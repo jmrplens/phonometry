@@ -10,6 +10,7 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.typing import ColorType
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import ThreePanels, TwoPanels
@@ -194,14 +195,16 @@ def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     return s.format(**fmt) if fmt else s
 
 
-def _db10(values: np.ndarray) -> np.ndarray:
+def _db10(values: NDArray[np.float64]) -> NDArray[np.float64]:
     """``10·log10`` with -inf (not a warning) at empty bins."""
     with np.errstate(divide="ignore"):
-        out: np.ndarray = 10.0 * np.log10(values)
+        out: NDArray[np.float64] = 10.0 * np.log10(values)
     return out
 
 
-def _finite_db_floor(curves: list[np.ndarray], *, margin: float = 5.0) -> float:
+def _finite_db_floor(
+    curves: list[NDArray[np.float64]], *, margin: float = 5.0
+) -> float:
     """A fixed lower dB bound from the finite values of several curves.
 
     Returns the smallest finite level across ``curves`` minus ``margin`` (or
@@ -547,8 +550,8 @@ _MISO_COLORS = (_C_PRIMARY, _C_SECONDARY, _C_TERTIARY)
 def _miso_spectra_panel(
     axs: Axes,
     result: MISOCoherenceResult,
-    freqs: np.ndarray,
-    pos: np.ndarray,
+    freqs: NDArray[np.float64],
+    pos: NDArray[np.bool_],
     language: Language,
 ) -> None:
     """Draw the per-input coherent output spectra with pale opaque fills."""
@@ -599,8 +602,8 @@ def _miso_spectra_panel(
 def _miso_coherence_panel(
     axc: Axes,
     result: MISOCoherenceResult,
-    freqs: np.ndarray,
-    pos: np.ndarray,
+    freqs: NDArray[np.float64],
+    pos: NDArray[np.bool_],
     language: Language,
 ) -> None:
     """Draw the multiple coherence over the per-input partial coherences."""

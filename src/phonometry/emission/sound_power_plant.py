@@ -570,12 +570,39 @@ def plant_background_correction(
     return as_float_or_array(correction, like=(level_difference,))
 
 
+@overload
+def plant_air_absorption_db_per_m[S: RealScalar](
+    frequencies: S,
+    *,
+    temperature_c: float | None = ...,
+    relative_humidity_percent: float | None = ...,
+) -> float: ...
+
+
+@overload
+def plant_air_absorption_db_per_m[V: RealValues](
+    frequencies: V,
+    *,
+    temperature_c: float | None = ...,
+    relative_humidity_percent: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def plant_air_absorption_db_per_m[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    temperature_c: float | None = ...,
+    relative_humidity_percent: float | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def plant_air_absorption_db_per_m(
     frequencies: NumericArrayLike,
     *,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The attenuation coefficient of the air :math:`\alpha` of 10.7, in dB/m.
 
     With no weather, Table 3 as printed, valid at 15 °C and 70 %. With the
@@ -604,7 +631,8 @@ def plant_air_absorption_db_per_m(
         ``None`` for Table 3.
     :param relative_humidity_percent: Relative humidity at the measurement, in
         percent (0 to 100), or ``None`` for Table 3.
-    :return: :math:`\alpha` per band, in dB/m.
+    :return: :math:`\alpha` per band, in dB/m. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band outside the method, only one of the two
         weather values, or a humidity outside 0 % to 100 %.
     :raises TypeError: if ``relative_humidity_percent`` or ``temperature_c`` is not a
@@ -614,8 +642,12 @@ def plant_air_absorption_db_per_m(
     bands = _octave_bands(frequencies)
     theta, humidity = _weather(temperature_c, relative_humidity_percent)
     if theta is None or humidity is None:
-        return np.array(
-            [PLANT_AIR_ABSORPTION_DB_PER_M[float(b)] for b in bands], dtype=np.float64
+        return as_float_or_array(
+            np.array(
+                [PLANT_AIR_ABSORPTION_DB_PER_M[float(b)] for b in bands],
+                dtype=np.float64,
+            ),
+            like=(frequencies,),
         )
     from ..aircraft import attenuation_arp866a
 
@@ -626,7 +658,7 @@ def plant_air_absorption_db_per_m(
             bands[covered], temperature_c=theta, relative_humidity_percent=humidity
         )
         alpha[covered] = arp.coefficient_db_per_100m / 100.0
-    return alpha
+    return as_float_or_array(alpha, like=(frequencies,))
 
 
 def plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]:

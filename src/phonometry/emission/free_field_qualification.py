@@ -115,11 +115,12 @@ from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
 from functools import partial
 from itertools import product
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_text,
     real_array,
@@ -137,7 +138,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 FreeFieldRoom = Literal["anechoic", "hemi-anechoic"]
 QualificationBandwidth = Literal["discrete-frequency", "broadband"]
@@ -340,9 +341,33 @@ def _table_b1(k: int, room: str) -> float:
     return top
 
 
+@overload
+def inverse_square_law_tolerance[S: RealScalar](
+    frequencies: S,
+    *,
+    room: FreeFieldRoom,
+) -> float: ...
+
+
+@overload
+def inverse_square_law_tolerance[V: RealValues](
+    frequencies: V,
+    *,
+    room: FreeFieldRoom,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def inverse_square_law_tolerance[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    room: FreeFieldRoom,
+) -> float | NDArray[np.float64]: ...
+
+
 def inverse_square_law_tolerance(
     frequencies: NumericArrayLike, *, room: FreeFieldRoom
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """Allowable deviation from the inverse square law per band (Table A.1).
 
     ISO 26101:2017 Annex A and ISO 3745:2012/Amd.1:2017 A.2.2 print the same
@@ -351,34 +376,66 @@ def inverse_square_law_tolerance(
 
     :param frequencies: Test frequencies or band mid-frequencies, in hertz.
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
-    :return: The half-width of the tolerance band, in dB, per frequency.
+    :return: The half-width of the tolerance band, in dB, per frequency. A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for an unknown room, a non-positive frequency or
         frequencies that are not one value or a 1-D array.
     :raises TypeError: if ``room`` is not a text, or ``frequencies`` holds a text or a
         value that is not a real number.
     """
     _check_room(room)
-    return np.array(
-        [_table_a1(k, room) for k in _lookup_bands(frequencies)], dtype=np.float64
+    return as_float_or_array(
+        np.array(
+            [_table_a1(k, room) for k in _lookup_bands(frequencies)], dtype=np.float64
+        ),
+        like=(frequencies,),
     )
+
+
+@overload
+def directionality_tolerance[S: RealScalar](
+    frequencies: S,
+    *,
+    room: FreeFieldRoom,
+) -> float: ...
+
+
+@overload
+def directionality_tolerance[V: RealValues](
+    frequencies: V,
+    *,
+    room: FreeFieldRoom,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def directionality_tolerance[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    room: FreeFieldRoom,
+) -> float | NDArray[np.float64]: ...
 
 
 def directionality_tolerance(
     frequencies: NumericArrayLike, *, room: FreeFieldRoom
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 
     :param frequencies: One-third octave mid-band frequencies, in hertz.
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
-    :return: The half-width of the tolerance band, in dB, per frequency.
+    :return: The half-width of the tolerance band, in dB, per frequency. A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for an unknown room, a non-positive frequency or
         frequencies that are not one value or a 1-D array.
     :raises TypeError: if ``room`` is not a text, or ``frequencies`` holds a text or a
         value that is not a real number.
     """
     _check_room(room)
-    return np.array(
-        [_table_b1(k, room) for k in _lookup_bands(frequencies)], dtype=np.float64
+    return as_float_or_array(
+        np.array(
+            [_table_b1(k, room) for k in _lookup_bands(frequencies)], dtype=np.float64
+        ),
+        like=(frequencies,),
     )
 
 

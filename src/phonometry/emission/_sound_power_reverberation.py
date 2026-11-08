@@ -78,9 +78,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
+
+from .._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     import os
@@ -89,7 +91,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -365,12 +367,69 @@ def _k1_eq14(
     return np.asarray(k1, dtype=np.float64), bool(np.any(judged < low))
 
 
+@overload
+def reverberation_background_correction[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    levels: S1,
+    background_levels: S2,
+    *,
+    frequencies: S3,
+) -> float: ...
+
+
+@overload
+def reverberation_background_correction[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    levels: V,
+    background_levels: A2,
+    *,
+    frequencies: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_background_correction[
+    S1: RealScalar,
+    V: RealValues,
+    A3: NumericArrayLike,
+](
+    levels: S1,
+    background_levels: V,
+    *,
+    frequencies: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_background_correction[S1: RealScalar, S2: RealScalar, V: RealValues](
+    levels: S1,
+    background_levels: S2,
+    *,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_background_correction[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    levels: A1,
+    background_levels: A2,
+    *,
+    frequencies: A3,
+) -> float | NDArray[np.float64]: ...
+
+
 def reverberation_background_correction(
     levels: NumericArrayLike,
     background_levels: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Background-noise correction :math:`K_1`, ISO 3741:2010 Equation (14).
 
     :math:`K_1 = -10 \lg (1 - 10^{-0,1 \Delta L_p})`, the decibels to take off
@@ -389,8 +448,10 @@ def reverberation_background_correction(
         decibels.
     :param background_levels: Background levels in the same bands, in decibels.
     :param frequencies: Nominal band centre frequencies, in hertz.
-    :return: :math:`K_1` per band, in decibels, to be subtracted from
-        ``levels``.
+    :return: :math:`K_1` per band, in decibels, to be subtracted from ``levels``. A
+        ``float`` when ``levels``, ``background_levels`` and ``frequencies`` are all
+        numbers, an array when one of them is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: For inputs that do not match band for band, that are
         not finite, or a band centre that is not strictly positive.
     :raises TypeError: if ``background_levels``, ``frequencies`` or ``levels`` holds a
@@ -405,7 +466,7 @@ def reverberation_background_correction(
         )
         raise ValueError(msg)
     k1, _ = _k1_eq14(signal - background, freqs)
-    return k1
+    return as_float_or_array(k1, like=(levels, background_levels, frequencies))
 
 
 def _checked_background(

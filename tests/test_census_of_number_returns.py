@@ -138,16 +138,6 @@ NOT_OF_A_NUMBER: dict[str, str] = {
 #: leaves the list when it is: the census then fails its entry as stale.
 ONE_ELEMENT: frozenset[str] = frozenset(
     {
-        "emission.directionality_tolerance",
-        "emission.in_duct_reproducibility",
-        "emission.inverse_square_law_tolerance",
-        "emission.min_analyzer_bandwidth",
-        "emission.plant_air_absorption_db_per_m",
-        "emission.ReferenceSourceCalibration.sound_power_level_at",
-        "emission.reverberation_background_correction",
-        "emission.room_absorption_coefficient",
-        "emission.room_constant_from_air_absorption",
-        "emission.room_constant_from_reverberation_time",
         "environment.acceleration_test_positions",
         "environment.adrienne_reflection_window",
         "environment.barrier_background_correction",

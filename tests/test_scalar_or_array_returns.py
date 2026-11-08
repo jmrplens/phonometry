@@ -161,6 +161,16 @@ def _cases() -> tuple[Case, ...]:
     plane = aircraft.mean_ground_plane([0.0, 100.0, 200.0], [0.0, 1.0, 3.0])
     profile = environment.linear_sound_speed_profile(0.1)
     pulse = metrology.RectangularPulse(duration_s=1.0e-3, amplitude_v=1.0)
+    thirds = np.array(
+        [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600,
+         2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000],
+        dtype=float,
+    )  # fmt: skip
+    calibration = emission.reference_source_calibration(
+        78.0 + np.linspace(-1.0, 1.0, 20)[:, None] + np.zeros(thirds.size),
+        frequencies=thirds,
+        arrangement="fixed",
+    )
     return (
         Case(
             broadcast.channel_weight,
@@ -1435,6 +1445,64 @@ def _cases() -> tuple[Case, ...]:
         ),
         Case(pulse.level_at, {"frequencies": 100.0}, ("frequencies",)),
         Case(pulse.spectrum_at, {"frequencies": 100.0}, ("frequencies",)),
+        Case(
+            calibration.sound_power_level_at, {"frequencies": 500.0}, ("frequencies",)
+        ),
+        Case(
+            emission.directionality_tolerance,
+            {"frequencies": 500.0, "room": "anechoic"},
+            ("frequencies",),
+        ),
+        Case(
+            emission.in_duct_reproducibility, {"frequencies": 500.0}, ("frequencies",)
+        ),
+        Case(
+            emission.inverse_square_law_tolerance,
+            {"frequencies": 500.0, "room": "anechoic"},
+            ("frequencies",),
+        ),
+        Case(
+            emission.min_analyzer_bandwidth,
+            {
+                "tone_frequency_hz": 12000.0,
+                "microphone_speed_m_s": 0.5,
+                "speed_of_sound": 343.0,
+            },
+            ("tone_frequency_hz",),
+        ),
+        Case(
+            emission.plant_air_absorption_db_per_m,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            increasing=True,
+        ),
+        Case(
+            emission.reverberation_background_correction,
+            {"levels": 70.0, "background_levels": 60.0, "frequencies": 500.0},
+            ("levels", "background_levels", "frequencies"),
+            together=True,
+        ),
+        Case(
+            emission.room_absorption_coefficient,
+            {"reverberation_time": 1.5, "volume": 200.0, "surface_area": 220.0},
+            ("reverberation_time",),
+        ),
+        Case(
+            emission.room_constant_from_air_absorption,
+            {
+                "frequencies": 10000.0,
+                "volume": 200.0,
+                "surface_area": 220.0,
+                "temperature_c": 20.0,
+                "relative_humidity_percent": 50.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            emission.room_constant_from_reverberation_time,
+            {"reverberation_time": 1.5, "volume": 200.0, "surface_area": 220.0},
+            ("reverberation_time",),
+        ),
     )
 
 

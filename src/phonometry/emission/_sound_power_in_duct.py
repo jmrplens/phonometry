@@ -89,12 +89,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -117,7 +118,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "InDuctSoundPowerResult",
@@ -1023,7 +1024,23 @@ def flow_modal_correction(
     )
 
 
-def in_duct_reproducibility(frequencies: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def in_duct_reproducibility[S: RealScalar](frequencies: S) -> float: ...
+
+
+@overload
+def in_duct_reproducibility[V: RealValues](frequencies: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_duct_reproducibility[A: NumericArrayLike](
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def in_duct_reproducibility(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Standard deviation of reproducibility :math:`\sigma_R` per band.
 
     Table 2 of ISO 5136:2003 for the sampling tube, 50 Hz to 10 kHz, which is
@@ -1035,14 +1052,17 @@ def in_duct_reproducibility(frequencies: NumericArrayLike) -> NDArray[np.float64
 
     :param frequencies: Nominal one-third-octave centre frequencies, in
         hertz, 50 Hz to 20 kHz.
-    :return: :math:`\sigma_R` per band, in decibels.
+    :return: :math:`\sigma_R` per band, in decibels. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band that is not a nominal centre.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
     freqs = _nominal_bands(frequencies)
     table = {**_TABLE_2_SIGMA_R, **_TABLE_3_SIGMA_R}
-    return np.asarray([table[band] for band in _band_keys(freqs)], dtype=np.float64)
+    return as_float_or_array(
+        [table[band] for band in _band_keys(freqs)], like=(frequencies,)
+    )
 
 
 def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float, float]:

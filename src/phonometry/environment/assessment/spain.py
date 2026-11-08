@@ -105,6 +105,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -417,10 +418,10 @@ class TonalCorrectionResult(OwnsArrays):
         or ``None`` when ``correction`` is 0 dB.
     """
 
-    frequencies: np.ndarray
-    levels: np.ndarray
-    differences: np.ndarray
-    band_corrections: np.ndarray
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
+    differences: NDArray[np.float64]
+    band_corrections: NDArray[np.float64]
     correction: float
     governing_frequency: float | None
 
@@ -469,7 +470,9 @@ def _kt_thresholds(frequency: float) -> tuple[float, float] | None:
     return None
 
 
-def _validate_kt_spectrum(band_levels: np.ndarray, freqs: np.ndarray) -> None:
+def _validate_kt_spectrum(
+    band_levels: NDArray[np.float64], freqs: NDArray[np.float64]
+) -> None:
     """Reject a spectrum the Annex IV A.3.3 procedure cannot read.
 
     :param band_levels: Unweighted one-third-octave band levels, dB.
@@ -502,8 +505,8 @@ def _validate_kt_spectrum(band_levels: np.ndarray, freqs: np.ndarray) -> None:
 
 
 def _band_tonal_corrections(
-    band_levels: np.ndarray, freqs: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    band_levels: NDArray[np.float64], freqs: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Steps b and c of Annex IV A.3.3, band by band.
 
     Interior bands only: the first and the last have no pair of neighbours to

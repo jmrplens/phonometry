@@ -2066,6 +2066,62 @@ def test_super_init_and_an_init_by_name_run_the_init_the_order_gives(
     ]
 
 
+def test_super_of_a_named_class_and_a_class_method_through_its_class(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``super(_Plain, self).plot(ax)`` looks the method up past ``_Plain``
+    in the order of the class it is written in: in ``PastPlain(_Plain,
+    _Labelled)`` it reaches ``_Labelled.plot``, which takes the language and
+    is not handed it; in ``PastLabelled(_Labelled, _Plain)``,
+    ``super(_Labelled, self)`` reaches ``_Plain.plot``, which takes none. A
+    class method called through its class, ``_Labelled.build(ax,
+    language)``, is bound to the class, so the language it is handed second
+    fills its ``language``.
+
+    ``super(Base, self)`` was read as ``super()``, past the class the method
+    is written in, so the first call passed and the second was refused; and
+    a method called through its class was read as taking the class's first
+    argument in its first parameter, ``cls`` for a class method, so the
+    language landed one place short and the call was refused.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            class _Plain:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class _Labelled:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+                @classmethod
+                def build(cls, ax=None, language="en"):
+                    return ax
+
+
+            class PastPlain(_Plain, _Labelled):
+                def plot(self, ax=None, *, language="en"):
+                    return super(_Plain, self).plot(ax)
+
+
+            class PastLabelled(_Labelled, _Plain):
+                def plot(self, ax=None, *, language="en"):
+                    return super(_Labelled, self).plot(ax)
+
+
+            def through_class(ax, language="en"):
+                return _Labelled.build(ax, language)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("PastPlain.plot", "pkg.records._Labelled.plot"),
+    ]
+
+
 _EXEMPTED = """
 from .helpers import axis
 

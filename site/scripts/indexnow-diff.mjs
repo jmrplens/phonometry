@@ -32,9 +32,12 @@
 // `index.md` beside it. The pages src/lib/page-markdown.mjs gives no Markdown
 // copy, those that render their data through a component (the two landing
 // pages and the catalogues among them), give the text of their <main> element
-// instead, and a page it gives one that the build did not write fails the
-// build. Nothing in the record depends on when the build ran, so two builds of
-// the same tree publish the same manifest. The header lines of a copy that
+// instead, less what the site's frame puts there around every page: the
+// release banner, the footer with the page's dates and the titles of the
+// pages before and after it, and the credit that follows. A page the module
+// gives a copy that the build did not write fails the build. Nothing in the
+// record depends on when the build ran, so two builds of the same tree
+// publish the same manifest. The header lines of a copy that
 // name the release (`Version:` and `Install:`, listed in
 // src/lib/page-markdown.mjs) are left out, so stamping a release does not
 // report every page as changed; the landing pages state the release in their
@@ -62,7 +65,7 @@ import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { hasMarkdownCopy, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
-import { decode, markupOf, tags } from './shared/dist-pages.mjs';
+import { attributes, decode, markupOf, tags } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -129,11 +132,62 @@ export function sitemapEntries(dist) {
 	return entries;
 }
 
-/** The text of a page's <main> element, with its tags, scripts and styles out and its spacing collapsed. */
+/** The elements that have no end tag, so that a marked one takes nothing but itself out. */
+const VOID_ELEMENTS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
+
+/**
+ * Markup without the elements marked `data-pagefind-ignore`, each taken out
+ * with everything it holds, down to the end tag that closes it, however many
+ * elements of its name it nests. The mark is the site's own for text a page
+ * shows that is not the page's: the release banner of
+ * src/components/Banner.astro and the label of a heading's anchor. The build
+ * writes balanced HTML, so a marked element it leaves open is a fault, and it
+ * fails here rather than take the rest of the page with it.
+ */
+export function withoutIgnored(markup) {
+	const tag = /<(\/?)([a-z][\w-]*)\b((?:[^>"]|"[^"]*")*)>/gi;
+	let kept = '';
+	let from = 0;
+	for (let open = tag.exec(markup); open !== null; open = tag.exec(markup)) {
+		const [whole, closing, name, rest] = open;
+		if (closing || !Object.hasOwn(attributes(whole), 'data-pagefind-ignore')) continue;
+		kept += markup.slice(from, open.index);
+		const element = name.toLowerCase();
+		if (!VOID_ELEMENTS.has(element) && !rest.endsWith('/')) {
+			let depth = 1;
+			while (depth > 0) {
+				const next = tag.exec(markup);
+				if (next === null) {
+					throw new ManifestError(`a <${element} data-pagefind-ignore> is never closed: ${markup.slice(open.index, open.index + 120)}`);
+				}
+				if (next[2].toLowerCase() !== element) continue;
+				if (next[1]) depth -= 1;
+				else if (!next[3].endsWith('/')) depth += 1;
+			}
+		}
+		from = tag.lastIndex;
+	}
+	return kept + markup.slice(from);
+}
+
+/**
+ * The text of a page's <main> element that is the page's own, with its tags,
+ * scripts and styles out and its spacing collapsed. What the site's frame
+ * puts into <main> around the page is left out, since it changes on pages
+ * whose text did not: the elements marked `data-pagefind-ignore` (see
+ * {@link withoutIgnored}), and the page footer with what follows it, which is
+ * Starlight's footer (the link to edit the page, its dates and the titles of
+ * the pages before and after it) and the credit src/components/Footer.astro
+ * adds. That footer is the last <footer> of the <main>, after the page's
+ * content: the entries of a page may carry footers of their own, as the terms
+ * of the glossary do, and those are the page's text.
+ */
 export function mainText(html) {
 	const main = /<main\b[^>]*>([\s\S]*)<\/main>/i.exec(markupOf(html));
 	if (!main) return null;
-	return decode(main[1].replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
+	const footer = [...main[1].matchAll(/<footer\b/gi)].at(-1);
+	const own = footer === undefined ? main[1] : main[1].slice(0, footer.index);
+	return decode(withoutIgnored(own).replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
 }
 
 /** The route of a sitemap URL, as src/lib/page-markdown.mjs names routes: no base path and no slash at either end. */
@@ -143,10 +197,11 @@ export const routeOfUrl = (loc) => decodeURIComponent(loc.slice(ORIGIN.length + 
  * What one page says, as one string: its title, its meta description, its
  * date and its text. The text is the Markdown copy beside the page without its
  * release lines, or, on a page src/lib/page-markdown.mjs gives no copy, the
- * text of its <main>. Which pages have a copy is that module's rule, not
- * whatever the build happens to hold: a copy the build should have written and
- * did not fails here, rather than the page being read another way and
- * reported as changed on this deploy and again on the one that restores it.
+ * page's own text in its <main> ({@link mainText}). Which pages have a copy
+ * is that module's rule, not whatever the build happens to hold: a copy the
+ * build should have written and did not fails here, rather than the page
+ * being read another way and reported as changed on this deploy and again on
+ * the one that restores it.
  */
 export function pageRecord(dist, { loc, lastmod }) {
 	const route = routeOfUrl(loc);

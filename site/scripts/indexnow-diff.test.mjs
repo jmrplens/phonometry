@@ -23,11 +23,13 @@ import { hasMarkdownCopy, releaseHeaderKeys, withheldRoutes, withoutReleaseLines
 import {
 	DEPLOY_BRANCH,
 	MANIFEST_NAME,
+	ManifestError,
 	ORIGIN,
 	SUBMITTED_ARTIFACT,
 	URLS_NAME,
 	lastSubmitted,
 	loadPrevious,
+	mainText,
 	serialize,
 	urlsToSubmit,
 } from './indexnow-diff.mjs';
@@ -247,6 +249,81 @@ test('a page that renders its data through a component is read from its <main>, 
 	assert.deepEqual(submit(t, before, before, { head: '<link rel="stylesheet" href="/phonometry/_astro/index.C0ffee12.css">' }).urls, []);
 	const stray = (text) => ({ ...BASE, [at]: data('7850 kg/m3', copy(at, text)) });
 	assert.deepEqual(submit(t, stray('One copy.'), stray('Another copy.')).urls, []);
+});
+
+/**
+ * The <main> of a catalogue page as the site builds it: the release banner,
+ * the title, the page's content with a heading, a table and an entry with a
+ * footer of its own, then Starlight's footer and the credit after it. Each
+ * part can be swapped for another.
+ */
+const framed = ({
+	banner = '<div class="sl-banner" data-pagefind-ignore><div class="notice">Pre-release.</div> This documentation describes <strong>version 4.0.0</strong>, which is not released yet.</div>',
+	anchor = 'Section titled “Data”',
+	updated = 'Nov 7, 2026',
+	next = 'Damping materials',
+	credit = 'All projects',
+	cell = '7850 kg/m3',
+	entry = 'Defined in: ISO 1683:2015',
+	after = 'The values are those of the sources cited.',
+} = {}) =>
+	`${banner}<div class="content-panel"><div class="sl-container"><h1 id="_top">Data</h1></div></div>` +
+	'<div class="content-panel"><div class="sl-container"><div class="sl-markdown-content">' +
+	`<div class="sl-heading-wrapper"><h2 id="data">Data</h2><a class="sl-anchor-link" href="#data"><span aria-hidden="true"><svg><path d="M0 0"/></svg></span><span class="sr-only" data-pagefind-ignore>${anchor}</span></a></div>` +
+	`<table><tr><th>Density</th></tr><tr><td>${cell}</td></tr></table>` +
+	`<article><p>A term.</p><footer><span>${entry}</span> <a href="/phonometry/x/">A guide</a></footer></article><p>${after}</p></div>` +
+	'<footer class="sl-flex"><div class="meta"><a href="https://github.com/jmrplens/phonometry/edit/main/site/x.mdx">Edit page</a>' +
+	`<p>Published <time datetime="2026-10-28">Oct 28, 2026</time>, updated <time datetime="2026-11-07">${updated}</time></p></div>` +
+	'<div class="pagination-links"><a href="/phonometry/prev/" rel="prev"><span>Previous</span> <span class="link-title">Overview</span></a>' +
+	`<a href="/phonometry/next/" rel="next"><span>Next</span> <span class="link-title">${next}</span></a></div></footer>` +
+	`<div class="maintainer"><span class="credit">Created and maintained by <a href="https://jmrp.io">José Manuel Requena Plens</a></span><span class="links"><a href="https://jmrp.io/projects/">${credit}</a></span></div>` +
+	'</div></div>';
+
+const textOf = (parts) => mainText(`<!DOCTYPE html><html><body><nav>Sidebar</nav><main data-pagefind-body>${framed(parts)}</main></body></html>`);
+
+test("what the frame puts in a page's <main> does not move it, and the page's own text does", (t) => {
+	// The release banner goes when a release is stamped, and the footer of a
+	// page changes with the title of the page after it or one word of the
+	// credit: none of that is what the page says. The entries of a page can
+	// carry footers of their own, as the terms of the glossary do, and those,
+	// like the cells of a table, are its text.
+	const frame = {
+		'the banner taken down': { banner: '' },
+		'the banner reworded': {
+			banner: '<div class="sl-banner" data-pagefind-ignore><div class="notice">Released.</div> This documentation describes <strong>version 4.0.1</strong>.</div>',
+		},
+		"a heading's anchor label": { anchor: 'Sección titulada «Data»' },
+		'the date in the footer': { updated: 'Nov 9, 2026' },
+		'the title of the next page': { next: 'Gases' },
+		'the credit after the footer': { credit: 'All of my projects' },
+	};
+	for (const [what, parts] of Object.entries(frame)) assert.equal(textOf(parts), textOf(), what);
+	const own = {
+		'a cell of the table': { cell: '7860 kg/m3' },
+		"the footer of one of the page's entries": { entry: 'Defined in: ISO 1683:2024' },
+		'the text after that footer': { after: 'The values are those of the sources cited, rounded.' },
+	};
+	for (const [what, parts] of Object.entries(own)) assert.notEqual(textOf(parts), textOf(), what);
+	assert.match(textOf(), /^Data Data Density 7850 kg\/m3 A term\. Defined in: ISO 1683:2015 A guide The values are those of the sources cited\.$/);
+
+	// The same on a build: the manifest reads a page the site gives no copy
+	// that way, so a deploy that changed only the frame submits nothing.
+	const tree = { contentDir: join(HERE, '..', 'src', 'content', 'docs'), docsDir: join(HERE, '..', '..', 'docs') };
+	const route = [...withheldRoutes(tree)].find((name) => name !== '' && name !== 'es');
+	const at = `/${route}/`;
+	const page = (parts) => ({ ...guide(at), main: framed(parts), copy: null });
+	const before = { ...BASE, [at]: page() };
+	const reframed = { banner: '', anchor: 'Sección titulada «Data»', updated: 'Nov 9, 2026', next: 'Gases', credit: 'All of my projects' };
+	assert.deepEqual(submit(t, before, { ...BASE, [at]: page(reframed) }).urls, []);
+	assert.deepEqual(submit(t, before, { ...BASE, [at]: page({ ...reframed, cell: '7860 kg/m3' }) }).urls, [url(at)]);
+});
+
+test('an element marked data-pagefind-ignore goes with all it nests, and one left open fails the build', () => {
+	const text = (main) => mainText(`<main>${main}</main>`);
+	assert.equal(text('<div data-pagefind-ignore><div>In</div> still in <div><div>deep</div></div></div><p>Out</p>'), 'Out');
+	assert.equal(text('<p>Before <img data-pagefind-ignore src="x.png" alt="x"> after</p>'), 'Before after');
+	assert.equal(text('<p title="data-pagefind-ignore">Kept</p>'), 'Kept');
+	assert.throws(() => text('<p>Before</p><div data-pagefind-ignore>never closed <div>in</div>'), (error) => error instanceof ManifestError && /never closed/.test(error.message));
 });
 
 test('the build fails on a sitemap it cannot read every page of', (t) => {

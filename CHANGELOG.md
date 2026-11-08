@@ -2401,6 +2401,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   naming the command, so a new one cannot pass in a checkout and fail only
   in an archive.
 
+- **A remote node sends the warnings of a run whatever its own warning
+  filters say.** The node recorded them under the filters of its process, so
+  a node started under `python -W error` or with `PYTHONWARNINGS=error` ended
+  the job on the run's first advisory instead of sending it to the client,
+  which raises each again under its own filters.
+
 - **The test suite fails on a warning a test did not ask for.** Every
   advisory of the library is a `UserWarning`, and the suite turns any
   `UserWarning` or `RuntimeWarning` that no test asserts into an error. 63

@@ -680,6 +680,7 @@ _STATED_FLAGS = {
     "phonometry.filters.periodic_tests.FilterPeriodicVerification."
     "pattern_approval_public": _CALLER,
     "phonometry.filters.weighting.TimeWeightedEnvelope.calibrated": _INPUT,
+    "phonometry.hearing.audiometry.AscendingThresholdResult.responses": _OBSERVED,
     "phonometry.hearing.audiometry.AscendingThresholdResult.shortened": _CALLER,
     "phonometry.io._chunks.WavChunks.has_ixml": _FILE,
     "phonometry._internal.signal.SignalOrigin.lossy": _FILE,

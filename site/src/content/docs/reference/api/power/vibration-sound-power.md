@@ -122,14 +122,44 @@ NORMALIZED_IMPEDANCE_PA_S_M = 411.0
 
 ```python
 radiated_sound_power_level(
+    velocity_level: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    *,
+    radiation_factor: float | np.floating[Any] | np.integer[Any] = ...,
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> float
+
+radiated_sound_power_level(
+    velocity_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    area: float,
+    *,
+    radiation_factor: NumericArrayLike = ...,
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> NDArray[np.float64]
+
+radiated_sound_power_level(
+    velocity_level: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    *,
+    radiation_factor: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> NDArray[np.float64]
+
+radiated_sound_power_level(
     velocity_level: NumericArrayLike,
     area: float,
     *,
-    radiation_factor: NumericArrayLike = 1.0,
-    reference_area: float = 1.0,
-    normalized_impedance: float = 411.0,
-    reference_impedance: float = 400.0,
-) -> np.ndarray
+    radiation_factor: NumericArrayLike = ...,
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Radiated sound power level (ISO/TS 7849-1 Eq. 12, -2 Eq. 15).
@@ -152,7 +182,7 @@ With the default `radiation_factor = 1` this is the Part 1 *upper limit*
 | `normalized_impedance` | `Z_c,n` (Default: 411 N.s/m^3). |
 | `reference_impedance` | `Z_c,0` (Default: 400 N.s/m^3). |
 
-**Returns:** The sound power level `L_W`, in dB re 1 pW.
+**Returns:** The sound power level `L_W`, in dB re 1 pW. A `float` when `velocity_level` and `radiation_factor` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -165,12 +195,36 @@ With the default `radiation_factor = 1` this is the Part 1 *upper limit*
 
 ```python
 radiation_factor(
+    sound_power: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    mean_square_velocity: float | np.floating[Any] | np.integer[Any],
+    *,
+    impedance: float = ...,
+) -> float
+
+radiation_factor(
+    sound_power: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    area: float,
+    mean_square_velocity: NumericArrayLike,
+    *,
+    impedance: float = ...,
+) -> NDArray[np.float64]
+
+radiation_factor(
+    sound_power: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    mean_square_velocity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    impedance: float = ...,
+) -> NDArray[np.float64]
+
+radiation_factor(
     sound_power: NumericArrayLike,
     area: float,
     mean_square_velocity: NumericArrayLike,
     *,
-    impedance: float = 411.0,
-) -> np.ndarray
+    impedance: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 A-weighted radiation factor `epsilon` (ISO/TS 7849-1 Eq. 4, -2 Eq. 8).
@@ -188,7 +242,7 @@ surface area and the mean-square vibratory velocity.
 | `mean_square_velocity` | Mean-square vibratory velocity $\langle v^2 \rangle$, in (m/s)^2. |
 | `impedance` | Characteristic impedance `Z_c` (Default: 411 N.s/m^3). |
 
-**Returns:** The radiation factor `epsilon` (dimensionless).
+**Returns:** The radiation factor `epsilon` (dimensionless). A `float` when `sound_power` and `mean_square_velocity` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -240,10 +294,22 @@ Bundle a sound-power-from-vibration determination (ISO/TS 7849).
 
 ```python
 velocity_level(
+    velocity: float | np.floating[Any] | np.integer[Any],
+    *,
+    reference: float = ...,
+) -> float
+
+velocity_level(
+    velocity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    reference: float = ...,
+) -> NDArray[np.float64]
+
+velocity_level(
     velocity: NumericArrayLike,
     *,
-    reference: float = 5e-08,
-) -> np.ndarray
+    reference: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Vibratory velocity level (ISO/TS 7849-1, Eq. 3).
@@ -257,7 +323,7 @@ $L_v = 20 \log_{10}(v/v_0)$ with `v0` the reference velocity.
 | `velocity` | R.m.s. vibratory velocity `v` (scalar or array), in m/s. |
 | `reference` | Reference velocity `v0` (Default: 5e-8 m/s). |
 
-**Returns:** The velocity level `L_v`, in dB re `v0`.
+**Returns:** The velocity level `L_v`, in dB re `v0`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -270,11 +336,32 @@ $L_v = 20 \log_{10}(v/v_0)$ with `v0` the reference velocity.
 
 ```python
 velocity_level_from_acceleration(
+    peak_acceleration: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    reference: float = ...,
+) -> float
+
+velocity_level_from_acceleration(
+    peak_acceleration: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    frequency: NumericArrayLike,
+    reference: float = ...,
+) -> NDArray[np.float64]
+
+velocity_level_from_acceleration(
+    peak_acceleration: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    reference: float = ...,
+) -> NDArray[np.float64]
+
+velocity_level_from_acceleration(
     peak_acceleration: NumericArrayLike,
     *,
     frequency: NumericArrayLike,
-    reference: float = 5e-08,
-) -> np.ndarray
+    reference: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
@@ -290,7 +377,7 @@ r.m.s. velocity level.
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `reference` | Reference velocity `v0` (Default: 5e-8 m/s). |
 
-**Returns:** The velocity level `L_v`, in dB re `v0`.
+**Returns:** The velocity level `L_v`, in dB re `v0`. A `float` when `peak_acceleration` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -303,11 +390,11 @@ r.m.s. velocity level.
 
 ```python
 VibrationSoundPowerResult(
-    velocity_level: np.ndarray,
-    sound_power_level: np.ndarray,
-    radiation_factor: np.ndarray,
+    velocity_level: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    radiation_factor: NDArray[np.float64],
     area: float,
-    frequencies: np.ndarray | None = None,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 

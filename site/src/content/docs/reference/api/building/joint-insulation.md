@@ -285,7 +285,7 @@ joint_sound_reduction_index(
     absorption_area: NumericArrayLike,
     *,
     joint_length_m: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Sound reduction index of joints per metre, Formula (J.1).
@@ -325,13 +325,13 @@ of the test arrangement $R_\mathrm{s,max}$ that
 ```python
 JointGapSeries(
     *,
-    gap_widths_mm: np.ndarray,
+    gap_widths_mm: NDArray[np.float64],
     results: tuple[LaboratoryJointInsulationResult, ...],
     nominal_gap_mm: float,
     min_gap_mm: float | None,
-    r_s_w: np.ndarray,
-    r_s_w_c: np.ndarray,
-    r_s_w_ctr: np.ndarray,
+    r_s_w: NDArray[np.float64],
+    r_s_w_c: NDArray[np.float64],
+    r_s_w_ctr: NDArray[np.float64],
 )
 ```
 
@@ -440,7 +440,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ```python
 JointGapSeries.single_number(
     quantity: Literal['r_s_w', 'r_s_w_c', 'r_s_w_ctr'] = 'r_s_w_ctr',
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The single number at each width: `"r_s_w"`, `"r_s_w_c"` or `"r_s_w_ctr"`.
@@ -733,10 +733,10 @@ the bracketed lower limit, whichever rule corrected them.
 
 ```python
 LaboratoryJointInsulationResult(
-    frequencies: np.ndarray,
-    r_s_prime: np.ndarray,
-    r_s_max: np.ndarray,
-    r_s: np.ndarray,
+    frequencies: NDArray[np.float64],
+    r_s_prime: NDArray[np.float64],
+    r_s_max: NDArray[np.float64],
+    r_s: NDArray[np.float64],
     joint_length_m: float | None,
     rating: WeightedRatingResult | None,
     c_100_5000: int | None,

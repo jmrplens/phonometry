@@ -646,7 +646,7 @@ RotorcraftGround(
     receiver_height_m: float = 1.2,
     ground_elevation: NumericArrayLike = 0.0,
     flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | NumericArrayLike = 'G',
-    terrain: Sequence[NumericArrayLike] | NDArray[Any] | None = None,
+    terrain: Sequence[NumericArrayLike] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any] | np.object_] | None = None,
     terrain_resolution: float | None = None,
 )
 ```

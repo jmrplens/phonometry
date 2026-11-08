@@ -1032,7 +1032,7 @@ $Z_\mathrm{a}$: alternate this with
 | `blocked_impedance_ohm` | $Z_\mathrm{e,0}$, complex, in Ω. |
 | `pressure_sensitivity_v_per_pa` | $M_\mathrm{p}$, complex, in V/Pa. |
 
-**Returns:** $Z_\mathrm{a}$, complex, in Pa·s/m³.
+**Returns:** $Z_\mathrm{a}$, complex, in Pa·s/m³, an array of the broadcast shape of the three, zero-dimensional for numbers.
 
 **Raises**
 

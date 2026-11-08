@@ -468,7 +468,7 @@ each, with commands that were run there.
 | [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error` |
 | [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
 | [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp` | nothing is left out |
-| [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict`, and pyright's strict mode from NumPy 2.3 | pyright's strict mode on NumPy 2.0 to 2.2; the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
+| [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode, on every NumPy the library accepts | the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
 
 ## Warnings as errors
 
@@ -515,7 +515,7 @@ run falls back to NumPy when its device is missing.
 - [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/): the kernel, record tables, inline and SVG figures, videos, fiches and how warnings show in a cell.
 - [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/): what installs with micropip, what runs in a browser and what cannot, and building a JupyterLite site.
 - [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/): a slim image, any user id, a read-only root file system and ffmpeg for videos.
-- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/): what mypy and pyright see on each NumPy, the choices they check and where a type is wider than its value.
+- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/): what mypy and pyright see on every NumPy the library accepts, the choices they check and where a type is wider than its value.
 
 ---
 
@@ -1146,14 +1146,14 @@ pressure = engine.numpy_field("p")       # a NumPy array; engine.p is the device
 print(pressure.shape)
 ```
 
-`mypy --strict` and pyright's basic mode report nothing on this script, on
-Python 3.12 to 3.14 and with every NumPy the library accepts there. pyright's
-strict mode reports nothing either from NumPy 2.3 on, the oldest the library
-accepts on Python 3.14. With NumPy 2.0 to 2.2, which Python 3.12 and 3.13
-still accept, `np.ndarray` has no default type arguments, so strict pyright
-reads the arrays phonometry annotates as partially unknown: three errors on
-this script, from `require_levels()` and `filter()`, and two more from
-`numpy_field()` before NumPy 2.2.
+`mypy --strict` and pyright, in its basic mode and in its strict mode, report
+nothing on this script, on Python 3.12 to 3.14 and with every NumPy the
+library accepts there, from NumPy 2.0.2 on Python 3.12 to the newest. Before
+NumPy 2.3, `np.ndarray` and the abstract scalar types such as `np.floating`
+have no default type arguments, and a checker reads one written alone as
+partly unknown; phonometry writes the dtype of every array it annotates
+(`NDArray[np.float64]`), so a checker reads its types the same on every
+NumPy.
 
 ## What a checker catches
 
@@ -1205,11 +1205,11 @@ and pyright refuses the same four lines.
 ## Completeness
 
 `pyright --verifytypes phonometry --ignoreexternal` reads the installed
-package as a user's checker does and scores it at 100% with NumPy 2.3 or
-newer: every symbol the package exports has a known type. With NumPy 2.0 to
-2.2 it scores about 86%, for the reason the strict mode reports above. The
-repository's CI runs the same command on the built wheel, with the newest
-NumPy, and fails below 100%.
+package as a user's checker does and scores it at 100% with every NumPy the
+library accepts, from NumPy 2.0.2 on Python 3.12 to the newest: every symbol
+the package exports has a known type. The repository's CI runs the same
+command on the built wheel with the newest NumPy, and on the package
+installed at the oldest versions each Python accepts, and fails below 100%.
 
 ---
 

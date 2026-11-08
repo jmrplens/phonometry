@@ -70,10 +70,22 @@ bending wavenumber.
 
 ```python
 beam_bending_wave_speed(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> float
+
+beam_bending_wave_speed(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     bending_stiffness: float,
     mass_per_length: float,
 ) -> NDArray[np.float64]
+
+beam_bending_wave_speed(
+    frequency: NumericArrayLike,
+    bending_stiffness: float,
+    mass_per_length: float,
+) -> float | NDArray[np.float64]
 ```
 
 Free bending wave speed of a beam
@@ -87,7 +99,7 @@ $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$.
 | `bending_stiffness` | Beam bending stiffness $B = E I$, in N.m^2. |
 | `mass_per_length` | Mass per unit length `m'`, in kg/m. |
 
-**Returns:** The bending phase speed `cB`, in m/s.
+**Returns:** The bending phase speed `cB`, in m/s. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -343,9 +355,24 @@ with the ISO 7626 mobility machinery.
 
 ```python
 injected_power(
-    force_n: NumericArrayLike,
+    force_n: complex | np.number[Any],
+    mobility: complex | np.number[Any],
+) -> float
+
+injected_power(
+    force_n: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
     mobility: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+injected_power(
+    force_n: complex | np.number[Any],
+    mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+injected_power(
+    force_n: NumericArrayLike,
+    mobility: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Time-averaged vibrational power injected by a point force (Cremer 5.23).
@@ -361,7 +388,7 @@ near-field energy.
 | `force_n` | Point-force amplitude `F` (peak, scalar or array), in N. |
 | `mobility` | Complex point mobility `Y` (broadcast with *force_n*), in m/(N.s). |
 
-**Returns:** The injected power `W`, in W.
+**Returns:** The injected power `W`, in W. A `float` when `force_n` and `mobility` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -466,10 +493,22 @@ in N.m used throughout this module and by the coincidence frequency of
 
 ```python
 plate_bending_wave_speed(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    bending_stiffness: float,
+    mass_per_area: float,
+) -> float
+
+plate_bending_wave_speed(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     bending_stiffness: float,
     mass_per_area: float,
 ) -> NDArray[np.float64]
+
+plate_bending_wave_speed(
+    frequency: NumericArrayLike,
+    bending_stiffness: float,
+    mass_per_area: float,
+) -> float | NDArray[np.float64]
 ```
 
 Free bending wave speed of a plate
@@ -483,7 +522,7 @@ $c_\mathrm{B} = (B' \omega^2 / m'')^{1/4}$.
 | `bending_stiffness` | Plate bending stiffness per unit width `B'`, in N.m. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2. |
 
-**Returns:** The bending phase speed `cB`, in m/s.
+**Returns:** The bending phase speed `cB`, in m/s. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

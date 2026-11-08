@@ -87,13 +87,13 @@ piston_directivity(
 ) -> float
 
 piston_directivity(
-    ka: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    ka: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     theta: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 piston_directivity(
     ka: float | np.floating[Any] | np.integer[Any],
-    theta: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    theta: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 piston_directivity(
@@ -163,7 +163,7 @@ the first zero of `J1` ($ka \sin\theta = 3.8317$).
 piston_reactance(x: float | np.floating[Any] | np.integer[Any]) -> float
 
 piston_reactance(
-    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 piston_reactance(x: NumericArrayLike) -> float | NDArray[np.float64]
@@ -197,7 +197,7 @@ at high `x`.
 piston_resistance(x: float | np.floating[Any] | np.integer[Any]) -> float
 
 piston_resistance(
-    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 piston_resistance(x: NumericArrayLike) -> float | NDArray[np.float64]
@@ -228,10 +228,10 @@ high `x`.
 
 ```python
 PistonDirectivity(
-    angles_rad: np.ndarray,
-    ka: np.ndarray,
-    directivity: np.ndarray,
-    directivity_db: np.ndarray,
+    angles_rad: NDArray[np.float64],
+    ka: NDArray[np.float64],
+    directivity: NDArray[np.float64],
+    directivity_db: NDArray[np.float64],
 )
 ```
 
@@ -384,16 +384,16 @@ the far-field directivity pattern $D(\theta)$.
 
 ```python
 RadiatingPistonResult(
-    frequencies: np.ndarray,
-    ka: np.ndarray,
-    resistance: np.ndarray,
-    reactance: np.ndarray,
-    radiation_resistance: np.ndarray,
-    radiation_reactance: np.ndarray,
+    frequencies: NDArray[np.float64],
+    ka: NDArray[np.float64],
+    resistance: NDArray[np.float64],
+    reactance: NDArray[np.float64],
+    radiation_resistance: NDArray[np.float64],
+    radiation_reactance: NDArray[np.float64],
     radiation_mass: float,
-    directivity_index: np.ndarray,
-    angles_rad: np.ndarray | None,
-    directivity: np.ndarray | None,
+    directivity_index: NDArray[np.float64],
+    angles_rad: NDArray[np.float64] | None,
+    directivity: NDArray[np.float64] | None,
     radius: float,
     speed_of_sound: float,
     density: float,

@@ -136,10 +136,10 @@ octaves 63 Hz to 500 Hz or the matching one-third octaves
 
 ```python
 HeavyImpactImprovementResult(
-    frequencies: np.ndarray,
-    l_i_fmax_0: np.ndarray,
-    l_i_fmax: np.ndarray,
-    improvement: np.ndarray,
+    frequencies: NDArray[np.float64],
+    l_i_fmax_0: NDArray[np.float64],
+    l_i_fmax: NDArray[np.float64],
+    improvement: NDArray[np.float64],
 )
 ```
 
@@ -290,10 +290,10 @@ read off the numbers, so neither is refused here.
 
 ```python
 LaboratoryFloorCoveringImprovementResult(
-    frequencies: np.ndarray,
-    l_n0: np.ndarray,
-    l_n: np.ndarray,
-    improvement: np.ndarray,
+    frequencies: NDArray[np.float64],
+    l_n0: NDArray[np.float64],
+    l_n: NDArray[np.float64],
+    improvement: NDArray[np.float64],
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'],
     delta_lw: int | None,
     ci_delta: int | None,
@@ -416,10 +416,10 @@ its place.
 
 ```python
 LaboratoryLiningImprovementResult(
-    frequencies: np.ndarray,
-    r_without: np.ndarray,
-    r_with: np.ndarray,
-    delta_r: np.ndarray,
+    frequencies: NDArray[np.float64],
+    r_without: NDArray[np.float64],
+    r_with: NDArray[np.float64],
+    delta_r: NDArray[np.float64],
     basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] | None,
     rating: ReductionImprovementRating | None,
     delta_rw_direct: int | None,

@@ -86,9 +86,9 @@ adaptation_term_kc(
     *,
     boundary_area: float,
     volume: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 
-adaptation_term_kc(frequencies: NumericArrayLike) -> np.ndarray
+adaptation_term_kc(frequencies: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Adaptation term `Kc` per ISO 15186-1:2000, Annex B.
@@ -249,7 +249,7 @@ with [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-in
 
 ```python
 IntensityElementNormalizedResult(
-    d_i_n_e: np.ndarray,
+    d_i_n_e: NDArray[np.float64],
     rating: WeightedRatingResult | None,
     measurement_area: float | None = None,
     n: int = 1,
@@ -362,8 +362,8 @@ PASS/FAIL verdict; the element insulation passes at or above the target.
 
 ```python
 IntensityReductionResult(
-    r_i: np.ndarray,
-    r_i_modified: np.ndarray | None,
+    r_i: NDArray[np.float64],
+    r_i_modified: NDArray[np.float64] | None,
     rating: WeightedRatingResult | None,
     rating_modified: WeightedRatingResult | None,
     area: float | None = None,
@@ -484,7 +484,7 @@ limp_panel_reduction_index(
     area: float,
     temperature_c: float = 23.0,
     static_pressure_pa: float = 101300.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Sound reduction index of a limp panel (ISO 15186-3:2002, Annex A).
@@ -685,9 +685,9 @@ energy-averaged. Sub-areas scanned separately are combined first with
 
 ```python
 LowFrequencyElementResult(
-    d_i_n_e: np.ndarray,
-    surface_pressure_intensity_indicator: np.ndarray | None,
-    frequencies: np.ndarray | None,
+    d_i_n_e: NDArray[np.float64],
+    surface_pressure_intensity_indicator: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None,
     measurement_area: float,
     n_elements: int,
     *,
@@ -756,9 +756,9 @@ The Clause 6.4.2 verdict per band, read from the indicator, or `None`.
 
 ```python
 LowFrequencyIntensityResult(
-    r_i: np.ndarray,
-    surface_pressure_intensity_indicator: np.ndarray | None,
-    frequencies: np.ndarray | None,
+    r_i: NDArray[np.float64],
+    surface_pressure_intensity_indicator: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None,
     area: float,
     measurement_area: float,
     *,
@@ -877,7 +877,7 @@ unsigned area sum.
 ## SubareaIntensityLevel
 
 ```python
-SubareaIntensityLevel(levels: np.ndarray, measurement_area: float)
+SubareaIntensityLevel(levels: NDArray[np.float64], measurement_area: float)
 ```
 
 The intensity level of a surface scanned in subareas (ISO 15186-1 F. (11)-(12)).
@@ -897,9 +897,24 @@ unpacked by position.
 
 ```python
 surface_pressure_intensity_indicator(
+    lp: float | np.floating[Any] | np.integer[Any],
+    l_in: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+surface_pressure_intensity_indicator(
+    lp: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    l_in: NumericArrayLike,
+) -> NDArray[np.float64]
+
+surface_pressure_intensity_indicator(
+    lp: float | np.floating[Any] | np.integer[Any],
+    l_in: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+surface_pressure_intensity_indicator(
     lp: NumericArrayLike,
     l_in: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Surface pressure-intensity indicator `FpI` (ISO 15186-1, Formula (10)).
@@ -922,7 +937,7 @@ must exceed $F_{pI} + 10$ dB (Clause 4.1).
 | `lp` | Surface-averaged sound pressure levels, in dB. |
 | `l_in` | Normal sound intensity levels on the surface, in dB. |
 
-**Returns:** The indicator `FpI` per band, in dB.
+**Returns:** The indicator `FpI` per band, in dB. A `float` when `lp` and `l_in` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -55,13 +55,13 @@ channel_weight(
 ) -> float
 
 channel_weight(
-    azimuth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    azimuth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     elevation: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 channel_weight(
     azimuth: float | np.floating[Any] | np.integer[Any],
-    elevation: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    elevation: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 channel_weight(
@@ -143,7 +143,7 @@ normalises to -23.0 LUFS.
 k_weighting(
     x: Signal | NumericArrayLike,
     fs: float | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Apply the two-stage K-weighting pre-filter (BS.1770-5 Annex 1).
@@ -166,7 +166,7 @@ low-frequency B-curve high-pass. Their concatenation is the K-weighting.
 ```python
 k_weighting_coefficients(
     fs: float,
-) -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]
+) -> tuple[tuple[NDArray[np.float64], NDArray[np.float64]], tuple[NDArray[np.float64], NDArray[np.float64]]]
 ```
 
 K-weighting biquad coefficients (BS.1770-5 Annex 1, Tables 1-2).
@@ -242,10 +242,10 @@ RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
 
 ```python
 KWeightingResponse(
-    frequencies: np.ndarray,
-    magnitude_db: np.ndarray,
-    shelf_magnitude_db: np.ndarray,
-    highpass_magnitude_db: np.ndarray,
+    frequencies: NDArray[np.float64],
+    magnitude_db: NDArray[np.float64],
+    shelf_magnitude_db: NDArray[np.float64],
+    highpass_magnitude_db: NDArray[np.float64],
     fs: float,
 )
 ```
@@ -385,17 +385,17 @@ ProgramLoudnessResult(
     integrated: float,
     loudness_range: float,
     true_peak: float,
-    momentary: np.ndarray,
-    momentary_time: np.ndarray,
-    short_term: np.ndarray,
-    short_term_time: np.ndarray,
+    momentary: NDArray[np.float64],
+    momentary_time: NDArray[np.float64],
+    short_term: NDArray[np.float64],
+    short_term_time: NDArray[np.float64],
     max_momentary: float,
     max_short_term: float,
     relative_threshold: float,
     lra_low: float,
     lra_high: float,
-    true_peak_per_channel: np.ndarray,
-    channel_weights: np.ndarray,
+    true_peak_per_channel: NDArray[np.float64],
+    channel_weights: NDArray[np.float64],
     fs: float,
 )
 ```

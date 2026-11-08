@@ -40,13 +40,13 @@ tonality.)
 ```python
 EcmaTonality(
     tonality: float,
-    specific_tonality: np.ndarray,
-    bark: np.ndarray,
-    frequencies: np.ndarray,
-    tonal_frequencies: np.ndarray,
-    times: np.ndarray,
-    tonality_vs_time: np.ndarray,
-    tonal_frequency_vs_time: np.ndarray,
+    specific_tonality: NDArray[np.float64],
+    bark: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    tonal_frequencies: NDArray[np.float64],
+    times: NDArray[np.float64],
+    tonality_vs_time: NDArray[np.float64],
+    tonal_frequency_vs_time: NDArray[np.float64],
     field: Literal['free', 'diffuse'],
 )
 ```

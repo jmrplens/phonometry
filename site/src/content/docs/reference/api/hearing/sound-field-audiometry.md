@@ -248,11 +248,11 @@ DIFFUSE_FIELD_VARIATION_LIMITS = ((5.0, 5.0), (4.5, 4.5), (4.0, 4.0))
 
 ```python
 DiffuseSoundFieldCheck(
-    frequencies: np.ndarray,
-    position_deviation_db: np.ndarray,
-    left_right_difference: np.ndarray,
-    directional_variation_db: np.ndarray,
-    front_to_random_index: np.ndarray | None,
+    frequencies: NDArray[np.float64],
+    position_deviation_db: NDArray[np.float64],
+    left_right_difference: NDArray[np.float64],
+    directional_variation_db: NDArray[np.float64],
+    front_to_random_index: NDArray[np.float64] | None,
     standard: Literal['ISO 8253-2 5.3', 'ISO 4869-3 5.2.2'],
     positions: tuple[Literal['front', 'back', 'left', 'right', 'up', 'down'], ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
@@ -382,9 +382,9 @@ Per band, whether all six positions stay within ±2,5 dB.
 ```python
 FreeSoundFieldCheck(
     field: Literal['free', 'quasi-free'],
-    frequencies: np.ndarray,
-    lateral_deviation_db: np.ndarray,
-    axis_difference: np.ndarray,
+    frequencies: NDArray[np.float64],
+    lateral_deviation_db: NDArray[np.float64],
+    axis_difference: NDArray[np.float64],
     loudspeaker_distance_m: float,
     positions: tuple[Literal['left', 'right', 'up', 'down'], ...] = ('left', 'right', 'up', 'down'),
 )
@@ -542,7 +542,7 @@ incidence_correction(
     frequencies: NumericArrayLike,
     *,
     incidence_angle_deg: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 How much louder the nearer ear is with the loudspeaker off axis (Table B.1).

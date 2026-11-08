@@ -171,16 +171,16 @@ One element of a duct path: what it attenuates and what it regenerates.
 
 ```python
 DuctPathResult(
-    frequencies: np.ndarray,
-    source_level: np.ndarray,
+    frequencies: NDArray[np.float64],
+    source_level: NDArray[np.float64],
     source_label: str,
     stages: tuple[DuctPathStage, ...],
-    room_effect: np.ndarray | None,
-    received_level: np.ndarray,
+    room_effect: NDArray[np.float64] | None,
+    received_level: NDArray[np.float64],
     criterion: Literal['NC', 'RC'],
     target: float | None,
     label: str,
-    contributions: tuple[tuple[str, np.ndarray], ...] = ...,
+    contributions: tuple[tuple[str, NDArray[np.float64]], ...] = ...,
 )
 ```
 
@@ -345,10 +345,10 @@ one path of a combination.
 DuctPathStage(
     label: str,
     code: str,
-    attenuation: np.ndarray,
-    attenuated: np.ndarray,
-    self_noise: np.ndarray,
-    levels: np.ndarray,
+    attenuation: NDArray[np.float64],
+    attenuated: NDArray[np.float64],
+    self_noise: NDArray[np.float64],
+    levels: NDArray[np.float64],
 )
 ```
 

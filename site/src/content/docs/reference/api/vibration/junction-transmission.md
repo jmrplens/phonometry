@@ -190,11 +190,25 @@ $\bar{\tau} = \int_0^{\pi/2} \tau(\theta) \cos\theta \,\mathrm{d}\theta$, evalua
 
 ```python
 corner_transmission_coefficient(
+    angle_rad: float | np.floating[Any] | np.integer[Any],
+    chi: float,
+    psi: float,
+    junction: Literal['X', 'T1', 'T2', 'L'] = ...,
+) -> float
+
+corner_transmission_coefficient(
+    angle_rad: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    chi: float,
+    psi: float,
+    junction: Literal['X', 'T1', 'T2', 'L'] = ...,
+) -> NDArray[np.float64]
+
+corner_transmission_coefficient(
     angle_rad: NumericArrayLike,
     chi: float,
     psi: float,
-    junction: Literal['X', 'T1', 'T2', 'L'] = 'X',
-) -> NDArray[np.float64]
+    junction: Literal['X', 'T1', 'T2', 'L'] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Transmission around a corner `tau12(theta)` (Hopkins Eq. 5.12).
@@ -211,7 +225,7 @@ Returns `0` for angles beyond the cut-off $\arcsin(\chi)$
 | `psi` | Wave parameter `psi` (Eq. 5.11, > 0). |
 | `junction` | `"X"`, `"T1"`, `"T2"` or `"L"`. |
 
-**Returns:** `tau12(theta)` (same shape as *angle*).
+**Returns:** `tau12(theta)` (same shape as *angle*). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -224,13 +238,40 @@ Returns `0` for angles beyond the cut-off $\arcsin(\chi)$
 
 ```python
 coupling_loss_factor(
-    transmission_coefficient: NumericArrayLike,
+    transmission_coefficient: float | np.floating[Any] | np.integer[Any],
+    group_velocity: float,
+    junction_length: float,
+    plate_area: float,
+    *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+coupling_loss_factor(
+    transmission_coefficient: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     group_velocity: float,
     junction_length: float,
     plate_area: float,
     *,
     frequency: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+coupling_loss_factor(
+    transmission_coefficient: float | np.floating[Any] | np.integer[Any],
+    group_velocity: float,
+    junction_length: float,
+    plate_area: float,
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+coupling_loss_factor(
+    transmission_coefficient: NumericArrayLike,
+    group_velocity: float,
+    junction_length: float,
+    plate_area: float,
+    *,
+    frequency: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Coupling loss factor from a transmission coefficient (Hopkins Eq. 2.154).
@@ -249,7 +290,7 @@ source-plate bending-wave group velocity `cg_i`, the junction length
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `plate_area` | Source-plate area `S_i`, in m^2 (> 0). |
 
-**Returns:** The coupling loss factor `eta_ij` (broadcast of the inputs).
+**Returns:** The coupling loss factor `eta_ij` (broadcast of the inputs). A `float` when `transmission_coefficient` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -382,9 +423,9 @@ JunctionTransmissionResult(
     psi: float,
     critical_frequency1: float,
     critical_frequency2: float,
-    angles_deg: np.ndarray,
-    corner: np.ndarray,
-    straight: np.ndarray | None,
+    angles_deg: NDArray[np.float64],
+    corner: NDArray[np.float64],
+    straight: NDArray[np.float64] | None,
     corner_average: float,
     straight_average: float | None,
     *,
@@ -532,7 +573,20 @@ the junction type follows
 
 ```python
 point_connection_coupling_loss_factor(
-    frequency: NumericArrayLike,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    n_connections: int | np.integer[Any],
+    *,
+    thickness1_m: float,
+    thickness2_m: float,
+    surface_density1: float,
+    surface_density2: float,
+    wave_speed1: float,
+    wave_speed2: float,
+    plate_area1: float,
+) -> float
+
+point_connection_coupling_loss_factor(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     n_connections: int | np.integer[Any],
     *,
     thickness1_m: float,
@@ -543,6 +597,19 @@ point_connection_coupling_loss_factor(
     wave_speed2: float,
     plate_area1: float,
 ) -> NDArray[np.float64]
+
+point_connection_coupling_loss_factor(
+    frequency: NumericArrayLike,
+    n_connections: int | np.integer[Any],
+    *,
+    thickness1_m: float,
+    thickness2_m: float,
+    surface_density1: float,
+    surface_density2: float,
+    wave_speed1: float,
+    wave_speed2: float,
+    plate_area1: float,
+) -> float | NDArray[np.float64]
 ```
 
 Coupling loss factor of a point-connected plate pair (Norton Eq. 6.56).
@@ -585,7 +652,7 @@ is the one that reproduces the book's own answer to problem 6.13; see
 | `wave_speed2` | Quasi-longitudinal wave speed `cL2`, in m/s (> 0). |
 | `plate_area1` | Source-plate area `S1`, in m^2 (> 0). |
 
-**Returns:** The coupling loss factor `eta_12` per band.
+**Returns:** The coupling loss factor `eta_12` per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -660,11 +727,25 @@ of [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-tra
 
 ```python
 straight_transmission_coefficient(
+    angle_rad: float | np.floating[Any] | np.integer[Any],
+    chi: float,
+    psi: float,
+    junction: Literal['X', 'T1', 'T2', 'L'] = ...,
+) -> float
+
+straight_transmission_coefficient(
+    angle_rad: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    chi: float,
+    psi: float,
+    junction: Literal['X', 'T1', 'T2', 'L'] = ...,
+) -> NDArray[np.float64]
+
+straight_transmission_coefficient(
     angle_rad: NumericArrayLike,
     chi: float,
     psi: float,
-    junction: Literal['X', 'T1', 'T2', 'L'] = 'X',
-) -> NDArray[np.float64]
+    junction: Literal['X', 'T1', 'T2', 'L'] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Transmission across a straight section `tau13(theta)` (Hopkins 5.13).
@@ -682,7 +763,7 @@ covered.
 | `psi` | Wave parameter `psi` (Eq. 5.11, > 0). |
 | `junction` | `"X"` or `"T1"` (the only junctions with a straight section). One of `"X"`, `"T1"`, `"T2"` or `"L"`. |
 
-**Returns:** `tau13(theta)` (same shape as *angle*).
+**Returns:** `tau13(theta)` (same shape as *angle*). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -695,9 +776,19 @@ covered.
 
 ```python
 wave_vibration_reduction_index(
-    transmission_coefficient: NumericArrayLike,
+    transmission_coefficient: float | np.floating[Any] | np.integer[Any],
+    critical_frequency_receiver: float,
+) -> float
+
+wave_vibration_reduction_index(
+    transmission_coefficient: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     critical_frequency_receiver: float,
 ) -> NDArray[np.float64]
+
+wave_vibration_reduction_index(
+    transmission_coefficient: NumericArrayLike,
+    critical_frequency_receiver: float,
+) -> float | NDArray[np.float64]
 ```
 
 Vibration reduction index from a transmission coefficient (Hopkins 5.116).
@@ -717,7 +808,7 @@ $\bar{\tau}_{ij} = \bar{\tau}_{ji} \sqrt{f_{\mathrm{c}j} / f_{\mathrm{c}i}}$
 | `transmission_coefficient` | `tau_ij` (scalar or array, > 0). |
 | `critical_frequency_receiver` | Critical frequency `fc_j` of the receiving plate, in hertz (> 0). |
 
-**Returns:** The vibration reduction index `K_ij`, in dB.
+**Returns:** The vibration reduction index `K_ij`, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

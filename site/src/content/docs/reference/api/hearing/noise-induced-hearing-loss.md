@@ -31,9 +31,24 @@ $H' = H + N - H N / 120$ (clause 6.1, Formula 1).
 
 ```python
 age_and_noise_threshold(
+    htla: float | np.floating[Any] | np.integer[Any],
+    nipts_value: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+age_and_noise_threshold(
+    htla: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    nipts_value: NumericArrayLike,
+) -> NDArray[np.float64]
+
+age_and_noise_threshold(
+    htla: float | np.floating[Any] | np.integer[Any],
+    nipts_value: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+age_and_noise_threshold(
     htla: NumericArrayLike,
     nipts_value: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Combine the age and noise components by Formula (1) (clause 6.1).
@@ -57,7 +72,7 @@ Feeding such a database here combines it with the library's NIPTS.
 | `htla` | Age-associated hearing threshold level `H`, in dB. |
 | `nipts_value` | Noise-induced permanent threshold shift `N`, in dB. |
 
-**Returns:** The combined threshold `H'`, in dB.
+**Returns:** The combined threshold `H'`, in dB. A `float` when `htla` and `nipts_value` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -122,10 +137,10 @@ HTLANResult(
     l_ex: float,
     exposure_duration_years: float,
     fractile: float,
-    frequencies: np.ndarray,
-    htla: np.ndarray,
-    nipts: np.ndarray,
-    threshold: np.ndarray,
+    frequencies: NDArray[np.float64],
+    htla: NDArray[np.float64],
+    nipts: NDArray[np.float64],
+    threshold: NDArray[np.float64],
 )
 ```
 
@@ -266,11 +281,11 @@ NIPTSResult(
     l_ex: float,
     exposure_duration_years: float,
     fractile: float,
-    frequencies: np.ndarray,
-    median: np.ndarray,
-    value: np.ndarray,
-    spread_upper: np.ndarray,
-    spread_lower: np.ndarray,
+    frequencies: NDArray[np.float64],
+    median: NDArray[np.float64],
+    value: NDArray[np.float64],
+    spread_upper: NDArray[np.float64],
+    spread_lower: NDArray[np.float64],
 )
 ```
 

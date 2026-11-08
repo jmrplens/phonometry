@@ -115,8 +115,8 @@ AmplifierOverloadVerification(
     test_current_a: float,
     doubling_frequency_hz: float,
     end_frequency_hz: float,
-    frequencies: np.ndarray,
-    voltage_v: np.ndarray,
+    frequencies: NDArray[np.float64],
+    voltage_v: NDArray[np.float64],
     test_frequency_voltage_v: float,
     compliance_voltage_v: float,
 )
@@ -234,7 +234,10 @@ does not, and withholds that relaxation.
 ## BackgroundNoiseAssessment
 
 ```python
-BackgroundNoiseAssessment(noise_levels: np.ndarray, noise_is_tonal: bool)
+BackgroundNoiseAssessment(
+    noise_levels: NDArray[np.float64],
+    noise_is_tonal: bool,
+)
 ```
 
 The magnetic background noise of a site against 7.2 of IEC 60118-4:2014.
@@ -308,7 +311,7 @@ operator".
 ## band_limit_response
 
 ```python
-band_limit_response(frequencies: NumericArrayLike) -> np.ndarray
+band_limit_response(frequencies: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 The theoretical response of the band limiting of the pink noise, in dB.
@@ -349,7 +352,7 @@ combi_signal(
     noise_s: float = 4.0,
     n_cycles: int | np.integer[Any] = 1,
     seed: int | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The combi signal of IEC 60118-4:2014 6.6 and Table 2.
@@ -386,7 +389,13 @@ own zero crossings.
 ## field_strength
 
 ```python
-field_strength(level: NumericArrayLike) -> np.ndarray
+field_strength(level: float | np.floating[Any] | np.integer[Any]) -> float
+
+field_strength(
+    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+field_strength(level: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 The magnetic field strength of a level in dB re 400 mA/m, in A/m.
@@ -401,7 +410,7 @@ prints 566 mA/m, which is $400\sqrt{2}$).
 | :--- | :--- |
 | `level` | Level, in dB re 400 mA/m (scalar or array). |
 
-**Returns:** The RMS field strength, in A/m.
+**Returns:** The RMS field strength, in A/m; a `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -412,7 +421,17 @@ prints 566 mA/m, which is $400\sqrt{2}$).
 ## field_strength_level
 
 ```python
-field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray
+field_strength_level(
+    field_strength_a_per_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+field_strength_level(
+    field_strength_a_per_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+field_strength_level(
+    field_strength_a_per_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The magnetic field strength level, in dB re 400 mA/m (IEC 60118-4:2014 3.1).
@@ -427,7 +446,7 @@ $$
 | :--- | :--- |
 | `field_strength_a_per_m` | RMS magnetic field strength, in A/m. |
 
-**Returns:** The level, in dB re 400 mA/m.
+**Returns:** The level, in dB re 400 mA/m; a `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -477,8 +496,8 @@ peak programme meter of 6.1.4, is definitive (6.1.1).
 FieldStrengthReading(
     fs: int,
     weighting: Literal['Z', 'A'],
-    times: np.ndarray,
-    levels: np.ndarray,
+    times: NDArray[np.float64],
+    levels: NDArray[np.float64],
     max_level: float,
     equivalent_level: float,
 )
@@ -612,7 +631,7 @@ loop_test_noise(
     *,
     rms: float = 1.0,
     seed: int | None = None,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The pink noise test signal of IEC 60118-4:2014 6.4.
@@ -734,8 +753,16 @@ The smallest margin, in dB: negative when the requirement fails.
 
 ```python
 magnetic_flux_density(
+    field_strength_a_per_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+magnetic_flux_density(
+    field_strength_a_per_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+magnetic_flux_density(
     field_strength_a_per_m: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 The magnetic flux density in air of a field strength (IEC 60118-4:2014 E.6).
@@ -751,7 +778,7 @@ $0{,}503\ \mu\mathrm{T}$. E.6 prints 1,256; the last digit rounds to
 | :--- | :--- |
 | `field_strength_a_per_m` | Magnetic field strength, in A/m. |
 
-**Returns:** The flux density, in tesla.
+**Returns:** The flux density, in tesla; a `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -800,7 +827,7 @@ REFERENCE_FIELD_STRENGTH_A_PER_M = 0.4
 ```python
 small_volume_measurement_points(
     layout: Literal['refuge_small', 'refuge_large', 'counter'],
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The measurement points of a disabled refuge or a counter (clause 9 as amended).
@@ -838,7 +865,17 @@ choice and is not part of the points.
 ## telecoil_response
 
 ```python
-telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray
+telecoil_response(
+    angle_deg: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+telecoil_response(
+    angle_deg: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+telecoil_response(
+    angle_deg: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The relative response of a telecoil off its axis, in dB (IEC 60118-4:2014 E.2).
@@ -860,7 +897,7 @@ $6 \times 10^{-17}$, which would read as about -324 dB instead.
 | :--- | :--- |
 | `angle_deg` | Angle between the telecoil's axis and the field, in degrees. |
 
-**Returns:** The response relative to the one on axis, in dB; minus infinity at 90 and 270 degrees.
+**Returns:** The response relative to the one on axis, in dB; minus infinity at 90 and 270 degrees. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

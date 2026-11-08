@@ -106,7 +106,7 @@ linkwitz_riley(
     *,
     frequency: float,
     order: int | np.integer[Any] = ...,
-) -> tuple[np.ndarray, np.ndarray]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 
 Linkwitz-Riley crossover filter (Butterworth squared).
@@ -145,7 +145,7 @@ time_weighting(
     fs: float,
     mode: Literal['fast', 'slow', 'impulse'] = ...,
     initial_state: Literal['zero', 'first'] | NumericArrayLike | None = ...,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Apply time weighting to a signal (Exponential averaging).
@@ -172,7 +172,7 @@ Apply time weighting to a signal (Exponential averaging).
 
 ```python
 TimeWeightedEnvelope(
-    mean_square: np.ndarray,
+    mean_square: NDArray[np.float64],
     fs: float,
     mode: Literal['fast', 'slow', 'impulse'],
     *,
@@ -290,7 +290,7 @@ across blocks, so concatenated block outputs equal a single continuous call.
 ```python
 TimeWeighting.process(x: Signal) -> TimeWeightedEnvelope
 
-TimeWeighting.process(x: NumericArrayLike) -> np.ndarray
+TimeWeighting.process(x: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Apply time weighting to a block, continuing from the previous block.
@@ -342,7 +342,7 @@ weighting_filter(
     weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = ...,
     *,
     high_accuracy: bool | np.bool_ = ...,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Apply a frequency weighting to a signal.
@@ -404,7 +404,7 @@ Initialize the weighting filter.
 ```python
 WeightingFilter.filter(x: Signal) -> Signal
 
-WeightingFilter.filter(x: NumericArrayLike) -> np.ndarray
+WeightingFilter.filter(x: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Apply the weighting filter to a signal.

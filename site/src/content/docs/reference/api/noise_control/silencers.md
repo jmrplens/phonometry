@@ -510,13 +510,13 @@ Closed quarter-wave side-branch tube on a duct (Bies Eqs. (8.144), (8.146)).
 
 ```python
 ReactiveSilencerResult(
-    frequencies: np.ndarray,
-    transmission_loss: np.ndarray,
-    insertion_loss: np.ndarray | None,
-    transfer_matrix: np.ndarray,
+    frequencies: NDArray[np.float64],
+    transmission_loss: NDArray[np.float64],
+    insertion_loss: NDArray[np.float64] | None,
+    transfer_matrix: NDArray[np.complex128],
     kind: Literal['expansion chamber', 'Helmholtz resonator', 'quarter-wave resonator', 'extended-tube chamber', 'element chain'],
     *,
-    resonances: np.ndarray | None,
+    resonances: NDArray[np.float64] | None,
     geometry: Mapping[Literal['length', 'chamber_area', 'pipe_area', 'inlet_extension', 'outlet_extension', 'duct_area', 'neck_area', 'neck_length', 'cavity_volume', 'branch_area'], float] | None,
     plane_wave_limit: float,
     chain: SilencerChain | None,
@@ -879,7 +879,7 @@ The compound four-pole matrix of the chain.
 
 ```python
 SilencerChainElement(
-    matrix: np.ndarray,
+    matrix: NDArray[np.complex128],
     length: float | None = None,
     area: float | None = None,
     label: str | None = None,

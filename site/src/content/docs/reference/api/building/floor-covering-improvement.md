@@ -61,7 +61,7 @@ acceleration_level(
     acceleration: NumericArrayLike,
     *,
     reference: float = 1e-06,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Vibratory acceleration level `La` (ISO 16251-1 Formula (1)).
@@ -199,11 +199,11 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 FloorCoveringImprovementResult(
-    frequencies: np.ndarray,
-    improvement: np.ndarray,
+    frequencies: NDArray[np.float64],
+    improvement: NDArray[np.float64],
     delta_lw: int | None,
     ci_delta: int | None = None,
-    background_margin_db: np.ndarray | None = None,
+    background_margin_db: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -390,8 +390,8 @@ each octave.
 
 ```python
 OctaveBandSpectrum(
-    frequencies: np.ndarray,
-    values: np.ndarray,
+    frequencies: NDArray[np.float64],
+    values: NDArray[np.float64],
     quantity: Literal['ΔL', 'ΔR', 'Rs', 'LI', 'LI,norm'],
 )
 ```

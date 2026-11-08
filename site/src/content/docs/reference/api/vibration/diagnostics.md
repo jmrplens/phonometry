@@ -278,7 +278,7 @@ Predicted frequencies, in hertz, in order.
 FaultFrequencyResult.harmonics(
     name: str,
     n_harmonics: int | np.integer[Any],
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The first *n_harmonics* integer harmonics of the line called *name*.

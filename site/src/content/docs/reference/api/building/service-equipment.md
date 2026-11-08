@@ -147,7 +147,7 @@ additional_microphone_position(
     source_position_m: NumericArrayLike,
     *,
     mounting: Literal['wall', 'ceiling'],
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The extra position for a sound source in the room (ISO/DIS 16032:2023 7.9).
@@ -186,7 +186,10 @@ source along that wall's inward normal.
 ## BackgroundDurationCheck
 
 ```python
-BackgroundDurationCheck(durations_s: np.ndarray, tolerance_s: float)
+BackgroundDurationCheck(
+    durations_s: NDArray[np.float64],
+    tolerance_s: float,
+)
 ```
 
 Whether each background was measured over approximately 30 s (7.6).
@@ -272,9 +275,9 @@ A departure of exactly `tolerance_s` is within it.
 
 ```python
 CalibrationDeviationResult(
-    levels: np.ndarray,
-    previous_levels: np.ndarray,
-    deviations_db: np.ndarray,
+    levels: NDArray[np.float64],
+    previous_levels: NDArray[np.float64],
+    deviations_db: NDArray[np.float64],
 )
 ```
 
@@ -730,8 +733,8 @@ ventilation outlet for example, is left out.
 
 ```python
 MeasurementDisturbanceCheck(
-    max_levels: np.ndarray,
-    equivalent_levels: np.ndarray,
+    max_levels: NDArray[np.float64],
+    equivalent_levels: NDArray[np.float64],
 )
 ```
 
@@ -850,7 +853,7 @@ of the document with the chosen conditions reported in detail.
 ## PositionSpreadCheck
 
 ```python
-PositionSpreadCheck(levels: np.ndarray)
+PositionSpreadCheck(levels: NDArray[np.float64])
 ```
 
 Whether the readings so far are enough to average (7.4.1).
@@ -1076,9 +1079,9 @@ SERVICE_EQUIPMENT_WEIGHTING = {3: {'A': {25.0: -44.7, 31.5: -39.4, 40.0: -34.6, 
 
 ```python
 ServiceEquipmentBackgroundResult(
-    measured_levels: np.ndarray,
-    background_levels: np.ndarray,
-    frequencies: np.ndarray | None = None,
+    measured_levels: NDArray[np.float64],
+    background_levels: NDArray[np.float64],
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -1171,10 +1174,10 @@ Per band, `"none"`, `"corrected"` or `"limited"` (Clause 9).
 ```python
 ServiceEquipmentPositionCheck(
     *,
-    room_dimensions_m: np.ndarray,
-    corner_position_m: np.ndarray,
-    room_positions_m: np.ndarray,
-    source_positions_m: np.ndarray,
+    room_dimensions_m: NDArray[np.float64],
+    corner_position_m: NDArray[np.float64],
+    room_positions_m: NDArray[np.float64],
+    source_positions_m: NDArray[np.float64],
     small_room: bool,
     corner_obstacle_distance_m: float | None = None,
 )
@@ -1358,19 +1361,19 @@ At least 0,50 m (0,30 m in a small room) from every surface.
 
 ```python
 ServiceEquipmentResult(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     fraction: Literal[1, 3],
     quantity: Literal['Smax', 'Fmax', 'eq'],
     a_weighting_range: Literal['restricted', 'extended'],
-    reading_levels: np.ndarray,
-    average_levels: np.ndarray,
+    reading_levels: NDArray[np.float64],
+    average_levels: NDArray[np.float64],
     background: ServiceEquipmentBackgroundResult | None,
-    corrected_levels: np.ndarray,
-    standardized_levels: np.ndarray | None,
-    normalized_levels: np.ndarray | None,
+    corrected_levels: NDArray[np.float64],
+    standardized_levels: NDArray[np.float64] | None,
+    normalized_levels: NDArray[np.float64] | None,
     ratings: Mapping[str, int],
     unrounded_ratings: Mapping[str, float],
-    reproducibility_db: np.ndarray,
+    reproducibility_db: NDArray[np.float64],
 )
 ```
 
@@ -1499,10 +1502,10 @@ of all, is more uncertain, and the draft states no coverage factor.
 
 ```python
 VaryingBackgroundCheck(
-    background_max_level: np.ndarray,
-    equipment_levels: np.ndarray,
+    background_max_level: NDArray[np.float64],
+    equipment_levels: NDArray[np.float64],
     observation_time_s: float,
-    frequencies: np.ndarray | None = None,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 

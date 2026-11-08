@@ -403,7 +403,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 ```python
 ElasticFDTD2D.numpy_field(
     field: Literal['txx', 'tyy', 'txy', 'vx', 'vy'],
-) -> NDArray[np.floating]
+) -> NDArray[np.floating[Any]]
 ```
 
 A NumPy copy of the stored *field*, in this process, whatever the device.
@@ -448,7 +448,7 @@ ElasticFDTD2D.run(
     *,
     snapshot_every: int | np.integer[Any] | None = None,
     snapshot_decimation: int | np.integer[Any] = 1,
-) -> NDArray[np.floating]
+) -> NDArray[np.floating[Any]]
 ```
 
 Advance `n_steps` steps, optionally recording pressure frames.
@@ -503,7 +503,7 @@ ElasticFDTDResult(
     dt: float,
     shape: tuple[int, int],
     sources: tuple[ExplosionSource | ForceSource, ...],
-    snapshots: NDArray[np.floating] | None,
+    snapshots: NDArray[np.floating[Any]] | None,
     snapshot_times: NDArray[np.float64] | None,
     snapshot_field: Literal['p', 'vx', 'vy'],
     obstacle_mask: NDArray[np.bool_] | None,

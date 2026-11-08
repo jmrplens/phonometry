@@ -196,8 +196,8 @@ measured.
 
 ```python
 AGCCharacteristic(
-    source_emf_levels: np.ndarray,
-    output_level: np.ndarray,
+    source_emf_levels: NDArray[np.float64],
+    output_level: NDArray[np.float64],
     agc_range_db: float,
     agc_range_start_level: float,
     agc_range_end_level: float,
@@ -321,9 +321,9 @@ source e.m.f. reduced to zero.
 ```python
 AmplifierFrequencyResponse(
     *,
-    frequencies: np.ndarray,
-    output_current_a: np.ndarray,
-    response_db: np.ndarray,
+    frequencies: NDArray[np.float64],
+    output_current_a: NDArray[np.float64],
+    response_db: NDArray[np.float64],
 )
 ```
 
@@ -340,7 +340,17 @@ The frequency response of an amplifier into its load (IEC 62489-1:2010 5.4.12).
 ### AmplifierFrequencyResponse.at()
 
 ```python
-AmplifierFrequencyResponse.at(frequency_hz: NumericArrayLike) -> np.ndarray
+AmplifierFrequencyResponse.at(
+    frequency_hz: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+AmplifierFrequencyResponse.at(
+    frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+AmplifierFrequencyResponse.at(
+    frequency_hz: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The response at any frequency inside the measured range, in dB.
@@ -354,7 +364,7 @@ response measured at one-third-octave centres is read between them.
 | :--- | :--- |
 | `frequency_hz` | Frequency or frequencies, in hertz. |
 
-**Returns:** The response there, dB re 1 kHz.
+**Returns:** The response there, dB re 1 kHz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -676,12 +686,12 @@ LoopField(
     length_m: float,
     width_m: float,
     n_turns: int,
-    x_m: np.ndarray,
-    y_m: np.ndarray,
-    z_m: np.ndarray,
-    h_x_a_per_m: np.ndarray,
-    h_y_a_per_m: np.ndarray,
-    h_z_a_per_m: np.ndarray,
+    x_m: NDArray[np.float64],
+    y_m: NDArray[np.float64],
+    z_m: NDArray[np.float64],
+    h_x_a_per_m: NDArray[np.float64],
+    h_y_a_per_m: NDArray[np.float64],
+    h_z_a_per_m: NDArray[np.float64],
 )
 ```
 
@@ -715,7 +725,7 @@ same arrays describe it turned on its side.
 ```python
 LoopField.level(
     component: Literal['x', 'y', 'z', 'magnitude'] = 'z',
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The field strength level of one component, dB re 400 mA/m.
@@ -784,8 +794,8 @@ LoopImpedance(
     *,
     resistance_ohm: float,
     inductance_h: float,
-    frequencies: np.ndarray,
-    impedance_ohm: np.ndarray,
+    frequencies: NDArray[np.float64],
+    impedance_ohm: NDArray[np.float64],
 )
 ```
 
@@ -811,7 +821,17 @@ $U = I|Z|$, the $U_\mathrm{h}$ of E.3.
 ### LoopImpedance.at()
 
 ```python
-LoopImpedance.at(frequency_hz: NumericArrayLike) -> np.ndarray
+LoopImpedance.at(
+    frequency_hz: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+LoopImpedance.at(
+    frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+LoopImpedance.at(
+    frequency_hz: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The magnitude of the impedance at any frequency, in ohms.
@@ -822,7 +842,7 @@ The magnitude of the impedance at any frequency, in ohms.
 | :--- | :--- |
 | `frequency_hz` | Frequency or frequencies, in hertz, positive and finite. |
 
-**Returns:** $|Z|$ there, in ohms.
+**Returns:** $|Z|$ there, in ohms; a `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -841,8 +861,18 @@ The frequency where the reactance equals the resistance, in hertz.
 ```python
 LoopImpedance.drive_voltage(
     current_a: float,
+    frequency_hz: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+LoopImpedance.drive_voltage(
+    current_a: float,
+    frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+LoopImpedance.drive_voltage(
+    current_a: float,
     frequency_hz: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
@@ -854,7 +884,7 @@ The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 | `current_a` | RMS loop current, in amperes. |
 | `frequency_hz` | Frequency or frequencies, in hertz, positive and finite. |
 
-**Returns:** $U = I|Z|$, in volts.
+**Returns:** $U = I|Z|$, in volts; a `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -940,9 +970,9 @@ interpolated linearly between the two steps either side of it.
 
 ```python
 MaxOutputCurrent(
-    resistor_voltage_v: np.ndarray,
-    load_current_a: np.ndarray,
-    thd_percent: np.ndarray,
+    resistor_voltage_v: NDArray[np.float64],
+    load_current_a: NDArray[np.float64],
+    thd_percent: NDArray[np.float64],
     load_resistance_ohm: float,
     rated_thd_percent: float,
     max_current_a: float,
@@ -1041,13 +1071,13 @@ NECK_LOOP_TYPES = {1: NeckLoopType(description='for audio sources powered by two
 
 ```python
 NeckLoopCharacteristics(
-    frequencies: np.ndarray,
-    field_strength_level: np.ndarray,
-    impedance_ohm: np.ndarray,
+    frequencies: NDArray[np.float64],
+    field_strength_level: NDArray[np.float64],
+    impedance_ohm: NDArray[np.float64],
     input_voltage_v: float,
     reference_input_voltage_v: float,
     min_impedance_ohm: float,
-    response_db: np.ndarray,
+    response_db: NDArray[np.float64],
     frequencies_3db_hz: tuple[float, ...],
 )
 ```
@@ -1222,9 +1252,9 @@ degrees are as much in quadrature as 90.
 
 ```python
 QuadraturePhaseError(
-    frequencies: np.ndarray,
-    phase_difference_deg: np.ndarray,
-    deviation_deg: np.ndarray,
+    frequencies: NDArray[np.float64],
+    phase_difference_deg: NDArray[np.float64],
+    deviation_deg: NDArray[np.float64],
     max_deviation_deg: float,
     max_deviation_frequency_hz: float,
 )

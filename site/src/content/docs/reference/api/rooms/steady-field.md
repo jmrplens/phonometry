@@ -89,7 +89,7 @@ critical_distance(
 ) -> float
 
 critical_distance(
-    room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
@@ -97,7 +97,7 @@ critical_distance(
 critical_distance(
     room_constant: float | np.floating[Any] | np.integer[Any],
     *,
-    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 critical_distance(
@@ -114,14 +114,14 @@ critical_distance(
 
 critical_distance(
     *,
-    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 critical_distance(
     *,
     absorption_area: float | np.floating[Any] | np.integer[Any],
-    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 critical_distance(
@@ -172,7 +172,7 @@ room_constant(
 
 room_constant(
     surface_area: float,
-    mean_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    mean_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 room_constant(
@@ -211,7 +211,7 @@ sabine_absorption_area(
 
 sabine_absorption_area(
     volume: float,
-    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
@@ -264,7 +264,7 @@ schroeder_frequency(
 ) -> float
 
 schroeder_frequency(
-    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     volume: float,
 ) -> NDArray[np.float64]
 
@@ -409,10 +409,10 @@ such as a room-to-room transmission uses.
 
 ```python
 SteadyFieldResult(
-    distances: np.ndarray,
-    direct: np.ndarray,
-    reverberant: np.ndarray,
-    total: np.ndarray,
+    distances: NDArray[np.float64],
+    direct: NDArray[np.float64],
+    reverberant: NDArray[np.float64],
+    total: NDArray[np.float64],
     critical_distance: float,
     room_constant: float,
     sound_power_level: float,

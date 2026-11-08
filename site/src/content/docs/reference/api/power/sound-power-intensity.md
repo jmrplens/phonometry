@@ -204,13 +204,13 @@ Evaluate the five ISO 9614-3:2002 Annex C acceptance criteria per band.
 ```python
 PrecisionCriteria(
     indicators: PrecisionFieldIndicators,
-    scan_intensity_level_1: np.ndarray | None = None,
-    scan_intensity_level_2: np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
-    repeatability_limit_db: np.ndarray | None = None,
-    pressure_residual_index: np.ndarray | None = None,
-    field_nonuniformity_1: np.ndarray | None = None,
-    field_nonuniformity_2: np.ndarray | None = None,
+    scan_intensity_level_1: NDArray[np.float64] | None = None,
+    scan_intensity_level_2: NDArray[np.float64] | None = None,
+    frequencies: NDArray[np.float64] | None = None,
+    repeatability_limit_db: NDArray[np.float64] | None = None,
+    pressure_residual_index: NDArray[np.float64] | None = None,
+    field_nonuniformity_1: NDArray[np.float64] | None = None,
+    field_nonuniformity_2: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -315,10 +315,10 @@ criterion 1 and criterion 2 are evaluable.
 ```python
 PrecisionFieldIndicators(
     *,
-    ft: np.ndarray | None,
-    f_pi_unsigned: np.ndarray,
-    f_pi_signed: np.ndarray,
-    fs: np.ndarray,
+    ft: NDArray[np.float64] | None,
+    f_pi_unsigned: NDArray[np.float64],
+    f_pi_signed: NDArray[np.float64],
+    fs: NDArray[np.float64],
 )
 ```
 
@@ -336,8 +336,8 @@ $F_{pI_\mathrm{n}}^{\mathrm{signed}} \ge F_{pI_\mathrm{n}}^{\mathrm{unsigned}}$.
 
 ```python
 PrecisionIntensityResult(
-    frequencies: np.ndarray | None,
-    partial_power: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    partial_power: NDArray[np.float64],
     surface_area: float,
     *,
     temperature_c: float = 23.0,
@@ -600,15 +600,15 @@ $$
 
 ```python
 SoundPowerIntensityResult(
-    frequencies: np.ndarray | None,
-    partial_power: np.ndarray,
-    surface_pressure_intensity_index: np.ndarray | None,
-    repeatability: np.ndarray | None,
-    pressure_residual_index: np.ndarray | None,
+    frequencies: NDArray[np.float64] | None,
+    partial_power: NDArray[np.float64],
+    surface_pressure_intensity_index: NDArray[np.float64] | None,
+    repeatability: NDArray[np.float64] | None,
+    pressure_residual_index: NDArray[np.float64] | None,
     surface_area: float,
     fraction: Literal[1, 3],
     grade: Literal['engineering', 'survey'],
-    repeatability_limit_db: np.ndarray | None = None,
+    repeatability_limit_db: NDArray[np.float64] | None = None,
 )
 ```
 

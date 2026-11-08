@@ -164,7 +164,7 @@ parametric_eq(
     fs: float,
     *,
     sections: EQSection | Sequence[EQSection],
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Apply a parametric-EQ cascade to a signal (RBJ Audio EQ Cookbook).
@@ -220,7 +220,7 @@ series as a numerically robust SOS cascade, following the house style of
 ```python
 ParametricEQ.filter(x: Signal) -> Signal
 
-ParametricEQ.filter(x: NumericArrayLike) -> np.ndarray
+ParametricEQ.filter(x: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Apply the EQ cascade to a signal.

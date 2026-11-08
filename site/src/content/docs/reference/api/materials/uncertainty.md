@@ -74,11 +74,11 @@ The coverage factor `k` for a coverage probability (Table 3).
 AbsorptionUncertaintyResult(
     quantity: Literal['absorption_coefficient', 'equivalent_area', 'practical_coefficient', 'weighted_coefficient', 'single_number_rating'],
     condition: Literal['reproducibility', 'repeatability'],
-    frequencies: np.ndarray,
-    values: np.ndarray,
-    standard_uncertainty: np.ndarray,
+    frequencies: NDArray[np.float64],
+    values: NDArray[np.float64],
+    standard_uncertainty: NDArray[np.float64],
     coverage_factor: float,
-    expanded_uncertainty: np.ndarray,
+    expanded_uncertainty: NDArray[np.float64],
 )
 ```
 

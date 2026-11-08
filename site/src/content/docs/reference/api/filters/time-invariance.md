@@ -158,7 +158,7 @@ distribution of half-width half the resolution (IEC 61260-3:2016 5.2):
 
 ```python
 TimeInvarianceResult(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     fraction: float,
     fs: float,
     seconds_per_decade: tuple[float, ...],
@@ -166,8 +166,8 @@ TimeInvarianceResult(
     end_frequency_hz: float,
     sweep_durations_s: tuple[float, ...],
     averaging_times_s: tuple[float, ...],
-    output_levels: np.ndarray,
-    expected_levels: np.ndarray,
+    output_levels: NDArray[np.float64],
+    expected_levels: NDArray[np.float64],
 )
 ```
 

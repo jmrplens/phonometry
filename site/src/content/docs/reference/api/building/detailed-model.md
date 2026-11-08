@@ -169,7 +169,7 @@ bare_floor_impact_level(
     mass_per_area: float,
     structural_reverberation_time: NumericArrayLike,
     radiation_factor: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Normalized impact level of a bare monolithic floor (Part 2, F. B.2).
@@ -217,7 +217,7 @@ bending_radiation_factor(
     length1: float,
     length2: float,
     speed_of_sound: float = 340.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Radiation factor for free bending waves `σ` (Formulae B.4 to B.6).
@@ -280,7 +280,7 @@ calculated_sound_reduction_index(
     density: float | None = None,
     longitudinal_velocity: float | None = None,
     fluid: Fluid = ...,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Sound reduction index of a homogeneous element (Formulae B.2, B.10).
@@ -428,10 +428,10 @@ carries no direct path at all.
 
 ```python
 DetailedAirborneResult(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     paths: tuple[BandPath, ...],
-    r_prime: np.ndarray,
-    energy_fractions: np.ndarray,
+    r_prime: NDArray[np.float64],
+    energy_fractions: NDArray[np.float64],
     rating: WeightedRatingResult | None,
 )
 ```
@@ -531,10 +531,10 @@ a PASS/FAIL verdict, followed by the footer.
 
 ```python
 DetailedImpactResult(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     paths: tuple[BandPath, ...],
-    l_prime_n: np.ndarray,
-    energy_fractions: np.ndarray,
+    l_prime_n: NDArray[np.float64],
+    energy_fractions: NDArray[np.float64],
     rating: ImpactRatingResult | None,
 )
 ```
@@ -636,7 +636,7 @@ direct_impact_level(
     *,
     delta_l: NumericArrayLike = 0.0,
     delta_l_ceiling: NumericArrayLike = 0.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Normalized impact level of the direct path `Ln,d` (Part 2, F. 11).
@@ -670,7 +670,7 @@ direct_reduction_index(
     *,
     delta_r_source: NumericArrayLike = 0.0,
     delta_r_receiving: NumericArrayLike = 0.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Sound reduction index of the direct path `RDd` (Formula 14).
@@ -714,7 +714,7 @@ flanking_impact_level(
     area_j: float,
     delta_l: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Flanking normalized impact level `Ln,ij` per band (Part 2, F. 12).
@@ -756,7 +756,7 @@ flanking_impact_level_from_flanking_level(
     laboratory_area: float,
     coupling_length: float,
     laboratory_coupling_length: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Flanking impact level from a measured `Ln,f` (Part 2, Formula 13).
@@ -801,7 +801,7 @@ flanking_impact_level_from_normalized_difference(
     coupling_length: float,
     delta_l: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Flanking impact level of a Type B junction (Part 2, Formula 14).
@@ -847,7 +847,7 @@ flanking_reduction_index(
     area_j: float,
     delta_r_i: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Flanking sound reduction index `Rij` per band (Formula 15).
@@ -894,7 +894,7 @@ flanking_reduction_index_from_flanking_level(
     coupling_length: float,
     laboratory_coupling_length: float,
     reference_absorption_area: float = 10.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Flanking index from a measured `Dn,f` (Formula 16).
@@ -938,7 +938,7 @@ flanking_reduction_index_from_normalized_difference(
     coupling_length: float,
     delta_r_i: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Flanking index of a Type B junction `Rij` (Formula 17).
@@ -982,7 +982,7 @@ floating_floor_improvement(
     *,
     resonance_frequency: float,
     slope: float = 30.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Improvement of a floating floor `ΔL` per band (Part 2, Formula C.1).
@@ -1023,7 +1023,7 @@ forced_radiation_factor(
     length1: float,
     length2: float,
     speed_of_sound: float = 340.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Radiation factor for forced waves `σf` (Formula B.3).
@@ -1253,7 +1253,7 @@ in_situ_equivalent_absorption_length(
     area: float,
     situ_reverberation_time: NumericArrayLike,
     speed_of_sound: float = 340.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 In-situ equivalent absorption length `asitu` (Formula 11).
@@ -1294,7 +1294,7 @@ in_situ_impact_level(
     impact_level: NumericArrayLike,
     situ_reverberation_time: NumericArrayLike,
     laboratory_reverberation_time: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 In-situ normalized impact level `Ln,situ` (Part 2, Formula 5).
@@ -1328,7 +1328,7 @@ in_situ_reduction_index(
     sound_reduction_index: NumericArrayLike,
     situ_reverberation_time: NumericArrayLike,
     laboratory_reverberation_time: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 In-situ sound reduction index `Rsitu` (Formula 9).
@@ -1370,7 +1370,7 @@ in_situ_total_loss_factor(
     radiation_factor: NumericArrayLike,
     perimeter_absorption: float,
     fluid: Fluid = ...,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Total loss factor in situ `ηtot,situ` (Formula C.1).
@@ -1413,7 +1413,7 @@ in_situ_velocity_level_difference(
     coupling_length: float,
     absorption_length_i: NumericArrayLike,
     absorption_length_j: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 In-situ velocity level difference `Dv,ij,situ` (Formula 10).
@@ -1447,15 +1447,15 @@ built.
 ```python
 InSituElementResult(
     label: str,
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     area: float,
-    radiation_factor: np.ndarray,
-    forced_radiation_factor: np.ndarray,
-    total_loss_factor: np.ndarray,
-    reverberation_time: np.ndarray,
-    absorption_length: np.ndarray,
-    sound_reduction_index: np.ndarray,
-    impact_level: np.ndarray,
+    radiation_factor: NDArray[np.float64],
+    forced_radiation_factor: NDArray[np.float64],
+    total_loss_factor: NDArray[np.float64],
+    reverberation_time: NDArray[np.float64],
+    absorption_length: NDArray[np.float64],
+    sound_reduction_index: NDArray[np.float64],
+    impact_level: NDArray[np.float64],
 )
 ```
 
@@ -1506,7 +1506,7 @@ laboratory_total_loss_factor(
     *,
     mass_per_area: float,
     internal_loss_factor: float = 0.01,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Total loss factor in the laboratory `ηtot,lab` (Formula C.3).
@@ -1577,7 +1577,7 @@ reciprocity_impact_level(
     *,
     frequencies: NumericArrayLike,
     fraction: Literal[1, 3] | np.integer[Any] = 3,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Impact level of a homogeneous floor by reciprocity (Part 2, B.3/B.4).
@@ -1616,7 +1616,7 @@ resonant_sound_reduction_index(
     frequencies: NumericArrayLike,
     critical_frequency: float,
     correction: NumericArrayLike = 8.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Correct a measured `R` to resonant transmission only (Formula B.1).
@@ -1655,7 +1655,7 @@ structural_reverberation_time(
     total_loss_factor: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Structural reverberation time $T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})$ (C.1).

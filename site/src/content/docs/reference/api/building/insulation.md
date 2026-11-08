@@ -188,12 +188,12 @@ volume is an argument here.
 
 ```python
 AirborneInsulationResult(
-    d: np.ndarray,
-    dnt: np.ndarray,
-    r_prime: np.ndarray | None,
-    l1: np.ndarray,
-    l2: np.ndarray,
-    t2: np.ndarray,
+    d: NDArray[np.float64],
+    dnt: NDArray[np.float64],
+    r_prime: NDArray[np.float64] | None,
+    l1: NDArray[np.float64],
+    l2: NDArray[np.float64],
+    t2: NDArray[np.float64],
     t0: float,
     source_low_frequency: LowFrequencyResult | None = None,
     receiver_low_frequency: LowFrequencyResult | None = None,
@@ -408,11 +408,11 @@ are not the ISO 16283 quantity.
 
 ```python
 FacadeInsulationResult(
-    d_2m: np.ndarray,
-    d_2m_nt: np.ndarray,
-    d_2m_n: np.ndarray | None,
-    r_prime: np.ndarray | None,
-    frequencies: np.ndarray | None = None,
+    d_2m: NDArray[np.float64],
+    d_2m_nt: NDArray[np.float64],
+    d_2m_n: NDArray[np.float64] | None,
+    r_prime: NDArray[np.float64] | None,
+    frequencies: NDArray[np.float64] | None = None,
     method: Literal['road_traffic', 'loudspeaker'] = 'loudspeaker',
     low_frequency: LowFrequencyResult | None = None,
 )
@@ -578,10 +578,10 @@ answers from the default procedure alone and raises a
 
 ```python
 ImpactInsulationResult(
-    l_n_t: np.ndarray,
-    l_n: np.ndarray | None,
-    li: np.ndarray,
-    t2: np.ndarray,
+    l_n_t: NDArray[np.float64],
+    l_n: NDArray[np.float64] | None,
+    li: NDArray[np.float64],
+    t2: NDArray[np.float64],
     t0: float,
     low_frequency: LowFrequencyResult | None = None,
 )

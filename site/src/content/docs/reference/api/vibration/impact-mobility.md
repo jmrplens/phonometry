@@ -110,7 +110,10 @@ CHANNEL_PHASE_TOLERANCE_DEG = 5.0
 ## ChannelMatchVerification
 
 ```python
-ChannelMatchVerification(frequencies: np.ndarray, response: np.ndarray)
+ChannelMatchVerification(
+    frequencies: NDArray[np.float64],
+    response: NDArray[np.complex128],
+)
 ```
 
 Do two analyser channels match in gain and phase? (8.1)
@@ -423,9 +426,9 @@ COHERENCE_RECORDS = 5
 
 ```python
 CoherenceCheck(
-    frequencies: np.ndarray,
-    coherence: np.ndarray,
-    judged: np.ndarray,
+    frequencies: NDArray[np.float64],
+    coherence: NDArray[np.float64],
+    judged: NDArray[np.bool_],
     *,
     n_impacts: int,
     min_coherence: float = 0.9,
@@ -509,9 +512,9 @@ NaN where the coherence is zero.
 
 ```python
 DoubleHitCheck(
-    force_n: np.ndarray,
+    force_n: NDArray[np.float64],
     fs: float,
-    impact_indices: np.ndarray,
+    impact_indices: NDArray[np.intp],
     *,
     threshold_ratio: float,
 )
@@ -676,7 +679,10 @@ The DC bin and, for an even record, the Nyquist bin are not doubled.
 ## EnergySpectralDensity
 
 ```python
-EnergySpectralDensity(frequencies: np.ndarray, density: np.ndarray)
+EnergySpectralDensity(
+    frequencies: NDArray[np.float64],
+    density: NDArray[np.float64],
+)
 ```
 
 The one-sided energy spectral density of a transient record (3.3, 3.4).
@@ -760,7 +766,7 @@ exponential_window(
     fs: float,
     *,
     decay_rate_per_s: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The exponential window of 8.5.2: $w(t) = \mathrm{e}^{-a t}$.
@@ -828,8 +834,8 @@ leaves the method open; [`single_mode_fit`](/phonometry/reference/api/vibration/
 
 ```python
 ExponentialWindowCorrection(
-    damped_natural_frequency_hz: np.ndarray,
-    apparent_damping_ratio: np.ndarray,
+    damped_natural_frequency_hz: NDArray[np.float64],
+    apparent_damping_ratio: NDArray[np.float64],
     *,
     exponential_decay_rate_per_s: float,
 )
@@ -918,7 +924,7 @@ force_window(
     width_s: float,
     start_s: float = 0.0,
     taper_s: float = 0.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The force window of 8.5.1: unity over the pulse, exactly zero elsewhere.
@@ -960,8 +966,8 @@ the response still carries it. [`check_double_hit`](/phonometry/reference/api/vi
 
 ```python
 ForceSpectrumCheck(
-    frequencies: np.ndarray,
-    energy_spectral_density: np.ndarray,
+    frequencies: NDArray[np.float64],
+    energy_spectral_density: NDArray[np.float64],
     *,
     frequency_range_hz: tuple[float, float],
     max_drop_db: float,
@@ -1139,10 +1145,10 @@ Advisory when an ISO 7626-5 record breaks a rule of the part.
 
 ```python
 ImpactMobilityResult(
-    frequencies: np.ndarray,
-    mobility: np.ndarray,
-    coherence: np.ndarray,
-    force_energy_spectral_density: np.ndarray,
+    frequencies: NDArray[np.float64],
+    mobility: NDArray[np.complex128],
+    coherence: NDArray[np.float64],
+    force_energy_spectral_density: NDArray[np.float64],
     *,
     n_impacts: int,
     exponential_decay_rate_per_s: float = 0.0,
@@ -1292,7 +1298,7 @@ window and the coherence at the mobility peak.
 ```python
 ImpactMobilityResult.to(
     target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 Convert the mobility to another FRF kind (see [`.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
@@ -1306,7 +1312,7 @@ Convert the mobility to another FRF kind (see [`.convert_frf`](/phonometry/refer
 ## OverloadCheck
 
 ```python
-OverloadCheck(x: np.ndarray, fs: float, *, full_scale: float)
+OverloadCheck(x: NDArray[np.float64], fs: float, *, full_scale: float)
 ```
 
 Did the record stay inside the linear range of its channel? (8.4)
@@ -1396,7 +1402,7 @@ RESPONSE_MIDPOINT_RATIO = 0.1
 
 ```python
 ResponseDecayCheck(
-    response: np.ndarray,
+    response: NDArray[np.float64],
     fs: float,
     *,
     segment_s: float,
@@ -1583,8 +1589,8 @@ the record the exponential window multiplied:
 
 ```python
 SingleModeFitResult(
-    frequencies: np.ndarray,
-    frf: np.ndarray,
+    frequencies: NDArray[np.float64],
+    frf: NDArray[np.complex128],
     pole_rad_s: complex,
     residue: complex,
     direct_term: complex,
@@ -1630,7 +1636,7 @@ $\hat\zeta_r$ of Annex A, the window's included.
 ```python
 SingleModeFitResult.corrected_frf(
     frequencies: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 The mode with the window taken out, of kind `kind` (Annex A).
@@ -1653,7 +1659,7 @@ and nothing else (Formula (A.2)).
 ```python
 SingleModeFitResult.corrected_mobility(
     frequencies: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.complex128]
 ```
 
 The corrected mode as mobility, in m/(N·s).
@@ -1681,7 +1687,9 @@ Damped natural frequency $\omega_d / 2\pi$, in hertz.
 ### SingleModeFitResult.fitted_frf()
 
 ```python
-SingleModeFitResult.fitted_frf(frequencies: NumericArrayLike) -> np.ndarray
+SingleModeFitResult.fitted_frf(
+    frequencies: NumericArrayLike,
+) -> NDArray[np.complex128]
 ```
 
 The fitted model at any frequencies, window included, of kind `kind`.

@@ -6,8 +6,8 @@ a variant without FMA from the ``GNU_PROPERTY_X86_ISA_1_NEEDED`` property of
 the ``libm`` :mod:`math` calls, so the tests below hand the reader minimal
 64-bit ELF objects whose note says x86-64-v3, the baseline or nothing, the
 way glibc writes it, hold the reading of the real library here to
-``readelf``'s wherever ``readelf`` names the property, and hold the ``libm``
-and the loader read to the objects that define ``exp`` and
+``readelf``'s wherever ``readelf`` knows the property note, and hold the
+``libm`` and the loader read to the objects that define ``exp`` and
 ``__tls_get_addr``, with planted ones mapped ahead of them.
 :func:`libm_identity.mask_reading` reads how a loader reads
 ``GLIBC_TUNABLES`` from the names its parser carries, so the tests hand it
@@ -765,29 +765,25 @@ def _readelf_notes(library: Path) -> str:
     ).stdout
 
 
-#: Why a readelf names no ISA property: it prints the property by its number
-#: where it knows the GNU property note but not the x86-64 levels (binutils
-#: 2.29 to 2.35), and the note as a type it does not know before that.
-_BY_ITS_NUMBER = (
-    "this readelf prints the ISA property by its number: it predates the names "
-    "of the x86-64 ISA levels, as binutils 2.29 to 2.35 do"
-)
+#: Why a readelf shows no ISA property: it prints the GNU property note as a
+#: type it does not know, as binutils 2.27 and 2.28 do. binutils 2.29 to 2.35
+#: know the note but not the x86-64 levels, and show the property by its
+#: number and its bytes, which are read as the levels.
 _AS_AN_UNKNOWN_NOTE = (
     "this readelf prints the GNU property note as a note type it does not "
     "know: it predates that note, as binutils 2.28 and earlier do"
 )
 
 
-def _why_readelf_names_no_property(shown: str) -> str | None:
-    """Why readelf, printing *shown*, names no ISA property, or ``None``.
+def _why_readelf_shows_no_property(shown: str) -> str | None:
+    """Why readelf, printing *shown*, shows no ISA property, or ``None``.
 
-    Both ways are read from what readelf prints, never from what the reader
-    reads: a readelf that prints neither names the property wherever the
-    object carries it, so the levels it names, none included, are the ones
-    the reader is held to.
+    It is read from what readelf prints, never from what the reader reads: a
+    readelf that knows the GNU property note shows the property wherever the
+    object carries it, by its levels' names or by its number and its bytes,
+    so the levels it shows, none included, are the ones the reader is held
+    to.
     """
-    if re.search(rf"type {_ISA_1_NEEDED:#x}\b", shown, re.IGNORECASE):
-        return _BY_ITS_NUMBER
     unknown = (
         r"^\s*GNU\s+0x[0-9a-f]+\s+"
         rf"Unknown note type: \({_NT_GNU_PROPERTY_TYPE_0:#010x}\)\s*$"
@@ -797,12 +793,26 @@ def _why_readelf_names_no_property(shown: str) -> str | None:
     return None
 
 
-def _levels_readelf_names(shown: str) -> int | None:
-    """The ISA levels ``readelf --notes`` names as needed, or ``None``."""
-    line = re.search(r"x86 ISA needed: ([^\n]*)", shown)
-    if line is None:
+#: The word readelf names each ISA property by, from binutils 2.36 on.
+_ISA_PROPERTY_WORDS = {_ISA_1_NEEDED: "needed", _ISA_1_USED: "used"}
+
+
+def _levels_readelf_shows(shown: str, kind: int = _ISA_1_NEEDED) -> int | None:
+    """The ISA levels ``readelf --notes`` shows in property *kind*, or ``None``.
+
+    binutils 2.36 and later name the levels, on an ``x86 ISA needed:`` or
+    ``x86 ISA used:`` line. binutils 2.29 to 2.35 know the note but not these
+    property types, and print each by its number and its bytes, as ``type
+    0xc0008002 data: 07 00 00 00``: the bytes are the bitmask the reader
+    reads, least significant first.
+    """
+    line = re.search(rf"x86 ISA {_ISA_PROPERTY_WORDS[kind]}: ([^\n]*)", shown)
+    if line is not None:
+        return sum(_LEVEL_BITS[name.strip()] for name in line.group(1).split(","))
+    data = re.search(rf"type {kind:#x} data: ((?:[0-9a-f]{{2}} )+)>", shown)
+    if data is None:
         return None
-    return sum(_LEVEL_BITS[name.strip()] for name in line.group(1).split(","))
+    return int.from_bytes(bytes.fromhex(data.group(1)), "little")
 
 
 @pytest.mark.parametrize(
@@ -858,19 +868,20 @@ def test_the_levels_readelf_prints_end_with_their_line(
     *, shown: str, needed: int | None
 ) -> None:
     """Each is the note as ``readelf --notes`` 2.44 printed it for that object."""
-    assert _levels_readelf_names(shown) == needed
+    assert _levels_readelf_shows(shown) == needed
 
 
 def _hold_to_readelf(image: bytes, shown: str) -> None:
-    """Hold the levels the reader reads in *image* to those readelf names.
+    """Hold the levels the reader reads in *image* to those readelf shows.
 
-    It skips where readelf, printing *shown*, names no ISA property, and fails
-    wherever readelf names other levels than the reader reads, none included.
+    It skips where readelf, printing *shown*, does not know the GNU property
+    note, and fails wherever readelf shows other levels than the reader
+    reads, by their names or by the property's bytes, none included.
     """
-    reason = _why_readelf_names_no_property(shown)
+    reason = _why_readelf_shows_no_property(shown)
     if reason is not None:
         pytest.skip(reason)
-    assert libm_identity.x86_isa_levels_needed(image) == _levels_readelf_names(shown)
+    assert libm_identity.x86_isa_levels_needed(image) == _levels_readelf_shows(shown)
 
 
 #: What ``readelf --notes`` printed, in the C locale, of a minimal object whose
@@ -942,32 +953,35 @@ _READELF_PRINTED = {
 
 
 @pytest.mark.parametrize(
-    ("printed", "reason"),
+    ("printed", "reason", "levels"),
     [
-        ("2.27-planted", _AS_AN_UNKNOWN_NOTE),
-        ("2.27-ubuntu-26.04-amd64v3-libm", _AS_AN_UNKNOWN_NOTE),
-        ("2.27-other-owner", None),
-        ("2.27-gnu-type-7", None),
-        ("2.30-ubuntu-26.04-amd64v3-libm", _BY_ITS_NUMBER),
-        ("2.30-almalinux-8-libm", None),
-        ("2.31.1-planted", _BY_ITS_NUMBER),
-        ("2.34-ubuntu-26.04-amd64-libm", _BY_ITS_NUMBER),
-        ("2.46-planted", None),
-        ("2.46-ubuntu-26.04-amd64-libm", None),
+        ("2.27-planted", _AS_AN_UNKNOWN_NOTE, None),
+        ("2.27-ubuntu-26.04-amd64v3-libm", _AS_AN_UNKNOWN_NOTE, None),
+        ("2.27-other-owner", None, None),
+        ("2.27-gnu-type-7", None, None),
+        ("2.30-ubuntu-26.04-amd64v3-libm", None, _V3),
+        ("2.30-almalinux-8-libm", None, None),
+        ("2.31.1-planted", None, _V3),
+        ("2.34-ubuntu-26.04-amd64-libm", None, _BASELINE),
+        ("2.46-planted", None, _V3),
+        ("2.46-ubuntu-26.04-amd64-libm", None, _BASELINE),
     ],
 )
-def test_readelf_names_no_property_only_by_its_number_or_as_an_unknown_note(
-    *, printed: str, reason: str | None
+def test_readelf_shows_the_levels_unless_it_prints_an_unknown_note(
+    *, printed: str, reason: str | None, levels: int | None
 ) -> None:
-    """Only a property printed by its number or an unknown note names none.
+    """Only a note readelf does not know shows no ISA property.
 
     binutils 2.27 (CentOS 7) knows no GNU property note; 2.30 (AlmaLinux 8),
     2.31.1 (Debian 10) and 2.34 (Ubuntu 20.04) know the note but not the
-    levels. An unknown note of another owner or of another GNU type is not the
-    property note, and a note that carries no ISA property, as AlmaLinux 8's
-    libm, is one readelf reads in full.
+    levels, and show the property by its number and its bytes; 2.46 names
+    the levels. An unknown note of another owner or of another GNU type is not
+    the property note, and a note that carries no ISA property, as AlmaLinux
+    8's libm, is one readelf reads in full.
     """
-    assert _why_readelf_names_no_property(_READELF_PRINTED[printed]) == reason
+    shown = _READELF_PRINTED[printed]
+    assert _why_readelf_shows_no_property(shown) == reason
+    assert _levels_readelf_shows(shown) == levels
 
 
 def _held(image: bytes, printed: str) -> str:
@@ -981,14 +995,15 @@ def _held(image: bytes, printed: str) -> str:
     return "agrees"
 
 
-def test_a_readelf_that_names_the_property_holds_the_reader_to_its_levels() -> None:
-    """Named, the levels are compared, and a difference fails the cross-check.
+def test_a_readelf_that_shows_the_property_holds_the_reader_to_its_levels() -> None:
+    """Shown, the levels are compared, and a difference fails the cross-check.
 
-    The object declares x86-64-v3: readelf naming the baseline, or naming the
-    note's properties without an ISA level, disagrees with the reader and
-    fails, never skips; readelf naming x86-64-v3 agrees; readelf printing the
-    property by its number or the note as an unknown type skips, whatever it
-    would say.
+    The object declares x86-64-v3: readelf naming x86-64-v3, or showing the
+    property by its number with the bytes of x86-64-v3, agrees; readelf naming
+    the baseline, showing the bytes of the baseline, or naming the note's
+    properties without an ISA level disagrees with the reader and fails,
+    never skips; readelf printing the note as an unknown type skips, whatever
+    it would say.
     """
     image = _elf((_PT_NOTE, _glibc_libm_note(_V3), 8))
     printed = (
@@ -996,19 +1011,27 @@ def test_a_readelf_that_names_the_property_holds_the_reader_to_its_levels() -> N
         "2.46-ubuntu-26.04-amd64-libm",
         "2.30-almalinux-8-libm",
         "2.31.1-planted",
+        "2.30-ubuntu-26.04-amd64v3-libm",
+        "2.34-ubuntu-26.04-amd64-libm",
         "2.27-planted",
     )
     assert {name: _held(image, name) for name in printed} == {
         "2.46-planted": "agrees",
         "2.46-ubuntu-26.04-amd64-libm": "fails",
         "2.30-almalinux-8-libm": "fails",
-        "2.31.1-planted": f"skips: {_BY_ITS_NUMBER}",
+        "2.31.1-planted": "agrees",
+        "2.30-ubuntu-26.04-amd64v3-libm": "agrees",
+        "2.34-ubuntu-26.04-amd64-libm": "fails",
         "2.27-planted": f"skips: {_AS_AN_UNKNOWN_NOTE}",
     }
 
 
 def test_readelf_and_the_reader_agree_past_the_needed_levels(tmp_path: Path) -> None:
-    """A note that carries the used features and levels after, as Fedora's does."""
+    """A note that carries the used features and levels after, as Fedora's does.
+
+    readelf shows the used levels after the needed ones, named or by the
+    property's number, and neither reading takes them for the needed ones.
+    """
     note = _property_note(
         (_FEATURE_1_AND, 0b11),
         (_ISA_1_NEEDED, _V3),
@@ -1020,9 +1043,9 @@ def test_readelf_and_the_reader_agree_past_the_needed_levels(tmp_path: Path) -> 
     library.write_bytes(image)
     shown = _readelf_notes(library)
     _hold_to_readelf(image, shown)
-    assert "x86 ISA used: x86-64-baseline, x86-64-v3" in shown
+    assert _levels_readelf_shows(shown, _ISA_1_USED) == 0b0101
     assert libm_identity.x86_isa_levels_needed(image) == _V3
-    assert _levels_readelf_names(shown) == _V3
+    assert _levels_readelf_shows(shown) == _V3
 
 
 def test_the_real_libm_reads_as_readelf_reads_it() -> None:

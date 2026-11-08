@@ -1697,10 +1697,15 @@ def test_an_assignment_expression_is_read_as_the_assignment_it_is() -> None:
 
 def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:
     """``every_path_calls`` yields the calls a function makes as statements
-    of their own at the top of its body, or of a ``with`` block there, up to
-    the first statement that may ``return``; a call on one branch, in a loop
-    or in a ``try``, or after a ``return`` that may have left, is not one,
-    and a ``return`` in a function written inside is that function's.
+    of their own at the top of its body, up to the first statement that may
+    ``return``; a call on one branch, in a loop or in a ``try``, or after a
+    ``return`` that may have left, is not one, nor one in a ``with`` block,
+    whose context manager may swallow what the block raises, and a
+    ``return`` in a function written inside is that function's.
+
+    A call in a ``with`` block was read as one every call makes, so
+    ``with contextlib.suppress(ValueError): self.__post_init__()`` was
+    credited with a hook whose refusal the block swallows.
     """
     tree = ast.parse(
         textwrap.dedent(
@@ -1733,5 +1738,5 @@ def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:
         for call in ast_scan.every_path_calls(function)
         if isinstance(call.func, ast.Name)
     ]
-    assert names == ["first", "second", "third"]
+    assert names == ["first", "third"]
     assert ast_scan.first_parameter(function) == "self"

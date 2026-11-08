@@ -4975,6 +4975,7 @@ def test_a_numpy_scalar_class_written_with_its_argument_is_one_number() -> None:
 
 #: The imports of the records below.
 _RECORDS_HEAD = """
+import contextlib
 import sys
 from dataclasses import InitVar, dataclass, field
 from typing import TYPE_CHECKING
@@ -5134,6 +5135,14 @@ class Rec(Plain):
         (
             """
             def __init__(self, data):
+                with contextlib.suppress(ValueError):
+                    Rec.__init__(self, data)
+            """,
+            {("make", "Sub.data", "data")},
+        ),
+        (
+            """
+            def __init__(self, data):
                 Plain.__init__(self, data)
                 self.__post_init__()
             """,
@@ -5147,7 +5156,14 @@ class Rec(Plain):
             set(),
         ),
     ],
-    ids=["one-branch", "named-only", "other-instance", "called", "handed-on"],
+    ids=[
+        "one-branch",
+        "named-only",
+        "other-instance",
+        "swallowed",
+        "called",
+        "handed-on",
+    ],
 )
 def test_a_hand_written_init_runs_the_hook_it_calls_on_self_on_every_path(
     tmp_path: pathlib.Path, body: str, expected: set[tuple[str, str, str]]
@@ -5157,9 +5173,11 @@ def test_a_hand_written_init_runs_the_hook_it_calls_on_self_on_every_path(
     does, on every path a call that returns takes.
 
     Any mention of ``__post_init__`` in its body was read as a call, so a
-    hook called on one branch, or only looked up, was credited; and any
+    hook called on one branch, or only looked up, was credited; any
     ``Base.__init__(...)`` was read as a hand-off, so ``Rec.__init__(other,
-    data)``, which copies into another instance, was credited to ``self``.
+    data)``, which copies into another instance, was credited to ``self``;
+    and so was one in a ``with`` block, whose context manager may swallow
+    what the hook raises before it copies.
     """
     source = (
         _RECORDS_HEAD

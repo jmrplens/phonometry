@@ -396,19 +396,17 @@ def every_path_calls(
     function: ast.FunctionDef | ast.AsyncFunctionDef,
 ) -> Iterator[ast.Call]:
     """The calls a function makes, as statements of their own, on every path
-    a call of it that returns takes: one at the top of its body, or of a
-    ``with`` block there, before any statement that may ``return``
-    (:func:`scope_nodes` of the statement, so a ``return`` of a function or
-    a class written there is another scope's). One in a branch, a loop or a
-    ``try`` may not run, nor one after a ``return`` that may have left; a
-    path that raises returns nothing.
+    a call of it that returns takes: one at the top of its body, before any
+    statement that may ``return`` (:func:`scope_nodes` of the statement, so
+    a ``return`` of a function or a class written there is another scope's).
+    One in a branch, a loop or a ``try`` may not run, nor one after a
+    ``return`` that may have left; a path that raises returns nothing. Nor
+    is one in a ``with`` block: its context manager may swallow what a
+    statement of the block raises, ``contextlib.suppress`` does, and the
+    call that returns then skips the rest of the block, or has run a call
+    that never got to its end.
     """
-    body: list[ast.stmt] = list(function.body)
-    while body:
-        statement = body.pop(0)
-        if isinstance(statement, ast.With | ast.AsyncWith):
-            body[:0] = statement.body
-            continue
+    for statement in function.body:
         if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
             yield statement.value
         if isinstance(statement, ast.Return) or any(

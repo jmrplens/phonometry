@@ -15,6 +15,7 @@ holds.
 from __future__ import annotations
 
 import ast
+import contextlib
 import dataclasses
 import enum
 import importlib.util
@@ -4149,6 +4150,18 @@ class _HookNamedOnly(_ChecksItsPace):
 
 
 @dataclass(init=False)
+class _HookSwallowed(_ChecksItsPace):
+    """A record whose ``__init__`` calls the hook in a block that swallows
+    its refusal.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        with contextlib.suppress(ValueError):
+            self.__post_init__()
+
+
+@dataclass(init=False)
 class _BuildsAnother(_ChecksItsPace):
     """A record whose ``__init__`` hands the pace to the base's ``__init__``
     for another instance, whose hook checks nothing.
@@ -4191,6 +4204,7 @@ class _HandsItselfOn(_ChecksItsPace):
     [
         (_HookOnOneBranch, False),
         (_HookNamedOnly, False),
+        (_HookSwallowed, False),
         (_BuildsAnother, False),
         (_CallsItsHook, True),
         (_CallsPastItself, True),
@@ -4199,6 +4213,7 @@ class _HandsItselfOn(_ChecksItsPace):
     ids=[
         "one-branch",
         "named-only",
+        "swallowed",
         "another-instance",
         "called",
         "called-past-itself",
@@ -4215,7 +4230,8 @@ def test_a_hand_written_init_runs_the_hook_it_calls_on_self_on_every_path(
 
     Any mention of ``__post_init__`` in its code was read as a call, so a
     hook called on one branch, or only looked up, was credited with its
-    check; and any ``Base.__init__(...)`` was read as a hand-off, so one
+    check, and so was one called in a ``with`` block that swallows its
+    refusal; and any ``Base.__init__(...)`` was read as a hand-off, so one
     that builds another instance credited the check to ``self``.
     """
     assert ccl._runs_a_post_init(record) is runs

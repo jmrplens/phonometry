@@ -399,9 +399,25 @@ def static_stress(mz: float = _MZ_MALE) -> float:
     return mz * _GRAVITY
 
 
+@overload
+def ultimate_strength[S: RealScalar](age: S, *, sex: Sex = "male") -> float: ...
+
+
+@overload
+def ultimate_strength[V: RealValues](
+    age: V, *, sex: Sex = "male"
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def ultimate_strength[A: NumericArrayLike](
+    age: A, *, sex: Sex = "male"
+) -> float | NDArray[np.float64]: ...
+
+
 def ultimate_strength(
     age: NumericArrayLike, *, sex: Sex = "male"
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Ultimate lumbar strength :math:`S_\mathrm{u}` at an age (Annex C,
     Formula C.4).
 
@@ -409,14 +425,15 @@ def ultimate_strength(
     :param sex: ``"male"`` or ``"female"`` (sets the age slope
         :math:`S_\text{age}`).
     :return: The ultimate strength
-        :math:`S_\mathrm{u} = 6.75 - S_\text{age} (b+i)`, MPa.
+        :math:`S_\mathrm{u} = 6.75 - S_\text{age} (b+i)`, MPa; a ``float`` for a
+        number; an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``sex`` is not a text, or ``age`` holds a text or a value that
         is not a real number.
     """
     require_choice(sex, "sex", _SEXES)
     slope = _STRENGTH_AGE_SLOPE_MALE if sex == "male" else _STRENGTH_AGE_SLOPE_FEMALE
     years = real_array(age, "age")
-    return _ULTIMATE_STRENGTH_INTERCEPT - slope * years
+    return as_float_or_array(_ULTIMATE_STRENGTH_INTERCEPT - slope * years, like=(age,))
 
 
 def injury_risk(

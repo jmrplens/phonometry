@@ -139,7 +139,23 @@ def object_fraction(object_volumes: NumericArrayLike, volume: float) -> float:
     return psi
 
 
-def hard_object_absorption(object_volume: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def hard_object_absorption[S: RealScalar](object_volume: S) -> float: ...
+
+
+@overload
+def hard_object_absorption[V: RealValues](object_volume: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def hard_object_absorption[A: NumericArrayLike](
+    object_volume: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def hard_object_absorption(
+    object_volume: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Equivalent absorption area of a hard object (Formula 4).
 
     An empirical estimate for hard, irregularly shaped objects (machinery,
@@ -147,7 +163,8 @@ def hard_object_absorption(object_volume: NumericArrayLike) -> NDArray[np.float6
 
     :param object_volume: Volume ``Vobj`` of the hard object(s), m3.
     :return: The equivalent absorption area
-        :math:`A_{\text{obj}} = V_{\text{obj}}^{2/3}`, m2.
+        :math:`A_{\text{obj}} = V_{\text{obj}}^{2/3}`, m2; a ``float`` for a number;
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``object_volume`` holds a text or a value that is not a real
         number.
     """
@@ -155,7 +172,7 @@ def hard_object_absorption(object_volume: NumericArrayLike) -> NDArray[np.float6
     if np.any(vol < 0.0):
         msg = "object volumes must be non-negative."
         raise ValueError(msg)
-    return vol**_OBJECT_EXPONENT
+    return as_float_or_array(vol**_OBJECT_EXPONENT, like=(object_volume,))
 
 
 @overload

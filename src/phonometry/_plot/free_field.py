@@ -25,6 +25,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..emission.free_field_qualification import (
@@ -130,7 +131,7 @@ def _hertz(value: float, language: Language) -> str:
     return text.replace(".", ",") if language == "es" else text
 
 
-def _in_range(freqs: np.ndarray, low: float, high: float) -> np.ndarray:
+def _in_range(freqs: NDArray[np.float64], low: float, high: float) -> NDArray[np.bool_]:
     """The frequencies whose one-third octave band lies within ``low``-``high``.
 
     Nominal and exact mid-band frequencies differ by under 3 %, well inside
@@ -233,7 +234,7 @@ def plot_inverse_square_law(
         _C_MUTED,
     )
     markers = ("o", "s", "^", "v", "D", "P", "X", "*")
-    drawn: list[np.ndarray] = []
+    drawn: list[NDArray[np.float64]] = []
     for index, (r, dev, name) in enumerate(
         zip(result.distances, result.deviations_db, result.traverse_names, strict=True)
     ):

@@ -831,8 +831,8 @@ def plot_absorption_uncertainty(
 
 def _absorption_spectrum_axes(
     ax: Axes | None,
-    freqs: np.ndarray,
-    alpha: np.ndarray,
+    freqs: NDArray[np.float64],
+    alpha: NDArray[np.float64],
     *,
     title: str,
     label: str,
@@ -858,9 +858,9 @@ def _absorption_spectrum_axes(
 
 def _absorption_reflection_axes(
     ax: Axes | None,
-    freqs: np.ndarray,
-    alpha: np.ndarray,
-    reflection: np.ndarray,
+    freqs: NDArray[np.float64],
+    alpha: NDArray[np.float64],
+    reflection: NDArray[np.complex128],
     *,
     title: str,
     language: Language = "en",

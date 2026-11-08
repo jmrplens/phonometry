@@ -2187,6 +2187,27 @@ def _is_classmethod(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     )
 
 
+#: The methods Python makes class methods without a ``classmethod``
+#: decorator.
+_IMPLICIT_CLASS_METHODS = frozenset({"__init_subclass__", "__class_getitem__"})
+
+
+def _class_receiver(node: ast.FunctionDef | ast.AsyncFunctionDef | None) -> str | None:
+    """The first parameter of a method when it holds the class: in a class
+    method, one Python makes one (:data:`_IMPLICIT_CLASS_METHODS`), and
+    ``__new__``, a static method a call of its class hands the class first;
+    ``None`` for any other function.
+    """
+    if node is None or not (
+        _is_classmethod(node)
+        or node.name in _IMPLICIT_CLASS_METHODS
+        or node.name == "__new__"
+    ):
+        return None
+    positional = [*node.args.posonlyargs, *node.args.args]
+    return positional[0].arg if positional else None
+
+
 class Reader:
     """Follows a parameter from a public function to where its body admits it."""
 
@@ -2418,7 +2439,10 @@ class Reader:
         record's own or the one past where ``super()`` looks, that has one
         of its own (:meth:`_initializer`): past one ``@dataclass`` writes,
         which the call runs as a record's constructor, no base's written
-        ``__init__`` runs.
+        ``__init__`` runs. A call on the class a class method is bound to or
+        ``__new__`` is handed (:func:`_class_receiver`) binds a class method
+        alone: a plain method takes the call's first argument as its
+        instance, as one called through its class does.
         """
         if not (isinstance(func, ast.Attribute) and function.owner is not None):
             return None
@@ -2428,6 +2452,9 @@ class Reader:
             isinstance(func.value, ast.Name) and func.value.id in _OWNERS
         ):
             return None
+        on_the_class = isinstance(
+            func.value, ast.Name
+        ) and func.value.id == _class_receiver(function.implementation)
         after: str | None = None
         if inherited:
             after = self._super_start(function, func.value, call, owner)
@@ -2441,7 +2468,7 @@ class Reader:
                 return "", False
             if not self._writes_init(runs):
                 return (
-                    (runs, True)
+                    (runs, not on_the_class)
                     if init_fields(self.package, self.annotations, runs)
                     else ("", False)
                 )
@@ -2453,6 +2480,8 @@ class Reader:
         if method is None:
             return "", False
         node = self.package.functions[method].implementation
+        if on_the_class:
+            return method, node is not None and _is_classmethod(node)
         return method, node is not None and not _is_static(node)
 
     def _super_instance(

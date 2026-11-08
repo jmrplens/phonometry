@@ -2486,6 +2486,66 @@ def test_a_route_runs_the_init_the_call_runs_and_the_hook_a_keyword_hands(
     ]
 
 
+def test_a_plain_method_called_on_the_class_takes_the_call_s_first_argument(
+    tmp_path: pathlib.Path,
+) -> None:
+    """In a class method, and in ``__new__``, ``cls`` is the class, so
+    ``cls.check(holder, n)`` calls a plain ``check`` through its class: it
+    checks ``n``, and the count reaches ``require_count()``; while
+    ``cls.check(n)`` hands ``n`` to ``self`` and checks the default.
+
+    ``cls`` was read as an instance, as ``self`` is, so ``cls.check(holder,
+    n)`` was read as checking ``holder`` and ``cls.check(n)`` as checking
+    ``n``: the count checked passed as ``int`` and the one never checked was
+    refused.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from ._internal.validation import require_count
+
+            __all__ = ["checked", "checked_in_new", "lost"]
+
+
+            class _Maker:
+                def check(self, n: int = 1) -> int:
+                    return require_count(n, "n")
+
+                @classmethod
+                def build(cls, holder: object, n: int) -> int:
+                    return cls.check(holder, n)
+
+                @classmethod
+                def lose(cls, n: int) -> int:
+                    return cls.check(n)
+
+                def __new__(cls, n: int) -> "_Maker":
+                    cls.check(None, n)
+                    return super().__new__(cls)
+
+
+            def checked(n: int) -> int:
+                return _Maker.build(None, n)
+
+
+            def checked_in_new(n: int) -> object:
+                return _Maker.__new__(_Maker, n)
+
+
+            def lost(n: int) -> int:
+                return _Maker.lose(n)
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("checked", "n"),
+        ("checked_in_new", "n"),
+    ]
+
+
 def test_a_record_handed_by_keyword_to_a_keyword_only_parameter_is_followed(
     tmp_path: pathlib.Path,
 ) -> None:

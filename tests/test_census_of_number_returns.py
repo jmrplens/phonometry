@@ -126,6 +126,10 @@ NOT_OF_A_NUMBER: dict[str, str] = {
         "one value per band the record holds for one length: its fields decide "
         "the shape, and the census builds the record from numbers"
     ),
+    "building.RainfallSoundResult.sound_power_levels": (
+        "one level per band the record holds for one area: its fields decide "
+        "the shape, and the census builds the record from numbers"
+    ),
 }
 
 #: The functions and methods whose validator makes a number one-dimensional,
@@ -134,21 +138,6 @@ NOT_OF_A_NUMBER: dict[str, str] = {
 #: leaves the list when it is: the census then fails its entry as stale.
 ONE_ELEMENT: frozenset[str] = frozenset(
     {
-        "building.acceleration_level",
-        "building.band_mode_count",
-        "building.direction_averaged_level_difference",
-        "building.equivalent_absorption_length",
-        "building.fast_reverberation_correction",
-        "building.modal_overlap_factor",
-        "building.normalized_ceiling_attenuation",
-        "building.partition_referenced_reduction_index",
-        "building.plate_loss_factor",
-        "building.RainfallSoundResult.sound_power_levels",
-        "building.resilient_mount_improvement",
-        "building.short_pulse_mean_square_force",
-        "building.total_loss_factor",
-        "building.velocity_level_difference",
-        "building.vibration_reduction_index_from_flanking",
         "electroacoustics.weighting_bs468",
         "emission.directionality_tolerance",
         "emission.in_duct_reproducibility",

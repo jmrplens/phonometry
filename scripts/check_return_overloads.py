@@ -326,6 +326,17 @@ EXEMPT: dict[tuple[str, str], str] = {
         "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
     ),
     (
+        "src/phonometry/building/measurement/flanking_transmission.py",
+        "vibration_reduction_index_from_flanking",
+    ): (
+        "five arguments of one value per band each decide the result "
+        "(normalized_flanking_level_difference, reduction_index_i, "
+        "reduction_index_j, absorption_length_i and absorption_length_j): the "
+        "heads that say which one first holds an array would number seven, and "
+        "the union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
         "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
         "absorption_coefficient_uncertainty",
     ): (

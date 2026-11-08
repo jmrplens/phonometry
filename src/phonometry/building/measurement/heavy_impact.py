@@ -98,13 +98,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_band_fraction,
@@ -123,7 +124,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
 
 Source = Literal["rubber_ball", "bang_machine"]
 
@@ -611,9 +617,33 @@ def _fast_peak_factor(c: NDArray[np.float64]) -> NDArray[np.float64]:
     return out
 
 
+@overload
+def fast_reverberation_correction[S: RealScalar](
+    reverberation_time: S,
+    *,
+    reference_time: float = ...,
+) -> float: ...
+
+
+@overload
+def fast_reverberation_correction[V: RealValues](
+    reverberation_time: V,
+    *,
+    reference_time: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def fast_reverberation_correction[A: NumericArrayLike](
+    reverberation_time: A,
+    *,
+    reference_time: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def fast_reverberation_correction(
     reverberation_time: NumericArrayLike, *, reference_time: float = _T0
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Fast time-weighting reverberation correction (Formulae (4), (5), (6)).
 
     The term :math:`10 \log_{10}[g(C)/g(C_0)]` subtracted in ISO 16283-2:2020
@@ -630,7 +660,8 @@ def fast_reverberation_correction(
         band, in seconds (> 0).
     :param reference_time: Reference reverberation time ``T0``, in seconds
         (Default: 0,5 s).
-    :return: The correction per band, in dB.
+    :return: The correction per band, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive reverberation time.
     :raises TypeError: if ``reference_time`` is not a single number, or
         ``reverberation_time`` holds a text or a value that is not a real number.
@@ -642,9 +673,9 @@ def fast_reverberation_correction(
     t0 = require_positive(reference_time, "reference_time")
     c = t / _FAST_FACTOR
     c0 = np.full_like(c, t0 / _FAST_FACTOR)
-    return np.asarray(
+    return as_float_or_array(
         10.0 * np.log10(_fast_peak_factor(c) / _fast_peak_factor(c0)),
-        dtype=np.float64,
+        like=(reverberation_time,),
     )
 
 

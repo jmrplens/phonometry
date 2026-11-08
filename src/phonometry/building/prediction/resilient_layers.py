@@ -497,9 +497,33 @@ def force_pulse(
     return as_float_or_array(v0 * k * t * np.exp(-decay * t), like=(time,))
 
 
+@overload
+def short_pulse_mean_square_force[S: RealScalar](
+    frequencies: S,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float: ...
+
+
+@overload
+def short_pulse_mean_square_force[V: RealValues](
+    frequencies: V,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def short_pulse_mean_square_force[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def short_pulse_mean_square_force(
     frequencies: NumericArrayLike, *, fraction: BandFraction | np.integer[Any] = 3
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Band mean-square force of a short impact
     :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92).
 
@@ -513,14 +537,18 @@ def short_pulse_mean_square_force(
     :param fraction: The band set, 3 for one-third octaves
         (:math:`B = 0.23 f`) or 1 for octaves (:math:`B = 0.707 f`). One of ``1`` or
         ``3``.
-    :return: The band mean-square force ``F²rms``, in N².
+    :return: The band mean-square force ``F²rms``, in N². A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
         ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
-    return np.asarray(_SHORT_PULSE_COEFFICIENT * _band_factor(fraction) * f)
+    return as_float_or_array(
+        np.asarray(_SHORT_PULSE_COEFFICIENT * _band_factor(fraction) * f),
+        like=(frequencies,),
+    )
 
 
 @dataclass(frozen=True)
@@ -1369,6 +1397,54 @@ def floating_floor_improvement_spectrum(
     )
 
 
+@overload
+def resilient_mount_improvement[S1: RealScalar, S2: RealScalar](
+    frequencies: S1,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: S2,
+    mount_stiffness: float,
+    mount_density: float,
+) -> float: ...
+
+
+@overload
+def resilient_mount_improvement[V: RealValues, A2: NumericArrayLike](
+    frequencies: V,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: A2,
+    mount_stiffness: float,
+    mount_density: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def resilient_mount_improvement[S1: RealScalar, V: RealValues](
+    frequencies: S1,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: V,
+    mount_stiffness: float,
+    mount_density: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def resilient_mount_improvement[A1: NumericArrayLike, A2: NumericArrayLike](
+    frequencies: A1,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: A2,
+    mount_stiffness: float,
+    mount_density: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def resilient_mount_improvement(
     frequencies: NumericArrayLike,
     *,
@@ -1377,7 +1453,7 @@ def resilient_mount_improvement(
     loss_factor: NumericArrayLike,
     mount_stiffness: float,
     mount_density: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Improvement of a floating floor on discrete resilient mounts (Vér).
 
     Vér's two-subsystem SEA model of a walking surface carrying a reverberant
@@ -1426,8 +1502,9 @@ def resilient_mount_improvement(
     :param mount_stiffness: Dynamic stiffness ``k`` of one mount, in N/m.
     :param mount_density: Number of mounts per unit area ``N/S1``, in 1/m²
         (Vigran's ``N``, which is already a density).
-    :return: The improvement ``ΔL`` per band, in dB, and 0 dB at and below
-        ``fo``.
+    :return: The improvement ``ΔL`` per band, in dB, and 0 dB at and below ``fo``. A
+        ``float`` when ``frequencies`` and ``loss_factor`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``impedance``, ``mass_per_area``, ``mount_density`` or
         ``mount_stiffness`` is not a single number, or ``frequencies`` or
@@ -1449,4 +1526,6 @@ def resilient_mount_improvement(
     # frequency bands below the band containing fms", printed p. 521) and the
     # way :func:`floating_floor_improvement_spectrum` already does.
     f0 = np.sqrt(n * k / m1) / (2.0 * np.pi)
-    return np.asarray(np.where(f > f0, delta, 0.0), dtype=np.float64)
+    return as_float_or_array(
+        np.where(f > f0, delta, 0.0), like=(frequencies, loss_factor)
+    )

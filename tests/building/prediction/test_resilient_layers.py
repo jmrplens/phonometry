@@ -82,7 +82,7 @@ def test_short_pulse_coefficient_reproduces_eq_3_92() -> None:
     assert derived == pytest.approx(3.925, abs=5e-3)
     # The library's own 3,9 B must agree with the printed coefficient.
     bandwidth = 0.23 * 500.0
-    assert building.short_pulse_mean_square_force(500.0)[0] == pytest.approx(
+    assert building.short_pulse_mean_square_force(500.0) == pytest.approx(
         3.9 * bandwidth, rel=1e-12
     )
     assert derived == pytest.approx(3.9 * 1.0064, rel=2e-3)
@@ -1236,8 +1236,8 @@ def test_a_power_input_of_another_length_is_refused() -> None:
 
 def test_octave_bandwidth_factor() -> None:
     """H Eq. (3.91): ``B = 0,23 f`` for thirds, ``B = 0,707 f`` for octaves."""
-    third = building.short_pulse_mean_square_force(1000.0, fraction=3)[0]
-    octave = building.short_pulse_mean_square_force(1000.0, fraction=1)[0]
+    third = building.short_pulse_mean_square_force(1000.0, fraction=3)
+    octave = building.short_pulse_mean_square_force(1000.0, fraction=1)
     assert octave / third == pytest.approx(0.707 / 0.23, rel=1e-12)
 
 

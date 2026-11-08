@@ -123,6 +123,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -183,7 +184,7 @@ _MAX_SINGLE_DEFICIENCY = 8.0
 _SIDEWALLS: dict[str, float] = {"absorbing": 1.0, "reflecting": 2.0}
 
 
-def _require_transmission_factor(tau: np.ndarray) -> None:
+def _require_transmission_factor(tau: NDArray[np.float64]) -> None:
     r"""Reject a ceiling/plenum transmission factor above unity.
 
     :math:`\tau_\mathrm{cl}` is a ratio of powers referred to the ceiling area, so a
@@ -224,7 +225,7 @@ def normalized_ceiling_attenuation(
     absorption_area: NumericArrayLike,
     *,
     reference_area: float = _A0_ISO,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Normalized ceiling attenuation ``Dn,c`` (ISO 140-9:1985, clause 3.3).
 
     :math:`D_\mathrm{n,c} = (L_1 - L_2) - 10 \log_{10}(A/A_0)`, the level difference
@@ -355,10 +356,10 @@ class CeilingAttenuationResult(OwnsArrays):
         contour at 500 Hz (clause 5.5), in dB.
     """
 
-    frequencies: np.ndarray
-    measured: np.ndarray
-    shifted_reference: np.ndarray
-    deficiencies: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured: NDArray[np.float64]
+    shifted_reference: NDArray[np.float64]
+    deficiencies: NDArray[np.float64]
     deficiency_sum: float
     max_deficiency: float
     rating: int
@@ -401,7 +402,7 @@ class CeilingAttenuationResult(OwnsArrays):
         _require_deficiency_totals(self)
 
     @property
-    def rounded(self) -> np.ndarray:
+    def rounded(self) -> NDArray[np.float64]:
         """The measured data rounded to the nearest integer, which the contour is fitted to.
 
         ASTM E413 clause 5.2 rounds the data to the nearest integer before the
@@ -468,7 +469,7 @@ def ceiling_attenuation_class(
     # Clause 5.2: the contour is fitted to integer-rounded data.
     rounded = np.asarray(np.floor(values + 0.5), dtype=np.float64)
 
-    def _deficiencies(shift: int) -> np.ndarray:
+    def _deficiencies(shift: int) -> NDArray[np.float64]:
         return np.maximum(contour + shift - rounded, 0.0)
 
     # Clause 5.3: start below every possible fit and raise until it fails.
@@ -516,13 +517,13 @@ class PlenumFlankingResult(OwnsArrays):
     :ivar ceiling_length: Receiving-side ceiling length ``LR``, in m.
     """
 
-    frequencies: np.ndarray | None
-    reduction_index: np.ndarray
-    transmission_factor: np.ndarray
-    reduction_index_source: np.ndarray
-    reduction_index_receiving: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    reduction_index: NDArray[np.float64]
+    transmission_factor: NDArray[np.float64]
+    reduction_index_source: NDArray[np.float64]
+    reduction_index_receiving: NDArray[np.float64]
     geometry_term: float | None
-    penalty: np.ndarray
+    penalty: NDArray[np.float64]
     model: Literal["undamped", "attenuated"]
     epsilon: float
     plenum_height_m: float
@@ -691,7 +692,7 @@ def plenum_flanking_reduction_index(
     eps = _SIDEWALLS[case]
     ss = _require_split(split_source, "split_source")
     sr = _require_split(split_receiving, "split_receiving")
-    freqs: np.ndarray | None = None
+    freqs: NDArray[np.float64] | None = None
     if frequencies is not None:
         freqs = require_finite_array(frequencies, "frequencies")
         require_equal_shapes(
@@ -779,7 +780,7 @@ def plenum_flanking_reduction_index(
 
 def partition_referenced_reduction_index(
     reduction_index: NumericArrayLike, room_height_m: float, room_length: float
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Refer ``Rcl`` to the partition area instead of the ceiling
     (Eq. (9.13)).
 

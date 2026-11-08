@@ -12,7 +12,12 @@ domain.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 #: Roughness frames discarded before the statistics, l50 in [0, 15]
 #: (ECMA-418-2:2025 Clause 7.1.8).
@@ -22,7 +27,7 @@ ROUGHNESS_SETTLING_FRAMES = 16
 FLUCTUATION_SETTLING_FRAMES = 36
 
 
-def _percentile(values: np.ndarray, percentile: int) -> float:
+def _percentile(values: NDArray[np.float64], percentile: int) -> float:
     r"""Percentile loudness as computed by the reference implementation.
 
     NX is the loudness exceeded X % of the time: with the values sorted

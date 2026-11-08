@@ -19,6 +19,8 @@ import numpy as np
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from numpy.typing import NDArray
+
 __all__ = ["ROOM_ABSORPTION_ESTIMATES"]
 
 # --- ISO 3744:2010 Annex E, A-weighting band corrections Ck (dB) ------------
@@ -62,7 +64,7 @@ _CK_OCTAVE: dict[int, float] = {
 }
 
 
-def _a_weighting_corrections(frequencies: np.ndarray) -> np.ndarray:
+def _a_weighting_corrections(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """A-weighting band corrections Ck for the given nominal mid-band
     frequencies (ISO 3744:2010 Annex E, Tables E.1/E.2). The octave-band
     values (Table E.2) coincide with the one-third-octave values (Table E.1)

@@ -113,7 +113,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from functools import cached_property
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 from scipy import signal
@@ -141,6 +141,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -318,7 +319,7 @@ def class_limits(
     omega: NumericArrayLike,
     *,
     edition: Edition = "2014",
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Acceptance limits on relative attenuation at normalized frequencies.
 
     :param fraction: Bandwidth designator denominator b (1 for octave,
@@ -391,7 +392,7 @@ def class_limits(
 
 def _test_frequencies(
     fraction: float, points_per_bandwidth: int, first: int, last: int
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""IEC 61260-2:2016 Formula (1): :math:`\Omega_i = G^{i/(bS)}`, ``first..last``.
 
     :param fraction: The bandwidth designator denominator ``b``.
@@ -414,7 +415,9 @@ _EPS = float(np.finfo(float).eps)
 _IMAGE_BATCH = 16
 
 
-def _anti_alias_gain(factor: int, fs_hz: float, frequencies: np.ndarray) -> np.ndarray:
+def _anti_alias_gain(
+    factor: int, fs_hz: float, frequencies: NDArray[np.float64]
+) -> NDArray[np.float64]:
     r"""The magnitude of a band's anti-aliasing filter at the bank's input rate.
 
     :param factor: The band's decimation factor; 1 has no such filter.
@@ -430,8 +433,11 @@ def _anti_alias_gain(factor: int, fs_hz: float, frequencies: np.ndarray) -> np.n
 
 
 def _band_gain(
-    sos: np.ndarray, factor: int, fs_hz: float, frequencies: np.ndarray
-) -> np.ndarray:
+    sos: NDArray[np.float64],
+    factor: int,
+    fs_hz: float,
+    frequencies: NDArray[np.float64],
+) -> NDArray[np.float64]:
     r"""The magnitude response of one band, decimation included, at the input rate.
 
     A tone of frequency :math:`f` at the input of the bank goes through the
@@ -453,7 +459,7 @@ def _band_gain(
 
 
 def _reference_attenuation_db(
-    sos: np.ndarray, factor: int, fs_hz: float, mid_hz: float
+    sos: NDArray[np.float64], factor: int, fs_hz: float, mid_hz: float
 ) -> float:
     """The attenuation of one band at its exact mid-band frequency, dB.
 
@@ -467,12 +473,12 @@ def _reference_attenuation_db(
 
 
 def _band_relative_attenuation(
-    sos: np.ndarray,
+    sos: NDArray[np.float64],
     factor: int,
     fs_hz: float,
     mid_hz: float,
-    frequencies: np.ndarray,
-) -> np.ndarray:
+    frequencies: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Relative attenuation of one designed band at arbitrary frequencies, dB.
 
     Formula (8) of IEC 61260-1:2014 with the attenuation at the exact
@@ -518,7 +524,7 @@ class _BandGrid:
     :ivar n_points: Points per decimated half-band.
     """
 
-    sos: np.ndarray
+    sos: NDArray[np.float64]
     factor: int
     fs_hz: float
     mid_hz: float
@@ -540,7 +546,7 @@ class _BandGrid:
         return _reference_attenuation_db(self.sos, self.factor, self.fs_hz, self.mid_hz)
 
     @cached_property
-    def folded_gain(self) -> np.ndarray:
+    def folded_gain(self) -> NDArray[np.float64]:
         """The sections' magnitude at the folded points ``0 .. n_points``.
 
         Point ``j`` is the frequency ``j * spacing`` of the decimated
@@ -551,13 +557,15 @@ class _BandGrid:
         _, h = signal.sosfreqz(self.sos, worN=g, fs=self.rate_hz)
         return read_only(np.abs(h))
 
-    def baseband(self) -> tuple[np.ndarray, np.ndarray]:
+    def baseband(self) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """The band below its decimated Nyquist frequency, anti-aliasing included.
 
         :return: ``(frequencies, relative_attenuation_db)`` on the grid
             points of ``(0, fs / (2 M))``.
         """
-        g = np.arange(1, self.n_points) * self.spacing_hz
+        # An integer grid times a float spacing is float64 by numpy's promotion
+        # rules; numpy's stubs read the product as a float of unknown precision.
+        g = cast("NDArray[np.float64]", np.arange(1, self.n_points) * self.spacing_hz)
         gain = self.folded_gain[1 : self.n_points]
         if self.factor > 1:
             taps = _multirate_lowpass(self.factor)
@@ -570,7 +578,9 @@ class _BandGrid:
             gain = gain * np.abs(zoom(taps))
         return g, -20.0 * np.log10(gain + _EPS) - self.reference_db
 
-    def images(self, first: int, last: int) -> Iterator[tuple[np.ndarray, np.ndarray]]:
+    def images(
+        self, first: int, last: int
+    ) -> Iterator[tuple[NDArray[np.float64], NDArray[np.float64]]]:
         r"""The alias images, on the frequencies that fold onto points ``first .. last``.
 
         Image ``k`` is the input band around :math:`k f_\mathrm{s}/M`: an
@@ -636,8 +646,8 @@ class _BandGrid:
 def _mask_margin(
     fraction: float,
     filter_class: int,
-    omega: np.ndarray,
-    delta_a: np.ndarray,
+    omega: NDArray[np.float64],
+    delta_a: NDArray[np.float64],
     edition: Edition,
 ) -> float:
     """The smallest distance, dB, of a relative attenuation to the Table 1 corridor.
@@ -698,7 +708,7 @@ def _image_window(
 
 
 def _effective_bandwidth(
-    omega: np.ndarray, relative_attenuation_db: np.ndarray
+    omega: NDArray[np.float64], relative_attenuation_db: NDArray[np.float64]
 ) -> float:
     r"""IEC 61260-2:2016 Formula (2): the trapezoidal :math:`B_\mathrm{e}`.
 
@@ -726,7 +736,7 @@ def _effective_bandwidth(
 
 
 def _effective_bandwidth_1995(
-    omega: np.ndarray, relative_attenuation_db: np.ndarray
+    omega: NDArray[np.float64], relative_attenuation_db: NDArray[np.float64]
 ) -> float:
     r"""IEC 61260:1995 equation (16): the trapezoidal :math:`B_\mathrm{e}`.
 
@@ -777,7 +787,9 @@ _BANDWIDTH_INTEGRALS: Mapping[str, tuple[Any, Any]] = MappingProxyType(
 )
 
 
-def _summation_deviation(relative_attenuations: np.ndarray) -> np.ndarray:
+def _summation_deviation(
+    relative_attenuations: NDArray[np.float64],
+) -> NDArray[np.float64]:
     r"""IEC 61260-2:2016 Formula (3) and IEC 61260:1995 equation (19), point by point.
 
     :math:`\Delta P_j = 10\lg\left[\sum 10^{-0.1\,\Delta A}\right]` over the
@@ -792,7 +804,7 @@ def _summation_deviation(relative_attenuations: np.ndarray) -> np.ndarray:
 
 
 def _bank_bandwidth_deviation(
-    sos: np.ndarray,
+    sos: NDArray[np.float64],
     factor: int,
     fs_hz: float,
     mid_hz: float,
@@ -890,15 +902,15 @@ def _summation_span(
 
 
 def _bank_summation(
-    sos: tuple[np.ndarray, ...] | list[np.ndarray],
-    factors: tuple[int, ...] | list[int] | np.ndarray,
+    sos: tuple[NDArray[np.float64], ...] | list[NDArray[np.float64]],
+    factors: tuple[int, ...] | list[int] | NDArray[np.intp],
     fs_hz: float,
-    mids_hz: np.ndarray,
+    mids_hz: NDArray[np.float64],
     fraction: float,
     points_per_bandwidth: int,
     band: int,
     edition: str = "2014",
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""The summation curve of one band: :math:`\Omega_i` and :math:`\Delta P_j`.
 
     Formula (3) of IEC 61260-2:2016, equation (19) of IEC 61260:1995, over
@@ -947,7 +959,7 @@ def _verify_band(
     bank: OctaveFilterBank,
     idx: int,
     classes_ordered: tuple[int, ...],
-    breakpoint_omegas: np.ndarray,
+    breakpoint_omegas: NDArray[np.float64],
     edition: Edition,
     n_points: int,
 ) -> dict[str, Any]:
@@ -1308,8 +1320,8 @@ class FilterComplianceResult(OwnsArrays):
     band_margins: tuple[Mapping[str, float | None], ...]
     fraction: int
     edition: Edition
-    sos: tuple[np.ndarray, ...]
-    frequencies: np.ndarray
+    sos: tuple[NDArray[np.float64], ...]
+    frequencies: NDArray[np.float64]
     factors: tuple[int, ...]
     fs: float
     n_points: int

@@ -95,6 +95,7 @@ from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, NumericArrayLike
@@ -376,7 +377,7 @@ def force_pulse(
     *,
     mass: float = TAPPING_HAMMER_MASS_KG,
     impact_velocity: float | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Force pulse ``F1(t)`` of a single hammer impact (Eqs. 3.95/3.96).
 
     Lindblad's solution of the mass-spring-dashpot of Hopkins Fig. 3.28, the
@@ -458,7 +459,7 @@ def force_pulse(
 
 def short_pulse_mean_square_force(
     frequencies: NumericArrayLike, *, fraction: BandFraction | np.integer[Any] = 3
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Band mean-square force of a short impact
     :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92).
 
@@ -511,10 +512,10 @@ class TappingForceResult(OwnsArrays):
     ``m`` (:attr:`over_critical`), so it is not a field.
     """
 
-    frequencies: np.ndarray
-    peak_force: np.ndarray
-    mean_square_force: np.ndarray
-    power_input: np.ndarray
+    frequencies: NDArray[np.float64]
+    peak_force: NDArray[np.float64]
+    mean_square_force: NDArray[np.float64]
+    power_input: NDArray[np.float64]
     cut_off_frequency: float
     limiting_frequency: float
     _: KW_ONLY
@@ -631,7 +632,7 @@ class TappingForceResult(OwnsArrays):
         return _is_over_critical(self.contact_stiffness, self.impedance, self.mass)
 
     @property
-    def power_input_level(self) -> np.ndarray:
+    def power_input_level(self) -> NDArray[np.float64]:
         r"""Power input level :math:`10 \log_{10}(W_\mathrm{in}/1~\text{pW})`, in dB
         (Hopkins Fig. 3.33).
         """
@@ -732,14 +733,14 @@ def tapping_force_spectrum(
 
 
 def _peak_force(
-    f: np.ndarray,
+    f: NDArray[np.float64],
     k: float,
     z: float,
     m: float,
     *,
     impact_velocity: float,
     impact_rate: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The magnitude :math:`|F_n|` of the tapping machine's force lines.
 
     The Fourier transform of the whole pulse when the oscillation is
@@ -791,13 +792,13 @@ class CoveringImprovementResult(OwnsArrays):
         ``lines``.
     """
 
-    frequencies: np.ndarray
-    improvement: np.ndarray
-    two_line: np.ndarray
+    frequencies: NDArray[np.float64]
+    improvement: NDArray[np.float64]
+    two_line: NDArray[np.float64]
     cut_off_frequency: float
     bare_cut_off_frequency: float
-    lines: np.ndarray
-    line_improvement: np.ndarray
+    lines: NDArray[np.float64]
+    line_improvement: NDArray[np.float64]
     bare: TappingForceResult
     covered: TappingForceResult
 
@@ -1146,8 +1147,8 @@ class FloatingFloorImprovementResult(OwnsArrays):
         model, Formula (C.5) for the other two.
     """
 
-    frequencies: np.ndarray
-    improvement: np.ndarray
+    frequencies: NDArray[np.float64]
+    improvement: NDArray[np.float64]
     resonance_frequency: float
     model: Literal["en12354", "cremer", "cremer_hammer"]
     slope: float
@@ -1336,7 +1337,7 @@ def resilient_mount_improvement(
     loss_factor: NumericArrayLike,
     mount_stiffness: float,
     mount_density: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Improvement of a floating floor on discrete resilient mounts (Vér).
 
     Vér's two-subsystem SEA model of a walking surface carrying a reverberant

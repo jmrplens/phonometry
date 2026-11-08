@@ -158,10 +158,10 @@ class DuctPathStage(OwnsArrays):
 
     label: str
     code: str
-    attenuation: np.ndarray
-    attenuated: np.ndarray
-    self_noise: np.ndarray
-    levels: np.ndarray
+    attenuation: NDArray[np.float64]
+    attenuated: NDArray[np.float64]
+    self_noise: NDArray[np.float64]
+    levels: NDArray[np.float64]
 
 
 @dataclass(frozen=True)
@@ -191,16 +191,18 @@ class DuctPathResult(OwnsArrays):
     :ivar label: A short human label of the path.
     """
 
-    frequencies: np.ndarray
-    source_level: np.ndarray
+    frequencies: NDArray[np.float64]
+    source_level: NDArray[np.float64]
     source_label: str
     stages: tuple[DuctPathStage, ...]
-    room_effect: np.ndarray | None
-    received_level: np.ndarray
+    room_effect: NDArray[np.float64] | None
+    received_level: NDArray[np.float64]
     criterion: CriterionFamily
     target: float | None
     label: str
-    contributions: tuple[tuple[str, np.ndarray], ...] = field(default_factory=tuple)
+    contributions: tuple[tuple[str, NDArray[np.float64]], ...] = field(
+        default_factory=tuple
+    )
 
     def __post_init__(self) -> None:
         """Reject a sheet whose rows, criterion or received spectrum lie.
@@ -287,7 +289,7 @@ class DuctPathResult(OwnsArrays):
         return rating_of(self)
 
     @property
-    def criterion_curve(self) -> np.ndarray | None:
+    def criterion_curve(self) -> NDArray[np.float64] | None:
         """The design criterion curve at :attr:`frequencies`, dB, or ``None``.
 
         The NC or RC curve of :attr:`target`, sampled at the analysis bands, so
@@ -296,7 +298,7 @@ class DuctPathResult(OwnsArrays):
         return curve_of(self)
 
     @property
-    def exceedance(self) -> np.ndarray | None:
+    def exceedance(self) -> NDArray[np.float64] | None:
         """Band-by-band excess of the received level over the criterion, dB.
 
         Positive where the design criterion is exceeded. ``None`` when no

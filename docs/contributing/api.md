@@ -1470,6 +1470,8 @@ Keep the last lines of the program's standard error for the error message. A new
 
 A function of a number or an array of them is the same case. Eighty-four returned `float | ndarray`, or a grade or an array of grades, with no overload, and a zero-dimensional array came back as a `float`, so neither the type nor the rule followed what the caller handed over. They follow it now, an array in and an array out: a `float` only when every argument that decides the shape is a number, an array as soon as one is a sequence or an array, a zero-dimensional one included, which `as_float_or_array(values, like=(...))` of `phonometry._internal.types` applies. The heads say it in three forms, and one more for each further argument that decides: a number, a sequence or an array, and a last head for what a type checker cannot shape, a `NumericArrayLike` or a nested list, which returns the union. The heads return the value alone and the array alone between them, since a type checker reads only the heads; where the last one stands is mypy's to check (`overload-cannot-match`), and a function with two routes to its input, `room.critical_distance`, has one for each. Each head takes its argument as a type parameter bounded by the form rather than the form itself: mypy reads an argument whose type holds an explicit `Any` (a bare `np.ndarray`, the `dtype[Any]` that `np.array(...)` returns, a shape written `tuple[Any, ...]`) as matching every head it fits, and answers `Any` unless those heads agree on its type, which a type parameter makes them do. `room.room_constant(100.0, np.array([0.2, 0.3]))` reads as `NDArray[np.float64]` with type parameters, and as `Any` with heads written with the plain forms.
 
+A function whose result is complex is the same case in its complex form. Twenty-eight of them, the single degree of freedom mobilities, the infinite beam impedances and mobilities, the transfer stiffnesses, the program signal filter and the microphone impedance among them, returned a zero-dimensional complex array for numbers (nineteen), a numpy complex (one) or a one-element array (eight), under an annotation that named the array alone, so `vibration.sdof_mobility(100.0, ...)` read as an array to a type checker for a call that holds one number. Such a function returns a Python `complex` when every argument that decides the shape is a number and a `complex128` array as soon as one is a sequence or an array, a zero-dimensional one included, which `as_complex_or_array(values, like=(...))` of `phonometry._internal.types` applies beside `as_float_or_array`. Its heads are those of the real form with `complex` and `NDArray[np.complex128]` where it has `float` and `NDArray[np.float64]`, the same type parameters bounded by the same forms (`ComplexScalar` and `ComplexValues` for a deciding argument that is itself complex, a mobility or an impedance), and its case in `tests/test_scalar_or_array_returns.py` says `single=complex`. A single value of one kind of number beside an array of the other, a `float` head beside `NDArray[np.complex128]`, would say the result changes kind with the shape of the input, and the check refuses it.
+
 A function of a `Signal` or an array is the same case again. `filters.weighting_filter`, `filters.parametric_eq` and `filters.time_weighting` had a head for the `Signal` and one for the array, while the reusable objects they wrap said the union for either input: `WeightingFilter.filter` and `ParametricEQ.filter` returned `Signal | ndarray`, `TimeWeighting.process` `TimeWeightedEnvelope | ndarray`, so `y: NDArray[np.float64] = wf.filter(x)` was refused by mypy and pyright for a call that cannot return a `Signal`. A return that names a record of the package and an array, or a tuple of records beside a tuple of arrays (`tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]`), has a head for each, the method as its function does.
 
 **Do**
@@ -1533,12 +1535,50 @@ def doubled(level: NumericArrayLike) -> float | NDArray[np.float64]:
 doubled(3.0), doubled([3.0, 4.0]), doubled(np.array(3.0))
 ```
 
+```python
+from typing import overload
+
+import numpy as np
+from numpy.typing import NDArray
+
+from phonometry._internal.types import (
+    NumericArrayLike,
+    RealScalar,
+    RealValues,
+    as_complex_or_array,
+)
+
+
+@overload
+def mass_mobility[S: RealScalar](frequency: S) -> complex: ...
+
+
+@overload
+def mass_mobility[V: RealValues](frequency: V) -> NDArray[np.complex128]: ...
+
+
+@overload
+def mass_mobility[A: NumericArrayLike](
+    frequency: A,
+) -> complex | NDArray[np.complex128]: ...
+
+
+def mass_mobility(frequency: NumericArrayLike) -> complex | NDArray[np.complex128]:
+    omega = 2.0 * np.pi * np.asarray(frequency, dtype=np.float64)
+    return as_complex_or_array(1.0 / (1j * omega * 2.0), like=(frequency,))
+
+
+mass_mobility(100.0), mass_mobility([100.0, 200.0]), mass_mobility(np.array(100.0))
+```
+
 **Don't**
 
 ```py
 def plot(self, ax: Axes | None = None) -> Axes | NDArray[np.object_]:  # the caller narrows what ax decided
     ...
 def doubled(level: NumericArrayLike) -> float | NDArray[np.float64]:  # and narrows what it handed over
+    ...
+def mass_mobility(frequency: NumericArrayLike) -> NDArray[np.complex128]:  # a zero-dimensional array for a number
     ...
 ```
 

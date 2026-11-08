@@ -188,6 +188,27 @@ def test_service_equipment_lxy() -> None:
     assert float(res.l_xy_n) == pytest.approx(expected - 3.0 - _norm(50.0))
 
 
+def test_service_equipment_global_reading_holds_three_arrays() -> None:
+    """Three single readings give three zero-dimensional arrays, one kind per record.
+
+    The global reading of Clause 6.3.3 is three numbers and a scalar ``k``;
+    ``LXY`` is then the zero-dimensional array of the energy average, and
+    ``LXY,nT`` and ``LXY,n``, read from it, are arrays of the same kind.
+    """
+    res = building.survey_service_equipment_level([30.0, 31.0, 32.0], 0.5, volume=50.0)
+    assert res.l_xy_n is not None
+    for name, value in (
+        ("l_xy", res.l_xy),
+        ("l_xy_nt", res.l_xy_nt),
+        ("l_xy_n", res.l_xy_n),
+    ):
+        assert isinstance(value, np.ndarray), name
+        assert value.shape == (), name
+        assert value.dtype == np.float64, name
+    assert res.l_xy_nt[()] == res.l_xy[()] - 0.5
+    assert res.l_xy_n[()] == res.l_xy[()] - 0.5 - _norm(50.0)
+
+
 def test_service_equipment_banded() -> None:
     """A (3, bands) input with a per-band k gives a per-band LXY."""
     meas = np.array([[35.0, 33.0], [30.0, 31.0], [32.0, 30.0]])

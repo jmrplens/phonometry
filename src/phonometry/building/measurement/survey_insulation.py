@@ -986,9 +986,15 @@ def survey_service_equipment_level(
         )
         raise ValueError(msg)
 
-    l_xy_nt = l_xy - k
+    # Three single readings make l_xy and k zero-dimensional, and numpy's
+    # arithmetic on them gives numpy scalars: asarray keeps the two levels
+    # read from l_xy arrays of the same kind as l_xy.
+    l_xy_nt = np.asarray(l_xy - k, dtype=np.float64)
     l_xy_n: NDArray[np.float64] | None = None
     if volume is not None:
-        l_xy_n = l_xy - k - _normalization_term(_positive(volume, "volume"))
+        l_xy_n = np.asarray(
+            l_xy - k - _normalization_term(_positive(volume, "volume")),
+            dtype=np.float64,
+        )
 
     return SurveyServiceEquipmentResult(l_xy=l_xy, l_xy_nt=l_xy_nt, l_xy_n=l_xy_n)

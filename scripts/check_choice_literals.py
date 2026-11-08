@@ -136,7 +136,7 @@ import phonometry
 from phonometry._internal.catalogue import CatalogueRow
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, Mapping, Set
+    from collections.abc import Callable, Iterator, Mapping, Sequence, Set
     from types import FunctionType, ModuleType
 
 #: The members of an annotation that let any string through.
@@ -2074,18 +2074,28 @@ def _call_target(node: ast.Call, namespace: dict[str, object]) -> object | None:
 
 
 def _arguments(
-    node: ast.Call, callee: FunctionType, spread: dict[str, dict[str, ast.expr]]
+    node: ast.Call,
+    callee: FunctionType,
+    spread: dict[str, dict[str, ast.expr]],
+    namespace: Mapping[str, object],
 ) -> dict[str, ast.expr]:
     """What a call hands each parameter of *callee*, by the parameter's name.
 
     By position, by keyword, and from a dict of keywords the body built and
-    spreads into the call (``f(**options)``).
+    spreads into the call (``f(**options)``). A method's ``self`` or
+    ``cls`` is the receiver's, but in a method called through its class,
+    which takes the instance as the call's first argument
+    (:func:`_instance_handed`).
     """
     try:
         parameters = list(inspect.signature(callee).parameters)
     except (TypeError, ValueError):
         return {}
-    if parameters and parameters[0] in {"self", "cls"}:
+    if (
+        parameters
+        and parameters[0] in {"self", "cls"}
+        and not _instance_handed(node, namespace)
+    ):
         parameters = parameters[1:]
     handed: dict[str, ast.expr] = {}
     for index, argument in enumerate(node.args):
@@ -2102,6 +2112,25 @@ def _arguments(
                 if key in parameters
             )
     return handed
+
+
+def _instance_handed(node: ast.Call, namespace: Mapping[str, object]) -> bool:
+    """Whether a call hands a method its instance as its first argument: a
+    method called through the class it is looked up on,
+    ``Base.method(self, ...)`` or ``Base.__init__(self, ...)``, but a class
+    or static method, which that class does not bind to an instance.
+    """
+    func = node.func
+    if not (
+        isinstance(func, ast.Attribute)
+        and isinstance(func.value, ast.Name)
+        and func.value.id not in {"self", "cls"}
+    ):
+        return False
+    owner = namespace.get(func.value.id)
+    return inspect.isclass(owner) and inspect.isfunction(
+        inspect.getattr_static(owner, func.attr, None)
+    )
 
 
 def _bound_tables(
@@ -2277,7 +2306,7 @@ def passed_on_evidence(  # noqa: PLR0913
         callee = _callee(node, namespace, module_name)
         if callee is None:
             continue
-        handed = _arguments(node, callee, spread)
+        handed = _arguments(node, callee, spread, namespace)
         received = next(
             (parameter for parameter, value in handed.items() if matches(value)),
             None,
@@ -3173,7 +3202,9 @@ def _read_handed_on(
     checks: list[tuple[int, int]],
 ) -> None:
     """Add what *callee* does with the choice a call hands it."""
-    for parameter, value in _arguments(node, callee, reader.spread).items():
+    for parameter, value in _arguments(
+        node, callee, reader.spread, reader.namespace
+    ).items():
         if not reader.matches(value):
             continue
         inner = _received(
@@ -3264,28 +3295,103 @@ def _runs_a_post_init(record: type) -> bool:
     ``self.__post_init__``.
 
     That ``__init__`` is the one of the first class of the record's method
-    resolution order that has one of its own. The one ``@dataclass`` writes
-    calls the hook when the record it was written for had one at the time,
-    which a class that is no record over it does not change, so
-    ``Plain(_Count)``, over a record that has none, never runs the
-    ``__post_init__`` it writes. One written by hand that hands its values on
-    to another ``__init__`` (``super().__init__(...)``, or a base's called by
-    name) runs what that one runs, read on from the next class of the order
-    that has one; one that names neither calls none, as ``object``'s does.
+    resolution order that has one of its own (:func:`_first_init`). The one
+    ``@dataclass`` writes calls the hook when the record it was written for
+    had one at the time, which a class that is no record over it does not
+    change, so ``Plain(_Count)``, over a record that has none, never runs
+    the ``__post_init__`` it writes. One written by hand runs it when it
+    names it, and runs what each ``__init__`` it hands its values on to runs
+    (:func:`_handed_on`); one that does neither calls none, as ``object``'s
+    does.
     """
-    for owner in record.__mro__:
+    first = _first_init(record.__mro__)
+    return first is not None and _init_runs_a_post_init(record, *first, frozenset())
+
+
+def _first_init(order: Sequence[type]) -> tuple[type, Callable[..., object]] | None:
+    """The first class of *order* with an ``__init__`` of its own, with that
+    ``__init__``: the one a lookup of ``__init__`` through *order* finds.
+    """
+    for owner in order:
         init = vars(owner).get("__init__")
-        if init is None:
+        if init is not None:
+            return owner, init
+    return None
+
+
+def _init_runs_a_post_init(
+    record: type, owner: type, init: Callable[..., object], seen: frozenset[type]
+) -> bool:
+    """Whether *init*, the ``__init__`` *owner* has, calls
+    ``self.__post_init__`` when it builds an instance of *record*, itself or
+    through an ``__init__`` it hands its values on to (:func:`_handed_on`).
+
+    *seen* are the classes whose ``__init__`` is being read: a hand-off back
+    to one of them runs nothing it has not run.
+    """
+    code = getattr(inspect.unwrap(init), "__code__", None)
+    if code is None:
+        return False
+    names = _code_names(code)
+    if "__post_init__" in names:
+        return True
+    if "__init__" not in names:
+        return False
+    seen = seen | {owner}
+    return any(
+        (found := _first_init(order)) is not None
+        and found[0] not in seen
+        and _init_runs_a_post_init(record, *found, seen)
+        for order in _handed_on(record, owner, init)
+    )
+
+
+def _handed_on(
+    record: type, owner: type, init: Callable[..., object]
+) -> Iterator[Sequence[type]]:
+    """The orders the ``__init__`` each ``<receiver>.__init__(...)`` call of
+    *init* runs is looked up through, for an instance of *record*.
+
+    ``super().__init__(...)``, in the ``__init__`` of *owner*, looks it up
+    from the class after *owner* in the record's method resolution order on,
+    and ``super(Base, self).__init__(...)`` from the class after ``Base``;
+    ``Base.__init__(self, ...)`` looks it up through the order of ``Base``,
+    the class it names, so a base before ``Base`` in the record's order,
+    which a lookup from the next class on would find, is passed over. A
+    receiver that names no class the guard can read (``self``, whose
+    ``__init__`` is the one being read) yields none.
+    """
+    unwrapped = inspect.unwrap(init)
+    tree = _parsed(unwrapped)
+    if tree is None:
+        return
+    module_name = getattr(unwrapped, "__module__", "") or ""
+    namespace = _namespace(unwrapped, tree, module_name)
+    namespace.pop("self", None)
+    namespace.pop("cls", None)
+    order = record.__mro__
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "__init__"
+        ):
             continue
-        code = getattr(inspect.unwrap(init), "__code__", None)
-        if code is None:
-            return False
-        names = _code_names(code)
-        if "__post_init__" in names:
-            return True
-        if "__init__" not in names:
-            return False
-    return False
+        receiver = node.func.value
+        if (
+            isinstance(receiver, ast.Call)
+            and isinstance(receiver.func, ast.Name)
+            and receiver.func.id == "super"
+        ):
+            start = (
+                _named_object(receiver.args[0], namespace) if receiver.args else owner
+            )
+            if start in order:
+                yield order[order.index(start) + 1 :]
+            continue
+        named = _named_object(receiver, namespace)
+        if inspect.isclass(named):
+            yield named.__mro__
 
 
 def _post_init(record: type) -> Callable[..., object] | None:
@@ -5392,7 +5498,7 @@ def _checks_of(
             if inspect.isclass(called) and dataclasses.is_dataclass(called)
             else _record_constructor(callee)
         )
-        for parameter, handed in _arguments(node, callee, spread).items():
+        for parameter, handed in _arguments(node, callee, spread, namespace).items():
             value = _held(handed)
             keys_kept = _keeps_keys(value, target, options)
             handed_part = _handed_part(

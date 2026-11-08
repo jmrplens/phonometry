@@ -2537,6 +2537,115 @@ def test_a_call_of_a_class_runs_the_init_its_order_gives() -> None:
             through("medium")  # type: ignore[arg-type]
 
 
+class _Unchecking:
+    """A class whose ``__init__`` checks nothing and hands nothing on."""
+
+    def __init__(self) -> None:
+        pass
+
+
+class _NamedPastAnEarlierBase(_Unchecking, _Checking):
+    """A class whose ``__init__`` calls by name the ``__init__`` of a base
+    that comes after another base with one of its own in the order.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _Checking.__init__(self, pace)
+
+
+class _SuperPastAnEarlierBase(_Unchecking, _Checking):
+    """A class whose ``__init__`` looks the next one up from after the base
+    it names, with ``super(_Unchecking, self)``.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        super(_Unchecking, self).__init__(pace)
+
+
+class _NamedAnUncheckingBase(_Checking, _Unchecking):
+    """A class whose ``__init__`` calls by name the ``__init__`` of a base
+    that calls no ``__post_init__``, though the next class of the order has
+    one that does.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _Unchecking.__init__(self)
+        object.__setattr__(self, "pace", pace)
+
+
+def test_an_init_handed_on_to_runs_the_one_its_call_names() -> None:
+    """``_Checking.__init__(self, pace)`` runs the ``__init__`` ``_Checking``
+    looks up, the one ``@dataclass`` wrote for it, which runs the check,
+    though ``_Unchecking`` comes before it in the order of
+    ``_NamedPastAnEarlierBase``; ``super(_Unchecking, self).__init__(pace)``
+    runs the first one after ``_Unchecking``, the same. ``_Unchecking.__init__``
+    calls none, though the class after ``_NamedAnUncheckingBase`` in its
+    order, ``_Checking``, has one that does: its pace is never checked.
+
+    Every ``__init__`` a hand-written one named was read as the one of the
+    next class of the order that has one: ``_Unchecking``'s for the first
+    two, so a pace they check was reported as never checked, and
+    ``_Checking``'s for the third, so a pace it never checks passed.
+    """
+    check = inspect.unwrap(vars(_Checking)["__post_init__"])
+    pace = "Literal['fast', 'slow']"
+    for runs in (_NamedPastAnEarlierBase, _SuperPastAnEarlierBase):
+        found = ccl._post_init(runs)
+        assert found is check, runs
+        assert ccl._choice_verdict(found, "pace", pace, field=True) is None
+        with pytest.raises(ValueError, match="pace"):
+            runs("medium")  # type: ignore[arg-type]
+    assert ccl._post_init(_NamedAnUncheckingBase) is None
+    assert vars(_NamedAnUncheckingBase("medium"))["pace"] == "medium"  # type: ignore[arg-type]
+
+
+class _PaceChecker:
+    """A class whose methods check the pace they are handed."""
+
+    def check(self, pace: _Pace) -> None:
+        require_choice(pace, "pace", _PACES)
+
+    @classmethod
+    def check_once(cls, pace: _Pace) -> None:
+        require_choice(pace, "pace", _PACES)
+
+
+class _ThroughTheClass(_PaceChecker):
+    """A class that calls its base's methods through the base's name."""
+
+    def run(self, pace: _Pace = "fast") -> None:
+        _PaceChecker.check(self, pace)
+
+    def run_once(self, pace: _Pace = "fast") -> None:
+        _PaceChecker.check_once(pace)
+
+
+def _through_a_named_init(pace: _Pace = "fast") -> _NamedPastAnEarlierBase:
+    """Hand a pace to a class whose ``__init__`` hands it on by name."""
+    return _NamedPastAnEarlierBase(pace)
+
+
+def test_a_method_called_through_its_class_takes_the_instance_first() -> None:
+    """``_PaceChecker.check(self, pace)`` hands ``self`` to the method's
+    ``self`` and the pace to its ``pace``, which it checks, as
+    ``_Checking.__init__(self, pace)`` hands the pace to the record's field;
+    a class method called through its class, ``_PaceChecker.check_once(pace)``,
+    is bound to it.
+
+    A method's ``self`` was taken as filled by the call whatever named the
+    method, so the pace was read as handed to the method's second parameter
+    or to none, and reported as never checked.
+    """
+    pace = "Literal['fast', 'slow']"
+    for through in (_ThroughTheClass.run, _ThroughTheClass.run_once):
+        assert ccl._choice_verdict(through, "pace", pace, field=False) is None
+        with pytest.raises(ValueError, match="pace"):
+            through(_ThroughTheClass(), "medium")  # type: ignore[arg-type]
+    assert ccl._choice_verdict(_through_a_named_init, "pace", pace, field=False) is None
+    with pytest.raises(ValueError, match="pace"):
+        _through_a_named_init("medium")  # type: ignore[arg-type]
+
+
 def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:
     """``Pace | Mapping[Side, Pace | float]`` takes a pace as one value, a side
     as each key and a pace as each value: a check of one part says nothing of

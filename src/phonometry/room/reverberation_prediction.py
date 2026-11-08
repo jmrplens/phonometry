@@ -637,12 +637,12 @@ class ReverberationModelResult(OwnsArrays):
     :ivar surface_area: Total boundary area ``S``, m2.
     """
 
-    frequencies: np.ndarray
-    sabine: np.ndarray
-    eyring: np.ndarray
-    millington_sette: np.ndarray
-    fitzroy: np.ndarray
-    arau_puchades: np.ndarray
+    frequencies: NDArray[np.float64]
+    sabine: NDArray[np.float64]
+    eyring: NDArray[np.float64]
+    millington_sette: NDArray[np.float64]
+    fitzroy: NDArray[np.float64]
+    arau_puchades: NDArray[np.float64]
     volume: float
     surface_area: float
 
@@ -704,7 +704,7 @@ class ReverberationModelResult(OwnsArrays):
         require_finite_fields(self, "frequencies", "volume", "surface_area")
 
     @property
-    def models(self) -> dict[str, np.ndarray]:
+    def models(self) -> dict[str, NDArray[np.float64]]:
         """The five reverberation-time curves keyed by model name."""
         return {
             "Sabine": self.sabine,
@@ -887,7 +887,7 @@ def reverberation_time_models(
             raise ValueError(msg)
         n_bands = freq.size
 
-    def _fit(arr: np.ndarray) -> np.ndarray:
+    def _fit(arr: NDArray[np.float64]) -> NDArray[np.float64]:
         # The five curves are float arrays the function computed above.
         return np.array(np.broadcast_to(arr, (n_bands,)))
 

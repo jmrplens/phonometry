@@ -275,6 +275,61 @@ def argument_places(arguments: Sequence[ast.expr]) -> list[tuple[int, bool]]:
     return places
 
 
+def argument_reach(
+    arguments: Sequence[ast.expr],
+    places: Sequence[str],
+    named: Collection[str] = (),
+    *,
+    open_ended: bool,
+    positional_only: int = 0,
+) -> list[tuple[int, int | None]]:
+    """Which of *places*, the named positional parameters of what a call
+    calls, each argument it gives by its place may fill on a call that
+    returns: the lowest and the highest, the highest ``None`` when it may
+    run past them into ``*args`` (*open_ended*), and lower than the lowest
+    when it fills none.
+
+    The values a call hands by place fill *places* one each from the first,
+    as many as there are, so none fills a place an explicit keyword of the
+    call fills (*named*, but for the first *positional_only*, which no
+    keyword fills), nor one past it: Python raises rather than give a
+    parameter two values. A ``*`` argument hands an unknown number of
+    values, none among them, so it, and every argument after one, may fill
+    any place from its lowest (:func:`argument_places`) to the last that
+    leaves each plain argument written after it a place of its own before
+    the first place a keyword fills, or before the end of *places* when the
+    function takes no ``*args``: in ``f(*head, value)`` of a ``f(a, b)``,
+    ``head`` fills ``a`` at most, and in ``f(*head, label="")`` of a
+    ``f(data, label)``, ``head`` fills ``data`` at most and never runs into
+    ``*args``. An argument with no ``*`` argument at or before it fills its
+    own place alone, past *places* when it is written past them.
+    """
+    barrier = next(
+        (
+            index
+            for index, name in enumerate(places)
+            if index >= positional_only and name in named
+        ),
+        None,
+    )
+    plain_after = [0] * len(arguments)
+    count = 0
+    for index in range(len(arguments) - 1, -1, -1):
+        plain_after[index] = count
+        if not isinstance(arguments[index], ast.Starred):
+            count += 1
+    reach: list[tuple[int, int | None]] = []
+    for index, (lowest, spreads) in enumerate(argument_places(arguments)):
+        if not spreads:
+            reach.append((lowest, lowest))
+        elif barrier is None and open_ended:
+            reach.append((lowest, None))
+        else:
+            end = len(places) if barrier is None else barrier
+            reach.append((lowest, end - 1 - plain_after[index]))
+    return reach
+
+
 def _opening(scope: ast.AST) -> list[ast.AST]:
     """The nodes a scope runs as its own, before any scope inside it is left out.
 

@@ -2280,6 +2280,69 @@ def test_a_star_and_what_follows_it_fill_places_from_their_lowest_on(
     ]
 
 
+#: Calls whose ``*`` argument a keyword of the call, or a plain argument
+#: after it, keeps from the place of the count.
+_STOPPED_STARS = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["Keyed", "before_a_keyword", "before_an_argument", "into_a_record", "past_a_keyword"]
+
+def _keyed(scale: float = 1.0, n: int = 1) -> int:
+    return require_count(n, "n")
+
+def _tail(scale: float = 1.0, *counts: int) -> int:
+    total = 0
+    for count in counts:
+        total += require_count(count, "count")
+    return total
+
+@dataclass(frozen=True)
+class Keyed:
+    height_m: float = 0.0
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+def before_a_keyword(*counts: int) -> int:
+    return _keyed(*counts, scale=2.0)
+
+def before_an_argument(*counts: int) -> int:
+    return _keyed(*counts, 2.0)
+
+def into_a_record(*counts: int) -> Keyed:
+    return Keyed(*counts, height_m=2.0)
+
+def past_a_keyword(*counts: int) -> int:
+    return _tail(*counts, scale=2.0)
+"""
+
+
+def test_a_star_fills_no_place_from_a_keyword_s_on_nor_one_a_later_argument_needs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The items of a ``*`` argument fill the places from its lowest on one
+    each, so on a call that returns they stop before the first place an
+    explicit keyword fills, and leave each plain argument after them a
+    place of their own before the end of a function with no ``*args``:
+    ``_keyed(*counts, scale=2.0)``, ``Keyed(*counts, height_m=2.0)`` and
+    ``_keyed(*counts, 2.0)`` hand ``counts`` no count, and
+    ``_tail(*counts, scale=2.0)`` hands it no ``*counts``.
+
+    The star was read as reaching every place from its lowest on that no
+    keyword fills, and ``*args`` past them, so all four were refused for a
+    count they never reach.
+    """
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "api": _STOPPED_STARS},
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert [(f.function, f.parameter) for f in found] == []
+
+
 def test_an_init_var_takes_its_place_and_reaches_post_init_by_it(
     tmp_path: pathlib.Path,
 ) -> None:

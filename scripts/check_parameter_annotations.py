@@ -198,6 +198,7 @@ import check_return_overloads as overloads
 from ast_scan import (
     ROOT,
     argument_places,
+    argument_reach,
     is_type_checking_block,
     own_names,
     python_files,
@@ -2013,6 +2014,9 @@ class _Landing:
     #: The names the call's explicit keywords fill: a ``*`` argument, or one
     #: after it, that reached the place of one would make the call raise.
     named: frozenset[str]
+    #: The arguments the call gives by their place, read for the last place
+    #: each may fill (:func:`ast_scan.argument_reach`).
+    arguments: Sequence[ast.expr] = ()
 
 
 #: Where the arguments of a call may land (:class:`_Landing`), ``None`` for
@@ -2027,6 +2031,7 @@ def _landing(call: ast.Call) -> _Spread:
     return _Landing(
         argument_places(call.args),
         frozenset(keyword.arg for keyword in call.keywords if keyword.arg is not None),
+        call.args,
     )
 
 
@@ -2036,26 +2041,41 @@ def _filled(
     spread: _Spread,
     *,
     positional_only: int = 0,
+    open_ended: bool = True,
 ) -> list[str]:
     """The names of *places* a call's arguments at *positions* may fill.
 
-    A ``*`` argument, and every argument after one, may fill any place from
-    the lowest it may take on (*spread*), the star its items one each: in
-    ``f(*head, 1, n)`` the count fills the second place or a later one,
-    never the first. A place an explicit keyword of the call fills is that
-    keyword's alone, as Python raises rather than put an item there, but
-    for the first *positional_only* places, which no keyword fills. An
-    argument with no star at or before it fills the place it is written in.
+    A ``*`` argument, and every argument after one, may fill the places from
+    the lowest it may take on (*spread*), the star its items one each, to
+    the last a call that returns leaves it (:func:`ast_scan.argument_reach`):
+    in ``f(*head, 1, n)`` the count fills the second place or a later one,
+    never the first. The items fill the places one each from the lowest
+    on, so they stop before the first place an explicit keyword of the call
+    fills, as Python raises rather than put an item there, but for the first
+    *positional_only* places, which no keyword fills; and in a function
+    with no ``*args`` (*open_ended*) they leave each plain argument after
+    them a place of its own before the end: in ``_helper(*values, a=0)``
+    of a ``_helper(a, b)``, ``values`` fills nothing. An argument with no
+    star at or before it fills the place it is written in.
     """
+    reach = (
+        argument_reach(
+            spread.arguments,
+            places,
+            spread.named,
+            open_ended=open_ended,
+            positional_only=positional_only,
+        )
+        if spread is not None
+        else []
+    )
     filled: list[str] = []
     for index in positions:
         lowest, spreads = spread.places[index] if spread is not None else (index, False)
         if spread is not None and spreads:
-            named = spread.named
+            _lowest, highest = reach[index]
             filled.extend(
-                name
-                for place, name in enumerate(places[lowest:], lowest)
-                if place < positional_only or name not in named
+                places[lowest : len(places) if highest is None else highest + 1]
             )
         elif index < len(places):
             filled.append(places[index])
@@ -2082,14 +2102,34 @@ def _takes_keyword(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[st
     )
 
 
-def _past_the_places(positions: Sequence[int], places: int, spread: _Spread) -> bool:
+def _past_the_places(
+    positions: Sequence[int],
+    places: Sequence[str],
+    spread: _Spread,
+    *,
+    positional_only: int = 0,
+) -> bool:
     """Whether a call's argument at one of *positions* may land past a
-    function's *places* named positional parameters, in its ``*args``: one
-    written past them, a ``*`` argument, whose items may run past them, or
-    one after it (*spread*).
+    function's *places*, its named positional parameters, in its ``*args``:
+    one written past them, or a ``*`` argument, whose items may run past
+    them, or one after it (*spread*), when no explicit keyword of the call
+    fills one of *places* the values would have to fill first
+    (:func:`ast_scan.argument_reach`).
     """
+    reach = (
+        argument_reach(
+            spread.arguments,
+            places,
+            spread.named,
+            open_ended=True,
+            positional_only=positional_only,
+        )
+        if spread is not None
+        else []
+    )
     return any(
-        index >= places or (spread is not None and spread.places[index][1])
+        index >= len(places)
+        or (spread is not None and spread.places[index][1] and reach[index][1] is None)
         for index in positions
     )
 
@@ -2779,21 +2819,35 @@ class Reader:
         holders = (
             [owner]
             if bound_self
-            else _holders(call, positional, owner, positional_only=posonly)
+            else _holders(
+                call,
+                positional,
+                owner,
+                positional_only=posonly,
+                open_ended=node.args.vararg is not None,
+            )
         )
         if not holders:
             return
         spread = _landing(call)
+        vararg = node.args.vararg
         received = (
             [positional[index] for index in given if index < len(positional)]
             if spread is None
-            else _filled(positional, given, spread, positional_only=posonly)
+            else _filled(
+                positional,
+                given,
+                spread,
+                positional_only=posonly,
+                open_ended=vararg is not None,
+            )
         )
         takes_keyword = _takes_keyword(node)
         received.extend(keyword for keyword in keywords if keyword in takes_keyword)
         names = [(parameter, parameter) for parameter in dict.fromkeys(received)]
-        vararg = node.args.vararg
-        if vararg is not None and _past_the_places(given, len(positional), spread):
+        if vararg is not None and _past_the_places(
+            given, positional, spread, positional_only=posonly
+        ):
             names.extend((vararg.arg, loop) for loop in _loops_over(node, vararg.arg))
         method = self.package.functions[reached]
         for holder in holders:
@@ -2907,7 +2961,7 @@ class Reader:
             for name in (
                 [positional[index] for index in given if index < len(positional)]
                 if spread is None
-                else _filled(positional, given, spread)
+                else _filled(positional, given, spread, open_ended=False)
             )
             if name in fields
         ]
@@ -2969,6 +3023,8 @@ class Reader:
         parameters = overloads._parameters(node)
         positional = [argument.arg for argument in _positional(node, bound=bound)]
         given, spread = positions
+        posonly = _positional_only(node, bound=bound)
+        vararg = node.args.vararg
         received = (
             [positional[index] for index in given if index < len(positional)]
             if spread is None
@@ -2976,13 +3032,15 @@ class Reader:
                 positional,
                 given,
                 spread,
-                positional_only=_positional_only(node, bound=bound),
+                positional_only=posonly,
+                open_ended=vararg is not None,
             )
         )
         takes_keyword = _takes_keyword(node)
         received.extend(keyword for keyword in keywords if keyword in takes_keyword)
-        vararg = node.args.vararg
-        if vararg is not None and _past_the_places(given, len(positional), spread):
+        if vararg is not None and _past_the_places(
+            given, positional, spread, positional_only=posonly
+        ):
             received.append(vararg.arg)
         bounds = self._bounds(callee)
         annotations = self.annotations
@@ -5222,7 +5280,12 @@ _SETATTR = 3
 
 
 def _holders(
-    call: ast.Call, positional: Sequence[str], owner: str, *, positional_only: int = 0
+    call: ast.Call,
+    positional: Sequence[str],
+    owner: str,
+    *,
+    positional_only: int = 0,
+    open_ended: bool = True,
 ) -> list[str]:
     """The parameters of a function that a call may hand the record to, by name.
 
@@ -5241,7 +5304,13 @@ def _holders(
         return [positional[index] for index in given if index < len(positional)]
     return list(
         dict.fromkeys(
-            _filled(positional, given, spread, positional_only=positional_only)
+            _filled(
+                positional,
+                given,
+                spread,
+                positional_only=positional_only,
+                open_ended=open_ended,
+            )
         )
     )
 
@@ -5290,18 +5359,31 @@ def _handed_stores(
         return set()
     positional = [argument.arg for argument in _positional(node, bound=False)]
     posonly = _positional_only(node, bound=False)
+    vararg = node.args.vararg
     owners = {
         holder
         for owner in _OWNERS
-        for holder in _holders(call, positional, owner, positional_only=posonly)
+        for holder in _holders(
+            call,
+            positional,
+            owner,
+            positional_only=posonly,
+            open_ended=vararg is not None,
+        )
     }
-    vararg = node.args.vararg
     spread = _landing(call)
     rest = [
         value
         for index, value in enumerate(call.args)
-        if _past_the_places([index], len(positional), spread)
+        if _past_the_places([index], positional, spread, positional_only=posonly)
     ]
+    reach = argument_reach(
+        call.args,
+        positional,
+        spread.named if spread is not None else (),
+        open_ended=vararg is not None,
+        positional_only=posonly,
+    )
     by_vararg = set(_loops_over(node, vararg.arg)) if vararg is not None else set()
     places = {name: index for index, name in enumerate(positional)}
     # A keyword fills the parameter of its name, but a positional-only one,
@@ -5339,14 +5421,19 @@ def _handed_stores(
                 handed.extend(call.args[place : place + 1])
             else:
                 # An argument after a star may fill any place from the
-                # lowest it may take on.
+                # lowest it may take on to the last a call that returns
+                # leaves it (:func:`ast_scan.argument_reach`).
                 handed.extend(
                     argument
-                    for argument, (lowest, spreads) in zip(
-                        call.args, spread.places, strict=True
+                    for argument, (lowest, spreads), (_, highest) in zip(
+                        call.args, spread.places, reach, strict=True
                     )
                     if not isinstance(argument, ast.Starred)
-                    and (lowest <= place if spreads else lowest == place)
+                    and (
+                        lowest <= place and (highest is None or place <= highest)
+                        if spreads
+                        else lowest == place
+                    )
                 )
         for value in handed:
             named = _field_named(value, looping)

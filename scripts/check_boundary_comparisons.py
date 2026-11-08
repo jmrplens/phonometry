@@ -130,6 +130,7 @@ from typing import TYPE_CHECKING, TypeGuard
 
 from ast_scan import (
     argument_places,
+    argument_reach,
     assigned_value,
     assignment_target,
     binding_of,
@@ -143,7 +144,14 @@ from ast_scan import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+    from collections.abc import (
+        Callable,
+        Collection,
+        Iterable,
+        Iterator,
+        Mapping,
+        Sequence,
+    )
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "src" / "phonometry"
@@ -1433,7 +1441,12 @@ class Module:
             unpacked = [
                 self.value(value, context)
                 for value in _unpacked_into(
-                    call, positional, name, keyword=name not in by_place
+                    call,
+                    positional,
+                    name,
+                    keyword=name not in by_place,
+                    takes_keywords=set(positional) - by_place,
+                    open_ended=arguments.vararg is not None,
                 )
             ]
             if unpacked:
@@ -1598,7 +1611,14 @@ class Module:
         values: list[Value] = []
         for call, scope in sites:
             argument = _argument(call, fields, attr, keyword=True)
-            unpacked = _unpacked_into(call, fields, attr, keyword=True)
+            unpacked = _unpacked_into(
+                call,
+                fields,
+                attr,
+                keyword=True,
+                takes_keywords=fields,
+                open_ended=False,
+            )
             if argument is not None:
                 values.append(self.value(argument, Context(scope)))
             elif unpacked:
@@ -2050,27 +2070,43 @@ def _argument(
 
 
 def _unpacked_into(
-    call: ast.Call, positional: list[str], name: str, *, keyword: bool
+    call: ast.Call,
+    positional: list[str],
+    name: str,
+    *,
+    keyword: bool,
+    takes_keywords: Collection[str],
+    open_ended: bool,
 ) -> list[ast.expr]:
     """What a call that unpacks its arguments may hand the parameter *name*
     when no argument of its own does (:func:`_argument`).
 
     A ``*`` argument, and every argument after it, may land in any place
-    from the lowest it may take on (:func:`ast_scan.argument_places`): in
-    the place of *name* when that is one of them, so ``f(*head, 1, value)``
-    hands ``value`` to no first parameter. A ``**`` mapping may hand any
-    parameter that takes a keyword (*keyword*) one of its values: those of
-    a ``{...}`` written there, or the mapping.
+    from the lowest it may take on to the last a call that returns leaves
+    it (:func:`ast_scan.argument_reach`): before the first place an explicit
+    keyword of the call fills, among the *takes_keywords* that take one, and
+    leaving each plain argument after it a place of its own before the end
+    when the function takes no ``*args`` (*open_ended*). So
+    ``f(*head, 1, value)`` hands ``value`` to no first parameter, and
+    ``f(*head, scale=2.0)`` hands ``head`` nothing past ``scale``. A ``**``
+    mapping may hand any parameter that takes a keyword (*keyword*) one of
+    its values: those of a ``{...}`` written there, or the mapping.
     """
     found: list[ast.expr] = []
     if name in positional:
         place = positional.index(name)
+        named = {
+            item.arg
+            for item in call.keywords
+            if item.arg is not None and item.arg in takes_keywords
+        }
+        reach = argument_reach(call.args, positional, named, open_ended=open_ended)
         found.extend(
             argument.value if isinstance(argument, ast.Starred) else argument
-            for argument, (lowest, spreads) in zip(
-                call.args, argument_places(call.args), strict=True
+            for argument, (lowest, spreads), (_, highest) in zip(
+                call.args, argument_places(call.args), reach, strict=True
             )
-            if spreads and lowest <= place
+            if spreads and lowest <= place and (highest is None or place <= highest)
         )
     if keyword:
         for item in call.keywords:

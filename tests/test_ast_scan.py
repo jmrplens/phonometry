@@ -101,6 +101,43 @@ def test_an_argument_lands_from_the_lowest_place_the_stars_before_it_allow() -> 
     assert ast_scan.argument_places(plain.args) == [(0, False), (1, False)]
 
 
+def test_an_argument_reaches_the_places_a_call_that_returns_leaves_it() -> None:
+    """A ``*`` argument, and every argument after one, fills places from its
+    lowest up to the last that leaves each plain argument after it a place
+    before the first place an explicit keyword fills, or before the end when
+    the function takes no ``*args``; a keyword that names a positional-only
+    parameter fills no place.
+    """
+
+    def reach(source: str, places: tuple[str, ...], **options: object) -> object:
+        call = ast.parse(source, mode="eval").body
+        assert isinstance(call, ast.Call)
+        named = {keyword.arg for keyword in call.keywords if keyword.arg}
+        return ast_scan.argument_reach(call.args, places, named, **options)
+
+    # ``f(*head, values)`` of ``f(a, b)``: ``head`` fills ``a`` at most.
+    assert reach("f(*head, values)", ("a", "b"), open_ended=False) == [(0, 0), (0, 1)]
+    # With ``*args`` both may run past the places.
+    assert reach("f(*head, values)", ("a", "b"), open_ended=True) == [
+        (0, None),
+        (0, None),
+    ]
+    # ``f(*head, label="")`` of ``f(data, label, *rest)``: ``head`` fills
+    # ``data`` at most, and never ``*rest``.
+    assert reach('f(*head, label="")', ("data", "label"), open_ended=True) == [(0, 0)]
+    # ``f(*levels, skip=0)`` of ``f(skip, values)``: ``levels`` fills nothing.
+    assert reach("f(*levels, skip=0)", ("skip", "values"), open_ended=False) == [
+        (0, -1)
+    ]
+    # A keyword that names a positional-only parameter is no barrier.
+    assert reach(
+        "f(*levels, skip=0)", ("skip", "values"), open_ended=False, positional_only=1
+    ) == [(0, 1)]
+    # A plain argument before any star fills its own place, past the places
+    # too.
+    assert reach("f(a, b, c)", ("x",), open_ended=False) == [(0, 0), (1, 1), (2, 2)]
+
+
 def test_a_scope_binds_what_runs_in_it_alone() -> None:
     names = ast_scan.own_names(_outer())
     assert names.parameters == {"keep", "x"}

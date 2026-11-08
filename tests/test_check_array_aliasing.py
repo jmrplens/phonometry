@@ -3274,11 +3274,13 @@ def test_an_argument_after_a_star_may_fill_any_place_from_the_star_s_on(
     """The ``*`` argument hands an unknown number of values, so an argument
     written after it may fill any field from the star's place on: with
     nothing in ``head`` it fills ``first``, with one ``label``, with two
-    ``data``. The star's own items fill the fields from its place on, the
-    same two among them.
+    ``data``. The star's own items fill the fields from its place on, but
+    leave ``values`` a field after them: ``first`` or ``label``, never
+    ``data``.
 
     It was read at its written place alone, the text ``label``, so the two
-    fields that may keep the caller's array passed.
+    fields that may keep the caller's array passed; then the star was read
+    as filling ``data`` too, which a call that returns never lets it.
     """
     found = _findings(
         tmp_path,
@@ -3300,8 +3302,53 @@ def test_an_argument_after_a_star_may_fill_any_place_from_the_star_s_on(
     )
     assert found == {
         ("build_spread", "Spread.first", "head, values"),
-        ("build_spread", "Spread.data", "head, values"),
+        ("build_spread", "Spread.data", "values"),
     }
+
+
+def test_a_star_fills_no_place_from_a_keyword_s_on(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The items of a ``*`` argument fill the places from its lowest on one
+    each, so on a call that returns they stop before the first place an
+    explicit keyword fills: ``Rec(*head, label="")`` hands ``head`` the
+    first field alone, never ``data``, and ``_pass(*head, label="")`` hands
+    it ``first`` alone, never ``data`` or ``*rest``.
+
+    The star was read as filling every place from its lowest on that no
+    keyword fills, and ``*args`` past them, so ``head`` was reported as kept
+    in ``data`` and as handed back through ``_pass``.
+    """
+    found = _findings(
+        tmp_path,
+        stopped="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        @dataclass(frozen=True)
+        class Rec:
+            first: str = ""
+            label: str = ""
+            data: NDArray[np.float64] | None = None
+
+        def build_rec(head):
+            return Rec(*head, label="")
+
+        def _pass(first, label="", data=None, *rest):
+            return data, rest
+
+        @dataclass(frozen=True)
+        class Holder:
+            data: NDArray[np.float64]
+
+        def build_holder(head):
+            data, rest = _pass(*head, label="")
+            return Holder(data)
+        """,
+    )
+    assert found == set()
 
 
 #: Calls whose ``*`` argument fills the fields or parameters from its lowest

@@ -160,6 +160,7 @@ from ast_scan import (
     COMPOUND_STATEMENTS,
     ROOT,
     argument_places,
+    argument_reach,
     assigned_value,
     assignment_target,
     binding_of,
@@ -3125,9 +3126,10 @@ class Reader:
             )
             if not pinned:
                 return values[0] if len(values) == 1 else union(_CLEAN, *values)
-        places = argument_places(node.args)
         values.extend(
-            self._returned_by(function, arguments, keywords, bound=bound, places=places)
+            self._returned_by(
+                function, arguments, keywords, bound=bound, given=node.args
+            )
             for function in self.reached(target, node, pins=pins)
         )
         return union(*values) if values else _CLEAN
@@ -3139,11 +3141,11 @@ class Reader:
         keywords: dict[str | None, Value],
         *,
         bound: bool,
-        places: Sequence[tuple[int, bool]] = (),
+        given: Sequence[ast.expr] = (),
     ) -> Value:
         """What one definition returns of the arguments given to it, bound
-        to its own parameters (:func:`bind`, *places* where each argument
-        may land, :func:`ast_scan.argument_places`).
+        to its own parameters (:func:`bind`, *given* the arguments the call
+        gives by their place).
 
         A function defined in this one, or in one around it (a sibling
         helper), is read as it was where it is defined, so what it returns of
@@ -3157,13 +3159,13 @@ class Reader:
             returned, closure = held
             mapping: dict[str, Value] = {label: frozenset({label}) for label in closure}
             mapping.update(
-                bind(function, arguments, keywords, bound=bound, places=places)
+                bind(function, arguments, keywords, bound=bound, given=given)
             )
             return substitute(returned, mapping)
         summary = self.summaries.get(function.node)
         if summary is None or not flat(summary.value):
             return _CLEAN
-        mapping = bind(function, arguments, keywords, bound=bound, places=places)
+        mapping = bind(function, arguments, keywords, bound=bound, given=given)
         return substitute(summary.value, mapping)
 
     def reached(
@@ -4432,26 +4434,32 @@ def _places_reached(
     (:meth:`Tree.positional_orders`), and whether it may fall past the last
     of them in one.
 
-    A ``*`` argument, and every argument after one, may fill any field from
-    the lowest place it may take on (:func:`ast_scan.argument_places`), the
-    star its items one each: ``Rec(x, *rest)`` hands ``rest`` every field
-    after the first, and ``Rec(*head, 1, value)`` hands ``value`` none of
-    the first. A field an explicit keyword of the call fills is that
-    keyword's alone, as Python raises rather than put an item there:
-    ``Rec(*head, data=values)`` hands ``head`` no ``data``. Only an
-    argument whose lowest place is past the last field of an order may fall
-    past them.
+    A ``*`` argument, and every argument after one, may fill the fields
+    from the lowest place it may take on to the last a call that returns
+    leaves it (:func:`ast_scan.argument_reach`), the star its items one
+    each: ``Rec(x, *rest)`` hands ``rest`` every field after the first, and
+    ``Rec(*head, 1, value)`` hands ``value`` none of the first. The items
+    fill the fields one each from the lowest on, so they stop before the
+    first field an explicit keyword of the call fills, as Python raises
+    rather than put an item there: ``Rec(*head, label="")`` hands ``head``
+    no field after ``label``. And they leave each plain argument after them
+    a field of its own: ``Spread(*head, values)`` hands ``head`` no last
+    field. Only an argument whose lowest place is past the last field of an
+    order may fall past them.
     """
     named = {keyword.arg for keyword in call.keywords if keyword.arg is not None}
+    reaches = [
+        argument_reach(call.args, order, named, open_ended=False) for order in orders
+    ]
     reached: list[tuple[tuple[str, ...], bool]] = []
-    for lowest, spread in argument_places(call.args):
+    for index, (lowest, spread) in enumerate(argument_places(call.args)):
         names: dict[str, None] = {}
         past = False
-        for order in orders:
+        for order, reach in zip(orders, reaches, strict=True):
             if spread:
-                names.update(
-                    dict.fromkeys(name for name in order[lowest:] if name not in named)
-                )
+                highest = reach[index][1]
+                end = len(order) if highest is None else highest + 1
+                names.update(dict.fromkeys(order[lowest:end]))
             elif lowest < len(order):
                 names[order[lowest]] = None
             past = past or lowest >= len(order)
@@ -4465,22 +4473,35 @@ def bind(
     keywords: dict[str | None, Value],
     *,
     bound: bool,
-    places: Sequence[tuple[int, bool]] = (),
+    given: Sequence[ast.expr] = (),
 ) -> dict[str, Value]:
     """What each parameter of *function* receives from one call.
 
-    *places* says where each argument may land
-    (:func:`ast_scan.argument_places`); with none given, each fills its own
-    place. From the first ``*`` argument on, the number of values the call
-    hands is unknown: that argument and every one after it may land in any
-    place from the lowest it may take on, or in ``*args``, and a place they
-    may leave unfilled is one a keyword or ``**options`` may fill. A place an
-    explicit keyword fills is that keyword's alone.
+    *given* are the arguments the call gives by their place, which say where
+    each may land (:func:`ast_scan.argument_places`); with none given, each
+    fills its own place. From the first ``*`` argument on, the number of
+    values the call hands is unknown: that argument and every one after it
+    may land in any place from the lowest it may take on to the last a call
+    that returns leaves it, or in ``*args`` (:func:`ast_scan.argument_reach`),
+    and a place they may leave unfilled is one a keyword or ``**options``
+    may fill. A place an explicit keyword fills is that keyword's alone,
+    and the values stop before it: they fill the places one each from the
+    lowest on, and never run past it into ``*args``.
     """
     spec = function.node.args
     positional = [a.arg for a in (*spec.posonlyargs, *spec.args)]
+    posonly = len(spec.posonlyargs)
     if bound and function.kind in {"method", "classmethod"}:
         positional = positional[1:]
+        posonly = max(posonly - 1, 0)
+    places = argument_places(given)
+    reach = argument_reach(
+        given,
+        positional,
+        {keyword for keyword in keywords if keyword is not None},
+        open_ended=spec.vararg is not None,
+        positional_only=posonly,
+    )
     mapping: dict[str, Value] = {}
     extra: list[Value] = []
     beyond: list[Value] = []
@@ -4488,10 +4509,15 @@ def bind(
     for index, value in enumerate(arguments):
         lowest, spread = places[index] if index < len(places) else (index, False)
         if spread:
-            for name in positional[lowest:]:
+            highest = reach[index][1]
+            reached = positional[
+                lowest : len(positional) if highest is None else highest + 1
+            ]
+            for name in reached:
                 mapping[name] = union(mapping.get(name, _CLEAN), value)
-            maybe.update(positional[lowest:])
-            beyond.append(value)
+            maybe.update(reached)
+            if highest is None:
+                beyond.append(value)
         elif index < len(positional):
             mapping[positional[index]] = value
         else:

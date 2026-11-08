@@ -1229,6 +1229,40 @@ def test_an_argument_after_a_star_takes_no_place_before_its_lowest(
 
 
 @pytest.mark.parametrize(
+    ("call", "refused"),
+    [
+        # An item of the star fills ``scale`` first, which the keyword fills
+        # too: a call that returns hands the star nothing.
+        ("_within(*[max(levels) - min(levels)], scale=1.0)", []),
+        # The ``1.0`` needs a place after the star's items, so they fill
+        # ``scale`` at most.
+        ("_within(*[max(levels) - min(levels)], 1.0)", []),
+        # Alone, the star may fill ``spread`` too.
+        ("_within(*[max(levels) - min(levels)])", ["spread <= _SPREAD_DB"]),
+    ],
+)
+def test_a_star_fills_no_place_from_a_keyword_s_on_nor_one_a_later_argument_needs(
+    tmp_path: pathlib.Path, call: str, refused: list[str]
+) -> None:
+    """The items of a ``*`` argument fill the places from its lowest on one
+    each, so on a call that returns they stop before the first place an
+    explicit keyword fills, and leave each plain argument after the star a
+    place of its own before the end of a function with no ``*args``.
+
+    The star was read as reaching every place from its lowest on, so the
+    spread reached ``spread`` past ``scale=1.0`` and past the place the
+    ``1.0`` needs, and the comparison of a constant was refused.
+    """
+    source = (
+        "_SPREAD_DB = 3.0\n"
+        "def _within(scale, spread=0.0):\n"
+        "    return spread <= _SPREAD_DB\n"
+        f"def judge(levels):\n    return {call}\n"
+    )
+    assert _texts(source, tmp_path) == refused
+
+
+@pytest.mark.parametrize(
     "call",
     [
         "_within(max(levels) - min(levels), spread=0.0)",

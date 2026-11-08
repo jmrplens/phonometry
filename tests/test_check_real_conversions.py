@@ -1913,6 +1913,62 @@ def test_an_argument_after_a_star_takes_no_place_before_its_lowest(
     assert _verdicts(tmp_path, source)["_convert"] == verdict
 
 
+#: A helper that converts its second place and takes no ``*args``.
+_SECOND_PLACE_HELPER = """
+def _convert(skip=None, values=None):
+    return np.asarray(values, dtype=np.float64)
+"""
+
+
+@pytest.mark.parametrize(
+    ("caller", "verdict"),
+    [
+        # Any item of ``levels`` fills ``skip`` first, which the keyword
+        # fills too: a call that returns hands ``levels`` nothing.
+        (
+            "def f(levels):\n"
+            "    return _convert(*levels, skip=0, values=np.zeros(3))\n",
+            "computed",
+        ),
+        (
+            "def f(levels):\n    return _convert(*levels, skip=0)\n",
+            "computed",
+        ),
+        # ``np.zeros(3)`` needs a place after ``levels``, so ``levels`` fills
+        # ``skip`` at most.
+        (
+            "def f(levels):\n    return _convert(*levels, np.zeros(3))\n",
+            "computed",
+        ),
+        # Without either, ``levels`` may reach ``values``.
+        (
+            "def f(levels):\n    return _convert(*levels)\n",
+            "unchecked",
+        ),
+        (
+            "def f(levels):\n    return _convert(0, *levels, values=np.zeros(3))\n",
+            "computed",
+        ),
+    ],
+)
+def test_a_star_fills_no_place_from_a_keyword_s_on_nor_one_a_later_argument_needs(
+    tmp_path: Path, caller: str, verdict: str
+) -> None:
+    """The items of a ``*`` argument fill the places from its lowest on one
+    each, so on a call that returns they stop before the first place an
+    explicit keyword fills, and leave each plain argument written after the
+    star a place of its own before the last one when the helper takes no
+    ``*args``.
+
+    The star was read as reaching every place from its lowest on that no
+    keyword fills, so ``levels`` reached ``values`` past ``skip=0`` and past
+    the place ``np.zeros(3)`` needs, and the conversion was read as one of
+    the caller's value.
+    """
+    source = _PLANTED_HEADER + _SECOND_PLACE_HELPER + "\n" + caller
+    assert _verdicts(tmp_path, source)["_convert"] == verdict
+
+
 def _read_apart(tmp_path: Path, published: str) -> str:
     """The verdict on a conversion in a private module that a public one calls."""
     package = tmp_path / "phonometry"

@@ -17,6 +17,10 @@ es lo que los convierte en una medición.
 
 ## Instalación
 
+Las órdenes de abajo son las de pip. [Entornos](/phonometry/es/start/environments/)
+trata uno a uno uv, conda, Jupyter, JupyterLite, Docker y los comprobadores de
+tipos.
+
 ### Desde PyPI (recomendada)
 
 ```bash
@@ -96,7 +100,9 @@ PyPI con CUDA.
 
 [Dónde se calcula una simulación](/phonometry/es/simulation/compute/) explica
 qué necesita cada dispositivo de las simulaciones FDTD, entre ellos el wheel
-de CuPy para una GPU de NVIDIA.
+de CuPy para una GPU de NVIDIA, y [pip y
+uv](/phonometry/es/start/environments/pip-and-uv/) qué trae cada extra y cómo
+los instala uv.
 
 ### Desde un clon
 
@@ -105,6 +111,9 @@ git clone https://github.com/jmrplens/phonometry.git
 cd phonometry
 pip install .
 ```
+
+pip construye el wheel sin compilador; [pip y
+uv](/phonometry/es/start/environments/pip-and-uv/#desde-un-clon) cuenta el resto.
 
 ### Como submódulo de git
 
@@ -508,7 +517,7 @@ poco sobre las bandas de 12,5 o 16 Hz por muchos dígitos que devuelva.
 
 ## En un cuaderno
 
-Jupyter, JupyterLab, VS Code y Colab muestran el valor de la última línea de
+Jupyter y JupyterLab muestran el valor de la última línea de
 una celda, y un resultado se muestra como una tabla de sus campos: cada uno con
 su unidad cuando su nombre la lleva (`_db`, `_hz`, `_m`...), nombra un nivel o
 una diferencia de niveles (`insertion_loss` y `band_levels` están en
@@ -585,6 +594,11 @@ ax = bank.plot()    # dibujada bajo la celda; en un script, plt.show()
 
 *La figura que `bank.plot()` dibuja bajo la celda: el espectro de tercio de
 octava del tono de 1 kHz sobre ruido.*
+
+[Jupyter y JupyterLab](/phonometry/es/start/environments/jupyter/) sigue desde
+aquí: las figuras en SVG, los vídeos, las fichas y cómo se ve un aviso en una
+celda, y [JupyterLite y Pyodide](/phonometry/es/start/environments/jupyterlite/)
+el mismo cuaderno en el navegador.
 
 ## Siguientes pasos
 

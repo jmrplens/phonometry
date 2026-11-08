@@ -107,7 +107,7 @@ __all__ = [
 # in-band bin indices, output slice into the concatenation-order level array,
 # FFT length).  The FFT length is >= the segment length so the Hann window is
 # never truncated (at 44.1/48 kHz the 64 ms segment exceeds the nominal 2048).
-_Plan = tuple[int, np.ndarray, float, np.ndarray, slice, int]
+_Plan = tuple[int, "NDArray[np.float64]", float, "NDArray[np.intp]", slice, int]
 
 # ---------------------------------------------------------------------------
 # ERB-number grid (clause 7.4): i from 1.75 to 39 Cam in 0.25 Cam steps
@@ -391,11 +391,11 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
     :ivar presentation: One of ``"binaural"``, ``"diotic"`` or ``"monaural"``.
     """
 
-    times: np.ndarray
-    short_term_loudness: np.ndarray
-    long_term_loudness: np.ndarray
-    short_term_loudness_level: np.ndarray
-    long_term_loudness_level: np.ndarray
+    times: NDArray[np.float64]
+    short_term_loudness: NDArray[np.float64]
+    long_term_loudness: NDArray[np.float64]
+    short_term_loudness_level: NDArray[np.float64]
+    long_term_loudness_level: NDArray[np.float64]
     n_max: float
     loudness_level_max: float
     percentiles: Mapping[float, float]
@@ -529,7 +529,9 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
 # ---------------------------------------------------------------------------
 
 
-def _excitation(comp_f: np.ndarray, comp_pow: np.ndarray) -> np.ndarray:
+def _excitation(
+    comp_f: NDArray[np.float64], comp_pow: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Excitation ratio E/E0 at every ERB-number filter (clause 7.4).
 
     ``comp_f`` are the (ascending) component frequencies and ``comp_pow`` their
@@ -557,7 +559,7 @@ def _excitation(comp_f: np.ndarray, comp_pow: np.ndarray) -> np.ndarray:
     return np.asarray(weight @ comp_pow, dtype=np.float64)
 
 
-def _specific_loudness(excitation: np.ndarray) -> np.ndarray:
+def _specific_loudness(excitation: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""Instantaneous specific loudness N'(i) in sone/Cam (clause 7.5).
 
     Applies the compressive transformation of Formulae (7)-(9) with the
@@ -583,7 +585,7 @@ def _specific_loudness(excitation: np.ndarray) -> np.ndarray:
     return n_spec
 
 
-def _smooth(pattern: np.ndarray) -> np.ndarray:
+def _smooth(pattern: NDArray[np.float64]) -> NDArray[np.float64]:
     """Broadly tuned across-frequency smoothing (clause 7.7, Formulae 14/15)."""
     smoothed = np.zeros_like(pattern)
     n = pattern.size
@@ -596,7 +598,9 @@ def _smooth(pattern: np.ndarray) -> np.ndarray:
     return smoothed
 
 
-def _short_term_loudness(stsl_l: np.ndarray, stsl_r: np.ndarray) -> tuple[float, float]:
+def _short_term_loudness(
+    stsl_l: NDArray[np.float64], stsl_r: NDArray[np.float64]
+) -> tuple[float, float]:
     """Short-term loudness of each ear with binaural inhibition (clauses 7.7/7.8).
 
     ``stsl_*`` are the (temporally smoothed) short-term specific loudness
@@ -640,7 +644,9 @@ def _loudness_level(
 # ---------------------------------------------------------------------------
 
 
-def _spectral_plan(fs: float) -> tuple[np.ndarray, list[_Plan], np.ndarray]:
+def _spectral_plan(
+    fs: float,
+) -> tuple[NDArray[np.float64], list[_Plan], NDArray[np.intp]]:
     """Precompute the six-window analysis for a sampling rate.
 
     Returns the ascending component frequencies, a list of
@@ -676,8 +682,8 @@ def _spectral_plan(fs: float) -> tuple[np.ndarray, list[_Plan], np.ndarray]:
 
 
 def _frame_levels(
-    signal: np.ndarray, centre: int, plans: list[_Plan], n_components: int
-) -> np.ndarray:
+    signal: NDArray[np.float64], centre: int, plans: list[_Plan], n_components: int
+) -> NDArray[np.float64]:
     """Component sound pressure levels (dB SPL) for one 1-ms frame (clause 7.3).
 
     Each window's Hann-windowed segment is centred on ``centre`` (zero padded
@@ -703,13 +709,13 @@ def _frame_levels(
 
 
 def _run_ear(
-    signal: np.ndarray,
+    signal: NDArray[np.float64],
     fs: float,
     field: str,
     plans: list[_Plan],
-    comp_f_sorted: np.ndarray,
-    perm: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+    comp_f_sorted: NDArray[np.float64],
+    perm: NDArray[np.intp],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Instantaneous and short-term specific loudness traces for one ear.
 
     Returns ``(instantaneous, short_term)`` arrays of shape ``(n_frames, K)``
@@ -750,7 +756,7 @@ def _run_ear(
 
 def _as_two_channels(
     signal: Signal | NumericArrayLike, presentation: str
-) -> tuple[np.ndarray, np.ndarray | None]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64] | None]:
     """Split the input into left and (optional) right calibrated pressure signals."""
     array = apply_calibration(signal, real_array(signal, "x"))
     # The number is a count of array axes, not a quantity.
@@ -781,7 +787,9 @@ def _as_two_channels(
     return left, right
 
 
-def _percentiles(trace: np.ndarray, fractions: Sequence[float]) -> dict[float, float]:
+def _percentiles(
+    trace: NDArray[np.float64], fractions: Sequence[float]
+) -> dict[float, float]:
     """Long-term-loudness value exceeded for each stated fraction of the trace."""
     if trace.size == 0:
         return {real_number(p, "fractions"): 0.0 for p in fractions}

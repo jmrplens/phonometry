@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..building.measurement._rainfall_sound import (
@@ -1242,7 +1243,7 @@ _MAX_NAMED_PATHS = 6
 
 def _plot_path_shares(
     result: DetailedAirborneResult | DetailedImpactResult,
-    total: np.ndarray,
+    total: NDArray[np.float64],
     *,
     total_label: str,
     ylabel: str,
@@ -1625,9 +1626,9 @@ def plot_band_uncertainty(
 
 def _plot_improvement(
     ax: Axes,
-    freqs: np.ndarray,
-    dl: np.ndarray,
-    limited: np.ndarray | None,
+    freqs: NDArray[np.float64],
+    dl: NDArray[np.float64],
+    limited: NDArray[np.bool_] | None,
     title: str,
     language: Language,
     kwargs: dict[str, Any],
@@ -1882,9 +1883,9 @@ def plot_db_hr_assessment(
 
 def _plot_shaded_band_pair(
     ax: Axes | None,
-    frequencies: np.ndarray | None,
-    reference: np.ndarray,
-    curve: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    reference: NDArray[np.float64],
+    curve: NDArray[np.float64],
     *,
     reference_label: str,
     curve_label: str,
@@ -2240,8 +2241,8 @@ def plot_wall_tie_coupling(
 # --------------------------------------------------------------------------- #
 def _plot_improvement_spectrum(
     ax: Axes,
-    freqs: np.ndarray,
-    curves: Sequence[tuple[np.ndarray, str, str, str]],
+    freqs: NDArray[np.float64],
+    curves: Sequence[tuple[NDArray[np.float64], str, str, str]],
     marker_frequency: float | None,
     marker_label: str,
     language: Language,
@@ -2494,7 +2495,7 @@ def plot_lining_improvement(
 
 def _plot_low_frequency(
     result: LowFrequencyIntensityResult | LowFrequencyElementResult,
-    values: np.ndarray,
+    values: NDArray[np.float64],
     *,
     symbol: str,
     title: str,
@@ -2517,7 +2518,7 @@ def _plot_low_frequency(
     # band set at three to six bands, and bars over so short a span read
     # better evenly spaced. Without centres the bands are labelled by order.
     band_word = _t("Band", language)
-    labels: Sequence[str] | np.ndarray = (
+    labels: Sequence[str] | NDArray[np.float64] = (
         result.frequencies
         if result.frequencies is not None
         else [f"{band_word} {i + 1}" for i in range(r_i.size)]
@@ -2689,9 +2690,9 @@ def _headline_rating(result: ServiceEquipmentResult) -> str | None:
 
 def _mark_upper_limits(
     ax: Axes,
-    positions: np.ndarray,
-    levels: np.ndarray,
-    limited: np.ndarray,
+    positions: NDArray[np.float64],
+    levels: NDArray[np.float64],
+    limited: NDArray[np.bool_],
     language: Language,
 ) -> None:
     """Mark the bands the background held at 2,2 dB as upper limits."""
@@ -3631,8 +3632,8 @@ def _db(value: float, language: Language) -> str:
 
 def _improvement_curve(
     ax: Axes,
-    freqs: np.ndarray,
-    values: np.ndarray,
+    freqs: NDArray[np.float64],
+    values: NDArray[np.float64],
     label: str,
     language: Language,
     kwargs: dict[str, Any],
@@ -3918,7 +3919,7 @@ def plot_rain_generator_verification(
 
     ax = ax if ax is not None else _new_axes()
     nominal = result.nominal
-    rows: list[tuple[str, np.ndarray]] = [
+    rows: list[tuple[str, NDArray[np.float64]]] = [
         (
             "rainfall rate",
             np.asarray(
@@ -4146,8 +4147,8 @@ _STRINGS.update(
 
 
 def _named_band_axis(
-    ax: Axes, frequencies: np.ndarray | None, n_bands: int, language: Language
-) -> np.ndarray:
+    ax: Axes, frequencies: NDArray[np.float64] | None, n_bands: int, language: Language
+) -> NDArray[np.float64]:
     """A band axis labelled with the centres, or numbered where none were given."""
     if frequencies is None:
         return _band_axis(

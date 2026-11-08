@@ -4120,6 +4120,75 @@ def test_the_callers_of_a_private_method_are_the_calls_that_reach_it(
     )
 
 
+def test_a_call_on_self_reaches_the_method_a_class_over_the_caller_holds(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``self._helper(text)`` in ``Base.a`` runs what the class of the
+    instance holds: on a ``Sub``, ``Sub``'s own ``_helper``, and on a
+    ``Mixed``, the ``_helper`` it takes from ``Mixin``. Both take the open
+    text ``a`` hands, beside the fixed texts their own callers hand.
+
+    A call on ``self`` was read as reaching only what the caller's class
+    holds, ``Base``'s ``_helper`` or none, so ``Sub._helper`` and
+    ``Mixin._helper`` were read as taking fixed texts alone.
+    """
+    source = (
+        "class Base:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def a(self, text):\n"
+        "        return self._helper(text)\n\n"
+        "class Sub(Base):\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def b(self, text):\n"
+        "        return self._helper('b')\n\n"
+        "class Abstract:\n"
+        "    def c(self, text):\n"
+        "        return self._helper(text)\n\n"
+        "class Mixin:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def d(self, text):\n"
+        "        return self._helper('d')\n\n"
+        "class Mixed(Abstract, Mixin):\n"
+        "    pass\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_overriding_helpers": source})
+    tree = ast.parse(source)
+    base, sub, abstract, mixin, _mixed = tree.body
+    assert isinstance(base, ast.ClassDef)
+    assert isinstance(sub, ast.ClassDef)
+    assert isinstance(abstract, ast.ClassDef)
+    assert isinstance(mixin, ast.ClassDef)
+    base_helper, a = base.body
+    sub_helper, b = sub.body
+    (c,) = abstract.body
+    mixin_helper, d = mixin.body
+    module = "phonometry._overriding_helpers"
+    owners = {
+        id(base_helper): "Base",
+        id(a): "Base",
+        id(sub_helper): "Sub",
+        id(b): "Sub",
+        id(c): "Abstract",
+        id(mixin_helper): "Mixin",
+        id(d): "Mixin",
+    }
+    sites: list[tuple[str, ast.AST | None, ast.Call]] = []
+    for caller in (a, b, c, d):
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        sites.append((module, caller, site))
+    monkeypatch.setattr(ccl, "_construction_sites", lambda: {"_helper": tuple(sites)})
+    monkeypatch.setattr(ccl, "_METHOD_OWNERS", owners)
+    for helper in (sub_helper, mixin_helper):
+        assert isinstance(helper, ast.FunctionDef)
+        assert ccl._callers_source(helper, "kind", module, 0) == ccl._OPEN_SOURCE
+
+
 @dataclass
 class _ChecksItsPace:
     """A record whose hook checks the pace."""

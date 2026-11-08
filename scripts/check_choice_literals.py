@@ -4538,17 +4538,42 @@ def _callers_source(
     return _merged(found) if found else _OPEN_SOURCE
 
 
+def _class_named(module_name: str, owner: str) -> type | None:
+    """The class of module *module_name* whose qualified name is *owner*."""
+    holder: object = _module_object(module_name)
+    for part in owner.split("."):
+        holder = getattr(holder, part, None)
+    return holder if inspect.isclass(holder) else None
+
+
 def _class_member(module_name: str, owner: str, name: str) -> object | None:
     """The function the class *owner* of module *module_name* holds as
     *name*, its own or a base's, unwrapped of ``staticmethod`` and
     ``classmethod``.
     """
-    holder: object = _module_object(module_name)
-    for part in owner.split("."):
-        holder = getattr(holder, part, None)
-    if not inspect.isclass(holder):
+    holder = _class_named(module_name, owner)
+    if holder is None:
         return None
     return _unwrapped(getattr(holder, name, None))
+
+
+def _held_by_a_class_over(owner: type, name: str, defined: object) -> bool:
+    """Whether *owner*, or a class over it, holds *defined* as *name*: a
+    call of ``self.name`` in a method of *owner* runs what the class of the
+    instance holds, and that may be a class over *owner*, a subclass that
+    overrides the name or one that mixes it in from another base.
+    """
+    pending: list[type] = [owner]
+    seen: set[type] = set()
+    while pending:
+        later = pending.pop()
+        if later in seen:
+            continue
+        seen.add(later)
+        if _unwrapped(getattr(later, name, None)) is defined:
+            return True
+        pending.extend(later.__subclasses__())
+    return False
 
 
 def _unwrapped(member: object) -> object | None:
@@ -4561,10 +4586,11 @@ def _may_reach_method(
     call: ast.Call, caller: ast.AST | None, caller_module: str, defined: object
 ) -> bool:
     """Whether *call*, written in *caller* in *caller_module*, may run the
-    method *defined*: a call on ``self`` or ``cls`` runs what the caller's
-    class holds of the name, one through a class or a module what that holds,
-    and a bare name a function, never a method; a call on any other object
-    may run it.
+    method *defined*: a call on ``self`` or ``cls`` runs what the class of
+    the instance holds of the name, the caller's class or a class over it
+    (:func:`_held_by_a_class_over`), one through a class or a module what
+    that holds, and a bare name a function, never a method; a call on any
+    other object may run it.
     """
     if defined is None:
         return True
@@ -4576,9 +4602,10 @@ def _may_reach_method(
     head = func.value.id
     if head in {"self", "cls"}:
         owner = _METHOD_OWNERS.get(id(caller)) if caller is not None else None
-        if owner is None:
+        held = _class_named(caller_module, owner) if owner is not None else None
+        if held is None:
             return True
-        return _class_member(caller_module, owner, func.attr) is defined
+        return _held_by_a_class_over(held, func.attr, defined)
     imported = _local_imports(caller, caller_module) if caller is not None else {}
     holder = (
         imported[head]

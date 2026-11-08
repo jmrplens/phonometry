@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
@@ -119,13 +120,13 @@ class EcmaTonality(OwnsArrays):
     )
 
     tonality: float
-    specific_tonality: np.ndarray
-    bark: np.ndarray
-    frequencies: np.ndarray
-    tonal_frequencies: np.ndarray
-    times: np.ndarray
-    tonality_vs_time: np.ndarray
-    tonal_frequency_vs_time: np.ndarray
+    specific_tonality: NDArray[np.float64]
+    bark: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    tonal_frequencies: NDArray[np.float64]
+    times: NDArray[np.float64]
+    tonality_vs_time: NDArray[np.float64]
+    tonal_frequency_vs_time: NDArray[np.float64]
     field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
@@ -252,13 +253,20 @@ def _band_range(f_low: float | None, f_high: float | None) -> tuple[int, int]:
 
 
 def _assemble_tonality(
-    n_tonal: np.ndarray,
-    n_noise: np.ndarray,
-    f_ton: np.ndarray,
+    n_tonal: NDArray[np.float64],
+    n_noise: NDArray[np.float64],
+    f_ton: NDArray[np.float64],
     n_samples: int,
     z_lo: int,
     z_hi: int,
-) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[
+    float,
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+]:
     """Assemble the tonality metric (Clause 6.2.8-6.2.11).
 
     Returns ``(T, T'(z), f_ton,z(z), T(l), f_ton(l), time)``.

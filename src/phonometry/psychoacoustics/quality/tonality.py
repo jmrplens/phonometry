@@ -30,6 +30,7 @@ from ..._internal.welch import _welch_autospectrum
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
@@ -256,8 +257,8 @@ def _proximity_spacing(fp: float) -> float:
 
 
 def _averaged_spectrum(
-    x: np.ndarray, fs: float, resolution_hz: float
-) -> tuple[np.ndarray, np.ndarray, float]:
+    x: NDArray[np.float64], fs: float, resolution_hz: float
+) -> tuple[NDArray[np.float64], NDArray[np.float64], float]:
     """Hann-windowed, RMS-averaged power spectrum (clauses 11.1 / 12.1).
 
     Returns (frequencies, bin powers in Pa^2-like units, bin spacing).
@@ -282,7 +283,7 @@ def _averaged_spectrum(
 
 
 def _find_peak(
-    freqs: np.ndarray, power: np.ndarray, tone_frequency: float | None
+    freqs: NDArray[np.float64], power: NDArray[np.float64], tone_frequency: float | None
 ) -> int:
     if tone_frequency is None:
         in_range = (freqs >= _F_MIN) & (freqs <= _F_MAX)
@@ -298,7 +299,9 @@ def _find_peak(
     return int(np.flatnonzero(near)[np.argmax(power[near])])
 
 
-def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> tuple[int, int]:
+def _tone_band(
+    power: NDArray[np.float64], peak: int, half_width_bins: int
+) -> tuple[int, int]:
     """Clause 11.2: tone-band edges at the minimal points on both sides of
     the peak within 15 % of the critical band; if the minimum falls on the
     window edge, the nearest local minimum beyond it is used.
@@ -323,7 +326,7 @@ def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> tuple[int,
 
 
 def _band_power(
-    freqs: np.ndarray, power: np.ndarray, f1: float, f2: float
+    freqs: NDArray[np.float64], power: NDArray[np.float64], f1: float, f2: float
 ) -> tuple[float, int]:
     mask = (freqs > f1) & (freqs <= f2)
     n = int(np.count_nonzero(mask))

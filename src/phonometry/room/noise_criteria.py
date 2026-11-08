@@ -56,6 +56,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -95,7 +96,7 @@ class NoiseCriterionWarning(PhonometryWarning):
 # ---------------------------------------------------------------------------
 
 #: Octave-band centre frequencies, in hertz (Table 1 / Table D.1).
-NC_OCTAVE_BANDS_HZ: np.ndarray = read_only(
+NC_OCTAVE_BANDS_HZ: NDArray[np.float64] = read_only(
     np.array(
         [16.0, 31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
         dtype=np.float64,
@@ -103,13 +104,13 @@ NC_OCTAVE_BANDS_HZ: np.ndarray = read_only(
 )
 
 #: NC curve designations (value at 1000 Hz), Table 1.
-NC_RATINGS: np.ndarray = read_only(
+NC_RATINGS: NDArray[np.float64] = read_only(
     np.array([15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70], dtype=np.float64)
 )
 
 #: NC curve octave-band sound pressure levels, in dB (Table 1), one row per
 #: entry of :data:`NC_RATINGS`, columns aligned with :data:`NC_OCTAVE_BANDS_HZ`.
-NC_CURVE_LEVELS: np.ndarray = read_only(
+NC_CURVE_LEVELS: NDArray[np.float64] = read_only(
     np.array(
         [
             [78, 61, 47, 36, 28, 22, 18, 14, 12, 11],  # NC-15
@@ -130,7 +131,7 @@ NC_CURVE_LEVELS: np.ndarray = read_only(
 )
 
 #: Integer octave steps of each band relative to 1000 Hz (Annex D generation).
-_RC_OCTAVE_STEPS: np.ndarray = np.array(
+_RC_OCTAVE_STEPS: NDArray[np.float64] = np.array(
     [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3], dtype=np.float64
 )
 _RC_LOW_FREQUENCY_FLOOR = 55.0  # dB, the 31.5 Hz floor (Annex D).
@@ -166,7 +167,7 @@ NCMethod = Literal["SIL", "tangency"]
 NCOutOfRange = Literal["above", "below"]
 
 
-def _require_table1_bands(owner: str, frequencies: np.ndarray) -> None:
+def _require_table1_bands(owner: str, frequencies: NDArray[np.float64]) -> None:
     """Require the band axis to be the ten tabulated octave bands.
 
     ANSI/ASA S12.2-2019 defines both rating families over one fixed axis: the
@@ -225,8 +226,8 @@ class NCResult(OwnsArrays):
 
     rating: float
     governing_frequency: float
-    frequencies: np.ndarray
-    levels: np.ndarray
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
     sil: float = float("nan")
     tangency_rating: float = float("nan")
     method: NCMethod = "tangency"
@@ -376,9 +377,9 @@ class RCResult(OwnsArrays):
     rating: int
     lmf: float
     classification: RCClassification
-    reference_curve: np.ndarray
-    frequencies: np.ndarray
-    levels: np.ndarray
+    reference_curve: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a rating whose axis, spectrum, curve or tag disagree.
@@ -549,7 +550,7 @@ class RCResult(OwnsArrays):
         )
 
 
-def nc_curve(index: float) -> np.ndarray:
+def nc_curve(index: float) -> NDArray[np.float64]:
     """Octave-band levels of a Noise Criteria curve (ANSI/ASA S12.2-2019 Table 1).
 
     :param index: The NC designation. Integer designations from 15 to 70 in
@@ -571,7 +572,7 @@ def nc_curve(index: float) -> np.ndarray:
     )
 
 
-def rc_curve(index: float) -> np.ndarray:
+def rc_curve(index: float) -> NDArray[np.float64]:
     """Octave-band levels of a Room Criteria Mark II curve (Annex D, Table D.1).
 
     The curve has a constant slope of -5 dB/octave keyed to its value at
@@ -592,7 +593,7 @@ def rc_curve(index: float) -> np.ndarray:
 
 def _align_levels(
     levels: NumericArrayLike, frequencies: NumericArrayLike | None, owner: str
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Validate levels and align them to :data:`NC_OCTAVE_BANDS_HZ`.
 
     :param levels: Octave-band sound pressure levels, in dB.

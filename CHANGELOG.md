@@ -2399,6 +2399,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   naming the command, so a new one cannot pass in a checkout and fail only
   in an archive.
 
+- **The test suite fails on a warning a test did not ask for.** Every
+  advisory of the library is a `UserWarning`, and the suite turns any
+  `UserWarning` or `RuntimeWarning` that no test asserts into an error. 63
+  tests in 14 files met an advisory they did not assert: a sound power
+  determination with no background levels, an expansion chamber analysed
+  past its cut-on, a fan efficiency below the table it is read from. Each
+  now asserts the advisory with its topic class, where the advisory or a
+  printed example that lacks the input is what it tests, or gives the call
+  the input the standard asks for. A packager who runs the suite against a
+  newer NumPy or SciPy sees a warning that release adds as a failure that
+  names it, not as one more line in the summary.
+
 - **The release SBOM is written by cyclonedx-bom 8.0.1, and every CI job
   upgrades pip before it installs.** The jobs that build, verify and rebuild
   a release, build the stub and load the wheel in Pyodide installed with the

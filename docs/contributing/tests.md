@@ -700,3 +700,31 @@ def test_every_install_command_quotes_its_extras() -> None:  # git ls-files insi
 **Enforced by:** `tests/git_checkout.py`, `tests/test_git_checkout.py`
 
 **Exceptions.** A helper that asks git about the repository and takes its refusal as an answer, so that a test reaching it runs the same in a tree with no `.git`, stands in `TOLERATES_NO_CHECKOUT` of `tests/git_checkout.py`, keyed `"path::function"` by the code that starts git, with its reason: today only `generate_llms._ignored_paths`, which lists what git ignores under `docs/` with `check=False`. The check reads the program and arguments the `subprocess.Popen` audit event carries, so it does not see a git that a child process starts, such as a script run with `sys.executable` that runs git in turn, a git run through a shell, or a test that takes what a helper's own cache kept from an earlier test of its worker. On Windows the event carries one command line, which the check leaves unread; every test it would judge there runs on Linux and macOS too. A run of the suite from a `git ls-files` export, with no `.git`, finds what the check cannot see.
+
+<a id="t28"></a>
+### T28. Assert the advisory a test meets, or give the call the input its clause asks for
+
+**Why.** Every advisory of the library is a `UserWarning`, and NumPy reports an overflow, a division by zero or a NaN as a `RuntimeWarning`; `pyproject.toml` turns both into errors, so a test that meets one it did not ask for fails. Before, 63 tests in 14 files met an advisory they did not assert: a sound power determination with no background levels, an expansion chamber analysed past its cut-on, a fan efficiency below the table it is read from. The suite printed each in its summary, where a new advisory beside them read as one more of the same, and a test that reproduced a printed example could not tell the reader the example lacked an input the standard asks for. Where the advisory is what the test is about, or comes with a printed example that lacks the input, `pytest.warns` names its topic class and its message ([T10](#t10)); where it is not, the call gets the input the clause asks for: the background levels, ten positions, a grid below the cut-on, a neck narrower than its slit. A warning a dependency raises is filtered in the test by its message, with the reason beside it, never by its class.
+
+**Do**
+
+```python
+import pytest
+
+from phonometry import emission
+
+with pytest.warns(emission.SoundPowerWarning, match="Only 1 measurement position"):
+    emission.sound_power_intensity_points([[1e-6]], [0.1], frequencies=[1000.0])
+```
+
+**Don't**
+
+```py
+@pytest.mark.filterwarnings("ignore::UserWarning")  # hides this advisory and every later one
+def test_one_position_reports_no_indicators() -> None:
+    emission.sound_power_intensity_points([[1e-6]], [0.1], frequencies=[1000.0])
+```
+
+**Enforced by:** `pyproject.toml`, `tests/test_repository_config.py::test_a_stray_warning_fails_the_suite`
+
+**Exceptions.** A test helper that takes a logarithm of an exact zero on purpose says so with `np.errstate(divide="ignore")` around that one line. The `DeprecationWarning` Python gives at a fork while another thread lives is filtered in the configuration by its message ([T25](#t25)), because every process the suite forks meets it.

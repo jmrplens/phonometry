@@ -81,7 +81,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 #: Octave-band centre frequencies of Table 1, in hertz.
-_OCTAVE_BANDS: np.ndarray = read_only(
+_OCTAVE_BANDS: NDArray[np.float64] = read_only(
     np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0], dtype=np.float64)
 )
 
@@ -97,7 +97,7 @@ _OBJECT_EXPONENT = 2.0 / 3.0
 #: Power attenuation coefficient ``m`` in air, in Neper per metre, by
 #: temperature/humidity condition over :data:`_OCTAVE_BANDS` (Table 1). The
 #: table lists ``10**-3 Neper/m``; the values here are already in Neper/m.
-_AIR_ATTENUATION: Mapping[AirCondition, np.ndarray] = MappingProxyType(
+_AIR_ATTENUATION: Mapping[AirCondition, NDArray[np.float64]] = MappingProxyType(
     {
         "10C_30-50": read_only(np.array([0.1, 0.2, 0.5, 1.1, 2.7, 9.4, 29.0]) * 1e-3),
         "10C_50-70": read_only(np.array([0.1, 0.2, 0.5, 0.8, 1.8, 5.9, 21.1]) * 1e-3),
@@ -139,7 +139,7 @@ def object_fraction(object_volumes: NumericArrayLike, volume: float) -> float:
     return psi
 
 
-def hard_object_absorption(object_volume: NumericArrayLike) -> np.ndarray:
+def hard_object_absorption(object_volume: NumericArrayLike) -> NDArray[np.float64]:
     r"""Equivalent absorption area of a hard object (Formula 4).
 
     An empirical estimate for hard, irregularly shaped objects (machinery,
@@ -344,9 +344,9 @@ class ReverberationResult(OwnsArrays):
     :ivar object_fraction: Object fraction ``psi`` (0-1).
     """
 
-    frequencies: np.ndarray
-    absorption_area: np.ndarray
-    reverberation_time: np.ndarray
+    frequencies: NDArray[np.float64]
+    absorption_area: NDArray[np.float64]
+    reverberation_time: NDArray[np.float64]
     volume: float
     object_fraction: float
 
@@ -519,7 +519,7 @@ def enclosed_space_reverberation(
         )
         raise ValueError(msg)
     if air_condition is None:
-        air_area: np.ndarray | float = 0.0
+        air_area: NDArray[np.float64] | float = 0.0
     elif air_condition in _AIR_ATTENUATION:
         air_area = air_absorption_area(
             _AIR_ATTENUATION[air_condition], volume, object_fraction

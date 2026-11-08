@@ -90,6 +90,9 @@ NOT_OF_A_NUMBER: dict[str, str] = {
     ),
     "vibration.kb_signal": "a weighted time record, as long as the record it filters",
     "vibration.kbf_signal": "a weighted time record, as long as the record it filters",
+    "vibration.assessment_velocity": (
+        "a weighted time record, as long as the record it filters"
+    ),
     "environment.acceleration_test_positions": (
         "the positions along a length: their count is what the value sets"
     ),
@@ -141,35 +144,12 @@ ONE_ELEMENT: frozenset[str] = frozenset(
         "environment.acceleration_test_positions",
         "environment.adrienne_reflection_window",
         "metrology.exact_frequencies",
-        "vibration.assessment_velocity",
-        "vibration.assessment_weighting_response",
-        "vibration.band_limiting_factors",
-        "vibration.beam_modal_density",
-        "vibration.blast_peak_velocity_mm_s",
-        "vibration.cylindrical_shell_modal_density",
-        "vibration.elastic_insertion_loss",
-        "vibration.far_field_velocity_mm_s",
-        "vibration.foundation_to_floor_level_difference",
-        "vibration.ground_attenuation_coefficient_per_m",
-        "vibration.ground_transmission",
-        "vibration.impact_peak_velocity_mm_s",
         "vibration.kbf_signal",
         "vibration.kb_signal",
-        "vibration.kb_weighted_levels",
-        "vibration.material_damping_factor",
-        "vibration.passage_energy_spectral_density",
-        "vibration.predict_floor_spectrum",
-        "vibration.rescale_emission_for_speed",
         "vibration.running_acceleration_level",
         "vibration.running_velocity_level",
         "vibration.running_velocity_rms",
-        "vibration.spectral_density_level",
         "vibration.track_excitation_frequency",
-        "vibration.train_kb_fmax",
-        "vibration.train_velocity_ratio",
-        "vibration.velocity_psd_from_voltage",
-        "vibration.velocity_spectrum_um_s",
-        "vibration.weighting_factors",
     }
 )
 

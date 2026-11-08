@@ -94,7 +94,7 @@ def _problem_610_inputs() -> tuple[float, float, float, float]:
     e_2 = _RHO * _T2 * _S2 * 0.0132**2
     n_1 = flat_plate_modal_density(_S1, _T1, _CL)
     n_2 = float(
-        cylindrical_shell_modal_density(_BAND, _S2, _T2, _RADIUS, _CL, fraction=1)[0]
+        cylindrical_shell_modal_density(_BAND, _S2, _T2, _RADIUS, _CL, fraction=1)
     )
     return e_1, e_2, n_1, n_2
 
@@ -358,7 +358,7 @@ class TestModalDensities:
         flat plate's ``sqrt(12)/2 = 5,441 S/(pi cL t)``.
         """
         f_r = ring_frequency(_RADIUS, _CL)
-        n = float(cylindrical_shell_modal_density(2e4 * f_r, _S2, _T2, _RADIUS, _CL)[0])
+        n = float(cylindrical_shell_modal_density(2e4 * f_r, _S2, _T2, _RADIUS, _CL))
         plate = flat_plate_modal_density(_S2, _T2, _CL)
         assert n == pytest.approx(plate, rel=0.10)
         assert n == pytest.approx(
@@ -374,14 +374,14 @@ class TestModalDensities:
         low = cylindrical_shell_modal_density(
             0.2 * f_r, _S2, _T2, _RADIUS, _CL, fraction=fraction
         )
-        assert float(low[0]) == pytest.approx(
+        assert low == pytest.approx(
             5.0 * _S2 / (math.pi * _CL * _T2) * math.sqrt(0.2), rel=1e-12
         )
         x = 2.0
         high = float(
             cylindrical_shell_modal_density(
                 x * f_r, _S2, _T2, _RADIUS, _CL, fraction=fraction
-            )[0]
+            )
         )
         shape = 0.596 / (factor - 1.0 / factor)
         expected = (

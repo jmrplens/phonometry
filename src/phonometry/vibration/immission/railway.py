@@ -54,6 +54,7 @@ import scipy.signal as sig
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean, energy_sum
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     real_number,
@@ -79,7 +80,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
     from ...signals.spectra import SpectralDensityResult
 
 __all__ = [
@@ -553,9 +554,30 @@ def narrowband_psd(
         raise ValueError(msg) from exc
 
 
+@overload
+def passage_energy_spectral_density[S: RealScalar](
+    psd: S,
+    duration_s: float,
+) -> float: ...
+
+
+@overload
+def passage_energy_spectral_density[V: RealValues](
+    psd: V,
+    duration_s: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def passage_energy_spectral_density[A: NumericArrayLike](
+    psd: A,
+    duration_s: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def passage_energy_spectral_density(
     psd: NumericArrayLike, duration_s: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The energy spectral density of :math:`T_2`, Formula (13), in (mm/s)²/Hz².
 
     Formula (13) writes :math:`e_2 = |V_2|^2/4` with the one-sided Fourier
@@ -568,7 +590,8 @@ def passage_energy_spectral_density(
     :param psd: :math:`G_2`, the power spectral density of the stretch, in
         (mm/s)²/Hz, as :func:`narrowband_psd` gives it.
     :param duration_s: :math:`T_2`, in seconds.
-    :return: :math:`e_2` at the same lines, in (mm/s)²/Hz².
+    :return: :math:`e_2` at the same lines, in (mm/s)²/Hz². A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a negative or non-finite density or a non-positive
         duration.
     :raises TypeError: if ``duration_s`` is not a single number, or ``psd`` holds a text
@@ -576,10 +599,24 @@ def passage_energy_spectral_density(
     """
     g = _non_negative(psd, "psd")
     duration = require_positive(duration_s, "duration_s")
-    return np.asarray(0.5 * g * duration, dtype=np.float64)
+    return as_float_or_array(0.5 * g * duration, like=(psd,))
 
 
-def spectral_density_level(psd: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def spectral_density_level[S: RealScalar](psd: S) -> float: ...
+
+
+@overload
+def spectral_density_level[V: RealValues](psd: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def spectral_density_level[A: NumericArrayLike](
+    psd: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def spectral_density_level(psd: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""The level of a power spectral density, as Figure 7 draws it, in dB.
 
     :math:`10 \lg(G / G_0)` with :math:`G_0 = (5 \cdot 10^{-8}\,\mathrm{m/s})^2
@@ -587,21 +624,49 @@ def spectral_density_level(psd: NumericArrayLike) -> NDArray[np.float64]:
     hertz.
 
     :param psd: The density, in (mm/s)²/Hz.
-    :return: The level at each line, in decibels; ``-inf`` where the density is
-        exactly zero.
+    :return: The level at each line, in decibels; ``-inf`` where the density is exactly
+        zero. A ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: For a negative or non-finite density.
     :raises TypeError: if ``psd`` holds a text or a value that is not a real number.
     """
     g = _non_negative(psd, "psd")
     with np.errstate(divide="ignore"):
-        return np.asarray(
-            10.0 * np.log10(g / VELOCITY_LEVEL_REFERENCE_MM_S**2), dtype=np.float64
+        return as_float_or_array(
+            10.0 * np.log10(g / VELOCITY_LEVEL_REFERENCE_MM_S**2), like=(psd,)
         )
+
+
+@overload
+def velocity_psd_from_voltage[S: RealScalar](
+    psd_v2_per_hz: S,
+    *,
+    sensitivity_v_per_mm_s: float,
+    gain: float,
+) -> float: ...
+
+
+@overload
+def velocity_psd_from_voltage[V: RealValues](
+    psd_v2_per_hz: V,
+    *,
+    sensitivity_v_per_mm_s: float,
+    gain: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_psd_from_voltage[A: NumericArrayLike](
+    psd_v2_per_hz: A,
+    *,
+    sensitivity_v_per_mm_s: float,
+    gain: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def velocity_psd_from_voltage(
     psd_v2_per_hz: NumericArrayLike, *, sensitivity_v_per_mm_s: float, gain: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""A density measured in volts, in the unit of the velocity (Annex A).
 
     The transducer's transfer coefficient :math:`\kappa_A` and the amplifier's
@@ -613,7 +678,8 @@ def velocity_psd_from_voltage(
         per second (Annex A uses 0,030).
     :param gain: :math:`\kappa_V`, the amplifier gain, in volts per volt
         (Annex A uses 10).
-    :return: The density of the velocity, in (mm/s)²/Hz.
+    :return: The density of the velocity, in (mm/s)²/Hz. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a negative or non-finite density or a non-positive
         coefficient.
     :raises TypeError: if ``gain`` or ``sensitivity_v_per_mm_s`` is not a single number,
@@ -622,7 +688,7 @@ def velocity_psd_from_voltage(
     g = _non_negative(psd_v2_per_hz, "psd_v2_per_hz")
     kappa_a = require_positive(sensitivity_v_per_mm_s, "sensitivity_v_per_mm_s")
     kappa_v = require_positive(gain, "gain")
-    return np.asarray(g / (kappa_a**2 * kappa_v**2), dtype=np.float64)
+    return as_float_or_array(g / (kappa_a**2 * kappa_v**2), like=(psd_v2_per_hz,))
 
 
 def _check_resolution(frequencies: NDArray[np.float64]) -> float:
@@ -730,9 +796,37 @@ def third_octaves_from_narrowband(
     )
 
 
+@overload
+def elastic_insertion_loss[S1: RealScalar, S2: RealScalar](
+    levels_before: S1,
+    levels_after: S2,
+) -> float: ...
+
+
+@overload
+def elastic_insertion_loss[V: RealValues, A2: NumericArrayLike](
+    levels_before: V,
+    levels_after: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def elastic_insertion_loss[S1: RealScalar, V: RealValues](
+    levels_before: S1,
+    levels_after: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def elastic_insertion_loss[A1: NumericArrayLike, A2: NumericArrayLike](
+    levels_before: A1,
+    levels_after: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def elastic_insertion_loss(
     levels_before: NumericArrayLike, levels_after: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The insertion loss :math:`D_\mathrm{e}(f_{\mathrm{T}n})` of Annex B, Formula (B.1), in dB.
 
     The drop in the third-octave structure-borne level at one point of a
@@ -743,8 +837,9 @@ def elastic_insertion_loss(
 
     :param levels_before: The third-octave levels before, in decibels.
     :param levels_after: The levels after, at the same point, in decibels.
-    :return: :math:`L_1 - L_2` per band, positive where the element reduces
-        the level.
+    :return: :math:`L_1 - L_2` per band, positive where the element reduces the level. A
+        ``float`` when ``levels_before`` and ``levels_after`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the two do not match band for band.
     :raises TypeError: if ``levels_after`` or ``levels_before`` holds a text or a value
         that is not a real number.
@@ -754,7 +849,7 @@ def elastic_insertion_loss(
     if before.shape != after.shape:
         msg = "'levels_before' and 'levels_after' must match band for band."
         raise ValueError(msg)
-    return np.asarray(before - after, dtype=np.float64)
+    return as_float_or_array(before - after, like=(levels_before, levels_after))
 
 
 def band_sum_level(levels: NumericArrayLike) -> float:

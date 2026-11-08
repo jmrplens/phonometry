@@ -31,27 +31,25 @@ def _true_centre(n: int) -> float:
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.8", "Wk design-goal factor at 6,31 Hz")
 def _chk_iso8041_wk_annex_b() -> Outcome:
-    factor = float(ph.vibration.weighting_factors("Wk", _true_centre(8))[0])
+    factor = float(ph.vibration.weighting_factors("Wk", _true_centre(8)))
     return numeric(ref.ISO8041_1_WK_FACTOR_6P31HZ, factor, 1e-3, rel=True, places=4)
 
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.9", "Wm design-goal factor at 1,585 Hz")
 def _chk_iso8041_wm_annex_b() -> Outcome:
-    factor = float(ph.vibration.weighting_factors("Wm", _true_centre(2))[0])
+    factor = float(ph.vibration.weighting_factors("Wm", _true_centre(2)))
     return numeric(ref.ISO8041_1_WM_FACTOR_1P585HZ, factor, 1e-3, rel=True, places=4)
 
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table 1", "Wh factor at the 500 rad/s reference")
 def _chk_iso8041_wh_reference() -> Outcome:
-    factor = float(
-        ph.vibration.weighting_factors("Wh", ref.ISO8041_1_WH_REF_FREQ_HZ)[0]
-    )
+    factor = float(ph.vibration.weighting_factors("Wh", ref.ISO8041_1_WH_REF_FREQ_HZ))
     return numeric(ref.ISO8041_1_WH_REF_FACTOR, factor, 1.5e-3, rel=True, places=4)
 
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.1", "Wb design-goal factor at 6,31 Hz")
 def _chk_iso8041_wb_annex_b() -> Outcome:
-    factor = float(ph.vibration.weighting_factors("Wb", _true_centre(8))[0])
+    factor = float(ph.vibration.weighting_factors("Wb", _true_centre(8)))
     return numeric(ref.ISO8041_1_WB_FACTOR_6P31HZ, factor, 1e-3, rel=True, places=4)
 
 
@@ -61,7 +59,7 @@ def _chk_iso8041_wb_annex_b() -> Outcome:
 def _chk_iso8041_wb_annex_b_edges() -> Outcome:
     worst = max(
         abs(
-            float(ph.vibration.weighting_factors("Wb", _true_centre(n))[0]) / expected
+            float(ph.vibration.weighting_factors("Wb", _true_centre(n))) / expected
             - 1.0
         )
         for n, expected in (
@@ -74,9 +72,7 @@ def _chk_iso8041_wb_annex_b_edges() -> Outcome:
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table 1", "Wc factor at the 100 rad/s reference")
 def _chk_iso8041_wc_reference() -> Outcome:
-    factor = float(
-        ph.vibration.weighting_factors("Wc", ref.ISO8041_1_WBV_REF_FREQ_HZ)[0]
-    )
+    factor = float(ph.vibration.weighting_factors("Wc", ref.ISO8041_1_WBV_REF_FREQ_HZ))
     return numeric(ref.ISO8041_1_WC_REF_FACTOR, factor, 1e-3, rel=True, places=4)
 
 
@@ -87,7 +83,7 @@ def _chk_iso8041_wc_reference() -> Outcome:
 )
 def _chk_iso8041_wd_reference_and_annex_b() -> Outcome:
     worst = max(
-        abs(float(ph.vibration.weighting_factors("Wd", freq)[0]) / expected - 1.0)
+        abs(float(ph.vibration.weighting_factors("Wd", freq)) / expected - 1.0)
         for freq, expected in (
             (ref.ISO8041_1_WBV_REF_FREQ_HZ, ref.ISO8041_1_WD_REF_FACTOR),
             (_true_centre(0), ref.ISO8041_1_WD_FACTOR_1HZ),
@@ -98,7 +94,7 @@ def _chk_iso8041_wd_reference_and_annex_b() -> Outcome:
 
 @register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.4", "We design-goal factor at 8 Hz")
 def _chk_iso8041_we_annex_b() -> Outcome:
-    factor = float(ph.vibration.weighting_factors("We", _true_centre(9))[0])
+    factor = float(ph.vibration.weighting_factors("We", _true_centre(9)))
     return numeric(ref.ISO8041_1_WE_FACTOR_8HZ, factor, 1e-3, rel=True, places=4)
 
 
@@ -108,7 +104,7 @@ def _chk_iso8041_we_annex_b() -> Outcome:
 def _chk_iso8041_wf_annex_b() -> Outcome:
     worst = max(
         abs(
-            float(ph.vibration.weighting_factors("Wf", _true_centre(n))[0]) / expected
+            float(ph.vibration.weighting_factors("Wf", _true_centre(n))) / expected
             - 1.0
         )
         for n, expected in (
@@ -125,7 +121,7 @@ def _chk_iso8041_wf_annex_b() -> Outcome:
 def _chk_iso8041_wj_annex_b() -> Outcome:
     worst = max(
         abs(
-            float(ph.vibration.weighting_factors("Wj", _true_centre(n))[0]) / expected
+            float(ph.vibration.weighting_factors("Wj", _true_centre(n))) / expected
             - 1.0
         )
         for n, expected in (
@@ -158,7 +154,7 @@ def _chk_iso8041_table5_envelope() -> Outcome:
             else:
                 region = 4
             upper, lower = ref.ISO8041_1_TABLE5_TOLERANCES[region]
-            ratio = float(ph.vibration.weighting_factors(name, freq)[0]) / printed - 1.0
+            ratio = float(ph.vibration.weighting_factors(name, freq)) / printed - 1.0
             if not -lower <= ratio <= upper:
                 violations += 1
     return numeric(
@@ -250,7 +246,7 @@ def _chk_iso8041_band_limiting_envelope() -> Outcome:
             else:
                 region = 4
             upper, lower = ref.ISO8041_1_TABLE5_TOLERANCES[region]
-            factor = float(ph.vibration.band_limiting_factors(name, freq)[0])
+            factor = float(ph.vibration.band_limiting_factors(name, freq))
             if not -lower <= factor / printed - 1.0 <= upper:
                 violations += 1
     return numeric(
@@ -272,7 +268,7 @@ def _register_band_limiting_samples() -> None:
             printed: float = printed,
         ) -> Outcome:
             factor = float(
-                ph.vibration.band_limiting_factors(weighting, _true_centre(band))[0]
+                ph.vibration.band_limiting_factors(weighting, _true_centre(band))
             )
             return numeric(printed, factor, 1e-3, rel=True, places=4)
 
@@ -292,7 +288,7 @@ _register_band_limiting_samples()
     "Wf design-goal factor at 0,3981 Hz, the cell Table 2 row 2 turns on",
 )
 def _chk_iso8041_wf_annex_b_reference_band() -> Outcome:
-    factor = float(ph.vibration.weighting_factors("Wf", _true_centre(-4))[0])
+    factor = float(ph.vibration.weighting_factors("Wf", _true_centre(-4)))
     return numeric(0.3884, factor, 1e-3, rel=True, places=4)
 
 

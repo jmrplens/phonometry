@@ -60,10 +60,11 @@ from __future__ import annotations
 
 import math
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
     require_count,
@@ -78,7 +79,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from numpy.typing import NDArray
 
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "BLASTING_RELEVANT_DISTANCE_M",
@@ -345,6 +346,39 @@ def attenuation_coefficient_per_m(
     return 2.0 * math.pi * damping / wavelength
 
 
+@overload
+def far_field_velocity_mm_s[S: RealScalar](
+    reference_velocity_mm_s: float,
+    distance_m: S,
+    *,
+    reference_distance_m: float,
+    exponent: float,
+    attenuation_per_m: float = ...,
+) -> float: ...
+
+
+@overload
+def far_field_velocity_mm_s[V: RealValues](
+    reference_velocity_mm_s: float,
+    distance_m: V,
+    *,
+    reference_distance_m: float,
+    exponent: float,
+    attenuation_per_m: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def far_field_velocity_mm_s[A: NumericArrayLike](
+    reference_velocity_mm_s: float,
+    distance_m: A,
+    *,
+    reference_distance_m: float,
+    exponent: float,
+    attenuation_per_m: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def far_field_velocity_mm_s(
     reference_velocity_mm_s: float,
     distance_m: NumericArrayLike,
@@ -352,7 +386,7 @@ def far_field_velocity_mm_s(
     reference_distance_m: float,
     exponent: float,
     attenuation_per_m: float = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The velocity amplitude at a distance in the far field, Formula (2).
 
     :math:`\bar v = \bar v_1 (R / R_1)^{-n} \exp[-\alpha (R - R_1)]`: the
@@ -369,7 +403,9 @@ def far_field_velocity_mm_s(
     :param attenuation_per_m: :math:`\alpha`, from
         :func:`attenuation_coefficient_per_m`; 0 (default) for no material
         damping.
-    :return: :math:`\bar v`, one per distance, in millimetres per second.
+    :return: :math:`\bar v`, one per distance, in millimetres per second. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: For a negative amplitude, exponent or attenuation, a
         non-positive reference distance, or a distance in the near field.
     :raises TypeError: if ``attenuation_per_m``, ``exponent``, ``reference_distance_m``
@@ -389,7 +425,37 @@ def far_field_velocity_mm_s(
     alpha = require_non_negative(attenuation_per_m, "attenuation_per_m")
     spread = (distances / reference) ** (-power)
     damped = np.exp(-alpha * (distances - reference))
-    return np.asarray(amplitude * spread * damped, dtype=np.float64)
+    return as_float_or_array(amplitude * spread * damped, like=(distance_m,))
+
+
+@overload
+def material_damping_factor[S: RealScalar](
+    distance_m: S,
+    *,
+    damping_ratio: float,
+    frequency_hz: float,
+    wave_speed_m_s: float,
+) -> float: ...
+
+
+@overload
+def material_damping_factor[V: RealValues](
+    distance_m: V,
+    *,
+    damping_ratio: float,
+    frequency_hz: float,
+    wave_speed_m_s: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def material_damping_factor[A: NumericArrayLike](
+    distance_m: A,
+    *,
+    damping_ratio: float,
+    frequency_hz: float,
+    wave_speed_m_s: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def material_damping_factor(
@@ -398,7 +464,7 @@ def material_damping_factor(
     damping_ratio: float,
     frequency_hz: float,
     wave_speed_m_s: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The share the ground absorbs over a distance, Figure 2.
 
     :math:`\exp[-2\pi D f (R - R_1) / c]`, the damping factor of Formula (2)
@@ -410,7 +476,8 @@ def material_damping_factor(
     :param damping_ratio: :math:`D`, not negative.
     :param frequency_hz: :math:`f`, in hertz.
     :param wave_speed_m_s: :math:`c`, in metres per second.
-    :return: The factor, one per distance, between 0 and 1.
+    :return: The factor, one per distance, between 0 and 1. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a negative distance or damping ratio, or a
         non-positive frequency or wave speed.
     :raises TypeError: if ``frequency_hz`` or ``wave_speed_m_s`` is not a single number,
@@ -424,7 +491,7 @@ def material_damping_factor(
         frequency_hz, "frequency_hz"
     )
     alpha = attenuation_coefficient_per_m(damping_ratio, wavelength_m=wavelength)
-    return np.asarray(np.exp(-alpha * distances), dtype=np.float64)
+    return as_float_or_array(np.exp(-alpha * distances), like=(distance_m,))
 
 
 def soil_building_natural_frequency(stiffness: float, *, mass: float) -> float:
@@ -509,6 +576,39 @@ def floor_transfer_max(floor_damping_ratio: float) -> float:
     return 1.0 / (2.0 * require_positive(floor_damping_ratio, "floor_damping_ratio"))
 
 
+@overload
+def blast_peak_velocity_mm_s[S: RealScalar](
+    charge_kg: float,
+    distance_m: S,
+    *,
+    coefficient_mm_s: float,
+    charge_exponent: float,
+    distance_exponent: float,
+) -> float: ...
+
+
+@overload
+def blast_peak_velocity_mm_s[V: RealValues](
+    charge_kg: float,
+    distance_m: V,
+    *,
+    coefficient_mm_s: float,
+    charge_exponent: float,
+    distance_exponent: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def blast_peak_velocity_mm_s[A: NumericArrayLike](
+    charge_kg: float,
+    distance_m: A,
+    *,
+    coefficient_mm_s: float,
+    charge_exponent: float,
+    distance_exponent: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def blast_peak_velocity_mm_s(
     charge_kg: float,
     distance_m: NumericArrayLike,
@@ -516,7 +616,7 @@ def blast_peak_velocity_mm_s(
     coefficient_mm_s: float,
     charge_exponent: float,
     distance_exponent: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The peak velocity of a blast in the far field, Formula (5).
 
     :math:`v_{\max} = k (L/L_0)^b (R/R_0)^{-m}` with the charge per delay
@@ -531,7 +631,9 @@ def blast_peak_velocity_mm_s(
     :param coefficient_mm_s: :math:`k`, in millimetres per second.
     :param charge_exponent: :math:`b`.
     :param distance_exponent: :math:`m`.
-    :return: :math:`v_{\max}`, one per distance, in millimetres per second.
+    :return: :math:`v_{\max}`, one per distance, in millimetres per second. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: For a non-positive charge, distance or coefficient,
         or a negative exponent.
     :raises TypeError: if ``charge_exponent``, ``charge_kg``, ``coefficient_mm_s`` or
@@ -543,11 +645,11 @@ def blast_peak_velocity_mm_s(
     factor = require_positive(coefficient_mm_s, "coefficient_mm_s")
     charge_power = require_non_negative(charge_exponent, "charge_exponent")
     distance_power = require_non_negative(distance_exponent, "distance_exponent")
-    return np.asarray(
+    return as_float_or_array(
         factor
         * (charge / _REFERENCE_CHARGE_KG) ** charge_power
         * (distances / _REFERENCE_DISTANCE_M) ** (-distance_power),
-        dtype=np.float64,
+        like=(distance_m,),
     )
 
 
@@ -576,13 +678,43 @@ def fall_energy_kj(weight_kn: float, *, drop_height_m: float) -> float:
     return _KJ_PER_KN_M * weight * height
 
 
+@overload
+def impact_peak_velocity_mm_s[S: RealScalar](
+    fall_energy_kj: float,
+    distance_m: S,
+    *,
+    coefficient_mm_s: float,
+    distance_exponent: float,
+) -> float: ...
+
+
+@overload
+def impact_peak_velocity_mm_s[V: RealValues](
+    fall_energy_kj: float,
+    distance_m: V,
+    *,
+    coefficient_mm_s: float,
+    distance_exponent: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def impact_peak_velocity_mm_s[A: NumericArrayLike](
+    fall_energy_kj: float,
+    distance_m: A,
+    *,
+    coefficient_mm_s: float,
+    distance_exponent: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def impact_peak_velocity_mm_s(
     fall_energy_kj: float,
     distance_m: NumericArrayLike,
     *,
     coefficient_mm_s: float,
     distance_exponent: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The peak velocity of a falling mass, Formula (6).
 
     :math:`v_{\max} = k (E/E_0)^{0{,}5} (R/R_0)^{-m}` with the fall energy
@@ -595,7 +727,9 @@ def impact_peak_velocity_mm_s(
     :param distance_m: :math:`R`, in metres, one or many.
     :param coefficient_mm_s: :math:`k`, in millimetres per second.
     :param distance_exponent: :math:`m`.
-    :return: :math:`v_{\max}`, one per distance, in millimetres per second.
+    :return: :math:`v_{\max}`, one per distance, in millimetres per second. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: For a non-positive energy, distance or coefficient,
         or a negative exponent.
     :raises TypeError: if ``coefficient_mm_s``, ``distance_exponent`` or
@@ -606,11 +740,11 @@ def impact_peak_velocity_mm_s(
     distances = _distances(distance_m)
     factor = require_positive(coefficient_mm_s, "coefficient_mm_s")
     distance_power = require_non_negative(distance_exponent, "distance_exponent")
-    return np.asarray(
+    return as_float_or_array(
         factor
         * math.sqrt(energy / _REFERENCE_ENERGY_KJ)
         * (distances / _REFERENCE_DISTANCE_M) ** (-distance_power),
-        dtype=np.float64,
+        like=(distance_m,),
     )
 
 

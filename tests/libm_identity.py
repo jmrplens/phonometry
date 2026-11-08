@@ -182,7 +182,8 @@ class MaskReading:
 
 
 #: The reading of a loader that cannot be read: a mask counts in any spelling,
-#: so that a process that may run another variant is not held to the pins.
+#: in either tunable, so that a process that may run another variant is not
+#: held to the pins.
 ANY_READING = MaskReading(
     tunables=frozenset(_HWCAPS_TUNABLES),
     fma_variant_names=frozenset(
@@ -241,24 +242,28 @@ def masks_the_fma_variant(tunables: str, reading: MaskReading) -> bool:
 
     :param tunables: The value of ``GLIBC_TUNABLES``.
     :param reading: How the loader reads it.
-    :return: ``True`` when the last setting of a tunable the loader reads
+    :return: ``True`` when, of a tunable the loader reads, the last setting
         masks, as written, a name that takes glibc off its FMA variant;
-        ``False`` otherwise, and for a value the loader drops whole.
+        ``False`` otherwise, and for a value the loader drops whole. Each
+        tunable keeps its own last setting: a loader reads one of them, so a
+        reading that names both counts a mask in either, whatever setting of
+        the other follows it.
     """
     if not tunables:
         return False
     entries = tunables.split(":")
     if reading.drops_ill_formed and _ill_formed(entries):
         return False
-    setting = None
+    settings: dict[str, str] = {}
     for entry in entries:
         name, equals, value = entry.partition("=")
         if equals and name in reading.tunables:
-            setting = value
-    if setting is None:
-        return False
-    masked = {part[1:] for part in setting.split(",") if part.startswith("-")}
-    return not masked.isdisjoint(reading.fma_variant_names)
+            settings[name] = value
+    masked = (
+        {part[1:] for part in setting.split(",") if part.startswith("-")}
+        for setting in settings.values()
+    )
+    return any(not names.isdisjoint(reading.fma_variant_names) for names in masked)
 
 
 def glibc_on_x86_64_with_fma() -> bool:

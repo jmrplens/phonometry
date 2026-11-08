@@ -337,67 +337,98 @@ def test_a_mask_leaves_a_build_for_v3_on_the_pinned_routines(
     assert libm_identity.runs_the_pinned_routines() is pinned
 
 
-@pytest.mark.parametrize(
-    ("glibc", "tunables", "masks"),
-    [
-        ("2.39", "", False),
-        ("2.39", "glibc.malloc.check=3", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA", True),
-        ("2.39", "glibc.cpu.hwcaps=-AVX2", True),
-        ("2.39", "glibc.cpu.hwcaps=-AVX,-FMA", True),
-        ("2.39", "glibc.malloc.check=3:glibc.cpu.hwcaps=-AVX2", True),
-        ("2.39", "glibc.cpu.hwcaps=-AVX", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA4", False),
-        ("2.39", "glibc.cpu.hwcaps=-AVX,-FMA4", False),
-        ("2.39", "glibc.cpu.hwcaps=-fma", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA_Usable", False),
-        ("2.39", "glibc.cpu.hwcaps=-AVX2_Usable", False),
-        ("2.39", "glibc.tune.hwcaps=-FMA", False),
-        ("2.35", "glibc.cpu.hwcaps=-FMA", True),
-        ("2.35", "glibc.cpu.hwcaps=-FMA_Usable", False),
-        ("2.31", "glibc.cpu.hwcaps=-FMA_Usable", True),
-        ("2.31", "glibc.cpu.hwcaps=-AVX2_Usable", True),
-        ("2.31", "glibc.cpu.hwcaps=-FMA,-AVX2", False),
-        ("2.31", "glibc.cpu.hwcaps=-AVX_Usable", False),
-        ("2.31", "glibc.tune.hwcaps=-FMA_Usable", False),
-        ("2.28", "glibc.tune.hwcaps=-FMA_Usable", True),
-        ("2.28", "glibc.tune.hwcaps=-FMA", False),
-        ("2.28", "glibc.cpu.hwcaps=-FMA_Usable", False),
-        ("2.39", "glibc.cpu.hwcaps= -FMA", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA ", False),
-        ("2.39", " glibc.cpu.hwcaps=-FMA", False),
-        ("2.39", "glibc.cpu.hwcaps =-FMA", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA:glibc.cpu.hwcaps=-SSE4_1", False),
-        ("2.39", "glibc.cpu.hwcaps=-SSE4_1:glibc.cpu.hwcaps=-FMA", True),
-        ("2.31", "glibc.cpu.hwcaps=-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA:junk", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA,-X=1", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA:glibc.malloc.check=3=1", False),
-        ("2.39", "glibc.cpu.hwcaps=-FMA::", False),
-        ("2.39", "junk:glibc.cpu.hwcaps=-FMA", True),
-        ("2.35", "glibc.cpu.hwcaps=-FMA:junk", True),
-        ("2.35", "glibc.cpu.hwcaps=-FMA,-X=1", True),
-        ("2.31", "glibc.cpu.hwcaps=-FMA_Usable::", True),
-        ("2.28", libm_identity.WITHOUT_FMA, True),
-        ("2.31", libm_identity.WITHOUT_FMA, True),
-        ("2.35", libm_identity.WITHOUT_FMA, True),
-        ("2.39", libm_identity.WITHOUT_FMA, True),
-        ("any", "glibc.cpu.hwcaps=-FMA_Usable", True),
-        ("any", "glibc.tune.hwcaps=-FMA", True),
-        ("any", "glibc.cpu.hwcaps=-FMA:junk", True),
-        ("any", "glibc.cpu.hwcaps=-AVX,-AVX_Usable", False),
-    ],
+#: What each glibc did to a child's ``exp`` under a mask, as
+#: ``(glibc, tunables, masks)``, and for ``any``, a loader that cannot be read,
+#: whether the mask counts: wherever one of those glibcs reads it so.
+_MASK_ROWS = (
+    ("2.39", "", False),
+    ("2.39", "glibc.malloc.check=3", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA", True),
+    ("2.39", "glibc.cpu.hwcaps=-AVX2", True),
+    ("2.39", "glibc.cpu.hwcaps=-AVX,-FMA", True),
+    ("2.39", "glibc.malloc.check=3:glibc.cpu.hwcaps=-AVX2", True),
+    ("2.39", "glibc.cpu.hwcaps=-AVX", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA4", False),
+    ("2.39", "glibc.cpu.hwcaps=-AVX,-FMA4", False),
+    ("2.39", "glibc.cpu.hwcaps=-fma", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA_Usable", False),
+    ("2.39", "glibc.cpu.hwcaps=-AVX2_Usable", False),
+    ("2.39", "glibc.tune.hwcaps=-FMA", False),
+    ("2.35", "glibc.cpu.hwcaps=-FMA", True),
+    ("2.35", "glibc.cpu.hwcaps=-FMA_Usable", False),
+    ("2.31", "glibc.cpu.hwcaps=-FMA_Usable", True),
+    ("2.31", "glibc.cpu.hwcaps=-AVX2_Usable", True),
+    ("2.31", "glibc.cpu.hwcaps=-FMA,-AVX2", False),
+    ("2.31", "glibc.cpu.hwcaps=-AVX_Usable", False),
+    ("2.31", "glibc.tune.hwcaps=-FMA_Usable", False),
+    ("2.28", "glibc.tune.hwcaps=-FMA_Usable", True),
+    ("2.28", "glibc.tune.hwcaps=-FMA", False),
+    ("2.28", "glibc.cpu.hwcaps=-FMA_Usable", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA:glibc.tune.hwcaps=-AVX", True),
+    ("2.39", "glibc.tune.hwcaps=-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1", False),
+    ("2.28", "glibc.cpu.hwcaps=-FMA:glibc.tune.hwcaps=-AVX", False),
+    ("2.28", "glibc.tune.hwcaps=-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1", True),
+    ("2.39", "glibc.cpu.hwcaps= -FMA", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA ", False),
+    ("2.39", " glibc.cpu.hwcaps=-FMA", False),
+    ("2.39", "glibc.cpu.hwcaps =-FMA", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA:glibc.cpu.hwcaps=-SSE4_1", False),
+    ("2.39", "glibc.cpu.hwcaps=-SSE4_1:glibc.cpu.hwcaps=-FMA", True),
+    ("2.31", "glibc.cpu.hwcaps=-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA:junk", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA,-X=1", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA:glibc.malloc.check=3=1", False),
+    ("2.39", "glibc.cpu.hwcaps=-FMA::", False),
+    ("2.39", "junk:glibc.cpu.hwcaps=-FMA", True),
+    ("2.35", "glibc.cpu.hwcaps=-FMA:junk", True),
+    ("2.35", "glibc.cpu.hwcaps=-FMA,-X=1", True),
+    ("2.31", "glibc.cpu.hwcaps=-FMA_Usable::", True),
+    ("2.28", libm_identity.WITHOUT_FMA, True),
+    ("2.31", libm_identity.WITHOUT_FMA, True),
+    ("2.35", libm_identity.WITHOUT_FMA, True),
+    ("2.39", libm_identity.WITHOUT_FMA, True),
+    ("any", "glibc.cpu.hwcaps=-FMA_Usable", True),
+    ("any", "glibc.tune.hwcaps=-FMA", True),
+    ("any", "glibc.cpu.hwcaps=-FMA:junk", True),
+    ("any", "glibc.cpu.hwcaps=-AVX,-AVX_Usable", False),
+    ("any", "glibc.cpu.hwcaps=-FMA:glibc.tune.hwcaps=-AVX", True),
+    ("any", "glibc.tune.hwcaps=-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1", True),
+    ("any", "glibc.cpu.hwcaps=-FMA:glibc.cpu.hwcaps=-SSE4_1", False),
 )
+
+
+@pytest.mark.parametrize(("glibc", "tunables", "masks"), _MASK_ROWS)
 def test_a_mask_counts_as_the_glibc_reading_it_reads_it(
     *, glibc: str, tunables: str, masks: bool
 ) -> None:
-    """Each row is what that glibc did to a child's ``exp`` under the mask.
+    """Each row of a glibc is what it did to a child's ``exp`` under the mask.
 
     The rows were measured on Debian 10 (2.28), Ubuntu 20.04 (2.31), 22.04
     (2.35) and 24.04 (2.39); the test below holds the loader of this process
-    to the same rule.
+    to the same rule. A loader reads one tunable, so a mask in one stays a
+    mask whatever setting of the other follows it, and a loader that cannot
+    be read counts it in either.
     """
     assert libm_identity.masks_the_fma_variant(tunables, _reading(glibc)) is masks
+
+
+def test_a_loader_that_cannot_be_read_counts_every_mask_a_glibc_reads() -> None:
+    """No mask any glibc above reads leaves a process held to the pins.
+
+    :data:`libm_identity.ANY_READING` stands for a loader whose spelling is
+    not known, so of every value in the rows above that one of those glibcs
+    reads as a mask, it reads the same.
+    """
+    missed = [
+        tunables
+        for _, tunables, _ in _MASK_ROWS
+        if any(
+            libm_identity.masks_the_fma_variant(tunables, _reading(glibc))
+            for glibc in _LOADERS
+        )
+        and not libm_identity.masks_the_fma_variant(tunables, libm_identity.ANY_READING)
+    ]
+    assert missed == []
 
 
 #: A child's :func:`math.exp` on a grid of the double range, whose digest
@@ -444,6 +475,8 @@ def _exp_digest_under(tunables: str) -> str:
         "glibc.cpu.hwcaps=-FMA,-FMA_Usable:glibc.cpu.hwcaps=-SSE4_1",
         "glibc.cpu.hwcaps=-SSE4_1:glibc.cpu.hwcaps=-FMA,-FMA_Usable",
         "glibc.cpu.hwcaps=-FMA,-FMA_Usable:junk",
+        "glibc.cpu.hwcaps=-FMA,-FMA_Usable:glibc.tune.hwcaps=-AVX",
+        "glibc.tune.hwcaps=-FMA_Usable:glibc.cpu.hwcaps=-AVX",
         libm_identity.WITHOUT_FMA,
     ],
 )
@@ -458,6 +491,8 @@ def test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
     entry. So the pinned routines count as running under the mask exactly
     when the child's ``exp`` is an unmasked child's: a mask this glibc does not
     read leaves the bit-for-bit tests running, and one it reads skips them.
+    Read as a loader that cannot be read, a mask that moved the child skips
+    them too.
     """
     if not libm_identity.glibc_on_x86_64_with_fma():
         pytest.skip("needs glibc on an x86-64 processor with FMA and AVX2")
@@ -468,6 +503,10 @@ def test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
     moved = _exp_digest_under(tunables) != _exp_digest_under("")
     monkeypatch.setenv(libm_identity.TUNABLES, tunables)
     assert libm_identity.runs_the_pinned_routines() is not moved
+    monkeypatch.setattr(
+        libm_identity, "mask_reading_here", lambda: libm_identity.ANY_READING
+    )
+    assert not (moved and libm_identity.runs_the_pinned_routines())
 
 
 def _on_x86_64_glibc() -> None:
@@ -575,19 +614,70 @@ def test_the_loader_read_is_the_one_that_defines_tls_get_addr(tmp_path: Path) ->
     A planted one, spelt as glibc 2.28's and mapped below every file here,
     stands in for a loader another namespace or a copy maps: the mask is still
     read as the loader the default namespace resolves ``__tls_get_addr`` in
-    reads it.
+    reads it, or in any spelling where that loader names no mask tunable, as
+    glibc's before 2.26 and one built without tunables do.
     """
     _on_x86_64_glibc()
     real = _file_holding("__tls_get_addr")
     reading = libm_identity.mask_reading(real.read_bytes())
-    assert reading is not None
+    expected = reading if reading is not None else libm_identity.ANY_READING
     planted = tmp_path / "ld-linux-x86-64.so.2"
     planted.write_bytes(_LOADERS["2.28"])
     with _mapped_first(planted):
         loader = libm_identity.loaded_loader()
         assert loader is not None
         assert loader.samefile(real)
-        assert libm_identity.mask_reading_here() == reading
+        assert libm_identity.mask_reading_here() == expected
+
+
+#: A child that imports :mod:`math`, leaves the directory it started in, and
+#: prints the ``libm`` read and the file mapped at ``exp``'s address.
+_LIBM_AFTER_CHDIR = (
+    "import math, os, sys\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "import test_libm_identity as here\n"
+    "os.chdir('/')\n"
+    "print(here.libm_identity.loaded_libm())\n"
+    "print(here._file_holding('exp'))\n"
+)
+
+
+def test_a_libm_found_by_a_relative_path_is_read_by_its_absolute_path(
+    tmp_path: Path,
+) -> None:
+    """The ``libm`` read is a file by its absolute path, wherever the process is.
+
+    With ``LD_LIBRARY_PATH=lib`` the loader finds ``libm.so.6`` under the
+    directory the process starts in, and ``dladdr`` names it as the loader
+    found it, ``lib/libm.so.6``: after a change of directory that name is
+    another file or none. A copy of the ``libm`` mapped at ``exp``'s address,
+    under ``lib/``, stands in for a library a relative path finds.
+    """
+    _on_x86_64_glibc()
+    planted = tmp_path / "lib" / "libm.so.6"
+    planted.parent.mkdir()
+    shutil.copyfile(_file_holding("exp"), planted)
+    search = os.environ.get("LD_LIBRARY_PATH")
+    environment = dict(os.environ, LD_LIBRARY_PATH=f"lib:{search}" if search else "lib")
+    # Fixed argv, no shell; the directory is the one this module is in
+    read, mapped = subprocess.run(
+        [
+            sys.executable,
+            "-I",
+            "-c",
+            _LIBM_AFTER_CHDIR,
+            str(Path(libm_identity.__file__).parent),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+        env=environment,
+        timeout=60,
+    ).stdout.splitlines()
+    assert Path(mapped).samefile(planted)
+    assert Path(read).is_absolute()
+    assert Path(read).samefile(planted)
 
 
 def test_where_dladdr_cannot_be_asked_the_first_mapped_files_are_read(

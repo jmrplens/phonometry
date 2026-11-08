@@ -309,7 +309,7 @@ _ON_CONDUCTOR = 1.0e-9
 
 def _segment_field(
     start: NDArray[np.float64], end: NDArray[np.float64], points: NDArray[np.float64]
-) -> tuple[NDArray[np.float64], NDArray[np.bool_]]:
+) -> tuple[NDArray[np.float64], NDArray[np.bool_] | np.bool_]:
     r"""Field of a unit current along one straight filament, and its singularity.
 
     For a filament from :math:`\mathbf{r}_1` to :math:`\mathbf{r}_2` carrying a
@@ -332,7 +332,8 @@ def _segment_field(
     :param end: End point, shape ``(3,)``.
     :param points: Evaluation points, shape ``(..., 3)``.
     :return: The field, shape ``(..., 3)``, and a boolean mask of the points
-        that lie on the filament.
+        that lie on the filament, shape ``(...)``: a numpy bool for one point
+        of shape ``(3,)``.
     """
     a = start - points
     b = end - points

@@ -160,7 +160,9 @@ _MID_LAYER_ELEVATION_DEG = 30.0
 # ---------------------------------------------------------------------------
 
 
-def _analog_from_biquad(coeffs: tuple[float, float, float], rate: float) -> np.ndarray:
+def _analog_from_biquad(
+    coeffs: tuple[float, float, float], rate: float
+) -> NDArray[np.float64]:
     r"""Map a digital biquad polynomial to its bilinear analog prototype.
 
     Substituting :math:`z^{-1} = (K - s)/(K + s)` with :math:`K = 2 f_\mathrm{s}`
@@ -179,7 +181,7 @@ def _analog_from_biquad(coeffs: tuple[float, float, float], rate: float) -> np.n
 
 def _redesign_biquad(
     b48: tuple[float, float, float], a48: tuple[float, float, float], fs: float
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Re-derive a Table 1/2 biquad for a sample rate other than 48 kHz.
 
     The Recommendation tabulates the coefficients at 48 kHz only and requires
@@ -201,7 +203,10 @@ def _redesign_biquad(
 
 def k_weighting_coefficients(
     fs: float,
-) -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]:
+) -> tuple[
+    tuple[NDArray[np.float64], NDArray[np.float64]],
+    tuple[NDArray[np.float64], NDArray[np.float64]],
+]:
     """K-weighting biquad coefficients (BS.1770-5 Annex 1, Tables 1-2).
 
     At 48 kHz the tabulated values are returned verbatim; at any other rate
@@ -238,7 +243,7 @@ def k_weighting_coefficients(
     )
 
 
-def k_weighting(x: SignalInput, fs: float | None = None) -> np.ndarray:
+def k_weighting(x: SignalInput, fs: float | None = None) -> NDArray[np.float64]:
     """Apply the two-stage K-weighting pre-filter (BS.1770-5 Annex 1).
 
     Stage 1 models the acoustic effect of the head as a rigid sphere (a
@@ -263,7 +268,11 @@ def k_weighting(x: SignalInput, fs: float | None = None) -> np.ndarray:
     if x_proc.shape[-1] == 0:
         raise ValueError(_EMPTY_SIGNAL)
     (b1, a1), (b2, a2) = k_weighting_coefficients(fs)
-    return np.asarray(
+    # scipy.signal.lfilter is unannotated: pyright infers its result from the
+    # source as an array or the (y, zf) pair it returns only when zi is given,
+    # and np.asarray of that pair resolves to numpy's bool overload. Without zi
+    # the result is the float64 array of the float64 samples and coefficients.
+    return np.asarray(  # pyright: ignore[reportReturnType]
         signal.lfilter(b2, a2, signal.lfilter(b1, a1, x_proc, axis=-1), axis=-1)
     )
 
@@ -292,10 +301,10 @@ class KWeightingResponse(OwnsArrays):
     :ivar fs: Sample rate the response was evaluated at, in Hz.
     """
 
-    frequencies: np.ndarray
-    magnitude_db: np.ndarray
-    shelf_magnitude_db: np.ndarray
-    highpass_magnitude_db: np.ndarray
+    frequencies: NDArray[np.float64]
+    magnitude_db: NDArray[np.float64]
+    shelf_magnitude_db: NDArray[np.float64]
+    highpass_magnitude_db: NDArray[np.float64]
     fs: float
 
     def __post_init__(self) -> None:
@@ -491,7 +500,9 @@ def channel_weight(
     return as_float_or_array(np.where(side, 1.41, 1.0), like=(azimuth, elevation))
 
 
-def _resolve_weights(n_channels: int, weights: NumericArrayLike | None) -> np.ndarray:
+def _resolve_weights(
+    n_channels: int, weights: NumericArrayLike | None
+) -> NDArray[np.float64]:
     """Return the per-channel weights, defaulting by channel count."""
     require_scalar(n_channels, "n_channels")
     if weights is None:
@@ -528,8 +539,8 @@ def _resolve_weights(n_channels: int, weights: NumericArrayLike | None) -> np.nd
 
 
 def _windowed_loudness(
-    csum: np.ndarray, weights: np.ndarray, n_window: int, step: int
-) -> tuple[np.ndarray, np.ndarray]:
+    csum: NDArray[np.float64], weights: NDArray[np.float64], n_window: int, step: int
+) -> tuple[NDArray[np.float64], NDArray[np.intp]]:
     r"""Channel-weighted loudness of every full sliding window.
 
     :param csum: Per-channel cumulative sum of the squared K-weighted signal,
@@ -554,7 +565,7 @@ def _windowed_loudness(
     return loudness, ends
 
 
-def _gated_power(block_power: np.ndarray, gate: np.ndarray) -> float:
+def _gated_power(block_power: NDArray[np.float64], gate: NDArray[np.bool_]) -> float:
     """Mean of ``block_power[gate]``, or 0.0 when the gate empties it."""
     if not np.any(gate):
         return 0.0
@@ -568,7 +579,7 @@ def _power_to_loudness(power: float) -> float:
     return _K_OFFSET + 10.0 * float(np.log10(power))
 
 
-def _integrated_from_blocks(block_loudness: np.ndarray) -> tuple[float, float]:
+def _integrated_from_blocks(block_loudness: NDArray[np.float64]) -> tuple[float, float]:
     """Two-stage gated loudness of the gating blocks (Formulae 5-7).
 
     :param block_loudness: Loudness of the 400 ms gating blocks, LUFS.
@@ -585,7 +596,7 @@ def _integrated_from_blocks(block_loudness: np.ndarray) -> tuple[float, float]:
     return _power_to_loudness(_gated_power(power, gate)), relative_threshold
 
 
-def _matlab_percentile(sorted_values: np.ndarray, percentile: float) -> float:
+def _matlab_percentile(sorted_values: NDArray[np.float64], percentile: float) -> float:
     """Nearest-rank percentile with the Tech 3342 reference indexing.
 
     The reference implementation picks ``sorted[round((n-1)*p/100 + 1)]``
@@ -596,7 +607,7 @@ def _matlab_percentile(sorted_values: np.ndarray, percentile: float) -> float:
     return real_number(sorted_values[index], "sorted_values")
 
 
-def _lra_distribution(short_term_loudness: np.ndarray) -> np.ndarray:
+def _lra_distribution(short_term_loudness: NDArray[np.float64]) -> NDArray[np.float64]:
     """The sorted short-term readings surviving the Tech 3342 cascaded gate."""
     stl = short_term_loudness[short_term_loudness >= ABSOLUTE_GATE]
     if stl.size == 0:
@@ -730,7 +741,7 @@ def integrated_loudness(
 
 def _prepare_signal(
     x: SignalInput, weights: NumericArrayLike | None
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Coerce to 2D float64, reject an empty signal, resolve weights.
 
     A NaN or infinity anywhere in the signal would poison every gating
@@ -744,7 +755,7 @@ def _prepare_signal(
     return x_proc, _resolve_weights(x_proc.shape[0], weights)
 
 
-def _power_cumsum(y: np.ndarray) -> np.ndarray:
+def _power_cumsum(y: NDArray[np.float64]) -> NDArray[np.float64]:
     """Zero-prefixed cumulative sum of the squared signal, per channel."""
     power = y * y
     csum = np.empty((power.shape[0], power.shape[1] + 1))
@@ -828,17 +839,17 @@ class ProgramLoudnessResult(OwnsArrays):
     integrated: float
     loudness_range: float
     true_peak: float
-    momentary: np.ndarray
-    momentary_time: np.ndarray
-    short_term: np.ndarray
-    short_term_time: np.ndarray
+    momentary: NDArray[np.float64]
+    momentary_time: NDArray[np.float64]
+    short_term: NDArray[np.float64]
+    short_term_time: NDArray[np.float64]
     max_momentary: float
     max_short_term: float
     relative_threshold: float
     lra_low: float
     lra_high: float
-    true_peak_per_channel: np.ndarray
-    channel_weights: np.ndarray
+    true_peak_per_channel: NDArray[np.float64]
+    channel_weights: NDArray[np.float64]
     fs: float
 
     def __post_init__(self) -> None:
@@ -975,7 +986,7 @@ class ProgramLoudnessResult(OwnsArrays):
         )
 
 
-def _lra_edges(short_term: np.ndarray) -> tuple[float, float]:
+def _lra_edges(short_term: NDArray[np.float64]) -> tuple[float, float]:
     """The gated 10th/95th percentile edges of the LRA distribution, LUFS."""
     stl = _lra_distribution(short_term)
     if stl.size == 0:

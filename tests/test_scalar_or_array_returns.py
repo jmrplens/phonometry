@@ -1349,6 +1349,81 @@ def _cases() -> tuple[Case, ...]:
             },
             ("frequencies",),
         ),
+        Case(building.acceleration_level, {"acceleration": 0.01}, ("acceleration",)),
+        Case(
+            building.band_mode_count,
+            {"frequencies": 500.0, "area": 10.0, "critical_frequency": 100.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.direction_averaged_level_difference,
+            {"dv_ij": 12.0, "dv_ji": 14.0},
+            ("dv_ij", "dv_ji"),
+            together=True,
+        ),
+        Case(
+            building.equivalent_absorption_length,
+            {"area": 10.0, "structural_reverberation_time": 0.2, "frequencies": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.fast_reverberation_correction,
+            {"reverberation_time": 1.2},
+            ("reverberation_time",),
+        ),
+        Case(
+            building.modal_overlap_factor,
+            {
+                "area": 10.0,
+                "critical_frequency": 100.0,
+                "structural_reverberation_time": 0.2,
+            },
+            ("structural_reverberation_time",),
+        ),
+        Case(
+            building.normalized_ceiling_attenuation,
+            {"level_source": 80.0, "level_receiving": 45.0, "absorption_area": 12.0},
+            ("level_source", "level_receiving", "absorption_area"),
+            together=True,
+        ),
+        Case(
+            building.partition_referenced_reduction_index,
+            {"reduction_index": 40.0, "room_height_m": 2.7, "room_length": 5.0},
+            ("reduction_index",),
+        ),
+        Case(
+            building.plate_loss_factor,
+            {"reverberation_time": 0.2, "frequency": 500.0},
+            ("frequency",),
+        ),
+        Case(
+            building.resilient_mount_improvement,
+            {
+                "frequencies": 500.0,
+                "impedance": 10000.0,
+                "mass_per_area": 20.0,
+                "loss_factor": 0.02,
+                "mount_stiffness": 100000.0,
+                "mount_density": 4.0,
+            },
+            ("frequencies", "loss_factor"),
+        ),
+        Case(
+            building.short_pulse_mean_square_force,
+            {"frequencies": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.total_loss_factor,
+            {"structural_reverberation_time": 0.2, "frequencies": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.velocity_level_difference,
+            {"source_level": 90.0, "receive_level": 78.0},
+            ("source_level", "receive_level"),
+            together=True,
+        ),
     )
 
 
@@ -1487,6 +1562,27 @@ UNHEADED = (
             "m4": 0.0,
         },
         ("c3", "t3", "c4", "t4", "m3", "m4"),
+    ),
+    Case(
+        building.vibration_reduction_index_from_flanking,
+        {
+            "normalized_flanking_level_difference": 60.0,
+            "reduction_index_i": 50.0,
+            "reduction_index_j": 48.0,
+            "junction_length": 4.0,
+            "area_i": 10.0,
+            "area_j": 12.0,
+            "absorption_length_i": 3.0,
+            "absorption_length_j": 3.5,
+        },
+        (
+            "normalized_flanking_level_difference",
+            "reduction_index_i",
+            "reduction_index_j",
+            "absorption_length_i",
+            "absorption_length_j",
+        ),
+        together=True,
     ),
 )
 

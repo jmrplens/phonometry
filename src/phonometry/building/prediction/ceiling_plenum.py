@@ -110,6 +110,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -126,7 +127,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 #: The two plenum sidewall conditions of Vigran Section 9.2.3.2.
 Sidewalls = Literal["absorbing", "reflecting"]
@@ -219,13 +220,71 @@ def _require_split(value: float, name: str) -> float:
     return ratio
 
 
+@overload
+def normalized_ceiling_attenuation[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    level_source: S1,
+    level_receiving: S2,
+    absorption_area: S3,
+    *,
+    reference_area: float = ...,
+) -> float: ...
+
+
+@overload
+def normalized_ceiling_attenuation[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    level_source: V,
+    level_receiving: A2,
+    absorption_area: A3,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def normalized_ceiling_attenuation[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    level_source: S1,
+    level_receiving: V,
+    absorption_area: A3,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def normalized_ceiling_attenuation[S1: RealScalar, S2: RealScalar, V: RealValues](
+    level_source: S1,
+    level_receiving: S2,
+    absorption_area: V,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def normalized_ceiling_attenuation[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    level_source: A1,
+    level_receiving: A2,
+    absorption_area: A3,
+    *,
+    reference_area: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def normalized_ceiling_attenuation(
     level_source: NumericArrayLike,
     level_receiving: NumericArrayLike,
     absorption_area: NumericArrayLike,
     *,
     reference_area: float = _A0_ISO,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Normalized ceiling attenuation ``Dn,c`` (ISO 140-9:1985, clause 3.3).
 
     :math:`D_\mathrm{n,c} = (L_1 - L_2) - 10 \log_{10}(A/A_0)`, the level difference
@@ -239,7 +298,10 @@ def normalized_ceiling_attenuation(
     :param absorption_area: Receiving-room equivalent absorption area ``A``
         per band, in m2 (> 0); a scalar is broadcast over the bands.
     :param reference_area: Reference area ``A0``, in m2 (Default: 10 m2).
-    :return: The normalized ceiling attenuation ``Dn,c`` per band, in dB.
+    :return: The normalized ceiling attenuation ``Dn,c`` per band, in dB. A ``float``
+        when ``level_source``, ``level_receiving`` and ``absorption_area`` are all
+        numbers, an array when one of them is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: for mismatched shapes or a non-positive area.
     :raises TypeError: if ``reference_area`` is not a single number, or
         ``absorption_area``, ``level_receiving`` or ``level_source`` holds a text or a
@@ -262,7 +324,10 @@ def normalized_ceiling_attenuation(
         msg = "'absorption_area' must be positive."
         raise ValueError(msg)
     a0 = require_positive(reference_area, "reference_area")
-    return np.asarray(l1 - l2 - 10.0 * np.log10(area / a0), dtype=np.float64)
+    return as_float_or_array(
+        l1 - l2 - 10.0 * np.log10(area / a0),
+        like=(level_source, level_receiving, absorption_area),
+    )
 
 
 def _require_deficiency_totals(result: CeilingAttenuationResult) -> None:
@@ -778,9 +843,33 @@ def plenum_flanking_reduction_index(
     )
 
 
+@overload
+def partition_referenced_reduction_index[S: RealScalar](
+    reduction_index: S,
+    room_height_m: float,
+    room_length: float,
+) -> float: ...
+
+
+@overload
+def partition_referenced_reduction_index[V: RealValues](
+    reduction_index: V,
+    room_height_m: float,
+    room_length: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def partition_referenced_reduction_index[A: NumericArrayLike](
+    reduction_index: A,
+    room_height_m: float,
+    room_length: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def partition_referenced_reduction_index(
     reduction_index: NumericArrayLike, room_height_m: float, room_length: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Refer ``Rcl`` to the partition area instead of the ceiling
     (Eq. (9.13)).
 
@@ -792,7 +881,8 @@ def partition_referenced_reduction_index(
     :param reduction_index: Ceiling/plenum path ``Rcl`` per band, in dB.
     :param room_height_m: Sending-room height ``HS``, in m (> 0).
     :param room_length: Sending-room length ``LS``, in m (> 0).
-    :return: The partition-referenced ``Rcl,p`` per band, in dB.
+    :return: The partition-referenced ``Rcl,p`` per band, in dB. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive dimension.
     :raises TypeError: if ``room_height_m`` or ``room_length`` is not a single number,
         or ``reduction_index`` holds a text or a value that is not a real number.
@@ -800,4 +890,4 @@ def partition_referenced_reduction_index(
     rcl = require_finite_array(reduction_index, "reduction_index")
     hs = require_positive(room_height_m, "room_height_m")
     ls = require_positive(room_length, "room_length")
-    return np.asarray(rcl + 10.0 * np.log10(hs / ls), dtype=np.float64)
+    return as_float_or_array(rcl + 10.0 * np.log10(hs / ls), like=(reduction_index,))

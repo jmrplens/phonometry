@@ -162,9 +162,33 @@ def spatial_mean_velocity_level(levels: NumericArrayLike) -> float:
     return float(10.0 * np.log10(np.mean(10.0 ** (0.1 * lv))))
 
 
+@overload
+def plate_loss_factor[S: RealScalar](
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: S,
+) -> float: ...
+
+
+@overload
+def plate_loss_factor[V: RealValues](
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def plate_loss_factor[A: NumericArrayLike](
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def plate_loss_factor(
     reverberation_time: NumericArrayLike, *, frequency: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Plate loss factor :math:`\eta = 2.2 / (f\, T_\mathrm{s})` (EN 15657, Formula 13).
 
     Estimated from the plate's structural reverberation time; identical to the
@@ -172,13 +196,17 @@ def plate_loss_factor(
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or per band).
     :param reverberation_time: Structural reverberation time ``Ts``, in s.
-    :return: The loss factor ``eta`` (dimensionless) per band.
+    :return: The loss factor ``eta`` (dimensionless) per band. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``frequency`` or ``reverberation_time`` holds a text or a
         value that is not a real number.
     """
     f = real_array(frequency, "frequency")
     ts = real_array(reverberation_time, "reverberation_time")
-    return total_loss_factor(frequencies=f, structural_reverberation_time=ts)
+    return as_float_or_array(
+        total_loss_factor(frequencies=f, structural_reverberation_time=ts),
+        like=(frequency,),
+    )
 
 
 @overload

@@ -51,12 +51,13 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, given_repr, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -79,7 +80,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 Quantity = Literal["ΔL", "ΔR", "Rs", "LI", "LI,norm"]
@@ -135,18 +141,43 @@ def _finite(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     return a
 
 
+@overload
+def acceleration_level[S: RealScalar](
+    acceleration: S,
+    *,
+    reference: float = ...,
+) -> float: ...
+
+
+@overload
+def acceleration_level[V: RealValues](
+    acceleration: V,
+    *,
+    reference: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def acceleration_level[A: NumericArrayLike](
+    acceleration: A,
+    *,
+    reference: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def acceleration_level(
     acceleration: NumericArrayLike,
     *,
     reference: float = _ACCELERATION_REFERENCE,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Vibratory acceleration level ``La`` (ISO 16251-1 Formula (1)).
 
     :math:`L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_0)` dB.
 
     :param acceleration: RMS acceleration ``a_rms`` per band, in m/s² (> 0).
     :param reference: Reference acceleration ``a0``, in m/s² (default 1e-6).
-    :return: The acceleration level ``La`` per band, in dB.
+    :return: The acceleration level ``La`` per band, in dB. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: Non-finite or non-positive acceleration, or a
         non-positive reference.
     :raises TypeError: if ``reference`` is not a single number, or ``acceleration``
@@ -160,7 +191,7 @@ def acceleration_level(
     if reference <= 0.0:
         msg = "'reference' must be positive."
         raise ValueError(msg)
-    return 20.0 * np.log10(a / reference)
+    return as_float_or_array(20.0 * np.log10(a / reference), like=(acceleration,))
 
 
 @dataclass(frozen=True)

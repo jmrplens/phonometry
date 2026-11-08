@@ -3724,6 +3724,59 @@ def test_a_method_called_through_its_class_takes_the_instance_first(
     }
 
 
+def test_a_call_on_self_reaches_the_method_the_class_of_the_instance_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``self._wrap(data)`` in ``Base.give`` runs what the class of the
+    instance holds: on a ``Sub``, ``Sub._wrap``, which hands the caller's
+    array back as it is, so ``Sub().give(data)`` keeps it in ``Rec.data``;
+    and ``self._wrap(data)`` in ``Inheriting.give`` runs the ``_wrap`` it
+    takes from ``Holder``, which keeps it too.
+
+    A call on ``self`` reached only a method the class body of the caller
+    writes: ``Base._wrap``, which copies, and none in ``Inheriting``, so
+    neither ``give`` was read as keeping the caller's array.
+    """
+    found = _findings(
+        tmp_path,
+        runs="""
+        from dataclasses import dataclass
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from ._internal.frozen import read_only_copy
+
+        @dataclass(frozen=True)
+        class Rec:
+            data: NDArray[np.float64]
+
+        class Base:
+            def _wrap(self, data):
+                return read_only_copy(data)
+
+            def give(self, data):
+                return Rec(self._wrap(data))
+
+        class Sub(Base):
+            def _wrap(self, data):
+                return data
+
+        class Holder:
+            def _wrap(self, data):
+                return data
+
+        class Inheriting(Holder):
+            def give(self, data):
+                return Rec(self._wrap(data))
+        """,
+    )
+    assert found == {
+        ("Base.give", "Rec.data", "data"),
+        ("Inheriting.give", "Rec.data", "data"),
+    }
+
+
 #: Records whose constructor takes the fields of their bases in their method
 #: resolution order, which reading each base's own order whole, the last
 #: base's first, does not give.

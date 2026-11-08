@@ -735,6 +735,9 @@ class Tree:
         #: What :meth:`calls_post_init` and :meth:`initializer` found, read
         #: once for each ``class`` statement.
         self.hook_cache: dict[ast.AST | None, bool] = {}
+        #: The classes of the package whose method resolution order holds a
+        #: class, by its ``class`` statement (:meth:`classes_over`).
+        self.over_cache: dict[ast.AST | None, tuple[ClassInfo, ...]] = {}
         self.init_cache: dict[ast.AST | None, tuple[ClassInfo | None, ...]] = {}
         self.fields_cache: dict[ast.AST | None, list[tuple[str, str]]] = {}
         self.orders_cache: dict[ast.AST | None, tuple[_Order, ...]] = {}
@@ -1448,6 +1451,48 @@ class Tree:
         found = tuple(ways) or ({node: ()},)
         self.worlds_cache[node] = found
         return found
+
+    def classes_over(self, info: ClassInfo) -> tuple[ClassInfo, ...]:
+        """*info*, and every class of the package whose method resolution
+        order, in any way its bases may be read (:meth:`linearizations`),
+        holds it: the classes an instance a method of *info* runs on may be
+        of.
+        """
+        node = info.node
+        found = self.over_cache.get(node)
+        if found is None:
+            over = [
+                later
+                for later in self.classes.values()
+                if later.node is not node
+                and any(
+                    other.node is node
+                    for line in self.linearizations(later)
+                    for other in line[1:]
+                )
+            ]
+            found = (info, *over)
+            self.over_cache[node] = found
+        return found
+
+    def method_of(self, info: ClassInfo, name: str) -> tuple[str, str] | None:
+        """The method *name* the order of *info* finds first, by its key, in
+        each way its bases may be read; ``None`` when no class of the
+        package in it writes one, or the ways disagree.
+        """
+        found: set[tuple[str, str]] = set()
+        for line in self.linearizations(info):
+            for later in line:
+                qualified = (
+                    self.qualnames.get(later.node) if later.node is not None else None
+                )
+                if qualified is None:
+                    continue
+                key = (qualified[0], f"{qualified[1]}.{name}")
+                if key in self.functions:
+                    found.add(key)
+                    break
+        return found.pop() if len(found) == 1 else None
 
     def linearizations(self, info: ClassInfo) -> tuple[tuple[ClassInfo, ...], ...]:
         """The method resolution order a class may have, the class first,
@@ -2817,9 +2862,9 @@ class Reader:
         if isinstance(func, ast.Name):
             return self.resolve_name(func.id, func, pins=pins)
         if isinstance(func, ast.Attribute):
-            target = self.method_target(func)
-            if target is not None:
-                return (target,)
+            targets = self.method_targets(func)
+            if targets:
+                return targets
             module = self.module_of(func.value)
             if module is not None:
                 return self.tree.resolve_all(module, func.attr, pins=pins)
@@ -3087,10 +3132,15 @@ class Reader:
                 return receiver
             if name in _METHOD_ALIASING:
                 return flat(receiver)
-            target = self.method_target(func)
-            if target is not None:
-                return self.apply(
-                    target, node, arguments, keywords, bound=self.binds(func)
+            targets = self.method_targets(func)
+            if targets:
+                return union(
+                    *(
+                        self.apply(
+                            target, node, arguments, keywords, bound=self.binds(func)
+                        )
+                        for target in targets
+                    )
                 )
             module = self.module_of(func.value)
             if module is not None:
@@ -3229,17 +3279,25 @@ class Reader:
         """
         return isinstance(func.value, ast.Name) and func.value.id == "self"
 
-    def method_target(self, func: ast.Attribute) -> tuple[str, str] | None:
-        """The method ``self.name`` or ``cls.name`` names, in the class read."""
+    def method_targets(self, func: ast.Attribute) -> tuple[tuple[str, str], ...]:
+        """The methods ``self.name``, ``cls.name`` or ``Owner.name`` may run,
+        in the class read: the one the order of the class finds first, its
+        own or a base's (:meth:`Tree.method_of`), and for a call on ``self``
+        or ``cls`` the one the order of every class over it finds
+        (:meth:`Tree.classes_over`), a subclass's own or a mixin's, since the
+        call runs what the class of the instance holds.
+        """
         owner = self.function.owner
         if owner is None or not isinstance(func.value, ast.Name):
-            return None
-        if func.value.id not in {"self", "cls"} and func.value.id != owner.name:
-            return None
-        key = (owner.module, f"{self.function.qualname.rpartition('.')[0]}.{func.attr}")
-        if key in self.tree.functions:
-            return key
-        return None
+            return ()
+        receiver = func.value.id
+        if receiver not in {"self", "cls"} and receiver != owner.name:
+            return ()
+        classes = (
+            self.tree.classes_over(owner) if receiver in {"self", "cls"} else (owner,)
+        )
+        found = (self.tree.method_of(klass, func.attr) for klass in classes)
+        return tuple(dict.fromkeys(key for key in found if key is not None))
 
     def apply(
         self,

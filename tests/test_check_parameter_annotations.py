@@ -2616,6 +2616,104 @@ def test_an_inherited_init_runs_the_hook_of_the_class_it_builds(
     assert sorted((f.function, f.parameter) for f in found) == [("loud", "n")]
 
 
+def test_a_method_a_public_class_inherits_runs_on_an_instance_of_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A public class runs the methods it takes from a base on an instance
+    of itself: ``Quiet(n)`` runs ``_Wrapper.__init__``, whose
+    ``super().__init__(n)`` calls ``Quiet``'s own hook, which checks
+    nothing, and ``Loud(n)`` runs ``_PlainWrapper.__init__``, which calls
+    ``Loud``'s, which checks the count; ``Public().judge(n)`` reaches
+    ``Public._check``, which checks it, and ``PublicQuiet().judge(n)``
+    ``PublicQuiet._check``, which does not. The run agrees.
+
+    A method a public class inherits was read on the class it is written
+    in, so ``_Wrapper.__init__`` was reported through ``_Hooked``'s hook and
+    ``_Loud.judge`` through ``_Loud._check``, which neither call runs, and
+    the two whose run checks the count passed.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["Loud", "Public", "PublicQuiet", "Quiet"]
+
+
+            @dataclass(frozen=True)
+            class _Hooked:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            class _Wrapper(_Hooked):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class Quiet(_Wrapper):
+                def __post_init__(self) -> None:
+                    pass
+
+
+            @dataclass(frozen=True)
+            class _Plain:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    pass
+
+
+            class _PlainWrapper(_Plain):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class Loud(_PlainWrapper):
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            class _Base:
+                def judge(self, n: int) -> int:
+                    return self._check(n)
+
+                def _check(self, n: int) -> int:
+                    return n
+
+
+            class Public(_Base):
+                def _check(self, n: int) -> int:
+                    return require_count(n, "n")
+
+
+            class _Loud:
+                def judge(self, n: int) -> int:
+                    return self._check(n)
+
+                def _check(self, n: int) -> int:
+                    return require_count(n, "n")
+
+
+            class PublicQuiet(_Loud):
+                def _check(self, n: int) -> int:
+                    return n
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("_Base.judge", "n"),
+        ("_PlainWrapper.__init__", "n"),
+    ]
+
+
 def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
     tmp_path: pathlib.Path,
 ) -> None:

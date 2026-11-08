@@ -3429,6 +3429,90 @@ def public_functions(package: overloads.Package) -> Iterator[overloads.Function]
                             yield package.functions[key]
 
 
+def public_readings(
+    package: overloads.Package, annotations: Annotations
+) -> Iterator[tuple[overloads.Function, str | None]]:
+    """Every public function and method of the package, each with the class
+    of the instance a caller runs it on, when that changes how it reads.
+
+    A method a public class takes from a base of the package runs on an
+    instance of the class, so its hook, ``super()`` and ``self.name`` are
+    looked up in the order of that class (:attr:`Reader._building`): a call
+    of ``Quiet``, which inherits ``_Wrapper.__init__``, runs the
+    ``__post_init__`` ``Quiet`` writes over the one ``_Wrapper``'s order
+    finds. It is read once for each such class (:func:`_built_on`), and once
+    on its own where the order of the class changes nothing; a function, and
+    a method a class writes itself, once.
+    """
+    seen: set[tuple[str, str | None]] = set()
+    for module, tree in sorted(package.trees.items()):
+        if any(part.startswith("_") for part in module.split(".")[1:]):
+            continue
+        for name in _exported(tree):
+            target = package.canonical(f"{module}.{name}")
+            if target in package.functions:
+                readings: list[tuple[str, str | None]] = [(target, None)]
+            elif target in annotations.classes:
+                readings = [
+                    (method, _built_on(package, annotations, target, method))
+                    for method in _methods(package, annotations, target)
+                ]
+            else:
+                continue
+            for method, building in readings:
+                if (method, building) in seen:
+                    continue
+                seen.add((method, building))
+                for key in package.every_definition(method):
+                    yield package.functions[key], building
+
+
+def _built_on(
+    package: overloads.Package, annotations: Annotations, exported: str, method: str
+) -> str | None:
+    """The class *exported* when the method *method* it takes from a base
+    reads otherwise on an instance of it: *exported* holds that method, no
+    class before the base in its order writing the name again, and a class
+    before the base writes anything, or the order past the base is not the
+    base's own; ``None`` otherwise, the method then read as it is written.
+    """
+    owner, _, name = method.rpartition(".")
+    if owner == exported:
+        return None
+    line = linearized(package, annotations, exported)
+    if owner not in line:
+        return None
+    place = line.index(owner)
+    before = line[:place]
+    if any(f"{klass}.{name}" in package.functions for klass in before):
+        return None
+    if line[place:] != linearized(package, annotations, owner) or any(
+        _writes_members(annotations, klass) for klass in before
+    ):
+        return exported
+    return None
+
+
+def _writes_members(annotations: Annotations, klass: str) -> bool:
+    """Whether the body of *klass* binds anything: a method, a field, an
+    attribute; a docstring, ``pass`` and ``...`` bind nothing.
+    """
+    entry = annotations.classes.get(klass)
+    if entry is None:
+        return True
+    _, node = entry
+    return any(
+        not (
+            isinstance(statement, ast.Pass)
+            or (
+                isinstance(statement, ast.Expr)
+                and isinstance(statement.value, ast.Constant)
+            )
+        )
+        for statement in node.body
+    )
+
+
 def _exported(tree: ast.Module) -> list[str]:
     for node in tree.body:
         assigned = overloads._assigned(node)
@@ -3500,36 +3584,50 @@ def findings_in(
     package = overloads.Package(files, root)
     reader = Reader(package, handed_on)
     found: list[Finding] = []
-    for function in public_functions(package):
-        path = repository_path(package.paths[function.module], root)
-        method = function.owner is not None
-        bounds = reader._bounds(function)
-        for head in function.heads:
-            found.extend(
-                _invariant_findings(reader, function, head, path, bounds, method=method)
-            )
-        node = function.implementation
-        if node is None:
-            continue
-        found.extend(
-            _invariant_findings(reader, function, node, path, bounds, method=method)
-        )
-        found.extend(
-            _conversion_findings(reader, function, path, bounds, method=method)
-        )
-        found.extend(_scalar_findings(reader, function, path, bounds, method=method))
-        found.extend(_window_findings(reader, function, path, bounds, method=method))
-        for definition in function.definitions:
-            found.extend(
-                _key_findings(reader, function, definition, path, bounds, method=method)
-            )
-        found.extend(_context_findings(reader, function, path, bounds, method=method))
-        found.extend(_choice_findings(reader, function, path, bounds, method=method))
+    for function, building in public_readings(package, reader.annotations):
+        # An inherited method runs on an instance of the class that exports
+        # it, whose order its hook, ``super()`` and ``self.name`` read.
+        reader._building = building
+        try:
+            found.extend(_function_findings(reader, function, root))
+        finally:
+            reader._building = None
     found.extend(_field_findings(reader, root))
     found.extend(_field_context_findings(reader, root))
     found.extend(_record_choice_findings(reader, root))
     found.extend(_name_findings(reader, root))
     return sorted(set(found), key=lambda item: (item.path, item.line, item.parameter))
+
+
+def _function_findings(
+    reader: Reader, function: overloads.Function, root: pathlib.Path
+) -> list[Finding]:
+    """What every rule of a public function finds in it (:func:`findings_in`)."""
+    package = reader.package
+    path = repository_path(package.paths[function.module], root)
+    method = function.owner is not None
+    bounds = reader._bounds(function)
+    found: list[Finding] = []
+    for head in function.heads:
+        found.extend(
+            _invariant_findings(reader, function, head, path, bounds, method=method)
+        )
+    node = function.implementation
+    if node is None:
+        return found
+    found.extend(
+        _invariant_findings(reader, function, node, path, bounds, method=method)
+    )
+    found.extend(_conversion_findings(reader, function, path, bounds, method=method))
+    found.extend(_scalar_findings(reader, function, path, bounds, method=method))
+    found.extend(_window_findings(reader, function, path, bounds, method=method))
+    for definition in function.definitions:
+        found.extend(
+            _key_findings(reader, function, definition, path, bounds, method=method)
+        )
+    found.extend(_context_findings(reader, function, path, bounds, method=method))
+    found.extend(_choice_findings(reader, function, path, bounds, method=method))
+    return found
 
 
 def _conversion_findings(

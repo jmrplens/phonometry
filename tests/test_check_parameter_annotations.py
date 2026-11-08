@@ -2714,6 +2714,69 @@ def test_a_method_a_public_class_inherits_runs_on_an_instance_of_it(
     ]
 
 
+#: A base whose ``__init__`` stores the count unchecked, and a class over it
+#: whose hook checks it, when ``@dataclass`` writes it an ``__init__`` that
+#: calls the hook; ``REBINDING`` and ``AFTER`` are where a module rebinds
+#: the decorator's name.
+_CHECKED_OVER_QUIET = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["make"]
+
+
+class _Quiet:
+    def __init__(self, n: int = 1) -> None:
+        object.__setattr__(self, "n", n)
+
+REBINDING
+
+@dataclass(frozen=True)
+class Sub(_Quiet):
+    n: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n", require_count(self.n, "n"))
+
+AFTER
+
+def make(n: int) -> Sub:
+    return Sub(n)
+"""
+
+
+@pytest.mark.parametrize(
+    ("rebinding", "after", "expected"),
+    [
+        ("if (dataclass := lambda **options: lambda cls: cls):\n    pass", "", []),
+        ("", "def dataclass(**options):\n    return lambda cls: cls", [("make", "n")]),
+        ("", "", [("make", "n")]),
+    ],
+    ids=["walrus-before", "defined-after", "imported"],
+)
+def test_a_decorator_is_read_through_the_bindings_that_stand_where_the_class_runs(
+    tmp_path: pathlib.Path, rebinding: str, after: str, expected: list[tuple[str, str]]
+) -> None:
+    """``@dataclass`` is what the name holds where the ``class`` statement
+    runs: a ``:=`` before it replaces the import, so ``Sub`` is no record and
+    ``Sub(n)`` runs ``_Quiet.__init__``, which never checks the count; a
+    ``def`` of the name after the class leaves the import in place, so the
+    generated ``__init__`` calls the hook, which checks it (reported, since
+    the check admits a numpy integer the annotation leaves out).
+
+    The name was read through every top-level binding of the module, a
+    ``def`` or an assignment over any import wherever it stands, and the
+    import past one a ``:=`` makes: the walrus was read as the import, so
+    the count was read as checked, and the later ``def`` as the decorator,
+    so the check the run makes was missed.
+    """
+    source = _CHECKED_OVER_QUIET.replace("REBINDING", rebinding).replace("AFTER", after)
+    root = _package(tmp_path, **{"_internal.validation": _VALIDATION, "api": source})
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
 def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
     tmp_path: pathlib.Path,
 ) -> None:

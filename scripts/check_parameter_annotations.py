@@ -204,6 +204,7 @@ from ast_scan import (
     module_constant,
     own_names,
     python_files,
+    reads_import,
     what_never_runs,
 )
 
@@ -5224,7 +5225,7 @@ def _declares_constructor(
         return True
     return any(
         isinstance(decorator, ast.Call)
-        and package.resolve(module, decorator.func) in _DATACLASS
+        and _record_decorator(package, module, decorator)
         and any(
             keyword.arg == "init"
             and isinstance(keyword.value, ast.Constant)
@@ -5295,8 +5296,9 @@ def _field_context_findings(reader: Reader, root: pathlib.Path) -> list[Finding]
     return found
 
 
-#: The decorator that makes a class a record with generated fields.
-_DATACLASS = frozenset({"dataclasses.dataclass"})
+#: The decorator that makes a class a record with generated fields, by the
+#: dotted name it is imported as.
+_DATACLASS = "dataclasses.dataclass"
 
 #: The sentinel after which a record's fields are keyword-only.
 _KW_ONLY = frozenset({"dataclasses.KW_ONLY"})
@@ -5337,12 +5339,27 @@ class Field:
     kind: str = _STORED
 
 
+def _record_decorator(
+    package: overloads.Package, module: str, decorator: ast.expr
+) -> bool:
+    """Whether *decorator*, with or without arguments, is ``dataclasses``'
+    ``dataclass``: its name read as it stands where the ``class`` statement
+    of *module* runs its decorators (:func:`ast_scan.reads_import`), so a
+    ``def``, an assignment or a ``:=`` of the name that ran before it
+    makes it none, and one written after the class leaves it the import.
+    A decorator that may be either, an import and a fallback in a ``try``,
+    is read as ``dataclasses``', as an ``init=`` the reader cannot read is
+    read as writing an ``__init__``.
+    """
+    called = decorator.func if isinstance(decorator, ast.Call) else decorator
+    return reads_import(package.trees[module], called, _DATACLASS) is not False
+
+
 def _is_dataclass(package: overloads.Package, module: str, node: ast.ClassDef) -> bool:
-    for decorator in node.decorator_list:
-        called = decorator.func if isinstance(decorator, ast.Call) else decorator
-        if package.resolve(module, called) in _DATACLASS:
-            return True
-    return False
+    return any(
+        _record_decorator(package, module, decorator)
+        for decorator in node.decorator_list
+    )
 
 
 def _generates_init(
@@ -5357,7 +5374,7 @@ def _generates_init(
     tree = package.trees.get(module)
     return not any(
         isinstance(decorator, ast.Call)
-        and package.resolve(module, decorator.func) in _DATACLASS
+        and _record_decorator(package, module, decorator)
         and any(
             keyword.arg == "init" and module_constant(keyword.value, tree) is False
             for keyword in decorator.keywords
@@ -5395,7 +5412,7 @@ def _keyword_only_record(
     """Whether a record's decorator makes every field keyword-only (``kw_only=True``)."""
     return any(
         isinstance(decorator, ast.Call)
-        and package.resolve(module, decorator.func) in _DATACLASS
+        and _record_decorator(package, module, decorator)
         and any(
             keyword.arg == "kw_only"
             and isinstance(keyword.value, ast.Constant)

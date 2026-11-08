@@ -611,7 +611,9 @@ def surface_pressure_intensity_indicator(
     if not (np.all(np.isfinite(p)) and np.all(np.isfinite(i))):
         msg = "Levels must contain only finite values."
         raise ValueError(msg)
-    return p - i
+    # Two zero-dimensional levels subtract to a numpy scalar; asarray keeps
+    # the indicator of one band pair an array, as it is for a list of bands.
+    return np.asarray(p - i, dtype=np.float64)
 
 
 @dataclass(frozen=True)

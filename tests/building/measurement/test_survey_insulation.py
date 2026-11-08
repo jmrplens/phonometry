@@ -4,11 +4,15 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from phonometry import building
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 _OCTAVE = 5  # ISO 10052 octave-band count (125-2000 Hz)
 
@@ -27,6 +31,27 @@ def test_reverberation_index_formula_3() -> None:
     """k = 10 lg(T/T0), T0 = 0,5 s."""
     k = building.reverberation_index([0.5, 1.0, 0.25])
     np.testing.assert_allclose(k, [0.0, 10.0 * np.log10(2.0), 10.0 * np.log10(0.5)])
+
+
+@pytest.mark.parametrize(
+    "t",
+    [1.0, np.float64(1.0), np.asarray(1.0)],
+    ids=["python float", "numpy float", "zero-dimensional array"],
+)
+def test_reverberation_index_of_one_time_is_a_zero_dimensional_array(
+    t: float | NDArray[np.float64],
+) -> None:
+    """One time, as the global reading takes it, gives an array like a list does.
+
+    Clause 3.17 reads ``k`` for a globally weighted level from one mean
+    reverberation time; the index of that one time is the zero-dimensional
+    array of the same value, as a band list gives a one-dimensional one.
+    """
+    k = building.reverberation_index(t)
+    assert isinstance(k, np.ndarray)
+    assert k.shape == ()
+    assert k.dtype == np.float64
+    assert k[()] == 10.0 * np.log10(1.0 / 0.5)
 
 
 def test_reverberation_index_rejects_nonpositive() -> None:

@@ -248,7 +248,7 @@ def _omega(frequency: NumericArrayLike, name: str = "frequency") -> NDArray[np.f
 
 def transfer_stiffness_level(
     stiffness: NumericArrayLike, *, reference: float = REFERENCE_STIFFNESS_N_M
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Level of the dynamic transfer stiffness (ISO 10846-2/-3, 3.17).
 
     :math:`L_k = 20 \log_{10}(|k_{2,1}| / k_0)` dB, with ``k0`` the reference
@@ -284,7 +284,7 @@ def transfer_stiffness_level(
     return np.asarray(20.0 * np.log10(magnitude / reference), dtype=np.float64)
 
 
-def loss_factor(stiffness: NumericArrayLike) -> np.ndarray:
+def loss_factor(stiffness: NumericArrayLike) -> NDArray[np.float64]:
     r"""Loss factor
     :math:`\eta = \operatorname{Im}(k_{2,1}) / \operatorname{Re}(k_{2,1})`
     (ISO 10846-1, 3.8).
@@ -312,7 +312,7 @@ def loss_factor(stiffness: NumericArrayLike) -> np.ndarray:
 
 def transfer_stiffness_direct(
     blocking_force: NumericArrayLike, input_displacement: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Dynamic transfer stiffness by the direct method (ISO 10846-2).
 
     :math:`k_{2,1} = F_{2,\mathrm{b}} / u_1`, the blocked output force phasor over
@@ -343,7 +343,7 @@ def transfer_stiffness_indirect(
     *,
     frequency: NumericArrayLike,
     flange_mass: float = 0.0,
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Dynamic transfer stiffness by the indirect method (ISO 10846-3, Eq. 1).
 
     :math:`k_{2,1} = -(2\pi f)^2 (m_2 + m_\mathrm{f}) T`: the blocking force is the
@@ -397,7 +397,7 @@ def _indirect_stiffness(
     blocking_mass: float,
     flange_mass: float,
     name: str,
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     """ISO 10846-3 Formula (1); *name* is the caller's own name for the frequency."""
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
     flange_mass = require_non_negative(flange_mass, "flange_mass")
@@ -434,7 +434,7 @@ def _indirect_stiffness(
 
 def blocking_force_ratio(
     driving_point_stiffness: NumericArrayLike, termination_stiffness: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Ratio of the delivered force to the blocking force (ISO 10846-1, Eq. 6).
 
     For an isolator driving a receiving structure, the output force for a
@@ -474,7 +474,7 @@ def blocking_force_ratio(
 
 def base_transmissibility(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float = 0.0
-) -> np.ndarray:
+) -> NDArray[np.complex128]:
     r"""Transmissibility of a mass on an ideal resilient element (model).
 
     The output mass ``m`` on a massless Kelvin-Voigt element (spring ``k`` in
@@ -607,7 +607,7 @@ class TransferStiffnessResult(OwnsArrays):
         )
 
     @property
-    def valid(self) -> np.ndarray | None:
+    def valid(self) -> NDArray[np.bool_] | None:
         r"""Per frequency, whether the line meets the adequacy condition of its method.
 
         Lines that fail it are left out of the band average (results that
@@ -623,17 +623,17 @@ class TransferStiffnessResult(OwnsArrays):
         return np.asarray(magnitude <= TRANSMISSIBILITY_LIMIT, dtype=bool)
 
     @property
-    def magnitude(self) -> np.ndarray:
+    def magnitude(self) -> NDArray[np.float64]:
         r"""Transfer-stiffness magnitude :math:`|k_{2,1}|`, in N/m."""
         return np.asarray(np.abs(self.transfer_stiffness), dtype=np.float64)
 
     @property
-    def levels(self) -> np.ndarray:
+    def levels(self) -> NDArray[np.float64]:
         """Transfer-stiffness level ``L_k`` re 1 N/m, in dB (3.17)."""
         return transfer_stiffness_level(self.transfer_stiffness)
 
     @property
-    def loss_factor(self) -> np.ndarray:
+    def loss_factor(self) -> NDArray[np.float64]:
         r"""Loss factor :math:`\eta = \operatorname{Im}/\operatorname{Re}`
         per frequency (3.8).
         """
@@ -649,7 +649,7 @@ class TransferStiffnessResult(OwnsArrays):
             "impedance",
             "apparent_mass",
         ],
-    ) -> np.ndarray:
+    ) -> NDArray[np.complex128]:
         r"""Convert :math:`k_{2,1}` to an FRF (ISO 10846-1 Annex A / Table A.2).
 
         ``target`` is ``"impedance"`` (:math:`Z = k/(j\omega)`) or
@@ -911,10 +911,10 @@ class BandAveragedStiffness(OwnsArrays):
         {"center_frequencies": "Hz", "nominal_frequencies": "Hz", "stiffness": "N/m"}
     )
 
-    nominal_frequencies: np.ndarray
-    center_frequencies: np.ndarray
-    stiffness: np.ndarray
-    line_counts: np.ndarray
+    nominal_frequencies: NDArray[np.float64]
+    center_frequencies: NDArray[np.float64]
+    stiffness: NDArray[np.float64]
+    line_counts: NDArray[np.integer[Any]]
 
     def __post_init__(self) -> None:
         """Reject bands whose value and count disagree.
@@ -970,7 +970,7 @@ class BandAveragedStiffness(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def determined(self) -> np.ndarray:
+    def determined(self) -> NDArray[np.bool_]:
         """Per band, whether it holds enough lines to have a value.
 
         :return: One boolean per band.
@@ -978,7 +978,7 @@ class BandAveragedStiffness(OwnsArrays):
         return np.asarray(self.line_counts) >= MIN_FREQUENCIES_PER_BAND
 
     @property
-    def levels(self) -> np.ndarray:
+    def levels(self) -> NDArray[np.float64]:
         r"""Band level :math:`L_{k,\mathrm{av}}` re 1 N/m, in dB, NaN where undetermined.
 
         :return: One level per band.
@@ -1178,8 +1178,8 @@ class LevelDifferenceCheck(OwnsArrays):
     :ivar condition: ``"blocked_output"`` or ``"unwanted_input"``.
     """
 
-    frequencies: np.ndarray
-    difference: np.ndarray
+    frequencies: NDArray[np.float64]
+    difference: NDArray[np.float64]
     condition: Literal["blocked_output", "unwanted_input"]
 
     def __post_init__(self) -> None:
@@ -1210,7 +1210,7 @@ class LevelDifferenceCheck(OwnsArrays):
         return _CONDITION_LIMITS_DB[self.condition]
 
     @property
-    def holds(self) -> np.ndarray:
+    def holds(self) -> NDArray[np.bool_]:
         """Per frequency, whether the difference reaches the limit.
 
         :return: One boolean per frequency.
@@ -1451,9 +1451,9 @@ class OutputMassCheck(OwnsArrays):
         over the output acceleration at each frequency, in kg.
     """
 
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     output_mass_kg: float
-    output_apparent_mass_kg: np.ndarray
+    output_apparent_mass_kg: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a check whose fields disagree or hold impossible values.
@@ -1481,7 +1481,7 @@ class OutputMassCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def mass_limit_kg(self) -> np.ndarray:
+    def mass_limit_kg(self) -> NDArray[np.float64]:
         r"""The right-hand side of the inequality at each frequency, in kg.
 
         :return: :math:`0{,}06\,|F_2|/|a_2|`, one per frequency.
@@ -1491,7 +1491,7 @@ class OutputMassCheck(OwnsArrays):
         )
 
     @property
-    def holds(self) -> np.ndarray:
+    def holds(self) -> NDArray[np.bool_]:
         """Per frequency, whether ``m0`` is within its limit.
 
         :return: One boolean per frequency.
@@ -1499,7 +1499,7 @@ class OutputMassCheck(OwnsArrays):
         return self.output_mass_kg <= np.asarray(self.mass_limit_kg, dtype=np.float64)
 
     @property
-    def inertia_ratio(self) -> np.ndarray:
+    def inertia_ratio(self) -> NDArray[np.float64]:
         r"""The inertia force over the measured force, :math:`r = m_0 |a_2| / |F_2|`.
 
         :return: One ratio per frequency; 0,06 where ``m0`` sits on its limit.
@@ -1508,7 +1508,7 @@ class OutputMassCheck(OwnsArrays):
         return np.asarray(self.output_mass_kg / apparent)
 
     @property
-    def bias_bound_db(self) -> np.ndarray:
+    def bias_bound_db(self) -> NDArray[np.float64]:
         r"""Largest :math:`|L_{F\mathrm{b}} - L_{F2}|` the mass can cause, in dB.
 
         :math:`-20 \lg(1 - r)`, reached when the inertia force opposes the
@@ -1713,8 +1713,8 @@ class EffectiveBlockingMass(OwnsArrays):
         {"blocking_mass": "kg"}
     )
 
-    frequencies: np.ndarray
-    effective_mass_kg: np.ndarray
+    frequencies: NDArray[np.float64]
+    effective_mass_kg: NDArray[np.float64]
     blocking_mass: float
 
     def __post_init__(self) -> None:
@@ -1742,7 +1742,7 @@ class EffectiveBlockingMass(OwnsArrays):
         _require_increasing(freq, owner)
 
     @property
-    def deviation_db(self) -> np.ndarray:
+    def deviation_db(self) -> NDArray[np.float64]:
         r""":math:`\Delta L = 20 \lg(m_{2,\mathrm{eff}}/m_2)`, in dB.
 
         :return: One deviation per frequency.
@@ -1778,7 +1778,7 @@ class EffectiveBlockingMass(OwnsArrays):
         return self._first_failure()[1]
 
     @property
-    def valid(self) -> np.ndarray:
+    def valid(self) -> NDArray[np.bool_]:
         """Per frequency, whether it lies below the first line outside 1 dB.
 
         :return: One boolean per frequency.
@@ -1927,10 +1927,10 @@ class DrivingPointStiffnessResult(OwnsArrays):
         Inequality (2) was not checked.
     """
 
-    frequencies: np.ndarray
-    driving_point_stiffness: np.ndarray
-    blocked_output_difference: np.ndarray | None = None
-    unwanted_input_difference: np.ndarray | None = None
+    frequencies: NDArray[np.float64]
+    driving_point_stiffness: NDArray[np.complex128]
+    blocked_output_difference: NDArray[np.float64] | None = None
+    unwanted_input_difference: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a sweep that cannot give a low-frequency value or an ordered limit.
@@ -2023,17 +2023,17 @@ class DrivingPointStiffnessResult(OwnsArrays):
         return np.asarray(self._adequate() & (freq >= low) & (freq <= high))
 
     @property
-    def magnitude(self) -> np.ndarray:
+    def magnitude(self) -> NDArray[np.float64]:
         r"""Driving-point stiffness magnitude :math:`|k_{1,1}|`, in N/m."""
         return np.asarray(np.abs(self.driving_point_stiffness), dtype=np.float64)
 
     @property
-    def levels(self) -> np.ndarray:
+    def levels(self) -> NDArray[np.float64]:
         """Driving-point stiffness level re 1 N/m at each frequency, in dB."""
         return transfer_stiffness_level(self.driving_point_stiffness)
 
     @property
-    def loss_factor(self) -> np.ndarray:
+    def loss_factor(self) -> NDArray[np.float64]:
         r"""Loss factor :math:`\eta = \operatorname{Im}(k_{1,1})/\operatorname{Re}(k_{1,1})` (Formula (4))."""
         return loss_factor(self.driving_point_stiffness)
 
@@ -2072,7 +2072,7 @@ class DrivingPointStiffnessResult(OwnsArrays):
         return self._first_failure()[1]
 
     @property
-    def valid(self) -> np.ndarray:
+    def valid(self) -> NDArray[np.bool_]:
         r"""Per frequency, whether the line is evaluated.
 
         A line is evaluated when it is adequate, lies at or above 1 Hz and

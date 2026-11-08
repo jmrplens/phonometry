@@ -84,6 +84,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, ReportEngine
@@ -148,8 +149,8 @@ class ImpulseProminenceResult(OwnsArrays):
         were selected over, in minutes (Clause 5; 30 min by default).
     """
 
-    onset_rates: np.ndarray
-    level_differences: np.ndarray
+    onset_rates: NDArray[np.float64]
+    level_differences: NDArray[np.float64]
     _: KW_ONLY
     assessment_period_minutes: float = _DEFAULT_ASSESSMENT_PERIOD_MINUTES
 
@@ -193,12 +194,12 @@ class ImpulseProminenceResult(OwnsArrays):
                 raise ValueError(msg)
 
     @property
-    def per_impulse(self) -> np.ndarray:
+    def per_impulse(self) -> NDArray[np.float64]:
         """Predicted prominence ``P`` of each impulse (Formula 1)."""
         return predicted_prominence(self.onset_rates, self.level_differences)
 
     @property
-    def qualifies(self) -> np.ndarray:
+    def qualifies(self) -> NDArray[np.bool_]:
         """Whether each event qualifies as an impulse.
 
         Onset rate above 10 dB/s (clause 4.5; clause 8 applies the adjustment
@@ -303,7 +304,7 @@ class ImpulseProminenceResult(OwnsArrays):
 
 def predicted_prominence(
     onset_rate: NumericArrayLike, level_difference: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Predicted prominence ``P`` of an impulse (NT ACOU 112, clause 7).
 
     :math:`P = 3 \log_{10}(\text{onset rate}) + 2 \log_{10}(\text{level difference})`
@@ -333,7 +334,7 @@ def predicted_prominence(
     return k1 * np.log10(orate) + k2 * np.log10(ld)
 
 
-def impulse_adjustment(prominence: NumericArrayLike) -> np.ndarray:
+def impulse_adjustment(prominence: NumericArrayLike) -> NDArray[np.float64]:
     r"""Adjustment ``KI`` to ``LAeq`` from the prominence (clause 8, Formula 2).
 
     :math:`K_\mathrm{I} = 1.8 \, (P - 5)` dB for :math:`P > 5`, else 0 dB. The
@@ -572,8 +573,8 @@ class ImpulsiveSoundResult(OwnsArrays):
     are read-only properties and not fields.
     """
 
-    times: np.ndarray
-    levels: np.ndarray
+    times: NDArray[np.float64]
+    levels: NDArray[np.float64]
     dt: float
     onsets: tuple[ImpulseOnset, ...]
     laeq: float
@@ -678,8 +679,8 @@ class LevelHistory(OwnsArrays):
     :ivar dt: Sampling interval of ``levels``, in seconds.
     """
 
-    times: np.ndarray
-    levels: np.ndarray
+    times: NDArray[np.float64]
+    levels: NDArray[np.float64]
     dt: float
 
     def __post_init__(self) -> None:
@@ -789,7 +790,7 @@ def sound_pressure_level_history(
 
 
 def _equivalent_level(
-    signal: np.ndarray,
+    signal: NDArray[np.float64],
     fs: float,
     reference_pressure_pa: float,
     calibration_offset: float,
@@ -811,7 +812,7 @@ def _equivalent_level(
 # ---------------------------------------------------------------------------
 
 
-def _raw_runs(gradient: np.ndarray) -> list[tuple[int, int]]:
+def _raw_runs(gradient: NDArray[np.float64]) -> list[tuple[int, int]]:
     """Return ``(start, end)`` sample-index pairs of maximal rising runs.
 
     A rising run is a maximal set of consecutive gradient samples exceeding the
@@ -834,7 +835,9 @@ def _raw_runs(gradient: np.ndarray) -> list[tuple[int, int]]:
 
 
 def _merge_runs(
-    runs: list[tuple[int, int]], times: np.ndarray, levels: np.ndarray
+    runs: list[tuple[int, int]],
+    times: NDArray[np.floating[Any]],
+    levels: NDArray[np.float64],
 ) -> list[tuple[int, int]]:
     """Merge onsets per procedure d) (Clause 4, Figure 2).
 
@@ -863,7 +866,9 @@ def _merge_runs(
 
 
 def _onset_rate(
-    times: np.ndarray, levels: np.ndarray, method: _OnsetRateMethod
+    times: NDArray[np.floating[Any]],
+    levels: NDArray[np.float64],
+    method: _OnsetRateMethod,
 ) -> float:
     """Least-squares slope of the onset, in dB/s (Clause 3.5)."""
     t = times

@@ -1085,3 +1085,35 @@ def test_two_prints_in_one_statement_share_its_comment() -> None:
     assert _failures(script, {2: "1", 3: "2"}) == []
     (failure, _) = _failures(script.replace("# 1 2", "# 1 3"), {2: "1", 3: "2"})
     assert "the comment says 3 where the print wrote 2" in failure
+
+
+def test_a_page_that_runs_past_its_time_reports_what_it_wrote_on_stderr(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The last line the stopped page wrote on stderr says where it was.
+
+    The page runs without the harness's own imports, which take about a
+    second, so that a limit of a few seconds stops it in its sleep.
+    """
+
+    def bare(page: pathlib.Path, fixture: str = "") -> tuple[str, dict[int, int]]:
+        return page.read_text("utf-8"), {}
+
+    monkeypatch.setattr(check_doc_snippets, "_script", bare)
+    monkeypatch.setattr(check_doc_snippets, "_TIMEOUT_S", 3)
+    stuck = tmp_path / "stuck.md"
+    stuck.write_text(
+        "import sys, time\n"
+        "print('meshing the room', file=sys.stderr, flush=True)\n"
+        "print('solving the 315 Hz band', file=sys.stderr, flush=True)\n"
+        "time.sleep(60)\n",
+        encoding="utf-8",
+    )
+    _, error, _ = check_doc_snippets._run_page(stuck)
+    assert (
+        error == "timed out after 3 s; its last line on stderr: solving the 315 Hz band"
+    )
+    silent = tmp_path / "silent.md"
+    silent.write_text("import time\ntime.sleep(60)\n", encoding="utf-8")
+    _, error, _ = check_doc_snippets._run_page(silent)
+    assert error == "timed out after 3 s"

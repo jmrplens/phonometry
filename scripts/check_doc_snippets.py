@@ -1397,6 +1397,16 @@ def _script(page: pathlib.Path, fixture: str = "") -> tuple[str, dict[int, int]]
     return script, lines
 
 
+def _text(output: bytes | str | None) -> str:
+    """What a stopped child wrote on a pipe, as text: :mod:`subprocess` hands
+    it over as bytes on POSIX whatever ``text=`` asked for, as text on
+    Windows, and as ``None`` when the child wrote nothing.
+    """
+    if isinstance(output, bytes):
+        return output.decode("utf-8", errors="replace")
+    return output or ""
+
+
 def _run_page(
     page: pathlib.Path, fixture: str = ""
 ) -> tuple[pathlib.Path, str, list[str]]:
@@ -1422,8 +1432,12 @@ def _run_page(
                 timeout=_TIMEOUT_S,
                 cwd=tmp,
             )
-        except subprocess.TimeoutExpired:
-            return page, f"timed out after {_TIMEOUT_S} s", []
+        except subprocess.TimeoutExpired as stopped:
+            # What the page wrote on stderr before it was stopped, a warning
+            # of the step it was in, is the cause the report can give.
+            tail = _text(stopped.stderr).strip().splitlines()
+            said = f"; its last line on stderr: {tail[-1]}" if tail else ""
+            return page, f"timed out after {_TIMEOUT_S} s{said}", []
         if done.returncode != 0:
             tail = done.stderr.strip().splitlines()
             return page, tail[-1] if tail else f"exit status {done.returncode}", []

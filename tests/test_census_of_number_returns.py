@@ -140,11 +140,6 @@ ONE_ELEMENT: frozenset[str] = frozenset(
     {
         "environment.acceleration_test_positions",
         "environment.adrienne_reflection_window",
-        "environment.barrier_background_correction",
-        "environment.fresnel_number",
-        "environment.line_source_segment_power",
-        "materials.air_absorption_correction",
-        "materials.spot_internal_loss_correction",
         "metrology.exact_frequencies",
         "noise_control.band_internal_levels",
         "noise_control.cavitation_distribution",

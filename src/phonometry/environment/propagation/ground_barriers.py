@@ -516,6 +516,39 @@ def ground_effect(
 # --------------------------------------------------------------------------- #
 # B4. Barrier diffraction
 # --------------------------------------------------------------------------- #
+@overload
+def fresnel_number[S: RealScalar](
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
+    frequencies: S,
+    *,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def fresnel_number[V: RealValues](
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
+    frequencies: V,
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def fresnel_number[A: NumericArrayLike](
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
+    frequencies: A,
+    *,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def fresnel_number(
     source_to_edge: float,
     edge_to_receiver: float,
@@ -523,7 +556,7 @@ def fresnel_number(
     frequencies: NumericArrayLike,
     *,
     speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Fresnel number :math:`N = (2/\lambda)(A + B - d)` (Bies Eq. (5.134)).
 
     ``A`` and ``B`` are the two segments of the shortest source-edge-receiver
@@ -536,7 +569,8 @@ def fresnel_number(
     :param direct_distance: Straight source-receiver distance ``d``, in metres.
     :param frequencies: Frequencies, in hertz.
     :param speed_of_sound: Speed of sound ``c``, in m/s.
-    :return: Fresnel number ``N`` per frequency.
+    :return: Fresnel number ``N`` per frequency. A ``float`` for a number, an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a distance is not positive.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or ``frequencies``
         holds a text or a value that is not a real number, or ``direct_distance``,
@@ -557,7 +591,7 @@ def fresnel_number(
     f = require_positive_array(frequencies, "frequencies")
     lam = speed_of_sound / f
     delta = source_to_edge + edge_to_receiver - direct_distance
-    return np.asarray(2.0 * delta / lam, dtype=np.float64)
+    return as_float_or_array(2.0 * delta / lam, like=(frequencies,))
 
 
 @overload

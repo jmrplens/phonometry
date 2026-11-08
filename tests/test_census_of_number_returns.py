@@ -122,6 +122,10 @@ NOT_OF_A_NUMBER: dict[str, str] = {
         "one value per lag the record holds: its fields decide the shape, and "
         "the census builds the record from numbers"
     ),
+    "aircraft.ARP866AAttenuation.path_attenuation": (
+        "one value per band the record holds for one length: its fields decide "
+        "the shape, and the census builds the record from numbers"
+    ),
 }
 
 #: The functions and methods whose validator makes a number one-dimensional,
@@ -130,10 +134,6 @@ NOT_OF_A_NUMBER: dict[str, str] = {
 #: leaves the list when it is: the census then fails its entry as stale.
 ONE_ELEMENT: frozenset[str] = frozenset(
     {
-        "aircraft.ARP866AAttenuation.path_attenuation",
-        "aircraft.atmospheric_adjustment",
-        "aircraft.diffraction_attenuation",
-        "aircraft.ground_effect_adjustment",
         "building.acceleration_level",
         "building.band_mode_count",
         "building.direction_averaged_level_difference",

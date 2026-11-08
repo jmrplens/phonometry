@@ -1328,6 +1328,27 @@ def _cases() -> tuple[Case, ...]:
             {"height_m": 10.0},
             ("height_m",),
         ),
+        # A validator that makes a number one-dimensional, the rest of the class.
+        Case(
+            aircraft.atmospheric_adjustment,
+            {"frequencies": 1000.0, "distance_m": 120.0},
+            ("frequencies",),
+        ),
+        Case(
+            aircraft.diffraction_attenuation,
+            {"frequencies": 1000.0, "path_difference": 0.5, "edge_height_m": 5.0},
+            ("frequencies",),
+        ),
+        Case(
+            aircraft.ground_effect_adjustment,
+            {
+                "frequencies": 1000.0,
+                "source_height_m": 30.0,
+                "receiver_height_m": 1.2,
+                "horizontal_distance_m": 150.0,
+            },
+            ("frequencies",),
+        ),
     )
 
 

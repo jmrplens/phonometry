@@ -5158,7 +5158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **A function of a number or an array of them returns a `float` for numbers
   (a `complex` where its result is complex) and an array for an array, a
   zero-dimensional one included, and says so in its signature.** Two hundred
-  and seven public functions and methods follow the rule. Ninety of them, such as `room.room_constant`,
+  and forty-seven public functions and methods follow the rule. Ninety of them, such as `room.room_constant`,
   `room.critical_distance`,
   `fluids.sea_water_sound_speed` and `vibration.evaluation_zone`, returned a
   `float` (or a grade) for a zero-dimensional array, most of them annotated
@@ -5205,24 +5205,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   readings; the values are the same bits.
   A function whose result is complex follows the rule in its complex form, a
   Python `complex` for numbers and a `complex128` array otherwise, through
-  `as_complex_or_array`: twenty-eight of them, the single degree of freedom
+  `as_complex_or_array`: forty-four of them, the single degree of freedom
   mobilities and `vibration.convert_frf`, the infinite beam impedances and
   mobilities, the transfer stiffnesses, `vibration.blocking_force_ratio`,
   `vibration.base_transmissibility`, the fitted and corrected modes of a
   `vibration.SingleModeFitResult`, `vibration.seat_to_spine_transfer`, the
   two responses of the vibration meter, `underwater.reflection_coefficient`,
   `simulation.far_field_from_contour`,
-  `electroacoustics.program_signal_filter` and the impedances, volumes and
-  transfer impedances of `metrology`, returned a zero-dimensional complex
-  array for numbers (eighteen), a `numpy.complex128`
-  (`metrology.microphone_acoustic_impedance` and
+  `electroacoustics.program_signal_filter`, the impedances, volumes and
+  transfer impedances of `metrology`, the surface impedances, admittance,
+  reflection factors, microphone calibration and tube wavenumber of the
+  impedance tube and the standing wave ratio, the membrane, perforated,
+  microperforated and Helmholtz resonator impedances of `materials`,
+  `noise_control.helmholtz_impedance`, `noise_control.quarter_wave_impedance`
+  and `environment.spherical_reflection_coefficient`, returned a
+  zero-dimensional complex array for numbers (twenty-seven), a
+  `numpy.complex128` (`metrology.microphone_acoustic_impedance` and
   `metrology.ReciprocityMicrophone.acoustic_impedance_pa_s_m3`) or a
-  one-element complex array (eight). The twenty-two functions of the
+  one-element complex array (fifteen), most of the materials ones under an
+  alias of a complex array that the census of returns had not read. Twenty
+  real results of `materials` and `environment` named the same way (the air
+  properties of ISO 10534-2, ASTM E2611 and ISO 17497-1, the absorption
+  coefficients and the uncertainty of ISO 17497-1, the absorptions read from
+  a reflection factor, a standing wave ratio or an impedance, the scattering
+  and diffusion coefficients, the tube attenuation constant and
+  `environment.kurze_anderson_attenuation`),
+  `aircraft.MeanGroundPlaneResult.height` and
+  `environment.EffectiveSoundSpeedProfile.speed_at` returned a
+  zero-dimensional array for numbers, and `materials.reverberation_time_uncertainty`
+  and `emission.mean_single_event_level` one for a sequence they reduce; they
+  return a `float` now. The twenty-two functions of the
   detailed building model and `electroacoustics.band_limit_response`
   returned a one-element array for a number and for a zero-dimensional
   array, because the check of their frequencies or levels made either
   one-dimensional; they return a `float` and a zero-dimensional array now.
-  The values are the same bits. A hundred and seventy-eight of them have
+  The values are the same bits. Two hundred and twelve of them have
   overloads, so `room.room_constant(100.0, 0.2)`
   reads as a `float`, `room.room_constant(100.0, alphas)` as an array
   whatever the shape of `alphas`, and an `ArrayLike` or a nested list as the
@@ -5236,9 +5253,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   among them, `broadcast.true_peak_level`, `building.energy_average_level`,
   `room.directivity_energy_average` and their kin), the predictions that read
   their bands from the surfaces they are given, the two properties,
-  `room.reverberation_time_standard_deviation`, `room.steady_state_spl` and
-  the four flanking paths of the detailed building model keep the union with
-  the rule at run time. `scripts/check_return_overloads.py` also fails on a
+  `room.reverberation_time_standard_deviation`, `room.steady_state_spl`,
+  the four flanking paths of the detailed building model and three ISO
+  17497-1 absorption coefficients and the uncertainty of one keep the union
+  with the rule at run time. `tests/test_census_of_number_returns.py` calls
+  every public function and method it can call with numbers alone and fails
+  a zero-dimensional array, a one-element array or a numpy scalar for them,
+  which a function annotated as an array alone gave past the check; it names
+  the 96 functions and methods whose validator still makes a number
+  one-dimensional, which follow later. `scripts/check_return_overloads.py` also fails on a
   single value and an array in one return with no overload saying which, and
   on a `float` head beside a complex array or a `complex` beside a real one,
   rule A57 states both forms, the

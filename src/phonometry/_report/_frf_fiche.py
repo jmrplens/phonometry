@@ -48,6 +48,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     import numpy as np
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..vibration.structural._impact_mobility import ImpactMobilityResult
@@ -56,7 +57,7 @@ if TYPE_CHECKING:
     from .metadata import ReportMetadata
 
 
-def frequency_range(frequencies: np.ndarray, language: Language = "en") -> str:
+def frequency_range(frequencies: NDArray[np.float64], language: Language = "en") -> str:
     """The ``fmin - fmax`` frequency-range string, in hertz (compact form)."""
     lo = format_number(float(frequencies.min()), language, decimals=1, trim=True)
     hi = format_number(float(frequencies.max()), language, decimals=1, trim=True)

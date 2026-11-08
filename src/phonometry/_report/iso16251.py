@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
     from reportlab.platypus import Table
 
@@ -138,7 +139,7 @@ def _metadata_pairs(
 
 def _reference_floor_with_covering(
     result: FloorCoveringImprovementResult,
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """Return ``Ln,r = Ln,r,0 - delta-L`` on the 16 rating bands, or ``None``.
 
     The heavyweight reference floor ``Ln,r,0`` (ISO 717-2:2020 Table 4) is
@@ -169,7 +170,7 @@ def _reference_floor_with_covering(
 
 def _value_table(
     result: FloorCoveringImprovementResult,
-    ln_r: np.ndarray | None,
+    ln_r: NDArray[np.float64] | None,
     language: Language = "en",
 ) -> Table:
     """Build the per-band ``f | delta-L`` table.

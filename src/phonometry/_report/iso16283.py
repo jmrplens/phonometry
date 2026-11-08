@@ -58,6 +58,8 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Sequence
 
+    from numpy.typing import NDArray
+
     from .._i18n import Language
     from ..building.measurement.insulation import (
         AirborneInsulationResult,
@@ -182,7 +184,11 @@ def render_iso16283_report(
     is_impact = quantity in _IMPACT_QUANTITIES
 
     def build_columns(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
+        value_header: str,
+        curve: NDArray[np.float64],
+        *,
+        verbose: bool,
+        language: Language,
     ) -> tuple[Sequence[Column], str, Any]:
         """The field table: ``f | value`` or, verbose, the measurement chain."""
         from reportlab.lib.units import mm

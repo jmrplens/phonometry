@@ -68,6 +68,7 @@ from ._layout import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -124,7 +125,7 @@ def _cell(
     return format_number(v, language, decimals=decimals)
 
 
-def _fraction_label(frequency: np.ndarray | None, language: Language) -> str:
+def _fraction_label(frequency: NDArray[np.float64] | None, language: Language) -> str:
     """Return the caption describing the analysis band set.
 
     Only a ``frequency is None`` result is a broadband analysis; a result that
@@ -312,7 +313,9 @@ def _parameter_table(result: RoomAcousticsResult, language: Language = "en") -> 
 
 
 def _band_value(
-    frequency: np.ndarray | None, values: np.ndarray, target: float
+    frequency: NDArray[np.float64] | None,
+    values: NDArray[np.float64],
+    target: float,
 ) -> float:
     """Return the parameter value at the band closest to ``target`` Hz.
 
@@ -328,7 +331,7 @@ def _band_value(
     return real_number(values[idx], "values")
 
 
-def _band_fraction(frequency: np.ndarray | None) -> int:
+def _band_fraction(frequency: NDArray[np.float64] | None) -> int:
     """The band fraction of a result: octave (1) or one-third octave (3).
 
     Uses the shared :func:`.._infer_band_fraction` classifier so the boxed
@@ -343,7 +346,7 @@ def _band_fraction(frequency: np.ndarray | None) -> int:
 
 
 def _reverberation_descriptor(
-    result: RoomAcousticsResult, values: np.ndarray, fraction: int
+    result: RoomAcousticsResult, values: NDArray[np.float64], fraction: int
 ) -> tuple[float, bool, float]:
     """Return ``(value, is_mid, band)`` for the boxed reverberation descriptor.
 

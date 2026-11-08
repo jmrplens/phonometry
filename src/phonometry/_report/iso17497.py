@@ -67,6 +67,7 @@ from .metadata import ReportMetadata
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -159,7 +160,7 @@ def _common_metadata_pairs(
     ]
 
 
-def _freq_range(freqs: np.ndarray, language: Language) -> str | None:
+def _freq_range(freqs: NDArray[np.float64], language: Language) -> str | None:
     """The ``{lo} to {hi}`` frequency-range string, or ``None`` when empty."""
     if not freqs.size:
         return None

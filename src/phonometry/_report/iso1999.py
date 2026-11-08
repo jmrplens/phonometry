@@ -61,6 +61,7 @@ from ._layout import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -110,7 +111,7 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
-def _handicap_indices(frequencies: np.ndarray) -> list[int]:
+def _handicap_indices(frequencies: NDArray[np.float64]) -> list[int]:
     """Indices of the 2/3/4 kHz hearing-handicap frequencies present in the set."""
     return [
         i
@@ -123,7 +124,7 @@ def _handicap_indices(frequencies: np.ndarray) -> list[int]:
 
 
 def _representative(
-    frequencies: np.ndarray, values: np.ndarray
+    frequencies: NDArray[np.float64], values: NDArray[np.float64]
 ) -> tuple[bool, float, float]:
     """Return the representative shift/level and whether it is the 2/3/4 kHz mean.
 

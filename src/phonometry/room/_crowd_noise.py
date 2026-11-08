@@ -390,9 +390,9 @@ class CrowdNoiseResult(OwnsArrays):
         conversation stops working.
     """
 
-    talkers: np.ndarray
-    absorption_areas: np.ndarray
-    levels: np.ndarray
+    talkers: NDArray[np.float64]
+    absorption_areas: NDArray[np.float64]
+    levels: NDArray[np.float64]
     signal_level: float
     distance: float
     sound_power_level: float
@@ -503,7 +503,7 @@ class CrowdNoiseResult(OwnsArrays):
             )
             raise ValueError(msg)
 
-    def speech_to_noise(self) -> np.ndarray:
+    def speech_to_noise(self) -> NDArray[np.float64]:
         """Speech-to-noise ratio for every point of :attr:`levels`, dB."""
         return self.signal_level - self.levels
 

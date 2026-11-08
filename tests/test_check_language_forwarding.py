@@ -2114,11 +2114,172 @@ def test_super_of_a_named_class_and_a_class_method_through_its_class(
 
             def through_class(ax, language="en"):
                 return _Labelled.build(ax, language)
+
+
+            def through_class_without_language(ax, language="en"):
+                return _Labelled.build(ax)
             """
         },
     )
     assert sorted((f.caller, f.helper) for f in found) == [
         ("PastPlain.plot", "pkg.records._Labelled.plot"),
+        ("through_class_without_language", "pkg.records._Labelled.build"),
+    ]
+
+
+def test_an_init_a_record_binds_or_writes_is_the_one_a_call_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``@dataclass`` writes no ``__init__`` its class body binds, so
+    ``__init__ = _Labelled.__init__`` is the one ``Assigned(1.0)`` runs,
+    and it drops the language; a ``dataclass`` the module rebinds to a
+    decorator of its own writes none, so ``Rebound(1.0)`` runs
+    ``_Labelled.__init__`` too. The ``__init__`` ``@dataclass`` writes
+    takes the record's fields, so ``Spoken(1.0)`` drops the language its
+    ``language`` field takes, and ``Spoken(1.0, language)`` and
+    ``KeywordOnly(1.0, language=language)`` hand it on.
+
+    A record's ``__init__`` was read as generated whenever an import named
+    the decorator ``dataclass``, so a body that binds one and a decorator
+    rebound to write none were passed over, and a generated one was read as
+    taking no language, so a call that drops it passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.labelled": """
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.value = value
+            """,
+            "pkg.records": """
+            from dataclasses import KW_ONLY, dataclass
+
+            from .labelled import _Labelled
+
+
+            @dataclass
+            class Assigned(_Labelled):
+                value: float = 0.0
+                __init__ = _Labelled.__init__
+
+
+            @dataclass
+            class Spoken:
+                value: float = 0.0
+                language: str = "en"
+
+
+            @dataclass
+            class KeywordOnly:
+                value: float = 0.0
+                _: KW_ONLY
+                language: str = "en"
+
+
+            def plot_assigned(ax, *, language="en"):
+                return Assigned(1.0)
+
+
+            def plot_spoken(ax, *, language="en"):
+                return Spoken(1.0)
+
+
+            def plot_spoken_on(ax, *, language="en"):
+                return Spoken(1.0, language)
+
+
+            def plot_keyword_only(ax, *, language="en"):
+                return KeywordOnly(1.0, language=language)
+            """,
+            "pkg.rebound": """
+            from dataclasses import dataclass
+
+            from .labelled import _Labelled
+
+
+            def dataclass(cls):
+                return cls
+
+
+            @dataclass
+            class Rebound(_Labelled):
+                value: float = 0.0
+
+
+            def plot_rebound(ax, *, language="en"):
+                return Rebound(1.0)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_assigned", "pkg.labelled._Labelled.__init__"),
+        ("plot_rebound", "pkg.labelled._Labelled.__init__"),
+        ("plot_spoken", "pkg.records.Spoken.__init__"),
+    ]
+
+
+def test_a_class_method_an_alias_holds_and_super_of_another_instance(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An alias of a class method, ``build = Maker.build``, holds it bound to
+    its class, so ``build(ax, language)`` hands the language to its
+    ``language`` and ``build(ax)`` drops it. ``super(Base, other)`` reads
+    the order of the class of ``other``, past ``Base``: in
+    ``Receiver(Base, Tail)`` it reaches ``Tail.plot``, which takes the
+    language, from a method of ``Caller(Tail)``, whose own order holds no
+    ``Base``.
+
+    An alias was read as taking the class's first argument in ``cls``, so
+    the language landed one place short and both calls were refused; and
+    ``super(Base, other)`` read the order of the class the method is
+    written in, which holds no ``Base``, so the call reached nothing and
+    passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            class Maker:
+                @classmethod
+                def build(cls, ax=None, language="en"):
+                    return ax
+
+
+            def through_alias(ax, language="en"):
+                build = Maker.build
+                return build(ax, language)
+
+
+            def through_alias_without_language(ax, language="en"):
+                build = Maker.build
+                return build(ax)
+
+
+            class Base:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class Tail:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            class Receiver(Base, Tail):
+                pass
+
+
+            class Caller(Tail):
+                def plot(self, ax=None, *, language="en"):
+                    other = Receiver()
+                    return super(Base, other).plot(ax)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("Caller.plot", "pkg.records.Tail.plot"),
+        ("through_alias_without_language", "pkg.records.Maker.build"),
     ]
 
 

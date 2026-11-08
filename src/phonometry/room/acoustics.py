@@ -171,16 +171,16 @@ class RoomAcousticsResult(OwnsArrays):
         }
     )
 
-    frequencies: np.ndarray | None
-    edt: np.ndarray
-    t20: np.ndarray
-    t30: np.ndarray
-    c50: np.ndarray
-    c80: np.ndarray
-    d50: np.ndarray
-    ts: np.ndarray
-    dynamic_range: np.ndarray
-    curvature: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    edt: NDArray[np.float64]
+    t20: NDArray[np.float64]
+    t30: NDArray[np.float64]
+    c50: NDArray[np.float64]
+    c80: NDArray[np.float64]
+    d50: NDArray[np.float64]
+    ts: NDArray[np.float64]
+    dynamic_range: NDArray[np.float64]
+    curvature: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a result whose parameters do not run over the same bands.
@@ -233,7 +233,7 @@ class RoomAcousticsResult(OwnsArrays):
         )
 
     @property
-    def edt_valid(self) -> np.ndarray:
+    def edt_valid(self) -> NDArray[np.bool_]:
         """Per band, whether the EDT is evaluated with the noise far enough below.
 
         At least 10 dB + 15 dB under the maximum (ISO 3382-1:2009, 5.3.3);
@@ -244,7 +244,7 @@ class RoomAcousticsResult(OwnsArrays):
         )
 
     @property
-    def t20_valid(self) -> np.ndarray:
+    def t20_valid(self) -> NDArray[np.bool_]:
         """Per band, whether T20 is evaluated with the noise far enough below.
 
         20 dB + 15 dB, tightened by the tail headroom to 46 dB so a
@@ -257,7 +257,7 @@ class RoomAcousticsResult(OwnsArrays):
         return np.isfinite(self.t20) & (self.dynamic_range >= needed)
 
     @property
-    def t30_valid(self) -> np.ndarray:
+    def t30_valid(self) -> NDArray[np.bool_]:
         """Per band, whether T30 is evaluated with the noise far enough below.
 
         30 dB + 15 dB, tightened by the tail headroom to 54 dB so a
@@ -358,8 +358,10 @@ class RoomAcousticsResult(OwnsArrays):
 
 
 def _schroeder(
-    p2: np.ndarray, fs: float
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, int, float]:
+    p2: NDArray[np.float64], fs: float
+) -> tuple[
+    NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], float, int, float
+]:
     r"""Backward-integrated decay curve (ISO 3382-1, 5.3.3, Eq. (1)-(3)).
 
     :param p2: Squared impulse response, onset-trimmed.
@@ -383,8 +385,8 @@ def _schroeder(
 
 
 def _fit_decay_time(
-    time: np.ndarray,
-    level: np.ndarray,
+    time: NDArray[np.float64],
+    level: NDArray[np.float64],
     decay_range: tuple[float, float],
     trust_floor_db: float,
 ) -> float:
@@ -408,7 +410,7 @@ def _fit_decay_time(
     return -60.0 / slope
 
 
-def _band_parameters(x: np.ndarray, fs: float) -> tuple[float, ...]:
+def _band_parameters(x: NDArray[np.float64], fs: float) -> tuple[float, ...]:
     """All ISO 3382 parameters for one band signal.
 
     :return: ``(edt, t20, t30, c50, c80, d50, ts, dynamic_range)``.
@@ -460,8 +462,8 @@ class DecayCurve(OwnsArrays):
     :func:`decay_curve` returned before it.
     """
 
-    times: np.ndarray
-    levels: np.ndarray
+    times: NDArray[np.float64]
+    levels: NDArray[np.float64]
     band: float | None = None
 
     def __post_init__(self) -> None:

@@ -189,6 +189,12 @@ EXEMPT: dict[tuple[str, str], str] = {
         "writes a data component in a fenced example, written out as a page "
         "writes it, to see the page keep its copy; it reads no fence itself"
     ),
+    ("site/scripts/indexnow-diff.test.mjs", "<script>"): (
+        "a test of what IndexNow is sent hands it a Markdown copy that prints a "
+        "release line in a fenced example, written out as a copy writes it, to "
+        "see the digest keep the line as the page's text; it reads no fence "
+        "itself"
+    ),
 }
 
 #: The strings the name read at a node stands for.

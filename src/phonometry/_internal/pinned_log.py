@@ -81,9 +81,16 @@ other platform already shipped.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from .validation import real_array
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    from .types import NumericArrayLike
 
 __all__ = ["pinned_log", "pinned_log10"]
 
@@ -433,8 +440,8 @@ _ONE = np.uint64(0x3FF0000000000000)
 
 
 def _two_product(
-    a: np.ndarray, b: np.ndarray | np.float64
-) -> tuple[np.ndarray, np.ndarray]:
+    a: NDArray[np.float64], b: NDArray[np.float64] | np.float64
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Dekker's exact product: ``a * b == p + e`` with ``p = fl(a * b)``.
 
     Exact whenever neither the split nor the product overflows, which the two
@@ -456,8 +463,8 @@ def _two_product(
 
 
 def _two_sum(
-    a: np.ndarray | np.float64, b: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    a: NDArray[np.float64] | np.float64, b: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Knuth's exact sum: ``a + b == s + e`` with ``s = fl(a + b)``.
 
     :param a: First addend.
@@ -471,10 +478,10 @@ def _two_sum(
 
 
 def _fused_multiply_add(
-    a: np.ndarray,
-    b: np.ndarray | np.float64,
-    c: np.ndarray | np.float64,
-) -> np.ndarray:
+    a: NDArray[np.float64],
+    b: NDArray[np.float64] | np.float64,
+    c: NDArray[np.float64] | np.float64,
+) -> NDArray[np.float64]:
     """``fl(a * b + c)`` emulated in plain IEEE 754 operations.
 
     The error-free-transformation emulation: the product and the first sum
@@ -497,7 +504,7 @@ def _fused_multiply_add(
     return np.asarray(total + (total_err + s_err))
 
 
-def _main_path(x: np.ndarray) -> np.ndarray:
+def _main_path(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """The table-driven path: every ``x`` outside the near-one window.
 
     ``x = 2^k z`` with ``z`` in ``[0x1.6p-1, 0x1.6p0)``; the subinterval table
@@ -531,7 +538,7 @@ def _main_path(x: np.ndarray) -> np.ndarray:
     )
 
 
-def _near_one_path(x: np.ndarray) -> np.ndarray:
+def _near_one_path(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """The window ``[1 - 0x1p-4, 1 + 0x1.09p-4]``, where the table is too coarse.
 
     A degree-twelve polynomial in ``r = x - 1`` (exact by Sterbenz), with the
@@ -570,7 +577,7 @@ def _near_one_path(x: np.ndarray) -> np.ndarray:
     return np.where(x.view(np.uint64) == _ONE, 0.0, y)
 
 
-def pinned_log(values: np.ndarray) -> np.ndarray:
+def pinned_log(values: NumericArrayLike) -> NDArray[np.float64]:
     """``log`` elementwise, identical bits everywhere, at numpy speed.
 
     The drop-in replacement for taking :func:`math.log` one element at a
@@ -629,7 +636,7 @@ _LOG10_2_HI = float.fromhex("0x1.34413509f6000p-2")
 _LOG10_2_LO = float.fromhex("0x1.9fef311f12b36p-42")
 
 
-def pinned_log10(values: np.ndarray) -> np.ndarray:
+def pinned_log10(values: NumericArrayLike) -> NDArray[np.float64]:
     """``log10`` elementwise, the bits glibc returns, on every machine.
 
     glibc's ``log10`` is the SunPro routine: the exponent ``k`` is split off,

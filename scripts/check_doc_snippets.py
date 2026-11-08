@@ -71,6 +71,7 @@ import subprocess
 import sys
 import tempfile
 import tokenize
+from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import (
     MAX_EMAX,
@@ -81,10 +82,7 @@ from decimal import (
     Inexact,
     InvalidOperation,
 )
-from typing import TYPE_CHECKING, TypeGuard
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+from typing import TypeGuard
 
 from markdown_fences import fences, page_kind
 
@@ -702,28 +700,60 @@ def _pieces(text: str, argument: _Argument) -> list[tuple[str, bool]]:
     return pieces
 
 
-def _written_parts(
-    calls: Sequence[tuple[str, Sequence[str]]],
-    arguments: tuple[_Argument, ...] | None,
-) -> list[_Part]:
-    """The parts of what a print wrote over all its calls, each call and each
-    line it wrote closed by a ``"line"`` part, its own literal text marked as
-    a label.
+#: What one call of a print wrote, as the recorder keeps it: the separator it
+#: was given, what each argument wrote, and what it wrote after the last of
+#: them, its ending, or the separator before an argument it failed to write.
+_Call = tuple[str, Sequence[str], str]
+
+
+def _stretches(
+    calls: Sequence[_Call], arguments: tuple[_Argument, ...] | None
+) -> list[tuple[str, bool]]:
+    """What a print wrote over all its calls, in the order it wrote it, cut
+    into stretches of the page's own text (``True``: its literals, the
+    separator, the ending) and of what its code computed (``False``).
+
+    Two pieces of the same kind written one after the other are one stretch,
+    as a reader reads them: ``print(1, 2, sep="")`` writes the value ``12``,
+    and a loop of ``print(x, end="")`` one value of all their digits. A
+    computed value and the page's text never join, so ``f"A{x}"`` still
+    writes the label ``A`` and the value of ``x``.
     """
-    out: list[_Part] = []
-    for sep, texts in calls:
+    pieces: list[tuple[str, bool]] = []
+    for sep, texts, end in calls:
         known = arguments is not None and len(arguments) == len(texts)
-        pieces: list[tuple[str, bool]] = []
         for index, text in enumerate(texts):
             if index:
                 pieces.append((sep, True))
             pieces += _pieces(text, arguments[index] if known and arguments else None)
-        for text, label in pieces:
-            for number, line in enumerate(text.split("\n")):
-                if number:
-                    out.append(_Part("line", "\n"))
-                out += _parts(line, label=label)
-        out.append(_Part("line", "\n"))
+        pieces.append((end, True))
+    # Each stretch gathers its pieces and joins them once, so a loop of many
+    # calls that write one stretch does not copy it again for each call.
+    stretches: list[tuple[list[str], bool]] = []
+    for text, label in pieces:
+        if not text:
+            continue
+        if stretches and stretches[-1][1] == label:
+            stretches[-1][0].append(text)
+        else:
+            stretches.append(([text], label))
+    return [("".join(texts), label) for texts, label in stretches]
+
+
+def _written_parts(
+    calls: Sequence[_Call],
+    arguments: tuple[_Argument, ...] | None,
+) -> list[_Part]:
+    """The parts of what a print wrote over all its calls (:func:`_stretches`),
+    a ``"line"`` part where it ended a line and its own text marked as a
+    label.
+    """
+    out: list[_Part] = []
+    for text, label in _stretches(calls, arguments):
+        for number, line in enumerate(text.split("\n")):
+            if number:
+                out.append(_Part("line", "\n"))
+            out += _parts(line, label=label)
     return out
 
 
@@ -1125,7 +1155,7 @@ def output_disagreement(
     """
     lines = promised.splitlines() if isinstance(promised, str) else list(promised)
     calls = [written] if isinstance(written, str) else list(written)
-    wrote = _written_parts([(" ", [text]) for text in calls], None)
+    wrote = _written_parts([(" ", [text], "\n") for text in calls], None)
     output = "\n".join(calls)
     comma = _reads_decimal_comma(output, spanish=decimal_comma)
     arrow = _ARROW.search(output) is None
@@ -1136,15 +1166,15 @@ def output_disagreements(
     page: pathlib.Path,
     script: str,
     lines: dict[int, int],
-    written: dict[int, list[tuple[str, list[str]]]],
+    written: dict[int, list[_Call]],
 ) -> list[str]:
     """Failures for every output comment of *page* that its print contradicts.
 
     :param script: The script the page ran as (:func:`_script`).
     :param lines: The line of the page each line of the script stands on.
     :param written: What each print wrote, keyed by its line in the script:
-        one ``(sep, texts)`` per call, *texts* holding what each argument
-        wrote, in the order the calls came.
+        one ``(sep, texts, end)`` per call (:data:`_Call`), in the order the
+        calls came.
     """
     failures: list[str] = []
     spanish = page.is_relative_to(_SITE_ES)
@@ -1166,7 +1196,8 @@ def output_disagreements(
                 "never runs this print"
             )
             continue
-        output = "\n".join(sep.join(texts) for sep, texts in calls)
+        output = "".join(sep.join(texts) + end for sep, texts, end in calls)
+        output = output.removesuffix("\n")
         comma = _reads_decimal_comma(output, spanish=spanish)
         arrow = _ARROW.search(output) is None
         why = _disagreement(promise.lines, wrote, decimal_comma=comma, arrow=arrow)
@@ -1180,10 +1211,15 @@ def output_disagreements(
 
 #: The module a page's script imports before anything else. It wraps
 #: ``print`` so that every call made from the script itself, at any depth of
-#: its own functions and loops, also records the text the call writes, keyed
-#: by the line of the script the call stands on; a print made inside the
-#: library is not the page's and is not recorded. When the script ends, however
-#: it ends, the record is saved beside it as JSON for :func:`_run_page` to read.
+#: its own functions and loops, also records what the call writes, keyed by
+#: the line of the script the call stands on; a print made inside the library
+#: is not the page's and is not recorded. The call writes through a file that
+#: hands each piece on to the one it was given and keeps it once that write
+#: has gone through, so the record holds what the print wrote and nothing
+#: else: each argument converted once, by the print itself, the ending it was
+#: given, and of a print that fails part of the way, or to a closed file,
+#: only what it wrote before it failed. When the script ends, however it
+#: ends, the record is saved beside it as JSON for :func:`_run_page` to read.
 _RECORDER = """\
 import atexit
 import builtins
@@ -1197,14 +1233,41 @@ _PRINT = builtins.print
 _WRITTEN = {}
 
 
+class _Kept:
+    def __init__(self, file):
+        self.file = file
+        self.pieces = []
+
+    def write(self, text):
+        written = self.file.write(text)
+        self.pieces.append(text)
+        return written
+
+    def flush(self):
+        self.file.flush()
+
+
+def _keep(line, count, sep, pieces):
+    # A print writes its arguments with the separator between them and then
+    # its ending: what it wrote after the last argument it wrote is the
+    # ending, or the separator before an argument it failed to write.
+    texts = pieces[0 : max(2 * count - 1, 0) : 2]
+    at = 2 * len(texts) - 1 if texts else 0
+    after = pieces[at] if at < len(pieces) else ""
+    _WRITTEN.setdefault(line, []).append([" " if sep is None else sep, texts, after])
+
+
 def _print(*args, sep=" ", end="\\n", file=None, flush=False):
     caller = sys._getframe(1)
-    if caller.f_code.co_filename == _SCRIPT:
-        texts = [str(arg) for arg in args]
-        _WRITTEN.setdefault(caller.f_lineno, []).append(
-            [" " if sep is None else sep, texts]
-        )
-    _PRINT(*args, sep=sep, end=end, file=file, flush=flush)
+    target = sys.stdout if file is None else file
+    if caller.f_code.co_filename != _SCRIPT or target is None:
+        return _PRINT(*args, sep=sep, end=end, file=file, flush=flush)
+    kept = _Kept(target)
+    try:
+        return _PRINT(*args, sep=sep, end=end, file=kept, flush=flush)
+    finally:
+        if kept.pieces:
+            _keep(caller.f_lineno, len(args), sep, kept.pieces)
 
 
 def _save():
@@ -1283,7 +1346,7 @@ def _run_page(
             return page, "the run ended without saving what its prints wrote", []
         saved = json.loads(record.read_text("utf-8"))
     written = {
-        int(line): [(sep, texts) for sep, texts in calls]
+        int(line): [(sep, texts, end) for sep, texts, end in calls]
         for line, calls in saved.items()
     }
     return page, "", output_disagreements(page, script, lines, written)

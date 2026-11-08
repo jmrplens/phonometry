@@ -294,7 +294,20 @@ def _failures(script: str, outputs: dict[int, str]) -> list[str]:
     """
     page = check_doc_snippets._SITE / "page.mdx"
     lines = {number: number for number in range(1, script.count("\n") + 2)}
-    written = {line: [(" ", [text])] for line, text in outputs.items()}
+    written = {line: [(" ", [text], "\n")] for line, text in outputs.items()}
+    found: list[str] = check_doc_snippets.output_disagreements(
+        page, script, lines, written
+    )
+    return found
+
+
+def _held_against(script: str, line: int, texts: list[str]) -> list[str]:
+    """What the output check reports for *script*, run as an English page,
+    whose print on *line* wrote *texts*, one for each of its arguments.
+    """
+    page = check_doc_snippets._SITE / "page.mdx"
+    lines = {number: number for number in range(1, script.count("\n") + 2)}
+    written = {line: [(" ", texts, "\n")]}
     found: list[str] = check_doc_snippets.output_disagreements(
         page, script, lines, written
     )
@@ -776,7 +789,7 @@ def test_a_spanish_page_reads_a_decimal_comma_from_its_path() -> None:
     """The page's path, under the Spanish site, decides the decimal comma."""
     script = "print(35.9)  # 35,9 m\n"
     lines = {1: 1}
-    written = {1: [(" ", ["35.9"])]}
+    written = {1: [(" ", ["35.9"], "\n")]}
     spanish = check_doc_snippets._SITE_ES / "page.mdx"
     english = check_doc_snippets._SITE / "page.mdx"
     assert (
@@ -880,3 +893,83 @@ def test_a_symbol_before_an_approximately_sign_is_read_past() -> None:
     assert promise.word is None
     assert _failures(script, {1: "11.125 6.0"}) == []
     assert _failures(script.replace("11.1 dB", "11.3 dB"), {1: "11.125 6.0"}) != []
+
+
+def test_a_print_converts_each_argument_once_and_is_held_to_what_it_wrote(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An argument whose text changes each time it is read is read once.
+
+    The recorder converted every argument itself and then let ``print``
+    convert it again, so it kept a text the print never wrote and ran the
+    conversion a second time in the page's own code.
+    """
+    code = (
+        "class Count:\n"
+        "    calls = 0\n"
+        "    def __str__(self):\n"
+        "        Count.calls += 1\n"
+        "        return str(Count.calls)\n"
+        "print(Count())  # 1\n"
+        "print(Count.calls)  # 1\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = _page(tmp_path, code.replace("# 1\nprint", "# 2\nprint"), name="w.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "the comment says 2 where the print wrote 1" in failure
+
+
+def test_a_print_is_held_to_what_it_wrote_before_it_failed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A print to a closed file wrote nothing, and one whose second argument
+    fails to convert wrote the first.
+    """
+    code = (
+        "import io\n"
+        "closed = io.StringIO()\n"
+        "closed.close()\n"
+        "try:\n"
+        "    print(2, file=closed)  # 2\n"
+        "except ValueError:\n"
+        "    pass\n"
+    )
+    (failure,) = check_doc_snippets.check_execution([_page(tmp_path, code)])
+    assert "never runs this print" in failure
+    partial = (
+        "class Unwritten:\n"
+        "    def __str__(self):\n"
+        "        raise RuntimeError('no text')\n"
+        "try:\n"
+        "    print(7, Unwritten())  # 7\n"
+        "except RuntimeError:\n"
+        "    pass\n"
+    )
+    page = _page(tmp_path, partial, name="partial.md")
+    assert check_doc_snippets.check_execution([page]) == []
+
+
+def test_a_print_is_read_with_the_separator_and_the_ending_it_was_given(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``sep=""`` joins the values, an ending is written, and a line ends only
+    where the print ends one.
+    """
+    code = (
+        "print(1, 2, sep='')  # 12\n"
+        "print(1, end=' 2\\n')  # 1 2\n"
+        "for x in range(3):\n"
+        "    print(x, end=' ')  # 0 1 2\n"
+        "print()\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    joined = _page(tmp_path, code.replace("# 12", "# 1 2"), name="joined.md")
+    (failure,) = check_doc_snippets.check_execution([joined])
+    assert "the comment says 1 where the print wrote 12" in failure
+    # A loop that writes one line is not stated by its first value alone.
+    short = _page(tmp_path, code.replace("# 0 1 2", "# 0"), name="short.md")
+    (failure,) = check_doc_snippets.check_execution([short])
+    assert "stops before the printed 1" in failure
+    # The page's own text and a value it formats into it stay apart.
+    script = 'x = 5\nprint(f"A{x}")  # 5\n'
+    assert _held_against(script, 2, ["A5"]) == []

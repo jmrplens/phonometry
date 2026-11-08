@@ -36,7 +36,12 @@ import numpy as np
 import numpy._core.numeric as numpy_numeric
 import pytest
 import scipy
-from libm_identity import TUNABLES, WITHOUT_FMA, runs_the_pinned_routines
+from libm_identity import (
+    TUNABLES,
+    WITHOUT_FMA,
+    glibc_built_for_x86_64_v3,
+    runs_the_pinned_routines,
+)
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
 from scipy._lib._array_api import array_namespace
@@ -1842,25 +1847,42 @@ def test_a_blas_that_fuses_its_complex_dot_designs_the_same_filters(
 
 @pytest.mark.skipif(
     not runs_the_pinned_routines(),
-    reason="needs this process on glibc's FMA variant, on an x86-64 processor "
-    "with FMA, so the child can be handed the other one",
+    reason="needs this process on the FMA variant of the glibc routines the pins "
+    "spell, glibc 2.29 or later on an x86-64 processor with FMA, so the child "
+    "can be handed the other one",
+)
+@pytest.mark.skipif(
+    glibc_built_for_x86_64_v3(),
+    reason="glibc here is built for x86-64-v3, its libm declaring that ISA "
+    "level needed, so it carries no variant without FMA for the child to be "
+    "handed",
 )
 def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     """glibc picks its routines by processor; the design no longer follows it.
 
-    On x86-64 glibc carries ``exp``, ``log``, ``pow``, ``sin``, ``tan`` and
-    ``atan`` twice, built with fused multiply-adds and without, and picks a
-    set by what the processor reports. A child process with FMA masked runs
-    the other set, which it shows by its ``exp`` parting from this process's
-    on the same draws. Before the pinned routines it designed 43f786ffab5c4dd4
-    for A at 48 kHz, and before the pinned arctangent it designed A at
-    44.1 kHz differently from this process; now it designs the documented
-    bytes at both rates, because no routine of glibc's is left on the path.
+    glibc built for the x86-64 baseline carries ``exp``, ``log``, ``pow``,
+    ``sin``, ``tan`` and ``atan`` twice, built with fused multiply-adds and
+    without, and picks a set by what the processor reports. A child process
+    with FMA masked runs the other set, which it shows by its ``exp`` parting
+    from this process's on the same draws. Before the pinned routines it
+    designed 43f786ffab5c4dd4 for A at 48 kHz, and before the pinned
+    arctangent it designed A at 44.1 kHz differently from this process; now
+    it designs the documented bytes at both rates, because no routine of
+    glibc's is left on the path.
 
     It asks for this process to run the FMA variant, not only for a processor
     that has one: started under a mask of its own, the parent would run the
     same variant as the child, and the check that the child's ``exp`` parts
-    from it would fail with both designs right.
+    from it would fail with both designs right. It asks for glibc 2.29 or
+    later, whose routines are the ones the pins spell: the ``exp`` of 2.28 is
+    IBM's, whose two builds part on 2 inputs in a million, so on these 20 000
+    draws the child's would be this process's. And it asks for a glibc that
+    carries the other variant: one built for x86-64-v3 compiles each routine
+    for a processor with FMA and carries no variant without it, so the mask
+    hands the child nothing else and the claim has no second variant to be
+    about. That is read from the ISA level the library declares, never from
+    the child's ``exp`` agreeing with this process's, which would turn a mask
+    that stopped working into a skip.
     """
     script = textwrap.dedent(
         """

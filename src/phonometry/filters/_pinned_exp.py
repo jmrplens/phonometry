@@ -10,7 +10,7 @@ a fraction of inputs to the other neighbour, and the fit amplifies a last bit
 into a different filter. This module removes the platform from the result. It
 spells the routines glibc ships for ``exp`` and ``pow`` (ARM's
 optimized-routines, ``math/exp.c`` and ``math/pow.c``, which glibc has carried
-since 2.28) in numpy array arithmetic that IEEE 754 fixes exactly, so the
+since 2.29) in numpy array arithmetic that IEEE 754 fixes exactly, so the
 answer is a function of the input alone.
 
 The C routines are compiled, on every x86-64 machine with a fused multiply-add

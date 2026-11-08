@@ -17,6 +17,7 @@ import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
 import { packagesNotListedIn } from './src/lib/bundled-packages.mjs';
 import { basePath, siteUrl } from './src/data/site.mjs';
+import { isoDay } from './src/lib/date-rules.mjs';
 import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
 import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
@@ -220,7 +221,7 @@ const commitDay = (args, what) => {
         'The build needs the repository history (a checkout with fetch-depth 0).',
     );
   }
-  return new Date(Number(printed) * 1000).toISOString().slice(0, 10);
+  return isoDay(new Date(Number(printed) * 1000));
 };
 const dateCreated = commitDay(['--max-parents=0', 'HEAD'], 'the first commit');
 const datePublished = '2026-01-06';

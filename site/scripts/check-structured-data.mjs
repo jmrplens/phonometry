@@ -46,6 +46,7 @@ import { basePath, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs, topicForSlug, topicSections, topics } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
+import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 
 import { decode, markupOf, markupText } from './shared/dist-pages.mjs';
@@ -85,7 +86,7 @@ const commitDay = (args, what) => {
 	if (!/^\d+$/.test(printed ?? '')) {
 		throw new Error(`git names no commit for ${what}: this check needs the repository history`);
 	}
-	return new Date(Number(printed) * 1000).toISOString().slice(0, 10);
+	return isoDay(new Date(Number(printed) * 1000));
 };
 
 // A shallow clone has a first commit of its own, the oldest one it fetched, and

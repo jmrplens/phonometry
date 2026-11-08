@@ -184,6 +184,25 @@ def test_a_skip_entry_stays_while_one_edition_still_fails(
     assert "runs now" in failures[0]
 
 
+def test_a_skipped_page_runs_to_show_it_fails_and_its_comments_are_not_held(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A page of the skip list is run, since one that starts running has to
+    leave the list, but only that it still fails is read of the run: a wrong
+    comment before the line it fails at is not reported.
+    """
+    ran = tmp_path / "ran.txt"
+    page = _page(
+        tmp_path,
+        f"import pathlib\npathlib.Path({str(ran)!r}).write_text('ran')\n"
+        "print(2)  # 3\nraise SystemExit('still fails')",
+        name="fine.md",
+    )
+    monkeypatch.setitem(check_doc_snippets._SKIP, "fine", "reason")
+    assert check_doc_snippets.check_execution([page]) == []
+    assert ran.read_text(encoding="utf-8") == "ran"
+
+
 def test_a_fixture_writes_the_file_a_page_reads(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

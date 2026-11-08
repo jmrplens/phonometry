@@ -65,12 +65,13 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -93,7 +94,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from numpy.typing import NDArray
 
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Coefficient = Literal["Cv", "Kv"]
 Form = Literal["annex", "clause"]
@@ -946,9 +947,27 @@ def reference_transmission_loss(
     )
 
 
+@overload
+def transmission_loss_correction[S: RealScalar](frequency: S, ring: float) -> float: ...
+
+
+@overload
+def transmission_loss_correction[V: RealValues](
+    frequency: V,
+    ring: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def transmission_loss_correction[A: NumericArrayLike](
+    frequency: A,
+    ring: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def transmission_loss_correction(
     frequency: NumericArrayLike, ring: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Equations (16b) and (22b): how far the wall is from its ring.
 
     .. math::
@@ -968,9 +987,9 @@ def transmission_loss_correction(
 
     :param frequency: :math:`f`, in Hz. A scalar or a 1-D array.
     :param ring: :math:`f_r` from :func:`pipe_ring_frequency`, in Hz.
-    :return: :math:`\Delta TL`, in dB, one value per frequency, and always
-        negative: the correction is worth at least 5,85 dB even where it is
-        smallest.
+    :return: :math:`\Delta TL`, in dB, one value per frequency, and always negative: the
+        correction is worth at least 5,85 dB even where it is smallest. A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not positive and finite.
     :raises TypeError: if ``ring`` is not a single number, or ``frequency`` holds a text
         or a value that is not a real number.
@@ -978,8 +997,8 @@ def transmission_loss_correction(
     bands = require_positive_array(frequency, "frequency")
     anchor = require_positive(ring, "ring")
     bracket = (anchor / bands) + (bands / anchor) ** _LOSS_CORRECTION_EXPONENT
-    return np.asarray(
-        _LOSS_CORRECTION_COEFFICIENT * np.log10(bracket), dtype=np.float64
+    return as_float_or_array(
+        _LOSS_CORRECTION_COEFFICIENT * np.log10(bracket), like=(frequency,)
     )
 
 
@@ -1063,9 +1082,27 @@ def _distribution(
     return np.asarray(-10.0 * np.log10(bracket) - offset, dtype=np.float64)
 
 
+@overload
+def turbulent_distribution[S: RealScalar](frequency: S, peak: float) -> float: ...
+
+
+@overload
+def turbulent_distribution[V: RealValues](
+    frequency: V,
+    peak: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def turbulent_distribution[A: NumericArrayLike](
+    frequency: A,
+    peak: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def turbulent_distribution(
     frequency: NumericArrayLike, peak: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Equation (20a): how turbulent noise spreads over the bands.
 
     .. math::
@@ -1091,17 +1128,38 @@ def turbulent_distribution(
 
     :param frequency: :math:`f_i`, the band centre or centres, in Hz (scalar or array).
     :param peak: :math:`f_\mathrm{p,turb}` from :func:`turbulent_peak_frequency`, in Hz.
-    :return: :math:`F_{turb}(f_i)`, in dB.
+    :return: :math:`F_{turb}(f_i)`, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not positive and finite.
     :raises TypeError: if ``peak`` is not a single number, or ``frequency`` holds a text
         or a value that is not a real number.
     """
-    return _distribution(frequency, peak, _TURBULENT_DISTRIBUTION)
+    return as_float_or_array(
+        _distribution(frequency, peak, _TURBULENT_DISTRIBUTION), like=(frequency,)
+    )
+
+
+@overload
+def cavitation_distribution[S: RealScalar](frequency: S, peak: float) -> float: ...
+
+
+@overload
+def cavitation_distribution[V: RealValues](
+    frequency: V,
+    peak: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def cavitation_distribution[A: NumericArrayLike](
+    frequency: A,
+    peak: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def cavitation_distribution(
     frequency: NumericArrayLike, peak: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Equation (20b): how cavitation noise spreads over the bands.
 
     .. math::
@@ -1122,12 +1180,48 @@ def cavitation_distribution(
     :param frequency: :math:`f_i`, the band centre or centres, in Hz (scalar or array).
     :param peak: :math:`f_\mathrm{p,cav}` from :func:`cavitation_peak_frequency`,
         in Hz.
-    :return: :math:`F_{cav}(f_i)`, in dB.
+    :return: :math:`F_{cav}(f_i)`, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not positive and finite.
     :raises TypeError: if ``peak`` is not a single number, or ``frequency`` holds a text
         or a value that is not a real number.
     """
-    return _distribution(frequency, peak, _CAVITATION_DISTRIBUTION)
+    return as_float_or_array(
+        _distribution(frequency, peak, _CAVITATION_DISTRIBUTION), like=(frequency,)
+    )
+
+
+@overload
+def band_internal_levels[S: RealScalar](
+    frequency: S,
+    internal_level: float,
+    *,
+    turbulent_peak: float,
+    cavitation_peak: float | None = ...,
+    cavitation_fraction: float = ...,
+) -> float: ...
+
+
+@overload
+def band_internal_levels[V: RealValues](
+    frequency: V,
+    internal_level: float,
+    *,
+    turbulent_peak: float,
+    cavitation_peak: float | None = ...,
+    cavitation_fraction: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def band_internal_levels[A: NumericArrayLike](
+    frequency: A,
+    internal_level: float,
+    *,
+    turbulent_peak: float,
+    cavitation_peak: float | None = ...,
+    cavitation_fraction: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def band_internal_levels(
@@ -1137,7 +1231,7 @@ def band_internal_levels(
     turbulent_peak: float,
     cavitation_peak: float | None = None,
     cavitation_fraction: float = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Equations (19a) and (19b): the internal level, band by band.
 
     .. math::
@@ -1165,7 +1259,8 @@ def band_internal_levels(
     :param cavitation_fraction:
         :math:`\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})`, between 0 and 1. Zero
         gives Equation (19a) whatever else is passed.
-    :return: :math:`L_{pi}(f_i)`, in dB, one value per band.
+    :return: :math:`L_{pi}(f_i)`, in dB, one value per band. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is out of range, or the cavitating branch
         was asked for without its peak frequency.
     :raises TypeError: if ``cavitation_fraction``, ``cavitation_peak``,
@@ -1185,7 +1280,7 @@ def band_internal_levels(
         raise ValueError(msg)
     turbulent = turbulent_distribution(frequency, turbulent_peak)
     if cavitation_fraction <= 0.0:
-        return np.asarray(internal_level + turbulent, dtype=np.float64)
+        return as_float_or_array(internal_level + turbulent, like=(frequency,))
     if cavitation_peak is None:
         msg = (
             "Equation (19b) needs 'cavitation_peak' as well as a non-zero "
@@ -1199,7 +1294,7 @@ def band_internal_levels(
     mixed = (1.0 - cavitation_fraction) * 10.0 ** (
         0.1 * turbulent
     ) + cavitation_fraction * 10.0 ** (0.1 * cavitating)
-    return np.asarray(internal_level + 10.0 * np.log10(mixed), dtype=np.float64)
+    return as_float_or_array(internal_level + 10.0 * np.log10(mixed), like=(frequency,))
 
 
 def _spreading(internal_diameter_m: float, wall_thickness: float) -> float:
@@ -1647,7 +1742,7 @@ def valve_hydrodynamic_noise(
         air_sound_speed=air_sound_speed,
     )
     turbulent_loss = reference + float(
-        transmission_loss_correction(turbulent_peak, ring)[0]
+        transmission_loss_correction(turbulent_peak, ring)
     )
     fraction = 0.0 if cavitation is None else cavitation / total_efficiency
     cavitation_loss = (

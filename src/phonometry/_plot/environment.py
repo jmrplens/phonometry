@@ -38,6 +38,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..environment.assessment.exposure_distribution import SELDistribution
@@ -1818,7 +1819,7 @@ def _spb_speed_axis(ax: Axes, speeds_kmh: list[float], language: Language) -> No
 
 def _spb_line(
     regression: PassByRegression, low: float, high: float
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The fitted line between two speeds, as the arrays to draw."""
     speeds = np.geomspace(low, high, 32)
     levels = regression.intercept_level + regression.slope_db_per_decade * np.log10(

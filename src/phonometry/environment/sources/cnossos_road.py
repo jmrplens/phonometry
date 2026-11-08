@@ -717,8 +717,8 @@ def _bands(values: tuple[float, ...]) -> NDArray[np.float64]:
 
 
 def _combine_rolling_and_propulsion(
-    key: str, rolling: np.ndarray, propulsion: np.ndarray
-) -> np.ndarray:
+    key: str, rolling: NDArray[np.float64], propulsion: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """(2.2.3): the energy sum of the two source terms, in dB.
 
     Categories 4a and 4b carry no rolling term, so their total is the

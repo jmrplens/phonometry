@@ -1,0 +1,36 @@
+name: Scratch glibc probe
+on:
+  pull_request:
+    paths: [".github/workflows/scratch-glibc-probe.yml"]
+permissions: {}
+jobs:
+  probe:
+    strategy:
+      matrix:
+        os: [ubuntu-26.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Probe
+        run: |
+          ldd --version | head -1
+          dpkg -l libc6 | tail -1 || true
+          dpkg --print-architecture; cat /etc/apt/apt.conf.d/* 2>/dev/null | grep -i variant || true
+          grep -m1 "model name" /proc/cpuinfo; grep -o -w -m1 -E "fma|avx2|avx512f" /proc/cpuinfo | sort -u | tr "\n" " "; echo
+          echo "GLIBC_TUNABLES=${GLIBC_TUNABLES-unset}"
+          /lib64/ld-linux-x86-64.so.2 --help | sed -n '/hwcaps/,$p' | head -8
+          /lib64/ld-linux-x86-64.so.2 --list-diagnostics | grep -E "isa_1|x86.*(fma|avx2|cpu_features.usable|preferred)" | head -12
+          pip install -q numpy
+          cat > p.py <<'PY'
+          import math, hashlib, sys, numpy as np
+          x = np.random.default_rng(1).uniform(-700.0, 700.0, 20000).tolist()
+          s = [v / 100 for v in x]
+          h = lambda f, xs: hashlib.sha256(np.array([f(v) for v in xs]).tobytes()).hexdigest()[:16]
+          print(sys.executable, "exp", h(math.exp, x), "sin", h(math.sin, s), "atan", h(math.atan, s))
+          PY
+          python p.py
+          GLIBC_TUNABLES=glibc.cpu.hwcaps=-AVX2,-FMA,-FMA4,-AVX python p.py
+          GLIBC_TUNABLES=glibc.cpu.hwcaps=-AVX2,-FMA,-FMA4,-AVX /lib64/ld-linux-x86-64.so.2 --list-diagnostics | grep -E "cpu_features.usable.*(FMA|AVX2)|tunables.*hwcaps" | head -6
+          ldd $(python -c 'import sys;print(sys.executable)') | grep -E "libm|libc"

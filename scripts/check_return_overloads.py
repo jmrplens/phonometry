@@ -372,6 +372,16 @@ EXEMPT: dict[tuple[str, str], str] = {
         "union says it as well; each is passed as like, and "
         "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
     ),
+    ("src/phonometry/noise_control/silencers.py", "transmission_loss"): (
+        "the rank of the four-pole array decides: a (2, 2) matrix alone gives "
+        "one number and a (n_freq, 2, 2) stack one per frequency, two arrays a "
+        "type checker cannot tell apart, which as_float_if_reduced applies"
+    ),
+    ("src/phonometry/noise_control/silencers.py", "insertion_loss"): (
+        "the rank of the four-pole array decides: a (2, 2) matrix alone gives "
+        "one number and a (n_freq, 2, 2) stack one per frequency, two arrays a "
+        "type checker cannot tell apart, which as_float_if_reduced applies"
+    ),
     ("src/phonometry/emission/sound_power.py", "mean_single_event_level"): (
         "an energy average over the events: with n_events=None it reduces "
         "the first axis of the levels, so their rank decides whether one "

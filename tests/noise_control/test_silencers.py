@@ -180,9 +180,59 @@ def test_cascade_refuses_what_is_not_a_four_pole_stack() -> None:
     f = np.linspace(50.0, 500.0, 20)
     t = sl.duct_matrix(f, 1.0, 0.05)
     with pytest.raises(ValueError, match=r"'matrices'\[1\].*\(n_freq, 2, 2\)"):
-        sl.cascade(t, [[1.0, 0.0], [0.0, 1.0]])
+        sl.cascade(t, np.eye(3, dtype=np.complex128))
     with pytest.raises(ValueError, match=r"'matrices'\[1\].*\(n_freq, 2, 2\)"):
         sl.cascade(t, np.ones(20, dtype=np.complex128))
+
+
+@pytest.mark.parametrize("frequency", [500.0, np.float64(500.0), np.asarray(500.0)])
+def test_one_frequency_gives_the_matrix_alone(frequency: object) -> None:
+    """A number frequency, Python, numpy or zero-dimensional, gives one 2x2 matrix.
+
+    It holds the bits the first matrix of a stack over that one frequency
+    holds, and a sequence of frequencies keeps its stack.
+    """
+    duct = sl.duct_matrix(frequency, 0.3, 0.05)  # type: ignore[arg-type]
+    assert duct.shape == (2, 2)
+    np.testing.assert_array_equal(duct, sl.duct_matrix([500.0], 0.3, 0.05)[0])
+    impedance = sl.quarter_wave_impedance(500.0, 0.2, 0.03)
+    shunt = sl.shunt_matrix(impedance)
+    assert shunt.shape == (2, 2)
+    np.testing.assert_array_equal(shunt, sl.shunt_matrix([impedance])[0])
+    assert sl.duct_matrix([500.0, 600.0], 0.3, 0.05).shape == (2, 2, 2)
+    assert sl.shunt_matrix([impedance, impedance]).shape == (2, 2, 2)
+
+
+def test_the_matrix_alone_cascades_and_gives_one_number() -> None:
+    """A matrix alone cascades into a matrix, and its losses are numbers.
+
+    Each is the one value the stack over that frequency gives, bit for bit.
+    """
+    impedance = sl.quarter_wave_impedance(500.0, 0.2, 0.03)
+    single = sl.cascade(sl.duct_matrix(500.0, 0.3, 0.05), sl.shunt_matrix(impedance))
+    stack = sl.cascade(sl.duct_matrix([500.0], 0.3, 0.05), sl.shunt_matrix([impedance]))
+    assert single.shape == (2, 2)
+    np.testing.assert_array_equal(single, stack[0])
+    loss = sl.transmission_loss(single, inlet_area=0.01, outlet_area=0.01)
+    assert type(loss) is float
+    stacked_loss = sl.transmission_loss(stack, inlet_area=0.01, outlet_area=0.01)
+    assert loss == stacked_loss[0]
+    insertion = sl.insertion_loss(
+        single, source_impedance=400.0, radiation_impedance=400.0
+    )
+    assert type(insertion) is float
+    stacked_insertion = sl.insertion_loss(
+        stack, source_impedance=400.0, radiation_impedance=400.0
+    )
+    assert insertion == stacked_insertion[0]
+
+
+def test_a_matrix_alone_does_not_cascade_with_a_stack() -> None:
+    """One frequency's matrix and a grid's stack are no chain."""
+    stack = sl.duct_matrix([500.0, 600.0], 0.3, 0.05)
+    alone = sl.duct_matrix(500.0, 0.3, 0.05)
+    with pytest.raises(ValueError, match=r"'matrices'\[1\].*\(2, 2\) matrix"):
+        sl.cascade(stack, alone)
 
 
 def test_extended_tube_reduces_to_expansion_chamber() -> None:

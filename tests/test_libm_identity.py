@@ -10,11 +10,14 @@ writes it, and hold the reading of the real library here to ``readelf``'s.
 
 from __future__ import annotations
 
+import functools
+import os
 import platform
 import re
 import shutil
 import struct
 import subprocess
+import sys
 from typing import TYPE_CHECKING
 
 import libm_identity
@@ -33,6 +36,10 @@ _PT_LOAD = 1
 #: the second the IBT and SHSTK marking that precedes it in glibc's note.
 _ISA_1_NEEDED = 0xC0008002
 _FEATURE_1_AND = 0xC0000002
+#: ``GNU_PROPERTY_X86_FEATURE_2_USED`` and ``GNU_PROPERTY_X86_ISA_1_USED``,
+#: which Fedora's and AlmaLinux's libms carry after the needed levels.
+_FEATURE_2_USED = 0xC0010001
+_ISA_1_USED = 0xC0010002
 
 #: The ISA bits ``readelf`` names, one per level from bit 0.
 _LEVEL_BITS = {
@@ -221,6 +228,7 @@ def test_the_libm_file_name(*, name: str, is_libm: bool) -> None:
     [
         (False, "", True),
         (False, libm_identity.WITHOUT_FMA, False),
+        (False, "glibc.cpu.hwcaps=-AVX", True),
         (True, "", True),
         (True, libm_identity.WITHOUT_FMA, True),
     ],
@@ -232,6 +240,94 @@ def test_a_mask_leaves_a_build_for_v3_on_the_pinned_routines(
     monkeypatch.setattr(libm_identity, "glibc_built_for_x86_64_v3", lambda: v3)
     monkeypatch.setenv(libm_identity.TUNABLES, tunables)
     assert libm_identity.runs_the_pinned_routines() is pinned
+
+
+@pytest.mark.parametrize(
+    ("tunables", "masks"),
+    [
+        ("", False),
+        ("glibc.cpu.hwcaps=-AVX", False),
+        ("glibc.cpu.hwcaps=-FMA4", False),
+        ("glibc.cpu.hwcaps=-AVX,-FMA4", False),
+        ("glibc.cpu.hwcaps=-FMA", True),
+        ("glibc.cpu.hwcaps=-AVX2", True),
+        ("glibc.cpu.hwcaps=-AVX,-FMA", True),
+        ("glibc.cpu.hwcaps=-FMA_Usable", True),
+        ("glibc.cpu.hwcaps=-AVX2_Usable", True),
+        ("glibc.cpu.hwcaps=-AVX_Usable", False),
+        ("glibc.cpu.hwcaps=-fma", False),
+        (libm_identity.WITHOUT_FMA, True),
+        ("glibc.malloc.check=3:glibc.cpu.hwcaps=-AVX2", True),
+        ("glibc.malloc.check=3", False),
+    ],
+)
+def test_a_mask_of_fma_or_avx2_is_one_and_of_avx_alone_is_not(
+    *, tunables: str, masks: bool
+) -> None:
+    assert libm_identity.masks_the_fma_variant(tunables) is masks
+
+
+#: A child's :func:`math.exp` on a grid of the double range, whose digest
+#: tells glibc's FMA variant from the others.
+_EXP_DIGEST = (
+    "import hashlib, math, struct\n"
+    "values = [math.exp(-700.0 + 1400.0 * k / 20000) for k in range(20000)]\n"
+    "print(hashlib.sha256(struct.pack('<20000d', *values)).hexdigest())\n"
+)
+
+
+@functools.cache
+def _exp_digest_under(tunables: str) -> str:
+    """The digest of the ``exp`` of a child started under *tunables*, or none."""
+    environment = {
+        key: value for key, value in os.environ.items() if key != libm_identity.TUNABLES
+    }
+    if tunables:
+        environment[libm_identity.TUNABLES] = tunables
+    # Fixed argv, no shell, no user input
+    return subprocess.run(
+        [sys.executable, "-I", "-c", _EXP_DIGEST],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+        timeout=60,
+    ).stdout.strip()
+
+
+@pytest.mark.parametrize(
+    "tunables",
+    [
+        "glibc.cpu.hwcaps=-AVX",
+        "glibc.cpu.hwcaps=-FMA4",
+        "glibc.cpu.hwcaps=-AVX_Usable",
+        "glibc.cpu.hwcaps=-fma",
+        "glibc.cpu.hwcaps=-FMA,-FMA_Usable",
+        "glibc.cpu.hwcaps=-AVX2,-AVX2_Usable",
+        libm_identity.WITHOUT_FMA,
+    ],
+)
+def test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
+    tunables: str,
+) -> None:
+    """The helper reads a mask as what the mask does to glibc's routines.
+
+    glibc takes its FMA variant when FMA and AVX2 are usable, and the mask
+    clears only the feature it names, as it spells it, so a child with AVX or
+    FMA4 masked, or ``fma`` in lower case, stays on it, its ``exp`` the same
+    as an unmasked child's, and the bit-for-bit tests of the pinned routines
+    run under that mask. Each mask here names its features in both spellings
+    or in neither: a glibc reads one spelling, and which one is not in its
+    version.
+    """
+    if not libm_identity.runs_the_pinned_routines():
+        pytest.skip("needs this process on glibc's FMA variant, unmasked")
+    if libm_identity.glibc_built_for_x86_64_v3():
+        pytest.skip(
+            "glibc here is built for x86-64-v3, so no mask moves it off its FMA variant"
+        )
+    moved = _exp_digest_under(tunables) != _exp_digest_under("")
+    assert libm_identity.masks_the_fma_variant(tunables) is moved
 
 
 def _real_glibc_libm() -> Path:
@@ -250,23 +346,114 @@ def test_the_real_libm_is_found_and_read() -> None:
     assert libm_identity.glibc_built_for_x86_64_v3() is built_for_v3
 
 
-def test_the_real_libm_reads_as_readelf_reads_it() -> None:
-    library = _real_glibc_libm()
+def _readelf_notes(library: Path) -> str:
+    """What ``readelf --notes`` prints of *library*.
+
+    Without ``--wide``, readelf prints each property of a note on a line of
+    its own; with it, it joins them on one line with ", ", which also
+    separates the levels of one property.
+    """
     readelf = shutil.which("readelf")
     if readelf is None:
         pytest.skip("needs binutils' readelf to read the note independently")
-    # Fixed argv, no shell; the path is the library this process mapped
+    # Fixed argv, no shell; the path is a library this process mapped or wrote
     shown = subprocess.run(
-        [readelf, "--notes", "--wide", str(library)],
+        [readelf, "--notes", str(library)],
         check=True,
         capture_output=True,
         text=True,
         timeout=60,
     ).stdout
+    if re.search(rf"type {_ISA_1_NEEDED:#x}\b", shown, re.IGNORECASE):
+        pytest.skip(
+            "this readelf prints the ISA property by its number: it predates the "
+            "names of the x86-64 ISA levels, as binutils 2.35 does"
+        )
+    return shown
+
+
+def _levels_readelf_names(shown: str) -> int | None:
+    """The ISA levels ``readelf --notes`` names as needed, or ``None``."""
     line = re.search(r"x86 ISA needed: ([^\n]*)", shown)
-    expected = (
-        None
-        if line is None
-        else sum(_LEVEL_BITS[name.strip()] for name in line.group(1).split(","))
+    if line is None:
+        return None
+    return sum(_LEVEL_BITS[name.strip()] for name in line.group(1).split(","))
+
+
+@pytest.mark.parametrize(
+    ("shown", "needed"),
+    [
+        pytest.param(
+            "  GNU                  0x00000010\tNT_GNU_PROPERTY_TYPE_0\n"
+            "      Properties: x86 ISA needed: x86-64-baseline\n",
+            _BASELINE,
+            id="debian-13-libm",
+        ),
+        pytest.param(
+            "  GNU                  0x00000020\tNT_GNU_PROPERTY_TYPE_0\n"
+            "      Properties: x86 feature: IBT, SHSTK\n"
+            "\tx86 ISA needed: x86-64-baseline\n",
+            _BASELINE,
+            id="ubuntu-26.04-amd64-libm",
+        ),
+        pytest.param(
+            "  GNU                  0x00000020\tNT_GNU_PROPERTY_TYPE_0\n"
+            "      Properties: x86 feature: IBT, SHSTK\n"
+            "\tx86 ISA needed: x86-64-baseline, x86-64-v2, x86-64-v3\n",
+            _V3,
+            id="ubuntu-26.04-amd64v3-libm",
+        ),
+        pytest.param(
+            "  GNU                  0x00000040\tNT_GNU_PROPERTY_TYPE_0\n"
+            "      Properties: x86 feature: IBT, SHSTK\n"
+            "\tx86 ISA needed: x86-64-baseline\n"
+            "\tx86 feature used: x86, x87, XMM, YMM\n"
+            "\tx86 ISA used: x86-64-baseline, x86-64-v2, x86-64-v3\n",
+            _BASELINE,
+            id="fedora-45-libm",
+        ),
+        pytest.param(
+            "  GNU                  0x00000040\tNT_GNU_PROPERTY_TYPE_0\n"
+            "      Properties: x86 feature: IBT, SHSTK\n"
+            "\tx86 ISA needed: x86-64-baseline, x86-64-v2, x86-64-v3\n"
+            "\tx86 feature used: x86, x87, XMM, YMM\n"
+            "\tx86 ISA used: x86-64-baseline, x86-64-v3\n",
+            _V3,
+            id="almalinux-10-libm",
+        ),
+        pytest.param(
+            "  GNU                  0x00000010\tNT_GNU_PROPERTY_TYPE_0\n"
+            "      Properties: x86 feature: IBT, SHSTK\n",
+            None,
+            id="debian-13-libnetfilter-conntrack",
+        ),
+    ],
+)
+def test_the_levels_readelf_prints_end_with_their_line(
+    *, shown: str, needed: int | None
+) -> None:
+    """Each is the note as ``readelf --notes`` 2.44 printed it for that object."""
+    assert _levels_readelf_names(shown) == needed
+
+
+def test_readelf_and_the_reader_agree_past_the_needed_levels(tmp_path: Path) -> None:
+    """A note that carries the used features and levels after, as Fedora's does."""
+    note = _property_note(
+        (_FEATURE_1_AND, 0b11),
+        (_ISA_1_NEEDED, _V3),
+        (_FEATURE_2_USED, 0b11011),
+        (_ISA_1_USED, 0b0101),
     )
+    image = _elf((_PT_GNU_PROPERTY, note, 8), (_PT_NOTE, note, 8))
+    library = tmp_path / "libm.so.6"
+    library.write_bytes(image)
+    shown = _readelf_notes(library)
+    assert "x86 ISA used: x86-64-baseline, x86-64-v3" in shown
+    assert libm_identity.x86_isa_levels_needed(image) == _V3
+    assert _levels_readelf_names(shown) == _V3
+
+
+def test_the_real_libm_reads_as_readelf_reads_it() -> None:
+    library = _real_glibc_libm()
+    expected = _levels_readelf_names(_readelf_notes(library))
     assert libm_identity.x86_isa_levels_needed(library.read_bytes()) == expected

@@ -15,13 +15,15 @@ broken routine into a skipped test on the one machine where it is proved.
 glibc built for the x86-64 baseline, as Debian's and Ubuntu's generic
 ``amd64`` packages are, carries ``exp``, ``log``, ``pow``, ``sin``, ``tan``
 and ``atan`` twice and picks its FMA variant when the processor reports both
-FMA and AVX2 as usable, so masking FMA, AVX2 or AVX through
-``GLIBC_TUNABLES`` (``glibc.cpu.hwcaps=-FMA``) hands the same process the
-other variant. glibc built for x86-64-v3, as Ubuntu's ``amd64v3`` packages
-are (the ones the ``ubuntu-26.04`` runner image installs), carries no other
-variant: it compiles those routines for a processor with FMA and AVX2, and
-glibc's multiarch sources build the variants without them only below that
-level (``MINIMUM_X86_ISA_LEVEL < AVX2_X86_ISA_LEVEL`` in
+FMA and AVX2 as usable, so masking FMA or AVX2 through ``GLIBC_TUNABLES``
+(``glibc.cpu.hwcaps=-FMA``, or ``-FMA_Usable`` where glibc reads the older
+spelling) hands the same process the other variant. Masking AVX alone does
+not: the mask clears only the feature it names, and FMA and AVX2 stay
+usable. glibc built for x86-64-v3, as Ubuntu's ``amd64v3`` packages are (the
+ones the ``ubuntu-26.04`` runner image installs), carries no other variant:
+it compiles those routines for a processor with FMA and AVX2, and glibc's
+multiarch sources build the variants without them only below that level
+(``MINIMUM_X86_ISA_LEVEL < AVX2_X86_ISA_LEVEL`` in
 ``sysdeps/x86_64/fpu/multiarch`` of glibc 2.43), so no mask hands a process
 anything but the FMA routines there.
 
@@ -30,10 +32,12 @@ same rule: the ISA level the object declares it needs, in the
 ``GNU_PROPERTY_X86_ISA_1_NEEDED`` property of its ``.note.gnu.property``.
 glibc writes that property from the same ``MINIMUM_X86_ISA_LEVEL``
 (``sysdeps/x86/isa-level.c``), and its loader checks it against the
-processor before it maps the object (``sysdeps/x86/dl-prop.h``). An object
-that declares no level is taken, as the loader takes it, to need the
-baseline, so a library this module cannot read keeps every test that asks
-for the other variant running, and failing if that variant is not there.
+processor when it loads the object, before relocating or running it
+(``sysdeps/x86/dl-prop.h``, called from ``elf/rtld.c`` and
+``elf/dl-open.c``). An object that declares no level is taken, as the loader
+takes it, to need the baseline, so a library this module cannot read keeps
+every test that asks for the other variant running, and failing if that
+variant is not there.
 """
 
 from __future__ import annotations
@@ -47,9 +51,20 @@ from pathlib import Path
 
 import pytest
 
-#: The processor features glibc's FMA variant needs, so that masking one takes
-#: glibc off it wherever glibc carries another variant.
-_FMA_VARIANT_FEATURES = frozenset({"FMA", "AVX2", "AVX"})
+#: The processor features glibc asks to be usable before it picks its FMA
+#: variant (``ifunc-fma.h``, ``ifunc-fma4.h`` and ``ifunc-avx-fma4.h`` in
+#: ``sysdeps/x86_64/fpu/multiarch``), so that masking one takes glibc off it
+#: wherever glibc carries another variant. AVX is not one: the mask clears
+#: only the feature it names (``sysdeps/x86/cpu-tunables.c``).
+_FMA_VARIANT_FEATURES = frozenset({"FMA", "AVX2"})
+
+#: The suffix of the name under which an older glibc masks a feature's usable
+#: bit, ``FMA_Usable``. glibc 2.31 as Ubuntu 20.04 builds it reads only those
+#: names, and glibc 2.32 on, as RHEL 8's glibc 2.28 does, only the features'
+#: own; each ignores the other spelling, and matches a name only as it is
+#: spelt, case included. Which spelling a glibc reads is not in its version,
+#: so a mask in either counts.
+_USABLE_SUFFIX = "_Usable"
 
 #: The first glibc that ships ARM's ``exp``, ``log`` and ``pow``.
 _FIRST_GLIBC = (2, 28)
@@ -58,8 +73,11 @@ _FIRST_GLIBC = (2, 28)
 TUNABLES = "GLIBC_TUNABLES"
 
 #: The value that makes glibc built for the x86-64 baseline take its variants
-#: without FMA.
-WITHOUT_FMA = "glibc.cpu.hwcaps=-AVX2,-FMA,-FMA4,-AVX"
+#: without FMA, in both spellings of the mask, so that every glibc reads it.
+WITHOUT_FMA = (
+    "glibc.cpu.hwcaps=-AVX2,-FMA,-FMA4,-AVX,"
+    "-AVX2_Usable,-FMA_Usable,-FMA4_Usable,-AVX_Usable"
+)
 
 #: ``EM_X86_64``, the machine whose processor-specific properties these are.
 _EM_X86_64 = 62
@@ -117,7 +135,7 @@ def masks_the_fma_variant(tunables: str) -> bool:
         if name.strip() != "glibc.cpu.hwcaps":
             continue
         masked = {
-            part.strip()[1:].upper().removesuffix("_USABLE")
+            part.strip()[1:].removesuffix(_USABLE_SUFFIX)
             for part in value.split(",")
             if part.strip().startswith("-")
         }

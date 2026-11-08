@@ -1544,6 +1544,56 @@ jobs:
       # run, which puts this step near 25 minutes.
       run: pytest -q -n auto --without-whole-tree
 
+  # glibc built for the x86-64 baseline carries exp, log, pow, sin, tan and
+  # atan twice, with fused multiply-adds and without, and the weighting
+  # design gives the documented bytes on both. The test that hands a child
+  # the set without FMA runs on no job of the matrix: ubuntu-latest is
+  # Ubuntu 26.04, whose glibc is built for x86-64-v3 and carries the FMA set
+  # alone, so the test skips there by name, and macOS and Windows run no
+  # glibc. Ubuntu 24.04's glibc 2.39 is the baseline build (its libm declares
+  # x86-64-baseline needed), so the test runs here, with the tests of the
+  # helper that tells the two builds apart and holds each mask to what it
+  # does to glibc. Those that read the real library or start a masked child
+  # need glibc on an x86-64 processor with FMA and AVX2, and the job fails on
+  # any skip: a runner image whose glibc moves to the x86-64-v3 build turns
+  # it red instead of green on nothing.
+  glibc-without-fma:
+    name: The weighting design on glibc's routines without FMA
+    # The baseline build of glibc, which ubuntu-latest no longer installs.
+    runs-on: ubuntu-24.04
+    # Its tests take seconds and the install a few minutes; a hung test ends
+    # the run fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+        pip install -e .
+    # A test that skips checks nothing, and pytest exits 0 all the same: the
+    # job fails on any skip, whatever its reason, as the localhost-node job
+    # does and for the same reasons (no colour, pipefail through tee).
+    - name: Design on glibc's routines without FMA, and read glibc's build
+      run: |
+        set -o pipefail
+        pytest -q --color=no -rfEPs tests/test_libm_identity.py \
+          "tests/filters/test_weighting_design.py::test_glibc_without_its_fma_variant_designs_the_documented_bytes" \
+          | tee "$RUNNER_TEMP/glibc-tests.txt"
+        if grep -q '^SKIPPED' "$RUNNER_TEMP/glibc-tests.txt"; then
+          echo "::error::A test of glibc's build skipped instead of running on the baseline glibc."
+          exit 1
+        fi
+
   # The FDTD engines step on any Array API backend. array-api-strict refuses
   # every call outside the standard and every mix of host and device arrays,
   # so a NumPy-only call in the engines fails here before it fails on a GPU;

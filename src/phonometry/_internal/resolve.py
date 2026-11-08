@@ -58,7 +58,7 @@ The rules, identical everywhere:
 from __future__ import annotations
 
 import math
-from typing import Any, overload
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -66,6 +66,9 @@ from .signal import Signal
 from .types import NumericArrayLike
 from .utils import _typesignal
 from .validation import require_scalar
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 #: What a function that consumes a recording accepts for its signal
 #: argument: a Signal, or the samples as anything ``np.asarray`` converts
@@ -220,7 +223,9 @@ def resolve_calibration(x: SignalInput, calibration_factor: float | None) -> flo
     return 1.0
 
 
-def _scaled(samples: np.ndarray, factor: float, name: str) -> np.ndarray:
+def _scaled(
+    samples: NDArray[np.float64], factor: float, name: str
+) -> NDArray[np.float64]:
     """Scale *samples* by *factor*, refusing a product that leaves the doubles.
 
     Both operands are finite by the time they reach here: the samples were
@@ -260,7 +265,7 @@ def _scaled(samples: np.ndarray, factor: float, name: str) -> np.ndarray:
 
 def resolve_samples(
     x: SignalInput, *, calibrate: bool = True, name: str = "x"
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The float64 samples of the input, in pascals when it can know.
 
     A :class:`~phonometry.io.Signal` contributes its array view (1-D for
@@ -290,8 +295,8 @@ def resolve_samples(
 
 
 def apply_calibration(
-    x: SignalInput, samples: np.ndarray, *, name: str = "x"
-) -> np.ndarray:
+    x: SignalInput, samples: NDArray[np.float64], *, name: str = "x"
+) -> NDArray[np.float64]:
     """Scale already-validated samples to pascals, if *x* carried a factor.
 
     The two-step sibling of :func:`resolve_samples`, for the functions that
@@ -313,18 +318,20 @@ def apply_calibration(
 
 
 @overload
-def like_input(x: Signal, samples: np.ndarray, fs: float | None = ...) -> Signal: ...
+def like_input(
+    x: Signal, samples: NDArray[np.float64], fs: float | None = ...
+) -> Signal: ...
 
 
 @overload
 def like_input(
-    x: NumericArrayLike, samples: np.ndarray, fs: float | None = ...
-) -> np.ndarray: ...
+    x: NumericArrayLike, samples: NDArray[np.float64], fs: float | None = ...
+) -> NDArray[np.float64]: ...
 
 
 def like_input(
-    x: SignalInput, samples: np.ndarray, fs: float | None = None
-) -> Signal | np.ndarray:
+    x: SignalInput, samples: NDArray[np.float64], fs: float | None = None
+) -> Signal | NDArray[np.float64]:
     """Hand the samples back as a Signal when they arrived as one.
 
     The return side of the contract, and the mirror of

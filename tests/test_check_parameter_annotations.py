@@ -1945,6 +1945,137 @@ def test_super_init_runs_the_init_the_order_gives(tmp_path: pathlib.Path) -> Non
     }
 
 
+#: Classes whose ``__init__`` hands its values on to the ``__init__`` of a
+#: class it names, through ``Base.__init__(self, ...)`` or
+#: ``super(Base, self)``, and a method called through its class.
+_NAMED_HAND_OFFS = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = [
+    "Bound",
+    "NamedPast",
+    "NamedWritten",
+    "SuperPast",
+    "SuperSkips",
+    "Through",
+    "ThroughMiddle",
+    "named_past",
+    "named_written",
+    "super_past",
+    "super_skips",
+]
+
+class _Plain:
+    def __init__(self, scale: float = 1.0, n: object = 1) -> None:
+        pass
+
+class _Checking:
+    def __init__(self, scale: float, n: int | np.integer[Any]) -> None:
+        require_count(n, "n")
+
+    def check(self, n: int | np.integer[Any]) -> None:
+        require_count(n, "n")
+
+    @classmethod
+    def make(cls, n: int | np.integer[Any]) -> None:
+        require_count(n, "n")
+
+@dataclass(frozen=True)
+class _Validated:
+    height_m: float = 0.0
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+class NamedPast(_Plain, _Validated):
+    def __init__(self, n: int) -> None:
+        _Validated.__init__(self, 1.0, n)
+
+class NamedWritten(_Plain, _Checking):
+    def __init__(self, n: int) -> None:
+        _Checking.__init__(self, 1.0, n)
+
+class SuperPast(_Plain, _Validated):
+    def __init__(self, n: int) -> None:
+        super(_Plain, self).__init__(1.0, n)
+
+class SuperSkips(_Checking, _Plain):
+    def __init__(self, n: int) -> None:
+        super(_Checking, self).__init__(1.0, n)
+
+class Through(_Checking):
+    def run(self, n: int) -> None:
+        _Checking.check(self, n)
+
+class Bound(_Checking):
+    def run(self, n: int) -> None:
+        _Checking.make(n)
+
+class _Middle(_Checking):
+    pass
+
+class ThroughMiddle(_Middle):
+    def run(self, n: int) -> None:
+        _Middle.check(self, n)
+
+def named_past(n: int) -> NamedPast:
+    return NamedPast(n)
+
+def named_written(n: int) -> NamedWritten:
+    return NamedWritten(n)
+
+def super_past(n: int) -> SuperPast:
+    return SuperPast(n)
+
+def super_skips(n: int) -> SuperSkips:
+    return SuperSkips(n)
+"""
+
+
+def test_an_init_handed_on_to_is_the_one_its_call_names(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``_Validated.__init__(self, 1.0, n)`` runs the ``__init__`` a call of
+    ``_Validated`` runs, the one ``@dataclass`` writes it, with the instance
+    first, and hands the count to its check; ``_Checking.__init__(self,
+    1.0, n)`` runs the one written for ``_Checking``.
+    ``super(_Plain, self).__init__(1.0, n)`` runs the first one past
+    ``_Plain``, and ``super(_Checking, self)`` the first one past
+    ``_Checking``, ``_Plain``'s, which checks nothing. A method called
+    through its class, ``_Checking.check(self, n)``, takes the instance as
+    its first argument, and a ``classmethod``, ``_Checking.make(n)``, the
+    class; ``_Middle.check(self, n)`` is the ``check`` the order of
+    ``_Middle`` gives, ``_Checking``'s.
+
+    A base's ``__init__`` named by the call was found only when it wrote one
+    and read as taking the instance by itself, so the count it was handed
+    landed one place too far and passed as ``int``, and a method a class
+    called by name takes from a base was found nowhere; ``super(Base, self)``
+    was read as ``super()``, so ``super_past`` passed and ``super_skips``
+    was refused for a check that never runs.
+    """
+    refused = _refused(
+        tmp_path, **{"_internal.validation": _VALIDATION, "api": _NAMED_HAND_OFFS}
+    )
+    record = "_Validated(n_positions), require_count() takes it"
+    written = "_Checking.__init__(n: np.integer[Any])"
+    narrow = "annotated int, which refuses np.integer[Any], while handed to "
+    assert refused == {
+        "NamedPast.__init__(n)": [narrow + record],
+        "SuperPast.__init__(n)": [narrow + record],
+        "NamedWritten.__init__(n)": [narrow + written],
+        "Through.run(n)": [narrow + "_Checking.check(n: np.integer[Any])"],
+        "Bound.run(n)": [narrow + "_Checking.make(n: np.integer[Any])"],
+        "ThroughMiddle.run(n)": [narrow + "_Checking.check(n: np.integer[Any])"],
+        "named_past(n)": [narrow + "NamedPast.__init__(n), handed to " + record],
+        "super_past(n)": [narrow + "SuperPast.__init__(n), handed to " + record],
+        "named_written(n)": [narrow + "NamedWritten.__init__(n), handed to " + written],
+    }
+
+
 #: Calls whose ``*`` argument fills the places from its own on, and whose
 #: arguments after it never fill a place before theirs.
 _LOWEST_PLACES = """

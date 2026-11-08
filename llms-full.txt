@@ -56896,7 +56896,8 @@ without AVX-512 or fused multiply-adds, and 64-bit ARM. No library step is
 left on the design path. Every transcendental the fit takes is spelled in
 arithmetic IEEE&nbsp;754 fixes or computed correctly rounded in exact
 integer arithmetic, so glibc, Apple's libm, musl and the Windows runtime,
-and the two builds glibc carries for x86-64, have no say in its bits. The
+and glibc's x86-64 routines, built with fused multiply-adds or without, have
+no say in its bits. The
 two steps after the fit that used to go through a numerical library are the
 package's own arithmetic too: the poles of the BS.468-4 prototype, which
 LAPACK found, are the correctly rounded roots of the network's exact

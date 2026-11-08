@@ -548,8 +548,8 @@ def _scalar_arctan(values: np.ndarray) -> np.ndarray:
     from the C library, and the one the C libraries split on where the
     checked designs reach: glibc's ``atan`` is not correctly rounded on 19 of
     the 15 866 arctangents the 133 checked designs evaluate, which reach 32
-    of those designs, and its two x86-64 builds, with fused multiply-adds and
-    without, round some inputs differently from each other. The correctly
+    of those designs, and its x86-64 builds with fused multiply-adds and
+    without round some inputs differently from each other. The correctly
     rounded value has one definition and no platform in it, so that is the
     arctangent here, in this package's own exact integer arithmetic. Six of
     those 32 designs moved on Linux by their last bits, inside the response

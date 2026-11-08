@@ -11,8 +11,9 @@ AVX-512 o multiply-add fusionado, y ARM de 64 bits. En el camino de diseño
 no queda ningún paso de biblioteca. Cada trascendente que toma el ajuste
 está escrita en aritmética que IEEE&nbsp;754 fija o calculada
 correctamente redondeada en aritmética entera exacta, así que glibc, la
-libm de Apple, musl y el runtime de Windows, y las dos compilaciones que
-glibc lleva para x86-64, no tienen voz en sus bits. Los dos pasos
+libm de Apple, musl y el runtime de Windows, y las rutinas de glibc para
+x86-64, compiladas con multiply-add fusionado o sin él, no tienen voz en sus
+bits. Los dos pasos
 posteriores al ajuste que antes pasaban por una biblioteca numérica son
 también aritmética propia del paquete: los polos del prototipo de BS.468-4,
 que hallaba LAPACK, son las raíces correctamente redondeadas del polinomio

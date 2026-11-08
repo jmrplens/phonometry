@@ -1638,6 +1638,45 @@ def test_a_method_called_on_the_class_of_a_class_method_takes_the_instance_first
     ) == [("Reader.wrong", _FOREIGN)]
 
 
+def test_new_is_handed_its_class_first_as_a_class_method_is_bound_to_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``__new__`` is a static method a call of its class hands the class
+    first, so ``cls.check(path)`` in it calls a plain ``check`` through its
+    class: ``path`` is the instance and ``check`` checks its default, while
+    ``cls.check(holder, path)`` checks ``path``.
+
+    ``__new__`` was read as a plain method, its ``cls`` as an instance, so
+    ``cls.check(path)`` was read as checking ``path`` and the read after it
+    passed, while the read after ``cls.check(holder, path)`` was refused.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+        from check import require_regular
+
+        class Reader:
+            def check(self, path="safe"):
+                require_regular(path)
+
+            def __new__(cls, path):
+                cls.check(path)
+                np.load(path)
+                return super().__new__(cls)
+
+        class Holder:
+            def check(self, path="safe"):
+                require_regular(path)
+
+            def __new__(cls, holder, path):
+                cls.check(holder, path)
+                np.load(path)
+                return object.__new__(cls)
+        """,
+    ) == [("Reader.__new__", _FOREIGN)]
+
+
 def test_a_call_on_the_receiver_is_known_by_its_place_whatever_it_is_called(
     tmp_path: pathlib.Path,
 ) -> None:

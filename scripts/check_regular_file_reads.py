@@ -35,8 +35,8 @@ reports two shapes:
   the first that is not called ``self`` or ``cls``, and the name a call hands
   it is the argument at its place, or the keyword that names it: a method
   called through its class, ``Reader.check(self, path)``, or through the
-  class a class method is bound to, ``cls.check(self, path)``, takes the
-  instance first and the name after it, one called on the receiver of a
+  class a class method is bound to or ``__new__`` is handed,
+  ``cls.check(self, path)``, takes the instance first and the name after it, one called on the receiver of a
   method, whatever the receiver is called, takes the name first, and a
   class method is bound to its class however it is called. Of the definitions of one name, those a call can
   reach say the place. The name is compared as written, once ``str()``,
@@ -1247,13 +1247,19 @@ def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
 #: decorator: their first parameter is bound to the class.
 _IMPLICIT_CLASS_METHODS = frozenset({"__init_subclass__", "__class_getitem__"})
 
+#: The method Python makes a static method without a ``staticmethod``
+#: decorator, which a call of its class hands the class first: its first
+#: parameter is the class, as a class method's is.
+_IMPLICIT_STATIC_METHOD = "__new__"
+
 
 def _kind(scope: _Scope) -> str:
     """How a call binds the first parameter of the function of *scope*:
-    ``"function"`` for a function or a static method, which takes what it is
-    handed, ``"class"`` for a class method, bound to its class however it is
-    called, and ``"method"`` for any other method of a class, bound to the
-    instance it is called on and handed it first through its class.
+    ``"function"`` for a function or a static method, ``__new__`` among
+    them, which takes what it is handed, ``"class"`` for a class method,
+    bound to its class however it is called, and ``"method"`` for any other
+    method of a class, bound to the instance it is called on and handed it
+    first through its class.
     """
     node = scope.node
     in_a_class = len(scope.around) > 1 and isinstance(scope.around[-2], ast.ClassDef)
@@ -1264,7 +1270,7 @@ def _kind(scope: _Scope) -> str:
         for decorator in node.decorator_list
         if isinstance(decorator, ast.Name)
     }
-    if "staticmethod" in decorators:
+    if "staticmethod" in decorators or node.name == _IMPLICIT_STATIC_METHOD:
         return "function"
     if "classmethod" in decorators or node.name in _IMPLICIT_CLASS_METHODS:
         return "class"
@@ -1334,21 +1340,28 @@ def first_parameter_places(scopes: Sequence[_Scope]) -> Places:
 
 def _receiver_kind(call: ast.Call, scope: _Scope) -> str | None:
     """What the name *call* is made on is in *scope*: ``"instance"`` for the
-    receiver of a method, ``"class"`` for the receiver of a class method,
-    ``None`` for a call on any other name or on none.
+    receiver of a method, ``"class"`` for the receiver of a class method or
+    the class ``__new__`` is handed first, ``None`` for a call on any other
+    name or on none.
 
     The receiver is the first parameter of the method of *scope*, whatever it
-    is called (:func:`_kind`): ``cls.check(path, other)`` in a class method
-    calls a plain ``check`` through its class, which takes ``path`` as the
-    instance.
+    is called (:func:`_kind`): ``cls.check(path, other)`` in a class method,
+    or in ``__new__``, calls a plain ``check`` through its class, which
+    takes ``path`` as the instance.
     """
     func = call.func
     if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
         return None
-    kind = _kind(scope)
     parameters = _positional(scope.node)
-    if kind == "function" or not parameters or parameters[0].arg != func.value.id:
+    if not parameters or parameters[0].arg != func.value.id:
         return None
+    kind = _kind(scope)
+    if kind == "function":
+        named = getattr(scope.node, "name", None)
+        in_a_class = len(scope.around) > 1 and isinstance(
+            scope.around[-2], ast.ClassDef
+        )
+        return "class" if in_a_class and named == _IMPLICIT_STATIC_METHOD else None
     return "instance" if kind == "method" else "class"
 
 

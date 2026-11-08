@@ -915,7 +915,7 @@ def _cropped_section(
 
 def _upper_hull(points: NDArray[np.float64]) -> NDArray[np.float64]:
     """The upper convex hull of ``(d, z)`` points sorted by ``d``."""
-    hull: list[np.ndarray] = []
+    hull: list[NDArray[np.float64]] = []
     for pt in points:
         # The fewest values the step below can work with, not a quantity.
         while len(hull) >= 2:  # noqa: PLR2004

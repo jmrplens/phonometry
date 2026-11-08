@@ -301,7 +301,9 @@ def _decode(node: object, buffers: Sequence[bytes | bytearray]) -> object:
     return _DECODERS[node["$"]](node, buffers)
 
 
-def _number_type(node: _Form) -> np.dtype[Any]:
+def _number_type(
+    node: _Form,
+) -> np.dtype[np.bool_ | np.integer[Any] | np.floating[Any]]:
     """The dtype *node* names, one of those the encoder sends."""
     dtype = np.dtype(node["dtype"])
     if not _travels(dtype):

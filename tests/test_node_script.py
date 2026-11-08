@@ -92,6 +92,18 @@ def test_a_script_that_ends_with_a_status_keeps_bytes_it_cannot_decode() -> None
     )
 
 
+def test_a_script_answer_keeps_bytes_it_cannot_decode() -> None:
+    """Node writes on stdout what a script hands it too, so a byte that is
+    not UTF-8 can reach the answer inside a JSON string; it is read as a
+    replacement character, as on stderr, and the answer is read all the same.
+    """
+    script = (
+        "process.stdout.write("
+        "Buffer.from([0x5b, 0x22, 0x62, 0x61, 0x64, 0xff, 0x22, 0x5d]));"
+    )
+    assert node_script.answer(script, [], timeout=_SCRIPT_S) == ["bad\ufffd"]
+
+
 @pytest.mark.skipif(
     sys.platform == "win32", reason="a signal stops a process on POSIX only"
 )

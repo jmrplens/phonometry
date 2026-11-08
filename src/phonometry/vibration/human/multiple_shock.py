@@ -173,7 +173,7 @@ def _mz_for_sex(sex: str) -> float:
 # ---------------------------------------------------------------------------
 
 
-def seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray:
+def seat_to_spine_transfer(frequencies: NumericArrayLike) -> NDArray[np.complex128]:
     r"""Seat-to-spine transfer function :math:`H(\omega)` (clause 5.2,
     Formula 1).
 
@@ -197,7 +197,7 @@ def seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray:
 
 def spinal_response(
     acceleration_m_s2: SignalInput, fs: float | None = None
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Vertical spinal response :math:`A_\mathrm{z}(t)` (clause 5.2, Formula 2).
 
     Applies the seat-to-spine transfer function to the measured conditioned
@@ -246,7 +246,7 @@ def spinal_response(
     return np.asarray(response, dtype=np.float64)
 
 
-def response_peaks(response: NumericArrayLike) -> np.ndarray:
+def response_peaks(response: NumericArrayLike) -> NDArray[np.float64]:
     r"""Positive response peaks :math:`A_{\mathrm{z},i}` (clause 5.3).
 
     A peak is the maximum value of the response between two consecutive zero
@@ -399,7 +399,9 @@ def static_stress(mz: float = _MZ_MALE) -> float:
     return mz * _GRAVITY
 
 
-def ultimate_strength(age: NumericArrayLike, *, sex: Sex = "male") -> np.ndarray:
+def ultimate_strength(
+    age: NumericArrayLike, *, sex: Sex = "male"
+) -> NDArray[np.float64]:
     r"""Ultimate lumbar strength :math:`S_\mathrm{u}` at an age (Annex C,
     Formula C.4).
 

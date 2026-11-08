@@ -606,13 +606,13 @@ class ReactiveSilencerResult(OwnsArrays):
         :meth:`plot_geometry` draws it.
     """
 
-    frequencies: np.ndarray
-    transmission_loss: np.ndarray
-    insertion_loss: np.ndarray | None
-    transfer_matrix: np.ndarray
+    frequencies: NDArray[np.float64]
+    transmission_loss: NDArray[np.float64]
+    insertion_loss: NDArray[np.float64] | None
+    transfer_matrix: NDArray[np.complex128]
     kind: SilencerKind
     _: KW_ONLY
-    resonances: np.ndarray | None
+    resonances: NDArray[np.float64] | None
     geometry: Mapping[SilencerDimension, float] | None
     plane_wave_limit: float
     chain: SilencerChain | None
@@ -1186,7 +1186,7 @@ class SilencerChainElement(OwnsArrays):
         analysis grid, and for every duct element.
     """
 
-    matrix: np.ndarray
+    matrix: NDArray[np.complex128]
     length: float | None = None
     area: float | None = None
     label: str | None = None

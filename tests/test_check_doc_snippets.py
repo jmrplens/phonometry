@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib.util
 import pathlib
 import sys
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -183,6 +184,25 @@ def test_a_skip_entry_stays_while_one_edition_still_fails(
     assert "runs now" in failures[0]
 
 
+def test_a_skipped_page_runs_to_show_it_fails_and_its_comments_are_not_held(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A page of the skip list is run, since one that starts running has to
+    leave the list, but only that it still fails is read of the run: a wrong
+    comment before the line it fails at is not reported.
+    """
+    ran = tmp_path / "ran.txt"
+    page = _page(
+        tmp_path,
+        f"import pathlib\npathlib.Path({str(ran)!r}).write_text('ran')\n"
+        "print(2)  # 3\nraise SystemExit('still fails')",
+        name="fine.md",
+    )
+    monkeypatch.setitem(check_doc_snippets._SKIP, "fine", "reason")
+    assert check_doc_snippets.check_execution([page]) == []
+    assert ran.read_text(encoding="utf-8") == "ran"
+
+
 def test_a_fixture_writes_the_file_a_page_reads(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -294,7 +314,21 @@ def _failures(script: str, outputs: dict[int, str]) -> list[str]:
     """
     page = check_doc_snippets._SITE / "page.mdx"
     lines = {number: number for number in range(1, script.count("\n") + 2)}
-    written = {line: [(" ", [text])] for line, text in outputs.items()}
+    # Each print wrote once, in the order of the lines they stand on.
+    written = {line: [(line, (" ", [text], "\n"))] for line, text in outputs.items()}
+    found: list[str] = check_doc_snippets.output_disagreements(
+        page, script, lines, written
+    )
+    return found
+
+
+def _held_against(script: str, line: int, texts: list[str]) -> list[str]:
+    """What the output check reports for *script*, run as an English page,
+    whose print on *line* wrote *texts*, one for each of its arguments.
+    """
+    page = check_doc_snippets._SITE / "page.mdx"
+    lines = {number: number for number in range(1, script.count("\n") + 2)}
+    written = {line: [(0, (" ", texts, "\n"))]}
     found: list[str] = check_doc_snippets.output_disagreements(
         page, script, lines, written
     )
@@ -505,13 +539,110 @@ def test_a_complex_number_holds_at_the_decimals_of_each_part() -> None:
     assert _disagreement("4.56j...", "4.5678j") == ""
 
 
+def test_a_complex_number_numpy_pads_is_one_value() -> None:
+    """NumPy pads the real part of each element to the width of the others."""
+    assert _disagreement("1+1j", "1.        +1.j") == ""
+    assert _disagreement("1+2j", "1.        +1.j") != ""
+    assert _disagreement("[1+1j 1.25-2j]", "[1.  +1.j 1.25-2.j]") == ""
+    assert "1.25-3j" in _disagreement("[1+1j 1.25-3j]", "[1.  +1.j 1.25-2.j]")
+    # A comment may space the sign out the same way.
+    assert _disagreement("1.23 + 4.57j", "(1.234+4.567j)") == ""
+    assert _disagreement("1.23 + 4.58j", "(1.234+4.567j)") != ""
+
+
 def test_a_minus_sign_reads_as_a_hyphen() -> None:
     assert _disagreement("\u22128.27 dB", "-8.27") == ""
+
+
+def test_a_minus_sign_the_print_writes_reads_as_a_hyphen() -> None:
+    """A formatted text that signs a value with U+2212 prints a negative value."""
+    assert _disagreement("-8.27 dB", "\u22128.27 dB") == ""
+    assert _disagreement("\u22128.27 dB", "\u22128.27 dB") == ""
+    assert "8.27" in _disagreement("8.27 dB", "\u22128.27 dB")
+
+
+def test_a_sign_the_page_writes_before_a_value_is_the_values() -> None:
+    """``f"\u2212{x:.2f}"`` prints a negative number, and the hyphen of a
+    range, after the value before it, stays the text's.
+    """
+    script = 'x = 8.27\nprint(f"\u2212{x:.2f} dB")  # \u22128.27 dB\n'
+    assert _held_against(script, 2, ["\u22128.27 dB"]) == []
+    positive = script.replace("# \u2212", "# ")
+    (failure,) = _held_against(positive, 2, ["\u22128.27 dB"])
+    assert "the comment says 8.27 where the print wrote -8.27" in failure
+    script = 'x = 8.27\nprint(f"dL = -{x:.2f} dB")  # dL = -8.27 dB\n'
+    assert _held_against(script, 2, ["dL = -8.27 dB"]) == []
+    script = 'a, b = 50, 80\nprint(f"{a}-{b} Hz")  # 50 to 80 Hz\n'
+    assert _held_against(script, 2, ["50-80 Hz"]) == []
+
+
+def test_a_sign_after_a_digit_or_a_letter_joins_in_the_comment_too(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A hyphen right after a digit, a letter, a point or a closing bracket
+    joins what stands either side of it wherever it stands, so a comment that
+    writes a range or a name as the print writes it is held to the values the
+    print wrote, whether its text, its separator or its code wrote the hyphen.
+    """
+    script = 'a, b = 50, 80\nprint(f"{a}-{b} Hz")  # 50-80 Hz\n'
+    assert _held_against(script, 2, ["50-80 Hz"]) == []
+    (failure,) = _held_against(script.replace("50-80", "50-90"), 2, ["50-80 Hz"])
+    assert "the comment says 90 where the print wrote 80" in failure
+    script = 'n = 35\nprint(f"NC-{n}")  # NC-35\n'
+    assert _held_against(script, 2, ["NC-35"]) == []
+    script = 'n = -35\nprint(f"NC{n}")  # NC-35\n'
+    assert _held_against(script, 2, ["NC-35"]) == []
+    script = 'x = 0.5\nprint(f"[{x}]-{x}")  # [0.5]-0.5\n'
+    assert _held_against(script, 2, ["[0.5]-0.5"]) == []
+    # The same text computed whole reads the same way.
+    assert _disagreement("50 to 80 Hz", "50-80 Hz") == ""
+    assert _disagreement("NC 35", "NC-35") == ""
+    # After a space, an opening bracket or an equals sign the sign is the
+    # value's, in the comment as in the print.
+    assert "-80 where the print wrote 80" in _disagreement("50 -80 Hz", "50 80 Hz")
+    assert "-8.27 where the print wrote 8.27" in _disagreement("x=-8.27", "x=8.27")
+    assert "-1 where the print wrote 1" in _disagreement("[-1]", "[1]")
+    # A sign the page writes before an infinity it formats is the infinity's.
+    script = 'x = float("inf")\nprint(f"-{x}")  # -inf\n'
+    assert _held_against(script, 2, ["-inf"]) == []
+    (failure,) = _held_against(script.replace("# -inf", "# inf"), 2, ["-inf"])
+    assert "the comment says inf where the print wrote -inf" in failure
+    code = (
+        "a, b = 50, 80\nprint(a, b, sep='-')  # 50-80\nprint(a, -b, sep='')  # 50-80\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
 
 
 def test_a_spanish_comment_may_write_a_decimal_comma() -> None:
     assert _disagreement("35,9 m", "35.9", decimal_comma=True) == ""
     assert _disagreement("35,9 m", "35.9") != ""
+
+
+def test_a_spanish_comment_may_write_a_container_without_spaces() -> None:
+    """A comma between two digits is a decimal point, or the comma of a list."""
+    assert _disagreement("[1,2]", "[1, 2]", decimal_comma=True) == ""
+    assert _disagreement("[1,2]", "[1 2]", decimal_comma=True) == ""
+    assert _disagreement("[1,2]", "[1, 3]", decimal_comma=True) != ""
+    assert _disagreement("1,2", "1.2", decimal_comma=True) == ""
+    assert _disagreement("1,2", "1.3", decimal_comma=True) != ""
+
+
+def test_a_spanish_comma_outside_a_bracket_is_only_a_decimal_point() -> None:
+    """Read as a list's, the comma of ``0,5 dB`` would leave a ``0`` that
+    rounds the printed ``0.4`` and a ``5`` that the unit after it makes a
+    note, so a wrong value would pass.
+    """
+    assert "0.5 where the print wrote 0.4" in _disagreement(
+        "0,5 dB", "0.4 dB", decimal_comma=True
+    )
+    assert _disagreement("35,9 m", "35.5 m", decimal_comma=True) != ""
+    assert _disagreement("36,1 m", "35.6 m", decimal_comma=True) != ""
+    assert _disagreement("35,9 m", "35.9 m", decimal_comma=True) == ""
+    # A bracket opened on one line goes on over the next, and a decimal
+    # comma outside it is still read as a point beside the list.
+    assert _disagreement(["[1,2,", " 3,4]"], "[1, 2, 3, 4]", decimal_comma=True) == ""
+    assert _disagreement("3,2 dB [1,2]", "3.2 dB [1, 2]", decimal_comma=True) == ""
+    assert _disagreement("3,2 dB [1,2]", "3.4 dB [1, 2]", decimal_comma=True) != ""
 
 
 def test_a_comment_continues_while_its_brackets_are_open() -> None:
@@ -568,6 +699,33 @@ def test_digits_cut_short_hold_as_the_start_of_the_printed_ones() -> None:
     assert _disagreement("55.350668... dB", "55.35066774343508") != ""
 
 
+def test_a_zero_cut_short_begins_only_a_zero_of_its_own_sign() -> None:
+    """``-0.0...`` does not begin ``0.00``, nor ``0.0...`` a printed ``-0.00``."""
+    assert _disagreement("-0.0...", "0.00") != ""
+    assert _disagreement("0.0...", "-0.00") != ""
+    assert _disagreement("-0.0...", "-0.00") == ""
+    assert _disagreement("0.0...", "0.00") == ""
+    assert _disagreement("-0.0...", "-0.0123") == ""
+    assert _disagreement("0.0...", "0.0123") == ""
+
+
+def test_an_ellipsis_meets_the_last_line_of_a_long_loop_in_linear_time() -> None:
+    """The values before each line end are counted on, not counted again.
+
+    Each line end counted the stated values before it from the first one, so
+    the time grew with the square of the lines: 1.4 s for 5,000, 27.5 s for
+    20,000 and about a minute for these 30,000.
+    """
+    loop = [str(n) for n in range(30_000)]
+    start = time.perf_counter()
+    found = _disagreement("0 ... 29999", loop)
+    # Ten seconds against the minute the quadratic count took, and the
+    # second the linear one takes: wide enough for a loaded runner.
+    assert time.perf_counter() - start < 10.0
+    assert found == ""
+    assert "30000" in _disagreement("0 ... 30000", loop)
+
+
 def test_a_unit_power_and_a_symbol_index_are_not_values() -> None:
     assert _disagreement("4.9 m/s^1.5 -> 1.6 % over 240 s", "4.9 1.6") == ""
     assert _disagreement("0.38, against A(8) = 0.38 m/s^2", "0.38") == ""
@@ -581,6 +739,29 @@ def test_a_quoted_message_may_stop_where_its_quotation_does() -> None:
     said = "'integration_time' must be one of the time constants Tables 10 and 11"
     assert _disagreement(said, written) == ""
     assert _disagreement(said.replace("11", "12"), written) != ""
+
+
+def test_a_label_the_print_writes_is_no_quotation_of_a_message() -> None:
+    """``Levels: 1`` beside ``print('Levels:', left, right)`` leaves out the 2.
+
+    A comment that quotes a computed message may stop where its quotation
+    does; repeating the print's own label quotes nothing, so the values after
+    it are still to be stated.
+    """
+    script = "left, right = 1, 2\nprint('Levels:', left, right)  # Levels: 1\n"
+    (failure,) = _held_against(script, 2, ["Levels:", "1", "2"])
+    assert "stops before the printed 2" in failure
+    full = script.replace("# Levels: 1", "# Levels: 1 2")
+    assert _held_against(full, 2, ["Levels:", "1", "2"]) == []
+
+
+def test_a_quoted_message_does_not_stand_for_a_value_printed_apart() -> None:
+    """A quotation may stop inside its message, not before the next argument."""
+    script = "print(message, code)  # takes 1 positional argument\n"
+    texts = ["takes 1 positional argument but 2 were given", "5"]
+    (failure,) = _held_against(script, 1, texts)
+    assert "stops before the printed 5" in failure
+    assert _held_against(script, 1, texts[:1]) == []
 
 
 def test_one_value_states_an_output_that_is_that_value_throughout() -> None:
@@ -776,7 +957,7 @@ def test_a_spanish_page_reads_a_decimal_comma_from_its_path() -> None:
     """The page's path, under the Spanish site, decides the decimal comma."""
     script = "print(35.9)  # 35,9 m\n"
     lines = {1: 1}
-    written = {1: [(" ", ["35.9"])]}
+    written = {1: [(0, (" ", ["35.9"], "\n"))]}
     spanish = check_doc_snippets._SITE_ES / "page.mdx"
     english = check_doc_snippets._SITE / "page.mdx"
     assert (
@@ -852,11 +1033,19 @@ def test_a_message_quoted_over_more_lines_than_prints_goes_to_the_last() -> None
     (promise,) = check_doc_snippets.promised_outputs(script)
     assert promise.first == 2
     assert promise.word == "Supply"
+    # The bracket line opens like an output and goes on with the quotation;
+    # the line that opens on a word of its own is prose and ends it.
+    assert promise.lines == (
+        "Supply: 6 of 8 frequencies are above",
+        "(188 Hz), where higher-order modes propagate",
+    )
     message = (
         "Supply: 6 of 8 frequencies are above the first duct cut-on frequency "
         "(188 Hz), where higher-order modes propagate and so on"
     )
-    assert _disagreement(promise.lines[0], message) == ""
+    assert _disagreement(list(promise.lines), message) == ""
+    wrong = [promise.lines[0], promise.lines[1].replace("188", "189")]
+    assert "189" in _disagreement(wrong, message)
 
 
 def test_what_follows_an_arrow_may_be_a_note() -> None:
@@ -880,3 +1069,296 @@ def test_a_symbol_before_an_approximately_sign_is_read_past() -> None:
     assert promise.word is None
     assert _failures(script, {1: "11.125 6.0"}) == []
     assert _failures(script.replace("11.1 dB", "11.3 dB"), {1: "11.125 6.0"}) != []
+
+
+def test_a_print_converts_each_argument_once_and_is_held_to_what_it_wrote(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An argument whose text changes each time it is read is read once.
+
+    The recorder converted every argument itself and then let ``print``
+    convert it again, so it kept a text the print never wrote and ran the
+    conversion a second time in the page's own code.
+    """
+    code = (
+        "class Count:\n"
+        "    calls = 0\n"
+        "    def __str__(self):\n"
+        "        Count.calls += 1\n"
+        "        return str(Count.calls)\n"
+        "print(Count())  # 1\n"
+        "print(Count.calls)  # 1\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = _page(tmp_path, code.replace("# 1\nprint", "# 2\nprint"), name="w.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "the comment says 2 where the print wrote 1" in failure
+
+
+def test_a_print_is_held_to_what_it_wrote_before_it_failed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A print to a closed file wrote nothing, and one whose second argument
+    fails to convert wrote the first.
+    """
+    code = (
+        "import io\n"
+        "closed = io.StringIO()\n"
+        "closed.close()\n"
+        "try:\n"
+        "    print(2, file=closed)  # 2\n"
+        "except ValueError:\n"
+        "    pass\n"
+    )
+    (failure,) = check_doc_snippets.check_execution([_page(tmp_path, code)])
+    assert "never runs this print" in failure
+    partial = (
+        "class Unwritten:\n"
+        "    def __str__(self):\n"
+        "        raise RuntimeError('no text')\n"
+        "try:\n"
+        "    print(7, Unwritten())  # 7\n"
+        "except RuntimeError:\n"
+        "    pass\n"
+    )
+    page = _page(tmp_path, partial, name="partial.md")
+    assert check_doc_snippets.check_execution([page]) == []
+
+
+def test_a_print_is_read_with_the_separator_and_the_ending_it_was_given(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``sep=""`` joins the values, an ending is written, and a line ends only
+    where the print ends one.
+    """
+    code = (
+        "print(1, 2, sep='')  # 12\n"
+        "print(1, end=' 2\\n')  # 1 2\n"
+        "for x in range(3):\n"
+        "    print(x, end=' ')  # 0 1 2\n"
+        "print()\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    joined = _page(tmp_path, code.replace("# 12", "# 1 2"), name="joined.md")
+    (failure,) = check_doc_snippets.check_execution([joined])
+    assert "the comment says 1 where the print wrote 12" in failure
+    # A loop that writes one line is not stated by its first value alone.
+    short = _page(tmp_path, code.replace("# 0 1 2", "# 0"), name="short.md")
+    (failure,) = check_doc_snippets.check_execution([short])
+    assert "stops before the printed 1" in failure
+    # The page's own text and a value it formats into it stay apart.
+    script = 'x = 5\nprint(f"A{x}")  # 5\n'
+    assert _held_against(script, 2, ["A5"]) == []
+
+
+def test_a_print_inside_another_statement_is_held() -> None:
+    """A call of ``print`` in an assignment or a comprehension writes too."""
+    script = "result = print(2)  # 3\n"
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert promise.lines == ("3",)
+    (failure,) = _failures(script, {1: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+    spread = "values = [\n    print(x) for x in (1, 2)\n]  # 1\n"
+    (promise,) = check_doc_snippets.promised_outputs(spread)
+    assert (promise.first, promise.last, promise.lines) == (1, 3, ("1",))
+    # The header of a compound statement closes on the call's own line.
+    header = "if print(4) is None:  # 4\n    pass\n"
+    (promise,) = check_doc_snippets.promised_outputs(header)
+    assert (promise.first, promise.last) == (1, 1)
+
+
+def test_two_prints_in_one_statement_share_its_comment() -> None:
+    """Each is held to what both wrote, as two prints on one line are."""
+    script = "data = [\n    print(1),\n    print(2),\n]  # 1 2\n"
+    promises = check_doc_snippets.promised_outputs(script)
+    assert [(p.first, p.last, p.lines) for p in promises] == [(1, 4, ("1 2",))] * 2
+    assert _failures(script, {2: "1", 3: "2"}) == []
+    (failure, _) = _failures(script.replace("# 1 2", "# 1 3"), {2: "1", 3: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+
+
+def test_prints_of_one_statement_are_held_in_the_order_they_wrote(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two prints of a comprehension, on two lines, take turns: the record
+    keeps the calls in the order they came, not gathered line by line.
+    """
+    code = (
+        "data = [\n"
+        "    (print(x, end=' '),\n"
+        "     print(x + 10, end=' '))\n"
+        "    for x in range(2)\n"
+        "]  # 0 10 1 11\n"
+        "print()\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = code.replace("# 0 10 1 11", "# 0 1 10 11")
+    failures = check_doc_snippets.check_execution([_page(tmp_path, wrong, name="w.md")])
+    assert len(failures) == 2  # one for each print the comment stands for
+    assert all("the comment says 1 where the print wrote 10" in f for f in failures)
+    # The calls of the lines of a statement are read by their order.
+    script = "data = [\n    print(0),\n    print(10),\n]  # 0 10 1 11\n"
+    page = check_doc_snippets._SITE / "page.mdx"
+    lines = {number: number for number in range(1, 6)}
+    written = {
+        2: [(0, (" ", ["0"], " ")), (2, (" ", ["1"], " "))],
+        3: [(1, (" ", ["10"], " ")), (3, (" ", ["11"], " "))],
+    }
+    assert check_doc_snippets.output_disagreements(page, script, lines, written) == []
+
+
+def test_a_print_inside_a_statement_is_held_to_the_comment_on_its_own_lines() -> None:
+    """A comment at the end of the print's own last line, or on the comment
+    line under it, inside the statement, is the print's own; the statement's
+    comment holds the prints left to it.
+    """
+    script = "result = (\n    print(2)  # 3\n)\n"
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert (promise.first, promise.last, promise.lines) == (2, 2, ("3",))
+    (failure,) = _failures(script, {2: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+    under = "result = (\n    print(2)\n    # 3\n)\n"
+    (failure,) = _failures(under, {2: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+    shared = "data = [\n    print(1),  # 1\n    print(2),\n]  # 2\n"
+    promises = check_doc_snippets.promised_outputs(shared)
+    assert [(p.first, p.last, p.lines) for p in promises] == [
+        (1, 4, ("2",)),
+        (2, 2, ("1",)),
+    ]
+    assert _failures(shared, {2: "1", 3: "2"}) == []
+    assert _failures(shared.replace("# 2", "# 1 2"), {2: "1", 3: "2"}) != []
+    # A note on an argument's line is not the print's output: the
+    # statement's comment still holds the print.
+    noted = "total = sum([\n    print(2) or 1,  # counted once\n    2,\n])  # 3\n"
+    (failure,) = _failures(noted, {2: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+
+
+def test_a_print_is_held_to_what_its_file_took(tmp_path: pathlib.Path) -> None:
+    """A file that takes part of a write says how much it took, by the count
+    its write returns or, when it blocks, on the error it raises.
+    """
+    code = (
+        "import errno\n"
+        "class Short:\n"
+        "    def write(self, text):\n"
+        "        return min(len(text), 1)\n"
+        "class Full:\n"
+        "    def write(self, text):\n"
+        "        raise BlockingIOError(errno.EAGAIN, 'full', 1)\n"
+        "print(123, file=Short())  # 1\n"
+        "try:\n"
+        "    print(456, file=Full())  # 4\n"
+        "except BlockingIOError:\n"
+        "    pass\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = code.replace("# 1\n", "# 123\n").replace("# 4\n", "# 456\n")
+    failures = check_doc_snippets.check_execution([_page(tmp_path, wrong, name="w.md")])
+    assert len(failures) == 2
+    assert "the comment says 123 where the print wrote 1" in failures[0]
+    assert "the comment says 456 where the print wrote 4" in failures[1]
+
+
+def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
+    """The brackets before each comma between two digits are counted on, not
+    counted again from the start of the line.
+
+    Counted again, a comment of 40,000 values took about 40 s on this machine.
+    """
+    count = 40_000
+    said = "[" + " ".join(f"{n},5" for n in range(count)) + "]"
+    wrote = "[" + " ".join(f"{n}.5" for n in range(count)) + "]"
+    start = time.perf_counter()
+    found = _disagreement(said, wrote, decimal_comma=True)
+    assert time.perf_counter() - start < 10.0
+    assert found == ""
+
+
+def test_a_comment_over_many_lines_is_read_in_linear_time() -> None:
+    """The brackets a comment leaves open are counted on as each line joins
+    it, not counted again over all of it for each line.
+
+    Counted again, a comment of 40,000 lines took about 23 s on this machine.
+    """
+    count = 40_000
+    rows = "".join(f"#  {n},\n" for n in range(1, count - 1))
+    script = f"print(list(range({count})))\n# [0,\n{rows}#  {count - 1}]\n"
+    start = time.perf_counter()
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert time.perf_counter() - start < 10.0
+    assert len(promise.lines) == count
+
+
+def test_a_spanish_comment_writes_the_commas_of_its_brackets_one_way() -> None:
+    """A comment that writes a decimal comma inside one bracket has said what
+    its commas are, so ``[1,2]`` in another bracket of it is 1.2, as a reader
+    takes it: the list is written ``[1, 2]`` or ``[1; 2]`` beside it.
+    """
+    mixed = "[0,5; 1,5] [1,2]"
+    assert "the comment says 1.2 where the print wrote 1" in _disagreement(
+        mixed, "[0.5, 1.5] [1, 2]", decimal_comma=True
+    )
+    assert _disagreement(mixed, "[0.5, 1.5] [1.2]", decimal_comma=True) == ""
+    for written_out in ("[0,5; 1,5] [1, 2]", "[0,5; 1,5] [1; 2]"):
+        assert _disagreement(written_out, "[0.5, 1.5] [1, 2]", decimal_comma=True) == ""
+
+
+def test_a_page_that_runs_past_its_time_reports_what_it_wrote_on_stderr(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The last line the stopped page wrote on stderr says where it was.
+
+    The page runs without the harness's own imports, which take about a
+    second, so that a limit of a few seconds stops it in its sleep.
+    """
+
+    def bare(page: pathlib.Path, fixture: str = "") -> tuple[str, dict[int, int]]:
+        return page.read_text("utf-8"), {}
+
+    monkeypatch.setattr(check_doc_snippets, "_script", bare)
+    monkeypatch.setattr(check_doc_snippets, "_TIMEOUT_S", 3)
+    stuck = tmp_path / "stuck.md"
+    stuck.write_text(
+        "import sys, time\n"
+        "print('meshing the room', file=sys.stderr, flush=True)\n"
+        "print('solving the 315 Hz band', file=sys.stderr, flush=True)\n"
+        "time.sleep(60)\n",
+        encoding="utf-8",
+    )
+    _, error, _ = check_doc_snippets._run_page(stuck)
+    assert (
+        error == "timed out after 3 s; its last line on stderr: solving the 315 Hz band"
+    )
+    silent = tmp_path / "silent.md"
+    silent.write_text("import time\ntime.sleep(60)\n", encoding="utf-8")
+    _, error, _ = check_doc_snippets._run_page(silent)
+    assert error == "timed out after 3 s"
+
+
+def test_a_page_that_writes_bytes_its_streams_cannot_decode_is_still_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A page, or a library it calls, can write raw bytes on stdout or stderr
+    that the encoding of its streams does not decode; such a byte is read as
+    a replacement character, so the page that fails is reported with its last
+    line on stderr and the page that runs is held to its comments, rather
+    than the check stopping on the byte. ``0x81`` decodes neither as UTF-8
+    nor in code page 1252, the encodings the streams take on the runners.
+    """
+    fails = _page(
+        tmp_path,
+        "import sys\nsys.stderr.buffer.write(b'bad\\x81\\n')\nsys.stderr.flush()\n"
+        "raise SystemExit(1)",
+        name="fails.md",
+    )
+    runs = _page(
+        tmp_path,
+        "import sys\nsys.stdout.buffer.write(b'bad\\x81\\n')\nsys.stdout.flush()\n"
+        "print(2)  # 2",
+        name="runs.md",
+    )
+    assert check_doc_snippets.check_execution([fails, runs]) == [
+        f"{check_doc_snippets._rel(fails)}: bad\ufffd"
+    ]

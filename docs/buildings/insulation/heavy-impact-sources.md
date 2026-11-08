@@ -76,15 +76,32 @@ measures with a force plate. The specification is stated **per octave band**,
 and Annex C puts the filter between the transducer and the analyser, so the
 record is band-filtered first and the formula is applied once per band: an
 unfiltered pulse returns the broadband level, which is several decibels above
-any single band value and must not be compared with the table above.
+any single band value and must not be compared with the table above. A band
+filter rings on after the 20 ms of the impact, the 31.5 Hz octave for some
+tenths of a second, and its ring is part of the band's energy: the record runs
+on in silence until the filters have died away. It is filtered forward, as a
+filter between the transducer and the analyser filters the force as it comes: a
+zero-phase filter (`zero_phase=True`) rings before the impact as well, so it
+needs as much silence before it, and even then it reads these five bands 0.3 to
+0.7 dB lower. The filter keeps the record's mean (`detrend=False`), which over
+the impact and its ring is the pulse's own: taken off, it hands every band a
+step at the start of the record, which moves the 500 Hz band by 0.2 dB here. A
+measured record also carries the offset the transducer reads at rest, which is
+no part of the pulse, so the mean of the samples before the impact is taken off
+the record first: an offset of 50 N, a thirtieth of the peak, left in raises
+the 500 Hz band by three quarters of a decibel. Cut at the end of the pulse,
+the same five bands read -2.9, 7.7, 13.3, 5.7 and -3.2 dB, the 31.5 Hz band
+41 dB low, and with the mean of so short a record taken off as well, as the
+default `detrend=True` does, -6.7, 14.6, 23.0, 21.2 and 18.2 dB.
 
 ```python
 import numpy as np
 from phonometry import building, filters
 
 fs = 48_000
-t = np.arange(0.0, 0.020, 1.0 / fs)          # the 20 ms contact time
-force = 1500.0 * np.sin(np.pi * t / 0.020)   # a single-peak half-sine pulse
+t = np.arange(0.0, 1.0, 1.0 / fs)            # the impact and the filters' ring
+# A single-peak half-sine pulse over the 20 ms contact time, then silence.
+force = np.where(t < 0.020, 1500.0 * np.sin(np.pi * t / 0.020), 0.0)
 
 # Broadband, i.e. the whole pulse energy: 10 lg(Fp^2 t / 2) = 43.5 dB.
 # Not a band value, and not comparable with the table above.
@@ -92,10 +109,10 @@ print(round(building.impact_force_exposure_level(force, fs), 2))
 
 # The five octave-band values the specification is actually written in.
 bank = filters.OctaveFilterBank(fs, fraction=1, limits=[31.5, 500.0])
-filtered = bank.filter(force, sigbands=True, calculate_level=False)
+filtered = bank.filter(force, sigbands=True, calculate_level=False, detrend=False)
 freqs, bands = filtered.frequencies, filtered.bands
 lfe = [building.impact_force_exposure_level(b, fs) for b in bands]
-print([round(v, 1) for v in lfe])   # [-6.7, 14.6, 23.0, 21.2, 18.2]
+print([round(v, 1) for v in lfe])   # [38.3, 30.8, 19.2, 8.9, -0.2]
 
 # Those five go to the conformance check; this synthetic half-sine is not a
 # rubber ball, so it does not conform:

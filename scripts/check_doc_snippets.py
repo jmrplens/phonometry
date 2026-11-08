@@ -65,12 +65,14 @@ import ast
 import concurrent.futures
 import io
 import json
+import locale
 import pathlib
 import re
 import subprocess
 import sys
 import tempfile
 import tokenize
+from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import (
     MAX_EMAX,
@@ -81,10 +83,7 @@ from decimal import (
     Inexact,
     InvalidOperation,
 )
-from typing import TYPE_CHECKING, TypeGuard
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+from typing import TypeGuard
 
 from markdown_fences import fences, page_kind
 
@@ -140,6 +139,14 @@ _FIXTURES: dict[str, str] = {
 
 #: Timeout per page, generous enough for the FDTD and ECMA pages.
 _TIMEOUT_S = 600
+
+#: The encoding a page's stdout and stderr are read in. A page runs on this
+#: interpreter, in this environment, so its streams take the encoding this
+#: process would give its own, the one :mod:`subprocess` reads text in when
+#: it is given none. A page, or a library it calls, can still write raw bytes
+#: that do not decode in it, and each such byte is read as a replacement
+#: character, so the report of that page is made all the same.
+_STREAM_ENCODING = "utf-8" if sys.flags.utf8_mode else locale.getencoding()
 
 
 #: The site's home page, which prints its examples from a data module rather
@@ -373,15 +380,27 @@ def _reading(text: str) -> str:
 #: A point before an ellipsis is the ellipsis's, not the number's.
 _REAL = r"(?:\d+(?:\.(?!\.\.)\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
 
+#: What a sign that follows it joins to what comes after, as the hyphen of a
+#: range (``50-80 Hz``) or of a name (``NC-35``) does: a digit, a letter, an
+#: underscore, a point or a closing bracket. Such a sign is no value's, in a
+#: comment and in what a print wrote alike, whoever wrote it.
+_JOINS = r"[\w.)\]}]"
+
+#: The sign of a value: one that does not follow what :data:`_JOINS` names.
+_SIGN = rf"(?:(?<!{_JOINS})[-+])?"
+
 #: The parts of an output, as :func:`output_disagreement` reads them: a value
 #: (a complex number, a real one, or a constant printed by its name), a word,
 #: and an ellipsis, which stands for values left out. A ``~`` before a value
 #: gives it roughly, and an ellipsis right after its digits says they go on.
 #: Punctuation and spaces are not parts: a container prints them its own way
-#: and a comment lays them out its own.
+#: and a comment lays them out its own, so a complex number may carry spaces
+#: before and after the sign of its imaginary part, as NumPy pads one to the
+#: width of the others in an array (``[ 1.  +1.j  1.25-2.j]``). A sign is a
+#: value's only where :data:`_SIGN` says it is.
 _OUTPUT_PART = re.compile(
     r"(?P<rough>[~\u2248]\s*)?"
-    rf"(?P<value>[-+]?{_REAL}[-+]{_REAL}j|[-+]?{_REAL}j?"
+    rf"(?P<value>{_SIGN}{_REAL} *[-+] *{_REAL}j|{_SIGN}{_REAL}j?"
     r"|(?<![\w.])(?:True|False|None|nan|-?inf)(?![\w.]))"
     r"(?P<cut>\.\.\.|\u2026)?"
     r"|(?P<word>[^\W\d]\w*)"
@@ -408,6 +427,11 @@ class _Part:
         an ellipsis.
     :param before: What the text writes between the part before and this
         one: the spaces, the punctuation and the brackets.
+    :param segment: For a part of an output, which stretch of it the part
+        stands in: the output is read in stretches of what the page's own
+        text wrote and of what its code computed, one after another, and a
+        computed value written apart from another by a stretch of the page's
+        text is in a stretch of its own.
     """
 
     kind: str
@@ -416,6 +440,7 @@ class _Part:
     rough: bool = False
     cut: bool = False
     before: str = ""
+    segment: int = 0
 
 
 #: What one argument of a print is: ``None`` for a value the code computes, or
@@ -428,8 +453,11 @@ _Argument = tuple[str | None, ...] | None
 class _Promise:
     """The output a comment promises for one print of a page's script.
 
-    :param first: The line of the script the print statement opens on.
-    :param last: The line it closes on.
+    :param first: The line of the script the statement the print stands in
+        opens on, or the print's own first line where the comment is its own
+        (:func:`promised_outputs`) or in the header of a compound statement
+        (:func:`_print_calls`).
+    :param last: The line that statement, or that print, closes on.
     :param lines: The comment and the comment lines that continue it.
     :param arguments: What each argument of the print is (:data:`_Argument`),
         or ``None`` when its arguments cannot be told apart (``*args``).
@@ -437,6 +465,9 @@ class _Promise:
         states the output only when the print writes that word first, which
         the run tells (:func:`output_disagreements`); ``None`` for a comment
         that opens like an output whatever the print writes.
+    :param apart: The lines from *first* to *last* whose prints have a
+        comment of their own inside the statement, and whose calls this
+        comment does not stand for.
     """
 
     first: int
@@ -444,6 +475,7 @@ class _Promise:
     lines: tuple[str, ...]
     arguments: tuple[_Argument, ...] | None = None
     word: str | None = None
+    apart: tuple[int, ...] = ()
 
     @property
     def text(self) -> str:
@@ -451,14 +483,46 @@ class _Promise:
         return " ".join(self.lines)
 
 
-def _is_print(node: ast.AST) -> TypeGuard[ast.Expr]:
-    """True for a statement that is a call of the builtin ``print``."""
+def _is_print(node: ast.AST) -> TypeGuard[ast.Call]:
+    """True for a call of the builtin ``print``, a statement of its own or
+    inside another one (``result = print(2)``, ``[print(x) for x in xs]``):
+    the record holds what every call writes, wherever it stands.
+    """
     return (
-        isinstance(node, ast.Expr)
-        and isinstance(node.value, ast.Call)
-        and isinstance(node.value.func, ast.Name)
-        and node.value.func.id == "print"
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "print"
     )
+
+
+#: The first and the last line of a stretch of a script.
+_Span = tuple[int, int]
+
+
+def _print_calls(tree: ast.AST) -> dict[ast.Call, tuple[_Span, _Span]]:
+    """Every call of ``print`` in *tree*, with its own lines and the lines of
+    the statement it stands in, whose last line is where a reader writes the
+    comment of a list comprehension of prints over three lines; in the header
+    of a compound statement, the call's own lines twice. Two calls in one
+    statement stand for its lines alike, as two prints written on one line
+    with a semicolon between them do.
+    """
+    found: dict[ast.Call, tuple[_Span, _Span]] = {}
+
+    def visit(node: ast.AST, span: _Span | None) -> None:
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, ast.stmt):
+                simple = not hasattr(child, "body") and not hasattr(child, "cases")
+                lines = (child.lineno, child.end_lineno or child.lineno)
+                visit(child, lines if simple else None)
+                continue
+            if _is_print(child):
+                own = (child.lineno, child.end_lineno or child.lineno)
+                found[child] = (own, span or own)
+            visit(child, span)
+
+    visit(tree, None)
+    return found
 
 
 def _open_brackets(text: str) -> int:
@@ -532,6 +596,13 @@ def promised_outputs(script: str) -> list[_Promise]:
     after line with no comment of their own share out the comment lines under
     the last of them, one line each, when each of those lines opens like the
     output of its print or on a word.
+
+    A print inside a statement that runs on past it is read first on its own
+    lines, where a comment that opens like its output is its own; a word
+    there is more likely a note on an argument than a message the print
+    writes, and is not read. The prints that have no comment there are read
+    on the lines of their statement, and that comment stands for their calls
+    only, not for those of the prints that have one of their own.
     """
     lines = script.splitlines()
     comments: dict[int, tuple[int, str]] = {}
@@ -553,105 +624,141 @@ def promised_outputs(script: str) -> list[_Promise]:
         )
 
     def run_from(number: int, said: list[str], call: ast.Call) -> list[str]:
-        """*said* and the comment lines from *number* down that go on with it."""
+        """*said* and the comment lines from *number* down that go on with it.
+
+        The brackets *said* leaves open are counted on as each line joins it,
+        not counted again over all of it for each line.
+        """
         said = list(said)
+        depth = sum(_open_brackets(text) for text in said)
         while comment_only(number):
             text = comments[number][1]
-            if not (_open_brackets(" ".join(said)) > 0 or _opens_output(text, call)):
+            if not (depth > 0 or _opens_output(text, call)):
                 break
             said.append(text)
+            depth += _open_brackets(text)
             number += 1
         return said
 
-    def end(node: ast.stmt) -> int:
-        return node.end_lineno or node.lineno
+    found = _print_calls(ast.parse(script))
+    span: dict[ast.Call, _Span] = {}
+    said_by: dict[ast.Call, list[str]] = {}
+    word_by: dict[ast.Call, str] = {}
 
-    def call_of(node: ast.stmt) -> ast.Call:
-        value = node.value if isinstance(node, ast.Expr) else None
-        if not isinstance(value, ast.Call):  # pragma: no cover - passed _is_print
-            raise TypeError(node)
-        return value
-
-    prints = sorted(
-        (node for node in ast.walk(ast.parse(script)) if _is_print(node)),
-        key=lambda node: node.lineno,
-    )
-    said_by: dict[int, list[str]] = {}
-    word_by: dict[int, str] = {}
-
-    def opening(text: str, index: int) -> bool:
-        """Whether *text* opens like the output of the print at *index*, or
-        on a word, noted for the run to settle.
+    def read(calls: list[ast.Call], *, words: bool) -> None:
+        """Find the comment of each of *calls* at the lines :data:`span`
+        gives it, a comment that opens on a word too when *words* is true.
         """
-        if _opens_output(text, call_of(prints[index])):
-            return True
-        word = _opening_word(text)
-        if word is not None:
-            word_by[index] = word
-        return word is not None
+        prints = sorted(
+            calls, key=lambda node: (span[node][0], node.lineno, node.col_offset)
+        )
 
-    at = 0
-    while at < len(prints):
-        node = prints[at]
-        comment = trailing(end(node))
-        if comment is not None:
-            if opening(comment, at):
-                said_by[at] = run_from(end(node) + 1, [comment], call_of(node))
-            at += 1
-            continue
-        stack = [at]
-        while (
-            stack[-1] + 1 < len(prints)
-            and prints[stack[-1] + 1].lineno == end(prints[stack[-1]]) + 1
-            and trailing(end(prints[stack[-1] + 1])) is None
-        ):
-            stack.append(stack[-1] + 1)
-        under = end(prints[stack[-1]]) + 1
-        dealt = [
-            comments[under + place][1]
-            for place, index in enumerate(stack)
-            if comment_only(under + place)
-            and opening(comments[under + place][1], index)
-        ]
-        last = call_of(prints[stack[-1]])
-        # A line that opens on a word may be prose that starts a comment the
-        # next lines go on with, so a share-out that counts one holds only
-        # when there is exactly one comment line for each print.
-        depth = 0
-        while comment_only(under + depth):
-            depth += 1
-        worded = any(index in word_by for index in stack)
-        if (
-            len(stack) > 1
-            and len(dealt) == len(stack)
-            and (not worded or depth == len(stack))
-        ):
-            for place, index in enumerate(stack[:-1]):
-                said_by[index] = [dealt[place]]
-            said_by[stack[-1]] = run_from(under + len(stack), [dealt[-1]], last)
-        else:
-            for index in stack:
-                word_by.pop(index, None)
-            run = run_from(under, [], last)
-            if run:
-                said_by[stack[-1]] = run
-            elif comment_only(under) and opening(comments[under][1], stack[-1]):
-                said_by[stack[-1]] = run_from(under + 1, [comments[under][1]], last)
-        at = stack[-1] + 1
+        def start(index: int) -> int:
+            return span[prints[index]][0]
+
+        def end(index: int) -> int:
+            return span[prints[index]][1]
+
+        def opening(text: str, index: int) -> bool:
+            """Whether *text* opens like the output of the print at *index*,
+            or on a word, noted for the run to settle.
+            """
+            if _opens_output(text, prints[index]):
+                return True
+            word = _opening_word(text) if words else None
+            if word is not None:
+                word_by[prints[index]] = word
+            return word is not None
+
+        at = 0
+        while at < len(prints):
+            node = prints[at]
+            comment = trailing(end(at))
+            if comment is not None:
+                if opening(comment, at):
+                    said_by[node] = run_from(end(at) + 1, [comment], node)
+                at += 1
+                continue
+            stack = [at]
+            while (
+                stack[-1] + 1 < len(prints)
+                and start(stack[-1] + 1) == end(stack[-1]) + 1
+                and trailing(end(stack[-1] + 1)) is None
+            ):
+                stack.append(stack[-1] + 1)
+            under = end(stack[-1]) + 1
+            dealt = [
+                comments[under + place][1]
+                for place, index in enumerate(stack)
+                if comment_only(under + place)
+                and opening(comments[under + place][1], index)
+            ]
+            last = prints[stack[-1]]
+            # A line that opens on a word may be prose that starts a comment
+            # the next lines go on with, so a share-out that counts one holds
+            # only when there is exactly one comment line for each print.
+            depth = 0
+            while comment_only(under + depth):
+                depth += 1
+            worded = any(prints[index] in word_by for index in stack)
+            if (
+                len(stack) > 1
+                and len(dealt) == len(stack)
+                and (not worded or depth == len(stack))
+            ):
+                for place, index in enumerate(stack[:-1]):
+                    said_by[prints[index]] = [dealt[place]]
+                said_by[last] = run_from(under + len(stack), [dealt[-1]], last)
+            else:
+                for index in stack:
+                    word_by.pop(prints[index], None)
+                run = run_from(under, [], last)
+                if run:
+                    said_by[last] = run
+                elif comment_only(under) and opening(comments[under][1], stack[-1]):
+                    said_by[last] = run_from(under + 1, [comments[under][1]], last)
+            at = stack[-1] + 1
+
+    # The prints a statement runs on past are read on their own lines first,
+    # and those left without a comment there on the lines of the statement.
+    for node, (own, _statement) in found.items():
+        span[node] = own
+    read([node for node, (own, stmt) in found.items() if own[1] < stmt[1]], words=False)
+    for node, (_own, statement) in found.items():
+        if node not in said_by:
+            span[node] = statement
+    read([node for node in found if node not in said_by], words=True)
+    claimed = {span[node] for node in said_by}
+
+    def apart(first: int, last: int) -> tuple[int, ...]:
+        """The lines from *first* to *last* of the prints inside them that
+        have a comment of their own.
+        """
+        inside = {
+            number
+            for low, high in claimed
+            if first <= low and high <= last and (low, high) != (first, last)
+            for number in range(low, high + 1)
+        }
+        return tuple(sorted(inside))
+
     return [
         _Promise(
-            prints[index].lineno,
-            end(prints[index]),
-            tuple(said),
-            _arguments(call_of(prints[index])),
-            word_by.get(index),
+            span[node][0],
+            span[node][1],
+            tuple(said_by[node]),
+            _arguments(node),
+            word_by.get(node),
+            apart(*span[node]),
         )
-        for index, said in sorted(said_by.items())
+        for node in sorted(
+            said_by, key=lambda node: (span[node][0], node.lineno, node.col_offset)
+        )
     ]
 
 
-def _parts(text: str, *, label: bool = False) -> list[_Part]:
-    """The values, words and ellipses of *text*, in order."""
+def _parts(text: str, *, label: bool = False, segment: int = 0) -> list[_Part]:
+    """The values, words and ellipses of *text*, in order, each in *segment*."""
     parts: list[_Part] = []
     at = 0
     for match in _OUTPUT_PART.finditer(text):
@@ -660,17 +767,22 @@ def _parts(text: str, *, label: bool = False) -> list[_Part]:
             parts.append(
                 _Part(
                     "value",
-                    match.group("value"),
+                    match.group("value").replace(" ", ""),
                     label,
                     rough=match.group("rough") is not None,
                     cut=match.group("cut") is not None,
                     before=before,
+                    segment=segment,
                 )
             )
         elif match.group("word") is not None:
-            parts.append(_Part("word", match.group(), label, before=before))
+            parts.append(
+                _Part("word", match.group(), label, before=before, segment=segment)
+            )
         elif match.group("gap") is not None:
-            parts.append(_Part("gap", match.group(), label, before=before))
+            parts.append(
+                _Part("gap", match.group(), label, before=before, segment=segment)
+            )
     return parts
 
 
@@ -702,28 +814,108 @@ def _pieces(text: str, argument: _Argument) -> list[tuple[str, bool]]:
     return pieces
 
 
-def _written_parts(
-    calls: Sequence[tuple[str, Sequence[str]]],
-    arguments: tuple[_Argument, ...] | None,
-) -> list[_Part]:
-    """The parts of what a print wrote over all its calls, each call and each
-    line it wrote closed by a ``"line"`` part, its own literal text marked as
-    a label.
+#: What one call of a print wrote, as the recorder keeps it: the separator it
+#: was given, what each argument wrote, and what it wrote after the last of
+#: them, its ending, or the separator before an argument it failed to write.
+_Call = tuple[str, Sequence[str], str]
+
+
+#: How a value a sign may stand before opens: with a digit, a point before
+#: one, or the infinity a float prints by name.
+_UNSIGNED = re.compile(r"\.?\d|inf(?![\w.])")
+
+
+def _joins(char: str) -> bool:
+    """Whether a sign right after *char* joins what stands either side of it
+    (:data:`_JOINS`) rather than signing the value after it.
     """
-    out: list[_Part] = []
-    for sep, texts in calls:
+    return re.fullmatch(_JOINS, char) is not None
+
+
+def _signed(pieces: list[tuple[str, bool]]) -> list[tuple[str, bool]]:
+    """*pieces*, none of them empty, with each sign between the page's own
+    text and a value its code computed given to the side the output reads it
+    with (:data:`_SIGN`), as a comment's is.
+
+    A sign the text writes right before the value, as ``f"-{x:.2f} dB"``, or
+    its minus sign (U+2212), signs what it formats: the reader reads a
+    negative number. One that follows a digit, a letter, a point or a closing
+    bracket joins what stands either side of it and stays the text's, as the
+    hyphen of a range ``f"{a:.0f}-{b:.0f} Hz"`` or of a name ``f"NC-{n}"``
+    does, and so does the sign of a negative value right after such a
+    character, as in ``f"NC{n}"``: both print ``NC-35``, which reads the same
+    whichever wrote the hyphen.
+    """
+    out = list(pieces)
+    for at in range(len(out) - 1):
+        (text, label), (value, value_label) = out[at], out[at + 1]
+        if not label or value_label:
+            continue
+        if text[-1] in "-+\u2212" and _UNSIGNED.match(value) is not None:
+            # What the output writes right before the sign: the text's own
+            # character before it, or the end of the piece before.
+            before = (
+                text[-2:-1] if len(text) > 1 else (out[at - 1][0][-1:] if at else "")
+            )
+            if not (before and _joins(before)):
+                out[at], out[at + 1] = (text[:-1], True), (text[-1] + value, False)
+        elif (
+            value[0] in "-+\u2212"
+            and _UNSIGNED.match(value, 1) is not None
+            and _joins(text[-1])
+        ):
+            out[at], out[at + 1] = (text + value[0], True), (value[1:], False)
+    return [piece for piece in out if piece[0]]
+
+
+def _stretches(
+    calls: Sequence[_Call], arguments: tuple[_Argument, ...] | None
+) -> list[tuple[str, bool]]:
+    """What a print wrote over all its calls, in the order it wrote it, cut
+    into stretches of the page's own text (``True``: its literals, the
+    separator, the ending) and of what its code computed (``False``).
+
+    Two pieces of the same kind written one after the other are one stretch,
+    as a reader reads them: ``print(1, 2, sep="")`` writes the value ``12``,
+    and a loop of ``print(x, end="")`` one value of all their digits. A
+    computed value and the page's text never join, so ``f"A{x}"`` still
+    writes the label ``A`` and the value of ``x``; a sign where the two meet
+    goes to the side the output reads it with (:func:`_signed`).
+    """
+    pieces: list[tuple[str, bool]] = []
+    for sep, texts, end in calls:
         known = arguments is not None and len(arguments) == len(texts)
-        pieces: list[tuple[str, bool]] = []
         for index, text in enumerate(texts):
             if index:
                 pieces.append((sep, True))
             pieces += _pieces(text, arguments[index] if known and arguments else None)
-        for text, label in pieces:
-            for number, line in enumerate(text.split("\n")):
-                if number:
-                    out.append(_Part("line", "\n"))
-                out += _parts(line, label=label)
-        out.append(_Part("line", "\n"))
+        pieces.append((end, True))
+    # Each stretch gathers its pieces and joins them once, so a loop of many
+    # calls that write one stretch does not copy it again for each call.
+    stretches: list[tuple[list[str], bool]] = []
+    for text, label in _signed([piece for piece in pieces if piece[0]]):
+        if stretches and stretches[-1][1] == label:
+            stretches[-1][0].append(text)
+        else:
+            stretches.append(([text], label))
+    return [("".join(texts), label) for texts, label in stretches]
+
+
+def _written_parts(
+    calls: Sequence[_Call],
+    arguments: tuple[_Argument, ...] | None,
+) -> list[_Part]:
+    """The parts of what a print wrote over all its calls (:func:`_stretches`),
+    a ``"line"`` part where it ended a line, its own text marked as a label
+    and each part in the stretch it stands in. A minus sign (U+2212) reads as
+    a hyphen, as it does in a comment.
+    """
+    out: list[_Part] = []
+    for segment, (text, label) in enumerate(_stretches(calls, arguments)):
+        for number, line in enumerate(text.replace("\u2212", "-").split("\n")):
+            if number:
+                out.append(_Part("line", "\n", segment=segment))
+            out += _parts(line, label=label, segment=segment)
     return out
 
 
@@ -756,6 +948,8 @@ def _states(said: Decimal, wrote: Decimal, *, rough: bool, cut: bool) -> bool:
     exact = Context(prec=digits + 2, Emax=MAX_EMAX, Emin=MIN_EMIN, traps=[Inexact])
     step = Decimal((0, (1,), exponent))
     if cut:  # its digits begin the printed ones, sign and all
+        if said.is_signed() != wrote.is_signed():
+            return False  # only a zero of the other sign gets past the bounds
         if said.is_signed():
             return exact.subtract(said, step) < wrote <= said
         return said <= wrote < exact.add(said, step)
@@ -862,10 +1056,19 @@ def _meet_after_gap(
         if wrote[n].kind == "value" and not wrote[n].label
     ]
     ends = [n for n in range(j, len(wrote)) if wrote[n].kind == "line"]
+    # How many of the stated values stand before each end, counted on as the
+    # ends go by rather than again for each one, which made a loop of many
+    # lines quadratic; an end with no new value before it is the last again.
+    reached = 0
+    tried = -1
     for end in [*ends, len(wrote)]:
-        before = [n for n in stated if n < end]
-        for count in range(min(len(after), len(before)), 0, -1):
-            tail = before[-count:]
+        while reached < len(stated) and stated[reached] < end:
+            reached += 1
+        if reached == tried:
+            continue
+        tried = reached
+        for count in range(min(len(after), reached), 0, -1):
+            tail = stated[reached - count : reached]
             if all(
                 _same_value(said[a], wrote[b].text)
                 for a, b in zip(after[:count], tail, strict=True)
@@ -942,6 +1145,20 @@ def _promised_after(said: list[_Part], last: int, read: int) -> int | None:
     return next((n for n in range(gap + 1, len(said)) if said[n].kind == "value"), None)
 
 
+def _apart(wrote: list[_Part], j: int, segment: int) -> _Part | None:
+    """The first value the print computed from ``wrote[j]`` to the end of that
+    line that stands outside *segment*, or ``None``: a comment that quotes a
+    message may stop inside the message, and not before a value written apart
+    from it, as the ``5`` of ``print(message, 5)``.
+    """
+    for part in wrote[j:]:
+        if part.kind == "line":
+            return None
+        if part.kind == "value" and not part.label and part.segment != segment:
+            return part
+    return None
+
+
 def _held(said: list[_Part], wrote: list[_Part]) -> str:
     """Why the comment's parts *said* do not state the output's parts *wrote*,
     or ``""`` (:func:`output_disagreement` gives the reading).
@@ -960,11 +1177,14 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
     last = -1
     k = j = 0
     # Whether the comment has stated a value, whether a line of the output
-    # has ended since the last one it stated, how many words the comment has
-    # quoted in a row, and whether that row was broken by a part either side
-    # read past.
+    # has ended since the last one it stated, how many words of a computed
+    # text (a message) the comment has quoted in a row, the stretch of the
+    # output the last of them stands in, and whether that row was broken by a
+    # part either side read past. A word of the print's own label is repeated,
+    # not quoted: it leaves the row as it was.
     stated = crossed = broken = False
     quoted = 0
+    quoted_in = -1
     while j < len(wrote):
         part = wrote[j]
         if part.kind == "line":
@@ -972,7 +1192,11 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
         elif part.kind == "word":
             if k < len(said) and said[k].kind == "word" and said[k].text == part.text:
                 k += 1
-                quoted = 1 if broken else quoted + 1
+                if not part.label:
+                    quoted = 1 if broken else quoted + 1
+                    quoted_in = part.segment
+                elif broken:
+                    quoted = 0
                 broken = False
             elif k < len(said):
                 broken = True
@@ -992,8 +1216,13 @@ def _held(said: list[_Part], wrote: list[_Part]) -> str:
                 continue
             if k == len(said):
                 if not part.label:
-                    if (stated and crossed) or (quoted and not broken):
+                    if stated and crossed:
                         return ""
+                    if quoted and not broken:
+                        apart = _apart(wrote, j, quoted_in)
+                        if apart is None:
+                            return ""
+                        return f"the comment stops before the printed {apart.text}"
                     return f"the comment stops before the printed {part.text}"
             elif _same_value(said[k], part.text):
                 if not part.label:
@@ -1035,6 +1264,39 @@ def _lines_of(parts: list[_Part]) -> list[list[_Part]]:
 #: ``78.2 Hz, 38.6 Hz -> valid here``.
 _ARROW = re.compile(r"\s*(?:->|\u2192)")
 
+#: A comma between two digits, which a Spanish comment writes as its decimal
+#: point (``35,9 m``) or as the comma of a list it writes without spaces.
+_DIGIT_COMMA = re.compile(r"(?<=\d),(?=\d)")
+
+
+def _decimal_points(texts: Sequence[str], *, in_brackets: bool) -> list[str]:
+    """*texts*, the lines of a Spanish comment, each comma between two digits
+    read as a decimal point, or, with *in_brackets* false, only those outside
+    a bracket the comment opens, the ones inside one left the commas of a list
+    (``[1,2]``). A bracket a line leaves open goes on over the next line, as
+    the comment's container does.
+
+    Outside a bracket a comma between two digits is never a list's: read as
+    one, the digits after it would be a value a word may follow as a note, so
+    that ``0,5 dB`` would state ``0.4 dB`` on its ``0``.
+    """
+    out: list[str] = []
+    # The brackets open at each comma are counted on from the last one, not
+    # counted again from the start of the line, which made a long line of
+    # values quadratic.
+    depth = 0
+    for text in texts:
+        pieces: list[str] = []
+        at = 0
+        for match in _DIGIT_COMMA.finditer(text):
+            depth += _open_brackets(text[at : match.start()])
+            pieces.append(text[at : match.start()])
+            pieces.append("," if depth > 0 and not in_brackets else ".")
+            at = match.end()
+        out.append("".join([*pieces, text[at:]]))
+        depth += _open_brackets(text[at:])
+    return out
+
 
 def _disagreement(
     said_lines: Sequence[str],
@@ -1045,7 +1307,13 @@ def _disagreement(
 ) -> str:
     """Why the comment lines *said_lines* do not state the output *wrote*.
 
-    :param decimal_comma: Read a comma between two digits as a decimal point.
+    :param decimal_comma: Read a comma between two digits as a decimal point,
+        or, when the comment does not state the output that way and the comma
+        stands inside a bracket, as the comma between two values that it is
+        in ``[1,2]`` (:func:`_decimal_points`). The commas of all the
+        comment's brackets are read alike: one that writes a decimal comma in
+        a bracket has said what its commas are, so the ``[1,2]`` of
+        ``[0,5; 1,5] [1,2]`` is 1.2, as a reader takes it.
     :param arrow: Let a line of the comment end what it states at an arrow
         (:data:`_ARROW`), the rest of it a note; off when the print writes an
         arrow itself.
@@ -1054,13 +1322,21 @@ def _disagreement(
         _NOT_A_VALUE.sub("", _reading(text).replace("\u2212", "-"))
         for text in said_lines
     ]
+    readings = [texts]
     if decimal_comma:
-        texts = [re.sub(r"(?<=\d),(?=\d)", ".", text) for text in texts]
-    why = _read(texts, wrote)
-    if why and arrow:
-        noted = [_ARROW.split(text, maxsplit=1)[0] for text in texts]
-        if noted != texts and not _read(noted, wrote):
+        decimal = _decimal_points(texts, in_brackets=True)
+        listed = _decimal_points(texts, in_brackets=False)
+        readings = [decimal] if listed == decimal else [decimal, listed]
+    why = ""
+    for reading in readings:
+        failed = _read(reading, wrote)
+        if not failed:
             return ""
+        why = why or failed
+        if arrow:
+            noted = [_ARROW.split(text, maxsplit=1)[0] for text in reading]
+            if noted != reading and not _read(noted, wrote):
+                return ""
     return why
 
 
@@ -1116,8 +1392,9 @@ def output_disagreement(
     over several lines may also state the output line by line, each line with
     its own annotation. A comment that opens on a quoted word quotes the word
     the print opens with. *decimal_comma* reads a comma between two digits as
-    a decimal point, as a Spanish page may write one, unless the print writes
-    such a comma itself (:func:`_reads_decimal_comma`).
+    a decimal point, as a Spanish page may write one, or, inside a bracket,
+    as the comma of a list where the comment states the output that way,
+    unless the print writes such a comma itself (:func:`_reads_decimal_comma`).
 
     :param promised: The comment, or its lines.
     :param written: What the print wrote, or what each of its calls wrote, as
@@ -1125,7 +1402,7 @@ def output_disagreement(
     """
     lines = promised.splitlines() if isinstance(promised, str) else list(promised)
     calls = [written] if isinstance(written, str) else list(written)
-    wrote = _written_parts([(" ", [text]) for text in calls], None)
+    wrote = _written_parts([(" ", [text], "\n") for text in calls], None)
     output = "\n".join(calls)
     comma = _reads_decimal_comma(output, spanish=decimal_comma)
     arrow = _ARROW.search(output) is None
@@ -1136,25 +1413,31 @@ def output_disagreements(
     page: pathlib.Path,
     script: str,
     lines: dict[int, int],
-    written: dict[int, list[tuple[str, list[str]]]],
+    written: dict[int, list[tuple[int, _Call]]],
 ) -> list[str]:
     """Failures for every output comment of *page* that its print contradicts.
 
     :param script: The script the page ran as (:func:`_script`).
     :param lines: The line of the page each line of the script stands on.
     :param written: What each print wrote, keyed by its line in the script:
-        one ``(sep, texts)`` per call, *texts* holding what each argument
-        wrote, in the order the calls came.
+        one ``(order, (sep, texts, end))`` per call (:data:`_Call`), *order*
+        counting the calls of the whole run in the order they began to write.
+        A comment that stands for the prints of several lines is held to
+        their calls in that order, as they took turns: two prints of a
+        comprehension over two lines write one value each time round.
     """
     failures: list[str] = []
     spanish = page.is_relative_to(_SITE_ES)
     for promise in promised_outputs(script):
         where = f"{_rel(page)}:{lines.get(promise.first, promise.first)}"
-        calls = [
+        apart = set(promise.apart)
+        kept = [
             call
             for number in range(promise.first, promise.last + 1)
+            if number not in apart
             for call in written.get(number, [])
         ]
+        calls = [call for _, call in sorted(kept, key=lambda call: call[0])]
         wrote = _written_parts(calls, promise.arguments)
         if promise.word is not None:
             first = next((part for part in wrote if part.kind != "line"), None)
@@ -1166,7 +1449,8 @@ def output_disagreements(
                 "never runs this print"
             )
             continue
-        output = "\n".join(sep.join(texts) for sep, texts in calls)
+        output = "".join(sep.join(texts) + end for sep, texts, end in calls)
+        output = output.removesuffix("\n")
         comma = _reads_decimal_comma(output, spanish=spanish)
         arrow = _ARROW.search(output) is None
         why = _disagreement(promise.lines, wrote, decimal_comma=comma, arrow=arrow)
@@ -1180,13 +1464,22 @@ def output_disagreements(
 
 #: The module a page's script imports before anything else. It wraps
 #: ``print`` so that every call made from the script itself, at any depth of
-#: its own functions and loops, also records the text the call writes, keyed
-#: by the line of the script the call stands on; a print made inside the
-#: library is not the page's and is not recorded. When the script ends, however
-#: it ends, the record is saved beside it as JSON for :func:`_run_page` to read.
+#: its own functions and loops, also records what the call writes, keyed by
+#: the line of the script the call stands on and numbered in the order the
+#: calls began to write; a print made inside the library is not the page's
+#: and is not recorded. The call writes through a file that hands each piece
+#: on to the one it was given and keeps what that file took, so the record
+#: holds what the print wrote and nothing else: each argument converted once,
+#: by the print itself, the ending it was given, of a write the file took in
+#: part only the characters it says it took, by the count its ``write``
+#: returns or on the :class:`BlockingIOError` it raises, and of a print that
+#: fails part of the way, or to a closed file, only what it wrote before it
+#: failed. When the script ends, however it ends, the record is saved beside
+#: it as JSON for :func:`_run_page` to read.
 _RECORDER = """\
 import atexit
 import builtins
+import itertools
 import json
 import os
 import sys
@@ -1195,16 +1488,64 @@ _SCRIPT = sys.argv[0]
 _SAVED = os.path.join(os.path.dirname(os.path.abspath(_SCRIPT)), "printed.json")
 _PRINT = builtins.print
 _WRITTEN = {}
+_ORDER = itertools.count()
+
+
+def _took(text, count):
+    # A write that says it took fewer characters than it was given took
+    # those first ones; one that says nothing, or something else, took all.
+    if isinstance(count, int) and not isinstance(count, bool):
+        if 0 <= count < len(text):
+            return text[:count]
+    return text
+
+
+class _Kept:
+    def __init__(self, file):
+        self.file = file
+        self.pieces = []
+        self.order = None
+
+    def write(self, text):
+        if self.order is None:
+            self.order = next(_ORDER)
+        try:
+            written = self.file.write(text)
+        except BlockingIOError as blocked:
+            # A write that blocks counts the characters it took before then.
+            count = getattr(blocked, "characters_written", 0)
+            if isinstance(count, int) and count > 0:
+                self.pieces.append(text[:count])
+            raise
+        self.pieces.append(_took(text, written))
+        return written
+
+    def flush(self):
+        self.file.flush()
+
+
+def _keep(line, order, count, sep, pieces):
+    # A print writes its arguments with the separator between them and then
+    # its ending: what it wrote after the last argument it wrote is the
+    # ending, or the separator before an argument it failed to write.
+    texts = pieces[0 : max(2 * count - 1, 0) : 2]
+    at = 2 * len(texts) - 1 if texts else 0
+    after = pieces[at] if at < len(pieces) else ""
+    kept = [order, " " if sep is None else sep, texts, after]
+    _WRITTEN.setdefault(line, []).append(kept)
 
 
 def _print(*args, sep=" ", end="\\n", file=None, flush=False):
     caller = sys._getframe(1)
-    if caller.f_code.co_filename == _SCRIPT:
-        texts = [str(arg) for arg in args]
-        _WRITTEN.setdefault(caller.f_lineno, []).append(
-            [" " if sep is None else sep, texts]
-        )
-    _PRINT(*args, sep=sep, end=end, file=file, flush=flush)
+    target = sys.stdout if file is None else file
+    if caller.f_code.co_filename != _SCRIPT or target is None:
+        return _PRINT(*args, sep=sep, end=end, file=file, flush=flush)
+    kept = _Kept(target)
+    try:
+        return _PRINT(*args, sep=sep, end=end, file=kept, flush=flush)
+    finally:
+        if kept.pieces:
+            _keep(caller.f_lineno, kept.order, len(args), sep, kept.pieces)
 
 
 def _save():
@@ -1248,6 +1589,17 @@ def _script(page: pathlib.Path, fixture: str = "") -> tuple[str, dict[int, int]]
     return script, lines
 
 
+def _text(output: bytes | str | None) -> str:
+    """What a stopped child wrote on a pipe, as text: :mod:`subprocess` hands
+    it over as bytes on POSIX whatever ``text=`` asked for, as text on
+    Windows, and as ``None`` when the child wrote nothing. Bytes are read as
+    :func:`_run_page` reads text (:data:`_STREAM_ENCODING`).
+    """
+    if isinstance(output, bytes):
+        return output.decode(_STREAM_ENCODING, errors="replace")
+    return output or ""
+
+
 def _run_page(
     page: pathlib.Path, fixture: str = ""
 ) -> tuple[pathlib.Path, str, list[str]]:
@@ -1270,11 +1622,17 @@ def _run_page(
                 check=False,
                 capture_output=True,
                 text=True,
+                encoding=_STREAM_ENCODING,
+                errors="replace",
                 timeout=_TIMEOUT_S,
                 cwd=tmp,
             )
-        except subprocess.TimeoutExpired:
-            return page, f"timed out after {_TIMEOUT_S} s", []
+        except subprocess.TimeoutExpired as stopped:
+            # What the page wrote on stderr before it was stopped, a warning
+            # of the step it was in, is the cause the report can give.
+            tail = _text(stopped.stderr).strip().splitlines()
+            said = f"; its last line on stderr: {tail[-1]}" if tail else ""
+            return page, f"timed out after {_TIMEOUT_S} s{said}", []
         if done.returncode != 0:
             tail = done.stderr.strip().splitlines()
             return page, tail[-1] if tail else f"exit status {done.returncode}", []
@@ -1283,7 +1641,7 @@ def _run_page(
             return page, "the run ended without saving what its prints wrote", []
         saved = json.loads(record.read_text("utf-8"))
     written = {
-        int(line): [(sep, texts) for sep, texts in calls]
+        int(line): [(order, (sep, texts, end)) for order, sep, texts, end in calls]
         for line, calls in saved.items()
     }
     return page, "", output_disagreements(page, script, lines, written)

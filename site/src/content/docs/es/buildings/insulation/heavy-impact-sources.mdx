@@ -186,15 +186,35 @@ especificación está dada **por bandas de octava**, y el Anexo C sitúa el filt
 entre el transductor y el analizador, así que el registro se filtra por bandas
 primero y la fórmula se aplica una vez por banda: un impulso sin filtrar
 devuelve el nivel de banda ancha, que queda varios decibelios por encima de
-cualquier valor por banda y no debe compararse con la tabla anterior.
+cualquier valor por banda y no debe compararse con la tabla anterior. Un filtro
+de banda sigue sonando después de los 20 ms del impacto, el de la octava de
+31,5 Hz durante algunas décimas de segundo, y ese resto es parte de la energía
+de la banda: el registro sigue en silencio hasta que los filtros se han
+apagado. Se filtra hacia delante, como filtra la fuerza a medida que llega un
+filtro entre el transductor y el analizador: un filtro de fase cero
+(`zero_phase=True`) suena también antes del impacto, así que necesita otro
+tanto de silencio delante, e incluso así da estas cinco bandas entre 0,3 y
+0,7 dB más bajas. El filtro conserva la media del registro (`detrend=False`),
+que sobre el impacto y su resto es la del propio impulso: quitarla da a cada
+banda un escalón al principio del registro, que aquí mueve 0,2 dB la banda de
+500 Hz. Un registro medido lleva además el desplazamiento que el transductor
+marca en reposo, que no es parte del impulso, así que al registro se le resta
+primero la media de las muestras anteriores al impacto: un desplazamiento de
+50 N, la trigésima parte del pico, que se quede dentro sube la banda de 500 Hz
+tres cuartos de decibelio. Cortado al final del impulso, las mismas cinco
+bandas dan -2,9, 7,7, 13,3, 5,7 y -3,2 dB, la de 31,5 Hz 41 dB por debajo, y
+quitando además la media de un registro tan corto, como hace el `detrend=True`
+por defecto, -6,7, 14,6, 23,0, 21,2 y 18,2 dB.
 
 ```python
 import numpy as np
 from phonometry import building, filters
 
 fs = 48_000
-t = np.arange(0.0, 0.020, 1.0 / fs)          # el tiempo de contacto de 20 ms
-force = 1500.0 * np.sin(np.pi * t / 0.020)   # un impulso semisinusoidal de pico único
+t = np.arange(0.0, 1.0, 1.0 / fs)            # el impacto y el resto de los filtros
+# Un impulso semisinusoidal de pico único durante los 20 ms de contacto, y
+# después silencio.
+force = np.where(t < 0.020, 1500.0 * np.sin(np.pi * t / 0.020), 0.0)
 
 # Banda ancha, la energía del impulso completo: 10 lg(Fp^2 t / 2) = 43,5 dB.
 # No es un valor por banda ni es comparable con la tabla anterior.
@@ -203,10 +223,10 @@ print(round(building.impact_force_exposure_level(force, fs), 2))
 # Los cinco valores por banda de octava en los que sí está escrita la
 # especificación.
 bank = filters.OctaveFilterBank(fs, fraction=1, limits=[31.5, 500.0])
-filtered = bank.filter(force, sigbands=True, calculate_level=False)
+filtered = bank.filter(force, sigbands=True, calculate_level=False, detrend=False)
 freqs, bands = filtered.frequencies, filtered.bands
 lfe = [building.impact_force_exposure_level(b, fs) for b in bands]
-print([round(v, 1) for v in lfe])   # [-6.7, 14.6, 23.0, 21.2, 18.2]
+print([round(v, 1) for v in lfe])   # [38.3, 30.8, 19.2, 8.9, -0.2]
 
 # Esos cinco van a la comprobación de conformidad; este impulso semisinusoidal
 # sintético no es una pelota de caucho, así que no cumple:

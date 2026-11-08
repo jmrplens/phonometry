@@ -42,10 +42,17 @@ configuration (``EXP_TABLE_BITS == 7``, ``EXP_POLY_ORDER == 5``,
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from .pinned_log import _two_product
 from .validation import real_array
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    from .types import NumericArrayLike
 
 __all__ = ["pinned_exp", "pinned_pow"]
 
@@ -359,12 +366,14 @@ def _split(value: float) -> tuple[float, float]:
     return high, value - high
 
 
-def _top(values: np.ndarray) -> np.ndarray:
+def _top(values: NDArray[np.float64]) -> NDArray[np.int64]:
     """The exponent field of each double, as a signed integer."""
     return ((values.view(np.uint64) >> _U52) & _EXPONENT).astype(np.int64)
 
 
-def _round_to_odd_sum(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+def _round_to_odd_sum(
+    a: NDArray[np.float64], b: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """``a + b`` rounded to odd: the exact sum if it is a double, else the odd neighbour.
 
     The rounding Boldo and Melquiond's emulation needs. The sum is rounded to
@@ -393,8 +402,10 @@ def _round_to_odd_sum(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 
 def _fused_multiply_add(
-    a: np.ndarray, b: np.ndarray | float, c: np.ndarray | float
-) -> np.ndarray:
+    a: NDArray[np.float64],
+    b: NDArray[np.float64] | float,
+    c: NDArray[np.float64] | float,
+) -> NDArray[np.float64]:
     """``fl(a * b + c)`` with a single rounding, in plain IEEE 754 operations.
 
     The product is split exactly (Dekker's two-product), the addend joins its
@@ -417,8 +428,11 @@ def _fused_multiply_add(
 
 
 def _fused_by_constant(
-    a: np.ndarray, constant: float, halves: tuple[float, float], c: np.ndarray | float
-) -> np.ndarray:
+    a: NDArray[np.float64],
+    constant: float,
+    halves: tuple[float, float],
+    c: NDArray[np.float64] | float,
+) -> NDArray[np.float64]:
     """:func:`_fused_multiply_add` with a constant factor split once, in advance."""
     product = a * constant
     scaled = a * _SPLIT
@@ -442,8 +456,8 @@ _C5_HALVES = _split(_C5)
 
 
 def _exp_kernel(
-    x: np.ndarray, tail: np.ndarray | None, sign_bias: int = 0
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    x: NDArray[np.float64], tail: NDArray[np.float64] | None, sign_bias: int = 0
+) -> tuple[NDArray[np.float64], NDArray[np.uint64], NDArray[np.uint64]]:
     """The shared table step of ``exp`` and ``pow``: ``tmp``, ``sbits`` and ``ki``.
 
     ``exp(x) = 2^(k/N) exp(r)`` with ``x = k ln2/N + r``. Every multiply-add
@@ -475,7 +489,9 @@ def _exp_kernel(
     return tmp, sbits, ki
 
 
-def _special_case(tmp: np.ndarray, sbits: np.ndarray, ki: np.ndarray) -> np.ndarray:
+def _special_case(
+    tmp: NDArray[np.float64], sbits: NDArray[np.uint64], ki: NDArray[np.uint64]
+) -> NDArray[np.float64]:
     """``scale * (1 + tmp)`` where the scale's exponent overflowed or underflowed.
 
     The C routine's ``specialcase``: ``k > 0`` rescales by ``2^1009`` around a
@@ -501,7 +517,9 @@ def _special_case(tmp: np.ndarray, sbits: np.ndarray, ki: np.ndarray) -> np.ndar
     return out
 
 
-def _special_case_down(tmp: np.ndarray, sbits: np.ndarray) -> np.ndarray:
+def _special_case_down(
+    tmp: NDArray[np.float64], sbits: NDArray[np.uint64]
+) -> NDArray[np.float64]:
     """The ``k < 0`` half of :func:`_special_case`, toward the subnormal range."""
     shifted = sbits + (np.uint64(1022) << _U52)
     scale = shifted.view(np.float64)
@@ -520,7 +538,9 @@ def _special_case_down(tmp: np.ndarray, sbits: np.ndarray) -> np.ndarray:
     return np.where(np.abs(y) < 1.0, narrowed, y) * float.fromhex("0x1p-1022")
 
 
-def _exp_from(x: np.ndarray, tail: np.ndarray | None) -> np.ndarray:
+def _exp_from(
+    x: NDArray[np.float64], tail: NDArray[np.float64] | None
+) -> NDArray[np.float64]:
     """``exp(x + tail)`` for finite ``x`` with ``2^-54 <= |x| < 1024``."""
     tmp, sbits, ki = _exp_kernel(x, tail)
     large = _top(x) >= _TOP_LARGE
@@ -536,8 +556,8 @@ def _exp_from(x: np.ndarray, tail: np.ndarray | None) -> np.ndarray:
 
 
 def _finish(
-    flat: np.ndarray, tail: np.ndarray | None, *, finite_only: bool
-) -> np.ndarray:
+    flat: NDArray[np.float64], tail: NDArray[np.float64] | None, *, finite_only: bool
+) -> NDArray[np.float64]:
     """Route each argument to the fast path, the tiny path or the overflow edge."""
     top = _top(flat)
     tiny = top < _TOP_TINY
@@ -558,7 +578,7 @@ def _finish(
     return out
 
 
-def pinned_exp(values: np.ndarray | float) -> np.ndarray:
+def pinned_exp(values: NumericArrayLike) -> NDArray[np.float64]:
     """``exp`` elementwise, the bits glibc's routine returns, on every machine.
 
     Special values follow the C routine: ``exp(-inf)`` is ``0``, ``inf`` and
@@ -576,7 +596,9 @@ def pinned_exp(values: np.ndarray | float) -> np.ndarray:
     return _finish(flat, None, finite_only=False).reshape(x.shape)
 
 
-def _log_inline(ix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _log_inline(
+    ix: NDArray[np.uint64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """``pow``'s logarithm in double-double: ``hi + lo`` with about 15 extra bits.
 
     :param ix: Bit patterns of positive bases, subnormals already normalised.
@@ -611,7 +633,7 @@ _LN2_LO_HALVES = _split(_LN2_LO)
 _A_HALVES = tuple(_split(value) for value in _A)
 
 
-def _normalised_bits(x: np.ndarray) -> np.ndarray:
+def _normalised_bits(x: NDArray[np.float64]) -> NDArray[np.uint64]:
     """Bit patterns of positive bases, subnormals rescaled as the C routine does."""
     ix = x.view(np.uint64).copy()
     subnormal = ix < np.uint64(0x0010000000000000)
@@ -621,7 +643,9 @@ def _normalised_bits(x: np.ndarray) -> np.ndarray:
     return ix
 
 
-def pinned_pow(base: np.ndarray | float, exponent: np.ndarray | float) -> np.ndarray:
+def pinned_pow(
+    base: NumericArrayLike, exponent: NumericArrayLike
+) -> NDArray[np.float64]:
     """``base ** exponent`` elementwise for a positive base, glibc's bits everywhere.
 
     The weighting design only ever raises a positive number to a finite
@@ -666,7 +690,7 @@ def pinned_pow(base: np.ndarray | float, exponent: np.ndarray | float) -> np.nda
     return out.reshape(shape)
 
 
-def _pow_regular(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+def _pow_regular(x: NDArray[np.float64], y: NDArray[np.float64]) -> NDArray[np.float64]:
     """The C routine's main path: ``exp(y log x)`` carried in double-double."""
     hi, lo = _log_inline(_normalised_bits(x))
     ehi, error = _two_product(y, hi)

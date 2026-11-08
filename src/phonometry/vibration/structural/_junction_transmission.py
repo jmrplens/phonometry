@@ -780,9 +780,9 @@ class JunctionTransmissionResult(OwnsArrays):
     psi: float
     critical_frequency1: float
     critical_frequency2: float
-    angles_deg: np.ndarray
-    corner: np.ndarray
-    straight: np.ndarray | None
+    angles_deg: NDArray[np.float64]
+    corner: NDArray[np.float64]
+    straight: NDArray[np.float64] | None
     corner_average: float
     straight_average: float | None
     _: KW_ONLY
@@ -930,7 +930,7 @@ def junction_transmission(
         chi, psi, name, section="corner"
     )
 
-    straight: np.ndarray | None = None
+    straight: NDArray[np.float64] | None = None
     straight_avg: float | None = None
     if _has_straight_section(name):
         straight = straight_transmission_coefficient(theta, chi, psi, name)

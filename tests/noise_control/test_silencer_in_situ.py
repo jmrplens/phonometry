@@ -20,6 +20,7 @@ report reads as well so that the two can never assert different values.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import warnings
 
@@ -597,14 +598,22 @@ def folded_octave_level(third_octave_db: tuple[float, ...]) -> float:
     return float(noise_control.octave_levels_from_third_octave(third_octave_db)[0])
 
 
+#: The advisory of a margin under the 3 dB at which ISO 11820 caps the correction.
+_CAPPED = "ISO 11820 caps the extraneous correction at 3 dB"
+
+
 def background_correction(margin_db: float) -> float:
     """What Equations (17) and (18) take off at a single measuring point."""
-    with warnings.catch_warnings():
-        # Barron's table reaches down to a 1 dB margin, where ISO 11820 caps
-        # the correction and refuses to call the level determined. The cap is
-        # tested on its own below; this helper is about the arithmetic under
-        # it, which the module returns uncapped either way.
-        warnings.simplefilter("ignore", SilencerInSituWarning)
+    # Barron's table reaches down to a 1 dB margin, where ISO 11820 caps the
+    # correction and says so. The cap is tested on its own below; this helper
+    # is about the arithmetic under it, which the module returns uncapped
+    # either way.
+    capped = (
+        pytest.warns(SilencerInSituWarning, match=_CAPPED)
+        if margin_db < 3.0
+        else contextlib.nullcontext()
+    )
+    with capped:
         corrected = noise_control.extraneous_corrected_mean_level(
             [CARRIER_DB], [CARRIER_DB - margin_db]
         ).corrected_level
@@ -822,8 +831,12 @@ def test_the_margin_window_is_the_declared_thousandth_of_a_nanodecibel() -> None
     times the declared figure, the 3 dB of clause 4 being the reference.
     """
     for deficit, expected in ((5e-10, False), (2e-9, True), (1e-8, True)):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", SilencerInSituWarning)
+        advisory = (
+            pytest.warns(SilencerInSituWarning, match=_CAPPED)
+            if expected
+            else contextlib.nullcontext()
+        )
+        with advisory:
             capped = noise_control.extraneous_corrected_mean_level(
                 [CARRIER_DB], [CARRIER_DB - (3.0 - deficit)]
             ).capped

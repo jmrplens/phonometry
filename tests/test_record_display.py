@@ -25,7 +25,6 @@ import pathlib
 import pkgutil
 import types
 import typing
-import warnings
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, NamedTuple
 from unittest import mock
@@ -124,9 +123,7 @@ def _factories() -> list[tuple[str, Callable[[], object]]]:
 @pytest.fixture(scope="module")
 def built_results() -> dict[str, object]:
     """What each factory builds, by factory name: a record or a tuple of them."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return {name: factory() for name, factory in _factories()}
+    return {name: factory() for name, factory in _factories()}
 
 
 @pytest.fixture(scope="module")
@@ -352,11 +349,9 @@ def test_the_largest_results_display_in_a_few_kilobytes(
 def test_a_record_holding_signals_names_them() -> None:
     fs = 8000
     tone = np.sin(2 * np.pi * 500 * np.arange(fs) / fs)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        result = phonometry.filters.octave_filter(
-            io.Signal(tone, fs), fraction=1, sigbands=True
-        )
+    result = phonometry.filters.octave_filter(
+        io.Signal(tone, fs), fraction=1, sigbands=True
+    )
     assert "tuple of 8 Signal" in _pretty(result)
     _parsed(result)
     signal = io.Signal(np.vstack([tone, tone]), fs)

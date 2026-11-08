@@ -26,8 +26,12 @@ from phonometry.fluids import Fluid
 
 # The resistivities of real grounds put the lowest bands outside the range the
 # two empirical models were fitted over, and each model says so with a
-# warning; that is the models' business, not what these tests hold.
-pytestmark = pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
+# warning; that is the models' business, not what these tests hold, so that
+# one advisory is let through by its message and no other is.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:(Delany-Bazley|Miki)\\W.*outside the published fit range"
+    ":phonometry.materials.PorousAbsorberWarning"
+)
 
 BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
 

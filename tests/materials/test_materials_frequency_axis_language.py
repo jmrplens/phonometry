@@ -12,7 +12,6 @@ a label without one proves nothing.
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 
 import matplotlib as mpl
@@ -55,10 +54,11 @@ def _tick_labels(ax: Axes) -> list[str]:
 
 
 def _medium() -> materials.PorousMediumResult:
-    # Delany-Bazley is fitted above 250 Hz; its range warning is not the
-    # subject here, only the axis the result is drawn on.
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    # Delany-Bazley is fitted above 250 Hz here, and says so below it; the
+    # subject is only the axis the result is drawn on.
+    with pytest.warns(
+        materials.PorousAbsorberWarning, match="outside the published fit range"
+    ):
         return delany_bazley(_FREQUENCIES, 20000.0, fluid=ABSORBER_AIR)
 
 
@@ -83,11 +83,9 @@ def _porous_medium(language: str) -> Axes:
 
 def _diffuse_field(language: str) -> Axes:
     # Drawn through the shared absorption-spectrum axes of the materials module.
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        result = diffuse_field_absorption(
-            _FREQUENCIES, [PorousLayer(thickness_m=0.05, medium=_medium())]
-        )
+    result = diffuse_field_absorption(
+        _FREQUENCIES, [PorousLayer(thickness_m=0.05, medium=_medium())]
+    )
     return result.plot(language=language)
 
 

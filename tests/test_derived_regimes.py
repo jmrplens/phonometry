@@ -207,7 +207,14 @@ def test_a_valve_result_stops_below_flashing() -> None:
 
 def _gas(outlet_pressure_pa: float) -> noise_control.AerodynamicValveNoise:
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.ValveNoiseWarning)
+        # The regimes are read across outlet pressures, the lowest of them past
+        # the outlet Mach limit of NOTE 1 to Equation (15), which the result
+        # says; that advisory alone is let through, by its message.
+        warnings.filterwarnings(
+            "ignore",
+            message="The valve outlet is at Mach",
+            category=noise_control.ValveNoiseWarning,
+        )
         return noise_control.valve_aerodynamic_noise(
             noise_control.GasStream(
                 mass_flow=2.22,
@@ -497,9 +504,12 @@ def test_a_correction_of_another_gas_is_refused() -> None:
 # --- ISO 11957 3.6: the prime says the measurement was in situ ----------------------
 
 
+#: The advisory of a spectrum short of the 100 Hz to 5000 Hz ISO 11957 asks for.
+_SHORT_RANGE = "ISO 11957 requires the bands from 100 Hz to 5000 Hz"
+
+
 def _laboratory_cabin() -> noise_control.CabinInsulationResult:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.CabinInsulationWarning)
+    with pytest.warns(noise_control.CabinInsulationWarning, match=_SHORT_RANGE):
         return noise_control.cabin_insulation(
             np.full(_BANDS.size, 80.0), np.full(_BANDS.size, 50.0), frequencies=_BANDS
         )
@@ -520,8 +530,7 @@ def test_a_cabin_result_refuses_an_unknown_method() -> None:
 
 
 def test_only_the_actual_noise_method_carries_an_a_weighted_insulation() -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.CabinInsulationWarning)
+    with pytest.warns(noise_control.CabinInsulationWarning, match=_SHORT_RANGE):
         actual = noise_control.cabin_insulation(
             np.full(_BANDS.size, 80.0),
             np.full(_BANDS.size, 50.0),

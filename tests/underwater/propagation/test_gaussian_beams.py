@@ -1741,7 +1741,14 @@ def test_the_default_width_is_the_optimum_raised_to_the_guides_need(
     edge: float,
 ) -> None:
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", NumericalPropagationWarning)
+        # Ten kilometres of a 200 m column at 100 Hz march the steepest beam
+        # across the column in one step, which the trace says; that advisory
+        # alone is let through, by its message.
+        warnings.filterwarnings(
+            "ignore",
+            message="gaussian_beams: one marching step carries the steepest beam",
+            category=NumericalPropagationWarning,
+        )
         res = gaussian_beams(
             frequency,
             [0.0, water_depth],

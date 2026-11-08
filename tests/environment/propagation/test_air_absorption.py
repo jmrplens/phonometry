@@ -21,7 +21,6 @@ from __future__ import annotations
 import dataclasses
 import math
 import sys
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -45,9 +44,25 @@ def test_table1_digit_exact(
     temp: float, rh: float, freq: float, alpha_km: float
 ) -> None:
     # air_attenuation returns dB/m; Table 1 is dB/km. Use exact midbands (Note 5).
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
-        computed_km = (
+    computed_km = (
+        float(
+            environment.air_attenuation(
+                freq,
+                temperature_c=temp,
+                relative_humidity_percent=rh,
+                exact_midband=True,
+            )
+        )
+        * 1e3
+    )
+    assert computed_km == pytest.approx(alpha_km, abs=_last_digit_ulp(alpha_km))
+
+
+def test_table1_agreement_is_tight() -> None:
+    # The whole grid reproduces to well under 0,5 % (rounding-limited).
+    worst = 0.0
+    for temp, rh, freq, alpha_km in ref.ISO9613_1_TABLE1:
+        got = (
             float(
                 environment.air_attenuation(
                     freq,
@@ -58,27 +73,7 @@ def test_table1_digit_exact(
             )
             * 1e3
         )
-    assert computed_km == pytest.approx(alpha_km, abs=_last_digit_ulp(alpha_km))
-
-
-def test_table1_agreement_is_tight() -> None:
-    # The whole grid reproduces to well under 0,5 % (rounding-limited).
-    worst = 0.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
-        for temp, rh, freq, alpha_km in ref.ISO9613_1_TABLE1:
-            got = (
-                float(
-                    environment.air_attenuation(
-                        freq,
-                        temperature_c=temp,
-                        relative_humidity_percent=rh,
-                        exact_midband=True,
-                    )
-                )
-                * 1e3
-            )
-            worst = max(worst, abs(got - alpha_km) / alpha_km)
+        worst = max(worst, abs(got - alpha_km) / alpha_km)
     assert worst < 0.005
 
 
@@ -109,8 +104,10 @@ def test_low_frequency_grows_as_f_squared() -> None:
     # Well below both relaxation frequencies alpha ~ f^2, so doubling f
     # quadruples alpha.
     f = np.array([10.0, 20.0, 40.0])
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
+    with pytest.warns(
+        environment.AtmosphericAbsorptionWarning,
+        match=r"outside the 50..10000 Hz tabulated range",
+    ):
         a = environment.air_attenuation(
             f, temperature_c=20.0, relative_humidity_percent=60.0
         )
@@ -242,10 +239,8 @@ def test_vectorized_matches_scalar() -> None:
 def test_exact_midband_snaps_nominal_to_midband() -> None:
     # Nominal 50 Hz snaps to fm = 1000*10^(-13/10) = 50.1187... Hz.
     fm = 1000.0 * 10.0 ** (-13.0 / 10.0)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
-        snapped = float(environment.air_attenuation(50.0, exact_midband=True))
-        direct = float(environment.air_attenuation(fm, exact_midband=False))
+    snapped = float(environment.air_attenuation(50.0, exact_midband=True))
+    direct = float(environment.air_attenuation(fm, exact_midband=False))
     assert snapped == pytest.approx(direct, rel=1e-12)
 
 
@@ -330,14 +325,12 @@ def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
 
 def test_atmospheric_attenuation_matches_table1_cell() -> None:
     # 10 degC, 70 % RH, 1 kHz -> 3,66 dB/km (ISO 9613-1 Table 1, exact midband).
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", environment.AtmosphericAbsorptionWarning)
-        res = environment.atmospheric_attenuation(
-            1000.0,
-            temperature_c=10.0,
-            relative_humidity_percent=70.0,
-            exact_midband=True,
-        )
+    res = environment.atmospheric_attenuation(
+        1000.0,
+        temperature_c=10.0,
+        relative_humidity_percent=70.0,
+        exact_midband=True,
+    )
     assert float(res.attenuation_db_per_m[0]) * 1e3 == pytest.approx(3.66, abs=0.01)
     # exact_midband stores the snapped midband the coefficient was computed at.
     assert float(res.frequencies[0]) == pytest.approx(1000.0 * 10.0**0.0)

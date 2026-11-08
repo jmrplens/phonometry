@@ -382,11 +382,9 @@ def test_table3_cells(
         # 4,5 dB about the mean needs a range above 5 dB, where Formula (5)
         # takes over; the class is what matters here, not the mean.
         survey = 70.0 + np.array([[-4.6], [4.6], [-4.6], [4.6], [0.0], [0.0]])
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
-        plan = emission.special_room_source_locations(
-            survey, frequencies=[band], n_microphone_positions=(3, 6, 12)[column]
-        )
+    plan = emission.special_room_source_locations(
+        survey, frequencies=[band], n_microphone_positions=(3, 6, 12)[column]
+    )
     assert plan.spectral_character == (cls,)
     assert int(plan.source_locations[0]) == row[column]
 
@@ -722,8 +720,9 @@ def test_result_refuses_an_unknown_method() -> None:
 def test_plot_of_the_direct_method() -> None:
     background = np.tile(BACKGROUND, (6, 1))
     background[:, 1] = ST[:, 1] - 3.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    with pytest.warns(
+        emission.SoundPowerWarning, match=r"A background margin is below 4 dB"
+    ):
         res = _direct(background_levels=background, sigma_omc_db=1.0)
     ax = res.plot()
     bars = ax.patches[: FREQS.size]

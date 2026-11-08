@@ -608,12 +608,10 @@ def test_the_indirect_result_averages_only_where_the_transmissibility_is_small()
         )
     assert res.valid is not None
     assert res.valid.tolist() == (np.abs(t) <= TRANSMISSIBILITY_LIMIT).tolist()
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
-        bands = res.band_average()
-        by_hand = vibration.band_averaged_stiffness(
-            frequencies=f[res.valid], stiffness=res.transfer_stiffness[res.valid]
-        )
+    bands = res.band_average()
+    by_hand = vibration.band_averaged_stiffness(
+        frequencies=f[res.valid], stiffness=res.transfer_stiffness[res.valid]
+    )
     assert bands.nominal_frequencies.tolist() == by_hand.nominal_frequencies.tolist()
     assert bands.line_counts.tolist() == by_hand.line_counts.tolist()
     np.testing.assert_allclose(bands.stiffness, by_hand.stiffness, rtol=1e-15)
@@ -994,9 +992,7 @@ def test_band_averages_below_f_ul_are_within_2_db_of_the_transfer_stiffness() ->
     res = vibration.driving_point_stiffness(
         frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
     )
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
-        bands = res.band_average()
+    bands = res.band_average()
     levels = bands.levels[bands.determined]
     assert levels.size > 0
     assert bool(np.all(np.abs(levels - 120.0) <= 2.0))
@@ -1080,8 +1076,18 @@ def test_a_line_must_pass_both_inequalities_and_counts_nowhere_if_it_fails() -> 
     unwanted = accel * 0.01
     loud = (_SWEEP_HZ > 29.95) & (_SWEEP_HZ < 31.05)
     unwanted[loud] = accel[loud] * 0.5
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
+    # The dip fails the 20 dB inequality and the loud band the 15 dB one, and
+    # the result says each.
+    with (
+        pytest.warns(
+            vibration.TransferStiffnessWarning,
+            match=r"fall short of the 20 dB of Inequality",
+        ),
+        pytest.warns(
+            vibration.TransferStiffnessWarning,
+            match=r"fall short of the 15 dB of Inequality",
+        ),
+    ):
         res = vibration.driving_point_stiffness(
             frequencies=_SWEEP_HZ,
             input_force_n=force,

@@ -515,7 +515,9 @@ def _warns_and_returns(**arguments: object) -> tuple[object, None]:
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
     # Recorded whatever Python's default filters say of a deprecation.
-    warnings.simplefilter("always")
+    warnings.filterwarnings(
+        "always", message="an old keyword", category=_LibraryDeprecation
+    )
     warnings.warn("an old keyword", _LibraryDeprecation, stacklevel=1)
     warnings.warn("two bases", _LibraryNotice, stacklevel=1)
     here = fdtd_simulation(_ACOUSTIC)

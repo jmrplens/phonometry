@@ -53,10 +53,16 @@ def _recording(seconds: float = 2.0) -> np.ndarray:
     return np.vstack([left, right])
 
 
+#: The advisory of a recording shorter than the 3 min of D.3, as every one here is.
+_SHORT = "ISO/TS 12913-2 D.3 requires a measurement time interval of at least 3 min"
+
+
 @pytest.fixture(scope="module")
 def levels_and_loudness() -> sb.BinauralIndicators:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", sb.SoundscapeWarning)
+    with pytest.warns(
+        sb.SoundscapeWarning,
+        match=_SHORT,
+    ):
         return sb.binaural_indicators(
             _recording(),
             FS,
@@ -225,8 +231,10 @@ def test_the_metrics_mapping_is_read_only(
 
 def test_identical_ears_have_one_value() -> None:
     mono = _noise(1.0, 0.1, 7)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", sb.SoundscapeWarning)
+    with pytest.warns(
+        sb.SoundscapeWarning,
+        match=_SHORT,
+    ):
         result = sb.binaural_indicators(
             np.vstack([mono, mono]), FS, parameters="sound_pressure_level"
         )
@@ -238,9 +246,9 @@ def test_a_calibrated_signal_is_read_in_pascals() -> None:
     """A two-channel Signal brings its rate and factor; the array does not."""
     x = _recording(1.0)
     record = io.Signal(x / 2.0, FS, calibration_factor=2.0)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", sb.SoundscapeWarning)
+    with pytest.warns(sb.SoundscapeWarning, match=_SHORT):
         from_signal = sb.binaural_indicators(record, parameters="sound_pressure_level")
+    with pytest.warns(sb.SoundscapeWarning, match=_SHORT):
         from_array = sb.binaural_indicators(x, FS, parameters="sound_pressure_level")
     assert from_signal.representative("LAeq,T") == pytest.approx(
         from_array.representative("LAeq,T"), abs=1e-9
@@ -259,8 +267,10 @@ def test_roughness_r10_is_the_ecma_single_value() -> None:
     tone = (
         0.02 * (1.0 + np.sin(2.0 * np.pi * 70.0 * t)) * np.sin(2.0 * np.pi * 1000.0 * t)
     )
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", sb.SoundscapeWarning)
+    with pytest.warns(
+        sb.SoundscapeWarning,
+        match=_SHORT,
+    ):
         result = sb.binaural_indicators(
             np.vstack([tone, tone]), FS, parameters="roughness"
         )
@@ -283,8 +293,10 @@ def test_fluctuation_percentiles_leave_out_the_settling_frames(
 
     monkeypatch.setattr(sb, "fluctuation_strength_ecma", lambda *a, **k: _Fake())
     x = np.zeros((2, FS // 10))
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", sb.SoundscapeWarning)
+    with pytest.warns(
+        sb.SoundscapeWarning,
+        match=_SHORT,
+    ):
         result = sb.binaural_indicators(x, FS, parameters="fluctuation_strength")
     kept = np.arange(1.0, 101.0)
     assert result.metrics["F10"].left == pytest.approx(float(np.percentile(kept, 90)))
@@ -306,8 +318,10 @@ def test_tonality_is_the_ecma_single_value_of_each_ear(
 
     monkeypatch.setattr(sb, "tonality_ecma", fake)
     x = np.vstack([np.full(FS // 10, 0.3), np.full(FS // 10, 0.1)])
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", sb.SoundscapeWarning)
+    with pytest.warns(
+        sb.SoundscapeWarning,
+        match=_SHORT,
+    ):
         result = sb.binaural_indicators(x, FS, parameters="tonality")
     assert calls == [pytest.approx(0.3), pytest.approx(0.1)]
     assert result.metrics["T"].left == pytest.approx(0.1)
@@ -389,10 +403,8 @@ def test_an_unknown_field_is_refused() -> None:
 
 def test_a_silent_recording_leaves_the_ratio_undefined() -> None:
     silence = np.zeros((2, FS // 2))
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", sb.SoundscapeWarning)
-        with pytest.raises(ValueError, match="N5/N95"):
-            sb.binaural_indicators(silence, FS, parameters="loudness")
+    with pytest.raises(ValueError, match="N5/N95"):
+        sb.binaural_indicators(silence, FS, parameters="loudness")
 
 
 def test_a_non_finite_ear_value_is_refused() -> None:

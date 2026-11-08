@@ -349,8 +349,9 @@ def test_event_levels_are_corrected_event_by_event() -> None:
     quiet = ST[0]
     events = np.stack([np.stack([quiet, loud])] * 4)  # (4, 2, 7)
     background = np.stack([ST[0] - 8.0] * 4)  # margins 8 dB and 18 dB
-    with warnings.catch_warnings():  # two events trip the N >= 5 advisory
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    with pytest.warns(
+        emission.SoundPowerWarning, match=r"Only 2 single event\(s\) were measured"
+    ):
         res = emission.sound_energy_in_situ(
             events, RSS, LW_RSS, frequencies=FREQS, background_levels=background
         )

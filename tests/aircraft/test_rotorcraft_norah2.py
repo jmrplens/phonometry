@@ -53,7 +53,6 @@ Measured deviations on which the tolerances rest (see the module docstring of
 from __future__ import annotations
 
 import re
-import warnings
 import zipfile
 
 import matplotlib as mpl
@@ -345,30 +344,28 @@ def r22_set(norah_root: pathlib.Path) -> dict:
 def _run_event(case: pathlib.Path, r22: dict) -> tuple[dict, np.ndarray, object]:
     header, rows = _parse_his(case.with_suffix(".his"))
     inp = _parse_inp(case.with_suffix(".inp"))
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")  # sub-noy-floor spectra warn in PNL
-        res = rotorcraft_event_level(
-            r22["hemispheres"],
-            r22["airspeeds"],
-            r22["path_angles_deg"],
-            inp["times"],
-            inp["positions"],
-            (header["XMICM"], header["YMICM"]),
-            level_offset=inp["ddb"],
-            ground=RotorcraftGround(
-                receiver_height_m=header["HMIC"],
-                ground_elevation=header["ZMIC"],
-                flow_resistivity=header["SIGMA"],
-            ),
-            track_state=RotorcraftTrackState(
-                airspeed=inp["speed"],
-                path_angle_deg=inp["vang"],
-                heading=inp["heading"],
-                bank_angle_deg=inp["roll"],
-            ),
-            interpolation=FlightConditionInterpolation(triangles=r22["triangles"]),
-            atmosphere=RotorcraftAtmosphere(atmospheric_method="sae"),
-        )
+    res = rotorcraft_event_level(
+        r22["hemispheres"],
+        r22["airspeeds"],
+        r22["path_angles_deg"],
+        inp["times"],
+        inp["positions"],
+        (header["XMICM"], header["YMICM"]),
+        level_offset=inp["ddb"],
+        ground=RotorcraftGround(
+            receiver_height_m=header["HMIC"],
+            ground_elevation=header["ZMIC"],
+            flow_resistivity=header["SIGMA"],
+        ),
+        track_state=RotorcraftTrackState(
+            airspeed=inp["speed"],
+            path_angle_deg=inp["vang"],
+            heading=inp["heading"],
+            bank_angle_deg=inp["roll"],
+        ),
+        interpolation=FlightConditionInterpolation(triangles=r22["triangles"]),
+        atmosphere=RotorcraftAtmosphere(atmospheric_method="sae"),
+    )
     return header, rows, res
 
 
@@ -427,19 +424,17 @@ def test_hover_ring_rim_reproduces_ring_rows(norah_root: pathlib.Path) -> None:
         assert np.allclose(got, levels[k])
     t = np.array([0.0, 1.0])
     pos = np.array([[0.0, 0.0, 3.0], [0.0, 0.0, 3.0]])
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")  # sub-noy-floor spectra warn in PNL
-        res = rotorcraft_event_level(
-            [hige],
-            [0.0],
-            [0.0],
-            t,
-            pos,
-            (100.0, 0.0),
-            track_state=RotorcraftTrackState(
-                airspeed=0.0, path_angle_deg=0.0, heading=0.0, bank_angle_deg=0.0
-            ),
-        )
+    res = rotorcraft_event_level(
+        [hige],
+        [0.0],
+        [0.0],
+        t,
+        pos,
+        (100.0, 0.0),
+        track_state=RotorcraftTrackState(
+            airspeed=0.0, path_angle_deg=0.0, heading=0.0, bank_angle_deg=0.0
+        ),
+    )
     assert np.isfinite(res.la_max)
     assert np.isfinite(res.sel)
 
@@ -478,23 +473,21 @@ def test_case4_hover_ogh_event(norah_root: pathlib.Path) -> None:
     )
     nadir = None
     for mic in mics:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")  # sub-noy-floor spectra warn in PNL
-            res = rotorcraft_event_level(
-                [hoge],
-                [0.0],
-                [0.0],
-                t,
-                pos,
-                (mic[0], mic[1]),
-                ground=RotorcraftGround(
-                    receiver_height_m=mic[3],
-                    ground_elevation=mic[2],
-                    flow_resistivity=mic[4],
-                ),
-                track_state=state,
-                atmosphere=RotorcraftAtmosphere(atmospheric_method="sae"),
-            )
+        res = rotorcraft_event_level(
+            [hoge],
+            [0.0],
+            [0.0],
+            t,
+            pos,
+            (mic[0], mic[1]),
+            ground=RotorcraftGround(
+                receiver_height_m=mic[3],
+                ground_elevation=mic[2],
+                flow_resistivity=mic[4],
+            ),
+            track_state=state,
+            atmosphere=RotorcraftAtmosphere(atmospheric_method="sae"),
+        )
         # Measured deviations peak at +0.42 dB on the nadir and near-nadir
         # microphones (the prototype damps the coherent two-ray interference
         # of Eq. 30, as documented for the flyover cases); the six oblique

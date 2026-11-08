@@ -2409,7 +2409,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   past its cut-on, a fan efficiency below the table it is read from. Each
   now asserts the advisory with its topic class, where the advisory or a
   printed example that lacks the input is what it tests, or gives the call
-  the input the standard asks for. A packager who runs the suite against a
+  the input the standard asks for. A filter a test sets on warnings names
+  the message it lets through, with its reason, and a test of the suite
+  refuses one that lets a warning through by its class alone: 125 such
+  filters, among them a module-wide ignore of every advisory under the
+  outdoor ground models, now assert the advisory, name its message, or were
+  dropped where they hid nothing. A packager who runs the suite against a
   newer NumPy or SciPy sees a warning that release adds as a failure that
   names it, not as one more line in the summary. pytest's own warning that
   it cannot write its cache directory, as in a read-only tree, is shown and

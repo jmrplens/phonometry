@@ -9,7 +9,6 @@ clear :class:`ValueError`.
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -80,9 +79,7 @@ def _texts(ax_or_axes: Axes | tuple[Axes, ...]) -> str:
 
 
 def _room_acoustics() -> room.RoomAcousticsResult:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return room.room_parameters(_decaying_ir(), FS, limits=None)
+    return room.room_parameters(_decaying_ir(), FS, limits=None)
 
 
 def _decay_curve() -> room.DecayCurve:

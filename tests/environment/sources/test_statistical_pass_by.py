@@ -413,14 +413,15 @@ def test_confidence_interval_is_the_line_interval_at_the_reference_speed() -> No
     assert regression.vehicle_sound_level == pytest.approx(shifted.intercept, rel=1e-12)
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.environment.StatisticalPassByWarning")
 def test_mean_speed_is_converted_from_the_logarithm() -> None:
-    regression = pass_by_regression(
-        [50.0, 80.0, 128.0],
-        [70.0, 76.0, 81.0],
-        vehicle_category="1",
-        road_speed_category="medium",
-    )
+    # Three vehicles are far short of the 100 of 7.3, which the regression says.
+    with pytest.warns(StatisticalPassByWarning, match="asks for at least 100 vehicles"):
+        regression = pass_by_regression(
+            [50.0, 80.0, 128.0],
+            [70.0, 76.0, 81.0],
+            vehicle_category="1",
+            road_speed_category="medium",
+        )
     assert regression.mean_speed_kmh == pytest.approx(80.0)
 
 
@@ -468,15 +469,16 @@ def test_all_the_weight_on_cars_gives_the_car_level() -> None:
     assert index == pytest.approx(77.3, rel=1e-14)
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.environment.StatisticalPassByWarning")
 def test_reported_levels_round_half_up() -> None:
     """A level on the half is reported up, as 9.2 rounds; Python's round() does not."""
-    regression = pass_by_regression(
-        [60.0, 80.0, 100.0],
-        [78.25, 78.25, 78.25],
-        vehicle_category="1",
-        road_speed_category="medium",
-    )
+    # Three vehicles are far short of the 100 of 7.3, which the regression says.
+    with pytest.warns(StatisticalPassByWarning, match="asks for at least 100 vehicles"):
+        regression = pass_by_regression(
+            [60.0, 80.0, 100.0],
+            [78.25, 78.25, 78.25],
+            vehicle_category="1",
+            road_speed_category="medium",
+        )
     assert regression.vehicle_sound_level == pytest.approx(78.25)
     assert regression.reported_vehicle_sound_level == pytest.approx(78.3)
     assert round(regression.vehicle_sound_level, 1) == pytest.approx(78.2)

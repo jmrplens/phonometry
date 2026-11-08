@@ -28,7 +28,6 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
-import warnings
 
 import numpy as np
 import pytest
@@ -37,6 +36,15 @@ from phonometry import environment
 from phonometry.environment.propagation import ground_barriers
 from phonometry.fluids import Fluid
 from phonometry.materials import delany_bazley
+
+# The resistivities of real grounds put the lowest bands outside the range the
+# two empirical models were fitted over, and each model says so with a
+# warning; that is the models' business, not what these tests hold, so that
+# one advisory is let through by its message and no other is.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:(Delany-Bazley|Miki)\\W.*outside the published fit range"
+    ":phonometry.materials.PorousAbsorberWarning"
+)
 
 _BANDS = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 
@@ -63,7 +71,6 @@ def test_hard_ground_low_frequency_enhancement_is_6_db() -> None:
     assert res.excess_attenuation[0] == pytest.approx(6.0, abs=0.2)
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 def test_excess_attenuation_stays_near_the_6_db_bound() -> None:
     # Physical anchor: the spherical-wave Q = Rp + (1 - Rp) F(w) is not an
     # energy coefficient; its ground-wave term lets |Q| slightly exceed 1 at
@@ -78,7 +85,6 @@ def test_excess_attenuation_stays_near_the_6_db_bound() -> None:
     assert np.all(np.abs(res.reflection_coefficient) <= 1.15)
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 def test_miki_ground_is_softer_than_delany_bazley() -> None:
     """The second ground model is reachable, and it is a different ground.
 
@@ -104,11 +110,9 @@ def test_miki_ground_is_softer_than_delany_bazley() -> None:
 
 
 def test_sigma_to_infinity_tends_to_hard_ground() -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        soft = environment.ground_effect(
-            _BANDS, 1.0, 1.0, 30.0, flow_resistivity_pa_s_m2=1e12
-        )
+    soft = environment.ground_effect(
+        _BANDS, 1.0, 1.0, 30.0, flow_resistivity_pa_s_m2=1e12
+    )
     hard = environment.ground_effect(_BANDS, 1.0, 1.0, 30.0, impedance=1e12)
     assert np.allclose(soft.excess_attenuation, hard.excess_attenuation, atol=0.02)
 
@@ -128,7 +132,6 @@ def test_grazing_incidence_plane_coefficient_tends_to_minus_one() -> None:
     assert q.shape == _BANDS.shape
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 def test_ground_effect_reciprocity_in_heights() -> None:
     ab = environment.ground_effect(_BANDS, 0.5, 3.0, 75.0, flow_resistivity_pa_s_m2=2e5)
     ba = environment.ground_effect(_BANDS, 3.0, 0.5, 75.0, flow_resistivity_pa_s_m2=2e5)
@@ -137,11 +140,7 @@ def test_ground_effect_reciprocity_in_heights() -> None:
 
 def test_grassland_shows_a_ground_dip() -> None:
     freqs = np.linspace(200.0, 2000.0, 400)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        res = environment.ground_effect(
-            freqs, 1.0, 1.0, 10.0, flow_resistivity_pa_s_m2=2e5
-        )
+    res = environment.ground_effect(freqs, 1.0, 1.0, 10.0, flow_resistivity_pa_s_m2=2e5)
     assert res.excess_attenuation.min() < -2.0  # a genuine interference dip
 
 
@@ -152,24 +151,20 @@ def test_salomons_fig_d3_grassland_dip() -> None:
     # time-convention fix (materials e^{+j omega t} fed unconjugated into the
     # Salomons e^{-i omega t} formulas) the dip almost vanished (-0.55 dB).
     freqs = np.linspace(50.0, 1000.0, 1901)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        res = environment.ground_effect(
-            freqs, 2.0, 2.0, 100.0, flow_resistivity_pa_s_m2=2e5
-        )
+    res = environment.ground_effect(
+        freqs, 2.0, 2.0, 100.0, flow_resistivity_pa_s_m2=2e5
+    )
     i = int(np.argmin(res.excess_attenuation))
     assert res.excess_attenuation[i] == pytest.approx(-12.7, abs=0.3)
     assert 380.0 <= freqs[i] <= 410.0
 
 
 def test_impedance_from_porous_medium_result_matches_flow_resistivity() -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        medium = delany_bazley(_BANDS, 2e5)
-        by_result = environment.ground_effect(_BANDS, 1.0, 1.5, 40.0, impedance=medium)
-        by_sigma = environment.ground_effect(
-            _BANDS, 1.0, 1.5, 40.0, flow_resistivity_pa_s_m2=2e5
-        )
+    medium = delany_bazley(_BANDS, 2e5)
+    by_result = environment.ground_effect(_BANDS, 1.0, 1.5, 40.0, impedance=medium)
+    by_sigma = environment.ground_effect(
+        _BANDS, 1.0, 1.5, 40.0, flow_resistivity_pa_s_m2=2e5
+    )
     assert np.allclose(by_result.excess_attenuation, by_sigma.excess_attenuation)
 
 
@@ -177,13 +172,11 @@ def test_user_impedance_convention_matches_flow_resistivity_path() -> None:
     # A user-supplied array is e^{-i omega t} (Im(Z) > 0 for a passive ground):
     # conjugating the materials' e^{+j omega t} impedance by hand must equal
     # the internal flow_resistivity path exactly.
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        z = np.conj(delany_bazley(_BANDS, 2e5).normalized_impedance)
-        by_array = environment.ground_effect(_BANDS, 1.0, 1.5, 40.0, impedance=z)
-        by_sigma = environment.ground_effect(
-            _BANDS, 1.0, 1.5, 40.0, flow_resistivity_pa_s_m2=2e5
-        )
+    z = np.conj(delany_bazley(_BANDS, 2e5).normalized_impedance)
+    by_array = environment.ground_effect(_BANDS, 1.0, 1.5, 40.0, impedance=z)
+    by_sigma = environment.ground_effect(
+        _BANDS, 1.0, 1.5, 40.0, flow_resistivity_pa_s_m2=2e5
+    )
     assert np.all(np.imag(z) > 0.0)  # passive ground in e^{-i omega t}
     assert np.allclose(by_array.excess_attenuation, by_sigma.excess_attenuation)
 
@@ -362,7 +355,6 @@ def test_thick_barrier_double_edge_fresnel_number_grows_with_width() -> None:
     assert np.all(thick.fresnel_number > thin.fresnel_number)
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 def test_ground_coherent_barrier_differs_from_free_barrier() -> None:
     free = environment.barrier_insertion_loss(
         _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact"
@@ -384,28 +376,26 @@ def test_ground_coherent_barrier_differs_from_free_barrier() -> None:
 
 
 def test_ground_coherent_barrier_impedance_paths_agree() -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        by_z = environment.barrier_insertion_loss(
-            _BANDS,
-            1.0,
-            50.0,
-            4.0,
-            100.0,
-            1.5,
-            method="exact",
-            ground_impedance=delany_bazley(_BANDS, 2e5),
-        )
-        by_sigma = environment.barrier_insertion_loss(
-            _BANDS,
-            1.0,
-            50.0,
-            4.0,
-            100.0,
-            1.5,
-            method="exact",
-            ground_flow_resistivity_pa_s_m2=2e5,
-        )
+    by_z = environment.barrier_insertion_loss(
+        _BANDS,
+        1.0,
+        50.0,
+        4.0,
+        100.0,
+        1.5,
+        method="exact",
+        ground_impedance=delany_bazley(_BANDS, 2e5),
+    )
+    by_sigma = environment.barrier_insertion_loss(
+        _BANDS,
+        1.0,
+        50.0,
+        4.0,
+        100.0,
+        1.5,
+        method="exact",
+        ground_flow_resistivity_pa_s_m2=2e5,
+    )
     assert np.allclose(by_z.insertion_loss, by_sigma.insertion_loss)
 
 

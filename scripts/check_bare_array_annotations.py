@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""List every numpy array or scalar type the package annotates without its type arguments.
+"""Refuse a numpy array or scalar type the package annotates without its type arguments.
 
 numpy gives :class:`numpy.ndarray`, :class:`numpy.dtype` and the abstract scalar
 types (:class:`numpy.number`, :class:`numpy.integer`, :class:`numpy.floating`,
@@ -43,11 +43,10 @@ Each finding has one of three kinds:
   of a type parameter. It takes no type argument below numpy 2.3 and is
   complete.
 
-The second and the third are listed for review and never fail. A bare one
-fails the check (:data:`REFUSES_BARE`); ``--refuse`` fails on it in a run of a
-copy that turns the constant off. A file or a directory named on the
-command line narrows what is listed to it; the whole package is read all the
-same, so that a name it re-exports resolves.
+A bare one fails the check, where it is written; the second and the third
+are listed for review and never fail. A file or a directory named on the
+command line narrows what is listed and refused to it; the whole package is
+read all the same, so that a name it re-exports resolves.
 """
 
 from __future__ import annotations
@@ -70,10 +69,6 @@ if TYPE_CHECKING:
 
 #: The package the check reads.
 SOURCE = ROOT / "src" / "phonometry"
-
-#: Whether a bare type fails the check. On: the package writes none, and a
-#: new one fails the check where it is written.
-REFUSES_BARE = True
 
 #: Each numpy type that takes type arguments with no default below numpy 2.3,
 #: by the dotted name it resolves to, with how many it takes there. An array
@@ -501,15 +496,10 @@ def _summary(findings: Sequence[Finding]) -> str:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """List the numpy types the package annotates, and fail on a bare one when asked."""
+    """List the numpy types the package annotates, and fail on a bare one."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument(
         "paths", nargs="*", help="files or directories to list; the package if none"
-    )
-    parser.add_argument(
-        "--refuse",
-        action="store_true",
-        help="fail on a bare type, as the check will once none is left",
     )
     parser.add_argument(
         "--kind",
@@ -543,7 +533,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(finding.line_text())
     print(_summary(findings))
     bare = [finding for finding in findings if finding.kind == "bare"]
-    if bare and (REFUSES_BARE or arguments.refuse):
+    if bare:
         print(
             f"::error::{len(bare)} numpy type(s) written without their type "
             "arguments: write the dtype each array holds (NDArray[np.float64]), "

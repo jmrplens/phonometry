@@ -1354,6 +1354,34 @@ jobs:
     - name: Check that every public parameter admits what its body converts
       run: python scripts/check_parameter_annotations.py
 
+  # numpy gives np.ndarray, np.dtype and its abstract scalar types (np.floating,
+  # np.integer, np.number and the others) default type arguments only from
+  # 2.3, and the package runs on 2.0.2. Below 2.3 a type checker reads a bare
+  # np.ndarray as ndarray[Unknown, Unknown], so every public name annotated
+  # with one is partly unknown to it, and mypy reports a [type-arg] error for
+  # each: the package wrote 3000, and pyright's --verifytypes read 86.9% of its
+  # public names as known at NumPy 2.1.0. This fails on a numpy array or
+  # abstract scalar type written without the type arguments it takes below
+  # 2.3 in any type expression of src/phonometry, read through the package's
+  # imports and re-exports, and lists the arrays whose dtype is left open
+  # (NDArray[Any]) and np.generic for review. The minimum-versions job reads
+  # the result at the floors. Static and dependency-free, so it runs on its own.
+  bare-array-annotations:
+    name: Every numpy type an annotation names carries its type arguments
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that every numpy type an annotation names carries its type arguments
+      run: python scripts/check_bare_array_annotations.py
+
   # pyright's --verifytypes reads the installed package as a user's type
   # checker does and scores the share of its public names whose type it
   # knows. It read 99.2%, 137 ambiguous and 8 unknown of 18 689: attributes a
@@ -2052,6 +2080,15 @@ jobs:
   # matplotlib does not have. The jitted kernels are on, so the numba floor is
   # compiled and exercised too.
   #
+  # It reads the installed package as a user's type checker does at the
+  # floors, too. numpy gives its array and abstract scalar types default type
+  # arguments only from 2.3, so below it a numpy type written without them is
+  # partly unknown, and pyright's --verifytypes, at the pin of
+  # requirements-dev.txt, read 86.9% of the public names as known at NumPy
+  # 2.1.0 while the type-completeness job read 100% on the newest stack. The
+  # step fails below 100% on each Python's floors; the bare-array-annotations
+  # job refuses the bare type where it is written.
+  #
   # Nor does it run the tests that read the repository whole: the guards,
   # censuses and generators run over the package, the scripts, the
   # documentation, the site and the committed figures read the repository's
@@ -2104,6 +2141,14 @@ jobs:
         pip install -r minimum-requirements.txt -r test-tools.txt
         pip install --no-deps -e .
         python scripts/minimum_requirements.py --check
+    - name: Fail below a type completeness of 100% at the floors
+      run: |
+        set -o pipefail
+        grep -E '^pyright\[nodejs\]==' requirements-dev.txt | cut -d' ' -f1 > pyright-pin.txt
+        pip install -r pyright-pin.txt -c minimum-requirements.txt
+        python scripts/minimum_requirements.py --check
+        pyright --verifytypes phonometry --ignoreexternal | tee "$RUNNER_TEMP/verifytypes.txt"
+        grep -qx 'Type completeness score: 100%' "$RUNNER_TEMP/verifytypes.txt"
     - name: Check the jitted kernels compile at the numba floor
       run: python scripts/check_jit_kernel.py
     - name: Run the library tests at the floors

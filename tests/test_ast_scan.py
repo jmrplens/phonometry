@@ -1754,6 +1754,151 @@ def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
         assert read(unread) is ast_scan.UNREAD
 
 
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("from dataclasses import dataclass as dc", True),
+        ("import dataclasses as dc", True),
+        ("from dataclasses import field as dc", False),
+        ("from dataclasses import dataclass\ndef dc(cls):\n    return cls", False),
+        ("from dataclasses import dataclass\ndc = lambda cls: cls", False),
+        ("from dataclasses import dataclass\nif (dc := len):\n    pass", False),
+        ("from .dataclasses import dataclass as dc", False),
+        (
+            "from typing import TYPE_CHECKING\n"
+            "if TYPE_CHECKING:\n    from dataclasses import dataclass as dc",
+            False,
+        ),
+        (
+            "try:\n    from dataclasses import dataclass as dc\n"
+            "except ImportError:\n    def dc(cls):\n        return cls",
+            None,
+        ),
+        (
+            "from dataclasses import dataclass as dc\n"
+            "def swap():\n    global dc\n    dc = len",
+            None,
+        ),
+    ],
+    ids=[
+        "imported",
+        "module",
+        "other-name",
+        "defined-after",
+        "assigned-after",
+        "walrus",
+        "relative",
+        "type-checking",
+        "either",
+        "under-global",
+    ],
+)
+def test_a_name_reads_an_import_through_the_bindings_that_stand_where_it_is_read(
+    source: str, *, expected: bool | None
+) -> None:
+    """``reads_import`` reads the decorator ``@dc`` (``@dc.dataclass`` after
+    ``import dataclasses as dc``) through the bindings of ``dc`` that may
+    stand where the ``class`` statement runs: ``True`` when each is an
+    import of ``dataclasses.dataclass``, ``False`` when none is (an import
+    of another name, a later ``def``, assignment or ``:=``, a relative
+    import, or one an ``if
+    TYPE_CHECKING:`` block holds, which never runs), ``None`` when one may
+    be and another may not, an import and its fallback in a ``try``, or a
+    function that rebinds it under ``global``.
+    """
+    decorator = "dc.dataclass" if "import dataclasses as dc" in source else "dc"
+    module = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
+    record = module.body[-1]
+    assert isinstance(record, ast.ClassDef)
+    found = ast_scan.reads_import(
+        module, record.decorator_list[0], "dataclasses.dataclass"
+    )
+    assert found is expected
+
+
+def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() -> None:
+    """In a function, the decorator is what the function's own binding holds
+    where the ``class`` statement runs, or a function's around it, before
+    the module's; a class body that has not yet bound it reads the scope
+    around the ``class`` statement, and one that has, its own.
+    """
+    module = ast.parse(
+        textwrap.dedent(
+            """
+            from dataclasses import dataclass
+
+            def assigned():
+                dataclass = len
+                @dataclass
+                class Rec:
+                    pass
+
+            def around():
+                def dataclass(cls):
+                    return cls
+                def build():
+                    @dataclass
+                    class Rec:
+                        pass
+
+            def imported():
+                @dataclass
+                class Rec:
+                    pass
+
+            class Before:
+                @dataclass
+                class Rec:
+                    pass
+                dataclass = len
+
+            class After:
+                dataclass = len
+                @dataclass
+                class Rec:
+                    pass
+            """
+        )
+    )
+    found = {
+        holder.name: ast_scan.reads_import(
+            module, record.decorator_list[0], "dataclasses.dataclass"
+        )
+        for holder in module.body
+        if isinstance(holder, ast.FunctionDef | ast.ClassDef)
+        for record in ast.walk(holder)
+        if isinstance(record, ast.ClassDef) and record.name == "Rec"
+    }
+    assert found == {
+        "assigned": False,
+        "around": False,
+        "imported": True,
+        "Before": True,
+        "After": False,
+    }
+
+
+def test_an_import_binds_a_name_to_a_dotted_path() -> None:
+    """``import_path`` gives what an import binds a name to: the module and
+    the name an absolute ``from`` import takes, the module ``import`` binds,
+    and its first part for a dotted ``import a.b``; nothing for a relative
+    import or a binding that is no import.
+    """
+    [plain, aliased, dotted, relative, assigned] = ast.parse(
+        "from dataclasses import dataclass as dc\n"
+        "import dataclasses as dcs\n"
+        "import os.path\n"
+        "from . import dataclasses\n"
+        "dc = len\n"
+    ).body
+    assert ast_scan.import_path(plain, "dc") == "dataclasses.dataclass"
+    assert ast_scan.import_path(aliased, "dcs") == "dataclasses"
+    assert ast_scan.import_path(dotted, "os") == "os"
+    assert ast_scan.import_path(relative, "dataclasses") is None
+    assert ast_scan.import_path(assigned, "dc") is None
+    assert ast_scan.import_path(plain, "dataclass") is None
+
+
 def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:
     """``every_path_calls`` yields the calls a function makes as statements
     of their own at the top of its body, up to the first statement that may

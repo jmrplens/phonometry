@@ -1282,6 +1282,94 @@ def binding_scope(root: ast.Module, node: ast.AST, name: str) -> ast.AST:
     return scope
 
 
+def standing_where_read(root: ast.Module, node: ast.AST, name: str) -> list[ast.AST]:
+    """The bindings of *name* that may stand where *node*, under *root*, reads
+    it, as a read that runs where it is written finds them: a decorator, a
+    base or a default, which run as the statement does.
+
+    Of the bindings of the scope the read reaches (:func:`binding_scope`),
+    those that may have run before it (:func:`held_before`): one a later
+    statement of the scope replaces is no longer there, and either of two
+    in the branches of an ``if`` or a ``try`` may be. A class body that has
+    not yet bound the name reads the scope around the ``class`` statement,
+    as Python does; a function that binds it later holds none, as the read
+    raises there. At the top of the module, a binding a function makes of
+    the name under ``global`` may stand as well, since that function may
+    have run (:func:`global_bindings`). Empty when nothing but a builtin
+    is the name.
+    """
+    scope = binding_scope(root, node, name)
+    held = list(held_before(root, bindings_by_name(scope).get(name, []), node))
+    if not held and isinstance(scope, ast.ClassDef):
+        return standing_where_read(root, scope, name)
+    if scope is root:
+        held.extend(
+            binding
+            for binding in global_bindings(root).get(name, [])
+            if all(binding is not other for other in held)
+        )
+    return held
+
+
+def import_path(binding: ast.AST, name: str) -> str | None:
+    """The dotted path an import statement, *binding*, binds *name* to:
+    ``dataclasses.dataclass`` for ``from dataclasses import dataclass``,
+    ``dataclasses`` for ``import dataclasses`` or ``import dataclasses as
+    dc`` and *name* ``dc``, ``a`` for ``import a.b``, which binds ``a``.
+    ``None`` for a relative import, whose module is the package's own, and
+    for any binding that is no import.
+    """
+    if isinstance(binding, ast.ImportFrom):
+        if binding.level or binding.module is None:
+            return None
+        return next(
+            (
+                f"{binding.module}.{alias.name}"
+                for alias in binding.names
+                if (alias.asname or alias.name) == name
+            ),
+            None,
+        )
+    if isinstance(binding, ast.Import):
+        for alias in binding.names:
+            if alias.asname is not None and alias.asname == name:
+                return alias.name
+            if alias.asname is None and alias.name.partition(".")[0] == name:
+                return name
+    return None
+
+
+def reads_import(root: ast.Module, node: ast.expr, dotted: str) -> bool | None:
+    """Whether *node*, a name or a dotted one under *root*, stands for
+    *dotted* where it is read: through an import of it (``dataclass`` after
+    ``from dataclasses import dataclass``) or of a module it is an attribute
+    of (``dataclasses.dataclass`` after ``import dataclasses``).
+
+    ``True`` when every binding of its first name that may stand there
+    (:func:`standing_where_read`) is such an import, ``False`` when none is,
+    a ``def``, an assignment or an import of something else, and ``None``
+    when some are and some are not, so either may be what the read finds.
+    """
+    attributes: list[str] = []
+    head = node
+    while isinstance(head, ast.Attribute):
+        attributes.append(head.attr)
+        head = head.value
+    if not isinstance(head, ast.Name):
+        return False
+    tail = "".join(f".{attribute}" for attribute in reversed(attributes))
+    hits = [
+        path is not None and f"{path}{tail}" == dotted
+        for path in (
+            import_path(binding, head.id)
+            for binding in standing_where_read(root, head, head.id)
+        )
+    ]
+    if hits and all(hits):
+        return True
+    return None if any(hits) else False
+
+
 #: The compound statements: those whose blocks hold statements of the scope
 #: they are written in.
 COMPOUND_STATEMENTS = (

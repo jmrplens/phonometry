@@ -91,6 +91,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, TypeGuard
 
 from ast_scan import (
+    UNREAD,
     assigned_value,
     assignment_target,
     binding_of,
@@ -102,6 +103,7 @@ from ast_scan import (
     live_bindings,
     module_constant,
     own_names,
+    reads_import,
     scope_nodes,
     what_never_runs,
 )
@@ -709,67 +711,70 @@ def _one(targets: list[_Target]) -> _Target:
     return first if all(t is first or t == first for t in targets) else None
 
 
-#: What an import binds ``dataclasses.dataclass`` and its module as.
-_DATACLASS = Binding("dataclasses", "dataclass")
-_DATACLASSES = Binding("dataclasses")
+#: The decorator that makes a class a record, by the dotted name it is imported as.
+_DATACLASS = "dataclasses.dataclass"
 
 
-def _generates_init(klass: Class) -> bool:
-    """Whether ``@dataclass`` writes *klass* an ``__init__``: a decorator of
-    it is the one ``dataclasses`` defines, by a name or an attribute of the
-    module its scope or module imports (:func:`_dataclass_call`), and it does
-    not say ``init=False``, as a constant or as a name its module binds once
-    to one (:func:`ast_scan.module_constant`).
+def _generates_init(klass: Class) -> bool | None:
+    """Whether ``@dataclass`` writes *klass* an ``__init__``.
+
+    ``True`` when a decorator of it is surely the one ``dataclasses``
+    defines (:func:`_dataclass_call`) and it does not turn ``init`` off, as
+    a constant or as a name its module binds once to one
+    (:func:`ast_scan.module_constant`); ``False`` when none may be, or it
+    turns ``init`` off. ``None`` when the decorator may be either, or its
+    ``init=`` is a value the guard cannot read: a call of the class then
+    runs the generated ``__init__`` or the one past it in its order, and
+    :meth:`Tree.members` gives both.
     """
-    decorator = _dataclass_call(klass)
+    decorator, sure = _dataclass_call(klass)
     if decorator is None:
         return False
-    return not (
-        isinstance(decorator, ast.Call)
-        and any(
-            keyword.arg == "init"
-            and module_constant(keyword.value, klass.module.node) is False
-            for keyword in decorator.keywords
-        )
+    option = (
+        next((k.value for k in decorator.keywords if k.arg == "init"), None)
+        if isinstance(decorator, ast.Call)
+        else None
     )
+    value = True if option is None else module_constant(option, klass.module.node)
+    if value is UNREAD:
+        return None
+    if not value:
+        return False
+    return True if sure else None
 
 
-def _dataclass_call(klass: Class) -> ast.expr | None:
-    """The decorator that makes *klass* a dataclass, with or without
-    arguments, or ``None``.
+def _dataclass_call(klass: Class) -> tuple[ast.expr | None, bool]:
+    """The decorator that may make *klass* a dataclass, with or without
+    arguments, or ``None``, and whether it surely does.
 
     The name is read as it stands where the ``class`` statement runs its
-    decorators (:func:`_standing`): one a later ``def`` or assignment
-    rebinds, a decorator of its own that writes nothing say, is
-    ``dataclasses``'s only when every binding that may stand there is.
+    decorators, in the scope that writes the class or a scope around it, as
+    Python finds it (:func:`ast_scan.reads_import`): a ``def`` or an
+    assignment of it that runs before the class statement, in the module
+    or in the function that writes the class, a decorator of its own that
+    writes nothing say, makes it no ``dataclasses``' one, and two bindings
+    that may each stand there, an import and a fallback in the branches of
+    a ``try``, make it one that may be either.
     """
-    names = klass.scope.names if klass.scope is not None else {}
-
-    def binds(name: str, binding: Binding) -> bool:
-        written = names.get(name) or klass.module.names.get(name, [])
-        standing = _standing(klass.module, written, klass.node)
-        return bool(standing) and all(bound == binding for bound in standing)
-
+    maybe: ast.expr | None = None
     for decorator in klass.node.decorator_list:
         called = decorator.func if isinstance(decorator, ast.Call) else decorator
-        if (isinstance(called, ast.Name) and binds(called.id, _DATACLASS)) or (
-            isinstance(called, ast.Attribute)
-            and called.attr == "dataclass"
-            and isinstance(called.value, ast.Name)
-            and binds(called.value.id, _DATACLASSES)
-        ):
-            return decorator
-    return None
+        reading = reads_import(klass.module.node, called, _DATACLASS)
+        if reading:
+            return decorator, True
+        if reading is None and maybe is None:
+            maybe = decorator
+    return maybe, False
 
 
 def _is_dataclass(klass: Class) -> bool:
-    """Whether ``@dataclass`` makes *klass* a record, whatever it writes."""
-    return _dataclass_call(klass) is not None
+    """Whether ``@dataclass`` may make *klass* a record, whatever it writes."""
+    return _dataclass_call(klass)[0] is not None
 
 
 def _record_kw_only(klass: Class) -> bool:
     """Whether the record is told ``kw_only=True``, every field by its name."""
-    decorator = _dataclass_call(klass)
+    decorator = _dataclass_call(klass)[0]
     return isinstance(decorator, ast.Call) and any(
         keyword.arg == "kw_only"
         and isinstance(keyword.value, ast.Constant)
@@ -1262,19 +1267,41 @@ class Tree:
         ``super().__init__(...)`` and ``Rec.__init__`` alike run no base's
         written one past it. The generated one takes the record's fields
         (:meth:`_generated_init`), and is read when they hold the language.
+
+        None as well when the readings :meth:`members` gives disagree.
+        """
+        found = self.members(klass, name, after=after)
+        first = found[0] if found else None
+        return first if all(item is first for item in found) else None
+
+    def members(
+        self, klass: Class, name: str, *, after: Class | None = None
+    ) -> list[Scope | None]:
+        """Each method *name* of *klass* a call may run, as :meth:`member`
+        finds it: one, but for an ``__init__`` past a class whose decorator
+        may or may not write one (:func:`_generates_init` is ``None``),
+        which is either the generated one or the one the order finds past
+        that class, so both are given. ``None`` for a reading that finds
+        none the tree writes, or a generated one that takes no language.
         """
         order = self.linearization(klass)
         if after is not None:
             if after not in order:
-                return None
+                return []
             order = order[order.index(after) + 1 :]
+        found: list[Scope | None] = []
         for later in order:
             defined, own = self._own_member(later, name)
             if defined:
-                return own
-            if name == "__init__" and _generates_init(later):
-                return self._generated_init(later)
-        return None
+                found.append(own)
+                return found
+            writes = _generates_init(later) if name == "__init__" else False
+            if writes is not False:
+                found.append(self._generated_init(later))
+                if writes:
+                    return found
+        found.append(None)
+        return found
 
     def _own_member(self, klass: Class, name: str) -> tuple[bool, Scope | None]:
         """Whether the body of *klass* binds *name*, and what it binds it to
@@ -1381,11 +1408,11 @@ class Tree:
         self._generated[klass] = found
         return found
 
-    def constructor(self, klass: Class) -> Scope | None:
-        """The ``__init__`` a call of *klass* runs, when the tree writes it
-        (:meth:`member`).
+    def constructors(self, klass: Class) -> list[Scope]:
+        """Each ``__init__`` a call of *klass* may run that the tree writes
+        and that takes the language (:meth:`members`).
         """
-        return self.member(klass, "__init__")
+        return [init for init in self.members(klass, "__init__") if init is not None]
 
     def _field_type(self, klass: Class, name: str, depth: int) -> Class | None:
         """The class an attribute of *klass* holds: as the first class of its
@@ -1555,8 +1582,9 @@ class Tree:
         found: list[Callee | None] = []
         if isinstance(func, ast.Name):
             found = [
-                self._target_callee(target, func, scope)
+                callee
                 for target in self.lookups(func.id, scope, module, call)
+                for callee in self._target_callees(target, func, scope)
             ]
         elif isinstance(func, ast.Call):
             # ``functools.partial(helper, ax)(...)``, called where it is built,
@@ -1570,26 +1598,29 @@ class Tree:
                 unique.append(callee)
         return unique
 
-    def _target_callee(
+    def _target_callees(
         self, target: _Target, func: ast.Name, scope: Scope
-    ) -> Callee | None:
-        """The helper a name reaches when it stands for *target*."""
+    ) -> list[Callee | None]:
+        """The helpers a name reaches when it stands for *target*: one, or
+        for a class each ``__init__`` a call of it may run (:meth:`constructors`).
+        """
         if isinstance(target, Scope):
             # A function, or a method named through its class, which takes
             # its instance as an argument but for a class method.
-            return self._callee(target, bound=target.classmethod)
+            return [self._callee(target, bound=target.classmethod)]
         if isinstance(target, Class):
-            init = self.constructor(target)
-            return self._callee(init, bound=True) if init else None
+            return [
+                self._callee(init, bound=True) for init in self.constructors(target)
+            ]
         if isinstance(target, Computed):
-            return self._computed_callee(target)
+            return [self._computed_callee(target)]
         if isinstance(target, Local):
             typed = self.type_of(func, scope)
             method = self.member(typed, "__call__") if typed else None
             if method is not None:
-                return self._callee(method, bound=True)
-            return self._value_callee(target)
-        return None
+                return [self._callee(method, bound=True)]
+            return [self._value_callee(target)]
+        return []
 
     def _attribute_callees(
         self, call: ast.Call, func: ast.Attribute, scope: Scope
@@ -1608,14 +1639,19 @@ class Tree:
                 elif isinstance(target, Computed):
                     found.append(self._computed_callee(target))
                 elif isinstance(target, Class):
-                    init = self.constructor(target)
-                    found.append(self._callee(init, bound=True) if init else None)
+                    found.extend(
+                        self._callee(init, bound=True)
+                        for init in self.constructors(target)
+                    )
             return found
         if isinstance(base, Class):
             # ``Base.method(obj, ...)`` takes the instance as its first
             # argument, and a class method is bound to ``Base``.
-            method = self.member(base, func.attr)
-            return [self._callee(method, bound=method.classmethod) if method else None]
+            return [
+                self._callee(method, bound=method.classmethod)
+                for method in self.members(base, func.attr)
+                if method is not None
+            ]
         receiver, after = self._receiver(func.value, scope)
         if receiver is not None:
             classes = (
@@ -1623,13 +1659,12 @@ class Tree:
                 if after is None
                 else (receiver,)
             )
-            found = []
-            for klass in classes:
-                method = self.member(klass, func.attr, after=after)
-                found.append(
-                    self._callee(method, bound=not method.static) if method else None
-                )
-            return found
+            return [
+                self._callee(method, bound=not method.static)
+                for klass in classes
+                for method in self.members(klass, func.attr, after=after)
+                if method is not None
+            ]
         return [self._by_name(call, func.attr)]
 
     def _instance_classes(

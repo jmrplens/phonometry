@@ -128,6 +128,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
 
@@ -309,11 +310,11 @@ _TABLE_3_CYCLES = 25
 
 
 def _quasi_peak_kernel_py(
-    rectified: np.ndarray,
+    rectified: NDArray[np.float64],
     alpha_charge: float,
     alpha_discharge: float,
     alpha_reading: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Peak rectifier and reading device in one pass (jitted when numba is present)."""
     trace = np.empty_like(rectified)
     peak = 0.0
@@ -349,7 +350,9 @@ _Weighting = Literal["468", "Z"]
 _WEIGHTINGS: tuple[_Weighting, ...] = ("468", "Z")
 
 
-def _weighted_record(samples: np.ndarray, fs: float, *, weighted: bool) -> np.ndarray:
+def _weighted_record(
+    samples: NDArray[np.float64], fs: float, *, weighted: bool
+) -> NDArray[np.float64]:
     """The record the detector rectifies, weighted or not.
 
     Clause 2's preamble runs every test but 2.4 through the weighting
@@ -372,12 +375,12 @@ def _weighted_record(samples: np.ndarray, fs: float, *, weighted: bool) -> np.nd
 
 
 def _detector_trace(
-    samples: np.ndarray,
+    samples: NDArray[np.float64],
     fs: float,
     *,
     weighted: bool,
     ballistics: QuasiPeakBallistics = BS468_BALLISTICS,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The reading device's output over the record, before calibration.
 
     The ballistics travel as an argument rather than being read from the
@@ -406,7 +409,7 @@ def _detector_trace(
     return np.asarray(trace[: samples.shape[-1]])
 
 
-def _steady_tone(frequency: float, amplitude: float, fs: float) -> np.ndarray:
+def _steady_tone(frequency: float, amplitude: float, fs: float) -> NDArray[np.float64]:
     """A sine of peak *amplitude* at *frequency*, long enough for the chain to settle.
 
     The amplitude is a *peak* amplitude, as
@@ -474,7 +477,7 @@ class QuasiPeakResult(OwnsArrays):
     reading: float
     level: float
     reference: float
-    trace: np.ndarray
+    trace: NDArray[np.float64]
     fs: float
     _: KW_ONLY
     weighting: _Weighting
@@ -506,7 +509,7 @@ class QuasiPeakResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def times(self) -> np.ndarray:
+    def times(self) -> NDArray[np.float64]:
         """Time of each sample of :attr:`trace`, in seconds."""
         return np.arange(self.trace.size) / self.fs
 

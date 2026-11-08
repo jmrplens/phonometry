@@ -1289,21 +1289,25 @@ cuando todos los argumentos que deciden la forma de su resultado son números,
 de Python o de NumPy, y un array en cuanto uno de ellos es una secuencia o un
 array, donde la 3.3.0 y la 4.0.0rc1 devolvían un `float` para un array de
 dimensión cero, y un array de dimensión cero o un escalar de NumPy para
-números. Ciento cincuenta y cinco funciones y métodos públicos siguen la
+números. Doscientas siete funciones y métodos públicos siguen la
 regla, entre ellos `room.room_constant`, `room.critical_distance` y
 `fluids.sea_water_sound_speed`, y `vibration.evaluation_zone` la sigue con la
-letra de una zona donde las demás dan un `float`:
+letra de una zona donde las demás dan un `float`, y un resultado complejo (una
+movilidad, una impedancia, una función de transferencia) con un `complex` de
+Python:
 
 | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `room.room_constant(100.0, np.array(0.2))` devolvía el `float` `25.0` | devuelve `array(25.)`; `float(...)` o `.item()` da el número |
 | `emission.local_environmental_correction([0.5])` devolvía un `float` para cualquier entrada de un elemento, igual que `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, y el campo `background_margin_db` y la propiedad `correction` del `WorkstationBackgroundCorrection` que devuelve `emission.background_noise_correction_at_workstation` | cada uno da un array de un elemento; para obtener un número, se pasa `0.5` y no `[0.5]` |
 | `electroacoustics.piston_resistance(1.0)` devolvía un `numpy.float64`, igual que `piston_reactance` y `piston_directivity` | devuelve un `float` de Python, sin `.shape` ni `.dtype` |
-| `building.mass_law_transmission_loss(500.0, 10.0)` devolvía un array de dimensión cero, igual que otras 45 funciones y métodos que se enumeran abajo | devuelve un `float` de Python; `np.asarray(...)` da un array donde haga falta |
+| `building.mass_law_transmission_loss(500.0, 10.0)` devolvía un array de dimensión cero, igual que otras 46 funciones y métodos que se enumeran abajo | devuelve un `float` de Python; `np.asarray(...)` da un array donde haga falta |
 | `materials.absorption_coefficient(4.0, 2.0, 200.0, 11.0)` devolvía un `numpy.float64`, igual que otras 16 que se enumeran abajo | devuelve un `float` de Python, sin `.shape` ni `.dtype` |
 | `building.composite_transmission_loss([10.0, 2.0], [40.0, 25.0])` devolvía un array de dimensión cero, igual que `building.total_structure_borne_pressure_level([30.0, 35.0])` | cada una devuelve un `float` cuando se reduce a un número |
 | `building.survey_service_equipment_level([30.0, 31.0, 32.0], 0.5, volume=50.0)` guardaba un array de dimensión cero en `l_xy` y un `numpy.float64` en `l_xy_nt` y `l_xy_n` | los tres niveles son `float` de Python para lecturas sueltas |
-| `metrology.microphone_acoustic_impedance` devolvía un `numpy.complex128` para números, que su anotación `NDArray` no nombraba | devuelve el array `complex128` de dimensión cero, como los demás resultados complejos de un número; `complex(...)` da el número |
+| `vibration.sdof_mobility(100.0, 1.0, 1.0e4, 5.0)` devolvía un array `complex128` de dimensión cero, igual que otras 17 funciones y métodos que se enumeran abajo, y `metrology.microphone_acoustic_impedance` y `metrology.ReciprocityMicrophone.acoustic_impedance_pa_s_m3` un `numpy.complex128` | devuelve un `complex` de Python; `np.asarray(...)` da un array donde haga falta |
+| `vibration.kb_weighting_response(16.0)` devolvía un array complejo de un elemento, igual que otras 7 funciones y métodos que se enumeran abajo | devuelve un `complex` de Python, y un array de dimensión cero da uno de dimensión cero |
+| `building.bending_radiation_factor(500.0, critical_frequency=100.0, length1=4.0, length2=3.0)` devolvía un array de un elemento, igual que otras 22 funciones que se enumeran abajo, cuya comprobación convertía un número en un array de una dimensión | devuelve un `float` de Python, y un array de dimensión cero da uno de dimensión cero |
 
 Las funciones y los métodos que devolvían un array de dimensión cero para
 números son, además de `building.mass_law_transmission_loss`: en `building`,
@@ -1330,7 +1334,8 @@ números son, además de `building.mass_law_transmission_loss`: en `building`,
 `coupling_loss_factor`, `point_connection_coupling_loss_factor`,
 `wave_vibration_reduction_index`, `random_error_percent`,
 `transfer_stiffness_level`, `loss_factor`, `beam_bending_wave_speed`,
-`plate_bending_wave_speed` e `injected_power`. Las que devolvían un escalar
+`plate_bending_wave_speed`, `injected_power` y `phase_tolerance_deg`. Las que
+devolvían un escalar
 de NumPy son, además de `materials.absorption_coefficient`:
 `building.surface_pressure_intensity_indicator` y
 `building.reverberation_index`; en `electroacoustics`, `field_strength`,
@@ -1343,7 +1348,41 @@ de NumPy son, además de `materials.absorption_coefficient`:
 dimensión cero que se dé a cualquiera de ellas devuelve un array de dimensión
 cero, y los valores son los mismos.
 
-Ciento treinta de ellos tienen sobrecargas tipadas, así que un comprobador
+Los resultados complejos que devolvían un array de dimensión cero para
+números son, además de `vibration.sdof_mobility`:
+`electroacoustics.program_signal_filter`; en `metrology`,
+`temperature_transfer_function` y
+`ReciprocityMicrophone.complex_equivalent_volume_m3`; y en `vibration`,
+`sdof_receptance`, `sdof_accelerance`, `convert_frf`,
+`infinite_beam_impedance`, `infinite_beam_mobility`,
+`infinite_beam_moment_mobility`, `base_transmissibility`,
+`blocking_force_ratio`, `transfer_stiffness_direct`,
+`transfer_stiffness_indirect`, `seat_to_spine_transfer` y los `fitted_frf`,
+`corrected_frf` y `corrected_mobility` de `SingleModeFitResult`. Los que
+devolvían un array complejo de un elemento son, además de
+`vibration.kb_weighting_response`: `vibration.band_limitation_response`; en
+`metrology`, `air_gap_series_impedance_pa_s_m3`,
+`free_field_transfer_impedance` y los `response_at` y `record_response_at`
+de `TimeSelectiveResponse`; `simulation.far_field_from_contour`; y
+`underwater.reflection_coefficient`. Los resultados reales que devolvían un
+array de un elemento son, además de `building.bending_radiation_factor`:
+`electroacoustics.band_limit_response` y, en `building`,
+`bare_floor_impact_level`, `calculated_sound_reduction_index`,
+`direct_impact_level`, `direct_reduction_index`, `flanking_impact_level`,
+`flanking_impact_level_from_flanking_level`,
+`flanking_impact_level_from_normalized_difference`,
+`flanking_reduction_index`, `flanking_reduction_index_from_flanking_level`,
+`flanking_reduction_index_from_normalized_difference`,
+`floating_floor_improvement`, `forced_radiation_factor`,
+`in_situ_equivalent_absorption_length`, `in_situ_impact_level`,
+`in_situ_reduction_index`, `in_situ_total_loss_factor`,
+`in_situ_velocity_level_difference`, `laboratory_total_loss_factor`,
+`reciprocity_impact_level`, `resonant_sound_reduction_index` y
+`structural_reverberation_time`. Una secuencia o un array que se dé a
+cualquiera de ellas devuelve el array que devolvía, y los valores son los
+mismos.
+
+Ciento setenta y ocho de ellos tienen sobrecargas tipadas, así que un comprobador
 de tipos lee `room.room_constant(100.0, 0.2)` como un `float` y
 `room.room_constant(100.0, alphas)` como un array, sea cual sea la forma de
 `alphas`; un `ArrayLike` o una lista anidada se lee como la unión, que quien
@@ -1351,6 +1390,11 @@ comprueba tipos estrecha. Las reducciones (`signals.leq` y los demás niveles
 de una señal, `building.energy_average_level`,
 `room.directivity_energy_average` y sus afines), cuyo resultado es un número
 para una entrada de una dimensión, conservan la unión y su comportamiento.
+Los cuatro caminos de flanco del modelo detallado de edificación
+(`building.flanking_reduction_index`, `building.flanking_impact_level` y sus
+dos formas a partir de una diferencia normalizada), cinco o seis de cuyos
+argumentos se difunden, conservan la unión en su firma y siguen la regla al
+ejecutarse.
 
 ## Una frecuencia de muestreo es un `float`, y un recuento admite un entero de NumPy
 

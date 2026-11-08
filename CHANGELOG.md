@@ -5156,9 +5156,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   states it.
 
 - **A function of a number or an array of them returns a `float` for numbers
-  and an array for an array, a zero-dimensional one included, and says so in
-  its signature.** A hundred and fifty-five public functions and methods
-  follow the rule. Ninety of them, such as `room.room_constant`,
+  (a `complex` where its result is complex) and an array for an array, a
+  zero-dimensional one included, and says so in its signature.** Two hundred
+  and seven public functions and methods follow the rule. Ninety of them, such as `room.room_constant`,
   `room.critical_distance`,
   `fluids.sea_water_sound_speed` and `vibration.evaluation_zone`, returned a
   `float` (or a grade) for a zero-dimensional array, most of them annotated
@@ -5177,7 +5177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `emission.background_noise_correction_at_workstation` returns.
   `piston_resistance`, `piston_reactance` and `piston_directivity` return a
   Python `float` for a number, where they returned `numpy.float64`. The other
-  sixty-five returned a zero-dimensional array or a numpy scalar for
+  sixty-six returned a zero-dimensional array or a numpy scalar for
   numbers: twenty of `building` (`building.mass_law_transmission_loss`,
   `building.coupling_term`, `building.background_correction` and the
   structure-borne power and installed-source functions beside them), with
@@ -5193,19 +5193,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the `at` and `drive_voltage` methods of `LoopImpedance` and the `at` of
   `AmplifierFrequencyResponse`; `hearing.age_and_noise_threshold`; the three
   ISO 354 conversions of `materials`; `room.hard_object_absorption`;
-  `signals.comb_filter_response`; and twelve of `vibration`
+  `signals.comb_filter_response`; and thirteen of `vibration`
   (`vibration.corner_transmission_coefficient`, `vibration.loss_factor`,
-  `vibration.injected_power`, `vibration.ultimate_strength` and the others of
-  the junction, transfer stiffness and point mobility models). They return a
+  `vibration.injected_power`, `vibration.ultimate_strength`,
+  `vibration.phase_tolerance_deg` and the others of the junction, transfer
+  stiffness and point mobility models). They return a
   `float` for numbers now, `building.composite_transmission_loss` and
   `building.total_structure_borne_pressure_level` a `float` when they reduce
   to one number, and the levels of the `SurveyServiceEquipmentResult` that
   `building.survey_service_equipment_level` returns are floats for single
   readings; the values are the same bits.
-  `metrology.microphone_acoustic_impedance` returns the zero-dimensional
-  `complex128` array its annotation names for numbers, where it returned a
-  `numpy.complex128`, as the other complex results of a number do. A hundred
-  and thirty of them have overloads, so `room.room_constant(100.0, 0.2)`
+  A function whose result is complex follows the rule in its complex form, a
+  Python `complex` for numbers and a `complex128` array otherwise, through
+  `as_complex_or_array`: twenty-eight of them, the single degree of freedom
+  mobilities and `vibration.convert_frf`, the infinite beam impedances and
+  mobilities, the transfer stiffnesses, `vibration.blocking_force_ratio`,
+  `vibration.base_transmissibility`, the fitted and corrected modes of a
+  `vibration.SingleModeFitResult`, `vibration.seat_to_spine_transfer`, the
+  two responses of the vibration meter, `underwater.reflection_coefficient`,
+  `simulation.far_field_from_contour`,
+  `electroacoustics.program_signal_filter` and the impedances, volumes and
+  transfer impedances of `metrology`, returned a zero-dimensional complex
+  array for numbers (eighteen), a `numpy.complex128`
+  (`metrology.microphone_acoustic_impedance` and
+  `metrology.ReciprocityMicrophone.acoustic_impedance_pa_s_m3`) or a
+  one-element complex array (eight). The twenty-two functions of the
+  detailed building model and `electroacoustics.band_limit_response`
+  returned a one-element array for a number and for a zero-dimensional
+  array, because the check of their frequencies or levels made either
+  one-dimensional; they return a `float` and a zero-dimensional array now.
+  The values are the same bits. A hundred and seventy-eight of them have
+  overloads, so `room.room_constant(100.0, 0.2)`
   reads as a `float`, `room.room_constant(100.0, alphas)` as an array
   whatever the shape of `alphas`, and an `ArrayLike` or a nested list as the
   union. The heads
@@ -5218,10 +5236,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   among them, `broadcast.true_peak_level`, `building.energy_average_level`,
   `room.directivity_energy_average` and their kin), the predictions that read
   their bands from the surfaces they are given, the two properties,
-  `room.reverberation_time_standard_deviation` and `room.steady_state_spl`
-  keep the union with the rule at run time.
-  `scripts/check_return_overloads.py` also fails on a single value and an
-  array in one return with no overload saying which, rule A57 states it, the
+  `room.reverberation_time_standard_deviation`, `room.steady_state_spl` and
+  the four flanking paths of the detailed building model keep the union with
+  the rule at run time. `scripts/check_return_overloads.py` also fails on a
+  single value and an array in one return with no overload saying which, and
+  on a `float` head beside a complex array or a `complex` beside a real one,
+  rule A57 states both forms, the
   API reference shows each head with the bounds of its type parameters, and
   the upgrading guide maps the change.
 

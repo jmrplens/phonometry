@@ -1253,22 +1253,25 @@ A function of a number or an array of them returns a `float` only when every
 argument that decides the shape of its result is a number, a Python or a
 NumPy one, and an array as soon as one of them is a sequence or an array,
 where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array,
-and a zero-dimensional array or a NumPy scalar for numbers. A hundred and
-fifty-five public functions and methods follow the rule, `room.room_constant`,
+and a zero-dimensional array or a NumPy scalar for numbers. Two hundred and
+seven public functions and methods follow the rule, `room.room_constant`,
 `room.critical_distance` and `fluids.sea_water_sound_speed` among them, and
 `vibration.evaluation_zone` follows it with a zone letter where the others
-give a `float`:
+give a `float`, and a complex result (a mobility, an impedance, a transfer
+function) with a Python `complex`:
 
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `room.room_constant(100.0, np.array(0.2))` returned the `float` `25.0` | it returns `array(25.)`; `float(...)` or `.item()` gives the number |
 | `emission.local_environmental_correction([0.5])` returned a `float` for any one-element input, as did `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, and the `background_margin_db` field and the `correction` property of the `WorkstationBackgroundCorrection` that `emission.background_noise_correction_at_workstation` returns | each gives a one-element array; hand over `0.5`, not `[0.5]`, to get a number |
 | `electroacoustics.piston_resistance(1.0)` returned a `numpy.float64`, as did `piston_reactance` and `piston_directivity` | it returns a Python `float`, with no `.shape` or `.dtype` |
-| `building.mass_law_transmission_loss(500.0, 10.0)` returned a zero-dimensional array, as did 45 other functions and methods listed below | it returns a Python `float`; `np.asarray(...)` gives an array where one is wanted |
+| `building.mass_law_transmission_loss(500.0, 10.0)` returned a zero-dimensional array, as did 46 other functions and methods listed below | it returns a Python `float`; `np.asarray(...)` gives an array where one is wanted |
 | `materials.absorption_coefficient(4.0, 2.0, 200.0, 11.0)` returned a `numpy.float64`, as did 16 others listed below | it returns a Python `float`, with no `.shape` or `.dtype` |
 | `building.composite_transmission_loss([10.0, 2.0], [40.0, 25.0])` returned a zero-dimensional array, as did `building.total_structure_borne_pressure_level([30.0, 35.0])` | each returns a `float` when it reduces to one number |
 | `building.survey_service_equipment_level([30.0, 31.0, 32.0], 0.5, volume=50.0)` held a zero-dimensional array in `l_xy` and a `numpy.float64` in `l_xy_nt` and `l_xy_n` | the three levels are Python `float`s for single readings |
-| `metrology.microphone_acoustic_impedance` returned a `numpy.complex128` for numbers, which its `NDArray` annotation did not name | it returns the zero-dimensional `complex128` array, as the other complex results of a number do; `complex(...)` gives the number |
+| `vibration.sdof_mobility(100.0, 1.0, 1.0e4, 5.0)` returned a zero-dimensional `complex128` array, as did 17 other functions and methods listed below, and `metrology.microphone_acoustic_impedance` and `metrology.ReciprocityMicrophone.acoustic_impedance_pa_s_m3` a `numpy.complex128` | it returns a Python `complex`; `np.asarray(...)` gives an array where one is wanted |
+| `vibration.kb_weighting_response(16.0)` returned a one-element complex array, as did 7 other functions and methods listed below | it returns a Python `complex`, and a zero-dimensional array gives a zero-dimensional one |
+| `building.bending_radiation_factor(500.0, critical_frequency=100.0, length1=4.0, length2=3.0)` returned a one-element array, as did 22 other functions listed below, whose check made a number one-dimensional | it returns a Python `float`, and a zero-dimensional array gives a zero-dimensional one |
 
 The functions and methods that returned a zero-dimensional array for numbers
 are, besides `building.mass_law_transmission_loss`: in `building`,
@@ -1295,7 +1298,8 @@ are, besides `building.mass_law_transmission_loss`: in `building`,
 `coupling_loss_factor`, `point_connection_coupling_loss_factor`,
 `wave_vibration_reduction_index`, `random_error_percent`,
 `transfer_stiffness_level`, `loss_factor`, `beam_bending_wave_speed`,
-`plate_bending_wave_speed` and `injected_power`. Those that returned a
+`plate_bending_wave_speed`, `injected_power` and `phase_tolerance_deg`.
+Those that returned a
 NumPy scalar are, besides `materials.absorption_coefficient`:
 `building.surface_pressure_intensity_indicator` and
 `building.reverberation_index`; in `electroacoustics`, `field_strength`,
@@ -1308,14 +1312,51 @@ NumPy scalar are, besides `materials.absorption_coefficient`:
 zero-dimensional array given to any of them gives a zero-dimensional array,
 and the values are the same.
 
-A hundred and thirty of them have typed overloads, so a type checker reads
+The complex results that returned a zero-dimensional array for numbers are,
+besides `vibration.sdof_mobility`: `electroacoustics.program_signal_filter`;
+in `metrology`, `temperature_transfer_function` and
+`ReciprocityMicrophone.complex_equivalent_volume_m3`; and in `vibration`,
+`sdof_receptance`, `sdof_accelerance`, `convert_frf`,
+`infinite_beam_impedance`, `infinite_beam_mobility`,
+`infinite_beam_moment_mobility`, `base_transmissibility`,
+`blocking_force_ratio`, `transfer_stiffness_direct`,
+`transfer_stiffness_indirect`, `seat_to_spine_transfer` and the
+`fitted_frf`, `corrected_frf` and `corrected_mobility` of
+`SingleModeFitResult`. Those that returned a one-element complex array are,
+besides `vibration.kb_weighting_response`:
+`vibration.band_limitation_response`; in `metrology`,
+`air_gap_series_impedance_pa_s_m3`, `free_field_transfer_impedance` and the
+`response_at` and `record_response_at` of `TimeSelectiveResponse`;
+`simulation.far_field_from_contour`; and
+`underwater.reflection_coefficient`. The real results that returned a
+one-element array are, besides `building.bending_radiation_factor`:
+`electroacoustics.band_limit_response` and, in `building`,
+`bare_floor_impact_level`, `calculated_sound_reduction_index`,
+`direct_impact_level`, `direct_reduction_index`, `flanking_impact_level`,
+`flanking_impact_level_from_flanking_level`,
+`flanking_impact_level_from_normalized_difference`,
+`flanking_reduction_index`, `flanking_reduction_index_from_flanking_level`,
+`flanking_reduction_index_from_normalized_difference`,
+`floating_floor_improvement`, `forced_radiation_factor`,
+`in_situ_equivalent_absorption_length`, `in_situ_impact_level`,
+`in_situ_reduction_index`, `in_situ_total_loss_factor`,
+`in_situ_velocity_level_difference`, `laboratory_total_loss_factor`,
+`reciprocity_impact_level`, `resonant_sound_reduction_index` and
+`structural_reverberation_time`. A sequence or an array given to any of them
+gives the array it gave, and the values are the same.
+
+A hundred and seventy-eight of them have typed overloads, so a type checker reads
 `room.room_constant(100.0, 0.2)` as a `float` and
 `room.room_constant(100.0, alphas)` as an array whatever the shape of
 `alphas`; an `ArrayLike` or a nested list reads as the union, which a typed
 caller narrows. The reducers (`signals.leq` and the other levels of a signal,
 `building.energy_average_level`, `room.directivity_energy_average` and their
 kin), whose result is one number for a one-dimensional input, keep the union
-and their behaviour.
+and their behaviour. The four flanking paths of the detailed building
+model (`building.flanking_reduction_index`, `building.flanking_impact_level`
+and their two forms from a normalized difference), five or six of whose
+arguments broadcast, keep the union in their signature and follow the rule
+when they run.
 
 ## A sample rate is a `float`, and a count takes a NumPy integer
 

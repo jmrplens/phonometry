@@ -203,7 +203,7 @@ class Signal(RichDisplay):
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None
-    ) -> np.ndarray:
+    ) -> NDArray[Any]:
         """Return the samples as an array (optionally recast)."""
         return np.asarray(self._view, dtype=dtype, copy=copy)
 
@@ -228,7 +228,7 @@ class Signal(RichDisplay):
         return tuple(self._view.shape)
 
     @property
-    def dtype(self) -> np.dtype[Any]:
+    def dtype(self) -> np.dtype[np.float64]:
         return self.data.dtype
 
     @property

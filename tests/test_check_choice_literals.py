@@ -2823,6 +2823,89 @@ def test_a_function_or_static_method_takes_what_it_is_handed_first() -> None:
             through(instance, "medium")  # type: ignore[arg-type]
 
 
+#: A module whose function and static method take a class first and check
+#: the pace after it, and one that calls them through the module and
+#: through a field of ``self``.
+_THROUGH_A_MODULE = {
+    "_takes_a_class_first": """
+        from phonometry._internal.validation import require_choice
+
+        PACES = ("fast", "slow")
+
+
+        def check_after(cls, pace):
+            require_choice(pace, "pace", PACES)
+
+
+        class StaticChecker:
+            @staticmethod
+            def check_for(cls, pace):
+                require_choice(pace, "pace", PACES)
+        """,
+    "_hands_through_a_module": """
+        from typing import Literal
+
+        from phonometry import _takes_a_class_first as first
+
+        Pace = Literal["fast", "slow"]
+
+
+        def through_the_module(pace: Pace = "fast") -> None:
+            first.check_after(int, pace)
+
+
+        def the_pace_first(pace: Pace = "fast") -> None:
+            first.check_after(pace, "fast")
+
+
+        class Holder:
+            checker: first.StaticChecker
+
+            def __init__(self) -> None:
+                self.checker = first.StaticChecker()
+
+            def on_a_field(self, pace: Pace = "fast") -> None:
+                self.checker.check_for(int, pace)
+        """,
+}
+
+
+def test_a_function_through_its_module_or_a_static_method_on_a_field_takes_it_all(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``first.check_after(int, pace)`` runs a function of the module
+    ``first``, which takes ``int`` as its ``cls`` and checks the pace after
+    it, and ``self.checker.check_for(int, pace)`` a static method of the
+    class the field ``checker`` is annotated with, which takes what it is
+    handed the same way; ``first.check_after(pace, "fast")`` checks
+    ``"fast"`` and never the pace.
+
+    A call through a module, or on a field of ``self``, was read as filling
+    a first parameter called ``cls`` itself whatever it ran, so ``int`` was
+    read as the pace: the pace checked was reported as never checked, and
+    the one never checked passed.
+    """
+    _plant_modules(tmp_path, monkeypatch, _THROUGH_A_MODULE)
+    module = sys.modules["phonometry._hands_through_a_module"]
+    pace = "Literal['fast', 'slow']"
+    never = "never checked, so a misspelling passes"
+    assert (
+        ccl._choice_verdict(module.through_the_module, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        module.through_the_module("medium")
+    assert (
+        ccl._choice_verdict(module.the_pace_first, "pace", pace, field=False) == never
+    )
+    module.the_pace_first("medium")
+    on_a_field = module.Holder.on_a_field
+    assert ccl._choice_verdict(on_a_field, "pace", pace, field=False) is None
+    holder = module.Holder()
+    with pytest.raises(ValueError, match="pace"):
+        holder.on_a_field("medium")
+
+
 def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:
     """``Pace | Mapping[Side, Pace | float]`` takes a pace as one value, a side
     as each key and a pace as each value: a check of one part says nothing of

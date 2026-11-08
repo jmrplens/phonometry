@@ -5,9 +5,10 @@ The parity tests hand pages to the site's readers and compare what comes
 back with what the scripts' Python readers make of the same pages.
 :func:`answer` gives the script its input as JSON on stdin and reads its
 answer as JSON from stdout. When Node fails, to import a reader or inside
-one, the test fails with how Node ended and what it wrote on stderr: the
-cause is there, and a :class:`subprocess.CalledProcessError` names only the
-command and its status.
+one, or runs past its time and is stopped, the test fails with how Node
+ended and what it wrote on stderr: the cause is there, and a
+:class:`subprocess.CalledProcessError` or :class:`subprocess.TimeoutExpired`
+names only the command and its status or its time.
 """
 
 from __future__ import annotations
@@ -30,18 +31,23 @@ def answer(script: str, given: object, *, timeout: float) -> list[object]:
     :param timeout: How long Node may take [s].
     :raises AssertionError: when Node ends with a status other than 0, with
         that status, or the signal that stopped it, and what it wrote on
-        stderr.
+        stderr; and when it runs past *timeout* and is stopped, with what it
+        wrote on stderr before then.
     """
     assert NODE is not None, "no JavaScript engine on the path"
-    ran = subprocess.run(  # nosec B603 - a fixed argument list
-        [NODE, "--input-type=module", "-e", script],
-        input=json.dumps(given),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=timeout,
-        check=False,
-    )
+    try:
+        ran = subprocess.run(  # nosec B603 - a fixed argument list
+            [NODE, "--input-type=module", "-e", script],
+            input=json.dumps(given),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=timeout,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as stopped:
+        ended = f"Node ran past its {timeout:g} s and was stopped"
+        raise AssertionError(_with_stderr(ended, stopped.stderr)) from None
     assert ran.returncode == 0, _how_node_ended(ran)
     read: list[object] = json.loads(ran.stdout)
     return read
@@ -61,6 +67,19 @@ def _how_node_ended(ran: subprocess.CompletedProcess[str]) -> str:
         ended = f"Node was stopped by signal {-ran.returncode}"
     else:
         ended = f"Node ended with status {ran.returncode}"
-    if not ran.stderr:
+    return _with_stderr(ended, ran.stderr)
+
+
+def _with_stderr(ended: str, stderr: bytes | str | None) -> str:
+    """*ended*, how Node ended, with what it wrote on *stderr*.
+
+    :param stderr: What Node wrote there: text for a Node that ended, and for
+        one stopped at its time limit what :class:`subprocess.TimeoutExpired`
+        kept, bytes on POSIX whatever ``text=`` asked for, text on Windows,
+        ``None`` for nothing.
+    """
+    if isinstance(stderr, bytes):
+        stderr = stderr.decode("utf-8", errors="replace")
+    if not stderr:
         return f"{ended} and wrote nothing on stderr"
-    return f"{ended}, and wrote on stderr:\n{ran.stderr}"
+    return f"{ended}, and wrote on stderr:\n{stderr}"

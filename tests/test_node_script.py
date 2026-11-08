@@ -28,6 +28,10 @@ pytestmark = pytest.mark.skipif(
 #: How long a script here may run [s]: each one ends in well under a second.
 _SCRIPT_S = 60.0
 
+#: The time limit of a script that never ends on its own [s]: long enough for
+#: Node to start and write its line on a loaded runner.
+_PAST_S = 5.0
+
 #: A script that reads its input and answers one entry for each entry given.
 _DOUBLES = (
     "let input = '';"
@@ -77,3 +81,27 @@ def test_a_script_stopped_by_a_signal_fails_with_that_signal() -> None:
     script = "process.kill(process.pid, 'SIGKILL');"
     with pytest.raises(AssertionError, match="^Node was stopped by signal 9 "):
         node_script.answer(script, [], timeout=_SCRIPT_S)
+
+
+def test_a_script_that_runs_past_its_time_fails_with_what_node_wrote() -> None:
+    """``subprocess.TimeoutExpired`` names the command and the time, and keeps
+    what Node wrote on stderr where the report does not show it.
+    """
+    script = (
+        "process.stderr.write('the reader went round line 3 again\\n');"
+        "setInterval(() => {}, 1000);"
+    )
+    with pytest.raises(AssertionError) as caught:
+        node_script.answer(script, [], timeout=_PAST_S)
+    assert str(caught.value) == (
+        f"Node ran past its {_PAST_S:g} s and was stopped, and wrote on stderr:\n"
+        "the reader went round line 3 again\n"
+    )
+
+
+def test_a_script_that_runs_past_its_time_silently_says_so() -> None:
+    with pytest.raises(
+        AssertionError,
+        match=r"^Node ran past its 5 s and was stopped and wrote nothing on stderr$",
+    ):
+        node_script.answer("setInterval(() => {}, 1000);", [], timeout=_PAST_S)

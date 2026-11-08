@@ -10,6 +10,7 @@ own rounding rather than on the library.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import warnings
 from decimal import Decimal
@@ -52,6 +53,10 @@ _TABLE_F1: tuple[tuple[str, tuple[float, float, float], dict[str, str]], ...] = 
         },
     ),
 )
+
+#: The advisory of an air state outside the domain Annex F states for its
+#: equations.
+_OUTSIDE_ANNEX_F = "Air state outside the domain IEC 61094-2:2009 Annex F states"
 
 
 def _half_of_the_last_printed_figure(printed: str) -> float:
@@ -204,8 +209,7 @@ def test_only_the_impossible_is_refused() -> None:
         (60.0, 50.0),
         (200.0, 6.0),
     ):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", FluidWarning)
+        with pytest.warns(FluidWarning, match=_OUTSIDE_ANNEX_F):
             assert math.isfinite(
                 air(
                     temperature_c=temperature_c,
@@ -230,10 +234,8 @@ def test_only_the_impossible_is_refused() -> None:
 def test_impossible_conditions_are_refused(
     kwargs: dict[str, float], match: str
 ) -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        with pytest.raises(ValueError, match=match):
-            air(temperature_c=20.0, **kwargs)
+    with pytest.raises(ValueError, match=match):
+        air(temperature_c=20.0, **kwargs)
 
 
 def test_conditions_that_cannot_hold_together_are_refused() -> None:
@@ -246,14 +248,12 @@ def test_conditions_that_cannot_hold_together_are_refused() -> None:
     carry on and return a density and a speed of sound that look like
     measurements.
     """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        with pytest.raises(ValueError, match="cannot hold together"):
-            air(
-                temperature_c=20.0,
-                static_pressure_pa=1_000.0,
-                relative_humidity_percent=50.0,
-            )
+    with pytest.raises(ValueError, match="cannot hold together"):
+        air(
+            temperature_c=20.0,
+            static_pressure_pa=1_000.0,
+            relative_humidity_percent=50.0,
+        )
 
 
 @pytest.mark.parametrize(
@@ -273,8 +273,14 @@ def test_air_that_can_exist_is_not_refused_by_that_guard(
     Saturation carries a fifth of the mole fraction at 60 degC, so a guard set
     anywhere below 1 would start refusing air that exists.
     """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    # Saturated air lies past the 90 % Annex F states for its equations, and
+    # the state says so; the corner of the printed domain says nothing.
+    outside = (
+        pytest.warns(FluidWarning, match=_OUTSIDE_ANNEX_F)
+        if relative_humidity_percent > 90.0
+        else contextlib.nullcontext()
+    )
+    with outside:
         fluid = air(
             temperature_c=temperature_c,
             static_pressure_pa=static_pressure_pa,

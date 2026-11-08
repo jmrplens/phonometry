@@ -149,16 +149,14 @@ def test_non_finite_transfer_stiffness_is_refused(bad: float) -> None:
     """
     transmissibility = np.array([0.05 + 0.005j, 0.04 + 0.004j, 0.03 + 0.003j])
     transmissibility[0] = complex(bad, 0.0)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", PhonometryWarning)
-        with pytest.raises(
-            ValueError, match=r"'transmissibility' must contain only finite"
-        ):
-            vibration.indirect_transfer_stiffness_result(
-                frequencies=np.array([10.0, 20.0, 40.0]),
-                transmissibility=transmissibility,
-                blocking_mass=50.0,
-            )
+    with pytest.raises(
+        ValueError, match=r"'transmissibility' must contain only finite"
+    ):
+        vibration.indirect_transfer_stiffness_result(
+            frequencies=np.array([10.0, 20.0, 40.0]),
+            transmissibility=transmissibility,
+            blocking_mass=50.0,
+        )
 
 
 def test_metadata_header_renders(tmp_path: Path) -> None:
@@ -277,8 +275,9 @@ def test_the_headline_is_read_at_the_lowest_valid_line(tmp_path: Path) -> None:
     pytest.importorskip("matplotlib")
     f = np.arange(90.0, 1120.0, 2.0)
     t = vibration.base_transmissibility(f, mass=8.0, stiffness=_K, damping=120.0)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", vibration.TransferStiffnessWarning)
+    with pytest.warns(
+        vibration.TransferStiffnessWarning, match=r"exceeds 0.1 \(DeltaL1,2 < 20 dB\)"
+    ):
         res = vibration.indirect_transfer_stiffness_result(
             frequencies=f, transmissibility=t, blocking_mass=8.0
         )

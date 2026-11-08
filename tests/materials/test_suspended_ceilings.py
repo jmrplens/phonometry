@@ -16,6 +16,7 @@ reproduced. The conformance rows in
 
 from __future__ import annotations
 
+import contextlib
 import math
 import warnings
 from typing import Any
@@ -682,6 +683,10 @@ def test_the_air_term_is_what_makes_that_certificate_reproduce() -> None:
     assert missed == [250.0, 2000.0, 4000.0]
 
 
+#: The advisory of an overall depth other than the 200 mm of 4.1.1.2.3.1.
+_NOT_200_MM = "is not the 200 mm that 4.1.1.2.3.1 recommends"
+
+
 def test_real_arrangements_against_the_printed_geometry() -> None:
     """4.1.1.1.1 and 4.1.1.2.3.1, printed folios 6 and 9, on real specimens.
 
@@ -717,10 +722,14 @@ def test_real_arrangements_against_the_printed_geometry() -> None:
         (area_m2, depth_mm),
         (area_error_m2, ce_marking),
     ) in arrangements.items():
-        with warnings.catch_warnings():
-            # A depth other than 200 mm is reported by the clause, which is the
-            # verdict under test rather than a surprise.
-            warnings.simplefilter("ignore", SuspendedCeilingWarning)
+        # A depth other than 200 mm is reported by the clause, which is the
+        # verdict under test rather than a surprise.
+        advisory = (
+            contextlib.nullcontext()
+            if ce_marking
+            else pytest.warns(SuspendedCeilingWarning, match=_NOT_200_MM)
+        )
+        with advisory:
             got = materials.check_ceiling_specimen(
                 area=area_m2, mounting="E", depth_mm=depth_mm
             )
@@ -755,10 +764,16 @@ def test_the_humidity_floor_against_real_room_climates() -> None:
     }
     below_the_floor = {"SRL 13441"}
     for report, ((area_m2, depth_mm), printed) in climates.items():
-        with warnings.catch_warnings():
-            # The dry room, and the depth of the E-50, are reported by the
-            # clause, which is the verdict under test rather than a surprise.
-            warnings.simplefilter("ignore", SuspendedCeilingWarning)
+        # The dry room, and the depth of the E-50, are reported by the
+        # clause, which is the verdict under test rather than a surprise.
+        expected = [_NOT_200_MM] if depth_mm != 200 else []
+        if report in below_the_floor:
+            expected.append("the relative humidity falls to")
+        with contextlib.ExitStack() as advisories:
+            for message in expected:
+                advisories.enter_context(
+                    pytest.warns(SuspendedCeilingWarning, match=message)
+                )
             got = materials.check_ceiling_specimen(
                 area=area_m2,
                 mounting="E",

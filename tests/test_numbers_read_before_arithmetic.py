@@ -27,30 +27,28 @@ if TYPE_CHECKING:
 
 
 def _valve_noise() -> noise_control.AerodynamicValveNoise:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.ValveNoiseWarning)
-        return noise_control.valve_aerodynamic_noise(
-            noise_control.GasStream(
-                mass_flow=2.22,
-                inlet_pressure_pa=1.0e6,
-                outlet_pressure_pa=7.2e5,
-                inlet_density=5.3,
-                inlet_temperature_c=176.85,
-                specific_heat_ratio=1.22,
-                molar_mass_kg_kmol=19.8,
-            ),
-            noise_control.ValveTrim(
-                flow_coefficient=90.0,
-                style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
-                pressure_recovery=0.792 / 0.984,
-                outlet_diameter_m=0.1,
-                efficiency_correction=-3.8,
-                strouhal_number=0.2,
-            ),
-            noise_control.DownstreamPipe(
-                internal_diameter_m=0.2031, wall_thickness_m=0.008, density=8000.0
-            ),
-        )
+    return noise_control.valve_aerodynamic_noise(
+        noise_control.GasStream(
+            mass_flow=2.22,
+            inlet_pressure_pa=1.0e6,
+            outlet_pressure_pa=7.2e5,
+            inlet_density=5.3,
+            inlet_temperature_c=176.85,
+            specific_heat_ratio=1.22,
+            molar_mass_kg_kmol=19.8,
+        ),
+        noise_control.ValveTrim(
+            flow_coefficient=90.0,
+            style_modifier=noise_control.valve_style_modifier(0.00137, 0.181, 6),
+            pressure_recovery=0.792 / 0.984,
+            outlet_diameter_m=0.1,
+            efficiency_correction=-3.8,
+            strouhal_number=0.2,
+        ),
+        noise_control.DownstreamPipe(
+            internal_diameter_m=0.2031, wall_thickness_m=0.008, density=8000.0
+        ),
+    )
 
 
 def _reflection(delay: object) -> np.ndarray:

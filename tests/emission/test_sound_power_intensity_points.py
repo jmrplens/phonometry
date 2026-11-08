@@ -2318,8 +2318,10 @@ def test_the_temporal_indicator_survives_a_band_a_2_3_refuses() -> None:
     temporal = np.tile(intensity[0], (6, 1)) * (
         1.0 + 0.05 * rng.standard_normal((6, 2))
     )
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    with pytest.warns(
+        emission.SoundPowerWarning,
+        match=r"algebraic mean normal intensity is not positive",
+    ):
         result = emission.sound_power_intensity_points(
             intensity,
             areas,

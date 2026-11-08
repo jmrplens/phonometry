@@ -14,6 +14,7 @@ the annex self-consistent and say so where they do.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import warnings
 from typing import Any
@@ -134,13 +135,16 @@ def _run(index: int) -> valves.AerodynamicValveNoise:
     """Example ``index`` of Table A.1, one to six, trim only.
 
     The sixth column is past the Mach limit of NOTE 1 to Equation (15), so it
-    warns that the outlet flow is a source this result does not carry. That
-    is the point of the warning and it is checked in its own test; here it
-    would only be noise.
+    warns that the outlet flow is a source this result does not carry, and
+    the run asserts it; the other five say nothing.
     """
     case = dict(EXAMPLES[index - 1])
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", valves.ValveNoiseWarning)
+    past_the_limit = (
+        pytest.warns(valves.ValveNoiseWarning, match=r"NOTE 1 to Equation \(15\)")
+        if index == 6
+        else contextlib.nullcontext()
+    )
+    with past_the_limit:
         return valves.valve_aerodynamic_noise(
             _stream(case),
             _trim(case),

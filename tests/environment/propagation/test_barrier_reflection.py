@@ -118,9 +118,14 @@ def _comb(reflection: float, delay_s: float) -> np.ndarray:
 def _index(
     front: np.ndarray, free: np.ndarray, **kwargs: object
 ) -> prop.ReflectionIndexResult:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", prop.RoadDeviceWarning)
-        return prop.reflection_index(front, free, _FS, speed_of_sound=_C, **kwargs)
+    return prop.reflection_index(front, free, _FS, speed_of_sound=_C, **kwargs)
+
+
+def _perfect_index() -> prop.ReflectionIndexResult:
+    """The index of a perfect reflector, which Clause 5.8 rates at its 0.99 limit."""
+    front, free = _grid()
+    with pytest.warns(prop.RoadDeviceWarning, match="exceeded the 0.99 limit"):
+        return _index(front, free)
 
 
 class TestGeometry:
@@ -320,8 +325,7 @@ class TestReflectionIndex:
     """Formula (1) with Formulas (2) to (4)."""
 
     def test_a_perfect_reflector_is_one_in_every_band(self) -> None:
-        front, free = _grid()
-        result = _index(front, free)
+        result = _perfect_index()
         np.testing.assert_allclose(result.reflection_index, 1.0, atol=1e-6)
         np.testing.assert_allclose(result.gain_corrections, 1.0, atol=1e-9)
 
@@ -352,16 +356,14 @@ class TestReflectionIndex:
         self, field: str, shape: tuple[int, ...], match: str
     ) -> None:
         """Bands, grid positions and microphones agree across every array."""
-        front, free = _grid()
-        result = _index(front, free)
+        result = _perfect_index()
         wrong = np.ones(shape)
         with pytest.raises(ValueError, match=match):
             dataclasses.replace(result, **{field: wrong})
 
     def test_a_result_holds_the_layout_of_the_standard(self) -> None:
         """Seventeen bands, or eight microphones, everywhere at once still agree."""
-        front, free = _grid()
-        result = _index(front, free)
+        result = _perfect_index()
         bands = {
             "frequencies": result.frequencies[:17],
             "reflection_index": result.reflection_index[:17],
@@ -545,11 +547,9 @@ class TestSignalContract:
 
         front, free = _grid(reflection=0.5)
         bare = _index(front, free)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", prop.RoadDeviceWarning)
-            result = prop.reflection_index(
-                Signal(front, int(_FS)), Signal(free, int(_FS)), speed_of_sound=_C
-            )
+        result = prop.reflection_index(
+            Signal(front, int(_FS)), Signal(free, int(_FS)), speed_of_sound=_C
+        )
         np.testing.assert_array_equal(result.reflection_index, bare.reflection_index)
         np.testing.assert_array_equal(result.gain_corrections, bare.gain_corrections)
 
@@ -559,13 +559,11 @@ class TestSignalContract:
         front, free = _grid(reflection=0.5)
         front2, free2 = _grid(reflection=0.3)
         bare = _index(np.stack([front, front2]), np.stack([free, free2]))
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", prop.RoadDeviceWarning)
-            result = prop.reflection_index(
-                [Signal(front, int(_FS)), Signal(front2, int(_FS))],
-                [free, free2],
-                speed_of_sound=_C,
-            )
+        result = prop.reflection_index(
+            [Signal(front, int(_FS)), Signal(front2, int(_FS))],
+            [free, free2],
+            speed_of_sound=_C,
+        )
         np.testing.assert_array_equal(result.position_values, bare.position_values)
 
     def test_the_calibration_is_applied_before_the_gain_check(self) -> None:
@@ -577,7 +575,6 @@ class TestSignalContract:
         calibrated = Signal(front / 1.3, int(_FS), calibration_factor=1.3)
         with warnings.catch_warnings():
             warnings.simplefilter("error", prop.BarrierReflectionWarning)
-            warnings.simplefilter("ignore", prop.RoadDeviceWarning)
             result = prop.reflection_index(calibrated, free, speed_of_sound=_C)
         np.testing.assert_allclose(result.gain_corrections, 1.0, rtol=1e-12)
         np.testing.assert_allclose(result.reflection_index, 0.25, atol=1e-6)

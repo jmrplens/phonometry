@@ -144,11 +144,21 @@ def _available(cases: Mapping[Any, str]) -> list[Any]:
 
 
 def _stipa_quiet(x: np.ndarray) -> speech.STIResult:
-    """stipa() with the expected verification-bench warnings silenced
-    (dead bands and junk m > 1,3 in the two-band C.4.2 signals).
+    """stipa() with the two advisories the verification bench meets let through.
+
+    The two-band C.4.2 signals leave octave bands without energy and give
+    m > 1,3 in others, and the analysis says both; those two advisories, and
+    no other, are let through by their messages.
     """
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", STIWarning)
+        warnings.filterwarnings(
+            "ignore", message="No energy in octave band", category=STIWarning
+        )
+        warnings.filterwarnings(
+            "ignore",
+            message="Modulation transfer values above 1.3 detected",
+            category=STIWarning,
+        )
         return speech.stipa(x, FS)
 
 

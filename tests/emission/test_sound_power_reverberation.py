@@ -87,8 +87,14 @@ def test_direct_method_multi_position_energy_average() -> None:
     t60 = np.array([1.5])
     # Two positions differing by 6 dB -> energy mean is between them.
     levels = np.array([[80.0], [86.0]])
-    with warnings.catch_warnings():  # 2 positions trip the qualification advisories
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    # Two positions 6 dB apart trip both qualification advisories of 8.4.
+    with (
+        pytest.warns(
+            emission.SoundPowerWarning,
+            match=r"Only 2 microphone position\(s\) were supplied",
+        ),
+        pytest.warns(emission.SoundPowerWarning, match="exceeds the ISO 3741 sM"),
+    ):
         res = emission.sound_power_reverberation(
             levels, t60, volume, surface, frequencies=freqs
         )

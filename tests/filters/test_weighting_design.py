@@ -2101,7 +2101,9 @@ def _is_module(path: str) -> bool:
     found: object = _ROOT_MODULES.get(root)
     with warnings.catch_warnings():
         # numpy.core is a deprecated spelling of numpy._core, and says so when read.
-        warnings.simplefilter("ignore", DeprecationWarning)
+        warnings.filterwarnings(
+            "ignore", message=r"numpy\.core is deprecated", category=DeprecationWarning
+        )
         for name in names:
             found = getattr(found, name, None)
     return isinstance(found, types.ModuleType)

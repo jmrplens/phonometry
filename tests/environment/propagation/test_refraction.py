@@ -24,8 +24,6 @@ Primary oracles:
 
 from __future__ import annotations
 
-import warnings
-
 import numpy as np
 import pytest
 
@@ -41,8 +39,12 @@ from phonometry.environment.propagation.refraction import (
     ray_curvature_radius,
     shadow_zone_distance,
 )
+from phonometry.materials import PorousAbsorberWarning
 from phonometry.materials.absorbers.porous import ABSORBER_AIR
 
+#: The Delany-Bazley advisory of a ground resistivity whose low bands leave the
+#: range the regression was fitted over.
+_FIT_RANGE = "Delany-Bazley: X = rho f / sigma outside the published fit range"
 C0 = 343.0
 # A representative grassland surface impedance (normalized, e^{-i omega t}:
 # Im(Z) > 0 for a passive ground), so the tests never trip the porous-model
@@ -397,8 +399,10 @@ def test_pe_finite_ground_shows_dip_below_hard_ground() -> None:
     # impedance-convention fix the PE ground condition received the conjugated
     # (e^{+j omega t}) impedance and the soft-ground dip almost vanished.
     freq, zs, zr = 395.0, 2.0, 2.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    with pytest.warns(
+        PorousAbsorberWarning,
+        match=_FIT_RANGE,
+    ):
         soft = atmospheric_parabolic_equation(
             freq,
             _flat_profile(),
@@ -480,18 +484,13 @@ def test_pe_flow_resistivity_matches_impedance_path() -> None:
     # hand into the e^{-i omega t} convention, since the materials domain works
     # in e^{+j omega t}) is identical. The low band falls outside the model's
     # published fit range, which raises a PorousAbsorberWarning by design.
-    from phonometry.materials import PorousAbsorberWarning, delany_bazley
+    from phonometry.materials import delany_bazley
 
     freq = 500.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", PorousAbsorberWarning)
-        z = complex(
-            np.conj(
-                delany_bazley(
-                    np.array([freq]), 2.0e5, fluid=ABSORBER_AIR
-                ).normalized_impedance[0]
-            )
-        )
+    with pytest.warns(PorousAbsorberWarning, match=_FIT_RANGE):
+        medium = delany_bazley(np.array([freq]), 2.0e5, fluid=ABSORBER_AIR)
+    z = complex(np.conj(medium.normalized_impedance[0]))
+    with pytest.warns(PorousAbsorberWarning, match=_FIT_RANGE):
         via_sigma = atmospheric_parabolic_equation(
             freq,
             _flat_profile(),
@@ -611,7 +610,6 @@ def test_result_types_and_shapes() -> None:
     assert pe.relative_level.shape == (pe.heights_m.size, pe.ranges.size)
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 def test_plots_smoke() -> None:
     pytest.importorskip("matplotlib")
     import matplotlib as mpl

@@ -128,7 +128,6 @@ _CALLS: dict[str, Callable[[], object]] = {
 }
 
 
-@pytest.mark.filterwarnings("ignore")
 @pytest.mark.parametrize("name", sorted(_CALLS))
 def test_a_fractional_rate_runs(name: str) -> None:
     assert _CALLS[name]() is not None
@@ -192,7 +191,6 @@ def test_a_fractional_rate_reaches_the_weighting_unrounded(
     assert seen == [FS]
 
 
-@pytest.mark.filterwarnings("ignore")
 def test_a_fractional_rate_reaches_the_band_analysis_unrounded(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

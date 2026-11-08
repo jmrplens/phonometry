@@ -967,8 +967,10 @@ def test_table_1_broadband() -> None:
 def test_the_report_refuses_an_upper_limit() -> None:
     levels, background = _levels()
     background[0] = levels[0] - 1.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", SoundPowerWarning)
+    with pytest.warns(
+        SoundPowerWarning,
+        match=r"background is less than 3 dB below the level with the turbine",
+    ):
         upper = emission.turbine_sound_power(
             levels,
             surface_area=100.0,

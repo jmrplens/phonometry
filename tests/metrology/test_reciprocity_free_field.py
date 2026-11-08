@@ -97,9 +97,22 @@ def _table_b1() -> tuple[np.ndarray, np.ndarray]:
     return frequencies, values
 
 
-@pytest.mark.filterwarnings(
-    "ignore::phonometry.environment.AtmosphericAbsorptionWarning"
+#: Table B.1 runs to 50 kHz, past the 10 kHz ISO 9613-1 tabulates, which it
+#: says; that advisory alone is let through, by its message.
+_PAST_10_KHZ = (
+    "ignore:One or more frequencies are outside the 50..10000 Hz tabulated range"
+    ":phonometry.environment.AtmosphericAbsorptionWarning"
 )
+#: B.2 states its accuracy from -20 degC to 50 degC, past the 15 to 27 degC
+#: Annex F of IEC 61094-2 states for the air; that advisory alone is let
+#: through, by its message (whose colon is matched by the dot).
+_OUTSIDE_ANNEX_F = (
+    "ignore:Air state outside the domain IEC 61094-2.2009 Annex F"
+    ":phonometry.fluids.FluidWarning"
+)
+
+
+@pytest.mark.filterwarnings(_PAST_10_KHZ)
 def test_table_b1_is_iso_9613_1() -> None:
     """All 162 entries, to half a unit of the fourth decimal, as the text says
     they were computed. Above 10 kHz ISO 9613-1 warns it is past its own
@@ -115,9 +128,7 @@ def test_table_b1_is_iso_9613_1() -> None:
         np.testing.assert_allclose(alpha, values[:, column], atol=5.01e-5)
 
 
-@pytest.mark.filterwarnings(
-    "ignore::phonometry.environment.AtmosphericAbsorptionWarning"
-)
+@pytest.mark.filterwarnings(_PAST_10_KHZ)
 def test_annex_b_procedure_is_within_its_stated_accuracy_of_table_b1() -> None:
     """B.2: "estimated to be ±10 %". The adjusted constants of the procedure
     put it within 0,8 % of ISO 9613-1 at every condition of the table.
@@ -159,10 +170,7 @@ def test_dispersion_is_a_few_parts_in_a_hundred_thousand() -> None:
     assert np.all(np.diff(relative) > 0.0)
 
 
-@pytest.mark.filterwarnings(
-    "ignore::phonometry.environment.AtmosphericAbsorptionWarning",
-    "ignore::phonometry.fluids.FluidWarning",
-)
+@pytest.mark.filterwarnings(_PAST_10_KHZ, _OUTSIDE_ANNEX_F)
 def test_annex_b_procedure_follows_iso_9613_1_across_its_accuracy_domain() -> None:
     """Wherever B.2 states its accuracy (-20 °C to 50 °C, x_w of 0,5e-3 to
     50e-3), the procedure stays within 1 % of ISO 9613-1, whose temperature

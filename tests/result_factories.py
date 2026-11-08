@@ -748,12 +748,15 @@ def _source_ranking() -> ph.environment.SourceRanking:
 
 
 def _binaural_indicators() -> ph.environment.BinauralIndicators:
-    """One second of noise at two ears, the right 4 dB down (ISO/TS 12913-3 D.2)."""
-    import warnings
+    """One second of noise at two ears, the right 4 dB down (ISO/TS 12913-3 D.2).
 
+    A second is short of the 3 min of D.3, which the indicators say.
+    """
     left = 0.1 * np.random.default_rng(12913).standard_normal(FS)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", ph.environment.SoundscapeWarning)
+    with pytest.warns(
+        ph.environment.SoundscapeWarning,
+        match="D.3 requires a measurement time interval of at least 3 min",
+    ):
         return ph.environment.binaural_indicators(
             np.vstack([left, 10.0 ** (-4.0 / 20.0) * left]),
             FS,

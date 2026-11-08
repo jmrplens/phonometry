@@ -39,6 +39,9 @@ from phonometry.hearing import noise_induced_hearing_loss as m
 # print. Known case (Table D.4, not pinned here): 100 dB, 10 years, 3000 Hz,
 # 10 % prints 41 where the unrounded value is 41.52 (rounds to 42). If a D.4
 # row is ever added, allow that +/-1 dB ambiguity.
+#: The advisory of an exposure duration outside the 1 to 40 years ISO 1999
+#: validates.
+_OUTSIDE_6_3_1 = "outside the 1-40 year range ISO 1999:2013 validates"
 _ANNEX_D = {
     (85.0, 40.0): [(0, 0, 0), (0, 0, 0), (1, 2, 2), (3, 5, 7), (5, 7, 9), (2, 4, 6)],
     (90.0, 20.0): [
@@ -133,14 +136,15 @@ def test_short_duration_extrapolation() -> None:
     np.testing.assert_allclose(n50_5, factor * n50_10, rtol=1e-9)
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.hearing.NoiseInducedHearingLossWarning")
 def test_spreads_non_negative_subyear() -> None:
     # Below 1 year the linear spread term can go negative; du/dl are clamped so
     # the fractile ordering never inverts (spreads are standard deviations).
     # The sub-year duration is a deliberate extrapolation, so its
     # validated-domain warning is expected here.
-    r_low = m.nipts(100.0, 0.02, 0.1)
-    r_high = m.nipts(100.0, 0.02, 0.9)
+    with pytest.warns(m.NoiseInducedHearingLossWarning, match=_OUTSIDE_6_3_1):
+        r_low = m.nipts(100.0, 0.02, 0.1)
+    with pytest.warns(m.NoiseInducedHearingLossWarning, match=_OUTSIDE_6_3_1):
+        r_high = m.nipts(100.0, 0.02, 0.9)
     assert np.all(r_high.value >= r_low.value)
     assert np.all(r_low.spread_upper >= 0.0)
     assert np.all(r_low.spread_lower >= 0.0)

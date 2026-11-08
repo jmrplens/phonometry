@@ -1257,9 +1257,7 @@ def test_a_file_of_sixteen_mebibytes_is_read(tmp_path: pathlib.Path) -> None:
     path = tmp_path / "panel-40.json"
     path.write_bytes((text + " " * (_LIMIT - len(text))).encode("ascii"))
     assert path.stat().st_size == _LIMIT
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", io.CatalogueWarning)
-        mine = io.read_catalogue(path, row_type=PorousMaterial)
+    mine = io.read_catalogue(path, row_type=PorousMaterial)
     assert set(mine) == {"panel-40/core-declared", "panel-40/core-lab"}
 
 

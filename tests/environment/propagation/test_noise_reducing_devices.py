@@ -25,8 +25,8 @@ is, which is what makes them oracles rather than regression pins:
 
 from __future__ import annotations
 
+import contextlib
 import math
-import warnings
 
 import numpy as np
 import pytest
@@ -155,8 +155,13 @@ class TestAbsorptionRating:
     def test_table_a1_categories(self, reported: int, category: str) -> None:
         # Solve for the constant coefficient that lands on each boundary.
         alpha = 1.0 - 10.0 ** (-0.1 * reported)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", prop.RoadDeviceWarning)
+        # At 20 dB the ratio reaches the 0.99 limit of Clause 5, and says so.
+        limit = (
+            pytest.warns(prop.RoadDeviceWarning, match="reached the 0.99 limit")
+            if reported >= 20
+            else contextlib.nullcontext()
+        )
+        with limit:
             got = prop.sound_absorption_rating(np.full(_BANDS, alpha))
         assert got.reported == reported
         assert got.category == category

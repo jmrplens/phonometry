@@ -123,11 +123,11 @@ class CriterionCarrier(Protocol):
     """
 
     @property
-    def frequencies(self) -> np.ndarray:
+    def frequencies(self) -> NDArray[np.float64]:
         """Analysis band centre frequencies, Hz."""
 
     @property
-    def received_level(self) -> np.ndarray:
+    def received_level(self) -> NDArray[np.float64]:
         """The spectrum arriving at the receiver, dB."""
 
     @property
@@ -159,7 +159,7 @@ def rating_of(result: CriterionCarrier) -> NCResult | RCResult:
 
 def _criterion_curve_at(
     family: str, index: float, frequencies: NumericArrayLike
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """An NC or RC curve resampled onto an arbitrary octave-band grid.
 
     Design sheets compare a received spectrum band by band with the criterion
@@ -181,14 +181,14 @@ def _criterion_curve_at(
     )
 
 
-def curve_of(result: CriterionCarrier) -> np.ndarray | None:
+def curve_of(result: CriterionCarrier) -> NDArray[np.float64] | None:
     """The design criterion curve at the analysis bands, or ``None``."""
     if result.target is None:
         return None
     return _criterion_curve_at(result.criterion, result.target, result.frequencies)
 
 
-def exceedance_of(result: CriterionCarrier) -> np.ndarray | None:
+def exceedance_of(result: CriterionCarrier) -> NDArray[np.float64] | None:
     """Band-by-band excess of the received level over the criterion curve."""
     curve = curve_of(result)
     return None if curve is None else result.received_level - curve

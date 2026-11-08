@@ -31,9 +31,13 @@ reports two shapes:
   one of the three shared functions, or a function of the library whose first
   parameter it hands to one of them (found by following such calls until no
   new one turns up, so ``require_regular_audio(path)`` counts, and so does a
-  reader that calls it on its own first parameter). The name is compared as
-  written, once ``str()``, ``Path()`` and ``os.fspath()`` around it are taken
-  off.
+  reader that calls it on its own first parameter). The first parameter is
+  the first that is not ``self`` or ``cls``, and the name a call hands it is
+  the argument at its place: a method called through its class,
+  ``Reader.check(self, path)``, takes the instance first and the name after
+  it, one called on ``self`` takes the name first, and a class method is
+  bound to its class however it is called. The name is compared as written,
+  once ``str()``, ``Path()`` and ``os.fspath()`` around it are taken off.
 
 A check is known by the module that defines it, never by the last part of its
 name alone: a call is followed to the function it reaches through the
@@ -280,12 +284,22 @@ def _subject(node: ast.expr) -> str:
     return ast.unparse(node)
 
 
-def _first_argument(call: ast.Call) -> ast.expr | None:
-    """The first argument of *call*, positional or the only keyword one."""
-    if call.args:
-        first = call.args[0]
-        return None if isinstance(first, ast.Starred) else first
-    if len(call.keywords) == 1 and call.keywords[0].arg is not None:
+def _first_argument(call: ast.Call, place: int = 0) -> ast.expr | None:
+    """The argument of *call* at *place* among its positional ones, the
+    first by default, or the only keyword one when *call* hands exactly
+    *place* by position; none at or past a ``*`` argument, which may fill
+    the place or not.
+    """
+    arguments = call.args
+    if any(isinstance(argument, ast.Starred) for argument in arguments[: place + 1]):
+        return None
+    if place < len(arguments):
+        return arguments[place]
+    if (
+        len(arguments) == place
+        and len(call.keywords) == 1
+        and call.keywords[0].arg is not None
+    ):
         return call.keywords[0].value
     return None
 
@@ -1226,6 +1240,89 @@ def _first_parameter(function: ast.AST) -> str | None:
     return None
 
 
+#: For each function of the library, by the module that defines it, where
+#: a call hands its first parameter that is not ``self`` or ``cls``
+#: (:func:`_first_parameter`) among its positional arguments: on ``self`` or
+#: ``cls``, and named any other way, one pair for each definition of it.
+Places = dict[str, frozenset[tuple[int, int]]]
+
+
+def first_parameter_places(scopes: Sequence[_Scope]) -> Places:
+    """Where a call hands each function of *scopes* its first parameter that
+    is not ``self`` or ``cls``, among the call's positional arguments
+    (:data:`Places`).
+
+    That is its place among the function's own, but in a method: a call on
+    ``self`` or ``cls`` fills its first place itself, and one through its
+    class, ``Reader.check(self, path)``, hands the instance as its first
+    argument; a ``classmethod`` is bound to its class however it is called,
+    and a ``staticmethod`` takes what it is handed.
+    """
+    places: dict[str, set[tuple[int, int]]] = {}
+    for scope in scopes:
+        node = scope.node
+        if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            continue
+        first = _first_parameter(node)
+        if first is None:
+            continue
+        place = [a.arg for a in (*node.args.posonlyargs, *node.args.args)].index(first)
+        decorators = {
+            decorator.id
+            for decorator in node.decorator_list
+            if isinstance(decorator, ast.Name)
+        }
+        in_a_class = len(scope.around) > 1 and isinstance(
+            scope.around[-2], ast.ClassDef
+        )
+        if not in_a_class or "staticmethod" in decorators:
+            pair = (place, place)
+        elif "classmethod" in decorators:
+            pair = (place - 1, place - 1)
+        else:
+            pair = (place - 1, place)
+        places.setdefault(scope.qualified, set()).add(pair)
+    return {name: frozenset(pairs) for name, pairs in places.items()}
+
+
+def _handed_first_parameter(
+    call: ast.Call, callee: str, places: Places
+) -> ast.expr | None:
+    """What *call* hands *callee* in its first parameter that is not ``self``
+    or ``cls`` (:func:`first_parameter_places`): the argument at that
+    parameter's place, read on ``self`` or ``cls`` or through any other name,
+    and none when the definitions of *callee* take it at different places. A
+    callee the library does not define (one of :data:`CHECKS` read from
+    outside the files given) takes it first.
+    """
+    func = call.func
+    on_the_receiver = (
+        isinstance(func, ast.Attribute)
+        and isinstance(func.value, ast.Name)
+        and func.value.id in {"self", "cls"}
+    )
+    found = {
+        bound if on_the_receiver else named
+        for bound, named in places.get(callee, frozenset({(0, 0)}))
+    }
+    if len(found) != 1:
+        return None
+    place = found.pop()
+    return _first_argument(call, place) if place >= 0 else None
+
+
+def _may_hand(call: ast.Call, name: str) -> bool:
+    """Whether *call* may hand the name written *name* to its callee's first
+    parameter that is not ``self`` or ``cls``: as its first argument, or as
+    its second, after the instance a method called through its class takes
+    first.
+    """
+    return any(
+        argument is not None and _subject(argument) == name
+        for argument in (_first_argument(call), _first_argument(call, 1))
+    )
+
+
 def checking_functions(
     scopes: Sequence[_Scope], exports: Mapping[str, str]
 ) -> frozenset[str]:
@@ -1234,14 +1331,19 @@ def checking_functions(
     Each by the module that defines it (:func:`qualified_callee`), followed
     until no new function turns up, so a reader that checks its name through
     a helper counts as a check for its own callers, and a function that hands
-    its name to a namesake of a check (``np.info``) does not.
+    its name to a namesake of a check (``np.info``) does not. A method called
+    through its class takes the instance first, and the name after it
+    (:func:`_handed_first_parameter`).
     """
     # Each function with the callees each definition of it hands its first
     # parameter to, worked out once; the search below only grows the set of
     # checks.
+    places = first_parameter_places(scopes)
     candidates: dict[str, list[set[str]]] = {}
     for scope in _reachable(scopes):
-        candidates.setdefault(scope.qualified, []).append(_handed_first(scope, exports))
+        candidates.setdefault(scope.qualified, []).append(
+            _handed_first(scope, exports, places)
+        )
     found = set(_SHARED_CHECKS)
     grew = True
     while grew:
@@ -1284,17 +1386,23 @@ def _reachable(scopes: Sequence[_Scope]) -> list[_Scope]:
     return reachable
 
 
-def _handed_first(scope: _Scope, exports: Mapping[str, str]) -> set[str]:
-    """The functions of the library *scope* hands its first parameter to."""
+def _handed_first(
+    scope: _Scope, exports: Mapping[str, str], places: Places
+) -> set[str]:
+    """The functions of the library *scope* hands its first parameter to,
+    in the first parameter of theirs that is not ``self`` or ``cls``
+    (:func:`_handed_first_parameter`).
+    """
     parameter = _first_parameter(scope.node)
     if parameter is None:
         return set()
     return {
         callee
         for call in scope.calls
-        if (argument := _first_argument(call)) is not None
-        and _subject(argument) == parameter
+        if _may_hand(call, parameter)
         and (callee := qualified_callee(call, scope, exports)) is not None
+        and (argument := _handed_first_parameter(call, callee, places)) is not None
+        and _subject(argument) == parameter
     }
 
 
@@ -1303,8 +1411,12 @@ def _checked_before(
     read: ast.Call,
     checks: frozenset[str],
     exports: Mapping[str, str],
+    places: Places,
 ) -> bool:
-    """Whether a check of the name *read* opens comes before it in *scope*."""
+    """Whether a check of the name *read* opens comes before it in *scope*:
+    a call of one of *checks* that hands the name to its first parameter that
+    is not ``self`` or ``cls`` (:func:`_handed_first_parameter`).
+    """
     argument = _first_argument(read)
     if argument is None:
         return False
@@ -1313,20 +1425,28 @@ def _checked_before(
     for call in scope.calls:
         if call is read or (call.lineno, call.col_offset) >= place:
             continue
-        checked = _first_argument(call)
-        if (
-            checked is not None
-            and _subject(checked) == name
-            and qualified_callee(call, scope, exports) in checks
-        ):
+        if not _may_hand(call, name):
+            continue
+        callee = qualified_callee(call, scope, exports)
+        if callee not in checks:
+            continue
+        checked = _handed_first_parameter(call, callee, places)
+        if checked is not None and _subject(checked) == name:
             return True
     return False
 
 
 def scan(
-    scope: _Scope, checks: frozenset[str], exports: Mapping[str, str]
+    scope: _Scope,
+    checks: frozenset[str],
+    exports: Mapping[str, str],
+    places: Places,
 ) -> list[Finding]:
-    """Every read of a file by its name in *scope* that skips the shared check."""
+    """Every read of a file by its name in *scope* that skips the shared check.
+
+    *places* say where a call hands each function of the library the name it
+    checks (:func:`first_parameter_places`).
+    """
     findings: list[Finding] = []
     for call in scope.calls:
         tables = aliases_at(call, scope)
@@ -1334,7 +1454,7 @@ def scan(
             shape = "an open of its own; read through open_regular or read_at_most"
         elif any(
             _foreign_read(call, aliases) for aliases in tables
-        ) and not _checked_before(scope, call, checks, exports):
+        ) and not _checked_before(scope, call, checks, exports, places):
             shape = (
                 "a reader of another library with no check of the name before it; "
                 "ask not_regular_at, or a check of the library, first"
@@ -1365,11 +1485,12 @@ def check(files: Sequence[pathlib.Path]) -> tuple[list[Finding], list[tuple[str,
         for name, target in exports_of(path, tree).items()
     }
     checks = checking_functions(scopes, exports)
+    places = first_parameter_places(scopes)
     findings = [
         finding
         for scope in scopes
         if scope.path.resolve().parts[-len(OWNER) :] != OWNER
-        for finding in scan(scope, checks, exports)
+        for finding in scan(scope, checks, exports, places)
     ]
     return exempted(findings, EXEMPT)
 

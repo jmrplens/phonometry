@@ -95,12 +95,13 @@ tables are recorded in ``docs/ERRATA.md``.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -126,7 +127,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
     from ..measurement.ratings import ImpactRatingResult, WeightedRatingResult
 
@@ -284,6 +291,39 @@ def _check_report_request(engine: ReportEngine, language: Language) -> None:
 # --------------------------------------------------------------------------- #
 # Radiation factors (ISO 12354-1:2017, Annex B)
 # --------------------------------------------------------------------------- #
+@overload
+def bending_radiation_factor[S: RealScalar](
+    frequencies: S,
+    *,
+    critical_frequency: float,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def bending_radiation_factor[V: RealValues](
+    frequencies: V,
+    *,
+    critical_frequency: float,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def bending_radiation_factor[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    critical_frequency: float,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def bending_radiation_factor(
     frequencies: NumericArrayLike,
     *,
@@ -291,7 +331,7 @@ def bending_radiation_factor(
     length1: float,
     length2: float,
     speed_of_sound: float = _SPEED_OF_SOUND,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Radiation factor for free bending waves ``σ`` (Formulae B.4 to B.6).
 
     The three candidate factors of Formula (B.4) are
@@ -325,7 +365,8 @@ def bending_radiation_factor(
     :param length2: The other side length, in m.
     :param speed_of_sound: Speed of sound in air ``co``, in m/s
         (Default: 340 m/s, the value ISO 12354-1 Annex A fixes).
-    :return: The radiation factor ``σ`` per band (dimensionless).
+    :return: The radiation factor ``σ`` per band (dimensionless). A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If any input is not positive and finite.
     :raises TypeError: if ``critical_frequency``, ``length1``, ``length2`` or
         ``speed_of_sound`` is not a single number, or ``frequencies`` holds a text or a
@@ -353,7 +394,9 @@ def bending_radiation_factor(
     else:
         sigma = np.where((f < fc) & (sigma2 < sigma3), sigma2, sigma3)
         sigma = np.where(above & (sigma1 < sigma3), sigma1, sigma)
-    return np.asarray(np.minimum(sigma, _MAX_RADIATION_FACTOR), dtype=np.float64)
+    return as_float_or_array(
+        np.minimum(sigma, _MAX_RADIATION_FACTOR), like=(frequencies,)
+    )
 
 
 def _mode_dense_radiation_factor(
@@ -384,13 +427,43 @@ def _mode_dense_radiation_factor(
     return np.asarray(np.where(below, low, sigma1), dtype=np.float64)
 
 
+@overload
+def forced_radiation_factor[S: RealScalar](
+    frequencies: S,
+    *,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def forced_radiation_factor[V: RealValues](
+    frequencies: V,
+    *,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def forced_radiation_factor[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    length1: float,
+    length2: float,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def forced_radiation_factor(
     frequencies: NumericArrayLike,
     *,
     length1: float,
     length2: float,
     speed_of_sound: float = _SPEED_OF_SOUND,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Radiation factor for forced waves ``σf`` (Formula B.3).
 
     :math:`\sigma_\mathrm{f} = 0.5 (\ln(k_\mathrm{o} \sqrt{l_1 l_2}) - \Lambda)` capped at
@@ -413,11 +486,11 @@ def forced_radiation_factor(
     :param length2: The other side length, in m.
     :param speed_of_sound: Speed of sound in air ``co``, in m/s
         (Default: 340 m/s).
-    :return: The forced radiation factor ``σf`` per band (dimensionless),
-        clipped to :math:`0 \le \sigma_\mathrm{f} \le 2` (the standard prints only the
-        upper bound;
-        the lower one guards the deep low-frequency extrapolation, where the
-        logarithm turns negative).
+    :return: The forced radiation factor ``σf`` per band (dimensionless), clipped to
+        :math:`0 \le \sigma_\mathrm{f} \le 2` (the standard prints only the upper bound;
+        the lower one guards the deep low-frequency extrapolation, where the logarithm
+        turns negative). A ``float`` for a number, an array for a sequence or an array,
+        a zero-dimensional one included.
     :raises ValueError: If any input is not positive and finite.
     :raises TypeError: if ``length1``, ``length2`` or ``speed_of_sound`` is not a single
         number, or ``frequencies`` holds a text or a value that is not a real number.
@@ -434,12 +507,65 @@ def forced_radiation_factor(
         - 1.0 / (4.0 * np.pi * l1 * l2 * k0**2)
     )
     sigma_f = 0.5 * (np.log(k0 * np.sqrt(l1 * l2)) - lam)
-    return np.asarray(np.clip(sigma_f, 0.0, _MAX_RADIATION_FACTOR), dtype=np.float64)
+    return as_float_or_array(
+        np.clip(sigma_f, 0.0, _MAX_RADIATION_FACTOR), like=(frequencies,)
+    )
 
 
 # --------------------------------------------------------------------------- #
 # Calculated element performance (Annex B of both parts)
 # --------------------------------------------------------------------------- #
+@overload
+def calculated_sound_reduction_index[S: RealScalar](
+    frequencies: S,
+    *,
+    mass_per_area: float,
+    critical_frequency: float,
+    total_loss_factor: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+    forced_radiation_factor: NumericArrayLike,
+    fraction: BandFraction | np.integer[Any] = ...,
+    resonant_only: bool = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    fluid: Fluid = ...,
+) -> float: ...
+
+
+@overload
+def calculated_sound_reduction_index[V: RealValues](
+    frequencies: V,
+    *,
+    mass_per_area: float,
+    critical_frequency: float,
+    total_loss_factor: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+    forced_radiation_factor: NumericArrayLike,
+    fraction: BandFraction | np.integer[Any] = ...,
+    resonant_only: bool = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def calculated_sound_reduction_index[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    mass_per_area: float,
+    critical_frequency: float,
+    total_loss_factor: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+    forced_radiation_factor: NumericArrayLike,
+    fraction: BandFraction | np.integer[Any] = ...,
+    resonant_only: bool = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    fluid: Fluid = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def calculated_sound_reduction_index(
     frequencies: NumericArrayLike,
     *,
@@ -453,7 +579,7 @@ def calculated_sound_reduction_index(
     density: float | None = None,
     longitudinal_velocity: float | None = None,
     fluid: Fluid = EN12354_AIR,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Sound reduction index of a homogeneous element (Formulae B.2, B.10).
 
     :math:`R = -10 \log_{10} \tau` with the three-branch transmission factor
@@ -509,7 +635,8 @@ def calculated_sound_reduction_index(
         the material, in m/s.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
-    :return: The sound reduction index ``R`` per band, in dB.
+    :return: The sound reduction index ``R`` per band, in dB. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive/finite or the per-band
         arrays do not share the band count.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
@@ -547,7 +674,37 @@ def calculated_sound_reduction_index(
             _PLATEAU_CONSTANT / eta
         )
         tau = np.maximum(tau, plateau)
-    return np.asarray(-10.0 * np.log10(tau), dtype=np.float64)
+    return as_float_or_array(-10.0 * np.log10(tau), like=(frequencies,))
+
+
+@overload
+def bare_floor_impact_level[S: RealScalar](
+    frequencies: S,
+    *,
+    mass_per_area: float,
+    structural_reverberation_time: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+) -> float: ...
+
+
+@overload
+def bare_floor_impact_level[V: RealValues](
+    frequencies: V,
+    *,
+    mass_per_area: float,
+    structural_reverberation_time: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def bare_floor_impact_level[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    mass_per_area: float,
+    structural_reverberation_time: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+) -> float | NDArray[np.float64]: ...
 
 
 def bare_floor_impact_level(
@@ -556,7 +713,7 @@ def bare_floor_impact_level(
     mass_per_area: float,
     structural_reverberation_time: NumericArrayLike,
     radiation_factor: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Normalized impact level of a bare monolithic floor (Part 2, F. B.2).
 
     .. math::
@@ -581,7 +738,9 @@ def bare_floor_impact_level(
         per band, in s.
     :param radiation_factor: Radiation factor for free bending waves ``σ`` per
         band.
-    :return: The normalized impact sound pressure level ``Ln`` per band, in dB.
+    :return: The normalized impact sound pressure level ``Ln`` per band, in dB. A
+        ``float`` for a number, an array for a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: If an input is not positive/finite or the per-band
         arrays do not share the band count.
     :raises TypeError: if ``mass_per_area`` is not a single number, or ``frequencies``,
@@ -597,13 +756,13 @@ def bare_floor_impact_level(
         positive=True,
     )
     sigma = _band_array(radiation_factor, f.size, "radiation_factor", positive=True)
-    return np.asarray(
+    return as_float_or_array(
         _IMPACT_LEVEL_CONSTANT
         - _IMPACT_MASS_COEFFICIENT * np.log10(m)
         + 10.0 * np.log10(ts)
         + 10.0 * np.log10(sigma)
         + 10.0 * np.log10(f / _REFERENCE_FREQUENCY),
-        dtype=np.float64,
+        like=(frequencies,),
     )
 
 
@@ -654,6 +813,48 @@ def perimeter_absorption_coefficient(
     return float(np.sum(np.sqrt(fc / _REFERENCE_FREQUENCY) * 10.0 ** (-kij / 10.0)))
 
 
+@overload
+def in_situ_total_loss_factor[S: RealScalar](
+    frequencies: S,
+    *,
+    internal_loss_factor: float,
+    mass_per_area: float,
+    area: float,
+    critical_frequency: float,
+    radiation_factor: NumericArrayLike,
+    perimeter_absorption: float,
+    fluid: Fluid = ...,
+) -> float: ...
+
+
+@overload
+def in_situ_total_loss_factor[V: RealValues](
+    frequencies: V,
+    *,
+    internal_loss_factor: float,
+    mass_per_area: float,
+    area: float,
+    critical_frequency: float,
+    radiation_factor: NumericArrayLike,
+    perimeter_absorption: float,
+    fluid: Fluid = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_total_loss_factor[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    internal_loss_factor: float,
+    mass_per_area: float,
+    area: float,
+    critical_frequency: float,
+    radiation_factor: NumericArrayLike,
+    perimeter_absorption: float,
+    fluid: Fluid = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def in_situ_total_loss_factor(
     frequencies: NumericArrayLike,
     *,
@@ -664,7 +865,7 @@ def in_situ_total_loss_factor(
     radiation_factor: NumericArrayLike,
     perimeter_absorption: float,
     fluid: Fluid = EN12354_AIR,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Total loss factor in situ ``ηtot,situ`` (Formula C.1).
 
     :math:`\eta_\mathrm{tot} = \eta_\mathrm{int} + 2 \rho_\mathrm{o} c_\mathrm{o} \sigma/(2 \pi f m')
@@ -686,7 +887,9 @@ def in_situ_total_loss_factor(
         perimeter, in m (may be zero for a free-edged element).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
-    :return: The total loss factor ``ηtot,situ`` per band (dimensionless).
+    :return: The total loss factor ``ηtot,situ`` per band (dimensionless). A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If an input is not positive/finite, the perimeter sum
         is negative, or the band counts disagree.
     :raises TypeError: if ``area``, ``critical_frequency``, ``internal_loss_factor``,
@@ -710,7 +913,34 @@ def in_situ_total_loss_factor(
 
     radiation = 2.0 * rho0 * c0 * sigma / (2.0 * np.pi * f * m)
     perimeter = c0 / (np.pi**2 * s * np.sqrt(f * fc)) * perimeter_sum
-    return np.asarray(eta_int + radiation + perimeter, dtype=np.float64)
+    return as_float_or_array(eta_int + radiation + perimeter, like=(frequencies,))
+
+
+@overload
+def laboratory_total_loss_factor[S: RealScalar](
+    frequencies: S,
+    *,
+    mass_per_area: float,
+    internal_loss_factor: float = ...,
+) -> float: ...
+
+
+@overload
+def laboratory_total_loss_factor[V: RealValues](
+    frequencies: V,
+    *,
+    mass_per_area: float,
+    internal_loss_factor: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def laboratory_total_loss_factor[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    mass_per_area: float,
+    internal_loss_factor: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def laboratory_total_loss_factor(
@@ -718,7 +948,7 @@ def laboratory_total_loss_factor(
     *,
     mass_per_area: float,
     internal_loss_factor: float = 0.01,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Total loss factor in the laboratory ``ηtot,lab`` (Formula C.3).
 
     :math:`\eta_\mathrm{tot,lab} \approx \eta_\mathrm{int} + m'/(485 \sqrt{f})`, the
@@ -730,7 +960,8 @@ def laboratory_total_loss_factor(
     :param mass_per_area: Mass per unit area ``m'``, in kg/m².
     :param internal_loss_factor: Internal loss factor ``ηint``
         (Default: 0,01).
-    :return: The laboratory total loss factor per band (dimensionless).
+    :return: The laboratory total loss factor per band (dimensionless). A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``internal_loss_factor`` or ``mass_per_area`` is not a single
         number, or ``frequencies`` holds a text or a value that is not a real number.
@@ -738,17 +969,44 @@ def laboratory_total_loss_factor(
     f = require_positive_array(frequencies, "frequencies")
     m = require_positive(mass_per_area, "mass_per_area")
     eta_int = require_positive(internal_loss_factor, "internal_loss_factor")
-    return np.asarray(eta_int + m / (_LAB_LOSS_CONSTANT * np.sqrt(f)), dtype=np.float64)
+    return as_float_or_array(
+        eta_int + m / (_LAB_LOSS_CONSTANT * np.sqrt(f)), like=(frequencies,)
+    )
+
+
+@overload
+def structural_reverberation_time[S: RealScalar](
+    total_loss_factor: NumericArrayLike,
+    *,
+    frequencies: S,
+) -> float: ...
+
+
+@overload
+def structural_reverberation_time[V: RealValues](
+    total_loss_factor: NumericArrayLike,
+    *,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structural_reverberation_time[A: NumericArrayLike](
+    total_loss_factor: NumericArrayLike,
+    *,
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
 
 
 def structural_reverberation_time(
     total_loss_factor: NumericArrayLike, *, frequencies: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Structural reverberation time :math:`T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})` (C.1).
 
     :param frequencies: Band centre frequencies ``f``, in Hz.
     :param total_loss_factor: Total loss factor ``ηtot`` per band.
-    :return: The structural reverberation time ``Ts`` per band, in s.
+    :return: The structural reverberation time ``Ts`` per band, in s. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``frequencies`` or ``total_loss_factor`` holds a text or a
@@ -756,17 +1014,61 @@ def structural_reverberation_time(
     """
     f = require_positive_array(frequencies, "frequencies")
     eta = _band_array(total_loss_factor, f.size, "total_loss_factor", positive=True)
-    return np.asarray(_STRUCTURAL_CONSTANT / (f * eta), dtype=np.float64)
+    return as_float_or_array(_STRUCTURAL_CONSTANT / (f * eta), like=(frequencies,))
 
 
 # --------------------------------------------------------------------------- #
 # Transfer of the input data to in-situ values (Clause 4.2.2)
 # --------------------------------------------------------------------------- #
+@overload
+def in_situ_reduction_index[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    sound_reduction_index: S1,
+    situ_reverberation_time: S2,
+    laboratory_reverberation_time: S3,
+) -> float: ...
+
+
+@overload
+def in_situ_reduction_index[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
+    sound_reduction_index: V,
+    situ_reverberation_time: A2,
+    laboratory_reverberation_time: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_reduction_index[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    sound_reduction_index: S1,
+    situ_reverberation_time: V,
+    laboratory_reverberation_time: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_reduction_index[S1: RealScalar, S2: RealScalar, V: RealValues](
+    sound_reduction_index: S1,
+    situ_reverberation_time: S2,
+    laboratory_reverberation_time: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_reduction_index[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    sound_reduction_index: A1,
+    situ_reverberation_time: A2,
+    laboratory_reverberation_time: A3,
+) -> float | NDArray[np.float64]: ...
+
+
 def in_situ_reduction_index(
     sound_reduction_index: NumericArrayLike,
     situ_reverberation_time: NumericArrayLike,
     laboratory_reverberation_time: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""In-situ sound reduction index ``Rsitu`` (Formula 9).
 
     :math:`R_\mathrm{situ} = R - 10 \log_{10}(T_\mathrm{s,situ}/T_\mathrm{s,lab})`: an element that is
@@ -781,7 +1083,10 @@ def in_situ_reduction_index(
         ``Ts,situ`` per band, in s.
     :param laboratory_reverberation_time: Laboratory structural reverberation
         time ``Ts,lab`` per band, in s.
-    :return: The in-situ index ``Rsitu`` per band, in dB.
+    :return: The in-situ index ``Rsitu`` per band, in dB. A ``float`` when
+        ``sound_reduction_index``, ``situ_reverberation_time`` and
+        ``laboratory_reverberation_time`` are all numbers, an array when one of them is
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a reverberation time is not positive/finite or the
         band counts disagree.
     :raises TypeError: if ``laboratory_reverberation_time``, ``situ_reverberation_time``
@@ -789,14 +1094,65 @@ def in_situ_reduction_index(
     """
     r = np.atleast_1d(real_array(sound_reduction_index, "sound_reduction_index"))
     ratio = _time_ratio(situ_reverberation_time, laboratory_reverberation_time)
-    return np.asarray(r - 10.0 * np.log10(ratio), dtype=np.float64)
+    return as_float_or_array(
+        r - 10.0 * np.log10(ratio),
+        like=(
+            sound_reduction_index,
+            situ_reverberation_time,
+            laboratory_reverberation_time,
+        ),
+    )
+
+
+@overload
+def in_situ_impact_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    impact_level: S1,
+    situ_reverberation_time: S2,
+    laboratory_reverberation_time: S3,
+) -> float: ...
+
+
+@overload
+def in_situ_impact_level[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
+    impact_level: V,
+    situ_reverberation_time: A2,
+    laboratory_reverberation_time: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_impact_level[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    impact_level: S1,
+    situ_reverberation_time: V,
+    laboratory_reverberation_time: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_impact_level[S1: RealScalar, S2: RealScalar, V: RealValues](
+    impact_level: S1,
+    situ_reverberation_time: S2,
+    laboratory_reverberation_time: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_impact_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    impact_level: A1,
+    situ_reverberation_time: A2,
+    laboratory_reverberation_time: A3,
+) -> float | NDArray[np.float64]: ...
 
 
 def in_situ_impact_level(
     impact_level: NumericArrayLike,
     situ_reverberation_time: NumericArrayLike,
     laboratory_reverberation_time: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""In-situ normalized impact level ``Ln,situ`` (Part 2, Formula 5).
 
     :math:`L_\mathrm{n,situ} = L_\mathrm{n} + 10 \log_{10}(T_\mathrm{s,situ}/T_\mathrm{s,lab})`, the sign
@@ -807,7 +1163,10 @@ def in_situ_impact_level(
     :param impact_level: Laboratory level ``Ln`` per band, in dB.
     :param situ_reverberation_time: ``Ts,situ`` per band, in s.
     :param laboratory_reverberation_time: ``Ts,lab`` per band, in s.
-    :return: The in-situ level ``Ln,situ`` per band, in dB.
+    :return: The in-situ level ``Ln,situ`` per band, in dB. A ``float`` when
+        ``impact_level``, ``situ_reverberation_time`` and
+        ``laboratory_reverberation_time`` are all numbers, an array when one of them is
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a reverberation time is not positive/finite or the
         band counts disagree.
     :raises TypeError: if ``impact_level``, ``laboratory_reverberation_time`` or
@@ -815,7 +1174,40 @@ def in_situ_impact_level(
     """
     ln = np.atleast_1d(real_array(impact_level, "impact_level"))
     ratio = _time_ratio(situ_reverberation_time, laboratory_reverberation_time)
-    return np.asarray(ln + 10.0 * np.log10(ratio), dtype=np.float64)
+    return as_float_or_array(
+        ln + 10.0 * np.log10(ratio),
+        like=(impact_level, situ_reverberation_time, laboratory_reverberation_time),
+    )
+
+
+@overload
+def in_situ_equivalent_absorption_length[S: RealScalar](
+    frequencies: S,
+    *,
+    area: float,
+    situ_reverberation_time: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def in_situ_equivalent_absorption_length[V: RealValues](
+    frequencies: V,
+    *,
+    area: float,
+    situ_reverberation_time: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_equivalent_absorption_length[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    area: float,
+    situ_reverberation_time: NumericArrayLike,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def in_situ_equivalent_absorption_length(
@@ -824,7 +1216,7 @@ def in_situ_equivalent_absorption_length(
     area: float,
     situ_reverberation_time: NumericArrayLike,
     speed_of_sound: float = _SPEED_OF_SOUND,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""In-situ equivalent absorption length ``asitu`` (Formula 11).
 
     :math:`a_\mathrm{situ} = 2.2\,\pi^2 S \sqrt{f_\mathrm{ref}/f}/(c_\mathrm{o} T_\mathrm{s,situ})` with
@@ -842,7 +1234,8 @@ def in_situ_equivalent_absorption_length(
     :param area: Element area ``S``, in m².
     :param situ_reverberation_time: ``Ts,situ`` per band, in s.
     :param speed_of_sound: Speed of sound in air ``co``, in m/s.
-    :return: The equivalent absorption length ``asitu`` per band, in m.
+    :return: The equivalent absorption length ``asitu`` per band, in m. A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``frequencies`` or ``situ_reverberation_time`` holds a text or
@@ -854,12 +1247,52 @@ def in_situ_equivalent_absorption_length(
     ts = _band_array(
         situ_reverberation_time, f.size, "situ_reverberation_time", positive=True
     )
-    return np.asarray(
+    return as_float_or_array(
         equivalent_absorption_length(
             area, ts, frequencies=f, speed_of_sound=speed_of_sound
         ),
-        dtype=np.float64,
+        like=(frequencies,),
     )
+
+
+@overload
+def in_situ_velocity_level_difference[S1: RealScalar, S2: RealScalar](
+    vibration_reduction_index: NumericArrayLike,
+    *,
+    coupling_length: float,
+    absorption_length_i: S1,
+    absorption_length_j: S2,
+) -> float: ...
+
+
+@overload
+def in_situ_velocity_level_difference[V: RealValues, A2: NumericArrayLike](
+    vibration_reduction_index: NumericArrayLike,
+    *,
+    coupling_length: float,
+    absorption_length_i: V,
+    absorption_length_j: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_velocity_level_difference[S1: RealScalar, V: RealValues](
+    vibration_reduction_index: NumericArrayLike,
+    *,
+    coupling_length: float,
+    absorption_length_i: S1,
+    absorption_length_j: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_velocity_level_difference[A1: NumericArrayLike, A2: NumericArrayLike](
+    vibration_reduction_index: NumericArrayLike,
+    *,
+    coupling_length: float,
+    absorption_length_i: A1,
+    absorption_length_j: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def in_situ_velocity_level_difference(
@@ -868,7 +1301,7 @@ def in_situ_velocity_level_difference(
     coupling_length: float,
     absorption_length_i: NumericArrayLike,
     absorption_length_j: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""In-situ velocity level difference ``Dv,ij,situ`` (Formula 10).
 
     :math:`D_{\mathrm{v},ij,\mathrm{situ}} = K_{ij} - 10 \log_{10}(l_{ij}/\sqrt{a_{i,\mathrm{situ}}
@@ -883,7 +1316,9 @@ def in_situ_velocity_level_difference(
     :param coupling_length: Common coupling length ``lij``, in m.
     :param absorption_length_i: ``ai,situ`` per band, in m.
     :param absorption_length_j: ``aj,situ`` per band, in m.
-    :return: ``Dv,ij,situ`` per band, in dB (never negative).
+    :return: ``Dv,ij,situ`` per band, in dB (never negative). A ``float`` when
+        ``absorption_length_i`` and ``absorption_length_j`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a length is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``coupling_length`` is not a single number, or
@@ -898,18 +1333,69 @@ def in_situ_velocity_level_difference(
     a_j = _band_array(a_j_raw, n, "absorption_length_j", positive=True)
     kij = _band_array(vibration_reduction_index, n, "vibration_reduction_index")
     dv = kij - 10.0 * np.log10(lij / np.sqrt(a_i * a_j))
-    return np.asarray(np.maximum(dv, 0.0), dtype=np.float64)
+    return as_float_or_array(
+        np.maximum(dv, 0.0), like=(absorption_length_i, absorption_length_j)
+    )
 
 
 # --------------------------------------------------------------------------- #
 # Transmission paths (Clause 4.2.3)
 # --------------------------------------------------------------------------- #
+@overload
+def direct_reduction_index[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    separating_index: S1,
+    *,
+    delta_r_source: S2 = ...,
+    delta_r_receiving: S3 = ...,
+) -> float: ...
+
+
+@overload
+def direct_reduction_index[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
+    separating_index: V,
+    *,
+    delta_r_source: A2 = ...,
+    delta_r_receiving: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direct_reduction_index[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    separating_index: S1,
+    *,
+    delta_r_source: V,
+    delta_r_receiving: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direct_reduction_index[S1: RealScalar, S2: RealScalar, V: RealValues](
+    separating_index: S1,
+    *,
+    delta_r_source: S2 = ...,
+    delta_r_receiving: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direct_reduction_index[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    separating_index: A1,
+    *,
+    delta_r_source: A2 = ...,
+    delta_r_receiving: A3 = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def direct_reduction_index(
     separating_index: NumericArrayLike,
     *,
     delta_r_source: NumericArrayLike = 0.0,
     delta_r_receiving: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Sound reduction index of the direct path ``RDd`` (Formula 14).
 
     :math:`R_\mathrm{Dd} = R_\mathrm{s,situ} + \Delta R_\mathrm{D,situ} + \Delta R_\mathrm{d,situ}`: the
@@ -921,16 +1407,18 @@ def direct_reduction_index(
     :param separating_index: ``Rs,situ`` per band, in dB.
     :param delta_r_source: ``ΔRD,situ`` on the source side, per band, in dB.
     :param delta_r_receiving: ``ΔRd,situ`` on the receiving side, in dB.
-    :return: ``RDd`` per band, in dB.
+    :return: ``RDd`` per band, in dB. A ``float`` when ``separating_index``,
+        ``delta_r_source`` and ``delta_r_receiving`` are all numbers, an array when one
+        of them is a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``delta_r_receiving``, ``delta_r_source`` or
         ``separating_index`` holds a text or a value that is not a real number.
     """
     r = np.atleast_1d(real_array(separating_index, "separating_index"))
-    return np.asarray(
+    return as_float_or_array(
         r
         + real_array(delta_r_source, "delta_r_source")
         + real_array(delta_r_receiving, "delta_r_receiving"),
-        dtype=np.float64,
+        like=(separating_index, delta_r_source, delta_r_receiving),
     )
 
 
@@ -944,7 +1432,7 @@ def flanking_reduction_index(
     area_j: float,
     delta_r_i: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Flanking sound reduction index ``Rij`` per band (Formula 15).
 
     :math:`R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2
@@ -970,7 +1458,10 @@ def flanking_reduction_index(
     :param area_j: Area ``Sj`` of element ``j``, in m².
     :param delta_r_i: ``ΔRi,situ`` on element ``i``, per band, in dB.
     :param delta_r_j: ``ΔRj,situ`` on element ``j``, per band, in dB.
-    :return: ``Rij`` per band, in dB.
+    :return: ``Rij`` per band, in dB. A ``float`` when ``index_i``, ``index_j``,
+        ``velocity_level_difference``, ``delta_r_i`` and ``delta_r_j`` are all numbers,
+        an array when one of them is a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If an area is not positive and finite.
     :raises TypeError: if ``area_i``, ``area_j`` or ``separating_area`` is not a single
         number, or ``delta_r_i``, ``delta_r_j``, ``index_i``, ``index_j`` or
@@ -984,14 +1475,14 @@ def flanking_reduction_index(
     dv = np.atleast_1d(
         real_array(velocity_level_difference, "velocity_level_difference")
     )
-    return np.asarray(
+    return as_float_or_array(
         r_i / 2.0
         + real_array(delta_r_i, "delta_r_i")
         + r_j / 2.0
         + real_array(delta_r_j, "delta_r_j")
         + dv
         + 10.0 * np.log10(ss / np.sqrt(si * sj)),
-        dtype=np.float64,
+        like=(index_i, index_j, velocity_level_difference, delta_r_i, delta_r_j),
     )
 
 
@@ -1004,7 +1495,7 @@ def flanking_reduction_index_from_normalized_difference(
     coupling_length: float,
     delta_r_i: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Flanking index of a Type B junction ``Rij`` (Formula 17).
 
     :math:`R_{ij} = R_{i,\mathrm{situ}}/2 + \Delta R_{i,\mathrm{situ}} + R_{j,\mathrm{situ}}/2
@@ -1026,7 +1517,10 @@ def flanking_reduction_index_from_normalized_difference(
     :param coupling_length: Common coupling length ``lij``, in m.
     :param delta_r_i: ``ΔRi,situ`` on element ``i``, per band, in dB.
     :param delta_r_j: ``ΔRj,situ`` on element ``j``, per band, in dB.
-    :return: ``Rij`` per band, in dB.
+    :return: ``Rij`` per band, in dB. A ``float`` when ``index_i``, ``index_j``,
+        ``normalized_velocity_level_difference``, ``delta_r_i`` and ``delta_r_j`` are
+        all numbers, an array when one of them is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If a geometry value is not positive and finite.
     :raises TypeError: if ``coupling_length`` or ``separating_area`` is not a single
         number, or ``delta_r_i``, ``delta_r_j``, ``index_i``, ``index_j`` or
@@ -1042,15 +1536,54 @@ def flanking_reduction_index_from_normalized_difference(
             normalized_velocity_level_difference, "normalized_velocity_level_difference"
         )
     )
-    return np.asarray(
+    return as_float_or_array(
         r_i / 2.0
         + real_array(delta_r_i, "delta_r_i")
         + r_j / 2.0
         + real_array(delta_r_j, "delta_r_j")
         + dv
         + 10.0 * np.log10(ss / (_REFERENCE_LENGTH * lij)),
-        dtype=np.float64,
+        like=(
+            index_i,
+            index_j,
+            normalized_velocity_level_difference,
+            delta_r_i,
+            delta_r_j,
+        ),
     )
+
+
+@overload
+def flanking_reduction_index_from_flanking_level[S: RealScalar](
+    flanking_level_difference: S,
+    *,
+    separating_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+    reference_absorption_area: float = ...,
+) -> float: ...
+
+
+@overload
+def flanking_reduction_index_from_flanking_level[V: RealValues](
+    flanking_level_difference: V,
+    *,
+    separating_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+    reference_absorption_area: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flanking_reduction_index_from_flanking_level[A: NumericArrayLike](
+    flanking_level_difference: A,
+    *,
+    separating_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+    reference_absorption_area: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def flanking_reduction_index_from_flanking_level(
@@ -1060,7 +1593,7 @@ def flanking_reduction_index_from_flanking_level(
     coupling_length: float,
     laboratory_coupling_length: float,
     reference_absorption_area: float = 10.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Flanking index from a measured ``Dn,f`` (Formula 16).
 
     :math:`R_{ij} = D_{\mathrm{n,f},ij,\mathrm{situ}} + 10 \log_{10}(S_\mathrm{s} l_\mathrm{lab}/(A_o l_{ij}))` with
@@ -1076,7 +1609,8 @@ def flanking_reduction_index_from_flanking_level(
     :param coupling_length: In-situ coupling length ``lij``, in m.
     :param laboratory_coupling_length: Laboratory coupling length ``llab``, m.
     :param reference_absorption_area: ``Ao``, in m² (Default: 10 m²).
-    :return: ``Rij`` per band, in dB.
+    :return: ``Rij`` per band, in dB. A ``float`` for a number, an array for a sequence
+        or an array, a zero-dimensional one included.
     :raises ValueError: If a geometry value is not positive and finite.
     :raises TypeError: if ``coupling_length``, ``laboratory_coupling_length``,
         ``reference_absorption_area`` or ``separating_area`` is not a single number, or
@@ -1089,7 +1623,39 @@ def flanking_reduction_index_from_flanking_level(
     dnf = np.atleast_1d(
         real_array(flanking_level_difference, "flanking_level_difference")
     )
-    return np.asarray(dnf + 10.0 * np.log10(ss * llab / (a0 * lij)), dtype=np.float64)
+    return as_float_or_array(
+        dnf + 10.0 * np.log10(ss * llab / (a0 * lij)), like=(flanking_level_difference,)
+    )
+
+
+@overload
+def resonant_sound_reduction_index[S: RealScalar](
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: S,
+    critical_frequency: float,
+    correction: NumericArrayLike = ...,
+) -> float: ...
+
+
+@overload
+def resonant_sound_reduction_index[V: RealValues](
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: V,
+    critical_frequency: float,
+    correction: NumericArrayLike = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def resonant_sound_reduction_index[A: NumericArrayLike](
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: A,
+    critical_frequency: float,
+    correction: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def resonant_sound_reduction_index(
@@ -1098,7 +1664,7 @@ def resonant_sound_reduction_index(
     frequencies: NumericArrayLike,
     critical_frequency: float,
     correction: NumericArrayLike = 8.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Correct a measured ``R`` to resonant transmission only (Formula B.1).
 
     :math:`R^* = R + 10 \log_{10}(\sigma_\mathrm{a}/\sigma_\mathrm{s})`. No standardized method
@@ -1117,7 +1683,8 @@ def resonant_sound_reduction_index(
         one per band (Default: 8 dB; Annex B.2 caps the estimate of Formula
         (B.8) at this value, and the Annex L lightweight example reduces it
         around the cavity resonance).
-    :return: The resonant-only index ``R*`` per band, in dB.
+    :return: The resonant-only index ``R*`` per band, in dB. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``critical_frequency`` is not a single number, or
@@ -1128,7 +1695,34 @@ def resonant_sound_reduction_index(
     fc = require_positive(critical_frequency, "critical_frequency")
     r = _band_array(sound_reduction_index, f.size, "sound_reduction_index")
     delta = _band_array(correction, f.size, "correction")
-    return np.asarray(np.where(f < fc, r + delta, r), dtype=np.float64)
+    return as_float_or_array(np.where(f < fc, r + delta, r), like=(frequencies,))
+
+
+@overload
+def reciprocity_impact_level[S: RealScalar](
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: S,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float: ...
+
+
+@overload
+def reciprocity_impact_level[V: RealValues](
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: V,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reciprocity_impact_level[A: NumericArrayLike](
+    sound_reduction_index: NumericArrayLike,
+    *,
+    frequencies: A,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def reciprocity_impact_level(
@@ -1136,7 +1730,7 @@ def reciprocity_impact_level(
     *,
     frequencies: NumericArrayLike,
     fraction: BandFraction | np.integer[Any] = 3,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Impact level of a homogeneous floor by reciprocity (Part 2, B.3/B.4).
 
     :math:`R + L_\mathrm{n} = 38 + 30 \log_{10}(f/1\,\mathrm{Hz})` in one-third-octave bands
@@ -1151,7 +1745,9 @@ def reciprocity_impact_level(
     :param frequencies: Band centre frequencies, in Hz.
     :param fraction: The band set, 3 for one-third octaves (default, constant
         38) or 1 for octaves (43). One of ``1`` or ``3``.
-    :return: The normalized impact sound pressure level ``Ln`` per band, dB.
+    :return: The normalized impact sound pressure level ``Ln`` per band, dB. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
@@ -1161,7 +1757,56 @@ def reciprocity_impact_level(
     f = require_positive_array(frequencies, "frequencies")
     r = _band_array(sound_reduction_index, f.size, "sound_reduction_index")
     constant = _RECIPROCITY_CONSTANT[require_band_fraction(fraction, "fraction")]
-    return np.asarray(constant + 30.0 * np.log10(f) - r, dtype=np.float64)
+    return as_float_or_array(constant + 30.0 * np.log10(f) - r, like=(frequencies,))
+
+
+@overload
+def direct_impact_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    floor_level: S1,
+    *,
+    delta_l: S2 = ...,
+    delta_l_ceiling: S3 = ...,
+) -> float: ...
+
+
+@overload
+def direct_impact_level[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
+    floor_level: V,
+    *,
+    delta_l: A2 = ...,
+    delta_l_ceiling: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direct_impact_level[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    floor_level: S1,
+    *,
+    delta_l: V,
+    delta_l_ceiling: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direct_impact_level[S1: RealScalar, S2: RealScalar, V: RealValues](
+    floor_level: S1,
+    *,
+    delta_l: S2 = ...,
+    delta_l_ceiling: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direct_impact_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    floor_level: A1,
+    *,
+    delta_l: A2 = ...,
+    delta_l_ceiling: A3 = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def direct_impact_level(
@@ -1169,7 +1814,7 @@ def direct_impact_level(
     *,
     delta_l: NumericArrayLike = 0.0,
     delta_l_ceiling: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Normalized impact level of the direct path ``Ln,d`` (Part 2, F. 11).
 
     :math:`L_\mathrm{n,d} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ} - \Delta L_\mathrm{d,situ}`: the
@@ -1181,16 +1826,18 @@ def direct_impact_level(
     :param delta_l: Improvement of the floor covering ``ΔLsitu``, per band, dB.
     :param delta_l_ceiling: Improvement ``ΔLd,situ`` of a layer on the
         receiving side, per band, in dB.
-    :return: ``Ln,d`` per band, in dB.
+    :return: ``Ln,d`` per band, in dB. A ``float`` when ``floor_level``, ``delta_l`` and
+        ``delta_l_ceiling`` are all numbers, an array when one of them is a sequence or
+        an array, a zero-dimensional one included.
     :raises TypeError: if ``delta_l``, ``delta_l_ceiling`` or ``floor_level`` holds a
         text or a value that is not a real number.
     """
     ln = np.atleast_1d(real_array(floor_level, "floor_level"))
-    return np.asarray(
+    return as_float_or_array(
         ln
         - real_array(delta_l, "delta_l")
         - real_array(delta_l_ceiling, "delta_l_ceiling"),
-        dtype=np.float64,
+        like=(floor_level, delta_l, delta_l_ceiling),
     )
 
 
@@ -1204,7 +1851,7 @@ def flanking_impact_level(
     area_j: float,
     delta_l: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Flanking normalized impact level ``Ln,ij`` per band (Part 2, F. 12).
 
     :math:`L_{\mathrm{n},ij} = L_\mathrm{n,situ} - \Delta L_\mathrm{situ}
@@ -1222,7 +1869,10 @@ def flanking_impact_level(
     :param delta_l: Improvement of the floor covering ``ΔLsitu``, in dB.
     :param delta_r_j: Improvement ``ΔRj,situ`` of a lining on the flanking
         element, per band, in dB.
-    :return: ``Ln,ij`` per band, in dB.
+    :return: ``Ln,ij`` per band, in dB. A ``float`` when ``floor_level``, ``index_i``,
+        ``index_j``, ``velocity_level_difference``, ``delta_l`` and ``delta_r_j`` are
+        all numbers, an array when one of them is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If an area is not positive and finite.
     :raises TypeError: if ``area_i`` or ``area_j`` is not a single number, or
         ``delta_l``, ``delta_r_j``, ``floor_level``, ``index_i``, ``index_j`` or
@@ -1236,14 +1886,21 @@ def flanking_impact_level(
     dv = np.atleast_1d(
         real_array(velocity_level_difference, "velocity_level_difference")
     )
-    return np.asarray(
+    return as_float_or_array(
         ln
         - real_array(delta_l, "delta_l")
         + (r_i - r_j) / 2.0
         - real_array(delta_r_j, "delta_r_j")
         - dv
         - 10.0 * np.log10(si / np.sqrt(si * sj)),
-        dtype=np.float64,
+        like=(
+            floor_level,
+            index_i,
+            index_j,
+            velocity_level_difference,
+            delta_l,
+            delta_r_j,
+        ),
     )
 
 
@@ -1257,7 +1914,7 @@ def flanking_impact_level_from_normalized_difference(
     coupling_length: float,
     delta_l: NumericArrayLike = 0.0,
     delta_r_j: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Flanking impact level of a Type B junction (Part 2, Formula 14).
 
     :math:`L_{\mathrm{n},ij} = L_{\mathrm{n},ii} - \Delta L_i + (R_i - R_j)/2 - \Delta R_j
@@ -1276,7 +1933,10 @@ def flanking_impact_level_from_normalized_difference(
     :param delta_l: Improvement of the floor covering ``ΔLi``, per band, dB.
     :param delta_r_j: Improvement ``ΔRj`` of a lining on the flanking element,
         per band, in dB.
-    :return: ``Ln,ij`` per band, in dB.
+    :return: ``Ln,ij`` per band, in dB. A ``float`` when ``floor_level``, ``index_i``,
+        ``index_j``, ``normalized_velocity_level_difference``, ``delta_l`` and
+        ``delta_r_j`` are all numbers, an array when one of them is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: If a geometry value is not positive and finite.
     :raises TypeError: if ``area_i`` or ``coupling_length`` is not a single number, or
         ``delta_l``, ``delta_r_j``, ``floor_level``, ``index_i``, ``index_j`` or
@@ -1293,15 +1953,55 @@ def flanking_impact_level_from_normalized_difference(
             normalized_velocity_level_difference, "normalized_velocity_level_difference"
         )
     )
-    return np.asarray(
+    return as_float_or_array(
         ln
         - real_array(delta_l, "delta_l")
         + (r_i - r_j) / 2.0
         - real_array(delta_r_j, "delta_r_j")
         - dv
         - 10.0 * np.log10(si / (_REFERENCE_LENGTH * lij)),
-        dtype=np.float64,
+        like=(
+            floor_level,
+            index_i,
+            index_j,
+            normalized_velocity_level_difference,
+            delta_l,
+            delta_r_j,
+        ),
     )
+
+
+@overload
+def flanking_impact_level_from_flanking_level[S: RealScalar](
+    normalized_flanking_impact_level: S,
+    *,
+    area: float,
+    laboratory_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+) -> float: ...
+
+
+@overload
+def flanking_impact_level_from_flanking_level[V: RealValues](
+    normalized_flanking_impact_level: V,
+    *,
+    area: float,
+    laboratory_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flanking_impact_level_from_flanking_level[A: NumericArrayLike](
+    normalized_flanking_impact_level: A,
+    *,
+    area: float,
+    laboratory_area: float,
+    coupling_length: float,
+    laboratory_coupling_length: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def flanking_impact_level_from_flanking_level(
@@ -1311,7 +2011,7 @@ def flanking_impact_level_from_flanking_level(
     laboratory_area: float,
     coupling_length: float,
     laboratory_coupling_length: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Flanking impact level from a measured ``Ln,f`` (Part 2, Formula 13).
 
     :math:`L_{\mathrm{n},ij} = L_{\mathrm{n,f},ij,\mathrm{situ}} - 10 \log_{10}(S_i l_\mathrm{lab}/(S_{i,\mathrm{lab}}
@@ -1331,7 +2031,8 @@ def flanking_impact_level_from_flanking_level(
     :param laboratory_coupling_length: Laboratory coupling length ``llab``,
         in m. ISO 12354-1 Clause 4.4.2 gives the usual values: 4,5 m for
         horizontal flanking elements, 2,5 m for vertical ones.
-    :return: ``Ln,ij`` per band, in dB.
+    :return: ``Ln,ij`` per band, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a geometry value is not positive and finite.
     :raises TypeError: if ``area``, ``coupling_length``, ``laboratory_area`` or
         ``laboratory_coupling_length`` is not a single number, or
@@ -1345,9 +2046,37 @@ def flanking_impact_level_from_flanking_level(
     ln = np.atleast_1d(
         real_array(normalized_flanking_impact_level, "normalized_flanking_impact_level")
     )
-    return np.asarray(
-        ln - 10.0 * np.log10(si * llab / (si_lab * lij)), dtype=np.float64
+    return as_float_or_array(
+        ln - 10.0 * np.log10(si * llab / (si_lab * lij)),
+        like=(normalized_flanking_impact_level,),
     )
+
+
+@overload
+def floating_floor_improvement[S: RealScalar](
+    frequencies: S,
+    *,
+    resonance_frequency: float,
+    slope: float = ...,
+) -> float: ...
+
+
+@overload
+def floating_floor_improvement[V: RealValues](
+    frequencies: V,
+    *,
+    resonance_frequency: float,
+    slope: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def floating_floor_improvement[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    resonance_frequency: float,
+    slope: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def floating_floor_improvement(
@@ -1355,7 +2084,7 @@ def floating_floor_improvement(
     *,
     resonance_frequency: float,
     slope: float = 30.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Improvement of a floating floor ``ΔL`` per band (Part 2, Formula C.1).
 
     :math:`\Delta L = 30 \log_{10}(f/f_\mathrm{o})` for sand/cement or calcium-sulfate
@@ -1371,7 +2100,9 @@ def floating_floor_improvement(
     :param frequencies: Band centre frequencies ``f``, in Hz.
     :param resonance_frequency: Resonance frequency ``fo``, in Hz.
     :param slope: 30 (screed, Formula C.1) or 40 (asphalt/dry, Formula C.3).
-    :return: The improvement ``ΔL`` per band, in dB (0 at and below ``fo``).
+    :return: The improvement ``ΔL`` per band, in dB (0 at and below ``fo``). A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``resonance_frequency`` or ``slope`` is not a single number,
         or ``frequencies`` holds a text or a value that is not a real number.
@@ -1379,7 +2110,9 @@ def floating_floor_improvement(
     f = require_positive_array(frequencies, "frequencies")
     f0 = require_positive(resonance_frequency, "resonance_frequency")
     require_positive(slope, "slope")
-    return np.asarray(np.where(f > f0, slope * np.log10(f / f0), 0.0), dtype=np.float64)
+    return as_float_or_array(
+        np.where(f > f0, slope * np.log10(f / f0), 0.0), like=(frequencies,)
+    )
 
 
 # --------------------------------------------------------------------------- #

@@ -73,13 +73,14 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     real_number,
@@ -106,7 +107,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Method = Literal["linear", "exponential"]
 
@@ -449,9 +450,30 @@ def weighting_tolerance_percent(
     return lower, upper
 
 
+@overload
+def phase_tolerance_deg[S: RealScalar](
+    name: WeightingName,
+    frequencies: S,
+) -> float: ...
+
+
+@overload
+def phase_tolerance_deg[V: RealValues](
+    name: WeightingName,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def phase_tolerance_deg[A: NumericArrayLike](
+    name: WeightingName,
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def phase_tolerance_deg(
     name: WeightingName, frequencies: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """The Table 5 characteristic phase-deviation band, region by region.
 
     Footnote a of the table limits this to instruments that provide a
@@ -463,7 +485,9 @@ def phase_tolerance_deg(
         ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
         ``"Wm"``.
     :param frequencies: Frequencies at which the band is wanted, in hertz.
-    :return: The permitted deviation, in degrees, infinite in the two tails.
+    :return: The permitted deviation, in degrees, infinite in the two tails. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: As for :func:`weighting_tolerance_percent`.
     :raises TypeError: if ``name`` is not a text, or ``frequencies`` holds a text or a
         value that is not a real number.
@@ -479,7 +503,7 @@ def phase_tolerance_deg(
         2
     ]
     limits[(f >= ft2) & (f <= ft3)] = CENTRAL_TOLERANCE_PERCENT[2]
-    return limits
+    return as_float_or_array(limits, like=(frequencies,))
 
 
 def _checked_uncertainty(value: float | None, name: str) -> float:

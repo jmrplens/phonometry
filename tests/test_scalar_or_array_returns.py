@@ -953,10 +953,253 @@ def _cases() -> tuple[Case, ...]:
             ("frequencies",),
             single=complex,
         ),
+        # A validator that makes a number one-dimensional: a float all the same.
+        Case(
+            building.bare_floor_impact_level,
+            {
+                "frequencies": 500.0,
+                "mass_per_area": 1.0,
+                "structural_reverberation_time": 1.0,
+                "radiation_factor": 1.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            building.bending_radiation_factor,
+            {
+                "frequencies": 500.0,
+                "critical_frequency": 500.0,
+                "length1": 1.0,
+                "length2": 1.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            building.calculated_sound_reduction_index,
+            {
+                "frequencies": 500.0,
+                "mass_per_area": 1.0,
+                "critical_frequency": 500.0,
+                "total_loss_factor": 1.0,
+                "radiation_factor": 1.0,
+                "forced_radiation_factor": 1.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            building.direct_impact_level,
+            {"delta_l": 0.0, "delta_l_ceiling": 0.0, "floor_level": 1.0},
+            ("floor_level", "delta_l", "delta_l_ceiling"),
+        ),
+        Case(
+            building.direct_reduction_index,
+            {"delta_r_source": 0.0, "delta_r_receiving": 0.0, "separating_index": 1.0},
+            ("separating_index", "delta_r_source", "delta_r_receiving"),
+        ),
+        Case(
+            building.flanking_impact_level_from_flanking_level,
+            {
+                "normalized_flanking_impact_level": 1.0,
+                "area": 1.0,
+                "laboratory_area": 1.0,
+                "coupling_length": 1.0,
+                "laboratory_coupling_length": 1.0,
+            },
+            ("normalized_flanking_impact_level",),
+        ),
+        Case(
+            building.flanking_reduction_index_from_flanking_level,
+            {
+                "flanking_level_difference": 1.0,
+                "separating_area": 1.0,
+                "coupling_length": 1.0,
+                "laboratory_coupling_length": 1.0,
+            },
+            ("flanking_level_difference",),
+        ),
+        Case(
+            building.floating_floor_improvement,
+            {"frequencies": 500.0, "resonance_frequency": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.forced_radiation_factor,
+            {"frequencies": 500.0, "length1": 1.0, "length2": 1.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.in_situ_equivalent_absorption_length,
+            {"frequencies": 500.0, "area": 1.0, "situ_reverberation_time": 1.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.in_situ_impact_level,
+            {
+                "impact_level": 1.0,
+                "situ_reverberation_time": 1.0,
+                "laboratory_reverberation_time": 1.0,
+            },
+            (
+                "impact_level",
+                "situ_reverberation_time",
+                "laboratory_reverberation_time",
+            ),
+        ),
+        Case(
+            building.in_situ_reduction_index,
+            {
+                "sound_reduction_index": 1.0,
+                "situ_reverberation_time": 1.0,
+                "laboratory_reverberation_time": 1.0,
+            },
+            (
+                "sound_reduction_index",
+                "situ_reverberation_time",
+                "laboratory_reverberation_time",
+            ),
+        ),
+        Case(
+            building.in_situ_total_loss_factor,
+            {
+                "frequencies": 500.0,
+                "internal_loss_factor": 1.0,
+                "mass_per_area": 1.0,
+                "area": 1.0,
+                "critical_frequency": 500.0,
+                "radiation_factor": 1.0,
+                "perimeter_absorption": 1.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            building.in_situ_velocity_level_difference,
+            {
+                "vibration_reduction_index": 1.0,
+                "coupling_length": 1.0,
+                "absorption_length_i": 1.0,
+                "absorption_length_j": 1.0,
+            },
+            ("absorption_length_i", "absorption_length_j"),
+        ),
+        Case(
+            building.laboratory_total_loss_factor,
+            {"frequencies": 500.0, "mass_per_area": 1.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.reciprocity_impact_level,
+            {"sound_reduction_index": 1.0, "frequencies": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            building.resonant_sound_reduction_index,
+            {
+                "sound_reduction_index": 1.0,
+                "frequencies": 500.0,
+                "critical_frequency": 500.0,
+            },
+            ("frequencies",),
+        ),
+        Case(
+            building.structural_reverberation_time,
+            {"total_loss_factor": 1.0, "frequencies": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            electroacoustics.band_limit_response,
+            {"frequencies": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            vibration.phase_tolerance_deg,
+            {"name": "Wb", "frequencies": 500.0},
+            ("frequencies",),
+        ),
     )
 
 
 CASES = _cases()
+
+#: Functions of four or more arguments that broadcast, which keep the union
+#: on a function without heads (EXEMPT in scripts/check_return_overloads.py)
+#: and follow the rule at run time all the same: the same calls as the cases.
+UNHEADED = (
+    Case(
+        building.flanking_impact_level,
+        {
+            "delta_l": 0.0,
+            "delta_r_j": 0.0,
+            "floor_level": 1.0,
+            "index_i": 1.0,
+            "index_j": 1.0,
+            "velocity_level_difference": 1.0,
+            "area_i": 1.0,
+            "area_j": 1.0,
+        },
+        (
+            "floor_level",
+            "index_i",
+            "index_j",
+            "velocity_level_difference",
+            "delta_l",
+            "delta_r_j",
+        ),
+    ),
+    Case(
+        building.flanking_impact_level_from_normalized_difference,
+        {
+            "delta_l": 0.0,
+            "delta_r_j": 0.0,
+            "floor_level": 1.0,
+            "index_i": 1.0,
+            "index_j": 1.0,
+            "normalized_velocity_level_difference": 1.0,
+            "area_i": 1.0,
+            "coupling_length": 1.0,
+        },
+        (
+            "floor_level",
+            "index_i",
+            "index_j",
+            "normalized_velocity_level_difference",
+            "delta_l",
+            "delta_r_j",
+        ),
+    ),
+    Case(
+        building.flanking_reduction_index,
+        {
+            "delta_r_i": 0.0,
+            "delta_r_j": 0.0,
+            "index_i": 1.0,
+            "index_j": 1.0,
+            "velocity_level_difference": 1.0,
+            "separating_area": 1.0,
+            "area_i": 1.0,
+            "area_j": 1.0,
+        },
+        ("index_i", "index_j", "velocity_level_difference", "delta_r_i", "delta_r_j"),
+    ),
+    Case(
+        building.flanking_reduction_index_from_normalized_difference,
+        {
+            "delta_r_i": 0.0,
+            "delta_r_j": 0.0,
+            "index_i": 1.0,
+            "index_j": 1.0,
+            "normalized_velocity_level_difference": 1.0,
+            "separating_area": 1.0,
+            "coupling_length": 1.0,
+        },
+        (
+            "index_i",
+            "index_j",
+            "normalized_velocity_level_difference",
+            "delta_r_i",
+            "delta_r_j",
+        ),
+    ),
+)
 
 #: The functions keyed on another argument than the shape of their input,
 #: each held by a test of its own below.
@@ -1031,14 +1274,14 @@ def test_every_function_of_a_number_or_an_array_has_a_case() -> None:
     assert named - found == set(), "a case for a function the heads do not split"
 
 
-@pytest.mark.parametrize("case", CASES, ids=_ids)
+@pytest.mark.parametrize("case", CASES + UNHEADED, ids=_ids)
 def test_numbers_give_a_single_value(case: Case) -> None:
     """Python numbers in, a Python ``float`` (or a grade) out, not a numpy scalar."""
     result = case.call()
     assert type(result) is case.single
 
 
-@pytest.mark.parametrize("case", CASES, ids=_ids)
+@pytest.mark.parametrize("case", CASES + UNHEADED, ids=_ids)
 @pytest.mark.parametrize("kind", [np.float64, np.float32])
 def test_numpy_numbers_give_a_single_value(case: Case, kind: type[np.floating]) -> None:
     """A numpy number is a number: it gives what a Python one gives."""
@@ -1062,7 +1305,7 @@ def _same_values(result: object, expected: list[object], single: type) -> None:
         np.testing.assert_array_equal(np.asarray(result), expected)
 
 
-@pytest.mark.parametrize("case", CASES, ids=_ids)
+@pytest.mark.parametrize("case", CASES + UNHEADED, ids=_ids)
 def test_a_sequence_gives_an_array(case: Case) -> None:
     """Each deciding argument given as a list makes the result an array."""
     expected = case.call()
@@ -1086,7 +1329,7 @@ def test_a_sequence_gives_an_array(case: Case) -> None:
         _same_values(result, values, case.single)
 
 
-@pytest.mark.parametrize("case", CASES, ids=_ids)
+@pytest.mark.parametrize("case", CASES + UNHEADED, ids=_ids)
 def test_a_zero_dimensional_array_gives_one(case: Case) -> None:
     """An array in, an array out, even with nothing to broadcast."""
     expected = case.call()
@@ -1095,6 +1338,20 @@ def test_a_zero_dimensional_array_gives_one(case: Case) -> None:
         assert isinstance(result, np.ndarray), name
         assert result.ndim == 0, name
         assert result[()] == expected, name
+
+
+def test_the_unheaded_functions_are_exempt_with_their_reason() -> None:
+    """A function of four or more broadcast arguments keeps its union by name.
+
+    The heads that say which argument first holds an array would number more
+    than the union says, so the check of return overloads lists each of them
+    with that reason; the cases above hold their runtime to the rule.
+    """
+    exempt = {qualname for _path, qualname in cro.EXEMPT}
+    missing = [
+        case.name for case in UNHEADED if case.name.rsplit(".", 1)[-1] not in exempt
+    ]
+    assert not missing
 
 
 def test_the_exposure_level_is_keyed_on_limits() -> None:
@@ -1229,7 +1486,7 @@ def test_the_helper_refuses_a_result_its_like_does_not_shape() -> None:
 
 def test_the_modules_of_the_cases_import() -> None:
     """Each case names a function its module still defines."""
-    for case in CASES:
+    for case in CASES + UNHEADED:
         module = importlib.import_module(inspect.unwrap(case.function).__module__)
         assert module is not None
 

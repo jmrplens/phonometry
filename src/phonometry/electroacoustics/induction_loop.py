@@ -638,7 +638,21 @@ def field_strength_meter(
 # ---------------------------------------------------------------------------
 
 
-def band_limit_response(frequencies: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def band_limit_response[S: RealScalar](frequencies: S) -> float: ...
+
+
+@overload
+def band_limit_response[V: RealValues](frequencies: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def band_limit_response[A: NumericArrayLike](
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def band_limit_response(frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""The theoretical response of the band limiting of the pink noise, in dB.
 
     6.4 band-limits the pink noise with third-order Butterworth high-pass and
@@ -654,7 +668,8 @@ def band_limit_response(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     6.4 requires from 100 Hz to 5 kHz holds either way.
 
     :param frequencies: Frequencies, in hertz.
-    :return: The response, in dB.
+    :return: The response, in dB. A ``float`` for a number, an array for a sequence or
+        an array, a zero-dimensional one included.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
@@ -662,7 +677,7 @@ def band_limit_response(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     low, high = _BAND_LIMIT_HZ
     n2 = 2 * _BAND_LIMIT_ORDER
     power = 1.0 / ((1.0 + (low / f) ** n2) * (1.0 + (f / high) ** n2))
-    return 10.0 * np.log10(power)
+    return as_float_or_array(10.0 * np.log10(power), like=(frequencies,))
 
 
 def _band_limited_noise(

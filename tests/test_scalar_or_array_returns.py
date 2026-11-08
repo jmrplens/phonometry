@@ -1540,6 +1540,98 @@ def _cases() -> tuple[Case, ...]:
             ("measured_absorption", "system_absorption"),
             together=True,
         ),
+        Case(
+            noise_control.band_internal_levels,
+            {"frequency": 1000.0, "internal_level": 120.0, "turbulent_peak": 800.0},
+            ("frequency",),
+        ),
+        Case(
+            noise_control.cavitation_distribution,
+            {"frequency": 1000.0, "peak": 800.0},
+            ("frequency",),
+        ),
+        Case(
+            noise_control.duct_sound_power_level,
+            {"room_sound_power_level": 70.0, "end_reflection_loss": 3.0},
+            ("room_sound_power_level", "end_reflection_loss"),
+            together=True,
+        ),
+        Case(
+            noise_control.flow_noise_power_level,
+            {"pressure_level": 70.0, "open_end_loss": 3.0, "room_correction": 2.0},
+            ("pressure_level", "open_end_loss", "room_correction"),
+            together=True,
+        ),
+        Case(
+            noise_control.flow_velocity_m_s,
+            {"velocity_pressure_pa": 60.0, "density": 1.2},
+            ("velocity_pressure_pa",),
+        ),
+        Case(
+            noise_control.insertion_level_difference,
+            {"levels_without": 80.0, "levels_with": 65.0},
+            ("levels_without", "levels_with"),
+            together=True,
+        ),
+        Case(
+            noise_control.measured_transmission_loss,
+            {"insertion_loss": 15.0, "open_end_loss": 3.0},
+            ("insertion_loss", "open_end_loss"),
+            together=True,
+        ),
+        Case(
+            noise_control.open_end_reflection_coefficient,
+            {"frequency": 250.0, "area": 0.05},
+            ("frequency",),
+        ),
+        Case(
+            noise_control.open_end_transmission_loss,
+            {"frequency": 250.0, "area": 0.05},
+            ("frequency",),
+        ),
+        Case(
+            noise_control.reverberant_surface_area_m2,
+            {"volume_m3": 200.0, "reverberation_time_s": 1.5},
+            ("reverberation_time_s",),
+        ),
+        Case(
+            noise_control.silencer_background_correction,
+            {"level_difference": 8.0},
+            ("level_difference",),
+        ),
+        Case(
+            noise_control.silencer_sound_power_level,
+            {"mean_level": 80.0, "area": 0.5, "field_correction": 1.0},
+            ("mean_level", "area", "field_correction"),
+        ),
+        Case(
+            noise_control.substitution_insertion_loss,
+            {"substitution_level": 80.0, "object_level": 65.0},
+            ("substitution_level", "object_level"),
+            together=True,
+        ),
+        Case(
+            noise_control.transmission_level_difference,
+            {"source_levels": 80.0, "receiver_levels": 60.0},
+            ("source_levels", "receiver_levels"),
+            together=True,
+        ),
+        Case(
+            noise_control.transmission_loss_correction,
+            {"frequency": 1000.0, "ring": 2000.0},
+            ("frequency",),
+        ),
+        Case(
+            noise_control.turbulent_distribution,
+            {"frequency": 1000.0, "peak": 800.0},
+            ("frequency",),
+        ),
+        Case(
+            noise_control.velocity_pressure_pa,
+            {"total_pressure_pa": 400.0, "static_pressure_pa": 340.0},
+            ("total_pressure_pa", "static_pressure_pa"),
+            together=True,
+        ),
     )
 
 

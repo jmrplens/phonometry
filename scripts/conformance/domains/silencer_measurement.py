@@ -80,7 +80,7 @@ def _chk_reverberation_correction() -> Outcome:
     )
     return numeric(
         10.0 * math.log10(2.0),
-        float(corrected[0] - plain[0]),
+        float(corrected - plain),
         1e-12,
         unit="dB",
         places=6,

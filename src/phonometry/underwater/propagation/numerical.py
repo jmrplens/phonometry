@@ -2369,9 +2369,17 @@ def _rung_plan(
     s: _BeamSamples,
     fold: _FoldColumns | None,
     water_depth: float,
-    r_bottom: NDArray[Any],
+    r_bottom: NDArray[np.float64] | NDArray[np.complex128],
     n_wrap: int,
-) -> list[tuple[int, float, NDArray[Any], NDArray[np.intp], NDArray[np.intp] | None]]:
+) -> list[
+    tuple[
+        int,
+        float,
+        NDArray[np.float64] | NDArray[np.complex128],
+        NDArray[np.intp],
+        NDArray[np.intp] | None,
+    ]
+]:
     """The rungs some beam can populate: strength, rows and columns of each.
 
     Each image sits at ``shift + side*z_r - z_j`` in depth, so with both
@@ -2384,7 +2392,13 @@ def _rung_plan(
     """
     reach_max = float(s.reach.max())
     plan: list[
-        tuple[int, float, NDArray[Any], NDArray[np.intp], NDArray[np.intp] | None]
+        tuple[
+            int,
+            float,
+            NDArray[np.float64] | NDArray[np.complex128],
+            NDArray[np.intp],
+            NDArray[np.intp] | None,
+        ]
     ] = []
     for wrap, side, n_surface, n_bottom in _image_ladder(n_wrap):
         cols = None
@@ -2474,7 +2488,7 @@ def _image_offsets(
 def _survivor_block(
     r: _BeamSamples,
     grid: _Influence,
-    strength: NDArray[Any],
+    strength: NDArray[np.float64] | NDArray[np.complex128],
     *,
     admitted: NDArray[np.bool_],
     q_infl: NDArray[np.complex128],
@@ -2534,7 +2548,7 @@ def _sum_rung(
     *,
     wrap: int,
     side: float,
-    strength: NDArray[Any],
+    strength: NDArray[np.float64] | NDArray[np.complex128],
     rows: NDArray[np.intp],
     cols: NDArray[np.intp] | None,
 ) -> None:

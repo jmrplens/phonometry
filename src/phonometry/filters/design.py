@@ -20,6 +20,8 @@ from .._internal.validation import require_scalar
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
+
 __all__: list[str] = []
 
 # Fewest standard-frequency ticks that must land inside the plotted range
@@ -89,14 +91,14 @@ def _design_sos_filter(
     freq_u: list[float],
     fs: float,
     order: int,
-    factor: np.ndarray,
+    factor: NDArray[np.intp],
     filter_type: str,
     ripple: float,
     attenuation: float,
     *,
     show: bool = False,
     plot_file: str | os.PathLike[str] | None = None,
-) -> list[np.ndarray]:
+) -> list[NDArray[np.float64]]:
     """Generate SOS coefficients for the filter bank.
 
     :param freq: Center frequencies.
@@ -192,12 +194,12 @@ def _save_beside(named: Path) -> None:
 
 @closes_its_figures
 def _showfilter(
-    sos: list[np.ndarray],
+    sos: list[NDArray[np.float64]],
     freq: list[float],
     freq_u: list[float],
     freq_d: list[float],
     fs: float,
-    factor: np.ndarray,
+    factor: NDArray[np.intp],
     *,
     show: bool = False,
     plot_file: str | os.PathLike[str] | None = None,
@@ -224,7 +226,7 @@ def _showfilter(
 
     wn = 8192
     w = np.zeros([wn, len(freq)])
-    h: np.ndarray = np.zeros([wn, len(freq)], dtype=np.complex128)
+    h: NDArray[np.complex128] = np.zeros([wn, len(freq)], dtype=np.complex128)
 
     for idx in range(len(freq)):
         fsd = fs / factor[idx]

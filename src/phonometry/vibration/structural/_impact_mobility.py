@@ -318,8 +318,8 @@ class EnergySpectralDensity(OwnsArrays):
         squared times s/Hz.
     """
 
-    frequencies: np.ndarray
-    density: np.ndarray
+    frequencies: NDArray[np.float64]
+    density: NDArray[np.float64]
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -378,7 +378,7 @@ def force_window(
     width_s: float,
     start_s: float = 0.0,
     taper_s: float = 0.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The force window of 8.5.1: unity over the pulse, exactly zero elsewhere.
 
     The window has unity gain for the part of the record that holds the force
@@ -443,7 +443,7 @@ def force_window(
 
 def exponential_window(
     n_samples: int | np.integer[Any], fs: float, *, decay_rate_per_s: float
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The exponential window of 8.5.2: :math:`w(t) = \mathrm{e}^{-a t}`.
 
     The window has an initial value of unity at the start of the record and
@@ -584,9 +584,9 @@ class DoubleHitCheck(OwnsArrays):
         {"force_n": "N", "impact_indices": ""}
     )
 
-    force_n: np.ndarray
+    force_n: NDArray[np.float64]
     fs: float
-    impact_indices: np.ndarray
+    impact_indices: NDArray[np.intp]
     _: KW_ONLY
     threshold_ratio: float
 
@@ -608,17 +608,17 @@ class DoubleHitCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def times(self) -> np.ndarray:
+    def times(self) -> NDArray[np.float64]:
         """Time of every sample of the record, in seconds."""
         return np.arange(np.asarray(self.force_n).size) / self.fs
 
     @property
-    def impact_times_s(self) -> np.ndarray:
+    def impact_times_s(self) -> NDArray[np.float64]:
         """Time of the peak of every impact, in seconds."""
         return np.asarray(self.impact_indices, dtype=np.float64) / self.fs
 
     @property
-    def impact_peaks(self) -> np.ndarray:
+    def impact_peaks(self) -> NDArray[np.float64]:
         """Force at the peak of every impact, in N."""
         force_n = np.asarray(self.force_n, dtype=np.float64)
         return np.asarray(force_n[np.asarray(self.impact_indices)], dtype=np.float64)
@@ -821,10 +821,10 @@ class ImpactMobilityResult(OwnsArrays):
         {"force_energy_spectral_density": "N²·s/Hz"}
     )
 
-    frequencies: np.ndarray
-    mobility: np.ndarray
-    coherence: np.ndarray
-    force_energy_spectral_density: np.ndarray
+    frequencies: NDArray[np.float64]
+    mobility: NDArray[np.complex128]
+    coherence: NDArray[np.float64]
+    force_energy_spectral_density: NDArray[np.float64]
     _: KW_ONLY
     n_impacts: int
     exponential_decay_rate_per_s: float = 0.0
@@ -881,12 +881,12 @@ class ImpactMobilityResult(OwnsArrays):
         )
 
     @property
-    def magnitude(self) -> np.ndarray:
+    def magnitude(self) -> NDArray[np.float64]:
         """Mobility magnitude ``|Y|``, in m/(N·s)."""
         return np.asarray(np.abs(self.mobility), dtype=np.float64)
 
     @property
-    def phase_rad(self) -> np.ndarray:
+    def phase_rad(self) -> NDArray[np.float64]:
         """Mobility phase, in radians."""
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 
@@ -905,7 +905,7 @@ class ImpactMobilityResult(OwnsArrays):
             "impedance",
             "apparent_mass",
         ],
-    ) -> np.ndarray:
+    ) -> NDArray[np.complex128]:
         """Convert the mobility to another FRF kind (see :func:`.convert_frf`).
 
         :raises TypeError: if ``target`` is not a text.
@@ -1242,8 +1242,8 @@ class ExponentialWindowCorrection(OwnsArrays):
     :ivar exponential_decay_rate_per_s: The window's decay rate ``a``, in 1/s.
     """
 
-    damped_natural_frequency_hz: np.ndarray
-    apparent_damping_ratio: np.ndarray
+    damped_natural_frequency_hz: NDArray[np.float64]
+    apparent_damping_ratio: NDArray[np.float64]
     _: KW_ONLY
     exponential_decay_rate_per_s: float
 
@@ -1294,7 +1294,7 @@ class ExponentialWindowCorrection(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def window_damping_ratio(self) -> np.ndarray:
+    def window_damping_ratio(self) -> NDArray[np.float64]:
         r"""The damping the window added to each mode, :math:`a/\omega_r`."""
         omega = (
             2.0 * np.pi * np.asarray(self.damped_natural_frequency_hz, dtype=np.float64)
@@ -1302,19 +1302,19 @@ class ExponentialWindowCorrection(OwnsArrays):
         return np.asarray(self.exponential_decay_rate_per_s / omega, dtype=np.float64)
 
     @property
-    def damping_ratio(self) -> np.ndarray:
+    def damping_ratio(self) -> NDArray[np.float64]:
         r"""True damping ratio of each mode, Formula (A.3): :math:`\hat\zeta_r - a/\omega_r`."""
         zeta = np.asarray(self.apparent_damping_ratio, dtype=np.float64)
         return np.asarray(zeta - self.window_damping_ratio, dtype=np.float64)
 
     @property
-    def peak_correction_factor(self) -> np.ndarray:
+    def peak_correction_factor(self) -> NDArray[np.float64]:
         r"""Factor on the measured peak of each mode, :math:`\hat\zeta_r / \zeta_r`."""
         zeta = np.asarray(self.apparent_damping_ratio, dtype=np.float64)
         return np.asarray(zeta / self.damping_ratio, dtype=np.float64)
 
     @property
-    def exact_damping_ratio(self) -> np.ndarray:
+    def exact_damping_ratio(self) -> NDArray[np.float64]:
         r"""Damping ratio of the pole moved back by ``a``, of which (A.3) is the first order.
 
         The window replaces the pole :math:`s_r = -\sigma_r + j\omega_r` by
@@ -1415,8 +1415,8 @@ class SingleModeFitResult(OwnsArrays):
         data carry, in 1/s (0 for none).
     """
 
-    frequencies: np.ndarray
-    frf: np.ndarray
+    frequencies: NDArray[np.float64]
+    frf: NDArray[np.complex128]
     pole_rad_s: complex
     residue: complex
     direct_term: complex
@@ -1469,7 +1469,9 @@ class SingleModeFitResult(OwnsArrays):
             exponential_decay_rate_per_s=self.exponential_decay_rate_per_s,
         )
 
-    def _synthesize(self, frequencies: NumericArrayLike, pole: complex) -> np.ndarray:
+    def _synthesize(
+        self, frequencies: NumericArrayLike, pole: complex
+    ) -> NDArray[np.complex128]:
         s = 2j * np.pi * real_array(frequencies, "frequencies")
         residue = complex(self.residue)
         value = (
@@ -1479,7 +1481,7 @@ class SingleModeFitResult(OwnsArrays):
         )
         return np.asarray(value, dtype=np.complex128)
 
-    def fitted_frf(self, frequencies: NumericArrayLike) -> np.ndarray:
+    def fitted_frf(self, frequencies: NumericArrayLike) -> NDArray[np.complex128]:
         """The fitted model at any frequencies, window included, of kind :attr:`kind`.
 
         :param frequencies: Frequencies, in hertz.
@@ -1487,7 +1489,7 @@ class SingleModeFitResult(OwnsArrays):
         """
         return self._synthesize(frequencies, complex(self.pole_rad_s))
 
-    def corrected_frf(self, frequencies: NumericArrayLike) -> np.ndarray:
+    def corrected_frf(self, frequencies: NumericArrayLike) -> NDArray[np.complex128]:
         r"""The mode with the window taken out, of kind :attr:`kind` (Annex A).
 
         The pole is moved back by the decay rate, :math:`p + a`, and the
@@ -1501,7 +1503,9 @@ class SingleModeFitResult(OwnsArrays):
         pole = complex(self.pole_rad_s) + self.exponential_decay_rate_per_s
         return self._synthesize(frequencies, pole)
 
-    def corrected_mobility(self, frequencies: NumericArrayLike) -> np.ndarray:
+    def corrected_mobility(
+        self, frequencies: NumericArrayLike
+    ) -> NDArray[np.complex128]:
         """The corrected mode as mobility, in m/(N·s).
 
         :param frequencies: Frequencies, in hertz (> 0).
@@ -1761,8 +1765,8 @@ class ForceSpectrumCheck(OwnsArrays):
         {"energy_spectral_density": "N²·s/Hz"}
     )
 
-    frequencies: np.ndarray
-    energy_spectral_density: np.ndarray
+    frequencies: NDArray[np.float64]
+    energy_spectral_density: NDArray[np.float64]
     _: KW_ONLY
     frequency_range_hz: tuple[float, float]
     max_drop_db: float
@@ -1786,14 +1790,14 @@ class ForceSpectrumCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def in_range(self) -> np.ndarray:
+    def in_range(self) -> NDArray[np.bool_]:
         """Per frequency, whether it lies in the frequency range of interest."""
         freqs = np.asarray(self.frequencies, dtype=np.float64)
         low, high = self.frequency_range_hz
         return (freqs >= low) & (freqs <= high)
 
     @property
-    def levels(self) -> np.ndarray:
+    def levels(self) -> NDArray[np.float64]:
         """The density in dB re its highest value inside the range."""
         esd = np.asarray(self.energy_spectral_density, dtype=np.float64)
         top = float(np.max(esd[self.in_range]))
@@ -1913,7 +1917,7 @@ class OverloadCheck(OwnsArrays):
         unit of the record.
     """
 
-    x: np.ndarray
+    x: NDArray[np.float64]
     fs: float
     _: KW_ONLY
     full_scale: float
@@ -2054,7 +2058,7 @@ class ResponseDecayCheck(OwnsArrays):
     :ivar start_s: Time from which the highest peak is sought, in seconds.
     """
 
-    response: np.ndarray
+    response: NDArray[np.float64]
     fs: float
     _: KW_ONLY
     segment_s: float
@@ -2318,9 +2322,9 @@ class CoherenceCheck(OwnsArrays):
     :ivar min_n_records: The fewest impacts the check accepts.
     """
 
-    frequencies: np.ndarray
-    coherence: np.ndarray
-    judged: np.ndarray
+    frequencies: NDArray[np.float64]
+    coherence: NDArray[np.float64]
+    judged: NDArray[np.bool_]
     _: KW_ONLY
     n_impacts: int
     min_coherence: float = HIGH_COHERENCE
@@ -2367,7 +2371,7 @@ class CoherenceCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def high(self) -> np.ndarray:
+    def high(self) -> NDArray[np.bool_]:
         """Per frequency, whether the coherence exceeds the minimum."""
         return np.asarray(self.coherence, dtype=np.float64) > self.min_coherence
 
@@ -2377,7 +2381,7 @@ class CoherenceCheck(OwnsArrays):
         return int(self.n_impacts) >= int(self.min_n_records)
 
     @property
-    def random_error_percent(self) -> np.ndarray:
+    def random_error_percent(self) -> NDArray[np.float64]:
         """Normalized random error of the FRF magnitude, in percent (ISO 7626-2 Annex A).
 
         NaN where the coherence is zero.
@@ -2520,8 +2524,8 @@ class ChannelMatchVerification(OwnsArrays):
     :ivar response: Complex frequency response between the channels.
     """
 
-    frequencies: np.ndarray
-    response: np.ndarray
+    frequencies: NDArray[np.float64]
+    response: NDArray[np.complex128]
 
     def __post_init__(self) -> None:
         """Reject a verification whose response is not on its frequency axis.
@@ -2538,17 +2542,17 @@ class ChannelMatchVerification(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def magnitude_deviation(self) -> np.ndarray:
+    def magnitude_deviation(self) -> NDArray[np.float64]:
         """Relative deviation of the magnitude from unity, ``|H| - 1``."""
         return np.asarray(np.abs(self.response) - 1.0, dtype=np.float64)
 
     @property
-    def phase_deg(self) -> np.ndarray:
+    def phase_deg(self) -> NDArray[np.float64]:
         """Phase of the response, in degrees."""
         return np.asarray(np.degrees(np.angle(self.response)), dtype=np.float64)
 
     @property
-    def magnitude_within(self) -> np.ndarray:
+    def magnitude_within(self) -> NDArray[np.bool_]:
         """Per frequency, whether the magnitude is within +/- 5 % of unity.
 
         The magnitude is compared with the bounds ``1 - 0,05`` and
@@ -2563,7 +2567,7 @@ class ChannelMatchVerification(OwnsArrays):
         )
 
     @property
-    def phase_within(self) -> np.ndarray:
+    def phase_within(self) -> NDArray[np.bool_]:
         """Per frequency, whether the phase is within +/- 5 degrees of zero."""
         return np.abs(self.phase_deg) <= CHANNEL_PHASE_TOLERANCE_DEG
 

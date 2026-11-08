@@ -2343,6 +2343,149 @@ def test_a_star_fills_no_place_from_a_keyword_s_on_nor_one_a_later_argument_need
     assert [(f.function, f.parameter) for f in found] == []
 
 
+#: Routes the reader followed short of the check, or stopped on: a record
+#: whose constructor is declared for the type checker alone, a class method
+#: ``__init__``, a ``*`` argument before the array of a NumPy call, a record
+#: handed to a helper by keyword, ``super(Base, other)``, and a class written
+#: inside another.
+_RUNTIME_ROUTES = """
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+import numpy as np
+
+from ._internal.validation import require_count
+
+__all__ = [
+    "as_array_after_a_star",
+    "built_with_a_declared_init",
+    "class_method_init",
+    "nested_holder",
+    "record_by_keyword",
+    "super_of_another",
+]
+
+
+@dataclass(frozen=True)
+class _Declared:
+    n: int = 1
+
+    if TYPE_CHECKING:
+
+        def __init__(self, n: int = 1) -> None: ...
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n", require_count(self.n, "n"))
+
+
+def built_with_a_declared_init(n: int) -> _Declared:
+    return _Declared(n)
+
+
+class _ClassInit:
+    @classmethod
+    def __init__(cls, n: int = 1) -> None:
+        require_count(n, "n")
+
+
+def class_method_init(n: int) -> None:
+    _ClassInit.__init__(n)
+
+
+def as_array_after_a_star(values: list[float]) -> object:
+    return np.asarray(*(), values)
+
+
+def _store(record: object, name: str) -> None:
+    object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+
+@dataclass(frozen=True)
+class _Stored:
+    n: int = 1
+
+    def __post_init__(self) -> None:
+        _store(record=self, name="n")
+
+
+def record_by_keyword(n: int) -> _Stored:
+    return _Stored(n)
+
+
+class _Base:
+    def check(self, n: int) -> int:
+        return n
+
+
+class _Tail:
+    def check(self, n: int) -> int:
+        return require_count(n, "n")
+
+
+class _Receiver(_Base, _Tail):
+    pass
+
+
+class _Caller(_Tail):
+    def check(self, n: int) -> int:
+        other = _Receiver()
+        return super(_Base, other).check(n)
+
+
+def super_of_another(n: int) -> int:
+    return _Caller.check(_Caller(), n)
+
+
+class _Holder:
+    class _Inner(_Declared):
+        @classmethod
+        def build(cls, n: int) -> object:
+            made = cls.__new__(cls)
+            cls.__init__(made, n)
+            return made
+
+
+def nested_holder(n: int) -> object:
+    return _Holder._Inner.build(n)
+"""
+
+
+def test_a_route_runs_the_init_the_call_runs_and_the_hook_a_keyword_hands(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of a record whose ``__init__`` is declared under ``if
+    TYPE_CHECKING:`` alone runs the one ``@dataclass`` writes, which calls
+    ``__post_init__``; a class method ``__init__`` called through its class,
+    ``_ClassInit.__init__(n)``, is bound to it; ``np.asarray(*(), values)``
+    hands ``values`` the first place; ``_store(record=self, name="n")``
+    hands the record by keyword; and ``super(_Base, other)`` reads the order
+    of the class ``other`` is built as. Each count reaches
+    ``require_count()``, and the array ``np.asarray()``. A class written
+    inside another reaches no ``__init__`` the reader can tell, and is read
+    to the end.
+
+    The declared ``__init__`` was followed as the one that runs, and its
+    body holds nothing; the class method took the count as ``cls``; the
+    array was read at its written place, the second; a record handed by
+    keyword was not followed; ``super(_Base, other)`` read the order of the
+    class the method is written in, which holds no ``_Base``; and a class
+    inside another stopped the scan on a ``KeyError``.
+    """
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "api": _RUNTIME_ROUTES},
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("as_array_after_a_star", "values"),
+        ("as_array_after_a_star", "values"),
+        ("built_with_a_declared_init", "n"),
+        ("class_method_init", "n"),
+        ("record_by_keyword", "n"),
+        ("super_of_another", "n"),
+    ]
+
+
 def test_an_init_var_takes_its_place_and_reaches_post_init_by_it(
     tmp_path: pathlib.Path,
 ) -> None:

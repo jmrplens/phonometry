@@ -61,6 +61,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .core import OctaveFilterBank
@@ -142,7 +143,7 @@ class TimeInvarianceResult(OwnsArrays):
         {"seconds_per_decade": "s/decade"}
     )
 
-    frequencies: np.ndarray
+    frequencies: NDArray[np.float64]
     fraction: float
     fs: float
     seconds_per_decade: tuple[float, ...]
@@ -150,8 +151,8 @@ class TimeInvarianceResult(OwnsArrays):
     end_frequency_hz: float
     sweep_durations_s: tuple[float, ...]
     averaging_times_s: tuple[float, ...]
-    output_levels: np.ndarray
-    expected_levels: np.ndarray
+    output_levels: NDArray[np.float64]
+    expected_levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Freeze the arrays and refuse levels the verdict cannot be read on.
@@ -187,7 +188,7 @@ class TimeInvarianceResult(OwnsArrays):
         object.__setattr__(self, "expected_levels", read_only(expected))
 
     @property
-    def deviations_db(self) -> np.ndarray:
+    def deviations_db(self) -> NDArray[np.float64]:
         r""":math:`L_\mathrm{out} - L_\mathrm{c}`, shape ``(rates, bands)``."""
         return np.asarray(self.output_levels - self.expected_levels)
 
@@ -251,7 +252,7 @@ def _time_invariance_class(worst_db: float) -> int | None:
 
 
 def _edge_frequency_hz(
-    sos: np.ndarray,
+    sos: NDArray[np.float64],
     factor: int,
     fs_hz: float,
     mid_hz: float,
@@ -278,7 +279,7 @@ def _edge_frequency_hz(
     return float(grid[hits[0]]) if hits.size else None
 
 
-def _decay_time_s(sos: np.ndarray, rate_hz: float) -> float:
+def _decay_time_s(sos: NDArray[np.float64], rate_hz: float) -> float:
     r"""How long the band's impulse response takes to lose all but 1e-9 of it.
 
     Read off the slowest pole: the energy of a response whose largest pole
@@ -295,7 +296,7 @@ def _decay_time_s(sos: np.ndarray, rate_hz: float) -> float:
 
 def _exponential_sweep(
     start_hz: float, end_hz: float, duration_s: float, fs: float
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""IEC 61260-2:2016 Formulas (A.3) and (A.4): the sampled sweep.
 
     :math:`s_n = \sqrt{2}\,\sin\!\left(\frac{2\pi}{r} f_\mathrm{start}

@@ -229,6 +229,27 @@ def test_a_change_that_reaches_a_clip_moves_its_fingerprint(
     assert moved == moves
 
 
+def test_the_value_of_a_type_alias_cannot_reach_a_clip(tree: pathlib.Path) -> None:
+    """A ``type`` statement's value is evaluated by a type checker alone.
+
+    Python evaluates it lazily, the first time something reads the alias's
+    ``__value__``, and no drawing code does, so typing it more precisely, as
+    ``np.ndarray`` becoming ``NDArray[np.float64]`` in a tuple of a plot
+    helper, cannot move a frame of the clips that import the module.
+    """
+    edit(
+        tree,
+        "theme",
+        'COLOR_PRIMARY = "#1f77b4"',
+        'COLOR_PRIMARY = "#1f77b4"\n\ntype Mark = tuple[str, object]',
+    )
+    before = fp.fingerprints(tree)
+    edit(
+        tree, "theme", "type Mark = tuple[str, object]", "type Mark = tuple[str, float]"
+    )
+    assert fp.fingerprints(tree) == before
+
+
 def test_a_helper_a_clip_imports_inside_its_function_is_followed(
     tree: pathlib.Path,
 ) -> None:

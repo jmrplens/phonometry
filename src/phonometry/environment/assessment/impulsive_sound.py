@@ -59,13 +59,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -87,7 +88,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -302,9 +308,33 @@ class ImpulseProminenceResult(OwnsArrays):
         )
 
 
+@overload
+def predicted_prominence[S1: RealScalar, S2: RealScalar](
+    onset_rate: S1, level_difference: S2
+) -> float: ...
+
+
+@overload
+def predicted_prominence[V: RealValues, A2: NumericArrayLike](
+    onset_rate: V, level_difference: A2
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def predicted_prominence[S1: RealScalar, V: RealValues](
+    onset_rate: S1, level_difference: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def predicted_prominence[A1: NumericArrayLike, A2: NumericArrayLike](
+    onset_rate: A1, level_difference: A2
+) -> float | NDArray[np.float64]: ...
+
+
 def predicted_prominence(
     onset_rate: NumericArrayLike, level_difference: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Predicted prominence ``P`` of an impulse (NT ACOU 112, clause 7).
 
     :math:`P = 3 \log_{10}(\text{onset rate}) + 2 \log_{10}(\text{level difference})`
@@ -317,7 +347,9 @@ def predicted_prominence(
 
     :param onset_rate: Onset rate(s), in dB/s (> 0).
     :param level_difference: Level difference(s), in dB (> 0).
-    :return: The predicted prominence ``P`` (scalar inputs give a 0-d array).
+    :return: The predicted prominence ``P``; a ``float`` when both are numbers,
+        an array when either is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: for a non-positive onset rate or level difference.
     :raises TypeError: if ``level_difference`` or ``onset_rate`` holds a text or a value
         that is not a real number.
@@ -331,10 +363,27 @@ def predicted_prominence(
         msg = "onset_rate and level_difference must be positive."
         raise ValueError(msg)
     k1, k2 = _PROMINENCE_COEFFS
-    return k1 * np.log10(orate) + k2 * np.log10(ld)
+    return as_float_or_array(
+        k1 * np.log10(orate) + k2 * np.log10(ld),
+        like=(onset_rate, level_difference),
+    )
 
 
-def impulse_adjustment(prominence: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def impulse_adjustment[S: RealScalar](prominence: S) -> float: ...
+
+
+@overload
+def impulse_adjustment[V: RealValues](prominence: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def impulse_adjustment[A: NumericArrayLike](
+    prominence: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def impulse_adjustment(prominence: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Adjustment ``KI`` to ``LAeq`` from the prominence (clause 8, Formula 2).
 
     :math:`K_\mathrm{I} = 1.8 \, (P - 5)` dB for :math:`P > 5`, else 0 dB. The
@@ -345,12 +394,17 @@ def impulse_adjustment(prominence: NumericArrayLike) -> NDArray[np.float64]:
     :func:`impulse_prominence`.
 
     :param prominence: Predicted prominence ``P``.
-    :return: The adjustment ``KI``, in dB, clamped at zero.
+    :return: The adjustment ``KI``, in dB, clamped at zero; a ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises TypeError: if ``prominence`` holds a text or a value that is not a real
         number.
     """
     p = real_array(prominence, "prominence")
-    return np.maximum(_ADJUSTMENT_SLOPE * (p - _ADJUSTMENT_THRESHOLD), 0.0)
+    return as_float_or_array(
+        np.maximum(_ADJUSTMENT_SLOPE * (p - _ADJUSTMENT_THRESHOLD), 0.0),
+        like=(prominence,),
+    )
 
 
 def impulse_prominence(

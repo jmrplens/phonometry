@@ -231,6 +231,12 @@ def _cases() -> tuple[Case, ...]:
             ("measured_level", "background_level"),
             together=True,
         ),
+        Case(
+            environment.predicted_prominence,
+            {"onset_rate": 1000.0, "level_difference": 30.0},
+            ("onset_rate", "level_difference"),
+        ),
+        Case(environment.impulse_adjustment, {"prominence": 10.0}, ("prominence",)),
         Case(shear.speed_at, {"height_m": 80.0}, ("height_m",)),
         Case(sel.class_density, {"levels": 35.0}, ("levels",)),
         Case(sel.density, {"levels": 35.0}, ("levels",)),

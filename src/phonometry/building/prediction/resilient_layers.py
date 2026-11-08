@@ -79,6 +79,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_axis_count,
@@ -98,7 +99,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
 
 __all__ = [
     "TAPPING_DROP_HEIGHT_M",
@@ -370,6 +376,39 @@ def hammer_limiting_frequency(
     return float(z / (2.0 * np.pi * m))
 
 
+@overload
+def force_pulse[S: RealScalar](
+    time: S,
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> float: ...
+
+
+@overload
+def force_pulse[V: RealValues](
+    time: V,
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def force_pulse[A: NumericArrayLike](
+    time: A,
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def force_pulse(
     time: NumericArrayLike,
     contact_stiffness: float,
@@ -377,7 +416,7 @@ def force_pulse(
     *,
     mass: float = TAPPING_HAMMER_MASS_KG,
     impact_velocity: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Force pulse ``F1(t)`` of a single hammer impact (Eqs. 3.95/3.96).
 
     Lindblad's solution of the mass-spring-dashpot of Hopkins Fig. 3.28, the
@@ -407,8 +446,9 @@ def force_pulse(
     :param mass: Hammer mass ``m``, in kg (Default: 0,5).
     :param impact_velocity: Impact velocity ``vo``, in m/s
         (Default: :func:`hammer_impact_velocity`).
-    :return: The force ``F1(t)``, in N, with the same shape as ``time``; never
-        negative.
+    :return: The force ``F1(t)``, in N, with the same shape as ``time``; never negative.
+        A ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite, or ``time``
         contains a negative value.
     :raises TypeError: if ``contact_stiffness``, ``impact_velocity``, ``impedance`` or
@@ -447,14 +487,14 @@ def force_pulse(
             * -np.expm1(-2.0 * gamma * t)
             / (2.0 * gamma)
         )
-        return np.asarray(pulse, dtype=np.float64)
+        return as_float_or_array(pulse, like=(time,))
     if excess < 0.0:
         beta = np.sqrt(omega0_sq - decay**2)
         pulse = v0 * k * np.exp(-decay * t) * np.sin(beta * t) / beta
-        return np.asarray(np.where(t <= np.pi / beta, pulse, 0.0), dtype=np.float64)
+        return as_float_or_array(np.where(t <= np.pi / beta, pulse, 0.0), like=(time,))
     # Critically damped: v0 K t e^-at, the γ → 0 limit of the over-critical
     # expression and the β → 0 limit of the under-critical one.
-    return np.asarray(v0 * k * t * np.exp(-decay * t), dtype=np.float64)
+    return as_float_or_array(v0 * k * t * np.exp(-decay * t), like=(time,))
 
 
 def short_pulse_mean_square_force(

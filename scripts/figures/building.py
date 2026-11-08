@@ -2862,7 +2862,7 @@ def generate_composite_facade_weak_element(output_dir: str) -> None:
     colours = (COLOR_PRIMARY, COLOR_TERTIARY, COLOR_SECONDARY)
     for blind, colour in zip((40.0, 50.0, 60.0), colours, strict=True):
         overall = [
-            building.composite_transmission_loss([6.0, 2.0], [blind, float(w)])
+            float(building.composite_transmission_loss([6.0, 2.0], [blind, float(w)]))
             for w in window
         ]
         ax.plot(
@@ -2887,7 +2887,7 @@ def generate_composite_facade_weak_element(output_dir: str) -> None:
 
     marks = ((26.0, 40.0, -4.6, -2.0), (26.0, 50.0, -4.6, 1.4), (31.0, 40.0, -3.6, 1.4))
     for w_val, blind, dx, dy in marks:
-        y = building.composite_transmission_loss([6.0, 2.0], [blind, w_val])
+        y = float(building.composite_transmission_loss([6.0, 2.0], [blind, w_val]))
         ax.plot([w_val], [y], "o", color=COLOR_FG, markersize=7, zorder=6)
         ax.annotate(
             f"{y:.2f}",

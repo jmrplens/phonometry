@@ -4,15 +4,11 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from phonometry import building
-
-if TYPE_CHECKING:
-    from numpy.typing import NDArray
 
 _OCTAVE = 5  # ISO 10052 octave-band count (125-2000 Hz)
 
@@ -31,27 +27,6 @@ def test_reverberation_index_formula_3() -> None:
     """k = 10 lg(T/T0), T0 = 0,5 s."""
     k = building.reverberation_index([0.5, 1.0, 0.25])
     np.testing.assert_allclose(k, [0.0, 10.0 * np.log10(2.0), 10.0 * np.log10(0.5)])
-
-
-@pytest.mark.parametrize(
-    "t",
-    [1.0, np.float64(1.0), np.asarray(1.0)],
-    ids=["python float", "numpy float", "zero-dimensional array"],
-)
-def test_reverberation_index_of_one_time_is_a_zero_dimensional_array(
-    t: float | NDArray[np.float64],
-) -> None:
-    """One time, as the global reading takes it, gives an array like a list does.
-
-    Clause 3.17 reads ``k`` for a globally weighted level from one mean
-    reverberation time; the index of that one time is the zero-dimensional
-    array of the same value, as a band list gives a one-dimensional one.
-    """
-    k = building.reverberation_index(t)
-    assert isinstance(k, np.ndarray)
-    assert k.shape == ()
-    assert k.dtype == np.float64
-    assert k[()] == 10.0 * np.log10(1.0 / 0.5)
 
 
 def test_reverberation_index_rejects_nonpositive() -> None:
@@ -188,12 +163,12 @@ def test_service_equipment_lxy() -> None:
     assert float(res.l_xy_n) == pytest.approx(expected - 3.0 - _norm(50.0))
 
 
-def test_service_equipment_global_reading_holds_three_arrays() -> None:
-    """Three single readings give three zero-dimensional arrays, one kind per record.
+def test_service_equipment_global_reading_holds_three_floats() -> None:
+    """Three single readings give three floats, as a banded reading gives arrays.
 
     The global reading of Clause 6.3.3 is three numbers and a scalar ``k``;
-    ``LXY`` is then the zero-dimensional array of the energy average, and
-    ``LXY,nT`` and ``LXY,n``, read from it, are arrays of the same kind.
+    ``LXY`` is then the energy average reduced to one number, and ``LXY,nT``
+    and ``LXY,n``, read from it, are numbers of the same kind.
     """
     res = building.survey_service_equipment_level([30.0, 31.0, 32.0], 0.5, volume=50.0)
     assert res.l_xy_n is not None
@@ -202,11 +177,9 @@ def test_service_equipment_global_reading_holds_three_arrays() -> None:
         ("l_xy_nt", res.l_xy_nt),
         ("l_xy_n", res.l_xy_n),
     ):
-        assert isinstance(value, np.ndarray), name
-        assert value.shape == (), name
-        assert value.dtype == np.float64, name
-    assert res.l_xy_nt[()] == res.l_xy[()] - 0.5
-    assert res.l_xy_n[()] == res.l_xy[()] - 0.5 - _norm(50.0)
+        assert type(value) is float, name
+    assert res.l_xy_nt == res.l_xy - 0.5
+    assert res.l_xy_n == res.l_xy - 0.5 - _norm(50.0)
 
 
 def test_service_equipment_banded() -> None:
@@ -214,6 +187,7 @@ def test_service_equipment_banded() -> None:
     meas = np.array([[35.0, 33.0], [30.0, 31.0], [32.0, 30.0]])
     k = np.array([3.0, 2.0])
     res = building.survey_service_equipment_level(meas, k)
+    assert isinstance(res.l_xy, np.ndarray)
     assert res.l_xy.shape == (2,)
     assert res.l_xy_n is None  # no volume
 

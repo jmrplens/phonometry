@@ -81,6 +81,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -105,7 +106,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -577,10 +583,38 @@ def adaptation_term_kc(
     return 10.0 * np.log10(1.0 + ratio)
 
 
+@overload
+def surface_pressure_intensity_indicator[S1: RealScalar, S2: RealScalar](
+    lp: S1,
+    l_in: S2,
+) -> float: ...
+
+
+@overload
+def surface_pressure_intensity_indicator[V: RealValues, A2: NumericArrayLike](
+    lp: V,
+    l_in: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def surface_pressure_intensity_indicator[S1: RealScalar, V: RealValues](
+    lp: S1,
+    l_in: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def surface_pressure_intensity_indicator[A1: NumericArrayLike, A2: NumericArrayLike](
+    lp: A1,
+    l_in: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def surface_pressure_intensity_indicator(
     lp: NumericArrayLike,
     l_in: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Surface pressure-intensity indicator ``FpI`` (ISO 15186-1, Formula (10)).
 
     Returns :math:`F_{pI} = L_p - L_{I\mathrm{n}}` per band from the surface- and
@@ -596,7 +630,9 @@ def surface_pressure_intensity_indicator(
 
     :param lp: Surface-averaged sound pressure levels, in dB.
     :param l_in: Normal sound intensity levels on the surface, in dB.
-    :return: The indicator ``FpI`` per band, in dB.
+    :return: The indicator ``FpI`` per band, in dB. A ``float`` when ``lp`` and ``l_in``
+        are both numbers, an array when either is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If the shapes differ or contain non-finite values.
     :raises TypeError: if ``l_in`` or ``lp`` holds a text or a value that is not a real
         number.
@@ -611,9 +647,7 @@ def surface_pressure_intensity_indicator(
     if not (np.all(np.isfinite(p)) and np.all(np.isfinite(i))):
         msg = "Levels must contain only finite values."
         raise ValueError(msg)
-    # Two zero-dimensional levels subtract to a numpy scalar; asarray keeps
-    # the indicator of one band pair an array, as it is for a list of bands.
-    return np.asarray(p - i, dtype=np.float64)
+    return as_float_or_array(p - i, like=(lp, l_in))
 
 
 @dataclass(frozen=True)

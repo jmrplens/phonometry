@@ -76,6 +76,8 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
+from ..._internal.types import as_float_or_array
+
 if TYPE_CHECKING:
     import os
     from collections.abc import Mapping
@@ -84,7 +86,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine, TwoPanels
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+        TwoPanels,
+    )
     from ..._report.metadata import ReportMetadata
 
 
@@ -532,9 +540,30 @@ def verify_rigid_mass_calibration(
     )
 
 
+@overload
+def random_error_percent[S: RealScalar](
+    coherence: S,
+    n_averages: int | np.integer[Any],
+) -> float: ...
+
+
+@overload
+def random_error_percent[V: RealValues](
+    coherence: V,
+    n_averages: int | np.integer[Any],
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def random_error_percent[A: NumericArrayLike](
+    coherence: A,
+    n_averages: int | np.integer[Any],
+) -> float | NDArray[np.float64]: ...
+
+
 def random_error_percent(
     coherence: NumericArrayLike, n_averages: int | np.integer[Any]
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).
 
     :math:`\epsilon = \sqrt{(1 - \gamma^2) / (2 n \gamma^2)}`, the normalized
@@ -550,7 +579,9 @@ def random_error_percent(
     :param coherence: Ordinary coherence :math:`\gamma^2` per frequency, in
         (0, 1].
     :param n_averages: Number of averaged spectra ``n`` (>= 1).
-    :return: The normalized random error, in percent (same shape as input).
+    :return: The normalized random error, in percent (same shape as input). A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: for a coherence outside (0, 1] or ``n_averages < 1``.
     :raises TypeError: if ``n_averages`` is a flag, a text or an array where a count
         goes, or ``coherence`` holds a text or a value that is not a real number.
@@ -565,7 +596,7 @@ def random_error_percent(
         msg = "'coherence' must lie in (0, 1]."
         raise ValueError(msg)
     eps = np.sqrt((1.0 - gamma2) / (2.0 * n * gamma2))
-    return np.asarray(100.0 * eps, dtype=np.float64)
+    return as_float_or_array(100.0 * eps, like=(coherence,))
 
 
 # ---------------------------------------------------------------------------

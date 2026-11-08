@@ -168,12 +168,13 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, TypeGuard
+from typing import TYPE_CHECKING, Any, Literal, TypeGuard, overload
 
 import numpy as np
 from scipy.integrate import quad
 
 from ..._internal.frozen import OwnsArrays, given_repr
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_choice,
@@ -192,7 +193,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Junction = Literal["X", "T1", "T2", "L"]
 #: The junctions with a straight section, the two :func:`straight_transmission_coefficient`
@@ -350,9 +351,36 @@ def _check_angle(angle_rad: NumericArrayLike) -> NDArray[np.float64]:
     return theta
 
 
+@overload
+def corner_transmission_coefficient[S: RealScalar](
+    angle_rad: S,
+    chi: float,
+    psi: float,
+    junction: Junction = ...,
+) -> float: ...
+
+
+@overload
+def corner_transmission_coefficient[V: RealValues](
+    angle_rad: V,
+    chi: float,
+    psi: float,
+    junction: Junction = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def corner_transmission_coefficient[A: NumericArrayLike](
+    angle_rad: A,
+    chi: float,
+    psi: float,
+    junction: Junction = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def corner_transmission_coefficient(
     angle_rad: NumericArrayLike, chi: float, psi: float, junction: Junction = "X"
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Transmission around a corner ``tau12(theta)`` (Hopkins Eq. 5.12).
 
     Returns ``0`` for angles beyond the cut-off :math:`\arcsin(\chi)`
@@ -363,7 +391,8 @@ def corner_transmission_coefficient(
     :param chi: Wave parameter ``chi`` (Eq. 5.10, > 0).
     :param psi: Wave parameter ``psi`` (Eq. 5.11, > 0).
     :param junction: ``"X"``, ``"T1"``, ``"T2"`` or ``"L"``.
-    :return: ``tau12(theta)`` (same shape as *angle*).
+    :return: ``tau12(theta)`` (same shape as *angle*). A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle or an unknown junction.
     :raises TypeError: if ``chi`` or ``psi`` is not a single number, or ``junction`` is
@@ -379,7 +408,34 @@ def corner_transmission_coefficient(
     num = 0.5 * j1 * j2 * p * np.cos(theta) * np.sqrt(np.clip(disc, 0.0, None))
     den = (j2 * p) ** 2 + c * c + j2 * p * _obliquity_sum(c, sin2)
     tau = np.where(disc >= 0.0, num / den, 0.0)
-    return np.asarray(tau, dtype=np.float64)
+    return as_float_or_array(tau, like=(angle_rad,))
+
+
+@overload
+def straight_transmission_coefficient[S: RealScalar](
+    angle_rad: S,
+    chi: float,
+    psi: float,
+    junction: StraightJunction = ...,
+) -> float: ...
+
+
+@overload
+def straight_transmission_coefficient[V: RealValues](
+    angle_rad: V,
+    chi: float,
+    psi: float,
+    junction: StraightJunction = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def straight_transmission_coefficient[A: NumericArrayLike](
+    angle_rad: A,
+    chi: float,
+    psi: float,
+    junction: StraightJunction = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def straight_transmission_coefficient(
@@ -387,7 +443,7 @@ def straight_transmission_coefficient(
     chi: float,
     psi: float,
     junction: StraightJunction = "X",
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Transmission across a straight section ``tau13(theta)`` (Hopkins 5.13).
 
     Defined only for the X-junction and T-junction (1); both incidence
@@ -403,7 +459,8 @@ def straight_transmission_coefficient(
         that :func:`corner_transmission_coefficient` takes, are not offered:
         Hopkins gives no ``J3`` for them, as no plate lies in line with the
         source plate across either.
-    :return: ``tau13(theta)`` (same shape as *angle*).
+    :return: ``tau13(theta)`` (same shape as *angle*). A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle, an unknown junction or a junction without a straight section,
         ``"T2"`` and ``"L"`` among them.
@@ -435,7 +492,7 @@ def straight_transmission_coefficient(
     )
     tau_lt = cos2 / den_lt
     tau = np.where(c >= sin, tau_ge, tau_lt)
-    return np.asarray(tau, dtype=np.float64)
+    return as_float_or_array(tau, like=(angle_rad,))
 
 
 def inline_transmission_coefficient(chi: float, psi: float) -> float:
@@ -512,6 +569,50 @@ def angular_average_transmission_coefficient(
     return float(value)
 
 
+@overload
+def coupling_loss_factor[S1: RealScalar, S2: RealScalar](
+    transmission_coefficient: S1,
+    group_velocity: float,
+    junction_length: float,
+    plate_area: float,
+    *,
+    frequency: S2,
+) -> float: ...
+
+
+@overload
+def coupling_loss_factor[V: RealValues, A2: NumericArrayLike](
+    transmission_coefficient: V,
+    group_velocity: float,
+    junction_length: float,
+    plate_area: float,
+    *,
+    frequency: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_loss_factor[S1: RealScalar, V: RealValues](
+    transmission_coefficient: S1,
+    group_velocity: float,
+    junction_length: float,
+    plate_area: float,
+    *,
+    frequency: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_loss_factor[A1: NumericArrayLike, A2: NumericArrayLike](
+    transmission_coefficient: A1,
+    group_velocity: float,
+    junction_length: float,
+    plate_area: float,
+    *,
+    frequency: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def coupling_loss_factor(
     transmission_coefficient: NumericArrayLike,
     group_velocity: float,
@@ -519,7 +620,7 @@ def coupling_loss_factor(
     plate_area: float,
     *,
     frequency: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Coupling loss factor from a transmission coefficient (Hopkins Eq. 2.154).
 
     :math:`\eta_{ij} = c_{\mathrm{g},i} L_{ij} \tau_{ij} / (2 \pi^2 f S_i)` with the
@@ -534,7 +635,9 @@ def coupling_loss_factor(
     :param junction_length: Junction length ``L_ij``, in m (> 0).
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param plate_area: Source-plate area ``S_i``, in m^2 (> 0).
-    :return: The coupling loss factor ``eta_ij`` (broadcast of the inputs).
+    :return: The coupling loss factor ``eta_ij`` (broadcast of the inputs). A ``float``
+        when ``transmission_coefficient`` and ``frequency`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input, or a coefficient and a
         frequency whose shapes cannot be broadcast together.
     :raises TypeError: if ``group_velocity``, ``junction_length`` or ``plate_area`` is
@@ -564,7 +667,7 @@ def coupling_loss_factor(
         )
         raise ValueError(msg) from None
     eta = cg * lij * tau / (2.0 * math.pi**2 * freq * area)
-    return np.asarray(eta, dtype=np.float64)
+    return as_float_or_array(eta, like=(transmission_coefficient, frequency))
 
 
 def right_angle_transmission_coefficient(
@@ -633,6 +736,51 @@ def right_angle_transmission_coefficient(
     return float(tau_0 * 2.754 * x / (1.0 + 3.24 * x))
 
 
+@overload
+def point_connection_coupling_loss_factor[S: RealScalar](
+    frequency: S,
+    n_connections: int | np.integer[Any],
+    *,
+    thickness1_m: float,
+    thickness2_m: float,
+    surface_density1: float,
+    surface_density2: float,
+    wave_speed1: float,
+    wave_speed2: float,
+    plate_area1: float,
+) -> float: ...
+
+
+@overload
+def point_connection_coupling_loss_factor[V: RealValues](
+    frequency: V,
+    n_connections: int | np.integer[Any],
+    *,
+    thickness1_m: float,
+    thickness2_m: float,
+    surface_density1: float,
+    surface_density2: float,
+    wave_speed1: float,
+    wave_speed2: float,
+    plate_area1: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def point_connection_coupling_loss_factor[A: NumericArrayLike](
+    frequency: A,
+    n_connections: int | np.integer[Any],
+    *,
+    thickness1_m: float,
+    thickness2_m: float,
+    surface_density1: float,
+    surface_density2: float,
+    wave_speed1: float,
+    wave_speed2: float,
+    plate_area1: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def point_connection_coupling_loss_factor(
     frequency: NumericArrayLike,
     n_connections: int | np.integer[Any],
@@ -644,7 +792,7 @@ def point_connection_coupling_loss_factor(
     wave_speed1: float,
     wave_speed2: float,
     plate_area1: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Coupling loss factor of a point-connected plate pair (Norton Eq. 6.56).
 
     Two homogeneous plates joined by ``N`` bolts, rivets or spot welds rather
@@ -682,7 +830,8 @@ def point_connection_coupling_loss_factor(
     :param wave_speed1: Quasi-longitudinal wave speed ``cL1``, in m/s (> 0).
     :param wave_speed2: Quasi-longitudinal wave speed ``cL2``, in m/s (> 0).
     :param plate_area1: Source-plate area ``S1``, in m^2 (> 0).
-    :return: The coupling loss factor ``eta_12`` per band.
+    :return: The coupling loss factor ``eta_12`` per band. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive or non-integer input.
     :raises TypeError: if ``plate_area1``, ``surface_density1``, ``surface_density2``,
         ``thickness1_m``, ``thickness2_m``, ``wave_speed1`` or ``wave_speed2`` is not a
@@ -719,13 +868,34 @@ def point_connection_coupling_loss_factor(
         * a_2
         / (a_1 + a_2) ** 2
     )
-    return np.asarray(eta, dtype=np.float64)
+    return as_float_or_array(eta, like=(frequency,))
+
+
+@overload
+def wave_vibration_reduction_index[S: RealScalar](
+    transmission_coefficient: S,
+    critical_frequency_receiver: float,
+) -> float: ...
+
+
+@overload
+def wave_vibration_reduction_index[V: RealValues](
+    transmission_coefficient: V,
+    critical_frequency_receiver: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def wave_vibration_reduction_index[A: NumericArrayLike](
+    transmission_coefficient: A,
+    critical_frequency_receiver: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def wave_vibration_reduction_index(
     transmission_coefficient: NumericArrayLike,
     critical_frequency_receiver: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Vibration reduction index from a transmission coefficient (Hopkins 5.116).
 
     :math:`K_{ij} = 10 \log_{10}(1 / \tau_{ij}) + 5 \log_{10}(f_{\mathrm{c}j} / f_{\text{ref}})`
@@ -739,7 +909,8 @@ def wave_vibration_reduction_index(
     :param transmission_coefficient: ``tau_ij`` (scalar or array, > 0).
     :param critical_frequency_receiver: Critical frequency ``fc_j`` of the
         receiving plate, in hertz (> 0).
-    :return: The vibration reduction index ``K_ij``, in dB.
+    :return: The vibration reduction index ``K_ij``, in dB. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive ``tau`` or ``fc_j``.
     :raises TypeError: if ``critical_frequency_receiver`` is not a single number, or
         ``transmission_coefficient`` holds a text or a value that is not a real number.
@@ -750,7 +921,7 @@ def wave_vibration_reduction_index(
         raise ValueError(msg)
     fcj = require_positive(critical_frequency_receiver, "critical_frequency_receiver")
     kij = 10.0 * np.log10(1.0 / tau) + 5.0 * math.log10(fcj / _REFERENCE_FREQUENCY)
-    return np.asarray(kij, dtype=np.float64)
+    return as_float_or_array(kij, like=(transmission_coefficient,))
 
 
 @dataclass(frozen=True)

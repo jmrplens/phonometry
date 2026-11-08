@@ -152,6 +152,22 @@ EXEMPT: dict[tuple[str, str], str] = {
         "overloaded on their quantity Literal and return PolarAxes for "
         "'directivity'"
     ),
+    (
+        "src/phonometry/building/prediction/aperture_transmission.py",
+        "composite_transmission_loss",
+    ): (
+        "an area-weighted sum over the elements: reduces the first axis of "
+        "the reduction indices, so their rank decides whether one number is "
+        "left (1-D) or one per band (2-D), which as_float_if_reduced applies"
+    ),
+    (
+        "src/phonometry/building/prediction/installed_structure_borne.py",
+        "total_structure_borne_pressure_level",
+    ): (
+        "an energy sum over the transmission paths: reduces the first axis "
+        "of the path levels, so their rank decides whether one number is "
+        "left or one per band, which as_float_if_reduced applies"
+    ),
     ("src/phonometry/signals/levels.py", "leq"): (
         "a level of a signal: reduces the last axis of what it is "
         "handed, so the rank of the input decides whether one number is "

@@ -1252,14 +1252,27 @@ class AmplifierFrequencyResponse(OwnsArrays):
     output_current_a: NDArray[np.float64]
     response_db: NDArray[np.float64]
 
-    def at(self, frequency_hz: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def at[S: RealScalar](self, frequency_hz: S) -> float: ...
+
+    @overload
+    def at[V: RealValues](self, frequency_hz: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def at[A: NumericArrayLike](
+        self,
+        frequency_hz: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def at(self, frequency_hz: NumericArrayLike) -> float | NDArray[np.float64]:
         """The response at any frequency inside the measured range, in dB.
 
         Interpolated linearly against the logarithm of frequency, the way a
         response measured at one-third-octave centres is read between them.
 
         :param frequency_hz: Frequency or frequencies, in hertz.
-        :return: The response there, dB re 1 kHz.
+        :return: The response there, dB re 1 kHz. A ``float`` for a number, an array for
+            a sequence or an array, a zero-dimensional one included.
         :raises ValueError: for a frequency that is not finite and positive,
             or lies outside the measured range.
         :raises TypeError: if ``frequency_hz`` holds a text or a value that is not a
@@ -1272,8 +1285,11 @@ class AmplifierFrequencyResponse(OwnsArrays):
         ):
             msg = f"frequency outside the measured range {lo:g} Hz to {hi:g} Hz."
             raise ValueError(msg)
-        return np.asarray(
-            np.interp(np.log(f), np.log(self.frequencies), self.response_db)
+        return as_float_or_array(
+            np.asarray(
+                np.interp(np.log(f), np.log(self.frequencies), self.response_db)
+            ),
+            like=(frequency_hz,),
         )
 
     def plot(

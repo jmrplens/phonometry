@@ -111,6 +111,10 @@ def _cases() -> tuple[Case, ...]:
     )
     box = (7.0, 5.0, 3.0)
     impedance = electroacoustics.loop_impedance(2.0, 1.0e-4)
+    amplifier = electroacoustics.amplifier_frequency_response(
+        frequencies=[50.0, 100.0, 1000.0, 8000.0],
+        output_current_a=[1.0, 1.9, 2.0, 1.5],
+    )
     return (
         Case(
             broadcast.channel_weight,
@@ -446,6 +450,180 @@ def _cases() -> tuple[Case, ...]:
             },
             ("displacement_um", "velocity_mm_s"),
             single=str,
+        ),
+        Case(amplifier.at, {"frequency_hz": 200.0}, ("frequency_hz",)),
+        Case(building.reverberation_index, {"t": 0.8}, ("t",)),
+        Case(
+            building.surface_pressure_intensity_indicator,
+            {"lp": 70.0, "l_in": 65.0},
+            ("lp", "l_in"),
+            together=True,
+        ),
+        Case(
+            building.background_correction,
+            {"signal_and_background": 60.0, "background": 40.0},
+            ("signal_and_background", "background"),
+            together=True,
+        ),
+        Case(
+            building.low_frequency_level,
+            {"level": 40.0, "corner": 45.0},
+            ("level", "corner"),
+            together=True,
+        ),
+        Case(
+            building.structure_borne_power_level,
+            {
+                "velocity_level": 60.0,
+                "mass_per_area": 200.0,
+                "area": 10.0,
+                "loss_factor": 0.02,
+                "frequency": 500.0,
+            },
+            ("velocity_level", "loss_factor", "frequency"),
+        ),
+        Case(
+            building.equivalent_blocked_force_level,
+            {"power_level": 80.0, "plate_mobility": 1.0e-5},
+            ("power_level", "plate_mobility"),
+        ),
+        Case(
+            building.characteristic_reception_plate_power,
+            {"blocked_force_level": 70.0},
+            ("blocked_force_level",),
+        ),
+        Case(
+            building.equivalent_free_velocity_level,
+            {"power_level": 80.0, "plate_mobility": 1.0e-3},
+            ("power_level", "plate_mobility"),
+        ),
+        Case(
+            building.source_mobility_from_levels,
+            {"free_velocity_level": 90.0, "blocked_force_level": 70.0},
+            ("free_velocity_level", "blocked_force_level"),
+        ),
+        Case(
+            building.coupling_term,
+            {
+                "source_mobility": 1.0e-4,
+                "receiver_mobility": 1.0e-5,
+                "transfer_mobility": 1.0e-6,
+            },
+            ("source_mobility", "receiver_mobility", "transfer_mobility"),
+        ),
+        Case(
+            building.coupling_term_force_source,
+            {"source_mobility": 1.0e-4, "receiver_mobility": 1.0e-5},
+            ("source_mobility", "receiver_mobility"),
+        ),
+        Case(
+            building.coupling_term_velocity_source,
+            {"source_mobility": 1.0e-4, "receiver_impedance": 1.0e5},
+            ("source_mobility", "receiver_impedance"),
+        ),
+        Case(
+            building.installed_power_from_reception_plate,
+            {"reception_plate_level": 80.0, "receiver_mobility": 1.0e-5},
+            ("reception_plate_level", "receiver_mobility"),
+        ),
+        Case(
+            building.installed_structure_borne_power_level,
+            {"characteristic_power_level": 80.0, "coupling_term": -5.0},
+            ("characteristic_power_level", "coupling_term"),
+        ),
+        Case(
+            building.structure_borne_pressure_level_path,
+            {
+                "installed_power_level": 80.0,
+                "adjustment_term": -5.0,
+                "flanking_reduction_index": 50.0,
+                "element_area": 10.0,
+            },
+            ("installed_power_level", "adjustment_term", "flanking_reduction_index"),
+        ),
+        Case(
+            building.structure_to_airborne_adjustment,
+            {
+                "frequency": 500.0,
+                "critical_frequency": 100.0,
+                "mass_per_area": 200.0,
+                "radiation_factor": 1.0,
+            },
+            ("frequency", "radiation_factor"),
+        ),
+        Case(
+            building.tapping_machine_characteristic_power_level,
+            {"force_level": 80.0, "frequency": 500.0},
+            ("force_level", "frequency"),
+        ),
+        Case(
+            building.tapping_machine_coupling_term,
+            {"receiver_mobility": 1.0e-5, "frequency": 500.0},
+            ("receiver_mobility", "frequency"),
+        ),
+        Case(
+            building.tapping_machine_force_level_estimate,
+            {"frequency": 500.0},
+            ("frequency",),
+        ),
+        Case(building.transmission_loss_from_coefficient, {"tau": 0.01}, ("tau",)),
+        Case(
+            building.mass_law_transmission_loss,
+            {"frequency": 500.0, "mass_per_area": 10.0},
+            ("frequency",),
+        ),
+        Case(
+            building.force_pulse,
+            {"time": 1.0e-3, "contact_stiffness": 1.0e7, "impedance": 1.0e4},
+            ("time",),
+        ),
+        Case(vibration.transfer_stiffness_level, {"stiffness": 2.0}, ("stiffness",)),
+        Case(vibration.loss_factor, {"stiffness": 2.0}, ("stiffness",)),
+        Case(
+            vibration.random_error_percent,
+            {"coherence": 0.8, "n_averages": 10},
+            ("coherence",),
+        ),
+        Case(
+            vibration.corner_transmission_coefficient,
+            {"angle_rad": 0.3, "chi": 1.0, "psi": 1.0},
+            ("angle_rad",),
+        ),
+        Case(
+            vibration.straight_transmission_coefficient,
+            {"angle_rad": 0.3, "chi": 1.0, "psi": 1.0},
+            ("angle_rad",),
+        ),
+        Case(
+            vibration.coupling_loss_factor,
+            {
+                "transmission_coefficient": 0.1,
+                "group_velocity": 100.0,
+                "junction_length": 4.0,
+                "plate_area": 10.0,
+                "frequency": 500.0,
+            },
+            ("transmission_coefficient", "frequency"),
+        ),
+        Case(
+            vibration.point_connection_coupling_loss_factor,
+            {
+                "frequency": 500.0,
+                "n_connections": 4,
+                "thickness1_m": 0.1,
+                "thickness2_m": 0.1,
+                "surface_density1": 200.0,
+                "surface_density2": 200.0,
+                "wave_speed1": 3000.0,
+                "wave_speed2": 3000.0,
+                "plate_area1": 10.0,
+            },
+            ("frequency",),
+        ),
+        Case(
+            vibration.wave_vibration_reduction_index,
+            {"transmission_coefficient": 0.1, "critical_frequency_receiver": 100.0},
+            ("transmission_coefficient",),
         ),
     )
 

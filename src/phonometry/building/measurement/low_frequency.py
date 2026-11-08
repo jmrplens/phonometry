@@ -94,12 +94,13 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     real_number,
@@ -115,7 +116,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "LOW_FREQUENCY_PROCEDURE_BANDS_HZ",
@@ -431,9 +432,37 @@ def corner_level(corner_levels: NumericArrayLike) -> NDArray[np.float64]:
     return np.asarray(energy_mean(highest, axis=_POSITION_AXIS), dtype=np.float64)
 
 
+@overload
+def low_frequency_level[S1: RealScalar, S2: RealScalar](
+    level: S1,
+    corner: S2,
+) -> float: ...
+
+
+@overload
+def low_frequency_level[V: RealValues, A2: NumericArrayLike](
+    level: V,
+    corner: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def low_frequency_level[S1: RealScalar, V: RealValues](
+    level: S1,
+    corner: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def low_frequency_level[A1: NumericArrayLike, A2: NumericArrayLike](
+    level: A1,
+    corner: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def low_frequency_level(
     level: NumericArrayLike, corner: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Combine the default and corner levels into :math:`L_\mathrm{LF}`.
 
     Part 1 Formula (13), Part 2 Formula (16) and Part 3 Formula (5), which are
@@ -453,7 +482,9 @@ def low_frequency_level(
         a scalar or one value per band.
     :param corner: Corner level :math:`L_\mathrm{Corner}` from
         :func:`corner_level`, in dB, same bands.
-    :return: :math:`L_\mathrm{LF}`, in dB, one value per band.
+    :return: :math:`L_\mathrm{LF}`, in dB, one value per band. A ``float`` when
+        ``level`` and ``corner`` are both numbers, an array when either is a sequence or
+        an array, a zero-dimensional one included.
     :raises ValueError: If the two shapes differ, either is empty, or either
         holds a non-finite value.
     :raises TypeError: if ``corner`` or ``level`` holds a text or a value that is not a
@@ -475,7 +506,7 @@ def low_frequency_level(
             msg = f"'{name}' must contain only finite values."
             raise ValueError(msg)
     combined = (10.0 ** (0.1 * highest) + 2.0 * 10.0 ** (0.1 * default)) / 3.0
-    return np.asarray(10.0 * np.log10(combined), dtype=np.float64)
+    return as_float_or_array(10.0 * np.log10(combined), like=(level, corner))
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -76,9 +76,11 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
+
+from ..._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     import os
@@ -88,7 +90,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 
@@ -246,9 +253,33 @@ def _omega(frequency: NumericArrayLike, name: str = "frequency") -> NDArray[np.f
     return 2.0 * np.pi * f
 
 
+@overload
+def transfer_stiffness_level[S: ComplexScalar](
+    stiffness: S,
+    *,
+    reference: float = ...,
+) -> float: ...
+
+
+@overload
+def transfer_stiffness_level[V: ComplexValues](
+    stiffness: V,
+    *,
+    reference: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def transfer_stiffness_level[A: NumericArrayLike](
+    stiffness: A,
+    *,
+    reference: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def transfer_stiffness_level(
     stiffness: NumericArrayLike, *, reference: float = REFERENCE_STIFFNESS_N_M
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Level of the dynamic transfer stiffness (ISO 10846-2/-3, 3.17).
 
     :math:`L_k = 20 \log_{10}(|k_{2,1}| / k_0)` dB, with ``k0`` the reference
@@ -257,7 +288,8 @@ def transfer_stiffness_level(
     :param stiffness: Dynamic transfer stiffness :math:`k_{2,1}` (complex or
         real, scalar or array, non-zero), in N/m.
     :param reference: Reference stiffness ``k0`` (Default: 1 N/m), in N/m.
-    :return: The level ``L_k``, in dB re ``k0``.
+    :return: The level ``L_k``, in dB re ``k0``. A ``float`` for a number, an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive reference, a non-finite stiffness,
         or a zero stiffness magnitude (a dead channel has no level).
     :raises TypeError: if ``reference`` is not a single number, or ``stiffness`` holds a
@@ -281,10 +313,22 @@ def transfer_stiffness_level(
             "stiffness has no level."
         )
         raise ValueError(msg)
-    return np.asarray(20.0 * np.log10(magnitude / reference), dtype=np.float64)
+    return as_float_or_array(20.0 * np.log10(magnitude / reference), like=(stiffness,))
 
 
-def loss_factor(stiffness: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def loss_factor[S: ComplexScalar](stiffness: S) -> float: ...
+
+
+@overload
+def loss_factor[V: ComplexValues](stiffness: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def loss_factor[A: NumericArrayLike](stiffness: A) -> float | NDArray[np.float64]: ...
+
+
+def loss_factor(stiffness: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Loss factor
     :math:`\eta = \operatorname{Im}(k_{2,1}) / \operatorname{Re}(k_{2,1})`
     (ISO 10846-1, 3.8).
@@ -294,7 +338,8 @@ def loss_factor(stiffness: NumericArrayLike) -> NDArray[np.float64]:
 
     :param stiffness: Dynamic transfer stiffness :math:`k_{2,1}` (complex,
         scalar or array, with a non-zero real part), in N/m.
-    :return: The loss factor ``eta`` (dimensionless).
+    :return: The loss factor ``eta`` (dimensionless). A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a purely imaginary stiffness
         (:math:`\operatorname{Re}(k_{2,1}) = 0`), for which the loss factor
         is undefined.
@@ -307,7 +352,7 @@ def loss_factor(stiffness: NumericArrayLike) -> NDArray[np.float64]:
             "factor eta = Im/Re is undefined there."
         )
         raise ValueError(msg)
-    return np.asarray(k.imag / k.real, dtype=np.float64)
+    return as_float_or_array(k.imag / k.real, like=(stiffness,))
 
 
 def transfer_stiffness_direct(

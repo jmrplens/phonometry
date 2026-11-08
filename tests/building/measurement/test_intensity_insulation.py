@@ -16,8 +16,6 @@ from phonometry.building import LaboratoryInsulationWarning
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from numpy.typing import NDArray
-
 
 def _levels_for_target_ri(
     ri: list[float], lp1: float, sm: float, s: float
@@ -200,26 +198,6 @@ def test_element_normalized_rejects_bad_n() -> None:
 def test_fpi_is_lp_minus_lin() -> None:
     fpi = building.surface_pressure_intensity_indicator([60.0, 58.0], [55.0, 54.0])
     np.testing.assert_allclose(fpi, [5.0, 4.0])
-
-
-@pytest.mark.parametrize(
-    ("lp", "l_in"),
-    [
-        (60.0, 55.0),
-        (np.float64(60.0), np.float64(55.0)),
-        (np.asarray(60.0), np.asarray(55.0)),
-    ],
-    ids=["python floats", "numpy floats", "zero-dimensional arrays"],
-)
-def test_fpi_of_one_band_level_pair_is_a_zero_dimensional_array(
-    lp: float | NDArray[np.float64], l_in: float | NDArray[np.float64]
-) -> None:
-    """One pair of levels gives the indicator as an array, as a band list does."""
-    fpi = building.surface_pressure_intensity_indicator(lp, l_in)
-    assert isinstance(fpi, np.ndarray)
-    assert fpi.shape == ()
-    assert fpi.dtype == np.float64
-    assert fpi[()] == 5.0
 
 
 def test_fpi_shape_mismatch_raises() -> None:

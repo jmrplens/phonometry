@@ -107,6 +107,20 @@ RealValues = (
     | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]]
 )
 
+#: One number that may be complex, as a function of a number or an array of
+#: them that reads a complex argument (a mobility, an impedance) is handed
+#: it: a Python ``complex``, ``float`` or ``int``, or a numpy number of any
+#: kind. Such a function returns a Python ``float`` for it.
+ComplexScalar = complex | np.number[Any]
+
+#: Several numbers that may be complex: a sequence of them, Python or numpy
+#: ones, or a numpy array of numbers or truth values of any shape, a
+#: zero-dimensional one included. A function that takes a number or an array
+#: of them returns an array for it.
+ComplexValues = (
+    Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]]
+)
+
 #: A fixed count of arrays a record holds as one field, a curve's ``(x, y)``
 #: or the ``(x, y, z)`` axes of an elevation model: a sequence of them, each
 #: any array-like of numbers (a tuple of an array and a list), or one array whose rows

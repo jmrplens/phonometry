@@ -74,9 +74,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
+
+from ..._internal.types import as_float_if_reduced, as_float_or_array
 
 if TYPE_CHECKING:
     import os
@@ -86,7 +88,15 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        BandFraction,
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 
@@ -183,12 +193,57 @@ def _nonzero_magnitude(values: NumericArrayLike, name: str) -> NDArray[np.comple
     return arr
 
 
+@overload
+def coupling_term[S1: ComplexScalar, S2: ComplexScalar, S3: ComplexScalar](
+    source_mobility: S1,
+    receiver_mobility: S2,
+    *,
+    transfer_mobility: S3 = ...,
+) -> float: ...
+
+
+@overload
+def coupling_term[V: ComplexValues, A2: NumericArrayLike, A3: NumericArrayLike](
+    source_mobility: V,
+    receiver_mobility: A2,
+    *,
+    transfer_mobility: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_term[S1: ComplexScalar, V: ComplexValues, A3: NumericArrayLike](
+    source_mobility: S1,
+    receiver_mobility: V,
+    *,
+    transfer_mobility: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_term[S1: ComplexScalar, S2: ComplexScalar, V: ComplexValues](
+    source_mobility: S1,
+    receiver_mobility: S2,
+    *,
+    transfer_mobility: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_term[A1: NumericArrayLike, A2: NumericArrayLike, A3: NumericArrayLike](
+    source_mobility: A1,
+    receiver_mobility: A2,
+    *,
+    transfer_mobility: A3 = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def coupling_term(
     source_mobility: NumericArrayLike,
     receiver_mobility: NumericArrayLike,
     *,
     transfer_mobility: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Coupling term ``D_C`` for a point excitation (EN 12354-5, Formula 19b/19e).
 
     :math:`D_\mathrm{C} = 10 \log_{10}\left( |Y_\mathrm{s} + Y_i + Y_k|^2 / (|Y_\mathrm{s}|
@@ -203,11 +258,13 @@ def coupling_term(
         positive real part).
     :param transfer_mobility: Elastic-support transfer mobility ``Y_k``
         (Default: 0.0).
-    :return: The coupling term ``D_C``, in dB. Positive whenever the source
-        and receiver mobilities are well mismatched (the usual installed
-        case), but **not** guaranteed non-negative: near a mounting
-        resonance where ``Y_s`` and ``Y_i`` are of comparable magnitude and
-        opposite phase the numerator
+    :return: The coupling term ``D_C``, in dB. Positive whenever the source and receiver
+        mobilities are well mismatched (the usual installed case), but **not**
+        guaranteed non-negative: near a mounting resonance where ``Y_s`` and ``Y_i`` are
+        of comparable magnitude and opposite phase the numerator A ``float`` when
+        ``source_mobility``, ``receiver_mobility`` and ``transfer_mobility`` are all
+        numbers, an array when one of them is a sequence or an array, a zero-dimensional
+        one included.
         :math:`\lvert Y_\mathrm{s} + Y_i \rvert^2` collapses and ``D_C``
         goes negative (the installed power then exceeds the characteristic
         level; e.g. :math:`Y_\mathrm{s} = j \cdot 10^{-4}`,
@@ -223,12 +280,43 @@ def coupling_term(
     yk = complex_array(transfer_mobility, "transfer_mobility")
     numerator = np.abs(ys + yi + yk) ** 2
     denominator = np.abs(ys) * np.real(yi)
-    return np.asarray(10.0 * np.log10(numerator / denominator), dtype=np.float64)
+    return as_float_or_array(
+        10.0 * np.log10(numerator / denominator),
+        like=(source_mobility, receiver_mobility, transfer_mobility),
+    )
+
+
+@overload
+def coupling_term_force_source[S1: ComplexScalar, S2: ComplexScalar](
+    source_mobility: S1,
+    receiver_mobility: S2,
+) -> float: ...
+
+
+@overload
+def coupling_term_force_source[V: ComplexValues, A2: NumericArrayLike](
+    source_mobility: V,
+    receiver_mobility: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_term_force_source[S1: ComplexScalar, V: ComplexValues](
+    source_mobility: S1,
+    receiver_mobility: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_term_force_source[A1: NumericArrayLike, A2: NumericArrayLike](
+    source_mobility: A1,
+    receiver_mobility: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def coupling_term_force_source(
     source_mobility: NumericArrayLike, receiver_mobility: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Coupling term for a force source, high source mobility (Formula 19c).
 
     .. math::
@@ -238,7 +326,9 @@ def coupling_term_force_source(
     :param source_mobility: Source point mobility ``Y_s`` (complex, non-zero).
     :param receiver_mobility: Receiver point mobility ``Y_i`` (complex,
         positive real part).
-    :return: The coupling term ``D_C``, in dB.
+    :return: The coupling term ``D_C``, in dB. A ``float`` when ``source_mobility`` and
+        ``receiver_mobility`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Y_i}`` is not
         positive and finite.
     :raises TypeError: if ``receiver_mobility`` or ``source_mobility`` holds a text or a
@@ -246,12 +336,42 @@ def coupling_term_force_source(
     """
     ys = np.abs(_nonzero_magnitude(source_mobility, "source_mobility"))
     yi = np.real(_positive_real_part(receiver_mobility, "receiver_mobility"))
-    return np.asarray(10.0 * np.log10(ys / yi), dtype=np.float64)
+    return as_float_or_array(
+        10.0 * np.log10(ys / yi), like=(source_mobility, receiver_mobility)
+    )
+
+
+@overload
+def coupling_term_velocity_source[S1: ComplexScalar, S2: ComplexScalar](
+    source_mobility: S1,
+    receiver_impedance: S2,
+) -> float: ...
+
+
+@overload
+def coupling_term_velocity_source[V: ComplexValues, A2: NumericArrayLike](
+    source_mobility: V,
+    receiver_impedance: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_term_velocity_source[S1: ComplexScalar, V: ComplexValues](
+    source_mobility: S1,
+    receiver_impedance: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def coupling_term_velocity_source[A1: NumericArrayLike, A2: NumericArrayLike](
+    source_mobility: A1,
+    receiver_impedance: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def coupling_term_velocity_source(
     source_mobility: NumericArrayLike, receiver_impedance: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Coupling term for a velocity source, low source mobility (Formula 19d).
 
     .. math::
@@ -261,7 +381,9 @@ def coupling_term_velocity_source(
     :param source_mobility: Source point mobility ``Y_s`` (complex, non-zero).
     :param receiver_impedance: Receiver point impedance ``Z_i`` (complex,
         positive real part).
-    :return: The coupling term ``D_C``, in dB.
+    :return: The coupling term ``D_C``, in dB. A ``float`` when ``source_mobility`` and
+        ``receiver_impedance`` are both numbers, an array when either is a sequence or
+        an array, a zero-dimensional one included.
     :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Z_i}`` is not
         positive and finite.
     :raises TypeError: if ``receiver_impedance`` holds a text or a value that is not a
@@ -270,7 +392,9 @@ def coupling_term_velocity_source(
     """
     ys = np.abs(_nonzero_magnitude(source_mobility, "source_mobility"))
     zi = np.real(_positive_real_part(receiver_impedance, "receiver_impedance"))
-    return np.asarray(-10.0 * np.log10(ys * zi), dtype=np.float64)
+    return as_float_or_array(
+        -10.0 * np.log10(ys * zi), like=(source_mobility, receiver_impedance)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -744,9 +868,33 @@ def tapping_machine_force_level() -> NDArray[np.float64]:
     return np.asarray(TABLE_F1_FORCE_LEVEL, dtype=np.float64)
 
 
+@overload
+def tapping_machine_force_level_estimate[S: RealScalar](
+    frequency: S,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float: ...
+
+
+@overload
+def tapping_machine_force_level_estimate[V: RealValues](
+    frequency: V,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def tapping_machine_force_level_estimate[A: NumericArrayLike](
+    frequency: A,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def tapping_machine_force_level_estimate(
     frequency: NumericArrayLike, *, fraction: BandFraction | np.integer[Any] = 1
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Closed form printed under Table F.1 for the tapping machine force level.
 
     .. math::
@@ -766,8 +914,9 @@ def tapping_machine_force_level_estimate(
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param fraction: The band set, 1 for octaves (default, coefficient 2,5) or
         3 for one-third octaves (coefficient 0,8). One of ``1`` or ``3``.
-    :return: The force level ``L_F``, in dB re 1e-6 N (the standard prints
-        "re 1 pN"; see ``docs/ERRATA.md``).
+    :return: The force level ``L_F``, in dB re 1e-6 N (the standard prints "re 1 pN";
+        see ``docs/ERRATA.md``). A ``float`` for a number, an array for a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency or a band set other than
         1 or 3.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
@@ -777,14 +926,49 @@ def tapping_machine_force_level_estimate(
         require_band_fraction(fraction, "fraction")
     ]
     f = _positive_values(frequency, "frequency")
-    return np.asarray(
-        10.0 * np.log10(coefficient * f / _FORCE_REFERENCE_SQUARED), dtype=np.float64
+    return as_float_or_array(
+        10.0 * np.log10(coefficient * f / _FORCE_REFERENCE_SQUARED), like=(frequency,)
     )
+
+
+@overload
+def tapping_machine_characteristic_power_level[S1: RealScalar, S2: RealScalar](
+    force_level: S1,
+    *,
+    frequency: S2,
+) -> float: ...
+
+
+@overload
+def tapping_machine_characteristic_power_level[V: RealValues, A2: NumericArrayLike](
+    force_level: V,
+    *,
+    frequency: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def tapping_machine_characteristic_power_level[S1: RealScalar, V: RealValues](
+    force_level: S1,
+    *,
+    frequency: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def tapping_machine_characteristic_power_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+](
+    force_level: A1,
+    *,
+    frequency: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def tapping_machine_characteristic_power_level(
     force_level: NumericArrayLike, *, frequency: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Characteristic power level of the tapping machine (Formula D.9a).
 
     .. math::
@@ -804,14 +988,54 @@ def tapping_machine_characteristic_power_level(
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param force_level: Force level ``L_F``, in dB re 1e-6 N (Table F.1 or
         :func:`tapping_machine_force_level_estimate`).
-    :return: The characteristic power level ``L_Ws,c``, in dB re 1 pW.
+    :return: The characteristic power level ``L_Ws,c``, in dB re 1 pW. A ``float`` when
+        ``force_level`` and ``frequency`` are both numbers, an array when either is a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency.
     :raises TypeError: if ``force_level`` or ``frequency`` holds a text or a value that
         is not a real number.
     """
     f = _positive_values(frequency, "frequency")
     lf = real_array(force_level, "force_level")
-    return np.asarray(lf - 5.0 - 10.0 * np.log10(f), dtype=np.float64)
+    return as_float_or_array(
+        lf - 5.0 - 10.0 * np.log10(f), like=(force_level, frequency)
+    )
+
+
+@overload
+def tapping_machine_coupling_term[S1: RealScalar, S2: RealScalar](
+    receiver_mobility: S1,
+    *,
+    frequency: S2,
+    hammer_mass: float = ...,
+) -> float: ...
+
+
+@overload
+def tapping_machine_coupling_term[V: RealValues, A2: NumericArrayLike](
+    receiver_mobility: V,
+    *,
+    frequency: A2,
+    hammer_mass: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def tapping_machine_coupling_term[S1: RealScalar, V: RealValues](
+    receiver_mobility: S1,
+    *,
+    frequency: V,
+    hammer_mass: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def tapping_machine_coupling_term[A1: NumericArrayLike, A2: NumericArrayLike](
+    receiver_mobility: A1,
+    *,
+    frequency: A2,
+    hammer_mass: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def tapping_machine_coupling_term(
@@ -819,7 +1043,7 @@ def tapping_machine_coupling_term(
     *,
     frequency: NumericArrayLike,
     hammer_mass: float = TAPPING_HAMMER_MASS_KG,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Coupling term of the tapping machine (EN 12354-5, Formula D.9b).
 
     .. math::
@@ -838,7 +1062,9 @@ def tapping_machine_coupling_term(
     :param hammer_mass: Source mass ``M``, in kilograms (Default:
         :data:`~phonometry.building.TAPPING_HAMMER_MASS_KG`, the 0,5 kg of clause
         D.1.3 and ISO 10140-5).
-    :return: The coupling term ``D_C,i``, in dB.
+    :return: The coupling term ``D_C,i``, in dB. A ``float`` when ``receiver_mobility``
+        and ``frequency`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency, mobility or mass.
     :raises TypeError: if ``hammer_mass`` is not a single number, or ``frequency`` or
         ``receiver_mobility`` holds a text or a value that is not a real number.
@@ -847,9 +1073,9 @@ def tapping_machine_coupling_term(
     y_i = _positive_values(receiver_mobility, "receiver_mobility")
     m = require_positive(hammer_mass, "hammer_mass")
     omega_m_y = 2.0 * np.pi * f * m * y_i
-    return np.asarray(
+    return as_float_or_array(
         -10.0 * np.log10(omega_m_y) + 10.0 * np.log10(1.0 + omega_m_y**2),
-        dtype=np.float64,
+        like=(receiver_mobility, frequency),
     )
 
 
@@ -892,13 +1118,53 @@ def multi_junction_adjustment(n_junctions: int | np.integer[Any]) -> float:
     return _MULTI_JUNCTION_ADJUSTMENT[min(n_junctions, 3)]
 
 
+@overload
+def structure_to_airborne_adjustment[S1: RealScalar, S2: RealScalar](
+    frequency: S1,
+    critical_frequency: float,
+    mass_per_area: float,
+    *,
+    radiation_factor: S2 = ...,
+) -> float: ...
+
+
+@overload
+def structure_to_airborne_adjustment[V: RealValues, A2: NumericArrayLike](
+    frequency: V,
+    critical_frequency: float,
+    mass_per_area: float,
+    *,
+    radiation_factor: A2 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_to_airborne_adjustment[S1: RealScalar, V: RealValues](
+    frequency: S1,
+    critical_frequency: float,
+    mass_per_area: float,
+    *,
+    radiation_factor: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_to_airborne_adjustment[A1: NumericArrayLike, A2: NumericArrayLike](
+    frequency: A1,
+    critical_frequency: float,
+    mass_per_area: float,
+    *,
+    radiation_factor: A2 = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def structure_to_airborne_adjustment(
     frequency: NumericArrayLike,
     critical_frequency: float,
     mass_per_area: float,
     *,
     radiation_factor: NumericArrayLike = 1.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Adjustment term ``D_sa`` of a supporting element (Formula F.3).
 
     .. math::
@@ -924,7 +1190,9 @@ def structure_to_airborne_adjustment(
     :param radiation_factor: Radiation factor ``sigma_i`` of the element
         (Default: 1.0, its value above ``fc``; EN 12354-1:2000 Annex B
         estimates it below).
-    :return: The adjustment term ``D_sa,i``, in dB.
+    :return: The adjustment term ``D_sa,i``, in dB. A ``float`` when ``frequency`` and
+        ``radiation_factor`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency, critical frequency, mass
         or radiation factor.
     :raises TypeError: if ``critical_frequency`` or ``mass_per_area`` is not a single
@@ -935,9 +1203,46 @@ def structure_to_airborne_adjustment(
     f_c = require_positive(critical_frequency, "critical_frequency")
     m = require_positive(mass_per_area, "mass_per_area")
     sigma = _positive_values(radiation_factor, "radiation_factor")
-    return np.asarray(
-        10.0 * np.log10(400.0 * f_c * sigma / (m * f**2)), dtype=np.float64
+    return as_float_or_array(
+        10.0 * np.log10(400.0 * f_c * sigma / (m * f**2)),
+        like=(frequency, radiation_factor),
     )
+
+
+@overload
+def installed_power_from_reception_plate[S1: RealScalar, S2: ComplexScalar](
+    reception_plate_level: S1,
+    receiver_mobility: S2,
+    *,
+    plate_mobility: float = ...,
+) -> float: ...
+
+
+@overload
+def installed_power_from_reception_plate[V: RealValues, A2: NumericArrayLike](
+    reception_plate_level: V,
+    receiver_mobility: A2,
+    *,
+    plate_mobility: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def installed_power_from_reception_plate[S1: RealScalar, V: ComplexValues](
+    reception_plate_level: S1,
+    receiver_mobility: V,
+    *,
+    plate_mobility: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def installed_power_from_reception_plate[A1: NumericArrayLike, A2: NumericArrayLike](
+    reception_plate_level: A1,
+    receiver_mobility: A2,
+    *,
+    plate_mobility: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def installed_power_from_reception_plate(
@@ -945,7 +1250,7 @@ def installed_power_from_reception_plate(
     receiver_mobility: NumericArrayLike,
     *,
     plate_mobility: float = _REFERENCE_PLATE_MOBILITY,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Mobility correction of the reception-plate power (EN 12354-5, Annex I).
 
     :math:`L_{\mathrm{Ws,inst},i} = L_{\mathrm{Ws,n},i} + 10 \log_{10}( Y_{\infty,i} /
@@ -973,7 +1278,9 @@ def installed_power_from_reception_plate(
         :math:`Y_{\infty,\mathrm{rec}} = 5 \cdot 10^{-6}` m/(N.s);
         pass the measured plate mobility when the input is a raw Formula (14)
         level).
-    :return: The mobility-corrected power level, in dB re 1 pW.
+    :return: The mobility-corrected power level, in dB re 1 pW. A ``float`` when
+        ``reception_plate_level`` and ``receiver_mobility`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive receiver or plate mobility.
     :raises TypeError: if ``plate_mobility`` is not a single number, or
         ``reception_plate_level`` holds a text or a value that is not a real number, or
@@ -985,12 +1292,43 @@ def installed_power_from_reception_plate(
     if not np.all(np.isfinite(y_i)) or np.any(y_i <= 0.0):
         msg = "'receiver_mobility' must be finite and non-zero."
         raise ValueError(msg)
-    return np.asarray(lw + 10.0 * np.log10(y_i / plate_mobility), dtype=np.float64)
+    return as_float_or_array(
+        lw + 10.0 * np.log10(y_i / plate_mobility),
+        like=(reception_plate_level, receiver_mobility),
+    )
+
+
+@overload
+def installed_structure_borne_power_level[S1: RealScalar, S2: RealScalar](
+    characteristic_power_level: S1,
+    coupling_term: S2,
+) -> float: ...
+
+
+@overload
+def installed_structure_borne_power_level[V: RealValues, A2: NumericArrayLike](
+    characteristic_power_level: V,
+    coupling_term: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def installed_structure_borne_power_level[S1: RealScalar, V: RealValues](
+    characteristic_power_level: S1,
+    coupling_term: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def installed_structure_borne_power_level[A1: NumericArrayLike, A2: NumericArrayLike](
+    characteristic_power_level: A1,
+    coupling_term: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def installed_structure_borne_power_level(
     characteristic_power_level: NumericArrayLike, coupling_term: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Installed structure-borne power level (EN 12354-5, Formula 18b).
 
     .. math::
@@ -1002,13 +1340,82 @@ def installed_structure_borne_power_level(
         Formulae (15)/(17) and the source-mobility correction (see the module
         docstring), **not** the raw plate-injected Formula (14) level.
     :param coupling_term: Coupling term ``D_C,i`` (per band), in dB.
-    :return: The installed structure-borne power level ``L_Ws,inst``, in dB.
+    :return: The installed structure-borne power level ``L_Ws,inst``, in dB. A ``float``
+        when ``characteristic_power_level`` and ``coupling_term`` are both numbers, an
+        array when either is a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``characteristic_power_level`` or ``coupling_term`` holds a
         text or a value that is not a real number.
     """
     lw = real_array(characteristic_power_level, "characteristic_power_level")
     dc = real_array(coupling_term, "coupling_term")
-    return np.asarray(lw - dc, dtype=np.float64)
+    return as_float_or_array(lw - dc, like=(characteristic_power_level, coupling_term))
+
+
+@overload
+def structure_borne_pressure_level_path[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    installed_power_level: S1,
+    adjustment_term: S2,
+    flanking_reduction_index: S3,
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> float: ...
+
+
+@overload
+def structure_borne_pressure_level_path[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    installed_power_level: V,
+    adjustment_term: A2,
+    flanking_reduction_index: A3,
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_borne_pressure_level_path[
+    S1: RealScalar,
+    V: RealValues,
+    A3: NumericArrayLike,
+](
+    installed_power_level: S1,
+    adjustment_term: V,
+    flanking_reduction_index: A3,
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_borne_pressure_level_path[S1: RealScalar, S2: RealScalar, V: RealValues](
+    installed_power_level: S1,
+    adjustment_term: S2,
+    flanking_reduction_index: V,
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_borne_pressure_level_path[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    installed_power_level: A1,
+    adjustment_term: A2,
+    flanking_reduction_index: A3,
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def structure_borne_pressure_level_path(
@@ -1018,7 +1425,7 @@ def structure_borne_pressure_level_path(
     element_area: float,
     *,
     reference_area: float = REFERENCE_AREA_M2,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Normalised structure-borne SPL for one path i->j (Formula 18a).
 
     .. math::
@@ -1033,7 +1440,10 @@ def structure_borne_pressure_level_path(
         ``R_ij,ref`` re ``S0`` (EN 12354-1), in dB.
     :param element_area: Supporting-element area ``S_i``, in m^2 (> 0).
     :param reference_area: Reference area :math:`S_0 = A_0` (Default: 10 m^2).
-    :return: The normalised path sound pressure level ``L_n,s,ij``, in dB.
+    :return: The normalised path sound pressure level ``L_n,s,ij``, in dB. A ``float``
+        when ``installed_power_level``, ``adjustment_term`` and
+        ``flanking_reduction_index`` are all numbers, an array when one of them is a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive area.
     :raises TypeError: if ``element_area`` or ``reference_area`` is not a single number,
         or ``adjustment_term``, ``flanking_reduction_index`` or
@@ -1051,12 +1461,14 @@ def structure_borne_pressure_level_path(
         - 10.0 * np.log10(element_area / reference_area)
         - 10.0 * np.log10(reference_area / 4.0)
     )
-    return np.asarray(lp, dtype=np.float64)
+    return as_float_or_array(
+        lp, like=(installed_power_level, adjustment_term, flanking_reduction_index)
+    )
 
 
 def total_structure_borne_pressure_level(
     path_levels: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Combine path sound pressure levels energetically (Formula 17).
 
     .. math::
@@ -1065,14 +1477,13 @@ def total_structure_borne_pressure_level(
 
     :param path_levels: Path levels ``L_n,s,ij``; sum is over the first axis
         (paths), broadcasting any trailing band axis.
-    :return: The total normalised sound pressure level ``L_n,s``, in dB.
+    :return: The total normalised sound pressure level ``L_n,s``, in dB: a
+        ``float`` for 1-D path levels, one value per band for 2-D ones.
     :raises TypeError: if ``path_levels`` holds a text or a value that is not a real
         number.
     """
     lp = real_array(path_levels, "path_levels")
-    return np.asarray(
-        10.0 * np.log10(np.sum(10.0 ** (0.1 * lp), axis=0)), dtype=np.float64
-    )
+    return as_float_if_reduced(10.0 * np.log10(np.sum(10.0 ** (0.1 * lp), axis=0)))
 
 
 @dataclass(frozen=True)

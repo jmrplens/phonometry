@@ -95,6 +95,7 @@ from scipy.integrate import quad
 from scipy.special import ellipe
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_band_fraction,
@@ -118,7 +119,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
     from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
@@ -229,6 +235,42 @@ def field_incidence_correction(fraction: BandFraction | np.integer[Any] = 3) -> 
     return _FIELD_CORRECTION[require_band_fraction(fraction, "fraction")]
 
 
+@overload
+def mass_law_transmission_loss[S: RealScalar](
+    frequency: S,
+    mass_per_area: float,
+    *,
+    incidence: Literal["normal", "field"] = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> float: ...
+
+
+@overload
+def mass_law_transmission_loss[V: RealValues](
+    frequency: V,
+    mass_per_area: float,
+    *,
+    incidence: Literal["normal", "field"] = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def mass_law_transmission_loss[A: NumericArrayLike](
+    frequency: A,
+    mass_per_area: float,
+    *,
+    incidence: Literal["normal", "field"] = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def mass_law_transmission_loss(
     frequency: NumericArrayLike,
     mass_per_area: float,
@@ -237,7 +279,7 @@ def mass_law_transmission_loss(
     fraction: BandFraction | np.integer[Any] = 3,
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Mass-law transmission loss of a limp panel (Bies Eq. 7.40/7.42).
 
     :math:`\mathrm{TL}_{\mathrm{normal}} = 10 \log_{10}[1 +
@@ -256,7 +298,8 @@ def mass_law_transmission_loss(
         (>= 0), overriding the band table (Default: ``None``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
-    :return: The transmission loss ``TL``, in dB.
+    :return: The transmission loss ``TL``, in dB. A ``float`` for a number, an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input, an unknown incidence or a
         band set other than 1 or 3.
     :raises TypeError: if ``incidence`` is not a text, or ``field_correction`` or
@@ -275,7 +318,7 @@ def mass_law_transmission_loss(
     tl = 10.0 * np.log10(1.0 + ratio**2)
     if incidence == "field":
         tl = tl - _resolve_field_correction(fraction, field_correction)
-    return np.asarray(tl, dtype=np.float64)
+    return as_float_or_array(tl, like=(frequency,))
 
 
 def _resolve_field_correction(

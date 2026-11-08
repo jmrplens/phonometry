@@ -49,12 +49,13 @@ per-band values are supplied.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -79,7 +80,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -445,10 +451,38 @@ def _absorption_area(
     return _SABINE * volume / t
 
 
+@overload
+def background_correction[S1: RealScalar, S2: RealScalar](
+    signal_and_background: S1,
+    background: S2,
+) -> float: ...
+
+
+@overload
+def background_correction[V: RealValues, A2: NumericArrayLike](
+    signal_and_background: V,
+    background: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_correction[S1: RealScalar, V: RealValues](
+    signal_and_background: S1,
+    background: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    signal_and_background: A1,
+    background: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def background_correction(
     signal_and_background: NumericArrayLike,
     background: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Correct receiving-room levels for background noise (ISO 10140-4:2010).
 
     Applies the correction of Clause 4.3 per band from the combined
@@ -484,7 +518,9 @@ def background_correction(
     :param signal_and_background: Combined signal-plus-background levels
         ``Lsb`` per band, in dB.
     :param background: Background-noise levels ``Lb`` per band, in dB.
-    :return: The background-corrected levels per band, in dB.
+    :return: The background-corrected levels per band, in dB. A ``float`` when
+        ``signal_and_background`` and ``background`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the shapes differ or contain non-finite values.
     :raises TypeError: if ``background`` or ``signal_and_background`` holds a text or a
         value that is not a real number.
@@ -520,7 +556,7 @@ def background_correction(
             "are the limit of measurement (ISO 10140-4:2010, Clause 4.3).",
             LaboratoryInsulationWarning,
         )
-    return np.asarray(corrected, dtype=np.float64)
+    return as_float_or_array(corrected, like=(signal_and_background, background))
 
 
 def laboratory_airborne_insulation(

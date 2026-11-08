@@ -73,6 +73,7 @@ from typing import TYPE_CHECKING, Any, Literal, get_args, overload
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_if_reduced, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -97,7 +98,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -265,12 +271,35 @@ def _rate_impact(values: NDArray[np.float64]) -> ImpactRatingResult | None:
     return weighted_impact_rating(values) if values.size in (16, 5) else None
 
 
-def reverberation_index(t: NumericArrayLike, *, t0: float = _T0) -> NDArray[np.float64]:
+@overload
+def reverberation_index[S: RealScalar](t: S, *, t0: float = ...) -> float: ...
+
+
+@overload
+def reverberation_index[V: RealValues](
+    t: V,
+    *,
+    t0: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_index[A: NumericArrayLike](
+    t: A,
+    *,
+    t0: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
+def reverberation_index(
+    t: NumericArrayLike, *, t0: float = _T0
+) -> float | NDArray[np.float64]:
     r"""Reverberation index :math:`k = 10 \log_{10}(T/T_0)` (ISO 10052, Cl. 3.3).
 
     :param t: Receiving-room reverberation time per band, in seconds.
     :param t0: Reference reverberation time ``T0``, in seconds (Default: 0,5 s).
-    :return: The reverberation index ``k`` per band, in dB.
+    :return: The reverberation index ``k`` per band, in dB. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``t``/``t0`` are not positive or ``t`` is non-finite.
     :raises TypeError: if ``t0`` is not a single number, or ``t`` holds a text or a
         value that is not a real number.
@@ -279,9 +308,7 @@ def reverberation_index(t: NumericArrayLike, *, t0: float = _T0) -> NDArray[np.f
     if np.any(tt <= 0.0):
         msg = "'t' must contain positive values."
         raise ValueError(msg)
-    # The array of one time is zero-dimensional, and numpy's arithmetic on it
-    # gives a numpy scalar; asarray keeps the index an array for it too.
-    return np.asarray(10.0 * np.log10(tt / _positive(t0, "t0")), dtype=np.float64)
+    return as_float_or_array(10.0 * np.log10(tt / _positive(t0, "t0")), like=(t,))
 
 
 #: A room of ISO 10052:2021 Table 4, by the key :func:`estimate_reverberation_index`
@@ -733,6 +760,9 @@ class SurveyServiceEquipmentResult(OwnsArrays):
         (Clause 3.17).
     :ivar l_xy_n: Normalized level ``LXY,n`` (Clause 3.18), or ``None`` when
         the receiving-room volume was not supplied.
+
+    Each level is a ``float`` for three single readings and one value per
+    band for a banded analysis.
     """
 
     # No __post_init__ axis check here, unlike the three insulation results
@@ -740,9 +770,9 @@ class SurveyServiceEquipmentResult(OwnsArrays):
     # banded ones, so these quantities are a single weighted number as often
     # as they are one value per band, and this module builds them both ways.
     # Requiring a band axis would refuse the survey's ordinary global reading.
-    l_xy: NDArray[np.float64]
-    l_xy_nt: NDArray[np.float64]
-    l_xy_n: NDArray[np.float64] | None
+    l_xy: float | NDArray[np.float64]
+    l_xy_nt: float | NDArray[np.float64]
+    l_xy_n: float | NDArray[np.float64] | None
 
 
 def _validate_index(k: NumericArrayLike, n_bands: int) -> NDArray[np.float64]:
@@ -976,25 +1006,23 @@ def survey_service_equipment_level(
             "(three scalars, or a (3, bands) array)."
         )
         raise ValueError(msg)
-    l_xy = np.asarray(energy_average_level(m, axis=0), dtype=np.float64)
+    l_xy = as_float_if_reduced(energy_average_level(m, axis=0))
 
     k = _finite_bands(reverberation_index, "reverberation_index")
-    if k.shape != l_xy.shape:
+    if k.shape != np.shape(l_xy):
         msg = (
             "'reverberation_index' must match the shape of the per-position "
             "average (scalar, or one value per band)."
         )
         raise ValueError(msg)
 
-    # Three single readings make l_xy and k zero-dimensional, and numpy's
-    # arithmetic on them gives numpy scalars: asarray keeps the two levels
-    # read from l_xy arrays of the same kind as l_xy.
-    l_xy_nt = np.asarray(l_xy - k, dtype=np.float64)
-    l_xy_n: NDArray[np.float64] | None = None
+    # Three single readings reduce to one level, and k is one number then:
+    # the levels read from l_xy are a float with it, as l_xy is.
+    l_xy_nt = as_float_if_reduced(l_xy - k)
+    l_xy_n: float | NDArray[np.float64] | None = None
     if volume is not None:
-        l_xy_n = np.asarray(
-            l_xy - k - _normalization_term(_positive(volume, "volume")),
-            dtype=np.float64,
+        l_xy_n = as_float_if_reduced(
+            l_xy - k - _normalization_term(_positive(volume, "volume"))
         )
 
     return SurveyServiceEquipmentResult(l_xy=l_xy, l_xy_nt=l_xy_nt, l_xy_n=l_xy_n)

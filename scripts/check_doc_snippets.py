@@ -445,8 +445,9 @@ class _Promise:
     """The output a comment promises for one print of a page's script.
 
     :param first: The line of the script the statement the print stands in
-        opens on, or the print's own first line in the header of a compound
-        statement (:func:`_print_calls`).
+        opens on, or the print's own first line where the comment is its own
+        (:func:`promised_outputs`) or in the header of a compound statement
+        (:func:`_print_calls`).
     :param last: The line that statement, or that print, closes on.
     :param lines: The comment and the comment lines that continue it.
     :param arguments: What each argument of the print is (:data:`_Argument`),
@@ -455,6 +456,9 @@ class _Promise:
         states the output only when the print writes that word first, which
         the run tells (:func:`output_disagreements`); ``None`` for a comment
         that opens like an output whatever the print writes.
+    :param apart: The lines from *first* to *last* whose prints have a
+        comment of their own inside the statement, and whose calls this
+        comment does not stand for.
     """
 
     first: int
@@ -462,6 +466,7 @@ class _Promise:
     lines: tuple[str, ...]
     arguments: tuple[_Argument, ...] | None = None
     word: str | None = None
+    apart: tuple[int, ...] = ()
 
     @property
     def text(self) -> str:
@@ -481,17 +486,21 @@ def _is_print(node: ast.AST) -> TypeGuard[ast.Call]:
     )
 
 
-def _print_calls(tree: ast.AST) -> dict[ast.Call, tuple[int, int]]:
-    """Every call of ``print`` in *tree*, with the lines its comment stands
-    for: those of the statement the call stands in, whose last line is where
-    a reader writes the comment of a list comprehension of prints over three
-    lines, or the call's own lines in the header of a compound statement.
-    Two calls in one statement stand for its lines alike, as two prints
-    written on one line with a semicolon between them do.
-    """
-    found: dict[ast.Call, tuple[int, int]] = {}
+#: The first and the last line of a stretch of a script.
+_Span = tuple[int, int]
 
-    def visit(node: ast.AST, span: tuple[int, int] | None) -> None:
+
+def _print_calls(tree: ast.AST) -> dict[ast.Call, tuple[_Span, _Span]]:
+    """Every call of ``print`` in *tree*, with its own lines and the lines of
+    the statement it stands in, whose last line is where a reader writes the
+    comment of a list comprehension of prints over three lines; in the header
+    of a compound statement, the call's own lines twice. Two calls in one
+    statement stand for its lines alike, as two prints written on one line
+    with a semicolon between them do.
+    """
+    found: dict[ast.Call, tuple[_Span, _Span]] = {}
+
+    def visit(node: ast.AST, span: _Span | None) -> None:
         for child in ast.iter_child_nodes(node):
             if isinstance(child, ast.stmt):
                 simple = not hasattr(child, "body") and not hasattr(child, "cases")
@@ -499,7 +508,8 @@ def _print_calls(tree: ast.AST) -> dict[ast.Call, tuple[int, int]]:
                 visit(child, lines if simple else None)
                 continue
             if _is_print(child):
-                found[child] = span or (child.lineno, child.end_lineno or child.lineno)
+                own = (child.lineno, child.end_lineno or child.lineno)
+                found[child] = (own, span or own)
             visit(child, span)
 
     visit(tree, None)
@@ -577,6 +587,13 @@ def promised_outputs(script: str) -> list[_Promise]:
     after line with no comment of their own share out the comment lines under
     the last of them, one line each, when each of those lines opens like the
     output of its print or on a word.
+
+    A print inside a statement that runs on past it is read first on its own
+    lines, where a comment that opens like its output is its own; a word
+    there is more likely a note on an argument than a message the print
+    writes, and is not read. The prints that have no comment there are read
+    on the lines of their statement, and that comment stands for their calls
+    only, not for those of the prints that have one of their own.
     """
     lines = script.splitlines()
     comments: dict[int, tuple[int, str]] = {}
@@ -598,96 +615,136 @@ def promised_outputs(script: str) -> list[_Promise]:
         )
 
     def run_from(number: int, said: list[str], call: ast.Call) -> list[str]:
-        """*said* and the comment lines from *number* down that go on with it."""
+        """*said* and the comment lines from *number* down that go on with it.
+
+        The brackets *said* leaves open are counted on as each line joins it,
+        not counted again over all of it for each line.
+        """
         said = list(said)
+        depth = sum(_open_brackets(text) for text in said)
         while comment_only(number):
             text = comments[number][1]
-            if not (_open_brackets(" ".join(said)) > 0 or _opens_output(text, call)):
+            if not (depth > 0 or _opens_output(text, call)):
                 break
             said.append(text)
+            depth += _open_brackets(text)
             number += 1
         return said
 
-    spans = _print_calls(ast.parse(script))
+    found = _print_calls(ast.parse(script))
+    span: dict[ast.Call, _Span] = {}
+    said_by: dict[ast.Call, list[str]] = {}
+    word_by: dict[ast.Call, str] = {}
 
-    def start(node: ast.Call) -> int:
-        return spans[node][0]
-
-    def end(node: ast.Call) -> int:
-        return spans[node][1]
-
-    prints = sorted(spans, key=lambda node: (start(node), node.lineno))
-    said_by: dict[int, list[str]] = {}
-    word_by: dict[int, str] = {}
-
-    def opening(text: str, index: int) -> bool:
-        """Whether *text* opens like the output of the print at *index*, or
-        on a word, noted for the run to settle.
+    def read(calls: list[ast.Call], *, words: bool) -> None:
+        """Find the comment of each of *calls* at the lines :data:`span`
+        gives it, a comment that opens on a word too when *words* is true.
         """
-        if _opens_output(text, prints[index]):
-            return True
-        word = _opening_word(text)
-        if word is not None:
-            word_by[index] = word
-        return word is not None
+        prints = sorted(
+            calls, key=lambda node: (span[node][0], node.lineno, node.col_offset)
+        )
 
-    at = 0
-    while at < len(prints):
-        node = prints[at]
-        comment = trailing(end(node))
-        if comment is not None:
-            if opening(comment, at):
-                said_by[at] = run_from(end(node) + 1, [comment], node)
-            at += 1
-            continue
-        stack = [at]
-        while (
-            stack[-1] + 1 < len(prints)
-            and start(prints[stack[-1] + 1]) == end(prints[stack[-1]]) + 1
-            and trailing(end(prints[stack[-1] + 1])) is None
-        ):
-            stack.append(stack[-1] + 1)
-        under = end(prints[stack[-1]]) + 1
-        dealt = [
-            comments[under + place][1]
-            for place, index in enumerate(stack)
-            if comment_only(under + place)
-            and opening(comments[under + place][1], index)
-        ]
-        last = prints[stack[-1]]
-        # A line that opens on a word may be prose that starts a comment the
-        # next lines go on with, so a share-out that counts one holds only
-        # when there is exactly one comment line for each print.
-        depth = 0
-        while comment_only(under + depth):
-            depth += 1
-        worded = any(index in word_by for index in stack)
-        if (
-            len(stack) > 1
-            and len(dealt) == len(stack)
-            and (not worded or depth == len(stack))
-        ):
-            for place, index in enumerate(stack[:-1]):
-                said_by[index] = [dealt[place]]
-            said_by[stack[-1]] = run_from(under + len(stack), [dealt[-1]], last)
-        else:
-            for index in stack:
-                word_by.pop(index, None)
-            run = run_from(under, [], last)
-            if run:
-                said_by[stack[-1]] = run
-            elif comment_only(under) and opening(comments[under][1], stack[-1]):
-                said_by[stack[-1]] = run_from(under + 1, [comments[under][1]], last)
-        at = stack[-1] + 1
+        def start(index: int) -> int:
+            return span[prints[index]][0]
+
+        def end(index: int) -> int:
+            return span[prints[index]][1]
+
+        def opening(text: str, index: int) -> bool:
+            """Whether *text* opens like the output of the print at *index*,
+            or on a word, noted for the run to settle.
+            """
+            if _opens_output(text, prints[index]):
+                return True
+            word = _opening_word(text) if words else None
+            if word is not None:
+                word_by[prints[index]] = word
+            return word is not None
+
+        at = 0
+        while at < len(prints):
+            node = prints[at]
+            comment = trailing(end(at))
+            if comment is not None:
+                if opening(comment, at):
+                    said_by[node] = run_from(end(at) + 1, [comment], node)
+                at += 1
+                continue
+            stack = [at]
+            while (
+                stack[-1] + 1 < len(prints)
+                and start(stack[-1] + 1) == end(stack[-1]) + 1
+                and trailing(end(stack[-1] + 1)) is None
+            ):
+                stack.append(stack[-1] + 1)
+            under = end(stack[-1]) + 1
+            dealt = [
+                comments[under + place][1]
+                for place, index in enumerate(stack)
+                if comment_only(under + place)
+                and opening(comments[under + place][1], index)
+            ]
+            last = prints[stack[-1]]
+            # A line that opens on a word may be prose that starts a comment
+            # the next lines go on with, so a share-out that counts one holds
+            # only when there is exactly one comment line for each print.
+            depth = 0
+            while comment_only(under + depth):
+                depth += 1
+            worded = any(prints[index] in word_by for index in stack)
+            if (
+                len(stack) > 1
+                and len(dealt) == len(stack)
+                and (not worded or depth == len(stack))
+            ):
+                for place, index in enumerate(stack[:-1]):
+                    said_by[prints[index]] = [dealt[place]]
+                said_by[last] = run_from(under + len(stack), [dealt[-1]], last)
+            else:
+                for index in stack:
+                    word_by.pop(prints[index], None)
+                run = run_from(under, [], last)
+                if run:
+                    said_by[last] = run
+                elif comment_only(under) and opening(comments[under][1], stack[-1]):
+                    said_by[last] = run_from(under + 1, [comments[under][1]], last)
+            at = stack[-1] + 1
+
+    # The prints a statement runs on past are read on their own lines first,
+    # and those left without a comment there on the lines of the statement.
+    for node, (own, _statement) in found.items():
+        span[node] = own
+    read([node for node, (own, stmt) in found.items() if own[1] < stmt[1]], words=False)
+    for node, (_own, statement) in found.items():
+        if node not in said_by:
+            span[node] = statement
+    read([node for node in found if node not in said_by], words=True)
+    claimed = {span[node] for node in said_by}
+
+    def apart(first: int, last: int) -> tuple[int, ...]:
+        """The lines from *first* to *last* of the prints inside them that
+        have a comment of their own.
+        """
+        inside = {
+            number
+            for low, high in claimed
+            if first <= low and high <= last and (low, high) != (first, last)
+            for number in range(low, high + 1)
+        }
+        return tuple(sorted(inside))
+
     return [
         _Promise(
-            start(prints[index]),
-            end(prints[index]),
-            tuple(said),
-            _arguments(prints[index]),
-            word_by.get(index),
+            span[node][0],
+            span[node][1],
+            tuple(said_by[node]),
+            _arguments(node),
+            word_by.get(node),
+            apart(*span[node]),
         )
-        for index, said in sorted(said_by.items())
+        for node in sorted(
+            said_by, key=lambda node: (span[node][0], node.lineno, node.col_offset)
+        )
     ]
 
 
@@ -1215,17 +1272,20 @@ def _decimal_points(texts: Sequence[str], *, in_brackets: bool) -> list[str]:
     that ``0,5 dB`` would state ``0.4 dB`` on its ``0``.
     """
     out: list[str] = []
+    # The brackets open at each comma are counted on from the last one, not
+    # counted again from the start of the line, which made a long line of
+    # values quadratic.
     depth = 0
     for text in texts:
         pieces: list[str] = []
         at = 0
         for match in _DIGIT_COMMA.finditer(text):
-            inside = depth + _open_brackets(text[: match.start()]) > 0
+            depth += _open_brackets(text[at : match.start()])
             pieces.append(text[at : match.start()])
-            pieces.append("," if inside and not in_brackets else ".")
+            pieces.append("," if depth > 0 and not in_brackets else ".")
             at = match.end()
         out.append("".join([*pieces, text[at:]]))
-        depth += _open_brackets(text)
+        depth += _open_brackets(text[at:])
     return out
 
 
@@ -1341,25 +1401,31 @@ def output_disagreements(
     page: pathlib.Path,
     script: str,
     lines: dict[int, int],
-    written: dict[int, list[_Call]],
+    written: dict[int, list[tuple[int, _Call]]],
 ) -> list[str]:
     """Failures for every output comment of *page* that its print contradicts.
 
     :param script: The script the page ran as (:func:`_script`).
     :param lines: The line of the page each line of the script stands on.
     :param written: What each print wrote, keyed by its line in the script:
-        one ``(sep, texts, end)`` per call (:data:`_Call`), in the order the
-        calls came.
+        one ``(order, (sep, texts, end))`` per call (:data:`_Call`), *order*
+        counting the calls of the whole run in the order they began to write.
+        A comment that stands for the prints of several lines is held to
+        their calls in that order, as they took turns: two prints of a
+        comprehension over two lines write one value each time round.
     """
     failures: list[str] = []
     spanish = page.is_relative_to(_SITE_ES)
     for promise in promised_outputs(script):
         where = f"{_rel(page)}:{lines.get(promise.first, promise.first)}"
-        calls = [
+        apart = set(promise.apart)
+        kept = [
             call
             for number in range(promise.first, promise.last + 1)
+            if number not in apart
             for call in written.get(number, [])
         ]
+        calls = [call for _, call in sorted(kept, key=lambda call: call[0])]
         wrote = _written_parts(calls, promise.arguments)
         if promise.word is not None:
             first = next((part for part in wrote if part.kind != "line"), None)
@@ -1387,17 +1453,21 @@ def output_disagreements(
 #: The module a page's script imports before anything else. It wraps
 #: ``print`` so that every call made from the script itself, at any depth of
 #: its own functions and loops, also records what the call writes, keyed by
-#: the line of the script the call stands on; a print made inside the library
-#: is not the page's and is not recorded. The call writes through a file that
-#: hands each piece on to the one it was given and keeps it once that write
-#: has gone through, so the record holds what the print wrote and nothing
-#: else: each argument converted once, by the print itself, the ending it was
-#: given, and of a print that fails part of the way, or to a closed file,
-#: only what it wrote before it failed. When the script ends, however it
-#: ends, the record is saved beside it as JSON for :func:`_run_page` to read.
+#: the line of the script the call stands on and numbered in the order the
+#: calls began to write; a print made inside the library is not the page's
+#: and is not recorded. The call writes through a file that hands each piece
+#: on to the one it was given and keeps what that file took, so the record
+#: holds what the print wrote and nothing else: each argument converted once,
+#: by the print itself, the ending it was given, of a write the file took in
+#: part only the characters it says it took, by the count its ``write``
+#: returns or on the :class:`BlockingIOError` it raises, and of a print that
+#: fails part of the way, or to a closed file, only what it wrote before it
+#: failed. When the script ends, however it ends, the record is saved beside
+#: it as JSON for :func:`_run_page` to read.
 _RECORDER = """\
 import atexit
 import builtins
+import itertools
 import json
 import os
 import sys
@@ -1406,30 +1476,51 @@ _SCRIPT = sys.argv[0]
 _SAVED = os.path.join(os.path.dirname(os.path.abspath(_SCRIPT)), "printed.json")
 _PRINT = builtins.print
 _WRITTEN = {}
+_ORDER = itertools.count()
+
+
+def _took(text, count):
+    # A write that says it took fewer characters than it was given took
+    # those first ones; one that says nothing, or something else, took all.
+    if isinstance(count, int) and not isinstance(count, bool):
+        if 0 <= count < len(text):
+            return text[:count]
+    return text
 
 
 class _Kept:
     def __init__(self, file):
         self.file = file
         self.pieces = []
+        self.order = None
 
     def write(self, text):
-        written = self.file.write(text)
-        self.pieces.append(text)
+        if self.order is None:
+            self.order = next(_ORDER)
+        try:
+            written = self.file.write(text)
+        except BlockingIOError as blocked:
+            # A write that blocks counts the characters it took before then.
+            count = getattr(blocked, "characters_written", 0)
+            if isinstance(count, int) and count > 0:
+                self.pieces.append(text[:count])
+            raise
+        self.pieces.append(_took(text, written))
         return written
 
     def flush(self):
         self.file.flush()
 
 
-def _keep(line, count, sep, pieces):
+def _keep(line, order, count, sep, pieces):
     # A print writes its arguments with the separator between them and then
     # its ending: what it wrote after the last argument it wrote is the
     # ending, or the separator before an argument it failed to write.
     texts = pieces[0 : max(2 * count - 1, 0) : 2]
     at = 2 * len(texts) - 1 if texts else 0
     after = pieces[at] if at < len(pieces) else ""
-    _WRITTEN.setdefault(line, []).append([" " if sep is None else sep, texts, after])
+    kept = [order, " " if sep is None else sep, texts, after]
+    _WRITTEN.setdefault(line, []).append(kept)
 
 
 def _print(*args, sep=" ", end="\\n", file=None, flush=False):
@@ -1442,7 +1533,7 @@ def _print(*args, sep=" ", end="\\n", file=None, flush=False):
         return _PRINT(*args, sep=sep, end=end, file=kept, flush=flush)
     finally:
         if kept.pieces:
-            _keep(caller.f_lineno, len(args), sep, kept.pieces)
+            _keep(caller.f_lineno, kept.order, len(args), sep, kept.pieces)
 
 
 def _save():
@@ -1535,7 +1626,7 @@ def _run_page(
             return page, "the run ended without saving what its prints wrote", []
         saved = json.loads(record.read_text("utf-8"))
     written = {
-        int(line): [(sep, texts, end) for sep, texts, end in calls]
+        int(line): [(order, (sep, texts, end)) for order, sep, texts, end in calls]
         for line, calls in saved.items()
     }
     return page, "", output_disagreements(page, script, lines, written)

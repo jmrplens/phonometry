@@ -295,7 +295,8 @@ def _failures(script: str, outputs: dict[int, str]) -> list[str]:
     """
     page = check_doc_snippets._SITE / "page.mdx"
     lines = {number: number for number in range(1, script.count("\n") + 2)}
-    written = {line: [(" ", [text], "\n")] for line, text in outputs.items()}
+    # Each print wrote once, in the order of the lines they stand on.
+    written = {line: [(line, (" ", [text], "\n"))] for line, text in outputs.items()}
     found: list[str] = check_doc_snippets.output_disagreements(
         page, script, lines, written
     )
@@ -308,7 +309,7 @@ def _held_against(script: str, line: int, texts: list[str]) -> list[str]:
     """
     page = check_doc_snippets._SITE / "page.mdx"
     lines = {number: number for number in range(1, script.count("\n") + 2)}
-    written = {line: [(" ", texts, "\n")]}
+    written = {line: [(0, (" ", texts, "\n"))]}
     found: list[str] = check_doc_snippets.output_disagreements(
         page, script, lines, written
     )
@@ -937,7 +938,7 @@ def test_a_spanish_page_reads_a_decimal_comma_from_its_path() -> None:
     """The page's path, under the Spanish site, decides the decimal comma."""
     script = "print(35.9)  # 35,9 m\n"
     lines = {1: 1}
-    written = {1: [(" ", ["35.9"], "\n")]}
+    written = {1: [(0, (" ", ["35.9"], "\n"))]}
     spanish = check_doc_snippets._SITE_ES / "page.mdx"
     english = check_doc_snippets._SITE / "page.mdx"
     assert (
@@ -1155,6 +1156,120 @@ def test_two_prints_in_one_statement_share_its_comment() -> None:
     assert _failures(script, {2: "1", 3: "2"}) == []
     (failure, _) = _failures(script.replace("# 1 2", "# 1 3"), {2: "1", 3: "2"})
     assert "the comment says 3 where the print wrote 2" in failure
+
+
+def test_prints_of_one_statement_are_held_in_the_order_they_wrote(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two prints of a comprehension, on two lines, take turns: the record
+    keeps the calls in the order they came, not gathered line by line.
+    """
+    code = (
+        "data = [\n"
+        "    (print(x, end=' '),\n"
+        "     print(x + 10, end=' '))\n"
+        "    for x in range(2)\n"
+        "]  # 0 10 1 11\n"
+        "print()\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = code.replace("# 0 10 1 11", "# 0 1 10 11")
+    failures = check_doc_snippets.check_execution([_page(tmp_path, wrong, name="w.md")])
+    assert len(failures) == 2  # one for each print the comment stands for
+    assert all("the comment says 1 where the print wrote 10" in f for f in failures)
+    # The calls of the lines of a statement are read by their order.
+    script = "data = [\n    print(0),\n    print(10),\n]  # 0 10 1 11\n"
+    page = check_doc_snippets._SITE / "page.mdx"
+    lines = {number: number for number in range(1, 6)}
+    written = {
+        2: [(0, (" ", ["0"], " ")), (2, (" ", ["1"], " "))],
+        3: [(1, (" ", ["10"], " ")), (3, (" ", ["11"], " "))],
+    }
+    assert check_doc_snippets.output_disagreements(page, script, lines, written) == []
+
+
+def test_a_print_inside_a_statement_is_held_to_the_comment_on_its_own_lines() -> None:
+    """A comment at the end of the print's own last line, or on the comment
+    line under it, inside the statement, is the print's own; the statement's
+    comment holds the prints left to it.
+    """
+    script = "result = (\n    print(2)  # 3\n)\n"
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert (promise.first, promise.last, promise.lines) == (2, 2, ("3",))
+    (failure,) = _failures(script, {2: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+    under = "result = (\n    print(2)\n    # 3\n)\n"
+    (failure,) = _failures(under, {2: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+    shared = "data = [\n    print(1),  # 1\n    print(2),\n]  # 2\n"
+    promises = check_doc_snippets.promised_outputs(shared)
+    assert [(p.first, p.last, p.lines) for p in promises] == [
+        (1, 4, ("2",)),
+        (2, 2, ("1",)),
+    ]
+    assert _failures(shared, {2: "1", 3: "2"}) == []
+    assert _failures(shared.replace("# 2", "# 1 2"), {2: "1", 3: "2"}) != []
+    # A note on an argument's line is not the print's output: the
+    # statement's comment still holds the print.
+    noted = "total = sum([\n    print(2) or 1,  # counted once\n    2,\n])  # 3\n"
+    (failure,) = _failures(noted, {2: "2"})
+    assert "the comment says 3 where the print wrote 2" in failure
+
+
+def test_a_print_is_held_to_what_its_file_took(tmp_path: pathlib.Path) -> None:
+    """A file that takes part of a write says how much it took, by the count
+    its write returns or, when it blocks, on the error it raises.
+    """
+    code = (
+        "import errno\n"
+        "class Short:\n"
+        "    def write(self, text):\n"
+        "        return min(len(text), 1)\n"
+        "class Full:\n"
+        "    def write(self, text):\n"
+        "        raise BlockingIOError(errno.EAGAIN, 'full', 1)\n"
+        "print(123, file=Short())  # 1\n"
+        "try:\n"
+        "    print(456, file=Full())  # 4\n"
+        "except BlockingIOError:\n"
+        "    pass\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = code.replace("# 1\n", "# 123\n").replace("# 4\n", "# 456\n")
+    failures = check_doc_snippets.check_execution([_page(tmp_path, wrong, name="w.md")])
+    assert len(failures) == 2
+    assert "the comment says 123 where the print wrote 1" in failures[0]
+    assert "the comment says 456 where the print wrote 4" in failures[1]
+
+
+def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
+    """The brackets before each comma between two digits are counted on, not
+    counted again from the start of the line.
+
+    Counted again, a comment of 40,000 values took about 40 s on this machine.
+    """
+    count = 40_000
+    said = "[" + " ".join(f"{n},5" for n in range(count)) + "]"
+    wrote = "[" + " ".join(f"{n}.5" for n in range(count)) + "]"
+    start = time.perf_counter()
+    found = _disagreement(said, wrote, decimal_comma=True)
+    assert time.perf_counter() - start < 10.0
+    assert found == ""
+
+
+def test_a_comment_over_many_lines_is_read_in_linear_time() -> None:
+    """The brackets a comment leaves open are counted on as each line joins
+    it, not counted again over all of it for each line.
+
+    Counted again, a comment of 40,000 lines took about 23 s on this machine.
+    """
+    count = 40_000
+    rows = "".join(f"#  {n},\n" for n in range(1, count - 1))
+    script = f"print(list(range({count})))\n# [0,\n{rows}#  {count - 1}]\n"
+    start = time.perf_counter()
+    (promise,) = check_doc_snippets.promised_outputs(script)
+    assert time.perf_counter() - start < 10.0
+    assert len(promise.lines) == count
 
 
 def test_a_page_that_runs_past_its_time_reports_what_it_wrote_on_stderr(

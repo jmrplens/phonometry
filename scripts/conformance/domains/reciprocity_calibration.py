@@ -164,7 +164,7 @@ def _chk_table_a1() -> Outcome:
         for ratio, (real, imag) in zip(
             ref.IEC61094_2_TABLE_A1_RATIOS, row, strict=True
         ):
-            value = complex(metrology.temperature_transfer_function(ratio, x)[()])
+            value = metrology.temperature_transfer_function(ratio, x)
             worst = max(worst, abs(value.real - real), abs(value.imag - imag))
     return numeric(
         0.0,
@@ -190,10 +190,8 @@ def _chk_approximation() -> Outcome:
         for ratio, (real, imag) in zip(
             ref.IEC61094_2_TABLE_A1_RATIOS, row, strict=True
         ):
-            value = complex(
-                metrology.temperature_transfer_function(
-                    ratio, x, method="approximation"
-                )[()]
+            value = metrology.temperature_transfer_function(
+                ratio, x, method="approximation"
             )
             worst = max(worst, abs(abs(value) / abs(complex(real, imag)) - 1.0))
     return numeric(

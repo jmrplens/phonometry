@@ -80,7 +80,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
-from ..._internal.types import as_float_or_array
+from ..._internal.types import as_complex_or_array, as_float_or_array
 
 if TYPE_CHECKING:
     import os
@@ -94,6 +94,8 @@ if TYPE_CHECKING:
         ComplexScalar,
         ComplexValues,
         NumericArrayLike,
+        RealScalar,
+        RealValues,
         ReportEngine,
     )
     from ..._report.metadata import ReportMetadata
@@ -355,9 +357,37 @@ def loss_factor(stiffness: NumericArrayLike) -> float | NDArray[np.float64]:
     return as_float_or_array(k.imag / k.real, like=(stiffness,))
 
 
+@overload
+def transfer_stiffness_direct[S1: ComplexScalar, S2: ComplexScalar](
+    blocking_force: S1,
+    input_displacement: S2,
+) -> complex: ...
+
+
+@overload
+def transfer_stiffness_direct[V: ComplexValues, A2: NumericArrayLike](
+    blocking_force: V,
+    input_displacement: A2,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def transfer_stiffness_direct[S1: ComplexScalar, V: ComplexValues](
+    blocking_force: S1,
+    input_displacement: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def transfer_stiffness_direct[A1: NumericArrayLike, A2: NumericArrayLike](
+    blocking_force: A1,
+    input_displacement: A2,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def transfer_stiffness_direct(
     blocking_force: NumericArrayLike, input_displacement: NumericArrayLike
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Dynamic transfer stiffness by the direct method (ISO 10846-2).
 
     :math:`k_{2,1} = F_{2,\mathrm{b}} / u_1`, the blocked output force phasor over
@@ -366,7 +396,9 @@ def transfer_stiffness_direct(
     :param blocking_force: Blocked output force phasor ``F2,b`` (complex), in N.
     :param input_displacement: Input displacement phasor ``u1`` (complex,
         non-zero), in m.
-    :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
+    :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m. A ``complex`` when
+        ``blocking_force`` and ``input_displacement`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a zero input displacement (dead input channel).
     :raises TypeError: if ``blocking_force`` or ``input_displacement`` holds a text or a
         value that is not a number.
@@ -379,7 +411,47 @@ def transfer_stiffness_direct(
             "ratio k2,1 = F2,b/u1 is undefined there."
         )
         raise ValueError(msg)
-    return np.asarray(f2b / u1, dtype=np.complex128)
+    return as_complex_or_array(f2b / u1, like=(blocking_force, input_displacement))
+
+
+@overload
+def transfer_stiffness_indirect[S1: ComplexScalar, S2: RealScalar](
+    transmissibility: S1,
+    blocking_mass: float,
+    *,
+    frequency: S2,
+    flange_mass: float = ...,
+) -> complex: ...
+
+
+@overload
+def transfer_stiffness_indirect[V: ComplexValues, A2: NumericArrayLike](
+    transmissibility: V,
+    blocking_mass: float,
+    *,
+    frequency: A2,
+    flange_mass: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def transfer_stiffness_indirect[S1: ComplexScalar, V: RealValues](
+    transmissibility: S1,
+    blocking_mass: float,
+    *,
+    frequency: V,
+    flange_mass: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def transfer_stiffness_indirect[A1: NumericArrayLike, A2: NumericArrayLike](
+    transmissibility: A1,
+    blocking_mass: float,
+    *,
+    frequency: A2,
+    flange_mass: float = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def transfer_stiffness_indirect(
@@ -388,7 +460,7 @@ def transfer_stiffness_indirect(
     *,
     frequency: NumericArrayLike,
     flange_mass: float = 0.0,
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Dynamic transfer stiffness by the indirect method (ISO 10846-3, Eq. 1).
 
     :math:`k_{2,1} = -(2\pi f)^2 (m_2 + m_\mathrm{f}) T`: the blocking force is the
@@ -421,7 +493,9 @@ def transfer_stiffness_indirect(
         scalar or array; velocity and acceleration ratios have the same value).
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
-    :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
+    :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m. A ``complex`` when
+        ``transmissibility`` and ``frequency`` are both numbers, an array when either is
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency or blocking mass, or a
         ``transmissibility`` that is not finite.
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
@@ -430,8 +504,11 @@ def transfer_stiffness_indirect(
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
-    return _indirect_stiffness(
-        frequency, transmissibility, blocking_mass, flange_mass, "frequency"
+    return as_complex_or_array(
+        _indirect_stiffness(
+            frequency, transmissibility, blocking_mass, flange_mass, "frequency"
+        ),
+        like=(transmissibility, frequency),
     )
 
 
@@ -466,9 +543,37 @@ def _indirect_stiffness(
     )
 
 
+@overload
+def blocking_force_ratio[S1: ComplexScalar, S2: ComplexScalar](
+    driving_point_stiffness: S1,
+    termination_stiffness: S2,
+) -> complex: ...
+
+
+@overload
+def blocking_force_ratio[V: ComplexValues, A2: NumericArrayLike](
+    driving_point_stiffness: V,
+    termination_stiffness: A2,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def blocking_force_ratio[S1: ComplexScalar, V: ComplexValues](
+    driving_point_stiffness: S1,
+    termination_stiffness: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def blocking_force_ratio[A1: NumericArrayLike, A2: NumericArrayLike](
+    driving_point_stiffness: A1,
+    termination_stiffness: A2,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def blocking_force_ratio(
     driving_point_stiffness: NumericArrayLike, termination_stiffness: NumericArrayLike
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Ratio of the delivered force to the blocking force (ISO 10846-1, Eq. 6).
 
     For an isolator driving a receiving structure, the output force for a
@@ -493,7 +598,9 @@ def blocking_force_ratio(
         the isolator (complex, scalar or array), in N/m.
     :param termination_stiffness: Driving-point stiffness ``kt`` of the
         receiving structure (complex, scalar or array, non-zero), in N/m.
-    :return: The complex ratio ``F2/F2,b``.
+    :return: The complex ratio ``F2/F2,b``. A ``complex`` when
+        ``driving_point_stiffness`` and ``termination_stiffness`` are both numbers, an
+        array when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a zero termination stiffness.
     :raises TypeError: if ``driving_point_stiffness`` or ``termination_stiffness`` holds
         a text or a value that is not a number.
@@ -503,12 +610,41 @@ def blocking_force_ratio(
     if not np.all(np.abs(kt) > 0.0):
         msg = "'termination_stiffness' must be non-zero."
         raise ValueError(msg)
-    return np.asarray(1.0 / (1.0 + k22 / kt), dtype=np.complex128)
+    return as_complex_or_array(
+        1.0 / (1.0 + k22 / kt), like=(driving_point_stiffness, termination_stiffness)
+    )
+
+
+@overload
+def base_transmissibility[S: RealScalar](
+    frequency: S,
+    mass: float,
+    stiffness: float,
+    damping: float = ...,
+) -> complex: ...
+
+
+@overload
+def base_transmissibility[V: RealValues](
+    frequency: V,
+    mass: float,
+    stiffness: float,
+    damping: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def base_transmissibility[A: NumericArrayLike](
+    frequency: A,
+    mass: float,
+    stiffness: float,
+    damping: float = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def base_transmissibility(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float = 0.0
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Transmissibility of a mass on an ideal resilient element (model).
 
     The output mass ``m`` on a massless Kelvin-Voigt element (spring ``k`` in
@@ -530,7 +666,8 @@ def base_transmissibility(
     :param mass: Output mass ``m``, in kg.
     :param stiffness: Element stiffness ``k``, in N/m.
     :param damping: Viscous damping ``c``, in N.s/m (Default: 0.0).
-    :return: The complex transmissibility ``T``.
+    :return: The complex transmissibility ``T``. A ``complex`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number,
         or ``frequency`` holds a text or a value that is not a real number.
     """
@@ -540,7 +677,7 @@ def base_transmissibility(
     omega = _omega(frequency)
     numerator = stiffness + 1j * omega * damping
     denominator = stiffness - omega**2 * mass + 1j * omega * damping
-    return np.asarray(numerator / denominator, dtype=np.complex128)
+    return as_complex_or_array(numerator / denominator, like=(frequency,))
 
 
 @dataclass(frozen=True)

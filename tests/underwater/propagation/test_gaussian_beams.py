@@ -795,9 +795,9 @@ def test_a_lossy_seabed_is_the_image_sum_with_R_at_each_images_own_angle() -> No
         rho2=_SEABED["rho2"],
         c2=_SEABED["c2"],
     )
-    assert np.abs(r_above[0]) < 0.999
-    assert np.abs(r_below[0]) == pytest.approx(1.0, abs=1e-12)
-    assert abs(np.angle(r_below[0])) > 0.3
+    assert np.abs(r_above) < 0.999
+    assert np.abs(r_below) == pytest.approx(1.0, abs=1e-12)
+    assert abs(np.angle(r_below)) > 0.3
 
     # The phase of R is load-bearing, not decorative: strip it from the oracle
     # and the 4 km point moves by decibels, while the solver stays with the

@@ -33,11 +33,12 @@ consistent unit works (kg/m³ by convention).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_complex_or_array
 from ..._internal.validation import (
     real_array,
     require_positive,
@@ -50,7 +51,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 # Upper edge of the grazing-angle domain: 90° is normal incidence.
 _NORMAL_INCIDENCE_DEG = 90.0
@@ -77,6 +78,39 @@ def critical_angle(c1: float, c2: float) -> float:
     return float(np.degrees(np.arccos(cw / cs)))
 
 
+@overload
+def reflection_coefficient[S: RealScalar](
+    grazing_angle_deg: S,
+    *,
+    rho1: float,
+    c1: float,
+    rho2: float,
+    c2: float,
+) -> complex: ...
+
+
+@overload
+def reflection_coefficient[V: RealValues](
+    grazing_angle_deg: V,
+    *,
+    rho1: float,
+    c1: float,
+    rho2: float,
+    c2: float,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def reflection_coefficient[A: NumericArrayLike](
+    grazing_angle_deg: A,
+    *,
+    rho1: float,
+    c1: float,
+    rho2: float,
+    c2: float,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def reflection_coefficient(
     grazing_angle_deg: NumericArrayLike,
     *,
@@ -84,7 +118,7 @@ def reflection_coefficient(
     c1: float,
     rho2: float,
     c2: float,
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Complex plane-wave pressure reflection coefficient at the seabed.
 
     :param grazing_angle_deg: Grazing angle(s) :math:`\varphi` from the
@@ -94,7 +128,8 @@ def reflection_coefficient(
     :param c1: Sound speed in the water ``c1``, in m/s.
     :param rho2: Sediment density :math:`\rho_2`.
     :param c2: Sound speed in the sediment ``c2``, in m/s.
-    :return: The complex reflection coefficient per grazing angle.
+    :return: The complex reflection coefficient per grazing angle. A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``c1``, ``c2``, ``rho1`` or ``rho2`` is not a single number,
         or ``grazing_angle_deg`` holds a text or a value that is not a real number.
@@ -124,7 +159,7 @@ def reflection_coefficient(
     # incidence, cos_t1 = cos_t2 = 0 gives 0/0 (NaN). The angle-independent limit
     # is the normal-incidence coefficient (z2 − z1)/(z2 + z1).
     r = np.where(np.isnan(r), (z2 - z1) / (z2 + z1), r)
-    return np.asarray(r, dtype=np.complex128)
+    return as_complex_or_array(r, like=(grazing_angle_deg,))
 
 
 @dataclass(frozen=True)

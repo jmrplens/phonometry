@@ -71,7 +71,7 @@ from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
 
 # Sex is imported to run, not only to type: typing.get_type_hints resolves the
 # sex field of MultipleShockResult in this module's namespace.
-from ..._internal.types import ReportEngine, Sex, as_float_or_array
+from ..._internal.types import ReportEngine, Sex, as_complex_or_array, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     floats_of,
@@ -173,7 +173,23 @@ def _mz_for_sex(sex: str) -> float:
 # ---------------------------------------------------------------------------
 
 
-def seat_to_spine_transfer(frequencies: NumericArrayLike) -> NDArray[np.complex128]:
+@overload
+def seat_to_spine_transfer[S: RealScalar](frequencies: S) -> complex: ...
+
+
+@overload
+def seat_to_spine_transfer[V: RealValues](frequencies: V) -> NDArray[np.complex128]: ...
+
+
+@overload
+def seat_to_spine_transfer[A: NumericArrayLike](
+    frequencies: A,
+) -> complex | NDArray[np.complex128]: ...
+
+
+def seat_to_spine_transfer(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]:
     r"""Seat-to-spine transfer function :math:`H(\omega)` (clause 5.2,
     Formula 1).
 
@@ -181,7 +197,9 @@ def seat_to_spine_transfer(frequencies: NumericArrayLike) -> NDArray[np.complex1
     the vertical spinal response; the transmissibility is unity at 0 Hz.
 
     :param frequencies: Frequencies at which to evaluate ``H``, in hertz.
-    :return: The complex frequency response, aligned with ``frequencies``.
+    :return: The complex frequency response, aligned with ``frequencies``. A ``complex``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
@@ -192,7 +210,7 @@ def seat_to_spine_transfer(frequencies: NumericArrayLike) -> NDArray[np.complex1
     response = 1.0 + 2.0 * z0 * (jw / w0) + (jw / w0) ** 2
     for wk, zk in _TRANSFER_POLES:
         response = response / (1.0 + 2.0 * zk * (jw / wk) + (jw / wk) ** 2)
-    return np.asarray(response, dtype=np.complex128)
+    return as_complex_or_array(response, like=(frequencies,))
 
 
 def spinal_response(

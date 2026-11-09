@@ -20,4 +20,4 @@ build==1.6.1
 setuptools==84.2.1
 twine==7.0.0
 check-wheel-contents==0.6.3
-cyclonedx-bom==7.6.0
+cyclonedx-bom==8.0.1

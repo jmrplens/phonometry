@@ -9,12 +9,12 @@
 # reportlab and svglib than the committed fiches were rendered with, so a
 # developer running `make reports` saw drift in fiches nobody had touched.
 # The versions here are the versions there; bump them together.
-ruff==0.17.3
+ruff==0.17.4
 mypy==2.4.1
 bandit==1.9.4
-zizmor==1.31.1  # audits .github/: workflows (template injection, token permissions, persisted credentials) and Dependabot
-types-setuptools==84.0.0.20261006
-types-PyYAML==6.0.12.20261030  # the type checker reads the tests' yaml calls against real stubs rather than skipping the package
+zizmor==1.32.0  # audits .github/: workflows (template injection, token permissions, persisted credentials) and Dependabot
+types-setuptools==84.2.0.20261104
+types-PyYAML==6.0.12.20261103  # the type checker reads the tests' yaml calls against real stubs rather than skipping the package
 types-jsonschema==4.26.0.20261006  # the same for the catalogue schema test's jsonschema calls
 
 pytest==9.2.0
@@ -23,7 +23,7 @@ pytest-xdist==3.8.0  # parallel test execution (`pytest -n auto`); coverage is c
 
 matplotlib==3.11.2  # required by the result-object .plot() tests
 reportlab==5.1.0  # required by the result-object .report() tests (ISO 717 PDF fiche)
-svglib==2.3.2
+svglib==2.4.0
 pypdf==6.21.4  # one-page assertion in the ISO 717 report tests
 pypdfium2==5.14.0  # rasterizes the .report() PDFs to committed WebP previews (scripts/generate_reports.py); no system Poppler needed
 

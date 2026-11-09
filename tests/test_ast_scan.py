@@ -1866,11 +1866,14 @@ def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() ->
     where the ``class`` statement runs, or a function's around it, before
     the module's; a class body that has not yet bound it reads the module's
     globals, as Python looks a name a class body binds up, not a function
-    or a class body around it, and one that has bound it reads its own.
+    or a class body around it, and one that has bound it reads its own; one
+    that binds it in a branch that may not have run reads either, as the
+    run falls back to the module's when the branch did not bind it.
 
     A class body that had not yet bound the name read the scope around the
     ``class`` statement, so ``dataclass = len`` in the function or the class
-    around was read as the decorator, while the run finds the import.
+    around was read as the decorator, while the run finds the import; and
+    one that may have bound it read that binding alone.
     """
     module = ast.parse(
         textwrap.dedent(
@@ -1923,6 +1926,20 @@ def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() ->
                     class Rec:
                         pass
                     dataclass = len
+
+            class Branch:
+                if ready:
+                    dataclass = len
+                @dataclass
+                class Rec:
+                    pass
+
+            class Defined:
+                def dataclass(cls):
+                    return cls
+                @dataclass
+                class Rec:
+                    pass
             """
         )
     )
@@ -1943,6 +1960,8 @@ def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() ->
         "After": False,
         "nested": True,
         "Around": True,
+        "Branch": None,
+        "Defined": False,
     }
 
 

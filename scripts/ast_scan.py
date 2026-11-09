@@ -1293,17 +1293,21 @@ def standing_where_read(root: ast.Module, node: ast.AST, name: str) -> list[ast.
     in the branches of an ``if`` or a ``try`` may be. A class body that has
     not yet bound the name reads the module's, as Python does: the body
     looks a name it binds up in its own namespace and then in the module's
-    globals, never in a function or a class body around it; a function
-    that binds it later holds none, as the read raises there. At the top
-    of the module, a binding a function makes of the name under ``global``
-    may stand as well, since that function may have run
+    globals, never in a function or a class body around it; and one that
+    may not have bound it yet, in a branch that may not have run, reads the
+    module's beside its own (:func:`_bound_on_every_way`). A function that
+    binds it later holds none, as the read raises there. At the top of the
+    module, a binding a function makes of the name under ``global`` may
+    stand as well, since that function may have run
     (:func:`global_bindings`). Empty when nothing but a builtin is the name.
     """
     scope = binding_scope(root, node, name)
     held = list(held_before(root, bindings_by_name(scope).get(name, []), node))
-    if not held and isinstance(scope, ast.ClassDef):
+    if isinstance(scope, ast.ClassDef) and not any(
+        _bound_on_every_way(root, binding, node) for binding in held
+    ):
         scope = root
-        held = list(held_before(root, bindings_by_name(root).get(name, []), node))
+        held.extend(held_before(root, bindings_by_name(root).get(name, []), node))
     if scope is root:
         held.extend(
             binding
@@ -1311,6 +1315,17 @@ def standing_where_read(root: ast.Module, node: ast.AST, name: str) -> list[ast.
             if all(binding is not other for other in held)
         )
     return held
+
+
+def _bound_on_every_way(root: ast.Module, binding: ast.AST, point: ast.AST) -> bool:
+    """Whether *binding*, of the scope that reads a name at *point*, binds it
+    on every way to *point*: an assignment or an import that runs before it
+    whatever happens (:func:`runs_before`), or a ``def`` or a ``class``
+    statement written straight in a block that holds *point*, before it.
+    """
+    if isinstance(binding, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return _later_in_block(_frames(root, binding), _frames(root, point))
+    return runs_before(root, binding, point)
 
 
 def import_path(binding: ast.AST, name: str, package: str | None = None) -> str | None:

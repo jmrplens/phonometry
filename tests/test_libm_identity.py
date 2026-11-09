@@ -8,7 +8,16 @@ the ``libm`` :mod:`math` calls, so the tests below hand the reader minimal
 way glibc writes it, hold the reading of the real library here to
 ``readelf``'s wherever ``readelf`` knows the property note, and hold the
 ``libm`` and the loader read to the objects that define ``exp`` and
-``__tls_get_addr``, with planted ones mapped ahead of them.
+``__tls_get_addr``, found by absolute paths and by relative ones, with
+planted ones of the other build mapped ahead of them. Where nothing names
+them, or they cannot be read, the build and the loader's reading are an
+:class:`libm_identity.Unread` that says what could not be read, and the tests
+that ask for one build or for that reading skip by it. Every child the tests
+start goes through :func:`libm_identity.run_child`, so that a system that
+refuses to start the interpreter, the loader or ``readelf`` skips the test
+that would read the child, and a child that runs and fails fails it. Only the
+tests that look a symbol up need :mod:`ctypes`; on an interpreter without it
+the others run, as :mod:`libm_identity` does there.
 :func:`libm_identity.mask_reading` reads how a loader reads
 ``GLIBC_TUNABLES`` from the names its parser carries, so the tests hand it
 loader images spelt as each glibc spells them and hold the reading of this
@@ -18,7 +27,7 @@ process's loader to what each mask does to a child's ``exp``.
 from __future__ import annotations
 
 import contextlib
-import ctypes
+import errno
 import functools
 import os
 import platform
@@ -27,8 +36,8 @@ import shutil
 import struct
 import subprocess
 import sys
-from pathlib import Path
-from typing import TYPE_CHECKING
+from pathlib import Path, PosixPath
+from typing import TYPE_CHECKING, Any
 
 import libm_identity
 import pytest
@@ -191,6 +200,7 @@ def test_a_note_segment_a_64_bit_loader_skips_is_skipped() -> None:
         _elf((_PT_GNU_PROPERTY, _glibc_libm_note(_V3), 8), machine=183),
         _elf((_PT_GNU_PROPERTY, _glibc_libm_note(_V3), 8), elf_class=1),
         _elf((_PT_GNU_PROPERTY, _glibc_libm_note(_V3), 8))[:100],
+        _elf((_PT_GNU_PROPERTY, _glibc_libm_note(_V3), 8))[:-4],
         b"#!/bin/sh\n",
         b"",
     ],
@@ -202,6 +212,7 @@ def test_a_note_segment_a_64_bit_loader_skips_is_skipped() -> None:
         "aarch64",
         "elf32",
         "truncated",
+        "cut-in-its-note",
         "script",
         "empty",
     ],
@@ -210,14 +221,60 @@ def test_an_object_that_declares_no_level_reads_as_none(image: bytes) -> None:
     assert libm_identity.x86_isa_levels_needed(image) is None
 
 
-def test_an_unreadable_library_is_no_build_for_v3(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_what_cannot_be_read_is_neither_true_nor_false() -> None:
+    unread = libm_identity.Unread("the libm lib/libm.so.6 cannot be read")
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "neither true nor false: the libm lib/libm.so.6 cannot be read"
+        ),
+    ):
+        bool(unread)
+
+
+#: What the libm is found to be when it cannot be named.
+_UNNAMED_LIBM = libm_identity.Unread(
+    "exp cannot be looked up here, and /proc/self/maps cannot be read "
+    "(Permission denied)"
+)
+
+
+@pytest.mark.parametrize(
+    ("found", "reason"),
+    [
+        ("absent", "the libm {library} cannot be read (No such file or directory)"),
+        ("script", "the libm {library} is no whole 64-bit x86-64 ELF object"),
+        ("cut", "the libm {library} is no whole 64-bit x86-64 ELF object"),
+        ("unnamed", _UNNAMED_LIBM.reason),
+    ],
+)
+def test_a_libm_that_cannot_be_read_is_neither_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, found: str, reason: str
 ) -> None:
+    """A libm that cannot be named or read, or is no whole object, is neither build.
+
+    Its build comes back as what could not be read, never as the baseline's
+    ``False``: a missing file, a file that is no ELF object, and one cut
+    short in its note, which declares the baseline in its first bytes.
+    """
+    library = tmp_path / "libm.so.6"
+    images = {
+        "script": b"#!/bin/sh\n",
+        "cut": _elf((_PT_GNU_PROPERTY, _glibc_libm_note(_BASELINE), 8))[:-4],
+    }
+    if found in images:
+        library.write_bytes(images[found])
     monkeypatch.setattr(platform, "system", lambda: "Linux")
     monkeypatch.setattr(platform, "machine", lambda: "x86_64")
     monkeypatch.setattr(libm_identity, "_glibc_version", lambda: (2, 43))
-    monkeypatch.setattr(libm_identity, "loaded_libm", lambda: tmp_path / "absent")
-    assert libm_identity.glibc_built_for_x86_64_v3() is False
+    monkeypatch.setattr(
+        libm_identity,
+        "loaded_libm",
+        lambda: _UNNAMED_LIBM if found == "unnamed" else library,
+    )
+    assert libm_identity.glibc_built_for_x86_64_v3() == libm_identity.Unread(
+        reason.format(library=library)
+    )
 
 
 @pytest.mark.parametrize(
@@ -309,14 +366,31 @@ def test_a_loader_that_names_no_mask_tunable_says_nothing(image: bytes) -> None:
     assert libm_identity.mask_reading(image) is None
 
 
-@pytest.mark.parametrize("found", ["none", "absent", "no-mask-tunable"])
+@pytest.mark.parametrize("found", ["unnamed", "absent", "no-mask-tunable"])
 def test_a_loader_that_cannot_be_read_counts_a_mask_in_any_spelling(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, found: str
 ) -> None:
+    """A loader that cannot be named or read gives no reading, and any spelling counts."""
     planted = tmp_path / "ld-linux-x86-64.so.2"
     planted.write_bytes(b"\x7fELF\0glibc.cpu.hwcap_mask\0")
-    loaders = {"none": None, "absent": tmp_path / "absent", "no-mask-tunable": planted}
+    unnamed = libm_identity.Unread(
+        "__tls_get_addr cannot be looked up here, and /proc/self/maps cannot be "
+        "read (Permission denied)"
+    )
+    absent = tmp_path / "absent"
+    loaders = {"unnamed": unnamed, "absent": absent, "no-mask-tunable": planted}
+    reasons = {
+        "unnamed": unnamed.reason,
+        "absent": (
+            f"the dynamic loader {absent} cannot be read (No such file or directory)"
+        ),
+        "no-mask-tunable": (
+            f"the dynamic loader {planted} names no tunable that masks processor "
+            "features"
+        ),
+    }
     monkeypatch.setattr(libm_identity, "loaded_loader", lambda: loaders[found])
+    assert libm_identity.loader_reading() == libm_identity.Unread(reasons[found])
     assert libm_identity.mask_reading_here() == libm_identity.ANY_READING
 
 
@@ -328,11 +402,18 @@ def test_a_loader_that_cannot_be_read_counts_a_mask_in_any_spelling(
         (False, "glibc.cpu.hwcaps=-AVX", True),
         (True, "", True),
         (True, libm_identity.WITHOUT_FMA, True),
+        (_UNNAMED_LIBM, "", True),
+        (_UNNAMED_LIBM, libm_identity.WITHOUT_FMA, False),
     ],
 )
 def test_a_mask_leaves_a_build_for_v3_on_the_pinned_routines(
-    monkeypatch: pytest.MonkeyPatch, *, v3: bool, tunables: str, pinned: bool
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    v3: bool | libm_identity.Unread,
+    tunables: str,
+    pinned: bool,
 ) -> None:
+    """A build that cannot be told runs the pins unmasked, as both builds do, and not masked."""
     monkeypatch.setattr(libm_identity, "glibc_on_x86_64_with_fma", lambda: True)
     monkeypatch.setattr(libm_identity, "glibc_built_for_x86_64_v3", lambda: v3)
     monkeypatch.setattr(libm_identity, "mask_reading_here", lambda: _reading("2.39"))
@@ -364,6 +445,67 @@ def test_the_pinned_routines_start_at_glibc_2_29(
     monkeypatch.delenv(libm_identity.TUNABLES, raising=False)
     assert libm_identity.glibc_on_x86_64_with_fma() is pinned
     assert libm_identity.runs_the_pinned_routines() is pinned
+
+
+#: A loader that cannot be read, and what the pins' skip says of it.
+_UNREAD_LOADER = libm_identity.Unread(
+    "the dynamic loader /lib64/ld-linux-x86-64.so.2 cannot be read (Permission denied)"
+)
+
+#: Why the pins skip where a mask may count and the build cannot be told,
+#: where the loader's reading cannot, and where the library is another.
+_OFF_BY_THE_BUILD = (
+    "GLIBC_TUNABLES may take glibc here off its FMA variant, and the build of "
+    f"glibc here cannot be told: {_UNNAMED_LIBM.reason}"
+)
+_OFF_BY_THE_LOADER = (
+    "GLIBC_TUNABLES may mask FMA or AVX2, and how this process's loader reads a "
+    f"mask cannot be told: {_UNREAD_LOADER.reason}"
+)
+_NOT_THE_PINNED_LIBM = (
+    "the C library here is not the glibc FMA variant the pinned routines "
+    "spell; their bits are the contract, the local library's are not"
+)
+
+
+@pytest.mark.parametrize(
+    ("fma", "build", "reading", "tunables", "why"),
+    [
+        (False, False, "2.39", "", _NOT_THE_PINNED_LIBM),
+        (True, True, "2.39", libm_identity.WITHOUT_FMA, None),
+        (True, False, "2.39", "", None),
+        (True, False, "2.39", "glibc.cpu.hwcaps=-FMA", _NOT_THE_PINNED_LIBM),
+        (True, False, "2.39", "glibc.cpu.hwcaps=-FMA_Usable", None),
+        (True, _UNNAMED_LIBM, "2.39", "", None),
+        (True, _UNNAMED_LIBM, "2.39", "glibc.cpu.hwcaps=-FMA", _OFF_BY_THE_BUILD),
+        (True, _UNNAMED_LIBM, "2.39", "glibc.cpu.hwcaps=-FMA_Usable", None),
+        (True, False, "unread", "", None),
+        (True, False, "unread", "glibc.cpu.hwcaps=-FMA_Usable", _OFF_BY_THE_LOADER),
+        (True, _UNNAMED_LIBM, "unread", libm_identity.WITHOUT_FMA, _OFF_BY_THE_BUILD),
+    ],
+)
+def test_the_pins_skip_by_what_could_not_be_read(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    fma: bool,
+    build: bool | libm_identity.Unread,
+    reading: str,
+    tunables: str,
+    why: str | None,
+) -> None:
+    """Under a mask that may count, a build or a reading not told is named as the cause.
+
+    Unmasked, both builds run the FMA routines, so neither what the libm is
+    nor how the loader reads a mask is asked; a mask the loader's reading
+    ignores counts for nothing whatever the build is.
+    """
+    loader_reading = _UNREAD_LOADER if reading == "unread" else _reading(reading)
+    monkeypatch.setattr(libm_identity, "glibc_on_x86_64_with_fma", lambda: fma)
+    monkeypatch.setattr(libm_identity, "glibc_built_for_x86_64_v3", lambda: build)
+    monkeypatch.setattr(libm_identity, "loader_reading", lambda: loader_reading)
+    monkeypatch.setenv(libm_identity.TUNABLES, tunables)
+    assert libm_identity.why_off_the_pinned_routines() == why
+    assert libm_identity.runs_the_pinned_routines() is (why is None)
 
 
 #: What each glibc did to a child's ``exp`` under a mask, as
@@ -477,15 +619,11 @@ def _exp_digest_under(tunables: str) -> str:
     }
     if tunables:
         environment[libm_identity.TUNABLES] = tunables
-    # Fixed argv, no shell, no user input
-    return subprocess.run(
+    return libm_identity.run_child(
         [sys.executable, "-I", "-c", _EXP_DIGEST],
-        check=True,
-        capture_output=True,
-        text=True,
         env=environment,
         timeout=60,
-    ).stdout.strip()
+    ).strip()
 
 
 @pytest.mark.parametrize(
@@ -521,16 +659,26 @@ def test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
     when the child's ``exp`` is an unmasked child's: a mask this glibc does not
     read leaves the bit-for-bit tests running, and one it reads skips them.
     Read as a loader that cannot be read, a mask that moved the child skips
-    them too.
+    them too. Where the build of glibc or the loader's reading cannot be
+    told, there is nothing to hold the child's ``exp`` to, and the test skips
+    by what could not be read.
     """
     if not libm_identity.glibc_on_x86_64_with_fma():
         pytest.skip(
             "needs glibc 2.29 or later, the routines the pins spell, on an x86-64 "
             "processor with FMA and AVX2"
         )
-    if libm_identity.glibc_built_for_x86_64_v3():
+    build = libm_identity.glibc_built_for_x86_64_v3()
+    if isinstance(build, libm_identity.Unread):
+        pytest.skip(f"the build of glibc here cannot be told: {build.reason}")
+    if build:
         pytest.skip(
             "glibc here is built for x86-64-v3, so no mask moves it off its FMA variant"
+        )
+    reading = libm_identity.loader_reading()
+    if isinstance(reading, libm_identity.Unread):
+        pytest.skip(
+            f"how this process's loader reads a mask cannot be told: {reading.reason}"
         )
     moved = _exp_digest_under(tunables) != _exp_digest_under("")
     monkeypatch.setenv(libm_identity.TUNABLES, tunables)
@@ -544,6 +692,14 @@ def test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
 def _on_x86_64_glibc() -> None:
     if platform.machine() != "x86_64" or platform.libc_ver()[0] != "glibc":
         pytest.skip("reads the objects glibc's loader maps on x86-64 Linux")
+
+
+#: Why a test that looks up where a symbol resolves, or maps a file of its
+#: own, skips: both go through ctypes.
+_WITHOUT_CTYPES = (
+    "needs ctypes to look up where the default namespace resolves a symbol and "
+    "to map a file; an interpreter built without libffi has none"
+)
 
 
 def _mappings() -> list[tuple[int, int, Path]]:
@@ -560,6 +716,12 @@ def _mappings() -> list[tuple[int, int, Path]]:
 
 def _file_holding(symbol: str) -> Path:
     """The file the kernel maps where the default namespace resolves *symbol*."""
+    try:
+        # Imported here: without ctypes this module still loads, and only the
+        # tests that look a symbol up skip.
+        import ctypes  # noqa: PLC0415
+    except ImportError:
+        pytest.skip(_WITHOUT_CTYPES)
     address = ctypes.cast(getattr(ctypes.CDLL(None), symbol), ctypes.c_void_p).value
     assert address is not None
     for start, end, file in _mappings():
@@ -569,11 +731,51 @@ def _file_holding(symbol: str) -> Path:
     raise AssertionError(msg)
 
 
-def _first_libm_mapped() -> Path | None:
+def _first_mapped(file_name: re.Pattern[str]) -> Path | None:
     for _, _, file in _mappings():
-        if libm_identity._LIBM_FILE_NAME.fullmatch(file.name):
+        if file_name.fullmatch(file.name):
             return file
     return None
+
+
+def _first_libm_mapped() -> Path | None:
+    return _first_mapped(libm_identity._LIBM_FILE_NAME)
+
+
+def _declares_v3(library: Path) -> bool:
+    """Whether *library* declares x86-64-v3 or a higher level, as readelf names them."""
+    needed = libm_identity.x86_isa_levels_needed(library.read_bytes())
+    return needed is not None and needed >= _LEVEL_BITS["x86-64-v3"]
+
+
+def _libm_of_the_other_build(real: Path, directory: Path) -> Path:
+    """A ``libm.so.6`` in *directory* that declares the build *real* is not.
+
+    It declares x86-64-v3 where *real* is built for a lower level and the
+    baseline where *real* is built for x86-64-v3, so that reading it in place
+    of *real* changes the predicate on either build.
+    """
+    planted = directory / "libm.so.6"
+    planted.parent.mkdir(parents=True, exist_ok=True)
+    needed = _BASELINE if _declares_v3(real) else _V3
+    planted.write_bytes(_elf((_PT_GNU_PROPERTY, _glibc_libm_note(needed), 8)))
+    return planted
+
+
+def _loader_read_otherwise(real: Path, directory: Path) -> Path:
+    """A loader in *directory* spelt as a glibc that reads the mask unlike *real*."""
+    reading = libm_identity.mask_reading(real.read_bytes())
+    expected = reading if reading is not None else libm_identity.ANY_READING
+    planted = directory / "ld-linux-x86-64.so.2"
+    planted.parent.mkdir(parents=True, exist_ok=True)
+    planted.write_bytes(
+        next(
+            image
+            for image in _LOADERS.values()
+            if libm_identity.mask_reading(image) != expected
+        )
+    )
+    return planted
 
 
 #: ``PROT_READ``, ``MAP_PRIVATE`` and ``MAP_FIXED_NOREPLACE`` (Linux 4.17),
@@ -586,6 +788,11 @@ _MAP_FIXED_NOREPLACE = 0x100000
 @contextlib.contextmanager
 def _mapped_first(path: Path) -> Iterator[None]:
     """*path* mapped below every file this process maps, so maps lists it first."""
+    try:
+        # Imported here, as in _file_holding.
+        import ctypes  # noqa: PLC0415
+    except ImportError:
+        pytest.skip(_WITHOUT_CTYPES)
     libc = ctypes.CDLL(None)
     mmap = libc.mmap
     mmap.argtypes = (
@@ -615,132 +822,525 @@ def _mapped_first(path: Path) -> Iterator[None]:
         munmap(address, size)
 
 
+class _RefusingMaps(PosixPath):
+    """A path whose ``/proc/self/maps`` cannot be read, as a policy that hides it refuses it."""
+
+    def read_text(self, *args: Any, **kwargs: Any) -> str:
+        if str(self) == "/proc/self/maps":
+            raise PermissionError(errno.EACCES, os.strerror(errno.EACCES), str(self))
+        return super().read_text(*args, **kwargs)
+
+
 def test_the_libm_read_is_the_one_that_defines_exp(tmp_path: Path) -> None:
     """A ``libm`` mapped ahead of the one :mod:`math` calls is not the one read.
 
     ``dlmopen`` maps a second ``libm`` into another namespace below the
     libraries already mapped, so ``/proc/self/maps`` lists it first. A planted
-    one that declares x86-64-v3, mapped below every file here, stands in for
-    it: the library read is still the file the kernel maps at the address the
-    default namespace resolves for ``exp``.
+    one that declares the other build, mapped below every file here, stands in
+    for it: the library read is still the file the kernel maps at the address
+    the default namespace resolves for ``exp``, and the predicate is still
+    that file's.
     """
     _on_x86_64_glibc()
     real = _file_holding("exp")
-    needed = libm_identity.x86_isa_levels_needed(real.read_bytes())
-    built_for_v3 = needed is not None and needed >= _LEVEL_BITS["x86-64-v3"]
-    planted = tmp_path / "libm.so.6"
-    planted.write_bytes(_elf((_PT_GNU_PROPERTY, _glibc_libm_note(_V3), 8)))
+    planted = _libm_of_the_other_build(real, tmp_path)
     with _mapped_first(planted):
         first = _first_libm_mapped()
         assert first is not None
         assert first.samefile(planted)
         library = libm_identity.loaded_libm()
-        assert library is not None
+        assert isinstance(library, Path), library
         assert library.samefile(real)
-        assert libm_identity.glibc_built_for_x86_64_v3() is built_for_v3
+        assert libm_identity.glibc_built_for_x86_64_v3() is _declares_v3(real)
 
 
 def test_the_loader_read_is_the_one_that_defines_tls_get_addr(tmp_path: Path) -> None:
     """A loader mapped ahead of this process's is not the one whose mask is read.
 
-    A planted one, spelt as glibc 2.28's and mapped below every file here,
-    stands in for a loader another namespace or a copy maps: the mask is still
-    read as the loader the default namespace resolves ``__tls_get_addr`` in
-    reads it, or in any spelling where that loader names no mask tunable, as
-    glibc's before 2.26 and one built without tunables do.
+    A planted one, spelt as a glibc that reads the mask otherwise and mapped
+    below every file here, stands in for a loader another namespace or a copy
+    maps: the mask is still read as the loader the default namespace resolves
+    ``__tls_get_addr`` in reads it, or in any spelling where that loader names
+    no mask tunable, as glibc's before 2.26 and one built without tunables do.
     """
     _on_x86_64_glibc()
     real = _file_holding("__tls_get_addr")
     reading = libm_identity.mask_reading(real.read_bytes())
     expected = reading if reading is not None else libm_identity.ANY_READING
-    planted = tmp_path / "ld-linux-x86-64.so.2"
-    planted.write_bytes(_LOADERS["2.28"])
-    with _mapped_first(planted):
+    with _mapped_first(_loader_read_otherwise(real, tmp_path)):
         loader = libm_identity.loaded_loader()
-        assert loader is not None
+        assert isinstance(loader, Path), loader
         assert loader.samefile(real)
         assert libm_identity.mask_reading_here() == expected
 
 
-#: A child that imports :mod:`math`, leaves the directory it started in, and
-#: prints the ``libm`` read and the file mapped at ``exp``'s address.
-_LIBM_AFTER_CHDIR = (
+#: A child that imports :mod:`math` and leaves the directory it started in,
+#: then, with the file its command line names mapped ahead of every other,
+#: prints the first ``libm`` listed, the ``libm`` read and the predicate, and
+#: last the file mapped at ``exp``'s address.
+_LIBM_READ_IN_A_CHILD = (
     "import math, os, sys\n"
+    "from pathlib import Path\n"
     "sys.path.insert(0, sys.argv[1])\n"
     "import test_libm_identity as here\n"
     "os.chdir('/')\n"
-    "print(here.libm_identity.loaded_libm())\n"
+    "with here._mapped_first(Path(sys.argv[2])):\n"
+    "    print(here._first_libm_mapped())\n"
+    "    print(here.libm_identity.loaded_libm())\n"
+    "    print(here.libm_identity.glibc_built_for_x86_64_v3())\n"
     "print(here._file_holding('exp'))\n"
 )
 
 
-def test_a_libm_found_by_a_relative_path_is_read_by_its_absolute_path(
+def test_a_libm_found_by_a_relative_path_is_the_file_mapped_at_exp(
     tmp_path: Path,
 ) -> None:
-    """The ``libm`` read is a file by its absolute path, wherever the process is.
+    """The ``libm`` read is the one :mod:`math` calls, by its absolute path.
 
     With ``LD_LIBRARY_PATH=lib`` the loader finds ``libm.so.6`` under the
     directory the process starts in, and ``dladdr`` names it as the loader
     found it, ``lib/libm.so.6``: after a change of directory that name is
-    another file or none. A copy of the ``libm`` mapped at ``exp``'s address,
-    under ``lib/``, stands in for a library a relative path finds.
+    another file or none, and the first ``libm`` ``/proc/self/maps`` lists may
+    be another namespace's. A copy of the ``libm`` mapped at ``exp``'s
+    address, under ``lib/``, stands in for a library a relative path finds,
+    and a planted ``libm`` of the other build, mapped ahead of every file, for
+    one that ``dlmopen`` loaded: the library read is the copy, and the
+    predicate is the copy's.
     """
     _on_x86_64_glibc()
-    planted = tmp_path / "lib" / "libm.so.6"
-    planted.parent.mkdir()
-    shutil.copyfile(_file_holding("exp"), planted)
+    copy = tmp_path / "lib" / "libm.so.6"
+    copy.parent.mkdir()
+    shutil.copyfile(_file_holding("exp"), copy)
+    planted = _libm_of_the_other_build(copy, tmp_path / "other")
     search = os.environ.get("LD_LIBRARY_PATH")
     environment = dict(os.environ, LD_LIBRARY_PATH=f"lib:{search}" if search else "lib")
-    # Fixed argv, no shell; the directory is the one this module is in
-    read, mapped = subprocess.run(
+    first, read, v3, mapped = libm_identity.run_child(
         [
             sys.executable,
             "-I",
             "-c",
-            _LIBM_AFTER_CHDIR,
-            str(Path(libm_identity.__file__).parent),
+            _LIBM_READ_IN_A_CHILD,
+            str(Path(__file__).parent),
+            str(planted),
         ],
-        check=True,
-        capture_output=True,
-        text=True,
         cwd=tmp_path,
         env=environment,
         timeout=60,
-    ).stdout.splitlines()
-    assert Path(mapped).samefile(planted)
+    ).splitlines()
+    assert Path(mapped).samefile(copy)
+    assert Path(first).samefile(planted)
     assert Path(read).is_absolute()
-    assert Path(read).samefile(planted)
+    assert Path(read).samefile(copy)
+    assert v3 == str(_declares_v3(copy))
 
 
-def test_where_dladdr_cannot_be_asked_the_first_mapped_files_are_read(
+#: A child that, with the file its command line names mapped ahead of every
+#: other, prints the loader read and whether the mask is read as the file
+#: mapped at ``__tls_get_addr``'s address reads it, and last that file.
+_LOADER_READ_IN_A_CHILD = (
+    "import sys\n"
+    "from pathlib import Path\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "import test_libm_identity as here\n"
+    "real = here._file_holding('__tls_get_addr')\n"
+    "reading = here.libm_identity.mask_reading(real.read_bytes())\n"
+    "expected = reading or here.libm_identity.ANY_READING\n"
+    "with here._mapped_first(Path(sys.argv[2])):\n"
+    "    print(here.libm_identity.loaded_loader())\n"
+    "    print(here.libm_identity.mask_reading_here() == expected)\n"
+    "print(real)\n"
+)
+
+
+def test_a_loader_run_by_a_relative_path_is_the_file_mapped_at_tls_get_addr(
+    tmp_path: Path,
+) -> None:
+    """The loader read is the one this process runs, by its absolute path.
+
+    Run as ``./ld-linux-x86-64.so.2`` from its own directory, the loader names
+    itself through ``dladdr`` by that relative path. A planted loader spelt as
+    a glibc that reads the mask otherwise, mapped ahead of every file, stands
+    in for one another namespace maps: the loader read is the file mapped at
+    ``__tls_get_addr``'s address, and the mask is read as it reads it.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("__tls_get_addr")
+    planted = _loader_read_otherwise(real, tmp_path)
+    read, agrees, mapped = libm_identity.run_child(
+        [
+            f"./{real.name}",
+            sys.executable,
+            "-I",
+            "-c",
+            _LOADER_READ_IN_A_CHILD,
+            str(Path(__file__).parent),
+            str(planted),
+        ],
+        cwd=real.parent,
+        timeout=60,
+    ).splitlines()
+    assert Path(mapped).samefile(real)
+    assert Path(read).is_absolute()
+    assert Path(read).samefile(real)
+    assert agrees == "True"
+
+
+def test_where_dladdr_names_no_file_the_file_at_the_address_is_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Where ``exp`` is looked up but ``dladdr`` finds no object, none is guessed.
+
+    The library read is still the file mapped at ``exp``'s address, not the
+    first ``libm`` listed, which is a planted one of the other build mapped
+    ahead of every file.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("exp")
+    # Imported here, where _file_holding has not skipped for the want of it.
+    import ctypes  # noqa: PLC0415
+
+    class WithoutDladdr(ctypes.CDLL):
+        """The libraries as ctypes opens them, with a ``dladdr`` that finds none."""
+
+        @staticmethod
+        def dladdr(address: object, info: object) -> int:
+            return 0
+
+    monkeypatch.setattr(ctypes, "CDLL", WithoutDladdr)
+    resolved = libm_identity._resolved("exp")
+    assert resolved is not None
+    assert resolved[1] is None
+    with _mapped_first(_libm_of_the_other_build(real, tmp_path)):
+        library = libm_identity.loaded_libm()
+        assert isinstance(library, Path), library
+        assert library.samefile(real)
+        assert libm_identity.glibc_built_for_x86_64_v3() is _declares_v3(real)
+
+
+#: A child that leaves the directory it started in, has its reads of
+#: ``/proc/self/maps`` refused, and prints the kind of what the reader its
+#: command line names comes back with, then its reason or its value.
+_UNREAD_IN_A_CHILD = (
+    "import os, sys\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "import test_libm_identity as here\n"
+    "os.chdir('/')\n"
+    "here.libm_identity.Path = here._RefusingMaps\n"
+    "read = getattr(here.libm_identity, sys.argv[2])()\n"
+    "print(type(read).__name__)\n"
+    "print(getattr(read, 'reason', read))\n"
+)
+
+
+def test_a_libm_named_by_a_relative_path_without_maps_is_neither_build(
+    tmp_path: Path,
+) -> None:
+    """Where nothing names the libm :mod:`math` calls, its build is taken for neither.
+
+    The loader names the ``libm`` found through ``LD_LIBRARY_PATH=lib`` as
+    ``lib/libm.so.6``, which names nothing once the child leaves its
+    directory, and ``/proc/self/maps``, refused as a policy that hides it
+    refuses it, cannot say which file is mapped at ``exp``'s address: the
+    build is what could not be read, never the baseline's ``False``.
+    """
+    _on_x86_64_glibc()
+    copy = tmp_path / "lib" / "libm.so.6"
+    copy.parent.mkdir()
+    shutil.copyfile(_file_holding("exp"), copy)
+    search = os.environ.get("LD_LIBRARY_PATH")
+    environment = dict(os.environ, LD_LIBRARY_PATH=f"lib:{search}" if search else "lib")
+    shown = libm_identity.run_child(
+        [
+            sys.executable,
+            "-I",
+            "-c",
+            _UNREAD_IN_A_CHILD,
+            str(Path(__file__).parent),
+            "glibc_built_for_x86_64_v3",
+        ],
+        cwd=tmp_path,
+        env=environment,
+        timeout=60,
+    )
+    assert shown.splitlines() == [
+        "Unread",
+        "dladdr names the object that defines exp by the relative path "
+        "lib/libm.so.6, and /proc/self/maps cannot be read (Permission denied)",
+    ]
+
+
+def test_a_loader_run_by_a_relative_path_without_maps_is_named_by_none() -> None:
+    """Where nothing names the loader this process runs, no file is taken for it.
+
+    Run as ``./ld-linux-x86-64.so.2``, the loader names itself by that
+    relative path, and with ``/proc/self/maps`` refused nothing says which
+    file is mapped at ``__tls_get_addr``'s address: the loader is what could
+    not be read.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("__tls_get_addr")
+    shown = libm_identity.run_child(
+        [
+            f"./{real.name}",
+            sys.executable,
+            "-I",
+            "-c",
+            _UNREAD_IN_A_CHILD,
+            str(Path(__file__).parent),
+            "loaded_loader",
+        ],
+        cwd=real.parent,
+        timeout=60,
+    )
+    assert shown.splitlines() == [
+        "Unread",
+        "dladdr names the object that defines __tls_get_addr by the relative path "
+        f"{real.name}, and /proc/self/maps cannot be read (Permission denied)",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("symbol", "tunables", "reason"),
+    [
+        (
+            "exp",
+            "glibc.cpu.hwcaps=-FMA",
+            "the build of glibc here cannot be told: dladdr names the object that "
+            "defines exp by the relative path lib/libm.so.6, and /proc/self/maps "
+            "cannot be read (Permission denied)",
+        ),
+        (
+            "__tls_get_addr",
+            "glibc.cpu.hwcaps=-FMA_Usable",
+            "how this process's loader reads a mask cannot be told: dladdr names "
+            "the object that defines __tls_get_addr by the relative path "
+            "ld-linux-x86-64.so.2, and /proc/self/maps cannot be read "
+            "(Permission denied)",
+        ),
+    ],
+    ids=["libm", "loader"],
+)
+def test_a_mask_is_held_to_no_build_and_no_reading_that_cannot_be_told(
+    monkeypatch: pytest.MonkeyPatch, *, symbol: str, tunables: str, reason: str
+) -> None:
+    """The test of the masks skips where the libm or the loader cannot be named.
+
+    ``dladdr`` names the object that defines *symbol* by a relative path and
+    ``/proc/self/maps`` is refused, so nothing names the ``libm`` or the
+    loader: the masks are not held to a build or a reading guessed for them,
+    which on a glibc built for x86-64-v3, or on a loader that ignores the
+    mask, fails although the mask does what it should. The build is taken as
+    the baseline's where the loader is the one not named, so that the test
+    reaches the loader on any build.
+    """
+    _on_x86_64_glibc()
+    _file_holding(symbol)
+    relative = {
+        "exp": Path("lib/libm.so.6"),
+        "__tls_get_addr": Path("ld-linux-x86-64.so.2"),
+    }
+    resolve = libm_identity._resolved
+
+    def resolved(name: str) -> tuple[int, Path | None] | None:
+        found = resolve(name)
+        if name != symbol or found is None:
+            return found
+        return found[0], relative[name]
+
+    monkeypatch.setattr(libm_identity, "_resolved", resolved)
+    monkeypatch.setattr(libm_identity, "Path", _RefusingMaps)
+    monkeypatch.setattr(libm_identity, "glibc_on_x86_64_with_fma", lambda: True)
+    if symbol == "__tls_get_addr":
+        monkeypatch.setattr(libm_identity, "glibc_built_for_x86_64_v3", lambda: False)
+    with pytest.raises(pytest.skip.Exception, match=re.escape(reason)):
+        test_a_mask_counts_where_it_moves_glibc_off_its_fma_variant(
+            monkeypatch, tunables
+        )
+
+
+def test_without_ctypes_the_first_mapped_files_are_read(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Where no symbol can be looked up, the first ``libm`` and loader listed are read.
+
+    An interpreter built without libffi has no ctypes, and nothing there asks
+    where the default namespace resolves a symbol: the files read are the
+    first of their names that ``/proc/self/maps`` lists.
+    """
     _on_x86_64_glibc()
-    monkeypatch.setattr(libm_identity, "_object_defining", lambda symbol: None)
+    monkeypatch.setitem(sys.modules, "ctypes", None)
+    assert libm_identity._resolved("exp") is None
     assert libm_identity.loaded_libm() == _first_libm_mapped()
     loader = libm_identity.loaded_loader()
-    assert loader is not None
-    assert libm_identity._LOADER_FILE_NAME.fullmatch(loader.name)
+    assert loader == _first_mapped(libm_identity._LOADER_FILE_NAME)
+    assert isinstance(loader, Path), loader
 
 
-def test_off_linux_no_object_is_asked_for(monkeypatch: pytest.MonkeyPatch) -> None:
+#: A child whose ``_ctypes`` cannot be imported, as in an interpreter built
+#: without libffi, that loads this module, runs one of its tests that reads
+#: no object, and prints why a test that looks a symbol up skips.
+_WITHOUT_CTYPES_CHILD = (
+    "import sys\n"
+    "sys.modules['_ctypes'] = None\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "import pytest\n"
+    "import test_libm_identity as here\n"
+    "here.test_a_build_for_x86_64_v3_declares_that_level()\n"
+    "try:\n"
+    "    here._file_holding('exp')\n"
+    "except pytest.skip.Exception as skipped:\n"
+    "    print(skipped)\n"
+)
+
+
+def test_without_ctypes_only_the_tests_that_look_a_symbol_up_skip() -> None:
+    """This module loads where ctypes cannot be imported.
+
+    :mod:`libm_identity` reads ``/proc/self/maps`` there, so the tests of the
+    note, of the mask and of that reading run on such an interpreter, and only
+    those that look up where a symbol resolves, or map a file of their own,
+    skip, saying why.
+    """
+    shown = libm_identity.run_child(
+        [sys.executable, "-I", "-c", _WITHOUT_CTYPES_CHILD, str(Path(__file__).parent)],
+        timeout=60,
+    )
+    assert shown.splitlines() == [_WITHOUT_CTYPES]
+
+
+def test_off_linux_no_symbol_is_looked_up(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(platform, "system", lambda: "Darwin")
-    assert libm_identity._object_defining("exp") is None
+    assert libm_identity._resolved("exp") is None
+
+
+def _refused(directory: Path, name: str, program: Path | None = None) -> Path:
+    """A file *name* in *directory* without its execute bits, a copy of *program*.
+
+    The system refuses to start it, as it refuses a program, or a loader,
+    whose mount was made ``noexec`` once this process started.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    refused = directory / name
+    if program is None:
+        refused.write_bytes(b"")
+    else:
+        shutil.copyfile(program, refused)
+    refused.chmod(0o644)
+    return refused
+
+
+def _refusal(program: Path | str, cwd: Path | None = None) -> str:
+    """The start of the reason a test skips for when *program* is refused."""
+    where = "" if cwd is None else f" from {cwd}"
+    return re.escape(
+        f"this system refuses to start {program}{where} (Permission denied)"
+    )
+
+
+@pytest.mark.parametrize("test", ["planted-loader", "without-maps"])
+def test_a_loader_the_system_refuses_to_start_skips_the_test_that_runs_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, test: str
+) -> None:
+    """Where the loader cannot be run as a program, the test that runs it skips.
+
+    A copy of the loader without its execute bits stands in for the loader
+    on a mount made ``noexec`` once this process started: the system refuses
+    to start it before the child runs, so there is no reading to hold, and
+    the test skips, naming the loader and the refusal, instead of erroring.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("__tls_get_addr")
+    refused = _refused(tmp_path / "refused", real.name, real)
+    monkeypatch.setitem(globals(), "_file_holding", lambda symbol: refused)
+    runs = {
+        "planted-loader": lambda: (
+            test_a_loader_run_by_a_relative_path_is_the_file_mapped_at_tls_get_addr(
+                tmp_path / "test"
+            )
+        ),
+        "without-maps": (
+            test_a_loader_run_by_a_relative_path_without_maps_is_named_by_none
+        ),
+    }
+    with pytest.raises(
+        pytest.skip.Exception, match=_refusal(f"./{refused.name}", refused.parent)
+    ):
+        runs[test]()
+
+
+@pytest.mark.parametrize(
+    "site", ["masks", "relative-libm", "relative-libm-without-maps", "without-ctypes"]
+)
+def test_an_interpreter_the_system_refuses_to_start_skips_the_test_of_its_child(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: str
+) -> None:
+    """Every child these tests start from the interpreter skips where it is refused.
+
+    A loader on a mount made ``noexec`` once this process started refuses
+    every dynamic program, the interpreter included: the masks' children, the
+    children that find the libm by a relative path and the child without
+    ctypes then never run, and their tests skip by the refusal.
+    """
+    _on_x86_64_glibc()
+    test = tmp_path / "test"
+    test.mkdir()
+    cwd = None
+    if site.startswith("relative-libm"):
+        # These copy the libm ctypes finds at exp's address and start their
+        # child from the directory that holds lib/.
+        _file_holding("exp")
+        cwd = test
+    refused = _refused(tmp_path / "refused", "python")
+    monkeypatch.setattr(sys, "executable", str(refused))
+    runs = {
+        "masks": lambda: _exp_digest_under.__wrapped__(""),
+        "relative-libm": lambda: (
+            test_a_libm_found_by_a_relative_path_is_the_file_mapped_at_exp(test)
+        ),
+        "relative-libm-without-maps": lambda: (
+            test_a_libm_named_by_a_relative_path_without_maps_is_neither_build(test)
+        ),
+        "without-ctypes": test_without_ctypes_only_the_tests_that_look_a_symbol_up_skip,
+    }
+    with pytest.raises(pytest.skip.Exception, match=_refusal(refused, cwd)):
+        runs[site]()
+
+
+@pytest.mark.parametrize(
+    ("script", "status"),
+    [("raise SystemExit(3)", 3), ("raise PermissionError(13, 'Permission denied')", 1)],
+    ids=["status", "permission-error"],
+)
+def test_a_child_that_runs_and_fails_fails_the_test(script: str, status: int) -> None:
+    """Only a refused start skips: a child that ran fails its test by its status.
+
+    A :class:`PermissionError` the child itself raises, as an identity check
+    that cannot read a file would, ends it with a status other than 0, which
+    is the test's failure, never a skip. Where the system refuses to start
+    the interpreter, the first child skips this test by that refusal; once
+    one has started, a skip from the failing child fails the test.
+    """
+    libm_identity.run_child([sys.executable, "-I", "-c", "pass"], timeout=60)
+    try:
+        with pytest.raises(
+            subprocess.CalledProcessError, match=f"non-zero exit status {status}"
+        ):
+            libm_identity.run_child([sys.executable, "-I", "-c", script], timeout=60)
+    except pytest.skip.Exception as skipped:
+        pytest.fail(f"a child that ran and failed skipped its test: {skipped}")
 
 
 def _real_glibc_libm() -> Path:
     _on_x86_64_glibc()
     library = libm_identity.loaded_libm()
-    assert library is not None, "glibc's libm is not mapped in this process"
+    assert isinstance(library, Path), library
     return library
 
 
 def test_the_real_libm_is_found_and_read() -> None:
     library = _real_glibc_libm()
     assert library.is_file()
-    needed = libm_identity.x86_isa_levels_needed(library.read_bytes())
-    built_for_v3 = needed is not None and needed >= _LEVEL_BITS["x86-64-v3"]
-    assert libm_identity.glibc_built_for_x86_64_v3() is built_for_v3
+    assert libm_identity.glibc_built_for_x86_64_v3() is _declares_v3(library)
 
 
 def _readelf_notes(library: Path) -> str:
@@ -754,15 +1354,11 @@ def _readelf_notes(library: Path) -> str:
     readelf = shutil.which("readelf")
     if readelf is None:
         pytest.skip("needs binutils' readelf to read the note independently")
-    # Fixed argv, no shell; the path is a library this process mapped or wrote
-    return subprocess.run(
+    return libm_identity.run_child(
         [readelf, "--notes", str(library)],
-        check=True,
-        capture_output=True,
-        text=True,
         env={**os.environ, "LC_ALL": "C"},
         timeout=60,
-    ).stdout
+    )
 
 
 #: Why a readelf shows no ISA property: it prints the GNU property note as a
@@ -1046,6 +1642,22 @@ def test_readelf_and_the_reader_agree_past_the_needed_levels(tmp_path: Path) -> 
     assert _levels_readelf_shows(shown, _ISA_1_USED) == 0b0101
     assert libm_identity.x86_isa_levels_needed(image) == _V3
     assert _levels_readelf_shows(shown) == _V3
+
+
+def test_a_readelf_the_system_refuses_to_start_skips_the_cross_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ``readelf`` the system refuses to start holds the reader to nothing.
+
+    Found but refused, as one whose loader sits on a mount made ``noexec``
+    once this process started, it never prints a note, and the cross-check
+    skips by the refusal, as it skips where no ``readelf`` is found.
+    """
+    _on_x86_64_glibc()
+    refused = _refused(tmp_path / "refused", "readelf")
+    monkeypatch.setattr(shutil, "which", lambda name: str(refused))
+    with pytest.raises(pytest.skip.Exception, match=_refusal(refused)):
+        _readelf_notes(tmp_path / "libm.so.6")
 
 
 def test_the_real_libm_reads_as_readelf_reads_it() -> None:

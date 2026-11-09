@@ -2435,6 +2435,60 @@ def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
 
 
 @pytest.mark.parametrize(
+    ("imported", "expected"),
+    [
+        (
+            "import dataclasses\nimport functools\n\n"
+            "dataclass = functools.partial(dataclasses.dataclass, init=False)",
+            ["_Labelled"],
+        ),
+        ("import dataclasses\n\ndataclass = dataclasses.dataclass(eq=False)", ["Sub"]),
+        (
+            "import dataclasses\nimport os\n\ndataclass = (\n"
+            "    dataclasses.dataclass if os.environ.get('RECORDS') else (lambda cls: cls)\n"
+            ")",
+            ["_Labelled", "Sub"],
+        ),
+        (
+            "import dataclasses\nimport functools\n\n"
+            "dataclass = functools.partial(dataclasses.dataclass, eq=False)",
+            ["Sub"],
+        ),
+    ],
+    ids=["partial-init-off", "called", "conditional", "partial"],
+)
+def test_what_an_alias_of_the_decorator_presets_is_read_with_it(
+    tmp_path: pathlib.Path, imported: str, expected: list[str]
+) -> None:
+    """An alias of ``@dataclass`` is read with what it presets: a
+    ``functools.partial`` that presets ``init=False`` writes ``Sub`` no
+    ``__init__``, so ``Sub(1.0)`` runs ``_Labelled.__init__``; a call of the
+    decorator with keywords alone is the decorator, so the call runs the
+    ``__init__`` it writes; and a conditional expression that gives it or
+    another may run either. Each drops the language one of them takes.
+
+    What a partial presets was not read, and a call of the decorator or a
+    conditional expression was read as another decorator, so the call was
+    read as running the generated ``__init__``, or ``_Labelled.__init__``
+    alone.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.labelled": _LABELLED,
+            "pkg.mod": _TAKEN_FROM.replace("IMPORT", imported),
+        },
+    )
+    helpers = {
+        "Sub": "pkg.mod.Sub.__init__",
+        "_Labelled": "pkg.labelled._Labelled.__init__",
+    }
+    assert sorted((f.caller, f.helper) for f in found) == sorted(
+        ("plot", helpers[name]) for name in expected
+    )
+
+
+@pytest.mark.parametrize(
     ("option", "expected"),
     [
         ("NO_INIT = False", [("draw", "pkg.records._Labelled.__init__")]),

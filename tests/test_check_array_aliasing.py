@@ -5325,6 +5325,52 @@ def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
     assert found == expected
 
 
+@pytest.mark.parametrize(
+    ("rebinding", "expected"),
+    [
+        (
+            "import functools\n\ndataclass = functools.partial(dataclass, init=False)",
+            {("make", "Sub.data", "data")},
+        ),
+        (
+            "import functools\n\n_OPTIONS = {'init': False}\n"
+            "dataclass = functools.partial(dataclass, **_OPTIONS)",
+            {("make", "Sub.data", "data")},
+        ),
+        ("dataclass = dataclass(eq=False)", set()),
+        ("dataclass = dataclass(init=False)", {("make", "Sub.data", "data")}),
+        (
+            "import functools\n\ndataclass = functools.partial(dataclass, eq=False)",
+            set(),
+        ),
+    ],
+    ids=[
+        "partial-init-off",
+        "partial-double-star",
+        "called",
+        "called-init-off",
+        "partial",
+    ],
+)
+def test_what_an_alias_of_the_decorator_presets_is_read_with_it(
+    tmp_path: pathlib.Path, rebinding: str, expected: set[tuple[str, str, str]]
+) -> None:
+    """An alias of ``@dataclass`` that presets ``init=False``, a
+    ``functools.partial`` of it or a call of it with keywords alone, writes
+    ``Sub`` no ``__init__``, so ``Sub(data)`` runs the one ``Base``'s
+    decorator wrote, which calls no hook and keeps the caller's array; one
+    whose ``**`` may preset it is read both ways. A call of the decorator
+    with keywords alone that leaves ``init`` on writes the ``__init__`` that
+    calls the copying hook, as a partial that presets ``eq=False`` does.
+
+    What a partial presets was not read, so ``init=False`` was read as
+    writing an ``__init__`` that copies, and ``dataclass(eq=False)`` was
+    read as another decorator, and the copy its hook makes was missed.
+    """
+    source = _KEEPING_BASE + rebinding + "\n" + textwrap.dedent(_COPYING_OVER)
+    assert _findings(tmp_path, records=source) == expected
+
+
 #: A record with no hook, one over it whose hook copies, and a record whose
 #: ``__init__`` is written by hand over that.
 _HAND_WRITTEN_HEAD = """

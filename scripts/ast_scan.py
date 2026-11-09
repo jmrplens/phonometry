@@ -1366,6 +1366,30 @@ def _import_source(binding: ast.ImportFrom, package: str | None) -> str | None:
 #: after another, past which it is read as the module that holds it.
 _EXPORT_DEPTH = 8
 
+#: The decorators that, called with keywords alone, give themselves back
+#: with those options preset: ``dataclasses.dataclass(eq=False)`` writes a
+#: record as ``@dataclass(eq=False)`` does.
+_OPTION_DECORATORS = frozenset({"dataclasses.dataclass"})
+
+#: The options one call presets on the way to what it wraps: its keywords,
+#: with the module that writes them, where a name among them is read.
+type Layer = tuple[tuple[ast.keyword, ...], ast.Module]
+
+
+@dataclass(frozen=True)
+class Reading:
+    """One thing a name may stand for where it is read: the dotted path an
+    import gives it, or ``None`` for a value no import names, and the options
+    preset on the way, by a ``functools.partial`` of it or a call of one of
+    :data:`_OPTION_DECORATORS` with keywords alone, the layer nearest the
+    read first, as the one Python applies last.
+    """
+
+    #: The dotted path, or ``None``.
+    path: str | None
+    #: The options preset on the way, nearest the read first.
+    presets: tuple[Layer, ...] = ()
+
 
 @dataclass(frozen=True, eq=False)
 class Exports:
@@ -1384,17 +1408,18 @@ class Exports:
         """The package *module* sits in: itself for a package's ``__init__``."""
         return module if self.is_package(module) else module.rpartition(".")[0]
 
-    def paths(self, dotted: str, depth: int = 0) -> list[str]:
-        """Each dotted path *dotted* may stand for once a module of the
-        package it names is read: ``pkg._dc.dataclass``, after ``from
-        dataclasses import dataclass`` in ``pkg/_dc.py``, is
-        ``dataclasses.dataclass``, as Python finds it.
+    def readings(self, dotted: str, depth: int = 0) -> list[Reading]:
+        """Each thing *dotted* may stand for once a module of the package it
+        names is read: ``pkg._dc.dataclass``, after ``from dataclasses import
+        dataclass`` in ``pkg/_dc.py``, is ``dataclasses.dataclass``, as
+        Python finds it.
 
         The name is read in the longest module of the package *dotted*
         starts with, through the bindings of it that stand once that module
         has run (:func:`live_bindings`, :func:`global_bindings`), each as
         :func:`reads_import` reads one: an import of it is followed, a
-        relative one too, and so is an alias of a name or a dotted one;
+        relative one too, and so is an alias of a name or a dotted one, with
+        the options a ``functools.partial`` of it presets (:class:`Reading`);
         any other, a ``def``, a ``class`` or another value, makes it that
         module's own, *dotted* itself. So is a module of the package, a
         name no module of the package starts, one its module never binds,
@@ -1410,7 +1435,7 @@ class Exports:
             None,
         )
         if depth > _EXPORT_DEPTH or dotted in self.modules or cut is None:
-            return [dotted]
+            return [Reading(dotted)]
         module = ".".join(parts[:cut])
         name = parts[cut]
         tail = "".join(f".{part}" for part in parts[cut + 1 :])
@@ -1421,49 +1446,100 @@ class Exports:
             *global_bindings(tree).get(name, []),
         ]
         return [
-            dotted if path is None else path
+            Reading(dotted) if reading.path is None else reading
             for binding in standing
-            for path in _binding_paths(tree, binding, name, tail, module, self, depth)
-        ] or [dotted]
+            for reading in _binding_readings(
+                tree, binding, name, tail, module, self, depth
+            )
+        ] or [Reading(dotted)]
 
 
-def _expression_paths(
+def _expression_readings(
     root: ast.Module,
     node: ast.expr,
     module: str | None,
     exports: Exports | None,
     depth: int,
-) -> list[str | None]:
-    """Each dotted path *node*, read where it is written under *root*, the
-    module *module* of the package *exports* reads, may stand for: a name
-    or a dotted one through the bindings of its first name that may stand
-    there (:func:`standing_where_read`, :func:`_binding_paths`), and a
-    ``functools.partial`` of one as that one, the options it presets
-    unread, as Python calls what it wraps. ``None`` for anything else.
+) -> list[Reading]:
+    """Each thing *node*, read where it is written under *root*, the module
+    *module* of the package *exports* reads, may stand for (:class:`Reading`):
+    a name or a dotted one through the bindings of its first name that may
+    stand there (:func:`standing_where_read`, :func:`_binding_readings`),
+    ``None`` when none does, a builtin's; either branch of a conditional
+    expression and each operand of an ``or`` or an ``and``, any of which
+    Python may give; and what a call gives back (:func:`_call_readings`).
+    ``None`` for anything else.
     """
     if depth > _EXPORT_DEPTH:
-        return [None]
+        return [Reading(None)]
+    if isinstance(node, ast.IfExp):
+        return [
+            *_expression_readings(root, node.body, module, exports, depth + 1),
+            *_expression_readings(root, node.orelse, module, exports, depth + 1),
+        ]
+    if isinstance(node, ast.BoolOp):
+        return [
+            reading
+            for value in node.values
+            for reading in _expression_readings(root, value, module, exports, depth + 1)
+        ]
     if isinstance(node, ast.Call):
-        wrapped = _expression_paths(root, node.func, module, exports, depth + 1)
-        if node.args and wrapped and all(p == "functools.partial" for p in wrapped):
-            return _expression_paths(root, node.args[0], module, exports, depth + 1)
-        return [None]
+        return _call_readings(root, node, module, exports, depth)
     attributes: list[str] = []
     head = node
     while isinstance(head, ast.Attribute):
         attributes.append(head.attr)
         head = head.value
     if not isinstance(head, ast.Name):
-        return [None]
+        return [Reading(None)]
     tail = "".join(f".{attribute}" for attribute in reversed(attributes))
     return [
-        path
+        reading
         for binding in standing_where_read(root, head, head.id)
-        for path in _binding_paths(root, binding, head.id, tail, module, exports, depth)
-    ]
+        for reading in _binding_readings(
+            root, binding, head.id, tail, module, exports, depth
+        )
+    ] or [Reading(None)]
 
 
-def _binding_paths(
+def _call_readings(
+    root: ast.Module,
+    node: ast.Call,
+    module: str | None,
+    exports: Exports | None,
+    depth: int,
+) -> list[Reading]:
+    """What a call, *node*, gives back that a name may stand for
+    (:func:`_expression_readings`): a ``functools.partial`` of one thing is
+    that thing with the call's keywords preset nearest the read, as Python
+    calls what it wraps with them; a call of one of
+    :data:`_OPTION_DECORATORS` with keywords alone is that decorator so, as
+    it gives itself back. ``None`` for any other call: a partial that
+    presets a second argument, which the thing it wraps takes before the
+    class, and a decorator a call of anything else builds, which is no
+    import's.
+    """
+    layer: Layer = (tuple(node.keywords), root)
+    called = _expression_readings(root, node.func, module, exports, depth + 1)
+    if (
+        len(node.args) == 1
+        and not isinstance(node.args[0], ast.Starred)
+        and called
+        and all(r.path == "functools.partial" and not r.presets for r in called)
+    ):
+        wrapped = _expression_readings(root, node.args[0], module, exports, depth + 1)
+        return [Reading(r.path, (layer, *r.presets)) for r in wrapped]
+    if node.args:
+        return [Reading(None)]
+    return [
+        Reading(r.path, (layer, *r.presets))
+        if r.path in _OPTION_DECORATORS
+        else Reading(None)
+        for r in called
+    ] or [Reading(None)]
+
+
+def _binding_readings(
     root: ast.Module,
     binding: ast.AST,
     name: str,
@@ -1471,14 +1547,15 @@ def _binding_paths(
     module: str | None,
     exports: Exports | None,
     depth: int,
-) -> list[str | None]:
-    """Each dotted path *name*, bound at *binding* under *root*, followed by
-    the attributes *tail* may stand for (:func:`_expression_paths`): an
-    import's path, read as *exports* makes it (:meth:`Exports.paths`); an
-    assignment's value when it is a name, a dotted one or a
-    ``functools.partial`` of one, read where the assignment runs; ``None``
-    for any other binding, and for a value that stands for nothing an
-    import names, a builtin among them.
+) -> list[Reading]:
+    """Each thing *name*, bound at *binding* under *root*, followed by the
+    attributes *tail* may stand for (:func:`_expression_readings`): an
+    import's path, read as *exports* makes it (:meth:`Exports.readings`); an
+    assignment's value when it is a name, a dotted one, a call, or an
+    expression that gives one of several, read where the assignment runs;
+    ``None`` for any other binding, for a value that stands for nothing an
+    import names, a builtin among them, and for an attribute of what a call
+    presets options on, which is none of the thing it wraps.
     """
     package = (
         exports.package_of(module)
@@ -1488,15 +1565,21 @@ def _binding_paths(
     path = import_path(binding, name, package)
     if path is not None:
         read = f"{path}{tail}"
-        followed: list[str | None] = [
-            *(exports.paths(read, depth + 1) if exports is not None else [read])
-        ]
-        return followed
+        if exports is None:
+            return [Reading(read)]
+        return exports.readings(read, depth + 1)
     value = assigned_value(root, binding) if assignment_target(binding) else None
-    if not isinstance(value, ast.Name | ast.Attribute | ast.Call):
-        return [None]
-    found = _expression_paths(root, value, module, exports, depth + 1)
-    return [None if path is None else f"{path}{tail}" for path in found] or [None]
+    if not isinstance(
+        value, ast.Name | ast.Attribute | ast.Call | ast.IfExp | ast.BoolOp
+    ):
+        return [Reading(None)]
+    found = _expression_readings(root, value, module, exports, depth + 1)
+    return [
+        Reading(None)
+        if reading.path is None or (tail and reading.presets)
+        else Reading(f"{reading.path}{tail}", reading.presets)
+        for reading in found
+    ] or [Reading(None)]
 
 
 def reads_import(
@@ -1511,30 +1594,98 @@ def reads_import(
     *dotted* where it is read: through an import of it (``dataclass`` after
     ``from dataclasses import dataclass``) or of a module it is an attribute
     of (``dataclasses.dataclass`` after ``import dataclasses``), or through
-    an alias of one (``dc = dataclasses.dataclass``, or a
-    ``functools.partial`` of it), read where the alias is assigned.
+    an alias of one (``dc = dataclasses.dataclass``, a ``functools.partial``
+    of it, or a call of it with keywords alone when it is one of
+    :data:`_OPTION_DECORATORS`), read where the alias is assigned.
 
     ``True`` when every binding of its first name that may stand there
     (:func:`standing_where_read`) is such an import, ``False`` when none is,
     a ``def``, an assignment of anything else or an import of something
     else, and ``None`` when some are and some are not, so either may be
-    what the read finds.
+    what the read finds; an alias that is one of several values (``dc = a
+    if ready else b``) counts each.
 
     With *exports*, the modules of the package *root* is the module
     *module* of, an import is read as the package's modules make it: a
     relative one against the package *module* sits in, and a name a module
     of the package takes from elsewhere as what it takes
-    (:meth:`Exports.paths`), so ``from ._dc import dataclass``, where
+    (:meth:`Exports.readings`), so ``from ._dc import dataclass``, where
     ``_dc`` imports ``dataclasses``' own, stands for it too.
     """
     if isinstance(node, ast.Call):
         return False
     hits = [
-        path == dotted for path in _expression_paths(root, node, module, exports, 0)
+        reading.path == dotted
+        for reading in _expression_readings(root, node, module, exports, 0)
     ]
     if hits and all(hits):
         return True
     return None if any(hits) else False
+
+
+def decorator_option(
+    root: ast.Module,
+    decorator: ast.expr,
+    dotted: str,
+    option: str,
+    *,
+    default: object,
+    module: str | None = None,
+    exports: Exports | None = None,
+) -> object:
+    """The value *decorator*, under *root*, with or without arguments, gives
+    its option *option* where it stands for *dotted* (:func:`reads_import`).
+
+    The keyword its own call passes, ``@dataclass(init=False)``, and else
+    the one preset on the way to *dotted* (:class:`Reading`), by a
+    ``functools.partial`` of it (``functools.partial(dataclasses.dataclass,
+    init=False)``) or a call of it with keywords alone
+    (``dataclasses.dataclass(init=False)``), the layer nearest the read
+    first, as Python applies it last; each a constant or a name the module
+    that writes it binds once to one (:func:`module_constant`). *default*
+    when no layer gives it, and when no reading stands for *dotted*.
+    :data:`UNREAD` when a ``**`` of a layer that does not name it may give
+    it, when the readings that stand for *dotted* give it differently, or
+    when its value is neither.
+    """
+    called = decorator.func if isinstance(decorator, ast.Call) else decorator
+    own: tuple[Layer, ...] = (
+        ((tuple(decorator.keywords), root),) if isinstance(decorator, ast.Call) else ()
+    )
+    found = [
+        _layered_option((*own, *reading.presets), option, default)
+        for reading in _expression_readings(root, called, module, exports, 0)
+        if reading.path == dotted
+    ]
+    if not found:
+        return default
+    first = found[0]
+    if all(_same_option(first, value) for value in found):
+        return first
+    return UNREAD
+
+
+def _layered_option(layers: Sequence[Layer], option: str, default: object) -> object:
+    """The value the first of *layers* that names *option* gives it
+    (:func:`decorator_option`); :data:`UNREAD` once a layer that does not
+    name it passes a ``**``, which may; *default* when none does.
+    """
+    for keywords, tree in layers:
+        named = next((keyword for keyword in keywords if keyword.arg == option), None)
+        if named is not None:
+            return module_constant(named.value, tree)
+        if any(keyword.arg is None for keyword in keywords):
+            return UNREAD
+    return default
+
+
+def _same_option(one: object, other: object) -> bool:
+    """Whether two values of an option (:func:`decorator_option`) are the
+    same: one :data:`UNREAD` is no value, so it is the same as none.
+    """
+    if one is UNREAD or other is UNREAD:
+        return False
+    return type(one) is type(other) and one == other
 
 
 #: The compound statements: those whose blocks hold statements of the scope

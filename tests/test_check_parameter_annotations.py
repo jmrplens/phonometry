@@ -2838,6 +2838,54 @@ def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
     assert sorted((f.function, f.parameter) for f in found) == expected
 
 
+@pytest.mark.parametrize(
+    ("rebinding", "expected"),
+    [
+        (
+            "import functools\ndataclass = functools.partial(dataclass, init=False)",
+            [],
+        ),
+        ("dataclass = dataclass(eq=False)", [("make", "n")]),
+        (
+            "import os\ndataclass = (\n"
+            "    dataclass if os.environ.get('RECORDS') else (lambda cls: cls)\n)",
+            [("make", "n")],
+        ),
+        ("dataclass = dataclass(init=False)", []),
+        (
+            "import functools\ndataclass = functools.partial(dataclass, eq=False)",
+            [("make", "n")],
+        ),
+    ],
+    ids=["partial-init-off", "called", "conditional", "called-init-off", "partial"],
+)
+def test_what_an_alias_of_the_decorator_presets_is_read_with_it(
+    tmp_path: pathlib.Path, rebinding: str, expected: list[tuple[str, str]]
+) -> None:
+    """An alias of ``@dataclass`` is read with what it presets: one that
+    presets ``init=False``, a ``functools.partial`` of it or a call of it
+    with keywords alone, writes ``Sub`` no ``__init__``, so ``Sub(n)`` runs
+    ``_Quiet.__init__``, which never checks the count; a call of it that
+    leaves ``init`` on, and a conditional expression that may give it, make
+    ``Sub`` a record whose generated ``__init__`` calls the hook that checks
+    it (reported, as the check admits a numpy integer the annotation leaves
+    out).
+
+    What a partial presets was not read, so ``init=False`` was read as
+    writing the ``__init__`` that calls the hook; and a call of the
+    decorator or a conditional expression was read as another decorator,
+    and the check was missed.
+    """
+    source = (
+        _CHECKED_OVER_QUIET.replace("@dataclass(frozen=True)", "@dataclass")
+        .replace("REBINDING", rebinding)
+        .replace("AFTER", "")
+    )
+    root = _package(tmp_path, **{"_internal.validation": _VALIDATION, "api": source})
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
 def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
     tmp_path: pathlib.Path,
 ) -> None:

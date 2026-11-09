@@ -1788,6 +1788,20 @@ def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
         ),
         ("import functools\ndc = functools.partial(len)", False),
         ("from dataclasses import dataclass\ndc = dataclass\ndc = len", False),
+        ("from dataclasses import dataclass\ndc = dataclass(eq=False)", True),
+        ("import functools\ndc = functools.lru_cache(maxsize=None)", False),
+        (
+            "from dataclasses import dataclass\nclass Base:\n    pass\n"
+            "dc = dataclass(Base)",
+            False,
+        ),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, object)",
+            False,
+        ),
+        ("from dataclasses import dataclass\ndc = dataclass if ready else len", None),
+        ("from dataclasses import dataclass\ndc = custom or dataclass", None),
     ],
     ids=[
         "imported",
@@ -1805,6 +1819,12 @@ def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
         "partial",
         "partial-of-other",
         "alias-replaced",
+        "called-with-options",
+        "other-called-with-options",
+        "called-on-a-class",
+        "partial-of-two",
+        "conditional",
+        "either-operand",
     ],
 )
 def test_a_name_reads_an_import_through_the_bindings_that_stand_where_it_is_read(
@@ -1820,10 +1840,16 @@ def test_a_name_reads_an_import_through_the_bindings_that_stand_where_it_is_read
     be and another may not, an import and its fallback in a ``try``, or a
     function that rebinds it under ``global``. An alias of the decorator, a
     name or a dotted one, or a ``functools.partial`` of it, is read through
-    its value where it is assigned, as Python calls what it holds.
+    its value where it is assigned, as Python calls what it holds; so is a
+    call of it with keywords alone, which gives the decorator back with them
+    preset, where a call of anything else, a call of it on a class and a
+    partial that presets a second argument are other values; and a
+    conditional expression or an ``or`` gives either of its operands.
 
     Every assignment was read as replacing the decorator, so ``dc =
-    dataclasses.dataclass`` was read as another one.
+    dataclasses.dataclass`` was read as another one; and once an alias was
+    read, ``dc = dataclass(eq=False)`` and ``dc = dataclass if ready else
+    len`` still were.
     """
     decorator = "dc.dataclass" if "import dataclasses as dc" in source else "dc"
     module = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
@@ -2013,6 +2039,132 @@ def test_an_import_is_read_through_the_modules_of_its_package(
         tree, record.decorator_list[0], "dataclasses.dataclass"
     )
     assert alone is False
+
+
+#: A module of a package whose alias of the decorator presets ``init=``
+#: through a name it binds once to a constant.
+_PRESETTING = (
+    "import dataclasses\nimport functools\nNO_INIT = False\n"
+    "dataclass = functools.partial(dataclasses.dataclass, init=NO_INIT)\n"
+)
+
+
+@pytest.mark.parametrize(
+    ("source", "decorator", "expected"),
+    [
+        ("from dataclasses import dataclass", "dataclass", True),
+        ("from dataclasses import dataclass", "dataclass(init=False)", False),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, init=False)",
+            "dc",
+            False,
+        ),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, init=False)",
+            "dc(init=True)",
+            True,
+        ),
+        (
+            "from dataclasses import dataclass\nfrom functools import partial\n"
+            "off = partial(dataclass, init=False)\non = partial(off, init=True)",
+            "on",
+            True,
+        ),
+        ("from dataclasses import dataclass\ndc = dataclass(init=False)", "dc", False),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, **OPTIONS)",
+            "dc",
+            "unread",
+        ),
+        (
+            "from dataclasses import dataclass",
+            "dataclass(**OPTIONS, init=False)",
+            False,
+        ),
+        ("from ._presetting import dataclass", "dataclass", False),
+        (
+            "import dataclasses\nimport functools\n"
+            "try:\n    dc = functools.partial(dataclasses.dataclass, init=False)\n"
+            "except ImportError:\n    dc = dataclasses.dataclass",
+            "dc",
+            "unread",
+        ),
+        ("from dataclasses import dataclass\ndc = len", "dc(init=False)", True),
+    ],
+    ids=[
+        "none",
+        "own",
+        "partial",
+        "call-over-partial",
+        "partial-over-partial",
+        "called-with-options",
+        "double-star",
+        "named-beside-double-star",
+        "re-exported",
+        "either-preset",
+        "other-decorator",
+    ],
+)
+def test_an_option_is_read_through_the_call_and_what_an_alias_presets(
+    source: str, decorator: str, expected: object
+) -> None:
+    """``decorator_option`` reads ``init=`` of ``@dataclass`` from the
+    decorator's own call, and else from what an alias of it presets on the
+    way, the layer nearest the read first, as Python applies it last: a
+    ``functools.partial`` of it, one of another partial, and a call of it
+    with keywords alone; a name in it through the module that writes it. A
+    ``**`` that may give it, and two readings that give it differently,
+    leave it unread; and a decorator that stands for another one gives the
+    default.
+
+    An alias was read through its value, but what it presets was not read,
+    so ``functools.partial(dataclasses.dataclass, init=False)`` was read as
+    writing an ``__init__``, while the run writes none.
+    """
+    tree = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
+    modules = {"pkg": ast.parse(""), "pkg._presetting": ast.parse(_PRESETTING)}
+    modules["pkg.mod"] = tree
+    exports = ast_scan.Exports(modules, {"pkg"}.__contains__)
+    record = tree.body[-1]
+    assert isinstance(record, ast.ClassDef)
+    found = ast_scan.decorator_option(
+        tree,
+        record.decorator_list[0],
+        "dataclasses.dataclass",
+        "init",
+        default=True,
+        module="pkg.mod",
+        exports=exports,
+    )
+    assert found is (ast_scan.UNREAD if expected == "unread" else expected)
+
+
+def test_kw_only_is_read_through_what_an_alias_presets() -> None:
+    """``kw_only=True`` a ``functools.partial`` of the decorator presets is
+    read as its own call's would be, and a call over it that says otherwise
+    wins, as Python applies the call's keywords last.
+    """
+    tree = ast.parse(
+        "import dataclasses\nimport functools\n"
+        "dc = functools.partial(dataclasses.dataclass, kw_only=True)\n"
+        "@dc\nclass Preset:\n    pass\n"
+        "@dc(kw_only=False)\nclass Overridden:\n    pass\n"
+    )
+    found = {
+        node.name: ast_scan.decorator_option(
+            tree,
+            node.decorator_list[0],
+            "dataclasses.dataclass",
+            "kw_only",
+            default=False,
+        )
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+    }
+    assert found == {"Preset": True, "Overridden": False}
 
 
 def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:

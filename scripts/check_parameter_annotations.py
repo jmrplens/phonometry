@@ -200,9 +200,9 @@ from ast_scan import (
     Exports,
     argument_places,
     argument_reach,
+    decorator_option,
     is_type_checking_block,
     last_class_binding,
-    module_constant,
     own_names,
     python_files,
     reads_import,
@@ -5211,8 +5211,10 @@ def _declares_constructor(
 
     One written in its body, under ``if TYPE_CHECKING:`` or not, which
     ``dataclass`` keeps and a type checker reads, or none at all
-    (``init=False``): the fields are then what the record holds, not what
-    its constructor takes.
+    (``init=False``, in the decorator's own call or preset on the way, as a
+    constant or a name its module binds once to one, :func:`_record_option`):
+    the fields are then what the record holds, not what its constructor
+    takes.
     """
     found = annotations.classes.get(record)
     if found is None:
@@ -5225,14 +5227,8 @@ def _declares_constructor(
     ):
         return True
     return any(
-        isinstance(decorator, ast.Call)
-        and _record_decorator(package, module, decorator)
-        and any(
-            keyword.arg == "init"
-            and isinstance(keyword.value, ast.Constant)
-            and keyword.value.value is False
-            for keyword in decorator.keywords
-        )
+        _record_decorator(package, module, decorator)
+        and _record_option(package, module, decorator, "init", default=True) is False
         for decorator in node.decorator_list
     )
 
@@ -5356,13 +5352,50 @@ def _record_decorator(
     read as writing an ``__init__``.
     """
     called = decorator.func if isinstance(decorator, ast.Call) else decorator
-    paths = package.paths
-    exports = Exports(package.trees, lambda name: paths[name].endswith("__init__.py"))
     return (
         reads_import(
-            package.trees[module], called, _DATACLASS, module=module, exports=exports
+            package.trees[module],
+            called,
+            _DATACLASS,
+            module=module,
+            exports=_exports(package),
         )
         is not False
+    )
+
+
+def _exports(package: overloads.Package) -> Exports:
+    """The modules of *package*, read for what each imports from another
+    (:class:`ast_scan.Exports`): a package's ``__init__`` by its path.
+    """
+    paths = package.paths
+    return Exports(package.trees, lambda name: paths[name].endswith("__init__.py"))
+
+
+def _record_option(
+    package: overloads.Package,
+    module: str,
+    decorator: ast.expr,
+    option: str,
+    *,
+    default: object,
+) -> object:
+    """The value *decorator*, written in *module*, gives the option *option*
+    of ``dataclasses``' ``dataclass``: the keyword its own call passes, and
+    else the one an alias of the decorator presets on the way, a
+    ``functools.partial`` of it or a call of it with keywords alone, each a
+    constant or a name its module binds once to one
+    (:func:`ast_scan.decorator_option`); *default* when none gives it,
+    :data:`ast_scan.UNREAD` when the reader cannot read it.
+    """
+    return decorator_option(
+        package.trees[module],
+        decorator,
+        _DATACLASS,
+        option,
+        default=default,
+        module=module,
+        exports=_exports(package),
     )
 
 
@@ -5377,19 +5410,15 @@ def _generates_init(
     package: overloads.Package, module: str, node: ast.ClassDef
 ) -> bool:
     """Whether ``@dataclass`` writes the class an ``__init__``: it is a
-    dataclass, and its decorator does not say ``init=False``, as a constant
-    or as a name its module binds once to one (:func:`ast_scan.module_constant`).
+    dataclass, and its decorator does not say ``init=False``, in its own
+    call or preset on the way, as a constant or as a name its module binds
+    once to one (:func:`_record_option`).
     """
     if not _is_dataclass(package, module, node):
         return False
-    tree = package.trees.get(module)
     return not any(
-        isinstance(decorator, ast.Call)
-        and _record_decorator(package, module, decorator)
-        and any(
-            keyword.arg == "init" and module_constant(keyword.value, tree) is False
-            for keyword in decorator.keywords
-        )
+        _record_decorator(package, module, decorator)
+        and _record_option(package, module, decorator, "init", default=True) is False
         for decorator in node.decorator_list
     )
 
@@ -5420,16 +5449,12 @@ def _field_option(
 def _keyword_only_record(
     package: overloads.Package, module: str, node: ast.ClassDef
 ) -> bool:
-    """Whether a record's decorator makes every field keyword-only (``kw_only=True``)."""
+    """Whether a record's decorator makes every field keyword-only
+    (``kw_only=True``), in its own call or preset on the way (:func:`_record_option`).
+    """
     return any(
-        isinstance(decorator, ast.Call)
-        and _record_decorator(package, module, decorator)
-        and any(
-            keyword.arg == "kw_only"
-            and isinstance(keyword.value, ast.Constant)
-            and keyword.value.value is True
-            for keyword in decorator.keywords
-        )
+        _record_decorator(package, module, decorator)
+        and _record_option(package, module, decorator, "kw_only", default=False) is True
         for decorator in node.decorator_list
     )
 

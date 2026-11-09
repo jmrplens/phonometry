@@ -167,6 +167,7 @@ from ast_scan import (
     binding_of,
     bindings_by_name,
     block_statements,
+    decorator_option,
     empty_type_checking_bodies,
     every_path_calls,
     exempted,
@@ -177,7 +178,6 @@ from ast_scan import (
     last_class_binding,
     live_bindings,
     live_class_members,
-    module_constant,
     own_names,
     python_files,
     reads_import,
@@ -676,6 +676,28 @@ def _record_decorator(node: ast.expr, module: str, exports: Exports) -> bool | N
         exports.modules[module],
         target,
         "dataclasses.dataclass",
+        module=module,
+        exports=exports,
+    )
+
+
+def _record_option(
+    node: ast.expr, module: str, exports: Exports, option: str, *, default: object
+) -> object:
+    """The value the decorator *node*, written in the module *module* of the
+    package *exports* reads, gives the option *option* of ``dataclasses``'
+    ``dataclass``: the keyword its own call passes, and else the one an
+    alias of the decorator presets on the way, a ``functools.partial`` of it
+    or a call of it with keywords alone (:func:`ast_scan.decorator_option`);
+    *default* when none gives it, :data:`ast_scan.UNREAD` when the guard
+    cannot read it.
+    """
+    return decorator_option(
+        exports.modules[module],
+        node,
+        "dataclasses.dataclass",
+        option,
+        default=default,
         module=module,
         exports=exports,
     )
@@ -2114,25 +2136,21 @@ def _generates_init(info: ClassInfo, exports: Exports) -> bool | None:
     """Whether ``@dataclass`` writes a class an ``__init__``: a decorator of
     it is ``dataclasses``' ``dataclass`` where the class statement runs
     (:func:`_record_decorator`), and it does not say ``init=False``, as a
-    constant or as a name its module binds once at its top to one. ``None``
+    constant or as a name its module binds once at its top to one, in its
+    own call or preset on the way by an alias of it, a ``functools.partial``
+    or a call of it with keywords alone (:func:`_record_option`). ``None``
     when its ``init=`` is a value the guard cannot read, or the decorator
     may be ``dataclasses``' or another, so it may write one or not.
     """
     node = info.node
     if node is None:
         return False
-    module = exports.modules[info.module]
     found: bool | None = False
     for decorator in node.decorator_list:
         surely = _record_decorator(decorator, info.module, exports)
         if surely is False:
             continue
-        flag = (
-            next((k.value for k in decorator.keywords if k.arg == "init"), None)
-            if isinstance(decorator, ast.Call)
-            else None
-        )
-        value = module_constant(flag, module) if flag is not None else True
+        value = _record_option(decorator, info.module, exports, "init", default=True)
         if value is True and surely:
             return True
         if value is not False:
@@ -2165,12 +2183,11 @@ def _keyword_only_record(
     decorators: Sequence[ast.expr], module: str, exports: Exports
 ) -> bool:
     """Whether ``@dataclass(kw_only=True)`` makes every field of the class
-    keyword-only.
+    keyword-only, in its own call or preset on the way (:func:`_record_option`).
     """
     return any(
-        isinstance(decorator, ast.Call)
-        and _record_decorator(decorator, module, exports) is not False
-        and _keyword_constant(decorator, "kw_only", default=False) is True
+        _record_decorator(decorator, module, exports) is not False
+        and _record_option(decorator, module, exports, "kw_only", default=False) is True
         for decorator in decorators
     )
 

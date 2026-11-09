@@ -97,12 +97,12 @@ from ast_scan import (
     assignment_target,
     binding_of,
     bindings_by_name,
+    decorator_option,
     empty_type_checking_bodies,
     global_bindings,
     held_before,
     is_type_checking_block,
     live_bindings,
-    module_constant,
     own_names,
     reads_import,
     scope_nodes,
@@ -722,22 +722,18 @@ def _generates_init(klass: Class, exports: Exports) -> bool | None:
 
     ``True`` when a decorator of it is surely the one ``dataclasses``
     defines (:func:`_dataclass_call`) and it does not turn ``init`` off, as
-    a constant or as a name its module binds once to one
-    (:func:`ast_scan.module_constant`); ``False`` when none may be, or it
-    turns ``init`` off. ``None`` when the decorator may be either, or its
-    ``init=`` is a value the guard cannot read: a call of the class then
-    runs the generated ``__init__`` or the one past it in its order, and
-    :meth:`Tree.members` gives both.
+    a constant or as a name its module binds once to one, in its own call
+    or preset on the way by an alias of it, a ``functools.partial`` or a
+    call of it with keywords alone (:func:`_record_option`); ``False`` when
+    none may be, or it turns ``init`` off. ``None`` when the decorator may
+    be either, or its ``init=`` is a value the guard cannot read: a call of
+    the class then runs the generated ``__init__`` or the one past it in
+    its order, and :meth:`Tree.members` gives both.
     """
     decorator, sure = _dataclass_call(klass, exports)
     if decorator is None:
         return False
-    option = (
-        next((k.value for k in decorator.keywords if k.arg == "init"), None)
-        if isinstance(decorator, ast.Call)
-        else None
-    )
-    value = True if option is None else module_constant(option, klass.module.node)
+    value = _record_option(klass, decorator, exports, "init", default=True)
     if value is UNREAD:
         return None
     if not value:
@@ -784,13 +780,34 @@ def _is_dataclass(klass: Class, exports: Exports) -> bool:
 
 
 def _record_kw_only(klass: Class, exports: Exports) -> bool:
-    """Whether the record is told ``kw_only=True``, every field by its name."""
+    """Whether the record is told ``kw_only=True``, every field by its name,
+    in its decorator's own call or preset on the way (:func:`_record_option`).
+    """
     decorator = _dataclass_call(klass, exports)[0]
-    return isinstance(decorator, ast.Call) and any(
-        keyword.arg == "kw_only"
-        and isinstance(keyword.value, ast.Constant)
-        and keyword.value.value is True
-        for keyword in decorator.keywords
+    return (
+        decorator is not None
+        and _record_option(klass, decorator, exports, "kw_only", default=False) is True
+    )
+
+
+def _record_option(
+    klass: Class, decorator: ast.expr, exports: Exports, option: str, *, default: object
+) -> object:
+    """The value *decorator*, of *klass*, gives the option *option* of
+    ``dataclasses``' ``dataclass``: the keyword its own call passes, and
+    else the one an alias of the decorator presets on the way, a
+    ``functools.partial`` of it or a call of it with keywords alone
+    (:func:`ast_scan.decorator_option`); *default* when none gives it,
+    :data:`ast_scan.UNREAD` when the guard cannot read it.
+    """
+    return decorator_option(
+        klass.module.node,
+        decorator,
+        _DATACLASS,
+        option,
+        default=default,
+        module=klass.module.name,
+        exports=exports,
     )
 
 

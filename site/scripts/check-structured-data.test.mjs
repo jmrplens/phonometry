@@ -2173,7 +2173,7 @@ test('a report whose Dataset is its main entity, versioned, dated by its data, b
 	assert.match(
 		ran.out,
 		new RegExp(
-			`ok {3}the conformance report's Dataset is the main entity of both report pages, versioned ${LIBRARY.replace(/\./g, '\\.')}, ` +
+			`ok {3}the conformance report's Dataset is the main entity of both report pages, versioned ${RegExp.escape(LIBRARY)}, ` +
 				'dated by the day its rows last changed, based on the 1 work the standards of its checks resolve to, named in each language, ' +
 				'and written in each page\'s language \\(5 texts\\)',
 		),
@@ -2211,7 +2211,7 @@ test("a report Dataset that gives the software's DOI as its own identifier fails
 	built['en/report'].article.mainEntity.identifier = { '@type': 'PropertyValue', propertyID: 'DOI', value: SOFTWARE_DOI };
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, new RegExp(`FAIL /reference/conformance/: the conformance report's Dataset: it gives the software's DOI ${SOFTWARE_DOI.replace(/\./g, '\\.')} as its own identifier`));
+	assert.match(ran.err, new RegExp(`FAIL /reference/conformance/: the conformance report's Dataset: it gives the software's DOI ${RegExp.escape(SOFTWARE_DOI)} as its own identifier`));
 });
 
 test('a report Dataset with no version, another one, or no day its data changed fails', (t) => {

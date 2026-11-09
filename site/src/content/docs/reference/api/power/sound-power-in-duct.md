@@ -92,13 +92,31 @@ module.
 
 ```python
 flow_modal_correction(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = ...,
+    speed_of_sound: float = ...,
+) -> float
+
+flow_modal_correction(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+flow_modal_correction(
     frequencies: NumericArrayLike,
     flow_velocity: float,
     duct_diameter_m: float,
     *,
-    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = 'sampling-tube',
-    speed_of_sound: float = 340.0,
-) -> NDArray[np.float64]
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Combined mean flow velocity and modal correction $C_{3,4}$.
@@ -138,7 +156,7 @@ coefficient in the annex is transcribed and none of them warns.
 | `shield` | `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `speed_of_sound` | The $c$ of Eq. (8), in metres per second; the 340 m/s clause 5.3.4.3 states for normal conditions by default. [`sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/#sound_power_in_duct) passes the duct air's own $c$ instead. Unused by the sampling tube. |
 
-**Returns:** $C_{3,4}$ per band, in decibels.
+**Returns:** $C_{3,4}$ per band, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

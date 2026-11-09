@@ -261,9 +261,7 @@ def _millington_absorption(
     return np.asarray(total, dtype=np.float64)
 
 
-def _eyring_absorption(
-    total_area: float, mean_absorption: NDArray[np.float64]
-) -> NDArray[np.float64]:
+def _eyring_absorption(total_area: float, mean_absorption: np.ndarray) -> np.ndarray:
     r"""Eyring equivalent absorption :math:`-S \ln(1 - \bar{\alpha})` (per band)."""
     # A mean of exactly 1 (fully absorbing on average) has no finite Eyring
     # time: ln(1 - mean) diverges, so fail with a clear message instead.

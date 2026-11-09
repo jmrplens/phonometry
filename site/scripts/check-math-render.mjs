@@ -173,6 +173,18 @@ function stylesheetMismatch(distDir) {
 }
 
 /**
+ * A card's markup one piece at a time: a formula's MathML annotation, whose
+ * TeX the page does not show, whole; a comment; a start or end tag, whose
+ * quoted attribute values may hold a `>` that ends no tag; or a run of text,
+ * captured. A `<` that opens none of them is text too.
+ */
+const CARD_PIECE =
+  /<annotation\b[^>]*>[\s\S]*?<\/annotation>|<!--[\s\S]*?-->|<\/?[a-zA-Z][\w:-]*(?:[^>"']|"[^"]*"|'[^']*')*>|([^<]+|<)/g;
+
+/** What a reader sees of a card: its runs of text, read in order, and nothing of its tags or its TeX. */
+const cardText = (inner) => Array.from(inner.matchAll(CARD_PIECE), ([, run = '']) => run).join('');
+
+/**
  * Inline maths the glossary printed as typed.
  *
  * The glossary's cards and its symbol index are written by
@@ -208,9 +220,7 @@ function glossaryAsTyped(distDir) {
       blocks.push({ where: ' (symbol index)', inner });
     }
     for (const { where, inner } of blocks) {
-      const text = inner
-        .replace(/<annotation\b[^>]*>[\s\S]*?<\/annotation>/g, '')
-        .replace(/<[^>]+>/g, '');
+      const text = cardText(inner);
       const at = text.indexOf('$');
       if (at < 0) continue;
       found.push({

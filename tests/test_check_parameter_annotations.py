@@ -2777,6 +2777,67 @@ def test_a_decorator_is_read_through_the_bindings_that_stand_where_the_class_run
     assert sorted((f.function, f.parameter) for f in found) == expected
 
 
+@pytest.mark.parametrize(
+    ("rebinding", "exporting", "expected"),
+    [
+        (
+            "from ._dc import dataclass",
+            "from dataclasses import dataclass",
+            [("make", "n")],
+        ),
+        (
+            "from pkg._dc import dataclass",
+            "from dataclasses import dataclass",
+            [("make", "n")],
+        ),
+        (
+            "from . import _dc\ndataclass = _dc.dataclass",
+            "import dataclasses\ndataclass = dataclasses.dataclass",
+            [("make", "n")],
+        ),
+        (
+            "import functools\nfrom ._dc import dataclass as _record\n"
+            "dataclass = functools.partial(_record, eq=False)",
+            "from dataclasses import dataclass",
+            [("make", "n")],
+        ),
+        (
+            "from ._dc import dataclass",
+            "def dataclass(**options):\n    return lambda cls: cls",
+            [],
+        ),
+    ],
+    ids=["relative", "absolute", "alias", "partial", "own"],
+)
+def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
+    tmp_path: pathlib.Path,
+    rebinding: str,
+    exporting: str,
+    expected: list[tuple[str, str]],
+) -> None:
+    """``@dataclass`` taken from a module of the package is what that module
+    took, and an alias of it is what it names: ``dataclasses``' own,
+    through a relative import or an absolute one, an alias in either module
+    or a ``functools.partial`` of it, so the generated ``__init__`` of
+    ``Sub`` calls the hook, which checks the count (reported, as the check
+    admits a numpy integer the annotation leaves out). A module that writes
+    a ``dataclass`` of its own makes ``Sub`` no record, and ``Sub(n)`` runs
+    ``_Quiet.__init__``, which never checks it.
+
+    An import was read as it is written and every assignment as replacing
+    the decorator, so each of these was read as no record decorator and the
+    check the run makes was missed; ``Package.canonical`` had followed the
+    re-exports before the decorator was read where the class runs.
+    """
+    source = _CHECKED_OVER_QUIET.replace("REBINDING", rebinding).replace("AFTER", "")
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "_dc": exporting, "api": source},
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
 def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
     tmp_path: pathlib.Path,
 ) -> None:

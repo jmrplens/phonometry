@@ -5277,6 +5277,54 @@ def test_a_decorator_is_read_through_the_bindings_that_stand_where_the_class_run
     assert _findings(tmp_path, records=source) == expected
 
 
+@pytest.mark.parametrize(
+    ("imported", "exporting", "expected"),
+    [
+        ("from ._dc import dataclass", "from dataclasses import dataclass", set()),
+        ("from pkg._dc import dataclass", "from dataclasses import dataclass", set()),
+        (
+            "from . import _dc\n\ndataclass = _dc.dataclass",
+            "import dataclasses\n\ndataclass = dataclasses.dataclass",
+            set(),
+        ),
+        (
+            "import functools\n\nfrom ._dc import dataclass as _record\n\n"
+            "dataclass = functools.partial(_record, eq=False)",
+            "from dataclasses import dataclass",
+            set(),
+        ),
+        (
+            "from ._dc import dataclass",
+            "def dataclass(cls):\n    return cls",
+            {("make", "Sub.data", "data")},
+        ),
+    ],
+    ids=["relative", "absolute", "alias", "partial", "own"],
+)
+def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
+    tmp_path: pathlib.Path,
+    imported: str,
+    exporting: str,
+    expected: set[tuple[str, str, str]],
+) -> None:
+    """``@dataclass`` taken from a module of the package is what that module
+    took, and an alias of it is what it names: ``dataclasses``' own,
+    through a relative import or an absolute one, an alias in either module
+    or a ``functools.partial`` of it, so ``Sub``'s generated ``__init__``
+    calls the copying hook and the caller's array is not kept. A module that
+    writes a ``dataclass`` of its own makes ``Sub`` no record, and
+    ``Sub(data)`` runs the ``__init__`` ``Base``'s decorator wrote, which
+    keeps it.
+
+    An import was read as it is written and every assignment as replacing
+    the decorator, so each of these was read as no record decorator,
+    ``Sub`` as running ``Base``'s ``__init__``, and the array as kept.
+    """
+    source = _KEEPING_BASE + imported + "\n" + textwrap.dedent(_COPYING_OVER)
+    found = _findings(tmp_path, records=source, _dc=exporting + "\n")
+    assert found == expected
+
+
 #: A record with no hook, one over it whose hook copies, and a record whose
 #: ``__init__`` is written by hand over that.
 _HAND_WRITTEN_HEAD = """

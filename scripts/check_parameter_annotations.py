@@ -197,6 +197,7 @@ from typing import TYPE_CHECKING
 import check_return_overloads as overloads
 from ast_scan import (
     ROOT,
+    Exports,
     argument_places,
     argument_reach,
     is_type_checking_block,
@@ -5346,13 +5347,23 @@ def _record_decorator(
     ``dataclass``: its name read as it stands where the ``class`` statement
     of *module* runs its decorators (:func:`ast_scan.reads_import`), so a
     ``def``, an assignment or a ``:=`` of the name that ran before it
-    makes it none, and one written after the class leaves it the import.
+    makes it none, and one written after the class leaves it the import;
+    an import of it is read as the modules of *package* make it, a
+    relative one or one a module of the package re-exports, as
+    :meth:`~check_return_overloads.Package.canonical` reads a name.
     A decorator that may be either, an import and a fallback in a ``try``,
     is read as ``dataclasses``', as an ``init=`` the reader cannot read is
     read as writing an ``__init__``.
     """
     called = decorator.func if isinstance(decorator, ast.Call) else decorator
-    return reads_import(package.trees[module], called, _DATACLASS) is not False
+    paths = package.paths
+    exports = Exports(package.trees, lambda name: paths[name].endswith("__init__.py"))
+    return (
+        reads_import(
+            package.trees[module], called, _DATACLASS, module=module, exports=exports
+        )
+        is not False
+    )
 
 
 def _is_dataclass(package: overloads.Package, module: str, node: ast.ClassDef) -> bool:

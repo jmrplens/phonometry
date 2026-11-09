@@ -1779,6 +1779,15 @@ def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
             "def swap():\n    global dc\n    dc = len",
             None,
         ),
+        ("from dataclasses import dataclass\ndc = dataclass", True),
+        ("import dataclasses\ndc = dataclasses.dataclass", True),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, eq=False)",
+            True,
+        ),
+        ("import functools\ndc = functools.partial(len)", False),
+        ("from dataclasses import dataclass\ndc = dataclass\ndc = len", False),
     ],
     ids=[
         "imported",
@@ -1791,6 +1800,11 @@ def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
         "type-checking",
         "either",
         "under-global",
+        "alias",
+        "dotted-alias",
+        "partial",
+        "partial-of-other",
+        "alias-replaced",
     ],
 )
 def test_a_name_reads_an_import_through_the_bindings_that_stand_where_it_is_read(
@@ -1804,7 +1818,12 @@ def test_a_name_reads_an_import_through_the_bindings_that_stand_where_it_is_read
     import, or one an ``if
     TYPE_CHECKING:`` block holds, which never runs), ``None`` when one may
     be and another may not, an import and its fallback in a ``try``, or a
-    function that rebinds it under ``global``.
+    function that rebinds it under ``global``. An alias of the decorator, a
+    name or a dotted one, or a ``functools.partial`` of it, is read through
+    its value where it is assigned, as Python calls what it holds.
+
+    Every assignment was read as replacing the decorator, so ``dc =
+    dataclasses.dataclass`` was read as another one.
     """
     decorator = "dc.dataclass" if "import dataclasses as dc" in source else "dc"
     module = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
@@ -1819,8 +1838,13 @@ def test_a_name_reads_an_import_through_the_bindings_that_stand_where_it_is_read
 def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() -> None:
     """In a function, the decorator is what the function's own binding holds
     where the ``class`` statement runs, or a function's around it, before
-    the module's; a class body that has not yet bound it reads the scope
-    around the ``class`` statement, and one that has, its own.
+    the module's; a class body that has not yet bound it reads the module's
+    globals, as Python looks a name a class body binds up, not a function
+    or a class body around it, and one that has bound it reads its own.
+
+    A class body that had not yet bound the name read the scope around the
+    ``class`` statement, so ``dataclass = len`` in the function or the class
+    around was read as the decorator, while the run finds the import.
     """
     module = ast.parse(
         textwrap.dedent(
@@ -1857,6 +1881,22 @@ def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() ->
                 @dataclass
                 class Rec:
                     pass
+
+            def nested():
+                dataclass = len
+                class Outer:
+                    @dataclass
+                    class Rec:
+                        pass
+                    dataclass = len
+
+            class Around:
+                dataclass = len
+                class Inner:
+                    @dataclass
+                    class Rec:
+                        pass
+                    dataclass = len
             """
         )
     )
@@ -1875,6 +1915,8 @@ def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() ->
         "imported": True,
         "Before": True,
         "After": False,
+        "nested": True,
+        "Around": True,
     }
 
 
@@ -1895,8 +1937,82 @@ def test_an_import_binds_a_name_to_a_dotted_path() -> None:
     assert ast_scan.import_path(aliased, "dcs") == "dataclasses"
     assert ast_scan.import_path(dotted, "os") == "os"
     assert ast_scan.import_path(relative, "dataclasses") is None
+    assert ast_scan.import_path(relative, "dataclasses", "pkg") == "pkg.dataclasses"
+    assert ast_scan.import_path(relative, "dataclasses", "") is None
     assert ast_scan.import_path(assigned, "dc") is None
     assert ast_scan.import_path(plain, "dataclass") is None
+
+
+#: The modules of a package a decorator is imported through, by their
+#: dotted names: one that takes ``dataclasses``' own, one that takes it from
+#: that one, and one that writes a name of its own over the import.
+_EXPORTING = {
+    "pkg": "",
+    "pkg.sub": "",
+    "pkg._dc": "from dataclasses import dataclass\n",
+    "pkg._chain": "from ._dc import dataclass\n",
+    "pkg._own": (
+        "from dataclasses import dataclass\ndef dataclass(cls):\n    return cls\n"
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("module", "source", "decorator", "expected"),
+    [
+        ("pkg.mod", "from ._dc import dataclass as dc", "dc", True),
+        ("pkg.mod", "from pkg._dc import dataclass as dc", "dc", True),
+        ("pkg.mod", "from ._chain import dataclass as dc", "dc", True),
+        ("pkg.mod", "from . import _dc", "_dc.dataclass", True),
+        ("pkg.mod", "import pkg._dc", "pkg._dc.dataclass", True),
+        ("pkg.sub.mod", "from .._dc import dataclass as dc", "dc", True),
+        ("pkg.mod", "from ._own import dataclass as dc", "dc", False),
+        ("pkg.mod", "from ._missing import dataclass as dc", "dc", False),
+    ],
+    ids=[
+        "relative",
+        "absolute",
+        "chain",
+        "module",
+        "dotted-import",
+        "two-levels",
+        "own",
+        "missing",
+    ],
+)
+def test_an_import_is_read_through_the_modules_of_its_package(
+    module: str, source: str, decorator: str, *, expected: bool
+) -> None:
+    """With the modules of the package (:class:`ast_scan.Exports`),
+    ``reads_import`` reads a relative import against the package its module
+    sits in, and a name a module of the package takes from elsewhere as what
+    it takes: through a chain of them, through a module the decorator names
+    by an attribute, and two levels up. A module that writes the name over
+    its import makes it its own, and one the package does not hold stands
+    for nothing the reader can follow. Without the modules, a relative
+    import stands for nothing.
+
+    An import's path was read as it is written, so ``from ._dc import
+    dataclass``, which is ``dataclasses``' own once ``_dc`` has run, was
+    read as another decorator.
+    """
+    modules = {name: ast.parse(text) for name, text in _EXPORTING.items()}
+    exports = ast_scan.Exports(modules, {"pkg", "pkg.sub"}.__contains__)
+    tree = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
+    record = tree.body[-1]
+    assert isinstance(record, ast.ClassDef)
+    found = ast_scan.reads_import(
+        tree,
+        record.decorator_list[0],
+        "dataclasses.dataclass",
+        module=module,
+        exports=exports,
+    )
+    assert found is expected
+    alone = ast_scan.reads_import(
+        tree, record.decorator_list[0], "dataclasses.dataclass"
+    )
+    assert alone is False
 
 
 def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:

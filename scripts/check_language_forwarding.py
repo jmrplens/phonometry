@@ -92,6 +92,7 @@ from typing import TYPE_CHECKING, TypeGuard
 
 from ast_scan import (
     UNREAD,
+    Exports,
     assigned_value,
     assignment_target,
     binding_of,
@@ -715,8 +716,9 @@ def _one(targets: list[_Target]) -> _Target:
 _DATACLASS = "dataclasses.dataclass"
 
 
-def _generates_init(klass: Class) -> bool | None:
-    """Whether ``@dataclass`` writes *klass* an ``__init__``.
+def _generates_init(klass: Class, exports: Exports) -> bool | None:
+    """Whether ``@dataclass`` writes *klass* an ``__init__``, its imports
+    read as the modules of *exports* make them.
 
     ``True`` when a decorator of it is surely the one ``dataclasses``
     defines (:func:`_dataclass_call`) and it does not turn ``init`` off, as
@@ -727,7 +729,7 @@ def _generates_init(klass: Class) -> bool | None:
     runs the generated ``__init__`` or the one past it in its order, and
     :meth:`Tree.members` gives both.
     """
-    decorator, sure = _dataclass_call(klass)
+    decorator, sure = _dataclass_call(klass, exports)
     if decorator is None:
         return False
     option = (
@@ -743,7 +745,7 @@ def _generates_init(klass: Class) -> bool | None:
     return True if sure else None
 
 
-def _dataclass_call(klass: Class) -> tuple[ast.expr | None, bool]:
+def _dataclass_call(klass: Class, exports: Exports) -> tuple[ast.expr | None, bool]:
     """The decorator that may make *klass* a dataclass, with or without
     arguments, or ``None``, and whether it surely does.
 
@@ -754,12 +756,21 @@ def _dataclass_call(klass: Class) -> tuple[ast.expr | None, bool]:
     or in the function that writes the class, a decorator of its own that
     writes nothing say, makes it no ``dataclasses``' one, and two bindings
     that may each stand there, an import and a fallback in the branches of
-    a ``try``, make it one that may be either.
+    a ``try``, make it one that may be either. An import of it is read as
+    the modules of the tree, *exports*, make it: a relative one, and one a
+    module of the tree re-exports, ``from ._dc import dataclass`` where
+    ``_dc`` imports ``dataclasses``' own, stand for it too.
     """
     maybe: ast.expr | None = None
     for decorator in klass.node.decorator_list:
         called = decorator.func if isinstance(decorator, ast.Call) else decorator
-        reading = reads_import(klass.module.node, called, _DATACLASS)
+        reading = reads_import(
+            klass.module.node,
+            called,
+            _DATACLASS,
+            module=klass.module.name,
+            exports=exports,
+        )
         if reading:
             return decorator, True
         if reading is None and maybe is None:
@@ -767,14 +778,14 @@ def _dataclass_call(klass: Class) -> tuple[ast.expr | None, bool]:
     return maybe, False
 
 
-def _is_dataclass(klass: Class) -> bool:
+def _is_dataclass(klass: Class, exports: Exports) -> bool:
     """Whether ``@dataclass`` may make *klass* a record, whatever it writes."""
-    return _dataclass_call(klass)[0] is not None
+    return _dataclass_call(klass, exports)[0] is not None
 
 
-def _record_kw_only(klass: Class) -> bool:
+def _record_kw_only(klass: Class, exports: Exports) -> bool:
     """Whether the record is told ``kw_only=True``, every field by its name."""
-    decorator = _dataclass_call(klass)[0]
+    decorator = _dataclass_call(klass, exports)[0]
     return isinstance(decorator, ast.Call) and any(
         keyword.arg == "kw_only"
         and isinstance(keyword.value, ast.Constant)
@@ -895,6 +906,12 @@ class Tree:
     def __init__(self, modules: dict[str, Module], root: Path) -> None:
         self.modules = modules
         self.root = root
+        #: The modules of the tree, read for what each imports from another,
+        #: a decorator one of them re-exports among them.
+        self.exports = Exports(
+            {name: module.node for name, module in modules.items()},
+            lambda name: modules[name].package,
+        )
         self.scopes: list[Scope] = []
         self.functions: dict[ast.AST, Scope] = {}
         self.classes: dict[ast.AST, Class] = {}
@@ -1295,7 +1312,9 @@ class Tree:
             if defined:
                 found.append(own)
                 return found
-            writes = _generates_init(later) if name == "__init__" else False
+            writes = (
+                _generates_init(later, self.exports) if name == "__init__" else False
+            )
             if writes is not False:
                 found.append(self._generated_init(later))
                 if writes:
@@ -1361,9 +1380,9 @@ class Tree:
         positional: dict[str, None] = {}
         keyword: dict[str, None] = {}
         for later in reversed(self.linearization(klass)):
-            if not _is_dataclass(later):
+            if not _is_dataclass(later, self.exports):
                 continue
-            only = _record_kw_only(later)
+            only = _record_kw_only(later, self.exports)
             for statement in later.node.body:
                 if isinstance(statement, ast.AnnAssign) and _is_kw_only_marker(
                     statement

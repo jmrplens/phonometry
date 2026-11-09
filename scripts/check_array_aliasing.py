@@ -159,6 +159,7 @@ from typing import TYPE_CHECKING, TypeGuard
 from ast_scan import (
     COMPOUND_STATEMENTS,
     ROOT,
+    Exports,
     argument_places,
     argument_reach,
     assigned_value,
@@ -655,11 +656,14 @@ def _pinned_functions(
     return [found for found in held if isinstance(found, FunctionInfo)]
 
 
-def _record_decorator(node: ast.expr, module: ast.Module) -> bool | None:
-    """Whether the decorator *node*, written in *module*, is ``dataclasses``'
-    ``dataclass``, with or without arguments: its name read as it stands
-    where the ``class`` statement runs its decorators, in the scope that
-    writes the class or a scope around it (:func:`ast_scan.reads_import`).
+def _record_decorator(node: ast.expr, module: str, exports: Exports) -> bool | None:
+    """Whether the decorator *node*, written in the module *module* of the
+    package *exports* reads, is ``dataclasses``' ``dataclass``, with or
+    without arguments: its name read as it stands where the ``class``
+    statement runs its decorators, in the scope that writes the class or a
+    scope around it, and an import of it as the modules of the package make
+    it, a relative one or one a module of the package re-exports
+    (:func:`ast_scan.reads_import`).
 
     ``True`` when every binding that may stand there imports it, ``False``
     when none does, a ``def`` of the name that replaced the import, a
@@ -668,7 +672,13 @@ def _record_decorator(node: ast.expr, module: ast.Module) -> bool | None:
     not.
     """
     target = node.func if isinstance(node, ast.Call) else node
-    return reads_import(module, target, "dataclasses.dataclass")
+    return reads_import(
+        exports.modules[module],
+        target,
+        "dataclasses.dataclass",
+        module=module,
+        exports=exports,
+    )
 
 
 def _base_name(node: ast.expr) -> str:
@@ -782,6 +792,9 @@ class Tree:
             self.paths[module] = relative(path)
             if path.name == "__init__.py":
                 self.packages.add(module)
+        #: The modules read for what each imports from another, a decorator
+        #: a module of the package re-exports among them.
+        self.exports = Exports(self.modules, self.packages.__contains__)
         for module, tree in self.modules.items():
             self._read_module(module, tree)
         self._read_aliases()
@@ -883,9 +896,9 @@ class Tree:
         for node in body:
             if isinstance(node, ast.ClassDef):
                 qualname = f"{scope}.{node.name}" if scope else node.name
-                tree = self.modules[module]
                 record = any(
-                    _record_decorator(d, tree) is not False for d in node.decorator_list
+                    _record_decorator(d, module, self.exports) is not False
+                    for d in node.decorator_list
                 ) or any(_base_name(b) == "NamedTuple" for b in node.bases)
                 info = ClassInfo(
                     node.name,
@@ -895,7 +908,9 @@ class Tree:
                     node.lineno,
                     node=node,
                 )
-                keyword_only = _keyword_only_record(node.decorator_list, tree)
+                keyword_only = _keyword_only_record(
+                    node.decorator_list, module, self.exports
+                )
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign) and isinstance(
                         item.target, ast.Name
@@ -1922,7 +1937,7 @@ class Tree:
         that is a value the guard cannot read, or the decorator may be
         ``dataclasses``' or another, so it may write one or not.
         """
-        return _generates_init(info, self.modules[info.module])
+        return _generates_init(info, self.exports)
 
     def _classes_named(
         self, definition: FunctionInfo, expr: ast.expr
@@ -2095,20 +2110,21 @@ def _public_path(module: str) -> bool:
     return not any(part.startswith("_") for part in module.split("."))
 
 
-def _generates_init(info: ClassInfo, module: ast.Module) -> bool | None:
+def _generates_init(info: ClassInfo, exports: Exports) -> bool | None:
     """Whether ``@dataclass`` writes a class an ``__init__``: a decorator of
     it is ``dataclasses``' ``dataclass`` where the class statement runs
     (:func:`_record_decorator`), and it does not say ``init=False``, as a
-    constant or as a name *module* binds once at its top to one. ``None``
+    constant or as a name its module binds once at its top to one. ``None``
     when its ``init=`` is a value the guard cannot read, or the decorator
     may be ``dataclasses``' or another, so it may write one or not.
     """
     node = info.node
     if node is None:
         return False
+    module = exports.modules[info.module]
     found: bool | None = False
     for decorator in node.decorator_list:
-        surely = _record_decorator(decorator, module)
+        surely = _record_decorator(decorator, info.module, exports)
         if surely is False:
             continue
         flag = (
@@ -2145,13 +2161,15 @@ def _excluded_from_init(value: ast.expr | None) -> bool:
     )
 
 
-def _keyword_only_record(decorators: Sequence[ast.expr], module: ast.Module) -> bool:
+def _keyword_only_record(
+    decorators: Sequence[ast.expr], module: str, exports: Exports
+) -> bool:
     """Whether ``@dataclass(kw_only=True)`` makes every field of the class
     keyword-only.
     """
     return any(
         isinstance(decorator, ast.Call)
-        and _record_decorator(decorator, module) is not False
+        and _record_decorator(decorator, module, exports) is not False
         and _keyword_constant(decorator, "kw_only", default=False) is True
         for decorator in decorators
     )

@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Iterator, Mapping, Sequence
+    from collections.abc import Callable, Collection, Iterator, Mapping, Sequence
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -1291,17 +1291,19 @@ def standing_where_read(root: ast.Module, node: ast.AST, name: str) -> list[ast.
     those that may have run before it (:func:`held_before`): one a later
     statement of the scope replaces is no longer there, and either of two
     in the branches of an ``if`` or a ``try`` may be. A class body that has
-    not yet bound the name reads the scope around the ``class`` statement,
-    as Python does; a function that binds it later holds none, as the read
-    raises there. At the top of the module, a binding a function makes of
-    the name under ``global`` may stand as well, since that function may
-    have run (:func:`global_bindings`). Empty when nothing but a builtin
-    is the name.
+    not yet bound the name reads the module's, as Python does: the body
+    looks a name it binds up in its own namespace and then in the module's
+    globals, never in a function or a class body around it; a function
+    that binds it later holds none, as the read raises there. At the top
+    of the module, a binding a function makes of the name under ``global``
+    may stand as well, since that function may have run
+    (:func:`global_bindings`). Empty when nothing but a builtin is the name.
     """
     scope = binding_scope(root, node, name)
     held = list(held_before(root, bindings_by_name(scope).get(name, []), node))
     if not held and isinstance(scope, ast.ClassDef):
-        return standing_where_read(root, scope, name)
+        scope = root
+        held = list(held_before(root, bindings_by_name(root).get(name, []), node))
     if scope is root:
         held.extend(
             binding
@@ -1311,20 +1313,26 @@ def standing_where_read(root: ast.Module, node: ast.AST, name: str) -> list[ast.
     return held
 
 
-def import_path(binding: ast.AST, name: str) -> str | None:
+def import_path(binding: ast.AST, name: str, package: str | None = None) -> str | None:
     """The dotted path an import statement, *binding*, binds *name* to:
     ``dataclasses.dataclass`` for ``from dataclasses import dataclass``,
     ``dataclasses`` for ``import dataclasses`` or ``import dataclasses as
     dc`` and *name* ``dc``, ``a`` for ``import a.b``, which binds ``a``.
-    ``None`` for a relative import, whose module is the package's own, and
-    for any binding that is no import.
+
+    A relative import is read against *package*, the package the module
+    that writes it sits in (the module itself for a package's
+    ``__init__``): ``pkg._dc.dataclass`` for ``from ._dc import dataclass``
+    in ``pkg``. ``None`` for one without *package*, or in a module that
+    sits in none, or one that climbs past its top, and for any binding that
+    is no import.
     """
     if isinstance(binding, ast.ImportFrom):
-        if binding.level or binding.module is None:
+        source = _import_source(binding, package)
+        if source is None:
             return None
         return next(
             (
-                f"{binding.module}.{alias.name}"
+                f"{source}.{alias.name}"
                 for alias in binding.names
                 if (alias.asname or alias.name) == name
             ),
@@ -1339,31 +1347,190 @@ def import_path(binding: ast.AST, name: str) -> str | None:
     return None
 
 
-def reads_import(root: ast.Module, node: ast.expr, dotted: str) -> bool | None:
-    """Whether *node*, a name or a dotted one under *root*, stands for
-    *dotted* where it is read: through an import of it (``dataclass`` after
-    ``from dataclasses import dataclass``) or of a module it is an attribute
-    of (``dataclasses.dataclass`` after ``import dataclasses``).
-
-    ``True`` when every binding of its first name that may stand there
-    (:func:`standing_where_read`) is such an import, ``False`` when none is,
-    a ``def``, an assignment or an import of something else, and ``None``
-    when some are and some are not, so either may be what the read finds.
+def _import_source(binding: ast.ImportFrom, package: str | None) -> str | None:
+    """The module a ``from ... import`` reads from, a relative one read
+    against *package* (:func:`import_path`); ``None`` when it cannot be read.
     """
+    if not binding.level:
+        return binding.module
+    if not package:
+        return None
+    parts = package.split(".")
+    if binding.level - 1 >= len(parts):
+        return None
+    parts = parts[: len(parts) - (binding.level - 1)]
+    return ".".join([*parts, binding.module] if binding.module else parts)
+
+
+#: How many modules of a package a name is followed through, one re-export
+#: after another, past which it is read as the module that holds it.
+_EXPORT_DEPTH = 8
+
+
+@dataclass(frozen=True, eq=False)
+class Exports:
+    """The modules of a package, by their dotted names, read for what each
+    imports from another: a relative import is read against the package a
+    module sits in (:meth:`package_of`), and a name one of them takes from
+    elsewhere is what it takes (:meth:`paths`).
+    """
+
+    #: Each module of the package, by its dotted name.
+    modules: Mapping[str, ast.Module]
+    #: Whether the module of a dotted name is a package's ``__init__``.
+    is_package: Callable[[str], bool]
+
+    def package_of(self, module: str) -> str:
+        """The package *module* sits in: itself for a package's ``__init__``."""
+        return module if self.is_package(module) else module.rpartition(".")[0]
+
+    def paths(self, dotted: str, depth: int = 0) -> list[str]:
+        """Each dotted path *dotted* may stand for once a module of the
+        package it names is read: ``pkg._dc.dataclass``, after ``from
+        dataclasses import dataclass`` in ``pkg/_dc.py``, is
+        ``dataclasses.dataclass``, as Python finds it.
+
+        The name is read in the longest module of the package *dotted*
+        starts with, through the bindings of it that stand once that module
+        has run (:func:`live_bindings`, :func:`global_bindings`), each as
+        :func:`reads_import` reads one: an import of it is followed, a
+        relative one too, and so is an alias of a name or a dotted one;
+        any other, a ``def``, a ``class`` or another value, makes it that
+        module's own, *dotted* itself. So is a module of the package, a
+        name no module of the package starts, one its module never binds,
+        and one followed through more than :data:`_EXPORT_DEPTH` names.
+        """
+        parts = dotted.split(".")
+        cut = next(
+            (
+                cut
+                for cut in range(len(parts) - 1, 0, -1)
+                if ".".join(parts[:cut]) in self.modules
+            ),
+            None,
+        )
+        if depth > _EXPORT_DEPTH or dotted in self.modules or cut is None:
+            return [dotted]
+        module = ".".join(parts[:cut])
+        name = parts[cut]
+        tail = "".join(f".{part}" for part in parts[cut + 1 :])
+        tree = self.modules[module]
+        nodes = bindings_by_name(tree).get(name, [])
+        standing = [
+            *(nodes if len(nodes) < 2 else live_bindings(tree, nodes, None)),
+            *global_bindings(tree).get(name, []),
+        ]
+        return [
+            dotted if path is None else path
+            for binding in standing
+            for path in _binding_paths(tree, binding, name, tail, module, self, depth)
+        ] or [dotted]
+
+
+def _expression_paths(
+    root: ast.Module,
+    node: ast.expr,
+    module: str | None,
+    exports: Exports | None,
+    depth: int,
+) -> list[str | None]:
+    """Each dotted path *node*, read where it is written under *root*, the
+    module *module* of the package *exports* reads, may stand for: a name
+    or a dotted one through the bindings of its first name that may stand
+    there (:func:`standing_where_read`, :func:`_binding_paths`), and a
+    ``functools.partial`` of one as that one, the options it presets
+    unread, as Python calls what it wraps. ``None`` for anything else.
+    """
+    if depth > _EXPORT_DEPTH:
+        return [None]
+    if isinstance(node, ast.Call):
+        wrapped = _expression_paths(root, node.func, module, exports, depth + 1)
+        if node.args and wrapped and all(p == "functools.partial" for p in wrapped):
+            return _expression_paths(root, node.args[0], module, exports, depth + 1)
+        return [None]
     attributes: list[str] = []
     head = node
     while isinstance(head, ast.Attribute):
         attributes.append(head.attr)
         head = head.value
     if not isinstance(head, ast.Name):
-        return False
+        return [None]
     tail = "".join(f".{attribute}" for attribute in reversed(attributes))
+    return [
+        path
+        for binding in standing_where_read(root, head, head.id)
+        for path in _binding_paths(root, binding, head.id, tail, module, exports, depth)
+    ]
+
+
+def _binding_paths(
+    root: ast.Module,
+    binding: ast.AST,
+    name: str,
+    tail: str,
+    module: str | None,
+    exports: Exports | None,
+    depth: int,
+) -> list[str | None]:
+    """Each dotted path *name*, bound at *binding* under *root*, followed by
+    the attributes *tail* may stand for (:func:`_expression_paths`): an
+    import's path, read as *exports* makes it (:meth:`Exports.paths`); an
+    assignment's value when it is a name, a dotted one or a
+    ``functools.partial`` of one, read where the assignment runs; ``None``
+    for any other binding, and for a value that stands for nothing an
+    import names, a builtin among them.
+    """
+    package = (
+        exports.package_of(module)
+        if exports is not None and module is not None
+        else None
+    )
+    path = import_path(binding, name, package)
+    if path is not None:
+        read = f"{path}{tail}"
+        followed: list[str | None] = [
+            *(exports.paths(read, depth + 1) if exports is not None else [read])
+        ]
+        return followed
+    value = assigned_value(root, binding) if assignment_target(binding) else None
+    if not isinstance(value, ast.Name | ast.Attribute | ast.Call):
+        return [None]
+    found = _expression_paths(root, value, module, exports, depth + 1)
+    return [None if path is None else f"{path}{tail}" for path in found] or [None]
+
+
+def reads_import(
+    root: ast.Module,
+    node: ast.expr,
+    dotted: str,
+    *,
+    module: str | None = None,
+    exports: Exports | None = None,
+) -> bool | None:
+    """Whether *node*, a name or a dotted one under *root*, stands for
+    *dotted* where it is read: through an import of it (``dataclass`` after
+    ``from dataclasses import dataclass``) or of a module it is an attribute
+    of (``dataclasses.dataclass`` after ``import dataclasses``), or through
+    an alias of one (``dc = dataclasses.dataclass``, or a
+    ``functools.partial`` of it), read where the alias is assigned.
+
+    ``True`` when every binding of its first name that may stand there
+    (:func:`standing_where_read`) is such an import, ``False`` when none is,
+    a ``def``, an assignment of anything else or an import of something
+    else, and ``None`` when some are and some are not, so either may be
+    what the read finds.
+
+    With *exports*, the modules of the package *root* is the module
+    *module* of, an import is read as the package's modules make it: a
+    relative one against the package *module* sits in, and a name a module
+    of the package takes from elsewhere as what it takes
+    (:meth:`Exports.paths`), so ``from ._dc import dataclass``, where
+    ``_dc`` imports ``dataclasses``' own, stands for it too.
+    """
+    if isinstance(node, ast.Call):
+        return False
     hits = [
-        path is not None and f"{path}{tail}" == dotted
-        for path in (
-            import_path(binding, head.id)
-            for binding in standing_where_read(root, head, head.id)
-        )
+        path == dotted for path in _expression_paths(root, node, module, exports, 0)
     ]
     if hits and all(hits):
         return True

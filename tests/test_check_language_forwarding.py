@@ -2358,6 +2358,82 @@ def test_a_decorator_is_read_through_the_bindings_that_stand_where_the_class_run
     assert sorted((f.caller, f.helper) for f in found) == expected
 
 
+#: A class over :data:`_LABELLED` with a ``language`` field, whose decorator
+#: ``IMPORT`` binds: a call of it runs the ``__init__`` ``@dataclass`` writes
+#: when the decorator is ``dataclasses``' own, ``_Labelled.__init__`` when
+#: it is not.
+_TAKEN_FROM = """
+IMPORT
+
+from .labelled import _Labelled
+
+
+@dataclass
+class Sub(_Labelled):
+    value: float = 0.0
+    language: str = "en"
+
+
+def plot(ax, *, language="en"):
+    return Sub(1.0)
+"""
+
+
+@pytest.mark.parametrize(
+    ("imported", "exporting", "expected"),
+    [
+        ("from .dc import dataclass", "from dataclasses import dataclass", "Sub"),
+        ("from pkg.dc import dataclass", "from dataclasses import dataclass", "Sub"),
+        (
+            "from . import dc\n\ndataclass = dc.dataclass",
+            "import dataclasses\n\ndataclass = dataclasses.dataclass",
+            "Sub",
+        ),
+        (
+            "import functools\n\nfrom .dc import dataclass as _record\n\n"
+            "dataclass = functools.partial(_record, eq=False)",
+            "from dataclasses import dataclass",
+            "Sub",
+        ),
+        (
+            "from .dc import dataclass",
+            "def dataclass(cls):\n    return cls",
+            "_Labelled",
+        ),
+    ],
+    ids=["relative", "absolute", "alias", "partial", "own"],
+)
+def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
+    tmp_path: pathlib.Path, imported: str, exporting: str, expected: str
+) -> None:
+    """``@dataclass`` taken from a module of the package is what that module
+    took, and an alias of it is what it names: ``dataclasses``' own,
+    through a relative import or an absolute one, an alias in either module
+    or a ``functools.partial`` of it, so ``Sub(1.0)`` runs the ``__init__``
+    it writes, which takes the record's ``language`` field. A module that
+    writes a ``dataclass`` of its own leaves ``Sub`` to
+    ``_Labelled.__init__``, which takes it too. Either drops the language.
+
+    An import was read as it is written and every assignment as replacing
+    the decorator, so the call was read as running ``_Labelled.__init__``
+    whatever the decorator was.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.labelled": _LABELLED,
+            "pkg.dc": exporting + "\n",
+            "pkg.mod": _TAKEN_FROM.replace("IMPORT", imported),
+        },
+    )
+    helper = (
+        "pkg.mod.Sub.__init__"
+        if expected == "Sub"
+        else "pkg.labelled._Labelled.__init__"
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [("plot", helper)]
+
+
 @pytest.mark.parametrize(
     ("option", "expected"),
     [

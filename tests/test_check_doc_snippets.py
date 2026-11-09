@@ -1480,6 +1480,31 @@ def test_a_long_run_of_digits_beside_a_label_is_read_in_linear_time() -> None:
     assert found == []
 
 
+def test_a_long_run_of_spaces_is_read_in_linear_time() -> None:
+    """An arrow is looked for from where a run of spaces opens, in what a
+    print wrote and in the comment alike, not again from each space of one.
+
+    Looked for from each space, a print of 80,000 spaces between two words
+    took about two minutes on this machine, and a comment of as many about a
+    minute and a half.
+    """
+    count = 80_000
+    value = "a" + " " * count + "b"
+    script = (
+        f'value = "a" + " " * {count} + "b"\nprint(f"ID: {{value}}")  # ID: {value}\n'
+    )
+    start = time.perf_counter()
+    found = _failures(script, {2: f"ID: {value}"})
+    printed = time.perf_counter() - start
+    start = time.perf_counter()
+    noted = _disagreement(f"ID: 1{' ' * count}3", "ID: 1 2")
+    commented = time.perf_counter() - start
+    assert printed < 10.0
+    assert commented < 10.0
+    assert found == []
+    assert "3" in noted
+
+
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
     """The brackets before each comma between two digits are counted on, not
     counted again from the start of the line.

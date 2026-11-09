@@ -766,13 +766,24 @@ def test_every_floored_distribution_has_a_display_name() -> None:
     assert set(_MODULE.floors(_pyproject())) == set(_DISPLAY_NAMES)
 
 
-def _unnamed_floors(text: str, distributions: Collection[str]) -> list[str]:
-    """The floors of ``distributions``, on each Python, that ``text`` leaves out.
+def _names_release(text: str, distribution: str, version: str) -> bool:
+    """Whether ``text`` names ``version`` of ``distribution``.
 
-    A floor is named when its version stands next to the name of its
+    A release is named when its version stands next to the name of its
     distribution. The version may end a sentence, but not run on into a
     longer one: "torch 2.9.0." names 2.9.0, "torch 2.9.0.1" does not.
     """
+    return bool(
+        re.search(
+            rf"(?<![\w-]){re.escape(_DISPLAY_NAMES[distribution])}\s+"
+            rf"{re.escape(version)}(?!\w|\.\w)",
+            text,
+        )
+    )
+
+
+def _unnamed_floors(text: str, distributions: Collection[str]) -> list[str]:
+    """The floors of ``distributions``, on each Python, that ``text`` leaves out."""
     floors = {
         (distribution, version)
         for python in _classified_pythons()
@@ -782,11 +793,7 @@ def _unnamed_floors(text: str, distributions: Collection[str]) -> list[str]:
     return [
         f"{_DISPLAY_NAMES[distribution]} {version}"
         for distribution, version in sorted(floors)
-        if not re.search(
-            rf"(?<![\w-]){re.escape(_DISPLAY_NAMES[distribution])}\s+"
-            rf"{re.escape(version)}(?!\w|\.\w)",
-            text,
-        )
+        if not _names_release(text, distribution, version)
     ]
 
 
@@ -795,6 +802,65 @@ def test_the_installation_instructions_name_every_floor(name: str) -> None:
     """Each floor of each Python stands next to the name of its distribution."""
     text = (_ROOT / name).read_text(encoding="utf-8")
     assert _unnamed_floors(text, _DISPLAY_NAMES) == []
+
+
+#: The floors whose wheel for their Python serves one platform only, as
+#: ``(distribution, Python, floor): (that platform, the first release with a
+#: wheel on the others)``, read from the files PyPI lists for each release:
+#: torch 2.5.0's one wheel for Python 3.13 is for Linux on x86-64, the platform
+#: of the minimum-versions job, and 2.6.0 has one for macOS on ARM, Windows on
+#: x86-64 and Linux on ARM as well.
+_FLOORS_OF_ONE_PLATFORM = {("torch", "3.13", "2.5.0"): ("x86-64", "2.6.0")}
+
+
+def test_a_floor_of_one_platform_is_still_the_declared_floor() -> None:
+    """Each entry above is a floor pyproject declares, so none outlives its floor."""
+    for distribution, python, floor in _FLOORS_OF_ONE_PLATFORM:
+        assert _MODULE.floors(_pyproject(), python)[distribution] == floor
+
+
+@pytest.mark.parametrize("name", _FLOOR_STATEMENTS)
+def test_a_floor_of_one_platform_is_stated_with_the_release_the_others_take(
+    name: str,
+) -> None:
+    """A floor with a wheel on one platform names it, and the oldest the others take.
+
+    The instructions call each floor the oldest release with a wheel for its
+    Python; for a floor whose wheel serves one platform, that holds there only.
+    """
+    text = " ".join((_ROOT / name).read_text(encoding="utf-8").split())
+    missing = [
+        f"{_DISPLAY_NAMES[distribution]} {elsewhere} beside {platform}"
+        for (distribution, _, _), (platform, elsewhere) in (
+            _FLOORS_OF_ONE_PLATFORM.items()
+        )
+        if platform not in text or not _names_release(text, distribution, elsewhere)
+    ]
+    assert missing == []
+
+
+@pytest.mark.parametrize("name", [*_FLOOR_STATEMENTS, "CHANGELOG.md"])
+def test_the_release_the_others_take_is_not_said_to_be_what_pip_installs(
+    name: str,
+) -> None:
+    """The oldest release that installs on the other platforms is not pip's choice.
+
+    pip installs it in neither way it is run: the minimum-versions job pins
+    each distribution to its floor, and ``torch==2.5.0`` finds no wheel on
+    those platforms, while a plain ``pip install "phonometry[torch]"`` takes
+    the newest torch. Only a resolver held at the oldest releases, as
+    ``uv pip install --resolution lowest-direct`` is, lands on it. The
+    CHANGELOG is read too: its entries for the floors state the same release.
+    """
+    text = " ".join((_ROOT / name).read_text(encoding="utf-8").split())
+    clauses = [
+        clause
+        for clause in re.split(r"(?<=[.;])\s+", text)
+        for (distribution, _, _), (_, elsewhere) in _FLOORS_OF_ONE_PLATFORM.items()
+        if _names_release(clause, distribution, elsewhere)
+    ]
+    assert clauses, f"{name} names no release the other platforms take"
+    assert [clause for clause in clauses if re.search(r"\bpip\b", clause)] == []
 
 
 #: Where the documentation pages are written: the mirror GitHub serves and the

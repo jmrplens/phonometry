@@ -256,10 +256,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   FDTD engines.** It brings torch 2.3.0 or later and array-api-compat 1.5.1 or
   later, the oldest releases the backend's tests pass with, which the
   minimum-versions CI job installs; on Python 3.13 torch 2.5.0 or later and on
-  3.14 torch 2.9.0 or later, its first releases with a wheel for each.
-  `[full]` leaves it out on purpose, because the torch wheels PyPI serves on
-  Linux bring gigabytes of CUDA libraries; on a Linux machine without an
-  NVIDIA GPU, running
+  3.14 torch 2.9.0 or later, its first releases with a wheel for each. The
+  Python 3.13 wheel of torch 2.5.0 is for Linux on x86-64 only, where the job
+  runs; on macOS on ARM, Windows on x86-64 and Linux on ARM the first is
+  torch 2.6.0, the oldest that installs there. `[full]` leaves it out on
+  purpose, because the torch wheels PyPI serves on Linux bring gigabytes of
+  CUDA libraries; on a Linux machine without an NVIDIA GPU, running
   `pip install torch --index-url https://download.pytorch.org/whl/cpu` before
   `pip install "phonometry[torch]"` takes the CPU wheels instead. The install
   pages, the README and llms.txt say so in English and Spanish, and so does
@@ -6638,9 +6640,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   there the floor is the oldest release with a wheel that the tests pass
   with, behind a `python_version` marker, NumPy 2.1.0, SciPy 1.14.1, numba
   0.61.0 and torch 2.5.0 on 3.13 and NumPy 2.3.2, SciPy 1.16.1, numba 0.63.0
-  and torch 2.9.0 on 3.14. The `[report]` floors are the oldest releases that
-  render a fiche in a fresh interpreter under `-W error`: reportlab 4.0.4 to
-  4.2.5 warn when they are imported, through importlib's `load_module` and
+  and torch 2.9.0 on 3.14. The Python 3.13 wheel of torch 2.5.0 is for Linux
+  on x86-64 only, where the job runs; on macOS on ARM, Windows on x86-64 and
+  Linux on ARM the first is torch 2.6.0, the oldest that installs there.
+  The `[report]` floors are the oldest releases that render a fiche in a
+  fresh interpreter under `-W error`: reportlab 4.0.4 to 4.2.5 warn when
+  they are imported, through importlib's `load_module` and
   `ast.NameConstant`, both deprecated, and svglib 0.9.0 raises a
   SyntaxWarning (`invalid escape sequence '\d'`), which Python shows under
   its default filters, on the first import after an install that did not

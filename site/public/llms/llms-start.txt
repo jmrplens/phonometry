@@ -136,6 +136,9 @@ of their own for NumPy, SciPy, numba and torch, whose oldest releases have no
 wheel for them: the oldest releases that do, which the same job installs on
 each, on Python 3.13 NumPy 2.1.0, SciPy 1.14.1, numba 0.61.0 and torch 2.5.0,
 and on Python 3.14 NumPy 2.3.2, SciPy 1.16.1, numba 0.63.0 and torch 2.9.0.
+The Python 3.13 wheel of torch 2.5.0 is for Linux on x86-64 only, where the
+job runs; on macOS on ARM, Windows on x86-64 and Linux on ARM the first is
+torch 2.6.0, the oldest that installs there.
 
 Optional extras:
 

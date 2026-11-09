@@ -1509,6 +1509,24 @@ def test_a_page_of_many_commented_prints_is_read_in_linear_time() -> None:
     assert len(promises) == count
 
 
+def test_a_function_that_binds_print_is_read_in_linear_time() -> None:
+    """Each call's name is looked up through the scopes around it, and
+    whether the call runs in a scope's own namespace is told by the
+    statements of its body kept once for each scope, not by scanning that
+    body again for each call.
+
+    Scanned again, a function of 16,000 commented prints of a parameter
+    named ``print`` took 17 to 19 s on this machine.
+    """
+    count = 16_000
+    body = "".join(f"    print({n})  # {n}\n" for n in range(count))
+    start = time.perf_counter()
+    promises = check_doc_snippets.promised_outputs(f"def show(print):\n{body}")
+    assert time.perf_counter() - start < 10.0
+    assert len(promises) == count
+    assert not any(promise.builtin for promise in promises)
+
+
 def test_a_spanish_comment_writes_the_commas_of_its_brackets_one_way() -> None:
     """A comment that writes a decimal comma inside one bracket has said what
     its commas are, so ``[1,2]`` in another bracket of it is 1.2, as a reader

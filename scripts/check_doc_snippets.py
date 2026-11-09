@@ -489,8 +489,9 @@ class _Promise:
         that opens like an output whatever the print writes.
     :param apart: Where the prints stand that open on those lines and whose
         calls the comment does not stand for: one with a comment of its own on
-        fewer lines inside them, and one that runs on past *last*, the print
-        whose arguments hold this one.
+        fewer lines inside them, with the prints inside its arguments that
+        comment holds, and one that runs on past *last*, the print whose
+        arguments hold this one.
     :param builtin: Whether the print reads the builtin ``print``: a name
         the script binds to something else (``from rich import print``) need
         not reach the recorder, so a run that records none of its calls does
@@ -552,6 +553,27 @@ def _reads_builtin(tree: ast.Module, call: ast.Call) -> bool:
         and not ast_scan.own_names(tree).binds("print")
         and "print" not in ast_scan.global_bindings(tree)
     )
+
+
+def _prints_around(tree: ast.AST) -> dict[ast.Call, ast.Call]:
+    """Each print of *tree* inside the arguments of another, at any depth,
+    with the innermost print around it: the calls a print's arguments make
+    before it writes, which its comment stands for unless one has a comment
+    of its own.
+    """
+    around: dict[ast.Call, ast.Call] = {}
+
+    def visit(node: ast.AST, outer: ast.Call | None) -> None:
+        for child in ast.iter_child_nodes(node):
+            if _is_print(child):
+                if outer is not None:
+                    around[child] = outer
+                visit(child, child)
+            else:
+                visit(child, outer)
+
+    visit(tree, None)
+    return around
 
 
 #: The first and the last line of a stretch of a script.
@@ -663,9 +685,13 @@ def promised_outputs(script: str) -> list[_Promise]:
     on the lines of their statement, and that comment stands for their calls
     only, not for those of the prints that have one of their own. A comment
     on a print's own lines stands for the calls of that print and of the
-    prints inside its arguments, not for those of the print whose arguments
-    hold it, which opens on its line: the run tells the calls apart by where
-    each stands (:data:`_Place`), not by the line alone.
+    prints inside its arguments, at any depth, that have none of their own,
+    not for those of the print whose arguments hold it, which opens on its
+    line: the run tells the calls apart by where each stands
+    (:data:`_Place`), not by the line alone. A print inside another that
+    closes on the line the outer one closes on shares its comment, which
+    stands for the calls of both, and a print a comment on the lines of a
+    print around it holds is not read again on the lines of its statement.
     """
     tree = ast.parse(script)
     try:
@@ -798,10 +824,27 @@ def _promises(script: str, tree: ast.Module) -> list[_Promise]:
     for node, (own, _statement) in found.items():
         span[node] = own
     read([node for node, (own, stmt) in found.items() if own[1] < stmt[1]], words=False)
+    # A print inside the arguments of one with a comment on its own lines is
+    # held by that comment, the print whose comment holds it kept for it
+    # here: one that closes on the line the comment is read from shares that
+    # comment, which stands for the calls of both, and one with no comment of
+    # its own is not read again on the lines of its statement.
+    around = _prints_around(tree)
+    holder: dict[ast.Call, ast.Call] = {}
+    for node in found:  # each print before the prints inside its arguments
+        outer = holder.get(around[node]) if node in around else None
+        if outer is not None and (
+            node not in said_by or span[node][1] == span[outer][1]
+        ):
+            holder[node] = outer
+            said_by.pop(node, None)
+            word_by.pop(node, None)
+        elif node in said_by:
+            holder[node] = node
     for node, (_own, statement) in found.items():
-        if node not in said_by:
+        if node not in holder:
             span[node] = statement
-    read([node for node in found if node not in said_by], words=True)
+    read([node for node in found if node not in holder], words=True)
 
     # The run records a call under the line it opens on, so the prints a
     # comment may stand for are those that open on its lines.
@@ -813,8 +856,8 @@ def _promises(script: str, tree: ast.Module) -> list[_Promise]:
     def stands_for(stretch: _Span) -> tuple[list[ast.Call], list[ast.Call]]:
         """The prints that open on the lines of *stretch* whose calls a
         comment there stands for, and those whose calls it does not: a print
-        with a comment of its own on fewer lines inside them, and one that
-        runs on past them.
+        held by a comment of its own on fewer lines inside them, its own or
+        that of a print around it, and one that runs on past them.
 
         Read once for each stretch, and only over the prints that open on
         it, so that a page of many prints each with its comment is read in a
@@ -826,8 +869,9 @@ def _promises(script: str, tree: ast.Module) -> list[_Promise]:
             left: list[ast.Call] = []
             for number in range(first, last + 1):
                 for node in opening.get(number, ()):
-                    own = node in said_by and span[node] != stretch
-                    inside = own and first <= span[node][0] and span[node][1] <= last
+                    owner = holder.get(node, node)
+                    own = owner in said_by and span[owner] != stretch
+                    inside = own and first <= span[owner][0] and span[owner][1] <= last
                     past = (node.end_lineno or node.lineno) > last
                     (left if inside or past else kept).append(node)
             shares[stretch] = (kept, left)

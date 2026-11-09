@@ -1314,18 +1314,64 @@ def test_a_print_inside_another_print_is_told_apart_by_where_it_stands(
     """Two prints that open on one line, one in the other's arguments, make
     two calls the run records under that line: the inner one's own comment
     holds its call alone, and the comment of the print around it holds that
-    print's call, not the inner one's nor none.
+    print's call, not the inner one's nor none. A print inside the inner
+    one's arguments, with no comment of its own, is the inner comment's, at
+    any depth, so the outer comment does not count its call again.
     """
     listed = "data = [\n    print(print(1),  # 1\n          2),  # None 2\n]\n"
     stated = "value = (\n    print(print(1, end=' '),  # 1\n          2)\n)  # None 2\n"
+    deep_listed = (
+        "data = [\n"
+        "    print(print(print(1, end=' '),\n"
+        "                2),  # 1 None 2\n"
+        "          3),  # None 3\n"
+        "]\n"
+    )
+    deep_stated = (
+        "value = (\n"
+        "    print(print(print(1, end=' '),\n"
+        "                2),  # 1 None 2\n"
+        "          3)\n"
+        ")  # None 3\n"
+    )
     pages = [
         _page(tmp_path, listed, name="listed.md"),
         _page(tmp_path, stated, name="stated.md"),
+        _page(tmp_path, deep_listed, name="deep_listed.md"),
+        _page(tmp_path, deep_stated, name="deep_stated.md"),
     ]
     assert check_doc_snippets.check_execution(pages) == []
     wrong = _page(tmp_path, stated.replace("# None 2", "# None 3"), name="w.md")
     (failure,) = check_doc_snippets.check_execution([wrong])
     assert "the comment says 3 where the print wrote 2" in failure
+    # The innermost call counted by both comments.
+    twice = deep_listed.replace("# None 3", "# 1 None 3")
+    (failure,) = check_doc_snippets.check_execution(
+        [_page(tmp_path, twice, name="twice.md")]
+    )
+    assert "the comment says 1 where the print wrote None" in failure
+
+
+def test_a_comment_two_nested_prints_close_beside_holds_both_their_calls(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A print that closes inside another on the line the outer one closes
+    on shares its comment, which states the calls of both in the order they
+    wrote; and a comment of the statement around prints that a comment on
+    their own lines already holds stands for none of them.
+    """
+    shared = "data = [print(1,\n              print(2)),  # 2 1 None\n]\n"
+    first = shared.replace("# 2 1 None", "# 2")
+    held = "value = (\n    print(print(1, end=' '),\n          2)  # 1 None 2\n)  # 1\n"
+    pages = [
+        _page(tmp_path, shared, name="shared.md"),
+        _page(tmp_path, first, name="first.md"),
+        _page(tmp_path, held, name="held.md"),
+    ]
+    assert check_doc_snippets.check_execution(pages) == []
+    wrong = _page(tmp_path, shared.replace("# 2 1 None", "# 2 3 None"), name="w.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "the comment says 3 where the print wrote 1" in failure
 
 
 def test_each_call_is_read_with_the_arguments_of_its_own_print(

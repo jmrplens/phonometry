@@ -945,23 +945,11 @@ def generate_airport_segment_corrections(output_dir: str) -> None:
         * 10.0
         ** (
             (
-                float(
-                    aircraft.npd_level(
-                        _DOC29_POWERS,
-                        _DOC29_DISTANCES,
-                        _DOC29_SEL,
-                        12000.0,
-                        526.0,
-                    )[0]
+                aircraft.npd_level(
+                    _DOC29_POWERS, _DOC29_DISTANCES, _DOC29_SEL, 12000.0, 526.0
                 )
-                - float(
-                    aircraft.npd_level(
-                        _DOC29_POWERS,
-                        _DOC29_DISTANCES,
-                        _DOC29_LMAX,
-                        12000.0,
-                        526.0,
-                    )[0]
+                - aircraft.npd_level(
+                    _DOC29_POWERS, _DOC29_DISTANCES, _DOC29_LMAX, 12000.0, 526.0
                 )
             )
             / 10.0

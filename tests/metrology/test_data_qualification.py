@@ -455,7 +455,7 @@ def test_narrowband_peaks_are_rayleigh_example_5_14() -> None:
     res = ph.metrology.peak_statistics(x, fs)
     assert res.irregularity_factor > 0.99
     # Example 5.14: Prob[peak > 4 sigma] = exp(-8) = 0.00033.
-    assert res.peak_exceedance(4.0)[0] == pytest.approx(np.exp(-8.0), rel=1e-2)
+    assert res.peak_exceedance(4.0) == pytest.approx(np.exp(-8.0), rel=1e-2)
     # One maximum per zero-crossing cycle: M matches N0 / 2.
     assert res.peak_rate == pytest.approx(res.zero_crossing_rate_rice / 2.0, rel=2e-2)
 

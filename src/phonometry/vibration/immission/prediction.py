@@ -773,9 +773,33 @@ def track_excitation_frequency(
     return np.asarray(speed / spacing * np.arange(1, count + 1), dtype=np.float64)
 
 
+@overload
+def machine_count_correction[S: RealScalar](
+    n_machines: S,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float: ...
+
+
+@overload
+def machine_count_correction[V: RealValues](
+    n_machines: V,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def machine_count_correction[A: NumericArrayLike](
+    n_machines: A,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float | NDArray[np.float64]: ...
+
+
 def machine_count_correction(
     n_machines: NumericArrayLike, *, n_reference_machines: int | np.integer[Any]
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The correction :math:`\chi` of Formula (7), Figure 3.
 
     The figure draws :math:`\chi` against the number of machines running,
@@ -785,7 +809,8 @@ def machine_count_correction(
 
     :param n_machines: :math:`N`, from 4 to 100, one or many.
     :param n_reference_machines: :math:`N_B`, one of the six curves.
-    :return: :math:`\chi`, one per count.
+    :return: :math:`\chi`, one per count. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a count outside the figure or a reference the
         figure has no curve for.
     :raises TypeError: if ``n_machines`` holds a text or a value that is not a real
@@ -804,7 +829,34 @@ def machine_count_correction(
         msg = f"Figure 3 runs from {grid[0]:g} to {grid[-1]:g} machines."
         raise ValueError(msg)
     curve = MACHINE_COUNT_CORRECTION[cast("int", n_reference_machines)]
-    return np.asarray(np.interp(counts, grid, curve), dtype=np.float64)
+    return as_float_or_array(np.interp(counts, grid, curve), like=(n_machines,))
+
+
+@overload
+def machine_hall_velocity_mm_s[S: RealScalar](
+    reference_velocity_mm_s: float,
+    n_machines: S,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float: ...
+
+
+@overload
+def machine_hall_velocity_mm_s[V: RealValues](
+    reference_velocity_mm_s: float,
+    n_machines: V,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def machine_hall_velocity_mm_s[A: NumericArrayLike](
+    reference_velocity_mm_s: float,
+    n_machines: A,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float | NDArray[np.float64]: ...
 
 
 def machine_hall_velocity_mm_s(
@@ -812,7 +864,7 @@ def machine_hall_velocity_mm_s(
     n_machines: NumericArrayLike,
     *,
     n_reference_machines: int | np.integer[Any],
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The peak velocity outside a hall of similar machines, Formula (7).
 
     :math:`v_N = \chi \, v_B \sqrt{N}`: the velocity measured at the point
@@ -824,7 +876,8 @@ def machine_hall_velocity_mm_s(
     :param reference_velocity_mm_s: :math:`v_B`, in millimetres per second.
     :param n_machines: :math:`N`, from 4 to 100, one or many.
     :param n_reference_machines: :math:`N_B`, one of 3, 5, 10, 30, 60 or 100.
-    :return: :math:`v_N`, one per count, in millimetres per second.
+    :return: :math:`v_N`, one per count, in millimetres per second. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a negative velocity, or a count or reference
         outside Figure 3.
     :raises TypeError: if ``reference_velocity_mm_s`` is not a single number, or
@@ -835,4 +888,4 @@ def machine_hall_velocity_mm_s(
     velocity = require_non_negative(reference_velocity_mm_s, "reference_velocity_mm_s")
     counts = require_finite_array(n_machines, "n_machines")
     chi = machine_count_correction(counts, n_reference_machines=n_reference_machines)
-    return np.asarray(chi * velocity * np.sqrt(counts), dtype=np.float64)
+    return as_float_or_array(chi * velocity * np.sqrt(counts), like=(n_machines,))

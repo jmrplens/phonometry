@@ -40,22 +40,22 @@ _L = [[100.0, 94.0, 88.0, 82.0], [110.0, 104.0, 98.0, 92.0]]
 
 
 def test_recovers_tabulated_nodes() -> None:
-    assert npd_level(_P, _D, _L, 1000.0, 200.0)[0] == pytest.approx(100.0)
-    assert npd_level(_P, _D, _L, 2000.0, 1600.0)[0] == pytest.approx(92.0)
-    assert npd_level(_P, _D, _L, 1000.0, 800.0)[0] == pytest.approx(88.0)
+    assert npd_level(_P, _D, _L, 1000.0, 200.0) == pytest.approx(100.0)
+    assert npd_level(_P, _D, _L, 2000.0, 1600.0) == pytest.approx(92.0)
+    assert npd_level(_P, _D, _L, 1000.0, 800.0) == pytest.approx(88.0)
 
 
 def test_log_linear_distance_interpolation() -> None:
     # Midpoint in log distance between 200 and 400 is sqrt(200*400); the level is
     # the arithmetic mean of the two node levels.
     dm = np.sqrt(200.0 * 400.0)
-    assert npd_level(_P, _D, _L, 1000.0, dm)[0] == pytest.approx(97.0)
+    assert npd_level(_P, _D, _L, 1000.0, dm) == pytest.approx(97.0)
 
 
 def test_linear_power_interpolation() -> None:
     # Halfway in power (1500) at a tabulated distance is the mean of the rows.
-    assert npd_level(_P, _D, _L, 1500.0, 200.0)[0] == pytest.approx(105.0)
-    assert npd_level(_P, _D, _L, 1500.0, 800.0)[0] == pytest.approx(93.0)
+    assert npd_level(_P, _D, _L, 1500.0, 200.0) == pytest.approx(105.0)
+    assert npd_level(_P, _D, _L, 1500.0, 800.0) == pytest.approx(93.0)
 
 
 def test_monotonic_decrease_with_distance() -> None:
@@ -68,18 +68,18 @@ def test_monotonic_decrease_with_distance() -> None:
 def test_distance_extrapolation_uses_terminal_slope() -> None:
     # Below 6 dB/doubling on the last segment (800->1600), one more doubling to
     # 3200 m gives 82 - 6 = 76 dB at P = 1000.
-    assert npd_level(_P, _D, _L, 1000.0, 3200.0)[0] == pytest.approx(76.0)
+    assert npd_level(_P, _D, _L, 1000.0, 3200.0) == pytest.approx(76.0)
     # And inward from 200 m: one halving to 100 m gives 100 + 6 = 106 dB.
-    assert npd_level(_P, _D, _L, 1000.0, 100.0)[0] == pytest.approx(106.0)
+    assert npd_level(_P, _D, _L, 1000.0, 100.0) == pytest.approx(106.0)
 
 
 def test_power_extrapolation() -> None:
     # Beyond the last power (2000): linear on the terminal power segment. At
     # P = 3000, d = 200: 100 + 2*(110-100) = 120 dB.
-    assert npd_level(_P, _D, _L, 3000.0, 200.0)[0] == pytest.approx(120.0)
+    assert npd_level(_P, _D, _L, 3000.0, 200.0) == pytest.approx(120.0)
     # Below the first power (1000): linear extrapolation downward. At P = 500,
     # d = 200: 100 + (-0.5)*(110-100) = 95 dB.
-    assert npd_level(_P, _D, _L, 500.0, 200.0)[0] == pytest.approx(95.0)
+    assert npd_level(_P, _D, _L, 500.0, 200.0) == pytest.approx(95.0)
 
 
 def test_npd_curve_result_and_plot() -> None:
@@ -213,7 +213,7 @@ def test_event_level_long_level_flyover_matches_infinite_path() -> None:
     from phonometry.aircraft.airport_noise import impedance_adjustment
 
     expected = (
-        npd_level(_NP, _ND, _NSEL, 10000.0, dp)[0]
+        npd_level(_NP, _ND, _NSEL, 10000.0, dp)
         + impedance_adjustment()
         + engine_installation_correction(beta, "wing")
         - lateral_attenuation(beta, lateral)
@@ -238,7 +238,7 @@ def test_event_level_maximum_metric() -> None:
     from phonometry.aircraft.airport_noise import impedance_adjustment
 
     expected = (
-        npd_level(_NP, _ND, _NMAX, 10000.0, dp)[0]
+        npd_level(_NP, _ND, _NMAX, 10000.0, dp)
         + impedance_adjustment()
         + engine_installation_correction(beta, "wing")
         - lateral_attenuation(beta, lateral)

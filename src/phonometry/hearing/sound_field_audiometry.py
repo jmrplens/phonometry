@@ -69,11 +69,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, given_repr, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -89,7 +90,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "DIFFUSE_FIELD_VARIATION_LIMITS",
@@ -1206,9 +1207,33 @@ def check_quasi_free_sound_field(
     )
 
 
+@overload
+def incidence_correction[S: RealScalar](
+    frequencies: S,
+    *,
+    incidence_angle_deg: float,
+) -> float: ...
+
+
+@overload
+def incidence_correction[V: RealValues](
+    frequencies: V,
+    *,
+    incidence_angle_deg: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def incidence_correction[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    incidence_angle_deg: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def incidence_correction(
     frequencies: NumericArrayLike, *, incidence_angle_deg: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """How much louder the nearer ear is with the loudspeaker off axis (Table B.1).
 
     The increase in sound pressure level at the ear closest to the
@@ -1220,7 +1245,8 @@ def incidence_correction(
     :param frequencies: Test frequencies in hertz, each one of
         :data:`INCIDENCE_CORRECTION_FREQUENCIES_HZ`.
     :param incidence_angle_deg: 45 or 90.
-    :return: The increase per frequency, in dB.
+    :return: The increase per frequency, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for another angle, or a frequency Table B.1 does not
         list.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
@@ -1253,4 +1279,4 @@ def incidence_correction(
             )
             raise ValueError(msg)
         out[position] = column[int(np.argmax(matches))]
-    return out
+    return as_float_or_array(out, like=(frequencies,))

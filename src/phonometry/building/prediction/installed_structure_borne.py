@@ -654,6 +654,57 @@ def _table_d1_arguments(
     return {k: real_number(supplied[k], "supplied") for k in required}
 
 
+@overload
+def typical_element_mobility[S: RealScalar](
+    structure: Structure,
+    *,
+    frequency: S | None = None,
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> float: ...
+
+
+@overload
+def typical_element_mobility[V: RealValues](
+    structure: Structure,
+    *,
+    frequency: V,
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def typical_element_mobility[A: NumericArrayLike](
+    structure: Structure,
+    *,
+    frequency: A | None = None,
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def typical_element_mobility(
     structure: Structure,
     *,
@@ -667,7 +718,7 @@ def typical_element_mobility(
     radius: float | None = None,
     stiffness: float | None = None,
     loss_factor: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Named lookup of EN 12354-5, Table D.1 (mobility of typical elements).
 
     Returns the mobility magnitude ``|Y|`` the third column of Table D.1
@@ -732,7 +783,9 @@ def typical_element_mobility(
     :param radius: Pipe radius ``r``, in metres (row ``"pipe"``).
     :param stiffness: Support stiffness ``s``, in N/m (row ``"mass_spring"``).
     :param loss_factor: Support loss factor ``eta`` (row ``"mass_spring"``).
-    :return: The mobility magnitude ``|Y|``, in m/(N.s).
+    :return: The mobility magnitude ``|Y|``, in m/(N.s). A ``float`` for a
+        number frequency or a row that reads none, an array for a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: for an unknown row, a missing or surplus describing
         quantity, a ``frequency`` that the row does not take (or lacks), or a
         non-positive value.
@@ -756,37 +809,39 @@ def typical_element_mobility(
         frequency,
     )
     if row == "mass":
-        return _mass_mobility(frequency, args["mass"])  # type: ignore[arg-type]
-    if row == "bar_end":
-        return _bar_end_mobility(
+        values = _mass_mobility(frequency, args["mass"])  # type: ignore[arg-type]
+    elif row == "bar_end":
+        values = _bar_end_mobility(
             args["density"], args["longitudinal_velocity"], args["area"]
         )
-    if row == "beam":
-        return _beam_mobility(
+    elif row == "beam":
+        values = _beam_mobility(
             frequency,  # type: ignore[arg-type]
             args["density"],
             args["longitudinal_velocity"],
             args["thickness_m"],
             args["width_m"],
         )
-    if row == "plate":
-        return _plate_mobility(
+    elif row == "plate":
+        values = _plate_mobility(
             args["density"], args["longitudinal_velocity"], args["thickness_m"]
         )
-    if row == "pipe":
-        return _pipe_mobility(
+    elif row == "pipe":
+        values = _pipe_mobility(
             frequency,  # type: ignore[arg-type]
             args["density"],
             args["longitudinal_velocity"],
             args["thickness_m"],
             args["radius"],
         )
-    return _mass_spring_mobility(
-        frequency,  # type: ignore[arg-type]
-        args["mass"],
-        args["stiffness"],
-        args["loss_factor"],
-    )
+    else:
+        values = _mass_spring_mobility(
+            frequency,  # type: ignore[arg-type]
+            args["mass"],
+            args["stiffness"],
+            args["loss_factor"],
+        )
+    return as_float_or_array(values, like=(frequency,))
 
 
 # ---------------------------------------------------------------------------

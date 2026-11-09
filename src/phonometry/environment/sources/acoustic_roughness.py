@@ -81,11 +81,12 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -101,7 +102,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandMapping, NumericArrayLike
+    from ..._internal.types import BandMapping, NumericArrayLike, RealScalar, RealValues
     from ...filters import OctaveFilterBank
 
 __all__ = [
@@ -392,13 +393,53 @@ def curvature_processed_roughness(
     return processed
 
 
+@overload
+def redistributed_band_energies[S1: RealScalar, S2: RealScalar](
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: S1,
+    target_upper: S2,
+) -> float: ...
+
+
+@overload
+def redistributed_band_energies[V: RealValues, A2: NumericArrayLike](
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: V,
+    target_upper: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def redistributed_band_energies[S1: RealScalar, V: RealValues](
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: S1,
+    target_upper: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def redistributed_band_energies[A1: NumericArrayLike, A2: NumericArrayLike](
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: A1,
+    target_upper: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def redistributed_band_energies(
     source_lower: NumericArrayLike,
     source_upper: NumericArrayLike,
     energies: NumericArrayLike,
     target_lower: NumericArrayLike,
     target_upper: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Band energies moved onto other bands in proportion to their overlap (Annex C).
 
     EN 15610 Annex C builds a one-third octave band from narrow band lines of
@@ -428,7 +469,9 @@ def redistributed_band_energies(
         level.
     :param target_lower: Lower edges of the target bands, on the same axis.
     :param target_upper: Their upper edges.
-    :return: The energy of each target band.
+    :return: The energy of each target band. A ``float`` when ``target_lower`` and
+        ``target_upper`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: For edges that are not finite, not increasing within
         a band or not one per band, or a negative energy.
     :raises TypeError: if ``energies``, ``source_lower``, ``source_upper``,
@@ -456,7 +499,7 @@ def redistributed_band_energies(
         None,
     )
     share = overlap / (s_hi - s_lo)[:, None]
-    return np.asarray(energy @ share, dtype=np.float64)
+    return as_float_or_array(energy @ share, like=(target_lower, target_upper))
 
 
 @dataclass(frozen=True, kw_only=True)

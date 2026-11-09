@@ -80,7 +80,7 @@ def _chk_ecac_event_level() -> Outcome:
     dp = math.hypot(300.0, 300.0)
     beta = math.degrees(math.acos(300.0 / dp))
     expected = (
-        float(ph.aircraft.npd_level(npd_p, npd_d, sel, 10000.0, dp)[0])
+        ph.aircraft.npd_level(npd_p, npd_d, sel, 10000.0, dp)
         + ph.aircraft.impedance_adjustment()
         + ph.aircraft.engine_installation_correction(beta, "wing")
         - ph.aircraft.lateral_attenuation(beta, 300.0)
@@ -229,7 +229,7 @@ def _chk_anp_round_trip() -> Outcome:
     # published value exactly. Boeing 747-100 (JT9DBD), departure SEL,
     # 28000 lb corrected net thrust, 2000 ft slant distance = 98.8 dB.
     curves = ph.aircraft.load_anp_database().npd_curves("747100", "departure", "SEL")
-    got = float(curves.level(28000.0, 2000.0 * 0.3048)[0])
+    got = curves.level(28000.0, 2000.0 * 0.3048)
     return numeric(98.8, got, 1e-9, unit="dB", places=4)
 
 
@@ -242,7 +242,7 @@ def _chk_ecac_npd() -> Outcome:
     # Log-midpoint distance -> arithmetic mean of the bracketing node levels.
     p, d = [1000.0, 2000.0], [200.0, 400.0, 800.0, 1600.0]
     lv = [[100.0, 94.0, 88.0, 82.0], [110.0, 104.0, 98.0, 92.0]]
-    got = float(ph.aircraft.npd_level(p, d, lv, 1000.0, math.sqrt(200.0 * 400.0))[0])
+    got = ph.aircraft.npd_level(p, d, lv, 1000.0, math.sqrt(200.0 * 400.0))
     return numeric(97.0, got, 1e-9, unit="dB", places=4)
 
 

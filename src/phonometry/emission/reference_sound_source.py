@@ -284,6 +284,39 @@ def knee_frequency(d0_m: float, *, speed_of_sound: float = 343.0) -> float:
     return c / (2.0 * math.pi * d0)
 
 
+@overload
+def radiation_impedance_correction[S: RealScalar](
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: RadiationCharacter = ...,
+    frequencies: S | None = None,
+    knee_frequency_hz: float | None = ...,
+) -> float: ...
+
+
+@overload
+def radiation_impedance_correction[V: RealValues](
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: RadiationCharacter = ...,
+    frequencies: V,
+    knee_frequency_hz: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def radiation_impedance_correction[A: NumericArrayLike](
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: RadiationCharacter = ...,
+    frequencies: A | None = None,
+    knee_frequency_hz: float | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def radiation_impedance_correction(
     *,
     temperature_c: float = 23.0,
@@ -291,7 +324,7 @@ def radiation_impedance_correction(
     radiation: RadiationCharacter = "unknown",
     frequencies: NumericArrayLike | None = None,
     knee_frequency_hz: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The radiation impedance correction :math:`C_2` of ISO 6926 Annex A.
 
     :math:`C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + n \lg(\theta/
@@ -309,7 +342,9 @@ def radiation_impedance_correction(
         monopole or a dipole, whose correction depends on the knee frequency.
     :param knee_frequency_hz: :math:`f_\mathrm{k}` (see
         :func:`knee_frequency`), required for a monopole or a dipole.
-    :return: :math:`C_2` per band, in dB (one value without frequencies).
+    :return: :math:`C_2` per band, in dB. A ``float`` for a number or for no
+        frequencies, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: for an unknown radiation character, a monopole or
         dipole without frequencies and knee frequency, or a dipole band below
         the knee frequency, for which Annex A gives no formula.
@@ -325,7 +360,10 @@ def radiation_impedance_correction(
         count = (
             1 if frequencies is None else np.atleast_1d(np.asarray(frequencies)).size
         )
-        return np.full(count, pressure_term + _C2_UNKNOWN * ratio, dtype=np.float64)
+        return as_float_or_array(
+            np.full(count, pressure_term + _C2_UNKNOWN * ratio, dtype=np.float64),
+            like=(frequencies,),
+        )
     require_choice(radiation, "radiation", ("monopole", "dipole"))
     if frequencies is None or knee_frequency_hz is None:
         msg = (
@@ -343,9 +381,42 @@ def radiation_impedance_correction(
                 "knee frequency (Formula (A.4)); a band lies below it."
             )
             raise ValueError(msg)
-        return np.full(freqs.size, pressure_term + _C2_DIPOLE * ratio)
+        return as_float_or_array(
+            np.full(freqs.size, pressure_term + _C2_DIPOLE * ratio),
+            like=(frequencies,),
+        )
     n = np.where(above, _C2_MONOPOLE_HIGH, _C2_MONOPOLE_LOW)
-    return np.asarray(pressure_term + n * ratio, dtype=np.float64)
+    return as_float_or_array(pressure_term + n * ratio, like=(frequencies,))
+
+
+@overload
+def reference_source_reproducibility[S: RealScalar](
+    frequencies: S,
+    *,
+    environment: CalibrationEnvironment,
+    arrangement: MicrophoneArrangement | None = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float: ...
+
+
+@overload
+def reference_source_reproducibility[V: RealValues](
+    frequencies: V,
+    *,
+    environment: CalibrationEnvironment,
+    arrangement: MicrophoneArrangement | None = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reference_source_reproducibility[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    environment: CalibrationEnvironment,
+    arrangement: MicrophoneArrangement | None = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def reference_source_reproducibility(
@@ -354,7 +425,7 @@ def reference_source_reproducibility(
     environment: CalibrationEnvironment,
     arrangement: MicrophoneArrangement | None = None,
     fraction: BandFraction | np.integer[Any] = 3,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Standard deviation of reproducibility of a calibration (ISO 6926 Table 2).
 
     The one-third octave and octave columns of Table 2 are read separately,
@@ -368,7 +439,8 @@ def reference_source_reproducibility(
         paths); ignored in a reverberation room.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves. One of ``1`` or ``3``.
-    :return: :math:`\sigma_R` per band, in dB.
+    :return: :math:`\sigma_R` per band, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band outside Table 2 or an unknown option.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
         ``arrangement`` or ``environment`` is not a text, or ``frequencies`` holds a
@@ -388,7 +460,7 @@ def reference_source_reproducibility(
             msg = f"{float(f):g} Hz is not an octave mid-band frequency."
             raise ValueError(msg)
         values.append(_stepped(k, rows, low, "ISO 6926 Table 2")[column])
-    return np.array(values, dtype=np.float64)
+    return as_float_or_array(np.array(values, dtype=np.float64), like=(frequencies,))
 
 
 def _repeatability_limit(k: int) -> float:

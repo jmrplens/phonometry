@@ -44,7 +44,7 @@ import math
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast, overload
 
 import numpy as np
 
@@ -95,7 +95,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .flight_performance import Aerodrome
     from .npd_atmosphere import RevisedNPDCurves
 
@@ -602,12 +602,29 @@ class ANPNPDCurves(OwnsArrays):
         require_same_length(self, "powers", "levels", axis="power setting")
         require_same_length(self, "distances_m", ("levels", 1), axis="slant distance")
 
-    def level(self, power: float, distance_m: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def level[S: RealScalar](self, power: float, distance_m: S) -> float: ...
+
+    @overload
+    def level[V: RealValues](
+        self, power: float, distance_m: V
+    ) -> NDArray[np.float64]: ...
+
+    @overload
+    def level[A: NumericArrayLike](
+        self, power: float, distance_m: A
+    ) -> float | NDArray[np.float64]: ...
+
+    def level(
+        self, power: float, distance_m: NumericArrayLike
+    ) -> float | NDArray[np.float64]:
         """Interpolated NPD level ``L(P, d)`` (Doc 29 Eq. 4-3/4-4).
 
         :param power: Query engine power setting.
         :param distance_m: Query slant distance(s), in metres.
-        :return: The interpolated level per query distance, in dB.
+        :return: The interpolated level per query distance, in dB. A ``float``
+            for a number, an array for a sequence or an array, a
+            zero-dimensional one included.
         """
         from .airport_noise import npd_level
 

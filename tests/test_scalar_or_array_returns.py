@@ -171,6 +171,22 @@ def _cases() -> tuple[Case, ...]:
         frequencies=thirds,
         arrangement="fixed",
     )
+    curves = aircraft.ANPNPDCurves(
+        aircraft_id="JET",
+        npd_id="JET",
+        metric="SEL",
+        operation="D",
+        power_parameter="CNT (lb)",
+        powers=[1.0e4, 2.0e4],
+        distances_m=[61.0, 122.0, 244.0],
+        levels=[[95.0, 90.0, 85.0], [100.0, 95.0, 90.0]],
+    )
+    peaks = metrology.peak_statistics(
+        np.random.default_rng(0).standard_normal(4000), fs=1000.0
+    )
+    seats = materials.PUBLISHED_ABSORPTION[
+        "bies-2017-table-6-2/unoccupied_heavily_upholstered_seats"
+    ]
     return (
         Case(
             broadcast.channel_weight,
@@ -1828,6 +1844,121 @@ def _cases() -> tuple[Case, ...]:
             {"name": "Wk", "frequencies": 10.0},
             ("frequencies",),
         ),
+        Case(
+            aircraft.npd_level,
+            {
+                "powers": [1.0, 2.0],
+                "distances_m": [100.0, 200.0],
+                "levels": [[80.0, 75.0], [85.0, 80.0]],
+                "power": 1.5,
+                "distance_m": 150.0,
+            },
+            ("distance_m",),
+        ),
+        Case(curves.level, {"power": 15000.0, "distance_m": 100.0}, ("distance_m",)),
+        Case(
+            building.typical_element_mobility,
+            {"structure": "mass", "frequency": 125.0, "mass": 120.0},
+            ("frequency",),
+        ),
+        Case(
+            emission.flow_modal_correction,
+            {"frequencies": 1000.0, "flow_velocity": 10.0, "duct_diameter_m": 0.5},
+            ("frequencies",),
+        ),
+        Case(
+            emission.radiation_impedance_correction,
+            {"frequencies": 1000.0},
+            ("frequencies",),
+            label="unknown",
+        ),
+        Case(
+            emission.radiation_impedance_correction,
+            {
+                "radiation": "monopole",
+                "frequencies": 1000.0,
+                "knee_frequency_hz": 200.0,
+            },
+            ("frequencies",),
+            label="monopole",
+        ),
+        Case(
+            emission.radiation_impedance_correction,
+            {"radiation": "dipole", "frequencies": 1000.0, "knee_frequency_hz": 200.0},
+            ("frequencies",),
+            label="dipole",
+        ),
+        Case(
+            emission.reference_source_reproducibility,
+            {"frequencies": 200.0, "environment": "reverberation-room"},
+            ("frequencies",),
+        ),
+        Case(
+            environment.redistributed_band_energies,
+            {
+                "source_lower": 100.0,
+                "source_upper": 200.0,
+                "energies": 1.0,
+                "target_lower": 100.0,
+                "target_upper": 200.0,
+            },
+            ("target_lower", "target_upper"),
+            together=True,
+        ),
+        Case(
+            hearing.earphone_reference_level,
+            {"earphone": "TDH 39", "frequencies": 1000.0},
+            ("frequencies",),
+        ),
+        Case(
+            hearing.hearing_level_to_coupler_spl,
+            {"hearing_level": 20.0, "frequencies": 1000.0},
+            ("hearing_level", "frequencies"),
+            together=True,
+        ),
+        Case(
+            hearing.incidence_correction,
+            {"frequencies": 1000.0, "incidence_angle_deg": 45.0},
+            ("frequencies",),
+        ),
+        Case(
+            hearing.reference_threshold,
+            {"field": "free", "frequencies": 1000.0},
+            ("frequencies",),
+        ),
+        Case(seats.values_at, {"frequencies": 500.0}, ("frequencies",)),
+        Case(
+            materials.reproducibility_uncertainty,
+            {"frequencies": 500.0},
+            ("frequencies",),
+        ),
+        Case(
+            metrology.max_expanded_uncertainty,
+            {"frequencies": 1000.0, "clause": 9},
+            ("frequencies",),
+        ),
+        Case(peaks.peak_density, {"z": 2.0}, ("z",)),
+        Case(peaks.peak_exceedance, {"z": 2.0}, ("z",)),
+        Case(
+            noise_control.screen_background_corrected_level,
+            {"levels": 60.0, "background_levels": 50.0},
+            ("levels", "background_levels"),
+            together=True,
+        ),
+        Case(
+            vibration.machine_count_correction,
+            {"n_machines": 4.0, "n_reference_machines": 3},
+            ("n_machines",),
+        ),
+        Case(
+            vibration.machine_hall_velocity_mm_s,
+            {
+                "reference_velocity_mm_s": 1.0,
+                "n_machines": 4.0,
+                "n_reference_machines": 3,
+            },
+            ("n_machines",),
+        ),
     )
 
 
@@ -2234,6 +2365,34 @@ def test_a_guideline_without_a_frequency_is_one_number() -> None:
     """The floors and the long-term table read no frequency, and print one value."""
     top = vibration.guideline_velocity("residential", location="top_floor")
     assert type(top) is float
+
+
+def test_a_correction_without_frequencies_is_one_number() -> None:
+    """The radiation of ISO 6926 Annex A without bands is one correction."""
+    assert type(emission.radiation_impedance_correction()) is float
+
+
+def test_a_mobility_row_without_a_frequency_is_one_number() -> None:
+    """A row of Table D.1 that reads no frequency gives one mobility."""
+    plate = building.typical_element_mobility(
+        "plate", density=2400.0, longitudinal_velocity=3800.0, thickness_m=0.2
+    )
+    assert type(plate) is float
+
+
+def test_a_table_without_frequencies_is_every_band() -> None:
+    """Left out, the frequencies are every band of the table, an array."""
+    for table in (
+        hearing.earphone_reference_level("TDH 39"),
+        hearing.reference_threshold("free"),
+        materials.reproducibility_uncertainty(),
+    ):
+        assert isinstance(table, np.ndarray)
+        assert table.ndim == 1
+        assert table.size > 1
+    audiogram = hearing.hearing_level_to_coupler_spl(np.zeros(23), "TDH 39")
+    assert isinstance(audiogram, np.ndarray)
+    assert audiogram.shape == (23,)
 
 
 def test_a_validator_s_one_element_array_is_read_as_the_number_it_holds() -> None:

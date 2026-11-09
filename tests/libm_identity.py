@@ -68,9 +68,13 @@ glibc writes that property from the same ``MINIMUM_X86_ISA_LEVEL``
 processor when it loads the object, before relocating or running it
 (``sysdeps/x86/dl-prop.h``, called from ``elf/rtld.c`` and
 ``elf/dl-open.c``). An object that declares no level is taken, as the loader
-takes it, to need the baseline, so a library this module cannot read keeps
-every test that asks for the other variant running, and failing if that
-variant is not there.
+takes it, to need the baseline.
+
+A ``libm`` or a loader that cannot be named or read is neither build and
+reads the mask in no known way: it comes back as an :class:`Unread` that says
+what could not be read, whose truth cannot be tested, so a test that asks for
+the baseline build, for the build for x86-64-v3 or for the loader's own
+reading skips by that name instead of checking a build it guessed.
 """
 
 from __future__ import annotations
@@ -82,6 +86,7 @@ import platform
 import re
 import struct
 from pathlib import Path
+from typing import NoReturn
 
 import pytest
 
@@ -176,6 +181,25 @@ def _glibc_version() -> tuple[int, ...] | None:
         return tuple(int(part) for part in version.split(".")[:2])
     except ValueError:
         return None
+
+
+@dataclasses.dataclass(frozen=True)
+class Unread:
+    """An object of this process's glibc that cannot be named or read, and why.
+
+    It stands for a build or a reading of the mask that cannot be told, which
+    is neither the baseline build nor the build for x86-64-v3, nor any
+    reading: a truth test of it raises, so that no caller takes it for one.
+
+    :ivar reason: What could not be read, as a skip names it.
+    """
+
+    reason: str
+
+    def __bool__(self) -> NoReturn:
+        """Refuse a truth test: what cannot be read is neither answer."""
+        msg = f"what cannot be read is neither true nor false: {self.reason}"
+        raise TypeError(msg)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -330,6 +354,36 @@ def _needed_in_notes(notes: bytes) -> int | None:
     return None
 
 
+def _segments(image: bytes) -> list[tuple[int, int, int, int]] | None:
+    """The segments of a whole little-endian 64-bit x86-64 ELF image, or ``None``.
+
+    The image is whole where its header, its program header table and the
+    bytes each segment takes from the file all lie within it.
+
+    :return: Each segment's type, file offset, size in the file and
+        alignment, in the order of the table; ``None`` for any other image.
+    """
+    if image[:6] != b"\x7fELF\x02\x01" or len(image) < 64:
+        return None
+    (machine,) = struct.unpack_from("<H", image, 18)
+    if machine != _EM_X86_64:
+        return None
+    (table,) = struct.unpack_from("<Q", image, 32)
+    entry_size, entries = struct.unpack_from("<HH", image, 54)
+    segments: list[tuple[int, int, int, int]] = []
+    for index in range(entries):
+        start = table + index * entry_size
+        if start + 56 > len(image):
+            return None
+        kind, _, offset, _, _, size, _, alignment = struct.unpack_from(
+            "<IIQQQQQQ", image, start
+        )
+        if offset + size > len(image):
+            return None
+        segments.append((kind, offset, size, alignment))
+    return segments
+
+
 def x86_isa_levels_needed(image: bytes) -> int | None:
     """The ISA levels a 64-bit x86-64 ELF object declares it needs.
 
@@ -340,28 +394,20 @@ def x86_isa_levels_needed(image: bytes) -> int | None:
     then ``PT_NOTE``, in each the 8-byte aligned notes a 64-bit object carries.
 
     :param image: The bytes of the object file.
-    :return: The property's bits, or ``None`` when the image is no
-        little-endian 64-bit x86-64 ELF object or declares no level.
+    :return: The property's bits, or ``None`` when the image is no whole
+        little-endian 64-bit x86-64 ELF object (:func:`_segments`) or
+        declares no level.
     """
-    if image[:6] != b"\x7fELF\x02\x01" or len(image) < 64:
+    segments = _segments(image)
+    if segments is None:
         return None
-    (machine,) = struct.unpack_from("<H", image, 18)
-    if machine != _EM_X86_64:
-        return None
-    (table,) = struct.unpack_from("<Q", image, 32)
-    entry_size, entries = struct.unpack_from("<HH", image, 54)
-    segments: list[tuple[int, int, int]] = []
-    for index in range(entries):
-        start = table + index * entry_size
-        if start + 56 > len(image):
-            return None
-        kind, _, offset, _, _, size, _, alignment = struct.unpack_from(
-            "<IIQQQQQQ", image, start
-        )
-        if kind in (_PT_GNU_PROPERTY, _PT_NOTE) and alignment == 8:
-            # False sorts first, so PT_GNU_PROPERTY is read before PT_NOTE.
-            segments.append((kind != _PT_GNU_PROPERTY, offset, size))
-    for _, offset, size in sorted(segments):
+    # False sorts first, so PT_GNU_PROPERTY is read before PT_NOTE.
+    notes = sorted(
+        (kind != _PT_GNU_PROPERTY, offset, size)
+        for kind, offset, size, alignment in segments
+        if kind in (_PT_GNU_PROPERTY, _PT_NOTE) and alignment == 8
+    )
+    for _, offset, size in notes:
         needed = _needed_in_notes(image[offset : offset + size])
         if needed is not None:
             return needed
@@ -423,13 +469,10 @@ def _mappings() -> list[tuple[int, int, Path]]:
 
     The kernel names each file by its absolute path, wherever the process is.
 
-    :return: The mappings in the order listed, none where the list cannot be
-        read.
+    :return: The mappings in the order listed.
+    :raises OSError: where ``/proc/self/maps`` cannot be read.
     """
-    try:
-        maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return []
+    maps = Path("/proc/self/maps").read_text(encoding="utf-8", errors="replace")
     mapped = []
     for line in maps.splitlines():
         fields = line.split(maxsplit=5)
@@ -439,24 +482,40 @@ def _mappings() -> list[tuple[int, int, Path]]:
     return mapped
 
 
-def _first_mapped(file_name: re.Pattern[str]) -> Path | None:
-    """The first file ``/proc/self/maps`` lists whose name matches, or ``None``."""
-    for _, _, file in _mappings():
+def _first_mapped(
+    file_name: re.Pattern[str], mapped: list[tuple[int, int, Path]]
+) -> Path | None:
+    """The first file of *mapped* whose name matches, or ``None``."""
+    for _, _, file in mapped:
         if file_name.fullmatch(file.name):
             return file
     return None
 
 
-def _mapped_at(address: int) -> Path | None:
-    """The file ``/proc/self/maps`` lists at ``address``, or ``None``."""
-    for start, end, file in _mappings():
+def _mapped_at(address: int, mapped: list[tuple[int, int, Path]]) -> Path | None:
+    """The file of *mapped* at ``address``, or ``None``."""
+    for start, end, file in mapped:
         if start <= address < end:
             return file
     return None
 
 
-def _object_defining(symbol: str, file_name: re.Pattern[str]) -> Path | None:
-    """The file of the object that defines ``symbol`` for this process, or ``None``.
+def _unnamed(symbol: str, resolved: tuple[int, Path | None] | None) -> str:
+    """How looking ``symbol`` up left its object without an absolute name."""
+    if resolved is None:
+        return f"{symbol} cannot be looked up here"
+    if resolved[1] is None:
+        return f"dladdr names no file for the object that defines {symbol}"
+    return (
+        f"dladdr names the object that defines {symbol} by the relative path "
+        f"{resolved[1]}"
+    )
+
+
+def _object_defining(
+    symbol: str, file_name: re.Pattern[str], kind: str
+) -> Path | Unread:
+    """The file of the object that defines ``symbol`` for this process.
 
     It is the file ``dladdr`` names, where it names it by an absolute path.
     glibc's loader names an object by the path it found it by, so a relative
@@ -469,58 +528,97 @@ def _object_defining(symbol: str, file_name: re.Pattern[str]) -> Path | None:
     (:func:`_resolved`) is it the first file listed whose name matches
     ``file_name``.
 
-    :return: The object's file, or ``None`` where nothing names it.
+    :param kind: What the object is, as a reason names it.
+    :return: The object's file, or what could not be read where nothing
+        names it: ``/proc/self/maps``, or the file at the address or of the
+        name it does not list.
     """
     resolved = _resolved(symbol)
+    if resolved is not None and resolved[1] is not None and resolved[1].is_absolute():
+        return resolved[1]
+    how = _unnamed(symbol, resolved)
+    try:
+        mapped = _mappings()
+    except OSError as error:
+        return Unread(
+            f"{how}, and /proc/self/maps cannot be read ({error.strerror or error})"
+        )
     if resolved is None:
-        return _first_mapped(file_name)
-    address, named = resolved
-    if named is not None and named.is_absolute():
-        return named
-    return _mapped_at(address)
+        file = _first_mapped(file_name, mapped)
+        missing = f"lists no {kind} of glibc's"
+    else:
+        file = _mapped_at(resolved[0], mapped)
+        missing = f"lists no file at its address {resolved[0]:#x}"
+    if file is None:
+        return Unread(f"{how}, and /proc/self/maps {missing}")
+    return file
 
 
-def loaded_libm() -> Path | None:
-    """The file of the ``libm`` whose routines :mod:`math` calls, or ``None``.
+def loaded_libm() -> Path | Unread:
+    """The file of the ``libm`` whose routines :mod:`math` calls.
 
     It is the object that defines ``exp`` where this process's default
     namespace resolves it (:func:`_object_defining`), so a ``libm`` another
     namespace mapped first is not taken for it. :mod:`math` is imported first,
     so that library is mapped whether the interpreter links it or the module
     does.
+
+    :return: The file, or what could not be read where nothing names it.
     """
     importlib.import_module("math")
-    return _object_defining("exp", _LIBM_FILE_NAME)
+    return _object_defining("exp", _LIBM_FILE_NAME, "libm")
 
 
-def loaded_loader() -> Path | None:
-    """The file of the dynamic loader this process runs, or ``None``.
+def loaded_loader() -> Path | Unread:
+    """The file of the dynamic loader this process runs.
 
     It is the object that defines ``__tls_get_addr``, which glibc's loader
     exports, where the default namespace resolves it
     (:func:`_object_defining`).
+
+    :return: The file, or what could not be read where nothing names it.
     """
-    return _object_defining("__tls_get_addr", _LOADER_FILE_NAME)
+    return _object_defining("__tls_get_addr", _LOADER_FILE_NAME, "dynamic loader")
+
+
+def loader_reading() -> MaskReading | Unread:
+    """How this process's loader reads the mask, or what could not be read.
+
+    :return: The reading of the loader's image; an :class:`Unread` where the
+        loader cannot be named or read, or names no tunable that masks
+        processor features, as glibc's before 2.26 and one built without
+        tunables do.
+    """
+    loader = loaded_loader()
+    if isinstance(loader, Unread):
+        return loader
+    try:
+        image = loader.read_bytes()
+    except OSError as error:
+        return Unread(
+            f"the dynamic loader {loader} cannot be read ({error.strerror or error})"
+        )
+    reading = mask_reading(image)
+    if reading is None:
+        return Unread(
+            f"the dynamic loader {loader} names no tunable that masks processor "
+            "features"
+        )
+    return reading
 
 
 def mask_reading_here() -> MaskReading:
     """How this process's loader reads the mask, or :data:`ANY_READING`.
 
-    :return: The reading of the loader's image, or :data:`ANY_READING` where
-        the loader cannot be found or read or names no tunable that masks
-        processor features.
+    :return: :func:`loader_reading`'s reading, or :data:`ANY_READING` where
+        that is an :class:`Unread`, so that a process whose loader reads the
+        mask in a way that cannot be told is not held to the pins under one.
     """
-    loader = loaded_loader()
-    if loader is None:
-        return ANY_READING
-    try:
-        reading = mask_reading(loader.read_bytes())
-    except OSError:
-        return ANY_READING
-    return reading if reading is not None else ANY_READING
+    reading = loader_reading()
+    return ANY_READING if isinstance(reading, Unread) else reading
 
 
-def glibc_built_for_x86_64_v3() -> bool:
+def glibc_built_for_x86_64_v3() -> bool | Unread:
     """Whether this process runs a glibc built for x86-64-v3 or above.
 
     Such a glibc compiles ``exp``, ``log``, ``pow``, ``sin``, ``tan`` and
@@ -531,40 +629,81 @@ def glibc_built_for_x86_64_v3() -> bool:
 
     :return: ``True`` when the ``libm`` of glibc on x86-64 Linux names
         x86-64-v3 or a higher level as needed; ``False`` for a build for a
-        lower level, for an object that names none, for one that cannot be
-        read, and on any other platform.
+        lower level, for an object that names none, and on any other
+        platform; an :class:`Unread` where that ``libm`` cannot be named or
+        read, or the file read is no whole x86-64 ELF object, so that its
+        build is taken for neither.
     """
     if platform.system() != "Linux" or platform.machine() != "x86_64":
         return False
     if _glibc_version() is None:
         return False
     library = loaded_libm()
-    if library is None:
-        return False
+    if isinstance(library, Unread):
+        return library
     try:
-        needed = x86_isa_levels_needed(library.read_bytes())
-    except OSError:
-        return False
+        image = library.read_bytes()
+    except OSError as error:
+        return Unread(f"the libm {library} cannot be read ({error.strerror or error})")
+    if _segments(image) is None:
+        return Unread(f"the libm {library} is no whole 64-bit x86-64 ELF object")
+    needed = x86_isa_levels_needed(image)
     return needed is not None and needed >= _X86_ISA_1_V3
+
+
+#: Why a test of a pinned routine skips on a C library that is not the one the
+#: pins spell.
+_NOT_THE_PINNED_LIBM = (
+    "the C library here is not the glibc FMA variant the pinned routines "
+    "spell; their bits are the contract, the local library's are not"
+)
+
+
+def why_off_the_pinned_routines() -> str | None:
+    """Why this process's ``math`` module is not known to call the pinned routines.
+
+    A mask takes glibc off its FMA variant only where glibc carries another:
+    a process on a glibc built for x86-64-v3 runs the FMA routines under any
+    mask. Elsewhere it does when this process's loader reads it so. A mask
+    that may count, on a glibc whose build or whose loader's reading cannot
+    be told, leaves the process off the pins by what could not be read.
+
+    :return: ``None`` where this process runs the routines the pins spell;
+        otherwise why it is not known to.
+    """
+    if not glibc_on_x86_64_with_fma():
+        return _NOT_THE_PINNED_LIBM
+    build = glibc_built_for_x86_64_v3()
+    if build is True:
+        return None
+    if not masks_the_fma_variant(os.environ.get(TUNABLES, ""), mask_reading_here()):
+        return None
+    if isinstance(build, Unread):
+        return (
+            f"{TUNABLES} may take glibc here off its FMA variant, and the build "
+            f"of glibc here cannot be told: {build.reason}"
+        )
+    reading = loader_reading()
+    if isinstance(reading, Unread):
+        return (
+            f"{TUNABLES} may mask FMA or AVX2, and how this process's loader reads "
+            f"a mask cannot be told: {reading.reason}"
+        )
+    return _NOT_THE_PINNED_LIBM
 
 
 def runs_the_pinned_routines() -> bool:
     """Whether this process's ``math`` module calls the routines the pins spell.
 
-    A mask takes glibc off its FMA variant only where glibc carries another:
-    a process on a glibc built for x86-64-v3 runs the FMA routines under any
-    mask. Elsewhere it does when this process's loader reads it so.
+    It does where :func:`why_off_the_pinned_routines` finds no reason why not.
     """
-    if not glibc_on_x86_64_with_fma():
-        return False
-    if glibc_built_for_x86_64_v3():
-        return True
-    return not masks_the_fma_variant(os.environ.get(TUNABLES, ""), mask_reading_here())
+    return why_off_the_pinned_routines() is None
 
+
+#: Why the tests of the pinned routines skip here, or ``None`` where they run.
+_OFF_THE_PINS = why_off_the_pinned_routines()
 
 #: Marks a test that compares a pinned routine bit for bit with :mod:`math`.
 on_the_pinned_libm = pytest.mark.skipif(
-    not runs_the_pinned_routines(),
-    reason="the C library here is not the glibc FMA variant the pinned routines "
-    "spell; their bits are the contract, the local library's are not",
+    _OFF_THE_PINS is not None, reason=_OFF_THE_PINS or ""
 )

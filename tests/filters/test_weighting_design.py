@@ -39,6 +39,7 @@ import scipy
 from libm_identity import (
     TUNABLES,
     WITHOUT_FMA,
+    Unread,
     glibc_built_for_x86_64_v3,
     runs_the_pinned_routines,
 )
@@ -1845,18 +1846,6 @@ def test_a_blas_that_fuses_its_complex_dot_designs_the_same_filters(
         )
 
 
-@pytest.mark.skipif(
-    not runs_the_pinned_routines(),
-    reason="needs this process on the FMA variant of the glibc routines the pins "
-    "spell, glibc 2.29 or later on an x86-64 processor with FMA, so the child "
-    "can be handed the other one",
-)
-@pytest.mark.skipif(
-    glibc_built_for_x86_64_v3(),
-    reason="glibc here is built for x86-64-v3, its libm declaring that ISA "
-    "level needed, so it carries no variant without FMA for the child to be "
-    "handed",
-)
 def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     """glibc picks its routines by processor; the design no longer follows it.
 
@@ -1882,8 +1871,24 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     hands the child nothing else and the claim has no second variant to be
     about. That is read from the ISA level the library declares, never from
     the child's ``exp`` agreeing with this process's, which would turn a mask
-    that stopped working into a skip.
+    that stopped working into a skip. Where that library cannot be named or
+    read, the build is taken for neither, and the test skips by what could
+    not be read.
     """
+    build = glibc_built_for_x86_64_v3()
+    if isinstance(build, Unread):
+        pytest.skip(f"the build of glibc here cannot be told: {build.reason}")
+    if build:
+        pytest.skip(
+            "glibc here is built for x86-64-v3, its libm declaring that ISA level "
+            "needed, so it carries no variant without FMA for the child to be handed"
+        )
+    if not runs_the_pinned_routines():
+        pytest.skip(
+            "needs this process on the FMA variant of the glibc routines the pins "
+            "spell, glibc 2.29 or later on an x86-64 processor with FMA, so the "
+            "child can be handed the other one"
+        )
     script = textwrap.dedent(
         """
         import hashlib
@@ -1916,6 +1921,27 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     )
     assert (at_48k, at_44k) == (_a_digest(48000), _a_digest(44100))
     assert (at_48k, at_44k) == (_A_DIGESTS[48000], _A_DIGESTS[44100])
+
+
+def test_a_build_that_cannot_be_told_hands_the_child_nothing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The test without FMA skips, by what could not be read, on a build not told.
+
+    A ``libm`` that nothing names is neither the baseline build, which
+    carries the variant without FMA, nor the build for x86-64-v3, which does
+    not: the test that hands the child that variant is not run on a guess.
+    """
+    unread = Unread(
+        "dladdr names the object that defines exp by the relative path "
+        "lib/libm.so.6, and /proc/self/maps cannot be read (Permission denied)"
+    )
+    monkeypatch.setitem(globals(), "glibc_built_for_x86_64_v3", lambda: unread)
+    with pytest.raises(
+        pytest.skip.Exception,
+        match=re.escape(f"the build of glibc here cannot be told: {unread.reason}"),
+    ):
+        test_glibc_without_its_fma_variant_designs_the_documented_bytes()
 
 
 #: The :mod:`math` functions the design path may name: IEEE 754 fixes every one

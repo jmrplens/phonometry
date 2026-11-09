@@ -511,6 +511,21 @@ def test_a_squared_envelope_past_the_floating_point_range_is_not_finite(
     assert not np.isfinite(np.asarray(result.amplitude)).any()
 
 
+@pytest.mark.parametrize("remove_dc", [True, False])
+def test_a_squared_envelope_whose_sum_leaves_the_range_says_so_once(
+    *, remove_dc: bool
+) -> None:
+    # Each squared sample, about 1e306, is finite; their sum over 4096
+    # samples is not, so the mean is infinite. The record restates that mean
+    # from its envelope under the same rule as the function, so neither
+    # reports NumPy's overflow in the reduction, which the suite raises.
+    result = ph.signals.envelope_spectrum(
+        np.full(4096, 1e153), 8192.0, kind="squared", remove_dc=remove_dc
+    )
+    assert np.isfinite(np.asarray(result.envelope)).all()
+    assert math.isinf(result.mean_level)
+
+
 def test_envelope_spectrum_plot_two_panels_and_external_ax() -> None:
     res = ph.signals.envelope_spectrum(_am_signal(), FS)
     axes = res.plot()

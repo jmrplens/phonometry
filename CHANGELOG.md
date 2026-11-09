@@ -2424,11 +2424,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the floating-point range on every SciPy, with no NumPy warning.** A finite
   record whose transform overflows inside the Hilbert step, or whose
   envelope overflows once squared under `kind="squared"`, gives an envelope,
-  a mean level and a spectrum that are not finite. Before 1.17, SciPy
-  multiplied that transform by the analytic-signal mask, and NumPy warned of
-  an invalid value where SciPy 1.17 says nothing; the square and the removed
-  mean warned on every release. Under `-W error` the call raised instead of
-  returning.
+  a mean level and a spectrum that are not finite; one whose squared
+  envelope stays finite but sums past the range gives a mean level that is
+  not, and the record that restates that mean to check it says nothing
+  either. Before 1.17, SciPy multiplied that transform by the analytic-signal
+  mask, and NumPy warned of an invalid value where SciPy 1.17 says nothing;
+  the square and the removed mean warned on every release, and the record's
+  check of an overflowing mean warned too. Under `-W error` the call raised
+  instead of returning.
 
 - **The release SBOM is written by cyclonedx-bom 8.0.1, and every CI job
   upgrades pip before it installs.** The jobs that build, verify and rebuild

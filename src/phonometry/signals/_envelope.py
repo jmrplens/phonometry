@@ -287,6 +287,21 @@ def envelope(
     )
 
 
+def _detector_mean(detector: NDArray[np.float64]) -> float:
+    """The plain mean of a detector output, the DC Figure 13.11 removes.
+
+    Read once by :func:`envelope_spectrum` and again by
+    :class:`EnvelopeSpectrumResult` when it checks the mean it is given, and
+    both under the same rule: a column whose samples are finite but whose
+    sum leaves the floating-point range (a squared envelope near 1e306 over
+    a few thousand samples) means ``inf``, and an overflowed one ``nan``,
+    with no RuntimeWarning of NumPy's about the reduction, which the result
+    already states.
+    """
+    with np.errstate(over="ignore", invalid="ignore"):
+        return float(np.mean(detector))
+
+
 @dataclass(frozen=True)
 class EnvelopeSpectrumResult(OwnsArrays):
     r"""Amplitude spectrum of a signal's envelope (B&P Section 13.3).
@@ -399,7 +414,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
         detector = real_array(self.envelope, "envelope")
         if detector.size == 0:
             return
-        expected = float(np.mean(detector))
+        expected = _detector_mean(detector)
         if math.isnan(expected):
             return
         if not math.isclose(self.mean_level, expected, rel_tol=1e-9, abs_tol=0.0):
@@ -545,7 +560,9 @@ def envelope_spectrum(
         roll-off). Default ``None``: detect on the record as given.
     :return: An :class:`EnvelopeSpectrumResult`. A finite record whose
         transform or squared envelope leaves the floating-point range gives
-        an envelope, a mean level and a spectrum that are not finite.
+        an envelope, a mean level and a spectrum that are not finite; a
+        squared envelope whose samples are finite but whose sum leaves the
+        range gives a mean level that is not.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes,
         ``kind`` is not a text, or an edge of ``band`` is not a real number.
@@ -567,16 +584,17 @@ def envelope_spectrum(
 
     taper = np.asarray(sp_signal.get_window(window, n), dtype=np.float64)
     # A finite record can still leave the floating-point range: its transform
-    # inside the Hilbert step, or its envelope once squared. The detector then
-    # reads inf or NaN, and the envelope, its mean and its spectrum carry it,
-    # which is the result such a record has. NumPy's own report of it came on
-    # some SciPy releases and not others: before 1.17, SciPy multiplies the
-    # transform by the analytic-signal mask (inf times 0) where 1.17 sets
-    # those bins, so it is left out on every one.
+    # inside the Hilbert step, its envelope once squared, or the sum of that
+    # squared envelope in its mean. The detector or its mean then reads inf or
+    # NaN, and what is computed from them carries it, which is the result such
+    # a record has. NumPy's own report of it came on some SciPy releases and
+    # not others: before 1.17, SciPy multiplies the transform by the
+    # analytic-signal mask (inf times 0) where 1.17 sets those bins, so it is
+    # left out on every one.
     with np.errstate(over="ignore", invalid="ignore"):
         env = np.asarray(np.abs(sp_signal.hilbert(xa)), dtype=np.float64)
         detector = env**2 if kind == "squared" else env
-        mean_level = float(np.mean(detector))
+        mean_level = _detector_mean(detector)
         y = detector - mean_level if remove_dc else detector
         spectrum = np.abs(np.fft.rfft(y * taper, nfft_v)) / float(np.sum(taper))
     amplitude = 2.0 * spectrum

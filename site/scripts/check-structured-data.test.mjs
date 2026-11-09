@@ -622,6 +622,42 @@ test('a dataset whose name is no heading of its page, or whose description no pa
 	assert.doesNotMatch(ran.out, /datasets is named by a heading of its page/);
 });
 
+/** An aside as the site renders one, `:::note[title]` or `<Aside title>` alike, holding one paragraph. */
+const renderedAside = (title, paragraph) =>
+	`<aside aria-label="${title}" class="starlight-aside starlight-aside--note">` +
+	`<p class="starlight-aside__title" aria-hidden="true">${title}</p>` +
+	`<div class="starlight-aside__content"><p>${paragraph}</p></div></aside>`;
+
+test('a dataset described by the lines of an admonition, its markers with them, fails', (t) => {
+	const built = catalogueBuild();
+	const catalogue = built['en/catalogue'];
+	catalogue.text = catalogue.text.replace(
+		'<p>The rows of gases.</p>',
+		`<p>The rows of gases.</p>${renderedAside('Where the rows come from', 'The book prints them in three parts.')}`,
+	);
+	// What a reader makes of `:::note[...]`, its paragraph and `:::` when it
+	// takes the lines of the admonition for a paragraph.
+	datasetOf(built, 'en', 'gases').description = ':::note[Where the rows come from] The book prints them in three parts. :::';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/catalogues\/solids\/ gases: the dataset's description is no paragraph of its page: ":::note\[Where/);
+});
+
+test("a dataset described by the paragraph an aside holds passes: keeping it out is the page reader's part", (t) => {
+	const built = catalogueBuild();
+	const catalogue = built['en/catalogue'];
+	catalogue.text = catalogue.text.replace(
+		'<p>The rows of gases.</p>',
+		`<p>The rows of gases.</p>${renderedAside('Where the rows come from', 'The book prints them in three parts.')}`,
+	);
+	// What a reader makes of `<Aside title="...">`, its paragraph and
+	// `</Aside>`: the component's tags are markup it drops.
+	datasetOf(built, 'en', 'gases').description = 'The book prints them in three parts.';
+	const ran = check(t, built);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /datasets is named by a heading of its page and described by a paragraph of it/);
+});
+
 test("a dataset's text is what its page shows, with the typographer's quotes and the page's character references read back", (t) => {
 	const built = catalogueBuild();
 	datasetOf(built, 'en', 'gases').description = 'The book\'s rows of gases & "air", in three parts...';

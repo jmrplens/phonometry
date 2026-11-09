@@ -54,13 +54,22 @@ print("wrote", sorted(p.name for p in out.iterdir()))
 
 ```bash
 docker build -t acoustics .
-docker run --rm acoustics
+mkdir -p out
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/out:/tmp/out" acoustics
 ```
 
 ```text
 33 bands, impulse maximum 0.0092
 wrote ['bands.png', 'rating.pdf']
 ```
+
+El trabajo escribe en `out` bajo su directorio de trabajo, `/tmp/out` en el
+contenedor, y `--rm` borra el contenedor con sus archivos cuando el trabajo
+termina. El montaje `-v` lleva esa carpeta a tu máquina como `out` en el
+directorio desde el que lo ejecutas, donde la figura y la ficha se quedan;
+`--user` ejecuta el trabajo como tú, así que los archivos son tuyos y no de
+root. Crea antes la carpeta: la que Docker crea para el montaje pertenece a
+root, y el trabajo, que corre como tú, no puede escribir en ella.
 
 matplotlib elige por sí solo su backend Agg en un contenedor sin pantalla, así
 que nada tiene que fijar `MPLBACKEND`.
@@ -70,8 +79,10 @@ que nada tiene que fijar `MPLBACKEND`.
 La imagen ejecuta el mismo trabajo como root, como un identificador de usuario
 cualquiera (`docker run --user 12345:12345`), como `nobody` y sobre un sistema
 de archivos raíz de solo lectura con un `/tmp` escribible
-(`docker run --read-only --tmpfs /tmp`). Dos cachés y un directorio deciden lo
-callado que lo hace:
+(`docker run --read-only --tmpfs /tmp`). Una carpeta montada para los
+resultados tiene que ser escribible para el usuario con el que corre el
+trabajo, como lo es `out` para ti arriba. Dos cachés y un directorio deciden
+lo callado que lo hace:
 
 - **`MPLCONFIGDIR`.** matplotlib guarda su configuración y su caché bajo el
   directorio personal del usuario. Para un usuario sin directorio personal
@@ -85,8 +96,9 @@ callado que lo hace:
   vengan después en el mismo contenedor.
 - **Una raíz de solo lectura.** El trabajo necesita algún sitio donde
   escribir: aquí su directorio de trabajo, `/tmp`, que `--tmpfs /tmp`
-  mantiene escribible. Sin ningún montaje escribible, el trabajo se detiene
-  en su propio `out.mkdir`.
+  mantiene escribible, y la carpeta `out` montada dentro de él desde tu
+  máquina. Sin ningún montaje escribible, el trabajo se detiene en su propio
+  `out.mkdir`.
 
 ## Vídeos
 

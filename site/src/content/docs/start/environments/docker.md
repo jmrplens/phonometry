@@ -53,13 +53,22 @@ print("wrote", sorted(p.name for p in out.iterdir()))
 
 ```bash
 docker build -t acoustics .
-docker run --rm acoustics
+mkdir -p out
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/out:/tmp/out" acoustics
 ```
 
 ```text
 33 bands, impulse maximum 0.0092
 wrote ['bands.png', 'rating.pdf']
 ```
+
+The job writes into `out` under its working directory, `/tmp/out` in the
+container, and `--rm` deletes the container with its files when the job ends.
+The `-v` mount gives that folder to the host as `out` in the directory you run
+from, where the figure and the fiche stay; `--user` runs the job as you, so
+the files are yours and not root's. Make the folder first: one that Docker
+makes for the mount belongs to root, and the job, running as you, cannot
+write in it.
 
 matplotlib picks its Agg backend by itself in a container with no display,
 so nothing has to set `MPLBACKEND`.
@@ -68,8 +77,10 @@ so nothing has to set `MPLBACKEND`.
 
 The image runs the same job as root, as an arbitrary user id
 (`docker run --user 12345:12345`), as `nobody`, and on a read-only root file
-system with a writable `/tmp` (`docker run --read-only --tmpfs /tmp`). Two
-caches and one directory decide how quietly it does so:
+system with a writable `/tmp` (`docker run --read-only --tmpfs /tmp`). A
+folder mounted for the results has to be writable by the user the job runs
+as, as `out` is for you above. Two caches and one directory decide how
+quietly it does so:
 
 - **`MPLCONFIGDIR`.** matplotlib keeps its configuration and cache under the
   user's home. For a user with no writable home it prints "Matplotlib created
@@ -81,8 +92,9 @@ caches and one directory decide how quietly it does so:
   `NUMBA_CACHE_DIR=/tmp/numba` it writes the kernel there, for the processes
   that follow in the same container.
 - **A read-only root.** The job needs somewhere to write: here its working
-  directory, `/tmp`, which `--tmpfs /tmp` keeps writable. With no writable
-  mount at all, the job stops at its own `out.mkdir`.
+  directory, `/tmp`, which `--tmpfs /tmp` keeps writable, and the `out`
+  folder mounted inside it from the host. With no writable mount at all, the
+  job stops at its own `out.mkdir`.
 
 ## Videos
 

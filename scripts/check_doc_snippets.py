@@ -1075,17 +1075,34 @@ def _written_parts(calls: Sequence[_Call]) -> list[_Part]:
     across stretches read as one value (:func:`_line_parts`). A minus sign
     (U+2212) reads as a hyphen, as it does in a comment.
     """
+    return _written_readings(calls)[0]
+
+
+def _written_readings(calls: Sequence[_Call]) -> list[list[_Part]]:
+    """The readings of what a print wrote over all its calls: its parts
+    (:func:`_written_parts`), and, where it spells a complex number one of
+    whose parts its own text writes, the parts read with that number as one
+    value too (:func:`_line_parts`), which a comment may state whole as it
+    may state the computed part alone.
+    """
     out: list[_Part] = []
+    whole: list[_Part] = []
     line: list[tuple[str, bool, int]] = []
     for segment, (text, label) in enumerate(_stretches(calls)):
         for number, piece in enumerate(text.replace("\u2212", "-").split("\n")):
             if number:
-                out += _line_parts(line)
+                computed, spelled = _line_parts(line)
+                out += computed
+                whole += spelled
                 line = []
                 out.append(_Part("line", "\n", segment=segment))
+                whole.append(out[-1])
             if piece:
                 line.append((piece, label, segment))
-    return out + _line_parts(line)
+    computed, spelled = _line_parts(line)
+    out += computed
+    whole += spelled
+    return [out] if whole == out else [out, whole]
 
 
 #: A complex number as a print may spell one across the page's own text and
@@ -1093,15 +1110,20 @@ def _written_parts(calls: Sequence[_Call]) -> list[_Part]:
 _SPELLED_COMPLEX = re.compile(rf"{_SIGN}{_REAL} *[-+] *{_REAL}j")
 
 
-def _line_parts(pieces: Sequence[tuple[str, bool, int]]) -> list[_Part]:
+def _line_parts(
+    pieces: Sequence[tuple[str, bool, int]],
+) -> tuple[list[_Part], list[_Part]]:
     """The parts of one line of what a print wrote, from the *pieces* of its
     stretches it is written in, each with whether the page's own text wrote
-    it and the stretch it stands in.
+    it and the stretch it stands in, read twice.
 
     A complex number whose two parts the code computed and whose sign and
     ``j`` the page's own text writes around them, as ``f"{a} + {b}j"`` does,
     is the one value the reader reads there, not two values and a label: it
     is read as a value the code computed, in the stretch of its real part.
+    One whose other part the page's text writes, as ``f"{a} + 2.5j"``, is
+    read so in the second reading only: the first keeps that part a label,
+    which a comment may leave out.
     """
     located: list[tuple[int, int, _Part]] = []
     at = 0
@@ -1112,8 +1134,21 @@ def _line_parts(pieces: Sequence[tuple[str, bool, int]]) -> list[_Part]:
         ]
         at += len(text)
     if len(pieces) < 2:
-        return [part for _, _, part in located]
+        parts = [part for _, _, part in located]
+        return parts, parts
     whole = "".join(text for text, _, _ in pieces)
+    return (
+        _merged(located, whole, written=False),
+        _merged(located, whole, written=True),
+    )
+
+
+def _merged(
+    located: Sequence[tuple[int, int, _Part]], whole: str, *, written: bool
+) -> list[_Part]:
+    """The *located* parts of the line *whole*, each complex number it spells
+    across them (:func:`_spells_complex`) read as one computed value.
+    """
     out: list[_Part] = []
     index = 0
     for match in _SPELLED_COMPLEX.finditer(whole):
@@ -1124,7 +1159,7 @@ def _line_parts(pieces: Sequence[tuple[str, bool, int]]) -> list[_Part]:
         while inside < len(located) and located[inside][1] <= match.end():
             inside += 1
         covered = located[index:inside]
-        if _spells_complex(covered, match.start(), match.end()):
+        if _spells_complex(covered, match.start(), match.end(), written=written):
             real = covered[0][2]
             out.append(
                 _Part(
@@ -1139,18 +1174,22 @@ def _line_parts(pieces: Sequence[tuple[str, bool, int]]) -> list[_Part]:
 
 
 def _spells_complex(
-    covered: Sequence[tuple[int, int, _Part]], start: int, end: int
+    covered: Sequence[tuple[int, int, _Part]], start: int, end: int, *, written: bool
 ) -> bool:
     """Whether the parts *covered*, each where it opens and closes in a line,
     are a complex number spelled from *start* to *end* (:data:`_SPELLED_COMPLEX`):
-    its real and its imaginary part, both computed, and at most the page's
-    ``j`` after them, opening and closing where it does.
+    its real and its imaginary part, both computed or, when *written*, one
+    of them written by the page's own text, and at most the page's ``j``
+    after them, opening and closing where it does.
     """
     parts = [part for _, _, part in covered]
     if len(parts) < 2 or (covered[0][0], covered[-1][1]) != (start, end):
         return False
     real, imaginary, *rest = parts
-    if any(part.kind != "value" or part.label for part in (real, imaginary)):
+    if any(part.kind != "value" for part in (real, imaginary)):
+        return False
+    labels = [part.label for part in (real, imaginary)]
+    if any(labels) and not (written and not all(labels)):
         return False
     if not rest:
         return imaginary.text.endswith("j")
@@ -1542,6 +1581,7 @@ def _disagreement(
     *,
     decimal_comma: bool,
     arrow: bool = True,
+    spelled: list[_Part] | None = None,
 ) -> str:
     """Why the comment lines *said_lines* do not state the output *wrote*.
 
@@ -1555,6 +1595,11 @@ def _disagreement(
     :param arrow: Let a line of the comment end what it states at an arrow
         (:data:`_ARROW`), the rest of it a note; off when the print writes an
         arrow itself.
+    :param spelled: The output read with each complex number it spells
+        across a part the page's own text writes as one value
+        (:func:`_written_readings`), which the comment may state instead:
+        the reason given is the one of the reading that reads such a number
+        as the comment does, whole when the comment writes a complex number.
     """
     texts = [
         _NOT_A_VALUE.sub("", _reading(text).replace("\u2212", "-"))
@@ -1565,16 +1610,23 @@ def _disagreement(
         decimal = _decimal_points(texts, in_brackets=True)
         listed = _decimal_points(texts, in_brackets=False)
         readings = [decimal] if listed == decimal else [decimal, listed]
+    outputs = [wrote] if spelled is None else [wrote, spelled]
+    if spelled is not None and any(
+        part.kind == "value" and part.text.endswith("j")
+        for part in _parts(" ".join(texts))
+    ):
+        outputs.reverse()
     why = ""
-    for reading in readings:
-        failed = _read(reading, wrote)
-        if not failed:
-            return ""
-        why = why or failed
-        if arrow:
-            noted = [_ARROW.split(text, maxsplit=1)[0] for text in reading]
-            if noted != reading and not _read(noted, wrote):
+    for output in outputs:
+        for reading in readings:
+            failed = _read(reading, output)
+            if not failed:
                 return ""
+            why = why or failed
+            if arrow:
+                noted = [_ARROW.split(text, maxsplit=1)[0] for text in reading]
+                if noted != reading and not _read(noted, output):
+                    return ""
     return why
 
 
@@ -1640,11 +1692,17 @@ def output_disagreement(
     """
     lines = promised.splitlines() if isinstance(promised, str) else list(promised)
     calls = [written] if isinstance(written, str) else list(written)
-    wrote = _written_parts([_Call((), [text], "\n") for text in calls])
+    wrote, *spelled = _written_readings([_Call((), [text], "\n") for text in calls])
     output = "\n".join(calls)
     comma = _reads_decimal_comma(output, spanish=decimal_comma)
     arrow = _ARROW.search(output) is None
-    return _disagreement(lines, wrote, decimal_comma=comma, arrow=arrow)
+    return _disagreement(
+        lines,
+        wrote,
+        decimal_comma=comma,
+        arrow=arrow,
+        spelled=spelled[0] if spelled else None,
+    )
 
 
 def output_disagreements(
@@ -1681,7 +1739,7 @@ def output_disagreements(
             if place not in apart
         ]
         calls = [call for _, call in sorted(kept, key=lambda kept: kept[0])]
-        wrote = _written_parts(calls)
+        wrote, *spelled = _written_readings(calls)
         if promise.word is not None:
             first = next((part for part in wrote if part.kind != "line"), None)
             if first is None or (first.kind, first.text) != ("word", promise.word):
@@ -1696,7 +1754,13 @@ def output_disagreements(
         output = "".join(call.text for call in calls).removesuffix("\n")
         comma = _reads_decimal_comma(output, spanish=spanish)
         arrow = _ARROW.search(output) is None
-        why = _disagreement(promise.lines, wrote, decimal_comma=comma, arrow=arrow)
+        why = _disagreement(
+            promise.lines,
+            wrote,
+            decimal_comma=comma,
+            arrow=arrow,
+            spelled=spelled[0] if spelled else None,
+        )
         if why:
             failures.append(
                 f"{where}: {why}; the comment promises {promise.text!r}, the "

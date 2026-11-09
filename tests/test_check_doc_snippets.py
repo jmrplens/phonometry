@@ -1424,7 +1424,8 @@ def test_a_complex_number_spelled_across_the_page_s_text_is_one_value(
 ) -> None:
     """A complex number whose parts the code computes and whose sign and
     ``j`` the page writes is the one value the reader reads; a part the
-    page's own text writes stays its label, which a comment may leave out.
+    page's own text writes stays its label, which a comment may leave out or
+    state with the rest of the number.
     """
     code = (
         "a = 1.0\n"
@@ -1432,11 +1433,22 @@ def test_a_complex_number_spelled_across_the_page_s_text_is_one_value(
         'print(f"{a} + {b}j")  # 1.0 + 2.5j\n'
         'print(f"{a}{b:+}j")  # 1.0+2.5j\n'
         'print(f"{a} + 2.5j")  # 1.0\n'
+        'print(f"{a} + 2.5j")  # 1.0 + 2.5j\n'
+        'print(f"1.0 + {b}j")  # 1.0 + 2.5j\n'
+        'print(f"1.0 + {b}j")  # 2.5\n'
     )
     assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
     wrong = _page(tmp_path, code.replace("# 1.0 + 2.5j", "# 1.0 + 2.6j"), name="w.md")
-    (failure,) = check_doc_snippets.check_execution([wrong])
-    assert "the comment says 1.0+2.6j where the print wrote 1.0+2.5j" in failure
+    failures = check_doc_snippets.check_execution([wrong])
+    assert len(failures) == 3
+    assert all(
+        "the comment says 1.0+2.6j where the print wrote 1.0+2.5j" in failure
+        for failure in failures
+    )
+    # A part the page writes, stated alone and wrong, is still read alone.
+    alone = _page(tmp_path, code.replace("# 1.0\n", "# 1.1\n"), name="alone.md")
+    (failure,) = check_doc_snippets.check_execution([alone])
+    assert "the comment says 1.1 where the print wrote 1.0" in failure
 
 
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:

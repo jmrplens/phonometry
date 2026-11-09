@@ -3,22 +3,26 @@
     "The pages whose text is built from data outside their own file, and that data.",
     "src/lib/content-dates.mjs dates a page by the last commit that changed its content;",
     "a page listed here is also dated by the newest commit to each of its sources, so a",
-    "count, a table or a report it renders moves its date the day it changes.",
-    "Paths are from the repository root, and one ending in / is a directory.",
-    "In \"sources\", every commit that changed a file counts, except that a directory of",
-    "the content tree stands for its pages, each dated by the page rule. \"counts\" names",
-    "each number a page shows of other files after the export that computes it, and",
-    "only a commit that changed that number moves the page. A list of git pathspecs is",
-    "a number of files, named after its src/data/repo-stats.mjs export; a pathspec that",
-    "holds {topic} stands for one per topic the navigation teaches (domainIds in",
-    "src/data/topics.mjs, the topics repo-stats.mjs counts the guides under). An object",
-    "{\"file\": path, \"lines\": pattern} is the number of lines of that file the pattern",
-    "matches, named after its src/data/conformance-stats.mjs export: an edit inside an",
-    "entry leaves it, a new entry moves it. The build fails on a page or a source HEAD",
-    "does not have. site/scripts/content-dates.test.mjs fails on a page that reaches data",
-    "without an entry here, on an entry that leaves out a data module or a reader of",
-    "the content collection its pages reach, and on a count that is not the number its",
-    "export computes. Keys beginning with an underscore are notes to the build; the test",
+    "count, a table or a report it renders moves its date the day it changes. Paths are",
+    "from the repository root, and one ending in / is a directory. In \"sources\", every",
+    "commit that changed a file counts, except that a directory of the content tree",
+    "stands for its pages, each dated by the page rule. \"counts\" names each number a page",
+    "shows of other files after the export that computes it, and only a commit that",
+    "changed that number moves the page. A list of git pathspecs is a number of files,",
+    "named after its src/data/repo-stats.mjs export; a pathspec that holds {topic} stands",
+    "for one per topic the navigation teaches (domainIds in src/data/topics.mjs, the",
+    "topics repo-stats.mjs counts the guides under). An object {\"file\": path, \"lines\":",
+    "pattern} is the number of lines of that file the pattern matches, named after its",
+    "src/data/conformance-stats.mjs export: an edit inside an entry leaves it, a new",
+    "entry moves it. \"texts\" names each text a page shows of other files after the export",
+    "that reads it: {\"files\": pathspecs, \"pattern\": pattern} is every match of the",
+    "pattern in those files, and only a commit that changed one moves the page. The build",
+    "fails on a page or a source HEAD does not have. site/scripts/content-dates.test.mjs",
+    "fails on a page that reaches data without an entry here, on an entry that leaves out",
+    "a data module or a reader of the content collection its pages reach, or a module that",
+    "carries one of them into the page, and on a count",
+    "that is not the number its export computes, or on a text that is not the one its",
+    "export reads. Keys beginning with an underscore are notes to the build; the test",
     "reads \"_via\", which maps each module the pages reach and are not dated by to the",
     "source that stands for it, or to the reason it moves no page."
   ],
@@ -91,48 +95,67 @@
       }
     },
     {
-      "_why": "The index of fiches lists every fiche the repository ships.",
+      "_why": "The index of fiches lists every fiche the repository ships, under the title and with the sentence the guide that shows it gives it in its <ReportPreview>, which reports.mjs reads off the guides: the Spanish index off the Spanish twins, with the English guides for its areas and for any fiche a twin does not declare. A commit that changes one of those declarations moves both indexes, and one that changes the rest of a guide moves neither. Each line also names the guide by its title, which moves no page's date, its own included.",
       "pages": [
         "site/src/content/docs/reference/reports.mdx",
         "site/src/content/docs/es/reference/reports.mdx"
       ],
       "sources": ["site/src/data/reports.mjs", "site/src/components/ReportIndex.astro"],
-      "counts": { "fiches": [":(glob).github/reports/*.pdf"] }
+      "counts": { "fiches": [":(glob).github/reports/*.pdf"] },
+      "texts": {
+        "reportsByArea": {
+          "files": [":(glob)site/src/content/docs/**/*.mdx", ":(exclude,glob)site/src/content/docs/es/**"],
+          "pattern": "<ReportPreview\\b[^>]*?/>"
+        },
+        "reportsByAreaEs": {
+          "files": [":(glob)site/src/content/docs/**/*.mdx"],
+          "pattern": "<ReportPreview\\b[^>]*?/>"
+        }
+      }
     },
     {
-      "_why": "Each catalogue page renders its tables from the generated catalogue data.",
+      "_why": "Each catalogue page renders its tables from the generated catalogue data, and the finder on every page and the list on the overview name each catalogue with its rows. CatalogueFinder.astro and CatalogueIndex.astro write those words, so a commit to either moves the pages. The directory stands for every page under it, the overview included, so a commit to Catalogues.astro moves the overview and one to CatalogueIndex.astro moves the catalogue pages, though neither shows what that component writes.",
       "pages": ["site/src/content/docs/reference/catalogues/"],
-      "sources": ["site/src/generated/catalogues.mjs", "site/src/components/Catalogues.astro"],
+      "sources": [
+        "site/src/generated/catalogues.mjs",
+        "site/src/components/Catalogues.astro",
+        "site/src/components/CatalogueFinder.astro",
+        "site/src/components/CatalogueIndex.astro"
+      ],
       "_via": {
+        "site/src/components/CatalogueRouter.astro": "the routes from the anchors of the old single catalogues page to each catalogue's page, which it writes into a script and no reader sees as text",
         "site/src/lib/catalogue-pages.ts": "the label, description and catalogue keys of every catalogue page, which the finder and the overview list: a label or a description moves no page's date anywhere on the site, and a catalogue key arrives with its rows in catalogues.mjs, a source",
         "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue joins it with its rows in catalogues.mjs, a source",
         "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which these pages show"
       }
     },
     {
-      "_why": "The Spanish catalogue pages render the same tables with their Spanish text.",
+      "_why": "The Spanish catalogue pages render the same tables, the finder and the overview with their Spanish text.",
       "pages": ["site/src/content/docs/es/reference/catalogues/"],
       "sources": [
         "site/src/generated/catalogues.mjs",
         "site/src/components/Catalogues.astro",
+        "site/src/components/CatalogueFinder.astro",
+        "site/src/components/CatalogueIndex.astro",
         "site/src/data/catalogue-es.json"
       ],
       "_via": {
+        "site/src/components/CatalogueRouter.astro": "the routes from the anchors of the old single catalogues page to each catalogue's page, which it writes into a script and no reader sees as text",
         "site/src/lib/catalogue-pages.ts": "the label, description and catalogue keys of every catalogue page, which the finder and the overview list: a label or a description moves no page's date anywhere on the site, and a catalogue key arrives with its rows in catalogues.mjs, a source",
         "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue joins it with its rows in catalogues.mjs, a source",
         "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which these pages show"
       }
     },
     {
-      "_why": "The errata index lists every entry of every family page.",
+      "_why": "The errata index lists every entry of every family page, each as ErrataFamily.astro writes its link from the heading the family page renders.",
       "pages": ["site/src/content/docs/reference/errata/index.mdx"],
-      "sources": ["site/src/content/docs/reference/errata/"],
+      "sources": ["site/src/content/docs/reference/errata/", "site/src/components/ErrataFamily.astro"],
       "_via": { "site/src/components/ErrataFamily.astro": "site/src/content/docs/reference/errata/" }
     },
     {
-      "_why": "The Spanish errata index lists every entry of every Spanish family page.",
+      "_why": "The Spanish errata index lists every entry of every Spanish family page, each as ErrataFamily.astro writes its link from the heading the family page renders.",
       "pages": ["site/src/content/docs/es/reference/errata/index.mdx"],
-      "sources": ["site/src/content/docs/es/reference/errata/"],
+      "sources": ["site/src/content/docs/es/reference/errata/", "site/src/components/ErrataFamily.astro"],
       "_via": { "site/src/components/ErrataFamily.astro": "site/src/content/docs/es/reference/errata/" }
     }
   ]

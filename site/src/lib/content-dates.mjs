@@ -17,9 +17,10 @@
  *
  * How it is read. The docs job checks out with `filter: blob:none`: every
  * commit and tree, no historical blob. A `git log -p` over the content tree
- * would fetch the old blobs on demand, a request per commit, and its output
- * (73 MB over 653 commits) would not fit the 64 MB buffer the old sitemap
- * script read git through, whose failures it caught and dropped. So the
+ * would fetch the old blobs on demand, a request per commit, and its output,
+ * past 64 MB since the history passed some 650 commits and longer with each
+ * one, would not fit the 64 MB buffer the old sitemap script read git
+ * through, whose failures it caught and dropped. So the
  * history is read from trees alone: `--raw` names each changed file with its
  * old and new blob ids, and `--no-renames` keeps git from looking for renames
  * by content, which needs the blobs (a move with the same blob is followed
@@ -30,7 +31,8 @@
  * about log2(n) requests. The sources and the counts of files are read from
  * trees alone too: their dates need no blob. A count of the lines of a file
  * reads the versions of that one file, newest first and in the same doubling
- * rounds, until one changed the number. Every git call streams its output,
+ * rounds, until one changed the number, and a text reads the versions of its
+ * files the same way, until one changed a match. Every git call streams its output,
  * and any failure throws: a build that cannot read the dates stops instead
  * of publishing guesses.
  *
@@ -441,6 +443,41 @@ async function lineCountDate(repo, { file, lines }) {
   return undefined;
 }
 
+/**
+ * The date a text a page shows of other files last changed: the newest
+ * commit that changed a match of the pattern in one of the files, each
+ * match read with every run of white space as one space, so a rewrap inside
+ * a match leaves the text, and so does an edit anywhere else in the file. A
+ * file added or deleted goes from no match or to none, so a guide moved to
+ * another folder, which moves its line to another heading of the index,
+ * moves the page. The versions are read newest first, in the same doubling
+ * rounds as a count of lines, so the usual case costs one request.
+ *
+ * @param {string} repo
+ * @param {{ files: string[], pattern: string }} text
+ * @returns {Promise<Date | undefined>}
+ */
+async function textDate(repo, { files, pattern }) {
+  const history = await readHistory(repo, files);
+  const regex = new RegExp(pattern, 'gm');
+  const matched = new Map();
+  const matches = (oid) => (NO_BLOB.test(oid) ? '' : matched.get(oid));
+  for (let next = 0, budget = 1; next < history.length; next += budget, budget *= 2) {
+    const batch = history.slice(next, next + budget);
+    const wanted = [...new Set(batch.flatMap((commit) => commit.changes.flatMap(({ from, to }) => [from, to])))].filter(
+      (oid) => !NO_BLOB.test(oid) && !matched.has(oid),
+    );
+    if (wanted.length > 0) {
+      for (const [oid, text] of await readBlobs(repo, wanted)) {
+        matched.set(oid, (text.match(regex) ?? []).map((match) => match.replace(/\s+/g, ' ')).join('\n'));
+      }
+    }
+    const moved = batch.find((commit) => commit.changes.some(({ from, to }) => matches(from) !== matches(to)));
+    if (moved !== undefined) return moved.date;
+  }
+  return undefined;
+}
+
 /** Whether a path from site/date-sources.json names `path`: the file, or a directory holding it. */
 const names = (spec, path) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec);
 
@@ -449,7 +486,8 @@ const later = (a, b) => (a === undefined || (b !== undefined && b > a) ? b : a);
 
 /**
  * Move the date of each page `site/date-sources.json` lists to the newest
- * change of what it is built from, when that is later than its own.
+ * change of what it is built from, when that is later than its own: a
+ * source, a count or a text.
  *
  * @param {{ repo: string, pathspec: string, pages: string[], dates: Map<string, Date>, entries: ReturnType<typeof readDateSources> }} options
  * @returns {Promise<{ sourced: number, raised: number }>} How many pages have
@@ -517,12 +555,22 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
     }
   }
 
+  // A text moves only with a commit that changed one of its matches.
+  const texts = new Map(
+    entries.flatMap((entry) => Object.values(entry.texts)).map((set) => [JSON.stringify(set), set]),
+  );
+  for (const [key, set] of texts) {
+    if ((await filesAtHead(repo, set.files)).length === 0) throw stale(`the files of the text ${set.files.join(' ')}`);
+    newest.set(key, await textDate(repo, set));
+  }
+
   const sourced = new Set();
   const raised = new Set();
   for (const entry of entries) {
     const when = [
       ...entry.sources.map((spec) => newest.get(spec)),
       ...Object.values(entry.counts).map((set) => newest.get(JSON.stringify(set))),
+      ...Object.values(entry.texts).map((set) => newest.get(JSON.stringify(set))),
     ].reduce(later, undefined);
     for (const page of pages.filter((path) => entry.pages.some((spec) => names(spec, path)))) {
       sourced.add(page);

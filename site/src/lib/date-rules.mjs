@@ -31,6 +31,9 @@
  * of a directory or a registry, moves only with a commit that changed it: a
  * count of files with one that changed how many there are, a count of the
  * lines of a file that match a pattern with one that changed how many do.
+ * So does a text, the matches of a pattern in some files, which is all the
+ * index of fiches shows of the guides: a commit that changed one of them
+ * moves the page, and one that changed the rest of a guide does not.
  * The build fails on a page or a source that HEAD does not have, and
  * site/scripts/content-dates.test.mjs fails on a page that reaches data
  * without being listed, and on an entry that leaves out a module its pages
@@ -151,12 +154,24 @@ export function readIgnoreRevs(file) {
  */
 
 /**
+ * The text a page shows of other files: every match of a pattern in the
+ * files some pathspecs name, as the title and the sentence each guide gives
+ * a fiche in its `<ReportPreview>`, which the index of fiches prints.
+ *
+ * @typedef {{ files: string[], pattern: string }} MatchedText
+ */
+
+/**
  * The entries of `site/date-sources.json`: each names pages (`pages`), the
- * files they are built from (`sources`) and the numbers they show of other
- * files (`counts`, under the name of each number). A count is either a list
- * of git pathspecs, whose number is how many files they match, or
+ * files they are built from (`sources`), the numbers they show of other
+ * files (`counts`, under the name of each number) and the text they show of
+ * other files (`texts`, under the name of each text). A count is either a
+ * list of git pathspecs, whose number is how many files they match, or
  * `{ "file": path, "lines": pattern }`, whose number is how many lines of
- * that file the regular expression matches, read with the `m` flag. Paths
+ * that file the regular expression matches, read with the `m` flag. A text
+ * is `{ "files": pathspecs, "pattern": pattern }`: every match of the
+ * regular expression, read with the `m` flag, in each file the pathspecs
+ * match. Paths
  * are from the repository root, as git names them, and one ending in `/` is
  * a directory. A pathspec of a count that holds `{topic}` stands for one
  * per topic, so a count over the topic directories follows the navigation
@@ -167,7 +182,7 @@ export function readIgnoreRevs(file) {
  * @param {string} file
  * @param {{ topics?: readonly string[] }} [options] What `{topic}` stands
  *   for: the topics the navigation teaches unless a caller says otherwise.
- * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[] | LineCount> }>}
+ * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[] | LineCount>, texts: Record<string, MatchedText> }>}
  */
 export function readDateSources(file, { topics = domainIds } = {}) {
   if (!existsSync(file)) return [];
@@ -181,7 +196,7 @@ export function readDateSources(file, { topics = domainIds } = {}) {
   return data.entries.map((entry, index) => {
     const where = `${file}, entry ${index + 1}`;
     const unknown = Object.keys(entry ?? {}).filter(
-      (key) => !key.startsWith('_') && !['pages', 'sources', 'counts'].includes(key),
+      (key) => !key.startsWith('_') && !['pages', 'sources', 'counts', 'texts'].includes(key),
     );
     if (unknown.length > 0) throw new Error(`${where}: unknown key(s) ${unknown.join(', ')}.`);
     const paths = (value, key, { magic = false } = {}) => {
@@ -210,6 +225,18 @@ export function readDateSources(file, { topics = domainIds } = {}) {
     if (typeof counted !== 'object' || Array.isArray(counted) || counted === null) {
       throw new Error(`${where}: "counts" maps the name of each number to its pathspecs.`);
     }
+    /** A pattern read with the `m` flag, refused with what is wrong with it. */
+    const pattern = (value, key, what) => {
+      if (typeof value !== 'string' || value === '') throw new Error(`${where}: ${key} is the pattern of ${what}.`);
+      let invalid = null;
+      try {
+        RegExp(value, 'm');
+      } catch (error) {
+        invalid = error.message;
+      }
+      if (invalid !== null) throw new Error(`${where}: ${key}: ${invalid}`);
+      return value;
+    };
     const lineCount = (name, set) => {
       const unknownKeys = Object.keys(set).filter((key) => !['file', 'lines'].includes(key));
       if (unknownKeys.length > 0) {
@@ -217,17 +244,7 @@ export function readDateSources(file, { topics = domainIds } = {}) {
       }
       const [path] = paths([set.file], `counts.${name}.file`);
       if (path.endsWith('/')) throw new Error(`${where}: counts.${name}.file names a file, not ${JSON.stringify(path)}.`);
-      if (typeof set.lines !== 'string' || set.lines === '') {
-        throw new Error(`${where}: counts.${name}.lines is the pattern of the lines it counts.`);
-      }
-      let invalid = null;
-      try {
-        RegExp(set.lines, 'm');
-      } catch (error) {
-        invalid = error.message;
-      }
-      if (invalid !== null) throw new Error(`${where}: counts.${name}.lines: ${invalid}`);
-      return { file: path, lines: set.lines };
+      return { file: path, lines: pattern(set.lines, `counts.${name}.lines`, 'the lines it counts') };
     };
     const counts = Object.fromEntries(
       Object.entries(counted).map(([name, set]) => {
@@ -243,11 +260,29 @@ export function readDateSources(file, { topics = domainIds } = {}) {
         return [name, specs];
       }),
     );
+    const shown = entry.texts ?? {};
+    if (typeof shown !== 'object' || Array.isArray(shown) || shown === null) {
+      throw new Error(`${where}: "texts" maps the name of each text to its files and its pattern.`);
+    }
+    const texts = Object.fromEntries(
+      Object.entries(shown).map(([name, set]) => {
+        if (typeof set !== 'object' || Array.isArray(set) || set === null) {
+          throw new Error(`${where}: texts.${name} is { "files": pathspecs, "pattern": pattern }.`);
+        }
+        const unknownKeys = Object.keys(set).filter((key) => !['files', 'pattern'].includes(key));
+        if (unknownKeys.length > 0) {
+          throw new Error(`${where}: unknown key(s) ${unknownKeys.join(', ')} in texts.${name}.`);
+        }
+        const files = paths(set.files, `texts.${name}.files`, { magic: true });
+        if (files.length === 0) throw new Error(`${where}: no pathspec for the text ${name}.`);
+        return [name, { files, pattern: pattern(set.pattern, `texts.${name}.pattern`, 'the text it shows') }];
+      }),
+    );
     if (pages.length === 0) throw new Error(`${where} names no page.`);
-    if (sources.length === 0 && Object.keys(counts).length === 0) {
+    if (sources.length === 0 && Object.keys(counts).length === 0 && Object.keys(texts).length === 0) {
       throw new Error(`${where} names no source.`);
     }
-    return { pages, sources, counts };
+    return { pages, sources, counts, texts };
   });
 }
 

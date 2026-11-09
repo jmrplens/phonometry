@@ -490,6 +490,62 @@ test('a count of lines moves the page only with a commit that changed how many l
 	assert.equal(packs() - before, 3, 'one fetch per round');
 });
 
+/** What the index of fiches reads off a guide: the declaration of each fiche it shows. */
+const FICHE = '<ReportPreview\\b[^>]*?/>';
+/** A guide that shows one fiche under `title`, with `more` after it. */
+const guide = (title, more = '') =>
+	page({ body: `The text.\n\n<ReportPreview\n\tname="one"\n\ttitle="${title}"\n\tdescription="One page."\n/>\n${more}` });
+/** The English guides and nothing under es/, as the English index reads them. */
+const ENGLISH_GUIDES = [':(glob)site/src/content/docs/**/*.mdx', ':(exclude,glob)site/src/content/docs/es/**'];
+
+test('a text moves the page only with a commit that changed one of its matches', async (t) => {
+	const repo = repository(t);
+	repo.write('reports.mdx', page({ title: 'Fiches' }));
+	repo.write('signals/guide.mdx', guide('First title'));
+	repo.write('es/signals/guide.mdx', guide('Primer título'));
+	repo.commit(1);
+	repo.write('signals/guide.mdx', guide('Second title'));
+	repo.commit(2, 'the title the index prints: the page moves');
+	repo.write('signals/guide.mdx', guide('Second title', '\nA paragraph more.\n'));
+	repo.commit(3, 'the guide changes outside its fiche: the page stays');
+	repo.write('signals/guide.mdx', guide('Second title', '\nA paragraph more.\n').replace('\n\tdescription', ' description'));
+	repo.commit(4, 'the declaration rewrapped: the page stays');
+	repo.write('es/signals/guide.mdx', guide('Segundo título'));
+	repo.commit(5, 'a guide the text leaves out');
+	repo.sources({ pages: ['site/src/content/docs/reports.mdx'], texts: { reportsByArea: { files: ENGLISH_GUIDES, pattern: FICHE } } });
+	repo.commit(6, 'the list, for the clone below');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'reports.mdx'), '2026-01-02', 'the commit that retitled the fiche');
+	assert.equal(day(dates, 'signals/guide.mdx'), '2026-01-04', 'the guide keeps its own date');
+
+	// The docs job's clone has no old version of a guide: they are fetched as
+	// a count of lines fetches them, in rounds, and the date is the same.
+	repo.git('config', 'uploadpack.allowFilter', 'true');
+	repo.git('config', 'uploadpack.allowAnySHA1InWant', 'true');
+	const clone = join(repo.root, 'blobless');
+	const ran = spawnSync('git', ['clone', '-q', '--filter=blob:none', `file://${repo.work}`, clone], { env: repo.env, encoding: 'utf8' });
+	assert.equal(ran.status, 0, ran.stderr);
+	const fromClone = await loadContentDates({ siteRoot: join(clone, 'site') });
+	assert.equal(day(fromClone, 'reports.mdx'), '2026-01-02');
+});
+
+test('a guide moved to another folder, or a fiche added or taken out, moves the page that shows its text', async (t) => {
+	for (const [change, expected] of [
+		[(repo) => repo.move('signals/guide.mdx', 'vibration/guide.mdx'), 'a guide moved'],
+		[(repo) => repo.write('signals/other.mdx', guide('Another fiche')), 'a fiche added'],
+		[(repo) => repo.write('signals/guide.mdx', page()), 'a fiche taken out'],
+	]) {
+		const repo = repository(t);
+		repo.write('reports.mdx', page({ title: 'Fiches' }));
+		repo.write('signals/guide.mdx', guide('A title'));
+		repo.sources({ pages: ['site/src/content/docs/reports.mdx'], texts: { reportsByArea: { files: ENGLISH_GUIDES, pattern: FICHE } } });
+		repo.commit(1);
+		change(repo);
+		repo.commit(2, expected);
+		assert.equal(day(await repo.dates(), 'reports.mdx'), '2026-01-02', expected);
+	}
+});
+
 test('a directory of the content tree stands for its pages, each dated by the page rule', async (t) => {
 	const repo = repository(t);
 	repo.write('errata/index.mdx', page({ title: 'Errata' }));
@@ -515,6 +571,7 @@ test('a page, a source or a count that HEAD does not have fails the build', asyn
 		[{ pages: ['site/src/content/docs/a.mdx'], sources: ['site/src/data/renamed.json'] }, /the source site\/src\/data\/renamed\.json, which HEAD does not have/],
 		[{ pages: ['site/src/content/docs/a.mdx'], counts: { fiches: [':(glob)site/fiches/*.pdf'] } }, /the counted files :\(glob\)site\/fiches\/\*\.pdf, which HEAD does not have/],
 		[{ pages: ['site/src/content/docs/a.mdx'], counts: { entries: { file: 'docs/GONE.md', lines: '^## ' } } }, /the counted file docs\/GONE\.md, which HEAD does not have/],
+		[{ pages: ['site/src/content/docs/a.mdx'], texts: { shown: { files: [':(glob)site/guides/*.mdx'], pattern: 'x' } } }, /the files of the text :\(glob\)site\/guides\/\*\.mdx, which HEAD does not have/],
 		[{ pages: ['site/src/data/table.json'], sources: ['site/src/data/table.json'] }, /as a page, and pages are under site\/src\/content\/docs\//],
 	];
 	for (const [entry, message] of cases) {
@@ -538,7 +595,7 @@ test('date-sources.json takes paths from the repository root, and an entry with 
 	const pages = ['site/src/content/docs/a.mdx'];
 	assert.deepEqual(readDateSources(join(root, 'none.json')), [], 'no file, no sources');
 	assert.deepEqual(read({ _comment: 'a note', entries: [{ _why: 'a note', pages, sources: ['docs/a.json'] }] })(), [
-		{ pages, sources: ['docs/a.json'], counts: {} },
+		{ pages, sources: ['docs/a.json'], counts: {}, texts: {} },
 	]);
 	assert.throws(read('{ not json'), /date-sources\.json: /);
 	assert.throws(read({ pages }), /no "entries" list/);
@@ -548,12 +605,21 @@ test('date-sources.json takes paths from the repository root, and an entry with 
 	assert.throws(read({ entries: [{ pages, counts: [['a/']] }] }), /"counts" maps the name of each number/);
 	assert.throws(read({ entries: [{ pages, counts: { fiches: [] } }] }), /no pathspec for the count fiches/);
 	const entries = { file: 'docs/ERRATA.md', lines: '^## .+$' };
-	assert.deepEqual(read({ entries: [{ pages, counts: { entries } }] })(), [{ pages, sources: [], counts: { entries } }]);
+	assert.deepEqual(read({ entries: [{ pages, counts: { entries } }] })(), [{ pages, sources: [], counts: { entries }, texts: {} }]);
 	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, file: 'docs/' } } }] }), /counts\.entries\.file names a file, not "docs\/"/);
 	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, file: '../ERRATA.md' } } }] }), /"counts\.entries\.file" takes paths from the repository root/);
 	assert.throws(read({ entries: [{ pages, counts: { entries: { file: 'docs/ERRATA.md' } } }] }), /counts\.entries\.lines is the pattern of the lines it counts/);
 	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, lines: '(' } } }] }), /counts\.entries\.lines: Invalid regular expression/);
 	assert.throws(read({ entries: [{ pages, counts: { entries: { ...entries, glob: '*' } } }] }), /unknown key\(s\) glob in counts\.entries/);
+	const fiches = { files: [':(glob)site/src/content/docs/**/*.mdx'], pattern: '<ReportPreview\\b[^>]*?/>' };
+	assert.deepEqual(read({ entries: [{ pages, texts: { fiches } }] })(), [{ pages, sources: [], counts: {}, texts: { fiches } }]);
+	assert.throws(read({ entries: [{ pages, texts: [fiches] }] }), /"texts" maps the name of each text to its files and its pattern/);
+	assert.throws(read({ entries: [{ pages, texts: { fiches: fiches.files } }] }), /texts\.fiches is \{ "files": pathspecs, "pattern": pattern \}/);
+	assert.throws(read({ entries: [{ pages, texts: { fiches: { ...fiches, files: [] } } }] }), /no pathspec for the text fiches/);
+	assert.throws(read({ entries: [{ pages, texts: { fiches: { ...fiches, files: ['../guides/'] } } }] }), /"texts\.fiches\.files" takes paths from the repository root or git pathspecs/);
+	assert.throws(read({ entries: [{ pages, texts: { fiches: { files: fiches.files } } }] }), /texts\.fiches\.pattern is the pattern of the text it shows/);
+	assert.throws(read({ entries: [{ pages, texts: { fiches: { ...fiches, pattern: '(' } } }] }), /texts\.fiches\.pattern: Invalid regular expression/);
+	assert.throws(read({ entries: [{ pages, texts: { fiches: { ...fiches, lines: 'x' } } }] }), /unknown key\(s\) lines in texts\.fiches/);
 	assert.throws(read({ entries: [{ pages }] }), /entry 1 names no source/);
 	assert.throws(read({ entries: [{ sources: ['a.json'] }] }), /entry 1 names no page/);
 });
@@ -614,10 +680,12 @@ const BANNER = '.github/badges/conformance-summary.svg';
 /**
  * The modules that read the repository when the site builds, and what each
  * of their exports is read from: the files whose commits change it, any one
- * of which the entry of a page that shows it has to name as a source, or
+ * of which the entry of a page that shows it has to name as a source;
  * `count`, a number of files or lines the entry has to carry under the
- * export's own name. A page that shows an export is dated by what it is
- * read from, which the imports alone do not show.
+ * export's own name; or `text`, the matches of a pattern in some files,
+ * which the entry has to carry under the export's own name too. A page that
+ * shows an export is dated by what it is read from, which the imports alone
+ * do not show.
  */
 const READS = {
 	'site/src/data/repo-stats.mjs': {
@@ -638,6 +706,15 @@ const READS = {
 		checksRatio: [BANNER, 'docs/conformance.json'],
 		report: ['docs/conformance.json'],
 		errataEntries: 'count',
+	},
+	// The title and the sentence each guide gives a fiche in its
+	// <ReportPreview>, read off the guides, English and Spanish.
+	'site/src/data/reports.mjs': {
+		reports: 'text',
+		reportsEs: 'text',
+		reportsByArea: 'text',
+		reportsByAreaEs: 'text',
+		reportCount: 'count',
 	},
 };
 
@@ -662,23 +739,30 @@ function boundNames(clause) {
  * repository paths, each under its kind: every data module it reaches
  * (`src/data`, `src/generated`), through any chain of imports and the data
  * modules' own, as `data`, and every module that reads the content
- * collection as `collection`. `bound` gathers, for each module that reads
- * the repository at build time, the names imported from it on the way.
+ * collection as `collection`. With `carriers`, also every component
+ * (`src/components`) on the way to one of those, which writes what it
+ * reaches into the page in words of its own, as `carrier`. `bound` gathers,
+ * for each module that reads the repository at build time, the names
+ * imported from it on the way.
  *
  * @param {string} file
  * @param {string} [site]
- * @param {Map<string, 'data' | 'collection'>} [out]
+ * @param {Map<string, 'data' | 'collection' | 'carrier'>} [out]
  * @param {Set<string>} [seen]
  * @param {Map<string, Set<string>>} [bound]
- * @returns {Map<string, 'data' | 'collection'>}
+ * @param {boolean} [carriers]
+ * @param {Map<string, boolean>} [carrying] whether each module read so far reaches data
+ * @returns {Map<string, 'data' | 'collection' | 'carrier'>}
  */
-function reach(file, site = SITE, out = new Map(), seen = new Set(), bound = new Map()) {
+function reach(file, site = SITE, out = new Map(), seen = new Set(), bound = new Map(), carriers = false, carrying = new Map()) {
 	if (seen.has(file)) return out;
 	seen.add(file);
 	const rel = relative(site, file).split(sep).join('/');
 	if (NOT_CONTENT.has(rel)) return out;
 	const path = relative(resolve(site, '..'), file).split(sep).join('/');
-	if (/^src\/(data|generated)\//.test(rel)) out.set(path, 'data');
+	let carries = /^src\/(data|generated)\//.test(rel);
+	if (carries) out.set(path, 'data');
+	carrying.set(file, carries);
 	if (!/\.(astro|mjs|ts|mdx?)$/.test(file)) return out;
 	let text = '';
 	try {
@@ -686,15 +770,21 @@ function reach(file, site = SITE, out = new Map(), seen = new Set(), bound = new
 	} catch {
 		return out; // A package or a virtual module: not this site's data.
 	}
-	if (/\b(getCollection|getEntry)\s*\(/.test(text)) out.set(path, 'collection');
+	if (/\b(getCollection|getEntry)\s*\(/.test(text)) {
+		out.set(path, 'collection');
+		carries = true;
+	}
 	for (const [, clause, spec] of text.matchAll(IMPORT)) {
 		if (!spec.startsWith('.')) continue;
 		const target = resolveImport(file, spec);
 		const module = relative(resolve(site, '..'), target).split(sep).join('/');
 		if (!bound.has(module)) bound.set(module, new Set());
 		for (const name of boundNames(clause)) bound.get(module).add(name);
-		reach(target, site, out, seen, bound);
+		reach(target, site, out, seen, bound, carriers, carrying);
+		if (carrying.get(target)) carries = true;
 	}
+	carrying.set(file, carries);
+	if (carriers && carries && !out.has(path) && /^src\/components\/.+\.astro$/.test(rel)) out.set(path, 'carrier');
 	return out;
 }
 
@@ -728,7 +818,8 @@ const REPO = resolve(SITE, '..');
  * What a site's date-sources.json leaves out of what its pages show: a page
  * that reaches data and has no entry, a listed page that reaches none, and
  * for each entry a data module or a reader of the content collection that
- * its pages reach and that neither "sources" nor "_via" names. "_via" maps
+ * its pages reach, or a component that carries one of them into the page,
+ * and that neither "sources" nor "_via" names. "_via" maps
  * such a module to the source the entry dates it by (a path, which the
  * entry has to name in "sources" or as a count) or to the reason it moves
  * no page (a sentence). A reader of the content collection always needs
@@ -739,7 +830,7 @@ const REPO = resolve(SITE, '..');
  * that the pages import has to be dated by what it is read from.
  *
  * @param {string} [site]
- * @param {Record<string, Record<string, string[] | 'count'>>} [reads]
+ * @param {Record<string, Record<string, string[] | 'count' | 'text'>>} [reads]
  * @returns {{ problems: string[], built: number }}
  */
 function auditDateSources(site = SITE, reads = READS) {
@@ -755,7 +846,7 @@ function auditDateSources(site = SITE, reads = READS) {
 	for (const page of sitePages(join(site, CONTENT_DIR))) {
 		const path = relative(repo, page).split(sep).join('/');
 		const bound = new Map();
-		const behind = reach(page, site, new Map(), new Set(), bound);
+		const behind = reach(page, site, new Map(), new Set(), bound, true);
 		const owners = entries.flatMap((entry, index) => (entry.pages.some((spec) => matches(spec, path)) ? [index] : []));
 		if (behind.size > 0) built += 1;
 		if (behind.size > 0 && owners.length === 0) {
@@ -775,10 +866,14 @@ function auditDateSources(site = SITE, reads = READS) {
 		const via = raw[index]._via ?? {};
 		const named = (path) => entry.sources.some((spec) => matches(spec, path));
 		for (const [module, kind] of reached[index]) {
-			if (kind === 'data' && named(module)) {
+			if (kind !== 'collection' && named(module)) {
 				if (Object.hasOwn(via, module)) problems.push(`${where}: "_via" explains ${module}, which "sources" already names`);
 			} else if (!Object.hasOwn(via, module)) {
-				const what = kind === 'data' ? 'the data of' : 'the pages of the content collection that are read by';
+				const what = {
+					data: 'the data of',
+					carrier: 'what is written from data by',
+					collection: 'the pages of the content collection that are read by',
+				}[kind];
 				problems.push(`${where}: its pages show ${what} ${module}, and neither "sources" nor "_via" names it`);
 			}
 		}
@@ -797,7 +892,9 @@ function auditDateSources(site = SITE, reads = READS) {
 				if (from === undefined) problems.push(`${where}: its pages show ${name} of ${module}, and the test does not say what that is read from`);
 				else if (from === 'count' && !Object.hasOwn(entry.counts, name)) {
 					problems.push(`${where}: its pages show ${name} of ${module}, a count the entry does not carry`);
-				} else if (from !== 'count' && !from.some((file) => named(file))) {
+				} else if (from === 'text' && !Object.hasOwn(entry.texts, name)) {
+					problems.push(`${where}: its pages show ${name} of ${module}, a text the entry does not carry`);
+				} else if (Array.isArray(from) && !from.some((file) => named(file))) {
 					problems.push(`${where}: its pages show ${name} of ${module}, read from ${from.join(' or ')}, which "sources" does not name`);
 				}
 			}
@@ -873,11 +970,35 @@ test('a listed page has to name every module it reaches, in "sources" or in "_vi
 	assert.deepEqual(readsOf('count'), [
 		'entry 1 (site/src/content/docs/a.mdx): its pages show count of site/src/data/numbers.mjs, a count the entry does not carry',
 	]);
+	// What a page shows of the guides, as the index of fiches shows the title
+	// and the sentence of each fiche, is a text the entry has to carry: the
+	// module that reads it is a source of the entry, which dates the page by
+	// its code and not by the guides.
+	assert.deepEqual(readsOf('text'), [
+		'entry 1 (site/src/content/docs/a.mdx): its pages show count of site/src/data/numbers.mjs, a text the entry does not carry',
+	]);
+	write(DATE_SOURCES, JSON.stringify({ entries: [{ ...a, texts: { count: { files: [page('c.mdx')], pattern: 'Plain' } } }, b] }));
+	assert.deepEqual(readsOf('text'), []);
 	assert.deepEqual(auditDateSources(site, { 'site/src/data/numbers.mjs': {} }).problems, [
 		'entry 1 (site/src/content/docs/a.mdx): its pages show count of site/src/data/numbers.mjs, and the test does not say what that is read from',
 	]);
 	write(DATE_SOURCES, JSON.stringify({ entries: [{ ...a, sources: ['site/src/data/numbers.mjs', 'site/src/data/rows.mjs'], _via: {} }, b] }));
 	assert.deepEqual(readsOf(['site/src/data/rows.mjs']), []);
+
+	// A component that writes what a data module holds into the page carries
+	// it: the page shows the component's words around the data, so the entry
+	// names the component as well, or says why it moves no page.
+	write('src/content/docs/d.mdx', "import Rows from '../../components/Rows.astro';\n\n<Rows />\n");
+	write('src/components/Rows.astro', "---\nimport { rows } from '../data/rows.mjs';\n---\n<p>{rows.length} rows</p>\n");
+	const d = { pages: [page('d.mdx')], sources: ['site/src/data/rows.mjs'] };
+	assert.deepEqual(audit(a, b, d), [
+		'entry 3 (site/src/content/docs/d.mdx): its pages show what is written from data by site/src/components/Rows.astro, and neither "sources" nor "_via" names it',
+	]);
+	assert.deepEqual(audit(a, b, { ...d, sources: [...d.sources, 'site/src/components/Rows.astro'] }), []);
+	assert.deepEqual(audit(a, b, { ...d, _via: { 'site/src/components/Rows.astro': 'what it writes around the rows moves no page' } }), []);
+	assert.deepEqual(audit(a, b, { ...d, sources: [...d.sources, 'site/src/components/Rows.astro'], _via: { 'site/src/components/Rows.astro': 'site/src/data/rows.mjs' } }), [
+		'entry 3 (site/src/content/docs/d.mdx): "_via" explains site/src/components/Rows.astro, which "sources" already names',
+	]);
 });
 
 test('every page that renders data from outside its file is listed in date-sources.json with all of it, and no other', async () => {
@@ -920,6 +1041,108 @@ test('each count in date-sources.json is the number the page shows: files as rep
 			continue;
 		}
 		assert.equal(filesAtHead(REPO, set).length, stats[name], `${name}: ${set.join(' ')}`);
+	}
+});
+
+test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides', async (t) => {
+	const reports = await import(pathToFileURL(join(SITE, 'src', 'data', 'reports.mjs')).href);
+	const texts = readDateSources(join(SITE, DATE_SOURCES)).flatMap((entry) => Object.entries(entry.texts));
+	assert.ok(texts.length > 0, 'the index of fiches shows what the guides say of each fiche');
+	for (const [name, set] of texts) {
+		assert.ok(Object.hasOwn(READS['site/src/data/reports.mjs'], name), `${name} is no export of src/data/reports.mjs`);
+		// The comparison is at HEAD, which is what the dates read.
+		const dirty = spawnSync('git', ['status', '--porcelain', '--', ...set.files], { cwd: REPO, encoding: 'utf8' });
+		if (dirty.stdout.trim() !== '') {
+			t.diagnostic(`${name}: uncommitted changes under its files, not compared`);
+			continue;
+		}
+		const matched = new Set();
+		for (const file of filesAtHead(REPO, set.files)) {
+			const head = spawnSync('git', ['show', `HEAD:${file}`], { cwd: REPO, encoding: 'utf8', maxBuffer: 1 << 28 });
+			assert.equal(head.status, 0, head.stderr);
+			for (const [match] of head.stdout.matchAll(new RegExp(set.pattern, 'gm'))) {
+				const fiche = /\bname="([^"]*)"/.exec(match);
+				assert.ok(fiche, `${name}: ${file} matches ${set.pattern} with no fiche named in it`);
+				matched.add(fiche[1]);
+			}
+		}
+		const shown = reports[name];
+		const fiches = (Array.isArray(shown) ? shown : Object.values(shown).flat()).map((report) => report.name);
+		assert.ok(fiches.length > 0, `${name} lists no fiche`);
+		assert.deepEqual([...matched].sort(), [...new Set(fiches)].sort(), `${name}: the fiches ${set.pattern} finds in ${set.files.join(' ')}`);
+	}
+});
+
+test('the index of fiches moves with a commit that changes only what a guide says of a fiche, and the errata index with one that changes only how it lists the entries', async (t) => {
+	// The site's own entries, on a history where nothing but the declaration
+	// in one guide changes, and then nothing but the component that writes
+	// each line of the errata index.
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	const entryOf = (path) => raw.entries.find((entry) => entry.pages.includes(path));
+	const cases = [
+		{
+			entry: entryOf('site/src/content/docs/reference/reports.mdx'),
+			before: (repo) => {
+				repo.writeFile('.github/reports/one.pdf', 'one\n');
+				repo.write('signals/guide.mdx', guide('A title'));
+				repo.write('es/signals/guide.mdx', guide('Un título'));
+			},
+			change: (repo) => repo.write('signals/guide.mdx', guide('A better title')),
+			pages: ['reference/reports.mdx', 'es/reference/reports.mdx'],
+		},
+		{
+			entry: entryOf('site/src/content/docs/reference/errata/index.mdx'),
+			before: (repo) => repo.write('reference/errata/iso-1.md', page({ title: 'ISO 1' })),
+			change: (repo) => repo.writeFile('site/src/components/ErrataFamily.astro', 'each entry linked by its typeset heading\n'),
+			pages: ['reference/errata/index.mdx'],
+		},
+		{
+			entry: entryOf('site/src/content/docs/es/reference/errata/index.mdx'),
+			before: (repo) => repo.write('es/reference/errata/iso-1.md', page({ title: 'ISO 1' })),
+			change: (repo) => repo.writeFile('site/src/components/ErrataFamily.astro', 'each entry linked by its typeset heading\n'),
+			pages: ['es/reference/errata/index.mdx'],
+		},
+	];
+	for (const { entry, before, change, pages } of cases) {
+		assert.ok(entry, `an entry for ${pages[0]}`);
+		const repo = repository(t);
+		for (const spec of entry.pages) repo.writeFile(spec, page());
+		for (const spec of entry.sources.filter((spec) => !spec.endsWith('/'))) repo.writeFile(spec, 'one\n');
+		before(repo);
+		writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [entry] }));
+		repo.commit(1);
+		change(repo);
+		repo.commit(2, 'the index changes for its readers, and no page file does');
+		const dates = await repo.dates();
+		for (const path of pages) assert.equal(day(dates, path), '2026-01-02', path);
+	}
+});
+
+test('the catalogue pages move with a commit that changes only the words of the overview list or of the finder', async (t) => {
+	// The site's own entries for the catalogue pages, on a history where no
+	// page and no catalogue changes, and only the component that writes the
+	// overview's list, or the one that writes the finder, does.
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	for (const lang of ['', 'es/']) {
+		const dir = `${lang}reference/catalogues/`;
+		const entry = raw.entries.find((candidate) => candidate.pages.includes(`site/src/content/docs/${dir}`));
+		assert.ok(entry, `an entry for site/src/content/docs/${dir}`);
+		const cases = [
+			['site/src/components/CatalogueIndex.astro', [`${dir}index.mdx`]],
+			['site/src/components/CatalogueFinder.astro', [`${dir}index.mdx`, `${dir}carpets.mdx`]],
+		];
+		for (const [component, pages] of cases) {
+			const repo = repository(t);
+			for (const path of [`${dir}index.mdx`, `${dir}carpets.mdx`]) repo.write(path, page());
+			for (const spec of entry.sources) repo.writeFile(spec, 'one\n');
+			repo.writeFile(component, 'one\n');
+			writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [entry] }));
+			repo.commit(1);
+			repo.writeFile(component, 'two\n');
+			repo.commit(2, 'the component changes what the pages say, and no page file does');
+			const dates = await repo.dates();
+			for (const path of pages) assert.equal(day(dates, path), '2026-01-02', `${path} after a commit to ${component} alone`);
+		}
 	}
 });
 

@@ -1316,12 +1316,18 @@ def test_a_child_that_runs_and_fails_fails_the_test(script: str, status: int) ->
 
     A :class:`PermissionError` the child itself raises, as an identity check
     that cannot read a file would, ends it with a status other than 0, which
-    is the test's failure, never a skip.
+    is the test's failure, never a skip. Where the system refuses to start
+    the interpreter, the first child skips this test by that refusal; once
+    one has started, a skip from the failing child fails the test.
     """
-    with pytest.raises(
-        subprocess.CalledProcessError, match=f"non-zero exit status {status}"
-    ):
-        libm_identity.run_child([sys.executable, "-I", "-c", script], timeout=60)
+    libm_identity.run_child([sys.executable, "-I", "-c", "pass"], timeout=60)
+    try:
+        with pytest.raises(
+            subprocess.CalledProcessError, match=f"non-zero exit status {status}"
+        ):
+            libm_identity.run_child([sys.executable, "-I", "-c", script], timeout=60)
+    except pytest.skip.Exception as skipped:
+        pytest.fail(f"a child that ran and failed skipped its test: {skipped}")
 
 
 def _real_glibc_libm() -> Path:

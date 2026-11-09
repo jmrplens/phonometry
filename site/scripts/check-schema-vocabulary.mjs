@@ -43,8 +43,8 @@
 // and holds no node. A property under `@reverse` states the node under it as
 // the subject, so that node's types are held to the domain, and the node
 // that carries the map as the value, so its types are held to the range.
-// What a node groups under `@nest` is its own, and an `@included` node is a
-// node of the graph.
+// The properties a node groups under `@nest` are its own, and an `@included`
+// node is a node of the graph.
 //
 // Two shapes are accepted on purpose, as the Schema Markup Validator accepts
 // them: a literal (text, a number, a date or an `@value` object) stands for

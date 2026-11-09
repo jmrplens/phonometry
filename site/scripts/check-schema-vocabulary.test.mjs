@@ -464,7 +464,7 @@ test('under @reverse, the node held is the subject, checked against the domain, 
 	});
 });
 
-test('what a node groups under @nest is its own, and an @included node is a node of the graph', () => {
+test('the properties a node groups under @nest are its own, and an @included node is a node of the graph', () => {
 	const outside =
 		'ItemList.inLanguage (domain BroadcastService|CommunicateAction|CreativeWork|Event|LinkRole|PronounceableText|WriteAction)';
 	assert.deepEqual(failuresOf(onePage([{ '@type': 'TechArticle', '@nest': { inLanguage: 'en', wordCount: 3 } }])), {});

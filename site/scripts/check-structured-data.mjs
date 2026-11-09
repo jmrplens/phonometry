@@ -32,7 +32,7 @@ import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 
-import { decode, markupOf } from './shared/dist-pages.mjs';
+import { decode, markupOf, markupText } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // An explicit directory is for reproducing a defect against a build kept aside;
@@ -334,8 +334,8 @@ const unset = (text) =>
 		.replace(/[ \t\r\n]+/g, ' ')
 		.trim();
 
-/** The text a reader sees of an element's markup: its tags out, its references decoded. */
-const shownText = (inner) => unset(decode(inner.replace(/<[^>]*>/g, '')));
+/** The text a reader sees of an element's markup: its runs of text, its references decoded. */
+const shownText = (inner) => unset(decode(markupText(inner)));
 
 /**
  * What a page shows a dataset could be named or described by: the text of

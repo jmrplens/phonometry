@@ -2347,9 +2347,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `sound_energy_in_situ`, the four reverberation-room methods, the four of
   the hard-walled room, the special room and its comparison and survey,
   `sound_power_anechoic`, the surface methods `sound_power_pressure` and
-  `sound_energy_pressure`, the discrete-point and precision intensity
-  methods, the high-frequency methods and their room constant, and
-  `turbine_sound_power`. So did
+  `sound_energy_pressure`, the scanning, discrete-point and precision
+  intensity methods, the in-duct method, the high-frequency methods and
+  their room constant, the reference source calibration, and
+  `turbine_sound_power`. Where an advisory comes on the way to a value a
+  later check needs, the call holds it until its result stands and drops it
+  when it refuses: the count of single events of the reverberation-room,
+  hard-walled and surface sound energy methods, the count of segments of
+  the scanning method, the background margin before the A-weighted total
+  refuses a band Annex E does not hold, the background margin of
+  `sound_power_anechoic` that the calibration composes, and the atmosphere
+  the room constant's air absorption advises on. So did
   `speech.stipa`, which said a clip was short before refusing one shorter
   than a modulation period or `levels` of the wrong length, `fluids.air`,
   which gave its domain advisory before refusing a pressure and a humidity

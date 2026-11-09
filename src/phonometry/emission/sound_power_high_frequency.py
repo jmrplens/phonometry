@@ -129,7 +129,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from .._internal.warnings import warn_caller
+from .._internal.warnings import advisories_held, warn_caller
 from ..environment.propagation.air_absorption import (
     _EIGHT_686,
     _KELVIN,
@@ -352,33 +352,36 @@ def room_constant_from_air_absorption(
     :raises TypeError: if ``surface_area`` or ``volume`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number.
     """
-    volume, surface = _room_geometry(volume, surface_area)
-    freqs = require_positive_array(frequencies, "frequencies")
-    alpha = air_absorption_np_per_m(
-        freqs,
-        temperature_c=temperature_c,
-        relative_humidity_percent=relative_humidity_percent,
-        static_pressure_kpa=static_pressure_kpa,
-    )
-    area = _AIR_ABSORPTION_FACTOR * alpha * volume
-    mean_absorption = area / surface
-    if np.any(mean_absorption >= 1.0):
-        msg = (
-            "8 alpha V / S reaches 1 at one or more frequencies: the air alone "
-            "would absorb more than the room surface can, and Formula (7) of "
-            "ISO 9295:2015 has no finite room constant there."
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        volume, surface = _room_geometry(volume, surface_area)
+        freqs = require_positive_array(frequencies, "frequencies")
+        alpha = air_absorption_np_per_m(
+            freqs,
+            temperature_c=temperature_c,
+            relative_humidity_percent=relative_humidity_percent,
+            static_pressure_kpa=static_pressure_kpa,
         )
-        raise ValueError(msg)
-    # Advised after the refusal above, so -W error raises the refusal.
-    if np.any(freqs < _AIR_ABSORPTION_FLOOR_HZ):
-        warn_caller(
-            "One or more frequencies are below 10 kHz, where ISO 9295:2015 "
-            "clause 7.2 no longer takes the air to hold practically all of the "
-            "room absorption; the measured reverberation time of clause 6 is "
-            "the method there.",
-            SoundPowerWarning,
-        )
-    return np.asarray(area / (1.0 - mean_absorption), dtype=np.float64)
+        area = _AIR_ABSORPTION_FACTOR * alpha * volume
+        mean_absorption = area / surface
+        if np.any(mean_absorption >= 1.0):
+            msg = (
+                "8 alpha V / S reaches 1 at one or more frequencies: the air alone "
+                "would absorb more than the room surface can, and Formula (7) of "
+                "ISO 9295:2015 has no finite room constant there."
+            )
+            raise ValueError(msg)
+        # Advised after the refusal above, so -W error raises the refusal.
+        if np.any(freqs < _AIR_ABSORPTION_FLOOR_HZ):
+            warn_caller(
+                "One or more frequencies are below 10 kHz, where ISO 9295:2015 "
+                "clause 7.2 no longer takes the air to hold practically all of the "
+                "room absorption; the measured reverberation time of clause 6 is "
+                "the method there.",
+                SoundPowerWarning,
+            )
+        return np.asarray(area / (1.0 - mean_absorption), dtype=np.float64)
 
 
 # --- Formulae (2) and (3): tones under a moving microphone -------------------

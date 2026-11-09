@@ -108,7 +108,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import warn_caller
+from .._internal.warnings import advisories_held, warn_caller
 from ._shared import _S0, SoundPowerWarning
 from ._sound_power_reverberation import _speed_of_sound
 
@@ -1176,61 +1176,72 @@ def sound_power_in_duct(
         number, or ``frequencies``, ``levels``, ``microphone_correction`` or
         ``shield_correction`` holds a text or a value that is not a real number.
     """
-    freqs = _nominal_bands(frequencies)
-    _check_shield(shield)
-    d = _check_duct_diameter(duct_diameter_m)
-    u = _check_flow_velocity(flow_velocity, shield)
-    c, rho_c = _check_air(temperature_c, static_pressure_kpa)
-    c1 = require_per_band(
-        microphone_correction, "microphone_correction", freqs, "frequencies"
-    )
-    c2 = require_per_band(shield_correction, "shield_correction", freqs, "frequencies")
-    if not np.all(np.isfinite(c1)):
-        msg = "'microphone_correction' must contain only finite values."
-        raise ValueError(msg)
-    if not np.all(np.isfinite(c2)):
-        msg = "'shield_correction' must contain only finite values."
-        raise ValueError(msg)
-    arr = _position_levels(levels, freqs.size)
-
-    # Eq. (9) over the positions, or Eq. (11) on an averaged spectrum.
-    mean_level = energy_mean(arr, axis=0) if arr.ndim == 2 else arr  # noqa: PLR2004
-    c34 = flow_modal_correction(freqs, u, d, shield=shield, speed_of_sound=c)
-    combined = c1 + c2 + c34  # Eq. (10)
-    corrected = mean_level + combined
-    # Eq. (12): the plane-wave relation with S = pi d^2 / 4.
-    area = math.pi * d**2 / 4.0
-    lw = corrected + 10.0 * math.log10(area / _S0) - 10.0 * math.log10(rho_c / _RHO_C_0)
-    lw = np.asarray(lw, dtype=np.float64)
-
-    sigma_r = in_duct_reproducibility(freqs)
-    if shield != "sampling-tube":
-        warn_caller(
-            f"The reproducibility reported for a {shield} is the one Table 2 "
-            "tabulates, which clause 4 NOTE 5 states refers to the sampling "
-            "tube only and 'can be expected to increase for other shields'; "
-            "the standard puts no number on the increase, so sigma_R and the "
-            "expanded uncertainty are a lower bound here.",
-            SoundPowerWarning,
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        freqs = _nominal_bands(frequencies)
+        _check_shield(shield)
+        d = _check_duct_diameter(duct_diameter_m)
+        u = _check_flow_velocity(flow_velocity, shield)
+        c, rho_c = _check_air(temperature_c, static_pressure_kpa)
+        c1 = require_per_band(
+            microphone_correction, "microphone_correction", freqs, "frequencies"
         )
-    # Annex C, Eq. (C.1): the energy sum with the C_j of Table C.1.
-    cj = np.asarray([_TABLE_C1[band] for band in _band_keys(freqs)], dtype=np.float64)
-    return InDuctSoundPowerResult(
-        frequencies=freqs,
-        sound_power_level=lw,
-        mean_pressure_level=np.asarray(mean_level, dtype=np.float64),
-        corrected_pressure_level=np.asarray(corrected, dtype=np.float64),
-        microphone_correction=c1,
-        shield_correction=c2,
-        flow_modal_correction=c34,
-        combined_correction=np.asarray(combined, dtype=np.float64),
-        reproducibility_standard_deviation=sigma_r,
-        expanded_uncertainty=_COVERAGE_FACTOR * sigma_r,
-        duct_diameter_m=d,
-        duct_area=area,
-        characteristic_impedance=rho_c,
-        speed_of_sound=c,
-        flow_velocity=u,
-        shield=shield,
-        sound_power_level_a=energy_sum(lw + cj),
-    )
+        c2 = require_per_band(
+            shield_correction, "shield_correction", freqs, "frequencies"
+        )
+        if not np.all(np.isfinite(c1)):
+            msg = "'microphone_correction' must contain only finite values."
+            raise ValueError(msg)
+        if not np.all(np.isfinite(c2)):
+            msg = "'shield_correction' must contain only finite values."
+            raise ValueError(msg)
+        arr = _position_levels(levels, freqs.size)
+
+        # Eq. (9) over the positions, or Eq. (11) on an averaged spectrum.
+        mean_level = energy_mean(arr, axis=0) if arr.ndim == 2 else arr  # noqa: PLR2004
+        c34 = flow_modal_correction(freqs, u, d, shield=shield, speed_of_sound=c)
+        combined = c1 + c2 + c34  # Eq. (10)
+        corrected = mean_level + combined
+        # Eq. (12): the plane-wave relation with S = pi d^2 / 4.
+        area = math.pi * d**2 / 4.0
+        lw = (
+            corrected
+            + 10.0 * math.log10(area / _S0)
+            - 10.0 * math.log10(rho_c / _RHO_C_0)
+        )
+        lw = np.asarray(lw, dtype=np.float64)
+
+        sigma_r = in_duct_reproducibility(freqs)
+        if shield != "sampling-tube":
+            warn_caller(
+                f"The reproducibility reported for a {shield} is the one Table 2 "
+                "tabulates, which clause 4 NOTE 5 states refers to the sampling "
+                "tube only and 'can be expected to increase for other shields'; "
+                "the standard puts no number on the increase, so sigma_R and the "
+                "expanded uncertainty are a lower bound here.",
+                SoundPowerWarning,
+            )
+        # Annex C, Eq. (C.1): the energy sum with the C_j of Table C.1.
+        cj = np.asarray(
+            [_TABLE_C1[band] for band in _band_keys(freqs)], dtype=np.float64
+        )
+        return InDuctSoundPowerResult(
+            frequencies=freqs,
+            sound_power_level=lw,
+            mean_pressure_level=np.asarray(mean_level, dtype=np.float64),
+            corrected_pressure_level=np.asarray(corrected, dtype=np.float64),
+            microphone_correction=c1,
+            shield_correction=c2,
+            flow_modal_correction=c34,
+            combined_correction=np.asarray(combined, dtype=np.float64),
+            reproducibility_standard_deviation=sigma_r,
+            expanded_uncertainty=_COVERAGE_FACTOR * sigma_r,
+            duct_diameter_m=d,
+            duct_area=area,
+            characteristic_impedance=rho_c,
+            speed_of_sound=c,
+            flow_velocity=u,
+            shield=shield,
+            sound_power_level_a=energy_sum(lw + cj),
+        )

@@ -56,7 +56,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import warn_caller
+from .._internal.warnings import advisories_held, warn_caller
 from ._shared import _S0, SoundPowerWarning, _a_weighting_corrections
 
 if TYPE_CHECKING:
@@ -934,87 +934,95 @@ def sound_power_anechoic(
         text, or ``areas``, ``background_levels``, ``frequencies`` or
         ``levels_positions`` holds a text or a value that is not a real number.
     """
-    require_scalar(radius, "radius")
-    require_choice(surface, "surface", ("sphere", "hemisphere"))
-    if radius <= 0:
-        msg = "A positive 'radius' is required."
-        raise ValueError(msg)
-    if room_qualification is not None:
-        _check_qualified_room(room_qualification, surface)
-    levels = np.atleast_2d(real_array(levels_positions, "levels_positions"))
-    # The number is a count of array axes, not a quantity.
-    if levels.ndim != 2:  # noqa: PLR2004
-        msg = "'levels_positions' must be a 2D (positions, bands) array."
-        raise ValueError(msg)
-    n_positions, n_bands = levels.shape
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_scalar(radius, "radius")
+        require_choice(surface, "surface", ("sphere", "hemisphere"))
+        if radius <= 0:
+            msg = "A positive 'radius' is required."
+            raise ValueError(msg)
+        if room_qualification is not None:
+            _check_qualified_room(room_qualification, surface)
+        levels = np.atleast_2d(real_array(levels_positions, "levels_positions"))
+        # The number is a count of array axes, not a quantity.
+        if levels.ndim != 2:  # noqa: PLR2004
+            msg = "'levels_positions' must be a 2D (positions, bands) array."
+            raise ValueError(msg)
+        n_positions, n_bands = levels.shape
 
-    area = (4.0 if surface == "sphere" else 2.0) * np.pi * radius**2
-    room: PrecisionRoom = "anechoic" if surface == "sphere" else "hemi-anechoic"
+        area = (4.0 if surface == "sphere" else 2.0) * np.pi * radius**2
+        room: PrecisionRoom = "anechoic" if surface == "sphere" else "hemi-anechoic"
 
-    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
-    if freqs is not None and freqs.shape[0] != n_bands:
-        msg = "'frequencies' length must match the number of bands."
-        raise ValueError(msg)
+        freqs = None if frequencies is None else real_array(frequencies, "frequencies")
+        if freqs is not None and freqs.shape[0] != n_bands:
+            msg = "'frequencies' length must match the number of bands."
+            raise ValueError(msg)
 
-    # --- per-position background correction K1i (Eq. 11) ------------------
-    k1 = _precision_k1(levels, background_levels, freqs)
+        # --- per-position background correction K1i (Eq. 11) ------------------
+        k1 = _precision_k1(levels, background_levels, freqs)
 
-    corrected = levels - k1  # Lpi = L'pi(ST) - K1i
+        corrected = levels - k1  # Lpi = L'pi(ST) - K1i
 
-    # --- surface time-averaged level Lp_bar (Eq. 12 equal / Eq. 13 area) --
-    mean_level = energy_mean(levels, axis=0)
-    lp_bar = _precision_surface_level(corrected, areas)
+        # --- surface time-averaged level Lp_bar (Eq. 12 equal / Eq. 13 area) --
+        mean_level = energy_mean(levels, axis=0)
+        lp_bar = _precision_surface_level(corrected, areas)
 
-    # --- meteorological corrections C1, C2, C3 (Eq. 14) -------------------
-    mc = meteorological_corrections(
-        temperature_c=temperature_c,
-        static_pressure_kpa=static_pressure_kpa,
-        air_absorption_db_per_m=air_absorption_db_per_m,
-        radius=radius,
-    )
-    c3 = np.broadcast_to(np.asarray(mc.c3, dtype=np.float64), (n_bands,))
-
-    lw = lp_bar + 10.0 * np.log10(area / _S0) + mc.c1 + mc.c2 + c3
-
-    # --- A-weighted total LWA (Eq. C.1) -----------------------------------
-    lwa = _precision_a_weighted_total(lw, freqs)
-
-    # --- directivity (Eq. 21) and non-uniformity (Eq. 22) indices ---------
-    directivity = np.asarray(corrected - lp_bar[np.newaxis, :], dtype=np.float64)
-    if n_positions > 1:
-        lp_av = np.mean(corrected, axis=0)  # arithmetic mean (Eq. 22)
-        vir = np.sqrt(
-            np.sum((corrected - lp_av[np.newaxis, :]) ** 2, axis=0) / (n_positions - 1)
+        # --- meteorological corrections C1, C2, C3 (Eq. 14) -------------------
+        mc = meteorological_corrections(
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
+            air_absorption_db_per_m=air_absorption_db_per_m,
+            radius=radius,
         )
-    else:
-        vir = np.zeros(n_bands, dtype=np.float64)
+        c3 = np.broadcast_to(np.asarray(mc.c3, dtype=np.float64), (n_bands,))
 
-    # --- uncertainty (Eq. 24/25) ------------------------------------------
-    u_a = float(precision_uncertainty(_SIGMA_R0_3745_A, sigma_omc_db, coverage_factor))
-    u_bands = _precision_uncertainty_bands(
-        freqs, n_bands, room, sigma_omc_db, coverage_factor
-    )
+        lw = lp_bar + 10.0 * np.log10(area / _S0) + mc.c1 + mc.c2 + c3
 
-    result = PrecisionSoundPowerResult(
-        frequencies=freqs,
-        sound_power_level=np.asarray(lw, dtype=np.float64),
-        surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
-        mean_pressure_level=mean_level,
-        background_correction=np.asarray(k1, dtype=np.float64),
-        c1=mc.c1,
-        c2=mc.c2,
-        c3=c3,
-        directivity_index=directivity,
-        non_uniformity_index=np.asarray(vir, dtype=np.float64),
-        surface_area=float(area),
-        surface=surface,
-        sound_power_level_a=lwa,
-        uncertainty=u_a,
-        uncertainty_bands=u_bands,
-        coverage_factor=float(coverage_factor),
-    )
-    # The qualification is advised on once the result stands, so a refusal of
-    # any argument above comes first, even under -W error.
-    if room_qualification is not None:
-        _room_qualification_warnings(room_qualification, surface, radius, frequencies)
-    return result
+        # --- A-weighted total LWA (Eq. C.1) -----------------------------------
+        lwa = _precision_a_weighted_total(lw, freqs)
+
+        # --- directivity (Eq. 21) and non-uniformity (Eq. 22) indices ---------
+        directivity = np.asarray(corrected - lp_bar[np.newaxis, :], dtype=np.float64)
+        if n_positions > 1:
+            lp_av = np.mean(corrected, axis=0)  # arithmetic mean (Eq. 22)
+            vir = np.sqrt(
+                np.sum((corrected - lp_av[np.newaxis, :]) ** 2, axis=0)
+                / (n_positions - 1)
+            )
+        else:
+            vir = np.zeros(n_bands, dtype=np.float64)
+
+        # --- uncertainty (Eq. 24/25) ------------------------------------------
+        u_a = float(
+            precision_uncertainty(_SIGMA_R0_3745_A, sigma_omc_db, coverage_factor)
+        )
+        u_bands = _precision_uncertainty_bands(
+            freqs, n_bands, room, sigma_omc_db, coverage_factor
+        )
+
+        result = PrecisionSoundPowerResult(
+            frequencies=freqs,
+            sound_power_level=np.asarray(lw, dtype=np.float64),
+            surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
+            mean_pressure_level=mean_level,
+            background_correction=np.asarray(k1, dtype=np.float64),
+            c1=mc.c1,
+            c2=mc.c2,
+            c3=c3,
+            directivity_index=directivity,
+            non_uniformity_index=np.asarray(vir, dtype=np.float64),
+            surface_area=float(area),
+            surface=surface,
+            sound_power_level_a=lwa,
+            uncertainty=u_a,
+            uncertainty_bands=u_bands,
+            coverage_factor=float(coverage_factor),
+        )
+        # The qualification is advised on once the result stands, so a refusal of
+        # any argument above comes first, even under -W error.
+        if room_qualification is not None:
+            _room_qualification_warnings(
+                room_qualification, surface, radius, frequencies
+            )
+        return result

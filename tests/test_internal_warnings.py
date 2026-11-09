@@ -39,7 +39,7 @@ import contextlib
 import dataclasses
 import functools
 
-from phonometry._internal.warnings import warn_caller
+from phonometry._internal.warnings import advisories_held, warn_caller
 
 
 class ProbeWarning(UserWarning):
@@ -48,6 +48,23 @@ class ProbeWarning(UserWarning):
 
 def advise():
     warn_caller("advised", ProbeWarning)
+
+
+def held(*, refuse=False):
+    with advisories_held():
+        advise()
+        warn_caller("advised again", ProbeWarning)
+        if refuse:
+            raise ValueError("refused")
+    return 1
+
+
+def nested(*, refuse=False):
+    with advisories_held():
+        held()
+        if refuse:
+            raise ValueError("refused after the inner block")
+    return 2
 
 
 def deeper():
@@ -181,6 +198,40 @@ def test_code_compiled_from_a_string_by_the_caller_is_the_callers(
             {"__name__": "__main__", "probe": probe},
         )
     assert [(w.filename, w.lineno) for w in caught] == [("<string>", 1)]
+
+
+def test_a_held_advisory_is_issued_at_the_callers_line_once_the_block_ends(
+    probe: types.ModuleType,
+) -> None:
+    with _recorded() as caught:
+        line = _here()
+        assert probe.held() == 1
+    assert [(w.filename, w.lineno, str(w.message)) for w in caught] == [
+        (__file__, line, "advised"),
+        (__file__, line, "advised again"),
+    ]
+
+
+@pytest.mark.parametrize("call", ["held", "nested"])
+def test_a_refusal_in_the_block_drops_every_advisory_it_held(
+    probe: types.ModuleType, call: str
+) -> None:
+    """Under ``-W error`` the caller meets the refusal, not the advisory before it."""
+    function = getattr(probe, call)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with pytest.raises(ValueError, match="refused"):
+            function(refuse=True)
+
+
+def test_a_block_inside_another_hands_its_advisories_to_the_outer_one(
+    probe: types.ModuleType,
+) -> None:
+    with _recorded() as caught:
+        line = _here()
+        assert probe.nested() == 2
+    assert [(w.filename, w.lineno) for w in caught] == [(__file__, line)] * 2
+    assert library_warnings._HELD.get() is None
 
 
 def test_a_warning_instance_is_raised_again_with_its_own_class() -> None:

@@ -12,7 +12,7 @@ docstring names.
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -29,6 +29,9 @@ from phonometry import (
     speech,
     vibration,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @pytest.fixture(autouse=True)
@@ -445,3 +448,188 @@ def test_the_binaural_indicators_refuse_a_silent_recording_before_its_length() -
         environment.binaural_indicators(
             np.zeros((2, 24000)), 48000, parameters="loudness"
         )
+
+
+#: Two octaves, the second of which ISO 3744 Annex E has no A-weighting for.
+_OFF_TABLE = [1000.0, 1234.0]
+#: The one-third octaves of an ISO 6926 calibration, 125 Hz to 10 kHz.
+_CALIBRATION = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 10000.0])
+
+
+def _events_reverberation() -> object:
+    return emission.sound_energy_reverberation(
+        np.full((4, 6), 80.0),
+        np.full(6, 1.5),
+        200.0,
+        220.0,
+        frequencies=_THIRDS,
+        n_events=3,
+        background_levels=np.full(6, 60.0),
+    )
+
+
+def _events_comparison() -> object:
+    return emission.sound_energy_comparison(
+        np.full((4, 6), 80.0),
+        np.full(6, 82.0),
+        np.full(6, 90.0),
+        frequencies=_THIRDS,
+        n_events=3,
+        background_levels=np.full(6, 60.0),
+    )
+
+
+def _events_hard_walled(**arguments: Any) -> object:
+    return emission.sound_energy_hard_walled(
+        np.full((1, 7), 80.0),
+        np.full((1, 7), 82.0),
+        np.full(7, 93.0),
+        frequencies=_OCTAVES,
+        n_events=3,
+        **arguments,
+    )
+
+
+def _events_surface(**arguments: Any) -> object:
+    return emission.sound_energy_pressure(
+        np.full((20, 2), 80.0), "hemisphere", n_events=3, **arguments
+    )
+
+
+def _two_segments(**arguments: Any) -> object:
+    return emission.sound_power_intensity(
+        np.full((2, 3), 1e-3), np.ones(2), **arguments
+    )
+
+
+def _anechoic_margin(**arguments: Any) -> object:
+    return emission.sound_power_anechoic(
+        np.full((20, 2), 80.0),
+        "sphere",
+        radius=1.0,
+        background_levels=np.full((20, 2), 79.0),
+        frequencies=[1000.0, 2000.0],
+        **arguments,
+    )
+
+
+def _calibration_margin(**arguments: Any) -> object:
+    return emission.reference_source_calibration(
+        np.full((20, 8), 80.0),
+        frequencies=_CALIBRATION,
+        arrangement="paths",
+        background_levels=np.full((20, 8), 79.0),
+        **arguments,
+    )
+
+
+#: A call whose arguments meet an advisory and a refusal both, the advisory
+#: computed first, and the refusal it must raise.
+_ADVISED_THEN_REFUSED: dict[str, tuple[Callable[[], object], str]] = {
+    "energy-reverberation-events": (_events_reverberation, "'integration_time'"),
+    "energy-comparison-events": (_events_comparison, "'integration_time'"),
+    "energy-hard-walled-events-interval": (
+        lambda: _events_hard_walled(background_levels=np.full(7, 50.0)),
+        "'integration_time'",
+    ),
+    "energy-hard-walled-events-temperature": (
+        lambda: _events_hard_walled(temperature_c=-300.0),
+        "'temperature_c' must be finite",
+    ),
+    "energy-surface-events-radius": (
+        lambda: _events_surface(radius=-1.0),
+        "A positive 'radius' is required",
+    ),
+    "energy-surface-events-bands": (
+        lambda: _events_surface(radius=1.0, frequencies=[1000.0]),
+        "'frequencies' length must match",
+    ),
+    "energy-surface-margin-a-weighting": (
+        lambda: emission.sound_energy_pressure(
+            np.full((20, 2), 80.0),
+            "hemisphere",
+            radius=1.0,
+            background_levels=np.full(2, 78.0),
+            integration_time=1.0,
+            frequencies=_OFF_TABLE,
+        ),
+        "No ISO 3744 Annex E A-weighting value for 1234 Hz",
+    ),
+    "surface-margin-a-weighting": (
+        lambda: emission.sound_power_pressure(
+            np.full((20, 2), 80.0),
+            "hemisphere",
+            radius=1.0,
+            background_levels=np.full(2, 78.0),
+            frequencies=_OFF_TABLE,
+        ),
+        "No ISO 3744 Annex E A-weighting value for 1234 Hz",
+    ),
+    "intensity-segments-second-sweep": (
+        lambda: _two_segments(normal_intensity_2=np.ones((5, 5))),
+        "'normal_intensity_2' must have shape",
+    ),
+    "intensity-segments-pressure-levels": (
+        lambda: _two_segments(pressure_levels=np.ones((5, 5))),
+        "'pressure_levels' must have shape",
+    ),
+    "in-duct-positions-velocity": (
+        lambda: emission.sound_power_in_duct(
+            np.full((2, 5), 90.0),
+            frequencies=[1000.0, 2000.0, 4000.0, 8000.0, 12500.0],
+            duct_diameter_m=0.5,
+            flow_velocity=50.0,
+        ),
+        "'flow_velocity' must satisfy",
+    ),
+    "anechoic-margin-temperature": (
+        lambda: _anechoic_margin(temperature_c=-300.0),
+        "'temperature_c' must be above",
+    ),
+    "anechoic-margin-areas": (
+        lambda: _anechoic_margin(areas=np.ones(3)),
+        "'areas' must have one value per microphone position",
+    ),
+    "anechoic-margin-coverage": (
+        lambda: _anechoic_margin(coverage_factor=0.0),
+        "'coverage_factor' must be positive",
+    ),
+    "calibration-margin-c2": (
+        lambda: _calibration_margin(c2=np.nan),
+        "'c2' must be finite",
+    ),
+    "calibration-margin-max-levels": (
+        lambda: _calibration_margin(max_levels=np.full((3, 3), 80.0)),
+        "'max_levels' must have the shape of 'levels'",
+    ),
+    "room-constant-atmosphere": (
+        lambda: emission.room_constant_from_air_absorption(
+            [10000.0, 20000.0],
+            volume=1.0e6,
+            surface_area=1.0,
+            temperature_c=-30.0,
+            relative_humidity_percent=50.0,
+        ),
+        "8 alpha V / S reaches 1",
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("call", "refusal"),
+    list(_ADVISED_THEN_REFUSED.values()),
+    ids=list(_ADVISED_THEN_REFUSED),
+)
+def test_an_emission_refusal_found_after_an_advisory_still_comes_first(
+    call: Callable[[], object], refusal: str
+) -> None:
+    """The advisory a helper, a correction or a composed function raises waits.
+
+    Each call computes an advisory before the step that refuses: the count of
+    events or segments in the helper that reduces them, the background margin
+    of a correction the A-weighted total follows, the K1 margin of
+    :func:`~phonometry.emission.sound_power_anechoic` that a calibration
+    composes, the atmosphere of the air absorption a room constant composes.
+    """
+    with pytest.raises(ValueError, match=refusal):
+        call()

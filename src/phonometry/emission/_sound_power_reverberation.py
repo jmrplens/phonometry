@@ -109,7 +109,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import warn_caller
+from .._internal.warnings import advisories_held, warn_caller
 from ._shared import (
     SoundPowerWarning,
     _a_weighting_corrections,
@@ -1230,46 +1230,49 @@ def sound_energy_reverberation(
         or ``frequencies``, ``levels`` or ``t60`` holds a text or a value that is not a
         real number.
     """
-    _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
-    event_levels, event_count = _room_event_levels(levels, n_events)
-    if integration_time is not None:
-        integration_time = require_positive(integration_time, "integration_time")
-    mean_level = _mean_level(event_levels)
-    n_bands = mean_level.shape[0]
-    t60_arr, freqs = _band_inputs(n_bands, t60, frequencies)
-    # Every refusal before the first advisory, as in sound_power_reverberation.
-    exposure = None
-    if background_levels is not None:
-        exposure = _background_exposure(background_levels, integration_time)
-        _checked_background(event_levels, exposure)
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
+        event_levels, event_count = _room_event_levels(levels, n_events)
+        if integration_time is not None:
+            integration_time = require_positive(integration_time, "integration_time")
+        mean_level = _mean_level(event_levels)
+        n_bands = mean_level.shape[0]
+        t60_arr, freqs = _band_inputs(n_bands, t60, frequencies)
+        # Every refusal before the first advisory, as in sound_power_reverberation.
+        exposure = None
+        if background_levels is not None:
+            exposure = _background_exposure(background_levels, integration_time)
+            _checked_background(event_levels, exposure)
 
-    _room_qualification_warnings(event_levels, t60_arr, volume, surface_area, freqs)
+        _room_qualification_warnings(event_levels, t60_arr, volume, surface_area, freqs)
 
-    if exposure is not None:
-        mean_level, k1 = _background_corrected_mean(event_levels, exposure, freqs)
-    else:
-        k1 = np.zeros(n_bands, dtype=np.float64)
+        if exposure is not None:
+            mean_level, k1 = _background_corrected_mean(event_levels, exposure, freqs)
+        else:
+            k1 = np.zeros(n_bands, dtype=np.float64)
 
-    terms = _direct_terms(
-        t60_arr, volume, surface_area, freqs, temperature_c, static_pressure_kpa
-    )
-    lj = np.asarray(mean_level + terms.bracket, dtype=np.float64)
+        terms = _direct_terms(
+            t60_arr, volume, surface_area, freqs, temperature_c, static_pressure_kpa
+        )
+        lj = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
-    return ReverberationSoundEnergyResult(
-        frequencies=freqs,
-        sound_energy_level=lj,
-        mean_event_level=mean_level,
-        absorption_area=terms.absorption_area,
-        waterhouse_correction=terms.waterhouse_correction,
-        background_correction=k1,
-        c1=terms.c1,
-        c2=terms.c2,
-        speed_of_sound=terms.speed_of_sound,
-        sound_energy_level_a=_a_weighted_total(lj, freqs),
-        method="direct",
-        n_events=event_count,
-        integration_time=integration_time,
-    )
+        return ReverberationSoundEnergyResult(
+            frequencies=freqs,
+            sound_energy_level=lj,
+            mean_event_level=mean_level,
+            absorption_area=terms.absorption_area,
+            waterhouse_correction=terms.waterhouse_correction,
+            background_correction=k1,
+            c1=terms.c1,
+            c2=terms.c2,
+            speed_of_sound=terms.speed_of_sound,
+            sound_energy_level_a=_a_weighted_total(lj, freqs),
+            method="direct",
+            n_events=event_count,
+            integration_time=integration_time,
+        )
 
 
 def sound_energy_comparison(
@@ -1338,59 +1341,62 @@ def sound_energy_comparison(
         ``levels``, ``reference_background_levels`` or ``reference_levels`` holds a text
         or a value that is not a real number.
     """
-    _validate_meteorology(temperature_c, static_pressure_kpa)
-    event_levels, event_count = _room_event_levels(levels, n_events)
-    if integration_time is not None:
-        integration_time = require_positive(integration_time, "integration_time")
-    le_st = _mean_level(event_levels)
-    n_bands = le_st.shape[0]
-    lp_rss, lw_rss, freqs = _comparison_inputs(
-        n_bands,
-        reference_levels,
-        reference_sound_power_levels,
-        frequencies,
-        temperature_c=temperature_c,
-        static_pressure_kpa=static_pressure_kpa,
-    )
-
-    exposure = (
-        None
-        if background_levels is None
-        else _background_exposure(background_levels, integration_time)
-    )
-    _checked_comparison_backgrounds(
-        event_levels, exposure, reference_levels, reference_background_levels, freqs
-    )
-    _position_sampling_warnings(event_levels)
-
-    k1_st = np.zeros(n_bands, dtype=np.float64)
-    if exposure is not None:
-        le_st, k1_st = _background_corrected_mean(
-            event_levels, exposure, _require_frequencies(freqs, "background_levels")
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        _validate_meteorology(temperature_c, static_pressure_kpa)
+        event_levels, event_count = _room_event_levels(levels, n_events)
+        if integration_time is not None:
+            integration_time = require_positive(integration_time, "integration_time")
+        le_st = _mean_level(event_levels)
+        n_bands = le_st.shape[0]
+        lp_rss, lw_rss, freqs = _comparison_inputs(
+            n_bands,
+            reference_levels,
+            reference_sound_power_levels,
+            frequencies,
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
         )
-    lp_rss = _reference_source_level(
-        lp_rss, reference_levels, reference_background_levels, freqs
-    )
 
-    c2 = _c2_correction(temperature_c, static_pressure_kpa)
-    lj = np.asarray(lw_rss + (le_st - lp_rss) + c2, dtype=np.float64)
+        exposure = (
+            None
+            if background_levels is None
+            else _background_exposure(background_levels, integration_time)
+        )
+        _checked_comparison_backgrounds(
+            event_levels, exposure, reference_levels, reference_background_levels, freqs
+        )
+        _position_sampling_warnings(event_levels)
 
-    nan_band = np.full(n_bands, np.nan, dtype=np.float64)
-    return ReverberationSoundEnergyResult(
-        frequencies=freqs,
-        sound_energy_level=lj,
-        mean_event_level=le_st,
-        absorption_area=nan_band,
-        waterhouse_correction=nan_band,
-        background_correction=k1_st,
-        c1=float("nan"),
-        c2=c2,
-        speed_of_sound=_speed_of_sound(temperature_c),
-        sound_energy_level_a=_a_weighted_total(lj, freqs),
-        method="comparison",
-        n_events=event_count,
-        integration_time=integration_time,
-    )
+        k1_st = np.zeros(n_bands, dtype=np.float64)
+        if exposure is not None:
+            le_st, k1_st = _background_corrected_mean(
+                event_levels, exposure, _require_frequencies(freqs, "background_levels")
+            )
+        lp_rss = _reference_source_level(
+            lp_rss, reference_levels, reference_background_levels, freqs
+        )
+
+        c2 = _c2_correction(temperature_c, static_pressure_kpa)
+        lj = np.asarray(lw_rss + (le_st - lp_rss) + c2, dtype=np.float64)
+
+        nan_band = np.full(n_bands, np.nan, dtype=np.float64)
+        return ReverberationSoundEnergyResult(
+            frequencies=freqs,
+            sound_energy_level=lj,
+            mean_event_level=le_st,
+            absorption_area=nan_band,
+            waterhouse_correction=nan_band,
+            background_correction=k1_st,
+            c1=float("nan"),
+            c2=c2,
+            speed_of_sound=_speed_of_sound(temperature_c),
+            sound_energy_level_a=_a_weighted_total(lj, freqs),
+            method="comparison",
+            n_events=event_count,
+            integration_time=integration_time,
+        )
 
 
 @dataclass(frozen=True)

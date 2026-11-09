@@ -1809,6 +1809,8 @@ def determine(levels, *, background_levels=None, temperature_c=23.0):
     require_finite(temperature_c, "temperature_c")  # under -W error the advisory wins
 ```
 
+Where the order cannot be kept by hand, the call holds its advisories. A function it composes may advise on its way to a value a later check needs (`emission.reference_source_calibration` reads the surface level of `emission.sound_power_anechoic`, which advises on the background margin, before it refuses a `c2` that is not finite), and a correction may advise before the step that refuses what it was computed with (the background correction of `emission.sound_power_pressure` before the A-weighted total refuses a band Annex E does not hold). `with advisories_held():` around the body, from `phonometry._internal.warnings`, keeps every warning `warn_caller` raises inside it: when the block ends normally they are issued in the order they were raised, at the caller's line as ever, and when it ends with an exception they are dropped, so the refusal is what the caller meets.
+
 **Enforced by:** `tests/refusal_order.py`, `tests/test_refusal_order.py`, `tests/test_refusals_before_advisories.py`
 
 **Exceptions.** None. NumPy's warnings count too when they are shown at a line of the package; silence the operation with `np.errstate` once the library has said what it has to say.

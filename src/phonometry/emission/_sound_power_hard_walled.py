@@ -133,7 +133,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import warn_caller
+from .._internal.warnings import advisories_held, warn_caller
 from ._shared import (
     _CK_OCTAVE,
     SoundPowerWarning,
@@ -1021,48 +1021,55 @@ def sound_energy_hard_walled(
         is a flag, a text or an array where a count goes, or ``background_levels`` or
         ``event_levels`` holds a text or a value that is not a real number.
     """
-    arr = real_array(event_levels, "event_levels")
-    if arr.size == 0 or not np.all(np.isfinite(arr)):
-        msg = "'event_levels' must be a non-empty array of finite levels in decibels."
-        raise ValueError(msg)
-    grid, traverse, _ = _event_grid(arr, n_events)
-    n_sources, n_positions, n_bands = grid.shape
-    per_position = energy_mean(grid, axis=0)  # Eq. (17)
-    mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
-    if integration_time is not None:
-        require_positive(integration_time, "integration_time")
-    exposure: np.ndarray | None = None
-    if background_levels is not None:
-        if integration_time is None:
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        arr = real_array(event_levels, "event_levels")
+        if arr.size == 0 or not np.all(np.isfinite(arr)):
             msg = (
-                "'integration_time' (the interval T of the single event levels, "
-                "in seconds) is required with 'background_levels': Eq. (19) "
-                "compares the background as its exposure over the same T "
-                f"({_STANDARD}, 8.2.3)."
+                "'event_levels' must be a non-empty array of finite levels in decibels."
             )
             raise ValueError(msg)
-        bg = _finite(background_levels, "background_levels", (1, 2))
-        carried = _background_exposure(bg, integration_time)
-        exposure = _position_mean(carried, "background_levels", n_positions, n_bands)
-    return _determine(
-        quantity="energy",
-        mean_source=mean_source,
-        background_for_source=exposure,
-        n_positions=n_positions,
-        n_sources=n_sources,
-        traverse=traverse,
-        reference=_Reference(
-            reference_levels=reference_levels,
-            reference_sound_power_levels=reference_sound_power_levels,
-            frequencies=frequencies,
-            background_levels=background_levels,
-            reference_background_levels=reference_background_levels,
-            temperature_c=temperature_c,
-            static_pressure_kpa=static_pressure_kpa,
-            sigma_omc_db=sigma_omc_db,
-            coverage_factor=coverage_factor,
-        ),
-    )
+        grid, traverse, _ = _event_grid(arr, n_events)
+        n_sources, n_positions, n_bands = grid.shape
+        per_position = energy_mean(grid, axis=0)  # Eq. (17)
+        mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
+        if integration_time is not None:
+            require_positive(integration_time, "integration_time")
+        exposure: np.ndarray | None = None
+        if background_levels is not None:
+            if integration_time is None:
+                msg = (
+                    "'integration_time' (the interval T of the single event levels, "
+                    "in seconds) is required with 'background_levels': Eq. (19) "
+                    "compares the background as its exposure over the same T "
+                    f"({_STANDARD}, 8.2.3)."
+                )
+                raise ValueError(msg)
+            bg = _finite(background_levels, "background_levels", (1, 2))
+            carried = _background_exposure(bg, integration_time)
+            exposure = _position_mean(
+                carried, "background_levels", n_positions, n_bands
+            )
+        return _determine(
+            quantity="energy",
+            mean_source=mean_source,
+            background_for_source=exposure,
+            n_positions=n_positions,
+            n_sources=n_sources,
+            traverse=traverse,
+            reference=_Reference(
+                reference_levels=reference_levels,
+                reference_sound_power_levels=reference_sound_power_levels,
+                frequencies=frequencies,
+                background_levels=background_levels,
+                reference_background_levels=reference_background_levels,
+                temperature_c=temperature_c,
+                static_pressure_kpa=static_pressure_kpa,
+                sigma_omc_db=sigma_omc_db,
+                coverage_factor=coverage_factor,
+            ),
+        )
 
 
 def reproducibility_from_round_robin(sigma_tot_db: float, sigma_omc_db: float) -> float:

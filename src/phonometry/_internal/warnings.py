@@ -5,7 +5,9 @@ Every warning the library emits derives from :class:`PhonometryWarning`
 so users can filter or escalate all phonometry diagnostics with a single
 :func:`warnings.filterwarnings` rule, and every one is emitted through
 :func:`warn_caller`, which reports it at the first line outside the package:
-the line of the caller's code that made the call.
+the line of the caller's code that made the call. A call that cannot finish
+its checks before it advises holds its advisories with
+:func:`advisories_held` until its result stands.
 """
 
 from __future__ import annotations
@@ -13,13 +15,15 @@ from __future__ import annotations
 import os
 import sys
 import warnings
+from contextlib import contextmanager
+from contextvars import ContextVar
 from typing import TYPE_CHECKING, overload
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
     from types import FrameType
 
-__all__ = ["PhonometryWarning", "published_by", "warn_caller"]
+__all__ = ["PhonometryWarning", "advisories_held", "published_by", "warn_caller"]
 
 
 def published_by[W: type[Warning]](module: str) -> Callable[[W], W]:
@@ -147,14 +151,66 @@ def warn_caller(message: str | Warning, category: type[Warning] | None = None) -
     frames by their file, and counting the few that run the package's code
     from elsewhere, lands on the caller's line however deep the route is.
 
+    Inside :func:`advisories_held` the warning is kept, not issued, until
+    the block that holds it ends.
+
     :param message: The warning's text, or a warning instance to raise again
         with its own class (the remote client relays a node's warnings so).
     :param category: The topic's published class; left out only with a
         warning instance.
     """
+    held = _HELD.get()
+    if held is not None:
+        held.append((message, category))
+        return
     warnings.warn(
         message,
         category,
         stacklevel=2 + _frames_between(sys._getframe(1)),
         skip_file_prefixes=(_PACKAGE_PREFIX,),
     )
+
+
+#: An advisory as :func:`warn_caller` received it: its text and class, or a
+#: warning instance and ``None``.
+type _Advisory = tuple[str | Warning, type[Warning] | None]
+
+#: The advisories of the innermost :func:`advisories_held` block that is
+#: running, in the order they were raised; ``None`` outside every block. A
+#: context variable, so a block holds only the warnings of its own thread or
+#: task.
+_HELD: ContextVar[list[_Advisory] | None] = ContextVar(
+    "phonometry_held_advisories", default=None
+)
+
+
+@contextmanager
+def advisories_held() -> Iterator[None]:
+    """Hold every advisory raised in the block until the block ends without an exception.
+
+    Rule A63 asks a call to check every argument before it advises, so that
+    under ``python -W error`` the caller meets the refusal the docstring
+    names rather than the advisory. A call cannot always order its steps so:
+    a function it composes advises on its way to a value a later check
+    needs, a correction advises before the A-weighted total refuses a band
+    the table does not hold, a record it builds refuses after the
+    measurement was advised on. Inside the block :func:`warn_caller` keeps
+    each warning instead of issuing it. When the block ends normally they
+    are issued in the order they were raised, each at the caller's line as
+    it would have been; when it ends with an exception they are dropped,
+    and the exception is what the caller meets. A block inside another
+    hands its warnings on to the outer one.
+    """
+    held: list[_Advisory] = []
+    token = _HELD.set(held)
+    try:
+        yield
+    finally:
+        _HELD.reset(token)
+    for message, category in held:
+        # As warnings.warn reads them: an instance carries its own class, and
+        # a text given no class is a UserWarning.
+        if isinstance(message, Warning):
+            warn_caller(message)
+        else:
+            warn_caller(message, UserWarning if category is None else category)

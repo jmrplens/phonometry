@@ -119,7 +119,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import warn_caller
+from .._internal.warnings import advisories_held, warn_caller
 from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import Grade, SoundPowerWarning, _a_weighting_corrections, _check_grade
 from .intensity import dynamic_capability_index
@@ -611,112 +611,116 @@ def sound_power_intensity(
         ``pressure_levels``, ``pressure_residual_index`` or ``repeatability_limit``
         holds a text or a value that is not a real number, or ``grade`` is not a text.
     """
-    grade = _check_grade(grade)
-    intensity, seg = _validate_scan(normal_intensity, areas, frequencies, fraction)
-    n_seg = seg.shape[0]
-    n_bands = intensity.shape[1]
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        grade = _check_grade(grade)
+        intensity, seg = _validate_scan(normal_intensity, areas, frequencies, fraction)
+        n_seg = seg.shape[0]
+        n_bands = intensity.shape[1]
 
-    # --- partial powers, using the mean of the two sweeps when available -----
-    repeatability: np.ndarray | None = None
-    if normal_intensity_2 is not None:
-        scan2 = _as_2d("normal_intensity_2", normal_intensity_2, n_seg, n_bands)
-        pi1 = intensity * seg[:, None]
-        pi2 = scan2 * seg[:, None]
-        repeatability = np.abs(_level_magnitude(pi1) - _level_magnitude(pi2))
-        # Criterion 3 (B.1.3) tests whether the partial power of a segment
-        # repeats between the two sweeps. A complete flow reversal (pi1 and
-        # pi2 of opposite sign) is grossly non-repeatable, yet |ΔL| of the
-        # magnitudes alone can be ~0 when |pi1| ~ |pi2|. Force the criterion to
-        # fail (repeatability = +inf) wherever the signs differ; exact zeros
-        # carry no direction and are treated as matching either sign.
-        reversed_flow = (np.sign(pi1) * np.sign(pi2)) < 0.0
-        repeatability = np.where(reversed_flow, np.inf, repeatability)
-        mean_intensity = 0.5 * (intensity + scan2)
-    else:
-        mean_intensity = intensity
+        # --- partial powers, using the mean of the two sweeps when available -----
+        repeatability: np.ndarray | None = None
+        if normal_intensity_2 is not None:
+            scan2 = _as_2d("normal_intensity_2", normal_intensity_2, n_seg, n_bands)
+            pi1 = intensity * seg[:, None]
+            pi2 = scan2 * seg[:, None]
+            repeatability = np.abs(_level_magnitude(pi1) - _level_magnitude(pi2))
+            # Criterion 3 (B.1.3) tests whether the partial power of a segment
+            # repeats between the two sweeps. A complete flow reversal (pi1 and
+            # pi2 of opposite sign) is grossly non-repeatable, yet |ΔL| of the
+            # magnitudes alone can be ~0 when |pi1| ~ |pi2|. Force the criterion to
+            # fail (repeatability = +inf) wherever the signs differ; exact zeros
+            # carry no direction and are treated as matching either sign.
+            reversed_flow = (np.sign(pi1) * np.sign(pi2)) < 0.0
+            repeatability = np.where(reversed_flow, np.inf, repeatability)
+            mean_intensity = 0.5 * (intensity + scan2)
+        else:
+            mean_intensity = intensity
 
-    partial_power = mean_intensity * seg[:, None]  # Eq. 12
-    total_power = np.sum(partial_power, axis=0)  # Eq. 6
-    s_total = float(np.sum(seg))
-    # The sign of the net power is judged on its settled share of the gross,
-    # so partial powers that cancel in decimal are no net power whichever way
-    # the last bits of their sum fall.
-    negative_band = settled_net_share(partial_power, axis=0) <= 0.0
+        partial_power = mean_intensity * seg[:, None]  # Eq. 12
+        total_power = np.sum(partial_power, axis=0)  # Eq. 6
+        s_total = float(np.sum(seg))
+        # The sign of the net power is judged on its settled share of the gross,
+        # so partial powers that cancel in decimal are no net power whichever way
+        # the last bits of their sum fall.
+        negative_band = settled_net_share(partial_power, axis=0) <= 0.0
 
-    # --- field indicators ----------------------------------------------------
-    abs_total = np.abs(total_power)
-    guarded_abs = np.maximum(abs_total, np.finfo(float).tiny)
-    lw_magnitude = 10.0 * np.log10(guarded_abs / _W0)
+        # --- field indicators ----------------------------------------------------
+        abs_total = np.abs(total_power)
+        guarded_abs = np.maximum(abs_total, np.finfo(float).tiny)
+        lw_magnitude = 10.0 * np.log10(guarded_abs / _W0)
 
-    fpi: np.ndarray | None = None
-    if pressure_levels is not None:
-        lp = _as_2d("pressure_levels", pressure_levels, n_seg, n_bands)
-        # Eq. A.1: area-weighted surface pressure level [Lp].
-        lp_surface = weighted_energy_mean(lp, seg[:, None], axis=0)
-        fpi = np.asarray(
-            lp_surface - lw_magnitude + 10.0 * np.log10(s_total / _S0),
-            dtype=np.float64,
+        fpi: np.ndarray | None = None
+        if pressure_levels is not None:
+            lp = _as_2d("pressure_levels", pressure_levels, n_seg, n_bands)
+            # Eq. A.1: area-weighted surface pressure level [Lp].
+            lp_surface = weighted_energy_mean(lp, seg[:, None], axis=0)
+            fpi = np.asarray(
+                lp_surface - lw_magnitude + 10.0 * np.log10(s_total / _S0),
+                dtype=np.float64,
+            )
+
+        # Eq. A.2: negative-partial-power indicator F+/-.
+        f_plus_minus = _negative_partial_power_index(partial_power)
+
+        dpi0_arr: np.ndarray | None = None
+        if pressure_residual_index is not None:
+            dpi0_arr = np.broadcast_to(
+                real_array(pressure_residual_index, "pressure_residual_index"),
+                (n_bands,),
+            )
+        s_arr: np.ndarray | None = None
+        if repeatability_limit is not None:
+            s_arr = np.broadcast_to(
+                real_array(repeatability_limit, "repeatability_limit"), (n_bands,)
+            )
+
+        freqs = None if frequencies is None else real_array(frequencies, "frequencies")
+        # The per-band grade (clause 8.4), the A-weighted screening (10.6 b) and
+        # the A-weighted total are read by the result from these fields.
+        result = SoundPowerIntensityResult(
+            frequencies=freqs,
+            partial_power=np.asarray(partial_power, dtype=np.float64),
+            surface_pressure_intensity_index=fpi,
+            repeatability=repeatability,
+            pressure_residual_index=dpi0_arr,
+            surface_area=s_total,
+            fraction=require_band_fraction(fraction, "fraction"),
+            grade=grade,
+            repeatability_limit_db=s_arr,
         )
 
-    # Eq. A.2: negative-partial-power indicator F+/-.
-    f_plus_minus = _negative_partial_power_index(partial_power)
-
-    dpi0_arr: np.ndarray | None = None
-    if pressure_residual_index is not None:
-        dpi0_arr = np.broadcast_to(
-            real_array(pressure_residual_index, "pressure_residual_index"), (n_bands,)
-        )
-    s_arr: np.ndarray | None = None
-    if repeatability_limit is not None:
-        s_arr = np.broadcast_to(
-            real_array(repeatability_limit, "repeatability_limit"), (n_bands,)
-        )
-
-    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
-    # The per-band grade (clause 8.4), the A-weighted screening (10.6 b) and
-    # the A-weighted total are read by the result from these fields.
-    result = SoundPowerIntensityResult(
-        frequencies=freqs,
-        partial_power=np.asarray(partial_power, dtype=np.float64),
-        surface_pressure_intensity_index=fpi,
-        repeatability=repeatability,
-        pressure_residual_index=dpi0_arr,
-        surface_area=s_total,
-        fraction=require_band_fraction(fraction, "fraction"),
-        grade=grade,
-        repeatability_limit_db=s_arr,
-    )
-
-    # --- warnings, once the result stands, so no refusal comes after one -----
-    if np.any(negative_band):
-        warn_caller(
-            "Total sound power is negative in one or more bands; ISO 9614-2:1996 "
-            "is not applicable to those bands (clause 9.2).",
-            SoundPowerWarning,
-        )
-    # Criterion 2 (F+/- <= 3 dB) is mandatory only for the engineering grade;
-    # for a survey run it is optional (ISO 9614-2:1996, B.1.2), so exceeding
-    # the limit does not by itself disqualify the survey grade and the warning
-    # is suppressed there.
-    if grade == "engineering" and np.any(
-        f_plus_minus[~negative_band] > _F_PLUS_MINUS_LIMIT
-    ):
-        warn_caller(
-            f"Negative-partial-power indicator F+/- exceeds {_F_PLUS_MINUS_LIMIT:g} "
-            "dB in one or more bands; criterion 2 is not satisfied and the "
-            "engineering grade is not achieved there (ISO 9614-2:1996, B.1.2).",
-            SoundPowerWarning,
-        )
-    if freqs is not None and (fpi is None or dpi0_arr is None) and n_bands > 1:
-        warn_caller(
-            "The A-weighted total sums every determinable band without "
-            "the ISO 9614-2:1996 clause 10.6 b screening (bands failing "
-            "criteria 1 and/or 2 must be omitted); supply "
-            "'pressure_levels' and 'pressure_residual_index' to "
-            "evaluate the criteria.",
-            SoundPowerWarning,
-        )
-    return result
+        # --- warnings, once the result stands, so no refusal comes after one -----
+        if np.any(negative_band):
+            warn_caller(
+                "Total sound power is negative in one or more bands; ISO 9614-2:1996 "
+                "is not applicable to those bands (clause 9.2).",
+                SoundPowerWarning,
+            )
+        # Criterion 2 (F+/- <= 3 dB) is mandatory only for the engineering grade;
+        # for a survey run it is optional (ISO 9614-2:1996, B.1.2), so exceeding
+        # the limit does not by itself disqualify the survey grade and the warning
+        # is suppressed there.
+        if grade == "engineering" and np.any(
+            f_plus_minus[~negative_band] > _F_PLUS_MINUS_LIMIT
+        ):
+            warn_caller(
+                f"Negative-partial-power indicator F+/- exceeds {_F_PLUS_MINUS_LIMIT:g} "
+                "dB in one or more bands; criterion 2 is not satisfied and the "
+                "engineering grade is not achieved there (ISO 9614-2:1996, B.1.2).",
+                SoundPowerWarning,
+            )
+        if freqs is not None and (fpi is None or dpi0_arr is None) and n_bands > 1:
+            warn_caller(
+                "The A-weighted total sums every determinable band without "
+                "the ISO 9614-2:1996 clause 10.6 b screening (bands failing "
+                "criteria 1 and/or 2 must be omitted); supply "
+                "'pressure_levels' and 'pressure_residual_index' to "
+                "evaluate the criteria.",
+                SoundPowerWarning,
+            )
+        return result
 
 
 def _negative_partial_power_index(partial_power: np.ndarray) -> np.ndarray:

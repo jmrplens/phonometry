@@ -270,7 +270,7 @@ are accepted with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-
 
 ```python
 measurement_positions(
-    surface: Literal['hemisphere', 'box'],
+    surface: Literal['hemisphere'],
     *,
     radius: float,
     n_reflecting_planes: int = 1,
@@ -300,7 +300,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 | Name | Description |
 | :--- | :--- |
-| `surface` | `'hemisphere'` (only shape with a coordinate table). One of `"hemisphere"` or `"box"`. |
+| `surface` | `"hemisphere"`, the one measurement surface with a coordinate table. A box, the `"box"` that [`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure) and [`sound_energy_pressure`](/phonometry/reference/api/power/sound-power/#sound_energy_pressure) take, is not offered: ISO 3744:2010 Annex C places its key positions by subdividing its faces, and no table gives them. |
 | `radius` | Hemisphere radius `r`, in metres. |
 | `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
 | `tones` | Engineering grade over one plane only: True reads Table B.1 of ISO 3744, False its Table B.2. The survey grade and the arrays for two and three planes have one table each and do not read it. |
@@ -312,7 +312,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a surface other than `'hemisphere'`, a radius that is not positive, a number of reflecting planes other than 1, 2 or 3, or an unknown grade. |
+| ValueError | for a surface other than `"hemisphere"`, a `"box"` among them, a radius that is not positive, a number of reflecting planes other than 1, 2 or 3, or an unknown grade. |
 | TypeError | if `radius` is not a single number, or `grade` or `surface` is not a text. |
 
 ## plot_microphone_positions

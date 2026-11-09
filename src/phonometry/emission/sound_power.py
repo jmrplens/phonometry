@@ -82,7 +82,7 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
@@ -919,7 +919,7 @@ def _hemisphere_position_table(
 
 
 def measurement_positions(
-    surface: Surface,
+    surface: Literal["hemisphere"],
     *,
     radius: float,
     n_reflecting_planes: int = 1,
@@ -943,8 +943,11 @@ def measurement_positions(
     Coordinates are scaled by ``radius`` and returned as an ``(N, 3)`` array of
     Cartesian ``(x, y, z)`` in metres, in the order of the position numbers.
 
-    :param surface: ``'hemisphere'`` (only shape with a coordinate table). One of
-        ``"hemisphere"`` or ``"box"``.
+    :param surface: ``"hemisphere"``, the one measurement surface with a
+        coordinate table. A box, the ``"box"`` that :func:`sound_power_pressure`
+        and :func:`sound_energy_pressure` take, is not offered: ISO 3744:2010
+        Annex C places its key positions by subdividing its faces, and no
+        table gives them.
     :param radius: Hemisphere radius ``r``, in metres.
     :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
     :param tones: Engineering grade over one plane only: True reads Table B.1
@@ -952,21 +955,21 @@ def measurement_positions(
         two and three planes have one table each and do not read it.
     :param grade: ``'engineering'`` or ``'survey'``.
     :return: ``(N, 3)`` microphone coordinates, in metres.
-    :raises ValueError: for a surface other than ``'hemisphere'``, a radius
-        that is not positive, a number of reflecting planes other than 1, 2
-        or 3, or an unknown grade.
+    :raises ValueError: for a surface other than ``"hemisphere"``, a
+        ``"box"`` among them, a radius that is not positive, a number of
+        reflecting planes other than 1, 2 or 3, or an unknown grade.
     :raises TypeError: if ``radius`` is not a single number, or ``grade`` or ``surface``
         is not a text.
     """
-    require_choice(surface, "surface", ("hemisphere", "box"))
-    require_scalar(radius, "radius")
-    if surface != "hemisphere":
+    if isinstance(surface, str) and surface != "hemisphere":
         msg = (
             "measurement_positions provides coordinates for 'hemisphere' only; "
-            "parallelepiped positions are defined by area subdivision "
-            "(ISO 3744:2010 Annex C)."
+            f"got {given_repr(surface)}. The positions on a parallelepiped are "
+            "defined by area subdivision (ISO 3744:2010 Annex C)."
         )
         raise ValueError(msg)
+    require_choice(surface, "surface", ("hemisphere",))
+    require_scalar(radius, "radius")
     if radius <= 0:
         msg = "A positive 'radius' is required for a hemisphere."
         raise ValueError(msg)

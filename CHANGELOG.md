@@ -2330,7 +2330,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   writes it ("One of ``"rms"`` or ``"peak"``"), 237 of them in a field that
   was missing, `language` on 202 plots among them; the API reference shows
   the same lists. `tests/test_choice_values_documented.py` holds every public
-  parameter to it (style rule D24).
+  parameter to it (style rule D24). `emission.measurement_positions` takes
+  `surface="hemisphere"` alone in its signature, the one surface with a
+  coordinate table: it offered `"box"` too, which it always refused, since
+  ISO 3744:2010 Annex C places the positions on a box by subdividing its
+  faces. A type checker now refuses the box, and the call's error still
+  names Annex C.
 
 - **A complex tangent that saturates says nothing on Windows either.**
   `tanh(z)` tends to 1 as the real part of `z` grows and `tan(z)` to `j` as

@@ -37,6 +37,13 @@ _BY_CLASS: dict[str, str] = {
         "block ends, fails on an advisory ahead of the refusal or hands each "
         "warning back"
     ),
+    "tests/test_census_of_number_returns.py::_first_call": (
+        "the census calls every public function of numbers with values chosen "
+        "for their type, never for a clause, and reads only the kind of what "
+        "it returns; what advisory each call meets is that function's own "
+        "tests' subject, and one raised as an error here would read as a "
+        "refusal"
+    ),
     "tests/test_curated_examples.py::stale_examples": (
         "ast.parse of the code spans of the documentation pages, prose among "
         "them: Python warns on a span's escapes as it would on code, and no code "

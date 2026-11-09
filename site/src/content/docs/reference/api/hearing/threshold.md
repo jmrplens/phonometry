@@ -262,7 +262,7 @@ is a decibel more in the coupler.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the audiogram does not match the frequencies, or for an unknown earphone or frequency. |
-| TypeError | if `earphone` is not a text, or `hearing_level` holds a text or a value that is not a real number. |
+| TypeError | if `earphone` is not a text, or `hearing_level` or `frequencies` holds a text or a value that is not a real number. |
 
 ## reference_threshold
 

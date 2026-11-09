@@ -58,6 +58,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
+from ndarray_hints import ndarray_of
 
 import phonometry
 
@@ -355,6 +356,11 @@ UNREACHED: dict[str, str] = {
     ),
     "environment.total_effective_roughness": _BANDS_24,
     "filters.time_weighting": "weights a time record, as long as the record",
+    "materials.area_factors": (
+        "takes the elevations of the receivers of a hemisphere, a one-dimensional "
+        "sequence of angles, and refuses a number"
+    ),
+    "noise_control.cascade": _FOUR_POLE,
     "noise_control.combined_internal_levels": (
         "adds a sequence of two or more spectra, which a number is not"
     ),
@@ -780,14 +786,20 @@ def census() -> Census:
 
 
 def _names_an_array(text: str, module: types.ModuleType) -> bool:
-    """Whether a return annotation names an array, written out or through an alias."""
+    """Whether a return annotation names an array, written out or through an alias.
+
+    An alias is read through numpy's ``NDArray`` to the ``np.ndarray`` it
+    stands for (:mod:`ndarray_hints`): numpy writes ``NDArray`` as a generic
+    alias of ``np.ndarray`` up to 2.4 and as a ``type`` statement from 2.5, so
+    the origin of an alias alone tells an array at the dependency floors and
+    not at the pins.
+    """
     if re.search(r"\b(NDArray|ndarray)\b", text):
         return True
-    for word in re.findall(r"\b[A-Za-z_]\w*\b", text):
-        value = _loaded(word, module)
-        if typing.get_origin(value) is np.ndarray:
-            return True
-    return False
+    return any(
+        ndarray_of(_loaded(word, module)) is not None
+        for word in re.findall(r"\b[A-Za-z_]\w*\b", text)
+    )
 
 
 def _of_numbers_returning_an_array() -> Iterator[tuple[str, Callable[..., object]]]:

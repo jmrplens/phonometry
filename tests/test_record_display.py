@@ -33,6 +33,7 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 import result_factories
+from ndarray_hints import ndarray_scalar
 
 import phonometry
 from phonometry import io
@@ -768,12 +769,11 @@ def _sample_of(annotation: object) -> object:
             return "a label"
         if arm is complex:
             return 1.0j
-        if typing.get_origin(arm) is np.ndarray:
-            scalar = (typing.get_args(typing.get_args(arm)[-1]) or (None,))[0]
-            if isinstance(scalar, type) and issubclass(
-                scalar, np.complexfloating | np.bool_
-            ):
-                return np.zeros(1, dtype=scalar)
+        scalar = ndarray_scalar(arm)
+        if isinstance(scalar, type) and issubclass(
+            scalar, np.complexfloating | np.bool_
+        ):
+            return np.zeros(1, dtype=scalar)
         if isinstance(arm, type) and (
             dataclasses.is_dataclass(arm)
             or (issubclass(arm, tuple) and hasattr(arm, "_fields"))

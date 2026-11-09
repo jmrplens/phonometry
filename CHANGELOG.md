@@ -2366,7 +2366,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   instead of first warning "overflow encountered in multiply", and the
   four-microphone transfer-matrix solves divide by the near-singular
   denominator their `ImpedanceTubeWarning` has already named without four
-  "invalid value encountered in divide" after it.
+  "invalid value encountered in divide" after it, and name a singular one
+  too: a downstream face with no pressure and no velocity, where the
+  denominator and the scale it is judged against are both zero, warns
+  where it returned NaN with nothing said.
   `vibration.transfer_stiffness_indirect` refuses a transmissibility that is
   not finite with a `ValueError` naming `transmissibility`, where it
   returned `-inf+nanj`, and `indirect_transfer_stiffness_result` names the

@@ -781,9 +781,16 @@ def _warn_ill_conditioned(
     scale: NDArray[np.float64],
     context: str,
 ) -> None:
-    """Flag a near-singular transfer-matrix solve (poor conditioning)."""
+    """Flag a near-singular transfer-matrix solve (poor conditioning).
+
+    A denominator is flagged unless it stands above its relative floor, so a
+    singular point where the denominator and the scale it is judged against
+    are both zero (no pressure and no velocity at the downstream face, both
+    transfer functions there zero) is flagged too: ``0 < 0`` would pass it,
+    and the division would carry NaN into the matrix with nothing said.
+    """
     den_mag = np.abs(complex_array(den, "den"))
-    bad = den_mag < _MATRIX_COND_EPS * real_array(scale, "scale")
+    bad = ~(den_mag > _MATRIX_COND_EPS * real_array(scale, "scale"))
     n = int(np.count_nonzero(bad))
     if n:
         warn_caller(

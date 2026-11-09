@@ -104,6 +104,42 @@ def test_a_singular_load_pair_warns_once_and_numpy_says_nothing() -> None:
     assert not np.all(np.isfinite(matrix.t11))
 
 
+@pytest.mark.parametrize("solve", ["two-load", "one-load"])
+def test_a_load_with_no_downstream_response_is_named_singular(solve: str) -> None:
+    # H3 = H4 = 0 leaves no pressure and no velocity at the downstream face, so
+    # the denominator and the scale it is judged against are both zero: the
+    # solve is singular, not merely near it, and still says so.
+    c0 = 343.24
+    k = np.asarray(materials.tube_wavenumber(np.array([500.0, 1000.0]), c0))
+    load = (
+        np.array([1.0 + 0j, 0.9 + 0j]),
+        np.array([0.8 + 0j, 0.7 + 0j]),
+        np.zeros(2, dtype=np.complex128),
+        np.zeros(2, dtype=np.complex128),
+    )
+    geometry: dict[str, Any] = {
+        "thickness_m": 0.05,
+        "wavenumber": k.real.astype(np.complex128),
+        "characteristic_impedance": 1.204 * c0,
+        "l1": 0.10,
+        "s1": 0.03,
+        "l2": 0.15,
+        "s2": 0.03,
+    }
+    loads = (load, load) if solve == "two-load" else (load,)
+    function = (
+        materials.transfer_matrix_two_load
+        if solve == "two-load"
+        else materials.transfer_matrix_one_load
+    )
+    with pytest.warns(
+        materials.ImpedanceTubeWarning,
+        match=r"near-singular at 2 frequency point\(s\)",
+    ):
+        matrix = function(*loads, **geometry)
+    assert not np.any(np.isfinite(matrix.t11))
+
+
 #: Octave mid-band frequencies of the ISO 3747 cases, 125 Hz to 8 kHz.
 _OCTAVES = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 #: Third-octave mid-band frequencies of the ISO 3741 cases.

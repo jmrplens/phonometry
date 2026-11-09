@@ -22,6 +22,7 @@ import math
 import pathlib
 import re
 import sys
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -37,7 +38,7 @@ if _SCRIPTS not in sys.path:
 import check_conformance_artifact as gate
 import conformance_report as cr
 from conformance import artifact, compare, metrics, references, registry, render, units
-from conformance.domains import in_situ_measurement
+from conformance.domains import headphones, in_situ_measurement
 
 #: A clause that opens with a sheet, part or corrigendum number, which belongs
 #: to the designation of a standard rather than to the place inside it.
@@ -263,9 +264,100 @@ def test_a_failing_row_whose_number_is_not_finite_still_writes(
     assert render.deviation_text(check) == outcome.delta
 
 
+#: A number of the library's side that JSON cannot write.
+_NOT_FINITE = (math.nan, math.inf, -math.inf)
+
+#: Every builder, with the check's own numbers finite, fed the library's number.
+_BUILDERS: dict[str, Callable[[float], registry.Outcome]] = {
+    "numeric": lambda value: registry.numeric(0.0, value, 1.0, unit="dB"),
+    "numeric-relative": lambda value: registry.numeric(10.0, value, 0.1, rel=True),
+    "record": lambda value: registry.record({"Rw": 52.0}, {"Rw": value}),
+    "mask-lower": lambda value: registry.mask(
+        expected="at or above 0 dB", computed=f"{value} dB", deviation=value, lower=0.0
+    ),
+    "mask-upper": lambda value: registry.mask(
+        expected="at or below 0 dB", computed=f"{value} dB", deviation=value, upper=0.0
+    ),
+    "mask-band": lambda value: registry.mask(
+        expected="within 1 dB",
+        computed=f"{value} dB",
+        deviation=value,
+        lower=-1.0,
+        upper=1.0,
+    ),
+    "mask-margin": lambda value: registry.mask(
+        expected="a margin of 0 dB or more", computed=f"{value} dB", deviation=value
+    ),
+}
+
+
+@pytest.mark.parametrize("value", _NOT_FINITE, ids=["nan", "inf", "-inf"])
+@pytest.mark.parametrize("builder", list(_BUILDERS))
+def test_no_builder_passes_on_a_number_of_the_library_that_is_not_finite(
+    builder: str, value: float
+) -> None:
+    """A mask passed a deviation that is not finite on three of its shapes.
+
+    ``min`` read a NaN beside the infinity of a missing edge as that infinity,
+    so a mask bounded below alone passed a NaN margin with "headroom inf", and
+    it passed +inf too, as one bounded above alone passed -inf and a margin
+    with no band passed +inf. The writer then refused the passing row: the
+    report stopped and the failure never showed. Three rows of the tree judge
+    a mask bounded below alone. Every builder now fails a number of the
+    library's side that is not finite, and the row writes with the words of
+    the outcome in its place.
+    """
+    outcome = _BUILDERS[builder](value)
+    assert outcome.verdict is registry.Verdict.FAIL
+    check = _written(outcome)
+    artifact.dumps({"checks": [check]})
+    assert render.deviation_text(check) == outcome.delta
+
+
+@pytest.mark.parametrize("value", _NOT_FINITE, ids=["nan", "inf", "-inf"])
+def test_a_mask_reads_no_headroom_off_a_deviation_that_is_not_finite(
+    value: float,
+) -> None:
+    """A NaN margin printed "headroom inf", the infinity of the missing edge.
+
+    A deviation that is not finite sits at no distance from an edge, and the
+    failing row says so instead of printing a headroom it does not have.
+    """
+    outcome = registry.mask(
+        expected="at or above 0 dB", computed="no margin", deviation=value, lower=0.0
+    )
+    assert outcome.delta == "headroom nan"
+
+
+def test_the_figure_2_row_fails_on_a_margin_that_is_not_a_number(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """IEC 60268-1 Figure 2 is a mask bounded below alone, as two other rows are.
+
+    A NaN margin from the library passed it, and the report stopped on the
+    passing row's number instead of showing the failure.
+    """
+
+    def no_margin(**_: object) -> SimpleNamespace:
+        return SimpleNamespace(margin_db=math.nan, binding_bands_hz=(1000.0,))
+
+    monkeypatch.setattr(headphones.ea, "check_program_signal", no_margin)
+    outcome = headphones._chk_figure_2()
+    assert outcome.verdict is registry.Verdict.FAIL
+    check = _written(outcome)
+    artifact.dumps({"checks": [check]})
+    assert "value" not in check["deviation"]
+    assert render.deviation_text(check) == "headroom nan"
+
+
 def test_a_passing_row_whose_number_is_not_finite_is_still_refused() -> None:
-    """No comparison of the builders passes on one, so a pass that holds one is
-    a mistake in the check and stops the write where the check can be named.
+    """A builder passes on such a number only where the check wrote one itself.
+
+    The tests above hold the library's side: every builder fails a number there
+    that is not finite. A numeric check passes on one only against a limit that
+    is not finite, and a record only against a printed value that is not, so a
+    pass that holds one is a mistake in the check and stops the write where the
+    check can be named.
     """
     outcome = registry.Outcome(
         expected="0 dB",

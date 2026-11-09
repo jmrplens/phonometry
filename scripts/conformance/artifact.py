@@ -274,8 +274,13 @@ def _written(
     reached, a rating left undetermined), and a library that returned one
     fails the comparison the same way. Such a number is left out, and the words
     of the outcome stand in for it, so the report shows the failure instead of
-    stopping on it. A passing check that holds one is a mistake in the check,
-    and *write* refuses it where the check can still be named.
+    stopping on it. A builder fails a number of the library's side that is not
+    finite: :func:`~conformance.registry.mask` fails such a deviation, and
+    :func:`~conformance.registry.numeric` and
+    :func:`~conformance.registry.record` pass on one only against a limit or a
+    printed value that is not finite either. A passing check that holds one
+    is therefore a mistake in the check, and *write* refuses it where the check
+    can still be named.
 
     :param value: The number, or ``None`` where the side has none.
     :param outcome: The outcome it belongs to.

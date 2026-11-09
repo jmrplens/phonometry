@@ -726,9 +726,7 @@ class OctaveFilterBank:
                     1.05 * _cheby2_headroom(fraction, order, design.attenuation),
                 )
             # The decimation factor of each band, a whole number from 1.
-            self.factor: NDArray[np.int_] = _downsamplingfactor(
-                self.upper_edges.tolist(), fs, headroom
-            )
+            self.factor = _downsamplingfactor(self.upper_edges.tolist(), fs, headroom)
         else:
             self.factor = np.ones(self.n_bands, dtype=int)
 

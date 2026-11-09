@@ -101,6 +101,43 @@ def test_an_argument_lands_from_the_lowest_place_the_stars_before_it_allow() -> 
     assert ast_scan.argument_places(plain.args) == [(0, False), (1, False)]
 
 
+def test_an_argument_reaches_the_places_a_call_that_returns_leaves_it() -> None:
+    """A ``*`` argument, and every argument after one, fills places from its
+    lowest up to the last that leaves each plain argument after it a place
+    before the first place an explicit keyword fills, or before the end when
+    the function takes no ``*args``; a keyword that names a positional-only
+    parameter fills no place.
+    """
+
+    def reach(source: str, places: tuple[str, ...], **options: object) -> object:
+        call = ast.parse(source, mode="eval").body
+        assert isinstance(call, ast.Call)
+        named = {keyword.arg for keyword in call.keywords if keyword.arg}
+        return ast_scan.argument_reach(call.args, places, named, **options)
+
+    # ``f(*head, values)`` of ``f(a, b)``: ``head`` fills ``a`` at most.
+    assert reach("f(*head, values)", ("a", "b"), open_ended=False) == [(0, 0), (0, 1)]
+    # With ``*args`` both may run past the places.
+    assert reach("f(*head, values)", ("a", "b"), open_ended=True) == [
+        (0, None),
+        (0, None),
+    ]
+    # ``f(*head, label="")`` of ``f(data, label, *rest)``: ``head`` fills
+    # ``data`` at most, and never ``*rest``.
+    assert reach('f(*head, label="")', ("data", "label"), open_ended=True) == [(0, 0)]
+    # ``f(*levels, skip=0)`` of ``f(skip, values)``: ``levels`` fills nothing.
+    assert reach("f(*levels, skip=0)", ("skip", "values"), open_ended=False) == [
+        (0, -1)
+    ]
+    # A keyword that names a positional-only parameter is no barrier.
+    assert reach(
+        "f(*levels, skip=0)", ("skip", "values"), open_ended=False, positional_only=1
+    ) == [(0, 1)]
+    # A plain argument before any star fills its own place, past the places
+    # too.
+    assert reach("f(a, b, c)", ("x",), open_ended=False) == [(0, 0), (1, 1), (2, 2)]
+
+
 def test_a_scope_binds_what_runs_in_it_alone() -> None:
     names = ast_scan.own_names(_outer())
     assert names.parameters == {"keep", "x"}
@@ -1656,3 +1693,541 @@ def test_an_assignment_expression_is_read_as_the_assignment_it_is() -> None:
     assert isinstance(statement, ast.Assign)
     assert ast_scan.assignment_target(statement.targets[0]) is statement.targets[0]
     assert ast_scan.assignment_target(statement) is None
+
+
+def test_the_last_binding_of_a_class_body_is_the_one_the_class_holds() -> None:
+    """``last_class_binding`` gives the last ``def`` or assignment of a name
+    in a class body, the one the class holds; a binding under a block is
+    not read, and a name the body never binds gives ``None``.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            class Assigned:
+                def __init__(self): ...
+                __init__ = Other.__init__
+
+            class Defined:
+                __init__ = Other.__init__
+                def __init__(self): ...
+
+            class Hidden:
+                if TYPE_CHECKING:
+                    __init__ = Other.__init__
+            """
+        )
+    )
+    assigned, defined, hidden = tree.body
+    assert isinstance(assigned, ast.ClassDef)
+    assert isinstance(defined, ast.ClassDef)
+    assert isinstance(hidden, ast.ClassDef)
+    assert isinstance(ast_scan.last_class_binding(assigned, "__init__"), ast.Assign)
+    assert isinstance(ast_scan.last_class_binding(defined, "__init__"), ast.FunctionDef)
+    assert ast_scan.last_class_binding(hidden, "__init__") is None
+    assert ast_scan.last_class_binding(assigned, "missing") is None
+
+
+def test_a_module_constant_is_read_through_the_one_name_that_holds_it() -> None:
+    """``module_constant`` reads a constant, or a name its module binds once
+    by an assignment to it alone; a name bound twice, imported, or bound to
+    anything but a constant is :data:`ast_scan.UNREAD`.
+    """
+    module = ast.parse(
+        textwrap.dedent(
+            """
+            ONCE = False
+            TWICE = True
+            TWICE = False
+            COMPUTED = not True
+            from flags import IMPORTED
+            """
+        )
+    )
+
+    def read(source: str) -> object:
+        node = ast.parse(source, mode="eval").body
+        return ast_scan.module_constant(node, module)
+
+    assert read("True") is True
+    assert read("ONCE") is False
+    for unread in ("TWICE", "COMPUTED", "IMPORTED", "MISSING"):
+        assert read(unread) is ast_scan.UNREAD
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("from dataclasses import dataclass as dc", True),
+        ("import dataclasses as dc", True),
+        ("from dataclasses import field as dc", False),
+        ("from dataclasses import dataclass\ndef dc(cls):\n    return cls", False),
+        ("from dataclasses import dataclass\ndc = lambda cls: cls", False),
+        ("from dataclasses import dataclass\nif (dc := len):\n    pass", False),
+        ("from .dataclasses import dataclass as dc", False),
+        (
+            "from typing import TYPE_CHECKING\n"
+            "if TYPE_CHECKING:\n    from dataclasses import dataclass as dc",
+            False,
+        ),
+        (
+            "try:\n    from dataclasses import dataclass as dc\n"
+            "except ImportError:\n    def dc(cls):\n        return cls",
+            None,
+        ),
+        (
+            "from dataclasses import dataclass as dc\n"
+            "def swap():\n    global dc\n    dc = len",
+            None,
+        ),
+        ("from dataclasses import dataclass\ndc = dataclass", True),
+        ("import dataclasses\ndc = dataclasses.dataclass", True),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, eq=False)",
+            True,
+        ),
+        ("import functools\ndc = functools.partial(len)", False),
+        ("from dataclasses import dataclass\ndc = dataclass\ndc = len", False),
+        ("from dataclasses import dataclass\ndc = dataclass(eq=False)", True),
+        ("import functools\ndc = functools.lru_cache(maxsize=None)", False),
+        (
+            "from dataclasses import dataclass\nclass Base:\n    pass\n"
+            "dc = dataclass(Base)",
+            False,
+        ),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, object)",
+            False,
+        ),
+        ("from dataclasses import dataclass\ndc = dataclass if ready else len", None),
+        ("from dataclasses import dataclass\ndc = custom or dataclass", None),
+    ],
+    ids=[
+        "imported",
+        "module",
+        "other-name",
+        "defined-after",
+        "assigned-after",
+        "walrus",
+        "relative",
+        "type-checking",
+        "either",
+        "under-global",
+        "alias",
+        "dotted-alias",
+        "partial",
+        "partial-of-other",
+        "alias-replaced",
+        "called-with-options",
+        "other-called-with-options",
+        "called-on-a-class",
+        "partial-of-two",
+        "conditional",
+        "either-operand",
+    ],
+)
+def test_a_name_reads_an_import_through_the_bindings_that_stand_where_it_is_read(
+    source: str, *, expected: bool | None
+) -> None:
+    """``reads_import`` reads the decorator ``@dc`` (``@dc.dataclass`` after
+    ``import dataclasses as dc``) through the bindings of ``dc`` that may
+    stand where the ``class`` statement runs: ``True`` when each is an
+    import of ``dataclasses.dataclass``, ``False`` when none is (an import
+    of another name, a later ``def``, assignment or ``:=``, a relative
+    import, or one an ``if
+    TYPE_CHECKING:`` block holds, which never runs), ``None`` when one may
+    be and another may not, an import and its fallback in a ``try``, or a
+    function that rebinds it under ``global``. An alias of the decorator, a
+    name or a dotted one, or a ``functools.partial`` of it, is read through
+    its value where it is assigned, as Python calls what it holds; so is a
+    call of it with keywords alone, which gives the decorator back with them
+    preset, where a call of anything else, a call of it on a class and a
+    partial that presets a second argument are other values; and a
+    conditional expression or an ``or`` gives either of its operands.
+
+    Every assignment was read as replacing the decorator, so ``dc =
+    dataclasses.dataclass`` was read as another one; and once an alias was
+    read, ``dc = dataclass(eq=False)`` and ``dc = dataclass if ready else
+    len`` still were.
+    """
+    decorator = "dc.dataclass" if "import dataclasses as dc" in source else "dc"
+    module = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
+    record = module.body[-1]
+    assert isinstance(record, ast.ClassDef)
+    found = ast_scan.reads_import(
+        module, record.decorator_list[0], "dataclasses.dataclass"
+    )
+    assert found is expected
+
+
+def test_a_decorator_reads_the_scope_that_writes_the_class_and_those_around() -> None:
+    """In a function, the decorator is what the function's own binding holds
+    where the ``class`` statement runs, or a function's around it, before
+    the module's; a class body that has not yet bound it reads the module's
+    globals, as Python looks a name a class body binds up, not a function
+    or a class body around it, and one that has bound it reads its own; one
+    that binds it in a branch that may not have run reads either, as the
+    run falls back to the module's when the branch did not bind it.
+
+    A class body that had not yet bound the name read the scope around the
+    ``class`` statement, so ``dataclass = len`` in the function or the class
+    around was read as the decorator, while the run finds the import; and
+    one that may have bound it read that binding alone.
+    """
+    module = ast.parse(
+        textwrap.dedent(
+            """
+            from dataclasses import dataclass
+
+            def assigned():
+                dataclass = len
+                @dataclass
+                class Rec:
+                    pass
+
+            def around():
+                def dataclass(cls):
+                    return cls
+                def build():
+                    @dataclass
+                    class Rec:
+                        pass
+
+            def imported():
+                @dataclass
+                class Rec:
+                    pass
+
+            class Before:
+                @dataclass
+                class Rec:
+                    pass
+                dataclass = len
+
+            class After:
+                dataclass = len
+                @dataclass
+                class Rec:
+                    pass
+
+            def nested():
+                dataclass = len
+                class Outer:
+                    @dataclass
+                    class Rec:
+                        pass
+                    dataclass = len
+
+            class Around:
+                dataclass = len
+                class Inner:
+                    @dataclass
+                    class Rec:
+                        pass
+                    dataclass = len
+
+            class Branch:
+                if ready:
+                    dataclass = len
+                @dataclass
+                class Rec:
+                    pass
+
+            class Defined:
+                def dataclass(cls):
+                    return cls
+                @dataclass
+                class Rec:
+                    pass
+            """
+        )
+    )
+    found = {
+        holder.name: ast_scan.reads_import(
+            module, record.decorator_list[0], "dataclasses.dataclass"
+        )
+        for holder in module.body
+        if isinstance(holder, ast.FunctionDef | ast.ClassDef)
+        for record in ast.walk(holder)
+        if isinstance(record, ast.ClassDef) and record.name == "Rec"
+    }
+    assert found == {
+        "assigned": False,
+        "around": False,
+        "imported": True,
+        "Before": True,
+        "After": False,
+        "nested": True,
+        "Around": True,
+        "Branch": None,
+        "Defined": False,
+    }
+
+
+def test_an_import_binds_a_name_to_a_dotted_path() -> None:
+    """``import_path`` gives what an import binds a name to: the module and
+    the name an absolute ``from`` import takes, the module ``import`` binds,
+    and its first part for a dotted ``import a.b``; nothing for a relative
+    import or a binding that is no import.
+    """
+    [plain, aliased, dotted, relative, assigned] = ast.parse(
+        "from dataclasses import dataclass as dc\n"
+        "import dataclasses as dcs\n"
+        "import os.path\n"
+        "from . import dataclasses\n"
+        "dc = len\n"
+    ).body
+    assert ast_scan.import_path(plain, "dc") == "dataclasses.dataclass"
+    assert ast_scan.import_path(aliased, "dcs") == "dataclasses"
+    assert ast_scan.import_path(dotted, "os") == "os"
+    assert ast_scan.import_path(relative, "dataclasses") is None
+    assert ast_scan.import_path(relative, "dataclasses", "pkg") == "pkg.dataclasses"
+    assert ast_scan.import_path(relative, "dataclasses", "") is None
+    assert ast_scan.import_path(assigned, "dc") is None
+    assert ast_scan.import_path(plain, "dataclass") is None
+
+
+#: The modules of a package a decorator is imported through, by their
+#: dotted names: one that takes ``dataclasses``' own, one that takes it from
+#: that one, and one that writes a name of its own over the import.
+_EXPORTING = {
+    "pkg": "",
+    "pkg.sub": "",
+    "pkg._dc": "from dataclasses import dataclass\n",
+    "pkg._chain": "from ._dc import dataclass\n",
+    "pkg._own": (
+        "from dataclasses import dataclass\ndef dataclass(cls):\n    return cls\n"
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("module", "source", "decorator", "expected"),
+    [
+        ("pkg.mod", "from ._dc import dataclass as dc", "dc", True),
+        ("pkg.mod", "from pkg._dc import dataclass as dc", "dc", True),
+        ("pkg.mod", "from ._chain import dataclass as dc", "dc", True),
+        ("pkg.mod", "from . import _dc", "_dc.dataclass", True),
+        ("pkg.mod", "import pkg._dc", "pkg._dc.dataclass", True),
+        ("pkg.sub.mod", "from .._dc import dataclass as dc", "dc", True),
+        ("pkg.mod", "from ._own import dataclass as dc", "dc", False),
+        ("pkg.mod", "from ._missing import dataclass as dc", "dc", False),
+    ],
+    ids=[
+        "relative",
+        "absolute",
+        "chain",
+        "module",
+        "dotted-import",
+        "two-levels",
+        "own",
+        "missing",
+    ],
+)
+def test_an_import_is_read_through_the_modules_of_its_package(
+    module: str, source: str, decorator: str, *, expected: bool
+) -> None:
+    """With the modules of the package (:class:`ast_scan.Exports`),
+    ``reads_import`` reads a relative import against the package its module
+    sits in, and a name a module of the package takes from elsewhere as what
+    it takes: through a chain of them, through a module the decorator names
+    by an attribute, and two levels up. A module that writes the name over
+    its import makes it its own, and one the package does not hold stands
+    for nothing the reader can follow. Without the modules, a relative
+    import stands for nothing.
+
+    An import's path was read as it is written, so ``from ._dc import
+    dataclass``, which is ``dataclasses``' own once ``_dc`` has run, was
+    read as another decorator.
+    """
+    modules = {name: ast.parse(text) for name, text in _EXPORTING.items()}
+    exports = ast_scan.Exports(modules, {"pkg", "pkg.sub"}.__contains__)
+    tree = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
+    record = tree.body[-1]
+    assert isinstance(record, ast.ClassDef)
+    found = ast_scan.reads_import(
+        tree,
+        record.decorator_list[0],
+        "dataclasses.dataclass",
+        module=module,
+        exports=exports,
+    )
+    assert found is expected
+    alone = ast_scan.reads_import(
+        tree, record.decorator_list[0], "dataclasses.dataclass"
+    )
+    assert alone is False
+
+
+#: A module of a package whose alias of the decorator presets ``init=``
+#: through a name it binds once to a constant.
+_PRESETTING = (
+    "import dataclasses\nimport functools\nNO_INIT = False\n"
+    "dataclass = functools.partial(dataclasses.dataclass, init=NO_INIT)\n"
+)
+
+
+@pytest.mark.parametrize(
+    ("source", "decorator", "expected"),
+    [
+        ("from dataclasses import dataclass", "dataclass", True),
+        ("from dataclasses import dataclass", "dataclass(init=False)", False),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, init=False)",
+            "dc",
+            False,
+        ),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, init=False)",
+            "dc(init=True)",
+            True,
+        ),
+        (
+            "from dataclasses import dataclass\nfrom functools import partial\n"
+            "off = partial(dataclass, init=False)\non = partial(off, init=True)",
+            "on",
+            True,
+        ),
+        ("from dataclasses import dataclass\ndc = dataclass(init=False)", "dc", False),
+        (
+            "import dataclasses\nimport functools\n"
+            "dc = functools.partial(dataclasses.dataclass, **OPTIONS)",
+            "dc",
+            "unread",
+        ),
+        (
+            "from dataclasses import dataclass",
+            "dataclass(**OPTIONS, init=False)",
+            False,
+        ),
+        ("from ._presetting import dataclass", "dataclass", False),
+        (
+            "import dataclasses\nimport functools\n"
+            "try:\n    dc = functools.partial(dataclasses.dataclass, init=False)\n"
+            "except ImportError:\n    dc = dataclasses.dataclass",
+            "dc",
+            "unread",
+        ),
+        ("from dataclasses import dataclass\ndc = len", "dc(init=False)", True),
+    ],
+    ids=[
+        "none",
+        "own",
+        "partial",
+        "call-over-partial",
+        "partial-over-partial",
+        "called-with-options",
+        "double-star",
+        "named-beside-double-star",
+        "re-exported",
+        "either-preset",
+        "other-decorator",
+    ],
+)
+def test_an_option_is_read_through_the_call_and_what_an_alias_presets(
+    source: str, decorator: str, expected: object
+) -> None:
+    """``decorator_option`` reads ``init=`` of ``@dataclass`` from the
+    decorator's own call, and else from what an alias of it presets on the
+    way, the layer nearest the read first, as Python applies it last: a
+    ``functools.partial`` of it, one of another partial, and a call of it
+    with keywords alone; a name in it through the module that writes it. A
+    ``**`` that may give it, and two readings that give it differently,
+    leave it unread; and a decorator that stands for another one gives the
+    default.
+
+    An alias was read through its value, but what it presets was not read,
+    so ``functools.partial(dataclasses.dataclass, init=False)`` was read as
+    writing an ``__init__``, while the run writes none.
+    """
+    tree = ast.parse(f"{source}\n@{decorator}\nclass Rec:\n    pass\n")
+    modules = {"pkg": ast.parse(""), "pkg._presetting": ast.parse(_PRESETTING)}
+    modules["pkg.mod"] = tree
+    exports = ast_scan.Exports(modules, {"pkg"}.__contains__)
+    record = tree.body[-1]
+    assert isinstance(record, ast.ClassDef)
+    found = ast_scan.decorator_option(
+        tree,
+        record.decorator_list[0],
+        "dataclasses.dataclass",
+        "init",
+        default=True,
+        module="pkg.mod",
+        exports=exports,
+    )
+    assert found is (ast_scan.UNREAD if expected == "unread" else expected)
+
+
+def test_kw_only_is_read_through_what_an_alias_presets() -> None:
+    """``kw_only=True`` a ``functools.partial`` of the decorator presets is
+    read as its own call's would be, and a call over it that says otherwise
+    wins, as Python applies the call's keywords last.
+    """
+    tree = ast.parse(
+        "import dataclasses\nimport functools\n"
+        "dc = functools.partial(dataclasses.dataclass, kw_only=True)\n"
+        "@dc\nclass Preset:\n    pass\n"
+        "@dc(kw_only=False)\nclass Overridden:\n    pass\n"
+    )
+    found = {
+        node.name: ast_scan.decorator_option(
+            tree,
+            node.decorator_list[0],
+            "dataclasses.dataclass",
+            "kw_only",
+            default=False,
+        )
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+    }
+    assert found == {"Preset": True, "Overridden": False}
+
+
+def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:
+    """``every_path_calls`` yields the calls a function makes as statements
+    of their own at the top of its body, up to the first statement that may
+    ``return``; a call on one branch, in a loop or in a ``try``, or after a
+    ``return`` that may have left, is not one, nor one in a ``with`` block,
+    whose context manager may swallow what the block raises, and a
+    ``return`` in a function written inside is that function's.
+
+    A call in a ``with`` block was read as one every call makes, so
+    ``with contextlib.suppress(ValueError): self.__post_init__()`` was
+    credited with a hook whose refusal the block swallows.
+    """
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def init(self, data, fast):
+                first(self)
+                with lock:
+                    second(self)
+                if fast:
+                    branch(self)
+                for item in data:
+                    looped(self)
+                try:
+                    guarded(self)
+                except ValueError:
+                    pass
+                def inner():
+                    return 1
+                third(self)
+                if fast:
+                    return
+                after(self)
+            """
+        )
+    )
+    function = tree.body[0]
+    assert isinstance(function, ast.FunctionDef)
+    names = [
+        call.func.id
+        for call in ast_scan.every_path_calls(function)
+        if isinstance(call.func, ast.Name)
+    ]
+    assert names == ["first", "third"]
+    assert ast_scan.first_parameter(function) == "self"

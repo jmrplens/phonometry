@@ -32,18 +32,21 @@ reports two shapes:
   parameter it hands to one of them (found by following such calls until no
   new one turns up, so ``require_regular_audio(path)`` counts, and so does a
   reader that calls it on its own first parameter). The first parameter is
-  the first that is not ``self`` or ``cls``, and the name a call hands it is
-  the argument at its place: a method called through its class,
-  ``Reader.check(self, path)``, takes the instance first and the name after
-  it, one called on ``self`` takes the name first, and a class method is
-  bound to its class however it is called. The name is compared as written,
-  once ``str()``, ``Path()`` and ``os.fspath()`` around it are taken off.
+  the first that is not called ``self`` or ``cls``, and the name a call hands
+  it is the argument at its place, or the keyword that names it: a method
+  called through its class, ``Reader.check(self, path)``, or through the
+  class a class method is bound to or ``__new__`` is handed,
+  ``cls.check(self, path)``, takes the instance first and the name after it, one called on the receiver of a
+  method, whatever the receiver is called, takes the name first, and a
+  class method is bound to its class however it is called. Of the definitions of one name, those a call can
+  reach say the place. The name is compared as written, once ``str()``,
+  ``Path()`` and ``os.fspath()`` around it are taken off.
 
 A check is known by the module that defines it, never by the last part of its
 name alone: a call is followed to the function it reaches through the
 module's imports (relative ones included, and a name a package imports from
 one of its modules), the module's own functions, the functions around it, and
-``self`` or ``cls`` in a method. So ``np.info(path)`` asks nothing of the name
+the receiver of a method. So ``np.info(path)`` asks nothing of the name
 though the library's ``info`` is a check, and neither does a method of another
 object called ``read_at_most``, or a function of the reader's own module that
 shares a check's name and checks nothing. A call the check cannot follow
@@ -284,17 +287,26 @@ def _subject(node: ast.expr) -> str:
     return ast.unparse(node)
 
 
-def _first_argument(call: ast.Call, place: int = 0) -> ast.expr | None:
+def _first_argument(
+    call: ast.Call, place: int = 0, keyword: str | None = None
+) -> ast.expr | None:
     """The argument of *call* at *place* among its positional ones, the
-    first by default, or the only keyword one when *call* hands exactly
-    *place* by position; none at or past a ``*`` argument, which may fill
-    the place or not.
+    first by default; none at or past a ``*`` argument, which may fill the
+    place or not.
+
+    When *call* hands fewer than *place* + 1 by position, the parameter at
+    *place* is filled by name: by the keyword called *keyword* when one is
+    given, and by no other, since a keyword fills the parameter it names
+    alone; with no *keyword*, by the only keyword of a call that hands
+    exactly *place* by position, as the read of a file takes its name.
     """
     arguments = call.args
     if any(isinstance(argument, ast.Starred) for argument in arguments[: place + 1]):
         return None
     if place < len(arguments):
         return arguments[place]
+    if keyword is not None:
+        return next((item.value for item in call.keywords if item.arg == keyword), None)
     if (
         len(arguments) == place
         and len(call.keywords) == 1
@@ -1171,18 +1183,19 @@ def qualified_callee(
 ) -> str | None:
     """The function *call* reaches, by the module that defines it, or ``None``.
 
-    ``self.f()`` and ``cls.f()`` in a method reach ``f`` of its class; a bare
-    or dotted name is read through the functions of the module and the
-    functions around the call, as far as the nearest scope that binds the
-    name otherwise (:func:`_local`), then through what that scope's imports
-    and assignments make it, each import that may stand for it at the call
-    (:func:`aliases_at`), and followed through :func:`exports_of`; two that
-    reach different functions reach no one function, and a parameter, or a
-    name stored from a call, is no function of the library.
-    A call that starts from anything
-    else (``handle.read_at_most(path)``, ``np.info(path)`` once ``np`` is
-    NumPy), or from a comprehension's or a lambda's own name, whatever it is
-    spelt (:func:`_own_to_an_expression`), reaches no function of the library.
+    A call on the receiver of a method (:func:`_receiver_kind`), ``self.f()``
+    or ``cls.f()`` in a class method whatever it is called, reaches ``f`` of
+    its class; a bare or dotted name is read through the functions of the
+    module and the functions around the call, as far as the nearest scope
+    that binds the name otherwise (:func:`_local`), then through what that
+    scope's imports and assignments make it, each import that may stand for
+    it at the call (:func:`aliases_at`), and followed through
+    :func:`exports_of`; two that reach different functions reach no one
+    function, and a parameter, or a name stored from a call, is no function
+    of the library. A call that starts from anything else
+    (``handle.read_at_most(path)``, ``np.info(path)`` once ``np`` is NumPy),
+    or from a comprehension's or a lambda's own name, whatever it is spelt
+    (:func:`_own_to_an_expression`), reaches no function of the library.
     """
     parts = _dotted(call.func)
     if parts is None:
@@ -1191,7 +1204,7 @@ def qualified_callee(
     if _own_to_an_expression(head, call, scope) is not None:
         return None
     owner = _owner(scope)
-    if head in {"self", "cls"} and len(rest) == 1 and owner is not None:
+    if len(rest) == 1 and owner is not None and _receiver_kind(call, scope) is not None:
         return f"{scope.module}.{owner}.{rest[0]}"
     local = _local(head, scope)
     if local is not None:
@@ -1230,11 +1243,53 @@ def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
     ]
 
 
-def _first_parameter(function: ast.AST) -> str | None:
-    """The first parameter of a function that is not ``self`` or ``cls``."""
+#: The methods Python makes class methods without a ``classmethod``
+#: decorator: their first parameter is bound to the class.
+_IMPLICIT_CLASS_METHODS = frozenset({"__init_subclass__", "__class_getitem__"})
+
+#: The method Python makes a static method without a ``staticmethod``
+#: decorator, which a call of its class hands the class first: its first
+#: parameter is the class, as a class method's is.
+_IMPLICIT_STATIC_METHOD = "__new__"
+
+
+def _kind(scope: _Scope) -> str:
+    """How a call binds the first parameter of the function of *scope*:
+    ``"function"`` for a function or a static method, ``__new__`` among
+    them, which takes what it is handed, ``"class"`` for a class method,
+    bound to its class however it is called, and ``"method"`` for any other
+    method of a class, bound to the instance it is called on and handed it
+    first through its class.
+    """
+    node = scope.node
+    in_a_class = len(scope.around) > 1 and isinstance(scope.around[-2], ast.ClassDef)
+    if not in_a_class or not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+        return "function"
+    decorators = {
+        decorator.id
+        for decorator in node.decorator_list
+        if isinstance(decorator, ast.Name)
+    }
+    if "staticmethod" in decorators or node.name == _IMPLICIT_STATIC_METHOD:
+        return "function"
+    if "classmethod" in decorators or node.name in _IMPLICIT_CLASS_METHODS:
+        return "class"
+    return "method"
+
+
+def _positional(function: ast.AST) -> list[ast.arg]:
+    """The parameters of *function* a call may fill by position."""
     if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
-        return None
-    for parameter in (*function.args.posonlyargs, *function.args.args):
+        return []
+    return [*function.args.posonlyargs, *function.args.args]
+
+
+def _first_parameter(scope: _Scope) -> str | None:
+    """The first parameter of the function of *scope* that is not called
+    ``self`` or ``cls``: a method whose receiver is called otherwise is read
+    as checking its receiver.
+    """
+    for parameter in _positional(scope.node):
         if parameter.arg not in {"self", "cls"}:
             return parameter.arg
     return None
@@ -1242,84 +1297,114 @@ def _first_parameter(function: ast.AST) -> str | None:
 
 #: For each function of the library, by the module that defines it, where
 #: a call hands its first parameter that is not ``self`` or ``cls``
-#: (:func:`_first_parameter`) among its positional arguments: on ``self`` or
-#: ``cls``, and named any other way, one pair for each definition of it.
-Places = dict[str, frozenset[tuple[int, int]]]
+#: (:func:`_first_parameter`) among its positional arguments: on the
+#: instance it is bound to, and through its class or any other name; and the
+#: keyword that fills it, ``None`` for a positional-only
+#: parameter, which no keyword fills; one for each definition of it that a
+#: call can reach (:func:`_reachable`).
+Places = dict[str, frozenset[tuple[int, int, str | None]]]
 
 
 def first_parameter_places(scopes: Sequence[_Scope]) -> Places:
     """Where a call hands each function of *scopes* its first parameter that
-    is not ``self`` or ``cls``, among the call's positional arguments
-    (:data:`Places`).
+    is not ``self`` or ``cls``, among the call's positional arguments, and
+    the keyword that fills it (:data:`Places`).
 
     That is its place among the function's own, but in a method: a call on
-    ``self`` or ``cls`` fills its first place itself, and one through its
-    class, ``Reader.check(self, path)``, hands the instance as its first
-    argument; a ``classmethod`` is bound to its class however it is called,
-    and a ``staticmethod`` takes what it is handed.
+    the instance fills its first place itself, and one through its class,
+    ``Reader.check(self, path)``, hands the instance as its first argument;
+    a ``classmethod`` is bound to its class however it is called, and a
+    ``staticmethod`` takes what it is handed. A definition a later one
+    replaces is reached by no call, so it gives no place.
     """
-    places: dict[str, set[tuple[int, int]]] = {}
-    for scope in scopes:
+    places: dict[str, set[tuple[int, int, str | None]]] = {}
+    for scope in _reachable(scopes):
         node = scope.node
-        if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-            continue
-        first = _first_parameter(node)
+        first = _first_parameter(scope)
         if first is None:
             continue
-        place = [a.arg for a in (*node.args.posonlyargs, *node.args.args)].index(first)
-        decorators = {
-            decorator.id
-            for decorator in node.decorator_list
-            if isinstance(decorator, ast.Name)
-        }
-        in_a_class = len(scope.around) > 1 and isinstance(
-            scope.around[-2], ast.ClassDef
-        )
-        if not in_a_class or "staticmethod" in decorators:
+        positional = [parameter.arg for parameter in _positional(node)]
+        place = positional.index(first)
+        assert isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        keyword = None if place < len(node.args.posonlyargs) else first
+        kind = _kind(scope)
+        if kind == "function":
             pair = (place, place)
-        elif "classmethod" in decorators:
+        elif kind == "class":
             pair = (place - 1, place - 1)
         else:
             pair = (place - 1, place)
-        places.setdefault(scope.qualified, set()).add(pair)
-    return {name: frozenset(pairs) for name, pairs in places.items()}
+        places.setdefault(scope.qualified, set()).add((*pair, keyword))
+    return {name: frozenset(entries) for name, entries in places.items()}
+
+
+def _receiver_kind(call: ast.Call, scope: _Scope) -> str | None:
+    """What the name *call* is made on is in *scope*: ``"instance"`` for the
+    receiver of a method, ``"class"`` for the receiver of a class method or
+    the class ``__new__`` is handed first, ``None`` for a call on any other
+    name or on none.
+
+    The receiver is the first parameter of the method of *scope*, whatever it
+    is called (:func:`_kind`): ``cls.check(path, other)`` in a class method,
+    or in ``__new__``, calls a plain ``check`` through its class, which
+    takes ``path`` as the instance.
+    """
+    func = call.func
+    if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
+        return None
+    parameters = _positional(scope.node)
+    if not parameters or parameters[0].arg != func.value.id:
+        return None
+    kind = _kind(scope)
+    if kind == "function":
+        named = getattr(scope.node, "name", None)
+        in_a_class = len(scope.around) > 1 and isinstance(
+            scope.around[-2], ast.ClassDef
+        )
+        return "class" if in_a_class and named == _IMPLICIT_STATIC_METHOD else None
+    return "instance" if kind == "method" else "class"
 
 
 def _handed_first_parameter(
-    call: ast.Call, callee: str, places: Places
+    call: ast.Call, callee: str, places: Places, scope: _Scope
 ) -> ast.expr | None:
-    """What *call* hands *callee* in its first parameter that is not ``self``
-    or ``cls`` (:func:`first_parameter_places`): the argument at that
-    parameter's place, read on ``self`` or ``cls`` or through any other name,
-    and none when the definitions of *callee* take it at different places. A
-    callee the library does not define (one of :data:`CHECKS` read from
-    outside the files given) takes it first.
+    """What *call* hands *callee* in its first parameter that is not
+    ``self`` or ``cls`` (:func:`first_parameter_places`): the
+    argument at that parameter's place, read as bound on the instance it is
+    called on (:func:`_receiver_kind`) and as handed through any other name,
+    the class's among them, or the keyword that names it; none when the
+    definitions of *callee* take it at different places or by different
+    names. A callee the library does not define (one of :data:`CHECKS` read
+    from outside the files given) takes it first, by position alone.
     """
-    func = call.func
-    on_the_receiver = (
-        isinstance(func, ast.Attribute)
-        and isinstance(func.value, ast.Name)
-        and func.value.id in {"self", "cls"}
-    )
+    on_the_instance = _receiver_kind(call, scope) == "instance"
     found = {
-        bound if on_the_receiver else named
-        for bound, named in places.get(callee, frozenset({(0, 0)}))
+        (bound if on_the_instance else named, keyword)
+        for bound, named, keyword in places.get(callee, frozenset({(0, 0, None)}))
     }
     if len(found) != 1:
         return None
-    place = found.pop()
-    return _first_argument(call, place) if place >= 0 else None
+    place, keyword = found.pop()
+    if place < 0:
+        return None
+    if keyword is None and callee in places:
+        # A positional-only parameter: no keyword fills it.
+        return _first_argument(call, place) if place < len(call.args) else None
+    return _first_argument(call, place, keyword)
 
 
 def _may_hand(call: ast.Call, name: str) -> bool:
-    """Whether *call* may hand the name written *name* to its callee's first
-    parameter that is not ``self`` or ``cls``: as its first argument, or as
-    its second, after the instance a method called through its class takes
-    first.
+    """Whether *call* may hand the name written *name* to its callee: as any
+    of its arguments, by position or by keyword; the place the callee takes
+    the name it checks at (:func:`_handed_first_parameter`) says whether it
+    does.
     """
     return any(
-        argument is not None and _subject(argument) == name
-        for argument in (_first_argument(call), _first_argument(call, 1))
+        _subject(argument) == name
+        for argument in (
+            *(item for item in call.args if not isinstance(item, ast.Starred)),
+            *(keyword.value for keyword in call.keywords if keyword.arg is not None),
+        )
     )
 
 
@@ -1393,7 +1478,7 @@ def _handed_first(
     in the first parameter of theirs that is not ``self`` or ``cls``
     (:func:`_handed_first_parameter`).
     """
-    parameter = _first_parameter(scope.node)
+    parameter = _first_parameter(scope)
     if parameter is None:
         return set()
     return {
@@ -1401,7 +1486,8 @@ def _handed_first(
         for call in scope.calls
         if _may_hand(call, parameter)
         and (callee := qualified_callee(call, scope, exports)) is not None
-        and (argument := _handed_first_parameter(call, callee, places)) is not None
+        and (argument := _handed_first_parameter(call, callee, places, scope))
+        is not None
         and _subject(argument) == parameter
     }
 
@@ -1430,7 +1516,7 @@ def _checked_before(
         callee = qualified_callee(call, scope, exports)
         if callee not in checks:
             continue
-        checked = _handed_first_parameter(call, callee, places)
+        checked = _handed_first_parameter(call, callee, places, scope)
         if checked is not None and _subject(checked) == name:
             return True
     return False

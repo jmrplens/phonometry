@@ -2280,6 +2280,807 @@ def test_a_star_and_what_follows_it_fill_places_from_their_lowest_on(
     ]
 
 
+#: Calls whose ``*`` argument a keyword of the call, or a plain argument
+#: after it, keeps from the place of the count.
+_STOPPED_STARS = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["Keyed", "before_a_keyword", "before_an_argument", "into_a_record", "past_a_keyword"]
+
+def _keyed(scale: float = 1.0, n: int = 1) -> int:
+    return require_count(n, "n")
+
+def _tail(scale: float = 1.0, *counts: int) -> int:
+    total = 0
+    for count in counts:
+        total += require_count(count, "count")
+    return total
+
+@dataclass(frozen=True)
+class Keyed:
+    height_m: float = 0.0
+    n_positions: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n_positions", require_count(self.n_positions, "n"))
+
+def before_a_keyword(*counts: int) -> int:
+    return _keyed(*counts, scale=2.0)
+
+def before_an_argument(*counts: int) -> int:
+    return _keyed(*counts, 2.0)
+
+def into_a_record(*counts: int) -> Keyed:
+    return Keyed(*counts, height_m=2.0)
+
+def past_a_keyword(*counts: int) -> int:
+    return _tail(*counts, scale=2.0)
+"""
+
+
+def test_a_star_fills_no_place_from_a_keyword_s_on_nor_one_a_later_argument_needs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The items of a ``*`` argument fill the places from its lowest on one
+    each, so on a call that returns they stop before the first place an
+    explicit keyword fills, and leave each plain argument after them a
+    place of their own before the end of a function with no ``*args``:
+    ``_keyed(*counts, scale=2.0)``, ``Keyed(*counts, height_m=2.0)`` and
+    ``_keyed(*counts, 2.0)`` hand ``counts`` no count, and
+    ``_tail(*counts, scale=2.0)`` hands it no ``*counts``.
+
+    The star was read as reaching every place from its lowest on that no
+    keyword fills, and ``*args`` past them, so all four were refused for a
+    count they never reach.
+    """
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "api": _STOPPED_STARS},
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert [(f.function, f.parameter) for f in found] == []
+
+
+#: Routes the reader followed short of the check, or stopped on: a record
+#: whose constructor is declared for the type checker alone, a class method
+#: ``__init__``, a ``*`` argument before the array of a NumPy call, a record
+#: handed to a helper by keyword, ``super(Base, other)``, and a class written
+#: inside another.
+_RUNTIME_ROUTES = """
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+import numpy as np
+
+from ._internal.validation import require_count
+
+__all__ = [
+    "as_array_after_a_star",
+    "built_with_a_declared_init",
+    "class_method_init",
+    "nested_holder",
+    "record_by_keyword",
+    "super_of_another",
+]
+
+
+@dataclass(frozen=True)
+class _Declared:
+    n: int = 1
+
+    if TYPE_CHECKING:
+
+        def __init__(self, n: int = 1) -> None: ...
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n", require_count(self.n, "n"))
+
+
+def built_with_a_declared_init(n: int) -> _Declared:
+    return _Declared(n)
+
+
+class _ClassInit:
+    @classmethod
+    def __init__(cls, n: int = 1) -> None:
+        require_count(n, "n")
+
+
+def class_method_init(n: int) -> None:
+    _ClassInit.__init__(n)
+
+
+def as_array_after_a_star(values: list[float]) -> object:
+    return np.asarray(*(), values)
+
+
+def _store(record: object, name: str) -> None:
+    object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+
+@dataclass(frozen=True)
+class _Stored:
+    n: int = 1
+
+    def __post_init__(self) -> None:
+        _store(record=self, name="n")
+
+
+def record_by_keyword(n: int) -> _Stored:
+    return _Stored(n)
+
+
+class _Base:
+    def check(self, n: int) -> int:
+        return n
+
+
+class _Tail:
+    def check(self, n: int) -> int:
+        return require_count(n, "n")
+
+
+class _Receiver(_Base, _Tail):
+    pass
+
+
+class _Caller(_Tail):
+    def check(self, n: int) -> int:
+        other = _Receiver()
+        return super(_Base, other).check(n)
+
+
+def super_of_another(n: int) -> int:
+    return _Caller.check(_Caller(), n)
+
+
+class _Holder:
+    class _Inner(_Declared):
+        @classmethod
+        def build(cls, n: int) -> object:
+            made = cls.__new__(cls)
+            cls.__init__(made, n)
+            return made
+
+
+def nested_holder(n: int) -> object:
+    return _Holder._Inner.build(n)
+"""
+
+
+def test_a_route_runs_the_init_the_call_runs_and_the_hook_a_keyword_hands(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of a record whose ``__init__`` is declared under ``if
+    TYPE_CHECKING:`` alone runs the one ``@dataclass`` writes, which calls
+    ``__post_init__``; a class method ``__init__`` called through its class,
+    ``_ClassInit.__init__(n)``, is bound to it; ``np.asarray(*(), values)``
+    hands ``values`` the first place; ``_store(record=self, name="n")``
+    hands the record by keyword; and ``super(_Base, other)`` reads the order
+    of the class ``other`` is built as. Each count reaches
+    ``require_count()``, and the array ``np.asarray()``. A class written
+    inside another reaches no ``__init__`` the reader can tell, and is read
+    to the end.
+
+    The declared ``__init__`` was followed as the one that runs, and its
+    body holds nothing; the class method took the count as ``cls``; the
+    array was read at its written place, the second; a record handed by
+    keyword was not followed; ``super(_Base, other)`` read the order of the
+    class the method is written in, which holds no ``_Base``; and a class
+    inside another stopped the scan on a ``KeyError``.
+    """
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "api": _RUNTIME_ROUTES},
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("as_array_after_a_star", "values"),
+        ("as_array_after_a_star", "values"),
+        ("built_with_a_declared_init", "n"),
+        ("class_method_init", "n"),
+        ("record_by_keyword", "n"),
+        ("super_of_another", "n"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("option", "expected"),
+    [
+        ("NO_INIT = False", []),
+        ("NO_INIT = True", [("named_option", "n")]),
+    ],
+    ids=["false", "true"],
+)
+def test_an_init_option_is_read_through_the_name_that_holds_it(
+    tmp_path: pathlib.Path, option: str, expected: list[tuple[str, str]]
+) -> None:
+    """``@dataclass(init=NO_INIT)`` with ``NO_INIT = False`` writes no
+    ``__init__``, so a call runs the base's, which checks nothing, and the
+    hook that checks the count never runs; with ``NO_INIT = True`` the
+    generated one runs and calls it.
+
+    A name was read as no value, ``init=True``, so the count was reported
+    as reaching the hook either way.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["named_option"]
+
+            OPTION
+
+
+            class _Quiet:
+                def __init__(self, n: int = 1) -> None:
+                    object.__setattr__(self, "n", n)
+
+
+            @dataclass(frozen=True, init=NO_INIT)
+            class _Named(_Quiet):
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    object.__setattr__(self, "n", require_count(self.n, "n"))
+
+
+            def named_option(n: int) -> _Named:
+                return _Named(n)
+            """.replace("OPTION", option),
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
+def test_an_inherited_init_runs_the_hook_of_the_class_it_builds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of ``_Quiet`` runs ``_Wrapper.__init__`` on a ``_Quiet``, and
+    the ``__post_init__`` the generated ``__init__`` of ``_Hooked`` calls
+    through ``super().__init__(n)`` is ``_Quiet``'s, which checks nothing;
+    a call of ``_Loud`` runs ``_PlainWrapper.__init__`` on a ``_Loud``, whose
+    own hook checks the count. The run agrees: only ``loud`` checks it.
+
+    Routes were read for the function alone, so the hook was looked up in
+    the order of the class the ``__init__`` is written in: ``quiet`` was
+    reported through ``_Hooked``'s hook, which never runs, and ``loud``
+    passed.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["loud", "quiet"]
+
+
+            @dataclass(frozen=True)
+            class _Hooked:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            class _Wrapper(_Hooked):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class _Quiet(_Wrapper):
+                def __post_init__(self) -> None:
+                    pass
+
+
+            @dataclass(frozen=True)
+            class _Plain:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    pass
+
+
+            class _PlainWrapper(_Plain):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class _Loud(_PlainWrapper):
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            def quiet(n: int) -> _Quiet:
+                return _Quiet(n)
+
+
+            def loud(n: int) -> _Loud:
+                return _Loud(n)
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [("loud", "n")]
+
+
+def test_a_method_a_public_class_inherits_runs_on_an_instance_of_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A public class runs the methods it takes from a base on an instance
+    of itself: ``Quiet(n)`` runs ``_Wrapper.__init__``, whose
+    ``super().__init__(n)`` calls ``Quiet``'s own hook, which checks
+    nothing, and ``Loud(n)`` runs ``_PlainWrapper.__init__``, which calls
+    ``Loud``'s, which checks the count; ``Public().judge(n)`` reaches
+    ``Public._check``, which checks it, and ``PublicQuiet().judge(n)``
+    ``PublicQuiet._check``, which does not. The run agrees.
+
+    A method a public class inherits was read on the class it is written
+    in, so ``_Wrapper.__init__`` was reported through ``_Hooked``'s hook and
+    ``_Loud.judge`` through ``_Loud._check``, which neither call runs, and
+    the two whose run checks the count passed.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["Loud", "Public", "PublicQuiet", "Quiet"]
+
+
+            @dataclass(frozen=True)
+            class _Hooked:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            class _Wrapper(_Hooked):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class Quiet(_Wrapper):
+                def __post_init__(self) -> None:
+                    pass
+
+
+            @dataclass(frozen=True)
+            class _Plain:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    pass
+
+
+            class _PlainWrapper(_Plain):
+                def __init__(self, n: int) -> None:
+                    super().__init__(n)
+
+
+            class Loud(_PlainWrapper):
+                def __post_init__(self) -> None:
+                    require_count(self.n, "n")
+
+
+            class _Base:
+                def judge(self, n: int) -> int:
+                    return self._check(n)
+
+                def _check(self, n: int) -> int:
+                    return n
+
+
+            class Public(_Base):
+                def _check(self, n: int) -> int:
+                    return require_count(n, "n")
+
+
+            class _Loud:
+                def judge(self, n: int) -> int:
+                    return self._check(n)
+
+                def _check(self, n: int) -> int:
+                    return require_count(n, "n")
+
+
+            class PublicQuiet(_Loud):
+                def _check(self, n: int) -> int:
+                    return n
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("_Base.judge", "n"),
+        ("_PlainWrapper.__init__", "n"),
+    ]
+
+
+#: A base whose ``__init__`` stores the count unchecked, and a class over it
+#: whose hook checks it, when ``@dataclass`` writes it an ``__init__`` that
+#: calls the hook; ``REBINDING`` and ``AFTER`` are where a module rebinds
+#: the decorator's name.
+_CHECKED_OVER_QUIET = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["make"]
+
+
+class _Quiet:
+    def __init__(self, n: int = 1) -> None:
+        object.__setattr__(self, "n", n)
+
+REBINDING
+
+@dataclass(frozen=True)
+class Sub(_Quiet):
+    n: int = 1
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "n", require_count(self.n, "n"))
+
+AFTER
+
+def make(n: int) -> Sub:
+    return Sub(n)
+"""
+
+
+@pytest.mark.parametrize(
+    ("rebinding", "after", "expected"),
+    [
+        ("if (dataclass := lambda **options: lambda cls: cls):\n    pass", "", []),
+        ("", "def dataclass(**options):\n    return lambda cls: cls", [("make", "n")]),
+        ("", "", [("make", "n")]),
+    ],
+    ids=["walrus-before", "defined-after", "imported"],
+)
+def test_a_decorator_is_read_through_the_bindings_that_stand_where_the_class_runs(
+    tmp_path: pathlib.Path, rebinding: str, after: str, expected: list[tuple[str, str]]
+) -> None:
+    """``@dataclass`` is what the name holds where the ``class`` statement
+    runs: a ``:=`` before it replaces the import, so ``Sub`` is no record and
+    ``Sub(n)`` runs ``_Quiet.__init__``, which never checks the count; a
+    ``def`` of the name after the class leaves the import in place, so the
+    generated ``__init__`` calls the hook, which checks it (reported, since
+    the check admits a numpy integer the annotation leaves out).
+
+    The name was read through every top-level binding of the module, a
+    ``def`` or an assignment over any import wherever it stands, and the
+    import past one a ``:=`` makes: the walrus was read as the import, so
+    the count was read as checked, and the later ``def`` as the decorator,
+    so the check the run makes was missed.
+    """
+    source = _CHECKED_OVER_QUIET.replace("REBINDING", rebinding).replace("AFTER", after)
+    root = _package(tmp_path, **{"_internal.validation": _VALIDATION, "api": source})
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
+@pytest.mark.parametrize(
+    ("rebinding", "exporting", "expected"),
+    [
+        (
+            "from ._dc import dataclass",
+            "from dataclasses import dataclass",
+            [("make", "n")],
+        ),
+        (
+            "from pkg._dc import dataclass",
+            "from dataclasses import dataclass",
+            [("make", "n")],
+        ),
+        (
+            "from . import _dc\ndataclass = _dc.dataclass",
+            "import dataclasses\ndataclass = dataclasses.dataclass",
+            [("make", "n")],
+        ),
+        (
+            "import functools\nfrom ._dc import dataclass as _record\n"
+            "dataclass = functools.partial(_record, eq=False)",
+            "from dataclasses import dataclass",
+            [("make", "n")],
+        ),
+        (
+            "from ._dc import dataclass",
+            "def dataclass(**options):\n    return lambda cls: cls",
+            [],
+        ),
+    ],
+    ids=["relative", "absolute", "alias", "partial", "own"],
+)
+def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
+    tmp_path: pathlib.Path,
+    rebinding: str,
+    exporting: str,
+    expected: list[tuple[str, str]],
+) -> None:
+    """``@dataclass`` taken from a module of the package is what that module
+    took, and an alias of it is what it names: ``dataclasses``' own,
+    through a relative import or an absolute one, an alias in either module
+    or a ``functools.partial`` of it, so the generated ``__init__`` of
+    ``Sub`` calls the hook, which checks the count (reported, as the check
+    admits a numpy integer the annotation leaves out). A module that writes
+    a ``dataclass`` of its own makes ``Sub`` no record, and ``Sub(n)`` runs
+    ``_Quiet.__init__``, which never checks it.
+
+    An import was read as it is written and every assignment as replacing
+    the decorator, so each of these was read as no record decorator and the
+    check the run makes was missed; ``Package.canonical`` had followed the
+    re-exports before the decorator was read where the class runs.
+    """
+    source = _CHECKED_OVER_QUIET.replace("REBINDING", rebinding).replace("AFTER", "")
+    root = _package(
+        tmp_path,
+        **{"_internal.validation": _VALIDATION, "_dc": exporting, "api": source},
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
+@pytest.mark.parametrize(
+    ("rebinding", "expected"),
+    [
+        (
+            "import functools\ndataclass = functools.partial(dataclass, init=False)",
+            [],
+        ),
+        ("dataclass = dataclass(eq=False)", [("make", "n")]),
+        (
+            "import os\ndataclass = (\n"
+            "    dataclass if os.environ.get('RECORDS') else (lambda cls: cls)\n)",
+            [("make", "n")],
+        ),
+        ("dataclass = dataclass(init=False)", []),
+        (
+            "import functools\ndataclass = functools.partial(dataclass, eq=False)",
+            [("make", "n")],
+        ),
+    ],
+    ids=["partial-init-off", "called", "conditional", "called-init-off", "partial"],
+)
+def test_what_an_alias_of_the_decorator_presets_is_read_with_it(
+    tmp_path: pathlib.Path, rebinding: str, expected: list[tuple[str, str]]
+) -> None:
+    """An alias of ``@dataclass`` is read with what it presets: one that
+    presets ``init=False``, a ``functools.partial`` of it or a call of it
+    with keywords alone, writes ``Sub`` no ``__init__``, so ``Sub(n)`` runs
+    ``_Quiet.__init__``, which never checks the count; a call of it that
+    leaves ``init`` on, and a conditional expression that may give it, make
+    ``Sub`` a record whose generated ``__init__`` calls the hook that checks
+    it (reported, as the check admits a numpy integer the annotation leaves
+    out).
+
+    What a partial presets was not read, so ``init=False`` was read as
+    writing the ``__init__`` that calls the hook; and a call of the
+    decorator or a conditional expression was read as another decorator,
+    and the check was missed.
+    """
+    source = (
+        _CHECKED_OVER_QUIET.replace("@dataclass(frozen=True)", "@dataclass")
+        .replace("REBINDING", rebinding)
+        .replace("AFTER", "")
+    )
+    root = _package(tmp_path, **{"_internal.validation": _VALIDATION, "api": source})
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == expected
+
+
+def test_an_init_a_record_binds_by_assignment_is_the_one_a_call_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record whose body binds ``__init__ = _Checker.__init__`` keeps that
+    one, which ``@dataclass`` does not replace: ``_ChecksThroughAssigned(n)``
+    runs ``_Checker.__init__``, which checks the count, and
+    ``_SkipsThroughAssigned(n)`` runs ``_Quiet.__init__``, which never calls
+    the hook that would.
+
+    The assignment was passed over for the ``__init__`` ``@dataclass``
+    would write: the count checked passed as ``int``, and the one never
+    checked was reported through the hook.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["assigned_checks", "assigned_skips"]
+
+
+            class _Checker:
+                def __init__(self, n: int = 1) -> None:
+                    object.__setattr__(self, "n", require_count(n, "n"))
+
+
+            class _Quiet:
+                def __init__(self, n: int = 1) -> None:
+                    object.__setattr__(self, "n", n)
+
+
+            @dataclass(frozen=True)
+            class _ChecksThroughAssigned:
+                n: int = 1
+
+                __init__ = _Checker.__init__
+
+
+            @dataclass(frozen=True)
+            class _SkipsThroughAssigned:
+                n: int = 1
+
+                __init__ = _Quiet.__init__
+
+                def __post_init__(self) -> None:
+                    object.__setattr__(self, "n", require_count(self.n, "n"))
+
+
+            def assigned_checks(n: int) -> _ChecksThroughAssigned:
+                return _ChecksThroughAssigned(n)
+
+
+            def assigned_skips(n: int) -> _SkipsThroughAssigned:
+                return _SkipsThroughAssigned(n)
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("assigned_checks", "n"),
+    ]
+
+
+def test_a_plain_method_called_on_the_class_takes_the_call_s_first_argument(
+    tmp_path: pathlib.Path,
+) -> None:
+    """In a class method, and in ``__new__``, ``cls`` is the class, so
+    ``cls.check(holder, n)`` calls a plain ``check`` through its class: it
+    checks ``n``, and the count reaches ``require_count()``; while
+    ``cls.check(n)`` hands ``n`` to ``self`` and checks the default.
+
+    ``cls`` was read as an instance, as ``self`` is, so ``cls.check(holder,
+    n)`` was read as checking ``holder`` and ``cls.check(n)`` as checking
+    ``n``: the count checked passed as ``int`` and the one never checked was
+    refused.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from ._internal.validation import require_count
+
+            __all__ = ["checked", "checked_in_new", "lost"]
+
+
+            class _Maker:
+                def check(self, n: int = 1) -> int:
+                    return require_count(n, "n")
+
+                @classmethod
+                def build(cls, holder: object, n: int) -> int:
+                    return cls.check(holder, n)
+
+                @classmethod
+                def lose(cls, n: int) -> int:
+                    return cls.check(n)
+
+                def __new__(cls, n: int) -> "_Maker":
+                    cls.check(None, n)
+                    return super().__new__(cls)
+
+
+            def checked(n: int) -> int:
+                return _Maker.build(None, n)
+
+
+            def checked_in_new(n: int) -> object:
+                return _Maker.__new__(_Maker, n)
+
+
+            def lost(n: int) -> int:
+                return _Maker.lose(n)
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("checked", "n"),
+        ("checked_in_new", "n"),
+    ]
+
+
+def test_a_record_handed_by_keyword_to_a_keyword_only_parameter_is_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``_store(record=self, name="n")`` hands the record to ``record``
+    whether it is a positional parameter or a keyword-only one, and the
+    count it stores reaches ``require_count()`` both ways.
+
+    A record was followed by keyword only into a positional parameter, so
+    the keyword-only ``record`` held nothing and its count passed as
+    ``int``.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["keyword_only", "positional"]
+
+
+            def _store(record: object, name: str) -> None:
+                object.__setattr__(
+                    record, name, require_count(getattr(record, name), name)
+                )
+
+
+            def _store_by_name(*, record: object, name: str) -> None:
+                object.__setattr__(
+                    record, name, require_count(getattr(record, name), name)
+                )
+
+
+            @dataclass(frozen=True)
+            class _Positional:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    _store(record=self, name="n")
+
+
+            @dataclass(frozen=True)
+            class _KeywordOnly:
+                n: int = 1
+
+                def __post_init__(self) -> None:
+                    _store_by_name(record=self, name="n")
+
+
+            def positional(n: int) -> _Positional:
+                return _Positional(n)
+
+
+            def keyword_only(n: int) -> _KeywordOnly:
+                return _KeywordOnly(n)
+
+            """,
+        },
+    )
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in found) == [
+        ("keyword_only", "n"),
+        ("positional", "n"),
+    ]
+
+
 def test_an_init_var_takes_its_place_and_reaches_post_init_by_it(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -122,6 +122,8 @@ from ast_scan import (
     bindings_by_name,
     block_statements,
     empty_type_checking_bodies,
+    every_path_calls,
+    first_parameter,
     for_the_type_checker,
     global_bindings,
     held_before,
@@ -2082,21 +2084,17 @@ def _arguments(
     """What a call hands each parameter of *callee*, by the parameter's name.
 
     By position, by keyword, and from a dict of keywords the body built and
-    spreads into the call (``f(**options)``). A first parameter called
-    ``self`` or ``cls`` is the receiver's when the call fills it itself
-    (:func:`_fills_the_first`), and the call's first argument when it does
-    not, as in a function or a static method, or a method called through
-    its class.
+    spreads into the call (``f(**options)``). The first parameter is the
+    receiver's when the call fills it itself (:func:`_fills_the_first`),
+    whatever it is called, ``def __init__(instance, pace)`` too, and the
+    call's first argument when it does not, as in a function or a static
+    method, or a method called through its class.
     """
     try:
         parameters = list(inspect.signature(callee).parameters)
     except (TypeError, ValueError):
         return {}
-    if (
-        parameters
-        and parameters[0] in {"self", "cls"}
-        and _fills_the_first(node, namespace)
-    ):
+    if parameters and _fills_the_first(node, namespace):
         parameters = parameters[1:]
     handed: dict[str, ast.expr] = {}
     for index, argument in enumerate(node.args):
@@ -2124,7 +2122,9 @@ def _fills_the_first(node: ast.Call, namespace: Mapping[str, object]) -> bool:
     method called on ``self``, ``cls`` or a field of ``self`` its instance.
     A function, a static method however it is called, and a method called
     through its class (:func:`_instance_handed`) take the call's first
-    argument there.
+    argument there, the class a class method is bound to or ``__new__`` is
+    handed among them (:data:`_CLASS_RECEIVER`): ``cls.check(pace)`` there
+    hands ``pace`` to a plain ``check`` as its instance.
     """
     target = _call_target(node, namespace)
     if inspect.isclass(target) or inspect.ismethod(target):
@@ -2135,6 +2135,8 @@ def _fills_the_first(node: ast.Call, namespace: Mapping[str, object]) -> bool:
     receiver = func.value
     owner: object = None
     if isinstance(receiver, ast.Name) and receiver.id in {"self", "cls"}:
+        if receiver.id == namespace.get(_CLASS_RECEIVER):
+            return False
         owner = namespace.get(receiver.id)
     elif (
         isinstance(receiver, ast.Attribute)
@@ -2171,7 +2173,7 @@ def _instance_handed(node: ast.Call, namespace: Mapping[str, object]) -> bool:
 
 
 def _fills_the_helpers_first(
-    call: ast.Call, caller: ast.AST | None, module_name: str
+    call: ast.Call, caller: ast.AST | None, module_name: str, *, bound_to_class: bool
 ) -> bool:
     """Whether *call*, written in *caller* in module *module_name* (``None``
     at the top of the module), fills the first parameter of the private
@@ -2180,13 +2182,17 @@ def _fills_the_helpers_first(
     A call by a bare name runs a function, and one through a module a
     function of it, which take the call's first argument there, as a method
     called through its class does (:func:`_instance_handed`); a class
-    method called through its class is bound to it. The name before the
-    helper is read as an import of *caller* (:func:`_local_imports`), or
-    else as the module's.
+    method called through its class is bound to it (*bound_to_class*). So is
+    one called on the class a class method is bound to or ``__new__`` is
+    handed (:func:`_class_receiver`), which hands a plain method the call's
+    first argument as its instance. The name before the helper is read as
+    an import of *caller* (:func:`_local_imports`), or else as the module's.
     """
     func = call.func
     if not isinstance(func, ast.Attribute):
         return False
+    if isinstance(func.value, ast.Name) and func.value.id == _class_receiver(caller):
+        return bound_to_class
     if not isinstance(func.value, ast.Name) or func.value.id in {"self", "cls"}:
         return True
     head = func.value.id
@@ -2197,6 +2203,36 @@ def _fills_the_helpers_first(
         else getattr(_module_object(module_name), head, None)
     )
     return not (inspect.ismodule(owner) or _instance_handed(call, {head: owner}))
+
+
+#: The key of :func:`_namespace` that holds the name the function it reads
+#: binds its class to: the first parameter of a class method, or of
+#: ``__new__``, which a call of its class hands the class first.
+_CLASS_RECEIVER = "<class receiver>"
+
+#: The methods Python makes class methods without a ``classmethod``
+#: decorator.
+_IMPLICIT_CLASS_METHODS = frozenset({"__init_subclass__", "__class_getitem__"})
+
+
+def _class_receiver(function: ast.AST | None) -> str | None:
+    """The first parameter of *function* when it holds the class: in a
+    class method, one Python makes one (:data:`_IMPLICIT_CLASS_METHODS`),
+    and ``__new__``; ``None`` for any other function.
+    """
+    if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
+        return None
+    decorated = any(
+        isinstance(decorator, ast.Name) and decorator.id == "classmethod"
+        for decorator in function.decorator_list
+    )
+    if not (
+        decorated
+        or function.name in _IMPLICIT_CLASS_METHODS
+        or function.name == "__new__"
+    ):
+        return None
+    return first_parameter(function)
 
 
 def _bound_tables(
@@ -2264,6 +2300,9 @@ def _namespace(function: object, tree: ast.AST, module_name: str) -> dict[str, o
     if owner is not None:
         names["self"] = owner
         names["cls"] = owner
+        receiver = _class_receiver(_parsed_function(tree))
+        if receiver is not None:
+            names[_CLASS_RECEIVER] = receiver
     return names
 
 
@@ -3366,9 +3405,12 @@ def _runs_a_post_init(record: type) -> bool:
     had one at the time, which a class that is no record over it does not
     change, so ``Plain(_Count)``, over a record that has none, never runs
     the ``__post_init__`` it writes. One written by hand runs it when it
-    names it, and runs what each ``__init__`` it hands its values on to runs
-    (:func:`_handed_on`); one that does neither calls none, as ``object``'s
-    does.
+    calls it on ``self`` (:func:`_calls_the_hook`) on every path a call that
+    returns takes (:func:`ast_scan.every_path_calls`), and runs what an
+    ``__init__`` it hands ``self`` on to on every such path runs
+    (:func:`_handed_on`): a hook it names without calling, calls on one
+    branch, or runs on another instance does not check ``self``. One that
+    does neither calls none, as ``object``'s does.
     """
     first = _first_init(record.__mro__)
     return first is not None and _init_runs_a_post_init(record, *first, frozenset())
@@ -3393,16 +3435,22 @@ def _init_runs_a_post_init(
     through an ``__init__`` it hands its values on to (:func:`_handed_on`).
 
     *seen* are the classes whose ``__init__`` is being read: a hand-off back
-    to one of them runs nothing it has not run.
+    to one of them runs nothing it has not run. One with no source, as the
+    one ``@dataclass`` writes, calls the hook when its code names it, which
+    it does on every path.
     """
-    code = getattr(inspect.unwrap(init), "__code__", None)
+    unwrapped = inspect.unwrap(init)
+    code = getattr(unwrapped, "__code__", None)
     if code is None:
         return False
-    names = _code_names(code)
-    if "__post_init__" in names:
+    function = _parsed_function(_parsed(unwrapped))
+    if function is None:
+        return "__post_init__" in _code_names(code)
+    if any(
+        _calls_the_hook(call, first_parameter(function))
+        for call in every_path_calls(function)
+    ):
         return True
-    if "__init__" not in names:
-        return False
     seen = seen | {owner}
     return any(
         (found := _first_init(order)) is not None
@@ -3425,23 +3473,24 @@ def _handed_on(
     the class it names, so a base before ``Base`` in the record's order,
     which a lookup from the next class on would find, is passed over. A
     receiver that names no class the guard can read (``self``, whose
-    ``__init__`` is the one being read) yields none.
+    ``__init__`` is the one being read) yields none. Only a call that runs
+    on every path a call that returns takes (:func:`ast_scan.every_path_calls`)
+    and hands on ``self`` is a hand-off: ``Base.__init__(other, ...)`` and
+    ``super(Base, other)`` build another instance.
     """
     unwrapped = inspect.unwrap(init)
     tree = _parsed(unwrapped)
-    if tree is None:
+    function = _parsed_function(tree)
+    if tree is None or function is None:
         return
+    instance = first_parameter(function)
     module_name = getattr(unwrapped, "__module__", "") or ""
     namespace = _namespace(unwrapped, tree, module_name)
     namespace.pop("self", None)
     namespace.pop("cls", None)
     order = record.__mro__
-    for node in ast.walk(tree):
-        if not (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "__init__"
-        ):
+    for node in every_path_calls(function):
+        if not (isinstance(node.func, ast.Attribute) and node.func.attr == "__init__"):
             continue
         receiver = node.func.value
         if (
@@ -3449,29 +3498,146 @@ def _handed_on(
             and isinstance(receiver.func, ast.Name)
             and receiver.func.id == "super"
         ):
+            if receiver.args and not (
+                len(receiver.args) == _SUPER_ARGUMENTS
+                and isinstance(receiver.args[1], ast.Name)
+                and receiver.args[1].id == instance
+            ):
+                continue
             start = (
                 _named_object(receiver.args[0], namespace) if receiver.args else owner
             )
             if start in order:
                 yield order[order.index(start) + 1 :]
             continue
+        if not (
+            node.args
+            and isinstance(node.args[0], ast.Name)
+            and node.args[0].id == instance
+        ):
+            continue
         named = _named_object(receiver, namespace)
         if inspect.isclass(named):
             yield named.__mro__
 
 
+#: The arguments of ``super(Base, instance)``.
+_SUPER_ARGUMENTS = 2
+
+
+def _calls_the_hook(call: ast.Call, instance: str | None) -> bool:
+    """Whether *call* runs a ``__post_init__`` on *instance*, the first
+    parameter of the ``__init__`` it is written in: ``self.__post_init__()``,
+    ``super().__post_init__()``, ``super(Base, self).__post_init__()`` or
+    ``Base.__post_init__(self)``. Which hook that is, is
+    :func:`_named_hook_order`'s.
+    """
+    func = call.func
+    if not (isinstance(func, ast.Attribute) and func.attr == "__post_init__"):
+        return False
+    receiver = func.value
+    if isinstance(receiver, ast.Name):
+        if receiver.id == instance:
+            return True
+        return bool(
+            call.args
+            and isinstance(call.args[0], ast.Name)
+            and call.args[0].id == instance
+        )
+    if (
+        isinstance(receiver, ast.Call)
+        and isinstance(receiver.func, ast.Name)
+        and receiver.func.id == "super"
+    ):
+        return not receiver.args or (
+            len(receiver.args) == _SUPER_ARGUMENTS
+            and isinstance(receiver.args[1], ast.Name)
+            and receiver.args[1].id == instance
+        )
+    return False
+
+
+def _parsed_function(
+    tree: ast.AST | None,
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    """The function whose source *tree* is (:func:`_parsed`), or ``None``."""
+    if not isinstance(tree, ast.Module):
+        return None
+    return next(
+        (
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        ),
+        None,
+    )
+
+
 def _post_init(record: type) -> Callable[..., object] | None:
     """The ``__post_init__`` a record runs, its own or the nearest base's,
     when the ``__init__`` a call of it runs calls one (:func:`_runs_a_post_init`).
+
+    The one ``@dataclass`` writes calls ``self.__post_init__()``, which the
+    record's own order resolves; one written by hand that names the hook
+    through a class, ``Base.__post_init__(self)``, runs the one that class's
+    order resolves (:func:`_named_hook_order`), whatever a subclass writes.
     """
     if not _runs_a_post_init(record):
         return None
-    for owner in record.__mro__:
+    for owner in _named_hook_order(record) or record.__mro__:
         check = vars(owner).get("__post_init__")
         if check is not None:
             unwrapped: Callable[..., object] = inspect.unwrap(check)
             return unwrapped
     return None
+
+
+def _named_hook_order(record: type) -> tuple[type, ...] | None:
+    """The order a hand-written ``__init__`` of *record* looks its hook up
+    through when it names it through a class, ``Base.__post_init__(self)``,
+    or past its own class, ``super().__post_init__()``: the order of
+    ``Base``, or the part of the record's past the class the ``__init__`` is
+    written in. ``None`` when the ``__init__`` that runs is the one
+    ``@dataclass`` writes, or calls ``self.__post_init__()``, which the
+    record's own order resolves, or names it two ways.
+    """
+    first = _first_init(record.__mro__)
+    if first is None:
+        return None
+    owner, init = first
+    unwrapped = inspect.unwrap(init)
+    tree = _parsed(unwrapped)
+    if tree is None:
+        return None
+    namespace = _namespace(unwrapped, tree, getattr(unwrapped, "__module__", "") or "")
+    orders: list[tuple[type, ...]] = []
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "__post_init__"
+        ):
+            continue
+        receiver = node.func.value
+        if (
+            isinstance(receiver, ast.Call)
+            and isinstance(receiver.func, ast.Name)
+            and receiver.func.id == "super"
+            and not receiver.args
+        ):
+            mro = record.__mro__
+            orders.append(mro[mro.index(owner) + 1 :])
+        elif (
+            isinstance(receiver, ast.Name)
+            and receiver.id not in {"self", "cls"}
+            and inspect.isclass(namespace.get(receiver.id))
+        ):
+            named = namespace[receiver.id]
+            assert inspect.isclass(named)
+            orders.append(named.__mro__)
+        else:
+            return None
+    return orders[0] if len(set(orders)) == 1 else None
 
 
 def _field_spelling(
@@ -3943,6 +4109,11 @@ def vocabulary_tables() -> Iterator[Choice]:
                     )
 
 
+#: The class each function of :func:`_construction_sites` is a method of, by
+#: the node of the function, and its qualified name in its module.
+_METHOD_OWNERS: dict[int, str] = {}
+
+
 @functools.cache
 def _construction_sites() -> MappingProxyType[
     str, tuple[tuple[str, ast.AST | None, ast.Call], ...]
@@ -3950,8 +4121,11 @@ def _construction_sites() -> MappingProxyType[
     """Every call in the package by the name it calls: ``(module, function, call)``.
 
     *function* is the function the call is written in, or ``None`` at module
-    level, so an argument is read where it is written.
+    level, so an argument is read where it is written. The class each
+    function written in a class body is a method of goes in
+    :data:`_METHOD_OWNERS`.
     """
+    _METHOD_OWNERS.clear()
     sites: dict[str, list[tuple[str, ast.AST | None, ast.Call]]] = {}
     root = pathlib.Path(phonometry.__file__).parent
     for path in sorted(root.rglob("*.py")):
@@ -3962,7 +4136,10 @@ def _construction_sites() -> MappingProxyType[
         tree = empty_type_checking_bodies(ast.parse(path.read_text(encoding="utf-8")))
 
         def visit(
-            node: ast.AST, function: ast.AST | None, module_name: str = module_name
+            node: ast.AST,
+            function: ast.AST | None,
+            module_name: str = module_name,
+            owner: str | None = None,
         ) -> None:
             for child in ast.iter_child_nodes(node):
                 inner = (
@@ -3970,6 +4147,24 @@ def _construction_sites() -> MappingProxyType[
                     if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
                     else function
                 )
+                if (
+                    isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
+                    and owner is not None
+                ):
+                    _METHOD_OWNERS[id(child)] = owner
+                # The class a body inside *child* is written in: a class at
+                # the top or in another class, never one in a function; a
+                # block keeps the class it is written in.
+                if isinstance(child, ast.ClassDef):
+                    held = (
+                        (f"{owner}.{child.name}" if owner else child.name)
+                        if function is None
+                        else None
+                    )
+                elif isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef):
+                    held = None
+                else:
+                    held = owner
                 if isinstance(child, ast.Call):
                     called = child.func
                     name = (
@@ -3983,7 +4178,7 @@ def _construction_sites() -> MappingProxyType[
                         sites.setdefault(name, []).append(
                             (module_name, function, child)
                         )
-                visit(child, inner)
+                visit(child, inner, owner=held)
 
         visit(tree, None)
     return MappingProxyType({name: tuple(found) for name, found in sites.items()})
@@ -4340,29 +4535,53 @@ def _callers_source(
 ) -> _Source:
     """What every caller of a private helper hands its parameter *name*.
 
-    A first parameter called ``self`` or ``cls`` is the receiver's when the
-    call fills it itself (:func:`_fills_the_helpers_first`), and the call's
-    first argument when it does not, as in a function or a static method,
-    or a method called through its class (``Maker._helper(self, ...)``).
+    The first parameter of a method that is no static method, whatever it
+    is called, is the receiver's when the call fills it itself
+    (:func:`_fills_the_helpers_first`), and the call's first argument when
+    it does not, as in a function or a static method, or a method called
+    through its class (``Maker._helper(self, ...)``) or through the class a
+    class method holds (``cls._helper(self, ...)``).
+    The callers of a method are the calls that may reach it
+    (:func:`_may_reach_method`), not every call of another class's method of
+    its name.
     """
-    defined = getattr(_module_object(module_name), function.name, None)
+    _construction_sites()
+    owner = _METHOD_OWNERS.get(id(function))
+    defined = (
+        _class_member(module_name, owner, function.name)
+        if owner is not None
+        else getattr(_module_object(module_name), function.name, None)
+    )
     every = [
         argument.arg for argument in (*function.args.posonlyargs, *function.args.args)
     ]
-    static = any(
-        isinstance(decorator, ast.Name) and decorator.id == "staticmethod"
+    decorators = {
+        decorator.id
         for decorator in function.decorator_list
+        if isinstance(decorator, ast.Name)
+    }
+    static = "staticmethod" in decorators or function.name == "__new__"
+    # The receiver of a method is its first parameter, whatever it is
+    # called; of a function the guard places in no class, one called so.
+    method = owner is not None or bool(every and every[0] in {"self", "cls"})
+    receiver = 1 if every and method and not static else 0
+    bound_to_class = (
+        "classmethod" in decorators or function.name in _IMPLICIT_CLASS_METHODS
     )
-    receiver = 1 if every and every[0] in {"self", "cls"} and not static else 0
     found: list[_Source] = []
     for caller_module, caller, call in _construction_sites().get(function.name, ()):
-        if getattr(_module_object(caller_module), function.name, None) is not defined:
+        if owner is not None:
+            if not _may_reach_method(call, caller, caller_module, defined):
+                continue
+        elif getattr(_module_object(caller_module), function.name, None) is not defined:
             continue
         handed = _handed_in(
             call,
             name,
             every[receiver:]
-            if _fills_the_helpers_first(call, caller, caller_module)
+            if _fills_the_helpers_first(
+                call, caller, caller_module, bound_to_class=bound_to_class
+            )
             else every,
             keyword=all(a.arg != name for a in function.args.posonlyargs),
         )
@@ -4370,6 +4589,85 @@ def _callers_source(
             return _OPEN_SOURCE
         found.append(_source(handed, caller, caller_module, depth + 1))
     return _merged(found) if found else _OPEN_SOURCE
+
+
+def _class_named(module_name: str, owner: str) -> type | None:
+    """The class of module *module_name* whose qualified name is *owner*."""
+    holder: object = _module_object(module_name)
+    for part in owner.split("."):
+        holder = getattr(holder, part, None)
+    return holder if inspect.isclass(holder) else None
+
+
+def _class_member(module_name: str, owner: str, name: str) -> object | None:
+    """The function the class *owner* of module *module_name* holds as
+    *name*, its own or a base's, unwrapped of ``staticmethod`` and
+    ``classmethod``.
+    """
+    holder = _class_named(module_name, owner)
+    if holder is None:
+        return None
+    return _unwrapped(getattr(holder, name, None))
+
+
+def _held_by_a_class_over(owner: type, name: str, defined: object) -> bool:
+    """Whether *owner*, or a class over it, holds *defined* as *name*: a
+    call of ``self.name`` in a method of *owner* runs what the class of the
+    instance holds, and that may be a class over *owner*, a subclass that
+    overrides the name or one that mixes it in from another base.
+    """
+    pending: list[type] = [owner]
+    seen: set[type] = set()
+    while pending:
+        later = pending.pop()
+        if later in seen:
+            continue
+        seen.add(later)
+        if _unwrapped(getattr(later, name, None)) is defined:
+            return True
+        pending.extend(later.__subclasses__())
+    return False
+
+
+def _unwrapped(member: object) -> object | None:
+    """*member* unwrapped of a bound method's instance and of decorators."""
+    function = getattr(member, "__func__", member)
+    return inspect.unwrap(function) if callable(function) else None
+
+
+def _may_reach_method(
+    call: ast.Call, caller: ast.AST | None, caller_module: str, defined: object
+) -> bool:
+    """Whether *call*, written in *caller* in *caller_module*, may run the
+    method *defined*: a call on ``self`` or ``cls`` runs what the class of
+    the instance holds of the name, the caller's class or a class over it
+    (:func:`_held_by_a_class_over`), one through a class or a module what
+    that holds, and a bare name a function, never a method; a call on any
+    other object may run it.
+    """
+    if defined is None:
+        return True
+    func = call.func
+    if isinstance(func, ast.Name):
+        return False
+    if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
+        return True
+    head = func.value.id
+    if head in {"self", "cls"}:
+        owner = _METHOD_OWNERS.get(id(caller)) if caller is not None else None
+        held = _class_named(caller_module, owner) if owner is not None else None
+        if held is None:
+            return True
+        return _held_by_a_class_over(held, func.attr, defined)
+    imported = _local_imports(caller, caller_module) if caller is not None else {}
+    holder = (
+        imported[head]
+        if head in imported
+        else getattr(_module_object(caller_module), head, None)
+    )
+    if inspect.isclass(holder) or inspect.ismodule(holder):
+        return _unwrapped(getattr(holder, func.attr, None)) is defined
+    return True
 
 
 def _field_options(record: object, name: str) -> frozenset[str]:
@@ -5589,6 +5887,30 @@ def _checks_of(
             if handed_part is False:
                 continue
             check = _post_init(record) if record is not None else callee
+            if (
+                record is not None
+                and check is not callee
+                and _parsed(inspect.unwrap(callee)) is not None
+            ):
+                # An ``__init__`` written by hand, which the record runs in
+                # place of the one ``@dataclass`` writes, checks what it is
+                # handed as any function does, beside the hook it may run.
+                inner.extend(
+                    _checks_of(
+                        callee,
+                        parameter,
+                        field=False,
+                        collection=collection and (target(value) or keys_kept),
+                        depth=depth + 1,
+                        options=options,
+                        part=handed_part,
+                        **_as_handed(
+                            forms,
+                            nontext=nontext,
+                            whole=base(value) and handed_part == part,
+                        ),
+                    )
+                )
             if check is None:
                 continue
             inner.extend(

@@ -126,6 +126,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 from ast_scan import (
     ROOT,
     argument_places,
+    argument_reach,
     assigned_value,
     binding_of,
     bindings_by_name,
@@ -2060,21 +2061,38 @@ class _Helper:
         self, call: ast.Call, state_of: Callable[[ast.expr], State]
     ) -> Iterator[tuple[str, State]]:
         """Each parameter *call* hands a value, with what the value holds; an
-        unpacked argument, and every argument after one, may reach any
-        parameter from the lowest place it may take on
-        (:func:`ast_scan.argument_places`), and a ``**`` mapping any that
-        takes a keyword, but neither one a plain argument of the call fills
+        unpacked argument, and every argument after one, may reach the
+        parameters from the lowest place it may take on to the last a call
+        that returns leaves it, before the first place an explicit keyword
+        fills and leaving each plain argument after it a place of its own,
+        and ``*args`` only past every named place
+        (:func:`ast_scan.argument_reach`); a ``**`` mapping may reach any
+        that takes a keyword, but one a plain argument of the call fills
         (:func:`_filled_by_the_call`).
         """
         filled = _filled_by_the_call(call, self.positional, self.keywords)
-        extra = tuple(filter(None, [self.vararg]))
+        named = {
+            keyword.arg
+            for keyword in call.keywords
+            if keyword.arg is not None and keyword.arg in self.keywords
+        }
+        reach = argument_reach(
+            call.args,
+            self.positional,
+            named,
+            open_ended=self.vararg is not None,
+        )
         places = argument_places(call.args)
         for place, argument in enumerate(call.args):
             lowest, spreads = places[place]
             value = argument.value if isinstance(argument, ast.Starred) else argument
             if spreads:
-                reached = [n for n in self.positional[lowest:] if n not in filled]
-                yield from ((name, state_of(value)) for name in (*reached, *extra))
+                _lowest, highest = reach[place]
+                end = len(self.positional) if highest is None else highest + 1
+                reached = list(self.positional[lowest:end])
+                if highest is None and self.vararg is not None:
+                    reached.append(self.vararg)
+                yield from ((name, state_of(value)) for name in reached)
             elif place < len(self.positional):
                 yield self.positional[place], state_of(value)
             elif self.vararg is not None:

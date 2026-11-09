@@ -15,6 +15,7 @@ holds.
 from __future__ import annotations
 
 import ast
+import contextlib
 import dataclasses
 import enum
 import importlib.util
@@ -3949,3 +3950,470 @@ def test_a_value_another_scope_binds_tells_nothing_of_the_mapping() -> None:
     assert ccl._value_names(tree, target) == {
         ("value", ccl._function_in(tree)),
     }
+
+
+class _ReceiverNamedOtherwise:
+    """A class whose ``__init__`` calls its receiver ``instance``."""
+
+    def __init__(instance, pace: _Pace = "fast") -> None:  # noqa: N805
+        require_choice(pace, "pace", _PACES)
+        instance.pace = pace
+
+
+def _through_a_receiver_named_otherwise(
+    pace: _Pace = "fast",
+) -> _ReceiverNamedOtherwise:
+    """Hand a pace to a class whose ``__init__`` names its receiver otherwise."""
+    return _ReceiverNamedOtherwise(pace)
+
+
+def test_a_receiver_is_dropped_whatever_it_is_called() -> None:
+    """A call of a class fills the first parameter of the ``__init__`` it
+    runs itself, whatever it is called: ``_ReceiverNamedOtherwise(pace)``
+    hands the pace to ``pace``, which the ``__init__`` checks.
+
+    The receiver was dropped only when it was called ``self`` or ``cls``,
+    so the pace was read as handed to ``instance`` and reported as never
+    checked.
+    """
+    pace = "Literal['fast', 'slow']"
+    assert (
+        ccl._choice_verdict(
+            _through_a_receiver_named_otherwise, "pace", pace, field=False
+        )
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _through_a_receiver_named_otherwise("medium")  # type: ignore[arg-type]
+
+
+class _ChecksThroughItsClass:
+    """A class whose class method and ``__new__`` call a plain method on the
+    class they hold, which takes the call's first argument as its instance.
+    """
+
+    def check(self, pace: _Pace = "fast") -> None:
+        """Check the pace this method is handed."""
+        require_choice(pace, "pace", _PACES)
+
+    @classmethod
+    def build(cls, pace: _Pace = "fast") -> None:
+        """Hand the pace to ``check`` as its instance."""
+        cls.check(pace)  # type: ignore[arg-type]
+
+    @classmethod
+    def build_held(cls, holder: object, pace: _Pace = "fast") -> None:
+        """Hand ``holder`` as the instance, and the pace to ``check``."""
+        cls.check(holder, pace)  # type: ignore[arg-type]
+
+    def __new__(cls, pace: _Pace = "fast") -> _ChecksThroughItsClass:
+        """Hand the pace to ``check`` as its instance."""
+        cls.check(pace)  # type: ignore[arg-type]
+        return super().__new__(cls)
+
+
+def _through_a_class_method(pace: _Pace = "fast") -> None:
+    """Hand a pace to a class method that loses it."""
+    _ChecksThroughItsClass.build(pace)
+
+
+def _through_a_class_method_held(pace: _Pace = "fast") -> None:
+    """Hand a pace to a class method that checks it."""
+    _ChecksThroughItsClass.build_held(None, pace)
+
+
+def _through_new(pace: _Pace = "fast") -> _ChecksThroughItsClass:
+    """Hand a pace to a ``__new__`` that loses it."""
+    return _ChecksThroughItsClass.__new__(_ChecksThroughItsClass, pace)
+
+
+def test_a_plain_method_called_on_the_class_takes_the_call_s_first_argument() -> None:
+    """In a class method, and in ``__new__``, ``cls`` is the class, so
+    ``cls.check(pace)`` calls a plain ``check`` through its class: the pace
+    is its instance and it checks its default, while
+    ``cls.check(holder, pace)`` checks the pace. The run agrees.
+
+    ``cls`` was read as an instance, as ``self`` is, so ``cls.check(pace)``
+    was read as checking the pace and ``cls.check(holder, pace)`` as never
+    checking it.
+    """
+    pace = "Literal['fast', 'slow']"
+    for lost in (_through_a_class_method, _through_new):
+        assert ccl._choice_verdict(lost, "pace", pace, field=False) is not None
+        lost("medium")  # type: ignore[arg-type]
+    assert (
+        ccl._choice_verdict(_through_a_class_method_held, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _through_a_class_method_held("medium")  # type: ignore[arg-type]
+
+
+@dataclass
+class _ChecksInItsInit:
+    """A record whose ``__init__``, written by hand, checks the pace itself."""
+
+    pace: _Pace = "fast"
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        require_choice(pace, "pace", _PACES)
+        self.pace = pace
+
+
+class _PlainOverChecks(_ChecksInItsInit):
+    """A class that is no record over one that checks in its ``__init__``."""
+
+
+def _through_an_inherited_init(pace: _Pace = "fast") -> _PlainOverChecks:
+    """Hand a pace to a class that runs its base's hand-written ``__init__``."""
+    return _PlainOverChecks(pace)
+
+
+@dataclass
+class _QuietHook:
+    """A record whose hook checks nothing."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        """Check nothing."""
+
+
+@dataclass
+class _NamesItsHook(_QuietHook):
+    """A record whose ``__init__`` runs the base's hook by its class's name,
+    past a hook of its own that checks the pace and never runs.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        _QuietHook.__post_init__(self)
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+def _through_a_named_hook(pace: _Pace = "fast") -> _NamesItsHook:
+    """Hand a pace to a record whose ``__init__`` names the hook it runs."""
+    return _NamesItsHook(pace)
+
+
+def test_a_hand_written_init_is_read_and_runs_the_hook_it_names() -> None:
+    """``_PlainOverChecks(pace)`` runs the ``__init__`` its base writes by
+    hand, which checks the pace as a function does; ``_NamesItsHook(pace)``
+    runs ``_QuietHook.__post_init__``, which its ``__init__`` names through
+    the class, and never the hook of its own that checks.
+
+    A record's ``__init__`` was read only through the hook it runs, so the
+    pace ``_ChecksInItsInit.__init__`` checks was reported as never checked;
+    and the hook was looked up through the record's own order, so the check
+    that never runs was credited.
+    """
+    pace = "Literal['fast', 'slow']"
+    assert (
+        ccl._choice_verdict(_through_an_inherited_init, "pace", pace, field=False)
+        is None
+    )
+    with pytest.raises(ValueError, match="pace"):
+        _through_an_inherited_init("medium")  # type: ignore[arg-type]
+    assert ccl._post_init(_NamesItsHook) is inspect.unwrap(
+        vars(_QuietHook)["__post_init__"]
+    )
+    assert (
+        ccl._choice_verdict(_through_a_named_hook, "pace", pace, field=False)
+        is not None
+    )
+    assert _through_a_named_hook("medium").pace == "medium"  # type: ignore[arg-type]
+
+
+def test_the_callers_of_a_private_method_are_the_calls_that_reach_it(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``self._helper("a")`` in ``First`` and ``First._helper(First(), "c")``
+    reach ``First._helper``; ``Second``'s own ``_helper``, of the same name,
+    takes the open text its callers hand, and is no caller of ``First``'s.
+
+    Every call of a method of that name was read as a caller, so the open
+    text ``Second`` hands its own ``_helper`` made ``First._helper``'s
+    ``kind`` open.
+    """
+    source = (
+        "class First:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def a(self, text):\n"
+        "        return self._helper('a')\n\n"
+        "class Second:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def b(self, text):\n"
+        "        return self._helper(text)\n\n"
+        "def c(text):\n"
+        "    return First._helper(First(), 'c')\n\n"
+        "def d(text):\n"
+        "    return Second._helper(Second(), text)\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_two_helpers": source})
+    tree = ast.parse(source)
+    first, second, c, d = tree.body
+    assert isinstance(first, ast.ClassDef)
+    assert isinstance(second, ast.ClassDef)
+    first_helper, a = first.body
+    second_helper, b = second.body
+    module = "phonometry._two_helpers"
+    owners = {
+        id(first_helper): "First",
+        id(a): "First",
+        id(second_helper): "Second",
+        id(b): "Second",
+    }
+    sites: list[tuple[str, ast.AST | None, ast.Call]] = []
+    for caller in (a, b, c, d):
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        sites.append((module, caller, site))
+    monkeypatch.setattr(ccl, "_construction_sites", lambda: {"_helper": tuple(sites)})
+    monkeypatch.setattr(ccl, "_METHOD_OWNERS", owners)
+    assert isinstance(first_helper, ast.FunctionDef)
+    assert ccl._callers_source(first_helper, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a", "c"})
+    )
+
+
+def test_a_helper_s_receiver_is_known_by_its_binding_at_every_caller(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The first parameter of a private method is its receiver whatever it
+    is called, so ``self._helper("a")`` hands ``"a"`` to ``kind`` of
+    ``_helper(this, kind)``; and ``cls`` in a class method is the class, so
+    ``cls._helper(text, "b")`` hands ``text`` to ``this`` and ``"b"`` to
+    ``kind``. Every caller hands ``kind`` a fixed text.
+
+    The receiver was known by the name ``self`` or ``cls``: ``"a"`` was
+    read as handed to ``this``, so ``kind`` was read as handed nothing and
+    came back open; and ``cls`` was read as an instance, so ``text`` was
+    read as handed to ``kind``.
+    """
+    source = (
+        "class Maker:\n"
+        "    def _helper(this, kind):\n"
+        "        return kind\n\n"
+        "    def a(self, text):\n"
+        "        return self._helper('a')\n\n"
+        "    @classmethod\n"
+        "    def b(cls, text):\n"
+        "        return cls._helper(text, 'b')\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_bound_helpers": source})
+    tree = ast.parse(source)
+    (maker,) = tree.body
+    assert isinstance(maker, ast.ClassDef)
+    helper, a, b = maker.body
+    module = "phonometry._bound_helpers"
+    owners = {id(helper): "Maker", id(a): "Maker", id(b): "Maker"}
+    sites: list[tuple[str, ast.AST | None, ast.Call]] = []
+    for caller in (a, b):
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        sites.append((module, caller, site))
+    monkeypatch.setattr(ccl, "_construction_sites", lambda: {"_helper": tuple(sites)})
+    monkeypatch.setattr(ccl, "_METHOD_OWNERS", owners)
+    assert isinstance(helper, ast.FunctionDef)
+    assert ccl._callers_source(helper, "kind", module, 0) == ccl._Source(
+        "texts", frozenset({"a", "b"})
+    )
+
+
+def test_a_call_on_self_reaches_the_method_a_class_over_the_caller_holds(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``self._helper(text)`` in ``Base.a`` runs what the class of the
+    instance holds: on a ``Sub``, ``Sub``'s own ``_helper``, and on a
+    ``Mixed``, the ``_helper`` it takes from ``Mixin``. Both take the open
+    text ``a`` hands, beside the fixed texts their own callers hand.
+
+    A call on ``self`` was read as reaching only what the caller's class
+    holds, ``Base``'s ``_helper`` or none, so ``Sub._helper`` and
+    ``Mixin._helper`` were read as taking fixed texts alone.
+    """
+    source = (
+        "class Base:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def a(self, text):\n"
+        "        return self._helper(text)\n\n"
+        "class Sub(Base):\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def b(self, text):\n"
+        "        return self._helper('b')\n\n"
+        "class Abstract:\n"
+        "    def c(self, text):\n"
+        "        return self._helper(text)\n\n"
+        "class Mixin:\n"
+        "    def _helper(self, kind):\n"
+        "        return kind\n\n"
+        "    def d(self, text):\n"
+        "        return self._helper('d')\n\n"
+        "class Mixed(Abstract, Mixin):\n"
+        "    pass\n"
+    )
+    _plant_modules(tmp_path, monkeypatch, {"_overriding_helpers": source})
+    tree = ast.parse(source)
+    base, sub, abstract, mixin, _mixed = tree.body
+    assert isinstance(base, ast.ClassDef)
+    assert isinstance(sub, ast.ClassDef)
+    assert isinstance(abstract, ast.ClassDef)
+    assert isinstance(mixin, ast.ClassDef)
+    base_helper, a = base.body
+    sub_helper, b = sub.body
+    (c,) = abstract.body
+    mixin_helper, d = mixin.body
+    module = "phonometry._overriding_helpers"
+    owners = {
+        id(base_helper): "Base",
+        id(a): "Base",
+        id(sub_helper): "Sub",
+        id(b): "Sub",
+        id(c): "Abstract",
+        id(mixin_helper): "Mixin",
+        id(d): "Mixin",
+    }
+    sites: list[tuple[str, ast.AST | None, ast.Call]] = []
+    for caller in (a, b, c, d):
+        assert isinstance(caller, ast.FunctionDef)
+        assert isinstance(caller.body[0], ast.Return)
+        site = caller.body[0].value
+        assert isinstance(site, ast.Call)
+        sites.append((module, caller, site))
+    monkeypatch.setattr(ccl, "_construction_sites", lambda: {"_helper": tuple(sites)})
+    monkeypatch.setattr(ccl, "_METHOD_OWNERS", owners)
+    for helper in (sub_helper, mixin_helper):
+        assert isinstance(helper, ast.FunctionDef)
+        assert ccl._callers_source(helper, "kind", module, 0) == ccl._OPEN_SOURCE
+
+
+@dataclass
+class _ChecksItsPace:
+    """A record whose hook checks the pace."""
+
+    pace: _Pace = "fast"
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(init=False)
+class _HookOnOneBranch(_ChecksItsPace):
+    """A record whose ``__init__`` runs the hook on one branch alone."""
+
+    def __init__(self, pace: _Pace = "fast", *, check: bool = False) -> None:
+        self.pace = pace
+        if check:
+            self.__post_init__()
+
+
+@dataclass(init=False)
+class _HookNamedOnly(_ChecksItsPace):
+    """A record whose ``__init__`` looks the hook up and never calls it."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        self.hook = self.__post_init__
+
+
+@dataclass(init=False)
+class _HookSwallowed(_ChecksItsPace):
+    """A record whose ``__init__`` calls the hook in a block that swallows
+    its refusal.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        with contextlib.suppress(ValueError):
+            self.__post_init__()
+
+
+@dataclass(init=False)
+class _BuildsAnother(_ChecksItsPace):
+    """A record whose ``__init__`` hands the pace to the base's ``__init__``
+    for another instance, whose hook checks nothing.
+    """
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        other = object.__new__(_QuietHook)
+        _ChecksItsPace.__init__(other, pace)  # type: ignore[arg-type]
+        self.pace = pace
+
+
+@dataclass(init=False)
+class _CallsItsHook(_ChecksItsPace):
+    """A record whose ``__init__`` calls the hook on every path."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        self.__post_init__()
+
+
+@dataclass(init=False)
+class _CallsPastItself(_ChecksItsPace):
+    """A record whose ``__init__`` calls the base's hook through ``super()``."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        self.pace = pace
+        super().__post_init__()
+
+
+@dataclass(init=False)
+class _HandsItselfOn(_ChecksItsPace):
+    """A record whose ``__init__`` hands ``self`` to the base's."""
+
+    def __init__(self, pace: _Pace = "fast") -> None:
+        _ChecksItsPace.__init__(self, pace)
+
+
+@pytest.mark.parametrize(
+    ("record", "runs"),
+    [
+        (_HookOnOneBranch, False),
+        (_HookNamedOnly, False),
+        (_HookSwallowed, False),
+        (_BuildsAnother, False),
+        (_CallsItsHook, True),
+        (_CallsPastItself, True),
+        (_HandsItselfOn, True),
+    ],
+    ids=[
+        "one-branch",
+        "named-only",
+        "swallowed",
+        "another-instance",
+        "called",
+        "called-past-itself",
+        "handed-on",
+    ],
+)
+def test_a_hand_written_init_runs_the_hook_it_calls_on_self_on_every_path(
+    record: type[_ChecksItsPace], *, runs: bool
+) -> None:
+    """An ``__init__`` written by hand runs ``__post_init__`` on ``self``
+    when it calls ``self.__post_init__()``, or hands ``self`` to an
+    ``__init__`` that does, on every path a call that returns takes; the
+    run agrees: only those refuse a pace the hook does not take.
+
+    Any mention of ``__post_init__`` in its code was read as a call, so a
+    hook called on one branch, or only looked up, was credited with its
+    check, and so was one called in a ``with`` block that swallows its
+    refusal; and any ``Base.__init__(...)`` was read as a hand-off, so one
+    that builds another instance credited the check to ``self``.
+    """
+    assert ccl._runs_a_post_init(record) is runs
+    if runs:
+        with pytest.raises(ValueError, match="pace"):
+            record("medium")  # type: ignore[arg-type]
+    else:
+        assert record("medium").pace == "medium"  # type: ignore[arg-type]

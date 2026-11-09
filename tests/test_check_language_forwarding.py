@@ -2114,11 +2114,494 @@ def test_super_of_a_named_class_and_a_class_method_through_its_class(
 
             def through_class(ax, language="en"):
                 return _Labelled.build(ax, language)
+
+
+            def through_class_without_language(ax, language="en"):
+                return _Labelled.build(ax)
             """
         },
     )
     assert sorted((f.caller, f.helper) for f in found) == [
         ("PastPlain.plot", "pkg.records._Labelled.plot"),
+        ("through_class_without_language", "pkg.records._Labelled.build"),
+    ]
+
+
+def test_an_init_a_record_binds_or_writes_is_the_one_a_call_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``@dataclass`` writes no ``__init__`` its class body binds, so
+    ``__init__ = _Labelled.__init__`` is the one ``Assigned(1.0)`` runs,
+    and it drops the language; a ``dataclass`` the module rebinds to a
+    decorator of its own writes none, so ``Rebound(1.0)`` runs
+    ``_Labelled.__init__`` too. The ``__init__`` ``@dataclass`` writes
+    takes the record's fields, so ``Spoken(1.0)`` drops the language its
+    ``language`` field takes, and ``Spoken(1.0, language)`` and
+    ``KeywordOnly(1.0, language=language)`` hand it on.
+
+    A record's ``__init__`` was read as generated whenever an import named
+    the decorator ``dataclass``, so a body that binds one and a decorator
+    rebound to write none were passed over, and a generated one was read as
+    taking no language, so a call that drops it passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.labelled": """
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.value = value
+            """,
+            "pkg.records": """
+            from dataclasses import KW_ONLY, dataclass
+
+            from .labelled import _Labelled
+
+
+            @dataclass
+            class Assigned(_Labelled):
+                value: float = 0.0
+                __init__ = _Labelled.__init__
+
+
+            @dataclass
+            class Spoken:
+                value: float = 0.0
+                language: str = "en"
+
+
+            @dataclass
+            class KeywordOnly:
+                value: float = 0.0
+                _: KW_ONLY
+                language: str = "en"
+
+
+            def plot_assigned(ax, *, language="en"):
+                return Assigned(1.0)
+
+
+            def plot_spoken(ax, *, language="en"):
+                return Spoken(1.0)
+
+
+            def plot_spoken_on(ax, *, language="en"):
+                return Spoken(1.0, language)
+
+
+            def plot_keyword_only(ax, *, language="en"):
+                return KeywordOnly(1.0, language=language)
+            """,
+            "pkg.rebound": """
+            from dataclasses import dataclass
+
+            from .labelled import _Labelled
+
+
+            def dataclass(cls):
+                return cls
+
+
+            @dataclass
+            class Rebound(_Labelled):
+                value: float = 0.0
+
+
+            def plot_rebound(ax, *, language="en"):
+                return Rebound(1.0)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_assigned", "pkg.labelled._Labelled.__init__"),
+        ("plot_rebound", "pkg.labelled._Labelled.__init__"),
+        ("plot_spoken", "pkg.records.Spoken.__init__"),
+    ]
+
+
+#: A base whose ``__init__`` takes the language, which a class over it runs
+#: when no ``@dataclass`` writes it one.
+_LABELLED = """
+class _Labelled:
+    def __init__(self, value, language="en"):
+        self.value = value
+"""
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        (
+            """
+            from dataclasses import dataclass
+
+            from .labelled import _Labelled
+
+
+            def _keep(cls):
+                return cls
+
+
+            def plot(ax, *, language="en"):
+                dataclass = _keep
+
+                @dataclass
+                class Sub(_Labelled):
+                    value: float = 0.0
+
+                return Sub(1.0)
+            """,
+            [("plot", "pkg.labelled._Labelled.__init__")],
+        ),
+        (
+            """
+            from dataclasses import dataclass
+
+            from .labelled import _Labelled
+
+
+            def plot(ax, *, language="en"):
+                dataclass = lambda cls: cls
+
+                @dataclass
+                class Sub(_Labelled):
+                    value: float = 0.0
+
+                return Sub(1.0)
+            """,
+            [("plot", "pkg.labelled._Labelled.__init__")],
+        ),
+        (
+            """
+            from dataclasses import dataclass
+
+            from .labelled import _Labelled
+
+
+            def plot(ax, *, language="en"):
+                def dataclass(cls):
+                    return cls
+
+                def build(language):
+                    @dataclass
+                    class Sub(_Labelled):
+                        value: float = 0.0
+
+                    return Sub(1.0)
+
+                return build(language)
+            """,
+            [("plot.<locals>.build", "pkg.labelled._Labelled.__init__")],
+        ),
+        (
+            """
+            try:
+                from dataclasses import dataclass
+            except ImportError:
+                def dataclass(cls):
+                    return cls
+
+
+            class _Plain:
+                def __init__(self, value):
+                    self.value = value
+
+
+            @dataclass
+            class Sub(_Plain):
+                value: float = 0.0
+                language: str = "en"
+
+
+            def plot(ax, *, language="en"):
+                return Sub(1.0)
+            """,
+            [("plot", "pkg.mod.Sub.__init__")],
+        ),
+        (
+            """
+            from dataclasses import dataclass
+
+
+            def plot(ax, *, language="en"):
+                @dataclass
+                class Sub:
+                    value: float = 0.0
+                    language: str = "en"
+
+                return Sub(1.0)
+            """,
+            [("plot", "pkg.mod.plot.<locals>.Sub.__init__")],
+        ),
+    ],
+    ids=["assigned-here", "lambda-here", "defined-around", "either", "imported"],
+)
+def test_a_decorator_is_read_through_the_bindings_that_stand_where_the_class_runs(
+    tmp_path: pathlib.Path, source: str, expected: list[tuple[str, str]]
+) -> None:
+    """The decorator of a class is what its name holds where the ``class``
+    statement runs: in the function that writes the class, ``dataclass =
+    _keep`` and ``dataclass = lambda cls: cls`` replace the import, as a
+    ``def`` of it in a function around does, so ``Sub(1.0)`` runs
+    ``_Labelled.__init__``, which takes the language; with an import and a
+    fallback that may each stand, either constructor may run, and the
+    generated one takes the language its field holds. With the import
+    alone, the generated one runs.
+
+    A function's assignment of the name and a function around were passed
+    over for the module's import, so the call was read as running the
+    generated ``__init__``, which takes no language, and passed; and of two
+    bindings that may stand, only the fallback was read, so a call that
+    drops the language the generated one takes passed.
+    """
+    found = _dropped(tmp_path, **{"pkg.labelled": _LABELLED, "pkg.mod": source})
+    assert sorted((f.caller, f.helper) for f in found) == expected
+
+
+#: A class over :data:`_LABELLED` with a ``language`` field, whose decorator
+#: ``IMPORT`` binds: a call of it runs the ``__init__`` ``@dataclass`` writes
+#: when the decorator is ``dataclasses``' own, ``_Labelled.__init__`` when
+#: it is not.
+_TAKEN_FROM = """
+IMPORT
+
+from .labelled import _Labelled
+
+
+@dataclass
+class Sub(_Labelled):
+    value: float = 0.0
+    language: str = "en"
+
+
+def plot(ax, *, language="en"):
+    return Sub(1.0)
+"""
+
+
+@pytest.mark.parametrize(
+    ("imported", "exporting", "expected"),
+    [
+        ("from .dc import dataclass", "from dataclasses import dataclass", "Sub"),
+        ("from pkg.dc import dataclass", "from dataclasses import dataclass", "Sub"),
+        (
+            "from . import dc\n\ndataclass = dc.dataclass",
+            "import dataclasses\n\ndataclass = dataclasses.dataclass",
+            "Sub",
+        ),
+        (
+            "import functools\n\nfrom .dc import dataclass as _record\n\n"
+            "dataclass = functools.partial(_record, eq=False)",
+            "from dataclasses import dataclass",
+            "Sub",
+        ),
+        (
+            "from .dc import dataclass",
+            "def dataclass(cls):\n    return cls",
+            "_Labelled",
+        ),
+    ],
+    ids=["relative", "absolute", "alias", "partial", "own"],
+)
+def test_a_decorator_a_module_of_the_package_re_exports_is_read_through_it(
+    tmp_path: pathlib.Path, imported: str, exporting: str, expected: str
+) -> None:
+    """``@dataclass`` taken from a module of the package is what that module
+    took, and an alias of it is what it names: ``dataclasses``' own,
+    through a relative import or an absolute one, an alias in either module
+    or a ``functools.partial`` of it, so ``Sub(1.0)`` runs the ``__init__``
+    it writes, which takes the record's ``language`` field. A module that
+    writes a ``dataclass`` of its own leaves ``Sub`` to
+    ``_Labelled.__init__``, which takes it too. Either drops the language.
+
+    An import was read as it is written and every assignment as replacing
+    the decorator, so the call was read as running ``_Labelled.__init__``
+    whatever the decorator was.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.labelled": _LABELLED,
+            "pkg.dc": exporting + "\n",
+            "pkg.mod": _TAKEN_FROM.replace("IMPORT", imported),
+        },
+    )
+    helper = (
+        "pkg.mod.Sub.__init__"
+        if expected == "Sub"
+        else "pkg.labelled._Labelled.__init__"
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [("plot", helper)]
+
+
+@pytest.mark.parametrize(
+    ("imported", "expected"),
+    [
+        (
+            "import dataclasses\nimport functools\n\n"
+            "dataclass = functools.partial(dataclasses.dataclass, init=False)",
+            ["_Labelled"],
+        ),
+        ("import dataclasses\n\ndataclass = dataclasses.dataclass(eq=False)", ["Sub"]),
+        (
+            "import dataclasses\nimport os\n\ndataclass = (\n"
+            "    dataclasses.dataclass if os.environ.get('RECORDS') else (lambda cls: cls)\n"
+            ")",
+            ["_Labelled", "Sub"],
+        ),
+        (
+            "import dataclasses\nimport functools\n\n"
+            "dataclass = functools.partial(dataclasses.dataclass, eq=False)",
+            ["Sub"],
+        ),
+    ],
+    ids=["partial-init-off", "called", "conditional", "partial"],
+)
+def test_what_an_alias_of_the_decorator_presets_is_read_with_it(
+    tmp_path: pathlib.Path, imported: str, expected: list[str]
+) -> None:
+    """An alias of ``@dataclass`` is read with what it presets: a
+    ``functools.partial`` that presets ``init=False`` writes ``Sub`` no
+    ``__init__``, so ``Sub(1.0)`` runs ``_Labelled.__init__``; a call of the
+    decorator with keywords alone is the decorator, so the call runs the
+    ``__init__`` it writes; and a conditional expression that gives it or
+    another may run either. Each drops the language one of them takes.
+
+    What a partial presets was not read, and a call of the decorator or a
+    conditional expression was read as another decorator, so the call was
+    read as running the generated ``__init__``, or ``_Labelled.__init__``
+    alone.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.labelled": _LABELLED,
+            "pkg.mod": _TAKEN_FROM.replace("IMPORT", imported),
+        },
+    )
+    helpers = {
+        "Sub": "pkg.mod.Sub.__init__",
+        "_Labelled": "pkg.labelled._Labelled.__init__",
+    }
+    assert sorted((f.caller, f.helper) for f in found) == sorted(
+        ("plot", helpers[name]) for name in expected
+    )
+
+
+@pytest.mark.parametrize(
+    ("option", "expected"),
+    [
+        ("NO_INIT = False", [("draw", "pkg.records._Labelled.__init__")]),
+        ("NO_INIT = True", []),
+        (
+            "NO_INIT = sys.flags.optimize > 9",
+            [("draw", "pkg.records._Labelled.__init__")],
+        ),
+    ],
+    ids=["false", "true", "unread"],
+)
+def test_an_init_option_is_read_through_the_name_that_holds_it(
+    tmp_path: pathlib.Path, option: str, expected: list[tuple[str, str]]
+) -> None:
+    """``@dataclass(init=NO_INIT)`` with ``NO_INIT = False`` writes no
+    ``__init__``, so ``Spoken(1.0)`` runs ``_Labelled.__init__``, which
+    takes the language and is handed none; with ``NO_INIT = True`` the
+    generated one runs, and it takes no language. A value the guard cannot
+    read may be either, so the call is read through both constructors, and
+    ``_Labelled.__init__`` is handed no language.
+
+    A name was read as no value, ``init=True``, so the call that drops the
+    language passed; and so was a value the guard cannot read.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            import sys
+            from dataclasses import dataclass
+
+            OPTION
+
+
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.language = language
+
+
+            @dataclass(init=NO_INIT)
+            class Spoken(_Labelled):
+                value: float = 0.0
+
+
+            def draw(language="en"):
+                return Spoken(1.0)
+            """.replace("OPTION", option)
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == expected
+
+
+def test_a_class_method_an_alias_holds_and_super_of_another_instance(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An alias of a class method, ``build = Maker.build``, holds it bound to
+    its class, so ``build(ax, language)`` hands the language to its
+    ``language`` and ``build(ax)`` drops it. ``super(Base, other)`` reads
+    the order of the class of ``other``, past ``Base``: in
+    ``Receiver(Base, Tail)`` it reaches ``Tail.plot``, which takes the
+    language, from a method of ``Caller(Tail)``, whose own order holds no
+    ``Base``.
+
+    An alias was read as taking the class's first argument in ``cls``, so
+    the language landed one place short and both calls were refused; and
+    ``super(Base, other)`` read the order of the class the method is
+    written in, which holds no ``Base``, so the call reached nothing and
+    passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            class Maker:
+                @classmethod
+                def build(cls, ax=None, language="en"):
+                    return ax
+
+
+            def through_alias(ax, language="en"):
+                build = Maker.build
+                return build(ax, language)
+
+
+            def through_alias_without_language(ax, language="en"):
+                build = Maker.build
+                return build(ax)
+
+
+            class Base:
+                def plot(self, ax=None):
+                    return ax
+
+
+            class Tail:
+                def plot(self, ax=None, *, language="en"):
+                    return ax
+
+
+            class Receiver(Base, Tail):
+                pass
+
+
+            class Caller(Tail):
+                def plot(self, ax=None, *, language="en"):
+                    other = Receiver()
+                    return super(Base, other).plot(ax)
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("Caller.plot", "pkg.records.Tail.plot"),
+        ("through_alias_without_language", "pkg.records.Maker.build"),
     ]
 
 
@@ -2158,3 +2641,42 @@ def test_every_exemption_carries_a_reason() -> None:
 def test_the_tree_passes_its_language_on() -> None:
     """The corpus itself, which is what the gate protects."""
     assert clf.main([]) == 0
+
+
+def test_a_call_on_self_reaches_the_method_the_class_of_the_instance_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``self._label(ax)`` in ``_Base.draw`` runs what the class of the
+    instance holds: on a ``Public``, ``Public._label``, which takes the
+    language, so the call drops it; on a ``_Base``, ``_Base._label``, which
+    takes none.
+
+    A call on ``self`` reached only the method the order of the class it is
+    written in finds, ``_Base._label``, so the call passed.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.records": """
+            class _Base:
+                def draw(self, ax, language="en"):
+                    return self._label(ax)
+
+                def _label(self, ax):
+                    return ax
+
+
+            class Public(_Base):
+                def _label(self, ax, language="en"):
+                    return language
+
+
+            class Other:
+                def _label(self, ax, language="en"):
+                    return language
+            """
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("_Base.draw", "pkg.records.Public._label")
+    ]

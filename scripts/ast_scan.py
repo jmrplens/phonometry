@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Iterator, Mapping, Sequence
+    from collections.abc import Callable, Collection, Iterator, Mapping, Sequence
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -275,6 +275,61 @@ def argument_places(arguments: Sequence[ast.expr]) -> list[tuple[int, bool]]:
     return places
 
 
+def argument_reach(
+    arguments: Sequence[ast.expr],
+    places: Sequence[str],
+    named: Collection[str] = (),
+    *,
+    open_ended: bool,
+    positional_only: int = 0,
+) -> list[tuple[int, int | None]]:
+    """Which of *places*, the named positional parameters of what a call
+    calls, each argument it gives by its place may fill on a call that
+    returns: the lowest and the highest, the highest ``None`` when it may
+    run past them into ``*args`` (*open_ended*), and lower than the lowest
+    when it fills none.
+
+    The values a call hands by place fill *places* one each from the first,
+    as many as there are, so none fills a place an explicit keyword of the
+    call fills (*named*, but for the first *positional_only*, which no
+    keyword fills), nor one past it: Python raises rather than give a
+    parameter two values. A ``*`` argument hands an unknown number of
+    values, none among them, so it, and every argument after one, may fill
+    any place from its lowest (:func:`argument_places`) to the last that
+    leaves each plain argument written after it a place of its own before
+    the first place a keyword fills, or before the end of *places* when the
+    function takes no ``*args``: in ``f(*head, value)`` of a ``f(a, b)``,
+    ``head`` fills ``a`` at most, and in ``f(*head, label="")`` of a
+    ``f(data, label)``, ``head`` fills ``data`` at most and never runs into
+    ``*args``. An argument with no ``*`` argument at or before it fills its
+    own place alone, past *places* when it is written past them.
+    """
+    barrier = next(
+        (
+            index
+            for index, name in enumerate(places)
+            if index >= positional_only and name in named
+        ),
+        None,
+    )
+    plain_after = [0] * len(arguments)
+    count = 0
+    for index in range(len(arguments) - 1, -1, -1):
+        plain_after[index] = count
+        if not isinstance(arguments[index], ast.Starred):
+            count += 1
+    reach: list[tuple[int, int | None]] = []
+    for index, (lowest, spreads) in enumerate(argument_places(arguments)):
+        if not spreads:
+            reach.append((lowest, lowest))
+        elif barrier is None and open_ended:
+            reach.append((lowest, None))
+        else:
+            end = len(places) if barrier is None else barrier
+            reach.append((lowest, end - 1 - plain_after[index]))
+    return reach
+
+
 def _opening(scope: ast.AST) -> list[ast.AST]:
     """The nodes a scope runs as its own, before any scope inside it is left out.
 
@@ -328,6 +383,50 @@ def _same_scope(node: ast.AST) -> list[ast.AST]:
     if isinstance(node, ast.NamedExpr):
         return [node.value]
     return list(ast.iter_child_nodes(node))
+
+
+def first_parameter(function: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
+    """The name of a function's first parameter, ``self`` in a method."""
+    spec = function.args
+    positional = (*spec.posonlyargs, *spec.args)
+    return positional[0].arg if positional else None
+
+
+def every_path_calls(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> Iterator[ast.Call]:
+    """The calls a function makes, as statements of their own, on every path
+    a call of it that returns takes: one at the top of its body, before any
+    statement that may ``return`` (:func:`scope_nodes` of the statement, so
+    a ``return`` of a function or a class written there is another scope's).
+    One in a branch, a loop or a ``try`` may not run, nor one after a
+    ``return`` that may have left; a path that raises returns nothing. Nor
+    is one in a ``with`` block: its context manager may swallow what a
+    statement of the block raises, ``contextlib.suppress`` does, and the
+    call that returns then skips the rest of the block, or has run a call
+    that never got to its end.
+    """
+    for statement in function.body:
+        if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+            yield statement.value
+        if isinstance(statement, ast.Return) or any(
+            isinstance(inner, ast.Return) for inner in _statement_nodes(statement)
+        ):
+            return
+
+
+def _statement_nodes(statement: ast.stmt) -> list[ast.AST]:
+    """Every node a statement runs in the scope it is written in, the
+    statement too: a ``def``, a ``class`` or a lambda written in it is met,
+    its body not entered (:func:`_same_scope`).
+    """
+    found: list[ast.AST] = []
+    pending: list[ast.AST] = [statement]
+    while pending:
+        node = pending.pop()
+        found.append(node)
+        pending.extend(_same_scope(node))
+    return found
 
 
 def scope_nodes(scope: ast.AST) -> list[ast.AST]:
@@ -531,6 +630,59 @@ def spells(value: ast.expr | None, name: str, owners: Collection[str] = ()) -> b
     while isinstance(head, ast.Attribute):
         head = head.value
     return isinstance(head, ast.Name) and (not owners or head.id in owners)
+
+
+def last_class_binding(node: ast.ClassDef, name: str) -> ast.stmt | None:
+    """The last statement of a class body that binds *name* itself, a
+    ``def`` or an assignment of it alone (``__init__ = _Keeper.__init__``),
+    or ``None``: the one the class holds once its body has run. A binding
+    under a block, ``if TYPE_CHECKING:`` among them, is not read.
+    """
+    return next(
+        (child for child in reversed(node.body) if _binds_itself(child, name)), None
+    )
+
+
+def _binds_itself(statement: ast.stmt, name: str) -> bool:
+    """Whether a statement of a class body binds *name* by a ``def`` or by
+    an assignment of it alone (:func:`last_class_binding`).
+    """
+    if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef):
+        return statement.name == name
+    if isinstance(statement, ast.Assign):
+        return any(
+            isinstance(target, ast.Name) and target.id == name
+            for target in statement.targets
+        )
+    return (
+        isinstance(statement, ast.AnnAssign)
+        and isinstance(statement.target, ast.Name)
+        and statement.target.id == name
+        and statement.value is not None
+    )
+
+
+#: What :func:`module_constant` gives for a value it cannot read.
+UNREAD = object()
+
+
+def module_constant(node: ast.expr, module: ast.Module | None) -> object:
+    """The constant *node* is, itself or a name *module* binds once, by an
+    assignment to it alone, to one (:func:`bindings_by_name`, so an import,
+    a ``def`` or a write from a function under ``global`` is another
+    binding); :data:`UNREAD` when it is neither. ``init=NO_INIT`` of a
+    ``@dataclass`` reads as the ``False`` a module's ``NO_INIT = False``
+    holds.
+    """
+    if isinstance(node, ast.Constant):
+        return node.value
+    if not isinstance(node, ast.Name) or module is None:
+        return UNREAD
+    nodes = bindings_by_name(module).get(node.id, [])
+    if len(nodes) != 1:
+        return UNREAD
+    value = assigned_value(module, nodes[0])
+    return value.value if isinstance(value, ast.Constant) else UNREAD
 
 
 def bindings_by_name(scope: ast.AST) -> dict[str, list[ast.AST]]:
@@ -1128,6 +1280,427 @@ def binding_scope(root: ast.Module, node: ast.AST, name: str) -> ast.AST:
     if scope is None or name in own_names(scope).declared_global:
         return root
     return scope
+
+
+def standing_where_read(root: ast.Module, node: ast.AST, name: str) -> list[ast.AST]:
+    """The bindings of *name* that may stand where *node*, under *root*, reads
+    it, as a read that runs where it is written finds them: a decorator, a
+    base or a default, which run as the statement does.
+
+    Of the bindings of the scope the read reaches (:func:`binding_scope`),
+    those that may have run before it (:func:`held_before`): one a later
+    statement of the scope replaces is no longer there, and either of two
+    in the branches of an ``if`` or a ``try`` may be. A class body that has
+    not yet bound the name reads the module's, as Python does: the body
+    looks a name it binds up in its own namespace and then in the module's
+    globals, never in a function or a class body around it; and one that
+    may not have bound it yet, in a branch that may not have run, reads the
+    module's beside its own (:func:`_bound_on_every_way`). A function that
+    binds it later holds none, as the read raises there. At the top of the
+    module, a binding a function makes of the name under ``global`` may
+    stand as well, since that function may have run
+    (:func:`global_bindings`). Empty when nothing but a builtin is the name.
+    """
+    scope = binding_scope(root, node, name)
+    held = list(held_before(root, bindings_by_name(scope).get(name, []), node))
+    if isinstance(scope, ast.ClassDef) and not any(
+        _bound_on_every_way(root, binding, node) for binding in held
+    ):
+        scope = root
+        held.extend(held_before(root, bindings_by_name(root).get(name, []), node))
+    if scope is root:
+        held.extend(
+            binding
+            for binding in global_bindings(root).get(name, [])
+            if all(binding is not other for other in held)
+        )
+    return held
+
+
+def _bound_on_every_way(root: ast.Module, binding: ast.AST, point: ast.AST) -> bool:
+    """Whether *binding*, of the scope that reads a name at *point*, binds it
+    on every way to *point*: an assignment or an import that runs before it
+    whatever happens (:func:`runs_before`), or a ``def`` or a ``class``
+    statement written straight in a block that holds *point*, before it.
+    """
+    if isinstance(binding, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return _later_in_block(_frames(root, binding), _frames(root, point))
+    return runs_before(root, binding, point)
+
+
+def import_path(binding: ast.AST, name: str, package: str | None = None) -> str | None:
+    """The dotted path an import statement, *binding*, binds *name* to:
+    ``dataclasses.dataclass`` for ``from dataclasses import dataclass``,
+    ``dataclasses`` for ``import dataclasses`` or ``import dataclasses as
+    dc`` and *name* ``dc``, ``a`` for ``import a.b``, which binds ``a``.
+
+    A relative import is read against *package*, the package the module
+    that writes it sits in (the module itself for a package's
+    ``__init__``): ``pkg._dc.dataclass`` for ``from ._dc import dataclass``
+    in ``pkg``. ``None`` for one without *package*, or in a module that
+    sits in none, or one that climbs past its top, and for any binding that
+    is no import.
+    """
+    if isinstance(binding, ast.ImportFrom):
+        source = _import_source(binding, package)
+        if source is None:
+            return None
+        return next(
+            (
+                f"{source}.{alias.name}"
+                for alias in binding.names
+                if (alias.asname or alias.name) == name
+            ),
+            None,
+        )
+    if isinstance(binding, ast.Import):
+        for alias in binding.names:
+            if alias.asname is not None and alias.asname == name:
+                return alias.name
+            if alias.asname is None and alias.name.partition(".")[0] == name:
+                return name
+    return None
+
+
+def _import_source(binding: ast.ImportFrom, package: str | None) -> str | None:
+    """The module a ``from ... import`` reads from, a relative one read
+    against *package* (:func:`import_path`); ``None`` when it cannot be read.
+    """
+    if not binding.level:
+        return binding.module
+    if not package:
+        return None
+    parts = package.split(".")
+    if binding.level - 1 >= len(parts):
+        return None
+    parts = parts[: len(parts) - (binding.level - 1)]
+    return ".".join([*parts, binding.module] if binding.module else parts)
+
+
+#: How many modules of a package a name is followed through, one re-export
+#: after another, past which it is read as the module that holds it.
+_EXPORT_DEPTH = 8
+
+#: The decorators that, called with keywords alone, give themselves back
+#: with those options preset: ``dataclasses.dataclass(eq=False)`` writes a
+#: record as ``@dataclass(eq=False)`` does.
+_OPTION_DECORATORS = frozenset({"dataclasses.dataclass"})
+
+#: The options one call presets on the way to what it wraps: its keywords,
+#: with the module that writes them, where a name among them is read.
+type Layer = tuple[tuple[ast.keyword, ...], ast.Module]
+
+
+@dataclass(frozen=True)
+class Reading:
+    """One thing a name may stand for where it is read: the dotted path an
+    import gives it, or ``None`` for a value no import names, and the options
+    preset on the way, by a ``functools.partial`` of it or a call of one of
+    :data:`_OPTION_DECORATORS` with keywords alone, the layer nearest the
+    read first, as the one Python applies last.
+    """
+
+    #: The dotted path, or ``None``.
+    path: str | None
+    #: The options preset on the way, nearest the read first.
+    presets: tuple[Layer, ...] = ()
+
+
+@dataclass(frozen=True, eq=False)
+class Exports:
+    """The modules of a package, by their dotted names, read for what each
+    imports from another: a relative import is read against the package a
+    module sits in (:meth:`package_of`), and a name one of them takes from
+    elsewhere is what it takes (:meth:`paths`).
+    """
+
+    #: Each module of the package, by its dotted name.
+    modules: Mapping[str, ast.Module]
+    #: Whether the module of a dotted name is a package's ``__init__``.
+    is_package: Callable[[str], bool]
+
+    def package_of(self, module: str) -> str:
+        """The package *module* sits in: itself for a package's ``__init__``."""
+        return module if self.is_package(module) else module.rpartition(".")[0]
+
+    def readings(self, dotted: str, depth: int = 0) -> list[Reading]:
+        """Each thing *dotted* may stand for once a module of the package it
+        names is read: ``pkg._dc.dataclass``, after ``from dataclasses import
+        dataclass`` in ``pkg/_dc.py``, is ``dataclasses.dataclass``, as
+        Python finds it.
+
+        The name is read in the longest module of the package *dotted*
+        starts with, through the bindings of it that stand once that module
+        has run (:func:`live_bindings`, :func:`global_bindings`), each as
+        :func:`reads_import` reads one: an import of it is followed, a
+        relative one too, and so is an alias of a name or a dotted one, with
+        the options a ``functools.partial`` of it presets (:class:`Reading`);
+        any other, a ``def``, a ``class`` or another value, makes it that
+        module's own, *dotted* itself. So is a module of the package, a
+        name no module of the package starts, one its module never binds,
+        and one followed through more than :data:`_EXPORT_DEPTH` names.
+        """
+        parts = dotted.split(".")
+        cut = next(
+            (
+                cut
+                for cut in range(len(parts) - 1, 0, -1)
+                if ".".join(parts[:cut]) in self.modules
+            ),
+            None,
+        )
+        if depth > _EXPORT_DEPTH or dotted in self.modules or cut is None:
+            return [Reading(dotted)]
+        module = ".".join(parts[:cut])
+        name = parts[cut]
+        tail = "".join(f".{part}" for part in parts[cut + 1 :])
+        tree = self.modules[module]
+        nodes = bindings_by_name(tree).get(name, [])
+        standing = [
+            *(nodes if len(nodes) < 2 else live_bindings(tree, nodes, None)),
+            *global_bindings(tree).get(name, []),
+        ]
+        return [
+            Reading(dotted) if reading.path is None else reading
+            for binding in standing
+            for reading in _binding_readings(
+                tree, binding, name, tail, module, self, depth
+            )
+        ] or [Reading(dotted)]
+
+
+def _expression_readings(
+    root: ast.Module,
+    node: ast.expr,
+    module: str | None,
+    exports: Exports | None,
+    depth: int,
+) -> list[Reading]:
+    """Each thing *node*, read where it is written under *root*, the module
+    *module* of the package *exports* reads, may stand for (:class:`Reading`):
+    a name or a dotted one through the bindings of its first name that may
+    stand there (:func:`standing_where_read`, :func:`_binding_readings`),
+    ``None`` when none does, a builtin's; either branch of a conditional
+    expression and each operand of an ``or`` or an ``and``, any of which
+    Python may give; and what a call gives back (:func:`_call_readings`).
+    ``None`` for anything else.
+    """
+    if depth > _EXPORT_DEPTH:
+        return [Reading(None)]
+    if isinstance(node, ast.IfExp):
+        return [
+            *_expression_readings(root, node.body, module, exports, depth + 1),
+            *_expression_readings(root, node.orelse, module, exports, depth + 1),
+        ]
+    if isinstance(node, ast.BoolOp):
+        return [
+            reading
+            for value in node.values
+            for reading in _expression_readings(root, value, module, exports, depth + 1)
+        ]
+    if isinstance(node, ast.Call):
+        return _call_readings(root, node, module, exports, depth)
+    attributes: list[str] = []
+    head = node
+    while isinstance(head, ast.Attribute):
+        attributes.append(head.attr)
+        head = head.value
+    if not isinstance(head, ast.Name):
+        return [Reading(None)]
+    tail = "".join(f".{attribute}" for attribute in reversed(attributes))
+    return [
+        reading
+        for binding in standing_where_read(root, head, head.id)
+        for reading in _binding_readings(
+            root, binding, head.id, tail, module, exports, depth
+        )
+    ] or [Reading(None)]
+
+
+def _call_readings(
+    root: ast.Module,
+    node: ast.Call,
+    module: str | None,
+    exports: Exports | None,
+    depth: int,
+) -> list[Reading]:
+    """What a call, *node*, gives back that a name may stand for
+    (:func:`_expression_readings`): a ``functools.partial`` of one thing is
+    that thing with the call's keywords preset nearest the read, as Python
+    calls what it wraps with them; a call of one of
+    :data:`_OPTION_DECORATORS` with keywords alone is that decorator so, as
+    it gives itself back. ``None`` for any other call: a partial that
+    presets a second argument, which the thing it wraps takes before the
+    class, and a decorator a call of anything else builds, which is no
+    import's.
+    """
+    layer: Layer = (tuple(node.keywords), root)
+    called = _expression_readings(root, node.func, module, exports, depth + 1)
+    if (
+        len(node.args) == 1
+        and not isinstance(node.args[0], ast.Starred)
+        and called
+        and all(r.path == "functools.partial" and not r.presets for r in called)
+    ):
+        wrapped = _expression_readings(root, node.args[0], module, exports, depth + 1)
+        return [Reading(r.path, (layer, *r.presets)) for r in wrapped]
+    if node.args:
+        return [Reading(None)]
+    return [
+        Reading(r.path, (layer, *r.presets))
+        if r.path in _OPTION_DECORATORS
+        else Reading(None)
+        for r in called
+    ] or [Reading(None)]
+
+
+def _binding_readings(
+    root: ast.Module,
+    binding: ast.AST,
+    name: str,
+    tail: str,
+    module: str | None,
+    exports: Exports | None,
+    depth: int,
+) -> list[Reading]:
+    """Each thing *name*, bound at *binding* under *root*, followed by the
+    attributes *tail* may stand for (:func:`_expression_readings`): an
+    import's path, read as *exports* makes it (:meth:`Exports.readings`); an
+    assignment's value when it is a name, a dotted one, a call, or an
+    expression that gives one of several, read where the assignment runs;
+    ``None`` for any other binding, for a value that stands for nothing an
+    import names, a builtin among them, and for an attribute of what a call
+    presets options on, which is none of the thing it wraps.
+    """
+    package = (
+        exports.package_of(module)
+        if exports is not None and module is not None
+        else None
+    )
+    path = import_path(binding, name, package)
+    if path is not None:
+        read = f"{path}{tail}"
+        if exports is None:
+            return [Reading(read)]
+        return exports.readings(read, depth + 1)
+    value = assigned_value(root, binding) if assignment_target(binding) else None
+    if not isinstance(
+        value, ast.Name | ast.Attribute | ast.Call | ast.IfExp | ast.BoolOp
+    ):
+        return [Reading(None)]
+    found = _expression_readings(root, value, module, exports, depth + 1)
+    return [
+        Reading(None)
+        if reading.path is None or (tail and reading.presets)
+        else Reading(f"{reading.path}{tail}", reading.presets)
+        for reading in found
+    ] or [Reading(None)]
+
+
+def reads_import(
+    root: ast.Module,
+    node: ast.expr,
+    dotted: str,
+    *,
+    module: str | None = None,
+    exports: Exports | None = None,
+) -> bool | None:
+    """Whether *node*, a name or a dotted one under *root*, stands for
+    *dotted* where it is read: through an import of it (``dataclass`` after
+    ``from dataclasses import dataclass``) or of a module it is an attribute
+    of (``dataclasses.dataclass`` after ``import dataclasses``), or through
+    an alias of one (``dc = dataclasses.dataclass``, a ``functools.partial``
+    of it, or a call of it with keywords alone when it is one of
+    :data:`_OPTION_DECORATORS`), read where the alias is assigned.
+
+    ``True`` when every binding of its first name that may stand there
+    (:func:`standing_where_read`) is such an import, ``False`` when none is,
+    a ``def``, an assignment of anything else or an import of something
+    else, and ``None`` when some are and some are not, so either may be
+    what the read finds; an alias that is one of several values (``dc = a
+    if ready else b``) counts each.
+
+    With *exports*, the modules of the package *root* is the module
+    *module* of, an import is read as the package's modules make it: a
+    relative one against the package *module* sits in, and a name a module
+    of the package takes from elsewhere as what it takes
+    (:meth:`Exports.readings`), so ``from ._dc import dataclass``, where
+    ``_dc`` imports ``dataclasses``' own, stands for it too.
+    """
+    if isinstance(node, ast.Call):
+        return False
+    hits = [
+        reading.path == dotted
+        for reading in _expression_readings(root, node, module, exports, 0)
+    ]
+    if hits and all(hits):
+        return True
+    return None if any(hits) else False
+
+
+def decorator_option(
+    root: ast.Module,
+    decorator: ast.expr,
+    dotted: str,
+    option: str,
+    *,
+    default: object,
+    module: str | None = None,
+    exports: Exports | None = None,
+) -> object:
+    """The value *decorator*, under *root*, with or without arguments, gives
+    its option *option* where it stands for *dotted* (:func:`reads_import`).
+
+    The keyword its own call passes, ``@dataclass(init=False)``, and else
+    the one preset on the way to *dotted* (:class:`Reading`), by a
+    ``functools.partial`` of it (``functools.partial(dataclasses.dataclass,
+    init=False)``) or a call of it with keywords alone
+    (``dataclasses.dataclass(init=False)``), the layer nearest the read
+    first, as Python applies it last; each a constant or a name the module
+    that writes it binds once to one (:func:`module_constant`). *default*
+    when no layer gives it, and when no reading stands for *dotted*.
+    :data:`UNREAD` when a ``**`` of a layer that does not name it may give
+    it, when the readings that stand for *dotted* give it differently, or
+    when its value is neither.
+    """
+    called = decorator.func if isinstance(decorator, ast.Call) else decorator
+    own: tuple[Layer, ...] = (
+        ((tuple(decorator.keywords), root),) if isinstance(decorator, ast.Call) else ()
+    )
+    found = [
+        _layered_option((*own, *reading.presets), option, default)
+        for reading in _expression_readings(root, called, module, exports, 0)
+        if reading.path == dotted
+    ]
+    if not found:
+        return default
+    first = found[0]
+    if all(_same_option(first, value) for value in found):
+        return first
+    return UNREAD
+
+
+def _layered_option(layers: Sequence[Layer], option: str, default: object) -> object:
+    """The value the first of *layers* that names *option* gives it
+    (:func:`decorator_option`); :data:`UNREAD` once a layer that does not
+    name it passes a ``**``, which may; *default* when none does.
+    """
+    for keywords, tree in layers:
+        named = next((keyword for keyword in keywords if keyword.arg == option), None)
+        if named is not None:
+            return module_constant(named.value, tree)
+        if any(keyword.arg is None for keyword in keywords):
+            return UNREAD
+    return default
+
+
+def _same_option(one: object, other: object) -> bool:
+    """Whether two values of an option (:func:`decorator_option`) are the
+    same: one :data:`UNREAD` is no value, so it is the same as none.
+    """
+    if one is UNREAD or other is UNREAD:
+        return False
+    return type(one) is type(other) and one == other
 
 
 #: The compound statements: those whose blocks hold statements of the scope

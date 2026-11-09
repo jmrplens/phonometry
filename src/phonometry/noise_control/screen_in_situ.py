@@ -61,13 +61,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.boundary import round_half_even, settled
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_choice,
     require_finite,
@@ -84,7 +85,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "ISO11821_BAND_RANGE_HZ",
@@ -178,9 +179,37 @@ class ScreenInSituWarning(PhonometryWarning):
     """The measurement is outside a condition ISO 11821 states."""
 
 
+@overload
+def screen_background_corrected_level[S1: RealScalar, S2: RealScalar](
+    levels: S1,
+    background_levels: S2,
+) -> float: ...
+
+
+@overload
+def screen_background_corrected_level[V: RealValues, A2: NumericArrayLike](
+    levels: V,
+    background_levels: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def screen_background_corrected_level[S1: RealScalar, V: RealValues](
+    levels: S1,
+    background_levels: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def screen_background_corrected_level[A1: NumericArrayLike, A2: NumericArrayLike](
+    levels: A1,
+    background_levels: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def screen_background_corrected_level(
     levels: NumericArrayLike, background_levels: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The level with the background taken off, clause 5.7.
 
     .. math::
@@ -200,19 +229,21 @@ def screen_background_corrected_level(
     :param levels: The level with the sources on, per band, in decibels.
     :param background_levels: The level with them off, per band, in
         decibels.
-    :return: The corrected level per band, in decibels.
+    :return: The corrected level per band, in decibels. A ``float`` when ``levels`` and
+        ``background_levels`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: For inputs that do not match band for band, or a
         margin under :data:`ISO11821_MIN_BACKGROUND_MARGIN_DB`.
     :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
         that is not a real number.
     """
-    levels = require_finite_array(levels, "levels")
+    measured = require_finite_array(levels, "levels")
     background = require_finite_array(background_levels, "background_levels")
-    if levels.shape != background.shape:
+    if measured.shape != background.shape:
         msg = "'levels' and 'background_levels' must match band for band."
         raise ValueError(msg)
     lower, upper = BACKGROUND_CORRECTION_WINDOW_DB
-    margin = levels - background
+    margin = measured - background
     judged = settled(margin)
     if float(np.min(judged)) < lower:
         msg = (
@@ -221,8 +252,10 @@ def screen_background_corrected_level(
             f"included; the smallest margin is {float(np.min(margin)):.1f} dB."
         )
         raise ValueError(msg)
-    corrected = 10.0 * np.log10(10.0 ** (levels / 10.0) - 10.0 ** (background / 10.0))
-    return np.asarray(np.where(judged > upper, levels, corrected), dtype=np.float64)
+    corrected = 10.0 * np.log10(10.0 ** (measured / 10.0) - 10.0 ** (background / 10.0))
+    return as_float_or_array(
+        np.where(judged > upper, measured, corrected), like=(levels, background_levels)
+    )
 
 
 def screen_source_directivity_index(levels: NumericArrayLike) -> NDArray[np.float64]:

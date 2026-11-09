@@ -257,8 +257,8 @@ for ell in (100.0, 300.0, 914.0):
 powers, distances = [8000.0, 12000.0], [60.0, 240.0, 960.0, 3840.0]
 sel = [[98.0, 86.0, 74.0, 62.0], [104.0, 92.0, 80.0, 68.0]]
 lmax = [[94.0, 82.0, 70.0, 58.0], [100.0, 88.0, 76.0, 64.0]]
-base = float(aircraft.npd_level(powers, distances, sel, 12000.0, 526.0)[0])
-peak = float(aircraft.npd_level(powers, distances, lmax, 12000.0, 526.0)[0])
+base = aircraft.npd_level(powers, distances, sel, 12000.0, 526.0)
+peak = aircraft.npd_level(powers, distances, lmax, 12000.0, 526.0)
 d_lambda = (2 / np.pi) * 82.3 * 10 ** ((base - peak) / 10)
 frac = np.linspace(-1.0, 2.0, 601)
 for length in (464.0, 2000.0):
@@ -346,8 +346,8 @@ dp = float(np.linalg.norm(observer - (s1 + q * u)))   # 526 m, distancia oblicua
 beta = float(np.degrees(np.arccos(500.0 / dp)))       # 18.0 grados (§4.5.5)
 p_seg = float(np.sqrt(power[top] ** 2
                       + (q / length) * (power[top + 1] ** 2 - power[top] ** 2)))
-base = float(aircraft.npd_level(powers, distances, sel, p_seg, dp)[0])
-peak = float(aircraft.npd_level(powers, distances, lmax, p_seg, dp)[0])
+base = aircraft.npd_level(powers, distances, sel, p_seg, dp)
+peak = aircraft.npd_level(powers, distances, lmax, p_seg, dp)
 d_lambda = (2 / np.pi) * 82.3 * 10 ** ((base - peak) / 10)   # Ec. 4-20
 terms = {
     "impedancia": aircraft.impedance_adjustment(),

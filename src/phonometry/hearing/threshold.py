@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 
@@ -33,7 +33,10 @@ from .._internal.frozen import OwnsArrays, read_only
 
 # Imported to run, not only to type: typing.get_type_hints resolves the
 # sex field of AgeThresholdResult in this module's namespace.
-from .._internal.types import Sex  # noqa: TC001
+from .._internal.types import (
+    Sex,  # noqa: TC001
+    as_float_or_array,
+)
 from .._internal.validation import (
     real_array,
     require_choice,
@@ -49,7 +52,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import FreeOrDiffuseField, NumericArrayLike
+    from .._internal.types import (
+        FreeOrDiffuseField,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
 
 __all__ = [
     "AUDIOMETRIC_FREQUENCIES_HZ",
@@ -392,9 +400,45 @@ def age_threshold(
     )
 
 
+@overload
+def reference_threshold(
+    field: FreeOrDiffuseField = ..., frequencies: None = None
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reference_threshold[S: RealScalar](
+    field: FreeOrDiffuseField, frequencies: S
+) -> float: ...
+
+
+@overload
+def reference_threshold[S: RealScalar](
+    field: FreeOrDiffuseField = ..., *, frequencies: S
+) -> float: ...
+
+
+@overload
+def reference_threshold[V: RealValues](
+    field: FreeOrDiffuseField, frequencies: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reference_threshold[V: RealValues](
+    field: FreeOrDiffuseField = ..., *, frequencies: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reference_threshold[A: NumericArrayLike](
+    field: FreeOrDiffuseField = ..., frequencies: A | None = None
+) -> float | NDArray[np.float64]: ...
+
+
 def reference_threshold(
     field: FreeOrDiffuseField = "free", frequencies: NumericArrayLike | None = None
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """Reference threshold of hearing (ISO 389-7:2005, Table 1).
 
     The sound pressure level, in dB, that corresponds to the audiometric zero
@@ -405,13 +449,18 @@ def reference_threshold(
         ``"diffuse"`` (a diffuse field).
     :param frequencies: Optional subset of the audiometric frequencies, in
         hertz; ``None`` uses all eleven (125 Hz to 8000 Hz).
-    :return: The reference threshold, in dB, aligned with the frequencies.
+    :return: The reference threshold, in dB, aligned with the frequencies. A
+        ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included, and every band without frequencies.
     :raises ValueError: for an unknown field or frequency.
     :raises TypeError: if ``field`` is not a text, or ``frequencies`` holds a text or a
         value that is not a real number.
     """
     chosen = require_choice(field, "field", FIELDS)
-    return _select(_REFERENCE[chosen], frequencies)
+    table = _select(_REFERENCE[chosen], frequencies)
+    return (
+        table if frequencies is None else as_float_or_array(table, like=(frequencies,))
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -597,10 +646,46 @@ def _select_retspl(
     return values[idx]
 
 
+@overload
+def earphone_reference_level(
+    earphone: ReferenceEarphone = ..., frequencies: None = None
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def earphone_reference_level[S: RealScalar](
+    earphone: ReferenceEarphone, frequencies: S
+) -> float: ...
+
+
+@overload
+def earphone_reference_level[S: RealScalar](
+    earphone: ReferenceEarphone = ..., *, frequencies: S
+) -> float: ...
+
+
+@overload
+def earphone_reference_level[V: RealValues](
+    earphone: ReferenceEarphone, frequencies: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def earphone_reference_level[V: RealValues](
+    earphone: ReferenceEarphone = ..., *, frequencies: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def earphone_reference_level[A: NumericArrayLike](
+    earphone: ReferenceEarphone = ..., frequencies: A | None = None
+) -> float | NDArray[np.float64]: ...
+
+
 def earphone_reference_level(
     earphone: ReferenceEarphone = _TDH39,
     frequencies: NumericArrayLike | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """Reference equivalent threshold sound pressure level (ISO 389-1:1998).
 
     The sound pressure level, in dB re 20 uPa, that an audiometer has to
@@ -614,13 +699,54 @@ def earphone_reference_level(
         artificial ear, for an earphone meeting the requirements of 4.3).
     :param frequencies: Optional subset of :data:`RETSPL_FREQUENCIES_HZ`, in
         hertz; ``None`` uses all twenty-three.
-    :return: The reference level, in dB, aligned with the frequencies.
+    :return: The reference level, in dB, aligned with the frequencies. A
+        ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included, and every frequency without frequencies.
     :raises ValueError: For an unknown earphone or frequency.
     :raises TypeError: if ``earphone`` is not a text, or ``frequencies`` holds a text or
         a value that is not a real number.
     """
     require_choice(earphone, "earphone", EARPHONES)
-    return _select_retspl(_RETSPL[earphone], frequencies)
+    table = _select_retspl(_RETSPL[earphone], frequencies)
+    return (
+        table if frequencies is None else as_float_or_array(table, like=(frequencies,))
+    )
+
+
+@overload
+def hearing_level_to_coupler_spl[S1: RealScalar, S2: RealScalar](
+    hearing_level: S1,
+    earphone: ReferenceEarphone = ...,
+    *,
+    frequencies: S2,
+) -> float: ...
+
+
+@overload
+def hearing_level_to_coupler_spl[V: RealValues, A2: NumericArrayLike](
+    hearing_level: V,
+    earphone: ReferenceEarphone = ...,
+    *,
+    frequencies: A2 | None = None,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def hearing_level_to_coupler_spl[S1: RealScalar, V: RealValues](
+    hearing_level: S1,
+    earphone: ReferenceEarphone = ...,
+    *,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def hearing_level_to_coupler_spl[A1: NumericArrayLike, A2: NumericArrayLike](
+    hearing_level: A1,
+    earphone: ReferenceEarphone = ...,
+    *,
+    frequencies: A2 | None = None,
+) -> float | NDArray[np.float64]: ...
 
 
 def hearing_level_to_coupler_spl(
@@ -628,7 +754,7 @@ def hearing_level_to_coupler_spl(
     earphone: ReferenceEarphone = _TDH39,
     *,
     frequencies: NumericArrayLike | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """An audiogram in dB HL as the level the coupler has to see, in dB SPL.
 
     Hearing level is defined against the audiometric zero, so the two differ
@@ -641,13 +767,17 @@ def hearing_level_to_coupler_spl(
         ``"TDH 39"`` or ``"other supra-aural"``.
     :param frequencies: The frequencies the audiogram was taken at; ``None``
         uses all twenty-three of :data:`RETSPL_FREQUENCIES_HZ`.
-    :return: The equivalent sound pressure level in the coupler, in dB.
+    :return: The equivalent sound pressure level in the coupler, in dB. A
+        ``float`` when ``hearing_level`` and ``frequencies`` are both numbers, an
+        array when either is a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If the audiogram does not match the frequencies, or
         for an unknown earphone or frequency.
     :raises TypeError: if ``earphone`` is not a text, or ``hearing_level`` holds a text
         or a value that is not a real number.
     """
-    reference = earphone_reference_level(earphone, frequencies)
+    require_choice(earphone, "earphone", EARPHONES)
+    reference = _select_retspl(_RETSPL[earphone], frequencies)
     levels = np.atleast_1d(real_array(hearing_level, "hearing_level"))
     if levels.shape != reference.shape:
         msg = (
@@ -655,4 +785,4 @@ def hearing_level_to_coupler_spl(
             f"covers {reference.size} frequency/frequencies."
         )
         raise ValueError(msg)
-    return np.asarray(levels + reference, dtype=np.float64)
+    return as_float_or_array(levels + reference, like=(hearing_level, frequencies))

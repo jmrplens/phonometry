@@ -454,9 +454,29 @@ def air_absorption_correction(
     )
 
 
+@overload
+def reproducibility_uncertainty(frequencies: None = None) -> NDArray[np.float64]: ...
+
+
+@overload
+def reproducibility_uncertainty[S: RealScalar](frequencies: S) -> float: ...
+
+
+@overload
+def reproducibility_uncertainty[V: RealValues](
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reproducibility_uncertainty[A: NumericArrayLike](
+    frequencies: A | None = None,
+) -> float | NDArray[np.float64]: ...
+
+
 def reproducibility_uncertainty(
     frequencies: NumericArrayLike | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """Table 1, the reproducibility between European laboratories.
 
     The figures are an expanded uncertainty: the round robin of Annex A gives a
@@ -467,7 +487,9 @@ def reproducibility_uncertainty(
 
     :param frequencies: The nominal octave centres wanted, in hertz; omit for
         the six the table prints, in order.
-    :return: The uncertainty of the absorption coefficient in each band.
+    :return: The uncertainty of the absorption coefficient in each band. A
+        ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included, and every band without frequencies.
     :raises ValueError: For a frequency Table 1 does not print.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
@@ -487,7 +509,7 @@ def reproducibility_uncertainty(
             msg = f"Table 1 of EN 16487 prints {printed} Hz; got {band:g} Hz."
             raise ValueError(msg)
         out.append(CEILING_UNCERTAINTY[match[0]])
-    return np.asarray(out, dtype=np.float64)
+    return as_float_or_array(out, like=(frequencies,))
 
 
 def _lowest_humidity(

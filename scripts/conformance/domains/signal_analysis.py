@@ -805,7 +805,7 @@ def _chk_rice_narrowband_peak_exceedance() -> Outcome:
     res = ph.metrology.peak_statistics(np.sin(2.0 * np.pi * 60.0 * t), fs)
     return numeric(
         float(np.exp(-8.0)),
-        float(res.peak_exceedance(4.0)[0]),
+        res.peak_exceedance(4.0),
         1e-5,
         places=6,
     )

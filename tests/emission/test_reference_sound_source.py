@@ -142,7 +142,7 @@ def test_annex_a_c2_for_each_radiation_character() -> None:
     unknown = emission.radiation_impedance_correction(
         temperature_c=30.0, static_pressure_kpa=95.0
     )
-    assert unknown[0] == pytest.approx(pressure + 7.5 * ratio, abs=1e-12)
+    assert unknown == pytest.approx(pressure + 7.5 * ratio, abs=1e-12)
     monopole = emission.radiation_impedance_correction(
         temperature_c=30.0,
         static_pressure_kpa=95.0,

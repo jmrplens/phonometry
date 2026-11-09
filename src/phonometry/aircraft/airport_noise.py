@@ -33,12 +33,13 @@ Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, overload
 
 import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -55,7 +56,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Mounting = Literal["wing", "fuselage", "propeller"]
 
@@ -452,13 +453,43 @@ class NPDLevelResult(OwnsArrays):
         return plot_npd_level(self, ax=ax, language=check_language(language), **kwargs)
 
 
+@overload
+def npd_level[S: RealScalar](
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
+    power: float,
+    distance_m: S,
+) -> float: ...
+
+
+@overload
+def npd_level[V: RealValues](
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
+    power: float,
+    distance_m: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def npd_level[A: NumericArrayLike](
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
+    power: float,
+    distance_m: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def npd_level(
     powers: NumericArrayLike,
     distances_m: NumericArrayLike,
     levels: NumericArrayLike,
     power: float,
     distance_m: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """Interpolated NPD event level ``L(P, d)`` (ECAC Doc 29 §4.2, Eqs. 4-3/4-4).
 
     Interpolates log-linearly in slant distance (Eq. 4-4) at the two bracketing
@@ -472,7 +503,8 @@ def npd_level(
         in dB.
     :param power: Query engine power setting ``P``.
     :param distance_m: Query slant distance(s) ``d``, in metres.
-    :return: The interpolated event level per query distance, in dB.
+    :return: The interpolated event level per query distance, in dB. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the table or inputs are invalid.
     :raises TypeError: if ``power`` is not a single number, or ``distance_m``,
         ``distances_m``, ``levels`` or ``powers`` holds a text or a value that is not a
@@ -496,7 +528,9 @@ def npd_level(
     # Linear interpolation/extrapolation over power between the bracketing rows.
     j = int(np.clip(np.searchsorted(p, pq) - 1, 0, p.size - 2))
     frac = (pq - p[j]) / (p[j + 1] - p[j])
-    return np.asarray(rows[j] + (rows[j + 1] - rows[j]) * frac, dtype=np.float64)
+    return as_float_or_array(
+        rows[j] + (rows[j + 1] - rows[j]) * frac, like=(distance_m,)
+    )
 
 
 def npd_curve(
@@ -1034,12 +1068,12 @@ def _event_level_core(
             q=q, ds=ds, engine=engine, roll_behind=roll_behind
         )
         if key == "maximum":
-            base = float(npd_level(p, d, lm, p_seg, max(ds, _NPD_FLOOR_M))[0])
+            base = npd_level(p, d, lm, p_seg, max(ds, _NPD_FLOOR_M))
             seg_levels.append(base + imp + di - lam_att + sor)
         else:
             dist = _npd_slant_distance(ds=ds, dp=dp, on_roll=roll_behind or roll_ahead)
-            le_d = float(npd_level(p, d, le, p_seg, dist)[0])
-            lm_d = float(npd_level(p, d, lm, p_seg, dist)[0])
+            le_d = npd_level(p, d, le, p_seg, dist)
+            lm_d = npd_level(p, d, lm, p_seg, dist)
             v_seg = _segment_speed(
                 v1=v1, v2=v2, frac=frac, on_roll=is_takeoff or is_landing
             )

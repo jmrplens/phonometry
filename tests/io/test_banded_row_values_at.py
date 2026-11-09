@@ -141,7 +141,8 @@ def test_the_shape_of_the_frequencies_is_the_shape_of_the_answer() -> None:
     assert values.shape == (2, 2)
     assert values.dtype == np.float64
     assert values[1, 0] == seats.absorption_coefficient(500)
-    assert seats.values_at(500.0).shape == ()
+    assert type(seats.values_at(500.0)) is float
+    assert seats.values_at(np.asarray(500.0)).shape == ()
     assert seats.values_at([]).shape == (0,)
 
 

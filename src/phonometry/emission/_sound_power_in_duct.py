@@ -941,6 +941,39 @@ def _annex_a_coefficients(rows: _Rows, band: int) -> tuple[float, ...]:
     return dict(rows)[band]
 
 
+@overload
+def flow_modal_correction[S: RealScalar](
+    frequencies: S,
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: MicrophoneShield = ...,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def flow_modal_correction[V: RealValues](
+    frequencies: V,
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: MicrophoneShield = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flow_modal_correction[A: NumericArrayLike](
+    frequencies: A,
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: MicrophoneShield = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def flow_modal_correction(
     frequencies: NumericArrayLike,
     flow_velocity: float,
@@ -948,7 +981,7 @@ def flow_modal_correction(
     *,
     shield: MicrophoneShield = "sampling-tube",
     speed_of_sound: float = _C_NORMAL,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Combined mean flow velocity and modal correction :math:`C_{3,4}`.
 
     For the sampling tube, the polynomial of clause 5.3.3.4 with the
@@ -989,7 +1022,8 @@ def flow_modal_correction(
         the 340 m/s clause 5.3.4.3 states for normal conditions by default.
         :func:`sound_power_in_duct` passes the duct air's own :math:`c`
         instead. Unused by the sampling tube.
-    :return: :math:`C_{3,4}` per band, in decibels.
+    :return: :math:`C_{3,4}` per band, in decibels. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band that is not a nominal centre, a diameter
         outside 0,15 m to 2 m, a velocity beyond the shield's limit (60 m/s
         for the sampling tube, 20 m/s for the nose cone, 15 m/s for the foam
@@ -1011,16 +1045,18 @@ def flow_modal_correction(
             raise ValueError(msg)
         # Eq. (8): 10 lg[1/(1 - U/c)^2], one value for every band.
         value = 10.0 * math.log10(1.0 / (1.0 - u / c) ** 2)
-        return np.full(freqs.shape, value, dtype=np.float64)
+        return as_float_or_array(
+            np.full(freqs.shape, value, dtype=np.float64), like=(frequencies,)
+        )
     _check_informative_bands(freqs, u)
     rows = _annex_a_rows(duct_diameter_m)
     _warn_reconstructed_coefficient(duct_diameter_m, freqs)
-    return np.asarray(
+    return as_float_or_array(
         [
             np.polynomial.polynomial.polyval(u, _annex_a_coefficients(rows, band))
             for band in _band_keys(freqs)
         ],
-        dtype=np.float64,
+        like=(frequencies,),
     )
 
 

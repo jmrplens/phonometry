@@ -581,7 +581,7 @@ x = np.sin(2 * np.pi * 60.0 * t)          # narrowband: r is essentially 1
 
 res = metrology.peak_statistics(x, fs)
 print(round(res.irregularity_factor, 3))       # 0.997
-print(res.peak_exceedance(4.0))                # exp(-8): about 1 in 3000
+print(round(res.peak_exceedance(4.0), 8))      # exp(-8): about 1 in 3000
 res.plot()   # empirical exceedance against the Rice mixture (figure below)
 ```
 

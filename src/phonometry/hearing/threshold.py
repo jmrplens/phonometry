@@ -773,8 +773,8 @@ def hearing_level_to_coupler_spl(
         included.
     :raises ValueError: If the audiogram does not match the frequencies, or
         for an unknown earphone or frequency.
-    :raises TypeError: if ``earphone`` is not a text, or ``hearing_level`` holds a text
-        or a value that is not a real number.
+    :raises TypeError: if ``earphone`` is not a text, or ``hearing_level`` or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     require_choice(earphone, "earphone", EARPHONES)
     reference = _select_retspl(_RETSPL[earphone], frequencies)

@@ -41,6 +41,7 @@ from libm_identity import (
     WITHOUT_FMA,
     Unread,
     glibc_built_for_x86_64_v3,
+    run_child,
     runs_the_pinned_routines,
 )
 from reference_data import IEC61672_TABLE3 as TABLE3
@@ -81,6 +82,7 @@ from phonometry.filters.weighting import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+    from pathlib import Path
 
 #: Sample rates the accuracy table below is measured at: the two broadcast
 #: families (32/44.1/48 kHz), their doubles, and 192 kHz.
@@ -1906,16 +1908,9 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     draws = np.random.default_rng(1).uniform(-700.0, 700.0, 20000).tolist()
     here = np.array([math.exp(v) for v in draws])
     environment = {**os.environ, TUNABLES: WITHOUT_FMA}
-    # Fixed argv, no shell, no user input
-    finished = subprocess.run(
-        [sys.executable, "-c", script],
-        check=True,
-        capture_output=True,
-        text=True,
-        env=environment,
-        timeout=300,
-    )
-    child_exp, at_48k, at_44k = finished.stdout.split()
+    child_exp, at_48k, at_44k = run_child(
+        [sys.executable, "-c", script], env=environment, timeout=300
+    ).split()
     assert child_exp != hashlib.sha256(here.tobytes()).hexdigest()[:16], (
         "the child still ran glibc's FMA variant"
     )
@@ -1940,6 +1935,31 @@ def test_a_build_that_cannot_be_told_hands_the_child_nothing(
     with pytest.raises(
         pytest.skip.Exception,
         match=re.escape(f"the build of glibc here cannot be told: {unread.reason}"),
+    ):
+        test_glibc_without_its_fma_variant_designs_the_documented_bytes()
+
+
+def test_a_child_the_system_refuses_to_start_hands_the_design_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The test without FMA skips, naming the interpreter, where its child is refused.
+
+    An interpreter without its execute bits stands in for one whose loader
+    sits on a mount made ``noexec`` once this process started: the child
+    that would design under the mask never runs, so there is no design to
+    hold to the documented bytes.
+    """
+    if sys.platform == "win32":
+        pytest.skip("Windows starts a program whatever its mode bits say")
+    refused = tmp_path / "python"
+    refused.write_bytes(b"")
+    refused.chmod(0o644)
+    monkeypatch.setattr(sys, "executable", str(refused))
+    monkeypatch.setitem(globals(), "glibc_built_for_x86_64_v3", lambda: False)
+    monkeypatch.setitem(globals(), "runs_the_pinned_routines", lambda: True)
+    with pytest.raises(
+        pytest.skip.Exception,
+        match=re.escape(f"this system refuses to start {refused} (Permission denied)"),
     ):
         test_glibc_without_its_fma_variant_designs_the_documented_bytes()
 

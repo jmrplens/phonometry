@@ -12,9 +12,12 @@ way glibc writes it, hold the reading of the real library here to
 planted ones of the other build mapped ahead of them. Where nothing names
 them, or they cannot be read, the build and the loader's reading are an
 :class:`libm_identity.Unread` that says what could not be read, and the tests
-that ask for one build or for that reading skip by it. Only the tests that
-look a symbol up need :mod:`ctypes`; on an interpreter without it the others
-run, as :mod:`libm_identity` does there.
+that ask for one build or for that reading skip by it. Every child the tests
+start goes through :func:`libm_identity.run_child`, so that a system that
+refuses to start the interpreter, the loader or ``readelf`` skips the test
+that would read the child, and a child that runs and fails fails it. Only the
+tests that look a symbol up need :mod:`ctypes`; on an interpreter without it
+the others run, as :mod:`libm_identity` does there.
 :func:`libm_identity.mask_reading` reads how a loader reads
 ``GLIBC_TUNABLES`` from the names its parser carries, so the tests hand it
 loader images spelt as each glibc spells them and hold the reading of this
@@ -616,15 +619,11 @@ def _exp_digest_under(tunables: str) -> str:
     }
     if tunables:
         environment[libm_identity.TUNABLES] = tunables
-    # Fixed argv, no shell, no user input
-    return subprocess.run(
+    return libm_identity.run_child(
         [sys.executable, "-I", "-c", _EXP_DIGEST],
-        check=True,
-        capture_output=True,
-        text=True,
         env=environment,
         timeout=60,
-    ).stdout.strip()
+    ).strip()
 
 
 @pytest.mark.parametrize(
@@ -915,9 +914,7 @@ def test_a_libm_found_by_a_relative_path_is_the_file_mapped_at_exp(
     planted = _libm_of_the_other_build(copy, tmp_path / "other")
     search = os.environ.get("LD_LIBRARY_PATH")
     environment = dict(os.environ, LD_LIBRARY_PATH=f"lib:{search}" if search else "lib")
-    # Fixed argv, no shell; the paths are this module's directory and a file
-    # this test wrote
-    first, read, v3, mapped = subprocess.run(
+    first, read, v3, mapped = libm_identity.run_child(
         [
             sys.executable,
             "-I",
@@ -926,13 +923,10 @@ def test_a_libm_found_by_a_relative_path_is_the_file_mapped_at_exp(
             str(Path(__file__).parent),
             str(planted),
         ],
-        check=True,
-        capture_output=True,
-        text=True,
         cwd=tmp_path,
         env=environment,
         timeout=60,
-    ).stdout.splitlines()
+    ).splitlines()
     assert Path(mapped).samefile(copy)
     assert Path(first).samefile(planted)
     assert Path(read).is_absolute()
@@ -972,9 +966,7 @@ def test_a_loader_run_by_a_relative_path_is_the_file_mapped_at_tls_get_addr(
     _on_x86_64_glibc()
     real = _file_holding("__tls_get_addr")
     planted = _loader_read_otherwise(real, tmp_path)
-    # Fixed argv, no shell; the loader is the one this process runs, the
-    # paths this module's directory and a file this test wrote
-    read, agrees, mapped = subprocess.run(
+    read, agrees, mapped = libm_identity.run_child(
         [
             f"./{real.name}",
             sys.executable,
@@ -984,12 +976,9 @@ def test_a_loader_run_by_a_relative_path_is_the_file_mapped_at_tls_get_addr(
             str(Path(__file__).parent),
             str(planted),
         ],
-        check=True,
-        capture_output=True,
-        text=True,
         cwd=real.parent,
         timeout=60,
-    ).stdout.splitlines()
+    ).splitlines()
     assert Path(mapped).samefile(real)
     assert Path(read).is_absolute()
     assert Path(read).samefile(real)
@@ -1060,8 +1049,7 @@ def test_a_libm_named_by_a_relative_path_without_maps_is_neither_build(
     shutil.copyfile(_file_holding("exp"), copy)
     search = os.environ.get("LD_LIBRARY_PATH")
     environment = dict(os.environ, LD_LIBRARY_PATH=f"lib:{search}" if search else "lib")
-    # Fixed argv, no shell; the path is this module's directory
-    shown = subprocess.run(
+    shown = libm_identity.run_child(
         [
             sys.executable,
             "-I",
@@ -1070,13 +1058,10 @@ def test_a_libm_named_by_a_relative_path_without_maps_is_neither_build(
             str(Path(__file__).parent),
             "glibc_built_for_x86_64_v3",
         ],
-        check=True,
-        capture_output=True,
-        text=True,
         cwd=tmp_path,
         env=environment,
         timeout=60,
-    ).stdout
+    )
     assert shown.splitlines() == [
         "Unread",
         "dladdr names the object that defines exp by the relative path "
@@ -1094,9 +1079,7 @@ def test_a_loader_run_by_a_relative_path_without_maps_is_named_by_none() -> None
     """
     _on_x86_64_glibc()
     real = _file_holding("__tls_get_addr")
-    # Fixed argv, no shell; the loader is the one this process runs, the
-    # path this module's directory
-    shown = subprocess.run(
+    shown = libm_identity.run_child(
         [
             f"./{real.name}",
             sys.executable,
@@ -1106,12 +1089,9 @@ def test_a_loader_run_by_a_relative_path_without_maps_is_named_by_none() -> None
             str(Path(__file__).parent),
             "loaded_loader",
         ],
-        check=True,
-        capture_output=True,
-        text=True,
         cwd=real.parent,
         timeout=60,
-    ).stdout
+    )
     assert shown.splitlines() == [
         "Unread",
         "dladdr names the object that defines __tls_get_addr by the relative path "
@@ -1221,20 +1201,127 @@ def test_without_ctypes_only_the_tests_that_look_a_symbol_up_skip() -> None:
     those that look up where a symbol resolves, or map a file of their own,
     skip, saying why.
     """
-    # Fixed argv, no shell; the directory is the one this module is in
-    shown = subprocess.run(
+    shown = libm_identity.run_child(
         [sys.executable, "-I", "-c", _WITHOUT_CTYPES_CHILD, str(Path(__file__).parent)],
-        check=True,
-        capture_output=True,
-        text=True,
         timeout=60,
-    ).stdout
+    )
     assert shown.splitlines() == [_WITHOUT_CTYPES]
 
 
 def test_off_linux_no_symbol_is_looked_up(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(platform, "system", lambda: "Darwin")
     assert libm_identity._resolved("exp") is None
+
+
+def _refused(directory: Path, name: str, program: Path | None = None) -> Path:
+    """A file *name* in *directory* without its execute bits, a copy of *program*.
+
+    The system refuses to start it, as it refuses a program, or a loader,
+    whose mount was made ``noexec`` once this process started.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    refused = directory / name
+    if program is None:
+        refused.write_bytes(b"")
+    else:
+        shutil.copyfile(program, refused)
+    refused.chmod(0o644)
+    return refused
+
+
+def _refusal(program: Path | str, cwd: Path | None = None) -> str:
+    """The start of the reason a test skips for when *program* is refused."""
+    where = "" if cwd is None else f" from {cwd}"
+    return re.escape(
+        f"this system refuses to start {program}{where} (Permission denied)"
+    )
+
+
+@pytest.mark.parametrize("test", ["planted-loader", "without-maps"])
+def test_a_loader_the_system_refuses_to_start_skips_the_test_that_runs_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, test: str
+) -> None:
+    """Where the loader cannot be run as a program, the test that runs it skips.
+
+    A copy of the loader without its execute bits stands in for the loader
+    on a mount made ``noexec`` once this process started: the system refuses
+    to start it before the child runs, so there is no reading to hold, and
+    the test skips, naming the loader and the refusal, instead of erroring.
+    """
+    _on_x86_64_glibc()
+    real = _file_holding("__tls_get_addr")
+    refused = _refused(tmp_path / "refused", real.name, real)
+    monkeypatch.setitem(globals(), "_file_holding", lambda symbol: refused)
+    runs = {
+        "planted-loader": lambda: (
+            test_a_loader_run_by_a_relative_path_is_the_file_mapped_at_tls_get_addr(
+                tmp_path / "test"
+            )
+        ),
+        "without-maps": (
+            test_a_loader_run_by_a_relative_path_without_maps_is_named_by_none
+        ),
+    }
+    with pytest.raises(
+        pytest.skip.Exception, match=_refusal(f"./{refused.name}", refused.parent)
+    ):
+        runs[test]()
+
+
+@pytest.mark.parametrize(
+    "site", ["masks", "relative-libm", "relative-libm-without-maps", "without-ctypes"]
+)
+def test_an_interpreter_the_system_refuses_to_start_skips_the_test_of_its_child(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: str
+) -> None:
+    """Every child these tests start from the interpreter skips where it is refused.
+
+    A loader on a mount made ``noexec`` once this process started refuses
+    every dynamic program, the interpreter included: the masks' children, the
+    children that find the libm by a relative path and the child without
+    ctypes then never run, and their tests skip by the refusal.
+    """
+    _on_x86_64_glibc()
+    test = tmp_path / "test"
+    test.mkdir()
+    cwd = None
+    if site.startswith("relative-libm"):
+        # These copy the libm ctypes finds at exp's address and start their
+        # child from the directory that holds lib/.
+        _file_holding("exp")
+        cwd = test
+    refused = _refused(tmp_path / "refused", "python")
+    monkeypatch.setattr(sys, "executable", str(refused))
+    runs = {
+        "masks": lambda: _exp_digest_under.__wrapped__(""),
+        "relative-libm": lambda: (
+            test_a_libm_found_by_a_relative_path_is_the_file_mapped_at_exp(test)
+        ),
+        "relative-libm-without-maps": lambda: (
+            test_a_libm_named_by_a_relative_path_without_maps_is_neither_build(test)
+        ),
+        "without-ctypes": test_without_ctypes_only_the_tests_that_look_a_symbol_up_skip,
+    }
+    with pytest.raises(pytest.skip.Exception, match=_refusal(refused, cwd)):
+        runs[site]()
+
+
+@pytest.mark.parametrize(
+    ("script", "status"),
+    [("raise SystemExit(3)", 3), ("raise PermissionError(13, 'Permission denied')", 1)],
+    ids=["status", "permission-error"],
+)
+def test_a_child_that_runs_and_fails_fails_the_test(script: str, status: int) -> None:
+    """Only a refused start skips: a child that ran fails its test by its status.
+
+    A :class:`PermissionError` the child itself raises, as an identity check
+    that cannot read a file would, ends it with a status other than 0, which
+    is the test's failure, never a skip.
+    """
+    with pytest.raises(
+        subprocess.CalledProcessError, match=f"non-zero exit status {status}"
+    ):
+        libm_identity.run_child([sys.executable, "-I", "-c", script], timeout=60)
 
 
 def _real_glibc_libm() -> Path:
@@ -1261,15 +1348,11 @@ def _readelf_notes(library: Path) -> str:
     readelf = shutil.which("readelf")
     if readelf is None:
         pytest.skip("needs binutils' readelf to read the note independently")
-    # Fixed argv, no shell; the path is a library this process mapped or wrote
-    return subprocess.run(
+    return libm_identity.run_child(
         [readelf, "--notes", str(library)],
-        check=True,
-        capture_output=True,
-        text=True,
         env={**os.environ, "LC_ALL": "C"},
         timeout=60,
-    ).stdout
+    )
 
 
 #: Why a readelf shows no ISA property: it prints the GNU property note as a
@@ -1553,6 +1636,22 @@ def test_readelf_and_the_reader_agree_past_the_needed_levels(tmp_path: Path) -> 
     assert _levels_readelf_shows(shown, _ISA_1_USED) == 0b0101
     assert libm_identity.x86_isa_levels_needed(image) == _V3
     assert _levels_readelf_shows(shown) == _V3
+
+
+def test_a_readelf_the_system_refuses_to_start_skips_the_cross_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ``readelf`` the system refuses to start holds the reader to nothing.
+
+    Found but refused, as one whose loader sits on a mount made ``noexec``
+    once this process started, it never prints a note, and the cross-check
+    skips by the refusal, as it skips where no ``readelf`` is found.
+    """
+    _on_x86_64_glibc()
+    refused = _refused(tmp_path / "refused", "readelf")
+    monkeypatch.setattr(shutil, "which", lambda name: str(refused))
+    with pytest.raises(pytest.skip.Exception, match=_refusal(refused)):
+        _readelf_notes(tmp_path / "libm.so.6")
 
 
 def test_the_real_libm_reads_as_readelf_reads_it() -> None:

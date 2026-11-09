@@ -75,6 +75,11 @@ reads the mask in no known way: it comes back as an :class:`Unread` that says
 what could not be read, whose truth cannot be tested, so a test that asks for
 the baseline build, for the build for x86-64-v3 or for the loader's own
 reading skips by that name instead of checking a build it guessed.
+
+The tests start children of their own through :func:`run_child`, which skips
+where the system refuses to start the program, as one whose file or whose
+loader sits on a mount made ``noexec`` once this process started: such a
+child never runs, so there is nothing of it to read.
 """
 
 from __future__ import annotations
@@ -85,10 +90,14 @@ import os
 import platform
 import re
 import struct
+import subprocess
 from pathlib import Path
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
 
 #: The processor features glibc asks to be usable before it picks its FMA
 #: variant (``ifunc-fma.h``, ``ifunc-fma4.h`` and ``ifunc-avx-fma4.h`` in
@@ -698,6 +707,45 @@ def runs_the_pinned_routines() -> bool:
     It does where :func:`why_off_the_pinned_routines` finds no reason why not.
     """
     return why_off_the_pinned_routines() is None
+
+
+def run_child(
+    args: Sequence[str],
+    *,
+    timeout: float,
+    cwd: Path | None = None,
+    env: Mapping[str, str] | None = None,
+) -> str:
+    """The output of a child these tests start, run to a status of 0.
+
+    A system that refuses to start the program, as one whose file or whose
+    loader sits on a mount made ``noexec`` once this process started, raises
+    :class:`PermissionError` before the child runs, and the test skips,
+    naming the program and the refusal. Whatever the child does once it
+    runs, its status included, is the test's.
+
+    :raises subprocess.CalledProcessError: for a status other than 0.
+    """
+    try:
+        # Fixed argv, no shell: the tests' own programs and arguments
+        finished = subprocess.run(  # nosec B603
+            list(args),
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=cwd,
+            env=env,
+            timeout=timeout,
+        )
+    except PermissionError as refused:
+        where = "" if cwd is None else f" from {cwd}"
+        pytest.skip(
+            f"this system refuses to start {args[0]}{where} "
+            f"({refused.strerror or refused}), so the child that would be read "
+            "never runs"
+        )
+    finished.check_returncode()
+    return finished.stdout
 
 
 #: Why the tests of the pinned routines skip here, or ``None`` where they run.

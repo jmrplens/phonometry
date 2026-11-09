@@ -402,7 +402,11 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     to travel too: the IndexNow job keeps the manifest it was handed, only
     once its submission went through, under the name the build looks for, in
     the folder the comparison reads, and the build may read it from an
-    earlier run.
+    earlier run. And the job keeps it only while the record its build
+    compared with is still the newest: a failed job re-run after a newer
+    deploy kept its record would otherwise put back an older manifest, and a
+    page that deploy added and the next one removes would never be sent as
+    removed.
     """
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
     triggers = workflow[True] if True in workflow else workflow["on"]
@@ -446,10 +450,18 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
         _steps_using(indexnow, "actions/upload-artifact", submitted),
         f"keep {submitted}",
     )
+    checked_at, check = _the_one(
+        _steps_running(indexnow, "indexnow-diff.mjs keep-record"),
+        "check that no newer record was kept",
+    )
 
-    # The record is kept only once the submission went through.
-    assert keep.get("if") in {None, "success()"}, (
-        "a record kept after a failed submission makes the next deploy skip its pages"
+    # The record is kept only once the submission went through, and only
+    # when the check says no newer record was kept since the build compared.
+    # A condition with no status function runs only when every step before it
+    # succeeded.
+    checker = check.get("id")
+    assert keep.get("if") == f"steps.{checker}.outputs.keep == 'true'", (
+        "a record kept whatever the check says can replace a newer deploy's"
     )
 
     # Every step the pages go through runs on every event that deploys. The
@@ -461,7 +473,7 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
         "handing": hand,
         "receiving": download,
         "submitting": submit,
-        "keeping": keep,
+        "checking": check,
     }
     for event in _DEPLOYING_EVENTS:
         for what, step in on_every_event.items():
@@ -474,7 +486,7 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert not _runs_on(hand.get("if"), "pull_request")
 
     # A failure anywhere on the way stops the run before the record is kept.
-    for what, step in {**on_every_event, "fetching": fetch}.items():
+    for what, step in {**on_every_event, "fetching": fetch, "keeping": keep}.items():
         assert not step.get("continue-on-error"), (
             f"a failure of the {what} step lets its job go on, "
             "so a record can be kept of pages that were not sent"
@@ -505,7 +517,9 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert "build" in _needs(jobs["deploy"])
     assert "deploy" in _needs(jobs["indexnow"]), "IndexNow is told before the deploy"
     assert received_at < sent_at, "the submission runs before the list is taken"
-    assert sent_at < kept_at, "the record is kept before the submission went through"
+    assert sent_at < checked_at < kept_at, (
+        "the record is kept before the submission went through, or unchecked"
+    )
 
     # The record is fetched from the run the finding step names, whatever
     # event this run is, and the build is allowed to read it.
@@ -521,6 +535,31 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     finder_env = find.get("env")
     assert isinstance(finder_env, dict)
     assert finder_env.get("GITHUB_TOKEN")
+
+    # The comparison names the record the finding step found, and the check
+    # reads that name from the list the IndexNow job took, with a token that
+    # may list the records.
+    compare_env = compare.get("env")
+    assert isinstance(compare_env, dict)
+    record_variable = re.search(
+        r'--record "\$(\w+)"', " ".join(str(compare["run"]).split())
+    )
+    assert record_variable, compare["run"]
+    assert compare_env.get(record_variable.group(1)) == (
+        f"${{{{ steps.{finder}.outputs.artifact-id }}}}"
+    )
+    check_command = " ".join(str(check["run"]).split())
+    taken = re.search(r'--urls "?([^"\s]+)', check_command)
+    assert taken, check_command
+    taken_from = download["with"]
+    assert isinstance(taken_from, dict)
+    assert taken.group(1) == f"{taken_from['path']}/urls.json"
+    check_env = check.get("env")
+    assert isinstance(check_env, dict)
+    assert check_env.get("GITHUB_TOKEN")
+    indexnow_permissions = jobs["indexnow"].get("permissions")
+    assert isinstance(indexnow_permissions, dict)
+    assert indexnow_permissions.get("actions") == "read"
 
     # The comparison reads the record where it was downloaded, and writes the
     # list and the manifest where the hand-over takes them from.

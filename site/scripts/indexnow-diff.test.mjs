@@ -30,6 +30,7 @@ import {
 	lastSubmitted,
 	loadPrevious,
 	mainText,
+	newerRecord,
 	serialize,
 	urlsToSubmit,
 } from './indexnow-diff.mjs';
@@ -102,14 +103,14 @@ function manifest(dist) {
  * manifest of `before` (a list of pages, or `null` for no record at all), with
  * the lines the script printed and the folder it handed the IndexNow job.
  */
-function submit(t, before, pages, options = {}) {
+function submit(t, before, pages, { record = '', ...options } = {}) {
 	const previous = join(mkdtempSync(join(tmpdir(), 'indexnow-previous-')), MANIFEST_NAME);
 	t.after(() => rmSync(dirname(previous), { recursive: true, force: true }));
 	if (before !== null) writeFileSync(previous, manifest(build(t, before)));
 	const dist = build(t, pages, options);
 	manifest(dist);
 	const out = join(dirname(previous), 'handed');
-	const ran = run('diff', '--dist', dist, '--previous', previous, '--out', out);
+	const ran = run('diff', '--dist', dist, '--previous', previous, '--out', out, '--record', record);
 	assert.equal(ran.status, 0, ran.err);
 	return { ...JSON.parse(readFileSync(join(out, URLS_NAME), 'utf8')), printed: ran.out, out, dist };
 }
@@ -150,6 +151,15 @@ test('the IndexNow job is handed the manifest the URLs were worked out from, to 
 	const after = { ...BASE, '/signals/filters/': guide('/signals/filters/', { body: 'The filters, rewritten.' }) };
 	const sent = submit(t, BASE, after);
 	assert.equal(readFileSync(join(sent.out, MANIFEST_NAME), 'utf8'), readFileSync(join(sent.dist, MANIFEST_NAME), 'utf8'));
+	// With the record that was the newest when the build compared, which the
+	// job checks before it keeps its own; none when there was none.
+	assert.equal(sent.record, null);
+	assert.equal(submit(t, BASE, after, { record: '7' }).record, 7);
+	const dist = build(t, BASE);
+	manifest(dist);
+	const refused = run('diff', '--dist', dist, '--previous', join(dist, 'none.json'), '--record', 'run-70');
+	assert.equal(refused.status, 1);
+	assert.match(refused.err, /--record takes the id of an artifact, not "run-70"/);
 });
 
 test('a deploy whose IndexNow job kept no record leaves its pages to the next deploy, which compares with the record before it', (t) => {
@@ -440,12 +450,54 @@ test('the record compared with is the newest one a run of main kept, in whatever
 	assert.equal(lastSubmitted(Object.values(never)), undefined);
 });
 
+test('a failed job re-run after a newer deploy kept its record keeps none, so the next deploy still sends what that deploy added and it removes', () => {
+	// The manifests, by what each page says: run A changed page x, its
+	// IndexNow job failed; run B added page y and kept its record; then A's
+	// job was re-run; run C removes page y.
+	const x = url('/x/');
+	const y = url('/y/');
+	const manifests = new Map();
+	const records = [];
+	/** The IndexNow job of a run: keep its manifest unless a newer record was kept since its build compared. */
+	const keep = (artifactId, at, pages, compared, check = true) => {
+		if (check && newerRecord(compared, records) !== undefined) return false;
+		records.push(artifact(artifactId, at));
+		manifests.set(artifactId, pages);
+		return true;
+	};
+	keep(1, '2026-11-01T10:00:00Z', { [x]: 'x0' }, null);
+	const comparedByA = lastSubmitted(records).id;
+	const comparedByB = lastSubmitted(records).id;
+	assert.equal(comparedByA, 1);
+	assert.equal(keep(3, '2026-11-02T10:00:00Z', { [x]: 'x1', [y]: 'y1' }, comparedByB), true, "B's job keeps its record");
+	assert.equal(keep(2, '2026-11-03T10:00:00Z', { [x]: 'x1' }, comparedByA), false, "A's job, re-run after B's, keeps none");
+	const previous = manifests.get(lastSubmitted(records).id);
+	assert.deepEqual(urlsToSubmit({ [x]: 'x1' }, previous).removed, [y], 'C sends the removal of the page B added');
+
+	// Kept as it used to be, A's older manifest would be the newest record,
+	// and C would compare with a manifest that never had y.
+	assert.equal(keep(2, '2026-11-03T10:00:00Z', { [x]: 'x1' }, comparedByA, false), true);
+	assert.deepEqual(urlsToSubmit({ [x]: 'x1' }, manifests.get(lastSubmitted(records).id)).removed, []);
+});
+
+test('a record is kept when the one its build compared with is still the newest, or there was none and still is', () => {
+	const r1 = artifact(1, '2026-11-01T10:00:00Z');
+	const r2 = artifact(2, '2026-11-02T10:00:00Z');
+	assert.equal(newerRecord(2, [r1, r2]), undefined, 'the usual deploy, and a whole run re-run after a newer one: its build compared with the newest');
+	assert.equal(newerRecord(null, []), undefined, 'the first record');
+	assert.equal(newerRecord(1, []), undefined, 'the record compared with has expired, and none was kept since');
+	assert.equal(newerRecord(1, [r1, r2]), r2, 'a newer record was kept since the build compared');
+	assert.equal(newerRecord(null, [r1]), r1, 'the build found no record, and one was kept since');
+	const pullRequest = artifact(3, '2026-11-03T10:00:00Z', { head_branch: 'site/a-change' });
+	assert.equal(newerRecord(2, [r1, r2, pullRequest]), undefined, 'an artifact a pull request uploaded is no record');
+});
+
 /**
  * Run `last-submitted` against a GitHub API that answers each page of the
  * listing with `pages[page - 1]` (or 503 when `pages` is `'fail'`), and say
  * what it fetched, printed and wrote to the step output.
  */
-function lastSubmittedAgainst(t, pages, env = {}) {
+function lastSubmittedAgainst(t, pages, env = {}, command = ['last-submitted']) {
 	const dir = mkdtempSync(join(tmpdir(), 'indexnow-api-'));
 	t.after(() => rmSync(dir, { recursive: true, force: true }));
 	const answers = join(dir, 'pages.json');
@@ -464,7 +516,7 @@ function lastSubmittedAgainst(t, pages, env = {}) {
 		'  return new Response(JSON.stringify(pages[page - 1]), { status: 200 });',
 		'};',
 	].join('\n');
-	const ran = spawnSync(process.execPath, ['--import', `data:text/javascript,${encodeURIComponent(stub)}`, SCRIPT, 'last-submitted'], {
+	const ran = spawnSync(process.execPath, ['--import', `data:text/javascript,${encodeURIComponent(stub)}`, SCRIPT, ...command], {
 		encoding: 'utf8',
 		env: {
 			...process.env,
@@ -498,7 +550,7 @@ test('the run of the newest record is read from every page the API lists, for th
 	const found = lastSubmittedAgainst(t, pages);
 	assert.equal(found.status, 0, found.err);
 	assert.deepEqual(found.fetched, [listing(1), listing(2)]);
-	assert.equal(found.output, 'run-id=70\n');
+	assert.equal(found.output, 'run-id=70\nartifact-id=7\n');
 	assert.match(found.out, /last submitted by run 70, of commit c0ffee7, on 2026-11-06T08:00:00Z/);
 });
 
@@ -514,4 +566,48 @@ test('with no record to find, or no API to ask, the build goes on and the full l
 	const outside = lastSubmittedAgainst(t, [], { GITHUB_TOKEN: '' });
 	assert.equal(outside.status, 1);
 	assert.match(outside.err, /needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT/);
+});
+
+/** Run `keep-record` on a list naming `record` (or with no such field), against `pages` of the API. */
+function keepRecordAgainst(t, pages, record, env = {}) {
+	const dir = mkdtempSync(join(tmpdir(), 'indexnow-urls-'));
+	t.after(() => rmSync(dir, { recursive: true, force: true }));
+	const urls = join(dir, URLS_NAME);
+	writeFileSync(urls, JSON.stringify(record === undefined ? { urls: [] } : { record, urls: [] }));
+	return lastSubmittedAgainst(t, pages, env, ['keep-record', '--urls', urls]);
+}
+
+test('the IndexNow job keeps its manifest only while the record its build compared with is the newest', (t) => {
+	const compared = artifact(7, '2026-11-06T08:00:00Z');
+	const kept = keepRecordAgainst(t, [{ total_count: 2, artifacts: [artifact(6, '2026-11-01T08:00:00Z'), compared] }], 7);
+	assert.equal(kept.status, 0, kept.err);
+	assert.deepEqual(kept.fetched, [listing(1)]);
+	assert.equal(kept.output, 'keep=true\n');
+	assert.match(kept.out, /no newer record than the one this build compared with \(7\): this manifest is kept/);
+
+	// A failed job re-run after a newer deploy kept its record.
+	const newer = artifact(9, '2026-11-08T08:00:00Z');
+	const stale = keepRecordAgainst(t, [{ total_count: 2, artifacts: [newer, compared] }], 7);
+	assert.equal(stale.status, 0, stale.err);
+	assert.equal(stale.output, 'keep=false\n');
+	assert.match(stale.out, /run 90, of commit c0ffee9, kept a newer record on 2026-11-08T08:00:00Z than the one this build compared with \(7\)/);
+
+	// The first record, and a build that found none while one was kept since.
+	assert.equal(keepRecordAgainst(t, [{ total_count: 0, artifacts: [] }], null).output, 'keep=true\n');
+	assert.equal(keepRecordAgainst(t, [{ total_count: 1, artifacts: [compared] }], null).output, 'keep=false\n');
+});
+
+test('a record that cannot be checked is not kept, so the next deploy sends these pages again', (t) => {
+	const failing = keepRecordAgainst(t, 'fail', 7);
+	assert.equal(failing.status, 0, failing.err);
+	assert.equal(failing.output, 'keep=false\n');
+	assert.match(failing.out, /^::warning::.*answered 503.*this manifest is not kept/m);
+	const unnamed = keepRecordAgainst(t, [{ total_count: 0, artifacts: [] }], undefined);
+	assert.equal(unnamed.status, 0, unnamed.err);
+	assert.deepEqual(unnamed.fetched, []);
+	assert.equal(unnamed.output, 'keep=false\n');
+	assert.match(unnamed.out, /^::warning::.*does not name the record its build compared with/m);
+	const outside = keepRecordAgainst(t, [], 7, { GITHUB_TOKEN: '' });
+	assert.equal(outside.status, 1);
+	assert.match(outside.err, /keep-record .* needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT/);
 });

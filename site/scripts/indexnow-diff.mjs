@@ -23,7 +23,12 @@
 // carries, because a deploy goes live before its pages are submitted. A run
 // whose IndexNow job fails, or which a newer push cancels after it deployed
 // and before it submitted, keeps no record, so the next run compares with the
-// record before it and sends those pages along with its own.
+// record before it and sends those pages along with its own. A record is kept
+// only while the one its build compared with is still the newest: a failed
+// job re-run after a newer deploy kept its record would otherwise put back a
+// manifest older than that deploy, and a page the newer deploy added and the
+// next one removes would be in neither manifest the next build compares, so
+// its removal would never be sent.
 //
 // What a page says is read from the build, the way an engine reads it: its
 // title, its meta description, the date the sitemap gives it (the last commit
@@ -49,15 +54,21 @@
 //   node scripts/indexnow-diff.mjs last-submitted
 //     asks the GitHub API (GITHUB_API_URL, GITHUB_REPOSITORY, GITHUB_TOKEN)
 //     for the newest record an IndexNow job kept, and writes the id of its run
-//     as `run-id` to $GITHUB_OUTPUT, for the workflow to download it from;
-//     writes nothing when there is none
-//   node scripts/indexnow-diff.mjs diff [--dist <dir>] --previous <file or URL> [--out <dir>]
+//     as `run-id` and its own id as `artifact-id` to $GITHUB_OUTPUT, for the
+//     workflow to download it from; writes nothing when there is none
+//   node scripts/indexnow-diff.mjs diff [--dist <dir>] --previous <file or URL> [--out <dir>] [--record <id>]
 //     checks the published manifest against the pages, compares it with the
 //     previous one (a record, or a URL such as the live site's manifest, to
 //     compare a local build with), prints the changed, new and removed URLs,
-//     and writes into <dir> the URLs to submit (urls.json: {"urls": [...]}
-//     and the lists behind it) and the manifest they were worked out from,
-//     which the IndexNow job keeps once it has submitted them
+//     and writes into <dir> the URLs to submit (urls.json: {"urls": [...]},
+//     the lists behind it and the id of the newest record, given by
+//     `--record`) and the manifest they were worked out from, which the
+//     IndexNow job keeps once it has submitted them
+//   node scripts/indexnow-diff.mjs keep-record --urls <urls.json>
+//     asks the GitHub API whether a record newer than the one urls.json
+//     names has been kept since the build compared with it, and writes
+//     `keep=true` to $GITHUB_OUTPUT when none has, `keep=false` when one has
+//     or when the records cannot be listed
 import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -333,6 +344,22 @@ export function lastSubmitted(artifacts) {
 }
 
 /**
+ * The record kept since the build compared with `compared` (the id of the
+ * newest record then, or null when there was none): the newest record now,
+ * when it is another one. The IndexNow job keeps its manifest only when there
+ * is none, so a job re-run after a newer deploy kept its record leaves that
+ * record the newest; that deploy's pages, and whatever it added, stay in the
+ * record the next build compares with.
+ *
+ * @returns the newer artifact, or undefined when the build compared with the
+ *   newest record, or there is none
+ */
+export function newerRecord(compared, artifacts) {
+	const newest = lastSubmitted(artifacts);
+	return newest !== undefined && newest.id !== compared ? newest : undefined;
+}
+
+/**
  * Every artifact named {@link SUBMITTED_ARTIFACT} of a repository, read from
  * the GitHub API a page at a time until it has listed as many as it counts.
  */
@@ -398,7 +425,57 @@ async function findLastSubmitted() {
 	}
 	const run = record.workflow_run;
 	console.log(`[indexnow] the pages were last submitted by run ${run.id}, of commit ${run.head_sha}, on ${record.created_at}.`);
-	appendFileSync(output, `run-id=${run.id}\n`);
+	appendFileSync(output, `run-id=${run.id}\nartifact-id=${record.id}\n`);
+}
+
+/**
+ * `keep-record --urls <urls.json>`: say, as `keep` in $GITHUB_OUTPUT, whether
+ * the IndexNow job keeps the manifest it submitted. It does unless a record
+ * newer than the one its build compared with has been kept meanwhile, which
+ * happens when a failed job is re-run after a newer deploy submitted its
+ * pages. A record that cannot be listed keeps nothing either: the next deploy
+ * then compares with the record before this one and sends these pages again,
+ * where keeping a stale record could leave a removed page out for good.
+ */
+async function keepRecord(args) {
+	const { GITHUB_API_URL: api = 'https://api.github.com', GITHUB_REPOSITORY: repository, GITHUB_TOKEN: token, GITHUB_OUTPUT: output } = process.env;
+	if (!repository || !token || !output) {
+		throw new ManifestError('keep-record reads the GitHub API from a workflow step: it needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT.');
+	}
+	const urls = option(args, '--urls');
+	if (!urls || !existsSync(urls)) throw new ManifestError(`say where the list the build handed over is: --urls <${URLS_NAME}>, not ${urls}.`);
+	const listed = JSON.parse(readFileSync(urls, 'utf8'));
+	if (!Object.hasOwn(listed, 'record') || !(listed.record === null || Number.isSafeInteger(listed.record))) {
+		console.log(
+			`::warning::[indexnow] ${urls} does not name the record its build compared with, as one written by another version of this script does not: ` +
+				'this manifest is not kept, and the next deploy sends these pages again.',
+		);
+		appendFileSync(output, 'keep=false\n');
+		return;
+	}
+	let artifacts;
+	try {
+		artifacts = await submittedArtifacts({ api, repository, token });
+	} catch (error) {
+		console.log(
+			`::warning::[indexnow] the records of the pages IndexNow was sent could not be listed (${error.cause?.code ?? error.message}): ` +
+				'this manifest is not kept, and the next deploy sends these pages again.',
+		);
+		appendFileSync(output, 'keep=false\n');
+		return;
+	}
+	const newer = newerRecord(listed.record, artifacts);
+	if (newer !== undefined) {
+		const run = newer.workflow_run;
+		console.log(
+			`[indexnow] run ${run.id}, of commit ${run.head_sha}, kept a newer record on ${newer.created_at} than the one this build compared with ` +
+				`(${listed.record ?? 'none'}): this manifest is not kept, and the next deploy compares with that one.`,
+		);
+		appendFileSync(output, 'keep=false\n');
+		return;
+	}
+	console.log(`[indexnow] no newer record than the one this build compared with (${listed.record ?? 'none'}): this manifest is kept.`);
+	appendFileSync(output, 'keep=true\n');
 }
 
 /** `diff ...`: compare the build with the previous manifest and say what to submit. */
@@ -432,13 +509,16 @@ async function diff(args) {
 			for (const url of list) console.log(`  ${label.padEnd(7)} ${url}`);
 		}
 	}
+	const given = option(args, '--record') ?? '';
+	if (!/^\d*$/.test(given)) throw new ManifestError(`--record takes the id of an artifact, not ${JSON.stringify(given)}.`);
+	const record = given === '' ? null : Number(given);
 	const out = option(args, '--out');
 	if (out) {
 		mkdirSync(out, { recursive: true });
 		const reason = result.full ? previous.reason : null;
 		writeFileSync(
 			join(out, URLS_NAME),
-			`${JSON.stringify({ previous: previous.from, reason, full: result.full, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
+			`${JSON.stringify({ previous: previous.from, record, reason, full: result.full, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
 		);
 		writeFileSync(join(out, MANIFEST_NAME), serialize(current));
 	}
@@ -450,7 +530,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 		if (command === 'manifest') writeManifest(args);
 		else if (command === 'last-submitted') await findLastSubmitted();
 		else if (command === 'diff') await diff(args);
-		else throw new ManifestError(`unknown command ${JSON.stringify(command)}: use \`manifest\`, \`last-submitted\` or \`diff\`.`);
+		else if (command === 'keep-record') await keepRecord(args);
+		else throw new ManifestError(`unknown command ${JSON.stringify(command)}: use \`manifest\`, \`last-submitted\`, \`diff\` or \`keep-record\`.`);
 	} catch (error) {
 		if (!(error instanceof ManifestError)) throw error;
 		console.error(`[indexnow] FAIL ${error.message}`);

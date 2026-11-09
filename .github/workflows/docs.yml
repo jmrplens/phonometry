@@ -509,7 +509,8 @@ jobs:
         # the header lines that name the release, or the text the page shows
         # where it publishes no copy. Once the IndexNow job has submitted a
         # deploy's pages it keeps that deploy's manifest as an artifact, and
-        # this step asks the API for the newest one a run of main kept. It
+        # this step asks the API for the newest one a run of main kept, and
+        # names it beside its run for the IndexNow job to check against. It
         # runs on every event: a deploy dispatched by hand or by jmrp.io has
         # to be compared like a push, and a pull request prints what its
         # merge would send.
@@ -535,11 +536,15 @@ jobs:
         # newer push cancelled in between, would otherwise leave its pages
         # out for good. It fails if a step changed the pages after the
         # manifest was written, which would publish a manifest that does not
-        # describe the site.
+        # describe the site. The list names the record that was the newest
+        # one, so the IndexNow job can tell whether a newer one was kept since.
+        env:
+          RECORD: ${{ steps.submitted.outputs.artifact-id }}
         run: >-
           node scripts/indexnow-diff.mjs diff
           --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
           --out "$RUNNER_TEMP/indexnow/next"
+          --record "$RECORD"
         working-directory: site
       - name: Hand the list of changed pages to the IndexNow job
         # With the manifest it was worked out from, which the job keeps once
@@ -580,9 +585,22 @@ jobs:
     name: Submit URLs to IndexNow
     needs: deploy
     runs-on: ubuntu-26.04
-    permissions: {}
+    permissions:
+      contents: read # the script below
+      actions: read # whether a newer deploy kept its record while this one waited
     timeout-minutes: 10
     steps:
+      # The script that tells whether this job's record is still the one to
+      # keep, and nothing else of the repository.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            site/scripts
+            site/src
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
       # The URLs come from the build this run deployed, through the list its
       # last steps wrote (site/scripts/indexnow-diff.mjs). This job used to
       # read the sitemap from the live site a moment after the deploy, where
@@ -659,12 +677,26 @@ jobs:
                   if r.status not in (200, 202):
                       sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
           PY
+      - name: Check that no newer deploy has kept its record since this build compared
+        # A failed job re-run after a newer deploy submitted its pages would
+        # otherwise keep a manifest older than that deploy's, and a page that
+        # deploy added and the next one removes would be in neither manifest
+        # the next build compares, so its removal would never be sent. The
+        # newer record stays the newest instead, and the pages this job sent
+        # are in it or in the next deploy's list. A record that cannot be
+        # listed keeps nothing: the next deploy sends these pages again.
+        id: newest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node site/scripts/indexnow-diff.mjs keep-record --urls indexnow/urls.json
       - name: Keep the manifest of the pages IndexNow was sent
         # The record the next build compares with, kept only once the
-        # submission above went through: a failed job keeps none, so the next
-        # deploy sends this one's pages along with its own. Ninety days, so a
-        # quiet spell does not send the whole site again; after one longer than
-        # that the next deploy sends every URL once, as the first one does.
+        # submission above went through and while the record its build
+        # compared with is still the newest: a failed job keeps none, so the
+        # next deploy sends this one's pages along with its own. Ninety days,
+        # so a quiet spell does not send the whole site again; after one longer
+        # than that the next deploy sends every URL once, as the first one does.
+        if: steps.newest.outputs.keep == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: indexnow-submitted

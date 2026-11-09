@@ -663,8 +663,10 @@ for (const file of files) {
 			// title or the `##` heading of its section, and its description a
 			// paragraph of the page, or the page's own description where the page
 			// renders one catalogue alone. Read off the built page, so a reading of
-			// the page's source that took markup for text, or a paragraph inside an
-			// aside for the page's own, fails here whatever the reader did.
+			// the page's source that took markup for text, or the lines of an aside
+			// for a paragraph, fails here whatever the reader did. Any paragraph of
+			// the page counts, one inside an aside or a list too: keeping those out
+			// is the reader's part, src/lib/catalogue-datasets.mjs and its tests.
 			pageText ??= pageTexts(html);
 			const nameShown = pageText.headings.has(unset(dataset.name ?? ''));
 			const descriptionShown =

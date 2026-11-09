@@ -914,17 +914,47 @@ $$
 typical_element_mobility(
     structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
     *,
-    frequency: NumericArrayLike | None = None,
-    mass: float | None = None,
-    density: float | None = None,
-    longitudinal_velocity: float | None = None,
-    thickness_m: float | None = None,
-    width_m: float | None = None,
-    area: float | None = None,
-    radius: float | None = None,
-    stiffness: float | None = None,
-    loss_factor: float | None = None,
+    frequency: float | np.floating[Any] | np.integer[Any] | None = None,
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> float
+
+typical_element_mobility(
+    structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
 ) -> NDArray[np.float64]
+
+typical_element_mobility(
+    structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
+    *,
+    frequency: NumericArrayLike | None = None,
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Named lookup of EN 12354-5, Table D.1 (mobility of typical elements).
@@ -990,7 +1020,7 @@ which [`coupling_term`](/phonometry/reference/api/building/installed-structure-b
 | `stiffness` | Support stiffness `s`, in N/m (row `"mass_spring"`). |
 | `loss_factor` | Support loss factor `eta` (row `"mass_spring"`). |
 
-**Returns:** The mobility magnitude `|Y|`, in m/(N.s).
+**Returns:** The mobility magnitude `|Y|`, in m/(N.s). A `float` for a number frequency or a row that reads none, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

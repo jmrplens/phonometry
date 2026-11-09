@@ -539,10 +539,22 @@ For a quasi-free field this is its usable frequency range (5.4).
 
 ```python
 incidence_correction(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    incidence_angle_deg: float,
+) -> float
+
+incidence_correction(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     incidence_angle_deg: float,
 ) -> NDArray[np.float64]
+
+incidence_correction(
+    frequencies: NumericArrayLike,
+    *,
+    incidence_angle_deg: float,
+) -> float | NDArray[np.float64]
 ```
 
 How much louder the nearer ear is with the loudspeaker off axis (Table B.1).
@@ -560,7 +572,7 @@ NOTE 1); how a report uses the increase is left to it.
 | `frequencies` | Test frequencies in hertz, each one of [`INCIDENCE_CORRECTION_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_correction_frequencies_hz). |
 | `incidence_angle_deg` | 45 or 90. |
 
-**Returns:** The increase per frequency, in dB.
+**Returns:** The increase per frequency, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

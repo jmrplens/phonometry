@@ -268,8 +268,16 @@ as $r \to 0$ (Sec. 5.5.4).
 
 ```python
 PeakStatisticsResult.peak_density(
-    z: NumericArrayLike,
+    z: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+PeakStatisticsResult.peak_density(
+    z: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+PeakStatisticsResult.peak_density(
+    z: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Peak probability density `w(z)` (B&P Eq. (5.217)).
@@ -280,7 +288,7 @@ Peak probability density `w(z)` (B&P Eq. (5.217)).
 | :--- | :--- |
 | `z` | Standardized peak heights (units of the record RMS). |
 
-**Returns:** Probability density values, same shape.
+**Returns:** Probability density values, same shape. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -292,8 +300,16 @@ Peak probability density `w(z)` (B&P Eq. (5.217)).
 
 ```python
 PeakStatisticsResult.peak_exceedance(
-    z: NumericArrayLike,
+    z: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+PeakStatisticsResult.peak_exceedance(
+    z: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+PeakStatisticsResult.peak_exceedance(
+    z: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $P[\text{peak} > z]$ at the record's irregularity
@@ -311,7 +327,7 @@ bandwidth limit.
 | :--- | :--- |
 | `z` | Standardized peak heights (units of the record RMS). |
 
-**Returns:** Exceedance probabilities, same shape.
+**Returns:** Exceedance probabilities, same shape. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

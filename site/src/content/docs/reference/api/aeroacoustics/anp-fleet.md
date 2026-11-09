@@ -720,8 +720,18 @@ with the parent database; copy them before mutating.
 ```python
 ANPNPDCurves.level(
     power: float,
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+ANPNPDCurves.level(
+    power: float,
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+ANPNPDCurves.level(
+    power: float,
+    distance_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Interpolated NPD level `L(P, d)` (Doc 29 Eq. 4-3/4-4).
@@ -733,7 +743,7 @@ Interpolated NPD level `L(P, d)` (Doc 29 Eq. 4-3/4-4).
 | `power` | Query engine power setting. |
 | `distance_m` | Query slant distance(s), in metres. |
 
-**Returns:** The interpolated level per query distance, in dB.
+**Returns:** The interpolated level per query distance, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### ANPNPDCurves.plot()
 

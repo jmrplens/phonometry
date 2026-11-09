@@ -897,10 +897,22 @@ judge. Zero for a single microphone.
 
 ```python
 max_expanded_uncertainty(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    clause: int | np.integer[Any],
+) -> float
+
+max_expanded_uncertainty(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     clause: int | np.integer[Any],
 ) -> NDArray[np.float64]
+
+max_expanded_uncertainty(
+    frequencies: NumericArrayLike,
+    *,
+    clause: int | np.integer[Any],
+) -> float | NDArray[np.float64]
 ```
 
 The maximum permitted expanded uncertainty of a correction
@@ -926,7 +938,7 @@ ones do.
 | `frequencies` | The frequencies, in Hz. |
 | `clause` | The clause, 9 to 14. |
 
-**Returns:** The maximum at each frequency, in dB, read-only.
+**Returns:** The maximum at each frequency, in dB, read-only. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

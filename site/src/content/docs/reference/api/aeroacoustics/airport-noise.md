@@ -461,8 +461,24 @@ npd_level(
     distances_m: NumericArrayLike,
     levels: NumericArrayLike,
     power: float,
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+npd_level(
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
+    power: float,
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+npd_level(
+    powers: NumericArrayLike,
+    distances_m: NumericArrayLike,
+    levels: NumericArrayLike,
+    power: float,
+    distance_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Interpolated NPD event level `L(P, d)` (ECAC Doc 29 §4.2, Eqs. 4-3/4-4).
@@ -481,7 +497,7 @@ tabulated envelope are extrapolated from the terminal segments.
 | `power` | Query engine power setting `P`. |
 | `distance_m` | Query slant distance(s) `d`, in metres. |
 
-**Returns:** The interpolated event level per query distance, in dB.
+**Returns:** The interpolated event level per query distance, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -136,9 +136,36 @@ EARPHONE_COUPLERS = {'DT 48': 'IEC 60303 acoustic coupler', 'TDH 39': 'IEC 60303
 
 ```python
 earphone_reference_level(
-    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
-    frequencies: NumericArrayLike | None = None,
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
+    frequencies: None = None,
 ) -> NDArray[np.float64]
+
+earphone_reference_level(
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'],
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+earphone_reference_level(
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
+    *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+earphone_reference_level(
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'],
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+earphone_reference_level(
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+earphone_reference_level(
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
+    frequencies: NumericArrayLike | None = None,
+) -> float | NDArray[np.float64]
 ```
 
 Reference equivalent threshold sound pressure level (ISO 389-1:1998).
@@ -156,7 +183,7 @@ standard prints two tables rather than one.
 | `earphone` | `"DT 48"` or `"TDH 39"` (Table 1, on the IEC 60303 coupler), or `"other supra-aural"` (Table 2, on the IEC 60318 artificial ear, for an earphone meeting the requirements of 4.3). |
 | `frequencies` | Optional subset of [`RETSPL_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#retspl_frequencies_hz), in hertz; `None` uses all twenty-three. |
 
-**Returns:** The reference level, in dB, aligned with the frequencies.
+**Returns:** The reference level, in dB, aligned with the frequencies. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included, and every frequency without frequencies.
 
 **Raises**
 
@@ -185,11 +212,32 @@ FIELDS = ('free', 'diffuse')
 
 ```python
 hearing_level_to_coupler_spl(
-    hearing_level: NumericArrayLike,
-    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = 'TDH 39',
+    hearing_level: float | np.floating[Any] | np.integer[Any],
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
+    *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+hearing_level_to_coupler_spl(
+    hearing_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
     *,
     frequencies: NumericArrayLike | None = None,
 ) -> NDArray[np.float64]
+
+hearing_level_to_coupler_spl(
+    hearing_level: float | np.floating[Any] | np.integer[Any],
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+hearing_level_to_coupler_spl(
+    hearing_level: NumericArrayLike,
+    earphone: Literal['DT 48', 'TDH 39', 'other supra-aural'] = ...,
+    *,
+    frequencies: NumericArrayLike | None = None,
+) -> float | NDArray[np.float64]
 ```
 
 An audiogram in dB HL as the level the coupler has to see, in dB SPL.
@@ -207,7 +255,7 @@ is a decibel more in the coupler.
 | `earphone` | As in [`earphone_reference_level`](/phonometry/reference/api/hearing/threshold/#earphone_reference_level). One of `"DT 48"`, `"TDH 39"` or `"other supra-aural"`. |
 | `frequencies` | The frequencies the audiogram was taken at; `None` uses all twenty-three of [`RETSPL_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#retspl_frequencies_hz). |
 
-**Returns:** The equivalent sound pressure level in the coupler, in dB.
+**Returns:** The equivalent sound pressure level in the coupler, in dB. A `float` when `hearing_level` and `frequencies` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -220,9 +268,36 @@ is a decibel more in the coupler.
 
 ```python
 reference_threshold(
-    field: Literal['free', 'diffuse'] = 'free',
-    frequencies: NumericArrayLike | None = None,
+    field: Literal['free', 'diffuse'] = ...,
+    frequencies: None = None,
 ) -> NDArray[np.float64]
+
+reference_threshold(
+    field: Literal['free', 'diffuse'],
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+reference_threshold(
+    field: Literal['free', 'diffuse'] = ...,
+    *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+reference_threshold(
+    field: Literal['free', 'diffuse'],
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+reference_threshold(
+    field: Literal['free', 'diffuse'] = ...,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+reference_threshold(
+    field: Literal['free', 'diffuse'] = ...,
+    frequencies: NumericArrayLike | None = None,
+) -> float | NDArray[np.float64]
 ```
 
 Reference threshold of hearing (ISO 389-7:2005, Table 1).
@@ -238,7 +313,7 @@ frequencies.
 | `field` | `"free"` (a free field, frontal incidence) or `"diffuse"` (a diffuse field). |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all eleven (125 Hz to 8000 Hz). |
 
-**Returns:** The reference threshold, in dB, aligned with the frequencies.
+**Returns:** The reference threshold, in dB, aligned with the frequencies. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included, and every band without frequencies.
 
 **Raises**
 

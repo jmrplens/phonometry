@@ -149,12 +149,30 @@ which length that is stays with the caller.
 ```python
 radiation_impedance_correction(
     *,
-    temperature_c: float = 23.0,
-    static_pressure_kpa: float = 101.325,
-    radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
-    frequencies: NumericArrayLike | None = None,
-    knee_frequency_hz: float | None = None,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: Literal['monopole', 'dipole', 'unknown'] = ...,
+    frequencies: float | np.floating[Any] | np.integer[Any] | None = None,
+    knee_frequency_hz: float | None = ...,
+) -> float
+
+radiation_impedance_correction(
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: Literal['monopole', 'dipole', 'unknown'] = ...,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    knee_frequency_hz: float | None = ...,
 ) -> NDArray[np.float64]
+
+radiation_impedance_correction(
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: Literal['monopole', 'dipole', 'unknown'] = ...,
+    frequencies: NumericArrayLike | None = None,
+    knee_frequency_hz: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The radiation impedance correction $C_2$ of ISO 6926 Annex A.
@@ -176,7 +194,7 @@ calibration used should be the one the user applies.
 | `frequencies` | The band frequencies, in hertz; required for a monopole or a dipole, whose correction depends on the knee frequency. |
 | `knee_frequency_hz` | $f_\mathrm{k}$ (see [`knee_frequency`](/phonometry/reference/api/power/reference-sound-source/#knee_frequency)), required for a monopole or a dipole. |
 
-**Returns:** $C_2$ per band, in dB (one value without frequencies).
+**Returns:** $C_2$ per band, in dB. A `float` for a number or for no frequencies, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -252,12 +270,28 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 
 ```python
 reference_source_reproducibility(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    environment: Literal['hemi-anechoic', 'reverberation-room'],
+    arrangement: Literal['paths', 'fixed'] | None = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float
+
+reference_source_reproducibility(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    environment: Literal['hemi-anechoic', 'reverberation-room'],
+    arrangement: Literal['paths', 'fixed'] | None = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> NDArray[np.float64]
+
+reference_source_reproducibility(
     frequencies: NumericArrayLike,
     *,
     environment: Literal['hemi-anechoic', 'reverberation-room'],
-    arrangement: Literal['paths', 'fixed'] | None = None,
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
-) -> NDArray[np.float64]
+    arrangement: Literal['paths', 'fixed'] | None = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Standard deviation of reproducibility of a calibration (ISO 6926 Table 2).
@@ -275,7 +309,7 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 | `arrangement` | In a hemi-anechoic room, `"paths"` (meridional or spiral) or `"fixed"` (20 discrete positions or coaxial circular paths); ignored in a reverberation room. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** $\sigma_R$ per band, in dB.
+**Returns:** $\sigma_R$ per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

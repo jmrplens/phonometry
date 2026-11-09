@@ -438,10 +438,22 @@ MACHINE_COUNT_CORRECTION = {3: (0.551, 0.537, 0.519, 0.496, 0.471, 0.423, 0.383,
 
 ```python
 machine_count_correction(
-    n_machines: NumericArrayLike,
+    n_machines: float | np.floating[Any] | np.integer[Any],
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float
+
+machine_count_correction(
+    n_machines: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
+
+machine_count_correction(
+    n_machines: NumericArrayLike,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float | NDArray[np.float64]
 ```
 
 The correction $\chi$ of Formula (7), Figure 3.
@@ -458,7 +470,7 @@ five-hundredth and interpolated linearly between the readings.
 | `n_machines` | $N$, from 4 to 100, one or many. |
 | `n_reference_machines` | $N_B$, one of the six curves. |
 
-**Returns:** $\chi$, one per count.
+**Returns:** $\chi$, one per count. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -480,10 +492,24 @@ MACHINE_FREQUENCY_BANDS_HZ = {'counter_blow_hammer': (4.0, 8.0), 'forging_press_
 ```python
 machine_hall_velocity_mm_s(
     reference_velocity_mm_s: float,
-    n_machines: NumericArrayLike,
+    n_machines: float | np.floating[Any] | np.integer[Any],
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float
+
+machine_hall_velocity_mm_s(
+    reference_velocity_mm_s: float,
+    n_machines: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
+
+machine_hall_velocity_mm_s(
+    reference_velocity_mm_s: float,
+    n_machines: NumericArrayLike,
+    *,
+    n_reference_machines: int | np.integer[Any],
+) -> float | NDArray[np.float64]
 ```
 
 The peak velocity outside a hall of similar machines, Formula (7).
@@ -502,7 +528,7 @@ sixty, the nearest group; beyond that the added groups are further off.
 | `n_machines` | $N$, from 4 to 100, one or many. |
 | `n_reference_machines` | $N_B$, one of 3, 5, 10, 30, 60 or 100. |
 
-**Returns:** $v_N$, one per count, in millimetres per second.
+**Returns:** $v_N$, one per count, in millimetres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

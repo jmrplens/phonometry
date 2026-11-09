@@ -10,15 +10,25 @@ that ignores, or shows without raising, names the message it means:
 ``warnings.filterwarnings`` with ``message=``, a ``filterwarnings`` mark
 with its message part. ``warnings.simplefilter`` takes no message and
 passes only where it hands each warning to a recorder the test reads, inside
-``warnings.catch_warnings(record=True)`` or ``pytest.warns``.
+``warnings.catch_warnings(record=True)`` or ``pytest.warns``, and so does
+``warnings.resetwarnings``, which drops the configuration's errors with
+every other filter. A filter whose action, or whose mark, the text does not
+settle is one the check cannot clear: a name bound once, at module level,
+to a constant is read as its value, and anything else, a loop variable or
+an argument, stands in the table below with its reason.
 """
 
 from __future__ import annotations
 
 import ast
 from pathlib import Path
+from types import MappingProxyType
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 _ROOT = Path(__file__).resolve().parents[1]
 _TESTS = _ROOT / "tests"
@@ -37,6 +47,13 @@ _BY_CLASS: dict[str, str] = {
         "block ends, fails on an advisory ahead of the refusal or hands each "
         "warning back"
     ),
+    "tests/simulation/test_remote_node.py::_under_a_node_s_filters": (
+        "the block serves one job under the filters a node starts with, "
+        "Python's defaults, in place of the suite's, so that the job meets what "
+        "it meets on a node; the node records every warning the job raises and "
+        "sends it back with the result, where the tests of what it sends read "
+        "it"
+    ),
     "tests/test_curated_examples.py::stale_examples": (
         "ast.parse of the code spans of the documentation pages, prose among "
         "them: Python warns on a span's escapes as it would on code, and no code "
@@ -51,15 +68,82 @@ _BY_CLASS: dict[str, str] = {
 }
 
 
-def _constant(node: ast.expr | None) -> object:
-    """The value of *node* when it is a constant, else a marker no filter holds."""
+#: No name read as a constant.
+_NO_NAMES: Mapping[str, object] = MappingProxyType({})
+
+
+def _constant(node: ast.expr | None, known: Mapping[str, object] = _NO_NAMES) -> object:
+    """The value of *node* when the text settles it, else a marker no filter holds.
+
+    A constant settles it, and so does a name in *known*.
+    """
     if isinstance(node, ast.Constant):
         return node.value
+    if isinstance(node, ast.Name) and node.id in known:
+        return known[node.id]
     return _UNKNOWN
 
 
 #: What :func:`_constant` returns for an expression the text does not settle.
 _UNKNOWN = object()
+
+
+def _bound(tree: ast.AST) -> dict[str, int]:
+    """How many times each name is bound anywhere in *tree*, in any scope."""
+    counts: dict[str, int] = {}
+    names: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and not isinstance(node.ctx, ast.Load):
+            names.append(node.id)
+        elif isinstance(node, ast.arg):
+            names.append(node.arg)
+        elif isinstance(
+            node,
+            (
+                ast.FunctionDef,
+                ast.AsyncFunctionDef,
+                ast.ClassDef,
+                ast.TypeVar,
+                ast.ParamSpec,
+                ast.TypeVarTuple,
+            ),
+        ):
+            names.append(node.name)
+        elif isinstance(node, ast.alias):
+            names.append((node.asname or node.name).partition(".")[0])
+        elif isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
+            names.extend([node.name] if node.name else [])
+        elif isinstance(node, ast.MatchMapping):
+            names.extend([node.rest] if node.rest else [])
+        elif isinstance(node, (ast.Global, ast.Nonlocal)):
+            names.extend(node.names)
+    for name in names:
+        counts[name] = counts.get(name, 0) + 1
+    return counts
+
+
+def _module_constants(tree: ast.Module) -> Mapping[str, object]:
+    """The names *tree* binds once, at module level, to a constant, with their values.
+
+    A name bound anywhere else as well, in a function, a loop or an import,
+    is left out: which value a filter reads under it is not in the text.
+    """
+    bound = _bound(tree)
+    known: dict[str, object] = {}
+    for statement in tree.body:
+        if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
+            target, value = statement.targets[0], statement.value
+        elif isinstance(statement, ast.AnnAssign) and statement.value is not None:
+            target, value = statement.target, statement.value
+        else:
+            continue
+        if (
+            isinstance(target, ast.Name)
+            and isinstance(value, ast.Constant)
+            and bound.get(target.id) == 1
+        ):
+            known[target.id] = value.value
+    return MappingProxyType(known)
 
 
 def _argument(call: ast.Call, name: str, position: int | None) -> ast.expr | None:
@@ -87,7 +171,8 @@ def _names(tree: ast.AST) -> tuple[frozenset[str], frozenset[str]]:
             bare |= {
                 alias.asname or alias.name
                 for alias in node.names
-                if alias.name in {"simplefilter", "filterwarnings", "catch_warnings"}
+                if alias.name
+                in {"simplefilter", "filterwarnings", "catch_warnings", "resetwarnings"}
             }
     return frozenset(modules), frozenset(bare)
 
@@ -95,7 +180,7 @@ def _names(tree: ast.AST) -> tuple[frozenset[str], frozenset[str]]:
 def _function(
     call: ast.Call, modules: frozenset[str], bare: frozenset[str]
 ) -> str | None:
-    """Which filter *call* is: ``simplefilter``, ``filterwarnings``, ``mark``, ``catch_warnings``."""
+    """Which filter *call* is: ``simplefilter``, ``filterwarnings``, ``mark``, ``catch_warnings``, ``resetwarnings``."""
     func = call.func
     if isinstance(func, ast.Name) and func.id in bare:
         return func.id
@@ -109,46 +194,70 @@ def _function(
     return None
 
 
-def _records(item: ast.withitem, modules: frozenset[str], bare: frozenset[str]) -> bool:
+def _records(
+    item: ast.withitem,
+    modules: frozenset[str],
+    bare: frozenset[str],
+    known: Mapping[str, object],
+) -> bool:
     """Whether the context manager of *item* records the warnings of its block."""
     call = item.context_expr
     if not isinstance(call, ast.Call):
         return False
     if _function(call, modules, bare) == "catch_warnings":
-        return _constant(_argument(call, "record", 0)) is True
+        return _constant(_argument(call, "record", 0), known) is True
     func = call.func
     return isinstance(func, ast.Attribute) and func.attr in _RECORDERS
 
 
-def _lets_through(call: ast.Call, what: str, *, recording: bool) -> str | None:
+def _spelled(node: ast.expr | None) -> str:
+    """*node* as the source spells it, or nothing where the call passes none."""
+    return "" if node is None else ast.unparse(node)
+
+
+def _lets_through(
+    call: ast.Call, what: str, *, recording: bool, known: Mapping[str, object]
+) -> str | None:
     """How *call*, a filter of kind *what*, lets a warning through by no message, or ``None``."""
     if what == "mark":
         for argument in call.args:
-            text = _constant(argument)
+            text = _constant(argument, known)
             if not isinstance(text, str):
-                continue
+                return f"mark {_spelled(argument)} is a filter the check cannot read"
             head, pattern = [*text.split(":"), ""][:2]
             if head.strip() in _LETS_THROUGH and not pattern.strip():
                 return f"mark {text!r} names no message"
         return None
+    if what == "resetwarnings":
+        if recording:
+            return None
+        return "resetwarnings() lets every warning through by no message"
     if what == "filterwarnings":
-        given = _constant(_argument(call, "action", 0))
+        spelled = _argument(call, "action", 0)
+        given = _constant(spelled, known)
         message = _argument(call, "message", 1)
-        if given in _LETS_THROUGH and (
-            message is None or _constant(message) in {"", None}
-        ):
+        if message is not None and _constant(message, known) not in {"", None}:
+            return None
+        if given is _UNKNOWN:
+            return (
+                f"filterwarnings({_spelled(spelled)}) takes an action the check "
+                "cannot read and names no message"
+            )
+        if given in _LETS_THROUGH:
             return f"filterwarnings({given!r}) names no message"
         return None
-    action: object
     if what == "simplefilter":
-        action = _constant(_argument(call, "action", 0))
+        spelled = _argument(call, "action", 0)
     elif what == "catch_warnings":
-        action = _constant(_argument(call, "action", None))
-        if action is None:
+        spelled = _argument(call, "action", None)
+        if spelled is None:
             return None
-        recording = recording or _constant(_argument(call, "record", 0)) is True
+        recording = recording or _constant(_argument(call, "record", 0), known) is True
     else:
         return None
+    action = _constant(spelled, known)
+    if action is _UNKNOWN:
+        return f"{what}({_spelled(spelled)}) takes an action the check cannot read"
     if action not in _LETS_THROUGH or (recording and action in _RECORDS):
         return None
     category = _argument(call, "category", 1)
@@ -160,6 +269,7 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
     """Each filter in the Python *source* of *where* that lets a warning through by no message."""
     tree = ast.parse(source, filename=where)
     modules, bare = _names(tree)
+    known = _module_constants(tree)
     found: list[tuple[str, str]] = []
 
     def visit(node: ast.AST, scope: str, *, recording: bool) -> None:
@@ -170,7 +280,7 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
                 inner = f"{scope}.{child.name}" if scope else child.name
                 records = False
             if isinstance(child, (ast.With, ast.AsyncWith)) and any(
-                _records(item, modules, bare) for item in child.items
+                _records(item, modules, bare, known) for item in child.items
             ):
                 for item in child.items:
                     visit(item, inner, recording=recording)
@@ -180,7 +290,7 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
             if isinstance(child, ast.Call):
                 what = _function(child, modules, bare)
                 if what is not None and (
-                    how := _lets_through(child, what, recording=records)
+                    how := _lets_through(child, what, recording=records, known=known)
                 ):
                     found.append((key, f"line {child.lineno}: {how}"))
             visit(child, inner, recording=records)
@@ -213,6 +323,19 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
         "with pytest.warns(UserWarning):\n    warnings.simplefilter('ignore', RuntimeWarning)",
         "import warnings as w\nw.simplefilter('ignore')",
         "from warnings import simplefilter\nsimplefilter('ignore')",
+        "warnings.resetwarnings()",
+        "with warnings.catch_warnings():\n    warnings.resetwarnings()",
+        "from warnings import resetwarnings\nresetwarnings()",
+        "for action in ACTIONS:\n    warnings.filterwarnings(action, category=UserWarning)",
+        "warnings.filterwarnings(*spec)",
+        "warnings.simplefilter(action)",
+        "with warnings.catch_warnings(record=True):\n    warnings.simplefilter(action)",
+        "warnings.catch_warnings(action=chosen)",
+        "pytest.mark.filterwarnings(spec)",
+        "ACTION = 'ignore'\nwarnings.simplefilter(ACTION, UserWarning)",
+        "SPEC = 'ignore::UserWarning'\npytest.mark.filterwarnings(SPEC)",
+        "SPEC = 'ignore:Low rate:UserWarning'\nSPEC = 'ignore'\npytest.mark.filterwarnings(SPEC)",
+        "SPEC = 'ignore:Low rate:UserWarning'\ndef test_it(SPEC):\n    pytest.mark.filterwarnings(SPEC)",
     ],
 )
 def test_a_filter_that_names_no_message_is_found(source: str) -> None:
@@ -235,6 +358,11 @@ def test_a_filter_that_names_no_message_is_found(source: str) -> None:
         "with pytest.warns(UserWarning):\n    warnings.simplefilter('always')",
         "warnings.catch_warnings()",
         "text.filterwarnings('ignore')",
+        "with warnings.catch_warnings(record=True):\n    warnings.resetwarnings()",
+        "warnings.filterwarnings(action, message='Low sampling rate')",
+        "ACTION = 'error'\nwarnings.simplefilter(ACTION, UserWarning)",
+        "SPEC = 'ignore:Low rate:UserWarning'\npytest.mark.filterwarnings(SPEC)",
+        "SPEC = (\n    'ignore:Low rate'\n    ':UserWarning'\n)\npytest.mark.filterwarnings(SPEC)",
     ],
 )
 def test_a_filter_that_names_its_message_or_records_passes(source: str) -> None:
@@ -259,6 +387,38 @@ def test_a_recorder_covers_its_own_block_and_no_function_defined_in_it() -> None
         (
             "tests/example.py::test_it",
             "line 6: simplefilter('always') lets every warning through by no message",
+        ),
+    ]
+
+
+def test_filters_put_back_to_python_s_defaults_are_found() -> None:
+    """The shape the remote node's tests use: the suite's filters cleared, others set.
+
+    ``resetwarnings`` drops the configuration's errors, so every warning the
+    block meets is shown and none raised, and an action read off a loop is
+    one the text does not settle. The check read neither, and passed the
+    block that lets every ``UserWarning`` and ``RuntimeWarning`` of a served
+    job through by no message.
+    """
+    source = (
+        "def _under_a_node_s_filters():\n"
+        "    with warnings.catch_warnings():\n"
+        "        warnings.resetwarnings()\n"
+        "        for action, category, module in _NODE_FILTERS:\n"
+        "            warnings.filterwarnings(\n"
+        "                action, category=category, module=module, append=True\n"
+        "            )\n"
+        "        yield\n"
+    )
+    assert _filters_in(source, "tests/example.py") == [
+        (
+            "tests/example.py::_under_a_node_s_filters",
+            "line 3: resetwarnings() lets every warning through by no message",
+        ),
+        (
+            "tests/example.py::_under_a_node_s_filters",
+            "line 5: filterwarnings(action) takes an action the check cannot "
+            "read and names no message",
         ),
     ]
 

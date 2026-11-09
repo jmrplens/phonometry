@@ -361,12 +361,14 @@ def deviation_text(check: Mapping[str, Any]) -> str:
     Four shapes, one per kind, plus the compatibility path: a check that
     declares no tolerance was built before the builders existed and its delta
     survives only as the string it was formatted as, so that string is printed
-    rather than a number reconstructed from it.
+    rather than a number reconstructed from it. A failing check whose deviation
+    JSON could not write carries its words the same way, and the site
+    component reads both cases as one.
     """
     deviation, unit = check["deviation"], check.get("unit", "")
-    if "tolerance" not in check:
-        return str(deviation["label"])
     kind, value = check["kind"], deviation.get("value")
+    if "tolerance" not in check or value is None:
+        return str(deviation.get("label", "-"))
     if kind in (str(Kind.RECORD), str(Kind.COUNT)):
         return "exact" if not value else f"{int(value)} differ"
     if kind == str(Kind.MASK):

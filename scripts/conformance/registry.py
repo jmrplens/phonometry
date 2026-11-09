@@ -378,7 +378,9 @@ def _snap(value: float, eps: float = 5e-4) -> float:
 def _fmt(value: float, unit: str = "", places: int = 4) -> str:
     """Compact fixed/again-significant formatting with an optional unit."""
     if not math.isfinite(value):
-        return "inf" if value > 0 else "-inf"
+        # str() and not a sign test: a NaN is neither side of zero, and read
+        # as "value > 0" it printed as "-inf".
+        return str(value)
     text = f"{value:.{places}f}".rstrip("0").rstrip(".")
     if text in ("", "-0"):
         text = "0"

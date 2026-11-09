@@ -2427,11 +2427,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a mean level and a spectrum that are not finite; one whose squared
   envelope stays finite but sums past the range gives a mean level that is
   not, and the record that restates that mean to check it says nothing
-  either. Before 1.17, SciPy multiplied that transform by the analytic-signal
-  mask, and NumPy warned of an invalid value where SciPy 1.17 says nothing;
-  the square and the removed mean warned on every release, and the record's
-  check of an overflowing mean warned too. Under `-W error` the call raised
-  instead of returning.
+  either; a spectrum bin near the top of the range, as a detector kept with
+  its mean under a narrow taper gives, reads infinite once the one-sided
+  spectrum doubles it. Before 1.17, SciPy multiplied that transform by the
+  analytic-signal mask, and NumPy warned of an invalid value where SciPy
+  1.17 says nothing; the square, the removed mean and the doubling warned on
+  every release, and the record's check of an overflowing mean warned too.
+  Under `-W error` the call raised instead of returning.
 
 - **The release SBOM is written by cyclonedx-bom 8.0.1, and every CI job
   upgrades pip before it installs.** The jobs that build, verify and rebuild

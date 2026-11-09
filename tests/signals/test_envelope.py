@@ -526,6 +526,36 @@ def test_a_squared_envelope_whose_sum_leaves_the_range_says_so_once(
     assert math.isinf(result.mean_level)
 
 
+def _impulse_near_the_top() -> np.ndarray:
+    x = np.zeros(64)
+    x[32] = 1.1e154
+    return x
+
+
+@pytest.mark.parametrize(
+    ("record", "window"),
+    [
+        (np.full(64, 1e154), ("gaussian", 0.5)),
+        (_impulse_near_the_top(), ("gaussian", 0.1)),
+        (_impulse_near_the_top(), ("gaussian", 0.5)),
+    ],
+    ids=["steady-gaussian-0.5", "impulse-gaussian-0.1", "impulse-gaussian-0.5"],
+)
+def test_a_spectrum_bin_doubled_past_the_range_says_so_once(
+    record: np.ndarray, window: tuple[str, float]
+) -> None:
+    # Each squared sample, about 1e308, is finite and the mean is not. Kept
+    # with its mean, the detector under a narrow taper gives bins near 1e308,
+    # which the one-sided doubling takes past the range; the amplitude says
+    # so, with no RuntimeWarning of NumPy's from the multiplication, which
+    # the suite raises.
+    result = ph.signals.envelope_spectrum(
+        record, 1.0, kind="squared", window=window, remove_dc=False
+    )
+    assert math.isinf(result.mean_level)
+    assert not np.isfinite(np.asarray(result.amplitude)).all()
+
+
 def test_envelope_spectrum_plot_two_panels_and_external_ax() -> None:
     res = ph.signals.envelope_spectrum(_am_signal(), FS)
     axes = res.plot()

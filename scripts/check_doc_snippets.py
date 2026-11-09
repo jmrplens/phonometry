@@ -493,7 +493,8 @@ class _Promise:
         comment holds, and one that runs on past *last*, the print whose
         arguments hold this one.
     :param builtin: Whether the print reads the builtin ``print``: a name
-        the script binds to something else (``from rich import print``) need
+        the script binds to something else (``from rich import print``, or
+        any name a ``from rich import *`` may bind) need
         not reach the recorder, so a run that records none of its calls does
         not show that the page never runs it.
     """
@@ -525,11 +526,25 @@ def _is_print(node: ast.AST) -> TypeGuard[ast.Call]:
     )
 
 
+def _imports_every_name(tree: ast.Module) -> bool:
+    """Whether *tree* imports every public name of a module
+    (``from rich import *``), which binds whatever that module lists,
+    ``print`` among them for one that lists it: Python takes such an import
+    at the top level of a module only, in any block there.
+    """
+    return any(
+        isinstance(node, ast.ImportFrom)
+        and any(alias.name == "*" for alias in node.names)
+        for node in ast.walk(tree)
+    )
+
+
 def _binds_print(tree: ast.Module) -> bool:
     """Whether any scope of *tree*, the module, a function, a lambda, a class
     body or a comprehension, binds the name ``print``, as its own or under
-    ``global``: when none does, every call of the name reads the builtin,
-    and none is looked up (:func:`_reads_builtin`).
+    ``global``: when none does, and the module imports no module's every
+    name (:func:`_imports_every_name`), every call of the name reads the
+    builtin, and none is looked up (:func:`_reads_builtin`).
     """
     scopes = [
         tree,
@@ -877,7 +892,10 @@ def _promises(script: str, tree: ast.Module) -> list[_Promise]:
             shares[stretch] = (kept, left)
         return shares[stretch]
 
-    bound = _binds_print(tree)
+    # A module that imports another's every name may hold its print: no
+    # call of the name is then known to read the builtin.
+    every_name = _imports_every_name(tree)
+    bound = every_name or _binds_print(tree)
     promises: list[_Promise] = []
     for node in sorted(
         said_by, key=lambda node: (span[node][0], node.lineno, node.col_offset)
@@ -891,7 +909,7 @@ def _promises(script: str, tree: ast.Module) -> list[_Promise]:
                 tuple((_place(each), _arguments(each)) for each in kept),
                 word_by.get(node),
                 tuple(_place(each) for each in left),
-                not bound or _reads_builtin(tree, node),
+                not bound or (not every_name and _reads_builtin(tree, node)),
             )
         )
     return promises
@@ -1710,6 +1728,8 @@ def output_disagreements(
     script: str,
     lines: dict[int, int],
     written: dict[int, list[_Recorded]],
+    *,
+    rebound: bool = False,
 ) -> list[str]:
     """Failures for every output comment of *page* that its print contradicts.
 
@@ -1725,6 +1745,10 @@ def output_disagreements(
         comment's lines and does not stand where a print stands whose calls
         the comment does not stand for (:attr:`_Promise.apart`), and it is
         read with the arguments of the print that stands where it does.
+    :param rebound: Whether the run ended with the name ``print`` bound to
+        something else than the recorder, in the builtins or in the
+        script's own module (:data:`_RECORDER`): a print whose calls the
+        run did not record then need not be one the page never runs.
     """
     failures: list[str] = []
     spanish = page.is_relative_to(_SITE_ES)
@@ -1745,7 +1769,7 @@ def output_disagreements(
             if first is None or (first.kind, first.text) != ("word", promise.word):
                 continue  # prose about the line, not what the print writes
         if not calls:
-            if promise.builtin:
+            if promise.builtin and not rebound:
                 failures.append(
                     f"{where}: the comment promises {promise.text!r}, but the "
                     "page never runs this print"
@@ -1783,7 +1807,11 @@ def output_disagreements(
 #: its ``write`` returns or on the :class:`BlockingIOError` it raises, and of
 #: a print that fails part of the way, or to a closed file, only what it
 #: wrote before it failed. When the script ends, however it ends, the record
-#: is saved beside it as JSON for :func:`_run_page` to read.
+#: is saved beside it as JSON for :func:`_run_page` to read, with whether the
+#: name ``print`` then still reaches the wrapper, in the builtins and in the
+#: script's own module: a page that bound it to something else while it ran
+#: (``builtins.print = ...``, ``globals()["print"] = ...``) made calls that
+#: need not have reached it.
 _RECORDER = """\
 import atexit
 import builtins
@@ -1871,8 +1899,14 @@ def _print(*args, sep=" ", end="\\n", file=None, flush=False):
 
 
 def _save():
+    # Whether the page bound the name print to something else as it ran, in
+    # the builtins or in its own module, where a call of the name finds it.
+    script = sys.modules.get("__main__")
+    rebound = builtins.print is not _print or (
+        getattr(script, "print", _print) is not _print
+    )
     with open(_SAVED, "w", encoding="utf-8") as out:
-        json.dump(_WRITTEN, out)
+        json.dump({"calls": _WRITTEN, "rebound": rebound}, out)
 
 
 builtins.print = _print
@@ -1981,9 +2015,10 @@ def _run_page(
             (order, _saved_place(place), _Call(separators, texts, end))
             for order, place, separators, texts, end in calls
         ]
-        for line, calls in saved.items()
+        for line, calls in saved["calls"].items()
     }
-    return page, "", output_disagreements(page, script, lines, written)
+    rebound = saved["rebound"] is True
+    return page, "", output_disagreements(page, script, lines, written, rebound=rebound)
 
 
 def check_execution(pages: list[pathlib.Path]) -> list[str]:

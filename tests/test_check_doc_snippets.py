@@ -1398,10 +1398,23 @@ def test_a_print_bound_to_something_else_is_not_said_never_to_run(
     show the page never runs it; one that reaches the builtin is still held
     to its comment, and a builtin print that never runs is still reported.
     """
+    # A module beside the page that lists a print of its own in __all__.
+    shout = (
+        "import pathlib\n\n"
+        "pathlib.Path('shout.py').write_text(\n"
+        "    \"__all__ = ['print']\\n\\ndef print(*args, **kwargs):\\n    pass\\n\"\n"
+        ")\n"
+    )
     bound = [
         "def print(*args, **kwargs):\n    pass\n\nprint(2)  # 2\n",
         "from pprint import pprint as print\n\nprint(2)  # 2\n",
         "def show(print):\n    print(2)  # 2\n\nshow(lambda value: None)\nprint(3)  # 3\n",
+        shout + "from shout import *\n\nprint(2)  # 2\n",
+        # Bound by the import and let go before the run ends, which the
+        # record of the end no longer shows.
+        shout + "from shout import *\n\nprint(2)  # 2\nglobals().pop('print')\n",
+        "import builtins\n\nbuiltins.print = lambda *args, **kwargs: None\nprint(2)  # 2\n",
+        "globals()['print'] = lambda *args, **kwargs: None\nprint(2)  # 2\n",
     ]
     pages = [_page(tmp_path, code, name=f"bound{n}.md") for n, code in enumerate(bound)]
     assert check_doc_snippets.check_execution(pages) == []

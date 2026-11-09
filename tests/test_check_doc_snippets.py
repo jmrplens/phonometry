@@ -11,14 +11,13 @@ nothing either way.
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import pathlib
 import sys
 import time
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 _SCRIPT = (
     pathlib.Path(__file__).resolve().parent.parent / "scripts" / "check_doc_snippets.py"
@@ -308,6 +307,25 @@ def test_a_page_that_fails_reports_the_failure_and_no_output(
     assert "boom" in failure
 
 
+def _recorded(
+    script: str, line: int, texts: list[str], *, order: int, end: str = "\n"
+) -> tuple[object, ...]:
+    """One call the run records for the print of *script* that opens on
+    *line*, where that print stands, as the recorder keeps it: *texts* for
+    its arguments, a space between each two, and *end*.
+    """
+    calls = [
+        node
+        for node in ast.walk(ast.parse(script))
+        if isinstance(node, ast.Call)
+        and check_doc_snippets._is_print(node)
+        and node.lineno == line
+    ]
+    place = check_doc_snippets._place(calls[0]) if calls else None
+    call = check_doc_snippets._Call([" "] * (len(texts) - 1), texts, end)
+    return (order, place, call)
+
+
 def _failures(script: str, outputs: dict[int, str]) -> list[str]:
     """What the output check reports for *script*, run as an English page,
     whose prints wrote *outputs*, keyed by the line each print stands on.
@@ -315,7 +333,10 @@ def _failures(script: str, outputs: dict[int, str]) -> list[str]:
     page = check_doc_snippets._SITE / "page.mdx"
     lines = {number: number for number in range(1, script.count("\n") + 2)}
     # Each print wrote once, in the order of the lines they stand on.
-    written = {line: [(line, (" ", [text], "\n"))] for line, text in outputs.items()}
+    written = {
+        line: [_recorded(script, line, [text], order=line)]
+        for line, text in outputs.items()
+    }
     found: list[str] = check_doc_snippets.output_disagreements(
         page, script, lines, written
     )
@@ -328,7 +349,7 @@ def _held_against(script: str, line: int, texts: list[str]) -> list[str]:
     """
     page = check_doc_snippets._SITE / "page.mdx"
     lines = {number: number for number in range(1, script.count("\n") + 2)}
-    written = {line: [(0, (" ", texts, "\n"))]}
+    written = {line: [_recorded(script, line, texts, order=0)]}
     found: list[str] = check_doc_snippets.output_disagreements(
         page, script, lines, written
     )
@@ -957,7 +978,7 @@ def test_a_spanish_page_reads_a_decimal_comma_from_its_path() -> None:
     """The page's path, under the Spanish site, decides the decimal comma."""
     script = "print(35.9)  # 35,9 m\n"
     lines = {1: 1}
-    written = {1: [(0, (" ", ["35.9"], "\n"))]}
+    written = {1: [_recorded(script, 1, ["35.9"], order=0)]}
     spanish = check_doc_snippets._SITE_ES / "page.mdx"
     english = check_doc_snippets._SITE / "page.mdx"
     assert (
@@ -1201,8 +1222,14 @@ def test_prints_of_one_statement_are_held_in_the_order_they_wrote(
     page = check_doc_snippets._SITE / "page.mdx"
     lines = {number: number for number in range(1, 6)}
     written = {
-        2: [(0, (" ", ["0"], " ")), (2, (" ", ["1"], " "))],
-        3: [(1, (" ", ["10"], " ")), (3, (" ", ["11"], " "))],
+        2: [
+            _recorded(script, 2, ["0"], order=0, end=" "),
+            _recorded(script, 2, ["1"], order=2, end=" "),
+        ],
+        3: [
+            _recorded(script, 3, ["10"], order=1, end=" "),
+            _recorded(script, 3, ["11"], order=3, end=" "),
+        ],
     }
     assert check_doc_snippets.output_disagreements(page, script, lines, written) == []
 
@@ -1261,6 +1288,182 @@ def test_a_print_is_held_to_what_its_file_took(tmp_path: pathlib.Path) -> None:
     assert "the comment says 456 where the print wrote 4" in failures[1]
 
 
+def test_a_separator_is_held_to_what_the_file_took_of_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A print writes each separator by a write of its own, and a file that
+    takes none of it wrote the two values side by side.
+    """
+    code = (
+        "class NoSpace:\n"
+        "    def write(self, text):\n"
+        "        return 0 if text == ' ' else len(text)\n"
+        "print(1, 2, file=NoSpace())  # 12\n"
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = code.replace("# 12", "# 1 2")
+    (failure,) = check_doc_snippets.check_execution(
+        [_page(tmp_path, wrong, name="w.md")]
+    )
+    assert "the comment says 1 where the print wrote 12" in failure
+
+
+def test_a_print_inside_another_print_is_told_apart_by_where_it_stands(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two prints that open on one line, one in the other's arguments, make
+    two calls the run records under that line: the inner one's own comment
+    holds its call alone, and the comment of the print around it holds that
+    print's call, not the inner one's nor none. A print inside the inner
+    one's arguments, with no comment of its own, is the inner comment's, at
+    any depth, so the outer comment does not count its call again.
+    """
+    listed = "data = [\n    print(print(1),  # 1\n          2),  # None 2\n]\n"
+    stated = "value = (\n    print(print(1, end=' '),  # 1\n          2)\n)  # None 2\n"
+    deep_listed = (
+        "data = [\n"
+        "    print(print(print(1, end=' '),\n"
+        "                2),  # 1 None 2\n"
+        "          3),  # None 3\n"
+        "]\n"
+    )
+    deep_stated = (
+        "value = (\n"
+        "    print(print(print(1, end=' '),\n"
+        "                2),  # 1 None 2\n"
+        "          3)\n"
+        ")  # None 3\n"
+    )
+    pages = [
+        _page(tmp_path, listed, name="listed.md"),
+        _page(tmp_path, stated, name="stated.md"),
+        _page(tmp_path, deep_listed, name="deep_listed.md"),
+        _page(tmp_path, deep_stated, name="deep_stated.md"),
+    ]
+    assert check_doc_snippets.check_execution(pages) == []
+    wrong = _page(tmp_path, stated.replace("# None 2", "# None 3"), name="w.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "the comment says 3 where the print wrote 2" in failure
+    # The innermost call counted by both comments.
+    twice = deep_listed.replace("# None 3", "# 1 None 3")
+    (failure,) = check_doc_snippets.check_execution(
+        [_page(tmp_path, twice, name="twice.md")]
+    )
+    assert "the comment says 1 where the print wrote None" in failure
+
+
+def test_a_comment_two_nested_prints_close_beside_holds_both_their_calls(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A print that closes inside another on the line the outer one closes
+    on shares its comment, which states the calls of both in the order they
+    wrote; and a comment of the statement around prints that a comment on
+    their own lines already holds stands for none of them.
+    """
+    shared = "data = [print(1,\n              print(2)),  # 2 1 None\n]\n"
+    first = shared.replace("# 2 1 None", "# 2")
+    held = "value = (\n    print(print(1, end=' '),\n          2)  # 1 None 2\n)  # 1\n"
+    pages = [
+        _page(tmp_path, shared, name="shared.md"),
+        _page(tmp_path, first, name="first.md"),
+        _page(tmp_path, held, name="held.md"),
+    ]
+    assert check_doc_snippets.check_execution(pages) == []
+    wrong = _page(tmp_path, shared.replace("# 2 1 None", "# 2 3 None"), name="w.md")
+    (failure,) = check_doc_snippets.check_execution([wrong])
+    assert "the comment says 3 where the print wrote 1" in failure
+
+
+def test_each_call_is_read_with_the_arguments_of_its_own_print(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two prints of one statement share its comment, and each call is read
+    with its own print's label, whose numbers the comment may leave out.
+    """
+    code = (
+        'data = [\n    print("Band 1:", 10),\n    print("Band 2:", 20),\n]  # 10 20\n'
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = _page(tmp_path, code.replace("# 10 20", "# 10 30"), name="w.md")
+    failures = check_doc_snippets.check_execution([wrong])
+    assert len(failures) == 2  # one for each print the comment stands for
+    assert all("the comment says 30 where the print wrote 20" in f for f in failures)
+
+
+def test_a_print_bound_to_something_else_is_not_said_never_to_run(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of a name ``print`` that the page binds to something else need
+    not reach the builtin, so a run that records none of its calls does not
+    show the page never runs it; one that reaches the builtin is still held
+    to its comment, and a builtin print that never runs is still reported.
+    """
+    # A module beside the page that lists a print of its own in __all__.
+    shout = (
+        "import pathlib\n\n"
+        "pathlib.Path('shout.py').write_text(\n"
+        "    \"__all__ = ['print']\\n\\ndef print(*args, **kwargs):\\n    pass\\n\"\n"
+        ")\n"
+    )
+    bound = [
+        "def print(*args, **kwargs):\n    pass\n\nprint(2)  # 2\n",
+        "from pprint import pprint as print\n\nprint(2)  # 2\n",
+        "def show(print):\n    print(2)  # 2\n\nshow(lambda value: None)\nprint(3)  # 3\n",
+        shout + "from shout import *\n\nprint(2)  # 2\n",
+        # Bound by the import and let go before the run ends, which the
+        # record of the end no longer shows.
+        shout + "from shout import *\n\nprint(2)  # 2\nglobals().pop('print')\n",
+        "import builtins\n\nbuiltins.print = lambda *args, **kwargs: None\nprint(2)  # 2\n",
+        "globals()['print'] = lambda *args, **kwargs: None\nprint(2)  # 2\n",
+    ]
+    pages = [_page(tmp_path, code, name=f"bound{n}.md") for n, code in enumerate(bound)]
+    assert check_doc_snippets.check_execution(pages) == []
+    passed_on = (
+        "import functools\n\n"
+        "print = functools.partial(print, end='!\\n')\n"
+        "print(2)  # 3\n"
+    )
+    (failure,) = check_doc_snippets.check_execution(
+        [_page(tmp_path, passed_on, name="passed.md")]
+    )
+    assert "the comment says 3 where the print wrote 2" in failure
+    never = _page(tmp_path, "def never():\n    print(4)  # 4\n", name="never.md")
+    (failure,) = check_doc_snippets.check_execution([never])
+    assert "the page never runs this print" in failure
+
+
+def test_a_complex_number_spelled_across_the_page_s_text_is_one_value(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A complex number whose parts the code computes and whose sign and
+    ``j`` the page writes is the one value the reader reads; a part the
+    page's own text writes stays its label, which a comment may leave out or
+    state with the rest of the number.
+    """
+    code = (
+        "a = 1.0\n"
+        "b = 2.5\n"
+        'print(f"{a} + {b}j")  # 1.0 + 2.5j\n'
+        'print(f"{a}{b:+}j")  # 1.0+2.5j\n'
+        'print(f"{a} + 2.5j")  # 1.0\n'
+        'print(f"{a} + 2.5j")  # 1.0 + 2.5j\n'
+        'print(f"1.0 + {b}j")  # 1.0 + 2.5j\n'
+        'print(f"1.0 + {b}j")  # 2.5\n'
+    )
+    assert check_doc_snippets.check_execution([_page(tmp_path, code)]) == []
+    wrong = _page(tmp_path, code.replace("# 1.0 + 2.5j", "# 1.0 + 2.6j"), name="w.md")
+    failures = check_doc_snippets.check_execution([wrong])
+    assert len(failures) == 3
+    assert all(
+        "the comment says 1.0+2.6j where the print wrote 1.0+2.5j" in failure
+        for failure in failures
+    )
+    # A part the page writes, stated alone and wrong, is still read alone.
+    alone = _page(tmp_path, code.replace("# 1.0\n", "# 1.1\n"), name="alone.md")
+    (failure,) = check_doc_snippets.check_execution([alone])
+    assert "the comment says 1.1 where the print wrote 1.0" in failure
+
+
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
     """The brackets before each comma between two digits are counted on, not
     counted again from the start of the line.
@@ -1289,6 +1492,39 @@ def test_a_comment_over_many_lines_is_read_in_linear_time() -> None:
     (promise,) = check_doc_snippets.promised_outputs(script)
     assert time.perf_counter() - start < 10.0
     assert len(promise.lines) == count
+
+
+def test_a_page_of_many_commented_prints_is_read_in_linear_time() -> None:
+    """The prints a comment does not stand for are found among those that
+    open on its lines, not among every print of the page with a comment.
+
+    Found among every one, a page of 16,000 prints, each with its comment,
+    took 60 to 260 s on this machine, as loaded.
+    """
+    count = 16_000
+    script = "".join(f"print({n})  # {n}\n" for n in range(count))
+    start = time.perf_counter()
+    promises = check_doc_snippets.promised_outputs(script)
+    assert time.perf_counter() - start < 10.0
+    assert len(promises) == count
+
+
+def test_a_function_that_binds_print_is_read_in_linear_time() -> None:
+    """Each call's name is looked up through the scopes around it, and
+    whether the call runs in a scope's own namespace is told by the
+    statements of its body kept once for each scope, not by scanning that
+    body again for each call.
+
+    Scanned again, a function of 16,000 commented prints of a parameter
+    named ``print`` took 17 to 19 s on this machine.
+    """
+    count = 16_000
+    body = "".join(f"    print({n})  # {n}\n" for n in range(count))
+    start = time.perf_counter()
+    promises = check_doc_snippets.promised_outputs(f"def show(print):\n{body}")
+    assert time.perf_counter() - start < 10.0
+    assert len(promises) == count
+    assert not any(promise.builtin for promise in promises)
 
 
 def test_a_spanish_comment_writes_the_commas_of_its_brackets_one_way() -> None:
@@ -1344,19 +1580,36 @@ def test_a_page_that_writes_bytes_its_streams_cannot_decode_is_still_reported(
     that the encoding of its streams does not decode; such a byte is read as
     a replacement character, so the page that fails is reported with its last
     line on stderr and the page that runs is held to its comments, rather
-    than the check stopping on the byte. ``0x81`` decodes neither as UTF-8
-    nor in code page 1252, the encodings the streams take on the runners.
+    than the check stopping on the byte.
+
+    The byte is one the encoding the check reads the streams in does not
+    decode, whatever the host gives it: ``0x80`` in UTF-8, ``0x81`` in code
+    page 1252, ``0x98`` in code page 1251. An encoding that decodes every
+    byte, as Latin-1 does, never reads a replacement character, and leaves
+    the test nothing to show.
     """
+    encoding = check_doc_snippets._STREAM_ENCODING
+    byte = next(
+        (
+            bytes([value])
+            for value in range(0x80, 0x100)
+            if (b"bad" + bytes([value])).decode(encoding, errors="replace")
+            == "bad\ufffd"
+        ),
+        None,
+    )
+    if byte is None:
+        pytest.skip(f"{encoding} decodes every byte")
     fails = _page(
         tmp_path,
-        "import sys\nsys.stderr.buffer.write(b'bad\\x81\\n')\nsys.stderr.flush()\n"
-        "raise SystemExit(1)",
+        f"import sys\nsys.stderr.buffer.write(b'bad' + {byte!r} + b'\\n')\n"
+        "sys.stderr.flush()\nraise SystemExit(1)",
         name="fails.md",
     )
     runs = _page(
         tmp_path,
-        "import sys\nsys.stdout.buffer.write(b'bad\\x81\\n')\nsys.stdout.flush()\n"
-        "print(2)  # 2",
+        f"import sys\nsys.stdout.buffer.write(b'bad' + {byte!r} + b'\\n')\n"
+        "sys.stdout.flush()\nprint(2)  # 2",
         name="runs.md",
     )
     assert check_doc_snippets.check_execution([fails, runs]) == [

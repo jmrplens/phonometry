@@ -39,16 +39,16 @@ wrong thing. Four checks, cheapest first:
    finishes, so a change to a solver, a catalogue row or a rounding that moved
    a printed value left the old value in the comment with every check green.
    Each page runs with ``print`` wrapped to record what every print of the
-   page's own code writes, keyed by its line, and every comment that opens
-   like a value (:data:`_OUTPUT_OPENING`) once a symbol, an ``e.g.`` or an
-   aligning ``#`` before it is read past (:func:`_reading`), or opens on the
-   word the print writes first, is held to that text
-   (:func:`output_disagreement`): the values first, in their order, each at
-   the decimals the comment writes it to, with units, labels and annotation
-   read past, and none of them left out at the end. A comment whose print
-   never runs is a failure too. There is no list of excused comments: one
-   the check misreads is taught to it, and one that is wrong is corrected on
-   the page.
+   page's own code writes, keyed by its line and by where on it the call
+   stands, and every comment that opens like a value
+   (:data:`_OUTPUT_OPENING`) once a symbol, an ``e.g.`` or an aligning ``#``
+   before it is read past (:func:`_reading`), or opens on the word the print
+   writes first, is held to that text (:func:`output_disagreement`): the
+   values first, in their order, each at the decimals the comment writes it
+   to, with units, labels and annotation read past, and none of them left
+   out at the end. A comment whose print never runs is a failure too. There
+   is no list of excused comments: one the check misreads is taught to it,
+   and one that is wrong is corrected on the page.
 
 Usage::
 
@@ -66,13 +66,13 @@ import concurrent.futures
 import io
 import json
 import locale
+import os
 import pathlib
 import re
 import subprocess
 import sys
 import tempfile
 import tokenize
-from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import (
     MAX_EMAX,
@@ -83,9 +83,13 @@ from decimal import (
     Inexact,
     InvalidOperation,
 )
-from typing import TypeGuard
+from typing import TYPE_CHECKING, NamedTuple, TypeGuard
 
+import ast_scan
 from markdown_fences import fences, page_kind
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _DOCS = _ROOT / "docs"
@@ -448,6 +452,20 @@ class _Part:
 #: value an f-string formats into it.
 _Argument = tuple[str | None, ...] | None
 
+#: Where a call stands in a script: the line it opens on, the line it closes
+#: on, and the columns it opens and closes at, in the order the interpreter
+#: gives them for the instruction that makes the call
+#: (:meth:`~types.CodeType.co_positions`), which places it where
+#: :func:`ast.parse` places the call. Two calls that open on one line, one
+#: inside the other's arguments, are told apart by it. The interpreter gives
+#: ``None`` for a column it was asked not to keep.
+_Place = tuple[int | None, int | None, int | None, int | None]
+
+
+def _place(call: ast.Call) -> _Place:
+    """Where *call* stands in its script (:data:`_Place`)."""
+    return (call.lineno, call.end_lineno, call.col_offset, call.end_col_offset)
+
 
 @dataclass(frozen=True)
 class _Promise:
@@ -459,23 +477,35 @@ class _Promise:
         (:func:`_print_calls`).
     :param last: The line that statement, or that print, closes on.
     :param lines: The comment and the comment lines that continue it.
-    :param arguments: What each argument of the print is (:data:`_Argument`),
-        or ``None`` when its arguments cannot be told apart (``*args``).
+    :param prints: The prints that open on the lines from *first* to *last*
+        whose calls the comment stands for, each where it stands
+        (:data:`_Place`) with what each of its arguments is
+        (:data:`_Argument`), or ``None`` when they cannot be told apart
+        (``*args``): a call is read with the arguments of the print that
+        made it.
     :param word: For a comment that opens on a word, the word: such a comment
         states the output only when the print writes that word first, which
         the run tells (:func:`output_disagreements`); ``None`` for a comment
         that opens like an output whatever the print writes.
-    :param apart: The lines from *first* to *last* whose prints have a
-        comment of their own inside the statement, and whose calls this
-        comment does not stand for.
+    :param apart: Where the prints stand that open on those lines and whose
+        calls the comment does not stand for: one with a comment of its own on
+        fewer lines inside them, with the prints inside its arguments that
+        comment holds, and one that runs on past *last*, the print whose
+        arguments hold this one.
+    :param builtin: Whether the print reads the builtin ``print``: a name
+        the script binds to something else (``from rich import print``, or
+        any name a ``from rich import *`` may bind) need
+        not reach the recorder, so a run that records none of its calls does
+        not show that the page never runs it.
     """
 
     first: int
     last: int
     lines: tuple[str, ...]
-    arguments: tuple[_Argument, ...] | None = None
+    prints: tuple[tuple[_Place, tuple[_Argument, ...] | None], ...] = ()
     word: str | None = None
-    apart: tuple[int, ...] = ()
+    apart: tuple[_Place, ...] = ()
+    builtin: bool = True
 
     @property
     def text(self) -> str:
@@ -484,15 +514,81 @@ class _Promise:
 
 
 def _is_print(node: ast.AST) -> TypeGuard[ast.Call]:
-    """True for a call of the builtin ``print``, a statement of its own or
+    """True for a call of ``print`` by that name, a statement of its own or
     inside another one (``result = print(2)``, ``[print(x) for x in xs]``):
-    the record holds what every call writes, wherever it stands.
+    the record holds what every call writes, wherever it stands. Whether the
+    name is the builtin's there is :func:`_reads_builtin`'s to tell.
     """
     return (
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
         and node.func.id == "print"
     )
+
+
+def _imports_every_name(tree: ast.Module) -> bool:
+    """Whether *tree* imports every public name of a module
+    (``from rich import *``), which binds whatever that module lists,
+    ``print`` among them for one that lists it: Python takes such an import
+    at the top level of a module only, in any block there.
+    """
+    return any(
+        isinstance(node, ast.ImportFrom)
+        and any(alias.name == "*" for alias in node.names)
+        for node in ast.walk(tree)
+    )
+
+
+def _binds_print(tree: ast.Module) -> bool:
+    """Whether any scope of *tree*, the module, a function, a lambda, a class
+    body or a comprehension, binds the name ``print``, as its own or under
+    ``global``: when none does, and the module imports no module's every
+    name (:func:`_imports_every_name`), every call of the name reads the
+    builtin, and none is looked up (:func:`_reads_builtin`).
+    """
+    scopes = [
+        tree,
+        *(node for node in ast.walk(tree) if isinstance(node, ast_scan.SCOPES)),
+    ]
+    return any(
+        ast_scan.own_names(scope).binds("print")
+        or ast_scan.own_names(scope).rebinds("print")
+        for scope in scopes
+    )
+
+
+def _reads_builtin(tree: ast.Module, call: ast.Call) -> bool:
+    """Whether the name *call* calls is the builtin ``print``: no scope it is
+    looked up in binds it (:func:`ast_scan.binding_of`), neither the module
+    nor a function that declares it ``global`` and binds it there.
+    """
+    how, _ = ast_scan.binding_of(tree, call.func, "print")
+    return (
+        how in {"outside", "global"}
+        and not ast_scan.own_names(tree).binds("print")
+        and "print" not in ast_scan.global_bindings(tree)
+    )
+
+
+def _prints_around(tree: ast.AST) -> dict[ast.Call, ast.Call]:
+    """Each print of *tree* inside the arguments of another, at any depth,
+    with the innermost print around it: the calls a print's arguments make
+    before it writes, which its comment stands for unless one has a comment
+    of its own.
+    """
+    around: dict[ast.Call, ast.Call] = {}
+
+    def visit(node: ast.AST, outer: ast.Call | None) -> None:
+        for child in ast.iter_child_nodes(node):
+            if _is_print(child):
+                if outer is not None:
+                    around[child] = outer
+                visit(child, child)
+            else:
+                visit(child, outer)
+
+    visit(tree, None)
+    return around
 
 
 #: The first and the last line of a stretch of a script.
@@ -602,8 +698,27 @@ def promised_outputs(script: str) -> list[_Promise]:
     there is more likely a note on an argument than a message the print
     writes, and is not read. The prints that have no comment there are read
     on the lines of their statement, and that comment stands for their calls
-    only, not for those of the prints that have one of their own.
+    only, not for those of the prints that have one of their own. A comment
+    on a print's own lines stands for the calls of that print and of the
+    prints inside its arguments, at any depth, that have none of their own,
+    not for those of the print whose arguments hold it, which opens on its
+    line: the run tells the calls apart by where each stands
+    (:data:`_Place`), not by the line alone. A print inside another that
+    closes on the line the outer one closes on shares its comment, which
+    stands for the calls of both, and a print a comment on the lines of a
+    print around it holds is not read again on the lines of its statement.
     """
+    tree = ast.parse(script)
+    try:
+        return _promises(script, tree)
+    finally:
+        # The scopes read for each print are kept by the tree they came from;
+        # a page's tree is read once, so nothing of it is kept for the next.
+        ast_scan.forget_trees()
+
+
+def _promises(script: str, tree: ast.Module) -> list[_Promise]:
+    """:func:`promised_outputs`, of *script* parsed as *tree*."""
     lines = script.splitlines()
     comments: dict[int, tuple[int, str]] = {}
     for token in tokenize.generate_tokens(io.StringIO(script).readline):
@@ -640,7 +755,7 @@ def promised_outputs(script: str) -> list[_Promise]:
             number += 1
         return said
 
-    found = _print_calls(ast.parse(script))
+    found = _print_calls(tree)
     span: dict[ast.Call, _Span] = {}
     said_by: dict[ast.Call, list[str]] = {}
     word_by: dict[ast.Call, str] = {}
@@ -724,65 +839,109 @@ def promised_outputs(script: str) -> list[_Promise]:
     for node, (own, _statement) in found.items():
         span[node] = own
     read([node for node, (own, stmt) in found.items() if own[1] < stmt[1]], words=False)
+    # A print inside the arguments of one with a comment on its own lines is
+    # held by that comment, the print whose comment holds it kept for it
+    # here: one that closes on the line the comment is read from shares that
+    # comment, which stands for the calls of both, and one with no comment of
+    # its own is not read again on the lines of its statement.
+    around = _prints_around(tree)
+    holder: dict[ast.Call, ast.Call] = {}
+    for node in found:  # each print before the prints inside its arguments
+        outer = holder.get(around[node]) if node in around else None
+        if outer is not None and (
+            node not in said_by or span[node][1] == span[outer][1]
+        ):
+            holder[node] = outer
+            said_by.pop(node, None)
+            word_by.pop(node, None)
+        elif node in said_by:
+            holder[node] = node
     for node, (_own, statement) in found.items():
-        if node not in said_by:
+        if node not in holder:
             span[node] = statement
-    read([node for node in found if node not in said_by], words=True)
-    claimed = {span[node] for node in said_by}
+    read([node for node in found if node not in holder], words=True)
 
-    def apart(first: int, last: int) -> tuple[int, ...]:
-        """The lines from *first* to *last* of the prints inside them that
-        have a comment of their own.
+    # The run records a call under the line it opens on, so the prints a
+    # comment may stand for are those that open on its lines.
+    opening: dict[int, list[ast.Call]] = {}
+    for node in found:
+        opening.setdefault(node.lineno, []).append(node)
+    shares: dict[_Span, tuple[list[ast.Call], list[ast.Call]]] = {}
+
+    def stands_for(stretch: _Span) -> tuple[list[ast.Call], list[ast.Call]]:
+        """The prints that open on the lines of *stretch* whose calls a
+        comment there stands for, and those whose calls it does not: a print
+        held by a comment of its own on fewer lines inside them, its own or
+        that of a print around it, and one that runs on past them.
+
+        Read once for each stretch, and only over the prints that open on
+        it, so that a page of many prints each with its comment is read in a
+        time that grows with the page, not with its square.
         """
-        inside = {
-            number
-            for low, high in claimed
-            if first <= low and high <= last and (low, high) != (first, last)
-            for number in range(low, high + 1)
-        }
-        return tuple(sorted(inside))
+        if stretch not in shares:
+            first, last = stretch
+            kept: list[ast.Call] = []
+            left: list[ast.Call] = []
+            for number in range(first, last + 1):
+                for node in opening.get(number, ()):
+                    owner = holder.get(node, node)
+                    own = owner in said_by and span[owner] != stretch
+                    inside = own and first <= span[owner][0] and span[owner][1] <= last
+                    past = (node.end_lineno or node.lineno) > last
+                    (left if inside or past else kept).append(node)
+            shares[stretch] = (kept, left)
+        return shares[stretch]
 
-    return [
-        _Promise(
-            span[node][0],
-            span[node][1],
-            tuple(said_by[node]),
-            _arguments(node),
-            word_by.get(node),
-            apart(*span[node]),
+    # A module that imports another's every name may hold its print: no
+    # call of the name is then known to read the builtin.
+    every_name = _imports_every_name(tree)
+    bound = every_name or _binds_print(tree)
+    promises: list[_Promise] = []
+    for node in sorted(
+        said_by, key=lambda node: (span[node][0], node.lineno, node.col_offset)
+    ):
+        kept, left = stands_for(span[node])
+        promises.append(
+            _Promise(
+                span[node][0],
+                span[node][1],
+                tuple(said_by[node]),
+                tuple((_place(each), _arguments(each)) for each in kept),
+                word_by.get(node),
+                tuple(_place(each) for each in left),
+                not bound or (not every_name and _reads_builtin(tree, node)),
+            )
         )
-        for node in sorted(
-            said_by, key=lambda node: (span[node][0], node.lineno, node.col_offset)
-        )
-    ]
+    return promises
 
 
 def _parts(text: str, *, label: bool = False, segment: int = 0) -> list[_Part]:
     """The values, words and ellipses of *text*, in order, each in *segment*."""
-    parts: list[_Part] = []
+    return [part for _, _, part in _located_parts(text, label=label, segment=segment)]
+
+
+def _located_parts(
+    text: str, *, label: bool = False, segment: int = 0
+) -> list[tuple[int, int, _Part]]:
+    """:func:`_parts`, each with where it opens and closes in *text*."""
+    parts: list[tuple[int, int, _Part]] = []
     at = 0
     for match in _OUTPUT_PART.finditer(text):
         before, at = text[at : match.start()], match.end()
         if match.group("value") is not None:
-            parts.append(
-                _Part(
-                    "value",
-                    match.group("value").replace(" ", ""),
-                    label,
-                    rough=match.group("rough") is not None,
-                    cut=match.group("cut") is not None,
-                    before=before,
-                    segment=segment,
-                )
+            part = _Part(
+                "value",
+                match.group("value").replace(" ", ""),
+                label,
+                rough=match.group("rough") is not None,
+                cut=match.group("cut") is not None,
+                before=before,
+                segment=segment,
             )
-        elif match.group("word") is not None:
-            parts.append(
-                _Part("word", match.group(), label, before=before, segment=segment)
-            )
-        elif match.group("gap") is not None:
-            parts.append(
-                _Part("gap", match.group(), label, before=before, segment=segment)
-            )
+        else:
+            kind = "word" if match.group("word") is not None else "gap"
+            part = _Part(kind, match.group(), label, before=before, segment=segment)
+        parts.append((match.start(), match.end(), part))
     return parts
 
 
@@ -814,10 +973,35 @@ def _pieces(text: str, argument: _Argument) -> list[tuple[str, bool]]:
     return pieces
 
 
-#: What one call of a print wrote, as the recorder keeps it: the separator it
-#: was given, what each argument wrote, and what it wrote after the last of
-#: them, its ending, or the separator before an argument it failed to write.
-_Call = tuple[str, Sequence[str], str]
+class _Call(NamedTuple):
+    """What one call of a print wrote, as the recorder keeps it."""
+
+    #: What the file took of each separator between two arguments the call
+    #: wrote: all of it, part of it, or none, as each write said.
+    separators: Sequence[str]
+    #: What each argument wrote.
+    texts: Sequence[str]
+    #: What the call wrote after the last of them: its ending, or the
+    #: separator before an argument it failed to write.
+    end: str
+    #: What each argument of the print that made the call is
+    #: (:data:`_Argument`), or ``None`` when that print is not known or its
+    #: arguments cannot be told apart.
+    arguments: tuple[_Argument, ...] | None = None
+
+    @property
+    def text(self) -> str:
+        """What the call wrote, whole."""
+        pieces = [self.texts[0]] if self.texts else []
+        for separator, text in zip(self.separators, self.texts[1:], strict=True):
+            pieces += [separator, text]
+        return "".join([*pieces, self.end])
+
+
+#: One call the run recorded: the order it began to write in among all the
+#: calls of the run, where it stands in the script (:data:`_Place`), ``None``
+#: when that is not known, and what it wrote.
+_Recorded = tuple[int, _Place | None, _Call]
 
 
 #: How a value a sign may stand before opens: with a digit, a point before
@@ -868,12 +1052,11 @@ def _signed(pieces: list[tuple[str, bool]]) -> list[tuple[str, bool]]:
     return [piece for piece in out if piece[0]]
 
 
-def _stretches(
-    calls: Sequence[_Call], arguments: tuple[_Argument, ...] | None
-) -> list[tuple[str, bool]]:
+def _stretches(calls: Sequence[_Call]) -> list[tuple[str, bool]]:
     """What a print wrote over all its calls, in the order it wrote it, cut
     into stretches of the page's own text (``True``: its literals, the
-    separator, the ending) and of what its code computed (``False``).
+    separator, the ending) and of what its code computed (``False``), each
+    call read with the arguments of the print that made it.
 
     Two pieces of the same kind written one after the other are one stretch,
     as a reader reads them: ``print(1, 2, sep="")`` writes the value ``12``,
@@ -883,13 +1066,15 @@ def _stretches(
     goes to the side the output reads it with (:func:`_signed`).
     """
     pieces: list[tuple[str, bool]] = []
-    for sep, texts, end in calls:
-        known = arguments is not None and len(arguments) == len(texts)
-        for index, text in enumerate(texts):
+    for call in calls:
+        arguments = call.arguments
+        if arguments is not None and len(arguments) != len(call.texts):
+            arguments = None
+        for index, text in enumerate(call.texts):
             if index:
-                pieces.append((sep, True))
-            pieces += _pieces(text, arguments[index] if known and arguments else None)
-        pieces.append((end, True))
+                pieces.append((call.separators[index - 1], True))
+            pieces += _pieces(text, None if arguments is None else arguments[index])
+        pieces.append((call.end, True))
     # Each stretch gathers its pieces and joins them once, so a loop of many
     # calls that write one stretch does not copy it again for each call.
     stretches: list[tuple[list[str], bool]] = []
@@ -901,22 +1086,132 @@ def _stretches(
     return [("".join(texts), label) for texts, label in stretches]
 
 
-def _written_parts(
-    calls: Sequence[_Call],
-    arguments: tuple[_Argument, ...] | None,
-) -> list[_Part]:
+def _written_parts(calls: Sequence[_Call]) -> list[_Part]:
     """The parts of what a print wrote over all its calls (:func:`_stretches`),
     a ``"line"`` part where it ended a line, its own text marked as a label
-    and each part in the stretch it stands in. A minus sign (U+2212) reads as
-    a hyphen, as it does in a comment.
+    and each part in the stretch it stands in, a complex number written
+    across stretches read as one value (:func:`_line_parts`). A minus sign
+    (U+2212) reads as a hyphen, as it does in a comment.
+    """
+    return _written_readings(calls)[0]
+
+
+def _written_readings(calls: Sequence[_Call]) -> list[list[_Part]]:
+    """The readings of what a print wrote over all its calls: its parts
+    (:func:`_written_parts`), and, where it spells a complex number one of
+    whose parts its own text writes, the parts read with that number as one
+    value too (:func:`_line_parts`), which a comment may state whole as it
+    may state the computed part alone.
     """
     out: list[_Part] = []
-    for segment, (text, label) in enumerate(_stretches(calls, arguments)):
-        for number, line in enumerate(text.replace("\u2212", "-").split("\n")):
+    whole: list[_Part] = []
+    line: list[tuple[str, bool, int]] = []
+    for segment, (text, label) in enumerate(_stretches(calls)):
+        for number, piece in enumerate(text.replace("\u2212", "-").split("\n")):
             if number:
+                computed, spelled = _line_parts(line)
+                out += computed
+                whole += spelled
+                line = []
                 out.append(_Part("line", "\n", segment=segment))
-            out += _parts(line, label=label, segment=segment)
-    return out
+                whole.append(out[-1])
+            if piece:
+                line.append((piece, label, segment))
+    computed, spelled = _line_parts(line)
+    out += computed
+    whole += spelled
+    return [out] if whole == out else [out, whole]
+
+
+#: A complex number as a print may spell one across the page's own text and
+#: the values its code computes: ``f"{a} + {b}j"``, ``f"{a}{b:+}j"``.
+_SPELLED_COMPLEX = re.compile(rf"{_SIGN}{_REAL} *[-+] *{_REAL}j")
+
+
+def _line_parts(
+    pieces: Sequence[tuple[str, bool, int]],
+) -> tuple[list[_Part], list[_Part]]:
+    """The parts of one line of what a print wrote, from the *pieces* of its
+    stretches it is written in, each with whether the page's own text wrote
+    it and the stretch it stands in, read twice.
+
+    A complex number whose two parts the code computed and whose sign and
+    ``j`` the page's own text writes around them, as ``f"{a} + {b}j"`` does,
+    is the one value the reader reads there, not two values and a label: it
+    is read as a value the code computed, in the stretch of its real part.
+    One whose other part the page's text writes, as ``f"{a} + 2.5j"``, is
+    read so in the second reading only: the first keeps that part a label,
+    which a comment may leave out.
+    """
+    located: list[tuple[int, int, _Part]] = []
+    at = 0
+    for text, label, segment in pieces:
+        located += [
+            (at + start, at + end, part)
+            for start, end, part in _located_parts(text, label=label, segment=segment)
+        ]
+        at += len(text)
+    if len(pieces) < 2:
+        parts = [part for _, _, part in located]
+        return parts, parts
+    whole = "".join(text for text, _, _ in pieces)
+    return (
+        _merged(located, whole, written=False),
+        _merged(located, whole, written=True),
+    )
+
+
+def _merged(
+    located: Sequence[tuple[int, int, _Part]], whole: str, *, written: bool
+) -> list[_Part]:
+    """The *located* parts of the line *whole*, each complex number it spells
+    across them (:func:`_spells_complex`) read as one computed value.
+    """
+    out: list[_Part] = []
+    index = 0
+    for match in _SPELLED_COMPLEX.finditer(whole):
+        while index < len(located) and located[index][0] < match.start():
+            out.append(located[index][2])
+            index += 1
+        inside = index
+        while inside < len(located) and located[inside][1] <= match.end():
+            inside += 1
+        covered = located[index:inside]
+        if _spells_complex(covered, match.start(), match.end(), written=written):
+            real = covered[0][2]
+            out.append(
+                _Part(
+                    "value",
+                    match.group().replace(" ", ""),
+                    before=real.before,
+                    segment=real.segment,
+                )
+            )
+            index = inside
+    return out + [part for _, _, part in located[index:]]
+
+
+def _spells_complex(
+    covered: Sequence[tuple[int, int, _Part]], start: int, end: int, *, written: bool
+) -> bool:
+    """Whether the parts *covered*, each where it opens and closes in a line,
+    are a complex number spelled from *start* to *end* (:data:`_SPELLED_COMPLEX`):
+    its real and its imaginary part, both computed or, when *written*, one
+    of them written by the page's own text, and at most the page's ``j``
+    after them, opening and closing where it does.
+    """
+    parts = [part for _, _, part in covered]
+    if len(parts) < 2 or (covered[0][0], covered[-1][1]) != (start, end):
+        return False
+    real, imaginary, *rest = parts
+    if any(part.kind != "value" for part in (real, imaginary)):
+        return False
+    labels = [part.label for part in (real, imaginary)]
+    if any(labels) and not (written and not all(labels)):
+        return False
+    if not rest:
+        return imaginary.text.endswith("j")
+    return [(part.kind, part.text) for part in rest] == [("word", "j")]
 
 
 def _read_number(text: str) -> Decimal | None:
@@ -1304,6 +1599,7 @@ def _disagreement(
     *,
     decimal_comma: bool,
     arrow: bool = True,
+    spelled: list[_Part] | None = None,
 ) -> str:
     """Why the comment lines *said_lines* do not state the output *wrote*.
 
@@ -1317,6 +1613,11 @@ def _disagreement(
     :param arrow: Let a line of the comment end what it states at an arrow
         (:data:`_ARROW`), the rest of it a note; off when the print writes an
         arrow itself.
+    :param spelled: The output read with each complex number it spells
+        across a part the page's own text writes as one value
+        (:func:`_written_readings`), which the comment may state instead:
+        the reason given is the one of the reading that reads such a number
+        as the comment does, whole when the comment writes a complex number.
     """
     texts = [
         _NOT_A_VALUE.sub("", _reading(text).replace("\u2212", "-"))
@@ -1327,16 +1628,23 @@ def _disagreement(
         decimal = _decimal_points(texts, in_brackets=True)
         listed = _decimal_points(texts, in_brackets=False)
         readings = [decimal] if listed == decimal else [decimal, listed]
+    outputs = [wrote] if spelled is None else [wrote, spelled]
+    if spelled is not None and any(
+        part.kind == "value" and part.text.endswith("j")
+        for part in _parts(" ".join(texts))
+    ):
+        outputs.reverse()
     why = ""
-    for reading in readings:
-        failed = _read(reading, wrote)
-        if not failed:
-            return ""
-        why = why or failed
-        if arrow:
-            noted = [_ARROW.split(text, maxsplit=1)[0] for text in reading]
-            if noted != reading and not _read(noted, wrote):
+    for output in outputs:
+        for reading in readings:
+            failed = _read(reading, output)
+            if not failed:
                 return ""
+            why = why or failed
+            if arrow:
+                noted = [_ARROW.split(text, maxsplit=1)[0] for text in reading]
+                if noted != reading and not _read(noted, output):
+                    return ""
     return why
 
 
@@ -1402,58 +1710,81 @@ def output_disagreement(
     """
     lines = promised.splitlines() if isinstance(promised, str) else list(promised)
     calls = [written] if isinstance(written, str) else list(written)
-    wrote = _written_parts([(" ", [text], "\n") for text in calls], None)
+    wrote, *spelled = _written_readings([_Call((), [text], "\n") for text in calls])
     output = "\n".join(calls)
     comma = _reads_decimal_comma(output, spanish=decimal_comma)
     arrow = _ARROW.search(output) is None
-    return _disagreement(lines, wrote, decimal_comma=comma, arrow=arrow)
+    return _disagreement(
+        lines,
+        wrote,
+        decimal_comma=comma,
+        arrow=arrow,
+        spelled=spelled[0] if spelled else None,
+    )
 
 
 def output_disagreements(
     page: pathlib.Path,
     script: str,
     lines: dict[int, int],
-    written: dict[int, list[tuple[int, _Call]]],
+    written: dict[int, list[_Recorded]],
+    *,
+    rebound: bool = False,
 ) -> list[str]:
     """Failures for every output comment of *page* that its print contradicts.
 
     :param script: The script the page ran as (:func:`_script`).
     :param lines: The line of the page each line of the script stands on.
-    :param written: What each print wrote, keyed by its line in the script:
-        one ``(order, (sep, texts, end))`` per call (:data:`_Call`), *order*
-        counting the calls of the whole run in the order they began to write.
-        A comment that stands for the prints of several lines is held to
-        their calls in that order, as they took turns: two prints of a
-        comprehension over two lines write one value each time round.
+    :param written: What each print wrote, keyed by the line of the script
+        its call opens on: one ``(order, place, call)`` per call
+        (:data:`_Recorded`), *order* counting the calls of the whole run in
+        the order they began to write. A comment that stands for the prints
+        of several lines is held to their calls in that order, as they took
+        turns: two prints of a comprehension over two lines write one value
+        each time round. A call is the comment's when it opens on the
+        comment's lines and does not stand where a print stands whose calls
+        the comment does not stand for (:attr:`_Promise.apart`), and it is
+        read with the arguments of the print that stands where it does.
+    :param rebound: Whether the run ended with the name ``print`` bound to
+        something else than the recorder, in the builtins or in the
+        script's own module (:data:`_RECORDER`): a print whose calls the
+        run did not record then need not be one the page never runs.
     """
     failures: list[str] = []
     spanish = page.is_relative_to(_SITE_ES)
     for promise in promised_outputs(script):
         where = f"{_rel(page)}:{lines.get(promise.first, promise.first)}"
         apart = set(promise.apart)
+        arguments = dict(promise.prints)
         kept = [
-            call
+            (order, call._replace(arguments=arguments.get(place) if place else None))
             for number in range(promise.first, promise.last + 1)
-            if number not in apart
-            for call in written.get(number, [])
+            for order, place, call in written.get(number, [])
+            if place not in apart
         ]
-        calls = [call for _, call in sorted(kept, key=lambda call: call[0])]
-        wrote = _written_parts(calls, promise.arguments)
+        calls = [call for _, call in sorted(kept, key=lambda kept: kept[0])]
+        wrote, *spelled = _written_readings(calls)
         if promise.word is not None:
             first = next((part for part in wrote if part.kind != "line"), None)
             if first is None or (first.kind, first.text) != ("word", promise.word):
                 continue  # prose about the line, not what the print writes
         if not calls:
-            failures.append(
-                f"{where}: the comment promises {promise.text!r}, but the page "
-                "never runs this print"
-            )
+            if promise.builtin and not rebound:
+                failures.append(
+                    f"{where}: the comment promises {promise.text!r}, but the "
+                    "page never runs this print"
+                )
             continue
-        output = "".join(sep.join(texts) + end for sep, texts, end in calls)
-        output = output.removesuffix("\n")
+        output = "".join(call.text for call in calls).removesuffix("\n")
         comma = _reads_decimal_comma(output, spanish=spanish)
         arrow = _ARROW.search(output) is None
-        why = _disagreement(promise.lines, wrote, decimal_comma=comma, arrow=arrow)
+        why = _disagreement(
+            promise.lines,
+            wrote,
+            decimal_comma=comma,
+            arrow=arrow,
+            spelled=spelled[0] if spelled else None,
+        )
         if why:
             failures.append(
                 f"{where}: {why}; the comment promises {promise.text!r}, the "
@@ -1465,17 +1796,22 @@ def output_disagreements(
 #: The module a page's script imports before anything else. It wraps
 #: ``print`` so that every call made from the script itself, at any depth of
 #: its own functions and loops, also records what the call writes, keyed by
-#: the line of the script the call stands on and numbered in the order the
-#: calls began to write; a print made inside the library is not the page's
-#: and is not recorded. The call writes through a file that hands each piece
-#: on to the one it was given and keeps what that file took, so the record
-#: holds what the print wrote and nothing else: each argument converted once,
-#: by the print itself, the ending it was given, of a write the file took in
-#: part only the characters it says it took, by the count its ``write``
-#: returns or on the :class:`BlockingIOError` it raises, and of a print that
-#: fails part of the way, or to a closed file, only what it wrote before it
-#: failed. When the script ends, however it ends, the record is saved beside
-#: it as JSON for :func:`_run_page` to read.
+#: the line of the script the call opens on, with where the call stands
+#: (:data:`_Place`), and numbered in the order the calls began to write; a
+#: print made inside the library is not the page's and is not recorded. The
+#: call writes through a file that hands each piece on to the one it was
+#: given and keeps what that file took, so the record holds what the print
+#: wrote and nothing else: each argument converted once, by the print
+#: itself, each separator and the ending as the file took them, of a write
+#: the file took in part only the characters it says it took, by the count
+#: its ``write`` returns or on the :class:`BlockingIOError` it raises, and of
+#: a print that fails part of the way, or to a closed file, only what it
+#: wrote before it failed. When the script ends, however it ends, the record
+#: is saved beside it as JSON for :func:`_run_page` to read, with whether the
+#: name ``print`` then still reaches the wrapper, in the builtins and in the
+#: script's own module: a page that bound it to something else while it ran
+#: (``builtins.print = ...``, ``globals()["print"] = ...``) made calls that
+#: need not have reached it.
 _RECORDER = """\
 import atexit
 import builtins
@@ -1489,6 +1825,7 @@ _SAVED = os.path.join(os.path.dirname(os.path.abspath(_SCRIPT)), "printed.json")
 _PRINT = builtins.print
 _WRITTEN = {}
 _ORDER = itertools.count()
+_PLACES = {}
 
 
 def _took(text, count):
@@ -1524,15 +1861,27 @@ class _Kept:
         self.file.flush()
 
 
-def _keep(line, order, count, sep, pieces):
-    # A print writes its arguments with the separator between them and then
-    # its ending: what it wrote after the last argument it wrote is the
-    # ending, or the separator before an argument it failed to write.
+def _place(frame):
+    # Where the call the frame is making stands: the place the interpreter
+    # gives the instruction it is at, read once for each code object.
+    code = frame.f_code
+    places = _PLACES.get(code)
+    if places is None:
+        places = _PLACES[code] = list(code.co_positions())
+    return places[frame.f_lasti // 2]
+
+
+def _keep(line, place, order, count, pieces):
+    # A print writes its arguments, each separator between two of them and
+    # then its ending, each by a write of its own: what the file took of a
+    # separator is kept as it took it, and what it took after the last
+    # argument it wrote is the ending, or the separator before an argument
+    # the print failed to write.
     texts = pieces[0 : max(2 * count - 1, 0) : 2]
+    separators = pieces[1 : max(2 * len(texts) - 1, 0) : 2]
     at = 2 * len(texts) - 1 if texts else 0
     after = pieces[at] if at < len(pieces) else ""
-    kept = [order, " " if sep is None else sep, texts, after]
-    _WRITTEN.setdefault(line, []).append(kept)
+    _WRITTEN.setdefault(line, []).append([order, place, separators, texts, after])
 
 
 def _print(*args, sep=" ", end="\\n", file=None, flush=False):
@@ -1545,12 +1894,19 @@ def _print(*args, sep=" ", end="\\n", file=None, flush=False):
         return _PRINT(*args, sep=sep, end=end, file=kept, flush=flush)
     finally:
         if kept.pieces:
-            _keep(caller.f_lineno, kept.order, len(args), sep, kept.pieces)
+            place = _place(caller)
+            _keep(caller.f_lineno, place, kept.order, len(args), kept.pieces)
 
 
 def _save():
+    # Whether the page bound the name print to something else as it ran, in
+    # the builtins or in its own module, where a call of the name finds it.
+    script = sys.modules.get("__main__")
+    rebound = builtins.print is not _print or (
+        getattr(script, "print", _print) is not _print
+    )
     with open(_SAVED, "w", encoding="utf-8") as out:
-        json.dump(_WRITTEN, out)
+        json.dump({"calls": _WRITTEN, "rebound": rebound}, out)
 
 
 builtins.print = _print
@@ -1600,6 +1956,16 @@ def _text(output: bytes | str | None) -> str:
     return output or ""
 
 
+def _saved_place(saved: object) -> _Place | None:
+    """The place the recorder saved for a call (:data:`_Place`), as JSON
+    gives it back: a list of its two lines and its two columns.
+    """
+    if isinstance(saved, list) and len(saved) == 4:
+        first, last, start, end = saved
+        return (first, last, start, end)
+    return None
+
+
 def _run_page(
     page: pathlib.Path, fixture: str = ""
 ) -> tuple[pathlib.Path, str, list[str]]:
@@ -1616,6 +1982,9 @@ def _run_page(
         (pathlib.Path(tmp) / "_snippet_recorder.py").write_text(
             _RECORDER, encoding="utf-8"
         )
+        # The recorder tells two calls on one line apart by their columns,
+        # which the interpreter drops when asked not to keep them.
+        env = {k: v for k, v in os.environ.items() if k != "PYTHONNODEBUGRANGES"}
         try:
             done = subprocess.run(
                 [sys.executable, str(path)],
@@ -1626,6 +1995,7 @@ def _run_page(
                 errors="replace",
                 timeout=_TIMEOUT_S,
                 cwd=tmp,
+                env=env,
             )
         except subprocess.TimeoutExpired as stopped:
             # What the page wrote on stderr before it was stopped, a warning
@@ -1641,10 +2011,14 @@ def _run_page(
             return page, "the run ended without saving what its prints wrote", []
         saved = json.loads(record.read_text("utf-8"))
     written = {
-        int(line): [(order, (sep, texts, end)) for order, sep, texts, end in calls]
-        for line, calls in saved.items()
+        int(line): [
+            (order, _saved_place(place), _Call(separators, texts, end))
+            for order, place, separators, texts, end in calls
+        ]
+        for line, calls in saved["calls"].items()
     }
-    return page, "", output_disagreements(page, script, lines, written)
+    rebound = saved["rebound"] is True
+    return page, "", output_disagreements(page, script, lines, written, rebound=rebound)
 
 
 def check_execution(pages: list[pathlib.Path]) -> list[str]:

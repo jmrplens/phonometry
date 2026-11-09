@@ -23,7 +23,7 @@ import dataclasses
 import numpy as np
 import pytest
 
-from phonometry import building
+from phonometry import building, filters, io
 
 # ---------------------------------------------------------------------------
 # Printed oracles
@@ -337,6 +337,33 @@ def test_force_exposure_level_scales_6_db_per_force_doubling() -> None:
     single = building.impact_force_exposure_level(force, fs)
     double = building.impact_force_exposure_level(2.0 * force, fs)
     assert double - single == pytest.approx(20.0 * np.log10(2.0), abs=1e-9)
+
+
+def test_a_calibrated_force_record_is_band_filtered_in_newtons_as_an_array() -> None:
+    """A bank that carries no calibration of its own filters a Signal in
+    pascals, its samples times the factor the Signal carries, which the
+    exposure level leaves off: the samples go to the bank as an array, as
+    the docstring says, and through the Signal a factor of 2 reads every
+    band 20 lg 2 = 6,02 dB high.
+    """
+    fs = 48_000
+    t = np.arange(0.0, 1.0, 1.0 / fs)
+    force = np.where(t < 0.020, 1500.0 * np.sin(np.pi * t / 0.020), 0.0)
+    bank = filters.OctaveFilterBank(fs, fraction=1, limits=[31.5, 500.0])
+    record = io.Signal(force, fs, calibration_factor=2.0)
+
+    def band_levels(x: io.Signal | np.ndarray) -> np.ndarray:
+        filtered = bank.filter(x, sigbands=True, calculate_level=False, detrend=False)
+        assert filtered.bands is not None
+        return np.array(
+            [building.impact_force_exposure_level(b, fs) for b in filtered.bands]
+        )
+
+    newtons = band_levels(force)
+    np.testing.assert_array_equal(band_levels(np.asarray(record)), newtons)
+    np.testing.assert_allclose(
+        band_levels(record) - newtons, 20.0 * np.log10(2.0), rtol=0.0, atol=1e-9
+    )
 
 
 def test_force_exposure_level_rejects_a_silent_record() -> None:

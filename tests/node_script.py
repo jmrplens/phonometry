@@ -32,9 +32,9 @@ def answer(script: str, given: object, *, timeout: float) -> list[object]:
     :raises AssertionError: when Node ends with a status other than 0, with
         that status, or the signal that stopped it, and what it wrote on
         stderr; and when it runs past *timeout* and is stopped, with what it
-        wrote on stderr before then. Node writes there what a script hands
-        it, so a byte that is not UTF-8 is read as a replacement character
-        rather than failing the read.
+        wrote on stderr before then. Node writes on stdout and on stderr
+        what a script hands it, so a byte that is not UTF-8 is read as a
+        replacement character on either rather than failing the read.
     """
     assert NODE is not None, "no JavaScript engine on the path"
     try:

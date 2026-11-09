@@ -1161,18 +1161,27 @@ def _parents(root: ast.AST) -> dict[ast.AST, ast.AST]:
     }
 
 
+@functools.cache
+def _body_of(scope: ast.AST) -> dict[int, ast.AST]:
+    """The statements of *scope*'s body, by their id, read once for each scope."""
+    return {id(statement): statement for statement in getattr(scope, "body", ())}
+
+
 def _runs_inside(scope: ast.AST, child: ast.AST, grandchild: ast.AST | None) -> bool:
     """Whether *child* of *scope*, on the way to a node, runs in *scope*'s own namespace.
 
     A ``def``'s or a ``class``'s body does, its decorators, defaults and
-    bases do not; a comprehension's first iterable does not either.
+    bases do not; a comprehension's first iterable does not either. The body
+    is looked up by the statement's id (:func:`_body_of`), so a name read in
+    each of many statements of one body is not looked for along the body
+    again each time.
     """
     if isinstance(scope, _COMPREHENSIONS):
         first = scope.generators[0]
         return not (child is first and grandchild is first.iter)
     if isinstance(scope, ast.Lambda):
         return child is scope.body
-    return any(child is statement for statement in getattr(scope, "body", ()))
+    return _body_of(scope).get(id(child)) is child
 
 
 def scopes_around(root: ast.AST, node: ast.AST) -> list[ast.AST]:
@@ -1254,6 +1263,7 @@ def forget_trees() -> None:
         own_names,
         _binding_nodes,
         _parents,
+        _body_of,
         _blocks,
         _class_is_live,
         for_the_type_checker,

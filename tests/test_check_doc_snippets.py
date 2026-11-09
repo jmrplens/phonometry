@@ -1464,6 +1464,22 @@ def test_a_complex_number_spelled_across_the_page_s_text_is_one_value(
     assert "the comment says 1.1 where the print wrote 1.0" in failure
 
 
+def test_a_long_run_of_digits_beside_a_label_is_read_in_linear_time() -> None:
+    """A complex number a print spells across its label and its values is
+    looked for from where a number opens, not again from each digit of one.
+
+    Looked for from each digit, a print of 20,000 digits beside its label
+    took about 30 s on this machine, and 40,000 about two minutes.
+    """
+    count = 20_000
+    digits = "7" * count
+    script = f'digits = "7" * {count}\nprint(f"ID: {{digits}}")  # ID: {digits}\n'
+    start = time.perf_counter()
+    found = _failures(script, {2: f"ID: {digits}"})
+    assert time.perf_counter() - start < 10.0
+    assert found == []
+
+
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
     """The brackets before each comma between two digits are counted on, not
     counted again from the start of the line.

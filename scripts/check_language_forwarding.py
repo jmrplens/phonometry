@@ -99,6 +99,7 @@ from ast_scan import (
     bindings_by_name,
     decorator_option,
     empty_type_checking_bodies,
+    for_the_type_checker,
     global_bindings,
     held_before,
     is_type_checking_block,
@@ -1349,8 +1350,18 @@ class Tree:
         assignment reads it (:meth:`resolve`), read through the body's own
         names; any other binding, or two that disagree, hold nothing the tree
         can read, which ends the lookup all the same.
+
+        A binding only a type checker reads (:func:`ast_scan.for_the_type_checker`)
+        is none: the ``__init__`` a record declares inside ``if TYPE_CHECKING:``
+        is never defined when the code runs, so the lookup goes on to the one
+        ``@dataclass`` writes, or a base's.
         """
-        nodes = bindings_by_name(klass.node).get(name, [])
+        never_runs = for_the_type_checker(klass.module.node)
+        nodes = [
+            node
+            for node in bindings_by_name(klass.node).get(name, [])
+            if id(node) not in never_runs
+        ]
         if not nodes:
             return False, None
         key = id(klass.node), name

@@ -1464,6 +1464,47 @@ def test_a_complex_number_spelled_across_the_page_s_text_is_one_value(
     assert "the comment says 1.1 where the print wrote 1.0" in failure
 
 
+def test_a_long_run_of_digits_beside_a_label_is_read_in_linear_time() -> None:
+    """A complex number a print spells across its label and its values is
+    looked for from where a number opens, not again from each digit of one.
+
+    Looked for from each digit, a print of 20,000 digits beside its label
+    took about 30 s on this machine, and 40,000 about two minutes.
+    """
+    count = 20_000
+    digits = "7" * count
+    script = f'digits = "7" * {count}\nprint(f"ID: {{digits}}")  # ID: {digits}\n'
+    start = time.perf_counter()
+    found = _failures(script, {2: f"ID: {digits}"})
+    assert time.perf_counter() - start < 10.0
+    assert found == []
+
+
+def test_a_long_run_of_spaces_is_read_in_linear_time() -> None:
+    """An arrow is looked for from where a run of spaces opens, in what a
+    print wrote and in the comment alike, not again from each space of one.
+
+    Looked for from each space, a print of 80,000 spaces between two words
+    took about two minutes on this machine, and a comment of as many about a
+    minute and a half.
+    """
+    count = 80_000
+    value = "a" + " " * count + "b"
+    script = (
+        f'value = "a" + " " * {count} + "b"\nprint(f"ID: {{value}}")  # ID: {value}\n'
+    )
+    start = time.perf_counter()
+    found = _failures(script, {2: f"ID: {value}"})
+    printed = time.perf_counter() - start
+    start = time.perf_counter()
+    noted = _disagreement(f"ID: 1{' ' * count}3", "ID: 1 2")
+    commented = time.perf_counter() - start
+    assert printed < 10.0
+    assert commented < 10.0
+    assert found == []
+    assert "3" in noted
+
+
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
     """The brackets before each comma between two digits are counted on, not
     counted again from the start of the line.

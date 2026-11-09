@@ -1574,6 +1574,75 @@ def test_a_constructor_declared_for_the_type_checker_is_no_namesake(
     assert tree.partial_namesakes() == []
 
 
+def test_a_constructor_declared_for_the_type_checker_is_not_the_one_a_call_runs(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call of a record runs the ``__init__`` that stands when the code
+    runs, never the one it declares inside ``if TYPE_CHECKING:``: the one
+    ``@dataclass`` writes, which takes ``Frame``'s ``language`` field, as
+    ``AnimationFrame``'s does, and, past ``@dataclass(init=False)``, the base's.
+
+    The declaration was read as the class's own ``__init__``, and, as no
+    function of the program, it ended the lookup with none, so ``Frame()``
+    and ``Sub(1.0)`` dropped the language unreported.
+    """
+    found = _dropped(
+        tmp_path,
+        **{
+            "pkg.labelled": """
+            class _Labelled:
+                def __init__(self, value, language="en"):
+                    self.value = value
+            """,
+            "pkg.records": """
+            from dataclasses import dataclass
+            from typing import TYPE_CHECKING
+
+            from .labelled import _Labelled
+
+
+            @dataclass(frozen=True)
+            class Frame:
+                language: str = "en"
+                size: int = 1
+
+                if TYPE_CHECKING:
+
+                    def __init__(self, *, language="en", size=1): ...
+
+
+            @dataclass(init=False)
+            class Sub(_Labelled):
+                value: float = 0.0
+
+                if TYPE_CHECKING:
+
+                    def __init__(self, value): ...
+
+
+            def plot_frame(ax, *, language="en"):
+                return Frame()
+
+
+            def plot_frame_on(ax, *, language="en"):
+                return Frame(language=language)
+
+
+            def plot_sub(ax, *, language="en"):
+                return Sub(1.0)
+
+
+            def plot_sub_on(ax, *, language="en"):
+                return Sub(1.0, language)
+            """,
+        },
+    )
+    assert sorted((f.caller, f.helper) for f in found) == [
+        ("plot_frame", "pkg.records.Frame.__init__"),
+        ("plot_sub", "pkg.labelled._Labelled.__init__"),
+    ]
+
+
 def test_an_exemption_covers_one_call_and_not_its_neighbour(
     tmp_path: pathlib.Path,
 ) -> None:

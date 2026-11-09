@@ -1124,8 +1124,12 @@ def _written_readings(calls: Sequence[_Call]) -> list[list[_Part]]:
 
 
 #: A complex number as a print may spell one across the page's own text and
-#: the values its code computes: ``f"{a} + {b}j"``, ``f"{a}{b:+}j"``.
-_SPELLED_COMPLEX = re.compile(rf"{_SIGN}{_REAL} *[-+] *{_REAL}j")
+#: the values its code computes: ``f"{a} + {b}j"``, ``f"{a}{b:+}j"``. It is
+#: looked for from where a number opens, never from a digit after another:
+#: whatever matches from inside a run of digits matches, the same way, from
+#: where the run opens, which the search meets first, and a search from each
+#: digit of a long run would read the rest of it again each time.
+_SPELLED_COMPLEX = re.compile(rf"(?<!\d){_SIGN}{_REAL} *[-+] *{_REAL}j")
 
 
 def _line_parts(
@@ -1556,8 +1560,12 @@ def _lines_of(parts: list[_Part]) -> list[list[_Part]]:
 
 
 #: An arrow, which in a comment leads from the output to a note on it:
-#: ``78.2 Hz, 38.6 Hz -> valid here``.
-_ARROW = re.compile(r"\s*(?:->|\u2192)")
+#: ``78.2 Hz, 38.6 Hz -> valid here``. It is looked for from where a run of
+#: spaces opens, never from a space after another: whatever matches from
+#: inside a run matches, the same way, from where the run opens, which the
+#: search meets first, and a search from each space of a long run would read
+#: the rest of it again each time.
+_ARROW = re.compile(r"(?<!\s)\s*(?:->|\u2192)")
 
 #: A comma between two digits, which a Spanish comment writes as its decimal
 #: point (``35,9 m``) or as the comma of a list it writes without spaces.

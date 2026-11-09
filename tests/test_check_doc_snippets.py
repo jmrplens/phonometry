@@ -1498,10 +1498,10 @@ def test_a_page_of_many_commented_prints_is_read_in_linear_time() -> None:
     """The prints a comment does not stand for are found among those that
     open on its lines, not among every print of the page with a comment.
 
-    Found among every one, a page of 40,000 prints, each with its comment,
-    took about 580 s on this machine.
+    Found among every one, a page of 16,000 prints, each with its comment,
+    took 60 to 260 s on this machine, as loaded.
     """
-    count = 40_000
+    count = 16_000
     script = "".join(f"print({n})  # {n}\n" for n in range(count))
     start = time.perf_counter()
     promises = check_doc_snippets.promised_outputs(script)

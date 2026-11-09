@@ -1253,8 +1253,8 @@ argument that decides the shape of its result is a number, a Python or a
 NumPy one, and an array as soon as one of them is a sequence or an array,
 where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array,
 and a zero-dimensional array, a NumPy scalar or a one-element array for
-numbers. Three hundred and thirty-three public functions and methods follow
-the rule, `room.room_constant`, `room.critical_distance` and
+numbers. Three hundred and fifty-two public functions and methods follow the
+rule, `room.room_constant`, `room.critical_distance` and
 `fluids.sea_water_sound_speed` among them, and `vibration.evaluation_zone`
 follows it with a zone letter where the others give a `float`, and a complex
 result (a mobility, an impedance, a transfer function) with a Python
@@ -1265,13 +1265,13 @@ result (a mobility, an impedance, a transfer function) with a Python
 | `room.room_constant(100.0, np.array(0.2))` returned the `float` `25.0` | it returns `array(25.)`; `float(...)` or `.item()` gives the number |
 | `emission.local_environmental_correction([0.5])` returned a `float` for any one-element input, as did `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, and the `background_margin_db` field and the `correction` property of the `WorkstationBackgroundCorrection` that `emission.background_noise_correction_at_workstation` returns | each gives a one-element array; hand over `0.5`, not `[0.5]`, to get a number |
 | `electroacoustics.piston_resistance(1.0)` returned a `numpy.float64`, as did `piston_reactance` and `piston_directivity` | it returns a Python `float`, with no `.shape` or `.dtype` |
-| `building.mass_law_transmission_loss(500.0, 10.0)` returned a zero-dimensional array, as did 60 other functions and methods listed below | it returns a Python `float`; `np.asarray(...)` gives an array where one is wanted |
+| `building.mass_law_transmission_loss(500.0, 10.0)` returned a zero-dimensional array, as did 61 other functions and methods listed below | it returns a Python `float`; `np.asarray(...)` gives an array where one is wanted |
 | `materials.absorption_coefficient(4.0, 2.0, 200.0, 11.0)` returned a `numpy.float64`, as did 7 others listed below | it returns a Python `float`, with no `.shape` or `.dtype` |
 | `building.composite_transmission_loss([10.0, 2.0], [40.0, 25.0])` returned a zero-dimensional array, as did `building.total_structure_borne_pressure_level([30.0, 35.0])`, `materials.reverberation_time_uncertainty` and `emission.mean_single_event_level` with `n_events=None` | each returns a `float` when it reduces to one number |
 | `building.survey_service_equipment_level([30.0, 31.0, 32.0], 0.5, volume=50.0)` held a zero-dimensional array in `l_xy` and a `numpy.float64` in `l_xy_nt` and `l_xy_n` | the three levels are Python `float`s for single readings |
 | `vibration.sdof_mobility(100.0, 1.0, 1.0e4, 5.0)` returned a zero-dimensional `complex128` array, as did 18 other functions listed below | it returns a Python `complex`; `np.asarray(...)` gives an array where one is wanted |
 | `materials.membrane_impedance(500.0, surface_density=1.0)` returned a one-element complex array, as did 8 other functions listed below | it returns a Python `complex`, and a zero-dimensional array gives a zero-dimensional one |
-| `building.bending_radiation_factor(500.0, critical_frequency=100.0, length1=4.0, length2=3.0)` returned a one-element array, as did 61 other functions listed below, whose check made a number one-dimensional | it returns a Python `float`, and a zero-dimensional array gives a zero-dimensional one |
+| `building.bending_radiation_factor(500.0, critical_frequency=100.0, length1=4.0, length2=3.0)` returned a one-element array, as did 69 other functions and methods listed below, whose check made a number one-dimensional | it returns a Python `float`, and a zero-dimensional array gives a zero-dimensional one |
 
 The functions and methods that returned a zero-dimensional array for numbers
 are, besides `building.mass_law_transmission_loss`:
@@ -1285,14 +1285,14 @@ are, besides `building.mass_law_transmission_loss`:
 `installed_structure_borne_power_level`,
 `structure_borne_pressure_level_path`, `structure_to_airborne_adjustment`,
 `tapping_machine_characteristic_power_level`,
-`tapping_machine_coupling_term`, `tapping_machine_force_level_estimate` and
-`force_pulse`; in `emission`, `normal_intensity_from_levels`,
-`phase_mismatch_from_residual_index`, `residual_index_from_phase_mismatch`,
-`background_noise_correction`, `radiated_sound_power_level`,
-`radiation_factor`, `velocity_level` and `velocity_level_from_acceleration`;
-in `environment`, `air_attenuation`, `kurze_anderson_attenuation` and
-`EffectiveSoundSpeedProfile.speed_at`; in `materials`,
-`absorption_from_reflection`, `absorption_reference_corrected`,
+`tapping_machine_coupling_term`, `tapping_machine_force_level_estimate`,
+`force_pulse` and `typical_element_mobility`; in `emission`,
+`normal_intensity_from_levels`, `phase_mismatch_from_residual_index`,
+`residual_index_from_phase_mismatch`, `background_noise_correction`,
+`radiated_sound_power_level`, `radiation_factor`, `velocity_level` and
+`velocity_level_from_acceleration`; in `environment`, `air_attenuation`,
+`kurze_anderson_attenuation` and `EffectiveSoundSpeedProfile.speed_at`; in
+`materials`, `absorption_from_reflection`, `absorption_reference_corrected`,
 `air_density_iso10534`, `normalized_diffusion_coefficient`,
 `scattering_coefficient`, `speed_of_sound_iso10534`,
 `speed_of_sound_iso17497`, `standing_wave_absorption`,
@@ -1333,9 +1333,10 @@ returned a one-element complex array are, besides
 and `quarter_wave_impedance`; `simulation.far_field_from_contour`; and
 `underwater.reflection_coefficient`. The real results that returned a
 one-element array are, besides `building.bending_radiation_factor`: in
-`aircraft`, `atmospheric_adjustment`, `diffraction_attenuation` and
-`ground_effect_adjustment`; in `building`, `acceleration_level`,
-`band_mode_count`, `bare_floor_impact_level`,
+`aircraft`, `atmospheric_adjustment`, `diffraction_attenuation`,
+`ground_effect_adjustment`, `npd_level` and `ANPNPDCurves.level`
+(`AnpNpdCurves.level` in 3.3.0 and 4.0.0rc1); in `building`,
+`acceleration_level`, `band_mode_count`, `bare_floor_impact_level`,
 `calculated_sound_reduction_index`, `direct_impact_level`,
 `direct_reduction_index`, `direction_averaged_level_difference`,
 `equivalent_absorption_length`, `fast_reverberation_correction`,
@@ -1354,9 +1355,12 @@ one-element array are, besides `building.bending_radiation_factor`: in
 `structural_reverberation_time`, `total_loss_factor`,
 `velocity_level_difference` and `vibration_reduction_index_from_flanking`;
 `electroacoustics.weighting_bs468` (`itu_r_468_weighting` in 3.3.0 and
-4.0.0rc1); `emission.in_duct_reproducibility`; in `environment`,
-`fresnel_number` (`environmental.fresnel_number` in 3.3.0) and
-`line_source_segment_power`; `materials.spot_internal_loss_correction`; in
+4.0.0rc1); in `emission`, `flow_modal_correction` and
+`in_duct_reproducibility`; in `environment`, `fresnel_number`
+(`environmental.fresnel_number` in 3.3.0) and `line_source_segment_power`;
+in `hearing`, `earphone_reference_level`, `hearing_level_to_coupler_spl` and
+`reference_threshold`; `materials.spot_internal_loss_correction`; the
+`peak_exceedance` and `peak_density` of `metrology.PeakStatisticsResult`; in
 `noise_control`, `band_internal_levels`, `cavitation_distribution`,
 `duct_sound_power_level`, `flow_noise_power_level`,
 `measured_transmission_loss`, `open_end_reflection_coefficient`,
@@ -1366,8 +1370,17 @@ one-element array are, besides `building.bending_radiation_factor`: in
 `thermal_noise_spectrum` and `wind_noise_spectrum`; and in `vibration`,
 `band_limiting_factors`, `beam_modal_density`,
 `cylindrical_shell_modal_density` and `weighting_factors`. A sequence or an
-array given to any of them, a one-element one included, gives the array it
-gave, and the values are the same.
+array given to the argument that decides the shape, a one-element one
+included, gives the array it gave, and the values are the same. A per-band
+argument that rides beside the frequencies decides nothing of its own: the
+structural reverberation time of `building.total_loss_factor` and
+`building.equivalent_absorption_length` and the reverberation time of
+`building.plate_loss_factor` (with `frequency=` for the first two in
+4.0.0rc1), given as a one-element sequence or a zero-dimensional array
+beside a number frequency, gave a one-element array and give a `float` now.
+Without frequencies, `hearing.reference_threshold` and
+`hearing.earphone_reference_level` give every band of their table, as
+before.
 
 These arrived after 4.0.0rc1 and follow the rule from the start, with a
 `complex` for numbers: `electroacoustics.program_signal_filter`; in
@@ -1389,31 +1402,43 @@ These arrived after 4.0.0rc1 and follow the rule from the start, with a
 `inverse_square_law_tolerance`, `min_analyzer_bandwidth`,
 `plant_air_absorption_db_per_m`, `reverberation_background_correction`,
 `room_absorption_coefficient`, `room_constant_from_air_absorption`,
-`room_constant_from_reverberation_time` and the `sound_power_level_at` of
+`room_constant_from_reverberation_time`, `radiation_impedance_correction`,
+`reference_source_reproducibility` and the `sound_power_level_at` of
 `ReferenceSourceCalibration`; in `environment`,
-`air_power_attenuation_per_m` and `barrier_background_correction`; in
-`hearing`, `age_and_noise_threshold` and `reat_expanded_uncertainty`; in
-`materials`, `power_attenuation_from_alpha`, `air_density_astm_e2611`,
-`speed_of_sound_astm_e2611`, `in_situ_absorption_from_reflection` and
-`air_absorption_correction`; in `metrology`, the `level_at` and
-`spectrum_at` of `RectangularPulse` and the `level_at` and `phase_deg_at` of
+`air_power_attenuation_per_m`, `barrier_background_correction` and
+`redistributed_band_energies`; in `hearing`, `age_and_noise_threshold`,
+`incidence_correction` and `reat_expanded_uncertainty`; in `io`, the
+`values_at` of `BandedRow` and of the catalogue rows of `materials`,
+`building` and `noise_control`; in `materials`,
+`power_attenuation_from_alpha`, `air_density_astm_e2611`,
+`speed_of_sound_astm_e2611`, `in_situ_absorption_from_reflection`,
+`air_absorption_correction` and `reproducibility_uncertainty`; in
+`metrology`, `max_expanded_uncertainty`, the `level_at` and `spectrum_at` of
+`RectangularPulse` and the `level_at` and `phase_deg_at` of
 `TimeSelectiveResponse`; in `noise_control`, `flow_velocity_m_s`,
 `insertion_level_difference`, `reverberant_surface_area_m2`,
-`silencer_background_correction`, `silencer_sound_power_level`,
-`transmission_level_difference` and `velocity_pressure_pa`; in `room`,
-`corrected_distribution_value`, `floor_reference_value`, `level_excess`,
-`reference_distribution_value` and `sound_distribution_value`; and in
-`vibration`, `assessment_weighting_response`, `blast_peak_velocity_mm_s`,
+`screen_background_corrected_level`, `silencer_background_correction`,
+`silencer_sound_power_level`, `transmission_level_difference` and
+`velocity_pressure_pa`; in `room`, `corrected_distribution_value`,
+`floor_reference_value`, `level_excess`, `reference_distribution_value` and
+`sound_distribution_value`; and in `vibration`,
+`assessment_weighting_response`, `blast_peak_velocity_mm_s`,
 `elastic_insertion_loss`, `far_field_velocity_mm_s`,
 `foundation_to_floor_level_difference`,
 `ground_attenuation_coefficient_per_m`, `ground_transmission`,
 `impact_peak_velocity_mm_s`, `kb_weighted_levels`,
+`machine_count_correction`, `machine_hall_velocity_mm_s`,
 `material_damping_factor`, `passage_energy_spectral_density`,
 `predict_floor_spectrum`, `rescale_emission_for_speed`,
 `spectral_density_level`, `train_kb_fmax`, `train_velocity_ratio`,
-`velocity_psd_from_voltage` and `velocity_spectrum_um_s`.
+`velocity_psd_from_voltage` and `velocity_spectrum_um_s`. A per-band
+argument beside the frequencies of these, such as the sound power levels of
+`room.sound_distribution_value`, the level differences of
+`vibration.predict_floor_spectrum` and the exponent of
+`vibration.ground_transmission`, decides nothing of its own, and gives a
+`float` beside a number frequency as a one-element sequence too.
 
-Two hundred and ninety-seven of them have typed overloads, so a type checker
+Three hundred and sixteen of them have typed overloads, so a type checker
 reads `room.room_constant(100.0, 0.2)` as a `float` and
 `room.room_constant(100.0, alphas)` as an array whatever the shape of
 `alphas`; an `ArrayLike` or a nested list reads as the union, which a typed

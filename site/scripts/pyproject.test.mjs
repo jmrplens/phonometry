@@ -133,9 +133,41 @@ test('what the reader cannot read stops it, with the line, rather than being mis
 		['[project]\nname = "a\rb"\n', /line 2: .*U\+000D/],
 		["[project]\nname = '''a\rb'''\n", /line 2: .*U\+000D/],
 		['[project]\nname = """a\u0001b"""\n', /line 2: .*U\+0001/],
+		// A key that holds a value is not a table a header or a dotted key
+		// can write into, whatever the value is.
+		['a = 1\n[a.b]\nx = 1\n', /line 2: a holds a value, not a table/],
+		['a = [1]\na.b = 2\n', /line 2: a holds a value, not a table/],
+		['a = "s"\na.b = 2\n', /line 2: a holds a value, not a table/],
+		['a = 1\n[[a]]\n', /line 2: .*\[\[a\]\].*not an array of tables/],
 	];
 	for (const [text, message] of refusals) {
 		assert.throws(() => parseToml(text), message, text);
+	}
+});
+
+test('a key every object inherits a property of is a key of the document, as Python reads it', () => {
+	// `__proto__`, `constructor` and the rest are bare keys like any other.
+	// Followed as the object's own entries, they stay in the document and
+	// nothing is written onto the objects every table inherits from.
+	const text = [
+		'__proto__ = 1',
+		'toString.x = 2',
+		'inline = { __proto__ = { b = 3 }, hasOwnProperty = 4 }',
+		'[tool.__proto__]',
+		'flag = true',
+		'[constructor.prototype]',
+		'polluted = 5',
+		'[[valueOf]]',
+		'n = 6',
+		'',
+	].join('\n');
+	const read = parseToml(text);
+	assert.deepEqual(read, tomllib(text));
+	assert.equal(Object.getPrototypeOf(read), Object.prototype);
+	assert.deepEqual(Object.keys(read), ['__proto__', 'toString', 'inline', 'tool', 'constructor', 'valueOf']);
+	for (const name of ['flag', 'polluted', 'b', 'n', 'x']) {
+		assert.equal(Object.hasOwn(Object.prototype, name), false, `Object.prototype.${name}`);
+		assert.equal(Object.hasOwn(Object, name), false, `Object.${name}`);
 	}
 });
 

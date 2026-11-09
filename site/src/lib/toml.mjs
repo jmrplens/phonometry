@@ -10,6 +10,10 @@
  * floats, booleans, arrays over several lines with comments between their
  * values, and inline tables, with its lines ended by a line feed or by CRLF.
  *
+ * A key is a key of the document whatever its name: `__proto__` and
+ * `constructor` are read into the tables like any other, and nothing is
+ * written onto the objects every table inherits from.
+ *
  * What it does not read, a date or a hexadecimal integer among them, stops it
  * with the line it met it on rather than being read as something else: a
  * misread requirement would be published on every page.
@@ -220,6 +224,35 @@ export function parseToml(text, source = 'TOML') {
 		}
 	}
 
+	// The arrays `[[...]]` headers made: a header may name the last table of
+	// one of these, and never an array a key was given as its value.
+	const tableArrays = new WeakSet();
+
+	/**
+	 * Make `name` an entry of `table` of its own. Plain assignment would take
+	 * `__proto__` as the table's prototype rather than as a key.
+	 */
+	const put = (table, name, item) =>
+		Object.defineProperty(table, name, { value: item, writable: true, enumerable: true, configurable: true });
+
+	/**
+	 * The table `parts[index]` names inside `target`, made if it is not there
+	 * yet. Only an entry `target` holds of its own is followed, so a key such
+	 * as `__proto__` or `constructor` names a table of the document and never
+	 * an object every table inherits from, and an entry that holds a value
+	 * stops the reader rather than being written into.
+	 */
+	const tableIn = (target, parts, index, throughArrays) => {
+		const part = parts[index];
+		if (!Object.hasOwn(target, part)) put(target, part, {});
+		const found = target[part];
+		if (throughArrays && tableArrays.has(found)) return found.at(-1);
+		if (found === null || typeof found !== 'object' || Array.isArray(found)) {
+			fail(`${parts.slice(0, index + 1).join('.')} holds a value, not a table`);
+		}
+		return found;
+	};
+
 	// `key = value`, with the key's dotted parts as tables inside `table`.
 	function assign(table, parts) {
 		const offset = at;
@@ -229,31 +262,31 @@ export function parseToml(text, source = 'TOML') {
 		skipSpaces();
 		if (peek() === '\n' || peek() === '#' || at >= text.length) fail(`${parts.join('.')} has no value`);
 		let target = table;
-		for (const part of parts.slice(0, -1)) {
-			target[part] ??= {};
-			target = target[part];
-		}
+		for (let index = 0; index < parts.length - 1; index += 1) target = tableIn(target, parts, index, false);
 		const last = parts.at(-1);
 		if (Object.hasOwn(target, last)) fail(`${parts.join('.')} is defined twice`, offset);
-		target[last] = value();
+		put(target, last, value());
 	}
 
 	// The table a header names, made on the way if it is not there yet.
 	function tableAt(parts, list) {
 		let target = root;
-		for (const [i, part] of parts.entries()) {
-			const isLast = i === parts.length - 1;
-			if (isLast && list) {
-				target[part] ??= [];
-				if (!Array.isArray(target[part])) fail(`[[${parts.join('.')}]] names a table, not an array of tables`);
-				const table = {};
-				target[part].push(table);
-				return table;
-			}
-			target[part] ??= {};
-			target = Array.isArray(target[part]) ? target[part].at(-1) : target[part];
+		for (let index = 0; index < parts.length - 1; index += 1) target = tableIn(target, parts, index, true);
+		if (!list) return tableIn(target, parts, parts.length - 1, true);
+		const last = parts.at(-1);
+		if (!Object.hasOwn(target, last)) {
+			const tables = [];
+			tableArrays.add(tables);
+			put(target, last, tables);
 		}
-		return target;
+		const found = target[last];
+		if (!tableArrays.has(found)) {
+			const what = found !== null && typeof found === 'object' && !Array.isArray(found) ? 'a table' : 'a value';
+			fail(`[[${parts.join('.')}]] names ${what}, not an array of tables`);
+		}
+		const table = {};
+		found.push(table);
+		return table;
 	}
 
 	let current = root;

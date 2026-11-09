@@ -95,11 +95,14 @@ io.write_video("wave.gif", animation, video=io.VideoOptions(quality="small"))
 ```
 
 ```py
-from IPython.display import Image, Video
+from IPython.display import Image, Video, display
 
-Video("wave.mp4", embed=True)   # an MP4 or a WebM, embedded in the notebook
-Image(filename="wave.gif")      # a GIF
+display(Video("wave.mp4", embed=True))  # an MP4 or a WebM, embedded in the notebook
+display(Image(filename="wave.gif"))     # a GIF
 ```
+
+A cell displays the value of its last line only, so both go through
+`display`: as two bare lines, the cell would show the GIF and not the video.
 
 ## Warnings in a cell
 

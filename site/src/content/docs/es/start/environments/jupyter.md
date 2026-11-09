@@ -99,11 +99,14 @@ io.write_video("wave.gif", animation, video=io.VideoOptions(quality="small"))
 ```
 
 ```py
-from IPython.display import Image, Video
+from IPython.display import Image, Video, display
 
-Video("wave.mp4", embed=True)   # un MP4 o un WebM, incrustado en el cuaderno
-Image(filename="wave.gif")      # un GIF
+display(Video("wave.mp4", embed=True))  # un MP4 o un WebM, incrustado en el cuaderno
+display(Image(filename="wave.gif"))     # un GIF
 ```
+
+Una celda muestra solo el valor de su última línea, así que los dos pasan por
+`display`: como dos líneas sueltas, la celda mostraría el GIF y no el vídeo.
 
 ## Avisos en una celda
 

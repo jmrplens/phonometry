@@ -1276,10 +1276,11 @@ _TOP_LEVEL_KEY = re.compile(r"^(?P<key>[A-Za-z_][\w-]*)\s*:")
 #: A key of an entry of a list and its value on one line, with the entry's
 #: dash or without it.
 _ENTRY_FIELD = re.compile(r"^ +(?:- +)?(?P<key>[A-Za-z]+):(?=[ \t]|$)")
-#: A run of hyphens with a character on either side that is neither blank nor
-#: a quote of the value: one inside an identifier, not between two words or at
-#: its edge.
-_UNSPACED_HYPHENS = re.compile(r"(?<=[^\s\"'])-{2,}(?=[^\s\"'])")
+#: A run of hyphens, taken whole, with a character on either side that is
+#: neither blank, nor a quote of the value, nor another hyphen: one inside an
+#: identifier, not between two words or at its edge. A longer run at the edge
+#: or by a blank is not cut down to the part of it that would look inside.
+_UNSPACED_HYPHENS = re.compile(r"(?<=[^\s\"'-])-{2,}(?=[^\s\"'-])")
 #: A line that is only a rule, as written: a docstring's heading underline, a
 #: table's separator row, a horizontal rule or a frontmatter fence. It holds
 #: nothing but the characters a rule is drawn with, and a pipe or a run of

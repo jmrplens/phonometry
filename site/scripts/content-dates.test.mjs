@@ -1199,7 +1199,7 @@ function stamp(repo, routes, siteRoot = repo.site) {
 	const ran = spawnSync(process.execPath, [STAMP, siteRoot], { env: repo.env, encoding: 'utf8' });
 	const xml = readFileSync(join(dist, 'sitemap-0.xml'), 'utf8');
 	const lastmod = (route) =>
-		new RegExp(`<loc>${siteUrl}${basePath}/${route}</loc><lastmod>([^<]+)</lastmod>`).exec(xml)?.[1];
+		new RegExp(`<loc>${RegExp.escape(`${siteUrl}${basePath}/${route}`)}</loc><lastmod>([^<]+)</lastmod>`).exec(xml)?.[1];
 	return { status: ran.status, out: ran.stdout, err: ran.stderr, lastmod };
 }
 

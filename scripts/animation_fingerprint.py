@@ -1287,6 +1287,7 @@ _INERT_DEFINITIONS = _BUILTIN_EXCEPTIONS | frozenset(
         "object",
         "phonometry._internal.display.RichDisplay",
         "phonometry._internal.warnings.PhonometryWarning",
+        "phonometry._internal.warnings.published_by",
         "property",
         "staticmethod",
         "typing.Generic",

@@ -142,6 +142,55 @@ test('a catalogue tag the page quotes rather than renders is no section', () => 
   );
 });
 
+test('a catalogue tag is read whole, across its lines, beside another on its line and with its attributes in any order', () => {
+  // MDX renders each of these tags, so each is a section where it opens: one
+  // written over several lines, a second on the line of the first, one with
+  // its catalogue after another attribute or in single quotes.
+  const sections = catalogueSections(
+    [
+      'What the first catalogue holds.',
+      '',
+      '<Catalogues',
+      '  catalogue="absorption"',
+      '  lang="en"',
+      '/>',
+      '',
+      '## Absorption areas of people and air',
+      '',
+      'The rows that are not coefficients.',
+      '',
+      '<Catalogues catalogue="absorptionAreas"',
+      '  lang="en" /><Catalogues lang="en" catalogue="gases" />',
+      '',
+      '## Fluids',
+      '',
+      'The fluids.',
+      '',
+      "<Catalogues lang='en' catalogue='fluids' />",
+    ].join('\n'),
+  );
+  assert.deepEqual(sections, [
+    { key: 'absorption', lead: 'What the first catalogue holds.' },
+    { key: 'absorptionAreas', heading: 'Absorption areas of people and air', lead: 'The rows that are not coefficients.' },
+    { key: 'gases' },
+    { key: 'fluids', heading: 'Fluids', lead: 'The fluids.' },
+  ]);
+});
+
+test('a catalogue tag whose catalogue is no word in quotes is a section named by what it writes, which no catalogue is', () => {
+  // The build then stops on a catalogue it does not know, naming the tag,
+  // where a tag it did not see would leave the page one catalogue short.
+  const sections = catalogueSections(
+    ['Prose.', '', '<Catalogues catalogue={key} lang="en" />', '', '## Other', '', 'Other prose.', '', '<Catalogues lang="en" />'].join(
+      '\n',
+    ),
+  );
+  assert.deepEqual(
+    sections.map(({ key }) => key),
+    ['{key}', '<Catalogues lang="en" />'],
+  );
+});
+
 test('a later catalogue under no heading of its own has none, and a subheading is not a section', () => {
   const sections = catalogueSections(
     [

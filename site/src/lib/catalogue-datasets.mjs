@@ -54,8 +54,17 @@ import { referenceStub } from './citations.mjs';
 import { printedTables } from './catalogue-sources.mjs';
 import { flowOf, MDX_TAG, NOT_INLINE_ROLES, pageLines, splitLines } from './markdown-fences.mjs';
 
-/** The catalogues a page renders, in what it renders of its source (`pageMarkup`). */
-const CATALOGUE_TAG = /<Catalogues\s+catalogue="(\w+)"/;
+/** Where a `<Catalogues>` tag opens, in what a page renders of its source (`pageMarkup`). */
+const CATALOGUE_OPENS = /<Catalogues(?![\w.:$-])/g;
+
+/** A whole tag from where it opens, across its lines, as the walk of a page reads one. */
+const WHOLE_TAG = new RegExp(MDX_TAG.source, 'y');
+
+/**
+ * Each attribute of a tag, past its name: the attribute's name, and its value
+ * in quotes or as an expression, so nothing a value holds is read as a name.
+ */
+const ATTRIBUTE = /([^\s"'=<>/{}]+)(?:\s*=\s*("[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\}))?/g;
 
 /**
  * A heading of the level a section of a page takes, past its blanks: its two
@@ -251,6 +260,48 @@ function nesting(piece) {
   return piece.endsWith('/>') ? 0 : 1;
 }
 
+/**
+ * The catalogue a `<Catalogues>` tag renders: the word its `catalogue` names
+ * in quotes, wherever among its attributes. A value the reader cannot read as
+ * a word, an expression, is the key as written, and a tag with no `catalogue`
+ * is the tag as written: no catalogue has either for its key, so the build
+ * stops on it by name, where a tag it did not see would leave its page a
+ * catalogue short.
+ */
+function catalogueOf(tag) {
+  for (const [, name, value] of tag.slice('<Catalogues'.length).matchAll(ATTRIBUTE)) {
+    if (name === 'catalogue') return /^(["'])\w+\1$/.test(value ?? '') ? value.slice(1, -1) : (value ?? tag);
+  }
+  return tag;
+}
+
+/**
+ * The catalogues a page renders, by the line each tag opens on: every
+ * `<Catalogues>` tag of what the page renders of its source, read whole, so
+ * one written over several lines or beside another on its line is there.
+ *
+ * @param {string[]} rendered The page's lines as `pageMarkup` leaves them.
+ * @returns {Map<number, string[]>}
+ */
+function cataloguesByLine(rendered) {
+  const text = rendered.join('\n');
+  const byLine = new Map();
+  // The line a tag opens on, and where the line feed that ends it stands.
+  let line = 0;
+  let lineEnd = rendered[0]?.length ?? 0;
+  for (const { index } of text.matchAll(CATALOGUE_OPENS)) {
+    WHOLE_TAG.lastIndex = index;
+    const tag = WHOLE_TAG.exec(text);
+    if (tag === null) continue;
+    while (index > lineEnd) {
+      line += 1;
+      lineEnd += rendered[line].length + 1;
+    }
+    byLine.set(line, [...(byLine.get(line) ?? []), catalogueOf(tag[0])]);
+  }
+  return byLine;
+}
+
 /** A section's reading of a heading or a paragraph: its text, and its markup if any. */
 function asRead(field, { text, markup }) {
   return { [field]: text, ...(markup.length > 0 ? { [`${field}Markup`]: markup } : {}) };
@@ -269,7 +320,9 @@ function asRead(field, { text, markup }) {
  * read, its ESM (`import`) neither, and a `##` inside a fence is not a heading.
  * A catalogue is a `<Catalogues>` tag the site renders (`pageMarkup`), so one
  * quoted in a code span, a comment or an expression, or written behind a
- * backslash, is no section. A paragraph or a heading
+ * backslash, is no section; and the tag is read whole where it opens, as MDX
+ * reads it, so one written over several lines, beside another on its line or
+ * with its `catalogue` after another attribute is one. A paragraph or a heading
  * counts only where it stands on the page itself, outside any list, quotation,
  * aside (`:::note`) or component (`<Aside>`), so what those hold never
  * describes a dataset. A heading ends the paragraph above it, with no blank
@@ -285,6 +338,7 @@ export function catalogueSections(body) {
   // Each line as the site renders it: every part that renders no tag blanked,
   // the lines and the columns where the page writes them.
   const rendered = splitLines(pageMarkup(body));
+  const tags = cataloguesByLine(rendered);
   const sections = [];
   let heading;
   let lead;
@@ -313,11 +367,11 @@ export function catalogueSections(body) {
       endParagraph();
       return;
     }
-    const tag = CATALOGUE_TAG.exec(rendered[index] ?? '');
-    if (tag) {
-      endParagraph();
+    const keys = tags.get(index);
+    if (keys) endParagraph();
+    for (const key of keys ?? []) {
       sections.push({
-        key: tag[1],
+        key,
         ...(heading !== undefined ? asRead('heading', heading) : {}),
         ...(lead?.text ? asRead('lead', lead) : {}),
       });
@@ -339,7 +393,7 @@ export function catalogueSections(body) {
     // Where the page itself holds the line, with no container of the walk's around it.
     const onPage = depth === 0 && line.rest === line.text;
     const written = pastBlanks(line.rest);
-    if (line.role === 'paragraph' && onPage && !tag && !MDX_ESM.test(written)) {
+    if (line.role === 'paragraph' && onPage && !keys && !MDX_ESM.test(written)) {
       paragraph = [line.rest];
       opensSection = open && lead === undefined;
     } else if (line.role === 'heading' && onPage) {

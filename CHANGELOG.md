@@ -2414,7 +2414,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   refusing a frequency ISO 1999 does not list, `htlan`, which composes it,
   before refusing an empty set of frequencies, and `full_day_exposure` on
   the spread of three measurements before refusing an instrument it does
-  not know.
+  not know. The same holds in `filters`, where `octave_filter` and
+  `OctaveFilterBank` named the bands a rate cannot hold before refusing a
+  signal or a design; in the ISO 11546 enclosure functions, which advised
+  on the band range before refusing half an A-weighted pair; in
+  `subtract_direct_sound`, `source_directivity_corrections` and
+  `reflection_index`, which advised on a rate below 44 kHz before refusing
+  records that do not match; in `underwater.gaussian_beams`, which advised
+  on a source at a break of the profile before refusing the fan or the
+  receiver grid; in `vibration.impact_mobility`, which advised on an impact
+  the force window removes before refusing a frequency range; and in
+  `transfer_stiffness_indirect` and `indirect_transfer_stiffness_result`,
+  which advised on Inequality (2) before NumPy failed to broadcast a
+  frequency axis and a transmissibility of different lengths, now refused
+  by name.
   `vibration.transfer_stiffness_indirect` refuses a transmissibility that is
   not finite with a `ValueError` naming `transmissibility`, where it
   returned `-inf+nanj`, and `indirect_transfer_stiffness_result` names the

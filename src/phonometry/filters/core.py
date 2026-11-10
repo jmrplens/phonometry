@@ -28,7 +28,7 @@ from .._internal.validation import (
     require_real,
     require_scalar,
 )
-from .._internal.warnings import warn_caller
+from .._internal.warnings import advisories_held, warn_caller
 from ..io._resolve import (
     like_input,
     refuse_foreign_rate,
@@ -680,71 +680,78 @@ class OctaveFilterBank:
             warning: at 44.1 kHz the 20 kHz third octave, whose upper edge is
             22.4 kHz, is left out.
         """
-        order = require_count(order, "order")
-        # Asked before the default fills it in: only limits the caller gave are
-        # worth a warning when the rate cannot hold their top bands.
-        limits_given = limits is not None
-        limits = _validate_bank_design(fs, fraction, limits, design, block_processing)
-        # A NumPy integer is read as the int it holds, so the bank keeps the
-        # plain number an int argument leaves there.
-        if isinstance(fraction, np.integer):
-            fraction = int(fraction)
+        # Every advisory waits for the result: a refusal reached after one is
+        # still what the caller meets under -W error.
+        with advisories_held():
+            order = require_count(order, "order")
+            # Asked before the default fills it in: only limits the caller gave are
+            # worth a warning when the rate cannot hold their top bands.
+            limits_given = limits is not None
+            limits = _validate_bank_design(
+                fs, fraction, limits, design, block_processing
+            )
+            # A NumPy integer is read as the int it holds, so the bank keeps the
+            # plain number an int argument leaves there.
+            if isinstance(fraction, np.integer):
+                fraction = int(fraction)
 
-        self.fs = fs
-        self.fraction = fraction
-        self.order = order
-        self.limits = limits
-        self.filter_type = design.filter_type
-        self.ripple = design.ripple
-        self.attenuation = design.attenuation
-        self.calibration_factor = calibration.factor
-        self.dbfs = calibration.dbfs
-        # Whether the caller left the whole calibration bundle alone, which is
-        # what decides if a calibrated Signal may supply its own factor. Asked
-        # of the bundle rather than of its float field: comparing the frozen
-        # dataclass to the default says "untouched" in one question, and it
-        # folds in the dBFS switch, since a dBFS bank is referenced to digital
-        # full scale and must not be handed pascals either.
-        self._default_calibration = calibration == _DEFAULT_CALIBRATION
-        self.stateful = block_processing.stateful
+            self.fs = fs
+            self.fraction = fraction
+            self.order = order
+            self.limits = limits
+            self.filter_type = design.filter_type
+            self.ripple = design.ripple
+            self.attenuation = design.attenuation
+            self.calibration_factor = calibration.factor
+            self.dbfs = calibration.dbfs
+            # Whether the caller left the whole calibration bundle alone, which is
+            # what decides if a calibrated Signal may supply its own factor. Asked
+            # of the bundle rather than of its float field: comparing the frozen
+            # dataclass to the default says "untouched" in one question, and it
+            # folds in the dBFS switch, since a dBFS bank is referenced to digital
+            # full scale and must not be handed pascals either.
+            self._default_calibration = calibration == _DEFAULT_CALIBRATION
+            self.stateful = block_processing.stateful
 
-        # The band set the bank is designed on, held as one immutable record
-        # and read through the properties below.
-        self._bands = _genfreqs(
-            limits, fraction, fs, warn=limits_given and self._names_left_out
-        )
+            # The band set the bank is designed on, held as one immutable record
+            # and read through the properties below.
+            self._bands = _genfreqs(
+                limits, fraction, fs, warn=limits_given and self._names_left_out
+            )
 
-        # Calculate factors and design SOS
-        if design.resample:
-            headroom = _DECIMATION_HEADROOM
-            if design.filter_type == "cheby2":
-                # The cheby2 stopband extends above the band's upper edge;
-                # 5% safety margin so it clears the decimated Nyquist.
-                headroom = max(
-                    headroom,
-                    1.05 * _cheby2_headroom(fraction, order, design.attenuation),
+            # Calculate factors and design SOS
+            if design.resample:
+                headroom = _DECIMATION_HEADROOM
+                if design.filter_type == "cheby2":
+                    # The cheby2 stopband extends above the band's upper edge;
+                    # 5% safety margin so it clears the decimated Nyquist.
+                    headroom = max(
+                        headroom,
+                        1.05 * _cheby2_headroom(fraction, order, design.attenuation),
+                    )
+                self.factor = _downsamplingfactor(
+                    self.upper_edges.tolist(), fs, headroom
                 )
-            self.factor = _downsamplingfactor(self.upper_edges.tolist(), fs, headroom)
-        else:
-            self.factor = np.ones(self.n_bands, dtype=int)
+            else:
+                self.factor = np.ones(self.n_bands, dtype=int)
 
-        self.sos = _design_sos_filter(
-            freq=self.frequencies.tolist(),
-            freq_d=self.lower_edges.tolist(),
-            freq_u=self.upper_edges.tolist(),
-            fs=fs,
-            order=order,
-            factor=self.factor,
-            filter_type=design.filter_type,
-            ripple=design.ripple,
-            attenuation=design.attenuation,
-            show=response_plot.show,
-            plot_file=response_plot.file,
-        )
+            self.sos = _design_sos_filter(
+                freq=self.frequencies.tolist(),
+                freq_d=self.lower_edges.tolist(),
+                freq_u=self.upper_edges.tolist(),
+                fs=fs,
+                order=order,
+                factor=self.factor,
+                filter_type=design.filter_type,
+                ripple=design.ripple,
+                attenuation=design.attenuation,
+                show=response_plot.show,
+                plot_file=response_plot.file,
+            )
 
-        # Calculate initial conditions for filter state
-        if self.stateful:
-            self._init_filter_state(steady_ic=block_processing.steady_ic)
+            # Calculate initial conditions for filter state
+            if self.stateful:
+                self._init_filter_state(steady_ic=block_processing.steady_ic)
 
     def _init_filter_state(self, *, steady_ic: bool) -> None:
         """Initialize filter state (zi) for stateful block-wise processing.
@@ -1250,43 +1257,46 @@ def octave_filter(
         edge lies above fs/2, naming the bands left out, at every call; the
         default span is trimmed without one.
     """
-    require_choice(mode, "mode", ("rms", "peak"))
-    fs = resolve_fs(x, fs)
-    # Both branches see the same already-checked pair: without this, a
-    # malformed limits argument died in the cache key's float() coercion on
-    # one branch and in the constructor's len() on the other, with two
-    # different stdlib messages and neither naming 'limits'.
-    limits = _resolve_limits(limits)
-    # Checked before the cache is asked: True is equal to 1 as a key, so a
-    # bank designed for order=1 would answer order=True without the
-    # constructor's refusal ever running.
-    order = require_count(order, "order")
-    if response_plot.show or response_plot.file:
-        # Plotting has side effects: bypass the cache.
-        filter_bank = OctaveFilterBank(
-            fs=fs,
-            fraction=fraction,
-            order=order,
-            limits=limits,
-            design=design,
-            calibration=calibration,
-            response_plot=response_plot,
-        )
-    else:
-        # The bank is immutable in non-stateful mode: reuse the design.
-        # Pass limits through (tuple for hashability); the bank constructor
-        # still owns the value checks and the default when None. The option
-        # bundles are frozen dataclasses, so they are hashable and compare
-        # by value: equal options hit the same cache entry.
-        limits_key = tuple(limits) if limits is not None else None
-        filter_bank = _cached_filter_bank(
-            fs, fraction, order, limits_key, design, calibration
-        )
-        if limits is not None:
-            # The cached design said nothing: name what these limits lose here,
-            # at every call, and at the caller's line.
-            _genfreqs(limits, filter_bank.fraction, filter_bank.fs, warn=True)
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_choice(mode, "mode", ("rms", "peak"))
+        fs = resolve_fs(x, fs)
+        # Both branches see the same already-checked pair: without this, a
+        # malformed limits argument died in the cache key's float() coercion on
+        # one branch and in the constructor's len() on the other, with two
+        # different stdlib messages and neither naming 'limits'.
+        limits = _resolve_limits(limits)
+        # Checked before the cache is asked: True is equal to 1 as a key, so a
+        # bank designed for order=1 would answer order=True without the
+        # constructor's refusal ever running.
+        order = require_count(order, "order")
+        if response_plot.show or response_plot.file:
+            # Plotting has side effects: bypass the cache.
+            filter_bank = OctaveFilterBank(
+                fs=fs,
+                fraction=fraction,
+                order=order,
+                limits=limits,
+                design=design,
+                calibration=calibration,
+                response_plot=response_plot,
+            )
+        else:
+            # The bank is immutable in non-stateful mode: reuse the design.
+            # Pass limits through (tuple for hashability); the bank constructor
+            # still owns the value checks and the default when None. The option
+            # bundles are frozen dataclasses, so they are hashable and compare
+            # by value: equal options hit the same cache entry.
+            limits_key = tuple(limits) if limits is not None else None
+            filter_bank = _cached_filter_bank(
+                fs, fraction, order, limits_key, design, calibration
+            )
+            if limits is not None:
+                # The cached design said nothing: name what these limits lose here,
+                # at every call, and at the caller's line.
+                _genfreqs(limits, filter_bank.fraction, filter_bank.fs, warn=True)
 
-    return filter_bank.filter(
-        x, sigbands=sigbands, mode=mode, detrend=detrend, nominal=nominal
-    )
+        return filter_bank.filter(
+            x, sigbands=sigbands, mode=mode, detrend=detrend, nominal=nominal
+        )

@@ -21,6 +21,7 @@ from phonometry import (
     building,
     emission,
     environment,
+    filters,
     fluids,
     hearing,
     materials,
@@ -28,6 +29,7 @@ from phonometry import (
     room,
     signals,
     speech,
+    underwater,
     vibration,
 )
 
@@ -923,6 +925,56 @@ def _decaying_ir(samples: int, seed: int = 7) -> np.ndarray:
 _PAST_NYQUIST = (500.0, 8000.0)
 
 
+#: Limits whose top bands an 8 kHz rate cannot hold, so the bank names them.
+_OCTAVES_PAST_8_KHZ = (12.0, 20000.0)
+
+
+def _impulse(samples: int) -> np.ndarray:
+    """One unit impulse a little way into a record of *samples* samples."""
+    record = np.zeros(samples)
+    record[64] = 1.0
+    return record
+
+
+#: Nine microphones of one grid position, recorded below the 44 kHz floor of
+#: EN 1793-5 5.5.2, and the same nine one sample shorter.
+_GRID = np.tile(_impulse(2048), (9, 1))
+_SHORT_GRID = _GRID[:, :-1]
+_LOW_RATE = 32000.0
+
+#: Two band spectra of ISO 11546 that stop short of its required bands.
+_BOX_WITHOUT = [90.0, 90.0]
+_BOX_WITH = [80.0, 80.0]
+
+
+#: A force record with a second impact a quarter second after the first, and
+#: a response, both one second long at 1024 Hz, so the DFT bins are 1 Hz apart.
+_IMPACT_FS = 1024.0
+_PULSE = np.exp(-0.5 * ((np.arange(1024) / _IMPACT_FS - 0.01) / 0.001) ** 2)
+_DOUBLE_IMPACT = _PULSE + 0.6 * np.roll(_PULSE, 245)
+
+#: A sound speed profile whose gradient breaks at 100 m, where the source sits.
+_KINKED_DEPTHS = np.array([0.0, 100.0, 300.0, 1000.0])
+_KINKED_SPEEDS = np.array([1500.0, 1510.0, 1488.0, 1512.0])
+
+
+def _beams_from_the_kink(
+    fan: underwater.BeamFan, ranges_m: np.ndarray | None = None
+) -> object:
+    """Gaussian beams launched from the profile's break, 1 km out."""
+    return underwater.gaussian_beams(
+        200.0,
+        _KINKED_DEPTHS,
+        _KINKED_SPEEDS,
+        source_depth=100.0,
+        max_range=1000.0,
+        ranges_m=ranges_m,
+        n_depth_points=2,
+        fan=fan,
+        range_step=100.0,
+    )
+
+
 #: A call of another domain that meets an advisory and a refusal both, the
 #: advisory computed first, the exception it must raise and its message.
 _ADVISED_THEN_REFUSED_ELSEWHERE: dict[
@@ -1130,6 +1182,105 @@ _ADVISED_THEN_REFUSED_ELSEWHERE: dict[
         lambda: _facade_with_three_corners(surface_level=_FIELD_L1[:3]),
         ValueError,
         "'surface_level' \\(3,\\), 'l2' \\(5,\\) must all have the same shape",
+    ),
+    "octave-filter-dropped-bands-empty-signal": (
+        lambda: filters.octave_filter(np.array([]), 8000, limits=_OCTAVES_PAST_8_KHZ),
+        ValueError,
+        "'x' must contain at least one sample",
+    ),
+    "octave-filter-dropped-bands-text-signal": (
+        lambda: filters.octave_filter("abc", 8000, limits=_OCTAVES_PAST_8_KHZ),
+        TypeError,
+        "'x' must be numbers, not text",
+    ),
+    "filter-bank-dropped-bands-design": (
+        lambda: filters.OctaveFilterBank(
+            fs=8000,
+            fraction=3,
+            limits=_OCTAVES_PAST_8_KHZ,
+            design=filters.FilterDesign(filter_type="cheby2", attenuation=2.0),
+        ),
+        ValueError,
+        "cheby2 'attenuation' must be greater than",
+    ),
+    "enclosure-band-range-a-weighted-pair": (
+        lambda: noise_control.enclosure_sound_power_insulation(
+            _BOX_WITHOUT,
+            _BOX_WITH,
+            frequencies=[500.0, 1000.0],
+            a_weighted_without=99.0,
+        ),
+        ValueError,
+        "give both 'a_weighted_without' and 'a_weighted_with'",
+    ),
+    "enclosure-band-range-infinite-a-weighted": (
+        lambda: noise_control.enclosure_sound_power_insulation(
+            _BOX_WITHOUT,
+            _BOX_WITH,
+            frequencies=[500.0, 1000.0],
+            a_weighted_without=99.0,
+            a_weighted_with=np.inf,
+        ),
+        ValueError,
+        "'a_weighted_with'",
+    ),
+    "direct-sound-rate-record-length": (
+        lambda: environment.subtract_direct_sound(
+            _impulse(2048), _impulse(2047), _LOW_RATE
+        ),
+        ValueError,
+        "'in_front_ir' and 'free_field_ir' must have the same length",
+    ),
+    "directivity-rate-record-shape": (
+        lambda: environment.source_directivity_corrections(
+            _GRID, _SHORT_GRID, _LOW_RATE
+        ),
+        ValueError,
+        "'microphone_irs' and 'specular_irs' must have the same shape",
+    ),
+    "reflection-index-rate-record-shape": (
+        lambda: environment.reflection_index(
+            _GRID, _SHORT_GRID, _LOW_RATE, speed_of_sound=343.0
+        ),
+        ValueError,
+        "'in_front_irs' and 'free_field_irs' must have the same shape",
+    ),
+    "impact-masked-impact-frequency-range": (
+        lambda: vibration.impact_mobility(
+            _DOUBLE_IMPACT,
+            _PULSE,
+            _IMPACT_FS,
+            force_window_s=0.02,
+            frequency_range_hz=(10.2, 10.8),
+        ),
+        ValueError,
+        "holds no DFT bin",
+    ),
+    "beams-kink-ranges": (
+        lambda: _beams_from_the_kink(
+            underwater.BeamFan(max_angle_deg=30.0, n_beams=9), np.array([-1.0])
+        ),
+        ValueError,
+        "'ranges_m' must be finite, non-negative and non-empty",
+    ),
+    "beams-kink-fan": (
+        lambda: _beams_from_the_kink(underwater.BeamFan(max_angle_deg=95.0, n_beams=9)),
+        ValueError,
+        "'max_angle_deg' must lie in",
+    ),
+    "transfer-stiffness-inequality-shapes": (
+        lambda: vibration.transfer_stiffness_indirect(
+            [0.5, 0.05], 10.0, frequency=[100.0, 200.0, 300.0]
+        ),
+        ValueError,
+        "'frequency' and 'transmissibility' must have the same shape",
+    ),
+    "transfer-stiffness-result-inequality-shapes": (
+        lambda: vibration.indirect_transfer_stiffness_result(
+            [0.5, 0.05], 10.0, frequencies=[100.0, 200.0, 300.0]
+        ),
+        ValueError,
+        "'frequencies' and 'transmissibility' must have the same shape",
     ),
 }
 

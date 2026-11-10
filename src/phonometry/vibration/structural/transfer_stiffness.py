@@ -108,7 +108,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..._internal.warnings import PhonometryWarning, warn_caller
+from ..._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from ...filters.frequencies import _nominal_freq_for_band
 from ...metrology.reference_values import REFERENCE_VALUES
 from ...metrology.uncertainty import (
@@ -377,8 +377,9 @@ def transfer_stiffness_indirect(
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
-    :raises ValueError: for a non-positive frequency or blocking mass, or a
-        ``transmissibility`` that is not finite.
+    :raises ValueError: for a non-positive frequency or blocking mass, a
+        ``transmissibility`` that is not finite, or a ``frequency`` and a
+        ``transmissibility`` of different shapes, neither of them one value.
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
         or ``frequency`` holds a text or a value that is not a real number, or
         ``transmissibility`` holds a text or a value that is not a number.
@@ -405,6 +406,18 @@ def _indirect_stiffness(
     if not np.all(np.isfinite(t)):
         msg = "'transmissibility' must contain only finite values."
         raise ValueError(msg)
+    try:
+        np.broadcast_shapes(omega.shape, t.shape)
+    except ValueError:
+        msg = (
+            f"'{name}' and 'transmissibility' must have the same shape, or one "
+            f"of them a single value; got {omega.shape} and {t.shape}."
+        )
+        raise ValueError(msg) from None
+    stiffness = np.asarray(
+        -(omega**2) * (blocking_mass + flange_mass) * t, dtype=np.complex128
+    )
+    # Inequality (2) is advised on once the stiffness stands (rule A63).
     magnitude = np.abs(t)
     if np.any(magnitude > TRANSMISSIBILITY_LIMIT):
         worst = float(np.max(magnitude))
@@ -416,9 +429,7 @@ def _indirect_stiffness(
             "range of the indirect method.",
             TransferStiffnessWarning,
         )
-    return np.asarray(
-        -(omega**2) * (blocking_mass + flange_mass) * t, dtype=np.complex128
-    )
+    return stiffness
 
 
 def blocking_force_ratio(
@@ -783,23 +794,29 @@ def indirect_transfer_stiffness_result(
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The :class:`TransferStiffnessResult` (indirect method).
+    :raises ValueError: for a non-positive frequency or blocking mass, a
+        ``transmissibility`` that is not finite, or ``frequencies`` and a
+        ``transmissibility`` of different shapes, neither of them one value.
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
         or ``frequencies`` holds a text or a value that is not a real number, or
         ``transmissibility`` holds a text or a value that is not a number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
-    freq = real_array(frequencies, "frequencies")
-    k = _indirect_stiffness(
-        freq, transmissibility, blocking_mass, flange_mass, "frequencies"
-    )
-    measured = complex_array(transmissibility, "transmissibility")
-    return TransferStiffnessResult(
-        frequencies=freq,
-        transfer_stiffness=k,
-        blocking_mass=float(blocking_mass),
-        transmissibility=np.broadcast_to(measured, k.shape),
-    )
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        freq = real_array(frequencies, "frequencies")
+        k = _indirect_stiffness(
+            freq, transmissibility, blocking_mass, flange_mass, "frequencies"
+        )
+        measured = complex_array(transmissibility, "transmissibility")
+        return TransferStiffnessResult(
+            frequencies=freq,
+            transfer_stiffness=k,
+            blocking_mass=float(blocking_mass),
+            transmissibility=np.broadcast_to(measured, k.shape),
+        )
 
 
 # ---------------------------------------------------------------------------

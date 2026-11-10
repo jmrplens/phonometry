@@ -66,10 +66,19 @@ wrote ['bands.png', 'rating.pdf']
 El trabajo escribe en `out` bajo su directorio de trabajo, `/tmp/out` en el
 contenedor, y `--rm` borra el contenedor con sus archivos cuando el trabajo
 termina. El montaje `-v` lleva esa carpeta a tu máquina como `out` en el
-directorio desde el que lo ejecutas, donde la figura y la ficha se quedan;
-`--user` ejecuta el trabajo como tú, así que los archivos son tuyos y no de
-root. Crea antes la carpeta: la que Docker crea para el montaje pertenece a
-root, y el trabajo, que corre como tú, no puede escribir en ella.
+directorio desde el que lo ejecutas, donde la figura y la ficha se quedan.
+Con un demonio de Docker que se ejecuta como root, `--user` ejecuta el trabajo
+como tú, así que los archivos son tuyos y no de root. Crea antes la carpeta:
+la que ese demonio crea para el montaje pertenece a root, y el trabajo, que
+corre como tú, no puede escribir en ella.
+
+Docker y Podman sin root (*rootless*) ya ejecutan el root del contenedor como
+tú, y llevan cualquier otro identificador de usuario del contenedor, el tuyo
+incluido, a un identificador subordinado de tu máquina que no puede escribir
+en tu `out`: ahí `--user` detiene el trabajo con un `PermissionError`.
+Quítalo, o pasa `--userns=keep-id` en Podman, y los archivos son tuyos. La
+carpeta creada antes sirve para los dos: Docker sin root crearía como tú una
+que faltase, y Podman se niega a montar una que no existe.
 
 matplotlib elige por sí solo su backend Agg en un contenedor sin pantalla, así
 que nada tiene que fijar `MPLBACKEND`.

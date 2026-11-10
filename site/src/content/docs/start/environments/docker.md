@@ -65,10 +65,18 @@ wrote ['bands.png', 'rating.pdf']
 The job writes into `out` under its working directory, `/tmp/out` in the
 container, and `--rm` deletes the container with its files when the job ends.
 The `-v` mount gives that folder to the host as `out` in the directory you run
-from, where the figure and the fiche stay; `--user` runs the job as you, so
-the files are yours and not root's. Make the folder first: one that Docker
-makes for the mount belongs to root, and the job, running as you, cannot
-write in it.
+from, where the figure and the fiche stay. With a Docker daemon that runs as
+root, `--user` runs the job as you, so the files are yours and not root's.
+Make the folder first: one that such a daemon makes for the mount belongs to
+root, and the job, running as you, cannot write in it.
+
+Rootless Docker and rootless Podman already run the container's root as you,
+and map every other user id of the container, your own included, to a
+subordinate id of the host that cannot write in your `out`: there `--user`
+stops the job with a `PermissionError`. Leave it out, or pass
+`--userns=keep-id` under Podman, and the files are yours. The folder made
+first serves both: rootless Docker would make a missing one as you, and
+Podman refuses to mount one that does not exist.
 
 matplotlib picks its Agg backend by itself in a container with no display,
 so nothing has to set `MPLBACKEND`.

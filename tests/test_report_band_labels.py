@@ -36,7 +36,6 @@ from phonometry.room import noise_criterion
 if TYPE_CHECKING:
     from pathlib import Path
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("pypdfium2")
 
@@ -100,6 +99,7 @@ def _sound_power_sheet(tmp_path: Path, language: str) -> str:
 
 def test_the_room_criterion_band_column_reaches_spanish(tmp_path: Path) -> None:
     """``31.5 60,0`` was one row of the rendered ANSI/ASA S12.2 sheet."""
+    pytest.importorskip("matplotlib")
     text = _room_criterion_sheet(tmp_path, "es")
     assert "31,5" in text
     assert "31.5" not in text
@@ -108,6 +108,7 @@ def test_the_room_criterion_band_column_reaches_spanish(tmp_path: Path) -> None:
 def test_the_room_criterion_band_column_is_unchanged_in_english(
     tmp_path: Path,
 ) -> None:
+    pytest.importorskip("matplotlib")
     text = _room_criterion_sheet(tmp_path, "en")
     assert "31.5" in text
     assert "31,5" not in text
@@ -115,12 +116,14 @@ def test_the_room_criterion_band_column_is_unchanged_in_english(
 
 def test_the_sound_power_band_column_reaches_spanish(tmp_path: Path) -> None:
     """One helper writes this column for nine sheets, so one test reaches them."""
+    pytest.importorskip("matplotlib")
     text = _sound_power_sheet(tmp_path, "es")
     assert "31,5" in text
     assert "31.5" not in text
 
 
 def test_the_sound_power_band_column_is_unchanged_in_english(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     text = _sound_power_sheet(tmp_path, "en")
     assert "31.5" in text
     assert "31,5" not in text
@@ -134,6 +137,7 @@ def test_a_result_without_band_frequencies_names_its_bands_in_spanish(
     That number was written ``Band 1`` on a Spanish sheet, in a column headed
     in Spanish.
     """
+    pytest.importorskip("matplotlib")
     levels = np.tile(np.array([80.0, 100.0, 90.0]), (10, 1))
     result = sound_power_pressure(levels, surface="hemisphere", radius=4.0)
     out = tmp_path / "bands_es.pdf"
@@ -146,6 +150,7 @@ def test_a_result_without_band_frequencies_names_its_bands_in_spanish(
 def test_a_result_without_band_frequencies_is_unchanged_in_english(
     tmp_path: Path,
 ) -> None:
+    pytest.importorskip("matplotlib")
     levels = np.tile(np.array([80.0, 100.0, 90.0]), (10, 1))
     result = sound_power_pressure(levels, surface="hemisphere", radius=4.0)
     out = tmp_path / "bands_en.pdf"

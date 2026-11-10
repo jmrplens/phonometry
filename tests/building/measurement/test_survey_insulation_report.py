@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -71,6 +70,7 @@ def _facade() -> building.survey_facade_insulation:  # type: ignore[valid-type]
 # --------------------------------------------------------------------------- #
 def test_airborne_fiche_rating_and_basis(tmp_path: Path) -> None:
     """The DnT fiche boxes the ISO 717-1 rating and names ISO 10052."""
+    pytest.importorskip("matplotlib")
     result = _airborne()
     rating = result.rating
     assert rating is not None
@@ -87,6 +87,7 @@ def test_airborne_fiche_rating_and_basis(tmp_path: Path) -> None:
 
 def test_airborne_r_prime_quantity(tmp_path: Path) -> None:
     """``quantity='r_prime'`` reports the apparent sound reduction index R'."""
+    pytest.importorskip("matplotlib")
     result = _airborne()
     assert result.r_prime_rating is not None
     out = tmp_path / "rprime.pdf"
@@ -103,6 +104,7 @@ def test_airborne_one_third_octave_caption(tmp_path: Path) -> None:
     100 Hz to 3150 Hz); the default table caption must follow the reported band
     set, not hard-code "Octave-band".
     """
+    pytest.importorskip("matplotlib")
     n = 16
     l1 = np.full(n, 80.0)
     d = np.linspace(33.0, 52.0, n)
@@ -122,6 +124,7 @@ def test_airborne_one_third_octave_caption(tmp_path: Path) -> None:
 
 def test_airborne_verbose_and_verdict_pass(tmp_path: Path) -> None:
     """Verbose annexes the ISO 717 evaluation; a level difference passes above."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "verbose.pdf"
     _airborne().report(
         str(out), metadata=ReportMetadata(requirement=40.0), verbose=True
@@ -134,6 +137,7 @@ def test_airborne_verbose_and_verdict_pass(tmp_path: Path) -> None:
 
 def test_airborne_verdict_fail(tmp_path: Path) -> None:
     """A level difference below the requirement fails (higher is better)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "fail.pdf"
     _airborne().report(str(out), metadata=ReportMetadata(requirement=60.0))
     assert "FAIL" in _extract_text(str(out))
@@ -141,6 +145,7 @@ def test_airborne_verdict_fail(tmp_path: Path) -> None:
 
 def test_airborne_spanish(tmp_path: Path) -> None:
     """``language='es'`` renders the Spanish survey fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "es.pdf"
@@ -162,6 +167,7 @@ def test_airborne_spanish(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------- #
 def test_impact_fiche_rating_and_basis(tmp_path: Path) -> None:
     """The L'nT fiche boxes the ISO 717-2 rating and names the tapping machine."""
+    pytest.importorskip("matplotlib")
     result = _impact()
     rating = result.rating
     assert rating is not None
@@ -178,6 +184,7 @@ def test_impact_fiche_rating_and_basis(tmp_path: Path) -> None:
 
 def test_impact_verdict_fail(tmp_path: Path) -> None:
     """An impact level above the requirement fails (lower is better)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "fail.pdf"
     _impact().report(str(out), metadata=ReportMetadata(requirement=50.0))
     assert "FAIL" in _extract_text(str(out))
@@ -188,6 +195,7 @@ def test_impact_verdict_fail(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------- #
 def test_facade_fiche_rating_and_basis(tmp_path: Path) -> None:
     """The D2m,nT fiche boxes the ISO 717-1 rating and names ISO 10052."""
+    pytest.importorskip("matplotlib")
     result = _facade()
     rating = result.rating
     assert rating is not None
@@ -203,6 +211,7 @@ def test_facade_fiche_rating_and_basis(tmp_path: Path) -> None:
 
 def test_facade_spanish(tmp_path: Path) -> None:
     """``language='es'`` renders the Spanish survey facade fiche."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "es.pdf"
     _facade().report(str(out), language="es")
     assert_one_page(str(out))

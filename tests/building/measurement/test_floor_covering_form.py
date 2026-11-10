@@ -18,7 +18,6 @@ import numpy as np
 import pytest
 import reference_data as ref
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -87,6 +86,7 @@ def _form_bands() -> building.LaboratoryFloorCoveringImprovementResult:
 
 def test_form_prints_the_printed_annex_c_rating(tmp_path: Path) -> None:
     """The rating box reads ΔLw = 15 dB, as ISO 717-2:2020 Table C.2 prints."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "h4.pdf"
     _annex_c2().report(str(out))
     assert_one_page(out)
@@ -96,6 +96,7 @@ def test_form_prints_the_printed_annex_c_rating(tmp_path: Path) -> None:
 
 
 def test_full_form_over_21_bands_is_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "full.pdf"
     _form_bands().report(str(out), metadata=_FULL)
     assert_one_page(out)
@@ -121,6 +122,7 @@ def test_full_form_over_21_bands_is_one_page(tmp_path: Path) -> None:
 
 
 def test_lightweight_floor_names_its_designation(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     bare = np.full(16, 75.0)
     res = building.laboratory_floor_covering_improvement(
         bare,
@@ -136,6 +138,7 @@ def test_lightweight_floor_names_its_designation(tmp_path: Path) -> None:
 
 
 def test_requirement_fails_below_it(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "fail.pdf"
     _annex_c2().report(str(out), metadata=ReportMetadata(requirement=20.0))
     assert "FAIL" in _text(out)
@@ -143,6 +146,7 @@ def test_requirement_fails_below_it(tmp_path: Path) -> None:
 
 def test_requirement_met_exactly_passes(tmp_path: Path) -> None:
     """ΔLw = 15 dB against a requirement of 15 dB: "required ≥ 15 dB" holds."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "boundary.pdf"
     _annex_c2().report(str(out), metadata=ReportMetadata(requirement=15.0))
     assert "∆Lw = 15 dB, required ≥ 15 dB → PASS" in _text(out)
@@ -150,6 +154,7 @@ def test_requirement_met_exactly_passes(tmp_path: Path) -> None:
 
 def test_header_prints_each_value_beside_its_label(tmp_path: Path) -> None:
     """Values no other field can carry, so each one is found only in its row."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "header.pdf"
     _annex_c2().report(
         str(out), metadata=ReportMetadata(curing_time_hours=36.0, mass_per_area=2.9)
@@ -160,6 +165,7 @@ def test_header_prints_each_value_beside_its_label(tmp_path: Path) -> None:
 
 
 def test_spanish_verbose_form_is_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "es.pdf"
     _form_bands().report(str(out), metadata=_FULL, verbose=True, language="es")
     assert_one_page(out)
@@ -193,6 +199,7 @@ def test_curing_time_may_be_zero_but_not_negative() -> None:
 
 def test_diagram_marks_the_frequency_range_of_the_rating() -> None:
     """Figure H.4 key 1: the rating range 100 Hz to 3150 Hz, dashed."""
+    pytest.importorskip("matplotlib")
     import matplotlib as mpl
 
     mpl.use("Agg")

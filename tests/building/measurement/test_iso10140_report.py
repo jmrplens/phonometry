@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from reference_data import (
@@ -80,6 +79,7 @@ def test_r_equals_level_difference_at_unity_absorption() -> None:
 
 def test_airborne_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
     """The R fiche's rating is the published ISO 717-1 Annex C 30 (-2; -3) dB."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "r.pdf"
     _airborne_result().report(str(out))
     assert_one_page(str(out))
@@ -102,6 +102,7 @@ def test_ln_equals_impact_level_at_reference_absorption() -> None:
 
 def test_impact_fiche_rating_pinned_to_iso717_2_annex_c(tmp_path: Path) -> None:
     """The Ln fiche's rating is the published ISO 717-2 Annex C 79 (-11) dB."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "ln.pdf"
     _impact_result().report(str(out))
     assert_one_page(str(out))
@@ -117,6 +118,7 @@ def test_impact_fiche_rating_pinned_to_iso717_2_annex_c(tmp_path: Path) -> None:
 
 def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
     """A fully populated lab fiche with the absorption column is one page."""
+    pytest.importorskip("matplotlib")
     metadata = ReportMetadata(
         specimen="100 mm autoclaved aerated concrete block wall",
         client="Acoustic Test Client Ltd.",
@@ -151,6 +153,7 @@ def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
 
 def test_requirement_verdicts_pass_and_fail(tmp_path: Path) -> None:
     """Airborne passes at/above the requirement; impact at/below it."""
+    pytest.importorskip("matplotlib")
     airborne = _airborne_result()  # Rw = 30 dB
     failing = tmp_path / "fail.pdf"
     airborne.report(str(failing), metadata=ReportMetadata(requirement=50.0))
@@ -164,6 +167,7 @@ def test_requirement_verdicts_pass_and_fail(tmp_path: Path) -> None:
 
 def test_octave_band_fiche_renders(tmp_path: Path) -> None:
     """A five-octave-band laboratory result also yields a one-page fiche."""
+    pytest.importorskip("matplotlib")
     l1 = np.full(5, 90.0)
     r = np.array([30.0, 40.0, 48.0, 52.0, 55.0])
     result = building.laboratory_airborne_insulation(
@@ -178,6 +182,7 @@ def test_octave_band_fiche_renders(tmp_path: Path) -> None:
 
 def test_spanish_fiche_renders_translated(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish lab fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "es.pdf"
@@ -232,6 +237,7 @@ def test_missing_rating_rejected(tmp_path: Path) -> None:
 
 def test_manual_impact_result_renders(tmp_path: Path) -> None:
     """A manually built lab impact result reports its Ln fiche."""
+    pytest.importorskip("matplotlib")
     result = _impact_result()
     bare = building.LaboratoryImpactInsulationResult(
         l_n=result.l_n, absorption_area=result.absorption_area, rating=result.rating

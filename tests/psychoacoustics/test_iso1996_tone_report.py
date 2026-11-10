@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from typing import TYPE_CHECKING
@@ -47,6 +46,7 @@ def _extract_text(path: str) -> str:
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
     """A detected-tone result renders a one-page PDF fiche."""
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "tone.pdf"
     returned = result.report(str(out))
@@ -77,6 +77,7 @@ def test_report_states_audibility_adjustment_and_frequency(tmp_path: Path) -> No
     tonal adjustment follows ISO 1996-2:2017 Table J.1. The extracted text must
     carry the boxed audibility, the adjustment value and the decisive frequency.
     """
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "tone.pdf"
     result.report(str(out))
@@ -99,6 +100,7 @@ def test_report_states_audibility_adjustment_and_frequency(tmp_path: Path) -> No
 
 def test_metadata_appears_and_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders one page and prints its fields."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         specimen="Combustion engine, steady operation",
         client="Acoustic Test Client Ltd.",
@@ -122,6 +124,7 @@ def test_metadata_appears_and_one_page(tmp_path: Path) -> None:
 
 def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
     """A PASS and a FAIL audibility limit both render one page."""
+    pytest.importorskip("matplotlib")
     result = _result()
     delta = result.decisive_audibility
     passing = tmp_path / "pass.pdf"
@@ -136,6 +139,7 @@ def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="engine <A> & exhaust",
@@ -152,6 +156,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "tone_es.pdf"
@@ -176,6 +181,7 @@ def test_absent_tone_reports_zero_adjustment(tmp_path: Path) -> None:
     K stay consistent with the decisive audibility.
     """
     # One tone barely above the masking threshold: LT chosen so ΔL_ta is small.
+    pytest.importorskip("matplotlib")
     result = psychoacoustics.assess_tones([40.0], [30.0], 2.0, tone_frequencies=[500.0])
     out = tmp_path / "weak.pdf"
     result.report(str(out))

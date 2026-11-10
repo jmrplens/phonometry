@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -65,6 +64,7 @@ def _case1_result() -> ProgramLoudnessResult:
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
     """A measured programme renders a one-page compliance fiche."""
+    pytest.importorskip("matplotlib")
     result = _case1_result()
     assert np.isfinite(result.integrated)
     out = tmp_path / "loudness.pdf"
@@ -83,6 +83,7 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
 
 def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders a one-page fiche."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         specimen="Reference tone sequence",
         client="Broadcast Client Ltd.",
@@ -102,6 +103,7 @@ def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
 
 def test_compliant_programme_passes(tmp_path: Path) -> None:
     """The trimmed signal is compliant (I within -23.0 +/-0.2 LU, TP <= -1 dBTP)."""
+    pytest.importorskip("matplotlib")
     result = _case1_result()
     assert abs(result.integrated - (-23.0)) <= 0.2
     _text, passed = _verdict(result, -23.0)
@@ -113,6 +115,7 @@ def test_compliant_programme_passes(tmp_path: Path) -> None:
 
 def test_non_compliant_true_peak_fails(tmp_path: Path) -> None:
     """A 0 dBFS tone exceeds the -1 dBTP true-peak ceiling and fails."""
+    pytest.importorskip("matplotlib")
     result = program_loudness(_stereo(_sine(0.0, 10.0)), FS)
     assert result.true_peak > -1.0
     _text, passed = _verdict(result, -23.0)
@@ -124,6 +127,7 @@ def test_non_compliant_true_peak_fails(tmp_path: Path) -> None:
 
 def test_informational_rows_do_not_change_verdict(tmp_path: Path) -> None:
     """LRA and the momentary/short-term maxima never affect the PASS verdict."""
+    pytest.importorskip("matplotlib")
     result = _case1_result()
     _text, passed = _verdict(result, -23.0)
     assert passed is True
@@ -173,6 +177,7 @@ def test_default_tolerance_is_qc_02_lu() -> None:
 
 def test_live_tolerance_applies_item_h_1_lu(tmp_path: Path) -> None:
     """``tolerance="live"`` applies the +-1.0 LU rule of R 128 item h)."""
+    pytest.importorskip("matplotlib")
     result = dataclasses.replace(_case1_result(), integrated=-23.8)
     _t1, qc_passed = _verdict(result, -23.0, "qc")
     _t2, live_passed = _verdict(result, -23.0, "live")
@@ -216,6 +221,7 @@ def test_fiche_pins_displayed_numbers(tmp_path: Path) -> None:
     """The rendered fiche shows the QC tolerance, its R 128 item and the
     0.1 LU rounded measured loudness.
     """
+    pytest.importorskip("matplotlib")
     result = _case1_result()
     out = tmp_path / "pins.pdf"
     result.report(str(out), metadata=ReportMetadata(requirement=-23.0))
@@ -240,6 +246,7 @@ def test_gated_silence_renders_dashes_and_fails(tmp_path: Path) -> None:
     the gated measurement as a failure, since no tolerance about any target
     contains ``-inf``.
     """
+    pytest.importorskip("matplotlib")
     result = program_loudness(_stereo(np.zeros(5 * FS)), FS)
     assert result.integrated == -np.inf
     _text, passed = _verdict(result, -23.0)
@@ -265,6 +272,7 @@ def test_gated_silence_renders_dashes_and_fails(tmp_path: Path) -> None:
 
 def test_gated_silence_note_absent_from_a_measured_fiche(tmp_path: Path) -> None:
     """A fiche with five finite readings carries no em-dash explanation."""
+    pytest.importorskip("matplotlib")
     result = _case1_result()
     assert np.isfinite(result.max_short_term)
     out = tmp_path / "measured.pdf"
@@ -276,6 +284,7 @@ def test_gated_silence_note_absent_from_a_measured_fiche(tmp_path: Path) -> None
 
 def test_gated_silence_renders_in_spanish(tmp_path: Path) -> None:
     """The Spanish sheet dashes the same readings and translates the note."""
+    pytest.importorskip("matplotlib")
     result = program_loudness(_stereo(np.zeros(5 * FS)), FS)
     out = tmp_path / "silence_es.pdf"
     result.report(str(out), metadata=ReportMetadata(requirement=-23.0), language="es")
@@ -287,6 +296,7 @@ def test_gated_silence_renders_in_spanish(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     result = _case1_result()

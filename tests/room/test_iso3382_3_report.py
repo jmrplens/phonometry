@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
@@ -108,6 +107,7 @@ def test_synthetic_line_matches_closed_form() -> None:
 # --------------------------------------------------------------------------
 def test_report_writes_pdf(tmp_path: Path) -> None:
     """An open-plan result renders a PDF fiche and returns its path."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "openplan.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -116,6 +116,7 @@ def test_report_writes_pdf(tmp_path: Path) -> None:
 
 def test_report_with_full_metadata_one_page(tmp_path: Path) -> None:
     """A full ReportMetadata renders a one-page accredited open-plan fiche."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "openplan_meta.pdf"
     _result().report(str(out), metadata=_full_metadata())
     assert_one_page(str(out))
@@ -123,6 +124,7 @@ def test_report_with_full_metadata_one_page(tmp_path: Path) -> None:
 
 def test_report_bare_without_metadata(tmp_path: Path) -> None:
     """metadata=None renders a bare characterisation fiche (no header)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "bare.pdf"
     _result().report(str(out), metadata=None)
     assert_one_page(str(out))
@@ -149,6 +151,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------
 def test_single_number_quantities_render(tmp_path: Path) -> None:
     """The four single-number quantities appear in the rendered text."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "values.pdf"
     _result().report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -168,6 +171,7 @@ def test_verdict_renders_both_ways(tmp_path: Path) -> None:
     The requirement is the minimum acceptable D2,S: the oracle 7.0 dB passes a
     7.0 dB target (at or above) and fails an 8.0 dB target.
     """
+    pytest.importorskip("matplotlib")
     passing = tmp_path / "pass.pdf"
     failing = tmp_path / "fail.pdf"
     _result().report(str(passing), metadata=_full_metadata(requirement=7.0))
@@ -180,6 +184,7 @@ def test_verdict_renders_both_ways(tmp_path: Path) -> None:
 
 def test_report_without_requirement_has_no_verdict(tmp_path: Path) -> None:
     """With no target the characterisation fiche omits the verdict row."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "noverdict.pdf"
     _result().report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -251,6 +256,7 @@ def test_infinite_decay_rate_with_requirement_withholds_the_verdict(
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="office <A> & annex",
@@ -267,6 +273,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """language="es" renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "openplan_es.pdf"

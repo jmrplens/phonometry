@@ -14,8 +14,6 @@ from __future__ import annotations
 
 import pytest
 
-mpl = pytest.importorskip("matplotlib")
-mpl.use("Agg")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 
@@ -60,6 +58,7 @@ def _metadata(**kwargs: object) -> ReportMetadata:
 
 
 def test_compliant_chain_renders_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     result = _class1_chain()
     path = result.report(str(tmp_path / "iec61043.pdf"), metadata=_metadata())
     assert_one_page(path)
@@ -67,6 +66,7 @@ def test_compliant_chain_renders_one_page(tmp_path: Path) -> None:
 
 def test_bare_fiche_without_metadata(tmp_path: Path) -> None:
     """A fiche without metadata still renders body, result and disclaimer."""
+    pytest.importorskip("matplotlib")
     result = _class1_chain()
     assert_one_page(result.report(str(tmp_path / "bare.pdf")))
 
@@ -80,6 +80,7 @@ def _extract_text(path: str) -> str:
 
 
 def test_spanish_fiche_renders(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     result = _class1_chain()
     path = result.report(str(tmp_path / "es.pdf"), metadata=_metadata(), language="es")
     assert_one_page(path)
@@ -94,6 +95,7 @@ def test_spanish_fiche_translates_every_fixed_string(tmp_path: Path) -> None:
     wording of each block: title, basis line, measurement-basis strip with its
     scope limiter, table headers, boxed result and verdict row.
     """
+    pytest.importorskip("matplotlib")
     result = _class1_chain()
     path = result.report(
         str(tmp_path / "es_text.pdf"),
@@ -131,6 +133,7 @@ def test_spanish_fiche_translates_every_fixed_string(tmp_path: Path) -> None:
 
 def test_required_class_verdict_both_ways(tmp_path: Path) -> None:
     """The verdict row renders whether the chain meets the requirement or not."""
+    pytest.importorskip("matplotlib")
     passing = _class1_chain()
     assert_one_page(
         passing.report(str(tmp_path / "pass.pdf"), metadata=_metadata(required_class=1))
@@ -147,6 +150,7 @@ def test_required_class_verdict_both_ways(tmp_path: Path) -> None:
 
 def test_non_compliant_chain_renders(tmp_path: Path) -> None:
     """A chain meeting neither class boxes a non-conformity statement."""
+    pytest.importorskip("matplotlib")
     limits = emission.residual_index_limits("probe")
     freqs, class2 = limits.frequencies, limits.class_2
     result = emission.verify_intensity_class(
@@ -158,6 +162,7 @@ def test_non_compliant_chain_renders(tmp_path: Path) -> None:
 
 def test_range_limited_note_renders(tmp_path: Path) -> None:
     """A partial band set adds the clause 6.1 qualifying note."""
+    pytest.importorskip("matplotlib")
     bands = _BANDS[6:14]
     limits = emission.residual_index_limits("processor", frequencies=bands)
     freqs, class1 = limits.frequencies, limits.class_1
@@ -179,6 +184,7 @@ def test_range_limited_note_drops_the_class_wording_when_no_class_is_met(
     the "Does not comply" box, where a sentence about what "the stated class
     attests" has no referent.
     """
+    pytest.importorskip("matplotlib")
     octaves = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
     limits = emission.residual_index_limits("processor", frequencies=octaves)
     freqs, class2 = limits.frequencies, limits.class_2
@@ -210,6 +216,7 @@ def test_unknown_engine_is_rejected(tmp_path: Path) -> None:
 
 
 def test_unknown_required_class_is_rejected(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     result = _class1_chain()
     target = str(tmp_path / "class0.pdf")
     metadata = _metadata(required_class=0)

@@ -13,8 +13,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-mpl = pytest.importorskip("matplotlib")
-mpl.use("Agg")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 
@@ -74,6 +72,7 @@ def _extract_text(path: str) -> str:
 
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_fiche_renders_one_page(tmp_path: Path, language: str) -> None:
+    pytest.importorskip("matplotlib")
     verdict = _verdict()
     path = verdict.report(
         str(tmp_path / f"iec62585_{language}.pdf"),
@@ -84,6 +83,7 @@ def test_fiche_renders_one_page(tmp_path: Path, language: str) -> None:
 
 
 def test_bare_fiche_without_metadata_or_range(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     verdict = _verdict(with_range=False)
     path = verdict.report(str(tmp_path / "bare.pdf"))
     assert_one_page(path)
@@ -92,6 +92,7 @@ def test_bare_fiche_without_metadata_or_range(tmp_path: Path) -> None:
 
 
 def test_english_fiche_states_the_clause_and_the_verdict(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     verdict = _verdict(exceed=True)
     path = verdict.report(str(tmp_path / "fail.pdf"), metadata=_metadata())
     text = _extract_text(path)
@@ -105,6 +106,7 @@ def test_english_fiche_states_the_clause_and_the_verdict(tmp_path: Path) -> None
 
 
 def test_spanish_fiche_translates_every_fixed_string(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     verdict = _verdict()
     path = verdict.report(
         str(tmp_path / "es_text.pdf"), metadata=_metadata(), language="es"

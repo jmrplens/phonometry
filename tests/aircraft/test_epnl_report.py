@@ -17,8 +17,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-mpl = pytest.importorskip("matplotlib")
-mpl.use("Agg")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -44,6 +42,7 @@ def _flyover() -> aircraft.EPNLResult:
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
     """A computed flyover renders a one-page certification fiche."""
+    pytest.importorskip("matplotlib")
     result = _flyover()
     assert np.isfinite(result.epnl)
     out = tmp_path / "epnl.pdf"
@@ -62,6 +61,7 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
 
 def test_passing_requirement_renders(tmp_path: Path) -> None:
     """A certification limit at or above the EPNL renders a passing fiche."""
+    pytest.importorskip("matplotlib")
     result = _flyover()
     limit = float(result.epnl) + 3.0
     out = tmp_path / "pass.pdf"
@@ -71,6 +71,7 @@ def test_passing_requirement_renders(tmp_path: Path) -> None:
 
 def test_failing_requirement_renders(tmp_path: Path) -> None:
     """A certification limit below the EPNL renders a failing fiche."""
+    pytest.importorskip("matplotlib")
     result = _flyover()
     limit = float(result.epnl) - 3.0
     out = tmp_path / "fail.pdf"
@@ -80,6 +81,7 @@ def test_failing_requirement_renders(tmp_path: Path) -> None:
 
 def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders a one-page fiche."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         specimen="Example twin-turbofan transport",
         manufacturer="Example Aircraft Company",
@@ -99,6 +101,7 @@ def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
 
 def test_no_metadata_prediction_fiche(tmp_path: Path) -> None:
     """With ``metadata=None`` a prediction fiche renders (no verdict row)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "prediction.pdf"
     _flyover().report(str(out))
     assert_one_page(str(out))
@@ -119,6 +122,7 @@ def test_verdict_follows_one_decimal_epnl_at_the_limit(tmp_path: Path) -> None:
     zero margin (previously the unrounded comparison printed "101.0",
     "margin -0.0" and FAIL, contradicting its own displayed numbers).
     """
+    pytest.importorskip("matplotlib")
     import dataclasses
 
     result = dataclasses.replace(_flyover(), epnl=101.04)
@@ -141,6 +145,7 @@ def test_verdict_follows_one_decimal_epnl_at_the_limit(tmp_path: Path) -> None:
 
 def test_reference_conditions_cite_part_ii(tmp_path: Path) -> None:
     """The reference-conditions strip states the Part II 3.6.1.5 conditions."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "refcond.pdf"
     _flyover().report(str(out))
     text = _extract_text(str(out)).replace("\n", " ")
@@ -151,6 +156,7 @@ def test_reference_conditions_cite_part_ii(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     result = _flyover()

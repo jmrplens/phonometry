@@ -496,6 +496,7 @@ def test_a_response_span_too_narrow_to_draw_is_refused(tmp_path: Path) -> None:
     divisor towards zero: the panel comes out empty under a printed range
     whose two ends read as the same frequency, and nothing warns.
     """
+    pytest.importorskip("matplotlib")
     frequencies = np.linspace(1000.0, 1000.001, 10)
     result = electroacoustics.loudspeaker_characteristics(
         frequencies=frequencies,

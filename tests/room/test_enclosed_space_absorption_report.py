@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
@@ -81,6 +80,7 @@ def _text(path: str) -> str:
 
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "enclosed.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -88,12 +88,14 @@ def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
 
 
 def test_report_with_metadata_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "enclosed_meta.pdf"
     _result().report(str(out), metadata=_metadata())
     assert_one_page(str(out))
 
 
 def test_no_metadata_still_renders(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "enclosed_bare.pdf"
     _result().report(str(out), metadata=None)
     assert_one_page(str(out))
@@ -115,6 +117,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 def test_band_labels_and_area_and_time_render(tmp_path: Path) -> None:
     """Nominal band labels and the closed-form A and T (2 decimals) render."""
+    pytest.importorskip("matplotlib")
     res = _result()
     out = tmp_path / "values.pdf"
     res.report(str(out), metadata=_metadata())
@@ -128,6 +131,7 @@ def test_band_labels_and_area_and_time_render(tmp_path: Path) -> None:
 
 def test_mid_frequency_descriptor_renders(tmp_path: Path) -> None:
     """The boxed mid-frequency reverberation time appears in the text."""
+    pytest.importorskip("matplotlib")
     res = _result()
     out = tmp_path / "mid.pdf"
     res.report(str(out), metadata=_metadata())
@@ -138,6 +142,7 @@ def test_mid_frequency_descriptor_renders(tmp_path: Path) -> None:
 
 def test_characterisation_has_no_pass_fail_verdict(tmp_path: Path) -> None:
     """The fiche never invents a PASS/FAIL verdict, even with a target."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "noverdict.pdf"
     _result().report(str(out), metadata=_metadata(requirement=0.6))
     text = _text(str(out))
@@ -147,6 +152,7 @@ def test_characterisation_has_no_pass_fail_verdict(tmp_path: Path) -> None:
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="room <A> & <B>",
@@ -161,6 +167,7 @@ def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
 
 
 def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "enclosed_es.pdf"

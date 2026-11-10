@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from reference_data import ISO717_1_ANNEX_C_R
@@ -58,6 +57,7 @@ def test_the_whole_decibel_terms_read_the_same_in_both_languages() -> None:
 def test_the_fiche_hands_its_language_to_the_terms(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
+    pytest.importorskip("matplotlib")
     real = iso717._extended_terms
     seen: list[str] = []
 

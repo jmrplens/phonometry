@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -73,6 +72,7 @@ def _extract_text(path: str) -> str:
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
     """An activity assessment renders a one-page PDF fiche."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "acta.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -94,6 +94,7 @@ def test_fiche_defaults_to_spanish(tmp_path: Path) -> None:
     language, so the renderer must translate that too rather than leaving an
     English line in a Spanish acta.
     """
+    pytest.importorskip("matplotlib")
     out = tmp_path / "acta_es.pdf"
     _result().report(str(out))
     assert_one_page(str(out))
@@ -111,6 +112,7 @@ def test_fiche_defaults_to_spanish(tmp_path: Path) -> None:
 
 def test_english_fiche_renders_one_page(tmp_path: Path) -> None:
     """``language="en"`` renders the same fiche in English on one page."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "acta_en.pdf"
     _result().report(str(out), language="en")
     assert_one_page(str(out))
@@ -127,6 +129,7 @@ def test_report_states_the_phase_and_period_numbers(tmp_path: Path) -> None:
     48 dB with Kt 6/3 and Kf 3/3; the period integration gives LKeq,d = 57 dB
     and the annual average LK,d = 56 dB against the 55 dB of Table B1.
     """
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "numbers.pdf"
     result.report(str(out), language="en")
@@ -153,6 +156,7 @@ def test_verdict_fails_for_a_new_activity_and_passes_for_an_existing_one(
     LK,d = 56 dB over a 55 dB limit fails; Article 25.2 subjects an activity
     already in operation only to the daily and phase criteria.
     """
+    pytest.importorskip("matplotlib")
     new = tmp_path / "new.pdf"
     existing = tmp_path / "existing.pdf"
     _result().report(str(new), language="en")
@@ -172,6 +176,7 @@ def test_verdict_fails_for_a_new_activity_and_passes_for_an_existing_one(
 
 def test_spanish_verdict_labels(tmp_path: Path) -> None:
     """The Spanish fiche renders the verdict as CUMPLE / NO CUMPLE."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "verdict_es.pdf"
     _result().report(str(out))
     text = _extract_text(str(out)).replace("\n", " ")
@@ -181,6 +186,7 @@ def test_spanish_verdict_labels(tmp_path: Path) -> None:
 
 def test_metadata_appears_and_stays_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders one page and prints its fields."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         specimen="Taller mecanico, horario 9 h a 21 h",
         client="Titular de la actividad",
@@ -209,6 +215,7 @@ def test_report_escapes_xml_specials_in_metadata_and_phase_labels(
     The phase label is free text that reaches the table as a paragraph, so it
     must be escaped on the same path as the metadata fields.
     """
+    pytest.importorskip("matplotlib")
     measurements = _measurements()
     measurements["day"][1] = rd.NoisePhase(
         duration_hours=6.0, laeq=50.0, kt=6.0, kf=3.0, label="Compresor <A> & <B>"
@@ -238,6 +245,7 @@ def test_three_period_fiche_stays_one_page(tmp_path: Path) -> None:
     The phase table grows with the number of noise phases, so the assessment
     figure shrinks to keep the fiche on a single page.
     """
+    pytest.importorskip("matplotlib")
     measurements = _measurements()
     measurements["night"] = [
         rd.NoisePhase(duration_hours=4.0, laeq=40.0, kt=3.0, label="Ventilacion"),
@@ -265,6 +273,7 @@ def test_adjacent_premises_limit_row_renders(tmp_path: Path) -> None:
     Its limit row description names the premises and the room type, which the
     Spanish fiche must translate along with the table reference.
     """
+    pytest.importorskip("matplotlib")
     out = tmp_path / "adjacent.pdf"
     result = rd.assess_activity(
         _measurements(),

@@ -19,7 +19,6 @@ import numpy as np
 import pytest
 import reference_data as ref
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -83,6 +82,7 @@ def _extract_text(path: str) -> str:
 
 def test_detailed_airborne_fiche_boxes_the_annex_l_rating(tmp_path: Path) -> None:
     """The detailed airborne fiche boxes R'w = 57 dB and names Clause 4.2."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "air.pdf"
     assert _annex_l_airborne().report(str(out)) == str(out)
     assert_one_page(str(out))
@@ -103,6 +103,7 @@ def test_detailed_airborne_fiche_boxes_the_annex_l_rating(tmp_path: Path) -> Non
 
 def test_detailed_impact_fiche_boxes_the_annex_g_rating(tmp_path: Path) -> None:
     """The detailed impact fiche boxes L'n,w = 41 dB and verdicts a limit."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "imp.pdf"
     result = _annex_g_impact()
     assert result.report(
@@ -142,6 +143,7 @@ def test_detailed_path_label_reaches_the_table_intact(
     aborted the render with a parse error naming neither the field nor the
     path.
     """
+    pytest.importorskip("matplotlib")
     result = building.detailed_airborne_prediction(
         _BANDS,
         direct_index=np.linspace(40.0, 60.0, _BANDS.size),
@@ -159,6 +161,7 @@ def test_detailed_path_label_reaches_the_table_intact(
 
 def test_spanish_detailed_fiche_renders(tmp_path: Path) -> None:
     """The fiches translate to Spanish like every other report."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "air_es.pdf"
     _annex_l_airborne().report(str(out), language="es")
     assert_one_page(str(out))
@@ -219,6 +222,7 @@ def test_the_fiche_legend_keeps_the_curve_it_rates(
     primary axes alone dropped the twin's half, so the sheet printed a legend
     without the very quantity the whole page rates.
     """
+    pytest.importorskip("matplotlib")
     from matplotlib.axes import Axes
 
     legends: list[list[str]] = []

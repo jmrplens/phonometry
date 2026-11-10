@@ -17,7 +17,6 @@ import numpy as np
 import pytest
 import reference_data as ref
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from typing import TYPE_CHECKING
@@ -101,6 +100,7 @@ def _extract_text(path: str) -> str:
 
 def test_airborne_prediction_rating_pinned_to_annex_h3(tmp_path: Path) -> None:
     """The airborne fiche boxes the Annex H.3 predicted R'w = 52 dB."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "air.pdf"
     # report() returns the written path (part of the public contract).
     assert _annex_h3_airborne().report(str(out)) == str(out)
@@ -123,6 +123,7 @@ def test_airborne_prediction_rating_pinned_to_annex_h3(tmp_path: Path) -> None:
 
 def test_impact_prediction_rating_pinned_to_annex_e3(tmp_path: Path) -> None:
     """The impact fiche boxes the Annex E.3 predicted L'n,w = 45 dB."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "imp.pdf"
     assert _annex_e3_impact().report(str(out)) == str(out)
     assert_one_page(str(out))
@@ -140,6 +141,7 @@ def test_impact_prediction_rating_pinned_to_annex_e3(tmp_path: Path) -> None:
 
 def test_airborne_verbose_adds_energy_share(tmp_path: Path) -> None:
     """``verbose=True`` annexes each path's share of the transmitted energy."""
+    pytest.importorskip("matplotlib")
     plain = tmp_path / "plain.pdf"
     _annex_h3_airborne().report(str(plain))
     assert "%" not in _extract_text(str(plain))
@@ -168,6 +170,7 @@ def test_flanking_path_label_reaches_the_table_intact(
     unclosed tag aborted the render with a parse error naming neither the
     field nor the path.
     """
+    pytest.importorskip("matplotlib")
     paths = building.flanking_element(
         label=label,
         r_flanking=48.0,
@@ -202,6 +205,7 @@ def test_facade_element_name_reaches_the_table_intact(
     as ``Wall``, ``<b>Wall</b>`` printed as bold ``Wall``, and an unclosed tag
     crashed the render inside reportlab's paraparser.
     """
+    pytest.importorskip("matplotlib")
     element = building.FacadeElement(
         name=name, area=8.0, r=list(np.linspace(30.0, 45.0, 16))
     )
@@ -214,6 +218,7 @@ def test_facade_element_name_reaches_the_table_intact(
 
 def test_airborne_requirement_verdict(tmp_path: Path) -> None:
     """Airborne insulation passes at or above the requirement."""
+    pytest.importorskip("matplotlib")
     result = _annex_h3_airborne()  # R'w = 52 dB
     passing = tmp_path / "pass.pdf"
     result.report(str(passing), metadata=ReportMetadata(requirement=50.0))
@@ -226,6 +231,7 @@ def test_airborne_requirement_verdict(tmp_path: Path) -> None:
 
 def test_impact_requirement_verdict_lower_is_better(tmp_path: Path) -> None:
     """Impact level passes at or below the requirement (lower is better)."""
+    pytest.importorskip("matplotlib")
     result = _annex_e3_impact()  # L'n,w = 45 dB
     passing = tmp_path / "pass.pdf"
     result.report(str(passing), metadata=ReportMetadata(requirement=53.0))
@@ -238,6 +244,7 @@ def test_impact_requirement_verdict_lower_is_better(tmp_path: Path) -> None:
 
 def test_metadata_header_renders(tmp_path: Path) -> None:
     """A populated metadata header prints on the fiche."""
+    pytest.importorskip("matplotlib")
     metadata = ReportMetadata(
         specimen="Separating wall Rs,w = 57 dB",
         client="Acoustic Consultants Ltd.",
@@ -258,6 +265,7 @@ def test_metadata_header_renders(tmp_path: Path) -> None:
 
 def test_lightweight_fiche_without_metadata(tmp_path: Path) -> None:
     """A fiche with no metadata is still a valid one-page prediction report."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "bare.pdf"
     _annex_e3_impact().report(str(out))
     assert_one_page(str(out))
@@ -266,6 +274,7 @@ def test_lightweight_fiche_without_metadata(tmp_path: Path) -> None:
 
 def test_spanish_fiche_renders_translated(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "es.pdf"
@@ -285,6 +294,7 @@ def test_spanish_fiche_renders_translated(tmp_path: Path) -> None:
 
 def test_impact_spanish_fiche_renders_translated(tmp_path: Path) -> None:
     """The impact fiche also renders in Spanish."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "es_imp.pdf"
     _annex_e3_impact().report(str(out), language="es")
     assert_one_page(str(out))
@@ -295,6 +305,7 @@ def test_impact_spanish_fiche_renders_translated(tmp_path: Path) -> None:
 
 def test_facade_prediction_rating_pinned_to_annex_f(tmp_path: Path) -> None:
     """The facade fiche boxes the Annex F predicted D2m,nT,w = 33 dB."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "facade.pdf"
     assert _annex_f_facade().report(str(out)) == str(out)
     assert_one_page(str(out))
@@ -322,6 +333,7 @@ def test_facade_prediction_rating_pinned_to_annex_f(tmp_path: Path) -> None:
 
 def test_facade_verbose_adds_energy_share(tmp_path: Path) -> None:
     """``verbose=True`` annexes each element's share of the transmitted energy."""
+    pytest.importorskip("matplotlib")
     plain = tmp_path / "plain.pdf"
     _annex_f_facade().report(str(plain))
     assert "%" not in _extract_text(str(plain))
@@ -335,6 +347,7 @@ def test_facade_verbose_adds_energy_share(tmp_path: Path) -> None:
 
 def test_facade_requirement_verdict(tmp_path: Path) -> None:
     """Facade insulation passes at or above the requirement."""
+    pytest.importorskip("matplotlib")
     result = _annex_f_facade()  # D2m,nT,w = 33 dB
     passing = tmp_path / "pass.pdf"
     result.report(str(passing), metadata=ReportMetadata(requirement=30.0))
@@ -347,6 +360,7 @@ def test_facade_requirement_verdict(tmp_path: Path) -> None:
 
 def test_facade_lightweight_fiche_without_metadata(tmp_path: Path) -> None:
     """A facade fiche with no metadata is still a valid one-page prediction."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "bare.pdf"
     _annex_f_facade().report(str(out))
     assert_one_page(str(out))
@@ -355,6 +369,7 @@ def test_facade_lightweight_fiche_without_metadata(tmp_path: Path) -> None:
 
 def test_facade_spanish_fiche_renders_translated(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish facade fiche."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "es.pdf"
     _annex_f_facade().report(
         str(out),

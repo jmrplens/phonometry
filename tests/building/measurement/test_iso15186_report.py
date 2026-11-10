@@ -23,7 +23,6 @@ import numpy as np
 import pytest
 import reference_data as ref
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -93,6 +92,7 @@ def test_ri_equals_annex_c_curve() -> None:
 
 def test_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
     """The RI fiche's rating is the published ISO 717-1 Annex C 30 (-2; -3) dB."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "ri.pdf"
     _intensity_result().report(str(out))
     assert_one_page(str(out))
@@ -109,6 +109,7 @@ def test_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
 
 def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
     """A fully populated fiche with the RI,M column is one page."""
+    pytest.importorskip("matplotlib")
     metadata = ReportMetadata(
         specimen="100 mm autoclaved aerated concrete block wall",
         client="Acoustic Test Client Ltd.",
@@ -141,6 +142,7 @@ def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
 
 def test_requirement_verdicts_pass_and_fail(tmp_path: Path) -> None:
     """Intensity insulation passes at or above the requirement."""
+    pytest.importorskip("matplotlib")
     result = _intensity_result()  # RI,w = 30 dB
     failing = tmp_path / "fail.pdf"
     result.report(str(failing), metadata=ReportMetadata(requirement=50.0))
@@ -164,6 +166,7 @@ def _octave_result(*, with_kc: bool = False) -> IntensityReductionResult:
 
 def test_octave_band_fiche_renders(tmp_path: Path) -> None:
     """A five-octave-band intensity result also yields a one-page fiche."""
+    pytest.importorskip("matplotlib")
     result = _octave_result()
     assert result.rating is not None
     out = tmp_path / "octave.pdf"
@@ -174,6 +177,7 @@ def test_octave_band_fiche_renders(tmp_path: Path) -> None:
 
 def test_octave_band_verbose_declares_band_resolution(tmp_path: Path) -> None:
     """The verbose RI,M caption still declares the octave-band resolution."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "octave_verbose.pdf"
     _octave_result(with_kc=True).report(str(out), verbose=True)
     assert_one_page(str(out))
@@ -184,6 +188,7 @@ def test_octave_band_verbose_declares_band_resolution(tmp_path: Path) -> None:
 
 def test_one_third_octave_verbose_declares_band_resolution(tmp_path: Path) -> None:
     """The verbose RI,M caption declares the one-third-octave resolution."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "verbose_res.pdf"
     _intensity_result(with_kc=True).report(str(out), verbose=True)
     assert_one_page(str(out))
@@ -194,6 +199,7 @@ def test_one_third_octave_verbose_declares_band_resolution(tmp_path: Path) -> No
 
 def test_spanish_fiche_renders_translated(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "es.pdf"
@@ -243,6 +249,7 @@ def test_missing_rating_rejected(tmp_path: Path) -> None:
 
 def test_verbose_without_kc_renders_plain_table(tmp_path: Path) -> None:
     """``verbose=True`` with no RI,M falls back to the two-column table."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "plain.pdf"
     _intensity_result(with_kc=False).report(str(out), verbose=True)
     assert_one_page(str(out))
@@ -279,6 +286,7 @@ def test_non_iso_band_count_rejected(tmp_path: Path) -> None:
 
 def test_clause8_areas_stated_in_statement(tmp_path: Path) -> None:
     """The statement carries S and Sm when the result holds them (Clause 8 g)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "areas.pdf"
     _intensity_result().report(str(out))
     text = " ".join(_extract_text(str(out)).split())
@@ -323,6 +331,7 @@ def test_band_indices_reject_non_finite(field: str) -> None:
 
 def test_clause8_fpi_and_residual_columns(tmp_path: Path) -> None:
     """Supplied FpI and dpI0 spectra are annexed as table columns (Clause 8 i)."""
+    pytest.importorskip("matplotlib")
     result = _intensity_result()
     fpi = np.full(16, 4.0)
     residual = np.full(16, 18.0)

@@ -261,7 +261,6 @@ def test_declare_requires_finite_lwa() -> None:
 
 def test_dual_number_report_renders_one_page(tmp_path: Path) -> None:
     """A dual-number declaration renders a valid one-page fiche."""
-    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     decl = _annex_b_declaration(noise_test_code="ISO 3746 test code")
     out = tmp_path / "iso4871.pdf"
@@ -276,7 +275,6 @@ def test_dual_number_report_renders_one_page(tmp_path: Path) -> None:
 
 def test_single_number_report_renders_one_page(tmp_path: Path) -> None:
     """A single-number declaration renders its L_WAd table."""
-    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     decl = _annex_b_declaration(form="single-number")
     out = tmp_path / "iso4871_single.pdf"
@@ -290,7 +288,6 @@ def test_dual_number_report_follows_annex_b2_layout(tmp_path: Path) -> None:
     L_WAd row, whose mix of separately rounded addends and a once-rounded sum
     is not part of the dual layout.
     """
-    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     decl = _annex_b_declaration()
     out = tmp_path / "iso4871_dual_layout.pdf"
@@ -305,7 +302,6 @@ def test_dual_number_verification_row_uses_rounded_sum(tmp_path: Path) -> None:
     """A dual-number fiche verifies against L_WA + K_WA of the separately
     rounded declared values (93 + 2 = 95 for 93,4/2,4), not round(95,8) = 96.
     """
-    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     mode = emission.OperatingModeDeclaration(
         "Operating mode 1", 93.4, 2.4, verification_level=95.0
@@ -331,7 +327,6 @@ def test_dual_number_verification_row_uses_rounded_sum(tmp_path: Path) -> None:
 
 def test_verification_verdict_renders_both_ways(tmp_path: Path) -> None:
     """A passing and a failing verification both render in the verdict table."""
-    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     mode1 = emission.OperatingModeDeclaration(
         "Operating mode 1", 88.0, 2.0, verification_level=89.0
@@ -351,7 +346,6 @@ def test_verification_verdict_renders_both_ways(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """language="es" renders a one-page Spanish fiche."""
-    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     decl = _annex_b_declaration()
     out = tmp_path / "iso4871_es.pdf"
@@ -364,7 +358,6 @@ def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
 
 def test_unknown_engine_rejected(tmp_path: Path) -> None:
     """An unknown rendering engine raises ValueError."""
-    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     decl = _annex_b_declaration()
     out = str(tmp_path / "x.pdf")

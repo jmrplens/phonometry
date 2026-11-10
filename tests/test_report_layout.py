@@ -17,7 +17,6 @@ import pytest
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from phonometry._report._layout import (

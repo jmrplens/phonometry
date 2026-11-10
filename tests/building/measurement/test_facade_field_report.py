@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -94,6 +93,7 @@ def test_dnt_reduces_to_d2m_at_reference_time() -> None:
 
 def test_dnt_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
     """The D2m,nT fiche's rating is the published ISO 717-1 Annex C 30 (-2; -3)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "d2mnt.pdf"
     _facade_dnt().report(str(out))
     assert_one_page(str(out))
@@ -107,6 +107,7 @@ def test_dnt_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
 
 def test_r_prime_fiche(tmp_path: Path) -> None:
     """``quantity='r_prime'`` reports the apparent sound reduction index R'45."""
+    pytest.importorskip("matplotlib")
     result = _facade_r_prime()
     assert result.r_prime is not None
     assert result.method == "loudspeaker"
@@ -123,6 +124,7 @@ def test_r_prime_fiche(tmp_path: Path) -> None:
 def test_r_prime_road_traffic_fiche_labelled_rtrs(tmp_path: Path) -> None:
     """A road-traffic result is labelled R'tr,s (Clause 3.13), never R'45."""
     # A = 0,16 x 62,5 / 1 = 10 = S, so 10 lg(S/A) = 0 and R'tr,s = L1,s - L2 - 3.
+    pytest.importorskip("matplotlib")
     surf = _ANNEX_C_R + 3.0
     result = building.facade_insulation(
         np.full(16, 50.0),
@@ -148,6 +150,7 @@ def test_r_prime_road_traffic_fiche_labelled_rtrs(tmp_path: Path) -> None:
 
 def test_d_2m_n_fiche(tmp_path: Path) -> None:
     """``quantity='d_2m_n'`` reports the normalized facade level difference."""
+    pytest.importorskip("matplotlib")
     result = _facade_dnt()
     assert result.d_2m_n is not None
     out = tmp_path / "d2mn.pdf"
@@ -158,6 +161,7 @@ def test_d_2m_n_fiche(tmp_path: Path) -> None:
 
 def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
     """A fully populated verbose facade fiche is one page and passes its target."""
+    pytest.importorskip("matplotlib")
     metadata = ReportMetadata(
         specimen="Dwelling facade, loudspeaker method",
         client="Acoustic Test Client Ltd.",
@@ -181,6 +185,7 @@ def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
 
 def test_requirement_verdict_fail(tmp_path: Path) -> None:
     """A facade level difference below the requirement fails."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "fail.pdf"
     _facade_dnt().report(str(out), metadata=ReportMetadata(requirement=45.0))
     assert "FAIL" in _extract_text(str(out))
@@ -188,6 +193,7 @@ def test_requirement_verdict_fail(tmp_path: Path) -> None:
 
 def test_spanish_fiche(tmp_path: Path) -> None:
     """``language='es'`` renders the Spanish facade fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "es.pdf"

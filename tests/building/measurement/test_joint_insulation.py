@@ -785,8 +785,7 @@ def test_joint_form_refuses_an_unknown_engine(tmp_path: Path) -> None:
 @pytest.fixture
 def agg_backend() -> Iterator[None]:
     """Draw on the Agg backend and close every figure afterwards."""
-    import matplotlib as mpl
-
+    mpl = pytest.importorskip("matplotlib")
     mpl.use("Agg")
     import matplotlib.pyplot as plt
 
@@ -867,6 +866,7 @@ def test_joint_figure_draws_each_column_as_its_curve() -> None:
 
 def test_joint_figure_lines_keep_three_to_one_on_a_dark_page() -> None:
     """The maximum and the measured index read on the dark theme too."""
+    pytest.importorskip("matplotlib")
     import matplotlib as mpl
 
     mpl.use("Agg")

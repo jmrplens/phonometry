@@ -18,7 +18,6 @@ import re
 
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from typing import TYPE_CHECKING
@@ -94,6 +93,7 @@ _PRIME = "′"
 
 
 def test_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dyn.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -108,6 +108,7 @@ def test_displayed_values_match_oracle(tmp_path: Path) -> None:
     (Formula 6, intermediate airflow resistivity), f0 = (1/2pi) sqrt(s'/m').
     Clause 9 rounds the stiffnesses to the nearest MN/m3.
     """
+    pytest.importorskip("matplotlib")
     s_t = 4.0 * math.pi**2 * _MT * _FR**2 / 1e6
     s_a = 1.0e5 / (_THICKNESS * _POROSITY) / 1e6
     s_installed = s_t + s_a
@@ -134,6 +135,7 @@ def test_displayed_values_match_oracle(tmp_path: Path) -> None:
 
 def test_metadata_fields_appear(tmp_path: Path) -> None:
     """The mass per area m't and the loaded thickness d appear in the header."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dyn.pdf"
     _result().report(str(out), metadata=_metadata())
     raw = _raw_text(str(out))
@@ -144,6 +146,7 @@ def test_metadata_fields_appear(tmp_path: Path) -> None:
 
 
 def test_no_metadata_still_renders(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dyn_bare.pdf"
     _result().report(str(out))
     assert_one_page(str(out))
@@ -152,6 +155,7 @@ def test_no_metadata_still_renders(tmp_path: Path) -> None:
 
 def test_high_resistivity_omits_gas_term(tmp_path: Path) -> None:
     """For r >= 100 kPa.s/m2 the installed s' equals s't and no s'a row shows."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dyn_hi.pdf"
     result = materials.floating_floor_resonance(
         resonant_frequency_hz=_FR,
@@ -178,12 +182,14 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dyn_xml.pdf"
     _result().report(str(out), metadata=_metadata(specimen='Layer <A> & <B> "edge"'))
     assert_one_page(str(out))
 
 
 def test_spanish_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dyn_es.pdf"
     _result().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))

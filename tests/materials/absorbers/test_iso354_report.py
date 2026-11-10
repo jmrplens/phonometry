@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 import numpy as np
@@ -142,6 +141,7 @@ def _text(path: str) -> str:
 
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso354.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -149,6 +149,7 @@ def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
 
 
 def test_report_with_metadata_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso354_meta.pdf"
     _result().report(str(out), metadata=_metadata())
     assert_one_page(str(out))
@@ -170,6 +171,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 def test_displayed_alpha_s_matches_oracle(tmp_path: Path) -> None:
     """The fiche prints the closed-form alpha_s and the band labels."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso354.pdf"
     _result().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -182,6 +184,7 @@ def test_displayed_alpha_s_matches_oracle(tmp_path: Path) -> None:
 
 def test_verbose_shows_areas_and_times_one_page(tmp_path: Path) -> None:
     """verbose=True adds the T1/T2/A1/A2 columns and stays one page."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso354_verbose.pdf"
     _result().report(str(out), metadata=_metadata(), verbose=True)
     assert_one_page(str(out))
@@ -214,6 +217,7 @@ def test_a_short_band_column_is_refused(field: str) -> None:
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso354_xml.pdf"
     _result().report(str(out), metadata=_metadata(specimen='Panel <A> & <B> "edge"'))
     assert_one_page(str(out))
@@ -221,6 +225,7 @@ def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
 
 def test_no_metadata_still_renders(tmp_path: Path) -> None:
     """Without metadata the body still shows the result's physical conditions."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso354_bare.pdf"
     _result().report(str(out))
     assert_one_page(str(out))
@@ -228,6 +233,7 @@ def test_no_metadata_still_renders(tmp_path: Path) -> None:
 
 
 def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso354_es.pdf"
     _result().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))
@@ -245,6 +251,7 @@ def test_non_evaluable_band_prints_the_em_dash(tmp_path: Path) -> None:
     the sibling fiches do. The verbose sheet em-dashes all three cells of that
     band's row (T2, A2 and alpha_s).
     """
+    pytest.importorskip("matplotlib")
     t2 = _T2.copy()
     t2[5] = np.nan  # 315 Hz band
     result = measure_sound_absorption(

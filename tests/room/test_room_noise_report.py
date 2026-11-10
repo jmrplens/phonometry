@@ -26,7 +26,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")
@@ -105,6 +104,7 @@ def test_example_spectra_match_standard() -> None:
 # --------------------------------------------------------------------------
 def test_nc_report_writes_pdf(tmp_path: Path) -> None:
     """An NC result renders a PDF fiche and returns its path."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "nc.pdf"
     returned = _nc_result().report(str(out))
     assert returned == str(out)
@@ -113,6 +113,7 @@ def test_nc_report_writes_pdf(tmp_path: Path) -> None:
 
 def test_rc_report_writes_pdf(tmp_path: Path) -> None:
     """An RC result renders a PDF fiche and returns its path."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "rc.pdf"
     returned = _rc_result().report(str(out))
     assert returned == str(out)
@@ -121,6 +122,7 @@ def test_rc_report_writes_pdf(tmp_path: Path) -> None:
 
 def test_reports_with_full_metadata_one_page(tmp_path: Path) -> None:
     """A full ReportMetadata renders a one-page fiche for both ratings."""
+    pytest.importorskip("matplotlib")
     _nc_result().report(str(tmp_path / "nc_meta.pdf"), metadata=_full_metadata())
     _rc_result().report(str(tmp_path / "rc_meta.pdf"), metadata=_full_metadata())
     assert_one_page(str(tmp_path / "nc_meta.pdf"))
@@ -129,6 +131,7 @@ def test_reports_with_full_metadata_one_page(tmp_path: Path) -> None:
 
 def test_reports_bare_without_metadata(tmp_path: Path) -> None:
     """metadata=None renders a bare assessment fiche (no header)."""
+    pytest.importorskip("matplotlib")
     _nc_result().report(str(tmp_path / "nc_bare.pdf"), metadata=None)
     _rc_result().report(str(tmp_path / "rc_bare.pdf"), metadata=None)
     assert_one_page(str(tmp_path / "nc_bare.pdf"))
@@ -137,6 +140,7 @@ def test_reports_bare_without_metadata(tmp_path: Path) -> None:
 
 def test_verbose_reports_one_page(tmp_path: Path) -> None:
     """verbose=True (NC contour / RC reference + deviation) still fits one page."""
+    pytest.importorskip("matplotlib")
     _nc_result().report(
         str(tmp_path / "nc_v.pdf"), metadata=_full_metadata(), verbose=True
     )
@@ -174,6 +178,7 @@ def test_unknown_language_rejected(
 # --------------------------------------------------------------------------
 def test_nc_rating_and_levels_render(tmp_path: Path) -> None:
     """The NC-40 rating, governing band and a couple band levels appear."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "nc_values.pdf"
     _nc_result().report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -186,6 +191,7 @@ def test_nc_rating_and_levels_render(tmp_path: Path) -> None:
 
 def test_rc_rating_and_levels_render(tmp_path: Path) -> None:
     """The RC-35(R) rating, the mid-frequency average and a level appear."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "rc_values.pdf"
     _rc_result().report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -196,6 +202,7 @@ def test_rc_rating_and_levels_render(tmp_path: Path) -> None:
 
 def test_nc_verbose_shows_contour_column(tmp_path: Path) -> None:
     """The verbose NC table adds the per-band NC contour column."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "nc_contour.pdf"
     _nc_result().report(str(out), metadata=_full_metadata(), verbose=True)
     text = _extract_text(str(out))
@@ -206,6 +213,7 @@ def test_nc_verbose_shows_contour_column(tmp_path: Path) -> None:
 
 def test_verdict_both_ways(tmp_path: Path) -> None:
     """A target rating renders PASS at or above the rating and FAIL below it."""
+    pytest.importorskip("matplotlib")
     passing = tmp_path / "pass.pdf"
     failing = tmp_path / "fail.pdf"
     _nc_result().report(str(passing), metadata=_full_metadata(requirement=40.0))
@@ -222,6 +230,7 @@ def test_verdict_uses_display_rounded_values(tmp_path: Path) -> None:
     0.01 dB above the NC-40 curve) prints as 40.0 and must PASS a target of
     40 rather than failing on the invisible third decimal.
     """
+    pytest.importorskip("matplotlib")
     contour = rn.nc_curve(40.0)
     levels = contour - 5.0
     levels[4] = contour[4] + 0.01  # 250 Hz a hair above the NC-40 curve.
@@ -236,6 +245,7 @@ def test_verdict_uses_display_rounded_values(tmp_path: Path) -> None:
 
 def test_nc_sil_designation_renders(tmp_path: Path) -> None:
     """A SIL-designated spectrum (clause 5.2.2) boxes NC-(SIL), no band."""
+    pytest.importorskip("matplotlib")
     result = rn.noise_criterion(rn.nc_curve(40.0))
     assert result.method == "SIL"
     out = tmp_path / "nc_sil.pdf"
@@ -248,6 +258,7 @@ def test_nc_sil_designation_renders(tmp_path: Path) -> None:
 
 def test_nc_out_of_range_above_renders(tmp_path: Path) -> None:
     """A spectrum above NC-70 renders >NC-70 and fails any in-family target."""
+    pytest.importorskip("matplotlib")
     import numpy as np
 
     result = rn.noise_criterion(np.full(10, 110.0))
@@ -262,6 +273,7 @@ def test_nc_out_of_range_above_renders(tmp_path: Path) -> None:
 
 def test_nc_out_of_range_below_renders(tmp_path: Path) -> None:
     """A spectrum below NC-15 renders <NC-15 and passes any in-family target."""
+    pytest.importorskip("matplotlib")
     import numpy as np
 
     result = rn.noise_criterion(np.full(10, 5.0))
@@ -275,6 +287,7 @@ def test_nc_out_of_range_below_renders(tmp_path: Path) -> None:
 
 def test_rc_out_of_family_note_renders(tmp_path: Path) -> None:
     """An RC rating outside RC-25 to RC-50 renders the extrapolation note."""
+    pytest.importorskip("matplotlib")
     result = rn.room_criterion(rn.rc_curve(55.0))
     assert result.out_of_family
     out = tmp_path / "rc_oof.pdf"
@@ -284,6 +297,7 @@ def test_rc_out_of_family_note_renders(tmp_path: Path) -> None:
 
 def test_report_without_requirement_has_no_verdict(tmp_path: Path) -> None:
     """With no target rating the assessment fiche omits the verdict row."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "noverdict.pdf"
     _rc_result().report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -296,6 +310,7 @@ def test_report_without_requirement_has_no_verdict(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="office <A> & foyer",
@@ -312,6 +327,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
 
 def test_spanish_reports_render_translated(tmp_path: Path) -> None:
     """language="es" renders one-page Spanish fiches with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     nc_out = tmp_path / "nc_es.pdf"
@@ -335,6 +351,7 @@ def test_spanish_reports_render_translated(tmp_path: Path) -> None:
 
 def test_subset_spectrum_renders_missing_bands(tmp_path: Path) -> None:
     """A subset of octave bands renders, showing an em dash for absent bands."""
+    pytest.importorskip("matplotlib")
     freqs = [500.0, 1000.0, 2000.0, 4000.0, 8000.0]
     levels = [40.0, 35.0, 30.0, 27.0, 22.0]
     out = tmp_path / "subset.pdf"
@@ -400,6 +417,7 @@ def test_a_fiche_is_written_where_a_path_object_names(tmp_path: Path) -> None:
     ReportLab's own error. The fiche is written where the path names, and
     ``.report()`` returns that path as a text.
     """
+    pytest.importorskip("matplotlib")
     target = tmp_path / "nc.pdf"
     assert _nc_result().report(target) == str(target)
     assert target.read_bytes().startswith(b"%PDF")

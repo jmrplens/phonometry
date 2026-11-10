@@ -22,7 +22,6 @@ import numpy as np
 import pytest
 import reference_data as ref
 
-pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page
@@ -84,6 +83,7 @@ def test_dine_equals_annex_c_curve() -> None:
 
 def test_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
     """The DI,n,e fiche's rating is the published 30 (-2; -3) dB."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dine.pdf"
     _element_result().report(str(out))
     assert_one_page(str(out))
@@ -100,6 +100,7 @@ def test_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> None:
 
 def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
     """A fully populated verbose fiche is one page and shows the evaluation."""
+    pytest.importorskip("matplotlib")
     metadata = ReportMetadata(
         specimen="Trickle ventilator in a 100 mm masonry wall",
         client="Acoustic Test Client Ltd.",
@@ -127,6 +128,7 @@ def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
 
 def test_requirement_verdicts_pass_and_fail(tmp_path: Path) -> None:
     """Element insulation passes at or above the requirement."""
+    pytest.importorskip("matplotlib")
     result = _element_result()  # DI,n,e,w = 30 dB
     failing = tmp_path / "fail.pdf"
     result.report(str(failing), metadata=ReportMetadata(requirement=50.0))
@@ -139,6 +141,7 @@ def test_requirement_verdicts_pass_and_fail(tmp_path: Path) -> None:
 
 def test_octave_band_fiche_renders(tmp_path: Path) -> None:
     """A five-octave-band element result also yields a one-page fiche."""
+    pytest.importorskip("matplotlib")
     result = _octave_result()
     assert result.rating is not None
     out = tmp_path / "octave.pdf"
@@ -149,6 +152,7 @@ def test_octave_band_fiche_renders(tmp_path: Path) -> None:
 
 def test_spanish_fiche_renders_translated(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "es.pdf"

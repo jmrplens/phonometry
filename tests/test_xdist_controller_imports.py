@@ -9,22 +9,54 @@ importing ``phonometry.emission._shared`` and
 to ``_DeadlockError``, and with ``--max-worker-restart=0`` the run ended at an
 INTERNALERROR with the rest of its tests unrun. ``tests/conftest.py`` imports
 the domains on the controller, in its main thread, before any worker starts,
-so the receivers find every warning's module already imported.
+so the receivers find every warning's module already imported. The modules
+that define a warning class are read off the source, not off what an import
+loaded, so a warning moved to a module no domain package imports fails here
+instead of waiting for the race.
 """
 
 from __future__ import annotations
 
+import ast
+import json
 import pathlib
 import sys
 import textwrap
 
 import child_process
+import pytest
+
+import phonometry
 
 _TESTS = pathlib.Path(__file__).resolve().parent
+
+#: The two modules whose warnings the receivers deadlocked on.
+_REPORTED = (
+    "phonometry.emission._shared",
+    "phonometry.environment.propagation.barrier_in_situ",
+)
+
+
+def _warning_modules() -> list[str]:
+    """Every module of the package whose source defines a warning class."""
+    package = pathlib.Path(phonometry.__file__).resolve().parent
+    found: list[str] = []
+    for path in sorted(package.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        if any(
+            isinstance(node, ast.ClassDef)
+            and any("Warning" in ast.unparse(base) for base in node.bases)
+            for node in tree.body
+        ):
+            parts = path.relative_to(package.parent).with_suffix("").parts
+            found.append(".".join(parts[:-1] if parts[-1] == "__init__" else parts))
+    return found
+
 
 #: What a fresh interpreter prints: the domains imported after the hook ran.
 _PROBE = textwrap.dedent(
     """
+    import json
     import sys
     import types
 
@@ -38,11 +70,17 @@ _PROBE = textwrap.dedent(
     conftest.import_domains_on_the_xdist_controller(config)
     print(sum(f"phonometry.{name}" in sys.modules for name in phonometry._PACKAGES))
     print(len(phonometry._PACKAGES))
+    print(json.dumps([name for name in json.loads(sys.argv[3]) if name not in sys.modules]))
     """
 )
 
 
-def _domains_imported(numprocesses: int, *, worker: bool) -> tuple[int, int]:
+def _probe(
+    numprocesses: int, *, worker: bool, warning_modules: list[str]
+) -> tuple[int, int, list[str]]:
+    """The domains imported after the hook ran, of how many, and those of
+    *warning_modules* still not imported.
+    """
     done = child_process.run(
         [
             sys.executable,
@@ -50,6 +88,7 @@ def _domains_imported(numprocesses: int, *, worker: bool) -> tuple[int, int]:
             _PROBE,
             str(numprocesses),
             "worker" if worker else "controller",
+            json.dumps(warning_modules),
         ],
         capture_output=True,
         text=True,
@@ -57,13 +96,26 @@ def _domains_imported(numprocesses: int, *, worker: bool) -> tuple[int, int]:
         cwd=_TESTS,
         timeout=300,  # importing the 21 domains takes a few seconds
     )
-    imported, total = (int(line) for line in done.stdout.split())
+    imported, total, unloaded = done.stdout.splitlines()[-3:]
+    return int(imported), int(total), json.loads(unloaded)
+
+
+def _domains_imported(numprocesses: int, *, worker: bool) -> tuple[int, int]:
+    imported, total, _ = _probe(numprocesses, worker=worker, warning_modules=[])
     return imported, total
 
 
 def test_the_controller_of_a_parallel_run_imports_every_domain() -> None:
     imported, total = _domains_imported(4, worker=False)
     assert imported == total
+
+
+@pytest.mark.whole_tree
+def test_the_controller_imports_every_module_that_defines_a_warning() -> None:
+    """A receiver imports a warning's module by its name; the hook has done it first."""
+    modules = _warning_modules()
+    assert set(_REPORTED) <= set(modules)
+    assert _probe(4, worker=False, warning_modules=modules)[2] == []
 
 
 def test_a_worker_and_a_serial_run_import_no_domain_for_it() -> None:

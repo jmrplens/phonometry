@@ -24,13 +24,15 @@ import {
 	DEPLOY_BRANCH,
 	MANIFEST_NAME,
 	ManifestError,
+	NOT_DEPLOYED,
 	ORIGIN,
+	PAGES_ENVIRONMENT,
 	SUBMITTED_ARTIFACT,
 	URLS_NAME,
 	lastSubmitted,
 	loadPrevious,
 	mainText,
-	newerRecord,
+	newerDeploy,
 	serialize,
 	urlsToSubmit,
 } from './indexnow-diff.mjs';
@@ -103,14 +105,14 @@ function manifest(dist) {
  * manifest of `before` (a list of pages, or `null` for no record at all), with
  * the lines the script printed and the folder it handed the IndexNow job.
  */
-function submit(t, before, pages, { record = '', ...options } = {}) {
+function submit(t, before, pages, options = {}) {
 	const previous = join(mkdtempSync(join(tmpdir(), 'indexnow-previous-')), MANIFEST_NAME);
 	t.after(() => rmSync(dirname(previous), { recursive: true, force: true }));
 	if (before !== null) writeFileSync(previous, manifest(build(t, before)));
 	const dist = build(t, pages, options);
 	manifest(dist);
 	const out = join(dirname(previous), 'handed');
-	const ran = run('diff', '--dist', dist, '--previous', previous, '--out', out, '--record', record);
+	const ran = run('diff', '--dist', dist, '--previous', previous, '--out', out);
 	assert.equal(ran.status, 0, ran.err);
 	return { ...JSON.parse(readFileSync(join(out, URLS_NAME), 'utf8')), printed: ran.out, out, dist };
 }
@@ -151,15 +153,6 @@ test('the IndexNow job is handed the manifest the URLs were worked out from, to 
 	const after = { ...BASE, '/signals/filters/': guide('/signals/filters/', { body: 'The filters, rewritten.' }) };
 	const sent = submit(t, BASE, after);
 	assert.equal(readFileSync(join(sent.out, MANIFEST_NAME), 'utf8'), readFileSync(join(sent.dist, MANIFEST_NAME), 'utf8'));
-	// With the record that was the newest when the build compared, which the
-	// job checks before it keeps its own; none when there was none.
-	assert.equal(sent.record, null);
-	assert.equal(submit(t, BASE, after, { record: '7' }).record, 7);
-	const dist = build(t, BASE);
-	manifest(dist);
-	const refused = run('diff', '--dist', dist, '--previous', join(dist, 'none.json'), '--record', 'run-70');
-	assert.equal(refused.status, 1);
-	assert.match(refused.err, /--record takes the id of an artifact, not "run-70"/);
 });
 
 test('a deploy whose IndexNow job kept no record leaves its pages to the next deploy, which compares with the record before it', (t) => {
@@ -450,54 +443,128 @@ test('the record compared with is the newest one a run of main kept, in whatever
 	assert.equal(lastSubmitted(Object.values(never)), undefined);
 });
 
-test('a failed job re-run after a newer deploy kept its record keeps none, so the next deploy still sends what that deploy added and it removes', () => {
-	// The manifests, by what each page says: run A changed page x, its
-	// IndexNow job failed; run B added page y and kept its record; then A's
-	// job was re-run; run C removes page y.
+/** A deployment of the site as the GitHub GraphQL API lists one. */
+const deployment = (databaseId, createdAt, state = 'ACTIVE') => ({ databaseId, createdAt, commitOid: `c0ffee${databaseId}`, state });
+
+/**
+ * The site, its deploys and the IndexNow jobs that follow them, played in the
+ * order a test gives. A deploy builds against the newest record of its time
+ * and goes out; the job of a run, when it runs, submits that run's list and
+ * keeps its manifest when `keeps(run, { records, deployments })` says so.
+ */
+function site(keeps) {
+	const records = [];
+	const manifests = new Map();
+	const deployments = [];
+	const runs = new Map();
+	let clock = Date.parse('2026-11-01T10:00:00Z');
+	const tick = () => new Date((clock += 60_000)).toISOString().replace('.000Z', 'Z');
+	return {
+		/** Run `name` builds `pages` and deploys them, and says what its list holds. */
+		deploy(name, pages) {
+			const compared = lastSubmitted(records);
+			deployments.push(deployment(deployments.length + 1, tick()));
+			const sent = urlsToSubmit(pages, compared && manifests.get(compared.id));
+			runs.set(name, { pages, compared: compared?.id ?? null, deployedAt: tick() });
+			return sent;
+		},
+		/** The IndexNow job of run `name`, run for the first time or re-run: whether it kept its manifest. */
+		job(name) {
+			const run = runs.get(name);
+			if (!keeps(run, { records, deployments })) return false;
+			const id = records.length + 1;
+			records.push(artifact(id, tick()));
+			manifests.set(id, run.pages);
+			return true;
+		},
+	};
+}
+
+/** The job keeps its manifest while no deploy has gone out after its run's, as the IndexNow job does. */
+const byDeploy = (run, { deployments }) => newerDeploy(run.deployedAt, deployments) === undefined;
+/** The job keeps its manifest whatever happened since. */
+const always = () => true;
+/** The job keeps its manifest while the record its build compared with is the newest. */
+const byRecord = (run, { records }) => (lastSubmitted(records)?.id ?? null) === run.compared;
+
+/**
+ * What the deploy that removes page y sends as removed, after run A changed
+ * page x and run B added y, both with jobs that failed, and the jobs played
+ * in `order` (A's and B's, first runs or re-runs).
+ */
+function removedAfter(keeps, order) {
 	const x = url('/x/');
 	const y = url('/y/');
-	const manifests = new Map();
-	const records = [];
-	/** The IndexNow job of a run: keep its manifest unless a newer record was kept since its build compared. */
-	const keep = (artifactId, at, pages, compared, check = true) => {
-		if (check && newerRecord(compared, records) !== undefined) return false;
-		records.push(artifact(artifactId, at));
-		manifests.set(artifactId, pages);
-		return true;
-	};
-	keep(1, '2026-11-01T10:00:00Z', { [x]: 'x0' }, null);
-	const comparedByA = lastSubmitted(records).id;
-	const comparedByB = lastSubmitted(records).id;
-	assert.equal(comparedByA, 1);
-	assert.equal(keep(3, '2026-11-02T10:00:00Z', { [x]: 'x1', [y]: 'y1' }, comparedByB), true, "B's job keeps its record");
-	assert.equal(keep(2, '2026-11-03T10:00:00Z', { [x]: 'x1' }, comparedByA), false, "A's job, re-run after B's, keeps none");
-	const previous = manifests.get(lastSubmitted(records).id);
-	assert.deepEqual(urlsToSubmit({ [x]: 'x1' }, previous).removed, [y], 'C sends the removal of the page B added');
+	const played = site(keeps);
+	played.deploy('R', { [x]: 'x0' });
+	played.job('R');
+	played.deploy('A', { [x]: 'x1' });
+	played.deploy('B', { [x]: 'x1', [y]: 'y1' });
+	for (const name of order) played.job(name);
+	return played.deploy('C', { [x]: 'x1' }).removed;
+}
 
-	// Kept as it used to be, A's older manifest would be the newest record,
-	// and C would compare with a manifest that never had y.
-	assert.equal(keep(2, '2026-11-03T10:00:00Z', { [x]: 'x1' }, comparedByA, false), true);
-	assert.deepEqual(urlsToSubmit({ [x]: 'x1' }, manifests.get(lastSubmitted(records).id)).removed, []);
+test('the newest record is the newest deploy that kept one, in whatever order failed jobs are re-run', () => {
+	const y = url('/y/');
+	const orders = {
+		"B's job keeps its record, then A's is re-run": ['B', 'A'],
+		"A's job is re-run, then B's": ['A', 'B'],
+	};
+	for (const [what, order] of Object.entries(orders)) {
+		assert.deepEqual(removedAfter(byDeploy, order), [y], what);
+	}
+	// A rule decided by when a record was kept leaves the removal of y out in
+	// one of the two orders: keeping always when A's job runs last, keeping
+	// while the record its build compared with is the newest when B's does.
+	assert.deepEqual(removedAfter(always, ['A', 'B']), [y]);
+	assert.deepEqual(removedAfter(always, ['B', 'A']), []);
+	assert.deepEqual(removedAfter(byRecord, ['B', 'A']), [y]);
+	assert.deepEqual(removedAfter(byRecord, ['A', 'B']), []);
+
+	// A's job re-run after B's deploy keeps nothing, whatever B's job does
+	// later, so the next deploy compares with the record both builds compared
+	// with and sends A's page again.
+	const x = url('/x/');
+	const played = site(byDeploy);
+	played.deploy('R', { [x]: 'x0' });
+	played.job('R');
+	played.deploy('A', { [x]: 'x1' });
+	played.deploy('B', { [x]: 'x1', [y]: 'y1' });
+	assert.equal(played.job('A'), false);
+	assert.deepEqual(played.deploy('C', { [x]: 'x1' }).changed, [x]);
 });
 
-test('a record is kept when the one its build compared with is still the newest, or there was none and still is', () => {
-	const r1 = artifact(1, '2026-11-01T10:00:00Z');
-	const r2 = artifact(2, '2026-11-02T10:00:00Z');
-	assert.equal(newerRecord(2, [r1, r2]), undefined, 'the usual deploy, and a whole run re-run after a newer one: its build compared with the newest');
-	assert.equal(newerRecord(null, []), undefined, 'the first record');
-	assert.equal(newerRecord(1, []), undefined, 'the record compared with has expired, and none was kept since');
-	assert.equal(newerRecord(1, [r1, r2]), r2, 'a newer record was kept since the build compared');
-	assert.equal(newerRecord(null, [r1]), r1, 'the build found no record, and one was kept since');
-	const pullRequest = artifact(3, '2026-11-03T10:00:00Z', { head_branch: 'site/a-change' });
-	assert.equal(newerRecord(2, [r1, r2, pullRequest]), undefined, 'an artifact a pull request uploaded is no record');
+test("a deploy that went out after this run's, and only such a deploy, stops the record from being kept", () => {
+	const at = '2026-11-06T08:00:00Z';
+	const own = deployment(1, '2026-11-06T07:59:30Z');
+	const later = '2026-11-08T08:00:00Z';
+	assert.equal(newerDeploy(at, []), undefined, 'no deployment listed');
+	assert.equal(newerDeploy(at, [own, deployment(0, '2026-11-01T08:00:00Z')]), undefined, "this run's own deployment and an older one");
+	assert.equal(newerDeploy(at, [own, deployment(2, at)]), undefined, 'one made in the second the pages went out is not after them');
+	for (const state of ['ACTIVE', 'INACTIVE', 'IN_PROGRESS', 'QUEUED', 'PENDING', 'WAITING', 'SUCCESS', null]) {
+		const newer = deployment(3, later, state);
+		assert.equal(newerDeploy(at, [own, newer]), newer, `a later deploy whose state is ${state}`);
+	}
+	for (const state of NOT_DEPLOYED) {
+		assert.equal(newerDeploy(at, [own, deployment(3, later, state)]), undefined, `a later deploy that ended ${state}, whose pages never went out`);
+	}
+	const unreadable = deployment(4, 'soon');
+	assert.equal(newerDeploy(at, [own, unreadable]), unreadable, 'one made at a moment that cannot be read counts');
+	const first = deployment(5, '2026-11-07T08:00:00Z');
+	const second = deployment(6, later);
+	for (const order of [[first, second, own], [own, second, first]]) assert.equal(newerDeploy(at, order), second, 'the newest of two');
+	// A whole run re-run after them deploys again, and its pages are the newest.
+	assert.equal(newerDeploy('2026-11-09T08:00:30Z', [own, first, second, deployment(7, '2026-11-09T08:00:00Z')]), undefined);
 });
 
 /**
- * Run `last-submitted` against a GitHub API that answers each page of the
- * listing with `pages[page - 1]` (or 503 when `pages` is `'fail'`), and say
- * what it fetched, printed and wrote to the step output.
+ * Run the script's `command` against a GitHub API that answers each page of
+ * a listing with `pages[page - 1]` (or 503 when `pages` is `'fail'`), and say
+ * what it fetched, printed and wrote to the step output. A REST listing names
+ * its page in the URL; a GraphQL one names the page after the cursor `pN`, and
+ * page 1 when there is none.
  */
-function lastSubmittedAgainst(t, pages, env = {}, command = ['last-submitted']) {
+function againstApi(t, pages, command, env = {}) {
 	const dir = mkdtempSync(join(tmpdir(), 'indexnow-api-'));
 	t.after(() => rmSync(dir, { recursive: true, force: true }));
 	const answers = join(dir, 'pages.json');
@@ -510,9 +577,11 @@ function lastSubmittedAgainst(t, pages, env = {}, command = ['last-submitted']) 
 		"import { readFileSync } from 'node:fs';",
 		`const pages = JSON.parse(readFileSync(${JSON.stringify(answers)}, 'utf8'));`,
 		'globalThis.fetch = async (url, init) => {',
-		'  process.stderr.write(`fetched ${url} with ${init.headers.authorization}\\n`);',
+		'  const asked = init.body === undefined ? undefined : JSON.parse(init.body).variables;',
+		'  const about = asked === undefined ? "" : ` for ${asked.owner}/${asked.name} in ${asked.environment} after ${asked.after}`;',
+		'  process.stderr.write(`fetched ${url} with ${init.headers.authorization}${about}\\n`);',
 		"  if (pages === 'fail') return new Response('unavailable', { status: 503 });",
-		"  const page = Number(new URL(url).searchParams.get('page'));",
+		"  const page = asked === undefined ? Number(new URL(url).searchParams.get('page')) : asked.after === null ? 1 : Number(asked.after.slice(1));",
 		'  return new Response(JSON.stringify(pages[page - 1]), { status: 200 });',
 		'};',
 	].join('\n');
@@ -521,6 +590,7 @@ function lastSubmittedAgainst(t, pages, env = {}, command = ['last-submitted']) 
 		env: {
 			...process.env,
 			GITHUB_API_URL: 'https://api.github.example',
+			GITHUB_GRAPHQL_URL: 'https://api.github.example/graphql',
 			GITHUB_REPOSITORY: 'jmrplens/phonometry',
 			GITHUB_TOKEN: 't0ken',
 			GITHUB_OUTPUT: output,
@@ -536,6 +606,9 @@ function lastSubmittedAgainst(t, pages, env = {}, command = ['last-submitted']) 
 	};
 }
 
+/** Run `last-submitted` against `pages` of the API. */
+const lastSubmittedAgainst = (t, pages, env = {}) => againstApi(t, pages, ['last-submitted'], env);
+
 const listing = (page) =>
 	`fetched https://api.github.example/repos/jmrplens/phonometry/actions/artifacts?name=${SUBMITTED_ARTIFACT}&per_page=100&page=${page} with Bearer t0ken`;
 
@@ -550,7 +623,7 @@ test('the run of the newest record is read from every page the API lists, for th
 	const found = lastSubmittedAgainst(t, pages);
 	assert.equal(found.status, 0, found.err);
 	assert.deepEqual(found.fetched, [listing(1), listing(2)]);
-	assert.equal(found.output, 'run-id=70\nartifact-id=7\n');
+	assert.equal(found.output, 'run-id=70\n');
 	assert.match(found.out, /last submitted by run 70, of commit c0ffee7, on 2026-11-06T08:00:00Z/);
 });
 
@@ -568,46 +641,143 @@ test('with no record to find, or no API to ask, the build goes on and the full l
 	assert.match(outside.err, /needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT/);
 });
 
-/** Run `keep-record` on a list naming `record` (or with no such field), against `pages` of the API. */
-function keepRecordAgainst(t, pages, record, env = {}) {
-	const dir = mkdtempSync(join(tmpdir(), 'indexnow-urls-'));
-	t.after(() => rmSync(dir, { recursive: true, force: true }));
-	const urls = join(dir, URLS_NAME);
-	writeFileSync(urls, JSON.stringify(record === undefined ? { urls: [] } : { record, urls: [] }));
-	return lastSubmittedAgainst(t, pages, env, ['keep-record', '--urls', urls]);
-}
+/** Run `keep-record` for pages that went out at `deployedAt` (none given when undefined), against `pages` of the API. */
+const keepRecordAgainst = (t, pages, deployedAt, env = {}) =>
+	againstApi(t, pages, ['keep-record', ...(deployedAt === undefined ? [] : ['--deployed-at', deployedAt])], env);
 
-test('the IndexNow job keeps its manifest only while the record its build compared with is the newest', (t) => {
-	const compared = artifact(7, '2026-11-06T08:00:00Z');
-	const kept = keepRecordAgainst(t, [{ total_count: 2, artifacts: [artifact(6, '2026-11-01T08:00:00Z'), compared] }], 7);
+/** A page of deployments as the GraphQL API answers one, with the cursor of the next when there is one. */
+const deploymentsPage = (nodes, next = null) => ({ data: { repository: { deployments: { pageInfo: { hasNextPage: next !== null, endCursor: next }, nodes } } } });
+
+/** The line the stub writes for a request of the deployments after the cursor `after`. */
+const asked = (after) =>
+	`fetched https://api.github.example/graphql with Bearer t0ken for jmrplens/phonometry in ${PAGES_ENVIRONMENT} after ${after}`;
+
+test("the IndexNow job keeps its manifest only while no deploy has gone out after its run's", (t) => {
+	const at = '2026-11-06T08:00:00Z';
+	const own = deployment(7, '2026-11-06T07:59:30Z');
+	const older = deployment(6, '2026-11-01T08:00:00Z');
+	// The listing comes newest first, so it is read only down to this run's deployment.
+	const kept = keepRecordAgainst(t, [deploymentsPage([own, older], 'p2')], at);
 	assert.equal(kept.status, 0, kept.err);
-	assert.deepEqual(kept.fetched, [listing(1)]);
+	assert.deepEqual(kept.fetched, [asked(null)]);
 	assert.equal(kept.output, 'keep=true\n');
-	assert.match(kept.out, /no newer record than the one this build compared with \(7\): this manifest is kept/);
+	assert.match(kept.out, /no deploy has gone out since this run's on 2026-11-06T08:00:00Z: this manifest is kept/);
 
-	// A failed job re-run after a newer deploy kept its record.
-	const newer = artifact(9, '2026-11-08T08:00:00Z');
-	const stale = keepRecordAgainst(t, [{ total_count: 2, artifacts: [newer, compared] }], 7);
+	// A failed job re-run after a newer deploy went out.
+	const newer = deployment(9, '2026-11-08T08:00:00Z', 'INACTIVE');
+	const stale = keepRecordAgainst(t, [deploymentsPage([deployment(10, '2026-11-09T08:00:00Z', 'FAILURE'), newer, own])], at);
 	assert.equal(stale.status, 0, stale.err);
 	assert.equal(stale.output, 'keep=false\n');
-	assert.match(stale.out, /run 90, of commit c0ffee9, kept a newer record on 2026-11-08T08:00:00Z than the one this build compared with \(7\)/);
+	assert.match(stale.out, /deployment 9, of commit c0ffee9, was made on 2026-11-08T08:00:00Z, after this run's pages went out on 2026-11-06T08:00:00Z: this manifest is not kept/);
 
-	// The first record, and a build that found none while one was kept since.
-	assert.equal(keepRecordAgainst(t, [{ total_count: 0, artifacts: [] }], null).output, 'keep=true\n');
-	assert.equal(keepRecordAgainst(t, [{ total_count: 1, artifacts: [compared] }], null).output, 'keep=false\n');
+	// A deploy that failed after this one, on as many pages as it takes.
+	const failed = deployment(8, '2026-11-07T08:00:00Z', 'FAILURE');
+	const paged = keepRecordAgainst(t, [deploymentsPage([failed], 'p2'), deploymentsPage([own, older])], at);
+	assert.equal(paged.status, 0, paged.err);
+	assert.deepEqual(paged.fetched, [asked(null), asked('p2')]);
+	assert.equal(paged.output, 'keep=true\n');
 });
 
-test('a record that cannot be checked is not kept, so the next deploy sends these pages again', (t) => {
-	const failing = keepRecordAgainst(t, 'fail', 7);
+test('a manifest whose deploy cannot be placed among the others is not kept, so the next deploy sends these pages again', (t) => {
+	const at = '2026-11-06T08:00:00Z';
+	const failing = keepRecordAgainst(t, 'fail', at);
 	assert.equal(failing.status, 0, failing.err);
 	assert.equal(failing.output, 'keep=false\n');
 	assert.match(failing.out, /^::warning::.*answered 503.*this manifest is not kept/m);
-	const unnamed = keepRecordAgainst(t, [{ total_count: 0, artifacts: [] }], undefined);
+	const refused = keepRecordAgainst(t, [{ errors: [{ message: 'Resource not accessible by integration' }] }], at);
+	assert.equal(refused.status, 0, refused.err);
+	assert.equal(refused.output, 'keep=false\n');
+	assert.match(refused.out, /^::warning::.*Resource not accessible by integration.*this manifest is not kept/m);
+	const unnamed = keepRecordAgainst(t, [], '');
 	assert.equal(unnamed.status, 0, unnamed.err);
 	assert.deepEqual(unnamed.fetched, []);
 	assert.equal(unnamed.output, 'keep=false\n');
-	assert.match(unnamed.out, /^::warning::.*does not name the record its build compared with/m);
-	const outside = keepRecordAgainst(t, [], 7, { GITHUB_TOKEN: '' });
+	assert.match(unnamed.out, /^::warning::.*named no time its pages went out/m);
+	const malformed = keepRecordAgainst(t, [], '2026-11-06 08:00');
+	assert.equal(malformed.status, 1);
+	assert.match(malformed.err, /--deployed-at takes the moment the pages went out, as 2026-11-10T08:00:00Z, not "2026-11-06 08:00"/);
+	const outside = keepRecordAgainst(t, [], at, { GITHUB_TOKEN: '' });
 	assert.equal(outside.status, 1);
 	assert.match(outside.err, /keep-record .* needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT/);
+});
+
+// ---------------------------------------------------------------------------
+// A deploy job re-run after a newer deploy
+// ---------------------------------------------------------------------------
+
+/**
+ * The sequence, through the CLI. The record holds BASE, with z and without
+ * y. Run A builds BASE again, so its list is empty, and its deploy fails.
+ * Run B changes x, adds y and drops z, deploys, submits and keeps its
+ * record. A's failed jobs are re-run: the deploy puts A's pages back, x as
+ * the record had it, z back and y gone, after B's deploy. The list A's
+ * build handed on still says nothing changed, so the IndexNow job of the
+ * re-run works it out again against the newest record, B's, and keeps A's
+ * manifest, which the site now serves.
+ */
+test('a deploy job re-run after a newer deploy works its list out again against the newest record, and sends what its pages put back', (t) => {
+	const x = url('/signals/filters/');
+	const y = url('/signals/weighting/');
+	const z = url('/es/signals/levels/');
+	const { '/es/signals/levels/': _dropped, ...withoutZ } = BASE;
+	const bPages = { ...withoutZ, '/signals/filters/': guide('/signals/filters/', { body: 'The filters, rewritten.' }), '/signals/weighting/': guide('/signals/weighting/') };
+	const a = submit(t, BASE, BASE);
+	assert.deepEqual(a.urls, []);
+	const handedManifest = readFileSync(join(a.out, MANIFEST_NAME), 'utf8');
+	const b = submit(t, BASE, bPages);
+	assert.deepEqual(b.urls, [z, x, y]);
+
+	// The job of the re-run finds B's record, the newest.
+	const found = lastSubmittedAgainst(t, [{ total_count: 2, artifacts: [artifact(1, '2026-11-10T09:00:00Z'), artifact(2, '2026-11-10T11:31:00Z')] }]);
+	assert.equal(found.status, 0, found.err);
+	assert.equal(found.output, 'run-id=20\n');
+
+	// It compares the manifest A's build handed on with B's record, and writes
+	// the list it submits over the one it was handed.
+	const again = run('diff', '--current', join(a.out, MANIFEST_NAME), '--previous', join(b.out, MANIFEST_NAME), '--out', a.out);
+	assert.equal(again.status, 0, again.err);
+	const sent = JSON.parse(readFileSync(join(a.out, URLS_NAME), 'utf8'));
+	assert.deepEqual(sent.changed, [x]);
+	assert.deepEqual(sent.new, [z]);
+	assert.deepEqual(sent.removed, [y]);
+	assert.deepEqual(sent.urls, [z, x, y]);
+	assert.match(again.out, /1 changed, 1 new and 1 removed of 3 pages: 3 URLs to submit/);
+	assert.equal(readFileSync(join(a.out, MANIFEST_NAME), 'utf8'), handedManifest, 'the manifest the job keeps is the one the build handed on');
+
+	// The re-run's deploy is the newest, so the job keeps A's manifest.
+	const rerun = { databaseId: 13, createdAt: '2026-11-10T12:00:00Z', commitOid: 'a0', state: 'ACTIVE' };
+	const ofB = { databaseId: 12, createdAt: '2026-11-10T11:20:00Z', commitOid: 'b0', state: 'INACTIVE' };
+	const failed = { databaseId: 11, createdAt: '2026-11-10T10:10:00Z', commitOid: 'a0', state: 'FAILURE' };
+	const kept = keepRecordAgainst(t, [deploymentsPage([rerun, ofB, failed])], '2026-11-10T12:01:00Z');
+	assert.equal(kept.output, 'keep=true\n');
+
+	// The next deploy compares with A's record: BASE again sends nothing, B's
+	// pages again send x, y and z.
+	assert.deepEqual(submit(t, BASE, BASE).urls, []);
+	assert.deepEqual(submit(t, BASE, bPages).urls, [z, x, y]);
+});
+
+test('the manifest a build handed IndexNow is compared as it is, and one that cannot be read stops the job', (t) => {
+	const retitled = { ...BASE, '/signals/filters/': guide('/signals/filters/', { title: 'Filter banks' }) };
+	const handedOn = submit(t, BASE, retitled);
+	const record = join(dirname(handedOn.out), 'record.json');
+	writeFileSync(record, manifest(build(t, BASE)));
+	const out = join(dirname(handedOn.out), 'again');
+	const same = run('diff', '--current', join(handedOn.out, MANIFEST_NAME), '--previous', record, '--out', out);
+	assert.equal(same.status, 0, same.err);
+	assert.deepEqual(JSON.parse(readFileSync(join(out, URLS_NAME), 'utf8')).urls, handedOn.urls);
+	assert.equal(readFileSync(join(out, MANIFEST_NAME), 'utf8'), readFileSync(join(handedOn.out, MANIFEST_NAME), 'utf8'));
+	const notJson = join(dirname(handedOn.out), 'not-json.json');
+	writeFileSync(notJson, '{"format": 1, "pages": {');
+	for (const [what, current, pattern] of [
+		['no such file', join(dirname(handedOn.out), 'missing.json'), /the manifest to compare, .*missing\.json, cannot be read \(ENOENT\)/],
+		['not JSON', notJson, /the manifest to compare, .*not-json\.json, cannot be compared: it is not JSON/],
+	]) {
+		const refused = run('diff', '--current', current, '--previous', record, '--out', join(dirname(handedOn.out), 'refused'));
+		assert.equal(refused.status, 1, what);
+		assert.match(refused.err, pattern, what);
+	}
+	const both = run('diff', '--current', join(handedOn.out, MANIFEST_NAME), '--dist', handedOn.dist, '--previous', record);
+	assert.equal(both.status, 1);
+	assert.match(both.err, /--dist or --current, not both/);
 });

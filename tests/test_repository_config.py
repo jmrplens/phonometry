@@ -376,6 +376,12 @@ def _shell_path(path: object) -> str:
     return str(path).replace("${{ runner.temp }}", "$RUNNER_TEMP").rstrip("/")
 
 
+def _of_this_run(step: dict[str, object]) -> bool:
+    """Whether a download step takes an artifact of this run, naming no other run."""
+    inputs = step.get("with")
+    return isinstance(inputs, dict) and "run-id" not in inputs
+
+
 def _needs(job: dict[str, object]) -> set[str]:
     """The jobs a job waits for, whether ``needs:`` names one or a list."""
     needs = job.get("needs")
@@ -402,11 +408,11 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     to travel too: the IndexNow job keeps the manifest it was handed, only
     once its submission went through, under the name the build looks for, in
     the folder the comparison reads, and the build may read it from an
-    earlier run. And the job keeps it only while the record its build
-    compared with is still the newest: a failed job re-run after a newer
-    deploy kept its record would otherwise put back an older manifest, and a
-    page that deploy added and the next one removes would never be sent as
-    removed.
+    earlier run. And the job keeps it only while no deploy has gone out
+    after its run's, which it learns from the moment the deploy job wrote: a
+    failed job re-run after a newer deploy would otherwise put back an older
+    manifest, and a page that deploy added and the next one removes would
+    never be sent as removed.
     """
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
     triggers = workflow[True] if True in workflow else workflow["on"]
@@ -416,12 +422,12 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     jobs: dict[str, dict[str, object]] = workflow["jobs"]
     build: list[dict[str, object]] = workflow["jobs"]["build"]["steps"]
     indexnow: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
-    record = re.search(
-        r"export const SUBMITTED_ARTIFACT = '([^']+)'",
-        _INDEXNOW_SCRIPT.read_text(encoding="utf-8"),
-    )
+    script = _INDEXNOW_SCRIPT.read_text(encoding="utf-8")
+    record = re.search(r"export const SUBMITTED_ARTIFACT = '([^']+)'", script)
     assert record, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
     submitted = record.group(1)
+    environment = re.search(r"export const PAGES_ENVIRONMENT = '([^']+)'", script)
+    assert environment, "indexnow-diff.mjs names no PAGES_ENVIRONMENT"
 
     built_at, _ = _the_one(_steps_running(build, "pnpm build"), "build the site")
     find_at, find = _the_one(
@@ -452,12 +458,12 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     )
     checked_at, check = _the_one(
         _steps_running(indexnow, "indexnow-diff.mjs keep-record"),
-        "check that no newer record was kept",
+        "check that no deploy went out after this run's",
     )
 
     # The record is kept only once the submission went through, and only
-    # when the check says no newer record was kept since the build compared.
-    # A condition with no status function runs only when every step before it
+    # when the check says no deploy has gone out after this run's. A
+    # condition with no status function runs only when every step before it
     # succeeded.
     checker = check.get("id")
     assert keep.get("if") == f"steps.{checker}.outputs.keep == 'true'", (
@@ -536,30 +542,52 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert isinstance(finder_env, dict)
     assert finder_env.get("GITHUB_TOKEN")
 
-    # The comparison names the record the finding step found, and the check
-    # reads that name from the list the IndexNow job took, with a token that
-    # may list the records.
-    compare_env = compare.get("env")
-    assert isinstance(compare_env, dict)
-    record_variable = re.search(
-        r'--record "\$(\w+)"', " ".join(str(compare["run"]).split())
+    # The check places this run's deploy among the deployments of the site:
+    # it reads the moment the deploy job wrote once its pages went out, in a
+    # step after the deployment, from the environment the script lists, with
+    # a token that may list the deployments.
+    deploy_job = jobs["deploy"]
+    deploy_steps: list[dict[str, object]] = workflow["jobs"]["deploy"]["steps"]
+    deployed_at, _ = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(deploy_steps)
+            if str(step.get("uses", "")).startswith("actions/deploy-pages@")
+        ],
+        "deploy the pages",
     )
-    assert record_variable, compare["run"]
-    assert compare_env.get(record_variable.group(1)) == (
-        f"${{{{ steps.{finder}.outputs.artifact-id }}}}"
+    clock_outputs = deploy_job.get("outputs")
+    assert isinstance(clock_outputs, dict)
+    clock_output = re.fullmatch(
+        r"\$\{\{ steps\.([\w-]+)\.outputs\.(\w+) \}\}",
+        str(clock_outputs.get("deployed-at")),
     )
-    check_command = " ".join(str(check["run"]).split())
-    taken = re.search(r'--urls "?([^"\s]+)', check_command)
-    assert taken, check_command
-    taken_from = download["with"]
-    assert isinstance(taken_from, dict)
-    assert taken.group(1) == f"{taken_from['path']}/urls.json"
+    assert clock_output, "the deploy job writes no deployed-at output"
+    clock_at, clock = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(deploy_steps)
+            if step.get("id") == clock_output.group(1)
+        ],
+        "write the moment the pages went out",
+    )
+    assert deployed_at < clock_at, "the moment is taken before the pages went out"
+    clock_command = f"{clock_output.group(2)}=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    assert clock_command in str(clock["run"]), clock["run"]
+    environment_of = deploy_job.get("environment")
+    assert isinstance(environment_of, dict)
+    assert environment_of.get("name") == environment.group(1), (
+        "the check lists the deployments of another environment than the deploy's"
+    )
     check_env = check.get("env")
     assert isinstance(check_env, dict)
     assert check_env.get("GITHUB_TOKEN")
+    moment = re.search(r'--deployed-at "\$(\w+)"', " ".join(str(check["run"]).split()))
+    assert moment, check["run"]
+    assert check_env.get(moment.group(1)) == "${{ needs.deploy.outputs.deployed-at }}"
     indexnow_permissions = jobs["indexnow"].get("permissions")
     assert isinstance(indexnow_permissions, dict)
-    assert indexnow_permissions.get("actions") == "read"
+    assert indexnow_permissions.get("deployments") == "read"
 
     # The comparison reads the record where it was downloaded, and writes the
     # list and the manifest where the hand-over takes them from.
@@ -580,6 +608,150 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert isinstance(kept_inputs, dict)
     assert isinstance(downloaded, dict)
     assert kept_inputs["path"] == f"{downloaded['path']}/indexnow-manifest.json"
+
+
+#: The condition the steps of a deploy re-run in the IndexNow job run on: the
+#: deploy job ran in another attempt than the build. A re-run runs a job again
+#: with every job that needs it, so the deploy job never runs in an earlier
+#: attempt than the build it needs, and another attempt is a later one.
+_DEPLOY_RE_RUN = "needs.deploy.outputs.attempt != needs.build.outputs.attempt"
+
+
+def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() -> None:
+    """A deploy job re-run after a newer deploy sends what its pages change on the site.
+
+    "Re-run failed jobs" on a run whose deploy failed runs the deploy job and
+    the IndexNow job again, and the build keeps its outputs and its list. The
+    deploy puts this run's pages back on the site after whatever deploy went
+    out since, and the list was worked out before that deploy, against the
+    record of the build's time. So both jobs say which attempt they ran in,
+    and when the deploy's is another than the build's, the IndexNow job finds
+    the newest record, downloads it from the run the finding step names, as
+    the build does, sets aside one that cannot be downloaded, and works the
+    list out again over the one it was handed, before it submits it. On any
+    other run none of those steps runs, and the job may read another run's
+    artifacts only for them.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    jobs: dict[str, dict[str, object]] = workflow["jobs"]
+    indexnow: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
+    script = _INDEXNOW_SCRIPT.read_text(encoding="utf-8")
+    record_name = re.search(r"export const SUBMITTED_ARTIFACT = '([^']+)'", script)
+    assert record_name, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
+
+    for job in ("build", "deploy"):
+        outputs = jobs[job].get("outputs")
+        assert isinstance(outputs, dict), f"the {job} job has no outputs"
+        assert outputs.get("attempt") == "${{ github.run_attempt }}", (
+            f"the {job} job does not say which attempt it ran in"
+        )
+    assert {"build", "deploy"} <= _needs(jobs["indexnow"]), (
+        "the IndexNow job cannot read the attempts of the build and the deploy"
+    )
+    permissions = jobs["indexnow"].get("permissions")
+    assert isinstance(permissions, dict)
+    assert permissions.get("actions") == "read", (
+        "the IndexNow job cannot list or download another run's artifacts"
+    )
+
+    received_at, received = _the_one(
+        [
+            (index, step)
+            for index, step in _steps_using(
+                indexnow, "actions/download-artifact", "indexnow-urls"
+            )
+            if _of_this_run(step)
+        ],
+        "take the list in the IndexNow job",
+    )
+    received_inputs = received["with"]
+    assert isinstance(received_inputs, dict)
+    folder = _shell_path(received_inputs["path"])
+
+    # The newest record.
+    find_at, find = _the_one(
+        _steps_running(indexnow, "indexnow-diff.mjs last-submitted"),
+        "find the newest record on a deploy re-run",
+    )
+    assert find.get("if") == _DEPLOY_RE_RUN, (
+        "the IndexNow job looks for the newest record on a run that is no deploy re-run, or never"
+    )
+    finder_env = find.get("env")
+    assert isinstance(finder_env, dict)
+    assert finder_env.get("GITHUB_TOKEN")
+    finder = find.get("id")
+    assert finder
+
+    def downloaded(
+        name: str, output: str, what: str
+    ) -> tuple[int, int, dict[str, object]]:
+        """The download of *name* from the run the finding step names as *output*, and the step that sets it aside."""
+        fetch_at, fetch = _the_one(
+            [
+                (index, step)
+                for index, step in _steps_using(
+                    indexnow, "actions/download-artifact", name
+                )
+                if not _of_this_run(step)
+            ],
+            f"download {what} on a deploy re-run",
+        )
+        assert fetch.get("if") == f"steps.{finder}.outputs.{output} != ''"
+        inputs = fetch["with"]
+        assert isinstance(inputs, dict)
+        assert inputs.get("run-id") == f"${{{{ steps.{finder}.outputs.{output} }}}}"
+        assert inputs.get("github-token"), "another run's artifact needs a token"
+        assert fetch.get("continue-on-error") is True, (
+            f"{what} that cannot be downloaded stops the IndexNow job"
+        )
+        fetcher = fetch.get("id")
+        assert fetcher
+        discard_at, discard = _the_one(
+            [
+                (index, step)
+                for index, step in enumerate(indexnow)
+                if step.get("if") == f"steps.{fetcher}.outcome == 'failure'"
+            ],
+            f"set aside {what} that could not be downloaded",
+        )
+        path = _shell_path(inputs["path"])
+        assert f'rm -rf "{path}"' in " ".join(str(discard.get("run", "")).split())
+        assert "::warning::" in str(discard.get("run", ""))
+        return fetch_at, discard_at, {"path": path}
+
+    fetch_at, record_set_aside_at, record = downloaded(
+        record_name.group(1), "run-id", "the record"
+    )
+
+    # The list worked out again over the one the build handed on, which the
+    # job submits and whose manifest it keeps.
+    again_at, again = _the_one(
+        _steps_running(indexnow, "indexnow-diff.mjs diff"),
+        "work the list out again on a deploy re-run",
+    )
+    assert again.get("if") == _DEPLOY_RE_RUN, (
+        "the IndexNow job works its list out again on a run that is no deploy re-run, or never"
+    )
+    command = " ".join(str(again["run"]).split())
+    for option, path in {
+        "--current": f"{folder}/indexnow-manifest.json",
+        "--previous": f"{record['path']}/indexnow-manifest.json",
+        "--out": folder,
+    }.items():
+        given = re.search(rf'{option} "?([^"\s]+)', command)
+        assert given, f"the comparison of a deploy re-run gives no {option}: {command}"
+        assert given.group(1) == path, command
+    sent_at, submit = _the_one(
+        _steps_running(indexnow, "api.indexnow.org"), "submit to IndexNow"
+    )
+    assert f"{folder}/urls.json" in str(submit["run"]), (
+        "the submission reads another list than the one worked out again"
+    )
+    assert (
+        received_at < find_at < fetch_at < record_set_aside_at < again_at < sent_at
+    ), "the list is worked out again out of order, or after the submission"
+    for step in (find, again):
+        assert not step.get("continue-on-error")
 
 
 def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:

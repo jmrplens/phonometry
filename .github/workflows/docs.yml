@@ -92,6 +92,12 @@ jobs:
     permissions:
       contents: read
       actions: read # the record of the pages IndexNow was last sent, kept by an earlier run
+    outputs:
+      # The attempt of the run this build ran in. "Re-run failed jobs" on a
+      # run whose deploy failed runs the deploy job and the IndexNow job again
+      # and leaves this job as it was, so the IndexNow job tells a deploy
+      # re-run from the deploy that followed this build.
+      attempt: ${{ github.run_attempt }}
     env:
       # corepack fetches the pnpm site/package.json pins and says so first;
       # the pin is the decision, so the announcement adds nothing to the log.
@@ -509,8 +515,7 @@ jobs:
         # the header lines that name the release, or the text the page shows
         # where it publishes no copy. Once the IndexNow job has submitted a
         # deploy's pages it keeps that deploy's manifest as an artifact, and
-        # this step asks the API for the newest one a run of main kept, and
-        # names it beside its run for the IndexNow job to check against. It
+        # this step asks the API for the newest one a run of main kept. It
         # runs on every event: a deploy dispatched by hand or by jmrp.io has
         # to be compared like a push, and a pull request prints what its
         # merge would send.
@@ -536,15 +541,11 @@ jobs:
         # newer push cancelled in between, would otherwise leave its pages
         # out for good. It fails if a step changed the pages after the
         # manifest was written, which would publish a manifest that does not
-        # describe the site. The list names the record that was the newest
-        # one, so the IndexNow job can tell whether a newer one was kept since.
-        env:
-          RECORD: ${{ steps.submitted.outputs.artifact-id }}
+        # describe the site.
         run: >-
           node scripts/indexnow-diff.mjs diff
           --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
           --out "$RUNNER_TEMP/indexnow/next"
-          --record "$RECORD"
         working-directory: site
       - name: Hand the list of changed pages to the IndexNow job
         # With the manifest it was worked out from, which the job keeps once
@@ -577,21 +578,34 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     outputs:
       page_url: ${{ steps.deployment.outputs.page_url }}
+      deployed-at: ${{ steps.deployed.outputs.at }}
+      # A later attempt than the build's when this job was re-run: its pages
+      # go out after whatever deploy went out since the build, and the
+      # IndexNow job works their list out again.
+      attempt: ${{ github.run_attempt }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+      # When this run's pages went out. The IndexNow job keeps its record
+      # only while no deploy has gone out after this moment. A re-run of that
+      # job alone reads the moment of the deploy it follows; a re-run of this
+      # job writes a moment of its own, since its pages go out again.
+      - id: deployed
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
   indexnow:
     name: Submit URLs to IndexNow
-    needs: deploy
+    needs: [build, deploy]
     runs-on: ubuntu-26.04
     permissions:
       contents: read # the script below
-      actions: read # whether a newer deploy kept its record while this one waited
+      actions: read # on a deploy re-run, the newest record, kept by another run
+      deployments: read # whether a deploy has gone out after this run's
     timeout-minutes: 10
     steps:
-      # The script that tells whether this job's record is still the one to
-      # keep, and nothing else of the repository.
+      # The script that works the list out again on a deploy re-run and tells
+      # whether this job's record is the one to keep, and nothing else of the
+      # repository.
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -610,6 +624,46 @@ jobs:
         with:
           name: indexnow-urls
           path: indexnow
+      # A deploy job re-run after a newer deploy puts this run's pages back
+      # on the site, and the list above, worked out by the build before that
+      # deploy, against the record of its own time, says nothing of what that
+      # deploy changed and this one puts back. When the deploy job ran in a
+      # later attempt than the build, the steps below find the newest record,
+      # as the build does, and work the list out again over the one above,
+      # from the manifest the build handed on. The job then submits that list
+      # and keeps the manifest under the same rule as any other. A deploy job
+      # never runs in an earlier attempt than the build it needs, so another
+      # attempt is a later one.
+      - name: Find the pages IndexNow was last sent, on a deploy re-run
+        id: submitted
+        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node site/scripts/indexnow-diff.mjs last-submitted
+      - name: Fetch the manifest of the pages IndexNow was last sent
+        id: record
+        if: steps.submitted.outputs.run-id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-submitted
+          run-id: ${{ steps.submitted.outputs.run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/indexnow/submitted
+      - name: Set aside a record that could not be downloaded
+        if: steps.record.outcome == 'failure'
+        env:
+          RUN_ID: ${{ steps.submitted.outputs.run-id }}
+        run: |
+          rm -rf "$RUNNER_TEMP/indexnow/submitted"
+          echo "::warning::[indexnow] the record of run $RUN_ID could not be downloaded: the full list goes out."
+      - name: Work out the list again against the newest record, on a deploy re-run
+        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        run: >-
+          node site/scripts/indexnow-diff.mjs diff
+          --current "indexnow/indexnow-manifest.json"
+          --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
+          --out "indexnow"
       - name: Submit the changed pages to IndexNow
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
@@ -677,25 +731,34 @@ jobs:
                   if r.status not in (200, 202):
                       sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
           PY
-      - name: Check that no newer deploy has kept its record since this build compared
-        # A failed job re-run after a newer deploy submitted its pages would
+      - name: Check that no deploy has gone out after this run's
+        # The records follow the order of the deploys, not the order their
+        # IndexNow jobs end in. A failed job re-run after a newer deploy would
         # otherwise keep a manifest older than that deploy's, and a page that
         # deploy added and the next one removes would be in neither manifest
-        # the next build compares, so its removal would never be sent. The
-        # newer record stays the newest instead, and the pages this job sent
-        # are in it or in the next deploy's list. A record that cannot be
-        # listed keeps nothing: the next deploy sends these pages again.
+        # the next build compares, so its removal would never be sent. Such a
+        # job keeps nothing; the newer deploy's own job, re-run before or after
+        # it, keeps its record, and when none of the newer deploys keeps one
+        # the next build compares with the record this job's build compared
+        # with and sends what changed since. A deploy job re-run is the newest
+        # deploy when it goes out, and the job, having worked its list out
+        # again above, keeps its manifest while no deploy goes out after it.
+        # Deployments that cannot be listed keep nothing either: the next
+        # deploy sends these pages again.
         id: newest
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node site/scripts/indexnow-diff.mjs keep-record --urls indexnow/urls.json
+          DEPLOYED_AT: ${{ needs.deploy.outputs.deployed-at }}
+        run: node site/scripts/indexnow-diff.mjs keep-record --deployed-at "$DEPLOYED_AT"
       - name: Keep the manifest of the pages IndexNow was sent
-        # The record the next build compares with, kept only once the
-        # submission above went through and while the record its build
-        # compared with is still the newest: a failed job keeps none, so the
-        # next deploy sends this one's pages along with its own. Ninety days,
-        # so a quiet spell does not send the whole site again; after one longer
-        # than that the next deploy sends every URL once, as the first one does.
+        # The record the next build compares with: the manifest the build
+        # handed on, which the list above was worked out from, on a deploy
+        # re-run against the newest record. It is kept only once the
+        # submission above went through and while no deploy has gone out
+        # after this run's: a failed job keeps none, so the next deploy sends
+        # this one's pages along with its own. Ninety days, so a quiet spell
+        # does not send the whole site again; after one longer than that the
+        # next deploy sends every URL once, as the first one does.
         if: steps.newest.outputs.keep == 'true'
         uses: actions/upload-artifact@v7
         with:

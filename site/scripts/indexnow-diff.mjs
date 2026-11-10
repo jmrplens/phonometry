@@ -24,11 +24,24 @@
 // whose IndexNow job fails, or which a newer push cancels after it deployed
 // and before it submitted, keeps no record, so the next run compares with the
 // record before it and sends those pages along with its own. A record is kept
-// only while the one its build compared with is still the newest: a failed
-// job re-run after a newer deploy kept its record would otherwise put back a
-// manifest older than that deploy, and a page the newer deploy added and the
-// next one removes would be in neither manifest the next build compares, so
-// its removal would never be sent.
+// only while no deploy has gone out after the one it describes, so the newest
+// record is the one of the newest deploy that kept one, in whatever order
+// failed jobs are re-run: a job re-run after a newer deploy keeps nothing, and
+// the newer deploy's own job, re-run before or after it, keeps its record. A
+// manifest older than a deploy that went out after it would otherwise be the
+// newest record, and a page that deploy added and the next one removes would
+// be in neither manifest the next build compares, so its removal would never
+// be sent.
+//
+// A deploy job re-run after a newer deploy, as "Re-run failed jobs" runs it
+// on a run whose deploy failed, puts its run's pages back on the site after
+// that deploy, and the list its build handed on, worked out before it,
+// against the record of the build's time, says nothing of the pages that
+// deploy changed and this one puts back. When the deploy job ran in a later
+// attempt than the build, the IndexNow job works the list out again: it
+// compares the manifest the build handed on with the newest record, as a
+// build would, and submits that. Its deploy is then the newest, so it keeps
+// its record like any other, while no deploy has gone out after it.
 //
 // What a page says is read from the build, the way an engine reads it: its
 // title, its meta description, the date the sitemap gives it (the last commit
@@ -54,21 +67,23 @@
 //   node scripts/indexnow-diff.mjs last-submitted
 //     asks the GitHub API (GITHUB_API_URL, GITHUB_REPOSITORY, GITHUB_TOKEN)
 //     for the newest record an IndexNow job kept, and writes the id of its run
-//     as `run-id` and its own id as `artifact-id` to $GITHUB_OUTPUT, for the
-//     workflow to download it from; writes nothing when there is none
-//   node scripts/indexnow-diff.mjs diff [--dist <dir>] --previous <file or URL> [--out <dir>] [--record <id>]
-//     checks the published manifest against the pages, compares it with the
-//     previous one (a record, or a URL such as the live site's manifest, to
-//     compare a local build with), prints the changed, new and removed URLs,
-//     and writes into <dir> the URLs to submit (urls.json: {"urls": [...]},
-//     the lists behind it and the id of the newest record, given by
-//     `--record`) and the manifest they were worked out from, which the
-//     IndexNow job keeps once it has submitted them
-//   node scripts/indexnow-diff.mjs keep-record --urls <urls.json>
-//     asks the GitHub API whether a record newer than the one urls.json
-//     names has been kept since the build compared with it, and writes
-//     `keep=true` to $GITHUB_OUTPUT when none has, `keep=false` when one has
-//     or when the records cannot be listed
+//     as `run-id` to $GITHUB_OUTPUT, for the workflow to download it from;
+//     writes nothing when there is none
+//   node scripts/indexnow-diff.mjs diff [--dist <dir> | --current <manifest>] --previous <file or URL> [--out <dir>]
+//     checks the published manifest against the pages, or reads the manifest
+//     a build handed on (`--current`, where there are no pages: the IndexNow
+//     job of a deploy re-run), compares it with the previous one (a record,
+//     or a URL such as the live site's manifest, to compare a local build
+//     with), prints the changed, new and removed URLs, and writes into <dir>
+//     the URLs to submit (urls.json: {"urls": [...]} and the lists behind it)
+//     and the manifest they were worked out from, which the IndexNow job
+//     keeps once it has submitted them
+//   node scripts/indexnow-diff.mjs keep-record --deployed-at <time>
+//     asks the GitHub API (GITHUB_GRAPHQL_URL as well) for the deployments of
+//     the site made after <time>, when this run's pages went out, and writes
+//     `keep=true` to $GITHUB_OUTPUT when none has gone out since (one that
+//     failed has not), `keep=false` when one has or when the deployments
+//     cannot be listed
 import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -107,6 +122,17 @@ export const DEPLOY_BRANCH = 'main';
 const PER_PAGE = 100;
 /** The most pages of artifacts read before giving up, far more than a record kept 90 days can fill. */
 const MAX_PAGES = 50;
+/** The environment .github/workflows/docs.yml deploys the site to. */
+export const PAGES_ENVIRONMENT = 'github-pages';
+/**
+ * The states, as the GitHub GraphQL API names them, of a deployment whose
+ * pages never went out, so that the site still serves the deploy before it.
+ */
+export const NOT_DEPLOYED = new Set(['ABANDONED', 'ERROR', 'FAILURE']);
+/** A moment as the deploy job writes it and the GitHub API gives one: UTC, to the second. */
+const MOMENT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+/** How many deployments one request lists, newest first: the newest one or two are all a check reads. */
+const DEPLOYMENTS_PER_PAGE = 20;
 
 /** A failure that stops the build, with what to do about it in the message. */
 export class ManifestError extends Error {}
@@ -344,19 +370,44 @@ export function lastSubmitted(artifacts) {
 }
 
 /**
- * The record kept since the build compared with `compared` (the id of the
- * newest record then, or null when there was none): the newest record now,
- * when it is another one. The IndexNow job keeps its manifest only when there
- * is none, so a job re-run after a newer deploy kept its record leaves that
- * record the newest; that deploy's pages, and whatever it added, stay in the
- * record the next build compares with.
+ * The deploy that went out after this run's, out of deployments of
+ * {@link PAGES_ENVIRONMENT} as the GitHub GraphQL API gives them
+ * (`databaseId`, `createdAt`, `commitOid`, `state`): the newest one created
+ * after `deployedAt`, the moment this run's pages went out, whose state is not
+ * one of {@link NOT_DEPLOYED}. One that failed never replaced this run's
+ * pages; one still under way is about to, and counts, as does one created at
+ * a moment that cannot be read. The order of the deploys decides which record
+ * is the newest, not the order their IndexNow jobs end in, so the job keeps
+ * its manifest only when there is none: a job re-run after a newer deploy
+ * keeps nothing, and the newer deploy's own job keeps its record, whenever it
+ * runs and whatever an older job kept before it. A deploy job re-run goes out
+ * anew, at a moment of its own, and its job, which works its list out again
+ * against the newest record, keeps its record by the same rule.
  *
- * @returns the newer artifact, or undefined when the build compared with the
- *   newest record, or there is none
+ * @returns the deployment, or undefined when no deploy has gone out after this run's
  */
-export function newerRecord(compared, artifacts) {
-	const newest = lastSubmitted(artifacts);
-	return newest !== undefined && newest.id !== compared ? newest : undefined;
+export function newerDeploy(deployedAt, deployments) {
+	const after = Date.parse(deployedAt);
+	let newest;
+	for (const deployment of deployments) {
+		if (Date.parse(deployment.createdAt) <= after || NOT_DEPLOYED.has(deployment.state)) continue;
+		const later =
+			newest === undefined ||
+			deployment.createdAt > newest.createdAt ||
+			(deployment.createdAt === newest.createdAt && deployment.databaseId > newest.databaseId);
+		if (later) newest = deployment;
+	}
+	return newest;
+}
+
+/** The headers every request to the GitHub API carries. */
+const apiHeaders = (token) => ({ accept: 'application/vnd.github+json', authorization: `Bearer ${token}`, 'x-github-api-version': '2022-11-28' });
+
+/** One answer of the GitHub API read as JSON, or an error that says what it answered. */
+async function fromApi(url, token, init = {}) {
+	const response = await fetch(url, { ...init, headers: { ...apiHeaders(token), ...init.headers }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+	if (!response.ok) throw new Error(`the API answered ${response.status} to ${url}`);
+	return response.json();
 }
 
 /**
@@ -367,12 +418,7 @@ export async function submittedArtifacts({ api, repository, token }) {
 	const artifacts = [];
 	for (let page = 1; page <= MAX_PAGES; page += 1) {
 		const url = `${api}/repos/${repository}/actions/artifacts?name=${SUBMITTED_ARTIFACT}&per_page=${PER_PAGE}&page=${page}`;
-		const response = await fetch(url, {
-			headers: { accept: 'application/vnd.github+json', authorization: `Bearer ${token}`, 'x-github-api-version': '2022-11-28' },
-			signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-		});
-		if (!response.ok) throw new Error(`the API answered ${response.status} to ${url}`);
-		const listed = await response.json();
+		const listed = await fromApi(url, token);
 		if (!Array.isArray(listed?.artifacts) || !Number.isInteger(listed.total_count)) {
 			throw new Error(`the API answered ${url} with no list of artifacts`);
 		}
@@ -380,6 +426,50 @@ export async function submittedArtifacts({ api, repository, token }) {
 		if (listed.artifacts.length < PER_PAGE || artifacts.length >= listed.total_count) return artifacts;
 	}
 	throw new Error(`the API lists more than ${MAX_PAGES * PER_PAGE} artifacts named ${SUBMITTED_ARTIFACT}`);
+}
+
+/** The deployments of an environment, newest first, a page after the cursor `after`. */
+const DEPLOYMENTS_QUERY = `query ($owner: String!, $name: String!, $environment: String!, $after: String) {
+  repository(owner: $owner, name: $name) {
+    deployments(environments: [$environment], first: ${DEPLOYMENTS_PER_PAGE}, after: $after, orderBy: { field: CREATED_AT, direction: DESC }) {
+      pageInfo { hasNextPage endCursor }
+      nodes { databaseId createdAt commitOid state }
+    }
+  }
+}`;
+
+/**
+ * The deployments of {@link PAGES_ENVIRONMENT} created after `deployedAt`, as
+ * {@link newerDeploy} reads them. They come from the GraphQL API, which lists
+ * a repository's deployments newest first, where the REST API states no
+ * order: the listing is read until it reaches one created at or before
+ * `deployedAt`, which on a deploy that is still the newest is the first page.
+ */
+export async function deploymentsAfter({ graphql, repository, token }, deployedAt) {
+	const [owner, name] = repository.split('/');
+	const after = Date.parse(deployedAt);
+	const newer = [];
+	let cursor = null;
+	for (let page = 1; page <= MAX_PAGES; page += 1) {
+		const variables = { owner, name, environment: PAGES_ENVIRONMENT, after: cursor };
+		const answer = await fromApi(graphql, token, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ query: DEPLOYMENTS_QUERY, variables }),
+		});
+		if (answer?.errors?.length) throw new Error(`the API answered ${answer.errors[0].message}`);
+		const listed = answer?.data?.repository?.deployments;
+		if (!Array.isArray(listed?.nodes) || typeof listed.pageInfo?.hasNextPage !== 'boolean') {
+			throw new Error(`the API answered ${graphql} with no list of deployments`);
+		}
+		for (const deployment of listed.nodes) {
+			if (Date.parse(deployment.createdAt) <= after) return newer;
+			newer.push(deployment);
+		}
+		if (!listed.pageInfo.hasNextPage) return newer;
+		cursor = listed.pageInfo.endCursor;
+	}
+	throw new Error(`the API lists more than ${MAX_PAGES * DEPLOYMENTS_PER_PAGE} deployments of ${PAGES_ENVIRONMENT} after ${deployedAt}`);
 }
 
 /** The value of `--name` in an argument list, or undefined. */
@@ -425,62 +515,74 @@ async function findLastSubmitted() {
 	}
 	const run = record.workflow_run;
 	console.log(`[indexnow] the pages were last submitted by run ${run.id}, of commit ${run.head_sha}, on ${record.created_at}.`);
-	appendFileSync(output, `run-id=${run.id}\nartifact-id=${record.id}\n`);
+	appendFileSync(output, `run-id=${run.id}\n`);
 }
 
 /**
- * `keep-record --urls <urls.json>`: say, as `keep` in $GITHUB_OUTPUT, whether
- * the IndexNow job keeps the manifest it submitted. It does unless a record
- * newer than the one its build compared with has been kept meanwhile, which
- * happens when a failed job is re-run after a newer deploy submitted its
- * pages. A record that cannot be listed keeps nothing either: the next deploy
- * then compares with the record before this one and sends these pages again,
- * where keeping a stale record could leave a removed page out for good.
+ * `keep-record --deployed-at <time>`: say, as `keep` in $GITHUB_OUTPUT,
+ * whether the IndexNow job keeps the manifest it submitted. It does unless a
+ * deploy has gone out after this run's, at `<time>` (the deploy job's
+ * `deployed-at`), which happens when a failed job is re-run after a newer
+ * deploy (see {@link newerDeploy}). A re-run of the deploy job writes that
+ * moment anew, since its pages go out again: its job, having worked its list
+ * out again against the newest record, keeps the manifest of the pages the
+ * site then serves. Deployments that cannot be listed keep nothing either,
+ * and neither does a run whose deploy job named no time, as one made before
+ * the job wrote it: the next deploy then compares with the record before this
+ * one and sends these pages again, where keeping a stale record could leave a
+ * removed page out for good.
  */
 async function keepRecord(args) {
-	const { GITHUB_API_URL: api = 'https://api.github.com', GITHUB_REPOSITORY: repository, GITHUB_TOKEN: token, GITHUB_OUTPUT: output } = process.env;
+	const {
+		GITHUB_API_URL: api = 'https://api.github.com',
+		GITHUB_GRAPHQL_URL: graphql = `${api}/graphql`,
+		GITHUB_REPOSITORY: repository,
+		GITHUB_TOKEN: token,
+		GITHUB_OUTPUT: output,
+	} = process.env;
 	if (!repository || !token || !output) {
 		throw new ManifestError('keep-record reads the GitHub API from a workflow step: it needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT.');
 	}
-	const urls = option(args, '--urls');
-	if (!urls || !existsSync(urls)) throw new ManifestError(`say where the list the build handed over is: --urls <${URLS_NAME}>, not ${urls}.`);
-	const listed = JSON.parse(readFileSync(urls, 'utf8'));
-	if (!Object.hasOwn(listed, 'record') || !(listed.record === null || Number.isSafeInteger(listed.record))) {
+	const deployedAt = option(args, '--deployed-at') ?? '';
+	if (deployedAt === '') {
 		console.log(
-			`::warning::[indexnow] ${urls} does not name the record its build compared with, as one written by another version of this script does not: ` +
+			'::warning::[indexnow] the deploy job named no time its pages went out, as the deploy job of a run made before it wrote one names none: ' +
 				'this manifest is not kept, and the next deploy sends these pages again.',
 		);
 		appendFileSync(output, 'keep=false\n');
 		return;
 	}
-	let artifacts;
+	if (!MOMENT.test(deployedAt) || Number.isNaN(Date.parse(deployedAt))) {
+		throw new ManifestError(`--deployed-at takes the moment the pages went out, as 2026-11-10T08:00:00Z, not ${JSON.stringify(deployedAt)}.`);
+	}
+	let newer;
 	try {
-		artifacts = await submittedArtifacts({ api, repository, token });
+		newer = newerDeploy(deployedAt, await deploymentsAfter({ graphql, repository, token }, deployedAt));
 	} catch (error) {
 		console.log(
-			`::warning::[indexnow] the records of the pages IndexNow was sent could not be listed (${error.cause?.code ?? error.message}): ` +
+			`::warning::[indexnow] the deployments of the site could not be listed (${error.cause?.code ?? error.message}): ` +
 				'this manifest is not kept, and the next deploy sends these pages again.',
 		);
 		appendFileSync(output, 'keep=false\n');
 		return;
 	}
-	const newer = newerRecord(listed.record, artifacts);
 	if (newer !== undefined) {
-		const run = newer.workflow_run;
 		console.log(
-			`[indexnow] run ${run.id}, of commit ${run.head_sha}, kept a newer record on ${newer.created_at} than the one this build compared with ` +
-				`(${listed.record ?? 'none'}): this manifest is not kept, and the next deploy compares with that one.`,
+			`[indexnow] deployment ${newer.databaseId}, of commit ${newer.commitOid}, was made on ${newer.createdAt}, after this run's pages went out on ${deployedAt}: ` +
+				"this manifest is not kept, and the next deploy compares with that deploy's record, or the one before it.",
 		);
 		appendFileSync(output, 'keep=false\n');
 		return;
 	}
-	console.log(`[indexnow] no newer record than the one this build compared with (${listed.record ?? 'none'}): this manifest is kept.`);
+	console.log(`[indexnow] no deploy has gone out since this run's on ${deployedAt}: this manifest is kept.`);
 	appendFileSync(output, 'keep=true\n');
 }
 
-/** `diff ...`: compare the build with the previous manifest and say what to submit. */
-async function diff(args) {
-	const dist = resolve(option(args, '--dist') ?? join(here, '..', 'dist'));
+/**
+ * The manifest a build published, rebuilt from the pages in `dist` and held
+ * to the one the build wrote beside them.
+ */
+function publishedManifest(dist) {
 	const published = join(dist, MANIFEST_NAME);
 	if (!existsSync(published)) {
 		throw new ManifestError(`${published} does not exist: run \`node scripts/indexnow-diff.mjs manifest\` after the build.`);
@@ -491,6 +593,34 @@ async function diff(args) {
 			`${published} is not the manifest the built pages give: a step after it changed the pages or the sitemap, so it has to run last.`,
 		);
 	}
+	return current;
+}
+
+/**
+ * The manifest at `file`, as `diff --current` compares it where there are no
+ * pages to rebuild it from: the one a build handed the IndexNow job, which
+ * the job submits and keeps. One that cannot be read stops the job, since it
+ * is the record the job would keep.
+ */
+function handedManifest(file) {
+	let text;
+	try {
+		text = readFileSync(file, 'utf8');
+	} catch (error) {
+		throw new ManifestError(`the manifest to compare, ${file}, cannot be read (${error.code ?? error.message}).`);
+	}
+	const manifest = parseManifest(text);
+	if (manifest.reason) throw new ManifestError(`the manifest to compare, ${file}, cannot be compared: ${manifest.reason}.`);
+	return { format: MANIFEST_FORMAT, pages: manifest.pages };
+}
+
+/** `diff ...`: compare the build, or the manifest it handed on, with the previous manifest and say what to submit. */
+async function diff(args) {
+	const given = option(args, '--current');
+	if (given !== undefined && option(args, '--dist') !== undefined) {
+		throw new ManifestError('give --dist or --current, not both: the pages of a build, or the manifest it handed on.');
+	}
+	const current = given === undefined ? publishedManifest(resolve(option(args, '--dist') ?? join(here, '..', 'dist'))) : handedManifest(given);
 	const source = option(args, '--previous');
 	if (!source) throw new ManifestError('say where the previous manifest is: --previous <file or URL>.');
 	const previous = await loadPrevious(source);
@@ -509,16 +639,13 @@ async function diff(args) {
 			for (const url of list) console.log(`  ${label.padEnd(7)} ${url}`);
 		}
 	}
-	const given = option(args, '--record') ?? '';
-	if (!/^\d*$/.test(given)) throw new ManifestError(`--record takes the id of an artifact, not ${JSON.stringify(given)}.`);
-	const record = given === '' ? null : Number(given);
 	const out = option(args, '--out');
 	if (out) {
 		mkdirSync(out, { recursive: true });
 		const reason = result.full ? previous.reason : null;
 		writeFileSync(
 			join(out, URLS_NAME),
-			`${JSON.stringify({ previous: previous.from, record, reason, full: result.full, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
+			`${JSON.stringify({ previous: previous.from, reason, full: result.full, changed: result.changed, new: result.added, removed: result.removed, urls: result.urls }, null, 1)}\n`,
 		);
 		writeFileSync(join(out, MANIFEST_NAME), serialize(current));
 	}

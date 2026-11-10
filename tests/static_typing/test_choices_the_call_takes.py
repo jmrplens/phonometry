@@ -8,8 +8,11 @@ coefficient takes always raised. ``improvement_octave_bands`` is typed with
 the three quantities it folds by the average of transmitted power; the
 rainfall intensity levels an ``OctaveBandSpectrum`` also holds sum their
 energy instead (ISO 10140-1 Formula (K.3)), and the call always refused
-them. A type checker now refuses each of those values, and the call's error
-says why.
+them. ``rail_roughness`` is typed with the two classes Table G-1b tabulates,
+``"E"`` and ``"M"`` and their members of ``RailRoughnessClass``: Appendix G
+gives no spectrum for the ``"N"`` and ``"B"`` classes, and the call always
+refused them. A type checker now refuses each of those values, and the call's
+error says why.
 
 Each refused value is written as a caller types it, on a call line of its own
 with the error code mypy reports for it, so that line's ignore becomes unused,
@@ -28,7 +31,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from phonometry import building, vibration
+from phonometry import building, environment, vibration
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -36,6 +39,7 @@ if TYPE_CHECKING:
 #: The calls the runtime cases make, with no type to hold their argument to.
 _STRAIGHT: Callable[..., object] = vibration.straight_transmission_coefficient
 _OCTAVE_BANDS: Callable[..., object] = building.improvement_octave_bands
+_RAIL_ROUGHNESS: Callable[..., object] = environment.rail_roughness
 
 
 @pytest.mark.parametrize("junction", ["T2", "L"])
@@ -125,3 +129,64 @@ def test_the_three_power_averaged_quantities_are_taken() -> None:
             thirds, frequencies=frequencies, quantity="Rs"
         ).quantity,
     ] == ["ΔL", "ΔR", "Rs"]
+
+
+@pytest.mark.parametrize(
+    ("roughness", "letter"),
+    [
+        ("N", "N"),
+        ("B", "B"),
+        (environment.RailRoughnessClass.NOT_WELL_MAINTAINED, "N"),
+        (environment.RailRoughnessClass.BAD, "B"),
+    ],
+)
+def test_a_rail_class_without_a_spectrum_is_refused(
+    roughness: object, letter: str
+) -> None:
+    with pytest.raises(
+        ValueError, match=rf"class '{letter}' has no spectrum in Table G-1b"
+    ):
+        _RAIL_ROUGHNESS(roughness)
+
+
+def test_the_type_checker_refuses_the_not_well_maintained_letter() -> None:
+    with pytest.raises(ValueError, match="national spectrum"):
+        environment.rail_roughness(
+            "N",  # type: ignore[arg-type]
+        )
+
+
+def test_the_type_checker_refuses_the_bad_letter() -> None:
+    with pytest.raises(ValueError, match="national spectrum"):
+        environment.rail_roughness(
+            "B",  # type: ignore[arg-type]
+        )
+
+
+def test_the_type_checker_refuses_the_not_well_maintained_class() -> None:
+    with pytest.raises(ValueError, match="national spectrum"):
+        environment.rail_roughness(
+            environment.RailRoughnessClass.NOT_WELL_MAINTAINED,  # type: ignore[arg-type]
+        )
+
+
+def test_the_type_checker_refuses_the_bad_class() -> None:
+    with pytest.raises(ValueError, match="national spectrum"):
+        environment.rail_roughness(
+            environment.RailRoughnessClass.BAD,  # type: ignore[arg-type]
+        )
+
+
+def test_the_two_tabulated_rail_classes_are_taken() -> None:
+    spectra = [
+        environment.rail_roughness("E"),
+        environment.rail_roughness("M"),
+        environment.rail_roughness(environment.RailRoughnessClass.WELL_MAINTAINED),
+        environment.rail_roughness(environment.RailRoughnessClass.NORMAL),
+    ]
+    assert [float(spectrum.levels[0]) for spectrum in spectra] == [
+        17.1,
+        35.0,
+        17.1,
+        35.0,
+    ]

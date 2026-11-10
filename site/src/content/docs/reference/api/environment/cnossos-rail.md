@@ -363,7 +363,7 @@ band".
 
 ```python
 rail_roughness(
-    roughness: RailRoughnessClass | Literal['E', 'M', 'N', 'B'],
+    roughness: Literal[RailRoughnessClass.WELL_MAINTAINED, RailRoughnessClass.NORMAL] | Literal['E', 'M'],
 ) -> WavelengthSpectrum
 ```
 
@@ -377,7 +377,7 @@ to be supplied by the Member State.
 
 | Name | Description |
 | :--- | :--- |
-| `roughness` | The [`RailRoughnessClass`](/phonometry/reference/api/environment/cnossos-rail/#railroughnessclass) of digit 2 of the track descriptor. One of `"E"`, `"M"`, `"N"` or `"B"`. |
+| `roughness` | The [`RailRoughnessClass`](/phonometry/reference/api/environment/cnossos-rail/#railroughnessclass) of digit 2 of the track descriptor, one of the two Table G-1b tabulates: `RailRoughnessClass.WELL_MAINTAINED` or `RailRoughnessClass.NORMAL`, or its letter, `"E"` or `"M"`. The not well maintained and bad classes, `"N"` and `"B"` (`RailRoughnessClass.NOT_WELL_MAINTAINED` and `RailRoughnessClass.BAD`), are not offered: Appendix G tabulates no spectrum for them, and the Member State supplies a national one. |
 
 **Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
@@ -385,7 +385,7 @@ to be supplied by the Member State.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the class carries no spectrum in Table G-1b. |
+| ValueError | If the class carries no spectrum in Table G-1b, `"N"` and `"B"` and their members among them, or is no class at all. |
 | TypeError | if `roughness` is not a text. |
 
 ## RailJoints

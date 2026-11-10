@@ -5704,14 +5704,35 @@ def _as_handed(
 def _lists_nontext(annotation: str) -> bool:
     """Whether a union annotation lists a value that is no text beside its texts.
 
-    ``None``, a number, an array or a record beside the ``Literal``: a value
-    of one is the caller's to give, and a path may take it past the check of
-    the text. A ``Literal`` of texts alone takes no other value, and the
-    check refuses one with ``TypeError`` (rule A45).
+    ``None``, a number, an array or a record beside the ``Literal``, or a
+    ``Literal`` that lists a value that is no text itself (the members of an
+    ``Enum``, ``Literal[RailRoughnessClass.NORMAL]``): a value of one is the
+    caller's to give, and a path may take it past the check of the text. A
+    ``Literal`` of texts alone takes no other value, and the check refuses
+    one with ``TypeError`` (rule A45).
     """
     return any(
-        not member.startswith("Literal[") and member not in _STRING_MEMBERS
+        _literal_lists_nontext(member)
+        if member.startswith("Literal[")
+        else member not in _STRING_MEMBERS
         for member in _members(annotation)
+    )
+
+
+def _literal_lists_nontext(member: str) -> bool:
+    """Whether the ``Literal[...]`` *member* of a union lists a value that is
+    no text: anything but a quoted string, as an ``Enum`` member is.
+    """
+    try:
+        node = ast.parse(member, mode="eval").body
+    except SyntaxError:
+        return False
+    if not isinstance(node, ast.Subscript):
+        return False
+    values = node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+    return any(
+        not (isinstance(value, ast.Constant) and isinstance(value.value, str))
+        for value in values
     )
 
 

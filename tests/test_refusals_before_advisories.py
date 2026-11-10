@@ -33,6 +33,10 @@ from phonometry import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from numpy.typing import ArrayLike
+
+    _Load = tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]
+
 
 @pytest.fixture(autouse=True)
 def _every_warning_an_error() -> None:
@@ -632,4 +636,232 @@ def test_an_emission_refusal_found_after_an_advisory_still_comes_first(
     composes, the atmosphere of the air absorption a room constant composes.
     """
     with pytest.raises(ValueError, match=refusal):
+        call()
+
+
+def _tube_wavenumbers(*frequencies: float) -> np.ndarray:
+    """Real air wavenumbers at 343.24 m/s, as the four-microphone cases use them."""
+    k = materials.tube_wavenumber(np.array(frequencies), 343.24)
+    return np.asarray(k).real.astype(np.complex128)
+
+
+#: 6 kHz lies above the ASTM E2611-19 plane-wave range of a 0.1 m tube with
+#: 30 mm microphone spacings, so a solve given ``diameter_m`` advises on it.
+_TUBE_GEOMETRY: dict[str, Any] = {
+    "l1": 0.10,
+    "s1": 0.03,
+    "l2": 0.15,
+    "s2": 0.03,
+    "thickness_m": 0.05,
+    "characteristic_impedance": 1.204 * 343.24,
+}
+_H = np.array([1.0 + 0j, 0.9 + 0j, 0.5 + 0j])
+_LOAD = (_H, 0.8 * _H, 0.5 * _H, 0.4 * _H)
+
+
+def _advised_one_load(load: _Load = _LOAD, **arguments: Any) -> object:
+    return materials.transfer_matrix_one_load(
+        load,
+        **{
+            **_TUBE_GEOMETRY,
+            "wavenumber": _tube_wavenumbers(500.0, 1000.0, 6000.0),
+            "diameter_m": 0.1,
+            **arguments,
+        },
+    )
+
+
+def _singular(solve: str, **arguments: Any) -> object:
+    """A solve whose loads leave the downstream face without pressure or velocity."""
+    load = (
+        np.array([1.0 + 0j, 0.9 + 0j]),
+        np.array([0.8 + 0j, 0.7 + 0j]),
+        np.zeros(2, dtype=np.complex128),
+        np.zeros(2, dtype=np.complex128),
+    )
+    geometry = {
+        **_TUBE_GEOMETRY,
+        "wavenumber": _tube_wavenumbers(500.0, 1000.0),
+        **arguments,
+    }
+    if solve == "two-load":
+        return materials.transfer_matrix_two_load(load, load, **geometry)
+    return materials.transfer_matrix_one_load(load, **geometry)
+
+
+#: Two bands of the four-microphone load, and their wavenumbers at 0 Hz and
+#: above: at 0 Hz the wave decomposition divides by sin(0).
+_LOW = (_H[:2], 0.8 * _H[:2], 0.5 * _H[:2], 0.4 * _H[:2])
+_AT_ZERO_HZ = np.array([0.0 + 0j, 2.0 + 0j])
+
+
+def _one_load_at_zero_hz(**arguments: Any) -> object:
+    return materials.transfer_matrix_one_load(
+        _LOW, **{**_TUBE_GEOMETRY, "wavenumber": _AT_ZERO_HZ, **arguments}
+    )
+
+
+def _two_load_at_zero_hz(load_b: _Load) -> object:
+    return materials.transfer_matrix_two_load(
+        _LOW, load_b, **_TUBE_GEOMETRY, wavenumber=_AT_ZERO_HZ
+    )
+
+
+def _two_microphone(h12: ArrayLike, frequency: ArrayLike, **arguments: Any) -> object:
+    return materials.two_microphone_impedance(
+        h12,
+        **{
+            "frequency": frequency,
+            "spacing_m": 0.05,
+            "x1": 0.1,
+            "speed_of_sound": 343.24,
+            "characteristic_impedance": 413.0,
+            **arguments,
+        },
+    )
+
+
+def _reflection_pole() -> np.ndarray:
+    """``H12`` equal to the reflected-wave transfer function at both bands."""
+    k0 = np.asarray(materials.tube_wavenumber(np.array([500.0, 1000.0]), 343.24))
+    return np.asarray(np.exp(1j * k0 * 0.05))
+
+
+_TEXT_FREQUENCIES = ["a", "b"]
+
+#: An impedance-tube call that meets an advisory, or a NumPy warning, and a
+#: refusal both, the warning computed first, and the refusal it must raise.
+_TUBE_ADVISED_THEN_REFUSED: dict[
+    str, tuple[Callable[[], object], type[Exception], str]
+] = {
+    "two-load-singular-frequencies": (
+        lambda: _singular("two-load", frequencies=_TEXT_FREQUENCIES),
+        TypeError,
+        "'frequencies' must be numbers",
+    ),
+    "one-load-singular-frequencies": (
+        lambda: _singular("one-load", frequencies=_TEXT_FREQUENCIES),
+        TypeError,
+        "'frequencies' must be numbers",
+    ),
+    "two-load-near-singular-frequencies": (
+        lambda: materials.transfer_matrix_two_load(
+            (1.0 + 0j, 0.9 + 0j, 0.8 + 0j, 0.7 + 0j),
+            (1.0 + 0j, 0.9 + 0j, 0.8 + 0j, 0.7 + 0j),
+            **_TUBE_GEOMETRY,
+            wavenumber=_tube_wavenumbers(500.0, 1000.0),
+            frequencies=_TEXT_FREQUENCIES,
+        ),
+        TypeError,
+        "'frequencies' must be numbers",
+    ),
+    "one-load-plane-wave-load": (
+        lambda: _advised_one_load(_LOAD[:3]),  # type: ignore[arg-type]
+        ValueError,
+        "'load' must be the four transfer functions",
+    ),
+    "one-load-plane-wave-thickness": (
+        lambda: _advised_one_load(thickness_m=-0.05),
+        ValueError,
+        "'thickness_m' must be positive",
+    ),
+    "one-load-plane-wave-impedance": (
+        lambda: _advised_one_load(characteristic_impedance=-1.0),
+        ValueError,
+        "'characteristic_impedance' must be positive",
+    ),
+    "one-load-plane-wave-frequencies": (
+        lambda: _advised_one_load(frequencies=["a", "b", "c"]),
+        TypeError,
+        "'frequencies' must be numbers",
+    ),
+    "two-load-plane-wave-load-b": (
+        lambda: materials.transfer_matrix_two_load(
+            _LOAD,
+            _LOAD[:2],  # type: ignore[arg-type]
+            **_TUBE_GEOMETRY,
+            wavenumber=_tube_wavenumbers(500.0, 1000.0, 6000.0),
+            diameter_m=0.1,
+        ),
+        ValueError,
+        "'load_b' must be the four transfer functions",
+    ),
+    "decomposition-plane-wave-text": (
+        lambda: materials.wave_decomposition(
+            "a",
+            _H,
+            _H,
+            _H,
+            l1=0.10,
+            s1=0.03,
+            l2=0.15,
+            s2=0.03,
+            wavenumber=_tube_wavenumbers(500.0, 1000.0, 6000.0),
+            diameter_m=0.1,
+        ),
+        TypeError,
+        "'h1' must be numbers, not text",
+    ),
+    "two-microphone-plane-wave-impedance": (
+        lambda: _two_microphone(
+            _H,
+            [50.0, 500.0, 6000.0],
+            characteristic_impedance=-413.0,
+            diameter_m=0.1,
+        ),
+        ValueError,
+        "'characteristic_impedance' must be positive",
+    ),
+    "one-load-zero-wavenumber-frequencies": (
+        lambda: _one_load_at_zero_hz(frequencies=_TEXT_FREQUENCIES),
+        TypeError,
+        "'frequencies' must be numbers",
+    ),
+    "one-load-zero-wavenumber-thickness": (
+        lambda: _one_load_at_zero_hz(thickness_m=-0.05),
+        ValueError,
+        "'thickness_m' must be positive",
+    ),
+    "two-load-zero-wavenumber-load-b": (
+        lambda: _two_load_at_zero_hz(_LOW[:2]),  # type: ignore[arg-type]
+        ValueError,
+        "'load_b' must be the four transfer functions",
+    ),
+    "two-load-zero-wavenumber-text": (
+        lambda: _two_load_at_zero_hz((_H[:2], _H[:2], _H[:2], ["x", "y"])),
+        TypeError,
+        "'load_b' must be numbers, not text",
+    ),
+    "two-microphone-reflection-pole-impedance": (
+        lambda: _two_microphone(
+            _reflection_pole(), [500.0, 1000.0], characteristic_impedance=-413.0
+        ),
+        ValueError,
+        "'characteristic_impedance' must be positive",
+    ),
+    "two-microphone-reflection-pole": (
+        lambda: _two_microphone(_reflection_pole(), [500.0, 1000.0]),
+        ValueError,
+        "'reflection' must contain only finite values",
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("call", "refused", "refusal"),
+    list(_TUBE_ADVISED_THEN_REFUSED.values()),
+    ids=list(_TUBE_ADVISED_THEN_REFUSED),
+)
+def test_an_impedance_tube_refusal_found_after_a_warning_still_comes_first(
+    call: Callable[[], object], refused: type[Exception], refusal: str
+) -> None:
+    """The plane-wave advisory, the singular solve and NumPy's division wait.
+
+    Each call meets a warning before the step that refuses: the plane-wave
+    range of a tube given its diameter, the denominator of a solve whose
+    downstream face is silent, the division by ``sin(k s)`` at 0 Hz or by
+    ``H_R - H12`` where the two meet. Every argument is checked before any of
+    them, and the advisories come once the result stands.
+    """
+    with pytest.raises(refused, match=refusal):
         call()

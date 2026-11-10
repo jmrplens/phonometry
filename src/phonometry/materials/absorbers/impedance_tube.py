@@ -786,21 +786,35 @@ def two_microphone_impedance(
     f = np.atleast_1d(real_array(frequency, "frequency"))
     h = _require_h12_per_band(h12, f, "frequency")
     k0 = tube_wavenumber(f, speed_of_sound, attenuation_np_per_m=attenuation_np_per_m)
-    r = reflection_factor(h, spacing_m=spacing_m, x1=x1, wavenumber=k0)
     canonical = _canonical_shape(shape)
-    if diameter_m is not None:
-        f_lower, f_upper = plane_wave_frequency_range(
+    band = (
+        None
+        if diameter_m is None
+        else plane_wave_frequency_range(
             spacing_m, speed_of_sound, diameter_m=diameter_m, shape=canonical
         )
-        _warn_frequency_range(f, f_lower, f_upper)
-    return ImpedanceTubeResult(
+    )
+    # An H12 that meets H_R, the pole of Eq. (17), carries inf or NaN into
+    # the fields, and the result refuses them by name; NumPy's warning on the
+    # way would take that refusal's place under python -W error, as the
+    # plane-wave advisory would, so it waits until the result stands (rule
+    # A63).
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+        r = reflection_factor(h, spacing_m=spacing_m, x1=x1, wavenumber=k0)
+        impedance = surface_impedance(r, characteristic_impedance)
+        normalized = normalized_surface_impedance(r)
+        absorption = absorption_from_reflection(r)
+    result = ImpedanceTubeResult(
         frequencies=f,
         reflection=r,
-        surface_impedance=surface_impedance(r, characteristic_impedance),
-        normalized_impedance=normalized_surface_impedance(r),
-        absorption=absorption_from_reflection(r),
+        surface_impedance=impedance,
+        normalized_impedance=normalized,
+        absorption=absorption,
         spacing_m=spacing_m,
         x1=x1,
         diameter_m=diameter_m,
         shape=canonical if diameter_m is not None else None,
     )
+    if band is not None:
+        _warn_frequency_range(f, *band)
+    return result

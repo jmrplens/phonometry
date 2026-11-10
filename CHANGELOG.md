@@ -2377,7 +2377,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   "invalid value encountered in divide" after it, and name a singular one
   too: a downstream face with no pressure and no velocity, where the
   denominator and the scale it is judged against are both zero, warns
-  where it returned NaN with nothing said.
+  where it returned NaN with nothing said. The impedance tube waits the
+  same way: `materials.wave_decomposition`, the two four-microphone solves
+  and `materials.two_microphone_impedance` read every argument, the loads
+  (an entry that is not a number is refused under the load's own name,
+  `load_a`, `load_b` or `load`, where the solves named it `h1` to `h4`),
+  the specimen, the impedance and the frequencies, before they advise on
+  the plane-wave range or a singular denominator, and divide by `sin(k s)`
+  at 0 Hz or by an `H12` at the pole of Eq. (17) without NumPy's warning
+  ahead of the refusal that names what follows.
   `vibration.transfer_stiffness_indirect` refuses a transmissibility that is
   not finite with a `ValueError` naming `transmissibility`, where it
   returned `-inf+nanj`, and `indirect_transfer_stiffness_result` names the

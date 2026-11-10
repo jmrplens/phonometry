@@ -201,22 +201,27 @@ def plane_wave_frequency_range_astm_e2611(
     )
 
 
-def _warn_astm_plane_wave(
-    wavenumber: ArrayLike,
+def _astm_plane_wave_bounds(
     *,
     s1: float,
     s2: float,
     diameter_m: float,
     shape: str,
-) -> None:
-    r"""Advise when wavenumbers leave the ASTM E2611-19 plane-wave range.
+) -> tuple[float, float]:
+    r"""Check the tube arguments and return the ASTM E2611-19 plane-wave wavenumbers.
 
-    The check runs on the real part of ``k`` so no speed of sound is needed:
+    The range is in wavenumber so no speed of sound is needed:
     :math:`f s < 0.40 c` maps to :math:`k s < 0.80 \pi` (6.5.4),
     :math:`f d < K c` to :math:`k d < 2 \pi K` (6.2.4.1/6.2.5) and the
     greater-than-1 %-of-wavelength spacing bound to
     :math:`k s > 0.02 \pi` (6.2.3). The upper spacing bound binds
     every microphone pair (largest spacing), the lower one the smallest.
+
+    A call checks these arguments with its others, before any arithmetic,
+    and gives the bounds to :func:`_warn_astm_plane_wave` once its result
+    stands (rule A63).
+
+    :return: The lower and upper wavenumbers ``(k_lower, k_upper)``, in rad/m.
     """
     require_scalar(diameter_m, "diameter_m")
     require_scalar(s1, "s1")
@@ -226,7 +231,6 @@ def _warn_astm_plane_wave(
         raise ValueError(msg)
     if diameter_m <= 0.0:
         raise ValueError(_DIAMETER_POSITIVE)
-    k = np.real(complex_array(wavenumber, "wavenumber"))
     ku = _ASTM_KU_CIRCULAR if shape == "circular" else _ASTM_KU_RECTANGULAR
     two_pi = 2.0 * np.pi
     k_upper = min(
@@ -234,6 +238,22 @@ def _warn_astm_plane_wave(
         two_pi * ku / diameter_m,
     )
     k_lower = two_pi / (_ASTM_LOWER_WAVELENGTH_FRACTION * min(s1, s2))
+    return k_lower, k_upper
+
+
+def _warn_astm_plane_wave(
+    wavenumber: Complex, bounds: tuple[float, float] | None
+) -> None:
+    """Advise when wavenumbers leave the ASTM E2611-19 plane-wave range.
+
+    ``bounds`` is what :func:`_astm_plane_wave_bounds` returned, or ``None``
+    when the caller gave no tube diameter and so asked for no check. The
+    check runs on the real part of ``k``.
+    """
+    if bounds is None:
+        return
+    k_lower, k_upper = bounds
+    k = np.real(wavenumber)
     if np.any(k < k_lower) or np.any(k > k_upper):
         warn_caller(
             "Wavenumbers outside the ASTM E2611-19 plane-wave working range "
@@ -242,6 +262,15 @@ def _warn_astm_plane_wave(
             "plane_wave_frequency_range_astm_e2611() for the limits in hertz.",
             ImpedanceTubeWarning,
         )
+
+
+def _plane_wave_bounds_if_asked(
+    *, s1: float, s2: float, diameter_m: float | None, shape: str
+) -> tuple[float, float] | None:
+    """The plane-wave bounds of a call given ``diameter_m``, else ``None``."""
+    if diameter_m is None:
+        return None
+    return _astm_plane_wave_bounds(s1=s1, s2=s2, diameter_m=diameter_m, shape=shape)
 
 
 @dataclass(frozen=True)
@@ -355,11 +384,9 @@ def wave_decomposition(
     if s1 <= 0.0 or s2 <= 0.0:
         msg = "'s1' and 's2' must be positive."
         raise ValueError(msg)
-    canonical = _canonical_shape(shape)
-    if diameter_m is not None:
-        _warn_astm_plane_wave(
-            wavenumber, s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
-        )
+    bounds = _plane_wave_bounds_if_asked(
+        s1=s1, s2=s2, diameter_m=diameter_m, shape=_canonical_shape(shape)
+    )
     ha = complex_array(h1, "h1")
     hb = complex_array(h2, "h2")
     hc = complex_array(h3, "h3")
@@ -371,12 +398,14 @@ def wave_decomposition(
     b = 1j * (hb * np.exp(1j * k * (l1 + s1)) - ha * np.exp(1j * k * l1)) / two_sin1
     c = 1j * (hc * np.exp(1j * k * (l2 + s2)) - hd * np.exp(1j * k * l2)) / two_sin2
     d = 1j * (hd * np.exp(-1j * k * l2) - hc * np.exp(-1j * k * (l2 + s2))) / two_sin2
-    return WaveAmplitudes(
+    amplitudes = WaveAmplitudes(
         a=np.asarray(a, dtype=np.complex128),
         b=np.asarray(b, dtype=np.complex128),
         c=np.asarray(c, dtype=np.complex128),
         d=np.asarray(d, dtype=np.complex128),
     )
+    _warn_astm_plane_wave(k, bounds)
+    return amplitudes
 
 
 def face_quantities(
@@ -723,24 +752,17 @@ def air_layer_transfer_matrix(
     )
 
 
-def _face_from_loads(
-    load: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
-    *,
-    name: str,
-    l1: float,
-    s1: float,
-    l2: float,
-    s2: float,
-    thickness: float,
-    wavenumber: ArrayLike,
-    characteristic_impedance: float,
+def _checked_load(
+    load: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike], name: str
 ) -> tuple[Complex, Complex, Complex, Complex]:
-    """Face pressures/velocities for one termination (Eqs. (17)-(21)).
+    """The four transfer functions of one termination, read before any arithmetic.
 
     ``name`` is the load parameter as the caller of the public solver typed
     it (``load_a``, ``load_b`` or ``load``), so a load of the wrong length is
     refused by name instead of dying in tuple indexing; a too-long load would
-    otherwise even pass, with its extra entries silently dropped.
+    otherwise even pass, with its extra entries silently dropped. Each entry
+    is read under that name too, so an entry that is not a number is refused
+    as the parameter the caller typed.
     """
     if len(load) != _LOAD_TRANSFER_FUNCTIONS:
         msg = (
@@ -748,6 +770,56 @@ def _face_from_loads(
             f"(H1, H2, H3, H4); got {len(load)}."
         )
         raise ValueError(msg)
+    return (
+        complex_array(load[0], name),
+        complex_array(load[1], name),
+        complex_array(load[2], name),
+        complex_array(load[3], name),
+    )
+
+
+def _check_solve_geometry(
+    *,
+    l1: float,
+    s1: float,
+    l2: float,
+    s2: float,
+    thickness_m: float,
+    characteristic_impedance: float,
+) -> None:
+    """Refuse a tube or specimen argument of a solve before any arithmetic.
+
+    The same checks :func:`wave_decomposition` and :func:`face_quantities`
+    make, made first: a solve divides by ``sin(k s)`` on its way to them, and
+    at 0 Hz NumPy's warning would take the place of the refusal under
+    ``python -W error`` (rule A63).
+    """
+    require_scalar(l1, "l1")
+    require_scalar(l2, "l2")
+    require_scalar(s1, "s1")
+    require_scalar(s2, "s2")
+    if s1 <= 0.0 or s2 <= 0.0:
+        msg = "'s1' and 's2' must be positive."
+        raise ValueError(msg)
+    require_positive(characteristic_impedance, "characteristic_impedance")
+    require_positive(thickness_m, "thickness_m")
+
+
+def _face_from_loads(
+    load: tuple[Complex, Complex, Complex, Complex],
+    *,
+    l1: float,
+    s1: float,
+    l2: float,
+    s2: float,
+    thickness: float,
+    wavenumber: Complex,
+    characteristic_impedance: float,
+) -> tuple[Complex, Complex, Complex, Complex]:
+    """Face pressures/velocities for one termination (Eqs. (17)-(21)).
+
+    ``load`` is what :func:`_checked_load` returned.
+    """
     waves = wave_decomposition(
         load[0],
         load[1],
@@ -878,45 +950,65 @@ def transfer_matrix_two_load(
         ``"square"``.
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
-    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
-        ``shape`` is not a text, or ``frequencies`` holds a text or a value that is not
-        a real number, or ``wavenumber`` holds a text or a value that is not a number.
+    :raises TypeError: if ``characteristic_impedance``, ``diameter_m``, ``l1``,
+        ``l2``, ``s1``, ``s2`` or ``thickness_m`` is not a single number, or ``shape``
+        is not a text, or ``frequencies`` holds a text or a value that is not a real
+        number, or ``load_a``, ``load_b`` or ``wavenumber`` holds a text or a value
+        that is not a number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)
-    if diameter_m is not None:
-        _warn_astm_plane_wave(
-            wavenumber, s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
-        )
+    # Every argument is read before any arithmetic, and the advisories wait
+    # until the matrix stands (rule A63): the plane-wave advisory, the
+    # singular denominator or NumPy's warning on a division by sin(k s) at
+    # 0 Hz would otherwise take the place of a refusal found after them.
+    bounds = _plane_wave_bounds_if_asked(
+        s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
+    )
+    checked_a = _checked_load(load_a, "load_a")
+    checked_b = _checked_load(load_b, "load_b")
+    _check_solve_geometry(
+        l1=l1,
+        s1=s1,
+        l2=l2,
+        s2=s2,
+        thickness_m=thickness_m,
+        characteristic_impedance=characteristic_impedance,
+    )
+    k = complex_array(wavenumber, "wavenumber")
+    context = _measurement_context(
+        l1=l1,
+        s1=s1,
+        l2=l2,
+        s2=s2,
+        thickness_m=thickness_m,
+        diameter_m=diameter_m,
+        shape=canonical,
+        frequencies=frequencies,
+        characteristic_impedance=characteristic_impedance,
+    )
     p0a, pda, u0a, uda = _face_from_loads(
-        load_a,
-        name="load_a",
+        checked_a,
         l1=l1,
         s1=s1,
         l2=l2,
         s2=s2,
         thickness=thickness_m,
-        wavenumber=wavenumber,
+        wavenumber=k,
         characteristic_impedance=characteristic_impedance,
     )
     p0b, pdb, u0b, udb = _face_from_loads(
-        load_b,
-        name="load_b",
+        checked_b,
         l1=l1,
         s1=s1,
         l2=l2,
         s2=s2,
         thickness=thickness_m,
-        wavenumber=wavenumber,
+        wavenumber=k,
         characteristic_impedance=characteristic_impedance,
     )
-    den = pda * udb - pdb * uda
-    _warn_ill_conditioned(
-        np.asarray(den, dtype=np.complex128),
-        np.abs(pda * udb) + np.abs(pdb * uda),
-        "transfer_matrix_two_load",
-    )
-    # The warning above has named a near-singular denominator; the division
+    den = np.asarray(pda * udb - pdb * uda, dtype=np.complex128)
+    # The warning below names a near-singular denominator; the division
     # carries it into the matrix as inf or nan without a second, anonymous
     # RuntimeWarning from NumPy.
     with np.errstate(divide="ignore", invalid="ignore"):
@@ -924,23 +1016,14 @@ def transfer_matrix_two_load(
         t12 = np.asarray((p0b * pda - p0a * pdb) / den, dtype=np.complex128)
         t21 = np.asarray((u0a * udb - u0b * uda) / den, dtype=np.complex128)
         t22 = np.asarray((pda * u0b - pdb * u0a) / den, dtype=np.complex128)
-    return TransferMatrix(
-        t11=t11,
-        t12=t12,
-        t21=t21,
-        t22=t22,
-        **_measurement_context(
-            l1=l1,
-            s1=s1,
-            l2=l2,
-            s2=s2,
-            thickness_m=thickness_m,
-            diameter_m=diameter_m,
-            shape=canonical,
-            frequencies=frequencies,
-            characteristic_impedance=characteristic_impedance,
-        ),
+    matrix = TransferMatrix(t11=t11, t12=t12, t21=t21, t22=t22, **context)
+    _warn_astm_plane_wave(k, bounds)
+    _warn_ill_conditioned(
+        den,
+        np.abs(pda * udb) + np.abs(pdb * uda),
+        "transfer_matrix_two_load",
     )
+    return matrix
 
 
 def transfer_matrix_one_load(
@@ -989,52 +1072,60 @@ def transfer_matrix_one_load(
         ``"square"``.
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
-    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
-        ``shape`` is not a text, or ``frequencies`` holds a text or a value that is not
-        a real number, or ``wavenumber`` holds a text or a value that is not a number.
+    :raises TypeError: if ``characteristic_impedance``, ``diameter_m``, ``l1``,
+        ``l2``, ``s1``, ``s2`` or ``thickness_m`` is not a single number, or ``shape``
+        is not a text, or ``frequencies`` holds a text or a value that is not a real
+        number, or ``load`` or ``wavenumber`` holds a text or a value that is not a
+        number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)
-    if diameter_m is not None:
-        _warn_astm_plane_wave(
-            wavenumber, s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
-        )
+    # As in the two-load solve: every argument first, the advisories last.
+    bounds = _plane_wave_bounds_if_asked(
+        s1=s1, s2=s2, diameter_m=diameter_m, shape=canonical
+    )
+    checked = _checked_load(load, "load")
+    _check_solve_geometry(
+        l1=l1,
+        s1=s1,
+        l2=l2,
+        s2=s2,
+        thickness_m=thickness_m,
+        characteristic_impedance=characteristic_impedance,
+    )
+    k = complex_array(wavenumber, "wavenumber")
+    context = _measurement_context(
+        l1=l1,
+        s1=s1,
+        l2=l2,
+        s2=s2,
+        thickness_m=thickness_m,
+        diameter_m=diameter_m,
+        shape=canonical,
+        frequencies=frequencies,
+        characteristic_impedance=characteristic_impedance,
+    )
     p0, pd, u0, ud = _face_from_loads(
-        load,
-        name="load",
+        checked,
         l1=l1,
         s1=s1,
         l2=l2,
         s2=s2,
         thickness=thickness_m,
-        wavenumber=wavenumber,
+        wavenumber=k,
         characteristic_impedance=characteristic_impedance,
     )
-    den = p0 * ud + pd * u0
-    _warn_ill_conditioned(
-        np.asarray(den, dtype=np.complex128),
-        np.abs(p0 * ud) + np.abs(pd * u0),
-        "transfer_matrix_one_load",
-    )
-    # As in the two-load solve: the warning above has named the denominator.
+    den = np.asarray(p0 * ud + pd * u0, dtype=np.complex128)
+    # As in the two-load solve: the warning below names the denominator.
     with np.errstate(divide="ignore", invalid="ignore"):
         t_diag = np.asarray((pd * ud + p0 * u0) / den, dtype=np.complex128)
         t12 = np.asarray((p0**2 - pd**2) / den, dtype=np.complex128)
         t21 = np.asarray((u0**2 - ud**2) / den, dtype=np.complex128)
-    return TransferMatrix(
-        t11=t_diag,
-        t12=t12,
-        t21=t21,
-        t22=t_diag,
-        **_measurement_context(
-            l1=l1,
-            s1=s1,
-            l2=l2,
-            s2=s2,
-            thickness_m=thickness_m,
-            diameter_m=diameter_m,
-            shape=canonical,
-            frequencies=frequencies,
-            characteristic_impedance=characteristic_impedance,
-        ),
+    matrix = TransferMatrix(t11=t_diag, t12=t12, t21=t21, t22=t_diag, **context)
+    _warn_astm_plane_wave(k, bounds)
+    _warn_ill_conditioned(
+        den,
+        np.abs(p0 * ud) + np.abs(pd * u0),
+        "transfer_matrix_one_load",
     )
+    return matrix

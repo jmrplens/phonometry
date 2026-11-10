@@ -167,12 +167,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Literal, TypeGuard
 
 import numpy as np
 from scipy.integrate import quad
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, given_repr
 from ..._internal.validation import (
     real_array,
     require_choice,
@@ -185,12 +186,17 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
 Junction = Literal["X", "T1", "T2", "L"]
+#: The junctions with a straight section, the two :func:`straight_transmission_coefficient`
+#: takes: Hopkins prints ``J3`` under Eq. 5.13 for these alone.
+StraightJunction = Literal["X", "T1"]
 
 #: Reference frequency ``f_ref`` of Hopkins Eq. 5.116, in Hz.
 _REFERENCE_FREQUENCY: float = 1000.0
@@ -209,6 +215,11 @@ _JUNCTIONS: dict[Junction, tuple[float, float, float | None]] = {
     "T2": (2.0, 2.0, None),
     "L": (4.0, 1.0, None),
 }
+
+#: ``J3`` of the two junctions :data:`_JUNCTIONS` gives a straight section.
+_STRAIGHT_J3: Mapping[StraightJunction, float] = MappingProxyType(
+    {name: j3 for name in ("X", "T1") if (j3 := _JUNCTIONS[name][2]) is not None}
+)
 
 __all__ = [
     "JunctionTransmissionResult",
@@ -306,6 +317,11 @@ def _junction(junction: object) -> tuple[float, float, float | None]:
     return _JUNCTIONS[name]
 
 
+def _has_straight_section(junction: Junction) -> TypeGuard[StraightJunction]:
+    """Whether *junction* has a straight section, the ``J3`` of Eq. 5.13."""
+    return junction in _STRAIGHT_J3
+
+
 def _obliquity_sum(chi: float, sin2: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""Shared denominator obliquity term of Eqs 5.12/5.13.
 
@@ -366,7 +382,7 @@ def corner_transmission_coefficient(
 
 
 def straight_transmission_coefficient(
-    angle_rad: ArrayLike, chi: float, psi: float, junction: Junction = "X"
+    angle_rad: ArrayLike, chi: float, psi: float, junction: StraightJunction = "X"
 ) -> NDArray[np.float64]:
     r"""Transmission across a straight section ``tau13(theta)`` (Hopkins 5.13).
 
@@ -378,21 +394,28 @@ def straight_transmission_coefficient(
         :math:`0 \le \theta \le \pi/2`).
     :param chi: Wave parameter ``chi`` (Eq. 5.10, > 0).
     :param psi: Wave parameter ``psi`` (Eq. 5.11, > 0).
-    :param junction: ``"X"`` or ``"T1"`` (the only junctions with a straight
-        section). One of ``"X"``, ``"T1"``, ``"T2"`` or ``"L"``.
+    :param junction: ``"X"`` or ``"T1"``, the two junctions with a straight
+        section. T-junction (2) and the L-junction, the ``"T2"`` and ``"L"``
+        that :func:`corner_transmission_coefficient` takes, are not offered:
+        Hopkins gives no ``J3`` for them, as no plate lies in line with the
+        source plate across either.
     :return: ``tau13(theta)`` (same shape as *angle*).
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
-        angle, or a junction without a straight section.
+        angle, an unknown junction or a junction without a straight section,
+        ``"T2"`` and ``"L"`` among them.
     :raises TypeError: if ``chi`` or ``psi`` is not a single number, or ``junction`` is
         not a text, or ``angle_rad`` holds a text or a value that is not a real number.
     """
     theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
     p = require_positive(psi, "psi")
-    _, _, j3 = _junction(junction)
-    if j3 is None:
-        msg = f"junction {junction!r} has no straight section (use 'X' or 'T1')."
+    if isinstance(junction, str) and junction not in _STRAIGHT_J3:
+        msg = (
+            f"junction {given_repr(junction)} has no straight section "
+            "(use 'X' or 'T1')."
+        )
         raise ValueError(msg)
+    j3 = _STRAIGHT_J3[require_choice(junction, "junction", tuple(_STRAIGHT_J3))]
     sin = np.sin(theta)
     sin2 = sin * sin
     cos2 = np.cos(theta) ** 2
@@ -467,10 +490,13 @@ def angular_average_transmission_coefficient(
 
         def coeff(t: float) -> float:
             return float(corner_transmission_coefficient(t, chi, psi, junction))
-    else:
+    elif _has_straight_section(junction):
 
         def coeff(t: float) -> float:
             return float(straight_transmission_coefficient(t, chi, psi, junction))
+    else:
+        msg = f"junction {junction!r} has no straight section (use 'X' or 'T1')."
+        raise ValueError(msg)
 
     # For chi < 1 the coefficient cuts off at theta = arcsin(chi), where the
     # integrand has a derivative kink; hand that break point to quad so it
@@ -900,13 +926,9 @@ def junction_transmission(
         chi, psi, name, section="corner"
     )
 
-    _, _, j3 = _JUNCTIONS[name]
-    straight: np.ndarray | None
-    straight_avg: float | None
-    if j3 is None:
-        straight = None
-        straight_avg = None
-    else:
+    straight: np.ndarray | None = None
+    straight_avg: float | None = None
+    if _has_straight_section(name):
         straight = straight_transmission_coefficient(theta, chi, psi, name)
         straight_avg = angular_average_transmission_coefficient(
             chi, psi, name, section="straight"

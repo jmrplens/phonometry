@@ -359,7 +359,7 @@ improvement_octave_bands(
     improvement: ArrayLike,
     *,
     frequencies: ArrayLike,
-    quantity: Literal['ΔL', 'ΔR', 'Rs', 'LI', 'LI,norm'] = 'ΔL',
+    quantity: Literal['ΔL', 'ΔR', 'Rs'] = 'ΔL',
 ) -> OctaveBandSpectrum
 ```
 
@@ -375,7 +375,7 @@ each octave.
 | :--- | :--- |
 | `improvement` | Improvement `ΔL` per one-third-octave band, in dB. |
 | `frequencies` | The matching one-third-octave centre frequencies, in Hz; must contain whole octave triplets (centre / centre·2^(±1/3)). |
-| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. One of `"ΔL"`, `"ΔR"`, `"Rs"`, `"LI"` or `"LI,norm"`. |
+| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. The rainfall sound intensity levels, the `"LI"` and `"LI,norm"` an [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) holds too, are not offered: ISO 10140-1 Formula (K.3) sums their energy, which [`RainfallSoundResult.octave_bands`](/phonometry/reference/api/building/rainfall-sound/#rainfallsoundresultoctave_bands) does. |
 
 **Returns:** An [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) with the octave centres (`.frequencies`) and the octave values (`.values`).
 
@@ -383,7 +383,7 @@ each octave.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | The thirds do not group into complete octave triplets, or `quantity` is not one of the three. |
+| ValueError | The thirds do not group into complete octave triplets, or `quantity` is not one of the three, `"LI"` and `"LI,norm"` among them. |
 | TypeError | if `quantity` is not a text, or `frequencies` or `improvement` holds a text or a value that is not a real number. |
 
 ## OctaveBandSpectrum

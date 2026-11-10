@@ -83,6 +83,9 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 Quantity = Literal["ΔL", "ΔR", "Rs", "LI", "LI,norm"]
+#: The quantities :func:`improvement_octave_bands` folds into octaves by the
+#: average of transmitted power, the first three of :data:`Quantity`.
+PowerAveragedQuantity = Literal["ΔL", "ΔR", "Rs"]
 
 __all__ = [
     "BackgroundCorrectedLevel",
@@ -690,7 +693,7 @@ def improvement_octave_bands(
     improvement: ArrayLike,
     *,
     frequencies: ArrayLike,
-    quantity: Quantity = "ΔL",
+    quantity: PowerAveragedQuantity = "ΔL",
 ) -> OctaveBandSpectrum:
     r"""Convert a one-third-octave improvement spectrum to octaves (F. (5)).
 
@@ -703,15 +706,28 @@ def improvement_octave_bands(
         must contain whole octave triplets (centre / centre·2^(±1/3)).
     :param quantity: What the values are, for the record and its plot:
         ``"ΔL"`` (Default), ``"ΔR"`` or ``"Rs"``, the three quantities folded
-        into octaves by this average of transmitted power. One of ``"ΔL"``, ``"ΔR"``,
-        ``"Rs"``, ``"LI"`` or ``"LI,norm"``.
+        into octaves by this average of transmitted power. The rainfall sound
+        intensity levels, the ``"LI"`` and ``"LI,norm"`` an
+        :class:`OctaveBandSpectrum` holds too, are not offered: ISO 10140-1
+        Formula (K.3) sums their energy, which
+        :meth:`RainfallSoundResult.octave_bands` does.
     :return: An :class:`OctaveBandSpectrum` with the octave centres
         (``.frequencies``) and the octave values (``.values``).
     :raises ValueError: The thirds do not group into complete octave triplets,
-        or ``quantity`` is not one of the three.
+        or ``quantity`` is not one of the three, ``"LI"`` and ``"LI,norm"``
+        among them.
     :raises TypeError: if ``quantity`` is not a text, or ``frequencies`` or
         ``improvement`` holds a text or a value that is not a real number.
     """
+    if isinstance(quantity, str) and quantity in _OCTAVE_BAND_QUANTITIES[3:]:
+        msg = (
+            "'quantity' must be one of ('ΔL', 'ΔR', 'Rs'), the quantities "
+            f"averaged by transmitted power; got {given_repr(quantity)}, a "
+            "rainfall intensity level, whose octaves sum the energy of their "
+            "thirds (ISO 10140-1 Formula (K.3)): use "
+            "RainfallSoundResult.octave_bands."
+        )
+        raise ValueError(msg)
     require_choice(quantity, "quantity", _OCTAVE_BAND_QUANTITIES[:3])
     dl = _finite(improvement, "improvement")
     freqs = _finite(frequencies, "frequencies")

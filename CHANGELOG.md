@@ -2335,7 +2335,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   coordinate table: it offered `"box"` too, which it always refused, since
   ISO 3744:2010 Annex C places the positions on a box by subdividing its
   faces. A type checker now refuses the box, and the call's error still
-  names Annex C.
+  names Annex C. `vibration.straight_transmission_coefficient` takes
+  `junction="X"` or `"T1"` alone, the two junctions Hopkins gives a straight
+  section (`J3`, Eq. 5.13), where it offered the `"T2"` and `"L"` it always
+  refused; `building.improvement_octave_bands` takes `quantity="ΔL"`, `"ΔR"`
+  or `"Rs"` alone, the three it folds by the average of transmitted power,
+  where it offered the rainfall levels `"LI"` and `"LI,norm"`, which ISO
+  10140-1 Formula (K.3) sums by energy and it always refused. A type checker
+  refuses each of those values now, and the error of a rainfall level names
+  `RainfallSoundResult.octave_bands`.
 
 - **A complex tangent that saturates says nothing on Windows either.**
   `tanh(z)` tends to 1 as the real part of `z` grows and `tan(z)` to `j` as

@@ -18,10 +18,10 @@ from __future__ import annotations
 
 import pathlib
 import sys
-import time
 import unicodedata
 
 import pytest
+from time_growth import assert_linear_time
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -862,14 +862,12 @@ def test_a_long_run_without_a_stop_is_read_in_linear_time() -> None:
     seconds while each context was a pattern spanning its sentence, since the
     pattern was tried again from every character before it.
     """
-    table = "| Cuadrado medio |" + " 0,5 |" * 4_000
-    start = time.perf_counter()
-    found = _departures(table, page=True)
-    # Ten seconds against the forty the quadratic reading took: wide enough
-    # that a loaded runner or an older interpreter does not fail a linear
-    # pass, and still far below what the old pattern needed.
-    assert time.perf_counter() - start < 10.0
-    assert found == [("Cuadrado medio", "Valor cuadrático medio")]
+
+    def table(cells: int) -> str:
+        return "| Cuadrado medio |" + " 0,5 |" * cells
+
+    growth = assert_linear_time(table, lambda text: _departures(text, page=True), 500)
+    assert growth.result == [("Cuadrado medio", "Valor cuadrático medio")]
 
 
 def test_an_analysis_of_variance_exempts_only_its_own_term() -> None:

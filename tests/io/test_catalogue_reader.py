@@ -26,7 +26,6 @@ import pathlib
 import pkgutil
 import stat
 import sys
-import time
 import warnings
 from collections.abc import Mapping
 from typing import IO, Any
@@ -39,6 +38,7 @@ from special_files import (
     raised_within,
     size_says_nothing,
 )
+from time_growth import assert_time_does_not_grow
 
 import phonometry
 from phonometry import fluids, io, materials, solids
@@ -934,10 +934,8 @@ def test_a_figure_too_far_from_one_or_too_long_is_refused_where_it_stands(
     path = tmp_path / "panel-40.json"
     path.write_text(text, encoding="utf-8")
     source: object = path if reader == "file" else text
-    start = time.perf_counter()
     with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
         _read_from(source)
-    assert time.perf_counter() - start < 1.0
     (issue,) = caught.value.issues
     assert (issue.location, issue.row_key, issue.field) == (
         "/rows/1/thickness_cm",
@@ -945,6 +943,48 @@ def test_a_figure_too_far_from_one_or_too_long_is_refused_where_it_stands(
         "thickness_mm",
     )
     assert said in issue.message
+
+
+#: The figures whose exact reading built a power of ten as many digits long as
+#: their exponent, the exponent left to fill in.
+_GROWING_FIGURES = {"exponent": "1e-{}", "zero": "0e{}"}
+
+
+@pytest.mark.parametrize("reader", ["file", "text"])
+@pytest.mark.parametrize("trigger", sorted(_GROWING_FIGURES))
+def test_a_figure_far_from_one_is_refused_before_its_power_of_ten_is_built(
+    trigger: str, reader: str, tmp_path: pathlib.Path
+) -> None:
+    """Read exactly, 1e-999999999 built a power of ten a billion digits long,
+    minutes of work; refused before it is read, it takes no longer to refuse
+    for an exponent eight times as large.
+
+    The figure a Decimal cannot hold and the one of more digits than Python
+    reads as one integer raised past the refusal instead of taking long,
+    which the test above sees.
+    """
+
+    def source(exponent: int) -> object:
+        text = _thickness_in_centimetres(_GROWING_FIGURES[trigger].format(exponent))
+        if reader == "text":
+            return text
+        path = tmp_path / str(exponent) / "panel-40.json"
+        path.parent.mkdir()
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    def refused(source: object) -> tuple[io.CatalogueIssue, ...]:
+        with pytest.raises(io.CatalogueError, match="panel-40.json") as caught:
+            _read_from(source)
+        return caught.value.issues
+
+    growth = assert_time_does_not_grow(source, refused, 100_000)
+    (issue,) = growth.result
+    side = "below" if trigger == "exponent" else "above"
+    assert (issue.location, issue.field) == ("/rows/1/thickness_cm", "thickness_mm")
+    assert f"is written {growth.factor * growth.size} powers of ten {side}" in (
+        issue.message
+    )
 
 
 def test_a_figure_a_decimal_cannot_hold_is_read_as_the_float_it_is() -> None:
@@ -1182,12 +1222,24 @@ def test_the_brackets_are_counted_to_the_end_of_the_value_the_text_opens() -> No
     assert issue.message == "this is not JSON: Extra data"
 
 
+def _lists_then_a_string(lists: int) -> str:
+    """Sixteen mebibytes of text: *lists* empty lists, then a string to the end."""
+    rest = _LIMIT - 2 * lists
+    return "[]" * lists + ('"' + "x" * (rest - 2) + '"' if rest else "")
+
+
 def test_sixteen_mebibytes_of_empty_lists_are_refused_at_once() -> None:
-    """Counted to the end of the text, they held a reader for seconds."""
-    text = "[]" * (8 * 1024 * 1024)
-    start = time.perf_counter()
-    (issue,) = _issues(text)
-    assert time.perf_counter() - start < 1.0
+    """Counted to the end of the text, they held a reader for seconds.
+
+    The count ends at the bracket that closes the first value, so eight
+    times as many lists after it take no longer to refuse. Both texts are
+    sixteen mebibytes long, the rest of the smaller one a string, since the
+    reader's checks of the whole text, its size and its characters, grow
+    with its length; the larger one is lists to the end.
+    """
+    growth = assert_time_does_not_grow(_lists_then_a_string, _issues, 1024 * 1024)
+    assert growth.factor * growth.size * 2 == _LIMIT
+    (issue,) = growth.result
     assert (issue.location, issue.message) == (
         "line 1, column 3",
         "this is not JSON: Extra data",

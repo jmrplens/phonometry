@@ -1480,7 +1480,7 @@ def test_a_long_run_of_digits_beside_a_label_is_read_in_linear_time() -> None:
         script = f'digits = "7" * {count}\nprint(f"ID: {{digits}}")  # ID: {digits}\n'
         return script, {2: f"ID: {digits}"}
 
-    growth = assert_linear_time(printed, lambda case: _failures(*case), 1_000)
+    growth = assert_linear_time(printed, lambda case: _failures(*case), 3_000)
     assert growth.result == []
 
 
@@ -1504,9 +1504,9 @@ def test_a_long_run_of_spaces_is_read_in_linear_time() -> None:
     def commented(count: int) -> str:
         return f"ID: 1{' ' * count}3"
 
-    found = assert_linear_time(printed, lambda case: _failures(*case), 2_000)
+    found = assert_linear_time(printed, lambda case: _failures(*case), 4_000)
     noted = assert_linear_time(
-        commented, lambda said: _disagreement(said, "ID: 1 2"), 2_000
+        commented, lambda said: _disagreement(said, "ID: 1 2"), 4_000
     )
     assert found.result == []
     assert "3" in noted.result

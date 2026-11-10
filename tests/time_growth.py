@@ -16,14 +16,16 @@ between linear and quadratic work on a logarithmic scale.
 between work that does not grow with the input and linear work: a refusal
 that must come before the input is read, whatever its size.
 
-The time is the CPU time of the process, never the time on the wall. A
-machine busy with more work than it has cores lets a short reading through
-between two other processes and stops a long one again and again: with every
-core kept busy by other processes, a linear reading of the snippet gate took
-28 times as long on the wall for an input eight times as large, and under 6
-times as long by the CPU time of the process, as on an idle machine. Where
-the system counts that time in coarse steps (Windows counts it in steps of
-the scheduler's tick, some 16 ms), a reading calls the reader as many times
+The time is the CPU time of the process, never the time on the wall. A machine
+busy with more work than it has cores lets a short reading through between two
+other processes and stops a long one again and again: with every core kept
+busy by other processes, a linear reading of the snippet gate took 28 times as
+long on the wall for an input eight times as large, and 7 times as long by the
+CPU time of the process, as on an idle machine. Other processes lengthen the
+CPU time of a reading too, since they share the caches and the cores, but they
+lengthen both readings much alike, so their ratio stays well under the bound.
+Where the system counts that time in coarse steps (Windows counts it in steps
+of the scheduler's tick, some 16 ms), a reading calls the reader as many times
 over as spans :data:`_STEPS_PER_READING` steps, counted once for each size
 before the readings start, and takes the time of one call; where one call
 spans them, as on Linux and macOS, one call is a reading.
@@ -37,10 +39,16 @@ first call is not charged to the smaller size, and the garbage collector is
 held off while the readings run, as :mod:`timeit` holds it, so that a
 collection the larger input sets off is not charged to it alone.
 
-A test chooses the smaller size so that its reading takes a millisecond or
-more, and so that the quadratic reading the fix replaced, at ``factor`` times
-that size, still ends within a minute or so: a scratch copy that restores it
-shows the test failing.
+A test of linear time chooses the smaller size so that its reading takes a
+millisecond or more, and so that the quadratic reading the fix replaced, at
+``factor`` times that size, still ends within a minute or so: a scratch copy
+that restores it shows the test failing. A reading that is part linear and
+part quadratic grows by a ratio between the two, and fails only once its
+quadratic part is some three quarters of the larger reading, so the larger the
+size, the smaller the constant of a quadratic term the test catches. A test
+that the time does not grow cannot lengthen its reading by the size, and the
+reading may stay under a millisecond; it chooses the sizes so that the work
+the fix removed would be most of the larger reading.
 """
 
 from __future__ import annotations

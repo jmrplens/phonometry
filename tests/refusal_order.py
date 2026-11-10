@@ -29,7 +29,7 @@ from __future__ import annotations
 import importlib.util
 import warnings
 from functools import cache
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
 import pytest
@@ -48,11 +48,22 @@ _HELD = "_refusal_order_recorder"
 
 
 @cache
-def _package_directory() -> str:
+def _package_directory() -> PurePath | None:
     """The directory of the installed package, found without importing it."""
     spec = importlib.util.find_spec("phonometry")
     origin = None if spec is None else spec.origin
-    return "" if origin is None else str(Path(origin).parent) + "/"
+    return None if origin is None else Path(origin).parent
+
+
+def _shown_in(filename: str, directory: PurePath) -> bool:
+    """Whether *filename* names a file under *directory*, read by its own rules.
+
+    The file name a warning carries is written the way the platform writes
+    it: with backslashes on Windows, and there a drive letter in either case
+    names the same file. Reading it as a path of the directory's own kind,
+    and not as text, keeps both from hiding a warning of the package.
+    """
+    return type(directory)(filename).is_relative_to(directory)
 
 
 def _waits_on_a_refusal(expected: tuple[object, ...]) -> bool:
@@ -70,8 +81,8 @@ def _is_library_advisory(record: warnings.WarningMessage) -> bool:
     from phonometry import PhonometryWarning
 
     directory = _package_directory()
-    return issubclass(record.category, PhonometryWarning) or bool(
-        directory and str(record.filename).replace("\\", "/").startswith(directory)
+    return issubclass(record.category, PhonometryWarning) or (
+        directory is not None and _shown_in(str(record.filename), directory)
     )
 
 

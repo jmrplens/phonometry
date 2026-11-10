@@ -8,10 +8,14 @@ so the plugin's verdict is the thing under test.
 
 from __future__ import annotations
 
+import importlib.machinery
+import importlib.util
 import warnings
+from pathlib import PureWindowsPath
 
 import numpy as np
 import pytest
+import refusal_order
 
 import phonometry
 from phonometry import emission
@@ -44,6 +48,46 @@ def test_a_warning_shown_at_a_library_line_counts_too() -> None:
     error = ValueError("refused")
     with pytest.raises(pytest.fail.Exception, match="RuntimeWarning"):
         _closed(raises, error)
+
+
+def test_a_warning_shown_at_a_library_line_counts_on_windows_too(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A warning's file name written with backslashes still names the package.
+
+    Windows writes the package's directory and the file a NumPy warning is
+    shown at with backslashes, the drive letter in either case. The plugin
+    is handed that platform's paths here, so the case runs on every runner.
+    """
+    package = r"D:\a\phonometry\src\phonometry"
+    spec = importlib.machinery.ModuleSpec(
+        "phonometry", None, origin=package + r"\__init__.py"
+    )
+    find_spec = importlib.util.find_spec
+
+    def found(name: str, package: str | None = None) -> object:
+        return spec if name == "phonometry" else find_spec(name, package)
+
+    monkeypatch.setattr(importlib.util, "find_spec", found)
+    monkeypatch.setattr(refusal_order, "Path", PureWindowsPath)
+    refusal_order._package_directory.cache_clear()
+    try:
+        inside = warnings.WarningMessage(
+            "overflow encountered in multiply",
+            RuntimeWarning,
+            r"d:\a\phonometry\src\phonometry\filters\core.py",
+            1,
+        )
+        beside = warnings.WarningMessage(
+            "overflow encountered in multiply",
+            RuntimeWarning,
+            r"D:\a\phonometry\src\phonometry_extra\core.py",
+            1,
+        )
+        assert refusal_order._is_library_advisory(inside)
+        assert not refusal_order._is_library_advisory(beside)
+    finally:
+        refusal_order._package_directory.cache_clear()
 
 
 def test_a_refusal_alone_passes_and_a_warning_of_the_test_is_handed_back() -> None:

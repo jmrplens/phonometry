@@ -404,7 +404,11 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     record needs, and none of them, nor any of the three jobs, lets the run go
     on past a failure: a comparison made before the record is downloaded
     sends every URL on every deploy, and a submission that fails quietly
-    keeps a record of pages the engines were never told about. The record has
+    keeps a record of pages the engines were never told about. The download
+    of the record is the one step that goes on: a record that expired, was
+    deleted or cannot be downloaded is not a reason to stop the deploy, so
+    what it left is set aside and the full list goes out, as it does with no
+    record at all, with a warning on the run. The record has
     to travel too: the IndexNow job keeps the manifest it was handed, only
     once its submission went through, under the name the build looks for, in
     the folder the comparison reads, and the build may read it from an
@@ -491,8 +495,9 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     )
     assert not _runs_on(hand.get("if"), "pull_request")
 
-    # A failure anywhere on the way stops the run before the record is kept.
-    for what, step in {**on_every_event, "fetching": fetch, "keeping": keep}.items():
+    # A failure anywhere on the way stops the run before the record is kept,
+    # but for the download of the record, held below to going on.
+    for what, step in {**on_every_event, "keeping": keep}.items():
         assert not step.get("continue-on-error"), (
             f"a failure of the {what} step lets its job go on, "
             "so a record can be kept of pages that were not sent"
@@ -535,6 +540,39 @@ def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
     assert isinstance(inputs, dict)
     assert inputs.get("run-id") == f"${{{{ steps.{finder}.outputs.run-id }}}}"
     assert inputs.get("github-token"), "another run's artifact needs a token"
+
+    # A record that cannot be downloaded does not stop the deploy: the
+    # download goes on past its failure, and the step after it, which runs
+    # only then, takes away whatever the download left, so the comparison
+    # finds no record and the full list goes out.
+    fetcher = fetch.get("id")
+    assert fetcher, (
+        "the download of the record has no id for a step to read its outcome by"
+    )
+    assert fetch.get("continue-on-error") is True, (
+        "a record that expired, was deleted or cannot be downloaded stops the build, "
+        "and with it the deploy, where the full list should go out"
+    )
+    discard_at, discard = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(build)
+            if step.get("if") == f"steps.{fetcher}.outcome == 'failure'"
+        ],
+        "set aside a record that could not be downloaded",
+    )
+    assert fetch_at < discard_at < compare_at, (
+        "what a failed download left is set aside after the comparison read it"
+    )
+    removal = f'rm -rf "{_shell_path(inputs["path"])}"'
+    assert removal in " ".join(str(discard.get("run", "")).split()), (
+        f"the step after a failed download does not run {removal}, "
+        "so the comparison can read a part of the record"
+    )
+    assert "::warning::" in str(discard.get("run", "")), (
+        "a record that could not be downloaded sends the full list with no word on the run"
+    )
+    assert not discard.get("continue-on-error")
     permissions = jobs["build"].get("permissions")
     assert isinstance(permissions, dict)
     assert permissions.get("actions") == "read"

@@ -15,9 +15,10 @@
 // the engines were last told. The next build finds the newest record, compares
 // its own manifest with it and hands the IndexNow job the URLs whose digest
 // changed, the URLs that are new and the URLs that are gone. When there is no
-// record to compare with (the first deploy, a record that expired, one that
-// cannot be read or one written by another version of this script), the job
-// sends every URL of the sitemap, as it did before.
+// record to compare with (the first deploy, a record that expired or could
+// not be downloaded, one that cannot be read or one written by another
+// version of this script), the job sends every URL of the sitemap, as it did
+// before, and the deploy goes on.
 //
 // The record is the IndexNow job's own, not the manifest the live site
 // carries, because a deploy goes live before its pages are submitted. A run
@@ -309,22 +310,32 @@ export function parseManifest(text) {
 /**
  * The previous manifest, from a file or a URL: `{ pages, from }` when it can
  * be compared with, `{ reason, from }` when it cannot. Nothing here fails the
- * build: without a previous manifest the full list goes out, as it always did.
+ * build: without a previous manifest the full list goes out, as it always did,
+ * and so it does when the manifest cannot be read, a body cut off on the way
+ * or a path that holds no file, as a download that failed half way can leave.
  */
 export async function loadPrevious(source) {
 	if (/^https?:\/\//.test(source)) {
 		let response;
+		let text;
 		try {
 			response = await fetch(source, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), redirect: 'follow' });
+			if (response.status === 404) return { from: source, reason: 'the live site has none yet (404)' };
+			if (!response.ok) return { from: source, reason: `the live site answered ${response.status}` };
+			text = await response.text();
 		} catch (error) {
 			return { from: source, reason: `it could not be fetched (${error.cause?.code ?? error.message})` };
 		}
-		if (response.status === 404) return { from: source, reason: 'the live site has none yet (404)' };
-		if (!response.ok) return { from: source, reason: `the live site answered ${response.status}` };
-		return { from: source, ...parseManifest(await response.text()) };
+		return { from: source, ...parseManifest(text) };
 	}
 	if (!existsSync(source)) return { from: source, reason: 'there is no such file' };
-	return { from: source, ...parseManifest(readFileSync(source, 'utf8')) };
+	let text;
+	try {
+		text = readFileSync(source, 'utf8');
+	} catch (error) {
+		return { from: source, reason: `it could not be read (${error.code ?? error.message})` };
+	}
+	return { from: source, ...parseManifest(text) };
 }
 
 /**

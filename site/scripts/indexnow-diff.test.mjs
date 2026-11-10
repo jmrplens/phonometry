@@ -195,6 +195,24 @@ test('a previous manifest that cannot be compared with sends every URL, and says
 	}
 });
 
+test('a previous manifest that cannot be read sends every URL, and says why, where it stopped the build', (t) => {
+	// What a download that failed half way can leave: a path the record should
+	// be at that holds something that is not a file.
+	const dir = mkdtempSync(join(tmpdir(), 'indexnow-unreadable-'));
+	t.after(() => rmSync(dir, { recursive: true, force: true }));
+	const previous = join(dir, MANIFEST_NAME);
+	mkdirSync(previous);
+	const dist = build(t, BASE);
+	manifest(dist);
+	const out = join(dir, 'handed');
+	const ran = run('diff', '--dist', dist, '--previous', previous, '--out', out);
+	assert.equal(ran.status, 0, ran.err);
+	const sent = JSON.parse(readFileSync(join(out, URLS_NAME), 'utf8'));
+	assert.equal(sent.full, true);
+	assert.match(sent.reason, /it could not be read \(EISDIR\)/);
+	assert.deepEqual(sent.urls, Object.keys(BASE).map(url).sort());
+});
+
 test('a copy that differs only in its Version: and Install: lines hashes the same', (t) => {
 	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install']);
 	const stamped = (version) =>
@@ -362,7 +380,7 @@ test('the deploy fails when a step after the manifest changed the pages it descr
 	assert.match(ran.err, /is not the manifest the built pages give/);
 });
 
-test('a previous manifest named by its URL is read over HTTP, and a missing or failing one sends the full list', async (t) => {
+test('a previous manifest named by its URL is read over HTTP, and a missing, failing or cut off one sends the full list', async (t) => {
 	const pages = { [url('/a/')]: 'a'.repeat(64) };
 	const server = createServer((request, response) => {
 		if (request.url.startsWith('/ok')) {
@@ -371,6 +389,11 @@ test('a previous manifest named by its URL is read over HTTP, and a missing or f
 		} else if (request.url.startsWith('/error')) {
 			response.writeHead(503);
 			response.end('unavailable');
+		} else if (request.url.startsWith('/cut')) {
+			// A body cut off on the way: fewer bytes than the length it announced.
+			response.writeHead(200, { 'content-type': 'application/json', 'content-length': '4096' });
+			response.write('{"format": 1, "pages": {');
+			setTimeout(() => request.socket.destroy(), 20);
 		} else {
 			response.writeHead(404);
 			response.end('<!DOCTYPE html><title>404</title>');
@@ -382,6 +405,7 @@ test('a previous manifest named by its URL is read over HTTP, and a missing or f
 	assert.deepEqual((await loadPrevious(`${base}/ok?v=1`)).pages, pages);
 	assert.equal((await loadPrevious(`${base}/missing?v=1`)).reason, 'the live site has none yet (404)');
 	assert.equal((await loadPrevious(`${base}/error?v=1`)).reason, 'the live site answered 503');
+	assert.match((await loadPrevious(`${base}/cut?v=1`)).reason, /it could not be fetched/);
 	server.close();
 	assert.match((await loadPrevious(`${base}/ok?v=2`)).reason, /it could not be fetched/);
 	assert.equal(urlsToSubmit({ [url('/a/')]: 'b'.repeat(64) }, undefined).full, true);

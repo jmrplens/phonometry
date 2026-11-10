@@ -275,11 +275,12 @@ jobs:
         # alone, a new or a removed page is sent as such, a new release number
         # in the header of every Markdown copy sends nothing, nor does a new
         # banner or footer around a page read from its <main>, no previous
-        # manifest sends every URL, and the record compared with is the newest
-        # one a run of main kept, read from a stand-in for the API. Node's own
-        # test runner, after the install: the structured-data check and the
-        # guides' dates read a page's frontmatter with the parser the content
-        # collection uses, from @astrojs/markdown-remark.
+        # manifest, or one that cannot be read, sends every URL, and the
+        # record compared with is the newest one a run of main kept, read from
+        # a stand-in for the API. Node's own test runner, after the install:
+        # the structured-data check and the guides' dates read a page's
+        # frontmatter with the parser the content collection uses, from
+        # @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own
@@ -525,23 +526,38 @@ jobs:
         run: node scripts/indexnow-diff.mjs last-submitted
         working-directory: site
       - name: Fetch the manifest of the pages IndexNow was last sent
+        # A record that expired or was deleted after the step above listed
+        # it, or that cannot be downloaded, is not a reason to stop the
+        # deploy: this step goes on past its failure, the next one takes
+        # away whatever it left, and the full list goes out.
+        id: record
         if: steps.submitted.outputs.run-id != ''
+        continue-on-error: true
         uses: actions/download-artifact@v8
         with:
           name: indexnow-submitted
           run-id: ${{ steps.submitted.outputs.run-id }}
           github-token: ${{ github.token }}
           path: ${{ runner.temp }}/indexnow/submitted
+      - name: Set aside a record that could not be downloaded
+        # A download that failed half way can leave part of the record, which
+        # the comparison must not read as the pages IndexNow was last sent.
+        if: steps.record.outcome == 'failure'
+        env:
+          RUN_ID: ${{ steps.submitted.outputs.run-id }}
+        run: |
+          rm -rf "$RUNNER_TEMP/indexnow/submitted"
+          echo "::warning::[indexnow] the record of run $RUN_ID could not be downloaded: the full list goes out."
       - name: Work out which pages changed since IndexNow was last sent them
         # The pages whose digest changed, the new ones and the removed ones.
-        # With no record to compare with, or one that cannot be read, the full
-        # list goes out, as before. The comparison is with the record, not
-        # with the manifest the live site carries: a deploy goes live before
-        # its IndexNow job submits, so a run whose job failed, or which a
-        # newer push cancelled in between, would otherwise leave its pages
-        # out for good. It fails if a step changed the pages after the
-        # manifest was written, which would publish a manifest that does not
-        # describe the site.
+        # With no record to compare with, one that could not be downloaded or
+        # one that cannot be read, the full list goes out, as before. The
+        # comparison is with the record, not with the manifest the live site
+        # carries: a deploy goes live before its IndexNow job submits, so a
+        # run whose job failed, or which a newer push cancelled in between,
+        # would otherwise leave its pages out for good. It fails if a step
+        # changed the pages after the manifest was written, which would
+        # publish a manifest that does not describe the site.
         run: >-
           node scripts/indexnow-diff.mjs diff
           --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"

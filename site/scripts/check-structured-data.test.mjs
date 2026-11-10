@@ -759,7 +759,7 @@ test('an errata family page naming fewer works than its corrects lists fails', (
 		new RegExp(
 			'FAIL 1 errata page\\(s\\) name in about other works than their corrects lists, or in another order ' +
 				`\\(first: /reference/errata/iso-1/ names 1 work\\(s\\) and its corrects lists 2; at position 2 it names nothing ` +
-				`where corrects lists ${EN}#std-iso-2-2010\\)`,
+				`where corrects lists ${RegExp.escape(EN)}#std-iso-2-2010\\)`,
 		),
 	);
 	assert.match(ran.err, /FAIL the en errata family pages name 1 work\(s\) in about, and their corrects list 2/);
@@ -776,13 +776,13 @@ test('an errata family page naming its works in another order, or one its correc
 	assert.match(
 		ran.err,
 		new RegExp(
-			`/es/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 2; at position 1 it names ${ES}#std-iso-1-2000 where corrects lists ${ES}#std-iso-2-2010`,
+			`/es/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 2; at position 1 it names ${RegExp.escape(ES)}#std-iso-1-2000 where corrects lists ${RegExp.escape(ES)}#std-iso-2-2010`,
 		),
 	);
 	assert.match(
 		ran.err,
 		new RegExp(
-			`/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 1; at position 2 it names ${EN}#std-iso-2-2010 where corrects lists nothing`,
+			`/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 1; at position 2 it names ${RegExp.escape(EN)}#std-iso-2-2010 where corrects lists nothing`,
 		),
 	);
 	assert.match(ran.err, /FAIL the en errata family pages name 2 work\(s\) in about, and their corrects list 1/);

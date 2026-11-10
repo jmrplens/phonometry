@@ -169,7 +169,7 @@ the rig is near either end of the range.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cavity_volume`, `frequency`, `kappa_prime`, `level_specimen`, `level_termination`, `piston_stroke_specimen`, `piston_stroke_termination` or `static_pressure_pa` is not a single number. |
+| TypeError | if `background_level`, `cavity_volume`, `frequency`, `kappa_prime`, `level_specimen`, `level_termination`, `piston_stroke_specimen`, `piston_stroke_termination` or `static_pressure_pa` is not a single number. |
 
 ## ANNEX_A_AIR
 

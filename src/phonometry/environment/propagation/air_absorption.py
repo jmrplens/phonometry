@@ -79,7 +79,7 @@ from ..._internal.validation import (
     require_same_shape,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning, warn_caller
+from ..._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from ...materials.absorbers.sound_absorption import power_attenuation_from_alpha
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -546,21 +546,24 @@ def atmospheric_attenuation(
         number.
         ``distance`` is refused the same way when it is not one real number.
     """
-    freqs = real_array(frequencies, "frequencies")
-    alpha = air_attenuation(
-        frequencies,
-        temperature_c=temperature_c,
-        relative_humidity_percent=relative_humidity_percent,
-        static_pressure_kpa=static_pressure_kpa,
-        exact_midband=exact_midband,
-    )
-    if exact_midband:
-        freqs = _exact_midband(freqs)
-    return AtmosphericAttenuation(
-        frequencies=np.atleast_1d(freqs),
-        attenuation_db_per_m=np.atleast_1d(alpha),
-        temperature_c=float(temperature_c),
-        relative_humidity_percent=float(relative_humidity_percent),
-        static_pressure_kpa=float(static_pressure_kpa),
-        distance=None if distance is None else real_number(distance, "distance"),
-    )
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        freqs = real_array(frequencies, "frequencies")
+        alpha = air_attenuation(
+            frequencies,
+            temperature_c=temperature_c,
+            relative_humidity_percent=relative_humidity_percent,
+            static_pressure_kpa=static_pressure_kpa,
+            exact_midband=exact_midband,
+        )
+        if exact_midband:
+            freqs = _exact_midband(freqs)
+        return AtmosphericAttenuation(
+            frequencies=np.atleast_1d(freqs),
+            attenuation_db_per_m=np.atleast_1d(alpha),
+            temperature_c=float(temperature_c),
+            relative_humidity_percent=float(relative_humidity_percent),
+            static_pressure_kpa=float(static_pressure_kpa),
+            distance=None if distance is None else real_number(distance, "distance"),
+        )

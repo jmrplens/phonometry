@@ -61,6 +61,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from ..._internal.warnings import advisories_held
 from .air_absorption import air_attenuation
 
 if TYPE_CHECKING:
@@ -1176,52 +1177,57 @@ def outdoor_propagation_attenuation(
         ``ground_source`` is not a single number, or ``frequencies`` holds a text or a
         value that is not a real number.
     """
-    require_scalar(ground_middle, "ground_middle")
-    require_scalar(ground_receiver, "ground_receiver")
-    require_scalar(ground_source, "ground_source")
-    require_scalar(distance, "distance")
-    relative_humidity_percent = (
-        70.0 if relative_humidity_percent is None else relative_humidity_percent
-    )
-    if distance <= 0.0:
-        raise ValueError(_DISTANCE_NOT_POSITIVE)
-    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_scalar(ground_middle, "ground_middle")
+        require_scalar(ground_receiver, "ground_receiver")
+        require_scalar(ground_source, "ground_source")
+        require_scalar(distance, "distance")
+        relative_humidity_percent = (
+            70.0 if relative_humidity_percent is None else relative_humidity_percent
+        )
+        if distance <= 0.0:
+            raise ValueError(_DISTANCE_NOT_POSITIVE)
+        freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
 
-    a_div = np.full_like(freqs, geometric_divergence(distance))
-    a_atm = atmospheric_absorption(
-        distance,
-        frequencies=freqs,
-        temperature_c=temperature_c,
-        relative_humidity_percent=relative_humidity_percent,
-        static_pressure_kpa=static_pressure_kpa,
-    )
-    a_gr = ground_attenuation(
-        distance,
-        source_height_m,
-        receiver_height_m,
-        frequencies=freqs,
-        ground_source=ground_source,
-        ground_middle=ground_middle,
-        ground_receiver=ground_receiver,
-        projected_distance=projected_distance,
-    )
+        a_div = np.full_like(freqs, geometric_divergence(distance))
+        a_atm = atmospheric_absorption(
+            distance,
+            frequencies=freqs,
+            temperature_c=temperature_c,
+            relative_humidity_percent=relative_humidity_percent,
+            static_pressure_kpa=static_pressure_kpa,
+        )
+        a_gr = ground_attenuation(
+            distance,
+            source_height_m,
+            receiver_height_m,
+            frequencies=freqs,
+            ground_source=ground_source,
+            ground_middle=ground_middle,
+            ground_receiver=ground_receiver,
+            projected_distance=projected_distance,
+        )
 
-    if barrier is None:
-        a_bar = np.zeros_like(freqs)
-    else:
-        dz = barrier_attenuation(barrier, distance, freqs)
-        a_bar = np.maximum(dz, 0.0) if barrier.lateral else np.maximum(dz - a_gr, 0.0)
+        if barrier is None:
+            a_bar = np.zeros_like(freqs)
+        else:
+            dz = barrier_attenuation(barrier, distance, freqs)
+            a_bar = (
+                np.maximum(dz, 0.0) if barrier.lateral else np.maximum(dz - a_gr, 0.0)
+            )
 
-    a_total = a_div + a_atm + a_gr + a_bar
-    return OutdoorAttenuation(
-        frequencies=freqs,
-        a_div=a_div,
-        a_atm=a_atm,
-        a_gr=a_gr,
-        a_bar=a_bar,
-        a_total=a_total,
-        d_omega=np.zeros_like(freqs),
-    )
+        a_total = a_div + a_atm + a_gr + a_bar
+        return OutdoorAttenuation(
+            frequencies=freqs,
+            a_div=a_div,
+            a_atm=a_atm,
+            a_gr=a_gr,
+            a_bar=a_bar,
+            a_total=a_total,
+            d_omega=np.zeros_like(freqs),
+        )
 
 
 def predicted_receiver_level(

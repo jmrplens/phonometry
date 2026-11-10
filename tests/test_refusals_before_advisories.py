@@ -18,6 +18,7 @@ import numpy as np
 import pytest
 
 from phonometry import (
+    building,
     emission,
     environment,
     fluids,
@@ -862,6 +863,292 @@ def test_an_impedance_tube_refusal_found_after_a_warning_still_comes_first(
     downstream face is silent, the division by ``sin(k s)`` at 0 Hz or by
     ``H_R - H12`` where the two meet. Every argument is checked before any of
     them, and the advisories come once the result stands.
+    """
+    with pytest.raises(refused, match=refusal):
+        call()
+
+
+#: Three corners where ISO 16283 asks for four, so the low-frequency
+#: procedure advises, over the five bands of an ISO 16283 field measurement.
+_THREE_CORNERS = np.array([[55.0, 60.0, 50.0], [56.0, 58.0, 52.0], [50.0, 54.0, 56.0]])
+_FIELD_BANDS = [50.0, 63.0, 80.0, 100.0, 125.0]
+_FIELD_L1 = np.array([80.0, 82.0, 79.0, 75.0, 74.0])
+_FIELD_L2 = np.array([50.0, 52.0, 49.0, 45.0, 44.0])
+_FIELD_T2 = np.array([0.60, 0.55, 0.50, 0.45, 0.40])
+
+
+def _three_corner_procedure(
+    t63: float | None = 0.7,
+) -> building.LowFrequencyProcedure:
+    return building.LowFrequencyProcedure(
+        volume=18.0, corner_levels=_THREE_CORNERS, reverberation_63_octave=t63
+    )
+
+
+def _facade_with_three_corners(**arguments: Any) -> object:
+    return building.facade_insulation(
+        _FIELD_L1,
+        _FIELD_L2,
+        _FIELD_T2,
+        **{
+            "area": 10.0,
+            "volume": 18.0,
+            "surface_level": _FIELD_L1,
+            "frequencies": _FIELD_BANDS,
+            "low_frequency": _three_corner_procedure(),
+            **arguments,
+        },
+    )
+
+
+#: The one-third-octave bands of ISO 11957 and a room and cabin spectrum.
+_CABIN_BANDS = np.array(
+    [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0]
+    + [800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0]
+)
+_ROOM_LEVELS = np.linspace(88.0, 80.0, _CABIN_BANDS.size)
+_CABIN_LEVELS = _ROOM_LEVELS - np.linspace(10.0, 38.0, _CABIN_BANDS.size)
+_DUCT_OCTAVES = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+
+
+def _decaying_ir(samples: int, seed: int = 7) -> np.ndarray:
+    """An exponentially decaying noise response sampled at 8 kHz."""
+    t = np.arange(samples) / 8000.0
+    rng = np.random.default_rng(seed)
+    return np.exp(-6.91 * t / 0.5) * rng.standard_normal(samples)
+
+
+#: Band limits whose two top octaves sit above fs / 2 at 8 kHz, so the bank
+#: advises that it drops them.
+_PAST_NYQUIST = (500.0, 8000.0)
+
+
+#: A call of another domain that meets an advisory and a refusal both, the
+#: advisory computed first, the exception it must raise and its message.
+_ADVISED_THEN_REFUSED_ELSEWHERE: dict[
+    str, tuple[Callable[[], object], type[Exception], str]
+] = {
+    "absorption-small-room-reverberation": (
+        lambda: materials.absorption_coefficient(-1.0, 1.0, 120.0, 11.0),
+        ValueError,
+        "'t1' must be positive",
+    ),
+    "absorption-climate-second-temperature": (
+        lambda: materials.absorption_coefficient(
+            2.0, 1.0, 200.0, 11.0, temperature1_c=35.0, temperature2_c=-300.0
+        ),
+        ValueError,
+        "'temperature2_c' must be finite and above",
+    ),
+    "absorption-measurement-climate-reverberation": (
+        lambda: materials.measure_sound_absorption(
+            [-1.0, 2.0],
+            [1.0, 1.0],
+            frequencies=[100.0, 125.0],
+            volume=200.0,
+            area=11.0,
+            temperature_c=35.0,
+        ),
+        ValueError,
+        "'t_empty' must be positive",
+    ),
+    "alternating-airflow-validity-background": (
+        lambda: materials.alternating_airflow_resistance(
+            80.0,
+            70.0,
+            piston_stroke_specimen=1e-3,
+            piston_stroke_termination=1e-3,
+            frequency=1.0,
+            cavity_volume=1e-3,
+            background_level="x",  # type: ignore[arg-type]
+        ),
+        TypeError,
+        "'background_level' must be one number",
+    ),
+    "floating-floor-gas-floor-mass": (
+        lambda: materials.floating_floor_resonance(
+            30.0,
+            200.0,
+            -1.0,
+            airflow_resistivity_kpa_s_m2=5.0,
+            thickness_m=0.02,
+            porosity=0.9,
+        ),
+        ValueError,
+        "'floor_mass_per_area_kg_m2' must be positive",
+    ),
+    "low-frequency-corners-reverberation": (
+        lambda: building.apply_low_frequency_procedure(
+            _FIELD_L2,
+            frequencies=_FIELD_BANDS,
+            procedure=_three_corner_procedure(t63=None),
+            reverberation_time=_FIELD_T2,
+            room="receiving",
+        ),
+        ValueError,
+        "needs the 63 Hz octave reverberation time",
+    ),
+    "airborne-source-corners-receiver-volume": (
+        lambda: building.airborne_insulation(
+            _FIELD_L1,
+            _FIELD_L2,
+            _FIELD_T2,
+            area=10.0,
+            volume=20.0,
+            frequencies=_FIELD_BANDS,
+            source_low_frequency=_three_corner_procedure(t63=None),
+            receiver_low_frequency=_three_corner_procedure(),
+        ),
+        ValueError,
+        "'volume' is 20",
+    ),
+    "airborne-source-corners-receiver-reverberation": (
+        lambda: building.airborne_insulation(
+            _FIELD_L1,
+            _FIELD_L2,
+            _FIELD_T2,
+            area=10.0,
+            volume=18.0,
+            frequencies=_FIELD_BANDS,
+            source_low_frequency=_three_corner_procedure(t63=None),
+            receiver_low_frequency=_three_corner_procedure(t63=None),
+        ),
+        ValueError,
+        "needs the 63 Hz octave reverberation time",
+    ),
+    "facade-corners-area": (
+        lambda: _facade_with_three_corners(area=-1.0),
+        ValueError,
+        "'area' must be positive",
+    ),
+    "lining-resonance-glued-area": (
+        lambda: building.lining_improvement(
+            10.0, system="mineral_wool", glued_area=150.0
+        ),
+        ValueError,
+        "'glued_area' is a percentage and cannot exceed 100",
+    ),
+    "cabin-background-margin-a-weighted-pair": (
+        lambda: noise_control.cabin_insulation(
+            _ROOM_LEVELS,
+            _CABIN_LEVELS,
+            frequencies=_CABIN_BANDS,
+            cabin_background_levels=_CABIN_LEVELS - 2.0,
+            method="in-situ-actual-noise",
+            a_weighted_room_level=86.4,
+        ),
+        ValueError,
+        "give both 'a_weighted_room_level' and 'a_weighted_cabin_level'",
+    ),
+    "duct-path-plane-wave-element": (
+        lambda: noise_control.duct_path(
+            np.full(8, 80.0),
+            ["silencer"],  # type: ignore[list-item]
+            frequencies=_DUCT_OCTAVES,
+            section={"width_m": 0.9144, "height_m": 0.6096},
+            flow_velocity=8.0,
+        ),
+        TypeError,
+        "'elements' must hold DuctElement entries",
+    ),
+    "stage-support-dropped-bands-short-response": (
+        lambda: room.stage_support(_decaying_ir(400), fs=8000, limits=_PAST_NYQUIST),
+        ValueError,
+        "integrates to 0.1 s",
+    ),
+    "early-lateral-dropped-bands-short-response": (
+        lambda: room.early_lateral_energy_fraction(
+            _decaying_ir(400), _decaying_ir(400, 8), fs=8000, limits=_PAST_NYQUIST
+        ),
+        ValueError,
+        "integrates to 0.08 s",
+    ),
+    "late-lateral-dropped-bands-reference": (
+        lambda: room.late_lateral_sound_level(
+            _decaying_ir(16000),
+            _decaying_ir(16000, 8),
+            fs=8000,
+            limits=_PAST_NYQUIST,
+            reference_level=[1.0, 2.0],
+        ),
+        ValueError,
+        "'reference_level' has shape",
+    ),
+    "strength-dropped-bands-reference": (
+        lambda: room.sound_strength(
+            _decaying_ir(16000),
+            fs=8000,
+            limits=_PAST_NYQUIST,
+            reference_level=[1.0, 2.0],
+        ),
+        ValueError,
+        "'reference_level' has shape",
+    ),
+    "nipts-domain-frequency": (
+        lambda: hearing.nipts(110.0, 10.0, 0.5, frequencies=[123.0]),
+        ValueError,
+        "not an ISO 1999 audiometric frequency",
+    ),
+    "htlan-domain-empty-frequencies": (
+        lambda: hearing.htlan(80.0, "male", 95.0, 60.0, 0.5, frequencies=[]),
+        ValueError,
+        "must carry at least one audiometric frequency",
+    ),
+    "full-day-spread-instrument": (
+        lambda: hearing.full_day_exposure(
+            [80.0, 85.0, 90.0],
+            8.0,
+            instrument="bogus",  # type: ignore[arg-type]
+        ),
+        ValueError,
+        "'instrument' must be one of",
+    ),
+    "atmospheric-attenuation-temperature-distance": (
+        lambda: environment.atmospheric_attenuation(
+            [1000.0], temperature_c=60.0, distance=-1.0
+        ),
+        ValueError,
+        "'distance' must be a finite, non-negative number",
+    ),
+    "outdoor-attenuation-temperature-ground": (
+        lambda: environment.outdoor_propagation_attenuation(
+            100.0, 1.0, 1.5, temperature_c=60.0, ground_source=2.0
+        ),
+        ValueError,
+        "'ground_source' must be within",
+    ),
+    "impulsive-adjustment-no-onset-laeq": (
+        lambda: environment.impulsive_sound_adjustment(
+            0.1 * np.sin(2.0 * np.pi * 1000.0 * np.arange(16000) / 8000.0),
+            8000.0,
+            laeq="x",  # type: ignore[arg-type]
+        ),
+        TypeError,
+        "'laeq' must be one number",
+    ),
+    "facade-corners-surface-level": (
+        lambda: _facade_with_three_corners(surface_level=_FIELD_L1[:3]),
+        ValueError,
+        "'surface_level' \\(3,\\), 'l2' \\(5,\\) must all have the same shape",
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("call", "refused", "refusal"),
+    list(_ADVISED_THEN_REFUSED_ELSEWHERE.values()),
+    ids=list(_ADVISED_THEN_REFUSED_ELSEWHERE),
+)
+def test_a_refusal_found_after_an_advisory_still_comes_first(
+    call: Callable[[], object], refused: type[Exception], refusal: str
+) -> None:
+    """Each call advises before a step that refuses, and the refusal is met.
+
+    The advisory comes from a helper or a public function the call composes
+    (the room volume, the climate of one measurement of two, the gas term of
+    a resilient layer, the validity of an airflow reading), or it was simply
+    written ahead of the last checks; every argument is now checked first, or
+    the call holds its advisories until its result stands.
     """
     with pytest.raises(refused, match=refusal):
         call()

@@ -435,15 +435,6 @@ def lining_improvement(
     """
     f0 = require_positive(resonance_frequency, "resonance_frequency")
     require_choice(system, "system", tuple(_ANNEX_D_SYSTEMS))
-    low, high = _TABLE_D1_RANGE
-    if not low <= f0 <= high:
-        warn_caller(
-            f"resonance_frequency = {f0:g} Hz lies outside the "
-            f"{low:g} Hz to {high:g} Hz range Annex D puts lining resonances "
-            "on; the fits are monotonic in lg(fo) and unbounded below it, so "
-            "the result is an extrapolation.",
-            BuildingPredictionWarning,
-        )
     ratings = [
         max(floor, slope * float(np.log10(f0)) + intercept)
         for slope, intercept, floor in _ANNEX_D_SYSTEMS[system]
@@ -467,7 +458,7 @@ def lining_improvement(
             raise ValueError(msg)
         slope, offset = _ANNEX_D_GLUE
         ratings = [value + slope * area + offset for value in ratings]
-    return LiningImprovementResult(
+    result = LiningImprovementResult(
         resonance_frequency=f0,
         system=system,
         delta_rw=float(ratings[0]),
@@ -478,6 +469,18 @@ def lining_improvement(
         if glued_area is None
         else real_number(glued_area, "glued_area"),
     )
+    # The glued area is refused, when it is, before the range is advised on
+    # (rule A63).
+    low, high = _TABLE_D1_RANGE
+    if not low <= f0 <= high:
+        warn_caller(
+            f"resonance_frequency = {f0:g} Hz lies outside the "
+            f"{low:g} Hz to {high:g} Hz range Annex D puts lining resonances "
+            "on; the fits are monotonic in lg(fo) and unbounded below it, so "
+            "the result is an extrapolation.",
+            BuildingPredictionWarning,
+        )
+    return result
 
 
 def lining_improvement_in_situ(

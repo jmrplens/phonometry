@@ -65,7 +65,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 
 if TYPE_CHECKING:
     import os
@@ -1024,22 +1024,25 @@ def full_day_exposure(
         or ``instrument`` is not a text, or ``samples`` holds a text or a value that is
         not a real number.
     """
-    arr = real_array(samples, "samples")
-    spread = (
-        arr.size == _MIN_FULL_DAY_SAMPLES
-        and float(settled(arr.max() - arr.min())) >= _SPREAD_ADVISORY_THRESHOLD
-    )
-    if spread and warn:
-        warn_caller(
-            f"Only three full-day measurements spanning {float(arr.max() - arr.min()):.1f} dB "
-            "(>= 3 dB); ISO 9612 Clause 11.3 requires at least two additional measurements.",
-            OccupationalExposureWarning,
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        arr = real_array(samples, "samples")
+        spread = (
+            arr.size == _MIN_FULL_DAY_SAMPLES
+            and float(settled(arr.max() - arr.min())) >= _SPREAD_ADVISORY_THRESHOLD
         )
-    return _sampled_exposure(
-        samples=samples,
-        effective_duration_hours=effective_duration_hours,
-        instrument=instrument,
-        u3=u3,
-        strategy="full_day",
-        warn=warn,
-    )
+        if spread and warn:
+            warn_caller(
+                f"Only three full-day measurements spanning {float(arr.max() - arr.min()):.1f} dB "
+                "(>= 3 dB); ISO 9612 Clause 11.3 requires at least two additional measurements.",
+                OccupationalExposureWarning,
+            )
+        return _sampled_exposure(
+            samples=samples,
+            effective_duration_hours=effective_duration_hours,
+            instrument=instrument,
+            u3=u3,
+            strategy="full_day",
+            warn=warn,
+        )

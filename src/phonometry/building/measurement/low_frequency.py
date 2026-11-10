@@ -784,16 +784,17 @@ def apply_low_frequency_procedure(
     # `LowFrequencyProcedure` fixes that on the way in, so no band lookup is
     # needed on this side and the indices are only used against the default
     # procedure's own, wider, band axis.
+    # The reverberation times are refused, when they are, before the corner
+    # count is advised on (rule A63).
+    substituted = _substituted_reverberation(
+        room, procedure, reverberation_time, levels, indices
+    )
     l_corner = corner_level(procedure.corner_levels)
     l_default = levels[indices]
     l_lf = low_frequency_level(l_default, l_corner)
 
     corrected = levels.copy()
     corrected[indices] = l_lf
-
-    substituted = _substituted_reverberation(
-        room, procedure, reverberation_time, levels, indices
-    )
     t63 = procedure.reverberation_63_octave
 
     return LowFrequencyResult(

@@ -2385,7 +2385,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the specimen, the impedance and the frequencies, before they advise on
   the plane-wave range or a singular denominator, and divide by `sin(k s)`
   at 0 Hz or by an `H12` at the pole of Eq. (17) without NumPy's warning
-  ahead of the refusal that names what follows.
+  ahead of the refusal that names what follows. A sweep of the rest of the
+  library found the same order elsewhere, and each call now checks first or
+  holds its advisories until its result stands: in `materials`,
+  `absorption_coefficient` and `measure_sound_absorption` advised on the
+  room volume, the sample area or the climate of one measurement before
+  refusing a reverberation time or the temperature of the other,
+  `floating_floor_resonance` on the enclosed gas before refusing the
+  floor's mass, and `alternating_airflow_resistance` on its validity
+  before a background level it never checked; in `building`,
+  `apply_low_frequency_procedure` counted the corners before refusing a
+  receiving room without its 63 Hz reverberation time,
+  `airborne_insulation` let the source room's procedure advise before the
+  receiving room's was refused, `facade_insulation` checked its geometry
+  and surface level only after the procedure, and `lining_improvement`
+  advised on the resonance before refusing the glued area; in
+  `noise_control`, `cabin_insulation` advised on the background before
+  refusing half an A-weighted pair, and `duct_path` on the plane-wave
+  limit before refusing an element; in `room`, `stage_support`,
+  `early_lateral_energy_fraction`, `late_lateral_sound_level` and
+  `sound_strength` let the bank advise on the bands it drops before
+  refusing a response too short for their window or a reference level of
+  the wrong shape; in `environment`, `atmospheric_attenuation` and
+  `outdoor_propagation_attenuation` let the air absorption advise on the
+  atmosphere before refusing a distance or a ground factor, and
+  `impulsive_sound_adjustment` said the interval was not impulsive before
+  refusing its `laeq`; in `hearing`, `nipts` advised on its domain before
+  refusing a frequency ISO 1999 does not list, `htlan`, which composes it,
+  before refusing an empty set of frequencies, and `full_day_exposure` on
+  the spread of three measurements before refusing an instrument it does
+  not know.
   `vibration.transfer_stiffness_indirect` refuses a transmissibility that is
   not finite with a `ValueError` naming `transmissibility`, where it
   returned `-inf+nanj`, and `indirect_transfer_stiffness_result` names the

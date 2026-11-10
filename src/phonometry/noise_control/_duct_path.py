@@ -64,6 +64,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import advisories_held
 from ._criterion import (
     CRITERION_FAMILIES,
     CriterionFamily,
@@ -541,77 +542,82 @@ def duct_path(
         number, or ``flow_velocity``, ``self_noise_floor`` or ``speed_of_sound`` is not
         a single number.
     """
-    require_scalar(flow_velocity, "flow_velocity")
-    require_scalar(self_noise_floor, "self_noise_floor")
-    require_scalar(speed_of_sound, "speed_of_sound")
-    f = np.atleast_1d(real_array(frequencies, "frequencies"))
-    if f.ndim != 1 or f.size == 0:
-        msg = "'frequencies' must be a non-empty 1-D array."
-        raise ValueError(msg)
-    n = f.size
-    level = as_band_spectrum(source_level, n, "source_level")
-    family, goal = validate_target(criterion, target)
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_scalar(flow_velocity, "flow_velocity")
+        require_scalar(self_noise_floor, "self_noise_floor")
+        require_scalar(speed_of_sound, "speed_of_sound")
+        f = np.atleast_1d(real_array(frequencies, "frequencies"))
+        if f.ndim != 1 or f.size == 0:
+            msg = "'frequencies' must be a non-empty 1-D array."
+            raise ValueError(msg)
+        n = f.size
+        level = as_band_spectrum(source_level, n, "source_level")
+        family, goal = validate_target(criterion, target)
 
-    if section is not None:
-        for dimension in section:
-            require_choice(dimension, "section", _SECTION_DIMENSIONS)
-        from .duct_modes import _warn_above_plane_wave_limit, plane_wave_limit
+        if section is not None:
+            for dimension in section:
+                require_choice(dimension, "section", _SECTION_DIMENSIONS)
+            from .duct_modes import _warn_above_plane_wave_limit, plane_wave_limit
 
-        # The dimensions are the keyword arguments of plane_wave_limit, which
-        # refuses a name it does not take.
-        dimensions: dict[str, float] = dict(section.items())
-        limit = plane_wave_limit(
-            flow_velocity=flow_velocity, speed_of_sound=speed_of_sound, **dimensions
-        )
-        _warn_above_plane_wave_limit(f, limit, label)
-
-    stages: list[DuctPathStage] = []
-    for position, element in enumerate(elements, start=1):
-        if not isinstance(element, DuctElement):
-            msg = (
-                "'elements' must hold DuctElement entries; got "
-                f"{type(element).__name__} at position {position}."
+            # The dimensions are the keyword arguments of plane_wave_limit, which
+            # refuses a name it does not take.
+            dimensions: dict[str, float] = dict(section.items())
+            limit = plane_wave_limit(
+                flow_velocity=flow_velocity, speed_of_sound=speed_of_sound, **dimensions
             )
-            raise TypeError(msg)
-        attenuation = as_band_spectrum(
-            element.attenuation, n, f"elements[{position - 1}].attenuation"
-        )
-        attenuated = level - attenuation
-        self_noise = as_band_spectrum(
-            element.self_noise,
-            n,
-            f"elements[{position - 1}].self_noise",
-            default=-np.inf if self_noise_floor is None else self_noise_floor,
-        )
-        if self_noise_floor is not None:
-            self_noise = np.maximum(self_noise, self_noise_floor)
-        level = _combine(attenuated, self_noise)
-        stages.append(
-            DuctPathStage(
-                label=element.label,
-                code=element.code or str(position),
-                attenuation=attenuation,
-                attenuated=attenuated,
-                self_noise=self_noise,
-                levels=level,
-            )
-        )
+            _warn_above_plane_wave_limit(f, limit, label)
 
-    room = (
-        None if room_effect is None else as_band_spectrum(room_effect, n, "room_effect")
-    )
-    received = level if room is None else level - room
-    return DuctPathResult(
-        frequencies=f,
-        source_level=as_band_spectrum(source_level, n, "source_level"),
-        source_label=source_label,
-        stages=tuple(stages),
-        room_effect=room,
-        received_level=received,
-        criterion=family,
-        target=goal,
-        label=label,
-    )
+        stages: list[DuctPathStage] = []
+        for position, element in enumerate(elements, start=1):
+            if not isinstance(element, DuctElement):
+                msg = (
+                    "'elements' must hold DuctElement entries; got "
+                    f"{type(element).__name__} at position {position}."
+                )
+                raise TypeError(msg)
+            attenuation = as_band_spectrum(
+                element.attenuation, n, f"elements[{position - 1}].attenuation"
+            )
+            attenuated = level - attenuation
+            self_noise = as_band_spectrum(
+                element.self_noise,
+                n,
+                f"elements[{position - 1}].self_noise",
+                default=-np.inf if self_noise_floor is None else self_noise_floor,
+            )
+            if self_noise_floor is not None:
+                self_noise = np.maximum(self_noise, self_noise_floor)
+            level = _combine(attenuated, self_noise)
+            stages.append(
+                DuctPathStage(
+                    label=element.label,
+                    code=element.code or str(position),
+                    attenuation=attenuation,
+                    attenuated=attenuated,
+                    self_noise=self_noise,
+                    levels=level,
+                )
+            )
+
+        room = (
+            None
+            if room_effect is None
+            else as_band_spectrum(room_effect, n, "room_effect")
+        )
+        received = level if room is None else level - room
+        return DuctPathResult(
+            frequencies=f,
+            source_level=as_band_spectrum(source_level, n, "source_level"),
+            source_label=source_label,
+            stages=tuple(stages),
+            room_effect=room,
+            received_level=received,
+            criterion=family,
+            target=goal,
+            label=label,
+        )
 
 
 def combine_duct_paths(

@@ -96,7 +96,7 @@ from ..._internal.validation import (
     require_positive,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning, warn_caller
+from ..._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 
 __all__ = [
     "PUBLISHED_RESILIENT_LAYERS",
@@ -895,41 +895,44 @@ def floating_floor_resonance(
         ``floor_mass_per_area_kg_m2``, ``resonant_frequency_hz`` or
         ``static_pressure_pa`` is not a single number.
     """
-    require_scalar(floor_mass_per_area_kg_m2, "floor_mass_per_area_kg_m2")
-    require_scalar(resonant_frequency_hz, "resonant_frequency_hz")
-    require_scalar(static_pressure_pa, "static_pressure_pa")
-    require_scalar(airflow_resistivity_kpa_s_m2, "airflow_resistivity_kpa_s_m2")
-    s_apparent = float(
-        apparent_dynamic_stiffness(resonant_frequency_hz, total_mass_per_area_kg_m2)
-    )
-    s_gas = 0.0
-    if airflow_resistivity_kpa_s_m2 < _HIGH_RESISTIVITY:
-        if thickness_m is None or porosity is None:
-            msg = (
-                "'thickness_m' and 'porosity' are required for the enclosed-gas "
-                "term when airflow_resistivity_kpa_s_m2 < 100 kPa.s/m2."
-            )
-            raise ValueError(msg)
-        s_gas = float(
-            enclosed_gas_stiffness(
-                thickness_m, porosity, static_pressure_pa=static_pressure_pa
-            )
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_scalar(floor_mass_per_area_kg_m2, "floor_mass_per_area_kg_m2")
+        require_scalar(resonant_frequency_hz, "resonant_frequency_hz")
+        require_scalar(static_pressure_pa, "static_pressure_pa")
+        require_scalar(airflow_resistivity_kpa_s_m2, "airflow_resistivity_kpa_s_m2")
+        s_apparent = float(
+            apparent_dynamic_stiffness(resonant_frequency_hz, total_mass_per_area_kg_m2)
         )
-    s_installed = installed_dynamic_stiffness(
-        s_apparent,
-        airflow_resistivity_kpa_s_m2=airflow_resistivity_kpa_s_m2,
-        gas_stiffness_n_m3=s_gas,
-    )
-    f0 = (
-        float(natural_frequency(s_installed, floor_mass_per_area_kg_m2))
-        if np.isfinite(s_installed)
-        else float("nan")
-    )
-    return DynamicStiffnessResult(
-        apparent_stiffness_n_m3=s_apparent,
-        gas_stiffness_n_m3=s_gas,
-        dynamic_stiffness_n_m3=s_installed,
-        resonant_frequency_hz=float(resonant_frequency_hz),
-        floor_mass_per_area_kg_m2=float(floor_mass_per_area_kg_m2),
-        natural_frequency=f0,
-    )
+        s_gas = 0.0
+        if airflow_resistivity_kpa_s_m2 < _HIGH_RESISTIVITY:
+            if thickness_m is None or porosity is None:
+                msg = (
+                    "'thickness_m' and 'porosity' are required for the enclosed-gas "
+                    "term when airflow_resistivity_kpa_s_m2 < 100 kPa.s/m2."
+                )
+                raise ValueError(msg)
+            s_gas = float(
+                enclosed_gas_stiffness(
+                    thickness_m, porosity, static_pressure_pa=static_pressure_pa
+                )
+            )
+        s_installed = installed_dynamic_stiffness(
+            s_apparent,
+            airflow_resistivity_kpa_s_m2=airflow_resistivity_kpa_s_m2,
+            gas_stiffness_n_m3=s_gas,
+        )
+        f0 = (
+            float(natural_frequency(s_installed, floor_mass_per_area_kg_m2))
+            if np.isfinite(s_installed)
+            else float("nan")
+        )
+        return DynamicStiffnessResult(
+            apparent_stiffness_n_m3=s_apparent,
+            gas_stiffness_n_m3=s_gas,
+            dynamic_stiffness_n_m3=s_installed,
+            resonant_frequency_hz=float(resonant_frequency_hz),
+            floor_mass_per_area_kg_m2=float(floor_mass_per_area_kg_m2),
+            natural_frequency=f0,
+        )

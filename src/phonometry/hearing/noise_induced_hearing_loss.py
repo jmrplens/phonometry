@@ -42,7 +42,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning, warn_caller
+from .._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from .threshold import age_threshold
 
 if TYPE_CHECKING:
@@ -574,33 +574,38 @@ def nipts(
     """
     # Finite before the domain advisory below, which a NaN would otherwise
     # trigger first and, under -W error, raise in place of this refusal.
-    require_finite(l_ex, "l_ex")
-    require_finite(exposure_duration_years, "exposure_duration_years")
-    if exposure_duration_years <= 0.0:
-        msg = f"'exposure_duration_years' must be positive; got {exposure_duration_years}."
-        raise ValueError(msg)
-    require_scalar(fractile, "fractile")
-    if not 0.0 < fractile < 1.0:
-        msg = f"fractile must be in (0, 1); got {fractile}."
-        raise ValueError(msg)
-    _warn_outside_domain(float(l_ex), float(exposure_duration_years), float(fractile))
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_finite(l_ex, "l_ex")
+        require_finite(exposure_duration_years, "exposure_duration_years")
+        if exposure_duration_years <= 0.0:
+            msg = f"'exposure_duration_years' must be positive; got {exposure_duration_years}."
+            raise ValueError(msg)
+        require_scalar(fractile, "fractile")
+        if not 0.0 < fractile < 1.0:
+            msg = f"fractile must be in (0, 1); got {fractile}."
+            raise ValueError(msg)
+        _warn_outside_domain(
+            float(l_ex), float(exposure_duration_years), float(fractile)
+        )
 
-    from scipy.special import ndtri  # standard-normal quantile
+        from scipy.special import ndtri  # standard-normal quantile
 
-    n50, du, dl = _nipts_components(float(l_ex), float(exposure_duration_years))
-    z = float(ndtri(fractile))
-    value = np.maximum(n50 + z * (du if z >= 0.0 else dl), 0.0)
+        n50, du, dl = _nipts_components(float(l_ex), float(exposure_duration_years))
+        z = float(ndtri(fractile))
+        value = np.maximum(n50 + z * (du if z >= 0.0 else dl), 0.0)
 
-    return NIPTSResult(
-        l_ex=float(l_ex),
-        exposure_duration_years=float(exposure_duration_years),
-        fractile=float(fractile),
-        frequencies=_select(_NIPTS_FREQUENCIES, frequencies),
-        median=_select(n50, frequencies),
-        value=_select(value, frequencies),
-        spread_upper=_select(du, frequencies),
-        spread_lower=_select(dl, frequencies),
-    )
+        return NIPTSResult(
+            l_ex=float(l_ex),
+            exposure_duration_years=float(exposure_duration_years),
+            fractile=float(fractile),
+            frequencies=_select(_NIPTS_FREQUENCIES, frequencies),
+            median=_select(n50, frequencies),
+            value=_select(value, frequencies),
+            spread_upper=_select(du, frequencies),
+            spread_lower=_select(dl, frequencies),
+        )
 
 
 def age_and_noise_threshold(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarray:

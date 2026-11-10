@@ -747,12 +747,15 @@ def alternating_airflow_resistance(
     with :func:`piston_volume_flow_rate` and :func:`linear_airflow_velocity` if
     the rig is near either end of the range.
 
-    :raises TypeError: if ``cavity_volume``, ``frequency``, ``kappa_prime``,
-        ``level_specimen``, ``level_termination``, ``piston_stroke_specimen``,
-        ``piston_stroke_termination`` or ``static_pressure_pa`` is not a single number.
+    :raises TypeError: if ``background_level``, ``cavity_volume``, ``frequency``,
+        ``kappa_prime``, ``level_specimen``, ``level_termination``,
+        ``piston_stroke_specimen``, ``piston_stroke_termination`` or
+        ``static_pressure_pa`` is not a single number.
     """
     require_scalar(level_specimen, "level_specimen")
     require_scalar(level_termination, "level_termination")
+    if background_level is not None:
+        require_scalar(background_level, "background_level")
     require_scalar(cavity_volume, "cavity_volume")
     require_scalar(frequency, "frequency")
     require_scalar(kappa_prime, "kappa_prime")
@@ -777,6 +780,15 @@ def alternating_airflow_resistance(
         msg = "'kappa_prime' must be positive."
         raise ValueError(msg)
 
+    stroke_ratio = piston_stroke_termination / piston_stroke_specimen
+    level_factor = float(10.0 ** ((level_specimen - level_termination) / 20.0))
+    ratio_term = stroke_ratio * level_factor
+    prefactor = (
+        kappa_prime * static_pressure_pa / (2.0 * math.pi * frequency * cavity_volume)
+    )
+    resistance = prefactor * ratio_term
+
+    # The advisories wait for the result (rule A63).
     low, high = _ALT_FREQUENCY_RANGE
     if not low <= frequency <= high:
         warn_caller(
@@ -784,13 +796,5 @@ def alternating_airflow_resistance(
             f"clause 6.2 range [{low:g}, {high:g}] Hz; the result is advisory.",
             AirflowResistanceWarning,
         )
-
-    stroke_ratio = piston_stroke_termination / piston_stroke_specimen
-    level_factor = float(10.0 ** ((level_specimen - level_termination) / 20.0))
-    ratio_term = stroke_ratio * level_factor
     _warn_alternating_validity(ratio_term, level_specimen, background_level)
-
-    prefactor = (
-        kappa_prime * static_pressure_pa / (2.0 * math.pi * frequency * cavity_volume)
-    )
-    return prefactor * ratio_term
+    return resistance

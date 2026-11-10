@@ -41,7 +41,7 @@ collection the larger input sets off is not charged to it alone.
 
 A test of linear time chooses the smaller size so that its reading takes a
 millisecond or more, and so that the quadratic reading the fix replaced, at
-``factor`` times that size, still ends within a minute or so: a scratch copy
+``factor`` times that size, still ends within a few minutes: a scratch copy
 that restores it shows the test failing. A reading that is part linear and
 part quadratic grows by a ratio between the two, and fails only once its
 quadratic part is some three quarters of the larger reading, so the larger the

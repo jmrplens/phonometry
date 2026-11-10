@@ -1557,7 +1557,14 @@ def test_a_page_of_many_commented_prints_is_read_in_linear_time() -> None:
     def page(count: int) -> str:
         return "".join(f"print({n})  # {n}\n" for n in range(count))
 
-    growth = assert_linear_time(page, check_doc_snippets.promised_outputs, 500)
+    # Four thousand prints, so that even a copy of every print of the page
+    # made for each stretch of comment, quadratic at C speed, outgrows the
+    # linear reading by the larger page and fails the test. The larger
+    # reading takes about a second and a half, so each size is read three
+    # times rather than five.
+    growth = assert_linear_time(
+        page, check_doc_snippets.promised_outputs, 4_000, repeats=3
+    )
     assert len(growth.result) == growth.factor * growth.size
 
 

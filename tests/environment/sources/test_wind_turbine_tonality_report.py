@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page

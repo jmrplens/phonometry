@@ -12,11 +12,10 @@ tests/metrology/test_intensity_compliance.py.
 
 from __future__ import annotations
 
-import matplotlib as mpl
 import pytest
 
+mpl = pytest.importorskip("matplotlib")
 mpl.use("Agg")
-
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 

@@ -161,6 +161,7 @@ def test_directive_boundaries_on_displayed_value(
 
 def test_job_based_report_renders_sampling_summary(tmp_path: Path) -> None:
     """A job-based result renders the sampling summary (Annex E numbers)."""
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     res = job_based_exposure(
         [88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5
@@ -178,6 +179,7 @@ def test_job_based_report_renders_sampling_summary(tmp_path: Path) -> None:
 
 def test_full_day_report_renders(tmp_path: Path) -> None:
     """A full-day result renders the Clause 11 basis and one page."""
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     res = full_day_exposure(
         [88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25

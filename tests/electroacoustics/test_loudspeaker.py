@@ -358,6 +358,7 @@ def test_the_response_graph_keeps_its_size_whatever_savefig_padding_says() -> No
     comes from ``rcParams`` unless the fiche sets it, and a matplotlibrc with
     a wide pad made the graph taller on the page.
     """
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     pytest.importorskip("svglib")
     import matplotlib as mpl

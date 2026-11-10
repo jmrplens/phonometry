@@ -23,6 +23,7 @@ import numpy as np
 import pytest
 import reference_data as ref
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page

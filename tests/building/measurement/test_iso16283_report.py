@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from reference_data import (

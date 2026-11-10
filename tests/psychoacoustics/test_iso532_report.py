@@ -15,6 +15,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from typing import TYPE_CHECKING

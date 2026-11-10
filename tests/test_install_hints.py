@@ -127,6 +127,7 @@ def test_a_report_without_reportlab_names_pip_and_conda(
 def test_a_report_figure_without_matplotlib_names_pip_and_conda(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     rating = _airborne()
     _block(monkeypatch, "matplotlib")

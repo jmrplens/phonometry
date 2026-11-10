@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import pytest
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")

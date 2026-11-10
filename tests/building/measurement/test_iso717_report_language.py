@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from reference_data import ISO717_1_ANNEX_C_R

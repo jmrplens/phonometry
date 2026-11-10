@@ -18,6 +18,7 @@ import re
 
 import pytest
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 
 from typing import TYPE_CHECKING

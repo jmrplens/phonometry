@@ -10,12 +10,11 @@ validated in tests/metrology/test_free_field_corrections.py.
 
 from __future__ import annotations
 
-import matplotlib as mpl
 import numpy as np
 import pytest
 
+mpl = pytest.importorskip("matplotlib")
 mpl.use("Agg")
-
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 

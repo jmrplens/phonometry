@@ -618,6 +618,7 @@ def _text(path: Path) -> str:
 
 
 def test_joint_form_renders_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     from report_assertions import assert_one_page
 
@@ -656,6 +657,7 @@ def test_joint_form_renders_one_page(tmp_path: Path) -> None:
 
 def test_joint_form_brackets_the_single_numbers(tmp_path: Path) -> None:
     """J.1 brackets every single number on the form, the enlarged range too."""
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     out = tmp_path / "bracketed.pdf"
     _dip_case().report(str(out))
@@ -672,6 +674,7 @@ def test_joint_form_shows_the_enlarged_range_term_that_moved(
     tmp_path: Path,
 ) -> None:
     """Only Rw + C100-5000 moves (37 dB to 56 dB): the note shows its +1 dB."""
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     maximum = np.full(18, 70.0)
     maximum[-2:] = 30.0
@@ -710,6 +713,7 @@ def test_joint_form_prints_the_climate_of_both_rooms(
     tmp_path: Path, fields: dict[str, float], climate: str
 ) -> None:
     """Figure J.7 asks for the "Climate in the test rooms", both of them."""
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     out = tmp_path / "climate.pdf"
     _example_joint().report(str(out), metadata=ReportMetadata(**fields))
@@ -720,6 +724,7 @@ def test_joint_form_draws_the_printed_diagram_range(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """The diagram of Figure J.7 runs from 30 dB to 80 dB, widened by 10 dB."""
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     import matplotlib as mpl
 
@@ -748,6 +753,7 @@ def test_joint_form_draws_the_printed_diagram_range(
 
 
 def test_joint_form_in_spanish_and_verbose(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     pytest.importorskip("reportlab")
     from report_assertions import assert_one_page
 

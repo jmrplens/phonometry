@@ -36,6 +36,7 @@ from phonometry.room import noise_criterion
 if TYPE_CHECKING:
     from pathlib import Path
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("pypdfium2")
 

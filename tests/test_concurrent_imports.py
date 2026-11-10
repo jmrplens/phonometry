@@ -124,10 +124,11 @@ def test_a_record_draws_and_prints_without_a_race(render: str, tmp_path: Path) -
     deadlocks against it, as two threads importing two domains did.
     """
     setup, call = _RENDERS[render]
+    # The child imports matplotlib before anything else, and a report draws
+    # its figures with it, so every case needs it and a report reportlab too.
+    pytest.importorskip("matplotlib")
     if call.startswith("record.report"):
         pytest.importorskip("reportlab")
-    else:
-        pytest.importorskip("matplotlib")
     program = "\n".join(
         [
             "import json",

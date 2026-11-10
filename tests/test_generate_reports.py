@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from types import ModuleType
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")

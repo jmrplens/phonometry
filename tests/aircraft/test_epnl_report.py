@@ -14,12 +14,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import matplotlib as mpl
-
-mpl.use("Agg")
 import numpy as np
 import pytest
 
+mpl = pytest.importorskip("matplotlib")
+mpl.use("Agg")
 pytest.importorskip("reportlab")
 
 from report_assertions import assert_one_page

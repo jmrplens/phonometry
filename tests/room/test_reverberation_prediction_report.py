@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+pytest.importorskip("matplotlib")
 pytest.importorskip("reportlab")
 pytest.importorskip("svglib")
 pytest.importorskip("pypdf")

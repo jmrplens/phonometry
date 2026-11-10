@@ -741,7 +741,10 @@ def test_an_ellipsis_meets_the_last_line_of_a_long_loop_in_linear_time() -> None
     def loop(lines: int) -> tuple[str, list[str]]:
         return f"0 ... {lines - 1}", [str(n) for n in range(lines)]
 
-    growth = assert_linear_time(loop, lambda case: _disagreement(*case), 1_000)
+    # Six thousand lines, so that even a copy of the stated values at each
+    # line end, quadratic at C speed, outgrows the linear reading by the
+    # larger loop and fails the test.
+    growth = assert_linear_time(loop, lambda case: _disagreement(*case), 6_000)
     assert growth.result == ""
     lines = growth.factor * growth.size
     assert str(lines) in _disagreement(f"0 ... {lines}", loop(lines)[1])
@@ -1569,14 +1572,19 @@ def test_a_function_that_binds_print_is_read_in_linear_time() -> None:
     """
 
     def function(count: int) -> str:
-        body = "".join(f"    print({n})  # {n}\n" for n in range(count))
+        body = "".join(
+            f"    print({n})  # {n}\n" + "    pass\n" * 9 for n in range(count)
+        )
         return f"def show(print):\n{body}"
 
-    # The scan outgrows the rest of the reading only past a few thousand
-    # prints, where the larger reading takes over a second, so each size is
-    # read three times rather than five.
+    # Nine statements the reader passes over at little cost follow each
+    # print, so that the body is ten times as long as its prints and a scan
+    # of it for each call, even one at C speed, outgrows the rest of the
+    # reading by the larger function and fails the test. The larger reading
+    # takes about a second, so each size is read three times rather than
+    # five.
     growth = assert_linear_time(
-        function, check_doc_snippets.promised_outputs, 3_000, repeats=3
+        function, check_doc_snippets.promised_outputs, 1_000, repeats=3
     )
     assert len(growth.result) == growth.factor * growth.size
     assert not any(promise.builtin for promise in growth.result)

@@ -3,12 +3,14 @@
 
 The tests that time a reader hand the helper only readers that pass, so a
 change that let quadratic work through, read a coarse clock one call at a
-time, kept a reading other processes lengthened or left the garbage collector
-off would pass them all. These tests hand it work whose cost they set, timed
-on a clock they drive: :class:`_Clock` stands in for the CPU time of the
-process, each call of :class:`_Work` moves it on by what its input costs, and
-it reads in steps, as the system's clock does. Every cost and every step is a
-power of two, so every reading is exact.
+time, read one size every time before the other, kept a reading other
+processes lengthened or left the garbage collector off would pass them all.
+These tests hand it work whose cost they set, timed on a clock they drive:
+:class:`_Clock` stands in for the CPU time of the process, each call of
+:class:`_Work` moves it on by what its input costs, and it reads in steps, as
+the system's clock does. Every cost and every step is a power of two, so every
+reading is exact. Two tests read the clock of the process itself: a wait on
+the wall is not charged to a reading, and the work of another thread is.
 """
 
 from __future__ import annotations
@@ -16,6 +18,9 @@ from __future__ import annotations
 import dataclasses
 import gc
 import math
+import re
+import threading
+import time
 from collections import Counter
 from typing import TYPE_CHECKING
 
@@ -38,6 +43,9 @@ _SIZE = 16
 _LARGE = time_growth.FACTOR * _SIZE
 #: What a call costs over each input of linear work [s].
 _LINEAR_S = {_SIZE: _COST_S, _LARGE: time_growth.FACTOR * _COST_S}
+#: How long a test waits on the wall for a thread that takes a twentieth of a
+#: second of CPU time, long past what a busy machine takes to give it that [s].
+_THREAD_WAIT_S = 30.0
 
 
 @dataclasses.dataclass
@@ -59,8 +67,9 @@ class _Work:
     """A reader whose calls cost what the test sets, on the test's clock.
 
     Its input is a size, and a call over it moves the clock on by what that
-    size costs and returns the size. It keeps how many calls each size took
-    and whether the garbage collector was on at each call.
+    size costs and returns the size and the place of the call among the calls
+    over it, from 0. It keeps how many calls each size took and whether the
+    garbage collector was on at each call.
     """
 
     clock: _Clock
@@ -74,13 +83,15 @@ class _Work:
     #: Whether the garbage collector was on at each call, in turn.
     collecting: list[bool] = dataclasses.field(default_factory=list)
 
-    def __call__(self, size: int) -> int:
-        """The size read, the clock moved on by what reading it cost."""
+    def __call__(self, size: int) -> tuple[int, int]:
+        """The size read and the place of the call, the clock moved on by what
+        reading it cost.
+        """
         place = self.calls[size]
         self.calls[size] += 1
         self.collecting.append(gc.isenabled())
         self.clock.now_s += self.costs_s[size] + self.extra_s.get((size, place), 0.0)
-        return size
+        return size, place
 
 
 def _clock(monkeypatch: pytest.MonkeyPatch, step_s: float) -> _Clock:
@@ -94,6 +105,13 @@ def _clock(monkeypatch: pytest.MonkeyPatch, step_s: float) -> _Clock:
 def _as_built(size: int) -> int:
     """The input of *size*: the size itself, which :class:`_Work` reads."""
     return size
+
+
+def _spin(seconds: float) -> None:
+    """Keep the calling thread at work until it has taken *seconds* of CPU time."""
+    start = time.thread_time()
+    while time.thread_time() - start < seconds:
+        pass
 
 
 @pytest.fixture(autouse=True)
@@ -117,19 +135,20 @@ def _collector_as_found() -> Iterator[None]:
     ],
 )
 def test_growth_under_the_bound_passes_and_hands_back_what_was_read(
-    assertion: Callable[..., time_growth.Growth[int]],
+    assertion: Callable[..., time_growth.Growth[tuple[int, int]]],
     ratio: float,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Linear work and work that does not grow pass, and so does work that grows
     just under the bound: 22.5 times against 8 ** 1.5 = 22.63, and 2.75 times
-    against 8 ** 0.5 = 2.83.
+    against 8 ** 0.5 = 2.83. What is handed back is what the last call over the
+    larger input returned, the fifth.
     """
     clock = _clock(monkeypatch, _FINE_STEP_S)
     work = _Work(clock, {_SIZE: _COST_S, _LARGE: ratio * _COST_S})
     growth = assertion(_as_built, work, _SIZE)
     assert (growth.size, growth.factor) == (_SIZE, time_growth.FACTOR)
-    assert growth.result == _LARGE
+    assert growth.result == (_LARGE, time_growth.REPEATS - 1)
     assert (growth.small_s, growth.large_s) == (_COST_S, ratio * _COST_S)
     assert growth.ratio == ratio
 
@@ -140,38 +159,99 @@ def test_growth_under_the_bound_passes_and_hands_back_what_was_read(
         (
             time_growth.assert_linear_time,
             64.0,
-            r"took 64\.0 times as long .*past 22\.6",
+            "an input 8 times as large took 64.0 times as long (0.98 ms for size "
+            "16, 62.50 ms for size 128), past 22.6: work that grows as the size "
+            "to the power 1 takes about 8 times as long, and to the power 2 about "
+            "64 times",
         ),
         (
             time_growth.assert_linear_time,
             22.75,
-            r"took 22\.8 times as long .*past 22\.6",
+            "an input 8 times as large took 22.8 times as long (0.98 ms for size "
+            "16, 22.22 ms for size 128), past 22.6: work that grows as the size "
+            "to the power 1 takes about 8 times as long, and to the power 2 about "
+            "64 times",
         ),
         (
             time_growth.assert_time_does_not_grow,
             8.0,
-            r"took 8\.0 times as long .*past 2\.8",
+            "an input 8 times as large took 8.0 times as long (0.98 ms for size "
+            "16, 7.81 ms for size 128), past 2.8: work that grows as the size to "
+            "the power 0 takes about 1 times as long, and to the power 1 about 8 "
+            "times",
         ),
         (
             time_growth.assert_time_does_not_grow,
             2.875,
-            r"took 2\.9 times as long .*past 2\.8",
+            "an input 8 times as large took 2.9 times as long (0.98 ms for size "
+            "16, 2.81 ms for size 128), past 2.8: work that grows as the size to "
+            "the power 0 takes about 1 times as long, and to the power 1 about 8 "
+            "times",
         ),
     ],
 )
 def test_growth_past_the_bound_fails_the_test(
-    assertion: Callable[..., time_growth.Growth[int]],
+    assertion: Callable[..., time_growth.Growth[tuple[int, int]]],
     ratio: float,
     said: str,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Quadratic work fails a test of linear time and linear work a test that the
-    time does not grow, and so does work that grows just past the bound.
+    time does not grow, and so does work that grows just past the bound, the
+    test told the two readings, the two sizes and what each power of growth
+    would take.
     """
     clock = _clock(monkeypatch, _FINE_STEP_S)
     work = _Work(clock, {_SIZE: _COST_S, _LARGE: ratio * _COST_S})
-    with pytest.raises(pytest.fail.Exception, match=said):
+    with pytest.raises(pytest.fail.Exception, match=f"^{re.escape(said)}$"):
         assertion(_as_built, work, _SIZE)
+
+
+@pytest.mark.parametrize(
+    ("assertion", "growing", "past", "said"),
+    [
+        (
+            time_growth.assert_linear_time,
+            4.0,
+            8.5,
+            "an input 4 times as large took 8.5 times as long (0.98 ms for size "
+            "16, 8.30 ms for size 64), past 8.0: work that grows as the size to "
+            "the power 1 takes about 4 times as long, and to the power 2 about "
+            "16 times",
+        ),
+        (
+            time_growth.assert_time_does_not_grow,
+            1.0,
+            2.25,
+            "an input 4 times as large took 2.2 times as long (0.98 ms for size "
+            "16, 2.20 ms for size 64), past 2.0: work that grows as the size to "
+            "the power 0 takes about 1 times as long, and to the power 1 about 4 "
+            "times",
+        ),
+    ],
+)
+def test_the_factor_and_the_repeats_a_test_asks_for_are_the_ones_read(
+    assertion: Callable[..., time_growth.Growth[tuple[int, int]]],
+    growing: float,
+    past: float,
+    said: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A test that asks for an input four times as large, read three times, has
+    the larger input built four times as large, each size read three times, and
+    its growth held under 4 ** 1.5 = 8 or 4 ** 0.5 = 2: work that grows as the
+    bound allows passes, and work that grows just past it fails, where it would
+    pass under the bounds of a factor of 8.
+    """
+    clock = _clock(monkeypatch, _FINE_STEP_S)
+    larger = 4 * _SIZE
+    work = _Work(clock, {_SIZE: _COST_S, larger: growing * _COST_S})
+    growth = assertion(_as_built, work, _SIZE, factor=4, repeats=3)
+    assert (growth.size, growth.factor, growth.ratio) == (_SIZE, 4, growing)
+    assert work.calls == {_SIZE: 1 + 3, larger: 3}
+    work = _Work(clock, {_SIZE: _COST_S, larger: past * _COST_S})
+    with pytest.raises(pytest.fail.Exception, match=f"^{re.escape(said)}$"):
+        assertion(_as_built, work, _SIZE, factor=4, repeats=3)
 
 
 def test_the_shortest_reading_of_each_size_is_kept(
@@ -194,6 +274,29 @@ def test_the_shortest_reading_of_each_size_is_kept(
     assert (growth.small_s, growth.large_s) == (_COST_S, _LINEAR_S[_LARGE])
 
 
+def test_a_load_that_starts_partway_lengthens_both_sizes_alike(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The two sizes are read in turn, so a load that starts partway through the
+    readings and stays lengthens the readings of both alike. Here it starts after
+    the third call, the untimed first one and a reading of each size, and makes
+    every call after it four times as long: one short reading of each is left,
+    and linear work passes. Were all the readings of one size taken before those
+    of the other, the larger input would read as 32 times as long as the smaller
+    and fail, or the smaller as four times as long as it costs.
+    """
+    clock = _clock(monkeypatch, _FINE_STEP_S)
+    sizes_read: list[int] = []
+
+    def loaded(size: int) -> int:
+        sizes_read.append(size)
+        clock.now_s += (4.0 if len(sizes_read) > 3 else 1.0) * _LINEAR_S[size]
+        return size
+
+    growth = time_growth.assert_linear_time(_as_built, loaded, _SIZE)
+    assert (growth.small_s, growth.large_s) == (_COST_S, _LINEAR_S[_LARGE])
+
+
 def test_on_a_coarse_clock_a_reading_calls_the_work_over_ten_steps(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -201,7 +304,8 @@ def test_on_a_coarse_clock_a_reading_calls_the_work_over_ten_steps(
     steps of 15.6 ms reads as no time or as a whole step. A call over the smaller
     input is a sixteenth of a step, so ten steps take 160 calls, and one over the
     larger input half a step, so they take 20: each size is counted once, then
-    read five times, and each reading is the time of one call.
+    read five times, and each reading is the time of one call. What is handed
+    back is what the last of the 120 calls over the larger input returned.
     """
     clock = _clock(monkeypatch, _COARSE_STEP_S)
     work = _Work(clock, _LINEAR_S)
@@ -209,6 +313,7 @@ def test_on_a_coarse_clock_a_reading_calls_the_work_over_ten_steps(
     assert (growth.small_s, growth.large_s) == (_COST_S, _LINEAR_S[_LARGE])
     readings = 1 + time_growth.REPEATS
     assert work.calls == {_SIZE: 160 * readings, _LARGE: 20 * readings}
+    assert growth.result == (_LARGE, 20 * readings - 1)
 
 
 def test_on_a_fine_clock_one_call_is_a_reading(
@@ -305,10 +410,13 @@ def test_a_smaller_input_read_in_no_time_the_clock_counts_is_refused(
     """Work slow once, as a reader that loads what it reads on its first call, and
     quicker than a step of the clock after: that first call spans the ten steps
     alone, so a reading is one call, and every reading of the smaller input reads
-    as no time. The helper refuses it rather than divide by it.
+    as no time. A call over the larger input takes two whole steps, so only the
+    smaller input reads as no time, and the helper refuses it rather than divide
+    by it.
     """
     clock = _clock(monkeypatch, _COARSE_STEP_S)
-    work = _Work(clock, {_SIZE: 2.0**-12, _LARGE: 2.0**-9}, extra_s={(_SIZE, 0): 0.25})
+    costs_s = {_SIZE: 2.0**-12, _LARGE: 2 * _COARSE_STEP_S}
+    work = _Work(clock, costs_s, extra_s={(_SIZE, 0): 0.25})
     with pytest.raises(ValueError, match="was read in no time the clock counts"):
         time_growth.measure_growth(_as_built, work, _SIZE)
 
@@ -327,3 +435,26 @@ def test_the_clock_step_is_the_smallest_of_three_seen(
     monkeypatch.setattr(time_growth, "_cpu_time", readings.__next__)
     assert time_growth._clock_step.__wrapped__() == step
     assert next(readings, None) is None
+
+
+def test_a_wait_on_the_wall_is_not_charged_to_a_reading() -> None:
+    """The helper reads the CPU time of the process, never the time on the wall: a
+    fifth of a second the process spends waiting, as one that other processes
+    keep off the cores waits, adds next to nothing to it.
+    """
+    start = time_growth._cpu_time()
+    time.sleep(0.2)
+    assert time_growth._cpu_time() - start < 0.1
+
+
+def test_the_work_of_another_thread_is_charged_to_a_reading() -> None:
+    """The CPU time is that of the whole process, all its threads together: the
+    twentieth of a second another thread works while this one waits for it is
+    counted, as the work of a reader that hands some of it to a thread would be.
+    """
+    start = time_growth._cpu_time()
+    worker = threading.Thread(target=_spin, args=(0.05,))
+    worker.start()
+    worker.join(_THREAD_WAIT_S)
+    assert not worker.is_alive()
+    assert time_growth._cpu_time() - start >= 0.025

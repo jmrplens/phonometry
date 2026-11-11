@@ -99,7 +99,9 @@ needed to have a reasonable probability of capturing them. A complete work cycle
 is representative for a repeatable task such as a mine haul truck; for
 non-repeatable ones (off-road travel, military transport) the sufficient
 duration depends on the variability of the terrain. Trials that expose people to
-repeated shock need their own risk assessment, and shorter measurements first.
+repeated shock are likely to need a careful risk assessment, and shorter
+measurements first may be appropriate to gain confidence that the exposure will
+not be excessive.
 
 ## 2. Conditioning the record (clause 5.1.3)
 
@@ -117,16 +119,16 @@ reader would otherwise give themselves.
    NOTE 1 warns that common data-processing packages apply suitable filters
    automatically, but that it is important to verify that they did.
 4. **Offset-correct** so that the recorded acceleration reads (0 ± 0.1) m/s²
-   with the accelerometer at rest. The clause then adds the warning: subtraction
-   of the mean **may not be appropriate** if the recorded acceleration is
-   asymmetric, and a shock record is asymmetric by construction, which is
-   exactly the case a mean subtraction gets wrong.
+   with the accelerometer at rest (or with a symmetric signal). The clause then
+   adds the warning: subtraction of the mean **may not be appropriate** if the
+   recorded acceleration is asymmetric, and a shock record is asymmetric by
+   construction, which is exactly the case a mean subtraction gets wrong.
 5. **Taper** (a cosine taper over several seconds, for instance) if the
    accelerometer was in motion at the start or the end of the recording, before
    the band limiting.
 6. **Band-limit** with a second-order Butterworth high pass at 0.01 Hz and a
    fourth-order Butterworth low pass at 80 Hz. The band-limiting and weighting
-   filters of ISO 2631-1 shall **not** be applied.
+   filters of ISO 2631-1 should **not** be applied.
 
 The last step is where the number is won or lost. NOTE 2 gives the reason in
 numbers: free-fall periods above 0.5 s have been observed on fast naval craft,
@@ -326,9 +328,11 @@ for sex, mz in (("male", 0.029), ("female", 0.025)):
 
 The lower compressive stress lands in the higher band, because the female
 thresholds of Table C.2 are lower still. NOTE 5 of Annex C records the same
-result for this exposure and quotes $R$ = 0.97 against the 0.96 computed here,
-a rounding of its own printed $S_\mathrm{d}$; the band, and therefore the verdict, is the
-same. The $\alpha$ and $\beta$ coefficients of Formula (C.5) and the Table C.2
+result for this exposure and quotes $R$ = 0.97 against the 0.96 computed here.
+Its printed $S_\mathrm{d}$ is the 1.40 MPa computed here too, so the slip is the
+last digit of the printed $R$, as the
+[errata register](/phonometry/reference/errata/) records; the band, and
+therefore the verdict, is the same. The $\alpha$ and $\beta$ coefficients of Formula (C.5) and the Table C.2
 thresholds for female subjects rest on a smaller data set, as the standard
 footnotes both tables.
 

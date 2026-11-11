@@ -18531,7 +18531,7 @@ calibrated readings the response function is not given.
   the sound attenuation of 8.11, measured by ISO 4869-1 on test subjects, and
   the active noise reduction of ISO 4869-6.
 - [Test signals and sample-rate tools](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/):
-  the tone bursts of IEC 60268-1 Annex A, the other part of that standard the
+  the tone bursts of IEC 60268-1 Appendix A, another part of that standard the
   library implements.
 - API reference: [`electroacoustics.program_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/program-signal/)
   and [`electroacoustics.headphones`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/headphones/).
@@ -29814,7 +29814,13 @@ equivalent diameters upstream and the receiver-side one at the distance Equation
 (16) gives, or agree on one when that expression falls to zero. Measure the mean
 level on each surface, take the extraneous sound off by the energy route where
 the sources can be switched, record the temperature on both sides, and measure
-the flow: the pressure loss and a velocity profile uniform within 10 %.
+the flow: the pressure loss and a velocity profile uniform within 10 %. Where
+the two temperatures differ, the field correction of Equations (20) and (22) is
+not zero, and both equations print the ratio of the absolute temperatures the
+wrong way up: the correction turns a squared pressure into a sound power, so the
+hotter side takes the larger one. `temperature_field_correction` returns the
+equations as printed, and the [errata register](https://docs.jmrp.io/phonometry/reference/errata/) records the
+evidence and the reading the characteristic impedance asks for.
 
 A silencer sits between two of four things: a duct, a room with a diffuse field,
 a room without one, and open space. Sixteen pairs are transmission measurements
@@ -29949,9 +29955,9 @@ Equations (1) to (3) to the flow quantities of Equations (27) to (31), with the
 twenty installations of Figure 1; the attenuation, background window, directivity
 test, microphone geometry, impulse rule and reporting rounding of ISO 11821; and the direct and
 indirect methods, background table, wind and cloud classes, short-distance test,
-reference microphone height and hemi-free-field clearance of ISO 10847. Two
-defects in the print of ISO 10847 are recorded in the
-[errata register](https://docs.jmrp.io/phonometry/reference/errata/), along with a note that the two stepped
+reference microphone height and hemi-free-field clearance of ISO 10847. One
+defect in the print of ISO 11820 and two in that of ISO 10847 are recorded in
+the [errata register](https://docs.jmrp.io/phonometry/reference/errata/), along with a note that the two stepped
 background tables are a difference and not an erratum. Not implemented: the
 prediction of a barrier insertion loss or a silencer attenuation, which are
 separate pages; the instrument and windscreen requirements; the judgement of site
@@ -29969,8 +29975,10 @@ equivalence; and the report templates.
 - [Outdoor sound propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the ISO 9613-2 barrier attenuation term a prediction computes for the barrier
   ISO 10847 measures.
-- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): an upwind wind class printed
-  with a positive lower bound, and one prime asked to mean two different things.
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): a temperature ratio of
+  ISO 11820 Equations (20) and (22) printed the wrong way up, an upwind wind
+  class printed with a positive lower bound, and one prime asked to mean two
+  different things.
 - API reference: [`noise_control.silencer_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-in-situ/),
   [`noise_control.screen_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/screen-in-situ/)
   and [`environment.propagation.barrier_in_situ`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-in-situ/).
@@ -55639,7 +55647,7 @@ it; the list grows as guides gain their References sections.
 - International Electrotechnical Commission. (1985). *Sound system
   equipment — Part 1: General* (IEC 60268-1:1985).
   [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Annex A, Clause A2: tone bursts starting at the zero crossing of the tone
+  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone
   with an integral number of full periods, repetitive burst trains at a
   stated repetition rate, and the Table AII burst durations.
   Cited by [Test signals and sample-rate tools](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/).
@@ -70873,15 +70881,16 @@ smearing them.
 
 ## What this guide covers
 
-**Covered.** IEC 60268-1:1985 Annex A, Clause A2: the tone burst that starts at
-a zero crossing of the tone and consists of an integral number of full periods
-(A2.1) and the repetitive burst train of A2.2, implemented by `tone_burst` and
-hand-checked against the Table AII durations. Bendat & Piersol Section 10.2's
-anti-alias requirement, turned into an explicit, checkable specification by
-`resample_signal`'s stopband attenuation and transition width.
+**Covered.** IEC 60268-1:1985 Appendix A, Clause A2: the tone burst that
+starts at a zero crossing of the tone and consists of an integral number of
+full periods (A2.1) and the repetitive burst train of A2.2, implemented by
+`tone_burst` and hand-checked against the Table AII durations. Bendat &
+Piersol Section 10.2's anti-alias requirement, turned into an explicit,
+checkable specification by `resample_signal`'s stopband attenuation and
+transition width.
 
 **Not covered.** IEC 60268-1:1985 is a general standard for sound system
-equipment; only the Annex A tone-burst clauses are implemented on this page.
+equipment; only the Appendix A tone-burst clauses are implemented on this page.
 Its Clause 7, the simulated programme signal, is in
 `electroacoustics.program_signal` and has its walk-through in the
 [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/)
@@ -70912,7 +70921,7 @@ accuracy claims are closed-form, not normative.
 - International Electrotechnical Commission. (1985). *Sound system
   equipment — Part 1: General* (IEC 60268-1:1985).
   [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Annex A, Clause A2: tone bursts starting at the zero crossing of the tone
+  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone
   with an integral number of full periods (A2.1), repetitive burst trains
   at a stated repetition rate (A2.2), and the Table AII burst durations the
   sample counts are hand-checked against.
@@ -84150,7 +84159,7 @@ belong to the Annex A finite-element model. In case of doubt the delineation
 is quantitative: when the band-limited vertical peak acceleration exceeds
 9.81 m/s² (1 g, the free-fall threshold), clause 5 and Annex C apply.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t), band-limited per ISO 2631-1, through the spinal response Az(t) from the seat-to-spine transfer function (one zero, six poles), the acceleration dose Dz = 1.07 times the sixth root of the sum of the positive response peaks to the sixth power and the daily dose Dzd, the compressive stress Sd = mz times Dzd, the age-cumulated stress variable R, and finally the Weibull probability of lumbar injury" width="86%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t), conditioned as clause 5.1.3 requires with a second-order 0.01 Hz high pass and a fourth-order 80 Hz low pass and not with the ISO 2631-1 0.4 to 100 Hz filters, through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" width="86%"></picture>
 
 ## 1. Spinal response (clause 5.2)
 
@@ -84163,13 +84172,22 @@ $$
 A_\mathrm{z}(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_\mathrm{z}(t)]\right].
 $$
 
-The input record must be **conditioned (DC-removed)**: because $H$ is unity at
-0 Hz by design, a DC offset (e.g. the 1 g gravity component of a DC-coupled
-accelerometer) passes straight into $A_\mathrm{z}(t)$ and corrupts the positive
-response peaks of the dose. Subtract the mean (or high-pass) before processing.
-The rest of the conditioning chain is the caller's too: `spinal_response`
-assumes a record that has already been sign-checked, split at the
-loss-of-contact boundaries, offset-corrected, tapered and band-limited.
+The input record must be **conditioned as clause 5.1.3 sets out**: because $H$
+is unity at 0 Hz by design, an offset left in the record (the 1 g gravity
+component of a DC-coupled accelerometer, say) passes straight into
+$A_\mathrm{z}(t)$ and corrupts the positive response peaks of the dose. The
+clause asks for an offset correction so that the recorded acceleration reads
+(0 ± 0.1) m/s² with the accelerometer at rest (or with a symmetric signal), and
+warns that subtraction of the mean **may not be appropriate** if the recorded
+acceleration is asymmetric, which a shock record is by construction. The
+offset-corrected record is then band-limited with a second-order Butterworth
+high pass at 0.01 Hz and a fourth-order Butterworth low pass at 80 Hz; the
+band-limiting and weighting filters of ISO 2631-1 should **not** be applied,
+because NOTE 2 shows a 0.5 Hz high pass dragging the −1 g of a free fall back
+to zero before the impact and offsetting the impact peak by up to +1 g. The
+whole conditioning chain is the caller's: `spinal_response` assumes a record
+that has already been sign-checked, split at the loss-of-contact boundaries,
+offset-corrected, tapered and band-limited.
 
 ```python
 from phonometry import vibration

@@ -24,7 +24,7 @@ with their accuracy stated instead of implied.
   to the requested RMS exactly. With the same ``seed`` the generator is
   fully deterministic across runs.
 
-* :func:`tone_burst`: the gated sine burst of IEC 60268-1:1985 (Annex A,
+* :func:`tone_burst`: the gated sine burst of IEC 60268-1:1985 (Appendix A,
   Clause A2): the tone starts at a zero crossing and lasts an integral
   number of full periods, either as a single burst or as a repetitive train
   with a stated repetition rate. The result records the rectangular gating
@@ -234,13 +234,13 @@ def _validate_1d_finite(x: Signal | NumericArrayLike, name: str) -> NDArray[np.f
 
 
 # ---------------------------------------------------------------------------
-# IEC 60268-1 tone bursts (Annex A, Clause A2)
+# IEC 60268-1 tone bursts (Appendix A, Clause A2)
 # ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
 class ToneBurstResult(OwnsArrays):
-    """Gated sine burst per IEC 60268-1:1985 (Annex A, Clause A2).
+    """Gated sine burst per IEC 60268-1:1985 (Appendix A, Clause A2).
 
     The tone starts at a zero crossing (positive-going) and the gate stays
     open for an integral number of full periods, as Clause A2.1 requires

@@ -560,7 +560,7 @@ belong to the Annex A finite-element model. In case of doubt the delineation
 is quantitative: when the band-limited vertical peak acceleration exceeds
 9.81 m/s² (1 g, the free-fall threshold), clause 5 and Annex C apply.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t), band-limited per ISO 2631-1, through the spinal response Az(t) from the seat-to-spine transfer function (one zero, six poles), the acceleration dose Dz = 1.07 times the sixth root of the sum of the positive response peaks to the sixth power and the daily dose Dzd, the compressive stress Sd = mz times Dzd, the age-cumulated stress variable R, and finally the Weibull probability of lumbar injury" width="86%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t), conditioned as clause 5.1.3 requires with a second-order 0.01 Hz high pass and a fourth-order 80 Hz low pass and not with the ISO 2631-1 0.4 to 100 Hz filters, through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" width="86%"></picture>
 
 ## 1. Spinal response (clause 5.2)
 
@@ -573,13 +573,22 @@ $$
 A_\mathrm{z}(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_\mathrm{z}(t)]\right].
 $$
 
-The input record must be **conditioned (DC-removed)**: because $H$ is unity at
-0 Hz by design, a DC offset (e.g. the 1 g gravity component of a DC-coupled
-accelerometer) passes straight into $A_\mathrm{z}(t)$ and corrupts the positive
-response peaks of the dose. Subtract the mean (or high-pass) before processing.
-The rest of the conditioning chain is the caller's too: `spinal_response`
-assumes a record that has already been sign-checked, split at the
-loss-of-contact boundaries, offset-corrected, tapered and band-limited.
+The input record must be **conditioned as clause 5.1.3 sets out**: because $H$
+is unity at 0 Hz by design, an offset left in the record (the 1 g gravity
+component of a DC-coupled accelerometer, say) passes straight into
+$A_\mathrm{z}(t)$ and corrupts the positive response peaks of the dose. The
+clause asks for an offset correction so that the recorded acceleration reads
+(0 ± 0.1) m/s² with the accelerometer at rest (or with a symmetric signal), and
+warns that subtraction of the mean **may not be appropriate** if the recorded
+acceleration is asymmetric, which a shock record is by construction. The
+offset-corrected record is then band-limited with a second-order Butterworth
+high pass at 0.01 Hz and a fourth-order Butterworth low pass at 80 Hz; the
+band-limiting and weighting filters of ISO 2631-1 should **not** be applied,
+because NOTE 2 shows a 0.5 Hz high pass dragging the −1 g of a free fall back
+to zero before the impact and offsetting the impact peak by up to +1 g. The
+whole conditioning chain is the caller's: `spinal_response` assumes a record
+that has already been sign-checked, split at the loss-of-contact boundaries,
+offset-corrected, tapered and band-limited.
 
 ```python
 from phonometry import vibration

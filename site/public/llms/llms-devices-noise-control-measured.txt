@@ -927,7 +927,13 @@ equivalent diameters upstream and the receiver-side one at the distance Equation
 (16) gives, or agree on one when that expression falls to zero. Measure the mean
 level on each surface, take the extraneous sound off by the energy route where
 the sources can be switched, record the temperature on both sides, and measure
-the flow: the pressure loss and a velocity profile uniform within 10 %.
+the flow: the pressure loss and a velocity profile uniform within 10 %. Where
+the two temperatures differ, the field correction of Equations (20) and (22) is
+not zero, and both equations print the ratio of the absolute temperatures the
+wrong way up: the correction turns a squared pressure into a sound power, so the
+hotter side takes the larger one. `temperature_field_correction` returns the
+equations as printed, and the [errata register](https://docs.jmrp.io/phonometry/reference/errata/) records the
+evidence and the reading the characteristic impedance asks for.
 
 A silencer sits between two of four things: a duct, a room with a diffuse field,
 a room without one, and open space. Sixteen pairs are transmission measurements
@@ -1062,9 +1068,9 @@ Equations (1) to (3) to the flow quantities of Equations (27) to (31), with the
 twenty installations of Figure 1; the attenuation, background window, directivity
 test, microphone geometry, impulse rule and reporting rounding of ISO 11821; and the direct and
 indirect methods, background table, wind and cloud classes, short-distance test,
-reference microphone height and hemi-free-field clearance of ISO 10847. Two
-defects in the print of ISO 10847 are recorded in the
-[errata register](https://docs.jmrp.io/phonometry/reference/errata/), along with a note that the two stepped
+reference microphone height and hemi-free-field clearance of ISO 10847. One
+defect in the print of ISO 11820 and two in that of ISO 10847 are recorded in
+the [errata register](https://docs.jmrp.io/phonometry/reference/errata/), along with a note that the two stepped
 background tables are a difference and not an erratum. Not implemented: the
 prediction of a barrier insertion loss or a silencer attenuation, which are
 separate pages; the instrument and windscreen requirements; the judgement of site
@@ -1082,8 +1088,10 @@ equivalence; and the report templates.
 - [Outdoor sound propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the ISO 9613-2 barrier attenuation term a prediction computes for the barrier
   ISO 10847 measures.
-- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): an upwind wind class printed
-  with a positive lower bound, and one prime asked to mean two different things.
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): a temperature ratio of
+  ISO 11820 Equations (20) and (22) printed the wrong way up, an upwind wind
+  class printed with a positive lower bound, and one prime asked to mean two
+  different things.
 - API reference: [`noise_control.silencer_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-in-situ/),
   [`noise_control.screen_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/screen-in-situ/)
   and [`environment.propagation.barrier_in_situ`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-in-situ/).

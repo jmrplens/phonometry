@@ -557,7 +557,7 @@ calibrated readings the response function is not given.
   the sound attenuation of 8.11, measured by ISO 4869-1 on test subjects, and
   the active noise reduction of ISO 4869-6.
 - [Test signals and sample-rate tools](../../signals/spectra/test-signals.md):
-  the tone bursts of IEC 60268-1 Annex A, the other part of that standard the
+  the tone bursts of IEC 60268-1 Appendix A, another part of that standard the
   library implements.
 - API reference: [`electroacoustics.program_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/program-signal/)
   and [`electroacoustics.headphones`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/headphones/).

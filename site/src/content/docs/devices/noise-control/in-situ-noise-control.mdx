@@ -194,7 +194,13 @@ measure the mean level on each surface, and measure the extraneous sound with
 the switchable sources off if you can, because the energy route of Equations
 (17) and (18) is better than the stepped table and both refuse under 3 dB
 anyway. Record the temperature on both sides: where they differ, the field
-correction of Equations (20) and (22) is not zero. Then measure the flow, the
+correction of Equations (20) and (22) is not zero. Both equations print the
+ratio of the two absolute temperatures the wrong way up: the correction turns a
+squared pressure into a sound power, so the hotter side takes the larger one,
+and the print gives the reciprocal. `temperature_field_correction` returns the
+equations as printed, so that its number is the one the standard gives, and
+[the errata register](/phonometry/reference/errata/) records the evidence and
+the reading the characteristic impedance asks for. Then measure the flow, the
 total pressure loss across the silencer and the velocity profile in the duct,
 which 9.2 asks to be uniform within 10 %.
 
@@ -304,7 +310,13 @@ The **indirect method** borrows the "before" campaign from a substitute site
 judged equivalent in terrain, ground and source, which makes it an estimate and
 the standard says so. Each campaign carries a correction for the kind of
 receiver position, 0 dB in a hemi free field and 6 dB against a facade where the
-pressure doubles.
+pressure doubles. Clause 8.2.2 prints the second correction with a prime, the
+same prime its equations give the "after" campaign, so read literally it would
+tie each campaign to one kind of position; the NOTE that closes the clause asks
+for positions where the two corrections are essentially the same, which only
+makes sense if each campaign takes its own. `measured_insertion_loss_indirect` takes a
+receiver type for each campaign, and
+[the errata register](/phonometry/reference/errata/) gives the reading.
 
 The reference microphone stands at least 1,5 m above the top edge of the
 barrier, measured from its highest point where the top is not a straight edge,
@@ -334,7 +346,11 @@ Two campaigns separated by months are two different days of weather, and clause
 6 spends most of its length on that. The wind enters as the vector component of
 the average velocity on the line from the source to the receiver, positive
 downwind. Table 1 gives a downwind class and a calm one over any distance, and
-adds an upwind class over short distances alone.
+adds an upwind class over short distances alone. That upwind row is printed
+"+ 1 to − 5", an interval whose ends run the wrong way and whose lower end is
+where the downwind class begins; `wind_class` reads it as −5 m/s to −1 m/s, the
+mirror of the downwind row, and
+[the errata register](/phonometry/reference/errata/) gives the evidence.
 
 ```python
 print(environment.wind_class(2.5))                        # downwind

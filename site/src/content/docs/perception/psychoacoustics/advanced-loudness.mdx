@@ -422,6 +422,15 @@ print(round(float(burst.short_term_loudness.max()), 1),
 # The result carries both traces on a 1 ms time axis:
 burst.plot()
 plt.show()
+
+# Or draw the fast short-term and the slow long-term trace by hand:
+fig, ax = plt.subplots()
+ax.plot(burst.times, burst.short_term_loudness, label="Short-term S'(t)")
+ax.plot(burst.times, burst.long_term_loudness, label="Long-term S''(t)")
+ax.set_xlabel("Time [s]")
+ax.set_ylabel("Loudness [sone]")
+ax.legend()
+plt.show()
 ```
 
 </details>

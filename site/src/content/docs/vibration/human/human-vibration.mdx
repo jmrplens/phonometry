@@ -942,8 +942,10 @@ res.report(
 )   # A(8) = 3.61 m/s² -> action zone (EAV exceeded, ELV not), verdict PASS
 ```
 
-The example fiche is regenerated with `make reports` and kept rendered in the
-repository; click the preview to open the PDF.
+Writing the fiche needs the `phonometry[report]` extra (reportlab), and its
+chart needs `phonometry[plot]` (matplotlib) as well. The example fiche is
+regenerated with `make reports` and kept rendered in the repository; click the
+preview to open the PDF.
 
 <ReportPreview
 	name="human_vibration_example"

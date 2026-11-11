@@ -17,6 +17,14 @@ references:
     url: "https://www.iso.org/standard/79482.html"
     note: "El Anexo F (normativo) imprime el mismo espectro de la pelota de caucho como Tabla F.1 y especifica la máquina de impactos modificada."
   - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation"
+    designation: "ISO 10140-3:2010"
+    implemented: false
+    url: "https://www.iso.org/standard/42089.html"
+    note: "Anexo A (informativo), la medición en laboratorio con fuentes de impacto pesadas y blandas."
+  - type: standard
     organization: "Japanese Standards Association"
     year: 2019
     title: "Acoustics — Measurement of floor impact sound insulation of buildings — Part 2: Method using standard heavy impact sources"
@@ -396,7 +404,10 @@ de esquina en baja frecuencia del apartado 8 se aplica solo a la máquina de
 impactos: la NOTA 2 del apartado 6 dice sin rodeos que todavía no se ha
 demostrado ninguna relación entre las mediciones en esquina y las de la zona
 central para un nivel *máximo* con ponderación Fast, así que no hay nada que
-combinar. Y el nivel de la pelota **no se corrige por ruido de fondo** (NOTA del
+combinar. Lo que sí llega a $L'_{\mathrm{i,Fmax},V,T}$ desde ese rincón de la
+norma es el tiempo de reverberación de la octava de 63 Hz del apartado 10.4, que
+entra aquí como uno de los tiempos de reverberación por bandas que aportas. Y el
+nivel de la pelota **no se corrige por ruido de fondo** (NOTA del
 apartado 9), porque no puede establecerse si un máximo que representa el fondo
 ha afectado al máximo que representa el impacto. En su lugar, mantén el fondo
 bajo y decláralo.

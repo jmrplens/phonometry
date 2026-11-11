@@ -13,10 +13,11 @@ passes only where it hands each warning to a recorder the test reads,
 ``pytest.warns`` or a ``warnings.catch_warnings(record=True)`` bound by
 ``as`` to a name the test reads, and so does ``warnings.resetwarnings``,
 which drops the configuration's errors with every other filter. A recorder
-bound to no name, or to one nothing reads, hides what its block meets. A filter whose action, or whose mark, the text does not
-settle is one the check cannot clear: a name bound once, at module level,
-to a constant is read as its value, and anything else, a loop variable or
-an argument, stands in the table below with its reason.
+bound to no name, or to one nothing reads, hides what its block meets. A
+filter whose action, or whose mark, the text does not settle is one the
+check cannot clear: a name bound once, at module level, to a constant is
+read as its value, and anything else, a loop variable or an argument,
+stands in the table below with its reason.
 """
 
 from __future__ import annotations

@@ -82,9 +82,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on writes CRLF on Linux and macOS too, and `check_release_artifacts.py`
   refuses a release whose sdist carries a file it does not cover, or one
   git does not track that setuptools did not write. The
-  PyOctaveBand bridge is built with the same pinned setuptools, and neither
-  package lists `wheel` among its build requirements any more, since
-  setuptools builds wheels itself.
+  PyOctaveBand bridge is built with the same pinned setuptools, at its
+  commit's time (`SOURCE_DATE_EPOCH`), and every pull request builds its
+  wheel twice, compares the two and reads it with `check-wheel-contents`.
+  Neither package lists `wheel` among its build requirements any more, since
+  setuptools builds wheels itself. Every build CI makes of either package, on
+  a pull request and in the release, runs under `PYTHONWARNINGS=error`, so a
+  warning the build prints fails it; only the SBOM step is left out, since
+  cyclonedx-bom warns about itself.
 
 ### Added
 
@@ -2296,6 +2301,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The audio-files guide shows it beside `pick` and `crop`.
 
 ### Fixed
+
+- **`import pyoctaveband` type-checks.** The PyOctaveBand 2.2.1 bridge now
+  ships the PEP 561 marker, `py.typed`, and re-exports `__version__` and
+  `__all__` as themselves. Without the marker, `mypy --strict` refused
+  `import pyoctaveband` with `import-untyped` and pyright strict asked for a
+  stub file; with the marker alone, pyright read the plain
+  `from phonometry import __version__` as a private import and refused
+  `pyoctaveband.__version__` in every mode. mypy, pyright in its basic,
+  standard and strict modes and `pyright --verifytypes pyoctaveband` (100 %)
+  now pass on a script that imports the old name.
+  `scripts/check_stub_metadata.py` refuses a built stub without the marker.
+
+- **The sdist carries no test module it cannot run.** setuptools packed the
+  top-level `tests/test*.py` into the sdist by default, without the
+  `conftest.py` and the helpers they import, so `pytest` in an unpacked sdist
+  stopped at 119 collection errors. A `MANIFEST.in` now prunes `tests/`,
+  which reads `scripts/`, `docs/` and `.github/` as well and so runs from the
+  repository; the sdist is a megabyte smaller and the wheel is unchanged.
+  `scripts/check_release_artifacts.py` refuses an sdist that carries
+  anything beside the package but what building the wheel needs, the
+  licence, the readme and `MANIFEST.in`.
 
 - **A count given as a `Decimal`, a `Fraction` or a complex number is refused by
   the kinds of number a count takes.** Every whole-number argument checked as
@@ -6599,13 +6625,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and every floor in the package metadata is now the oldest release the
   library's tests pass with on Python 3.12, measured beside every other
   floor: NumPy 2.0.2, SciPy 1.14.0, matplotlib 3.10.7 for `[plot]`, numba
-  0.60.0 for `[perf]`, reportlab 4.0.4 and svglib 0.9.0 for `[report]` and
+  0.60.0 for `[perf]`, reportlab 4.3.0 and svglib 0.9.1 for `[report]` and
   python-soundfile 0.12.0 for `[audio]`. They used to repeat the newest
   releases, which turned away environments a release or two behind for no
-  reason anyone had found. A CI job installs exactly those floors on Python
-  3.12 and runs the library's tests, so a floor cannot stop being true without
-  a pull request failing, and Python 3.12 joins the test matrix. A floor rises
-  only with a failure measured at it; CONTRIBUTING.md states the rule.
+  reason anyone had found. The `[report]` floors are the oldest releases that
+  render a fiche in a fresh interpreter under `-W error`: reportlab 4.0.4 to
+  4.2.5 warn when they are imported, through importlib's `load_module` and
+  `ast.NameConstant`, both deprecated, and svglib 0.9.0 raises a
+  SyntaxWarning (`invalid escape sequence '\d'`), which Python shows under
+  its default filters, on the first import after an install that did not
+  precompile it, as uv installs. `[report]` and `[full]` also refuse svglib
+  1.4.0, which stops a `.report()` at a debugger prompt, or fails it without
+  a terminal, so they ask for `svglib>=0.9.1,!=1.4.0`. A CI job installs
+  exactly those floors on Python 3.12 and runs the library's tests, a fiche
+  rendered under `-W error` among them, so a floor cannot stop being true
+  without a pull request failing, and Python 3.12 joins the test matrix.
+  `scripts/minimum_requirements.py`, which reads the floors for that job,
+  takes a floor followed by `!=` exclusions of releases above it and still
+  pins the floor. A floor rises only with a failure measured at it;
+  CONTRIBUTING.md states the rule.
 
 - **The railway rolling stock guide says what EN 15610 7.5 asks of longer
   wavelengths, and why the library computes none of it.** The guide listed the

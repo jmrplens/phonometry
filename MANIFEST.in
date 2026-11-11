@@ -1,0 +1,6 @@
+# setuptools packs the top-level tests/test*.py into the sdist by default,
+# without the conftest.py and the helpers they import, so an unpacked sdist
+# could not collect them. The suite also reads scripts/, docs/ and .github/,
+# so it stays in the repository. The wheel takes no file from here: its data
+# files are the package-data globs of pyproject.toml alone.
+prune tests

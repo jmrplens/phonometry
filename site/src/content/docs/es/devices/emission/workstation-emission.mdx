@@ -56,6 +56,11 @@ Es el número que imprime una ficha técnica. La
 de ISO 4871 lleva $L_{p\mathrm{A}}$ junto a $L_{W\mathrm{A}}$, y la Directiva
 de Máquinas lo exige siempre que supere los 70 dB(A). Lo determinan cinco
 normas, y se diferencian en una sola cosa: en cómo se quitan la sala de encima.
+ISO 11201 cualifica el entorno hasta que no queda sala que quitar; ISO 11202
+corrige su efecto de forma aproximada, por dos caminos; ISO 11204 lo corrige de
+forma precisa; ISO 11203 deduce el nivel del nivel de potencia acústica, de
+modo que en el propio puesto de trabajo no se mide nada; e ISO 11205 usa la
+intensidad sonora, un camino que esta biblioteca no implementa.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workstation_microphone.svg"
@@ -251,13 +256,21 @@ de la propia tabla B.1 sería 2,5 dB en vez de los 2,4 dB que imprime. La
 biblioteca sigue la ecuación y
 [el registro de erratas](/phonometry/es/reference/errata/) cuenta el resto.
 
-<SeeAlso
-  links={[
-    { href: '/phonometry/es/devices/emission/sound-power/', label: 'Potencia acústica' },
-    { href: '/phonometry/es/devices/emission/sound-power-pressure/', label: 'Potencia acústica por métodos de presión' },
-    { href: '/phonometry/es/perception/hearing/occupational-exposure/', label: 'Exposición laboral al ruido' },
-  ]}
-/>
+<SeeAlso>
+
+## Véase también
+
+- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): las vías
+  normalizadas hasta el nivel de potencia acústica, y la declaración ISO 4871
+  que lleva $L_{p\mathrm{A}}$ junto a $L_{W\mathrm{A}}$.
+- [Potencia acústica por métodos de presión](/phonometry/es/devices/emission/sound-power-pressure/):
+  la corrección ambiental $K_2$ de ISO 3744 por la que pasa el primer camino
+  hasta $z$.
+- [Exposición laboral al ruido](/phonometry/es/perception/hearing/occupational-exposure/):
+  lo que acumula a lo largo de la jornada la persona del puesto de trabajo, el
+  $L_{\mathrm{EX,8h}}$ de ISO 9612.
+
+</SeeAlso>
 
 ## Qué cubre esta guía
 

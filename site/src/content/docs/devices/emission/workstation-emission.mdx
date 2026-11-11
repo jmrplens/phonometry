@@ -56,7 +56,11 @@ It is the number a datasheet prints. The
 ISO 4871 carries $L_{p\mathrm{A}}$ beside $L_{W\mathrm{A}}$, and the EU
 Machinery Directive requires it whenever it exceeds 70 dB(A). Five standards
 determine it, and they differ in exactly one thing: how they get rid of the
-room.
+room. ISO 11201 qualifies the environment until there is no room to get rid
+of; ISO 11202 corrects for it approximately, by two routes; ISO 11204 corrects
+for it accurately; ISO 11203 derives the level from the sound power level, so
+nothing is measured at the work station itself; and ISO 11205 uses sound
+intensity, a route this library does not implement.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workstation_microphone.svg"
@@ -249,13 +253,21 @@ uncertainty would be 2.5 dB rather than the 2.4 dB it prints. The library
 follows the equation and
 [the errata register](/phonometry/reference/errata/) records the rest.
 
-<SeeAlso
-  links={[
-    { href: '/phonometry/devices/emission/sound-power/', label: 'Sound Power' },
-    { href: '/phonometry/devices/emission/sound-power-pressure/', label: 'Sound Power by Pressure Methods' },
-    { href: '/phonometry/perception/hearing/occupational-exposure/', label: 'Occupational Noise Exposure' },
-  ]}
-/>
+<SeeAlso>
+
+## See also
+
+- [Sound Power](/phonometry/devices/emission/sound-power/): the standardized
+  routes to the sound power level, and the ISO 4871 declaration that carries
+  $L_{p\mathrm{A}}$ beside $L_{W\mathrm{A}}$.
+- [Sound Power by Pressure Methods](/phonometry/devices/emission/sound-power-pressure/):
+  the ISO 3744 environmental correction $K_2$ that the first route to $z$ goes
+  through.
+- [Occupational Noise Exposure](/phonometry/perception/hearing/occupational-exposure/):
+  what the person at the work station accumulates over a day, the
+  $L_{\mathrm{EX,8h}}$ of ISO 9612.
+
+</SeeAlso>
 
 ## What this guide covers
 

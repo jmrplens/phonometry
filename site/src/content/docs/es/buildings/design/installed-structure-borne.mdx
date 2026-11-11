@@ -24,6 +24,14 @@ references:
     designation: "EN 12354-5:2009"
     url: "https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-building-from-the-performance-of-elements-sounds-levels-due-to-the-service-equipment"
     note: "El término de acoplamiento (apartado 4.4.3, Fórmulas 19a-19e), el nivel de potencia estructural instalada (Fórmula 18b), el término de ajuste estructura-a-aéreo (apartado 4.4.4, Fórmulas 20a/20b) y el nivel de presión acústica normalizado por trayectoria y su combinación energética (Fórmulas 18a, 17). La conformidad se ancla en el límite de fuente de fuerza del término de acoplamiento y en los ejemplos resueltos del propio Anexo I de la norma: la bañera de hidromasaje de I.2 (Tabla I.6a: corrección de movilidad y trayectoria 11) y la cisterna de I.3 (Tablas I.8/I.9: conversión de la fuente, las cuatro trayectorias de transmisión, el total de la Fórmula 17 y su cierre a 29 dB(A)), dentro del redondeo de ±0,15 dB de los intermedios impresos con un decimal. D_sa y R_ij,ref son entradas (de medición / EN 12354-1 / Anexos D y F). La ficha de catálogo enlazada es la página de BSI Knowledge de BS EN 12354-5:2009; revisada después como EN 12354-5:2023 (https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sounds-levels-due-to-the-service-equipment)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms"
+    designation: "ISO 12354-1:2017"
+    implemented: false
+    url: "https://www.iso.org/standard/70242.html"
+    note: "De dónde sale un índice de reducción por flancos R_ij,ref calculado, y el apartado 4.2.4, que limita el modelo a recintos contiguos; el modelo detallado está implementado en la guía de predicción detallada."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -232,7 +240,9 @@ da las seis formas cerradas que usa. `typical_element_mobility` es esa tabla:
 La frecuencia no está en la columna de magnitudes que describen el elemento,
 porque es la frecuencia de banda de la predicción y no una propiedad del
 elemento, pero sí aparece en cuatro de las seis expresiones, así que esas
-cuatro filas admiten `frequency` y las otras dos la rechazan. Elige la fila por
+cuatro filas admiten `frequency` y las otras dos la rechazan.
+`TABLE_D1_QUANTITIES` guarda esa columna fila a fila, y cada fila solo admite
+las magnitudes que figuran en ella. Elige la fila por
 lo que realmente transporta la vibración: una máquina pequeña y compacta es su
 masa total, una máquina sobre patas no rígidas es la fila masa-muelle, y la
 tubería que sale de una bomba es la fila de tubo. Fíjate en que `"plate"` es de
@@ -350,7 +360,8 @@ Tabla F.1 es su nivel de fuerza en bandas de octava:
 
 Con la tabla viajan dos condiciones. La forma cerrada que la norma imprime a su
 lado, $L_\mathrm{F} = 10\log_{10}(2{,}5f/10^{-12})$ en bandas de octava y
-$10\log_{10}(0{,}8f/10^{-12})$ en tercios de octava, solo vale «hasta unos
+$10\log_{10}(0{,}8f/10^{-12})$ en tercios de octava
+(`tapping_machine_force_level_estimate`), solo vale «hasta unos
 1000 Hz»: da 157 dB y 160 dB a 2 kHz y 4 kHz, donde la tabla se aplana en
 156 dB, así que lee la tabla donde la tabla existe y la forma cerrada solo para
 los tercios de octava que no tabula. Y los niveles están referidos a
@@ -409,8 +420,9 @@ la trayectoria (Fórmula F.1), las longitudes de absorción equivalentes de los
 elementos intermedios se pueden tomar numéricamente iguales a sus superficies
 como primera estimación en elementos grandes o bien amortiguados, y un ajuste
 $\Delta K$ cubre las ondas longitudinales y en el plano que se le escapan a la
-teoría de ondas de flexión (unos 4 dB para dos uniones y 6 dB para tres o más),
-con el $K_{ij}$ encadenado acotado inferiormente cerca de $-5$ dB, que
+teoría de ondas de flexión (unos 4 dB para dos uniones y 6 dB para tres o más,
+los que devuelve `multi_junction_adjustment`), con el $K_{ij}$ encadenado
+acotado inferiormente cerca de $-5$ dB (`MIN_MULTI_JUNCTION_KIJ`), que
 corresponde a transmisión estructural total. Dos consecuencias para el dato que
 aportas aquí:
 un $R_{ij,\mathrm{ref}}$ calculado para una sola unión sobrestima el aislamiento
@@ -591,7 +603,8 @@ global (menos es mejor). `verbose=True` añade una columna por trayectoria de
 transmisión (hasta cinco); en otro caso solo se muestran la potencia instalada
 y el total combinado. `language="es"` genera la ficha en español con comas
 decimales. La franja de base indica las Fórmulas 18a/17 y el aviso de
-predicción.
+predicción. La ficha necesita el extra opcional `phonometry[report]`
+(reportlab), y la gráfica necesita matplotlib.
 
 Dos números del fragmento de código de abajo son de la norma, no inventados:
 `16.2` es el término de acoplamiento de la cisterna del Anexo I.3 en su contacto

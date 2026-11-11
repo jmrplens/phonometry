@@ -24,6 +24,14 @@ references:
     designation: "EN 12354-5:2009"
     url: "https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-building-from-the-performance-of-elements-sounds-levels-due-to-the-service-equipment"
     note: "The coupling term (clause 4.4.3, Formulae 19a-19e), the installed structure-borne power level (Formula 18b), the structure-to-airborne adjustment term (clause 4.4.4, Formulae 20a/20b), and the normalised sound pressure level per path and its energetic combination (Formulae 18a, 17). Conformance is anchored on the coupling-term force-source limit and the standard's own Annex I worked examples: the whirlpool bath of I.2 (Table I.6a: mobility correction and path 11) and the flushing cistern of I.3 (Tables I.8/I.9: source conversion, all four transmission paths, the Formula 17 total and its 29 dB(A) closure), within the ±0.15 dB rounding of the printed one-decimal intermediates. D_sa and R_ij,ref are inputs (from measurement / EN 12354-1 / Annexes D and F). The linked catalogue record is the BSI Knowledge page for BS EN 12354-5:2009; since revised as EN 12354-5:2023 (https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sounds-levels-due-to-the-service-equipment)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms"
+    designation: "ISO 12354-1:2017"
+    implemented: false
+    url: "https://www.iso.org/standard/70242.html"
+    note: "Where a calculated flanking reduction index R_ij,ref comes from, and clause 4.2.4, which confines the model to adjacent rooms; the detailed model is implemented in the detailed-prediction guide."
 ---
 
 import ReportPreview from '../../../../components/ReportPreview.astro';
@@ -223,7 +231,8 @@ gives the six closed forms it uses. `typical_element_mobility` is that table:
 Frequency is not in the "describing quantities" column, because it is the band
 frequency of the prediction rather than a property of the element, but it is
 in four of the six expressions, so those four rows take `frequency` and the
-other two refuse it. Pick the row by what actually carries the vibration: a
+other two refuse it. `TABLE_D1_QUANTITIES` holds the column, row by row, and a
+row accepts only the quantities it lists there. Pick the row by what actually carries the vibration: a
 small compact machine is its total mass, a machine on non-rigid feet is the
 mass-spring row, and the pipework leaving a pump is the pipe row. Note that
 `"plate"` is Formula (F.4) again, written in $\rho$, $c_\mathrm{L}$ and $t$ instead of
@@ -332,7 +341,8 @@ Table F.1 is its octave-band force level:
 
 Two conditions travel with the table. The closed form the standard prints
 beside it, $L_\mathrm{F} = 10\log_{10}(2{,}5f/10^{-12})$ in octave bands and
-$10\log_{10}(0{,}8f/10^{-12})$ in one-third-octave bands, holds only "up till
+$10\log_{10}(0{,}8f/10^{-12})$ in one-third-octave bands
+(`tapping_machine_force_level_estimate`), holds only "up till
 about 1000 Hz": it gives 157 dB and 160 dB at 2 kHz and 4 kHz where the table
 flattens at 156 dB, so read the table where the table exists and the closed
 form only for the one-third-octave bands it does not tabulate. And the levels
@@ -388,8 +398,9 @@ junction indices add along the path (Formula F.1), the intermediate elements'
 equivalent absorption lengths may be taken numerically equal to their areas as a
 first estimate for large or well-damped elements, and an adjustment $\Delta K$
 covers the longitudinal and in-plane waves that bending-wave theory misses
-(about 4 dB for two junctions and 6 dB for three or more), with the chained
-$K_{ij}$ floored near $-5$ dB, which corresponds to total structure-borne
+(about 4 dB for two junctions and 6 dB for three or more, which
+`multi_junction_adjustment` returns), with the chained $K_{ij}$ floored near
+$-5$ dB (`MIN_MULTI_JUNCTION_KIJ`), which corresponds to total structure-borne
 transmission. Two consequences for the input you supply here: an
 $R_{ij,\mathrm{ref}}$ computed for a single junction over-predicts the insulation
 of a multi-junction route, and several distinct routes usually join the same
@@ -564,7 +575,8 @@ PASS/FAIL verdict against a declared upper limit on the overall $L_\mathrm{n,s}$
 is better). `verbose=True` adds one column per transmission path (up to five);
 otherwise only the installed power and the combined total are shown.
 `language="es"` renders the Spanish fiche with comma decimals. The basis strip
-states Formulae 18a/17 and the prediction disclaimer.
+states Formulae 18a/17 and the prediction disclaimer. Rendering needs the
+optional `phonometry[report]` extra (reportlab), and the plot needs matplotlib.
 
 Two numbers in the snippet below are the standard's, not invented: `16.2` is the
 coupling term of the Annex I.3 cistern at its wall contact, and the `lwc` array is

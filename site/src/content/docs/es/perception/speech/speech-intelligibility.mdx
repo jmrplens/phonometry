@@ -198,8 +198,19 @@ A_i = \operatorname{clip}\!\left(\frac{E_i' - D_i + 15}{30},\; 0,\; 1\right).
 $$
 
 A niveles de habla muy por encima del esfuerzo normal, un **factor de distorsión
-de nivel** del apartado 5.7 (la unidad para los espectros estándar usados en
-esta página) reduce aún más $A_i$; phonometry lo aplica automáticamente.
+de nivel** del apartado 5.7 reduce aún más $A_i$; phonometry lo aplica
+automáticamente. Vale uno hasta que el nivel espectral del habla supera en más
+de 10 dB el espectro de voz estándar de esfuerzo normal, así que, de los cuatro
+espectros de voz estándar de la sección 4, deja intactos los esfuerzos normal y
+elevado y actúa sobre el fuerte y el grito:
+
+```python
+# `speech` es la importación del primer fragmento de esta página.
+for effort in ("normal", "raised", "loud", "shout"):
+    factor = speech.speech_intelligibility_index(effort).level_distortion
+    print(effort, round(float(factor.min()), 3))
+# normal 1.0 | raised 1.0 | loud 0.951 | shout 0.89
+```
 
 Todos los arrays de esa cadena están en el resultado, así que puede dibujarse el
 apartado 5 entero para un caso donde el trabajo lo hace la propagación del

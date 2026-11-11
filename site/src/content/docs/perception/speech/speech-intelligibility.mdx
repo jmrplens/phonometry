@@ -187,8 +187,18 @@ A_i = \operatorname{clip}\!\left(\frac{E_i' - D_i + 15}{30},\; 0,\; 1\right).
 $$
 
 At speech levels well above normal effort a **level-distortion factor** of
-clause 5.7 (unity for the standard spectra used on this page) reduces $A_i$
-further; phonometry applies it automatically.
+clause 5.7 reduces $A_i$ further; phonometry applies it automatically. It stays
+at one until the speech spectrum level rises more than 10 dB above the
+normal-effort standard spectrum, so among the four standard spectra of section 4
+it leaves normal and raised speech alone and bites on loud and shout:
+
+```python
+# `speech` is the import of the first snippet on this page.
+for effort in ("normal", "raised", "loud", "shout"):
+    factor = speech.speech_intelligibility_index(effort).level_distortion
+    print(effort, round(float(factor.min()), 3))
+# normal 1.0 | raised 1.0 | loud 0.951 | shout 0.89
+```
 
 Every array in that chain is on the result, so the whole of clause 5 can be
 drawn for a case where the spread of masking does the work: a fan or a duct

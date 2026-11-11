@@ -68,6 +68,13 @@ varias guías.
   Citado por [Electroacústica](/phonometry/es/devices/electroacoustics/electroacoustics/),
   [Caracterización de altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/) y
   [Potencia acústica](/phonometry/es/devices/emission/sound-power/).
+- Beranek, L. L., & Mellow, T. J. (2019). *Acoustics: Sound fields,
+  transducers and vibration* (2.ª ed.). Academic Press.
+  ISBN 978-0-12-815227-0. La edición en la que el informe de conformidad lee
+  la impedancia de radiación y la directividad del pistón en pantalla
+  (Ecs. 13.117, 13.118, 4.151, 13.102), y aquella cuya Tabla 7.1 da las
+  amplitudes de Delany-Bazley que trata
+  [Erratas de las fuentes publicadas](/phonometry/es/reference/errata/).
 - Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
   control* (5.ª ed.). CRC Press. ISBN 978-1-4987-2405-0.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152). Las
@@ -93,9 +100,11 @@ varias guías.
   Los modelos de potencia acústica del apartado 4.6 (Tabla 4.5,
   Ecs. 4.53-4.56), el balance de potencia entre recintos del apartado 4.9
   (Ecs. 4.92-4.101), la ecuación de diseño de cerramientos del apartado 4.10
-  (Ecs. 4.102-4.115) y los problemas resueltos 4.16, 4.18 y 4.21 con sus
-  respuestas impresas por bandas de octava, alrededor de los cuales está
-  construida esta guía. Citado por
+  (Ecs. 4.102-4.115), el método de la meseta para la pérdida de transmisión
+  de paneles del apartado 3.9 (Tabla 3.1), los modos acústicos de orden
+  superior de un conducto circular rígido del apartado 7.2 (Tabla 7.1) y los
+  problemas resueltos 4.16, 4.18 y 4.21 con sus respuestas impresas por
+  bandas de octava. Citado por
   [Entre recintos: partición, receptor y criterio](/phonometry/es/devices/noise-control/room-to-room/),
   [Ruido por conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/),
   [Transmisión de onda de flexión en uniones de placas](/phonometry/es/vibration/structural/junction-transmission/)
@@ -104,8 +113,8 @@ varias guías.
 - Vér, I. L., & Beranek, L. L. (2006). *Noise and vibration control
   engineering: Principles and applications* (2.ª ed.). Wiley.
   [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568). El
-  tratamiento complementario de los conductos y los cerramientos de esta
-  página. Citado por
+  tratamiento complementario de los conductos, los silenciadores y los
+  cerramientos. Citado por
   [Control de ruido industrial: HVAC y cerramientos](/phonometry/es/devices/noise-control/noise-control/)
   y [Silenciadores](/phonometry/es/devices/noise-control/silencers/).
 
@@ -965,6 +974,15 @@ FRF. Las obras de vibración en humanos son de otra clase: sustentan las
 ponderaciones y las medidas de dosis, no la física de transmisión que tienen
 por encima.
 
+- Vér, I. L., & Beranek, L. L. (Eds.). (2006). *Noise and vibration control
+  engineering: Principles and applications* (2.ª ed.). John Wiley & Sons.
+  ISBN 978-0-471-44942-3.
+  [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568).
+  El manual del que esta biblioteca lee sus materiales de amortiguamiento
+  comerciales: la Tabla 14.1 del capítulo 14, «Structural Damping», de
+  Eric E. Ungar y Jeffrey A. Zapfe, que es la única tabla del corpus que da
+  un factor de pérdidas con la temperatura y la frecuencia a las que alcanza
+  su máximo.
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
   sound: Structural vibrations and sound radiation at audio frequencies*
   (3.ª ed.). Springer. ISBN 978-3-540-22696-3.

@@ -110,7 +110,7 @@ around.
 - Vér, I. L., & Beranek, L. L. (2006). *Noise and vibration control
   engineering: Principles and applications* (2nd ed.). Wiley.
   [doi:10.1002/9780470172568](https://doi.org/10.1002/9780470172568). The
-  companion treatment of the ducts and enclosures of this page. Cited by
+  companion treatment of ducts, silencers and enclosures. Cited by
   [Industrial Noise Control: HVAC and Enclosures](/phonometry/devices/noise-control/noise-control/)
   and [Silencers](/phonometry/devices/noise-control/silencers/).
 

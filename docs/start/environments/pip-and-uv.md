@@ -51,8 +51,9 @@ ImportError: Plotting requires matplotlib. Install it with: pip install "phonome
 The oldest release of each dependency the library is tested with, on each
 Python, is listed in [Getting
 Started](../getting-started.md#installation).
-On Windows on ARM, on Linux on ARM with musl and on macOS on Intel, some of
-those releases have no wheel, and pip builds them from source there, but for
+On Windows on ARM, on Linux with musl, on macOS on Intel and on 32-bit
+Windows, some of those releases have no wheel, and pip builds them from source
+there, as even a plain install does with SciPy on 32-bit Windows, but for
 torch, which publishes no source to build and so does not install there; the
 same section names which.
 

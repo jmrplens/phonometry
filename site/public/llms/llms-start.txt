@@ -145,22 +145,27 @@ The Python 3.13 wheel of torch 2.5.0 is for Linux on x86-64 only, where the
 job runs; on macOS on ARM, Windows on x86-64 and Linux on ARM the first is
 torch 2.6.0, the oldest that installs there.
 
-Windows on ARM, Linux on ARM with musl and macOS on Intel have no wheel at
-some of those floors, and pip held to them builds those releases from source
-there, which takes compilers. On Windows on ARM the first wheels are NumPy
-2.3.0, SciPy 1.16.2 and numba 0.68.0 (0.67.0 on Python 3.14), so every floor
-of the three but NumPy's on Python 3.14 is built. On Linux on ARM with musl,
-as in Alpine, the first SciPy wheel for Python 3.12 and 3.13 is 1.15.2, and
-numba, with the llvmlite it needs, publishes no musl wheel at all, so `[perf]`
-builds from source on any musl system. On macOS on Intel numba publishes no
-wheel from 0.63.0 on, nor llvmlite from 0.46.0 on, so `[perf]` builds both at
-the floor of Python 3.14; their last wheels there, numba 0.62.1 and llvmlite
-0.45.1, are for Python 3.12 and 3.13. A plain install takes the newest
-releases, which have wheels on all three platforms but numba's on musl and on
-macOS on Intel, where a plain `[perf]` install builds numba and llvmlite on
-every Python. PyPI has no torch wheel for any of the three, the last for macOS
-on Intel being 2.2.2, older than every floor, and torch publishes no source
-distribution, so `[torch]` does not install on them.
+Windows on ARM, Linux with musl, macOS on Intel and 32-bit Windows have no
+wheel at some of those floors, and pip held to them builds those releases from
+source there, which takes compilers. On Windows on ARM the first wheels are
+NumPy 2.3.0, SciPy 1.16.2 and numba 0.68.0 (0.67.0 on Python 3.14), so every
+floor of the three but NumPy's on Python 3.14 is built. On Linux with musl, as
+in Alpine, the first SciPy wheel on ARM for Python 3.12 and 3.13 is 1.15.2,
+and numba, with the llvmlite it needs, publishes no musl wheel at all, so
+`[perf]` builds from source on any musl system. On macOS on Intel numba
+publishes no wheel from 0.63.0 on, nor llvmlite from 0.46.0 on, so `[perf]`
+builds both at the floor of Python 3.14; their last wheels there, numba 0.62.1
+and llvmlite 0.45.1, are for Python 3.12 and 3.13. On 32-bit Windows NumPy has
+a wheel at every floor, but the last SciPy wheel there is 1.9.1, for Python
+3.9 at most, and the last numba and llvmlite wheels, 0.57.1 and 0.41.1, are
+for Python 3.10 at most, so even a plain install builds SciPy there on every
+Python, and `[perf]` builds numba and llvmlite. A plain install takes the
+newest releases, which have wheels on the other three platforms but numba's on
+musl and on macOS on Intel, where a plain `[perf]` install builds numba and
+llvmlite on every Python. PyPI has no torch wheel for any of the four, the
+last for macOS on Intel being 2.2.2, older than every floor, and none ever for
+32-bit Windows, and torch publishes no source distribution, so `[torch]` does
+not install on them.
 
 Optional extras:
 
@@ -594,8 +599,9 @@ ImportError: Plotting requires matplotlib. Install it with: pip install "phonome
 The oldest release of each dependency the library is tested with, on each
 Python, is listed in [Getting
 Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation).
-On Windows on ARM, on Linux on ARM with musl and on macOS on Intel, some of
-those releases have no wheel, and pip builds them from source there, but for
+On Windows on ARM, on Linux with musl, on macOS on Intel and on 32-bit
+Windows, some of those releases have no wheel, and pip builds them from source
+there, as even a plain install does with SciPy on 32-bit Windows, but for
 torch, which publishes no source to build and so does not install there; the
 same section names which.
 

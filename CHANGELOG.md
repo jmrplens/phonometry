@@ -7435,14 +7435,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on x86-64 only, where the job runs; on macOS on ARM, Windows on x86-64 and
   Linux on ARM the first is torch 2.6.0, the oldest that installs there.
   On Windows on ARM the first wheels are NumPy 2.3.0, SciPy 1.16.2 and numba
-  0.68.0 (0.67.0 on Python 3.14), on Linux on ARM with musl the first SciPy
-  wheel for Python 3.12 and 3.13 is 1.15.2 and numba publishes none, and on
+  0.68.0 (0.67.0 on Python 3.14), on Linux with musl the first SciPy wheel on
+  ARM for Python 3.12 and 3.13 is 1.15.2 and numba publishes none, and on
   macOS on Intel numba publishes none from 0.63.0 on and llvmlite none from
   0.46.0 on, so pip held to the floors builds those releases from source
   there, and a plain `[perf]` install builds numba on musl and on macOS on
-  Intel on every Python. PyPI has no torch wheel for any of the three
-  platforms and no torch source distribution, so `[torch]` does not install
-  there. The install pages say so.
+  Intel on every Python. On 32-bit Windows the last SciPy wheel is 1.9.1, for
+  Python 3.9 at most, and the last numba and llvmlite wheels are 0.57.1 and
+  0.41.1, for Python 3.10 at most, so even a plain install builds SciPy there
+  on every Python and `[perf]` builds numba and llvmlite. PyPI has no torch
+  wheel for any of the four platforms and no torch source distribution, so
+  `[torch]` does not install there. The install pages say so.
   The `[report]` floors are the oldest releases that render a fiche in a
   fresh interpreter under `-W error`: reportlab 4.0.4 to 4.2.5 warn when
   they are imported, through importlib's `load_module` and

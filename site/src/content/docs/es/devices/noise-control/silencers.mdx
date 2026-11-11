@@ -64,9 +64,9 @@ conductos HVAC, el ruido de flujo y los cerramientos de máquina, vive en
 
 La reflexión se calcula elemento a elemento. Cada elemento acústico es una
 matriz de transferencia 2x2 que relaciona la presión $p$ y la velocidad de
-volumen $Su$ en sus dos extremos, y un silenciador compuesto es el producto
-ordenado de las matrices de sus elementos (Bies §8.9). Un conducto recto de
-longitud $L$ y área $S$ es
+volumen $Su$ en sus dos extremos (Bies Ec. (8.133)), y un silenciador compuesto
+es el producto ordenado de las matrices de sus elementos (Bies §8.9). Un
+conducto recto de longitud $L$ y área $S$ es (Bies Ec. (8.143), sin flujo)
 
 $$
 \begin{bmatrix} \cos kL & j\,\tfrac{\rho c}{S}\sin kL \\[2pt]
@@ -75,8 +75,8 @@ j\,\tfrac{S}{\rho c}\sin kL & \cos kL \end{bmatrix},
 $$
 
 y una rama lateral de impedancia $Z_\mathrm{b}$ es la derivación
-$\left[\begin{smallmatrix} 1 & 0 \\ 1/Z_\mathrm{b} & 1 \end{smallmatrix}\right]$. La
-**pérdida de transmisión** se obtiene de la matriz compuesta $T$ con las
+$\left[\begin{smallmatrix} 1 & 0 \\ 1/Z_\mathrm{b} & 1 \end{smallmatrix}\right]$
+(Bies Ec. (8.144)). La **pérdida de transmisión** se obtiene de la matriz compuesta $T$ con las
 impedancias de los puertos $Z_1 = \rho c/S_\text{in}$ y $Z_n = \rho c/S_\text{out}$
 (Munjal Ec. (3.27); Bies Ec. (8.141) imprime invertidos los pesos de impedancia
 de `T11` y `T22` de esta fórmula y no cumple el límite de expansión

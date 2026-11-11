@@ -12,7 +12,6 @@ falling as omega**-1/2), the rod impedance ``rho cL S``, and the injected power
 from __future__ import annotations
 
 import math
-import warnings
 
 import numpy as np
 import pytest
@@ -109,12 +108,13 @@ def test_beam_mobility_of_a_vanishing_impedance_is_the_same_for_a_number() -> No
     """An impedance that underflows to zero gives the array's answer for a number too.
 
     m' c_B is 0.0 for these inputs; the mobility, its reciprocal, came back
-    inf + nan j under a RuntimeWarning for an array and raised
-    ZeroDivisionError for a number.
+    inf + nan j under NumPy's division warnings for an array and raised
+    ZeroDivisionError for a number. Both forms now warn alike.
     """
-    with warnings.catch_warnings(record=True):
-        warnings.simplefilter("always")
+    divide = "(divide by zero|invalid value) encountered in divide"
+    with pytest.warns(RuntimeWarning, match=divide):
         array = vibration.infinite_beam_mobility([1e-300], 1e-300, 1e-300)
+    with pytest.warns(RuntimeWarning, match=divide):
         number = vibration.infinite_beam_mobility(1e-300, 1e-300, 1e-300)
     np.testing.assert_array_equal([number], array)
 

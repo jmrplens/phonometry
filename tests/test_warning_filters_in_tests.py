@@ -9,10 +9,11 @@ library, a new deprecation of a dependency, a NumPy overflow. So a filter
 that ignores, or shows without raising, names the message it means:
 ``warnings.filterwarnings`` with ``message=``, a ``filterwarnings`` mark
 with its message part. ``warnings.simplefilter`` takes no message and
-passes only where it hands each warning to a recorder the test reads, inside
-``warnings.catch_warnings(record=True)`` or ``pytest.warns``, and so does
-``warnings.resetwarnings``, which drops the configuration's errors with
-every other filter. A filter whose action, or whose mark, the text does not
+passes only where it hands each warning to a recorder the test reads,
+``pytest.warns`` or a ``warnings.catch_warnings(record=True)`` bound by
+``as`` to a name the test reads, and so does ``warnings.resetwarnings``,
+which drops the configuration's errors with every other filter. A recorder
+bound to no name, or to one nothing reads, hides what its block meets. A filter whose action, or whose mark, the text does not
 settle is one the check cannot clear: a name bound once, at module level,
 to a constant is read as its value, and anything else, a loop variable or
 an argument, stands in the table below with its reason.
@@ -201,18 +202,38 @@ def _function(
     return None
 
 
+def _reads(scope: ast.AST) -> frozenset[str]:
+    """The names *scope* reads, in its own body or in a function defined in it."""
+    return frozenset(
+        node.id
+        for node in ast.walk(scope)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+    )
+
+
 def _records(
     item: ast.withitem,
     modules: frozenset[str],
     bare: frozenset[str],
     known: Mapping[str, object],
+    reads: frozenset[str],
 ) -> bool:
-    """Whether the context manager of *item* records the warnings of its block."""
+    """Whether the context manager of *item* records the warnings of its block for the test.
+
+    ``catch_warnings(record=True)`` does only when its list is bound by ``as``
+    to a name among *reads*, those the enclosing scope reads: a list no one
+    reads hides every warning of the block.
+    """
     call = item.context_expr
     if not isinstance(call, ast.Call):
         return False
     if _function(call, modules, bare) == "catch_warnings":
-        return _constant(_argument(call, "record", 0), known) is True
+        bound = item.optional_vars
+        return (
+            _constant(_argument(call, "record", 0), known) is True
+            and isinstance(bound, ast.Name)
+            and bound.id in reads
+        )
     func = call.func
     return isinstance(func, ast.Attribute) and func.attr in _RECORDERS
 
@@ -259,7 +280,6 @@ def _lets_through(
         spelled = _argument(call, "action", None)
         if spelled is None:
             return None
-        recording = recording or _constant(_argument(call, "record", 0), known) is True
     else:
         return None
     action = _constant(spelled, known)
@@ -279,20 +299,24 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
     known = _module_constants(tree)
     found: list[tuple[str, str]] = []
 
-    def visit(node: ast.AST, scope: str, *, recording: bool) -> None:
+    def visit(
+        node: ast.AST, scope: str, reads: frozenset[str], *, recording: bool
+    ) -> None:
         key = f"{where}::{scope or '<module>'}"
         for child in ast.iter_child_nodes(node):
-            inner, records = scope, recording
+            inner, inner_reads, records = scope, reads, recording
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 inner = f"{scope}.{child.name}" if scope else child.name
+                inner_reads = _reads(child)
                 records = False
             if isinstance(child, (ast.With, ast.AsyncWith)) and any(
-                _records(item, modules, bare, known) for item in child.items
+                _records(item, modules, bare, known, reads) for item in child.items
             ):
                 for item in child.items:
-                    visit(item, inner, recording=recording)
+                    own = _records(item, modules, bare, known, reads)
+                    visit(item, inner, reads, recording=recording or own)
                 for statement in child.body:
-                    visit_one(statement, inner, recording=True)
+                    visit_one(statement, inner, reads, recording=True)
                 continue
             if isinstance(child, ast.Call):
                 what = _function(child, modules, bare)
@@ -300,13 +324,15 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
                     how := _lets_through(child, what, recording=records, known=known)
                 ):
                     found.append((key, f"line {child.lineno}: {how}"))
-            visit(child, inner, recording=records)
+            visit(child, inner, inner_reads, recording=records)
 
-    def visit_one(statement: ast.AST, scope: str, *, recording: bool) -> None:
+    def visit_one(
+        statement: ast.AST, scope: str, reads: frozenset[str], *, recording: bool
+    ) -> None:
         holder = ast.Module(body=[statement], type_ignores=[])  # type: ignore[list-item]
-        visit(holder, scope, recording=recording)
+        visit(holder, scope, reads, recording=recording)
 
-    visit(tree, "", recording=False)
+    visit(tree, "", _reads(tree), recording=False)
     return found
 
 
@@ -337,6 +363,13 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
         "warnings.filterwarnings(*spec)",
         "warnings.simplefilter(action)",
         "with warnings.catch_warnings(record=True):\n    warnings.simplefilter(action)",
+        "with warnings.catch_warnings(record=True):\n    warnings.simplefilter('default', UserWarning)",
+        "with warnings.catch_warnings(record=True):\n    warnings.simplefilter('always')\n    call()",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen = []",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\ndef other(seen):\n    assert seen",
+        "with warnings.catch_warnings(action='always', record=True):\n    pass",
+        "with warnings.catch_warnings(record=True):\n    warnings.resetwarnings()",
         "warnings.catch_warnings(action=chosen)",
         "pytest.mark.filterwarnings(spec)",
         "ACTION = 'ignore'\nwarnings.simplefilter(ACTION, UserWarning)",
@@ -359,13 +392,14 @@ def test_a_filter_that_names_no_message_is_found(source: str) -> None:
         "warnings.filterwarnings('ignore', message=re.escape(text))",
         "pytest.mark.filterwarnings('ignore:Low sampling rate:UserWarning')",
         "pytest.mark.filterwarnings('error::UserWarning')",
-        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')",
-        "with warnings.catch_warnings(record=True):\n    warnings.simplefilter('default', UserWarning)",
-        "with warnings.catch_warnings(action='always', record=True):\n    pass",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nassert not seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('default', UserWarning)\nassert len(seen) == 1",
+        "with warnings.catch_warnings(action='always', record=True) as seen:\n    pass\nassert not seen",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        assert seen\n    check()",
         "with pytest.warns(UserWarning):\n    warnings.simplefilter('always')",
         "warnings.catch_warnings()",
         "text.filterwarnings('ignore')",
-        "with warnings.catch_warnings(record=True):\n    warnings.resetwarnings()",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.resetwarnings()\nassert not seen",
         "warnings.filterwarnings(action, message='Low sampling rate')",
         "ACTION = 'error'\nwarnings.simplefilter(ACTION, UserWarning)",
         "SPEC = 'ignore:Low rate:UserWarning'\npytest.mark.filterwarnings(SPEC)",
@@ -379,11 +413,12 @@ def test_a_filter_that_names_its_message_or_records_passes(source: str) -> None:
 def test_a_recorder_covers_its_own_block_and_no_function_defined_in_it() -> None:
     source = (
         "def test_it():\n"
-        "    with warnings.catch_warnings(record=True):\n"
+        "    with warnings.catch_warnings(record=True) as seen:\n"
         "        warnings.simplefilter('always')\n"
         "        def helper():\n"
         "            warnings.simplefilter('always')\n"
         "    warnings.simplefilter('always')\n"
+        "    assert not seen\n"
     )
     found = _filters_in(source, "tests/example.py")
     assert found == [

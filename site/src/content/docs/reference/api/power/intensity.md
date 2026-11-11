@@ -102,11 +102,11 @@ $L_\mathrm{d} > F_2$ (criterion 1, Annex B equation (B.1)).
 
 ```python
 field_indicators(
-    pressure_levels: ArrayLike,
-    normal_intensity: ArrayLike,
+    pressure_levels: NumericArrayLike,
+    normal_intensity: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    temporal_intensity: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    temporal_intensity: NumericArrayLike | None = None,
 ) -> FieldIndicators
 ```
 
@@ -219,7 +219,7 @@ the limit is not flagged.
 FieldIndicators.plot(
     ax: Axes | None = None,
     *,
-    dynamic_capability: ArrayLike | None = None,
+    dynamic_capability: NumericArrayLike | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -424,8 +424,8 @@ intensity axis through both; default is the classic 12 mm spacer.
 
 ```python
 sound_intensity(
-    p1: Signal | ArrayLike,
-    p2: Signal | ArrayLike,
+    p1: Signal | NumericArrayLike,
+    p2: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     spacing_m: float,
@@ -504,7 +504,7 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 
 ```python
 temporal_variability_indicator(
-    short_time_intensity: ArrayLike,
+    short_time_intensity: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 

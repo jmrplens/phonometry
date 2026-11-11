@@ -91,10 +91,10 @@ which a duct stops carrying plane waves alone is in
 
 ```python
 average_pressure_loss_coefficient(
-    object_static_pressure_pa: ArrayLike,
-    object_dynamic_pressure_pa: ArrayLike,
-    substitution_static_pressure_pa: ArrayLike,
-    substitution_dynamic_pressure_pa: ArrayLike,
+    object_static_pressure_pa: NumericArrayLike,
+    object_dynamic_pressure_pa: NumericArrayLike,
+    substitution_static_pressure_pa: NumericArrayLike,
+    substitution_dynamic_pressure_pa: NumericArrayLike,
 ) -> float
 ```
 
@@ -159,8 +159,8 @@ DENSITY_RATIO_RANGE = (0.98, 1.02)
 
 ```python
 duct_sound_power_level(
-    room_sound_power_level: ArrayLike,
-    end_reflection_loss: ArrayLike,
+    room_sound_power_level: NumericArrayLike,
+    end_reflection_loss: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -252,7 +252,10 @@ EXTRAPOLATION_RANGE_FACTORS = (0.5, 2.0)
 ## fit_operating_line
 
 ```python
-fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine
+fit_operating_line(
+    duty: NumericArrayLike,
+    levels: NumericArrayLike,
+) -> OperatingLine
 ```
 
 ISO 5135 5.5.2: the least-squares line through the test points.
@@ -289,9 +292,9 @@ serves both.
 
 ```python
 flow_noise_power_level(
-    pressure_level: ArrayLike,
-    open_end_loss: ArrayLike,
-    room_correction: ArrayLike,
+    pressure_level: NumericArrayLike,
+    open_end_loss: NumericArrayLike,
+    room_correction: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -379,8 +382,8 @@ ISO7235_SPREAD_LIMITS = ((50.0, 10.0), (63.0, 10.0), (80.0, 8.0), (100.0, 8.0), 
 
 ```python
 measured_transmission_loss(
-    insertion_loss: ArrayLike,
-    open_end_loss: ArrayLike,
+    insertion_loss: NumericArrayLike,
+    open_end_loss: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -488,7 +491,10 @@ silencers, and that the other two rest on experience.
 ## microphone_positions_required
 
 ```python
-microphone_positions_required(levels: ArrayLike, frequency: float) -> int
+microphone_positions_required(
+    levels: NumericArrayLike,
+    frequency: float,
+) -> int
 ```
 
 ISO 7235 6.2.1: three microphone positions, or five.
@@ -676,7 +682,9 @@ carry them as printed.
 ## octave_insertion_loss
 
 ```python
-octave_insertion_loss(insertion_loss: ArrayLike) -> NDArray[np.float64]
+octave_insertion_loss(
+    insertion_loss: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 ISO 11691 Equation (2): three one-third octaves into their octave.
@@ -715,7 +723,7 @@ the substitution duct, so their energies can be weighted equally here.
 
 ```python
 open_end_reflection_coefficient(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     area: float,
     *,
     solid_angle_sr: float = 6.283185307179586,
@@ -761,7 +769,7 @@ reflection coefficient is no greater than 0,3.
 
 ```python
 open_end_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     area: float,
     *,
     solid_angle_sr: float = 6.283185307179586,
@@ -1036,10 +1044,10 @@ transition elements may be fitted.
 
 ```python
 substitution_insertion_loss(
-    substitution_level: ArrayLike,
-    object_level: ArrayLike,
+    substitution_level: NumericArrayLike,
+    object_level: NumericArrayLike,
     *,
-    reverberation_times: tuple[ArrayLike, ArrayLike] | None = None,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = None,
 ) -> NDArray[np.float64]
 ```
 

@@ -37,8 +37,8 @@ that module.
 ```python
 air_density_astm_e2611(
     *,
-    temperature_c: ArrayLike,
-    static_pressure_kpa: ArrayLike = 101.325,
+    temperature_c: NumericArrayLike,
+    static_pressure_kpa: NumericArrayLike = 101.325,
 ) -> NDArray[np.float64]
 ```
 
@@ -66,7 +66,7 @@ $\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}$.
 
 ```python
 air_layer_transfer_matrix(
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     thickness_m: float,
     characteristic_impedance: float,
 ) -> TransferMatrix
@@ -102,12 +102,12 @@ $T_{11} = T_{22}$).
 
 ```python
 face_quantities(
-    a: ArrayLike,
-    b: ArrayLike,
-    c: ArrayLike,
-    d: ArrayLike,
+    a: NumericArrayLike,
+    b: NumericArrayLike,
+    c: NumericArrayLike,
+    d: NumericArrayLike,
     *,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     thickness_m: float,
     characteristic_impedance: float,
 ) -> FaceQuantities
@@ -218,7 +218,7 @@ binding for every microphone pair).
 ```python
 speed_of_sound_astm_e2611(
     *,
-    temperature_c: ArrayLike,
+    temperature_c: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -245,16 +245,16 @@ $c = 20.047 \sqrt{273.15 + T}$.
 
 ```python
 transfer_matrix_one_load(
-    load: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
+    load: tuple[NumericArrayLike, NumericArrayLike, NumericArrayLike, NumericArrayLike],
     *,
     l1: float,
     s1: float,
     l2: float,
     s2: float,
     thickness_m: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     characteristic_impedance: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     diameter_m: float | None = None,
     shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> TransferMatrix
@@ -298,17 +298,17 @@ $$
 
 ```python
 transfer_matrix_two_load(
-    load_a: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
-    load_b: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
+    load_a: tuple[NumericArrayLike, NumericArrayLike, NumericArrayLike, NumericArrayLike],
+    load_b: tuple[NumericArrayLike, NumericArrayLike, NumericArrayLike, NumericArrayLike],
     *,
     l1: float,
     s1: float,
     l2: float,
     s2: float,
     thickness_m: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     characteristic_impedance: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     diameter_m: float | None = None,
     shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> TransferMatrix
@@ -353,10 +353,10 @@ $$
 
 ```python
 TransferMatrix(
-    t11: ArrayLike,
-    t12: ArrayLike,
-    t21: ArrayLike,
-    t22: ArrayLike,
+    t11: NumericArrayLike,
+    t12: NumericArrayLike,
+    t21: NumericArrayLike,
+    t22: NumericArrayLike,
     *,
     l1: float | None = None,
     s1: float | None = None,
@@ -365,7 +365,7 @@ TransferMatrix(
     thickness_m: float | None = None,
     diameter_m: float | None = None,
     shape: Literal['circular', 'rectangular', 'square'] | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     air_characteristic_impedance: float | None = None,
 )
 ```
@@ -468,7 +468,7 @@ $k' = \arccos(T_{11}) / d$ (complex `arccos`).
 TransferMatrix.plot(
     ax: Axes | None = None,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     characteristic_impedance: float | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
@@ -606,16 +606,16 @@ a real wavenumber).
 
 ```python
 wave_decomposition(
-    h1: ArrayLike,
-    h2: ArrayLike,
-    h3: ArrayLike,
-    h4: ArrayLike,
+    h1: NumericArrayLike,
+    h2: NumericArrayLike,
+    h3: NumericArrayLike,
+    h4: NumericArrayLike,
     *,
     l1: float,
     s1: float,
     l2: float,
     s2: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     diameter_m: float | None = None,
     shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> WaveAmplitudes

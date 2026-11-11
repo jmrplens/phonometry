@@ -75,12 +75,12 @@ Clause, table and annex numbers refer to ISO 8253-2:2009(E).
 
 ```python
 check_diffuse_sound_field(
-    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], ArrayLike],
-    reference_levels: ArrayLike,
+    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    directional_levels: ArrayLike | None = None,
-    front_to_random_index: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    directional_levels: NumericArrayLike | None = None,
+    front_to_random_index: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> DiffuseSoundFieldCheck
 ```
 
@@ -127,13 +127,13 @@ them.
 
 ```python
 check_free_sound_field(
-    lateral_levels: Mapping[Literal['left', 'right', 'up', 'down'], ArrayLike],
-    reference_levels: ArrayLike,
+    lateral_levels: Mapping[Literal['left', 'right', 'up', 'down'], NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    front_levels: ArrayLike,
-    back_levels: ArrayLike,
+    front_levels: NumericArrayLike,
+    back_levels: NumericArrayLike,
     loudspeaker_distance_m: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FreeSoundFieldCheck
 ```
 
@@ -186,13 +186,13 @@ to 5.2 says only an anechoic room does.
 
 ```python
 check_quasi_free_sound_field(
-    lateral_levels: Mapping[Literal['left', 'right', 'up', 'down'], ArrayLike],
-    reference_levels: ArrayLike,
+    lateral_levels: Mapping[Literal['left', 'right', 'up', 'down'], NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    front_levels: ArrayLike,
-    back_levels: ArrayLike,
+    front_levels: NumericArrayLike,
+    back_levels: NumericArrayLike,
     loudspeaker_distance_m: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FreeSoundFieldCheck
 ```
 
@@ -539,7 +539,7 @@ For a quasi-free field this is its usable frequency range (5.4).
 
 ```python
 incidence_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     incidence_angle_deg: float,
 ) -> np.ndarray

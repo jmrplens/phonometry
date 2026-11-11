@@ -48,10 +48,10 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -130,7 +130,7 @@ def slant_distance(
     return float(np.hypot(h, r0))
 
 
-def apparent_sound_power_level(band_levels: ArrayLike, r1: float) -> float:
+def apparent_sound_power_level(band_levels: NumericArrayLike, r1: float) -> float:
     r"""A-weighted apparent sound power level ``L_WA`` (IEC 61400-11 Formula 26).
 
     :math:`L_{W\mathrm{A},i} = L_{p,i} - 6 + 10 \cdot \log_{10}(4\pi R_1^2/S_0)` per
@@ -436,8 +436,8 @@ class WindTurbineTonalityResult(OwnsArrays):
 
 
 def _validate_narrowband(
-    levels: ArrayLike,
-    frequencies: ArrayLike,
+    levels: NumericArrayLike,
+    frequencies: NumericArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], float]:
     """Coerce and validate a uniformly-spaced narrowband spectrum."""
     lv = real_array(levels, "levels")
@@ -558,9 +558,9 @@ def _tone_lines(
 
 
 def wind_turbine_tonality(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     tone_frequency: float | None = None,
 ) -> WindTurbineTonalityResult:
     r"""Tonal audibility of a narrowband spectrum (IEC 61400-11 Formulae 30-34).

@@ -118,10 +118,10 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 #: Constant term of the critical bandwidth Δfc (Formula (2)), in Hz.
@@ -281,7 +281,7 @@ def audibility_from_levels(
 
 
 def energy_sum_level(
-    line_levels: ArrayLike,
+    line_levels: NumericArrayLike,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
@@ -336,7 +336,7 @@ def energy_sum_level(
 # (Clauses 5.3.2/5.3.3, Annex D)
 # --------------------------------------------------------------------------- #
 def _validate_spectrum(
-    levels: ArrayLike, frequencies: ArrayLike, owner: str
+    levels: NumericArrayLike, frequencies: NumericArrayLike, owner: str
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Coerce and validate a narrow-band ``(levels, frequencies)`` spectrum.
 
@@ -378,10 +378,10 @@ _TONE_PEAK_DROP = 10.0
 
 
 def mean_narrowband_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     tone_frequency: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
     r"""Mean narrow-band level ``LS`` of the masking noise (Formula (6), Annex D).
@@ -424,8 +424,8 @@ def mean_narrowband_level(
 
 
 def _mean_narrowband_level_lines(
-    levels: ArrayLike,
-    frequencies: ArrayLike,
+    levels: NumericArrayLike,
+    frequencies: NumericArrayLike,
     tone_frequency: float,
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
@@ -475,11 +475,11 @@ def _mean_narrowband_level_lines(
 
 
 def tone_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     tone_frequency: float,
     mean_narrowband_level: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
     r"""Tone level ``LT`` from the tonal lines about a tone (Formula (8)).
@@ -702,10 +702,10 @@ def _step3_groups(
 
 
 def analyze_spectrum(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     line_spacing_hz: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> ToneAudibilityResult:
     r"""Detect and rate the audible tones of a narrow-band spectrum (Clause 5.3.8).
@@ -817,11 +817,11 @@ def analyze_spectrum(
 
 
 def combined_tone_level(
-    levels: ArrayLike,
-    mean_narrowband_levels: ArrayLike,
+    levels: NumericArrayLike,
+    mean_narrowband_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    tone_frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
+    tone_frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
     r"""Combined tone level ``LT`` of several tones in one critical band (Formula (17)).
@@ -970,7 +970,7 @@ def resolve_tones_separately(
 # --------------------------------------------------------------------------- #
 # Decisive and mean audibility (Clauses 5.3.8/5.3.9)
 # --------------------------------------------------------------------------- #
-def mean_audibility(decisive_audibilities: ArrayLike) -> float:
+def mean_audibility(decisive_audibilities: NumericArrayLike) -> float:
     r"""Mean audibility ``ΔL`` over a number of spectra (Formula (20)).
 
     :math:`\Delta L = 10 \log_{10}[(1/J) \sum_j 10^{\Delta L_j/10}]` dB, the energy
@@ -1007,8 +1007,8 @@ COVERAGE_FACTOR_90 = 1.645
 
 
 def audibility_uncertainty(
-    tone_line_levels: ArrayLike,
-    noise_line_levels: ArrayLike,
+    tone_line_levels: NumericArrayLike,
+    noise_line_levels: NumericArrayLike,
     tone_frequency: float,
     line_spacing_hz: float,
     *,
@@ -1085,8 +1085,8 @@ def audibility_uncertainty(
 
 
 def mean_audibility_uncertainty(
-    decisive_audibilities: ArrayLike,
-    extended_uncertainties: ArrayLike,
+    decisive_audibilities: NumericArrayLike,
+    extended_uncertainties: NumericArrayLike,
 ) -> float:
     r"""Extended uncertainty ``U`` of the mean audibility (Formulae (28)/(29)).
 
@@ -1550,12 +1550,12 @@ def tone_audibility(
 
 
 def assess_tones(
-    tone_levels: ArrayLike,
-    mean_narrowband_levels: ArrayLike,
+    tone_levels: NumericArrayLike,
+    mean_narrowband_levels: NumericArrayLike,
     line_spacing_hz: float,
     *,
-    tone_frequencies: ArrayLike,
-    extended_uncertainties: ArrayLike | None = None,
+    tone_frequencies: NumericArrayLike,
+    extended_uncertainties: NumericArrayLike | None = None,
 ) -> ToneAudibilityResult:
     """Assess the audibility of the tones of a narrow-band spectrum.
 

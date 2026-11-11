@@ -2306,6 +2306,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A filter object types a Signal in as a Signal out, and an array in as an
+  array out.** `WeightingFilter.filter` and `ParametricEQ.filter` returned
+  `Signal | ndarray`, and `TimeWeighting.process` `TimeWeightedEnvelope |
+  ndarray`, whatever they were handed, so `y: NDArray[np.float64] =
+  wf.filter(x)` was a type error in mypy and pyright where
+  `filters.weighting_filter(x, fs)` typed the same call as an array. Each
+  method now has the overload heads of its function, and
+  `scripts/check_return_overloads.py` refuses a return that names a record
+  of the package and an array, or a tuple of each, without a head for each.
+  The levels guide shows `float(signals.leq(x))` for the one level of a 1D
+  record, whose type the shape of the input decides.
+
+- **Every public name has a type a type checker knows.** pyright's
+  `--verifytypes` read 99.2% of the installed package: 137 of its 18 689
+  public names had a type checkers may infer differently and 8 had none it
+  could name. The attributes the constructors of `OctaveFilterBank`,
+  `WeightingFilter`, `ParametricEQ`, `FDTD2D` and `ElasticFDTD2D` set from an
+  expression (`sos`, `zi`, `factor`, `p`, `c`, `dx` and the rest) were left to
+  inference, so pyright saw `WeightingFilter.zi` as `NDArray | Any` where mypy
+  saw an array, and the catalogue's provenance record replaced its inherited
+  hash with an undeclared `None`, which left every catalogue row partly
+  unknown, and with it each function that takes or returns one,
+  `io.read_catalogue` and `io.write_catalogue` among them. Each attribute is
+  now annotated where it is set, the hash is declared as the class variable
+  it is, and the three coefficient tables of `aircraft.PerformanceAircraft`
+  default to an empty read-only mapping that its signature shows, where it
+  showed `...`. The score is 100%, and a CI job holds the wheel to it.
+
+- **The FDTD engines say what their fields are.** `FDTD2D.p`, `vx` and
+  `vy`, and the stresses and velocities of `ElasticFDTD2D` with its
+  synthetic pressure, are arrays of the library the engine steps on, a
+  NumPy array, a CuPy array or a PyTorch tensor, which a type checker reads
+  as `Any`; the class docstrings and the API reference said only their
+  shapes. Each now says so, and points to `numpy_field`, which gives a
+  NumPy copy typed as an array of floats on every device.
+
 - **Two threads importing two domains no longer deadlock.** After a plain
   `import phonometry`, a thread pool that read `phonometry.electroacoustics`
   and `phonometry.vibration` raised `_DeadlockError` in one of its two
@@ -4821,6 +4857,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   count of its parameters, followed through the helpers it is handed to, and
   on a union of mappings a written `dict` needs one at a time that no
   overload splits; rule A58 of the contributor guide states both.
+
+- **A text where numbers go is a type error.** 2161 public parameters of
+  1099 functions and methods, 29 fields of public records and the
+  constructors those records declare took their numbers as numpy's
+  `ArrayLike`, which admits any `str` and any `bytes`, so
+  `signals.leq("not a signal")` type-checked in mypy and pyright and only the
+  call refused it. Each takes `NumericArrayLike` now, the array-like of
+  numbers that the choices beside numbers already took: a list, a tuple, a
+  nested list, a numpy array of a number or truth-value dtype and a Signal
+  type-check as before, while a text or a `bytes`, which the call refuses as
+  well, an array typed with a dtype that is no number, and a variable of
+  your own annotated `ArrayLike`, which may hold a text, are a type error.
+  So is a `memoryview`, a `ctypes` array or another object that offers its
+  numbers only through the buffer protocol, which the call still converts:
+  hand it as `np.asarray(view)`. The labels of
+  `environment.statistical_pass_by` and the sites of the soundscape
+  summaries keep `ArrayLike`, since they take texts. The API
+  reference shows the name, and its index page says once what it takes.
+  `scripts/check_parameter_annotations.py` fails on a public parameter, a
+  record field or a declared constructor that holds `ArrayLike` where
+  numbers go, and rule A65 of the contributor guide states it.
 
 - **A misspelt choice beside numbers is a type error.** The `initial_state`
   of `filters.time_weighting`, the `flow_resistivity` of

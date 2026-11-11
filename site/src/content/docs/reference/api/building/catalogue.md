@@ -435,7 +435,7 @@ The loss in one band, or a refusal that says what the page had.
 
 ```python
 TransmissionLossSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

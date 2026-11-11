@@ -68,7 +68,7 @@ ContourProbe(
     ix1: int | np.integer[Any],
     iy0: int | np.integer[Any],
     iy1: int | np.integer[Any],
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 )
 ```
 
@@ -203,17 +203,17 @@ Source waveform at time `t` (seconds).
 ```python
 FDTD2D(
     *,
-    c: ArrayLike,
+    c: NumericArrayLike,
     dx: float,
-    rho: ArrayLike = 1.2,
+    rho: NumericArrayLike = 1.2,
     cfl: float = 0.6,
     absorbing_layer_cells: int | np.integer[Any] = 0,
     absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     absorbing_layer_reflection: float = 0.0001,
-    damping: ArrayLike = 0.0,
+    damping: NumericArrayLike = 0.0,
     shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
-    edge_impedance: Mapping[Literal['left', 'right', 'top', 'bottom'], ArrayLike] | None = None,
-    obstacle_mask: ArrayLike | None = None,
+    edge_impedance: Mapping[Literal['left', 'right', 'top', 'bottom'], NumericArrayLike] | None = None,
+    obstacle_mask: NumericArrayLike | None = None,
     compute: Compute | None = None,
 )
 ```
@@ -228,6 +228,13 @@ boundary is perfectly rigid (zero normal velocity, Eq. 4.32) by
 construction; sponge layers and per-cell real impedances turn selected
 sides into absorbing or locally reacting boundaries. Sources are soft
 (additive) pressure injections.
+
+The three fields are arrays of the library the engine steps on, not
+NumPy arrays: a NumPy array on NumPy, a CuPy array on CuPy and a tensor
+on PyTorch, typed `Any` for a type checker since no one array type
+covers the three. Reading one in place keeps it on the device, and
+`numpy_field` gives a NumPy copy of it, typed as an array of
+floats, on every device.
 
 **Parameters**
 
@@ -270,7 +277,7 @@ FDTD2D.add_contour_probe(
     iy0: int | np.integer[Any],
     iy1: int | np.integer[Any],
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> ContourProbe
 ```
 
@@ -706,17 +713,17 @@ Domain size `(lx, ly)` [m].
 ```python
 FDTDRun(
     *,
-    c: ArrayLike,
+    c: NumericArrayLike,
     dx: float,
     duration_s: float,
     sources: Sequence[GaussianPulse | CWSource | SignalSource | PlaneWaveSource],
     shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
-    rho: ArrayLike = 1.2,
+    rho: NumericArrayLike = 1.2,
     cfl: float = 0.6,
     recording: FDTDRecording | None = None,
     boundaries: FDTDBoundaries | None = None,
-    obstacle_mask: ArrayLike | None = None,
-    damping: ArrayLike = 0.0,
+    obstacle_mask: NumericArrayLike | None = None,
+    damping: NumericArrayLike = 0.0,
 )
 ```
 
@@ -842,7 +849,7 @@ SignalSource(
     *,
     ix: int | np.integer[Any],
     iy: int | np.integer[Any],
-    samples: ArrayLike,
+    samples: NumericArrayLike,
     fs: float,
     amplitude: float = 1.0,
 )

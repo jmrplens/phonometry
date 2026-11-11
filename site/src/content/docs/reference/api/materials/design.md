@@ -161,7 +161,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 plot_qrd_geometry(
-    depths: ArrayLike,
+    depths: NumericArrayLike,
     well_width: float,
     *,
     ax: Axes | None = None,
@@ -207,8 +207,8 @@ predict_diffuser_polar_response(
     well_width: float,
     frequency: float,
     *,
-    depths: ArrayLike,
-    angles_deg: ArrayLike = ...,
+    depths: NumericArrayLike,
+    angles_deg: NumericArrayLike = ...,
     source_angle_deg: float = ...,
     n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
@@ -220,8 +220,8 @@ predict_diffuser_polar_response(
     well_width: float,
     frequency: float,
     *,
-    reflection: ArrayLike,
-    angles_deg: ArrayLike = ...,
+    reflection: NumericArrayLike,
+    angles_deg: NumericArrayLike = ...,
     source_angle_deg: float = ...,
     n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
@@ -268,11 +268,11 @@ exactly one.
 ```python
 predicted_diffusion_spectrum(
     well_width: float,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    depths: ArrayLike,
+    depths: NumericArrayLike,
     reflection_of: None = None,
-    angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
+    angles_deg: NumericArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
     n_repetitions: int | np.integer[Any] = 1,
     speed_of_sound: float = 343.0,

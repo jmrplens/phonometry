@@ -64,10 +64,10 @@ Clause, formula and table numbers refer to ISO 4869-2:2018(E).
 
 ```python
 assumed_protection_value(
-    attenuation: ArrayLike,
+    attenuation: NumericArrayLike,
     *,
     performance: int | np.integer[Any] = 84,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> AssumedProtectionResult
 ```
 
@@ -217,7 +217,7 @@ $L'_{p,\mathrm{A}x}$.
 
 ```python
 hml_rating(
-    attenuation: ArrayLike,
+    attenuation: NumericArrayLike,
     *,
     performance: int | np.integer[Any] = 84,
 ) -> HMLRatingResult
@@ -361,11 +361,11 @@ Draw the predicted noise level reduction against `LpC - LpA`.
 
 ```python
 octave_band_protected_level(
-    noise_levels: ArrayLike,
-    apv: AssumedProtectionResult | ArrayLike,
+    noise_levels: NumericArrayLike,
+    apv: AssumedProtectionResult | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    a_weighting: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    a_weighting: NumericArrayLike | None = None,
 ) -> ProtectedLevelResult
 ```
 
@@ -548,7 +548,7 @@ integer.
 
 ```python
 snr_rating(
-    attenuation: ArrayLike,
+    attenuation: NumericArrayLike,
     *,
     performance: int | np.integer[Any] = 84,
 ) -> SNRRatingResult

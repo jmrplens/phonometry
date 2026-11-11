@@ -48,9 +48,9 @@ from ._draft import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
     from ...electroacoustics.piston import RadiatingPistonResult
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
@@ -83,8 +83,8 @@ def plot_piston_geometry(
     radius: float,
     *,
     ax: Axes | None = ...,
-    angles_rad: ArrayLike,
-    directivity: ArrayLike,
+    angles_rad: NumericArrayLike,
+    directivity: NumericArrayLike,
     lobe_label: str | None = ...,
     language: Language = ...,
     **kwargs: Any,
@@ -107,8 +107,8 @@ def plot_piston_geometry(
     radius: float,
     *,
     ax: Axes | None = None,
-    angles_rad: ArrayLike | None = None,
-    directivity: ArrayLike | None = None,
+    angles_rad: NumericArrayLike | None = None,
+    directivity: NumericArrayLike | None = None,
     lobe_label: str | None = None,
     language: Language = "en",
     **kwargs: Any,

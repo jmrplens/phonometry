@@ -64,9 +64,10 @@ from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "EnvironmentalMeasurementWarning",
@@ -332,7 +333,7 @@ def tonal_adjustment_from_mean_audibility(
 # Survey / simplified tonal method (ISO 1996-2:2017 Annex K)
 # --------------------------------------------------------------------------- #
 def _survey_spectrum(
-    owner: str, levels: ArrayLike, frequencies: ArrayLike
+    owner: str, levels: NumericArrayLike, frequencies: NumericArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The levels and band centres the survey method can read, as float arrays."""
     lev = real_array(levels, "levels")
@@ -453,7 +454,7 @@ class TonalSurveyAssessment(OwnsArrays):
 
 
 def assess_tonal_survey(
-    levels: ArrayLike, *, frequencies: ArrayLike
+    levels: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> TonalSurveyAssessment:
     """Which one-third-octave bands hold a prominent tone? (Annex K, survey method).
 
@@ -728,7 +729,7 @@ class RepeatedMeasurementResult(RichDisplay):
 
 
 def uncertainty_from_repeated_measurements(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
 ) -> RepeatedMeasurementResult:
     r"""Energy mean and its uncertainty from repeated levels (Formulae (17)–(20)).
 

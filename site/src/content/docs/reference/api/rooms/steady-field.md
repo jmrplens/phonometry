@@ -91,7 +91,7 @@ critical_distance(
 critical_distance(
     room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 critical_distance(
@@ -101,9 +101,9 @@ critical_distance(
 ) -> NDArray[np.float64]
 
 critical_distance(
-    room_constant: ArrayLike,
+    room_constant: NumericArrayLike,
     *,
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 
 critical_distance(
@@ -115,7 +115,7 @@ critical_distance(
 critical_distance(
     *,
     absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 critical_distance(
@@ -126,8 +126,8 @@ critical_distance(
 
 critical_distance(
     *,
-    absorption_area: ArrayLike,
-    directivity: ArrayLike = ...,
+    absorption_area: NumericArrayLike,
+    directivity: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -177,7 +177,7 @@ room_constant(
 
 room_constant(
     surface_area: float,
-    mean_absorption: ArrayLike,
+    mean_absorption: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -218,7 +218,7 @@ sabine_absorption_area(
 
 sabine_absorption_area(
     volume: float,
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
     speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]
@@ -269,7 +269,7 @@ schroeder_frequency(
 ) -> NDArray[np.float64]
 
 schroeder_frequency(
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     volume: float,
 ) -> float | NDArray[np.float64]
 ```
@@ -313,7 +313,7 @@ steady_state_field(
     surface_area: float,
     mean_absorption: float,
     *,
-    distances: ArrayLike | None = None,
+    distances: NumericArrayLike | None = None,
     directivity: float = 1.0,
     characteristic_impedance: float | None = None,
 ) -> SteadyFieldResult
@@ -349,21 +349,21 @@ distance (crossover of the two fields).
 
 ```python
 steady_state_spl(
-    sound_power_level: ArrayLike,
-    distance: ArrayLike | None,
-    room_constant: ArrayLike,
+    sound_power_level: NumericArrayLike,
+    distance: NumericArrayLike | None,
+    room_constant: NumericArrayLike,
     *,
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
     source_model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = ...,
     characteristic_impedance: float | None = ...,
 ) -> float | NDArray[np.float64]
 
 steady_state_spl(
-    sound_power_level: ArrayLike,
-    distance: ArrayLike | None,
+    sound_power_level: NumericArrayLike,
+    distance: NumericArrayLike | None,
     *,
-    absorption_area: ArrayLike,
-    directivity: ArrayLike = ...,
+    absorption_area: NumericArrayLike,
+    directivity: NumericArrayLike = ...,
     source_model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = ...,
     characteristic_impedance: float | None = ...,
 ) -> float | NDArray[np.float64]

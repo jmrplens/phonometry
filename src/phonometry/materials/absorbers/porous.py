@@ -72,7 +72,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 from scipy import special
 
 from ..._internal.boundary import settled
@@ -355,7 +355,7 @@ def _warn_fit_range(
 
 
 def delany_bazley(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
     coefficients: DelanyBazleyPreset | NumericArrayLike = "delany_bazley",
@@ -426,7 +426,7 @@ def delany_bazley(
 
 
 def miki(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
     fluid: Fluid = ABSORBER_AIR,
@@ -474,7 +474,7 @@ def miki(
 
 
 def johnson_champoux_allard(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
     porosity: float,
@@ -850,7 +850,7 @@ class FiberResistivityFit(RichDisplay):
             k1: float,
             k2: float,
             fiber_diameter_um: float,
-            bulk_density_range_kg_m3: ArrayLike,
+            bulk_density_range_kg_m3: NumericArrayLike,
             direction: Literal["lateral", "longitudinal"],
             source: str,
         ) -> None: ...
@@ -1122,7 +1122,7 @@ def perforation_end_correction(open_area: float) -> float:
 
 
 def perforated_plate_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     thickness_m: float,
     hole_radius: float,
@@ -1189,7 +1189,7 @@ def perforated_plate_impedance(
 
 
 def microperforated_plate_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     thickness_m: float,
     hole_radius: float,
@@ -1255,7 +1255,7 @@ def microperforated_plate_impedance(
 
 
 def membrane_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     surface_density: float,
     resistance: float = 0.0,

@@ -382,7 +382,7 @@ Whether this library computed this field instead of reading it.
 
 ```python
 PorousMaterial.medium(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     model: Literal['johnson_champoux_allard', 'delany_bazley', 'miki'] = 'johnson_champoux_allard',
     fluid: Fluid = ...,

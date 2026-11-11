@@ -123,10 +123,10 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, ReportEngine
+    from ..._internal.types import BandFraction, NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
     from ..measurement.ratings import ImpactRatingResult, WeightedRatingResult
 
@@ -216,7 +216,7 @@ FlankingKind = Literal["Ff", "Df", "Fd"]
 # Private helpers
 # --------------------------------------------------------------------------- #
 def _band_array(
-    values: ArrayLike, n_bands: int, name: str, *, positive: bool = False
+    values: NumericArrayLike, n_bands: int, name: str, *, positive: bool = False
 ) -> np.ndarray:
     """Coerce *values* to ``n_bands`` finite floats, broadcasting a scalar."""
     require_scalar(n_bands, "n_bands")
@@ -245,7 +245,7 @@ def _ordered_sides(length1: float, length2: float) -> tuple[float, float]:
     return (a, b) if a >= b else (b, a)
 
 
-def _time_ratio(situ: ArrayLike, laboratory: ArrayLike) -> np.ndarray:
+def _time_ratio(situ: NumericArrayLike, laboratory: NumericArrayLike) -> np.ndarray:
     """Validated ``Ts,situ / Ts,lab`` ratio shared by Formulae (9) and (5)."""
     ts = require_positive_array(situ, "situ_reverberation_time")
     tl = require_positive_array(laboratory, "laboratory_reverberation_time")
@@ -283,7 +283,7 @@ def _check_report_request(engine: ReportEngine, language: Language) -> None:
 # Radiation factors (ISO 12354-1:2017, Annex B)
 # --------------------------------------------------------------------------- #
 def bending_radiation_factor(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     critical_frequency: float,
     length1: float,
@@ -378,7 +378,7 @@ def _mode_dense_radiation_factor(
 
 
 def forced_radiation_factor(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     length1: float,
     length2: float,
@@ -434,13 +434,13 @@ def forced_radiation_factor(
 # Calculated element performance (Annex B of both parts)
 # --------------------------------------------------------------------------- #
 def calculated_sound_reduction_index(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     mass_per_area: float,
     critical_frequency: float,
-    total_loss_factor: ArrayLike,
-    radiation_factor: ArrayLike,
-    forced_radiation_factor: ArrayLike,
+    total_loss_factor: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
+    forced_radiation_factor: NumericArrayLike,
     fraction: BandFraction | np.integer[Any] = 3,
     resonant_only: bool = False,
     density: float | None = None,
@@ -544,11 +544,11 @@ def calculated_sound_reduction_index(
 
 
 def bare_floor_impact_level(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     mass_per_area: float,
-    structural_reverberation_time: ArrayLike,
-    radiation_factor: ArrayLike,
+    structural_reverberation_time: NumericArrayLike,
+    radiation_factor: NumericArrayLike,
 ) -> np.ndarray:
     r"""Normalized impact level of a bare monolithic floor (Part 2, F. B.2).
 
@@ -604,7 +604,9 @@ def bare_floor_impact_level(
 # Structural reverberation time and loss factors (Annex C)
 # --------------------------------------------------------------------------- #
 def perimeter_absorption_coefficient(
-    vibration_reduction_indices: ArrayLike, *, critical_frequencies: ArrayLike
+    vibration_reduction_indices: NumericArrayLike,
+    *,
+    critical_frequencies: NumericArrayLike,
 ) -> float:
     r"""Absorption coefficient for bending waves at one border (Formula C.4).
 
@@ -646,13 +648,13 @@ def perimeter_absorption_coefficient(
 
 
 def in_situ_total_loss_factor(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     internal_loss_factor: float,
     mass_per_area: float,
     area: float,
     critical_frequency: float,
-    radiation_factor: ArrayLike,
+    radiation_factor: NumericArrayLike,
     perimeter_absorption: float,
     fluid: Fluid = EN12354_AIR,
 ) -> np.ndarray:
@@ -705,7 +707,7 @@ def in_situ_total_loss_factor(
 
 
 def laboratory_total_loss_factor(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     mass_per_area: float,
     internal_loss_factor: float = 0.01,
@@ -733,7 +735,7 @@ def laboratory_total_loss_factor(
 
 
 def structural_reverberation_time(
-    total_loss_factor: ArrayLike, *, frequencies: ArrayLike
+    total_loss_factor: NumericArrayLike, *, frequencies: NumericArrayLike
 ) -> np.ndarray:
     r"""Structural reverberation time :math:`T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})` (C.1).
 
@@ -754,9 +756,9 @@ def structural_reverberation_time(
 # Transfer of the input data to in-situ values (Clause 4.2.2)
 # --------------------------------------------------------------------------- #
 def in_situ_reduction_index(
-    sound_reduction_index: ArrayLike,
-    situ_reverberation_time: ArrayLike,
-    laboratory_reverberation_time: ArrayLike,
+    sound_reduction_index: NumericArrayLike,
+    situ_reverberation_time: NumericArrayLike,
+    laboratory_reverberation_time: NumericArrayLike,
 ) -> np.ndarray:
     r"""In-situ sound reduction index ``Rsitu`` (Formula 9).
 
@@ -784,9 +786,9 @@ def in_situ_reduction_index(
 
 
 def in_situ_impact_level(
-    impact_level: ArrayLike,
-    situ_reverberation_time: ArrayLike,
-    laboratory_reverberation_time: ArrayLike,
+    impact_level: NumericArrayLike,
+    situ_reverberation_time: NumericArrayLike,
+    laboratory_reverberation_time: NumericArrayLike,
 ) -> np.ndarray:
     r"""In-situ normalized impact level ``Ln,situ`` (Part 2, Formula 5).
 
@@ -810,10 +812,10 @@ def in_situ_impact_level(
 
 
 def in_situ_equivalent_absorption_length(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     area: float,
-    situ_reverberation_time: ArrayLike,
+    situ_reverberation_time: NumericArrayLike,
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""In-situ equivalent absorption length ``asitu`` (Formula 11).
@@ -854,11 +856,11 @@ def in_situ_equivalent_absorption_length(
 
 
 def in_situ_velocity_level_difference(
-    vibration_reduction_index: ArrayLike,
+    vibration_reduction_index: NumericArrayLike,
     *,
     coupling_length: float,
-    absorption_length_i: ArrayLike,
-    absorption_length_j: ArrayLike,
+    absorption_length_i: NumericArrayLike,
+    absorption_length_j: NumericArrayLike,
 ) -> np.ndarray:
     r"""In-situ velocity level difference ``Dv,ij,situ`` (Formula 10).
 
@@ -896,10 +898,10 @@ def in_situ_velocity_level_difference(
 # Transmission paths (Clause 4.2.3)
 # --------------------------------------------------------------------------- #
 def direct_reduction_index(
-    separating_index: ArrayLike,
+    separating_index: NumericArrayLike,
     *,
-    delta_r_source: ArrayLike = 0.0,
-    delta_r_receiving: ArrayLike = 0.0,
+    delta_r_source: NumericArrayLike = 0.0,
+    delta_r_receiving: NumericArrayLike = 0.0,
 ) -> np.ndarray:
     r"""Sound reduction index of the direct path ``RDd`` (Formula 14).
 
@@ -927,14 +929,14 @@ def direct_reduction_index(
 
 def flanking_reduction_index(
     *,
-    index_i: ArrayLike,
-    index_j: ArrayLike,
-    velocity_level_difference: ArrayLike,
+    index_i: NumericArrayLike,
+    index_j: NumericArrayLike,
+    velocity_level_difference: NumericArrayLike,
     separating_area: float,
     area_i: float,
     area_j: float,
-    delta_r_i: ArrayLike = 0.0,
-    delta_r_j: ArrayLike = 0.0,
+    delta_r_i: NumericArrayLike = 0.0,
+    delta_r_j: NumericArrayLike = 0.0,
 ) -> np.ndarray:
     r"""Flanking sound reduction index ``Rij`` per band (Formula 15).
 
@@ -988,13 +990,13 @@ def flanking_reduction_index(
 
 def flanking_reduction_index_from_normalized_difference(
     *,
-    index_i: ArrayLike,
-    index_j: ArrayLike,
-    normalized_velocity_level_difference: ArrayLike,
+    index_i: NumericArrayLike,
+    index_j: NumericArrayLike,
+    normalized_velocity_level_difference: NumericArrayLike,
     separating_area: float,
     coupling_length: float,
-    delta_r_i: ArrayLike = 0.0,
-    delta_r_j: ArrayLike = 0.0,
+    delta_r_i: NumericArrayLike = 0.0,
+    delta_r_j: NumericArrayLike = 0.0,
 ) -> np.ndarray:
     r"""Flanking index of a Type B junction ``Rij`` (Formula 17).
 
@@ -1045,7 +1047,7 @@ def flanking_reduction_index_from_normalized_difference(
 
 
 def flanking_reduction_index_from_flanking_level(
-    flanking_level_difference: ArrayLike,
+    flanking_level_difference: NumericArrayLike,
     *,
     separating_area: float,
     coupling_length: float,
@@ -1084,11 +1086,11 @@ def flanking_reduction_index_from_flanking_level(
 
 
 def resonant_sound_reduction_index(
-    sound_reduction_index: ArrayLike,
+    sound_reduction_index: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     critical_frequency: float,
-    correction: ArrayLike = 8.0,
+    correction: NumericArrayLike = 8.0,
 ) -> np.ndarray:
     r"""Correct a measured ``R`` to resonant transmission only (Formula B.1).
 
@@ -1123,9 +1125,9 @@ def resonant_sound_reduction_index(
 
 
 def reciprocity_impact_level(
-    sound_reduction_index: ArrayLike,
+    sound_reduction_index: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     fraction: BandFraction | np.integer[Any] = 3,
 ) -> np.ndarray:
     r"""Impact level of a homogeneous floor by reciprocity (Part 2, B.3/B.4).
@@ -1156,10 +1158,10 @@ def reciprocity_impact_level(
 
 
 def direct_impact_level(
-    floor_level: ArrayLike,
+    floor_level: NumericArrayLike,
     *,
-    delta_l: ArrayLike = 0.0,
-    delta_l_ceiling: ArrayLike = 0.0,
+    delta_l: NumericArrayLike = 0.0,
+    delta_l_ceiling: NumericArrayLike = 0.0,
 ) -> np.ndarray:
     r"""Normalized impact level of the direct path ``Ln,d`` (Part 2, F. 11).
 
@@ -1187,14 +1189,14 @@ def direct_impact_level(
 
 def flanking_impact_level(
     *,
-    floor_level: ArrayLike,
-    index_i: ArrayLike,
-    index_j: ArrayLike,
-    velocity_level_difference: ArrayLike,
+    floor_level: NumericArrayLike,
+    index_i: NumericArrayLike,
+    index_j: NumericArrayLike,
+    velocity_level_difference: NumericArrayLike,
     area_i: float,
     area_j: float,
-    delta_l: ArrayLike = 0.0,
-    delta_r_j: ArrayLike = 0.0,
+    delta_l: NumericArrayLike = 0.0,
+    delta_r_j: NumericArrayLike = 0.0,
 ) -> np.ndarray:
     r"""Flanking normalized impact level ``Ln,ij`` per band (Part 2, F. 12).
 
@@ -1240,14 +1242,14 @@ def flanking_impact_level(
 
 def flanking_impact_level_from_normalized_difference(
     *,
-    floor_level: ArrayLike,
-    index_i: ArrayLike,
-    index_j: ArrayLike,
-    normalized_velocity_level_difference: ArrayLike,
+    floor_level: NumericArrayLike,
+    index_i: NumericArrayLike,
+    index_j: NumericArrayLike,
+    normalized_velocity_level_difference: NumericArrayLike,
     area_i: float,
     coupling_length: float,
-    delta_l: ArrayLike = 0.0,
-    delta_r_j: ArrayLike = 0.0,
+    delta_l: NumericArrayLike = 0.0,
+    delta_r_j: NumericArrayLike = 0.0,
 ) -> np.ndarray:
     r"""Flanking impact level of a Type B junction (Part 2, Formula 14).
 
@@ -1296,7 +1298,7 @@ def flanking_impact_level_from_normalized_difference(
 
 
 def flanking_impact_level_from_flanking_level(
-    normalized_flanking_impact_level: ArrayLike,
+    normalized_flanking_impact_level: NumericArrayLike,
     *,
     area: float,
     laboratory_area: float,
@@ -1342,7 +1344,7 @@ def flanking_impact_level_from_flanking_level(
 
 
 def floating_floor_improvement(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     slope: float = 30.0,
@@ -1587,7 +1589,7 @@ class InSituElementResult(OwnsArrays):
 
 def in_situ_element(
     element: HomogeneousElement,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     fraction: BandFraction | np.integer[Any] = 3,
     resonant_only: bool = False,
@@ -1706,7 +1708,7 @@ class BandPath(OwnsArrays):
             *,
             label: str,
             kind: Literal["Dd", "Ff", "Df", "Fd"],
-            values: ArrayLike,
+            values: NumericArrayLike,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -1784,11 +1786,11 @@ def airborne_flanking_path(
     kind: FlankingKind,
     element_i: InSituElementResult,
     element_j: InSituElementResult,
-    vibration_reduction_index: ArrayLike,
+    vibration_reduction_index: NumericArrayLike,
     coupling_length: float,
     separating_area: float,
-    delta_r_i: ArrayLike = 0.0,
-    delta_r_j: ArrayLike = 0.0,
+    delta_r_i: NumericArrayLike = 0.0,
+    delta_r_j: NumericArrayLike = 0.0,
 ) -> BandPath:
     """Build one airborne flanking path from two in-situ elements (Formula 15).
 
@@ -1836,10 +1838,10 @@ def impact_flanking_path(
     label: str,
     floor: InSituElementResult,
     element_j: InSituElementResult,
-    vibration_reduction_index: ArrayLike,
+    vibration_reduction_index: NumericArrayLike,
     coupling_length: float,
-    delta_l: ArrayLike = 0.0,
-    delta_r_j: ArrayLike = 0.0,
+    delta_l: NumericArrayLike = 0.0,
+    delta_r_j: NumericArrayLike = 0.0,
 ) -> BandPath:
     """Build one impact flanking path ``Df`` (Part 2, Formula 12).
 
@@ -2057,9 +2059,9 @@ class DetailedImpactResult(OwnsArrays):
 
 
 def detailed_airborne_prediction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    direct_index: ArrayLike,
+    direct_index: NumericArrayLike,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = "Dd",
     fraction: BandFraction | np.integer[Any] = 3,
@@ -2111,9 +2113,9 @@ def detailed_airborne_prediction(
 
 
 def detailed_impact_prediction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    direct_level: ArrayLike | None = None,
+    direct_level: NumericArrayLike | None = None,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = "Dd",
     fraction: BandFraction | np.integer[Any] = 3,

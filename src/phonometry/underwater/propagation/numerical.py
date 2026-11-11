@@ -82,10 +82,11 @@ from .closed_form import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.rays import RayDerivative, RayMarch
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "BeamFan",
@@ -177,8 +178,8 @@ _MIN_PE_DEPTH_POINTS = 16
 
 
 def _clean_profile(
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     owner: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """One validated sound-speed profile out of the two node arrays.
@@ -216,7 +217,7 @@ def _clean_profile(
 
 
 def _clean_bathymetry(
-    bathymetry: tuple[ArrayLike, ArrayLike] | None,
+    bathymetry: tuple[NumericArrayLike, NumericArrayLike] | None,
     z_prof: NDArray[np.float64],
     owner: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]] | None:
@@ -526,12 +527,12 @@ def _propagating_band(
 
 def normal_modes(
     frequency_hz: float,
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
     receiver_depth: float,
-    ranges_m: ArrayLike | None = None,
+    ranges_m: NumericArrayLike | None = None,
     density: float = 1000.0,
     bottom: Literal["pressure-release", "rigid"] = "pressure-release",
     n_depth_points: int | np.integer[Any] | None = None,
@@ -863,14 +864,14 @@ class RayTraceResult(OwnsArrays):
 
 
 def ray_trace(
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
-    launch_angles_deg: ArrayLike,
+    launch_angles_deg: NumericArrayLike,
     max_range: float = 10_000.0,
     n_steps: int | np.integer[Any] = 2000,
-    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
+    bathymetry: tuple[NumericArrayLike, NumericArrayLike] | None = None,
 ) -> RayTraceResult:
     r"""Trace acoustic rays through a range-independent sound-speed profile.
 
@@ -2842,7 +2843,7 @@ def _check_source_on_kink(
 
 
 def _beam_range_grid(
-    ranges_m: ArrayLike | None,
+    ranges_m: NumericArrayLike | None,
     *,
     n_steps: int,
     dr: float,
@@ -2872,7 +2873,7 @@ def _beam_range_grid(
 
 
 def _beam_receiver_grid(
-    receiver_depths_m: ArrayLike | None,
+    receiver_depths_m: NumericArrayLike | None,
     *,
     n_depth_points: int | np.integer[Any],
     water_depth: float,
@@ -3098,19 +3099,19 @@ def _retire_stopped_beams(
 
 def gaussian_beams(
     frequency_hz: float,
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
     max_range: float = 10_000.0,
-    ranges_m: ArrayLike | None = None,
-    receiver_depths_m: ArrayLike | None = None,
+    ranges_m: NumericArrayLike | None = None,
+    receiver_depths_m: NumericArrayLike | None = None,
     n_depth_points: int | np.integer[Any] = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
     bottom: BottomType | FluidSeabed = "pressure-release",
     absorption: AbsorptionModel | VolumeAbsorption | None = None,
-    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
+    bathymetry: tuple[NumericArrayLike, NumericArrayLike] | None = None,
 ) -> GaussianBeamResult:
     r"""Propagation-loss field from Gaussian beam tracing.
 
@@ -3713,8 +3714,8 @@ class ParabolicEquationResult(OwnsArrays):
 
 def parabolic_equation(
     frequency_hz: float,
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
     max_range: float = 10_000.0,

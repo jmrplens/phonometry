@@ -74,9 +74,9 @@ decay curves; that step belongs to downstream room-acoustics modules.
 
 ```python
 golay_impulse_response(
-    recorded_a: Signal | ArrayLike,
-    recorded_b: Signal | ArrayLike,
-    pair: tuple[ArrayLike, ArrayLike],
+    recorded_a: Signal | NumericArrayLike,
+    recorded_b: Signal | NumericArrayLike,
+    pair: tuple[NumericArrayLike, NumericArrayLike],
     *,
     length: int | None = None,
     fs: float | None = None,
@@ -159,8 +159,8 @@ autocorrelation of an MLS.
 
 ```python
 impulse_response(
-    recorded: Signal | ArrayLike,
-    reference: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
+    reference: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     method: Literal['farina'],
@@ -171,8 +171,8 @@ impulse_response(
 ) -> ImpulseResponseResult
 
 impulse_response(
-    recorded: Signal | ArrayLike,
-    reference: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
+    reference: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     method: Literal['spectral', 'farina'] = ...,
@@ -217,7 +217,7 @@ causal part (B.5).
 
 ```python
 ImpulseResponseResult(
-    ir: ArrayLike,
+    ir: NumericArrayLike,
     fs: float | None,
     method: Literal['spectral', 'farina', 'mls', 'golay'],
 )
@@ -343,8 +343,8 @@ the spectral-division convention (rather than a unit pulse peak).
 
 ```python
 mls_impulse_response(
-    recorded: Signal | ArrayLike,
-    mls: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
+    mls: Signal | NumericArrayLike,
     *,
     length: int | None = None,
     fs: float | None = None,
@@ -414,7 +414,7 @@ autocorrelation is a near-perfect periodic delta
 
 ```python
 plot_excitation(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     kind: Literal['sweep', 'mls'] = 'sweep',
@@ -424,7 +424,7 @@ plot_excitation(
 ) -> tuple[Axes, Axes]
 
 plot_excitation(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     kind: Literal['sweep', 'mls'] = 'sweep',
@@ -472,7 +472,7 @@ shaped_sweep_signal(
     f2: float,
     duration_s: float,
     *,
-    target: Literal['white', 'pink'] | tuple[ArrayLike, ArrayLike] = 'pink',
+    target: Literal['white', 'pink'] | tuple[NumericArrayLike, NumericArrayLike] = 'pink',
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,

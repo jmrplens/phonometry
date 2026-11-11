@@ -80,10 +80,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -236,7 +235,7 @@ def _table4_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def special_room_background_correction(
-    levels: ArrayLike, background_levels: ArrayLike
+    levels: NumericArrayLike, background_levels: NumericArrayLike
 ) -> np.ndarray:
     r"""The background correction of ISO 3743-2:2018 Table 4 (9.8).
 
@@ -291,7 +290,7 @@ def special_room_background_correction(
 
 
 def reverberation_parameter(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     *,
     surface_area: float | None = None,
@@ -626,9 +625,9 @@ def _climate_change(
 
 
 def check_special_room_reverberation(
-    reverberation_time: ArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     nominal_reverberation_time_s: float | None = None,
     surface_area: float | None = None,
@@ -880,7 +879,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         )
 
 
-def _coefficients(value: ArrayLike, name: str, ndim: int) -> np.ndarray:
+def _coefficients(value: NumericArrayLike, name: str, ndim: int) -> np.ndarray:
     """Absorption coefficients of the given rank, finite and in [0, 1]."""
     require_scalar(ndim, "ndim")
     arr = real_array(value, name)
@@ -897,11 +896,11 @@ def _coefficients(value: ArrayLike, name: str, ndim: int) -> np.ndarray:
 
 
 def check_special_room_surfaces(
-    surface_absorption_coefficients: ArrayLike,
-    floor_absorption_coefficients: ArrayLike,
+    surface_absorption_coefficients: NumericArrayLike,
+    floor_absorption_coefficients: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    surface_areas_m2: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    surface_areas_m2: NumericArrayLike | None = None,
 ) -> SpecialRoomSurfaceCheck:
     """Are the room's surfaces treated as ISO 3743-2:2018, 6.4 asks?
 
@@ -1067,7 +1066,7 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
         )
 
 
-def _table_bands(frequencies: ArrayLike, n_bands: int, table: str) -> np.ndarray:
+def _table_bands(frequencies: NumericArrayLike, n_bands: int, table: str) -> np.ndarray:
     """Octave centres from 125 Hz to 8 kHz, the bands Tables 1, 3 and 5 cover."""
     freqs = _octave_frequencies(frequencies, n_bands, _TABLE_F1)
     if any(round(float(f)) not in _TABLE1_DB for f in freqs):
@@ -1077,10 +1076,10 @@ def _table_bands(frequencies: ArrayLike, n_bands: int, table: str) -> np.ndarray
 
 
 def check_special_room_suitability(
-    measured_power_levels: ArrayLike,
-    calibrated_power_levels: ArrayLike | ReferenceSourceCalibration,
+    measured_power_levels: NumericArrayLike,
+    calibrated_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
 ) -> SpecialRoomSuitabilityCheck:
@@ -1190,11 +1189,11 @@ def _survey_deviation(levels: np.ndarray) -> np.ndarray:
 
 
 def special_room_source_locations(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     n_microphone_positions: int | np.integer[Any] = _SURVEY_MICROPHONES,
-    a_weighted_levels: ArrayLike | None = None,
+    a_weighted_levels: NumericArrayLike | None = None,
 ) -> SourceLocationPlan:
     r"""The number of source locations for a number of microphone positions,
     from the survey of ISO 3743-2:2018, 9.4 (Table 3), and the spectral
@@ -1514,7 +1513,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         )
 
 
-def _measurement_grid(value: ArrayLike, name: str) -> tuple[np.ndarray, bool]:
+def _measurement_grid(value: NumericArrayLike, name: str) -> tuple[np.ndarray, bool]:
     """Levels as ``(NS, NM, NB)`` and whether they came from a traverse."""
     arr = _finite(value, name, (1, 2, 3))
     if arr.ndim == 1:
@@ -1526,7 +1525,7 @@ def _measurement_grid(value: ArrayLike, name: str) -> tuple[np.ndarray, bool]:
 
 
 def _background_grid(
-    value: ArrayLike, name: str, n_positions: int, n_bands: int
+    value: NumericArrayLike, name: str, n_positions: int, n_bands: int
 ) -> np.ndarray:
     """A background as ``(NM, NB)``: one spectrum for every position, or one
     per position.
@@ -1659,7 +1658,7 @@ def _microphone_advisory(
 
 
 def _a_weighted_mean(
-    levels: ArrayLike, background: ArrayLike | None
+    levels: NumericArrayLike, background: NumericArrayLike | None
 ) -> tuple[float, float]:
     """Formula (8) over the A-weighted levels after Table 4, and their smallest
     margin over the background (``NaN`` without a background).
@@ -1690,14 +1689,14 @@ def _annex_f_total(level: np.ndarray, freqs: np.ndarray) -> float:
 
 
 def sound_power_special_room(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     nominal_reverberation_time_s: float,
-    background_levels: ArrayLike | None = None,
-    a_weighted_levels: ArrayLike | None = None,
-    a_weighted_background_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    a_weighted_levels: NumericArrayLike | None = None,
+    a_weighted_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -1817,13 +1816,13 @@ def sound_power_special_room(
 
 
 def sound_power_special_room_comparison(
-    levels: ArrayLike,
-    reference_levels: ArrayLike,
-    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
+    levels: NumericArrayLike,
+    reference_levels: NumericArrayLike,
+    reference_sound_power_levels: NumericArrayLike | ReferenceSourceCalibration,
     *,
-    frequencies: ArrayLike,
-    background_levels: ArrayLike | None = None,
-    reference_background_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    background_levels: NumericArrayLike | None = None,
+    reference_background_levels: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,

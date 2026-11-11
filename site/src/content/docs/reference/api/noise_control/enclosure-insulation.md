@@ -217,10 +217,10 @@ rather than a number the annex does not give.
 
 ```python
 enclosure_artificial_source_insulation(
-    level_without_by_position: ArrayLike,
-    level_with_by_position: ArrayLike,
+    level_without_by_position: NumericArrayLike,
+    level_with_by_position: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     quantity: Literal['sound_power', 'sound_pressure'] = 'sound_power',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     fraction: Literal[1, 3] | np.integer[Any] = 3,
@@ -264,10 +264,10 @@ $D_p$ and 9.4 e) reports whichever it was. That is `quantity`.
 
 ```python
 enclosure_reciprocity_insulation(
-    external_levels: ArrayLike,
-    internal_levels: ArrayLike,
+    external_levels: NumericArrayLike,
+    internal_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult
 ```
@@ -303,10 +303,10 @@ at all.
 
 ```python
 enclosure_sound_power_insulation(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
+    level_without: NumericArrayLike,
+    level_with: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
     base_standard: Literal['ISO 3741', 'ISO 3742', 'ISO 3743-2', 'ISO 3743-1', 'ISO 3744', 'ISO 3746', 'ISO 3747', 'ISO 9614-1', 'ISO 9614-2'] = 'ISO 3744',
@@ -350,10 +350,10 @@ the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 
 ```python
 enclosure_sound_pressure_insulation(
-    level_without: ArrayLike,
-    level_with: ArrayLike,
+    level_without: NumericArrayLike,
+    level_with: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
     base_standard: Literal['ISO 11201', 'ISO 11202', 'ISO 11204'] = 'ISO 11201',
@@ -528,10 +528,10 @@ $4 / ((10^{K_2/10} - 1)\,\alpha)$ at
 
 ```python
 estimated_a_weighted_enclosure_insulation(
-    spectrum_levels: ArrayLike,
-    insulation: ArrayLike,
+    spectrum_levels: NumericArrayLike,
+    insulation: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> float
 ```
 
@@ -766,7 +766,7 @@ UNRESTRICTED_ENCLOSURE_VOLUME_M3 = 2.0
 
 ```python
 weighted_enclosure_insulation(
-    insulation: ArrayLike,
+    insulation: NumericArrayLike,
     *,
     quantity: Literal['sound_power', 'reciprocity'] = 'sound_power',
     fraction: Literal[1, 3] | np.integer[Any] = 3,

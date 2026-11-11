@@ -81,11 +81,11 @@ random error with its \< 5 % averaging criterion ([`random_error_percent`](/phon
 
 ```python
 convert_frf(
-    value: ArrayLike,
+    value: NumericArrayLike,
     source: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
     target: Literal['receptance', 'mobility', 'accelerance', 'dynamic_stiffness', 'impedance', 'apparent_mass'],
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -267,7 +267,7 @@ impedance $1/Y_{ij}$, not the blocked matrix impedance of Table 1
 
 ```python
 random_error_percent(
-    coherence: ArrayLike,
+    coherence: NumericArrayLike,
     n_averages: int | np.integer[Any],
 ) -> np.ndarray
 ```
@@ -424,7 +424,7 @@ bits of the ratio fall.
 
 ```python
 sdof_accelerance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass: float,
     stiffness: float,
     damping: float,
@@ -448,7 +448,7 @@ Accelerance of a viscously damped SDOF resonator: $A = -\omega^2 H$.
 
 ```python
 sdof_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass: float,
     stiffness: float,
     damping: float,
@@ -472,7 +472,7 @@ Mobility of a viscously damped SDOF resonator: $Y = j \omega H$.
 
 ```python
 sdof_mobility_result(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass: float,
     stiffness: float,
     damping: float,
@@ -502,7 +502,7 @@ SDOF driving-point mobility bundled as a [`MobilityResult`](/phonometry/referenc
 
 ```python
 sdof_receptance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass: float,
     stiffness: float,
     damping: float,
@@ -536,10 +536,10 @@ ISO 7626-1 (Table 1 / 3.1.2 definitions).
 
 ```python
 verify_rigid_mass_calibration(
-    frf: ArrayLike,
+    frf: NumericArrayLike,
     mass: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     quantity: Literal['accelerance', 'mobility'] = 'accelerance',
 ) -> RigidMassCalibrationResult
 ```

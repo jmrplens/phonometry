@@ -37,7 +37,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from numpy.typing import ArrayLike
+
+from .._internal.types import NumericArrayLike
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -89,7 +90,7 @@ ScalarModel = Callable[..., RealScalar]
 #: trials per input and returns the output of every trial, read with
 #: ``np.asarray``, so it may return a number, a sequence or an array; a
 #: model written for numbers that broadcasts over arrays is one.
-VectorModel = Callable[..., ArrayLike]
+VectorModel = Callable[..., NumericArrayLike]
 
 # Eigenvalues of a caller-supplied correlation matrix down to minus this
 # tolerance are accepted as zero within floating point; anything more
@@ -469,7 +470,9 @@ def _sensitivity(
     return coeffs
 
 
-def _validated_correlation(correlation: ArrayLike | None, n: int) -> np.ndarray | None:
+def _validated_correlation(
+    correlation: NumericArrayLike | None, n: int
+) -> np.ndarray | None:
     """Check a caller-supplied correlation matrix of an ``N``-input budget.
 
     :param correlation: The ``N x N`` correlation matrix, or ``None``.
@@ -537,7 +540,7 @@ def _effective_dof(
 def uncertainty_propagation(
     model: ScalarModel,
     quantities: Sequence[Quantity],
-    correlation: ArrayLike | None = None,
+    correlation: NumericArrayLike | None = None,
 ) -> UncertaintyResult:
     r"""Combined standard uncertainty by the GUM law of propagation (clause 5).
 

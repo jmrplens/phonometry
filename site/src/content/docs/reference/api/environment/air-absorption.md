@@ -66,7 +66,7 @@ the ISO 9613-1 `alpha` via $m = \alpha / (10 \log_{10} e)$.
 
 ```python
 air_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
@@ -113,7 +113,7 @@ entirely to this `alpha` via $m = \alpha / (10 \log_{10} e)$. Use
 
 ```python
 air_power_attenuation_per_m(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
@@ -149,7 +149,7 @@ hand-entering `m`.
 
 ```python
 atmospheric_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     temperature_c: float = 20.0,
     relative_humidity_percent: float = 50.0,
@@ -195,8 +195,8 @@ Advisory for ISO 9613-1 inputs outside the tabulated/validity ranges.
 
 ```python
 AtmosphericAttenuation(
-    frequencies: ArrayLike,
-    attenuation_db_per_m: ArrayLike,
+    frequencies: NumericArrayLike,
+    attenuation_db_per_m: NumericArrayLike,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float,

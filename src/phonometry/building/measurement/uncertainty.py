@@ -67,9 +67,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "COVERAGE_FACTORS",
@@ -812,8 +812,8 @@ def reduce_by_independent_measurements(u: float, m: int | np.integer[Any]) -> fl
 
 
 def single_number_uncertainty_uncorrelated(
-    band_uncertainties: ArrayLike,
-    reference_differences: ArrayLike,
+    band_uncertainties: NumericArrayLike,
+    reference_differences: NumericArrayLike,
 ) -> float:
     r"""Uncorrelated single-number uncertainty from band uncertainties (Formula B.2).
 

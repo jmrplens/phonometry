@@ -79,7 +79,7 @@ are bracketed and excluded from the single-number mean when the per-band
 
 ```python
 band_mode_count(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     area: float,
     critical_frequency: float,
     *,
@@ -117,13 +117,13 @@ band is
 
 ```python
 check_strong_coupling(
-    velocity_level_difference: ArrayLike,
+    velocity_level_difference: NumericArrayLike,
     mass_i: float,
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> StrongCouplingCheck
 ```
 
@@ -206,8 +206,8 @@ Hopkins Eq. 2.201 derives. See `docs/ERRATA.md`.
 
 ```python
 direction_averaged_level_difference(
-    dv_ij: ArrayLike,
-    dv_ji: ArrayLike,
+    dv_ij: NumericArrayLike,
+    dv_ji: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -239,9 +239,9 @@ $\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji
 ```python
 equivalent_absorption_length(
     area: float,
-    structural_reverberation_time: ArrayLike,
+    structural_reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -468,7 +468,7 @@ Modal density $n = \pi \cdot S \cdot f_\mathrm{c} / c_0^2$ (Part 4, (5)).
 modal_overlap_factor(
     area: float,
     critical_frequency: float,
-    structural_reverberation_time: ArrayLike,
+    structural_reverberation_time: NumericArrayLike,
     *,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
@@ -506,8 +506,8 @@ bracketing and single-number exclusion.
 
 ```python
 normalized_flanking_impact_level(
-    receive_level: ArrayLike,
-    absorption_area: ArrayLike,
+    receive_level: NumericArrayLike,
+    absorption_area: NumericArrayLike,
     *,
     reference_area: float = 10.0,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
@@ -542,9 +542,9 @@ tapping machine on the source-room floor.
 
 ```python
 normalized_flanking_level_difference(
-    source_level: ArrayLike,
-    receive_level: ArrayLike,
-    absorption_area: ArrayLike,
+    source_level: NumericArrayLike,
+    receive_level: NumericArrayLike,
+    absorption_area: NumericArrayLike,
     *,
     reference_area: float = 10.0,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
@@ -674,9 +674,9 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 total_loss_factor(
-    structural_reverberation_time: ArrayLike,
+    structural_reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -702,8 +702,8 @@ Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
 
 ```python
 velocity_level_difference(
-    source_level: ArrayLike,
-    receive_level: ArrayLike,
+    source_level: NumericArrayLike,
+    receive_level: NumericArrayLike,
 ) -> np.ndarray
 ```
 
@@ -729,16 +729,16 @@ Velocity level difference $D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},
 
 ```python
 vibration_reduction_index(
-    velocity_level_difference: ArrayLike,
+    velocity_level_difference: NumericArrayLike,
     junction_length: float,
     area_i: float,
     area_j: float,
     *,
-    frequencies: ArrayLike | None = None,
-    structural_reverberation_time_i: ArrayLike | None = None,
-    structural_reverberation_time_j: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    structural_reverberation_time_i: NumericArrayLike | None = None,
+    structural_reverberation_time_j: NumericArrayLike | None = None,
     speed_of_sound: float = 343.0,
-    modal_overlap: ArrayLike | None = None,
+    modal_overlap: NumericArrayLike | None = None,
 ) -> VibrationReductionResult
 ```
 
@@ -780,14 +780,14 @@ is used.
 
 ```python
 vibration_reduction_index_from_flanking(
-    normalized_flanking_level_difference: ArrayLike,
-    reduction_index_i: ArrayLike,
-    reduction_index_j: ArrayLike,
+    normalized_flanking_level_difference: NumericArrayLike,
+    reduction_index_i: NumericArrayLike,
+    reduction_index_j: NumericArrayLike,
     junction_length: float,
     area_i: float,
     area_j: float,
-    absorption_length_i: ArrayLike,
-    absorption_length_j: ArrayLike,
+    absorption_length_i: NumericArrayLike,
+    absorption_length_j: NumericArrayLike,
     *,
     reference_area: float = 10.0,
 ) -> np.ndarray

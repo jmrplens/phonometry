@@ -415,7 +415,7 @@ was.
 
 ```python
 ImpactImprovementSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -865,7 +865,7 @@ was.
 
 ```python
 SoundReductionSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

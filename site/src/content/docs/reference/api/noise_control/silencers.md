@@ -104,7 +104,7 @@ they describe the plane-wave mode alone and a measurement will show the rest.
 ## cascade
 
 ```python
-cascade(*matrices: ArrayLike) -> NDArray[np.complex128]
+cascade(*matrices: NumericArrayLike) -> NDArray[np.complex128]
 ```
 
 Cascade element four-pole matrices from inlet to outlet.
@@ -131,7 +131,7 @@ outlet), broadcast over the frequency axis.
 
 ```python
 duct_matrix(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     area: float,
     *,
@@ -164,15 +164,15 @@ Four-pole matrix of a straight duct (Bies Eq. (8.143), no flow).
 
 ```python
 expansion_chamber(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     chamber_area: float,
     pipe_area: float,
     *,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult
 ```
 
@@ -203,7 +203,7 @@ Simple expansion-chamber silencer (Bies Eq. (8.111) / four-pole).
 
 ```python
 extended_tube_chamber(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     chamber_area: float,
     pipe_area: float,
@@ -212,8 +212,8 @@ extended_tube_chamber(
     outlet_extension: float = 0.0,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult
 ```
 
@@ -265,7 +265,7 @@ limit of the cascade; extensions that would overlap are rejected.
 
 ```python
 helmholtz_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     neck_area: float,
     neck_length: float,
     cavity_volume: float,
@@ -311,7 +311,7 @@ its resistance instead, which is what bounds the peak attenuation.
 
 ```python
 helmholtz_resonator(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     duct_area: float,
     neck_area: float,
     neck_length: float,
@@ -320,8 +320,8 @@ helmholtz_resonator(
     resistance: float = 0.0,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult
 ```
 
@@ -356,8 +356,8 @@ Side-branch Helmholtz resonator on a duct (Bies Eqs. (8.144), (8.152)).
 insertion_loss(
     transfer_matrix: NDArray[np.complex128],
     *,
-    source_impedance: ArrayLike,
-    radiation_impedance: ArrayLike,
+    source_impedance: NumericArrayLike,
+    radiation_impedance: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -433,7 +433,7 @@ the cube of equal volume with its volume annotated.
 
 ```python
 quarter_wave_impedance(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     length: float,
     area: float,
     *,
@@ -471,15 +471,15 @@ pressure node and shorts the duct.
 
 ```python
 quarter_wave_resonator(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     duct_area: float,
     length: float,
     branch_area: float,
     *,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult
 ```
 
@@ -644,7 +644,7 @@ transmission-loss relation.
 ## shunt_matrix
 
 ```python
-shunt_matrix(branch_impedance: ArrayLike) -> NDArray[np.complex128]
+shunt_matrix(branch_impedance: NumericArrayLike) -> NDArray[np.complex128]
 ```
 
 Four-pole matrix of a side branch of impedance `Z_b` (Bies Eq. (8.144)).
@@ -667,7 +667,7 @@ Four-pole matrix of a side branch of impedance `Z_b` (Bies Eq. (8.144)).
 
 ```python
 SilencerChain(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
@@ -802,8 +802,8 @@ SilencerChain.result(
     *,
     inlet_area: float,
     outlet_area: float,
-    source_impedance: ArrayLike | None = None,
-    radiation_impedance: ArrayLike | None = None,
+    source_impedance: NumericArrayLike | None = None,
+    radiation_impedance: NumericArrayLike | None = None,
 ) -> ReactiveSilencerResult
 ```
 
@@ -834,7 +834,7 @@ them in the chain as duct elements if the drawing is to show them.
 
 ```python
 SilencerChain.shunt(
-    branch_impedance: ArrayLike,
+    branch_impedance: NumericArrayLike,
     *,
     label: str | None = None,
 ) -> SilencerChain

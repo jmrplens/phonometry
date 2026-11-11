@@ -162,10 +162,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction
+    from ..._internal.types import BandFraction, NumericArrayLike
 
 __all__ = [
     "SERVICE_EQUIPMENT_OPERATING_CONDITIONS",
@@ -807,7 +806,7 @@ _MOUNTINGS: Final = ("wall", "ceiling")
 # ---------------------------------------------------------------------------
 
 
-def _round_half_up_array(values: ArrayLike, decimals: int) -> np.ndarray:
+def _round_half_up_array(values: NumericArrayLike, decimals: int) -> np.ndarray:
     """Round halves upward, not to even as :func:`round` would.
 
     7.5 rounds the band average to one decimal and 7.8 the weighted values to
@@ -826,7 +825,7 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
     return float(_round_half_up_array(value, decimals))
 
 
-def _nominal_bands(frequencies: ArrayLike, fraction: int) -> np.ndarray:
+def _nominal_bands(frequencies: NumericArrayLike, fraction: int) -> np.ndarray:
     """Match each given centre to the nominal band of 4.2 it stands for."""
     table = np.asarray(_THIRD_OCTAVE_BANDS if fraction == _THIRD else _OCTAVE_BANDS)
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
@@ -877,7 +876,7 @@ def _weighted_sum(
     )
 
 
-def _as_levels(value: ArrayLike, name: str) -> np.ndarray:
+def _as_levels(value: NumericArrayLike, name: str) -> np.ndarray:
     """A finite float array of levels, or a ``ValueError`` naming the input."""
     arr = real_array(value, name)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
@@ -886,7 +885,7 @@ def _as_levels(value: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _positive_number(value: ArrayLike, name: str) -> float:
+def _positive_number(value: NumericArrayLike, name: str) -> float:
     """One positive, finite, real number, or a refusal naming it.
 
     A string, a flag, a complex number or an array of numbers is refused
@@ -914,7 +913,7 @@ def _positive_number(value: ArrayLike, name: str) -> float:
     return require_positive(real_array(value, name).item(), name)
 
 
-def _numbers(value: ArrayLike, name: str) -> np.ndarray:
+def _numbers(value: NumericArrayLike, name: str) -> np.ndarray:
     """A float array of what was given, refusing text and flags by name.
 
     ``np.asarray("0.3", dtype=float)`` is 0,3 and ``True`` is 1,0: read
@@ -938,7 +937,7 @@ def _numbers(value: ArrayLike, name: str) -> np.ndarray:
     return real_array(value, name)
 
 
-def _room(room_dimensions_m: ArrayLike) -> np.ndarray:
+def _room(room_dimensions_m: NumericArrayLike) -> np.ndarray:
     """The length, width and height of a rectangular room, or a ``ValueError``."""
     dims = real_array(room_dimensions_m, "room_dimensions_m")
     if dims.shape != (3,) or not np.all(np.isfinite(dims)) or np.any(dims <= 0.0):
@@ -1061,10 +1060,10 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
 
 
 def service_equipment_background_correction(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ServiceEquipmentBackgroundResult:
     r"""Correct band levels for the background (ISO/DIS 16032:2023 Clause 9).
 
@@ -1348,13 +1347,13 @@ class ServiceEquipmentResult(OwnsArrays):
 
 
 def service_equipment_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     quantity: _Quantity,
     fraction: BandFraction | np.integer[Any] = 3,
-    background_levels: ArrayLike | None = None,
-    reverberation_time: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
     volume: float | None = None,
     reference_reverberation_time_s: float = _T0,
     a_weighting_range: _Range = "restricted",
@@ -1498,7 +1497,7 @@ def _standardize(
     corrected: np.ndarray,
     standardizable: np.ndarray,
     *,
-    reverberation_time: ArrayLike | None,
+    reverberation_time: NumericArrayLike | None,
     volume: float | None,
     t0: float,
 ) -> tuple[np.ndarray | None, np.ndarray | None]:
@@ -1667,7 +1666,7 @@ class PositionSpreadCheck(OwnsArrays):
         )
 
 
-def check_position_spread(levels: ArrayLike) -> PositionSpreadCheck:
+def check_position_spread(levels: NumericArrayLike) -> PositionSpreadCheck:
     r"""Are the positions measured so far enough (ISO/DIS 16032:2023 7.4.1)?
 
     The A-weighted levels read directly from the instrument, without any
@@ -1717,7 +1716,7 @@ def check_position_spread(levels: ArrayLike) -> PositionSpreadCheck:
 
 
 def loudest_corner(
-    c_weighted_levels: ArrayLike,
+    c_weighted_levels: NumericArrayLike,
     *,
     excluded: Sequence[int | np.integer[Any]] = (),
 ) -> int:
@@ -1753,7 +1752,7 @@ def loudest_corner(
     try:
         # A sequence that mixes int and np.int64 is one numpy reads; its
         # static type is no ArrayLike, since numpy's nests hold one kind.
-        rank = np.ndim(cast("ArrayLike", excluded))
+        rank = np.ndim(cast("NumericArrayLike", excluded))
     except TypeError as exc:  # a ragged nesting of lists
         raise TypeError(msg) from exc
     except ValueError as exc:  # a ragged nesting of lists
@@ -1999,7 +1998,7 @@ class ServiceEquipmentPositionCheck(OwnsArrays):
         )
 
 
-def _points(value: ArrayLike, name: str) -> np.ndarray:
+def _points(value: NumericArrayLike, name: str) -> np.ndarray:
     """An ``(n, 3)`` array of finite coordinates, or a ``ValueError``.
 
     An empty list is no position at all, the same as an empty ``(0, 3)``
@@ -2022,13 +2021,13 @@ def _points(value: ArrayLike, name: str) -> np.ndarray:
 
 
 def check_service_equipment_positions(
-    room_dimensions_m: ArrayLike,
-    corner_position_m: ArrayLike,
-    room_positions_m: ArrayLike,
+    room_dimensions_m: NumericArrayLike,
+    corner_position_m: NumericArrayLike,
+    room_positions_m: NumericArrayLike,
     *,
-    source_positions_m: ArrayLike | None = None,
+    source_positions_m: NumericArrayLike | None = None,
     small_room: bool | np.bool_ = False,
-    corner_obstacle_distance_m: ArrayLike | None = None,
+    corner_obstacle_distance_m: NumericArrayLike | None = None,
 ) -> ServiceEquipmentPositionCheck:
     """Are the microphone positions far enough apart (ISO/DIS 16032:2023 7.2, 7.3)?
 
@@ -2116,7 +2115,7 @@ def check_service_equipment_positions(
     )
 
 
-def _corner_obstacle_distance(value: ArrayLike | None) -> float | None:
+def _corner_obstacle_distance(value: NumericArrayLike | None) -> float | None:
     """The shortest of the measured obstacle distances of 7.2, in m, or ``None``.
 
     :raises ValueError: for an empty input, or a distance that is not finite
@@ -2140,8 +2139,8 @@ def _corner_obstacle_distance(value: ArrayLike | None) -> float | None:
 
 
 def additional_microphone_position(
-    room_dimensions_m: ArrayLike,
-    source_position_m: ArrayLike,
+    room_dimensions_m: NumericArrayLike,
+    source_position_m: NumericArrayLike,
     *,
     mounting: _Mounting,
 ) -> np.ndarray:
@@ -2205,7 +2204,7 @@ def additional_microphone_position(
 # ---------------------------------------------------------------------------
 
 
-def _readings(value: ArrayLike, name: str) -> np.ndarray:
+def _readings(value: NumericArrayLike, name: str) -> np.ndarray:
     """One or more finite levels as a one-dimensional array, or a ``ValueError``."""
     arr = np.atleast_1d(_as_levels(_numbers(value, name), name))
     if arr.ndim != 1:
@@ -2301,9 +2300,9 @@ class CalibrationDeviationResult(OwnsArrays):
 
 
 def verify_calibration_deviation(
-    calibration_levels: ArrayLike,
+    calibration_levels: NumericArrayLike,
     *,
-    previous_levels: ArrayLike | None = None,
+    previous_levels: NumericArrayLike | None = None,
 ) -> CalibrationDeviationResult:
     r"""Has the sensitivity moved more than 0,5 dB (ISO/DIS 16032:2023 Clause 5)?
 
@@ -2448,7 +2447,7 @@ class BackgroundDurationCheck(OwnsArrays):
 
 
 def check_background_duration(
-    durations_s: ArrayLike, *, tolerance_s: float
+    durations_s: NumericArrayLike, *, tolerance_s: float
 ) -> BackgroundDurationCheck:
     r"""Was the background measured over approximately 30 s (ISO/DIS 16032:2023 7.6)?
 
@@ -2607,11 +2606,11 @@ class VaryingBackgroundCheck(OwnsArrays):
 
 
 def check_varying_background(
-    background_max_level: ArrayLike,
-    equipment_levels: ArrayLike,
+    background_max_level: NumericArrayLike,
+    equipment_levels: NumericArrayLike,
     *,
     observation_time_s: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> VaryingBackgroundCheck:
     r"""Can the result stand without correction (NOTE to ISO/DIS 16032:2023 Clause 9)?
 
@@ -2766,7 +2765,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
 
 
 def check_measurement_disturbance(
-    max_levels: ArrayLike, equivalent_levels: ArrayLike
+    max_levels: NumericArrayLike, equivalent_levels: NumericArrayLike
 ) -> MeasurementDisturbanceCheck:
     r"""Was a measurement period disturbed (ISO/DIS 16032:2023 Clause 9)?
 
@@ -2901,7 +2900,7 @@ class InstrumentAgreementCheck(RichDisplay):
 
 def check_instrument_agreement(
     result: ServiceEquipmentResult,
-    instrument_levels: Mapping[str, ArrayLike],
+    instrument_levels: Mapping[str, NumericArrayLike],
 ) -> InstrumentAgreementCheck:
     r"""Does the calculation agree with the instrument (NOTE to ISO/DIS 16032:2023 7.8)?
 

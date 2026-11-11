@@ -78,8 +78,7 @@ from ...materials import ABSORBER_AIR, delany_bazley, miki
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from numpy.typing import ArrayLike
-
+    from ..._internal.types import NumericArrayLike
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
 
@@ -135,7 +134,7 @@ class GroundSurface(CatalogueRow):
 
     def medium(
         self,
-        frequency: ArrayLike,
+        frequency: NumericArrayLike,
         *,
         model: Literal["delany_bazley", "miki"] = "delany_bazley",
         fluid: Fluid = ABSORBER_AIR,

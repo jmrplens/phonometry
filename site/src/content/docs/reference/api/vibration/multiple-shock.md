@@ -71,7 +71,7 @@ text and is out of scope.
 
 ```python
 acceleration_dose(
-    acceleration_m_s2: Signal | ArrayLike,
+    acceleration_m_s2: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> float
 ```
@@ -147,9 +147,9 @@ Daily acceleration dose $D_\mathrm{zd}$ (clause 5.3, Formula 4).
 
 ```python
 daily_dose_multi(
-    doses: ArrayLike,
-    exposure_times: ArrayLike,
-    measurement_times: ArrayLike,
+    doses: NumericArrayLike,
+    exposure_times: NumericArrayLike,
+    measurement_times: NumericArrayLike,
 ) -> float
 ```
 
@@ -174,7 +174,7 @@ Daily dose from several exposure conditions (clause 5.3, Formula 5).
 ## dose_from_peaks
 
 ```python
-dose_from_peaks(peaks: ArrayLike) -> float
+dose_from_peaks(peaks: NumericArrayLike) -> float
 ```
 
 Acceleration dose $D_\mathrm{z}$ from response peaks (clause 5.3,
@@ -210,7 +210,7 @@ injury_probability(
 ) -> NDArray[np.float64]
 
 injury_probability(
-    risk: ArrayLike,
+    risk: NumericArrayLike,
     *,
     sex: Literal['male', 'female'] = 'male',
 ) -> float | NDArray[np.float64]
@@ -276,7 +276,7 @@ weighted by the reducing ultimate strength of the ageing spine.
 
 ```python
 multiple_shock_assessment(
-    acceleration_m_s2: Signal | ArrayLike,
+    acceleration_m_s2: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     start_age: float,
@@ -289,7 +289,7 @@ multiple_shock_assessment(
 ) -> MultipleShockResult
 
 multiple_shock_assessment(
-    acceleration_m_s2: Signal | ArrayLike,
+    acceleration_m_s2: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     start_age: float,
@@ -350,7 +350,7 @@ MultipleShockResult(
     start_age: float,
     exposure_duration_years: int,
     days_per_year: float,
-    peaks: ArrayLike,
+    peaks: NumericArrayLike,
     risk_thresholds: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 )
 ```
@@ -458,7 +458,7 @@ moderate band matching the Annex C worked example.
 ## response_peaks
 
 ```python
-response_peaks(response: ArrayLike) -> np.ndarray
+response_peaks(response: NumericArrayLike) -> np.ndarray
 ```
 
 Positive response peaks $A_{\mathrm{z},i}$ (clause 5.3).
@@ -483,7 +483,7 @@ crossings; only positive peaks are counted.
 ## seat_to_spine_transfer
 
 ```python
-seat_to_spine_transfer(frequencies: ArrayLike) -> np.ndarray
+seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray
 ```
 
 Seat-to-spine transfer function $H(\omega)$ (clause 5.2,
@@ -510,7 +510,7 @@ the vertical spinal response; the transmissibility is unity at 0 Hz.
 
 ```python
 spinal_response(
-    acceleration_m_s2: Signal | ArrayLike,
+    acceleration_m_s2: Signal | NumericArrayLike,
     fs: float | None = None,
 ) -> np.ndarray
 ```
@@ -562,7 +562,7 @@ Static compressive stress $S_\text{stat} = m_\mathrm{z} \cdot 9.81$
 
 ```python
 ultimate_strength(
-    age: ArrayLike,
+    age: NumericArrayLike,
     *,
     sex: Literal['male', 'female'] = 'male',
 ) -> np.ndarray

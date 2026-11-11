@@ -72,7 +72,7 @@ most of all. `parameters` chooses which rows of Table D.1 to compute.
 
 ```python
 binaural_indicators(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     calibration_factor: float | None = None,

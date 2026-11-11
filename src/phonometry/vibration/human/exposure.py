@@ -62,7 +62,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, get_args
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 from scipy import signal as sig
 
 from ..._internal.display import RichDisplay
@@ -90,7 +90,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import Real, ReportEngine
+    from ..._internal.types import NumericArrayLike, Real, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 Kind = Literal["hav", "wbv"]
@@ -499,7 +499,7 @@ class WeightingResponse(OwnsArrays):
 
 
 def _response_result(
-    name: WeightingName, frequencies: ArrayLike, *, band_limiting: bool
+    name: WeightingName, frequencies: NumericArrayLike, *, band_limiting: bool
 ) -> WeightingResponse:
     """Evaluate one of the two responses of ``name`` and package it."""
     freq = np.atleast_1d(real_array(frequencies, "frequencies"))
@@ -525,7 +525,7 @@ def _response_result(
 
 
 def frequency_weighting(
-    name: WeightingName, frequencies: ArrayLike
+    name: WeightingName, frequencies: NumericArrayLike
 ) -> WeightingResponse:
     """Frequency-weighting response ``H(f)`` (ISO 8041-1:2017, Formula (5)).
 
@@ -546,7 +546,7 @@ def frequency_weighting(
 
 
 def band_limiting_response(
-    name: WeightingName, frequencies: ArrayLike
+    name: WeightingName, frequencies: NumericArrayLike
 ) -> WeightingResponse:
     r"""Band-limiting weighting response (ISO 8041-1:2017, Formulae (1), (2)).
 
@@ -584,7 +584,7 @@ def band_limiting_response(
     return _response_result(name, frequencies, band_limiting=True)
 
 
-def band_limiting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
+def band_limiting_factors(name: WeightingName, frequencies: NumericArrayLike) -> Real:
     """Band-limiting weighting factors (ISO 8041-1:2017, Annex B).
 
     Convenience wrapper over :func:`band_limiting_response` returning only the
@@ -602,7 +602,7 @@ def band_limiting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
     return band_limiting_response(name, frequencies).magnitude
 
 
-def weighting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
+def weighting_factors(name: WeightingName, frequencies: NumericArrayLike) -> Real:
     """Weighting factors ``|H(f)|`` of weighting ``name`` (ISO 8041-1).
 
     Convenience wrapper over :func:`frequency_weighting` returning only the
@@ -779,7 +779,10 @@ class WeightedSpectrum(OwnsArrays):
 
 
 def weighted_acceleration(
-    band_accelerations: ArrayLike, weighting: WeightingName, *, frequencies: ArrayLike
+    band_accelerations: NumericArrayLike,
+    weighting: WeightingName,
+    *,
+    frequencies: NumericArrayLike,
 ) -> WeightedSpectrum:
     r"""Weighted r.m.s. acceleration from a band spectrum (ISO 2631-1
     Eq. (9)).
@@ -1048,9 +1051,9 @@ def crest_factor(x: SignalInput) -> float:
 # Vector sum and daily exposure (ISO 2631-1 Eq. (10); ISO 5349-1 Eqs. (1)-(3)).
 # ---------------------------------------------------------------------------
 def vibration_total_value(
-    components: ArrayLike,
+    components: NumericArrayLike,
     *,
-    k: ArrayLike | None = None,
+    k: NumericArrayLike | None = None,
 ) -> float:
     r"""Vibration total value ``a_v`` / ``a_hv`` (ISO 2631-1 Eq. (10)).
 
@@ -1146,7 +1149,7 @@ def daily_exposure(total_value: float, duration_s: float) -> float:
     return a * math.sqrt(t / REFERENCE_DURATION_S)
 
 
-def combined_daily_exposure(partials: ArrayLike) -> float:
+def combined_daily_exposure(partials: NumericArrayLike) -> float:
     r"""Combine partial exposures into ``A(8)`` (ISO 5349-1/-2 Eq. (3)).
 
     :math:`A(8) = \sqrt{\sum_i A_i(8)^2}`.
@@ -1165,8 +1168,8 @@ def combined_daily_exposure(partials: ArrayLike) -> float:
 
 
 def hav_daily_exposure(
-    total_values: ArrayLike,
-    durations_s: ArrayLike,
+    total_values: NumericArrayLike,
+    durations_s: NumericArrayLike,
 ) -> float:
     r"""Daily exposure ``A(8)`` for several operations (ISO 5349-1 Eq. (3)).
 
@@ -1197,8 +1200,8 @@ def hav_daily_exposure(
 
 
 def energy_equivalent_acceleration(
-    magnitudes: ArrayLike,
-    durations_s: ArrayLike,
+    magnitudes: NumericArrayLike,
+    durations_s: NumericArrayLike,
 ) -> float:
     r"""Energy-equivalent weighted acceleration (ISO 2631-1 Eq. (B.3)).
 
@@ -1512,8 +1515,8 @@ class DailyVibrationExposure(OwnsArrays):
 
 
 def daily_vibration_exposure(
-    total_values: ArrayLike,
-    durations_s: ArrayLike,
+    total_values: NumericArrayLike,
+    durations_s: NumericArrayLike,
     *,
     kind: Kind,
     labels: list[str] | tuple[str, ...] | None = None,

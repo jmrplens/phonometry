@@ -143,8 +143,8 @@ The clause offers no correction for those. Judged settled.
 
 ```python
 check_background_margin(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
 ) -> BackgroundMarginCheck
 ```
 
@@ -186,9 +186,9 @@ read band by band.
 
 ```python
 corrected_distribution_value(
-    distribution_levels: ArrayLike,
-    measured_reference_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    measured_reference_levels: NumericArrayLike,
+    distances: NumericArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -282,7 +282,7 @@ EVALUATION_DISTANCES_M = {'near': 4.0, 'middle': 10.0, 'far': 30.0}
 
 ```python
 floor_reference_value(
-    distances: ArrayLike,
+    distances: NumericArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -353,8 +353,8 @@ ISO14257_REFERENCE_DISTANCE_M = 1.0
 
 ```python
 level_excess(
-    distribution_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -384,8 +384,8 @@ $$
 
 ```python
 level_excess_at(
-    distribution_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
     distance: float,
 ) -> float
 ```
@@ -435,8 +435,8 @@ MAX_DIRECTIVITY_INDEX = 8.0
 
 ```python
 mean_level_excess(
-    distribution_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
 ) -> float
 ```
 
@@ -486,9 +486,9 @@ NEAR_REGION_START_M = 1.0
 
 ```python
 normalized_distribution_value(
-    distribution_levels: ArrayLike,
+    distribution_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -602,7 +602,9 @@ PREFERRED_MIDDLE_LIMIT_M = 24.0
 ## reference_distribution_value
 
 ```python
-reference_distribution_value(distances: ArrayLike) -> NDArray[np.float64]
+reference_distribution_value(
+    distances: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 The free-field reference curve, Equation (2).
@@ -634,8 +636,8 @@ used here, because it is the curve the standard draws in its own figures.
 
 ```python
 sound_distribution_value(
-    levels: ArrayLike,
-    sound_power_levels: ArrayLike,
+    levels: NumericArrayLike,
+    sound_power_levels: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -685,8 +687,8 @@ SPATIAL_DECAY_BANDS_HZ = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
 
 ```python
 spatial_decay_curve(
-    distribution_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
     *,
     near_limit_m: float = 5.0,
     far_limit_m: float = 16.0,
@@ -721,8 +723,8 @@ The curve of one region with its two descriptors, clause 6.
 
 ```python
 spatial_decay_rate(
-    distribution_levels: ArrayLike,
-    distances: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    distances: NumericArrayLike,
 ) -> float
 ```
 
@@ -817,8 +819,8 @@ The measurement is outside a condition ISO 14257 states.
 
 ```python
 spectrum_distribution_value(
-    distribution_levels: ArrayLike,
-    machine_power_levels: ArrayLike,
+    distribution_levels: NumericArrayLike,
+    machine_power_levels: NumericArrayLike,
 ) -> float
 ```
 

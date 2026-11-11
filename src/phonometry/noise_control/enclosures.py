@@ -110,8 +110,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
+    from .._internal.types import NumericArrayLike
     from .._report.metadata import ReportMetadata
 
 
@@ -284,7 +285,7 @@ class PanelTransmissionResult(Protocol):
 
 
 def _resolve_frequencies(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
 ) -> NDArray[np.float64] | None:
     """Validate an optional 1-D positive frequency grid (Hz)."""
     if frequencies is None:
@@ -300,7 +301,7 @@ def _resolve_frequencies(
 
 
 def _resolve_panel_r(
-    values: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
+    values: NumericArrayLike | Callable[[NDArray[np.float64]], NumericArrayLike],
     freqs: NDArray[np.float64] | None,
     name: str = "panel_transmission_loss",
 ) -> NDArray[np.float64]:
@@ -322,11 +323,11 @@ def _resolve_panel_r(
 
 
 def _resolve_interior(
-    values: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
+    values: NumericArrayLike | Callable[[NDArray[np.float64]], NumericArrayLike],
     external_area: float,
     internal_area: float,
-    internal_absorption: ArrayLike,
-    frequencies: ArrayLike | None,
+    internal_absorption: NumericArrayLike,
+    frequencies: NumericArrayLike | None,
     model: object,
     name: str,
     owner: str,
@@ -399,13 +400,15 @@ def _resolve_interior(
 
 def enclosure_insertion_loss(
     panel_transmission_loss: (
-        ArrayLike | Callable[[NDArray[np.float64]], ArrayLike] | PanelTransmissionResult
+        NumericArrayLike
+        | Callable[[NDArray[np.float64]], NumericArrayLike]
+        | PanelTransmissionResult
     ),
     external_area: float,
     internal_area: float,
-    internal_absorption: ArrayLike,
+    internal_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     model: EnclosureModel = "bies",
 ) -> EnclosureInsertionLossResult:
     r"""Net insertion loss of a machine enclosure (Bies Eqs. (7.103), (7.111)).
@@ -493,12 +496,13 @@ def enclosure_insertion_loss(
 
 
 def enclosure_required_transmission_loss(
-    insertion_loss: ArrayLike | Callable[[NDArray[np.float64]], ArrayLike],
+    insertion_loss: NumericArrayLike
+    | Callable[[NDArray[np.float64]], NumericArrayLike],
     external_area: float,
     internal_area: float,
-    internal_absorption: ArrayLike,
+    internal_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     model: EnclosureModel = "bies",
 ) -> EnclosureInsertionLossResult:
     r"""Panel ``R`` an enclosure needs to deliver a given insertion loss.

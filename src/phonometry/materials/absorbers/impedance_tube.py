@@ -35,7 +35,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
@@ -60,7 +60,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import Real, ReportEngine
+    from ..._internal.types import NumericArrayLike, Real, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 Shape = Literal["circular", "rectangular", "square"]
@@ -134,7 +134,7 @@ class ImpedanceTubeWarning(PhonometryWarning):
 # Air properties. Eqs. (5) and (7) are written in kelvin; the argument is in
 # degrees Celsius, as everywhere else in the library, and converted here.
 # ---------------------------------------------------------------------------
-def speed_of_sound_iso10534(*, temperature_c: ArrayLike) -> Real:
+def speed_of_sound_iso10534(*, temperature_c: NumericArrayLike) -> Real:
     r"""Speed of sound in air (ISO 10534-2:2001, Eq. (5)).
 
     :math:`c_0 = 343.2 \sqrt{T / 293}`, with :math:`T` in kelvin.
@@ -153,8 +153,8 @@ def speed_of_sound_iso10534(*, temperature_c: ArrayLike) -> Real:
 
 def air_density_iso10534(
     *,
-    temperature_c: ArrayLike,
-    static_pressure_kpa: ArrayLike = _ISO_P_REF,
+    temperature_c: NumericArrayLike,
+    static_pressure_kpa: NumericArrayLike = _ISO_P_REF,
 ) -> Real:
     r"""Air density (ISO 10534-2:2001, Eq. (7)).
 
@@ -224,7 +224,7 @@ def hydraulic_diameter(width_m: float, height_m: float) -> float:
 
 
 def tube_attenuation_constant(
-    frequency: ArrayLike, speed_of_sound: float, diameter_m: float
+    frequency: NumericArrayLike, speed_of_sound: float, diameter_m: float
 ) -> Real:
     r"""Lower-bound tube attenuation constant ``k0''`` (ISO 10534-2, Eq. (A.18)).
 
@@ -258,10 +258,10 @@ def tube_attenuation_constant(
 
 
 def tube_wavenumber(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     speed_of_sound: float,
     *,
-    attenuation_np_per_m: ArrayLike | None = None,
+    attenuation_np_per_m: NumericArrayLike | None = None,
 ) -> Complex:
     r"""Complex wavenumber :math:`k_0 = k_0' - jk_0''` (ISO 10534-2, Clause 2.6).
 
@@ -298,7 +298,7 @@ def tube_wavenumber(
 
 
 def _require_h12_per_band(
-    h12: ArrayLike, bands: NDArray[np.float64] | Complex, bands_name: str
+    h12: NumericArrayLike, bands: NDArray[np.float64] | Complex, bands_name: str
 ) -> Complex:
     """Coerce ``h12`` to complex128, as a scalar or one value per band.
 
@@ -321,11 +321,11 @@ def _require_h12_per_band(
 # ISO 10534-2: reflection factor, impedance, absorption.
 # ---------------------------------------------------------------------------
 def reflection_factor(
-    h12: ArrayLike,
+    h12: NumericArrayLike,
     *,
     spacing_m: float,
     x1: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
 ) -> Complex:
     r"""Complex reflection factor at the sample surface (ISO 10534-2, Eq. (17)).
 
@@ -367,7 +367,7 @@ def reflection_factor(
     return np.asarray(r, dtype=np.complex128)
 
 
-def normalized_surface_impedance(reflection: ArrayLike) -> Complex:
+def normalized_surface_impedance(reflection: NumericArrayLike) -> Complex:
     r"""Normalised surface impedance :math:`Z/(\rho c_0)` (ISO 10534-2, Eq. (19)).
 
     :math:`Z / (\rho c_0) = (1 + r) / (1 - r)`.
@@ -381,7 +381,7 @@ def normalized_surface_impedance(reflection: ArrayLike) -> Complex:
 
 
 def surface_impedance(
-    reflection: ArrayLike, characteristic_impedance: float
+    reflection: NumericArrayLike, characteristic_impedance: float
 ) -> Complex:
     r"""Absolute surface impedance ``Z`` (ISO 10534-2, Eq. (19)).
 
@@ -403,7 +403,7 @@ def surface_impedance(
     )
 
 
-def normalized_surface_admittance(reflection: ArrayLike) -> Complex:
+def normalized_surface_admittance(reflection: NumericArrayLike) -> Complex:
     r"""Normalised surface admittance :math:`G \rho c_0` (ISO 10534-2, Eq. (20)).
 
     :math:`G \rho c_0 = (\rho c_0) / Z = (1 - r) / (1 + r)`.
@@ -416,7 +416,7 @@ def normalized_surface_admittance(reflection: ArrayLike) -> Complex:
     return np.asarray((1.0 - r) / (1.0 + r), dtype=np.complex128)
 
 
-def absorption_from_reflection(reflection: ArrayLike) -> Real:
+def absorption_from_reflection(reflection: NumericArrayLike) -> Real:
     r"""Normal-incidence absorption coefficient (ISO 10534-2, Eq. (18)).
 
     :math:`\alpha = 1 - |r|^2`. This form is shared with ISO 10534-1 Eq. (9) and
@@ -431,7 +431,7 @@ def absorption_from_reflection(reflection: ArrayLike) -> Real:
 
 
 def microphone_calibration_factor(
-    h12_config1: ArrayLike, h12_config2: ArrayLike
+    h12_config1: NumericArrayLike, h12_config2: NumericArrayLike
 ) -> Complex:
     r"""Microphone-mismatch calibration factor ``Hc`` (ISO 10534-2, Eq. (10)).
 
@@ -452,7 +452,7 @@ def microphone_calibration_factor(
 
 
 def apply_microphone_calibration(
-    h12_uncorrected: ArrayLike, calibration_factor: ArrayLike
+    h12_uncorrected: NumericArrayLike, calibration_factor: NumericArrayLike
 ) -> Complex:
     r"""Apply the microphone calibration factor (ISO 10534-2, Eq. (13)).
 
@@ -751,14 +751,14 @@ class ImpedanceTubeResult(OwnsArrays):
 
 
 def two_microphone_impedance(
-    h12: ArrayLike,
+    h12: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     spacing_m: float,
     x1: float,
     speed_of_sound: float,
     characteristic_impedance: float,
-    attenuation_np_per_m: ArrayLike | None = None,
+    attenuation_np_per_m: NumericArrayLike | None = None,
     diameter_m: float | None = None,
     shape: Shape = "circular",
 ) -> ImpedanceTubeResult:

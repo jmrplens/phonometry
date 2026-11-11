@@ -191,7 +191,7 @@ Upper limit `LEX,8h + U` of the one-sided 95 % interval, dB.
 
 ```python
 full_day_exposure(
-    samples: ArrayLike,
+    samples: NumericArrayLike,
     effective_duration_hours: float,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
@@ -238,7 +238,7 @@ INSTRUMENT_U2 = {'class1': 0.7, 'class2': 1.5, 'personal_exposimeter': 1.5}
 
 ```python
 job_based_exposure(
-    samples: ArrayLike,
+    samples: NumericArrayLike,
     effective_duration_hours: float,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
@@ -341,10 +341,10 @@ uncertainty `u1`. The `u1` axis is anchored at the origin (`u1 = 0` gives
 ```python
 Task(
     *,
-    samples: ArrayLike,
+    samples: NumericArrayLike,
     duration_hours: float,
-    duration_observations_hours: ArrayLike | None = None,
-    duration_range_hours: ArrayLike | None = None,
+    duration_observations_hours: NumericArrayLike | None = None,
+    duration_range_hours: NumericArrayLike | None = None,
     label: str | None = None,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] | None = None,
 )

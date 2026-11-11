@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import ArrayRows, NumericArrayLike
@@ -178,10 +178,10 @@ class RotorcraftHemisphere(OwnsArrays):
         def __init__(
             self,
             *,
-            frequencies: ArrayLike,
-            azimuth_deg: ArrayLike,
-            polar_deg: ArrayLike,
-            levels: ArrayLike,
+            frequencies: NumericArrayLike,
+            azimuth_deg: NumericArrayLike,
+            polar_deg: NumericArrayLike,
+            levels: NumericArrayLike,
             distance_m: float = _RH,
         ) -> None: ...
 
@@ -454,10 +454,10 @@ def _ring_levels(
 
 
 def hover_ring_hemisphere(
-    bearings: ArrayLike,
-    levels: ArrayLike,
+    bearings: NumericArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
@@ -626,13 +626,13 @@ def hover_derived_hemisphere(
 
 
 def flight_condition_weights(
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
     airspeed: float,
     path_angle_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: ArrayLike | None = None,
+    triangles: NumericArrayLike | None = None,
 ) -> list[tuple[int, float]]:
     r"""Hemisphere blending weights for a flight condition (Eq. 3-10).
 
@@ -734,7 +734,7 @@ def _enveloping_simplex(
     pts: NDArray[np.float64],
     q: NDArray[np.float64],
     n: int,
-    triangles: ArrayLike | None,
+    triangles: NumericArrayLike | None,
 ) -> NDArray[np.intp] | None:
     """The triangle of ``pts`` (given or Delaunay) enveloping ``q``, or ``None``."""
     if triangles is not None:
@@ -755,7 +755,7 @@ def _simplex_from_table(
     pts: NDArray[np.float64],
     q: NDArray[np.float64],
     n: int,
-    triangles: ArrayLike,
+    triangles: NumericArrayLike,
 ) -> NDArray[np.intp] | None:
     """The first triangle of a lookup table enveloping ``q``, or ``None``."""
     require_scalar(n, "n")
@@ -785,15 +785,15 @@ def _simplex_from_table(
 
 def interpolated_source_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
     airspeed: float,
     path_angle_deg: float,
     azimuth_deg: float,
     polar_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: ArrayLike | None = None,
+    triangles: NumericArrayLike | None = None,
 ) -> NDArray[np.float64]:
     """Source level at a flight condition between hemispheres (Eq. 8/10 over Eq. 13).
 
@@ -835,7 +835,7 @@ def interpolated_source_level(
 
 def _common_frequencies(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
+    airspeeds: NumericArrayLike,
 ) -> NDArray[np.float64]:
     """The shared band grid of a hemisphere set (validated)."""
     if len(hemispheres) == 0:
@@ -953,8 +953,8 @@ class FlightPathKinematics(OwnsArrays):
 
 
 def flight_path_kinematics(
-    times: ArrayLike,
-    positions: ArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
     *,
     gravity: float = _G0,
 ) -> FlightPathKinematics:
@@ -1284,7 +1284,7 @@ class RotorcraftNoiseContourResult(OwnsArrays):
 
 
 def _per_point(
-    value: ArrayLike | None,
+    value: NumericArrayLike | None,
     n: int,
     name: str,
 ) -> NDArray[np.float64] | None:
@@ -1304,8 +1304,8 @@ def _per_point(
 
 
 def _validated_track(
-    times: ArrayLike,
-    positions: ArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(times, positions)`` track arrays."""
     t = real_array(times, "times")
@@ -1424,7 +1424,7 @@ class RotorcraftGround(OwnsArrays):
             self,
             *,
             receiver_height_m: float = 1.2,
-            ground_elevation: ArrayLike = 0.0,
+            ground_elevation: NumericArrayLike = 0.0,
             flow_resistivity: GroundClass | NumericArrayLike = "G",
             terrain: ArrayRows | None = None,
             terrain_resolution: float | None = None,
@@ -1504,10 +1504,10 @@ class RotorcraftTrackState(OwnsArrays):
         def __init__(
             self,
             *,
-            airspeed: ArrayLike | None = None,
-            path_angle_deg: ArrayLike | None = None,
-            heading: ArrayLike | None = None,
-            bank_angle_deg: ArrayLike | None = None,
+            airspeed: NumericArrayLike | None = None,
+            path_angle_deg: NumericArrayLike | None = None,
+            heading: NumericArrayLike | None = None,
+            bank_angle_deg: NumericArrayLike | None = None,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -1545,7 +1545,10 @@ class FlightConditionInterpolation(OwnsArrays):
     if TYPE_CHECKING:
 
         def __init__(
-            self, *, scaling_factor: float = 2.0, triangles: ArrayLike | None = None
+            self,
+            *,
+            scaling_factor: float = 2.0,
+            triangles: NumericArrayLike | None = None,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -1651,12 +1654,12 @@ class _EventSetup:
 
 def _event_setup(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
-    times: ArrayLike,
-    positions: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
     *,
-    level_offset: ArrayLike,
+    level_offset: NumericArrayLike,
     atmosphere: RotorcraftAtmosphere,
     ground: RotorcraftGround,
     track_state: RotorcraftTrackState,
@@ -2089,13 +2092,13 @@ def _resolved_track_state(
 
 def rotorcraft_event_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
-    times: ArrayLike,
-    positions: ArrayLike,
-    receiver: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
+    receiver: NumericArrayLike,
     *,
-    level_offset: ArrayLike = 0.0,
+    level_offset: NumericArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = _ICAO_ATMOSPHERE,
     ground: RotorcraftGround = _FLAT_GROUND,
     track_state: RotorcraftTrackState = _DERIVED_TRACK_STATE,
@@ -2228,15 +2231,15 @@ def _track_emission_geometry(
 
 def rotorcraft_noise_contour(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
-    times: ArrayLike,
-    positions: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
     *,
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     metric: EventMetric = "exposure",
-    level_offset: ArrayLike = 0.0,
+    level_offset: NumericArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = _ICAO_ATMOSPHERE,
     ground: RotorcraftGround = _FLAT_GROUND,
     track_state: RotorcraftTrackState = _DERIVED_TRACK_STATE,

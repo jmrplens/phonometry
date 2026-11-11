@@ -288,7 +288,7 @@ Whether this library computed this field instead of reading it.
 
 ```python
 GroundSurface.medium(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
     fluid: Fluid = ...,

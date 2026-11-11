@@ -37,9 +37,10 @@ from ._draft import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
     from ...simulation.fdtd import FDTD2D
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
@@ -124,7 +125,7 @@ def plot_fdtd_domain(
     sim: FDTD2D,
     ax: Axes | None = None,
     *,
-    probe_positions: ArrayLike | None = None,
+    probe_positions: NumericArrayLike | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:

@@ -98,9 +98,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 #: The wall ties Hopkins Table A4 prints a stiffness for.
 WallTie = Literal[
@@ -285,7 +285,7 @@ class WallTieCouplingResult(OwnsArrays):
 
 
 def wall_tie_coupling_loss_factor(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass1: float,
     mass2: float,
     bending_stiffness1: float,

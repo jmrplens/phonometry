@@ -35,7 +35,7 @@ quadratic-residue diffuser in a fraction of the depth.
 
 ```python
 area_factors(
-    elevations: ArrayLike,
+    elevations: NumericArrayLike,
     *,
     delta_theta: float,
     delta_phi: float | None = None,
@@ -78,10 +78,10 @@ be dimensionally consistent with the $4 \pi$ factor.
 
 ```python
 diffusion_spectrum(
-    diffusion: ArrayLike,
+    diffusion: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    normalized: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    normalized: NumericArrayLike | None = None,
 ) -> DiffusionSpectrum
 ```
 
@@ -305,10 +305,10 @@ characterisation, so there is no pass/fail verdict.
 
 ```python
 directional_diffusion(
-    angles_deg: ArrayLike,
-    levels: ArrayLike,
+    angles_deg: NumericArrayLike,
+    levels: NumericArrayLike,
     *,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
 ) -> DiffusionResult
 ```
 
@@ -339,9 +339,9 @@ keeps the receiver angles alongside the levels and returns a plottable
 
 ```python
 directional_diffusion_coefficient(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    area_weights: ArrayLike | None = None,
+    area_weights: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -387,8 +387,8 @@ are equal.
 
 ```python
 normalized_diffusion_coefficient(
-    d_theta: ArrayLike,
-    d_theta_reference: ArrayLike,
+    d_theta: NumericArrayLike,
+    d_theta_reference: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -464,9 +464,9 @@ resolution (37 microphones).
 
 ```python
 random_incidence_diffusion(
-    directional_coefficients: ArrayLike,
+    directional_coefficients: NumericArrayLike,
     *,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
 ) -> float
 ```
 

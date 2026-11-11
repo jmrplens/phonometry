@@ -351,10 +351,11 @@ def impedance(rho, c): ...
 
 ```python
 import numpy as np
-from numpy.typing import ArrayLike
+
+from phonometry._internal.types import NumericArrayLike
 
 
-def energy_mean(levels: ArrayLike) -> float:
+def energy_mean(levels: NumericArrayLike) -> float:
     """Energy mean of ``levels``, in dB."""
     return float(10 * np.log10(np.mean(10 ** (np.asarray(levels) / 10))))
 ```
@@ -362,7 +363,7 @@ def energy_mean(levels: ArrayLike) -> float:
 **Don't**
 
 ```py
-def energy_mean(level: ArrayLike) -> float: ...
+def energy_mean(level: NumericArrayLike) -> float: ...
 ```
 
 **Enforced by:** `tests/test_public_vocabulary.py::test_an_array_of_a_quantity_is_named_in_the_plural`

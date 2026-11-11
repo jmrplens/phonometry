@@ -94,11 +94,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import ThreePanels, TwoPanels, WindowSpec
+    from .._internal.types import NumericArrayLike, ThreePanels, TwoPanels, WindowSpec
 
 Scaling = Literal["density", "spectrum"]
 
@@ -340,7 +340,7 @@ class SpectralDensityResult(OwnsArrays):
 
 
 def power_spectral_density(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     window: WindowSpec = "hann",
@@ -574,8 +574,8 @@ class CrossSpectralDensityResult(OwnsArrays):
 
 
 def cross_spectral_density(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     window: WindowSpec = "hann",
@@ -820,8 +820,8 @@ class CoherentOutputSpectrumResult(OwnsArrays):
 
 
 def coherent_output_spectrum(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     window: WindowSpec = "hann",
@@ -1004,9 +1004,9 @@ def _smoothing_window_average(
 
 
 def fractional_octave_smoothing(
-    values: ArrayLike,
+    values: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     fraction: float = 3.0,
     domain: Literal["power", "amplitude", "db"] = "power",
 ) -> NDArray[np.float64]:

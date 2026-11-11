@@ -58,8 +58,8 @@ hall, and this module does not make them follow the weather.
 ```python
 assess_perceptible_difference(
     symbol: Literal['G', 'EDT', 'C80', 'D50', 'Ts', 'J_LF', 'J_LFC', 'L_J'],
-    first: ArrayLike,
-    second: ArrayLike,
+    first: NumericArrayLike,
+    second: NumericArrayLike,
 ) -> PerceptibleDifference
 ```
 
@@ -151,7 +151,7 @@ DIRECTIVITY_ARC_DEG = 30.0
 
 ```python
 directivity_energy_average(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     axis: int | np.integer[Any] = -1,
 ) -> float | NDArray[np.float64]
@@ -229,8 +229,8 @@ EARLY_ENERGY_LIMIT_S = 0.08
 
 ```python
 early_lateral_energy_fraction(
-    ir: Signal | ArrayLike,
-    lateral_ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
+    lateral_ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     weighting: Literal['squared', 'cosine'] = 'squared',
@@ -320,7 +320,7 @@ free_field_reference_level(
 ) -> NDArray[np.float64]
 
 free_field_reference_level(
-    level: ArrayLike,
+    level: NumericArrayLike,
     distance: float,
 ) -> float | NDArray[np.float64]
 ```
@@ -364,7 +364,9 @@ its docstring says what the printed step does and does not determine.
 ## gliding_directivity_deviation
 
 ```python
-gliding_directivity_deviation(levels: ArrayLike) -> NDArray[np.float64]
+gliding_directivity_deviation(
+    levels: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Deviation of each gliding arc from the whole-turn reference (4.2.1).
@@ -435,8 +437,8 @@ IACC_SEARCH_S = 0.001
 
 ```python
 interaural_cross_correlation(
-    left: Signal | ArrayLike,
-    right: Signal | ArrayLike,
+    left: Signal | NumericArrayLike,
+    right: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     window: tuple[float, float | None] = (0.0, None),
@@ -543,7 +545,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ## late_lateral_average
 
 ```python
-late_lateral_average(levels: ArrayLike) -> float
+late_lateral_average(levels: NumericArrayLike) -> float
 ```
 
 Frequency-average the late lateral level over its four octave bands.
@@ -588,12 +590,12 @@ LATE_LATERAL_AVERAGE_BANDS_HZ = (125.0, 250.0, 500.0, 1000.0)
 
 ```python
 late_lateral_sound_level(
-    ir: Signal | ArrayLike,
-    lateral_ir: Signal | ArrayLike,
-    reference_ir: Signal | ArrayLike | None = None,
+    ir: Signal | NumericArrayLike,
+    lateral_ir: Signal | NumericArrayLike,
+    reference_ir: Signal | NumericArrayLike | None = None,
     fs: float | None = None,
     *,
-    reference_level: ArrayLike | None = None,
+    reference_level: NumericArrayLike | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
     fraction: int | np.integer[Any] = 1,
 ) -> LateLateralResult
@@ -800,7 +802,9 @@ min_receiver_positions(
     seats: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-min_receiver_positions(seats: ArrayLike) -> float | NDArray[np.float64]
+min_receiver_positions(
+    seats: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Fewest microphone positions a hall of a given size wants (Table A.2).
@@ -850,9 +854,9 @@ MIN_REFERENCE_DISTANCE_M = 3.0
 
 ```python
 octave_pair_averages(
-    values: ArrayLike,
+    values: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> dict[str, float]
 ```
 
@@ -963,7 +967,7 @@ reverberation_room_reference_level(
 
 reverberation_room_reference_level(
     reverberation_room_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    absorption_area: ArrayLike,
+    absorption_area: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 reverberation_room_reference_level(
@@ -972,8 +976,8 @@ reverberation_room_reference_level(
 ) -> NDArray[np.float64]
 
 reverberation_room_reference_level(
-    reverberation_room_level: ArrayLike,
-    absorption_area: ArrayLike,
+    reverberation_room_level: NumericArrayLike,
+    absorption_area: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -1029,9 +1033,9 @@ reproduces the method rather than quietly improving it.
 ```python
 single_number_average(
     symbol: Literal['G', 'EDT', 'C80', 'D50', 'Ts', 'J_LF', 'J_LFC', 'L_J'],
-    values: ArrayLike,
+    values: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> float
 ```
 
@@ -1072,7 +1076,7 @@ table.
 
 ```python
 sound_pressure_exposure_level(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     limits: None,
@@ -1080,7 +1084,7 @@ sound_pressure_exposure_level(
 ) -> float
 
 sound_pressure_exposure_level(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     limits: tuple[float, float] = (125.0, 4000.0),
@@ -1135,11 +1139,11 @@ $L_{pE,10}$.
 
 ```python
 sound_strength(
-    ir: Signal | ArrayLike,
-    reference_ir: Signal | ArrayLike | None = None,
+    ir: Signal | NumericArrayLike,
+    reference_ir: Signal | NumericArrayLike | None = None,
     fs: float | None = None,
     *,
-    reference_level: ArrayLike | None = None,
+    reference_level: NumericArrayLike | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
     fraction: int | np.integer[Any] = 1,
 ) -> SoundStrengthResult
@@ -1199,7 +1203,7 @@ sound_strength_from_power(
 
 sound_strength_from_power(
     pressure_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    power_level: ArrayLike,
+    power_level: NumericArrayLike,
 ) -> NDArray[np.float64]
 
 sound_strength_from_power(
@@ -1208,8 +1212,8 @@ sound_strength_from_power(
 ) -> NDArray[np.float64]
 
 sound_strength_from_power(
-    pressure_level: ArrayLike,
-    power_level: ArrayLike,
+    pressure_level: NumericArrayLike,
+    power_level: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -1339,7 +1343,7 @@ STAGE_DIRECT_WINDOW_S = (0.0, 0.01)
 
 ```python
 stage_support(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     limits: tuple[float, float] | None = (250.0, 2000.0),

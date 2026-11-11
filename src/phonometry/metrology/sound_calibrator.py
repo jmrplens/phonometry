@@ -102,9 +102,9 @@ if TYPE_CHECKING:
     from typing import TypedDict, Unpack
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 CalibratorClass = Literal["LS", "LS/M", "1", "1/M", "2"]
 #: The class a designation reads its limits from, without the ``/M`` of a
@@ -530,25 +530,25 @@ if TYPE_CHECKING:
         every field defaults to ``None``.
         """
 
-        level_deviation_db: ArrayLike | None
-        level_uncertainty_db: ArrayLike | None
-        static_pressure_correction: ArrayLike | None
-        fluctuation_db: ArrayLike | None
-        fluctuation_uncertainty_db: ArrayLike | None
-        frequency_deviation_percent: ArrayLike | None
-        frequency_uncertainty_percent: ArrayLike | None
-        distortion_percent: ArrayLike | None
-        distortion_uncertainty_percent: ArrayLike | None
-        supply_voltage_deviation_db: ArrayLike | None
-        supply_voltage_uncertainty_db: ArrayLike | None
-        environmental_level_deviation_db: ArrayLike | None
-        environmental_level_uncertainty_db: ArrayLike | None
-        environmental_level_in_band_deviation_db: ArrayLike | None
-        environmental_level_in_band_uncertainty_db: ArrayLike | None
-        environmental_frequency_deviation_percent: ArrayLike | None
-        environmental_frequency_uncertainty_percent: ArrayLike | None
-        field_immunity_deviation_db: ArrayLike | None
-        field_immunity_uncertainty_db: ArrayLike | None
+        level_deviation_db: NumericArrayLike | None
+        level_uncertainty_db: NumericArrayLike | None
+        static_pressure_correction: NumericArrayLike | None
+        fluctuation_db: NumericArrayLike | None
+        fluctuation_uncertainty_db: NumericArrayLike | None
+        frequency_deviation_percent: NumericArrayLike | None
+        frequency_uncertainty_percent: NumericArrayLike | None
+        distortion_percent: NumericArrayLike | None
+        distortion_uncertainty_percent: NumericArrayLike | None
+        supply_voltage_deviation_db: NumericArrayLike | None
+        supply_voltage_uncertainty_db: NumericArrayLike | None
+        environmental_level_deviation_db: NumericArrayLike | None
+        environmental_level_uncertainty_db: NumericArrayLike | None
+        environmental_level_in_band_deviation_db: NumericArrayLike | None
+        environmental_level_in_band_uncertainty_db: NumericArrayLike | None
+        environmental_frequency_deviation_percent: NumericArrayLike | None
+        environmental_frequency_uncertainty_percent: NumericArrayLike | None
+        field_immunity_deviation_db: NumericArrayLike | None
+        field_immunity_uncertainty_db: NumericArrayLike | None
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -44,9 +44,9 @@ from ._draft import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
     from ...room.image_source import ImageSourceResult
     from ...room.open_plan import OpenPlanResult
 
@@ -210,7 +210,7 @@ def plot_image_source_geometry(
 # ---------------------------------------------------------------------------
 @closes_its_figures
 def plot_open_plan_geometry(
-    positions: ArrayLike,
+    positions: NumericArrayLike,
     *,
     ax: Axes | None = None,
     rd: float | None = None,

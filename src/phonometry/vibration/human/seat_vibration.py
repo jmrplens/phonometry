@@ -67,9 +67,9 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "ACTIVE_DAMPING_TEST_MASS_KG",
@@ -124,7 +124,7 @@ UNITY_TRANSMISSION: float = 1.0
 
 
 def mean_of_test_runs(
-    values: ArrayLike, *, relative_tolerance: float = RUN_AGREEMENT_TOLERANCE
+    values: NumericArrayLike, *, relative_tolerance: float = RUN_AGREEMENT_TOLERANCE
 ) -> float:
     """The arithmetic mean of the runs of one test (10.2.1, 10.3).
 
@@ -314,8 +314,8 @@ class SeatTransmissionResult(RichDisplay):
 
 
 def seat_transmission(
-    seat_runs: ArrayLike,
-    platform_runs: ArrayLike,
+    seat_runs: NumericArrayLike,
+    platform_runs: NumericArrayLike,
     *,
     relative_tolerance: float = RUN_AGREEMENT_TOLERANCE,
 ) -> SeatTransmissionResult:

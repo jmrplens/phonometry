@@ -84,7 +84,7 @@ CalibrationConditions(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
-    air_absorption_db_per_m: ArrayLike | None = None,
+    air_absorption_db_per_m: NumericArrayLike | None = None,
 )
 ```
 
@@ -152,7 +152,7 @@ radiation_impedance_correction(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     knee_frequency_hz: float | None = None,
 ) -> np.ndarray
 ```
@@ -189,17 +189,17 @@ calibration used should be the one the user applies.
 
 ```python
 reference_source_calibration(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     arrangement: Literal['paths', 'fixed'],
-    background_levels: ArrayLike | None = None,
-    max_levels: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    max_levels: NumericArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
     radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
     knee_frequency_hz: float | None = None,
-    c2: ArrayLike | None = None,
-    intensity_sound_power_level: ArrayLike | None = None,
+    c2: NumericArrayLike | None = None,
+    intensity_sound_power_level: NumericArrayLike | None = None,
     room_qualification: FreeFieldCheck | None = None,
     coverage_factor: float = 1.96,
 ) -> ReferenceSourceCalibration
@@ -252,7 +252,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 
 ```python
 reference_source_reproducibility(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     environment: Literal['hemi-anechoic', 'reverberation-room'],
     arrangement: Literal['paths', 'fixed'] | None = None,
@@ -586,7 +586,7 @@ A-weighted sound power level over `a_weighted_range_hz` (5.3).
 
 ```python
 ReferenceSourceCalibration.sound_power_level_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     fraction: Literal[1, 3] | np.integer[Any] = 3,
     temperature_c: float | None = None,
@@ -690,7 +690,7 @@ Draw the change of each band against its limit.
 ## repeatability_standard_deviation
 
 ```python
-repeatability_standard_deviation(levels: ArrayLike) -> np.ndarray
+repeatability_standard_deviation(levels: NumericArrayLike) -> np.ndarray
 ```
 
 Standard deviation under repeatability conditions (ISO 6926 Formula (1)).
@@ -718,12 +718,12 @@ $\overline{L_X}$ the energy average of the repetitions, as clause
 
 ```python
 verify_reference_sound_source(
-    calibration: ReferenceSourceCalibration | ArrayLike,
+    calibration: ReferenceSourceCalibration | NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    repeated_levels: ArrayLike | None = None,
-    supply_variation_db: ArrayLike | None = None,
-    directivity_index: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    repeated_levels: NumericArrayLike | None = None,
+    supply_variation_db: NumericArrayLike | None = None,
+    directivity_index: NumericArrayLike | None = None,
     reverberation_rooms_only: bool = False,
 ) -> ReferenceSoundSourceVerdict
 ```
@@ -761,10 +761,10 @@ frequencies.
 
 ```python
 verify_reference_source_drift(
-    reference_levels: ArrayLike,
-    latest_levels: ArrayLike,
+    reference_levels: NumericArrayLike,
+    latest_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> ReferenceSourceDriftResult
 ```
 

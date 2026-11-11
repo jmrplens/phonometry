@@ -116,7 +116,7 @@ ambient_noise_limits(
     *,
     lowest_test_frequency_hz: float = 125.0,
     earphone: Literal['supra-aural', 'ER-3A', 'HDA 200'] = 'supra-aural',
-    earphone_attenuation: ArrayLike | None = None,
+    earphone_attenuation: NumericArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
 ) -> np.ndarray
@@ -302,10 +302,10 @@ Per band, whether the measured level is at or below the limit.
 
 ```python
 ascending_method_threshold(
-    ascent_levels: ArrayLike | None = None,
+    ascent_levels: NumericArrayLike | None = None,
     *,
-    presentation_levels: ArrayLike | None = None,
-    responses: ArrayLike | None = None,
+    presentation_levels: NumericArrayLike | None = None,
+    responses: NumericArrayLike | None = None,
     shortened: bool = False,
     familiarization_level: float | None = None,
 ) -> AscendingThresholdResult
@@ -463,10 +463,10 @@ ascents, once the stopping rule of 6.2.3.2 is met; NaN until then.
 
 ```python
 audiogram_cautions(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    air_conduction_threshold_levels: ArrayLike | None = None,
-    bone_conduction_threshold_levels: ArrayLike | None = None,
+    air_conduction_threshold_levels: NumericArrayLike | None = None,
+    bone_conduction_threshold_levels: NumericArrayLike | None = None,
     vibrator_placement: Literal['mastoid', 'forehead'] = 'mastoid',
 ) -> AudiogramCautions
 ```
@@ -758,7 +758,7 @@ The eight standard uncertainties in the order of Table A.1, in dB.
 
 ```python
 automatic_audiometry_threshold(
-    reversal_levels: ArrayLike,
+    reversal_levels: NumericArrayLike,
 ) -> AutomaticThresholdResult
 ```
 
@@ -901,8 +901,8 @@ BONE_CONDUCTION_AMBIENT_LIMITS_DB = {125.0: array([55., 47., 41., 35., 30., 25.,
 
 ```python
 bracketing_method_threshold(
-    ascent_levels: ArrayLike,
-    descent_levels: ArrayLike,
+    ascent_levels: NumericArrayLike,
+    descent_levels: NumericArrayLike,
 ) -> BracketingThresholdResult
 ```
 
@@ -1022,16 +1022,16 @@ Whether the ascents or the descents spread over more than 10 dB.
 
 ```python
 check_audiometric_ambient_noise(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     presentation: Literal['air', 'bone', 'sound field'] = 'air',
     lowest_test_frequency_hz: float = 125.0,
     earphone: Literal['supra-aural', 'ER-3A', 'HDA 200'] = 'supra-aural',
-    earphone_attenuation: ArrayLike | None = None,
+    earphone_attenuation: NumericArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
-    frequencies: ArrayLike | None = None,
-    noise_floor_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    noise_floor_levels: NumericArrayLike | None = None,
 ) -> AmbientNoiseCheck
 ```
 
@@ -1199,10 +1199,10 @@ Whether Step 3 sends the test back to the further frequencies.
 
 ```python
 sweep_audiometry_threshold(
-    reversal_levels: ArrayLike,
+    reversal_levels: NumericArrayLike,
     *,
-    reversal_frequencies: ArrayLike,
-    frequencies: ArrayLike | None = None,
+    reversal_frequencies: NumericArrayLike,
+    frequencies: NumericArrayLike | None = None,
 ) -> SweepThresholdResult
 ```
 

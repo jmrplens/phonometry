@@ -72,9 +72,10 @@ from .propagation.closed_form import AbsorptionModel, SpreadingLaw  # noqa: TC00
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from .propagation.closed_form import PropagationLossResult
 
 __all__ = [
@@ -112,7 +113,7 @@ def _finite(value: float, name: str) -> float:
     return scalar
 
 
-def _finite_array(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _finite_array(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     arr = np.atleast_1d(real_array(values, name))
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = f"'{name}' must be finite and non-empty."
@@ -231,7 +232,7 @@ class SonarEquationResult(OwnsArrays):
 
 def passive_sonar_equation(
     source_level: float,
-    propagation_loss: ArrayLike,
+    propagation_loss: NumericArrayLike,
     noise_level: float,
     *,
     directivity_index: float = 0.0,
@@ -278,7 +279,7 @@ def passive_sonar_equation(
 
 def active_sonar_equation(
     source_level: float,
-    propagation_loss: ArrayLike,
+    propagation_loss: NumericArrayLike,
     target_strength: float,
     noise_level: float,
     *,
@@ -489,8 +490,8 @@ def detection_range(
 
 def detection_range_from_curve(
     figure_of_merit: float,
-    range_m: ArrayLike,
-    propagation_loss: ArrayLike,
+    range_m: NumericArrayLike,
+    propagation_loss: NumericArrayLike,
     *,
     crossing: Literal["first", "last"] = "first",
 ) -> float:

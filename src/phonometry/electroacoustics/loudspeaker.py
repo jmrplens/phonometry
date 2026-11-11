@@ -78,10 +78,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import ArrayRows, ReportEngine
+    from .._internal.types import ArrayRows, NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
     from .piston import RadiatingPistonResult
     from .swept_sine import SweptSineDistortionResult
@@ -110,8 +110,8 @@ _MIN_CURVE_POINTS = 2
 
 
 def _as_curve(
-    frequencies: ArrayLike,
-    values: ArrayLike,
+    frequencies: NumericArrayLike,
+    values: NumericArrayLike,
     name: str,
     *,
     names: tuple[str, str] | None = None,
@@ -373,7 +373,7 @@ class LoudspeakerRatings(RichDisplay):
         def __init__(
             self,
             *,
-            frequency_range: ArrayLike | None = None,
+            frequency_range: NumericArrayLike | None = None,
             noise_power: float | None = None,
             sinusoidal_power: float | None = None,
             resonance_frequency: float | None = None,
@@ -840,7 +840,7 @@ def _characteristic_sensitivity_level(
 
 
 def _resolve_impedance(
-    impedance: tuple[ArrayLike, ArrayLike] | None,
+    impedance: tuple[NumericArrayLike, NumericArrayLike] | None,
 ) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Validate the optional impedance-modulus curve (16.2)."""
     if impedance is None:
@@ -853,7 +853,9 @@ def _resolve_impedance(
 
 
 def _resolve_distortion(
-    distortion: SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None,
+    distortion: SweptSineDistortionResult
+    | tuple[NumericArrayLike, NumericArrayLike]
+    | None,
 ) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
     """Resolve the optional THD-against-frequency curve, in % (24.1)."""
     if distortion is None:
@@ -898,16 +900,18 @@ def _resolve_polar(
 
 
 def loudspeaker_characteristics(
-    spl: ArrayLike,
+    spl: NumericArrayLike,
     rated_impedance_ohm: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     input_voltage_v: float | None = None,
     distance: float = 1.0,
     sensitivity_band: tuple[float, float] | None = None,
     tolerance_db: float = 3.0,
-    impedance: tuple[ArrayLike, ArrayLike] | None = None,
-    distortion: SweptSineDistortionResult | tuple[ArrayLike, ArrayLike] | None = None,
+    impedance: tuple[NumericArrayLike, NumericArrayLike] | None = None,
+    distortion: SweptSineDistortionResult
+    | tuple[NumericArrayLike, NumericArrayLike]
+    | None = None,
     directivity: LoudspeakerDirectivity = _DEFAULT_DIRECTIVITY,
     ratings: LoudspeakerRatings = _DEFAULT_RATINGS,
 ) -> LoudspeakerCharacteristics:

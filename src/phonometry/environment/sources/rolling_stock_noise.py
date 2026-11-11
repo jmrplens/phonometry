@@ -131,10 +131,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Callable, Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandMapping, RealScalar, RealValues
+    from ..._internal.types import BandMapping, NumericArrayLike, RealScalar, RealValues
     from ...metrology.uncertainty import Quantity
 
 __all__ = [
@@ -738,7 +738,9 @@ def pass_by_measurement(
 # ---------------------------------------------------------------------------
 
 
-def stationary_unit_level(levels: ArrayLike, lengths_m: ArrayLike) -> float:
+def stationary_unit_level(
+    levels: NumericArrayLike, lengths_m: NumericArrayLike
+) -> float:
     r"""The length-weighted energy average of a stationary mesh, Formulae 1 to 3.
 
     .. math::
@@ -854,7 +856,9 @@ class StationaryTestResult(OwnsArrays):
         return plot_stationary_test(self, ax, language=language, **kwargs)
 
 
-def stationary_test(levels: ArrayLike, lengths_m: ArrayLike) -> StationaryTestResult:
+def stationary_test(
+    levels: NumericArrayLike, lengths_m: NumericArrayLike
+) -> StationaryTestResult:
     r"""The stationary test of a unit from its measured mesh, 5.7 and 5.8.1.
 
     Each set gives the unit level of Formula 1, and the result is the mean of
@@ -989,7 +993,7 @@ class RollingStockTestResult(RichDisplay):
 
 
 def rolling_stock_test(
-    run_levels: Mapping[str, ArrayLike],
+    run_levels: Mapping[str, NumericArrayLike],
     *,
     method: TestMethod = "constant_speed",
 ) -> RollingStockTestResult:
@@ -1092,7 +1096,9 @@ class RiseSpeedResult(OwnsArrays):
         return plot_rise_speed(self, ax, language=language, **kwargs)
 
 
-def impulsiveness_rise_speed(times: ArrayLike, levels: ArrayLike) -> RiseSpeedResult:
+def impulsiveness_rise_speed(
+    times: NumericArrayLike, levels: NumericArrayLike
+) -> RiseSpeedResult:
     r"""The rise speed that characterises impulsive noise, Annex A.
 
     The rising slopes of :math:`L_{p\mathrm{AF}}(t)` are the stretches where
@@ -1158,7 +1164,7 @@ def background_level_increase[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def background_level_increase[V: RealValues, A2: ArrayLike](
+def background_level_increase[V: RealValues, A2: NumericArrayLike](
     measured_level: V, background_level: A2
 ) -> NDArray[np.float64]: ...
 
@@ -1170,13 +1176,13 @@ def background_level_increase[S1: RealScalar, V: RealValues](
 
 
 @overload
-def background_level_increase[A1: ArrayLike, A2: ArrayLike](
+def background_level_increase[A1: NumericArrayLike, A2: NumericArrayLike](
     measured_level: A1, background_level: A2
 ) -> float | NDArray[np.float64]: ...
 
 
 def background_level_increase(
-    measured_level: ArrayLike, background_level: ArrayLike
+    measured_level: NumericArrayLike, background_level: NumericArrayLike
 ) -> float | NDArray[np.float64]:
     r"""How much a steady background raises a measured level, Formula D.1.
 
@@ -1317,7 +1323,7 @@ def check_adjacent_vehicle_neutrality(
 
 
 def _frequency_bands(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.int64]]:
     """Nominal band frequencies and their base-ten band indices."""
     frequencies = require_positive_array(frequencies, "frequencies")
@@ -1497,7 +1503,9 @@ class SmallRoughnessDeviation(OwnsArrays):
 
 
 def _noise_spectrum(
-    noise_levels: ArrayLike, frequencies: ArrayLike, name: str = "noise_levels"
+    noise_levels: NumericArrayLike,
+    frequencies: NumericArrayLike,
+    name: str = "noise_levels",
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.int64]]:
     """The noise levels and their bands, one level per band.
 
@@ -1513,9 +1521,9 @@ def _noise_spectrum(
 
 def check_small_roughness_deviations(
     roughness: AcousticRoughnessSpectrum,
-    noise_levels: ArrayLike,
+    noise_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     speed_kmh: float,
     limit_db: BandMapping = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
 ) -> SmallRoughnessDeviation:
@@ -1689,10 +1697,10 @@ def _envelope(
 def roughness_comparability(
     roughness_1: AcousticRoughnessSpectrum,
     roughness_2: AcousticRoughnessSpectrum,
-    noise_levels_1: ArrayLike,
-    noise_levels_2: ArrayLike,
+    noise_levels_1: NumericArrayLike,
+    noise_levels_2: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     speed_kmh: float,
 ) -> RoughnessComparability:
     r"""Bound how much the roughness of two tracks could change a pass-by level, Annex E.

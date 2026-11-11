@@ -14,7 +14,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from .validation import real_array
 
@@ -55,9 +55,14 @@ class NestedSequence[T](Protocol):
     def __reversed__(self, /) -> Iterator[T | NestedSequence[T]]: ...
     # A list of numbers counts only a number: typed object, the method would
     # refuse every typed list, as numpy's own nested sequence says.
-    def count(self, value: Any, /) -> int: ...  # noqa: ANN401
+    def count(self, value: Any, /) -> int:  # noqa: ANN401
+        """How many items equal *value*."""
+        ...
+
     # The same holds for the position of an item.
-    def index(self, value: Any, /) -> int: ...  # noqa: ANN401
+    def index(self, value: Any, /) -> int:  # noqa: ANN401
+        """Where the first item equal to *value* sits."""
+        ...
 
 
 #: The forms of numbers ``np.asarray`` converts to an array of numbers: a
@@ -71,7 +76,9 @@ class NestedSequence[T](Protocol):
 #: (``termination: TerminationName | ArrayLike``) it took a misspelt choice
 #: as numbers, which only the call refused. Beside a ``Literal`` this alias
 #: stands for the numbers, and a text that is not one of the choices is a
-#: type error.
+#: type error. Every parameter of the package that takes numbers takes it,
+#: beside a choice or not: ``signals.leq("not a signal")`` type-checked as
+#: numbers too while the parameter said ``ArrayLike``.
 NumericArrayLike = (
     complex
     | NestedSequence[complex]
@@ -100,10 +107,10 @@ RealValues = (
 
 #: A fixed count of arrays a record holds as one field, a curve's ``(x, y)``
 #: or the ``(x, y, z)`` axes of an elevation model: a sequence of them, each
-#: any array-like (a tuple of an array and a list), or one array whose rows
+#: any array-like of numbers (a tuple of an array and a list), or one array whose rows
 #: they are (``np.vstack((x, y))``), which is no ``Sequence`` to a type
 #: checker and so is named beside it.
-ArrayRows = Sequence[ArrayLike] | NDArray[Any]
+ArrayRows = Sequence[NumericArrayLike] | NDArray[Any]
 
 #: Values keyed by a band centre frequency in hertz (or by another number a
 #: caller writes as an ``int`` as often as a ``float``, an angle in degrees),
@@ -113,8 +120,8 @@ ArrayRows = Sequence[ArrayLike] | NDArray[Any]
 BandMapping = Mapping[int, float] | Mapping[float, float]
 
 #: Values by band, as a :data:`BandMapping` of band centre to value or in
-#: band order as any array-like.
-BandValues = BandMapping | ArrayLike
+#: band order as any array-like of numbers.
+BandValues = BandMapping | NumericArrayLike
 
 
 def float_keyed[V](mapping: Mapping[int, V] | Mapping[float, V]) -> dict[float, V]:
@@ -173,8 +180,10 @@ Sex = Literal["male", "female"]
 #: (``("kaiser", 8.6)``, ``("tukey", 0.5)``, ``("general_cosine", weights)``).
 #: A bare number, which ``get_window`` reads as the beta of a Kaiser window,
 #: is left out: the Welch estimators refuse it, and ``("kaiser", beta)``
-#: names it everywhere.
-WindowSpec = str | tuple[ArrayLike, ...]
+#: names it everywhere. The tuple's first item is the name, and every item
+#: takes a text or numbers: numpy's ``ArrayLike`` took the name as it takes
+#: any text.
+WindowSpec = str | tuple[str | NumericArrayLike, ...]
 
 
 def own_window(window: WindowSpec) -> WindowSpec:
@@ -223,7 +232,7 @@ CALIBRATION_FIELDS: tuple[CalibrationField, ...] = ("pressure", "free")
 AnswerForm = Literal["number", "zero-dimensional", "array"]
 
 
-def answer_form(like: tuple[ArrayLike | None, ...]) -> AnswerForm:
+def answer_form(like: tuple[NumericArrayLike | None, ...]) -> AnswerForm:
     """The form a result takes for the arguments that decide its shape.
 
     An array in, an array out: ``"array"`` when one of *like* holds more
@@ -245,7 +254,7 @@ def answer_form(like: tuple[ArrayLike | None, ...]) -> AnswerForm:
 
 
 def as_float_or_array(
-    values: ArrayLike, *, like: tuple[ArrayLike | None, ...]
+    values: NumericArrayLike, *, like: tuple[NumericArrayLike | None, ...]
 ) -> float | NDArray[np.float64]:
     """Return *values* in the form the arguments that decide their shape came in.
 
@@ -293,7 +302,7 @@ def one_value[T: np.generic](values: NDArray[T]) -> NDArray[T]:
     return values.reshape(())
 
 
-def as_float_if_reduced(values: ArrayLike) -> float | NDArray[np.float64]:
+def as_float_if_reduced(values: NumericArrayLike) -> float | NDArray[np.float64]:
     """Return a Python ``float`` for a result reduced to one number, else the array.
 
     For a function that reduces an axis (a level over the samples of a

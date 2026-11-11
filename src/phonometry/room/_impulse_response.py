@@ -105,11 +105,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, DTypeLike, NDArray
+    from numpy.typing import DTypeLike, NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import TwoPanels
+    from .._internal.types import NumericArrayLike, TwoPanels
 
 #: Warn from mls_impulse_response when the recovered IR still carries more than
 #: this level (dB re its peak) in the last 10 % of the MLS period: an IR longer
@@ -191,7 +191,7 @@ class ImpulseResponseResult(OwnsArrays):
     if TYPE_CHECKING:
 
         def __init__(
-            self, ir: ArrayLike, fs: float | None, method: ExcitationMethod
+            self, ir: NumericArrayLike, fs: float | None, method: ExcitationMethod
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -448,8 +448,8 @@ def _farina_deconvolve(
 
 @overload
 def impulse_response(
-    recorded: Signal | ArrayLike,
-    reference: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
+    reference: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     method: Literal["farina"],
@@ -462,8 +462,8 @@ def impulse_response(
 
 @overload
 def impulse_response(
-    recorded: Signal | ArrayLike,
-    reference: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
+    reference: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     method: Literal["spectral", "farina"] = ...,
@@ -475,8 +475,8 @@ def impulse_response(
 
 
 def impulse_response(
-    recorded: Signal | ArrayLike,
-    reference: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
+    reference: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     method: Literal["spectral", "farina"] = "spectral",
@@ -620,8 +620,8 @@ def mls_signal(order: int | np.integer[Any]) -> np.ndarray:
 
 
 def mls_impulse_response(
-    recorded: Signal | ArrayLike,
-    mls: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
+    mls: Signal | NumericArrayLike,
     *,
     length: int | None = None,
     fs: float | None = None,
@@ -772,9 +772,9 @@ def golay_pair(order: int | np.integer[Any]) -> tuple[np.ndarray, np.ndarray]:
 
 
 def golay_impulse_response(
-    recorded_a: Signal | ArrayLike,
-    recorded_b: Signal | ArrayLike,
-    pair: tuple[ArrayLike, ArrayLike],
+    recorded_a: Signal | NumericArrayLike,
+    recorded_b: Signal | NumericArrayLike,
+    pair: tuple[NumericArrayLike, NumericArrayLike],
     *,
     length: int | None = None,
     fs: float | None = None,
@@ -1006,7 +1006,7 @@ class ShapedSweepResult(OwnsArrays):
 
 
 def _shaped_target_db(
-    target: str | tuple[ArrayLike, ArrayLike],
+    target: str | tuple[NumericArrayLike, NumericArrayLike],
     freqs: np.ndarray,
     f_range: tuple[float, float],
 ) -> np.ndarray:
@@ -1093,7 +1093,8 @@ def shaped_sweep_signal(
     f2: float,
     duration_s: float,
     *,
-    target: Literal["white", "pink"] | tuple[ArrayLike, ArrayLike] = "pink",
+    target: Literal["white", "pink"]
+    | tuple[NumericArrayLike, NumericArrayLike] = "pink",
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,

@@ -67,7 +67,7 @@ they are three separate implementations here and share nothing.
 
 ```python
 barrier_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -312,12 +312,12 @@ MAX_WIND_SPEED_M_S = 5.0
 
 ```python
 measured_insertion_loss_direct(
-    reference_levels_before: ArrayLike,
-    reference_levels_after: ArrayLike,
-    receiver_levels_before: ArrayLike,
-    receiver_levels_after: ArrayLike,
+    reference_levels_before: NumericArrayLike,
+    reference_levels_after: NumericArrayLike,
+    receiver_levels_before: NumericArrayLike,
+    receiver_levels_after: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> MeasuredBarrierInsertionLoss
 ```
 
@@ -360,12 +360,12 @@ anything: **the same reference and receiver positions in both campaigns**.
 
 ```python
 measured_insertion_loss_indirect(
-    reference_levels_before: ArrayLike,
-    reference_levels_after: ArrayLike,
-    receiver_levels_before: ArrayLike,
-    receiver_levels_after: ArrayLike,
+    reference_levels_before: NumericArrayLike,
+    reference_levels_after: NumericArrayLike,
+    receiver_levels_before: NumericArrayLike,
+    receiver_levels_after: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     receiver_type_before: Literal['hemi_free_field', 'reflecting_surface'] = 'hemi_free_field',
     receiver_type_after: Literal['hemi_free_field', 'reflecting_surface'] = 'hemi_free_field',
 ) -> MeasuredBarrierInsertionLoss

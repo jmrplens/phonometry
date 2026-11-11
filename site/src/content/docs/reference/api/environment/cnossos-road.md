@@ -72,7 +72,7 @@ Junction types `k` of Table F-3 for the speed-variation correction.
 
 ```python
 line_source_segment_power(
-    line_power: ArrayLike,
+    line_power: NumericArrayLike,
     length: float,
 ) -> NDArray[np.float64]
 ```
@@ -362,8 +362,8 @@ RoadEmissionCoefficients(
     rolling_b: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
     propulsion_a: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
     propulsion_b: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
-    studded_a: ArrayLike,
-    studded_b: ArrayLike,
+    studded_a: NumericArrayLike,
+    studded_b: NumericArrayLike,
     junction_c: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[tuple[float, float], tuple[float, float]]],
     temperature_coefficient_db_per_k: Mapping[Literal['1', '2', '3', '4a', '4b'], float],
 )
@@ -466,7 +466,7 @@ RoadSurfaceCoefficients(
     name: str,
     alpha: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
     beta: Mapping[Literal['1', '2', '3', '4a', '4b'], float],
-    speed_range_kmh: ArrayLike | None,
+    speed_range_kmh: NumericArrayLike | None,
 )
 ```
 

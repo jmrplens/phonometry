@@ -381,7 +381,12 @@ record-display:
 # A function of a number or an array of them is the same case: it fails on a
 # return that names a single value and an array (float | NDArray, a grade or
 # an array of grades) with no heads, and on a head that returns that union
-# unless its siblings return the value alone and the array alone.
+# unless its siblings return the value alone and the array alone. So is a
+# function that takes a Signal or an array and returns a record of the
+# package or an array (Signal | ndarray, a TimeWeightedEnvelope or an array,
+# a tuple of either): the record and the array each need a head; the method
+# forms of the weighting filter, the EQ cascade and the time weighting had
+# none while their functions did.
 # Annotations are read through the package's aliases and imports, and a
 # projection through the module constant that holds it. On the tree it was
 # written against it found 74 such plots, one of which (_plot_one_quantity)
@@ -927,12 +932,28 @@ engine-digests:
 		env -u PHONOMETRY_COMPUTE NPY_DISABLE_CPU_FEATURES="$$(PYTHONPATH=src $(PYTHON) scripts/engine_digests.py --avx512-features)" PYTHONPATH=src $(PYTHON) scripts/engine_digests.py; \
 	fi
 
+# pyright --verifytypes on the package as a user installs it: a wheel built
+# here, in an environment of its own beside the pyright requirements-dev.txt
+# pins, where pyright reads the installed package rather than src/. It fails
+# below a type completeness of 100%, as the type-completeness CI job does on
+# the release's own build of the wheel. setuptools stages the build in
+# build/lib, which is cleared first so a module deleted since cannot ride along.
+TYPE_COMPLETENESS_DIR = build/type-completeness
+type-completeness:
+	rm -rf $(TYPE_COMPLETENESS_DIR) build/lib build/bdist.*
+	$(PYTHON) -m pip wheel --no-deps --wheel-dir $(TYPE_COMPLETENESS_DIR)/dist .
+	$(PYTHON) -m venv $(TYPE_COMPLETENESS_DIR)/user
+	grep -E '^pyright\[nodejs\]==' requirements-dev.txt | cut -d' ' -f1 > $(TYPE_COMPLETENESS_DIR)/pyright-pin.txt
+	$(TYPE_COMPLETENESS_DIR)/user/bin/python -m pip install $(TYPE_COMPLETENESS_DIR)/dist/phonometry-*.whl -r $(TYPE_COMPLETENESS_DIR)/pyright-pin.txt
+	PATH="$(CURDIR)/$(TYPE_COMPLETENESS_DIR)/user/bin:$$PATH" VIRTUAL_ENV="$(CURDIR)/$(TYPE_COMPLETENESS_DIR)/user" \
+		pyright --verifytypes phonometry --ignoreexternal
+
 check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
-	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests coverage check \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \

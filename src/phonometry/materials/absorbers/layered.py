@@ -73,7 +73,6 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike, Real
@@ -767,7 +766,7 @@ def _stack_blocks(
 
 
 def layered_absorber(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     layers: Sequence[Layer],
     *,
     angle_rad: float = 0.0,
@@ -894,7 +893,7 @@ def layered_absorber(
 
 
 def diffuse_field_absorption(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     layers: Sequence[Layer],
     *,
     angle_limit_rad: float = np.pi / 2.0,
@@ -969,7 +968,7 @@ def diffuse_field_absorption(
 
 
 def statistical_absorption(
-    normalized_impedance: ArrayLike,
+    normalized_impedance: NumericArrayLike,
     *,
     angle_limit_rad: float = np.pi / 2.0,
 ) -> Real:

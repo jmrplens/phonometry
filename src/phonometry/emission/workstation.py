@@ -125,10 +125,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "DEFAULT_COVERAGE_FACTOR",
@@ -307,8 +307,8 @@ class WorkstationBackgroundCorrection(OwnsArrays):
 
 
 def background_noise_correction_at_workstation(
-    measured_level: ArrayLike,
-    background_level: ArrayLike,
+    measured_level: NumericArrayLike,
+    background_level: NumericArrayLike,
     *,
     grade: Grade = "engineering",
 ) -> WorkstationBackgroundCorrection:
@@ -372,12 +372,14 @@ def local_environmental_correction[V: RealValues](ratio: V) -> NDArray[np.float6
 
 
 @overload
-def local_environmental_correction[A: ArrayLike](
+def local_environmental_correction[A: NumericArrayLike](
     ratio: A,
 ) -> float | NDArray[np.float64]: ...
 
 
-def local_environmental_correction(ratio: ArrayLike) -> float | NDArray[np.float64]:
+def local_environmental_correction(
+    ratio: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Local environmental correction :math:`K_3` from the ratio :math:`z`.
 
     .. math::
@@ -425,7 +427,7 @@ def environmental_ratio_from_k2[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def environmental_ratio_from_k2[V: RealValues, A2: ArrayLike](
+def environmental_ratio_from_k2[V: RealValues, A2: NumericArrayLike](
     environmental_correction: V, directivity_index: A2 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -437,13 +439,14 @@ def environmental_ratio_from_k2[S1: RealScalar, V: RealValues](
 
 
 @overload
-def environmental_ratio_from_k2[A1: ArrayLike, A2: ArrayLike](
+def environmental_ratio_from_k2[A1: NumericArrayLike, A2: NumericArrayLike](
     environmental_correction: A1, directivity_index: A2 = ...
 ) -> float | NDArray[np.float64]: ...
 
 
 def environmental_ratio_from_k2(
-    environmental_correction: ArrayLike, directivity_index: ArrayLike = 0.0
+    environmental_correction: NumericArrayLike,
+    directivity_index: NumericArrayLike = 0.0,
 ) -> float | NDArray[np.float64]:
     r"""The ratio :math:`z` from the environmental correction of the test room.
 
@@ -491,7 +494,7 @@ def environmental_ratio_from_absorption[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def environmental_ratio_from_absorption[V: RealValues, A2: ArrayLike](
+def environmental_ratio_from_absorption[V: RealValues, A2: NumericArrayLike](
     absorption_area: V, measurement_surface_m2: float, directivity_index: A2 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -503,15 +506,15 @@ def environmental_ratio_from_absorption[S1: RealScalar, V: RealValues](
 
 
 @overload
-def environmental_ratio_from_absorption[A1: ArrayLike, A2: ArrayLike](
+def environmental_ratio_from_absorption[A1: NumericArrayLike, A2: NumericArrayLike](
     absorption_area: A1, measurement_surface_m2: float, directivity_index: A2 = ...
 ) -> float | NDArray[np.float64]: ...
 
 
 def environmental_ratio_from_absorption(
-    absorption_area: ArrayLike,
+    absorption_area: NumericArrayLike,
     measurement_surface_m2: float,
-    directivity_index: ArrayLike = 0.0,
+    directivity_index: NumericArrayLike = 0.0,
 ) -> float | NDArray[np.float64]:
     r"""The ratio :math:`z` from the equivalent sound absorption area.
 
@@ -553,13 +556,17 @@ def emission_sound_pressure_level[S1: RealScalar, S2: RealScalar, S3: RealScalar
 
 
 @overload
-def emission_sound_pressure_level[V: RealValues, A2: ArrayLike, A3: ArrayLike](
+def emission_sound_pressure_level[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
     measured_level: V, *, background_correction: A2 = ..., local_correction: A3 = ...
 ) -> NDArray[np.float64]: ...
 
 
 @overload
-def emission_sound_pressure_level[S1: RealScalar, V: RealValues, A3: ArrayLike](
+def emission_sound_pressure_level[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
     measured_level: S1, *, background_correction: V, local_correction: A3 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -571,16 +578,20 @@ def emission_sound_pressure_level[S1: RealScalar, S2: RealScalar, V: RealValues]
 
 
 @overload
-def emission_sound_pressure_level[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+def emission_sound_pressure_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
     measured_level: A1, *, background_correction: A2 = ..., local_correction: A3 = ...
 ) -> float | NDArray[np.float64]: ...
 
 
 def emission_sound_pressure_level(
-    measured_level: ArrayLike,
+    measured_level: NumericArrayLike,
     *,
-    background_correction: ArrayLike = 0.0,
-    local_correction: ArrayLike = 0.0,
+    background_correction: NumericArrayLike = 0.0,
+    local_correction: NumericArrayLike = 0.0,
 ) -> float | NDArray[np.float64]:
     r"""The emission sound pressure level, reading less both corrections.
 
@@ -617,7 +628,7 @@ def emission_sound_pressure_level(
     )
 
 
-def operating_standard_deviation(levels: ArrayLike) -> float:
+def operating_standard_deviation(levels: NumericArrayLike) -> float:
     r"""Standard deviation of the operating and mounting conditions.
 
     .. math::
@@ -706,7 +717,7 @@ def emission_expanded_uncertainty(
     return sigma * k
 
 
-def subinterval_level(levels: ArrayLike, durations_s: ArrayLike) -> float:
+def subinterval_level(levels: NumericArrayLike, durations_s: NumericArrayLike) -> float:
     r"""One level for a cycle made of operating periods of different lengths.
 
     .. math::
@@ -743,7 +754,7 @@ def subinterval_level(levels: ArrayLike, durations_s: ArrayLike) -> float:
     )
 
 
-def grade_from_local_correction(local_correction: ArrayLike) -> Grade:
+def grade_from_local_correction(local_correction: NumericArrayLike) -> Grade:
     r"""The accuracy grade a local environmental correction earns.
 
     ISO 11202:2010 A.1.3 puts the boundary at

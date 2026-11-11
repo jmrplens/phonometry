@@ -81,7 +81,9 @@ from ..metrology import REFERENCE_VALUES
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping, Sequence
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from .._internal.types import NumericArrayLike
 
 Coefficient = Literal["Cv", "Kv"]
 
@@ -624,7 +626,7 @@ def _peak_frequency(
 
 
 def internal_spectrum(
-    internal_level: float, peak_frequency: float, frequencies: ArrayLike
+    internal_level: float, peak_frequency: float, frequencies: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""Equation (19): the internal level spread over the third-octave bands.
 
@@ -773,7 +775,7 @@ def _damping_factor(valve_outlet_diameter_m: float) -> float:
 
 
 def pipe_transmission_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     internal_diameter_m: float,
     wall_thickness_m: float,
@@ -1165,7 +1167,7 @@ class ExpanderNoise(OwnsArrays):
 
 
 def expander_noise(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     mass_flow: float,
     downstream_density: float,
@@ -1276,7 +1278,7 @@ def expander_noise(
 
 
 def combined_internal_levels(
-    levels: Sequence[ArrayLike],
+    levels: Sequence[NumericArrayLike],
 ) -> NDArray[np.float64]:
     r"""Equation (43): two internal spectra at the same pipe wall, added.
 

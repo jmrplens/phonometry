@@ -56,10 +56,9 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 #: The RC Mark II classifications this library rates: neutral ``N``, rumble
@@ -592,7 +591,7 @@ def rc_curve(index: float) -> np.ndarray:
 
 
 def _align_levels(
-    levels: ArrayLike, frequencies: ArrayLike | None, owner: str
+    levels: NumericArrayLike, frequencies: NumericArrayLike | None, owner: str
 ) -> np.ndarray:
     """Validate levels and align them to :data:`NC_OCTAVE_BANDS_HZ`.
 
@@ -630,7 +629,7 @@ def _align_levels(
 
 
 def noise_criterion(
-    levels: ArrayLike, *, frequencies: ArrayLike | None = None
+    levels: NumericArrayLike, *, frequencies: NumericArrayLike | None = None
 ) -> NCResult:
     """Noise Criteria (NC) rating of a spectrum (ANSI/ASA S12.2-2019, 5.2.2).
 
@@ -730,7 +729,7 @@ def noise_criterion(
 
 
 def room_criterion(
-    levels: ArrayLike, *, frequencies: ArrayLike | None = None
+    levels: NumericArrayLike, *, frequencies: NumericArrayLike | None = None
 ) -> RCResult:
     """Room Criteria Mark II rating (ANSI/ASA S12.2-2019, Annex D).
 

@@ -161,7 +161,7 @@ turbine_background_correction(
 ) -> NDArray[np.float64]
 
 turbine_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -406,7 +406,7 @@ $K$ above 7 dB) cannot carry the statement, and is refused.
 
 ```python
 turbine_reference_source_correction(
-    sound_power_levels: ArrayLike,
+    sound_power_levels: NumericArrayLike,
     *,
     calibrated_level: float,
     machine_length_m: float,
@@ -447,12 +447,12 @@ of the determinations.
 
 ```python
 turbine_sound_power(
-    pressure_levels: ArrayLike,
+    pressure_levels: NumericArrayLike,
     *,
     surface_area: float,
-    background_levels: ArrayLike | None,
+    background_levels: NumericArrayLike | None,
     environmental_correction: float,
-    overhead_mask: ArrayLike | None = None,
+    overhead_mask: NumericArrayLike | None = None,
 ) -> TurbineSoundPowerResult
 ```
 

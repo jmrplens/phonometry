@@ -112,9 +112,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "LOW_FREQUENCY_PROCEDURE_BANDS_HZ",
@@ -248,7 +249,7 @@ def _require_volume_triggers(volume: float, name: str) -> None:
         raise ValueError(msg)
 
 
-def _named_low_frequency_bands(frequencies: ArrayLike) -> list[float]:
+def _named_low_frequency_bands(frequencies: NumericArrayLike) -> list[float]:
     """The low-frequency bands a band-centre vector names, in 50/63/80 order.
 
     The non-raising half of :func:`_low_frequency_indices`, and the question
@@ -290,7 +291,7 @@ def _named_low_frequency_bands(frequencies: ArrayLike) -> list[float]:
 
 def _warn_when_the_procedure_is_required(
     volume: float | None,
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     supplied: LowFrequencyProcedure | None,
     *,
     owner: str,
@@ -368,7 +369,7 @@ def _warn_when_the_procedure_is_required(
     )
 
 
-def corner_level(corner_levels: ArrayLike) -> np.ndarray:
+def corner_level(corner_levels: NumericArrayLike) -> np.ndarray:
     r"""Corner sound pressure level :math:`L_\mathrm{Corner}` per band.
 
     Two shapes are accepted, and they are the two the standards describe.
@@ -430,7 +431,9 @@ def corner_level(corner_levels: ArrayLike) -> np.ndarray:
     return np.asarray(energy_mean(highest, axis=_POSITION_AXIS), dtype=np.float64)
 
 
-def low_frequency_level(level: ArrayLike, corner: ArrayLike) -> np.ndarray:
+def low_frequency_level(
+    level: NumericArrayLike, corner: NumericArrayLike
+) -> np.ndarray:
     r"""Combine the default and corner levels into :math:`L_\mathrm{LF}`.
 
     Part 1 Formula (13), Part 2 Formula (16) and Part 3 Formula (5), which are
@@ -510,7 +513,7 @@ class LowFrequencyProcedure(OwnsArrays):
             self,
             *,
             volume: float,
-            corner_levels: ArrayLike,
+            corner_levels: NumericArrayLike,
             reverberation_63_octave: float | None = None,
         ) -> None: ...
 
@@ -668,7 +671,7 @@ def _low_frequency_indices(frequencies: np.ndarray) -> np.ndarray:
 def _substituted_reverberation(
     room: str,
     procedure: LowFrequencyProcedure,
-    reverberation_time: ArrayLike | None,
+    reverberation_time: NumericArrayLike | None,
     levels: np.ndarray,
     indices: np.ndarray,
 ) -> np.ndarray | None:
@@ -733,11 +736,11 @@ def _substituted_reverberation(
 
 
 def apply_low_frequency_procedure(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     procedure: LowFrequencyProcedure,
     *,
-    frequencies: ArrayLike,
-    reverberation_time: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    reverberation_time: NumericArrayLike | None = None,
     room: Literal["receiving", "source"] = "receiving",
 ) -> LowFrequencyResult:
     r"""Run the low-frequency procedure over one room's band values.

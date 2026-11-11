@@ -169,7 +169,7 @@ import math
 import re
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -193,10 +193,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "ACOUSTIC_COUPLINGS",
@@ -533,7 +534,7 @@ _FREQUENCY_MATCH_RTOL = 1e-6
 
 
 def _frequencies(
-    frequencies: ArrayLike, name: str = "frequencies"
+    frequencies: NumericArrayLike, name: str = "frequencies"
 ) -> NDArray[np.float64]:
     """Positive, finite, strictly ascending frequencies, 1-D."""
     f = np.atleast_1d(real_array(frequencies, name))
@@ -549,7 +550,7 @@ def _frequencies(
     return f
 
 
-def _levels(values: ArrayLike, name: str) -> NDArray[np.float64]:
+def _levels(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A finite float array of levels."""
     levels = real_array(values, name)
     if not np.all(np.isfinite(levels)):
@@ -569,7 +570,7 @@ def _band_index(frequencies: NDArray[np.float64], target_hz: float) -> int:
     return int(matches[0])
 
 
-def _db20(ratio: ArrayLike) -> NDArray[np.float64]:
+def _db20(ratio: NumericArrayLike) -> NDArray[np.float64]:
     """Twenty times the decimal logarithm."""
     return np.asarray(20.0 * np.log10(ratio), dtype=np.float64)
 
@@ -678,9 +679,9 @@ class RatedImpedanceVerification(OwnsArrays):
 
 
 def verify_rated_impedance(
-    impedance_ohm: ArrayLike,
+    impedance_ohm: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     rated_impedance_ohm: float,
     rated_frequency_range_hz: tuple[float, float],
 ) -> RatedImpedanceVerification:
@@ -911,7 +912,7 @@ def _band_corrections(
     frequencies: NDArray[np.float64],
     *,
     weighting: str,
-    free_field_response_db: ArrayLike | None,
+    free_field_response_db: NumericArrayLike | None,
 ) -> NDArray[np.float64]:
     """The per-band A-weighting minus the free-field response, in dB."""
     from .._internal.weighting_tables import _analytic_weighting_db, exact_base10
@@ -929,11 +930,11 @@ def _band_corrections(
 
 
 def program_signal_level(
-    band_levels: ArrayLike,
+    band_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     weighting: AOrZWeighting = "Z",
-    free_field_response_db: ArrayLike | None = None,
+    free_field_response_db: NumericArrayLike | None = None,
 ) -> float:
     r"""The level of the simulated programme signal from its one-third-octave bands.
 
@@ -1077,12 +1078,12 @@ class ProgramCharacteristicVoltage(OwnsArrays):
 
 
 def program_characteristic_voltage(
-    source_emf_v: ArrayLike,
-    band_levels: ArrayLike,
+    source_emf_v: NumericArrayLike,
+    band_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     weighting: AOrZWeighting = "Z",
-    free_field_response_db: ArrayLike | None = None,
+    free_field_response_db: NumericArrayLike | None = None,
 ) -> ProgramCharacteristicVoltage:
     """The simulated programme signal characteristic voltage of IEC 60268-7.
 
@@ -1197,7 +1198,7 @@ class LimitingTestSignalCheck(RichDisplay):
 
 
 def check_limiting_test_signal(
-    x: Signal | ArrayLike, fs: float | None = None
+    x: Signal | NumericArrayLike, fs: float | None = None
 ) -> LimitingTestSignalCheck:
     """Is this the clipped programme signal IEC 60268-7 8.3.2.2 b) asks for?
 
@@ -1249,9 +1250,9 @@ def check_limiting_test_signal(
     if analysis.levels is None:  # pragma: no cover - the bank always returns levels
         msg = "The one-third-octave analysis returned no band levels."
         raise RuntimeError(msg)
-    spectrum = check_program_signal(
-        frequencies=analysis.frequencies, band_levels=analysis.levels
-    )
+    # A bank asked for no nominal labels hands back the exact centres.
+    centres = cast("tuple[float, ...]", analysis.frequencies)
+    spectrum = check_program_signal(frequencies=centres, band_levels=analysis.levels)
     return LimitingTestSignalCheck(peak_to_rms=peak_to_rms, spectrum=spectrum)
 
 
@@ -1315,7 +1316,7 @@ class ProtectionVoltage(OwnsArrays):
 
 
 def protection_voltage(
-    source_emf_v: ArrayLike, sound_pressure_level: ArrayLike
+    source_emf_v: NumericArrayLike, sound_pressure_level: NumericArrayLike
 ) -> ProtectionVoltage:
     r"""The protection voltage of a headphone's protective device (IEC 60268-7 8.3.6).
 
@@ -1445,9 +1446,9 @@ class CouplerFrequencyResponse(OwnsArrays):
 
 
 def coupler_frequency_response(
-    sound_pressure_level: ArrayLike,
+    sound_pressure_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     rated_frequency_range_hz: tuple[float, float] | None = None,
 ) -> CouplerFrequencyResponse:
     """The coupler or ear simulator frequency response of IEC 60268-7 8.6.2.
@@ -1533,7 +1534,10 @@ class CrosstalkAttenuation(OwnsArrays):
 
 
 def crosstalk_attenuation(
-    driven_level: ArrayLike, other_level: ArrayLike, *, frequencies: ArrayLike
+    driven_level: NumericArrayLike,
+    other_level: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
 ) -> CrosstalkAttenuation:
     """The crosstalk attenuation of IEC 60268-7 8.12.
 
@@ -1654,10 +1658,10 @@ class FieldComparisonResponse(OwnsArrays):
 
 
 def field_comparison_response(
-    field_level: ArrayLike,
-    source_emf_v: ArrayLike,
+    field_level: NumericArrayLike,
+    source_emf_v: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     field: Literal["free", "diffuse"],
     reference_frequency_hz: float = _STANDARD_REFERENCE_FREQUENCY_HZ,
 ) -> FieldComparisonResponse:
@@ -1866,10 +1870,10 @@ class EarCanalFrequencyResponse(OwnsArrays):
 
 
 def ear_canal_frequency_response(
-    earphone_levels: ArrayLike,
-    sound_field_levels: ArrayLike,
+    earphone_levels: NumericArrayLike,
+    sound_field_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     reference_frequency_hz: float = _MEASURING_FREQUENCY_HZ,
 ) -> EarCanalFrequencyResponse:
     r"""The ear canal sound pressure level frequency response of IEC 60268-7 8.6.5.
@@ -2021,9 +2025,9 @@ def verify_ear_canal_microphone(
     entrance_area_mm2: float,
     canal_section_area_mm2: float,
     volume_mm3: float,
-    pink_noise_band_levels: ArrayLike,
-    open_levels: ArrayLike,
-    sealed_levels: ArrayLike,
+    pink_noise_band_levels: NumericArrayLike,
+    open_levels: NumericArrayLike,
+    sealed_levels: NumericArrayLike,
     ear_canal_area_mm2: float = _ADULT_EAR_CANAL_AREA_MM2,
 ) -> EarCanalMicrophoneVerification:
     """May this microphone measure inside the ear canal by IEC 60268-7 Annex B?

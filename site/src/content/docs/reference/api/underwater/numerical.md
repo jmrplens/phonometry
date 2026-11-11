@@ -308,19 +308,19 @@ sound-speed profile, so it is not repeated here.
 ```python
 gaussian_beams(
     frequency_hz: float,
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
     max_range: float = 10000.0,
-    ranges_m: ArrayLike | None = None,
-    receiver_depths_m: ArrayLike | None = None,
+    ranges_m: NumericArrayLike | None = None,
+    receiver_depths_m: NumericArrayLike | None = None,
     n_depth_points: int | np.integer[Any] = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
     bottom: Literal['pressure-release', 'rigid'] | FluidSeabed = 'pressure-release',
     absorption: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] | VolumeAbsorption | None = None,
-    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
+    bathymetry: tuple[NumericArrayLike, NumericArrayLike] | None = None,
 ) -> GaussianBeamResult
 ```
 
@@ -645,12 +645,12 @@ Plot the propagation-loss field (depth increasing downward).
 ```python
 normal_modes(
     frequency_hz: float,
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
     receiver_depth: float,
-    ranges_m: ArrayLike | None = None,
+    ranges_m: NumericArrayLike | None = None,
     density: float = 1000.0,
     bottom: Literal['pressure-release', 'rigid'] = 'pressure-release',
     n_depth_points: int | np.integer[Any] | None = None,
@@ -760,8 +760,8 @@ water column.
 ```python
 parabolic_equation(
     frequency_hz: float,
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
     max_range: float = 10000.0,
@@ -855,14 +855,14 @@ Plot the propagation-loss field (depth increasing downward).
 
 ```python
 ray_trace(
-    depths: ArrayLike,
-    speeds_of_sound: ArrayLike,
+    depths: NumericArrayLike,
+    speeds_of_sound: NumericArrayLike,
     *,
     source_depth: float,
-    launch_angles_deg: ArrayLike,
+    launch_angles_deg: NumericArrayLike,
     max_range: float = 10000.0,
     n_steps: int | np.integer[Any] = 2000,
-    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
+    bathymetry: tuple[NumericArrayLike, NumericArrayLike] | None = None,
 ) -> RayTraceResult
 ```
 

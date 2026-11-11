@@ -100,11 +100,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import TwoPanels
+    from .._internal.types import NumericArrayLike, TwoPanels
 
 __all__ = [
     "SynchronousAverageResult",
@@ -122,7 +122,7 @@ _MIN_SAMPLES_PER_PERIOD = 2
 
 
 def comb_filter_response(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     period_s: float,
     n_averages: int | np.integer[Any],
 ) -> NDArray[np.float64]:
@@ -420,7 +420,7 @@ def _comb_grid(
 
 
 def time_synchronous_average(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     period_s: float,

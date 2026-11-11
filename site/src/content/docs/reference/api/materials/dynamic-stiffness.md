@@ -84,7 +84,7 @@ apparent_dynamic_stiffness(
 ) -> NDArray[np.float64]
 
 apparent_dynamic_stiffness(
-    resonant_frequency_hz: ArrayLike,
+    resonant_frequency_hz: NumericArrayLike,
     total_mass_per_area_kg_m2: float,
 ) -> float | NDArray[np.float64]
 ```
@@ -232,7 +232,7 @@ enclosed_gas_stiffness(
 ) -> NDArray[np.float64]
 
 enclosed_gas_stiffness(
-    thickness_m: ArrayLike,
+    thickness_m: NumericArrayLike,
     porosity: float,
     *,
     static_pressure_pa: float = 100000.0,
@@ -372,7 +372,7 @@ natural_frequency(
 ) -> NDArray[np.float64]
 
 natural_frequency(
-    dynamic_stiffness_n_m3: ArrayLike,
+    dynamic_stiffness_n_m3: NumericArrayLike,
     mass_per_area_kg_m2: float,
 ) -> float | NDArray[np.float64]
 ```

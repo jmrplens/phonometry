@@ -39,14 +39,14 @@ are built on the spectrum, notch and weighting helpers of this module.
 
 ```python
 harmonic_analysis(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
     n_harmonics: int = 10,
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> HarmonicDistortionResult
 ```
 
@@ -80,13 +80,13 @@ conventions), THD+N and SINAD into a plottable result.
 
 ```python
 harmonic_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     fundamental: float,
     order: int | np.integer[Any],
     n_harmonics: int = 10,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -166,13 +166,13 @@ Plot the magnitude spectrum with the harmonics marked.
 
 ```python
 sinad(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -209,13 +209,13 @@ measurement (same notch, same measurement bandwidth).
 
 ```python
 thd(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
     kind: Literal['F', 'R'] = 'F',
     n_harmonics: int = 10,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -263,13 +263,13 @@ datasheets; the two agree to first order for small distortion.
 
 ```python
 thd_plus_noise(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
     as_db: bool = False,
 ) -> float
 ```
@@ -310,13 +310,13 @@ and out-of-band noise do not inflate the result.
 
 ```python
 weighted_thd(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
     notch_q: float = 2.0,
     weighting: Literal['468', 'A', 'C'] = '468',
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -358,7 +358,7 @@ between 31,5 Hz and 400 Hz.
 ## weighting_bs468
 
 ```python
-weighting_bs468(frequencies: ArrayLike) -> NDArray[np.float64]
+weighting_bs468(frequencies: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 ITU-R BS.468-4 weighting response, in dB re 1 kHz.

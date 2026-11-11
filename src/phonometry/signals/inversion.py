@@ -61,9 +61,10 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, DTypeLike
+    from numpy.typing import DTypeLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 
 __all__ = [
@@ -283,7 +284,7 @@ class InverseFilterResult(OwnsArrays):
         """Number of samples in the inverse filter."""
         return int(self.inverse.size)
 
-    def apply(self, x: ArrayLike) -> np.ndarray:
+    def apply(self, x: NumericArrayLike) -> np.ndarray:
         """Equalize a signal with the inverse filter.
 
         Convolves ``x`` with the filter and removes the modeling delay, so

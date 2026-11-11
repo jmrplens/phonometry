@@ -278,6 +278,33 @@ EXEMPT: dict[tuple[str, str, str], str] = {
 #: its constructor (a ``TYPE_CHECKING`` ``__init__``), so none is listed.
 CONSTRUCTOR_EXEMPT: dict[tuple[str, str, str], str] = {}
 
+#: Public parameters that take an array of labels on purpose, which only
+#: numpy's ``ArrayLike`` (or anything) says, keyed by file, qualified function
+#: and parameter, each with the reason. Every other parameter that holds
+#: ``ArrayLike`` takes numbers, and takes :data:`NUMERIC_ARRAY_LIKE` instead.
+TEXT_ARRAYS: dict[tuple[str, str, str], str] = {
+    (
+        "src/phonometry/environment/sources/_statistical_pass_by.py",
+        "statistical_pass_by",
+        "vehicle_categories",
+    ): (
+        "the ISO 11819-1 category of each pass-by, the labels '1', '2a' and "
+        "'2b', each read against VehicleCategory by the run"
+    ),
+    **{
+        ("src/phonometry/environment/assessment/soundscape.py", name, "sites"): (
+            "the site of each response, labels of any kind (ISO/TS 12913-3), "
+            "read one by one with str() by the run"
+        )
+        for name in (
+            "method_a_summary",
+            "pleasantness_eventfulness",
+            "method_b_summary",
+            "method_b_source_ranking",
+        )
+    },
+}
+
 #: Mapping parameters whose overload heads pair each mapping of a union with
 #: a value of another parameter on purpose, keyed by file, qualified function
 #: and parameter, each with the reason. The pairing part asks the heads that
@@ -332,6 +359,9 @@ _ARRAY_LIKE = frozenset(
         "numpy._typing._array_like.ArrayLike",
     }
 )
+
+#: What a callable a caller hands over is spelt with.
+_CALLABLES = frozenset({"typing.Callable", "collections.abc.Callable"})
 
 #: Annotations that admit anything, an array-like among it.
 _ANYTHING = frozenset({"typing.Any", "typing_extensions.Any", "builtins.object"})
@@ -725,7 +755,8 @@ class Finding:
     #: written ``dict`` is not read against), ``"pairing"`` (the heads that
     #: offer each of them take different calls), ``"window"`` (a window SciPy
     #: reads), ``"choice"`` (a ``Literal`` beside an alternative that takes
-    #: any text) or ``"name"`` (a quantity's family).
+    #: any text), ``"text"`` (numpy's ``ArrayLike``, which admits any text,
+    #: where numbers go) or ``"name"`` (a quantity's family).
     part: str = "array"
     #: Whether it is a field a caller-built record stores the validated value
     #: in, which its constructor, not its field, is to admit.
@@ -1345,6 +1376,45 @@ class Annotations:
             for inner, member in members:
                 dotted = self.resolve(inner, member)
                 if dotted in _LITERALS or (
+                    dotted is not None and dotted.partition(".")[0] == "numpy"
+                ):
+                    continue
+                for item in _items(member):
+                    stack.extend(
+                        (inner, each, own if inner == where else {})
+                        for each in (
+                            item.elts if isinstance(item, ast.List) else [item]
+                        )
+                    )
+        return found
+
+    def text_array_likes(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> list[str]:
+        """Each numpy ``ArrayLike`` an annotation holds, at the top or inside.
+
+        Every union is read, at the top and inside a container, a mapping or
+        a tuple (``Sequence[ArrayLike]``, ``tuple[str | ArrayLike, ...]``),
+        its aliases spelt out and each type parameter of *bounds* read as
+        what it stands for, as :meth:`swallowed_choices` reads them. numpy's
+        own types (an ``NDArray`` of a dtype) say nothing of a text and are
+        not read inside, nor are the arguments a ``Callable`` hands to the
+        function a caller gives, which take what the package hands them.
+        """
+        found: list[str] = []
+        stack: list[tuple[str, ast.expr, dict[str, ast.expr]]] = (
+            [] if node is None else [(module, node, bounds)]
+        )
+        seen = 0
+        while stack and seen < _MEMBERS_READ:
+            seen += 1
+            where, union, own = stack.pop()
+            for inner, member in self.members(where, union, own):
+                dotted = self.resolve(inner, member)
+                if dotted in _ARRAY_LIKE:
+                    found.append(ast.unparse(member))
+                    continue
+                if dotted in _CALLABLES or (
                     dotted is not None and dotted.partition(".")[0] == "numpy"
                 ):
                     continue
@@ -3597,6 +3667,7 @@ def findings_in(
     found.extend(_field_findings(reader, root))
     found.extend(_field_context_findings(reader, root))
     found.extend(_record_choice_findings(reader, root))
+    found.extend(_record_text_findings(reader, root))
     found.extend(_name_findings(reader, root))
     return sorted(set(found), key=lambda item: (item.path, item.line, item.parameter))
 
@@ -3629,6 +3700,7 @@ def _function_findings(
         )
     found.extend(_context_findings(reader, function, path, bounds, method=method))
     found.extend(_choice_findings(reader, function, path, bounds, method=method))
+    found.extend(_text_findings(reader, function, path, bounds, method=method))
     return found
 
 
@@ -3835,6 +3907,102 @@ def _record_choice_findings(reader: Reader, root: pathlib.Path) -> list[Finding]
                         part="choice",
                     )
                 )
+    return found
+
+
+#: What a finding of the text part says, after the annotation that holds
+#: numpy's array-like.
+_TEXT_ARRAY = (
+    "which admits any str and any bytes, so a text type-checks where the "
+    "numbers go and only the call refuses it; take NumericArrayLike"
+)
+
+
+def _text_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters that take numpy's ``ArrayLike``, which admits any text.
+
+    Each definition a caller can reach is read, the implementation and every
+    overload head, a type parameter of the definition or of its class read
+    as its bound: the last head of a function overloaded on the shape of its
+    input takes its argument as one (``[A: NumericArrayLike]``).
+    """
+    found: list[Finding] = []
+    owner = reader.owner(function)
+    for node in function.definitions:
+        own = {**bounds, **_type_bounds(owner), **_type_bounds(node)}
+        for parameter in _arguments(node, method=method):
+            found.extend(
+                Finding(
+                    path,
+                    node.lineno,
+                    function.qualname,
+                    parameter.arg,
+                    f"holds {taker}, {_TEXT_ARRAY}",
+                    part="text",
+                )
+                for taker in reader.annotations.text_array_likes(
+                    function.module, parameter.annotation, own
+                )
+            )
+    return found
+
+
+def _record_text_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
+    """The fields of public records, and their declared constructors, that take ``ArrayLike``.
+
+    A record's generated ``__init__`` takes each field as annotated, and a
+    ``TYPE_CHECKING`` ``__init__`` is what a type checker reads instead: a
+    field of numbers a caller builds the record with is held to
+    :data:`NUMERIC_ARRAY_LIKE` in both.
+    """
+    package = reader.package
+    annotations = reader.annotations
+    found: list[Finding] = []
+    for record in public_records(package, annotations):
+        module, node = annotations.classes[record]
+        path = repository_path(package.paths[module], root)
+        shown = record.removeprefix(f"{module}.")
+        for field in record_fields(package, annotations, record).values():
+            written_in = annotations.classes.get(field.record)
+            found.extend(
+                Finding(
+                    repository_path(package.paths[field.module], root),
+                    field.line,
+                    record.removeprefix(f"{field.module}."),
+                    field.name,
+                    f"holds {taker}, {_TEXT_ARRAY}",
+                    part="text",
+                )
+                for taker in annotations.text_array_likes(
+                    field.module,
+                    field.annotation,
+                    _type_bounds(written_in[1] if written_in else None),
+                )
+            )
+        stub = _constructor_stub(annotations, record)
+        if stub is None:
+            continue
+        for parameter in _arguments(stub, method=True):
+            found.extend(
+                Finding(
+                    path,
+                    stub.lineno,
+                    f"{shown}.__init__",
+                    parameter.arg,
+                    f"holds {taker}, {_TEXT_ARRAY}",
+                    part="text",
+                )
+                for taker in annotations.text_array_likes(
+                    module, parameter.annotation, _type_bounds(node, stub)
+                )
+            )
     return found
 
 
@@ -7219,8 +7387,9 @@ def judged(
     :data:`EXEMPT` covers the array part, :data:`FAMILY_EXEMPT` the
     quantities kept in another family, :data:`PAIRED_MAPPINGS` the heads
     that pair each mapping with a value of another parameter; the
-    numpy-scalar, mapping-key and context parts have no exemption. A stale
-    exemption comes with the table that lists it.
+    numpy-scalar, mapping-key and context parts have no exemption, and
+    :data:`TEXT_ARRAYS` covers the parameters that take an array of labels.
+    A stale exemption comes with the table that lists it.
     """
     found, stale = checked([f for f in findings if f.part == "array"], EXEMPT)
     named, stale_named = checked(
@@ -7232,13 +7401,16 @@ def judged(
     paired, stale_paired = checked(
         [f for f in findings if f.part == "pairing"], PAIRED_MAPPINGS
     )
+    labels, stale_labels = checked(
+        [f for f in findings if f.part == "text"], TEXT_ARRAYS
+    )
     rest = [
         f
         for f in findings
-        if f.part not in {"array", "name", "pairing"} and not f.constructor
+        if f.part not in {"array", "name", "pairing", "text"} and not f.constructor
     ]
     every = sorted(
-        [*found, *named, *built, *paired, *rest],
+        [*found, *named, *built, *paired, *labels, *rest],
         key=lambda item: (item.path, item.line, item.parameter),
     )
     return every, [
@@ -7246,6 +7418,7 @@ def judged(
         *(("FAMILY_EXEMPT", key) for key in stale_named),
         *(("CONSTRUCTOR_EXEMPT", key) for key in stale_built),
         *(("PAIRED_MAPPINGS", key) for key in stale_paired),
+        *(("TEXT_ARRAYS", key) for key in stale_labels),
     ]
 
 
@@ -7271,8 +7444,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "dict or set or a mapping a narrower key cannot match, each "
             "mapping a written dict is read against is offered alone, every "
             "window takes its parameters, no choice stands beside a type that "
-            "takes any text, and every quantity of the vocabulary keeps its "
-            "family of numbers."
+            "takes any text, every array of numbers refuses a text, and every "
+            "quantity of the vocabulary keeps its family of numbers."
         )
         return 0
     if found:
@@ -7283,8 +7456,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 f"({finding.parameter}): {finding.problem}"
             )
         print(
-            "  -> annotate a parameter the body converts with ArrayLike "
-            "(Signal | ArrayLike where a Signal is taken too), a list of "
+            "  -> annotate a parameter the body converts with NumericArrayLike "
+            "(Signal | NumericArrayLike where a Signal is taken too), never "
+            "numpy's ArrayLike, which takes any text, a list of "
             "records or texts with Sequence[...], and a mapping with "
             "Mapping[...]; a count a validator takes a numpy integer for with "
             "int | np.integer[Any], a band fraction with BandFraction | "
@@ -7297,7 +7471,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "with NumericArrayLike (src/phonometry/_internal/types.py), never "
             "ArrayLike, str, DTypeLike or a sequence of texts, which take any "
             "text; a sample rate as the float every 'fs' of the API is. A "
-            "parameter narrower on purpose goes in EXEMPT, a quantity of "
+            "parameter narrower on purpose goes in EXEMPT, one that takes an "
+            "array of labels in TEXT_ARRAYS, a quantity of "
             "another family in FAMILY_EXEMPT, a field a caller-built record "
             "stores is admitted by its constructor (a TYPE_CHECKING __init__) "
             "or goes in CONSTRUCTOR_EXEMPT, and a mapping whose heads pair it "

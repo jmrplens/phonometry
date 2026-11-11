@@ -96,14 +96,14 @@ is in `docs/ERRATA.md`.
 
 ```python
 adjustment_value(
-    free_field_indicated_level: ArrayLike,
+    free_field_indicated_level: NumericArrayLike,
     calibrator_indicated_level_before: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     calibrator_level: float,
-    incident_level: ArrayLike | None = None,
-    tolerance_db: ArrayLike | None = None,
-    pressure_indicated_level: ArrayLike | None = None,
+    incident_level: NumericArrayLike | None = None,
+    tolerance_db: NumericArrayLike | None = None,
+    pressure_indicated_level: NumericArrayLike | None = None,
     check_frequency_hz: float = 1000.0,
 ) -> AdjustmentValue
 ```
@@ -290,15 +290,15 @@ normalised to sum to one; equal without tolerances.
 
 ```python
 comparison_coupler_correction(
-    slm_free_field_level: ArrayLike,
-    reference_free_field_level: ArrayLike,
-    slm_coupler_level: ArrayLike,
-    reference_coupler_level: ArrayLike,
+    slm_free_field_level: NumericArrayLike,
+    reference_free_field_level: NumericArrayLike,
+    slm_coupler_level: NumericArrayLike,
+    reference_coupler_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_free_field_correction: ArrayLike,
-    free_field_level_difference: ArrayLike = 0.0,
-    coupler_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike,
+    reference_free_field_correction: NumericArrayLike,
+    free_field_level_difference: NumericArrayLike = 0.0,
+    coupler_level_difference: NumericArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection
 ```
@@ -673,15 +673,15 @@ by frequency.
 
 ```python
 electrostatic_actuator_correction(
-    slm_free_field_level: ArrayLike,
-    reference_free_field_level: ArrayLike,
-    slm_actuator_level: ArrayLike,
+    slm_free_field_level: NumericArrayLike,
+    reference_free_field_level: NumericArrayLike,
+    slm_actuator_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_sensitivity_level: ArrayLike,
-    reference_channel_gain_db: ArrayLike = 0.0,
-    actuator_level: ArrayLike = 0.0,
-    free_field_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike,
+    reference_sensitivity_level: NumericArrayLike,
+    reference_channel_gain_db: NumericArrayLike = 0.0,
+    actuator_level: NumericArrayLike = 0.0,
+    free_field_level_difference: NumericArrayLike = 0.0,
     check_frequency_hz: float = 1000.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection
@@ -897,7 +897,7 @@ judge. Zero for a single microphone.
 
 ```python
 max_expanded_uncertainty(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     clause: int | np.integer[Any],
 ) -> NDArray[np.float64]
@@ -939,15 +939,15 @@ ones do.
 
 ```python
 sound_calibrator_correction(
-    slm_free_field_level: ArrayLike,
-    reference_free_field_level: ArrayLike,
-    slm_calibrator_level: ArrayLike,
-    reference_calibrator_level: ArrayLike,
+    slm_free_field_level: NumericArrayLike,
+    reference_free_field_level: NumericArrayLike,
+    slm_calibrator_level: NumericArrayLike,
+    reference_calibrator_level: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    reference_free_field_correction: ArrayLike,
-    free_field_level_difference: ArrayLike = 0.0,
-    calibrator_level_difference: ArrayLike = 0.0,
+    frequencies: NumericArrayLike,
+    reference_free_field_correction: NumericArrayLike,
+    free_field_level_difference: NumericArrayLike = 0.0,
+    calibrator_level_difference: NumericArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection
 ```
@@ -1023,13 +1023,13 @@ uncertainty of a correction measured with a comparison coupler (Annex E).
 
 ```python
 verify_correction_uncertainty(
-    expanded_uncertainty_db: ArrayLike,
+    expanded_uncertainty_db: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     clause: int | np.integer[Any],
-    correction: ArrayLike | None = None,
-    coverage_factor: ArrayLike | None = None,
-    correction_range_db: ArrayLike | None = None,
+    correction: NumericArrayLike | None = None,
+    coverage_factor: NumericArrayLike | None = None,
+    correction_range_db: NumericArrayLike | None = None,
 ) -> CorrectionUncertaintyVerification
 ```
 

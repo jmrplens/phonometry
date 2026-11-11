@@ -119,9 +119,9 @@ if TYPE_CHECKING:
     from typing import TypedDict, Unpack
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 Clause = Literal["10.2", "10.3", "11.7", "11.9", "13"]
 
@@ -342,20 +342,20 @@ if TYPE_CHECKING:
         leaves out any of them, as every field defaults to ``None``.
         """
 
-        midband_attenuations: ArrayLike | None
-        midband_uncertainties_db: ArrayLike | None
-        bandwidth_deviations_db: ArrayLike | None
-        bandwidth_uncertainties_db: ArrayLike | None
-        set_midband_frequencies_hz: ArrayLike | None
-        linearity_deviations_db: ArrayLike | None
-        linearity_levels_below_upper: ArrayLike | None
-        linearity_uncertainties_db: ArrayLike | None
-        linearity_midband_frequencies_hz: ArrayLike | None
-        range_linearity_deviations_db: ArrayLike | None
-        range_linearity_uncertainties_db: ArrayLike | None
-        relative_attenuations: ArrayLike | None
-        relative_attenuation_uncertainties_db: ArrayLike | None
-        tested_midband_frequencies_hz: ArrayLike | None
+        midband_attenuations: NumericArrayLike | None
+        midband_uncertainties_db: NumericArrayLike | None
+        bandwidth_deviations_db: NumericArrayLike | None
+        bandwidth_uncertainties_db: NumericArrayLike | None
+        set_midband_frequencies_hz: NumericArrayLike | None
+        linearity_deviations_db: NumericArrayLike | None
+        linearity_levels_below_upper: NumericArrayLike | None
+        linearity_uncertainties_db: NumericArrayLike | None
+        linearity_midband_frequencies_hz: NumericArrayLike | None
+        range_linearity_deviations_db: NumericArrayLike | None
+        range_linearity_uncertainties_db: NumericArrayLike | None
+        relative_attenuations: NumericArrayLike | None
+        relative_attenuation_uncertainties_db: NumericArrayLike | None
+        tested_midband_frequencies_hz: NumericArrayLike | None
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -147,8 +147,8 @@ averages.
 
 ```python
 pass_by_regression(
-    speeds_kmh: ArrayLike,
-    max_levels: ArrayLike,
+    speeds_kmh: NumericArrayLike,
+    max_levels: NumericArrayLike,
     *,
     vehicle_category: Literal['1', '2a', '2b'],
     road_speed_category: Literal['low', 'medium', 'high'],
@@ -420,8 +420,8 @@ SPB_WEIGHTING_FACTORS = {'low': {'1': 0.9, '2a': 0.075, '2b': 0.025}, 'medium': 
 ```python
 statistical_pass_by(
     vehicle_categories: ArrayLike,
-    speeds_kmh: ArrayLike,
-    max_levels: ArrayLike,
+    speeds_kmh: NumericArrayLike,
+    max_levels: NumericArrayLike,
     *,
     road_speed_category: Literal['low', 'medium', 'high'],
     corrected_vehicle_sound_levels: Mapping[Literal['1', '2a', '2b'], float] | None = None,

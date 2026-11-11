@@ -108,9 +108,9 @@ The measurement chain
 
 ```python
 ceiling_attenuation_class(
-    attenuation: ArrayLike,
+    attenuation: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> CeilingAttenuationResult
 ```
 
@@ -211,9 +211,9 @@ library rounds it up (`floor(measured + 0.5)`). Read from
 
 ```python
 normalized_ceiling_attenuation(
-    level_source: ArrayLike,
-    level_receiving: ArrayLike,
-    absorption_area: ArrayLike,
+    level_source: NumericArrayLike,
+    level_receiving: NumericArrayLike,
+    absorption_area: NumericArrayLike,
     *,
     reference_area: float = 10.0,
 ) -> np.ndarray
@@ -249,7 +249,7 @@ ASTM value about 0.79 dB higher for the same rooms.
 
 ```python
 partition_referenced_reduction_index(
-    reduction_index: ArrayLike,
+    reduction_index: NumericArrayLike,
     room_height_m: float,
     room_length: float,
 ) -> np.ndarray
@@ -284,28 +284,28 @@ path as transmission factors.
 
 ```python
 plenum_flanking_reduction_index(
-    reduction_index_source: ArrayLike,
-    reduction_index_receiving: ArrayLike,
+    reduction_index_source: NumericArrayLike,
+    reduction_index_receiving: NumericArrayLike,
     *,
     ceiling_length: float,
     plenum_height_m: float,
     sidewalls: Literal['absorbing', 'reflecting'] = ...,
-    frequencies: ArrayLike | None = ...,
-    attenuation_source_per_m: ArrayLike,
-    attenuation_receiving_per_m: ArrayLike,
+    frequencies: NumericArrayLike | None = ...,
+    attenuation_source_per_m: NumericArrayLike,
+    attenuation_receiving_per_m: NumericArrayLike,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,
 ) -> PlenumFlankingResult
 
 plenum_flanking_reduction_index(
-    reduction_index_source: ArrayLike,
-    reduction_index_receiving: ArrayLike,
+    reduction_index_source: NumericArrayLike,
+    reduction_index_receiving: NumericArrayLike,
     *,
     ceiling_length: float,
     plenum_height_m: float,
     sidewalls: Literal['absorbing', 'reflecting'] = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,

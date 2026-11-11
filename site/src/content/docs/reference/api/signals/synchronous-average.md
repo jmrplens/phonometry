@@ -85,7 +85,7 @@ No resampling onto an `M`-point angular grid is performed.
 
 ```python
 comb_filter_response(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     period_s: float,
     n_averages: int | np.integer[Any],
 ) -> NDArray[np.float64]
@@ -206,7 +206,7 @@ With `ax` given, only the averaged-waveform panel is drawn on it.
 
 ```python
 time_synchronous_average(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     period_s: float,

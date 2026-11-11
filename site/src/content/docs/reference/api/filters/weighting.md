@@ -101,7 +101,7 @@ linkwitz_riley(
 ) -> tuple[Signal, Signal]
 
 linkwitz_riley(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     frequency: float,
@@ -137,14 +137,14 @@ time_weighting(
     x: Signal,
     fs: float | None = ...,
     mode: Literal['fast', 'slow', 'impulse'] = ...,
-    initial_state: Literal['zero', 'first'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] | None = ...,
+    initial_state: Literal['zero', 'first'] | NumericArrayLike | None = ...,
 ) -> TimeWeightedEnvelope
 
 time_weighting(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     mode: Literal['fast', 'slow', 'impulse'] = ...,
-    initial_state: Literal['zero', 'first'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] | None = ...,
+    initial_state: Literal['zero', 'first'] | NumericArrayLike | None = ...,
 ) -> np.ndarray
 ```
 
@@ -288,9 +288,9 @@ across blocks, so concatenated block outputs equal a single continuous call.
 ### TimeWeighting.process()
 
 ```python
-TimeWeighting.process(
-    x: Signal | ArrayLike,
-) -> TimeWeightedEnvelope | np.ndarray
+TimeWeighting.process(x: Signal) -> TimeWeightedEnvelope
+
+TimeWeighting.process(x: NumericArrayLike) -> np.ndarray
 ```
 
 Apply time weighting to a block, continuing from the previous block.
@@ -337,7 +337,7 @@ weighting_filter(
 ) -> Signal
 
 weighting_filter(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = ...,
     *,
@@ -402,7 +402,9 @@ Initialize the weighting filter.
 ### WeightingFilter.filter()
 
 ```python
-WeightingFilter.filter(x: Signal | ArrayLike) -> Signal | np.ndarray
+WeightingFilter.filter(x: Signal) -> Signal
+
+WeightingFilter.filter(x: NumericArrayLike) -> np.ndarray
 ```
 
 Apply the weighting filter to a signal.

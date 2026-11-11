@@ -88,7 +88,7 @@ foreword).
 
 ```python
 acoustic_roughness_spectrum(
-    roughness_um: ArrayLike,
+    roughness_um: NumericArrayLike,
     *,
     sample_spacing_m: float,
     spike_removal: bool = True,
@@ -140,8 +140,8 @@ Nyquist wavenumber of the sampling.
 ```python
 AcousticRoughnessSpectrum(
     *,
-    wavelengths_m: ArrayLike,
-    levels: ArrayLike,
+    wavelengths_m: NumericArrayLike,
+    levels: NumericArrayLike,
     record_length_m: float | None = None,
     n_segments: int | None = None,
     method: Literal['A', 'B'] | None = None,
@@ -265,7 +265,7 @@ limit. Only the bands every spectrum has are averaged.
 
 ```python
 curvature_processed_roughness(
-    roughness_um: ArrayLike,
+    roughness_um: NumericArrayLike,
     *,
     sample_spacing_m: float,
     curve_radius_m: float = 0.375,
@@ -309,7 +309,7 @@ of the record can win the maximum, so the search is limited to them.
 
 ```python
 filtered_roughness_spectrum(
-    roughness_um: ArrayLike,
+    roughness_um: NumericArrayLike,
     *,
     sample_spacing_m: float,
     spike_removal: bool = True,
@@ -361,11 +361,11 @@ whose upper edge lies below the Nyquist wavenumber.
 
 ```python
 redistributed_band_energies(
-    source_lower: ArrayLike,
-    source_upper: ArrayLike,
-    energies: ArrayLike,
-    target_lower: ArrayLike,
-    target_upper: ArrayLike,
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: NumericArrayLike,
+    target_upper: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -412,7 +412,7 @@ band is dropped.
 
 ```python
 remove_roughness_spikes(
-    roughness_um: ArrayLike,
+    roughness_um: NumericArrayLike,
     *,
     sample_spacing_m: float,
 ) -> NDArray[np.float64]

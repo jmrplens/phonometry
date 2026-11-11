@@ -103,12 +103,12 @@ How much a rotated directional microphone may see vary (Table 1).
 
 ```python
 assess_attenuation_difference(
-    first: ArrayLike | RealEarAttenuationResult,
-    second: ArrayLike | RealEarAttenuationResult,
+    first: NumericArrayLike | RealEarAttenuationResult,
+    second: NumericArrayLike | RealEarAttenuationResult,
     *,
-    first_expanded_uncertainty_db: ArrayLike | None = None,
-    second_expanded_uncertainty_db: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    first_expanded_uncertainty_db: NumericArrayLike | None = None,
+    second_expanded_uncertainty_db: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> AttenuationDifferenceResult
 ```
 
@@ -239,12 +239,12 @@ The test signals at which the two measurements differ, in hertz.
 
 ```python
 check_reat_sound_field(
-    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], ArrayLike],
-    reference_levels: ArrayLike,
+    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    rotation_levels: ArrayLike | None = None,
+    rotation_levels: NumericArrayLike | None = None,
     free_field_rejection: float | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> REATSoundFieldCheck
 ```
 
@@ -295,7 +295,7 @@ min_significant_difference(
 ) -> NDArray[np.float64]
 
 min_significant_difference(
-    expanded_uncertainty_db: ArrayLike,
+    expanded_uncertainty_db: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -375,11 +375,11 @@ $U_{95} = 2u$, in dB.
 
 ```python
 real_ear_attenuation(
-    attenuation: ArrayLike | None = None,
+    attenuation: NumericArrayLike | None = None,
     *,
-    open_threshold_levels: ArrayLike | None = None,
-    occluded_threshold_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    open_threshold_levels: NumericArrayLike | None = None,
+    occluded_threshold_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> RealEarAttenuationResult
 ```
 
@@ -491,7 +491,7 @@ REAT_BETWEEN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUnce
 
 ```python
 reat_expanded_uncertainty(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     protector: Literal['earplug', 'earmuff'],
     between_laboratories: bool = False,

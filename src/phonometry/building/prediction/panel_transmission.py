@@ -115,10 +115,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction
+    from ..._internal.types import BandFraction, NumericArrayLike
     from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
@@ -189,7 +188,7 @@ _NORTON_FIELD_CORRECTION: float = 5.0
 _GRAZING_INCIDENCE_DEG: float = 90.0
 
 
-def _band_axis(frequency: ArrayLike) -> np.ndarray:
+def _band_axis(frequency: NumericArrayLike) -> np.ndarray:
     """Validate a 1-D array of strictly positive band centre frequencies."""
     f = np.atleast_1d(real_array(frequency, "frequency"))
     if f.ndim != 1 or f.size == 0:
@@ -230,7 +229,7 @@ def field_incidence_correction(fraction: BandFraction | np.integer[Any] = 3) -> 
 
 
 def mass_law_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass_per_area: float,
     *,
     incidence: Literal["normal", "field"] = "field",
@@ -464,7 +463,7 @@ class SoundReductionResult(OwnsArrays):
 
 
 def single_panel_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass_per_area: float,
     *,
     critical_frequency: float | None = None,
@@ -720,7 +719,7 @@ def _resolve_plateau_panel(
 
 @overload
 def plateau_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     material: PlateauMaterialName | PlateauMaterial,
     thickness_mm: float,
@@ -733,7 +732,7 @@ def plateau_transmission_loss(
 
 @overload
 def plateau_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     material: PlateauMaterialName | PlateauMaterial,
     mass_per_area: float,
@@ -747,7 +746,7 @@ def plateau_transmission_loss(
 
 @overload
 def plateau_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     mass_per_area: float,
     plateau_height_db: float,
@@ -758,7 +757,7 @@ def plateau_transmission_loss(
 
 
 def plateau_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     material: PlateauMaterialName | PlateauMaterial | None = None,
     thickness_mm: float | None = None,
@@ -1242,7 +1241,7 @@ def _heckl_transmission_loss(
 
 
 def orthotropic_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass_per_area: float,
     *,
     critical_frequency_lower: float,
@@ -1474,7 +1473,7 @@ def mass_spring_mass_resonance(
 
 
 def double_wall_transmission_loss(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass1: float,
     mass2: float,
     gap_m: float,

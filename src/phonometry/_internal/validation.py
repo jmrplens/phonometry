@@ -21,14 +21,14 @@ import numpy as np
 from .frozen import _HoldsItself, given_repr, given_type, owned_members
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     # TypeIs reached typing in Python 3.13; the type checker reads it from
     # typing_extensions for the 3.12 the package supports, and nothing imports
     # it at run time.
     from typing_extensions import TypeIs
 
-    from .types import BandFraction, ReportEngine
+    from .types import BandFraction, NumericArrayLike, ReportEngine
 
 
 def is_positive(value: float) -> bool:
@@ -118,7 +118,7 @@ def is_scalar(value: object) -> bool:
     :return: ``True`` when ``value`` has rank 0, ``False`` otherwise.
     """
     try:
-        return int(np.ndim(cast("ArrayLike", value))) == 0
+        return int(np.ndim(cast("NumericArrayLike", value))) == 0
     except ValueError:
         return False
 
@@ -580,7 +580,7 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     return number
 
 
-def require_above_absolute_zero_array(x: ArrayLike, name: str) -> np.ndarray:
+def require_above_absolute_zero_array(x: NumericArrayLike, name: str) -> np.ndarray:
     """Require every temperature in ``x`` to be finite and above absolute zero.
 
     The array companion of :func:`require_above_absolute_zero`. A profile is
@@ -852,7 +852,9 @@ _PLAIN_REALS = frozenset({float, int, np.float64})
 _MATRIX_RANK = 2
 
 
-def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.float64]:
+def real_array(
+    x: NumericArrayLike, name: str, *, copy: bool = False
+) -> NDArray[np.float64]:
     """A caller's numbers as a ``float64`` array, refused by name when they are not.
 
     The one reading of a caller's value where real numbers belong, a number
@@ -995,7 +997,7 @@ _PLAIN_NUMBERS_OF_ANY_KIND = frozenset({float, int, complex, np.float64, np.comp
 
 
 def complex_array(
-    x: ArrayLike, name: str, *, copy: bool = False
+    x: NumericArrayLike, name: str, *, copy: bool = False
 ) -> NDArray[np.complex128]:
     """A caller's numbers as a ``complex128`` array, refused by name when they are not.
 
@@ -1067,7 +1069,7 @@ def _numbers_read(x: object, name: str) -> np.ndarray:
     return array
 
 
-def require_positive_array(x: ArrayLike, name: str) -> np.ndarray:
+def require_positive_array(x: NumericArrayLike, name: str) -> np.ndarray:
     """Coerce *x* to a 1-D float64 array of strictly positive, finite values.
 
     :param x: The input (scalar or 1-D array-like).
@@ -1090,7 +1092,7 @@ def require_positive_array(x: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def require_finite_array(x: ArrayLike, name: str) -> np.ndarray:
+def require_finite_array(x: NumericArrayLike, name: str) -> np.ndarray:
     """Coerce *x* to a non-empty 1-D float64 array of finite values.
 
     The sign-agnostic sibling of :func:`require_positive_array`, for the
@@ -1114,7 +1116,7 @@ def require_finite_array(x: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def require_finite_matrix(x: ArrayLike, name: str) -> np.ndarray:
+def require_finite_matrix(x: NumericArrayLike, name: str) -> np.ndarray:
     """Coerce *x* to a non-empty 2-D float64 array of finite values.
 
     The two-dimensional sibling of :func:`require_finite_array`, for the level
@@ -1197,7 +1199,7 @@ def _rank(value: object) -> int:
     ):
         return 1
     try:
-        return int(np.ndim(cast("ArrayLike", value)))
+        return int(np.ndim(cast("NumericArrayLike", value)))
     except ValueError:
         # Ragged in some other shape: numpy has no rank to give, and the
         # sequence is still one axis of whatever it holds.
@@ -1591,7 +1593,7 @@ def indices_of(value: object, name: str) -> tuple[int, ...]:
 
 
 def require_per_band(
-    x: ArrayLike, name: str, bands: np.ndarray, bands_name: str
+    x: NumericArrayLike, name: str, bands: np.ndarray, bands_name: str
 ) -> np.ndarray:
     """Broadcast *x* over the band axis, saying whose length disagrees.
 
@@ -1626,7 +1628,7 @@ def require_per_band(
     return np.broadcast_to(arr, bands.shape).astype(np.float64)
 
 
-def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
+def require_1d_signal(x: NumericArrayLike, name: str) -> np.ndarray:
     """Coerce *x* to a float64 array and require a 1-D time series.
 
     Multichannel input is rejected rather than silently flattened (a raveled
@@ -1732,7 +1734,7 @@ def arrays_of(
     for item in items:
         refuse_complex(item, f"{msg} of real numbers, not complex ones.")
         refuse_text(item, f"{msg} of numbers, not text.")
-    return tuple(real_array(cast("ArrayLike", item), name) for item in items)
+    return tuple(real_array(cast("NumericArrayLike", item), name) for item in items)
 
 
 def pair_of_arrays(

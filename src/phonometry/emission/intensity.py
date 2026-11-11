@@ -69,10 +69,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import BandFraction, RealValues
+    from .._internal.types import BandFraction, NumericArrayLike, RealValues
 
 from .._internal.bands import bands_held
 from .._internal.boundary import settled, settled_net_share
@@ -567,7 +567,7 @@ class FieldIndicators(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        dynamic_capability: ArrayLike | None = None,
+        dynamic_capability: NumericArrayLike | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -958,7 +958,7 @@ def _coefficient_of_variation(
 
 
 def temporal_variability_indicator(
-    short_time_intensity: ArrayLike,
+    short_time_intensity: NumericArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""ISO 9614-1:1993 temporal variability indicator F1 (equation (A.1)).
 
@@ -1064,7 +1064,7 @@ def _temporal_indicator_for(
 
 @overload
 def _temporal_indicator_for(
-    temporal_intensity: ArrayLike | None,
+    temporal_intensity: NumericArrayLike | None,
     n_bands: int,
     *,
     scalar_surface: bool,
@@ -1072,7 +1072,7 @@ def _temporal_indicator_for(
 
 
 def _temporal_indicator_for(
-    temporal_intensity: ArrayLike | None,
+    temporal_intensity: NumericArrayLike | None,
     n_bands: int,
     *,
     scalar_surface: bool,
@@ -1113,11 +1113,11 @@ def _temporal_indicator_for(
 
 
 def field_indicators(
-    pressure_levels: ArrayLike,
-    normal_intensity: ArrayLike,
+    pressure_levels: NumericArrayLike,
+    normal_intensity: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
-    temporal_intensity: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    temporal_intensity: NumericArrayLike | None = None,
 ) -> FieldIndicators:
     r"""ISO 9614-1:1993 Annex A field indicators F1 to F4.
 

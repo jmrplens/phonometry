@@ -94,10 +94,10 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 #: Sound power level of one talker in normal conversation, dB re 1 pW
 #: (Long, Chapter 17, "a normal conversational level").
@@ -115,7 +115,7 @@ COMMUNICATION_SNR_DB = -6.0
 PRIVACY_SNR_DB = -9.0
 
 
-def _require_distance(value: ArrayLike, name: str) -> NDArray[np.float64]:
+def _require_distance(value: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Validate a positive, finite distance (scalar or array)."""
     r = real_array(value, name)
     if not np.all(np.isfinite(r)) or np.any(r <= 0.0):
@@ -143,7 +143,7 @@ def speech_direct_level[V: RealValues](
 
 
 @overload
-def speech_direct_level[A: ArrayLike](
+def speech_direct_level[A: NumericArrayLike](
     distance: A,
     *,
     sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
@@ -152,7 +152,7 @@ def speech_direct_level[A: ArrayLike](
 
 
 def speech_direct_level(
-    distance: ArrayLike,
+    distance: NumericArrayLike,
     *,
     sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
     directivity: float = TALKER_DIRECTIVITY,
@@ -192,7 +192,7 @@ def crowd_noise_level[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def crowd_noise_level[V: RealValues, A2: ArrayLike](
+def crowd_noise_level[V: RealValues, A2: NumericArrayLike](
     talkers: V,
     absorption_area: A2,
     *,
@@ -210,7 +210,7 @@ def crowd_noise_level[S1: RealScalar, V: RealValues](
 
 
 @overload
-def crowd_noise_level[A1: ArrayLike, A2: ArrayLike](
+def crowd_noise_level[A1: NumericArrayLike, A2: NumericArrayLike](
     talkers: A1,
     absorption_area: A2,
     *,
@@ -219,8 +219,8 @@ def crowd_noise_level[A1: ArrayLike, A2: ArrayLike](
 
 
 def crowd_noise_level(
-    talkers: ArrayLike,
-    absorption_area: ArrayLike,
+    talkers: NumericArrayLike,
+    absorption_area: NumericArrayLike,
     *,
     sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
 ) -> float | NDArray[np.float64]:
@@ -266,7 +266,7 @@ def speech_to_noise_ratio[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def speech_to_noise_ratio[V: RealValues, A2: ArrayLike](
+def speech_to_noise_ratio[V: RealValues, A2: NumericArrayLike](
     distance: V, absorption_per_table: A2, *, directivity: float = TALKER_DIRECTIVITY
 ) -> NDArray[np.float64]: ...
 
@@ -278,14 +278,14 @@ def speech_to_noise_ratio[S1: RealScalar, V: RealValues](
 
 
 @overload
-def speech_to_noise_ratio[A1: ArrayLike, A2: ArrayLike](
+def speech_to_noise_ratio[A1: NumericArrayLike, A2: NumericArrayLike](
     distance: A1, absorption_per_table: A2, *, directivity: float = TALKER_DIRECTIVITY
 ) -> float | NDArray[np.float64]: ...
 
 
 def speech_to_noise_ratio(
-    distance: ArrayLike,
-    absorption_per_table: ArrayLike,
+    distance: NumericArrayLike,
+    absorption_per_table: NumericArrayLike,
     *,
     directivity: float = TALKER_DIRECTIVITY,
 ) -> float | NDArray[np.float64]:
@@ -332,13 +332,13 @@ def absorption_per_table[V: RealValues](
 
 
 @overload
-def absorption_per_table[A: ArrayLike](
+def absorption_per_table[A: NumericArrayLike](
     distance: A, speech_to_noise: float, *, directivity: float = TALKER_DIRECTIVITY
 ) -> float | NDArray[np.float64]: ...
 
 
 def absorption_per_table(
-    distance: ArrayLike,
+    distance: NumericArrayLike,
     speech_to_noise: float,
     *,
     directivity: float = TALKER_DIRECTIVITY,
@@ -528,9 +528,9 @@ class CrowdNoiseResult(OwnsArrays):
 
 
 def crowd_noise(
-    absorption_areas: ArrayLike,
+    absorption_areas: NumericArrayLike,
     *,
-    talkers: ArrayLike | None = None,
+    talkers: NumericArrayLike | None = None,
     distance: float = 1.2,
     sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
     directivity: float = TALKER_DIRECTIVITY,

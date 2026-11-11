@@ -30,9 +30,9 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.lines import Line2D
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ..environment.assessment.wind_turbine_modulation import (
         BinnedModulation,
         ModulationBlock,
@@ -165,7 +165,7 @@ _SECTOR_COLOURS: tuple[str, ...] = (
 
 
 def _direction_groups(
-    directions: ArrayLike | None, count: int, language: Language
+    directions: NumericArrayLike | None, count: int, language: Language
 ) -> list[tuple[str, np.ndarray, str | None]]:
     """Name, member mask and colour of each direction sector, in increasing order.
 

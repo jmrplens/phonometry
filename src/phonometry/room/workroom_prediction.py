@@ -67,7 +67,7 @@ from .._internal.validation import (
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
-    from numpy.typing import ArrayLike
+    from .._internal.types import NumericArrayLike
 
 Category = Literal["1", "2a", "2b", "2c"]
 Region = Literal["near", "middle", "far"]
@@ -425,7 +425,7 @@ def workstation_level(
 
 
 def total_workstation_level(
-    contribution_levels: ArrayLike, *, existing_level: float | None = None
+    contribution_levels: NumericArrayLike, *, existing_level: float | None = None
 ) -> float:
     """What a workstation hears once the new machines are installed, Annex B.
 

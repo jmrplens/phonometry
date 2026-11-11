@@ -68,7 +68,7 @@ fractional_delay(
 ) -> Signal
 
 fractional_delay(
-    x: ArrayLike,
+    x: NumericArrayLike,
     delay: float,
     *,
     mode: Literal['linear', 'circular'] = ...,
@@ -163,7 +163,7 @@ zero-mean and rescaled to the requested RMS exactly.
 
 ```python
 resample_signal(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     fs_new: float,

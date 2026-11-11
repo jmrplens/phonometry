@@ -24,6 +24,10 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 A choice is checked as written: a text it does not offer is a `ValueError` and a value that is not a text a `TypeError`. That holds for `language` and `engine` everywhere they are taken, and is said here once rather than on every function.
 :::
 
+:::note[Arrays of numbers]
+A parameter typed `NumericArrayLike` takes a number or an array of numbers: a `float`, an `int` or a `complex`, a list or a tuple of them nested to any depth, or a NumPy array, or anything with an `__array__`, of a numeric or boolean dtype. It is NumPy's `ArrayLike` without its texts, so a type checker refuses a `str` or `bytes` there, as the call does. In code of your own, an `NDArray`, a `Sequence[float]` or a `float` passes it, and a variable annotated `ArrayLike` does not, nor does a `memoryview` or another object that offers its numbers only through the buffer protocol, which the call converts: pass `np.asarray(view)`.
+:::
+
 ## Filters and frequencies
 
 | Page | Summary |

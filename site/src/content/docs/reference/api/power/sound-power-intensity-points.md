@@ -482,9 +482,9 @@ remaining four cells are blank in the print.
 
 ```python
 normal_intensity_from_levels(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    negative: ArrayLike = False,
+    negative: NumericArrayLike = False,
 ) -> np.ndarray
 ```
 
@@ -528,8 +528,8 @@ error, and only the *sum* going negative puts a band outside the method
 
 ```python
 partial_power_concentration(
-    normal_intensity: ArrayLike,
-    areas: ArrayLike,
+    normal_intensity: NumericArrayLike,
+    areas: NumericArrayLike,
     *,
     grade: Literal['precision', 'engineering', 'survey'] = 'engineering',
 ) -> PartialPowerConcentration
@@ -660,13 +660,13 @@ asked for, and asking the wrong half raises.
 
 ```python
 sound_power_intensity_points(
-    normal_intensity: ArrayLike,
-    areas: ArrayLike,
+    normal_intensity: NumericArrayLike,
+    areas: NumericArrayLike,
     *,
-    pressure_levels: ArrayLike | None = None,
-    pressure_residual_index: float | ArrayLike | None = None,
-    temporal_intensity: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    pressure_levels: NumericArrayLike | None = None,
+    pressure_residual_index: float | NumericArrayLike | None = None,
+    temporal_intensity: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     fraction: Literal[1, 3] | np.integer[Any] = 3,
     grade: Literal['precision', 'engineering', 'survey'] = 'engineering',
 ) -> DiscretePointIntensityResult

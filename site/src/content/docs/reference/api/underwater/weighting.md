@@ -66,7 +66,7 @@ implements **1.36**; the printed 1.37 remains available as
 
 ```python
 auditory_weighting(
-    frequency_hz: ArrayLike,
+    frequency_hz: NumericArrayLike,
     group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
     guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
@@ -239,10 +239,10 @@ Hearing-group codes defined by a guidance version.
 
 ```python
 weighted_exposure(
-    band_sel: ArrayLike,
+    band_sel: NumericArrayLike,
     group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     *,
-    frequencies_hz: ArrayLike,
+    frequencies_hz: NumericArrayLike,
     guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
     impulsive: bool = True,
     n_events: int | np.integer[Any] = 1,

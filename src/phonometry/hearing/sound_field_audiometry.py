@@ -86,9 +86,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "DIFFUSE_FIELD_VARIATION_LIMITS",
@@ -299,7 +299,7 @@ def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
     return np.asarray(values <= np.asarray(bound) + _BOUNDARY_SLACK_DB, dtype=bool)
 
 
-def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
+def _band_values(values: NumericArrayLike, count: int | None, name: str) -> np.ndarray:
     """A one-dimensional array of finite decibel values, one per band.
 
     :param values: The values.
@@ -321,7 +321,7 @@ def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
 
 
 def _frequency_axis(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     count: int,
     owner: str,
     default: np.ndarray | tuple[float, ...],
@@ -365,7 +365,7 @@ def _frequency_axis(
 
 
 def _position_grid[P: str](
-    levels: Mapping[P, ArrayLike],
+    levels: Mapping[P, NumericArrayLike],
     positions: tuple[P, ...],
     count: int,
     name: str,
@@ -611,12 +611,12 @@ class DiffuseSoundFieldCheck(OwnsArrays):
 
 
 def _diffuse_field_check(
-    position_levels: Mapping[SoundFieldPosition, ArrayLike],
-    reference_levels: ArrayLike,
+    position_levels: Mapping[SoundFieldPosition, NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    directional_levels: ArrayLike | None,
-    front_to_random_index: ArrayLike | None,
-    frequencies: ArrayLike | None,
+    directional_levels: NumericArrayLike | None,
+    front_to_random_index: NumericArrayLike | None,
+    frequencies: NumericArrayLike | None,
     default_frequencies: np.ndarray | tuple[float, ...],
     standard: Literal["ISO 8253-2 5.3", "ISO 4869-3 5.2.2"],
     owner: str,
@@ -666,8 +666,8 @@ def _diffuse_field_check(
 
 
 def _directional_variation(
-    directional_levels: ArrayLike | None,
-    front_to_random_index: ArrayLike | None,
+    directional_levels: NumericArrayLike | None,
+    front_to_random_index: NumericArrayLike | None,
     freqs: np.ndarray,
     *,
     limits: tuple[tuple[float, float], ...],
@@ -717,7 +717,7 @@ def _directional_variation(
 
 
 def _front_to_random_index(
-    front_to_random_index: ArrayLike,
+    front_to_random_index: NumericArrayLike,
     count: int,
     limits: tuple[tuple[float, float], ...],
     standard: str,
@@ -748,12 +748,12 @@ def _front_to_random_index(
 
 
 def check_diffuse_sound_field(
-    position_levels: Mapping[SoundFieldPosition, ArrayLike],
-    reference_levels: ArrayLike,
+    position_levels: Mapping[SoundFieldPosition, NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    directional_levels: ArrayLike | None = None,
-    front_to_random_index: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
+    directional_levels: NumericArrayLike | None = None,
+    front_to_random_index: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> DiffuseSoundFieldCheck:
     r"""Is the sound field of the test room diffuse? (ISO 8253-2, 5.3).
 
@@ -1023,13 +1023,13 @@ class FreeSoundFieldCheck(OwnsArrays):
 
 
 def _free_field_check(
-    lateral_levels: Mapping[LateralPosition, ArrayLike],
-    reference_levels: ArrayLike,
+    lateral_levels: Mapping[LateralPosition, NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    front_levels: ArrayLike,
-    back_levels: ArrayLike,
+    front_levels: NumericArrayLike,
+    back_levels: NumericArrayLike,
     loudspeaker_distance_m: float,
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     field: Literal["free", "quasi-free"],
     owner: str,
 ) -> FreeSoundFieldCheck:
@@ -1075,13 +1075,13 @@ def _free_field_check(
 
 
 def check_free_sound_field(
-    lateral_levels: Mapping[LateralPosition, ArrayLike],
-    reference_levels: ArrayLike,
+    lateral_levels: Mapping[LateralPosition, NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    front_levels: ArrayLike,
-    back_levels: ArrayLike,
+    front_levels: NumericArrayLike,
+    back_levels: NumericArrayLike,
     loudspeaker_distance_m: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FreeSoundFieldCheck:
     r"""Is the sound field of the test room free? (ISO 8253-2, 5.2).
 
@@ -1141,13 +1141,13 @@ def check_free_sound_field(
 
 
 def check_quasi_free_sound_field(
-    lateral_levels: Mapping[LateralPosition, ArrayLike],
-    reference_levels: ArrayLike,
+    lateral_levels: Mapping[LateralPosition, NumericArrayLike],
+    reference_levels: NumericArrayLike,
     *,
-    front_levels: ArrayLike,
-    back_levels: ArrayLike,
+    front_levels: NumericArrayLike,
+    back_levels: NumericArrayLike,
     loudspeaker_distance_m: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FreeSoundFieldCheck:
     r"""Is the sound field of the test room quasi-free? (ISO 8253-2, 5.4).
 
@@ -1202,7 +1202,7 @@ def check_quasi_free_sound_field(
 
 
 def incidence_correction(
-    frequencies: ArrayLike, *, incidence_angle_deg: float
+    frequencies: NumericArrayLike, *, incidence_angle_deg: float
 ) -> np.ndarray:
     """How much louder the nearer ear is with the loudspeaker off axis (Table B.1).
 

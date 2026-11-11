@@ -49,10 +49,10 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Sequence
 
-    from numpy.typing import ArrayLike
     from reportlab.platypus import Table
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from .metadata import ReportMetadata
 
     class SoundPowerLike(Protocol):
@@ -205,7 +205,7 @@ def range_str(values: np.ndarray, language: Language = "en", decimals: int = 1) 
     )
 
 
-def energy_sum(levels: ArrayLike) -> float:
+def energy_sum(levels: NumericArrayLike) -> float:
     """Energy sum of a per-band level array, ``10 lg(sum 10^(L/10))`` dB.
 
     Non-finite bands are skipped: a band the method could not determine

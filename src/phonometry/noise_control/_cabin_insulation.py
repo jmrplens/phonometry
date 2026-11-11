@@ -107,10 +107,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import BandFraction
+    from .._internal.types import BandFraction, NumericArrayLike
 
 Method = Literal["laboratory", "in-situ-loudspeaker", "in-situ-actual-noise"]
 
@@ -309,7 +309,7 @@ class CabinInsulationWarning(PhonometryWarning):
 
 def _corrected(
     levels: NDArray[np.float64],
-    background_levels: ArrayLike | None,
+    background_levels: NumericArrayLike | None,
     frequencies: NDArray[np.float64] | None,
     where: str,
 ) -> NDArray[np.float64]:
@@ -734,14 +734,14 @@ class CabinUncertainty(RichDisplay):
 
 
 def cabin_insulation(
-    room_levels: ArrayLike,
-    cabin_levels: ArrayLike,
+    room_levels: NumericArrayLike,
+    cabin_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     method: CabinMethod = "laboratory",
     fraction: BandFraction | np.integer[Any] = 3,
-    room_background_levels: ArrayLike | None = None,
-    cabin_background_levels: ArrayLike | None = None,
+    room_background_levels: NumericArrayLike | None = None,
+    cabin_background_levels: NumericArrayLike | None = None,
     a_weighted_room_level: float | None = None,
     a_weighted_cabin_level: float | None = None,
     internal_noise_level: float | None = None,
@@ -851,7 +851,7 @@ def cabin_insulation(
 
 
 def weighted_cabin_insulation(
-    insulation: ArrayLike,
+    insulation: NumericArrayLike,
     *,
     method: CabinMethod = "laboratory",
     fraction: BandFraction | np.integer[Any] = 3,
@@ -902,10 +902,10 @@ def weighted_cabin_insulation(
 
 
 def estimated_cabin_noise_insulation(
-    spectrum_levels: ArrayLike,
-    insulation: ArrayLike,
+    spectrum_levels: NumericArrayLike,
+    insulation: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> float:
     r"""What a cabin is worth against a stated spectrum, Annex A.
 
@@ -952,7 +952,7 @@ def estimated_cabin_noise_insulation(
 
 
 def internal_noise_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     background_level: float | None = None,
 ) -> float:
@@ -1008,7 +1008,7 @@ def internal_noise_level(
 
 
 def check_source_positions(
-    insulation_by_position: ArrayLike,
+    insulation_by_position: NumericArrayLike,
 ) -> SourcePositionCheck:
     r"""Were there enough loudspeaker positions? 7.2.1.
 
@@ -1065,9 +1065,9 @@ def _nominal_third(frequency: float) -> tuple[float, int]:
 
 
 def check_band_flatness(
-    third_octave_levels: ArrayLike,
+    third_octave_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> BandFlatnessCheck:
     r"""Is the driving spectrum flat enough inside each octave? 6.4 and 7.2.1.
 

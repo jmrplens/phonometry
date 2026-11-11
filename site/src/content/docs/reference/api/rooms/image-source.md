@@ -106,16 +106,16 @@ impulses [`image_source_rir`](/phonometry/reference/api/rooms/image-source/#imag
 ```python
 image_source_rir(
     dimensions: tuple[float, float, float],
-    source: ArrayLike,
-    receiver: ArrayLike,
-    absorption: ArrayLike,
+    source: NumericArrayLike,
+    receiver: NumericArrayLike,
+    absorption: NumericArrayLike,
     *,
     fs: int | np.integer[Any],
     max_order: int | np.integer[Any] = 20,
     speed_of_sound: float = 343.0,
-    air_attenuation_per_m: ArrayLike = 0.0,
+    air_attenuation_per_m: NumericArrayLike = 0.0,
     duration_s: float | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ImageSourceResult
 ```
 
@@ -291,7 +291,7 @@ reflection_density(
 ) -> NDArray[np.float64]
 
 reflection_density(
-    time: ArrayLike,
+    time: NumericArrayLike,
     volume: float,
     *,
     speed_of_sound: float = 343.0,

@@ -57,10 +57,11 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
+    from .._internal.types import NumericArrayLike
 
 __all__ = [
     "STOIResult",
@@ -281,8 +282,8 @@ def _resample_to_internal(sig: NDArray[np.float64], fs: int) -> NDArray[np.float
 
 
 def _validate_pair(
-    clean: Signal | ArrayLike,
-    degraded: Signal | ArrayLike,
+    clean: Signal | NumericArrayLike,
+    degraded: Signal | NumericArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate and return the clean/degraded 1-D float arrays."""
     x = real_array(clean, "clean")
@@ -328,8 +329,8 @@ def _row_col_normalize(seg: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def stoi(
-    clean: Signal | ArrayLike,
-    degraded: Signal | ArrayLike,
+    clean: Signal | NumericArrayLike,
+    degraded: Signal | NumericArrayLike,
     fs: int | np.integer[Any] | None = None,
     *,
     extended: bool = False,

@@ -69,8 +69,8 @@ hard-coded as if normative.
 
 ```python
 absorption_reference_corrected(
-    road_reflection: ArrayLike,
-    reference_reflection: ArrayLike,
+    road_reflection: NumericArrayLike,
+    reference_reflection: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -163,7 +163,7 @@ normative fixed set of timings. The lower usable frequency scales as
 ## check_spot_frequency_range
 
 ```python
-check_spot_frequency_range(frequency: ArrayLike) -> None
+check_spot_frequency_range(frequency: NumericArrayLike) -> None
 ```
 
 Advise when a spot-method frequency is out of range (ISO 13472-2, Scope).
@@ -273,8 +273,8 @@ cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 
 ```python
 in_situ_absorption_coefficient(
-    incident_ir: Signal | ArrayLike,
-    reflected_ir: Signal | ArrayLike,
+    incident_ir: Signal | NumericArrayLike,
+    reflected_ir: Signal | NumericArrayLike,
     *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
@@ -308,7 +308,7 @@ is treated as absorbed, so `alpha` may be slightly overestimated
 
 ```python
 in_situ_absorption_from_reflection(
-    reflection: ArrayLike,
+    reflection: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -338,8 +338,8 @@ $1 / K_\mathrm{r}$ factor
 
 ```python
 in_situ_absorption_spectrum(
-    incident_ir: Signal | ArrayLike,
-    reflected_ir: Signal | ArrayLike,
+    incident_ir: Signal | NumericArrayLike,
+    reflected_ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     source_height_m: float = 1.25,
@@ -388,8 +388,8 @@ in a plottable [`InSituAbsorptionResult`](/phonometry/reference/api/materials/ro
 
 ```python
 in_situ_reflection_factor(
-    incident_ir: Signal | ArrayLike,
-    reflected_ir: Signal | ArrayLike,
+    incident_ir: Signal | NumericArrayLike,
+    reflected_ir: Signal | NumericArrayLike,
     *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
@@ -596,9 +596,9 @@ source-to-microphone distance projected on the reference plane.
 
 ```python
 one_third_octave_absorption(
-    absorption: ArrayLike,
+    absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     f_min: float = 250.0,
     f_max: float = 4000.0,
     clip_negative: bool = True,
@@ -732,8 +732,8 @@ with the sampled radius of the standard 5 ms window.
 
 ```python
 power_reflection_coefficient(
-    incident_ir: Signal | ArrayLike,
-    reflected_ir: Signal | ArrayLike,
+    incident_ir: Signal | NumericArrayLike,
+    reflected_ir: Signal | NumericArrayLike,
     *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
@@ -819,8 +819,8 @@ SPOT_FREQUENCY_RANGE_HZ = (250.0, 1600.0)
 
 ```python
 spot_internal_loss_correction(
-    measured_absorption: ArrayLike,
-    system_absorption: ArrayLike,
+    measured_absorption: NumericArrayLike,
+    system_absorption: NumericArrayLike,
     *,
     clip_negative: bool = True,
 ) -> NDArray[np.float64]

@@ -96,10 +96,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 #: The three sound power models of a source near reflecting planes (Norton Table 4.5).
 SourceModel = Literal["constant_power", "constant_volume", "constant_pressure"]
@@ -116,7 +116,9 @@ __all__ = [
 ]
 
 
-def _require_fraction_below_one(value: ArrayLike, name: str) -> NDArray[np.float64]:
+def _require_fraction_below_one(
+    value: NumericArrayLike, name: str
+) -> NDArray[np.float64]:
     """Validate a mean absorption in ``(0, 1)`` (scalar or per-band)."""
     arr = real_array(value, name)
     if not np.all(np.isfinite(arr)):
@@ -132,7 +134,7 @@ def _require_fraction_below_one(value: ArrayLike, name: str) -> NDArray[np.float
     return arr
 
 
-def _require_positive_array(value: ArrayLike, name: str) -> NDArray[np.float64]:
+def _require_positive_array(value: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Validate a positive, finite quantity that may be one value per band.
 
     An empty array is refused before the range checks, because it passes
@@ -152,7 +154,7 @@ def _require_positive_array(value: ArrayLike, name: str) -> NDArray[np.float64]:
 
 
 def _one_absorption_measure(
-    room_constant: ArrayLike | None, absorption_area: ArrayLike | None
+    room_constant: NumericArrayLike | None, absorption_area: NumericArrayLike | None
 ) -> NDArray[np.float64]:
     r"""The reverberant-field denominator, from whichever measure was given.
 
@@ -190,13 +192,13 @@ def room_constant[V: RealValues](
 
 
 @overload
-def room_constant[A: ArrayLike](
+def room_constant[A: NumericArrayLike](
     surface_area: float, mean_absorption: A
 ) -> float | NDArray[np.float64]: ...
 
 
 def room_constant(
-    surface_area: float, mean_absorption: ArrayLike
+    surface_area: float, mean_absorption: NumericArrayLike
 ) -> float | NDArray[np.float64]:
     r"""Room constant :math:`R = S \bar{\alpha} / (1 - \bar{\alpha})`
     (Bies Equation (6.44)).
@@ -224,7 +226,7 @@ def critical_distance[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def critical_distance[V: RealValues, A2: ArrayLike](
+def critical_distance[V: RealValues, A2: NumericArrayLike](
     room_constant: V, *, directivity: A2 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -236,7 +238,7 @@ def critical_distance[S1: RealScalar, V: RealValues](
 
 
 @overload
-def critical_distance[A1: ArrayLike, A2: ArrayLike](
+def critical_distance[A1: NumericArrayLike, A2: NumericArrayLike](
     room_constant: A1, *, directivity: A2 = ...
 ) -> float | NDArray[np.float64]: ...
 
@@ -248,7 +250,7 @@ def critical_distance[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def critical_distance[V: RealValues, A2: ArrayLike](
+def critical_distance[V: RealValues, A2: NumericArrayLike](
     *, absorption_area: V, directivity: A2 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -260,16 +262,16 @@ def critical_distance[S1: RealScalar, V: RealValues](
 
 
 @overload
-def critical_distance[A1: ArrayLike, A2: ArrayLike](
+def critical_distance[A1: NumericArrayLike, A2: NumericArrayLike](
     *, absorption_area: A1, directivity: A2 = ...
 ) -> float | NDArray[np.float64]: ...
 
 
 def critical_distance(
-    room_constant: ArrayLike | None = None,
+    room_constant: NumericArrayLike | None = None,
     *,
-    absorption_area: ArrayLike | None = None,
-    directivity: ArrayLike = 1.0,
+    absorption_area: NumericArrayLike | None = None,
+    directivity: NumericArrayLike = 1.0,
 ) -> float | NDArray[np.float64]:
     r"""Critical (reverberation) distance
     :math:`r_\mathrm{c} = \sqrt{Q R / (16 \pi)}`.
@@ -322,13 +324,16 @@ def sabine_absorption_area[V: RealValues](
 
 
 @overload
-def sabine_absorption_area[A: ArrayLike](
+def sabine_absorption_area[A: NumericArrayLike](
     volume: float, reverberation_time: A, *, speed_of_sound: float = 343.0
 ) -> float | NDArray[np.float64]: ...
 
 
 def sabine_absorption_area(
-    volume: float, reverberation_time: ArrayLike, *, speed_of_sound: float = 343.0
+    volume: float,
+    reverberation_time: NumericArrayLike,
+    *,
+    speed_of_sound: float = 343.0,
 ) -> float | NDArray[np.float64]:
     r"""Equivalent absorption area from a reverberation time (Sabine, inverted).
 
@@ -377,13 +382,13 @@ def schroeder_frequency[V: RealValues](
 
 
 @overload
-def schroeder_frequency[A: ArrayLike](
+def schroeder_frequency[A: NumericArrayLike](
     reverberation_time: A, volume: float
 ) -> float | NDArray[np.float64]: ...
 
 
 def schroeder_frequency(
-    reverberation_time: ArrayLike, volume: float
+    reverberation_time: NumericArrayLike, volume: float
 ) -> float | NDArray[np.float64]:
     r"""Schroeder frequency :math:`f_\mathrm{s} = 2000 \sqrt{T / V}`
     (Kuttruff Equation (3.44)).
@@ -426,11 +431,11 @@ SOURCE_POWER_MODELS: Mapping[SourceModel, float] = MappingProxyType(
 
 @overload
 def steady_state_spl(
-    sound_power_level: ArrayLike,
-    distance: ArrayLike | None,
-    room_constant: ArrayLike,
+    sound_power_level: NumericArrayLike,
+    distance: NumericArrayLike | None,
+    room_constant: NumericArrayLike,
     *,
-    directivity: ArrayLike = ...,
+    directivity: NumericArrayLike = ...,
     source_model: SourceModel = ...,
     characteristic_impedance: float | None = ...,
 ) -> float | NDArray[np.float64]: ...
@@ -438,23 +443,23 @@ def steady_state_spl(
 
 @overload
 def steady_state_spl(
-    sound_power_level: ArrayLike,
-    distance: ArrayLike | None,
+    sound_power_level: NumericArrayLike,
+    distance: NumericArrayLike | None,
     *,
-    absorption_area: ArrayLike,
-    directivity: ArrayLike = ...,
+    absorption_area: NumericArrayLike,
+    directivity: NumericArrayLike = ...,
     source_model: SourceModel = ...,
     characteristic_impedance: float | None = ...,
 ) -> float | NDArray[np.float64]: ...
 
 
 def steady_state_spl(
-    sound_power_level: ArrayLike,
-    distance: ArrayLike | None,
-    room_constant: ArrayLike | None = None,
+    sound_power_level: NumericArrayLike,
+    distance: NumericArrayLike | None,
+    room_constant: NumericArrayLike | None = None,
     *,
-    absorption_area: ArrayLike | None = None,
-    directivity: ArrayLike = 1.0,
+    absorption_area: NumericArrayLike | None = None,
+    directivity: NumericArrayLike = 1.0,
     source_model: SourceModel = "constant_power",
     characteristic_impedance: float | None = None,
 ) -> float | NDArray[np.float64]:
@@ -621,7 +626,7 @@ def steady_state_field(
     surface_area: float,
     mean_absorption: float,
     *,
-    distances: ArrayLike | None = None,
+    distances: NumericArrayLike | None = None,
     directivity: float = 1.0,
     characteristic_impedance: float | None = None,
 ) -> SteadyFieldResult:

@@ -36,13 +36,13 @@ and the tones are assumed to fall on (or very near) FFT bins.
 
 ```python
 difference_frequency_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f1: float,
     f2: float,
     order: int = 2,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -89,12 +89,12 @@ tone or DC read zero.
 
 ```python
 dynamic_intermodulation_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f_sine: float = 15000.0,
     f_square: float = 3150.0,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -129,12 +129,12 @@ sine amplitude.
 
 ```python
 modulation_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f_low: float,
     f_high: float,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> ModulationDistortionResult
 ```
 
@@ -249,12 +249,12 @@ the carrier, the modulation counterpart of
 
 ```python
 total_difference_frequency_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     f1: float = 8000.0,
     f2: float = 11950.0,
     *,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
 ) -> float
 ```
 

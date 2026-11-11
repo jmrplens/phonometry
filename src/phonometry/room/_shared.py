@@ -25,9 +25,10 @@ from .._internal.validation import (
 from ..filters import OctaveFilterBank, nominal_frequencies
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._internal.signal import Signal
+    from .._internal.types import NumericArrayLike
 
 #: Onset threshold: the direct sound starts where the squared IR first
 #: rises to within 20 dB of its maximum (trigger point per ISO 3382-1:2009,
@@ -42,7 +43,7 @@ ONSET_DB = 20.0
 NOISE_TAIL_FRACTION = 0.1
 
 
-def validate_ir(ir: Signal | ArrayLike, fs: float) -> NDArray[np.float64]:
+def validate_ir(ir: Signal | NumericArrayLike, fs: float) -> NDArray[np.float64]:
     """Accept a one-dimensional, non-silent impulse response, calibrated.
 
     :param ir: The impulse response, as an array or a

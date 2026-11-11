@@ -190,7 +190,7 @@ $\bar{\tau} = \int_0^{\pi/2} \tau(\theta) \cos\theta \,\mathrm{d}\theta$, evalua
 
 ```python
 corner_transmission_coefficient(
-    angle_rad: ArrayLike,
+    angle_rad: NumericArrayLike,
     chi: float,
     psi: float,
     junction: Literal['X', 'T1', 'T2', 'L'] = 'X',
@@ -224,12 +224,12 @@ Returns `0` for angles beyond the cut-off $\arcsin(\chi)$
 
 ```python
 coupling_loss_factor(
-    transmission_coefficient: ArrayLike,
+    transmission_coefficient: NumericArrayLike,
     group_velocity: float,
     junction_length: float,
     plate_area: float,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -298,7 +298,7 @@ junction_transmission(
     wave_speed2: float,
     surface_density2: float,
     *,
-    angles_deg: ArrayLike | None = None,
+    angles_deg: NumericArrayLike | None = None,
 ) -> JunctionTransmissionResult
 ```
 
@@ -532,7 +532,7 @@ the junction type follows
 
 ```python
 point_connection_coupling_loss_factor(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     n_connections: int | np.integer[Any],
     *,
     thickness1_m: float,
@@ -660,7 +660,7 @@ of [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-tra
 
 ```python
 straight_transmission_coefficient(
-    angle_rad: ArrayLike,
+    angle_rad: NumericArrayLike,
     chi: float,
     psi: float,
     junction: Literal['X', 'T1'] = 'X',
@@ -695,7 +695,7 @@ covered.
 
 ```python
 wave_vibration_reduction_index(
-    transmission_coefficient: ArrayLike,
+    transmission_coefficient: NumericArrayLike,
     critical_frequency_receiver: float,
 ) -> NDArray[np.float64]
 ```

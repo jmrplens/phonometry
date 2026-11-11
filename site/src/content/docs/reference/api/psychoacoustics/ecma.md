@@ -164,7 +164,7 @@ Adds a loudness-vs-time panel.  Requires matplotlib
 
 ```python
 loudness_ecma(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     field: Literal['free', 'diffuse'] = 'free',
 ) -> EcmaLoudness

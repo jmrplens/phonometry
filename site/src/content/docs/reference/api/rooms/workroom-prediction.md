@@ -266,7 +266,7 @@ SOURCE_DETAIL_LEVELS = {1: 'omnidirectional point sources', 2: 'point sources wi
 
 ```python
 total_workstation_level(
-    contribution_levels: ArrayLike,
+    contribution_levels: NumericArrayLike,
     *,
     existing_level: float | None = None,
 ) -> float

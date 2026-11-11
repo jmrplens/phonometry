@@ -160,7 +160,7 @@ an altered or extended line (6.5.3.6 b)).
 ## railway_kb_fmax
 
 ```python
-railway_kb_fmax(kb_ftm_zug: ArrayLike) -> float
+railway_kb_fmax(kb_ftm_zug: NumericArrayLike) -> float
 ```
 
 The $KB_\mathrm{Fmax}$ of a railway, Formula (8).
@@ -266,10 +266,10 @@ $KB_\mathrm{Fmax}$ and the $KB_\mathrm{FTr}$ condition hold.
 
 ```python
 train_assessment_severity(
-    kb_ftm_zug: ArrayLike,
-    trains: ArrayLike,
+    kb_ftm_zug: NumericArrayLike,
+    trains: NumericArrayLike,
     *,
-    alpha: ArrayLike,
+    alpha: NumericArrayLike,
     time_of_day: Literal['day', 'night'] = 'day',
 ) -> float
 ```
@@ -307,7 +307,7 @@ two tracks can each carry a train in the same interval.
 ## train_category_rms
 
 ```python
-train_category_rms(kb_fti_zug: ArrayLike) -> float
+train_category_rms(kb_fti_zug: NumericArrayLike) -> float
 ```
 
 The clock maximum r.m.s. of one category of train, Formula (5).
@@ -337,7 +337,7 @@ $KB_\mathrm{Fmax}$ of Formula (7) is formed from this value.
 ## train_kb_fmax
 
 ```python
-train_kb_fmax(kb_ftm_zug: ArrayLike) -> NDArray[np.float64]
+train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 The $KB_\mathrm{Fmax,Zug}$ of each category, Formula (7).

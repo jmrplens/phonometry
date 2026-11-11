@@ -47,11 +47,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import WindowSpec
+    from .._internal.types import NumericArrayLike, WindowSpec
 
 __all__ = [
     "ModulationDistortionResult",
@@ -184,7 +184,7 @@ class ModulationDistortionResult(OwnsArrays):
 
 
 def modulation_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f_low: float,
@@ -275,7 +275,7 @@ def modulation_distortion(
 
 
 def difference_frequency_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f1: float,
@@ -346,7 +346,7 @@ def difference_frequency_distortion(
 
 
 def total_difference_frequency_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     f1: float = 8000.0,
     f2: float = 11950.0,
@@ -439,7 +439,7 @@ def _dim_components(f_sine: float, f_square: float, nyquist: float) -> list[floa
 
 
 def dynamic_intermodulation_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f_sine: float = 15000.0,

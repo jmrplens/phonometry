@@ -64,10 +64,10 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .._report.metadata import ReportMetadata
     from .free_field_qualification import FreeFieldCheck
 
@@ -501,7 +501,10 @@ def _k1_lower_criterion(frequencies: np.ndarray) -> np.ndarray:
 
 
 def precision_background_correction(
-    source_levels: ArrayLike, background_levels: ArrayLike, *, frequencies: ArrayLike
+    source_levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
 ) -> np.ndarray:
     r"""Per-position background correction ``K1i`` (ISO 3745:2012 Eq. 11).
 
@@ -559,7 +562,7 @@ def meteorological_corrections(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
-    air_absorption_db_per_m: ArrayLike | None = None,
+    air_absorption_db_per_m: NumericArrayLike | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection:
     r"""Meteorological corrections C1, C2, C3 (ISO 3745:2012 Eq. 14 block).
@@ -665,13 +668,13 @@ def precision_uncertainty[V: RealValues](
 
 
 @overload
-def precision_uncertainty[A: ArrayLike](
+def precision_uncertainty[A: NumericArrayLike](
     sigma_r0: A, sigma_omc_db: float = 0.0, coverage_factor: float = 2.0
 ) -> float | NDArray[np.float64]: ...
 
 
 def precision_uncertainty(
-    sigma_r0: ArrayLike, sigma_omc_db: float = 0.0, coverage_factor: float = 2.0
+    sigma_r0: NumericArrayLike, sigma_omc_db: float = 0.0, coverage_factor: float = 2.0
 ) -> float | NDArray[np.float64]:
     r"""Expanded uncertainty :math:`U = k \sigma_\mathrm{tot}` (ISO 3745:2012).
 
@@ -704,7 +707,7 @@ def precision_uncertainty(
 
 def _precision_k1(
     levels: np.ndarray,
-    background_levels: ArrayLike | None,
+    background_levels: NumericArrayLike | None,
     freqs: np.ndarray | None,
 ) -> np.ndarray:
     """Per-position background correction K1i (Eq. 11), zero without background.
@@ -734,7 +737,7 @@ def _precision_k1(
 
 
 def _precision_surface_level(
-    corrected: np.ndarray, areas: ArrayLike | None
+    corrected: np.ndarray, areas: NumericArrayLike | None
 ) -> np.ndarray:
     """Surface time-averaged level Lp_bar: equal-area Eq. 12 or area-weighted
     Eq. 13 when partial areas ``Si`` are supplied.
@@ -804,7 +807,7 @@ def _room_qualification_warnings(
     check: FreeFieldCheck,
     surface: PrecisionSurface,
     radius: float,
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
 ) -> None:
     """Warn where the measurement leaves the room qualification (Annex A)."""
     _check_qualified_room(check, surface)
@@ -843,16 +846,16 @@ def _room_qualification_warnings(
 
 @overload
 def sound_power_anechoic(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: PrecisionSurface,
     *,
     radius: float,
-    background_levels: ArrayLike,
-    frequencies: ArrayLike,
-    areas: ArrayLike | None = ...,
+    background_levels: NumericArrayLike,
+    frequencies: NumericArrayLike,
+    areas: NumericArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: ArrayLike | None = ...,
+    air_absorption_db_per_m: NumericArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -861,15 +864,15 @@ def sound_power_anechoic(
 
 @overload
 def sound_power_anechoic(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: PrecisionSurface,
     *,
     radius: float,
-    frequencies: ArrayLike | None = ...,
-    areas: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
+    areas: NumericArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: ArrayLike | None = ...,
+    air_absorption_db_per_m: NumericArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -877,16 +880,16 @@ def sound_power_anechoic(
 
 
 def sound_power_anechoic(
-    levels_positions: ArrayLike,
+    levels_positions: NumericArrayLike,
     surface: PrecisionSurface,
     *,
     radius: float,
-    background_levels: ArrayLike | None = None,
-    frequencies: ArrayLike | None = None,
-    areas: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    areas: NumericArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
-    air_absorption_db_per_m: ArrayLike | None = None,
+    air_absorption_db_per_m: NumericArrayLike | None = None,
     sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
     room_qualification: FreeFieldCheck | None = None,

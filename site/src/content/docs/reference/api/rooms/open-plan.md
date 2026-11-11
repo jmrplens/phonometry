@@ -41,9 +41,9 @@ STI > 0.20 in all positions" (Clause 6.3).
 
 ```python
 open_plan_metrics(
-    positions_m: ArrayLike,
-    spl_a_speech: ArrayLike,
-    sti_values: ArrayLike,
+    positions_m: NumericArrayLike,
+    spl_a_speech: NumericArrayLike,
+    sti_values: NumericArrayLike,
 ) -> OpenPlanResult
 ```
 
@@ -202,7 +202,7 @@ above it).
 
 ```python
 plot_open_plan_geometry(
-    positions: ArrayLike,
+    positions: NumericArrayLike,
     *,
     ax: Axes | None = None,
     rd: float | None = None,

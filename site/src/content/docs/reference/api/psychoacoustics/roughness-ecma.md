@@ -123,7 +123,7 @@ PROMINENT_ROUGHNESS_ASPER = 0.2
 
 ```python
 roughness_ecma(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     field: Literal['free', 'diffuse'] = 'free',
 ) -> EcmaRoughness

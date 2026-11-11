@@ -72,10 +72,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import NumericArrayLike, ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -194,7 +194,7 @@ def _to_units(alpha: float) -> int:
 
 
 def _coerce(
-    values: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    values: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
     centers: tuple[int, ...],
     name: str,
 ) -> list[float]:
@@ -522,7 +522,7 @@ class AbsorptionRatingResult(OwnsArrays):
 
 
 def practical_absorption_coefficient(
-    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> NDArray[np.float64]:
     """Practical sound absorption coefficients ``alpha_p`` (ISO 11654 Clause 4.1).
 
@@ -572,7 +572,7 @@ def _shape_indicator(measured_units: list[int], reference_units: list[int]) -> s
 
 
 def weighted_absorption(
-    alpha_p: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    alpha_p: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> AbsorptionRatingResult:
     """Weighted sound absorption coefficient ``alpha_w`` (ISO 11654 Clause 4.2).
 
@@ -653,7 +653,7 @@ def _rate(
 
 
 def weighted_absorption_from_third_octave(
-    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | ArrayLike,
+    third_octave_alpha_s: Mapping[Any, float] | Sequence[float] | NumericArrayLike,
 ) -> AbsorptionRatingResult:
     """Weighted absorption rating from one-third-octave ``alpha_s`` (ISO 11654).
 

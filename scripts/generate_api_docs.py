@@ -954,6 +954,12 @@ _ANNOTATION_NAME_RE = re.compile(r"(?<![\w.])[A-Za-z_]\w*")
 #: How deep one alias may name another before the expansion stops.
 _MAX_ALIAS_DEPTH = 5
 
+#: Unpublished aliases a signature keeps by name, each with the module that
+#: defines it: the index page says once what each one takes. Spelt out,
+#: ``NumericArrayLike`` would put its four members on nearly every parameter
+#: of the reference.
+KEPT_ALIASES = MappingProxyType({"NumericArrayLike": "phonometry._internal.types"})
+
 
 def _is_type_alias(obj: object) -> bool:
     """Whether ``obj`` is a typing alias (``Literal[...]``, a union, ``type X``)."""
@@ -1083,7 +1089,8 @@ def expand_unpublished_aliases(text: str, module_name: str, depth: int = 0) -> s
     ``form: DeclarationForm`` names something a reader can neither import nor
     look up: no type alias is public. So ``form: Literal['dual-number',
     'single-number']`` is what the page shows, the alias's definition as its
-    author wrote it. An alias some package did publish would stay a name. An
+    author wrote it. An alias some package did publish would stay a name, and
+    so does one of :data:`KEPT_ALIASES`, which the index page explains. An
     alias that composes a ``Literal`` from others reads as the one list of its
     members (see :func:`_flattened_literals`).
 
@@ -1102,6 +1109,8 @@ def expand_unpublished_aliases(text: str, module_name: str, depth: int = 0) -> s
             return match.group(0)
         home, definition = found
         alias_name = match.group(0)
+        if KEPT_ALIASES.get(alias_name) == home:
+            return alias_name
         obj = getattr(sys.modules[home], alias_name, None)
         if obj is not None and id(obj) in _published_ids():
             return alias_name
@@ -1308,12 +1317,27 @@ def _keyword_annotation(node: ast.expr) -> ast.expr:
     return node
 
 
+class _Written:
+    """A default the page shows as the stub writes it."""
+
+    __slots__ = ("text",)
+
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    def __repr__(self) -> str:
+        return self.text
+
+
 def _stub_default(node: ast.expr | None, runtime: inspect.Parameter | None) -> object:
     """The default a stub parameter shows: the literal it writes, else the running one.
 
     ``...`` is a stub's placeholder (a ``default_factory`` field writes it),
     and a name (a module constant) is read from the running signature, which
-    is the same object the dataclass holds as the field's default.
+    is the same object the dataclass holds as the field's default. Any other
+    expression, ``MappingProxyType({})`` say, shows as written: its running
+    value would print as its own repr, ``mappingproxy({})``, which names no
+    type a reader can find.
     """
     if node is None:
         return inspect.Parameter.empty
@@ -1322,6 +1346,8 @@ def _stub_default(node: ast.expr | None, runtime: inspect.Parameter | None) -> o
     try:
         return ast.literal_eval(node)
     except ValueError:
+        if not isinstance(node, ast.Name | ast.Attribute):
+            return _Written(ast.unparse(node))
         return runtime.default if runtime is not None else Ellipsis
 
 
@@ -1545,6 +1571,8 @@ def _format_parameter(
             # The placeholder an overload head uses for "whatever the
             # implementation defaults to"; `repr` would print `Ellipsis`.
             default = "..."
+        elif isinstance(parameter.default, _Written):
+            default = parameter.default.text
         elif type(parameter.default).__module__ not in ("builtins", "types"):
             # Third-party reprs (numpy arrays) are not pinned, so a repr here
             # would make the drift gate hostage to dependency upgrades; the
@@ -2342,6 +2370,21 @@ def render_index(
             "`ValueError` and a value that is not a text a `TypeError`. That "
             "holds for `language` and `engine` everywhere they are taken, and "
             "is said here once rather than on every function."
+        ),
+        ":::",
+        "",
+        ":::note[Arrays of numbers]",
+        (
+            "A parameter typed `NumericArrayLike` takes a number or an array "
+            "of numbers: a `float`, an `int` or a `complex`, a list or a tuple "
+            "of them nested to any depth, or a NumPy array, or anything with an "
+            "`__array__`, of a numeric or boolean dtype. It is NumPy's "
+            "`ArrayLike` without its texts, so a type checker refuses a `str` "
+            "or `bytes` there, as the call does. In code of your own, an "
+            "`NDArray`, a `Sequence[float]` or a `float` passes it, and a "
+            "variable annotated `ArrayLike` does not, nor does a `memoryview` "
+            "or another object that offers its numbers only through the buffer "
+            "protocol, which the call converts: pass `np.asarray(view)`."
         ),
         ":::",
         "",

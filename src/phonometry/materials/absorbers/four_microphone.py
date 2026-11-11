@@ -32,7 +32,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
@@ -57,7 +57,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
 
 Shape = Literal["circular", "rectangular", "square"]
 
@@ -108,7 +108,7 @@ __all__ = [
 # Air properties. The ISO 10534-2 pair lives with the two-microphone method;
 # both pairs take degrees Celsius.
 # ---------------------------------------------------------------------------
-def speed_of_sound_astm_e2611(*, temperature_c: ArrayLike) -> Real:
+def speed_of_sound_astm_e2611(*, temperature_c: NumericArrayLike) -> Real:
     r"""Speed of sound in air (ASTM E2611-19, Eq. (4)).
 
     :math:`c = 20.047 \sqrt{273.15 + T}`.
@@ -125,8 +125,8 @@ def speed_of_sound_astm_e2611(*, temperature_c: ArrayLike) -> Real:
 
 def air_density_astm_e2611(
     *,
-    temperature_c: ArrayLike,
-    static_pressure_kpa: ArrayLike = _ASTM_P_REF,
+    temperature_c: NumericArrayLike,
+    static_pressure_kpa: NumericArrayLike = _ASTM_P_REF,
 ) -> Real:
     r"""Air density (ASTM E2611-19, Eq. (5)).
 
@@ -314,16 +314,16 @@ class FaceQuantities(OwnsArrays):
 
 
 def wave_decomposition(
-    h1: ArrayLike,
-    h2: ArrayLike,
-    h3: ArrayLike,
-    h4: ArrayLike,
+    h1: NumericArrayLike,
+    h2: NumericArrayLike,
+    h3: NumericArrayLike,
+    h4: NumericArrayLike,
     *,
     l1: float,
     s1: float,
     l2: float,
     s2: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     diameter_m: float | None = None,
     shape: Shape = "circular",
 ) -> WaveAmplitudes:
@@ -409,12 +409,12 @@ def wave_decomposition(
 
 
 def face_quantities(
-    a: ArrayLike,
-    b: ArrayLike,
-    c: ArrayLike,
-    d: ArrayLike,
+    a: NumericArrayLike,
+    b: NumericArrayLike,
+    c: NumericArrayLike,
+    d: NumericArrayLike,
     *,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     thickness_m: float,
     characteristic_impedance: float,
 ) -> FaceQuantities:
@@ -512,10 +512,10 @@ class TransferMatrix(OwnsArrays):
 
         def __init__(
             self,
-            t11: ArrayLike,
-            t12: ArrayLike,
-            t21: ArrayLike,
-            t22: ArrayLike,
+            t11: NumericArrayLike,
+            t12: NumericArrayLike,
+            t21: NumericArrayLike,
+            t22: NumericArrayLike,
             *,
             l1: float | None = None,
             s1: float | None = None,
@@ -524,7 +524,7 @@ class TransferMatrix(OwnsArrays):
             thickness_m: float | None = None,
             diameter_m: float | None = None,
             shape: Shape | None = None,
-            frequencies: ArrayLike | None = None,
+            frequencies: NumericArrayLike | None = None,
             air_characteristic_impedance: float | None = None,
         ) -> None: ...
 
@@ -638,7 +638,7 @@ class TransferMatrix(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        frequencies: ArrayLike | None = None,
+        frequencies: NumericArrayLike | None = None,
         characteristic_impedance: float | None = None,
         language: Language = "en",
         **kwargs: Any,
@@ -717,7 +717,7 @@ class TransferMatrix(OwnsArrays):
 
 
 def air_layer_transfer_matrix(
-    wavenumber: ArrayLike, thickness_m: float, characteristic_impedance: float
+    wavenumber: NumericArrayLike, thickness_m: float, characteristic_impedance: float
 ) -> TransferMatrix:
     r"""Analytic transfer matrix of a pure air layer of thickness ``d``.
 
@@ -756,7 +756,8 @@ def air_layer_transfer_matrix(
 
 
 def _checked_load(
-    load: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike], name: str
+    load: tuple[NumericArrayLike, NumericArrayLike, NumericArrayLike, NumericArrayLike],
+    name: str,
 ) -> tuple[Complex, Complex, Complex, Complex]:
     """The four transfer functions of one termination, read before any arithmetic.
 
@@ -885,7 +886,7 @@ def _measurement_context(
     thickness_m: float,
     diameter_m: float | None,
     shape: str,
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     characteristic_impedance: float,
 ) -> dict[str, Any]:
     """Context fields a solver retains on the :class:`TransferMatrix`."""
@@ -905,17 +906,21 @@ def _measurement_context(
 
 
 def transfer_matrix_two_load(
-    load_a: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
-    load_b: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
+    load_a: tuple[
+        NumericArrayLike, NumericArrayLike, NumericArrayLike, NumericArrayLike
+    ],
+    load_b: tuple[
+        NumericArrayLike, NumericArrayLike, NumericArrayLike, NumericArrayLike
+    ],
     *,
     l1: float,
     s1: float,
     l2: float,
     s2: float,
     thickness_m: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     characteristic_impedance: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     diameter_m: float | None = None,
     shape: Shape = "circular",
 ) -> TransferMatrix:
@@ -1030,16 +1035,16 @@ def transfer_matrix_two_load(
 
 
 def transfer_matrix_one_load(
-    load: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
+    load: tuple[NumericArrayLike, NumericArrayLike, NumericArrayLike, NumericArrayLike],
     *,
     l1: float,
     s1: float,
     l2: float,
     s2: float,
     thickness_m: float,
-    wavenumber: ArrayLike,
+    wavenumber: NumericArrayLike,
     characteristic_impedance: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     diameter_m: float | None = None,
     shape: Shape = "circular",
 ) -> TransferMatrix:

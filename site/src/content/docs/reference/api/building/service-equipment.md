@@ -143,8 +143,8 @@ the on-site checks met exactly and missed.
 
 ```python
 additional_microphone_position(
-    room_dimensions_m: ArrayLike,
-    source_position_m: ArrayLike,
+    room_dimensions_m: NumericArrayLike,
+    source_position_m: NumericArrayLike,
     *,
     mounting: Literal['wall', 'ceiling'],
 ) -> np.ndarray
@@ -341,7 +341,7 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 check_background_duration(
-    durations_s: ArrayLike,
+    durations_s: NumericArrayLike,
     *,
     tolerance_s: float,
 ) -> BackgroundDurationCheck
@@ -385,7 +385,7 @@ the same positions, is not a number and is left to the operator.
 ```python
 check_instrument_agreement(
     result: ServiceEquipmentResult,
-    instrument_levels: Mapping[str, ArrayLike],
+    instrument_levels: Mapping[str, NumericArrayLike],
 ) -> InstrumentAgreementCheck
 ```
 
@@ -425,8 +425,8 @@ case.
 
 ```python
 check_measurement_disturbance(
-    max_levels: ArrayLike,
-    equivalent_levels: ArrayLike,
+    max_levels: NumericArrayLike,
+    equivalent_levels: NumericArrayLike,
 ) -> MeasurementDisturbanceCheck
 ```
 
@@ -461,7 +461,7 @@ the frequency range", which the operator chooses. A difference of exactly
 ## check_position_spread
 
 ```python
-check_position_spread(levels: ArrayLike) -> PositionSpreadCheck
+check_position_spread(levels: NumericArrayLike) -> PositionSpreadCheck
 ```
 
 Are the positions measured so far enough (ISO/DIS 16032:2023 7.4.1)?
@@ -512,13 +512,13 @@ while a later one can still pass, and a spread at a limit does not pass it
 
 ```python
 check_service_equipment_positions(
-    room_dimensions_m: ArrayLike,
-    corner_position_m: ArrayLike,
-    room_positions_m: ArrayLike,
+    room_dimensions_m: NumericArrayLike,
+    corner_position_m: NumericArrayLike,
+    room_positions_m: NumericArrayLike,
     *,
-    source_positions_m: ArrayLike | None = None,
+    source_positions_m: NumericArrayLike | None = None,
     small_room: bool | np.bool_ = False,
-    corner_obstacle_distance_m: ArrayLike | None = None,
+    corner_obstacle_distance_m: NumericArrayLike | None = None,
 ) -> ServiceEquipmentPositionCheck
 ```
 
@@ -571,11 +571,11 @@ positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
 ```python
 check_varying_background(
-    background_max_level: ArrayLike,
-    equipment_levels: ArrayLike,
+    background_max_level: NumericArrayLike,
+    equipment_levels: NumericArrayLike,
     *,
     observation_time_s: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> VaryingBackgroundCheck
 ```
 
@@ -694,7 +694,7 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 loudest_corner(
-    c_weighted_levels: ArrayLike,
+    c_weighted_levels: NumericArrayLike,
     *,
     excluded: Sequence[int | np.integer[Any]] = (),
 ) -> int
@@ -948,10 +948,10 @@ How many sets of three readings there are: 1, 2 or 3.
 
 ```python
 service_equipment_background_correction(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> ServiceEquipmentBackgroundResult
 ```
 
@@ -993,13 +993,13 @@ the equipment, the result stands without correction
 
 ```python
 service_equipment_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     quantity: Literal['Smax', 'Fmax', 'eq'],
     fraction: Literal[1, 3] | np.integer[Any] = 3,
-    background_levels: ArrayLike | None = None,
-    reverberation_time: ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reverberation_time: NumericArrayLike | None = None,
     volume: float | None = None,
     reference_reverberation_time_s: float = 0.5,
     a_weighting_range: Literal['restricted', 'extended'] = 'restricted',
@@ -1588,9 +1588,9 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 verify_calibration_deviation(
-    calibration_levels: ArrayLike,
+    calibration_levels: NumericArrayLike,
     *,
-    previous_levels: ArrayLike | None = None,
+    previous_levels: NumericArrayLike | None = None,
 ) -> CalibrationDeviationResult
 ```
 

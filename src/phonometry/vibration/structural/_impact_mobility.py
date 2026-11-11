@@ -130,10 +130,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine, TwoPanels
+    from ..._internal.types import NumericArrayLike, ReportEngine, TwoPanels
     from ..._report.metadata import ReportMetadata
 
 Kind = Literal["accelerance", "mobility", "receptance"]
@@ -1356,9 +1356,9 @@ class ExponentialWindowCorrection(OwnsArrays):
 
 
 def exponential_window_correction(
-    apparent_damping_ratio: ArrayLike,
+    apparent_damping_ratio: NumericArrayLike,
     *,
-    damped_natural_frequency_hz: ArrayLike,
+    damped_natural_frequency_hz: NumericArrayLike,
     exponential_decay_rate_per_s: float,
 ) -> ExponentialWindowCorrection:
     r"""Remove an exponential window's damping from estimated modes (Formula (A.3)).
@@ -1469,7 +1469,7 @@ class SingleModeFitResult(OwnsArrays):
             exponential_decay_rate_per_s=self.exponential_decay_rate_per_s,
         )
 
-    def _synthesize(self, frequencies: ArrayLike, pole: complex) -> np.ndarray:
+    def _synthesize(self, frequencies: NumericArrayLike, pole: complex) -> np.ndarray:
         s = 2j * np.pi * real_array(frequencies, "frequencies")
         residue = complex(self.residue)
         value = (
@@ -1479,7 +1479,7 @@ class SingleModeFitResult(OwnsArrays):
         )
         return np.asarray(value, dtype=np.complex128)
 
-    def fitted_frf(self, frequencies: ArrayLike) -> np.ndarray:
+    def fitted_frf(self, frequencies: NumericArrayLike) -> np.ndarray:
         """The fitted model at any frequencies, window included, of kind :attr:`kind`.
 
         :param frequencies: Frequencies, in hertz.
@@ -1487,7 +1487,7 @@ class SingleModeFitResult(OwnsArrays):
         """
         return self._synthesize(frequencies, complex(self.pole_rad_s))
 
-    def corrected_frf(self, frequencies: ArrayLike) -> np.ndarray:
+    def corrected_frf(self, frequencies: NumericArrayLike) -> np.ndarray:
         r"""The mode with the window taken out, of kind :attr:`kind` (Annex A).
 
         The pole is moved back by the decay rate, :math:`p + a`, and the
@@ -1501,7 +1501,7 @@ class SingleModeFitResult(OwnsArrays):
         pole = complex(self.pole_rad_s) + self.exponential_decay_rate_per_s
         return self._synthesize(frequencies, pole)
 
-    def corrected_mobility(self, frequencies: ArrayLike) -> np.ndarray:
+    def corrected_mobility(self, frequencies: NumericArrayLike) -> np.ndarray:
         """The corrected mode as mobility, in m/(N·s).
 
         :param frequencies: Frequencies, in hertz (> 0).
@@ -1572,9 +1572,9 @@ def _solve_mode(
 
 
 def single_mode_fit(
-    frf: ArrayLike,
+    frf: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     band_hz: tuple[float, float],
     kind: Kind = "mobility",
     exponential_decay_rate_per_s: float = 0.0,
@@ -2615,9 +2615,9 @@ class ChannelMatchVerification(OwnsArrays):
 
 
 def verify_channel_match(
-    response: ArrayLike,
+    response: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     frequency_range_hz: tuple[float, float],
 ) -> ChannelMatchVerification:
     """Is the analyser's channel-to-channel match inside 8.1's tolerances?

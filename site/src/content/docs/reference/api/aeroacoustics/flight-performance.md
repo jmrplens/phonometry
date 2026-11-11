@@ -521,9 +521,9 @@ PerformanceAircraft(
     n_engines: int | np.integer[Any],
     max_static_thrust_lb: float,
     max_landing_weight_lb: float,
-    jet_coefficients: Mapping[str, JetEngineCoefficients] = ...,
-    propeller_coefficients: Mapping[str, PropellerEngineCoefficients] = ...,
-    aerodynamic_coefficients: Mapping[tuple[str, str], AerodynamicCoefficients] = ...,
+    jet_coefficients: Mapping[str, JetEngineCoefficients] = MappingProxyType({}),
+    propeller_coefficients: Mapping[str, PropellerEngineCoefficients] = MappingProxyType({}),
+    aerodynamic_coefficients: Mapping[tuple[str, str], AerodynamicCoefficients] = MappingProxyType({}),
 )
 ```
 

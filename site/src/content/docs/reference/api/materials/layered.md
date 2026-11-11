@@ -59,12 +59,12 @@ A plain air gap of `thickness_m` metres inside the stack.
 
 ```python
 diffuse_field_absorption(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer],
     *,
     angle_limit_rad: float = 1.5707963267948966,
     n_quadrature_points: int | np.integer[Any] = 64,
-    termination: Literal['rigid', 'free'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'rigid',
+    termination: Literal['rigid', 'free'] | NumericArrayLike = 'rigid',
     fluid: Fluid = ...,
 ) -> DiffuseFieldAbsorptionResult
 ```
@@ -145,11 +145,11 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 layered_absorber(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer],
     *,
     angle_rad: float = 0.0,
-    termination: Literal['rigid', 'free'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'rigid',
+    termination: Literal['rigid', 'free'] | NumericArrayLike = 'rigid',
     fluid: Fluid = ...,
 ) -> LayeredAbsorberResult
 ```
@@ -361,7 +361,7 @@ is passed to [`layered_absorber`](/phonometry/reference/api/materials/layered/#l
 
 ```python
 statistical_absorption(
-    normalized_impedance: ArrayLike,
+    normalized_impedance: NumericArrayLike,
     *,
     angle_limit_rad: float = 1.5707963267948966,
 ) -> NDArray[np.float64]

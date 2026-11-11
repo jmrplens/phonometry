@@ -72,7 +72,9 @@ from ..._internal.validation import (
 from .mechanical_mobility import MobilityResult
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from ..._internal.types import NumericArrayLike
 
 BeamLocation = Literal["center", "end"]
 PlateLocation = Literal["center", "edge"]
@@ -130,7 +132,7 @@ def plate_bending_stiffness(
 
 
 def beam_bending_wave_speed(
-    frequency: ArrayLike, bending_stiffness: float, mass_per_length: float
+    frequency: NumericArrayLike, bending_stiffness: float, mass_per_length: float
 ) -> NDArray[np.float64]:
     r"""Free bending wave speed of a beam
     :math:`c_\mathrm{B} = (B \omega^2 / m')^{1/4}`.
@@ -150,7 +152,7 @@ def beam_bending_wave_speed(
 
 
 def plate_bending_wave_speed(
-    frequency: ArrayLike, bending_stiffness: float, mass_per_area: float
+    frequency: NumericArrayLike, bending_stiffness: float, mass_per_area: float
 ) -> NDArray[np.float64]:
     r"""Free bending wave speed of a plate
     :math:`c_\mathrm{B} = (B' \omega^2 / m'')^{1/4}`.
@@ -170,7 +172,7 @@ def plate_bending_wave_speed(
     return np.asarray((b * omega**2 / m2) ** 0.25, dtype=np.float64)
 
 
-def _omega(frequency: ArrayLike) -> NDArray[np.float64]:
+def _omega(frequency: NumericArrayLike) -> NDArray[np.float64]:
     r"""Angular frequency :math:`\omega = 2\pi f` (rad/s); rejects f <= 0."""
     f = real_array(frequency, "frequency")
     if np.any(f <= 0.0):
@@ -246,7 +248,7 @@ def infinite_plate_mobility(
 
 
 def infinite_beam_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
@@ -276,7 +278,7 @@ def infinite_beam_impedance(
 
 
 def infinite_beam_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,
@@ -304,7 +306,7 @@ def infinite_beam_mobility(
 
 
 def infinite_beam_moment_mobility(
-    frequency: ArrayLike, bending_stiffness: float, mass_per_length: float
+    frequency: NumericArrayLike, bending_stiffness: float, mass_per_length: float
 ) -> NDArray[np.complex128]:
     r"""Moment (rotational) mobility of an infinite beam (Cremer Eq. 5.75).
 
@@ -377,7 +379,9 @@ def longitudinal_rod_mobility(
 # ---------------------------------------------------------------------------
 
 
-def injected_power(force_n: ArrayLike, mobility: ArrayLike) -> NDArray[np.float64]:
+def injected_power(
+    force_n: NumericArrayLike, mobility: NumericArrayLike
+) -> NDArray[np.float64]:
     r"""Time-averaged vibrational power injected by a point force (Cremer 5.23).
 
     :math:`W = 0.5\, |F|^2 \operatorname{Re}\{Y\}`: only the real part
@@ -397,7 +401,7 @@ def injected_power(force_n: ArrayLike, mobility: ArrayLike) -> NDArray[np.float6
 
 
 def infinite_plate_point_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_area: float,
     *,
@@ -428,7 +432,7 @@ def infinite_plate_point_mobility(
 
 
 def infinite_beam_point_mobility(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     bending_stiffness: float,
     mass_per_length: float,
     *,

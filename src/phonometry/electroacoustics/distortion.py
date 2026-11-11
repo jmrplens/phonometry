@@ -50,11 +50,11 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import WindowSpec
+    from .._internal.types import NumericArrayLike, WindowSpec
 
 __all__ = [
     "HarmonicDistortionResult",
@@ -131,7 +131,7 @@ _MIN_SIGNAL_SAMPLES = 64
 
 
 def _validate_signal(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     *,
     calibrate: bool = True,
 ) -> NDArray[np.float64]:
@@ -224,7 +224,7 @@ def _harmonic_amplitudes(
 # Harmonic distortion (IEC 60268-3 14.12.2-3 / 14.12.5, AES17 6.3)
 # --------------------------------------------------------------------------- #
 def thd(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -296,7 +296,7 @@ def thd(
 
 
 def harmonic_distortion(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     fundamental: float,
@@ -442,7 +442,7 @@ def _aes17_rms_pair(
 
 
 def thd_plus_noise(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -508,7 +508,7 @@ def thd_plus_noise(
 
 
 def sinad(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -556,7 +556,7 @@ def sinad(
     return float(-thdn_db)
 
 
-def weighting_bs468(frequencies: ArrayLike) -> NDArray[np.float64]:
+def weighting_bs468(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     r"""ITU-R BS.468-4 weighting response, in dB re 1 kHz.
 
     Clause 1 of the Recommendation defines the nominal curve as the response
@@ -626,7 +626,7 @@ def _weighted_rms_468(x: NDArray[np.float64], fs: float) -> float:
 
 
 def weighted_thd(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -759,7 +759,7 @@ class HarmonicDistortionResult(OwnsArrays):
 
 
 def harmonic_analysis(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,

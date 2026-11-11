@@ -87,7 +87,9 @@ from .validation import real_array
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from .types import NumericArrayLike
 
 _REQUIRED = ("source", "about", "rows")
 
@@ -333,8 +335,10 @@ class Provenance(RichDisplay):
     field_test_standards: Mapping[str, str] = field(default_factory=dict)
 
     # A mapping field makes the record unhashable; saying so here gives the
-    # refusal the class's name instead of the mapping's.
-    __hash__ = None  # type: ignore[assignment]
+    # refusal the class's name instead of the mapping's. Declared as a class
+    # variable of None, so a type checker reads the override as written rather
+    # than inferring object's hash method on the rows that inherit it.
+    __hash__: ClassVar[None] = None  # type: ignore[assignment]
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
@@ -3037,7 +3041,7 @@ class BandedRow(CatalogueRow):
             self._band_field(band_hz), wanted_by=f"the {band_hz} Hz band"
         )
 
-    def values_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def values_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
         """The row's value at each of *frequencies*, or a refusal.
 
         The adapter for a function that takes one value per band by position

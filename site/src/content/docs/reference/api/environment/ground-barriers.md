@@ -108,7 +108,7 @@ Fresnel number $N = (2/\lambda)(A + B + e - d)$ (Bies Eq. (5.157)).
 
 ```python
 barrier_insertion_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source_height_m: float,
     barrier_distance: float,
     barrier_height_m: float,
@@ -117,7 +117,7 @@ barrier_insertion_loss(
     *,
     method: Literal['kurze_anderson', 'exact'] = 'exact',
     thickness_m: float | None = None,
-    ground_impedance: ArrayLike | PorousMediumResult | None = None,
+    ground_impedance: NumericArrayLike | PorousMediumResult | None = None,
     ground_flow_resistivity_pa_s_m2: float | None = None,
     ground_model: Literal['delany_bazley', 'miki'] = 'delany_bazley',
     fluid: Fluid = ...,
@@ -311,7 +311,7 @@ fresnel_number(
     source_to_edge: float,
     edge_to_receiver: float,
     direct_distance: float,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
@@ -347,18 +347,18 @@ in the bright zone.
 
 ```python
 ground_effect(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
     *,
-    impedance: ArrayLike | PorousMediumResult,
+    impedance: NumericArrayLike | PorousMediumResult,
     model: Literal['delany_bazley', 'miki'] = ...,
     fluid: Fluid = ...,
 ) -> SphericalGroundResult
 
 ground_effect(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
@@ -410,7 +410,9 @@ of the materials domain. Exactly one of the two must be given.
 ## kurze_anderson_attenuation
 
 ```python
-kurze_anderson_attenuation(fresnel_number: ArrayLike) -> NDArray[np.float64]
+kurze_anderson_attenuation(
+    fresnel_number: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Kurze-Anderson barrier attenuation (Bies Eq. (5.138); Kurze & Anderson, 1971).
@@ -496,12 +498,12 @@ difference annotated. Distances follow
 
 ```python
 spherical_reflection_coefficient(
-    normalized_impedance: ArrayLike,
+    normalized_impedance: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.complex128]
 ```

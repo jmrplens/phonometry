@@ -126,7 +126,7 @@ facade_sound_reduction(
     volume: float,
     delta_l_fs: float = 0.0,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> FacadePredictionResult
 ```
 
@@ -162,9 +162,9 @@ FacadeElement(
     *,
     name: str,
     area: float | None = None,
-    r: ArrayLike | None = None,
-    dn_e: ArrayLike | None = None,
-    insertion_loss: ArrayLike | None = None,
+    r: NumericArrayLike | None = None,
+    dn_e: NumericArrayLike | None = None,
+    insertion_loss: NumericArrayLike | None = None,
 )
 ```
 
@@ -376,7 +376,7 @@ into the quarter-space over hard ground is built into the formula.
 ## outdoor_level
 
 ```python
-outdoor_level(l_w: ArrayLike, attenuation: ArrayLike) -> float
+outdoor_level(l_w: NumericArrayLike, attenuation: NumericArrayLike) -> float
 ```
 
 Exterior level from one or more radiating sides (EN 12354-4 Formula E.1).
@@ -443,11 +443,11 @@ an area, such as airbricks rated by `dn_e`, get a nominal 0,1 m2 tile).
 radiated_sound_power(
     elements: Sequence[FacadeElement],
     *,
-    lp_in: ArrayLike,
+    lp_in: NumericArrayLike,
     area: float,
     c_d: float = -6.0,
     r_prime_cap: float | None = None,
-    octave_bands: ArrayLike | None = None,
+    octave_bands: NumericArrayLike | None = None,
 ) -> RadiatedPowerResult
 ```
 

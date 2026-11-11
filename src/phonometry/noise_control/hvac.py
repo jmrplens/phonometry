@@ -110,10 +110,10 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
 
 Shape = Literal["rectangular", "round"]
@@ -611,7 +611,7 @@ _DAMPER_CORRECTION: dict[str, NDArray[np.float64]] = {
 }
 
 
-def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
+def _frequencies(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     # Converted only when it must, never copied: every function here hands it
     # to an HVACSpectrumResult, which keeps its own read-only copy, and
     # nothing writes into it before that.
@@ -626,7 +626,7 @@ def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
 
 
 def _octave_slots(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     bands: NDArray[np.float64] = _OCTAVE_BANDS,
 ) -> tuple[NDArray[np.float64], NDArray[np.intp]]:
     """Map requested frequencies onto tabulated octave-band slots.
@@ -788,7 +788,7 @@ class HVACSpectrumResult(OwnsArrays):
 
 
 def end_reflection_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diameter_m: float,
     *,
     termination: Literal["flush", "room", "wall", "edge", "corner", "free"] = "flush",
@@ -968,7 +968,7 @@ def _vdi2081_bend_result(
 
 
 def elbow_insertion_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     width_m: float,
     *,
     bend_type: Literal["round", "square"] = "square",
@@ -1083,7 +1083,7 @@ def plenum_attenuation[V: RealValues](
 
 
 @overload
-def plenum_attenuation[A: ArrayLike](
+def plenum_attenuation[A: NumericArrayLike](
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
@@ -1097,7 +1097,7 @@ def plenum_attenuation(
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
-    mean_absorption: ArrayLike,
+    mean_absorption: NumericArrayLike,
     *,
     angle_rad: float = 0.0,
 ) -> float | NDArray[np.float64]:
@@ -1154,7 +1154,7 @@ def plenum_attenuation(
 
 
 def flow_noise_straight_duct(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flow_velocity: float,
     area: float,
 ) -> HVACSpectrumResult:
@@ -1249,7 +1249,7 @@ def flow_noise_straight_duct_overall(
 
 
 def flow_noise_bend(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flow_velocity: float,
     area: float,
     height_m: float,
@@ -1508,7 +1508,7 @@ def fan_sound_power(
     fan_type: FanType = ...,
     relative_efficiency_percent: float = ...,
     blade_frequency: float | None = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
 ) -> HVACSpectrumResult: ...
 
 
@@ -1523,7 +1523,7 @@ def fan_sound_power(
     specific_sound_power_level: float | None = ...,
     n_blades: int | np.integer[Any] | None = ...,
     relative_flow: float = ...,
-    frequencies: ArrayLike | None = ...,
+    frequencies: NumericArrayLike | None = ...,
 ) -> HVACSpectrumResult: ...
 
 
@@ -1543,7 +1543,7 @@ def fan_sound_power(
     specific_sound_power_level: float | None = None,
     n_blades: int | np.integer[Any] | None = None,
     relative_flow: float = 1.0,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HVACSpectrumResult:
     r"""Octave-band fan sound power from the operating point, by either method.
 
@@ -1722,7 +1722,7 @@ def fan_sound_power(
 
 def octave_band_limits(
     a_weighted_limit_db: float,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HVACSpectrumResult:
     r"""Octave limits from an A-weighted room requirement (VDI 2081 Part 2 Eq. (1)).
 
@@ -1765,7 +1765,7 @@ def octave_band_limits(
 
 
 def fan_casing_attenuation(
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HVACSpectrumResult:
     """Fan-housing (casing) attenuation of the radiated power (Long Table 13.8).
 
@@ -2008,7 +2008,7 @@ def _perimeter_over_area(width: float, height: float) -> float:
 
 
 def unlined_rectangular_duct_attenuation(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     width_m: float,
     height_m: float,
     length: float,
@@ -2100,7 +2100,7 @@ def unlined_rectangular_duct_attenuation(
 
 
 def unlined_circular_duct_attenuation(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     length: float,
     *,
     diameter_m: float | None = None,
@@ -2165,7 +2165,7 @@ def unlined_circular_duct_attenuation(
 
 
 def lined_rectangular_duct_attenuation(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     width_m: float,
     height_m: float,
     length: float,
@@ -2223,7 +2223,7 @@ def lined_rectangular_duct_attenuation(
 
 
 def lined_circular_duct_attenuation(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     diameter_m: float,
     length: float,
     lining_thickness_m: float,
@@ -2269,7 +2269,7 @@ def lined_circular_duct_attenuation(
 
 
 def flexible_duct_insertion_loss(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     diameter_m: float,
     length: float,
 ) -> HVACSpectrumResult:
@@ -2319,7 +2319,7 @@ def flexible_duct_insertion_loss(
 
 
 def section_change_loss(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     upstream_area: float,
     downstream_area: float,
     *,
@@ -2431,7 +2431,7 @@ def section_change_loss(
 
 def split_loss(
     main_area: float,
-    branch_areas: ArrayLike,
+    branch_areas: NumericArrayLike,
     *,
     branch: int | np.integer[Any] = 0,
     model: Model = "ashrae",
@@ -2508,7 +2508,7 @@ def split_loss(
 
 
 def end_reflection_loss_closed_form(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     diameter_m: float,
     *,
     termination: Literal["flush", "free"] = "flush",
@@ -2570,10 +2570,10 @@ def equivalent_diameter(area: float) -> float:
 def splitter_silencer_insertion_loss(
     height_m: float,
     length: float,
-    airway_widths: ArrayLike,
+    airway_widths: NumericArrayLike,
     splitter_thickness_m: float,
     *,
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
 ) -> HVACSpectrumResult:
     r"""Insertion loss of a parallel-splitter (dissipative) silencer.
 
@@ -2650,7 +2650,7 @@ def splitter_silencer_insertion_loss(
 
 
 def silencer_self_noise(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     airway_velocity: float,
     n_passages: int | np.integer[Any],
     height_m: float,
@@ -2765,7 +2765,7 @@ def _octave_band_number(frequencies: NDArray[np.float64]) -> NDArray[np.float64]
 
 
 def diffuser_sound_power(
-    frequencies: ArrayLike | None,
+    frequencies: NumericArrayLike | None,
     face_area: float,
     volume_flow: float,
     pressure_drop_pa: float,
@@ -2940,7 +2940,7 @@ def air_terminal_damper_correction(
 # Room effect
 # ---------------------------------------------------------------------------
 def _room_measure(
-    room_constant: ArrayLike | None, absorption_area: ArrayLike | None
+    room_constant: NumericArrayLike | None, absorption_area: NumericArrayLike | None
 ) -> NDArray[np.float64]:
     """The reverberant-field denominator, from whichever measure was given.
 
@@ -2975,7 +2975,7 @@ def room_effect[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def room_effect[V: RealValues, A2: ArrayLike](
+def room_effect[V: RealValues, A2: NumericArrayLike](
     distance: float, room_constant: V, *, directivity: A2 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -2987,7 +2987,7 @@ def room_effect[S1: RealScalar, V: RealValues](
 
 
 @overload
-def room_effect[A1: ArrayLike, A2: ArrayLike](
+def room_effect[A1: NumericArrayLike, A2: NumericArrayLike](
     distance: float, room_constant: A1, *, directivity: A2 = ...
 ) -> float | NDArray[np.float64]: ...
 
@@ -2999,7 +2999,7 @@ def room_effect[S1: RealScalar, S2: RealScalar](
 
 
 @overload
-def room_effect[V: RealValues, A2: ArrayLike](
+def room_effect[V: RealValues, A2: NumericArrayLike](
     distance: float, *, absorption_area: V, directivity: A2 = ...
 ) -> NDArray[np.float64]: ...
 
@@ -3011,17 +3011,17 @@ def room_effect[S1: RealScalar, V: RealValues](
 
 
 @overload
-def room_effect[A1: ArrayLike, A2: ArrayLike](
+def room_effect[A1: NumericArrayLike, A2: NumericArrayLike](
     distance: float, *, absorption_area: A1, directivity: A2 = ...
 ) -> float | NDArray[np.float64]: ...
 
 
 def room_effect(
     distance: float,
-    room_constant: ArrayLike | None = None,
+    room_constant: NumericArrayLike | None = None,
     *,
-    absorption_area: ArrayLike | None = None,
-    directivity: ArrayLike = 2.0,
+    absorption_area: NumericArrayLike | None = None,
+    directivity: NumericArrayLike = 2.0,
 ) -> float | NDArray[np.float64]:
     r"""Room effect: the drop from the terminal sound power to the room level.
 

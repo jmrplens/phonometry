@@ -84,7 +84,7 @@ without ties and $f_\mathrm{msm} = 50$ Hz with them for the same wall.
 
 ```python
 wall_tie_coupling_loss_factor(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     mass1: float,
     mass2: float,
     bending_stiffness1: float,

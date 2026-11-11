@@ -42,7 +42,7 @@ consistent unit works (kg/m³ by convention).
 
 ```python
 bottom_reflection_loss(
-    grazing_angle_deg: ArrayLike,
+    grazing_angle_deg: NumericArrayLike,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,
@@ -151,7 +151,7 @@ below this grazing angle the wave is totally reflected.
 
 ```python
 reflection_coefficient(
-    grazing_angle_deg: ArrayLike,
+    grazing_angle_deg: NumericArrayLike,
     *,
     rho1: float,
     c1: float,
@@ -185,7 +185,7 @@ Complex plane-wave pressure reflection coefficient at the seabed.
 
 ```python
 seabed_reflection(
-    grazing_angle_deg: ArrayLike,
+    grazing_angle_deg: NumericArrayLike,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,

@@ -43,10 +43,10 @@ from .frequencies import _genfreqs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealValues
+    from .._internal.types import NumericArrayLike, RealValues
 
 Mode = Literal["rms", "peak"]
 
@@ -244,7 +244,7 @@ def _spectrogram_axis(
         its axis of ``levels``.
     """
     count = levels.shape[-1 if name == "times" else -2]
-    axis = real_array(cast("ArrayLike", value), name)
+    axis = real_array(cast("NumericArrayLike", value), name)
     if axis.ndim != 1:
         msg = (
             f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
@@ -701,10 +701,10 @@ class OctaveFilterBank:
             self.order = order
             self.limits = limits
             self.filter_type = design.filter_type
-            self.ripple = design.ripple
-            self.attenuation = design.attenuation
-            self.calibration_factor = calibration.factor
-            self.dbfs = calibration.dbfs
+            self.ripple: float = design.ripple
+            self.attenuation: float = design.attenuation
+            self.calibration_factor: float = calibration.factor
+            self.dbfs: bool = calibration.dbfs
             # Whether the caller left the whole calibration bundle alone, which is
             # what decides if a calibrated Signal may supply its own factor. Asked
             # of the bundle rather than of its float field: comparing the frozen
@@ -712,7 +712,7 @@ class OctaveFilterBank:
             # folds in the dBFS switch, since a dBFS bank is referenced to digital
             # full scale and must not be handed pascals either.
             self._default_calibration = calibration == _DEFAULT_CALIBRATION
-            self.stateful = block_processing.stateful
+            self.stateful: bool = block_processing.stateful
 
             # The band set the bank is designed on, held as one immutable record
             # and read through the properties below.
@@ -730,13 +730,14 @@ class OctaveFilterBank:
                         headroom,
                         1.05 * _cheby2_headroom(fraction, order, design.attenuation),
                     )
-                self.factor = _downsamplingfactor(
+                # The decimation factor of each band, a whole number from 1.
+                self.factor: NDArray[np.int_] = _downsamplingfactor(
                     self.upper_edges.tolist(), fs, headroom
                 )
             else:
                 self.factor = np.ones(self.n_bands, dtype=int)
 
-            self.sos = _design_sos_filter(
+            self.sos: list[NDArray[np.float64]] = _design_sos_filter(
                 freq=self.frequencies.tolist(),
                 freq_d=self.lower_edges.tolist(),
                 freq_u=self.upper_edges.tolist(),
@@ -798,7 +799,7 @@ class OctaveFilterBank:
 
     def filter(
         self,
-        x: Signal | ArrayLike,
+        x: Signal | NumericArrayLike,
         *,
         sigbands: bool = False,
         mode: Mode = "rms",
@@ -879,7 +880,7 @@ class OctaveFilterBank:
         return OctaveFilterResult(spl, freq_out)
 
     def _prepare_signal(
-        self, x: Signal | ArrayLike, *, detrend: bool
+        self, x: Signal | NumericArrayLike, *, detrend: bool
     ) -> tuple[np.ndarray, bool]:
         """Coerce the input to a 2D ``[channels, samples]`` array for filtering.
 
@@ -918,7 +919,7 @@ class OctaveFilterBank:
 
     def spectrogram(
         self,
-        x: Signal | ArrayLike,
+        x: Signal | NumericArrayLike,
         window_time: float = 0.125,
         overlap: float = 0.5,
         mode: Mode = "rms",
@@ -1189,7 +1190,7 @@ def _cached_filter_bank(
 
 
 def octave_filter(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fraction: float | np.integer[Any] = 1,
     order: int | np.integer[Any] = 6,

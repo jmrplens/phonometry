@@ -70,10 +70,10 @@ so the report never merely repeats a manufacturer number:
 
 ```python
 microphone_characteristics(
-    response_db: ArrayLike,
+    response_db: NumericArrayLike,
     sensitivity_mv_per_pa: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     reference_frequency_hz: float = 1000.0,
     tolerance_db: float = 2.0,
     directivity: MicrophoneDirectivity = ...,
@@ -306,7 +306,7 @@ noise (17), carrying the same weighting.
 ```python
 MicrophoneDirectivity(
     *,
-    polar: Sequence[ArrayLike] | NDArray[Any] | None = None,
+    polar: Sequence[NumericArrayLike] | NDArray[Any] | None = None,
     frequency: float | None = None,
     index: float | None = None,
 )
@@ -362,7 +362,7 @@ MicrophoneNoise(
     voltage_v: float | None = None,
     equivalent_level: float | None = None,
     weighting: Literal['A', '468'] = 'A',
-    spectrum: Sequence[ArrayLike] | NDArray[Any] | None = None,
+    spectrum: Sequence[NumericArrayLike] | NDArray[Any] | None = None,
 )
 ```
 
@@ -386,7 +386,7 @@ output voltage, and the band spectrum that voltage was measured over.
 ```python
 MicrophoneOverload(
     *,
-    distortion: Sequence[ArrayLike] | NDArray[Any] | None = None,
+    distortion: Sequence[NumericArrayLike] | NDArray[Any] | None = None,
     thd_percent: float = 1.0,
     spl: float | None = None,
 )

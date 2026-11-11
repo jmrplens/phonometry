@@ -81,8 +81,8 @@ account for.
 
 ```python
 frequency_weighted_sel(
-    band_levels: ArrayLike,
-    weighting_db: ArrayLike,
+    band_levels: NumericArrayLike,
+    weighting_db: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -118,8 +118,8 @@ range from 1 Hz to 10 kHz always meets the requirement.
 
 ```python
 long_term_sel(
-    levels: ArrayLike,
-    probabilities: ArrayLike,
+    levels: NumericArrayLike,
+    probabilities: NumericArrayLike,
     *,
     rating_adjustment: float = 0.0,
 ) -> float
@@ -163,8 +163,8 @@ atmospheric-absorption class of probability 1.
 
 ```python
 replica_probabilities(
-    absorption_probabilities: ArrayLike,
-    excess_attenuation_probabilities: ArrayLike,
+    absorption_probabilities: NumericArrayLike,
+    excess_attenuation_probabilities: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -199,8 +199,8 @@ excess-attenuation class.
 
 ```python
 sel_distribution(
-    levels: ArrayLike,
-    probabilities: ArrayLike,
+    levels: NumericArrayLike,
+    probabilities: NumericArrayLike,
     *,
     sigma_db: float = 5.0,
     n_subclasses: int | np.integer[Any] = 10,
@@ -299,7 +299,7 @@ SELDistribution.class_density(
 ) -> NDArray[np.float64]
 
 SELDistribution.class_density(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -335,7 +335,9 @@ SELDistribution.density(
     levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-SELDistribution.density(levels: ArrayLike) -> float | NDArray[np.float64]
+SELDistribution.density(
+    levels: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The continuous density $\rho^{*}(x)$ (Equations (21), (23)), in 1/dB.
@@ -365,7 +367,9 @@ SELDistribution.exceedance(
     levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-SELDistribution.exceedance(levels: ArrayLike) -> float | NDArray[np.float64]
+SELDistribution.exceedance(
+    levels: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Probability that the level exceeds `x` (Equation (24)).
@@ -404,7 +408,7 @@ SELDistribution.exceedance_level(
 ) -> NDArray[np.float64]
 
 SELDistribution.exceedance_level(
-    percent: ArrayLike,
+    percent: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 

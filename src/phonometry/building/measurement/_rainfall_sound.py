@@ -86,9 +86,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 RainType = Literal["intense", "heavy"]
 
@@ -531,8 +531,8 @@ def verify_rain_generator(
     rainfall_rate_mm_h: float,
     *,
     rain_type: RainType = "heavy",
-    drop_diameters_mm: ArrayLike | None = None,
-    fall_velocities_m_s: ArrayLike | None = None,
+    drop_diameters_mm: NumericArrayLike | None = None,
+    fall_velocities_m_s: NumericArrayLike | None = None,
 ) -> RainGeneratorVerification:
     """Does the rain generator make the rain of Table H.1 (ISO 10140-5:2021)?
 
@@ -659,10 +659,10 @@ class RainfallReferenceCorrection(OwnsArrays):
 
 
 def rainfall_reference_correction(
-    l_i_reference: ArrayLike,
-    structural_reverberation_time: ArrayLike,
+    l_i_reference: NumericArrayLike,
+    structural_reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> RainfallReferenceCorrection:
     r"""Correction :math:`\Delta L_{I\mathrm{c}}` of a laboratory (ISO 10140-5 I.2).
 
@@ -846,7 +846,7 @@ class RainfallSoundResult(OwnsArrays):
 def _normalized(
     frequencies: np.ndarray,
     l_i: np.ndarray,
-    reference: RainfallReferenceCorrection | ArrayLike | None,
+    reference: RainfallReferenceCorrection | NumericArrayLike | None,
 ) -> tuple[np.ndarray | None, np.ndarray | None, float | None]:
     """``(ΔLIc, LInorm, LIAnorm)`` by Formula (K.5), or three ``None``."""
     if reference is None:
@@ -877,14 +877,14 @@ def _normalized(
 
 
 def rainfall_sound(
-    l_pr: ArrayLike,
-    reverberation_time: ArrayLike,
+    l_pr: NumericArrayLike,
+    reverberation_time: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     volume: float,
     excited_area_m2: float,
-    background_levels: ArrayLike | None = None,
-    reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
+    background_levels: NumericArrayLike | None = None,
+    reference_correction: RainfallReferenceCorrection | NumericArrayLike | None = None,
 ) -> RainfallSoundResult:
     r"""Sound intensity level of a specimen under artificial rain (K.4.2).
 
@@ -984,12 +984,12 @@ def rainfall_sound(
 
 
 def rainfall_sound_from_intensity(
-    l_im: ArrayLike,
+    l_im: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     measuring_area_m2: float,
     excited_area_m2: float,
-    reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
+    reference_correction: RainfallReferenceCorrection | NumericArrayLike | None = None,
 ) -> RainfallSoundResult:
     r"""Sound intensity level of a specimen under rain, measured directly (K.4.3).
 

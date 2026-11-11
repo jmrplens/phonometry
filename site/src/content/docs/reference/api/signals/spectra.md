@@ -67,11 +67,11 @@ is [`phonometry.signals.multitaper.multitaper_psd`](/phonometry/reference/api/si
 
 ```python
 coherent_output_spectrum(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -132,7 +132,7 @@ CoherentOutputSpectrumResult(
     n_segments: int,
     n_averages: float,
     resolution_bandwidth: float,
-    window: str | tuple[ArrayLike, ...],
+    window: str | tuple[str | NumericArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],
@@ -201,11 +201,11 @@ Plot the output/coherent/noise spectra and the spectral SNR.
 
 ```python
 cross_spectral_density(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -257,7 +257,7 @@ CrossSpectralDensityResult(
     n_segments: int,
     n_averages: float,
     resolution_bandwidth: float,
-    window: str | tuple[ArrayLike, ...],
+    window: str | tuple[str | NumericArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],
@@ -318,9 +318,9 @@ Plot the magnitude, phase (with ±σ band) and coherence.
 
 ```python
 fractional_octave_smoothing(
-    values: ArrayLike,
+    values: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     fraction: float = 3.0,
     domain: Literal['power', 'amplitude', 'db'] = 'power',
 ) -> NDArray[np.float64]
@@ -365,10 +365,10 @@ are copied unchanged.
 
 ```python
 power_spectral_density(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -458,7 +458,7 @@ SpectralDensityResult(
     n_averages: float,
     degrees_of_freedom: float,
     resolution_bandwidth: float,
-    window: str | tuple[ArrayLike, ...],
+    window: str | tuple[str | NumericArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],

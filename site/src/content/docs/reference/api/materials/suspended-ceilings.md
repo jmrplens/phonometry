@@ -57,8 +57,8 @@ air_absorption_correction(
     *,
     volume: float,
     specimen_area_m2: float,
-    attenuation_with_per_m: ArrayLike,
-    attenuation_empty_per_m: ArrayLike,
+    attenuation_with_per_m: NumericArrayLike,
+    attenuation_empty_per_m: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -250,7 +250,7 @@ check_ceiling_specimen(
     support_width_mm: float = 0.0,
     support_height_mm: float = 0.0,
     support_center_distance_m: float | None = None,
-    relative_humidity_percent: ArrayLike | None = None,
+    relative_humidity_percent: NumericArrayLike | None = None,
 ) -> CeilingSpecimenCheck
 ```
 
@@ -399,7 +399,7 @@ MOUNTING_TYPES = {'A': 'attached directly against a hard surface, with no air sp
 
 ```python
 reproducibility_uncertainty(
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> NDArray[np.float64]
 ```
 

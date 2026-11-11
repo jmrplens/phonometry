@@ -87,8 +87,8 @@ DOWNSTREAM_DISTANCE_COEFFICIENTS = (12.0, 10.0)
 
 ```python
 extraneous_corrected_mean_level(
-    levels: ArrayLike,
-    extraneous_levels: ArrayLike,
+    levels: NumericArrayLike,
+    extraneous_levels: NumericArrayLike,
 ) -> ExtraneousCorrectionResult
 ```
 
@@ -180,7 +180,7 @@ margin that floating point leaves a few parts in $10^{14}$ under
 
 ```python
 flow_velocity_m_s(
-    velocity_pressure_pa: ArrayLike,
+    velocity_pressure_pa: NumericArrayLike,
     density: float,
 ) -> NDArray[np.float64]
 ```
@@ -253,13 +253,13 @@ Equation (29) prints it and admits any gas through its molar mass.
 
 ```python
 in_situ_insertion_loss(
-    levels_without: ArrayLike,
-    levels_with: ArrayLike,
+    levels_without: NumericArrayLike,
+    levels_with: NumericArrayLike,
     *,
-    area_without_m2: ArrayLike,
-    area_with_m2: ArrayLike,
-    frequencies: ArrayLike | None = None,
-    field_correction_difference: ArrayLike = 0.0,
+    area_without_m2: NumericArrayLike,
+    area_with_m2: NumericArrayLike,
+    frequencies: NumericArrayLike | None = None,
+    field_correction_difference: NumericArrayLike = 0.0,
     case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult
 ```
@@ -313,13 +313,13 @@ value per band.
 
 ```python
 in_situ_transmission_loss(
-    source_levels: ArrayLike,
-    receiver_levels: ArrayLike,
+    source_levels: NumericArrayLike,
+    receiver_levels: NumericArrayLike,
     *,
-    source_area_m2: ArrayLike,
-    receiver_area_m2: ArrayLike,
-    frequencies: ArrayLike | None = None,
-    field_correction_difference: ArrayLike = 0.0,
+    source_area_m2: NumericArrayLike,
+    receiver_area_m2: NumericArrayLike,
+    frequencies: NumericArrayLike | None = None,
+    field_correction_difference: NumericArrayLike = 0.0,
     case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult
 ```
@@ -369,8 +369,8 @@ band, or one value per band.
 
 ```python
 insertion_level_difference(
-    levels_without: ArrayLike,
-    levels_with: ArrayLike,
+    levels_without: NumericArrayLike,
+    levels_with: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -617,7 +617,9 @@ diameters of the upstream measurement cross-section.
 ## octave_levels_from_third_octave
 
 ```python
-octave_levels_from_third_octave(levels: ArrayLike) -> NDArray[np.float64]
+octave_levels_from_third_octave(
+    levels: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 One-third-octave levels folded into octaves, 9.1.5.
@@ -655,7 +657,7 @@ difference taken afterwards.
 ```python
 reverberant_surface_area_m2(
     volume_m3: float,
-    reverberation_time_s: ArrayLike,
+    reverberation_time_s: NumericArrayLike,
     *,
     speed_of_sound: float = 340.0,
 ) -> NDArray[np.float64]
@@ -706,7 +708,7 @@ SABINE_AREA_COEFFICIENT = 13.815510557964275
 
 ```python
 silencer_background_correction(
-    level_difference: ArrayLike,
+    level_difference: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -780,7 +782,7 @@ why 9.2 asks for it rather than for the duct velocity.
 ## silencer_mean_sound_pressure_level
 
 ```python
-silencer_mean_sound_pressure_level(levels: ArrayLike) -> float
+silencer_mean_sound_pressure_level(levels: NumericArrayLike) -> float
 ```
 
 The mean level over the measuring points, Equation (2).
@@ -811,10 +813,10 @@ sound pressure level".
 
 ```python
 silencer_sound_power_level(
-    mean_level: ArrayLike,
+    mean_level: NumericArrayLike,
     *,
-    area: ArrayLike,
-    field_correction: ArrayLike = 0.0,
+    area: NumericArrayLike,
+    field_correction: NumericArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -1044,8 +1046,8 @@ also the static pressure difference.
 
 ```python
 transmission_level_difference(
-    source_levels: ArrayLike,
-    receiver_levels: ArrayLike,
+    source_levels: NumericArrayLike,
+    receiver_levels: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -1096,8 +1098,8 @@ UPSTREAM_DISTANCE_DIAMETERS = 1.5
 
 ```python
 velocity_pressure_pa(
-    total_pressure_pa: ArrayLike,
-    static_pressure_pa: ArrayLike,
+    total_pressure_pa: NumericArrayLike,
+    static_pressure_pa: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

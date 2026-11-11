@@ -120,7 +120,7 @@ DAMPING_TEST_MASS_TOLERANCE = 0.01
 
 ```python
 mean_of_test_runs(
-    values: ArrayLike,
+    values: NumericArrayLike,
     *,
     relative_tolerance: float = 0.05,
 ) -> float
@@ -219,8 +219,8 @@ The SEAT factor of Formula (2), dimensionless.
 
 ```python
 seat_transmission(
-    seat_runs: ArrayLike,
-    platform_runs: ArrayLike,
+    seat_runs: NumericArrayLike,
+    platform_runs: NumericArrayLike,
     *,
     relative_tolerance: float = 0.05,
 ) -> SeatTransmissionResult

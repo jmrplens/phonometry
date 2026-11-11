@@ -54,9 +54,8 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Sequence
 
-    from numpy.typing import ArrayLike
-
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ..building.measurement.intensity_insulation import (
         IntensityElementNormalizedResult,
         IntensityReductionResult,
@@ -95,8 +94,8 @@ _N_OCTAVE_BANDS = 5
 
 
 def _qualification_columns(
-    fpi: ArrayLike | None,
-    residual_index: ArrayLike | None,
+    fpi: NumericArrayLike | None,
+    residual_index: NumericArrayLike | None,
     n_bands: int,
 ) -> list[Column]:
     """The optional Clause 8 i) columns: ``FpI`` and ``δpI0`` per band.
@@ -172,8 +171,8 @@ def render_iso15186_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: Language = "en",
-    fpi: ArrayLike | None = None,
-    residual_index: ArrayLike | None = None,
+    fpi: NumericArrayLike | None = None,
+    residual_index: NumericArrayLike | None = None,
 ) -> str:
     """Render an ISO 15186-1 intensity sound-insulation test report to a PDF.
 
@@ -316,8 +315,8 @@ def render_iso15186_element_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: Language = "en",
-    fpi: ArrayLike | None = None,
-    residual_index: ArrayLike | None = None,
+    fpi: NumericArrayLike | None = None,
+    residual_index: NumericArrayLike | None = None,
 ) -> str:
     """Render an ISO 15186-1 element-normalized insulation report to a PDF.
 

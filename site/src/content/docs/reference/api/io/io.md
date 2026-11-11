@@ -417,7 +417,7 @@ was.
 ### BandedRow.values_at()
 
 ```python
-BandedRow.values_at(frequencies: ArrayLike) -> NDArray[np.float64]
+BandedRow.values_at(frequencies: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 The row's value at each of *frequencies*, or a refusal.
@@ -1551,7 +1551,7 @@ The sidecar filename of an audio file (see the module docstring).
 
 ```python
 Signal(
-    data: ArrayLike,
+    data: NumericArrayLike,
     fs: float,
     *,
     calibration_factor: float | None = None,
@@ -1851,7 +1851,7 @@ checked when the path is known, still before anything starts.
 ```python
 write(
     path: str | os.PathLike[str],
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,
@@ -1863,7 +1863,7 @@ write(
 
 write(
     path: str | os.PathLike[str],
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,

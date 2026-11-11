@@ -101,7 +101,9 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import BinaryIO
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
+
+    from .._internal.types import NumericArrayLike
 
 
 @published_by("phonometry.io")
@@ -152,7 +154,7 @@ _RIFF_FOURCC = b"RIFF"
 
 
 def _resolve_input(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | np.integer[Any] | None,
 ) -> tuple[np.ndarray, int]:
     """Normalise the input to ``(channels, samples)`` plus a sample rate.
@@ -455,7 +457,7 @@ def _check_dither(dither: str | None, subtype: str) -> None:
 
 
 def _resolve_bext(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     bext: BroadcastMetadata | str | None,
     data: np.ndarray,
     fs: int,
@@ -653,7 +655,7 @@ def _check_target_suffix(path: str | os.PathLike[str], target: Path) -> None:
         raise ValueError(msg)
 
 
-def _sidecar_request(x: Signal | ArrayLike, *, sidecar: bool) -> bytes | None:
+def _sidecar_request(x: Signal | NumericArrayLike, *, sidecar: bool) -> bytes | None:
     """The bytes of the sidecar requested, or ``None`` when none is.
 
     A Signal without a calibration has nothing for a sidecar to carry, and one
@@ -749,7 +751,7 @@ def _write_through_scipy(
 @overload
 def write(
     path: str | os.PathLike[str],
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Subtype | None = ...,
@@ -763,7 +765,7 @@ def write(
 @overload
 def write(
     path: str | os.PathLike[str],
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Subtype | None = ...,
@@ -774,7 +776,7 @@ def write(
 
 def write(
     path: str | os.PathLike[str],
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | np.integer[Any] | None = None,
     *,
     subtype: Subtype | None = None,
@@ -983,7 +985,7 @@ def _flac_quantised_codes(
 def _write_flac(
     path: str | os.PathLike[str],
     file: Path,
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     data: np.ndarray,
     fs: int,
     subtype: str | None,

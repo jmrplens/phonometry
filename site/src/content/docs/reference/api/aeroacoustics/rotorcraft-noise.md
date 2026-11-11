@@ -57,13 +57,13 @@ levels and event metrics).
 
 ```python
 flight_condition_weights(
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
     airspeed: float,
     path_angle_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: ArrayLike | None = None,
+    triangles: NumericArrayLike | None = None,
 ) -> list[tuple[int, float]]
 ```
 
@@ -116,8 +116,8 @@ as the database conditions.
 
 ```python
 flight_path_kinematics(
-    times: ArrayLike,
-    positions: ArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
     *,
     gravity: float = 9.80665,
 ) -> FlightPathKinematics
@@ -159,7 +159,7 @@ radar tracks (e.g. spline resampling) before differentiating.
 FlightConditionInterpolation(
     *,
     scaling_factor: float = 2.0,
-    triangles: ArrayLike | None = None,
+    triangles: NumericArrayLike | None = None,
 )
 ```
 
@@ -318,10 +318,10 @@ reference implementation.
 
 ```python
 hover_ring_hemisphere(
-    bearings: ArrayLike,
-    levels: ArrayLike,
+    bearings: NumericArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
@@ -386,15 +386,15 @@ and the propagation adjustments honour as the reference distance.
 ```python
 interpolated_source_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
     airspeed: float,
     path_angle_deg: float,
     azimuth_deg: float,
     polar_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: ArrayLike | None = None,
+    triangles: NumericArrayLike | None = None,
 ) -> NDArray[np.float64]
 ```
 
@@ -431,13 +431,13 @@ by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcra
 ```python
 rotorcraft_event_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
-    times: ArrayLike,
-    positions: ArrayLike,
-    receiver: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
+    receiver: NumericArrayLike,
     *,
-    level_offset: ArrayLike = 0.0,
+    level_offset: NumericArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = ...,
     ground: RotorcraftGround = ...,
     track_state: RotorcraftTrackState = ...,
@@ -496,15 +496,15 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 ```python
 rotorcraft_noise_contour(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: ArrayLike,
-    path_angles_deg: ArrayLike,
-    times: ArrayLike,
-    positions: ArrayLike,
+    airspeeds: NumericArrayLike,
+    path_angles_deg: NumericArrayLike,
+    times: NumericArrayLike,
+    positions: NumericArrayLike,
     *,
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     metric: Literal['exposure', 'maximum'] = 'exposure',
-    level_offset: ArrayLike = 0.0,
+    level_offset: NumericArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = ...,
     ground: RotorcraftGround = ...,
     track_state: RotorcraftTrackState = ...,
@@ -644,9 +644,9 @@ Plot the A-weighted level time history with its event metrics.
 RotorcraftGround(
     *,
     receiver_height_m: float = 1.2,
-    ground_elevation: ArrayLike = 0.0,
-    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'G',
-    terrain: Sequence[ArrayLike] | NDArray[Any] | None = None,
+    ground_elevation: NumericArrayLike = 0.0,
+    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | NumericArrayLike = 'G',
+    terrain: Sequence[NumericArrayLike] | NDArray[Any] | None = None,
     terrain_resolution: float | None = None,
 )
 ```
@@ -672,10 +672,10 @@ and an optional elevation model replaces the flat plane with real terrain.
 ```python
 RotorcraftHemisphere(
     *,
-    frequencies: ArrayLike,
-    azimuth_deg: ArrayLike,
-    polar_deg: ArrayLike,
-    levels: ArrayLike,
+    frequencies: NumericArrayLike,
+    azimuth_deg: NumericArrayLike,
+    polar_deg: NumericArrayLike,
+    levels: NumericArrayLike,
     distance_m: float = 60.0,
 )
 ```
@@ -777,10 +777,10 @@ Plot filled noise contours over the ground plane.
 ```python
 RotorcraftTrackState(
     *,
-    airspeed: ArrayLike | None = None,
-    path_angle_deg: ArrayLike | None = None,
-    heading: ArrayLike | None = None,
-    bank_angle_deg: ArrayLike | None = None,
+    airspeed: NumericArrayLike | None = None,
+    path_angle_deg: NumericArrayLike | None = None,
+    heading: NumericArrayLike | None = None,
+    bank_angle_deg: NumericArrayLike | None = None,
 )
 ```
 

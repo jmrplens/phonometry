@@ -119,7 +119,7 @@ allowable_velocity(
 ) -> NDArray[np.float64]
 
 allowable_velocity(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     constant_velocity_mm_s: float,
     zone_factor: float = 1.0,
@@ -209,7 +209,7 @@ evaluation_zone(
 ) -> NDArray[np.str_]
 
 evaluation_zone(
-    magnitude: ArrayLike,
+    magnitude: NumericArrayLike,
     boundaries: ZoneBoundaries,
 ) -> Literal['A', 'B', 'C', 'D'] | NDArray[np.str_]
 ```
@@ -276,7 +276,7 @@ gear_housing_velocity_limit(
 ) -> NDArray[np.float64]
 
 gear_housing_velocity_limit(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     rating: float,
 ) -> float | NDArray[np.float64]
@@ -322,7 +322,7 @@ gear_shaft_displacement_limit(
 ) -> NDArray[np.float64]
 
 gear_shaft_displacement_limit(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     rating: float,
 ) -> float | NDArray[np.float64]
@@ -460,7 +460,7 @@ industrial_machine_zone(
     support: Literal['rigid', 'flexible'],
     *,
     displacement_um: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    velocity_mm_s: ArrayLike | None = None,
+    velocity_mm_s: NumericArrayLike | None = None,
 ) -> NDArray[np.str_]
 
 industrial_machine_zone(
@@ -475,8 +475,8 @@ industrial_machine_zone(
     group: Literal['group_1', 'group_2'],
     support: Literal['rigid', 'flexible'],
     *,
-    displacement_um: ArrayLike | None = None,
-    velocity_mm_s: ArrayLike | None = None,
+    displacement_um: NumericArrayLike | None = None,
+    velocity_mm_s: NumericArrayLike | None = None,
 ) -> Literal['A', 'B', 'C', 'D'] | NDArray[np.str_]
 ```
 

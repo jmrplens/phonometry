@@ -78,7 +78,7 @@ How the energy in a band becomes a level reading.
 
 ```python
 octave_filter(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     fraction: float | np.integer[Any] = 1,
     order: int | np.integer[Any] = 6,
@@ -185,7 +185,7 @@ Initialize the Octave Filter Bank.
 
 ```python
 OctaveFilterBank.filter(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     *,
     sigbands: bool = False,
     mode: Literal['rms', 'peak'] = 'rms',
@@ -246,7 +246,7 @@ How many bands the bank holds.
 
 ```python
 OctaveFilterBank.spectrogram(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     window_time: float = 0.125,
     overlap: float = 0.5,
     mode: Literal['rms', 'peak'] = 'rms',

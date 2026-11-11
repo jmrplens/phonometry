@@ -79,7 +79,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
@@ -93,7 +93,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
     from .porous import PorousMediumResult
 
 Complex = NDArray[np.complex128]
@@ -687,7 +687,7 @@ def poroelastic_transfer_matrix(
     waves: BiotWavesResult,
     thickness_m: float,
     *,
-    transverse_wavenumber: ArrayLike = 0.0,
+    transverse_wavenumber: NumericArrayLike = 0.0,
 ) -> Complex:
     r"""The 6x6 transfer matrix :math:`[T^p]` of a Biot poroelastic layer.
 
@@ -789,7 +789,7 @@ def _fluid_block(transfer_matrix: Complex) -> _Block:
 
 
 def _poroelastic_block(
-    waves: BiotWavesResult, thickness: float, transverse_wavenumber: ArrayLike
+    waves: BiotWavesResult, thickness: float, transverse_wavenumber: NumericArrayLike
 ) -> _Block:
     """A six-variable block, parameterised by its wave amplitudes."""
     h = require_positive(thickness, "thickness_m")
@@ -852,7 +852,7 @@ def _layer_attenuation(waves: BiotWavesResult, thickness: float, k_t: Complex) -
 
 
 def _poroelastic_blocks(
-    waves: BiotWavesResult, thickness: float, transverse_wavenumber: ArrayLike
+    waves: BiotWavesResult, thickness: float, transverse_wavenumber: NumericArrayLike
 ) -> list[_Block]:
     """The bonded sub-layer blocks of one poroelastic layer.
 

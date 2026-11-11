@@ -160,7 +160,7 @@ parametric_eq(
 ) -> Signal
 
 parametric_eq(
-    x: ArrayLike,
+    x: NumericArrayLike,
     fs: float,
     *,
     sections: EQSection | Sequence[EQSection],
@@ -218,7 +218,9 @@ series as a numerically robust SOS cascade, following the house style of
 ### ParametricEQ.filter()
 
 ```python
-ParametricEQ.filter(x: Signal | ArrayLike) -> Signal | np.ndarray
+ParametricEQ.filter(x: Signal) -> Signal
+
+ParametricEQ.filter(x: NumericArrayLike) -> np.ndarray
 ```
 
 Apply the EQ cascade to a signal.

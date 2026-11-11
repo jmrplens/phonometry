@@ -126,7 +126,7 @@ method_a_scale_values(
 ) -> NDArray[np.float64]
 
 method_a_scale_values(
-    positions: ArrayLike,
+    positions: NumericArrayLike,
     *,
     part: int | np.integer[Any],
 ) -> float | NDArray[np.float64]
@@ -164,7 +164,7 @@ are 5 and the value is `6 - position`.
 
 ```python
 method_a_summary(
-    scale_values: Mapping[str, ArrayLike] | ArrayLike,
+    scale_values: Mapping[str, NumericArrayLike] | NumericArrayLike,
     *,
     part: int,
     sites: ArrayLike | Sequence[object] | None = None,
@@ -211,7 +211,7 @@ method_b_scale_values(
 ) -> NDArray[np.float64]
 
 method_b_scale_values(
-    marked_fraction: ArrayLike,
+    marked_fraction: NumericArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -281,7 +281,7 @@ Median and range of the rank of each recognised sound source per site
 
 ```python
 method_b_summary(
-    scale_values: Mapping[str, ArrayLike] | ArrayLike,
+    scale_values: Mapping[str, NumericArrayLike] | NumericArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
     confidence: float = 0.95,
@@ -440,8 +440,8 @@ Plot the mean of each scale per site with its confidence interval.
 
 ```python
 pearson_correlation(
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     *,
     alternative: Literal['two-sided', 'greater', 'less'] = 'two-sided',
 ) -> SoundscapeCorrelation
@@ -490,7 +490,7 @@ PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES = ('pleasant', 'chaotic', 'vibrant', 'une
 
 ```python
 pleasantness_eventfulness(
-    scale_values: Mapping[Literal['pleasant', 'chaotic', 'vibrant', 'uneventful', 'calm', 'annoying', 'eventful', 'monotonous'], ArrayLike] | ArrayLike,
+    scale_values: Mapping[Literal['pleasant', 'chaotic', 'vibrant', 'uneventful', 'calm', 'annoying', 'eventful', 'monotonous'], NumericArrayLike] | NumericArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
     central_tendency: Literal['median', 'mean'] = 'median',
@@ -911,8 +911,8 @@ Plot the median rank of each source per site, with its range.
 
 ```python
 spearman_rank_correlation(
-    x: ArrayLike,
-    y: ArrayLike,
+    x: NumericArrayLike,
+    y: NumericArrayLike,
     *,
     alternative: Literal['two-sided', 'greater', 'less'] = 'two-sided',
 ) -> SoundscapeCorrelation

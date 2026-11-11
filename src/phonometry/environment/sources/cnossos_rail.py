@@ -106,9 +106,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "AERODYNAMIC_REFERENCE_SPEED_KMH",
@@ -1806,7 +1807,9 @@ def _speed(value: float, name: str = "speed_kmh") -> float:
     return v
 
 
-def _spectrum(values: ArrayLike, name: str, size: int = 24) -> NDArray[np.float64]:
+def _spectrum(
+    values: NumericArrayLike, name: str, size: int = 24
+) -> NDArray[np.float64]:
     array = real_array(values, name)
     if array.shape != (size,):
         msg = (
@@ -1847,7 +1850,9 @@ class WavelengthSpectrum(OwnsArrays):
 
     if TYPE_CHECKING:
 
-        def __init__(self, *, wavelengths_mm: ArrayLike, levels: ArrayLike) -> None: ...
+        def __init__(
+            self, *, wavelengths_mm: NumericArrayLike, levels: NumericArrayLike
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Hold both arrays read-only as ``float64``, whatever sequence was given.
@@ -1894,7 +1899,9 @@ class RailSourceSpectra(OwnsArrays):
 
     if TYPE_CHECKING:
 
-        def __init__(self, *, source_a: ArrayLike, source_b: ArrayLike) -> None: ...
+        def __init__(
+            self, *, source_a: NumericArrayLike, source_b: NumericArrayLike
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Hold both spectra read-only as ``float64``, whatever sequence was given."""
@@ -2214,11 +2221,11 @@ def bridge_transfer(bridge: BridgeType | BridgeTypeName) -> NDArray[np.float64]:
 
 
 def roughness_to_frequency(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    wavelengths_mm: ArrayLike,
+    wavelengths_mm: NumericArrayLike,
     speed_kmh: float,
-    frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
+    frequencies: NumericArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
     interpolation: RoughnessInterpolation = RoughnessInterpolation.PROPORTIONAL,
 ) -> NDArray[np.float64]:
     r"""Resample a roughness spectrum from wavelength onto frequency.
@@ -2269,7 +2276,7 @@ def roughness_to_frequency(
 
 
 def total_effective_roughness(
-    rail: ArrayLike, wheel: ArrayLike, filter_: ArrayLike
+    rail: NumericArrayLike, wheel: NumericArrayLike, filter_: NumericArrayLike
 ) -> NDArray[np.float64]:
     r"""Total effective roughness ``L_R,TOT,i`` of (2.3.7), in dB.
 
@@ -2291,7 +2298,9 @@ def total_effective_roughness(
     )
 
 
-def impact_roughness(single: ArrayLike, joint_density: float) -> NDArray[np.float64]:
+def impact_roughness(
+    single: NumericArrayLike, joint_density: float
+) -> NDArray[np.float64]:
     r"""Impact roughness ``L_R,IMPACT,i`` of (2.3.12), in dB.
 
     :math:`L_{\mathrm{R,IMPACT},i} = L_{\mathrm{R,IMPACT-SINGLE},i} + 10
@@ -2320,7 +2329,7 @@ def impact_roughness(single: ArrayLike, joint_density: float) -> NDArray[np.floa
 
 
 def rolling_sound_power(
-    roughness: ArrayLike, transfer: ArrayLike, n_axles: float
+    roughness: NumericArrayLike, transfer: NumericArrayLike, n_axles: float
 ) -> NDArray[np.float64]:
     r"""One rolling-noise component of (2.3.8) to (2.3.10), in dB.
 
@@ -2398,7 +2407,7 @@ def curve_squeal_excess(
 
 
 def horizontal_directivity(
-    phi: float, *, frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ
+    phi: float, *, frequencies: NumericArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ
 ) -> NDArray[np.float64]:
     r"""Horizontal directivity ``dL_W,dir,hor,i`` of (2.3.15), in dB.
 
@@ -2427,7 +2436,7 @@ def horizontal_directivity(
 def vertical_directivity(
     psi: float,
     *,
-    frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
+    frequencies: NumericArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
     height: int | np.integer[Any] = 1,
     aerodynamic: bool = False,
     edition: DirectivityEdition = DirectivityEdition.CURRENT,
@@ -2474,7 +2483,7 @@ def vertical_directivity(
     return np.asarray(np.where(angle > 0.0, shape, 0.0), dtype=np.float64)
 
 
-def octave_bands_from_third_octaves(levels: ArrayLike) -> NDArray[np.float64]:
+def octave_bands_from_third_octaves(levels: NumericArrayLike) -> NDArray[np.float64]:
     """Energy-sum a 24-band 1/3-octave spectrum into the eight octave bands.
 
     Annex II 2.3.2 requires the directional sound power to be derived in 1/3
@@ -2564,8 +2573,8 @@ class RollingStock(OwnsArrays):
             n_axles: int,
             wheel_roughness: WavelengthSpectrum,
             contact_filter: WavelengthSpectrum,
-            wheel_transfer: ArrayLike,
-            superstructure_transfer: ArrayLike | None = None,
+            wheel_transfer: NumericArrayLike,
+            superstructure_transfer: NumericArrayLike | None = None,
             traction: RailSourceSpectra | None = None,
             aerodynamic: RailSourceSpectra | None = None,
             aerodynamic_alpha: float = _AERODYNAMIC_ALPHA,
@@ -2644,10 +2653,10 @@ class RailwayTrack(OwnsArrays):
             self,
             *,
             rail_roughness: WavelengthSpectrum,
-            track_transfer: ArrayLike,
+            track_transfer: NumericArrayLike,
             impact_roughness: WavelengthSpectrum | None = None,
             joint_density: float = REFERENCE_JOINT_DENSITY_PER_M,
-            bridge_transfer: ArrayLike | None = None,
+            bridge_transfer: NumericArrayLike | None = None,
             squeal_excess: float = 0.0,
             length: float = 100.0,
         ) -> None: ...

@@ -92,7 +92,7 @@ module.
 
 ```python
 flow_modal_correction(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     flow_velocity: float,
     duct_diameter_m: float,
     *,
@@ -150,7 +150,7 @@ coefficient in the annex is transcribed and none of them warns.
 ## in_duct_reproducibility
 
 ```python
-in_duct_reproducibility(frequencies: ArrayLike) -> np.ndarray
+in_duct_reproducibility(frequencies: NumericArrayLike) -> np.ndarray
 ```
 
 Standard deviation of reproducibility $\sigma_R$ per band.
@@ -278,14 +278,14 @@ $L_{W\mathrm{A}}$ of Annex C in the title. Requires matplotlib
 
 ```python
 sound_power_in_duct(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     duct_diameter_m: float,
     flow_velocity: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = 'sampling-tube',
-    microphone_correction: ArrayLike = 0.0,
-    shield_correction: ArrayLike = 0.0,
+    microphone_correction: NumericArrayLike = 0.0,
+    shield_correction: NumericArrayLike = 0.0,
     temperature_c: float = 20.0,
     static_pressure_kpa: float = 101.325,
 ) -> InDuctSoundPowerResult

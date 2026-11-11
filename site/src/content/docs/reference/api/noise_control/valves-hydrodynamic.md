@@ -87,7 +87,7 @@ AIR_DENSITY_KG_M3 = 1.293
 
 ```python
 band_internal_levels(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     internal_level: float,
     *,
     turbulent_peak: float,
@@ -187,7 +187,7 @@ and no inequality; the minimum is what it means.
 
 ```python
 cavitation_distribution(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     peak: float,
 ) -> NDArray[np.float64]
 ```
@@ -375,7 +375,7 @@ printed.
 ## combined_stage_level
 
 ```python
-combined_stage_level(levels: ArrayLike) -> float
+combined_stage_level(levels: NumericArrayLike) -> float
 ```
 
 Equation (27): the stages of a multistage trim, added.
@@ -1075,7 +1075,7 @@ stage_conditions(
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
     vapor_pressure_pa: float,
-    stage_coefficients: ArrayLike,
+    stage_coefficients: NumericArrayLike,
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]
 ```
@@ -1157,7 +1157,7 @@ STROUHAL_CONSTANTS = {'annex': 0.036, 'clause': 0.02}
 
 ```python
 transmission_loss_correction(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     ring: float,
 ) -> NDArray[np.float64]
 ```
@@ -1197,7 +1197,7 @@ costs 6,02.
 
 ```python
 turbulent_distribution(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     peak: float,
 ) -> NDArray[np.float64]
 ```
@@ -1354,7 +1354,7 @@ valve_hydrodynamic_noise(
     pipe: LiquidPipe,
     *,
     strouhal_form: Literal['annex', 'clause'] = 'annex',
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> HydrodynamicValveNoise
 ```
 

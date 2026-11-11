@@ -81,9 +81,9 @@ Combines [`tonal_audibility`](/phonometry/reference/api/environment/measurement/
 
 ```python
 assess_tonal_survey(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> TonalSurveyAssessment
 ```
 
@@ -566,7 +566,7 @@ The centres of the bands that hold a prominent tone, in Hz.
 
 ```python
 uncertainty_from_repeated_measurements(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
 ) -> RepeatedMeasurementResult
 ```
 

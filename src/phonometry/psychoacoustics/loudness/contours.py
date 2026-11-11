@@ -26,9 +26,9 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.types import NumericArrayLike
 
 __all__ = [
     "EqualLoudnessContours",
@@ -305,7 +305,7 @@ class EqualLoudnessContours(OwnsArrays):
 def equal_loudness_contours(
     phons: Sequence[float] = _DEFAULT_PHONS,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
 ) -> EqualLoudnessContours:
     """Build the ISO 226:2023 equal-loudness-level contour family.
 

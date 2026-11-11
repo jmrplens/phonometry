@@ -56,10 +56,9 @@ if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 
@@ -119,7 +118,7 @@ _K1A_CLAMPED_BELOW_DB: float = 3.0
 
 
 def velocity_level(
-    velocity: ArrayLike, *, reference: float = REFERENCE_VELOCITY_M_S
+    velocity: NumericArrayLike, *, reference: float = REFERENCE_VELOCITY_M_S
 ) -> np.ndarray:
     r"""Vibratory velocity level (ISO/TS 7849-1, Eq. 3).
 
@@ -138,9 +137,9 @@ def velocity_level(
 
 
 def velocity_level_from_acceleration(
-    peak_acceleration: ArrayLike,
+    peak_acceleration: NumericArrayLike,
     *,
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     reference: float = REFERENCE_VELOCITY_M_S,
 ) -> np.ndarray:
     r"""Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
@@ -168,7 +167,9 @@ def velocity_level_from_acceleration(
     return np.asarray(20.0 * np.log10(v_rms / reference), dtype=np.float64)
 
 
-def mean_velocity_level(levels: ArrayLike, areas: ArrayLike | None = None) -> float:
+def mean_velocity_level(
+    levels: NumericArrayLike, areas: NumericArrayLike | None = None
+) -> float:
     """Mean vibratory velocity level over the surface (ISO/TS 7849-1, Eq. 10/11).
 
     With uniformly distributed positions (``areas`` is ``None``) this is the
@@ -198,9 +199,9 @@ def mean_velocity_level(levels: ArrayLike, areas: ArrayLike | None = None) -> fl
 
 
 def radiation_factor(
-    sound_power: ArrayLike,
+    sound_power: NumericArrayLike,
     area: float,
-    mean_square_velocity: ArrayLike,
+    mean_square_velocity: NumericArrayLike,
     *,
     impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
 ) -> np.ndarray:
@@ -230,10 +231,10 @@ def radiation_factor(
 
 
 def radiated_sound_power_level(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     area: float,
     *,
-    radiation_factor: ArrayLike = 1.0,
+    radiation_factor: NumericArrayLike = 1.0,
     reference_area: float = _REFERENCE_AREA,
     normalized_impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
     reference_impedance: float = _REFERENCE_IMPEDANCE,
@@ -499,11 +500,11 @@ class VibrationSoundPowerResult(OwnsArrays):
 
 
 def sound_power_from_vibration(
-    velocity_level: ArrayLike,
+    velocity_level: NumericArrayLike,
     area: float,
     *,
-    radiation_factor: ArrayLike = 1.0,
-    frequencies: ArrayLike | None = None,
+    radiation_factor: NumericArrayLike = 1.0,
+    frequencies: NumericArrayLike | None = None,
 ) -> VibrationSoundPowerResult:
     """Bundle a sound-power-from-vibration determination (ISO/TS 7849).
 

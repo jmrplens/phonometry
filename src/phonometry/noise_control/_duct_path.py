@@ -81,10 +81,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
     from ..room.noise_criteria import NCResult, RCResult
     from .hvac import HVACSpectrumResult
@@ -133,8 +133,8 @@ class DuctElement(OwnsArrays):
     """
 
     label: str
-    attenuation: ArrayLike | HVACSpectrumResult | None = None
-    self_noise: ArrayLike | HVACSpectrumResult | None = None
+    attenuation: NumericArrayLike | HVACSpectrumResult | None = None
+    self_noise: NumericArrayLike | HVACSpectrumResult | None = None
     code: str = ""
 
 
@@ -484,11 +484,11 @@ class DuctPathResult(OwnsArrays):
 
 
 def duct_path(
-    source_level: ArrayLike,
+    source_level: NumericArrayLike,
     elements: Sequence[DuctElement],
     *,
-    frequencies: ArrayLike,
-    room_effect: ArrayLike | None = None,
+    frequencies: NumericArrayLike,
+    room_effect: NumericArrayLike | None = None,
     source_label: str = "Fan",
     criterion: CriterionFamily = "NC",
     target: float | None = None,

@@ -126,9 +126,10 @@ from ._criterion import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ..room.noise_criteria import NCResult, RCResult
 
 
@@ -171,9 +172,9 @@ class SourceRoom(OwnsArrays):
         :math:`10 \log_{10} Q`).
     """
 
-    level: ArrayLike | None = None
-    power_level: ArrayLike | None = None
-    room_constant: ArrayLike | None = None
+    level: NumericArrayLike | None = None
+    power_level: NumericArrayLike | None = None
+    room_constant: NumericArrayLike | None = None
     directivity: float = 1.0
     model: Literal["constant_power", "constant_volume", "constant_pressure"] = (
         "constant_power"
@@ -513,11 +514,11 @@ class RoomToRoomResult(OwnsArrays):
 
 
 def room_to_room_transmission(
-    transmission_loss: ArrayLike,
+    transmission_loss: NumericArrayLike,
     partition_area: float,
-    receiving_absorption: ArrayLike,
+    receiving_absorption: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     source: SourceRoom | None = None,
     include_partition_transmission: bool = False,
     criterion: DesignCriterion | None = None,

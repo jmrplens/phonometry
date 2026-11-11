@@ -79,7 +79,7 @@ pieces have an oracle and which do not.
 ## combined_dynamic_stiffness
 
 ```python
-combined_dynamic_stiffness(layers: ArrayLike) -> float
+combined_dynamic_stiffness(layers: NumericArrayLike) -> float
 ```
 
 Total dynamic stiffness of stacked resilient layers (Formula C.6).
@@ -144,7 +144,7 @@ quoted there as 7 cm² against the 7.07 cm² of a 15 mm radius.
 
 ```python
 covering_improvement(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     covering_stiffness: float,
     plate_stiffness: float,
     impedance: float,
@@ -310,7 +310,7 @@ and $1.618 f_\mathrm{ms}$.
 
 ```python
 floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal['cremer_hammer'],
@@ -320,7 +320,7 @@ floating_floor_improvement_spectrum(
 ) -> FloatingFloorImprovementResult
 
 floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal['cremer_hammer'],
@@ -328,7 +328,7 @@ floating_floor_improvement_spectrum(
 ) -> FloatingFloorImprovementResult
 
 floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal['en12354', 'cremer'] = ...,
@@ -337,7 +337,7 @@ floating_floor_improvement_spectrum(
 ) -> FloatingFloorImprovementResult
 
 floating_floor_improvement_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     resonance_frequency: float,
     model: Literal['en12354', 'cremer'] = ...,
@@ -484,7 +484,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 force_pulse(
-    time: ArrayLike,
+    time: NumericArrayLike,
     contact_stiffness: float,
     impedance: float,
     *,
@@ -638,11 +638,11 @@ top of it.
 
 ```python
 resilient_mount_improvement(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     impedance: float,
     mass_per_area: float,
-    loss_factor: ArrayLike,
+    loss_factor: NumericArrayLike,
     mount_stiffness: float,
     mount_density: float,
 ) -> np.ndarray
@@ -707,7 +707,7 @@ gives; the two forms agree.
 
 ```python
 short_pulse_mean_square_force(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
     fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> np.ndarray
@@ -789,7 +789,7 @@ TAPPING_DROP_HEIGHT_M = 0.04
 
 ```python
 tapping_force_spectrum(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     contact_stiffness: float,
     impedance: float,
     *,

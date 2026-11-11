@@ -41,10 +41,10 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealScalar, RealValues
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .._report.metadata import ReportMetadata
 
 
@@ -117,7 +117,7 @@ _PUBLISHED_AIR_CONDITION = "20C_50-70"
 # ---------------------------------------------------------------------------
 
 
-def object_fraction(object_volumes: ArrayLike, volume: float) -> float:
+def object_fraction(object_volumes: NumericArrayLike, volume: float) -> float:
     r"""Object fraction ``psi`` of an enclosed space (Formula 3).
 
     :param object_volumes: Volumes of the objects and object arrays, m3.
@@ -139,7 +139,7 @@ def object_fraction(object_volumes: ArrayLike, volume: float) -> float:
     return psi
 
 
-def hard_object_absorption(object_volume: ArrayLike) -> np.ndarray:
+def hard_object_absorption(object_volume: NumericArrayLike) -> np.ndarray:
     r"""Equivalent absorption area of a hard object (Formula 4).
 
     An empirical estimate for hard, irregularly shaped objects (machinery,
@@ -171,13 +171,13 @@ def air_absorption_area[V: RealValues](
 
 
 @overload
-def air_absorption_area[A: ArrayLike](
+def air_absorption_area[A: NumericArrayLike](
     m: A, volume: float, object_fraction: float = 0.0
 ) -> float | NDArray[np.float64]: ...
 
 
 def air_absorption_area(
-    m: ArrayLike, volume: float, object_fraction: float = 0.0
+    m: NumericArrayLike, volume: float, object_fraction: float = 0.0
 ) -> float | NDArray[np.float64]:
     r"""Equivalent absorption area of the air (Formula 2).
 
@@ -202,10 +202,10 @@ def air_absorption_area(
 
 
 def equivalent_absorption_area(
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
     *,
-    objects: ArrayLike = (),
-    air_area: ArrayLike = 0.0,
+    objects: NumericArrayLike = (),
+    air_area: NumericArrayLike = 0.0,
 ) -> float | NDArray[np.float64]:
     """Total equivalent sound absorption area (Formula 1).
 
@@ -249,11 +249,11 @@ def equivalent_absorption_area(
     # the objects as given, not from their float copy, so a single value that
     # is a zero-dimensional array keeps that form.
     if not obj.size:
-        entry: tuple[ArrayLike, ...] = ()
+        entry: tuple[NumericArrayLike, ...] = ()
     elif np.ndim(objects) == 0:
         entry = (objects,)
     else:
-        entry = (next(iter(cast("Iterable[ArrayLike]", objects))),)
+        entry = (next(iter(cast("Iterable[NumericArrayLike]", objects))),)
     return as_float_or_array(
         total, like=(*(alpha for _, alpha in surfaces), air_area, *entry)
     )
@@ -285,7 +285,7 @@ def reverberation_time[V: RealValues](
 
 
 @overload
-def reverberation_time[A: ArrayLike](
+def reverberation_time[A: NumericArrayLike](
     absorption_area: A,
     volume: float,
     *,
@@ -295,7 +295,7 @@ def reverberation_time[A: ArrayLike](
 
 
 def reverberation_time(
-    absorption_area: ArrayLike,
+    absorption_area: NumericArrayLike,
     volume: float,
     *,
     object_fraction: float = 0.0,
@@ -461,13 +461,13 @@ class ReverberationResult(OwnsArrays):
 
 
 def enclosed_space_reverberation(
-    surfaces: Sequence[tuple[float, ArrayLike]],
+    surfaces: Sequence[tuple[float, NumericArrayLike]],
     volume: float,
     *,
-    objects: ArrayLike = (),
+    objects: NumericArrayLike = (),
     object_fraction: float = 0.0,
     air_condition: AirCondition | None = None,
-    frequencies: ArrayLike = _OCTAVE_BANDS,
+    frequencies: NumericArrayLike = _OCTAVE_BANDS,
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> ReverberationResult:
     """Predict the absorption area and reverberation time per octave band.

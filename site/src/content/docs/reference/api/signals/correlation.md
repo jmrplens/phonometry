@@ -59,8 +59,8 @@ consistent bin by bin.
 
 ```python
 align_impulse_responses(
-    ir: Signal | ArrayLike,
-    reference: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
+    reference: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     interpolation: Literal['parabolic', 'none'] = 'parabolic',
@@ -147,8 +147,8 @@ Plot the reference and the aligned impulse response.
 
 ```python
 correlation(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike | None = None,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike | None = None,
     fs: float | None = None,
     *,
     normalization: Literal['biased', 'unbiased', 'coefficient'] = 'unbiased',
@@ -334,10 +334,10 @@ return `inf`.
 
 ```python
 impulse_response_delay(
-    ir: Signal | ArrayLike,
+    ir: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
-    reference: Signal | ArrayLike | None = None,
+    reference: Signal | NumericArrayLike | None = None,
     interpolation: Literal['parabolic', 'none'] = 'parabolic',
     upsample: int | np.integer[Any] = 8,
 ) -> float
@@ -383,13 +383,13 @@ default `upsample=8`).
 
 ```python
 time_delay(
-    x: Signal | ArrayLike,
-    y: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
+    y: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     method: Literal['gcc', 'direct', 'phase'] = 'gcc',
     weighting: Literal['none', 'roth', 'scot', 'phat', 'ml'] = 'phat',
-    window: str | tuple[ArrayLike, ...] = 'hann',
+    window: str | tuple[str | NumericArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     max_delay: float | None = None,

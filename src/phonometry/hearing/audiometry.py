@@ -114,9 +114,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 Presentation = Literal["air", "bone", "sound field"]
 VibratorPlacement = Literal["mastoid", "forehead"]
@@ -351,7 +351,7 @@ def _at_least(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
     return np.asarray(values >= np.asarray(bound) - _BOUNDARY_SLACK_DB, dtype=bool)
 
 
-def _levels(values: ArrayLike, name: str, *, minimum: int = 1) -> np.ndarray:
+def _levels(values: NumericArrayLike, name: str, *, minimum: int = 1) -> np.ndarray:
     """A one-dimensional array of finite levels, in dB.
 
     :param values: The levels.
@@ -407,7 +407,7 @@ def _table_for(
 
 
 def _earphone_allowance(
-    presentation: str, earphone: Earphone, earphone_attenuation: ArrayLike | None
+    presentation: str, earphone: Earphone, earphone_attenuation: NumericArrayLike | None
 ) -> np.ndarray:
     """What an earphone's extra attenuation adds to the limits of Table 2.
 
@@ -457,7 +457,7 @@ def ambient_noise_limits(
     *,
     lowest_test_frequency_hz: float = 125.0,
     earphone: Earphone = "supra-aural",
-    earphone_attenuation: ArrayLike | None = None,
+    earphone_attenuation: NumericArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
 ) -> np.ndarray:
@@ -772,16 +772,16 @@ class AmbientNoiseCheck(OwnsArrays):
 
 
 def check_audiometric_ambient_noise(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     *,
     presentation: Presentation = "air",
     lowest_test_frequency_hz: float = 125.0,
     earphone: Earphone = "supra-aural",
-    earphone_attenuation: ArrayLike | None = None,
+    earphone_attenuation: NumericArrayLike | None = None,
     lowest_hearing_level: float = 0.0,
     allowed_threshold_shift_db: float = 2.0,
-    frequencies: ArrayLike | None = None,
-    noise_floor_levels: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
+    noise_floor_levels: NumericArrayLike | None = None,
 ) -> AmbientNoiseCheck:
     """Is the test room quiet enough for the audiometry? (ISO 8253-1 Clause 11).
 
@@ -873,7 +873,7 @@ def check_audiometric_ambient_noise(
 
 
 def _earphone_name(
-    presentation: str, earphone: Earphone, earphone_attenuation: ArrayLike | None
+    presentation: str, earphone: Earphone, earphone_attenuation: NumericArrayLike | None
 ) -> Earphone | Literal["own attenuation"] | None:
     """The earphone a check's limits were written for, for its figure.
 
@@ -1130,10 +1130,10 @@ def _next_ascending_level(
 
 
 def ascending_method_threshold(
-    ascent_levels: ArrayLike | None = None,
+    ascent_levels: NumericArrayLike | None = None,
     *,
-    presentation_levels: ArrayLike | None = None,
-    responses: ArrayLike | None = None,
+    presentation_levels: NumericArrayLike | None = None,
+    responses: NumericArrayLike | None = None,
     shortened: bool = False,
     familiarization_level: float | None = None,
 ) -> AscendingThresholdResult:
@@ -1198,7 +1198,7 @@ def ascending_method_threshold(
 
 
 def _threshold_from_ascents(
-    ascent_levels: ArrayLike, *, shortened: bool
+    ascent_levels: NumericArrayLike, *, shortened: bool
 ) -> AscendingThresholdResult:
     """6.2.4.2 on the response level of each ascent, checked against 6.2.3.2.
 
@@ -1233,8 +1233,8 @@ def _threshold_from_ascents(
 
 
 def _threshold_from_sequence(
-    presentation_levels: ArrayLike,
-    responses: ArrayLike,
+    presentation_levels: NumericArrayLike,
+    responses: NumericArrayLike,
     *,
     shortened: bool,
     familiarization_level: float | None,
@@ -1358,7 +1358,7 @@ class BracketingThresholdResult(OwnsArrays):
 
 
 def bracketing_method_threshold(
-    ascent_levels: ArrayLike, descent_levels: ArrayLike
+    ascent_levels: NumericArrayLike, descent_levels: NumericArrayLike
 ) -> BracketingThresholdResult:
     r"""The hearing threshold level by the bracketing method (6.2.4.3).
 
@@ -1590,7 +1590,7 @@ class AutomaticThresholdResult(OwnsArrays):
 
 
 def automatic_audiometry_threshold(
-    reversal_levels: ArrayLike,
+    reversal_levels: NumericArrayLike,
 ) -> AutomaticThresholdResult:
     """The hearing threshold level from an automatic recording (6.3.5).
 
@@ -1636,7 +1636,7 @@ def automatic_audiometry_threshold(
 
 
 def _sweep_frequencies(
-    reversal_frequencies: ArrayLike, levels: np.ndarray
+    reversal_frequencies: NumericArrayLike, levels: np.ndarray
 ) -> np.ndarray:
     """The reversal frequencies of a sweep, one per level, running one way.
 
@@ -1820,10 +1820,10 @@ class SweepThresholdResult(OwnsArrays):
 
 
 def sweep_audiometry_threshold(
-    reversal_levels: ArrayLike,
+    reversal_levels: NumericArrayLike,
     *,
-    reversal_frequencies: ArrayLike,
-    frequencies: ArrayLike | None = None,
+    reversal_frequencies: NumericArrayLike,
+    frequencies: NumericArrayLike | None = None,
 ) -> SweepThresholdResult:
     r"""Hearing threshold levels from a sweep-frequency tracing (7.5).
 
@@ -2101,10 +2101,10 @@ class AudiogramCautions(OwnsArrays):
 
 
 def audiogram_cautions(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     *,
-    air_conduction_threshold_levels: ArrayLike | None = None,
-    bone_conduction_threshold_levels: ArrayLike | None = None,
+    air_conduction_threshold_levels: NumericArrayLike | None = None,
+    bone_conduction_threshold_levels: NumericArrayLike | None = None,
     vibrator_placement: VibratorPlacement = "mastoid",
 ) -> AudiogramCautions:
     """Flag the levels of an audiogram that call for caution (6.2.3.2, 8.4).

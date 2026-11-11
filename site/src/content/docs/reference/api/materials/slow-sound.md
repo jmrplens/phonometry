@@ -179,7 +179,7 @@ unpacked by position, with the names
 
 ```python
 helmholtz_resonator_impedance(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     resonator: HelmholtzResonator,
     *,
     slit_height_m: float | None = None,
@@ -351,7 +351,7 @@ with `period_m` `d`; rigid back wall at the right.
 
 ```python
 rectangular_duct_properties(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     side_m: float,
     fluid: Fluid = ...,
@@ -405,7 +405,7 @@ $28.454\,\eta/\text{side}^2$ as $\omega \to 0$.
 
 ```python
 slit_effective_properties(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     *,
     slit_height_m: float,
     fluid: Fluid = ...,
@@ -447,7 +447,7 @@ $\kappa_0 = \gamma P_0$.
 
 ```python
 slit_helmholtz_absorber(
-    frequency: ArrayLike,
+    frequency: NumericArrayLike,
     resonators: HelmholtzResonator | Sequence[HelmholtzResonator],
     *,
     slit_height_m: float,

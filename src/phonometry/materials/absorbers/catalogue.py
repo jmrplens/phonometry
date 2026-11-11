@@ -89,9 +89,8 @@ from .porous import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from numpy.typing import ArrayLike
-
     from ..._internal.catalogue import Completion
+    from ..._internal.types import NumericArrayLike
     from ...fluids import Fluid
     from .porous import PorousMediumResult
 
@@ -310,7 +309,7 @@ class PorousMaterial(CatalogueRow):
 
     def medium(
         self,
-        frequency: ArrayLike,
+        frequency: NumericArrayLike,
         *,
         model: Literal[
             "johnson_champoux_allard", "delany_bazley", "miki"

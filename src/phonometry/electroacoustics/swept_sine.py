@@ -77,11 +77,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import TwoPanels
+    from .._internal.types import NumericArrayLike, TwoPanels
 
 __all__ = [
     "SweptSineDistortionResult",
@@ -527,7 +527,7 @@ def _default_ir_length(min_spacing: int) -> int:
 
 
 def _validated_recording(
-    recorded: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
 ) -> NDArray[np.float64]:
     rec = real_array(recorded, "recorded")
     if rec.ndim != 1:
@@ -640,7 +640,7 @@ def _check_farina_span(
 
 
 def swept_sine_distortion(
-    recorded: Signal | ArrayLike,
+    recorded: Signal | NumericArrayLike,
     fs: float | None = None,
     *,
     f1: float,

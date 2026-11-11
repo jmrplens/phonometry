@@ -190,18 +190,18 @@ is why it travels with the sides rather than beside them.
 ```python
 ElasticFDTD2D(
     *,
-    c_p: ArrayLike,
-    c_s: ArrayLike,
+    c_p: NumericArrayLike,
+    c_s: NumericArrayLike,
     dx: float,
-    rho: ArrayLike,
+    rho: NumericArrayLike,
     cfl: float = 0.6,
     absorbing_layer_cells: int | np.integer[Any] = 0,
     absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     absorbing_layer_reflection: float = 0.0001,
-    damping: ArrayLike = 0.0,
+    damping: NumericArrayLike = 0.0,
     shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     free_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
-    obstacle_mask: ArrayLike | None = None,
+    obstacle_mask: NumericArrayLike | None = None,
     compute: Compute | None = None,
 )
 ```
@@ -228,6 +228,14 @@ arithmetically averaged onto the faces and `mu` harmonically averaged
 onto the corners (zero whenever any neighbour is a fluid), the Moczo
 et al. (2007) effective parameters (Eqs. 7.37-7.39) that make internal
 interfaces converge to the physical traction continuity.
+
+The five fields, the synthetic pressure `p` and what
+`collocated` returns are arrays of the library the engine steps
+on, not NumPy arrays: a NumPy array on NumPy, a CuPy array on CuPy and a
+tensor on PyTorch, typed `Any` for a type checker since no one array
+type covers the three. Reading one in place keeps it on the device, and
+`numpy_field` gives a NumPy copy of a stored field, typed as an
+array of floats, on every device.
 
 **Parameters**
 
@@ -331,9 +339,9 @@ ElasticFDTD2D.from_regions(
     absorbing_layer_cells: int | np.integer[Any] = 0,
     absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     absorbing_layer_reflection: float = 0.0001,
-    damping: ArrayLike = 0.0,
+    damping: NumericArrayLike = 0.0,
     free_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
-    obstacle_mask: ArrayLike | None = None,
+    obstacle_mask: NumericArrayLike | None = None,
     compute: Compute | None = None,
 ) -> ElasticFDTD2D
 ```
@@ -610,18 +618,18 @@ nothing (the default) runs the physics and keeps only the time axis.
 ```python
 ElasticRun(
     *,
-    c_p: ArrayLike,
-    c_s: ArrayLike,
+    c_p: NumericArrayLike,
+    c_s: NumericArrayLike,
     dx: float,
     duration_s: float,
     sources: Sequence[ExplosionSource | ForceSource],
-    rho: ArrayLike,
+    rho: NumericArrayLike,
     shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     cfl: float = 0.6,
     recording: ElasticRecording | None = None,
     boundaries: ElasticBoundaries | None = None,
-    obstacle_mask: ArrayLike | None = None,
-    damping: ArrayLike = 0.0,
+    obstacle_mask: NumericArrayLike | None = None,
+    damping: NumericArrayLike = 0.0,
 )
 ```
 

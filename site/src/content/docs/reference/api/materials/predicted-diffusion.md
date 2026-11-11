@@ -402,7 +402,7 @@ was.
 
 ```python
 NormalizedDiffusionSpectrum.values_at(
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
 ```
 

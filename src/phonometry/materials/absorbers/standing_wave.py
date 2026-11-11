@@ -24,12 +24,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
 from ..._internal.validation import real_array
 
 if TYPE_CHECKING:
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
 
 Complex = NDArray[np.complex128]
 
@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 
-def standing_wave_ratio_from_level(level_difference: ArrayLike) -> Real:
+def standing_wave_ratio_from_level(level_difference: NumericArrayLike) -> Real:
     r"""Standing-wave ratio from a level difference (ISO 10534-1, Eq. (15)).
 
     :math:`s = 10^{\Delta L / 20}` with
@@ -67,7 +67,7 @@ def _check_swr(swr: NDArray[np.float64]) -> None:
         raise ValueError(msg)
 
 
-def standing_wave_reflection_magnitude(swr: ArrayLike) -> Real:
+def standing_wave_reflection_magnitude(swr: NumericArrayLike) -> Real:
     r"""Reflection magnitude from the standing-wave ratio (ISO 10534-1, Eq. (14)).
 
     :math:`|r| = (s - 1) / (s + 1)`.
@@ -81,7 +81,7 @@ def standing_wave_reflection_magnitude(swr: ArrayLike) -> Real:
     return np.asarray((s - 1.0) / (s + 1.0), dtype=np.float64)
 
 
-def standing_wave_absorption(swr: ArrayLike) -> Real:
+def standing_wave_absorption(swr: NumericArrayLike) -> Real:
     r"""Absorption coefficient from the standing-wave ratio (ISO 10534-1).
 
     Combining :math:`\alpha = 1 - |r|^2` (Eq. (9)) with
@@ -113,7 +113,10 @@ def _standing_wave_phase(
 
 
 def standing_wave_reflection(
-    swr: ArrayLike, first_min_distance: ArrayLike, *, wavelength: ArrayLike
+    swr: NumericArrayLike,
+    first_min_distance: NumericArrayLike,
+    *,
+    wavelength: NumericArrayLike,
 ) -> Complex:
     r"""Complex reflection factor from the standing wave (ISO 10534-1, Eqs. (17)-(23)).
 
@@ -138,7 +141,10 @@ def standing_wave_reflection(
 
 
 def standing_wave_normalized_impedance(
-    swr: ArrayLike, first_min_distance: ArrayLike, *, wavelength: ArrayLike
+    swr: NumericArrayLike,
+    first_min_distance: NumericArrayLike,
+    *,
+    wavelength: NumericArrayLike,
 ) -> Complex:
     r"""Normalised impedance from the standing wave (ISO 10534-1, Eqs. (24)-(26)).
 

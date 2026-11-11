@@ -56,7 +56,7 @@ channel_weight(
 
 channel_weight(
     azimuth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    elevation: ArrayLike = ...,
+    elevation: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 channel_weight(
@@ -65,8 +65,8 @@ channel_weight(
 ) -> NDArray[np.float64]
 
 channel_weight(
-    azimuth: ArrayLike,
-    elevation: ArrayLike = ...,
+    azimuth: NumericArrayLike,
+    elevation: NumericArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -105,9 +105,9 @@ DEFAULT_CHANNEL_WEIGHTS = {1: (1.0,), 2: (1.0, 1.0), 5: (1.0, 1.0, 1.0, 1.41, 1.
 
 ```python
 integrated_loudness(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
 ) -> float
 ```
 
@@ -140,7 +140,10 @@ normalises to -23.0 LUFS.
 ## k_weighting
 
 ```python
-k_weighting(x: Signal | ArrayLike, fs: float | None = None) -> np.ndarray
+k_weighting(
+    x: Signal | NumericArrayLike,
+    fs: float | None = None,
+) -> np.ndarray
 ```
 
 Apply the two-stage K-weighting pre-filter (BS.1770-5 Annex 1).
@@ -198,7 +201,7 @@ rejected.
 k_weighting_response(
     fs: float = 48000.0,
     *,
-    frequencies: ArrayLike | None = None,
+    frequencies: NumericArrayLike | None = None,
     n: int | np.integer[Any] = 512,
 ) -> KWeightingResponse
 ```
@@ -302,7 +305,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ## loudness_range
 
 ```python
-loudness_range(short_term_loudness: ArrayLike) -> float
+loudness_range(short_term_loudness: NumericArrayLike) -> float
 ```
 
 Loudness range LRA of a short-term loudness series (EBU Tech 3342).
@@ -332,9 +335,9 @@ distribution, following the Tech 3342 reference implementation.
 
 ```python
 program_loudness(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
-    weights: ArrayLike | None = None,
+    weights: NumericArrayLike | None = None,
     *,
     momentary_step: float = 0.01,
     short_term_step: float = 0.1,
@@ -491,7 +494,7 @@ PASS/FAIL verdict row and a footer with the fixed disclaimer.
 
 ```python
 true_peak_level(
-    x: Signal | ArrayLike,
+    x: Signal | NumericArrayLike,
     fs: float | None = None,
     oversample: int | np.integer[Any] | None = None,
 ) -> float | NDArray[np.float64]

@@ -155,9 +155,10 @@ from .fdtd import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
     from ._backends import DeviceArray
     from ._remote.client import Expected
     from .compute import Compute, RunProvenance
@@ -575,7 +576,9 @@ def scholte_speed(
     return sol.c_s * float(np.sqrt(root))
 
 
-def _resolve_speed_map(name: str, value: ArrayLike, shape: GridShape | None) -> Field2D:
+def _resolve_speed_map(
+    name: str, value: NumericArrayLike, shape: GridShape | None
+) -> Field2D:
     """Broadcast/validate a wave-speed spec into a finite 2D map.
 
     :raises TypeError: for a speed that holds a complex number or a text,
@@ -615,7 +618,7 @@ def _resolve_free_sides(
 
 
 def _elastic_grid(
-    c_p: ArrayLike, shape: GridShape | None, cfl: float, dx: float
+    c_p: NumericArrayLike, shape: GridShape | None, cfl: float, dx: float
 ) -> tuple[Field2D, float, float]:
     """The P-wave speed map, the grid spacing and the time step, checked on the host.
 
@@ -636,7 +639,7 @@ def _elastic_grid(
     return cp_map, dx, _time_step(courant, dx, float(cp_map.max()))
 
 
-def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
+def _checked_shear_speed(c_s: NumericArrayLike, cp_map: Field2D) -> Field2D:
     """The S-wave speed map on the grid of *cp_map*, checked against it."""
     ny, nx = cp_map.shape
     cs_map = _resolve_speed_map("c_s", c_s, (ny, nx))
@@ -658,7 +661,7 @@ def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
     return cs_map
 
 
-def _checked_density(rho: ArrayLike, ny: int, nx: int) -> Field2D:
+def _checked_density(rho: NumericArrayLike, ny: int, nx: int) -> Field2D:
     """The density map on the ``(ny, nx)`` grid, strictly positive.
 
     :raises TypeError: for a density that holds a complex number or a text,
@@ -701,19 +704,19 @@ class _ElasticMedium:
 
 
 def _elastic_medium(
-    c_p: ArrayLike,
-    c_s: ArrayLike,
+    c_p: NumericArrayLike,
+    c_s: NumericArrayLike,
     dx: float,
     *,
-    rho: ArrayLike,
+    rho: NumericArrayLike,
     cfl: float,
     absorbing_layer_cells: int | np.integer[Any],
     absorbing_sides: Side | Iterable[Side] | None,
     absorbing_layer_reflection: float,
-    damping: ArrayLike,
+    damping: NumericArrayLike,
     shape: GridShape | None,
     free_sides: Side | Iterable[Side] | None,
-    obstacle_mask: ArrayLike | None,
+    obstacle_mask: NumericArrayLike | None,
 ) -> _ElasticMedium:
     """Check every argument of :class:`ElasticFDTD2D` that describes the medium.
 
@@ -836,6 +839,14 @@ class ElasticFDTD2D:
     et al. (2007) effective parameters (Eqs. 7.37-7.39) that make internal
     interfaces converge to the physical traction continuity.
 
+    The five fields, the synthetic pressure :attr:`p` and what
+    :meth:`collocated` returns are arrays of the library the engine steps
+    on, not NumPy arrays: a NumPy array on NumPy, a CuPy array on CuPy and a
+    tensor on PyTorch, typed ``Any`` for a type checker since no one array
+    type covers the three. Reading one in place keeps it on the device, and
+    :meth:`numpy_field` gives a NumPy copy of a stored field, typed as an
+    array of floats, on every device.
+
     :param c_p: P-wave speed map [m/s], shape ``(ny, nx)``. A scalar with an
         explicit ``shape`` is also accepted.
     :param c_s: S-wave speed map [m/s]; scalar or ``(ny, nx)`` array.
@@ -902,18 +913,18 @@ class ElasticFDTD2D:
     def __init__(
         self,
         *,
-        c_p: ArrayLike,
-        c_s: ArrayLike,
+        c_p: NumericArrayLike,
+        c_s: NumericArrayLike,
         dx: float,
-        rho: ArrayLike,
+        rho: NumericArrayLike,
         cfl: float = 0.6,
         absorbing_layer_cells: int | np.integer[Any] = 0,
         absorbing_sides: Side | Iterable[Side] | None = None,
         absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
-        damping: ArrayLike = 0.0,
+        damping: NumericArrayLike = 0.0,
         shape: GridShape | None = None,
         free_sides: Side | Iterable[Side] | None = None,
-        obstacle_mask: ArrayLike | None = None,
+        obstacle_mask: NumericArrayLike | None = None,
         compute: Compute | None = None,
     ) -> None:
         medium = _elastic_medium(
@@ -931,10 +942,11 @@ class ElasticFDTD2D:
             obstacle_mask=obstacle_mask,
         )
         cp_map, cs_map, rho_map = medium.cp_map, medium.cs_map, medium.rho_map
-        self.dx, self.dt = medium.dx, medium.dt
+        self.dx: float = medium.dx
+        self.dt: float = medium.dt
         ny, nx = cp_map.shape
         #: Thickness of the absorbing (sponge) layer, in cells.
-        self.absorbing_layer_cells = medium.absorbing_layer_cells
+        self.absorbing_layer_cells: int = medium.absorbing_layer_cells
         #: Sides carrying the absorbing layer; none when it has no cells.
         self.absorbing_sides: tuple[Side, ...] = medium.absorbing_sides
         #: Sides carrying a traction-free surface (immutable record).
@@ -950,16 +962,16 @@ class ElasticFDTD2D:
         self._xp = backend.xp
         # Read-only copies of their own, so the maps the simulation reports
         # stay the ones mu, lam and dt were computed from.
-        self.c_p = read_only_copy(cp_map)
-        self.c_s = read_only_copy(cs_map)
-        self.rho = read_only_copy(rho_map)
+        self.c_p: NDArray[np.float64] = read_only_copy(cp_map)
+        self.c_s: NDArray[np.float64] = read_only_copy(cs_map)
+        self.rho: NDArray[np.float64] = read_only_copy(rho_map)
         c_max = float(cp_map.max())
         #: Shear modulus ``mu = rho c_s**2`` at cell centres, a read-only
         #: NumPy copy.
-        self.mu = read_only_copy(rho_map * cs_map**2)
+        self.mu: NDArray[np.float64] = read_only_copy(rho_map * cs_map**2)
         #: First Lame parameter ``lambda = rho (c_p**2 - 2 c_s**2)``, a
         #: read-only NumPy copy.
-        self.lam = read_only_copy(
+        self.lam: NDArray[np.float64] = read_only_copy(
             np.maximum(rho_map * (cp_map**2 - 2.0 * cs_map**2), 0.0)
         )
         mu2 = 2.0 * self.mu
@@ -989,18 +1001,28 @@ class ElasticFDTD2D:
         self._rho_y = backend.asarray(rho_y)
         self._mu_c = backend.asarray(mu_c)
 
-        self.txx = backend.zeros((ny, nx))
-        self.tyy = backend.zeros((ny, nx))
-        self.txy = backend.zeros((ny - 1, nx - 1))
-        self.vx = backend.zeros((ny, nx - 1))
-        self.vy = backend.zeros((ny - 1, nx))
+        #: Normal stress along x at the cell centres [Pa], shape ``(ny, nx)``,
+        #: an array of the backend: ``numpy_field("txx")`` is its NumPy copy.
+        self.txx: DeviceArray = backend.zeros((ny, nx))
+        #: Normal stress along y at the cell centres [Pa], shape ``(ny, nx)``,
+        #: an array of the backend.
+        self.tyy: DeviceArray = backend.zeros((ny, nx))
+        #: Shear stress at the interior corners [Pa], shape
+        #: ``(ny - 1, nx - 1)``, an array of the backend.
+        self.txy: DeviceArray = backend.zeros((ny - 1, nx - 1))
+        #: Particle velocity at the interior x-faces [m/s], shape
+        #: ``(ny, nx - 1)``, an array of the backend.
+        self.vx: DeviceArray = backend.zeros((ny, nx - 1))
+        #: Particle velocity at the interior y-faces [m/s], shape
+        #: ``(ny - 1, nx)``, an array of the backend.
+        self.vy: DeviceArray = backend.zeros((ny - 1, nx))
         self._div = backend.zeros((ny, nx))
         self._dvx = backend.zeros((ny, nx))
         self._dvy = backend.zeros((ny, nx))
         self._dty = backend.zeros((ny, nx - 1))
         self._dtx = backend.zeros((ny - 1, nx))
         self._sources: list[ElasticSource] = []
-        self.n = 0  # completed steps
+        self.n: int = 0  # completed steps
 
         self._init_decay(
             medium.sides,
@@ -1025,9 +1047,9 @@ class ElasticFDTD2D:
         absorbing_layer_cells: int | np.integer[Any] = 0,
         absorbing_sides: Side | Iterable[Side] | None = None,
         absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
-        damping: ArrayLike = 0.0,
+        damping: NumericArrayLike = 0.0,
         free_sides: Side | Iterable[Side] | None = None,
-        obstacle_mask: ArrayLike | None = None,
+        obstacle_mask: NumericArrayLike | None = None,
         compute: Compute | None = None,
     ) -> ElasticFDTD2D:
         """Build the engine from named materials painted over a background.
@@ -1977,18 +1999,18 @@ class ElasticRun(OwnsArrays):
         def __init__(
             self,
             *,
-            c_p: ArrayLike,
-            c_s: ArrayLike,
+            c_p: NumericArrayLike,
+            c_s: NumericArrayLike,
             dx: float,
             duration_s: float,
             sources: Sequence[ElasticSource],
-            rho: ArrayLike,
+            rho: NumericArrayLike,
             shape: GridShape | None = None,
             cfl: float = 0.6,
             recording: ElasticRecording | None = None,
             boundaries: ElasticBoundaries | None = None,
-            obstacle_mask: ArrayLike | None = None,
-            damping: ArrayLike = 0.0,
+            obstacle_mask: NumericArrayLike | None = None,
+            damping: NumericArrayLike = 0.0,
         ) -> None: ...
 
     def __post_init__(self) -> None:

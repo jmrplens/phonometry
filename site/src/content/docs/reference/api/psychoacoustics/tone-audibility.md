@@ -104,10 +104,10 @@ reading, matching its executable Annex J reference program; the ISO/PAS
 
 ```python
 analyze_spectrum(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     line_spacing_hz: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> ToneAudibilityResult
 ```
@@ -157,12 +157,12 @@ the wrong mean narrow-band level for tones near its edges.
 
 ```python
 assess_tones(
-    tone_levels: ArrayLike,
-    mean_narrowband_levels: ArrayLike,
+    tone_levels: NumericArrayLike,
+    mean_narrowband_levels: NumericArrayLike,
     line_spacing_hz: float,
     *,
-    tone_frequencies: ArrayLike,
-    extended_uncertainties: ArrayLike | None = None,
+    tone_frequencies: NumericArrayLike,
+    extended_uncertainties: NumericArrayLike | None = None,
 ) -> ToneAudibilityResult
 ```
 
@@ -226,8 +226,8 @@ $\Delta L = L_\mathrm{T} - L_\mathrm{G} - a_\mathrm{v}$ dB.
 
 ```python
 audibility_uncertainty(
-    tone_line_levels: ArrayLike,
-    noise_line_levels: ArrayLike,
+    tone_line_levels: NumericArrayLike,
+    noise_line_levels: NumericArrayLike,
     tone_frequency: float,
     line_spacing_hz: float,
     *,
@@ -289,11 +289,11 @@ consideration; see [`mean_audibility_uncertainty`](/phonometry/reference/api/psy
 
 ```python
 combined_tone_level(
-    levels: ArrayLike,
-    mean_narrowband_levels: ArrayLike,
+    levels: NumericArrayLike,
+    mean_narrowband_levels: NumericArrayLike,
     *,
-    frequencies: ArrayLike,
-    tone_frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
+    tone_frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> float
 ```
@@ -418,7 +418,7 @@ stepped ISO 1996-2 Annex C [`critical_bandwidth`](/phonometry/reference/api/envi
 
 ```python
 energy_sum_level(
-    line_levels: ArrayLike,
+    line_levels: NumericArrayLike,
     *,
     effective_bandwidth_factor: float = 1.5,
 ) -> float
@@ -496,7 +496,7 @@ negative with frequency (see Annex C).
 ## mean_audibility
 
 ```python
-mean_audibility(decisive_audibilities: ArrayLike) -> float
+mean_audibility(decisive_audibilities: NumericArrayLike) -> float
 ```
 
 Mean audibility `ΔL` over a number of spectra (Formula (20)).
@@ -527,8 +527,8 @@ value explicitly for such spectra.
 
 ```python
 mean_audibility_uncertainty(
-    decisive_audibilities: ArrayLike,
-    extended_uncertainties: ArrayLike,
+    decisive_audibilities: NumericArrayLike,
+    extended_uncertainties: NumericArrayLike,
 ) -> float
 ```
 
@@ -564,10 +564,10 @@ with 12 averages the standard reports ~+/-1.5 dB as typically achieved.
 
 ```python
 mean_narrowband_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     tone_frequency: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> float
 ```
@@ -695,11 +695,11 @@ $\Delta L = L_\mathrm{T} - L_\mathrm{G} - a_\mathrm{v}$
 
 ```python
 tone_level(
-    levels: ArrayLike,
+    levels: NumericArrayLike,
     tone_frequency: float,
     mean_narrowband_level: float,
     *,
-    frequencies: ArrayLike,
+    frequencies: NumericArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> float
 ```

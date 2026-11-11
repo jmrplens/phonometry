@@ -11,7 +11,7 @@ from scipy import signal
 from .validation import real_array
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from .types import NumericArrayLike
 
 # Rank of the cached SOS filter state ``zi`` as ``_sos_initial_state`` lays
 # it out: (n_sections, 2) for 1-D input, (n_sections, n_channels, 2) for 2-D.
@@ -19,7 +19,7 @@ _ZI_NDIM_MONO = 2
 _ZI_NDIM_MULTICHANNEL = 3
 
 
-def _typesignal(x: ArrayLike, *, name: str = "x") -> np.ndarray:
+def _typesignal(x: NumericArrayLike, *, name: str = "x") -> np.ndarray:
     """Ensure signal is a float64 numpy array.
 
     Integer inputs (e.g. int16 audio from ``scipy.io.wavfile.read``) are
@@ -42,7 +42,7 @@ def _typesignal(x: ArrayLike, *, name: str = "x") -> np.ndarray:
     array of one sample, so a call that lost its signal on the way in came
     back with a whole spectrum of ``NaN`` and refused nothing. It is not a
     ``Signal``, not a sequence of floats and not an array, which is what
-    ``ArrayLike`` above says and what every caller's own annotation says.
+    ``NumericArrayLike`` above says and what every caller's own annotation says.
 
     A non-finite sample is refused for the same reason one layer further
     down: a single ``NaN`` survives every filter and poisons every band

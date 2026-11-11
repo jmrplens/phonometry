@@ -77,7 +77,9 @@ cam_from_frequency(
     frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-cam_from_frequency(frequency: ArrayLike) -> float | NDArray[np.float64]
+cam_from_frequency(
+    frequency: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 ERB_N number (Cam) of a frequency.
@@ -112,7 +114,7 @@ erb_bandwidth(
     frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-erb_bandwidth(frequency: ArrayLike) -> float | NDArray[np.float64]
+erb_bandwidth(frequency: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 Equivalent rectangular bandwidth of the auditory filter, Hz.
@@ -160,7 +162,7 @@ frequency_from_cam(
     cam: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
-frequency_from_cam(cam: ArrayLike) -> float | NDArray[np.float64]
+frequency_from_cam(cam: NumericArrayLike) -> float | NDArray[np.float64]
 ```
 
 Frequency of an ERB_N number, the inverse of [`cam_from_frequency`](/phonometry/reference/api/psychoacoustics/erb-scale/#cam_from_frequency).

@@ -18,6 +18,7 @@ import ast
 import contextlib
 import dataclasses
 import enum
+import functools
 import importlib.util
 import inspect
 import pathlib
@@ -41,6 +42,7 @@ import pytest
 from phonometry import building, emission, environment, io, vibration
 from phonometry._internal.frozen import OwnsArrays
 from phonometry._internal.validation import require_choice
+from phonometry.environment import RailRoughnessClass
 from phonometry.filters.weighting import time_weighting
 
 #: The tests that read the whole package share what the guard keeps of it, so
@@ -4485,6 +4487,20 @@ class _GearMember(enum.Enum):
     HIGH = "high"
 
 
+class _Lane(enum.Enum):
+    SLOW = "slow"
+    FAST = "fast"
+    CLOSED = "closed"
+
+
+#: The posted speed of each lane open to traffic; the closed lane has none.
+_LANE_SPEEDS = MappingProxyType({"slow": 80.0, "fast": 120.0})
+#: Every lane as its member, the closed one among them.
+_LaneMember = Literal[_Lane.SLOW, _Lane.FAST, _Lane.CLOSED]
+#: The gears and the parking position: a ``Literal`` that lists another.
+_GearOrPark = Literal[_Gear, "park"]
+
+
 def _ratio_by_check(gear: _Gear) -> float:
     return _GEAR_RATIOS[require_choice(gear, "gear", tuple(_GEAR_RATIOS))]
 
@@ -4602,6 +4618,16 @@ def _ratio_unless_a_load_stops_short(gear: _Gear, loads: Sequence[float]) -> flo
         else:
             return total
     return total * _GEAR_RATIOS[gear]
+
+
+def _speed_of_lane(lane: _LaneMember) -> float:
+    return _LANE_SPEEDS[lane.value]
+
+
+def _ratio_or_park(gear: _GearOrPark) -> float:
+    if gear == "park":
+        return 0.0
+    return _GEAR_RATIOS[gear]
 
 
 def _refusal(function: Callable[..., object], name: str, value: object) -> str | None:
@@ -4766,6 +4792,136 @@ def test_each_value_the_literal_lists_is_read(
     ] == ["'reverse'"]
 
 
+def test_each_member_and_each_text_of_a_literal_it_lists_is_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The walk reads a ``Literal`` as the package holds it: an ``Enum``
+    member it lists is read like a text, and so is each text of a ``Literal``
+    it lists in turn.
+
+    The values were read from the text of the annotation, the constants
+    alone, so ``Literal[RailRoughnessClass.WELL_MAINTAINED, ...]`` listed
+    nothing to read, and ``Literal[WeightingName, "band-limiting"]`` listed
+    ``"band-limiting"`` alone.
+    """
+    targets = [
+        (__name__, "_speed_of_lane", _speed_of_lane),
+        (__name__, "_ratio_or_park", _ratio_or_park),
+    ]
+    monkeypatch.setattr(ccl, "_targets", lambda: iter(targets))
+    found = {
+        choice.qualname: [evidence.split(":")[0] for evidence in choice.evidence]
+        for choice in ccl.refused_choices()
+    }
+    assert found == {
+        "_speed_of_lane": ["_Lane.CLOSED"],
+        "_ratio_or_park": ["'reverse'"],
+    }
+
+
+#: A vocabulary of ``Enum`` members, and a function that names it through an
+#: import its module makes for the type checker alone.
+_LANES_FOR_THE_CHECKER = {
+    "_lane_kinds": """
+        import enum
+        from typing import Literal
+
+        class Lane(enum.Enum):
+            SLOW = "slow"
+            CLOSED = "closed"
+
+        LaneMember = Literal[Lane.SLOW, Lane.CLOSED]
+        """,
+    "_lane_speeds": """
+        from __future__ import annotations
+
+        from types import MappingProxyType
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            from phonometry._lane_kinds import LaneMember
+
+        _SPEEDS = MappingProxyType({"slow": 80.0})
+
+        def speed(lane: LaneMember) -> float:
+            return _SPEEDS[lane.value]
+        """,
+}
+
+
+def test_a_literal_its_module_imports_for_the_type_checker_alone_is_read(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An annotation may name what its module imports under ``if
+    TYPE_CHECKING:``, a name the module never binds when it runs: the walk
+    reads it where the import points.
+    """
+    _plant_modules(tmp_path, monkeypatch, _LANES_FOR_THE_CHECKER)
+    speed = sys.modules["phonometry._lane_speeds"].speed
+    monkeypatch.setattr(
+        ccl, "_targets", lambda: iter([("phonometry._lane_speeds", "speed", speed)])
+    )
+    (choice,) = ccl.refused_choices()
+    assert [evidence.split(":")[0] for evidence in choice.evidence] == ["Lane.CLOSED"]
+
+
+def test_a_literal_the_walk_cannot_read_stops_it_by_name(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ``Literal`` whose values the walk cannot read, the members of an
+    ``Enum`` its module imports from nowhere, stops the walk with the
+    annotation it could not read, where it would pass values it never saw.
+    """
+    source = """
+        from __future__ import annotations
+
+        from typing import TYPE_CHECKING, Literal
+
+        if TYPE_CHECKING:
+            from phonometry._no_such_lanes import Lane
+
+        def speed(lane: Literal[Lane.SLOW] | None = None) -> float:
+            return 80.0
+        """
+    _plant_modules(tmp_path, monkeypatch, {"_lane_of_nowhere": source})
+    speed = sys.modules["phonometry._lane_of_nowhere"].speed
+    monkeypatch.setattr(
+        ccl,
+        "_targets",
+        lambda: iter([("phonometry._lane_of_nowhere", "speed", speed)]),
+    )
+    with pytest.raises(LookupError, match=r"Literal\[Lane\.SLOW\]"):
+        list(ccl.refused_choices())
+
+
+def _shown(value: object) -> str:
+    """*value* as the walk names it: an ``Enum`` member by its class and name."""
+    if isinstance(value, enum.Enum):
+        return f"{type(value).__name__}.{value.name}"
+    return repr(value)
+
+
+def _widened(
+    function: Callable[..., object], name: str, values: tuple[object, ...]
+) -> Callable[..., object]:
+    """*function* with its parameter *name* typed with a ``Literal`` of *values*."""
+
+    @functools.wraps(function)
+    def widened(*args: object, **kwargs: object) -> object:
+        return function(*args, **kwargs)
+
+    signature = inspect.signature(function)
+    listed: object = typing.Literal.__getitem__(values)
+    parameters = [
+        parameter.replace(annotation=listed) if parameter.name == name else parameter
+        for parameter in signature.parameters.values()
+    ]
+    widened.__signature__ = signature.replace(  # type: ignore[attr-defined]
+        parameters=parameters
+    )
+    return widened
+
+
 @pytest.mark.parametrize(
     ("function", "name", "refused", "taken"),
     [
@@ -4775,7 +4931,12 @@ def test_each_value_the_literal_lists_is_read(
             ("T2", "L"),
             ("X", "T1"),
         ),
-        (environment.rail_roughness, "roughness", ("N", "B"), ("E", "M")),
+        (
+            environment.rail_roughness,
+            "roughness",
+            ("N", "B", RailRoughnessClass.NOT_WELL_MAINTAINED, RailRoughnessClass.BAD),
+            ("E", "M", RailRoughnessClass.WELL_MAINTAINED, RailRoughnessClass.NORMAL),
+        ),
         (
             building.improvement_octave_bands,
             "quantity",
@@ -4801,18 +4962,27 @@ def test_each_value_the_literal_lists_is_read(
 def test_the_values_a_narrowed_choice_dropped_are_the_ones_its_call_refuses(
     function: Callable[..., object],
     name: str,
-    refused: tuple[str, ...],
-    taken: tuple[str, ...],
+    refused: tuple[object, ...],
+    taken: tuple[object, ...],
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Each choice the package narrowed to the values its call takes still
-    refuses the ones it dropped, whatever the other arguments are, and the
-    guard reads it so: the same function with its old, wider annotation
-    fails the walk.
+    refuses the ones it dropped, whatever the other arguments are, and takes
+    the ones it kept; and the walk, handed the same function with its old,
+    wider annotation, names the dropped values and no other, the members of
+    ``RailRoughnessClass`` among them.
     """
     for value in refused:
         assert _refusal(function, name, value) is not None, value
     for value in taken:
         assert _refusal(function, name, value) is None, value
+    widened = _widened(function, name, (*taken, *refused))
+    target = (function.__module__, function.__qualname__, widened)
+    monkeypatch.setattr(ccl, "_targets", lambda: iter([target]))
+    (choice,) = ccl.refused_choices()
+    assert [evidence.split(":")[0] for evidence in choice.evidence] == [
+        _shown(value) for value in refused
+    ]
 
 
 @pytest.mark.parametrize(

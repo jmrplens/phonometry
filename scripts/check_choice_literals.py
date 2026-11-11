@@ -96,14 +96,16 @@ reads it.
 A ``Literal`` lists only values its call takes (rule D24,
 :func:`refused_choices`): a value every call refuses, whatever the other
 arguments, is one the editor offers and the field lists for nothing. Each
-value is read through the function as it runs (:class:`_ValueReader`), every
-other argument unknown: a test the value alone decides takes its branch, a
-test that asks anything else takes both, and the value fails when every path
-raises and one of them raises for it, at a shared check that does not take
-it, a fixed table with no key for it, an ``Enum`` with no member of it, a
-``raise`` a test of it steered the call to, or a function of the package it
-is handed to that refuses it in turn. A value refused only beside a value of
-another argument is a combination the ``Literal`` cannot say, and passes.
+value it lists, a text, a number or an ``Enum`` member, is taken from the
+annotation's value and not its text (:func:`_listed_values`), and read
+through the function as it runs (:class:`_ValueReader`), every other argument
+unknown: a test the value alone decides takes its branch, a test that asks
+anything else takes both, and the value fails when every path raises and one
+of them raises for it, at a shared check that does not take it, a fixed table
+with no key for it, an ``Enum`` with no member of it, a ``raise`` a test of
+it steered the call to, or a function of the package it is handed to that
+refuses it in turn. A value refused only beside a value of another argument
+is a combination the ``Literal`` cannot say, and passes.
 """
 
 from __future__ import annotations
@@ -125,7 +127,7 @@ import re
 import sys
 import textwrap
 import typing
-from types import CodeType, MappingProxyType, ModuleType
+from types import CodeType, MappingProxyType, ModuleType, UnionType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from ast_scan import (
@@ -7666,43 +7668,243 @@ def _always_refused(
     return flow.refusals[0]
 
 
-def _listed_values(annotation: str) -> tuple[object, ...]:
-    """The values the ``Literal`` of an annotation lists, read through its
-    aliases (:func:`expanded`): each text and number one of its members
-    writes, the choice itself and not an item of a collection of them.
+#: What a ``Literal`` lists that a caller hands as the choice itself: a text,
+#: a number, or a member of an ``Enum``. A truth value is an ``int`` too, and
+#: is left out.
+_LISTED_KINDS = (str, int, enum.Enum)
+
+
+class _AnnotationNames(dict[str, object]):
+    """The names the annotations of one module read that the module does not
+    hold once it has run: each it binds under ``if TYPE_CHECKING:``, an
+    import or an alias, read where it points the first time an annotation
+    reads it (:func:`_unbound_bindings`).
+
+    Handed to :func:`eval` as the names to look in first, it is asked for
+    every name an annotation reads; one the module holds, or a builtin, is a
+    :class:`KeyError` at once, and Python reads it where it reads any name.
+    Read lazily, so a module the package imports for the type checker alone
+    (``reportlab``, ``matplotlib.axes``) is imported only when an annotation
+    names it.
     """
-    values: list[object] = []
-    for member in _members(annotation):
-        if not member.startswith("Literal["):
-            continue
+
+    def __init__(self, module: ModuleType) -> None:
+        super().__init__()
+        self.module = module
+        self._reading: set[str] = set()
+
+    def __missing__(self, name: str) -> object:
+        if name in self._reading or name in vars(self.module) or name in vars(builtins):
+            raise KeyError(name)
+        self._reading.add(name)
         try:
-            node = ast.parse(member, mode="eval").body
-        except SyntaxError:
-            continue
-        if not isinstance(node, ast.Subscript):
-            continue
-        elements = (
-            node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
-        )
-        values.extend(
-            element.value
-            for element in elements
-            if isinstance(element, ast.Constant)
-            and isinstance(element.value, str | int)
-            and not isinstance(element.value, bool)
-        )
-    return tuple(dict.fromkeys(values))
+            for statement in _unbound_bindings(self.module.__name__).get(name, ()):
+                try:
+                    found = self._bound_by(name, statement)
+                except Exception:
+                    # An import that fails, or an alias that names what
+                    # nothing binds: the next binding of the name may hold.
+                    continue
+                self[name] = found
+                return found
+        finally:
+            self._reading.discard(name)
+        raise KeyError(name)
+
+    def _bound_by(self, name: str, statement: ast.stmt) -> object:
+        """What *statement*, a binding of *name* the module never ran, binds."""
+        if isinstance(statement, ast.ImportFrom):
+            source = importlib.util.resolve_name(
+                "." * statement.level + (statement.module or ""),
+                self.module.__package__ or "",
+            )
+            for alias in statement.names:
+                if (alias.asname or alias.name) == name:
+                    module = importlib.import_module(source)
+                    if hasattr(module, alias.name):
+                        return getattr(module, alias.name)
+                    return importlib.import_module(f"{source}.{alias.name}")
+        elif isinstance(statement, ast.Import):
+            for alias in statement.names:
+                if alias.asname == name:
+                    return importlib.import_module(alias.name)
+                if alias.asname is None and alias.name.partition(".")[0] == name:
+                    importlib.import_module(alias.name)
+                    return importlib.import_module(name)
+        elif (
+            isinstance(statement, ast.TypeAlias | ast.Assign | ast.AnnAssign)
+            and statement.value is not None
+        ):
+            return _evaluated(ast.unparse(statement.value), self.module.__name__)
+        raise KeyError(name)
+
+
+@functools.cache
+def _unbound_bindings(module_name: str) -> MappingProxyType[str, tuple[ast.stmt, ...]]:
+    """Each name a statement at the top of *module_name* binds, an import or
+    an assignment, that the module does not hold once it has run, with the
+    statements that bind it: those under ``if TYPE_CHECKING:``, which a type
+    checker reads and the program never runs.
+
+    ``event_level(metric: NoiseMetric)`` may name an alias its module imports
+    for the type checker alone.
+    """
+    parsed = _parsed_module(module_name)
+    if parsed is None:
+        return MappingProxyType({})
+    module, tree, _ = parsed
+    held = vars(module)
+    found: dict[str, list[ast.stmt]] = {}
+    for statement in _module_statements(tree.body):
+        for name in _names_bound_by(statement):
+            if name not in held:
+                found.setdefault(name, []).append(statement)
+    return MappingProxyType({name: tuple(nodes) for name, nodes in found.items()})
+
+
+def _names_bound_by(statement: ast.stmt) -> Iterator[str]:
+    """The names an import, an assignment to a name or a ``type`` statement binds."""
+    if isinstance(statement, ast.Import):
+        for alias in statement.names:
+            yield alias.asname or alias.name.partition(".")[0]
+    elif isinstance(statement, ast.ImportFrom):
+        for alias in statement.names:
+            if alias.name != "*":
+                yield alias.asname or alias.name
+    elif isinstance(statement, ast.TypeAlias):
+        yield statement.name.id
+    elif isinstance(statement, ast.Assign):
+        for target in statement.targets:
+            if isinstance(target, ast.Name):
+                yield target.id
+    elif (
+        isinstance(statement, ast.AnnAssign)
+        and statement.value is not None
+        and isinstance(statement.target, ast.Name)
+    ):
+        yield statement.target.id
+
+
+@functools.cache
+def _annotation_names(module_name: str) -> _AnnotationNames | None:
+    """The names the annotations of *module_name* read beyond those it holds
+    (:class:`_AnnotationNames`), or ``None`` when it is not imported.
+    """
+    module = sys.modules.get(module_name)
+    return None if module is None else _AnnotationNames(module)
+
+
+@functools.cache
+def _evaluated(member: str, module_name: str) -> object:
+    """*member*, an annotation written in *module_name* as text, as the
+    package holds it: its value read in the module's names and in those its
+    annotations read for the type checker alone (:func:`_annotation_names`).
+
+    Raises what evaluating it raises, :class:`NameError` above all.
+    """
+    names = _annotation_names(module_name)
+    if names is None:
+        msg = f"{module_name} is not imported"
+        raise LookupError(msg)
+    # The text of an annotation the package writes, read as Python reads it
+    # when typing.get_type_hints() asks for it.
+    return eval(member, vars(names.module), names)
+
+
+def _literal_values(held: object) -> Iterator[object]:
+    """Each value a ``Literal`` of *held* lists for the choice itself, read
+    through unions, ``Annotated``, ``type`` statements and a ``Literal``
+    listed inside another; not an item of a collection of them.
+    """
+    if isinstance(held, typing.TypeAliasType):
+        yield from _literal_values(held.__value__)
+        return
+    origin = typing.get_origin(held)
+    if origin is typing.Annotated:
+        yield from _literal_values(typing.get_args(held)[0])
+    elif origin is typing.Union or origin is UnionType:
+        for arm in typing.get_args(held):
+            yield from _literal_values(arm)
+    elif origin is typing.Literal:
+        for value in typing.get_args(held):
+            if isinstance(value, typing.TypeAliasType) or (
+                typing.get_origin(value) is typing.Literal
+            ):
+                yield from _literal_values(value)
+            elif isinstance(value, _LISTED_KINDS) and not isinstance(value, bool):
+                yield value
+
+
+def _listed_values(annotation: object, module_name: str) -> tuple[object, ...]:
+    """The values the ``Literal`` of an annotation lists for the choice
+    itself, as the package holds them: each text, number and ``Enum``
+    member, read through aliases, unions, ``Annotated``, ``type`` statements
+    and a ``Literal`` listed inside another (:func:`_literal_values`).
+
+    Read from the objects, not from the text: the text of
+    ``Literal[RailRoughnessClass.WELL_MAINTAINED, RailRoughnessClass.NORMAL]``
+    holds no value, and that of ``Literal[WeightingName, "band-limiting"]``
+    holds one of ten. An annotation its module writes as text is read one
+    member of its union at a time, in *module_name*, where it is written
+    (:func:`_evaluated`). A member written ``Literal[...]``, or a union with
+    one, once its aliases are spelled out (:func:`expanded`), that cannot be
+    read so is a :class:`LookupError` that names it: the check is taught to
+    read it, rather than pass values it never saw. Any other member that
+    cannot be read, ``typing.Literal[...]`` or ``Annotated[Literal[...], ...]``
+    among them, and one that reads as a text, written in quotes inside an
+    annotation its module already writes as text, is passed over as one that
+    lists nothing.
+    """
+    held: list[object] = []
+    if isinstance(annotation, str):
+        for member in _members(annotation):
+            try:
+                held.extend(_literal_values(_evaluated(member, module_name)))
+            except Exception as error:
+                # A member that names something no import binds, a type
+                # parameter of the function among them, says nothing of the
+                # choice unless it is written as a Literal.
+                if not any(
+                    part.startswith("Literal[")
+                    for part in _members(expanded(member, module_name))
+                ):
+                    continue
+                msg = (
+                    f"the Literal of {member!r} in {module_name} cannot be "
+                    f"read as the package runs ({error!r}): teach "
+                    "_annotation_names where it points"
+                )
+                raise LookupError(msg) from error
+    else:
+        held.extend(_literal_values(annotation))
+    # An Enum member with a text or number value equals that value, and
+    # both are listed.
+    return tuple(value for _, value in dict.fromkeys((type(v), v) for v in held))
+
+
+def _shown(value: object) -> str:
+    """*value* as a report names it: an ``Enum`` member by its class and name."""
+    if isinstance(value, enum.Enum):
+        return f"{type(value).__name__}.{value.name}"
+    return repr(value)
 
 
 def _refused(
-    check: Callable[..., object], name: str, read: str, *, field: bool
+    check: Callable[..., object],
+    name: str,
+    annotation: object,
+    module_name: str,
+    *,
+    field: bool,
 ) -> tuple[str, ...]:
-    """Each value the ``Literal`` of *read* lists that every call refuses, with why."""
+    """Each value the ``Literal`` of *annotation*, written in *module_name*,
+    lists that every call refuses, with why.
+    """
     found: list[str] = []
-    for value in _listed_values(read):
+    for value in _listed_values(annotation, module_name):
         reason = _always_refused(check, name, value, field=field)
         if reason is not None:
-            found.append(f"{value!r}: {reason}")
+            found.append(f"{_shown(value)}: {reason}")
     return tuple(found)
 
 
@@ -7727,10 +7929,13 @@ def refused_choices() -> Iterator[Choice]:
                 if check is None:
                     continue
                 for field in dataclasses.fields(obj):
-                    read = expanded(
-                        _annotation(field.type), _field_module(obj, field.name)
+                    refusals = _refused(
+                        check,
+                        field.name,
+                        field.type,
+                        _field_module(obj, field.name),
+                        field=True,
                     )
-                    refusals = _refused(check, field.name, read, field=True)
                     if refusals:
                         yield Choice(
                             home,
@@ -7747,8 +7952,9 @@ def refused_choices() -> Iterator[Choice]:
             except (TypeError, ValueError):
                 continue
             for parameter in signature.parameters.values():
-                read = expanded(_annotation(parameter.annotation), home)
-                refusals = _refused(obj, parameter.name, read, field=False)
+                refusals = _refused(
+                    obj, parameter.name, parameter.annotation, home, field=False
+                )
                 if refusals:
                     yield Choice(
                         home,
@@ -7762,6 +7968,9 @@ def refused_choices() -> Iterator[Choice]:
         # and would stay in memory for whatever runs next.
         _flow_of.cache_clear()
         _facts.cache_clear()
+        _evaluated.cache_clear()
+        _annotation_names.cache_clear()
+        _unbound_bindings.cache_clear()
 
 
 def offenders() -> tuple[list[Choice], list[tuple[str, str, str]]]:

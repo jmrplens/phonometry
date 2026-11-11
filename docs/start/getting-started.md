@@ -205,16 +205,17 @@ import numpy as np
 from phonometry import filters
 
 fs = 48000
-t = np.linspace(0, 1, fs, endpoint=False)
-# Composite signal: 100Hz + 1000Hz
-signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
+t = np.linspace(0, 5, 5 * fs, endpoint=False)
+# Six tones at amplitude 100, so the bands land around 130 dB
+tones = [20, 100, 500, 2000, 4000, 15000]
+y = 100 * np.sum([np.sin(2 * np.pi * f * t) for f in tones], axis=0)
 # Apply 1/3 octave filter bank
-filtered = filters.octave_filter(signal, fs=fs, fraction=3)
+filtered = filters.octave_filter(y, fs=fs, fraction=3, limits=[12.0, 20000.0])
 spl, freq = filtered.levels, filtered.frequencies
 
 # Gray background: the raw-signal PSD (Welch), shifted to sit just below the
 # band SPLs so both spectral shapes share one axis.
-f_psd, psd = scipy.signal.welch(signal, fs, nperseg=8192)
+f_psd, psd = scipy.signal.welch(y, fs, nperseg=8192)
 psd_db = 10 * np.log10(psd + 1e-12)
 psd_db += np.max(spl) - np.max(psd_db) - 5
 
@@ -224,7 +225,8 @@ ax.semilogx(freq, spl, marker="o", markerfacecolor="white",
             label="1/3 octave bands")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("SPL [dB]")
-ax.legend()
+ax.set_xlim(11, 25000)
+ax.legend(loc="lower right")
 plt.show()
 ```
 

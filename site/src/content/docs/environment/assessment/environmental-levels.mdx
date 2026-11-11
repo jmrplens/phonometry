@@ -328,6 +328,7 @@ tonal = environment.assess_tonal_audibility(54.1, 45.2, 430.0)  # TonalAssessmen
 kt = tonal.adjustment                                             # 6 dB
 tonal.plot()   # this audibility on the Kt curve, as in the figure above
 corr = environment.residual_sound_correction(measured_level=58.0, residual_level=50.0)
+print(round(corr.corrected_level, 2), corr.reliable)          # 57.25 True
 
 # Table G.2: one hour beside a road under favourable conditions. The five
 # contributions are the measured level (0.5 dB scaled by the F.7 sensitivity),

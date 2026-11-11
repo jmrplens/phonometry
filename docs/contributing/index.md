@@ -314,6 +314,7 @@ Each rule on a page has the same parts:
 | [F67](docs-and-figures.md#f67) | Write beside a print what it writes: its values first, in their order | `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`, `tests/test_check_doc_snippets.py` |
 | [F68](docs-and-figures.md#f68) | Close the figure a plot made when it raises, through `closes_its_figures` | `tests/test_plot_errors.py` |
 | [F69](docs-and-figures.md#f69) | Leave the site build printing no warning | `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
+| [F70](docs-and-figures.md#f70) | Link a standard's catalogue page by the number its catalogue gives the edition the page cites | `scripts/check_catalogue_links.py`, `make catalogue-links`, `CI: Every catalogue link opens the document beside it`, `tests/test_check_catalogue_links.py` |
 
 ### Prose, commits and pull requests
 

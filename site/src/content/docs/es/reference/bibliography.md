@@ -190,7 +190,7 @@ síncrono, Golay por los pares complementarios.
   Citado por [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/).
 - International Electrotechnical Commission. (2014). *Sound system equipment —
   Part 4: Microphones* (IEC 60268-4:2014).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/32039).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/1221).
   Las características nominales del micrófono: sensibilidad en campo libre y su
   nivel re 1 V/Pa, la respuesta en frecuencia y el rango de frecuencias
   efectivo frente a los límites de tolerancia, el diagrama direccional y el
@@ -208,7 +208,7 @@ síncrono, Golay por los pares complementarios.
   Citado por [Caracterización de altavoces](/phonometry/es/devices/electroacoustics/loudspeakers/).
 - International Electrotechnical Commission. (1982). *Scales and sizes for
   plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/1218).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/1176).
   Las proporciones de escala de las gráficas características: una década de
   frecuencia igual a 25 dB en la ordenada, y el diagrama polar sobre un radio
   de círculo de referencia de 25 dB.
@@ -1493,7 +1493,7 @@ implementación.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [Catálogo iso.org](https://www.iso.org/standard/10868.html).
+  [Catálogo iso.org](https://www.iso.org/standard/10855.html).
   La declaración de emisión sonora: las formas de doble/único número,
   $L_{WAd} = L_{WA} + K_{WA}$ y la verificación del apartado 6.2.
   Citado por [Potencia acústica](/phonometry/es/devices/emission/sound-power/).

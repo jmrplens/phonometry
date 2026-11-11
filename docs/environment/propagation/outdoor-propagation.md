@@ -754,7 +754,7 @@ against the exact half-plane and coherent-ground models.
   Software for the calculation of sound outdoors — Part 3: Recommendations for
   quality assured implementation of ISO 9613-2 in software according to
   ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/63697.html).
+  [iso.org catalogue](https://www.iso.org/standard/66128.html).
   The nineteen worked test cases, the +/-0,05 dB envelope they are judged by,
   and the two reductions of section 2: the region ground factors and the mean
   path height.

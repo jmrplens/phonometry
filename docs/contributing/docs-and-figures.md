@@ -1700,3 +1700,32 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 **Enforced by:** `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them`
 
 **Exceptions.** A warning the site cannot silence is listed in `KNOWN` of the check, word for word as the build prints it from where its shape starts, with the reason; an entry the build no longer prints fails, so the list empties as the fixes land upstream. Today it holds Starlight's lookup of a 404 entry (Starlight 0.42.8 with Astro 7.4.4), which a page of the site's own would silence only by adding a page and its Spanish twin to every check that reads the build. The check reads the output of `pnpm build` alone: `pnpm install` and the checks after the build are not read. A warning printed in a shape the check does not know is not seen; a new shape is added to `WARNINGS` with a test.
+
+## Catalogue links
+
+<a id="f70"></a>
+### F70. Link a standard's catalogue page by the number its catalogue gives the edition the page cites
+
+**Why.** A link to the ISO catalogue or the IEC webstore carries a number and nothing else, so a slip of the number opens another document while the page builds, the link resolves and nothing looks wrong until a reader follows it. A review found the tone-burst guide's reference to IEC 60268-1:1985 opening IEC 60264-2-1:1989; the sweep that followed found 107 more such links in the pages and their mirrors, copied from page to page: ISO 4871:1996 opening ISO 4878:1981, ISO 16283-2:2020 opening two plastics standards, the four parts of ISO 10140 a theory page cites opening numbers the catalogue does not hold, and 23 links opening a later edition than the one the page cites. `scripts/check_catalogue_links.py` reads every such link beside the designation its page gives (the reference's `designation` in the frontmatter, the cell of a table, the entry or paragraph otherwise, with the other links taken out) and holds it to the designation `scripts/catalogue_ids.json` pins for the number, by its number and, when the page gives one, its year. A page that gains a catalogue link runs `python scripts/check_catalogue_links.py --refresh`, which pins the new number from ISO's open data or the IEC webstore's own page and drops the numbers no page links.
+
+**Do**
+
+```markdown
+- International Organization for Standardization. (1996). *Acoustics —
+  Declaration and verification of noise emission values of machinery and
+  equipment* (ISO 4871:1996).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
+```
+
+**Don't**
+
+```markdown
+- International Organization for Standardization. (1996). *Acoustics —
+  Declaration and verification of noise emission values of machinery and
+  equipment* (ISO 4871:1996).
+  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+```
+
+**Enforced by:** `scripts/check_catalogue_links.py`, `make catalogue-links`, `CI: Every catalogue link opens the document beside it`, `tests/test_check_catalogue_links.py`
+
+**Exceptions.** A document the catalogue no longer lists (IEC 651:1979 has no page on the webstore) is cited without a link. A later edition is linked under its own designation, as a "since revised as" link, and the entry's catalogue link stays on the edition it cites. Only the ISO and IEC catalogues are read: their numbers are opaque, where the other publishers the pages link put the designation in the address; the two CEN project links are read by review.

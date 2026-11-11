@@ -458,7 +458,7 @@ steel of the stated thickness. It too is in [ERRATA](../../ERRATA.md).
   Measurement of sound insulation in buildings and of building elements
   using sound intensity — Part 3: Laboratory measurements at low
   frequencies* (ISO 15186-3:2002).
-  [iso.org catalogue](https://www.iso.org/standard/33962.html).
+  [iso.org catalogue](https://www.iso.org/standard/31395.html).
   The low-frequency variant: the source level is read on the surface of the
   specimen and 9 dB is subtracted instead of 6, with the normative limp-panel
   qualification of Annex A.

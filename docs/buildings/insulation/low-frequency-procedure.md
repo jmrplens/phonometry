@@ -539,13 +539,13 @@ report mentions it or not.
 - International Organization for Standardization. (2020). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 2: Impact sound insulation* (ISO 16283-2:2020).
-  [iso.org catalogue](https://www.iso.org/standard/74162.html).
+  [iso.org catalogue](https://www.iso.org/standard/77436.html).
   Clause 8, whose heading confines the procedure to the tapping machine, with
   Formulae (15) and (16). Two defects of this print are in the errata registry.
 - International Organization for Standardization. (2016). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 3: Façade sound insulation* (ISO 16283-3:2016).
-  [iso.org catalogue](https://www.iso.org/standard/55998.html).
+  [iso.org catalogue](https://www.iso.org/standard/59748.html).
   Clause 7.3, which numbers no corner formula, with Formula (5) for the
   combination; Clause 6 restricts the procedure to the loudspeaker methods.
 - International Organization for Standardization. (2020). *Acoustics — Rating

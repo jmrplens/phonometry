@@ -2211,7 +2211,7 @@ this page, or the full ISO 10140-3 floor, is the reference, and the
   — Estimation of acoustic performance of buildings from the performance of
   elements — Part 2: Impact sound insulation between rooms*
   (ISO 12354-2:2017).
-  [iso.org catalogue](https://www.iso.org/standard/70239.html).
+  [iso.org catalogue](https://www.iso.org/standard/70243.html).
   The informative Annex C floating-floor estimate reproduced above (Formulae
   C.1 to C.4) and the worked floor of Annex G.
 

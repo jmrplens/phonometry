@@ -194,7 +194,7 @@ synchronous averaging, Golay for the complementary pairs.
   Cited by [Calibration and dBFS](/phonometry/signals/metrology/calibration/).
 - International Electrotechnical Commission. (2014). *Sound system equipment —
   Part 4: Microphones* (IEC 60268-4:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/32039).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1221).
   The rated microphone characteristics: free-field sensitivity and its level
   re 1 V/Pa, the frequency response and the effective frequency range against
   the tolerance limits, the directional pattern and the directivity index, the
@@ -211,7 +211,7 @@ synchronous averaging, Golay for the complementary pairs.
   Cited by [Loudspeaker Characterisation](/phonometry/devices/electroacoustics/loudspeakers/).
 - International Electrotechnical Commission. (1982). *Scales and sizes for
   plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1218).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1176).
   The scale proportions of the characteristic graphs: one frequency decade
   equal to 25 dB on the ordinate, and the polar diagram on a 25 dB
   reference-circle radius.
@@ -1446,7 +1446,7 @@ implementation is validated against.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
   The noise-emission declaration: the dual/single-number forms,
   $L_{WAd} = L_{WA} + K_{WA}$ and the clause 6.2 verification.
   Cited by [Sound Power](/phonometry/devices/emission/sound-power/).

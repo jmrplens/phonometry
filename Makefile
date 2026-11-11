@@ -282,6 +282,14 @@ figure-minus-sign:
 fence-names:
 	$(PYTHON) scripts/check_fence_names.py
 
+# A link to the ISO catalogue or the IEC webstore carries only a number, and
+# 109 of them opened another document or another edition than the one their
+# page cites before this check. It holds every such link to the designation
+# scripts/catalogue_ids.json pins for its number; `--refresh` pins a new one
+# from the catalogues and is the only step that needs the network. Stdlib only.
+catalogue-links:
+	$(PYTHON) scripts/check_catalogue_links.py
+
 # A private constant nothing reads is either a leftover or the trace of a check
 # that was planned and never written; the sweep that added this found one of
 # each. Stdlib only.
@@ -974,7 +982,7 @@ check: lint security test
 	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
-	fence-names fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
+	fence-names catalogue-links fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \
 	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations bare-array-annotations \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \

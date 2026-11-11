@@ -3609,7 +3609,7 @@ this page, or the full ISO 10140-3 floor, is the reference, and the
   — Estimation of acoustic performance of buildings from the performance of
   elements — Part 2: Impact sound insulation between rooms*
   (ISO 12354-2:2017).
-  [iso.org catalogue](https://www.iso.org/standard/70239.html).
+  [iso.org catalogue](https://www.iso.org/standard/70243.html).
   The informative Annex C floating-floor estimate reproduced above (Formulae
   C.1 to C.4) and the worked floor of Annex G.
 
@@ -7290,7 +7290,7 @@ repository. Click a preview to open the PDF:
   Measurement of sound insulation in buildings and of building elements —
   Part 9: Laboratory measurement of room-to-room airborne sound insulation of
   a suspended ceiling with a plenum above it* (ISO 140-9:1985).
-  [iso.org catalogue](https://www.iso.org/standard/3944.html).
+  [iso.org catalogue](https://www.iso.org/standard/3965.html).
   The normalized ceiling attenuation $D_\mathrm{n,c}$ (clause 3.3) and the plenum
   test facility.
 - ASTM International. (2022). *Classification for Rating Sound Insulation*
@@ -8846,7 +8846,7 @@ steel of the stated thickness. It too is in [ERRATA](https://docs.jmrp.io/phonom
   Measurement of sound insulation in buildings and of building elements
   using sound intensity — Part 3: Laboratory measurements at low
   frequencies* (ISO 15186-3:2002).
-  [iso.org catalogue](https://www.iso.org/standard/33962.html).
+  [iso.org catalogue](https://www.iso.org/standard/31395.html).
   The low-frequency variant: the source level is read on the surface of the
   specimen and 9 dB is subtracted instead of 6, with the normative limp-panel
   qualification of Annex A.
@@ -11508,13 +11508,13 @@ report mentions it or not.
 - International Organization for Standardization. (2020). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 2: Impact sound insulation* (ISO 16283-2:2020).
-  [iso.org catalogue](https://www.iso.org/standard/74162.html).
+  [iso.org catalogue](https://www.iso.org/standard/77436.html).
   Clause 8, whose heading confines the procedure to the tapping machine, with
   Formulae (15) and (16). Two defects of this print are in the errata registry.
 - International Organization for Standardization. (2016). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 3: Façade sound insulation* (ISO 16283-3:2016).
-  [iso.org catalogue](https://www.iso.org/standard/55998.html).
+  [iso.org catalogue](https://www.iso.org/standard/59748.html).
   Clause 7.3, which numbers no corner formula, with Formula (5) for the
   combination; Clause 6 restricts the procedure to the loudspeaker methods.
 - International Organization for Standardization. (2020). *Acoustics — Rating
@@ -27461,7 +27461,7 @@ per-band field indicators then decide the grade actually achieved.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
   The declaration section: the dual/single-number forms,
   $L_{W\mathrm{Ad}} = L_{W\mathrm{A}} + K_{W\mathrm{A}}$ (clause 3.15) and the clause 6.2 verification.
 
@@ -36445,7 +36445,7 @@ against the exact half-plane and coherent-ground models.
   Software for the calculation of sound outdoors — Part 3: Recommendations for
   quality assured implementation of ISO 9613-2 in software according to
   ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/63697.html).
+  [iso.org catalogue](https://www.iso.org/standard/66128.html).
   The nineteen worked test cases, the +/-0,05 dB envelope they are judged by,
   and the two reductions of section 2: the region ground factors and the mean
   path height.
@@ -36926,7 +36926,7 @@ Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-pro
   Software for the calculation of sound outdoors — Part 3: Recommendations for
   quality assured implementation of ISO 9613-2 in software according to
   ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/63697.html). Test case T03,
+  [iso.org catalogue](https://www.iso.org/standard/66128.html). Test case T03,
   Table 6, row L_A.
 - Deutsches Institut für Normung. (2006). *Akustik — Software-Erzeugnisse zur
   Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und
@@ -55621,7 +55621,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/).
 - International Electrotechnical Commission. (2014). *Sound system equipment —
   Part 4: Microphones* (IEC 60268-4:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/32039).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1221).
   The rated microphone characteristics: free-field sensitivity and its level
   re 1 V/Pa, the frequency response and the effective frequency range against
   the tolerance limits, the directional pattern and the directivity index, the
@@ -55638,7 +55638,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Loudspeaker characterisation](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/).
 - International Electrotechnical Commission. (1982). *Scales and sizes for
   plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1218).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1176).
   The scale proportions of the characteristic graphs: one frequency decade
   equal to 25 dB on the ordinate, and the polar diagram on a 25 dB
   reference-circle radius.
@@ -55755,7 +55755,7 @@ it; the list grows as guides gain their References sections.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
   What a manufacturer publishes once the power level is measured: the dual
   and single-number declaration forms, the declared value
   $L_{WAd} = L_{WA} + K_{WA}$ and the clause 6.2 verification procedure.

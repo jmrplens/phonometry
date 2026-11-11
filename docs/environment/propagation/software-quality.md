@@ -448,7 +448,7 @@ Propagation](outdoor-propagation.md) guide).
   Software for the calculation of sound outdoors — Part 3: Recommendations for
   quality assured implementation of ISO 9613-2 in software according to
   ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/63697.html). Test case T03,
+  [iso.org catalogue](https://www.iso.org/standard/66128.html). Test case T03,
   Table 6, row L_A.
 - Deutsches Institut für Normung. (2006). *Akustik — Software-Erzeugnisse zur
   Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und

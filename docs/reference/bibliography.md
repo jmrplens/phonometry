@@ -172,7 +172,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Calibration and dBFS](../signals/metrology/calibration.md).
 - International Electrotechnical Commission. (2014). *Sound system equipment —
   Part 4: Microphones* (IEC 60268-4:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/32039).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1221).
   The rated microphone characteristics: free-field sensitivity and its level
   re 1 V/Pa, the frequency response and the effective frequency range against
   the tolerance limits, the directional pattern and the directivity index, the
@@ -189,7 +189,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Loudspeaker characterisation](../devices/electroacoustics/loudspeakers.md).
 - International Electrotechnical Commission. (1982). *Scales and sizes for
   plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1218).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1176).
   The scale proportions of the characteristic graphs: one frequency decade
   equal to 25 dB on the ordinate, and the polar diagram on a 25 dB
   reference-circle radius.
@@ -306,7 +306,7 @@ it; the list grows as guides gain their References sections.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
   What a manufacturer publishes once the power level is measured: the dual
   and single-number declaration forms, the declared value
   $L_{WAd} = L_{WA} + K_{WA}$ and the clause 6.2 verification procedure.

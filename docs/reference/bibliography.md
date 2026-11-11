@@ -542,6 +542,8 @@ distributed, which is exactly where the five disagree.
   Cited by [Image Sources and the Steady-State Room Field](../buildings/rooms/room-image-sources.md) and [Theory: Rooms and Buildings](theory/rooms-buildings.md).
 - **Witew, I. B., Behler, G. K., & Vorländer, M. (2017).** About just noticeable differences for aspects of spatial impressions in concert halls. *Acoustics Australia*, *45*(2), 195-202. https://doi.org/10.1007/s40857-017-0094-7
   Cited by [Reporting and source qualification (ISO 3382-1)](../buildings/rooms/reporting-and-qualification.md).
+- **Zerwas, M., & Kayku, S. (2026).** [*Room acoustic measurement and decay analysis data of the St. Nicholas Chapel, Aachen Cathedral*](https://zenodo.org/records/20428705) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.20428705
+  Cited by [Room acoustic parameters (ISO 3382-1/2)](../buildings/rooms/room-acoustics.md).
 
 ## Materials and surfaces
 

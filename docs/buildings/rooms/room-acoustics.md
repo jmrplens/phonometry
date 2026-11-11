@@ -523,6 +523,160 @@ array is the arithmetic mean clause 8 a) prescribes, but only over the
 combinations whose band actually passed, and the surviving count is part of the
 result.
 
+### A measured chapel against its published parameters
+
+Everything above runs on synthetic decays. The repository also keeps a real
+one: the impulse response of the St. Nicholas Chapel of Aachen Cathedral, a
+coupled Gothic chapel of about 3050 m³ that FH Aachen measured to
+ISO 3382-1 with a dodecahedral source and an exponential sweep, source 1 and
+receiver 1 standing 2.56 m apart. The deposit publishes the room parameters
+its authors computed with their own software, per one-third-octave band, so
+the same response can be run through `room_parameters` and set against them.
+The yardstick is the one ISO 3382-1 gives for whether two values of a
+parameter differ audibly: the just noticeable differences (JND) of Table A.1,
+5 % of the value for EDT, 1 dB for C80, 0.05 for D50 and 10 ms for the
+centre time Ts, which `room.TABLE_A1` holds.
+
+**The data.** Omnidirectional channel of the S1-Do_R1 impulse response from
+M. Zerwas and S. Kayku, 'Room acoustic measurement and decay analysis data of
+the St. Nicholas Chapel, Aachen Cathedral', Zenodo, 2026, DOI
+[10.5281/zenodo.20428705](https://doi.org/10.5281/zenodo.20428705), licensed
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Change: one channel
+of four extracted and repackaged.
+
+The file is read from a checkout of the repository, where the oracle test
+reads it too; a wheel does not install the test data.
+
+```python
+import pathlib
+
+import numpy as np
+import phonometry
+from phonometry import room
+
+# The committed response lives in the repository, so this runs from a checkout
+#   (or an editable install); with your own measured response, load that instead.
+repo = pathlib.Path(phonometry.__file__).resolve().parents[2]
+with np.load(repo / "tests/data/audio/nikolauskapelle/s1_do_r1_w.npz") as npz:
+    chapel_ir, chapel_fs = npz["w"].astype(np.float64), int(npz["fs"])
+
+chapel = room.room_parameters(chapel_ir, chapel_fs, limits=(100.0, 5000.0), fraction=3)
+bands = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+
+# The deposit's workbook, row S1-Do_R1, one value per band from 100 Hz to 5 kHz.
+published = {
+    "EDT": [3.3121, 3.4835, 4.6281, 4.2371, 4.3389, 3.8817, 3.6988, 3.8547, 4.4786,
+            4.9678, 3.8599, 3.4878, 2.5415, 2.6911, 2.2371, 1.7814, 1.4736, 1.198],
+    "T20": [4.3325, 4.4211, 4.2996, 4.7631, 4.944, 4.9925, 4.7133, 4.7381, 4.649,
+            4.5321, 4.533, 4.1439, 3.8006, 3.3868, 2.8327, 2.4767, 1.9659, 1.5017],
+    "T30": [4.7058, 4.7348, 4.4475, 4.6511, 4.6734, 4.8526, 4.7217, 4.8584, 4.7744,
+            4.6152, 4.4409, 4.1049, 3.8218, 3.3945, 2.9959, 2.4781, 2.0283, 1.5823],
+    "C50": [-0.8857, -1.6775, -1.1019, -0.8407, -2.4858, -1.0162, 0.0553, -0.7639,
+            -2.097, 0.0628, -1.4394, 0.3681, 1.4292, 1.7993, 1.1941, 1.1194, 2.5834, 4.6042],
+    "C80": [-0.36, -0.8159, -1.2315, -0.1926, -1.8477, 0.7525, 0.9272, -0.171, -1.5149,
+            0.9836, 0.023, 1.7805, 2.8353, 3.2893, 3.2199, 2.5758, 4.344, 6.177],
+    "D50": [0.4552, 0.4075, 0.4352, 0.4514, 0.3617, 0.4439, 0.5076, 0.4519, 0.3836,
+            0.5026, 0.4179, 0.5206, 0.5817, 0.602, 0.5684, 0.564, 0.6443, 0.743],
+    # Ts in milliseconds, as the workbook gives it, turned into seconds.
+    "Ts": [ms / 1000 for ms in (226.79, 220.39, 232.98, 189.96, 260.19, 182.72, 162.69, 202.2,
+                                242.02, 213.45, 195.51, 153.0, 114.73, 104.2, 100.94, 90.64,
+                                64.43, 44.36)],
+}
+computed = {"EDT": chapel.edt, "T20": chapel.t20, "T30": chapel.t30,
+            "C50": chapel.c50, "C80": chapel.c80, "D50": chapel.d50, "Ts": chapel.ts}
+print(f"T30 at 1 kHz: {chapel.t30[10]:.2f} s, published {published['T30'][10]:.2f} s")
+# T30 at 1 kHz: 4.46 s, published 4.44 s
+
+# ISO 3382-1 Table A.1 gives the just noticeable difference (JND) of EDT, C80,
+#   D50 and Ts; T20, T30 and C50 have no row of their own, and the test holds
+#   them to the JND of EDT (5 %) and of C80 (1 dB).
+jnd_row = {"EDT": "EDT", "T20": "EDT", "T30": "EDT",
+           "C50": "C80", "C80": "C80", "D50": "D50", "Ts": "Ts"}
+for name, values in published.items():
+    row = room.TABLE_A1[jnd_row[name]]
+    gap = computed[name] - np.asarray(values)
+    if row.relative_jnd:
+        gap = gap / np.asarray(values)
+    in_jnds = gap / row.just_noticeable_difference
+    worst = int(np.argmax(np.abs(in_jnds)))
+    print(f"{np.sum(np.abs(in_jnds) <= 1)} of {len(bands)} bands within one JND for {name}, "
+          f"worst {in_jnds[worst]:+.1f} JND at {bands[worst]} Hz")
+# 17 of 18 bands within one JND for EDT, worst +1.3 JND at 5000 Hz
+# 18 of 18 bands within one JND for T20, worst +0.5 JND at 250 Hz
+# 18 of 18 bands within one JND for T30, worst +0.6 JND at 250 Hz
+# 17 of 18 bands within one JND for C50, worst -1.5 JND at 100 Hz
+# 18 of 18 bands within one JND for C80, worst -0.9 JND at 100 Hz
+# 17 of 18 bands within one JND for D50, worst -1.8 JND at 100 Hz
+# 17 of 18 bands within one JND for Ts, worst +1.3 JND at 250 Hz
+```
+
+T20, T30 and C80 land on the published value within one just noticeable
+difference in all 18 bands, EDT, C50, D50 and Ts in 17 of them, and T30 at
+1 kHz reads 4.46 s against the published 4.44 s. The four misses are the two
+edge cases
+[the test](https://github.com/jmrplens/phonometry/blob/main/tests/room/test_room_nikolauskapelle_oracle.py)
+documents and holds at three JNDs instead of one. EDT at 5 kHz is +1.3 JND:
+air absorption shortens the decay at the top of the range, so the 0 to
+−10 dB fit has very little of it to work with. And the quantities that hang
+on where the response starts: the early-energy ratios at 100 Hz, C50 at
+−1.5 JND and D50 at −1.8, with C80 just inside at −0.9, and the centre time
+Ts at 250 Hz, +1.3 JND. At 100 Hz a one-third-octave filter's group delay is
+comparable to the 50 ms and 80 ms early/late split, so where each
+implementation puts the start of the response decides most of the ratio;
+Ts is a time counted from that same start, so it moves with it. Two independent
+implementations agreeing that closely on decays this long is as strong a
+statement as the parameters' definitions allow.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_chapel_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_chapel.svg" alt="ISO 3382 per-band parameters of the St. Nicholas Chapel in one-third octaves from 100 Hz to 5 kHz: EDT, T20 and T30 bars falling from about 4.7 s to 1.5 s, each topped by an open marker at the value the deposit publishes, over a second panel where the computed C50 and C80 curves follow the published values within a decibel in every band but one, C50 at 100 Hz" width="92%"></picture>
+
+*The chapel through the result's own `.plot()`, with the deposit's published
+row drawn over it as open markers. The bars and the curves are what
+`room_parameters` computes from the impulse response alone; the markers are
+the authors' numbers, within one just noticeable difference of the bars and
+the lines in every band but the ones the prints above name.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `chapel`, `published` and `bands` come from the snippet above.
+# One line: the result draws its own bars and curves; the published row goes on top.
+ax_times, ax_clarity = chapel.plot()
+x = np.arange(len(bands))
+for offset, name in [(-0.27, "EDT"), (0.0, "T20"), (0.27, "T30")]:
+    ax_times.plot(x + offset, published[name], "o", mfc="none", color="k",
+                  label="Published" if name == "EDT" else None)
+for name in ["C50", "C80"]:
+    ax_clarity.plot(x, published[name], "o", mfc="none", label=f"{name} published")
+ax_times.legend()
+ax_clarity.legend()
+plt.show()
+
+# By hand: the decay times as bars and the clarities as lines, the published
+# row as open markers over them, from the result's fields.
+fig, (top, bottom) = plt.subplots(2, 1, sharex=True)
+for offset, name, values in [(-0.27, "EDT", chapel.edt), (0.0, "T20", chapel.t20),
+                             (0.27, "T30", chapel.t30)]:
+    top.bar(x + offset, values, width=0.27, label=name)
+    top.plot(x + offset, published[name], "o", mfc="none", color="k")
+for name, values in [("C50", chapel.c50), ("C80", chapel.c80)]:
+    line, = bottom.plot(x, values, "o-", label=name)
+    bottom.plot(x, published[name], "o", mfc="none", color=line.get_color())
+bottom.set_xticks(x, [str(band) for band in bands], rotation=45)
+bottom.set_xlabel("Frequency [Hz]")
+top.set_ylabel("Decay time [s]")
+bottom.set_ylabel("Clarity [dB]")
+top.legend()
+bottom.legend()
+plt.show()
+```
+
+</details>
+
 ### ISO 3382 report (`.report()`)
 
 `RoomAcousticsResult.report(path)` renders a one-page PDF fiche laid out like a
@@ -680,3 +834,5 @@ The fit window plus a safety margin must fit inside the impulse-to-noise ratio (
   The reference monograph behind this page: the statistical theory of decaying sound fields, the Schroeder frequency and the perceptual room parameters of this page.
 - **Schroeder, M. R. (1965).** New method of measuring reverberation time. *The Journal of the Acoustical Society of America*, *37*(3), 409-412. https://doi.org/10.1121/1.1909343
   The backward-integration method that turns the squared impulse response into the smooth decay curve of this page.
+- **Zerwas, M., & Kayku, S. (2026).** [*Room acoustic measurement and decay analysis data of the St. Nicholas Chapel, Aachen Cathedral*](https://zenodo.org/records/20428705) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.20428705
+  The measured chapel of the worked case: the impulse response of source 1 and receiver 1, whose omnidirectional channel the repository keeps, and the per-band parameters its authors published.

@@ -44,6 +44,15 @@ references:
     designation: "ISO 3382-2:2008"
     url: "https://www.iso.org/standard/36201.html"
     note: "Los grados de exactitud y el criterio de rango dinámico tras el análisis del decaimiento; sus reglas de posiciones se aplican en la guía de medición de la respuesta al impulso."
+  - type: dataset
+    authors: ["Zerwas, M.", "Kayku, S."]
+    year: 2026
+    title: "Room acoustic measurement and decay analysis data of the St. Nicholas Chapel, Aachen Cathedral"
+    publisher: "Zenodo"
+    url: "https://zenodo.org/records/20428705"
+    doi: "10.5281/zenodo.20428705"
+    license: "https://creativecommons.org/licenses/by/4.0/"
+    note: "La capilla medida del caso resuelto: la respuesta al impulso de la fuente 1 y el receptor 1, cuyo canal omnidireccional guarda el repositorio, y los parámetros por banda que publicaron sus autores."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -602,6 +611,162 @@ la máscara: `np.nanmean` sobre el array enmascarado es la media aritmética que
 prescribe el apartado 8 a), pero solo sobre las combinaciones cuya banda haya
 superado de verdad la marca, y el número de supervivientes forma parte del
 resultado.
+
+### Una capilla medida frente a sus parámetros publicados
+
+Todo lo anterior se calcula sobre decaimientos sintéticos. El repositorio
+guarda también uno real: la respuesta al impulso de la capilla de San Nicolás
+de la catedral de Aquisgrán, una capilla gótica acoplada de unos 3050 m³ que
+la FH Aachen midió según ISO 3382-1 con una fuente dodecaédrica y un barrido
+exponencial, con la fuente 1 y el receptor 1 a 2,56 m. El depósito publica
+los parámetros de sala que sus autores calcularon con su propio software, por
+banda de tercio de octava, así que la misma respuesta puede pasar por
+`room_parameters` y compararse con ellos. La vara de medir es la que da
+ISO 3382-1 para saber si dos valores de un parámetro se distinguen de oído:
+las diferencias apenas perceptibles (JND) de la Tabla A.1, el 5 % del valor
+para EDT, 1 dB para C80, 0,05 para D50 y 10 ms para el tiempo central Ts, que
+guarda `room.TABLE_A1`.
+
+**Los datos.** Canal omnidireccional de la respuesta al impulso S1-Do_R1 de
+M. Zerwas y S. Kayku, «Room acoustic measurement and decay analysis data of
+the St. Nicholas Chapel, Aachen Cathedral», Zenodo, 2026, DOI
+[10.5281/zenodo.20428705](https://doi.org/10.5281/zenodo.20428705), con licencia
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Cambio: se extrajo
+uno de los cuatro canales y se volvió a empaquetar.
+
+El archivo se lee desde un checkout del repositorio, donde también lo lee el
+test de oráculo; el paquete instalado con pip no trae los datos de test.
+
+```python
+import pathlib
+
+import numpy as np
+import phonometry
+from phonometry import room
+
+# La respuesta versionada vive en el repositorio, así que esto funciona desde un
+#   checkout (o instalación editable); con tu propia respuesta medida, carga esa.
+repo = pathlib.Path(phonometry.__file__).resolve().parents[2]
+with np.load(repo / "tests/data/audio/nikolauskapelle/s1_do_r1_w.npz") as npz:
+    chapel_ir, chapel_fs = npz["w"].astype(np.float64), int(npz["fs"])
+
+chapel = room.room_parameters(chapel_ir, chapel_fs, limits=(100.0, 5000.0), fraction=3)
+bands = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+
+# El libro de cálculo del depósito, fila S1-Do_R1, un valor por banda de 100 Hz a 5 kHz.
+published = {
+    "EDT": [3.3121, 3.4835, 4.6281, 4.2371, 4.3389, 3.8817, 3.6988, 3.8547, 4.4786,
+            4.9678, 3.8599, 3.4878, 2.5415, 2.6911, 2.2371, 1.7814, 1.4736, 1.198],
+    "T20": [4.3325, 4.4211, 4.2996, 4.7631, 4.944, 4.9925, 4.7133, 4.7381, 4.649,
+            4.5321, 4.533, 4.1439, 3.8006, 3.3868, 2.8327, 2.4767, 1.9659, 1.5017],
+    "T30": [4.7058, 4.7348, 4.4475, 4.6511, 4.6734, 4.8526, 4.7217, 4.8584, 4.7744,
+            4.6152, 4.4409, 4.1049, 3.8218, 3.3945, 2.9959, 2.4781, 2.0283, 1.5823],
+    "C50": [-0.8857, -1.6775, -1.1019, -0.8407, -2.4858, -1.0162, 0.0553, -0.7639,
+            -2.097, 0.0628, -1.4394, 0.3681, 1.4292, 1.7993, 1.1941, 1.1194, 2.5834, 4.6042],
+    "C80": [-0.36, -0.8159, -1.2315, -0.1926, -1.8477, 0.7525, 0.9272, -0.171, -1.5149,
+            0.9836, 0.023, 1.7805, 2.8353, 3.2893, 3.2199, 2.5758, 4.344, 6.177],
+    "D50": [0.4552, 0.4075, 0.4352, 0.4514, 0.3617, 0.4439, 0.5076, 0.4519, 0.3836,
+            0.5026, 0.4179, 0.5206, 0.5817, 0.602, 0.5684, 0.564, 0.6443, 0.743],
+    # Ts en milisegundos, como lo da el libro de cálculo, pasado a segundos.
+    "Ts": [ms / 1000 for ms in (226.79, 220.39, 232.98, 189.96, 260.19, 182.72, 162.69, 202.2,
+                                242.02, 213.45, 195.51, 153.0, 114.73, 104.2, 100.94, 90.64,
+                                64.43, 44.36)],
+}
+computed = {"EDT": chapel.edt, "T20": chapel.t20, "T30": chapel.t30,
+            "C50": chapel.c50, "C80": chapel.c80, "D50": chapel.d50, "Ts": chapel.ts}
+print(f"T30 a 1 kHz: {chapel.t30[10]:.2f} s, publicado {published['T30'][10]:.2f} s")
+# T30 a 1 kHz: 4.46 s, publicado 4.44 s
+
+# La Tabla A.1 de ISO 3382-1 da la diferencia apenas perceptible (JND) de EDT,
+#   C80, D50 y Ts; T20, T30 y C50 no tienen fila propia, y el test los somete a
+#   la JND de EDT (5 %) y a la de C80 (1 dB).
+jnd_row = {"EDT": "EDT", "T20": "EDT", "T30": "EDT",
+           "C50": "C80", "C80": "C80", "D50": "D50", "Ts": "Ts"}
+for name, values in published.items():
+    row = room.TABLE_A1[jnd_row[name]]
+    gap = computed[name] - np.asarray(values)
+    if row.relative_jnd:
+        gap = gap / np.asarray(values)
+    in_jnds = gap / row.just_noticeable_difference
+    worst = int(np.argmax(np.abs(in_jnds)))
+    print(f"{np.sum(np.abs(in_jnds) <= 1)} de {len(bands)} bandas dentro de una JND para {name}, "
+          f"peor {in_jnds[worst]:+.1f} JND a {bands[worst]} Hz")
+# 17 de 18 bandas dentro de una JND para EDT, peor +1.3 JND a 5000 Hz
+# 18 de 18 bandas dentro de una JND para T20, peor +0.5 JND a 250 Hz
+# 18 de 18 bandas dentro de una JND para T30, peor +0.6 JND a 250 Hz
+# 17 de 18 bandas dentro de una JND para C50, peor -1.5 JND a 100 Hz
+# 18 de 18 bandas dentro de una JND para C80, peor -0.9 JND a 100 Hz
+# 17 de 18 bandas dentro de una JND para D50, peor -1.8 JND a 100 Hz
+# 17 de 18 bandas dentro de una JND para Ts, peor +1.3 JND a 250 Hz
+```
+
+T20, T30 y C80 caen sobre el valor publicado dentro de una diferencia
+apenas perceptible en las 18 bandas, EDT, C50, D50 y Ts en 17 de ellas, y el
+T30 a 1 kHz da 4,46 s frente a los 4,44 s publicados. Los cuatro desvíos son
+los dos casos límite que [el test](https://github.com/jmrplens/phonometry/blob/main/tests/room/test_room_nikolauskapelle_oracle.py)
+documenta y sujeta a tres JND en lugar de una. EDT a 5 kHz queda en +1,3 JND:
+la absorción del aire acorta el decaimiento en lo alto del rango, así que al
+ajuste de 0 a −10 dB le queda muy poco con lo que trabajar. Y las magnitudes
+que dependen de dónde empieza la respuesta: los cocientes de energía temprana
+a 100 Hz, C50 en −1,5 JND y D50 en −1,8, con C80 justo dentro en −0,9, y el
+tiempo central Ts a 250 Hz, en +1,3 JND. A 100 Hz el retardo de grupo de un
+filtro de tercio de octava es comparable a la división temprana/tardía de
+50 ms y 80 ms, así que dónde pone cada implementación el inicio de la
+respuesta decide buena parte del cociente; Ts es un tiempo contado desde ese
+mismo inicio, así que se mueve con él.
+Que dos implementaciones independientes coincidan tanto en decaimientos tan
+largos es lo más que permiten afirmar las definiciones de los parámetros.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_parameters_chapel.svg" alt="Parámetros ISO 3382 por banda de la capilla de San Nicolás en tercios de octava de 100 Hz a 5 kHz: barras de EDT, T20 y T30 que bajan de unos 4,7 s a 1,5 s, cada una con un marcador hueco en el valor que publica el depósito, sobre un segundo panel en el que las curvas calculadas de C50 y C80 siguen a los valores publicados a menos de un decibelio en todas las bandas salvo una, C50 a 100 Hz" width="92%" />
+
+*La capilla dibujada por el propio `.plot()` del resultado, con la fila
+publicada del depósito encima como marcadores huecos. Las barras y las curvas
+son lo que `room_parameters` calcula a partir de la respuesta al impulso sola;
+los marcadores son los números de los autores, a menos de una diferencia
+apenas perceptible de las barras y las líneas en todas las bandas salvo las
+que nombran las salidas de arriba.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `chapel`, `published` y `bands` vienen del fragmento de arriba.
+# Una línea: el resultado dibuja sus barras y sus curvas; encima, la fila publicada.
+ax_times, ax_clarity = chapel.plot()
+x = np.arange(len(bands))
+for offset, name in [(-0.27, "EDT"), (0.0, "T20"), (0.27, "T30")]:
+    ax_times.plot(x + offset, published[name], "o", mfc="none", color="k",
+                  label="Publicado" if name == "EDT" else None)
+for name in ["C50", "C80"]:
+    ax_clarity.plot(x, published[name], "o", mfc="none", label=f"{name} publicado")
+ax_times.legend()
+ax_clarity.legend()
+plt.show()
+
+# A mano: los tiempos de caída como barras y las claridades como líneas, con la
+# fila publicada como marcadores huecos encima, desde los campos del resultado.
+fig, (top, bottom) = plt.subplots(2, 1, sharex=True)
+for offset, name, values in [(-0.27, "EDT", chapel.edt), (0.0, "T20", chapel.t20),
+                             (0.27, "T30", chapel.t30)]:
+    top.bar(x + offset, values, width=0.27, label=name)
+    top.plot(x + offset, published[name], "o", mfc="none", color="k")
+for name, values in [("C50", chapel.c50), ("C80", chapel.c80)]:
+    line, = bottom.plot(x, values, "o-", label=name)
+    bottom.plot(x, published[name], "o", mfc="none", color=line.get_color())
+bottom.set_xticks(x, [str(band) for band in bands], rotation=45)
+bottom.set_xlabel("Frecuencia [Hz]")
+top.set_ylabel("Tiempo de caída [s]")
+bottom.set_ylabel("Claridad [dB]")
+top.legend()
+bottom.legend()
+plt.show()
+```
+
+</details>
 
 ### Informe ISO 3382 (`.report()`)
 

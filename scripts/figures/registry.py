@@ -577,6 +577,7 @@ from .room import (
     generate_reverberation_models,
     generate_room_noise_criteria,
     generate_room_parameters_bands,
+    generate_room_parameters_chapel,
     generate_room_proportion_modes,
     generate_schroeder_decay,
     generate_sound_strength_routes,
@@ -1469,6 +1470,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_flow_resistivity_window,
     generate_steady_state_field,
     generate_room_parameters_bands,
+    # ISO 3382-1 on a measured chapel, against its authors' published row.
+    generate_room_parameters_chapel,
     # ISO 3382-1 A.2.1: the three printed routes to the free-field reference
     # of the sound strength, and what G does with distance in a hall. A.2.4,
     # A.2.5 and Annex B: the two angular weightings of the lateral energy

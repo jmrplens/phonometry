@@ -1997,6 +1997,87 @@ def generate_room_parameters_bands(output_dir: str) -> None:
     plt.close()
 
 
+#: The one-third-octave bands of the chapel's published row, 100 Hz to 5 kHz.
+_CHAPEL_BANDS = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)  # fmt: skip
+#: The published row S1-Do_R1 of the St. Nicholas Chapel deposit's workbook
+#: (``Nikolauskapelle_Source1_Results_20260205.xlsx``, sheet "Parameters"),
+#: as tests/room/test_room_nikolauskapelle_oracle.py transcribes it.
+_CHAPEL_PUBLISHED = {
+    "EDT": (3.3121, 3.4835, 4.6281, 4.2371, 4.3389, 3.8817, 3.6988, 3.8547, 4.4786,
+            4.9678, 3.8599, 3.4878, 2.5415, 2.6911, 2.2371, 1.7814, 1.4736, 1.198),
+    "T20": (4.3325, 4.4211, 4.2996, 4.7631, 4.944, 4.9925, 4.7133, 4.7381, 4.649,
+            4.5321, 4.533, 4.1439, 3.8006, 3.3868, 2.8327, 2.4767, 1.9659, 1.5017),
+    "T30": (4.7058, 4.7348, 4.4475, 4.6511, 4.6734, 4.8526, 4.7217, 4.8584, 4.7744,
+            4.6152, 4.4409, 4.1049, 3.8218, 3.3945, 2.9959, 2.4781, 2.0283, 1.5823),
+    "C50": (-0.8857, -1.6775, -1.1019, -0.8407, -2.4858, -1.0162, 0.0553, -0.7639,
+            -2.097, 0.0628, -1.4394, 0.3681, 1.4292, 1.7993, 1.1941, 1.1194, 2.5834,
+            4.6042),
+    "C80": (-0.36, -0.8159, -1.2315, -0.1926, -1.8477, 0.7525, 0.9272, -0.171, -1.5149,
+            0.9836, 0.023, 1.7805, 2.8353, 3.2893, 3.2199, 2.5758, 4.344, 6.177),
+}  # fmt: skip
+
+
+def generate_room_parameters_chapel(output_dir: str) -> None:
+    """ISO 3382-1 on a measured chapel, against the values its authors published.
+
+    The omnidirectional channel of the St. Nicholas Chapel impulse response
+    committed under tests/data/audio/nikolauskapelle/ (CC BY 4.0, attribution
+    on the page and in that folder's README), through ``room_parameters`` in
+    one-third octaves and the result's own ``.plot()``; the deposit's
+    published EDT, T20, T30, C50 and C80 are drawn over it as open markers.
+    One concept: the library's per-band parameters land on the published ones.
+    """
+    print("Generating room_parameters_chapel...")
+    from pathlib import Path
+
+    from phonometry import room
+
+    npz = (
+        Path(__file__).resolve().parents[2]
+        / "tests/data/audio/nikolauskapelle/s1_do_r1_w.npz"
+    )
+    with np.load(npz) as data:
+        ir, fs = data["w"].astype(np.float64), int(data["fs"])
+    chapel = room.room_parameters(ir, fs, limits=(100.0, 5000.0), fraction=3)
+    ax_times, ax_clarity = chapel.plot(language=_LANG)
+    plt.gcf().set_size_inches(12.5, 6.8)
+
+    positions = np.arange(len(_CHAPEL_BANDS), dtype=np.float64)
+    # The bars of the plot sit at these offsets, EDT, T20 and T30 left to right.
+    for offset, name in ((-0.27, "EDT"), (0.0, "T20"), (0.27, "T30")):
+        ax_times.plot(
+            positions + offset,
+            _CHAPEL_PUBLISHED[name],
+            linestyle="none",
+            marker="o",
+            markersize=4.5,
+            markerfacecolor="none",
+            markeredgecolor=COLOR_FG,
+            markeredgewidth=1.1,
+            label="Published, FH Aachen" if name == "EDT" else None,
+            zorder=5,
+        )
+    for name, color in (("C50", COLOR_TERTIARY), ("C80", COLOR_QUATERNARY)):
+        ax_clarity.plot(
+            positions,
+            _CHAPEL_PUBLISHED[name],
+            linestyle="none",
+            marker="o",
+            markersize=6,
+            markerfacecolor="none",
+            markeredgecolor=color,
+            markeredgewidth=1.3,
+            label=f"{name} published",
+            zorder=5,
+        )
+    ax_times.legend(loc="upper right", fontsize="small", ncols=4)
+    ax_clarity.legend(loc="upper left", fontsize="small", ncols=2)
+    plt.tight_layout()
+    save_figure(output_dir, "room_parameters_chapel.svg")
+    plt.close()
+
+
 def generate_reverberation_model_absorption(output_dir: str) -> None:
     """Sabine, Eyring and Millington-Sette against the mean absorption.
 

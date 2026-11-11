@@ -84,7 +84,7 @@
 //        (the content tree, the report and the glossary entries the build
 //        was made from; by default the repository's)
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -98,12 +98,15 @@ import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
+import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { referenceId } from '../src/lib/citations.mjs';
 import { SAME_WORKS, conformanceEvidence, governingDocuments } from '../src/lib/conformance-evidence.mjs';
+import { DATA_COMPONENTS } from '../src/lib/page-markdown.mjs';
 import { readPageReferences } from '../src/lib/page-references.mjs';
+import { pageMarkup } from './shared/markdown-spans.mjs';
 import { requirementDefects } from './shared/requirement-defects.mjs';
 
-import { decode, markupOf, markupText } from './shared/dist-pages.mjs';
+import { attributes, decode, markupOf, markupText } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -262,6 +265,40 @@ const typesOf = (node) => (Array.isArray(node['@type']) ? node['@type'] : [node[
 
 /** The one node of a page carrying `type`, or undefined. */
 const nodeOfType = (nodes, type) => nodes.find((node) => typesOf(node).includes(type));
+
+/**
+ * The least share of the words a page shows, its code blocks left out, that its
+ * article's `wordCount` may count. Head.astro counts the page's source with its
+ * imports, tags and fences taken out, so the count runs below the words the page
+ * shows, which add the chips, captions, headings and the References section.
+ * On the build this
+ * was set against, the lowest share on a page whose source holds its text was
+ * about a third (a short API page), and most sat between a half and the whole.
+ * A source that holds a marker the build fills in shows the gap at once: the
+ * bibliography counted 1 381 of the 21 323 words it shows while its lists were
+ * markers.
+ */
+const WORD_COUNT_FLOOR = 0.25;
+
+/** A tag of one of the components that render a page's rows from data (src/lib/page-markdown.mjs). */
+const DATA_TAG = new RegExp(`<(?:${DATA_COMPONENTS.join('|')})\\b`);
+
+/**
+ * The source of a built route in the content tree, or null when it has none:
+ * a page the build writes from nothing of its own, or a fallback route.
+ *
+ * @param {string} route `/x/y/`.
+ * @returns {{text: string, kind: 'md' | 'mdx'} | null}
+ */
+function sourceOf(route) {
+	const path = route.replace(/^\/|\/$/g, '');
+	const names = path ? [`${path}.md`, `${path}.mdx`, `${path}/index.md`, `${path}/index.mdx`] : ['index.md', 'index.mdx'];
+	for (const name of names) {
+		const file = join(CONTENT, name);
+		if (existsSync(file)) return { text: readCommittedText(file), kind: name.endsWith('.mdx') ? 'mdx' : 'md' };
+	}
+	return null;
+}
 
 /** Fields every article node carries, whatever its type. */
 const ARTICLE_FIELDS = [
@@ -765,6 +802,50 @@ const canonical = (value) =>
 					: v,
 			);
 
+/** One item of a list in the page's markup: its start tag's attributes, then its body. */
+const LIST_ITEM = /<li\b((?:[^>"]|"[^"]*")*)>([\s\S]*?)<\/li>/g;
+
+/** The "Cited by" list that closes an entry (src/lib/remark-bibliography.mjs, `markCitedBy`). */
+const CITED_BY_LIST = /<span\b[^>]*\bdata-cited-by\b[^>]*>([\s\S]*?)<\/span>/;
+
+/**
+ * What the bibliography page lists, in page order: each item of a list in its
+ * `<main>` whose `id` is the fragment of a cited work on `pageUrl`, with the
+ * routes its "Cited by" list links, or null when it has no such list; and the
+ * text of every other item, which nothing wrote from the pages' references.
+ *
+ * The page's own prose holds no list: every list on it is one the build wrote
+ * from a section's marker (src/lib/remark-bibliography.mjs), each item of it
+ * an entry. An item with no `id`, or one that names no cited work, is an entry
+ * written into the page by hand, and that is what the rule this check enforces
+ * forbids ([F72] in docs/contributing/docs-and-figures.md).
+ *
+ * @param {string} html The built page.
+ * @param {string} pageUrl The page's own address, which the works' `@id`s hang off.
+ * @returns {{entries: {id: string, citedBy: string[] | null}[], strays: string[]}}
+ */
+function bibliographyList(html, pageUrl) {
+	const main = markupOf(html).match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? '';
+	const entries = [];
+	const strays = [];
+	for (const [, attrs, body] of main.matchAll(LIST_ITEM)) {
+		const fragment = attributes(`<li${attrs}>`).id;
+		const id = `${pageUrl}#${fragment}`;
+		if (!fragment || !isCitedWork(id)) {
+			strays.push(decode(markupText(body)).replace(/\s+/g, ' ').trim());
+			continue;
+		}
+		const list = CITED_BY_LIST.exec(body);
+		const citedBy = list
+			? [...list[1].matchAll(/href="([^"]+)"/g)].map(([, href]) =>
+					href.replace(ORIGIN, '').replace(new RegExp(`^${basePath}(?=/)`), ''),
+				)
+			: null;
+		entries.push({ id, citedBy });
+	}
+	return { entries, strays };
+}
+
 /** Every object under `value` that refers to a cited work, in document order. */
 function citedWorkReferences(value, out = []) {
 	if (Array.isArray(value)) {
@@ -1078,7 +1159,12 @@ const seen = {
 	languages: 0,
 	definedTerms: 0,
 	reports: 0,
+	wordsCounted: 0,
+	dataPages: 0,
 };
+
+/** The pages whose `wordCount` counts less than WORD_COUNT_FLOOR of the words they show. */
+const wordShort = [];
 
 /** The About pages found in each language, and how many of them are typed AboutPage. */
 const about = { en: { found: 0, typed: 0 }, es: { found: 0, typed: 0 } };
@@ -1493,6 +1579,8 @@ const unnamedCited = [];
 const stubs = [];
 /** What each language's bibliography page defines, for the check across the two. */
 const bibliographies = new Map();
+/** Every cited work's `@id`, with the routes whose article names it in `citation`. */
+const citedOn = new Map();
 /** Per language: each catalogue's dataset, by key, with the page that publishes it. */
 const datasetsByLanguage = { en: new Map(), es: new Map() };
 /** Per language: what the overview of the catalogues lists, by `@id`. */
@@ -1715,6 +1803,29 @@ for (const file of files) {
 		fail(`${route}: article inLanguage is ${JSON.stringify(article.inLanguage)}, not ${lang}`);
 	}
 
+	// The count of a page's words reads its source (Head.astro), which holds
+	// what the page shows unless the build writes text into it: a marker a
+	// plugin fills in, as the bibliography's lists are. A page whose rows a
+	// data component renders counts its introduction alone, a known reading
+	// recorded where Head.astro counts, and is left out here.
+	const source = sourceOf(route);
+	if (source !== null) {
+		if (source.kind === 'mdx' && DATA_TAG.test(pageMarkup(source.text, { kind: 'mdx' }))) seen.dataPages += 1;
+		else if (typeof article.wordCount === 'number') {
+			seen.wordsCounted += 1;
+			// Head.astro counts prose, its fences taken out, so the words shown
+			// are counted the same way, the page's code blocks left out: a guide
+			// with much code would otherwise sit near the floor for its code alone.
+			const shown = textOf(html.replace(/<pre\b[\s\S]*?<\/pre>/gi, ' ')).split(' ').filter(Boolean).length;
+			if (article.wordCount < WORD_COUNT_FLOOR * shown) {
+				wordShort.push(
+					`${route}: its wordCount, ${article.wordCount}, counts ${Math.round((100 * article.wordCount) / shown)} % of the ` +
+						`${shown} words the page shows: the count reads the page's source, and the text the page shows is not in it`,
+				);
+			}
+		}
+	}
+
 	// The per-page nodes join the site-wide ones by `@id`. A reference that
 	// resolves to nothing on the page that makes it is the failure the single
 	// `@graph` in Head.astro exists to prevent: a plain JSON-LD processor
@@ -1762,6 +1873,15 @@ for (const file of files) {
 	seen.cited += works.size;
 	const unnamed = [...works].filter((id) => !namedHere.has(id));
 	if (unnamed.length > 0) unnamedCited.push([route, unnamed.length]);
+	// The works the page cites, its whole bibliography (citations.mjs,
+	// `citationsFor`): what the bibliography page's "Cited by" list of each
+	// work has to name, page for page, below.
+	for (const item of [article.citation ?? []].flat()) {
+		const id = item?.['@id'];
+		if (!isCitedWork(id)) continue;
+		if (!citedOn.has(id)) citedOn.set(id, new Set());
+		citedOn.get(id).add(own);
+	}
 
 	// Every published catalogue is a Dataset of the page that renders it, and
 	// the overview of the catalogues is the DataCatalog that lists them
@@ -2129,7 +2249,8 @@ for (const file of files) {
 		} else if (described.length > 0) {
 			ok(`${route}: none of the ${described.length} works it describes is described as one catalogue page's rows`);
 		}
-		bibliographies.set(lang, { route, defined, standards, byId });
+		const works = new Set(nodes.map((node) => node['@id']).filter(isCitedWork));
+		bibliographies.set(lang, { route, defined, standards, byId, works, ...bibliographyList(html, canonical) });
 	}
 
 	// The two locales are one work. English pages point forward to their
@@ -2555,6 +2676,93 @@ if (errataAgree && seen.corrected > 0) {
 			ok(`each of the ${stubs.length} stubs that name a work on a page says what the bibliography says of it`);
 		}
 	}
+}
+
+// The list a reader sees on each bibliography holds every work its structured
+// data describes, once, and closes each with every page whose bibliography
+// cites the work, each page once. The list used to be written by hand and held
+// 212 entries for 208 of the 440 works, with "Cited by" lists that named the
+// pages of the day it was written and none after; src/lib/remark-bibliography.mjs
+// writes it from the pages' references now, and this reads what it wrote
+// against the structured data and the citations of every page that was built.
+// An item no reference wrote, an entry added to the page by hand, fails too.
+for (const lang of ['en', 'es']) {
+	const bibliography = bibliographies.get(lang);
+	if (!bibliography) continue;
+	const { route, works, entries, strays } = bibliography;
+	const at = (id) => id.slice(id.indexOf('#'));
+	const listed = new Map();
+	for (const entry of entries) {
+		if (!listed.has(entry.id)) listed.set(entry.id, []);
+		listed.get(entry.id).push(entry);
+	}
+	const missing = [...works].filter((id) => !listed.has(id));
+	const strangers = [...listed.keys()].filter((id) => !works.has(id));
+	const twice = [...listed].filter(([, found]) => found.length > 1).map(([id]) => id);
+	const stale = [];
+	for (const [id, [entry]] of listed) {
+		if (!works.has(id)) continue;
+		const want = citedOn.get(id) ?? new Set();
+		const have = new Set(entry.citedBy ?? []);
+		const absent = [...want].filter((page) => !have.has(page));
+		const extra = [...have].filter((page) => !want.has(page));
+		// A page named twice collapses in the set: counted on the list itself.
+		const repeated = [...have].filter((page) => (entry.citedBy ?? []).filter((named) => named === page).length > 1);
+		if (entry.citedBy === null || absent.length > 0 || extra.length > 0 || repeated.length > 0) {
+			const parts = [
+				...(entry.citedBy === null ? ['no "Cited by" list'] : []),
+				...absent.map((page) => `lacks ${page}`),
+				...extra.map((page) => `names ${page}, which does not cite it`),
+				...repeated.map((page) => `names ${page} twice`),
+			];
+			stale.push(`${at(id)} (${parts.join(', ')})`);
+		}
+	}
+	const first = (list) => list.slice(0, 3).map((item) => (item.startsWith('http') ? at(item) : item)).join('; ');
+	if (entries.length === 0) {
+		fail(`${route}: lists no work: the bibliography's markup changed under this check`);
+		continue;
+	}
+	if (missing.length > 0) {
+		fail(
+			`${route}: ${missing.length} of the ${works.size} works its structured data describes have no entry on the ` +
+				`page (first: ${first(missing)})`,
+		);
+	}
+	if (strangers.length > 0) {
+		fail(`${route}: ${strangers.length} entries name a work its structured data does not describe (first: ${first(strangers)})`);
+	}
+	if (twice.length > 0) {
+		fail(`${route}: ${twice.length} works have two entries or more (first: ${first(twice)})`);
+	}
+	if (stale.length > 0) {
+		fail(
+			`${route}: ${stale.length} entries' "Cited by" lists are not the pages that cite the work ` +
+				`(first: ${first(stale)})`,
+		);
+	}
+	if (strays.length > 0) {
+		const quoted = strays.slice(0, 3).map((text) => `"${text.length > 160 ? `${text.slice(0, 157)}...` : text}"`);
+		fail(
+			`${route}: ${strays.length} items of its lists are not entries written from the pages' references ` +
+				`(first: ${quoted.join('; ')})`,
+		);
+	}
+	if ([missing, strangers, twice, stale, strays].every((found) => found.length === 0)) {
+		const pages = entries.reduce((sum, entry) => sum + new Set(entry.citedBy).size, 0);
+		ok(
+			`${route}: lists each of the ${works.size} works its structured data describes once, with the ` +
+				`${pages} citations of the pages that cite them`,
+		);
+	}
+}
+
+for (const line of wordShort) fail(line);
+if (wordShort.length === 0 && seen.wordsCounted + seen.dataPages > 0) {
+	ok(
+		`wordCount counts at least a quarter of the words shown on each of the ${seen.wordsCounted} pages whose source ` +
+			`holds their text (${seen.dataPages} more render their rows from data and count their introduction)`,
+	);
 }
 
 // Every page carries the same site-wide nodes, so a defect in them is on every

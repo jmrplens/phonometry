@@ -228,6 +228,10 @@ const sources = (documents = [['ISO 2', '2010']]) => ({
  * YAML, so the frontmatter is written as JSON).
  */
 function check(t, built, from = sources()) {
+	for (const lang of ['en', 'es']) {
+		const bibliography = built[`${lang}/bibliography`];
+		if (bibliography && bibliography.text === '') bibliography.text = listHtml(listOf(built, lang));
+	}
 	const frontmatter = `---\ntitle: A guide\nreferences: ${JSON.stringify(from.references)}\n---\n\nText.\n`;
 	const content = { ...built.content, 'guide.mdx': frontmatter, 'es/guide.mdx': frontmatter };
 	return checkBuild(t, { ...built, content, report: from.report });
@@ -272,6 +276,38 @@ function build({ pages = 4, base: extra = {}, ...options } = {}) {
 	}
 	return wholeBuild({ pages, ...options, base: { ...base, ...extra } });
 }
+
+/**
+ * The list the bibliography of `lang` shows, as src/lib/remark-bibliography.mjs
+ * writes it: one entry per work the page's nodes define, in their order, with
+ * the address of every page of `built` whose article cites the work.
+ */
+function listOf(built, lang) {
+	const works = built[`${lang}/bibliography`].nodes
+		.map((node) => node['@id'])
+		.filter((id) => /\/reference\/bibliography\/#(?:std|doi|book|article|report|web)-/.test(String(id)));
+	return works.map((id) => ({
+		fragment: id.slice(id.indexOf('#') + 1),
+		citedBy: Object.values(built)
+			.filter(({ article }) => [article?.citation ?? []].flat().some((item) => item?.['@id'] === id))
+			.map(({ article }) => article.url.replace(ORIGIN, '/phonometry')),
+	}));
+}
+
+/** The list as the built page holds it: an item per entry, its "Cited by" list in a span of its own. */
+const listHtml = (entries) =>
+	'<ul>' +
+	entries
+		.map(
+			({ fragment, citedBy, marked = true }) =>
+				`<li id="${fragment}"><strong>A. (2000).</strong> <em>A work</em>.\n` +
+				(marked
+					? `<span data-cited-by="">Cited by ${citedBy.map((href) => `<a href="${href}">A page</a>`).join(', ')}.</span>`
+					: `Cited by ${citedBy.map((href) => `<a href="${href}">A page</a>`).join(', ')}.`) +
+				'</li>',
+		)
+		.join('') +
+	'</ul>';
 
 /** The node with `id` among a built page's nodes. */
 const nodeAt = (built, key, id) => built[key].nodes.find((node) => node['@id'] === id);
@@ -2393,4 +2429,166 @@ test('a report page that names no commit its rows are of fails', (t) => {
 		ran.err,
 		/FAIL \/reference\/conformance\/: the conformance report's Dataset: the page names no commit its rows are of \(\[data-report-provenance\] with a data-report-commit of 40 hexadecimal digits\)/,
 	);
+});
+
+test('a bibliography that lists every work it describes once, with the pages that cite it, passes', (t) => {
+	const ran = check(t, build());
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		/ok {3}\/reference\/bibliography\/: lists each of the 4 works its structured data describes once, with the 3 citations of the pages that cite them/,
+	);
+	assert.match(ran.out, /ok {3}\/es\/reference\/bibliography\/: lists each of the 4 works/);
+});
+
+test('a work the bibliography describes with no entry on the page fails, and names the work', (t) => {
+	const built = build();
+	built['en/bibliography'].text = listHtml(listOf(built, 'en').filter(({ fragment }) => fragment !== 'std-iso-2-2010'));
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/bibliography\/: 1 of the 4 works its structured data describes have no entry on the page \(first: #std-iso-2-2010\)/,
+	);
+	assert.doesNotMatch(ran.err, /\/es\/reference\/bibliography\/: \d+ of the/);
+});
+
+test('a "Cited by" list that lacks a citing page, or names a page that cites nothing, fails', (t) => {
+	const built = build();
+	const guide = `/phonometry/${GUIDE}/`;
+	built['es/bibliography'].text = listHtml(
+		listOf(built, 'es').map((entry) =>
+			entry.fragment === 'std-iso-1-2000'
+				? { ...entry, citedBy: [] }
+				: entry.fragment === 'std-ley-37-2003'
+					? { ...entry, citedBy: [guide] }
+					: entry,
+		),
+	);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/es\/reference\/bibliography\/: 2 entries' "Cited by" lists are not the pages that cite the work/);
+	assert.match(ran.err, new RegExp(`#std-iso-1-2000 \\(lacks /es/${GUIDE}/\\)`));
+	assert.match(ran.err, new RegExp(`#std-ley-37-2003 \\(names /${GUIDE}/, which does not cite it\\)`));
+});
+
+test('an entry whose "Cited by" list is not marked as one fails as one that lists nothing', (t) => {
+	const built = build();
+	built['en/bibliography'].text = listHtml(
+		listOf(built, 'en').map((entry) => (entry.fragment === 'std-iso-1-2000' ? { ...entry, marked: false } : entry)),
+	);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /#std-iso-1-2000 \(no "Cited by" list/);
+});
+
+test('two entries for one work fail, and so does an entry for a work the page does not describe', (t) => {
+	const built = build();
+	const entries = listOf(built, 'en');
+	built['en/bibliography'].text = listHtml([
+		...entries,
+		entries[0],
+		{ fragment: 'book-roe-2001-another-book', citedBy: [] },
+	]);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/bibliography\/: 1 works have two entries or more \(first: #std-iso-1-2000\)/);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/bibliography\/: 1 entries name a work its structured data does not describe \(first: #book-roe-2001-another-book\)/,
+	);
+});
+
+test('a bibliography that lists no work fails: the markup changed under the check', (t) => {
+	const built = build();
+	built['es/bibliography'].text = '<p>No list.</p>';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/es\/reference\/bibliography\/: lists no work: the bibliography's markup changed under this check/);
+});
+
+test('a "Cited by" list that names a citing page twice fails, and the passing language counts each page once', (t) => {
+	const built = build();
+	built['en/bibliography'].text = listHtml(
+		listOf(built, 'en').map((entry) =>
+			entry.fragment === 'std-iso-1-2000' ? { ...entry, citedBy: [entry.citedBy[0], ...entry.citedBy] } : entry,
+		),
+	);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/bibliography\/: 1 entries' "Cited by" lists are not the pages that cite the work/);
+	assert.match(ran.err, new RegExp(`#std-iso-1-2000 \\(names /${GUIDE}/ twice\\)`));
+	assert.match(ran.out, /ok {3}\/es\/reference\/bibliography\/: lists each of the 4 works .* with the 3 citations/);
+});
+
+test('an item of the list written by hand, which no work of the page is, fails and is quoted', (t) => {
+	const built = build();
+	built['en/bibliography'].text =
+		listHtml(listOf(built, 'en')) +
+		'<ul><li><strong>Bendat, J. S., &amp; Piersol, A. G. (2010).</strong> <em>Random data</em>. Wiley. ' +
+		'Cited by <a href="/phonometry/nowhere/">Nowhere</a>.</li></ul>';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/bibliography\/: 1 items of its lists are not entries written from the pages' references \(first: "Bendat, J\. S\., & Piersol, A\. G\. \(2010\)\. Random data\. Wiley\. Cited by Nowhere\."\)/,
+	);
+	assert.doesNotMatch(ran.err, /FAIL \/es\/reference\/bibliography\/: \d+ items/);
+});
+
+test('an item whose id names no cited work is written by hand too', (t) => {
+	const built = build();
+	built['es/bibliography'].text =
+		listHtml(listOf(built, 'es')) + '<ul><li id="a-note">Una nota escrita a mano.</li></ul>';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/bibliography\/: 1 items of its lists are not entries written from the pages' references \(first: "Una nota escrita a mano\."\)/,
+	);
+});
+
+/** A page text of `count` words. */
+const wordsOf = (count) => `<p>${Array.from({ length: count }, (_, i) => `word${i}`).join(' ')}</p>`;
+
+test("a page whose wordCount counts a fraction of the words it shows fails, naming both counts", (t) => {
+	const built = build();
+	built['en/guide'].text = wordsOf(1000);
+	built.content = { [`${GUIDE}.mdx`]: '---\ntitle: A guide\n---\n\nText.\n' };
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(`FAIL /${GUIDE}/: its wordCount, 100, counts 10 % of the 1000 words the page shows`),
+	);
+});
+
+test("the words a page shows in its code blocks are left out of the count, as its wordCount leaves its fences out", (t) => {
+	const built = build();
+	const code = Array.from({ length: 1000 }, (_, i) => `x${i} = ${i}`).join('\n');
+	built['en/guide'].text = `${wordsOf(300)}<pre class="astro-code"><code>${code}</code></pre>`;
+	built.content = { [`${GUIDE}.mdx`]: `---\ntitle: A guide\n---\n\nText.\n\n\`\`\`python\n${code}\n\`\`\`\n` };
+	const ran = check(t, built);
+	assert.doesNotMatch(ran.err, /its wordCount, \d+, counts/);
+	assert.match(ran.out, /ok {3}wordCount counts at least a quarter of the words shown/);
+});
+
+test('a page whose source holds a marker the build fills in still fails, its prose shown and not counted', (t) => {
+	const built = build();
+	built['en/guide'].text = `${wordsOf(1000)}<pre><code>x = 1</code></pre>`;
+	built.content = { [`${GUIDE}.mdx`]: '---\ntitle: A guide\n---\n\n<!-- bibliography: general -->\n' };
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, new RegExp(`FAIL /${GUIDE}/: its wordCount, 100, counts 10 % of the 1000 words the page shows`));
+});
+
+test('a page whose source renders a data component counts its introduction alone and passes', (t) => {
+	const built = build();
+	built['en/guide'].text = wordsOf(1000);
+	built.content = {
+		[`${GUIDE}.mdx`]: "---\ntitle: A guide\n---\n\nimport Glossary from '../x.astro';\n\nText.\n\n<Glossary lang=\"en\" />\n",
+	};
+	const ran = check(t, built);
+	assert.doesNotMatch(ran.err, /its wordCount, \d+, counts/);
+	assert.match(ran.out, /ok {3}wordCount counts at least a quarter of the words shown on each of the \d+ pages whose source holds their text/);
 });

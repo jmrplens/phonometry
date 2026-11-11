@@ -409,7 +409,9 @@ jobs:
         # no links there. A renamed topic left one section of the site
         # publishing no articleSection at all, on all 54 of its pages across
         # the two locales, and every check in this job stayed green for the
-        # twelve days it took to notice.
+        # twelve days it took to notice. It also reads the bibliography's list
+        # against that graph: one entry per work the page describes, each
+        # closed by every page whose citations name the work.
         run: pnpm run check:structured-data
         working-directory: site
       - name: Check the structured data against the schema.org vocabulary

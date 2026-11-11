@@ -879,7 +879,7 @@ def test_the_census_calls_the_package() -> None:
     """
     for name, build in FIXTURES.items():
         record = build()
-        assert f"{name.partition('.')[0]}.{type(record).__name__}" == name, name
+        assert name == f"{name.partition('.')[0]}.{type(record).__name__}", name
         assert getattr(phonometry, name.partition(".")[0]).__dict__[
             type(record).__name__
         ] is type(record), name

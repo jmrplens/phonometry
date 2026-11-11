@@ -620,7 +620,7 @@ microphone and the governing number is no longer on the datasheet: the system
 is a **closed loop**: the loudspeaker feeds the audience, and it also
 feeds the microphone that drives it. Long (*Architectural Acoustics* 2e,
 Ch. 18, Eqs. (18.13) to (18.24)) writes that loop with two decibel gains. The
-**open-loop system gain** is what the system buys the talker,
+**open-loop system gain** (Eq. (18.17)) is what the system buys the talker,
 
 $$
 Z_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{L}} - L_{\mathrm{T}\text{-}\mathrm{M}},
@@ -629,8 +629,8 @@ $$
 the level the loudspeaker produces at an average listener minus the level the
 talker produces at the microphone; $Z_\mathrm{S} = -6$ dB, typical of an auditorium or
 a church, means a comfortable conversational level at twice the
-talker-to-microphone distance. The **feedback-loop gain** is the part of the
-output that comes back,
+talker-to-microphone distance. The **feedback-loop gain** (Eq. (18.18)) is the part of
+the output that comes back,
 
 $$
 G_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{M}} - L_{\mathrm{H}\text{-}\mathrm{L}} + D_\mathrm{M}(\theta),
@@ -850,6 +850,11 @@ enters the design separately.
 - [Sound Power](/phonometry/devices/emission/sound-power/): the radiated-power
   descriptor, for when the question is how much acoustic power the source
   emits rather than how it responds on axis.
+- [Conformance report](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
+  the exact analytic results the piston is checked against (the radiation
+  resistance and reactance, their low-frequency limit, the radiation mass, the
+  first directivity null and the 3.01 dB half-space directivity index), and
+  Long's two special cases of the feedback criterion.
 - API reference: [`electroacoustics.piston`](/phonometry/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/phonometry/reference/api/electroacoustics/loudspeaker/) and [`electroacoustics.sound_reinforcement`](/phonometry/reference/api/electroacoustics/sound-reinforcement/).
 
 </SeeAlso>

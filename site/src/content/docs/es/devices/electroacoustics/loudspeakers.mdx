@@ -647,8 +647,8 @@ micrófono abierto y la cifra que manda ya no está en la hoja de característic
 el sistema es un **lazo cerrado**: el altavoz alimenta al público, pero también al
 micrófono que lo excita. Long (*Architectural Acoustics* 2.ª ed., cap. 18,
 ecs. (18.13) a (18.24)) escribe ese lazo con dos ganancias en decibelios. La
-**ganancia del sistema en lazo abierto** es lo que el sistema le aporta al
-hablante,
+**ganancia del sistema en lazo abierto** (ec. (18.17)) es lo que el sistema le
+aporta al hablante,
 
 $$
 Z_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{L}} - L_{\mathrm{T}\text{-}\mathrm{M}},
@@ -657,8 +657,8 @@ $$
 el nivel que el altavoz produce en un oyente medio menos el que el hablante
 produce en el micrófono; $Z_\mathrm{S} = -6$ dB, típico de un auditorio o una iglesia,
 significa un nivel de conversación cómodo al doble de la distancia
-hablante-micrófono. La **ganancia del lazo de realimentación** es la parte de
-la salida que vuelve,
+hablante-micrófono. La **ganancia del lazo de realimentación** (ec. (18.18)) es la
+parte de la salida que vuelve,
 
 $$
 G_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{M}} - L_{\mathrm{H}\text{-}\mathrm{L}} + D_\mathrm{M}(\theta),
@@ -889,6 +889,12 @@ directo-reverberante entra en el diseño por separado.
 - [Potencia acústica](/phonometry/es/devices/emission/sound-power/): el descriptor de
   potencia radiada, para cuando la pregunta es cuánta potencia acústica emite
   la fuente y no cómo responde en el eje.
+- [Informe de conformidad](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md):
+  los resultados analíticos exactos frente a los que se comprueba el pistón (la
+  resistencia y la reactancia de radiación, su límite de baja frecuencia, la
+  masa de radiación, el primer nulo de directividad y el índice de directividad
+  de 3,01 dB del semiespacio), y los dos casos particulares de Long del
+  criterio de realimentación.
 - Referencia de la API: [`electroacoustics.piston`](/phonometry/es/reference/api/electroacoustics/piston/), [`electroacoustics.loudspeaker`](/phonometry/es/reference/api/electroacoustics/loudspeaker/) y [`electroacoustics.sound_reinforcement`](/phonometry/es/reference/api/electroacoustics/sound-reinforcement/).
 
 </SeeAlso>

@@ -47,6 +47,22 @@ references:
     doi: "10.2788/31776"
     url: "https://publications.jrc.ec.europa.eu/repository/handle/JRC72550"
     note: "Las clases de suelo por resistividad de flujo 'A'-'H' que acepta ground_effect_adjustment."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    implemented: false
+    url: "https://www.iso.org/standard/17426.html"
+    note: "El coeficiente de atenuación de tono puro que el ajuste atmosférico toma en las frecuencias centrales exactas de las bandas (Ec. 26/27); el modelo en sí está implementado en la guía de propagación en exteriores."
+  - type: standard
+    organization: "International Civil Aviation Organization"
+    year: 2017
+    title: "Annex 16 to the Convention on International Civil Aviation: Environmental protection — Volume I: Aircraft noise"
+    designation: "ICAO Annex 16, Vol. I, 8.ª ed."
+    implemented: false
+    url: "https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise"
+    note: "El EPNL del Apéndice 2, que el término de evento único de la Ec. 28 de la Doc 32 obtiene con epnl_from_pnlt (implementado en la guía de ruido de aeronaves), y el sobrevuelo de certificación de helicópteros del Capítulo 8 que muestra el diagrama de certificación."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -232,8 +248,8 @@ plt.show()
 El nivel del hemisferio a 60 m se lleva al receptor con tres ajustes (§A.4):
 `spherical_spreading_adjustment` ($\Delta L_\mathrm{s} = -20\log_{10}(r/60)$, Ec. 24),
 `atmospheric_adjustment` ($\Delta L_\mathrm{a} = -\alpha(f)\,(r - 60)$ con el
-coeficiente de
-ISO 9613-1, Ec. 26/27) y `ground_effect_adjustment` (interferencia directo/
+coeficiente de tono puro de ISO 9613-1 en la frecuencia central exacta de la
+banda (Ec. 26/27), que calcula `air_attenuation` de la biblioteca) y `ground_effect_adjustment` (interferencia directo/
 reflejado sobre un plano de impedancia, Chien-Soroka Ec. 28-35, con la impedancia
 de Delany-Bazley y las clases de resistividad de flujo CNOSSOS `"A"`-`"H"`).
 
@@ -335,7 +351,11 @@ diferencia es mayor justo donde un espectro de helicóptero todavía lleva energ
 las bandas de tercio de octava altas sobre trayectos oblicuos largos, así que un
 emplazamiento frío, seco o de gran altitud necesita el argumento.
 `atmospheric_method` elige `"iso9613"` (el valor por defecto) o `"sae"`; los dos
-coinciden en unos 0,05 dB por debajo de 3,15 kHz.
+coinciden en unos 0,05 dB por debajo de 3,15 kHz. La Tabla 4 de la guía tabula
+en dB/km otra asignación por bandas, el método SAE de Rickley et al.; los tests
+sujetan a ella el coeficiente de tono puro por defecto con 0,1 dB/km hasta
+630 Hz, 0,3 dB/km hasta 3,15 kHz, 1,0 dB/km hasta 6,3 kHz y 2,5 dB/km en 8 y
+10 kHz, las bandas en las que más se separan.
 
 ## Condiciones de vuelo: interpolar entre hemisferios
 
@@ -428,9 +448,10 @@ estribor), reducido a la distancia polar del anillo, normalmente 70 m frente
 a los 60 m de la base de datos de sobrevuelo. El §A.3.5 de la guía define
 cuatro condiciones (estacionario con efecto suelo, HIGE; estacionario sin
 efecto suelo, HOGE; ralentí a régimen reducido; y ralentí a régimen pleno) y
-tres enfoques en prioridad descendente: medir los cuatro anillos; medir el
-anillo HIGE y las otras tres condiciones solo en la dirección de 0°; o medir
-el anillo HIGE a secas y aplicar desplazamientos fijos.
+tres enfoques en prioridad descendente: medir los cuatro anillos (Enfoque 1);
+medir el anillo HIGE y las otras tres condiciones solo en la dirección de 0°
+(Enfoque 2); o medir el anillo HIGE a secas y aplicar desplazamientos fijos
+(Enfoque 3).
 
 `hover_ring_hemisphere` extiende el anillo a un `RotorcraftHemisphere`
 completo asumiendo directividad constante en φ: cada bin
@@ -520,7 +541,7 @@ plt.show()
 La guía advierte de que sus constantes salen de medidas con micrófonos
 invertidos sobre placas en el suelo y pueden no valer para otros montajes; y
 la base de datos pública de NORAH2 distribuye en realidad **+8/−10/−2 dB** en
-el archivo de interpolación de cada tipo. Pásalos como `offset_db` para
+el archivo de interpolación de cada tipo (sus correcciones `Corr_dB`). Pásalos como `offset_db` para
 reproducir el prototipo; las constantes publicadas de la Tabla 3 son los
 valores por defecto. La prosa del Enfoque 3 deriva además el ralentí a
 régimen pleno desde HOGE donde su propia tabla lo deriva desde HIGE, con
@@ -567,8 +588,10 @@ este módulo (que consume hemisferios ya reducidos) no modela.
 
 `flight_path_kinematics` deriva de una trayectoria con marcas de tiempo, por
 diferencias finitas centradas, todo lo que necesita el evento (Ec. 16-21 /
-Doc 32 Ec. 8-10): velocidad respecto al suelo, velocidad aerodinámica (sin
-viento), rumbo, curvatura, ángulo de alabeo $\Phi = \arctan(K V_\mathrm{g}^2 / g)$ y
+Doc 32 Ec. 8-10): velocidad respecto al suelo $V_\mathrm{g}$, velocidad
+aerodinámica $V_\mathrm{A}$ (sin viento), rumbo
+$\Theta = \operatorname{atan2}(\Delta X, \Delta Y)$, curvatura
+$K = \Delta\Theta/\Delta S$, ángulo de alabeo $\Phi = \arctan(K V_\mathrm{g}^2 / g)$ y
 ángulo de trayectoria $\gamma = \arctan(\Delta Z / \Delta S)$. La guía
 recomienda suavizar las trazas radar
 (p. ej. remuestreo con splines a cadencia de 0,5 s) antes de derivar.
@@ -632,7 +655,8 @@ tercios de octava se expresa en tiempo registrado $t_\mathrm{r} = t_\mathrm{e} +
 $c = 346{,}1\ \text{m/s}$) y se integra: `LASmax`, `SEL` sobre el historial
 completo y
 sobre la ventana de certificación de 10 dB por debajo (Doc 32 Ec. 27), y `EPNL`
-según Anexo 16 de la OACI (Doc 32 Ec. 28).
+según Anexo 16 de la OACI (Doc 32 Ec. 28), reutilizando `epnl_from_pnlt` de la
+biblioteca.
 
 ```python
 res = aircraft.rotorcraft_event_level(
@@ -836,8 +860,10 @@ Cuando el terreno bloquea la línea de visión, el sonido sigue el camino
 convexo más corto sobre él (la guía NORAH2 lo llama la goma elástica) y cada
 vértice tocado es una **arista de difracción**. La atenuación combina la
 difracción pura de la diferencia de camino $\delta$ (Ec. 42-44,
-$10 C_h \log_{10}\bigl(3 + (40/\lambda)\,C''\,\delta\bigr)$, con tope de 25 dB) con
-los efectos de suelo
+$10 C_h \log_{10}\bigl(3 + (40/\lambda)\,C''\,\delta\bigr)$, con tope de 25 dB
+y nula en cuanto $(40/\lambda)\,C''\,\delta$ baja de $-2$, de modo que una
+longitud de onda mayor todavía ve atenuación más por debajo de la línea de
+visión) con los efectos de suelo
 del lado fuente y del lado receptor, cada uno sobre su propio plano medio y
 ponderado por la difracción de su camino imagen (Ec. 45-47, el esquema
 CNOSSOS-EU que adopta la guía NORAH2). El efecto de suelo no se evalúa por
@@ -990,7 +1016,7 @@ reproduce los casos ARP de verificación del prototipo NORAH2:
 
 | Magnitud | Oráculo | Coincidencia |
 |---|---|---|
-| Niveles de banda, 31 bandas | Tabla 4 de la guía NORAH2 | exacta |
+| Atenuación atmosférica, 31 bandas | Tabla 4 de la guía NORAH2 | 0,1 dB/km hasta 630 Hz, 0,3 hasta 3,15 kHz, 1,0 hasta 6,3 kHz, 2,5 por encima |
 | Ángulos de emisión | prototipo NORAH2, casos ARP | 0,01° |
 | Tiempo retardado | el mismo | 0,02 s |
 | Nivel por paso, suelo duro, hasta 18 km | el mismo | 0,08 dB(A) |

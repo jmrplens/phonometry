@@ -61,11 +61,12 @@ The hemisphere level at 60 m is carried to the receiver by three adjustments
   (Eq. 24).
 - **`atmospheric_adjustment(freqs, r)`**: $\Delta L_\mathrm{a} = -\alpha(f)\,(r - 60)$
   with the
-  ISO 9613-1 pure-tone coefficient at the exact band centre (Eq. 26/27), reusing
-  the library's `air_attenuation`; this is what the NORAH2 reference
-  implementation computes. The guidance's alternative SAE (Rickley) band mapping,
-  tabulated in its Table 4, coincides below 3.15 kHz and deviates by up to
-  2.2 dB/km at 8-10 kHz.
+  ISO 9613-1 pure-tone coefficient at the exact band centre (Eq. 26/27), which
+  the library's `air_attenuation` computes, as the NORAH2 reference
+  implementation does. The tests hold it to the guidance's alternative SAE
+  (Rickley) band mapping, tabulated in its Table 4, within 0.1 dB/km up to
+  630 Hz, 0.3 dB/km up to 3.15 kHz, 1.0 dB/km up to 6.3 kHz and 2.5 dB/km at
+  8 and 10 kHz, the bands where the two part most.
 - **`ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity=…)`**: the
   interference between the direct and ground-reflected rays over an impedance
   plane (Chien-Soroka, Eq. 28-35), with the Delany-Bazley one-parameter impedance

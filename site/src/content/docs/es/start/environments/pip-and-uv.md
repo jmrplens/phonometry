@@ -53,9 +53,10 @@ ImportError: Plotting requires matplotlib. Install it with: pip install "phonome
 La versión más antigua de cada dependencia con la que se prueba la
 biblioteca, en cada Python, está en [Primeros
 pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada).
-En Windows en ARM, y en Linux en ARM con musl, algunas de esas versiones no
-tienen wheel, y pip las compila allí desde el código fuente; la misma sección
-dice cuáles.
+En Windows en ARM, en Linux en ARM con musl y en macOS en Intel, algunas de
+esas versiones no tienen wheel, y pip las compila allí desde el código fuente,
+salvo torch, que no publica código fuente que compilar y por eso no se instala
+allí; la misma sección dice cuáles.
 
 ## torch sin CUDA
 

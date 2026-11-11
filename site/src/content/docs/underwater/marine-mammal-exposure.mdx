@@ -54,6 +54,13 @@ references:
     implemented: false
     url: "https://www.iso.org/standard/62406.html"
     note: "The symbols and references the guidance documents adopt for their criteria (Lp,0-pk and LE,p re 1 µPa and 1 µPa²·s)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Underwater acoustics — Measurement of radiated underwater sound from percussive pile driving"
+    designation: "ISO 18406:2017"
+    url: "https://www.iso.org/standard/62407.html"
+    note: "The single-strike sound exposure (Formulae 3–4) that strike_sel_spectrum splits into bands and the +10 log10 N accumulation over strikes (Formula 9) that weighted_exposure applies; the broadband metrics are on the Underwater acoustics page."
 ---
 
 import Scope from '../../../components/Scope.astro';
@@ -620,9 +627,10 @@ There is no audiogram for LF cetaceans, because Southall et al. never print
 its $F_1$ parameter. Behavioural-disturbance criteria (the step-function and
 dose-response thresholds used for harassment take estimates) are out of scope:
 only the auditory-effect criteria are implemented. The library does not choose
-a hearing group or an accumulation period for you, and it does not model the
-animal's movement relative to the source, so the cumulative SEL it reports is
-the stationary-receiver worst case. It also does not check that the supplied
+a hearing group or an accumulation period for you: both are assessment
+decisions, made per species and per activity. Nor does it model the animal's
+movement relative to the source, so the cumulative SEL it reports is the
+stationary-receiver worst case. It also does not check that the supplied
 spectrum spans the group's passband: a record that stops short of $f_2$ is
 weighted as given and under-reports the exposure. Propagation from source to
 receiver belongs to [Underwater sound

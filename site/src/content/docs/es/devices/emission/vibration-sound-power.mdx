@@ -473,7 +473,9 @@ límite de potencia acústica ponderado A declarado (una emisión de potencia
 acústica es una magnitud en la que menos es mejor, así que la fuente cumple en
 el límite o por debajo). `verbose=True` añade la columna del factor de radiación
 $\varepsilon$ a la tabla. `language="es"` genera la ficha en español con
-decimales de coma.
+decimales de coma. La ficha requiere el extra de informes
+(`pip install "phonometry[report]"`), y su panel del espectro requiere además
+matplotlib (`pip install "phonometry[plot]"`).
 
 ```python
 import numpy as np

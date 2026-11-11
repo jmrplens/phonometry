@@ -329,6 +329,30 @@ def test_room_constant_is_per_band() -> None:
     assert np.all(np.diff(room) > 0.0)  # shorter T, more absorption
 
 
+def test_room_constant_of_a_short_decay_is_its_formula_for_a_number_and_an_array() -> (
+    None
+):
+    """T = 1 ms in 100 m3 behind 130 m2: alpha rounds to 1, R does not.
+
+    Formula (5) puts 1 - alpha = exp(-0,16 V / (S T)) into Formula (4), so
+    R = S (exp(0,16 V / (S T)) - 1), about 4e55 m2 here. Divided as Formula
+    (4) prints it, a number raised ZeroDivisionError and an array gave inf
+    under a RuntimeWarning.
+    """
+    x = 0.16 * 100.0 / (130.0 * 1e-3)
+    expected = 130.0 * math.expm1(x)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        number = emission.room_constant_from_reverberation_time(
+            1e-3, volume=100.0, surface_area=130.0
+        )
+        array = emission.room_constant_from_reverberation_time(
+            [1e-3], volume=100.0, surface_area=130.0
+        )
+    assert number == pytest.approx(expected, rel=1e-14)
+    np.testing.assert_allclose(array, [expected], rtol=1e-14)
+
+
 def test_room_constant_refuses_a_zero_reverberation_time() -> None:
     with pytest.raises(ValueError, match="reverberation_time"):
         emission.room_constant_from_reverberation_time(

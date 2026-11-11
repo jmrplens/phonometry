@@ -20,6 +20,8 @@ physics identities:
 from __future__ import annotations
 
 import dataclasses
+import warnings
+from fractions import Fraction
 
 import numpy as np
 import pytest
@@ -532,6 +534,68 @@ def test_swr_normalized_impedance_matches_reflection() -> None:
     r = standing_wave_reflection(swr, x_min, wavelength=lam)
     z = standing_wave_normalized_impedance(swr, x_min, wavelength=lam)
     assert complex(z) == pytest.approx((1.0 + r) / (1.0 - r))
+
+
+def test_swr_impedance_of_a_minimum_a_quarter_wavelength_out_is_the_ratio() -> None:
+    """At phi = 0 Eqs. (25) and (26) give z = s, for a number and an array alike.
+
+    Formed from r, 1 - r is nothing once |r| rounds to 1 (s past about 1e16):
+    a number raised ZeroDivisionError and an array gave inf + nan j under a
+    RuntimeWarning, for an impedance that is s itself.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        number = standing_wave_normalized_impedance(1e20, 0.25, wavelength=1.0)
+        array = standing_wave_normalized_impedance([1e20], 0.25, wavelength=1.0)
+    assert number == 1e20 + 0j
+    np.testing.assert_array_equal(array, [1e20 + 0j])
+
+
+def test_swr_impedance_keeps_its_resistance_where_r_rounds_to_a_unit_circle() -> None:
+    """s = 1e300 with the minimum an eighth of a wavelength out, phi = -pi/2.
+
+    z' = s / (1 + (s^2 - 1) sin^2(phi/2)) is 2/s there and z'' tends to
+    cot(phi/2) = -1; formed from r, |r| = 1 left z' at the rounding of
+    cos(-pi/2), about 1e-16, and s^2 overflows in a plain reading of the
+    formula.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        z = standing_wave_normalized_impedance(1e300, 0.125, wavelength=1.0)
+    assert z.imag == pytest.approx(-1.0, rel=1e-15)
+    assert z.real == pytest.approx(2e-300, rel=1e-12, abs=0.0)
+
+
+def _exact_sin_cos(x: Fraction) -> tuple[Fraction, Fraction]:
+    """sin and cos of a small rational angle by their series, to far below a double."""
+    sine, cosine, term, k = Fraction(0), Fraction(0), Fraction(1), 0
+    while k < 2 or abs(term) > Fraction(1, 10**60):
+        if k % 2:
+            sine += term if k % 4 == 1 else -term
+        else:
+            cosine += term if k % 4 == 0 else -term
+        k += 1
+        term = term * x / k
+    return sine, cosine
+
+
+def test_swr_impedance_matches_eqs_25_and_26_in_exact_arithmetic() -> None:
+    """s = 1e8 with the minimum 1 nm past a quarter wavelength: |r| = 1 - 2e-8.
+
+    Eqs. (25) and (26), read in exact rationals from r' = |r| cos(phi) and
+    r'' = |r| sin(phi) (Eqs. (22), (23)), against the double result: formed
+    from r, 1 - r' kept eight digits of sixteen.
+    """
+    swr, x_min, lam = 1e8, 0.25 + 1e-9, 1.0
+    pi = Fraction("3.14159265358979323846264338327950288419716939937510")
+    phase = pi * (4 * Fraction(x_min) / Fraction(lam) - 1)
+    sine, cosine = _exact_sin_cos(phase)
+    magnitude = (Fraction(swr) - 1) / (Fraction(swr) + 1)
+    r1, r2 = magnitude * cosine, magnitude * sine
+    denominator = (1 - r1) ** 2 + r2**2
+    z = standing_wave_normalized_impedance(swr, x_min, wavelength=lam)
+    assert z.real == pytest.approx(float((1 - r1**2 - r2**2) / denominator), rel=1e-14)
+    assert z.imag == pytest.approx(float(2 * r2 / denominator), rel=1e-14)
 
 
 # ---------------------------------------------------------------------------

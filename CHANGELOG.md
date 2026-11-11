@@ -2323,6 +2323,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The standing-wave impedance and the room constant of ISO 9295 keep their
+  digits where a reflection or an absorption rounds to one.**
+  `materials.standing_wave_normalized_impedance` formed $(1 + r)/(1 - r)$
+  from the reflection factor, whose $1 - r$ keeps only the digits
+  $1 - |r| = 2/(s + 1)$ leaves it: up to 4e-6 of the result was lost for a
+  ratio of 1e4 to 1e15 with the first minimum near a quarter wavelength, and
+  past $s \approx 10^{16}$, where $|r|$ rounds to 1, a minimum a quarter
+  wavelength out gave inf + nan j for an array and raised
+  `ZeroDivisionError` for a number, for an impedance that is $s$ itself. It
+  computes Eqs. (25) and (26) with Eq. (14) put in, $z' = s/D$ and
+  $z'' = (s^2 - 1)\sin(\phi/2)\cos(\phi/2)/D$ with
+  $D = 1 + (s^2 - 1)\sin^2(\phi/2)$, scaled so that no product overflows,
+  within 5e-16 of the formula read in 60 digits.
+  `emission.room_constant_from_reverberation_time` divided by
+  $1 - \alpha_\mathrm{room}$, which is nothing once the exponent of Formula
+  (5) passes about 37; it computes $R = S\,(\mathrm{e}^{0{,}16 V/(S T)} - 1)$,
+  the two formulae read together. `vibration.infinite_beam_mobility` takes
+  the reciprocal of the impedance as an array, so an impedance that underflows
+  to zero gives a number what it gives an array.
+
 - **The documentation site's type check fails on a hint, and the site has
   none.** `pnpm run check:types` passed with 132 hints: 127 uses in
   `site/src/content.config.ts` of zod helpers that Astro 7 and zod 4

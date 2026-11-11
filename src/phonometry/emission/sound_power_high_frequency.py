@@ -387,6 +387,13 @@ def room_constant_from_reverberation_time(
     the room constant of the method of clause 6. It goes into
     :func:`high_frequency_sound_power` as ``room_constant``.
 
+    Formula (5) makes :math:`1 - \alpha_\mathrm{room} =
+    \mathrm{e}^{-0{,}16 \, V / (S T)}`, so the two read together are
+    :math:`R = S \, (\mathrm{e}^{0{,}16 \, V / (S T)} - 1)`, which is how
+    ``R`` is computed: the quotient of Formula (4) divides by nothing once
+    :math:`\alpha_\mathrm{room}` rounds to 1, for a decay short enough
+    that the exponent passes about 37, where ``R`` is still a number.
+
     :param reverberation_time: Mean measured reverberation time ``T`` per
         band, in seconds (scalar or one value per band).
     :param volume: Room volume ``V``, in cubic metres.
@@ -396,11 +403,11 @@ def room_constant_from_reverberation_time(
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
     """
-    alpha = room_absorption_coefficient(
-        reverberation_time, volume=volume, surface_area=surface_area
-    )
+    t = require_positive_array(reverberation_time, "reverberation_time")
+    volume, surface = _room_geometry(volume, surface_area)
     return as_float_or_array(
-        float(surface_area) * alpha / (1.0 - alpha), like=(reverberation_time,)
+        surface * np.expm1(_EYRING_CONSTANT * volume / (surface * t)),
+        like=(reverberation_time,),
     )
 
 

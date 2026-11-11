@@ -103,8 +103,21 @@ standing_wave_normalized_impedance(
 
 Normalised impedance from the standing wave (ISO 10534-1, Eqs. (24)-(26)).
 
-$z = Z/Z_0 = (1 + r)/(1 - r)$; the real/imaginary split is
-Eqs. (25)/(26).
+$z = Z/Z_0 = (1 + r)/(1 - r)$, split into real and imaginary parts
+by Eqs. (25)/(26). With $|r| = (s - 1)/(s + 1)$ (Eq. (14)) and the
+phase of Eq. (20) put in for $r' = |r| \cos\phi$ and
+$r'' = |r| \sin\phi$ (Eqs. (22), (23)), the two parts read
+
+$$
+z' = \frac{s}{D}, \qquad z'' = \frac{(s^2 - 1)\sin(\phi/2)\cos(\phi/2)}{D}, \qquad D = 1 + (s^2 - 1)\sin^2(\phi/2),
+$$
+
+which is how they are computed: the same numbers, with no
+$1 - r'$ to cancel. That difference keeps only the digits
+$1 - |r| = 2/(s + 1)$ leaves it, and none once $|r|$ rounds
+to 1, past $s \approx 10^{16}$; a first minimum a quarter
+wavelength from the face ($\phi = 0$) then gives $z = s$
+exactly.
 
 **Parameters**
 

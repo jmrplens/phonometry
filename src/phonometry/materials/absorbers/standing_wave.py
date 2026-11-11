@@ -312,8 +312,23 @@ def standing_wave_normalized_impedance(
 ) -> complex | NDArray[np.complex128]:
     r"""Normalised impedance from the standing wave (ISO 10534-1, Eqs. (24)-(26)).
 
-    :math:`z = Z/Z_0 = (1 + r)/(1 - r)`; the real/imaginary split is
-    Eqs. (25)/(26).
+    :math:`z = Z/Z_0 = (1 + r)/(1 - r)`, split into real and imaginary parts
+    by Eqs. (25)/(26). With :math:`|r| = (s - 1)/(s + 1)` (Eq. (14)) and the
+    phase of Eq. (20) put in for :math:`r' = |r| \cos\phi` and
+    :math:`r'' = |r| \sin\phi` (Eqs. (22), (23)), the two parts read
+
+    .. math::
+
+        z' = \frac{s}{D}, \qquad
+        z'' = \frac{(s^2 - 1)\sin(\phi/2)\cos(\phi/2)}{D}, \qquad
+        D = 1 + (s^2 - 1)\sin^2(\phi/2),
+
+    which is how they are computed: the same numbers, with no
+    :math:`1 - r'` to cancel. That difference keeps only the digits
+    :math:`1 - |r| = 2/(s + 1)` leaves it, and none once :math:`|r|` rounds
+    to 1, past :math:`s \approx 10^{16}`; a first minimum a quarter
+    wavelength from the face (:math:`\phi = 0`) then gives :math:`z = s`
+    exactly.
 
     :param swr: Standing-wave ratio ``s`` (>= 1).
     :param first_min_distance: Distance ``x_min1`` to the first minimum, in metres.
@@ -322,7 +337,23 @@ def standing_wave_normalized_impedance(
         ``first_min_distance`` and ``wavelength`` are all numbers, an array when one of
         them is a sequence or an array, a zero-dimensional one included.
     """
-    r = standing_wave_reflection(swr, first_min_distance, wavelength=wavelength)
+    s = real_array(swr, "swr")
+    _check_swr(s)
+    phase = _standing_wave_phase(
+        real_array(first_min_distance, "first_min_distance"),
+        real_array(wavelength, "wavelength"),
+    )
+    half_sin = np.sin(phase / 2.0)
+    half_cos = np.cos(phase / 2.0)
+    # Every term over w**2, w = 1 + (s + 1)|sin(phi/2)|, so that no product
+    # overflows for a ratio whose square does: (s - 1) sin(phi/2) / w and
+    # (s + 1) sin(phi/2) / w stay within 1, and (1 / w)**2 keeps D positive.
+    w = 1.0 + (s + 1.0) * np.abs(half_sin)
+    lower = (s - 1.0) * half_sin / w
+    upper = (s + 1.0) * half_sin / w
+    d = (1.0 / w) * (1.0 / w) + lower * upper
+    resistance = s / w / w / d
+    reactance = lower * ((s + 1.0) / w) * half_cos / d
     return as_complex_or_array(
-        (1.0 + r) / (1.0 - r), like=(swr, first_min_distance, wavelength)
+        resistance + 1j * reactance, like=(swr, first_min_distance, wavelength)
     )

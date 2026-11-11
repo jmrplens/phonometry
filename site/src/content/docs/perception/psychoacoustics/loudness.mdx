@@ -34,6 +34,15 @@ references:
     designation: "ISO 532-1:2017"
     url: "https://www.iso.org/standard/63077.html"
     note: "Stationary and time-varying loudness in sones from the normative Annex A.4 reference program, with the N5/N10 percentile loudness, validated against the Annex B set."
+  - type: dataset
+    authors: ["Grangeiro de Barros, A.", "Vuye, C."]
+    year: 2023
+    title: "Psychoacoustic indicators of pass-by road traffic noise"
+    publisher: "Zenodo"
+    url: "https://zenodo.org/records/7904680"
+    doi: "10.5281/zenodo.7904680"
+    license: "https://creativecommons.org/licenses/by/4.0/"
+    note: "The road pass-bys of the worked case: five 4 s excerpts recorded by an NTi Audio XL2, and the levels and N50 its authors published for each."
 ---
 
 import ReportPreview from '../../../../components/ReportPreview.astro';
@@ -301,6 +310,94 @@ caricatures. `loudness_vs_time` and `times` carry the trace, so a record can be
 trimmed to the operating state of interest before the percentile is read, and
 the measurement interval belongs in `ReportMetadata`, since the fiche prints
 $N_5$ without one.
+
+### Road pass-bys recorded by a class 1 meter
+
+Every number above comes from a synthetic signal. The repository also keeps
+five real road-traffic pass-bys, recorded by an NTi Audio XL2 sound level
+meter 7.5 m from the lane centre during a statistical pass-by campaign of the
+University of Antwerp. The deposit that publishes the campaign lists, for each
+pass-by, the $L_\mathrm{A,eq}$, the $L_\mathrm{A,max}$, the $L_{10}$ and the
+median loudness $N_{50}$ its authors computed with PsySound3 over a 4 s window
+centred on the peak, and the five excerpts are five of those windows: the
+deposit's four vehicle categories, with a van at 60 km/h and another at
+90 km/h. So the same chain runs on them here: the A-weighted levels through
+`signals`, the maximum from the A-weighted, Fast-weighted envelope (the
+workbook does not name the time weighting; Fast reproduces every published
+maximum and Slow misses by several decibels), and $N_{50}$ as the median of
+the ISO 532-1 loudness trace, the percentile beside $N_5$ above. An excerpt is
+a cut, not a file the meter wrote, so it carries no `bext` of its own: each one
+is calibrated by the digital full scale its session's meter declared in the
+recording it was cut from, 129.4 or 129.5 dB SPL;
+[Reading and writing measurement audio](/phonometry/io/audio-files/) reads a
+declaration of the same kind, 129.3 dB SPL, off the meter's own calibration
+take.
+
+**The data.** Pass-by excerpts from A. Grangeiro de Barros and C. Vuye,
+'Psychoacoustic indicators of pass-by road traffic noise', Zenodo, 2023, DOI
+[10.5281/zenodo.7904680](https://doi.org/10.5281/zenodo.7904680), licensed
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), recorded with an
+NTi Audio XL2. Changes: 4-second extracts cut bit-exactly and recontainered.
+
+The files are read from a checkout of the repository, where the oracle test
+reads them too; a wheel does not install the test data.
+
+```python
+import pathlib
+
+import numpy as np
+import phonometry
+from phonometry import filters, io, psychoacoustics, signals
+
+# The committed excerpts live in the repository, so this runs from a checkout
+#   (or an editable install); with your own meter's WAV files, pass their paths.
+repo = pathlib.Path(phonometry.__file__).resolve().parents[2]
+# Per excerpt: the full scale its session's meter declared (0 dBFS in dB SPL, in the
+#   bext of the recording it was cut from), then the deposit's row:
+#   LA,eq, LA,max and L10 in dB, N50 in sone.
+pass_bys = {
+    "passby_0566_van_60kmh.wav": (129.4, 73.905, 78.196, 77.358, 27.445),
+    "passby_0571_van_90kmh.wav": (129.4, 76.928, 82.154, 81.522, 25.821),
+    "passby_0668_passenger_car_74kmh.wav": (129.4, 75.546, 80.353, 79.525, 25.999),
+    "passby_0960_heavy_dual_axle_66kmh.wav": (129.4, 80.600, 85.993, 85.114, 38.271),
+    "passby_1558_heavy_multi_axle_62kmh.wav": (129.5, 77.537, 81.616, 81.090, 33.002),
+}
+level_gaps, loudness_gaps = [], []
+for name, (full_scale_spl, *published) in pass_bys.items():
+    take = io.read(repo / "tests/data/audio/xl2" / name)
+    cal = 2e-5 * 10 ** (full_scale_spl / 20)   # what 0 dBFS is in pascals
+    laeq = float(signals.laeq(take, calibration_factor=cal))
+    # LA,max with Fast time weighting: the peak of the A-weighted, Fast-averaged square.
+    a_fast = filters.time_weighting(filters.weighting_filter(np.asarray(take), take.fs, "A"),
+                                    take.fs, mode="fast")
+    lamax = 10 * np.log10(float(np.max(a_fast)) * cal**2 / 2e-5**2)
+    l10 = float(signals.ln_levels(take, n=(10,), mode="fast", weighting="A",
+                                  calibration_factor=cal)[10])
+    # N50: the median of the ISO 532-1 loudness trace, exceeded half of the 4 s.
+    n50 = float(np.median(psychoacoustics.loudness_zwicker(take, calibration_factor=cal).loudness_vs_time))
+    level_gaps += [abs(a - b) for a, b in zip((laeq, lamax, l10), published[:3], strict=True)]
+    loudness_gaps.append(100 * abs(n50 / published[3] - 1))
+    print(f"{name[7:-4]}: LAeq {laeq:.1f} ({published[0]:.1f}), LAmax {lamax:.1f} ({published[1]:.1f}), "
+          f"L10 {l10:.1f} ({published[2]:.1f}) dB, N50 {n50:.1f} ({published[3]:.1f}) sone")
+# 0566_van_60kmh: LAeq 73.7 (73.9), LAmax 78.0 (78.2), L10 77.3 (77.4) dB, N50 28.2 (27.4) sone
+# 0571_van_90kmh: LAeq 76.7 (76.9), LAmax 81.9 (82.2), L10 81.4 (81.5) dB, N50 26.6 (25.8) sone
+# 0668_passenger_car_74kmh: LAeq 75.4 (75.5), LAmax 80.1 (80.4), L10 79.4 (79.5) dB, N50 26.6 (26.0) sone
+# 0960_heavy_dual_axle_66kmh: LAeq 80.4 (80.6), LAmax 85.8 (86.0), L10 85.1 (85.1) dB, N50 39.5 (38.3) sone
+# 1558_heavy_multi_axle_62kmh: LAeq 77.4 (77.5), LAmax 81.5 (81.6), L10 81.0 (81.1) dB, N50 34.1 (33.0) sone
+print(f"Largest gap: {max(level_gaps):.2f} dB in a level, {max(loudness_gaps):.1f} % in N50")  # Largest gap: 0.23 dB in a level, 3.4 % in N50
+```
+
+Each line gives the computed value with the published one in brackets. The
+three levels land within 0.23 dB of the workbook and $N_{50}$ within 3.4 %,
+inside the 0.3 dB and 5 % that
+[the test](https://github.com/jmrplens/phonometry/blob/main/tests/signals/test_xl2_passby_oracle.py)
+holds them to. The levels come out a little below the published ones and
+$N_{50}$ a little above, a small systematic offset between two
+implementations of the same chain, and 5 % is the width of the per-sample
+tolerance band ISO 532-1 puts around its own reference loudness traces. Two
+published columns are left out on purpose, $L_{90}$ and $\Delta L$: both depend
+on where the Fast envelope starts relative to the 4 s window, so they would
+pin a windowing convention, not a measurement.
 
 ### ISO 532-1 report (`.report()`)
 

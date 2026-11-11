@@ -370,8 +370,10 @@ print(by_snr.reported_level)              # 82
 print(hearing.snr_protected_level(snr, l_p_a=104.0, c_minus_a=-1.0).reported_level)  # 82
 ```
 
-Clause 8.3 also allows the unweighted level in place of the C-weighted one,
-and Clause 7.3 says the same for HML. It reads high for noise with a lot of
+Clause 8.2 rounds the SNR to the nearest integer, as Clause 7.2 does the HML
+values, and that rounded rating is the one `snr.reported` carries and the
+application consumes. Clause 8.3 also allows the unweighted level in place of
+the C-weighted one, and Clause 7.3 says the same for HML. It reads high for noise with a lot of
 very low frequency content, so it is a fallback rather than an equivalent.
 
 Because the reference noise is fixed, the rating says nothing about the shape

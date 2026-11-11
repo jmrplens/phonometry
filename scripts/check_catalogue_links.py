@@ -40,6 +40,10 @@ beside that designation, read where the link is written:
 - in a table, the link's own cell up to the link, or, when that names no
   designation of the link's catalogue, the nearest cell before it in the
   row that names one;
+- in a reference written as its References section prints it, the title
+  in emphasis as the label of the link, the designation in parentheses
+  right after the link (``[*Building acoustics*](...) (ISO 12354-1:2017)``,
+  as the GitHub copy of the bibliography writes every entry);
 - anywhere else, the link's own clause read the same way, or, when that
   names no designation of the link's catalogue, the paragraph or list item
   up to the link without the other links and without the clauses that name
@@ -140,6 +144,16 @@ MARKDOWN_LINK = re.compile(r"\[[^\]\n]*\]\([^)\s]*\)")
 #: The label of the link a text written up to that link ends at.
 _LABEL = re.compile(r"\[([^\]\n]*)\]\($")
 
+#: The label of a reference's own link, as its References section prints the
+#: work: the title in emphasis, the label of the link the text written up to
+#: that link ends at.
+_CITATION_TITLE = re.compile(r"\[([*_])[^\]\n]*\1\]\($")
+
+#: The rest of a link's destination and the parentheses right after it, as a
+#: reference prints the designation after its linked title:
+#: ``[*Building acoustics*](https://...) (ISO 12354-1:2017)``.
+_CITATION_DESIGNATION = re.compile(r"[^)\s]*\)[ \t]*\(((?:[^()\n]|\([^()\n]*\))*)\)")
+
 #: The start of a list item, a table row or a heading: a block of its own.
 _BLOCK_START = re.compile(r"\s*(?:[-*+]\s|\d+\.\s|\||#)")
 
@@ -189,6 +203,29 @@ _NAMED = {
     catalogue: re.compile(rf"(?<![\w-]){publisher}(?:/[A-Z]+)*{_KIND}\s+\d")
     for catalogue, publisher in (("iso", "ISO"), ("iec", "IEC"))
 }
+
+#: A whole designation of either catalogue as a label writes it: the
+#: national and European prefixes of an adoption (UNE-EN ISO, BS EN ISO,
+#: ÖNORM EN ISO, AS/NZS ISO), the publishers and the kind of deliverable, the
+#: number, the year and the amendments. A national prefix is any run of
+#: capital letters, an accented one among them.
+_ADOPTER = r"[A-ZÀ-ÖØ-Þ]+"
+_WHOLE_DESIGNATION = re.compile(
+    rf"(?<![\w-])(?:(?:{_ADOPTER}(?:/{_ADOPTER})?[-\s])?EN\s+"
+    r"|(?:ANSI|AS/NZS|AS|NZS|BS|DIN|NF|UNE|UNI|NEN|JIS|CSA|SANS)\s+)?"
+    rf"(?:[A-Z]+/)*(?:ISO|IEC)(?:/[A-Z]+)*{_KIND}\s+\d+(?:[-.]\d+)*(?::\d{{4}})?"
+    r"(?:\s?[+/]\s?(?:AMD|Amd|A|COR|Cor)\.?\s?\d+(?::\d{4})?)*"
+)
+
+#: A qualifier in parentheses ("(withdrawn)", "(en vigor)").
+_PARENTHESISED = re.compile(r"\([^()]*\)")
+
+#: What joins the documents a label names, in English and in Spanish, and the
+#: marks of emphasis and code around them.
+_CONNECTIVES = re.compile(r"(?i:\b(?:and|or|y|o|e|u)\b)|[&,;/+*_`]")
+
+#: A letter of any script.
+_LETTER = re.compile(r"[^\W\d_]")
 
 #: The two publishers whose catalogues the check reads, by catalogue.
 PUBLISHERS = {"iso": "ISO", "iec": "IEC"}
@@ -386,6 +423,59 @@ def _beside_in_body(text: str, start: int, catalogue: str) -> str:
     return _read_up_to("\n".join(lines), catalogue)
 
 
+def _cited_designation(text: str, start: int, end: int, catalogue: str) -> str:
+    """The designation a reference prints right after its linked title, or ``""``.
+
+    A work written as its References section prints it, the title in emphasis
+    as the label of the link and the designation in parentheses right after
+    the link (``[*Building acoustics*](https://...) (ISO 12354-1:2017)``, the
+    form the GitHub copy of the bibliography writes every entry in), names
+    the document its link opens after the link and not before it: read up to
+    the link, the entry would show only its publisher and year. A title may
+    name other documents in its words ("... Part 3: Recommendations for
+    quality assured implementation of ISO 9613-2 ..."), and the parentheses
+    still say which document the link opens. A label that names documents
+    and nothing else (:func:`_names_documents_only`, read by its structure
+    and not its case) is a label naming a document, which F70 holds the link
+    to wherever it is written: the
+    parentheses after it do not vouch for a label that names another
+    document, or the same one by the other catalogue's publisher, so such a
+    link gives ``""`` too. So does any other link, a title that is no label of
+    its own link or parentheses that name no designation of the link's
+    catalogue, and each is read as :func:`_beside_in_body` reads it.
+
+    :param start: Where the catalogue address starts.
+    :param end: Where the catalogue address ends.
+    """
+    line_start = text.rfind("\n", 0, start) + 1
+    if not _CITATION_TITLE.search(text, line_start, start):
+        return ""
+    label = _designation_label(text[line_start:start])
+    if label is not None and _names_documents_only(label):
+        return ""
+    after = _CITATION_DESIGNATION.match(text, end)
+    if after is None or not _names_a_designation(after.group(1), catalogue):
+        return ""
+    return after.group(1)
+
+
+def _names_documents_only(label: str) -> bool:
+    """Whether a label names documents and nothing else.
+
+    Read by its structure, never by its case: every designation is taken out
+    (:data:`_WHOLE_DESIGNATION`), then every qualifier in parentheses and
+    every word or mark that joins them (:data:`_CONNECTIVES`). A label with
+    no letter left ("*ISO 13887:2017 (withdrawn)*", "*ISO 13887:2017 and
+    ISO 3382-3:2022*") names documents only; one with a word left
+    ("*Building acoustics*", "*IMPLEMENTATION OF ISO 13887:2017*") is a
+    title, whatever its case.
+    """
+    rest = _WHOLE_DESIGNATION.sub(" ", label.translate(_SPACES))
+    while _PARENTHESISED.search(rest):
+        rest = _PARENTHESISED.sub(" ", rest)
+    return _LETTER.search(_CONNECTIVES.sub(" ", rest)) is None
+
+
 def _blank(text: str) -> str:
     """The text with every character but a line end a space."""
     return re.sub(r"[^\n]", " ", text)
@@ -458,7 +548,9 @@ def links_in(path: str, text: str) -> list[Link]:
         if start < end:
             beside = _beside_in_frontmatter(text, start, end, catalogue)
         else:
-            beside = _beside_in_body(text, start, catalogue)
+            beside = _cited_designation(
+                text, start, match.end(), catalogue
+            ) or _beside_in_body(text, start, catalogue)
         found.append(
             Link(
                 path,

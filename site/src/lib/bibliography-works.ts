@@ -13,22 +13,24 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 import { citedWorks } from './citations.mjs';
 
-/** One page's `references`, as the citation helpers take them. */
+/** One page's `references`, as the citation helpers take them, and its title. */
 export interface PageReferences {
 	id: string;
+	title?: string;
 	references: object[];
 }
 
 let everyPage: Promise<PageReferences[]> | undefined;
 const byLanguage = new Map<string, Promise<Map<string, object>>>();
 
-/** Every page of the site with its frontmatter `references`, both languages. */
+/** Every page of the site with its title and frontmatter `references`, both languages. */
 export function referencesOfEveryPage(): Promise<PageReferences[]> {
 	const pages =
 		everyPage ??
 		getCollection('docs').then((docs: CollectionEntry<'docs'>[]) =>
 			docs.map((entry) => ({
 				id: entry.id,
+				title: entry.data.title,
 				references: (entry.data as { references?: object[] }).references ?? [],
 			})),
 		);

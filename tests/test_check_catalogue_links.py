@@ -107,6 +107,101 @@ def test_an_entry_link_to_another_document_is_named() -> None:
     assert "opens ISO 13887:2017" in problem
 
 
+#: A work written as the pages' References sections print it, the title linked
+#: and the designation in parentheses after the link, as the GitHub copy of the
+#: bibliography writes each entry.
+_CITED_WORK = (
+    "- International Organization for Standardization. (2017).\n"
+    "  [{title}](https://www.iso.org/standard/{number}.html) (ISO 12354-1:2017).\n"
+    "  Cited by [A page](../a.md).\n"
+)
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "*Building acoustics*",
+        # A title that names another document in its words is still the
+        # work's title: the designation after the link says which document
+        # the link opens (as ISO/TR 17534-3 names ISO 9613-2 in its title).
+        "*Building acoustics, with ISO 13887:2017 as its steel annex*",
+    ],
+)
+def test_a_reference_written_as_its_references_section_prints_it_is_read_beside_its_designation(
+    title: str,
+) -> None:
+    page = _CITED_WORK.replace("{title}", title)
+    assert _named(page.format(number="70242")) == []
+    (problem,) = _named(page.format(number="70238"))
+    assert "page.md:2" in problem
+    assert (
+        "opens ISO 13887:2017, which the link is not written beside: 'ISO 12354-1:2017'"
+        in problem
+    )
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        # The other catalogue's publisher: "IEC 12354-1:2017" does not vouch
+        # for an iso.org link, whatever the parentheses after it say.
+        "*IEC 12354-1:2017*",
+        # Another document.
+        "*ISO 13887:2017*",
+        # Another document with a qualifier in parentheses: what the label
+        # names is still a document and nothing else.
+        "*ISO 13887:2017 (withdrawn)*",
+        # Two documents joined by a connective, neither the one linked.
+        "*ISO 13887:2017 and ISO 3382-3:2022*",
+        # An adoption, its national and European prefixes, and a lower-case
+        # qualifier: no word of a title is left once the designation is out.
+        "*UNE-EN ISO 13887:2017 (en vigor)*",
+        # A national prefix with an accented capital is a prefix all the same.
+        "*ÖNORM EN ISO 13887:2017*",
+    ],
+)
+def test_an_emphasised_label_naming_another_designation_is_held_to_its_label(
+    title: str,
+) -> None:
+    # F70 holds a link whose label is a designation to that label wherever it
+    # is written: the designation after the link does not vouch for it.
+    (problem,) = _named(_CITED_WORK.replace("{title}", title).format(number="70242"))
+    assert "page.md:2" in problem
+    assert (
+        f"opens ISO 12354-1:2017, which the link is not written beside: '{title}'"
+        in problem
+    )
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        # A title written in capitals is a title whatever its case: the
+        # words left once its designation is out are prose.
+        "*IMPLEMENTATION OF ISO 13887:2017*",
+        "*BUILDING ACOUSTICS*",
+        "*Acoustics: ISO 13887:2017 in practice*",
+    ],
+)
+def test_a_title_that_names_a_designation_among_its_words_is_read_beside_the_parentheses(
+    title: str,
+) -> None:
+    page = _CITED_WORK.replace("{title}", title)
+    assert _named(page.format(number="70242")) == []
+
+
+def test_a_link_a_plain_label_names_is_not_read_beside_the_parenthesis_after_it() -> (
+    None
+):
+    # Only a work's title, set in emphasis, is a reference's own link: any
+    # other label is read as before, beside the text written up to it.
+    page = "ISO 13887:2017, the [catalogue page](https://www.iso.org/standard/70238.html) (ISO 12354-1:2017).\n"
+    assert _named(page) == []
+    page = "ISO 12354-1:2017, the [catalogue page](https://www.iso.org/standard/70238.html) (ISO 13887:2017).\n"
+    (problem,) = _named(page)
+    assert "opens ISO 13887:2017" in problem
+
+
 def test_an_entry_is_not_read_beside_the_entry_before_it() -> None:
     page = (
         "- Body. (2017). *Steel* (ISO 13887:2017).\n"

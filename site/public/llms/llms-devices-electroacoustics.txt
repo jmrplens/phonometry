@@ -976,6 +976,13 @@ design separately.
   The transducer physics behind sections 1 and 2: loudspeaker radiation,
   the baffled-piston impedance and directivity (§4.19, §13.7), and the
   near-field to far-field transition.
+- Beranek, L. L., & Mellow, T. J. (2019). [*Acoustics: Sound fields,
+  transducers and vibration*](https://shop.elsevier.com/books/acoustics-sound-fields-transducers-and-vibration/beranek/978-0-12-815227-0)
+  (2nd ed.). Academic Press. ISBN 978-0-12-815227-0. The edition the
+  conformance report holds the piston functions of section 2 to: the
+  radiation resistance and reactance (Eqs. 13.117, 13.118), the radiation
+  mass (Eq. 4.151) and the directivity (Eq. 13.102), numbered as in the first
+  edition.
 - Long, M. (2014). *Architectural acoustics* (2nd ed.). Academic Press.
   [doi:10.1016/C2012-0-03257-5](https://doi.org/10.1016/C2012-0-03257-5).
   Chapter 18 (the gain-before-feedback criterion of section 4: the open-loop

@@ -735,6 +735,15 @@ posters: assets
 brand:
 	$(PYTHON) scripts/generate_brand.py
 
+# Write docs/reference/bibliography.md, the GitHub copy of the bibliography,
+# from the references every page of the site declares, as the site build writes
+# the page (site/scripts/mirror-bibliography.mjs). It needs the site's
+# dependencies (`pnpm install` in site/). Run it after changing a page's
+# references and before `make llms`, which cuts the bibliography's shards from
+# the copy; the docs workflow fails while the copy is stale.
+bibliography-mirror:
+	cd site && $(PNPM) run mirror:bibliography
+
 llms:
 	$(PYTHON) scripts/mirror_overviews.py
 	$(PYTHON) scripts/mirror_glossary.py
@@ -985,7 +994,7 @@ check: lint security test
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
-	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
+	bibliography-mirror llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names catalogue-links fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \

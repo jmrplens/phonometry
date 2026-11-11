@@ -106,6 +106,66 @@ class TestCitationGrammar:
         assert "bibliography" in problems[0]
 
 
+class TestAbbreviatedBodies:
+    """A body a banner names by its abbreviation is listed under its full name.
+
+    The bibliography spells a group author out, as APA asks and as the pages'
+    references give it, so ``ASHRAE (2019)`` is the entry that opens with the
+    American Society of Heating, Refrigerating and Air-Conditioning Engineers.
+    """
+
+    _ENTRY = (
+        "- American Society of Heating, Refrigerating and Air-Conditioning "
+        "Engineers. (2019). *ASHRAE handbook*. ASHRAE.\n"
+    )
+
+    def _bibliography(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, text: str
+    ) -> None:
+        bibliography = tmp_path / "bibliography.md"
+        bibliography.write_text(text, encoding="utf-8")
+        monkeypatch.setattr(gate, "BIBLIOGRAPHY", bibliography)
+
+    def test_the_abbreviation_reaches_the_entry_of_its_full_name(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        self._bibliography(tmp_path, monkeypatch, self._ENTRY)
+        assert "ASHRAE" in gate.bibliography_leads()
+        assert (
+            gate.citation_problems(
+                "ASHRAE (2019) Table 40, PDF page 1 (printed p. 49.40)"
+            )
+            == []
+        )
+        assert gate.abbreviation_problems() == []
+
+    def test_another_year_of_the_body_is_not_its_entry(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        self._bibliography(tmp_path, monkeypatch, self._ENTRY)
+        problems = gate.citation_problems(
+            "ASHRAE (2023) Table 40, PDF page 1 (printed p. 49.40)"
+        )
+        assert len(problems) == 1
+        assert "'ASHRAE (2023)', which has no entry" in problems[0]
+
+    def test_a_full_name_no_entry_opens_with_fails(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        self._bibliography(
+            tmp_path, monkeypatch, "- Somebody, A. (2000). *A book*. A Press.\n"
+        )
+        assert "ASHRAE" not in gate.bibliography_leads()
+        assert gate.abbreviation_problems() == [
+            "ABBREVIATED_BODIES maps 'ASHRAE' to 'American Society of Heating, "
+            "Refrigerating and Air-Conditioning Engineers', which no entry of "
+            "docs/reference/bibliography.md opens with"
+        ]
+
+    def test_the_real_bibliography_lists_every_abbreviated_body(self) -> None:
+        assert gate.abbreviation_problems() == []
+
+
 class TestWhereItLooks:
     """A record, a mapping of records and a sequence of records are all tables."""
 

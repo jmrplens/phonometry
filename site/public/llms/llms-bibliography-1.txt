@@ -1,0 +1,636 @@
+# phonometry: Bibliography, part 1 of 2
+
+Part of https://docs.jmrp.io/phonometry/llms.txt. One page in 2 parts, cut at its own sections so that each fits one fetch: https://docs.jmrp.io/phonometry/llms/llms-bibliography-1.txt, https://docs.jmrp.io/phonometry/llms/llms-bibliography-2.txt.
+
+---
+
+<!-- source: docs/reference/bibliography.md | canonical: https://docs.jmrp.io/phonometry/reference/bibliography/ -->
+Source: https://docs.jmrp.io/phonometry/reference/bibliography/
+
+# Bibliography
+
+Every guide in this documentation closes with two citation sections: a
+`## References` section listing the books and papers that support the physics
+on the page (APA style, one bullet per source, each with half a sentence on
+what the entry supports and with its DOI or official publisher link where it
+has one), followed by a
+`## Standards` section naming the normative documents behind the page, clause
+by clause, with what each one is to it: the ones the page implements, and those
+it only requires, cites or compares with, which the site prints in its
+bibliography but leaves out of the page's standards chips and search field.
+This page collects every work the pages of the documentation site cite, the
+guides, the theory pages and the published catalogues alike, once each, grouped
+by area, and ends each entry with every page that cites it. It is written from
+the same data as the site's
+[bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/), the references of every
+page, so each entry gives the work as the site does; a page with no copy in this
+folder, a published catalogue, is linked on the site. Within an area the entries
+run in the order of a reference list, by author. The list below is written by
+`site/scripts/mirror-bibliography.mjs` from those references, and the docs
+workflow fails while it is not what they write.
+
+## General acoustics
+
+The three works here are the ones to reach for when the question does not
+belong to any single area. Kinsler et al. is the first course, Rossing the
+one-volume survey of every domain this library touches, and Beranek and Mellow
+the treatment to open when the question is radiation or transduction. Bies,
+Hansen and Howard and Norton and Karczub are the two engineering handbooks the
+guides lean on most across areas: the first for room relations and enclosures,
+the second for its worked octave-band problems, which several guides are built
+around.
+
+- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+  ISBN 978-0-12-391421-7. Sound fields, radiation and electroacoustic transducers; supports the electroacoustics and sound-power material.
+  Cited by [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/), [Sound Power by Pressure Methods](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/), [Sound Power in the Reverberation Room](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/), [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/) and [Microphone Characterisation (IEC 60268-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/).
+- Beranek, L. L., & Mellow, T. J. (2019). [*Acoustics: Sound fields, transducers and vibration*](https://shop.elsevier.com/books/acoustics-sound-fields-transducers-and-vibration/beranek/978-0-12-815227-0) (2nd ed.). Academic Press.
+  ISBN 978-0-12-815227-0. The edition the conformance report reads for the baffled-piston radiation impedance and directivity (Eqs. 13.117, 13.118, 4.151, 13.102, numbered as in the first edition), and the one whose Table 7.1 gives the Delany-Bazley amplitudes discussed in [Source properties that are not errata](https://docs.jmrp.io/phonometry/reference/errata/not-errata/).
+  Cited by [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/).
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise control* (5th ed.). CRC Press. https://doi.org/10.1201/9781351228152
+  ISBN 978-1-4987-2405-0. The steady-state room relations (section 6.4, Eqs. 6.43-6.44) behind `steady_state_spl` and `room_constant`, the enclosure insertion loss of section 7.4.2 (Eqs. 7.103, 7.111) that is the library default enclosure model, and Appendix D, which collects the porous-material coefficient sets of Table D.1 and the layered-construction recursions (Eqs. D.91-D.99).
+  Cited by [Time Weighting](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/), [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/), [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/), [Image Sources and the Steady-State Room Field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/), [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/), [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/), [Spherical ground effect and advanced barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/), [Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/), [Duct-Borne Noise: Fan to Room](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/), [Room to Room: Partition, Receiving Room, Criterion](https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/), [Industrial Noise Control: HVAC and Enclosures](https://docs.jmrp.io/phonometry/devices/noise-control/noise-control/), [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/), [Catalogue of absorption coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/), [Catalogue of transmission loss](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/), [Catalogue of ground surfaces](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/), [Catalogue of gases](https://docs.jmrp.io/phonometry/reference/catalogues/gases/) and [Catalogue of fluids](https://docs.jmrp.io/phonometry/reference/catalogues/fluids/).
+- Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000). [*Fundamentals of acoustics*](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892) (4th ed.). Wiley.
+  ISBN 978-0-471-84789-2. The standard first course in acoustics: plane and spherical waves, acoustic impedance and the level definitions assumed throughout the guides.
+  Cited by [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/).
+- Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and vibration analysis for engineers* (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9781139163927
+  The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure design equation of section 4.10 (Eqs. 4.102-4.115), the plateau method for panel transmission loss of section 3.9 (Table 3.1), the higher-order acoustic modes of a rigid circular duct of section 7.2 (Table 7.1) and the worked problems 4.16, 4.18 and 4.21 with their printed octave-band answers.
+  Cited by [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/), [Plate junctions: wave approach and experimental SEA](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/), [Machine fault frequencies](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/), [Duct-Borne Noise: Fan to Room](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/), [Room to Room: Partition, Receiving Room, Criterion](https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/), [Catalogue of plateau-method constants](https://docs.jmrp.io/phonometry/reference/catalogues/plateau-method-constants/) and [Catalogue of fluids](https://docs.jmrp.io/phonometry/reference/catalogues/fluids/).
+- Rossing, T. D. (Ed.). (2014). *Springer handbook of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-1-4939-0755-7
+  ISBN 978-1-4939-0754-0. A one-volume survey of every domain this library touches, from room acoustics to psychoacoustics and underwater sound; the cross-domain reference of first resort.
+  Cited by [Catalogue of orthotropic wood](https://docs.jmrp.io/phonometry/reference/catalogues/orthotropic-wood/), [Catalogue of transmission loss](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/), [Catalogue of the nonlinearity parameter B/A](https://docs.jmrp.io/phonometry/reference/catalogues/nonlinearity-parameter-ba/) and [Catalogue of the nonlinearity parameter of solids](https://docs.jmrp.io/phonometry/reference/catalogues/nonlinearity-parameter-of-solids/).
+- Vér, I. L., & Beranek, L. L. (2006). *Noise and vibration control engineering: Principles and applications* (2nd ed.). Wiley. https://doi.org/10.1002/9780470172568
+  ISBN 978-0-471-44942-3. The companion treatment of ducts, silencers and enclosures, and the handbook this library reads its commercial damping materials from: Table 14.1 of chapter 14, "Structural Damping", by Eric E. Ungar and Jeffrey A. Zapfe, which is the only table in the corpus that gives a loss factor with the temperature and the frequency at which it peaks.
+  Cited by [Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/), [Industrial Noise Control: HVAC and Enclosures](https://docs.jmrp.io/phonometry/devices/noise-control/noise-control/), [Catalogue of damping materials](https://docs.jmrp.io/phonometry/reference/catalogues/damping-materials/) and [Catalogue of resistive facings](https://docs.jmrp.io/phonometry/reference/catalogues/resistive-facings/).
+
+## Signal analysis
+
+Oppenheim and Schafer is the filter-theory backbone, and Smith the free
+companion when the question is design rather than analysis. Open Bendat and
+Piersol whenever a spectral estimate needs an error bar: it is the reference
+behind every random-error figure in this area, and the multiple-coherence
+chapter has no equivalent elsewhere. The papers are here as sources rather than
+as reading, each pinning one estimator: Welch for the overlapped-segment
+variance, Harris for the window figures of merit, Thomson and Percival and
+Walden for the multitaper method, Knapp and Carter for time delay, McFadden for
+synchronous averaging, Golay for the complementary pairs.
+
+- American National Standards Institute. (1983). [*Specification for sound level meters*](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985) (ANSI S1.4-1983).
+  Cited by [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/) and [Time Weighting](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/).
+- American National Standards Institute. (2004). [*Specification for octave-band and fractional-octave-band analog and digital filters*](https://webstore.ansi.org/standards/asa/ansis1112004) (ANSI S1.11-2004). Acoustical Society of America.
+  Cited by [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/), [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/) and [Filter Class Verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/).
+- Bendat, J. S., & Piersol, A. G. (2010). *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  ISBN 978-0-470-24877-5. The reference for the Welch spectral estimators and their statistical quality, and for the multiple-input/output coherence functions of Chapter 7 (multiple and partial coherence, conditioned spectra) with the Section 9.3 error formulas implemented by `miso_coherence`. Also the correlation and time-delay formulas, the Hilbert-envelope chapter and the log-magnitude/phase Hilbert relation of the minimum-phase utilities.
+  Cited by [Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/), [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/), [Multiple and partial coherence](https://docs.jmrp.io/phonometry/signals/spectra/miso-coherence/), [Time-frequency analysis](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/), [Cepstrum, echoes and the envelope spectrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/), [Correlation, time delay and envelope](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/), [Test signals and sample-rate tools](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/), [Data qualification: stationarity and peaks](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/), [Electroacoustics: distortion and frequency response](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) and [Swept-sine distortion and phase utilities](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
+- Bennett, R. L., & Pearsons, K. S. (1981). [*Handbook of Aircraft Noise Metrics*](https://ntrs.nasa.gov/citations/19810013341) (NASA CR-3406). NASA.
+  Cited by [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/).
+- Bristow-Johnson, R. (2021). [*Audio EQ Cookbook*](https://www.w3.org/TR/audio-eq-cookbook/). W3C Working Group Note (ed. R. Toy), 8 June 2021.
+  The biquad coefficient recipes (peaking, shelves, low/high-pass, band-pass, notch, all-pass) and their Q / bandwidth / shelf-slope parameterization, implemented verbatim by `ParametricEQ`.
+  Cited by [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/).
+- Golay, M. J. E. (1961). Complementary series. *IRE Transactions on Information Theory*, *7*(2), 82-87. https://doi.org/10.1109/TIT.1961.1057620
+  The original construction of the complementary pairs of §1.
+  Cited by [System measurement: Golay, shaped sweeps, inversion](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/).
+- Harris, F. J. (1978). On the use of windows for harmonic analysis with the discrete Fourier transform. *Proceedings of the IEEE*, *66*(1), 51-83. https://doi.org/10.1109/PROC.1978.10837
+  The window figures of merit (Table 1): equivalent noise bandwidth, coherent gain, scalloping loss, worst-case processing loss, highest sidelobe level and main-lobe width, computed by `window_metrics` for any scipy taper.
+  Cited by [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/) and [Time-frequency analysis](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/).
+- Havelock, D., Kuwano, S., & Vorländer, M. (Eds.). (2008). *Handbook of signal processing in acoustics*. Springer. https://doi.org/10.1007/978-0-387-30441-0
+  Part I Chapter 6 (Xiang, Digital Sequences): the Golay recursion of §1, the complementary-autocorrelation identity of Eq. (2) and the frequency-domain recovery procedure of Eq. (4) and Fig. 2. ISBN 978-0-387-77698-9.
+  Cited by [Cepstrum, echoes and the envelope spectrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/) and [System measurement: Golay, shaped sweeps, inversion](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/).
+- International Electrotechnical Commission. (1976). *Frequency weighting for the measurement of aircraft noise (D-weighting)* (IEC 537:1976 (withdrawn)).
+  Cited by [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/).
+- International Electrotechnical Commission. (1979). *Sound level meters* (IEC 651:1979).
+  Cited by [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/).
+- International Electrotechnical Commission. (1982). [*Scales and sizes for plotting frequency characteristics and polar diagrams*](https://webstore.iec.ch/en/publication/1176) (IEC 60263:1982).
+  The scale proportions of the characteristic graphs: one frequency decade equal to 25 dB on the ordinate, and the polar diagram on a 25 dB reference-circle radius.
+  Cited by [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/) and [Microphone Characterisation (IEC 60268-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/).
+- International Electrotechnical Commission. (1985). [*Sound system equipment — Part 1: General*](https://webstore.iec.ch/en/publication/1204) (IEC 60268-1:1985).
+  The simulated programme signal of Clause 7, and Appendix A: the quasi-peak network and meter of Table AI, Figure A1 and Tables AII and AIII, and the tone bursts of Clause A2, which start at the zero crossing of the tone with an integral number of full periods, repeat in trains at a stated repetition rate and last the burst durations of Table AII.
+  Cited by [Test signals and sample-rate tools](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/), [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/) and [Quasi-peak programme meter (ITU-R BS.468-4)](https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/).
+- International Electrotechnical Commission. (1990). [*Filters for the measurement of audible sound in the presence of ultrasound*](https://webstore.iec.ch/en/publication/4296) (IEC 61012:1990).
+  Cited by [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/).
+- International Electrotechnical Commission. (1993). [*Electroacoustics — Specifications for personal sound exposure meters*](https://webstore.iec.ch/en/publication/5054) (IEC 61252:1993).
+  Cited by [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/).
+- International Electrotechnical Commission. (1995). [*Electroacoustics — Octave-band and fractional-octave-band filters*](https://webstore.iec.ch/en/publication/5065) (IEC 61260:1995).
+  Cited by [Filter Class Verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/).
+- International Electrotechnical Commission. (2003). [*Sound system equipment – Part 5: Loudspeakers*](https://webstore.iec.ch/en/publication/1224) (IEC 60268-5:2003+A1:2007).
+  The rated loudspeaker characteristics: rated impedance, rated frequency range, characteristic sensitivity referred to 1 W at 1 m, the effective frequency range against the -10 dB band, the directivity index and the total harmonic distortion against frequency.
+  Cited by [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/).
+- International Electrotechnical Commission. (2013). [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The A/C/Z weightings, the exponential time weightings and the level metrics of the sound level meter, with the tolerance tables used for verification.
+  Cited by [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/), [Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/), [Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/), [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/), [Time Weighting](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/), [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/), [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/), [Free-Field Corrections of a Sound Level Meter (IEC 62585)](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/), [Periodic Tests of a Sound Level Meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/), [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/) and [Theory: Signal Analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/).
+- International Electrotechnical Commission. (2013). [*Electroacoustics — Sound level meters — Part 3: Periodic tests*](https://webstore.iec.ch/en/publication/5710) (IEC 61672-3:2013).
+  The periodic laboratory verification of a sound level meter.
+  Cited by [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/), [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/) and [Periodic Tests of a Sound Level Meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/).
+- International Electrotechnical Commission. (2014). [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The base-10 band edges and the class acceptance masks of the fractional octave banks.
+  Cited by [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/), [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/), [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/), [Filter Class Verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/), [Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/), [Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/), [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/), [Reporting and source qualification (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/), [Control Valve Noise (IEC 60534-8-3)](https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/), [Hydrodynamic Valve Noise (IEC 60534-8-4)](https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/) and [Theory: Signal Analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/).
+- International Electrotechnical Commission. (2014). [*Sound system equipment – Part 4: Microphones*](https://webstore.iec.ch/en/publication/1221) (IEC 60268-4:2014).
+  The rated microphone characteristics: free-field sensitivity and its level re 1 V/Pa, the frequency response and the effective frequency range against the tolerance limits, the directional pattern and the directivity index, the overload sound pressure level, the equivalent sound pressure level due to inherent noise, and the rated impedances and power supply.
+  Cited by [Microphone Characterisation (IEC 60268-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/).
+- International Electrotechnical Commission. (2016). [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 2: Pattern-evaluation tests*](https://webstore.iec.ch/en/publication/24398) (IEC 61260-2:2016).
+  Cited by [Filter Class Verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/) and [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/).
+- International Electrotechnical Commission. (2016). [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 3: Periodic tests*](https://webstore.iec.ch/en/publication/24399) (IEC 61260-3:2016).
+  Cited by [Filter Class Verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/) and [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/).
+- International Electrotechnical Commission. (2017). [*Electroacoustics — Sound calibrators*](https://webstore.iec.ch/en/publication/30045) (IEC 60942:2017).
+  The calibrator classes, level tolerances and the short-term stability criterion applied to calibration recordings.
+  Cited by [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/), [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/), [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/) and [Periodic Tests of a Sound Level Meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/).
+- International Organization for Standardization. (1995). [*Acoustics — Frequency-weighting characteristic for infrasound measurements*](https://www.iso.org/standard/13813.html) (ISO 7196:1995).
+  Cited by [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/).
+- International Organization for Standardization. (1997). [*Acoustics — Preferred frequencies*](https://www.iso.org/standard/1350.html) (ISO 266:1997).
+  Cited by [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/).
+- International Organization for Standardization. (2015). *Acoustics. Preferred reference values for acoustical and vibratory levels* (ISO 1683:2015).
+  Cited by [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/) and [Underwater acoustics: radiated noise and pile driving](https://docs.jmrp.io/phonometry/underwater/underwater-acoustics/).
+- International Organization for Standardization. (2021). [*Mechanical vibration and shock — Mechanical mounting of accelerometers*](https://www.iso.org/standard/78160.html) (ISO 5348:2021).
+  Cited by [Cepstrum, echoes and the envelope spectrum](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/).
+- Kirkeby, O., & Nelson, P. A. (1999). [Digital filter design for inversion problems in sound reproduction](https://aes.org/publications/elibrary-page/?id=12098). *Journal of the Audio Engineering Society*, *47*(7/8), 583-595.
+  Cited by [System measurement: Golay, shaped sweeps, inversion](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/).
+- Knapp, C. H., & Carter, G. C. (1976). The generalized correlation method for estimation of time delay. *IEEE Transactions on Acoustics, Speech, and Signal Processing*, *24*(4), 320-327. https://doi.org/10.1109/TASSP.1976.1162830
+  The GCC framework, the Table I weightings (Roth, SCOT, PHAT) and their conditions, and the maximum-likelihood (Hannan-Thomson) processor.
+  Cited by [Correlation, time delay and envelope](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/).
+- McFadden, P. D. (1987). A revised model for the extraction of periodic waveforms by time domain averaging. *Mechanical Systems and Signal Processing*, *1*(1), 83-95. https://doi.org/10.1016/0888-3270(87)90085-9
+  The comb-filter model of synchronous averaging (Eq. 8, magnitude Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two.
+  Cited by [Time synchronous averaging](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/).
+- Oppenheim, A. V., & Schafer, R. W. (2010). [*Discrete-time signal processing*](https://openlibrary.org/isbn/9780131988422) (3rd ed.). Pearson.
+  ISBN 978-0-13-198842-2. The digital-filter theory behind the SOS cascades, the bilinear transform and the multirate decimation used by the filter banks.
+  Cited by [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/), [Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/) and [Theory: Signal Analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/).
+- Percival, D. B., & Walden, A. T. (1993). *Spectral analysis for physical applications: Multitaper and conventional univariate techniques*. Cambridge University Press. https://doi.org/10.1017/CBO9780511622762
+  ISBN 978-0-521-43541-3. The multitaper development (Chapter 7) behind `multitaper_psd` and the Slepian-sequence eigenvalue tables that anchor its test oracle.
+  Cited by [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/).
+- Smith, J. O. (n.d.). [*Introduction to digital filters with audio applications*](https://ccrma.stanford.edu/~jos/filters/). Center for Computer Research in Music and Acoustics (CCRMA), Stanford University.
+  Free companion treatment of digital-filter design and analysis, a good next step after the filter-bank guides.
+  Cited by [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/), [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/) and [Theory: Signal Analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/).
+- Thomson, D. J. (1982). Spectrum estimation and harmonic analysis. *Proceedings of the IEEE*, *70*(9), 1055-1096. https://doi.org/10.1109/PROC.1982.12433
+  The multitaper method: Slepian tapers, eigenspectra and the adaptive weights implemented by `multitaper_psd`.
+  Cited by [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/).
+- Welch, P. D. (1967). The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms. *IEEE Transactions on Audio and Electroacoustics*, *15*(2), 70-73. https://doi.org/10.1109/TAU.1967.1161901
+  The overlapped-segment variance formula behind the effective number of averages (Bendat & Piersol Section 11.5.2.2, Ref. 11).
+  Cited by [Calibrated spectral analysis](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/).
+
+## Files
+
+Standards rather than books: the file layer implements published container
+and metadata specifications, and each entry pins the piece of the module
+that follows it. Lipshitz, Wannamaker and Vanderkooy is the one paper, and
+it settles a single default: what dither to offer, and when offering it
+would be a disservice.
+
+- Alliance for Open Media. (n.d.). [*SVT-AV1*](https://gitlab.com/AOMediaCodec/SVT-AV1).
+  Cited by [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/).
+- European Broadcasting Union. (1999). [*Format for CodingHistory field in Broadcast Wave Format files, BWF*](https://tech.ebu.ch/publications/r098) (EBU R 98).
+  Cited by [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/).
+- European Broadcasting Union. (2011). [*Specification of the Broadcast Wave Format (BWF) — A format for audio data files in broadcasting, Version 2.0*](https://tech.ebu.ch/publications/tech3285) (EBU Tech 3285).
+  The `bext` chunk read and written field by field at its published offsets, including the version-2 loudness values.
+  Cited by [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/).
+- FFmpeg project. (n.d.). [*FFmpeg codecs documentation*](https://ffmpeg.org/ffmpeg-codecs.html).
+  Cited by [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/).
+- International Organization for Standardization. (2010). [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/42088.html) (ISO 10140-2:2010).
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/), [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/) and [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/).
+- International Telecommunication Union. (2025). [*Long-form file format for the international exchange of audio programme materials with metadata*](https://www.itu.int/rec/R-REC-BS.2088/en) (Recommendation ITU-R BS.2088-2).
+  The RF64/BW64 64-bit container an overnight recording promotes to, resolved through its `ds64` sizes.
+  Cited by [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/).
+- Internet Engineering Task Force. (2005). [*Common Format and MIME Type for Comma-Separated Values (CSV) Files*](https://www.rfc-editor.org/info/rfc4180/) (RFC 4180).
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/).
+- Internet Engineering Task Force. (2013). [*JavaScript Object Notation (JSON) Pointer*](https://www.rfc-editor.org/info/rfc6901/) (RFC 6901).
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/).
+- Internet Engineering Task Force. (2017). [*The JavaScript Object Notation (JSON) Data Interchange Format*](https://www.rfc-editor.org/info/rfc8259/) (RFC 8259).
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/).
+- Internet Engineering Task Force. (2024). [*Free Lossless Audio Codec*](https://datatracker.ietf.org/doc/rfc9639/) (RFC 9639).
+  The lossless codec behind the FLAC archive route, and the reason a round trip can return bit-identical codes.
+  Cited by [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/).
+- Lipshitz, S. P., Wannamaker, R. A., & Vanderkooy, J. (1992). [Quantization and dither: A theoretical survey](https://aes.org/publications/elibrary-page/?id=7047). *Journal of the Audio Engineering Society*, *40*(5), 355-375.
+  Why the optional dither is triangular-PDF at one LSB and offered only at 16 bits.
+  Cited by [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/).
+- Wright, A., Andrews, H., & Hutton, B. (2022). [*JSON Schema Validation: A Vocabulary for Structural Validation of JSON*](https://json-schema.org/draft/2020-12/json-schema-validation) (Internet-Draft draft-bhutton-json-schema-validation-01).
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/).
+- Wright, A., Andrews, H., Hutton, B., & Dennis, G. (2022). [*JSON Schema: A Media Type for Describing JSON Documents*](https://json-schema.org/draft/2020-12/json-schema-core) (Internet-Draft draft-bhutton-json-schema-01).
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/).
+
+## Hearing and perception
+
+Fastl and Zwicker is the way in and stays useful long after; Moore is the
+better first book if the question is the auditory system rather than the
+metric. The standards-side works and the model papers here are sources for one
+algorithm each, so read the note before the paper: several are the definitive
+statement of a model the guides implement rather than a general treatment of
+hearing.
+
+- American National Standards Institute. (1997). [*Methods for calculation of the speech intelligibility index*](https://webstore.ansi.org/standards/asa/ansiasas31997r2017) (ANSI S3.5-1997 (R2017)). Acoustical Society of America.
+  Cited by [Speech Intelligibility Index](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Deutsches Institut für Normung. (2005). [*Akustik — Bestimmung der Tonhaltigkeit von Geräuschen und Ermittlung eines Tonzuschlages für die Beurteilung von Geräuschimmissionen*](https://www.dinmedia.de/en/standard/din-45681/76463232) (DIN 45681:2005-03).
+  Cited by [Objective audibility of tones in noise (ISO/PAS 20065)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/).
+- Deutsches Institut für Normung. (2009). [*Messtechnische Simulation der Hörempfindung Schärfe*](https://www.dinmedia.de/en/standard/din-45692/117635111) (DIN 45692:2009-08).
+  Cited by [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Ecma International. (2024). [*Psychoacoustic metrics for ITT equipment — Part 1: Prominent discrete tones*](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf) (ECMA-418-1:2024 (3rd ed.)).
+  The freely downloadable tone-to-noise ratio and prominence ratio methods.
+  Cited by [Prominent Discrete Tones (ECMA-418-1)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Ecma International. (2025). [*Measurement of airborne noise emitted by information technology and telecommunications equipment*](https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf) (ECMA-74:2025 (22nd ed.)).
+  The freely downloadable parent emission standard whose Annex D delegates tone assessment to ECMA-418-1.
+  Cited by [Prominent Discrete Tones (ECMA-418-1)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/).
+- Ecma International. (2025). [*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)*](https://ecma-international.org/publications-and-standards/standards/ecma-418/) (ECMA-418-2:2025).
+  Cited by [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/), [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- European Parliament and Council. (2003). [*Directive 2003/10/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (noise)*](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng) (Directive 2003/10/EC). Official Journal of the European Union.
+  The EU exposure action and limit values for occupational noise.
+  Cited by [Occupational Noise Exposure (ISO 9612)](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/).
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models* (3rd ed.). Springer. https://doi.org/10.1007/978-3-540-68888-4
+  The psychoacoustic-annoyance model and the closed-form fluctuation strength for amplitude-modulated broadband noise.
+  Cited by [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/), [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/), [Psychoacoustic annoyance and fluctuation strength](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B. (2025). [*SQAT: A sound quality analysis toolbox for MATLAB*](https://github.com/ggrecow/SQAT). GitHub. https://doi.org/10.5281/zenodo.7934709
+  The open MATLAB reference used as the numeric oracle for the fluctuation-strength cross-checks.
+  Cited by [Psychoacoustic annoyance and fluctuation strength](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/).
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement and calculation. *The Journal of the Acoustical Society of America*, *5*(2), 82-108. https://doi.org/10.1121/1.1915637
+  The original equal-loudness measurements whose 40-phon contour became the A-weighting curve.
+  Cited by [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/), [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the intelligibility of speech sounds. *The Journal of the Acoustical Society of America*, *19*(1), 90-119. https://doi.org/10.1121/1.1916407
+  The articulation-band experiments behind the band-importance function of the Speech Intelligibility Index.
+  Cited by [Speech Intelligibility Index](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Google. (2019). [*speech_intelligibility_index*](https://github.com/google/speech_intelligibility_index). GitHub.
+  Cited by [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. https://doi.org/10.1121/1.392224
+  The modulation-transfer framework the Speech Transmission Index is built on.
+  Cited by [Speech Transmission Index (STI)](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Electrotechnical Commission. (2011). *Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index* (IEC 60268-16:2011).
+  Cited by [Speech Transmission Index (STI)](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/).
+- International Electrotechnical Commission. (2020). [*Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index*](https://webstore.iec.ch/en/publication/26771) (IEC 60268-16:2020 (Edition 5)).
+  Cited by [Speech Transmission Index (STI)](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Organization for Standardization. (1998). [*Acoustics – Reference zero for the calibration of audiometric equipment – Part 1: Reference equivalent threshold sound pressure levels for pure tones and supra-aural earphones*](https://www.iso.org/standard/30443.html) (ISO 389-1:1998).
+  Cited by [Hearing threshold (age and reference zero)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/).
+- International Organization for Standardization. (2005). [*Acoustics — Reference zero for the calibration of audiometric equipment — Part 7: Reference threshold of hearing under free-field and diffuse-field listening conditions*](https://www.iso.org/standard/38976.html) (ISO 389-7:2005).
+  The audiometric zero as a sound pressure level.
+  Cited by [Hearing threshold (age and reference zero)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Organization for Standardization. (2007). *Acoustics — Hearing protectors — Part 3: Measurement of insertion loss of ear-muff type protectors using an acoustic test fixture* (ISO 4869-3:2007).
+  Cited by [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/).
+- International Organization for Standardization. (2009). *Acoustics — Audiometric test methods — Part 2: Sound field audiometry with pure-tone and narrow-band test signals* (ISO 8253-2:2009).
+  Cited by [Audiometric Test Methods (ISO 8253-1 and -2)](https://docs.jmrp.io/phonometry/perception/hearing/audiometry/).
+- International Organization for Standardization. (2009). [*Acoustics — Determination of occupational noise exposure — Engineering method*](https://www.iso.org/standard/41718.html) (ISO 9612:2009).
+  The three measurement strategies and the Annex C uncertainty budget.
+  Cited by [Occupational Noise Exposure (ISO 9612)](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/) and [Theory: Environment and Transport](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/).
+- International Organization for Standardization. (2010). *Acoustics — Audiometric test methods — Part 1: Pure-tone air and bone conduction audiometry* (ISO 8253-1:2010).
+  Cited by [Audiometric Test Methods (ISO 8253-1 and -2)](https://docs.jmrp.io/phonometry/perception/hearing/audiometry/).
+- International Organization for Standardization. (2013). [*Acoustics — Estimation of noise-induced hearing loss*](https://www.iso.org/standard/45103.html) (ISO 1999:2013).
+  The NIPTS model, its distribution and the HTLAN combination.
+  Cited by [Noise-induced hearing loss (ISO 1999)](https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Organization for Standardization. (2016). [*Acoustics — Objective method for assessing the audibility of tones in noise — Engineering method*](https://www.iso.org/standard/66941.html) (ISO/PAS 20065:2016).
+  Withdrawn and superseded by [ISO/TS 20065:2022](https://www.iso.org/standard/81518.html). The engineering method for the objective audibility of tones; the implementation follows the 2016 PAS edition.
+  Cited by [Objective audibility of tones in noise (ISO/PAS 20065)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/).
+- International Organization for Standardization. (2017). [*Acoustics — Methods for calculating loudness — Part 1: Zwicker method*](https://www.iso.org/standard/63077.html) (ISO 532-1:2017).
+  Cited by [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Organization for Standardization. (2017). [*Acoustics — Methods for calculating loudness — Part 2: Moore-Glasberg method*](https://www.iso.org/standard/63078.html) (ISO 532-2:2017).
+  Cited by [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Organization for Standardization. (2017). [*Acoustics — Statistical distribution of hearing thresholds related to age and gender*](https://www.iso.org/standard/42916.html) (ISO 7029:2017).
+  The age model of the hearing threshold and its population spread.
+  Cited by [Hearing threshold (age and reference zero)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Organization for Standardization. (2018). [*Acoustics — Hearing protectors — Part 1: Subjective method for the measurement of sound attenuation*](https://www.iso.org/standard/65581.html) (ISO 4869-1:2018).
+  Cited by [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/).
+- International Organization for Standardization. (2018). [*Acoustics — Hearing protectors — Part 2: Estimation of effective A-weighted sound pressure levels when hearing protectors are worn*](https://www.iso.org/standard/65582.html) (ISO 4869-2:2018).
+  Cited by [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/).
+- International Organization for Standardization. (2019). *Acoustics — Hearing protectors — Part 6: Determination of sound attenuation of active noise reduction earmuffs* (ISO 4869-6:2019).
+  Cited by [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/).
+- International Organization for Standardization. (2023). [*Acoustics — Methods for calculating loudness — Part 3: Moore-Glasberg-Schlittenlacher method*](https://www.iso.org/standard/69856.html) (ISO 532-3:2023).
+  Cited by [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- International Organization for Standardization. (2023). [*Acoustics — Normal equal-loudness-level contours*](https://www.iso.org/standard/83117.html) (ISO 226:2023).
+  The modern equal-loudness contours, successors of the Fletcher-Munson curves.
+  Cited by [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/), [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Jensen, J., & Taal, C. H. (2016). An algorithm for predicting the intelligibility of speech masked by modulated noise maskers. *IEEE/ACM Transactions on Audio, Speech, and Language Processing*, *24*(11), 2009-2022. https://doi.org/10.1109/TASLP.2016.2585878
+  ESTOI: the row- and column-normalised short-time spectrogram and its spectral-correlation intermediate index.
+  Cited by [Objective Intelligibility (STOI & ESTOI)](https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/).
+- Moore, B. C. J. (2013). *An introduction to the psychology of hearing* (6th ed.). Brill. https://doi.org/10.1163/9789004252424
+  The standard textbook on auditory perception; pages 76-77 give the Glasberg and Moore (1990) ERB_N auditory-filter bandwidth and the Cam (ERB_N number) frequency scale the loudness models are written on.
+  Cited by [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/).
+- National Institute for Occupational Safety and Health. (1998). [*Criteria for a recommended standard: Occupational noise exposure — Revised criteria 1998*](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf) (DHHS/NIOSH Publication No. 98-126). https://doi.org/10.26616/NIOSHPUB98126
+  The freely available criteria document behind the 85 dB(A) recommended exposure limit and the hearing-conservation and fence discussion.
+  Cited by [Noise-induced hearing loss (ISO 1999)](https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/) and [Occupational Noise Exposure (ISO 9612)](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/).
+- Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*, *28*, 050005. https://doi.org/10.1121/2.0000410
+  The fluctuation-strength signal model and its Table 1 literature values.
+  Cited by [Psychoacoustic annoyance and fluctuation strength](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/).
+- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to steady-state broad-band noise. *The Journal of the Acoustical Society of America*, *56*(5), 1585-1593. https://doi.org/10.1121/1.1903482
+  A field study of the noise exposure-response relations later codified in ISO 1999.
+  Cited by [Noise-induced hearing loss (ISO 1999)](https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/) and [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+- Pavlovic, C. (n.d.). [*C program developer's kit for the Speech Intelligibility Index (SII.C)*](https://www.sii.to/html/programs.html). Support site for the Speech Intelligibility Index.
+  Cited by [Speech Intelligibility Index](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/).
+- Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2010). A short-time objective intelligibility measure for time-frequency weighted noisy speech. *2010 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)*, 4214-4217. https://doi.org/10.1109/ICASSP.2010.5495701
+  The short conference version of STOI.
+  Cited by [Objective Intelligibility (STOI & ESTOI)](https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/).
+- Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2011). An algorithm for intelligibility prediction of time-frequency weighted noisy speech. *IEEE Transactions on Audio, Speech, and Language Processing*, *19*(7), 2125-2136. https://doi.org/10.1109/TASL.2011.2114881
+  STOI: the shared one-third-octave front end, the normalisation and signal-to-distortion clipping, and the per-band envelope correlation the index averages.
+  Cited by [Objective Intelligibility (STOI & ESTOI)](https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/).
+- Warnes, G. R. (2018). [*SII: Calculate ANSI S3.5-1997 Speech Intelligibility Index (version 1.0.3.1)*](https://cran.r-project.org/src/contrib/Archive/SII/). CRAN archive.
+  Cited by [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/).
+
+## Rooms and buildings
+
+Kuttruff is the reference monograph and the one to own; Long is the
+design-side companion when the question is architectural rather than
+metrological, and Hopkins is the one to open for anything structure-borne or
+flanking. The Sabine, Eyring, Millington, Fitzroy and Arau papers are here as
+the sources of the five prediction formulas rather than as reading, and each is
+worth opening to see what its author assumed about how absorption is
+distributed, which is exactly where the five disagree.
+
+- Acoustical Society of America. (2019). [*Criteria for evaluating room noise*](https://webstore.ansi.org/standards/asa/ansiasas122019) (ANSI/ASA S12.2-2019).
+  The normative NC tangency method and the RC Mark II rating of its informative Annex D, with its spectral tag.
+  Cited by [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/), [Room to Room: Partition, Receiving Room, Criterion](https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently simulating small-room acoustics. *The Journal of the Acoustical Society of America*, *65*(4), 943-950. https://doi.org/10.1121/1.382599
+  The reflection-count decomposition of the rectangular-room image lattice.
+  Cited by [Image Sources and the Steady-State Room Field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Arau-Puchades, H. (1988). [An improved reverberation formula](https://www.ingentaconnect.com/content/dav/aaua/1988/00000065/00000004/art00003). *Acustica*, *65*(4), 163-180.
+  The geometric-mean refinement of the axial reverberation formula.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/).
+- Arau-Puchades, H. (1999). *ABC de la acústica arquitectónica*. Grupo Editorial CEAC.
+  ISBN 84-329-2017-7. The Spanish textbook of architectural acoustics, cited in this tree as Arau-Puchades (1999) and not to be confused with his 1988 paper on the reverberation formula. Its Table 4.1 prints the density, the critical frequency of a one-centimetre plate and the damping factor of seventeen solids, and its Table 6.1 the octave-band absorption coefficients of building materials and finishes, each row numbered; the book prints a decimal point.
+  Cited by [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/) and [Catalogue of absorption coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/).
+- Asociación Española de Normalización. (2018). [*Propiedades acústicas de los elementos de construcción y de los edificios — Mediciones en laboratorio del ruido estructural de los equipos técnicos de los edificios para todas las condiciones de instalación*](https://www.une.org/encuentra-tu-norma/busca-tu-norma/norma?c=N0059781) (UNE-EN 15657:2018).
+  Cited by [Structure-borne sound power of equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/).
+- ASTM International. (2022). [*Classification for Rating Sound Insulation*](https://www.astm.org/e0413-22.html) (ASTM E413-22).
+  Cited by [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/).
+- Avilés López, R., & Perera Martín, R. (2017). *Manual de acústica ambiental y arquitectónica*. Paraninfo.
+  Cited by [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/) and [Spanish Noise Regulation (RD 1367/2007)](https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/).
+- Barron, M. (2009). *Auditorium acoustics and architectural design* (2nd ed.). Spon Press.
+  Cited by [Sound strength G (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/).
+- Barron, M., & Lee, L.-J. (1988). Energy relations in concert auditoriums. I. *The Journal of the Acoustical Society of America*, *84*(2), 618-628. https://doi.org/10.1121/1.396840
+  Cited by [Sound strength G (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/).
+- Barron, M., & Marshall, A. H. (1981). Spatial impression due to early lateral reflections in concert halls: The derivation of a physical measure. *Journal of Sound and Vibration*, *77*(2), 211-232. https://doi.org/10.1016/S0022-460X(81)80020-X
+  Cited by [Spatial impression (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/).
+- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise Control*, *3*(1), 19-27. https://doi.org/10.1121/1.2369239
+  The original NC curves and their speech-interference rationale.
+  Cited by [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the noise of heating, ventilating, and air-conditioning (HVAC) systems in buildings. *Noise Control Engineering Journal*, *45*(6), 243-250. https://doi.org/10.3397/1.2828446
+  The RC Mark II procedure later codified by ANSI/ASA S12.2 Annex D.
+  Cited by [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Bradley, J. S. (2011). Review of objective room acoustics measures and future needs. *Applied Acoustics*, *72*(10), 713-720. https://doi.org/10.1016/j.apacoust.2011.04.004
+  Cited by [Reporting and source qualification (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/).
+- Bradley, J. S., & Soulodre, G. A. (1995). Objective measures of listener envelopment. *The Journal of the Acoustical Society of America*, *98*(5), 2590-2597. https://doi.org/10.1121/1.413225
+  Cited by [Spatial impression (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/).
+- Carrión Isbert, A. (1998). [*Diseño acústico de espacios arquitectónicos*](https://openlibrary.org/books/OL23159935M). Edicions UPC.
+  ISBN 978-84-8301-252-9. A Spanish-language textbook on acoustic room design.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/).
+- Craik, R. J. M., & Wilson, R. (1995). Sound transmission through masonry cavity walls. *Journal of Sound and Vibration 179(1), 79-96*. https://doi.org/10.1006/jsvi.1995.0006
+  Cited by [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/).
+- Davy, J. L. (1980). The variance of impulse decays. *Acustica*, *44*(1), 51-56.
+  Cited by [Stage support and uncertainty (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/).
+- European Committee for Standardization. (2000). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-airborne-sound-insulation-between-rooms) (EN 12354-1:2000).
+  Cited by [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- European Committee for Standardization. (2000). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-impact-sound-insulation-between-rooms) (EN 12354-2:2000).
+  Cited by [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- European Committee for Standardization. (2000). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 3: Airborne sound insulation against outdoor sound*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-airborne-sound-insulation-against-outdoor-sound) (EN 12354-3:2000).
+  Cited by [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/).
+- European Committee for Standardization. (2000). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 4: Transmission of indoor sound to the outside*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-transmission-of-indoor-sound-to-the-outside) (EN 12354-4:2000).
+  Cited by [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/).
+- European Committee for Standardization. (2003). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 6: Sound absorption in enclosed spaces*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces) (EN 12354-6:2003).
+  The absorption member of the EN 12354 prediction family.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/), [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/), [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/) and [Catalogue of air attenuation](https://docs.jmrp.io/phonometry/reference/catalogues/air-attenuation/).
+- European Committee for Standardization. (2009). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 5: Sound levels due to service equipment*](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-building-from-the-performance-of-elements-sounds-levels-due-to-the-service-equipment) (EN 12354-5:2009).
+  Cited by [Structure-borne sound power of equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/) and [Installed structure-borne sound (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/).
+- Everest, F. A. (2001). [*Master handbook of acoustics*](https://openlibrary.org/isbn/9780071360975) (4th ed.). McGraw-Hill.
+  ISBN 978-0-07-136097-5. A practical room-acoustics handbook; its Fig. 7-22 worked example anchors the reverberation-prediction conformance suite.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/) and [Catalogue of absorption coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/).
+- Eyring, C. F. (1930). Reverberation time in "dead" rooms. *The Journal of the Acoustical Society of America*, *1*(2A), 217-241. https://doi.org/10.1121/1.1915175
+  The mean-free-path reverberation formula for strongly absorbing rooms.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/).
+- Fitzroy, D. (1959). Reverberation formula which seems to be more accurate with nonuniform distribution of absorption. *The Journal of the Acoustical Society of America*, *31*(7), 893-897. https://doi.org/10.1121/1.1907814
+  The axial reverberation formula for anisotropic absorption.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/).
+- Foret, R., Chéné, J.-B., & Guigou-Carter, C. (2011). A comparison of the reduction of transmitted impact noise by floor coverings measured using ISO 140-8 and ISO/CD 16251-1. *Forum Acusticum 2011, Aalborg (CSTB)*.
+  Cited by [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/).
+- Gade, A. C. (1989). Investigations of musicians' room acoustic conditions in concert halls. II: Field experiments and synthesis of results. *Acustica*, *69*(6), 249-262.
+  Cited by [Stage support and uncertainty (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/).
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012). Measuring room impulse responses: Impact of the decay range on derived room acoustic parameters. *Acta Acustica united with Acustica*, *98*(6), 907-915. https://doi.org/10.3813/aaa.918574
+  The impulse-to-noise-ratio (INR) analysis of decay-range requirements.
+  Cited by [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Hall, R., & Hopkins, C. (2001). The measurement of dynamic stiffness of wall ties used in masonry cavity walls. *Proceedings of the Institute of Acoustics 23(8), 259-266*.
+  Cited by [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/).
+- Harris, C. M. (Ed.). (1977). *Manual para el control del ruido* (Vol. 1). Instituto de Estudios de Administración Local.
+  Instituto de Estudios de Administración Local. The Spanish translation of the first edition of the *Handbook of Noise Control* (McGraw-Hill, 1957), cited in this tree as Harris (1977). Chapter 19, "Control del ruido a través de los sólidos", by Fritz Ingerslev and Cyril M. Harris, prints in its Tables 19.2 to 19.4 the average improvement in impact sound insulation of twenty-three floor finishes, floating screeds and timber floors on a bare concrete floor, and Table 14.2, in Richard N. Hamme's chapter on vibration damping, the decay rate of eight asphalt felt treatments on a standard steel panel.
+  Cited by [Catalogue of damping treatments](https://docs.jmrp.io/phonometry/reference/catalogues/damping-treatments/) and [Catalogue of impact insulation](https://docs.jmrp.io/phonometry/reference/catalogues/impact-insulation/).
+- Harris, C. M. (Ed.). (1995). *Manual de medidas acústicas y control del ruido* (3rd ed.). McGraw-Hill.
+  McGraw-Hill. The Spanish edition of the handbook, cited in this tree as Harris 3e and not to be confused with the window paper of F. J. Harris under Signal processing. Chapter 30 prints in Tables 30.2 and 30.3 the noise reduction coefficient of nineteen carpets on bare concrete and on a hair pad; Chapter 31 prints in seven tables the sound transmission class of stud walls, block walls, doors, sealed windows and floor-ceiling systems, and Chapter 32, "Aislamiento del sonido transmitido por estructuras", prints in its Tables 32.1 to 32.8 the measured impact insulation class of forty-two floor-ceiling constructions and the improvement six elastic surface treatments add over a hard massive floor.
+  Cited by [Catalogue of carpets](https://docs.jmrp.io/phonometry/reference/catalogues/carpets/), [Catalogue of transmission loss](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/) and [Catalogue of impact insulation](https://docs.jmrp.io/phonometry/reference/catalogues/impact-insulation/).
+- Hidaka, T., Beranek, L. L., & Okano, T. (1995). Interaural cross-correlation, lateral fraction, and low- and high-frequency sound levels as measures of acoustical quality in concert halls. *The Journal of the Acoustical Society of America*, *98*(2), 988-1007. https://doi.org/10.1121/1.414451
+  Cited by [Spatial impression (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/).
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  ISBN 978-0-7506-6526-1. The comprehensive treatment of airborne and impact sound insulation: measurement chains, flanking transmission and the EN 12354 prediction framework.
+  Cited by [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/), [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/), [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/), [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/), [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/), [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/), [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/), [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/), [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/), [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/), [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/), [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/), [Installed structure-borne sound (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/), [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/), [Plate junctions: wave approach and experimental SEA](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/), [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/), [Theory: Vibration](https://docs.jmrp.io/phonometry/reference/theory/vibration/), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/), [Catalogue of resilient layers](https://docs.jmrp.io/phonometry/reference/catalogues/resilient-layers/) and [Catalogue of gases](https://docs.jmrp.io/phonometry/reference/catalogues/gases/).
+- Hopkins, C., Wilson, R., & Craik, R. J. M. (1999). Dynamic stiffness as an acoustic specification parameter for wall ties used in masonry cavity walls. *Applied Acoustics 58, 51-68*. https://doi.org/10.1016/S0003-682X(98)00068-1
+  The measurement behind the 50 mm rows of Hopkins' Table A4: butterfly 1,7 MN/m, double-triangle 16,1 MN/m and vertical-twist 94,0 MN/m.
+  Cited by [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/).
+- Instituto de Ciencias de la Construcción Eduardo Torroja (CSIC). (n.d.). [*Catálogo informático de elementos constructivos (CEC)*](https://www.codigotecnico.org/Programas/CatalogoElementosConstructivos.html). Código Técnico de la Edificación.
+  Cited by [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/).
+- International Organization for Standardization. (1985). [*Acoustics — Measurement of sound insulation in buildings and of building elements — Part 9: Laboratory measurement of room-to-room airborne sound insulation of a suspended ceiling with a plenum above it*](https://www.iso.org/standard/3965.html) (ISO 140-9:1985).
+  Cited by [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/).
+- International Organization for Standardization. (1989). [*Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings*](https://www.iso.org/standard/16620.html) (EN 29052-1:1992 (ISO 9052-1:1989)).
+  The resonance method for the dynamic stiffness per unit area, identical to EN 29052-1.
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/), [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/), [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/) and [Dynamic stiffness of resilient materials](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/).
+- International Organization for Standardization. (1998). *Acoustics — Recommended practice for the design of low-noise workplaces containing machinery — Part 3: Sound propagation and noise prediction in workrooms* (ISO 11690-3:1998).
+  Cited by [Spatial Sound Decay in Workrooms](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/).
+- International Organization for Standardization. (2000). [*Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 1: Laboratory measurements*](https://www.iso.org/standard/26097.html) (ISO 15186-1:2000).
+  Cited by [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/).
+- International Organization for Standardization. (2001). *Acoustics — Measurement and parametric description of spatial sound distribution curves in workrooms for evaluation of their acoustical performance* (ISO 14257:2001).
+  Cited by [Spatial Sound Decay in Workrooms](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/).
+- International Organization for Standardization. (2002). [*Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 3: Laboratory measurements at low frequencies*](https://www.iso.org/standard/31395.html) (ISO 15186-3:2002).
+  Cited by [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/).
+- International Organization for Standardization. (2003). [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
+  The reverberation-room absorption measurement behind the surface data.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/), [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/), [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/), [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/), [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2003). [*Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 2: Field measurements*](https://www.iso.org/standard/30105.html) (ISO 15186-2:2003).
+  Cited by [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/).
+- International Organization for Standardization. (2004). *Acoustics — Measurement of sound pressure level from service equipment in buildings — Engineering method* (ISO 16032:2004).
+  Cited by [Service-Equipment and Activity Noise (ISO 16032)](https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/).
+- International Organization for Standardization. (2006). [*Acoustics — Application of new measurement methods in building and room acoustics*](https://www.iso.org/standard/40408.html) (ISO 18233:2006).
+  The swept-sine and MLS acquisition of impulse responses.
+  Cited by [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2006). [*Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 1: Frame document*](https://www.iso.org/standard/38284.html) (ISO 10848-1:2006).
+  Cited by [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/).
+- International Organization for Standardization. (2006). [*Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 2: Application to light elements when the junction has a small influence*](https://www.iso.org/standard/35004.html) (ISO 10848-2:2006).
+  Cited by [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/).
+- International Organization for Standardization. (2006). [*Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 3: Application to light elements when the junction has a substantial influence*](https://www.iso.org/standard/35003.html) (ISO 10848-3:2006).
+  Cited by [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/).
+- International Organization for Standardization. (2008). [*Acoustics — Measurement of room acoustic parameters — Part 2: Reverberation time in ordinary rooms*](https://www.iso.org/standard/36201.html) (ISO 3382-2:2008).
+  The accuracy grades and position counts of reverberation measurement.
+  Cited by [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/), [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/), [Stage support and uncertainty (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2009). [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
+  Room-parameter definitions, position requirements and just-noticeable differences.
+  Cited by [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/), [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/), [Sound strength G (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/), [Spatial impression (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/), [Stage support and uncertainty (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/), [Reporting and source qualification (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products* (ISO 10140-1:2010).
+  Cited by [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/) and [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/).
+- International Organization for Standardization. (2010). [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation*](https://www.iso.org/standard/42089.html) (ISO 10140-3:2010).
+  Cited by [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/), [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/) and [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/).
+- International Organization for Standardization. (2010). [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 4: Measurement procedures and requirements*](https://www.iso.org/standard/42090.html) (ISO 10140-4:2010).
+  Cited by [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/).
+- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment* (ISO 10140-5:2010).
+  Cited by [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/).
+- International Organization for Standardization. (2010). [*Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 4: Application to junctions with at least one heavy element*](https://www.iso.org/standard/45360.html) (ISO 10848-4:2010).
+  Cited by [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/).
+- International Organization for Standardization. (2012). [*Acoustics — Measurement of room acoustic parameters — Part 3: Open plan offices*](https://www.iso.org/standard/46520.html) (ISO 3382-3:2012).
+  Since revised as [ISO 3382-3:2022](https://www.iso.org/standard/77437.html). The open-plan speech-privacy quantities.
+  Cited by [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/), [Spatial Sound Decay in Workrooms](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2014). [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/55997.html) (ISO 16283-1:2014).
+  The field airborne measurement method.
+  Cited by [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/), [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2014). [*Acoustics — Laboratory measurement of the reduction of transmitted impact noise by floor coverings on a small floor mock-up — Part 1: Heavyweight compact floor*](https://www.iso.org/standard/56017.html) (ISO 16251-1:2014).
+  Cited by [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/).
+- International Organization for Standardization. (2016). [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 3: Façade sound insulation*](https://www.iso.org/standard/59748.html) (ISO 16283-3:2016).
+  Cited by [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/), [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2016). *Acoustics — Requirements for the performance and calibration of reference sound sources used for the determination of sound power levels* (ISO 6926:2016).
+  Cited by [Spatial Sound Decay in Workrooms](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/) and [Free Field and Reference Sources (ISO 26101 / ISO 6926)](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/).
+- International Organization for Standardization. (2017). [*Acoustics — Laboratory and field measurement of flanking transmission for airborne, impact and building service equipment sound between adjoining rooms — Part 1: Frame document*](https://www.iso.org/standard/67226.html) (ISO 10848-1:2017).
+  Cited by [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/).
+- International Organization for Standardization. (2017). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms*](https://www.iso.org/standard/70242.html) (ISO 12354-1:2017).
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/), [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/), [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/), [Installed structure-borne sound (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/) and [Catalogue of fluids](https://docs.jmrp.io/phonometry/reference/catalogues/fluids/).
+- International Organization for Standardization. (2017). [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms*](https://www.iso.org/standard/70243.html) (ISO 12354-2:2017).
+  Cited by [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/), [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/) and [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/).
+- International Organization for Standardization. (2020). [*Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/77436.html) (ISO 16283-2:2020).
+  Cited by [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/), [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/), [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2020). [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/77435.html) (ISO 717-1:2020).
+  The reference-curve rating and the spectrum adaptation terms C and Ctr.
+  Cited by [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/), [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/), [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/), [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/), [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/), [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/), [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/), [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/), [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](https://docs.jmrp.io/phonometry/devices/noise-control/enclosure-cabin-insulation/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2020). [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
+  Cited by [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/), [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/), [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/), [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/), [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/), [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/), [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2021). [*Acoustics — Field measurements of airborne and impact sound insulation and of service equipment sound — Survey method*](https://www.iso.org/standard/76560.html) (ISO 10052:2021).
+  Cited by [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/) and [Service-Equipment and Activity Noise (ISO 16032)](https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/).
+- International Organization for Standardization. (2021). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products* (ISO 10140-1:2021).
+  Cited by [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/).
+- International Organization for Standardization. (2021). [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/79487.html) (ISO 10140-2:2021).
+  Cited by [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2021). [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation*](https://www.iso.org/standard/79483.html) (ISO 10140-3:2021).
+  Cited by [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2021). [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 4: Measurement procedures and requirements*](https://www.iso.org/standard/73911.html) (ISO 10140-4:2021).
+  Cited by [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2021). [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 5: Requirements for test facilities and equipment*](https://www.iso.org/standard/79482.html) (ISO 10140-5:2021).
+  Cited by [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/), [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- International Organization for Standardization. (2023). *Acoustics — Measurement of sound pressure level from service equipment or activities in buildings — Engineering method (draft international standard)* (E DIN EN ISO 16032:2023-05).
+  Cited by [Service-Equipment and Activity Noise (ISO 16032)](https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/).
+- Japanese Standards Association. (2019). [*Acoustics — Measurement of floor impact sound insulation of buildings — Part 2: Method using standard heavy impact sources*](https://www.jisc.go.jp/) (JIS A 1418-2:2019).
+  Cited by [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/).
+- Kim, K. W., Park, S. H., Shin, H. K., & Kim, K. C. (2023). Changes of floor impact sound regulations and future improvement directions in Korea. *Proceedings of Forum Acusticum 2023 (10th Convention of the European Acoustics Association)*. https://doi.org/10.61782/fa.2023.0364
+  Cited by [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/).
+- Kosten, C. W., & van Os, G. J. (1962). [Community reaction criteria for external noises](https://openlibrary.org/books/OL58781133M). *The Control of Noise (National Physical Laboratory Symposium No. 12)*, 373-387.
+  Published by Her Majesty's Stationery Office. The NR curve family contrasted with NC.
+  Cited by [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/).
+- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press. https://doi.org/10.1201/9781315372150
+  The reference monograph on sound fields in rooms: statistical decay theory, the Schroeder frequency, absorption and the perceptual room parameters.
+  Cited by [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/), [Image Sources and the Steady-State Room Field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/), [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/), [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/), [Room to Room: Partition, Receiving Room, Criterion](https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/), [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Long, M. (2014). *Architectural acoustics* (2nd ed.). Academic Press. https://doi.org/10.1016/C2012-0-03257-5
+  The architectural-design companion to the measurement standards: the rectangular-room eigenfrequencies and the Morse/Pierce mode count (Chapter 8), the crowd self-noise of an occupied room (Chapter 17) and the gain-before-feedback criterion of a reinforcement system (Chapter 18).
+  Cited by [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/), [Image Sources and the Steady-State Room Field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/), [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/), [Duct-Borne Noise: Fan to Room](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/) and [Catalogue of absorption coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/).
+- Lundeby, A., Vigran, T. E., Bietz, H., & Vorländer, M. (1995). Uncertainties of measurements in room acoustics. *Acta Acustica united with Acustica*, *81*(4), 344-355.
+  Cited by [Sound strength G (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/).
+- Millington, G. (1932). A modified formula for reverberation. *The Journal of the Acoustical Society of America*, *4*(1), 69-82. https://doi.org/10.1121/1.1915588
+  The per-surface logarithmic reverberation formula.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/).
+- Ministerio de Fomento (Spain). (2019). [*Código Técnico de la Edificación, Documento Básico HR Protección frente al ruido*](https://www.codigotecnico.org/pdf/Documentos/HR/DBHR.pdf) (CTE DB-HR).
+  Cited by [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/).
+- Ministerio de la Presidencia (Spain). (2007). [*Real Decreto 1367/2007, developing Ley 37/2003 del Ruido on acoustic zoning, quality objectives and acoustic emissions*](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397) (RD 1367/2007 (BOE-A-2007-18397), consolidated text).
+  Cited by [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/) and [Spanish Noise Regulation (RD 1367/2007)](https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/).
+- Sabine, W. C. (1922). [*Collected papers on acoustics*](https://archive.org/details/collectedpaperso00sabi). Harvard University Press.
+  The founding reverberation experiments and the Sabine law.
+  Cited by [Reverberation-time prediction (Sabine, Eyring, Arau)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/).
+- Schroeder, M. R. (1965). New method of measuring reverberation time. *The Journal of the Acoustical Society of America*, *37*(3), 409-412. https://doi.org/10.1121/1.1909343
+  The backward integration of the squared impulse response into a decay curve.
+  Cited by [Room acoustic parameters (ISO 3382-1/2)](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press. https://doi.org/10.1201/9781482266016
+  ISBN 978-0-415-42853-8. A compact textbook on sound transmission in buildings, from single and double constructions to floating floors.
+  Cited by [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/), [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/), [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/), [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/), [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/), [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/), [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/), [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/), [Dynamic stiffness of resilient materials](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/), [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/) and [Catalogue of dynamic moduli of resilient materials](https://docs.jmrp.io/phonometry/reference/catalogues/dynamic-modulus-of-resilient-materials/).
+- Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer. https://doi.org/10.1007/978-3-030-51202-6
+  The mirror-source model (Chapter 11), with the reflection-factor and delay expressions.
+  Cited by [Image Sources and the Steady-State Room Field](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/) and [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/).
+- Witew, I. B., Behler, G. K., & Vorländer, M. (2017). About just noticeable differences for aspects of spatial impressions in concert halls. *Acoustics Australia*, *45*(2), 195-202. https://doi.org/10.1007/s40857-017-0094-7
+  Cited by [Reporting and source qualification (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/).
+
+## Materials and surfaces
+
+Allard and Atalla is the reference for porous media and the transfer-matrix
+method, and Cox and D'Antonio for anything a surface scatters rather than
+absorbs. The papers are the models themselves, in rough order of scope:
+Delany and Bazley and its Miki regression are empirical, Johnson-Koplik-Dashen
+and the JCA family are phenomenological with measurable parameters, and Maa is
+the microperforated panel in closed form.
+
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media: Modelling sound absorbing materials* (2nd ed.). Wiley. https://doi.org/10.1002/9780470747339
+  ISBN 978-0-470-74661-5. The porous-material theory linking airflow resistivity, surface impedance and absorption.
+  Cited by [Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/), [Impedance Tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/), [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/), [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/) and [Catalogue of porous materials](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/).
+- ASTM International. (2019). [*Standard test method for normal incidence determination of porous material acoustical properties based on the transfer matrix method*](https://store.astm.org/e2611-19.html) (ASTM E2611-19).
+  The edition the library implements, since revised as [ASTM E2611-24](https://store.astm.org/e2611-24.html). The four-microphone transfer-matrix transmission-loss method.
+  Cited by [Impedance Tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/) and [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- Audio Engineering Society. (2001). [*AES information document for room acoustics and sound reinforcement systems — Characterization and measurement of surface scattering uniformity*](https://www.aes.org/publications/standards/list.cfm) (AES-4id-2001).
+  Printed in the *Journal of the Audio Engineering Society*, 49(3), 149-165. The single-plane free-field diffusion-coefficient procedure that ISO 17497-2 later standardised.
+  Cited by [Diffusers and Their Coefficients](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/).
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers: Theory, design and application* (3rd ed.). CRC Press. https://doi.org/10.1201/9781315369211
+  ISBN 978-1-4987-4099-9. The monograph on absorber and diffuser measurement and design, by the authors behind the ISO 17497-2 diffusion-coefficient method.
+  Cited by [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/), [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/), [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/), [Diffusers and Their Coefficients](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/), [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/), [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/), [Catalogue of porous materials](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/), [Catalogue of absorption coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/), [Catalogue of scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/), [Catalogue of diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/), [Catalogue of predicted scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/) and [Catalogue of ground surfaces](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/).
+- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous absorbent materials. *Applied Acoustics*, *3*(2), 105-116. https://doi.org/10.1016/0003-682X(70)90031-9
+  The original one-parameter empirical model for fibrous absorbers: the relations in frequency over flow resistivity, with their stated range of validity. The same model is the one-parameter flow-resistivity ground-impedance model.
+  Cited by [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/) and [Rotorcraft noise: the hemisphere method](https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/).
+- European Committee for Standardization. (2003). *Acoustics — Measurement of sound absorption in a reverberation room* (EN ISO 354:2003).
+  Cited by [Suspended Ceilings: the EN 16487 Test Code](https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/).
+- European Committee for Standardization. (2014). *Acoustics — Test code for suspended ceilings — Sound absorption* (EN 16487:2014).
+  Cited by [Suspended Ceilings: the EN 16487 Test Code](https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/).
+- European Committee for Standardization. (2014). *Suspended ceilings — Requirements and test methods* (EN 13964:2014).
+  Cited by [Suspended Ceilings: the EN 16487 Test Code](https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/).
+- European Committee for Standardization. (2015). *Thermal insulation products for buildings — Factory made mineral wool (MW) products — Specification* (EN 13162:2012+A1:2015).
+  Cited by [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/).
+- Hargreaves, T. J., Cox, T. J., Lam, Y. W., & D'Antonio, P. (2000). Surface diffusion coefficients for room acoustics: Free-field measures of single-plane diffusion. *The Journal of the Acoustical Society of America*, *108*(4), 1710-1720. https://doi.org/10.1121/1.1310192
+  The free-field diffusion-coefficient method behind ISO 17497-2 and the published N = 7 QRD geometry of the worked example.
+  Cited by [Diffusers and Their Coefficients](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/).
+- International Organization for Standardization. (1996). [*Acoustics — Determination of sound absorption coefficient and impedance in impedance tubes — Part 1: Method using standing wave ratio*](https://www.iso.org/standard/18603.html) (ISO 10534-1:1996).
+  Implemented as its European adoption, BS EN ISO 10534-1:2001. The standing-wave-ratio method.
+  Cited by [Impedance Tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/).
+- International Organization for Standardization. (1997). [*Acoustics — Sound absorbers for use in buildings — Rating of sound absorption*](https://www.iso.org/standard/19583.html) (ISO 11654:1997).
+  The weighted sound-absorption rating $\alpha_\mathrm{w}$, its shape indicators and the absorption class.
+  Cited by [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/), [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/), [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/) and [Suspended Ceilings: the EN 16487 Test Code](https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/).
+- International Organization for Standardization. (1998). [*Acoustics — Determination of sound absorption coefficient and impedance in impedance tubes — Part 2: Transfer-function method*](https://www.iso.org/standard/22851.html) (ISO 10534-2:1998).
+  Adopted in Europe as EN ISO 10534-2:2001, and since revised as [ISO 10534-2:2023](https://www.iso.org/standard/81294.html). The two-microphone transfer-function method and its plane-wave limits.
+  Cited by [Impedance Tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/), [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/) and [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- International Organization for Standardization. (2002). [*Acoustics — Measurement of sound absorption properties of road surfaces in situ — Part 1: Extended surface method*](https://www.iso.org/standard/35387.html) (ISO 13472-1:2002).
+  The edition the library implements, since revised as ISO 13472-1:2022. The subtraction technique with the Adrienne window and the sampled-area radius.
+  Cited by [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/).
+- International Organization for Standardization. (2004). [*Acoustics — Sound-scattering properties of surfaces — Part 1: Measurement of the random-incidence scattering coefficient in a reverberation room*](https://www.iso.org/standard/31397.html) (ISO 17497-1:2004+A1:2014).
+  The edition the library implements. The turntable scattering-coefficient method.
+  Cited by [Diffusers and Their Coefficients](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/) and [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- International Organization for Standardization. (2010). [*Acoustics — Measurement of sound absorption properties of road surfaces in situ — Part 2: Spot method for reflective surfaces*](https://www.iso.org/standard/32304.html) (ISO 13472-2:2010).
+  The edition the library implements, since revised as ISO 13472-2:2025. The spot-tube method and its plane-wave and spacing limits.
+  Cited by [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/).
+- International Organization for Standardization. (2012). [*Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field*](https://www.iso.org/standard/55293.html) (ISO 17497-2:2012).
+  The goniometer diffusion-coefficient method.
+  Cited by [Diffusers and Their Coefficients](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/), [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/) and [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- International Organization for Standardization. (2018). [*Acoustics — Determination of airflow resistance — Part 1: Static airflow method*](https://www.iso.org/standard/69869.html) (ISO 9053-1:2018).
+  The static airflow-resistance method and its reference velocity.
+  Cited by [Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/) and [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- International Organization for Standardization. (2020). [*Acoustics — Determination and application of measurement uncertainties in building acoustics — Part 2: Sound absorption*](https://www.iso.org/standard/68749.html) (ISO 12999-2:2020).
+  The reproducibility and repeatability uncertainties of the reverberation-room quantities and their single-number ratings.
+  Cited by [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/).
+- International Organization for Standardization. (2020). [*Acoustics — Determination of airflow resistance — Part 2: Alternating airflow method*](https://www.iso.org/standard/76744.html) (ISO 9053-2:2020).
+  The alternating airflow-resistance method with the Annex A effective ratio of specific heats.
+  Cited by [Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/).
+- Jiménez, N., Cox, T. J., Groby, J.-P., & Romero-García, V. (2019). [Beyond phase grating diffusers using locally-resonant metamaterials](https://pub.dega-akustik.de/ICA2019/data/articles/000706.pdf). *Proceedings of the 23rd International Congress on Acoustics (ICA 2019)*.
+  The congress companion to the metadiffuser paper: the transfer-matrix chain and the slow-sound dispersion picture.
+  Cited by [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/).
+- Jiménez, N., Cox, T. J., Romero-García, V., & Groby, J.-P. (2017). Metadiffusers: Deep-subwavelength sound diffusers. *Scientific Reports*, *7*, 5389. https://doi.org/10.1038/s41598-017-05710-5
+  The metadiffuser model: resonator-loaded slits reproducing Schroeder phase profiles and ternary sequences from deep-subwavelength panels.
+  Cited by [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/), [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/) and [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- Jiménez, N., Groby, J.-P., Pagneux, V., & Romero-García, V. (2017). Iridescent perfect absorption in critically-coupled acoustic metamaterials using the transfer matrix method. *Applied Sciences*, *7*(6), 618. https://doi.org/10.3390/app7060618
+  The slit + Helmholtz-resonator transfer-matrix model and the critical-coupling condition.
+  Cited by [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/), [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/) and [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- Jiménez, N., Huang, W., Romero-García, V., Pagneux, V., & Groby, J.-P. (2016). Ultra-thin metamaterial for perfect and quasi-omnidirectional sound absorption. *Applied Physics Letters*, *109*(12), 121902. https://doi.org/10.1063/1.4962328
+  The resonator impedance and radiation end corrections, and the published λ/88 perfect absorber.
+  Cited by [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/) and [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/).
+- Jiménez, N., Romero-García, V., & Groby, J.-P. (2018). Perfect absorption of sound by rigidly-backed high-porous materials. *Acta Acustica united with Acustica*, *104*(3), 396-409. https://doi.org/10.3813/AAA.919183
+  The critical-coupling condition applied to a rigidly-backed layer of ordinary high-porosity absorber, connecting the porous-material models of the characterisation section to perfect single-frequency absorption.
+  Cited by [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/).
+- Jiménez, N., Umnova, O., & Groby, J.-P. (Eds.). (2021). *Acoustic waves in periodic structures, metamaterials, and porous media*. Springer. https://doi.org/10.1007/978-3-030-84300-7
+  Volume 143 of the series Topics in Applied Physics. An edited umbrella volume on resonant and periodic sound-absorbing and sound-diffusing structures, from the transfer-matrix and critical-coupling theory of metamaterial absorbers to deep-subwavelength diffusers; the modern metamaterials companion to Cox & D'Antonio.
+  Cited by [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/) and [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/).
+- Johnson, D. L., Koplik, J., & Dashen, R. (1987). Theory of dynamic permeability and tortuosity in fluid-saturated porous media. *Journal of Fluid Mechanics*, *176*, 379-402. https://doi.org/10.1017/S0022112087000727
+  The dynamic-tortuosity model behind the JCA effective density.
+  Cited by [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/).
+- Maa, D.-Y. (1998). Potential of microperforated panel absorber. *The Journal of the Acoustical Society of America*, *104*(5), 2861-2866. https://doi.org/10.1121/1.423870
+  The exact MPP impedance (Eq. 2), end corrections, design formulas and the Fig. 5 example pinned in the tests.
+  Cited by [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/) and [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/).
+- Mechel, F. P. (Ed.). (2008). *Formulas of acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-3-540-76833-3
+  ISBN 978-3-540-76832-6. Sections D.3-D.6 (layer reflection, multilayer scheme, diffuse-field integrals) and G.11 (empirical porous relations).
+  Cited by [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/), [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/) and [Catalogue of porous materials](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/).
+- Miki, Y. (1990). Acoustical properties of porous materials — Modifications of Delany-Bazley models. *Journal of the Acoustical Society of Japan (E)*, *11*(1), 19-24. https://doi.org/10.1250/ast.11.19
+  The positive-real regression implemented in miki.
+  Cited by [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/).
+- Stinson, M. R. (1991). The propagation of plane sound waves in narrow and wide circular tubes, and generalization to uniform tubes of arbitrary cross-sectional shape. *The Journal of the Acoustical Society of America*, *89*(2), 550-558. https://doi.org/10.1121/1.400379
+  The visco-thermal effective parameters of the slit and the square necks and cavities.
+  Cited by [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/).
+
+---

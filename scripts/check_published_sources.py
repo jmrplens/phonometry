@@ -87,6 +87,7 @@ import pkgutil
 import re
 import sys
 from collections.abc import Mapping, Sequence
+from types import MappingProxyType
 from typing import TYPE_CHECKING, NamedTuple
 
 from conformance import references
@@ -557,6 +558,40 @@ NOT_TRANSCRIBED: dict[tuple[str, str], str] = {
 #: the gate reported green. Found by ASHRAE Chapter 49.
 _BIBLIOGRAPHY_ENTRY = re.compile(r"^- (?P<lead>[^\s,.]+)(?:[,.]| \()", re.MULTILINE)
 
+#: A body the banners cite by the abbreviation its handbook goes by, with the
+#: name the bibliography lists it under. APA spells a group author out in full
+#: in a reference list, and the bibliography writes every entry from the
+#: references of the pages that cite the work, which give the full name, so
+#: ``ASHRAE (2019)`` in a banner is the entry
+#: ``- American Society of Heating, ... (2019).``. A line whose name opens no
+#: entry fails (:func:`abbreviation_problems`).
+ABBREVIATED_BODIES: Mapping[str, str] = MappingProxyType(
+    {
+        "ASHRAE": (
+            "American Society of Heating, Refrigerating and Air-Conditioning Engineers"
+        ),
+    }
+)
+
+
+def _lists_body(text: str, name: str, year: str = r"[^)]+") -> bool:
+    """Whether *text* holds an entry that opens with the body *name* and *year*."""
+    return (
+        re.search(rf"^- {re.escape(name)}\. \({year}\)\.", text, re.MULTILINE)
+        is not None
+    )
+
+
+def abbreviation_problems() -> list[str]:
+    """Every :data:`ABBREVIATED_BODIES` line whose full name opens no entry."""
+    text = BIBLIOGRAPHY.read_text(encoding="utf-8")
+    return [
+        f"ABBREVIATED_BODIES maps {abbreviation!r} to {name!r}, which no entry of "
+        "docs/reference/bibliography.md opens with"
+        for abbreviation, name in ABBREVIATED_BODIES.items()
+        if not _lists_body(text, name)
+    ]
+
 
 def bibliography_leads() -> tuple[str, ...]:
     """Every lead surname ``docs/reference/bibliography.md`` lists.
@@ -572,9 +607,13 @@ def bibliography_leads() -> tuple[str, ...]:
     :return: The surnames, sorted, in the spelling the bibliography uses.
     """
     text = BIBLIOGRAPHY.read_text(encoding="utf-8")
-    return tuple(
-        sorted({match["lead"] for match in _BIBLIOGRAPHY_ENTRY.finditer(text)})
-    )
+    leads = {match["lead"] for match in _BIBLIOGRAPHY_ENTRY.finditer(text)}
+    leads |= {
+        abbreviation
+        for abbreviation, name in ABBREVIATED_BODIES.items()
+        if _lists_body(text, name)
+    }
+    return tuple(sorted(leads))
 
 
 def _book_or_paper() -> re.Pattern[str]:
@@ -741,6 +780,13 @@ def _bibliography_problems(cite: str, parsed: references.Reference) -> list[str]
         # a year would reach here as "ASHRAE" and be rejected against an
         # entry that does have one. Two patterns for one rule is how the
         # first of them came to be wrong on its own.
+        # A body cited by its abbreviation is listed under its full name
+        # (ABBREVIATED_BODIES), with the year the banner gives.
+        abbreviated = re.fullmatch(r"(?P<body>\S+) \((?P<year>\d{4})\)", lead)
+        if abbreviated is not None:
+            body = ABBREVIATED_BODIES.get(abbreviated["body"])
+            if body is not None and _lists_body(text, body, abbreviated["year"]):
+                continue
         if not re.search(rf"^- {re.escape(lead)}(?:[,.]| \()", text, re.MULTILINE):
             problems.append(
                 f"{cite!r} names {designation!r}, which has no entry in "
@@ -1013,7 +1059,11 @@ def main() -> int:
     )
     parser.parse_args()
 
-    problems = record_problems() + registry_problems()
+    problems = (
+        record_problems()
+        + registry_problems()
+        + [Problem("ABBREVIATED_BODIES", detail) for detail in abbreviation_problems()]
+    )
     if not problems:
         registered = len(SOURCED)
         records = sum(1 for _ in published_records())

@@ -381,4 +381,4 @@ the normative PDF fiche.
 - [Why phonometry](why-phonometry.md): the conformance-first design philosophy
 - [Conformance report](../CONFORMANCE.md): the expected and computed value of all 1897 checks
 - [API Reference](../reference/api/index.md): every parameter of every function
-- [Bibliography](../reference/bibliography.md): the books and papers behind every guide, each with a verified link
+- [Bibliography](../reference/bibliography.md): every work the guides cite, with the pages that cite it and its link where it has one

@@ -27,6 +27,7 @@ import {
   standardsBody,
 } from '../lib/citations.mjs';
 import { bibliographyWorks, referencesOfEveryPage } from '../lib/bibliography-works';
+import { siteBibliography, withSections } from '../lib/bibliography-entries.mjs';
 import { pageEvidence } from '../lib/page-evidence';
 import { conformanceDataset } from '../lib/conformance-dataset.mjs';
 import { loadContentDates } from '../lib/content-dates.mjs';
@@ -267,8 +268,15 @@ const mainEntity = pageEntity ?? reportDataset;
 
 // Word count of the page source, with the machinery that is not prose (MDX
 // imports, component tags, fenced code) stripped first. An approximation, but
-// an honest one: it moves with the text, not with the markup around it.
-const rawBody = (route?.entry as { body?: string } | undefined)?.body ?? '';
+// an honest one: it moves with the text, not with the markup around it. The
+// bibliography's source holds its sections' lists as markers the build fills
+// in (src/lib/remark-bibliography.mjs), so its lists are counted as the page
+// shows them, written by the same functions from the same pages. Counted from
+// the markers, the count left out every entry, about fourteen words in fifteen.
+const sourceBody = (route?.entry as { body?: string } | undefined)?.body ?? '';
+const rawBody = isBibliography
+  ? withSections(sourceBody, siteBibliography(await referencesOfEveryPage(), lang), lang)
+  : sourceBody;
 const proseBody = prose(rawBody)
   .replace(/^import\s.+$/gm, ' ')
   .replace(/<\/?[A-Za-z][^>]*>/g, ' ');

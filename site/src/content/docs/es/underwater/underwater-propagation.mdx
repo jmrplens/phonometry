@@ -83,6 +83,16 @@ references:
     doi: "10.1121/1.386920"
     note: "La ecuación de nueve términos basada en profundidad y su valor de comprobación de 1550,744 m/s."
   - type: article
+    authors: ["Medwin, H."]
+    year: 1975
+    title: "Speed of sound in water: A simple equation for realistic parameters"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 58
+    issue: 6
+    pages: "1318-1319"
+    doi: "10.1121/1.380790"
+    note: "La ecuación de velocidad del sonido de seis términos (\"medwin\") que hay detrás de las reglas prácticas de la sección de velocidad del sonido, evaluada tal como la imprime Ainslie (2010) en la Ecuación 1.2."
+  - type: article
     authors: ["Leroy, C. C.", "Parthiot, F."]
     year: 1998
     title: "Depth-pressure relationships in the oceans and seas"
@@ -272,6 +282,11 @@ for model in ("ainslie-mccolm", "thorp"):
 pl.plot()   # PL frente a distancia con la separación divergencia/absorción
 ```
 
+`propagation_loss` devuelve un `PropagationLossResult`: la `pl` total con sus
+términos de divergencia (`spreading`) y absorción (`absorption`) en cada
+`range_m`, y la `frequency`, la `law`, el `model` y el `absorption_db_per_km`
+que los produjeron.
+
 Dos argumentos de esa llamada deciden más de lo que parece. `depth` es solo la
 profundidad a la que se evalúa el coeficiente de absorción (una profundidad
 representativa del trayecto, porque $\alpha$ cae con la presión) y **no** es la
@@ -401,7 +416,16 @@ b = underwater.weston_regime_boundaries(250.0, 50.0, seabed="sand")
 print(b.cylindrical_to_mode_stripping)   # r_CS, en metros
 print(b.cutoff_frequency, b.n_modes)  # la propagación guiada exige f > f_c
 print(underwater.reflection_loss_gradient("sand"))   # 0.278 Np/rad
+
+# Las filas de fondo marino (Tabla 9.1 de Ainslie) son accesibles.
+print(underwater.WESTON_SEABEDS["sand"].density_ratio)            # 2.1
+print(round(underwater.reflection_loss_gradient("mud", frequency_hz=250.0), 2))  # 5,18 Np/rad
 ```
+
+El gradiente de la arena lo fija el fondo por sí solo (Ec. 9.51 de Ainslie). El
+fango no tiene ángulo crítico: pierde energía por refracción hacia el
+sedimento, así que su gradiente crece en proporción a la frecuencia (Ec. 9.53)
+y `reflection_loss_gradient` lo rechaza si no se le da una.
 
 Al ser un resultado *incoherente*, el flujo describe el campo promediado en
 distancia, y eso es justo lo que lo convierte en referencia para los
@@ -410,7 +434,27 @@ submarina](/phonometry/es/underwater/underwater-solvers/).
 Con el ángulo crítico a 90° y el gradiente de pérdida a cero, la rama cilíndrica
 se reduce a $F = \pi/(rH)$, el límite exacto de muchos modos de una guía ideal;
 la pérdida por modos normales promediada en profundidad y distancia cae sobre
-ella dentro de un decibelio.
+ella dentro de un decibelio. Promediar en la profundidad del receptor forma
+parte de esa afirmación: una sola profundidad muestrea la forma de cada modo en
+un punto y arrastra ese sesgo al promedio en distancia.
+
+```python
+import numpy as np
+from phonometry import underwater
+
+ranges = np.linspace(20_000.0, 30_000.0, 2001)
+flux = underwater.weston_propagation_loss(
+    ranges, 100.0, 100.0, critical_angle_deg=90.0,
+    reflection_loss_gradient_value_np_per_rad=0.0)
+# Energía modal promediada en distancia, en nueve profundidades de la guía de 100 m.
+energy = [np.mean(10.0 ** (-underwater.normal_modes(
+    100.0, [0.0, 100.0], [1500.0, 1500.0], source_depth=41.0,
+    receiver_depth=float(zr), ranges_m=ranges).propagation_loss / 10.0))
+    for zr in np.linspace(10.0, 90.0, 9)]
+flux_mean = -10.0 * np.log10(np.mean(10.0 ** (-flux.propagation_loss / 10.0)))
+print(round(float(flux_mean), 1), round(float(-10.0 * np.log10(np.mean(energy))), 1))
+# 58,9 58,4 dB: la ley de flujo y después los modos
+```
 
 :::note
 La Ecuación (9.57) impresa por Ainslie para $r_\mathrm{MS}$ dice $k^2H_\mathrm{e}^3/(9\eta)$.
@@ -428,7 +472,9 @@ Chen-Millero** (`model="unesco"`, el valor por defecto, en la forma Wong & Zhu
 contrario que en los modelos de absorción de arriba, con guion), **Mackenzie**
 (`"mackenzie"`) o **Medwin** (`"medwin"`), todas de 1974-1981. La profundidad se
 convierte a
-presión con Leroy & Parthiot (1998). **Dentro del dominio que comparten las
+presión con Leroy & Parthiot (1998), la conversión que
+`fluids.depth_to_gauge_pressure_mpa` evalúa por sí sola (una presión
+manométrica en MPa, nula en la superficie). **Dentro del dominio que comparten las
 cuatro, coinciden dentro de 1 m/s**: 0,98 m/s a 25 °C, 35 ‰ y 1000 m, y
 0,52 m/s en todo el kilómetro superior del perfil dibujado más abajo, así que la
 elección va de rango de validez, no de exactitud. El valor de verificación
@@ -634,6 +680,19 @@ print(se.figure_of_merit)
 se.plot()   # exceso de señal frente a pérdida de propagación
 ```
 
+La forma activa toma el nivel de fuente, la pérdida de propagación de ida y la
+fuerza del blanco, y paga la pérdida dos veces, así que su figura de mérito es
+la pérdida de ida con la que cierra el balance de ida y vuelta:
+
+```python
+from phonometry import underwater
+
+active = underwater.active_sonar_equation(220.0, 70.0, target_strength=15.0,
+                                          noise_level=60.0, directivity_index=20.0,
+                                          detection_threshold=10.0)
+print(active.signal_excess, active.figure_of_merit)   # [45.] 92,5 dB
+```
+
 Los términos, una vez: $SL$ el nivel de fuente del blanco, $PL$ la pérdida de
 propagación de ida, $NL$ el nivel de ruido en el receptor, $DI$ el índice de
 directividad (ganancia de array), $DT$ el umbral de detección y, para la forma
@@ -799,6 +858,23 @@ plt.show()
 
 </details>
 
+`crossing="last"` lee en cambio el extremo lejano de la misma curva, de modo que
+los dos extremos de esa convención pueden ir al informe:
+
+```python
+import numpy as np
+from phonometry import underwater
+
+ranges = np.linspace(200.0, 6000.0, 1200)
+modes = underwater.normal_modes(30.0, [0.0, 100.0], [1500.0, 1500.0],
+                                source_depth=25.0, receiver_depth=60.0,
+                                ranges_m=ranges, n_depth_points=800)
+for crossing in ("first", "last"):
+    r50 = underwater.detection_range_from_curve(60.0, ranges, modes.propagation_loss,
+                                                crossing=crossing)
+    print(crossing, round(r50 / 1000.0, 1))   # 4,4 / 5,9 km
+```
+
 <span id="perdida-por-reflexion-en-el-fondo"></span>
 
 ## Pérdida por reflexión en el fondo
@@ -859,6 +935,23 @@ bl = underwater.bottom_reflection_loss(psi, rho1=1000.0, c1=1500.0,   # agua
                                rho2=1900.0, c2=1650.0)          # arena
 print(bl.critical_angle_deg)            # 24.6°
 bl.plot()   # pérdida por reflexión frente al ángulo rasante
+```
+
+`bottom_reflection_loss` devuelve un `BottomLossResult` con la
+`reflection_loss` (dB), el `reflection_coefficient` complejo y el
+`critical_angle_deg`, que vale `None` para un fondo más lento ($c_2 < c_1$),
+donde no hay reflexión total. Las dos piezas se pueden llamar también por
+separado, y `critical_angle(c1, c2)` rechaza un fondo más lento en lugar de
+devolver un ángulo que no existe:
+
+```python
+import numpy as np
+from phonometry import underwater
+
+print(round(underwater.critical_angle(1500.0, 1650.0), 2))   # 24,62°
+r = underwater.reflection_coefficient([90.0], rho1=1000.0, c1=1500.0,
+                                      rho2=1900.0, c2=1650.0)
+print(np.round(r, 3))   # [0.353+0.j] en incidencia normal
 ```
 
 El complemento `seabed_reflection` agrupa el `reflection_coefficient` complejo,
@@ -1017,6 +1110,10 @@ from phonometry import underwater
 freqs = np.logspace(2, 5.5, 300)
 noise = underwater.ocean_ambient_noise(freqs, wind_speed_kt=15.0)
 noise.plot()   # espectro compuesto con las componentes viento/térmico
+
+# wind_noise_spectrum y thermal_noise_spectrum son las dos componentes por
+# separado; el anclaje de la regla de los cincos, 1 kHz con viento de 5 nudos:
+print(round(float(underwater.wind_noise_spectrum(1000.0, 5.0)), 2))   # 51,02 dB
 ```
 
 ## Nivel de fuente del tráfico marítimo
@@ -1024,7 +1121,12 @@ noise.plot()   # espectro compuesto con las componentes viento/térmico
 Cuando no hay espectro medido, el nivel de fuente de un buque puede
 **estimarse** a partir de su clase, velocidad y eslora con **JOMOPANS-ECHO**
 (MacGillivray & de Jong 2021, por defecto, validado contra 1862 medidas),
-**RANDI 3.1** o **Wales & Heitmeyer** (2002).
+**RANDI 3.1** o **Wales & Heitmeyer** (2002). La implementación de
+JOMOPANS-ECHO reproduce la propia calculadora de referencia de los autores (el
+archivo S1 del artículo) con una diferencia de 0,01 dB como mucho, y en ella las
+cuatro clases de carga (graneleros, portacontenedores, petroleros y buques de
+transporte de vehículos) llevan una joroba adicional de baja frecuencia por
+debajo de 100 Hz.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise.svg" alt="Espectros de nivel de fuente predichos por JOMOPANS-ECHO para un portacontenedores, un crucero y un remolcador, con los buques de carga mostrando una joroba de baja frecuencia por debajo de 100 Hz" width="82%" />
 

@@ -404,7 +404,12 @@ ISO 7029:2017's age model: the median power-law deviation from age 18 (clause
 implemented by `age_threshold(age, sex, fractile)`. ISO 389-7:2005 Table 1's
 free-field and diffuse-field reference threshold of hearing at the eleven
 audiometric frequencies, returned by `reference_threshold(field)`, together
-with the clause 1 listening conditions that define it.
+with the clause 1 listening conditions that define it. ISO 389-1:1998's
+reference equivalent threshold sound pressure levels, the audiometric zero of
+section 3: the Beyer DT 48 and the Telephonics TDH 39 on an IEC 60303 coupler
+(Table 1) and any other supra-aural earphone on an IEC 60318 artificial ear
+(Table 2), returned by `earphone_reference_level(earphone, frequencies)` and
+added to an audiogram by `hearing_level_to_coupler_spl`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">

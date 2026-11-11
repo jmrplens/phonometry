@@ -132,10 +132,10 @@ plt.show()
 La implementación sigue exactamente los polos/ceros de la Tabla 1 de ISO 7196 y
 se verifica en CI contra todos los valores nominales de respuesta de la Tabla 2
 (0,25 Hz a 315 Hz). `WeightingFilter(fs, "G")` admite el mismo procesado
-multicanal y por bloques que A/C, pero el modo con estado ejecuta el diseño
-simple a la frecuencia de entrada, así que si procesas la ponderación G en
-streaming a una frecuencia de muestreo baja, verifica la respuesta antes de
-fiarte del nivel. Los niveles medidos con la curva G se expresan como
+multicanal y por bloques que A/C, y procesar en streaming no cuesta nada: el
+diseño es la misma cascada de secciones de segundo orden en los dos modos, así
+que los bloques encadenados reproducen exactamente una sola llamada a cualquier
+frecuencia de muestreo. Los niveles medidos con la curva G se expresan como
 $L_{p\mathrm{G}}$ (o $L_\mathrm{Geq}$ para el nivel equivalente).
 
 ### Leer un LpG: la escala no es la escala dB(A)

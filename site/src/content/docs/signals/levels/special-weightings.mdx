@@ -127,9 +127,9 @@ plt.show()
 The implementation follows the ISO 7196 Table 1 pole/zero values exactly and is
 verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
 `WeightingFilter(fs, "G")` supports the same multichannel and stateful block
-processing as A/C, but stateful mode runs the plain design at the input rate,
-so if you stream G-weighting at a low sample rate, verify the response before
-trusting the level. Levels measured with the G curve are reported as
+processing as A/C, and streaming costs nothing: the design is the same cascade
+of second-order sections either way, so stitched blocks reproduce a single
+call exactly at any sample rate. Levels measured with the G curve are reported as
 $L_{p\mathrm{G}}$ (or $L_\mathrm{Geq}$ for the equivalent level over time).
 
 ### Reading an LpG: the scale is not the dB(A) scale

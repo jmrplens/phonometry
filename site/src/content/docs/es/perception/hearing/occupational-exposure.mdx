@@ -368,11 +368,11 @@ término de muestreo de la tarea solo adelanta al del instrumento cuando la
 desviación típica muestral supera $1{,}5\sqrt{I}$, unos 3,7 dB con seis
 muestras, y en esta jornada del anexo D no lo hace: el corte y amolado dispersa
 3,0 dB sobre seis muestras, así que $u_{1\mathrm{a}} = 1{,}2$ dB frente a
-$u_2 = 1{,}5$ dB. El mayor segmento suelto de aquí es en realidad la
-**duración** de esa tarea corta y ruidosa, porque
-$c_{1\mathrm{b}} = 4{,}34\,c_{1\mathrm{a}}/\bar{T}_m$ crece a medida que la tarea se acorta, así
-que una incertidumbre de $\pm 0{,}5$ h sobre una tarea de 1,5 h cuesta más que
-el término de muestreo o el del instrumento.
+$u_2 = 1{,}5$ dB. La **duración** de esa tarea corta y ruidosa pesa más que su
+muestreo, porque $c_{1\mathrm{b}} = 4{,}34\,c_{1\mathrm{a}}/\bar{T}_m$ crece a medida que la
+tarea se acorta: una incertidumbre de $\pm 0{,}5$ h sobre una tarea de 1,5 h
+cuesta más que el término de muestreo y casi tanto como el del instrumento, el
+mayor segmento de la jornada.
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -386,10 +386,13 @@ import numpy as np
 # duración incluido.
 res_d = hearing.task_based_exposure(tasks, warn=False)
 for t in res_d.tasks:
-    print(f"{t.label:<16} muestreo {(t.c1a * t.u1a) ** 2:5.3f}  "
+    print(f"tarea {t.label:<16} muestreo {(t.c1a * t.u1a) ** 2:5.3f}  "
           f"duración {(t.c1b * t.u1b) ** 2:5.3f}  "
           f"instrumento {(t.c1a * t.u2) ** 2:5.3f}  "
           f"posición {(t.c1a * t.u3) ** 2:5.3f}")
+    # tarea planning/breaks  muestreo 0.000  duración 0.000  instrumento 0.000  posición 0.000
+    # tarea welding          muestreo 0.049  duración 0.059  instrumento 0.175  posición 0.078
+    # tarea cutting/grinding muestreo 0.757  duración 1.070  instrumento 1.148  posición 0.510
 
 counts = np.arange(3, 31)
 u2, u3, scatter = 1.5, 1.0, 3.0
@@ -478,7 +481,10 @@ la atenuación de los protectores auditivos utilizados, que el $L_\mathrm{EX,8h}
 medido no incluye. `verbose=True` añade las columnas de incertidumbre por
 tarea del anexo C ($u_{1\mathrm{a}}$, $u_{1\mathrm{b}}$, $u_2$), y `language="es"` produce la
 ficha en español (*nivel de exposición diario equivalente*, *valor límite de
-exposición*, con coma decimal).
+exposición*, con coma decimal). Para escribir la ficha hace falta el extra
+`phonometry[report]` (reportlab y svglib), y además matplotlib
+(`phonometry[plot]`) para la gráfica de contribuciones de un resultado por
+tareas.
 
 ```python
 from phonometry import ReportMetadata, hearing

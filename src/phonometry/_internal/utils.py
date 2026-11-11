@@ -13,7 +13,7 @@ from .validation import real_array
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    from .types import NumericArrayLike
+    from .types import NumericArrayLike, Real
 
 # Rank of the cached SOS filter state ``zi`` as ``_sos_initial_state`` lays
 # it out: (n_sections, 2) for 1-D input, (n_sections, n_channels, 2) for 2-D.
@@ -94,12 +94,10 @@ def _resample_to_length(
         # Nothing to resample: fall through to the slice/pad logic only.
         y_resampled = y
     elif taps is None:
-        y_resampled = cast(
-            "NDArray[np.float64]", signal.resample_poly(y, factor, 1, axis=-1)
-        )
+        y_resampled = cast("Real", signal.resample_poly(y, factor, 1, axis=-1))
     else:
         y_resampled = cast(
-            "NDArray[np.float64]",
+            "Real",
             signal.resample_poly(y, factor, 1, axis=-1, window=taps),
         )
     current_length = y_resampled.shape[-1]
@@ -146,7 +144,7 @@ def _sos_initial_state(
     n_sections = sos.shape[0]
     if x_proc.ndim == 1:
         if steady_ic:
-            return cast("NDArray[np.float64]", signal.sosfilt_zi(sos))
+            return cast("Real", signal.sosfilt_zi(sos))
         return np.zeros((n_sections, 2))
     n_channels = x_proc.shape[0]
     if steady_ic:

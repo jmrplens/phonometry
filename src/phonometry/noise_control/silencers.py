@@ -214,8 +214,13 @@ def _matrix_or_stack(stack: _Complex, like: NumericArrayLike) -> _Complex:
     return stack[0] if np.ndim(like) == 0 else stack
 
 
-def _as_stack(matrix: NumericArrayLike, name: str) -> tuple[_Complex, bool]:
+def _as_stack(
+    matrix: NumericArrayLike, name: str, *, index: int | None = None
+) -> tuple[_Complex, bool]:
     """A four-pole matrix or stack as a stack, and whether it was one matrix.
+
+    *index* places *matrix* among several passed under one *name*, and the
+    refusal names it so: ``'matrices'[1]``.
 
     :raises ValueError: If *matrix* is neither a ``(2, 2)`` matrix nor a
         ``(n_freq, 2, 2)`` stack of them.
@@ -224,12 +229,42 @@ def _as_stack(matrix: NumericArrayLike, name: str) -> tuple[_Complex, bool]:
     if arr.ndim == _ONE_FOUR_POLE_NDIM and arr.shape == (2, 2):
         return arr[np.newaxis], True
     if arr.ndim != _FOUR_POLE_NDIM or arr.shape[1:] != (2, 2):
+        where = f"'{name}'" if index is None else f"'{name}'[{index}]"
         msg = (
-            f"'{name}' must be a (2, 2) four-pole matrix or a (n_freq, 2, 2) "
+            f"{where} must be a (2, 2) four-pole matrix or a (n_freq, 2, 2) "
             f"stack of them; got shape {arr.shape}."
         )
         raise ValueError(msg)
     return arr, False
+
+
+def _cascade_operands(
+    matrices: tuple[NumericArrayLike, ...],
+) -> tuple[list[_Complex], bool]:
+    """The matrices of a cascade as stacks, and whether they were matrices alone.
+
+    Every matrix is read before any two are compared, so the first that is no
+    four-pole matrix is the one refused.
+
+    :raises ValueError: If a matrix is neither a ``(2, 2)`` matrix nor a
+        ``(n_freq, 2, 2)`` stack, or if matrices alone and stacks are mixed.
+    """
+    stacks: list[_Complex] = []
+    alone: list[bool] = []
+    for i, matrix in enumerate(matrices):
+        stack, single = _as_stack(matrix, "matrices", index=i)
+        stacks.append(stack)
+        alone.append(single)
+    for i, single in enumerate(alone):
+        if single != alone[0]:
+            kind = "a (2, 2) matrix" if single else "a (n_freq, 2, 2) stack"
+            other = "(n_freq, 2, 2) stacks" if single else "(2, 2) matrices"
+            msg = (
+                f"'matrices'[{i}] is {kind} beside {other}: cascade the "
+                "matrices of one frequency, or the stacks of one grid."
+            )
+            raise ValueError(msg)
+    return stacks, alone[0]
 
 
 def _per_frequency(impedance: NumericArrayLike, name: str, n_freq: int) -> _Complex:
@@ -356,39 +391,15 @@ def cascade(*matrices: NumericArrayLike) -> _Complex:
     if not matrices:
         msg = "cascade() needs at least one matrix."
         raise ValueError(msg)
-    arrays: list[_Complex] = []
-    alone: list[bool] = []
-    for i, matrix in enumerate(matrices):
-        arr = complex_array(matrix, "matrices")
-        if arr.ndim == _ONE_FOUR_POLE_NDIM and arr.shape == (2, 2):
-            arrays.append(arr[np.newaxis])
-            alone.append(True)
-            continue
-        if arr.ndim != _FOUR_POLE_NDIM or arr.shape[1:] != (2, 2):
-            msg = (
-                f"'matrices'[{i}] must be a (2, 2) four-pole matrix or a "
-                f"(n_freq, 2, 2) stack of them; got shape {arr.shape}."
-            )
-            raise ValueError(msg)
-        arrays.append(arr)
-        alone.append(False)
-    for i, single in enumerate(alone):
-        if single != alone[0]:
-            kind = "a (2, 2) matrix" if single else "a (n_freq, 2, 2) stack"
-            other = "(n_freq, 2, 2) stacks" if single else "(2, 2) matrices"
-            msg = (
-                f"'matrices'[{i}] is {kind} beside {other}: cascade the "
-                "matrices of one frequency, or the stacks of one grid."
-            )
-            raise ValueError(msg)
-    n = arrays[0].shape[0]
-    if any(m.shape[0] != n for m in arrays[1:]):
+    stacks, alone = _cascade_operands(matrices)
+    n = stacks[0].shape[0]
+    if any(m.shape[0] != n for m in stacks[1:]):
         msg = "cascade() matrices must share the same frequency grid (n_freq)."
         raise ValueError(msg)
-    total = arrays[0]
-    for m in arrays[1:]:
+    total = stacks[0]
+    for m in stacks[1:]:
         total = np.matmul(total, m)
-    return total[0] if alone[0] else total
+    return total[0] if alone else total
 
 
 def transmission_loss(

@@ -92,6 +92,10 @@ MAX_INLINE = 6
 #: displayed; a record further down is named, not expanded.
 MAX_DEPTH = 1
 
+#: The square metre, the unit of an area, which the field names and the
+#: name endings below both give.
+_SQUARE_METRE = "m\N{SUPERSCRIPT TWO}"
+
 #: The field names that are a unit on their own: a sampling rate, in hertz,
 #: and the axes the public vocabulary names by the bare concept because their
 #: unit never changes (a band axis is ``frequencies``, an array of levels
@@ -113,9 +117,9 @@ _NAMED_UNITS: Mapping[str, str] = MappingProxyType(
         "volume": "m\N{SUPERSCRIPT THREE}",
         "speeds_of_sound": "m/s",
         "speed_of_sound": "m/s",
-        "surface_area": "m\N{SUPERSCRIPT TWO}",
-        "absorption_area": "m\N{SUPERSCRIPT TWO}",
-        "room_constant": "m\N{SUPERSCRIPT TWO}",
+        "surface_area": _SQUARE_METRE,
+        "absorption_area": _SQUARE_METRE,
+        "room_constant": _SQUARE_METRE,
     }
 )
 
@@ -138,7 +142,7 @@ _UNITS: Mapping[str, str] = MappingProxyType(
         "mm": "mm",
         "um": "\N{MICRO SIGN}m",
         "ft": "ft",
-        "m2": "m\N{SUPERSCRIPT TWO}",
+        "m2": _SQUARE_METRE,
         "mm2": "mm\N{SUPERSCRIPT TWO}",
         "m3": "m\N{SUPERSCRIPT THREE}",
         "mm3": "mm\N{SUPERSCRIPT THREE}",
@@ -1004,9 +1008,14 @@ class RichDisplay:
         super().__init_subclass__(**kwargs)
         if "_repr_pretty_" not in vars(cls):
             type.__setattr__(cls, "_repr_pretty_", RichDisplay._repr_pretty_)
-        for name, member in list(vars(cls).items()):
-            if is_plotting_method(name) and inspect.isfunction(member):
-                type.__setattr__(cls, name, closes_its_figures(member))
+        # The namespace is read whole before a wrapped plot is written back to it.
+        plots = {
+            name: closes_its_figures(member)
+            for name, member in vars(cls).items()
+            if is_plotting_method(name) and inspect.isfunction(member)
+        }
+        for name, plot in plots.items():
+            type.__setattr__(cls, name, plot)
 
     def _repr_html_(self) -> str:
         """The table Jupyter, JupyterLab, VS Code and Colab render."""

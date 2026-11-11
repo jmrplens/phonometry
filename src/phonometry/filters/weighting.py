@@ -129,7 +129,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, Real
 
 Mode = Literal["fast", "slow", "impulse"]
 #: How a time weighting starts: from rest, or settled on the first sample.
@@ -664,7 +664,7 @@ class WeightingFilter:
         else:
             y = signal.sosfilt(self.sos, x_proc, axis=-1)
 
-        return like_input(x, cast("NDArray[np.float64]", y))
+        return like_input(x, cast("Real", y))
 
 
 def _runtime_frequency_response(
@@ -1050,7 +1050,7 @@ def time_weighting(
         # We apply the weighting to the squared signal to get the Mean Square value
         zi = np.expand_dims((1 - alpha) * initial, axis=-1)
         y, _ = signal.lfilter(b, a, x_sq, axis=-1, zi=zi)
-        return _as_envelope(x, cast("NDArray[np.float64]", y), fs, mode)
+        return _as_envelope(x, cast("Real", y), fs, mode)
 
     if mode == "impulse":
         # Time weighting I of the withdrawn IEC 60651: 35 ms rising, 1500 ms falling

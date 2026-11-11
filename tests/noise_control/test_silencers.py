@@ -235,6 +235,53 @@ def test_a_matrix_alone_does_not_cascade_with_a_stack() -> None:
         sl.cascade(stack, alone)
 
 
+def test_cascade_reads_every_matrix_before_it_compares_them() -> None:
+    """Each refusal of a cascade names its matrix, in the order the chain is read.
+
+    Every matrix is read before any two are compared, so one that is no
+    four-pole matrix is refused even after a matrix alone has met a stack;
+    then a stack beside matrices alone, then grids that disagree. A chain of
+    three is the product taken from the inlet, bit for bit.
+    """
+    stack = sl.duct_matrix([500.0, 600.0], 0.3, 0.05)
+    longer = sl.duct_matrix([500.0, 600.0, 700.0], 0.3, 0.05)
+    alone = sl.duct_matrix(500.0, 0.3, 0.05)
+    square = np.eye(3)
+    with pytest.raises(ValueError, match=r"^cascade\(\) needs at least one matrix\.$"):
+        sl.cascade()
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"^'matrices'\[2\] must be a \(2, 2\) four-pole matrix or a "
+            r"\(n_freq, 2, 2\) stack of them; got shape \(3, 3\)\.$"
+        ),
+    ):
+        sl.cascade(alone, stack, square)
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"^'matrices'\[1\] is a \(n_freq, 2, 2\) stack beside \(2, 2\) "
+            r"matrices: cascade the matrices of one frequency, or the stacks "
+            r"of one grid\.$"
+        ),
+    ):
+        sl.cascade(alone, stack)
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"^cascade\(\) matrices must share the same frequency grid "
+            r"\(n_freq\)\.$"
+        ),
+    ):
+        sl.cascade(stack, longer)
+    shunt = sl.shunt_matrix(
+        [sl.quarter_wave_impedance(f, 0.2, 0.03) for f in (500.0, 600.0)]
+    )
+    np.testing.assert_array_equal(
+        sl.cascade(stack, shunt, stack), np.matmul(np.matmul(stack, shunt), stack)
+    )
+
+
 def test_extended_tube_reduces_to_expansion_chamber() -> None:
     f = np.linspace(20.0, 880.0, 500)  # below the 891 Hz cut-on of 0.04 m2
     ext = sl.extended_tube_chamber(f, 0.3, 0.04, 0.01)

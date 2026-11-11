@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, RealValues
+    from .._internal.types import NumericArrayLike, Real, RealValues
 
 Mode = Literal["rms", "peak"]
 
@@ -1096,7 +1096,7 @@ class OctaveFilterBank:
             )
 
         # sosfilt supports axis=-1 by default
-        return cast("NDArray[np.float64]", y)
+        return cast("Real", y)
 
     def _calculate_level(
         self, y: NDArray[np.float64], mode: Mode
@@ -1145,9 +1145,7 @@ def _decimate_and_filter(
     :param factor: The band's decimation factor (1 filters at full rate).
     :return: The band output at the decimated rate.
     """
-    return cast(
-        "NDArray[np.float64]", signal.sosfilt(sos, _decimate(x, factor), axis=-1)
-    )
+    return cast("Real", signal.sosfilt(sos, _decimate(x, factor), axis=-1))
 
 
 def _decimate(x: NDArray[np.float64], factor: int) -> NDArray[np.float64]:
@@ -1160,7 +1158,7 @@ def _decimate(x: NDArray[np.float64], factor: int) -> NDArray[np.float64]:
     if factor == 1:
         return x
     return cast(
-        "NDArray[np.float64]",
+        "Real",
         signal.resample_poly(x, 1, factor, axis=-1, window=_multirate_lowpass(factor)),
     )
 

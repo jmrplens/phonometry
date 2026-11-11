@@ -86,6 +86,9 @@ _ASTM_KU_SPACING = 0.40
 #: (ASTM E2611-19, 6.2.3), i.e. ``f_l = c / (100 s)``.
 _ASTM_LOWER_WAVELENGTH_FRACTION = 100.0
 
+#: Shared validation message for the two microphone spacings.
+_SPACINGS_POSITIVE = "'s1' and 's2' must be positive."
+
 #: A load is the tuple of the four microphone transfer functions H1..H4
 #: (ASTM E2611-19, Eqs. (17)-(20)).
 _LOAD_TRANSFER_FUNCTIONS = 4
@@ -285,8 +288,7 @@ def _astm_plane_wave_bounds(
     require_scalar(s1, "s1")
     require_scalar(s2, "s2")
     if s1 <= 0.0 or s2 <= 0.0:
-        msg = "'s1' and 's2' must be positive."
-        raise ValueError(msg)
+        raise ValueError(_SPACINGS_POSITIVE)
     if diameter_m <= 0.0:
         raise ValueError(_DIAMETER_POSITIVE)
     ku = _ASTM_KU_CIRCULAR if shape == "circular" else _ASTM_KU_RECTANGULAR
@@ -440,8 +442,7 @@ def wave_decomposition(
     require_scalar(s1, "s1")
     require_scalar(s2, "s2")
     if s1 <= 0.0 or s2 <= 0.0:
-        msg = "'s1' and 's2' must be positive."
-        raise ValueError(msg)
+        raise ValueError(_SPACINGS_POSITIVE)
     bounds = _plane_wave_bounds_if_asked(
         s1=s1, s2=s2, diameter_m=diameter_m, shape=_canonical_shape(shape)
     )
@@ -861,8 +862,7 @@ def _check_solve_geometry(
     require_scalar(s1, "s1")
     require_scalar(s2, "s2")
     if s1 <= 0.0 or s2 <= 0.0:
-        msg = "'s1' and 's2' must be positive."
-        raise ValueError(msg)
+        raise ValueError(_SPACINGS_POSITIVE)
     require_positive(characteristic_impedance, "characteristic_impedance")
     require_positive(thickness_m, "thickness_m")
 

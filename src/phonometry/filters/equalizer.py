@@ -87,7 +87,7 @@ if TYPE_CHECKING:
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import NumericArrayLike, TwoPanels
+    from .._internal.types import NumericArrayLike, Real, TwoPanels
 
 __all__ = [
     "EQResponseResult",
@@ -635,7 +635,7 @@ class ParametricEQ:
         if not self.stateful:
             return like_input(
                 x,
-                cast("NDArray[np.float64]", signal.sosfilt(self.sos, x_proc, axis=-1)),
+                cast("Real", signal.sosfilt(self.sos, x_proc, axis=-1)),
             )
 
         if _sos_state_mismatch(self.zi, x_proc):
@@ -643,7 +643,7 @@ class ParametricEQ:
                 sos=self.sos, x_proc=x_proc, steady_ic=self._steady_ic
             )
         y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
-        return like_input(x, cast("NDArray[np.float64]", y))
+        return like_input(x, cast("Real", y))
 
     def response(
         self,

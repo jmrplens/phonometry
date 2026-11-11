@@ -87,6 +87,9 @@ half is a level in its own right, which is what makes the three routes of
 section 2 possible: you can obtain $L_{pE,10}$ without ever measuring
 $p_{10}(t)$, and subtract it from a level you did measure.
 
+All of this is Annex A, and Annex A is informative: it fixes the definition
+everyone quotes, and nothing about $G$ is normative in ISO 3382-1.
+
 ```python
 import numpy as np
 from phonometry import room
@@ -221,6 +224,18 @@ print(round(room.sound_strength_from_power(80.0, 100.0), 4))   # 11.0
 
 A.2.1 asks for $L_W$ to be measured to ISO 3741, which lives in
 [Sound Power](/phonometry/devices/emission/sound-power/).
+
+The printed A.2.1 carries two defects, both in
+[the errata register](/phonometry/reference/errata/). The same symbol
+$L_{pE}$ names the hall's exposure level under (A.2) and the
+reverberation-room level under (A.5), so substituting one into the other as
+printed makes the hall vanish from $G$; the library keeps the two apart, the
+hall's level coming from the `ir` that `sound_strength` measures and the
+laboratory's as the `reverberation_room_level` of
+`reverberation_room_reference_level`. And the note under (A.4) asks for a
+measurement "at every 12,5°", a step that does not close the circle
+(360/12.5 = 28.8), so `directivity_energy_average` takes at least 29 bearings
+spread over the full turn and refuses fewer.
 
 ## 3. Why the routes cannot agree exactly
 
@@ -373,14 +388,21 @@ acquiring the response itself, with the source and microphone positions
 ISO 3382-1 asks for, is in
 [Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/).
 
-<SeeAlso
-  links={[
-    { href: '/phonometry/buildings/rooms/room-acoustics/', label: 'Room Acoustic Parameters' },
-    { href: '/phonometry/buildings/rooms/room-impulse-response/', label: 'Measuring the Room Impulse Response' },
-    { href: '/phonometry/devices/emission/sound-power/', label: 'Sound Power' },
-    { href: '/phonometry/buildings/rooms/enclosed-space-absorption/', label: 'Absorption and Reverberation Time' },
-  ]}
-/>
+<SeeAlso>
+
+## See also
+
+- [Room Acoustic Parameters](/phonometry/buildings/rooms/room-acoustics/): the
+  decay times and energy ratios read from the same impulse response.
+- [Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/):
+  the ISO 18233 acquisition of the responses this page compares.
+- [Sound Power](/phonometry/devices/emission/sound-power/): the $L_W$ that
+  Equation (A.9) subtracts, measured to ISO 3741.
+- [Absorption and Reverberation Time](/phonometry/buildings/rooms/enclosed-space-absorption/):
+  the absorption area Equation (A.5) converts a diffuse-field reading through.
+- API reference: [`room.auditorium`](/phonometry/reference/api/rooms/auditorium/).
+
+</SeeAlso>
 
 ## What this guide covers
 

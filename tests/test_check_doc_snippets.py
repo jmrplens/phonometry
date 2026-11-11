@@ -15,9 +15,9 @@ import ast
 import importlib.util
 import pathlib
 import sys
-import time
 
 import pytest
+from time_growth import assert_linear_time
 
 _SCRIPT = (
     pathlib.Path(__file__).resolve().parent.parent / "scripts" / "check_doc_snippets.py"
@@ -735,16 +735,19 @@ def test_an_ellipsis_meets_the_last_line_of_a_long_loop_in_linear_time() -> None
 
     Each line end counted the stated values before it from the first one, so
     the time grew with the square of the lines: 1.4 s for 5,000, 27.5 s for
-    20,000 and about a minute for these 30,000.
+    20,000 and about a minute for 30,000.
     """
-    loop = [str(n) for n in range(30_000)]
-    start = time.perf_counter()
-    found = _disagreement("0 ... 29999", loop)
-    # Ten seconds against the minute the quadratic count took, and the
-    # second the linear one takes: wide enough for a loaded runner.
-    assert time.perf_counter() - start < 10.0
-    assert found == ""
-    assert "30000" in _disagreement("0 ... 30000", loop)
+
+    def loop(lines: int) -> tuple[str, list[str]]:
+        return f"0 ... {lines - 1}", [str(n) for n in range(lines)]
+
+    # Six thousand lines, so that even a copy of the stated values at each
+    # line end, quadratic at C speed, outgrows the linear reading by the
+    # larger loop and fails the test.
+    growth = assert_linear_time(loop, lambda case: _disagreement(*case), 6_000)
+    assert growth.result == ""
+    lines = growth.factor * growth.size
+    assert str(lines) in _disagreement(f"0 ... {lines}", loop(lines)[1])
 
 
 def test_a_unit_power_and_a_symbol_index_are_not_values() -> None:
@@ -1471,13 +1474,14 @@ def test_a_long_run_of_digits_beside_a_label_is_read_in_linear_time() -> None:
     Looked for from each digit, a print of 20,000 digits beside its label
     took about 30 s on this machine, and 40,000 about two minutes.
     """
-    count = 20_000
-    digits = "7" * count
-    script = f'digits = "7" * {count}\nprint(f"ID: {{digits}}")  # ID: {digits}\n'
-    start = time.perf_counter()
-    found = _failures(script, {2: f"ID: {digits}"})
-    assert time.perf_counter() - start < 10.0
-    assert found == []
+
+    def printed(count: int) -> tuple[str, dict[int, str]]:
+        digits = "7" * count
+        script = f'digits = "7" * {count}\nprint(f"ID: {{digits}}")  # ID: {digits}\n'
+        return script, {2: f"ID: {digits}"}
+
+    growth = assert_linear_time(printed, lambda case: _failures(*case), 3_000)
+    assert growth.result == []
 
 
 def test_a_long_run_of_spaces_is_read_in_linear_time() -> None:
@@ -1488,21 +1492,24 @@ def test_a_long_run_of_spaces_is_read_in_linear_time() -> None:
     took about two minutes on this machine, and a comment of as many about a
     minute and a half.
     """
-    count = 80_000
-    value = "a" + " " * count + "b"
-    script = (
-        f'value = "a" + " " * {count} + "b"\nprint(f"ID: {{value}}")  # ID: {value}\n'
+
+    def printed(count: int) -> tuple[str, dict[int, str]]:
+        value = "a" + " " * count + "b"
+        script = (
+            f'value = "a" + " " * {count} + "b"\n'
+            f'print(f"ID: {{value}}")  # ID: {value}\n'
+        )
+        return script, {2: f"ID: {value}"}
+
+    def commented(count: int) -> str:
+        return f"ID: 1{' ' * count}3"
+
+    found = assert_linear_time(printed, lambda case: _failures(*case), 4_000)
+    noted = assert_linear_time(
+        commented, lambda said: _disagreement(said, "ID: 1 2"), 4_000
     )
-    start = time.perf_counter()
-    found = _failures(script, {2: f"ID: {value}"})
-    printed = time.perf_counter() - start
-    start = time.perf_counter()
-    noted = _disagreement(f"ID: 1{' ' * count}3", "ID: 1 2")
-    commented = time.perf_counter() - start
-    assert printed < 10.0
-    assert commented < 10.0
-    assert found == []
-    assert "3" in noted
+    assert found.result == []
+    assert "3" in noted.result
 
 
 def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
@@ -1511,13 +1518,16 @@ def test_a_long_spanish_comment_is_read_in_linear_time() -> None:
 
     Counted again, a comment of 40,000 values took about 40 s on this machine.
     """
-    count = 40_000
-    said = "[" + " ".join(f"{n},5" for n in range(count)) + "]"
-    wrote = "[" + " ".join(f"{n}.5" for n in range(count)) + "]"
-    start = time.perf_counter()
-    found = _disagreement(said, wrote, decimal_comma=True)
-    assert time.perf_counter() - start < 10.0
-    assert found == ""
+
+    def comment(count: int) -> tuple[str, str]:
+        said = "[" + " ".join(f"{n},5" for n in range(count)) + "]"
+        wrote = "[" + " ".join(f"{n}.5" for n in range(count)) + "]"
+        return said, wrote
+
+    growth = assert_linear_time(
+        comment, lambda case: _disagreement(*case, decimal_comma=True), 1_000
+    )
+    assert growth.result == ""
 
 
 def test_a_comment_over_many_lines_is_read_in_linear_time() -> None:
@@ -1526,13 +1536,14 @@ def test_a_comment_over_many_lines_is_read_in_linear_time() -> None:
 
     Counted again, a comment of 40,000 lines took about 23 s on this machine.
     """
-    count = 40_000
-    rows = "".join(f"#  {n},\n" for n in range(1, count - 1))
-    script = f"print(list(range({count})))\n# [0,\n{rows}#  {count - 1}]\n"
-    start = time.perf_counter()
-    (promise,) = check_doc_snippets.promised_outputs(script)
-    assert time.perf_counter() - start < 10.0
-    assert len(promise.lines) == count
+
+    def script(count: int) -> str:
+        rows = "".join(f"#  {n},\n" for n in range(1, count - 1))
+        return f"print(list(range({count})))\n# [0,\n{rows}#  {count - 1}]\n"
+
+    growth = assert_linear_time(script, check_doc_snippets.promised_outputs, 1_000)
+    (promise,) = growth.result
+    assert len(promise.lines) == growth.factor * growth.size
 
 
 def test_a_page_of_many_commented_prints_is_read_in_linear_time() -> None:
@@ -1542,12 +1553,19 @@ def test_a_page_of_many_commented_prints_is_read_in_linear_time() -> None:
     Found among every one, a page of 16,000 prints, each with its comment,
     took 60 to 260 s on this machine, as loaded.
     """
-    count = 16_000
-    script = "".join(f"print({n})  # {n}\n" for n in range(count))
-    start = time.perf_counter()
-    promises = check_doc_snippets.promised_outputs(script)
-    assert time.perf_counter() - start < 10.0
-    assert len(promises) == count
+
+    def page(count: int) -> str:
+        return "".join(f"print({n})  # {n}\n" for n in range(count))
+
+    # Four thousand prints, so that even a copy of every print of the page
+    # made for each stretch of comment, quadratic at C speed, outgrows the
+    # linear reading by the larger page and fails the test. The larger
+    # reading takes about a second and a half, so each size is read three
+    # times rather than five.
+    growth = assert_linear_time(
+        page, check_doc_snippets.promised_outputs, 4_000, repeats=3
+    )
+    assert len(growth.result) == growth.factor * growth.size
 
 
 def test_a_function_that_binds_print_is_read_in_linear_time() -> None:
@@ -1559,13 +1577,24 @@ def test_a_function_that_binds_print_is_read_in_linear_time() -> None:
     Scanned again, a function of 16,000 commented prints of a parameter
     named ``print`` took 17 to 19 s on this machine.
     """
-    count = 16_000
-    body = "".join(f"    print({n})  # {n}\n" for n in range(count))
-    start = time.perf_counter()
-    promises = check_doc_snippets.promised_outputs(f"def show(print):\n{body}")
-    assert time.perf_counter() - start < 10.0
-    assert len(promises) == count
-    assert not any(promise.builtin for promise in promises)
+
+    def function(count: int) -> str:
+        body = "".join(
+            f"    print({n})  # {n}\n" + "    pass\n" * 9 for n in range(count)
+        )
+        return f"def show(print):\n{body}"
+
+    # Nine statements the reader passes over at little cost follow each
+    # print, so that the body is ten times as long as its prints and a scan
+    # of it for each call, even one at C speed, outgrows the rest of the
+    # reading by the larger function and fails the test. The larger reading
+    # takes about a second, so each size is read three times rather than
+    # five.
+    growth = assert_linear_time(
+        function, check_doc_snippets.promised_outputs, 1_000, repeats=3
+    )
+    assert len(growth.result) == growth.factor * growth.size
+    assert not any(promise.builtin for promise in growth.result)
 
 
 def test_a_spanish_comment_writes_the_commas_of_its_brackets_one_way() -> None:

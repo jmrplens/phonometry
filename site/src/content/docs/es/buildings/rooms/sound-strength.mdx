@@ -238,9 +238,9 @@ están impresos hace desaparecer la sala de $G$; la biblioteca mantiene los dos
 separados: el nivel de la sala sale de la `ir` que mide `sound_strength` y el
 del laboratorio entra como el `reverberation_room_level` de
 `reverberation_room_reference_level`. Y la nota bajo (A.4) pide una medida
-«cada 12,5°», un paso que no cierra la circunferencia (360/12,5 = 28,8), así
-que `directivity_energy_average` toma al menos 29 acimuts repartidos por la
-vuelta completa y rechaza menos.
+«cada 12,5°», un paso que no cabe un número entero de veces en una vuelta
+completa, así que `directivity_energy_average` toma al menos 29 acimuts
+repartidos por la vuelta completa y rechaza menos.
 
 ## 3. Por qué las rutas no pueden coincidir exactamente
 

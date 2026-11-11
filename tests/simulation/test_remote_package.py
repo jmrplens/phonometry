@@ -10,6 +10,8 @@ import tomllib
 from pathlib import Path
 
 import pytest
+from packaging.requirements import Requirement
+from packaging.version import Version
 
 from phonometry.simulation._remote import bootstrap, package
 
@@ -37,15 +39,43 @@ def test_the_wheel_is_built_by_the_rules_the_client_follows() -> None:
     assert "exclude-package-data" not in setuptools
 
 
-def test_the_floors_a_node_checks_are_the_package_s() -> None:
+def _floors_on(python: str) -> dict[str, str]:
+    """The floors of the base install on *python*, as pip reads their markers."""
     floors = {}
-    for requirement in _PYPROJECT["project"]["dependencies"]:
-        found = re.fullmatch(r"([A-Za-z0-9_.-]+)>=([0-9.]+)", requirement)
-        assert found is not None, requirement
-        name, floor = found.groups()
-        floors[name] = floor
-    assert dict(package.FLOORS) == floors
+    for requirement in map(Requirement, _PYPROJECT["project"]["dependencies"]):
+        marker = requirement.marker
+        if marker is None or marker.evaluate({"python_version": python}):
+            floors[requirement.name] = next(
+                clause.version
+                for clause in requirement.specifier
+                if clause.operator == ">="
+            )
+    return floors
+
+
+def _supported_pythons() -> list[str]:
+    return [
+        classifier.rsplit(" :: ", 1)[1]
+        for classifier in _PYPROJECT["project"]["classifiers"]
+        if re.fullmatch(r"Programming Language :: Python :: 3\.\d+", classifier)
+    ]
+
+
+def test_the_floors_a_node_checks_are_the_package_s() -> None:
+    """The floors of the oldest Python, which the node checks on any Python."""
+    assert dict(package.FLOORS) == _floors_on(package.PYTHON_FLOOR)
     assert _PYPROJECT["project"]["requires-python"] == f">={package.PYTHON_FLOOR}"
+
+
+@pytest.mark.parametrize("python", _supported_pythons())
+def test_no_python_has_a_floor_below_the_ones_a_node_checks(python: str) -> None:
+    """What a node refuses, the package runs with on no Python."""
+    floors = _floors_on(python)
+    assert set(floors) == set(package.FLOORS)
+    below = [
+        name for name in floors if Version(floors[name]) < Version(package.FLOORS[name])
+    ]
+    assert below == []
 
 
 def test_the_installed_package_is_what_a_wheel_holds() -> None:

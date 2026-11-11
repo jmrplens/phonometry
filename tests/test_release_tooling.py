@@ -553,6 +553,23 @@ def test_the_declared_dependencies_are_read_from_pyproject() -> None:
     assert release_sbom.declared_dependencies() == ["numpy", "scipy"]
 
 
+def test_a_dependency_with_a_floor_per_python_is_declared_once(
+    tmp_path: pathlib.Path,
+) -> None:
+    """One floor per Python is one dependency the SBOM has to list, not three."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        "[project]\n"
+        "dependencies = [\n"
+        "    \"numpy>=2.0.2; python_version<'3.13'\",\n"
+        "    \"numpy>=2.1.0; python_version>='3.13'\",\n"
+        '    "SciPy>=1.14.0",\n'
+        "]\n",
+        encoding="utf-8",
+    )
+    assert release_sbom.declared_dependencies(pyproject) == ["numpy", "scipy"]
+
+
 def test_the_sbom_script_rewrites_the_file(tmp_path: pathlib.Path) -> None:
     path = tmp_path / "sbom.json"
     path.write_text(json.dumps(_sbom()), encoding="utf-8")

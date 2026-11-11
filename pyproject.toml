@@ -92,12 +92,29 @@ classifiers = [
     "Typing :: Typed",
 ]
 # The floors are measured, not guessed: each is the oldest release the
-# library's suite passes with on Python 3.12, with every other floor
-# installed beside it, and a CI job (minimum-versions in python-app.yml)
-# installs exactly these and runs the suite, so a floor cannot rot into a
-# promise nobody checks. A floor rises only with a failure measured at it;
-# the pins the repository develops on live in requirements*.txt and stay at
-# the latest releases. What each one rests on:
+# library's suite passes with, with every other floor installed beside it, on
+# each Python the package supports, and a CI job (minimum-versions in
+# python-app.yml) installs exactly these on each of those Pythons and runs the
+# suite, so a floor cannot rot into a promise nobody checks. A floor rises
+# only with a failure measured at it; the pins the repository develops on live
+# in requirements*.txt and stay at the latest releases.
+#
+# Where the oldest release has no wheel for a newer Python, that Python has a
+# floor of its own, the oldest release with a wheel for it, written behind a
+# python_version marker. Held at the floors of 3.12, a resolver on 3.13 or
+# 3.14 builds NumPy and SciPy from their sources, which fails without a
+# compiler, and gets no numba or torch at all: the sources of numba 0.60.0
+# refuse any Python above 3.12, and torch publishes none. The markers give each
+# distribution one floor on every Python from 3.12 up, the last of them open
+# above, and scripts/minimum_requirements.py refuses a gap or an overlap. The
+# first wheel for each, on 3.13 and on 3.14:
+#   numpy  2.1.0 and 2.3.2      scipy  1.14.1 and 1.16.1
+#   numba  0.61.0 and 0.63.0    torch  2.5.0 and 2.9.0
+# torch's are those of Linux on x86-64, the platform of the CI job; its first
+# 3.13 wheel for macOS on ARM, Windows on x86-64 and Linux on ARM is 2.6.0,
+# which a resolver there takes instead, since 2.5.0 has nothing to build from.
+#
+# What each floor rests on, on Python 3.12:
 #   numpy 2.0.2   2.0.0 and 2.0.1 return a multiple coherence that differs in
 #                 the last bit between a Signal block and the same records
 #                 passed one by one, in about half the runs
@@ -124,12 +141,20 @@ classifiers = [
 #                 wheel for Python 3.12
 #   array-api-compat 1.5.1  1.5 refuses a Python scalar in where()
 dependencies = [
-    "numpy>=2.0.2",
-    "scipy>=1.14.0",
+    "numpy>=2.0.2; python_version<'3.13'",
+    "numpy>=2.1.0; python_version=='3.13'",
+    "numpy>=2.3.2; python_version>='3.14'",
+    "scipy>=1.14.0; python_version<'3.13'",
+    "scipy>=1.14.1; python_version=='3.13'",
+    "scipy>=1.16.1; python_version>='3.14'",
 ]
 
 [project.optional-dependencies]
-perf = ["numba>=0.60.0"]
+perf = [
+    "numba>=0.60.0; python_version<'3.13'",
+    "numba>=0.61.0; python_version=='3.13'",
+    "numba>=0.63.0; python_version>='3.14'",
+]
 plot = ["matplotlib>=3.10.7"]
 report = ["reportlab>=4.3.0", "svglib>=0.9.1,!=1.4.0"]
 # The base install already reads the whole linear WAV family (PCM, float,
@@ -142,8 +167,21 @@ audio = ["soundfile>=0.12.0"]
 # CUDA or Apple MPS. CuPy is not an extra: its wheel depends on the CUDA
 # version, and no CI job can measure a floor for it; the guide names the
 # version the GPU proof ran on.
-torch = ["torch>=2.3.0", "array-api-compat>=1.5.1"]
-full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.3.0", "svglib>=0.9.1,!=1.4.0", "soundfile>=0.12.0"]
+torch = [
+    "torch>=2.3.0; python_version<'3.13'",
+    "torch>=2.5.0; python_version=='3.13'",
+    "torch>=2.9.0; python_version>='3.14'",
+    "array-api-compat>=1.5.1",
+]
+full = [
+    "numba>=0.60.0; python_version<'3.13'",
+    "numba>=0.61.0; python_version=='3.13'",
+    "numba>=0.63.0; python_version>='3.14'",
+    "matplotlib>=3.10.7",
+    "reportlab>=4.3.0",
+    "svglib>=0.9.1,!=1.4.0",
+    "soundfile>=0.12.0",
+]
 
 [project.urls]
 "Homepage" = "https://docs.jmrp.io/phonometry/"

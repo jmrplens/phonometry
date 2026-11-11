@@ -131,11 +131,12 @@ different questions:
   request, and `tests/test_minimum_requirements.py` refuses it.
 - **The floors** in `pyproject.toml`, under `[project.dependencies]` and
   `[project.optional-dependencies]`, are what a user may install. Each one is
-  the oldest release the library's tests pass with on Python 3.12, measured
-  with every other floor installed beside it, and the comment above them says
-  what each one rests on. The `minimum-versions` CI job installs exactly those
-  floors and runs the library's tests on them, so a floor that stops being
-  true fails the pull request that made it so.
+  the oldest release the library's tests pass with, on each supported Python,
+  measured with every other floor installed beside it, and the comment above
+  them says what each one rests on. The `minimum-versions` CI job runs on
+  every supported Python, installs exactly that Python's floors and runs the
+  library's tests on them, so a floor that stops being true fails the pull
+  request that made it so.
 
 The rule: keep the pins at the latest releases, keep the floors measured, and
 **never raise a floor without a failure measured at it**. When new code needs
@@ -147,12 +148,40 @@ excluded beside the floor rather than raising the floor past it, and the
 comment says why: `svglib>=0.9.1,!=1.4.0`, since 1.4.0 stops `.report()` at a
 debugger prompt.
 
+A floor can differ from one Python to the next. The oldest release of a
+compiled dependency often has no wheel for a newer Python: NumPy 2.0.2,
+SciPy 1.14.0, numba 0.60.0 and torch 2.3.0 have none for 3.13 or 3.14, where
+a resolver held at them builds from source or finds nothing. Such a Python
+gets a floor of its own, the oldest release that installs from a wheel there
+and passes the tests there, written once per Python behind a marker:
+
+```toml
+"numpy>=2.0.2; python_version<'3.13'",
+"numpy>=2.1.0; python_version=='3.13'",
+"numpy>=2.3.2; python_version>='3.14'",
+```
+
+The markers of a distribution give every supported Python exactly one floor,
+and the last of them stays open above, so a Python newer than the ones the
+classifiers name still gets one. When a new Python joins the classifiers,
+measure each floor there the same way, in a clean image of that Python with
+no compiler, and split the last marker if it needs a newer one. Leave the
+floors of the older Pythons as they are: a newer Python's wheel says nothing
+about them. Nor does a newer Python take a lower floor than the one before
+it, which `tests/test_minimum_requirements.py` refuses: the last marker
+covers Pythons nobody has measured yet, and conda-forge's recipe, which has
+one constraint for every Python, takes the floor of the oldest. reportlab
+4.2.5 renders a fiche on 3.14, where the deprecated name it reads is gone,
+and warns on 3.12 and 3.13, so `reportlab>=4.3.0` holds for all three.
+
 The job reads the floors with
 [`scripts/minimum_requirements.py`](scripts/minimum_requirements.py), which
-also refuses a requirement that is anything but one `>=` floor and `!=`
-exclusions of releases above it, and, with `--check`, an environment where
-pip settled on anything else. To run it as the
-job does, in a fresh Python 3.12 environment:
+prints those of the Python it runs on. It also refuses a requirement that is
+anything but one `>=` floor, `!=` exclusions of releases above it and one
+marker on `python_version` (`<`, `==` or `>=` a release), markers that leave
+a supported Python with no floor or with two, and, with `--check`, an
+environment where pip settled on anything else. To run it as the job does,
+in a fresh environment of the Python whose floors you test:
 
 ```bash
 python scripts/minimum_requirements.py > minimum-requirements.txt

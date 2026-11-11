@@ -30,6 +30,14 @@ trabajo de CI instala exactamente esas versiones en Python 3.12 para que siga
 siendo así: matplotlib 3.10.7 para `[plot]`, reportlab 4.3.0 y svglib 0.9.1
 (salvo la 1.4.0) para `[report]`, numba 0.60.0 para `[perf]`, python-soundfile
 0.12.0 para `[audio]` y torch 2.3.0 con array-api-compat 1.5.1 para `[torch]`.
+Python 3.13 y 3.14 tienen mínimas propias para NumPy, SciPy, numba y torch,
+cuyas versiones más antiguas no tienen wheel para ellos: las más antiguas que
+sí lo tienen, que el mismo trabajo instala en cada uno, en Python 3.13 NumPy
+2.1.0, SciPy 1.14.1, numba 0.61.0 y torch 2.5.0, y en Python 3.14 NumPy 2.3.2,
+SciPy 1.16.1, numba 0.63.0 y torch 2.9.0. El wheel de Python 3.13 de
+torch 2.5.0 es solo para Linux en x86-64, donde corre el trabajo; en macOS en
+ARM, Windows en x86-64 y Linux en ARM el primero es torch 2.6.0, el más
+antiguo que se instala allí.
 
 ### Extras opcionales
 

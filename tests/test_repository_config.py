@@ -192,11 +192,14 @@ def test_the_docs_workflow_triggers_on_every_root_file_the_site_build_reads() ->
 
 
 def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
-    """The 3.14 job explains itself by quoting pyproject's numba floor."""
+    """The 3.14 job explains itself by quoting pyproject's numba floor.
+
+    A floor is quoted without its marker: the comment says which Python it is for.
+    """
     with (_ROOT / "pyproject.toml").open("rb") as handle:
         pyproject = tomllib.load(handle)
     declared = {
-        spec
+        spec.split(";", 1)[0].replace(" ", "")
         for extra in pyproject["project"]["optional-dependencies"].values()
         for spec in extra
         if spec.replace(" ", "").startswith("numba")

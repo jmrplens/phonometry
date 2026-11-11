@@ -45,7 +45,9 @@ clean one, and near `0` for uncorrelated noise. They work directly on the two
 waveforms, which makes them the standard yardstick for **time-frequency
 weighted** speech: noise reduction, source separation and binary-mask
 processing, where separating the clean speech from its distortion is not
-straightforward.
+straightforward. Neither measure is standardised: both are journal
+algorithms, and the papers that define them (Taal et al. 2011 for STOI, Jensen
+and Taal 2016 for ESTOI) are their normative text.
 
 :::note
 **STOI/ESTOI vs STI vs SII.** STOI and ESTOI need the clean reference *and* the
@@ -72,8 +74,9 @@ Section II): resampling to **10 kHz**; a 256-sample (25.6 ms) Hann-windowed,
 frames whose *clean* energy is more than **40 dB** below the loudest clean
 frame; a **15-band one-third-octave** grouping of the DFT magnitudes from a
 lowest centre of 150 Hz; and **384 ms** (30-frame) analysis segments as the
-unit of comparison. The sample rate of the inputs is free, the library
-resamples internally.
+unit of comparison, sliding one frame at a time and long enough to carry the
+slow modulations that matter for intelligibility. The sample rate of the
+inputs is free, the library resamples internally.
 
 Both measures are defined for **running speech**, and the front end is where
 that assumption bites: the 40 dB rule keys off the *clean* signal's dynamic
@@ -325,6 +328,16 @@ normalised columns (Jensen and Taal 2016, Eqs. 4-8). Making the columns compete
 means a masker that leaves quiet gaps, where the clean speech is briefly
 audible, is credited for the speech glimpsed there, which STOI's per-band
 average largely misses.
+
+```python
+# The steady-masker pair of the per-segment figure above, scored the other
+# way: `extended=True` on the same call selects ESTOI.
+estoi = speech.stoi(ref, ref + masker, fs, extended=True)
+print(round(steady.value, 3), round(estoi.value, 3), estoi.extended)  # 0.772 0.417 True
+```
+
+On the same steady masker ESTOI reads well below STOI: the two indices are not
+on one scale, so compare an ESTOI value with ESTOI values only.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_intelligibility.svg"

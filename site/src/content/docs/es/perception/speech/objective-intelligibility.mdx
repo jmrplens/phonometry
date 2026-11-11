@@ -45,7 +45,10 @@ coincide con la limpia y cerca de `0` para ruido no correlacionado. Trabajan
 directamente sobre las dos formas de onda, lo que las convierte en la vara de
 medir habitual para el habla con **ponderación tiempo-frecuencia**: reducción de
 ruido, separación de fuentes y procesado por máscara binaria, donde separar el
-habla limpia de su distorsión no es inmediato.
+habla limpia de su distorsión no es inmediato. Ninguna de las dos medidas está
+normalizada: ambas son algoritmos publicados en revistas, y los artículos que
+las definen (Taal et al. 2011 para STOI, Jensen y Taal 2016 para ESTOI) son su
+texto normativo.
 
 :::note
 **STOI/ESTOI frente a STI y SII.** STOI y ESTOI necesitan la referencia limpia
@@ -75,8 +78,10 @@ hasta 512 puntos; eliminación de las tramas cuya energía *limpia* está más d
 **40 dB** por debajo de la trama limpia más intensa; una agrupación por **15
 bandas de tercio de octava** de las magnitudes DFT desde un centro mínimo de
 150 Hz; y segmentos de análisis de **384 ms** (30 tramas) como unidad de
-comparación. La frecuencia de muestreo de las entradas es libre, la biblioteca
-remuestrea internamente.
+comparación, que se desplazan de trama en trama y son lo bastante largos para
+recoger las modulaciones lentas de las que depende la inteligibilidad. La
+frecuencia de muestreo de las entradas es libre, la biblioteca remuestrea
+internamente.
 
 Ambas medidas están definidas para **habla continua**, y el procesado inicial es
 donde muerde esa suposición: la regla de los 40 dB se apoya en el rango dinámico
@@ -338,6 +343,17 @@ columnas normalizadas (Jensen y Taal 2016, Ecs. 4-8). Hacer competir las
 columnas significa que un enmascarador que deja silencios, donde el habla limpia
 es audible por instantes, recibe crédito por el habla vislumbrada ahí, algo que
 el promedio por banda de STOI apenas capta.
+
+```python
+# El par con enmascarador estacionario de la figura por segmentos de arriba,
+# puntuado de la otra forma: `extended=True` en la misma llamada elige ESTOI.
+estoi = speech.stoi(ref, ref + masker, fs, extended=True)
+print(round(steady.value, 3), round(estoi.value, 3), estoi.extended)  # 0.772 0.417 True
+```
+
+Con el mismo enmascarador estacionario, ESTOI queda muy por debajo de STOI: los
+dos índices no están en la misma escala, así que un valor de ESTOI solo se
+compara con otros valores de ESTOI.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_intelligibility.svg"

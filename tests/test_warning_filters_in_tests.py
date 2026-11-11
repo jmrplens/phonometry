@@ -574,9 +574,12 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
             if isinstance(child, (ast.With, ast.AsyncWith)) and any(
                 _records(item, modules, bare, known, owner) for item in child.items
             ):
+                # Python enters the items in order, so a recorder an item
+                # opens also records the warnings of every item after it.
+                entered = recording
                 for item in child.items:
-                    own = _records(item, modules, bare, known, owner)
-                    visit(item, inner, owner, recording=recording or own)
+                    entered = entered or _records(item, modules, bare, known, owner)
+                    visit(item, inner, owner, recording=entered)
                 for statement in child.body:
                     visit_one(statement, inner, owner, recording=True)
                 continue
@@ -648,6 +651,7 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
         "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\ndef seen():\n    pass\nassert seen",
         "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\ntry:\n    call()\nexcept OSError as seen:\n    assert seen",
         "with warnings.catch_warnings(action='always', record=True):\n    pass",
+        "with warnings.catch_warnings(action='always'), warnings.catch_warnings(record=True) as seen:\n    pass\nassert not seen",
         "with warnings.catch_warnings(record=True):\n    warnings.resetwarnings()",
         "warnings.catch_warnings(action=chosen)",
         "pytest.mark.filterwarnings(spec)",
@@ -674,6 +678,8 @@ def test_a_filter_that_names_no_message_is_found(source: str) -> None:
         "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nassert not seen",
         "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('default', UserWarning)\nassert len(seen) == 1",
         "with warnings.catch_warnings(action='always', record=True) as seen:\n    pass\nassert not seen",
+        "with warnings.catch_warnings(record=True) as seen, warnings.catch_warnings(action='always'):\n    pass\nassert not seen",
+        "with pytest.warns(UserWarning), warnings.catch_warnings(action='always'):\n    pass",
         "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        assert seen\n    check()",
         "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        assert not seen\n        return lambda seen: seen\n    check()",
         "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        assert not seen\n        def inner():\n            seen = 1\n            return seen\n        return [seen for seen in range(2)], inner\n    check()",

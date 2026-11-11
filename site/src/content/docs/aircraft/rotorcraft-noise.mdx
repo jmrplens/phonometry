@@ -636,8 +636,8 @@ hemispheres), and the received one-third-octave history is expressed at
 recorded time $t_\mathrm{r} = t_\mathrm{e} + r/c$ (Eq. 22, $c = 346.1\ \text{m/s}$) and
 integrated:
 `LASmax`, `SEL` over the full history and over the certification 10 dB-down
-window (Doc 32 Eq. 27), and `EPNL` per ICAO Annex 16 (Doc 32 Eq. 28), reusing
-the library's `epnl_from_pnlt`.
+window (Doc 32 Eq. 27), and `EPNL` per ICAO Annex 16 (Doc 32 Eq. 28), which
+the library's `epnl_from_pnlt` computes.
 
 ```python
 res = aircraft.rotorcraft_event_level(

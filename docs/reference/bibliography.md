@@ -353,14 +353,16 @@ it; the list grows as guides gain their References sections.
   [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
   The mirror-source room model (Chapter 11), with the reflection-factor and
   delay expressions.
-  Cited by [Image sources and the steady-state room field](../buildings/rooms/room-image-sources.md).
+  Cited by [Image sources and the steady-state room field](../buildings/rooms/room-image-sources.md)
+  and [Theory: Rooms and Buildings](theory/rooms-buildings.md).
 - Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
   simulating small-room acoustics. *The Journal of the Acoustical Society of
   America*, 65(4), 943-950.
   [doi:10.1121/1.382599](https://doi.org/10.1121/1.382599).
   The efficient rectangular-room image-source construction and its
   reflection-count decomposition.
-  Cited by [Image sources and the steady-state room field](../buildings/rooms/room-image-sources.md).
+  Cited by [Image sources and the steady-state room field](../buildings/rooms/room-image-sources.md)
+  and [Theory: Rooms and Buildings](theory/rooms-buildings.md).
 - Sabine, W. C. (1922). *Collected papers on acoustics*. Harvard University
   Press.
   [Free scan at the Internet Archive](https://archive.org/details/collectedpaperso00sabi).
@@ -657,7 +659,8 @@ it; the list grows as guides gain their References sections.
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [iso.org catalogue](https://www.iso.org/standard/55293.html).
   The goniometer diffusion-coefficient method.
-  Cited by [Diffusers and Their Coefficients](../materials/diffusers/diffusers.md).
+  Cited by [Diffusers and Their Coefficients](../materials/diffusers/diffusers.md)
+  and [Metadiffusers](../materials/diffusers/metadiffusers.md).
 - International Organization for Standardization. (2002). *Acoustics —
   Measurement of sound absorption properties of road surfaces in situ —
   Part 1: Extended surface method* (ISO 13472-1:2002, the edition
@@ -739,7 +742,10 @@ it; the list grows as guides gain their References sections.
   Airborne sound insulation* (ISO 717-1:2020).
   [iso.org catalogue](https://www.iso.org/standard/77435.html).
   The reference-curve rating and the spectrum adaptation terms C and Ctr.
-  Cited by [Field Insulation Measurement (ISO 16283)](../buildings/insulation/insulation-field.md).
+  Cited by [Insulation Ratings (ISO 717)](../buildings/insulation/insulation-ratings.md),
+  [Field Insulation Measurement (ISO 16283)](../buildings/insulation/insulation-field.md),
+  [Sound Insulation by Intensity (ISO 15186)](../buildings/insulation/insulation-intensity.md) and
+  [Sound Insulation Survey Method (ISO 10052)](../buildings/insulation/insulation-survey.md).
 - International Organization for Standardization. (2014). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 1: Airborne sound insulation* (ISO 16283-1:2014).
@@ -752,7 +758,8 @@ it; the list grows as guides gain their References sections.
   [iso.org catalogue](https://www.iso.org/standard/16620.html).
   The resonance method for the dynamic stiffness per unit area, identical to
   EN 29052-1.
-  Cited by [Dynamic stiffness of resilient materials](../materials/resilient/dynamic-stiffness.md).
+  Cited by [Dynamic stiffness of resilient materials](../materials/resilient/dynamic-stiffness.md)
+  and [Floor-Covering Impact Improvement (ISO 16251-1)](../buildings/design/impact-improvement.md).
 
 ## Structure-borne sound
 
@@ -923,7 +930,8 @@ it; the list grows as guides gain their References sections.
   the absorption of sound by the atmosphere* (ISO 9613-1:1993).
   [iso.org catalogue](https://www.iso.org/standard/17426.html).
   The pure-tone atmospheric attenuation coefficient.
-  Cited by [Outdoor Sound Propagation](../environment/propagation/outdoor-propagation.md).
+  Cited by [Outdoor Sound Propagation](../environment/propagation/outdoor-propagation.md) and
+  [Rotorcraft noise](../aircraft/rotorcraft-noise.md).
 - International Organization for Standardization. (1996). *Acoustics —
   Attenuation of sound during propagation outdoors — Part 2: General method
   of calculation* (ISO 9613-2:1996; revised in 2024, the 1996 method is the
@@ -983,7 +991,8 @@ it; the list grows as guides gain their References sections.
   [ICAO store](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise).
   The aircraft noise-certification standard whose Appendix 2 defines the
   EPNL procedure.
-  Cited by [Aircraft noise](../aircraft/aircraft-noise.md).
+  Cited by [Aircraft noise](../aircraft/aircraft-noise.md) and
+  [Rotorcraft noise](../aircraft/rotorcraft-noise.md).
 - International Civil Aviation Organization. (2018). *Environmental technical
   manual — Volume I: Procedures for the noise certification of aircraft*
   (Doc 9501, 3rd ed.).
@@ -1098,8 +1107,11 @@ it; the list grows as guides gain their References sections.
   Academic Press. ISBN 978-0-12-487570-8.
   [Publisher page](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8).
   Ocean acoustics from first principles; the fluid-fluid Rayleigh
-  reflection coefficient of the seabed model.
-  Cited by [Underwater sound propagation](../underwater/underwater-propagation.md).
+  reflection coefficient of the seabed model, and the closed-form travel time
+  along the circular-arc ray of a linear sound-speed gradient
+  (Equation 3.3.20).
+  Cited by [Underwater sound propagation](../underwater/underwater-propagation.md) and
+  [Underwater propagation solvers](../underwater/underwater-solvers.md).
 - Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).
   *Computational ocean acoustics* (2nd ed.). Springer.
   [doi:10.1007/978-1-4419-8678-8](https://doi.org/10.1007/978-1-4419-8678-8).

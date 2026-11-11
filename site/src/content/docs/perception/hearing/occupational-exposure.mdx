@@ -448,9 +448,8 @@ measured $L_\mathrm{EX,8h}$ does not include. `verbose=True` adds the per-task
 Annex C uncertainty columns ($u_{1\mathrm{a}}$, $u_{1\mathrm{b}}$, $u_2$), and `language="es"`
 renders the Spanish fiche (the vocabulary of the Spanish transposition,
 RD 286/2006: *nivel de exposición diario equivalente*, *valor límite de
-exposición*, with comma decimals). Writing the fiche needs the
-`phonometry[report]` extra (reportlab and svglib), plus matplotlib
-(`phonometry[plot]`) for the contribution chart of a task-based result.
+exposición*, with comma decimals). Rendering needs reportlab and, for the contribution chart the fiche of a
+task-based result embeds, matplotlib (`pip install "phonometry[report,plot]"`).
 
 ```python
 from phonometry import ReportMetadata, hearing

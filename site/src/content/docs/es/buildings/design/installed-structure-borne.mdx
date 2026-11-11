@@ -603,8 +603,8 @@ global (menos es mejor). `verbose=True` añade una columna por trayectoria de
 transmisión (hasta cinco); en otro caso solo se muestran la potencia instalada
 y el total combinado. `language="es"` genera la ficha en español con comas
 decimales. La franja de base indica las Fórmulas 18a/17 y el aviso de
-predicción. La ficha necesita el extra opcional `phonometry[report]`
-(reportlab), y la gráfica necesita matplotlib.
+predicción. La generación necesita reportlab y, para la figura que incrusta la ficha,
+matplotlib (`pip install "phonometry[report,plot]"`).
 
 Dos números del fragmento de código de abajo son de la norma, no inventados:
 `16.2` es el término de acoplamiento de la cisterna del Anexo I.3 en su contacto

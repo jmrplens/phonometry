@@ -481,10 +481,9 @@ la atenuación de los protectores auditivos utilizados, que el $L_\mathrm{EX,8h}
 medido no incluye. `verbose=True` añade las columnas de incertidumbre por
 tarea del anexo C ($u_{1\mathrm{a}}$, $u_{1\mathrm{b}}$, $u_2$), y `language="es"` produce la
 ficha en español (*nivel de exposición diario equivalente*, *valor límite de
-exposición*, con coma decimal). Para escribir la ficha hace falta el extra
-`phonometry[report]` (reportlab y svglib), y además matplotlib
-(`phonometry[plot]`) para la gráfica de contribuciones de un resultado por
-tareas.
+exposición*, con coma decimal). La generación necesita reportlab y, para la gráfica de contribuciones que
+incrusta la ficha de un resultado por tareas, matplotlib
+(`pip install "phonometry[report,plot]"`).
 
 ```python
 from phonometry import ReportMetadata, hearing

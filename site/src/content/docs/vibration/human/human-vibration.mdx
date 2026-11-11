@@ -942,9 +942,8 @@ res.report(
 )   # A(8) = 3.61 m/s² -> action zone (EAV exceeded, ELV not), verdict PASS
 ```
 
-Writing the fiche needs the `phonometry[report]` extra (reportlab), and its
-chart needs `phonometry[plot]` (matplotlib) as well. The example fiche is
-regenerated with `make reports` and kept rendered in the repository; click the
+Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
+(`pip install "phonometry[report,plot]"`). The example fiche is regenerated with `make reports` and kept rendered in the repository; click the
 preview to open the PDF.
 
 <ReportPreview

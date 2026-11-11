@@ -453,9 +453,8 @@ basis strip. Supplying `requirement` adds a PASS/FAIL verdict against a declared
 A-weighted sound-power limit (a sound-power emission is a quantity where less is
 better, so the source passes at or below the limit). `verbose=True` adds the
 radiation factor $\varepsilon$ column to the table. `language="es"` renders the
-Spanish fiche with comma decimals. The fiche needs the report extra
-(`pip install "phonometry[report]"`), and its spectrum panel needs matplotlib
-as well (`pip install "phonometry[plot]"`).
+Spanish fiche with comma decimals. Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
+(`pip install "phonometry[report,plot]"`).
 
 ```python
 import numpy as np

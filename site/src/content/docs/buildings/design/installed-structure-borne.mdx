@@ -575,8 +575,8 @@ PASS/FAIL verdict against a declared upper limit on the overall $L_\mathrm{n,s}$
 is better). `verbose=True` adds one column per transmission path (up to five);
 otherwise only the installed power and the combined total are shown.
 `language="es"` renders the Spanish fiche with comma decimals. The basis strip
-states Formulae 18a/17 and the prediction disclaimer. Rendering needs the
-optional `phonometry[report]` extra (reportlab), and the plot needs matplotlib.
+states Formulae 18a/17 and the prediction disclaimer. Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
+(`pip install "phonometry[report,plot]"`).
 
 Two numbers in the snippet below are the standard's, not invented: `16.2` is the
 coupling term of the Annex I.3 cistern at its wall contact, and the `lwc` array is

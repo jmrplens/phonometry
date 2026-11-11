@@ -698,8 +698,10 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   [Catálogo iso.org](https://www.iso.org/standard/77435.html).
   La valoración por curva de referencia y los términos de adaptación
   espectral C y Ctr.
-  Citado por [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/) y
-  [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/).
+  Citado por [Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/),
+  [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/),
+  [Aislamiento acústico por intensidad (ISO 15186)](/phonometry/es/buildings/insulation/insulation-intensity/) y
+  [Método de control del aislamiento (ISO 10052)](/phonometry/es/buildings/insulation/insulation-survey/).
 - International Organization for Standardization. (2014). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 1: Airborne sound insulation* (ISO 16283-1:2014).
@@ -712,7 +714,8 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   [Catálogo iso.org](https://www.iso.org/standard/16620.html).
   El método de resonancia para la rigidez dinámica por unidad de superficie,
   idéntico a EN 29052-1.
-  Citado por [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/).
+  Citado por [Rigidez dinámica de materiales resilientes](/phonometry/es/materials/resilient/dynamic-stiffness/)
+  y [Mejora del aislamiento a impacto de suelos (ISO 16251-1)](/phonometry/es/buildings/design/impact-improvement/).
 - Hopkins, C., Wilson, R., & Craik, R. J. M. (1999). Dynamic stiffness as an
   acoustic specification parameter for wall ties used in masonry cavity walls.
   *Applied Acoustics 58, 51-68*.
@@ -723,16 +726,18 @@ se reparte la absorción, que es justo donde discrepan los cinco.
 - Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
   simulation, algorithms and acoustic virtual reality* (2.ª ed.). Springer.
   [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
-  El modelo de fuentes imagen del apartado 1 (capítulo 11), con las
-  expresiones del factor de reflexión y del retardo. Citado por
-  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/).
+  El modelo de fuentes imagen (capítulo 11), con las expresiones del factor de
+  reflexión y del retardo. Citado por
+  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/)
+  y [Teoría: salas y edificación](/phonometry/es/reference/theory/rooms-buildings/).
 - Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
   simulating small-room acoustics. *The Journal of the Acoustical Society of
   America*, 65(4), 943-950.
   [doi:10.1121/1.382599](https://doi.org/10.1121/1.382599). La descomposición
   por número de reflexiones de la retícula de fuentes imagen de una sala
-  rectangular que se usa en el apartado 1. Citado por
-  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/).
+  rectangular. Citado por
+  [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/)
+  y [Teoría: salas y edificación](/phonometry/es/reference/theory/rooms-buildings/).
 
 ## Materiales y superficies
 
@@ -898,7 +903,8 @@ medibles, y Maa es el panel microperforado en forma cerrada.
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [Catálogo iso.org](https://www.iso.org/standard/55293.html).
   El método del coeficiente de difusión con goniómetro.
-  Citado por [Difusores y sus coeficientes](/phonometry/es/materials/diffusers/diffusers/).
+  Citado por [Difusores y sus coeficientes](/phonometry/es/materials/diffusers/diffusers/)
+  y [Metadifusores](/phonometry/es/materials/diffusers/metadiffusers/).
 - International Organization for Standardization. (2002). *Acoustics —
   Measurement of sound absorption properties of road surfaces in situ —
   Part 1: Extended surface method* (ISO 13472-1:2002, la edición
@@ -930,7 +936,7 @@ medibles, y Maa es el panel microperforado en forma cerrada.
   porosidad con fondo rígido, que conecta los modelos de material poroso del
   apartado de caracterización con la absorción perfecta a una sola frecuencia.
   Citado por
-  [Materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
+  [Teoría: materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
 - Mechel, F. P. (Ed.) (2008). *Formulas of acoustics* (2.ª ed.). Springer.
   ISBN 978-3-540-76832-6.
   [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
@@ -1113,7 +1119,8 @@ frecuencia y la revisión que adoptó su edición de 2016.
   the absorption of sound by the atmosphere* (ISO 9613-1:1993).
   [Catálogo iso.org](https://www.iso.org/standard/17426.html).
   El coeficiente de atenuación atmosférica de tono puro.
-  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/).
+  Citado por [Propagación del sonido en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/) y
+  [Ruido de helicópteros](/phonometry/es/aircraft/rotorcraft-noise/).
 - International Organization for Standardization. (1996). *Acoustics —
   Attenuation of sound during propagation outdoors — Part 2: General method
   of calculation* (ISO 9613-2:1996; revisada en 2024, el método de 1996 es el
@@ -1191,8 +1198,8 @@ frecuencia y la revisión que adoptó su edición de 2016.
   pérdida por inserción de la barrera. Citado por
   [Efecto suelo esférico y barreras avanzadas](/phonometry/es/environment/propagation/ground-barriers/).
 - European Committee for Standardization. (2016). *Road traffic noise
-  reducing devices - Test method for determining the acoustic performance -
-  Part 5: Intrinsic characteristics - In situ values of sound reflection
+  reducing devices — Test method for determining the acoustic performance —
+  Part 5: Intrinsic characteristics — In situ values of sound reflection
   under direct sound field conditions* (EN 1793-5:2016).
   El índice de reflexión acústica in situ de una pantalla de carretera: la
   sustracción de señales y la ventana de Adrienne que comparte con la
@@ -1230,7 +1237,8 @@ vuelo.
   [Tienda ICAO](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise).
   La norma de certificación acústica de aeronaves cuyo Apéndice 2 define el
   procedimiento EPNL.
-  Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/).
+  Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/) y
+  [Ruido de helicópteros](/phonometry/es/aircraft/rotorcraft-noise/).
 - International Civil Aviation Organization. (2018). *Environmental technical
   manual — Volume I: Procedures for the noise certification of aircraft*
   (Doc 9501, 3.ª ed.).
@@ -1360,8 +1368,11 @@ absorción de alcance decreciente y no tres alternativas.
   Academic Press. ISBN 978-0-12-487570-8.
   [Página del editor](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8).
   La acústica oceánica desde primeros principios; el coeficiente de reflexión
-  de Rayleigh fluido-fluido del modelo de fondo marino.
-  Citado por [Propagación submarina del sonido](/phonometry/es/underwater/underwater-propagation/).
+  de Rayleigh fluido-fluido del modelo de fondo marino, y el tiempo de
+  propagación en forma cerrada a lo largo del rayo en arco de círculo de un
+  gradiente lineal de velocidad del sonido (Ecuación 3.3.20).
+  Citado por [Propagación submarina del sonido](/phonometry/es/underwater/underwater-propagation/) y
+  [Métodos numéricos de propagación submarina](/phonometry/es/underwater/underwater-solvers/).
 - Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).
   *Computational ocean acoustics* (2.ª ed.). Springer.
   [doi:10.1007/978-1-4419-8678-8](https://doi.org/10.1007/978-1-4419-8678-8).

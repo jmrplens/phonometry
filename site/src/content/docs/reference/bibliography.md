@@ -675,8 +675,10 @@ distributed, which is exactly where the five disagree.
   Airborne sound insulation* (ISO 717-1:2020).
   [iso.org catalogue](https://www.iso.org/standard/77435.html).
   The reference-curve rating and the spectrum adaptation terms C and Ctr.
-  Cited by [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/) and
-  [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/).
+  Cited by [Insulation Ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/),
+  [Field Insulation Measurement (ISO 16283)](/phonometry/buildings/insulation/insulation-field/),
+  [Sound Insulation by Intensity (ISO 15186)](/phonometry/buildings/insulation/insulation-intensity/) and
+  [Sound Insulation Survey Method (ISO 10052)](/phonometry/buildings/insulation/insulation-survey/).
 - International Organization for Standardization. (2014). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 1: Airborne sound insulation* (ISO 16283-1:2014).
@@ -689,7 +691,8 @@ distributed, which is exactly where the five disagree.
   [iso.org catalogue](https://www.iso.org/standard/16620.html).
   The resonance method for the dynamic stiffness per unit area, identical to
   EN 29052-1.
-  Cited by [Dynamic stiffness of resilient materials](/phonometry/materials/resilient/dynamic-stiffness/).
+  Cited by [Dynamic stiffness of resilient materials](/phonometry/materials/resilient/dynamic-stiffness/)
+  and [Floor-Covering Impact Improvement (ISO 16251-1)](/phonometry/buildings/design/impact-improvement/).
 - Hopkins, C., Wilson, R., & Craik, R. J. M. (1999). Dynamic stiffness as an
   acoustic specification parameter for wall ties used in masonry cavity walls.
   *Applied Acoustics 58, 51-68*.
@@ -700,16 +703,18 @@ distributed, which is exactly where the five disagree.
 - Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
   simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer.
   [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
-  The mirror-source model of §1 (Chapter 11), with the reflection-factor and
-  delay expressions. Cited by
-  [Image Sources and the Steady-State Room Field](/phonometry/buildings/rooms/room-image-sources/).
+  The mirror-source model (Chapter 11), with the reflection-factor and delay
+  expressions. Cited by
+  [Image Sources and the Steady-State Room Field](/phonometry/buildings/rooms/room-image-sources/)
+  and [Theory: Rooms and Buildings](/phonometry/reference/theory/rooms-buildings/).
 - Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
   simulating small-room acoustics. *The Journal of the Acoustical Society of
   America*, 65(4), 943-950.
   [doi:10.1121/1.382599](https://doi.org/10.1121/1.382599). The
-  reflection-count decomposition of the rectangular-room image lattice used in
-  §1. Cited by
-  [Image Sources and the Steady-State Room Field](/phonometry/buildings/rooms/room-image-sources/).
+  reflection-count decomposition of the rectangular-room image lattice. Cited
+  by
+  [Image Sources and the Steady-State Room Field](/phonometry/buildings/rooms/room-image-sources/)
+  and [Theory: Rooms and Buildings](/phonometry/reference/theory/rooms-buildings/).
 
 ## Materials and surfaces
 
@@ -867,7 +872,8 @@ the microperforated panel in closed form.
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [iso.org catalogue](https://www.iso.org/standard/55293.html).
   The goniometer diffusion-coefficient method.
-  Cited by [Diffusers and Their Coefficients](/phonometry/materials/diffusers/diffusers/).
+  Cited by [Diffusers and Their Coefficients](/phonometry/materials/diffusers/diffusers/)
+  and [Metadiffusers](/phonometry/materials/diffusers/metadiffusers/).
 - International Organization for Standardization. (2002). *Acoustics —
   Measurement of sound absorption properties of road surfaces in situ —
   Part 1: Extended surface method* (ISO 13472-1:2002, the edition
@@ -898,7 +904,7 @@ the microperforated panel in closed form.
   critical-coupling condition applied to a rigidly-backed layer of ordinary
   high-porosity absorber, connecting the porous-material models of the
   characterisation section to perfect single-frequency absorption. Cited by
-  [Materials and Surfaces](/phonometry/reference/theory/materials-surfaces/).
+  [Theory: Materials and Surfaces](/phonometry/reference/theory/materials-surfaces/).
 - Mechel, F. P. (Ed.) (2008). *Formulas of acoustics* (2nd ed.). Springer.
   ISBN 978-3-540-76832-6.
   [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
@@ -1079,7 +1085,8 @@ adopted.
   the absorption of sound by the atmosphere* (ISO 9613-1:1993).
   [iso.org catalogue](https://www.iso.org/standard/17426.html).
   The pure-tone atmospheric attenuation coefficient.
-  Cited by [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/).
+  Cited by [Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/) and
+  [Rotorcraft noise](/phonometry/aircraft/rotorcraft-noise/).
 - International Organization for Standardization. (1996). *Acoustics —
   Attenuation of sound during propagation outdoors — Part 2: General method
   of calculation* (ISO 9613-2:1996; revised in 2024, the 1996 method is the
@@ -1153,8 +1160,8 @@ adopted.
   insertion loss uses. Cited by
   [Spherical ground effect and advanced barriers](/phonometry/environment/propagation/ground-barriers/).
 - European Committee for Standardization. (2016). *Road traffic noise
-  reducing devices - Test method for determining the acoustic performance -
-  Part 5: Intrinsic characteristics - In situ values of sound reflection
+  reducing devices — Test method for determining the acoustic performance —
+  Part 5: Intrinsic characteristics — In situ values of sound reflection
   under direct sound field conditions* (EN 1793-5:2016).
   The in situ sound reflection index of a road noise barrier: the signal
   subtraction and Adrienne window it shares with ISO 13472-1, the
@@ -1191,7 +1198,8 @@ contour around an airport rather than a level under a flight path.
   [ICAO store](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise).
   The aircraft noise-certification standard whose Appendix 2 defines the
   EPNL procedure.
-  Cited by [Aircraft noise](/phonometry/aircraft/aircraft-noise/).
+  Cited by [Aircraft noise](/phonometry/aircraft/aircraft-noise/) and
+  [Rotorcraft noise](/phonometry/aircraft/rotorcraft-noise/).
 - International Civil Aviation Organization. (2018). *Environmental technical
   manual — Volume I: Procedures for the noise certification of aircraft*
   (Doc 9501, 3rd ed.).
@@ -1316,8 +1324,11 @@ models of decreasing scope rather than three alternatives.
   Academic Press. ISBN 978-0-12-487570-8.
   [Publisher page](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8).
   Ocean acoustics from first principles; the fluid-fluid Rayleigh
-  reflection coefficient of the seabed model.
-  Cited by [Underwater sound propagation](/phonometry/underwater/underwater-propagation/).
+  reflection coefficient of the seabed model, and the closed-form travel time
+  along the circular-arc ray of a linear sound-speed gradient
+  (Equation 3.3.20).
+  Cited by [Underwater sound propagation](/phonometry/underwater/underwater-propagation/) and
+  [Underwater propagation solvers](/phonometry/underwater/underwater-solvers/).
 - Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).
   *Computational ocean acoustics* (2nd ed.). Springer.
   [doi:10.1007/978-1-4419-8678-8](https://doi.org/10.1007/978-1-4419-8678-8).

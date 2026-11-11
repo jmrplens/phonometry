@@ -51,19 +51,22 @@ ImportError: Plotting requires matplotlib. Install it with: pip install "phonome
 
 The oldest release of each dependency the library is tested with, on each
 Python, is listed in [Getting
-Started](/phonometry/start/getting-started/#from-pypi-recommended).
-On Windows on ARM, on Linux with musl, on macOS on Intel and on 32-bit
-Windows, some of those releases have no wheel, and pip builds them from source
-there, as even a plain install does with SciPy on 32-bit Windows, but for
-torch, which publishes no source to build and so does not install there; the
-same section names which.
+Started](/phonometry/start/getting-started/#from-pypi-recommended). On Windows
+on ARM, on Linux with musl, on macOS on Intel and on 32-bit Windows, some of
+those releases have no wheel, and pip builds them from source there, as even a
+plain install does with SciPy on 32-bit Windows; that section names which.
+numba no longer supports 32-bit Windows, and torch publishes no source to
+build, so it installs on none of the four from PyPI, and on Windows on ARM
+from PyTorch's CPU index, as the next section does.
 
 ## torch without CUDA
 
 `[full]` leaves `[torch]` out, because the torch wheels PyPI serves on Linux
 bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
 install torch from PyTorch's CPU index first, then the extra, which keeps the
-torch it finds, in the virtual environment made above:
+torch it finds, in the virtual environment made above. On Windows on ARM,
+where PyPI has no torch, the same two commands bring `[torch]` on Python 3.12
+and 3.13, from torch 2.7.0 and 2.8.0:
 
 ```bash
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu

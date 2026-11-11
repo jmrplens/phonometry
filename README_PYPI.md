@@ -83,19 +83,26 @@ floor of the three but NumPy's on Python 3.14 is built. On Linux with musl, as
 in Alpine, the first SciPy wheel on ARM for Python 3.12 and 3.13 is 1.15.2,
 and numba, with the llvmlite it needs, publishes no musl wheel at all, so
 `[perf]` builds from source on any musl system. On macOS on Intel numba
-publishes no wheel from 0.63.0 on, nor llvmlite from 0.46.0 on, so `[perf]`
+publishes no wheel from 0.63.0 on, nor llvmlite from 0.46.0 on, and numba no
+longer tests that platform, which it leaves to community support, so `[perf]`
 builds both at the floor of Python 3.14; their last wheels there, numba 0.62.1
 and llvmlite 0.45.1, are for Python 3.12 and 3.13. On 32-bit Windows NumPy has
 a wheel at every floor, but the last SciPy wheel there is 1.9.1, for Python
-3.9 at most, and the last numba and llvmlite wheels, 0.57.1 and 0.41.1, are
-for Python 3.10 at most, so even a plain install builds SciPy there on every
-Python, and `[perf]` builds numba and llvmlite. A plain install takes the
-newest releases, which have wheels on the other three platforms but numba's on
-musl and on macOS on Intel, where a plain `[perf]` install builds numba and
-llvmlite on every Python. PyPI has no torch wheel for any of the four, the
-last for macOS on Intel being 2.2.2, older than every floor, and none ever for
-32-bit Windows, and torch publishes no source distribution, so `[torch]` does
-not install on them.
+3.9 at most, so even a plain install builds SciPy there on every Python, and
+SciPy's own build warns there to install a 64-bit Python. numba stopped
+supporting 32-bit Windows at 0.58.0, below the floor of `[perf]`, and its last
+wheels there, numba 0.57.1 and llvmlite 0.41.1, are for Python 3.10 at most,
+so `[perf]` is not supported there. A plain install takes the newest releases,
+which have wheels on the other three platforms but numba's on musl and on
+macOS on Intel, where a plain `[perf]` install builds numba and llvmlite on
+every Python. PyPI has no torch wheel for any of the four, the last for macOS
+on Intel being 2.2.2, older than every floor, and none ever for 32-bit
+Windows, and torch publishes no source distribution, so `[torch]` does not
+install on them from PyPI. On Windows on ARM PyTorch's CPU index has torch
+wheels for Python 3.12, from 2.7.0, and 3.13, from 2.8.0, so installing torch
+from it first, as below, brings `[torch]` there; it has none for Python 3.14
+there, none for Linux with musl or 32-bit Windows, and for macOS on Intel none
+after 2.2.2, as on PyPI.
 
 Optional extras: `phonometry[plot]` (matplotlib for response plots and result
 `.plot()` methods), `phonometry[perf]` (numba for faster impulse ballistics),

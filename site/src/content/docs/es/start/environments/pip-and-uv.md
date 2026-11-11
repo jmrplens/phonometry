@@ -50,14 +50,16 @@ orden de pip y la de conda:
 ImportError: Plotting requires matplotlib. Install it with: pip install "phonometry[plot]" (conda: conda install -c conda-forge matplotlib-base)
 ```
 
-La versión más antigua de cada dependencia con la que se prueba la
-biblioteca, en cada Python, está en [Primeros
-pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada).
-En Windows en ARM, en Linux con musl, en macOS en Intel y en Windows de 32
-bits, algunas de esas versiones no tienen wheel, y pip las compila allí desde
-el código fuente, como hace incluso una instalación normal con SciPy en
-Windows de 32 bits, salvo torch, que no publica código fuente que compilar y
-por eso no se instala allí; la misma sección dice cuáles.
+La versión más antigua de cada dependencia con la que se prueba la biblioteca,
+en cada Python, está en [Primeros
+pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada). En
+Windows en ARM, en Linux con musl, en macOS en Intel y en Windows de 32 bits,
+algunas de esas versiones no tienen wheel, y pip las compila allí desde el
+código fuente, como hace incluso una instalación normal con SciPy en Windows
+de 32 bits; esa sección dice cuáles. numba ya no da soporte a Windows de 32
+bits, y torch no publica código fuente que compilar, así que no se instala en
+ninguna de las cuatro desde PyPI, y en Windows en ARM se instala desde el
+índice de CPU de PyTorch, como hace la sección siguiente.
 
 ## torch sin CUDA
 
@@ -65,7 +67,8 @@ por eso no se instala allí; la misma sección dice cuáles.
 Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin GPU de
 NVIDIA, instala primero torch desde el índice de CPU de PyTorch y después el
 extra, que conserva el torch que encuentra, en el entorno virtual creado más
-arriba:
+arriba. En Windows en ARM, donde PyPI no tiene torch, las mismas dos órdenes
+traen `[torch]` en Python 3.12 y 3.13, desde torch 2.7.0 y 2.8.0:
 
 ```bash
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu

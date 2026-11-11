@@ -52,21 +52,29 @@ NumPy en Python 3.14. En Linux con musl, como en Alpine, el primer wheel de
 SciPy en ARM para Python 3.12 y 3.13 es el 1.15.2, y numba, con el llvmlite
 que necesita, no publica ningún wheel para musl, así que `[perf]` se compila
 desde el código fuente en cualquier sistema con musl. En macOS en Intel numba
-no publica wheel desde la 0.63.0, ni llvmlite desde la 0.46.0, así que
-`[perf]` compila los dos en la mínima de Python 3.14; sus últimos wheels allí,
-numba 0.62.1 y llvmlite 0.45.1, son para Python 3.12 y 3.13. En Windows de 32
-bits NumPy tiene wheel en todas las mínimas, pero el último wheel de SciPy
-allí es el 1.9.1, para Python 3.9 como mucho, y los últimos de numba y
-llvmlite, el 0.57.1 y el 0.41.1, son para Python 3.10 como mucho, así que
-incluso una instalación normal compila SciPy allí en todos los Python, y
-`[perf]` compila numba y llvmlite. Una instalación normal toma las versiones
-más recientes, que tienen wheels en las otras tres plataformas salvo numba en
-musl y en macOS en Intel, donde una instalación normal de `[perf]` compila
-numba y llvmlite en todos los Python. PyPI no tiene wheel de torch para
-ninguna de las cuatro (el último para macOS en Intel es el 2.2.2, anterior a
-todas las mínimas, y para Windows de 32 bits nunca ha habido ninguno) y torch
-no publica distribución de código fuente, así que `[torch]` no se instala en
-ellas.
+no publica wheel desde la 0.63.0, ni llvmlite desde la 0.46.0, y numba ya no
+prueba esa plataforma, que deja al soporte de su comunidad, así que `[perf]`
+compila los dos en la mínima de Python 3.14; sus últimos wheels allí, numba
+0.62.1 y llvmlite 0.45.1, son para Python 3.12 y 3.13. En Windows de 32 bits
+NumPy tiene wheel en todas las mínimas, pero el último wheel de SciPy allí es
+el 1.9.1, para Python 3.9 como mucho, así que incluso una instalación normal
+compila SciPy allí en todos los Python, y la propia compilación de SciPy avisa
+allí de que se instale un Python de 64 bits. numba dejó de dar soporte a
+Windows de 32 bits en la 0.58.0, por debajo de la mínima de `[perf]`, y sus
+últimos wheels allí, numba 0.57.1 y llvmlite 0.41.1, son para Python 3.10 como
+mucho, así que `[perf]` no tiene soporte allí. Una instalación normal toma las
+versiones más recientes, que tienen wheels en las otras tres plataformas salvo
+numba en musl y en macOS en Intel, donde una instalación normal de `[perf]`
+compila numba y llvmlite en todos los Python. PyPI no tiene wheel de torch
+para ninguna de las cuatro (el último para macOS en Intel es el 2.2.2,
+anterior a todas las mínimas, y para Windows de 32 bits nunca ha habido
+ninguno) y torch no publica distribución de código fuente, así que `[torch]`
+no se instala en ellas desde PyPI. En Windows en ARM el índice de CPU de
+PyTorch tiene wheels de torch para Python 3.12, desde la 2.7.0, y 3.13, desde
+la 2.8.0, así que instalar antes torch desde él, como se explica más abajo,
+trae `[torch]` allí; no tiene ninguno para Python 3.14 allí, ni para Linux con
+musl ni para Windows de 32 bits, y para macOS en Intel ninguno posterior al
+2.2.2, como en PyPI.
 
 ### Extras opcionales
 
@@ -112,10 +120,11 @@ proceso; apunta `NUMBA_CACHE_DIR` a un directorio con permiso de escritura para
 conservarlo.
 
 `[full]` deja fuera `[torch]` a propósito: los wheels de torch que sirve PyPI
-para Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin GPU
-de NVIDIA, instala primero torch desde el índice de CPU de PyTorch y después
-el extra, que conserva el torch que encuentra, y esas bibliotecas se quedan
-fuera:
+para Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin
+GPU de NVIDIA, instala primero torch desde el índice de CPU de PyTorch y
+después el extra, que conserva el torch que encuentra, y esas bibliotecas se
+quedan fuera; en Windows en ARM, donde PyPI no tiene torch, las mismas dos
+órdenes traen `[torch]` en Python 3.12 y 3.13:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu

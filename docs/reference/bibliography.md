@@ -351,8 +351,8 @@ it; the list grows as guides gain their References sections.
 - Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
   simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer.
   [doi:10.1007/978-3-030-51202-6](https://doi.org/10.1007/978-3-030-51202-6).
-  The mirror-source room model and the source-path-receiver auralization
-  chain.
+  The mirror-source room model (Chapter 11), with the reflection-factor and
+  delay expressions.
   Cited by [Image sources and the steady-state room field](../buildings/rooms/room-image-sources.md).
 - Allen, J. B., & Berkley, D. A. (1979). Image method for efficiently
   simulating small-room acoustics. *The Journal of the Acoustical Society of
@@ -446,13 +446,13 @@ it; the list grows as guides gain their References sections.
   [ISO 3382-3:2022](https://www.iso.org/standard/77437.html)).
   [iso.org catalogue](https://www.iso.org/standard/46520.html).
   The open-plan speech-privacy quantities.
-  Cited by [Room Acoustics](../buildings/rooms/room-acoustics.md).
+  Cited by [Open-Plan Office Acoustics](../buildings/rooms/open-plan-acoustics.md).
 - International Organization for Standardization. (2006). *Acoustics —
   Application of new measurement methods in building and room acoustics*
   (ISO 18233:2006).
   [iso.org catalogue](https://www.iso.org/standard/40408.html).
   The swept-sine and MLS acquisition of impulse responses.
-  Cited by [Room Acoustics](../buildings/rooms/room-acoustics.md).
+  Cited by [Measuring the Room Impulse Response](../buildings/rooms/room-impulse-response.md).
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [iso.org catalogue](https://www.iso.org/standard/34545.html).
@@ -785,7 +785,7 @@ it; the list grows as guides gain their References sections.
   transmission coefficients for junctions of plates.
   Cited by [Bending-wave transmission at plate junctions](../vibration/structural/junction-transmission.md).
 - Craik, R. J. M. (1996). *Sound transmission through buildings using
-  statistical energy analysis*. Gower. ISBN 978-0-566-07572-5.
+  statistical energy analysis*. Gower. ISBN 978-0-566-07572-8.
   The SEA treatment of airborne and structure-borne transmission in buildings,
   with the tabulated bending-wave transmission coefficients for X, T, L and
   in-line junctions.
@@ -871,8 +871,7 @@ it; the list grows as guides gain their References sections.
   [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
   The screen-attenuation chart against Fresnel number that barrier
   engineering formulas descend from.
-  Cited by [Outdoor Sound Propagation](../environment/propagation/outdoor-propagation.md) and
-  [Spherical ground effect and advanced barriers](../environment/propagation/ground-barriers.md).
+  Cited by [Outdoor Sound Propagation](../environment/propagation/outdoor-propagation.md).
 - Kurze, U. J., & Anderson, G. S. (1971). Sound attenuation by barriers.
   *Applied Acoustics*, 4(1), 35-53.
   [doi:10.1016/0003-682X(71)90024-7](https://doi.org/10.1016/0003-682X(71)90024-7).

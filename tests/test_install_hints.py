@@ -136,6 +136,22 @@ def test_a_report_figure_without_matplotlib_names_pip_and_conda(
     )
 
 
+@pytest.mark.parametrize("factory", ["_microphone", "_loudspeaker"])
+def test_an_electroacoustic_fiche_without_matplotlib_names_pip_and_conda(
+    factory: str, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The microphone and loudspeaker fiches draw their own panels, and say so too."""
+    pytest.importorskip("reportlab")
+    import result_factories
+
+    characteristics = getattr(result_factories, factory)()
+    _block(monkeypatch, "matplotlib")
+    message = _message(lambda: characteristics.report(tmp_path / "fiche.pdf"))
+    assert message == (
+        f"Rendering the report figure requires matplotlib. Install it with: {PLOT}"
+    )
+
+
 def test_a_report_figure_without_svglib_names_pip_and_conda(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

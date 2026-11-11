@@ -72,6 +72,13 @@ def install_hint(*extras: Extra, pip_first: str | None = None) -> str:
     return _with_conda(pip, packages)
 
 
+#: What a drawing says when matplotlib cannot be imported: every plot, and
+#: the wrapper of every public one, hands the user this message.
+PLOT_INSTALL_HINT: Final = (
+    f"Plotting requires matplotlib. Install it with: {install_hint('plot')}"
+)
+
+
 def package_hint(pip_package: str, conda_package: str) -> str:
     """How to install a library no extra brings, as pip and conda-forge name it.
 

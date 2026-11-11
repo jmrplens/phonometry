@@ -2343,6 +2343,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the reciprocal of the impedance as an array, so an impedance that underflows
   to zero gives a number what it gives an array.
 
+- **Every plot and fiche that finds no matplotlib says how to install it.**
+  Seventeen of them, the plots of thirteen results (the p-p probe of an
+  `emission.IntensityResult`, the amplitude modulation bins, the service
+  equipment positions, the soundscape pleasantness and eventfulness, the
+  directivity factor of a sound level meter, the calibration correction
+  budget, the transmission through an aperture, the free-field check, the
+  plant contour, the special room suitability, the wind turbine sound power,
+  the sound calibrator and the ear canal microphone) and
+  `building.plot_aperture_geometry`,
+  `electroacoustics.plot_sound_reinforcement_geometry`,
+  `emission.plot_pp_probe_geometry` and `noise_control.plot_plenum_geometry`,
+  imported a module of matplotlib before making their figure and raised a bare
+  `ModuleNotFoundError`, and so did the `.report()` of a microphone and of a
+  loudspeaker, which draw their own panels. The wrapper every public plot
+  already goes through raises the install hint of the `[plot]` extra in its
+  place, with the missing module as its cause, and the two fiches make their
+  panels through the hint the other fiches give.
+
 - **The documentation site's type check fails on a hint, and the site has
   none.** `pnpm run check:types` passed with 132 hints: 127 uses in
   `site/src/content.config.ts` of zod helpers that Astro 7 and zod 4

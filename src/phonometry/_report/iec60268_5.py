@@ -242,6 +242,22 @@ def _drawing_from_figure(
     return drawing
 
 
+def _agg_figure(figsize: tuple[float, float]) -> Figure:
+    """A figure of *figsize* inches on an Agg canvas, for a panel of the fiche.
+
+    :raises ImportError: If matplotlib is not installed, with the install
+        hint of the ``[plot]`` extra.
+    """
+    try:
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        from matplotlib.figure import Figure
+    except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
+        raise ImportError(_MATPLOTLIB_HINT) from exc
+    fig = Figure(figsize=figsize)
+    FigureCanvasAgg(fig)
+    return fig
+
+
 def _response_drawing(
     result: LoudspeakerCharacteristics, target_width: float, language: Language = "en"
 ) -> Drawing:
@@ -252,14 +268,10 @@ def _response_drawing(
     IEC 60263 clause 2 proportion: one frequency decade equals 25 dB on the
     ordinate (:data:`_DB_PER_DECADE`).
     """
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-
+    fig = _agg_figure((5.6, 4.2))
     from .._plot.electroacoustics import _draw_loudspeaker_response
 
     f = result.frequencies
-    fig = Figure(figsize=(5.6, 4.2))
-    FigureCanvasAgg(fig)
     ax = fig.subplots()
     _draw_loudspeaker_response(result, ax, language=language)
     decades = response_decades(f, "IEC 60268-5 loudspeaker fiche")
@@ -279,9 +291,6 @@ def _secondary_drawing(
     :func:`phonometry._plot.electroacoustics` renderers, so the fiche and the
     ``.plot()`` data sheet never diverge.
     """
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-
     from .._plot.electroacoustics import (
         _draw_datasheet_polar,
         _draw_impedance,
@@ -295,8 +304,7 @@ def _secondary_drawing(
     if panels == 0:
         return None
 
-    fig = Figure(figsize=(5.6 * panels / 2.4 + 0.8, 2.6))
-    FigureCanvasAgg(fig)
+    fig = _agg_figure((5.6 * panels / 2.4 + 0.8, 2.6))
     idx = 1
     if has_imp:
         ax = fig.add_subplot(1, panels, idx)

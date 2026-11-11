@@ -165,10 +165,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   whose bootstrap the client runs as the container's entrypoint through the
   `python` on the image's `PATH`; either way it runs the caller's own
   phonometry, which the client sends once per version and the node keeps in
-  a cache. A Docker node runs the container as the node's user under a daemon
-  run by root, and keeps the container's root, which is that user, under one
-  run by the user (rootless Docker, or Podman behind a `docker` command), as
-  `docker info` describes it. ssh runs with no terminal and no agent, X11 or
+  a cache. A Docker node runs the container in the node's own user namespace
+  (`--userns=host`), as the node's user under a daemon run by root and as the
+  container's root, which is that user, under one run by the user (rootless
+  Docker, or rootless Podman behind a `docker` command), as `docker info`
+  describes it. ssh runs with no terminal and no agent, X11 or
   port forwarding, delegates no Kerberos credentials and runs no
   `RemoteCommand` or `LocalCommand`, whatever `~/.ssh/config` says; every byte
   the node sends back is checked against what the request implies before it is

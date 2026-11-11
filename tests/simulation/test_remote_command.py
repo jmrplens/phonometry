@@ -223,7 +223,7 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
     docker = words[words.index("exec") + 1 :]
     # No log: Docker would copy the result stream, the container's standard
     # output, into a log on the node's disk.
-    assert docker[:10] == [
+    assert docker[:11] == [
         "docker",
         "run",
         "--rm",
@@ -234,6 +234,7 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
         "none",
         "--log-driver",
         "none",
+        "--userns=host",
     ]
     assert docker[docker.index("--gpus") + 1] == "device=1"
     assert docker[docker.index("-v") - 1] == "$user"
@@ -340,12 +341,15 @@ _DOCKER_WITH_INFO = (
 )
 
 #: What ``docker info --format '{{json .}}'`` holds of a daemon's security,
-#: measured on Docker 29.9 run by root and run by a user
-#: (``dockerd-rootless.sh``), and on Podman 5.4, which answers the same
-#: command with the ``rootless`` flag of its host.
+#: measured on Docker 29.9 run by root, run by root with ``--userns-remap``
+#: and run by a user (``dockerd-rootless.sh``), and on Podman 5.4, which
+#: answers the same command with the ``rootless`` flag of its host.
 _INFO = {
     "docker as root": '{"SecurityOptions":["name=apparmor,profile=default",'
     '"name=seccomp,profile=builtin","name=cgroupns"]}',
+    "docker as root remapping user ids": '{"SecurityOptions":['
+    '"name=apparmor,profile=default","name=seccomp,profile=builtin",'
+    '"name=userns","name=cgroupns"]}',
     "docker without root": '{"SecurityOptions":["name=seccomp,profile=builtin",'
     '"name=rootless","name=cgroupns"]}',
     "podman as root": '{"host":{"security":{"rootless":false}}}',
@@ -369,7 +373,9 @@ def _docker_words(tmp_path: Path, info: str, status: int = 0) -> list[str]:
 
 
 @_posix_only
-@pytest.mark.parametrize("daemon", ["docker as root", "podman as root"])
+@pytest.mark.parametrize(
+    "daemon", ["docker as root", "docker as root remapping user ids", "podman as root"]
+)
 def test_a_docker_node_run_by_root_runs_the_container_as_the_node_s_user(
     tmp_path: Path, daemon: str
 ) -> None:
@@ -379,19 +385,41 @@ def test_a_docker_node_run_by_root_runs_the_container_as_the_node_s_user(
 
 @_posix_only
 @pytest.mark.parametrize("daemon", ["docker without root", "podman without root"])
-def test_a_docker_node_without_root_keeps_the_container_s_root(
+def test_a_docker_node_without_root_runs_the_container_as_its_root(
     tmp_path: Path, daemon: str
 ) -> None:
-    """A daemon run by the node's user already runs the container's root as that user.
+    """A daemon run by the node's user runs the container's root as that user.
 
-    Any other uid, the user's own among them, maps to one of its subordinate
-    ids, which cannot write the cache the node mounts: measured on Docker 29.9
-    and Podman 5.4 without root, ``--user`` failed the run with a
-    PermissionError and its absence wrote the files as the node's user.
+    Any other uid, the user's own among them and one an image names with
+    ``USER``, maps to one of its subordinate ids, which cannot write the cache
+    the node mounts: measured on Docker 29.9 and Podman 5.4 without root, an
+    image whose ``USER`` is 1000 failed to write the cache with no ``--user``
+    and wrote it as the node's user with ``--user=0:0``.
     """
     words = _docker_words(tmp_path, _INFO[daemon])
-    assert not [word for word in words if word.startswith("--user")]
+    assert [word for word in words if word.startswith("--user=")] == ["--user=0:0"]
     assert words[words.index("-v") + 1].endswith(":/cache")
+
+
+@_posix_only
+@pytest.mark.parametrize("daemon", [*_INFO, "a daemon that does not answer"])
+def test_a_docker_node_runs_the_container_in_the_node_s_own_user_namespace(
+    tmp_path: Path, daemon: str
+) -> None:
+    """``--userns=host`` keeps the ids of the container the node's own, whatever the daemon.
+
+    Measured: under Docker 29.9 with ``--userns-remap``, ``--user`` with the
+    node's uid failed to write the cache and wrote it as the node's user
+    with ``--userns=host``; under Podman 5.4 without root set to
+    ``userns = "keep-id"``, ``--user=0:0`` wrote it as a subordinate id the
+    node's user cannot remove, and as that user with ``--userns=host``.
+    Docker run by root and Docker run by a user take the flag and run as
+    before.
+    """
+    info = _INFO.get(daemon, "")
+    words = _docker_words(tmp_path, info, status=0 if info else 1)
+    assert words.count("--userns=host") == 1
+    assert words.index("--userns=host") < words.index("-v")
 
 
 @_posix_only

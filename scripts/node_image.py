@@ -3,11 +3,12 @@
 
 Reads the host's entry from the hosts file with the library's own reader,
 packs the build context (the Dockerfile, its provisioning script, the
-requirements files and the node bootstrap) into a tar archive in memory,
-and pipes it over ssh to ``docker build`` on the node, which tags the image
-with the entry's ``image``. Nothing goes to a registry. The archive is the
-same bytes for the same files, so a rebuild with nothing changed is all
-cache.
+signing key of the PPA Python comes from, the requirements files and the
+node bootstrap) into a tar archive in memory, and pipes it over ssh to
+``docker build`` on the node, which tags the image with the entry's
+``image``. Nothing goes to a registry, and the build reaches no keyserver.
+The archive is the same bytes for the same files, so a rebuild with nothing
+changed is all cache.
 """
 
 from __future__ import annotations
@@ -28,6 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CONTEXT = (
     "docker/node/Dockerfile",
     "docker/node/provision.sh",
+    "docker/node/deadsnakes.asc",
     "requirements.txt",
     "requirements-figures.txt",
     "src/phonometry/simulation/_remote/bootstrap.py",

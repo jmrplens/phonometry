@@ -1,6 +1,6 @@
 ---
 title: "Parámetros acústicos de salas (ISO 3382-1/2)"
-description: "Análisis del decaimiento de la respuesta al impulso según ISO 3382-1/2: curva de Schroeder, EDT, T20, T30, claridad, definición, tiempo central y ficha."
+description: "EDT, T20 y T30 con Python a partir de la respuesta al impulso (ISO 3382-1/2): curva de Schroeder, claridad, definición, tiempo central y ficha."
 references:
   - type: book
     authors: ["Kuttruff, H."]
@@ -70,6 +70,40 @@ un material; ese método (ISO 354) vive en
 Para el aislamiento acústico *entre* recintos (la misma RI medida a ambos
 lados de un cerramiento) consulta la guía complementaria
 [Medición del aislamiento en campo (ISO 16283)](/phonometry/es/buildings/insulation/insulation-field/).
+
+## ¿Cómo calculo EDT, T20 y T30 a partir de una respuesta al impulso con Python?
+
+Pasa la respuesta al impulso y su frecuencia de muestreo a
+`room.room_parameters(ir, fs)`. La función divide la respuesta en bandas de
+octava (`fraction=3` da tercios de octava), integra hacia atrás cada banda para
+obtener su curva de decaimiento de Schroeder y ajusta el rango de evaluación de
+cada parámetro, de modo que `res.edt`, `res.t20` y `res.t30` guardan un tiempo
+de decaimiento en segundos por banda, junto a la claridad `c50` y `c80`, la
+definición `d50` y el tiempo central `ts`. `res.t30_valid` indica, banda a
+banda, si el suelo de ruido dejó al ajuste rango de decaimiento suficiente. En
+el ejemplo de abajo, un ruido que decae hace las veces de respuesta medida, y
+los valores por octava de `res.t30` dan una media de `1.21` s. Qué significa que
+EDT, T20 y T30 no coincidan se explica en
+[Leer EDT, T20 y T30 unos frente a otros](#leer-edt-t20-y-t30-unos-frente-a-otros).
+
+```python
+import numpy as np
+from phonometry import room
+
+# ir: tu respuesta al impulso medida, muestreada a fs hercios. Aquí la sustituyen
+# dos segundos de ruido que decae con un tiempo de reverberación de 1,2 s.
+fs = 48000
+t = np.arange(2 * fs) / fs
+ir = np.random.default_rng(1).standard_normal(t.size) * np.exp(-3 * np.log(10) / 1.2 * t)
+
+res = room.room_parameters(ir, fs)
+print(res.frequencies.round())        # [ 126.  251.  501. 1000. 1995. 3981.]
+print(res.edt.round(2))               # [1.16 1.29 1.16 1.12 1.19 1.17] s
+print(res.t20.round(2))               # [1.18 1.24 1.21 1.25 1.24 1.2 ] s
+print(res.t30.round(2))               # [1.2  1.19 1.23 1.21 1.21 1.21] s
+print(res.t30_valid.all())            # True
+print(round(float(res.t30.mean()), 2))  # 1.21 s
+```
 
 ## Análisis del decaimiento y parámetros de sala (ISO 3382-1/2)
 

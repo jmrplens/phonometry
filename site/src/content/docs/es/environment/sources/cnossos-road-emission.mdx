@@ -1,6 +1,6 @@
 ---
 title: "Emisión de la fuente de tráfico viario CNOSSOS-EU"
-description: "Emisión del tráfico viario CNOSSOS-EU (Directiva 2002/49/CE, Anexo II): rodadura y propulsión por categoría de vehículo, correcciones y potencia por metro."
+description: "Emisión del tráfico viario CNOSSOS-EU con Python (Directiva 2002/49/CE, Anexo II): rodadura y propulsión por categoría, correcciones y potencia por metro."
 references:
   - type: standard
     organization: "European Union"
@@ -65,6 +65,38 @@ receptor.
 Esta guía cubre la fuente viaria, el apartado 2.2 del Anexo II con la base de
 coeficientes del Apéndice F. La fuente ferroviaria (2.3, Apéndice G) y el modelo
 de propagación CNOSSOS-EU (2.5) van aparte.
+
+## ¿Cómo calculo la emisión del tráfico viario CNOSSOS-EU con Python?
+
+Describe el flujo de cada categoría de vehículo con `environment.RoadTraffic` y
+pasa la lista a
+`environment.road_source_power(traffic, surface=..., temperature_c=...)`. La
+función suma, por categoría y banda de octava, las potencias acústicas de
+rodadura y de propulsión del Anexo II y las convierte en una potencia acústica
+direccional por metro de línea fuente: `result.total_line_power` guarda las
+bandas de octava y `result.a_weighted_line_power` su total ponderado A, que un
+modelo de propagación lleva después hasta el receptor. Para la arteria urbana
+de abajo, cuyo espectro se dibuja más adelante,
+`result.a_weighted_line_power` vale `84.2` dB(A) por metro con un decimal.
+
+```python
+from phonometry import environment
+
+# Una arteria urbana: vehículos por hora de cada categoría, todos a 50 km/h.
+traffic = [
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.LIGHT, flow_rate=1200.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.MEDIUM_HEAVY, flow_rate=90.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.HEAVY, flow_rate=45.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.MOTORCYCLES, flow_rate=60.0, speed_kmh=50.0),
+]
+result = environment.road_source_power(
+    traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, road_slope_percent=3.0,
+    junction_distance=60.0, junction_type=environment.JunctionType.CROSSING,
+)
+print(result.frequencies)                             # [  63.  125.  250.  500. 1000. 2000. 4000. 8000.] Hz
+print(result.total_line_power.round(1))               # [89.1 82.7 81.3 80.2 80.4 76.2 71.7 66. ] dB re 1 pW por metro
+print(round(float(result.a_weighted_line_power), 1))  # 84.2 dB(A) por metro
+```
 
 ## 1. Qué texto está implementado
 

@@ -605,6 +605,28 @@ STI/STIPA, and [Theory](../../reference/theory/perception.md) for the underlying
 - API reference: [`psychoacoustics.quality.sharpness`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/roughness-ecma/) and [`psychoacoustics`: fluctuation strength (Sottek model)](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/).
 - Theory: [Advanced loudness models and sound quality](../../reference/theory/perception.md#advanced-loudness-models--sound-quality): the specific-loudness pattern the sharpness, roughness and fluctuation-strength metrics are all built on.
 
+## Quick answers
+
+### Above what values does ECMA-418-2 call tonality, roughness or fluctuation strength prominent?
+
+ECMA-418-2 sets one threshold per metric, and the library holds each as a
+constant: `psychoacoustics.PROMINENT_TONALITY_TU_HMS` is `0.4` tu_HMS
+(clause 6.3), `PROMINENT_ROUGHNESS_ASPER` is `0.2` asper (clause 7.2) and
+`PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS` is `0.2` vacil_HMS (clause 9.2).
+Roughness and fluctuation strength compare their single value $R$ or $F$ with
+it. Tonality compares the specific tonality of a band that is a local maximum,
+with its tonal frequency between $F(z - 1)$ and $F(z + 1)$, for a stationary
+sound, and the
+single value $T$ for one that varies in time.
+
+```python
+from phonometry import psychoacoustics
+
+print(psychoacoustics.PROMINENT_TONALITY_TU_HMS)                 # 0.4 tu_HMS
+print(psychoacoustics.PROMINENT_ROUGHNESS_ASPER)                 # 0.2 asper
+print(psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS)  # 0.2 vacil_HMS
+```
+
 ## References
 
 - **Deutsches Institut für Normung. (2009).** [*Messtechnische Simulation der Hörempfindung Schärfe*](https://www.dinmedia.de/en/standard/din-45692/117635111) (DIN 45692:2009-08).

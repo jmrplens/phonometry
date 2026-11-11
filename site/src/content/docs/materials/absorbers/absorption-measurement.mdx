@@ -967,3 +967,28 @@ measurement method (road-traffic noise-reducing devices) is not.
   one was measured on.
 
 </SeeAlso>
+
+## Quick answers
+
+### What weighted absorption coefficient does each ISO 11654 class need?
+
+`materials.absorption_class(alpha_w)` reads Table B.1 of ISO 11654, and
+`weighted_absorption` hands back the same letter as `absorption_class` beside
+the rating itself. The weighted coefficient $\alpha_\mathrm{w}$ moves in fixed
+steps, so each class is a run of steps, and the loop below prints the lowest
+step of each class beside the step under it: class A starts at `0.9`, B at
+`0.8`, C at `0.6`, D at `0.3` and E at `0.15`, and below that a product is
+`Not classified`.
+
+```python
+from phonometry import materials
+
+for lowest in (0.9, 0.8, 0.6, 0.3, 0.15):
+    below = round(lowest - 0.05, 2)
+    print(lowest, materials.absorption_class(lowest), below, materials.absorption_class(below))
+# 0.9 A 0.85 B
+# 0.8 B 0.75 C
+# 0.6 C 0.55 D
+# 0.3 D 0.25 E
+# 0.15 E 0.1 Not classified
+```

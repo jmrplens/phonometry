@@ -582,3 +582,19 @@ moved to [Airport noise](/phonometry/aircraft/airport-noise/).
 - API reference: [`aircraft.certification`](/phonometry/reference/api/aeroacoustics/certification/) and [`aircraft.atmospheric_absorption`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).
 
 </SeeAlso>
+
+## Quick answers
+
+### Why can EPNL come out below the peak tone-corrected level?
+
+EPNL is not the peak: `aircraft.effective_perceived_noise_level` sums the
+tone-corrected energy of the records around it and divides that energy by a
+fixed reference duration, `reference_time`, whose default is the one Appendix 2
+sets and the [EPNL](#epnl) section gives. What decides the sign is the
+tone-corrected energy of the whole 10 dB-down window against PNLTM held for
+`reference_time`, not how long the peak lasts: a window whose energy falls short
+of that scores below its PNLTM, and one whose energy exceeds it, a brief peak
+over a long shoulder included, scores above it.
+`res.duration_correction` is that difference, `res.epnl` minus the peak
+`res.pnltm`, and `res.band_limits` names the first and last records the sum
+took in.

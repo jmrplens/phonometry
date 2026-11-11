@@ -1037,3 +1037,25 @@ página no sustituyen.
 - Teoría: [Vibración en humanos](/phonometry/es/reference/theory/vibration/#vibracion-en-humanos-iso-8041-1-iso-2631-12-iso-5349-12-directiva-200244ce): las ponderaciones frecuenciales de la ISO 2631-1 y la ISO 5349-1, y las definiciones de valor eficaz móvil, VDV y MTVV.
 
 </SeeAlso>
+
+## Respuestas rápidas
+
+### ¿Cuáles son los valores de acción y límite de la vibración mano-brazo y de cuerpo entero?
+
+La Directiva 2002/44/CE los fija sobre la exposición diaria $A(8)$, y la
+biblioteca los guarda como las constantes frente a las que evalúa
+`daily_vibration_exposure`. La vibración mano-brazo tiene un valor de exposición
+que da lugar a una acción de `2.5` m/s² y un valor límite de exposición de
+`5.0` m/s²; la de cuerpo entero, `0.5` y `1.15` m/s², o `9.1` y `21.0` m/s¹·⁷⁵
+cuando un Estado miembro trabaja con el valor de dosis de vibración. La $A(8)$
+de cuerpo entero parte del mayor valor por eje ponderado en frecuencia de
+ISO 2631-1 (`wbv_exposure_basis`), y la de mano-brazo, del valor total de
+vibración de ISO 5349-1.
+
+```python
+from phonometry import vibration
+
+print(vibration.HAV_EAV_A8_M_S2, vibration.HAV_ELV_A8_M_S2)  # 2.5 5.0 m/s^2, A(8) de mano-brazo
+print(vibration.WBV_EAV_A8_M_S2, vibration.WBV_ELV_A8_M_S2)  # 0.5 1.15 m/s^2, A(8) de cuerpo entero
+print(vibration.WBV_EAV_VDV, vibration.WBV_ELV_VDV)          # 9.1 21.0 m/s^1.75, VDV de cuerpo entero
+```

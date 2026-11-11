@@ -1,6 +1,6 @@
 ---
 title: "Integrated and Statistical Levels"
-description: "Leq, LAeq, L10/L50/L90 percentile levels, LCpeak/SEL and noise dose (IEC 61252), and octave spectrograms, with the ISO 1996 indicators in their own guide."
+description: "Leq, LAeq, L10/L50/L90 percentiles, LCpeak, SEL and noise dose (IEC 61252) in Python, with octave spectrograms; ISO 1996 indicators have their own guide."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -95,6 +95,33 @@ nothing but the energy, which is why $L_\mathrm{Aeq}$, SEL and $L_\mathrm{EX,8h}
 turn into one another through $T$, 1 s and 8 h alone; the maxima and the
 percentiles belong to the time-weighted track and the peak to a single
 excursion, so none of those can be rebuilt from the energy.*
+
+## How do I compute Leq and LAeq in Python?
+
+Pass the calibrated pressure signal, in pascals, to `signals.leq(recording)`
+for the equivalent continuous level and to `signals.laeq(recording, fs)` for
+the A-weighted one. A recording in digital units takes its sensitivity as
+`calibration_factor=`, and a `Signal` from `io.read` brings its own sample rate
+and, when calibrated (through `io.read(..., calibration_factor=)` or a
+sidecar), its calibration; uncalibrated, the levels are in digital full-scale
+units. Both integrate the squared pressure over the whole record with
+no time constant, so the result is the level of the steady sound that carries
+the same energy. On the pink noise below, `signals.leq` gives `80.0` dB and
+`signals.laeq` gives `74.8` dB, the gap being the bass the A curve discounts.
+The percentile levels come from the time-weighted level track instead, in
+[Percentile levels (LN)](#percentile-levels-ln).
+
+```python
+from phonometry import signals
+
+# recording: a calibrated pressure signal in pascals, sampled at fs hertz.
+# Ten seconds of pink noise at 0.2 Pa r.m.s. stand in for it here.
+fs = 48000
+recording = signals.noise_signal(fs, duration_s=10.0, color="pink", rms=0.2, seed=1)
+
+print(round(float(signals.leq(recording)), 1))       # 80.0 dB, Leq
+print(round(float(signals.laeq(recording, fs)), 1))  # 74.8 dB, LAeq
+```
 
 ## Leq and LAeq
 

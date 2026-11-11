@@ -22,6 +22,39 @@ For sound insulation *between* spaces (the same IR measured either side of a
 partition) see the companion
 [Field Insulation Measurement (ISO 16283) guide](../insulation/insulation-field.md).
 
+## How do I compute EDT, T20 and T30 from an impulse response in Python?
+
+Pass the impulse response and its sample rate to
+`room.room_parameters(ir, fs)`. It splits the response into octave bands
+(`fraction=3` gives one-third octaves), integrates each band backwards into its
+Schroeder decay curve and fits the evaluation range of each parameter, so
+`res.edt`, `res.t20` and `res.t30` hold one decay time in seconds per band,
+with the clarity `c50` and `c80`, the definition `d50` and the centre time `ts`
+beside them. `res.t30_valid` says, band by band, whether the noise floor left
+the fit enough decay range. On the stand-in response below, the octave values
+of `res.t30` average to `1.21` s. What it means when EDT, T20 and T30
+disagree is in
+[Reading EDT, T20 and T30 against each other](#reading-edt-t20-and-t30-against-each-other).
+
+```python
+import numpy as np
+from phonometry import room
+
+# ir: your measured impulse response, sampled at fs hertz. Two seconds of noise
+# decaying with a reverberation time of 1.2 s stand in for it here.
+fs = 48000
+t = np.arange(2 * fs) / fs
+ir = np.random.default_rng(1).standard_normal(t.size) * np.exp(-3 * np.log(10) / 1.2 * t)
+
+res = room.room_parameters(ir, fs)
+print(res.frequencies.round())        # [ 126.  251.  501. 1000. 1995. 3981.]
+print(res.edt.round(2))               # [1.16 1.29 1.16 1.12 1.19 1.17] s
+print(res.t20.round(2))               # [1.18 1.24 1.21 1.25 1.24 1.2 ] s
+print(res.t30.round(2))               # [1.2  1.19 1.23 1.21 1.21 1.21] s
+print(res.t30_valid.all())            # True
+print(round(float(res.t30.mean()), 2))  # 1.21 s
+```
+
 ## Decay analysis and room parameters (ISO 3382-1/2)
 
 The IR is filtered into octave (or one-third-octave) bands and each band is

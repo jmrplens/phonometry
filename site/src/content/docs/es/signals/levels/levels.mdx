@@ -1,6 +1,6 @@
 ---
 title: "Niveles integrados y estadísticos"
-description: "Leq, LAeq, percentiles L10/L50/L90, LCpeak/SEL y dosis de ruido (IEC 61252), y espectrogramas de octava, con los indicadores de ISO 1996 en su propia guía."
+description: "Leq, LAeq, L10/L50/L90, LCpeak, SEL y dosis de ruido (IEC 61252) con Python, y espectrogramas de octava; los indicadores de ISO 1996 van en otra guía."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -98,6 +98,34 @@ se convierten unos en otros solo con $T$, 1 s y 8 h; los máximos y los
 percentiles pertenecen a la traza con ponderación temporal y el pico a una
 única excursión, así que ninguno de ellos se reconstruye a partir de la
 energía.*
+
+## ¿Cómo calculo Leq y LAeq con Python?
+
+Pasa la señal de presión calibrada, en pascales, a `signals.leq(recording)`
+para el nivel continuo equivalente y a `signals.laeq(recording, fs)` para el
+ponderado A. Una grabación en unidades digitales recibe su sensibilidad como
+`calibration_factor=`, y un `Signal` leído con `io.read` aporta su propia
+frecuencia de muestreo y, si está calibrado (con `io.read(...,
+calibration_factor=)` o con un sidecar), su calibración; sin calibrar,
+los niveles quedan en unidades digitales de fondo de escala. Las dos funciones integran la presión
+al cuadrado sobre todo el registro, sin constante de tiempo, así que el
+resultado es el nivel del sonido estacionario que transporta la misma energía.
+Con el ruido rosa de abajo, `signals.leq` da `80.0` dB y `signals.laeq` da
+`74.8` dB: la diferencia son los graves que la curva A descuenta. Los niveles
+percentiles salen en cambio de la traza de nivel con ponderación temporal, en
+[Niveles percentiles (LN)](#niveles-percentiles-ln).
+
+```python
+from phonometry import signals
+
+# recording: una señal de presión calibrada en pascales, muestreada a fs hercios.
+# Aquí la sustituyen diez segundos de ruido rosa de 0,2 Pa eficaces.
+fs = 48000
+recording = signals.noise_signal(fs, duration_s=10.0, color="pink", rms=0.2, seed=1)
+
+print(round(float(signals.leq(recording)), 1))       # 80.0 dB, Leq
+print(round(float(signals.laeq(recording, fs)), 1))  # 74.8 dB, LAeq
+```
 
 ## Leq y LAeq
 

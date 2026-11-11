@@ -466,3 +466,19 @@ construida sobre la ponderación Impulse de aquí.
 - Teoría: [Integración temporal](/phonometry/es/reference/theory/signal-analysis/#integracion-temporal): la ecuación de primer orden que resuelven los detectores exponenciales, y qué cambiaría integrarla en su lugar sobre un bloque fijo.
 
 </SeeAlso>
+
+## Respuestas rápidas
+
+### ¿Qué ponderación temporal debo usar y cuál es la predeterminada?
+
+`filters.time_weighting(x, fs)` y `TimeWeighting` usan Fast salvo que `mode`
+indique otra, y Fast es lo que espera casi cualquier método actual: los niveles
+percentiles, la detección de eventos, el ruido comunitario y la gráfica de nivel
+frente a tiempo. Slow conviene a fuentes cuasi estacionarias y a los
+procedimientos que la prescriben, entre ellos la certificación de aeronaves.
+Impulse es herencia histórica: IEC 61672-1 la dejó fuera de sus requisitos y la
+práctica actual valora la impulsividad con $L_\mathrm{Aeq}$ más un ajuste, pero
+el RD 1367/2007 español sigue graduando su corrección por impulsividad sobre
+$L_\mathrm{AIeq} - L_\mathrm{Aeq}$, y por eso `mode='impulse'` se mantiene. Las
+constantes de tiempo están en
+[Las tres ponderaciones temporales](#2-las-tres-ponderaciones-temporales).

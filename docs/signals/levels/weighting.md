@@ -65,10 +65,34 @@ documented in [Special Weightings](special-weightings.md):
 `'D'` (IEC 537), and `'AU'` for audible sound in the presence of ultrasound
 (IEC 61012).
 
-The one-line answer is `filters.weighting_filter(recording, fs, weighting='A')`.
-Section 2 shows it on a runnable signal, section 5 explains why the default
-design is fitted at the sample rate rather than transformed from the printed
-prototype, and section 6 proves the result meets class 1.
+Section 2 shows the call on a runnable signal, section 5 explains why the
+default design is fitted at the sample rate rather than transformed from the
+printed prototype, and section 6 proves the result meets class 1.
+
+## How do I apply A-weighting to a signal in Python?
+
+Call `filters.weighting_filter(recording, fs, weighting='A')` on a calibrated
+signal. It returns the A-weighted time signal, filtered with the pole-zero
+design of IEC 61672-1:2013 within class 1 tolerances, so `signals.leq()` on the
+output is the $L_\mathrm{Aeq}$, and `signals.laeq(recording, fs)` does both
+steps in one call. The same function applies C, Z, B, D, AU and the infrasound
+G weighting through its `weighting` argument. On the tone below, A-weighting
+takes the level from `77.0` dB to `57.8` dB.
+
+```python
+import numpy as np
+from phonometry import filters, signals
+
+# recording: a calibrated pressure signal in pascals, sampled at fs hertz.
+# One second of a 100 Hz tone stands in for it here.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 100 * np.arange(fs) / fs)
+
+weighted = filters.weighting_filter(recording, fs, weighting="A")
+print(round(float(signals.leq(recording)), 1))       # 77.0 dB, unweighted
+print(round(float(signals.leq(weighted)), 1))        # 57.8 dB, A-weighted
+print(round(float(signals.laeq(recording, fs)), 1))  # 57.8 dB, the same in one call
+```
 
 ## 1. Where the curves come from
 
@@ -555,14 +579,6 @@ plt.show()
 - Theory: [Weighting Curves (IEC 61672-1)](../../reference/theory/signal-analysis.md#weighting-curves-iec-61672-1): the pole-zero definition of the A, C and Z curves and the bilinear warping the fitted design cancels.
 
 ## Quick answers
-
-### How do I apply A-weighting to a signal in Python?
-
-Call `filters.weighting_filter(recording, fs, weighting='A')` on a calibrated
-signal. It returns the A-weighted time signal, filtered with the pole-zero
-design of IEC 61672-1:2013 within class 1 tolerances, so
-`signals.leq()` on the output is the $L_\mathrm{Aeq}$. The same function applies C,
-Z, B, D, AU and the infrasound G weighting through its `weighting` argument.
 
 ### When should I use C-weighting instead of A-weighting?
 

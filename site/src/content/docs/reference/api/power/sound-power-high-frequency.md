@@ -679,6 +679,7 @@ that the exponent passes about 37, where `R` is still a number.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite time, volume or surface. |
+| TypeError | if `surface_area` or `volume` is not a single number, or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## tone_level_from_sidebands
 

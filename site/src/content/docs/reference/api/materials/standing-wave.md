@@ -129,6 +129,12 @@ exactly.
 
 **Returns:** Normalised surface impedance `z` (complex). A `complex` when `swr`, `first_min_distance` and `wavelength` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `swr`, `first_min_distance` or `wavelength` holds a text or a value that is not a real number. |
+
 ## standing_wave_ratio_from_level
 
 ```python

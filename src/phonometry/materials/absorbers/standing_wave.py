@@ -336,6 +336,8 @@ def standing_wave_normalized_impedance(
     :return: Normalised surface impedance ``z`` (complex). A ``complex`` when ``swr``,
         ``first_min_distance`` and ``wavelength`` are all numbers, an array when one of
         them is a sequence or an array, a zero-dimensional one included.
+    :raises TypeError: if ``swr``, ``first_min_distance`` or ``wavelength`` holds a
+        text or a value that is not a real number.
     """
     s = real_array(swr, "swr")
     _check_swr(s)

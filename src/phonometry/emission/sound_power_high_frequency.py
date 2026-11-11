@@ -402,6 +402,8 @@ def room_constant_from_reverberation_time(
         sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
+    :raises TypeError: if ``surface_area`` or ``volume`` is not a single number, or
+        ``reverberation_time`` holds a text or a value that is not a real number.
     """
     t = require_positive_array(reverberation_time, "reverberation_time")
     volume, surface = _room_geometry(volume, surface_area)

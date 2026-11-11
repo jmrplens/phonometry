@@ -169,8 +169,9 @@ values against the IEC 61265:1995 tolerances for aircraft-noise measurement
 systems: the microphone directional-response limits (Table 1, with the
 "intermediate angle uses the greater angle's limit" rule) and the scalar
 frequency-response, linearity and resolution limits. The one-third-octave
-filtering itself is covered by the library's IEC 61260 class-2 filter
-verification (`verify_filter_class`).
+filtering itself is covered by the library's IEC 61260 filter class
+verification (`verify_filter_class`), which grades every class; Annex 16 §3.7.3
+asks for class 1.
 
 ```python
 from phonometry import aircraft

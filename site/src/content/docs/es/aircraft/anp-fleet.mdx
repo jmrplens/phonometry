@@ -65,7 +65,7 @@ print(len(db.aircraft_ids))          # 155 tipos de aeronave
 ac = db.aircraft("747100")
 print(ac.description)                # Boeing 747-100 / JT9DBD
 print(ac.engine_type, ac.n_engines, ac.weight_class)
-print(ac.power_parameter, ac.mounting)
+print(ac.power_parameter, ac.mounting)   # CNT (lb) wing
 ```
 
 Las guías hermanas importan el módulo como `aircraft` y llaman a
@@ -234,7 +234,9 @@ plt.show()
 ```python
 from phonometry import aircraft
 
-aircraft.load_anp_database().aircraft("747100").profile("D", stage_length=1).plot(language="es")
+profile = aircraft.load_anp_database().aircraft("747100").profile("D", stage_length=1)
+print(profile.profile_id, profile.stage_length, profile.path.shape)   # DEFAULT 1 (11, 5)
+profile.plot(language="es")
 ```
 
 La **longitud de etapa** selecciona el tramo de distancia de viaje: una etapa más

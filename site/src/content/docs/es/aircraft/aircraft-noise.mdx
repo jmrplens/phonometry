@@ -233,6 +233,12 @@ incrementos, y el resultado es $D = -4{,}78$ dB y
 $\mathrm{EPNL} = 92{,}62$ EPNdB, un pelo por debajo del $\mathrm{PNLTM}$ porque
 la ventana es apenas más larga que la duración de referencia.
 
+Los dos puntos de 10 dB por debajo son los registros cuyo PNLT queda más cerca
+de $\mathrm{PNLTM} - 10$, el primero contado desde el principio y el último
+desde el final, de modo que una caída por debajo de ese umbral dentro de una
+historia con más de un lóbulo no recorta la ventana: el §4.5 pide la duración
+más larga que esa historia permita.
+
 Esa cadena tiene un orden, y el orden es justo lo que una historia temporal ya
 terminada no puede enseñar. La corrección tonal se mide sobre cada espectro
 según llega, un registro cada vez, ajustando un fondo bajo el espectro y
@@ -291,6 +297,13 @@ integrado en condiciones de referencia de la Tabla 4-4 del ETM Vol. I, que es
 otra historia temporal de certificación distinta y real, con incrementos de
 entre 0,395 s y 0,431 s, se reproduce como
 $\mathrm{EPNL} = 92{,}6\ \text{EPNdB}$.
+
+Cuando ya se tiene la historia de PNLT, `epnl_from_pnlt` ejecuta por sí sola la
+maquinaria de la duración y de la ventana: toma la serie de PNLT y su `dt` (y,
+si se quiere, las correcciones tonales de cada registro, que activan el ajuste
+por compartición de banda) y devuelve un registro `EPNLIntegration` que nombra
+`epnl`, `pnltm`, `bandsharing_adjustment`, `band_limits` y
+`duration_correction`.
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -435,7 +448,8 @@ hercios; la clave interior es el
 micrófono; y el valor es la **diferencia de nivel de sensibilidad en campo libre
 en decibelios respecto a 0°, incidencia normal**, medida con ondas sinusoidales
 en campo libre. En 4 kHz los límites son 0,5 / 1,0 / 2,0 / 2,5 / 2,5 dB en 30 /
-60 / 90 / 120 / 150°, así que el ejemplo de abajo cumple con margen. Esa
+60 / 90 / 120 / 150°, así que el ejemplo de abajo cumple con margen. Un ángulo
+situado entre dos de los tabulados se somete al límite del mayor (§4.4.2). Esa
 comprobación importa porque el avión barre un intervalo amplio de ángulos de
 incidencia mientras el micrófono se queda quieto, y toda la estación está
 construida en torno a un sonido que llega a pocos grados de la rasante. Los
@@ -454,7 +468,9 @@ los datos que has aportado: una comprobación fallida invalida los datos de
 certificación, no es una corrección que aplicar. La conformidad de los filtros de
 banda es asunto aparte: el §3.7.3 del Anexo 16 exige clase 1 de IEC 61260, y la
 clase 2 solo se admite si la autoridad certificadora lo permite, y la
-verificación de filtros de la propia biblioteca es donde eso se comprueba.
+verificación de filtros de la propia biblioteca, `verify_filter_class` de la
+[Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/),
+es donde eso se comprueba.
 
 ```python
 from phonometry import aircraft
@@ -538,6 +554,11 @@ att = aircraft.band_attenuation_arp5534(freqs, path_length_m=7620.0,
                               temperature_c=25.0, relative_humidity_percent=70.0)
 att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
 ```
+
+El resultado es un `AircraftBandAttenuation` que guarda la atenuación de banda
+$\delta_\mathrm{B}$ en `band_attenuation`, el valor de tono puro medio de banda $\delta_\mathrm{t} = \alpha\,s$ en `midband_attenuation` y el
+propio coeficiente de tono puro $\alpha$, en dB/m, en `coefficient_db_per_m`,
+con un valor por banda en cada uno.
 
 La regresión se ajustó para aproximadamente 6-32 °C y 20-95 % de humedad
 relativa, la ventana de ensayo de 14 CFR Part 36, y para longitudes de trayecto

@@ -65,7 +65,7 @@ print(len(db.aircraft_ids))          # 155 aircraft types
 ac = db.aircraft("747100")
 print(ac.description)                # Boeing 747-100 / JT9DBD
 print(ac.engine_type, ac.n_engines, ac.weight_class)
-print(ac.power_parameter, ac.mounting)
+print(ac.power_parameter, ac.mounting)   # CNT (lb) wing
 ```
 
 The sibling guides import the module as `aircraft` and call
@@ -230,7 +230,9 @@ plt.show()
 ```python
 from phonometry import aircraft
 
-aircraft.load_anp_database().aircraft("747100").profile("D", stage_length=1).plot()
+profile = aircraft.load_anp_database().aircraft("747100").profile("D", stage_length=1)
+print(profile.profile_id, profile.stage_length, profile.path.shape)   # DEFAULT 1 (11, 5)
+profile.plot()
 ```
 
 The **stage length** selects the trip-distance bin: a longer stage means more

@@ -49,8 +49,10 @@ engineering theory of Bies, Hansen & Howard: the ASHRAE tables and closed forms
 for bends, end reflection, plenums and flow noise, and an enclosure model that
 combines a panel transmission loss you supply with the reverberant build-up
 inside the enclosure. The first, the reactive four-pole silencer, has its own
-guide, [Silencers](/phonometry/devices/noise-control/silencers/), which also
-covers the trade-off against dissipative linings.
+guide, [Silencers](/phonometry/devices/noise-control/silencers/), which covers
+the closed-form expansion chamber, the Helmholtz, quarter-wave and
+extended-tube resonators, the independent FDTD cross-check and the trade-off
+against dissipative linings.
 
 Everything below is a **prediction** from declared geometry and declared
 material data. Section 2.2 names the standards that measure the same quantity
@@ -221,9 +223,11 @@ angle off the inlet axis.
 and $S_\mathrm{w}$ enter Wells' method as bare areas, so any plenum sharing these four
 numbers has the same predicted attenuation.*
 
-The formula is a sum of two terms inside one logarithm, a direct term
-$\cos\theta/\pi r^2$ and a reverberant term $(1-\alpha)/S_\mathrm{w}\alpha$, and which
-of them dominates decides which design move is worth making. For the plenum
+The formula, Bies Equation (8.275), is a sum of two terms inside one
+logarithm, a direct term $\cos\theta/\pi r^2$ and a reverberant term
+$(1-\alpha)/S_\mathrm{w}\alpha$, which is the reciprocal of the plenum's
+[room constant](/phonometry/buildings/rooms/room-image-sources/), and which of
+them dominates decides which design move is worth making. For the plenum
 drawn above ($r = 1.2$ m, $S_\mathrm{w} = 6$ m², $\alpha = 0.2$) the two are 0.221 and
 0.667, so the reverberant term rules: doubling the line of sight to 2.4 m buys
 0.9 dB and swinging the outlet a full radian off the inlet axis buys 0.6 dB,
@@ -277,7 +281,9 @@ duct-noise fiche with the per-band table beside the spectrum, the boxed
 single-number result (the A-weighted sound power level when the spectrum is
 regenerated noise, the mean attenuation when it is a loss), and, when a
 `requirement` is declared, the verdict against it: a maximum $L_{W\mathrm{A}}$ in the
-first case, a minimum mean attenuation in the second.
+first case, a minimum mean attenuation in the second. Rendering needs reportlab
+and, for the embedded figure, matplotlib
+(`pip install "phonometry[report,plot]"`).
 
 ```python
 from phonometry import ReportMetadata

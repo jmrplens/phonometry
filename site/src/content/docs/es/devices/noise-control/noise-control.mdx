@@ -50,8 +50,10 @@ ASHRAE y las formas cerradas de codos, reflexión de extremo, plenums y ruido de
 flujo, y un modelo de cerramiento que combina una pérdida de transmisión del
 panel que aportas tú con la acumulación reverberante en el interior. La primera,
 el silenciador reactivo de cuatro polos, tiene guía propia,
-[Silenciadores](/phonometry/es/devices/noise-control/silencers/), que además cubre
-el compromiso frente a los revestimientos disipativos.
+[Silenciadores](/phonometry/es/devices/noise-control/silencers/), que cubre la
+cámara de expansión en forma cerrada, los resonadores de Helmholtz, de cuarto
+de onda y de tubo extendido, el contraste con la simulación FDTD independiente
+y el compromiso frente a los revestimientos disipativos.
 
 Todo lo que sigue es una **predicción** a partir de una geometría declarada y de
 unos datos de material declarados. El apartado 2.2 nombra las normas que miden
@@ -231,9 +233,11 @@ $S_\text{out}$ y $S_\mathrm{w}$ entran en el método de Wells como áreas a seca
 cualquier plenum que comparta estos cuatro números tiene la misma atenuación
 predicha.*
 
-La fórmula es una suma de dos términos dentro de un mismo logaritmo, uno directo
-$\cos\theta/\pi r^2$ y otro reverberante $(1-\alpha)/S_\mathrm{w}\alpha$, y cuál de los
-dos domina decide qué movimiento de diseño merece la pena. Para el plenum
+La fórmula, la ecuación (8.275) de Bies, es una suma de dos términos dentro de
+un mismo logaritmo, uno directo $\cos\theta/\pi r^2$ y otro reverberante
+$(1-\alpha)/S_\mathrm{w}\alpha$, que es el inverso de la
+[constante de sala](/phonometry/es/buildings/rooms/room-image-sources/) del
+plenum, y cuál de los dos domina decide qué movimiento de diseño merece la pena. Para el plenum
 dibujado arriba ($r = 1{,}2$ m, $S_\mathrm{w} = 6$ m², $\alpha = 0{,}2$) valen 0,221 y 0,667,
 así que manda el término reverberante: duplicar la línea de visión hasta 2,4 m
 aporta 0,9 dB y desviar la salida un radián entero del eje de entrada aporta
@@ -289,7 +293,8 @@ resultado de número único en su recuadro (el nivel de potencia acústica
 ponderado A cuando el espectro es ruido regenerado, la atenuación media cuando
 es una pérdida), y, cuando se declara un `requirement`, el veredicto frente a
 él: un $L_{W\mathrm{A}}$ máximo en el primer caso, una atenuación media mínima en el
-segundo.
+segundo. Generarla necesita reportlab y, para la figura incrustada, matplotlib
+(`pip install "phonometry[report,plot]"`).
 
 ```python
 from phonometry import ReportMetadata

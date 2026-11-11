@@ -79,7 +79,7 @@ def _cells(outputs: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
 def test_a_notebook_that_showed_everything_passes_every_check() -> None:
     lines = cn.read(_cells(_GOOD))
     assert len(lines) == len(cn.CHECKS)
-    assert lines[0] == "phonometry '4.0.0' imports in the kernel"
+    assert lines[0] == "phonometry 4.0.0 imports in the kernel"
     assert lines[3] == "a verdict is displayed as FAIL"
 
 
@@ -87,6 +87,11 @@ def test_a_notebook_that_showed_everything_passes_every_check() -> None:
     ("tag", "outputs", "message"),
     [
         ("import", [], "one displayed result expected, 0 found"),
+        (
+            "import",
+            [_result(**{"text/plain": "<module 'phonometry'>"})],
+            "the import cell shows no version string",
+        ),
         (
             "rich-display",
             [

@@ -111,6 +111,7 @@ def test_each_problem_names_its_line() -> None:
     assert [p.split(": ", 1)[0] for p in cqe.problems(text, "a.md")] == ["a.md:3"]
 
 
+@pytest.mark.git_checkout
 def test_tests_are_not_read() -> None:
     root = pathlib.Path(__file__).resolve().parents[1]
     assert not any(
@@ -119,6 +120,7 @@ def test_tests_are_not_read() -> None:
     )
 
 
+@pytest.mark.git_checkout
 def test_the_files_a_command_is_copied_from_are_read() -> None:
     root = pathlib.Path(__file__).resolve().parents[1]
     read = {p.relative_to(root).as_posix() for p in cqe.tracked_files(root)}
@@ -197,6 +199,7 @@ def test_a_command_spelled_in_the_package_is_named_by_the_line_it_starts_on() ->
     assert problem.startswith("src/phonometry/a.py:3: pip install spelled outside")
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_the_repository_quotes_every_install_command() -> None:
     root = pathlib.Path(__file__).resolve().parents[1]

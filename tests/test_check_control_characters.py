@@ -91,6 +91,7 @@ def test_an_exemption_whose_file_is_gone_is_stale(tmp_path: pathlib.Path) -> Non
     assert stale == sorted(ccc.AS_DELIVERED)
 
 
+@pytest.mark.git_checkout
 def test_every_exemption_names_a_file_the_scan_reads() -> None:
     """The hatch cannot point at something the check never opens.
 
@@ -121,6 +122,7 @@ def _is_binary(path: pathlib.Path) -> bool:
     return False
 
 
+@pytest.mark.git_checkout
 @pytest.mark.whole_tree
 def test_nothing_the_scan_skips_is_text() -> None:
     """The partition has to be total, and its skipped half has to be earned.

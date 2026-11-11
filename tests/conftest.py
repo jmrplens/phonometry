@@ -1,4 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
+import importlib
 import os
 import sys
 from collections.abc import Iterator
@@ -16,10 +17,13 @@ import pytest
 # second `conftest.py` would share this one's module name; and the count of
 # the repository's files each test opens, with --without-whole-tree, which
 # leaves out the tests that read the repository whole (tests/whole_tree.py);
+# and the git commands each test runs on the repository, with the skip of the
+# tests that ask git about it where there is no .git (tests/git_checkout.py);
 # and the order of a refusal and an advisory, which fails a test whose
 # awaited refusal came after a library warning (tests/refusal_order.py).
 pytest_plugins = (
     "engine_fixtures",
+    "git_checkout",
     "hang_guard",
     "matplotlib_guard",
     "refusal_order",
@@ -45,6 +49,32 @@ def pytest_configure(config: pytest.Config) -> None:
     # A placement in the developer's shell must not move the suite onto a GPU
     # or refuse it: the tests that want a device ask for it by name.
     os.environ.pop("PHONOMETRY_COMPUTE", None)
+    import_domains_on_the_xdist_controller(config)
+
+
+def import_domains_on_the_xdist_controller(config: pytest.Config) -> None:
+    """Import every domain package on the pytest-xdist controller, in its main thread.
+
+    pytest-xdist 3.8 rebuilds each warning a worker forwards in a receiver
+    thread of the controller, one per worker, and imports the module of the
+    warning's class by its dotted name to do it. Several receivers importing
+    deep modules of the package at once lost the race to ``_DeadlockError``,
+    which with ``--max-worker-restart=0`` ended the run at an INTERNALERROR.
+    Imported here first, every such module is already in ``sys.modules``. A
+    worker, and a run without ``-n``, imports nothing here: there the suite's
+    own imports, after coverage has started, are the first.
+
+    :param config: The pytest configuration; on a worker it carries
+        ``workerinput``.
+    """
+    if getattr(config, "workerinput", None) is not None:
+        return
+    if not getattr(config.option, "numprocesses", None):
+        return
+    import phonometry
+
+    for name in phonometry._PACKAGES:
+        importlib.import_module(f"phonometry.{name}")
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

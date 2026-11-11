@@ -57,7 +57,7 @@ from .units import UNITS
 
 if TYPE_CHECKING:
     import pathlib
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Callable, Iterable, Mapping
 
     from .registry import Check
 
@@ -143,7 +143,8 @@ def _rounded(value: float, precision: int) -> float:
         cannot flip the sign of a byte comparison.
     :raises ValueError: If the value is not finite. ``Infinity`` is not JSON
         and would throw in the site build, so it fails here, at write time,
-        where the check that produced it can still be named.
+        where the check that produced it can still be named. A failing check
+        never gets here with one: :func:`_written` leaves it out.
     """
     if not math.isfinite(value):
         msg = f"non-finite value {value!r} cannot be stored in the artefact."
@@ -224,16 +225,24 @@ def _computed_document(outcome: Outcome) -> dict[str, Any]:
     does not contain, beside a label reading 0.6 and a verdict of pass, since
     the comparison itself is an exact match made before any of this. The defect
     was invisible while the only record check held the ISO 717 single numbers,
-    which the standard rounds to integers itself.
+    which the standard rounds to integers itself. A failing check's number
+    that JSON cannot write is left out, as :func:`_written` says.
     """
     side = outcome.computed_data
     record = side.record
     exact_record = outcome.kind is Kind.RECORD
+    value = _written(
+        side.value, outcome, lambda number: _rounded(number, outcome.precision)
+    )
+    if record is not None and _unwritable(record.values(), outcome):
+        record = None
+    left_out = (value is None and side.value is not None) or (
+        record is None and side.record is not None
+    )
     return {
-        "value": (
-            None if side.value is None else _rounded(side.value, outcome.precision)
-        ),
-        "label": side.label,
+        "value": value,
+        # A number left out is one the words of the outcome stand in for.
+        "label": outcome.computed if side.label is None and left_out else side.label,
         "record": (
             None
             if record is None
@@ -247,6 +256,40 @@ def _computed_document(outcome: Outcome) -> dict[str, Any]:
             }
         ),
     }
+
+
+def _unwritable(values: Iterable[float], outcome: Outcome) -> bool:
+    """Whether a failing check holds one number JSON cannot write among *values*."""
+    return not outcome.passed and not all(math.isfinite(value) for value in values)
+
+
+def _written(
+    value: float | None, outcome: Outcome, write: Callable[[float], float]
+) -> float | None:
+    """A number of the library's side as the document carries it.
+
+    A failing check may hold a number JSON cannot write. A check spells its
+    failure as an infinity or a NaN where the library gave it nothing to
+    measure (the advisory of the NOTE to ISO 10847 8.2.2 missing, an f_UL
+    reached, a rating left undetermined), and a library that returned one
+    fails the comparison the same way. Such a number is left out, and the words
+    of the outcome stand in for it, so the report shows the failure instead of
+    stopping on it. A builder fails a number of the library's side that is not
+    finite: :func:`~conformance.registry.mask` fails such a deviation, and
+    :func:`~conformance.registry.numeric` and
+    :func:`~conformance.registry.record` pass on one only against a limit or a
+    printed value that is not finite either. A passing check that holds one
+    is therefore a mistake in the check, and *write* refuses it where the check
+    can still be named.
+
+    :param value: The number, or ``None`` where the side has none.
+    :param outcome: The outcome it belongs to.
+    :param write: How a number of this field is stored.
+    :return: The stored number, or ``None`` where it is left out.
+    """
+    if value is None or _unwritable((value,), outcome):
+        return None
+    return write(value)
 
 
 def _tolerance_document(outcome: Outcome) -> dict[str, Any] | None:
@@ -279,7 +322,8 @@ def _check_document(
 ) -> dict[str, Any]:
     """One check, as the document carries it."""
     deviation = outcome.deviation
-    value = deviation.value
+    places = deviation_places(outcome.precision)
+    value = _written(deviation.value, outcome, lambda number: _rounded(number, places))
     return {
         "id": check_id(check),
         "domain": slug(check.domain),
@@ -298,12 +342,14 @@ def _check_document(
             # Stored at the deviation floor, not at the value precision: a
             # distance reported to the foot still has a deviation of hundredths
             # of one, and rounding the two the same way reports it as zero.
-            "value": (
-                None
-                if value is None
-                else _rounded(value, deviation_places(outcome.precision))
+            "value": value,
+            "label": (
+                outcome.delta
+                if deviation.label is None
+                and value is None
+                and deviation.value is not None
+                else deviation.label
             ),
-            "label": deviation.label,
         },
         "binding": _binding_document(outcome),
         "precision": outcome.precision,

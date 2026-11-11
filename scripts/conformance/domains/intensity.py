@@ -14,6 +14,7 @@ tabulated one.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import warnings
 from typing import TYPE_CHECKING, Literal
@@ -37,6 +38,8 @@ from ..registry import (
 from .levels import _FS
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from phonometry._internal.types import BandFraction
     from phonometry.emission._sound_power_intensity_points import (
         DeterminationGrade,
@@ -686,17 +689,36 @@ _ISO3747_EXCESS_GRADE2 = [8.0, 9.5, 7.2, 8.8]
 _ISO3747_DIRECTIVITY_GRADE2 = 3.0
 
 
+@contextlib.contextmanager
+def _no_background_levels() -> Iterator[None]:
+    """Hold back the one advisory a determination without background levels gives.
+
+    The 9.5 EXAMPLE prints no background levels, and the closed forms below
+    need none, so the library says once per call that no band can be reported
+    as meeting the requirement of 8.1. The rows are about what it computes
+    from the levels they carry; any other advisory still reaches the report.
+    """
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="No background levels were supplied",
+            category=ph.emission.SoundPowerWarning,
+        )
+        yield
+
+
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 9.5 EXAMPLE",
     "Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB, grade 2 with sigma_omc = 2,0 dB",
 )
 def _chk_iso3747_example_uncertainty() -> Outcome:
-    res = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
-        sigma_omc_db=2.0,
-        conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
-    )  # fmt: skip
+    with _no_background_levels():
+        res = ph.emission.sound_power_in_situ(
+            _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
+            sigma_omc_db=2.0,
+            conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
+        )  # fmt: skip
     return numeric(5.0, float(res.expanded_uncertainty), 1e-12, unit="dB", places=6)
 
 
@@ -706,15 +728,16 @@ def _chk_iso3747_example_uncertainty() -> Outcome:
     "sigma_R0 by grade: 1,5 dB (grade 2) and 4,0 dB (grade 3), sigma_tot of Table E.1 row 2",
 )
 def _chk_iso3747_table2_and_e1() -> Outcome:
-    grade2 = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
-        sigma_omc_db=4.0,
-        conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
-    )  # fmt: skip
-    grade3 = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
-        conditions=ph.emission.GradeConditions(excess_levels=[8.0, 6.9, 7.2, 8.8], directivity_range=3.0)
-    )  # fmt: skip
+    with _no_background_levels():
+        grade2 = ph.emission.sound_power_in_situ(
+            _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
+            sigma_omc_db=4.0,
+            conditions=ph.emission.GradeConditions(excess_levels=_ISO3747_EXCESS_GRADE2, directivity_range=_ISO3747_DIRECTIVITY_GRADE2),
+        )  # fmt: skip
+        grade3 = ph.emission.sound_power_in_situ(
+            _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
+            conditions=ph.emission.GradeConditions(excess_levels=[8.0, 6.9, 7.2, 8.8], directivity_range=3.0)
+        )  # fmt: skip
     # Table E.1, sigma_R0 = 1,5 dB row at sigma_omc = 4 dB: sqrt(18,25) = 4,27 -> 4,3.
     return record(
         {"sigma_R0 grade 2": 1.5, "sigma_R0 grade 3": 4.0, "sigma_tot (1,5; 4)": 4.3},
@@ -770,10 +793,11 @@ def _chk_iso3747_eq11_vs_iso3741() -> Outcome:
             _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS,
             frequencies=_ISO3747_FREQS, temperature_c=20.0, static_pressure_kpa=100.0,
         )  # fmt: skip
-    res = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
-        temperature_c=20.0, static_pressure_kpa=100.0,
-    )  # fmt: skip
+    with _no_background_levels():
+        res = ph.emission.sound_power_in_situ(
+            _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
+            temperature_c=20.0, static_pressure_kpa=100.0,
+        )  # fmt: skip
     worst = float(
         np.max(
             np.abs(
@@ -792,25 +816,26 @@ def _chk_iso3747_eq11_vs_iso3741() -> Outcome:
     "m identical reference-source locations collapse to Eq. 11 / Eq. 19 (closed form)",
 )
 def _chk_iso3747_locations_collapse() -> Outcome:
-    one = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
-    )
-    three = ph.emission.sound_power_in_situ(
-        _ISO3747_ST,
-        np.stack([_ISO3747_RSS] * 3),
-        np.stack([_ISO3747_LW_RSS] * 3),
-        frequencies=_ISO3747_FREQS,
-    )
     events = np.repeat(_ISO3747_ST[:, None, :], 5, axis=1)
-    one_j = ph.emission.sound_energy_in_situ(
-        events, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
-    )
-    two_j = ph.emission.sound_energy_in_situ(
-        events,
-        np.stack([_ISO3747_RSS] * 2),
-        _ISO3747_LW_RSS,
-        frequencies=_ISO3747_FREQS,
-    )
+    with _no_background_levels():
+        one = ph.emission.sound_power_in_situ(
+            _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
+        )
+        three = ph.emission.sound_power_in_situ(
+            _ISO3747_ST,
+            np.stack([_ISO3747_RSS] * 3),
+            np.stack([_ISO3747_LW_RSS] * 3),
+            frequencies=_ISO3747_FREQS,
+        )
+        one_j = ph.emission.sound_energy_in_situ(
+            events, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
+        )
+        two_j = ph.emission.sound_energy_in_situ(
+            events,
+            np.stack([_ISO3747_RSS] * 2),
+            _ISO3747_LW_RSS,
+            frequencies=_ISO3747_FREQS,
+        )
     worst = max(
         float(np.max(np.abs(three.sound_power_level - one.sound_power_level))),
         float(np.max(np.abs(two_j.sound_energy_level - one_j.sound_energy_level))),
@@ -827,14 +852,15 @@ def _chk_iso3747_locations_collapse() -> Outcome:
 )
 def _chk_iso3747_event_forms() -> Outcome:
     n_events = 8
-    one_at_a_time = ph.emission.sound_energy_in_situ(
-        np.repeat(_ISO3747_ST[:, None, :], n_events, axis=1),
-        _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
-    )  # fmt: skip
-    encompassing = ph.emission.sound_energy_in_situ(
-        _ISO3747_ST + 10.0 * math.log10(n_events),
-        _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS, n_events=n_events,
-    )  # fmt: skip
+    with _no_background_levels():
+        one_at_a_time = ph.emission.sound_energy_in_situ(
+            np.repeat(_ISO3747_ST[:, None, :], n_events, axis=1),
+            _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
+        )  # fmt: skip
+        encompassing = ph.emission.sound_energy_in_situ(
+            _ISO3747_ST + 10.0 * math.log10(n_events),
+            _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS, n_events=n_events,
+        )  # fmt: skip
     worst = float(
         np.max(
             np.abs(encompassing.sound_energy_level - one_at_a_time.sound_energy_level)
@@ -851,9 +877,10 @@ def _chk_iso3747_event_forms() -> Outcome:
     "C2 at 101,325 kPa and 23,0 degC is 15 lg(296,15/296) = 0,003 300 dB (theta_ref = 296 K)",
 )
 def _chk_iso3747_c2_reference_conditions() -> Outcome:
-    res = ph.emission.sound_power_in_situ(
-        _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
-    )
+    with _no_background_levels():
+        res = ph.emission.sound_power_in_situ(
+            _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS
+        )
     expected = 15.0 * math.log10(296.15 / 296.0)
     return numeric(expected, float(res.c2), 1e-9, unit="dB", places=6)
 
@@ -880,7 +907,8 @@ def _chk_iso3747_a_weighted_total() -> Outcome:
     flat = np.full((3, freqs.size), 80.0)
     lw_rss = np.full(freqs.size, 90.0)
     # Equal levels for both sources: LW = LW(RSS) = 90 dB in every band.
-    res = ph.emission.sound_power_in_situ(flat, flat, lw_rss, frequencies=freqs)
+    with _no_background_levels():
+        res = ph.emission.sound_power_in_situ(flat, flat, lw_rss, frequencies=freqs)
     expected = 90.0 + 10.0 * math.log10(float(np.sum(10.0 ** (0.1 * ck))))
     return numeric(expected, float(res.sound_power_level_a), 1e-9, unit="dB", places=4)
 

@@ -14,10 +14,15 @@ on:
 
 permissions: {}
 
+# pip prints a notice whenever the pip a step runs lags its newest
+# release, which says nothing about the build and lands in every log.
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
 jobs:
   preflight:
     name: Preflight
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # A job of its own because the wait outlasts the build job's ten minutes
     # by far. Fifty, above the wait's own forty-five, so the message the wait
     # writes is the one a reader gets. The ceiling is not redundant: the loop
@@ -82,7 +87,7 @@ jobs:
   build:
     name: Build the stub
     needs: preflight
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -117,7 +122,7 @@ jobs:
   publish:
     name: Publish to PyPI
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       id-token: write # the OIDC exchange with PyPI's trusted publisher

@@ -526,11 +526,31 @@ markers = [
     # text, which neither the jitted kernel nor a dependency floor changes,
     # and the test matrix runs them (tests/whole_tree.py).
     "whole_tree: reads the repository whole, a guard, a census or a generator run over the package, the scripts, the documentation, the site or the committed figures",
+    # A tree unpacked from a source archive (GitHub's "Source code", or a
+    # packager's export) has no .git, and git refuses to list its files: the
+    # tests carrying this mark are skipped there, saying why, and an unmarked
+    # test that runs git on the repository fails (tests/git_checkout.py).
+    "git_checkout: asks git about the repository, its tracked files or their attributes, and so needs a git checkout",
 ]
 filterwarnings = [
+    # The clip-frame audit, the figure checks, the doc-snippet runner and the
+    # process-exit tests fork on purpose, so a child shares what its parent
+    # computed. Python 3.12 and later warn at a fork while another thread
+    # lives, and under pytest one always does: the faulthandler watchdog of
+    # faulthandler_timeout, and under -n the xdist worker's own thread, so a
+    # filter around one fork would race the other threads' warnings anyway.
+    "ignore:This process \\(pid=\\d+\\) is multi-threaded, use of fork\\(\\) may lead to deadlocks in the child:DeprecationWarning",
     # 4.0 carries no deprecated names: the aliases the 3.x layout left behind
     # were removed with the shims that served them. The rule stays as a guard,
     # so the day a deprecation is introduced the suite fails instead of
     # logging, and it costs nothing while nothing matches it.
     "error:.*is deprecated since phonometry.*:DeprecationWarning",
+    # A fixture of class, module, package or session scope written as an
+    # instance method runs once for its scope on an instance no test sees, and
+    # pytest 10 refuses it. pytest 9.2 only warns, for each of the four scopes,
+    # with a PytestRemovedIn10Warning, a DeprecationWarning named here by its
+    # builtin class and its message, which starts with the scope's name
+    # (pytest 9.1 warned for class scope alone, in the singular), so the test
+    # that uses such a fixture fails at its setup.
+    "error:(Class|Module|Package|Session)-scoped fixtures? defined as instance methods? (is|are) deprecated:DeprecationWarning",
 ]

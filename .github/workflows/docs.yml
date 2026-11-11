@@ -81,7 +81,7 @@ concurrency:
 jobs:
   build:
     name: Site builds and validates
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
         with:
@@ -416,7 +416,7 @@ jobs:
   deploy:
     needs: build
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       pages: write
       id-token: write
@@ -432,7 +432,7 @@ jobs:
   indexnow:
     name: Submit URLs to IndexNow
     needs: deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions: {}
     timeout-minutes: 10
     steps:

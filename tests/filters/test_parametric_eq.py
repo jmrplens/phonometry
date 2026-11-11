@@ -53,9 +53,15 @@ _ALL_TYPES = ("peaking", "lowshelf", "highshelf") + _GAINLESS_TYPES
 
 
 def _gain_db_at(sos: np.ndarray, freqs: list[float], fs: float = FS) -> np.ndarray:
-    """Cascade gain in dB at the given frequencies (machine-exact eval)."""
+    """Cascade gain in dB at the given frequencies (machine-exact eval).
+
+    A zero of the response that falls exactly on a frequency, as the double
+    zero of a low-pass at Nyquist and of a high-pass at DC does, reads as
+    -inf dB, which the tests compare with a bound.
+    """
     _, h = signal.sosfreqz(sos, worN=np.asarray(freqs, dtype=np.float64), fs=fs)
-    return 20 * np.log10(np.abs(h))
+    with np.errstate(divide="ignore"):
+        return 20 * np.log10(np.abs(h))
 
 
 # ---------------------------------------------------------------------------

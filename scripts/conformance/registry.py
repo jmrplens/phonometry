@@ -378,7 +378,9 @@ def _snap(value: float, eps: float = 5e-4) -> float:
 def _fmt(value: float, unit: str = "", places: int = 4) -> str:
     """Compact fixed/again-significant formatting with an optional unit."""
     if not math.isfinite(value):
-        return "inf" if value > 0 else "-inf"
+        # str() and not a sign test: a NaN is neither side of zero, and read
+        # as "value > 0" it printed as "-inf".
+        return str(value)
     text = f"{value:.{places}f}".rstrip("0").rstrip(".")
     if text in ("", "-0"):
         text = "0"
@@ -490,8 +492,13 @@ def _headroom(deviation: float, lower: float | None, upper: float | None) -> flo
 
     A missing edge is unbounded on that side. With neither edge the deviation
     is already the headroom, which is how a check that knows its margin but not
-    the band that produced it reports.
+    the band that produced it reports. A deviation that is not finite sits at
+    no distance from an edge, and its headroom is NaN: ``min`` read a NaN
+    beside the infinity of a missing edge as that infinity, so a NaN margin
+    printed "headroom inf".
     """
+    if not math.isfinite(deviation):
+        return math.nan
     if lower is None and upper is None:
         return deviation
     to_upper = math.inf if upper is None else upper - deviation
@@ -521,7 +528,9 @@ def mask(
     :param expected: What the band requires, in prose.
     :param computed: What was measured, in prose.
     :param deviation: Signed deviation from nominal, or the margin itself when
-        no band is given.
+        no band is given. One that is not finite fails: it is no measurement
+        of the axis, and a check reads its failure that way where the library
+        gave it nothing to measure.
     :param lower: Lower edge of the acceptance band, ``None`` if unbounded.
     :param upper: Upper edge, ``None`` if unbounded.
     :param frequency_hz: Frequency the band binds at, when there is one.
@@ -535,7 +544,7 @@ def mask(
         expected=expected,
         computed=computed,
         delta=f"headroom {_fmt(headroom, unit, deviation_places(places))}",
-        passed=headroom >= 0.0,
+        passed=math.isfinite(deviation) and headroom >= 0.0,
         kind=Kind.MASK,
         unit=canonical_unit(unit),
         tolerance=Tolerance(ToleranceMode.MASK, 0.0),

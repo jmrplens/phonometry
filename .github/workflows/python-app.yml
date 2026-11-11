@@ -21,9 +21,14 @@ on:
 permissions:
   contents: read
 
+# pip prints a notice whenever the pip a step runs lags its newest
+# release, which says nothing about the build and lands in every log.
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -129,7 +134,7 @@ jobs:
   # would reject a malformed one) to where a mistake is still cheap.
   transition-stub:
     name: Transition stub builds and its metadata is sound
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -191,7 +196,7 @@ jobs:
   # build turned into the failure it was for anyone who built from source.
   release-build:
     name: The release build gives the same bytes twice
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -274,7 +279,7 @@ jobs:
   # count quoted from either must equal a fresh `make conformance` run.
   conformance:
     name: Conformance report up to date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -339,7 +344,7 @@ jobs:
   # equal a fresh `make api-docs` run (deterministic, stdlib-only generator).
   api-docs:
     name: Generated API reference up to date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -378,7 +383,7 @@ jobs:
   # compared, so a stale commit could not be told from a fresh one.
   llms:
     name: llms artifacts up to date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -413,7 +418,7 @@ jobs:
   # `conformance` job gates instead.
   site-reports:
     name: Generated evidence pages up to date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -438,7 +443,7 @@ jobs:
   # glyph. See scripts/check_errata_evidence.py and CONTRIBUTING.md.
   errata-evidence:
     name: Errata entries cite their page
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -463,7 +468,7 @@ jobs:
   # docs/contributing/docs-and-figures.md#f17.
   fence-names:
     name: Documentation fences read in order
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -483,7 +488,7 @@ jobs:
   # or namespace entries are fine). See scripts/check_api_reference.py.
   api-reference-table:
     name: Curated API quick table covers __all__
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -513,7 +518,7 @@ jobs:
   # private module, and a scan by file path does not see it.
   parameter-units:
     name: Every public quantity names its unit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -554,7 +559,7 @@ jobs:
   # table built by a function call only shows its type once it exists.
   frozen-constants:
     name: Every published table refuses writes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -586,7 +591,7 @@ jobs:
   # so a table from a new book fails until it is registered.
   published-sources:
     name: Every published value names its page
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -631,7 +636,7 @@ jobs:
   # imported package, like the units and sources guards.
   solid-agreement:
     name: The books agree about the solids they share
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -671,7 +676,7 @@ jobs:
   # `make graphs` regeneration.
   figures:
     name: Documentation figures up to date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -843,7 +848,7 @@ jobs:
   # than a script.
   doc-snippets:
     name: Documentation snippets run
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -886,7 +891,7 @@ jobs:
   # rather than waiting behind an install.
   markdown-hazards:
     name: Markdown renders the way it reads
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -959,7 +964,7 @@ jobs:
   # rather than the byte. Needs no dependencies, so it runs on its own.
   control-characters:
     name: No stray control character
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -982,7 +987,7 @@ jobs:
   # on its own rather than waiting behind an install.
   subscript-slope:
     name: One meaning per subscript per file
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1002,7 +1007,7 @@ jobs:
   # and dependency-free, like the subscript gate beside it.
   euler-number:
     name: Euler's number is upright
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1028,7 +1033,7 @@ jobs:
   # costs a second and runs without one.
   docstring-math:
     name: Docstring mathematics reaches the page intact
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1052,7 +1057,7 @@ jobs:
   # Static and dependency-free, so it runs on its own.
   language-forwarding:
     name: Every call passes the language on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1078,7 +1083,7 @@ jobs:
   # code did not take. Static and dependency-free, so it runs on its own.
   dead-constants:
     name: No private constant goes unread
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1103,7 +1108,7 @@ jobs:
   # Static and dependency-free, so it runs on its own.
   raises-blocks:
     name: Every exception test waits on one call
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1126,7 +1131,7 @@ jobs:
   # Static and dependency-free, so it runs on its own.
   regular-file-reads:
     name: Every reader asks what a name holds before it opens it
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1151,7 +1156,7 @@ jobs:
   # on its own.
   real-conversions:
     name: Every conversion of a caller's numbers goes through a check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1176,7 +1181,7 @@ jobs:
   # rather than a grep. Static and dependency-free, so it runs on its own.
   reference-values:
     name: Every reference value points at ISO 1683 or names its source
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1204,7 +1209,7 @@ jobs:
   # dependency-free, so it runs on its own.
   boundary-comparisons:
     name: No verdict hangs on the last bits of a computed decimal
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1238,7 +1243,7 @@ jobs:
   # on its own.
   array-aliasing:
     name: Every result keeps its own copy of the arrays it was given
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1264,7 +1269,7 @@ jobs:
   # dependency-free, so it runs on its own.
   record-display:
     name: Every public record shows itself as a table in a notebook
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1295,7 +1300,7 @@ jobs:
   # across modules. Static and dependency-free, so it runs on its own.
   return-overloads:
     name: Every return an argument decides is overloaded on it
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1331,7 +1336,7 @@ jobs:
   # on its own.
   parameter-annotations:
     name: Every public parameter admits what its body converts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1363,7 +1368,7 @@ jobs:
   # runs the same check on a wheel built here.
   type-completeness:
     name: Every public name has a type a type checker knows
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -1405,7 +1410,7 @@ jobs:
   # Static and dependency-free, so it runs on its own.
   conformance-rows:
     name: Every conformance row runs the library
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1430,7 +1435,7 @@ jobs:
   # fixes the rendered page the check compares.
   reports:
     name: Example report fiches up to date
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -1472,7 +1477,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-26.04, macos-latest, windows-latest]
         # From the oldest Python requires-python admits to the newest the
         # classifiers name, every one in between included;
         # tests/test_minimum_requirements.py holds the list to pyproject.toml.
@@ -1537,7 +1542,7 @@ jobs:
           coverage.xml
       if: always()
     - name: Upload coverage to Codecov
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-26.04'
       uses: codecov/codecov-action@v7
       with:
         files: coverage.xml
@@ -1550,7 +1555,7 @@ jobs:
   # minimum-versions below builds the same kernels at the numba floor.
   tests-perf:
     name: tests (numba-jitted kernel)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
     # 2026-11-05, all but a minute or two of it in the test step, and the run of
     # 2026-11-04 reached this limit and was stopped. A hung test ends the run
@@ -1622,8 +1627,8 @@ jobs:
   # glibc built for the x86-64 baseline carries exp, log, pow, sin, tan and
   # atan twice, with fused multiply-adds and without, and the weighting
   # design gives the documented bytes on both. The test that hands a child
-  # the set without FMA runs on no job of the matrix: ubuntu-latest is
-  # Ubuntu 26.04, whose glibc is built for x86-64-v3 and carries the FMA set
+  # the set without FMA runs on no job of the matrix: its Linux runner,
+  # ubuntu-26.04, has a glibc built for x86-64-v3 that carries the FMA set
   # alone, so the test skips there by name, and macOS and Windows run no
   # glibc. Ubuntu 24.04's glibc 2.39 is the baseline build (its libm declares
   # x86-64-baseline needed), so the test runs here, with the tests of the
@@ -1635,7 +1640,7 @@ jobs:
   # turns it red instead of green on nothing.
   glibc-without-fma:
     name: The weighting design on glibc's routines without FMA
-    # The baseline build of glibc, which ubuntu-latest no longer installs.
+    # The baseline build of glibc, which Ubuntu 26.04 no longer installs.
     runs-on: ubuntu-24.04
     # Its tests take seconds and the install a few minutes; a hung test ends
     # the run fifteen minutes after it started (pyproject.toml).
@@ -1677,7 +1682,7 @@ jobs:
   # the tolerance the guide publishes.
   array-api:
     name: FDTD engines on array-api-strict and torch (CPU)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Under 5 min in its last 18 passing runs, and a hung test ends the run
     # fifteen minutes after it started (pyproject.toml).
     timeout-minutes: 25
@@ -1733,7 +1738,7 @@ jobs:
   # failing the build over a distribution's choice of encoders.
   video:
     name: Videos encode with a real ffmpeg
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Its tests take under a minute in its first five passing runs, and
     # installing ffmpeg took under a minute in three of them and 15 and 17
     # min in the other two, waiting on Ubuntu's mirror; a hung test ends the
@@ -2054,7 +2059,7 @@ jobs:
   # 25 minutes.
   minimum-versions:
     name: Library tests at the dependency floors
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # On main it took 14 to 40 min in its passing runs from 2026-10-25 to
     # 2026-11-05, all but a minute or two of it in the test step. A hung test
     # ends the run fifteen minutes after it started (pyproject.toml).
@@ -2111,7 +2116,7 @@ jobs:
   # low sampling rate provokes.
   notebook:
     name: phonometry runs in a notebook kernel
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -2145,7 +2150,7 @@ jobs:
   # there.
   pyodide:
     name: phonometry installs and runs in Pyodide (JupyterLite)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -2178,7 +2183,7 @@ jobs:
 
   sonar:
     needs: tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Dependabot runs with a restricted token and no access to repository secrets, so
     # SONAR_TOKEN is empty there and the scan can only ever fail. Skip it for those runs.
     if: >-
@@ -2192,7 +2197,7 @@ jobs:
     - name: Download coverage report
       uses: actions/download-artifact@v8
       with:
-        name: test-results-ubuntu-latest-3.13
+        name: test-results-ubuntu-26.04-3.13
     # SonarCloud counts as new code everything since the version changed, and
     # a scan that names no version leaves it "not provided" for ever: every
     # analysis from the first one on carried that, so the new-code period never
@@ -2221,7 +2226,7 @@ jobs:
 
   pr-comment:
     needs: [quality, tests]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: always() && github.event_name == 'pull_request'
     permissions:
       contents: read

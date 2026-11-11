@@ -803,7 +803,7 @@ veredictos de conformidad de la biblioteca. Ninguna de esas funciones rechaza
 muestras sin calibrar (no pueden saberlo), así que el marco es una decisión que el
 analista tiene que anotar junto al resultado.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dbfs_versus_spl.svg" alt="Izquierda: el mismo espectro en bandas de tercio de octava calculado con un factor de calibración y con dbfs=True, superpuestos una vez añadido el desplazamiento constante. Derecha: los primeros ciclos de una ráfaga tonal filtrada por bandas que sobrepasa la amplitud de excitación en 1,32 decibelios, que es lo que lee mode='peak'" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dbfs_versus_spl.svg" alt="Izquierda: el mismo espectro en bandas de tercio de octava calculado con un factor de calibración y con dbfs=True, superpuestos una vez añadido el desplazamiento constante. Derecha: los primeros ciclos de una ráfaga tonal filtrada por bandas que sobrepasa la amplitud de excitación en 0,82 decibelios, que es lo que lee mode='peak'" width="92%" />
 
 *Izquierda: un registro, dos marcos. El espectro en dBFS es el espectro en dB SPL
 desplazado una constante, aquí 106,04 dB, que es exactamente el nivel del
@@ -811,7 +811,7 @@ calibrador menos el nivel en dBFS de la toma del calibrador; el marco dBFS cambi
 el origen y nada más, que es por lo que todas las magnitudes basadas en formas de
 arriba lo sobreviven. Derecha: el ataque de una ráfaga tonal de 1 kHz después del
 filtro de octava, con amplitud de excitación 0,5. La señal de banda sobrepasa
-hasta 0,582 antes de asentarse, así que `mode='peak'` lee 1,32 dB por encima del
+hasta 0,549 antes de asentarse, así que `mode='peak'` lee 0,82 dB por encima del
 tono estacionario.*
 
 ## RMS frente a niveles de pico
@@ -843,11 +843,24 @@ spl_peak, freq = filtered.levels, filtered.frequencies
 :::note
 `mode='peak'` mide el máximo absoluto de la señal de banda **filtrada**, que
 incluye el transitorio de arranque del filtro (sobreimpulso). Las señales que
-empiezan de forma abrupta pueden leer alrededor de 1 dB de más: 1,32 dB para la
+empiezan de forma abrupta pueden leer alrededor de 1 dB de más: 0,82 dB para la
 ráfaga tonal dibujada en el panel derecho de arriba. Es inherente a los filtros
 de banda IIR (un sonómetro analógico se comporta igual), no un artefacto del
 procesado.
 :::
+
+La ráfaga de ese panel son cuarenta ciclos de 1 kHz con amplitud de excitación
+0,5, y `mode='peak'` lee su sobreimpulso directamente:
+
+```python
+from phonometry import signals
+
+burst = signals.tone_burst(fs, 1000.0, 40, amplitude=0.5, post_silence=0.03)
+peak = filters.octave_filter(burst.signal, fs, fraction=1, mode='peak')
+level = peak.levels[peak.frequencies.index(1000.0)]   # la banda de octava de 1 kHz
+print(f"{2e-5 * 10 ** (level / 20):.3f}, {level - 20 * np.log10(0.5 / 2e-5):.2f} dB")
+# 0.549, 0.82 dB
+```
 
 ## Entrada de audio entero
 

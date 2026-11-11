@@ -155,8 +155,19 @@ chi, psi = params.chi, params.psi
 For an incident wave on plate 1, transmission **around the corner** (into the
 perpendicular plate 2) is $\tau_{12}(\theta)$ (Eq. 5.12), and transmission
 **across the straight section** (into the collinear plate 3, X- and
-T-junction (1) only) is $\tau_{13}(\theta)$ (Eq. 5.13). The corner coefficient
-is zero beyond the cut-off, $\tau_{12}(\theta) = 0$ for $\chi < \sin\theta$.
+T-junction (1) only) is $\tau_{13}(\theta)$ (Eq. 5.13). Around the corner,
+
+$$
+\tau_{12}(\theta) =
+\frac{0.5\,J_1 J_2 \psi \cos\theta \sqrt{\chi^2 - \sin^2\theta}}
+     {(J_2\psi)^2 + \chi^2
+      + J_2\psi\left(\sqrt{(1+\sin^2\theta)(\chi^2+\sin^2\theta)}
+      + \sqrt{(1-\sin^2\theta)(\chi^2-\sin^2\theta)}\right)},
+\qquad \chi \ge \sin\theta
+$$
+
+and beyond the cut-off the coefficient is zero, $\tau_{12}(\theta) = 0$ for
+$\chi < \sin\theta$: no propagating wave is transmitted there.
 The junction constants $J_1$, $J_2$, $J_3$ select the geometry:
 
 A T-junction has three plates, and **which of them carries the incident wave**

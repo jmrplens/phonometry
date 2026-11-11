@@ -159,9 +159,20 @@ chi, psi = params.chi, params.psi
 Para una onda incidente sobre la placa 1, la transmisión **alrededor de la
 esquina** (hacia la placa perpendicular 2) es $\tau_{12}(\theta)$ (Ec. 5.12),
 y la transmisión **a través del tramo recto** (hacia la placa colineal 3, solo
-en las uniones en X y en T (1)) es $\tau_{13}(\theta)$ (Ec. 5.13). El
-coeficiente de esquina es cero más allá del ángulo de corte,
-$\tau_{12}(\theta) = 0$ para $\chi < \sin\theta$.
+en las uniones en X y en T (1)) es $\tau_{13}(\theta)$ (Ec. 5.13). Alrededor
+de la esquina,
+
+$$
+\tau_{12}(\theta) =
+\frac{0{,}5\,J_1 J_2 \psi \cos\theta \sqrt{\chi^2 - \sin^2\theta}}
+     {(J_2\psi)^2 + \chi^2
+      + J_2\psi\left(\sqrt{(1+\sin^2\theta)(\chi^2+\sin^2\theta)}
+      + \sqrt{(1-\sin^2\theta)(\chi^2-\sin^2\theta)}\right)},
+\qquad \chi \ge \sin\theta
+$$
+
+y más allá del ángulo de corte el coeficiente es cero, $\tau_{12}(\theta) = 0$
+para $\chi < \sin\theta$: no se transmite ninguna onda propagante.
 Las constantes de unión $J_1$, $J_2$, $J_3$ seleccionan la geometría:
 
 Una unión en T tiene tres placas, y **cuál de ellas lleva la onda incidente** es

@@ -4988,18 +4988,27 @@ def test_the_values_a_narrowed_choice_dropped_are_the_ones_its_call_refuses(
 @pytest.mark.parametrize(
     ("function", "name", "value"),
     [
-        (vibration.junction_transmission, "junction", "T2"),
         (io.write, "subtype", "PCM_32"),
+        (vibration.junction_transmission, "junction", "T2"),
         (vibration.guide_values, "area", "sensitive"),
     ],
-    ids=["corner-only-junction", "subtype-beside-flac", "area-of-table-1"],
+    ids=[
+        "refused-beside-a-flac-file",
+        "taken-though-a-helper-refuses-it",
+        "taken-though-a-sibling-table-refuses-it",
+    ],
 )
-def test_a_value_the_package_refuses_only_beside_another_argument_passes(
+def test_a_value_some_call_takes_passes(
     function: Callable[..., object], name: str, value: str
 ) -> None:
-    """``junction_transmission`` takes the ``"T2"`` it reads no straight
-    section of, ``io.write`` refuses ``"PCM_32"`` beside a FLAC file alone,
-    and ``guide_values`` takes the sensitive area Table 2 has no row for.
+    """A value some call takes passes. ``io.write`` refuses ``"PCM_32"``
+    beside a FLAC file alone, a combination the ``Literal`` cannot say.
+    ``junction_transmission`` takes every junction, ``"T2"`` among them, and
+    reaches ``straight_transmission_coefficient``, which refuses it, only
+    behind a test of the value that ``"T2"`` does not pass;
+    ``guide_values`` takes the sensitive area with every source, edition and
+    time of day it takes any area with, though Table 2, which
+    ``construction_guide_values`` reads, has no row for it.
     """
     assert _refusal(function, name, value) is None
 

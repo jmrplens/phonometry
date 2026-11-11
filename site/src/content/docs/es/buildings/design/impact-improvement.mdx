@@ -36,6 +36,14 @@ references:
     designation: "ISO 12354-2:2017"
     url: "https://www.iso.org/standard/70243.html"
     note: "La estimación informativa de suelos flotantes del Anexo C que reproduce esta página (Fórmulas C.1 a C.4, la resonancia 160 raíz(s'/m')) y el suelo resuelto de su Anexo G."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1989
+    title: "Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings"
+    designation: "EN 29052-1:1992 (ISO 9052-1:1989)"
+    implemented: false
+    url: "https://www.iso.org/standard/16620.html"
+    note: "La medida de la rigidez dinámica por unidad de superficie s' de la que parte la estimación del Anexo C de ISO 12354-2; está implementada en la guía de rigidez dinámica."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -196,6 +204,12 @@ opcionalmente ampliadas hasta 50 Hz); la valoración se forma sobre el subrango
 $C_{\mathrm{I},\Delta} = C_\mathrm{I,r,0} - C_\mathrm{I,r}$ (ISO 717-2:2020, Fórmula (A.4)), expuesto
 como `ci_delta` en el resultado y de forma independiente como
 `impact_improvement_adaptation_term()`.
+
+El ejemplo resuelto de abajo es una medición real: una moqueta textil sobre la
+maqueta pesada del CSTB, cuyo espectro de mejora se ha digitalizado de la
+Figura 4 de Foret, Chéné y Guigou-Carter (2011). El artículo publica para ella
+$\Delta L_\mathrm{w} = 29$ dB, y el motor de valoración devuelve exactamente ese
+valor.
 
 **Y $C_{\mathrm{I},\Delta}$ es la mitad de la respuesta, así que léelo.** La valoración
 ponderada desliza una curva de referencia hasta que encaja el exceso, lo que

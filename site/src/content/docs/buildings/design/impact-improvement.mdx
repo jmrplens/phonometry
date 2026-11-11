@@ -36,6 +36,14 @@ references:
     designation: "ISO 12354-2:2017"
     url: "https://www.iso.org/standard/70243.html"
     note: "The informative Annex C floating-floor estimate reproduced on this page (Formulae C.1 to C.4, the 160 sqrt(s'/m') resonance) and the worked floor of its Annex G."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1989
+    title: "Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings"
+    designation: "EN 29052-1:1992 (ISO 9052-1:1989)"
+    implemented: false
+    url: "https://www.iso.org/standard/16620.html"
+    note: "The measurement of the dynamic stiffness per unit area s' that the ISO 12354-2 Annex C estimate starts from; it is implemented in the dynamic-stiffness guide."
 ---
 
 import ReportPreview from '../../../../components/ReportPreview.astro';
@@ -186,6 +194,11 @@ results (clause 8 e)) also carries the spectrum adaptation term
 $C_{\mathrm{I},\Delta} = C_\mathrm{I,r,0} - C_\mathrm{I,r}$ (ISO 717-2:2020 Formula (A.4)), exposed as
 `ci_delta` on the result and standalone as
 `impact_improvement_adaptation_term()`.
+
+The worked example below is a real measurement: a textile carpet on the CSTB
+heavyweight mock-up, its improvement spectrum digitized from Figure 4 of Foret,
+Chéné and Guigou-Carter (2011). The paper publishes
+$\Delta L_\mathrm{w} = 29$ dB for it, and the rating engine returns exactly that.
 
 **And $C_{\mathrm{I},\Delta}$ is half the answer, so read it.** The weighted rating slides
 a reference curve until the excess fits, which rewards improvement wherever in

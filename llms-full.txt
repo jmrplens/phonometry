@@ -5963,7 +5963,7 @@ column of the Annex G worked example anchors Formula (C.1) band for band.
 ISO 12354-1:2017, Annex D: the additional-layer resonance (Formulae D.1 and
 D.2), the Table D.1 ratings read at the rounded one-third-octave band of the
 resonance, and the corrections of Formulae (D.3) to (D.8). One defect of the
-printed annex, Table D.1 listing 1 600 Hz in two rows, is recorded in
+printed annex, Table D.1 listing 1600 Hz in two rows, is recorded in
 `docs/ERRATA.md`. What each formula rests on is
 set out in "What is anchored on a published number, and what is not" above.
 

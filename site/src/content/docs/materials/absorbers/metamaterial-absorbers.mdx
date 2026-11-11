@@ -496,10 +496,36 @@ Below its own resonance the shunt is a compliance: it softens the slit
 without adding moving mass, and that is exactly what lowers the phase speed.
 `materials.rectangular_duct_properties(f, side_m=1.0e-3)` gives the same
 effective pair for a square duct when the guiding geometry is a duct rather
-than a slit, and all three take an `AirProperties` state (speed of sound,
-density, viscosity, Prandtl number, heat-capacity ratio, atmospheric
-pressure), so a design for a hot exhaust duct or a cabin at altitude changes
-one argument rather than the model.
+than a slit, and all three take the air as a `Fluid` (`fluid=`, by default
+`materials.ABSORBER_AIR`: speed of sound, density, viscosity, Prandtl number,
+heat-capacity ratio, static pressure), so a design for a hot exhaust duct or
+a cabin at altitude changes one argument rather than the model.
+
+Both visco-thermal models are held to the limits they must reach exactly. As
+the boundary layers vanish in a wide channel, the effective density and bulk
+modulus tend to those of free air, $\rho_0$ and $\kappa_0$; as
+$\omega \to 0$, $j\omega\rho$ tends to the Poiseuille flow resistivity of the
+channel, $12\eta/h^2$ for a slit of height $h$ and $28.454\,\eta/w^2$ for a
+square duct of side $w$. The tests and the conformance report check both:
+
+```python
+f_dc = np.array([1.0e-2])                     # 0.01 Hz: steady flow
+eta = materials.ABSORBER_AIR.viscosity
+slit = materials.slit_effective_properties(f_dc, slit_height_m=1.2e-3)
+duct = materials.rectangular_duct_properties(f_dc, side_m=3.0e-3)
+sigma_slit = (1j * 2 * np.pi * f_dc * slit.effective_density)[0].real
+sigma_duct = (1j * 2 * np.pi * f_dc * duct.effective_density)[0].real
+print(round(sigma_slit, 1), round(12 * eta / 1.2e-3**2, 1))       # 153.3 153.3
+print(round(sigma_duct, 2), round(28.454 * eta / 3.0e-3**2, 2))   # 58.17 58.17
+```
+
+Those limits are what settle the square-duct series as Jiménez et al. (2017)
+print it in Eqs. (7) and (8): its leading constant of 4 gives sixteen times
+$\rho_0$ where only 64 reaches both. That constant, and a slit-radiation term
+printed in the opposite time convention, which would raise the resonance an
+added mass must lower, are the two entries of the
+[errata register](/phonometry/reference/errata/) on these papers; the library
+implements 64 and the added-mass sign.
 
 ## 4. Classical resonant absorbers through the same lens
 
@@ -629,7 +655,7 @@ cavity length and slit height until the reflection zero sits on the
 real-frequency axis. The two visco-thermal building blocks the chain is
 assembled from are exposed as well (`slit_effective_properties`,
 `rectangular_duct_properties` and `helmholtz_resonator_impedance`, all taking
-an `AirProperties` state), and `slit_helmholtz_absorber` accepts a *list* of
+the air as a `Fluid`), and `slit_helmholtz_absorber` accepts a *list* of
 resonators, which is the graded chain of section 4.
 </ScopeClaim>
 

@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import dataclasses
+import errno
 import functools
 import io
 import os
@@ -811,6 +812,16 @@ def _end(process: subprocess.Popen[bytes], relay: threading.Thread) -> None:
             process.stderr.close()
 
 
+def _reader_gone(exc: OSError) -> bool:
+    """Whether a write failed because the process that reads the pipe has left it.
+
+    POSIX says so with ``EPIPE``, a ``BrokenPipeError``; Windows with
+    ``EINVAL``, for a child that has exited or closed its end, which is how
+    :mod:`subprocess` reads it there too. Any other error is the writer's.
+    """
+    return isinstance(exc, BrokenPipeError) or exc.errno == errno.EINVAL
+
+
 def _talk(
     entry: HostEntry,
     compute: Compute,
@@ -826,8 +837,8 @@ def _talk(
     reaches this process alone, which then closes the node's input and
     gives it its grace (:func:`_end`), rather than cutting the connection
     under it. A node that exits before it has read everything leaves a
-    broken pipe here; what it said, if anything, is still read, and an exit
-    status other than 0 is named.
+    pipe without a reader here (:func:`_reader_gone`); what it said, if
+    anything, is still read, and an exit status other than 0 is named.
 
     :raises FileNotFoundError: when no ``ssh`` is on ``PATH``, or on Windows
         when it was found only in the working directory.
@@ -856,10 +867,13 @@ def _talk(
     try:
         # The node's loader takes the program first, the program takes the
         # archive, and the unpacked node reads the job.
-        with contextlib.suppress(BrokenPipeError):
+        try:
             clip_link.send_program(process.stdin, clip_node.BOOTSTRAP)
             process.stdin.write(len(data).to_bytes(8, "big") + data)
             clip_link.send(process.stdin, header)
+        except OSError as exc:
+            if not _reader_gone(exc):
+                raise
         problems = receive(process.stdout)
     finally:
         _end(process, relay)

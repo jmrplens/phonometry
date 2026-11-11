@@ -551,7 +551,8 @@ jobs:
     # Literal of its options, so a type checker refuses a misspelt option
     # before the call runs; a string open by its nature says why. Each one is
     # checked on every path, a choice written in several parts (a single
-    # name, each key and each value of a mapping) in each of them.
+    # name, each key and each value of a mapping) in each of them, and no
+    # Literal lists a value every call refuses, whatever the other arguments.
     - name: Check that every fixed public choice is typed Literal
       run: python scripts/check_choice_literals.py
 

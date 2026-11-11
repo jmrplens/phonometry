@@ -92,6 +92,18 @@ the code runs, it is held to the row closest to the ``Literal``. The text is
 followed into every function it is handed to, six calls deep, and a record
 field from its ``__post_init__`` into every function of its module that
 reads it.
+
+A ``Literal`` lists only values its call takes (rule D24,
+:func:`refused_choices`): a value every call refuses, whatever the other
+arguments, is one the editor offers and the field lists for nothing. Each
+value is read through the function as it runs (:class:`_ValueReader`), every
+other argument unknown: a test the value alone decides takes its branch, a
+test that asks anything else takes both, and the value fails when every path
+raises and one of them raises for it, at a shared check that does not take
+it, a fixed table with no key for it, an ``Enum`` with no member of it, a
+``raise`` a test of it steered the call to, or a function of the package it
+is handed to that refuses it in turn. A value refused only beside a value of
+another argument is a combination the ``Literal`` cannot say, and passes.
 """
 
 from __future__ import annotations
@@ -113,7 +125,7 @@ import re
 import sys
 import textwrap
 import typing
-from types import CodeType, MappingProxyType
+from types import CodeType, MappingProxyType, ModuleType
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from ast_scan import (
@@ -138,8 +150,10 @@ import phonometry
 from phonometry._internal.catalogue import CatalogueRow
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, Mapping, Sequence, Set
-    from types import FunctionType, ModuleType
+    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence, Set
+    from types import FunctionType
+
+    from ast_scan import OwnNames
 
 #: The members of an annotation that let any string through.
 _STRING_MEMBERS = frozenset({"str", "Optional[str]"})
@@ -6168,6 +6182,1588 @@ def unchecked_choices() -> Iterator[Choice]:
                 )
 
 
+#: How deep a value of a choice is followed into the functions it is handed to.
+_REFUSAL_DEPTH = 6
+
+
+class _Unknown:
+    """What a call holds that the guard cannot know before it runs: another
+    argument, or anything worked out from one.
+    """
+
+    def __repr__(self) -> str:
+        return "?"
+
+
+#: The one :class:`_Unknown`.
+_UNKNOWN: object = _Unknown()
+
+
+class _Nothing:
+    """What the paths that return hand back when none of them returns."""
+
+    def __repr__(self) -> str:
+        return "<nothing>"
+
+
+#: The one :class:`_Nothing`.
+_NOTHING: object = _Nothing()
+
+#: The builtins a test of the choice may call, which read their arguments and
+#: change nothing.
+_PURE_BUILTINS = frozenset(
+    {
+        abs,
+        all,
+        any,
+        bool,
+        frozenset,
+        int,
+        isinstance,
+        issubclass,
+        len,
+        list,
+        max,
+        min,
+        set,
+        sorted,
+        str,
+        tuple,
+        type,
+    }
+)
+
+#: The methods of a table or a collection a test may call, which change nothing.
+_PURE_METHODS = frozenset(
+    {
+        "copy",
+        "count",
+        "difference",
+        "get",
+        "index",
+        "intersection",
+        "issubset",
+        "issuperset",
+        "items",
+        "keys",
+        "union",
+        "values",
+    }
+)
+
+#: The methods that write into a table, which then holds what the code put
+#: there and not what the module wrote.
+_WRITING_METHODS = frozenset(
+    {
+        "__setitem__",
+        "add",
+        "append",
+        "clear",
+        "discard",
+        "extend",
+        "insert",
+        "pop",
+        "popitem",
+        "remove",
+        "setdefault",
+        "update",
+    }
+)
+
+#: The types a binary operator is worked out on: what a module writes its
+#: options and tables with.
+_PLAIN_TYPES = (bool, int, float, str, tuple, frozenset, set, list)
+
+#: The values a function may change in place once it holds them.
+_MUTABLE_TYPES = (list, dict, set, bytearray)
+
+#: The most items a comprehension over a known collection is worked out for.
+_COMPREHENSION_ITEMS = 4096
+
+
+def _same(one: object, other: object) -> bool:
+    """Whether two values the paths hold are the same value."""
+    if one is other:
+        return True
+    if one is _UNKNOWN or other is _UNKNOWN or type(one) is not type(other):
+        return False
+    try:
+        return bool(one == other)
+    except Exception:
+        # A comparison that fails says "not the same".
+        return False
+
+
+def _hashable(value: object) -> bool:
+    try:
+        hash(value)
+    except TypeError:
+        return False
+    return True
+
+
+class _Held:
+    """A known value a call hands a function, as the function is read for it.
+
+    Compared and hashed by what it is when it can be, and by identity when
+    it cannot: a table a module holds (a ``MappingProxyType``) is no hashable
+    value, and is the same table at every call.
+    """
+
+    __slots__ = ("value",)
+
+    def __init__(self, value: object) -> None:
+        self.value = value
+
+    def __hash__(self) -> int:
+        if _hashable(self.value):
+            return hash((type(self.value), self.value))
+        return id(self.value)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, _Held):
+            return NotImplemented
+        if self.value is other.value:
+            return True
+        return (
+            _hashable(self.value)
+            and _hashable(other.value)
+            and _same(self.value, other.value)
+        )
+
+    def __repr__(self) -> str:
+        return repr(self.value)
+
+
+class _Handed(NamedTuple):
+    """What a call hands the function it runs, as the guard knows it.
+
+    Each known parameter as ``(name, value, from the choice)``, and the same
+    for each field of ``self`` a ``__post_init__`` reads, which the record's
+    constructor filled.
+    """
+
+    parameters: tuple[tuple[str, _Held, bool], ...]
+    fields: tuple[tuple[str, _Held, bool], ...] = ()
+
+
+class _Path(NamedTuple):
+    """What the paths that reach a statement know.
+
+    *values* are the locals they bind on the way, each as it is or
+    :data:`_UNKNOWN`; *derived* the locals worked out from the choice, and
+    *fields* the fields of ``self`` that still hold what the constructor put
+    there; *steer* the last test of the choice they took, which a ``raise``
+    they meet refuses the choice under.
+    """
+
+    values: Mapping[str, object]
+    derived: frozenset[str]
+    fields: frozenset[str]
+    steer: str | None
+
+
+class _Flow(NamedTuple):
+    """Where the paths through a block end up.
+
+    *returned* is what the paths that end the call with a ``return`` hand
+    back, the same value on all of them, :data:`_UNKNOWN` when they differ
+    or the guard cannot tell, and :data:`_NOTHING` when none returns;
+    *after* is what the paths that go on to the next statement know
+    (``None`` when none does); *refusals* names each refusal of the choice
+    the paths that raise meet.
+    """
+
+    returned: object
+    after: _Path | None
+    refusals: tuple[str, ...]
+
+    @property
+    def returns(self) -> bool:
+        """Whether one of the paths ends the call and hands a value back."""
+        return self.returned is not _NOTHING
+
+
+#: What a function's flow keeps of the paths that run off the end of its body.
+_RUNS_OFF_THE_END = _Path(MappingProxyType({}), frozenset(), frozenset(), steer=None)
+
+
+def _raising(reasons: tuple[str, ...] = ()) -> _Flow:
+    """The flow of a statement that raises on every path."""
+    return _Flow(returned=_NOTHING, after=None, refusals=reasons)
+
+
+def _going_on(path: _Path | None) -> _Flow:
+    """The flow of a statement every path goes on from, knowing *path*."""
+    return _Flow(returned=_NOTHING, after=path, refusals=())
+
+
+def _either_returned(one: object, other: object) -> object:
+    """What two sets of paths that return hand back together."""
+    if one is _NOTHING:
+        return other
+    if other is _NOTHING:
+        return one
+    return one if _same(one, other) else _UNKNOWN
+
+
+def _joined(paths: Sequence[_Path]) -> _Path | None:
+    """What the paths know together: a value they all hold alike, the rest unknown."""
+    if not paths:
+        return None
+    first, *rest = paths
+    if not rest:
+        return first
+    names = {name for path in paths for name in path.values}
+    values: dict[str, object] = {}
+    for name in names:
+        held = [path.values.get(name, _UNKNOWN) for path in paths]
+        values[name] = (
+            held[0] if all(_same(held[0], other) for other in held[1:]) else _UNKNOWN
+        )
+    steers = {path.steer for path in paths}
+    return _Path(
+        MappingProxyType(values),
+        frozenset().union(*(path.derived for path in paths)),
+        frozenset.intersection(*(path.fields for path in paths)),
+        first.steer if len(steers) == 1 else None,
+    )
+
+
+def _either(*flows: _Flow) -> _Flow:
+    """The flow of a statement that takes one of *flows*, the guard cannot tell which."""
+    returned = _NOTHING
+    for flow in flows:
+        returned = _either_returned(returned, flow.returned)
+    return _Flow(
+        returned=returned,
+        after=_joined([flow.after for flow in flows if flow.after is not None]),
+        refusals=tuple(refusal for flow in flows for refusal in flow.refusals),
+    )
+
+
+class _Raised(NamedTuple):
+    """A part of a statement that raises whenever it runs, and the refusal of
+    the choice that raises, when the choice is why.
+    """
+
+    reason: str | None
+
+
+def _fixed_keys(table: object) -> Mapping[object, object] | None:
+    """The keys a lookup in *table* finds, when it is a table that refuses any
+    other: a mapping without a ``__missing__``, or an ``Enum`` looked up by
+    the name of a member.
+    """
+    if inspect.isclass(table) and issubclass(table, enum.Enum):
+        return {name: table[name] for name in table.__members__}
+    if isinstance(table, collections.abc.Mapping) and not hasattr(
+        type(table), "__missing__"
+    ):
+        return table
+    return None
+
+
+def _fits(key: object, known: Sequence[object]) -> bool:
+    """Whether a key of a table is a tuple that holds what *known* holds,
+    an unknown place holding anything.
+    """
+    if not isinstance(key, tuple) or len(key) != len(known):
+        return False
+    return all(
+        part is _UNKNOWN or _same(part, held)
+        for part, held in zip(known, key, strict=True)
+    )
+
+
+def _unknown_among(values: Iterable[object]) -> bool:
+    """Whether one of *values* is unknown, asked by identity: an array a
+    module holds has no truth to compare with.
+    """
+    return any(value is _UNKNOWN for value in values)
+
+
+def _short(text: str, width: int = 96) -> str:
+    """*text* on one line, cut to *width* characters."""
+    line = " ".join(text.split())
+    return line if len(line) <= width else line[: width - 3] + "..."
+
+
+@functools.cache
+def _pure_checks() -> tuple[object, ...]:
+    """The shared checks of a choice, which read their arguments, change
+    nothing and refuse what they do not take: :data:`VALIDATORS`, and the one
+    that checks a spelling before mapping it to its option.
+    """
+    from phonometry._internal.validation import require_aliased_choice
+
+    return (*_validator_functions(), require_aliased_choice)
+
+
+def _written_into(root: ast.AST) -> frozenset[str]:
+    """The names *root* writes into, by an item or by a method that changes
+    what they hold: a table filled when the code runs is no table the guard
+    can read before it does.
+    """
+    names: set[str] = set()
+    for node in ast.walk(root):
+        if (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.ctx, ast.Store | ast.Del)
+            and isinstance(node.value, ast.Name)
+        ):
+            names.add(node.value.id)
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in _WRITING_METHODS
+            and isinstance(node.func.value, ast.Name)
+        ):
+            names.add(node.func.value.id)
+    return frozenset(names)
+
+
+def _names_handed_to_calls(root: ast.AST) -> frozenset[str]:
+    """The names *root* hands to a call, by position, by keyword or spread:
+    what a call is handed it may change.
+    """
+    names: set[str] = set()
+    for node in ast.walk(root):
+        if not isinstance(node, ast.Call):
+            continue
+        for argument in (*node.args, *(keyword.value for keyword in node.keywords)):
+            held = argument.value if isinstance(argument, ast.Starred) else argument
+            if isinstance(held, ast.Name):
+                names.add(held.id)
+    return frozenset(names)
+
+
+def _stored_names(node: ast.AST) -> set[str]:
+    """The names *node* binds in the scope it runs in: its targets, ``:=``,
+    ``with ... as``, ``except ... as``, a ``match`` capture, ``del``, and the
+    name of a function or a class it defines, whose body binds its own.
+    """
+    found: set[str] = set()
+    pending = [node]
+    while pending:
+        part = pending.pop()
+        if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Store | ast.Del):
+            found.add(part.id)
+        elif isinstance(part, ast.MatchAs | ast.MatchStar) and part.name:
+            found.add(part.name)
+        elif isinstance(part, ast.MatchMapping) and part.rest:
+            found.add(part.rest)
+        elif isinstance(part, ast.ExceptHandler) and part.name:
+            found.add(part.name)
+        if isinstance(part, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            found.add(part.name)
+            continue
+        if isinstance(part, ast.Lambda):
+            continue
+        if isinstance(part, _COMPREHENSIONS):
+            # A comprehension's own targets are its own; ``:=`` in it binds
+            # in the scope around.
+            found.update(
+                inner.target.id
+                for inner in ast.walk(part)
+                if isinstance(inner, ast.NamedExpr)
+                and isinstance(inner.target, ast.Name)
+            )
+            continue
+        pending.extend(ast.iter_child_nodes(part))
+    return found
+
+
+def _returns_in(statements: Iterable[ast.stmt]) -> bool:
+    """Whether a ``return`` of the function's own is written in *statements*:
+    one of them, or one in any branch of one, and not one of a function or a
+    class written there.
+
+    Read as the body of one scope (:func:`ast_scan.scope_nodes`). A statement
+    handed to it alone is read as a scope of its own, entered by its
+    ``body``: a bare ``return``, the ``else`` of a test, a handler and a
+    ``finally`` go unseen, and the ``return`` of a ``def`` counts.
+    """
+    block = ast.Module(body=list(statements), type_ignores=[])
+    return any(isinstance(node, ast.Return) for node in scope_nodes(block))
+
+
+@functools.cache
+def _rewritten_globals(module_name: str) -> frozenset[str]:
+    """The names a function of the module may put something else in: those
+    written into anywhere in it (:func:`_written_into`) and those a function
+    declares ``global``. What the module holds under them when the guard
+    reads it is what some call left there, not what every call meets.
+    """
+    parsed = _parsed_module(module_name)
+    if parsed is None:
+        return frozenset()
+    tree = parsed[1]
+    declared = {
+        name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Global)
+        for name in node.names
+    }
+    return _written_into(tree) | declared
+
+
+def _reads_of(
+    node: ast.AST, receiver: str | None
+) -> tuple[frozenset[str], frozenset[str]]:
+    """The names *node* reads, and the attributes of *receiver* it reads."""
+    names: set[str] = set()
+    fields: set[str] = set()
+    for part in ast.walk(node):
+        if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Load):
+            names.add(part.id)
+        elif (
+            isinstance(part, ast.Attribute)
+            and isinstance(part.ctx, ast.Load)
+            and isinstance(part.value, ast.Name)
+            and part.value.id == receiver
+        ):
+            fields.add(part.attr)
+    return frozenset(names), frozenset(fields)
+
+
+class _Facts(NamedTuple):
+    """What a function is, read once for every value it is read for."""
+
+    tree: ast.AST
+    root: ast.FunctionDef
+    module_name: str
+    #: The names it calls by (:func:`_namespace`).
+    namespace: dict[str, object]
+    own: OwnNames
+    #: Its first parameter, ``self`` in a method.
+    receiver: str | None
+    #: The names it writes into (:func:`_written_into`).
+    written: frozenset[str]
+    #: The names it hands to a call (:func:`_names_handed_to_calls`).
+    escaping: frozenset[str]
+    spread: dict[str, dict[str, ast.expr]]
+    #: The names each call it makes reads its first name in
+    #: (:func:`_names_for_call`), filled as the calls are met.
+    call_names: dict[int, Mapping[str, object] | None]
+    #: What each node of it reads: the bare names and the attributes of the
+    #: receiver (:func:`_reads_of`), filled as the nodes are met.
+    reads: dict[int, tuple[frozenset[str], frozenset[str]]]
+    #: The names each statement of it binds (:func:`_stored_names`), filled
+    #: as the statements are met.
+    stores: dict[int, frozenset[str]]
+
+
+@functools.cache
+def _facts(function: Callable[..., object]) -> _Facts | None:
+    """What *function* is, or ``None`` when its source cannot be read as one
+    function: the ``__init__`` :mod:`dataclasses` writes, a builtin.
+    """
+    tree = _parsed(function)
+    root = _function_in(tree) if tree is not None else None
+    if tree is None or not isinstance(root, ast.FunctionDef):
+        return None
+    module_name = getattr(function, "__module__", "") or ""
+    return _Facts(
+        tree=tree,
+        root=root,
+        module_name=module_name,
+        namespace=_namespace(function, tree, module_name),
+        own=own_names(root),
+        receiver=first_parameter(root),
+        written=_written_into(root),
+        escaping=_names_handed_to_calls(root),
+        spread=_spread_dicts(tree),
+        call_names={},
+        reads={},
+        stores={},
+    )
+
+
+class _ValueReader:
+    """How one function treats the values a call hands it, whatever its
+    other arguments (:func:`_flow_of`).
+
+    The function's statements are read in the order they run, with each
+    parameter the call hands a known value holding it and every other one
+    unknown. A test those values alone decide (``==`` or ``in`` against
+    values the module writes, ``isinstance``, ``not``, ``and`` and ``or`` of
+    such tests) takes one branch; a test that asks anything else, another
+    argument above all, takes either, and a refusal on one of two branches
+    refuses on some calls only. A refusal is a shared check of the choice
+    that does not take the value, a lookup of it in a fixed table that holds
+    no such key (or, by a tuple of the choice and other values, no key with
+    the value in that place), an ``Enum`` the value names no member of, a
+    ``raise`` a test of the choice steered the call into, or a function of
+    the package it is handed to that raises on every call itself. What a
+    function of the package hands back, read the same way for what it is
+    handed, is what its call holds.
+    """
+
+    def __init__(self, facts: _Facts, handed: _Handed, *, depth: int) -> None:
+        self.facts = facts
+        self.tree = facts.tree
+        self.namespace = facts.namespace
+        self.module_name = facts.module_name
+        self.own = facts.own
+        self.receiver = facts.receiver
+        self.written = facts.written
+        self.escaping = facts.escaping
+        self.spread = facts.spread
+        self.handed = handed
+        self.depth = depth
+        self.fields = {name: held.value for name, held, _ in handed.fields}
+        self.field_derived = frozenset(
+            name for name, _, derived in handed.fields if derived
+        )
+
+    def start(self) -> _Path:
+        """What the function knows where it starts: what the call hands it."""
+        parameters = self.handed.parameters
+        return _Path(
+            MappingProxyType({name: held.value for name, held, _ in parameters}),
+            frozenset(name for name, _, derived in parameters if derived),
+            frozenset(self.fields),
+            steer=None,
+        )
+
+    # -- the statements -------------------------------------------------
+
+    def block(self, statements: Sequence[ast.stmt], path: _Path) -> _Flow:
+        """Where the paths through *statements* end up, from *path*."""
+        returned = _NOTHING
+        refusals: list[str] = []
+        current: _Path | None = path
+        for statement in statements:
+            if current is None:
+                break
+            flow = self.statement(statement, current)
+            returned = _either_returned(returned, flow.returned)
+            refusals.extend(flow.refusals)
+            current = flow.after
+        return _Flow(returned=returned, after=current, refusals=tuple(refusals))
+
+    def statement(self, statement: ast.stmt, path: _Path) -> _Flow:
+        """Where the paths through one statement end up, from *path*."""
+        if isinstance(statement, ast.If):
+            return self._if(statement, path)
+        if isinstance(statement, ast.Match):
+            return self._match(statement, path)
+        if isinstance(statement, ast.For | ast.AsyncFor | ast.While):
+            return self._loop(statement, path)
+        if isinstance(statement, ast.Try | ast.TryStar):
+            return self._try(statement, path)
+        if isinstance(statement, ast.With | ast.AsyncWith):
+            return self._with(statement, path)
+        if isinstance(statement, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            return _going_on(self._unbound(path, {statement.name}))
+        if isinstance(statement, ast.Assert | ast.Break | ast.Continue | ast.Pass):
+            # An assertion runs only without ``-O``; a loop's body is never
+            # read in line, so neither of the other two meets the block.
+            return _going_on(path)
+        raised = self._raises_in(statement, path)
+        if raised is not None:
+            return raised
+        if isinstance(statement, ast.Return):
+            value = (
+                self.evaluate(statement.value, path)
+                if statement.value is not None
+                else None
+            )
+            return _Flow(returned=value, after=None, refusals=())
+        if isinstance(statement, ast.Raise):
+            steered = f"raises where {_short(path.steer)}" if path.steer else None
+            return _raising((steered,) if steered else ())
+        return _going_on(self._bound(statement, path))
+
+    def _if(self, statement: ast.If, path: _Path) -> _Flow:
+        raised = self._raises_in(statement.test, path)
+        if raised is not None:
+            return raised
+        truth = self.truth(statement.test, path)
+        steer = (
+            ast.unparse(statement.test)
+            if self._mentions(statement.test, path)
+            else None
+        )
+        path = self._unbound(path, self._stores(statement.test))
+        if truth is _UNKNOWN:
+            return _either(
+                self.block(statement.body, path), self.block(statement.orelse, path)
+            )
+        if steer is not None:
+            path = path._replace(steer=steer)
+        return self.block(statement.body if truth else statement.orelse, path)
+
+    def _match(self, statement: ast.Match, path: _Path) -> _Flow:
+        raised = self._raises_in(statement.subject, path)
+        if raised is not None:
+            return raised
+        subject = self.evaluate(statement.subject, path)
+        steer = (
+            f"match {ast.unparse(statement.subject)}"
+            if self._mentions(statement.subject, path)
+            else None
+        )
+        flows: list[_Flow] = []
+        for case in statement.cases:
+            matched = self._matched(case.pattern, subject, path)
+            if matched is not _UNKNOWN and case.guard is not None:
+                guard = self.truth(case.guard, path)
+                matched = _UNKNOWN if guard is _UNKNOWN else matched and guard
+            if matched is False:
+                continue
+            inner = self._unbound(path, self._stores(case.pattern))
+            if matched is True and steer is not None:
+                inner = inner._replace(steer=steer)
+            flows.append(self.block(case.body, inner))
+            if matched is True:
+                return _either(*flows)
+        return _either(*flows, _going_on(path))
+
+    def _matched(self, pattern: ast.pattern, subject: object, path: _Path) -> object:
+        """Whether *subject* matches *pattern*: ``True``, ``False`` or unknown."""
+        if isinstance(pattern, ast.MatchAs):
+            if pattern.pattern is None:
+                return True
+            return self._matched(pattern.pattern, subject, path)
+        if subject is _UNKNOWN:
+            return _UNKNOWN
+        if isinstance(pattern, ast.MatchValue):
+            value = self.evaluate(pattern.value, path)
+            if value is _UNKNOWN:
+                return _UNKNOWN
+            try:
+                return bool(subject == value)
+            except Exception:
+                # A comparison the types do not allow.
+                return _UNKNOWN
+        if isinstance(pattern, ast.MatchSingleton):
+            return subject is pattern.value
+        if isinstance(pattern, ast.MatchOr):
+            each = [self._matched(option, subject, path) for option in pattern.patterns]
+            if True in each:
+                return True
+            return False if all(one is False for one in each) else _UNKNOWN
+        return _UNKNOWN
+
+    def _loop(
+        self, statement: ast.For | ast.AsyncFor | ast.While, path: _Path
+    ) -> _Flow:
+        """A loop's body may run no time at all, so what it does is no refusal;
+        a ``return`` in it may end the call, with a value the guard does not read.
+        """
+        head = statement.test if isinstance(statement, ast.While) else statement.iter
+        raised = self._raises_in(head, path)
+        if raised is not None:
+            return raised
+        returns = _returns_in((*statement.body, *statement.orelse))
+        return _Flow(
+            returned=_UNKNOWN if returns else _NOTHING,
+            after=self._unbound(path, self._stores(statement)),
+            refusals=(),
+        )
+
+    def _try(self, statement: ast.Try | ast.TryStar, path: _Path) -> _Flow:
+        """A handler may catch what the body raises and go on, so a refusal
+        in the body refuses only when no handler ends the call or goes on.
+        """
+        body = self.block(statement.body, path)
+        normal = (
+            self.block(statement.orelse, body.after)
+            if body.after is not None
+            else _raising()
+        )
+        flows = [body._replace(after=None), normal]
+        if statement.handlers:
+            caught = self._unbound(
+                path, set().union(*(self._stores(part) for part in statement.body))
+            )
+            for handler in statement.handlers:
+                inner = self._unbound(caught, {handler.name} if handler.name else set())
+                flows.append(self.block(handler.body, inner))
+        flow = _either(*flows)
+        if not statement.finalbody:
+            return flow
+        if _returns_in(statement.finalbody):
+            # A ``return`` in ``finally`` swallows what the rest raised.
+            return _Flow(returned=_UNKNOWN, after=None, refusals=())
+        if flow.after is None:
+            return flow
+        final = self.block(statement.finalbody, flow.after)
+        return _Flow(
+            returned=_either_returned(flow.returned, final.returned),
+            after=final.after,
+            refusals=flow.refusals + final.refusals,
+        )
+
+    def _with(self, statement: ast.With | ast.AsyncWith, path: _Path) -> _Flow:
+        """A ``with`` runs its body in line, but under ``suppress`` a refusal
+        in it may be swallowed.
+        """
+        for item in statement.items:
+            raised = self._raises_in(item.context_expr, path)
+            if raised is not None:
+                return raised
+        inner = self._unbound(
+            path, set().union(*(self._stores(item) for item in statement.items))
+        )
+        body = self.block(statement.body, inner)
+        if any(self._suppresses(item.context_expr) for item in statement.items):
+            bound = set().union(*(self._stores(part) for part in statement.body))
+            return _Flow(
+                returned=_UNKNOWN if body.returns else _NOTHING,
+                after=self._unbound(inner, bound),
+                refusals=(),
+            )
+        return body
+
+    def _call_names(self, node: ast.Call) -> Mapping[str, object] | None:
+        """The names a call reads its first name in (:func:`_names_for_call`)."""
+        known = self.facts.call_names
+        if id(node) not in known:
+            known[id(node)] = _names_for_call(
+                node, self.namespace, self.tree, self.module_name
+            )
+        return known[id(node)]
+
+    def _suppresses(self, node: ast.expr) -> bool:
+        return isinstance(node, ast.Call) and _call_name(node) == "suppress"
+
+    # -- what a statement binds -------------------------------------------
+
+    def _unbound(self, path: _Path, names: Set[str]) -> _Path:
+        """*path* with *names* bound to what the guard cannot know."""
+        if not names:
+            return path
+        values = dict(path.values)
+        values.update(dict.fromkeys(names, _UNKNOWN))
+        fields = frozenset() if self.receiver in names else path.fields
+        return path._replace(
+            values=MappingProxyType(values),
+            derived=path.derived - names,
+            fields=fields,
+        )
+
+    def _bound(self, statement: ast.stmt, path: _Path) -> _Path:
+        """*path* after a simple statement binds what it binds."""
+        values = dict(path.values)
+        derived = set(path.derived)
+        for name in self._stores(statement):
+            values[name] = _UNKNOWN
+            derived.discard(name)
+        targets: list[ast.expr] = []
+        source: ast.expr | None = None
+        if isinstance(statement, ast.Assign):
+            targets, source = statement.targets, statement.value
+        elif isinstance(statement, ast.AnnAssign) and statement.value is not None:
+            targets, source = [statement.target], statement.value
+        if source is not None:
+            held = self.evaluate(source, path)
+            from_choice = self._mentions(source, path)
+            for target, value in self._unpacked(targets, held):
+                values[target] = value
+                if from_choice:
+                    derived.add(target)
+        return _Path(
+            MappingProxyType(values),
+            frozenset(derived),
+            path.fields - self._fields_written(statement),
+            path.steer,
+        )
+
+    def _unpacked(
+        self, targets: Sequence[ast.expr], held: object
+    ) -> Iterator[tuple[str, object]]:
+        """Each name *targets* binds, with what it holds of *held*: a tuple
+        of names takes a known tuple or list of its length item by item.
+        """
+        for target in targets:
+            if isinstance(target, ast.Name):
+                yield target.id, held
+            elif (
+                isinstance(target, ast.Tuple | ast.List)
+                and isinstance(held, tuple | list)
+                and len(held) == len(target.elts)
+                and all(isinstance(element, ast.Name) for element in target.elts)
+            ):
+                for element, item in zip(target.elts, held, strict=True):
+                    if isinstance(element, ast.Name):
+                        yield element.id, item
+
+    def _fields_written(self, statement: ast.stmt) -> frozenset[str]:
+        """The fields of ``self`` *statement* puts something else in."""
+        written: set[str] = set()
+        for node in ast.walk(statement):
+            if (
+                isinstance(node, ast.Attribute)
+                and isinstance(node.ctx, ast.Store)
+                and isinstance(node.value, ast.Name)
+                and node.value.id == self.receiver
+            ):
+                written.add(node.attr)
+            elif (
+                isinstance(node, ast.Call)
+                and _call_name(node) == "__setattr__"
+                and len(node.args) >= 2
+                and isinstance(node.args[1], ast.Constant)
+                and isinstance(node.args[1].value, str)
+            ):
+                written.add(node.args[1].value)
+        return frozenset(written)
+
+    # -- what an expression refuses ---------------------------------------
+
+    def _field_read(self, node: ast.AST, path: _Path) -> str | None:
+        """The field of ``self`` *node* reads, while it holds what the
+        constructor put there.
+        """
+        if (
+            isinstance(node, ast.Attribute)
+            and isinstance(node.ctx, ast.Load)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == self.receiver
+            and node.attr in path.fields
+        ):
+            return node.attr
+        return None
+
+    def _mentions(self, node: ast.AST, path: _Path) -> bool:
+        """Whether *node* reads the choice, or a value worked out from it."""
+        known = self.facts.reads
+        if id(node) not in known:
+            known[id(node)] = _reads_of(node, self.receiver)
+        names, fields = known[id(node)]
+        return not names.isdisjoint(path.derived) or not (
+            fields & path.fields
+        ).isdisjoint(self.field_derived)
+
+    def _stores(self, node: ast.AST) -> frozenset[str]:
+        """The names *node* binds (:func:`_stored_names`)."""
+        known = self.facts.stores
+        if id(node) not in known:
+            known[id(node)] = frozenset(_stored_names(node))
+        return known[id(node)]
+
+    def _eager(self, node: ast.AST, path: _Path) -> Iterator[ast.AST]:
+        """The parts of *node* that run whenever it does, given *path*.
+
+        The branch of a conditional expression its test does not take, an
+        operand of ``and`` or ``or`` the ones before it may skip, a later
+        link of a chained comparison whose links before it may not hold, all
+        of a comprehension but what it iterates first, and the body of a
+        lambda or a function written in it may not run.
+        """
+        yield node
+        if isinstance(
+            node, ast.Lambda | ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+        ):
+            return
+        if isinstance(node, ast.AnnAssign):
+            if node.value is not None:
+                yield from self._eager(node.value, path)
+            return
+        if isinstance(node, ast.IfExp):
+            yield from self._eager(node.test, path)
+            truth = self.truth(node.test, path)
+            if truth is not _UNKNOWN:
+                yield from self._eager(node.body if truth else node.orelse, path)
+            return
+        if isinstance(node, ast.BoolOp):
+            for operand in node.values:
+                yield from self._eager(operand, path)
+                truth = self.truth(operand, path)
+                if truth is _UNKNOWN or truth is not isinstance(node.op, ast.And):
+                    return
+            return
+        if isinstance(node, _COMPREHENSIONS):
+            yield from self._eager(node.generators[0].iter, path)
+            return
+        if isinstance(node, ast.Compare) and len(node.ops) > 1:
+            # ``a < b < c`` reads ``c`` only once ``a < b`` holds.
+            yield from self._eager(node.left, path)
+            yield from self._eager(node.comparators[0], path)
+            left = node.left
+            for comparison, right, following in zip(
+                node.ops, node.comparators, node.comparators[1:], strict=False
+            ):
+                if self._compared(left, comparison, right, path) is not True:
+                    return
+                yield from self._eager(following, path)
+                left = right
+            return
+        for child in ast.iter_child_nodes(node):
+            yield from self._eager(child, path)
+
+    def _raises_in(self, node: ast.AST, path: _Path) -> _Flow | None:
+        """The flow of a statement whose *node* raises whenever it runs, with
+        the refusal of the choice that raises; ``None`` when it may not raise.
+        """
+        for part in self._eager(node, path):
+            raised: _Raised | None = None
+            if isinstance(part, ast.Subscript) and isinstance(part.ctx, ast.Load):
+                raised = self._missing_key(part, path)
+            elif isinstance(part, ast.Call):
+                raised = self._refused_by_call(part, path)
+            if raised is not None:
+                return _raising((raised.reason,) if raised.reason is not None else ())
+        return None
+
+    def _missing_key(self, node: ast.Subscript, path: _Path) -> _Raised | None:
+        """A lookup of the choice in a fixed table that has no key for it."""
+        if not self._mentions(node.slice, path):
+            return None
+        keys = _fixed_keys(self.evaluate(node.value, path))
+        if keys is None:
+            return None
+        table = _short(ast.unparse(node.value), 48)
+        key = self.evaluate(node.slice, path)
+        if key is not _UNKNOWN:
+            try:
+                missing = key not in keys
+            except TypeError:
+                return None
+            return _Raised(f"{table} has no key {key!r}") if missing else None
+        if isinstance(node.slice, ast.Tuple) and not any(
+            isinstance(part, ast.Starred) for part in node.slice.elts
+        ):
+            known = tuple(self.evaluate(part, path) for part in node.slice.elts)
+            if not any(_fits(key, known) for key in keys):
+                return _Raised(f"{table} has no key {known!r}")
+        return None
+
+    def _refused_by_call(self, node: ast.Call, path: _Path) -> _Raised | None:
+        """A call that reads the choice and raises whatever else it is handed."""
+        if not self._mentions(node, path):
+            return None
+        names = self._call_names(node)
+        found = _named_object(node.func, names) if names is not None else None
+        if any(found is check for check in _pure_checks()):
+            return self._checked(node, found, path)
+        if (
+            inspect.isclass(found)
+            and issubclass(found, enum.Enum)
+            and len(node.args) == 1
+            and not node.keywords
+        ):
+            return self._no_member(node, found, path)
+        handed = self._handed(node, path)
+        if handed is None:
+            return None
+        callee, what = handed
+        flow = _flow_of(callee, what, depth=self.depth + 1)
+        if flow is None or flow.returns or flow.after is not None:
+            return None
+        if flow.refusals:
+            return _Raised(f"handed to {_qualified(callee)}, {flow.refusals[0]}")
+        # The function raises on every call, whatever it is handed: the
+        # choice is why only when a test of it steered the call there.
+        return _Raised(f"raises where {_short(path.steer)}" if path.steer else None)
+
+    def _handed(
+        self, node: ast.Call, path: _Path
+    ) -> tuple[Callable[..., object], _Handed] | None:
+        """The function of the package a call runs and what it hands it, when
+        one of the values is worked out from the choice.
+
+        The ``__init__`` :mod:`dataclasses` writes has no source of its own:
+        the record checks what it is handed in its ``__post_init__``, as the
+        fields of ``self``, or there as the parameters of an ``InitVar``.
+        """
+        callee = _callee(node, self.namespace, self.module_name)
+        if callee is None or self.depth >= _REFUSAL_DEPTH:
+            return None
+        parameters: list[tuple[str, _Held, bool]] = []
+        for parameter, argument in _arguments(
+            node, callee, self.spread, self.namespace
+        ).items():
+            held = self.evaluate(argument, path)
+            if held is not _UNKNOWN:
+                parameters.append(
+                    (parameter, _Held(held), self._mentions(argument, path))
+                )
+        if not any(derived for _, _, derived in parameters):
+            return None
+        record = _record_constructor(callee)
+        if record is None or _facts(callee) is not None:
+            return callee, _Handed(tuple(parameters))
+        hook = _post_init(record)
+        if hook is None:
+            return None
+        takes = set(inspect.signature(hook).parameters)
+        return hook, _Handed(
+            tuple(part for part in parameters if part[0] in takes),
+            tuple(part for part in parameters if part[0] not in takes),
+        )
+
+    def _checked(self, node: ast.Call, check: object, path: _Path) -> _Raised | None:
+        """A shared check that refuses the choice, run on what it is handed."""
+        held = self._arguments_held(node, path)
+        if held is None or not callable(check):
+            return None
+        arguments, keywords = held
+        try:
+            check(*arguments, **keywords)
+        except (TypeError, ValueError, KeyError) as error:
+            called = _short(ast.unparse(node.func), 32)
+            return _Raised(f"{called} refuses it: {_short(str(error))}")
+        return None
+
+    def _arguments_held(
+        self, node: ast.Call, path: _Path
+    ) -> tuple[list[object], dict[str, object]] | None:
+        """What a call hands by position and by keyword, when all of it is known."""
+        if any(isinstance(argument, ast.Starred) for argument in node.args) or any(
+            keyword.arg is None for keyword in node.keywords
+        ):
+            return None
+        arguments = [self.evaluate(argument, path) for argument in node.args]
+        keywords = {
+            keyword.arg: self.evaluate(keyword.value, path)
+            for keyword in node.keywords
+            if keyword.arg is not None
+        }
+        if _unknown_among(arguments) or _unknown_among(keywords.values()):
+            return None
+        return arguments, keywords
+
+    def _no_member(
+        self, node: ast.Call, members: type[enum.Enum], path: _Path
+    ) -> _Raised | None:
+        """An ``Enum`` called with the choice, which names no member of it."""
+        held = self.evaluate(node.args[0], path)
+        if held is _UNKNOWN:
+            return None
+        try:
+            members(held)
+        except ValueError:
+            return _Raised(f"{members.__name__} has no member of value {held!r}")
+        return None
+
+    # -- what an expression holds -----------------------------------------
+
+    def truth(self, node: ast.expr, path: _Path) -> object:
+        """Whether *node* holds a true value: ``True``, ``False`` or unknown.
+
+        ``and`` and ``or`` are read in three values, so that a test one of
+        whose operands decides it (``mode not in OPTIONS or level < 0`` with
+        the mode not among the options) is decided whatever the others hold.
+        """
+        if isinstance(node, ast.BoolOp):
+            each = [self.truth(operand, path) for operand in node.values]
+            decides = isinstance(node.op, ast.Or)
+            if decides in each:
+                return decides
+            return (not decides) if not _unknown_among(each) else _UNKNOWN
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            inner = self.truth(node.operand, path)
+            return inner if inner is _UNKNOWN else not inner
+        held = self.evaluate(node, path)
+        if held is _UNKNOWN:
+            return _UNKNOWN
+        try:
+            return bool(held)
+        except Exception:
+            # An array, or anything with no truth.
+            return _UNKNOWN
+
+    def evaluate(self, node: ast.expr, path: _Path) -> object:
+        """What *node* holds on every path *path* stands for, or unknown.
+
+        Read off the module and the builtins: a constant, a name, an
+        attribute of a module, a class or an ``Enum`` member, a display, a
+        comparison, a subscript of a fixed table, a conditional expression
+        its test decides, a call of a builtin that changes nothing or of a
+        shared check of a choice, and what a function of the package hands
+        back on every path that returns, read for what the call hands it.
+        """
+        if isinstance(node, ast.Constant):
+            return node.value
+        if isinstance(node, ast.Name):
+            return self._name(node.id, path)
+        if isinstance(node, ast.Attribute):
+            return self._attribute(node, path)
+        if isinstance(node, ast.Tuple | ast.List | ast.Set):
+            return self._display(node, path)
+        if isinstance(node, ast.Compare):
+            return self._compare(node, path)
+        if isinstance(node, ast.BoolOp | ast.UnaryOp | ast.BinOp):
+            return self._operation(node, path)
+        if isinstance(node, ast.IfExp):
+            truth = self.truth(node.test, path)
+            if truth is _UNKNOWN:
+                return _UNKNOWN
+            return self.evaluate(node.body if truth else node.orelse, path)
+        if isinstance(node, ast.NamedExpr):
+            return self.evaluate(node.value, path)
+        if isinstance(node, ast.Subscript):
+            return self._subscript(node, path)
+        if isinstance(node, ast.Slice):
+            parts = [
+                None if part is None else self.evaluate(part, path)
+                for part in (node.lower, node.upper, node.step)
+            ]
+            return _UNKNOWN if _unknown_among(parts) else slice(*parts)
+        if isinstance(node, _COMPREHENSIONS):
+            return self._comprehension(node, path)
+        if isinstance(node, ast.Call):
+            return self._call(node, path)
+        return _UNKNOWN
+
+    def _subscript(self, node: ast.Subscript, path: _Path) -> object:
+        """A key of a fixed table, or an item or a slice of a tuple, a list
+        or a text.
+        """
+        held = self.evaluate(node.value, path)
+        key = self.evaluate(node.slice, path)
+        if key is _UNKNOWN:
+            return _UNKNOWN
+        if isinstance(held, tuple | list | str) and isinstance(key, int | slice):
+            try:
+                return held[key]
+            except (IndexError, TypeError):
+                return _UNKNOWN
+        keys = _fixed_keys(held)
+        if keys is None:
+            return _UNKNOWN
+        try:
+            return keys.get(key, _UNKNOWN)
+        except TypeError:
+            return _UNKNOWN
+
+    def _comprehension(
+        self,
+        node: ast.ListComp | ast.SetComp | ast.GeneratorExp | ast.DictComp,
+        path: _Path,
+    ) -> object:
+        """What a comprehension of one ``for`` over a known collection
+        holds, each item read with its target bound to it; a generator is
+        held as the tuple of what it yields.
+        """
+        if len(node.generators) != 1 or node.generators[0].is_async:
+            return _UNKNOWN
+        clause = node.generators[0]
+        source = self.evaluate(clause.iter, path)
+        if (
+            source is _UNKNOWN
+            or not isinstance(clause.target, ast.Name | ast.Tuple)
+            or not isinstance(source, collections.abc.Iterable)
+        ):
+            return _UNKNOWN
+        made: list[object] = []
+        for count, item in enumerate(source):
+            if count >= _COMPREHENSION_ITEMS:
+                return _UNKNOWN
+            values = dict(path.values)
+            bound = list(self._unpacked([clause.target], item))
+            if not bound:
+                return _UNKNOWN
+            values.update(bound)
+            inner = path._replace(values=MappingProxyType(values))
+            kept = [self.truth(test, inner) for test in clause.ifs]
+            if _unknown_among(kept):
+                return _UNKNOWN
+            if not all(kept):
+                continue
+            if isinstance(node, ast.DictComp):
+                pair = (
+                    self.evaluate(node.key, inner),
+                    self.evaluate(node.value, inner),
+                )
+                if _unknown_among(pair):
+                    return _UNKNOWN
+                made.append(pair)
+                continue
+            element = self.evaluate(node.elt, inner)
+            if element is _UNKNOWN:
+                return _UNKNOWN
+            made.append(element)
+        try:
+            if isinstance(node, ast.DictComp):
+                return dict(made)  # type: ignore[arg-type]
+            if isinstance(node, ast.SetComp):
+                return set(made)
+        except TypeError:
+            return _UNKNOWN
+        return made if isinstance(node, ast.ListComp) else tuple(made)
+
+    def _name(self, name: str, path: _Path) -> object:
+        if name in self.written:
+            return _UNKNOWN
+        if name in path.values:
+            value = path.values[name]
+            # A list, a dict or a set the function hands on may come back
+            # holding something else.
+            if isinstance(value, _MUTABLE_TYPES) and name in self.escaping:
+                return _UNKNOWN
+            return value
+        if self.own.binds(name) and name not in self.own.imported:
+            return _UNKNOWN
+        if name in self.namespace:
+            if name in _rewritten_globals(self.module_name):
+                return _UNKNOWN
+            return self.namespace[name]
+        return vars(builtins).get(name, _UNKNOWN)
+
+    def _attribute(self, node: ast.Attribute, path: _Path) -> object:
+        field = self._field_read(node, path)
+        if field is not None:
+            return self.fields.get(field, _UNKNOWN)
+        owner = self.evaluate(node.value, path)
+        if isinstance(owner, ModuleType):
+            return vars(owner).get(node.attr, _UNKNOWN)
+        if inspect.isclass(owner) and issubclass(owner, enum.Enum):
+            if node.attr in owner.__members__:
+                return owner.__members__[node.attr]
+        elif isinstance(owner, enum.Enum) and node.attr in {"name", "value"}:
+            return getattr(owner, node.attr)
+        if inspect.isclass(owner):
+            found = inspect.getattr_static(owner, node.attr, _UNKNOWN)
+            if isinstance(found, (*_PLAIN_TYPES, MappingProxyType)):
+                return found
+        return _UNKNOWN
+
+    def _display(self, node: ast.Tuple | ast.List | ast.Set, path: _Path) -> object:
+        items: list[object] = []
+        for element in node.elts:
+            if isinstance(element, ast.Starred):
+                spread = self.evaluate(element.value, path)
+                if spread is _UNKNOWN or not isinstance(
+                    spread, collections.abc.Iterable
+                ):
+                    return _UNKNOWN
+                items.extend(spread)
+                continue
+            held = self.evaluate(element, path)
+            if held is _UNKNOWN:
+                return _UNKNOWN
+            items.append(held)
+        if isinstance(node, ast.Tuple):
+            return tuple(items)
+        if isinstance(node, ast.List):
+            return items
+        try:
+            return set(items)
+        except TypeError:
+            return _UNKNOWN
+
+    def _compare(self, node: ast.Compare, path: _Path) -> object:
+        """A comparison, read in three values along its chain.
+
+        A membership test of a tuple some of whose places are unknown is
+        decided when no item of the collection could hold the known ones
+        there.
+        """
+        outcomes: list[object] = []
+        left = node.left
+        for comparison, right in zip(node.ops, node.comparators, strict=True):
+            outcomes.append(self._compared(left, comparison, right, path))
+            left = right
+        if False in outcomes:
+            return False
+        return True if all(one is True for one in outcomes) else _UNKNOWN
+
+    def _compared(
+        self, left: ast.expr, comparison: ast.cmpop, right: ast.expr, path: _Path
+    ) -> object:
+        one = self.evaluate(left, path)
+        other = self.evaluate(right, path)
+        if (
+            one is _UNKNOWN
+            and isinstance(comparison, ast.In | ast.NotIn)
+            and other is not _UNKNOWN
+            and isinstance(left, ast.Tuple)
+            and isinstance(other, collections.abc.Iterable)
+            and not any(isinstance(part, ast.Starred) for part in left.elts)
+        ):
+            known = tuple(self.evaluate(part, path) for part in left.elts)
+            if any(_fits(item, known) for item in other):
+                return _UNKNOWN
+            return isinstance(comparison, ast.NotIn)
+        if one is _UNKNOWN or other is _UNKNOWN:
+            return _UNKNOWN
+        compare = _COMPARISONS.get(type(comparison))
+        if compare is None:
+            return _UNKNOWN
+        try:
+            return bool(compare(one, other))
+        except Exception:
+            # A comparison the types do not allow.
+            return _UNKNOWN
+
+    def _operation(
+        self, node: ast.BoolOp | ast.UnaryOp | ast.BinOp, path: _Path
+    ) -> object:
+        if isinstance(node, ast.BoolOp):
+            held = [self.evaluate(operand, path) for operand in node.values]
+            if _unknown_among(held):
+                return _UNKNOWN
+            result = held[0]
+            for operand in held[1:]:
+                try:
+                    if bool(result) is isinstance(node.op, ast.Or):
+                        break
+                except Exception:
+                    # An operand with no truth.
+                    return _UNKNOWN
+                result = operand
+            return result
+        if isinstance(node, ast.UnaryOp):
+            operand = self.evaluate(node.operand, path)
+            if isinstance(node.op, ast.USub) and isinstance(operand, int | float):
+                return -operand
+            if isinstance(node.op, ast.Not) and isinstance(operand, _PLAIN_TYPES):
+                return not operand
+            return _UNKNOWN
+        one = self.evaluate(node.left, path)
+        other = self.evaluate(node.right, path)
+        apply = _OPERATORS.get(type(node.op))
+        if (
+            apply is None
+            or not isinstance(one, _PLAIN_TYPES)
+            or not isinstance(other, _PLAIN_TYPES)
+        ):
+            return _UNKNOWN
+        try:
+            return apply(one, other)
+        except Exception:
+            # An operation the types do not allow.
+            return _UNKNOWN
+
+    def _call(self, node: ast.Call, path: _Path) -> object:
+        """What a call holds: one the guard may run on known values, or what a
+        function of the package handed a value of the choice hands back.
+        """
+        function = self._runnable(node, path)
+        if function is not None:
+            held = self._arguments_held(node, path)
+            if held is None:
+                return _UNKNOWN
+            arguments, keywords = held
+            try:
+                return function(*arguments, **keywords)
+            except Exception:
+                # What refuses is read as a refusal elsewhere.
+                return _UNKNOWN
+        if not self._mentions(node, path):
+            return _UNKNOWN
+        handed = self._handed(node, path)
+        if handed is None or handed[1].fields:
+            return _UNKNOWN
+        flow = _flow_of(*handed, depth=self.depth + 1)
+        if flow is None:
+            return _UNKNOWN
+        returned = _either_returned(
+            flow.returned, None if flow.after is not None else _NOTHING
+        )
+        return _UNKNOWN if returned is _NOTHING else returned
+
+    def _runnable(self, node: ast.Call, path: _Path) -> Callable[..., object] | None:
+        """The function a call runs, when it is one the guard may run itself:
+        a method of a text, a method of a table or a collection that changes
+        nothing, a builtin that changes nothing or a shared check of a choice.
+        """
+        if isinstance(node.func, ast.Attribute):
+            owner = self.evaluate(node.func.value, path)
+            plain = isinstance(owner, str) and not node.func.attr.startswith("_")
+            if plain or (
+                type(owner) in {dict, MappingProxyType, tuple, frozenset, set, list}
+                and node.func.attr in _PURE_METHODS
+            ):
+                method = getattr(owner, node.func.attr, None)
+                return method if callable(method) else None
+        names = self._call_names(node)
+        found = _named_object(node.func, names) if names is not None else None
+        if any(found is check for check in _pure_checks()) or (
+            _hashable(found) and found in _PURE_BUILTINS
+        ):
+            return found if callable(found) else None
+        return None
+
+
+#: The comparisons a test is worked out with.
+_COMPARISONS: Mapping[type[ast.cmpop], Callable[[Any, Any], object]] = MappingProxyType(
+    {
+        ast.Eq: lambda one, other: one == other,
+        ast.NotEq: lambda one, other: one != other,
+        ast.Lt: lambda one, other: one < other,
+        ast.LtE: lambda one, other: one <= other,
+        ast.Gt: lambda one, other: one > other,
+        ast.GtE: lambda one, other: one >= other,
+        ast.Is: lambda one, other: one is other,
+        ast.IsNot: lambda one, other: one is not other,
+        ast.In: lambda one, other: one in other,
+        ast.NotIn: lambda one, other: one not in other,
+    }
+)
+
+#: The binary operators an option set or a table is built with.
+_OPERATORS: Mapping[type[ast.operator], Callable[[Any, Any], object]] = (
+    MappingProxyType(
+        {
+            ast.Add: lambda one, other: one + other,
+            ast.Sub: lambda one, other: one - other,
+            ast.BitOr: lambda one, other: one | other,
+            ast.BitAnd: lambda one, other: one & other,
+        }
+    )
+)
+
+
+def _qualified(function: Callable[..., object]) -> str:
+    return getattr(function, "__qualname__", repr(function))
+
+
+@functools.cache
+def _flow_of(
+    function: Callable[..., object], handed: _Handed, *, depth: int
+) -> _Flow | None:
+    """How a call of *function* ends when it is handed *handed*, whatever its
+    other arguments (:class:`_ValueReader`), or ``None`` when its source
+    cannot be read.
+
+    A path that runs off the end of the body returns ``None``. A generator
+    runs nothing when it is called, and neither does a coroutine, so a call
+    of one raises nothing.
+    """
+    unwrapped = inspect.unwrap(function)
+    if depth > _REFUSAL_DEPTH or not inspect.isfunction(unwrapped):
+        return None
+    if inspect.isgeneratorfunction(unwrapped) or inspect.iscoroutinefunction(unwrapped):
+        return None
+    facts = _facts(function)
+    if facts is None:
+        return None
+    reader = _ValueReader(facts, handed, depth=depth)
+    flow = reader.block(facts.root.body, reader.start())
+    if flow.after is None:
+        return flow
+    # What the paths that run off the end know is no use to the caller, and
+    # the cache would keep it for every call read.
+    return _Flow(
+        returned=_either_returned(flow.returned, None),
+        after=_RUNS_OFF_THE_END,
+        refusals=flow.refusals,
+    )
+
+
+def _always_refused(
+    function: Callable[..., object], name: str, value: object, *, field: bool
+) -> str | None:
+    """Why every call of *function* refuses *value* for the choice *name*,
+    whatever its other arguments, or ``None`` when some call may take it.
+
+    With *field*, the choice is the record's ``self.<name>``, which
+    *function*, its ``__post_init__``, checks. Every path must raise, and
+    one of them must raise for the value: a function that raises on every
+    call whatever it is handed says nothing of the choice.
+    """
+    choice = ((name, _Held(value), True),)
+    handed = _Handed((), choice) if field else _Handed(choice)
+    flow = _flow_of(function, handed, depth=0)
+    if flow is None or flow.returns or not flow.refusals:
+        return None
+    return flow.refusals[0]
+
+
+def _listed_values(annotation: str) -> tuple[object, ...]:
+    """The values the ``Literal`` of an annotation lists, read through its
+    aliases (:func:`expanded`): each text and number one of its members
+    writes, the choice itself and not an item of a collection of them.
+    """
+    values: list[object] = []
+    for member in _members(annotation):
+        if not member.startswith("Literal["):
+            continue
+        try:
+            node = ast.parse(member, mode="eval").body
+        except SyntaxError:
+            continue
+        if not isinstance(node, ast.Subscript):
+            continue
+        elements = (
+            node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+        )
+        values.extend(
+            element.value
+            for element in elements
+            if isinstance(element, ast.Constant)
+            and isinstance(element.value, str | int)
+            and not isinstance(element.value, bool)
+        )
+    return tuple(dict.fromkeys(values))
+
+
+def _refused(
+    check: Callable[..., object], name: str, read: str, *, field: bool
+) -> tuple[str, ...]:
+    """Each value the ``Literal`` of *read* lists that every call refuses, with why."""
+    found: list[str] = []
+    for value in _listed_values(read):
+        reason = _always_refused(check, name, value, field=field)
+        if reason is not None:
+            found.append(f"{value!r}: {reason}")
+    return tuple(found)
+
+
+def refused_choices() -> Iterator[Choice]:
+    """Every public ``Literal`` choice that lists a value every call refuses.
+
+    A ``Literal`` promises each value it lists: the editor offers it, a type
+    checker passes it and the field lists it (rule D24). A value the call
+    refuses whatever the other arguments are, ``"T2"`` for a junction with a
+    straight section that only ``"X"`` and ``"T1"`` have, breaks that
+    promise. A value refused beside one value of another argument and taken
+    beside another is a combination the ``Literal`` cannot say, and passes;
+    so does a refusal on some paths only. A record field is read in the
+    ``__post_init__`` that checks it.
+    """
+    try:
+        for home, qualname, obj in _targets():
+            if inspect.isclass(obj):
+                if not dataclasses.is_dataclass(obj):
+                    continue
+                check = _post_init(obj)
+                if check is None:
+                    continue
+                for field in dataclasses.fields(obj):
+                    read = expanded(
+                        _annotation(field.type), _field_module(obj, field.name)
+                    )
+                    refusals = _refused(check, field.name, read, field=True)
+                    if refusals:
+                        yield Choice(
+                            home,
+                            qualname,
+                            field.name,
+                            _annotation(field.type),
+                            refusals,
+                        )
+                continue
+            if not callable(obj):
+                continue
+            try:
+                signature = inspect.signature(obj)
+            except (TypeError, ValueError):
+                continue
+            for parameter in signature.parameters.values():
+                read = expanded(_annotation(parameter.annotation), home)
+                refusals = _refused(obj, parameter.name, read, field=False)
+                if refusals:
+                    yield Choice(
+                        home,
+                        qualname,
+                        parameter.name,
+                        _annotation(parameter.annotation),
+                        refusals,
+                    )
+    finally:
+        # What the walk read of each function is no use once it is done,
+        # and would stay in memory for whatever runs next.
+        _flow_of.cache_clear()
+        _facts.cache_clear()
+
+
 def offenders() -> tuple[list[Choice], list[tuple[str, str, str]]]:
     """The closed choices typed ``str``, and the stale entries of :data:`OPEN`.
 
@@ -6213,9 +7809,9 @@ def _report(title: str, choices: list[Choice], advice: str) -> None:
 
 def main() -> int:
     """Report every closed choice typed ``str``, every ``Literal`` choice
-    cleaned up before its check or not checked on every path, and every
-    published table keyed by text that is a vocabulary; the exit status says
-    if any.
+    cleaned up before its check, not checked on every path or listing a
+    value every call refuses, and every published table keyed by text that
+    is a vocabulary; the exit status says if any.
     """
     found, stale = offenders()
     cleaned = sorted(cleaned_up_choices())
@@ -6232,6 +7828,7 @@ def main() -> int:
     ]
     stale_tables = _stale_tables(list(vocabulary_tables()))
     stale_unchecked = _stale_unchecked(every_unchecked)
+    refused = sorted(refused_choices())
     if not (
         found
         or stale
@@ -6240,14 +7837,26 @@ def main() -> int:
         or unchecked
         or stale_tables
         or stale_unchecked
+        or refused
     ):
         print(
             "Every public choice of a fixed set of strings is typed Literal, "
             "every string left open says why, every Literal choice is checked "
-            "as the caller wrote it on every path, and every published table "
-            "of a vocabulary is keyed by it."
+            "as the caller wrote it on every path and lists no value every "
+            "call refuses, and every published table of a vocabulary is keyed "
+            "by it."
         )
         return 0
+    if refused:
+        _report(
+            "a Literal choice lists a value every call refuses",
+            refused,
+            "type the parameter with a Literal of the values the call takes (a "
+            "narrower alias where the vocabulary is shared, as StraightJunction "
+            "is of Junction) and say in its field why the others are not "
+            "offered; a value refused only beside a value of another argument "
+            "is a combination, and stays (rule D24).",
+        )
     if cleaned:
         _report(
             "a Literal choice takes a spelling its Literal does not list",

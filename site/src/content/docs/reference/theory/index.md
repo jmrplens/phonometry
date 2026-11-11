@@ -78,9 +78,10 @@ the hearing-threshold statistics and the damage model built on them.
 
 ## [Rooms and Buildings](/phonometry/reference/theory/rooms-buildings/)
 
-Five groups: the ANSI S12.2 criterion curves, the impulse response and the
-parameters read off it, sound insulation and absorption as measured, the same
-quantities as predicted, and the uncertainty that qualifies either.
+Six groups: the ANSI S12.2 criterion curves, the impulse response and the
+parameters read off it, the sound field of a room as the image-source and
+steady-state models predict it, sound insulation and absorption as measured,
+the same quantities as predicted, and the uncertainty that qualifies either.
 
 - [Room noise criteria (ANSI S12.2)](/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122)
 - [Impulse response and room-acoustic parameters (ISO 18233, ISO 3382-1/-2/-3)](/phonometry/reference/theory/rooms-buildings/#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3)
@@ -89,6 +90,9 @@ quantities as predicted, and the uncertainty that qualifies either.
   - [Regression windows and validity (ISO 3382-2, Clause 6, Annex B/C)](/phonometry/reference/theory/rooms-buildings/#regression-windows-and-validity-iso-3382-2-clause-6-annex-bc)
   - [Clarity, definition and centre time (ISO 3382-1, Annex A)](/phonometry/reference/theory/rooms-buildings/#clarity-definition-and-centre-time-iso-3382-1-annex-a)
   - [Open-plan spatial decay (ISO 3382-3, Clause 6)](/phonometry/reference/theory/rooms-buildings/#open-plan-spatial-decay-iso-3382-3-clause-6)
+- [Room sound field, predicted (Kuttruff, Vorländer, Bies)](/phonometry/reference/theory/rooms-buildings/#room-sound-field-predicted-kuttruff-vorlander-bies)
+  - [Image-source room impulse response (Kuttruff 4.1, Vorländer 11)](/phonometry/reference/theory/rooms-buildings/#image-source-room-impulse-response-kuttruff-41-vorlander-11)
+  - [Steady-state room field (Bies 6.4, Kuttruff 5.6)](/phonometry/reference/theory/rooms-buildings/#steady-state-room-field-bies-64-kuttruff-56)
 - [Sound insulation and absorption, measured (ISO 16283, ISO 10140, ISO 717, ISO 354)](/phonometry/reference/theory/rooms-buildings/#sound-insulation-and-absorption-measured-iso-16283-iso-10140-iso-717-iso-354)
   - [Field insulation and weighted rating (ISO 16283-1, ISO 717-1)](/phonometry/reference/theory/rooms-buildings/#field-insulation-and-weighted-rating-iso-16283-1-iso-717-1)
   - [Impact insulation (ISO 16283-2, ISO 717-2)](/phonometry/reference/theory/rooms-buildings/#impact-insulation-iso-16283-2-iso-717-2)

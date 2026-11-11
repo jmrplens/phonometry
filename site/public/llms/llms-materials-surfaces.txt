@@ -331,8 +331,9 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 
 The frequency window is the price of portability: the tube diameter that
 keeps the mouth sealable on real pavement caps the upper bands at 1600 Hz,
-and the tube length caps the lower ones at 250 Hz, a narrower window than the
-250–4000 Hz of the subtraction technique. Within it, the reduction is the
+and the microphone spacing, which has to stay above 5 % of a wavelength,
+caps the lower ones at 250 Hz (the tube length only has to let a plane wave
+form), a narrower window than the 250–4000 Hz of the subtraction technique. Within it, the reduction is the
 ISO 10534-2 chain unchanged: the transfer function between the two
 microphones separates incident and reflected waves, and the standard's
 Annex A additionally subtracts the internal losses of the system (measured

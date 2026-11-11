@@ -1100,7 +1100,7 @@ print(res.roughness > psychoacoustics.PROMINENT_ROUGHNESS_ASPER)   # True: promi
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg" alt="Two panels. Top: the ECMA-418-2 time-dependent tonality T(t) over two seconds for a 1 kHz tone in noise, holding near 1.19 tu_HMS, against pure noise flat at 0.02 tu_HMS. Bottom: the roughness of a 1 kHz carrier at 100 percent amplitude modulation against modulation frequency from 10 to 210 Hz, rising to a marked peak of 1.0 asper at 70 Hz and falling away on either side" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -1110,30 +1110,38 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import psychoacoustics
 
-fs = 48000
+fs, p0 = 48000, 2e-5
+
+# Top panel: tonality T(t) of a 1 kHz tone in noise against the noise alone,
+# each component at 50 dB SPL over 2 s.
 t = np.arange(int(2.0 * fs)) / fs
-amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)
+rng = np.random.default_rng(2026)
+noise = rng.standard_normal(t.size)
+noise *= p0 * 10 ** (50 / 20) / np.sqrt(np.mean(noise**2))
+tone = p0 * 10 ** (50 / 20) * np.sqrt(2) * np.sin(2 * np.pi * 1000 * t)
+tin = psychoacoustics.tonality_ecma(tone + noise, fs)
+pn = psychoacoustics.tonality_ecma(noise, fs)
 
-# A pure tone (tonal, smooth) vs a 70 Hz amplitude-modulated tone (rough),
-# both normalized to an overall level of 60 dB SPL:
-tone = amp * np.sin(2 * np.pi * 1000 * t)
-rough = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
-rough *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(rough**2))
+# Bottom panel: roughness of a 1 kHz carrier at 100 % AM, swept over the
+# modulation frequency (1 s per point at 60 dB SPL).
+tm = np.arange(fs) / fs
+fmods = np.array([20.0, 30, 40, 50, 60, 70, 80, 100, 120, 150, 180, 200])
+r = []
+for fm in fmods:
+    am = (1 + np.sin(2 * np.pi * fm * tm)) * np.sin(2 * np.pi * 1000 * tm)
+    am *= p0 * 10 ** (60 / 20) / np.sqrt(np.mean(am**2))
+    r.append(psychoacoustics.roughness_ecma(am, fs).roughness)
 
-scores = {
-    "Pure tone": (psychoacoustics.tonality_ecma(tone, fs).tonality, psychoacoustics.roughness_ecma(tone, fs).roughness),
-    "70 Hz AM tone": (psychoacoustics.tonality_ecma(rough, fs).tonality, psychoacoustics.roughness_ecma(rough, fs).roughness),
-}
-labels = list(scores)
-tonal = [scores[k][0] for k in labels]
-rough_v = [scores[k][1] for k in labels]
-xpos = np.arange(len(labels))
-fig, ax = plt.subplots()
-ax.bar(xpos - 0.2, tonal, 0.4, label=r"Tonality [$\mathrm{tu}_\mathrm{HMS}$]")
-ax.bar(xpos + 0.2, rough_v, 0.4, label="Roughness [asper]")
-ax.set_xticks(xpos)
-ax.set_xticklabels(labels)
-ax.legend()
+fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(10, 8.5))
+ax0.plot(tin.times, tin.tonality_vs_time,
+         label=rf"Tone in noise ($T$ = {tin.tonality:.2f} $\mathrm{{tu}}_\mathrm{{HMS}}$)")   # 1.19
+ax0.plot(pn.times, pn.tonality_vs_time,
+         label=rf"Pure noise ($T$ = {pn.tonality:.2f} $\mathrm{{tu}}_\mathrm{{HMS}}$)")       # 0.02
+ax0.set(xlabel="Time [s]", ylabel=r"Tonality $T$ [$\mathrm{tu}_\mathrm{HMS}$]")
+ax0.legend()
+ax1.plot(fmods, r, "o-", label="1 kHz carrier, 100 % AM")          # peak 1.0 asper
+ax1.set(xlabel=r"Modulation frequency $f_\mathrm{mod}$ [Hz]", ylabel="Roughness $R$ [asper]")
+ax1.legend()
 plt.show()
 ```
 
@@ -1640,8 +1648,10 @@ tone through that chain, down to the $K_\mathrm{t}$ the mean audibility earns.
 The **decisive** audibility of one narrow-band spectrum is the largest tone
 audibility in it (clause 5.3.8). Over $J$ staggered spectra the **mean
 audibility** is their energy mean (Formula 20); a spectrum in which no tone is
-found contributes $\Delta L_j = -10\ \text{dB}$ (Formula 21). `assess_tones` applies the whole
-chain to a spectrum's tones and reports the decisive tone.
+found contributes $\Delta L_j = -10\ \text{dB}$ (Formula 21). `assess_tones` is
+the *per-tone* entry point: it applies Formulae (2)-(5) and (12)-(14) to each
+tone it is given and reports the largest, which is the decisive audibility only
+when no two audible tones share a critical band.
 
 **How the decisive band is selected.** The method does not scan a fixed set of
 bands: each detected *tone* defines its own critical band (§1), the audibility
@@ -1712,12 +1722,13 @@ amount of level justifies a penalty for it.
 
 Clause 5.4 attaches a 90 % bilateral extended uncertainty $U$ to every
 audibility, and clause 6 makes it mandatory whenever fewer than 12 spectra
-have been averaged. `assess_tones` computes it per tone
-(`res.extended_uncertainties`), `audibility_uncertainty` evaluates it straight
-from the spectrum lines, and `mean_audibility_uncertainty` propagates it to
-the energy-averaged audibility of a spectrum set. The Annex E example
-reproduces the printed Table E.2 column (for the 137.3 Hz tone,
-$U = 2.80\ \text{dB}$ against the printed 2,79).
+have been averaged. `analyze_spectrum` computes it per tone
+(`res.extended_uncertainties`) from the spectrum lines it holds;
+`assess_tones`, which receives levels and no lines, only carries the values
+passed to it as `extended_uncertainties=`. `audibility_uncertainty` evaluates it
+straight from the spectrum lines, and `mean_audibility_uncertainty` propagates
+it to the energy-averaged audibility of a spectrum set (Annex E Table E.2:
+$U = 2.80\ \text{dB}$ for the 137.3 Hz tone against the printed 2,79).
 
 **How to read $U$.** A 90 % *bilateral* interval leaves 5 % in each tail, so
 $\Delta L - U$ is a one-sided 95 % statement: when the whole interval
@@ -2261,10 +2272,28 @@ accumulates more of it than the single closed form allows.
 > overlap and absolute-threshold screening become 50 % overlap, a Hann window
 > and relative floors here), so perfectly steady signals do not read exactly
 > zero: a steady 1 kHz tone comes out near 0.09 vacil and steady broadband
-> noise about 0.15-0.19 vacil, partly the physical level fluctuation of the
+> noise about 0.15 vacil, partly the physical level fluctuation of the
 > noise itself. For **AM broadband noise** the signal model overshoots
 > the absolute level (it spreads the modulated energy across bands); quote the
 > closed form `fluctuation_strength_am_noise` (§3.1) for that stimulus.
+
+The two steady readings of the note, computed:
+
+```python
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(2 * fs) / fs
+tone = np.sin(2 * np.pi * 1000 * t)  # 1 kHz, unmodulated, set to 70 dB SPL
+tone *= 2e-5 * 10 ** (70 / 20) / np.sqrt(np.mean(tone**2))
+noise = np.random.default_rng(0).standard_normal(t.size)  # broadband, 60 dB SPL
+noise *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(noise**2))
+steady_tone = psychoacoustics.fluctuation_strength(tone, float(fs))
+steady_noise = psychoacoustics.fluctuation_strength(noise, float(fs))
+print(round(steady_tone.fluctuation_strength, 2))   # 0.09 vacil
+print(round(steady_noise.fluctuation_strength, 2))  # 0.15 vacil
+```
 
 ## See also
 

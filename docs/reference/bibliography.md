@@ -767,6 +767,10 @@ adopted.
   Cited by [Environmental Levels (ISO 1996-1/-2)](../environment/assessment/environmental-levels.md).
 - **Deutsches Institut für Normung. (2006).** *Akustik — Software-Erzeugnisse zur Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und Prüfbestimmungen* (DIN 45687:2006-05).
   Cited by [Quality of Outdoor Sound Software (ISO 17534-1)](../environment/propagation/software-quality.md).
+- **Dublin City Council. (2016).** [*Ambient Sound Monitoring Network annual report for 2015*](https://www.dublincity.ie/sites/default/files/media/file-uploads/2018-07/AMBIENT_SOUND_MONITORING_NETWORK_ANNUAL_REPORT_2015.pdf).
+  Cited by [Environmental Levels (ISO 1996-1/-2)](../environment/assessment/environmental-levels.md).
+- **Dublin City Council. (2017).** [*Ambient Sound Monitoring Network DCC*](https://data.smartdublin.ie/dataset/ambient-sound-monitoring-network) \[Data set\]. Smart Dublin.
+  Cited by [Environmental Levels (ISO 1996-1/-2)](../environment/assessment/environmental-levels.md).
 - **European Committee for Standardization. (1997).** *Road traffic noise reducing devices — Test method for determining the acoustic performance — Part 3: Normalized traffic noise spectrum* (EN 1793-3:1997).
   Cited by [Spherical ground effect and advanced barriers](../environment/propagation/ground-barriers.md) and [Sound reflection of a noise barrier in situ](../environment/propagation/barrier-reflection.md).
 - **European Committee for Standardization. (2009).** *Railway applications — Noise emission — Rail roughness measurement related to rolling noise generation* (EN 15610:2009).

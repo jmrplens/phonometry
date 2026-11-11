@@ -43,6 +43,18 @@ torch 2.5.0 es solo para Linux en x86-64, donde corre el trabajo; en macOS en
 ARM, Windows en x86-64 y Linux en ARM el primero es torch 2.6.0, el más
 antiguo que se instala allí.
 
+Dos plataformas no tienen wheel en algunas de esas mínimas, y pip, ceñido a
+ellas, compila allí esas versiones desde el código fuente, lo que requiere
+compiladores. En Windows en ARM los primeros wheels son NumPy 2.3.0, SciPy
+1.16.2 y numba 0.68.0 (0.67.0 en Python 3.14), así que se compilan todas las
+mínimas de las tres salvo la de NumPy en Python 3.14. En Linux en ARM con musl,
+como en Alpine, el primer wheel de SciPy para Python 3.12 y 3.13 es el 1.15.2,
+y numba, con el llvmlite que necesita, no publica ningún wheel para musl, así
+que `[perf]` se compila desde el código fuente en cualquier sistema con musl.
+Una instalación normal toma las versiones más recientes, que tienen wheels en
+las dos plataformas salvo numba en musl, y PyPI no tiene wheel de torch para
+ninguna de las dos.
+
 ### Extras opcionales
 
 ```bash

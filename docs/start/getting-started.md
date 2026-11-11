@@ -28,6 +28,16 @@ The Python 3.13 wheel of torch 2.5.0 is for Linux on x86-64 only, where the
 job runs; on macOS on ARM, Windows on x86-64 and Linux on ARM the first is
 torch 2.6.0, the oldest that installs there.
 
+Two platforms have no wheel at some of those floors, and pip held to them
+builds those releases from source there, which takes compilers. On Windows on
+ARM the first wheels are NumPy 2.3.0, SciPy 1.16.2 and numba 0.68.0 (0.67.0 on
+Python 3.14), so every floor of the three but NumPy's on Python 3.14 is built.
+On Linux on ARM with musl, as in Alpine, the first SciPy wheel for Python 3.12
+and 3.13 is 1.15.2, and numba, with the llvmlite it needs, publishes no musl
+wheel at all, so `[perf]` builds from source on any musl system. A plain
+install takes the newest releases, which have wheels on both platforms,
+numba's on musl aside, and PyPI has no torch wheel for either.
+
 Optional extras:
 
 ```bash

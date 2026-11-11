@@ -7431,6 +7431,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and torch 2.9.0 on 3.14. The Python 3.13 wheel of torch 2.5.0 is for Linux
   on x86-64 only, where the job runs; on macOS on ARM, Windows on x86-64 and
   Linux on ARM the first is torch 2.6.0, the oldest that installs there.
+  On Windows on ARM the first wheels are NumPy 2.3.0, SciPy 1.16.2 and numba
+  0.68.0 (0.67.0 on Python 3.14), and on Linux on ARM with musl the first
+  SciPy wheel for Python 3.12 and 3.13 is 1.15.2 and numba publishes none, so
+  pip held to the floors builds those releases from source there; the install
+  pages say so.
   The `[report]` floors are the oldest releases that render a fiche in a
   fresh interpreter under `-W error`: reportlab 4.0.4 to 4.2.5 warn when
   they are imported, through importlib's `load_module` and

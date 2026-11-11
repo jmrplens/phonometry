@@ -52,6 +52,8 @@ ImportError: Plotting requires matplotlib. Install it with: pip install "phonome
 The oldest release of each dependency the library is tested with, on each
 Python, is listed in [Getting
 Started](/phonometry/start/getting-started/#from-pypi-recommended).
+On Windows on ARM, and on Linux on ARM with musl, some of those releases have
+no wheel, and pip builds them from source there; the same section names which.
 
 ## torch without CUDA
 

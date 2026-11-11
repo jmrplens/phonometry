@@ -549,8 +549,9 @@ operating line of 5.5.2 with its 3 dB fit limit and its half-to-twice reading
 range. Checked in the [conformance report](../../CONFORMANCE.md); the gap
 Table 6 leaves at 160 Hz and the two printed gas-law constants are in the
 [errata register](../../ERRATA.md). Not implemented: the facility requirements
-themselves, the flow measurement of ISO 5167-1, the ISO 3741 determination the
-receiving side is handed to, and ISO 11820, which measures a silencer in situ.
+themselves, the flow measurement of ISO 5167-1 and the ISO 3741 determination
+the receiving side is handed to. ISO 11820, which measures a silencer in situ, has
+[a page of its own](in-situ-noise-control.md).
 
 ## See also
 

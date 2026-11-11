@@ -28,7 +28,6 @@ part contains a numeric worked example.
 from __future__ import annotations
 
 import math
-import warnings
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -48,7 +47,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import os
@@ -761,12 +760,11 @@ def check_base_plate_scattering(
     )
     if not check.passes:
         exceeded = [int(band) for band in check.exceeded_frequencies.tolist()]
-        warnings.warn(
+        warn_caller(
             "Base-plate scattering coefficient exceeds the ISO 17497-1 Table 1 "
             f"limit at {exceeded} Hz; the turntable is not compliant "
             "(Clause 6.2).",
             ScatteringDiffusionWarning,
-            stacklevel=2,
         )
     return check
 

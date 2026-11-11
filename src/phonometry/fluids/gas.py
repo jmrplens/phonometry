@@ -40,8 +40,8 @@ what every other fluid here does with a quantity its model did not fix.
 from __future__ import annotations
 
 import math
-import warnings
 
+from .._internal.warnings import warn_caller
 from ._air import DEFAULT_STATIC_PRESSURE_PA
 from ._state import Fluid, FluidAssumptionWarning
 
@@ -77,7 +77,7 @@ def _warn_assumed_pressure(static_pressure_pa: float) -> None:
         "proportional to it, so a measurement at 950 hPa is 6 % lighter than "
         "this. Pass static_pressure_pa to silence this."
     )
-    warnings.warn(msg, FluidAssumptionWarning, stacklevel=3)
+    warn_caller(msg, FluidAssumptionWarning)
 
 
 def ideal_gas(

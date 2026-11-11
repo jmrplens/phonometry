@@ -50,7 +50,6 @@ hall, and this module does not make them follow the weather.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
@@ -67,7 +66,7 @@ from .._internal.validation import (
     require_finite_array,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from ..io._resolve import resolve_fs
 from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import (
@@ -293,25 +292,23 @@ def _warn_short_ring_down(name: str, short: list[tuple[float, float]]) -> None:
     if not short:
         return
     needed, held = max(short)
-    warnings.warn(
+    warn_caller(
         f"'{name}' holds {held * 1e3:.0f} ms after its direct sound and "
         f"a band of it needs about {needed * 1e3:.0f} ms for its filter "
         "to ring down, so that band's exposure level is short of the "
         "energy the response actually carries.",
         AuditoriumWarning,
-        stacklevel=4,
     )
 
 
 def _warn_cut_short(name: str) -> None:
     """Warn about a room response that never reaches 30 dB of decay."""
-    warnings.warn(
+    warn_caller(
         f"'{name}' has a band whose noise floor is less than "
         f"{_MINIMUM_DECAY_RANGE_DB:g} dB below its peak, so the room "
         "response was cut short of the point ISO 3382-1:2009, A.2.1 asks "
         "the integral to reach.",
         AuditoriumWarning,
-        stacklevel=4,
     )
 
 
@@ -476,13 +473,12 @@ def free_field_reference_level(
         msg = f"'distance' must be a positive, finite length in m, got {distance!r}."
         raise ValueError(msg)
     if distance < MIN_REFERENCE_DISTANCE_M:
-        warnings.warn(
+        warn_caller(
             f"ISO 3382-1:2009, Equations (A.4) and (A.8) are printed for a "
             f"distance of at least {MIN_REFERENCE_DISTANCE_M:g} m; "
             f"{distance:g} m is inside that, where the inverse-square law "
             "need not hold.",
             AuditoriumWarning,
-            stacklevel=2,
         )
     corrected = values + 20.0 * np.log10(distance / REFERENCE_DISTANCE_M)
     return as_float_or_array(corrected, like=(level,))
@@ -801,41 +797,44 @@ def sound_strength(
     :raises TypeError: if ``reference_level`` holds a text or a value that is not a real
         number, or ``fraction`` is not a single number.
     """
-    if (reference_ir is None) == (reference_level is None):
-        msg = (
-            "Give the free-field reference exactly once: either "
-            "'reference_ir', the response measured at 10 m, or "
-            "'reference_level', the level already obtained from it."
-        )
-        raise ValueError(msg)
-
-    fs = resolve_fs(ir, fs, name="ir")
-    frequency, levels = _band_exposure_levels(
-        ir, fs, limits, fraction, "ir", check_decay=True
-    )
-
-    if reference_ir is not None:
-        reference_fs = resolve_fs(reference_ir, fs, name="reference_ir")
-        _, reference = _band_exposure_levels(
-            reference_ir, reference_fs, limits, fraction, "reference_ir"
-        )
-    else:
-        given = real_array(cast("ArrayLike", reference_level), "reference_level")
-        try:
-            reference = np.broadcast_to(given, levels.shape).astype(np.float64)
-        except ValueError as exc:
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        if (reference_ir is None) == (reference_level is None):
             msg = (
-                f"'reference_level' has shape {given.shape}, which does not "
-                f"broadcast onto the {levels.size} analysis band(s)."
+                "Give the free-field reference exactly once: either "
+                "'reference_ir', the response measured at 10 m, or "
+                "'reference_level', the level already obtained from it."
             )
-            raise ValueError(msg) from exc
+            raise ValueError(msg)
 
-    return SoundStrengthResult(
-        frequencies=frequency,
-        strength=levels - reference,
-        exposure_level=levels,
-        reference_level=reference,
-    )
+        fs = resolve_fs(ir, fs, name="ir")
+        frequency, levels = _band_exposure_levels(
+            ir, fs, limits, fraction, "ir", check_decay=True
+        )
+
+        if reference_ir is not None:
+            reference_fs = resolve_fs(reference_ir, fs, name="reference_ir")
+            _, reference = _band_exposure_levels(
+                reference_ir, reference_fs, limits, fraction, "reference_ir"
+            )
+        else:
+            given = real_array(cast("ArrayLike", reference_level), "reference_level")
+            try:
+                reference = np.broadcast_to(given, levels.shape).astype(np.float64)
+            except ValueError as exc:
+                msg = (
+                    f"'reference_level' has shape {given.shape}, which does not "
+                    f"broadcast onto the {levels.size} analysis band(s)."
+                )
+                raise ValueError(msg) from exc
+
+        return SoundStrengthResult(
+            frequencies=frequency,
+            strength=levels - reference,
+            exposure_level=levels,
+            reference_level=reference,
+        )
 
 
 #: Integration window of the numerator of Equations (A.14) and (A.15), in
@@ -1004,45 +1003,48 @@ def early_lateral_energy_fraction(
         80 ms window.
     :raises TypeError: if ``weighting`` is not a text.
     """
-    require_choice(weighting, "weighting", LATERAL_WEIGHTINGS)
-    fs = resolve_fs(ir, fs, name="ir")
-    omni = validate_ir(ir, fs)
-    lateral = validate_ir(lateral_ir, resolve_fs(lateral_ir, fs, name="lateral_ir"))
-    if omni.shape != lateral.shape:
-        msg = (
-            f"'ir' has {omni.size} samples and 'lateral_ir' has "
-            f"{lateral.size}; the two microphones record one event at one "
-            "point, so their responses share a time axis."
-        )
-        raise ValueError(msg)
-
-    frequency, omni_bands = split_bands(omni, fs, limits, fraction)
-    _, lateral_bands = split_bands(lateral, fs, limits, fraction)
-    start, stop = EARLY_LATERAL_WINDOW_S
-
-    fractions = np.empty(len(omni_bands), dtype=np.float64)
-    for index, (band, lateral_band) in enumerate(
-        zip(omni_bands, lateral_bands, strict=True)
-    ):
-        p2 = band.astype(np.float64) ** 2
-        if not np.any(p2 > 0.0):
-            msg = f"Band {index} of 'ir' has no energy."
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_choice(weighting, "weighting", LATERAL_WEIGHTINGS)
+        fs = resolve_fs(ir, fs, name="ir")
+        omni = validate_ir(ir, fs)
+        lateral = validate_ir(lateral_ir, resolve_fs(lateral_ir, fs, name="lateral_ir"))
+        if omni.shape != lateral.shape:
+            msg = (
+                f"'ir' has {omni.size} samples and 'lateral_ir' has "
+                f"{lateral.size}; the two microphones record one event at one "
+                "point, so their responses share a time axis."
+            )
             raise ValueError(msg)
-        onset = onset_index(p2)
-        p2 = p2[onset:]
-        lateral_p = lateral_band.astype(np.float64)[onset:]
-        numerator = (
-            lateral_p**2
-            if weighting == "squared"
-            else np.abs(lateral_p * band.astype(np.float64)[onset:])
-        )
-        fractions[index] = _window_energy(numerator, fs, start, stop) / _window_energy(
-            p2, fs, 0.0, EARLY_ENERGY_LIMIT_S
-        )
 
-    return LateralEnergyResult(
-        frequencies=frequency, energy_fraction=fractions, weighting=weighting
-    )
+        frequency, omni_bands = split_bands(omni, fs, limits, fraction)
+        _, lateral_bands = split_bands(lateral, fs, limits, fraction)
+        start, stop = EARLY_LATERAL_WINDOW_S
+
+        fractions = np.empty(len(omni_bands), dtype=np.float64)
+        for index, (band, lateral_band) in enumerate(
+            zip(omni_bands, lateral_bands, strict=True)
+        ):
+            p2 = band.astype(np.float64) ** 2
+            if not np.any(p2 > 0.0):
+                msg = f"Band {index} of 'ir' has no energy."
+                raise ValueError(msg)
+            onset = onset_index(p2)
+            p2 = p2[onset:]
+            lateral_p = lateral_band.astype(np.float64)[onset:]
+            numerator = (
+                lateral_p**2
+                if weighting == "squared"
+                else np.abs(lateral_p * band.astype(np.float64)[onset:])
+            )
+            fractions[index] = _window_energy(
+                numerator, fs, start, stop
+            ) / _window_energy(p2, fs, 0.0, EARLY_ENERGY_LIMIT_S)
+
+        return LateralEnergyResult(
+            frequencies=frequency, energy_fraction=fractions, weighting=weighting
+        )
 
 
 @dataclass(frozen=True)
@@ -1135,71 +1137,74 @@ def late_lateral_sound_level(
     :raises TypeError: if ``reference_level`` holds a text or a value that is not a real
         number, or ``fraction`` is not a single number.
     """
-    if (reference_ir is None) == (reference_level is None):
-        msg = (
-            "Give the free-field reference exactly once: either "
-            "'reference_ir', the response measured at 10 m, or "
-            "'reference_level', the level already obtained from it."
-        )
-        raise ValueError(msg)
-
-    fs = resolve_fs(ir, fs, name="ir")
-    omni = validate_ir(ir, fs)
-    lateral = validate_ir(lateral_ir, resolve_fs(lateral_ir, fs, name="lateral_ir"))
-    if omni.shape != lateral.shape:
-        msg = (
-            f"'ir' has {omni.size} samples and 'lateral_ir' has "
-            f"{lateral.size}; the two microphones record one event at one "
-            "point, so their responses share a time axis."
-        )
-        raise ValueError(msg)
-
-    frequency, omni_bands = split_bands(omni, fs, limits, fraction)
-    _, lateral_bands = split_bands(lateral, fs, limits, fraction)
-
-    levels = np.empty(len(omni_bands), dtype=np.float64)
-    for index, (band, lateral_band) in enumerate(
-        zip(omni_bands, lateral_bands, strict=True)
-    ):
-        p2 = band.astype(np.float64) ** 2
-        if not np.any(p2 > 0.0):
-            msg = f"Band {index} of 'ir' has no energy."
-            raise ValueError(msg)
-        late = lateral_band.astype(np.float64)[onset_index(p2) :] ** 2
-        energy = _window_energy(late, fs, LATE_LATERAL_START_S, None)
-        levels[index] = 10.0 * np.log10(energy / (_T0 * _P0**2))
-
-    if reference_ir is not None:
-        _, reference = _band_exposure_levels(
-            reference_ir,
-            resolve_fs(reference_ir, fs, name="reference_ir"),
-            limits,
-            fraction,
-            "reference_ir",
-        )
-        if reference.shape != levels.shape:
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        if (reference_ir is None) == (reference_level is None):
             msg = (
-                f"'lateral_ir' splits into {levels.size} band(s) and "
-                f"'reference_ir' into {reference.size}; the two responses "
-                "must be long enough for the same bands."
+                "Give the free-field reference exactly once: either "
+                "'reference_ir', the response measured at 10 m, or "
+                "'reference_level', the level already obtained from it."
             )
             raise ValueError(msg)
-    else:
-        given = real_array(cast("ArrayLike", reference_level), "reference_level")
-        try:
-            reference = np.broadcast_to(given, levels.shape).astype(np.float64)
-        except ValueError as exc:
-            msg = (
-                f"'reference_level' has shape {given.shape}, which does not "
-                f"broadcast onto the {levels.size} analysis band(s)."
-            )
-            raise ValueError(msg) from exc
 
-    return LateLateralResult(
-        frequencies=frequency,
-        levels=levels - reference,
-        reference_level=reference,
-    )
+        fs = resolve_fs(ir, fs, name="ir")
+        omni = validate_ir(ir, fs)
+        lateral = validate_ir(lateral_ir, resolve_fs(lateral_ir, fs, name="lateral_ir"))
+        if omni.shape != lateral.shape:
+            msg = (
+                f"'ir' has {omni.size} samples and 'lateral_ir' has "
+                f"{lateral.size}; the two microphones record one event at one "
+                "point, so their responses share a time axis."
+            )
+            raise ValueError(msg)
+
+        frequency, omni_bands = split_bands(omni, fs, limits, fraction)
+        _, lateral_bands = split_bands(lateral, fs, limits, fraction)
+
+        levels = np.empty(len(omni_bands), dtype=np.float64)
+        for index, (band, lateral_band) in enumerate(
+            zip(omni_bands, lateral_bands, strict=True)
+        ):
+            p2 = band.astype(np.float64) ** 2
+            if not np.any(p2 > 0.0):
+                msg = f"Band {index} of 'ir' has no energy."
+                raise ValueError(msg)
+            late = lateral_band.astype(np.float64)[onset_index(p2) :] ** 2
+            energy = _window_energy(late, fs, LATE_LATERAL_START_S, None)
+            levels[index] = 10.0 * np.log10(energy / (_T0 * _P0**2))
+
+        if reference_ir is not None:
+            _, reference = _band_exposure_levels(
+                reference_ir,
+                resolve_fs(reference_ir, fs, name="reference_ir"),
+                limits,
+                fraction,
+                "reference_ir",
+            )
+            if reference.shape != levels.shape:
+                msg = (
+                    f"'lateral_ir' splits into {levels.size} band(s) and "
+                    f"'reference_ir' into {reference.size}; the two responses "
+                    "must be long enough for the same bands."
+                )
+                raise ValueError(msg)
+        else:
+            given = real_array(cast("ArrayLike", reference_level), "reference_level")
+            try:
+                reference = np.broadcast_to(given, levels.shape).astype(np.float64)
+            except ValueError as exc:
+                msg = (
+                    f"'reference_level' has shape {given.shape}, which does not "
+                    f"broadcast onto the {levels.size} analysis band(s)."
+                )
+                raise ValueError(msg) from exc
+
+        return LateLateralResult(
+            frequencies=frequency,
+            levels=levels - reference,
+            reference_level=reference,
+        )
 
 
 def late_lateral_average(levels: ArrayLike) -> float:
@@ -1569,30 +1574,33 @@ def stage_support(
         second Equation (C.2) integrates to.
 
     """
-    fs = resolve_fs(ir, fs, name="ir")
-    x = validate_ir(ir, fs)
-    frequency, bands = split_bands(x, fs, limits, fraction)
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        fs = resolve_fs(ir, fs, name="ir")
+        x = validate_ir(ir, fs)
+        frequency, bands = split_bands(x, fs, limits, fraction)
 
-    early = np.empty(len(bands), dtype=np.float64)
-    late = np.empty(len(bands), dtype=np.float64)
-    for index, band in enumerate(bands):
-        p2 = band.astype(np.float64) ** 2
-        if not np.any(p2 > 0.0):
-            msg = f"Band {index} of 'ir' has no energy."
-            raise ValueError(msg)
-        p2 = p2[onset_index(p2) :]
-        # The A.3.4 trigger puts the direct sound at sample zero of the
-        # trimmed band and that sample is non-zero by construction, so the
-        # denominator of both equations always has something in it.
-        direct = _window_energy(p2, fs, *STAGE_DIRECT_WINDOW_S)
-        early[index] = 10.0 * np.log10(
-            _window_energy(p2, fs, *EARLY_SUPPORT_WINDOW_S) / direct
-        )
-        late[index] = 10.0 * np.log10(
-            _window_energy(p2, fs, *LATE_SUPPORT_WINDOW_S) / direct
-        )
+        early = np.empty(len(bands), dtype=np.float64)
+        late = np.empty(len(bands), dtype=np.float64)
+        for index, band in enumerate(bands):
+            p2 = band.astype(np.float64) ** 2
+            if not np.any(p2 > 0.0):
+                msg = f"Band {index} of 'ir' has no energy."
+                raise ValueError(msg)
+            p2 = p2[onset_index(p2) :]
+            # The A.3.4 trigger puts the direct sound at sample zero of the
+            # trimmed band and that sample is non-zero by construction, so the
+            # denominator of both equations always has something in it.
+            direct = _window_energy(p2, fs, *STAGE_DIRECT_WINDOW_S)
+            early[index] = 10.0 * np.log10(
+                _window_energy(p2, fs, *EARLY_SUPPORT_WINDOW_S) / direct
+            )
+            late[index] = 10.0 * np.log10(
+                _window_energy(p2, fs, *LATE_SUPPORT_WINDOW_S) / direct
+            )
 
-    return StageSupportResult(frequencies=frequency, early=early, late=late)
+        return StageSupportResult(frequencies=frequency, early=early, late=late)
 
 
 #: Maximum deviation of source directivity in dB, by octave band centre in

@@ -846,7 +846,7 @@ def test_a_position_spread_of_exactly_1_5_db_does_not_warn() -> None:
         levels = np.array([[start], [round(start + 1.5, 1)], [round(start + 3.0, 1)]])
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
-            _position_sampling_warnings(levels, stacklevel=2)
+            _position_sampling_warnings(levels)
         assert not [w for w in caught if "sM" in str(w.message)]
 
 

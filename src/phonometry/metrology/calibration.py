@@ -3,13 +3,12 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
 from .._internal.validation import real_array, real_number, require_scalar
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
 from .reference_values import REFERENCE_VALUES
 from .sound_calibrator import _designation, _fluctuation_limit_db
@@ -214,12 +213,11 @@ def _validate_reference_stability(
     # The integrator attack lasts ~8*tau (1 s for F); we need at least
     # another second of settled envelope to assess the fluctuation.
     if signal_arr.shape[-1] < 2 * fs:
-        warnings.warn(
+        warn_caller(
             "Calibration tone is shorter than 2 s: too short to validate its "
             "stability (IEC 60942 measures the generated level over 60 s). "
             "Record a longer, steady tone.",
             CalibrationWarning,
-            stacklevel=3,
         )
         return
     envelope = time_weighting(signal_arr, fs, mode="fast")
@@ -233,13 +231,12 @@ def _validate_reference_stability(
     deviation = np.max(np.abs(levels - mean), axis=-1)
     fluctuation = float(np.max(deviation))
     if fluctuation > max_fluctuation_db:
-        warnings.warn(
+        warn_caller(
             f"Calibration tone level fluctuation is {fluctuation:.2f} dB "
             f"(limit {max_fluctuation_db:.2f} dB per IEC 60942:2017 Table 2). "
             "Check the microphone coupling and trim handling noise before "
             "trusting the resulting sensitivity.",
             CalibrationWarning,
-            stacklevel=3,
         )
 
 

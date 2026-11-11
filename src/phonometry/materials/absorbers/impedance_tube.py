@@ -30,7 +30,6 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -51,7 +50,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
@@ -545,17 +544,14 @@ def _warn_frequency_range(
     frequency: NDArray[np.float64],
     f_lower: float,
     f_upper: float,
-    *,
-    stacklevel: int,
 ) -> None:
     """Advise when any frequency falls outside the plane-wave range."""
     if np.any(frequency < f_lower) or np.any(frequency > f_upper):
-        warnings.warn(
+        warn_caller(
             f"Frequencies outside the plane-wave range "
             f"[{f_lower:.1f}, {f_upper:.1f}] Hz (ISO 10534-2:2001, Eqs. (1)-(4)); "
             "results there are advisory.",
             ImpedanceTubeWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -790,21 +786,35 @@ def two_microphone_impedance(
     f = np.atleast_1d(real_array(frequency, "frequency"))
     h = _require_h12_per_band(h12, f, "frequency")
     k0 = tube_wavenumber(f, speed_of_sound, attenuation_np_per_m=attenuation_np_per_m)
-    r = reflection_factor(h, spacing_m=spacing_m, x1=x1, wavenumber=k0)
     canonical = _canonical_shape(shape)
-    if diameter_m is not None:
-        f_lower, f_upper = plane_wave_frequency_range(
+    band = (
+        None
+        if diameter_m is None
+        else plane_wave_frequency_range(
             spacing_m, speed_of_sound, diameter_m=diameter_m, shape=canonical
         )
-        _warn_frequency_range(f, f_lower, f_upper, stacklevel=2)
-    return ImpedanceTubeResult(
+    )
+    # An H12 that meets H_R, the pole of Eq. (17), carries inf or NaN into
+    # the fields, and the result refuses them by name; NumPy's warning on the
+    # way would take that refusal's place under python -W error, as the
+    # plane-wave advisory would, so it waits until the result stands (rule
+    # A63).
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+        r = reflection_factor(h, spacing_m=spacing_m, x1=x1, wavenumber=k0)
+        impedance = surface_impedance(r, characteristic_impedance)
+        normalized = normalized_surface_impedance(r)
+        absorption = absorption_from_reflection(r)
+    result = ImpedanceTubeResult(
         frequencies=f,
         reflection=r,
-        surface_impedance=surface_impedance(r, characteristic_impedance),
-        normalized_impedance=normalized_surface_impedance(r),
-        absorption=absorption_from_reflection(r),
+        surface_impedance=impedance,
+        normalized_impedance=normalized,
+        absorption=absorption,
         spacing_m=spacing_m,
         x1=x1,
         diameter_m=diameter_m,
         shape=canonical if diameter_m is not None else None,
     )
+    if band is not None:
+        _warn_frequency_range(f, *band)
+    return result

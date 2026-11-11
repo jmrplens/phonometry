@@ -2269,6 +2269,25 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 # True
 ```
 
+## A warning names the line of your code that caused it
+
+Every warning of the library is now shown at the first line of the caller's
+code, whichever functions of the library it was reached through. Python's
+`default` action then shows it once for each line of yours that causes it, and
+a filter by module reads your module. A traceback names the warning by the
+package that exports it:
+
+| What | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| the file and line a warning is shown at | the line its `stacklevel` counted to, a line of the library for 33 of them, such as `filters/core.py:698` for every filter bank that dropped a band | the line of your code that made the call |
+| `warnings.filterwarnings("ignore", module="phonometry")` | silenced the warnings shown at a line of the library, and no other | silences none; filter by class, `warnings.filterwarnings("ignore", category=phonometry.PhonometryWarning)`, or by topic |
+| `warnings.filterwarnings("error", module="my_analysis")` | missed the warnings shown at a line of the library | reaches every warning a call in `my_analysis` causes |
+| `filters.OctaveFilterBank(44100)`, `filters.octave_filter(x, 44100)` and the other banks on the default span, at a rate that cannot hold its top bands (44.1, 32, 22.05, 16 or 8 kHz) | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed` | no warning, and the same bands: the default span is trimmed to what `fs` holds |
+| a bank on `limits` you gave that reach past fs/2 | the same warning, at the first call only, since the design is cached | `FilterBankWarning: Low sampling rate: fs = 44100 Hz cannot hold the 20 kHz band, whose upper edge 22387 Hz is above fs/2 = 22050 Hz; it was left out of the bank.`, at every call; a filter on the message `Low sampling rate` still matches |
+| a bank at a rate that holds no band of its span, the default one or yours, such as `filters.OctaveFilterBank(20, fraction=3)` | `FilterBankWarning: Low sampling rate: frequencies above fs/2 removed`, and a bank of no band whose analysis came back empty | `ValueError: fs = 20 Hz cannot hold any band from 12.5 Hz to 20 kHz: the upper edge of the lowest, 14.13 Hz, is above fs/2 = 10 Hz.` |
+| `vibration.transfer_stiffness_indirect` with a transmissibility that holds `inf` or `nan` | an array holding `-inf+nanj` | `ValueError: 'transmissibility' must contain only finite values.` |
+| the name a traceback, a repr or pickle gives the 14 warnings written in private modules, `PhonometryWarning` among them | the private module, `phonometry.fluids._state.FluidAssumptionWarning` | the package that exports it, `phonometry.fluids.FluidAssumptionWarning`; the class is the same, and `inspect.getsource` of it raises `OSError` |
+
 ## A choice is matched as it is written
 
 A parameter or a record field typed with a `Literal` of its options, whose

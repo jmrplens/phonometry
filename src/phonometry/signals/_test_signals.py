@@ -51,7 +51,6 @@ with their accuracy stated instead of implied.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -67,7 +66,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ..io._resolve import (
     apply_calibration,
     like_input,
@@ -95,6 +94,7 @@ __all__ = [
 ]
 
 
+@published_by("phonometry.signals")
 class ToneBurstWarning(PhonometryWarning):
     """A tone burst whose gate cannot close on the tone's zero crossing.
 
@@ -457,7 +457,7 @@ def tone_burst(
     delta = n_on - exact_samples  # gate-close offset from the zero crossing
     if abs(delta) > _GATE_ALIGN_TOL:
         residual = amplitude_v * math.sin(2.0 * math.pi * f_v * delta / fs_v)
-        warnings.warn(
+        warn_caller(
             f"'frequency' = {f_v:g} Hz is incommensurate with fs = "
             f"{fs_v:g} Hz: {cycles_v} full periods span {exact_samples:.6g} "
             f"samples, gated at {n_on}. The gate closes {abs(delta):.3g} "
@@ -465,7 +465,6 @@ def tone_burst(
             f"residual step of {residual:.3g} (peak amplitude "
             f"{amplitude_v:g}).",
             ToneBurstWarning,
-            stacklevel=2,
         )
 
     n_pre = round(real_number(pre_silence, "pre_silence") * fs_v)

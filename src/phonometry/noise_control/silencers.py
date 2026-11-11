@@ -825,7 +825,7 @@ def _result(
         )
         raise ValueError(msg)
     limit = _plane_wave_limit(area=max(areas), speed_of_sound=c)
-    _warn_above_plane_wave_limit(f, limit, kind, stacklevel=4)
+    _warn_above_plane_wave_limit(f, limit, kind)
     tl = transmission_loss(
         t,
         inlet_area=inlet_area,

@@ -20,9 +20,9 @@ in closed form rather than against a printed number.
 from __future__ import annotations
 
 import math
-import warnings
 
 from .._internal.validation import real_number, require_scalar
+from .._internal.warnings import warn_caller
 from ._state import Fluid, FluidAssumptionWarning, FluidWarning
 
 __all__ = [
@@ -179,7 +179,7 @@ def _warn_assumptions(
         f"of humidity, 0 % to 100 %, is worth about 1 % of the density. Pass "
         f"the conditions to silence this."
     )
-    warnings.warn(msg, FluidAssumptionWarning, stacklevel=3)
+    warn_caller(msg, FluidAssumptionWarning)
 
 
 def _warn_outside_domain(
@@ -207,7 +207,7 @@ def _warn_outside_domain(
         f"extrapolation of a fit, not a refusal: the annex states where it was "
         f"validated, not what air can be."
     )
-    warnings.warn(msg, FluidWarning, stacklevel=3)
+    warn_caller(msg, FluidWarning)
 
 
 def air(
@@ -281,12 +281,6 @@ def air(
         msg = "'co2_mole_fraction' must be a mole fraction between 0 and 1."
         raise ValueError(msg)
 
-    # After the refusals, not before them: a caller who promotes this warning to
-    # an error would otherwise receive it in place of the ValueError the invalid
-    # argument earns, and never learn which argument was wrong.
-    _warn_assumptions(static_pressure_pa, relative_humidity_percent)
-    _warn_outside_domain(float(temperature_c), pressure, humidity)
-
     t = float(temperature_c)
     saturation = _saturation_vapour_pressure(kelvin)
     enhancement = _enhancement_factor(pressure, t)
@@ -306,6 +300,12 @@ def air(
             f"this temperature needs at least {saturation * enhancement:.0f} Pa."
         )
         raise ValueError(msg)
+    # After the refusals, the combination's among them, not before them: a
+    # caller who promotes this warning to an error would otherwise receive it
+    # in place of the ValueError the invalid arguments earn, and never learn
+    # which argument was wrong.
+    _warn_assumptions(static_pressure_pa, relative_humidity_percent)
+    _warn_outside_domain(t, pressure, humidity)
     compressibility = _compressibility(pressure, t, water)
 
     density = (

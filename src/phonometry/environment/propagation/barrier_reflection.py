@@ -98,7 +98,6 @@ caller.
 from __future__ import annotations
 
 import math
-import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -122,7 +121,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from ...io._resolve import (
     SignalInput,
     apply_calibration,
@@ -722,7 +721,7 @@ def _require_fs(fs: float) -> float:
             f"the subtraction can align the records to a fraction of a sample; "
             f"got {rate:g} Hz."
         )
-        warnings.warn(msg, BarrierReflectionWarning, stacklevel=3)
+        warn_caller(msg, BarrierReflectionWarning)
     return rate
 
 
@@ -799,7 +798,7 @@ def _warn_reduction(reduction: float, where: str) -> None:
             f"{reduction:.1f} dB{where}, below the 10 dB under which EN 1793-5 "
             f"5.5.4 warns that the direct sound was not fully removed."
         )
-        warnings.warn(msg, BarrierReflectionWarning, stacklevel=3)
+        warn_caller(msg, BarrierReflectionWarning)
 
 
 def subtract_direct_sound(
@@ -832,39 +831,45 @@ def subtract_direct_sound(
     :warns BarrierReflectionWarning: If :math:`R_\mathrm{sub}` is below 10 dB or the
         sample rate below 44 kHz.
     """
-    rate = _require_fs(
-        float(
-            resolve_pair_fs(
-                in_front_ir, free_field_ir, fs, names=("in_front_ir", "free_field_ir")
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        rate = _require_fs(
+            float(
+                resolve_pair_fs(
+                    in_front_ir,
+                    free_field_ir,
+                    fs,
+                    names=("in_front_ir", "free_field_ir"),
+                )
             )
         )
-    )
-    in_front = apply_calibration(
-        in_front_ir, _record(in_front_ir, "in_front_ir"), name="in_front_ir"
-    )
-    free_field = apply_calibration(
-        free_field_ir, _record(free_field_ir, "free_field_ir"), name="free_field_ir"
-    )
-    if in_front.size != free_field.size:
-        msg = (
-            f"'in_front_ir' and 'free_field_ir' must have the same length; got "
-            f"{in_front.size} and {free_field.size} samples."
+        in_front = apply_calibration(
+            in_front_ir, _record(in_front_ir, "in_front_ir"), name="in_front_ir"
         )
-        raise ValueError(msg)
-    result = _subtract(in_front, free_field, rate)
-    _warn_reduction(result.reduction, "")
-    return DirectSoundSubtraction(
-        in_front=like_input(in_front_ir, np.asarray(result.in_front)),
-        aligned_free_field=like_input(
-            free_field_ir, np.asarray(result.aligned_free_field)
-        ),
-        residual=like_input(in_front_ir, np.asarray(result.residual)),
-        fs=result.fs,
-        peak_index=result.peak_index,
-        shift_samples=result.shift_samples,
-        amplitude_factor=result.amplitude_factor,
-        reduction=result.reduction,
-    )
+        free_field = apply_calibration(
+            free_field_ir, _record(free_field_ir, "free_field_ir"), name="free_field_ir"
+        )
+        if in_front.size != free_field.size:
+            msg = (
+                f"'in_front_ir' and 'free_field_ir' must have the same length; got "
+                f"{in_front.size} and {free_field.size} samples."
+            )
+            raise ValueError(msg)
+        result = _subtract(in_front, free_field, rate)
+        _warn_reduction(result.reduction, "")
+        return DirectSoundSubtraction(
+            in_front=like_input(in_front_ir, np.asarray(result.in_front)),
+            aligned_free_field=like_input(
+                free_field_ir, np.asarray(result.aligned_free_field)
+            ),
+            residual=like_input(in_front_ir, np.asarray(result.residual)),
+            fs=result.fs,
+            peak_index=result.peak_index,
+            shift_samples=result.shift_samples,
+            amplitude_factor=result.amplitude_factor,
+            reduction=result.reduction,
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -986,44 +991,51 @@ def source_directivity_corrections(
         ``specular_irs`` or ``window_length_s`` holds a text or a value that is not a
         real number.
     """
-    rate = _require_fs(
-        float(
-            resolve_pair_fs(
-                microphone_irs,
-                specular_irs,
-                fs,
-                names=("microphone_irs", "specular_irs"),
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        rate = _require_fs(
+            float(
+                resolve_pair_fs(
+                    microphone_irs,
+                    specular_irs,
+                    fs,
+                    names=("microphone_irs", "specular_irs"),
+                )
             )
         )
-    )
-    on_axis = _grid_record(microphone_irs, "microphone_irs")
-    specular = _grid_record(specular_irs, "specular_irs")
-    if on_axis.shape != specular.shape:
-        msg = (
-            f"'microphone_irs' and 'specular_irs' must have the same shape; got "
-            f"{on_axis.shape} and {specular.shape}."
-        )
-        raise ValueError(msg)
-    high = _per_microphone(window_length_s, "window_length_s")
-    low = _per_microphone(low_band_window_length_s, "low_band_window_length_s")
-    out = np.empty((_MICROPHONES, len(_BANDS_HZ)))
-    for k in range(_MICROPHONES):
-        for lengths, bands in (
-            (low, slice(0, _FIRST_FULL_GRID_BAND)),
-            (high, slice(_FIRST_FULL_GRID_BAND, None)),
-        ):
-            window = adrienne_reflection_window(rate, window_length_s=float(lengths[k]))
-            energies = []
-            for record in (on_axis[k], specular[k]):
-                peak = float(np.argmax(np.abs(record)))
-                segment = _windowed(record, peak, window, rate, "directivity record")
-                energies.append(
-                    _band_energies(
-                        segment, rate, _BAND_LOWER_HZ[bands], _BAND_UPPER_HZ[bands]
-                    )
+        on_axis = _grid_record(microphone_irs, "microphone_irs")
+        specular = _grid_record(specular_irs, "specular_irs")
+        if on_axis.shape != specular.shape:
+            msg = (
+                f"'microphone_irs' and 'specular_irs' must have the same shape; got "
+                f"{on_axis.shape} and {specular.shape}."
+            )
+            raise ValueError(msg)
+        high = _per_microphone(window_length_s, "window_length_s")
+        low = _per_microphone(low_band_window_length_s, "low_band_window_length_s")
+        out = np.empty((_MICROPHONES, len(_BANDS_HZ)))
+        for k in range(_MICROPHONES):
+            for lengths, bands in (
+                (low, slice(0, _FIRST_FULL_GRID_BAND)),
+                (high, slice(_FIRST_FULL_GRID_BAND, None)),
+            ):
+                window = adrienne_reflection_window(
+                    rate, window_length_s=float(lengths[k])
                 )
-            out[k, bands] = energies[0] / energies[1]
-    return read_only(out)
+                energies = []
+                for record in (on_axis[k], specular[k]):
+                    peak = float(np.argmax(np.abs(record)))
+                    segment = _windowed(
+                        record, peak, window, rate, "directivity record"
+                    )
+                    energies.append(
+                        _band_energies(
+                            segment, rate, _BAND_LOWER_HZ[bands], _BAND_UPPER_HZ[bands]
+                        )
+                    )
+                out[k, bands] = energies[0] / energies[1]
+        return read_only(out)
 
 
 def _grid_record(entry: SignalInput, name: str) -> NDArray[np.float64]:
@@ -1541,116 +1553,123 @@ def reflection_index(
     :warns BarrierReflectionWarning: For an :math:`R_\mathrm{sub}` below 10 dB, a
         gain factor more than 20 % from 1, or a sample rate below 44 kHz.
     """
-    fronts = _grid_positions(in_front_irs, "in_front_irs")
-    frees = _grid_positions(free_field_irs, "free_field_irs")
-    rate = _require_fs(_grid_rate(fronts, frees, fs))
-    speed = require_positive(speed_of_sound, "speed_of_sound")
-    in_front = [_grid_record(entry, "in_front_irs") for entry in fronts]
-    free_field = [_grid_record(entry, "free_field_irs") for entry in frees]
-    shapes = [record.shape for record in in_front]
-    if shapes != [record.shape for record in free_field]:
-        msg = (
-            f"'in_front_irs' and 'free_field_irs' must have the same shape; got "
-            f"{shapes} and {[record.shape for record in free_field]}."
-        )
-        raise ValueError(msg)
-    high = _per_microphone(window_length_s, "window_length_s")
-    low = _per_microphone(low_band_window_length_s, "low_band_window_length_s")
-    low_mics = sorted(set(indices_of(low_band_microphones, "low_band_microphones")))
-    if not low_mics or low_mics[0] < 1 or low_mics[-1] > _MICROPHONES:
-        msg = "'low_band_microphones' must name microphones between 1 and 9."
-        raise ValueError(msg)
-    directivity = _directivity(directivity_corrections)
-    paths = reflection_grid_paths_m()
-    divergence = (paths[:, 1] / paths[:, 0]) ** 2
-    delays = (paths[:, 1] - paths[:, 0]) / speed * rate
-    calibration = adrienne_reflection_window(
-        rate, window_length_s=ADRIENNE_CALIBRATION_LENGTH_S
-    )
-    gain_lower = (_BAND_LOWER_HZ[_BANDS_HZ.index(_GAIN_BANDS_HZ[0])],)
-    gain_upper = (_BAND_UPPER_HZ[_BANDS_HZ.index(_GAIN_BANDS_HZ[1])],)
-
-    positions = len(in_front)
-    bands = len(_BANDS_HZ)
-    values = np.full((positions, _MICROPHONES, bands), np.nan)
-    gains = np.empty((positions, _MICROPHONES))
-    reductions = np.empty((positions, _MICROPHONES))
-    low_bands = slice(0, _FIRST_FULL_GRID_BAND)
-    high_bands = slice(_FIRST_FULL_GRID_BAND, None)
-    for p in range(positions):
-        for k in range(_MICROPHONES):
-            where = f" at microphone {k + 1} of grid position {p + 1}"
-            sub = _subtract(in_front[p][k], free_field[p][k], rate)
-            _warn_reduction(sub.reduction, where)
-            reductions[p, k] = sub.reduction
-            direct_peak = float(sub.peak_index)
-            free_peak = float(np.argmax(np.abs(free_field[p][k])))
-            gain = float(
-                _band_energies(
-                    _windowed(
-                        in_front[p][k], direct_peak, calibration, rate, "gain check"
-                    ),
-                    rate,
-                    gain_lower,
-                    gain_upper,
-                )[0]
-                / _band_energies(
-                    _windowed(
-                        free_field[p][k], free_peak, calibration, rate, "gain check"
-                    ),
-                    rate,
-                    gain_lower,
-                    gain_upper,
-                )[0]
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        fronts = _grid_positions(in_front_irs, "in_front_irs")
+        frees = _grid_positions(free_field_irs, "free_field_irs")
+        rate = _require_fs(_grid_rate(fronts, frees, fs))
+        speed = require_positive(speed_of_sound, "speed_of_sound")
+        in_front = [_grid_record(entry, "in_front_irs") for entry in fronts]
+        free_field = [_grid_record(entry, "free_field_irs") for entry in frees]
+        shapes = [record.shape for record in in_front]
+        if shapes != [record.shape for record in free_field]:
+            msg = (
+                f"'in_front_irs' and 'free_field_irs' must have the same shape; got "
+                f"{shapes} and {[record.shape for record in free_field]}."
             )
-            _warn_gain(gain, where)
-            gains[p, k] = gain
-            groups = [(high, high_bands)]
-            if k + 1 in low_mics:
-                groups.append((low, low_bands))
-            for lengths, selected in groups:
-                window = adrienne_reflection_window(
-                    rate, window_length_s=float(lengths[k])
-                )
-                incident = _band_energies(
-                    _windowed(
-                        free_field[p][k], free_peak, window, rate, "incident component"
-                    ),
-                    rate,
-                    _BAND_LOWER_HZ[selected],
-                    _BAND_UPPER_HZ[selected],
-                )
-                reflected = _band_energies(
-                    _windowed(
-                        np.asarray(sub.residual),
-                        direct_peak + delays[k],
-                        window,
+            raise ValueError(msg)
+        high = _per_microphone(window_length_s, "window_length_s")
+        low = _per_microphone(low_band_window_length_s, "low_band_window_length_s")
+        low_mics = sorted(set(indices_of(low_band_microphones, "low_band_microphones")))
+        if not low_mics or low_mics[0] < 1 or low_mics[-1] > _MICROPHONES:
+            msg = "'low_band_microphones' must name microphones between 1 and 9."
+            raise ValueError(msg)
+        directivity = _directivity(directivity_corrections)
+        paths = reflection_grid_paths_m()
+        divergence = (paths[:, 1] / paths[:, 0]) ** 2
+        delays = (paths[:, 1] - paths[:, 0]) / speed * rate
+        calibration = adrienne_reflection_window(
+            rate, window_length_s=ADRIENNE_CALIBRATION_LENGTH_S
+        )
+        gain_lower = (_BAND_LOWER_HZ[_BANDS_HZ.index(_GAIN_BANDS_HZ[0])],)
+        gain_upper = (_BAND_UPPER_HZ[_BANDS_HZ.index(_GAIN_BANDS_HZ[1])],)
+
+        positions = len(in_front)
+        bands = len(_BANDS_HZ)
+        values = np.full((positions, _MICROPHONES, bands), np.nan)
+        gains = np.empty((positions, _MICROPHONES))
+        reductions = np.empty((positions, _MICROPHONES))
+        low_bands = slice(0, _FIRST_FULL_GRID_BAND)
+        high_bands = slice(_FIRST_FULL_GRID_BAND, None)
+        for p in range(positions):
+            for k in range(_MICROPHONES):
+                where = f" at microphone {k + 1} of grid position {p + 1}"
+                sub = _subtract(in_front[p][k], free_field[p][k], rate)
+                _warn_reduction(sub.reduction, where)
+                reductions[p, k] = sub.reduction
+                direct_peak = float(sub.peak_index)
+                free_peak = float(np.argmax(np.abs(free_field[p][k])))
+                gain = float(
+                    _band_energies(
+                        _windowed(
+                            in_front[p][k], direct_peak, calibration, rate, "gain check"
+                        ),
                         rate,
-                        "reflected component",
-                    ),
-                    rate,
-                    _BAND_LOWER_HZ[selected],
-                    _BAND_UPPER_HZ[selected],
+                        gain_lower,
+                        gain_upper,
+                    )[0]
+                    / _band_energies(
+                        _windowed(
+                            free_field[p][k], free_peak, calibration, rate, "gain check"
+                        ),
+                        rate,
+                        gain_lower,
+                        gain_upper,
+                    )[0]
                 )
-                values[p, k, selected] = (
-                    reflected
-                    / incident
-                    * divergence[k]
-                    * directivity[k, selected]
-                    / gain
-                )
-    counts = np.sum(np.isfinite(values), axis=1)
-    sums = np.nansum(values, axis=1)
-    position_values = np.full(counts.shape, np.nan)
-    np.divide(sums, counts, out=position_values, where=counts > 0)
-    return _result(
-        position_values,
-        values.reshape(-1, bands),
-        lowest_band_hz,
-        microphone_values=values,
-        gain_corrections=gains,
-        reductions_db=reductions,
-    )
+                _warn_gain(gain, where)
+                gains[p, k] = gain
+                groups = [(high, high_bands)]
+                if k + 1 in low_mics:
+                    groups.append((low, low_bands))
+                for lengths, selected in groups:
+                    window = adrienne_reflection_window(
+                        rate, window_length_s=float(lengths[k])
+                    )
+                    incident = _band_energies(
+                        _windowed(
+                            free_field[p][k],
+                            free_peak,
+                            window,
+                            rate,
+                            "incident component",
+                        ),
+                        rate,
+                        _BAND_LOWER_HZ[selected],
+                        _BAND_UPPER_HZ[selected],
+                    )
+                    reflected = _band_energies(
+                        _windowed(
+                            np.asarray(sub.residual),
+                            direct_peak + delays[k],
+                            window,
+                            rate,
+                            "reflected component",
+                        ),
+                        rate,
+                        _BAND_LOWER_HZ[selected],
+                        _BAND_UPPER_HZ[selected],
+                    )
+                    values[p, k, selected] = (
+                        reflected
+                        / incident
+                        * divergence[k]
+                        * directivity[k, selected]
+                        / gain
+                    )
+        counts = np.sum(np.isfinite(values), axis=1)
+        sums = np.nansum(values, axis=1)
+        position_values = np.full(counts.shape, np.nan)
+        np.divide(sums, counts, out=position_values, where=counts > 0)
+        return _result(
+            position_values,
+            values.reshape(-1, bands),
+            lowest_band_hz,
+            microphone_values=values,
+            gain_corrections=gains,
+            reductions_db=reductions,
+        )
 
 
 def _warn_gain(gain: float, where: str) -> None:
@@ -1662,7 +1681,7 @@ def _warn_gain(gain: float, where: str) -> None:
             f"between the free-field and the in-front records, and asks to "
             f"recheck the data."
         )
-        warnings.warn(msg, BarrierReflectionWarning, stacklevel=3)
+        warn_caller(msg, BarrierReflectionWarning)
 
 
 # --------------------------------------------------------------------------- #

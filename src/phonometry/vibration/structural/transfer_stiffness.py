@@ -74,7 +74,6 @@ source and building prediction standards (ISO 9611, EN 15657, EN 12354-5).
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -109,7 +108,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from ...filters.frequencies import _nominal_freq_for_band
 from ...metrology.reference_values import REFERENCE_VALUES
 from ...metrology.uncertainty import (
@@ -378,7 +377,9 @@ def transfer_stiffness_indirect(
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
-    :raises ValueError: for a non-positive frequency or blocking mass.
+    :raises ValueError: for a non-positive frequency or blocking mass, a
+        ``transmissibility`` that is not finite, or a ``frequency`` and a
+        ``transmissibility`` of different shapes, neither of them one value.
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
         or ``frequency`` holds a text or a value that is not a real number, or
         ``transmissibility`` holds a text or a value that is not a number.
@@ -402,21 +403,33 @@ def _indirect_stiffness(
     flange_mass = require_non_negative(flange_mass, "flange_mass")
     omega = _omega(frequency, name)
     t = complex_array(transmissibility, "transmissibility")
+    if not np.all(np.isfinite(t)):
+        msg = "'transmissibility' must contain only finite values."
+        raise ValueError(msg)
+    try:
+        np.broadcast_shapes(omega.shape, t.shape)
+    except ValueError:
+        msg = (
+            f"'{name}' and 'transmissibility' must have the same shape, or one "
+            f"of them a single value; got {omega.shape} and {t.shape}."
+        )
+        raise ValueError(msg) from None
+    stiffness = np.asarray(
+        -(omega**2) * (blocking_mass + flange_mass) * t, dtype=np.complex128
+    )
+    # Inequality (2) is advised on once the stiffness stands (rule A63).
     magnitude = np.abs(t)
     if np.any(magnitude > TRANSMISSIBILITY_LIMIT):
         worst = float(np.max(magnitude))
-        warnings.warn(
+        warn_caller(
             f"|T| up to {worst:.3g} exceeds {TRANSMISSIBILITY_LIMIT:g} "
             "(DeltaL1,2 < 20 dB): ISO 10846-3 Inequality (2) is violated and "
             "the T << 1 approximation of Formula (1) is no longer accurate "
             "within 1 dB (12 %); those bands lie outside the valid frequency "
             "range of the indirect method.",
             TransferStiffnessWarning,
-            stacklevel=3,
         )
-    return np.asarray(
-        -(omega**2) * (blocking_mass + flange_mass) * t, dtype=np.complex128
-    )
+    return stiffness
 
 
 def blocking_force_ratio(
@@ -781,23 +794,29 @@ def indirect_transfer_stiffness_result(
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The :class:`TransferStiffnessResult` (indirect method).
+    :raises ValueError: for a non-positive frequency or blocking mass, a
+        ``transmissibility`` that is not finite, or ``frequencies`` and a
+        ``transmissibility`` of different shapes, neither of them one value.
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
         or ``frequencies`` holds a text or a value that is not a real number, or
         ``transmissibility`` holds a text or a value that is not a number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
-    freq = real_array(frequencies, "frequencies")
-    k = _indirect_stiffness(
-        freq, transmissibility, blocking_mass, flange_mass, "frequencies"
-    )
-    measured = complex_array(transmissibility, "transmissibility")
-    return TransferStiffnessResult(
-        frequencies=freq,
-        transfer_stiffness=k,
-        blocking_mass=float(blocking_mass),
-        transmissibility=np.broadcast_to(measured, k.shape),
-    )
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        freq = real_array(frequencies, "frequencies")
+        k = _indirect_stiffness(
+            freq, transmissibility, blocking_mass, flange_mass, "frequencies"
+        )
+        measured = complex_array(transmissibility, "transmissibility")
+        return TransferStiffnessResult(
+            frequencies=freq,
+            transfer_stiffness=k,
+            blocking_mass=float(blocking_mass),
+            transmissibility=np.broadcast_to(measured, k.shape),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1044,9 +1063,9 @@ def _band_average(
 ) -> BandAveragedStiffness:
     """The body of :func:`band_averaged_stiffness`.
 
-    The public function and the two ``band_average`` methods reach it at the
-    same depth, so the warning below points at the caller's own line from all
-    three. ``quiet_up_to_hz`` spares the bands centred at or below it the
+    The public function and the two ``band_average`` methods reach it, and the
+    warning below names the caller's own line from all three.
+    ``quiet_up_to_hz`` spares the bands centred at or below it the
     warning: ISO 10846-5 7.5 asks for five lines per band only above 20 Hz,
     its 0,2 Hz spacing below leaves the lowest bands short of five, and the
     NOTE to clause 9 m) accepts narrow-band data there instead.
@@ -1095,12 +1114,11 @@ def _band_average(
             f"{f:g} Hz ({n})"
             for f, n in zip(nominal[short], counts[short], strict=True)
         )
-        warnings.warn(
+        warn_caller(
             f"ISO 10846 takes a band average over at least "
             f"{MIN_FREQUENCIES_PER_BAND} frequencies; these bands hold fewer "
             f"valid lines and are left undetermined: {listed}.",
             TransferStiffnessWarning,
-            stacklevel=3,
         )
     return BandAveragedStiffness(
         nominal_frequencies=nominal,
@@ -1254,14 +1272,13 @@ def _warn_level_difference(
     holds = check.holds
     difference = np.asarray(check.difference, dtype=np.float64)
     worst = int(np.argmin(difference))
-    warnings.warn(
+    warn_caller(
         f"{np.count_nonzero(~holds)} of {holds.size} frequencies fall short of "
         f"the {check.limit_db:g} dB of {clauses}, down to "
         f"{difference[worst]:.1f} dB at {float(check.frequencies[worst]):g} Hz: "
         f"{meaning} The measurements are valid only where it holds, and the "
         "parts exclude the rest from the evaluation.",
         TransferStiffnessWarning,
-        stacklevel=3,
     )
 
 
@@ -1600,7 +1617,7 @@ def check_output_mass(
     limit = check.mass_limit_kg
     if not check.passes:
         worst = int(np.argmin(limit))
-        warnings.warn(
+        warn_caller(
             f"m0 = {output_mass_kg:g} kg exceeds the limit of ISO 10846-4 "
             f"Inequality (3) (ISO 10846-2 Inequality (2)) at "
             f"{np.count_nonzero(~check.holds)} of {freq.size} frequencies, "
@@ -1608,7 +1625,6 @@ def check_output_mass(
             "force may miss the blocking force by more than 0.5 dB there; use a "
             "lighter m0 or stiffer force transducers (NOTE 2).",
             TransferStiffnessWarning,
-            stacklevel=2,
         )
     return check
 

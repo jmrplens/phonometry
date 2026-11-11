@@ -1015,7 +1015,7 @@ def _where(obj: object) -> str:
         path = inspect.getsourcefile(source)  # type: ignore[arg-type]
         line = inspect.getsourcelines(source)[1]  # type: ignore[arg-type]
     except (OSError, TypeError):
-        path = None
+        path, line = _written_at(source)
     where = (
         ""
         if path is None
@@ -1023,6 +1023,35 @@ def _where(obj: object) -> str:
     )
     _WHERE[id(obj)] = (obj, where)
     return where
+
+
+def _written_at(obj: object) -> tuple[str | None, int]:
+    """The file and line of a class :mod:`inspect` has no source for.
+
+    A warning written in a private module is named by the public one that
+    exports it (``published_by``): its ``__module__`` names a module that
+    does not write it, and it keeps no ``__firstlineno__``. The module of the
+    package that binds the class by its name and writes a ``class`` statement
+    of that name is the one that wrote it.
+    """
+    if not isinstance(obj, type):
+        return None, 0
+    name: str = obj.__name__
+    for module in list(sys.modules.values()):
+        path = getattr(module, "__file__", None)
+        if (
+            not getattr(module, "__name__", "").startswith("phonometry")
+            or path is None
+            or vars(module).get(name) is not obj
+        ):
+            continue
+        tree = ast.parse(pathlib.Path(path).read_text(encoding="utf-8"))
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == name:
+                return path, min(
+                    [node.lineno, *(d.lineno for d in node.decorator_list)]
+                )
+    return None, 0
 
 
 def _resolved_members(cls: type) -> Iterator[tuple[type, str, object]]:

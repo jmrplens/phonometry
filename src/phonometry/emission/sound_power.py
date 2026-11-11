@@ -74,7 +74,6 @@ altitude or below 10 degrees C (clauses 8.2.5 and 8.3.6).
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, overload
@@ -100,6 +99,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import advisories_held, warn_caller
 from ._shared import (
     _S0,
     Grade,
@@ -654,12 +654,11 @@ def background_noise_correction(
     judged = settled(delta)
     k1 = np.where(judged > high, 0.0, k1)
     if np.any(judged < low):
-        warnings.warn(
+        warn_caller(
             f"Background margin below {low:g} dB in one or more bands; K1 "
             "clamped to the criterion value and levels are upper bounds "
             "(ISO 3744:2010, 8.2.3).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return np.asarray(k1, dtype=np.float64)
 
@@ -1088,7 +1087,8 @@ def _surface_environmental_correction(
     :param n_bands: Number of frequency bands.
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :param room: Room data behind ``K2`` (:class:`RoomEnvironment`).
-    :return: ``K2`` per band, in decibels.
+    :return: ``K2`` per band, in decibels; :func:`_k2_advisory` says when it
+        exceeds the limit of the grade, once every argument has been checked.
     :raises ValueError: If a per-band room input does not match the bands.
     """
     k2_value = environmental_correction(
@@ -1106,43 +1106,58 @@ def _surface_environmental_correction(
             " / mean_absorption_coefficient) must match the number of bands."
         )
         raise ValueError(msg)
-    if np.any(k2_arr > _K2_LIMIT[grade]):
-        warnings.warn(
-            f"K2 up to {float(np.max(k2_arr)):.1f} dB exceeds the {grade} "
+    return np.broadcast_to(k2_arr, (n_bands,)).astype(np.float64)
+
+
+def _k2_advisory(k2: np.ndarray, grade: Grade) -> None:
+    """Warn when ``K2`` exceeds the validity limit of the grade (4.3.2).
+
+    Called once the determination has checked every argument, so that under
+    ``python -W error`` a refusal is never replaced by this advisory.
+    """
+    if np.any(k2 > _K2_LIMIT[grade]):
+        warn_caller(
+            f"K2 up to {float(np.max(k2)):.1f} dB exceeds the {grade} "
             f"validity limit of {_K2_LIMIT[grade]:g} dB. ISO 3744:2010 clause "
             "4.3.2 states this limit for the A-weighted K2A, so this per-band "
             "check is conservative; the acoustic environment may not qualify "
             "for this method.",
             SoundPowerWarning,
-            stacklevel=3,  # report at the caller of sound_power_pressure
         )
-    return np.broadcast_to(k2_arr, (n_bands,)).astype(np.float64)
 
 
-def _a_weighted_total(
-    lw: np.ndarray, frequencies: ArrayLike | None, n_bands: int
-) -> tuple[np.ndarray | None, float]:
-    """Band frequencies and the A-weighted total ``LWA`` (ISO 3744 Annex E).
+def _band_frequencies(frequencies: ArrayLike | None, n_bands: int) -> np.ndarray | None:
+    """The band mid-band frequencies as an array, ``None`` when not given.
 
-    :param lw: Band sound power levels, in decibels.
     :param frequencies: Band mid-band frequencies, in hertz, or ``None``.
     :param n_bands: Number of frequency bands.
-    :return: ``(frequencies as an array or None, LWA)``.
     :raises ValueError: If the frequencies do not match the number of bands.
     """
     require_scalar(n_bands, "n_bands")
     if frequencies is None:
-        # A-weighting needs the band centre frequencies; with several bands and
-        # none supplied the A-weighted total is undefined (NaN). A single band
-        # carries no weighting, so LWA = LW.
-        return None, (real_number(lw[0], "lw") if n_bands == 1 else float("nan"))
+        return None
     # A scalar is one band's centre frequency, not a shape mistake: accept it
     # for a single band (as 1-D) and reject it, by name, for several.
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.shape[0] != n_bands:
         msg = "'frequencies' length must match the number of bands."
         raise ValueError(msg)
-    return freqs, energy_sum(lw + _a_weighting_corrections(freqs))
+    return freqs
+
+
+def _a_weighted_total(lw: np.ndarray, freqs: np.ndarray | None) -> float:
+    """The A-weighted total ``LWA`` of checked bands (ISO 3744 Annex E).
+
+    :param lw: Band sound power levels, in decibels.
+    :param freqs: The bands from :func:`_band_frequencies`, or ``None``.
+    :return: ``LWA``.
+    """
+    if freqs is None:
+        # A-weighting needs the band centre frequencies; with several bands and
+        # none supplied the A-weighted total is undefined (NaN). A single band
+        # carries no weighting, so LWA = LW.
+        return real_number(lw[0], "lw") if lw.shape[0] == 1 else float("nan")
+    return energy_sum(lw + _a_weighting_corrections(freqs))
 
 
 def sound_power_pressure(
@@ -1198,80 +1213,91 @@ def sound_power_pressure(
         ``levels_positions`` holds a text or a value that is not a real number, or
         ``grade`` is not a text, or ``surface`` is not a text.
     """
-    require_choice(surface, "surface", ("hemisphere", "box"))
-    grade = require_choice(grade, "grade", ("engineering", "survey"))
-    sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
-    levels = np.atleast_2d(real_array(levels_positions, "levels_positions"))
-    # The number is a count of array axes, not a quantity.
-    if levels.ndim != 2:  # noqa: PLR2004
-        msg = "'levels_positions' must be a 2D (positions, bands) array."
-        raise ValueError(msg)
-    if levels.shape[1] == 0:
-        msg = "'levels_positions' must contain at least one frequency band."
-        raise ValueError(msg)
-    if not np.all(np.isfinite(levels)):
-        msg = "'levels_positions' must contain only finite values."
-        raise ValueError(msg)
-    n_positions = levels.shape[0]
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_choice(surface, "surface", ("hemisphere", "box"))
+        grade = require_choice(grade, "grade", ("engineering", "survey"))
+        sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
+        levels = np.atleast_2d(real_array(levels_positions, "levels_positions"))
+        # The number is a count of array axes, not a quantity.
+        if levels.ndim != 2:  # noqa: PLR2004
+            msg = "'levels_positions' must be a 2D (positions, bands) array."
+            raise ValueError(msg)
+        if levels.shape[1] == 0:
+            msg = "'levels_positions' must contain at least one frequency band."
+            raise ValueError(msg)
+        if not np.all(np.isfinite(levels)):
+            msg = "'levels_positions' must contain only finite values."
+            raise ValueError(msg)
+        n_positions = levels.shape[0]
 
-    # --- measurement surface area -----------------------------------------
-    if n_reflecting_planes not in (1, 2, 3):
-        msg = _REFLECTING_PLANES_MSG
-        raise ValueError(msg)
-    area, min_positions = _measurement_surface(
-        surface, radius, dimensions, distance, n_reflecting_planes, grade
-    )
-
-    if n_positions < min_positions:
-        msg = (
-            f"{grade} {surface} with {n_reflecting_planes} reflecting plane(s) "
-            f"requires at least {min_positions} microphone positions, got "
-            f"{n_positions} (ISO 3744/3746:2010 clause 8)."
+        # --- measurement surface area -----------------------------------------
+        if n_reflecting_planes not in (1, 2, 3):
+            msg = _REFLECTING_PLANES_MSG
+            raise ValueError(msg)
+        area, min_positions = _measurement_surface(
+            surface, radius, dimensions, distance, n_reflecting_planes, grade
         )
-        raise ValueError(msg)
 
-    # --- energy average and background correction K1 ----------------------
-    mean_level = energy_mean(levels, axis=0)
-    n_bands = mean_level.shape[0]
-    k1 = _surface_background_correction(background_levels, levels, mean_level, grade)
+        if n_positions < min_positions:
+            msg = (
+                f"{grade} {surface} with {n_reflecting_planes} reflecting plane(s) "
+                f"requires at least {min_positions} microphone positions, got "
+                f"{n_positions} (ISO 3744/3746:2010 clause 8)."
+            )
+            raise ValueError(msg)
 
-    # --- environmental correction K2 (scalar or per band) -----------------
-    k2 = _surface_environmental_correction(
-        area, n_bands, grade, RoomEnvironment() if room is None else room
-    )
+        # --- environmental correction K2 (scalar or per band) and the bands ---
+        # Checked before K1, whose correction may advise on a short margin: under
+        # -W error an advisory raised first would stand in for these refusals.
+        mean_level = energy_mean(levels, axis=0)
+        n_bands = mean_level.shape[0]
+        k2 = _surface_environmental_correction(
+            area, n_bands, grade, RoomEnvironment() if room is None else room
+        )
+        freqs = _band_frequencies(frequencies, n_bands)
 
-    # --- surface SPL, sound power level and A-weighted total ---------------
-    surface_spl = mean_level - k1 - k2
-    lw = surface_spl + 10.0 * np.log10(area / _S0)
-    freqs, lwa = _a_weighted_total(lw, frequencies, n_bands)
+        # --- background correction K1 ------------------------------------------
+        k1 = _surface_background_correction(
+            background_levels, levels, mean_level, grade
+        )
 
-    # --- apparent directivity index per position AND band (Eq. 7) ---------
-    # ISO 3744:2010 clause 8.4 requires the apparent directivity indices to be
-    # calculated on the actual measurement surface (to validate the number of
-    # measurement positions), per frequency band, so DIi* is a (NM, NB) array.
-    # Per Eq. 7
-    # DIi*(k) = Lpi(k) - (Lp'(k) - K1(k)): BOTH the per-position level Lpi(k)
-    # and the surface energy mean Lp'(k) carry the same per-band background
-    # correction K1(k), which cancels in the difference (3.24 DI definition).
-    # The uniform per-band K1 therefore drops out and DIi*(k) reduces to the raw
-    # per-band level minus the raw per-band surface mean (no residual +K1 bias).
-    directivity = np.asarray(levels - mean_level[np.newaxis, :], dtype=np.float64)
+        # --- surface SPL, sound power level and A-weighted total ---------------
+        surface_spl = mean_level - k1 - k2
+        lw = surface_spl + 10.0 * np.log10(area / _S0)
+        lwa = _a_weighted_total(lw, freqs)
+        _k2_advisory(k2, grade)
 
-    uncertainty = _COVERAGE_FACTOR_95 * float(np.hypot(_SIGMA_R0[grade], sigma_omc_db))
+        # --- apparent directivity index per position AND band (Eq. 7) ---------
+        # ISO 3744:2010 clause 8.4 requires the apparent directivity indices to be
+        # calculated on the actual measurement surface (to validate the number of
+        # measurement positions), per frequency band, so DIi* is a (NM, NB) array.
+        # Per Eq. 7
+        # DIi*(k) = Lpi(k) - (Lp'(k) - K1(k)): BOTH the per-position level Lpi(k)
+        # and the surface energy mean Lp'(k) carry the same per-band background
+        # correction K1(k), which cancels in the difference (3.24 DI definition).
+        # The uniform per-band K1 therefore drops out and DIi*(k) reduces to the raw
+        # per-band level minus the raw per-band surface mean (no residual +K1 bias).
+        directivity = np.asarray(levels - mean_level[np.newaxis, :], dtype=np.float64)
 
-    return SoundPowerResult(
-        frequencies=freqs,
-        sound_power_level=np.asarray(lw, dtype=np.float64),
-        surface_pressure_level=np.asarray(surface_spl, dtype=np.float64),
-        mean_pressure_level=mean_level,
-        background_correction=k1,
-        environmental_correction=k2,
-        directivity_index=directivity,
-        surface_area=float(area),
-        sound_power_level_a=lwa,
-        uncertainty=uncertainty,
-        grade=grade,
-    )
+        uncertainty = _COVERAGE_FACTOR_95 * float(
+            np.hypot(_SIGMA_R0[grade], sigma_omc_db)
+        )
+
+        return SoundPowerResult(
+            frequencies=freqs,
+            sound_power_level=np.asarray(lw, dtype=np.float64),
+            surface_pressure_level=np.asarray(surface_spl, dtype=np.float64),
+            mean_pressure_level=mean_level,
+            background_correction=k1,
+            environmental_correction=k2,
+            directivity_index=directivity,
+            surface_area=float(area),
+            sound_power_level_a=lwa,
+            uncertainty=uncertainty,
+            grade=grade,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1460,7 +1486,7 @@ def mean_single_event_level(
     :raises ValueError: for non-finite levels, an empty first axis or a
         non-positive ``n_events``.
     """
-    return _single_event_mean(levels, n_events, name="levels", stacklevel=3)
+    return _single_event_mean(levels, n_events, name="levels")
 
 
 def _static_pressure_at_altitude(altitude: float) -> float:
@@ -1586,7 +1612,7 @@ def _event_position_levels(
             )
             raise ValueError(msg)
         count = int(arr.shape[0])
-        arr = _single_event_mean(arr, None, name="levels_positions", stacklevel=4)
+        arr = _single_event_mean(arr, None, name="levels_positions")
         return arr, count
     # The number is a count of array axes, not a quantity.
     if arr.ndim != 2:  # noqa: PLR2004
@@ -1600,7 +1626,7 @@ def _event_position_levels(
             msg = "'levels_positions' must contain only finite values."
             raise ValueError(msg)
         return arr, None
-    arr = _single_event_mean(arr, n_events, name="levels_positions", stacklevel=4)
+    arr = _single_event_mean(arr, n_events, name="levels_positions")
     return arr, require_count(n_events, "n_events", at_least=None)
 
 
@@ -1694,70 +1720,80 @@ def sound_energy_pressure(
         ``levels_positions`` holds a text or a value that is not a real number, or
         ``grade`` is not a text, or ``surface`` is not a text.
     """
-    require_choice(surface, "surface", ("hemisphere", "box"))
-    grade = require_choice(grade, "grade", ("engineering", "survey"))
-    sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
-    levels, event_count = _event_position_levels(levels_positions, n_events)
-    if levels.shape[1] == 0:
-        msg = "'levels_positions' must contain at least one frequency band."
-        raise ValueError(msg)
-    n_positions = levels.shape[0]
-    if integration_time is not None:
-        integration_time = require_positive(integration_time, "integration_time")
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_choice(surface, "surface", ("hemisphere", "box"))
+        grade = require_choice(grade, "grade", ("engineering", "survey"))
+        sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
+        levels, event_count = _event_position_levels(levels_positions, n_events)
+        if levels.shape[1] == 0:
+            msg = "'levels_positions' must contain at least one frequency band."
+            raise ValueError(msg)
+        n_positions = levels.shape[0]
+        if integration_time is not None:
+            integration_time = require_positive(integration_time, "integration_time")
 
-    # --- measurement surface area (clause 7.2, as for LW) -----------------
-    if n_reflecting_planes not in (1, 2, 3):
-        msg = _REFLECTING_PLANES_MSG
-        raise ValueError(msg)
-    area, min_positions = _measurement_surface(
-        surface, radius, dimensions, distance, n_reflecting_planes, grade
-    )
-    if n_positions < min_positions:
-        msg = (
-            f"{grade} {surface} with {n_reflecting_planes} reflecting plane(s) "
-            f"requires at least {min_positions} microphone positions, got "
-            f"{n_positions} (ISO 3744/3746:2010 clause 8)."
+        # --- measurement surface area (clause 7.2, as for LW) -----------------
+        if n_reflecting_planes not in (1, 2, 3):
+            msg = _REFLECTING_PLANES_MSG
+            raise ValueError(msg)
+        area, min_positions = _measurement_surface(
+            surface, radius, dimensions, distance, n_reflecting_planes, grade
         )
-        raise ValueError(msg)
+        if n_positions < min_positions:
+            msg = (
+                f"{grade} {surface} with {n_reflecting_planes} reflecting plane(s) "
+                f"requires at least {min_positions} microphone positions, got "
+                f"{n_positions} (ISO 3744/3746:2010 clause 8)."
+            )
+            raise ValueError(msg)
 
-    # --- mean over the surface (8.3.3, as Eq. 12) and K1 (Eq. 21) ---------
-    mean_level = energy_mean(levels, axis=0)
-    n_bands = mean_level.shape[0]
-    if background_levels is None:
-        k1 = np.zeros(n_bands, dtype=np.float64)
-    else:
-        exposure = _background_exposure(background_levels, integration_time)
+        # --- mean over the surface (8.3.3, as Eq. 12), K2 and the bands -------
+        # Checked before K1, whose correction may advise on a short margin, as in
+        # sound_power_pressure.
+        mean_level = energy_mean(levels, axis=0)
+        n_bands = mean_level.shape[0]
+        exposure = (
+            None
+            if background_levels is None
+            else _background_exposure(background_levels, integration_time)
+        )
+        k2 = _surface_environmental_correction(
+            area, n_bands, grade, RoomEnvironment() if room is None else room
+        )
+        freqs = _band_frequencies(frequencies, n_bands)
+
+        # --- K1 (Eq. 21) -------------------------------------------------------
         k1 = _surface_background_correction(exposure, levels, mean_level, grade)
 
-    # --- environmental correction K2 (Annex A, as for LW) -----------------
-    k2 = _surface_environmental_correction(
-        area, n_bands, grade, RoomEnvironment() if room is None else room
-    )
+        # --- surface single event level (Eq. 22), LJ (Eq. 23), LJA (Eq. E.2) --
+        surface_level = mean_level - k1 - k2
+        lj = surface_level + 10.0 * np.log10(area / _S0)
+        lja = _a_weighted_total(lj, freqs)
+        _k2_advisory(k2, grade)
 
-    # --- surface single event level (Eq. 22), LJ (Eq. 23), LJA (Eq. E.2) --
-    surface_level = mean_level - k1 - k2
-    lj = surface_level + 10.0 * np.log10(area / _S0)
-    freqs, lja = _a_weighted_total(lj, frequencies, n_bands)
+        # The same per-band K1 corrects the position level and the surface mean,
+        # so the apparent directivity index reduces to the raw difference exactly
+        # as it does for the time-averaged levels (clause 3.24, 8.4).
+        directivity = np.asarray(levels - mean_level[np.newaxis, :], dtype=np.float64)
 
-    # The same per-band K1 corrects the position level and the surface mean,
-    # so the apparent directivity index reduces to the raw difference exactly
-    # as it does for the time-averaged levels (clause 3.24, 8.4).
-    directivity = np.asarray(levels - mean_level[np.newaxis, :], dtype=np.float64)
+        uncertainty = _COVERAGE_FACTOR_95 * float(
+            np.hypot(_SIGMA_R0[grade], sigma_omc_db)
+        )
 
-    uncertainty = _COVERAGE_FACTOR_95 * float(np.hypot(_SIGMA_R0[grade], sigma_omc_db))
-
-    return SoundEnergyResult(
-        frequencies=freqs,
-        sound_energy_level=np.asarray(lj, dtype=np.float64),
-        surface_event_level=np.asarray(surface_level, dtype=np.float64),
-        mean_event_level=mean_level,
-        background_correction=k1,
-        environmental_correction=k2,
-        directivity_index=directivity,
-        surface_area=float(area),
-        sound_energy_level_a=lja,
-        uncertainty=uncertainty,
-        grade=grade,
-        n_events=event_count,
-        integration_time=integration_time,
-    )
+        return SoundEnergyResult(
+            frequencies=freqs,
+            sound_energy_level=np.asarray(lj, dtype=np.float64),
+            surface_event_level=np.asarray(surface_level, dtype=np.float64),
+            mean_event_level=mean_level,
+            background_correction=k1,
+            environmental_correction=k2,
+            directivity_index=directivity,
+            surface_area=float(area),
+            sound_energy_level_a=lja,
+            uncertainty=uncertainty,
+            grade=grade,
+            n_events=event_count,
+            integration_time=integration_time,
+        )

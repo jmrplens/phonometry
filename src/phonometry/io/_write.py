@@ -70,7 +70,6 @@ from __future__ import annotations
 
 import os
 import struct
-import warnings
 from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, overload
@@ -86,7 +85,7 @@ from .._internal.validation import (
     require_count,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ._bext import (
     coding_history_line,
     extend_coding_history,
@@ -105,6 +104,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 
+@published_by("phonometry.io")
 class ClippingWarning(PhonometryWarning):
     """Warns that samples exceeded full scale and were saturated on write."""
 
@@ -262,13 +262,12 @@ def _warn_clipped(
     peak_dbfs: float,
 ) -> None:
     """Report saturation loudly: count, total, and how far over the top."""
-    warnings.warn(
+    warn_caller(
         f"{escaped(os.fspath(path))}: {clipped} of {total} samples exceed the full-scale range "
         f"of {subtype} (signal peak {peak_dbfs:+.2f} dBFS) and were "
         "saturated. Nothing was rescaled: scale the signal before writing "
         "if clipping is not intended.",
         ClippingWarning,
-        stacklevel=4,
     )
 
 

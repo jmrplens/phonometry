@@ -126,7 +126,6 @@ Source: ISO 8297:1994, read in the identical British adoption BS ISO
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from functools import cached_property
 from types import MappingProxyType
@@ -152,6 +151,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     _CK_OCTAVE,
     _S0,
@@ -1864,7 +1864,7 @@ def plant_sound_power(
             "further from the plant; where that is not practicable it replaces "
             "those levels by the average plus 5 dB, as done here (10.3)."
         )
-        warnings.warn(msg, SoundPowerWarning, stacklevel=2)
+        warn_caller(msg, SoundPowerWarning)
     return result
 
 

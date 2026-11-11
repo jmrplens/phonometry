@@ -2306,6 +2306,182 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A traceback names a warning by the package that publishes it.** Fourteen
+  published warnings, the root `PhonometryWarning` among them, were written in
+  private modules and carried them as their `__module__`, so under
+  `python -W error` a traceback ended with
+  `phonometry.fluids._state.FluidAssumptionWarning`, a repr printed
+  `<class 'phonometry.filters._warnings.FilterBankWarning'>`, and pickle
+  stored the private path. Each now carries the package that exports it:
+  `phonometry.PhonometryWarning`, `phonometry.filters.FilterBankWarning`,
+  `phonometry.fluids.FluidWarning` and `FluidAssumptionWarning`,
+  `phonometry.io.CatalogueWarning`, `ClippingWarning` and
+  `LossyCompressionWarning`, `phonometry.materials.AirflowResistanceWarning`,
+  `phonometry.noise_control.CabinInsulationWarning`,
+  `phonometry.vibration.ImpactExcitationWarning`,
+  `phonometry.room.ImpulseResponseWarning`,
+  `phonometry.emission.SoundPowerWarning`,
+  `phonometry.environment.StatisticalPassByWarning` and
+  `phonometry.signals.ToneBurstWarning`. They are the same classes, so a
+  filter or an `except` that names them is unchanged. `inspect.getsource` of
+  these fourteen now raises `OSError`, as Python does for any class named
+  after it is built, rather than read the public module's file at the line
+  the private one wrote the class on; type checkers still name the module
+  the class is written in. `tests/test_package_architecture.py` checks every
+  published warning, and that `inspect` reads every other published class
+  from the file that writes it (style rule A49).
+
+- **A documented refusal comes before any warning, under `python -W error`
+  too.** Five refusals were preceded by an advisory that, made an error,
+  took their place: `room.decay_curve` and `room.room_parameters` built the
+  filter bank, which warned about the band it dropped, before refusing a
+  band or limits no bank at that rate holds; `speech.stipa` warned that the
+  recording was short before refusing ambient levels without speech levels;
+  `noise_control.stage_conditions` gave its series-law advisory about a
+  result it then refused to return; and the railway passage analysis
+  silenced the bank's warning with a `catch_warnings` block, which is not
+  safe across threads, before raising its own error. Each now checks first.
+  The sound power determinations of `emission` did the same with their
+  advisories on the microphone positions, the background, the room, the
+  survey and the band range: `sound_power_in_situ` and
+  `sound_energy_in_situ`, the four reverberation-room methods, the four of
+  the hard-walled room, the special room and its comparison and survey,
+  `sound_power_anechoic`, the surface methods `sound_power_pressure` and
+  `sound_energy_pressure`, the scanning, discrete-point and precision
+  intensity methods, the in-duct method, the high-frequency methods and
+  their room constant, the reference source calibration, and
+  `turbine_sound_power`. Where an advisory comes on the way to a value a
+  later check needs, the call holds it until its result stands and drops it
+  when it refuses: the count of single events of the reverberation-room,
+  hard-walled and surface sound energy methods, the count of segments of
+  the scanning method, the background margin before the A-weighted total
+  refuses a band Annex E does not hold, the background margin of
+  `sound_power_anechoic` that the calibration composes, and the atmosphere
+  the room constant's air absorption advises on. So did
+  `speech.stipa`, which said a clip was short before refusing one shorter
+  than a modulation period or `levels` of the wrong length, `fluids.air`,
+  which gave its domain advisory before refusing a pressure and a humidity
+  that cannot hold together, `hearing.nipts`, which warned about a NaN
+  duration before its record refused it, and
+  `environment.binaural_indicators`, which warned about the length of a
+  recording before refusing the loudness ratio a silent one leaves
+  undefined. Each checks every argument first and advises once the result
+  stands, and a pytest plugin, `tests/refusal_order.py`, fails any test
+  whose awaited refusal came after a warning of the library (style rule
+  A63).
+  NumPy's `RuntimeWarning` no longer runs ahead of the library either:
+  `signals.comb_filter_response` refuses an order that overflows by name
+  instead of first warning "overflow encountered in multiply", and the
+  four-microphone transfer-matrix solves divide by the near-singular
+  denominator their `ImpedanceTubeWarning` has already named without four
+  "invalid value encountered in divide" after it, and name a singular one
+  too: a downstream face with no pressure and no velocity, where the
+  denominator and the scale it is judged against are both zero, warns
+  where it returned NaN with nothing said. The impedance tube waits the
+  same way: `materials.wave_decomposition`, the two four-microphone solves
+  and `materials.two_microphone_impedance` read every argument, the loads
+  (an entry that is not a number is refused under the load's own name,
+  `load_a`, `load_b` or `load`, where the solves named it `h1` to `h4`),
+  the specimen, the impedance and the frequencies, before they advise on
+  the plane-wave range or a singular denominator, and divide by `sin(k s)`
+  at 0 Hz or by an `H12` at the pole of Eq. (17) without NumPy's warning
+  ahead of the refusal that names what follows. A sweep of the rest of the
+  library found the same order elsewhere, and each call now checks first or
+  holds its advisories until its result stands: in `materials`,
+  `absorption_coefficient` and `measure_sound_absorption` advised on the
+  room volume, the sample area or the climate of one measurement before
+  refusing a reverberation time or the temperature of the other,
+  `floating_floor_resonance` on the enclosed gas before refusing the
+  floor's mass, and `alternating_airflow_resistance` on its validity
+  before a background level it never checked; in `building`,
+  `apply_low_frequency_procedure` counted the corners before refusing a
+  receiving room without its 63 Hz reverberation time,
+  `airborne_insulation` let the source room's procedure advise before the
+  receiving room's was refused, `facade_insulation` checked its geometry
+  and surface level only after the procedure, and `lining_improvement`
+  advised on the resonance before refusing the glued area; in
+  `noise_control`, `cabin_insulation` advised on the background before
+  refusing half an A-weighted pair, and `duct_path` on the plane-wave
+  limit before refusing an element; in `room`, `stage_support`,
+  `early_lateral_energy_fraction`, `late_lateral_sound_level` and
+  `sound_strength` let the bank advise on the bands it drops before
+  refusing a response too short for their window or a reference level of
+  the wrong shape; in `environment`, `atmospheric_attenuation` and
+  `outdoor_propagation_attenuation` let the air absorption advise on the
+  atmosphere before refusing a distance or a ground factor, and
+  `impulsive_sound_adjustment` said the interval was not impulsive before
+  refusing its `laeq`; in `hearing`, `nipts` advised on its domain before
+  refusing a frequency ISO 1999 does not list, `htlan`, which composes it,
+  before refusing an empty set of frequencies, and `full_day_exposure` on
+  the spread of three measurements before refusing an instrument it does
+  not know. The same holds in `filters`, where `octave_filter` and
+  `OctaveFilterBank` named the bands a rate cannot hold before refusing a
+  signal or a design; in the ISO 11546 enclosure functions, which advised
+  on the band range before refusing half an A-weighted pair; in
+  `subtract_direct_sound`, `source_directivity_corrections` and
+  `reflection_index`, which advised on a rate below 44 kHz before refusing
+  records that do not match; in `underwater.gaussian_beams`, which advised
+  on a source at a break of the profile before refusing the fan or the
+  receiver grid; in `vibration.impact_mobility`, which advised on an impact
+  the force window removes before refusing a frequency range; and in
+  `transfer_stiffness_indirect` and `indirect_transfer_stiffness_result`,
+  which advised on Inequality (2) before NumPy failed to broadcast a
+  frequency axis and a transmissibility of different lengths, now refused
+  by name.
+  `vibration.transfer_stiffness_indirect` refuses a transmissibility that is
+  not finite with a `ValueError` naming `transmissibility`, where it
+  returned `-inf+nanj`, and `indirect_transfer_stiffness_result` names the
+  same parameter instead of the derived `transfer_stiffness`.
+
+- **A filter bank on its default span says nothing at 44.1 kHz.** The default
+  span runs from 12 Hz to 20 kHz, and the 20 kHz third octave reaches
+  22.4 kHz, past fs/2 at the CD rate, so every `OctaveFilterBank(44100)` and
+  `octave_filter(x, 44100)`, and every default bank at 32, 22.05, 16 and
+  8 kHz, warned "Low sampling rate: frequencies above fs/2 removed", which
+  reads like an error at the most common rate there is, about a band nobody
+  asked for. The default span is now trimmed to the bands `fs` holds without
+  a warning; the bands are the ones the bank kept before. Limits the caller
+  gives still warn when the rate cannot hold their top bands, and the message
+  keeps its prefix and names them: "Low sampling rate: fs = 44100 Hz cannot
+  hold the 20 kHz band, whose upper edge 22387 Hz is above fs/2 = 22050 Hz;
+  it was left out of the bank." `octave_filter` says so at every call, where
+  its design cache made it say so at the first only, and `sound_intensity`
+  follows the same rule for its own `limits`. A rate that holds no band of
+  the span at all, the default one or the caller's, is refused with a
+  `ValueError` that names fs and the lowest band, where the bank came back
+  with no band and the analysis empty: below 28.25 Hz for third octaves and
+  44.77 Hz for octaves on the default span. The pytest configuration no longer
+  ignores the warning; the tests that ask for such limits wait for it.
+
+- **Every warning of the library is shown at the line of the caller's code
+  that made the call.** Of its 178 warnings, 175 passed a `stacklevel`
+  counted by hand for one route to it, the other three already skipping the
+  package's files, and 33 of the 175, reached by another route, were shown at
+  a line of the library instead: every `OctaveFilterBank` and
+  `octave_filter` that dropped a band warned at `filters/core.py:698`, the
+  room-volume and sample-area advisories of the absorption measurement
+  inside `sound_absorption.py`, the
+  atmospheric absorption reached from the aircraft and emission domains, the
+  fluid conditions reached from the reciprocity calibration, and the tone
+  burst the broadcast meter builds. Python's `default` action shows a warning
+  once for each line it is attributed to, so the same call in a later
+  notebook cell said nothing, and a filter by the caller's module missed it.
+  Every warning now goes through one helper, `warn_caller` in
+  `_internal/warnings.py`, which skips the package's own frames
+  (`skip_file_prefixes`, new in Python 3.12) and counts the frames that run
+  the package's code from elsewhere: the `__init__` a dataclass generates for
+  a record, which calls its `__post_init__`, a `functools.cached_property`,
+  the exit of a `contextlib.contextmanager` and `dataclasses.replace`. The
+  `stacklevel` parameters 18 private helpers took to forward are gone. A
+  filter written as `module="phonometry"` now reaches none of them; filter by
+  `category=phonometry.PhonometryWarning` or by topic.
+  `tests/test_warning_attribution.py` provokes each published warning through
+  a public call and wants the caller's file, and
+  `tests/test_package_architecture.py` refuses a `warnings.warn` anywhere else
+  in the package, however it is reached (style rule A62). The notebook job
+  fails when the warning its smoke notebook provokes is shown at a line of
+  the package rather than at the cell's.
+
 - **`import pyoctaveband` type-checks.** The PyOctaveBand 2.2.1 bridge now
   ships the PEP 561 marker, `py.typed`, and re-exports `__version__` and
   `__all__` as themselves. Without the marker, `mypy --strict` refused

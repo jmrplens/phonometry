@@ -80,7 +80,6 @@ are.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -96,6 +95,7 @@ from .._internal.validation import (
     require_positive,
     require_scalar,
 )
+from .._internal.warnings import advisories_held, warn_caller
 from ._shared import (
     _PS0,
     _S0,
@@ -873,11 +873,10 @@ def _calibration_room_qualified(
         return None
     qualified = _room_qualified(room_qualification, freqs)
     if not qualified:
-        warnings.warn(
+        warn_caller(
             "The room qualification does not cover these bands at 2 m in a "
             "hemi-anechoic room (ISO 6926:2016, 8.1).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     return qualified
 
@@ -958,64 +957,72 @@ def reference_source_calibration(
         holds a text or a value that is not a real number.
         ``knee_frequency_hz`` is refused the same way when it is not one real number.
     """
-    require_choice(radiation, "radiation", ("monopole", "dipole", "unknown"))
-    # Checked here as the text it must be: the column helper also serves the
-    # reverberation room, where None is an arrangement.
-    require_choice(arrangement, "arrangement", ("paths", "fixed"))
-    freqs, ks = _calibration_bands(frequencies)
-    air = CalibrationConditions() if conditions is None else conditions
-    k = require_positive(coverage_factor, "coverage_factor")
-    precision = _hemisphere_levels(levels, freqs, background_levels, max_levels)
-    lp_bar = precision.surface_pressure_level
-    area = 2.0 * math.pi * _RADIUS_M**2
-    c1 = _c1_correction(air.temperature_c, air.static_pressure_kpa)
-    if c2 is not None:
-        c2_bands = np.broadcast_to(real_array(c2, "c2"), freqs.shape).copy()
-        if not np.all(np.isfinite(c2_bands)):
-            msg = "'c2' must be finite, one value or one per band."
-            raise ValueError(msg)
-    else:
-        c2_bands = radiation_impedance_correction(
-            temperature_c=air.temperature_c,
-            static_pressure_kpa=air.static_pressure_kpa,
-            radiation=radiation,
-            frequencies=freqs,
-            knee_frequency_hz=knee_frequency_hz,
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_choice(radiation, "radiation", ("monopole", "dipole", "unknown"))
+        # Checked here as the text it must be: the column helper also serves the
+        # reverberation room, where None is an arrangement.
+        require_choice(arrangement, "arrangement", ("paths", "fixed"))
+        freqs, ks = _calibration_bands(frequencies)
+        air = CalibrationConditions() if conditions is None else conditions
+        k = require_positive(coverage_factor, "coverage_factor")
+        precision = _hemisphere_levels(levels, freqs, background_levels, max_levels)
+        lp_bar = precision.surface_pressure_level
+        area = 2.0 * math.pi * _RADIUS_M**2
+        c1 = _c1_correction(air.temperature_c, air.static_pressure_kpa)
+        if c2 is not None:
+            c2_bands = np.broadcast_to(real_array(c2, "c2"), freqs.shape).copy()
+            if not np.all(np.isfinite(c2_bands)):
+                msg = "'c2' must be finite, one value or one per band."
+                raise ValueError(msg)
+        else:
+            c2_bands = radiation_impedance_correction(
+                temperature_c=air.temperature_c,
+                static_pressure_kpa=air.static_pressure_kpa,
+                radiation=radiation,
+                frequencies=freqs,
+                knee_frequency_hz=knee_frequency_hz,
+            )
+        c3 = _c3_correction(air.air_absorption_db_per_m, freqs)
+        _, intensity_bands, _ = _with_annex_b(
+            lp_bar + 10.0 * math.log10(area / _S0) + c1 + c2_bands + c3,
+            ks,
+            intensity_sound_power_level,
         )
-    c3 = _c3_correction(air.air_absorption_db_per_m, freqs)
-    _, intensity_bands, _ = _with_annex_b(
-        lp_bar + 10.0 * math.log10(area / _S0) + c1 + c2_bands + c3,
-        ks,
-        intensity_sound_power_level,
-    )
-    directivity = _calibration_directivity(precision, max_levels)
-    _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
-    uncertainty = k * reference_source_reproducibility(
-        freqs, environment="hemi-anechoic", arrangement=arrangement
-    )
-    return ReferenceSourceCalibration(
-        frequencies=freqs,
-        surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
-        directivity_index=np.asarray(directivity, dtype=np.float64),
-        c1=float(c1),
-        c2=np.asarray(c2_bands, dtype=np.float64),
-        c3=np.asarray(c3, dtype=np.float64),
-        expanded_uncertainty_db=np.asarray(uncertainty, dtype=np.float64),
-        coverage_factor=k,
-        arrangement=arrangement,
-        radiation=None if c2 is not None else radiation,
-        knee_frequency_hz=(
-            None
-            if c2 is not None or knee_frequency_hz is None
-            else real_number(knee_frequency_hz, "knee_frequency_hz")
-        ),
-        intensity_sound_power_level=(
-            None
-            if intensity_sound_power_level is None
-            else real_array(intensity_sound_power_level, "intensity_sound_power_level")
-        ),
-        room_qualification=room_qualification,
-    )
+        directivity = _calibration_directivity(precision, max_levels)
+        uncertainty = k * reference_source_reproducibility(
+            freqs, environment="hemi-anechoic", arrangement=arrangement
+        )
+        calibration = ReferenceSourceCalibration(
+            frequencies=freqs,
+            surface_pressure_level=np.asarray(lp_bar, dtype=np.float64),
+            directivity_index=np.asarray(directivity, dtype=np.float64),
+            c1=float(c1),
+            c2=np.asarray(c2_bands, dtype=np.float64),
+            c3=np.asarray(c3, dtype=np.float64),
+            expanded_uncertainty_db=np.asarray(uncertainty, dtype=np.float64),
+            coverage_factor=k,
+            arrangement=arrangement,
+            radiation=None if c2 is not None else radiation,
+            knee_frequency_hz=(
+                None
+                if c2 is not None or knee_frequency_hz is None
+                else real_number(knee_frequency_hz, "knee_frequency_hz")
+            ),
+            intensity_sound_power_level=(
+                None
+                if intensity_sound_power_level is None
+                else real_array(
+                    intensity_sound_power_level, "intensity_sound_power_level"
+                )
+            ),
+            room_qualification=room_qualification,
+        )
+        # The room is advised on once the calibration stands, so a refusal of any
+        # argument above comes first, even under -W error.
+        _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
+        return calibration
 
 
 @dataclass(frozen=True)

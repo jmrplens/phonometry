@@ -83,7 +83,6 @@ end-to-end fan-to-room calculation.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
@@ -103,7 +102,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..room.steady_field import room_constant
 from .duct_modes import plane_wave_limit
 
@@ -1425,13 +1424,12 @@ def fan_efficiency_correction(*, relative_efficiency_percent: float) -> float:
         msg = "'relative_efficiency_percent' must not exceed 100 per cent."
         raise ValueError(msg)
     if eta < _TABLE_13_6_FLOOR_PERCENT:
-        warnings.warn(
+        warn_caller(
             f"A relative efficiency of {eta:g} % is below the 50 % floor Long "
             f"Table 13.6 is tabulated from, so the table's worst-case "
             f"correction is returned. A fraction such as 0,8 lands here; this "
             f"argument is a percentage.",
             HVACWarning,
-            stacklevel=2,
         )
     for lower, correction in _EFFICIENCY_CORRECTION:
         if eta >= lower:

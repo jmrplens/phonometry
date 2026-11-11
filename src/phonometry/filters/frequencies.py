@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
@@ -18,6 +17,7 @@ from .._internal.validation import (
     require_count,
     require_positive,
 )
+from .._internal.warnings import warn_caller
 from ._warnings import FilterBankWarning
 
 if TYPE_CHECKING:
@@ -221,38 +221,89 @@ def _bandedge(g: float, b: float) -> float:
     return float(g ** (1 / (2 * b)))
 
 
-def _deleteouters(bands: FractionalOctaveBands, fs: float) -> FractionalOctaveBands:
-    """Remove the bands whose upper edge exceeds the Nyquist frequency.
+def _band_name(label: str) -> str:
+    """A nominal label as a frequency a reader says: ``"20k"`` is 20 kHz."""
+    if label.endswith("k"):
+        return f"{label[:-1]} kHz"
+    return f"{label} Hz"
 
-    :param bands: The bands the limits asked for.
-    :param fs: Sample rate.
-    :return: The bands a bank at ``fs`` can hold, in the same order.
+
+def _left_out(bands: FractionalOctaveBands, keep: NDArray[np.bool_], fs: float) -> str:
+    """The warning that names the bands a bank at ``fs`` leaves out.
+
+    It opens with ``Low sampling rate``, the text a filter on the message and
+    the upgrading guide read, and names the bands and fs/2.
     """
+    names = [
+        _band_name(label)
+        for label, kept in zip(bands.labels, keep.tolist(), strict=True)
+        if not kept
+    ]
+    if len(names) == 1:
+        edge = float(bands.upper_edges[~keep][0])
+        return (
+            f"Low sampling rate: fs = {fs:g} Hz cannot hold the {names[0]} band, "
+            f"whose upper edge {edge:.0f} Hz is above fs/2 = {fs / 2:g} Hz; it "
+            "was left out of the bank."
+        )
+    return (
+        f"Low sampling rate: fs = {fs:g} Hz cannot hold the {len(names)} bands "
+        f"from {names[0]} to {names[-1]}, whose upper edges are above fs/2 = "
+        f"{fs / 2:g} Hz; they were left out of the bank."
+    )
+
+
+def _holds_none(bands: FractionalOctaveBands, fs: float) -> str:
+    """The refusal of a rate that holds not one band of the span."""
+    names = [_band_name(label) for label in bands.labels]
+    edge = float(bands.upper_edges[0])
+    if len(names) == 1:
+        return (
+            f"fs = {fs:g} Hz cannot hold the {names[0]} band, the only one of "
+            f"the bank: its upper edge, {edge:.4g} Hz, is above fs/2 = "
+            f"{fs / 2:g} Hz."
+        )
+    return (
+        f"fs = {fs:g} Hz cannot hold any band from {names[0]} to {names[-1]}: "
+        f"the upper edge of the lowest, {edge:.4g} Hz, is above fs/2 = "
+        f"{fs / 2:g} Hz."
+    )
+
+
+def _genfreqs(
+    limits: RealValues, fraction: float, fs: float, *, warn: bool
+) -> FractionalOctaveBands:
+    """Determine the bands within limits that a bank at ``fs`` can hold.
+
+    A band whose upper edge lies above the Nyquist frequency is left out. A
+    caller who asked for those limits is told which with a
+    :class:`FilterBankWarning`; the default span is trimmed to what ``fs``
+    holds without one, since nobody asked for its top bands at that rate. A
+    rate that holds no band of the span at all is refused, whoever chose the
+    span: a bank of no band would analyse nothing and say so nowhere.
+
+    :param limits: [f_min, f_max].
+    :param fraction: Bandwidth fraction.
+    :param fs: Sample rate.
+    :param warn: Whether the caller gave the limits, so a band left out is
+        named in a warning.
+    :return: The bands, without those above the Nyquist frequency.
+    :raises ValueError: when the upper edge of every band is above fs/2.
+    """
+    bands = nominal_frequencies(fraction, limits)
     keep = bands.upper_edges <= fs / 2
     if np.all(keep):
         return bands
-    warnings.warn(
-        "Low sampling rate: frequencies above fs/2 removed",
-        FilterBankWarning,
-        stacklevel=3,
-    )
+    if not np.any(keep):
+        raise ValueError(_holds_none(bands, fs))
+    if warn:
+        warn_caller(_left_out(bands, keep, fs), FilterBankWarning)
     return _band_set(
         bands.frequencies[keep],
         bands.lower_edges[keep],
         bands.upper_edges[keep],
         [label for label, kept in zip(bands.labels, keep, strict=True) if kept],
     )
-
-
-def _genfreqs(limits: RealValues, fraction: float, fs: float) -> FractionalOctaveBands:
-    """Determine the bands within limits that a bank at ``fs`` can hold.
-
-    :param limits: [f_min, f_max].
-    :param fraction: Bandwidth fraction.
-    :param fs: Sample rate.
-    :return: The bands, without those above the Nyquist frequency.
-    """
-    return _deleteouters(nominal_frequencies(fraction, limits), fs)
 
 
 def _iec_e3_round(f: float) -> float:

@@ -25,7 +25,6 @@ what those pages add beside this procedure is unknown here.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -53,7 +52,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..filters.core import OctaveFilterBank
 from ..filters.frequencies import nominal_frequencies
 from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
@@ -382,14 +381,22 @@ def _validate_band_vector(values: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _truncated_mtf(mtf: ArrayLike, *, stacklevel: int = 4) -> np.ndarray:
+def _truncated_mtf(mtf: ArrayLike) -> np.ndarray:
     """Validate the modulation transfer matrix and truncate it to 1,0.
 
     Ed.4 A.5.3 NOTE 1 (= Ed.5): a value above 1,3 means the measurement is
     invalid, and every value is truncated to 1,0 before the chain runs.
-    ``stacklevel`` points the warning at the caller's caller: the default 4
-    fits the public functions that route through :func:`_sti_from_mtf`, and
-    :func:`sti_adjusted_for_levels`, which calls here directly, passes 3.
+    """
+    m, invalid = _checked_mtf(mtf)
+    _invalid_mtf_advisory(invalid=invalid)
+    return m
+
+
+def _checked_mtf(mtf: ArrayLike) -> tuple[np.ndarray, bool]:
+    """The matrix truncated to 1,0, and whether a value lay above 1,3.
+
+    The advisory on such a value is the caller's to give, once every argument
+    of the call has been checked (:func:`_invalid_mtf_advisory`).
     """
     m = real_array(mtf, "mtf", copy=True)
     # The number is a count of array axes, not a quantity.
@@ -402,14 +409,17 @@ def _truncated_mtf(mtf: ArrayLike, *, stacklevel: int = 4) -> np.ndarray:
     if np.any(m < 0.0) or not np.all(np.isfinite(m)):
         msg = "Modulation transfer values must be finite and >= 0."
         raise ValueError(msg)
-    if np.any(m > _MTF_INVALID_ABOVE):
-        warnings.warn(
+    return np.minimum(m, 1.0), bool(np.any(m > _MTF_INVALID_ABOVE))
+
+
+def _invalid_mtf_advisory(*, invalid: bool) -> None:
+    """Warn that a modulation transfer value above 1,3 was truncated."""
+    if invalid:
+        warn_caller(
             "Modulation transfer values above 1.3 detected: the measurement "
             "is likely invalid (IEC 60268-16 A.5.3). Values truncated to 1.0.",
             STIWarning,
-            stacklevel=stacklevel,
         )
-    return np.minimum(m, 1.0)
 
 
 def _snr_vector(
@@ -608,15 +618,17 @@ def _sti_from_mtf(
     instead, with ``ambient`` (or ``levels - snr``) defining :math:`I_{\mathrm{n},k}`,
     so the noise degradation is never applied twice.
     """
-    m = _truncated_mtf(mtf)
+    m, invalid = _checked_mtf(mtf)
 
     if snr is not None and ambient is not None:
         msg = "Provide either 'snr' or 'ambient' noise levels, not both."
         raise ValueError(msg)
 
-    return _index_from_corrected_mtf(
-        *_corrected_mtf(m, _snr_vector(snr), level, ambient)
-    )
+    corrected = _corrected_mtf(m, _snr_vector(snr), level, ambient)
+    # Advised once the corrections have checked the levels, so -W error
+    # raises their refusal rather than this advisory.
+    _invalid_mtf_advisory(invalid=invalid)
+    return _index_from_corrected_mtf(*corrected)
 
 
 def sti_adjusted_for_levels(
@@ -700,8 +712,8 @@ def sti_adjusted_for_levels(
     )
     # Step 2 leaves the channel alone and may exceed 1,0; step 3 puts the
     # operational condition back, and only then is the matrix truncated.
-    source = _truncated_mtf(mtf, stacklevel=3) / measured.factor[:, np.newaxis]
-    adjusted = _truncated_mtf(source * operational.factor[:, np.newaxis], stacklevel=3)
+    source = _truncated_mtf(mtf) / measured.factor[:, np.newaxis]
+    adjusted = _truncated_mtf(source * operational.factor[:, np.newaxis])
     return _index_from_corrected_mtf(
         adjusted, operational.speech_level, operational.ambient_level
     )
@@ -862,7 +874,24 @@ def _intensity_envelopes(x: np.ndarray, fs: float) -> np.ndarray:
     return env
 
 
-def _stipa_modulation_depths(env: np.ndarray, fs: float) -> np.ndarray:
+def _require_full_modulation_periods(n_samples: int, fs: float) -> None:
+    """Refuse a recording too short to hold one period of every modulation.
+
+    Asked before any advisory of the call, so -W error raises this refusal.
+    """
+    lowest = float(min(np.min(_STIPA_F1), np.min(_STIPA_F2)))
+    if int(np.floor(n_samples / fs * lowest)) < 1:
+        msg = (
+            f"Signal too short for STIPA: it must contain at least one "
+            f"full period of the {lowest} Hz modulation (>= {1.0 / lowest:.2f} s; "
+            "the standard recommends 15 s to 25 s)."
+        )
+        raise ValueError(msg)
+
+
+def _stipa_modulation_depths(
+    env: np.ndarray, fs: float
+) -> tuple[np.ndarray, list[int]]:
     r"""Modulation depths :math:`mdr_{k,f_m}` of the intensity envelopes at
     the two Table B.1 frequencies of each band, over an integer number of
     periods (Ed.4 A.5.2):
@@ -903,15 +932,18 @@ def _stipa_modulation_depths(env: np.ndarray, fs: float) -> np.ndarray:
             s = float(np.dot(seg, np.sin(2.0 * np.pi * fm * t)))
             c = float(np.dot(seg, np.cos(2.0 * np.pi * fm * t)))
             mdr[k, j] = 2.0 * float(np.hypot(s, c)) / total
+    return mdr, empty_bands
+
+
+def _empty_band_advisory(empty_bands: list[int]) -> None:
+    """Warn that a band without energy had its modulation depths set to 0."""
     if empty_bands:
-        warnings.warn(
+        warn_caller(
             f"No energy in octave band(s) {empty_bands} (125 Hz to 8 kHz, "
             "index 0-6): modulation depths set to 0 (TI = 0) there. A full "
             "STIPA measurement needs all seven carriers of the test signal.",
             STIWarning,
-            stacklevel=3,
         )
-    return mdr
 
 
 @overload
@@ -1023,17 +1055,7 @@ def stipa(
         )
         raise ValueError(msg)
 
-    if x_proc.size / fs < _STIPA_MIN_SECONDS:
-        warnings.warn(
-            f"STIPA recording is {x_proc.size / fs:.1f} s, shorter than the "
-            f"recommended {_STIPA_MIN_SECONDS:.0f} s (IEC 60268-16 STIPA "
-            "practice, 15 s to 25 s): the recovered modulation depths, and "
-            "hence the STI, are biased low.",
-            STIWarning,
-            stacklevel=2,
-        )
-
-    mdr = _stipa_modulation_depths(_intensity_envelopes(x_proc, fs), fs)
+    ref_proc = None
     if reference is not None:
         ref_proc = apply_calibration(
             reference, _typesignal(reference, name="reference")
@@ -1041,14 +1063,33 @@ def stipa(
         if ref_proc.ndim != 1:
             msg = "'reference' must be a 1D signal."
             raise ValueError(msg)
-        mdt = _stipa_modulation_depths(_intensity_envelopes(ref_proc, fs), fs)
+    # Every refusal comes before the advisories at the end, which would
+    # otherwise describe an index this call never returns and, under -W
+    # error, stand in for the ValueError.
+    _require_full_modulation_periods(x_proc.size, fs)
+    if ref_proc is not None:
+        _require_full_modulation_periods(ref_proc.size, fs)
+
+    mdr, empty_bands = _stipa_modulation_depths(_intensity_envelopes(x_proc, fs), fs)
+    if ref_proc is not None:
+        mdt, _ = _stipa_modulation_depths(_intensity_envelopes(ref_proc, fs), fs)
         if np.any(mdt <= 0.0):
             msg = "'reference' has zero modulation depth in a band."
             raise ValueError(msg)
         mtf = mdr / mdt
     else:
         mtf = mdr / _STIPA_MOD_INDEX
-    return _sti_from_mtf(mtf, level=levels, ambient=ambient)
+    result = _sti_from_mtf(mtf, level=levels, ambient=ambient)
+    if x_proc.size / fs < _STIPA_MIN_SECONDS:
+        warn_caller(
+            f"STIPA recording is {x_proc.size / fs:.1f} s, shorter than the "
+            f"recommended {_STIPA_MIN_SECONDS:.0f} s (IEC 60268-16 STIPA "
+            "practice, 15 s to 25 s): the recovered modulation depths, and "
+            "hence the STI, are biased low.",
+            STIWarning,
+        )
+    _empty_band_advisory(empty_bands)
+    return result
 
 
 def _pink_noise(n: int, rng: np.random.Generator) -> np.ndarray:

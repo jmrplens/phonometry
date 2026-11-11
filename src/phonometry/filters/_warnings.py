@@ -10,15 +10,17 @@ neither has to import the other to name it. It is published by
 
 from __future__ import annotations
 
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, published_by
 
 __all__ = ["FilterBankWarning"]
 
 
+@published_by("phonometry.filters")
 class FilterBankWarning(PhonometryWarning):
     """A fractional-octave filter bank asked for something it cannot honour.
 
-    Emitted when a band lies above the Nyquist frequency of the sample rate
-    and is dropped from the bank, and when a stateful bank is asked to detrend
-    its blocks, which introduces a step between them.
+    Emitted when limits the caller gave hold a band above the Nyquist
+    frequency of the sample rate, which is dropped from the bank, and when a
+    stateful bank is asked to detrend its blocks, which introduces a step
+    between them.
     """

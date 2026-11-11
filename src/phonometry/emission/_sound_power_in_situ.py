@@ -82,7 +82,6 @@ evaluated.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from itertools import pairwise
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
@@ -111,6 +110,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     _CK_OCTAVE,
     _PS0,
@@ -773,12 +773,11 @@ def _position_advisory(n_positions: int) -> None:
     procedure uses (7.4.1 bounds the count on both sides).
     """
     if not _MIN_POSITIONS <= n_positions <= _MAX_POSITIONS:
-        warnings.warn(
+        warn_caller(
             f"{n_positions} microphone position(s) were supplied; the "
             "procedure uses three or four, distributed as evenly as possible "
             "around the source (ISO 3747:2010, 7.4.1).",
             SoundPowerWarning,
-            stacklevel=3,
         )
 
 
@@ -791,13 +790,12 @@ def _background_advisory(background_levels: ArrayLike | None) -> None:
     requirement, so ``background_requirement_met`` is ``False`` throughout.
     """
     if background_levels is None:
-        warnings.warn(
+        warn_caller(
             "No background levels were supplied; the procedure obtains them "
             "once at each microphone position (ISO 3747:2010, 7.5), so no "
             "band can be reported as meeting the background requirement of "
             "8.1.",
             SoundPowerWarning,
-            stacklevel=3,
         )
 
 
@@ -822,6 +820,58 @@ class _Comparison:
     conditions: GradeConditions | None
     sigma_omc_db: float | None
     coverage_factor: float
+
+
+@dataclass(frozen=True)
+class _CheckedComparison:
+    """The reference source and the conditions of the test, every one checked.
+
+    :func:`_checked_comparison` builds it before either determination says
+    anything, so a refusal of any of these arguments comes ahead of the
+    advisories on the positions, the events and the background (under
+    ``python -W error`` an advisory raised first would take its place).
+    """
+
+    frequencies: np.ndarray
+    reference_levels: np.ndarray
+    reference_power: np.ndarray
+    reference_background: np.ndarray | None
+    excess: np.ndarray | None
+    directivity: float | None
+    sigma_omc_db: float
+
+
+def _checked_comparison(
+    comparison: _Comparison, n_positions: int, n_bands: int
+) -> _CheckedComparison:
+    """Refuse whatever the reference source or the test conditions get wrong."""
+    freqs = _checked_frequencies(comparison.frequencies, n_bands)
+    ref, power = _reference_grids(
+        comparison.reference_levels,
+        _reference_power_levels(
+            comparison.reference_sound_power_levels, freqs, fraction=1
+        ),
+        n_positions,
+        n_bands,
+    )
+    bg_ref = _background_grid(
+        comparison.reference_background_levels,
+        "reference_background_levels",
+        n_positions,
+        n_bands,
+    )
+    _validate_meteorology(comparison.temperature_c, comparison.static_pressure_kpa)
+    excess, directivity = _grade_indicators(comparison.conditions, n_positions)
+    omc = _checked_sigma_omc(comparison.sigma_omc_db, comparison.coverage_factor)
+    return _CheckedComparison(
+        frequencies=freqs,
+        reference_levels=ref,
+        reference_power=power,
+        reference_background=bg_ref,
+        excess=excess,
+        directivity=directivity,
+        sigma_omc_db=omc,
+    )
 
 
 def _event_shape(
@@ -911,30 +961,19 @@ def _determine(
     margin_source: np.ndarray,
     background_levels: np.ndarray | None,
     comparison: _Comparison,
+    checked: _CheckedComparison,
 ) -> InSituSoundPowerResult:
     """The part of both determinations that runs on the reference source:
     Eq. (9), (10) and the two energy means of Eq. (12) / (20), then Annex C,
     Annex D and clause 9.
     """
     n_positions, n_bands = background_correction.shape
-    freqs = _checked_frequencies(comparison.frequencies, n_bands)
-    ref, power = _reference_grids(
-        comparison.reference_levels,
-        _reference_power_levels(
-            comparison.reference_sound_power_levels, freqs, fraction=1
-        ),
-        n_positions,
-        n_bands,
-    )
+    freqs = checked.frequencies
+    ref, power = checked.reference_levels, checked.reference_power
     m = ref.shape[0]
     # One background reading serves both sources (7.5): the reference-source
     # measurement takes the source's background unless it brought its own.
-    bg_ref = _background_grid(
-        comparison.reference_background_levels,
-        "reference_background_levels",
-        n_positions,
-        n_bands,
-    )
+    bg_ref = checked.reference_background
     if bg_ref is None:
         bg_ref = background_levels
     if bg_ref is None:
@@ -947,7 +986,6 @@ def _determine(
         delta_ref = ref - bg_ref[None, :, :]
         k1_ref, _ = _background_correction(delta_ref)
         margin_ref = np.min(delta_ref, axis=(0, 1))
-    _validate_meteorology(comparison.temperature_c, comparison.static_pressure_kpa)
     corrected_ref = ref - k1_ref
     per_location = energy_mean(corrected_ref, axis=1)  # Eq. (9) / (10)
     mean_ref = energy_mean(per_location, axis=0)  # second term of Eq. (12)
@@ -955,8 +993,6 @@ def _determine(
     level = np.asarray(ref_power - mean_ref + mean_source, dtype=np.float64)
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     total = energy_sum(level + _a_weighting_corrections(freqs))  # Eq. (D.1) / (D.2)
-    excess, directivity = _grade_indicators(comparison.conditions, n_positions)
-    omc = _checked_sigma_omc(comparison.sigma_omc_db, comparison.coverage_factor)
     is_power = quantity == "power"
     return InSituSoundPowerResult(
         frequencies=freqs,
@@ -973,9 +1009,9 @@ def _determine(
         background_margin_db=real_array(margin_source, "margin_source"),
         reference_background_margin_db=np.asarray(margin_ref, dtype=np.float64),
         c2=_c2_correction(comparison.temperature_c, comparison.static_pressure_kpa),
-        excess_levels=excess,
-        directivity_range_db=directivity,
-        sigma_omc_db=omc,
+        excess_levels=checked.excess,
+        directivity_range_db=checked.directivity,
+        sigma_omc_db=checked.sigma_omc_db,
         coverage_factor=comparison.coverage_factor,
         sound_power_level_a=total if is_power else float("nan"),
         sound_energy_level_a=float("nan") if is_power else total,
@@ -1078,9 +1114,23 @@ def sound_power_in_situ(
     """
     arr = _finite_grid(levels, "levels", (2,))
     n_positions, n_bands = arr.shape
+    bg = _background_grid(background_levels, "background_levels", n_positions, n_bands)
+    comparison = _Comparison(
+        reference_levels=reference_levels,
+        reference_sound_power_levels=reference_sound_power_levels,
+        frequencies=frequencies,
+        reference_background_levels=reference_background_levels,
+        temperature_c=temperature_c,
+        static_pressure_kpa=static_pressure_kpa,
+        conditions=conditions,
+        sigma_omc_db=sigma_omc_db,
+        coverage_factor=coverage_factor,
+    )
+    # Every refusal before the first advisory: under -W error an advisory
+    # raised first would stand in for the ValueError documented above.
+    checked = _checked_comparison(comparison, n_positions, n_bands)
     _position_advisory(n_positions)
     _background_advisory(background_levels)
-    bg = _background_grid(background_levels, "background_levels", n_positions, n_bands)
     if bg is None:
         k1 = np.zeros_like(arr)
         margin = np.full(n_bands, np.nan, dtype=np.float64)
@@ -1094,17 +1144,8 @@ def sound_power_in_situ(
         background_correction=k1,
         margin_source=margin,
         background_levels=bg,
-        comparison=_Comparison(
-            reference_levels=reference_levels,
-            reference_sound_power_levels=reference_sound_power_levels,
-            frequencies=frequencies,
-            reference_background_levels=reference_background_levels,
-            temperature_c=temperature_c,
-            static_pressure_kpa=static_pressure_kpa,
-            conditions=conditions,
-            sigma_omc_db=sigma_omc_db,
-            coverage_factor=coverage_factor,
-        ),
+        comparison=comparison,
+        checked=checked,
     )
 
 
@@ -1189,18 +1230,30 @@ def sound_energy_in_situ(
     """
     arr = _finite_grid(event_levels, "event_levels", (2, 3))
     one_at_a_time, n_positions, n_events, n_bands = _event_shape(arr, n_events)
-    _position_advisory(n_positions)
-    if n_events < _MIN_EVENTS:
-        warnings.warn(
-            f"Only {n_events} single event(s) were measured; the procedure asks "
-            f"for at least {_MIN_EVENTS} (ISO 3747:2010, 7.6).",
-            SoundPowerWarning,
-            stacklevel=2,
-        )
-    _background_advisory(background_levels)
     bg = _background_grid(background_levels, "background_levels", n_positions, n_bands)
     if integration_time is not None:
         require_positive(integration_time, "integration_time")
+    comparison = _Comparison(
+        reference_levels=reference_levels,
+        reference_sound_power_levels=reference_sound_power_levels,
+        frequencies=frequencies,
+        reference_background_levels=reference_background_levels,
+        temperature_c=temperature_c,
+        static_pressure_kpa=static_pressure_kpa,
+        conditions=conditions,
+        sigma_omc_db=sigma_omc_db,
+        coverage_factor=coverage_factor,
+    )
+    # Every refusal before the first advisory, as in sound_power_in_situ.
+    checked = _checked_comparison(comparison, n_positions, n_bands)
+    _position_advisory(n_positions)
+    if n_events < _MIN_EVENTS:
+        warn_caller(
+            f"Only {n_events} single event(s) were measured; the procedure asks "
+            f"for at least {_MIN_EVENTS} (ISO 3747:2010, 7.6).",
+            SoundPowerWarning,
+        )
+    _background_advisory(background_levels)
     k1, margin, per_position = _event_background(
         arr,
         bg,
@@ -1217,15 +1270,6 @@ def sound_energy_in_situ(
         background_correction=np.asarray(k1, dtype=np.float64),
         margin_source=margin,
         background_levels=bg,
-        comparison=_Comparison(
-            reference_levels=reference_levels,
-            reference_sound_power_levels=reference_sound_power_levels,
-            frequencies=frequencies,
-            reference_background_levels=reference_background_levels,
-            temperature_c=temperature_c,
-            static_pressure_kpa=static_pressure_kpa,
-            conditions=conditions,
-            sigma_omc_db=sigma_omc_db,
-            coverage_factor=coverage_factor,
-        ),
+        comparison=comparison,
+        checked=checked,
     )

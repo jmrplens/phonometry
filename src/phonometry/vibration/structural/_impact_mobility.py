@@ -87,7 +87,6 @@ after exponential windowing and the Annex A correction.
 from __future__ import annotations
 
 import math
-import warnings
 from collections.abc import Iterable
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
@@ -112,7 +111,12 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import (
+    PhonometryWarning,
+    advisories_held,
+    published_by,
+    warn_caller,
+)
 from ...io._resolve import SignalInput, resolve_fs, resolve_pair_fs, resolve_samples
 from .mechanical_mobility import MobilityResult, convert_frf, random_error_percent
 
@@ -209,6 +213,7 @@ _PULSE_END_RATIO = 0.01
 _PERCENT = 100.0
 
 
+@published_by("phonometry.vibration")
 class ImpactExcitationWarning(PhonometryWarning):
     """Advisory when an ISO 7626-5 record breaks a rule of the part."""
 
@@ -1015,13 +1020,12 @@ def _warn_masked_impacts(
         peaks = _impact_peaks(record, 0.1)
         masked = [int(p) for p in peaks if window[p] < 1.0]
         if masked:
-            warnings.warn(
+            warn_caller(
                 f"impact record {row}: the force window removes an impact at "
                 f"{masked[0] / fs:g} s. ISO 7626-5 6.4 forbids using a force "
                 "window to eliminate secondary impacts: the response still "
                 "carries them, so the estimate is wrong. Discard the record.",
                 ImpactExcitationWarning,
-                stacklevel=3,
             )
 
 
@@ -1108,96 +1112,101 @@ def impact_mobility(
         number, or ``frequency_range_hz`` is not a pair of numbers.
     :warns ImpactExcitationWarning: when the force window removes an impact.
     """
-    rate = require_positive(
-        resolve_pair_fs(force_n, response, fs, names=("force_n", "response")), "fs"
-    )
-    f_records = _records(force_n, "force_n")
-    x_records = _records(response, "response")
-    if f_records.shape != x_records.shape:
-        msg = (
-            f"'force_n' and 'response' must have the same shape; got "
-            f"{f_records.shape} and {x_records.shape}."
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        rate = require_positive(
+            resolve_pair_fs(force_n, response, fs, names=("force_n", "response")), "fs"
         )
-        raise ValueError(msg)
-    require_choice(response_quantity, "response_quantity", tuple(_FRF_OF_RESPONSE))
-    # Read by this function's names for them, which exponential_window and
-    # force_window call decay_rate_per_s, width_s, start_s and taper_s.
-    require_non_negative(exponential_decay_rate_per_s, "exponential_decay_rate_per_s")
-    n = f_records.shape[1]
-    exponential = exponential_window(
-        n, rate, decay_rate_per_s=exponential_decay_rate_per_s
-    )
-    weighted_force = f_records
-    if force_window_s is not None:
-        require_positive(force_window_s, "force_window_s")
-        require_non_negative(force_window_start_s, "force_window_start_s")
-        require_non_negative(force_window_taper_s, "force_window_taper_s")
-        window = force_window(
-            n,
-            rate,
-            width_s=force_window_s,
-            start_s=force_window_start_s,
-            taper_s=force_window_taper_s,
-        )
-        _warn_masked_impacts(f_records, window, rate)
-        weighted_force = weighted_force * window
-    if exponential_on_force:
-        weighted_force = weighted_force * exponential
-    else:
-        peaks = np.argmax(np.abs(weighted_force), axis=1)
-        weighted_force = weighted_force * exponential[peaks][:, np.newaxis]
-    weighted_response = x_records * exponential
-
-    freqs, f_spec = _spectrum(weighted_force, rate)
-    _, x_spec = _spectrum(weighted_response, rate)
-    g_ff = np.sum(np.abs(f_spec) ** 2, axis=0)
-    g_xx = np.sum(np.abs(x_spec) ** 2, axis=0)
-    g_xf = np.sum(x_spec * np.conj(f_spec), axis=0)
-    band = freqs > 0.0
-    if frequency_range_hz is not None:
-        low, high = _frequency_range(frequency_range_hz, nyquist=rate / 2.0)
-        band &= (freqs >= low) & (freqs <= high)
-        if not np.any(band):
+        f_records = _records(force_n, "force_n")
+        x_records = _records(response, "response")
+        if f_records.shape != x_records.shape:
             msg = (
-                f"'frequency_range_hz' ({low:g} Hz to {high:g} Hz) holds no DFT "
-                f"bin above 0 Hz; the bins are {rate / n:g} Hz apart."
+                f"'force_n' and 'response' must have the same shape; got "
+                f"{f_records.shape} and {x_records.shape}."
             )
             raise ValueError(msg)
-    vanishing = ~(g_ff[band] > _rounding_floor(weighted_force, rate))
-    if np.any(vanishing):
-        zero = float(freqs[band][vanishing][0])
-        msg = (
-            f"the force spectrum vanishes at {zero:g} Hz; the frequency response "
-            "is undefined where no force was applied."
+        require_choice(response_quantity, "response_quantity", tuple(_FRF_OF_RESPONSE))
+        # Read by this function's names for them, which exponential_window and
+        # force_window call decay_rate_per_s, width_s, start_s and taper_s.
+        require_non_negative(
+            exponential_decay_rate_per_s, "exponential_decay_rate_per_s"
         )
-        raise ValueError(msg)
-    frf = g_xf[band] / g_ff[band]
-    denominator = g_ff[band] * g_xx[band]
-    coherence = np.divide(
-        np.abs(g_xf[band]) ** 2,
-        denominator,
-        out=np.zeros_like(denominator),
-        where=denominator > 0.0,
-    )
-    n_impacts = f_records.shape[0]
-    factor = _one_sided_factor(n, freqs.size)[band]
-    return ImpactMobilityResult(
-        frequencies=np.asarray(freqs[band], dtype=np.float64),
-        mobility=convert_frf(
-            frf,
-            frequency=freqs[band],
-            source=_FRF_OF_RESPONSE[response_quantity],
-            target="mobility",
-        ),
-        coherence=np.asarray(np.clip(coherence, 0.0, 1.0), dtype=np.float64),
-        force_energy_spectral_density=np.asarray(
-            factor * g_ff[band] / n_impacts, dtype=np.float64
-        ),
-        n_impacts=n_impacts,
-        exponential_decay_rate_per_s=float(exponential_decay_rate_per_s),
-        response_quantity=response_quantity,
-        driving_point=bool(driving_point),
-    )
+        n = f_records.shape[1]
+        exponential = exponential_window(
+            n, rate, decay_rate_per_s=exponential_decay_rate_per_s
+        )
+        weighted_force = f_records
+        if force_window_s is not None:
+            require_positive(force_window_s, "force_window_s")
+            require_non_negative(force_window_start_s, "force_window_start_s")
+            require_non_negative(force_window_taper_s, "force_window_taper_s")
+            window = force_window(
+                n,
+                rate,
+                width_s=force_window_s,
+                start_s=force_window_start_s,
+                taper_s=force_window_taper_s,
+            )
+            _warn_masked_impacts(f_records, window, rate)
+            weighted_force = weighted_force * window
+        if exponential_on_force:
+            weighted_force = weighted_force * exponential
+        else:
+            peaks = np.argmax(np.abs(weighted_force), axis=1)
+            weighted_force = weighted_force * exponential[peaks][:, np.newaxis]
+        weighted_response = x_records * exponential
+
+        freqs, f_spec = _spectrum(weighted_force, rate)
+        _, x_spec = _spectrum(weighted_response, rate)
+        g_ff = np.sum(np.abs(f_spec) ** 2, axis=0)
+        g_xx = np.sum(np.abs(x_spec) ** 2, axis=0)
+        g_xf = np.sum(x_spec * np.conj(f_spec), axis=0)
+        band = freqs > 0.0
+        if frequency_range_hz is not None:
+            low, high = _frequency_range(frequency_range_hz, nyquist=rate / 2.0)
+            band &= (freqs >= low) & (freqs <= high)
+            if not np.any(band):
+                msg = (
+                    f"'frequency_range_hz' ({low:g} Hz to {high:g} Hz) holds no DFT "
+                    f"bin above 0 Hz; the bins are {rate / n:g} Hz apart."
+                )
+                raise ValueError(msg)
+        vanishing = ~(g_ff[band] > _rounding_floor(weighted_force, rate))
+        if np.any(vanishing):
+            zero = float(freqs[band][vanishing][0])
+            msg = (
+                f"the force spectrum vanishes at {zero:g} Hz; the frequency response "
+                "is undefined where no force was applied."
+            )
+            raise ValueError(msg)
+        frf = g_xf[band] / g_ff[band]
+        denominator = g_ff[band] * g_xx[band]
+        coherence = np.divide(
+            np.abs(g_xf[band]) ** 2,
+            denominator,
+            out=np.zeros_like(denominator),
+            where=denominator > 0.0,
+        )
+        n_impacts = f_records.shape[0]
+        factor = _one_sided_factor(n, freqs.size)[band]
+        return ImpactMobilityResult(
+            frequencies=np.asarray(freqs[band], dtype=np.float64),
+            mobility=convert_frf(
+                frf,
+                frequency=freqs[band],
+                source=_FRF_OF_RESPONSE[response_quantity],
+                target="mobility",
+            ),
+            coherence=np.asarray(np.clip(coherence, 0.0, 1.0), dtype=np.float64),
+            force_energy_spectral_density=np.asarray(
+                factor * g_ff[band] / n_impacts, dtype=np.float64
+            ),
+            n_impacts=n_impacts,
+            exponential_decay_rate_per_s=float(exponential_decay_rate_per_s),
+            response_quantity=response_quantity,
+            driving_point=bool(driving_point),
+        )
 
 
 # ---------------------------------------------------------------------------

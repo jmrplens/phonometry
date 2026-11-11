@@ -51,7 +51,6 @@ frequencies in Hz. The water column has a pressure-release surface at z = 0.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, get_args
 
@@ -72,7 +71,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from ._seabed_reflection import reflection_coefficient
 from .closed_form import (
     _ABSORPTION_MODELS,
@@ -511,12 +510,11 @@ def _propagating_band(
     fd_floor = k2_max**2 * dz**2 / 12.0
     prop = eigvals > fd_floor
     if np.any(prop & (eigvals <= 10.0 * fd_floor)):
-        warnings.warn(
+        warn_caller(
             "normal_modes: retained near-cutoff mode(s) lie within 10x the"
             " finite-difference error band; increase 'n_depth_points' to"
             " resolve them accurately.",
             NumericalPropagationWarning,
-            stacklevel=3,
         )
     kr = np.sqrt(eigvals[prop])
     order = np.argsort(kr)[::-1]  # descending kr (mode 1 first)
@@ -1389,12 +1387,11 @@ def _earliest_arrivals(
     order = np.argsort(times, kind="stable")
     cap = require_count(max_n_arrivals, "max_n_arrivals", at_least=None)
     if order.size > cap:
-        warnings.warn(
+        warn_caller(
             f"eigenrays: {order.size} eigenrays connect the receiver within"
             f" the traced fan; keeping the {cap} earliest."
             " Raise 'max_n_arrivals' to keep them all.",
             NumericalPropagationWarning,
-            stacklevel=3,
         )
         order = order[:cap]
     return order
@@ -2791,23 +2788,14 @@ def _beam_influence(
     return field
 
 
-def _warn_beams(
-    message: str,
-    *,
-    nested: int = 0,
-) -> None:
+def _warn_beams(message: str) -> None:
     """Emit a :class:`NumericalPropagationWarning` at the caller's call site.
 
-    The frame the warning is reported against is the one that called
+    The line the warning is reported against is the one that called
     :func:`gaussian_beams`, which is where the input that provoked it was
-    written. ``nested`` counts the frames between this one and
-    :func:`gaussian_beams` for a check that lives in a helper of its own.
+    written.
     """
-    warnings.warn(
-        f"gaussian_beams: {message}",
-        NumericalPropagationWarning,
-        stacklevel=3 + nested,
-    )
+    warn_caller(f"gaussian_beams: {message}", NumericalPropagationWarning)
 
 
 def _check_source_on_kink(
@@ -2836,8 +2824,7 @@ def _check_source_on_kink(
         _warn_beams(
             "'source_depth' sits on a gradient discontinuity of the profile,"
             " which concentrates the near-horizontal beams into a spurious jet;"
-            " offset the source or smooth the profile there.",
-            nested=1,
+            " offset the source or smooth the profile there."
         )
 
 
@@ -3375,169 +3362,174 @@ def gaussian_beams(
         ``fan.max_angle_deg`` and ``range_step`` that is easiest to get
         wrong.
     """
-    f = require_positive(frequency_hz, "frequency_hz")
-    fan = BeamFan() if fan is None else fan
-    z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "gaussian_beams")
-    bathy = _clean_bathymetry(bathymetry, z_prof, "gaussian_beams")
-    water_depth = float(z_prof[-1])
-    depth_at_source = water_depth if bathy is None else float(bathy[1][0])
-    require_scalar(source_depth, "source_depth")
-    zs = float(source_depth)
-    if not (0.0 < zs < depth_at_source):
-        raise ValueError(_SOURCE_OUTSIDE)
-    rmax = require_positive(max_range, "max_range")
-    dr_step = require_positive(range_step, "range_step")
-    if dr_step > rmax:
-        msg = "'range_step' must not exceed 'max_range'."
-        raise ValueError(msg)
-    key, seabed = _resolve_boundary(bottom)
-    if seabed is not None and bathy is not None:
-        msg = (
-            "a lossy fluid seabed and a sloping bottom cannot be combined:"
-            " the one-coefficient-per-beam collapse (and the image ladder's"
-            " powers of R) rests on Snell's invariant fixing a single grazing"
-            " angle per ray at a level bottom, and a slope rotates that"
-            " invariant at every touch. Sloping runs take the perfect"
-            " reflectors of 'bottom'."
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        f = require_positive(frequency_hz, "frequency_hz")
+        fan = BeamFan() if fan is None else fan
+        z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "gaussian_beams")
+        bathy = _clean_bathymetry(bathymetry, z_prof, "gaussian_beams")
+        water_depth = float(z_prof[-1])
+        depth_at_source = water_depth if bathy is None else float(bathy[1][0])
+        require_scalar(source_depth, "source_depth")
+        zs = float(source_depth)
+        if not (0.0 < zs < depth_at_source):
+            raise ValueError(_SOURCE_OUTSIDE)
+        rmax = require_positive(max_range, "max_range")
+        dr_step = require_positive(range_step, "range_step")
+        if dr_step > rmax:
+            msg = "'range_step' must not exceed 'max_range'."
+            raise ValueError(msg)
+        key, seabed = _resolve_boundary(bottom)
+        if seabed is not None and bathy is not None:
+            msg = (
+                "a lossy fluid seabed and a sloping bottom cannot be combined:"
+                " the one-coefficient-per-beam collapse (and the image ladder's"
+                " powers of R) rests on Snell's invariant fixing a single grazing"
+                " angle per ray at a level bottom, and a slope rotates that"
+                " invariant at every touch. Sloping runs take the perfect"
+                " reflectors of 'bottom'."
+            )
+            raise ValueError(msg)
+        absorption_key, alpha = _resolve_absorption(absorption, f, zs)
+        # dB/km to nepers/m: N dB is e^(N ln 10 / 20) in amplitude.
+        attenuation = alpha * np.log(10.0) / (20.0 * _M_PER_KM)
+
+        omega = 2.0 * np.pi * f
+        c0 = float(np.interp(zs, z_prof, c_prof))
+        wavelength = c0 / f
+        _check_source_on_kink(z_prof, c_prof, zs)
+
+        launch_fan = _resolve_fan(fan, wavelength, rmax, water_depth, c0)
+        launch, w0 = launch_fan.launch, launch_fan.width
+        n_fan = launch.size
+
+        n_steps = int(np.ceil(rmax / dr_step)) + 1
+        dr = rmax / (n_steps - 1)
+
+        bottom_factor: float | NDArray[np.complex128] = _BOTTOM_REFLECTION[key]
+        if seabed is not None:
+            rho1, rho2, c2 = seabed
+            c_bottom = float(c_prof[-1])
+            # One coefficient per beam is exact rather than sampled: see
+            # :func:`_seabed_grazing_deg` for why Snell's invariant fixes a single
+            # grazing angle per ray at a flat seabed.
+            grazing = _seabed_grazing_deg(launch_fan.xi, c_bottom)
+            # Conjugated, deliberately. The beam sum is assembled in the
+            # exp(+i omega t) convention Eq. (3.88) is printed in and conjugated
+            # once at the end (see the sign-convention note above the result
+            # class), so every complex factor fed into it must be the conjugate of
+            # its exp(-i omega t) self or the final conjugation turns its phase
+            # backwards. The perfect reflectors are real and never showed this;
+            # a below-critical R is where it bites, |R| = 1 and only the phase
+            # carrying the seabed, and applying it un-conjugated measured 15 dB
+            # wrong against the lossy image sum at 4 km where the conjugate
+            # measures 0.02 dB.
+            bottom_factor = np.conj(
+                reflection_coefficient(
+                    grazing, rho1=rho1, c1=c_bottom, rho2=rho2, c2=c2
+                )
+            )
+
+        upper: float | SlopingBoundary = (
+            water_depth if bathy is None else SlopingBoundary(*bathy)
         )
-        raise ValueError(msg)
-    absorption_key, alpha = _resolve_absorption(absorption, f, zs)
-    # dB/km to nepers/m: N dB is e^(N ln 10 / 20) in amplitude.
-    attenuation = alpha * np.log(10.0) / (20.0 * _M_PER_KM)
-
-    omega = 2.0 * np.pi * f
-    c0 = float(np.interp(zs, z_prof, c_prof))
-    wavelength = c0 / f
-    _check_source_on_kink(z_prof, c_prof, zs)
-
-    launch_fan = _resolve_fan(fan, wavelength, rmax, water_depth, c0)
-    launch, w0 = launch_fan.launch, launch_fan.width
-    n_fan = launch.size
-
-    n_steps = int(np.ceil(rmax / dr_step)) + 1
-    dr = rmax / (n_steps - 1)
-
-    bottom_factor: float | NDArray[np.complex128] = _BOTTOM_REFLECTION[key]
-    if seabed is not None:
-        rho1, rho2, c2 = seabed
-        c_bottom = float(c_prof[-1])
-        # One coefficient per beam is exact rather than sampled: see
-        # :func:`_seabed_grazing_deg` for why Snell's invariant fixes a single
-        # grazing angle per ray at a flat seabed.
-        grazing = _seabed_grazing_deg(launch_fan.xi, c_bottom)
-        # Conjugated, deliberately. The beam sum is assembled in the
-        # exp(+i omega t) convention Eq. (3.88) is printed in and conjugated
-        # once at the end (see the sign-convention note above the result
-        # class), so every complex factor fed into it must be the conjugate of
-        # its exp(-i omega t) self or the final conjugation turns its phase
-        # backwards. The perfect reflectors are real and never showed this;
-        # a below-critical R is where it bites, |R| = 1 and only the phase
-        # carrying the seabed, and applying it un-conjugated measured 15 dB
-        # wrong against the lossy image sum at 4 km where the conjugate
-        # measures 0.02 dB.
-        bottom_factor = np.conj(
-            reflection_coefficient(grazing, rho1=rho1, c1=c_bottom, rho2=rho2, c2=c2)
-        )
-
-    upper: float | SlopingBoundary = (
-        water_depth if bathy is None else SlopingBoundary(*bathy)
-    )
-    march = march_rays(
-        _ocean_ray_derivative(z_prof, c_prof),
-        xi=launch_fan.xi,
-        z0=np.full(n_fan, zs),
-        zeta0=np.sin(launch) / c0,
-        range_step=dr,
-        n_steps=n_steps,
-        lower=0.0,
-        upper=upper,
-        dynamic=DynamicRays(
-            np.asarray(0.5j * omega * w0**2, dtype=np.complex128),
-            np.full(n_fan, 1.0 + 0.0j),
-            z_prof,
-            c_prof,
-        ),
-    )
-
-    ranges = _beam_range_grid(ranges_m, n_steps=n_steps, dr=dr, rmax=rmax)
-    receivers = _beam_receiver_grid(
-        receiver_depths_m, n_depth_points=n_depth_points, water_depth=water_depth
-    )
-
-    climb = dr * np.tan(np.radians(float(fan.max_angle_deg)))
-    if climb > _MAX_STEEP_CLIMB * water_depth:
-        _warn_beams(
-            f"one marching step carries the steepest beam of the fan {climb:.0f} m"
-            f" across a {water_depth:.0f} m column, so its trajectory is not"
-            " resolved; cut 'range_step' or narrow 'max_angle_deg'."
+        march = march_rays(
+            _ocean_ray_derivative(z_prof, c_prof),
+            xi=launch_fan.xi,
+            z0=np.full(n_fan, zs),
+            zeta0=np.sin(launch) / c0,
+            range_step=dr,
+            n_steps=n_steps,
+            lower=0.0,
+            upper=upper,
+            dynamic=DynamicRays(
+                np.asarray(0.5j * omega * w0**2, dtype=np.complex128),
+                np.full(n_fan, 1.0 + 0.0j),
+                z_prof,
+                c_prof,
+            ),
         )
 
-    # The image ladder folds each receiver column at its own local facet when
-    # the bottom slopes: depth and slope both, since a fold plane wrong by the
-    # facet's tilt displaces the images by wavelengths (see _beam_influence).
-    fold: _FoldColumns | None = None
-    if bathy is not None:
-        br, bd = bathy
-        facet = np.concatenate(([0.0], np.diff(bd) / np.diff(br), [0.0]))
-        fold = _FoldColumns(
-            ranges,
-            np.asarray(np.interp(ranges, br, bd)),
-            facet[np.searchsorted(br, ranges, side="right")],
+        ranges = _beam_range_grid(ranges_m, n_steps=n_steps, dr=dr, rmax=rmax)
+        receivers = _beam_receiver_grid(
+            receiver_depths_m, n_depth_points=n_depth_points, water_depth=water_depth
         )
-    field, widths, curvatures = _assemble_beam_field(
-        march,
-        ranges=ranges,
-        receivers=receivers,
-        fan=launch_fan,
-        dr=dr,
-        z_prof=z_prof,
-        c_prof=c_prof,
-        omega=omega,
-        c0=c0,
-        water_depth=water_depth,
-        bottom_reflection=bottom_factor,
-        attenuation=attenuation,
-        fold=fold,
-    )
 
-    # Eq. (3.88) is written in the exp(+i omega t) convention; conjugating once
-    # here hands back a field in the exp(-i omega t) one the rest of the module
-    # speaks. The loss is untouched by that, and the weights of Eq. (3.92)
-    # normalise the sum to Eq. (3.80)'s unit pressure at 1 m, so there is no
-    # p_0 to divide by.
-    pressure = np.conj(field)
-    with np.errstate(divide="ignore"):
-        pl = -20.0 * np.log10(np.abs(pressure))
+        climb = dr * np.tan(np.radians(float(fan.max_angle_deg)))
+        if climb > _MAX_STEEP_CLIMB * water_depth:
+            _warn_beams(
+                f"one marching step carries the steepest beam of the fan {climb:.0f} m"
+                f" across a {water_depth:.0f} m column, so its trajectory is not"
+                " resolved; cut 'range_step' or narrow 'max_angle_deg'."
+            )
 
-    ray_depths, ray_widths, ray_curvatures = _retire_stopped_beams(
-        march=march,
-        sloping=bathy is not None,
-        n_steps=n_steps,
-        widths=widths,
-        curvatures=curvatures,
-    )
+        # The image ladder folds each receiver column at its own local facet when
+        # the bottom slopes: depth and slope both, since a fold plane wrong by the
+        # facet's tilt displaces the images by wavelengths (see _beam_influence).
+        fold: _FoldColumns | None = None
+        if bathy is not None:
+            br, bd = bathy
+            facet = np.concatenate(([0.0], np.diff(bd) / np.diff(br), [0.0]))
+            fold = _FoldColumns(
+                ranges,
+                np.asarray(np.interp(ranges, br, bd)),
+                facet[np.searchsorted(br, ranges, side="right")],
+            )
+        field, widths, curvatures = _assemble_beam_field(
+            march,
+            ranges=ranges,
+            receivers=receivers,
+            fan=launch_fan,
+            dr=dr,
+            z_prof=z_prof,
+            c_prof=c_prof,
+            omega=omega,
+            c0=c0,
+            water_depth=water_depth,
+            bottom_reflection=bottom_factor,
+            attenuation=attenuation,
+            fold=fold,
+        )
 
-    return GaussianBeamResult(
-        frequency=f,
-        ranges=ranges,
-        depths=receivers,
-        propagation_loss=np.asarray(pl, dtype=np.float64),
-        pressure=np.asarray(pressure, dtype=np.complex128),
-        launch_angles_deg=np.degrees(launch),
-        ray_ranges=np.broadcast_to(np.arange(n_steps) * dr, march.positions.shape),
-        ray_depths=ray_depths,
-        beam_widths=ray_widths,
-        wavefront_curvatures=ray_curvatures,
-        initial_beam_widths=np.asarray(w0, dtype=np.float64),
-        absorption_model=absorption_key,
-        absorption_db_per_km=alpha,
-        seabed_density=None if seabed is None else seabed[1],
-        seabed_sound_speed=None if seabed is None else seabed[2],
-        source_depth=zs,
-        water_depth=water_depth,
-        bathymetry_ranges=None if bathy is None else bathy[0],
-        bathymetry_depths=None if bathy is None else bathy[1],
-    )
+        # Eq. (3.88) is written in the exp(+i omega t) convention; conjugating once
+        # here hands back a field in the exp(-i omega t) one the rest of the module
+        # speaks. The loss is untouched by that, and the weights of Eq. (3.92)
+        # normalise the sum to Eq. (3.80)'s unit pressure at 1 m, so there is no
+        # p_0 to divide by.
+        pressure = np.conj(field)
+        with np.errstate(divide="ignore"):
+            pl = -20.0 * np.log10(np.abs(pressure))
+
+        ray_depths, ray_widths, ray_curvatures = _retire_stopped_beams(
+            march=march,
+            sloping=bathy is not None,
+            n_steps=n_steps,
+            widths=widths,
+            curvatures=curvatures,
+        )
+
+        return GaussianBeamResult(
+            frequency=f,
+            ranges=ranges,
+            depths=receivers,
+            propagation_loss=np.asarray(pl, dtype=np.float64),
+            pressure=np.asarray(pressure, dtype=np.complex128),
+            launch_angles_deg=np.degrees(launch),
+            ray_ranges=np.broadcast_to(np.arange(n_steps) * dr, march.positions.shape),
+            ray_depths=ray_depths,
+            beam_widths=ray_widths,
+            wavefront_curvatures=ray_curvatures,
+            initial_beam_widths=np.asarray(w0, dtype=np.float64),
+            absorption_model=absorption_key,
+            absorption_db_per_km=alpha,
+            seabed_density=None if seabed is None else seabed[1],
+            seabed_sound_speed=None if seabed is None else seabed[2],
+            source_depth=zs,
+            water_depth=water_depth,
+            bathymetry_ranges=None if bathy is None else bathy[0],
+            bathymetry_depths=None if bathy is None else bathy[1],
+        )
 
 
 def _assemble_beam_field(

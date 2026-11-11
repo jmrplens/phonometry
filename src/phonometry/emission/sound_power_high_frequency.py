@@ -112,7 +112,6 @@ in closed form; Tables 1 and 2 are the numeric oracle of Annex A.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -130,6 +129,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+from .._internal.warnings import advisories_held, warn_caller
 from ..environment.propagation.air_absorption import (
     _EIGHT_686,
     _KELVIN,
@@ -352,33 +352,36 @@ def room_constant_from_air_absorption(
     :raises TypeError: if ``surface_area`` or ``volume`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number.
     """
-    volume, surface = _room_geometry(volume, surface_area)
-    freqs = require_positive_array(frequencies, "frequencies")
-    alpha = air_absorption_np_per_m(
-        freqs,
-        temperature_c=temperature_c,
-        relative_humidity_percent=relative_humidity_percent,
-        static_pressure_kpa=static_pressure_kpa,
-    )
-    if np.any(freqs < _AIR_ABSORPTION_FLOOR_HZ):
-        warnings.warn(
-            "One or more frequencies are below 10 kHz, where ISO 9295:2015 "
-            "clause 7.2 no longer takes the air to hold practically all of the "
-            "room absorption; the measured reverberation time of clause 6 is "
-            "the method there.",
-            SoundPowerWarning,
-            stacklevel=2,
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        volume, surface = _room_geometry(volume, surface_area)
+        freqs = require_positive_array(frequencies, "frequencies")
+        alpha = air_absorption_np_per_m(
+            freqs,
+            temperature_c=temperature_c,
+            relative_humidity_percent=relative_humidity_percent,
+            static_pressure_kpa=static_pressure_kpa,
         )
-    area = _AIR_ABSORPTION_FACTOR * alpha * volume
-    mean_absorption = area / surface
-    if np.any(mean_absorption >= 1.0):
-        msg = (
-            "8 alpha V / S reaches 1 at one or more frequencies: the air alone "
-            "would absorb more than the room surface can, and Formula (7) of "
-            "ISO 9295:2015 has no finite room constant there."
-        )
-        raise ValueError(msg)
-    return np.asarray(area / (1.0 - mean_absorption), dtype=np.float64)
+        area = _AIR_ABSORPTION_FACTOR * alpha * volume
+        mean_absorption = area / surface
+        if np.any(mean_absorption >= 1.0):
+            msg = (
+                "8 alpha V / S reaches 1 at one or more frequencies: the air alone "
+                "would absorb more than the room surface can, and Formula (7) of "
+                "ISO 9295:2015 has no finite room constant there."
+            )
+            raise ValueError(msg)
+        # Advised after the refusal above, so -W error raises the refusal.
+        if np.any(freqs < _AIR_ABSORPTION_FLOOR_HZ):
+            warn_caller(
+                "One or more frequencies are below 10 kHz, where ISO 9295:2015 "
+                "clause 7.2 no longer takes the air to hold practically all of the "
+                "room absorption; the measured reverberation time of clause 6 is "
+                "the method there.",
+                SoundPowerWarning,
+            )
+        return np.asarray(area / (1.0 - mean_absorption), dtype=np.float64)
 
 
 # --- Formulae (2) and (3): tones under a moving microphone -------------------
@@ -605,7 +608,9 @@ def _mean_band_level(levels: ArrayLike, name: str) -> NDArray[np.float64]:
 
 
 def _band_frequencies(frequencies: ArrayLike, n_bands: int) -> NDArray[np.float64]:
-    """One positive frequency per band, with an advisory outside the octave."""
+    """One positive frequency per band; :func:`_octave_advisory` says when one
+    lies outside the octave, once the determination has checked everything.
+    """
     freqs = require_positive_array(frequencies, "frequencies")
     if freqs.shape != (n_bands,):
         msg = (
@@ -613,15 +618,18 @@ def _band_frequencies(frequencies: ArrayLike, n_bands: int) -> NDArray[np.float6
             "band(s); give one frequency per band."
         )
         raise ValueError(msg)
+    return freqs
+
+
+def _octave_advisory(freqs: NDArray[np.float64]) -> None:
+    """Warn when a frequency lies outside the 16 kHz octave ISO 9295 covers."""
     if np.any(freqs < _OCTAVE_LOW_HZ) or np.any(freqs > _OCTAVE_HIGH_HZ):
-        warnings.warn(
+        warn_caller(
             "One or more frequencies are outside the 16 kHz octave band "
             "(11.2 kHz to 22.4 kHz) that ISO 9295:2015 covers; the methods of "
             "ISO 3741 and ISO 3744 are the ones below it.",
             SoundPowerWarning,
-            stacklevel=3,
         )
-    return freqs
 
 
 def _per_band(value: ArrayLike, name: str, n_bands: int) -> NDArray[np.float64]:
@@ -686,6 +694,8 @@ def high_frequency_sound_power(
     c1 = _c1_correction(temperature_c, static_pressure_kpa)
     c2 = _c2_correction(temperature_c, static_pressure_kpa)
     level = mean_level - 10.0 * np.log10(_DIFFUSE_FIELD_FOUR / room_constant) + c1 + c2
+    # Advised once every argument is checked, so -W error raises a refusal.
+    _octave_advisory(freqs)
     return HighFrequencySoundPowerResult(
         frequencies=freqs,
         sound_power_level=np.asarray(level, dtype=np.float64),
@@ -803,12 +813,15 @@ def high_frequency_sound_power_comparison(
     bandwidth = None
     if noise_bandwidth_hz is not None:
         bandwidth = require_positive(noise_bandwidth_hz, "noise_bandwidth_hz")
+    # The advisories come once every argument is checked, so -W error raises
+    # a refusal rather than one of them.
+    _octave_advisory(freqs)
+    if bandwidth is not None:
         if bandwidth > _MAX_FFT_BANDWIDTH_HZ:
-            warnings.warn(
+            warn_caller(
                 f"A noise bandwidth of {bandwidth:g} Hz is wider than the 112 Hz "
                 "ISO 9295:2015 clause 8.5.2 allows an FFT analyser.",
                 SoundPowerWarning,
-                stacklevel=2,
             )
         bandwidth_term = 10.0 * np.log10(bandwidth)
     c2 = _c2_correction(temperature_c, static_pressure_kpa)

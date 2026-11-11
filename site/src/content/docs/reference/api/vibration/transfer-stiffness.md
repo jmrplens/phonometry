@@ -996,6 +996,7 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 
 | Exception | When |
 | :--- | :--- |
+| ValueError | for a non-positive frequency or blocking mass, a `transmissibility` that is not finite, or `frequencies` and a `transmissibility` of different shapes, neither of them one value. |
 | TypeError | if `blocking_mass` or `flange_mass` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `transmissibility` holds a text or a value that is not a number. |
 
 **Warns**
@@ -1327,7 +1328,7 @@ $|10 \log_{10}(m_{2,\mathrm{eff}}^2 / m_2^2)| \le 1$ dB
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive frequency or blocking mass. |
+| ValueError | for a non-positive frequency or blocking mass, a `transmissibility` that is not finite, or a `frequency` and a `transmissibility` of different shapes, neither of them one value. |
 | TypeError | if `blocking_mass` or `flange_mass` is not a single number, or `frequency` holds a text or a value that is not a real number, or `transmissibility` holds a text or a value that is not a number. |
 
 **Warns**

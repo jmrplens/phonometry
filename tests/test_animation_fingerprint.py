@@ -2462,6 +2462,17 @@ _DEFINITIONS = {
         "    return s",
         set(),
     ),
+    # Naming a warning by the module that publishes it sets __module__ and
+    # hands the class back: nothing a frame is drawn with.
+    "warning-named-by-its-public-module": (
+        "from phonometry._internal.warnings import PhonometryWarning\n\n\n"
+        "class _ProbeWarning(PhonometryWarning):\n    pass\n",
+        "from phonometry._internal.warnings import PhonometryWarning, published_by\n\n\n"
+        '@published_by("phonometry.io")\n'
+        "class _ProbeWarning(PhonometryWarning):\n    pass\n",
+        "    return s",
+        set(),
+    ),
 }
 
 

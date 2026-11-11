@@ -77,7 +77,6 @@ alike for the two quantities.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -110,6 +109,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import advisories_held, warn_caller
 from ._shared import (
     SoundPowerWarning,
     _a_weighting_corrections,
@@ -399,6 +399,57 @@ def reverberation_background_correction(
     return k1
 
 
+def _checked_background(
+    levels: ArrayLike,
+    background_levels: ArrayLike,
+    *,
+    names: tuple[str, str] = ("levels", "background_levels"),
+) -> np.ndarray:
+    """The background in the shape the correction reads, or a refusal naming it.
+
+    Per-position 2D ``levels`` take a background of the same shape or one
+    ``(bands,)`` spectrum used at every position, returned broadcast to the
+    levels; 1D levels take one spectrum, returned as its energy mean when it
+    is given per position. A determination asks this before its first
+    advisory, so a background of the wrong shape is refused even under
+    ``python -W error``.
+
+    :param names: The caller's names for *levels* and *background_levels*,
+        which a refusal gives: the reference source's in a comparison.
+    """
+    levels_name, background_name = names
+    arr = real_array(levels, levels_name)
+    # The number is a count of array axes, not a quantity.
+    if arr.ndim == 2:  # noqa: PLR2004
+        bg = real_array(background_levels, background_name)
+        # Checked before the broadcast, not after it. A 1-D spectrum of the
+        # wrong length used to die inside `np.broadcast_to`, whose message
+        # reports two shapes from inside numpy and names neither the argument
+        # nor the function, so the caller never saw the sentence below.
+        expected = arr.shape[1:] if bg.ndim == 1 else arr.shape
+        if bg.shape != expected:
+            msg = (
+                f"'{background_name}' must match the per-position "
+                f"'{levels_name}' shape or be a single (bands,) spectrum."
+            )
+            raise ValueError(msg)
+        return np.broadcast_to(bg, arr.shape) if bg.ndim == 1 else bg
+    raw_mean = _mean_level(levels, levels_name)
+    bg_mean = _mean_level(background_levels, background_name)
+    # The per-position branch's check, one axis down: a spectrum of the
+    # wrong band count used to die in the subtraction of the correction with
+    # numpy's two-shape message, which names neither the argument nor the
+    # function.
+    if bg_mean.shape != raw_mean.shape:
+        msg = (
+            f"'{background_name}' must carry one value per band "
+            f"({raw_mean.size} in '{levels_name}'); got shape "
+            f"{np.shape(background_levels)}."
+        )
+        raise ValueError(msg)
+    return bg_mean
+
+
 def _background_corrected_mean(
     levels: ArrayLike,
     background_levels: ArrayLike,
@@ -427,60 +478,34 @@ def _background_corrected_mean(
     :param names: The caller's names for *levels* and *background_levels*,
         which a refusal gives: the reference source's in a comparison.
     """
-    levels_name, background_name = names
+    levels_name = names[0]
     arr = real_array(levels, levels_name)
     raw_mean = _mean_level(levels, levels_name)
+    bg = _checked_background(levels, background_levels, names=names)
     # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
-        bg = real_array(background_levels, background_name)
-        # Checked before the broadcast, not after it. A 1-D spectrum of the
-        # wrong length used to die inside `np.broadcast_to`, whose message
-        # reports two shapes from inside numpy and names neither the argument
-        # nor the function, so the caller never saw the sentence below.
-        expected = arr.shape[1:] if bg.ndim == 1 else arr.shape
-        if bg.shape != expected:
-            msg = (
-                f"'{background_name}' must match the per-position "
-                f"'{levels_name}' shape or be a single (bands,) spectrum."
-            )
-            raise ValueError(msg)
-        if bg.ndim == 1:
-            bg = np.broadcast_to(bg, arr.shape)
         k1i, clamped = _k1_eq14(arr - bg, frequencies)
         corrected = energy_mean(arr - k1i, axis=0)
     else:
-        bg_mean = _mean_level(background_levels, background_name)
-        # The per-position branch's check, one axis down: a spectrum of the
-        # wrong band count used to die in the subtraction below with numpy's
-        # two-shape message, which names neither the argument nor the function.
-        if bg_mean.shape != raw_mean.shape:
-            msg = (
-                f"'{background_name}' must carry one value per band "
-                f"({raw_mean.size} in '{levels_name}'); got shape "
-                f"{np.shape(background_levels)}."
-            )
-            raise ValueError(msg)
-        k1, clamped = _k1_eq14(raw_mean - bg_mean, frequencies)
+        k1, clamped = _k1_eq14(raw_mean - bg, frequencies)
         corrected = raw_mean - k1
     if clamped and reference:
         # The reference source's corrected level is subtracted in Eq. (21), so
         # its clamped K1 lowers the result: no upper bound comes of it.
-        warnings.warn(
+        warn_caller(
             "Background margin of the reference sound source below the ISO 3741 "
             "criterion (6 dB / 10 dB) in one or more bands; K1 clamped to the "
             "criterion value, which lowers the comparison result there, so it "
             "does not meet the criterion and is not an upper bound "
             "(ISO 3741:2010, 9.1.2).",
             SoundPowerWarning,
-            stacklevel=4,
         )
     elif clamped:
-        warnings.warn(
+        warn_caller(
             "Background margin below the ISO 3741 criterion (6 dB / 10 dB) in "
             "one or more bands; K1 clamped to the criterion value and the "
             "levels are upper bounds (ISO 3741:2010, 9.1.2).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     return np.asarray(corrected, dtype=np.float64), np.asarray(
         raw_mean - corrected, dtype=np.float64
@@ -524,28 +549,28 @@ def _room_qualification_warnings(
     lowest = float(np.min(frequencies))
     vmin = _min_room_volume(lowest)
     if volume < vmin:
-        warnings.warn(
+        warn_caller(
             f"Room volume {volume:g} m^3 is below the ISO 3741 Table 1 minimum "
             f"({vmin:g} m^3) for the lowest band of interest ({lowest:g} Hz); "
             "the room must be qualified per Annex C/D (ISO 3741:2010, 5.2, "
             "Table 1).",
             SoundPowerWarning,
-            stacklevel=3,
         )
     floor = volume / surface_area
     below_6k3 = frequencies < _ABSORPTION_CRITERION_MAX_HZ
     if np.any(below_6k3 & (settled(t60 - floor) <= 0.0)):
-        warnings.warn(
+        warn_caller(
             f"Reverberation time falls to or below the V/S floor ({floor:g} s) "
             "in one or more bands below 6,3 kHz; the room is too absorptive and "
             "must be qualified per Annex C (ISO 3741:2010, 5.3, Eq. 7).",
             SoundPowerWarning,
-            stacklevel=3,
         )
-    _position_sampling_warnings(levels, stacklevel=4)
+    _position_sampling_warnings(levels)
 
 
-def _position_sampling_warnings(levels: ArrayLike, stacklevel: int) -> None:
+def _position_sampling_warnings(
+    levels: ArrayLike,
+) -> None:
     """Emit the microphone-sampling advisories for a per-position level array.
 
     Flags fewer than 6 positions (ISO 3741:2010, 8.3, 8.4.1) and an
@@ -560,24 +585,22 @@ def _position_sampling_warnings(levels: ArrayLike, stacklevel: int) -> None:
         return
     n_positions = arr.shape[0]
     if n_positions < _MIN_MIC_POSITIONS:
-        warnings.warn(
+        warn_caller(
             f"Only {n_positions} microphone position(s) were supplied; an "
             f"unqualified reverberation room requires at least {_MIN_MIC_POSITIONS} "
             "(ISO 3741:2010, 8.3, 8.4.1).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
     if n_positions >= _MIN_POSITIONS_FOR_SM:
         s_m = np.std(arr, axis=0, ddof=1)
         if np.any(settled(s_m) > _SM_CRITERION_DB):
-            warnings.warn(
+            warn_caller(
                 "Inter-position standard deviation exceeds the ISO 3741 sM "
                 "criterion (1,5 dB) in one or more bands; the source may radiate "
                 "significant discrete tones, requiring more microphone/source "
                 "positions or room qualification per Annex D (ISO 3741:2010, "
                 "8.4.2.2, Eq. 10).",
                 SoundPowerWarning,
-                stacklevel=stacklevel,
             )
 
 
@@ -803,6 +826,10 @@ def sound_power_reverberation(
     mean_level = _mean_level(levels)
     n_bands = mean_level.shape[0]
     t60_arr, freqs = _band_inputs(n_bands, t60, frequencies)
+    # Every refusal before the first advisory: under -W error an advisory
+    # raised first would stand in for the ValueError of a wrong background.
+    if background_levels is not None:
+        _checked_background(levels, background_levels)
 
     _room_qualification_warnings(levels, t60_arr, volume, surface_area, freqs)
 
@@ -891,11 +918,19 @@ def sound_power_comparison(
         static_pressure_kpa=static_pressure_kpa,
     )
 
+    _checked_comparison_backgrounds(
+        levels,
+        background_levels,
+        reference_levels,
+        reference_background_levels,
+        freqs,
+    )
     # Microphone-sampling advisories (<6 positions, sM > 1,5 dB) apply to the
     # per-position measurement of the source under test, exactly as in the
     # direct method; there is no room geometry here, so no V/S check. Emitted
-    # only after the shape validations so malformed input raises cleanly first.
-    _position_sampling_warnings(levels, stacklevel=2)
+    # only after every refusal, the backgrounds' included, so a malformed
+    # input raises its ValueError first even under -W error.
+    _position_sampling_warnings(levels)
 
     k1_st = np.zeros(n_bands, dtype=np.float64)
     if background_levels is not None:
@@ -923,6 +958,31 @@ def sound_power_comparison(
         sound_power_level_a=_a_weighted_total(lw, freqs),
         method="comparison",
     )
+
+
+def _checked_comparison_backgrounds(
+    levels: ArrayLike,
+    background_levels: ArrayLike | None,
+    reference_levels: ArrayLike,
+    reference_background_levels: ArrayLike | None,
+    freqs: np.ndarray | None,
+) -> None:
+    """Refuse a background of a comparison before any advisory is raised.
+
+    Each background needs the band centres for its frequency-dependent ``K1``
+    criterion and the shape of the levels it is taken from, the source's or
+    the reference source's.
+    """
+    if background_levels is not None:
+        _require_frequencies(freqs, "background_levels")
+        _checked_background(levels, background_levels)
+    if reference_background_levels is not None:
+        _require_frequencies(freqs, "reference_background_levels")
+        _checked_background(
+            reference_levels,
+            reference_background_levels,
+            names=("reference_levels", "reference_background_levels"),
+        )
 
 
 def _reference_source_level(
@@ -1080,7 +1140,7 @@ def _room_event_levels(
             )
             raise ValueError(msg)
         count = int(arr.shape[0])
-        return _single_event_mean(arr, None, name="levels", stacklevel=4), count
+        return _single_event_mean(arr, None, name="levels"), count
     if arr.ndim not in (1, 2):
         msg = (
             "'levels' must be a 1D spectrum, a 2D (positions, bands) array or a "
@@ -1092,9 +1152,9 @@ def _room_event_levels(
             msg = "'levels' must contain only finite values."
             raise ValueError(msg)
         return arr, None
-    return _single_event_mean(
-        arr, n_events, name="levels", stacklevel=4
-    ), require_count(n_events, "n_events", at_least=None)
+    return _single_event_mean(arr, n_events, name="levels"), require_count(
+        n_events, "n_events", at_least=None
+    )
 
 
 def sound_energy_reverberation(
@@ -1170,42 +1230,49 @@ def sound_energy_reverberation(
         or ``frequencies``, ``levels`` or ``t60`` holds a text or a value that is not a
         real number.
     """
-    _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
-    event_levels, event_count = _room_event_levels(levels, n_events)
-    if integration_time is not None:
-        integration_time = require_positive(integration_time, "integration_time")
-    mean_level = _mean_level(event_levels)
-    n_bands = mean_level.shape[0]
-    t60_arr, freqs = _band_inputs(n_bands, t60, frequencies)
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        _room_inputs(volume, surface_area, temperature_c, static_pressure_kpa)
+        event_levels, event_count = _room_event_levels(levels, n_events)
+        if integration_time is not None:
+            integration_time = require_positive(integration_time, "integration_time")
+        mean_level = _mean_level(event_levels)
+        n_bands = mean_level.shape[0]
+        t60_arr, freqs = _band_inputs(n_bands, t60, frequencies)
+        # Every refusal before the first advisory, as in sound_power_reverberation.
+        exposure = None
+        if background_levels is not None:
+            exposure = _background_exposure(background_levels, integration_time)
+            _checked_background(event_levels, exposure)
 
-    _room_qualification_warnings(event_levels, t60_arr, volume, surface_area, freqs)
+        _room_qualification_warnings(event_levels, t60_arr, volume, surface_area, freqs)
 
-    if background_levels is not None:
-        exposure = _background_exposure(background_levels, integration_time)
-        mean_level, k1 = _background_corrected_mean(event_levels, exposure, freqs)
-    else:
-        k1 = np.zeros(n_bands, dtype=np.float64)
+        if exposure is not None:
+            mean_level, k1 = _background_corrected_mean(event_levels, exposure, freqs)
+        else:
+            k1 = np.zeros(n_bands, dtype=np.float64)
 
-    terms = _direct_terms(
-        t60_arr, volume, surface_area, freqs, temperature_c, static_pressure_kpa
-    )
-    lj = np.asarray(mean_level + terms.bracket, dtype=np.float64)
+        terms = _direct_terms(
+            t60_arr, volume, surface_area, freqs, temperature_c, static_pressure_kpa
+        )
+        lj = np.asarray(mean_level + terms.bracket, dtype=np.float64)
 
-    return ReverberationSoundEnergyResult(
-        frequencies=freqs,
-        sound_energy_level=lj,
-        mean_event_level=mean_level,
-        absorption_area=terms.absorption_area,
-        waterhouse_correction=terms.waterhouse_correction,
-        background_correction=k1,
-        c1=terms.c1,
-        c2=terms.c2,
-        speed_of_sound=terms.speed_of_sound,
-        sound_energy_level_a=_a_weighted_total(lj, freqs),
-        method="direct",
-        n_events=event_count,
-        integration_time=integration_time,
-    )
+        return ReverberationSoundEnergyResult(
+            frequencies=freqs,
+            sound_energy_level=lj,
+            mean_event_level=mean_level,
+            absorption_area=terms.absorption_area,
+            waterhouse_correction=terms.waterhouse_correction,
+            background_correction=k1,
+            c1=terms.c1,
+            c2=terms.c2,
+            speed_of_sound=terms.speed_of_sound,
+            sound_energy_level_a=_a_weighted_total(lj, freqs),
+            method="direct",
+            n_events=event_count,
+            integration_time=integration_time,
+        )
 
 
 def sound_energy_comparison(
@@ -1274,52 +1341,62 @@ def sound_energy_comparison(
         ``levels``, ``reference_background_levels`` or ``reference_levels`` holds a text
         or a value that is not a real number.
     """
-    _validate_meteorology(temperature_c, static_pressure_kpa)
-    event_levels, event_count = _room_event_levels(levels, n_events)
-    if integration_time is not None:
-        integration_time = require_positive(integration_time, "integration_time")
-    le_st = _mean_level(event_levels)
-    n_bands = le_st.shape[0]
-    lp_rss, lw_rss, freqs = _comparison_inputs(
-        n_bands,
-        reference_levels,
-        reference_sound_power_levels,
-        frequencies,
-        temperature_c=temperature_c,
-        static_pressure_kpa=static_pressure_kpa,
-    )
-
-    _position_sampling_warnings(event_levels, stacklevel=2)
-
-    k1_st = np.zeros(n_bands, dtype=np.float64)
-    if background_levels is not None:
-        exposure = _background_exposure(background_levels, integration_time)
-        le_st, k1_st = _background_corrected_mean(
-            event_levels, exposure, _require_frequencies(freqs, "background_levels")
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        _validate_meteorology(temperature_c, static_pressure_kpa)
+        event_levels, event_count = _room_event_levels(levels, n_events)
+        if integration_time is not None:
+            integration_time = require_positive(integration_time, "integration_time")
+        le_st = _mean_level(event_levels)
+        n_bands = le_st.shape[0]
+        lp_rss, lw_rss, freqs = _comparison_inputs(
+            n_bands,
+            reference_levels,
+            reference_sound_power_levels,
+            frequencies,
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
         )
-    lp_rss = _reference_source_level(
-        lp_rss, reference_levels, reference_background_levels, freqs
-    )
 
-    c2 = _c2_correction(temperature_c, static_pressure_kpa)
-    lj = np.asarray(lw_rss + (le_st - lp_rss) + c2, dtype=np.float64)
+        exposure = (
+            None
+            if background_levels is None
+            else _background_exposure(background_levels, integration_time)
+        )
+        _checked_comparison_backgrounds(
+            event_levels, exposure, reference_levels, reference_background_levels, freqs
+        )
+        _position_sampling_warnings(event_levels)
 
-    nan_band = np.full(n_bands, np.nan, dtype=np.float64)
-    return ReverberationSoundEnergyResult(
-        frequencies=freqs,
-        sound_energy_level=lj,
-        mean_event_level=le_st,
-        absorption_area=nan_band,
-        waterhouse_correction=nan_band,
-        background_correction=k1_st,
-        c1=float("nan"),
-        c2=c2,
-        speed_of_sound=_speed_of_sound(temperature_c),
-        sound_energy_level_a=_a_weighted_total(lj, freqs),
-        method="comparison",
-        n_events=event_count,
-        integration_time=integration_time,
-    )
+        k1_st = np.zeros(n_bands, dtype=np.float64)
+        if exposure is not None:
+            le_st, k1_st = _background_corrected_mean(
+                event_levels, exposure, _require_frequencies(freqs, "background_levels")
+            )
+        lp_rss = _reference_source_level(
+            lp_rss, reference_levels, reference_background_levels, freqs
+        )
+
+        c2 = _c2_correction(temperature_c, static_pressure_kpa)
+        lj = np.asarray(lw_rss + (le_st - lp_rss) + c2, dtype=np.float64)
+
+        nan_band = np.full(n_bands, np.nan, dtype=np.float64)
+        return ReverberationSoundEnergyResult(
+            frequencies=freqs,
+            sound_energy_level=lj,
+            mean_event_level=le_st,
+            absorption_area=nan_band,
+            waterhouse_correction=nan_band,
+            background_correction=k1_st,
+            c1=float("nan"),
+            c2=c2,
+            speed_of_sound=_speed_of_sound(temperature_c),
+            sound_energy_level_a=_a_weighted_total(lj, freqs),
+            method="comparison",
+            n_events=event_count,
+            integration_time=integration_time,
+        )
 
 
 @dataclass(frozen=True)

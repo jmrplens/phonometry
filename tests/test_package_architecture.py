@@ -2824,6 +2824,89 @@ def test_every_published_warning_is_a_phonometry_warning() -> None:
     )
 
 
+def test_every_published_warning_is_named_by_the_package_that_publishes_it() -> None:
+    """A traceback names a warning by its module, so that module is one a caller imports.
+
+    Under ``python -W error`` a warning is raised and its traceback ends with
+    the class's ``__module__``: ``phonometry.fluids._state.FluidAssumptionWarning``
+    for the advisory of ``fluids.air()``, a path the reference never documents
+    and a private module a caller should not import. Thirteen published
+    warnings and the root were written in private modules. Each now carries
+    the public package that publishes it, which still finds the same class,
+    so a pickled warning comes back as itself.
+    """
+    import importlib
+    import pickle
+
+    from phonometry import PhonometryWarning
+
+    warnings = {
+        name: obj
+        for name, obj in _published_classes().items()
+        if issubclass(obj, Warning)
+    }
+    warnings["PhonometryWarning"] = PhonometryWarning
+    misnamed = [
+        f"{name} is named {cls.__module__}.{cls.__qualname__}"
+        for name, cls in sorted(warnings.items())
+        if any(part.startswith("_") for part in cls.__module__.split("."))
+        or getattr(importlib.import_module(cls.__module__), cls.__qualname__, None)
+        is not cls
+    ]
+    assert not misnamed, (
+        "warnings named by a module that does not publish them:\n  "
+        + ("\n  ".join(misnamed))
+    )
+    for cls in warnings.values():
+        assert type(pickle.loads(pickle.dumps(cls("x")))) is cls  # noqa: S301
+
+
+@pytest.mark.whole_tree
+@pytest.mark.skipif(
+    sys.version_info < (3, 13), reason="Python records __firstlineno__ from 3.13"
+)
+def test_inspect_reads_each_published_class_from_the_file_that_writes_it() -> None:
+    """``inspect`` opens a class's ``__module__`` at the line Python recorded.
+
+    A ``__module__`` assigned in the class body keeps the ``__firstlineno__``
+    the compiler recorded, so ``inspect.getsource(FilterBankWarning)`` read
+    ``phonometry/filters/__init__.py`` at the line ``filters/_warnings.py``
+    wrote the class on and printed a name of an import list, and the guards
+    that say where a public name is defined stopped on a ``TokenError``.
+    ``published_by`` names the class once it exists, which drops the line, so
+    ``inspect`` says it has no source. Every line kept opens the class's own
+    statement, decorators first; a class that keeps none is a warning named
+    so, with no annotation to read against the publisher's globals.
+    """
+    import inspect
+    import linecache
+
+    misread, unnamed = [], []
+    for name, cls in sorted(_published_classes().items()):
+        first = vars(cls).get("__firstlineno__")
+        if first is None:
+            if not issubclass(cls, Warning) or inspect.get_annotations(cls):
+                unnamed.append(name)
+            continue
+        path = inspect.getsourcefile(cls) or ""
+        lines = linecache.getlines(path)[first - 1 :]
+        # The recorded line is the first decorator's, or the statement's.
+        opening = lines[0].strip() if lines else ""
+        statement = next(
+            (ln.strip() for ln in lines if ln.lstrip()[:6] == "class "), ""
+        )
+        if not (
+            opening.startswith(("@", "class "))
+            and re.match(rf"class {cls.__name__}\b", statement)
+        ):
+            misread.append(f"{name}: {path}:{first} reads {opening!r}")
+    assert not misread, (
+        "inspect reads these classes from a line that does not write them:\n  "
+        + "\n  ".join(misread)
+    )
+    assert not unnamed, f"classes inspect cannot read that are no warnings: {unnamed}"
+
+
 def test_every_published_exception_is_named_an_error() -> None:
     """An exception reads as one: ``<Topic>Error``, as PEP 8 asks.
 
@@ -2878,11 +2961,40 @@ def _resolve_category(
     return None
 
 
+def _warn_caller_names(tree: ast.AST) -> set[str]:
+    """Each name *tree* binds to :func:`phonometry._internal.warnings.warn_caller`."""
+    return {
+        alias.asname or alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom)
+        and (node.module or "").split(".")[-1] == "warnings"
+        and (node.level > 0 or (node.module or "").startswith("phonometry."))
+        for alias in node.names
+        if alias.name == "warn_caller"
+    }
+
+
 def _warning_calls(
     tree: ast.AST,
 ) -> list[tuple[ast.FunctionDef | ast.AsyncFunctionDef | None, ast.Call]]:
-    """Every ``warnings.warn(...)`` call, with the function it is written in."""
+    """Every call that emits a warning, with the function it is written in.
+
+    That is each call of ``warn_caller``, the library's one way of warning,
+    under whatever name the module imports it as, and each ``warnings.warn``,
+    which :func:`bare_warnings` refuses on its own.
+    """
+    helper = _warn_caller_names(tree)
     calls: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef | None, ast.Call]] = []
+
+    def emits(call: ast.Call) -> bool:
+        if isinstance(call.func, ast.Name):
+            return call.func.id in helper
+        return (
+            isinstance(call.func, ast.Attribute)
+            and call.func.attr == "warn"
+            and isinstance(call.func.value, ast.Name)
+            and call.func.value.id == "warnings"
+        )
 
     def visit(
         node: ast.AST, function: ast.FunctionDef | ast.AsyncFunctionDef | None
@@ -2893,13 +3005,7 @@ def _warning_calls(
                 if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
                 else function
             )
-            if (
-                isinstance(child, ast.Call)
-                and isinstance(child.func, ast.Attribute)
-                and child.func.attr == "warn"
-                and isinstance(child.func.value, ast.Name)
-                and child.func.value.id == "warnings"
-            ):
+            if isinstance(child, ast.Call) and emits(child):
                 calls.append((function, child))
             visit(child, inner)
 
@@ -2981,7 +3087,9 @@ def test_every_warning_names_a_published_topic() -> None:
     found = [
         offence
         for path in sorted(SRC.rglob("*.py"))
-        if "warnings.warn" in path.read_text(encoding="utf-8")
+        if path != _WARN_CALLER_HOME
+        and {"warn_caller", "warnings.warn"}
+        & set(_WORDS.findall(path.read_text(encoding="utf-8")))
         for offence in warnings_without_a_topic(path)
     ]
     assert not found, "warnings emitted without a published topic:\n  " + (
@@ -3001,6 +3109,170 @@ def test_every_warning_relay_still_relays() -> None:
         assert name in relays, (
             f"{key} no longer raises a warning; drop it from WARNING_RELAYS"
         )
+
+
+#: The one module that calls :func:`warnings.warn`: the helper every other
+#: warning of the library goes through.
+_WARN_CALLER_HOME = SRC / "_internal" / "warnings.py"
+#: The modules that hold :func:`warnings.warn`, the standard one and the C
+#: one it is built on.
+_WARNINGS_MODULES = frozenset({"warnings", "_warnings"})
+#: The two functions of those modules that emit a warning.
+_EMITTERS = frozenset({"warn", "warn_explicit"})
+#: Dotted names and the attribute after a name, as a text search reads them.
+_WORDS = re.compile(r"[A-Za-z_][\w.]*")
+
+
+def _names_the_warnings_module(node: ast.expr, bound: set[str]) -> bool:
+    """Whether *node* is the :mod:`warnings` module, however it was reached.
+
+    A name the module binds to it, ``__import__("warnings")``,
+    ``importlib.import_module("warnings")`` or ``sys.modules["warnings"]``.
+    """
+    if isinstance(node, ast.Name):
+        return node.id in bound
+    if isinstance(node, ast.Call) and node.args:
+        first = node.args[0]
+        return (
+            ast.unparse(node.func) in {"__import__", "importlib.import_module"}
+            and isinstance(first, ast.Constant)
+            and first.value in _WARNINGS_MODULES
+        )
+    if isinstance(node, ast.Subscript):
+        return (
+            ast.unparse(node.value) == "sys.modules"
+            and isinstance(node.slice, ast.Constant)
+            and node.slice.value in _WARNINGS_MODULES
+        )
+    return False
+
+
+def bare_warnings(source: str, where: str) -> list[str]:
+    """Each place *source* reaches :func:`warnings.warn` itself, not ``warn_caller``.
+
+    A call, a reference handed on (``emit = warnings.warn``), an import of
+    the function (``from warnings import warn``), a ``getattr`` of it, and
+    ``warn_explicit`` beside it: every one of them names whatever frame its
+    own ``stacklevel`` counts to, which is the class of fault ``warn_caller``
+    exists to end.
+
+    :return: ``<where>:<line> <what>`` for each.
+    """
+    tree = ast.parse(source)
+    bound = {
+        alias.asname or alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+        if alias.name in _WARNINGS_MODULES
+    }
+    found: list[tuple[int, str]] = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.ImportFrom)
+            and node.level == 0
+            and (node.module in _WARNINGS_MODULES)
+        ):
+            found.extend(
+                (node.lineno, f"imports {node.module}.{alias.name}")
+                for alias in node.names
+                if alias.name in _EMITTERS or alias.name == "*"
+            )
+        elif (
+            isinstance(node, ast.Attribute)
+            and node.attr in _EMITTERS
+            and _names_the_warnings_module(node.value, bound)
+        ) or (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "getattr"
+            and len(node.args) >= 2  # noqa: PLR2004
+            and _names_the_warnings_module(node.args[0], bound)
+            and isinstance(node.args[1], ast.Constant)
+            and node.args[1].value in _EMITTERS
+        ):
+            found.append((node.lineno, f"reaches {ast.unparse(node)}"))
+    return [f"{where}:{line} {what}" for line, what in sorted(found)]
+
+
+@pytest.mark.whole_tree
+def test_the_library_warns_only_through_warn_caller() -> None:
+    """Every warning of the library names the caller's line, so none counts its own frames.
+
+    Of 178 calls, 175 passed a ``stacklevel`` counted by hand for one route,
+    the other three already skipping the package's files, and 33 of the 175
+    landed on a library line when the route was another: the
+    filter bank's warning at ``filters/core.py:698`` for every bank at
+    44.1 kHz, the room-volume advisory inside ``sound_absorption.py``, the
+    atmospheric absorption reached from aircraft and emission. Python's
+    ``default`` action keys its memory on the line, so each of them showed
+    once per process, and a filter by the caller's module missed it.
+    """
+    found = [
+        offence
+        for path in sorted(SRC.rglob("*.py"))
+        if path != _WARN_CALLER_HOME
+        and "warn" in (text := path.read_text(encoding="utf-8"))
+        for offence in bare_warnings(text, path.relative_to(SRC).as_posix())
+    ]
+    assert not found, (
+        "warnings emitted without warn_caller (phonometry._internal.warnings):\n  "
+        + "\n  ".join(found)
+    )
+
+
+def test_the_warning_rule_reads_every_way_to_reach_warnings_warn() -> None:
+    """A planted module that reaches the function each way is refused at each."""
+    source = (
+        "import importlib\n"
+        "import sys\n"
+        "import warnings\n"
+        "import warnings as w\n"
+        "import _warnings\n"
+        "from warnings import warn\n"
+        "from warnings import warn_explicit as explicit\n"
+        "from warnings import catch_warnings, simplefilter\n"
+        "from .._internal.warnings import warn_caller\n"
+        "\n"
+        "\n"
+        "def f():\n"
+        "    warnings.warn('x', UserWarning, stacklevel=2)\n"
+        "    w.warn('x')\n"
+        "    emit = warnings.warn_explicit\n"
+        "    _warnings.warn('x')\n"
+        "    getattr(warnings, 'warn')('x')\n"
+        "    __import__('warnings').warn('x')\n"
+        "    importlib.import_module('warnings').warn('x')\n"
+        "    sys.modules['warnings'].warn('x')\n"
+        "    warn_caller('x', UserWarning)\n"
+        "    with catch_warnings():\n"
+        "        simplefilter('ignore', UserWarning)\n"
+    )
+    assert bare_warnings(source, "x.py") == [
+        "x.py:6 imports warnings.warn",
+        "x.py:7 imports warnings.warn_explicit",
+        "x.py:13 reaches warnings.warn",
+        "x.py:14 reaches w.warn",
+        "x.py:15 reaches warnings.warn_explicit",
+        "x.py:16 reaches _warnings.warn",
+        "x.py:17 reaches getattr(warnings, 'warn')",
+        "x.py:18 reaches __import__('warnings').warn",
+        "x.py:19 reaches importlib.import_module('warnings').warn",
+        "x.py:20 reaches sys.modules['warnings'].warn",
+    ]
+
+
+def test_the_topic_rule_reads_warn_caller_under_any_name() -> None:
+    """The category of a ``warn_caller`` call is read whatever the import calls it."""
+    tree = ast.parse(
+        "from ..._internal.warnings import warn_caller as advise\n"
+        "def f():\n"
+        "    advise('x', SomeWarning)\n"
+    )
+    assert [
+        (function.name if function else None, ast.unparse(call))
+        for function, call in _warning_calls(tree)
+    ] == [("f", "advise('x', SomeWarning)")]
 
 
 def broad_warning_filters(path: Path) -> list[str]:
@@ -3068,10 +3340,11 @@ def broad_warning_filters(path: Path) -> list[str]:
 def test_a_warning_filter_in_the_library_names_its_topic() -> None:
     """The library silences the one advisory it means, never a whole family.
 
-    The railway passage bank silenced ``UserWarning`` around the filter bank
-    it builds, to drop the band the rate cannot carry; inside that block every
-    advisory the bank raised for any other reason went unseen as well. It now
-    silences ``FilterBankWarning``, the topic the bank warns with.
+    The railway passage analysis silenced ``UserWarning`` around the filter
+    bank it builds, to drop the band the rate cannot carry; inside that block
+    every advisory the bank raised for any other reason went unseen as well.
+    It now checks the band against the rate before it builds the bank, and
+    silences nothing.
     """
     found = [
         offence

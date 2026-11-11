@@ -69,7 +69,6 @@ the spectral character of 9.5.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
@@ -102,6 +101,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from ._shared import (
     SoundPowerWarning,
     _a_weighting_corrections,
@@ -281,12 +281,11 @@ def special_room_background_correction(
         raise ValueError(msg) from exc
     correction, met = _table4_correction(delta)
     if not np.all(met):
-        warnings.warn(
+        warn_caller(
             "A background margin is below 4 dB; Table 4 has no row for it, the "
             "4 dB row is applied and the level can be reported only as not "
             f"meeting the background requirement ({_STANDARD}, 9.8).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return correction
 
@@ -750,12 +749,11 @@ def check_special_room_reverberation(
         source_volume_m3=float(source),
     )
     if check.source_size_recommended is False:
-        warnings.warn(
+        warn_caller(
             f"The noise source is {source:g} m³ in a room of {volume:g} m³; "
             f"clause 5 recommends at most {100.0 * _SOURCE_VOLUME_FRACTION:g} % of the "
             f"room, {_SOURCE_VOLUME_FRACTION * volume:g} m³ ({_STANDARD}).",
             SoundPowerWarning,
-            stacklevel=2,
         )
     return check
 
@@ -1233,13 +1231,6 @@ def special_room_source_locations(
     if n_positions < 2:  # noqa: PLR2004
         msg = "'levels' must hold at least two microphone positions for Formula (4)."
         raise ValueError(msg)
-    if n_positions != _SURVEY_MICROPHONES:
-        warnings.warn(
-            f"{n_positions} microphone position(s) were surveyed; step 1 of 9.4 "
-            f"uses {_SURVEY_MICROPHONES} ({_STANDARD}).",
-            SoundPowerWarning,
-            stacklevel=2,
-        )
     if n_microphone_positions not in _TABLE3_MICROPHONES:
         msg = (
             "'n_microphone_positions' must be one of the columns of Table 3, "
@@ -1268,7 +1259,7 @@ def special_room_source_locations(
         s_a = float(_survey_deviation(a_levels[:, None])[0])
         class_a = _sm_class(s_a)
         n_a = _TABLE3[class_a]["A"][column]
-    return SourceLocationPlan(
+    plan = SourceLocationPlan(
         standard=_STANDARD,
         frequencies=freqs,
         standard_deviation_db=np.asarray(s_m, dtype=np.float64),
@@ -1280,6 +1271,14 @@ def special_room_source_locations(
         a_weighted_standard_deviation_db=s_a,
         n_a_weighted_source_locations=n_a,
     )
+    # Advised once the plan stands, so a refusal above comes first under -W error.
+    if n_positions != _SURVEY_MICROPHONES:
+        warn_caller(
+            f"{n_positions} microphone position(s) were surveyed; step 1 of 9.4 "
+            f"uses {_SURVEY_MICROPHONES} ({_STANDARD}).",
+            SoundPowerWarning,
+        )
+    return plan
 
 
 @dataclass(frozen=True)
@@ -1580,66 +1579,68 @@ def _table5_sigma(frequencies: np.ndarray) -> np.ndarray:
 
 
 def _background_advisory(
-    requirement: np.ndarray, *, measured: bool, stacklevel: int
+    requirement: np.ndarray,
+    *,
+    measured: bool,
 ) -> None:
     """Warn when a band cannot be reported as meeting 6.5 and 9.8."""
     if not measured:
-        warnings.warn(
+        warn_caller(
             "No background levels were supplied; 6.5 checks the background at "
             f"each microphone position ({_STANDARD}), so no band can be reported "
             "as meeting it.",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
     elif not np.all(requirement):
-        warnings.warn(
+        warn_caller(
             "A background margin is below 4 dB in one or more bands; Table 4 "
             "has no row for it and those levels can be reported only as not "
             f"meeting the background requirement ({_STANDARD}, 9.8).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
 
 
 def _room_advisories(
-    volume: float, nominal: float, freqs: np.ndarray, stacklevel: int
+    volume: float,
+    nominal: float,
+    freqs: np.ndarray,
 ) -> None:
     """Warn when the room of a direct determination is outside 6.2 or 6.3."""
     if volume < _MIN_VOLUME_M3:
-        warnings.warn(
+        warn_caller(
             f"The room is {volume:g} m³; a special reverberation test room is "
             f"at least {_MIN_VOLUME_M3:g} m³ ({_STANDARD}, 6.2).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
     if (
         volume > _MAX_VOLUME_HIGH_OCTAVES_M3
         and np.max(freqs) >= _EIGHT_KHZ_OCTAVE_LOWER_EDGE_HZ
     ):
-        warnings.warn(
+        warn_caller(
             f"The room is {volume:g} m³ and the 8 kHz octave is measured; the "
             f"direct method then needs at most {_MAX_VOLUME_HIGH_OCTAVES_M3:g} m³ "
             f"({_STANDARD}, 6.2).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
     if not _TNOM_MIN_S <= nominal <= _TNOM_MAX_S:
-        warnings.warn(
+        warn_caller(
             f"The nominal reverberation time is {nominal:g} s; 6.3 puts it "
             f"between {_TNOM_MIN_S:g} s and {_TNOM_MAX_S:g} s ({_STANDARD}).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
 
 
-def _microphone_advisory(n_positions: int, *, traverse: bool, stacklevel: int) -> None:
+def _microphone_advisory(
+    n_positions: int,
+    *,
+    traverse: bool,
+) -> None:
     """Warn below the three microphone positions of the first Table 3 column."""
     if not traverse and n_positions < _MIN_MICROPHONES:
-        warnings.warn(
+        warn_caller(
             f"{n_positions} microphone position(s) were supplied; Table 3 starts "
             f"at {_MIN_MICROPHONES} and 9.4 generally needs 6 ({_STANDARD}).",
             SoundPowerWarning,
-            stacklevel=stacklevel,
         )
 
 
@@ -1745,8 +1746,6 @@ def sound_power_special_room(
     )
     omc = _check_uncertainty_inputs(sigma_omc_db, coverage_factor)
     _validate_meteorology(temperature_c, static_pressure_kpa)
-    _microphone_advisory(n_positions, traverse=traverse, stacklevel=3)
-    _room_advisories(volume, nominal, freqs, stacklevel=3)
     background = (
         None
         if background_levels is None
@@ -1755,9 +1754,6 @@ def sound_power_special_room(
         )
     )
     mean, shift, margin = _corrected_mean(grid, background)
-    _background_advisory(
-        _margin_met(margin), measured=background is not None, stacklevel=3
-    )
     room_term = (
         -10.0 * math.log10(nominal / _T0_S)
         + 10.0 * math.log10(volume / _V0_M3)
@@ -1773,7 +1769,7 @@ def sound_power_special_room(
         )
         level_a_direct = mean_a + room_term
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
-    return SpecialRoomSoundPowerResult(
+    result = SpecialRoomSoundPowerResult(
         frequencies=freqs,
         sound_power_level=level,
         mean_pressure_level=mean,
@@ -1797,6 +1793,13 @@ def sound_power_special_room(
         n_microphone_positions=n_positions,
         n_source_positions=n_sources,
     )
+    # The advisories come once the result stands: a refusal of any argument,
+    # the A-weighted levels' among them, is never replaced by one under -W
+    # error.
+    _microphone_advisory(n_positions, traverse=traverse)
+    _room_advisories(volume, nominal, freqs)
+    _background_advisory(_margin_met(margin), measured=background is not None)
+    return result
 
 
 def sound_power_special_room_comparison(
@@ -1865,7 +1868,6 @@ def sound_power_special_room_comparison(
     freqs = _octave_frequencies(frequencies, n_bands, _TABLE_F1)
     omc = _check_uncertainty_inputs(sigma_omc_db, coverage_factor)
     _validate_meteorology(temperature_c, static_pressure_kpa)
-    _microphone_advisory(n_positions, traverse=traverse, stacklevel=3)
     ref_grid, ref_traverse = _measurement_grid(reference_levels, "reference_levels")
     if ref_grid.shape[0] != 1 or ref_grid.shape[2] != n_bands:
         msg = (
@@ -1874,13 +1876,6 @@ def sound_power_special_room_comparison(
         )
         raise ValueError(msg)
     n_ref_positions = ref_grid.shape[1]
-    if not ref_traverse and n_ref_positions < _SURVEY_MICROPHONES:
-        warnings.warn(
-            f"The reference source was measured at {n_ref_positions} position(s); "
-            f"10.3 asks for no fewer than {_SURVEY_MICROPHONES} ({_STANDARD}).",
-            SoundPowerWarning,
-            stacklevel=2,
-        )
     # Formula (10) gives the level under the conditions of the test (Annex E),
     # so a calibration is read there, less its own C2.
     power = _finite(
@@ -1923,13 +1918,8 @@ def sound_power_special_room_comparison(
     )
     mean, shift, margin = _corrected_mean(grid, background)
     mean_ref, _, margin_ref = _corrected_mean(ref_grid, ref_background)
-    _background_advisory(
-        _margin_met(margin) & _margin_met(margin_ref),
-        measured=background is not None,
-        stacklevel=3,
-    )
     level = np.asarray(mean + (power - mean_ref), dtype=np.float64)
-    return SpecialRoomSoundPowerResult(
+    result = SpecialRoomSoundPowerResult(
         frequencies=freqs,
         sound_power_level=level,
         mean_pressure_level=mean,
@@ -1953,3 +1943,15 @@ def sound_power_special_room_comparison(
         n_microphone_positions=n_positions,
         n_source_positions=n_sources,
     )
+    # As in the direct method, every advisory waits for the result to stand.
+    _microphone_advisory(n_positions, traverse=traverse)
+    if not ref_traverse and n_ref_positions < _SURVEY_MICROPHONES:
+        warn_caller(
+            f"The reference source was measured at {n_ref_positions} position(s); "
+            f"10.3 asks for no fewer than {_SURVEY_MICROPHONES} ({_STANDARD}).",
+            SoundPowerWarning,
+        )
+    _background_advisory(
+        _margin_met(margin) & _margin_met(margin_ref), measured=background is not None
+    )
+    return result

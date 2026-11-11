@@ -23,7 +23,6 @@ Formulae 4/5, Table 2), clamped at zero. The HTLAN combines the age component
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -37,12 +36,13 @@ from .._internal.types import Sex  # noqa: TC001
 from .._internal.validation import (
     check_engine,
     real_array,
+    require_finite,
     require_finite_fields,
     require_ranks,
     require_same_length,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, advisories_held, warn_caller
 from .threshold import age_threshold
 
 if TYPE_CHECKING:
@@ -144,29 +144,26 @@ def _warn_outside_domain(
     outside (0, 1) are rejected outright).
     """
     if not _VALIDATED_YEARS[0] <= exposure_duration_years <= _VALIDATED_YEARS[1]:
-        warnings.warn(
+        warn_caller(
             f"exposure duration {exposure_duration_years:g} years is outside the 1-40 year "
             f"range ISO 1999:2013 validates (clause 6.3.1); the result is an "
             f"extrapolation.",
             NoiseInducedHearingLossWarning,
-            stacklevel=3,
         )
     if not _VALIDATED_FRACTILES[0] <= fractile <= _VALIDATED_FRACTILES[1]:
-        warnings.warn(
+        warn_caller(
             f"fractile {fractile:g} lies in the distribution tails "
             f"(Q < 5 % or Q > 95 %) that ISO 1999:2013 calls unreliable and "
             f"says should not be estimated (clause 6.3.2).",
             NoiseInducedHearingLossWarning,
-            stacklevel=3,
         )
     if l_ex > _VALIDATED_L_EX_MAX:
-        warnings.warn(
+        warn_caller(
             f"L_EX,8h = {l_ex:g} dB exceeds the 100 dB covered by "
             f"ISO 1999:2013 (Annex D; Scope NOTE 4 restricts validity to the "
             f"stated exposure levels), so the quadratic Formula (2) is used "
             f"outside its supporting data; the result is an extrapolation.",
             NoiseInducedHearingLossWarning,
-            stacklevel=3,
         )
 
 
@@ -563,8 +560,9 @@ def nipts(
     :param frequencies: Optional subset of the audiometric frequencies, in
         hertz; ``None`` uses all six (500 Hz to 6000 Hz).
     :return: A :class:`NIPTSResult` with the distribution and ``.plot()``.
-    :raises ValueError: for a non-positive duration, a fractile outside (0, 1),
-        or an unknown frequency.
+    :raises ValueError: for a level or a duration that is not finite, a
+        non-positive duration, a fractile outside (0, 1), or an unknown
+        frequency.
     :raises TypeError: if ``exposure_duration_years``, ``fractile`` or ``l_ex`` is not a
         single number, or ``frequencies`` holds a text or a value that is not a real
         number.
@@ -574,33 +572,40 @@ def nipts(
     runs but a :class:`NoiseInducedHearingLossWarning` marks the result as an
     extrapolation, and the ``.report()`` fiche prints the matching caveat.
     """
-    require_scalar(l_ex, "l_ex")
-    require_scalar(exposure_duration_years, "exposure_duration_years")
-    if exposure_duration_years <= 0.0:
-        msg = f"'exposure_duration_years' must be positive; got {exposure_duration_years}."
-        raise ValueError(msg)
-    require_scalar(fractile, "fractile")
-    if not 0.0 < fractile < 1.0:
-        msg = f"fractile must be in (0, 1); got {fractile}."
-        raise ValueError(msg)
-    _warn_outside_domain(float(l_ex), float(exposure_duration_years), float(fractile))
+    # Finite before the domain advisory below, which a NaN would otherwise
+    # trigger first and, under -W error, raise in place of this refusal.
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        require_finite(l_ex, "l_ex")
+        require_finite(exposure_duration_years, "exposure_duration_years")
+        if exposure_duration_years <= 0.0:
+            msg = f"'exposure_duration_years' must be positive; got {exposure_duration_years}."
+            raise ValueError(msg)
+        require_scalar(fractile, "fractile")
+        if not 0.0 < fractile < 1.0:
+            msg = f"fractile must be in (0, 1); got {fractile}."
+            raise ValueError(msg)
+        _warn_outside_domain(
+            float(l_ex), float(exposure_duration_years), float(fractile)
+        )
 
-    from scipy.special import ndtri  # standard-normal quantile
+        from scipy.special import ndtri  # standard-normal quantile
 
-    n50, du, dl = _nipts_components(float(l_ex), float(exposure_duration_years))
-    z = float(ndtri(fractile))
-    value = np.maximum(n50 + z * (du if z >= 0.0 else dl), 0.0)
+        n50, du, dl = _nipts_components(float(l_ex), float(exposure_duration_years))
+        z = float(ndtri(fractile))
+        value = np.maximum(n50 + z * (du if z >= 0.0 else dl), 0.0)
 
-    return NIPTSResult(
-        l_ex=float(l_ex),
-        exposure_duration_years=float(exposure_duration_years),
-        fractile=float(fractile),
-        frequencies=_select(_NIPTS_FREQUENCIES, frequencies),
-        median=_select(n50, frequencies),
-        value=_select(value, frequencies),
-        spread_upper=_select(du, frequencies),
-        spread_lower=_select(dl, frequencies),
-    )
+        return NIPTSResult(
+            l_ex=float(l_ex),
+            exposure_duration_years=float(exposure_duration_years),
+            fractile=float(fractile),
+            frequencies=_select(_NIPTS_FREQUENCIES, frequencies),
+            median=_select(n50, frequencies),
+            value=_select(value, frequencies),
+            spread_upper=_select(du, frequencies),
+            spread_lower=_select(dl, frequencies),
+        )
 
 
 def age_and_noise_threshold(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarray:

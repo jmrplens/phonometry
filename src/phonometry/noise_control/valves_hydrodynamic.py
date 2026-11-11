@@ -63,7 +63,6 @@ areas, only the last stage is calculated at all.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -81,6 +80,7 @@ from .._internal.validation import (
     require_positive_array,
     require_scalar,
 )
+from .._internal.warnings import warn_caller
 from .valves import (
     AIR_SPEED_OF_SOUND_M_S,
     PIPE_SPEED_OF_SOUND_M_S,
@@ -1803,18 +1803,6 @@ def stage_conditions(
             f"p_2 = {outlet_pressure_pa!r} Pa and p_v = {vapor_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
-    shares = float(np.sum((capacity / stages) ** 2))
-    if abs(shares - 1.0) > _SERIES_LAW_TOLERANCE:
-        warnings.warn(
-            "The stage coefficients account for "
-            f"{shares:.0%} of the valve's own resistance, where the series "
-            "law 1/C^2 = sum(1/C_i^2) asks for 100 %. Equation (24b) fixes "
-            "the last stage's outlet at the valve outlet, so that stage "
-            "absorbs the whole of the difference and its pressure ratio is "
-            "what moves.",
-            ValveNoiseWarning,
-            stacklevel=2,
-        )
     total = p1 - p2
     inlets = [p1]
     for previous in stages[:-1]:
@@ -1827,6 +1815,19 @@ def stage_conditions(
             "1/C^2 = sum(1/C_i^2) says each C_i is larger than C."
         )
         raise ValueError(msg)
+    # Advised only once the stages are known to make a result: a warning that
+    # describes a result never returned would run ahead of the refusal.
+    shares = float(np.sum((capacity / stages) ** 2))
+    if abs(shares - 1.0) > _SERIES_LAW_TOLERANCE:
+        warn_caller(
+            "The stage coefficients account for "
+            f"{shares:.0%} of the valve's own resistance, where the series "
+            "law 1/C^2 = sum(1/C_i^2) asks for 100 %. Equation (24b) fixes "
+            "the last stage's outlet at the valve outlet, so that stage "
+            "absorbs the whole of the difference and its pressure ratio is "
+            "what moves.",
+            ValveNoiseWarning,
+        )
     outlets = [*inlets[1:], p2]
     return tuple(
         StageConditions(

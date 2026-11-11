@@ -152,7 +152,7 @@ def test_non_finite_transfer_stiffness_is_refused(bad: float) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", PhonometryWarning)
         with pytest.raises(
-            ValueError, match=r"'transfer_stiffness' must contain only finite"
+            ValueError, match=r"'transmissibility' must contain only finite"
         ):
             vibration.indirect_transfer_stiffness_result(
                 frequencies=np.array([10.0, 20.0, 40.0]),

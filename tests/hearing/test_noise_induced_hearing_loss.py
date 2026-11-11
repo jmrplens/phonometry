@@ -13,6 +13,7 @@ most-susceptible tenth (fractile 0.9 here) and its 90 % column the least
 from __future__ import annotations
 
 import dataclasses
+import warnings
 
 import numpy as np
 import pytest
@@ -291,14 +292,13 @@ def test_nipts_rejects_nan_exposure_level() -> None:
 
 
 def test_nipts_rejects_nan_years() -> None:
-    with (
-        pytest.warns(
-            m.NoiseInducedHearingLossWarning,
-            match=r"exposure duration .* is outside the 1-40 year range",
-        ),
-        pytest.raises(ValueError, match="'exposure_duration_years' must be finite"),
-    ):
-        m.nipts(l_ex=85.0, exposure_duration_years=float("nan"))
+    """A NaN is refused before the domain advisory it would otherwise trigger."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with pytest.raises(
+            ValueError, match="'exposure_duration_years' must be finite"
+        ):
+            m.nipts(l_ex=85.0, exposure_duration_years=float("nan"))
 
 
 def test_nipts_rejects_an_empty_frequency_subset() -> None:

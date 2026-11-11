@@ -64,7 +64,6 @@ most of all. ``parameters`` chooses which rows of Table D.1 to compute.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -74,7 +73,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import reduce_with_plain_rows
 from ..._internal.validation import is_text, real_number, require_choice
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...filters.weighting import weighting_filter
 from ...io._resolve import resolve_calibration, resolve_fs, resolve_samples
 from ...psychoacoustics.loudness.zwicker import _percentile, loudness_zwicker
@@ -485,18 +484,16 @@ def _two_channels(
 def _check_recording(duration_s: float, fs: float) -> None:
     """Warn where the recording falls short of ISO/TS 12913-2 Annex D."""
     if duration_s < _MINIMUM_INTERVAL_S:
-        warnings.warn(
+        warn_caller(
             f"The recording lasts {duration_s:.1f} s; ISO/TS 12913-2 D.3 requires a "
             "measurement time interval of at least 3 min.",
             SoundscapeWarning,
-            stacklevel=3,
         )
     if fs < _MINIMUM_FS_HZ:
-        warnings.warn(
+        warn_caller(
             f"The sampling frequency is {fs:g} Hz; ISO/TS 12913-2 D.6 requires at "
             "least 44.1 kHz.",
             SoundscapeWarning,
-            stacklevel=3,
         )
 
 
@@ -686,7 +683,6 @@ def binaural_indicators(
         require_choice(name, "parameters", tuple(BINAURAL_PARAMETERS))
     pressure, rate = _two_channels(x, fs, calibration_factor)
     duration = pressure.shape[1] / rate
-    _check_recording(duration, rate)
     computed: dict[str, BinauralMetric] = {}
     missing: dict[str, str] = {}
     for name in BINAURAL_PARAMETERS:
@@ -708,7 +704,7 @@ def binaural_indicators(
         else:
             found = _fluctuation(pressure, rate, field)
         computed.update({metric.symbol: metric for metric in found})
-    return BinauralIndicators(
+    indicators = BinauralIndicators(
         metrics=computed,
         not_implemented=missing,
         parameters=rows,
@@ -716,3 +712,8 @@ def binaural_indicators(
         duration_s=duration,
         field=field,
     )
+    # Advised once the metrics stand: a recording whose loudness ratio is
+    # undefined is refused, and under -W error this advisory would otherwise
+    # stand in for that refusal.
+    _check_recording(duration, rate)
+    return indicators

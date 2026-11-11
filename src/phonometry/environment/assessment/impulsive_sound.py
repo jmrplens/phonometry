@@ -58,7 +58,6 @@ the reported ``LAeq`` and the adjusted ``LAeq`` depend on calibration.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -77,7 +76,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..._internal.warnings import PhonometryWarning
+from ..._internal.warnings import PhonometryWarning, warn_caller
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 from ...metrology.reference_values import REFERENCE_VALUES
 
@@ -403,12 +402,11 @@ def impulse_prominence(
     predicted_prominence(orate, ld)  # refuses a non-positive rate or difference
     qualifies = orate > _ONSET_RATE_LIMIT
     if not np.all(qualifies):
-        warnings.warn(
+        warn_caller(
             "One or more level rises have onset rates at or below 10 dB/s: "
             "they do not qualify as impulses (NT ACOU 112, clauses 4.5/8) "
             "and cannot produce a KI adjustment.",
             ImpulseProminenceWarning,
-            stacklevel=2,
         )
     return ImpulseProminenceResult(
         onset_rates=orate,
@@ -1008,24 +1006,25 @@ def impulsive_sound_adjustment(
     realised_dt = float(times[1] - times[0]) if times.size > 1 else dt
     onsets = detect_onsets(levels, realised_dt, onset_rate_method=onset_rate_method)
 
-    if not any(o.qualifies for o in onsets):
-        warnings.warn(
-            "No onset with a gradient above 10 dB/s was found; the interval is "
-            "not impulsive and the adjustment is 0 dB (ISO/PAS 1996-3, Clause 6).",
-            ImpulsiveSoundWarning,
-            stacklevel=2,
-        )
-
     if laeq is None:
         laeq = _equivalent_level(x, fs, reference_pressure_pa, calibration_offset)
 
-    return ImpulsiveSoundResult(
+    result = ImpulsiveSoundResult(
         times=times,
         levels=levels,
         dt=realised_dt,
         onsets=onsets,
         laeq=real_number(laeq, "laeq"),
     )
+    # The interval is advised on once the result stands, so a refused laeq is
+    # what the caller meets (rule A63).
+    if not any(o.qualifies for o in onsets):
+        warn_caller(
+            "No onset with a gradient above 10 dB/s was found; the interval is "
+            "not impulsive and the adjustment is 0 dB (ISO/PAS 1996-3, Clause 6).",
+            ImpulsiveSoundWarning,
+        )
+    return result
 
 
 # ---------------------------------------------------------------------------

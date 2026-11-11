@@ -106,6 +106,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from ..._internal.warnings import advisories_held
 from .low_frequency import (
     LowFrequencyProcedure,
     _warn_when_the_procedure_is_required,
@@ -1045,81 +1046,84 @@ def airborne_insulation(
         ``frequencies`` names any of the three bands but no ``receiver_low_frequency``
         answers Clause 8.1.
     """
-    l1_bands = _as_band_levels(l1, "l1")
-    l2_bands = _as_band_levels(l2, "l2")
-    t = real_array(t2, "t2")
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        l1_bands = _as_band_levels(l1, "l1")
+        l2_bands = _as_band_levels(l2, "l2")
+        t = real_array(t2, "t2")
 
-    # Compared by count, not by shape, so a `t2` that carries an extra axis
-    # falls through to `_validate_reverberation`, which says that is what is
-    # wrong. Comparing shapes answered a (1, n) array against n bands with a
-    # band-count complaint, which was false: the counts matched.
-    require_equal_counts(
-        "airborne_insulation",
-        {"l1": l1_bands.size, "l2": l2_bands.size, "t2": t.size},
-        "band",
-    )
-    _validate_reverberation(t, t0)
-    checked_frequencies = _checked_frequency_axis(
-        frequencies, l2_bands.size, "airborne_insulation"
-    )
+        # Compared by count, not by shape, so a `t2` that carries an extra axis
+        # falls through to `_validate_reverberation`, which says that is what is
+        # wrong. Comparing shapes answered a (1, n) array against n bands with a
+        # band-count complaint, which was false: the counts matched.
+        require_equal_counts(
+            "airborne_insulation",
+            {"l1": l1_bands.size, "l2": l2_bands.size, "t2": t.size},
+            "band",
+        )
+        _validate_reverberation(t, t0)
+        checked_frequencies = _checked_frequency_axis(
+            frequencies, l2_bands.size, "airborne_insulation"
+        )
 
-    source_lf: LowFrequencyResult | None = None
-    receiver_lf: LowFrequencyResult | None = None
-    if source_low_frequency is not None or receiver_low_frequency is not None:
-        freqs = _require_frequencies(checked_frequencies, "airborne_insulation")
-        if source_low_frequency is not None:
-            source_lf = apply_low_frequency_procedure(
-                l1_bands,
-                frequencies=freqs,
-                procedure=source_low_frequency,
-                room="source",
-            )
-            l1_bands = source_lf.levels
-        if receiver_low_frequency is not None:
-            _check_low_frequency_volume(
-                receiver_low_frequency, volume, "airborne_insulation"
-            )
-            receiver_lf = apply_low_frequency_procedure(
-                l2_bands,
-                frequencies=freqs,
-                procedure=receiver_low_frequency,
-                reverberation_time=t,
-                room="receiving",
-            )
-            l2_bands = receiver_lf.levels
-            # `reverberation_time=` was passed, so the substituted vector is
-            # never None on this branch; the test narrows the type rather than
-            # guarding against a case the call above has already excluded.
-            substituted = receiver_lf.reverberation_time
-            if substituted is not None:
-                t = substituted
+        source_lf: LowFrequencyResult | None = None
+        receiver_lf: LowFrequencyResult | None = None
+        if source_low_frequency is not None or receiver_low_frequency is not None:
+            freqs = _require_frequencies(checked_frequencies, "airborne_insulation")
+            if source_low_frequency is not None:
+                source_lf = apply_low_frequency_procedure(
+                    l1_bands,
+                    frequencies=freqs,
+                    procedure=source_low_frequency,
+                    room="source",
+                )
+                l1_bands = source_lf.levels
+            if receiver_low_frequency is not None:
+                _check_low_frequency_volume(
+                    receiver_low_frequency, volume, "airborne_insulation"
+                )
+                receiver_lf = apply_low_frequency_procedure(
+                    l2_bands,
+                    frequencies=freqs,
+                    procedure=receiver_low_frequency,
+                    reverberation_time=t,
+                    room="receiving",
+                )
+                l2_bands = receiver_lf.levels
+                # `reverberation_time=` was passed, so the substituted vector is
+                # never None on this branch; the test narrows the type rather than
+                # guarding against a case the call above has already excluded.
+                substituted = receiver_lf.reverberation_time
+                if substituted is not None:
+                    t = substituted
 
-    d = l1_bands - l2_bands
-    dnt = d + 10.0 * np.log10(t / t0)
-    r_prime = _apparent_reduction_index(d, t, area, volume)
+        d = l1_bands - l2_bands
+        dnt = d + 10.0 * np.log10(t / t0)
+        r_prime = _apparent_reduction_index(d, t, area, volume)
 
-    # Only the receiving room, because only its volume is an argument here:
-    # Clause 8.1 tests the two rooms on their own volumes and a source room
-    # small enough to trigger is something the caller has to declare.
-    _warn_when_the_procedure_is_required(
-        volume,
-        checked_frequencies,
-        receiver_low_frequency,
-        owner="airborne_insulation",
-        argument="receiver_low_frequency",
-    )
+        # Only the receiving room, because only its volume is an argument here:
+        # Clause 8.1 tests the two rooms on their own volumes and a source room
+        # small enough to trigger is something the caller has to declare.
+        _warn_when_the_procedure_is_required(
+            volume,
+            checked_frequencies,
+            receiver_low_frequency,
+            owner="airborne_insulation",
+            argument="receiver_low_frequency",
+        )
 
-    return AirborneInsulationResult(
-        d=d,
-        dnt=dnt,
-        r_prime=r_prime,
-        l1=l1_bands,
-        l2=l2_bands,
-        t2=t,
-        t0=t0,
-        source_low_frequency=source_lf,
-        receiver_low_frequency=receiver_lf,
-    )
+        return AirborneInsulationResult(
+            d=d,
+            dnt=dnt,
+            r_prime=r_prime,
+            l1=l1_bands,
+            l2=l2_bands,
+            t2=t,
+            t0=t0,
+            source_low_frequency=source_lf,
+            receiver_low_frequency=receiver_lf,
+        )
 
 
 # --- ISO 16283-2 field impact sound insulation ---------------------------
@@ -1417,6 +1421,21 @@ def facade_insulation(
         frequencies, l2_bands.size, "facade_insulation"
     )
 
+    # The geometry is checked before the low-frequency procedure can advise on
+    # its corners (rule A63).
+    _validate_facade_geometry(area, volume, surface_level)
+    surf_bands = (
+        None
+        if surface_level is None
+        else _as_band_levels(surface_level, "surface_level")
+    )
+    if surf_bands is not None:
+        require_equal_shapes(
+            "facade_insulation",
+            {"surface_level": surf_bands.shape, "l2": l2_bands.shape},
+            "band",
+        )
+
     low_frequency_result: LowFrequencyResult | None = None
     if low_frequency is not None:
         if method != _FACADE_LOUDSPEAKER:
@@ -1445,8 +1464,6 @@ def facade_insulation(
     d_2m = l1_bands - l2_bands
     d_2m_nt = d_2m + 10.0 * np.log10(t / t0)
 
-    _validate_facade_geometry(area, volume, surface_level)
-
     # Sabine equivalent absorption area A = 0,16 V / T (Clause 3.17).
     absorption = 0.16 * volume / t if volume is not None else None
 
@@ -1455,13 +1472,7 @@ def facade_insulation(
         d_2m_n = d_2m - 10.0 * np.log10(absorption / _A0_FACADE)
 
     r_prime: np.ndarray | None = None
-    if surface_level is not None and area is not None and absorption is not None:
-        surf_bands = _as_band_levels(surface_level, "surface_level")
-        require_equal_shapes(
-            "facade_insulation",
-            {"surface_level": surf_bands.shape, "l2": l2_bands.shape},
-            "band",
-        )
+    if surf_bands is not None and area is not None and absorption is not None:
         r_prime = (
             surf_bands
             - l2_bands

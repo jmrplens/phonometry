@@ -73,7 +73,6 @@ thresholds and tables.
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
@@ -92,7 +91,7 @@ from .._internal.validation import (
     require_finite_matrix,
     require_positive,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 from ..emission._shared import ROOM_ABSORPTION_ESTIMATES, _a_weighting_corrections
 from ._insulation_shared import (
     MANDATORY_BAND_RANGE_HZ,
@@ -544,18 +543,6 @@ def _insulation(
     without, with_, freqs = _pair(level_without, level_with, frequencies, names)
     fraction = require_band_fraction(fraction, "fraction")
     where, kind = _method_pair(condition, source_kind)
-    _check_band_range(
-        freqs,
-        fraction,
-        standard="ISO 11546",
-        category=EnclosureInsulationWarning,
-    )
-    if base_standard in _A_WEIGHTED_ONLY and without.size > 1:
-        msg = (
-            f"{base_standard} determines an A-weighted value only (Table 1 of "
-            "ISO 11546), so a band spectrum cannot be declared from it."
-        )
-        warnings.warn(msg, EnclosureInsulationWarning, stacklevel=3)
     insulation = without - with_
     weighted: float | None = None
     if (a_weighted_without is None) != (a_weighted_with is None):
@@ -575,7 +562,7 @@ def _insulation(
         # per band, so a single pair of levels is that number: naming it as
         # such is what keeps the result from passing a total off as a band.
         weighted = float(insulation[0])
-    return EnclosureInsulationResult(
+    result = EnclosureInsulationResult(
         frequencies=freqs,
         level_without=without,
         level_with=with_,
@@ -587,6 +574,22 @@ def _insulation(
         base_standard=str(base_standard),
         fraction=fraction,
     )
+    # The band range and a survey standard's band spectrum are advised on once
+    # the result stands, so a refused A-weighted pair is what the caller meets
+    # (rule A63).
+    _check_band_range(
+        freqs,
+        fraction,
+        standard="ISO 11546",
+        category=EnclosureInsulationWarning,
+    )
+    if base_standard in _A_WEIGHTED_ONLY and without.size > 1:
+        msg = (
+            f"{base_standard} determines an A-weighted value only (Table 1 of "
+            "ISO 11546), so a band spectrum cannot be declared from it."
+        )
+        warn_caller(msg, EnclosureInsulationWarning)
+    return result
 
 
 def enclosure_sound_power_insulation(

@@ -93,7 +93,6 @@ import math
 import numbers
 import re
 import unicodedata
-import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from fractions import Fraction
@@ -132,7 +131,7 @@ from .._internal.json_input import (
     write_beside,
 )
 from .._internal.validation import real_number, require_scalar
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ._sidecar import _SIDECAR_TAIL
 
 if TYPE_CHECKING:
@@ -265,6 +264,7 @@ _HEDGE_WORDS: Mapping[str, frozenset[str]] = MappingProxyType(
 )
 
 
+@published_by("phonometry.io")
 class CatalogueWarning(PhonometryWarning):
     """A catalogue file was read, and some of its cells are worth a second look.
 
@@ -1803,7 +1803,7 @@ def _warn(catalogue: Catalogue[Any], label: str) -> None:
         f"{label}: {count} note{plural} on this catalogue, in Catalogue.notes; "
         "the rows hold what the document writes"
     )
-    warnings.warn("\n".join([head, *shown]), CatalogueWarning, stacklevel=3)
+    warn_caller("\n".join([head, *shown]), CatalogueWarning)
 
 
 def _catalogue_path(path: str | os.PathLike[str], what: str) -> tuple[Path, str]:

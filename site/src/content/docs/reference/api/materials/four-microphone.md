@@ -292,7 +292,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number, or `wavenumber` holds a text or a value that is not a number. |
+| TypeError | if `characteristic_impedance`, `diameter_m`, `l1`, `l2`, `s1`, `s2` or `thickness_m` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number, or `load` or `wavenumber` holds a text or a value that is not a number. |
 
 ## transfer_matrix_two_load
 
@@ -347,7 +347,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number, or `wavenumber` holds a text or a value that is not a number. |
+| TypeError | if `characteristic_impedance`, `diameter_m`, `l1`, `l2`, `s1`, `s2` or `thickness_m` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number, or `load_a`, `load_b` or `wavenumber` holds a text or a value that is not a number. |
 
 ## TransferMatrix
 

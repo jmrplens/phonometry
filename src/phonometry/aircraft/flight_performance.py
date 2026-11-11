@@ -40,7 +40,6 @@ Source (clean-room, implemented from the published standard): ECAC.CEAC Doc 29,
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -56,7 +55,7 @@ from .._internal.validation import (
     require_finite_fields,
     require_scalar,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -2737,7 +2736,7 @@ def _warn_level_idle_inputs(step: ApproachStep, anchor: _Anchor) -> None:
             f"it (B7.1.4, {case}); {step.start_altitude_ft!r} ft is followed "
             f"by a {following.step_type} step at {altitude!r} ft."
         )
-        warnings.warn(msg, FlightProfileWarning, stacklevel=2)
+        warn_caller(msg, FlightProfileWarning)
     start = step.start_calibrated_airspeed_kt
     next_cas = following.start_calibrated_airspeed_kt
     if start is not None and next_cas is not None and start < next_cas:
@@ -2746,7 +2745,7 @@ def _warn_level_idle_inputs(step: ApproachStep, anchor: _Anchor) -> None:
             f"step's (B7.1.4, {case}); {start!r} kt is followed by {next_cas!r} "
             "kt, which is an acceleration on an idle segment."
         )
-        warnings.warn(msg, FlightProfileWarning, stacklevel=2)
+        warn_caller(msg, FlightProfileWarning)
 
 
 def _approach_point2(

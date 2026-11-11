@@ -28,9 +28,10 @@ How the bank carries its filter state from one block to the next.
 
 A fractional-octave filter bank asked for something it cannot honour.
 
-Emitted when a band lies above the Nyquist frequency of the sample rate
-and is dropped from the bank, and when a stateful bank is asked to detrend
-its blocks, which introduces a step between them.
+Emitted when limits the caller gave hold a band above the Nyquist
+frequency of the sample rate, which is dropped from the bank, and when a
+stateful bank is asked to detrend its blocks, which introduces a step
+between them.
 
 ## FilterDesign
 
@@ -109,7 +110,7 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 | `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fraction` | Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1. |
 | `order` | Order of the filter. Default: 6. |
-| `limits` | Minimum and maximum limit frequencies [f_min, f_max], a sequence or an array of the two. Default [12, 20000]. |
+| `limits` | Minimum and maximum limit frequencies [f_min, f_max], a sequence or an array of the two. Default [12, 20000], trimmed to the bands `fs` holds: at 44.1 kHz the third octaves stop at 16 kHz. |
 | `sigbands` | If True, also return the signal in the time domain divided into bands. |
 | `detrend` | If True, remove DC offset before filtering. Default: True. |
 | `mode` | 'rms' or 'peak'. Default: 'rms'. |
@@ -125,7 +126,13 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `fraction` or `fs` is not a single number, `order` is a flag, a text or an array where a count goes, `limits` is not a pair of numbers, or `mode` is not a text. |
-| ValueError | for a bare array with no `fs`, a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, or frequency limits or a design the bank cannot be built with. |
+| ValueError | for a bare array with no `fs`, a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, frequency limits or a design the bank cannot be built with, or a sample rate that holds no band of the span, the default one or `limits`: the upper edge of the lowest band above fs/2. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| FilterBankWarning | when `limits` asks for a band whose upper edge lies above fs/2, naming the bands left out, at every call; the default span is trimmed without one. |
 
 ## OctaveFilterBank
 
@@ -165,8 +172,14 @@ Initialize the Octave Filter Bank.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, or frequency limits or a design the bank cannot be built with. |
+| ValueError | for a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, frequency limits or a design the bank cannot be built with, or a sample rate that holds no band of the span, the default one or `limits`: the upper edge of the lowest band above fs/2. |
 | TypeError | if `fraction` or `fs` is not a single number, or `order` is a flag, a text or an array where a count goes. An element of `limits` is refused the same way when it is not one real number. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| FilterBankWarning | when `limits` asks for a band whose upper edge lies above fs/2, naming the bands left out. The default span, 12 Hz to 20 kHz, is trimmed to the bands `fs` holds without a warning: at 44.1 kHz the 20 kHz third octave, whose upper edge is 22.4 kHz, is left out. |
 
 ### OctaveFilterBank.filter()
 

@@ -1256,6 +1256,21 @@ def test_sound_power_anechoic_reads_the_qualification() -> None:
         )
 
 
+def test_the_anechoic_method_refuses_before_it_reads_the_qualification() -> None:
+    """A refusal of the levels comes first, so -W error raises it, not the advisory."""
+    unjudged = _qualified(_free_field_traverses(_SPACING, background=None))
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with pytest.raises(ValueError, match="'frequencies' length"):
+            emission.sound_power_anechoic(
+                np.full((20, 3), 80.0),
+                "hemisphere",
+                radius=2.0,
+                frequencies=np.array([500.0, 1000.0]),
+                room_qualification=unjudged,
+            )
+
+
 def test_a_measurement_inside_the_qualification_raises_no_warning() -> None:
     """Within the radius and the range, the qualification says nothing."""
     check = _qualified(_free_field_traverses(_SPACING))

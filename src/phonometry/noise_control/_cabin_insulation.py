@@ -67,7 +67,6 @@ inputs.
 from __future__ import annotations
 
 import math
-import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -88,7 +87,12 @@ from .._internal.validation import (
     require_finite_matrix,
     require_positive,
 )
-from .._internal.warnings import PhonometryWarning
+from .._internal.warnings import (
+    PhonometryWarning,
+    advisories_held,
+    published_by,
+    warn_caller,
+)
 from ..emission._shared import _a_weighting_corrections
 from ..emission._sound_power_reverberation import reverberation_background_correction
 from ._insulation_shared import (
@@ -298,6 +302,7 @@ _LOWEST_FLATNESS_OCTAVE_HZ = 125.0
 _SPEED_OF_SOUND_M_S = 343.0
 
 
+@published_by("phonometry.noise_control")
 class CabinInsulationWarning(PhonometryWarning):
     """The measurement is outside a condition ISO 11957 states."""
 
@@ -329,7 +334,7 @@ def _corrected(
             f"{ISO11957_PREFERRED_BACKGROUND_MARGIN_DB:g} dB; the smallest margin is "
             f"{float(np.min(margin)):.1f} dB."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=3)
+        warn_caller(msg, CabinInsulationWarning)
     return levels - reverberation_background_correction(
         levels, background, frequencies=frequencies
     )
@@ -784,60 +789,63 @@ def cabin_insulation(
         ``cabin_levels``, ``frequencies``, ``room_background_levels`` or ``room_levels``
         holds a text or a value that is not a real number, or ``method`` is not a text.
     """
-    room = require_finite_array(room_levels, "room_levels")
-    cabin = require_finite_array(cabin_levels, "cabin_levels")
-    if room.shape != cabin.shape:
-        msg = "'room_levels' and 'cabin_levels' must match band for band."
-        raise ValueError(msg)
-    freqs: NDArray[np.float64] | None = None
-    if frequencies is not None:
-        freqs = require_finite_array(frequencies, "frequencies")
-        if freqs.shape != room.shape:
-            msg = "'frequencies' must match the spectra band for band."
+    # Every advisory waits for the result: a refusal reached after one is
+    # still what the caller meets under -W error.
+    with advisories_held():
+        room = require_finite_array(room_levels, "room_levels")
+        cabin = require_finite_array(cabin_levels, "cabin_levels")
+        if room.shape != cabin.shape:
+            msg = "'room_levels' and 'cabin_levels' must match band for band."
             raise ValueError(msg)
-        if np.any(freqs <= 0.0):
-            msg = "'frequencies' must be positive."
-            raise ValueError(msg)
-    fraction = require_band_fraction(fraction, "fraction")
-    how = require_choice(method, "method", _METHODS)
-    _check_band_range(
-        freqs, fraction, standard="ISO 11957", category=CabinInsulationWarning
-    )
-    room = _corrected(room, room_background_levels, freqs, "room")
-    cabin = _corrected(cabin, cabin_background_levels, freqs, "cabin")
-    weighted: float | None = None
-    if a_weighted_room_level is not None or a_weighted_cabin_level is not None:
-        if a_weighted_room_level is None or a_weighted_cabin_level is None:
-            msg = (
-                "Equation (3) is a difference, so give both "
-                "'a_weighted_room_level' and 'a_weighted_cabin_level' or "
-                "neither."
-            )
-            raise ValueError(msg)
-        if how != _ACTUAL_NOISE:
-            msg = (
-                "ISO 11957 defines the A-weighted insulation D'_pA only for "
-                "the actual environmental noise (definition 3.7 and Equation "
-                f"(3)); method is {how!r}."
-            )
-            raise ValueError(msg)
-        weighted = require_finite(
-            a_weighted_room_level, "a_weighted_room_level"
-        ) - require_finite(a_weighted_cabin_level, "a_weighted_cabin_level")
-    return CabinInsulationResult(
-        frequencies=freqs,
-        room_levels=room,
-        cabin_levels=cabin,
-        insulation=np.asarray(room - cabin, dtype=np.float64),
-        a_weighted_insulation=weighted,
-        internal_noise_level=(
-            None
-            if internal_noise_level is None
-            else require_finite(internal_noise_level, "internal_noise_level")
-        ),
-        method=how,
-        fraction=fraction,
-    )
+        freqs: NDArray[np.float64] | None = None
+        if frequencies is not None:
+            freqs = require_finite_array(frequencies, "frequencies")
+            if freqs.shape != room.shape:
+                msg = "'frequencies' must match the spectra band for band."
+                raise ValueError(msg)
+            if np.any(freqs <= 0.0):
+                msg = "'frequencies' must be positive."
+                raise ValueError(msg)
+        fraction = require_band_fraction(fraction, "fraction")
+        how = require_choice(method, "method", _METHODS)
+        _check_band_range(
+            freqs, fraction, standard="ISO 11957", category=CabinInsulationWarning
+        )
+        room = _corrected(room, room_background_levels, freqs, "room")
+        cabin = _corrected(cabin, cabin_background_levels, freqs, "cabin")
+        weighted: float | None = None
+        if a_weighted_room_level is not None or a_weighted_cabin_level is not None:
+            if a_weighted_room_level is None or a_weighted_cabin_level is None:
+                msg = (
+                    "Equation (3) is a difference, so give both "
+                    "'a_weighted_room_level' and 'a_weighted_cabin_level' or "
+                    "neither."
+                )
+                raise ValueError(msg)
+            if how != _ACTUAL_NOISE:
+                msg = (
+                    "ISO 11957 defines the A-weighted insulation D'_pA only for "
+                    "the actual environmental noise (definition 3.7 and Equation "
+                    f"(3)); method is {how!r}."
+                )
+                raise ValueError(msg)
+            weighted = require_finite(
+                a_weighted_room_level, "a_weighted_room_level"
+            ) - require_finite(a_weighted_cabin_level, "a_weighted_cabin_level")
+        return CabinInsulationResult(
+            frequencies=freqs,
+            room_levels=room,
+            cabin_levels=cabin,
+            insulation=np.asarray(room - cabin, dtype=np.float64),
+            a_weighted_insulation=weighted,
+            internal_noise_level=(
+                None
+                if internal_noise_level is None
+                else require_finite(internal_noise_level, "internal_noise_level")
+            ),
+            method=how,
+            fraction=fraction,
+        )
 
 
 def weighted_cabin_insulation(
@@ -990,7 +998,7 @@ def internal_noise_level(
             f"{ISO11957_PREFERRED_BACKGROUND_MARGIN_DB:g} dB; the margin is "
             f"{margin:.1f} dB, so L_pA is an upper bound."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
+        warn_caller(msg, CabinInsulationWarning)
         return mean
     if judged > upper:
         return mean
@@ -1145,7 +1153,7 @@ def min_cabin_clearance_m(
             f"ISO 11957 6.2 covers {preferred_low:g} Hz to {preferred_high:g} Hz; "
             f"{frequency:g} Hz is outside it."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
+        warn_caller(msg, CabinInsulationWarning)
     if low <= frequency <= high:
         return LOW_BAND_CLEARANCE_M
     return WALL_CLEARANCE_FACTOR * celerity / frequency
@@ -1191,5 +1199,5 @@ def uncertainty_conditions(
             f"{MIN_ROOM_TO_CABIN_VOLUME_RATIO:g} times the volume of the cabin; "
             f"the ratio is {ratio:.1f}."
         )
-        warnings.warn(msg, CabinInsulationWarning, stacklevel=2)
+        warn_caller(msg, CabinInsulationWarning)
     return statement

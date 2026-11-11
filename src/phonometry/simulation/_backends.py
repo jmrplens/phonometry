@@ -17,13 +17,13 @@ from __future__ import annotations
 
 import os
 import sys
-import warnings
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.warnings import warn_caller
 from .compute import (
     Compute,
     ComputeDeviceError,
@@ -441,23 +441,6 @@ def _load(request: Compute) -> Backend:
     return LOADERS[request.device](request)
 
 
-def _package_prefix(module_file: str) -> str:
-    """The package directory of *module_file*, ``phonometry/simulation/x.py``.
-
-    Cut from the string as it is, never through :class:`~pathlib.Path`: a
-    frame's ``co_filename`` keeps the path the import system built from the
-    ``sys.path`` entry, a ``/./`` or a ``..`` included, and a normalised
-    prefix would not match it. The trailing separator stays, so that a
-    sibling named like the package (``phonometry_extra/``) does not match.
-    """
-    return f"{module_file.rsplit(os.sep, 2)[0]}{os.sep}"
-
-
-#: The package's own directory as the import system wrote it. A fallback
-#: warning skips every frame in it.
-_PACKAGE_PREFIX = _package_prefix(__file__)
-
-
 def backend_for(compute: Compute | None) -> Backend:
     """The backend *compute* asks for, after the precedence rules and the fallback.
 
@@ -492,9 +475,7 @@ def backend_for(compute: Compute | None) -> Backend:
     except (ComputeImportError, ComputeDeviceError) as exc:
         if not request.fallback:
             raise
-        warnings.warn(
-            f"{exc}; running on NumPy instead (fallback=True)",
-            ComputeFallbackWarning,
-            skip_file_prefixes=(_PACKAGE_PREFIX,),
+        warn_caller(
+            f"{exc}; running on NumPy instead (fallback=True)", ComputeFallbackWarning
         )
         return LOADERS["cpu"](Compute(dtype=request.dtype))

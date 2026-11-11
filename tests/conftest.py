@@ -15,8 +15,16 @@ import pytest
 # simulation engine tests, which live in a module of their own name because a
 # second `conftest.py` would share this one's module name; and the count of
 # the repository's files each test opens, with --without-whole-tree, which
-# leaves out the tests that read the repository whole (tests/whole_tree.py).
-pytest_plugins = ("engine_fixtures", "hang_guard", "matplotlib_guard", "whole_tree")
+# leaves out the tests that read the repository whole (tests/whole_tree.py);
+# and the order of a refusal and an advisory, which fails a test whose
+# awaited refusal came after a library warning (tests/refusal_order.py).
+pytest_plugins = (
+    "engine_fixtures",
+    "hang_guard",
+    "matplotlib_guard",
+    "refusal_order",
+    "whole_tree",
+)
 
 # Select a non-interactive matplotlib backend for the headless test suite.
 # The library no longer forces a backend (see issue #52), so the test harness

@@ -144,7 +144,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, Real, ReportEngine
     from .._report.metadata import ReportMetadata
     from .core import OctaveFilterBank
 
@@ -565,7 +565,7 @@ class _BandGrid:
         """
         # An integer grid times a float spacing is float64 by numpy's promotion
         # rules; numpy's stubs read the product as a float of unknown precision.
-        g = cast("NDArray[np.float64]", np.arange(1, self.n_points) * self.spacing_hz)
+        g = cast("Real", np.arange(1, self.n_points) * self.spacing_hz)
         gain = self.folded_gain[1 : self.n_points]
         if self.factor > 1:
             taps = _multirate_lowpass(self.factor)

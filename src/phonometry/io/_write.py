@@ -103,7 +103,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import NDArray
 
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, Real
 
 
 @published_by("phonometry.io")
@@ -918,7 +918,7 @@ def write(
             _write_pcm24(
                 path,
                 file,
-                cast("NDArray[np.float64]", data),
+                cast("Real", data),
                 rate,
                 resolved,
                 dither,
@@ -929,7 +929,7 @@ def write(
             _write_through_scipy(
                 path,
                 file,
-                cast("NDArray[np.float64]", data),
+                cast("Real", data),
                 rate,
                 resolved,
                 dither,
@@ -1010,9 +1010,7 @@ def _flac_quantised_codes(
     bits = _SUBTYPE_BITS[resolved]
     # Past the refusal above the data are the float64 samples _resolve_input
     # made, which the checker does not see from the dtype's kind.
-    codes, clipped, peak_dbfs = _quantise(
-        cast("NDArray[np.float64]", data), bits, dither, rng
-    )
+    codes, clipped, peak_dbfs = _quantise(cast("Real", data), bits, dither, rng)
     if clipped:
         _warn_clipped(path, resolved, clipped, data.size, peak_dbfs)
     out = (

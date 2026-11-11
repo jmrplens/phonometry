@@ -78,7 +78,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, get_args
 
 import numpy as np
 
@@ -123,6 +123,10 @@ Source = Literal[
 
 #: The areas of Table 1, by use.
 Area = Literal["industrial", "commercial", "mixed", "residential", "sensitive"]
+#: The areas Table 2 gives guide values for, the four
+#: :func:`construction_guide_values` takes: 6.5.4.2 applies it to no
+#: especially sensitive area.
+ConstructionArea = Literal["industrial", "commercial", "mixed", "residential"]
 #: The alignment of a railway line: on the surface or underground.
 Alignment = Literal["surface", "underground"]
 #: A stage of 6.5.4.2 a construction site may be held to.
@@ -445,6 +449,8 @@ _CONSTRUCTION_AREAS = ("commercial", "industrial")
 #: The area Table 2 is not applicable to (6.5.4.2): hospitals and the like
 #: need their own investigation and agreement.
 _NO_CONSTRUCTION_TABLE = "sensitive"
+#: The areas Table 2 is applicable to.
+_CONSTRUCTION_TABLE_AREAS: tuple[ConstructionArea, ...] = get_args(ConstructionArea)
 #: The longest duration, in working days, of the middle and the last column
 #: of Table 2.
 _CONSTRUCTION_MIDDLE_DAYS = 26
@@ -593,7 +599,7 @@ def construction_guide_values(
     duration_days: int | np.integer[Any],
     *,
     stage: ConstructionStage = "I",
-    area: Area = "residential",
+    area: ConstructionArea = "residential",
 ) -> GuideValues:
     r"""The daytime guide values of Table 2 for a construction site (6.5.4.2).
 
@@ -610,12 +616,15 @@ def construction_guide_values(
         to 78.
     :param stage: ``"I"`` (default), ``"II"`` or ``"III"``.
     :param area: The area the site is in; a commercial or industrial one has
-        an :math:`A_\mathrm{o}` of 6 rather than 5, and ``"sensitive"`` is refused. One
-        of ``"industrial"``, ``"commercial"``, ``"mixed"``, ``"residential"`` or
-        ``"sensitive"``.
+        an :math:`A_\mathrm{o}` of 6 rather than 5. One of ``"industrial"``,
+        ``"commercial"``, ``"mixed"`` or ``"residential"``. The especially
+        sensitive area, the ``"sensitive"`` that :func:`guide_values` takes, is
+        not offered: 6.5.4.2 applies Table 2 to none, and asks for a separate
+        investigation and agreement there.
     :return: The three values, as a :class:`GuideValues`.
     :raises ValueError: For a duration that is not a whole number of days
-        from 1 to 78, an unknown stage, an unknown area or a sensitive one.
+        from 1 to 78, an unknown stage, or an unknown area, ``"sensitive"``
+        among them.
     :raises TypeError: if ``duration_days`` is a flag, a text or an array where a count
         goes, or ``area`` or ``stage`` is not a text.
     """
@@ -629,13 +638,13 @@ def construction_guide_values(
     columns = CONSTRUCTION_GUIDE_VALUES[
         require_choice(stage, "stage", CONSTRUCTION_STAGES)
     ]
-    kind = require_choice(area, "area", _AREAS)
-    if kind == _NO_CONSTRUCTION_TABLE:
+    if isinstance(area, str) and area == _NO_CONSTRUCTION_TABLE:
         msg = (
             "Table 2 is not applicable to an especially sensitive area (6.5.4.2); "
             "the standard asks for a separate investigation and agreement there."
         )
         raise ValueError(msg)
+    kind = require_choice(area, "area", _CONSTRUCTION_TABLE_AREAS)
     one_day, to_26, to_78 = (columns[bound] for bound in sorted(columns))
     a_o = _CONSTRUCTION_A_O_COMMERCIAL if kind in _CONSTRUCTION_AREAS else one_day.a_o
     first, next_column = _INTERPOLATION_DAYS

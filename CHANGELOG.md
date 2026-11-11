@@ -2580,14 +2580,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   refused; `building.improvement_octave_bands` takes `quantity="ΔL"`, `"ΔR"`
   or `"Rs"` alone, the three it folds by the average of transmitted power,
   where it offered the rainfall levels `"LI"` and `"LI,norm"`, which ISO
-  10140-1 Formula (K.3) sums by energy and it always refused; and
+  10140-1 Formula (K.3) sums by energy and it always refused;
   `environment.rail_roughness` takes the two classes Table G-1b tabulates,
   `RailRoughnessClass.WELL_MAINTAINED` and `RailRoughnessClass.NORMAL` or
   their letters `"E"` and `"M"`, where it offered `"N"` and `"B"` and their
   members too, which Appendix G gives no spectrum for and it always
-  refused. A type checker refuses each of those values now, the error of a
-  rainfall level names `RainfallSoundResult.octave_bands`, and the error of
-  an untabulated rail class still asks for a national spectrum.
+  refused; and `vibration.construction_guide_values` takes `area=` one of
+  `"industrial"`, `"commercial"`, `"mixed"` or `"residential"` alone, the
+  four areas DIN 4150-2 Table 2 gives guide values for, where it offered the
+  `"sensitive"` that `vibration.guide_values` takes and it always refused,
+  since 6.5.4.2 applies the table to no especially sensitive area. A type
+  checker refuses each of those values now, the error of a rainfall level
+  names `RainfallSoundResult.octave_bands`, the error of an untabulated rail
+  class still asks for a national spectrum, and the error of a sensitive
+  area still asks for a separate investigation and agreement.
 
 - **A complex tangent that saturates says nothing on Windows either.**
   `tanh(z)` tends to 1 as the real part of `z` grows and `tan(z)` to `j` as

@@ -140,6 +140,33 @@ y no de uno que uno recuerda a medias. Todas están además en el
 [catálogo publicado de sólidos](/phonometry/es/reference/catalogues/solids/),
 filtrables, con el libro y la página en que se leyó cada fila.
 
+Las nueve son la **Tabla A2** de Hopkins, materiales de construcción; la
+**Tabla 4.3** de Cremer (3.ª ed.), trece metales, con el plomo y el cobre en dos
+variantes cada uno; la **Tabla 3** de Mechel, materiales de construcción,
+plásticos y metales; la **Tabla C.1** de Bies (5.ª ed.), metales, materiales de
+construcción, maderas, plásticos y paneles de nido de abeja; el **Apéndice 4 A**
+de Norton & Karczub, sólidos con la velocidad de barra y la de sólido extenso en
+columnas separadas, y su **Tabla 6.1**, factores de pérdidas estructurales; la
+**Tabla 3.1** de Vigran, materiales de construcción; la **Tabla 12.1** de Long,
+y la **Tabla 4.1** de Arau. Cada fila nombra su tabla, así que contarlas da lo
+que aportó cada una:
+
+```python
+from collections import Counter
+
+for table, rows in Counter(row.table for row in solids.PUBLISHED_SOLIDS.values()).items():
+    print(table, rows)
+# hopkins-2007-table-a2 25
+# cremer-2005-table-4-3 15
+# mechel-2008-table-3 38
+# bies-2017-table-c1 105
+# long-2014-table-12-1 18
+# arau-1999-table-4-1 18
+# norton-karczub-2003-appendix-4a 21
+# norton-karczub-2003-table-6-1 11
+# vigran-2008-table-3-1 9
+```
+
 ```python
 from phonometry import solids
 
@@ -231,7 +258,26 @@ Poisson ni velocidad del sonido ni conversión, y eso lo convierte en la
 comprobación cruzada más barata que hay entre libros que no comparten ninguna
 otra columna: para el acero, los dos imprimen 12,3 m Hz. Cremer no imprime esa
 columna, así que sus filas llevan una derivada y entran en la comparación sólo
-a través de la suposición de cabecera que Hopkins sí declara.
+a través de la suposición de cabecera que Hopkins sí declara. Arau imprime la
+frecuencia crítica de una placa de un centímetro en lugar del producto, que es
+un cambio de unidad y no una suposición, así que sus filas también llevan
+`h f_c`. En esa columna él y Hopkins coinciden dentro del cuatro por ciento para
+el aluminio, el ladrillo y el vidrio, y se separan un diecinueve por ciento en
+el acero:
+
+```python
+for hopkins_key, arau_key in [("aluminium", "aluminio"), ("brick", "ladrillo_macizo"),
+                              ("glass", "vidrio_monolitico"), ("steel", "acero")]:
+    hopkins = solids.PUBLISHED_SOLIDS[f"hopkins-2007-table-a2/{hopkins_key}"]
+    arau = solids.PUBLISHED_SOLIDS[f"arau-1999-table-4-1/{arau_key}"]
+    h_fc, a_fc = (hopkins.thickness_critical_frequency_product_m_hz,
+                  arau.thickness_critical_frequency_product_m_hz)
+    print(hopkins_key, h_fc, a_fc, f"{abs(a_fc - h_fc) / h_fc:.0%}")
+# aluminium 12.7 12.6 1%
+# brick 24.0 23.8 1%
+# glass 12.5 12.0 4%
+# steel 12.3 10.0 19%
+```
 
 ### La forma más cara de leer mal una tabla
 

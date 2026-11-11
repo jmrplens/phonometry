@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Room acoustic parameters of a real measured RIR against published values.
 
-Source: "Room acoustic measurement and simulation data of the St. Nicholas
+Source: "Room acoustic measurement and decay analysis data of the St. Nicholas
 Chapel, Aachen Cathedral", M. Zerwas and S. Kayku (FH Aachen), Zenodo,
 DOI 10.5281/zenodo.20428705, CC BY 4.0 (see ``tests/data/audio/README.md``):
 a coupled Gothic chapel, V of about 3050 m3, measured per ISO 3382-1 with
@@ -21,14 +21,16 @@ onset detection and truncation handling, so agreeing within one JND on a
 4.5 s decay is as strong an equivalence as the parameter definition
 supports.
 
-Two edge cases sit outside one JND and are asserted at the looser bound
-below instead: the 100 Hz early-energy ratios (C80 -1.1 dB, C50 -2.1 dB,
-D50 -0.12, and at 250 Hz Ts +13 ms), where a one-third-octave filter's
-group delay is comparable to the early/late split so the ratio is
-dominated by the onset convention; and EDT at 5 kHz (+7.7 %), where the
-air-absorption-shortened decay leaves the 0 to -10 dB fit only ~0.1 s of
-data. Every parameter in every band is still pinned within three JNDs;
-nothing is left unasserted.
+Two edge cases are asserted at the looser bound below instead of one JND:
+the 100 Hz early-energy ratios (C80 -0.9 dB, C50 -1.5 dB, D50 -0.09, and
+at 250 Hz Ts +13 ms), where a one-third-octave filter's group delay is
+comparable to the early/late split so the ratio is dominated by the onset
+convention; and EDT at 5 kHz (+6.5 %), where the air-absorption-shortened
+decay leaves the 0 to -10 dB fit only ~0.1 s of data. C50 and D50 at
+100 Hz, Ts at 250 Hz and the 5 kHz EDT sit outside one JND, and C80 at
+100 Hz just inside it. Every parameter in every band is still pinned
+within three JNDs; nothing is left unasserted. The room-acoustics guide
+works this comparison through for the reader, edge cases included.
 """
 
 from __future__ import annotations

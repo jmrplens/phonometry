@@ -413,6 +413,25 @@ level (it spreads the modulated energy across bands); quote the closed form
 `fluctuation_strength_am_noise` (§3.1) for that stimulus.
 :::
 
+A steady signal does not read zero, because of the framing the scope below
+describes:
+
+```python
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(2 * fs) / fs
+tone = np.sin(2 * np.pi * 1000 * t)  # 1 kHz, unmodulated, set to 70 dB SPL
+tone *= 2e-5 * 10 ** (70 / 20) / np.sqrt(np.mean(tone**2))
+noise = np.random.default_rng(0).standard_normal(t.size)  # broadband, 60 dB SPL
+noise *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(noise**2))
+steady_tone = psychoacoustics.fluctuation_strength(tone, float(fs))
+steady_noise = psychoacoustics.fluctuation_strength(noise, float(fs))
+print(round(steady_tone.fluctuation_strength, 2))   # 0.09 vacil
+print(round(steady_noise.fluctuation_strength, 2))  # 0.15 vacil
+```
+
 ## What this guide covers
 
 <Scope>
@@ -431,9 +450,11 @@ with the exact model.
 <ScopeClaim status="not-covered" label="Not covered">
 The Osses 2016 model's accuracy for FM tones is explicitly not pursued. Only
 AM stimuli are validated here. The front-end also departs from the paper's
-exact framing (2 s frames, 90 % overlap, absolute-threshold gating). As a
-result, a steady 1 kHz tone reads about 0.09 vacil instead of 0, and steady
-broadband noise reads about 0.15-0.19 vacil. For AM broadband noise, quote
+exact framing: its 2 s frames with 90 % overlap and its screening against the
+absolute hearing threshold become 50 % overlap, a Hann window and relative
+floors here. As a result, a steady 1 kHz tone reads about 0.09 vacil instead
+of 0, and steady broadband noise reads about 0.15 vacil, partly the
+physical level fluctuation of the noise itself. For AM broadband noise, quote
 `fluctuation_strength_am_noise` (§3.1) instead of `fluctuation_strength`,
 which overshoots that stimulus. The normative Sottek-model fluctuation
 strength of ECMA-418-2 Clause 9 is not implemented on this page: it lives in

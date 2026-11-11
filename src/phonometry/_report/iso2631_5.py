@@ -416,7 +416,7 @@ def render_iso2631_5_report(
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab or matplotlib is not installed. The
         fiche always embeds the injury-probability chart, so both are required
-        (``pip install "phonometry[report,plot]"``).
+        (the ``[report]`` and ``[plot]`` extras).
     """
     del verbose  # uniform signature; the fiche has one stacked body layout
     try:

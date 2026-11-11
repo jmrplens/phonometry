@@ -203,7 +203,7 @@ $\Delta L_\mathrm{g} = 10 \cdot \log_{10}\{1 + (r_1/r_2)^2 \lvert Q \rvert^2 + 2
 | `source_height_m` | Source height above the ground `hs`, in metres (clamped to `>= 0.1`). |
 | `receiver_height_m` | Receiver height above the ground `hr`, in metres (clamped to `>= 0.1`). |
 | `horizontal_distance_m` | Horizontal source-receiver distance `dp`, in metres (`> 0`). |
-| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter `"A"`-`"H"`. The default `"G"` (20e6, hard surfaces) is the CNOSSOS class covering the paved surroundings typical of heliports; the guidance's own suggestions, concrete $\sigma = 65 \times 10^6$ for city areas and grass $\sigma = 200 \times 10^3$ for rural areas (§A.4.3), can be passed as numeric values. |
+| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter `"A"`-`"H"`. The default `"G"` (20e6, hard surfaces) is the CNOSSOS class covering the paved surroundings typical of heliports; the guidance's own suggestions, concrete $\sigma = 65 \times 10^6$ for city areas and grass $\sigma = 200 \times 10^3$ for rural areas (§A.4.3), can be passed as numeric values. One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, `"F"`, `"G"` or `"H"`. |
 
 **Returns:** The adjustment `ΔLg` per band, in dB (added to the level).
 
@@ -362,6 +362,12 @@ MeanGroundPlaneResult.plot(
 
 Plot the terrain section and the fitted mean ground plane.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## spherical_spreading_adjustment
 
 ```python
@@ -447,7 +453,7 @@ whose diffraction equations follow CNOSSOS-EU.
 | `receiver` | Receiver `(d, z)` in the section, in metres (the microphone point, i.e. ground plus microphone height). |
 | `distances_m` | Terrain section distances `d`, in metres, strictly increasing, covering `[source d, receiver d]`. |
 | `heights_m` | Terrain heights `z(d)`, in metres. |
-| `flow_resistivity` | Ground flow resistivity: a value in Pa·s/m², a CNOSSOS class letter, or one value per profile segment (shape `(M−1,)`) averaged per sub-path by Eq. 41. |
+| `flow_resistivity` | Ground flow resistivity: a value in Pa·s/m², a CNOSSOS class letter, or one value per profile segment (shape `(M−1,)`) averaged per sub-path by Eq. 41. One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, `"F"`, `"G"` or `"H"`. |
 
 **Returns:** A [`TerrainScreeningResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#terrainscreeningresult).
 
@@ -504,6 +510,12 @@ TerrainScreeningResult.plot(
 ```
 
 Plot the section geometry: terrain, line of sight and sound path.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### TerrainScreeningResult.screened
 

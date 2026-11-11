@@ -363,7 +363,7 @@ def render_transfer_stiffness_report(
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab or matplotlib is not installed. The fiche
         always embeds the ``L_k(f)`` spectrum, so both are required
-        (``pip install "phonometry[report,plot]"``).
+        (the ``[report]`` and ``[plot]`` extras).
     """
     del verbose  # uniform signature; the transfer-stiffness fiche has one layout
     header_pairs = (

@@ -437,7 +437,7 @@ figure at 4 kHz within 6.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | The one-third-octave band centre, in Hz. |
-| `quantity` | The column of Table 7, as in [`measurement_reproducibility`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_reproducibility). |
+| `quantity` | The column of Table 7, as in [`measurement_reproducibility`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_reproducibility). One of `"insertion_loss"`, `"transmission_loss"` or `"intensity"`. |
 
 **Returns:** The expanded uncertainty, in dB.
 
@@ -904,7 +904,13 @@ OperatingLine.plot(
 
 Plot the measured points and the line fitted through them.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### OperatingLine.valid_range
 

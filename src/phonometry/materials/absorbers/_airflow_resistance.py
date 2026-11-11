@@ -69,7 +69,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -86,6 +87,7 @@ from ...fluids import Fluid
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -202,6 +204,18 @@ class StaticAirflowResult(RichDisplay):
     :math:`\Delta p` at ``evaluation_velocity`` (Pa).
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "evaluation_velocity": "m/s",
+            "linear_coefficient": "Pa·s/m",
+            "quadratic_coefficient": "Pa·s²/m²",
+            "resistance": "Pa·s/m³",
+            "resistivity": "Pa·s/m²",
+            "specific_resistance": "Pa·s/m",
+        }
+    )
+
     resistance: float
     specific_resistance: float
     resistivity: float | None
@@ -264,8 +278,10 @@ class StaticAirflowResult(RichDisplay):
     ) -> Axes:
         """Plot the fitted ``dp(u)`` curve with the evaluation point.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_static_airflow
@@ -326,7 +342,7 @@ class StaticAirflowResult(RichDisplay):
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab or matplotlib is not installed. The
             fiche always embeds the fitted ``dp(u)`` curve, so both are required
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

@@ -196,7 +196,8 @@ class CalibratorTableRow(RichDisplay):
         """The figure this row prints for a class, or ``None`` for a dash.
 
         :param calibrator_class: ``"LS"``, ``"1"`` or ``"2"``, or a /M
-            designation, which reads the column of its class (5.1.14).
+            designation, which reads the column of its class (5.1.14). One of ``"LS"``,
+            ``"LS/M"``, ``"1"``, ``"1/M"`` or ``"2"``.
         :return: The printed figure, or ``None`` where the table prints a dash.
         :raises ValueError: for an unknown class.
         :raises TypeError: if ``calibrator_class`` is not a text.
@@ -703,7 +704,10 @@ class SoundCalibratorMeasurements(RichDisplay):
     ) -> tuple[tuple[float, float], ...]:
         """The ``(deviation, uncertainty)`` pairs measured for a requirement.
 
-        :param requirement: One of :data:`CALIBRATOR_REQUIREMENTS`.
+        :param requirement: One of :data:`CALIBRATOR_REQUIREMENTS`. One of ``"level"``,
+            ``"fluctuation"``, ``"frequency"``, ``"distortion"``, ``"supply_voltage"``,
+            ``"environmental_level"``, ``"environmental_level_in_band"``,
+            ``"environmental_frequency"`` or ``"field_immunity"``.
         :return: One pair per measurement, empty when it was not measured.
         :raises ValueError: for an unknown requirement.
         :raises TypeError: if ``requirement`` is not a text.
@@ -794,7 +798,7 @@ class SoundCalibratorRequirement(RichDisplay):
     ) -> Axes:
         """Draw each measurement against the requirement's limits, as Figure E.1.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -814,7 +818,8 @@ class SoundCalibratorVerification(RichDisplay):
     """The IEC 60942:2017 verdict on one setting of a sound calibrator.
 
     :ivar calibrator_class: The designation it was judged as, one of
-        :data:`CALIBRATOR_CLASSES`.
+        :data:`CALIBRATOR_CLASSES`. One of ``"LS"``, ``"LS/M"``, ``"1"``, ``"1/M"`` or
+        ``"2"``.
     :ivar nominal_frequency_hz: The nominal frequency of the setting, in
         hertz, which selects the rows of the banded tables.
     :ivar environmental_test: ``"full"`` (Tables 5 and 6) or
@@ -879,7 +884,7 @@ class SoundCalibratorVerification(RichDisplay):
         acceptance limit and the uncertainty as a share of its maximum. A
         requirement conforms when both of its bars stop at or before 100 %.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

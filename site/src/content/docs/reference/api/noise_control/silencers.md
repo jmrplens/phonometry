@@ -533,9 +533,9 @@ Transmission and insertion loss of a reactive silencer over frequency.
 | `transmission_loss` | Transmission loss per frequency, dB. |
 | `insertion_loss` | Insertion loss per frequency, dB, or `None` when no source/radiation impedance was supplied. |
 | `transfer_matrix` | The compound `(n_freq, 2, 2)` four-pole matrix. |
-| `kind` | A short label of the device (e.g. `"expansion chamber"`). |
+| `kind` | A short label of the device (e.g. `"expansion chamber"`). One of `"expansion chamber"`, `"Helmholtz resonator"`, `"quarter-wave resonator"`, `"extended-tube chamber"` or `"element chain"`. |
 | `resonances` | Notable resonance frequencies, Hz (e.g. the resonator tuning frequency), or `None`. |
-| `geometry` | The defining geometry the constructor was called with (keys matching its keyword names, e.g. `length`/`chamber_area`/ `pipe_area` for a chamber), retained so `plot_geometry` can draw the device, or `None` for a result assembled by a [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain), which carries its geometry in `chain`. |
+| `geometry` | The defining geometry the constructor was called with (keys matching its keyword names, e.g. `length`/`chamber_area`/ `pipe_area` for a chamber), retained so `plot_geometry` can draw the device, or `None` for a result assembled by a [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain), which carries its geometry in `chain`. Keyed by any of `"length"`, `"chamber_area"`, `"pipe_area"`, `"inlet_extension"`, `"outlet_extension"`, `"duct_area"`, `"neck_area"`, `"neck_length"`, `"cavity_volume"` or `"branch_area"`. |
 | `plane_wave_limit` | The first higher-order-mode cut-on frequency of the widest cross section of the device, Hz (Norton & Karczub Eq. 7.6, [`phonometry.noise_control.duct_modes.plane_wave_limit`](/phonometry/reference/api/noise_control/duct-modes/#plane_wave_limit)). The four-pole algebra of this module is one-dimensional and is valid below it; above it several modes propagate at once and the result describes the plane-wave mode only, which is why a [`PlaneWaveWarning`](/phonometry/reference/api/noise_control/duct-modes/#planewavewarning) is raised when the analysis reaches past it. |
 | `chain` | The [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) that assembled this result, for a result built by [`SilencerChain.result`](/phonometry/reference/api/noise_control/silencers/#silencerchainresult), and `None` for a named device. A chain is a list of four-pole elements rather than a named device, so it carries its geometry element by element instead of in `geometry`; exactly one of the two is present, and `plot_geometry` draws it. |
 
@@ -552,8 +552,14 @@ ReactiveSilencerResult.plot(
 
 Plot the transmission (and insertion) loss against frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ReactiveSilencerResult.plot_geometry()
 
@@ -570,7 +576,7 @@ Draw the silencer cross-section to scale (dimensioned side cut).
 A named device is drawn from its `geometry`; a result assembled by a
 [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) is drawn from that `chain`, duct by duct.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -633,7 +639,7 @@ transmission-loss relation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 
 ## shunt_matrix
 
@@ -771,7 +777,7 @@ stub of any length: it is marked with a leader at the station where it
 joins the run, carrying its label and, when the analysis grid resolves
 one, the frequency at which it comes closest to shorting the duct.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

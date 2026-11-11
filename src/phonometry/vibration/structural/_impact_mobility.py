@@ -573,9 +573,10 @@ class DoubleHitCheck(OwnsArrays):
         to exceed to count as an impact.
     """
 
-    #: The impact indices are sample positions, not levels.
+    #: The impact indices are sample positions, not levels, and the force is
+    #: in newtons, which the ``_n`` of its name does not say.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
-        {"impact_indices": ""}
+        {"force_n": "N", "impact_indices": ""}
     )
 
     force_n: np.ndarray
@@ -704,7 +705,7 @@ class DoubleHitCheck(OwnsArrays):
         largest impacts cut (Figure 5). With ``ax`` only the time history is
         drawn on it.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -809,6 +810,11 @@ class ImpactMobilityResult(OwnsArrays):
         ``"acceleration"``, ``"velocity"`` or ``"displacement"``.
     :ivar driving_point: ``True`` if force and response are co-located.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"force_energy_spectral_density": "N²·s/Hz"}
+    )
 
     frequencies: np.ndarray
     mobility: np.ndarray
@@ -959,7 +965,7 @@ class ImpactMobilityResult(OwnsArrays):
         With no ``ax`` a two-panel figure is drawn: ``|Y(f)|`` on log-log axes
         and the coherence beneath it. With ``ax`` only the magnitude is drawn.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1329,7 +1335,7 @@ class ExponentialWindowCorrection(OwnsArrays):
     ) -> Axes:
         """Plot each mode's apparent damping split into the true and the window's part.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1508,7 +1514,7 @@ class SingleModeFitResult(OwnsArrays):
     ) -> Axes:
         """Plot the data fitted, the fitted mode and the mode with the window taken out.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1745,6 +1751,11 @@ class ForceSpectrumCheck(OwnsArrays):
         in dB.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"energy_spectral_density": "N²·s/Hz"}
+    )
+
     frequencies: np.ndarray
     energy_spectral_density: np.ndarray
     _: KW_ONLY
@@ -1819,7 +1830,7 @@ class ForceSpectrumCheck(OwnsArrays):
     ) -> Axes:
         """Plot the force energy spectral density against the range and the limit.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1949,7 +1960,7 @@ class OverloadCheck(OwnsArrays):
     ) -> Axes:
         """Plot the record against its full scale, clipped samples marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -2162,7 +2173,7 @@ class ResponseDecayCheck(OwnsArrays):
     ) -> Axes:
         """Plot the response with the levels it reaches at the midpoint and the end.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -2392,7 +2403,7 @@ class CoherenceCheck(OwnsArrays):
     ) -> Axes:
         """Plot the coherence against its minimum, excluded frequencies shaded.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -2583,7 +2594,7 @@ class ChannelMatchVerification(OwnsArrays):
         With no ``ax`` a two-panel figure is drawn; with ``ax`` only the
         magnitude deviation.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

@@ -275,7 +275,7 @@ into the variation it may read.
 | `directional_variation_db` | The largest less the smallest level the directional microphone read at the reference point per band, in dB, or NaN where no reading was given or the band is below 500 Hz. |
 | `front_to_random_index` | The directional microphone's front-to-random sensitivity index per band, in dB, or `None` when no directional reading was given. |
 | `standard` | The clause this check applies, `"ISO 8253-2 5.3"` or `"ISO 4869-3 5.2.2"`, which picks the Table 1 the index is read against. |
-| `positions` | The position names, in row order. |
+| `positions` | The position names, in row order. Each one of `"front"`, `"back"`, `"left"`, `"right"`, `"up"` or `"down"`. |
 
 What Table 1 allows the variation (`allowable_variation_db`) is read
 from the microphone's index and the standard's table, not stored, so a
@@ -403,7 +403,7 @@ The verdict of ISO 8253-2:2009, 5.2 (free) or 5.4 (quasi-free).
 | `lateral_deviation_db` | The level at each of the four positions 0,15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
 | `axis_difference` | The level at the axial point in front of the reference point, towards the loudspeaker, less the level at the one behind it, per band, in dB. |
 | `loudspeaker_distance_m` | $r$, the distance from the loudspeaker to the reference point, in metres. |
-| `positions` | The lateral position names, in row order. |
+| `positions` | The lateral position names, in row order. Each one of `"left"`, `"right"`, `"up"` or `"down"`. |
 
 Where the axial points sit (`axis_offset_m`) is the clause's, and
 so is the difference the inverse distance law gives there

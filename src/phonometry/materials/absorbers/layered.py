@@ -125,7 +125,7 @@ class _DrawableLayer(RichDisplay):
     ) -> Axes:
         """Draw this layer's cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -298,8 +298,10 @@ class LayeredAbsorberResult(OwnsArrays):
         r"""Plot the absorption spectrum :math:`\alpha(f)` with
         :math:`\lvert R \rvert` overlaid.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_layered_absorber
@@ -312,8 +314,10 @@ class LayeredAbsorberResult(OwnsArrays):
     ) -> Axes:
         """Draw the solved stack cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_layered_absorber_geometry
@@ -342,8 +346,10 @@ class DiffuseFieldAbsorptionResult(OwnsArrays):
         r"""Plot the random-incidence absorption spectrum
         :math:`\alpha_{\mathrm{dif}}(f)`.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_diffuse_field_absorption
@@ -573,7 +579,10 @@ def _surface_admittance(
     for kind, a, b in reversed(terms):
         if kind == _FLUID:
             zx, kxd = a, b
-            t = np.tan(kxd)
+            # tan saturates to j as a lossy layer grows thick; NumPy's own
+            # routine on Windows overflows on the way there, and says so.
+            with np.errstate(over="ignore"):
+                t = np.tan(kxd)
             g = (g + 1j * t / zx) / (1.0 + 1j * zx * t * g)
         else:
             g = g / (1.0 + a * g)
@@ -913,7 +922,8 @@ def diffuse_field_absorption(
     :param angle_limit_rad: Upper integration angle ``theta_lim``, in radians
         (0 < theta_lim <= pi/2; default pi/2).
     :param n_quadrature_points: Gauss-Legendre order (default 64).
-    :param termination: As in :func:`layered_absorber`.
+    :param termination: As in :func:`layered_absorber`. One of ``"rigid"`` or
+        ``"free"``.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,

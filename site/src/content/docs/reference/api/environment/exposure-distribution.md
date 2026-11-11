@@ -453,7 +453,7 @@ Plot the distribution, as its class density, density or exceedance.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the primary artist. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 **Raises**
 

@@ -195,6 +195,12 @@ EPNLResult.plot(
 
 Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### EPNLResult.report()
 
 ```python
@@ -238,7 +244,7 @@ strip and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## NOY_BANDS_HZ
 

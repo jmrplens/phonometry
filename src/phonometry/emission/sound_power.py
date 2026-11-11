@@ -76,13 +76,13 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
@@ -113,7 +113,7 @@ from ._shared import (
 
 if TYPE_CHECKING:
     import os
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -389,7 +389,14 @@ class SoundPowerResult(OwnsArrays):
     uncertainty
     :math:`U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}` (95 %, ISO 3744
     clause 9.5).
+
+    :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"uncertainty": "dB"}
+    )
 
     frequencies: np.ndarray | None
     sound_power_level: np.ndarray
@@ -481,8 +488,10 @@ class SoundPowerResult(OwnsArrays):
     ) -> Axes:
         """Plot the LW spectrum with the A-weighted total annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_sound_power
@@ -530,7 +539,7 @@ class SoundPowerResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install "phonometry[report]"``).
+            not installed (the ``[report]`` extra).
         """
         from .._i18n import check_language
 
@@ -910,7 +919,7 @@ def _hemisphere_position_table(
 
 
 def measurement_positions(
-    surface: Surface,
+    surface: Literal["hemisphere"],
     *,
     radius: float,
     n_reflecting_planes: int = 1,
@@ -934,7 +943,11 @@ def measurement_positions(
     Coordinates are scaled by ``radius`` and returned as an ``(N, 3)`` array of
     Cartesian ``(x, y, z)`` in metres, in the order of the position numbers.
 
-    :param surface: ``'hemisphere'`` (only shape with a coordinate table).
+    :param surface: ``"hemisphere"``, the one measurement surface with a
+        coordinate table. A box, the ``"box"`` that :func:`sound_power_pressure`
+        and :func:`sound_energy_pressure` take, is not offered: ISO 3744:2010
+        Annex C places its key positions by subdividing its faces, and no
+        table gives them.
     :param radius: Hemisphere radius ``r``, in metres.
     :param n_reflecting_planes: Number of reflecting planes (1, 2 or 3).
     :param tones: Engineering grade over one plane only: True reads Table B.1
@@ -942,21 +955,21 @@ def measurement_positions(
         two and three planes have one table each and do not read it.
     :param grade: ``'engineering'`` or ``'survey'``.
     :return: ``(N, 3)`` microphone coordinates, in metres.
-    :raises ValueError: for a surface other than ``'hemisphere'``, a radius
-        that is not positive, a number of reflecting planes other than 1, 2
-        or 3, or an unknown grade.
+    :raises ValueError: for a surface other than ``"hemisphere"``, a
+        ``"box"`` among them, a radius that is not positive, a number of
+        reflecting planes other than 1, 2 or 3, or an unknown grade.
     :raises TypeError: if ``radius`` is not a single number, or ``grade`` or ``surface``
         is not a text.
     """
-    require_choice(surface, "surface", ("hemisphere", "box"))
-    require_scalar(radius, "radius")
-    if surface != "hemisphere":
+    if isinstance(surface, str) and surface != "hemisphere":
         msg = (
             "measurement_positions provides coordinates for 'hemisphere' only; "
-            "parallelepiped positions are defined by area subdivision "
-            "(ISO 3744:2010 Annex C)."
+            f"got {given_repr(surface)}. The positions on a parallelepiped are "
+            "defined by area subdivision (ISO 3744:2010 Annex C)."
         )
         raise ValueError(msg)
+    require_choice(surface, "surface", ("hemisphere",))
+    require_scalar(radius, "radius")
     if radius <= 0:
         msg = "A positive 'radius' is required for a hemisphere."
         raise ValueError(msg)
@@ -1355,7 +1368,14 @@ class SoundEnergyResult(OwnsArrays):
     per-position mean single event levels directly; ``integration_time`` is
     the interval :math:`T` of the single event levels, in seconds, or ``None``
     when no background correction needed it.
+
+    :ivar grade: One of ``"engineering"`` or ``"survey"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"uncertainty": "dB"}
+    )
 
     frequencies: np.ndarray | None
     sound_energy_level: np.ndarray
@@ -1436,8 +1456,10 @@ class SoundEnergyResult(OwnsArrays):
     ) -> Axes:
         """Plot the LJ spectrum with the A-weighted total annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_sound_energy

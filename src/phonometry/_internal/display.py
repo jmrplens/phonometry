@@ -49,6 +49,7 @@ import dataclasses
 import datetime as dt
 import enum
 import html
+import inspect
 import itertools
 import os
 import re
@@ -57,6 +58,8 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
+
+from .figures import closes_its_figures, is_plotting_method
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -90,7 +93,9 @@ MAX_DEPTH = 1
 #: The field names that are a unit on their own: a sampling rate, in hertz,
 #: and the axes the public vocabulary names by the bare concept because their
 #: unit never changes (a band axis is ``frequencies``, an array of levels
-#: ``levels``), with the compounds of them that carry no unit of their own.
+#: ``levels``), with the compounds of them that carry no unit of their own,
+#: and the quantities it names one way in every record: a speed of sound, a
+#: measurement surface, an equivalent absorption area and a room constant.
 _NAMED_UNITS: Mapping[str, str] = MappingProxyType(
     {
         "fs": "Hz",
@@ -105,6 +110,10 @@ _NAMED_UNITS: Mapping[str, str] = MappingProxyType(
         "depths": "m",
         "volume": "m\N{SUPERSCRIPT THREE}",
         "speeds_of_sound": "m/s",
+        "speed_of_sound": "m/s",
+        "surface_area": "m\N{SUPERSCRIPT TWO}",
+        "absorption_area": "m\N{SUPERSCRIPT TWO}",
+        "room_constant": "m\N{SUPERSCRIPT TWO}",
     }
 )
 
@@ -374,14 +383,17 @@ _LENGTH_SYMBOL_PACKAGES = ("phonometry.materials",)
 
 #: The symbols that say decibel in one package only, as the first word of a
 #: field or as its head: in ``building`` the sound reduction index :math:`R`, a
-#: level difference :math:`D`, the C, Ctr and CI of ISO 717 and the vibration
-#: reduction indices :math:`K_{ij}`, :math:`K_{Ff}`, :math:`K_{Fd}` and
-#: :math:`K_{Df}`; in ``emission`` the corrections :math:`C_1` to :math:`C_3`
-#: and :math:`K_1` to :math:`K_3` of the sound power standards. Elsewhere an
-#: ``r`` is a distance and a ``c`` a gain.
+#: level difference :math:`D`, the standardized level difference
+#: :math:`D_{nT}` and the impact level :math:`L_i`, the C, Ctr and CI of ISO 717
+#: and the vibration reduction indices :math:`K_{ij}`, :math:`K_{Ff}`,
+#: :math:`K_{Fd}` and :math:`K_{Df}`; in ``emission`` the corrections
+#: :math:`C_1` to :math:`C_3` and :math:`K_1` to :math:`K_3` of the sound
+#: power standards. Elsewhere an ``r`` is a distance and a ``c`` a gain.
 _PACKAGE_DECIBEL_SYMBOLS: Mapping[str, frozenset[str]] = MappingProxyType(
     {
-        "phonometry.building": frozenset({"r", "d", "c", "ctr", "ci", "k", "kij"}),
+        "phonometry.building": frozenset(
+            {"r", "d", "dnt", "li", "c", "ctr", "ci", "k", "kij"}
+        ),
         "phonometry.emission": frozenset({"c1", "c2", "c3", "k1", "k2", "k3"}),
     }
 )
@@ -977,15 +989,22 @@ class RichDisplay:
     record class, which a ``_repr_pretty_`` inherited from this base would
     come after, so each subclass is given the method in its own namespace as
     it is created; ``repr()`` keeps the dataclass's.
+
+    The ``plot`` and ``plot_*`` methods a subclass writes are wrapped as it
+    is created too, by :func:`~phonometry._internal.figures.closes_its_figures`,
+    so a plot that raises closes the figures it opened.
     """
 
     __slots__ = ()
 
     def __init_subclass__(cls, **kwargs: object) -> None:
-        """Put :meth:`_repr_pretty_` in the subclass's own namespace."""
+        """Put :meth:`_repr_pretty_` in the subclass's own namespace, and wrap its plots."""
         super().__init_subclass__(**kwargs)
         if "_repr_pretty_" not in vars(cls):
             type.__setattr__(cls, "_repr_pretty_", RichDisplay._repr_pretty_)
+        for name, member in list(vars(cls).items()):
+            if is_plotting_method(name) and inspect.isfunction(member):
+                type.__setattr__(cls, name, closes_its_figures(member))
 
     def _repr_html_(self) -> str:
         """The table Jupyter, JupyterLab, VS Code and Colab render."""

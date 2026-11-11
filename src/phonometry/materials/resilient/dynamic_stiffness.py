@@ -784,8 +784,10 @@ class DynamicStiffnessResult(RichDisplay):
     ) -> Axes:
         """Plot ``f0(s')`` with this design point marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_dynamic_stiffness
@@ -844,7 +846,7 @@ class DynamicStiffnessResult(RichDisplay):
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab or matplotlib is not installed. The
             fiche always embeds the ``f0(s')`` design curve, so both are
-            required (``pip install "phonometry[report,plot]"``).
+            required (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

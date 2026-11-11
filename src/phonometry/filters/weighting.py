@@ -96,6 +96,7 @@ import numpy as np
 from scipy import signal
 
 from .._internal.frozen import OwnsArrays
+from .._internal.kernels import compiled
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
     holds_complex,
@@ -161,13 +162,6 @@ __all__ = [
 _FS_POSITIVE = "Sample rate 'fs' must be positive."
 #: Rejection message of a time weighting that is none of the three.
 _MODE_INVALID = "Invalid time weighting mode. Use ['fast', 'slow', 'impulse']"
-
-try:
-    from numba import jit as _numba_jit
-except ImportError:  # pragma: no cover - depends on install extras
-    # unused-ignore: with numba absent its import is Any and the ignore is
-    # unnecessary; with numba installed the assignment needs it.
-    _numba_jit = None  # type: ignore[assignment, unused-ignore]
 
 
 def _require_design_flag(value: object) -> bool:
@@ -970,6 +964,8 @@ class TimeWeightedEnvelope(OwnsArrays):
         the time weighting and nothing else. Needs a calibrated record to
         mean dB SPL, and says so rather than drawing a number counted from
         nothing.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.filters import plot_time_weighted_envelope
@@ -1121,10 +1117,7 @@ def _impulse_kernel_py(
     return y_t
 
 
-if _numba_jit is not None:
-    _apply_impulse_kernel = _numba_jit(nopython=True, cache=True)(_impulse_kernel_py)
-else:  # pragma: no cover - exercised only without numba installed
-    _apply_impulse_kernel = _impulse_kernel_py
+_apply_impulse_kernel = compiled(_impulse_kernel_py)
 
 
 @overload

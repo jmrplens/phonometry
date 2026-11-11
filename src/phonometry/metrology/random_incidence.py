@@ -668,7 +668,7 @@ class DirectivityFactor(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the curve of the first plane.
         :return: The axes, polar for the response. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         :raises ValueError: if ``view`` is not one of the two names above, or
             ``ax`` is not polar for the response.
         :raises TypeError: if ``view`` is not a text.
@@ -1032,7 +1032,7 @@ class RandomIncidenceSensitivity(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the first curve drawn.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         :raises ValueError: if ``view`` is not one of the two names above.
         :raises TypeError: if ``view`` is not a text.
         """
@@ -1222,7 +1222,7 @@ class DiffuseFieldSensitivity(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the :math:`G_\mathrm{D}` curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_diffuse_field_sensitivity

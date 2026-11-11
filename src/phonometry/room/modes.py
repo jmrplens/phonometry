@@ -62,7 +62,8 @@ field (:mod:`phonometry.room.steady_field`).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -78,6 +79,8 @@ from .._internal.validation import (
 from .steady_field import schroeder_frequency
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -314,6 +317,11 @@ class RoomModesResult(OwnsArrays):
         time was supplied; otherwise ``None``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"dimensions": "m", "max_frequency": "Hz", "schroeder_frequency": "Hz"}
+    )
+
     orders: np.ndarray
     frequencies: np.ndarray
     kinds: np.ndarray
@@ -444,7 +452,9 @@ class RoomModesResult(OwnsArrays):
         axial / tangential / oblique; the lower panel draws the smooth modal
         density (Long Equation (8.46)). The Schroeder frequency, when known,
         is marked on both. Requires matplotlib
-        (``pip install "phonometry[plot]"``).
+        (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_room_modes

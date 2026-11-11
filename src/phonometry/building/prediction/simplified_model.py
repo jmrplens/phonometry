@@ -57,7 +57,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite, log10
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from ..._internal.display import RichDisplay
 from ..._internal.validation import check_engine, require_choice, require_scalar
@@ -65,7 +66,7 @@ from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Mapping, Sequence
 
     from matplotlib.axes import Axes
 
@@ -270,8 +271,10 @@ class AirbornePredictionResult(RichDisplay):
     ) -> Axes:
         """Plot the per-path shares of the transmitted energy.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_airborne_prediction
@@ -322,8 +325,8 @@ class AirbornePredictionResult(RichDisplay):
         :raises ValueError: If ``engine`` is unknown or ``language`` is not
             supported.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 
@@ -346,6 +349,9 @@ class ImpactPredictionResult(RichDisplay):
     :ivar delta_l_w: Weighted covering improvement ``ΔLw``, in dB.
     :ivar k_correction: Flanking correction ``K``, in dB (Table 1).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"ln_w_eq": "dB"})
 
     l_prime_n_w: float
     ln_w_eq: float
@@ -375,8 +381,10 @@ class ImpactPredictionResult(RichDisplay):
     ) -> Axes:
         """Plot the Formula 21 terms and the resulting ``L'n,w``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_impact_prediction
@@ -429,8 +437,8 @@ class ImpactPredictionResult(RichDisplay):
         :raises ValueError: If ``engine`` is unknown or ``language`` is not
             supported.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 
@@ -639,7 +647,10 @@ def junction_vibration_reduction(
     - ``"thickness_change"`` (E.9 B, thickness change in an element): through
       :math:`K_{12} = 5 M^2 - 5` (:math:`= K_{21}`); the only path.
 
-    :param junction_type: Junction geometry (see above).
+    :param junction_type: Junction geometry (see above). One of ``"rigid_cross"``,
+        ``"rigid_t"``, ``"flexible_t"``, ``"lightweight_facade"``,
+        ``"lightweight_double_homogeneous"``, ``"lightweight_double_coupled"``,
+        ``"corner"`` or ``"thickness_change"``.
     :param path: ``"through"`` (K13; also the single K12 path of a thickness
         change), ``"corner"`` (K12 = K23; also the single path of a corner) or
         ``"double_leaf"`` (K24).

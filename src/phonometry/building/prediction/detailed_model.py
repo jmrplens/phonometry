@@ -494,7 +494,7 @@ def calculated_sound_reduction_index(
         ``resonant_only`` is set.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves, setting the band limits used to locate the
-        :math:`f \approx f_\mathrm{c}` branch.
+        :math:`f \approx f_\mathrm{c}` branch. One of ``1`` or ``3``.
     :param resonant_only: Drop the forced-transmission term below ``fc``.
     :param density: Density ``ρ`` of the material, in kg/m³; with
         ``longitudinal_velocity`` it enables the Formula (B.10) plateau.
@@ -1141,7 +1141,7 @@ def reciprocity_impact_level(
     :param sound_reduction_index: ``R`` of the floor per band, in dB.
     :param frequencies: Band centre frequencies, in Hz.
     :param fraction: The band set, 3 for one-third octaves (default, constant
-        38) or 1 for octaves (43).
+        38) or 1 for octaves (43). One of ``1`` or ``3``.
     :return: The normalized impact sound pressure level ``Ln`` per band, dB.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
@@ -1573,8 +1573,10 @@ class InSituElementResult(OwnsArrays):
     ) -> Axes:
         """Plot the in-situ ``Rsitu`` and ``Ln,situ`` spectra of the element.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_in_situ_element
@@ -1607,7 +1609,7 @@ def in_situ_element(
     :param element: The :class:`HomogeneousElement` description.
     :param frequencies: Band centre frequencies, in Hz.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves.
+        octaves. One of ``1`` or ``3``.
     :param resonant_only: Drop the forced-transmission term of Formula (B.2)
         below ``fc`` (Annex B.1, flanking paths).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
@@ -1909,7 +1911,7 @@ class DetailedAirborneResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band path contributions and the resulting ``R'``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -2003,7 +2005,7 @@ class DetailedImpactResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band path contributions and the resulting ``L'n``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -2079,7 +2081,7 @@ def detailed_airborne_prediction(
         :func:`airborne_flanking_path`); may be empty.
     :param direct_label: Label of the direct path (Default: ``"Dd"``).
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves, selecting the ISO 717-1 rating range.
+        octaves, selecting the ISO 717-1 rating range. One of ``1`` or ``3``.
     :return: The :class:`DetailedAirborneResult`.
     :raises ValueError: If a path does not match the band count.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
@@ -2135,7 +2137,7 @@ def detailed_impact_prediction(
         given.
     :param direct_label: Label of the direct path (Default: ``"Dd"``).
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves, selecting the ISO 717-2 rating range.
+        octaves, selecting the ISO 717-2 rating range. One of ``1`` or ``3``.
     :return: The :class:`DetailedImpactResult`.
     :raises ValueError: If a path does not match the band count, or if neither
         a direct level nor any flanking path is given.

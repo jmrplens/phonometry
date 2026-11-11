@@ -137,6 +137,12 @@ time); the standard itself reports only the peak long-term loudness
 (clause 9), the percentiles are provided as a convenience.  `field` and
 `presentation` echo the listening conditions.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `presentation` | One of `"binaural"`, `"diotic"` or `"monaural"`. |
+
 ### MooreGlasbergTimeVaryingLoudness.plot()
 
 ```python
@@ -150,5 +156,11 @@ MooreGlasbergTimeVaryingLoudness.plot(
 
 Plot the short-term and long-term loudness against time.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.  See `phonometry._plot.psychoacoustics`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

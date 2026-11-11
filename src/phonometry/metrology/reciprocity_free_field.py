@@ -268,7 +268,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the total-attenuation curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_air_attenuation
@@ -788,7 +788,7 @@ class AcousticCenter(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the fitted line.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_acoustic_centre
@@ -962,7 +962,7 @@ class FreeFieldArrangementCheck(RichDisplay):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.barh`.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_free_field_arrangement
@@ -1053,7 +1053,14 @@ class FreeFieldParameterUncertainty(OwnsArrays):
     :ivar frequencies: The frequencies, in Hz.
     :ivar component_uncertainties_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_3_TABLE_1`, in dB at each
-        frequency.
+        frequency. Keyed by any of ``"series_impedance"``, ``"voltage_ratio"``,
+        ``"cross_talk"``, ``"noise"``, ``"distortion"``, ``"reflections"``,
+        ``"frequency"``, ``"receiver_shield"``, ``"transmitter_shield"``,
+        ``"distance"``, ``"static_pressure"``, ``"temperature"``,
+        ``"relative_humidity"``, ``"standing_waves"``, ``"air_attenuation"``,
+        ``"acoustic_centers"``, ``"polarizing_voltage"``, ``"plane_wave_deviation"``,
+        ``"mathematical_manipulations"``, ``"rounding"``, ``"repeatability"``,
+        ``"static_pressure_corrections"`` or ``"temperature_corrections"``.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 
@@ -1103,7 +1110,7 @@ class FreeFieldParameterUncertainty(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the first component's curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_parameter_uncertainty

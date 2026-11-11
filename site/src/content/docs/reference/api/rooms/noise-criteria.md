@@ -125,8 +125,14 @@ NCResult.plot(
 
 Plot the measured spectrum against the NC curves.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### NCResult.report()
 
@@ -169,7 +175,7 @@ fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## noise_criterion
 
@@ -312,8 +318,14 @@ RCResult.plot(
 
 Plot the measured spectrum against the reference RC Mark II curve.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RCResult.report()
 
@@ -355,7 +367,7 @@ fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## room_criterion
 

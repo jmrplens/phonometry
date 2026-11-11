@@ -506,7 +506,7 @@ def position_count_factor(
         (octave) or 50 Hz to 6,3 kHz (one-third octave).
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves, selecting the frequency column; ignored when ``frequency`` is
-        ``None``.
+        ``None``. One of ``1`` or ``3``.
     :return: ``C``, dimensionless.
     :raises ValueError: If ``grade`` is unknown or ``fraction`` is not 1 or 3;
         if a per-band value is asked for at the survey grade, or an A-weighted
@@ -556,7 +556,7 @@ def determination_standard_deviation(
     :param frequency: Nominal mid-band centre in Hz, or ``None`` for the
         A-weighted row.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves; ignored when ``frequency`` is ``None``.
+        octaves; ignored when ``frequency`` is ``None``. One of ``1`` or ``3``.
     :return: ``s`` in decibels.
     :raises ValueError: On the same mismatches
         :func:`position_count_factor` refuses.
@@ -961,6 +961,9 @@ class DiscretePointIntensityResult(OwnsArrays):
     ``sound_power_level_a`` omits the bands outside the method and, per clause
     10.5 b), those failing criteria 1 and/or 2, which
     ``a_weighting_omitted_bands`` flags.
+
+    :ivar fraction: One of ``1`` or ``3``.
+    :ivar grade: One of ``"precision"``, ``"engineering"`` or ``"survey"``.
     """
 
     frequencies: np.ndarray | None
@@ -1279,7 +1282,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         :class:`~phonometry.emission.intensity.FieldIndicators` that
         :func:`~phonometry.emission.field_indicators` returns.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1981,7 +1984,8 @@ def sound_power_intensity_points(
         W/m^2, for ``F1``.
     :param frequencies: Optional ``(bands,)`` nominal mid-band centres, Hz.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
-        octaves, the column of Tables B.2 and 2 the frequencies are read in.
+        octaves, the column of Tables B.2 and 2 the frequencies are read in. One of
+        ``1`` or ``3``.
     :param grade: ``'precision'`` (grade 1), ``'engineering'`` (grade 2,
         default) or ``'survey'`` (grade 3).
     :return: A :class:`DiscretePointIntensityResult`.

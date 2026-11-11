@@ -281,8 +281,10 @@ class SphericalGroundResult(OwnsArrays):
     ) -> Axes:
         r"""Plot the excess attenuation :math:`\Delta L` versus frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_spherical_ground
@@ -553,7 +555,9 @@ def kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real:
     n_clipped = np.maximum(n, _MAEKAWA_ILLUMINATED_LIMIT)
     x = np.sqrt(2.0 * np.pi * n_clipped.astype(np.complex128))
     # x / tanh(x) is real for both real and imaginary x; take the real part.
-    with np.errstate(divide="ignore", invalid="ignore"):
+    # tanh saturates to 1 for a large Fresnel number, where NumPy's own
+    # routine on Windows overflows on the way, and says so.
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
         ratio = np.where(np.abs(x) < _X_OVER_TANH_EPS, 1.0 + 0.0j, x / np.tanh(x))
     delta = 5.0 + 20.0 * np.log10(np.abs(ratio))
     delta = np.where(n <= _MAEKAWA_ILLUMINATED_LIMIT, 0.0, delta)
@@ -764,8 +768,10 @@ class BarrierInsertionLoss(OwnsArrays):
     ) -> Axes:
         """Plot the insertion loss versus frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_barrier_insertion_loss
@@ -779,8 +785,10 @@ class BarrierInsertionLoss(OwnsArrays):
     ) -> Axes:
         """Draw the source-barrier-receiver section to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_barrier_result_geometry
@@ -826,7 +834,7 @@ class BarrierInsertionLoss(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab or matplotlib is not installed
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

@@ -103,7 +103,7 @@ Weighted sound absorption rating (ISO 11654:1997).
 | :--- | :--- |
 | `alpha_w` | Weighted sound absorption coefficient `alpha_w`, the shifted reference curve read at 500 Hz (Clause 4.2). A multiple of 0,05 in `[0, 1]`. |
 | `shape_indicator` | Concatenated shape indicators, `L`/`M`/`H` in that order, or an empty string when none applies (Clause 4.3). |
-| `absorption_class` | Sound absorption class `A`-`E` or `"Not classified"` from Table B.1 (Annex B). |
+| `absorption_class` | Sound absorption class `A`-`E` or `"Not classified"` from Table B.1 (Annex B). One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"` or `"Not classified"`. |
 | `shift` | Downward shift applied to the reference curve, in absorption units (Clause 4.2); $\alpha_\mathrm{w} = 1.00 - \text{shift}$. |
 | `unfavorable_sum` | Sum of the unfavourable deviations at the final shift (Clause 4.2): `shifted_reference - measured` over the bands where the measured coefficient falls below the curve, and nothing elsewhere; at most 0.10. |
 | `frequencies` | Octave rating-band centre frequencies, in Hz (250 Hz to 4000 Hz). |
@@ -127,8 +127,14 @@ Plot the practical curve vs the shifted reference (ISO 11654).
 
 Unfavourable deviations (measured below the shifted reference) are
 shaded and `alpha_w` annotated. Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes` and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### AbsorptionRatingResult.rating_label
 
@@ -178,7 +184,7 @@ full ISO 354 one-third-octave `alpha_s` table with the octave
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## practical_absorption_coefficient
 

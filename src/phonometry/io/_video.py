@@ -54,6 +54,7 @@ from typing import TYPE_CHECKING, Any, Final, cast, get_args
 import numpy as np
 
 from .._internal.display import RichDisplay
+from .._internal.extras import install_hint
 from .._internal.json_input import beside_name, escaped, flushed, make_new, mode_of
 from .._internal.validation import (
     is_text,
@@ -116,7 +117,9 @@ _STOP_TIMEOUT_S: Final = 5.0
 _RUNNING: set[subprocess.Popen[bytes]] = set()
 _RUNNING_LOCK = threading.Lock()
 
-_MATPLOTLIB_HINT = 'Writing a video requires matplotlib. Install it with: pip install "phonometry[plot]"'
+_MATPLOTLIB_HINT = (
+    f"Writing a video requires matplotlib. Install it with: {install_hint('plot')}"
+)
 
 
 @dataclass(frozen=True, kw_only=True)

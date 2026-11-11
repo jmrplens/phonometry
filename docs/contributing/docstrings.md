@@ -749,3 +749,28 @@ A split that also renames a public function, rewords its docstring or tidies a b
 **Enforced by:** `make conformance`, review
 
 **Exceptions.** The one rename a split may carry is a private name that named nothing (the diagram builders `_d1` to `_d9`, already registered under their real names), as a separate, deliberate change that stops at names no caller outside the file can see.
+
+## Choices
+
+<a id="d24"></a>
+### D24. List in the field of a parameter typed with a `Literal` alias every value it takes
+
+**Why.** A choice written once and reused is a type alias (`Mode = Literal["rms", "peak"]`) the package never publishes ([A5](api.md#a5)), and every module reads its annotations as text, so `help()` and the signature a notebook shows print `mode: 'Mode' = 'rms'`: the name of an alias no caller can look up, and not one of the values. Of the 1416 public parameters typed with such an alias, 512 named none or only some of their values in their `:param:` or `:ivar:` field, 237 of them with no field at all, the `language` of 202 plots among them.
+
+**Do**
+
+```text
+:param mode: The detector. One of ``"rms"`` or ``"peak"``.
+:ivar fractions: The band sets of the analysis. Each one of ``1`` or ``3``.
+```
+
+**Don't**
+
+```text
+:param mode: The detector.
+```
+
+**Enforced by:** `tests/test_choice_values_documented.py`
+
+**Exceptions.** A record written by `dataclasses` documents its constructor's parameters as the class's `:ivar` fields, and a class whose `__init__` has no docstring as the class's `:param` fields. An inline `Literal[...]` shows its values in the signature and needs no list. A value is written as the caller types it, a text in double quotes inside the code span; an alias that keys a mapping lists its values as the keys ("Keyed by any of"), and one that types the items of a sequence as each item's ("Each one of").
+

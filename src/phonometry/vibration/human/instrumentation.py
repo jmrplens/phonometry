@@ -400,7 +400,9 @@ PVEM_INDICATION_TOLERANCES_PERCENT: Mapping[str, float] = MappingProxyType(
 def indication_tolerance_percent(name: WeightingName) -> float:
     """The Table 2 indication tolerance at the reference frequency.
 
-    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :return: The permitted deviation of the indication, in per cent.
     :raises ValueError: If the weighting is not one of the nine.
     :raises TypeError: if ``name`` is not a text.
@@ -416,7 +418,9 @@ def weighting_tolerance_percent(
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The Table 5 band around a weighting, region by region.
 
-    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :param frequencies: Frequencies at which the band is wanted, in hertz.
     :return: ``(lower, upper)`` percentages, elementwise, lower first and
         signed as Table 5 prints them: ``lower`` is negative (``-11.0`` in the
@@ -454,7 +458,9 @@ def phase_tolerance_deg(
     separate function rather than a third array beside the magnitudes: an
     r.m.s.-only meter is not graded on phase at all.
 
-    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :param frequencies: Frequencies at which the band is wanted, in hertz.
     :return: The permitted deviation, in degrees, infinite in the two tails.
     :raises ValueError: As for :func:`weighting_tolerance_percent`.
@@ -499,7 +505,9 @@ def _checked_uncertainty(value: float | None, name: str) -> float:
 class WeightingVerification(OwnsArrays):
     """One measured weighting response against its ISO 8041-1 tolerances.
 
-    :ivar weighting: The weighting the response was measured for.
+    :ivar weighting: The weighting the response was measured for. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :ivar frequencies: The frequencies it was measured at.
     :ivar measured: The measured weighting factors, as supplied.
     :ivar design: The design-goal factors of ISO 8041-1 Table 3 at the same
@@ -590,7 +598,7 @@ class WeightingVerification(OwnsArrays):
     ) -> Axes:
         """Draw the measured response inside the tolerance band.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -633,7 +641,9 @@ def verify_weighting(
     laboratory's *actual* uncertainty, which is its own number and is bounded
     by :data:`MAX_EXPANDED_UNCERTAINTY_PERCENT`.
 
-    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :param frequencies: The frequencies the response was measured at, in
         hertz.
     :param measured_factors: The measured weighting factors, linear and not in
@@ -970,7 +980,9 @@ def _warn_if_inverted(deviation_deg: NDArray[np.float64]) -> None:
 class PhaseVerification(OwnsArrays):
     """One measured phase response against the ISO 8041-1 Table 5 phase band.
 
-    :ivar weighting: The weighting the response was measured for.
+    :ivar weighting: The weighting the response was measured for. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :ivar frequencies: The frequencies it was measured at.
     :ivar measured_phase_deg: The measured phase, as supplied.
     :ivar design_phase_deg: The design-goal phase of Formula (H.1) at the same
@@ -1062,7 +1074,7 @@ class PhaseVerification(OwnsArrays):
     ) -> Axes:
         """Draw the characteristic phase deviation inside the Table 5 band.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1119,7 +1131,9 @@ def verify_phase_response(
     about, because the verdict is real but the diagnosis is a polarity test
     this function does not perform.
 
-    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :param frequencies: The frequencies the phase was measured at, in
         hertz, strictly ascending and at least two of them.
     :param measured_phase_deg: The measured phase at each frequency, in
@@ -1170,7 +1184,9 @@ def reference_indication(name: WeightingName) -> float:
     r.m.s. acceleration, and the weightings are not unity there, so the
     expected indication is the product of the two.
 
-    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :return: The weighted acceleration, in metres per second squared.
     :raises ValueError: If the weighting is not one of the nine.
     :raises TypeError: if ``name`` is not a text.
@@ -1229,7 +1245,9 @@ def band_limited_weighting_factor(name: WeightingName) -> float:
     "(see Table 1)" of 12.7 points at the reading that cannot be satisfied;
     the ambiguity is registered in ``docs/ERRATA.md``.
 
-    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
+    :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`. One of ``"Wb"``,
+        ``"Wc"``, ``"Wd"``, ``"We"``, ``"Wf"``, ``"Wh"``, ``"Wj"``, ``"Wk"`` or
+        ``"Wm"``.
     :return: ``|H(f_ref)| / |H_BL(f_ref)|``, dimensionless.
     :raises ValueError: If the weighting is not one of the nine.
     :raises TypeError: if ``name`` is not a text.
@@ -1424,7 +1442,7 @@ class RunningRMSDecayVerification(RichDisplay):
     ) -> Axes:
         """Draw the measured decay time against the printed interval.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

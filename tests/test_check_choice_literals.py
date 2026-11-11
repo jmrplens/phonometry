@@ -1391,9 +1391,14 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
             [member.value for member in cnossos_road.RoadSurface],
         ),
         (cnossos_rail.BrakeCode, [member.value for member in cnossos_rail.BrakeType]),
+        (cnossos_rail.RailRoughnessCode, cnossos_rail._TABLE_G1B),
         (
-            cnossos_rail.RailRoughnessCode,
-            [member.value for member in cnossos_rail.RailRoughnessClass],
+            cnossos_rail.TabulatedRailRoughness,
+            [
+                member
+                for member in cnossos_rail.RailRoughnessClass
+                if member.value in cnossos_rail._TABLE_G1B
+            ],
         ),
         (
             cnossos_rail.TrackTransferCode,
@@ -3281,6 +3286,46 @@ def test_a_choice_of_texts_alone_leaves_through_no_test_of_its_form() -> None:
                 leaky,
                 beside,
             )
+
+
+class _Gait(enum.Enum):
+    """A pace by its member, as ``RailRoughnessClass`` names a roughness."""
+
+    FAST = "fast"
+    SLOW = "slow"
+
+
+def _member_or_checked_text(mode: object) -> str:
+    return (
+        mode.value if isinstance(mode, _Gait) else require_choice(mode, "mode", _PACES)
+    )
+
+
+def test_a_literal_of_enum_members_lists_a_value_that_is_no_text() -> None:
+    """``Literal[_Gait.FAST] | Literal["fast"]`` takes a member of an
+    ``Enum`` beside the text, as ``rail_roughness`` takes a
+    ``RailRoughnessClass`` member or its letter.
+
+    A member is no text, so the path a test of its form sends it down holds
+    nothing ``require_choice`` reads, as the path of a number does beside
+    ``Pace | float``. The guard read every ``Literal`` as one of texts alone
+    and called that path one that skips the check. A ``Literal`` of texts
+    alone keeps its verdict.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    members = 'Literal[_Gait.FAST, _Gait.SLOW] | Literal["fast", "slow"]'
+    assert ccl._lists_nontext(members)
+    assert not ccl._lists_nontext('Literal["fast", "slow"]')
+    assert (
+        ccl._choice_verdict(_member_or_checked_text, "mode", members, field=False)
+        is None
+    )
+    assert (
+        ccl._choice_verdict(
+            _member_or_checked_text, "mode", 'Literal["fast", "slow"]', field=False
+        )
+        == some_paths
+    )
 
 
 def _passes_none_by(mode: _Pace | None) -> None:

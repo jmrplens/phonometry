@@ -269,7 +269,8 @@ class InstallationCase(RichDisplay):
         ``"diffuse_room"``, ``"non_diffuse_room"``, ``"open_space"``, or
         ``"any"`` for the four insertion cases, whose source side is not part
         of the case.
-    :ivar receiver_side: The same for the receiver side.
+    :ivar receiver_side: The same for the receiver side. One of ``"duct"``,
+        ``"diffuse_room"``, ``"non_diffuse_room"`` or ``"open_space"``.
     :ivar quantity: ``"transmission"`` for cases 1 to 16, ``"insertion"`` for
         17 to 20.
     :ivar source_area_rule: How 9.1.3 or 9.1.4 says to read :math:`S_2`, the
@@ -808,7 +809,7 @@ class SilencerInSituResult(OwnsArrays):
     ) -> Axes:
         """Draw the level difference and the loss it becomes.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

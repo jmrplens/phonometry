@@ -228,7 +228,7 @@ against sound pressure level).
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes to draw on, or `None` for a fresh figure (a polar axes is created for `"directivity"`). |
-| `quantity` | Which characteristic to plot (see above). |
+| `quantity` | Which characteristic to plot (see above). One of `"response"`, `"directivity"`, `"noise"` or `"distortion"`. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 
 **Returns:** The axes the characteristic was drawn on, polar for `"directivity"`.
@@ -238,7 +238,7 @@ against sound pressure level).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `quantity` or `language` is unknown, the result carries no data for `quantity`, or `ax` is not a polar axes for `"directivity"`. |
-| ImportError | If matplotlib is not installed (`pip install "phonometry[plot]"`). |
+| ImportError | If matplotlib is not installed (the `[plot]` extra). |
 | TypeError | if `quantity` is not a text. |
 
 ### MicrophoneCharacteristics.report()
@@ -281,7 +281,7 @@ requirement is given, and the footer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ### MicrophoneCharacteristics.sensitivity_v_per_pa
 

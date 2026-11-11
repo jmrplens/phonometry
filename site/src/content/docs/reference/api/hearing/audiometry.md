@@ -1057,7 +1057,7 @@ a narrow-band noise signal.
 | `levels` | The measured one-third-octave band levels, in dB re 20 µPa: one per band of the table, or one per band of `frequencies`. |
 | `presentation` | `"air"` (default), `"bone"` or `"sound field"`. |
 | `lowest_test_frequency_hz` | The lowest test tone frequency, 125 (default), 250, or for air conduction 500. |
-| `earphone` | A column of Table 3; air conduction only. |
+| `earphone` | A column of Table 3; air conduction only. One of `"supra-aural"`, `"ER-3A"` or `"HDA 200"`. |
 | `earphone_attenuation` | Or another earphone's attenuation per band of Table 3; air conduction only. |
 | `lowest_hearing_level` | The lowest hearing threshold level to be measured, in dB; 0 by default. |
 | `allowed_threshold_shift_db` | The threshold shift accepted from the ambient noise, 2 (default) or 5, in dB. |

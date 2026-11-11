@@ -151,8 +151,10 @@ class MetadiffuserResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-well and face-averaged absorption spectra.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_metadiffuser_absorption
@@ -165,8 +167,10 @@ class MetadiffuserResult(OwnsArrays):
     ) -> Axes:
         """Draw the panel cross-section to scale (slits and resonators).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_metadiffuser_geometry

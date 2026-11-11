@@ -132,6 +132,11 @@ EXEMPT: dict[str, str] = {
         "literal is two backticks and whose roles and interpreted text open "
         "on one; a page's list item is read through the shared reader"
     ),
+    "scripts/check_digit_grouping.py": (
+        "blanks the inline literals of two backticks in the docstrings of the "
+        "library, reStructuredText, before it reads them as prose; a page's "
+        "spans are read through the shared reader"
+    ),
     "scripts/generate_api_docs.py": (
         "converts the docstrings of the library, reStructuredText: it rewrites "
         "their inline literals of two backticks as code spans of one, and "

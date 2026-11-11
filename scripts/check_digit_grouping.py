@@ -113,11 +113,23 @@ def _markdown_prose(text: str, *, kind: str = "md") -> list[tuple[int, str]]:
     ]
 
 
+#: An inline literal of reStructuredText, which a docstring writes for a value
+#: as the caller types it: like a span of inline code in Markdown, it is
+#: quoted as it is written, not prose.
+_RST_LITERAL = re.compile(r"``.+?``")
+
+
+def _blank(match: re.Match[str]) -> str:
+    """As many blanks as *match* holds characters, so the columns stay."""
+    return " " * len(match.group(0))
+
+
 def _prose_of(path: Path) -> list[tuple[int, str]]:
     """The lines of *path* that are read as prose, with their line numbers.
 
-    Everything in Markdown. In Python, the docstrings and the comments, so that
-    a string holding data keeps whatever spelling its key has.
+    Everything in Markdown. In Python, the docstrings, less their inline
+    literals, and the comments, so that a string holding data keeps whatever
+    spelling its key has.
     """
     text = path.read_text(encoding="utf-8")
     if path.suffix != ".py":
@@ -134,7 +146,8 @@ def _prose_of(path: Path) -> list[tuple[int, str]]:
             continue
         first = node.body[0].lineno
         prose.extend(
-            (first + offset, line) for offset, line in enumerate(doc.splitlines())
+            (first + offset, _RST_LITERAL.sub(_blank, line))
+            for offset, line in enumerate(doc.splitlines())
         )
     prose.extend(
         (token.start[0], token.string)

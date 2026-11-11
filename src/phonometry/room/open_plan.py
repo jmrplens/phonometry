@@ -33,7 +33,8 @@ STI > 0.20 in all positions" (Clause 6.3).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -48,6 +49,7 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -118,6 +120,11 @@ class OpenPlanResult(OwnsArrays):
         line.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"d2s": "dB", "rd": "m", "rp": "m"}
+    )
+
     d2s: float
     lp_as_4m: float
     rd: float
@@ -138,8 +145,10 @@ class OpenPlanResult(OwnsArrays):
 
         Redraws the Clause 6.2 regression line from ``d2s`` and
         ``lp_as_4m`` and marks the distraction and privacy distances.
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_open_plan
@@ -152,8 +161,10 @@ class OpenPlanResult(OwnsArrays):
     ) -> Axes:
         """Draw the measurement line to scale, rD and rP marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_open_plan_result_geometry
@@ -213,7 +224,7 @@ class OpenPlanResult(OwnsArrays):
         :raises ImportError: If reportlab or, for the embedded spatial-decay
             chart, matplotlib is not installed. The fiche embeds the result's
             own plot whenever the regression is defined, so both are required
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from .._i18n import check_language
 

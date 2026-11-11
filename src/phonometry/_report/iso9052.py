@@ -230,7 +230,7 @@ def render_dynamic_stiffness_report(
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab or matplotlib is not installed. The fiche
         always embeds the ``f0(s')`` design curve, so both are required
-        (``pip install "phonometry[report,plot]"``).
+        (the ``[report]`` and ``[plot]`` extras).
     """
     del verbose  # uniform signature; the dynamic-stiffness fiche has one layout
     pairs = (

@@ -228,6 +228,12 @@ FlightPathKinematics.plot(
 
 Plot the speed and angle profiles along the track.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## hemisphere_source_level
 
 ```python
@@ -626,6 +632,12 @@ RotorcraftEventResult.plot(
 
 Plot the A-weighted level time history with its event metrics.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## RotorcraftGround
 
 ```python
@@ -651,7 +663,7 @@ and an optional elevation model replaces the flat plane with real terrain.
 | :--- | :--- |
 | `receiver_height_m` | Microphone height above local ground, in metres (default 1.2). |
 | `ground_elevation` | Ground elevation `z` at the receivers, in metres on the track datum (default 0); source and receiver heights above ground follow from it. A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for receivers on uneven sites without a full elevation model. |
-| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter (see [`ground_effect_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#ground_effect_adjustment)). A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for heterogeneous ground across the receivers (each receiver's two-ray model uses its local value). |
+| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter (see [`ground_effect_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#ground_effect_adjustment)). A contour grid also accepts one value per grid point (shape `(len(y), len(x))`) for heterogeneous ground across the receivers (each receiver's two-ray model uses its local value). One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, `"F"`, `"G"` or `"H"`. |
 | `terrain` | Optional digital elevation model `(x, y, z)` on the track frame (`x` and `y` strictly increasing, `z` of shape `(len(y), len(x))`, all in metres on the track datum). When given, every emission-receiver pair is evaluated over its sampled vertical section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with equivalent heights, and rubber-band diffraction where terrain blocks the line of sight; `ground_elevation` is then taken from the model. The model must cover the whole track and every receiver (fabricating terrain beyond its edges is refused). |
 | `terrain_resolution` | Section sampling step along the path, in metres (default: the elevation model's cell size; sections are capped at 20000 sampling intervals). |
 
@@ -713,6 +725,12 @@ RotorcraftHemisphere.plot(
 
 Plot the hemisphere directivity for one band (polar section).
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## RotorcraftNoiseContourResult
 
 ```python
@@ -747,6 +765,12 @@ RotorcraftNoiseContourResult.plot(
 ```
 
 Plot filled noise contours over the ground plane.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## RotorcraftTrackState
 

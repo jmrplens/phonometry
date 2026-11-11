@@ -192,7 +192,8 @@ class EmissionPressureResult(OwnsArrays):
     :ivar measured_level: The uncorrected reading :math:`L'_p`, in decibels.
     :ivar background_correction: :math:`K_1`, in decibels.
     :ivar local_correction: :math:`K_3`, in decibels.
-    :ivar grade: Accuracy grade the determination earns.
+    :ivar grade: Accuracy grade the determination earns. One of ``"engineering"`` or
+        ``"survey"``.
     :ivar background_margin_db: :math:`\Delta L = L'_p - L_p(B)`, the margin
         of the reading over the background, in decibels, a scalar or one per
         band; :attr:`upper_bound` is read from it and the grade's minimum.

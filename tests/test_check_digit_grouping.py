@@ -113,3 +113,23 @@ def test_an_empty_page_has_no_findings(tmp_path: pathlib.Path) -> None:
     the two raised a ``ValueError`` where the page has nothing to report.
     """
     assert gate._findings(_file("", tmp_path)) == []
+
+
+def test_a_literal_in_a_docstring_is_quoted_as_it_is_written(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A value a caller types, quoted as a literal in a docstring, keeps its spelling.
+
+    ``"diesel locomotive, c. 2 200 kW"`` keys a table by that exact string, as
+    an inline code span does in Markdown; prose around it is still read.
+    """
+    path = tmp_path / "module.py"
+    path.write_text(
+        "def f(vehicle):\n"
+        '    """Draw.\n\n'
+        '    :param vehicle: One of ``"diesel locomotive, c. 2 200 kW"``, about\n'
+        "        2 200 kW.\n"
+        '    """\n',
+        encoding="utf-8",
+    )
+    assert gate._findings(path) == [(5, "2 200")]

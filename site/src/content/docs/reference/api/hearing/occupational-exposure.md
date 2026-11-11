@@ -113,8 +113,14 @@ Plot the per-task contributions with the `LEX,8h` line.
 
 Only task-based results carry per-task contributions (the job and
 full-day strategies raise `ValueError`). Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ExposureResult.report()
 
@@ -161,7 +167,7 @@ a footer identity/disclaimer block.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for a task-based result's chart, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for a task-based result's chart, matplotlib) is not installed (the `[report]` extra). |
 
 ### ExposureResult.sampling_advisory
 
@@ -207,7 +213,7 @@ sampling advisory. The uncertainty is the job-based budget (Eq C.9, Table C.4).
 | :--- | :--- |
 | `samples` | Whole-day `Lp,A,eqT,n` measurements, dB (three minimum per Clause 11.3; two is enforced numerically). |
 | `effective_duration_hours` | Effective working-day duration `T_e`, hours. |
-| `instrument` | Instrument class selecting `u2` (Table C.5). |
+| `instrument` | Instrument class selecting `u2` (Table C.5). One of `"class1"`, `"class2"` or `"personal_exposimeter"`. |
 | `u3` | Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0). |
 | `warn` | Emit [`OccupationalExposureWarning`](/phonometry/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) for the 3 dB spread rule and the Table C.4 advisory. |
 
@@ -257,7 +263,7 @@ $c_2 = c_3 = 1$.
 | :--- | :--- |
 | `samples` | Measured `Lp,A,eqT,n` job samples, dB (at least five per Clause 10.2; a minimum of two is enforced numerically). |
 | `effective_duration_hours` | Effective working-day duration `T_e`, hours. |
-| `instrument` | Instrument class selecting `u2` (Table C.5). |
+| `instrument` | Instrument class selecting `u2` (Table C.5). One of `"class1"`, `"class2"` or `"personal_exposimeter"`. |
 | `u3` | Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0). |
 | `n_workers` | Optional homogeneous-group size `n_G`; when given with `sample_duration_hours`, the cumulative duration is checked against Table 1 and an advisory is raised if it falls short. |
 | `sample_duration_hours` | Optional per-sample duration (hours) for the Table 1 cumulative-duration check. |
@@ -355,7 +361,7 @@ One task of a task-based measurement (ISO 9612:2009 Clause 9).
 | `duration_observations_hours` | Optional independent duration observations `T_m,j` (hours) used for `u1b` via Eq C.7. |
 | `duration_range_hours` | Optional `(T_min, T_max)` range (hours); `u1b` is then `0.5*(T_max - T_min)` (Eq C.7 NOTE). Ignored if `duration_observations_hours` is given. |
 | `label` | Optional human-readable task name. |
-| `instrument` | Optional per-task instrument class overriding the call default (selects `u2` from Table C.5). |
+| `instrument` | Optional per-task instrument class overriding the call default (selects `u2` from Table C.5). One of `"class1"`, `"class2"` or `"personal_exposimeter"`. |
 
 ## task_based_exposure
 
@@ -382,7 +388,7 @@ follows Eq C.3 with sampling `u1a` (Eq C.6), optional duration `u1b`
 | Name | Description |
 | :--- | :--- |
 | `tasks` | The tasks making up the nominal day. |
-| `instrument` | Default instrument class selecting `u2` (Table C.5); may be overridden per [`Task`](/phonometry/reference/api/hearing/occupational-exposure/#task). |
+| `instrument` | Default instrument class selecting `u2` (Table C.5); may be overridden per [`Task`](/phonometry/reference/api/hearing/occupational-exposure/#task). One of `"class1"`, `"class2"` or `"personal_exposimeter"`. |
 | `u3` | Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0). |
 | `include_duration_uncertainty` | Include the $(c_{1\mathrm{b}} u_{1\mathrm{b}})^2$ duration term (Eq C.3). When False the budget omits it (ISO 9612 Annex D case a). |
 | `warn` | Emit [`OccupationalExposureWarning`](/phonometry/reference/api/hearing/occupational-exposure/#occupationalexposurewarning) when a task triggers the 3 dB spread rule (Clause 9.3). |

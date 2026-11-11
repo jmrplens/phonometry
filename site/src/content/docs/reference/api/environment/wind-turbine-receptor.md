@@ -1367,7 +1367,7 @@ The rating level of wind turbine sound (Annex A, A.1).
 | :--- | :--- |
 | `equivalent_level` | The equivalent continuous level $L_\mathrm{eq}$, in dB. |
 | `adjustments` | The three candidate adjustments, keyed `"tonal"`, `"amplitude_modulation"` and `"impulsive"`, in dB. |
-| `governing` | The adjustment applied, the most severe of the three, or `None` when all three are zero. |
+| `governing` | The adjustment applied, the most severe of the three, or `None` when all three are zero. One of `"tonal"`, `"amplitude_modulation"` or `"impulsive"`. |
 | `rating_level` | $L_\mathrm{r} = L_\mathrm{eq} + K$, in dB. |
 
 ### WindTurbineRatingLevel.plot()

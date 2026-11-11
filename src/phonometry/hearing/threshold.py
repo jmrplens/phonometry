@@ -287,8 +287,10 @@ class AgeThresholdResult(OwnsArrays):
     ) -> Axes:
         """Plot the median threshold with the fractile band over frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.hearing import plot_age_threshold
@@ -631,7 +633,8 @@ def hearing_level_to_coupler_spl(
     is a decibel more in the coupler.
 
     :param hearing_level: The audiogram, in dB HL, one value per frequency.
-    :param earphone: As in :func:`earphone_reference_level`.
+    :param earphone: As in :func:`earphone_reference_level`. One of ``"DT 48"``,
+        ``"TDH 39"`` or ``"other supra-aural"``.
     :param frequencies: The frequencies the audiogram was taken at; ``None``
         uses all twenty-three of :data:`RETSPL_FREQUENCIES_HZ`.
     :return: The equivalent sound pressure level in the coupler, in dB.

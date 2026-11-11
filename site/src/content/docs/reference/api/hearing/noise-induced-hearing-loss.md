@@ -160,8 +160,14 @@ HTLANResult.plot(
 
 Plot the age, noise and combined threshold components over frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### HTLANResult.report()
 
@@ -207,7 +213,7 @@ individual.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab, matplotlib or svglib is not installed (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab, matplotlib or svglib is not installed (the `[report]` and `[plot]` extras). |
 
 ## nipts
 
@@ -298,8 +304,14 @@ NIPTSResult.plot(
 
 Plot the NIPTS spectrum with the fractile band over frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### NIPTSResult.report()
 
@@ -344,7 +356,7 @@ clinical diagnosis of any individual.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab, matplotlib or svglib is not installed (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab, matplotlib or svglib is not installed (the `[report]` and `[plot]` extras). |
 
 ## NoiseInducedHearingLossWarning
 

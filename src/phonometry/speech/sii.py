@@ -763,7 +763,9 @@ class SIIResult(OwnsArrays):
     :ivar level_distortion: Per-band level-distortion factor ``Li`` in [0, 1]
         (clause 5.7), unity until the speech spectrum level rises above the
         standard normal-effort spectrum by more than 10 dB.
-    :ivar method: The band procedure used, one of :data:`SII_METHODS`.
+    :ivar method: The band procedure used, one of :data:`SII_METHODS`. One of
+        ``"critical-band"``, ``"equally-contributing"``, ``"one-third-octave"`` or
+        ``"octave"``.
     :raises ValueError: If the per-band quantities disagree, ``method`` is not
         one of :data:`SII_METHODS`, or any quantity is not finite.
     """
@@ -863,8 +865,10 @@ class SIIResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band audibility weighted by importance, with the SII.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.speech import plot_sii
@@ -905,8 +909,8 @@ class SIIResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or
             ``language`` is not a supported language.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from .._i18n import check_language
 
@@ -998,7 +1002,7 @@ class StandardSpeechSpectrum(OwnsArrays):
         each vocal effort in :attr:`vocal_efforts` is one labelled line, so the
         whole spectrum lifting with vocal effort reads at a glance.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1275,7 +1279,9 @@ class SIIProcedure(OwnsArrays):
     :meth:`plot`. Build it with :func:`sii_procedure`; the frozen instance is a
     plottable view of the tabulated constants and runs none of the SII maths.
 
-    :ivar method: The procedure name, one of :data:`SII_METHODS`.
+    :ivar method: The procedure name, one of :data:`SII_METHODS`. One of
+        ``"critical-band"``, ``"equally-contributing"``, ``"one-third-octave"`` or
+        ``"octave"``.
     :ivar frequencies: Nominal band centre frequencies, in hertz.
     :ivar band_edges: Band limits, in hertz; one value more than the number of
         bands, so band ``i`` runs from ``band_edges[i]`` to ``band_edges[i+1]``.
@@ -1367,7 +1373,7 @@ class SIIProcedure(OwnsArrays):
         limits, so procedures with different band counts and widths can be
         overlaid on the same logarithmic frequency axis and compared directly.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1386,7 +1392,9 @@ class SIIProcedure(OwnsArrays):
 def sii_procedure(method: Method = "one-third-octave") -> SIIProcedure:
     """Build the plottable band table of an ANSI S3.5-1997 band procedure.
 
-    :param method: The band procedure, one of :data:`SII_METHODS`.
+    :param method: The band procedure, one of :data:`SII_METHODS`. One of
+        ``"critical-band"``, ``"equally-contributing"``, ``"one-third-octave"`` or
+        ``"octave"``.
     :return: A frozen :class:`SIIProcedure` carrying the band centre
         frequencies, band limits, band-importance function, reference internal
         noise spectrum level and normal-effort standard speech spectrum level

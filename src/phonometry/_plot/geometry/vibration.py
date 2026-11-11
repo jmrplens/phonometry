@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import require_choice, require_positive
 from ..common import _new_axes
 from ._draft import (
@@ -55,6 +56,7 @@ def _t(text: str, language: Language = "en") -> str:
 # ---------------------------------------------------------------------------
 # Plate junction (L / T / X).
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_junction_geometry(
     junction: Literal["L", "T1", "T2", "X"],
     thickness1_m: float,
@@ -142,6 +144,7 @@ def plot_junction_result_geometry(
 # ---------------------------------------------------------------------------
 # Baffled rectangular plate (radiation efficiency).
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_plate_geometry(
     length_x: float,
     length_y: float,

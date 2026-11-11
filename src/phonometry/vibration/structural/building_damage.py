@@ -320,7 +320,8 @@ def guideline_velocity(
     used for anything faster. Everywhere else Table 1 and Table 3 print one
     number for all frequencies, and *frequency* is then not needed.
 
-    :param building_class: One of :data:`BUILDING_CLASSES`.
+    :param building_class: One of :data:`BUILDING_CLASSES`. One of ``"commercial"``,
+        ``"residential"`` or ``"sensitive"``.
     :param frequency: Frequency of the dominant component, in hertz (scalar
         or array). Required for the short-term foundation case, and refused
         for every other one, where the printed value is the same at every
@@ -407,7 +408,8 @@ def pipeline_guideline_velocity(
     surface above it only estimates the value (5.3, D.1). Long-term vibration
     halves the table, which is what 6.3 allows without further evidence.
 
-    :param material: One of :data:`PIPELINE_MATERIALS`.
+    :param material: One of :data:`PIPELINE_MATERIALS`. One of ``"welded_steel"``,
+        ``"concrete_or_flanged_metal"`` or ``"masonry_or_plastic"``.
     :param duration: ``"short_term"`` (default) or ``"long_term"``.
     :return: The guideline peak velocity, in millimetres per second.
     :raises ValueError: If a name is not one of its choices.
@@ -426,9 +428,12 @@ class DamageAssessment(RichDisplay):
     :ivar velocity_mm_s: The measured peak velocity, in millimetres per
         second: the largest of the three components at the foundation, or the
         larger of the two horizontal components in the topmost floor plane.
-    :ivar building_class: The row of Table 1 or Table 3 that was used.
-    :ivar location: Where the velocity was measured.
-    :ivar duration: Which clause the guideline came from.
+    :ivar building_class: The row of Table 1 or Table 3 that was used. One of
+        ``"commercial"``, ``"residential"`` or ``"sensitive"``.
+    :ivar location: Where the velocity was measured. One of ``"foundation"`` or
+        ``"top_floor"``.
+    :ivar duration: Which clause the guideline came from. One of ``"short_term"`` or
+        ``"long_term"``.
     :ivar frequency_hz: The frequency the guideline was read at, or ``None``
         where the guideline does not depend on frequency.
     :ivar massive_structure: Whether the row 1 values were raised by
@@ -507,7 +512,7 @@ class DamageAssessment(RichDisplay):
         measured velocity as a point, so the margin is read rather than
         computed.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -536,7 +541,8 @@ def assess_building_vibration(
     :param velocity_mm_s: The measured peak velocity, in millimetres per
         second; see :class:`DamageAssessment` for which component it is. Zero
         is accepted and keeps to every guideline value.
-    :param building_class: One of :data:`BUILDING_CLASSES`.
+    :param building_class: One of :data:`BUILDING_CLASSES`. One of ``"commercial"``,
+        ``"residential"`` or ``"sensitive"``.
     :param frequency_hz: Frequency of the dominant component, in hertz.
         Required for the short-term foundation case.
     :param location: ``"foundation"`` (default) or ``"top_floor"``.
@@ -723,7 +729,8 @@ def foundation_guideline_curve(
     The corner points of Table 1 by default, which is the polyline Bild 1
     draws; pass *frequency* to sample the same polyline elsewhere.
 
-    :param building_class: One of :data:`BUILDING_CLASSES`.
+    :param building_class: One of :data:`BUILDING_CLASSES`. One of ``"commercial"``,
+        ``"residential"`` or ``"sensitive"``.
     :param frequency: Frequency or frequencies to sample at, in hertz, or ``None`` for the
         four corners of Table 1.
     :return: The frequencies and the guideline velocities, as a

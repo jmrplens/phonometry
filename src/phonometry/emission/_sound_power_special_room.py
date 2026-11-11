@@ -71,7 +71,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
 
 import numpy as np
 
@@ -402,7 +402,14 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     of the room, which :attr:`source_size_recommended` reads and
     :attr:`passes` leaves out, the clause saying "should" where 6.2, 6.3 and
     6.6 say "shall".
+
+    :ivar method: One of ``"direct"`` or ``"comparison"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"reverberation_time": "s"}
+    )
 
     frequencies: np.ndarray
     reverberation_time: np.ndarray
@@ -557,7 +564,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         6,3 kHz band as the text of 6.3 says (the figure widens them at
         6,3 kHz already; see ``docs/ERRATA.md``).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -858,7 +865,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         mean, and the floor against its 0,06, with every coefficient outside
         6.4 ringed and the verdict in the title.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1045,7 +1052,7 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
     ) -> Axes:
         """Plot the difference per band within the ± Table 1 limits.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1318,7 +1325,14 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     and ``background_requirement_met_a`` the 4 dB test of 6.5 read from it.
     ``sigma_r0`` is Table 5 per band (``NaN`` at 63 Hz) and ``sigma_r0_a`` its
     A-weighted row; the uncertainty properties follow Formulae (12) and (13).
+
+    :ivar method: One of ``"direct"`` or ``"comparison"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"sigma_r0": "dB", "sigma_r0_a": "dB"}
+    )
 
     frequencies: np.ndarray
     sound_power_level: np.ndarray
@@ -1435,7 +1449,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         A band whose background margin fell below 4 dB is hatched as not
         meeting 9.8, and the expanded uncertainty is drawn as an error bar
         where ``sigma_omc_db`` was given. Requires matplotlib
-        (``pip install "phonometry[plot]"``).
+        (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1487,7 +1501,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install "phonometry[report]"``).
+            not installed (the ``[report]`` extra).
         """
         from .._i18n import check_language
 

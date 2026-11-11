@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
+from .._internal.figures import closes_its_figures
 from .._internal.validation import real_array, require_choice, require_scalar
 from .common import (
     _C_EDGE,
@@ -1247,6 +1248,7 @@ def plot_excitation(
 ) -> Axes: ...
 
 
+@closes_its_figures
 def plot_excitation(
     x: ArrayLike,
     fs: float,
@@ -1270,6 +1272,7 @@ def plot_excitation(
     :param kind: ``"sweep"`` (default) or ``"mls"``.
     :param ax: Existing axes for the top (time-domain) panel, or ``None`` for a
         fresh two-panel figure.
+    :param language: The language of the labels: ``"en"`` or ``"es"``.
     :param kwargs: Forwarded to the time-domain ``plot`` call.
     :return: The time-domain axes (``ax`` given) or the tuple of two axes.
     :raises ValueError: for an unknown ``kind``, or an empty signal.

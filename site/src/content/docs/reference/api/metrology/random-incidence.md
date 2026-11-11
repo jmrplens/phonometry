@@ -359,7 +359,7 @@ $G_\mathrm{D,ref}$ against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the $G_\mathrm{D}$ curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### DiffuseFieldSensitivity.reference_diffuse_field_level
 
@@ -498,7 +498,7 @@ Plot the directional response or the weight of each reading.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the curve of the first plane. |
 
-**Returns:** The axes, polar for the response. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes, polar for the response. Requires matplotlib (the `[plot]` extra).
 
 **Raises**
 
@@ -735,7 +735,7 @@ Plot the sensitivity levels or the correction against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the first curve drawn. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 **Raises**
 

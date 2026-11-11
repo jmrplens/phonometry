@@ -275,8 +275,14 @@ ReverberationResult.plot(
 
 Plot the reverberation time over the octave bands.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ReverberationResult.report()
 
@@ -324,4 +330,4 @@ quantity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |

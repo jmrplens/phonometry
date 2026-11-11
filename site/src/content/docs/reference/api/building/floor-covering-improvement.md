@@ -183,7 +183,7 @@ and 15 dB have the background subtracted in energy, and those under
 are drawn across the bands and the three regimes are told apart. A
 (positions, bands) record draws one line per position.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -251,8 +251,14 @@ FloorCoveringImprovementResult.plot(
 
 Plot the improvement spectrum `ΔL` (with `ΔLw` when available).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### FloorCoveringImprovementResult.report()
 
@@ -297,7 +303,7 @@ rating bands 100-3150 Hz), an optional verdict row and a footer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## impact_improvement
 
@@ -353,7 +359,7 @@ improvement_octave_bands(
     improvement: ArrayLike,
     *,
     frequencies: ArrayLike,
-    quantity: Literal['ΔL', 'ΔR', 'Rs', 'LI', 'LI,norm'] = 'ΔL',
+    quantity: Literal['ΔL', 'ΔR', 'Rs'] = 'ΔL',
 ) -> OctaveBandSpectrum
 ```
 
@@ -369,7 +375,7 @@ each octave.
 | :--- | :--- |
 | `improvement` | Improvement `ΔL` per one-third-octave band, in dB. |
 | `frequencies` | The matching one-third-octave centre frequencies, in Hz; must contain whole octave triplets (centre / centre·2^(±1/3)). |
-| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. |
+| `quantity` | What the values are, for the record and its plot: `"ΔL"` (Default), `"ΔR"` or `"Rs"`, the three quantities folded into octaves by this average of transmitted power. The rainfall sound intensity levels, the `"LI"` and `"LI,norm"` an [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) holds too, are not offered: ISO 10140-1 Formula (K.3) sums their energy, which [`RainfallSoundResult.octave_bands`](/phonometry/reference/api/building/rainfall-sound/#rainfallsoundresultoctave_bands) does. |
 
 **Returns:** An [`OctaveBandSpectrum`](/phonometry/reference/api/building/floor-covering-improvement/#octavebandspectrum) with the octave centres (`.frequencies`) and the octave values (`.values`).
 
@@ -377,7 +383,7 @@ each octave.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | The thirds do not group into complete octave triplets, or `quantity` is not one of the three. |
+| ValueError | The thirds do not group into complete octave triplets, or `quantity` is not one of the three, `"LI"` and `"LI,norm"` among them. |
 | TypeError | if `quantity` is not a text, or `frequencies` or `improvement` holds a text or a value that is not a real number. |
 
 ## OctaveBandSpectrum
@@ -419,7 +425,7 @@ OctaveBandSpectrum.plot(
 
 Plot the octave values against their octave bands.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

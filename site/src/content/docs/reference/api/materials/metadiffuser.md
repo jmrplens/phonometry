@@ -213,8 +213,14 @@ MetadiffuserResult.plot(
 
 Plot the per-well and face-averaged absorption spectra.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### MetadiffuserResult.plot_geometry()
 
@@ -229,8 +235,14 @@ MetadiffuserResult.plot_geometry(
 
 Draw the panel cross-section to scale (slits and resonators).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## MetadiffuserWell
 

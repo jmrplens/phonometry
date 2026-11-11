@@ -439,7 +439,7 @@ class VectorChangeResult(RichDisplay):
         The two states as vectors from the origin and the change as the vector
         joining their tips, which is the picture that makes the point.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         polar axes it drew on.
 
         :param ax: Existing polar axes, or ``None`` to create a figure.

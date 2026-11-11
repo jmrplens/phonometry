@@ -166,9 +166,11 @@ class DiffusionResult(OwnsArrays):
     ) -> Axes:
         """Plot the polar response with the diffusion coefficient annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         axes it drew on: a new polar axes without ``ax``, else ``ax``, polar or
         not. Never calls ``plt.show``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_diffusion_polar
@@ -212,8 +214,8 @@ class DiffusionResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 
@@ -300,8 +302,10 @@ class DiffusionSpectrum(OwnsArrays):
     ) -> Axes:
         """Plot the diffusion coefficient ``d`` versus frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_diffusion_report
@@ -346,8 +350,8 @@ class DiffusionSpectrum(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 

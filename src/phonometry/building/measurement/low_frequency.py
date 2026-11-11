@@ -93,7 +93,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Final, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
 
 import numpy as np
 
@@ -108,6 +109,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -588,6 +591,15 @@ class LowFrequencyResult(OwnsArrays):
         seconds, or ``None`` when none was substituted.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "low_frequency_bands": "Hz",
+            "reverberation_63_octave": "s",
+            "reverberation_time": "s",
+        }
+    )
+
     frequencies: np.ndarray
     levels: np.ndarray
     reverberation_time: np.ndarray | None
@@ -603,8 +615,10 @@ class LowFrequencyResult(OwnsArrays):
     ) -> Axes:
         """Plot the three low-frequency bands, default against corner and LF.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_low_frequency_procedure

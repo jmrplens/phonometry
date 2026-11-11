@@ -360,8 +360,14 @@ Plot the corrected reference level against Table I.1.
 
 The gap between the two curves is the correction every specimen of
 the laboratory is normalized by. Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## RainfallSoundResult
 
@@ -430,8 +436,14 @@ RainfallSoundResult.plot(
 
 Plot the sound intensity level per band, normalized when available.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RainfallSoundResult.sound_power_levels()
 
@@ -550,8 +562,14 @@ Plot each measured quantity against its tolerance window.
 
 Every quantity is drawn as its deviation from the nominal value in
 units of its tolerance, so the three share one axis and the window is
--1 to 1. Requires matplotlib (`pip install "phonometry[plot]"`);
+-1 to 1. Requires matplotlib (the `[plot]` extra);
 returns the `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### RainGeneratorVerification.rate_deviation_mm_h
 

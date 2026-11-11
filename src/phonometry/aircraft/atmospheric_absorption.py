@@ -223,7 +223,10 @@ class AircraftBandAttenuation(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the band and pure-tone mid-band attenuation versus frequency."""
+        """Plot the band and pure-tone mid-band attenuation versus frequency.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_aircraft_band_attenuation
 
@@ -511,7 +514,10 @@ class ARP866AAttenuation(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the attenuation coefficient versus frequency."""
+        """Plot the attenuation coefficient versus frequency.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_attenuation_arp866a
 

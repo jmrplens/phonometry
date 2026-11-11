@@ -174,6 +174,9 @@ class STIResult(OwnsArrays):
     The two level spectra are what :meth:`adjusted_for_levels` reads to
     undo the corrections they produced, so a result that carries them can
     be moved to another speech and occupancy-noise condition.
+
+    :ivar rating: One of ``"U"``, ``"J"``, ``"I"``, ``"H"``, ``"G"``, ``"F"``, ``"E"``,
+        ``"D"``, ``"C"``, ``"B"``, ``"A"`` or ``"A+"``.
     """
 
     sti: float
@@ -221,8 +224,10 @@ class STIResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band MTI bars with the STI and rating letter.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.speech import plot_sti
@@ -263,8 +268,8 @@ class STIResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or
             ``language`` is not a supported language.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from .._i18n import check_language
 

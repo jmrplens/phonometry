@@ -233,7 +233,7 @@ supplied to [`field_indicators`](/phonometry/reference/api/power/intensity/#fiel
 
 Requires per-band data (call [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) with 2D
 `(positions, bands)` arrays and `frequencies`) and matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -355,8 +355,14 @@ IntensityResult.plot(
 Plot Lp vs LI per band with the pressure-intensity index.
 
 Requires per-band data (call `sound_intensity(..., fraction=...)`)
-and matplotlib (`pip install "phonometry[plot]"`); returns the
+and matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### IntensityResult.plot_geometry()
 
@@ -371,8 +377,14 @@ IntensityResult.plot_geometry(
 
 Draw the p-p probe with its spacer to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## plot_pp_probe_geometry
 
@@ -469,7 +481,7 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 | `spacing_m` | Microphone separation $\Delta r$, in metres. |
 | `density` | Air density, in kg/m^3. Default 1.204 (20 degC). |
 | `speed_of_sound` | Speed of sound, in m/s. Default 343.0. |
-| `fraction` | `None` (broadband only), 1 (octave bands) or 3 (one-third octave bands). |
+| `fraction` | `None` (broadband only), 1 (octave bands) or 3 (one-third octave bands). One of `1` or `3`. |
 | `limits` | [f_min, f_max] band limits in Hz, a sequence or an array of the two (default [12, 20000], as in [`phonometry.filters.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies), trimmed to the bands `fs` holds). |
 | `bias_correct` | If True, apply the per-bin finite-difference correction $(k \Delta r)/\sin(k \Delta r)$ (IEC 61043:1993, 7.3) to the intensity spectral density before summing the band and broadband totals, so the totals no longer under-read as the frequency approaches `max_valid_frequency`. The reciprocal diverges as $k \Delta r \to \pi$ (the first spatial-aliasing null at $c/(2 \Delta r)$, inside the default band range for close spacings), so it is applied only over the probe's usable range (up to $k \Delta r = \pi/2$) and held constant beyond, keeping the totals bounded instead of letting a few near-null bins dominate them. Default False keeps the exact legacy totals; the per-band `bias_correction` factor (same clamped definition) is reported either way. |
 

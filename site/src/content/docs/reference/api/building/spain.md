@@ -486,6 +486,12 @@ DBHRAssessment.plot(
 
 Plot the achieved values against their DB-HR limits.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## DBHRCheck
 
 ```python
@@ -557,7 +563,7 @@ A DB-HR A-weighted global insulation index.
 | `intermediate` | The index rounded to one decimal, the form DB-HR prescribes for intermediate quantities and for product specifications. |
 | `reported` | The index rounded to an integer, the form DB-HR requires for the quantities that define the requirements (3.1.3.1 point 4). |
 | `name` | The index name, e.g. `"RA"` or `_D2M_NT_ATR`. |
-| `spectrum` | Key of the normalised spectrum used. |
+| `spectrum` | Key of the normalised spectrum used. One of `"pink"`, `"traffic"`, `"railway"` or `"aircraft"`. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `band_values` | The band insulation values `X_i`, in dB. |
 | `spectrum_levels` | The normalised spectrum `L_x,i`, in dBA. |
@@ -576,6 +582,12 @@ DBHRGlobalIndexResult.plot(
 ```
 
 Plot the band insulation with the weighted per-band contributions.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## DBHRRequirement
 

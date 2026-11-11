@@ -47,7 +47,7 @@ from __future__ import annotations
 from dataclasses import KW_ONLY, dataclass, field, replace
 from math import isfinite, log10, sqrt
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -319,7 +319,8 @@ class Task(RichDisplay):
         ``duration_observations_hours`` is given.
     :param label: Optional human-readable task name.
     :param instrument: Optional per-task instrument class overriding the call
-        default (selects ``u2`` from Table C.5).
+        default (selects ``u2`` from Table C.5). One of ``"class1"``, ``"class2"`` or
+        ``"personal_exposimeter"``.
     """
 
     samples: tuple[float, ...]
@@ -491,6 +492,16 @@ class ExposureResult(RichDisplay):
         below.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "combined_standard_uncertainty": "dB",
+            "expanded_uncertainty": "dB",
+            "lex_8h": "dB",
+            "u3": "dB",
+        }
+    )
+
     lex_8h: float
     combined_standard_uncertainty: float
     expanded_uncertainty: float
@@ -633,8 +644,10 @@ class ExposureResult(RichDisplay):
 
         Only task-based results carry per-task contributions (the job and
         full-day strategies raise :class:`ValueError`). Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.hearing import plot_occupational_exposure
@@ -683,7 +696,7 @@ class ExposureResult(RichDisplay):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for a task-based result's chart,
-            matplotlib) is not installed (``pip install "phonometry[report]"``).
+            matplotlib) is not installed (the ``[report]`` extra).
         """
         from .._i18n import check_language
 
@@ -816,7 +829,8 @@ def task_based_exposure(
 
     :param tasks: The tasks making up the nominal day.
     :param instrument: Default instrument class selecting ``u2`` (Table C.5);
-        may be overridden per :class:`Task`.
+        may be overridden per :class:`Task`. One of ``"class1"``, ``"class2"`` or
+        ``"personal_exposimeter"``.
     :param u3: Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0).
     :param include_duration_uncertainty: Include the :math:`(c_{1\mathrm{b}} u_{1\mathrm{b}})^2`
         duration term (Eq C.3). When False the budget omits it (ISO 9612
@@ -950,7 +964,8 @@ def job_based_exposure(
     :param samples: Measured ``Lp,A,eqT,n`` job samples, dB (at least five per
         Clause 10.2; a minimum of two is enforced numerically).
     :param effective_duration_hours: Effective working-day duration ``T_e``, hours.
-    :param instrument: Instrument class selecting ``u2`` (Table C.5).
+    :param instrument: Instrument class selecting ``u2`` (Table C.5). One of
+        ``"class1"``, ``"class2"`` or ``"personal_exposimeter"``.
     :param u3: Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0).
     :param n_workers: Optional homogeneous-group size ``n_G``; when given with
         ``sample_duration_hours``, the cumulative duration is checked against
@@ -1014,7 +1029,8 @@ def full_day_exposure(
     :param samples: Whole-day ``Lp,A,eqT,n`` measurements, dB (three minimum per
         Clause 11.3; two is enforced numerically).
     :param effective_duration_hours: Effective working-day duration ``T_e``, hours.
-    :param instrument: Instrument class selecting ``u2`` (Table C.5).
+    :param instrument: Instrument class selecting ``u2`` (Table C.5). One of
+        ``"class1"``, ``"class2"`` or ``"personal_exposimeter"``.
     :param u3: Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0).
     :param warn: Emit :class:`OccupationalExposureWarning` for the 3 dB spread rule and the
         Table C.4 advisory.

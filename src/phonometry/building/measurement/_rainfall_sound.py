@@ -61,7 +61,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -507,8 +507,10 @@ class RainGeneratorVerification(OwnsArrays):
 
         Every quantity is drawn as its deviation from the nominal value in
         units of its tolerance, so the three share one axis and the window is
-        -1 to 1. Requires matplotlib (``pip install "phonometry[plot]"``);
+        -1 to 1. Requires matplotlib (the ``[plot]`` extra);
         returns the :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_rain_generator_verification
@@ -603,6 +605,11 @@ class RainfallReferenceCorrection(OwnsArrays):
         L_{I\mathrm{c,ref}}`, in dB (Formula (I.3)).
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"structural_reverberation_time": "s"}
+    )
+
     frequencies: np.ndarray
     l_i_reference: np.ndarray
     structural_reverberation_time: np.ndarray
@@ -637,8 +644,10 @@ class RainfallReferenceCorrection(OwnsArrays):
 
         The gap between the two curves is the correction every specimen of
         the laboratory is normalized by. Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_rainfall_reference_correction
@@ -822,8 +831,10 @@ class RainfallSoundResult(OwnsArrays):
     ) -> Axes:
         """Plot the sound intensity level per band, normalized when available.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_rainfall_sound

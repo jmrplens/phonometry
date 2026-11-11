@@ -236,7 +236,7 @@ def render_iso3382_3_report(
     :return: The written ``path`` as a :class:`str`.
     :raises ImportError: If reportlab or, for the embedded spatial-decay chart,
         matplotlib is not installed; both are required whenever the regression
-        is defined (``pip install "phonometry[report,plot]"``).
+        is defined (the ``[report]`` and ``[plot]`` extras).
     """
     del verbose  # uniform signature; the fiche has one stacked body layout
     try:

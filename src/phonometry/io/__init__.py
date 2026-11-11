@@ -167,3 +167,8 @@ __all__ = [
     "write_sidecar",
     "write_video",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.io.`` offers alone."""
+    return sorted(__all__)

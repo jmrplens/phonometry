@@ -381,8 +381,14 @@ PrecisionIntensityResult.plot(
 
 Plot the `LW` spectrum; non-applicable bands are hatched/greyed.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### PrecisionIntensityResult.report()
 
@@ -454,7 +460,7 @@ fields; the fiche prints them verbatim in its footer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `language` is unknown, or a supplied `indicators`, `criteria` or `residual_index` does not span the result's bands. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 | TypeError | if `residual_index` holds a text or a value that is not a real number. |
 
 ### PrecisionIntensityResult.sound_power
@@ -532,7 +538,7 @@ screening.
 | `pressure_levels` | Optional `(N_seg, N_bands)` `Lpi` (dB) for FpI. |
 | `pressure_residual_index` | `delta_pI0` (dB), scalar or per band, for the dynamic-capability index / criterion 1. |
 | `frequencies` | `(N_bands,)` nominal band centres (Hz), for the A-weighted total and the Table 2 repeatability limits. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves (Table 2 lookup). |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves (Table 2 lookup). One of `1` or `3`. |
 | `grade` | `'engineering'` (grade 2) or `'survey'` (grade 3); selects `K` for the reported `Ld` and the criterion-2 warning. |
 | `repeatability_limit` | Override for the criterion-3 limit `s` (dB), scalar or per band; defaults to ISO 9614-2 Table 2 by `frequencies` for `'engineering'`. For `'survey'` the default is the A-weighted 4 dB reused per band (extrapolated, non-normative). |
 
@@ -644,6 +650,13 @@ verdicts, the totals and the indicators read from the partial powers are
 read-only properties, worked out from the fields and the limits Annex B
 prints, so they are not fields.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `fraction` | One of `1` or `3`. |
+| `grade` | One of `"engineering"` or `"survey"`. |
+
 ### SoundPowerIntensityResult.a_weighting_omitted_bands
 
 *property*
@@ -701,8 +714,14 @@ SoundPowerIntensityResult.plot(
 
 Plot the LW spectrum; non-positive bands are hatched as unusable.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SoundPowerIntensityResult.report()
 
@@ -749,7 +768,7 @@ indicators (`FpI`, `F+/-`) and the Annex B qualification criteria.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 
 ### SoundPowerIntensityResult.sound_power
 

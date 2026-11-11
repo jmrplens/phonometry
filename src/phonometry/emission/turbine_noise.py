@@ -112,7 +112,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, overload
 
 import numpy as np
 
@@ -327,6 +327,9 @@ class TurbineMeasurementSurface(OwnsArrays):
     :ivar area: :math:`S` of Equation (1), in square metres.
     :ivar measurement_distance_m: :math:`d`, 1 m (7.1).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"area": "m²"})
 
     reference_boxes: tuple[TurbineReferenceBox, ...]
     lengths_m: np.ndarray

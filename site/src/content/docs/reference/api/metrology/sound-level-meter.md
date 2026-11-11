@@ -430,12 +430,12 @@ keyword-only, so the unit in its name is written at the call site.
 | `acoustic_weighting_uncertainties_db` | Their uncertainties. |
 | `acoustic_weighting_uncertainties_without_correction_data_db` | Optional, for 4.4: the same uncertainties without the uncertainty of the manufacturer's free-field or random-incidence correction data, never more than the totals. A result whose total exceeds its maximum and whose uncertainty without that data does not is a result that did not conform, for that reason, rather than one 4.3 forbids using. |
 | `electrical_weighting_deviations_db` | 13.9: for every frequency weighting the meter provides, keyed `"A"`, `"C"`, `"Z"`, the corrected relative frequency weightings, which are the deviations from the design goal, at [`ELECTRICAL_TEST_FREQUENCIES_HZ`](/phonometry/reference/api/metrology/sound-level-meter/#electrical_test_frequencies_hz) for the class in order, NaN at a frequency not measured. |
-| `electrical_weighting_uncertainties_db` | The same keys and shape. |
-| `electrical_weighting_uncertainties_without_correction_data_db` | Optional, for 4.4: the same without the uncertainty of the manufacturer's correction data, which 13.7 applies too; the same keys, shape and gaps. |
+| `electrical_weighting_uncertainties_db` | The same keys and shape. Keyed by any of `"A"`, `"C"` or `"Z"`. |
+| `electrical_weighting_uncertainties_without_correction_data_db` | Optional, for 4.4: the same without the uncertainty of the manufacturer's correction data, which 13.7 applies too; the same keys, shape and gaps. Keyed by any of `"A"`, `"C"` or `"Z"`. |
 | `weighting_at_1khz_deviations_db` | 14.2: the C-weighted and Z-weighted indications at 1 kHz less the A-weighted one, keyed `"C"` and `"Z"`. |
-| `weighting_at_1khz_uncertainties_db` | The same keys. |
+| `weighting_at_1khz_uncertainties_db` | The same keys. Keyed by any of `"C"` or `"Z"`. |
 | `time_weighting_at_1khz_deviations_db` | 14.3: the A-weighted S-time-weighted (`"S"`) and time-averaged (`"eq"`) indications at 1 kHz less the F-time-weighted one. |
-| `time_weighting_at_1khz_uncertainties_db` | The same keys. |
+| `time_weighting_at_1khz_uncertainties_db` | The same keys. Keyed by any of `"S"` or `"eq"`. |
 | `long_term_stability_db` | 15.3: the final less the initial A-weighted indication over 25 min to 35 min of operation. |
 | `long_term_stability_uncertainty_db` | Its uncertainty. |
 | `linearity_deviations_db` | 16: the level linearity deviations at 8 kHz on the reference level range, indicated less anticipated level, one per step of 16.3, in any order. |
@@ -446,9 +446,9 @@ keyword-only, so the unit in its name is written at the call site.
 | `linearity_overload_level` | The anticipated level of the step that first caused an indication of overload, which the rising steps of 16.3 stop short of. |
 | `linearity_under_range_level` | The anticipated level of the step that first caused an indication of under-range, which the falling steps of 16.3 stop short of. |
 | `range_linearity_deviations_db` | 17.5: the level linearity deviations including the level range control, at 1 kHz, keyed `"17.3"` (the reference sound level of 17.2 held on each level range besides the reference one, NaN where it is not displayed) and `"17.4"` (5 dB above the first indication of under-range on each level range, NaN where not measured). `"17.4"` starts with the reference level range, which 17.4 tests "for each level range" as well, and then takes the other ranges in the order of `"17.3"`, so it holds one value more; 17.3 has no reading on the reference range, where the reference sound level of 17.2 deviates by zero by construction (IEC 61672-1 5.6.3). |
-| `range_linearity_uncertainties_db` | The same keys, shape and gaps. |
+| `range_linearity_uncertainties_db` | The same keys, shape and gaps. Keyed by any of `"17.3"` or `"17.4"`. |
 | `toneburst_responses_db` | 18: the toneburst responses relative to the steady level, keyed `"F"` ($L_\mathrm{AFmax} - L_\mathrm{A}$), `"S"` ($L_\mathrm{ASmax} - L_\mathrm{A}$) and `"E"` ($L_\mathrm{AE} - L_\mathrm{A}$), each at [`TONEBURST_TEST_DURATIONS_MS`](/phonometry/reference/api/metrology/sound-level-meter/#toneburst_test_durations_ms) in order, NaN where not measured. The deviation from Table 4 is taken by the verdict. |
-| `toneburst_uncertainties_db` | The same keys and shape. |
+| `toneburst_uncertainties_db` | The same keys and shape. Keyed by any of `"F"`, `"S"` or `"E"`. |
 | `c_peak_differences` | 19.6: $L_\mathrm{Cpeak} - L_\mathrm{C}$ for one cycle at 8 kHz, a positive half cycle at 500 Hz and a negative half cycle at 500 Hz, in that order, NaN where not measured. The deviation from Table 5 is taken by the verdict. |
 | `c_peak_uncertainties_db` | Their uncertainties. |
 | `c_peak_overload_indicated` | Whether any of those signals caused an overload indication, which 19.3 and 19.5 forbid. |
@@ -478,8 +478,8 @@ The verdict on one requirement of IEC 61672-3:2013.
 
 | Name | Description |
 | :--- | :--- |
-| `name` | The requirement, one of [`SLM_PERIODIC_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-level-meter/#slm_periodic_requirements). |
-| `clause` | The clause of IEC 61672-3:2013 that tests it. |
+| `name` | The requirement, one of [`SLM_PERIODIC_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-level-meter/#slm_periodic_requirements). One of `"acoustic_weighting"`, `"electrical_weighting"`, `"weighting_at_1khz"`, `"time_weighting_at_1khz"`, `"long_term_stability"`, `"level_linearity"`, `"range_linearity"`, `"toneburst"`, `"c_peak"`, `"overload"` or `"high_level_stability"`. |
+| `clause` | The clause of IEC 61672-3:2013 that tests it. One of `"12"`, `"13"`, `"14.2"`, `"14.3"`, `"15"`, `"16"`, `"17"`, `"18"`, `"19"`, `"20"` or `"21"`. |
 | `tables` | Where IEC 61672-1:2013 prints its acceptance limits and maximum-permitted uncertainty. |
 | `labels` | What each result is (the frequency, the weighting, the toneburst or the signal), in the order given. |
 | `verifications` | One [`ConformanceVerification`](/phonometry/reference/api/metrology/conformance/#conformanceverification) per result, on the deviation from the design goal. |
@@ -549,7 +549,7 @@ hollow, as 4.3 forbids using it, and a result of
 (4.4). The title names the clause and its verdict above the clause's
 heading.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -720,7 +720,7 @@ a diamond at the result nearest its limit. Each requirement's own
 [`SoundLevelMeterPeriodicRequirement.plot`](/phonometry/reference/api/metrology/sound-level-meter/#soundlevelmeterperiodicrequirementplot) draws its results one
 by one.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

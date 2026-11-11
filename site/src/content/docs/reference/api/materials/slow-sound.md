@@ -267,8 +267,14 @@ HelmholtzResonator.plot(
 
 Draw the resonator cross-section to scale (dimensioned).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## plot_helmholtz_resonator_geometry
 
@@ -482,6 +488,7 @@ only the front air impedance carries `cos(theta)`.
 | `angle_rad` | Polar angle of incidence `theta`, in radians ($0 \le \theta < \pi/2 - 10^{-6}$). |
 | `end_correction` | Include the resonator radiation end corrections. |
 | `slit_radiation` | Include the slit-to-free-air radiation correction. |
+| `resonator_geometry` | One of `"square"` or `"slit"`. |
 | `fluid` | State of the air the panel radiates into and the slit and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)): its speed of sound `c0`, density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0`. |
 
 **Returns:** A [`SlitResonatorAbsorberResult`](/phonometry/reference/api/materials/slow-sound/#slitresonatorabsorberresult).
@@ -542,8 +549,14 @@ SlitResonatorAbsorberResult.plot(
 
 Plot the absorption spectrum `alpha(f)` with `|R|` overlaid.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SlitResonatorAbsorberResult.plot_geometry()
 
@@ -558,8 +571,14 @@ SlitResonatorAbsorberResult.plot_geometry(
 
 Draw one period of the panel cross-section to scale (dimensioned).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## SlowSoundAbsorberWarning
 

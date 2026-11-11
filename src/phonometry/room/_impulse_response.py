@@ -64,7 +64,8 @@ decay curves; that step belongs to downstream room-acoustics modules.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from scipy import signal
@@ -101,6 +102,8 @@ class ImpulseResponseWarning(PhonometryWarning):
 
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, DTypeLike, NDArray
 
@@ -177,6 +180,8 @@ class ImpulseResponseResult(OwnsArrays):
     :func:`phonometry.speech.sti_from_impulse_response`. Indexing,
     ``len(result)`` and the ``size``/``ndim``/``shape``/``dtype`` attributes
     forward to ``ir``.
+
+    :ivar method: One of ``"spectral"``, ``"farina"``, ``"mls"`` or ``"golay"``.
     """
 
     ir: NDArray[np.float64]
@@ -249,8 +254,10 @@ class ImpulseResponseResult(OwnsArrays):
         Draws the (normalised) time-domain waveform and, below it, the
         log-magnitude envelope in dB with a Schroeder energy-decay overlay.
         With ``ax`` given, only the decay panel is drawn on it. Requires
-        matplotlib (``pip install "phonometry[plot]"``); returns the
+        matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_impulse_response
@@ -911,6 +918,11 @@ class ShapedSweepResult(OwnsArrays):
         typical shaped sweeps here measure about 4.2-4.3 dB.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"f_range": "Hz", "group_delay": "s"}
+    )
+
     signal: np.ndarray
     fs: float
     frequencies: np.ndarray
@@ -995,7 +1007,7 @@ class ShapedSweepResult(OwnsArrays):
         magnitude spectrum overlaid on the synthesis target (both in dB re
         their in-band maximum). With ``ax`` given, only the spectrum panel
         is drawn on it. Requires matplotlib
-        (``pip install "phonometry[plot]"``).
+        (the ``[plot]`` extra).
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         """

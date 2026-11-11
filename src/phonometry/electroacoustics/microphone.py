@@ -63,7 +63,8 @@ so the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -89,6 +90,7 @@ from .loudspeaker import (
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
@@ -535,6 +537,11 @@ class MicrophoneCharacteristics(OwnsArrays):
         or ``None``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"effective_range": "Hz", "noise_frequencies": "Hz", "polar_frequency": "Hz"}
+    )
+
     frequencies: NDArray[np.float64]
     response_db: NDArray[np.float64]
     reference_frequency_hz: float
@@ -720,8 +727,8 @@ class MicrophoneCharacteristics(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from .._i18n import check_language
 
@@ -774,14 +781,15 @@ class MicrophoneCharacteristics(OwnsArrays):
 
         :param ax: Existing axes to draw on, or ``None`` for a fresh figure (a
             polar axes is created for ``"directivity"``).
-        :param quantity: Which characteristic to plot (see above).
+        :param quantity: Which characteristic to plot (see above). One of
+            ``"response"``, ``"directivity"``, ``"noise"`` or ``"distortion"``.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :return: The axes the characteristic was drawn on, polar for ``"directivity"``.
         :raises ValueError: If ``quantity`` or ``language`` is unknown, the
             result carries no data for ``quantity``, or ``ax`` is not a polar
             axes for ``"directivity"``.
         :raises ImportError: If matplotlib is not installed
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         :raises TypeError: if ``quantity`` is not a text.
         """
         require_choice(

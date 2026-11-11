@@ -246,7 +246,7 @@ BackgroundDurationCheck.plot(
 
 Plot each duration against the 30 s of 7.6 and the tolerance accepted.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -325,7 +325,7 @@ CalibrationDeviationResult.plot(
 
 Plot each reading against the window the earlier calibrations leave it.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -678,7 +678,7 @@ InstrumentAgreementCheck.plot(
 
 Plot each calculated-less-instrument difference against 2 dB.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -789,7 +789,7 @@ MeasurementDisturbanceCheck.plot(
 
 Plot each period's maximum-to-equivalent difference against 5 dB.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -920,7 +920,7 @@ PositionSpreadCheck.plot(
 
 Plot the readings against the spread the stage allows.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -1028,7 +1028,7 @@ over the integration time of Annex B for an equivalent level.
 | `levels` | Band levels of each reading, shape `(readings, bands)` (one-dimensional for a single reading), in dB. |
 | `frequencies` | Nominal band centres, in Hz, increasing: the one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of 31,5 Hz to 8 000 Hz, as `fraction` says. |
 | `quantity` | The Table 1 quantity measured: `"Smax"`, `"Fmax"` or `"eq"`. It names the single numbers and nothing else. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. 6 asks for the weighted values from one-third-octave bands; octave results are optional. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. 6 asks for the weighted values from one-third-octave bands; octave results are optional. One of `1` or `3`. |
 | `background_levels` | Background band levels, in dB, one per band or one row per microphone position (energy-averaged over the positions, as the 2004 edition says in so many words and the draft leaves implicit). |
 | `reverberation_time` | Reverberation time of each band, in s, measured by ISO 3382-2 (Clause 8). Only the bands of the standardization range are read; the others may be `nan`. |
 | `volume` | Room volume, in m³, for the normalized levels. |
@@ -1148,7 +1148,7 @@ ServiceEquipmentBackgroundResult.plot(
 Plot measured, background and corrected band levels.
 
 Bands held at 2,2 dB are marked as upper limits. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
 
 **Parameters**
 
@@ -1268,7 +1268,7 @@ ServiceEquipmentPositionCheck.plot(
 
 Plot the room in plan with the positions and their clearances.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -1384,7 +1384,7 @@ Produced by [`service_equipment_level`](/phonometry/reference/api/building/servi
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in Hz. |
-| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `quantity` | The Table 1 quantity: `"Smax"`, `"Fmax"` or `"eq"`. |
 | `a_weighting_range` | `"restricted"` (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz) or `"extended"` (25 Hz to 10 000 Hz; octave 31,5 Hz to 8 000 Hz), the range the A-weighted values were summed over. |
 | `reading_levels` | The band levels of every reading, shape `(readings, bands)`, in dB. |
@@ -1422,7 +1422,7 @@ Plot the band spectrum through each step of the method.
 The average, the background, the corrected level and, when formed, the
 standardized one, with the bands the background limits marked and the
 A-weighted single numbers in the title. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
 
 **Parameters**
 
@@ -1572,7 +1572,7 @@ VaryingBackgroundCheck.plot(
 
 Plot the equipment level against the background maximum, per band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 

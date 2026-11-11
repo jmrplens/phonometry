@@ -152,3 +152,8 @@ __all__ = [
     "tone_to_noise_ratio",
     "two_tone_separation_frequency",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.psychoacoustics.`` offers alone."""
+    return sorted(__all__)

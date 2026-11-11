@@ -159,8 +159,10 @@ class HelmholtzResonator(RichDisplay):
     ) -> Axes:
         """Draw the resonator cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_helmholtz_resonator_geometry
@@ -235,8 +237,11 @@ def slit_effective_properties(
     omega = 2.0 * np.pi * f
     x_rho = (h / 2.0) * np.sqrt(1j * omega * rho0 / eta)
     x_kap = (h / 2.0) * np.sqrt(1j * omega * pr * rho0 / eta)
-    rho_s = rho0 / (1.0 - np.tanh(x_rho) / x_rho)
-    kap_s = (gamma * p0) / (1.0 + (gamma - 1.0) * np.tanh(x_kap) / x_kap)
+    # tanh saturates to 1 as the boundary layers thin; NumPy's own routine on
+    # Windows passes through an exponential that overflows there, and says so.
+    with np.errstate(over="ignore"):
+        rho_s = rho0 / (1.0 - np.tanh(x_rho) / x_rho)
+        kap_s = (gamma * p0) / (1.0 + (gamma - 1.0) * np.tanh(x_kap) / x_kap)
     return EffectiveFluidProperties(
         effective_density=np.asarray(rho_s, dtype=np.complex128),
         bulk_modulus=np.asarray(kap_s, dtype=np.complex128),
@@ -591,8 +596,10 @@ class SlitResonatorAbsorberResult(OwnsArrays):
     ) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|R|`` overlaid.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_slit_resonator_absorber
@@ -605,8 +612,10 @@ class SlitResonatorAbsorberResult(OwnsArrays):
     ) -> Axes:
         """Draw one period of the panel cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_slit_absorber_result_geometry
@@ -739,6 +748,7 @@ def slit_helmholtz_absorber(
         (:math:`0 \le \theta < \pi/2 - 10^{-6}`).
     :param end_correction: Include the resonator radiation end corrections.
     :param slit_radiation: Include the slit-to-free-air radiation correction.
+    :param resonator_geometry: One of ``"square"`` or ``"slit"``.
     :param fluid: State of the air the panel radiates into and the slit and
         resonators are filled with
         (:class:`~phonometry.fluids.Fluid`): its

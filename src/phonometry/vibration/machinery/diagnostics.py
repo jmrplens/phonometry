@@ -291,7 +291,7 @@ class FaultFrequencyResult(RichDisplay):
         object exposing ``frequencies`` and ``amplitude``); without it the
         predicted lines are drawn alone as a labelled stem plot.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

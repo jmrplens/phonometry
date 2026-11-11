@@ -160,8 +160,14 @@ BandUncertainty.plot(
 
 Plot the per-band standard uncertainty spectrum.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## COVERAGE_FACTORS
 
@@ -381,7 +387,7 @@ available for impact sound insulation (Table 5, footnote a).
 
 | Name | Description |
 | :--- | :--- |
-| `quantity` | Rating descriptor (see above). |
+| `quantity` | Rating descriptor (see above). One of `"r_w"`, `"r_w+c_50_3150"`, `"r_w+c_50_5000"`, `"r_w+c_100_3150"`, `"r_w+c_100_5000"`, `"r_w+ctr_50_3150"`, `"r_w+ctr_50_5000"`, `"r_w+ctr_100_3150"`, `"r_w+ctr_100_5000"`, `"ln_w"`, `"ln_w+ci"`, `"delta_lw"`, `"rprime_w"`, `"r_prime_w"`, `"dn_w"`, `"dnw"`, `"dnt_w"`, `"dntw"`, `"lprime_n_w"`, `"lnprime_w"`, `"lnt_w"`, `"lprime_nt_w"` or `"delta_l_w"`. |
 | `situation` | Measurement situation `"A"`, `"B"` or `"C"` (Clause 5.2). |
 | `upper_limit` | Select the `σR95` upper limit (airborne, situation A). |
 
@@ -459,7 +465,7 @@ dataclasses. For conformity checks pass `one_sided=True` and read
 | Name | Description |
 | :--- | :--- |
 | `value` | Best estimate `y` (e.g. `Rw` in dB). |
-| `quantity` | Rating descriptor (see [`single_number_uncertainty`](/phonometry/reference/api/building/uncertainty/#single_number_uncertainty)). |
+| `quantity` | Rating descriptor (see [`single_number_uncertainty`](/phonometry/reference/api/building/uncertainty/#single_number_uncertainty)). One of `"r_w"`, `"r_w+c_50_3150"`, `"r_w+c_50_5000"`, `"r_w+c_100_3150"`, `"r_w+c_100_5000"`, `"r_w+ctr_50_3150"`, `"r_w+ctr_50_5000"`, `"r_w+ctr_100_3150"`, `"r_w+ctr_100_5000"`, `"ln_w"`, `"ln_w+ci"`, `"delta_lw"`, `"rprime_w"`, `"r_prime_w"`, `"dn_w"`, `"dnw"`, `"dnt_w"`, `"dntw"`, `"lprime_n_w"`, `"lnprime_w"`, `"lnt_w"`, `"lprime_nt_w"` or `"delta_l_w"`. |
 | `situation` | Measurement situation `"A"`, `"B"` or `"C"` (Clause 5.2). |
 | `coverage` | Coverage probability as a fraction. |
 | `one_sided` | Use the one-sided coverage factor. |

@@ -254,7 +254,7 @@ unit area as *tie_stiffness_per_area* (see
 | `loss_factor` | Leaf loss factor `eta` (> 0, Default: 0.1); reserved for the coincidence extension and reported for reference. |
 | `cavity_medium` | Optional porous fill; see [`mass_spring_mass_resonance`](/phonometry/reference/api/building/panel-transmission/#mass_spring_mass_resonance). |
 | `tie_stiffness_per_area` | Stiffness per unit area $N k / S$ of a connection array bridging the cavity, in N/m^3 (>= 0, Default: 0). |
-| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
 **Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"double-wall"`).
@@ -280,7 +280,7 @@ Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
 
 | Name | Description |
 | :--- | :--- |
-| `fraction` | The band set, 3 for one-third octaves (5.5 dB) or 1 for octaves (4.0 dB). |
+| `fraction` | The band set, 3 for one-third octaves (5.5 dB) or 1 for octaves (4.0 dB). One of `1` or `3`. |
 
 **Returns:** The correction subtracted from the normal-incidence mass law, dB.
 
@@ -320,7 +320,7 @@ builds its estimate on).
 | `frequency` | Frequency `f`, in hertz (scalar or array, > 0). |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
 | `incidence` | `"normal"` or `"field"` (Default: `"field"`). |
-| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `field_correction` | Explicit field-incidence correction, in dB (>= 0), overriding the band table (Default: `None`). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
@@ -561,7 +561,7 @@ no smooth model predicts.
 | `method` | `"integral"` (Default) or `"heckl"`. |
 | `area` | Panel area `S`, in m^2 (> 0), selecting the size-dependent limiting angle of Bies Eq. (7.36) (Default: `None`); used only by `method="integral"`, but validated on both routes. |
 | `limiting_angle_deg` | Fixed limiting angle `theta_L`, in degrees ($0 < \theta_\mathrm{L} < 90$, Default: 78.0), used when *area* is `None` and only by `method="integral"`, but validated on both routes. |
-| `fraction` | The band set of the field correction of the Heckl mass-law branch, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set of the field correction of the Heckl mass-law branch, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
 
 **Returns:** A [`SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult) (model `"orthotropic-integral"` or `"orthotropic-heckl"`) carrying `fc1` in [`critical_frequency`](/phonometry/reference/api/building/flanking-transmission/#critical_frequency) and `fc2` in [`critical_frequency_upper`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult).
@@ -656,7 +656,7 @@ and the material's own is then not read at all.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
-| `material` | A key into [`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials), or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row (Default: `None`). |
+| `material` | A key into [`PLATEAU_MATERIALS`](/phonometry/reference/api/building/panel-transmission/#plateau_materials), or a [`PlateauMaterial`](/phonometry/reference/api/solids/plateau/#plateaumaterial) row (Default: `None`). One of `"aluminium"`, `"brick"`, `"concrete"`, `"glass"`, `"lead"`, `"plaster"`, `"plywood"` or `"steel"`. |
 | `thickness_mm` | Panel thickness, in **millimetres** (> 0), used with *material* to get the surface density. |
 | `mass_per_area` | Mass per unit area `m''`, in kg/m^2 (> 0). |
 | `plateau_height_db` | Coincidence plateau height, in dB (> 0). |
@@ -772,7 +772,7 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 | `critical_frequency` | Coincidence frequency `fc`, in hertz (> 0). |
 | `bending_stiffness` | Bending stiffness per unit width `B'`, in N.m, used to compute `fc` when *critical_frequency* is not given. |
 | `loss_factor` | Total loss factor `eta` (> 0, Default: 0.01). |
-| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set of the field correction, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `coincidence_model` | `"sharp"` (Default, Bies Eq. 7.44 above `fc` with the interpolated bridge from $f_\mathrm{c}/2$) or `"cremer"` (Norton Eq. 3.110, mass law right up to `fc`). |
 | `field_correction` | Explicit field-incidence correction of the mass-law region, in dB (>= 0), overriding the band table (Default: `None`; Norton's Eq. 3.106 uses a flat 5 dB). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). |
@@ -838,8 +838,14 @@ SoundReductionResult.plot(
 
 Plot the predicted sound reduction index `R(f)`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SoundReductionResult.plot_geometry()
 
@@ -854,8 +860,14 @@ SoundReductionResult.plot_geometry(
 
 Draw the mass-spring-mass cross-section to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 **Raises**
 
@@ -881,7 +893,7 @@ requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
 
 | Name | Description |
 | :--- | :--- |
-| `fraction` | Band set forwarded to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves (Default: `None`, read from the number of values). |
+| `fraction` | Band set forwarded to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves (Default: `None`, read from the number of values). One of `1` or `3`. |
 
 **Returns:** The [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult).
 

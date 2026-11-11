@@ -241,8 +241,14 @@ Plot `R` against the shifted ISO 717-1 reference curve.
 Delegates to the weighted-rating plot (measured `R` versus the
 shifted reference, unfavourable deviations shaded). Requires the
 automatic rating to be available (16 or 5 bands) and matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### LaboratoryAirborneInsulationResult.report()
 
@@ -289,7 +295,7 @@ is rejected.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded rating figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded rating figure (the `[plot]` extra). |
 
 ## LaboratoryImpactInsulationResult
 
@@ -326,8 +332,14 @@ Plot `Ln` against the shifted ISO 717-2 reference curve.
 
 Delegates to the weighted impact-rating plot. Requires the automatic
 rating to be available (16 or 5 bands) and matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### LaboratoryImpactInsulationResult.report()
 
@@ -373,7 +385,7 @@ is rejected.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `language` is not one of the supported values, or the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-2 rating the fiche needs was not formed). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded rating figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded rating figure (the `[plot]` extra). |
 
 ## LaboratoryInsulationWarning
 

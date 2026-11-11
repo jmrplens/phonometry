@@ -381,12 +381,11 @@ class TrackBase(Enum):
     OTHER = "O"  #: Other.
 
 
-#: A :class:`RailRoughnessClass`, by its letter.
+#: The letter of a :class:`RailRoughnessClass` that Table G-1b tabulates, one
+#: of the two :func:`rail_roughness` takes.
 RailRoughnessCode = Literal[
     "E",
     "M",
-    "N",
-    "B",
 ]
 
 
@@ -397,6 +396,14 @@ class RailRoughnessClass(Enum):
     NORMAL = "M"  #: Normally maintained, smooth.
     NOT_WELL_MAINTAINED = "N"  #: Not well maintained.
     BAD = "B"  #: Not maintained and in bad condition.
+
+
+#: The two :class:`RailRoughnessClass` members Table G-1b tabulates, the ones
+#: :func:`rail_roughness` takes beside their letters.
+TabulatedRailRoughness = Literal[
+    RailRoughnessClass.WELL_MAINTAINED,
+    RailRoughnessClass.NORMAL,
+]
 
 
 class RailPad(Enum):
@@ -795,6 +802,12 @@ _TABLE_G1B: dict[str, tuple[float, ...]] = {
         -19.0,
     ),
 }
+
+#: The letters of the :class:`RailRoughnessClass` members Table G-1b gives no
+#: spectrum for, which :func:`rail_roughness` refuses by saying so.
+_UNTABULATED_ROUGHNESS: frozenset[str] = frozenset(
+    member.value for member in RailRoughnessClass if member.value not in _TABLE_G1B
+)
 
 # ---------------------------------------------------------------------------
 # Table G-2 - contact filter A_3,i, as replaced by (EU) 2021/1226 Annex point
@@ -1895,7 +1908,8 @@ def wheel_roughness(
 ) -> WavelengthSpectrum:
     """Wheel roughness ``L_r,VEH`` of Table G-1a.
 
-    :param brake: The :class:`BrakeType` of digit 3 of the vehicle descriptor.
+    :param brake: The :class:`BrakeType` of digit 3 of the vehicle descriptor. One of
+        ``"c"``, ``"k"`` or ``"n"``.
     :return: The wavelengths in mm and the levels in dB, as a
         :class:`WavelengthSpectrum`.
     :raises ValueError: If the brake type is not tabulated.
@@ -1912,8 +1926,18 @@ def wheel_roughness(
     )
 
 
+def _no_rail_spectrum(letter: str) -> str:
+    """Why the rail roughness class *letter* has no spectrum to give."""
+    return (
+        f"Rail roughness class {letter!r} has no spectrum in Table G-1b, "
+        "which only tabulates "
+        + " and ".join(_TABLE_G1B)
+        + "; supply a national spectrum instead."
+    )
+
+
 def rail_roughness(
-    roughness: RailRoughnessClass | RailRoughnessCode,
+    roughness: TabulatedRailRoughness | RailRoughnessCode,
 ) -> WavelengthSpectrum:
     """Rail roughness ``L_r,TR`` of Table G-1b.
 
@@ -1922,26 +1946,27 @@ def rail_roughness(
     to be supplied by the Member State.
 
     :param roughness: The :class:`RailRoughnessClass` of digit 2 of the track
-        descriptor.
+        descriptor, one of the two Table G-1b tabulates:
+        ``RailRoughnessClass.WELL_MAINTAINED`` or ``RailRoughnessClass.NORMAL``,
+        or its letter, ``"E"`` or ``"M"``. The not well maintained and bad
+        classes, ``"N"`` and ``"B"`` (``RailRoughnessClass.NOT_WELL_MAINTAINED``
+        and ``RailRoughnessClass.BAD``), are not offered: Appendix G tabulates
+        no spectrum for them, and the Member State supplies a national one.
     :return: The wavelengths in mm and the levels in dB, as a
         :class:`WavelengthSpectrum`.
-    :raises ValueError: If the class carries no spectrum in Table G-1b.
+    :raises ValueError: If the class carries no spectrum in Table G-1b, ``"N"``
+        and ``"B"`` and their members among them, or is no class at all.
     :raises TypeError: if ``roughness`` is not a text.
     """
+    if isinstance(roughness, str) and roughness in _UNTABULATED_ROUGHNESS:
+        raise ValueError(_no_rail_spectrum(roughness))
     key = (
         roughness.value
         if isinstance(roughness, RailRoughnessClass)
-        else require_choice(
-            roughness, "roughness", tuple(m.value for m in RailRoughnessClass)
-        )
+        else require_choice(roughness, "roughness", tuple(_TABLE_G1B))
     )
-    if key not in _TABLE_G1B:
-        raise ValueError(
-            f"Rail roughness class {key!r} has no spectrum in Table G-1b, "
-            "which only tabulates "
-            + " and ".join(_TABLE_G1B)
-            + "; supply a national spectrum instead."
-        )
+    if key in _UNTABULATED_ROUGHNESS:
+        raise ValueError(_no_rail_spectrum(key))
     return WavelengthSpectrum(
         wavelengths_mm=np.asarray(_WAVELENGTHS_STANDARD, dtype=np.float64),
         levels=np.asarray(_TABLE_G1B[key], dtype=np.float64),
@@ -2016,7 +2041,9 @@ def track_transfer(
 ) -> NDArray[np.float64]:
     """Track transfer function ``L_H,TR,i`` of Table G-3a, in dB per axle.
 
-    :param track: A :class:`TrackTransferClass` member or its column code.
+    :param track: A :class:`TrackTransferClass` member or its column code. One of
+        ``"M/S"``, ``"M/M"``, ``"M/H"``, ``"B/S"``, ``"B/M"``, ``"B/H"``, ``"W"`` or
+        ``"D"``.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the column is not tabulated.
     :raises TypeError: if ``track`` is not a text.
@@ -2098,7 +2125,10 @@ def traction_sound_power(
     :math:`L_{W,0,\mathrm{const},i} = L_{W,0,\mathrm{idling},i}`, so this
     one table serves both running conditions.
 
-    :param vehicle: A :class:`TractionVehicle` member or its description.
+    :param vehicle: A :class:`TractionVehicle` member or its description. One of
+        ``"diesel locomotive, c. 800 kW"``, ``"diesel locomotive, c. 2 200 kW"``,
+        ``"diesel multiple unit"``, ``"electric locomotive"`` or
+        ``"electric multiple unit"``.
     :return: The 24 band levels at source height A and at source height B,
         as a :class:`RailSourceSpectra`.
     :raises ValueError: If the vehicle is not tabulated.
@@ -2164,7 +2194,8 @@ def aerodynamic_sound_power(
 def bridge_transfer(bridge: BridgeType | BridgeTypeName) -> NDArray[np.float64]:
     """Bridge transfer function ``L_H,bridge,i`` of Table G-7, in dB per axle.
 
-    :param bridge: A :class:`BridgeType` member or its column label.
+    :param bridge: A :class:`BridgeType` member or its column label. One of
+        ``"+10 dB(A)"`` or ``"+15 dB(A)"``.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the column is not tabulated.
     :raises TypeError: if ``bridge`` is not a text.
@@ -2760,7 +2791,10 @@ class RailwayEmissionResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the per-metre line power of the two equivalent source heights."""
+        """Plot the per-metre line power of the two equivalent source heights.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_cnossos_rail_emission
 

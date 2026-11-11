@@ -391,8 +391,10 @@ class InSituSoundPowerResult(OwnsArrays):
         determination); a band that 8.1 makes an upper bound is hatched and
         named as one, and a band that fails the background requirement
         otherwise is cross-hatched and named as that. Requires
-        matplotlib (``pip install "phonometry[plot]"``); returns the
+        matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_in_situ_sound_power

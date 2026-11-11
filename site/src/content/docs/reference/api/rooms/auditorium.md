@@ -72,7 +72,7 @@ and this function refuses to invent one.
 
 | Name | Description |
 | :--- | :--- |
-| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. |
+| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
 | `first` | One value, in the quantity's unit. |
 | `second` | The other, of the same shape. |
 
@@ -120,6 +120,12 @@ Equation (A.17) while every other row is averaged arithmetically.
 it: frequency-averaged values at single positions in unoccupied concert
 and multi-purpose halls up to 25 000 m³. It is not a range for one band,
 for an occupied hall, or for a spatial average.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `symbol` | One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"` or `"L_J"`. |
 
 ## AuditoriumWarning
 
@@ -525,8 +531,14 @@ InterauralCorrelationResult.plot(
 
 Plot the correlation function over the search window, per band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## late_lateral_average
 
@@ -680,8 +692,14 @@ LateLateralResult.plot(
 
 Plot the per-band late lateral level against the Table A.1 range.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## LATERAL_WEIGHTINGS
 
@@ -711,6 +729,12 @@ $J_\mathrm{LF}$ or $J_\mathrm{LFC}$ depending on
 gives them a just-noticeable difference of 0,05 and a typical range of
 0,05 to 0,35 over the 125 Hz to 1 kHz octave bands.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `weighting` | One of `"squared"` or `"cosine"`. |
+
 ### LateralEnergyResult.plot()
 
 ```python
@@ -724,8 +748,14 @@ LateralEnergyResult.plot(
 
 Plot the per-band lateral fraction against the Table A.1 range.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## MAX_DIRECTIVITY_STEP_DEG
 
@@ -887,7 +917,7 @@ built against another JND.
 
 | Name | Description |
 | :--- | :--- |
-| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it, or `"J_LFC"`. |
+| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it, or `"J_LFC"`. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
 | `first` | One value, in the quantity's unit. |
 | `second` | The other, of the same shape. |
 
@@ -1025,7 +1055,7 @@ table.
 
 | Name | Description |
 | :--- | :--- |
-| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. |
+| `symbol` | The quantity, as [`TABLE_A1`](/phonometry/reference/api/rooms/auditorium/#table_a1) keys it. `"J_LFC"` is taken too: Table A.1 prints the early lateral energy fraction as one row, "J_LF or J_LFC", so both weightings of [`early_lateral_energy_fraction`](/phonometry/reference/api/rooms/auditorium/#early_lateral_energy_fraction) share its four bands, its just-noticeable difference and its typical range. One of `"G"`, `"EDT"`, `"C80"`, `"D50"`, `"Ts"`, `"J_LF"`, `"J_LFC"` or `"L_J"`. |
 | `values` | Its per-band values, one per entry of `frequencies`. |
 | `frequencies` | The band centre frequencies in Hz, as a result carries them. |
 
@@ -1265,8 +1295,14 @@ Plot the per-band sound strength against the Table A.1 range.
 
 With `ax` given, only the strength panel is drawn on it; otherwise a
 second panel shows the two levels G is the difference of. Requires
-matplotlib (`pip install "phonometry[plot]"`); returns the
+matplotlib (the `[plot]` extra); returns the
 `Axes` it drew on, or the tuple of two without `ax`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## source_directivity_limit
 
@@ -1433,8 +1469,14 @@ StageSupportResult.plot(
 
 Plot both supports per band against the Table C.1 ranges.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## TABLE_A1
 

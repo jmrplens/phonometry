@@ -593,7 +593,8 @@ def typical_element_mobility(
     injects the most power. ``loss_factor=0`` returns exactly zero there,
     which :func:`coupling_term` then rejects.
 
-    :param structure: Table D.1 row name.
+    :param structure: Table D.1 row name. One of ``"mass"``, ``"bar_end"``, ``"beam"``,
+        ``"plate"``, ``"pipe"`` or ``"mass_spring"``.
     :param frequency: Frequency ``f``, in hertz (scalar or array), for the
         frequency-dependent rows only.
     :param mass: Mass ``M``, in kilograms (rows ``"mass"``, ``"mass_spring"``).
@@ -762,7 +763,7 @@ def tapping_machine_force_level_estimate(
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param fraction: The band set, 1 for octaves (default, coefficient 2,5) or
-        3 for one-third octaves (coefficient 0,8).
+        3 for one-third octaves (coefficient 0,8). One of ``1`` or ``3``.
     :return: The force level ``L_F``, in dB re 1e-6 N (the standard prints
         "re 1 pN"; see ``docs/ERRATA.md``).
     :raises ValueError: for a non-positive frequency or a band set other than
@@ -1125,8 +1126,10 @@ class InstalledSourceResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-path and total normalised sound pressure levels.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_installed_structure_borne
@@ -1174,7 +1177,7 @@ class InstalledSourceResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install "phonometry[report]"``).
+            not installed (the ``[report]`` extra).
         """
         from ..._i18n import check_language
 

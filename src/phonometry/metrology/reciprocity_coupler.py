@@ -314,7 +314,11 @@ def _gerber_exact(ratio: float, x: float) -> complex:
     zeros = _bessel_zeros(count)
     q = np.sqrt(zeros**2 + s)
     z = q * ratio
-    terms = 4.0 / zeros**2 * (s / q**2) * (1.0 - np.tanh(z) / z)
+    # tanh saturates to 1 for the large X of the table's last rows; NumPy's
+    # own routine on Windows overflows on the way there, and says so.
+    with np.errstate(over="ignore"):
+        saturating = np.tanh(z)
+    terms = 4.0 / zeros**2 * (s / q**2) * (1.0 - saturating / z)
     edge = float(zeros[-1]) + 0.5 * math.pi
     root = np.sqrt(s)
     first = 4.0 * (1.0 / edge - np.arctan(root / edge) / root)
@@ -448,7 +452,7 @@ class HeatConductionCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the modulus curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_heat_conduction_correction
@@ -625,9 +629,12 @@ class CapillaryTubeImpedance(OwnsArrays):
         r""":math:`Z_{\mathrm{a,C}} = Z_{\mathrm{a,t}}\tanh\gamma l_\mathrm{C}`
         (Formula (B.1)), in Pa·s/m³.
         """
-        return self.wave_impedance_pa_s_m3 * np.tanh(
-            self.propagation_coefficient_per_m * self.length_m
-        )
+        # tanh saturates to 1 for a long tube; NumPy's own routine on Windows
+        # overflows on the way there, and says so.
+        with np.errstate(over="ignore"):
+            return self.wave_impedance_pa_s_m3 * np.tanh(
+                self.propagation_coefficient_per_m * self.length_m
+            )
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -639,7 +646,7 @@ class CapillaryTubeImpedance(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the real-part curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_capillary_tube_impedance
@@ -1218,7 +1225,7 @@ class CouplerTransferImpedance(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the heat-conduction curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_coupler_transfer_impedance
@@ -1680,7 +1687,7 @@ class WaveMotionCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the correction curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_wave_motion_correction
@@ -1791,7 +1798,7 @@ class CouplerCheck(RichDisplay):
         frequency; ``None`` otherwise. It binds only the approximation.
     :ivar lowest_frequency_hz: The lowest frequency of the calibration, in Hz.
     :ivar heat_conduction_method: The method the calibration uses for
-        :math:`E_V`.
+        :math:`E_V`. One of ``"exact"`` or ``"approximation"``.
     :ivar temperature_c: The temperature, in °C.
     :ivar static_pressure_pa: The static pressure, in Pa.
     :ivar relative_humidity_percent: The relative humidity, in %.
@@ -1909,7 +1916,7 @@ class CouplerCheck(RichDisplay):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.barh`.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_coupler_check
@@ -1963,7 +1970,7 @@ def check_coupler(
     :param relative_humidity_percent: The relative humidity, in %.
     :param gas: Another gas than air, or ``None``.
     :param heat_conduction_method: The method the calibration uses for
-        :math:`E_V`.
+        :math:`E_V`. One of ``"exact"`` or ``"approximation"``.
     :return: The :class:`CouplerCheck`.
     :raises ValueError: for frequencies that are not positive and increasing,
         fewer than two microphones, or an unknown method.
@@ -2050,7 +2057,19 @@ class CouplerParameterUncertainty(OwnsArrays):
     :ivar frequencies: The frequencies, in Hz.
     :ivar component_uncertainties_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_2_TABLE_1`, in dB at each
-        frequency.
+        frequency. Keyed by any of ``"series_impedance"``, ``"voltage_ratio"``,
+        ``"cross_talk"``, ``"noise"``, ``"distortion"``, ``"frequency"``,
+        ``"receiver_ground_shield"``, ``"transmitter_ground_shield"``,
+        ``"coupler_length"``, ``"coupler_diameter"``, ``"coupler_volume"``,
+        ``"coupler_surface_area"``, ``"leakage"``, ``"capillary_tube_dimensions"``,
+        ``"static_pressure"``, ``"temperature"``, ``"relative_humidity"``,
+        ``"front_cavity_depth"``, ``"front_cavity_volume"``, ``"equivalent_volume"``,
+        ``"resonance_frequency"``, ``"loss_factor"``, ``"diaphragm_compliance"``,
+        ``"diaphragm_mass"``, ``"diaphragm_resistance"``, ``"front_cavity_thread"``,
+        ``"polarizing_voltage"``, ``"heat_conduction_theory"``, ``"excess_volume"``,
+        ``"viscosity_losses"``, ``"radial_wave_motion"``, ``"rounding"``,
+        ``"repeatability"``, ``"static_pressure_corrections"`` or
+        ``"temperature_corrections"``.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 
@@ -2100,7 +2119,7 @@ class CouplerParameterUncertainty(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the first component's curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.reciprocity import plot_parameter_uncertainty
@@ -2258,7 +2277,7 @@ def coupler_parameter_uncertainty(
         the static pressure, the temperature or the humidity could not move
         them with it, and an uncertainty on any of the three is refused.
     :param heat_conduction_method: The method for :math:`E_V` (Default:
-        ``"exact"``).
+        ``"exact"``). One of ``"exact"`` or ``"approximation"``.
     :return: The :class:`CouplerParameterUncertainty`, with a component for
         each parameter given a non-zero uncertainty.
     :raises ValueError: for other than three microphones, a microphone index

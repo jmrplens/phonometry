@@ -148,8 +148,14 @@ DynamicStiffnessResult.plot(
 
 Plot `f0(s')` with this design point marked.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### DynamicStiffnessResult.report()
 
@@ -202,7 +208,7 @@ frequencies are shown to 0,1 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the `f0(s')` design curve, so both are required (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab or matplotlib is not installed. The fiche always embeds the `f0(s')` design curve, so both are required (the `[report]` and `[plot]` extras). |
 
 ## DynamicStiffnessWarning
 

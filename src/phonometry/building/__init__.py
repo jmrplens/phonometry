@@ -739,3 +739,8 @@ __all__ = [
     "weighted_rating_extended",
     "window_size_correction",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.building.`` offers alone."""
+    return sorted(__all__)

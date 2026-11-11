@@ -164,7 +164,9 @@ def train_weighting_factor(
 ) -> float:
     r"""The weighting factor :math:`\alpha_\mathrm{Zug}` of Table 2 for one category.
 
-    :param kind: The kind of train, as :data:`TRAIN_KINDS` lists them.
+    :param kind: The kind of train, as :data:`TRAIN_KINDS` lists them. One of
+        ``"tram_metro"``, ``"s_bahn"``, ``"passenger"``, ``"freight"`` or
+        ``"freight_long"``.
     :param alignment: ``"surface"`` (default) or ``"underground"``.
     :return: :math:`\alpha_\mathrm{Zug}`, dimensionless.
     :raises ValueError: For an unknown kind or alignment.
@@ -313,7 +315,8 @@ def railway_guide_values(
     an altered or extended line (6.5.3.6 b)).
 
     :param area: The row of Table 1, as :data:`~phonometry.vibration.GUIDE_VALUES`
-        keys it.
+        keys it. One of ``"industrial"``, ``"commercial"``, ``"mixed"``,
+        ``"residential"`` or ``"sensitive"``.
     :param time_of_day: ``"day"`` (default) or ``"night"``.
     :param alignment: ``"surface"`` (default) or ``"underground"``.
     :return: The three values, as a :class:`~phonometry.vibration.GuideValues`

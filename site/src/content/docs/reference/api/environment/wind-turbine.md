@@ -228,6 +228,12 @@ WindTurbineTonalityResult.plot(
 
 Plot the narrowband spectrum with the critical band and masking level.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### WindTurbineTonalityResult.report()
 
 ```python
@@ -272,4 +278,4 @@ verdict row and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `language` is not one of the supported languages, or if `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |

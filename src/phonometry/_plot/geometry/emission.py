@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import (
     is_text,
     real_array,
@@ -156,6 +157,7 @@ def _number_points(
         )
 
 
+@closes_its_figures
 def plot_microphone_positions(
     positions: ArrayLike,
     *,
@@ -284,6 +286,7 @@ def plot_microphone_positions(
 # ---------------------------------------------------------------------------
 # p-p intensity probe.
 # ---------------------------------------------------------------------------
+@closes_its_figures
 def plot_pp_probe_geometry(
     spacing_m: float = 0.012,
     *,

@@ -21,7 +21,8 @@ the window as this library actually uses it.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, overload
 
 import numpy as np
 
@@ -38,6 +39,8 @@ from .._internal.validation import (
 from .spectra import _positive
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -96,6 +99,11 @@ class WindowMetricsResult(OwnsArrays):
     :ivar mainlobe_width_3db_bins: Two-sided -3 dB width of the main
         lobe, in bins.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"enbw_bins": "bins", "mainlobe_width_3db_bins": "bins"}
+    )
 
     window: WindowSpec
     n: int

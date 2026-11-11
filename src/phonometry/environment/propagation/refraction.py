@@ -155,7 +155,10 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the effective sound-speed profile (height on the vertical axis)."""
+        """Plot the effective sound-speed profile (height on the vertical axis).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_sound_speed_profile
 
@@ -469,7 +472,10 @@ class AtmosphericRayResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the curved ray paths (height on the vertical axis)."""
+        """Plot the curved ray paths (height on the vertical axis).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_atmospheric_rays
 
@@ -671,7 +677,10 @@ class AtmosphericPEResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the relative-level field over the range-height plane."""
+        """Plot the relative-level field over the range-height plane.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_atmospheric_pe
 

@@ -406,7 +406,7 @@ exists.
 | `receiver_levels_after` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 | `receiver_type_before` | `"hemi_free_field"` (default) or `"reflecting_surface"`, for the substitute site. |
-| `receiver_type_after` | The same for the barrier site. |
+| `receiver_type_after` | The same for the barrier site. One of `"hemi_free_field"` or `"reflecting_surface"`. |
 
 **Returns:** The insertion loss, as a [`MeasuredBarrierInsertionLoss`](/phonometry/reference/api/environment/barrier-in-situ/#measuredbarrierinsertionloss).
 
@@ -462,7 +462,7 @@ MeasuredBarrierInsertionLoss.plot(
 
 Draw the four levels and the insertion loss they give.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 

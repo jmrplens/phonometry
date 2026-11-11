@@ -2306,6 +2306,132 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A record's table shows the unit of every field that has one.** The
+  notebook table reads a field's unit from its name, and `speed_of_sound`,
+  `surface_area`, `absorption_area` and `room_constant`, which the library
+  names one way in every record, always in m/s, m², m² and m², were shown
+  bare, as were the standardized level difference `dnt` and the impact level
+  `li` of `building`, in dB. Each now shows its unit, and so do the fields
+  whose names say none, which 63 records now declare: the decay times,
+  clarities and centre time of `RoomAcousticsResult`, the ratings of
+  ISO 717, the attenuation terms of `OutdoorAttenuation`, `LEX,8h` and its
+  uncertainties, the loudness, roughness, fluctuation strength and tonality
+  of the psychoacoustic results and the airflow resistances among 157 such
+  fields. A test holds every number the results show to a unit or to a
+  reason it has none.
+
+- **`help()` names the values every choice takes.** A choice written once
+  and reused is a type alias the package does not publish, and the
+  annotations are read as text, so `help(filters.octave_filter)` and a
+  notebook's signature showed `mode: 'Mode' = 'rms'`: an alias no caller
+  can look up, and none of the values. The `:param:` field of each of the
+  512 public parameters typed with such an alias that left some value out,
+  and the `:ivar:` field of a record's, now lists every value as the caller
+  writes it ("One of ``"rms"`` or ``"peak"``"), 237 of them in a field that
+  was missing, `language` on 202 plots among them; the API reference shows
+  the same lists. `tests/test_choice_values_documented.py` holds every public
+  parameter to it (style rule D24). `emission.measurement_positions` takes
+  `surface="hemisphere"` alone in its signature, the one surface with a
+  coordinate table: it offered `"box"` too, which it always refused, since
+  ISO 3744:2010 Annex C places the positions on a box by subdividing its
+  faces. A type checker now refuses the box, and the call's error still
+  names Annex C. `vibration.straight_transmission_coefficient` takes
+  `junction="X"` or `"T1"` alone, the two junctions Hopkins gives a straight
+  section (`J3`, Eq. 5.13), where it offered the `"T2"` and `"L"` it always
+  refused; `building.improvement_octave_bands` takes `quantity="ΔL"`, `"ΔR"`
+  or `"Rs"` alone, the three it folds by the average of transmitted power,
+  where it offered the rainfall levels `"LI"` and `"LI,norm"`, which ISO
+  10140-1 Formula (K.3) sums by energy and it always refused; and
+  `environment.rail_roughness` takes the two classes Table G-1b tabulates,
+  `RailRoughnessClass.WELL_MAINTAINED` and `RailRoughnessClass.NORMAL` or
+  their letters `"E"` and `"M"`, where it offered `"N"` and `"B"` and their
+  members too, which Appendix G gives no spectrum for and it always
+  refused. A type checker refuses each of those values now, the error of a
+  rainfall level names `RainfallSoundResult.octave_bands`, and the error of
+  an untabulated rail class still asks for a national spectrum.
+
+- **A complex tangent that saturates says nothing on Windows either.**
+  `tanh(z)` tends to 1 as the real part of `z` grows and `tan(z)` to `j` as
+  its imaginary part does, which NumPy on Linux and macOS returns without a
+  word; NumPy on Windows passes through an exponential that overflows there
+  and warned "overflow encountered in tanh" (or `tan`) from the library's
+  line, an error under `python -W error`: the layered absorber of a very
+  resistive layer, the slit's effective properties at high frequency and
+  the coupler's heat-conduction correction for the last rows of IEC
+  61094-2 Table A.1, as the Windows test cells showed, and Maekawa's barrier
+  ratio for a large Fresnel number, the Biot layer's impedance of a thick
+  layer and the capillary tube's impedance of a long tube, which take the
+  same tangent of an argument that grows with an input. Each saturates
+  quietly now, to the same values.
+
+- **A `.plot()` that raises leaves no figure behind.** A plot makes its
+  figure before it draws, so a keyword matplotlib refuses, as
+  `result.plot(colour="red")` for `color`, raised from the drawing and left
+  the half-drawn figure open: a notebook showed it under the traceback, and
+  pyplot held it until the kernel ended. Every figure a plot opened is now
+  closed when it raises, for the `plot` and `plot_*` methods of every
+  result, the geometry views of `FDTD2D` and `SilencerChain`, the 24
+  `plot_*` functions the domains publish, from
+  `building.plot_aperture_geometry` to `vibration.plot_plate_geometry`, and
+  the response a filter bank draws for its `ResponsePlot` when the file
+  cannot be written; an axes the caller handed it, and its figure, stay the
+  caller's (style rule F68).
+
+- **`dir()` and tab completion of a domain offer what it publishes.** The
+  root already answered `dir(phonometry)` with its published names, but no
+  domain did: `phonometry.filters.` completed to 49 names, among them
+  `annotations` from the `__future__` import and the submodules it imports
+  from, `core` and `design` included, which are no address of anything.
+  Each of the 21 domain packages now lists its `__all__` alone; the
+  submodules stay importable. The catalogues read their data files as files
+  of the package, where `importlib.resources.files("phonometry.solids.data")`
+  imported each data directory, which has no `__init__.py`, as a namespace
+  package: ten of them sat in `sys.modules`, and in the completion of their
+  domain, once the packages were imported and the ANP database read.
+
+- **With `[perf]`, every package imports where numba can write no cache.**
+  The impulse time weighting and the BS.468-4 quasi-peak chain are compiled
+  by numba with an on-disk cache, and numba refuses that decoration with
+  `RuntimeError: cannot cache function ...: no locator available` where
+  neither the package directory, `NUMBA_CACHE_DIR` nor the home directory
+  is writable: for a service account, `nobody`, or a container user with no
+  home over a read-only install. The decoration runs at import, so 15 of
+  the 21 domain packages failed to import there, on numba 0.60.0 and
+  0.68.1 alike, and a cache warmed by root did not help. The kernels now
+  compile without the cache in that case, once per process on their first
+  call, and getting-started says to point `NUMBA_CACHE_DIR` at a writable
+  directory to keep it.
+
+- **A WAV file reads from a file system that cannot be memory-mapped.**
+  `io.read` asks SciPy to map every linear WAV but a 24-bit one, and
+  JupyterLite's notebook folder (`/drive`) refuses the map, so reading a
+  16-bit or float WAV there raised `OSError: [Errno 43] No such device`
+  until the file was copied to `/tmp`. A refused map is now read without
+  one, to the same samples; some network and FUSE mounts refuse it too.
+
+- **A message for a missing extra names the conda command beside pip's.**
+  `.plot()` without matplotlib, `.report()` without reportlab, svglib or
+  matplotlib, a compressed audio file or a FLAC target without soundfile, a
+  video without matplotlib and a torch or CuPy device without its library
+  said only `pip install "phonometry[plot]"` and the like, which in a conda
+  environment installs matplotlib and eight of its dependencies from PyPI
+  beside conda-forge's NumPy. Each now ends with both commands, for example
+  `pip install "phonometry[plot]" (conda: conda install -c conda-forge
+  matplotlib-base)`, built in one place from the conda-forge packages that
+  bring each extra: `matplotlib-base` for `[plot]`, `reportlab svglib` for
+  `[report]`, `pysoundfile` for `[audio]`, `numba` for `[perf]` and
+  `pytorch array-api-compat` for `[torch]`, with no index URL for the CPU
+  build. Writing or converting to FLAC without soundfile says "Writing FLAC
+  requires python-soundfile" where it said "Reading FLAC", and the
+  soundfile message names the `[audio]` extra once. A soundfile that
+  imports without its libsndfile, as soundfile 0.14.0 from PyPI does in
+  Pyodide, raised the loader's `OSError: sndfile library not found`; it now
+  raises the same `ImportError` as a missing extra, with the loader's
+  reason in it. Docstrings name the extra (the `[plot]` extra) instead of a
+  pip command, and `scripts/check_quoted_extras.py` refuses an install
+  command spelled anywhere in the package but the module that builds the
+  hints (style rule A64).
+
 - **A traceback names a warning by the package that publishes it.** Fourteen
   published warnings, the root `PhonometryWarning` among them, were written in
   private modules and carried them as their `__module__`, so under

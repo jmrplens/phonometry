@@ -56,7 +56,8 @@ the same system.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -73,6 +74,8 @@ from .._internal.validation import (
 from ..io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -250,6 +253,11 @@ class SweptSineDistortionResult(OwnsArrays):
     :ivar rate: Sweep rate :math:`L = T / \ln(f_2/f_1)`, in seconds.
     :ivar method: ``"synchronized"`` or ``"farina"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"delays": "s", "f1": "Hz", "f2": "Hz", "rate": "s", "thd_frequencies": "Hz"}
+    )
 
     frequencies: NDArray[np.float64]
     harmonic_responses: NDArray[np.complex128]

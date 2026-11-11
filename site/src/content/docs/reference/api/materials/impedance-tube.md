@@ -184,6 +184,12 @@ they were not supplied to [`two_microphone_impedance`](/phonometry/reference/api
 and `x1` are always there, because the reduction cannot run without
 them.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `shape` | One of `"circular"`, `"rectangular"` or `"square"`. |
+
 ### ImpedanceTubeResult.plot()
 
 ```python
@@ -197,8 +203,14 @@ ImpedanceTubeResult.plot(
 
 Plot the absorption spectrum `alpha(f)` with `|r|` overlaid.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ImpedanceTubeResult.plot_geometry()
 
@@ -213,8 +225,14 @@ ImpedanceTubeResult.plot_geometry(
 
 Draw the two-microphone tube to scale (dimensioned side view).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ImpedanceTubeResult.report()
 
@@ -261,7 +279,7 @@ to the normal-incidence coefficient reported here).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## ImpedanceTubeWarning
 

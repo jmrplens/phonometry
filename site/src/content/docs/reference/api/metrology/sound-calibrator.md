@@ -188,7 +188,7 @@ The figure this row prints for a class, or `None` for a dash.
 
 | Name | Description |
 | :--- | :--- |
-| `calibrator_class` | `"LS"`, `"1"` or `"2"`, or a /M designation, which reads the column of its class (5.1.14). |
+| `calibrator_class` | `"LS"`, `"1"` or `"2"`, or a /M designation, which reads the column of its class (5.1.14). One of `"LS"`, `"LS/M"`, `"1"`, `"1/M"` or `"2"`. |
 
 **Returns:** The printed figure, or `None` where the table prints a dash.
 
@@ -386,7 +386,7 @@ The `(deviation, uncertainty)` pairs measured for a requirement.
 
 | Name | Description |
 | :--- | :--- |
-| `requirement` | One of [`CALIBRATOR_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_requirements). |
+| `requirement` | One of [`CALIBRATOR_REQUIREMENTS`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_requirements). One of `"level"`, `"fluctuation"`, `"frequency"`, `"distortion"`, `"supply_voltage"`, `"environmental_level"`, `"environmental_level_in_band"`, `"environmental_frequency"` or `"field_immunity"`. |
 
 **Returns:** One pair per measurement, empty when it was not measured.
 
@@ -450,7 +450,7 @@ SoundCalibratorRequirement.plot(
 
 Draw each measurement against the requirement's limits, as Figure E.1.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -485,7 +485,7 @@ The IEC 60942:2017 verdict on one setting of a sound calibrator.
 
 | Name | Description |
 | :--- | :--- |
-| `calibrator_class` | The designation it was judged as, one of [`CALIBRATOR_CLASSES`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_classes). |
+| `calibrator_class` | The designation it was judged as, one of [`CALIBRATOR_CLASSES`](/phonometry/reference/api/metrology/sound-calibrator/#calibrator_classes). One of `"LS"`, `"LS/M"`, `"1"`, `"1/M"` or `"2"`. |
 | `nominal_frequency_hz` | The nominal frequency of the setting, in hertz, which selects the rows of the banded tables. |
 | `environmental_test` | `"full"` (Tables 5 and 6) or `"abbreviated"` (the reduced limits of A.6.4.7). |
 | `measurements` | The record the verdict was reached on. |
@@ -525,7 +525,7 @@ One pair of bars per measurement: the deviation as a share of its
 acceptance limit and the uncertainty as a share of its maximum. A
 requirement conforms when both of its bars stop at or before 100 %.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

@@ -256,9 +256,17 @@ def read_wav(
             # about the skip would tell the user their metadata was lost
             # when it was not.
             warnings.simplefilter("ignore", wavfile.WavFileWarning)
-            fs, raw = wavfile.read(
-                os.fspath(path), mmap=fmt.bits_per_sample != _THREE_BYTE_PCM_BITS
-            )
+            mapped = fmt.bits_per_sample != _THREE_BYTE_PCM_BITS
+            try:
+                fs, raw = wavfile.read(os.fspath(path), mmap=mapped)
+            except OSError:
+                if not mapped:
+                    raise
+                # A file system that cannot be memory-mapped refuses the map
+                # (JupyterLite's notebook folder with "[Errno 43] No such
+                # device", some network and FUSE mounts likewise); the bytes
+                # are read instead, the length already checked above.
+                fs, raw = wavfile.read(os.fspath(path), mmap=False)
         # scipy returns (frames,) or (frames, channels); the transpose to
         # the library's (channels, samples) is taken before the float
         # conversion so the conversion itself materialises the C-contiguous

@@ -91,7 +91,7 @@ Compare one measured peak velocity with its guideline value.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured peak velocity, in millimetres per second; see [`DamageAssessment`](/phonometry/reference/api/vibration/building-damage/#damageassessment) for which component it is. Zero is accepted and keeps to every guideline value. |
-| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). |
+| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `frequency_hz` | Frequency of the dominant component, in hertz. Required for the short-term foundation case. |
 | `location` | `"foundation"` (default) or `"top_floor"`. |
 | `duration` | `"short_term"` (default) or `"long_term"`. |
@@ -219,9 +219,9 @@ One measured velocity against the guideline value it is judged by.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured peak velocity, in millimetres per second: the largest of the three components at the foundation, or the larger of the two horizontal components in the topmost floor plane. |
-| `building_class` | The row of Table 1 or Table 3 that was used. |
-| `location` | Where the velocity was measured. |
-| `duration` | Which clause the guideline came from. |
+| `building_class` | The row of Table 1 or Table 3 that was used. One of `"commercial"`, `"residential"` or `"sensitive"`. |
+| `location` | Where the velocity was measured. One of `"foundation"` or `"top_floor"`. |
+| `duration` | Which clause the guideline came from. One of `"short_term"` or `"long_term"`. |
 | `frequency_hz` | The frequency the guideline was read at, or `None` where the guideline does not depend on frequency. |
 | `massive_structure` | Whether the row 1 values were raised by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), the allowance 5.1 leaves to the assessor for a massive engineering structure. |
 
@@ -252,7 +252,7 @@ The three foundation curves of Table 1 against frequency, and the
 measured velocity as a point, so the margin is read rather than
 computed.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -315,7 +315,7 @@ draws; pass *frequency* to sample the same polyline elsewhere.
 
 | Name | Description |
 | :--- | :--- |
-| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). |
+| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `frequency` | Frequency or frequencies to sample at, in hertz, or `None` for the four corners of Table 1. |
 
 **Returns:** The frequencies and the guideline velocities, as a [`GuidelineCurve`](/phonometry/reference/api/vibration/building-damage/#guidelinecurve).
@@ -371,7 +371,7 @@ number for all frequencies, and *frequency* is then not needed.
 
 | Name | Description |
 | :--- | :--- |
-| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). |
+| `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). One of `"commercial"`, `"residential"` or `"sensitive"`. |
 | `frequency` | Frequency of the dominant component, in hertz (scalar or array). Required for the short-term foundation case, and refused for every other one, where the printed value is the same at every frequency and a frequency would govern nothing. |
 | `location` | `"foundation"` (default) or `"top_floor"`. |
 | `duration` | `"short_term"` (Table 1, default) or `"long_term"` (Table 3). |
@@ -444,7 +444,7 @@ halves the table, which is what 6.3 allows without further evidence.
 
 | Name | Description |
 | :--- | :--- |
-| `material` | One of [`PIPELINE_MATERIALS`](/phonometry/reference/api/vibration/building-damage/#pipeline_materials). |
+| `material` | One of [`PIPELINE_MATERIALS`](/phonometry/reference/api/vibration/building-damage/#pipeline_materials). One of `"welded_steel"`, `"concrete_or_flanged_metal"` or `"masonry_or_plastic"`. |
 | `duration` | `"short_term"` (default) or `"long_term"`. |
 
 **Returns:** The guideline peak velocity, in millimetres per second.

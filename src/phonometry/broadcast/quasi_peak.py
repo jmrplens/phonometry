@@ -110,6 +110,7 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.kernels import compiled
 from .._internal.validation import (
     real_number,
     require_1d_signal,
@@ -139,13 +140,6 @@ __all__ = [
     "quasi_peak_meter",
     "verify_quasi_peak_dynamics",
 ]
-
-try:
-    from numba import jit as _numba_jit
-except ImportError:  # pragma: no cover - depends on install extras
-    # unused-ignore: with numba absent its import is Any and the ignore is
-    # unnecessary; with numba installed the assignment needs it.
-    _numba_jit = None  # type: ignore[assignment, unused-ignore]
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -333,12 +327,7 @@ def _quasi_peak_kernel_py(
     return trace
 
 
-if _numba_jit is not None:
-    _apply_quasi_peak_kernel = _numba_jit(nopython=True, cache=True)(
-        _quasi_peak_kernel_py
-    )
-else:  # pragma: no cover - exercised only without numba installed
-    _apply_quasi_peak_kernel = _quasi_peak_kernel_py
+_apply_quasi_peak_kernel = compiled(_quasi_peak_kernel_py)
 
 
 def _alpha(time_constant: float, fs: float) -> float:
@@ -550,7 +539,7 @@ class QuasiPeakResult(OwnsArrays):
     ) -> Axes:
         """Plot the quasi-peak trace over time, with the reading marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

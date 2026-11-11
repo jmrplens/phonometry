@@ -559,6 +559,8 @@ class MooreGlasbergLoudness(OwnsArrays):
     pattern is that of a single ear before binaural inhibition; the total
     ``loudness`` already includes the binaural summation.  ``field`` and
     ``presentation`` echo the listening conditions.
+
+    :ivar presentation: One of ``"binaural"``, ``"diotic"`` or ``"monaural"``.
     """
 
     loudness: float
@@ -644,8 +646,10 @@ class MooreGlasbergLoudness(OwnsArrays):
     ) -> Axes:
         """Plot the specific loudness N'(i) over the ERB-number scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.  See :mod:`phonometry._plot.psychoacoustics`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_moore_glasberg_loudness

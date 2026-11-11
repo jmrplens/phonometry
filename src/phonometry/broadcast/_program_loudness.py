@@ -339,7 +339,7 @@ class KWeightingResponse(OwnsArrays):
         frequency axis, with the two stages (the +4 dB shelf and the RLB
         high-pass) as light companion curves.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -902,7 +902,7 @@ class ProgramLoudnessResult(OwnsArrays):
         """Plot momentary and short-term loudness over time, with the
         integrated loudness and the loudness range annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -955,8 +955,8 @@ class ProgramLoudnessResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or
             ``tolerance`` is not ``"qc"``/``"live"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         :raises TypeError: if ``tolerance`` is not a text.
         """
         from .._i18n import check_language

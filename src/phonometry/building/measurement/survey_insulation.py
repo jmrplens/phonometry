@@ -343,7 +343,9 @@ def estimate_reverberation_index(
     to 150 m³.
 
     :param volume: Receiving-room volume ``V``, in m³ (0 < V <= 150).
-    :param room: Room-type key (see above).
+    :param room: Room-type key (see above). One of ``"furnished"``, ``"kitchen"``,
+        ``"bathroom"``, ``"a"``, ``"b"``, ``"c"``, ``"d"``, ``"e"``, ``"f"``, ``"g"``,
+        ``"h"``, ``"a+e"``, ``"b+f"``, ``"c+g"`` or ``"d+h"``.
     :param weighted: When ``True`` return the single A-/C-weighted index (the
         Table 4 ``A, C`` column) instead of the five octave-band values, for
         globally weighted service-equipment noise (Clause 3.17).
@@ -437,8 +439,10 @@ class SurveyAirborneResult(OwnsArrays):
 
         Delegates to the weighted-rating plot. Requires the automatic rating
         (5 octave or 16 one-third-octave bands) and matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         if self.rating is None:
             raise ValueError(_NO_RATING_TO_PLOT)
@@ -484,8 +488,8 @@ class SurveyAirborneResult(OwnsArrays):
             5 octave or 16 one-third-octave bands, and ``R'`` needs ``area``
             and ``volume``).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         :raises TypeError: if ``quantity`` is not a text.
         """
         _validate_report_request(engine, language)
@@ -551,7 +555,10 @@ class SurveyImpactResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot ``L'nT`` against the shifted ISO 717-2 reference curve."""
+        """Plot ``L'nT`` against the shifted ISO 717-2 reference curve.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         if self.rating is None:
             raise ValueError(_NO_RATING_TO_PLOT)
         return self.rating.plot(ax=ax, language=language, **kwargs)
@@ -589,8 +596,8 @@ class SurveyImpactResult(OwnsArrays):
             single-number rating (the survey needs 5 octave or 16
             one-third-octave bands).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         _validate_report_request(engine, language)
         if self.rating is None:
@@ -651,7 +658,10 @@ class SurveyFacadeResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot ``D2m,nT`` against the shifted ISO 717-1 reference curve."""
+        """Plot ``D2m,nT`` against the shifted ISO 717-1 reference curve.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         if self.rating is None:
             raise ValueError(_NO_RATING_TO_PLOT)
         return self.rating.plot(ax=ax, language=language, **kwargs)
@@ -689,8 +699,8 @@ class SurveyFacadeResult(OwnsArrays):
             single-number rating (the survey needs 5 octave or 16
             one-third-octave bands).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         _validate_report_request(engine, language)
         if self.rating is None:

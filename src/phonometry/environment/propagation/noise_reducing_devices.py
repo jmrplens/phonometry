@@ -75,7 +75,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -264,7 +264,8 @@ class RoadDeviceRating(OwnsArrays):
     :ivar category: The Annex A category of the reported value, ``"A1"`` to
         ``"A5"`` for absorption or ``"B1"`` to ``"B4"`` for insulation, or
         ``None`` for a railway rating and for reflection, whose standards
-        print no ladder.
+        print no ladder. One of ``"A1"``, ``"A2"``, ``"A3"``, ``"A4"``, ``"A5"``,
+        ``"B1"``, ``"B2"``, ``"B3"`` or ``"B4"``.
     :ivar quantity: ``"absorption"``, ``"insulation"`` or ``"reflection"``.
     :ivar spectrum: ``"road"`` (EN 1793-3) or ``"railway"`` (EN 16272-3-1).
     :ivar frequencies: The eighteen band centre frequencies, in Hz.
@@ -276,6 +277,11 @@ class RoadDeviceRating(OwnsArrays):
         ``DLα`` and ``DL_R``, which sum all eighteen, and the lowest reliable
         band :math:`m` for ``DL_RI``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"rating": "dB", "reported": "dB", "weights": "dB"}
+    )
 
     rating: float
     reported: int
@@ -292,8 +298,10 @@ class RoadDeviceRating(OwnsArrays):
     ) -> Axes:
         """Plot the per-band input against the spectrum that weights it.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_road_device_rating

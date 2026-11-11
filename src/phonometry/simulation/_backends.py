@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.extras import TORCH_CPU_WHEELS, install_hint, package_hint
 from .._internal.warnings import warn_caller
 from .compute import (
     Compute,
@@ -232,7 +233,8 @@ def _cupy(compute: Compute) -> Backend:
             needs="CuPy",
             packages=("cupy",),
             install=(
-                "install the wheel for your CUDA version, e.g. pip install cupy-cuda12x"
+                "install the wheel for your CUDA version, e.g. "
+                f"{package_hint('cupy-cuda12x', 'cupy')}"
             ),
             repair=(
                 "check that the CUDA libraries its wheel loads are present and "
@@ -320,15 +322,13 @@ def _torch_install(compute: Compute) -> str:
 
     For ``torch:cpu`` the CPU wheels first, then the extra, which keeps the
     torch it finds: the wheels PyPI serves for Linux bring gigabytes of CUDA
-    libraries a CPU never uses. For a GPU device the extra alone. No
-    punctuation touches the index URL, so the command copies as it reads.
+    libraries a CPU never uses. For a GPU device the extra alone. conda-forge
+    needs no index URL for either, and nothing but a blank touches the URL,
+    so the command copies as it reads.
     """
     if compute.device == "torch:cpu":
-        return (
-            "pip install torch --index-url https://download.pytorch.org/whl/cpu "
-            'and then pip install "phonometry[torch]"'
-        )
-    return 'pip install "phonometry[torch]"'
+        return install_hint("torch", pip_first=TORCH_CPU_WHEELS)
+    return install_hint("torch")
 
 
 def _torch(compute: Compute) -> Backend:

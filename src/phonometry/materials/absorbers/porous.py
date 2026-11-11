@@ -69,7 +69,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -270,6 +270,11 @@ class PorousMediumResult(OwnsArrays):
     :math:`k = \omega \sqrt{\rho_\mathrm{e} / K_\mathrm{e}}` for every model.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"air_density": "kg/m³"}
+    )
+
     frequencies: Real
     characteristic_impedance: Complex
     wavenumber: Complex
@@ -299,8 +304,10 @@ class PorousMediumResult(OwnsArrays):
     ) -> Axes:
         """Plot the normalised ``Zc`` and ``k`` components against frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_porous_medium

@@ -63,7 +63,8 @@ with ``L1`` the smaller and ``L2`` the larger plate dimension.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -77,6 +78,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -141,6 +144,11 @@ class RadiationEfficiencyResult(OwnsArrays):
     :ivar baffle: Baffle orientation (``"infinite"`` / ``"perpendicular"``).
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"critical_frequency": "Hz", "length_x": "m", "length_y": "m"}
+    )
+
     frequencies: np.ndarray
     radiation_efficiency: np.ndarray
     critical_frequency: float
@@ -182,8 +190,10 @@ class RadiationEfficiencyResult(OwnsArrays):
     ) -> Axes:
         """Plot the radiation efficiency ``sigma(f)`` on log-log axes.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_radiation_efficiency
@@ -197,8 +207,10 @@ class RadiationEfficiencyResult(OwnsArrays):
     ) -> Axes:
         """Draw the baffled plate to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_radiation_result_geometry

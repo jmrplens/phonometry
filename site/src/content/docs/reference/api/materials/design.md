@@ -112,8 +112,14 @@ DiffuserPolarResponse.plot(
 
 Plot the predicted polar response with the diffusion coefficient annotated.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the polar
+Requires matplotlib (the `[plot]` extra); returns the polar
 axes it drew on and never calls `plt.show`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 **Returns:** The polar axes.
 
@@ -136,8 +142,14 @@ DiffuserPolarResponse.plot_geometry(
 
 Draw the well profile of the predicted surface to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 **Raises**
 

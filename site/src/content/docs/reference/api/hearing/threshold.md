@@ -111,8 +111,14 @@ AgeThresholdResult.plot(
 
 Plot the median threshold with the fractile band over frequency.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## AUDIOMETRIC_FREQUENCIES_HZ
 
@@ -198,7 +204,7 @@ is a decibel more in the coupler.
 | Name | Description |
 | :--- | :--- |
 | `hearing_level` | The audiogram, in dB HL, one value per frequency. |
-| `earphone` | As in [`earphone_reference_level`](/phonometry/reference/api/hearing/threshold/#earphone_reference_level). |
+| `earphone` | As in [`earphone_reference_level`](/phonometry/reference/api/hearing/threshold/#earphone_reference_level). One of `"DT 48"`, `"TDH 39"` or `"other supra-aural"`. |
 | `frequencies` | The frequencies the audiogram was taken at; `None` uses all twenty-three of [`RETSPL_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/threshold/#retspl_frequencies_hz). |
 
 **Returns:** The equivalent sound pressure level in the coupler, in dB.

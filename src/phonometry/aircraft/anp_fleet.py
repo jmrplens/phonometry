@@ -615,7 +615,10 @@ class ANPNPDCurves(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the NPD curve at each tabulated power versus slant distance."""
+        """Plot the NPD curve at each tabulated power versus slant distance.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_anp_npd
 
@@ -700,7 +703,10 @@ class ANPProfile(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the trajectory altitude versus along-track distance."""
+        """Plot the trajectory altitude versus along-track distance.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_anp_profile
 
@@ -747,7 +753,10 @@ class SpectralClass(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the band levels versus frequency."""
+        """Plot the band levels versus frequency.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_spectral_class
 
@@ -789,6 +798,8 @@ class ANPAircraft(RichDisplay):
     def npd_curves(self, operation: Operation, metric: Metric = "SEL") -> ANPNPDCurves:
         """NPD curves for this aircraft (see :meth:`ANPDatabase.npd_curves`).
 
+        :param operation: One of ``"departure"``, ``"D"``, ``"arrival"`` or ``"A"``.
+        :param metric: One of ``"SEL"`` or ``"LAmax"``.
         :raises ValueError: for an ``operation`` or ``metric`` other than those
             listed (the spelling as written, ``"departure"`` and not
             ``"Departure"``).
@@ -824,6 +835,9 @@ class ANPAircraft(RichDisplay):
     ) -> RevisedNPDCurves:
         """NPD curves for another atmosphere (see :meth:`ANPDatabase.revised_npd_curves`).
 
+        :param operation: One of ``"departure"``, ``"D"``, ``"arrival"`` or ``"A"``.
+        :param metric: One of ``"SEL"`` or ``"LAmax"``.
+        :param absorption: One of ``"arp5534"`` or ``"arp866a"``.
         :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
             other than those listed (the spelling as written).
         :raises TypeError: if ``operation``, ``absorption`` or ``metric`` is not a text.
@@ -847,6 +861,7 @@ class ANPAircraft(RichDisplay):
     ) -> ANPProfile:
         """Fixed-point profile (see :meth:`ANPDatabase.profile`).
 
+        :param operation: One of ``"departure"``, ``"D"``, ``"arrival"`` or ``"A"``.
         :raises ValueError: for an ``operation`` other than the four listed
             (the spelling as written, ``"arrival"`` and not ``"ARRIVAL"``).
         :raises TypeError: if ``operation`` is not a text.
@@ -870,6 +885,9 @@ class ANPAircraft(RichDisplay):
     ) -> FlyoverResult:
         """Single-event level at a receiver (see :meth:`ANPDatabase.event_level`).
 
+        :param operation: One of ``"departure"``, ``"D"``, ``"arrival"`` or ``"A"``.
+        :param metric: One of ``"exposure"`` or ``"maximum"``.
+        :param absorption: One of ``"arp5534"`` or ``"arp866a"``.
         :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
             other than those listed (the spelling as written).
         :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
@@ -904,6 +922,9 @@ class ANPAircraft(RichDisplay):
     ) -> NoiseContourResult:
         """Single-event ground contour (see :meth:`ANPDatabase.noise_contour`).
 
+        :param operation: One of ``"departure"``, ``"D"``, ``"arrival"`` or ``"A"``.
+        :param metric: One of ``"exposure"`` or ``"maximum"``.
+        :param absorption: One of ``"arp5534"`` or ``"arp866a"``.
         :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
             other than those listed (the spelling as written).
         :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
@@ -1477,6 +1498,7 @@ class ANPDatabase:
 
         Takes the same arguments as :meth:`flight_profile`.
 
+        :param operation: One of ``"departure"``, ``"D"``, ``"arrival"`` or ``"A"``.
         :return: An :class:`ANPProfile`.
         :raises ValueError: for an ``operation`` other than the four listed (the
             spelling as written), and as :meth:`flight_profile` does.
@@ -1814,7 +1836,8 @@ def _read_tables(path: str | os.PathLike[str] | None) -> dict[str, Traversable]:
     if path is None:
         from importlib.resources import files
 
-        root = files("phonometry.aircraft.data.anp")
+        # Read as files, never imported as a namespace package.
+        root = files("phonometry.aircraft") / "data" / "anp"
         return {
             entry.name: entry
             for entry in root.iterdir()

@@ -21,7 +21,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -29,6 +30,7 @@ from ...io._resolve import resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -144,6 +146,17 @@ class ZwickerLoudness(OwnsArrays):
     to state.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "loudness": "sone",
+            "loudness_vs_time": "sone",
+            "n10": "sone",
+            "n5": "sone",
+            "specific": "sone/Bark",
+        }
+    )
+
     loudness: float
     loudness_level: float
     specific: np.ndarray
@@ -244,9 +257,11 @@ class ZwickerLoudness(OwnsArrays):
         """Plot the specific loudness N'(z) over Bark (see :mod:`phonometry._plot.psychoacoustics`).
 
         Adds a loudness-vs-time panel when the time-varying trace is
-        present.  Requires matplotlib (``pip install "phonometry[plot]"``);
+        present.  Requires matplotlib (the ``[plot]`` extra);
         returns the :class:`~matplotlib.axes.Axes`, or a tuple of two for a
         time-varying result drawn without ``ax``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_zwicker_loudness
@@ -291,8 +306,8 @@ class ZwickerLoudness(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 

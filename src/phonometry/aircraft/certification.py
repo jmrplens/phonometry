@@ -780,7 +780,10 @@ class EPNLResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band."""
+        """Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from .._i18n import check_language
         from .._plot.aircraft import plot_epnl
 
@@ -822,8 +825,8 @@ class EPNLResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from .._i18n import check_language
 

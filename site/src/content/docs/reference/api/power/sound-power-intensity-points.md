@@ -184,7 +184,7 @@ determination. Footnote 3 calls the grade-3 figure tentative.
 | :--- | :--- |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2) or `'survey'` (grade 3). |
 | `frequency` | Nominal mid-band centre in Hz, or `None` for the A-weighted row. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves; ignored when `frequency` is `None`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves; ignored when `frequency` is `None`. One of `1` or `3`. |
 
 **Returns:** `s` in decibels.
 
@@ -256,6 +256,13 @@ prints no `s`, and `None` for the whole determination where
 `sound_power_level_a` omits the bands outside the method and, per clause
 10.5 b), those failing criteria 1 and/or 2, which
 `a_weighting_omitted_bands` flags.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `fraction` | One of `1` or `3`. |
+| `grade` | One of `"precision"`, `"engineering"` or `"survey"`. |
 
 ### DiscretePointIntensityResult.a_weighting_omitted_bands
 
@@ -365,7 +372,7 @@ behind the qualification have their own figure, on the
 [`FieldIndicators`](/phonometry/reference/api/power/intensity/#fieldindicators) that
 [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) returns.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -638,7 +645,7 @@ asked for, and asking the wrong half raises.
 | :--- | :--- |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2) or `'survey'` (grade 3). |
 | `frequency` | Nominal mid-band centre in Hz, as a Table B.2 label or the exact base-ten centre behind it. `None` asks for the A-weighted row instead, whose footnote fixes the summed range at 63 Hz to 4 kHz (octave) or 50 Hz to 6,3 kHz (one-third octave). |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the frequency column; ignored when `frequency` is `None`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the frequency column; ignored when `frequency` is `None`. One of `1` or `3`. |
 
 **Returns:** `C`, dimensionless.
 
@@ -718,7 +725,7 @@ achieved grade rather than the requested one, which is the grade clause
 | `pressure_residual_index` | Optional $\delta_{pI0}$ of the instrument, dB, as a scalar or one value per band. |
 | `temporal_intensity` | Optional `(M, bands)` or `(M,)` short-time samples of the normal intensity at one typical position (clause 8.2), W/m^2, for `F1`. |
 | `frequencies` | Optional `(bands,)` nominal mid-band centres, Hz. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, the column of Tables B.2 and 2 the frequencies are read in. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, the column of Tables B.2 and 2 the frequencies are read in. One of `1` or `3`. |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2, default) or `'survey'` (grade 3). |
 
 **Returns:** A [`DiscretePointIntensityResult`](/phonometry/reference/api/power/sound-power-intensity-points/#discretepointintensityresult).

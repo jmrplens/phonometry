@@ -352,13 +352,15 @@ class HeadphoneClassification(RichDisplay):
     """The classification of a headphone by IEC 60268-7:2010 Clause 4.
 
     :ivar principle: The principle of the transducer, a key of
-        :data:`TRANSDUCER_PRINCIPLES`.
+        :data:`TRANSDUCER_PRINCIPLES`. One of ``"D"``, ``"E"``, ``"F"``, ``"M"``,
+        ``"P"`` or ``"S"``.
     :ivar earphone_type: The type of earphone, a key of
-        :data:`EARPHONE_TYPES`.
+        :data:`EARPHONE_TYPES`. One of ``"C"``, ``"E"``, ``"H"``, ``"I"``, ``"M"``,
+        ``"S"`` or ``"T"``.
     :ivar coupling: The acoustic coupling to the ear canal, a key of
-        :data:`ACOUSTIC_COUPLINGS`.
+        :data:`ACOUSTIC_COUPLINGS`. One of ``"L"`` or ``"S"``.
     :ivar radiation: The radiation to the external environment, a key of
-        :data:`BACK_RADIATIONS`.
+        :data:`BACK_RADIATIONS`. One of ``"C"`` or ``"O"``.
     :ivar impedance_ohm: The impedance, in ohms, as coded by
         :func:`impedance_code`.
     :ivar n_channels: The number of channels, 1 to 9.
@@ -661,7 +663,7 @@ class RatedImpedanceVerification(OwnsArrays):
     ) -> Axes:
         """Draw the modulus against frequency with the rated value and its 80 %.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1056,7 +1058,7 @@ class ProgramCharacteristicVoltage(OwnsArrays):
     ) -> Axes:
         """Draw the band levels at the characteristic voltage and their 94 dB sum.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1180,7 +1182,7 @@ class LimitingTestSignalCheck(RichDisplay):
     ) -> Axes:
         """Draw the spectrum against Table II, with the ratio in the title.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1298,7 +1300,7 @@ class ProtectionVoltage(OwnsArrays):
     ) -> Axes:
         """Draw the sensitivity change against the e.m.f., with the 1 dB line.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1424,7 +1426,7 @@ class CouplerFrequencyResponse(OwnsArrays):
 
         8.6.2.2 c): "the preferred scale has the same length representing
         50 dB as represents one decade of frequency (see IEC 60268-1 and
-        IEC 60263)". Requires matplotlib (``pip install "phonometry[plot]"``).
+        IEC 60263)". Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1516,7 +1518,7 @@ class CrosstalkAttenuation(OwnsArrays):
     ) -> Axes:
         """Draw the attenuation against frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1633,7 +1635,7 @@ class FieldComparisonResponse(OwnsArrays):
         deviation of the results in each band should be indicated on the
         graph. The scales for the graph preferably shall be such that 50 dB
         is represented by the same length as one decade of frequency."
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1845,7 +1847,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         8.6.5.2 h): the results "may be tabulated or presented graphically,
         the scales being preferably chosen so that 50 dB and one decade of
         frequency are represented by the same length". Requires matplotlib
-        (``pip install "phonometry[plot]"``).
+        (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -2000,7 +2002,7 @@ class EarCanalMicrophoneVerification(RichDisplay):
     ) -> Axes:
         """Draw each requirement's value as a share of its limit.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

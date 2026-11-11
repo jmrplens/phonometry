@@ -31,7 +31,8 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -54,6 +55,7 @@ from ..._internal.warnings import PhonometryWarning, warn_caller
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
 
@@ -574,7 +576,12 @@ class ImpedanceTubeResult(OwnsArrays):
     they were not supplied to :func:`two_microphone_impedance`; the spacing
     and ``x1`` are always there, because the reduction cannot run without
     them.
+
+    :ivar shape: One of ``"circular"``, ``"rectangular"`` or ``"square"``.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"x1": "m"})
 
     frequencies: Real
     reflection: Complex
@@ -657,8 +664,10 @@ class ImpedanceTubeResult(OwnsArrays):
     ) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|r|`` overlaid.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_impedance_tube
@@ -671,8 +680,10 @@ class ImpedanceTubeResult(OwnsArrays):
     ) -> Axes:
         """Draw the two-microphone tube to scale (dimensioned side view).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_impedance_tube_result_geometry
@@ -725,8 +736,8 @@ class ImpedanceTubeResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from ..._i18n import check_language
 

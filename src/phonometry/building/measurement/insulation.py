@@ -87,7 +87,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, cast, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
 
 import numpy as np
 
@@ -122,7 +123,7 @@ from .ratings import (
 
 if TYPE_CHECKING:
     import os
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -187,6 +188,11 @@ class AirborneInsulationResult(OwnsArrays):
         for ``t2``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"t0": "s", "t2": "s"}
+    )
+
     d: np.ndarray
     dnt: np.ndarray
     r_prime: np.ndarray | None
@@ -245,8 +251,10 @@ class AirborneInsulationResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band insulation quantities (``DnT``, ``D``, ``R'``).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_airborne_insulation
@@ -296,8 +304,8 @@ class AirborneInsulationResult(OwnsArrays):
             16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1
             rating needs.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         :raises TypeError: if ``quantity`` is not a text.
         """
         require_choice(quantity, "quantity", ("dnt", "r_prime"))
@@ -334,6 +342,11 @@ class ImpactInsulationResult(OwnsArrays):
         did to ``li`` and, through Clause 10.4, to ``t2``; ``None`` when the
         receiving room was not under 25 m³ or carried no corner measurements.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"t0": "s", "t2": "s"}
+    )
 
     l_n_t: np.ndarray
     l_n: np.ndarray | None
@@ -387,8 +400,10 @@ class ImpactInsulationResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band impact levels (``L'nT`` and, if present, ``L'n``).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_impact_insulation
@@ -437,8 +452,8 @@ class ImpactInsulationResult(OwnsArrays):
             16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2
             rating needs.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         :raises TypeError: if ``quantity`` is not a text.
         """
         require_choice(quantity, "quantity", ("l_n_t", "l_n"))
@@ -524,8 +539,10 @@ class FacadeInsulationResult(OwnsArrays):
 
         Draws the standardized level difference and any other available
         quantities (``D2m``, ``D2m,n``, ``R'``) against frequency. Requires
-        matplotlib (``pip install "phonometry[plot]"``); returns the
+        matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_facade_insulation
@@ -580,8 +597,8 @@ class FacadeInsulationResult(OwnsArrays):
             the 16 core one-third-octave bands (100 Hz to 3150 Hz) the
             ISO 717-1 rating needs.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         :raises TypeError: if ``quantity`` is not a text.
         """
         return _render_iso16283_facade(

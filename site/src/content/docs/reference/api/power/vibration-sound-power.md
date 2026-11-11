@@ -336,8 +336,14 @@ VibrationSoundPowerResult.plot(
 
 Plot the radiated sound power level per band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### VibrationSoundPowerResult.report()
 
@@ -385,7 +391,7 @@ relation $L_W = L_v + 10 \log_{10}(S/S_0) + 10 \log_{10} \epsilon + 10 \log_{10}
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 
 ### VibrationSoundPowerResult.sound_power_level_a
 

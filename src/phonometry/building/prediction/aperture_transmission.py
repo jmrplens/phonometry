@@ -54,7 +54,8 @@ energetic combination used by the EN 12354-3/-4 facade model of
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from scipy.special import j1, struve
@@ -72,6 +73,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -130,6 +133,9 @@ class ApertureTransmissionResult(OwnsArrays):
     :ivar radius: Circular-aperture radius, in metres; given for a circular
         aperture and ``None`` for a slit.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"depth": "m"})
 
     frequencies: np.ndarray
     transmission_coefficient: np.ndarray
@@ -209,8 +215,10 @@ class ApertureTransmissionResult(OwnsArrays):
     ) -> Axes:
         """Plot the aperture sound reduction index ``R(f)``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_aperture_transmission
@@ -223,8 +231,10 @@ class ApertureTransmissionResult(OwnsArrays):
     ) -> Axes:
         """Draw the wall-aperture cross-section to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_aperture_result_geometry

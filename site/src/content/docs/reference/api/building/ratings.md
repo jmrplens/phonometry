@@ -124,8 +124,14 @@ bands 100-3150 Hz, with the unfavourable deviations (measurement
 above the reference) shaded on the core bands and the bands outside
 the core range marked as the enlarged range; the title carries the
 impact rating with `CI` and, when covered, `CI,50-2500`.
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## ExtendedWeightedRatingResult
 
@@ -190,8 +196,14 @@ bands 100-3150 Hz, with the unfavourable deviations shaded on the
 core bands and the bands outside the core range marked as the
 enlarged range; the title carries `Rw (C; Ctr)` and every Annex B
 adaptation term the input covered. Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## impact_improvement_adaptation_term
 
@@ -308,8 +320,14 @@ ImpactImprovementRatingResult.plot(
 
 Plot the improvement spectrum with its rating (ISO 717-2).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## ImpactRatingResult
 
@@ -354,8 +372,14 @@ Plot the measured curve vs the shifted reference (ISO 717-2).
 
 Unfavourable deviations (measurement above the reference, the sign
 opposite to airborne) are shaded and `Ln,w (CI)` annotated.
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ImpactRatingResult.report()
 
@@ -397,7 +421,7 @@ optional verdict row and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`frequencies`, `measured`, `shifted_reference`). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## LINING_REFERENCE_ELEMENTS
 
@@ -475,8 +499,14 @@ Plot `Rref,without` and `Rref,with` with the improvement ratings.
 Draws the reference curve of the basic element and the same curve
 raised by the measured `ΔR`, the two curves Annex D rates; the title
 carries `ΔRw`, `Δ(Rw + C)` and `Δ(Rw + Ctr)` with the element
-index. Requires matplotlib (`pip install "phonometry[plot]"`); returns
+index. Requires matplotlib (the `[plot]` extra); returns
 the `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## weighted_impact_improvement
 
@@ -574,7 +604,7 @@ airborne problem, so no separate search is duplicated.
 | Name | Description |
 | :--- | :--- |
 | `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to level is read band by band, as [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) reads one, and a rating band it lacks is refused rather than filled. |
-| `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. One of `1` or `3`. |
 
 **Returns:** [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) with `rating`, `ci` and `unfavorable_sum`.
 
@@ -653,7 +683,7 @@ No. 2. Input values are first reduced to one decimal place
 | Name | Description |
 | :--- | :--- |
 | `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to value, such as a catalogue row's [`spectrum`](/phonometry/reference/api/io/io/#bandedrowspectrum), is read band by band: one that holds any one-third-octave band that is not an octave centre as the 16 one-third octaves, any other as the 5 octaves, and a rating band it lacks is refused rather than filled. |
-| `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. One of `1` or `3`. |
 
 **Returns:** [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavorable_sum`.
 
@@ -804,8 +834,14 @@ Plot the measured curve vs the shifted reference (ISO 717-1).
 
 Unfavourable deviations (reference above measurement) are shaded and
 `Rw (C; Ctr)` annotated. Requires matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### WeightedRatingResult.report()
 
@@ -847,4 +883,4 @@ row and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`frequencies`, `measured`, `shifted_reference`). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |

@@ -72,3 +72,8 @@ __all__ = [
     "youngs_modulus_from_bulk_speed",
     "youngs_modulus_from_plate_speed",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.solids.`` offers alone."""
+    return sorted(__all__)

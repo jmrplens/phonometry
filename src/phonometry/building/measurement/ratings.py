@@ -76,7 +76,7 @@ import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -551,6 +551,16 @@ class WeightedRatingResult(OwnsArrays):
         have one, so the promise ended in the renderer's ``AttributeError``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "measured": "dB",
+            "rating": "dB",
+            "shifted_reference": "dB",
+            "unfavorable_sum": "dB",
+        }
+    )
+
     rating: int
     c: int
     ctr: int
@@ -605,8 +615,10 @@ class WeightedRatingResult(OwnsArrays):
 
         Unfavourable deviations (reference above measurement) are shaded and
         ``Rw (C; Ctr)`` annotated. Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_weighted_rating
@@ -654,8 +666,8 @@ class WeightedRatingResult(OwnsArrays):
             without the per-band data (``frequencies``, ``measured``,
             ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         return _render_iso717(
             self,
@@ -691,6 +703,16 @@ class ImpactRatingResult(OwnsArrays):
     :ivar quantity: Always ``"impact"`` (ISO 717-2), selecting the impact
         labels of the ISO 717 Annex C report.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "measured": "dB",
+            "rating": "dB",
+            "shifted_reference": "dB",
+            "unfavorable_sum": "dB",
+        }
+    )
 
     rating: int
     ci: int
@@ -739,8 +761,10 @@ class ImpactRatingResult(OwnsArrays):
 
         Unfavourable deviations (measurement above the reference, the sign
         opposite to airborne) are shaded and ``Ln,w (CI)`` annotated.
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_impact_rating
@@ -787,8 +811,8 @@ class ImpactRatingResult(OwnsArrays):
             without the per-band data (``frequencies``, ``measured``,
             ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         return _render_iso717(
             self,
@@ -974,7 +998,7 @@ def weighted_rating(
         a rating band it lacks is refused rather than filled.
     :param fraction: The band set, 3 for one-third octaves or 1 for octaves,
         or ``None`` to infer it from the number of values or the keys of the
-        mapping.
+        mapping. One of ``1`` or ``3``.
     :return: :class:`WeightedRatingResult` with ``rating``, ``c``,
         ``ctr`` and ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
@@ -1096,7 +1120,7 @@ def weighted_impact_rating(
         one, and a rating band it lacks is refused rather than filled.
     :param fraction: The band set, 3 for one-third octaves or 1 for octaves,
         or ``None`` to infer it from the number of values or the keys of the
-        mapping.
+        mapping. One of ``1`` or ``3``.
     :return: :class:`ImpactRatingResult` with ``rating``, ``ci`` and
         ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
@@ -1201,8 +1225,10 @@ class ImpactImprovementRatingResult(OwnsArrays):
     ) -> Axes:
         """Plot the improvement spectrum with its rating (ISO 717-2).
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_impact_improvement_rating
@@ -1258,6 +1284,11 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         range (after the one-decimal reduction of Clause 4.4), in dB.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"measured": "dB", "rating": "dB"}
+    )
+
     rating: float
     c: float
     ctr: float
@@ -1304,8 +1335,10 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         core bands and the bands outside the core range marked as the
         enlarged range; the title carries ``Rw (C; Ctr)`` and every Annex B
         adaptation term the input covered. Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_extended_weighted_rating
@@ -1332,6 +1365,11 @@ class ExtendedImpactRatingResult(OwnsArrays):
     :ivar measured: The measured impact levels over the full enlarged range
         (after the one-decimal reduction of Clause 4.3), in dB.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"measured": "dB", "rating": "dB"}
+    )
 
     rating: float
     ci: float
@@ -1372,8 +1410,10 @@ class ExtendedImpactRatingResult(OwnsArrays):
         above the reference) shaded on the core bands and the bands outside
         the core range marked as the enlarged range; the title carries the
         impact rating with ``CI`` and, when covered, ``CI,50-2500``.
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_extended_impact_rating
@@ -1965,8 +2005,10 @@ class ReductionImprovementRating(RichDisplay):
         Draws the reference curve of the basic element and the same curve
         raised by the measured ``ΔR``, the two curves Annex D rates; the title
         carries ``ΔRw``, ``Δ(Rw + C)`` and ``Δ(Rw + Ctr)`` with the element
-        index. Requires matplotlib (``pip install "phonometry[plot]"``); returns
+        index. Requires matplotlib (the ``[plot]`` extra); returns
         the :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_reduction_improvement_rating

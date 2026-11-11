@@ -144,6 +144,7 @@ Each rule on a page has the same parts:
 | [A61](api.md#a61) | Read a caller's numbers through `real_array`, `complex_array`, `real_number` or `complex_number`, which refuse what is no number by name | `scripts/check_real_conversions.py`, `make real-conversions`, `CI: Every conversion of a caller's numbers goes through a check`, `tests/test_check_real_conversions.py::test_the_package_keeps_the_rule`, `tests/test_check_real_conversions.py::test_each_shape_of_a_caller_s_value_is_found`, `tests/test_check_real_conversions.py::test_a_caller_s_value_no_check_reads_on_every_path_is_found`, `tests/test_check_real_conversions.py::test_every_check_said_to_refuse_a_complex_value_does`, `tests/test_check_real_conversions.py::test_every_check_said_to_refuse_a_text_does`, `tests/test_check_real_conversions.py::test_a_private_helper_reads_what_its_calls_hand_it`, `tests/test_real_numbers_read_by_name.py`, `tests/test_reader_names.py`, `tests/test_numbers_read_before_arithmetic.py`, `tests/test_scalar_guards.py::test_every_public_scalar_parameter_refuses_an_array_or_a_text_by_name` |
 | [A62](api.md#a62) | Warn through `warn_caller`, which names the caller's line, never through `warnings.warn` | `tests/test_package_architecture.py::test_the_library_warns_only_through_warn_caller`, `tests/test_package_architecture.py::test_the_warning_rule_reads_every_way_to_reach_warnings_warn`, `tests/test_internal_warnings.py`, `tests/test_warning_attribution.py` |
 | [A63](api.md#a63) | Check every argument before the first advisory, and advise once the result stands | `tests/refusal_order.py`, `tests/test_refusal_order.py`, `tests/test_refusals_before_advisories.py` |
+| [A64](api.md#a64) | Take the install command of a missing extra from `install_hint`, which names pip and conda | `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py::test_the_package_spells_no_install_command_outside_its_hints`, `tests/test_install_hints.py` |
 
 ### Docstrings and comments
 
@@ -177,6 +178,7 @@ Each rule on a page has the same parts:
 | [C5](docstrings.md#c5) | Fix a SonarCloud finding; never suppress it with NOSONAR | review |
 | [D22](docstrings.md#d22) | Judge a module's length by its subject, never by a line count | review |
 | [D23](docstrings.md#d23) | Split a module as a pure move: names, docstrings, bodies and outputs unchanged | `make conformance`, review |
+| [D24](docstrings.md#d24) | List in the field of a parameter typed with a `Literal` alias every value it takes | `tests/test_choice_values_documented.py` |
 
 ### Numbers and data
 
@@ -293,7 +295,7 @@ Each rule on a page has the same parts:
 | [F52](docs-and-figures.md#f52) | Re-render a clip whenever the code that draws it changes | `scripts/check_animation_freshness.py`, `make animation-freshness` |
 | [F53](docs-and-figures.md#f53) | Embed an animation lazily, with its space reserved | review |
 | [F54](docs-and-figures.md#f54) | Let every public record inherit `RichDisplay`, and give it no display method of its own | `scripts/check_record_display.py`, `make record-display`, `CI: Every public record shows itself as a table in a notebook`, `tests/test_check_record_display.py::test_the_package_shows_every_public_record_as_a_table`, `scripts/check_notebook.py`, `CI: phonometry runs in a notebook kernel` |
-| [F55](docs-and-figures.md#f55) | Let a record field's unit read from its name, or declare it in `_display_units` | `tests/test_record_display.py::test_every_unit_a_record_names_is_needed_and_shown`, `tests/test_record_display.py::test_no_public_field_that_holds_no_number_is_shown_in_a_unit`, `tests/test_record_display.py::test_every_public_field_ending_in_a_unit_shows_it`, `tests/test_record_display.py::test_a_number_its_name_misreads_shows_its_own_unit` |
+| [F55](docs-and-figures.md#f55) | Let a record field's unit read from its name, or declare it in `_display_units` | `tests/test_record_display.py::test_every_unit_a_record_names_is_needed_and_shown`, `tests/test_record_display.py::test_no_public_field_that_holds_no_number_is_shown_in_a_unit`, `tests/test_record_display.py::test_every_public_field_ending_in_a_unit_shows_it`, `tests/test_record_display.py::test_a_number_its_name_misreads_shows_its_own_unit`, `tests/test_record_display.py::test_every_number_a_result_shows_has_its_unit_or_a_reason` |
 | [F56](docs-and-figures.md#f56) | Register every `PUBLISHED_` catalogue in the catalogues page generator | `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`, `site/src/lib/catalogue-pages.ts` |
 | [F57](docs-and-figures.md#f57) | Cite an errata entry's page by document, edition, PDF page and printed folio | `scripts/check_errata_evidence.py`, `CI: Errata entries cite their page` |
 | [F58](docs-and-figures.md#f58) | Quote a printed value, its symbols and its separator exactly as the source prints them | review |
@@ -306,6 +308,7 @@ Each rule on a page has the same parts:
 | [F65](docs-and-figures.md#f65) | Read a page's inline code spans through `scripts/markdown_spans.py`, never with a pattern of your own | `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py` |
 | [F66](docs-and-figures.md#f66) | Start a process from the site's source once per build, never once per page | `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 | [F67](docs-and-figures.md#f67) | Write beside a print what it writes: its values first, in their order | `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`, `tests/test_check_doc_snippets.py` |
+| [F68](docs-and-figures.md#f68) | Close the figure a plot made when it raises, through `closes_its_figures` | `tests/test_plot_errors.py` |
 
 ### Prose, commits and pull requests
 

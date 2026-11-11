@@ -103,7 +103,7 @@ open or closed fence).
 
 | Name | Description |
 | :--- | :--- |
-| `shape` | Façade shape key (see above). |
+| `shape` | Façade shape key (see above). One of `"plane_facade"`, `"gallery_2"`, `"gallery_3"`, `"gallery_4"`, `"gallery_5"`, `"balcony_6"`, `"balcony_7"`, `"balcony_8"`, `"terrace_open"` or `"terrace_closed"`. |
 | `line_of_sight` | Height of the line of sight from the source at the façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m). |
 | `absorption` | Weighted absorption coefficient `αw` of the underside above the façade (default 0,3; reflecting). |
 
@@ -144,7 +144,7 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 | `area` | Total façade area `S` seen from inside, in m². |
 | `volume` | Receiving-room volume `V`, in m³ (Formula 13). |
 | `delta_l_fs` | Façade-shape term `ΔLfs` in dB (Annex C; 0 for a flat reflecting façade). |
-| `fraction` | The band set of the single-number ratings, passed to [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating): 3 for one-third octaves, 1 for octaves or `None` (Default) to read it from the number of bands. |
+| `fraction` | The band set of the single-number ratings, passed to [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating): 3 for one-third octaves, 1 for octaves or `None` (Default) to read it from the number of bands. One of `1` or `3`. |
 | `frequencies` | Optional band centre frequencies (Hz), stored on the result for plotting; must match the element band count. |
 
 **Returns:** A [`FacadePredictionResult`](/phonometry/reference/api/building/facade/#facadepredictionresult).
@@ -252,6 +252,12 @@ FacadePredictionResult.plot(
 
 Plot the per-element partial indices and the façade `R'` / `D2m,nT`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ### FacadePredictionResult.plot_geometry()
 
 ```python
@@ -265,8 +271,14 @@ FacadePredictionResult.plot_geometry(
 
 Draw the composite facade elevation, element areas to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### FacadePredictionResult.report()
 
@@ -321,7 +333,7 @@ supplies the target `D2m,nT,w`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `language` is not supported, or the result lacks the ISO 717-1 single-number ratings (build it on the 5 octave or 16 one-third-octave bands). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## outdoor_attenuation
 
@@ -501,3 +513,9 @@ RadiatedPowerResult.plot(
 ```
 
 Plot the radiated sound power level `LW` per band.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

@@ -157,6 +157,12 @@ PileStrikeResult.plot(
 
 Plot the strike waveform and its cumulative energy.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
+
 ## single_strike_sel
 
 ```python
@@ -268,3 +274,9 @@ StrikeSELSpectrum.plot(
 ```
 
 Plot the per-band single-strike SEL.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

@@ -262,8 +262,10 @@ class IntensityReductionResult(OwnsArrays):
         Delegates to the weighted-rating plot (measured ``RI`` versus the
         shifted reference, unfavourable deviations shaded). Requires the
         automatic rating to be available (16 or 5 bands) and matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         if self.rating is None:
             msg = (
@@ -337,8 +339,8 @@ class IntensityReductionResult(OwnsArrays):
             octave, so the ISO 717-1 rating the fiche needs was not formed),
             or ``fpi`` / ``residual_index`` do not match the band count.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded rating figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded rating figure (the ``[plot]`` extra).
         """
         rating = _validate_intensity_report(
             engine=engine,
@@ -391,8 +393,10 @@ class IntensityElementNormalizedResult(OwnsArrays):
 
         Delegates to the weighted-rating plot. Requires the automatic rating
         to be available (16 or 5 bands) and matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         if self.rating is None:
             msg = (
@@ -469,8 +473,8 @@ class IntensityElementNormalizedResult(OwnsArrays):
             octave, so the ISO 717-1 rating the fiche needs was not formed),
             or ``fpi`` / ``residual_index`` do not match the band count.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded rating figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded rating figure (the ``[plot]`` extra).
         """
         rating = _validate_intensity_report(
             engine=engine,

@@ -222,7 +222,7 @@ GPa·s/m³, the unit of Tables B.1 and B.2.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the real-part curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## check_coupler
 
@@ -264,7 +264,7 @@ equations (15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 %).
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
 | `gas` | Another gas than air, or `None`. |
-| `heat_conduction_method` | The method the calibration uses for $E_V$. |
+| `heat_conduction_method` | The method the calibration uses for $E_V$. One of `"exact"` or `"approximation"`. |
 
 **Returns:** The [`CouplerCheck`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplercheck).
 
@@ -324,7 +324,7 @@ are the length and the radius of the capillary tubes.
 | `relative_humidity_percent` | The relative humidity, in %. |
 | `microphone` | The microphone whose level is analysed, 1, 2 or 3 (Default: 1). |
 | `gas` | A [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) for a coupler filled with a gas other than air (7.3.2.1), as in [`coupler_transfer_impedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_transfer_impedance); `None` (default) takes humid air by Annex F at the conditions. A given gas keeps its properties whatever the conditions, so a step in the static pressure, the temperature or the humidity could not move them with it, and an uncertainty on any of the three is refused. |
-| `heat_conduction_method` | The method for $E_V$ (Default: `"exact"`). |
+| `heat_conduction_method` | The method for $E_V$ (Default: `"exact"`). One of `"exact"` or `"approximation"`. |
 
 **Returns:** The [`CouplerParameterUncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplerparameteruncertainty), with a component for each parameter given a non-zero uncertainty.
 
@@ -433,7 +433,7 @@ prints, so they are not fields.
 | `broadband_margin` | For a plane-wave coupler, $\omega\rho a^2/(100\eta)$ at the lowest frequency, which A.3 requires above 1 for Formulas (A.3) and (A.4); `None` otherwise. |
 | `lowest_x` | For a large-volume coupler, $X$ at the lowest frequency; `None` otherwise. It binds only the approximation. |
 | `lowest_frequency_hz` | The lowest frequency of the calibration, in Hz. |
-| `heat_conduction_method` | The method the calibration uses for $E_V$. |
+| `heat_conduction_method` | The method the calibration uses for $E_V$. One of `"exact"` or `"approximation"`. |
 | `temperature_c` | The temperature, in °C. |
 | `static_pressure_pa` | The static pressure, in Pa. |
 | `relative_humidity_percent` | The relative humidity, in %. |
@@ -502,7 +502,7 @@ Plot each condition as its margin to the limit it is held to.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `barh`. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### CouplerCheck.ratio_recommended
 
@@ -622,7 +622,7 @@ Built by [`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/r
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), in dB at each frequency. |
+| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), in dB at each frequency. Keyed by any of `"series_impedance"`, `"voltage_ratio"`, `"cross_talk"`, `"noise"`, `"distortion"`, `"frequency"`, `"receiver_ground_shield"`, `"transmitter_ground_shield"`, `"coupler_length"`, `"coupler_diameter"`, `"coupler_volume"`, `"coupler_surface_area"`, `"leakage"`, `"capillary_tube_dimensions"`, `"static_pressure"`, `"temperature"`, `"relative_humidity"`, `"front_cavity_depth"`, `"front_cavity_volume"`, `"equivalent_volume"`, `"resonance_frequency"`, `"loss_factor"`, `"diaphragm_compliance"`, `"diaphragm_mass"`, `"diaphragm_resistance"`, `"front_cavity_thread"`, `"polarizing_voltage"`, `"heat_conduction_theory"`, `"excess_volume"`, `"viscosity_losses"`, `"radial_wave_motion"`, `"rounding"`, `"repeatability"`, `"static_pressure_corrections"` or `"temperature_corrections"`. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
 ### CouplerParameterUncertainty.plot()
@@ -646,7 +646,7 @@ Plot each component against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the first component's curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ## CouplerTransferImpedance
 
@@ -710,7 +710,7 @@ impedance, in dB, against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the heat-conduction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### CouplerTransferImpedance.transfer_impedance_pa_s_m3
 
@@ -820,7 +820,7 @@ Plot $|\Delta_\mathrm{H}|$ in dB and its phase against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the modulus curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### HeatConductionCorrection.volume_factor
 
@@ -1378,4 +1378,4 @@ Plot the correction against frequency, with the rows of Table C.3.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the correction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).

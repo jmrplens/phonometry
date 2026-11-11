@@ -150,7 +150,7 @@ Bridge transfer function `L_H,bridge,i` of Table G-7, in dB per axle.
 
 | Name | Description |
 | :--- | :--- |
-| `bridge` | A [`BridgeType`](/phonometry/reference/api/environment/cnossos-rail/#bridgetype) member or its column label. |
+| `bridge` | A [`BridgeType`](/phonometry/reference/api/environment/cnossos-rail/#bridgetype) member or its column label. One of `"+10 dB(A)"` or `"+15 dB(A)"`. |
 
 **Returns:** The 24 1/3-octave values, in dB.
 
@@ -363,7 +363,7 @@ band".
 
 ```python
 rail_roughness(
-    roughness: RailRoughnessClass | Literal['E', 'M', 'N', 'B'],
+    roughness: Literal[RailRoughnessClass.WELL_MAINTAINED, RailRoughnessClass.NORMAL] | Literal['E', 'M'],
 ) -> WavelengthSpectrum
 ```
 
@@ -377,7 +377,7 @@ to be supplied by the Member State.
 
 | Name | Description |
 | :--- | :--- |
-| `roughness` | The [`RailRoughnessClass`](/phonometry/reference/api/environment/cnossos-rail/#railroughnessclass) of digit 2 of the track descriptor. |
+| `roughness` | The [`RailRoughnessClass`](/phonometry/reference/api/environment/cnossos-rail/#railroughnessclass) of digit 2 of the track descriptor, one of the two Table G-1b tabulates: `RailRoughnessClass.WELL_MAINTAINED` or `RailRoughnessClass.NORMAL`, or its letter, `"E"` or `"M"`. The not well maintained and bad classes, `"N"` and `"B"` (`RailRoughnessClass.NOT_WELL_MAINTAINED` and `RailRoughnessClass.BAD`), are not offered: Appendix G tabulates no spectrum for them, and the Member State supplies a national one. |
 
 **Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 
@@ -385,7 +385,7 @@ to be supplied by the Member State.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the class carries no spectrum in Table G-1b. |
+| ValueError | If the class carries no spectrum in Table G-1b, `"N"` and `"B"` and their members among them, or is no class at all. |
 | TypeError | if `roughness` is not a text. |
 
 ## RailJoints
@@ -560,6 +560,12 @@ RailwayEmissionResult.plot(
 ```
 
 Plot the per-metre line power of the two equivalent source heights.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## RailwayTrack
 
@@ -823,7 +829,7 @@ Track transfer function `L_H,TR,i` of Table G-3a, in dB per axle.
 
 | Name | Description |
 | :--- | :--- |
-| `track` | A [`TrackTransferClass`](/phonometry/reference/api/environment/cnossos-rail/#tracktransferclass) member or its column code. |
+| `track` | A [`TrackTransferClass`](/phonometry/reference/api/environment/cnossos-rail/#tracktransferclass) member or its column code. One of `"M/S"`, `"M/M"`, `"M/H"`, `"B/S"`, `"B/M"`, `"B/H"`, `"W"` or `"D"`. |
 
 **Returns:** The 24 1/3-octave values, in dB.
 
@@ -941,7 +947,7 @@ one table serves both running conditions.
 
 | Name | Description |
 | :--- | :--- |
-| `vehicle` | A [`TractionVehicle`](/phonometry/reference/api/environment/cnossos-rail/#tractionvehicle) member or its description. |
+| `vehicle` | A [`TractionVehicle`](/phonometry/reference/api/environment/cnossos-rail/#tractionvehicle) member or its description. One of `"diesel locomotive, c. 800 kW"`, `"diesel locomotive, c. 2 200 kW"`, `"diesel multiple unit"`, `"electric locomotive"` or `"electric multiple unit"`. |
 
 **Returns:** The 24 band levels at source height A and at source height B, as a [`RailSourceSpectra`](/phonometry/reference/api/environment/cnossos-rail/#railsourcespectra).
 
@@ -1130,7 +1136,7 @@ Wheel roughness `L_r,VEH` of Table G-1a.
 
 | Name | Description |
 | :--- | :--- |
-| `brake` | The [`BrakeType`](/phonometry/reference/api/environment/cnossos-rail/#braketype) of digit 3 of the vehicle descriptor. |
+| `brake` | The [`BrakeType`](/phonometry/reference/api/environment/cnossos-rail/#braketype) of digit 3 of the vehicle descriptor. One of `"c"`, `"k"` or `"n"`. |
 
 **Returns:** The wavelengths in mm and the levels in dB, as a [`WavelengthSpectrum`](/phonometry/reference/api/environment/cnossos-rail/#wavelengthspectrum).
 

@@ -60,7 +60,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, cast, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -81,6 +82,8 @@ from .scattering_diffusion import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
 
@@ -288,6 +291,11 @@ class DiffuserPolarResponse(OwnsArrays):
     :ivar n_repetitions: Number of repeated periods of the prediction.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"frequency": "Hz", "well_width": "m"}
+    )
+
     frequency: float
     angles_deg: Real
     levels: Real
@@ -310,9 +318,10 @@ class DiffuserPolarResponse(OwnsArrays):
     ) -> PolarAxes:
         """Plot the predicted polar response with the diffusion coefficient annotated.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the polar
+        Requires matplotlib (the ``[plot]`` extra); returns the polar
         axes it drew on and never calls ``plt.show``.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :return: The polar axes.
         :raises ValueError: If *ax* is not a polar axes.
         """
@@ -327,9 +336,10 @@ class DiffuserPolarResponse(OwnsArrays):
     ) -> Axes:
         """Draw the well profile of the predicted surface to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         :raises ValueError: If the response was predicted from an explicit
             ``reflection`` sequence, which has no well profile to draw.
         """

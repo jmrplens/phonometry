@@ -258,7 +258,8 @@ def cylindrical_shell_modal_density(
     :param mean_radius: Mean shell radius ``a_m``, in m (> 0).
     :param longitudinal_wave_speed: Plate wave speed ``cL``, in m/s (> 0).
     :param fraction: The analysis band set, 1 for octaves (Default,
-        :math:`F = 1.414`) or 3 for one-third octaves (:math:`F = 1.122`).
+        :math:`F = 1.414`) or 3 for one-third octaves (:math:`F = 1.122`). One of ``1``
+        or ``3``.
     :return: The modal density ``n(f)``, in modes per hertz.
     :raises ValueError: for a non-positive input or a band set other than 1
         or 3.
@@ -458,7 +459,7 @@ class PowerInjectionResult(OwnsArrays):
         log axis: their ordering is the whole diagnosis, because SEA is only
         valid where the coupling stays below the internal damping.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

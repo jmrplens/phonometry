@@ -282,6 +282,12 @@ $U = k\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$
 per-band value (`NaN` without `frequencies`).
 `sound_power_level_a` is the A-weighted total `LWA` (Eq. C.1).
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `surface` | One of `"sphere"` or `"hemisphere"`. |
+
 ### PrecisionSoundPowerResult.plot()
 
 ```python
@@ -295,8 +301,14 @@ PrecisionSoundPowerResult.plot(
 
 Plot the precision `LW` spectrum with the A-weighted total.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### PrecisionSoundPowerResult.report()
 
@@ -339,7 +351,7 @@ energy-averaged level `Lp'`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 
 ## sound_power_anechoic
 

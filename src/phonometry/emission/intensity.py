@@ -234,9 +234,15 @@ class IntensityResult(OwnsArrays):
     """
 
     #: The bias correction is the linear factor :math:`k\Delta r/\sin(k\Delta r)`
-    #: the intensity is multiplied by, not a level.
+    #: the intensity is multiplied by, not a level; the intensities are in
+    #: W/m² and the usable bandwidth in Hz, which their names do not say.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
-        {"bias_correction": ""}
+        {
+            "bias_correction": "",
+            "intensity": "W/m²",
+            "max_valid_frequency": "Hz",
+            "total_intensity": "W/m²",
+        }
     )
 
     frequencies: np.ndarray | None
@@ -350,8 +356,10 @@ class IntensityResult(OwnsArrays):
         """Plot Lp vs LI per band with the pressure-intensity index.
 
         Requires per-band data (call ``sound_intensity(..., fraction=...)``)
-        and matplotlib (``pip install "phonometry[plot]"``); returns the
+        and matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_intensity
@@ -364,8 +372,10 @@ class IntensityResult(OwnsArrays):
     ) -> Axes:
         """Draw the p-p probe with its spacer to scale.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_intensity_result_geometry
@@ -470,6 +480,11 @@ class FieldIndicators(OwnsArrays):
     are scalars and ``frequencies`` is ``None``.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"f2": "dB", "f3": "dB"}
+    )
+
     f2: float | np.ndarray
     f3: float | np.ndarray
     f4: float | np.ndarray
@@ -563,7 +578,7 @@ class FieldIndicators(OwnsArrays):
 
         Requires per-band data (call :func:`field_indicators` with 2D
         ``(positions, bands)`` arrays and ``frequencies``) and matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -748,7 +763,7 @@ def sound_intensity(
     :param density: Air density, in kg/m^3. Default 1.204 (20 degC).
     :param speed_of_sound: Speed of sound, in m/s. Default 343.0.
     :param fraction: ``None`` (broadband only), 1 (octave bands) or
-        3 (one-third octave bands).
+        3 (one-third octave bands). One of ``1`` or ``3``.
     :param limits: [f_min, f_max] band limits in Hz, a sequence or an array
         of the two (default [12, 20000], as in
         :func:`phonometry.filters.nominal_frequencies`, trimmed to the bands

@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy import signal
 
+from .._internal.extras import install_hint
+from .._internal.figures import closes_its_figures
 from .._internal.json_input import writing_beside
 from .._internal.validation import require_scalar
 from .frequencies import _format_nominal_freq
@@ -188,6 +190,7 @@ def _save_beside(named: Path) -> None:
         plt.savefig(file, format=drawn, dpi=150, bbox_inches="tight")
 
 
+@closes_its_figures
 def _showfilter(
     sos: list[np.ndarray],
     freq: list[float],
@@ -216,7 +219,7 @@ def _showfilter(
     try:
         import matplotlib.pyplot as plt
     except ImportError as exc:
-        msg = 'Plotting requires matplotlib. Install it with: pip install "phonometry[plot]"'
+        msg = f"Plotting requires matplotlib. Install it with: {install_hint('plot')}"
         raise ImportError(msg) from exc
 
     wn = 8192

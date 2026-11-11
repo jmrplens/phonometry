@@ -471,7 +471,8 @@ def short_pulse_mean_square_force(
 
     :param frequencies: Band centre frequencies ``f``, in Hz.
     :param fraction: The band set, 3 for one-third octaves
-        (:math:`B = 0.23 f`) or 1 for octaves (:math:`B = 0.707 f`).
+        (:math:`B = 0.23 f`) or 1 for octaves (:math:`B = 0.707 f`). One of ``1`` or
+        ``3``.
     :return: The band mean-square force ``F²rms``, in N².
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
@@ -504,7 +505,7 @@ class TappingForceResult(OwnsArrays):
         :math:`\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}`, in N
         (Eq. 3.100); 6 dB above ``lower_limit`` in mean square.
     :ivar fraction: Band set used for ``mean_square_force``, 3 for one-third
-        octaves or 1 for octaves.
+        octaves or 1 for octaves. One of ``1`` or ``3``.
     :ivar mass: Hammer mass ``m`` used, in kg (Default: 0,5).
 
     Whether the oscillation is over-critical is read from ``K``, ``Zdp`` and
@@ -642,8 +643,10 @@ class TappingForceResult(OwnsArrays):
     ) -> Axes:
         """Plot the force spectrum ``|Fn|`` with its asymptotes and ``fco``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_tapping_force
@@ -690,7 +693,7 @@ def tapping_force_spectrum(
     :param impact_velocity: Impact velocity ``vo``, in m/s
         (Default: :func:`hammer_impact_velocity`).
     :param fraction: The band set of Eq. (3.91), 3 for one-third octaves or 1
-        for octaves.
+        for octaves. One of ``1`` or ``3``.
     :return: A :class:`TappingForceResult`.
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
@@ -853,8 +856,10 @@ class CoveringImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot ``ΔL(f)`` from the force ratio beside the two-line estimate.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_covering_improvement
@@ -913,7 +918,8 @@ def covering_improvement(
     :param mass: Hammer mass ``m``, in kg (Default: 0,5).
     :param impact_rate: Impact repetition rate ``fi``, in Hz (Default: 10);
         it sets the spacing of the Fourier lines the bands average over.
-    :param fraction: The band set, 3 for one-third octaves or 1 for octaves.
+    :param fraction: The band set, 3 for one-third octaves or 1 for octaves. One of
+        ``1`` or ``3``.
     :return: A :class:`CoveringImprovementResult`.
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
@@ -1169,8 +1175,10 @@ class FloatingFloorImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot ``ΔL(f)`` with the resonance and the asymptotic slope marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_floating_floor_improvement

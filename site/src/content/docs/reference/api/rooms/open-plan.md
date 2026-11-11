@@ -114,8 +114,14 @@ Plot the spatial decay of speech with `rD`/`rP` marked.
 
 Redraws the Clause 6.2 regression line from `d2s` and
 `lp_as_4m` and marks the distraction and privacy distances.
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### OpenPlanResult.plot_geometry()
 
@@ -130,8 +136,14 @@ OpenPlanResult.plot_geometry(
 
 Draw the measurement line to scale, rD and rP marked.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### OpenPlanResult.report()
 
@@ -184,7 +196,7 @@ above it).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab or, for the embedded spatial-decay chart, matplotlib is not installed. The fiche embeds the result's own plot whenever the regression is defined, so both are required (`pip install "phonometry[report,plot]"`). |
+| ImportError | If reportlab or, for the embedded spatial-decay chart, matplotlib is not installed. The fiche embeds the result's own plot whenever the regression is defined, so both are required (the `[report]` and `[plot]` extras). |
 
 ## plot_open_plan_geometry
 

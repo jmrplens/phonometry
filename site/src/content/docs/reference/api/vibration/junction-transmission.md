@@ -437,8 +437,14 @@ JunctionTransmissionResult.plot(
 
 Plot `tau(theta)` versus incidence angle for this junction.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### JunctionTransmissionResult.plot_geometry()
 
@@ -453,8 +459,14 @@ JunctionTransmissionResult.plot_geometry(
 
 Draw the plate-junction cross-section to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## JunctionWaveParameters
 
@@ -651,7 +663,7 @@ straight_transmission_coefficient(
     angle_rad: ArrayLike,
     chi: float,
     psi: float,
-    junction: Literal['X', 'T1', 'T2', 'L'] = 'X',
+    junction: Literal['X', 'T1'] = 'X',
 ) -> NDArray[np.float64]
 ```
 
@@ -668,7 +680,7 @@ covered.
 | `angle_rad` | Incidence angle `theta`, in **radians** (scalar or array, $0 \le \theta \le \pi/2$). |
 | `chi` | Wave parameter `chi` (Eq. 5.10, > 0). |
 | `psi` | Wave parameter `psi` (Eq. 5.11, > 0). |
-| `junction` | `"X"` or `"T1"` (the only junctions with a straight section). |
+| `junction` | `"X"` or `"T1"`, the two junctions with a straight section. T-junction (2) and the L-junction, the `"T2"` and `"L"` that [`corner_transmission_coefficient`](/phonometry/reference/api/vibration/junction-transmission/#corner_transmission_coefficient) takes, are not offered: Hopkins gives no `J3` for them, as no plate lies in line with the source plate across either. |
 
 **Returns:** `tau13(theta)` (same shape as *angle*).
 
@@ -676,7 +688,7 @@ covered.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive `chi`/`psi`, an out-of-range angle, or a junction without a straight section. |
+| ValueError | for a non-positive `chi`/`psi`, an out-of-range angle, an unknown junction or a junction without a straight section, `"T2"` and `"L"` among them. |
 | TypeError | if `chi` or `psi` is not a single number, or `junction` is not a text, or `angle_rad` holds a text or a value that is not a real number. |
 
 ## wave_vibration_reduction_index

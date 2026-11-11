@@ -270,7 +270,7 @@ are accepted with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-
 
 ```python
 measurement_positions(
-    surface: Literal['hemisphere', 'box'],
+    surface: Literal['hemisphere'],
     *,
     radius: float,
     n_reflecting_planes: int = 1,
@@ -300,7 +300,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 | Name | Description |
 | :--- | :--- |
-| `surface` | `'hemisphere'` (only shape with a coordinate table). |
+| `surface` | `"hemisphere"`, the one measurement surface with a coordinate table. A box, the `"box"` that [`sound_power_pressure`](/phonometry/reference/api/power/sound-power/#sound_power_pressure) and [`sound_energy_pressure`](/phonometry/reference/api/power/sound-power/#sound_energy_pressure) take, is not offered: ISO 3744:2010 Annex C places its key positions by subdividing its faces, and no table gives them. |
 | `radius` | Hemisphere radius `r`, in metres. |
 | `n_reflecting_planes` | Number of reflecting planes (1, 2 or 3). |
 | `tones` | Engineering grade over one plane only: True reads Table B.1 of ISO 3744, False its Table B.2. The survey grade and the arrays for two and three planes have one table each and do not read it. |
@@ -312,7 +312,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a surface other than `'hemisphere'`, a radius that is not positive, a number of reflecting planes other than 1, 2 or 3, or an unknown grade. |
+| ValueError | for a surface other than `"hemisphere"`, a `"box"` among them, a radius that is not positive, a number of reflecting planes other than 1, 2 or 3, or an unknown grade. |
 | TypeError | if `radius` is not a single number, or `grade` or `surface` is not a text. |
 
 ## plot_microphone_positions
@@ -662,6 +662,12 @@ per-position mean single event levels directly; `integration_time` is
 the interval $T$ of the single event levels, in seconds, or `None`
 when no background correction needed it.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `grade` | One of `"engineering"` or `"survey"`. |
+
 ### SoundEnergyResult.plot()
 
 ```python
@@ -675,8 +681,14 @@ SoundEnergyResult.plot(
 
 Plot the LJ spectrum with the A-weighted total annotated.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## SoundPowerResult
 
@@ -712,6 +724,12 @@ evaluated per band per clause 8.4). `uncertainty` is the expanded
 uncertainty
 $U = 2\sqrt{\sigma_{R0}^2 + \sigma_\mathrm{omc}^2}$ (95 %, ISO 3744
 clause 9.5).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `grade` | One of `"engineering"` or `"survey"`. |
 
 ### SoundPowerResult.declare()
 
@@ -776,8 +794,14 @@ SoundPowerResult.plot(
 
 Plot the LW spectrum with the A-weighted total annotated.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SoundPowerResult.report()
 
@@ -823,7 +847,7 @@ applied background (`K1`) and environmental (`K2`) corrections.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (the `[report]` extra). |
 
 ## SoundPowerWarning
 

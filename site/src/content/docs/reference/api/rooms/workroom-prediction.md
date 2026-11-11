@@ -183,7 +183,7 @@ category selects, so they are not fields.
 
 | Name | Description |
 | :--- | :--- |
-| `category` | The category asked about. |
+| `category` | The category asked about. One of `"1"`, `"2a"`, `"2b"` or `"2c"`. |
 | `room_detail` | The level of Table 1 the room is described at. |
 | `fitting_detail` | The level of Table 2 the fittings are described at. |
 | `source_detail` | The level of Table 3 the sources are described at. |

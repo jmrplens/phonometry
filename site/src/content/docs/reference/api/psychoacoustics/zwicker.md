@@ -167,9 +167,15 @@ ZwickerLoudness.plot(
 Plot the specific loudness N'(z) over Bark (see `phonometry._plot.psychoacoustics`).
 
 Adds a loudness-vs-time panel when the time-varying trace is
-present.  Requires matplotlib (`pip install "phonometry[plot]"`);
+present.  Requires matplotlib (the `[plot]` extra);
 returns the `Axes`, or a tuple of two for a
 time-varying result drawn without `ax`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ZwickerLoudness.report()
 
@@ -215,4 +221,4 @@ footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |

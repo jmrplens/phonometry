@@ -793,7 +793,7 @@ class AdjustmentValue(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the adjusted-response curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_adjustment_value
@@ -1070,7 +1070,7 @@ class FreeFieldCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the mean-correction curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_free_field_correction
@@ -1586,7 +1586,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.barh`.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_correction_budget
@@ -1710,7 +1710,9 @@ def correction_uncertainty_budget(
 
     :param stated_uncertainties_db: The value of each of the 15 components, in dB, keyed by
         the descriptor of Table I.1, ``"a1"`` to ``"a15"``. A component taken
-        as negligible is given as 0, as Table I.2 gives a6 and a13.
+        as negligible is given as 0, as Table I.2 gives a6 and a13. Keyed by any of
+        ``"a1"``, ``"a2"``, ``"a3"``, ``"a4"``, ``"a5"``, ``"a6"``, ``"a7"``, ``"a8"``,
+        ``"a9"``, ``"a10"``, ``"a11"``, ``"a12"``, ``"a13"``, ``"a14"`` or ``"a15"``.
     :param repeatability_dof: The degrees of freedom of the repeatability
         (a15), from the number of repeat measurements: 2 in Tables I.2 and
         I.3.
@@ -2080,7 +2082,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the expanded-uncertainty curve.
         :return: The axes. Requires matplotlib
-            (``pip install "phonometry[plot]"``).
+            (the ``[plot]`` extra).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_correction_uncertainty_verification
@@ -2115,8 +2117,8 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing
-            for the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing
+            for the embedded figure (the ``[plot]`` extra).
         """
         from .._i18n import check_language
 

@@ -71,7 +71,7 @@ One predicted fundamental frequency, with the error it carries.
 | :--- | :--- |
 | `frequency_hz` | The predicted fundamental frequency. |
 | `period_s` | The same prediction as a period. |
-| `model` | Which of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models) produced it. |
+| `model` | Which of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models) produced it. One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `coefficient` | The code coefficient used, or `None` for the storey model, which has none. |
 | `height_m` | The height it was computed from, where the model uses one. |
 
@@ -97,7 +97,7 @@ Draw Figure D.1 with this estimate on it.
 The `f = 46/h` line against height on logarithmic axes, the ± 50 %
 band around it, and this estimate as a point.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -172,7 +172,7 @@ One prediction, bundled with the coefficient and the error band.
 
 | Name | Description |
 | :--- | :--- |
-| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). |
+| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `n_stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
@@ -210,7 +210,7 @@ reader should not have to remember which.
 
 | Name | Description |
 | :--- | :--- |
-| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). |
+| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `n_stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |
@@ -255,7 +255,7 @@ form, since the annex gives a range and no way to choose inside it; state
 
 | Name | Description |
 | :--- | :--- |
-| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). |
+| `model` | One of [`PERIOD_MODELS`](/phonometry/reference/api/vibration/building-response/#period_models). One of `"stories"`, `"height"`, `"height_width"` or `"slenderness"`. |
 | `n_stories` | Number of storeys `n`, for the storey model. |
 | `height_m` | Height `h` above the base, in metres. |
 | `width_m` | Width `b` parallel to the force, in metres. |

@@ -76,7 +76,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -701,8 +701,10 @@ class TransferStiffnessResult(OwnsArrays):
     ) -> Axes:
         """Plot the transfer-stiffness level ``L_k(f)``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_transfer_stiffness
@@ -760,7 +762,7 @@ class TransferStiffnessResult(OwnsArrays):
             adequacy conditions (there is then no value to report).
         :raises ImportError: If reportlab or matplotlib is not installed. The
             fiche always embeds the ``L_k(f)`` spectrum, so both are required
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 
@@ -904,6 +906,11 @@ class BandAveragedStiffness(OwnsArrays):
     :ivar line_counts: Number of narrow-band lines averaged in each band.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"center_frequencies": "Hz", "nominal_frequencies": "Hz", "stiffness": "N/m"}
+    )
+
     nominal_frequencies: np.ndarray
     center_frequencies: np.ndarray
     stiffness: np.ndarray
@@ -987,7 +994,7 @@ class BandAveragedStiffness(OwnsArrays):
     ) -> Axes:
         """Plot the band levels, with the undetermined bands marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1234,7 +1241,7 @@ class LevelDifferenceCheck(OwnsArrays):
     ) -> Axes:
         """Plot the level difference against its limit, failures marked.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1536,7 +1543,7 @@ class OutputMassCheck(OwnsArrays):
     ) -> Axes:
         """Plot the mass limit over frequency against the mass in place.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1698,6 +1705,11 @@ class EffectiveBlockingMass(OwnsArrays):
     :ivar blocking_mass: The mass ``m2`` of the block, in kg.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"blocking_mass": "kg"}
+    )
+
     frequencies: np.ndarray
     effective_mass_kg: np.ndarray
     blocking_mass: float
@@ -1779,7 +1791,7 @@ class EffectiveBlockingMass(OwnsArrays):
     ) -> Axes:
         """Plot the deviation from ``m2`` with the 1 dB tolerance and ``f3``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -2108,7 +2120,7 @@ class DrivingPointStiffnessResult(OwnsArrays):
     ) -> Axes:
         r"""Plot the driving-point stiffness level with the 6.2 threshold and :math:`f_\mathrm{UL}`.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -2314,7 +2326,7 @@ class DrivingPointUncertainty(RichDisplay):
     ) -> Axes:
         """Plot the contribution of each input quantity, with ``u`` and ``U``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

@@ -199,7 +199,7 @@ rather than a number the annex does not give.
 
 | Name | Description |
 | :--- | :--- |
-| `base_standard` | One of the columns of Table C.1, as [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements) keys them. |
+| `base_standard` | One of the columns of Table C.1, as [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements) keys them. One of `"ISO 3743-1"`, `"ISO 3744"`, `"ISO 3746"`, `"ISO 3747"`, `"ISO 9614-1"`, `"ISO 9614-2"`, `"ISO 11201"`, `"ISO 11202"` or `"ISO 11204"`. |
 | `mean_absorption_coefficient` | $\alpha$ of the room, dimensionless. |
 | `room_surface_area_m2` | $S_V$, the total area of the room's boundary surfaces, in square metres. |
 | `measurement_surface_area_m2` | $S$, the area of the measurement surface around the source, in square metres. |
@@ -249,7 +249,7 @@ $D_p$ and 9.4 e) reports whichever it was. That is `quantity`.
 | `frequencies` | Nominal band centres, in hertz. |
 | `quantity` | `"sound_power"` (default) for Equation (1), or `"sound_pressure"` for Equation (3). |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** The averaged insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
@@ -288,7 +288,7 @@ at all.
 | `external_levels` | The averaged level in the field outside, per band, in decibels. |
 | `internal_levels` | The averaged level inside the enclosure standing in that field, per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult) whose quantity is `"reciprocity"`.
 
@@ -332,10 +332,10 @@ the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 | `frequencies` | Nominal band centres, in hertz. |
 | `a_weighted_without` | $L_{WA}$ without the enclosure, in decibels, when it was measured rather than computed. |
 | `a_weighted_with` | The same with the enclosure, in decibels. |
-| `base_standard` | The standard the sound power came from, one of those Table 1 of either part lists for a sound power (default `"ISO 3744"`). |
+| `base_standard` | The standard the sound power came from, one of those Table 1 of either part lists for a sound power (default `"ISO 3744"`). One of `"ISO 3741"`, `"ISO 3742"`, `"ISO 3743-2"`, `"ISO 3743-1"`, `"ISO 3744"`, `"ISO 3746"`, `"ISO 3747"`, `"ISO 9614-1"` or `"ISO 9614-2"`. |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
@@ -381,10 +381,10 @@ different numbers about the same enclosure.
 | `frequencies` | Nominal band centres, in hertz. |
 | `a_weighted_without` | $L_{pA}$ without the enclosure, in decibels, when it was measured rather than computed. |
 | `a_weighted_with` | The same with the enclosure, in decibels. |
-| `base_standard` | The standard the pressure levels came from, one of those Table 1 of either part lists for a sound pressure level (default `"ISO 11201"`). |
+| `base_standard` | The standard the pressure levels came from, one of those Table 1 of either part lists for a sound pressure level (default `"ISO 11201"`). One of `"ISO 11201"`, `"ISO 11202"` or `"ISO 11204"`. |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
@@ -427,7 +427,7 @@ The measured insulation of an enclosure, band by band (ISO 11546).
 | `condition` | `"laboratory"` (part 1) or `"in-situ"` (part 2). |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
 | `base_standard` | The standard the levels were determined by. |
-| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 
 ### EnclosureInsulationResult.plot()
 
@@ -442,7 +442,7 @@ EnclosureInsulationResult.plot(
 
 Draw the two runs and the difference between them.
 
-Requires matplotlib (`pip install "phonometry[plot]"`).
+Requires matplotlib (the `[plot]` extra).
 
 **Parameters**
 
@@ -484,7 +484,7 @@ stored beside them: an answer cannot be built against another limit.
 
 | Name | Description |
 | :--- | :--- |
-| `base_standard` | The standard asked about, one of the keys of [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements). |
+| `base_standard` | The standard asked about, one of the keys of [`TEST_ENVIRONMENT_REQUIREMENTS`](/phonometry/reference/api/noise_control/enclosure-insulation/#test_environment_requirements). One of `"ISO 3743-1"`, `"ISO 3744"`, `"ISO 3746"`, `"ISO 3747"`, `"ISO 9614-1"`, `"ISO 9614-2"`, `"ISO 11201"`, `"ISO 11202"` or `"ISO 11204"`. |
 | `actual_area_ratio` | The $S_V/S$ of the room and the measurement surface given. |
 | `mean_absorption_coefficient` | The $\alpha$ the answer was read at. |
 
@@ -787,7 +787,7 @@ rows; what is done here is the trim to the rating bands.
 | :--- | :--- |
 | `insulation` | The insertion loss per band, in decibels, over exactly the 16 one-third-octave rating bands of 100 Hz to 3,15 kHz or the 5 octave ones of 125 Hz to 2 kHz; a wider spectrum is refused rather than trimmed, because which bands it holds is the caller's to say. |
 | `quantity` | `"sound_power"` (default) or `"reciprocity"`. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** The rating, as a [`WeightedEnclosureInsulation`](/phonometry/reference/api/noise_control/enclosure-insulation/#weightedenclosureinsulation).
 

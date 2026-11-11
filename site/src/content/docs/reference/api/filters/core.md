@@ -328,8 +328,14 @@ OctaveFilterResult.plot(
 
 Plot the band levels against their band centres.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 **Raises**
 
@@ -419,7 +425,7 @@ OctaveSpectrogramResult.plot(
 
 Draw the levels as one raster over time and band centre, with a colour bar.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**

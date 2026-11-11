@@ -880,7 +880,9 @@ def stationary_test(levels: ArrayLike, lengths_m: ArrayLike) -> StationaryTestRe
 class RollingStockTestResult(RichDisplay):
     r"""A test decided by the highest rounded mean of three runs per position.
 
-    :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`.
+    :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`. One of
+        ``"constant_speed"``, ``"acceleration_maximum"``, ``"acceleration_averaged"`` or
+        ``"braking"``.
     :param run_levels: The runs of each position, in dB, keyed by the
         position's name: :math:`L_{p\mathrm{Aeq},T_p}` at constant speed,
         :math:`L_{p\mathrm{AFmax}}` when starting (maximum level method) and
@@ -1002,7 +1004,9 @@ def rolling_stock_test(
 
     :param run_levels: The runs of each position, in dB, keyed by a name
         for the position (``"left"``, ``"right"``, ``"front, direction 1"``).
-    :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`.
+    :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`. One of
+        ``"constant_speed"``, ``"acceleration_maximum"``, ``"acceleration_averaged"`` or
+        ``"braking"``.
     :return: The test.
     :raises ValueError: See :class:`RollingStockTestResult`.
     :raises TypeError: if ``method`` is not a text.
@@ -1802,7 +1806,7 @@ class ReferenceTrackCheck(RichDisplay):
     :param roughness_limit_db: The roughness limit judged against, held as a
         read-only copy.
     :param decay_limits_db_per_m: The decay-rate limits judged against, held
-        as read-only copies.
+        as read-only copies. Keyed by any of ``"vertical"`` or ``"lateral"``.
     :param small_deviations: The Annex C verdict the roughness limit was
         judged by, when the roughness exceeds the limit and one was given;
         ``None`` otherwise.
@@ -2345,7 +2349,8 @@ def check_reference_track(
         roughness exceedance whose effect is small.
     :param roughness_limit_db: The roughness limit; Figure 2 by default.
     :param decay_limits_db_per_m: The decay-rate limits, a band-to-rate
-        mapping for each of the two directions; Figure 3 by default.
+        mapping for each of the two directions; Figure 3 by default. Keyed by any of
+        ``"vertical"`` or ``"lateral"``.
     :return: The verdict, with every requirement and its numbers.
     :raises ValueError: For a speed that is not positive, a radius or
         gradient that is not a valid number, decay limits that leave out a

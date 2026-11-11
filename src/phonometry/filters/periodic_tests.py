@@ -639,7 +639,7 @@ class PeriodicTestClause(RichDisplay):
         of a decibel to 70 dB, is drawn as each result's margin to its nearer
         limit against the test frequency: at or above zero it conforms.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -919,7 +919,7 @@ class FilterPeriodicVerification(RichDisplay):
         as its error bar; a result at or above zero lies within its limits.
         A result drawn hollow is one 5.3 forbids using.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

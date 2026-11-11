@@ -878,3 +878,8 @@ __all__ = [
     "uniform_sample_indices",
     "verify_calculation_results",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.environment.`` offers alone."""
+    return sorted(__all__)

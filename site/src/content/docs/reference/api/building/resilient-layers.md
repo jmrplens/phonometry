@@ -195,7 +195,7 @@ model identifies the general features rather than replacing a measurement.
 | `impedance` | Driving-point impedance `Zdp` of the base floor, in N.s/m; unchanged by the covering. |
 | `mass` | Hammer mass `m`, in kg (Default: 0,5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10); it sets the spacing of the Fourier lines the bands average over. |
-| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** A [`CoveringImprovementResult`](/phonometry/reference/api/building/resilient-layers/#coveringimprovementresult).
 
@@ -252,8 +252,14 @@ CoveringImprovementResult.plot(
 
 Plot `ΔL(f)` from the force ratio beside the two-line estimate.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## double_floating_floor_resonances
 
@@ -465,8 +471,14 @@ FloatingFloorImprovementResult.plot(
 
 Plot `ΔL(f)` with the resonance and the asymptotic slope marked.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## force_pulse
 
@@ -715,7 +727,7 @@ concrete slabs of at least 100 mm.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies `f`, in Hz. |
-| `fraction` | The band set, 3 for one-third octaves ($B = 0.23 f$) or 1 for octaves ($B = 0.707 f$). |
+| `fraction` | The band set, 3 for one-third octaves ($B = 0.23 f$) or 1 for octaves ($B = 0.707 f$). One of `1` or `3`. |
 
 **Returns:** The band mean-square force `F²rms`, in N².
 
@@ -818,7 +830,7 @@ rebound), the two limits of Eqs. (3.99)/(3.100).
 | `mass` | Hammer mass `m`, in kg (Default: 0,5). |
 | `impact_rate` | Impact repetition rate `fi`, in Hz (Default: 10). |
 | `impact_velocity` | Impact velocity `vo`, in m/s (Default: [`hammer_impact_velocity`](/phonometry/reference/api/building/resilient-layers/#hammer_impact_velocity)). |
-| `fraction` | The band set of Eq. (3.91), 3 for one-third octaves or 1 for octaves. |
+| `fraction` | The band set of Eq. (3.91), 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 
 **Returns:** A [`TappingForceResult`](/phonometry/reference/api/building/resilient-layers/#tappingforceresult).
 
@@ -889,7 +901,7 @@ Force spectrum of the ISO tapping machine on one walking surface.
 | `impedance` | Driving-point impedance `Zdp` used, in N.s/m. |
 | `lower_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{lower}} = m v_0/T_\mathrm{i}$, in N (Eq. 3.99). |
 | `upper_limit` | Low-frequency asymptote $\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}$, in N (Eq. 3.100); 6 dB above `lower_limit` in mean square. |
-| `fraction` | Band set used for `mean_square_force`, 3 for one-third octaves or 1 for octaves. |
+| `fraction` | Band set used for `mean_square_force`, 3 for one-third octaves or 1 for octaves. One of `1` or `3`. |
 | `mass` | Hammer mass `m` used, in kg (Default: 0,5). |
 
 Whether the oscillation is over-critical is read from `K`, `Zdp` and
@@ -919,8 +931,14 @@ TappingForceResult.plot(
 
 Plot the force spectrum `|Fn|` with its asymptotes and `fco`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### TappingForceResult.power_input_level
 

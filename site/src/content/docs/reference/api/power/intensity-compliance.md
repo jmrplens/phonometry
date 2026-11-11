@@ -247,7 +247,7 @@ IntensityInstrumentComplianceResult.plot(
 Plot the measured `delta_pI0` over the Table 2 class masks.
 
 See `phonometry._plot.emission.plot_intensity_class`. Requires
-matplotlib (`pip install "phonometry[plot]"`) and returns the
+matplotlib (the `[plot]` extra) and returns the
 `Axes`.
 
 **Parameters**
@@ -318,7 +318,7 @@ class result, an optional verdict row against a supplied
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ### IntensityInstrumentComplianceResult.spacing_offset_db
 

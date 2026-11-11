@@ -93,8 +93,14 @@ ApertureTransmissionResult.plot(
 
 Plot the aperture sound reduction index `R(f)`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ApertureTransmissionResult.plot_geometry()
 
@@ -109,8 +115,14 @@ ApertureTransmissionResult.plot_geometry(
 
 Draw the wall-aperture cross-section to scale.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ApertureTransmissionResult.transmission_loss
 

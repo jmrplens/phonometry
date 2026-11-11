@@ -273,8 +273,10 @@ class NIPTSResult(OwnsArrays):
     ) -> Axes:
         """Plot the NIPTS spectrum with the fractile band over frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.hearing import plot_nipts
@@ -317,7 +319,7 @@ class NIPTSResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab, matplotlib or svglib is not installed
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from .._i18n import check_language
 
@@ -427,8 +429,10 @@ class HTLANResult(OwnsArrays):
     ) -> Axes:
         """Plot the age, noise and combined threshold components over frequency.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.hearing import plot_htlan
@@ -472,7 +476,7 @@ class HTLANResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab, matplotlib or svglib is not installed
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from .._i18n import check_language
 

@@ -94,7 +94,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
@@ -104,6 +105,8 @@ from scipy.interpolate import PchipInterpolator
 from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -223,6 +226,17 @@ class EcmaFluctuationStrength(OwnsArrays):
     ``(n_times, 53)``. ``field`` records the assumed sound field.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "bark": "Bark_HMS",
+            "fluctuation_strength": "vacil_HMS",
+            "fluctuation_strength_vs_time": "vacil_HMS",
+            "specific_fluctuation_strength": "vacil_HMS/Bark_HMS",
+            "specific_fluctuation_strength_vs_time": "vacil_HMS/Bark_HMS",
+        }
+    )
+
     fluctuation_strength: float
     specific_fluctuation_strength: np.ndarray
     bark: np.ndarray
@@ -308,7 +322,9 @@ class EcmaFluctuationStrength(OwnsArrays):
 
         Draws the time-dependent fluctuation strength F(l50) and a
         specific-fluctuation-strength heatmap. Requires matplotlib
-        (``pip install "phonometry[plot]"``).
+        (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_ecma_fluctuation_strength

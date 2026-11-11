@@ -325,7 +325,7 @@ upwards on its lightweight blockwork.
 | `total_loss_factor` | Total loss factor `ηtot` per band (laboratory or in situ, matching the situation being described). |
 | `radiation_factor` | Radiation factor for free bending waves `σ` per band (see [`bending_radiation_factor`](/phonometry/reference/api/building/detailed-model/#bending_radiation_factor)). |
 | `forced_radiation_factor` | Radiation factor for forced waves `σf` per band (see [`forced_radiation_factor`](/phonometry/reference/api/building/detailed-model/#forced_radiation_factor)); ignored when `resonant_only` is set. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, setting the band limits used to locate the $f \approx f_\mathrm{c}$ branch. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, setting the band limits used to locate the $f \approx f_\mathrm{c}$ branch. One of `1` or `3`. |
 | `resonant_only` | Drop the forced-transmission term below `fc`. |
 | `density` | Density `ρ` of the material, in kg/m³; with `longitudinal_velocity` it enables the Formula (B.10) plateau. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s. |
@@ -371,7 +371,7 @@ the bands cover the rating range (100 Hz to 3150 Hz in one-third octaves,
 | `direct_index` | `RDd` per band, in dB (see [`direct_reduction_index`](/phonometry/reference/api/building/detailed-model/#direct_reduction_index)). |
 | `flanking_paths` | The flanking paths (see [`airborne_flanking_path`](/phonometry/reference/api/building/detailed-model/#airborne_flanking_path)); may be empty. |
 | `direct_label` | Label of the direct path (Default: `"Dd"`). |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-1 rating range. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-1 rating range. One of `1` or `3`. |
 
 **Returns:** The [`DetailedAirborneResult`](/phonometry/reference/api/building/detailed-model/#detailedairborneresult).
 
@@ -413,7 +413,7 @@ carries no direct path at all.
 | `direct_level` | `Ln,d` per band, in dB (see [`direct_impact_level`](/phonometry/reference/api/building/detailed-model/#direct_impact_level)), or `None` for the Formula (2) case of two rooms next to each other, which has no direct path. |
 | `flanking_paths` | The flanking paths (see [`impact_flanking_path`](/phonometry/reference/api/building/detailed-model/#impact_flanking_path)); may be empty when `direct_level` is given. |
 | `direct_label` | Label of the direct path (Default: `"Dd"`). |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-2 rating range. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-2 rating range. One of `1` or `3`. |
 
 **Returns:** The [`DetailedImpactResult`](/phonometry/reference/api/building/detailed-model/#detailedimpactresult).
 
@@ -467,7 +467,7 @@ DetailedAirborneResult.plot(
 
 Plot the per-band path contributions and the resulting `R'`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -570,7 +570,7 @@ DetailedImpactResult.plot(
 
 Plot the per-band path contributions and the resulting `L'n`.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
 
 **Parameters**
@@ -1231,7 +1231,7 @@ data come from a laboratory measurement.
 | :--- | :--- |
 | `element` | The [`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement) description. |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 | `resonant_only` | Drop the forced-transmission term of Formula (B.2) below `fc` (Annex B.1, flanking paths). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
 
@@ -1489,8 +1489,14 @@ InSituElementResult.plot(
 
 Plot the in-situ `Rsitu` and `Ln,situ` spectra of the element.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## laboratory_total_loss_factor
 
@@ -1590,7 +1596,7 @@ about 1 kHz, above which the stiffness of the floor's top layer matters).
 | :--- | :--- |
 | `sound_reduction_index` | `R` of the floor per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `fraction` | The band set, 3 for one-third octaves (default, constant 38) or 1 for octaves (43). |
+| `fraction` | The band set, 3 for one-third octaves (default, constant 38) or 1 for octaves (43). One of `1` or `3`. |
 
 **Returns:** The normalized impact sound pressure level `Ln` per band, dB.
 

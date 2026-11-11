@@ -150,7 +150,13 @@ Plot the fluctuation-strength result (see `phonometry._plot.psychoacoustics`).
 
 Draws the time-dependent fluctuation strength F(l50) and a
 specific-fluctuation-strength heatmap. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## fluctuation_strength_ecma
 

@@ -116,7 +116,7 @@ to 150 m³.
 | Name | Description |
 | :--- | :--- |
 | `volume` | Receiving-room volume `V`, in m³ (0 \< V \<= 150). |
-| `room` | Room-type key (see above). |
+| `room` | Room-type key (see above). One of `"furnished"`, `"kitchen"`, `"bathroom"`, `"a"`, `"b"`, `"c"`, `"d"`, `"e"`, `"f"`, `"g"`, `"h"`, `"a+e"`, `"b+f"`, `"c+g"` or `"d+h"`. |
 | `weighted` | When `True` return the single A-/C-weighted index (the Table 4 `A, C` column) instead of the five octave-band values, for globally weighted service-equipment noise (Clause 3.17). |
 
 **Returns:** The reverberation index `k` per octave band (125-2000 Hz), in dB, or the scalar A-/C-weighted index when `weighted` is `True`.
@@ -373,8 +373,14 @@ Plot `DnT` against the shifted ISO 717-1 reference curve.
 
 Delegates to the weighted-rating plot. Requires the automatic rating
 (5 octave or 16 one-third-octave bands) and matplotlib
-(`pip install "phonometry[plot]"`); returns the
+(the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SurveyAirborneResult.report()
 
@@ -418,7 +424,7 @@ requirement) and a footer with the identity block and disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, or the selected quantity has no single-number rating (the survey needs 5 octave or 16 one-third-octave bands, and `R'` needs `area` and `volume`). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 | TypeError | if `quantity` is not a text. |
 
 ## SurveyFacadeResult
@@ -455,6 +461,12 @@ SurveyFacadeResult.plot(
 ```
 
 Plot `D2m,nT` against the shifted ISO 717-1 reference curve.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SurveyFacadeResult.report()
 
@@ -496,7 +508,7 @@ requirement) and a footer with the identity block and disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown or the result has no single-number rating (the survey needs 5 octave or 16 one-third-octave bands). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## SurveyImpactResult
 
@@ -532,6 +544,12 @@ SurveyImpactResult.plot(
 ```
 
 Plot `L'nT` against the shifted ISO 717-2 reference curve.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### SurveyImpactResult.report()
 
@@ -573,7 +591,7 @@ a footer with the identity block and disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown or the result has no single-number rating (the survey needs 5 octave or 16 one-third-octave bands). |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## SurveyServiceEquipmentResult
 

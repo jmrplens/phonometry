@@ -90,7 +90,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 | `layers` | Layer stack, as in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
 | `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 | `n_quadrature_points` | Gauss-Legendre order (default 64). |
-| `termination` | As in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
+| `termination` | As in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). One of `"rigid"` or `"free"`. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`DiffuseFieldAbsorptionResult`](/phonometry/reference/api/materials/layered/#diffusefieldabsorptionresult).
@@ -132,8 +132,14 @@ DiffuseFieldAbsorptionResult.plot(
 Plot the random-incidence absorption spectrum
 $\alpha_{\mathrm{dif}}(f)$.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## layered_absorber
 
@@ -235,8 +241,14 @@ LayeredAbsorberResult.plot(
 Plot the absorption spectrum $\alpha(f)$ with
 $\lvert R \rvert$ overlaid.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### LayeredAbsorberResult.plot_geometry()
 
@@ -251,8 +263,14 @@ LayeredAbsorberResult.plot_geometry(
 
 Draw the solved stack cross-section to scale (dimensioned).
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## MembraneLayer
 

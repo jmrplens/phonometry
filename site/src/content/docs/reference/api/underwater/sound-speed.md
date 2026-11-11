@@ -36,7 +36,7 @@ Evaluate a sound-speed profile over a depth column.
 | `depths` | Depths, in metres (1-D, non-negative, increasing). |
 | `temperatures_c` | Temperature per depth, in °C (array or a scalar broadcast to every depth). |
 | `salinities` | Salinity per depth, in PSU (array or scalar). |
-| `model` | Sound-speed equation (see [`sea_water_sound_speed`](/phonometry/reference/api/fluids/water/#sea_water_sound_speed)). |
+| `model` | Sound-speed equation (see [`sea_water_sound_speed`](/phonometry/reference/api/fluids/water/#sea_water_sound_speed)). One of `"unesco"`, `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
 | `latitude` | Latitude for the depth→pressure conversion, in degrees. |
 
 **Returns:** A [`SoundSpeedProfile`](/phonometry/reference/api/underwater/sound-speed/#soundspeedprofile).
@@ -68,7 +68,7 @@ Sound-speed profile `c(z)` over a column of water.
 | `depths` | Depths, in metres (increasing downward). |
 | `speeds_of_sound` | Sound speed at each depth, in m/s. |
 | `gradient_per_s` | Vertical sound-speed gradient `dc/dz`, in (m/s)/m. |
-| `model` | The equation used. |
+| `model` | The equation used. One of `"unesco"`, `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
 
 ### SoundSpeedProfile.plot()
 
@@ -82,3 +82,9 @@ SoundSpeedProfile.plot(
 ```
 
 Plot the sound-speed profile (speed vs depth, depth increasing down).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

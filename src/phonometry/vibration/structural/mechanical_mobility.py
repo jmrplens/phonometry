@@ -72,7 +72,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -214,7 +214,9 @@ def convert_frf(
     :param source: The FRF kind of *value*: one of ``"receptance"``,
         ``"mobility"``, ``"accelerance"``, ``"dynamic_stiffness"``,
         ``"impedance"`` or ``"apparent_mass"``.
-    :param target: The FRF kind to convert to (same set).
+    :param target: The FRF kind to convert to (same set). One of ``"receptance"``,
+        ``"mobility"``, ``"accelerance"``, ``"dynamic_stiffness"``, ``"impedance"`` or
+        ``"apparent_mass"``.
     :return: The FRF value(s) of kind *target*, as a complex array.
     :raises ValueError: for an unknown FRF name, a non-positive frequency, or
         a zero *value* (dead channel) when the conversion involves a
@@ -369,6 +371,9 @@ class RigidMassCalibrationResult(OwnsArrays):
     :ivar quantity: FRF kind checked (``"accelerance"`` or ``"mobility"``).
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"mass": "kg"})
+
     frequencies: np.ndarray
     measured: np.ndarray
     _: KW_ONLY
@@ -460,7 +465,9 @@ class RigidMassCalibrationResult(OwnsArrays):
         no ``ax`` a two-panel figure is drawn and its two axes returned as a tuple; with
         ``ax`` the deviation diagnostic is drawn on it and that axes returned.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``).
+        Requires matplotlib (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_rigid_mass_calibration
@@ -648,6 +655,8 @@ class MobilityResult(OwnsArrays):
         impedance :math:`1/Y_{ij}`, not the blocked matrix impedance of Table 1
         (which does not invert element-wise).
 
+        :param target: One of ``"receptance"``, ``"mobility"``, ``"accelerance"``,
+            ``"dynamic_stiffness"``, ``"impedance"`` or ``"apparent_mass"``.
         :raises TypeError: if ``target`` is not a text.
         """
         require_choice(
@@ -671,8 +680,10 @@ class MobilityResult(OwnsArrays):
     ) -> Axes:
         """Plot the mobility magnitude ``|Y(f)|``.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_mobility
@@ -718,7 +729,7 @@ class MobilityResult(OwnsArrays):
             is unknown.
         :raises ImportError: If reportlab or matplotlib is not installed. The
             fiche always embeds the mobility spectrum, so both are required
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

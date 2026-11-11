@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ..._internal.figures import closes_its_figures
 from ..._internal.validation import real_array
 from ..common import (
     _C_EDGE,
@@ -116,6 +117,9 @@ def _fdtd_edges(
         handles[key] = line
 
 
+# FDTD2D is no record, so its method is not wrapped as it is made; and the
+# engine's file is fingerprinted by the GPU proof, so the renderer is.
+@closes_its_figures
 def plot_fdtd_domain(
     sim: FDTD2D,
     ax: Axes | None = None,

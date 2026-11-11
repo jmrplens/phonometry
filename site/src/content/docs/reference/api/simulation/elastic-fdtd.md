@@ -289,6 +289,12 @@ positions. The result is on the engine's device, where the fields
 live: a NumPy array by default, the backend's own array on another
 device; `numpy_field` gives NumPy copies of the stored fields.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field` | One of `"p"`, `"vx"` or `"vy"`. |
+
 **Raises**
 
 | Exception | When |
@@ -360,10 +366,10 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | `regions` | `(where, material)` pairs painted in order, each material taken in any of the forms `background` takes. |
 | `cfl` | Courant number, as [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes it. |
 | `absorbing_layer_cells` | Thickness of the absorbing (sponge) layer, in cells (default 0, no layer). |
-| `absorbing_sides` | Which sides absorb, as [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes them. |
+| `absorbing_sides` | Which sides absorb, as [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes them. One of `"left"`, `"right"`, `"top"` or `"bottom"`. Each one of `"left"`, `"right"`, `"top"` or `"bottom"`. |
 | `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer. |
 | `damping` | Bulk amplitude decay rate [1/s], a scalar or an `(ny, nx)` map. |
-| `free_sides` | Sides carrying a traction-free surface. |
+| `free_sides` | Sides carrying a traction-free surface. One of `"left"`, `"right"`, `"top"` or `"bottom"`. Each one of `"left"`, `"right"`, `"top"` or `"bottom"`. |
 | `obstacle_mask` | Boolean `(ny, nx)` map of rigid cells. |
 | `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)). |
 
@@ -516,9 +522,9 @@ Frozen result of an [`elastic_fdtd_simulation`](/phonometry/reference/api/simula
 | `sources` | The source definitions of the run. |
 | `snapshots` | Recorded cell-centre fields of `snapshot_field`, shape `(n_frames, ceil(ny / d), ceil(nx / d))` with `d` the `snapshot_decimation`, in the dtype the run stepped in, or `None` when no snapshots were requested. |
 | `snapshot_times` | Time of each snapshot [s], or `None`. |
-| `snapshot_field` | The field recorded in `snapshots`. |
+| `snapshot_field` | The field recorded in `snapshots`. One of `"p"`, `"vx"` or `"vy"`. |
 | `obstacle_mask` | Boolean map of rigid cells, or `None`. |
-| `free_sides` | Sides carrying a traction-free surface. |
+| `free_sides` | Sides carrying a traction-free surface. Each one of `"left"`, `"right"`, `"top"` or `"bottom"`. |
 | `snapshot_decimation` | Every how many cells a snapshot keeps along each axis (1 keeps every cell). |
 | `provenance` | Where the run stepped ([`RunProvenance`](/phonometry/reference/api/simulation/compute/#runprovenance)). |
 

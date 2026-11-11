@@ -44,7 +44,8 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -66,6 +67,7 @@ from .air_absorption import air_attenuation
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -352,6 +354,18 @@ class OutdoorAttenuation(OwnsArrays):
         non-zero only for the alternative ground method of 7.3.2.
     """
 
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "a_atm": "dB",
+            "a_bar": "dB",
+            "a_div": "dB",
+            "a_gr": "dB",
+            "a_total": "dB",
+            "d_omega": "dB",
+        }
+    )
+
     frequencies: NDArray[np.float64]
     a_div: NDArray[np.float64]
     a_atm: NDArray[np.float64]
@@ -413,8 +427,10 @@ class OutdoorAttenuation(OwnsArrays):
     ) -> Axes:
         """Plot the stacked per-band attenuation terms with the total.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_outdoor_attenuation
@@ -474,7 +490,7 @@ class OutdoorAttenuation(OwnsArrays):
             is unknown, or a supplied ``source_emission`` sound power does not
             match the number of frequency bands.
         :raises ImportError: If reportlab or matplotlib is not installed
-            (``pip install "phonometry[report,plot]"``).
+            (the ``[report]`` and ``[plot]`` extras).
         """
         from ..._i18n import check_language
 

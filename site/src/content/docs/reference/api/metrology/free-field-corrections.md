@@ -252,7 +252,7 @@ with the tolerances it was weighed against.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the adjusted-response curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### AdjustmentValue.pressure_indicated_level
 
@@ -392,7 +392,7 @@ adds its own, which `additional_components` carries.
 
 | Name | Description |
 | :--- | :--- |
-| `stated_uncertainties_db` | The value of each of the 15 components, in dB, keyed by the descriptor of Table I.1, `"a1"` to `"a15"`. A component taken as negligible is given as 0, as Table I.2 gives a6 and a13. |
+| `stated_uncertainties_db` | The value of each of the 15 components, in dB, keyed by the descriptor of Table I.1, `"a1"` to `"a15"`. A component taken as negligible is given as 0, as Table I.2 gives a6 and a13. Keyed by any of `"a1"`, `"a2"`, `"a3"`, `"a4"`, `"a5"`, `"a6"`, `"a7"`, `"a8"`, `"a9"`, `"a10"`, `"a11"`, `"a12"`, `"a13"`, `"a14"` or `"a15"`. |
 | `repeatability_dof` | The degrees of freedom of the repeatability (a15), from the number of repeat measurements: 2 in Tables I.2 and I.3. |
 | `frequency_hz` | The frequency, in Hz, which sets the clause 6 component and the maximum the budget is judged against. |
 | `correction` | The correction the budget is for, in dB (Default: 0). |
@@ -503,7 +503,7 @@ $u_\mathrm{c}$, $k$ and $U$.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `barh`. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### CorrectionUncertaintyBudget.standard_uncertainties_db
 
@@ -607,7 +607,7 @@ the clause.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the expanded-uncertainty curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### CorrectionUncertaintyVerification.range_passes
 
@@ -654,7 +654,7 @@ maximum permitted values.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ### CorrectionUncertaintyVerification.subject
 
@@ -878,7 +878,7 @@ and the range between them.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the mean-correction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes. Requires matplotlib (the `[plot]` extra).
 
 ### FreeFieldCorrection.range_db
 

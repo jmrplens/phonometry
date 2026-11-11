@@ -41,7 +41,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, cast, overload
+from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 
 import numpy as np
 
@@ -69,6 +69,7 @@ from ._shared import (
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -149,6 +150,20 @@ class RoomAcousticsResult(OwnsArrays):
     C = 100*(T30/T20 - 1) in percent (ISO 3382-2:2008, B.3); values
     above 10 % indicate an unreliable, non-straight decay.
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "c50": "dB",
+            "c80": "dB",
+            "curvature": "%",
+            "dynamic_range": "dB",
+            "edt": "s",
+            "t20": "s",
+            "t30": "s",
+            "ts": "s",
+        }
+    )
 
     frequencies: np.ndarray | None
     edt: np.ndarray
@@ -263,8 +278,10 @@ class RoomAcousticsResult(OwnsArrays):
 
         Invalid bands are hatched and greyed. With ``ax`` given, only the
         decay-times panel is drawn on it. Requires matplotlib
-        (``pip install "phonometry[plot]"``); returns the
+        (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_room_acoustics
@@ -320,8 +337,8 @@ class RoomAcousticsResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install "phonometry[report]"``), or matplotlib is missing for
-            the embedded figure (``pip install "phonometry[plot]"``).
+            (the ``[report]`` extra), or matplotlib is missing for
+            the embedded figure (the ``[plot]`` extra).
         """
         from .._i18n import check_language
 
@@ -468,9 +485,11 @@ class DecayCurve(OwnsArrays):
     ) -> Axes:
         """Plot the decay curve with optional straight T-fit overlays.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`. Pass ``fits=False`` to omit the
         EDT/T20/T30 fit lines.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_decay_curve

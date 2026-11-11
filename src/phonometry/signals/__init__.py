@@ -132,3 +132,8 @@ __all__ = [
     "window_metrics",
     "zoom_fft",
 ]
+
+
+def __dir__() -> list[str]:
+    """What the package publishes, which the completion of ``phonometry.signals.`` offers alone."""
+    return sorted(__all__)

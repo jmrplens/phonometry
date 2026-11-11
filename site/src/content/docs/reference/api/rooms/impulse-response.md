@@ -240,6 +240,12 @@ the result can be passed straight to array consumers such as
 `len(result)` and the `size`/`ndim`/`shape`/`dtype` attributes
 forward to `ir`.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `method` | One of `"spectral"`, `"farina"`, `"mls"` or `"golay"`. |
+
 ### ImpulseResponseResult.dtype
 
 *property*
@@ -271,8 +277,14 @@ Plot the impulse response: waveform and log-magnitude decay.
 Draws the (normalised) time-domain waveform and, below it, the
 log-magnitude envelope in dB with a Schroeder energy-decay overlay.
 With `ax` given, only the decay panel is drawn on it. Requires
-matplotlib (`pip install "phonometry[plot]"`); returns the
+matplotlib (the `[plot]` extra); returns the
 `Axes` it drew on, or the tuple of two without `ax`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### ImpulseResponseResult.shape
 
@@ -439,6 +451,7 @@ bipolar sequence and its (flat) magnitude spectrum.
 | `fs` | Sample rate in Hz (for the time and frequency axes). |
 | `kind` | `"sweep"` (default) or `"mls"`. |
 | `ax` | Existing axes for the top (time-domain) panel, or `None` for a fresh two-panel figure. |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 | `kwargs` | Forwarded to the time-domain `plot` call. |
 
 **Returns:** The time-domain axes (`ax` given) or the tuple of two axes.
@@ -579,7 +592,7 @@ Two stacked panels: the time-domain waveform, and the sweep's Welch
 magnitude spectrum overlaid on the synthesis target (both in dB re
 their in-band maximum). With `ax` given, only the spectrum panel
 is drawn on it. Requires matplotlib
-(`pip install "phonometry[plot]"`).
+(the `[plot]` extra).
 
 **Parameters**
 

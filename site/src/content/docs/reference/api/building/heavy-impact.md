@@ -125,7 +125,7 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 | :--- | :--- |
 | `levels` | Maximum impact sound pressure levels `Xi,Fmax,j`, in dB, in ascending band order. |
 | `frequencies` | Optional band centre frequencies, in Hz. When given they must be exactly the rating bands of the chosen band set. |
-| `fraction` | The band set, 3 for one-third octaves or 1 for octaves; inferred from the number of values (12 one-third octaves, 4 octaves) when omitted. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves; inferred from the number of values (12 one-third octaves, 4 octaves) when omitted. One of `1` or `3`. |
 
 **Returns:** An [`AWeightedMaxImpactResult`](/phonometry/reference/api/building/heavy-impact/#aweightedmaximpactresult).
 
@@ -157,7 +157,7 @@ A-weighted maximum impact sound pressure level (ISO 717-2 Annex D).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `fraction` | The band set, 3 for one-third octaves (50-630 Hz) or 1 for octaves (63-500 Hz). |
+| `fraction` | The band set, 3 for one-third octaves (50-630 Hz) or 1 for octaves (63-500 Hz). One of `1` or `3`. |
 | `levels` | Input maximum levels `Xi,Fmax,j` per band, in dB. |
 | `a_weighting` | Table D.3 correction `Aj` per band, in dB. |
 | `corrected` | `Xi,Fmax,j + Aj` per band, in dB. |
@@ -177,8 +177,14 @@ AWeightedMaxImpactResult.plot(
 
 Plot the band levels, their A-weighted contributions and the rating.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ## check_heavy_impact_source
 
@@ -418,8 +424,14 @@ HeavyImpactSourceCheck.plot(
 
 Plot the measured `LFE` against the printed tolerance band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### HeavyImpactSourceCheck.tolerance_db
 
@@ -659,5 +671,11 @@ StandardizedMaxImpactResult.plot(
 
 Plot `Li,Fmax` and `L'i,Fmax,V,T` per band.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |

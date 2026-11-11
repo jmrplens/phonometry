@@ -270,7 +270,7 @@ An emission sound pressure level and the two corrections behind it.
 | `measured_level` | The uncorrected reading $L'_p$, in decibels. |
 | `background_correction` | $K_1$, in decibels. |
 | `local_correction` | $K_3$, in decibels. |
-| `grade` | Accuracy grade the determination earns. |
+| `grade` | Accuracy grade the determination earns. One of `"engineering"` or `"survey"`. |
 | `background_margin_db` | $\Delta L = L'_p - L_p(B)$, the margin of the reading over the background, in decibels, a scalar or one per band; `upper_bound` is read from it and the grade's minimum. |
 | `standard` | The part of the group the determination followed. |
 

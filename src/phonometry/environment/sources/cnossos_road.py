@@ -52,7 +52,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import KW_ONLY, dataclass, fields
 from enum import Enum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 import numpy as np
 
@@ -480,17 +480,22 @@ class RoadEmissionCoefficients(RichDisplay):
     national database, and how the superseded 2015/996 coefficients can be
     reproduced for comparison with pre-2021 studies.
 
-    :ivar rolling_a: ``A_R,i,m`` per category, eight octave bands, in dB.
-    :ivar rolling_b: ``B_R,i,m`` per category, eight octave bands, in dB.
-    :ivar propulsion_a: ``A_P,i,m`` per category, eight octave bands, in dB.
-    :ivar propulsion_b: ``B_P,i,m`` per category, eight octave bands, in dB.
+    :ivar rolling_a: ``A_R,i,m`` per category, eight octave bands, in dB. Keyed by any
+        of ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or ``"4b"``.
+    :ivar rolling_b: ``B_R,i,m`` per category, eight octave bands, in dB. Keyed by any
+        of ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or ``"4b"``.
+    :ivar propulsion_a: ``A_P,i,m`` per category, eight octave bands, in dB. Keyed by
+        any of ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or ``"4b"``.
+    :ivar propulsion_b: ``B_P,i,m`` per category, eight octave bands, in dB. Keyed by
+        any of ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or ``"4b"``.
     :ivar studded_a: ``a_i`` of Table F-2 (category 1 only), in dB.
     :ivar studded_b: ``b_i`` of Table F-2 (category 1 only), in dB.
     :ivar junction_c: ``(C_R, C_P)`` of Table F-3 per category and junction
-        type, in dB.
+        type, in dB. Keyed by any of ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or ``"4b"``.
     :ivar temperature_coefficient_db_per_k: ``K_m`` of (2.2.10), in dB per kelvin,
         the same number per degree Celsius, since it multiplies a difference
-        of temperatures.
+        of temperatures. Keyed by any of ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or
+        ``"4b"``.
     """
 
     rolling_a: Mapping[RoadVehicleCode, tuple[float, ...]]
@@ -585,8 +590,10 @@ class RoadSurfaceCoefficients(RichDisplay):
     """One row of Table F-4: the acoustic signature of a road surface.
 
     :ivar name: The surface description as printed in Table F-4.
-    :ivar alpha: ``alpha_i,m`` per category, eight octave bands, in dB.
-    :ivar beta: ``beta_m`` per category (dimensionless speed coefficient).
+    :ivar alpha: ``alpha_i,m`` per category, eight octave bands, in dB. Keyed by any of
+        ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or ``"4b"``.
+    :ivar beta: ``beta_m`` per category (dimensionless speed coefficient). Keyed by any
+        of ``"1"``, ``"2"``, ``"3"``, ``"4a"`` or ``"4b"``.
     :ivar speed_range_kmh: ``(v_min, v_max)`` over which the row is declared valid,
         in km/h, or ``None`` for the reference surface, which carries no range.
         Carried for the reader, not enforced: Table F-4 prints these columns
@@ -649,7 +656,13 @@ def road_surface_coefficients(
 ) -> RoadSurfaceCoefficients:
     """Look up a Table F-4 row.
 
-    :param surface: A :class:`RoadSurface` member or its description string.
+    :param surface: A :class:`RoadSurface` member or its description string. One of
+        ``"reference road surface"``, ``"1-layer ZOAB"``, ``"2-layer ZOAB"``,
+        ``"2-layer ZOAB (fine)"``, ``"SMA-NL5"``, ``"SMA-NL8"``,
+        ``"brushed down concrete"``, ``"optimised brushed down concrete"``,
+        ``"fine broomed concrete"``, ``"worked surface"``,
+        ``"hard elements in herringbone"``, ``"hard elements not in herringbone"``,
+        ``"quiet hard elements"``, ``"thin layer A"`` or ``"thin layer B"``.
     :return: The :class:`RoadSurfaceCoefficients` of that surface.
     :raises ValueError: If the surface is not tabulated in Table F-4.
     :raises TypeError: if ``surface`` is not a text.
@@ -880,11 +893,18 @@ def road_rolling_noise(
     Categories 4a and 4b have no rolling noise: their Table F-1 rows are zero,
     and their total power is the propulsion term alone (2.2.3).
 
-    :param category: Vehicle category (Table [2.2.a]).
+    :param category: Vehicle category (Table [2.2.a]). One of ``"1"``, ``"2"``, ``"3"``,
+        ``"4a"`` or ``"4b"``.
     :param speed_kmh: Average speed ``v_m``, in km/h; values below 20 km/h are
         raised to 20 km/h (2.2.1).
     :param surface: Road surface, as a :class:`RoadSurface`, its description or
-        an explicit :class:`RoadSurfaceCoefficients`.
+        an explicit :class:`RoadSurfaceCoefficients`. One of
+        ``"reference road surface"``, ``"1-layer ZOAB"``, ``"2-layer ZOAB"``,
+        ``"2-layer ZOAB (fine)"``, ``"SMA-NL5"``, ``"SMA-NL8"``,
+        ``"brushed down concrete"``, ``"optimised brushed down concrete"``,
+        ``"fine broomed concrete"``, ``"worked surface"``,
+        ``"hard elements in herringbone"``, ``"hard elements not in herringbone"``,
+        ``"quiet hard elements"``, ``"thin layer A"`` or ``"thin layer B"``.
     :param temperature_c: Air temperature ``tau``, in degrees Celsius.
     :param studded_fraction: ``Q_stud,ratio`` of (2.2.7).
     :param studded_months: ``T_s`` of (2.2.7), the months per year over which
@@ -952,11 +972,18 @@ def road_propulsion_noise(
     reduces
     propulsion noise, a noisy one does not increase it.
 
-    :param category: Vehicle category (Table [2.2.a]).
+    :param category: Vehicle category (Table [2.2.a]). One of ``"1"``, ``"2"``, ``"3"``,
+        ``"4a"`` or ``"4b"``.
     :param speed_kmh: Average speed ``v_m``, in km/h; values below 20 km/h are
         raised to 20 km/h (2.2.1).
     :param surface: Road surface, as a :class:`RoadSurface`, its description or
-        an explicit :class:`RoadSurfaceCoefficients`.
+        an explicit :class:`RoadSurfaceCoefficients`. One of
+        ``"reference road surface"``, ``"1-layer ZOAB"``, ``"2-layer ZOAB"``,
+        ``"2-layer ZOAB (fine)"``, ``"SMA-NL5"``, ``"SMA-NL8"``,
+        ``"brushed down concrete"``, ``"optimised brushed down concrete"``,
+        ``"fine broomed concrete"``, ``"worked surface"``,
+        ``"hard elements in herringbone"``, ``"hard elements not in herringbone"``,
+        ``"quiet hard elements"``, ``"thin layer A"`` or ``"thin layer B"``.
     :param road_slope_percent: Road slope ``s``, in per cent, positive uphill in the
         direction of travel. For a bidirectional flow, split the flow in two
         and correct one half uphill and the other downhill.
@@ -1020,9 +1047,16 @@ def road_vehicle_sound_power(
     energetically (2.2.2); for the powered two-wheelers of category 4 the
     propulsion term is the whole of it (2.2.3).
 
-    :param category: Vehicle category (Table [2.2.a]).
+    :param category: Vehicle category (Table [2.2.a]). One of ``"1"``, ``"2"``, ``"3"``,
+        ``"4a"`` or ``"4b"``.
     :param speed_kmh: Average speed ``v_m``, in km/h.
-    :param surface: Road surface (Table F-4).
+    :param surface: Road surface (Table F-4). One of ``"reference road surface"``,
+        ``"1-layer ZOAB"``, ``"2-layer ZOAB"``, ``"2-layer ZOAB (fine)"``,
+        ``"SMA-NL5"``, ``"SMA-NL8"``, ``"brushed down concrete"``,
+        ``"optimised brushed down concrete"``, ``"fine broomed concrete"``,
+        ``"worked surface"``, ``"hard elements in herringbone"``,
+        ``"hard elements not in herringbone"``, ``"quiet hard elements"``,
+        ``"thin layer A"`` or ``"thin layer B"``.
     :param temperature_c: Air temperature ``tau``, in degrees Celsius.
     :param road_slope_percent: Road slope ``s``, in per cent.
     :param studded_fraction: ``Q_stud,ratio`` of (2.2.7).
@@ -1081,6 +1115,17 @@ class RoadEmissionResult(OwnsArrays):
     :ivar source_height_m: Height of the equivalent point source above the road
         surface, in m (0,05 m, fixed by 2.2.1).
     """
+
+    #: The units the field names do not say, as the docstring gives them.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "line_power": "dB",
+            "propulsion": "dB",
+            "rolling": "dB",
+            "total_line_power": "dB",
+            "vehicle_power": "dB",
+        }
+    )
 
     frequencies: NDArray[np.float64]
     categories: tuple[RoadVehicleCategory, ...]
@@ -1181,7 +1226,10 @@ class RoadEmissionResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the per-metre line power spectrum and its category breakdown."""
+        """Plot the per-metre line power spectrum and its category breakdown.
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
+        """
         from ..._i18n import check_language
         from ..._plot.environment import plot_cnossos_road_emission
 
@@ -1217,7 +1265,13 @@ def road_source_power(
 
     :param traffic: One :class:`RoadTraffic` or a sequence of them, at most one
         per vehicle category.
-    :param surface: Road surface (Table F-4).
+    :param surface: Road surface (Table F-4). One of ``"reference road surface"``,
+        ``"1-layer ZOAB"``, ``"2-layer ZOAB"``, ``"2-layer ZOAB (fine)"``,
+        ``"SMA-NL5"``, ``"SMA-NL8"``, ``"brushed down concrete"``,
+        ``"optimised brushed down concrete"``, ``"fine broomed concrete"``,
+        ``"worked surface"``, ``"hard elements in herringbone"``,
+        ``"hard elements not in herringbone"``, ``"quiet hard elements"``,
+        ``"thin layer A"`` or ``"thin layer B"``.
     :param temperature_c: Yearly average air temperature ``tau``, in degrees
         Celsius (the reference condition is 20 degC).
     :param road_slope_percent: Road slope ``s``, in per cent, positive uphill.

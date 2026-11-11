@@ -320,6 +320,12 @@ The two level spectra are what `adjusted_for_levels` reads to
 undo the corrections they produced, so a result that carries them can
 be moved to another speech and occupancy-noise condition.
 
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `rating` | One of `"U"`, `"J"`, `"I"`, `"H"`, `"G"`, `"F"`, `"E"`, `"D"`, `"C"`, `"B"`, `"A"` or `"A+"`. |
+
 ### STIResult.adjusted_for_levels()
 
 ```python
@@ -367,8 +373,14 @@ STIResult.plot(
 
 Plot the per-band MTI bars with the STI and rating letter.
 
-Requires matplotlib (`pip install "phonometry[plot]"`); returns the
+Requires matplotlib (the `[plot]` extra); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `language` | The language of the labels: `"en"` or `"es"`. |
 
 ### STIResult.report()
 
@@ -411,7 +423,7 @@ optional verdict row and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is not a supported language. |
-| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| ImportError | If reportlab is not installed (the `[report]` extra), or matplotlib is missing for the embedded figure (the `[plot]` extra). |
 
 ## STIWarning
 

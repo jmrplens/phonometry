@@ -1239,19 +1239,22 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         corrected relative frequency weightings, which are the deviations from
         the design goal, at :data:`ELECTRICAL_TEST_FREQUENCIES_HZ` for the
         class in order, NaN at a frequency not measured.
-    :ivar electrical_weighting_uncertainties_db: The same keys and shape.
+    :ivar electrical_weighting_uncertainties_db: The same keys and shape. Keyed by any
+        of ``"A"``, ``"C"`` or ``"Z"``.
     :ivar electrical_weighting_uncertainties_without_correction_data_db:
         Optional, for 4.4: the same without the uncertainty of the
         manufacturer's correction data, which 13.7 applies too; the same keys,
-        shape and gaps.
+        shape and gaps. Keyed by any of ``"A"``, ``"C"`` or ``"Z"``.
     :ivar weighting_at_1khz_deviations_db: 14.2: the C-weighted and
         Z-weighted indications at 1 kHz less the A-weighted one, keyed
         ``"C"`` and ``"Z"``.
-    :ivar weighting_at_1khz_uncertainties_db: The same keys.
+    :ivar weighting_at_1khz_uncertainties_db: The same keys. Keyed by any of ``"C"`` or
+        ``"Z"``.
     :ivar time_weighting_at_1khz_deviations_db: 14.3: the A-weighted
         S-time-weighted (``"S"``) and time-averaged (``"eq"``) indications at
         1 kHz less the F-time-weighted one.
-    :ivar time_weighting_at_1khz_uncertainties_db: The same keys.
+    :ivar time_weighting_at_1khz_uncertainties_db: The same keys. Keyed by any of
+        ``"S"`` or ``"eq"``.
     :ivar long_term_stability_db: 15.3: the final less the initial A-weighted
         indication over 25 min to 35 min of operation.
     :ivar long_term_stability_uncertainty_db: Its uncertainty.
@@ -1285,14 +1288,16 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         value more; 17.3 has no reading on the reference range, where the
         reference sound level of 17.2 deviates by zero by construction
         (IEC 61672-1 5.6.3).
-    :ivar range_linearity_uncertainties_db: The same keys, shape and gaps.
+    :ivar range_linearity_uncertainties_db: The same keys, shape and gaps. Keyed by any
+        of ``"17.3"`` or ``"17.4"``.
     :ivar toneburst_responses_db: 18: the toneburst responses relative to the
         steady level, keyed ``"F"`` (:math:`L_\mathrm{AFmax} -
         L_\mathrm{A}`), ``"S"`` (:math:`L_\mathrm{ASmax} - L_\mathrm{A}`) and
         ``"E"`` (:math:`L_\mathrm{AE} - L_\mathrm{A}`), each at
         :data:`TONEBURST_TEST_DURATIONS_MS` in order, NaN where not measured.
         The deviation from Table 4 is taken by the verdict.
-    :ivar toneburst_uncertainties_db: The same keys and shape.
+    :ivar toneburst_uncertainties_db: The same keys and shape. Keyed by any of ``"F"``,
+        ``"S"`` or ``"E"``.
     :ivar c_peak_differences: 19.6: :math:`L_\mathrm{Cpeak} -
         L_\mathrm{C}` for one cycle at 8 kHz, a positive half cycle at 500 Hz
         and a negative half cycle at 500 Hz, in that order, NaN where not
@@ -2030,8 +2035,14 @@ class SoundLevelMeterFeatures(RichDisplay):
 class SoundLevelMeterPeriodicRequirement(RichDisplay):
     """The verdict on one requirement of IEC 61672-3:2013.
 
-    :ivar name: The requirement, one of :data:`SLM_PERIODIC_REQUIREMENTS`.
-    :ivar clause: The clause of IEC 61672-3:2013 that tests it.
+    :ivar name: The requirement, one of :data:`SLM_PERIODIC_REQUIREMENTS`. One of
+        ``"acoustic_weighting"``, ``"electrical_weighting"``, ``"weighting_at_1khz"``,
+        ``"time_weighting_at_1khz"``, ``"long_term_stability"``, ``"level_linearity"``,
+        ``"range_linearity"``, ``"toneburst"``, ``"c_peak"``, ``"overload"`` or
+        ``"high_level_stability"``.
+    :ivar clause: The clause of IEC 61672-3:2013 that tests it. One of ``"12"``,
+        ``"13"``, ``"14.2"``, ``"14.3"``, ``"15"``, ``"16"``, ``"17"``, ``"18"``,
+        ``"19"``, ``"20"`` or ``"21"``.
     :ivar tables: Where IEC 61672-1:2013 prints its acceptance limits and
         maximum-permitted uncertainty.
     :ivar labels: What each result is (the frequency, the weighting, the
@@ -2183,7 +2194,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         (4.4). The title names the clause and its verdict above the clause's
         heading.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -3145,7 +3156,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         :meth:`SoundLevelMeterPeriodicRequirement.plot` draws its results one
         by one.
 
-        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
+        Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

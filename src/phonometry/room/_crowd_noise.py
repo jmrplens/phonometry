@@ -516,7 +516,9 @@ class CrowdNoiseResult(OwnsArrays):
         speech-to-noise limit of Equation (17.53) are drawn as references, so
         the crossing point reads directly as the occupancy at which the room
         stops working. Requires matplotlib
-        (``pip install "phonometry[plot]"``).
+        (the ``[plot]`` extra).
+
+        :param language: The language of the labels: ``"en"`` or ``"es"``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_crowd_noise

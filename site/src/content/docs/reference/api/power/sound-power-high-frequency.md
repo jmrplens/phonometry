@@ -403,7 +403,7 @@ Plot the band levels, with the mean room level they came from.
 Broadband bands are drawn as bars over the one-third octave bands; a
 tonal determination is drawn as one stem per tone on a frequency axis,
 with the line 10 dB below the highest tone that clause 13 c) reports
-down to. Requires matplotlib (`pip install "phonometry[plot]"`);
+down to. Requires matplotlib (the `[plot]` extra);
 returns the `Axes`.
 
 **Parameters**

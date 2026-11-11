@@ -107,6 +107,7 @@ jobs:
       # stray or duplicated files.
       - name: Build and check the stub
         run: |
+          python -m pip install --upgrade pip
           python -m pip install -r requirements-release.txt
           SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation stub/
           python -m twine check --strict stub/dist/*

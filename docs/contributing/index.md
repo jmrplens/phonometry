@@ -238,6 +238,7 @@ Each rule on a page has the same parts:
 | [T25](tests.md#t25) | Filter a warning in the pytest configuration by a builtin class, never an imported one | `tests/test_repository_config.py::test_the_pytest_configuration_filters_warnings_by_builtin_class` |
 | [T26](tests.md#t26) | Mark a test that reads the repository whole `whole_tree` | `tests/whole_tree.py`, `tests/test_whole_tree.py`, `CI: tests (numba-jitted kernel)`, `CI: Library tests at the dependency floors` |
 | [T27](tests.md#t27) | Mark a test that asks git about the repository `git_checkout` | `tests/git_checkout.py`, `tests/test_git_checkout.py` |
+| [T28](tests.md#t28) | Assert the advisory a test meets, or give the call the input its clause asks for | `pyproject.toml`, `tests/test_repository_config.py::test_a_stray_warning_fails_the_suite`, `tests/test_warning_filters_in_tests.py::test_every_warning_filter_in_the_suite_names_its_message` |
 
 ### Documentation and figures
 

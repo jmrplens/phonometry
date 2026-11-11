@@ -138,7 +138,6 @@ def test_a_saturating_tangent_says_nothing_with_numpy_s_own_functions(
     """What Windows checks: NumPy's own tangents raise no warning under ``-W error``."""
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        warnings.filterwarnings("ignore", category=ph.PhonometryWarning)
         _SATURATING[site]()
 
 
@@ -151,6 +150,5 @@ def test_a_saturating_tangent_is_computed_where_overflow_is_ignored(
         _overflowing_as_windows_does(name, monkeypatch, reached)
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        warnings.filterwarnings("ignore", category=ph.PhonometryWarning)
         _SATURATING[site]()
     assert max(reached) > _WINDOWS_LIMIT, f"{site}: the input does not overflow"

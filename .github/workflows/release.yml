@@ -212,7 +212,9 @@ jobs:
           python-version: "3.13"
 
       - name: Install the release tooling
-        run: python -m pip install -r requirements-release.txt
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-release.txt
 
       # The sdist first, and the wheel from the sdist, as pip builds one for
       # anyone who installs from source: a wheel that only builds from the
@@ -318,7 +320,9 @@ jobs:
           path: dist
 
       - name: Install the wheel with every extra
-        run: python -m pip install --no-cache-dir "dist/phonometry-$VERSION-py3-none-any.whl[full]"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --no-cache-dir "dist/phonometry-$VERSION-py3-none-any.whl[full]"
 
       - name: Import every module and read every data file of the installed package
         run: python scripts/check_installed_package.py --version "$VERSION"
@@ -533,6 +537,7 @@ jobs:
       - name: Install the release tooling the source pins
         run: |
           python -m venv "$RUNNER_TEMP/build-env"
+          "$RUNNER_TEMP/build-env/bin/python" -m pip install --upgrade pip
           "$RUNNER_TEMP/build-env/bin/python" -m pip install -r source/requirements-release.txt
 
       - name: Fetch the checksum file this run wrote
@@ -585,6 +590,7 @@ jobs:
       # PyPI's CDN can take a few minutes to serve a new file everywhere.
       - name: Install the published version
         run: |
+          python -m pip install --upgrade pip
           for attempt in 1 2 3 4 5 6 7 8 9 10; do
             if python -m pip install --no-cache-dir "phonometry==$VERSION"; then
               break

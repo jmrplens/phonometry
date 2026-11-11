@@ -156,6 +156,7 @@ jobs:
     # phonometry's.
     - name: Build the stub and check its long description and contents
       run: |
+        python -m pip install --upgrade pip
         python -m pip install -r requirements-release.txt
         SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) PYTHONWARNINGS=error python -m build --no-isolation stub/
         python -m twine check --strict stub/dist/*
@@ -209,7 +210,9 @@ jobs:
       with:
         python-version: "3.13"
     - name: Install the release tooling
-      run: python -m pip install -r requirements-release.txt
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements-release.txt
     - name: Build the sdist and the wheel
       env:
         PYTHONWARNINGS: error
@@ -261,6 +264,7 @@ jobs:
     - name: Install the release tooling
       run: |
         python -m venv "$RUNNER_TEMP/build-env"
+        "$RUNNER_TEMP/build-env/bin/python" -m pip install --upgrade pip
         "$RUNNER_TEMP/build-env/bin/python" -m pip install -r requirements-release.txt
     - uses: actions/download-artifact@v8
       with:
@@ -2153,6 +2157,10 @@ jobs:
     runs-on: ubuntu-26.04
     permissions:
       contents: read
+    env:
+      # corepack fetches the pnpm tests/pyodide pins and says so first; the
+      # pin is the decision, so the announcement adds nothing to the log.
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     steps:
     - uses: actions/checkout@v7
       with:
@@ -2165,6 +2173,7 @@ jobs:
     # with the setuptools requirements-release.txt pins.
     - name: Build the wheel
       run: |
+        python -m pip install --upgrade pip
         python -m pip install -r requirements-release.txt
         PYTHONWARNINGS=error python scripts/build_release.py --outdir dist
     - uses: actions/setup-node@v7
@@ -2175,10 +2184,24 @@ jobs:
         corepack enable
         pnpm install --frozen-lockfile
       working-directory: tests/pyodide
+    # The wheels Pyodide fetches from its CDN for numpy, scipy, matplotlib and
+    # the rest, kept between runs. They are the ones its lock file names, so
+    # the key is the lockfile that pins Pyodide: a new Pyodide starts empty.
+    # smoke.mjs hands the directory to loadPyodide as packageCacheDir, which
+    # loads a wheel found there and keeps one it had to download.
+    - name: Restore the packages Pyodide downloads
+      uses: actions/cache@v6
+      with:
+        path: ${{ runner.temp }}/pyodide-packages
+        key: pyodide-packages-${{ hashFiles('tests/pyodide/pnpm-lock.yaml') }}
     - name: Install the wheel and its plot and report extras with micropip
+      env:
+        PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
       run: node tests/pyodide/smoke.mjs install dist/phonometry-*.whl
     - name: Run an octave filter bank on the numpy and scipy Pyodide ships
       if: ${{ !cancelled() }}
+      env:
+        PYODIDE_PACKAGE_CACHE_DIR: ${{ runner.temp }}/pyodide-packages
       run: node tests/pyodide/smoke.mjs run dist/phonometry-*.whl
 
   sonar:

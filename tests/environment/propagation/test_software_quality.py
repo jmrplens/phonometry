@@ -18,6 +18,7 @@ Seite 7 and 8 (Tables 5 and 6), and anchors Table C.1 a second time.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import statistics
 import warnings
@@ -253,8 +254,15 @@ def _ordinals(n: int, m: int) -> list[int]:
     ("n", "m"), [(300, 20), (2000, 20), (4567, 45), (20, 20), (39, 20)]
 )
 def test_uniform_sample_indices_are_the_ordinals_of_c2(n: int, m: int) -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", environment.SoftwareQualityWarning)
+    # C.2 recommends a sample of at least 1:100; a thinner one says so.
+    thin = (
+        pytest.warns(
+            environment.SoftwareQualityWarning, match="is thinner than the ratio"
+        )
+        if 100 * m < n
+        else contextlib.nullcontext()
+    )
+    with thin:
         indices = environment.uniform_sample_indices(n, m)
     assert indices.tolist() == _ordinals(n, m)
     assert len(set(indices.tolist())) == m

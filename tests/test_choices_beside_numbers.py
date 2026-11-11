@@ -41,7 +41,6 @@ import functools
 import inspect
 import pathlib
 import sys
-import warnings
 from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
@@ -450,9 +449,7 @@ def _diffuse(value: object) -> object:
 
 
 def _delany_bazley(value: object) -> object:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", materials.PorousAbsorberWarning)
-        return materials.delany_bazley(_BANDS, 1.0e4, coefficients=value)  # type: ignore[arg-type]
+    return materials.delany_bazley(_BANDS, 1.0e4, coefficients=value)  # type: ignore[arg-type]
 
 
 def _shaped_sweep(value: object) -> object:

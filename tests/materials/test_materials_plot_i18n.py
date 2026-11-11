@@ -9,7 +9,6 @@ clear :class:`ValueError`.
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -145,27 +144,26 @@ def _uncertainty() -> materials.AbsorptionUncertaintyResult:
     return materials.sound_absorption_coefficient_uncertainty(alpha, frequencies=freqs)
 
 
+#: A flow resistivity that keeps 100 Hz to 5 kHz inside the X = 0.01 to 1
+#: Delany and Bazley fitted over, so the drawings meet no advisory.
+_SIGMA = 10000.0
+
+
 def _porous_medium() -> materials.PorousMediumResult:
     f = np.geomspace(100.0, 5000.0, 24)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
+    return delany_bazley(f, _SIGMA, fluid=ABSORBER_AIR)
 
 
 def _layered() -> materials.LayeredAbsorberResult:
     f = np.geomspace(100.0, 5000.0, 24)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
-        return layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=med)])
+    med = delany_bazley(f, _SIGMA, fluid=ABSORBER_AIR)
+    return layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=med)])
 
 
 def _diffuse() -> materials.DiffuseFieldAbsorptionResult:
     f = np.geomspace(100.0, 5000.0, 24)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        med = delany_bazley(f, 20000.0, fluid=ABSORBER_AIR)
-        return diffuse_field_absorption(f, [PorousLayer(thickness_m=0.05, medium=med)])
+    med = delany_bazley(f, _SIGMA, fluid=ABSORBER_AIR)
+    return diffuse_field_absorption(f, [PorousLayer(thickness_m=0.05, medium=med)])
 
 
 # (id, builder, expected Spanish substring) for every materials result renderer.

@@ -291,7 +291,13 @@ def test_a_cabin_band_exactly_6_db_over_its_background_does_not_warn(
 ) -> None:
     # ISO 11957 6.4 by way of ISO 3741: at least 6 dB over the background.
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.CabinInsulationWarning)
+        # One band is short of the 100 Hz to 5000 Hz of the clause, which the
+        # result says; that advisory alone is let through, by its message.
+        warnings.filterwarnings(
+            "ignore",
+            message="ISO 11957 requires the bands from 100 Hz to 5000 Hz",
+            category=noise_control.CabinInsulationWarning,
+        )
         warnings.filterwarnings(
             "error",
             message="ISO 11957 asks for at least",
@@ -725,16 +731,14 @@ def test_a_temporal_variability_of_exactly_0_6_is_stationary(
         np.full(10, 121.0), np.ones(10), temporal_intensity=samples
     )
     assert indicators.check_field_stationarity().passes
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
-        result = emission.sound_power_intensity_points(
-            np.ones((10, 1)),
-            np.ones(10),
-            pressure_levels=np.full((10, 1), 121.0),
-            pressure_residual_index=20.0,
-            temporal_intensity=np.array(samples).reshape(-1, 1),
-            frequencies=[1000.0],
-        )
+    result = emission.sound_power_intensity_points(
+        np.ones((10, 1)),
+        np.ones(10),
+        pressure_levels=np.full((10, 1), 121.0),
+        pressure_residual_index=20.0,
+        temporal_intensity=np.array(samples).reshape(-1, 1),
+        frequencies=[1000.0],
+    )
     assert (
         emission.ActionCode.REDUCE_TEMPORAL_VARIABILITY
         not in (result.required_actions()[0])
@@ -1198,8 +1202,22 @@ def test_a_weighted_intensities_that_cancel_have_no_f4_in_either_order(
     # defined; read in either order they must not refuse the determination.
     intensity = np.column_stack([np.array(column + [0.0] * 7), np.full(10, -1.0)])
     areas = np.array([1.0, 1.0, 0.5] + [1.0] * 7)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    # The band of negative intensity is inapplicable (9.2) and its field
+    # indicators undefined (A.2.3), and with no pressure levels the A-weighted
+    # total skips the screening of 10.5 b); the determination says all three.
+    with (
+        pytest.warns(
+            emission.SoundPowerWarning,
+            match=r"total sound power is not positive in one or more bands",
+        ),
+        pytest.warns(
+            emission.SoundPowerWarning,
+            match=r"algebraic mean normal intensity is not positive",
+        ),
+        pytest.warns(
+            emission.SoundPowerWarning, match=r"without the ISO 9614-1:1993 clause"
+        ),
+    ):
         result = emission.sound_power_intensity_points(
             intensity, areas, frequencies=[1000.0, 2000.0]
         )
@@ -1273,9 +1291,7 @@ def test_a_screen_attenuation_on_a_half_is_reported_even(
 def test_a_cabin_insulation_on_a_half_is_reported_even(
     pair: tuple[float, float], reported: int
 ) -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.CabinInsulationWarning)
-        result = noise_control.cabin_insulation([pair[0]], [pair[1]])
+    result = noise_control.cabin_insulation([pair[0]], [pair[1]])
     assert int(result.rounded[0]) == reported
 
 
@@ -1283,9 +1299,7 @@ def test_a_cabin_insulation_on_a_half_is_reported_even(
 def test_an_enclosure_insulation_on_a_half_is_reported_even(
     pair: tuple[float, float], reported: int
 ) -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", noise_control.EnclosureInsulationWarning)
-        result = noise_control.enclosure_sound_pressure_insulation([pair[0]], [pair[1]])
+    result = noise_control.enclosure_sound_pressure_insulation([pair[0]], [pair[1]])
     assert int(result.rounded[0]) == reported
 
 

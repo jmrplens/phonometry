@@ -223,16 +223,12 @@ def test_oversized_impulse_set_stays_one_page(tmp_path: Path) -> None:
     ``... plus N more`` note and still render as a single A4 page.
     """
     pytest.importorskip("matplotlib")
-    import warnings
-
     import numpy as np
 
     rng = np.random.default_rng(0)
     onset_rates = rng.uniform(20.0, 2000.0, 40)
     level_differences = rng.uniform(5.0, 40.0, 40)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        result = nt.impulse_prominence(onset_rates, level_differences)
+    result = nt.impulse_prominence(onset_rates, level_differences)
     out = tmp_path / "big.pdf"
     result.report(str(out))
     assert_one_page(str(out))

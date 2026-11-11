@@ -29,13 +29,21 @@ _OCTAVES = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 
 
 def _half_up(values: np.ndarray) -> np.ndarray:
-    """Round to one decimal, halves away from zero, as the workbook's ROUND does."""
+    """Round to one decimal, halves away from zero, as the workbook's ROUND does.
+
+    Each value goes through a Python loop, not ``np.vectorize``: some CPython
+    builds (the 3.12.12 that uv installs) raise the floating-point invalid flag
+    inside ``repr`` of a float, and a NumPy ufunc reports a flag raised during
+    its loop as a RuntimeWarning, which the suite's configuration makes an error.
+    """
 
     def one(value: float) -> float:
         exact = Decimal(repr(round(float(value), 9)))
         return float(exact.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
 
-    return np.vectorize(one)(np.asarray(values, dtype=float))
+    array = np.asarray(values, dtype=float)
+    rounded = [one(value) for value in array.ravel().tolist()]
+    return np.asarray(rounded, dtype=float).reshape(array.shape)
 
 
 def _workbook_insertion_loss() -> hearing.ActiveInsertionLossResult:

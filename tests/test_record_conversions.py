@@ -317,6 +317,8 @@ def _catalogue() -> object:
                 "document": "Example tile data sheet",
                 "version": None,
                 "consulted": "2026-09-25",
+                # A measured basis names where the measurement came from.
+                "report": "Example test report 1",
             },
             "basis": "measured",
             "rows": [
@@ -461,9 +463,7 @@ def _factory_records() -> list[object]:
         parameters = inspect.signature(factory).parameters.values()
         if any(p.default is p.empty and p.kind != p.VAR_KEYWORD for p in parameters):
             continue
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            record = factory()
+        record = factory()
         if dataclasses.is_dataclass(record) and not isinstance(record, type):
             found.append(record)
     return found
@@ -515,11 +515,7 @@ def _published_rows() -> list[object]:
 
 @pytest.fixture(scope="module")
 def records() -> list[object]:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        built = [
-            build() for build in (*_HAND_BUILT.values(), *_MAPPING_HOLDERS.values())
-        ]
+    built = [build() for build in (*_HAND_BUILT.values(), *_MAPPING_HOLDERS.values())]
     fluid = ph.fluids.air(
         temperature_c=20.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0
     )
@@ -661,9 +657,7 @@ def test_a_list_given_to_a_converted_field_is_held_converted(
                 kept.append(f"{type(record).__name__}.{each.name}: held a list")
                 continue
             for given in _given(stored, arrays=each.name in arrays):
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    rebuilt = dataclasses.replace(record, **{each.name: given})  # type: ignore[type-var]
+                rebuilt = dataclasses.replace(record, **{each.name: given})  # type: ignore[type-var]
                 held = getattr(rebuilt, each.name)
                 if held is given or type(held) is not type(stored):
                     kept.append(
@@ -728,12 +722,10 @@ def test_a_record_given_an_array_like_holds_a_copy_of_its_own(
             given = make(mine)
             where = f"{type(record).__name__}.{each.name}"
             try:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    warnings.filterwarnings(
-                        "error", message=".*__array__", category=DeprecationWarning
-                    )
-                    rebuilt = dataclasses.replace(record, **{each.name: given})  # type: ignore[type-var]
+                warnings.filterwarnings(
+                    "error", message=".*__array__", category=DeprecationWarning
+                )
+                rebuilt = dataclasses.replace(record, **{each.name: given})  # type: ignore[type-var]
             except (TypeError, ValueError, DeprecationWarning) as error:
                 found.append(f"{where}: refused it ({type(error).__name__}: {error})")
                 continue
@@ -851,9 +843,7 @@ def test_every_record_survives_pickle_and_deepcopy(records: list[object]) -> Non
         )
         for how, travel in travels:
             try:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    back: Any = travel(record)
+                back: Any = travel(record)
             except (TypeError, pickle.PicklingError) as error:
                 failed.append(f"{type(record).__name__} ({how}): {error}")
                 continue

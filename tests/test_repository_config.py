@@ -500,6 +500,261 @@ def test_every_workflow_that_runs_pip_turns_its_version_notice_off() -> None:
     )
 
 
+#: The actions of a ``filterwarnings`` entry that let a warning through.
+_LETS_THROUGH = frozenset({"ignore", "default", "always", "module", "once"})
+
+
+def test_a_stray_warning_fails_the_suite(tmp_path: pathlib.Path) -> None:
+    """A UserWarning or RuntimeWarning that no test asked for is an error.
+
+    Before, 63 tests in 14 files met an advisory of the library they did not
+    assert, and the suite printed each in its summary, where a new one beside
+    them read as one more of the same. The configuration turns both classes
+    into errors, and no later entry lets either class back through whole: an
+    entry after them may let one warning through by its message, never the
+    class. A planted file under the configuration shows it: a stray topic
+    warning and a stray division by zero fail, an asserted one passes.
+    """
+    options = tomllib.loads((_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    entries = options["tool"]["pytest"]["ini_options"]["filterwarnings"]
+    assert "error::UserWarning" in entries
+    assert "error::RuntimeWarning" in entries
+    first = min(
+        entries.index("error::UserWarning"), entries.index("error::RuntimeWarning")
+    )
+    whole_class = []
+    for entry in entries[first + 1 :]:
+        action, message, category = (entry.split(":") + ["", ""])[:3]
+        if (
+            action in _LETS_THROUGH
+            and not message
+            and category
+            in {
+                "",
+                "Warning",
+                "UserWarning",
+                "RuntimeWarning",
+            }
+        ):
+            whole_class.append(entry)
+    assert whole_class == []
+    planted = tmp_path / "test_planted.py"
+    planted.write_text(
+        "import warnings\n\n"
+        "import numpy as np\n"
+        "import pytest\n\n"
+        "from phonometry.filters import FilterBankWarning\n\n\n"
+        "def test_a_stray_advisory():\n"
+        "    warnings.warn('stray', FilterBankWarning, stacklevel=1)\n\n\n"
+        "def test_a_stray_division_by_zero():\n"
+        "    np.log10(np.zeros(1))\n\n\n"
+        "def test_an_asserted_advisory():\n"
+        "    with pytest.warns(FilterBankWarning, match='asked for'):\n"
+        "        warnings.warn('asked for', FilterBankWarning, stacklevel=1)\n",
+        encoding="utf-8",
+    )
+    result = child_process.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "-c",
+            str(_ROOT / "pyproject.toml"),
+            "--rootdir",
+            str(tmp_path),
+            str(planted),
+        ],
+        timeout=120,
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+    )
+    assert "2 failed, 1 passed" in result.stdout, result.stdout + result.stderr
+
+
+def test_a_cache_pytest_cannot_write_fails_no_run(tmp_path: pathlib.Path) -> None:
+    """A run whose tests pass passes where pytest cannot write its cache.
+
+    pytest warns with a PytestCacheWarning, a UserWarning, when its cache
+    directory cannot be made or written, as in a read-only checkout or
+    container a packager's run can be. Raised once the last test has run,
+    the warning ended such a run with a traceback, exit status 1 and no
+    summary line. The configuration shows it instead.
+    """
+    planted = tmp_path / "test_planted.py"
+    planted.write_text("def test_a_pass():\n    assert True\n", encoding="utf-8")
+    # A cache directory under a file: no platform can make it, root included.
+    (tmp_path / "a-file").write_text("", encoding="utf-8")
+    result = child_process.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-c",
+            str(_ROOT / "pyproject.toml"),
+            "--rootdir",
+            str(tmp_path),
+            "-o",
+            f"cache_dir={tmp_path / 'a-file' / 'cache'}",
+            str(planted),
+        ],
+        timeout=120,
+        capture_output=True,
+        text=True,
+        cwd=tmp_path,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "1 passed, 1 warning" in result.stdout, result.stdout
+    assert "could not create cache path" in result.stdout
+
+
+#: ``<interpreter> -m pip [options] install <rest>``: the pip of that
+#: interpreter, unless ``--python`` hands the install to another one, which
+#: the interpreter's own pip still runs.
+_MODULE_PIP_INSTALL = re.compile(
+    r'(?P<owner>"[^"]+"|[\w./$-]+)\s+-m\s+pip\s+(?:--python\s+\S+\s+)?install\b(?P<rest>.*)'
+)
+#: ``pip install <rest>`` run bare, which is the pip of the Python on PATH.
+_BARE_PIP_INSTALL = re.compile(r"(?:^|[\s;&|(])pip\s+install\b(?P<rest>.*)")
+#: The requirement that upgrades pip itself.
+_UPGRADES_PIP = re.compile(r"(?:--upgrade|-U)\s+pip(?:\s|$)")
+
+
+def _pip_installs(job: Mapping[str, object]) -> Iterator[tuple[str, str]]:
+    """``(interpreter, what follows install)`` for each pip install of a job, in order."""
+    steps = job.get("steps") or []
+    assert isinstance(steps, list)
+    for step in steps:
+        run = step.get("run") if isinstance(step, dict) else None
+        if not isinstance(run, str):
+            continue
+        for raw in run.splitlines():
+            line = raw.strip()
+            if line.startswith("#"):
+                continue
+            module = _MODULE_PIP_INSTALL.search(line)
+            if module is not None:
+                yield module["owner"].strip('"'), module["rest"]
+                continue
+            bare = _BARE_PIP_INSTALL.search(line)
+            if bare is not None:
+                yield "python", bare["rest"]
+
+
+def test_every_job_that_installs_with_pip_upgrades_it_first() -> None:
+    """Each pip a job installs with is brought to the newest release first.
+
+    The pip of a setup-python runner, and the one a fresh ``venv`` bundles,
+    lags the newest release by whatever the image is behind, so a job that
+    installed with it resolved with an older pip than a contributor following
+    the documentation gets. Every interpreter whose pip a job installs with,
+    the runner's and each virtual environment's, upgrades pip before its
+    first install.
+    """
+    late = []
+    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+        jobs = yaml.safe_load(path.read_text(encoding="utf-8")).get("jobs") or {}
+        for name, job in jobs.items():
+            upgraded: set[str] = set()
+            for owner, rest in _pip_installs(job):
+                if _UPGRADES_PIP.search(rest):
+                    upgraded.add(owner)
+                elif owner not in upgraded:
+                    late.append(f"{path.name}:{name}: {owner} -m pip install{rest}")
+                    upgraded.add(owner)
+    assert late == [], (
+        "these jobs install with a pip they have not upgraded; run "
+        f"`<python> -m pip install --upgrade pip` first: {late}"
+    )
+
+
+@pytest.mark.parametrize(
+    ("line", "found"),
+    [
+        ("python -m pip install --upgrade pip", ("python", " --upgrade pip")),
+        (
+            '"$RUNNER_TEMP/env/bin/python" -m pip install x',
+            ("$RUNNER_TEMP/env/bin/python", " x"),
+        ),
+        ('python -m pip --python "$E/bin/python" install w.whl', ("python", " w.whl")),
+        ("pip install -e .", ("python", " -e .")),
+        (
+            'if python -m pip install --no-cache-dir "p==1"; then',
+            ("python", ' --no-cache-dir "p==1"; then'),
+        ),
+        ("# python -m pip install x", None),
+        ("python -m pipx install x", None),
+    ],
+)
+def test_the_pip_install_reader_names_the_pip_that_runs(
+    line: str, found: tuple[str, str] | None
+) -> None:
+    installs = list(_pip_installs({"steps": [{"run": line}]}))
+    assert installs == ([] if found is None else [found])
+
+
+def test_every_job_that_runs_corepack_turns_its_download_prompt_off() -> None:
+    """corepack fetches the pinned pnpm without announcing it in the log.
+
+    The first ``pnpm`` a corepack shim runs downloads the release the
+    ``packageManager`` field pins and prints that it is about to; the pin is
+    the decision, and the line is noise in every build. The setting is read
+    from the job's environment, the workflow's or the step's.
+    """
+    missing = []
+    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+        workflow_env = workflow.get("env") or {}
+        for name, job in (workflow.get("jobs") or {}).items():
+            job_env = {**workflow_env, **(job.get("env") or {})}
+            for step in job.get("steps") or []:
+                if "corepack" not in str(step.get("run", "")):
+                    continue
+                env = {**job_env, **(step.get("env") or {})}
+                if str(env.get("COREPACK_ENABLE_DOWNLOAD_PROMPT")) != "0":
+                    missing.append(f"{path.name}:{name}: {step.get('name')}")
+    assert missing == [], (
+        'these steps run corepack without COREPACK_ENABLE_DOWNLOAD_PROMPT: "0" '
+        f"in their environment: {missing}"
+    )
+
+
+def test_the_pyodide_job_keeps_the_packages_pyodide_downloads() -> None:
+    """The wheels Pyodide fetches from its CDN are restored between runs.
+
+    ``node_modules/pyodide`` is a link pnpm makes into its own store, so a
+    cache of that path would keep the link and none of the wheels behind it.
+    The job hands ``smoke.mjs`` a directory of its own instead, which the
+    script passes to ``loadPyodide`` as ``packageCacheDir``, and caches that
+    directory under the lockfile that pins Pyodide, so a new Pyodide starts
+    from an empty one.
+    """
+    workflow = yaml.safe_load(
+        (_ROOT / ".github" / "workflows" / "python-app.yml").read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"]["pyodide"]["steps"]
+    caches = [
+        step for step in steps if str(step.get("uses", "")).startswith("actions/cache@")
+    ]
+    assert len(caches) == 1, caches
+    cache = caches[0]["with"]
+    assert "hashFiles('tests/pyodide/pnpm-lock.yaml')" in cache["key"]
+    smoke = [
+        step for step in steps if "tests/pyodide/smoke.mjs" in str(step.get("run", ""))
+    ]
+    assert len(smoke) == 2, smoke
+    for step in smoke:
+        assert steps.index(step) > steps.index(caches[0])
+        assert (step.get("env") or {}).get("PYODIDE_PACKAGE_CACHE_DIR") == cache["path"]
+    script = (_ROOT / "tests" / "pyodide" / "smoke.mjs").read_text(encoding="utf-8")
+    assert "process.env.PYODIDE_PACKAGE_CACHE_DIR" in script
+    assert "packageCacheDir" in script
+
+
 def _config_time_filters(options: Mapping[str, str | Sequence[str]]) -> list[str]:
     """Every warning filter pytest resolves while it reads its configuration.
 

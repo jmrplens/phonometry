@@ -30,6 +30,7 @@ Normative anchors (BS EN ISO 3743-1:2010, read on the printed pages):
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import math
 import warnings
@@ -182,8 +183,15 @@ def test_background_correction_is_eq13_of_the_two_means() -> None:
 )
 def test_background_rules_of_8_1_3(margin: float, expected: float) -> None:
     background = _energy_mean(ST, 0) - margin
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    # Below 6 dB, 8.1.3 makes the level an upper bound, and says so.
+    advisory = (
+        pytest.warns(
+            emission.SoundPowerWarning, match="margin of the source under test"
+        )
+        if margin < 6.0
+        else contextlib.nullcontext()
+    )
+    with advisory:
         res = _power(
             background_levels=background, reference_background_levels=BACKGROUND
         )
@@ -230,8 +238,14 @@ def test_reference_source_margin_fails_4_5_but_is_no_upper_bound() -> None:
 def test_both_margins_short_is_no_upper_bound() -> None:
     background = BACKGROUND.copy()
     background[0] = min(_energy_mean(ST, 0)[0], _energy_mean(RSS, 0)[0]) - 3.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    with (
+        pytest.warns(
+            emission.SoundPowerWarning, match=r"margin of the source under test"
+        ),
+        pytest.warns(
+            emission.SoundPowerWarning, match=r"margin of the reference sound source"
+        ),
+    ):
         res = _power(background_levels=background)
     assert not bool(res.background_requirement_met[0])
     assert not bool(res.upper_bound[0])
@@ -668,8 +682,14 @@ def test_plot_draws_one_bar_per_band_hatches_and_error_bars() -> None:
     background[0] = _energy_mean(ST, 0)[0] - 3.0
     bg_ref = BACKGROUND.copy()
     bg_ref[6] = _energy_mean(RSS, 0)[6] - 4.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    with (
+        pytest.warns(
+            emission.SoundPowerWarning, match=r"margin of the source under test"
+        ),
+        pytest.warns(
+            emission.SoundPowerWarning, match=r"margin of the reference sound source"
+        ),
+    ):
         res = _power(
             background_levels=background,
             reference_background_levels=bg_ref,
@@ -690,8 +710,9 @@ def test_plot_draws_one_bar_per_band_hatches_and_error_bars() -> None:
 
 
 def test_plot_without_a_background_claims_no_upper_bound() -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", emission.SoundPowerWarning)
+    with pytest.warns(
+        emission.SoundPowerWarning, match=r"No background levels were supplied"
+    ):
         res = emission.sound_power_hard_walled(ST, RSS, LW_RSS, frequencies=FREQS)
     ax = res.plot()
     assert {p.get_hatch() for p in ax.patches[: FREQS.size]} == {"xx"}

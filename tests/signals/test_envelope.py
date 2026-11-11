@@ -496,6 +496,66 @@ def test_envelope_spectrum_mean_level_restates_an_undetermined_envelope() -> Non
     assert math.isnan(restated.mean_level)
 
 
+@pytest.mark.parametrize("remove_dc", [True, False])
+def test_a_squared_envelope_past_the_floating_point_range_is_not_finite(
+    *, remove_dc: bool
+) -> None:
+    # The record and its Hilbert envelope are finite, their square is not:
+    # the envelope, its mean and its spectrum say so, with no RuntimeWarning
+    # of NumPy's from the square, the removed mean or the taper.
+    result = ph.signals.envelope_spectrum(
+        np.full(4096, 1e200), 8192.0, kind="squared", remove_dc=remove_dc
+    )
+    assert math.isinf(result.mean_level)
+    assert not np.isfinite(np.asarray(result.envelope)).any()
+    assert not np.isfinite(np.asarray(result.amplitude)).any()
+
+
+@pytest.mark.parametrize("remove_dc", [True, False])
+def test_a_squared_envelope_whose_sum_leaves_the_range_says_so_once(
+    *, remove_dc: bool
+) -> None:
+    # Each squared sample, about 1e306, is finite; their sum over 4096
+    # samples is not, so the mean is infinite. The record restates that mean
+    # from its envelope under the same rule as the function, so neither
+    # reports NumPy's overflow in the reduction, which the suite raises.
+    result = ph.signals.envelope_spectrum(
+        np.full(4096, 1e153), 8192.0, kind="squared", remove_dc=remove_dc
+    )
+    assert np.isfinite(np.asarray(result.envelope)).all()
+    assert math.isinf(result.mean_level)
+
+
+def _impulse_near_the_top() -> np.ndarray:
+    x = np.zeros(64)
+    x[32] = 1.1e154
+    return x
+
+
+@pytest.mark.parametrize(
+    ("record", "window"),
+    [
+        (np.full(64, 1e154), ("gaussian", 0.5)),
+        (_impulse_near_the_top(), ("gaussian", 0.1)),
+        (_impulse_near_the_top(), ("gaussian", 0.5)),
+    ],
+    ids=["steady-gaussian-0.5", "impulse-gaussian-0.1", "impulse-gaussian-0.5"],
+)
+def test_a_spectrum_bin_doubled_past_the_range_says_so_once(
+    record: np.ndarray, window: tuple[str, float]
+) -> None:
+    # Each squared sample, about 1e308, is finite and the mean is not. Kept
+    # with its mean, the detector under a narrow taper gives bins near 1e308,
+    # which the one-sided doubling takes past the range; the amplitude says
+    # so, with no RuntimeWarning of NumPy's from the multiplication, which
+    # the suite raises.
+    result = ph.signals.envelope_spectrum(
+        record, 1.0, kind="squared", window=window, remove_dc=False
+    )
+    assert math.isinf(result.mean_level)
+    assert not np.isfinite(np.asarray(result.amplitude)).all()
+
+
 def test_envelope_spectrum_plot_two_panels_and_external_ax() -> None:
     res = ph.signals.envelope_spectrum(_am_signal(), FS)
     axes = res.plot()

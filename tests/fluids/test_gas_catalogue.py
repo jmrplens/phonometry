@@ -14,8 +14,6 @@ transcription error in a data file cannot make the test that checks it pass.
 
 from __future__ import annotations
 
-import warnings
-
 import pytest
 import reference_data as ref
 
@@ -101,18 +99,18 @@ def test_the_only_interval_on_the_bies_page_is_saturated_steam() -> None:
 # ---------------------------------------------------------------------------
 def test_a_gas_reaches_a_state_through_the_ideal_closure() -> None:
     """The pair the page prints is exactly what the closure takes."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        state = PUBLISHED_GASES[f"{BIES}/methane"].ideal_state(temperature_c=20.0)
+    state = PUBLISHED_GASES[f"{BIES}/methane"].ideal_state(
+        temperature_c=20.0, static_pressure_pa=101_325.0
+    )
     assert state.speed_of_sound == pytest.approx(447.9, abs=0.1)
     assert state.density == pytest.approx(0.667, abs=0.001)
 
 
 def test_the_state_carries_the_page_of_the_row_it_came_from() -> None:
     """A number that leaves the catalogue keeps the citation with it."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        state = PUBLISHED_GASES[f"{BIES}/helium"].ideal_state(temperature_c=20.0)
+    state = PUBLISHED_GASES[f"{BIES}/helium"].ideal_state(
+        temperature_c=20.0, static_pressure_pa=101_325.0
+    )
     assert "Helium" in state.model
     assert "Bies 5e Table C.2" in state.model
     assert "ideal gas" in state.model

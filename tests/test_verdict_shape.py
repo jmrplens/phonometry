@@ -44,7 +44,6 @@ import re
 import textwrap
 import types
 import typing
-import warnings
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -493,9 +492,7 @@ def test_a_built_verdict_refuses_a_truth_value() -> None:
         parameters = inspect.signature(factory).parameters.values()
         if any(p.default is p.empty and p.kind != p.VAR_KEYWORD for p in parameters):
             continue
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            result = factory()
+        result = factory()
         if type(result) not in held:
             continue
         with pytest.raises(TypeError, match="has no truth value"):
@@ -707,9 +704,7 @@ _BUILT: dict[str, Callable[[], object]] = {
 
 @pytest.mark.parametrize("name", sorted(_BUILT))
 def test_a_real_verdict_refuses_a_truth_value(name: str) -> None:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        result = _BUILT[name]()
+    result = _BUILT[name]()
     assert type(result).__name__ == name
     with pytest.raises(TypeError, match="has no truth value"):
         bool(result)

@@ -18,7 +18,6 @@ languages) complete the checks.
 from __future__ import annotations
 
 import dataclasses
-import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -108,9 +107,17 @@ def _hard_walled(
     background_levels: np.ndarray | None = _BACKGROUND,
     sigma_omc_db: float | None = None,
 ) -> HardWalledSoundPowerResult:
-    """The guide's blender, its 125 Hz band an upper bound."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", SoundPowerWarning)
+    """The guide's blender, its 125 Hz band an upper bound.
+
+    With the background, 8.1.3 makes the 125 Hz band an upper bound; with
+    none, 7.5 has no band meeting 4.5. Either way the determination says so.
+    """
+    advisory = (
+        "No background levels were supplied"
+        if background_levels is None
+        else "margin of the source under test over the background is below 6 dB"
+    )
+    with pytest.warns(SoundPowerWarning, match=advisory):
         return sound_power_hard_walled(
             _ST,
             _RSS,
@@ -203,8 +210,10 @@ def test_hard_walled_short_reference_margin_is_no_upper_bound(
     """
     bg_ref = _BACKGROUND.copy()
     bg_ref[:, 6] = _energy_mean(_RSS)[6] - 4.0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", SoundPowerWarning)
+    with (
+        pytest.warns(SoundPowerWarning, match=r"margin of the source under test"),
+        pytest.warns(SoundPowerWarning, match=r"margin of the reference sound source"),
+    ):
         res = sound_power_hard_walled(
             _ST,
             _RSS,
@@ -222,8 +231,10 @@ def test_hard_walled_short_reference_margin_is_no_upper_bound(
 
 def test_hard_walled_one_sided_coverage_is_named(tmp_path: Path) -> None:
     """9.1: k = 1,6 is the one-sided 95 % factor, and the basis says so."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", SoundPowerWarning)
+    with pytest.warns(
+        SoundPowerWarning,
+        match=r"margin of the source under test over the background is below 6 dB",
+    ):
         res = sound_power_hard_walled(
             _ST,
             _RSS,
@@ -320,8 +331,7 @@ def test_special_room_direct_fiche(tmp_path: Path) -> None:
 
 def test_special_room_comparison_fiche(tmp_path: Path) -> None:
     """Formula 10, with no background and no sigma_omc stated as such."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", SoundPowerWarning)
+    with pytest.warns(SoundPowerWarning, match=r"No background levels were supplied"):
         res = sound_power_special_room_comparison(
             _ST, np.vstack([_RSS, _RSS[:2]]), _LW_RSS, frequencies=_FREQS
         )

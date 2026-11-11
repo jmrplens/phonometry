@@ -77,6 +77,10 @@ RHO0 = 1.205
 C0 = 343.0
 RC = RHO0 * C0
 
+#: The advisory of a porous model read outside the range its regression was
+#: fitted over.
+_FIT_RANGE = "outside the published fit range"
+
 
 def _grid(lo: float = 50.0, hi: float = 4000.0, n: int = 300) -> np.ndarray:
     return np.linspace(lo, hi, n)
@@ -115,7 +119,6 @@ class TestDelanyBazley:
         assert np.all(res.characteristic_impedance.real > 0.0)
         assert np.all(res.wavenumber.imag < 0.0)
 
-    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
     def test_layer_inadmissibility_below_fit_range(self) -> None:
         """Mechel G.12: DB gives a negative-Re layer impedance at low X."""
         sigma = 100000.0
@@ -217,7 +220,6 @@ class TestMiki:
             res.normalized_wavenumber, [ref.POROUS_MIKI_K_EXPECTED], rtol=1e-12
         )
 
-    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
     def test_positive_real_below_fit_range(self) -> None:
         """The Miki constraint: Re(Zc) > 0 well below f/sigma = 0.01.
 
@@ -422,7 +424,6 @@ class TestLayeredAbsorber:
         without = layered_absorber(f, [PorousLayer(thickness_m=0.05, medium=med)])
         np.testing.assert_array_equal(with_zero.reflection, without.reflection)
 
-    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
     def test_very_high_resistivity_approaches_rigid_wall(self) -> None:
         f = _grid(100.0, 1000.0, 50)
         with pytest.warns(PorousAbsorberWarning):
@@ -490,7 +491,12 @@ class TestLayeredAbsorber:
             t.absorption_hard_backed(RC), res.absorption, atol=1e-12
         )
 
-    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
+    # A random resistivity puts some low bands outside Miki's fit, which the
+    # model says; that advisory alone is let through, by its message.
+    @pytest.mark.filterwarnings(
+        "ignore:Miki\\W.*outside the published fit range"
+        ":phonometry.materials.PorousAbsorberWarning"
+    )
     def test_energy_and_reciprocity_random_stacks(self) -> None:
         """0 <= alpha <= 1, |R| <= 1 and det(T) = 1 over random stacks."""
         rng = np.random.default_rng(20260717)
@@ -564,10 +570,10 @@ class TestLayeredAbsorber:
         zs_ref = -1j * (RC / np.cos(theta)) / np.tan(k0 * d * np.cos(theta))
         np.testing.assert_allclose(res.surface_impedance, zs_ref, rtol=1e-10)
 
-    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
     def test_rejects_bad_inputs(self) -> None:
         f = _grid(100.0, 200.0, 5)
-        med = miki(f, 20000.0)
+        # f / sigma of 0.011 to 0.022, inside the range Miki fitted over.
+        med = miki(f, 9000.0)
         layers = [PorousLayer(thickness_m=0.05, medium=med)]
         with pytest.raises(ValueError, match="at least one layer"):
             layered_absorber(f, [])
@@ -577,7 +583,7 @@ class TestLayeredAbsorber:
             layered_absorber(f, layers, angle_rad=np.pi / 2.0)
         with pytest.raises(ValueError, match="'termination' must be one of"):
             layered_absorber(f, layers, termination="soft")
-        other = miki(_grid(100.0, 200.0, 7), 20000.0)
+        other = miki(_grid(100.0, 200.0, 7), 9000.0)
         mismatched = [PorousLayer(thickness_m=0.05, medium=other)]
         with pytest.raises(
             ValueError,
@@ -787,12 +793,10 @@ class TestResonantSheets:
         sound, which is neither air: warm humid air carries 1,3806, and the
         0,7 % it moves the frequency by is invisible in the result.
         """
-        import warnings
-
         from phonometry import fluids
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        # 60 degC is past the 15 to 27 degC Annex F states, and the state says so.
+        with pytest.warns(fluids.FluidWarning, match="outside the domain IEC 61094-2"):
             humid = fluids.air(
                 temperature_c=60.0,
                 static_pressure_pa=101_325.0,
@@ -819,12 +823,12 @@ class TestResonantSheets:
         ) / (2.0 * np.pi)
         assert got != pytest.approx(float(with_published_gamma), rel=1e-4)
 
-    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
     def test_membrane_over_cavity_peaks_at_resonance(self) -> None:
         m, d = 5.0, 0.05
         f0 = membrane_resonance_frequency(surface_density=m, cavity_depth=d)
         f = np.linspace(20.0, 500.0, 3000)
-        med = delany_bazley(f, 10000.0, fluid=ABSORBER_AIR)
+        with pytest.warns(PorousAbsorberWarning, match=_FIT_RANGE):
+            med = delany_bazley(f, 10000.0, fluid=ABSORBER_AIR)
         res = layered_absorber(
             f,
             [
@@ -985,7 +989,6 @@ class TestRandomIncidence:
         ).absorption
         np.testing.assert_allclose(a64, a128, atol=1e-8)
 
-    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
     def test_rejects_bad_inputs(self) -> None:
         f = np.array([500.0])
         med = miki(f, 15000.0)

@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import dataclasses
 import math
-import warnings
 from typing import TYPE_CHECKING
 
 import matplotlib as mpl
@@ -547,8 +546,10 @@ def test_table_c4_a_weighting_is_iec_61672_table_3() -> None:
 
 
 def _iso_9613_1_db_per_km(humidity: float) -> np.ndarray:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    with pytest.warns(
+        env.AtmosphericAbsorptionWarning,
+        match=r"outside the 50..10000 Hz tabulated range",
+    ):
         return 1000.0 * np.asarray(
             air_attenuation(
                 np.asarray(ref.WT_C_BANDS_HZ),

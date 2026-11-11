@@ -225,6 +225,7 @@ git clone --depth 1 --branch v4.0.0 --config core.autocrlf=false \
     https://github.com/jmrplens/phonometry.git
 cd phonometry
 python3.13 -m venv ../phonometry-build
+../phonometry-build/bin/python -m pip install --upgrade pip
 ../phonometry-build/bin/python -m pip install -r requirements-release.txt
 ../phonometry-build/bin/python scripts/build_release.py --outdir ../rebuilt --check-pypi
 ```

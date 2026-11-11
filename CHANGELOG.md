@@ -2401,6 +2401,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   naming the command, so a new one cannot pass in a checkout and fail only
   in an archive.
 
+- **The test suite fails on a warning a test did not ask for.** Every
+  advisory of the library is a `UserWarning`, and the suite turns any
+  `UserWarning` or `RuntimeWarning` that no test asserts into an error. 63
+  tests in 14 files met an advisory they did not assert: a sound power
+  determination with no background levels, an expansion chamber analysed
+  past its cut-on, a fan efficiency below the table it is read from. Each
+  now asserts the advisory with its topic class, where the advisory or a
+  printed example that lacks the input is what it tests, or gives the call
+  the input the standard asks for. A filter a test sets on warnings names
+  the message it lets through, with its reason, and a test of the suite
+  refuses one that lets a warning through by its class alone: 125 such
+  filters, among them a module-wide ignore of every advisory under the
+  outdoor ground models, now assert the advisory, name its message, or were
+  dropped where they hid nothing. A packager who runs the suite against a
+  newer NumPy or SciPy sees a warning that release adds as a failure that
+  names it, not as one more line in the summary. pytest's own warning that
+  it cannot write its cache directory, as in a read-only tree, is shown and
+  fails nothing.
+
+- **`signals.envelope_spectrum` returns the same result for a record past
+  the floating-point range on every SciPy, with no NumPy warning.** A finite
+  record whose transform overflows inside the Hilbert step, or whose
+  envelope overflows once squared under `kind="squared"`, gives an envelope,
+  a mean level and a spectrum that are not finite; one whose squared
+  envelope stays finite but sums past the range gives a mean level that is
+  not, and the record that restates that mean to check it says nothing
+  either; a spectrum bin near the top of the range, as a detector kept with
+  its mean under a narrow taper gives, reads infinite once the one-sided
+  spectrum doubles it. Before 1.17, SciPy multiplied that transform by the
+  analytic-signal mask, and NumPy warned of an invalid value where SciPy
+  1.17 says nothing; the square, the removed mean and the doubling warned on
+  every release, and the record's check of an overflowing mean warned too.
+  Under `-W error` the call raised instead of returning.
+
+- **The release SBOM is written by cyclonedx-bom 8.0.1, and every CI job
+  upgrades pip before it installs.** The jobs that build, verify and rebuild
+  a release, build the stub and load the wheel in Pyodide installed with the
+  pip the runner image or a fresh virtual environment bundled, whatever it
+  lagged the newest release by; each upgrades it first now, as the test jobs
+  already did, and the rebuild SECURITY.md describes upgrades the pip of its
+  virtual environment too.
+
 - **A filter object types a Signal in as a Signal out, and an array in as an
   array out.** `WeightingFilter.filter` and `ParametricEQ.filter` returned
   `Signal | ndarray`, and `TimeWeighting.process` `TimeWeightedEnvelope |

@@ -39,11 +39,15 @@ def _close_figures() -> Iterator[None]:
 # ---------------------------------------------------------------------------
 # Reactive silencers.
 # ---------------------------------------------------------------------------
+#: A grid below the 1 029 Hz cut-on of the 195 mm chambers drawn here.
+SILENCER_FREQ = np.linspace(50.0, 1000.0, 20)
+
+
 def test_silencer_results_retain_geometry_and_draw() -> None:
     cases = (
-        pm.noise_control.expansion_chamber(FREQ, 0.3, 0.03, 0.005),
+        pm.noise_control.expansion_chamber(SILENCER_FREQ, 0.3, 0.03, 0.005),
         pm.noise_control.extended_tube_chamber(
-            FREQ,
+            SILENCER_FREQ,
             0.3,
             0.03,
             0.005,
@@ -70,7 +74,7 @@ def test_a_silencer_result_holds_exactly_one_geometry() -> None:
     """
     import dataclasses
 
-    result = pm.noise_control.expansion_chamber(FREQ, 0.3, 0.03, 0.005)
+    result = pm.noise_control.expansion_chamber(SILENCER_FREQ, 0.3, 0.03, 0.005)
     with pytest.raises(TypeError, match="exactly one of 'geometry'"):
         dataclasses.replace(result, geometry=None)
 

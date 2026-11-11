@@ -30,7 +30,6 @@ import inspect
 import linecache
 import pathlib
 import re
-import warnings
 from collections.abc import Mapping
 from types import MappingProxyType
 from typing import TYPE_CHECKING, NamedTuple
@@ -146,9 +145,7 @@ def _refusals(record: object) -> Iterator[tuple[str, str]]:
             continue
         for probe_name, probe in _probes(getattr(record, field.name)):
             try:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    dataclasses.replace(record, **{field.name: probe})  # type: ignore[type-var]
+                dataclasses.replace(record, **{field.name: probe})  # type: ignore[type-var]
             except Exception as error:
                 message = str(error)
                 if _raised_by_the_library(error) and _SAYS_BYTES.search(message):
@@ -164,9 +161,7 @@ def test_a_refusal_names_a_bytearray_the_caller_gave(
     factory: Callable[[], object],
 ) -> None:
     """Each field of a real record, given a ``bytearray``, is refused naming one."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        record = factory()
+    record = factory()
     held = list(_records(record))
     if not held:
         pytest.skip("holds no record")
@@ -261,9 +256,7 @@ def _names_the_bytearray(record: object) -> bool:
             continue
         for _, probe in _probes(getattr(record, field.name)):
             try:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    dataclasses.replace(record, **{field.name: probe})  # type: ignore[type-var]
+                dataclasses.replace(record, **{field.name: probe})  # type: ignore[type-var]
             except Exception as error:
                 if _raised_by_the_library(error) and "bytearray" in str(error):
                     return True
@@ -275,9 +268,7 @@ def test_a_record_no_factory_builds_names_the_bytearray_too(
     build: Callable[[], object],
 ) -> None:
     """A record with a refusal of its own names the ``bytearray`` the caller gave."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        record = build()
+    record = build()
     held = list(_records(record))
     offenders = {field: message for each in held for field, message in _refusals(each)}
     assert not offenders, offenders

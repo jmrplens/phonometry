@@ -427,17 +427,13 @@ def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match=r"stipa expects a 1D signal"):
         speech.stipa(two_dimensional_signal, FS)
     half_second_clip = speech.stipa_signal(FS, duration_s=18.0, seed=3)[: FS // 2]
-    # The 0.5 s clip also triggers the (correct) sub-15 s STIPA warning;
-    # silence it so the test output stays clean while asserting the error.
-    # simplefilter has to run inside catch_warnings, before the call, so the
-    # two blocks stay nested rather than combined.
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", STIWarning)
-        with pytest.raises(
-            ValueError,
-            match=r"Signal too short for STIPA: it must contain at least one full period",
-        ):
-            speech.stipa(half_second_clip, FS)
+    # The 0.5 s clip is refused before the sub-15 s STIPA advisory is
+    # raised, as every refusal comes ahead of an advisory.
+    with pytest.raises(
+        ValueError,
+        match=r"Signal too short for STIPA: it must contain at least one full period",
+    ):
+        speech.stipa(half_second_clip, FS)
     # A pure tone: the 4 s clip (correctly) raises the sub-15 s STIPA and the
     # m > 1.3 advisories; recording the whole STIWarning family keeps them out
     # of the run summary (a leaked warning is re-materialised on the

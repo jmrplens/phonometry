@@ -7,6 +7,7 @@ import contextlib
 import dataclasses
 import errno
 import io
+import json
 import os
 import subprocess
 import sys
@@ -15,7 +16,7 @@ import time
 import types
 import warnings
 from types import MappingProxyType, SimpleNamespace
-from typing import IO, TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any, Literal
 
 import fake_ffmpeg
 import numpy as np
@@ -39,7 +40,7 @@ from phonometry.simulation import (
     elastic_fdtd_simulation,
     fdtd_simulation,
 )
-from phonometry.simulation._remote import bootstrap, node, wire
+from phonometry.simulation._remote import bootstrap, command, node, wire
 from phonometry.simulation._remote.package import (
     FLOORS,
     PYTHON_FLOOR,
@@ -47,7 +48,7 @@ from phonometry.simulation._remote.package import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
     from pathlib import Path
 
 _CPU = {"device": "cpu", "device_index": 0, "dtype": "float64"}
@@ -73,6 +74,20 @@ _THREAD_S = 30.0
 #: to 3.5 s, and took 31 s once, on Python 3.14: more than ten times that,
 #: and short of the fifteen minutes pytest gives the test.
 _NODE_S = 360.0
+#: The longest a node's interpreter may take to run a program of one line [s].
+_LOADER_S = 60.0
+#: The warning filters a node starts with, each an action, the class it
+#: applies to and the module it is limited to: Python's own defaults
+#: (https://docs.python.org/3/library/warnings.html#default-warning-filter).
+#: A client starts a node as ``python -I``, which reads no PYTHONWARNINGS,
+#: and passes the interpreter as one word, which no ``-W`` option reaches.
+_NODE_FILTERS: tuple[tuple[Literal["default", "ignore"], type[Warning], str], ...] = (
+    ("default", DeprecationWarning, "__main__"),
+    ("ignore", DeprecationWarning, ""),
+    ("ignore", PendingDeprecationWarning, ""),
+    ("ignore", ImportWarning, ""),
+    ("ignore", ResourceWarning, ""),
+)
 
 
 def _job(
@@ -117,6 +132,23 @@ def _closed_quietly(file: IO[bytes]) -> Iterator[IO[bytes]]:
             file.close()
 
 
+@contextlib.contextmanager
+def _under_a_node_s_filters() -> Iterator[None]:
+    """The warning filters of a node in place of the suite's, until the block ends.
+
+    The suite turns a warning no test asked for into an error, and pytest
+    shows every deprecation; a node keeps Python's defaults, and what a run
+    meets is recorded under them.
+    """
+    with warnings.catch_warnings():
+        warnings.resetwarnings()
+        for action, category, module in _NODE_FILTERS:
+            warnings.filterwarnings(
+                action, category=category, module=module, append=True
+            )
+        yield
+
+
 def _serve(
     job: bytes,
     *,
@@ -125,7 +157,8 @@ def _serve(
 ) -> tuple[int, list[tuple[dict[str, object], list[bytes]]]]:
     """Serve *job* in this process, the input open as a client keeps it.
 
-    The input stays open until the node answers, as a client's does, or ends
+    The job runs under the warning filters a node starts with, not the
+    suite's. The input stays open until the node answers, as a client's does, or ends
     after *end_input_after_s* seconds, as when a client goes away. The
     threads the client and the node start here have ended when it returns.
     The client has *client_s* seconds to send the job once the node is done.
@@ -154,7 +187,8 @@ def _serve(
         sender = threading.Thread(target=client, daemon=True)
         sender.start()
         try:
-            code = node.serve(stream, out)
+            with _under_a_node_s_filters():
+                code = node.serve(stream, out)
         finally:
             sender.join(client_s)
         assert not sender.is_alive(), "the client never finished sending the job"
@@ -481,13 +515,123 @@ def _warns_and_returns(**arguments: object) -> tuple[object, None]:
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
     # Recorded whatever Python's default filters say of a deprecation.
-    warnings.simplefilter("always")
+    warnings.filterwarnings(
+        "always", message="an old keyword", category=_LibraryDeprecation
+    )
     warnings.warn("an old keyword", _LibraryDeprecation, stacklevel=1)
     warnings.warn("two bases", _LibraryNotice, stacklevel=1)
     here = fdtd_simulation(_ACOUSTIC)
     return SimpleNamespace(
         pressures=here.pressures, snapshots=None, provenance=here.provenance
     ), None
+
+
+def test_a_node_starts_with_the_warning_filters_its_jobs_run_under_here() -> None:
+    # A client starts a node as ``python -I -c LOADER``: a PYTHONWARNINGS
+    # set on the node turns none of its warnings into errors, and Python's
+    # defaults, under which the jobs here are served, are the filters it has.
+    source = (
+        b"import json, sys, warnings; json.dump([[a, c.__module__, c.__qualname__, "
+        b"getattr(m, 'pattern', m) or ''] for a, _, c, m, _ in warnings.filters], "
+        b"sys.stdout)"
+    )
+    done = subprocess.run(
+        [sys.executable, "-I", "-c", command.LOADER],
+        input=b"%d\n" % len(source) + source,
+        capture_output=True,
+        env={**os.environ, "PYTHONWARNINGS": "error"},
+        check=False,
+        timeout=_LOADER_S,
+    )
+    assert done.returncode == 0, done.stderr
+    filters = [tuple(entry) for entry in json.loads(done.stdout)]
+    assert "error" not in {entry[0] for entry in filters}
+    defaults = [
+        (action, category.__module__, category.__qualname__, module)
+        for action, category, module in _NODE_FILTERS
+    ]
+    assert [entry for entry in filters if entry in defaults] == defaults
+
+
+def _meets_what_python_hides(**arguments: object) -> tuple[object, None]:
+    # As a dependency's own code meets them, outside the script the user runs.
+    warnings.warn("an old call inside a dependency", DeprecationWarning, stacklevel=1)
+    warnings.warn("unclosed file <a dependency's>", ResourceWarning, stacklevel=1)
+    here = fdtd_simulation(_ACOUSTIC)
+    return SimpleNamespace(
+        pressures=here.pressures, snapshots=None, provenance=here.provenance
+    ), None
+
+
+def test_a_warning_python_hides_by_default_stays_on_the_node(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The client raises what a node sends at the user's own line, where
+    # Python shows a deprecation: one sent from a dependency's code would be
+    # shown remotely and hidden locally, for the same call.
+    monkeypatch.setattr(
+        node,
+        "FUNCTIONS",
+        MappingProxyType(
+            {"fdtd_simulation": (_meets_what_python_hides, ("pressures", "snapshots"))}
+        ),
+    )
+    code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
+    ((header, _),) = frames
+    assert code == 0
+    assert header["warnings"] == []
+
+
+#: How often the run below meets its one warning.
+_STEPS = 1000
+
+
+def _meets_one_warning_on_every_step(**arguments: object) -> tuple[object, None]:
+    for _ in range(_STEPS):
+        warnings.warn("overflow encountered in multiply", RuntimeWarning, stacklevel=1)
+    here = fdtd_simulation(_ACOUSTIC)
+    return SimpleNamespace(
+        pressures=here.pressures, snapshots=None, provenance=here.provenance
+    ), None
+
+
+def test_a_warning_a_run_meets_on_every_step_is_held_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Python shows a warning once for the line that raises it, and the node
+    # records it the same way: a long run would otherwise hold one record
+    # for each step until it ends.
+    held: list[int] = []
+    caught = node._caught
+
+    def counted(records: Sequence[warnings.WarningMessage]) -> list[dict[str, str]]:
+        held.append(len(records))
+        return caught(records)
+
+    monkeypatch.setattr(node, "_caught", counted)
+    monkeypatch.setattr(
+        node,
+        "FUNCTIONS",
+        MappingProxyType(
+            {
+                "fdtd_simulation": (
+                    _meets_one_warning_on_every_step,
+                    ("pressures", "snapshots"),
+                )
+            }
+        ),
+    )
+    code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
+    ((header, _),) = frames
+    assert code == 0
+    assert held == [1]
+    assert header["warnings"] == [
+        {
+            "category": "builtins:RuntimeWarning",
+            "base": "RuntimeWarning",
+            "message": "overflow encountered in multiply",
+        }
+    ]
 
 
 def test_the_warnings_of_a_run_travel_once_each_with_their_class(

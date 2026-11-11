@@ -86,6 +86,10 @@ def test_factors_are_symmetric_about_the_axis() -> None:
     np.testing.assert_allclose(factors[1:], factors[1:][::-1], rtol=1e-15)
 
 
+#: The advisory of a division whose largest element is over the 3 % of A.1.6.
+_COARSE = "The largest element of the sphere is"
+
+
 @pytest.mark.parametrize("step_deg", [10.0, 5.0, 15.0, 30.0, 45.0, 90.0, 2.0])
 @pytest.mark.parametrize("planes", [1, 2, 3, 4])
 def test_the_factors_of_every_plane_together_sum_to_one(
@@ -93,7 +97,11 @@ def test_the_factors_of_every_plane_together_sum_to_one(
 ) -> None:
     """With the poles counted in every plane's sum, the division is the sphere."""
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", metrology.SphereDivisionWarning)
+        # A coarse division is one of the parameters, and A.1.6 says so of it;
+        # that advisory alone is let through, by its message.
+        warnings.filterwarnings(
+            "ignore", message=_COARSE, category=metrology.SphereDivisionWarning
+        )
         factors = metrology.adjustment_factors(step_deg, n_planes=planes)
     assert planes * float(np.sum(factors)) == pytest.approx(1.0, abs=1e-14)
 
@@ -266,7 +274,10 @@ def test_an_omnidirectional_instrument_has_gamma_one(
     planes: int, per_plane: int
 ) -> None:
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore", metrology.SphereDivisionWarning)
+        # Twelve readings a plane is a coarse division, and A.1.6 says so of it.
+        warnings.filterwarnings(
+            "ignore", message=_COARSE, category=metrology.SphereDivisionWarning
+        )
         result = metrology.directivity_factor(_omni(planes, per_plane))
     assert result.gamma == pytest.approx(1.0, abs=1e-13)
     assert float(np.sum(result.weights)) == pytest.approx(1.0, abs=1e-13)

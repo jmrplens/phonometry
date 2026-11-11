@@ -426,7 +426,6 @@ def test_medium_is_the_model_called_with_the_stored_parameters() -> None:
     )
 
 
-@pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
 def test_medium_dispatches_to_the_one_parameter_models() -> None:
     row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-2/soft_fibrous"]
     f = np.array([500.0])

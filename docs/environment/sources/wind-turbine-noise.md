@@ -6,8 +6,8 @@ IEC 61400-11 measures the acoustic emission of a wind turbine. This page covers
 its two closed-form quantities: the **apparent sound power level** referred to
 an equivalent point source at the rotor centre, and the **tonal audibility**
 that decides whether a discrete tone (blade-passing, gearbox, generator) is
-audible above the masking noise. Each is validated against the standard's
-formulas and a hand-derived synthetic-tone oracle.
+audible above the masking noise. Both are validated against the standard's
+formulas, and the audibility also against a hand-derived synthetic-tone oracle.
 
 ## 1. Apparent sound power level
 

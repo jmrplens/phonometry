@@ -8,7 +8,7 @@ references:
     title: "Wind turbines — Part 11: Acoustic noise measurement techniques"
     designation: "IEC 61400-11:2012+AMD1:2018 CSV"
     url: "https://webstore.iec.ch/en/publication/63367"
-    note: "The implemented edition: the measurement geometry, the wind-speed binning and the tonal-audibility chain (apparent sound power Formula 26, critical bandwidth Formula 30, masking level Formula 31, tonality/audibility Formulae 32-34). The full measurement pipeline is out of scope here."
+    note: "The implemented edition: the measurement geometry and the tonal-audibility chain (apparent sound power Formula 26, critical bandwidth Formula 30, masking level Formula 31, tonality/audibility Formulae 32-34). The full measurement pipeline, with its wind-speed binning, its regression to standardised wind speeds and its uncertainty budgets, is out of scope here."
   - type: standard
     organization: "International Electrotechnical Commission"
     year: 2005
@@ -37,7 +37,9 @@ IEC 61400-11 measures the acoustic emission of a wind turbine. This page covers
 its two closed-form quantities: the **apparent sound power level** referred to
 an equivalent point source at the rotor centre, and the **tonal audibility**
 that decides whether a discrete tone (blade-passing, gearbox, generator) is
-audible above the masking noise.
+audible above the masking noise. Both are checked against the standard's
+formulas, and the audibility also against a synthetic tone whose audibility is
+worked out by hand.
 
 ## Apparent sound power level
 
@@ -45,7 +47,7 @@ With the reference microphone on a ground board at the horizontal distance
 $R_0 = H + D/2$ (hub height $H$, rotor diameter $D$), the slant distance to
 the rotor centre is $R_1 = \sqrt{H^2 + R_0^2}$ and the apparent sound power
 level is $L_{W\mathrm{A},i} = L_{p,i} - 6 + 10\log_{10}(4\pi R_1^2/S_0)$ per band
-($S_0 = 1\ \text{m}^2$), energy-summed over bands. The −6 dB accounts for the
+($S_0 = 1\ \text{m}^2$), energy-summed over bands (Formula 27). The −6 dB accounts for the
 ground-board pressure doubling.
 
 <ThemeImage loading="eager" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400.svg" alt="Side view of a horizontal-axis wind turbine with hub height H and rotor diameter D, a microphone lying on a flat ground board downwind at the horizontal distance R0 = H + D/2 from the tower centreline, the slant distance R1 from the rotor centre to the microphone with the board inclination angle phi between 25 and 40 degrees, and a met mast measuring wind speed and direction; a plan-view inset shows the Figure 3 pattern with the reference position downwind and three optional positions at plus and minus 60 degrees and upwind, and the annotations give R1 equals the square root of H squared plus R0 squared and the apparent sound power formula LWA,i = Lp,i minus 6 plus 10 lg(4 pi R1 squared over S0)" width="94%" />
@@ -324,6 +326,8 @@ carry the criterion with opposite signs.
 
 ### Assessment report (`.report()`)
 
+Tonal audibility is the part of a wind-turbine assessment that ends in a
+document handed to a regulator, and the result writes that document:
 `WindTurbineTonalityResult.report(path)` renders a one-page PDF fiche laid out
 like the tonality assessment of an environmental-noise laboratory, following
 **IEC 61400-11:2012+A1:2018** (subclauses 9.5.2 to 9.5.8): a standard-basis

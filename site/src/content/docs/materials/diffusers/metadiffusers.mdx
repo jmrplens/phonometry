@@ -54,6 +54,13 @@ references:
     publisher: "Springer"
     doi: "10.1007/978-3-030-84300-7"
     note: "Topics in Applied Physics, Vol. 143. The book-length treatment of resonant metamaterial absorbers and diffusers; the modern companion to Cox & D'Antonio for this whole family."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field"
+    designation: "ISO 17497-2:2012"
+    url: "https://www.iso.org/standard/55293.html"
+    note: "The directional diffusion coefficient the far field of the panel is reduced to, and its normalisation against a flat reference of the same footprint (Formula (7)); the goniometer measurement that grades a built panel is in the Diffusers guide."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -551,7 +558,10 @@ normalised spectrum (`metadiffuser_diffusion_spectrum`).
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
-The model is locally reacting (wells do not couple internally) and shares the
+No standard governs the model itself: it is the journal method of
+Jiménez et al. (2017), implemented from the cited papers, and ISO 17497-2
+only grades what it predicts. The model is locally reacting (wells do not
+couple internally) and shares the
 stated limits of the Fraunhofer far field: it loses accuracy at low frequency,
 at grazing angles and where edge diffraction matters, so it grades designs
 rather than replacing an ISO 17497-2 measurement. The inverse problem (solving

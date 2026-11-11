@@ -91,7 +91,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

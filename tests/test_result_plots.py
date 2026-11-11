@@ -1095,7 +1095,7 @@ def _public_plot_methods() -> dict[str, Callable[..., object]]:
     """Every ``plot`` a caller can reach on a class the package publishes.
 
     Walks the imported package rather than the source, so a class published
-    from a private module (``io._signal.Signal``) counts under the public name
+    from a private module (``_internal.signal.Signal``) counts under the public name
     that reaches it, and a ``plot`` inherited from a phonometry base class is
     held to the rule on every subclass that exposes it.
     """

@@ -2,7 +2,7 @@
 """Every public filter takes a ``phonometry.io.Signal`` in place of ``(x, fs)``.
 
 The contract is the one ``signals.levels`` established and
-``phonometry.io._resolve`` now holds for the whole library: the
+``phonometry._internal.resolve`` now holds for the whole library: the
 object supplies the rate when ``fs`` is omitted and a disagreeing explicit
 one raises, a bare array still demands its rate by name, and a calibrated
 Signal is filtered in pascals.

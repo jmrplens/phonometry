@@ -2958,7 +2958,7 @@ def positional_record_axes() -> tuple[
 #: name)``, with the reason. Every other record a public function takes as an
 #: argument is written by name, field by field, as a function call is.
 RECORD_POSITIONAL_EXEMPT: dict[tuple[str, str], str] = {
-    ("phonometry.io._signal", "Signal"): (
+    ("phonometry._internal.signal", "Signal"): (
         "Signal(x, fs) is the pair every function of the library takes "
         "positionally, the samples and their rate, and nothing else is taken "
         "by position"

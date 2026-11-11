@@ -69,6 +69,12 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.resolve import (
+    SignalInput,
+    apply_calibration,
+    resolve_optional_pair_fs,
+    resolve_pair_fs,
+)
 from ..._internal.validation import (
     complex_array,
     real_array,
@@ -80,12 +86,6 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning, warn_caller
-from ...io._resolve import (
-    SignalInput,
-    apply_calibration,
-    resolve_optional_pair_fs,
-    resolve_pair_fs,
-)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes

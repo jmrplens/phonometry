@@ -68,7 +68,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from .ratings import impact_improvement_adaptation_term, weighted_impact_improvement
 
 if TYPE_CHECKING:

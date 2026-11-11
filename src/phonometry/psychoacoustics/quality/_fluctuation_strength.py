@@ -52,21 +52,21 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.resolve import apply_calibration, resolve_fs
 from ..._internal.validation import (
     real_array,
     require_ranks,
     require_same_length,
     require_scalar,
 )
-from ...io._resolve import apply_calibration, resolve_fs
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
-    from ...io._signal import Signal
+    from ..._internal.signal import Signal
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value

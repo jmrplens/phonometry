@@ -47,7 +47,7 @@ and falling at about -30 dB/octave above 12.5 kHz, which is what makes
 broadband noise audible in a programme chain rather than what makes it
 loud. Clause 1 defines it as the response of the passive network of Fig. 1a,
 so it is built from that network's seven printed component values
-(:func:`_itu_r_468_prototype`) and reproduces all 21 rows of the Table 1
+(:func:`~phonometry._internal.itu_r_468.itu_r_468_prototype`) and reproduces all 21 rows of the Table 1
 sampling to 0.0503 dB. Its skirt is steep enough that the plain bilinear
 design at the input rate reads 23 dB out at 16 kHz, so ``high_accuracy=False``
 is refused for this curve rather than shipped: the Recommendation prints one
@@ -88,7 +88,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from fractions import Fraction
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
@@ -96,7 +95,17 @@ import numpy as np
 from scipy import signal
 
 from .._internal.frozen import OwnsArrays
+from .._internal.itu_r_468 import itu_r_468_prototype
 from .._internal.kernels import compiled
+from .._internal.pinned_complex import _shifted_to, complex_product, complex_quotient
+from .._internal.pinned_trig import pinned_hypot
+from .._internal.resolve import (
+    like_input,
+    refuse_foreign_rate,
+    resolve_fs,
+    resolve_samples,
+)
+from .._internal.signal import Signal
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
     holds_complex,
@@ -107,25 +116,10 @@ from .._internal.validation import (
     require_count,
     require_positive,
     require_scalar,
+    require_str,
 )
-from ..io._resolve import (
-    like_input,
-    refuse_foreign_rate,
-    resolve_fs,
-    resolve_samples,
-)
-from ..io._signal import Signal
-from ._pinned_roots import (
-    Polynomial,
-    correctly_rounded_roots,
-    exact_polynomial_product,
-    exact_polynomial_sum,
-)
-from ._pinned_trig import pinned_hypot
 from ._weighting_design import (
     bilinear_zpk,
-    complex_product,
-    complex_quotient,
     design_sos,
     second_order_sections,
 )
@@ -180,160 +174,6 @@ def _require_design_flag(value: object) -> bool:
         msg = f"'high_accuracy' must be True or False; got {type(value).__name__}."
         raise TypeError(msg)
     return bool(value)
-
-
-def _require_str(value: object, name: str) -> str:
-    """Require *value* to be a string before a choice check compares it.
-
-    The choice checks in this module compare the text as written, so a
-    non-string would otherwise reach them as a value no option equals and be
-    refused as the wrong value rather than the wrong type.
-
-    :param value: The value to validate.
-    :param name: Parameter name used in the error message.
-    :return: The validated string.
-    :raises TypeError: for a non-string value.
-    """
-    if not isinstance(value, str):
-        msg = f"'{name}' must be a string; got {type(value).__name__}."
-        raise TypeError(msg)
-    return value
-
-
-#: Source resistance of ITU-R BS.468-4 Fig. 1a, in series with the generator.
-_ITU_R_468_SOURCE_OHM = 600.0
-#: Load the Fig. 1a response is taken across: the amplifier input, drawn in
-#: the figure as ``Z = 600 ohm``.
-_ITU_R_468_LOAD_OHM = 600.0
-#: The seven reactive elements of ITU-R BS.468-4 Fig. 1a, "Weighting network,
-#: simple form" (printed p. 1), in ladder order left to right. Kinds are
-#: ``"shunt_c"`` (capacitor to ground, admittance ``s C``), ``"series_l"``
-#: (inductor in the series arm, impedance ``s L``) and ``"series_c"`` (the one
-#: capacitor in the series arm, impedance ``1 / (s C)``). Values in SI units;
-#: the figure prints nF and mH.
-_ITU_R_468_LADDER: tuple[tuple[str, float], ...] = (
-    ("shunt_c", 13.85e-9),
-    ("series_l", 12.88e-3),
-    ("shunt_c", 26.82e-9),
-    ("series_c", 33.06e-9),
-    ("shunt_c", 9.21e-9),
-    ("series_l", 26.49e-3),
-    ("shunt_c", 31.47e-9),
-)
-
-
-#: A two-port's ABCD matrix ``[[A, B], [C, D]]``, each entry a polynomial in
-#: ``s`` held as its exact coefficients, the highest power first.
-_TwoPort = list[list[Polynomial]]
-
-
-def _abcd_product(left: _TwoPort, right: _TwoPort) -> _TwoPort:
-    """Product of two 2x2 ABCD matrices whose entries are polynomials in ``s``.
-
-    The chain rule of two-port theory is an ordinary matrix product over the
-    polynomial ring, so the ladder's transfer function comes out as
-    polynomials, with no per-frequency evaluation; and over exact rational
-    coefficients it comes out with no rounding either, where ``numpy``'s
-    ``polymul`` hands each product to the BLAS.
-
-    :param left: The upstream two-port, as ``[[A, B], [C, D]]``.
-    :param right: The downstream two-port, in the same form.
-    :return: The cascade ``left @ right``.
-    """
-    return [
-        [
-            exact_polynomial_sum(
-                exact_polynomial_product(left[row][0], right[0][col]),
-                exact_polynomial_product(left[row][1], right[1][col]),
-            )
-            for col in (0, 1)
-        ]
-        for row in (0, 1)
-    ]
-
-
-def _ladder_element(kind: str, value: float) -> _TwoPort:
-    """The ABCD matrix of one element of the Fig. 1a ladder, exactly.
-
-    The component values are read as the doubles the table holds, each an
-    exact rational number.
-    """
-    one, zero, s = (Fraction(1),), (Fraction(0),), (Fraction(1), Fraction(0))
-    exact = Fraction(value)
-    if kind == "shunt_c":
-        return [[one, zero], [(exact, Fraction(0)), one]]
-    if kind == "series_l":
-        return [[one, (exact, Fraction(0))], [zero, one]]
-    # "series_c": s * [[1, 1 / (s C)], [0, 1]], the scaling the prototype's
-    # docstring describes.
-    return [[s, (1 / exact,)], [zero, s]]
-
-
-def _shifted_to(w_ref: float, roots: np.ndarray) -> list[tuple[float, float]]:
-    """``j w_ref - r`` for each root, as ``(real, imaginary)``, formed as numpy forms it."""
-    return [(0.0 - root.real, w_ref - root.imag) for root in roots.tolist()]
-
-
-@lru_cache(maxsize=1)
-def _itu_r_468_prototype() -> tuple[tuple[complex, ...], float]:
-    r"""Poles and gain of the ITU-R BS.468-4 weighting network.
-
-    Clause 1 of the Recommendation makes the passive network of Fig. 1a the
-    primitive: "The nominal response curve of the weighting network is given
-    in Fig. 1b which is the theoretical response of the passive network shown
-    in Fig. 1a. Table 1 gives the values of this response at various
-    frequencies." So the nominal curve is defined at every frequency, and the
-    21 rows of Table 1 are that curve sampled and rounded to 0.1 dB, not the
-    definition. The network is rebuilt here from the seven printed component
-    values by a polynomial ABCD chain, rather than stored as precomputed
-    roots, so a reader can check the constants against the figure.
-
-    Chaining the ladder scaled by ``s`` clears the series capacitor's
-    ``1 / (s C)`` entry, which is the whole of the algebra: the scaling comes
-    back as the numerator of
-
-    .. math::
-
-       H(s) = \frac{K\,s}{s^6 + a_5 s^5 + \dots + a_0},
-
-    one zero at the origin because that series capacitor blocks dc, and six
-    poles because ``C2``, ``C3`` and ``C4`` form a capacitive loop whose
-    third state is dependent (seven reactive elements, order six). The
-    coefficients are exact: the chain runs in rational arithmetic over the
-    component values, so the denominator is the network's own polynomial,
-    and the poles are its roots with each part correctly rounded
-    (:func:`~phonometry.filters._pinned_roots.correctly_rounded_roots`), the
-    same doubles on every platform. ``numpy.roots`` takes them as
-    eigenvalues through LAPACK, which is a library's arithmetic and gave
-    other last bits on 64-bit ARM; its answers lie within its own error of
-    these. The resulting curve reproduces all 21 rows of Table 1 to
-    0.0503 dB maximum and 0.0264 dB rms, which is the 0.05 dB rounding
-    quantum of the printed table (the 100 Hz row overshoots it by
-    0.0002 dB, a rounding tie the four-significant-figure component values
-    cannot resolve).
-
-    :return: The six poles in rad/s, sorted for reproducibility, and the
-        gain ``K`` that puts the response at 0 dB at the 1 kHz reference
-        frequency Table 1 prints as its zero row.
-    """
-    abcd: _TwoPort = [
-        [(Fraction(1),), (Fraction(_ITU_R_468_SOURCE_OHM),)],
-        [(Fraction(0),), (Fraction(1),)],
-    ]
-    for kind, value in _ITU_R_468_LADDER:
-        abcd = _abcd_product(abcd, _ladder_element(kind, value))
-
-    # Loading the two-port: V_out / V_in = 1 / (A + B / R_load), times the s
-    # the series capacitor's matrix was scaled by.
-    load = Fraction(_ITU_R_468_LOAD_OHM)
-    denominator = exact_polynomial_sum(abcd[0][0], tuple(c / load for c in abcd[0][1]))
-    poles = correctly_rounded_roots(denominator)
-    w_ref = 2.0 * np.pi * 1000.0
-    # prod(j w_ref - poles), spelled in real arithmetic by complex_product
-    # because numpy's own complex product is fused on some builds.
-    at_reference = complex_product(_shifted_to(w_ref, np.array(poles)))
-    gain = pinned_hypot(*at_reference) / w_ref
-    return poles, gain
 
 
 #: The curves that have an analog prototype, i.e. everything but the ``Z``
@@ -532,13 +372,13 @@ def _itu_r_468_zpk() -> _Prototype:
     """Analog 468 weighting, ITU-R BS.468-4 clause 1 via Fig. 1a.
 
     One zero at the origin, because the series capacitor blocks dc, and the six
-    poles :func:`_itu_r_468_prototype` reads off the network's seven printed
+    poles :func:`~phonometry._internal.itu_r_468.itu_r_468_prototype` reads off the network's seven printed
     component values. Its gain already puts 0 dB at 1 kHz, so the shared
     renormalisation below is an identity here; it is left in place rather than
     special-cased, because it costs one evaluation and keeps the reference in
     one place for every curve.
     """
-    poles, gain = _itu_r_468_prototype()
+    poles, gain = itu_r_468_prototype()
     return 1, np.zeros(0), np.array(poles), gain
 
 
@@ -679,7 +519,7 @@ class WeightingFilter:
             'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196
             infrasound), 'AU' (IEC 61012, audible sound in the presence of
             ultrasound), '468' (ITU-R BS.468-4 psophometric noise weighting,
-            see :func:`_itu_r_468_prototype`) or 'Z'.
+            see :func:`~phonometry._internal.itu_r_468.itu_r_468_prototype`) or 'Z'.
         :param stateful: If True, carry the section state between calls, so
             concatenated blocks equal one continuous call. Available for every
             curve and independent of ``high_accuracy``: both designs are a
@@ -727,7 +567,7 @@ class WeightingFilter:
         require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
-        _require_str(weighting, "weighting")
+        require_str(weighting, "weighting")
         high_accuracy = _require_design_flag(high_accuracy)
         self.fs = fs
         self.weighting = weighting
@@ -1174,7 +1014,7 @@ def time_weighting(
     x_proc = resolve_samples(x)
     if fs <= 0:
         raise ValueError(_FS_POSITIVE)
-    _require_str(mode, "mode")
+    require_str(mode, "mode")
     x_sq = x_proc**2
     initial = _prepare_time_weighting_initial_state(x_sq, initial_state)
 
@@ -1227,7 +1067,7 @@ class TimeWeighting:
         require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
-        _require_str(mode, "mode")
+        require_str(mode, "mode")
         require_choice(mode, "mode", _TIME_WEIGHTINGS)
         self.fs = fs
         self.mode: Mode = mode

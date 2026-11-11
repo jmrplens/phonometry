@@ -167,9 +167,9 @@ __all__ = ["TrackDescriptor"]  # its fields are TrackMeasure and RailJoints
 **Exceptions.** Rows for methods, namespace subpackages and `convention` rows (`.plot()`) are allowed although no `__all__` lists them.
 
 <a id="a8"></a>
-### A8. Import across domain packages only along an edge the architecture test lists
+### A8. Import across domain packages only along an edge the architecture test lists, and only through the names the package publishes
 
-**Why.** The dependency graph between domains is a contract: an import from one domain into another claims that one audience's work feeds the other's, and the claim is written down, not noticed. Every domain may import the toolbox (`filters`, `fluids`, `signals`, `metrology`) and `_internal`, and `_internal` imports no domain code.
+**Why.** The dependency graph between domains is a contract: an import from one domain into another claims that one audience's work feeds the other's, and the claim is written down, not noticed. Every domain may import the toolbox (`filters`, `fluids`, `signals`, `metrology`) and `_internal`, and `_internal` imports no domain code. The import names the package and a name it publishes, never a module inside it: CPython takes a module's lock before its package's, and a thread importing the package meanwhile takes the two the other way round. `from ..filters.weighting import weighting_filter` in `electroacoustics` made two threads importing `electroacoustics` and `vibration` raise `_DeadlockError` five times in five. A kernel several domains share that no package publishes lives in `_internal`, whose `__init__` imports nothing. No module reads a name off the root package, whose lazy `__getattr__` imports a domain on its first read under a lock. And no cycle of imports that run at import time joins two domains: `filters`, `metrology` and `signals` imported one another in one, which held only because each step named a module inside the next.
 
 **Do**
 
@@ -178,6 +178,8 @@ __all__ = ["TrackDescriptor"]  # its fields are TrackMeasure and RailJoints
 ALLOWED_EDGES = {
     ("aircraft", "environment"),  # atmospheric absorption reuse
 }
+# and aircraft takes what it reuses by a name the package publishes:
+# from ..environment import air_attenuation
 ```
 
 **Don't**
@@ -185,16 +187,17 @@ ALLOWED_EDGES = {
 ```py
 # src/phonometry/room/x.py
 from ..building.prediction import flanking  # no (room, building) edge
+from ..filters.weighting import weighting_filter  # a module inside filters
 ```
 
-**Enforced by:** `tests/test_package_architecture.py::test_cross_package_edges_are_whitelisted`, `tests/test_package_architecture.py::test_family_edges_are_whitelisted`, `tests/test_package_architecture.py::test_internal_imports_no_domain_code`
+**Enforced by:** `tests/test_package_architecture.py::test_cross_package_edges_are_whitelisted`, `tests/test_package_architecture.py::test_family_edges_are_whitelisted`, `tests/test_package_architecture.py::test_every_allowed_edge_is_still_taken`, `tests/test_package_architecture.py::test_a_domain_reaches_another_only_through_its_published_names`, `tests/test_package_architecture.py::test_no_cycle_runs_between_domains_at_import`, `tests/test_package_architecture.py::test_internal_imports_no_domain_code`, `tests/test_package_architecture.py::test_no_import_names_a_module_its_support_package_loads`, `tests/test_package_architecture.py::test_no_module_reads_a_name_off_the_root`, `tests/test_concurrent_imports.py`
 
-**Exceptions.** An edge is declared in `ALLOWED_EDGES` (domain to domain) or `ALLOWED_FAMILY_EDGES` (subgroup to subgroup inside a domain) of `tests/test_package_architecture.py`, with a comment saying why; adding one is an explicit, reviewed decision. The root facade and the rendering leaves are not counted as sources.
+**Exceptions.** An edge is declared in `ALLOWED_EDGES` (domain to domain) or `ALLOWED_FAMILY_EDGES` (subgroup to subgroup inside a domain) of `tests/test_package_architecture.py`, with a comment saying why; adding one is an explicit, reviewed decision, and an edge no import takes any more fails until it is removed. The root facade and the rendering leaves are not counted as sources. An import only a type checker reads, under `if TYPE_CHECKING:`, may name a module inside another domain, and a type alias the package does not publish ([A5](#a5)): it never runs. A module of `_internal` imports nothing above it when it runs; inside a function it may import from `_plot` and `_i18n` the renderer and the language check of the one record it defines that draws, `io.Signal`. Inside `_internal`, `_plot` and `_report` the lock order holds too: a package whose `__init__` loads some of its own modules is imported by name from outside it (`from .geometry import _draft`), never through one of those modules.
 
 <a id="a9"></a>
 ### A9. Import domain code in `_plot` and `_report` only under `TYPE_CHECKING`
 
-**Why.** The rendering leaves are imported lazily by `.plot()` and `.report()`; a module-level import of domain code from them creates a cycle and drags the domain into every render.
+**Why.** The rendering leaves are imported lazily by `.plot()` and `.report()`; a module-level import of domain code from them creates a cycle and drags the domain into every render. The import a renderer makes inside its function runs when a record draws or prints, with the record's domain loaded and the domains it imports, and maybe no other: a module inside any other domain is reached through that domain's package and a name it publishes, or through `_internal`, never named, for the lock order of [A8](#a8). `from ..filters.frequencies import _format_nominal_freq` in the ISO 10846 fiche of a vibration record, which loads no filters, raced a thread importing `filters`.
 
 **Do**
 
@@ -211,9 +214,9 @@ if TYPE_CHECKING:
 from ..room.modes import RoomModesResult  # at module level in src/phonometry/_plot/room.py
 ```
 
-**Enforced by:** `tests/test_package_architecture.py::test_render_modules_only_type_check_domain_imports`
+**Enforced by:** `tests/test_package_architecture.py::test_render_modules_only_type_check_domain_imports`, `tests/test_package_architecture.py::test_a_renderer_reaches_into_a_domain_only_its_records_have_loaded`, `tests/test_concurrent_imports.py::test_a_record_draws_and_prints_without_a_race`
 
-**Exceptions.** Imports from `_internal`, which imports nothing from the domains.
+**Exceptions.** Imports from `_internal`, which imports nothing from the domains. Inside a function, a module inside the record's own domain, or inside a domain every caller of the function loads when it is imported, may be named: the package is in place.
 
 <a id="a10"></a>
 ### A10. Import matplotlib inside the function that draws, never at module scope
@@ -1187,7 +1190,7 @@ def total(frequencies):
 
 **Enforced by:** `tests/test_public_vocabulary.py::test_a_message_names_the_parameter_the_caller_passed`, review
 
-**Exceptions.** The test catches a message that calls a parameter by a retired spelling of the vocabulary tables, in a module whose path is public; any other wrong name is review. The shared helpers in `_internal/validation.py`, `_internal/utils.py` and `io/_resolve.py` name a value by their `name` argument, which has no default where a default would name a parameter the caller does not have (`require_1d_signal(values, name)`).
+**Exceptions.** The test catches a message that calls a parameter by a retired spelling of the vocabulary tables, in a module whose path is public; any other wrong name is review. The shared helpers in `_internal/validation.py`, `_internal/utils.py` and `_internal/resolve.py` name a value by their `name` argument, which has no default where a default would name a parameter the caller does not have (`require_1d_signal(values, name)`).
 
 <a id="a48"></a>
 ### A48. Put an error message in a variable before raising it
@@ -1427,8 +1430,8 @@ source = simulation.ExplosionSource(ix=5, iy=5, waveform=lambda t: 0.0)  # code:
 import subprocess
 
 from phonometry import io
-from phonometry.io._video import video_request
-from phonometry.io._video_encoders import NO_WINDOW, find_ffmpeg
+from phonometry._internal.video import video_request
+from phonometry._internal.video_encoders import NO_WINDOW, find_ffmpeg
 
 # The setting the user knows, rcParams["animation.ffmpeg_path"], resolved once to a full path
 # (on Windows the one on PATH, past an ffmpeg in the working directory).
@@ -1534,7 +1537,7 @@ def doubled(level: ArrayLike) -> float | np.ndarray:  # and narrows what it hand
 <a id="a58"></a>
 ### A58. Annotate a parameter with every type its validation accepts
 
-**Why.** 559 public parameters of 313 functions and methods were annotated narrower than what their body takes. 534 handed the value, or each of its items, to `np.asarray`, or to a helper that does, so a tuple, a `list[int]`, an integer array or a nested `[channels, samples]` list ran; and each was annotated `list[float]`, `NDArray[np.float64]`, `Sequence[float] | np.ndarray` or a sequence of fixed pairs, so a typed caller's code that ran was a type error. The other 25 held a `list` or a `dict` that their body only reads. `list` adds a trap of its own: it is invariant, so a `list[int]` is not a `list[float]`, and the 2-D list that `broadcast.true_peak_level` documents for a multichannel signal was refused by the `SignalInput` alias. A parameter the body converts takes `ArrayLike`, numpy's type for what `np.asarray` converts (`Signal | ArrayLike` where a Signal is taken too, the `SignalInput` alias of `io/_resolve.py`); a sequence of records or texts takes `Sequence[...]`, and a mapping `Mapping[...]`, which say what the body reads and take a tuple or a read-only mapping as well. A window that `scipy.signal.get_window` or a Welch estimator reads is a name or a tuple of a name and its parameters: 19 `window` parameters were `str`, so `("kaiser", 8.6)` was a type error while the call ran, and they take `str | tuple[ArrayLike, ...]`.
+**Why.** 559 public parameters of 313 functions and methods were annotated narrower than what their body takes. 534 handed the value, or each of its items, to `np.asarray`, or to a helper that does, so a tuple, a `list[int]`, an integer array or a nested `[channels, samples]` list ran; and each was annotated `list[float]`, `NDArray[np.float64]`, `Sequence[float] | np.ndarray` or a sequence of fixed pairs, so a typed caller's code that ran was a type error. The other 25 held a `list` or a `dict` that their body only reads. `list` adds a trap of its own: it is invariant, so a `list[int]` is not a `list[float]`, and the 2-D list that `broadcast.true_peak_level` documents for a multichannel signal was refused by the `SignalInput` alias. A parameter the body converts takes `ArrayLike`, numpy's type for what `np.asarray` converts (`Signal | ArrayLike` where a Signal is taken too, the `SignalInput` alias of `_internal/resolve.py`); a sequence of records or texts takes `Sequence[...]`, and a mapping `Mapping[...]`, which say what the body reads and take a tuple or a read-only mapping as well. A window that `scipy.signal.get_window` or a Welch estimator reads is a name or a tuple of a name and its parameters: 19 `window` parameters were `str`, so `("kaiser", 8.6)` was a type error while the call ran, and they take `str | tuple[ArrayLike, ...]`.
 
 The same holds for one number. 231 counts, band fractions and flags of public functions and records were annotated `int`, `BandFraction` or `bool` while their validator (`require_count`, `require_band_fraction`, an `isinstance` check) took the `np.int64` that `np.argmax` or a shape gives and the `np.True_` of a comparison, so a typed caller converted a value the function would have taken; they take `int | np.integer[Any]`, `BandFraction | np.integer[Any]` and `bool | np.bool_`, and so do 43 more counts, orders and indices that a scalar check read as one number, which `require_count` now reads as a whole one. A mapping is invariant in its key: the 11 mappings of band values that were `Mapping[float, float]` refused the `{125: 40.0}` a caller writes for a band spectrum, so a mapping keyed by `float` stands beside one keyed by `int` (`BandMapping`). A union of mappings whose key or value is more than a plain number, a text or a record (a `Literal`, a mapping, a sequence) asks one step more: mypy reads a `dict` written in the call against the type it is passed for only when that type holds one mapping, and otherwise on its own, a `Literal` column name as a `str` and two inner mappings of different key types as `object`, so `vibration.verify_signal_burst_response("whole-body", "Wk", {16: {"rms": 0.115}})` was refused while it ran, and so was a directional response of `aircraft.verify_aircraft_noise_system` with one band read at 22.5 degrees; each mapping of such a union is offered alone in an overload head, the implementation keeping the union, unless another mapping of the union takes the `dict` as mypy reads it on its own (a `Mapping[str, float]` beside a `Mapping[Literal["rms"], float]` takes the `dict[str, float]` that `{"rms": 1.0}` is). A record's generated constructor has no heads, so a field holds at most one such mapping, and a record that declares its own `__init__` offers them in its heads. The heads that split a union take the same other arguments, or wider ones, read as Python binds a call (a keyword-only parameter or `**kwargs` takes what the other head takes by place) and as a type checker reads the items of a container (a `Sequence[float]` takes a `list[int]`): a head reached only by `kind="a"` is no context, and offers no key, to a call with `kind="b"`, so the `dict[int, float]` of that call stays refused by its own head keyed by `float`. And a quantity of the vocabulary keeps one family of numbers across the API: 40 sample rates that run at any positive value were `int` while 149 were `float`, so the `float` rate `signals.resample_signal` returns, or a `Signal` holds, was refused by the next function; every such rate is a `float`. A NumPy number an annotation takes on its own it takes in the sequences beside it too: `io.Signal.pick(channels: int | np.integer[Any] | Sequence[int])` took one `np.int64` and, for a type checker, refused a list of them, and the impedance profile of `simulation.FDTDBoundaries` took a NumPy float alone and only a `Sequence[float]` beside it, while each call ran; `tests/test_package_architecture.py::test_a_numpy_number_taken_alone_is_taken_in_a_sequence_too` fails a parameter or a field whose sequences, read together (`RealValues` holds the NumPy numbers in sequences of their own) as far as they take the same container a caller writes (a `tuple[np.integer[Any], ...]` beside `Sequence[int]` takes a tuple of NumPy integers, not a list of them), and at every depth, leave out a NumPy number its annotation takes alone.
 

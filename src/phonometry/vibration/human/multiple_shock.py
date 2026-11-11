@@ -67,6 +67,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
 
 # Sex is imported to run, not only to type: typing.get_type_hints resolves the
 # sex field of MultipleShockResult in this module's namespace.
@@ -83,8 +84,7 @@ from ..._internal.validation import (
     require_ranks,
     require_scalar,
 )
-from ...hearing.threshold import SEXES as _SEXES
-from ...io._resolve import SignalInput, resolve_fs, resolve_samples
+from ...hearing import SEXES as _SEXES
 
 if TYPE_CHECKING:
     import os
@@ -229,7 +229,7 @@ def spinal_response(
         resolve_fs(acceleration_m_s2, fs, name="acceleration_m_s2"), "fs"
     )
     # calibrate=False: a Signal may carry a digital-to-pascal factor, and
-    # this is an acceleration in m/s2. See phonometry.io._resolve.
+    # this is an acceleration in m/s2. See phonometry._internal.resolve.
     az = np.asarray(
         resolve_samples(acceleration_m_s2, calibrate=False, name="acceleration_m_s2"),
         dtype=np.float64,

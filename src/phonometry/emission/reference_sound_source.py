@@ -87,6 +87,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.sound_power import _a_weighting_corrections
 from .._internal.validation import (
     real_array,
     real_number,
@@ -101,7 +102,6 @@ from ._shared import (
     _S0,
     _THETA1,
     SoundPowerWarning,
-    _a_weighting_corrections,
     _c1_correction,
     _validate_meteorology,
 )

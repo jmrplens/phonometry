@@ -78,6 +78,7 @@ def test_airborne_fiche_rating_pinned_to_iso717_1_annex_c(tmp_path: Path) -> Non
     ``DnT = D`` here by construction, so the fiche must print the exact
     worked-example rating triplet in its boxed result.
     """
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dnt.pdf"
     _airborne_result().report(str(out))
     assert_one_page(str(out))
@@ -96,6 +97,7 @@ def test_r_prime_fiche_hand_computed(tmp_path: Path) -> None:
     A = 0,16 x 50 / 0,5 = 16 m2, so R' = D + 10 lg(10/16) = D - 2,041 dB
     in every band.
     """
+    pytest.importorskip("matplotlib")
     result = _airborne_result(area=10.0, volume=50.0)
     assert result.r_prime is not None
     expected = result.d + 10.0 * np.log10(10.0 / 16.0)
@@ -115,6 +117,7 @@ def test_impact_lnt_equals_li_at_reference_time() -> None:
 
 def test_impact_fiche_rating_pinned_to_iso717_2_annex_c(tmp_path: Path) -> None:
     """The L'nT fiche's rating is the published ISO 717-2 Annex C 79 (-11) dB."""
+    pytest.importorskip("matplotlib")
     result = building.impact_insulation(_IMPACT_LN, _T_AT_T0, volume=31.25)
     out = tmp_path / "lnt.pdf"
     result.report(str(out))
@@ -134,6 +137,7 @@ def test_impact_l_n_fiche_hand_computed(tmp_path: Path) -> None:
     V = 31,25 m3 and T = 0,5 s give A = 10 m2 = A0, so L'n = Li and the
     normalized fiche prints the same Annex C rating as the standardized one.
     """
+    pytest.importorskip("matplotlib")
     result = building.impact_insulation(_IMPACT_LN, _T_AT_T0, volume=31.25)
     assert result.l_n is not None
     assert np.allclose(result.l_n, _IMPACT_LN)
@@ -147,6 +151,7 @@ def test_impact_l_n_fiche_hand_computed(tmp_path: Path) -> None:
 
 def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
     """A fully populated field fiche with the measurement chain is one page."""
+    pytest.importorskip("matplotlib")
     result = _airborne_result(area=12.5, volume=30.4)
     metadata = ReportMetadata(
         specimen="Separating wall, 240 mm brick with independent lining",
@@ -172,6 +177,7 @@ def test_full_metadata_and_verbose_render_one_page(tmp_path: Path) -> None:
 
 def test_requirement_verdicts_pass_and_fail(tmp_path: Path) -> None:
     """Airborne passes at/above the requirement; impact at/below it."""
+    pytest.importorskip("matplotlib")
     airborne = _airborne_result()  # DnT,w = 30 dB
     failing = tmp_path / "fail.pdf"
     airborne.report(str(failing), metadata=ReportMetadata(requirement=50.0))
@@ -185,6 +191,7 @@ def test_requirement_verdicts_pass_and_fail(tmp_path: Path) -> None:
 
 def test_spanish_fiche_renders_translated(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish field fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     result = _airborne_result()

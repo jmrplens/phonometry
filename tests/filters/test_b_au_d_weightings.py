@@ -34,13 +34,12 @@ from reference_data import (
 from scipy import signal as sg
 
 from phonometry import filters
+from phonometry._internal.weighting_tables import _U_POLES_HZ, _analytic_weighting_db
 from phonometry.filters.weighting_compliance import (
     _ANSI_S14_TABLE4_B,
     _ANSI_S14_TABLE5_12,
     _IEC61012_AU_HF,
     _IEC61012_TABLE1,
-    _U_POLES_HZ,
-    _analytic_weighting_db,
 )
 
 

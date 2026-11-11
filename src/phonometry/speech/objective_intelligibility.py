@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import apply_calibration, resolve_pair_fs
 from .._internal.validation import (
     real_array,
     require_count,
@@ -53,14 +54,13 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import apply_calibration, resolve_pair_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
 
 __all__ = [
     "STOIResult",

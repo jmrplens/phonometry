@@ -32,7 +32,7 @@ of the 15 866 distinct arctangents those designs evaluate to the other
 neighbour, those 19 reach 32 of the designs, and pinning the arctangent here
 moved six of those designs on Linux by their last bits. Away from the corpus
 the agreement is the C library's accuracy, not a guarantee:
-``tests/filters/test_pinned_trig.py`` holds the agreement on the inputs a
+``tests/test_internalpinned_trig.py`` holds the agreement on the inputs a
 design evaluates, measures it on draws across the domain, and checks the
 arctangent against exact rational bounds that evaluate no arctangent.
 
@@ -52,7 +52,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .validation import real_array
 
 if TYPE_CHECKING:
     from collections.abc import Callable

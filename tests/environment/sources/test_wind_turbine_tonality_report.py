@@ -57,6 +57,7 @@ def _extract_text(path: str) -> str:
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
     """An audible-tone result renders a one-page PDF fiche."""
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "wt.pdf"
     returned = result.report(str(out))
@@ -82,6 +83,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 def test_report_states_audibility_frequency_and_decision(tmp_path: Path) -> None:
     """The fiche states ΔL_a, the tone frequency and the audibility decision."""
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "wt.pdf"
     result.report(str(out))
@@ -97,6 +99,7 @@ def test_report_states_audibility_frequency_and_decision(tmp_path: Path) -> None
 
 def test_metadata_appears_and_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders one page and prints its fields."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         specimen="Horizontal-axis wind turbine, gearbox tone",
         client="Acoustic Test Client Ltd.",
@@ -120,6 +123,7 @@ def test_metadata_appears_and_one_page(tmp_path: Path) -> None:
 
 def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
     """A PASS and a FAIL tonal-audibility limit both render one page."""
+    pytest.importorskip("matplotlib")
     result = _result()
     delta = result.tonal_audibility
     passing = tmp_path / "pass.pdf"
@@ -134,6 +138,7 @@ def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="turbine <A> & gearbox",
@@ -150,6 +155,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "wt_es.pdf"
@@ -174,6 +180,7 @@ def test_decision_matches_displayed_audibility_at_boundary(tmp_path: Path) -> No
     a single line, so ΔL_a moves decibel for decibel with its level, and the
     synthetic tone lowered by the difference lands on 0.03 dB.
     """
+    pytest.importorskip("matplotlib")
     levels, freqs = _synthetic_tone()
     peak = int(np.argmax(levels))
     levels[peak] -= _result().tonal_audibility - 0.03
@@ -195,6 +202,7 @@ def test_no_identified_tone_reports_exclusion(tmp_path: Path) -> None:
     so the fiche states that no tone was identified and the spectrum is excluded
     from the bin averaging, rather than fabricating an audibility decision.
     """
+    pytest.importorskip("matplotlib")
     df = 2.0
     freqs = np.arange(380.0, 620.0 + df, df)
     levels = np.full(freqs.size, 30.0)

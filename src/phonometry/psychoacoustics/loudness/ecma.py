@@ -64,7 +64,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import numpy as np
 from scipy import signal
 
-from ...io._resolve import apply_calibration, resolve_fs
+from ..._internal.resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -73,8 +73,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.signal import Signal
     from ..._internal.types import TwoPanels
-    from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
@@ -88,7 +88,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 
 __all__ = [
     "AUDIBILITY_THRESHOLD_SONE_HMS",

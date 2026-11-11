@@ -204,7 +204,7 @@ HANDOVER = "handed_over"
 #: Public records that can hold an array and do not inherit :data:`MECHANISM`,
 #: keyed by file and class, each with the reason.
 RECORD_EXEMPT: dict[tuple[str, str], str] = {
-    ("src/phonometry/io/_signal.py", "Signal"): (
+    ("src/phonometry/_internal/signal.py", "Signal"): (
         "copies its samples itself, into the C-ordered float64 layout it "
         "promises, and keeps them writeable for processing in place, as "
         "io.read's contract says (tests/io/test_io_read.py); its other "

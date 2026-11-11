@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 
 def test_airborne_report_writes_pdf(tmp_path: Path) -> None:
     """An ISO 717-1 airborne rating renders a PDF fiche."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     out = tmp_path / "airborne.pdf"
     returned = result.report(str(out))
@@ -46,6 +47,7 @@ def test_airborne_report_writes_pdf(tmp_path: Path) -> None:
 
 def test_impact_report_writes_pdf(tmp_path: Path) -> None:
     """An ISO 717-2 impact rating renders a PDF fiche."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_impact_rating(_IMPACT_LN)
     assert result.quantity == "impact"
     out = tmp_path / "impact.pdf"
@@ -56,6 +58,7 @@ def test_impact_report_writes_pdf(tmp_path: Path) -> None:
 
 def test_panel_result_report_convenience(tmp_path: Path) -> None:
     """``SoundReductionResult.report()`` rates ``R(f)`` and writes its fiche."""
+    pytest.importorskip("matplotlib")
     freqs = [
         100,
         125,
@@ -97,6 +100,7 @@ def test_airborne_fiche_reproduces_iso717_1_annex_c1(tmp_path: Path) -> None:
     fiche shows: Rw(C;Ctr) = 30(-2;-3) dB, unfavourable-deviation sum 31,8 dB, the
     reference curve shifted by -22 dB, and the per-band unfavourable deviations.
     """
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     assert (result.rating, result.c, result.ctr) == (30, -2, -3)
     assert result.unfavorable_sum == pytest.approx(31.8, abs=0.05)
@@ -120,6 +124,7 @@ def test_impact_fiche_reproduces_iso717_2_annex_c1(tmp_path: Path) -> None:
     Ln,w = 79 dB, CI = -11 dB, unfavourable-deviation sum 28,0 dB (see the note
     on the 2020 reprint's CI in reference_data).
     """
+    pytest.importorskip("matplotlib")
     result = building.weighted_impact_rating(_IMPACT_LN)
     assert result.rating == _IMPACT_EXPECTED["ln_w"]
     assert result.ci == _IMPACT_EXPECTED["ci"]
@@ -175,6 +180,7 @@ def test_metadata_rejects_out_of_range_humidity() -> None:
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
@@ -191,6 +197,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
 
 def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
     """A full ReportMetadata renders a one-page accredited fiche."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     out = tmp_path / "airborne_meta.pdf"
     result.report(str(out), metadata=_full_metadata())
@@ -199,6 +206,7 @@ def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
 
 def test_verbose_renders_annex_c_table(tmp_path: Path) -> None:
     """``verbose=True`` renders the Annex C evaluation table one-pager."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     out = tmp_path / "airborne_verbose.pdf"
     result.report(str(out), metadata=_full_metadata(), verbose=True)
@@ -207,6 +215,7 @@ def test_verbose_renders_annex_c_table(tmp_path: Path) -> None:
 
 def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
     """A PASS and a FAIL requirement both render a one-page fiche."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)  # Rw = 30 dB
     passing = tmp_path / "pass.pdf"
     failing = tmp_path / "fail.pdf"
@@ -218,6 +227,7 @@ def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
 
 def test_impact_requirement_verdict_renders(tmp_path: Path) -> None:
     """An impact fiche with a requirement (lower is better) renders."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_impact_rating(_IMPACT_LN)
     out = tmp_path / "impact_meta.pdf"
     result.report(
@@ -255,6 +265,7 @@ def test_airborne_fiche_pins_displayed_rating(tmp_path: Path) -> None:
     adaptation terms carry a sign only when negative, as the standard's own
     examples write them (e.g. "41 (0; -5) dB" in clause 5.2).
     """
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     out = tmp_path / "pins.pdf"
     result.report(str(out), verbose=True)
@@ -271,6 +282,7 @@ def test_octave_band_fiche_declares_octave_bands(tmp_path: Path) -> None:
     or octave measurements; a 5-row octave fiche must not claim
     "One-third-octave".
     """
+    pytest.importorskip("matplotlib")
     result = building.weighted_impact_rating([65.0, 68.0, 67.0, 63.0, 58.0])
     assert result.frequencies is not None
     assert len(result.frequencies) == 5
@@ -288,6 +300,7 @@ def test_symbol_labels_field_quantity(tmp_path: Path) -> None:
     reported as the laboratory ``Rw`` (ISO 717-1 Tables 1-2 distinguish the
     quantities).
     """
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     out = tmp_path / "symbol.pdf"
     result.report(str(out), metadata=ReportMetadata(requirement=25.0), symbol="DnT,w")
@@ -307,6 +320,7 @@ def test_invalid_symbol_rejected(tmp_path: Path) -> None:
 
 def test_metadata_area_is_not_display_rounded(tmp_path: Path) -> None:
     """A supplied area of 1.23 m^2 is reprinted verbatim, not reduced to 1.2."""
+    pytest.importorskip("matplotlib")
     result = building.weighted_rating(_AIRBORNE_R)
     out = tmp_path / "area.pdf"
     result.report(str(out), metadata=ReportMetadata(area=1.23))
@@ -317,6 +331,7 @@ def test_metadata_area_is_not_display_rounded(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     result = building.weighted_rating(_AIRBORNE_R)  # Rw = 30 dB, passes a 25 dB minimum

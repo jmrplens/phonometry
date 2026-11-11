@@ -41,9 +41,9 @@ import numpy as np
 from reference_data import wind_turbine_receptor as oracle
 
 from phonometry import environment as env
+from phonometry._internal import weighting_tables
 from phonometry.environment.assessment import wind_turbine_receptor as wtr
 from phonometry.environment.propagation.air_absorption import air_attenuation
-from phonometry.filters import weighting_compliance
 
 from ..registry import Outcome, count, numeric, record, register
 
@@ -361,7 +361,7 @@ def _chk_c2_iso_80() -> Outcome:
     "A-weighting row, 10 Hz to 200 Hz, against IEC 61672-1:2013 Table 3",
 )
 def _chk_c4_a_weighting() -> Outcome:
-    table = {row[0]: row[1] for row in weighting_compliance._WEIGHTING_TABLE3}
+    table = {row[0]: row[1] for row in weighting_tables.WEIGHTING_TABLE3}
     matching = sum(
         int(
             math.isclose(wtr._A_WEIGHTING_DB[f], value, abs_tol=1e-9)

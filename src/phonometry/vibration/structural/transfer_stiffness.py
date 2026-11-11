@@ -92,6 +92,7 @@ if TYPE_CHECKING:
     from ..._report.metadata import ReportMetadata
 
 
+from ..._internal.bands import _nominal_freq_for_band
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
@@ -109,9 +110,8 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ..._internal.warnings import PhonometryWarning, advisories_held, warn_caller
-from ...filters.frequencies import _nominal_freq_for_band
-from ...metrology.reference_values import REFERENCE_VALUES
-from ...metrology.uncertainty import (
+from ...metrology import (
+    REFERENCE_VALUES,
     Quantity,
     UncertaintyResult,
     uncertainty_propagation,

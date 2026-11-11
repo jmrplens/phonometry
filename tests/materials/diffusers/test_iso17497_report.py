@@ -176,6 +176,7 @@ def _text(path: str) -> str:
 
 # --- ISO 17497-1 scattering ------------------------------------------------
 def test_scattering_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "scat.pdf"
     returned = _scattering().report(str(out))
     assert returned == str(out)
@@ -184,6 +185,7 @@ def test_scattering_writes_one_page_pdf(tmp_path: Path) -> None:
 
 def test_scattering_displayed_values_match_oracle(tmp_path: Path) -> None:
     """The fiche prints the closed-form s (Eq. (5)) and the band labels."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "scat.pdf"
     _scattering().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -198,6 +200,7 @@ def test_scattering_displayed_values_match_oracle(tmp_path: Path) -> None:
 
 
 def test_scattering_verbose_shows_alpha_spec_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "scat_v.pdf"
     _scattering().report(str(out), metadata=_metadata(), verbose=True)
     assert_one_page(str(out))
@@ -219,6 +222,7 @@ def test_scattering_unknown_language_rejected(tmp_path: Path) -> None:
 
 
 def test_scattering_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "scat_xml.pdf"
     _scattering().report(
         str(out), metadata=_metadata(specimen='Panel <A> & <B> "edge"')
@@ -227,6 +231,7 @@ def test_scattering_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
 
 
 def test_scattering_no_metadata_still_renders(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "scat_bare.pdf"
     _scattering().report(str(out))
     assert_one_page(str(out))
@@ -234,6 +239,7 @@ def test_scattering_no_metadata_still_renders(tmp_path: Path) -> None:
 
 
 def test_scattering_spanish_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "scat_es.pdf"
     _scattering().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))
@@ -260,6 +266,7 @@ def test_scattering_short_specular_rejected() -> None:
 
 # --- ISO 17497-2 diffusion spectrum ---------------------------------------
 def test_diffusion_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "diff.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata())
     assert_one_page(str(out))
@@ -267,6 +274,7 @@ def test_diffusion_writes_one_page_pdf(tmp_path: Path) -> None:
 
 def test_diffusion_displayed_values_match_oracle(tmp_path: Path) -> None:
     """The fiche prints the per-band random-incidence d (Clause 8.4)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "diff.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -278,6 +286,7 @@ def test_diffusion_displayed_values_match_oracle(tmp_path: Path) -> None:
 
 def test_diffusion_omits_room_fields(tmp_path: Path) -> None:
     """The free-field diffusion fiche must not show sample area / room volume."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "diff.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -286,6 +295,7 @@ def test_diffusion_omits_room_fields(tmp_path: Path) -> None:
 
 
 def test_diffusion_verbose_shows_normalized_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "diff_v.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata(), verbose=True)
     assert_one_page(str(out))
@@ -300,6 +310,7 @@ def test_diffusion_unknown_engine_rejected(tmp_path: Path) -> None:
 
 
 def test_diffusion_spanish_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "diff_es.pdf"
     _diffusion_spectrum().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))
@@ -326,12 +337,14 @@ def test_diffusion_short_spectrum_rejected() -> None:
 
 # --- ISO 17497-2 polar response -------------------------------------------
 def test_polar_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "polar.pdf"
     _polar().report(str(out), metadata=_metadata())
     assert_one_page(str(out))
 
 
 def test_polar_displays_coefficient_and_angles(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "polar.pdf"
     _polar().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -354,6 +367,7 @@ def test_polar_short_levels_rejected() -> None:
 
 
 def test_polar_spanish_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "polar_es.pdf"
     _polar().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))

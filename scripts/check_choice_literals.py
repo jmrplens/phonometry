@@ -603,7 +603,7 @@ OPEN: dict[tuple[str, str, str], str] = {
     ): _CLAUSE,
     ("phonometry.filters.periodic_tests", "PeriodicTestClause", "title"): _PRINTED_TEXT,
     (
-        "phonometry.io._video",
+        "phonometry._internal.video",
         "VideoOptions",
         "vaapi_device",
     ): "the path of a render device on the caller's machine",

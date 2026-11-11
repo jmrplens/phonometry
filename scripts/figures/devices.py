@@ -5713,7 +5713,7 @@ def generate_high_frequency_air_absorption(output_dir: str) -> None:
     """ISO 9295 Annex A against Tables 1 and 2, and the 43 cells they misprint."""
     print("Generating high_frequency_air_absorption.svg...")
     from phonometry import emission
-    from phonometry.environment.propagation.air_absorption import _pure_tone_terms
+    from phonometry._internal.air_absorption import _pure_tone_terms
 
     cells = _iso9295_printed_cells()
     fig, (axa, axd) = plt.subplots(1, 2, figsize=(12.5, 5.4))

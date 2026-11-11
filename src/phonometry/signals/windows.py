@@ -36,7 +36,7 @@ from .._internal.validation import (
     require_ranks,
     require_scalar,
 )
-from .spectra import _positive
+from .._internal.welch import _positive
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

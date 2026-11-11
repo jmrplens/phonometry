@@ -81,7 +81,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..metrology import REFERENCE_VALUES
 from .loudspeaker import (
     _as_curve,
     _require_frequency_pair,

@@ -90,64 +90,20 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     # an enclosure or a cabin is rated by the ISO 717-1 reference-curve
     # shift, the same procedure the building ratings already implement
     ("noise_control", "building"),
-    # the insulation of an enclosure is a difference of two sound powers,
-    # so it reuses the A-weighting corrections and the background
-    # correction of the sound power measurement methods it cites
+    # the insulation of a cabin is a difference of two sound powers, so it
+    # reuses the background correction of the sound power measurement
+    # methods it cites
     ("noise_control", "emission"),
-    # ISO 9295:2015 Annex A is the ISO 9613-1 air absorption written in
-    # nepers per metre and evaluated up to 22,4 kHz, so the high-frequency
-    # sound power methods read the one implementation of it
-    ("emission", "environment"),
     # ISO 8297 Table 3 takes the air absorption of an industrial plant from
     # ISO 3891, whose Annex A (SAE ARP 866A) is transcribed once, in
     # aircraft.atmospheric_absorption; aircraft imports nothing from emission
     ("emission", "aircraft"),
-    # the level functions detect io.Signal so a read measurement carries
-    # its own fs and calibration; io imports no toolbox code back at
-    # module level, so import stays acyclic
-    ("signals", "io"),
     # write(bext="loudness") fills the five R128 fields from the
     # library's own BS.1770 implementation (a lazy import inside the
-    # writer: reading a file never pays for it)
+    # writer: reading a file never pays for it). The recording every
+    # package accepts, io.Signal, and the rules that resolve its rate and
+    # calibration live in _internal, so no package imports io for them
     ("io", "broadcast"),
-    # the filters detect io.Signal for the same reason the level functions
-    # do: a read measurement carries its own fs and calibration, and asking
-    # the caller to repeat either is asking for a transcription error. Same
-    # direction as ("signals", "io"), so the graph stays acyclic
-    ("filters", "io"),
-    # data qualification runs on the record as read, so it takes the object
-    # the reader returns for the same reason
-    ("metrology", "io"),
-    # the electroacoustic, room and speech measurements read their record
-    # from a file too, so they take the object the reader returns and
-    # resolve its rate and calibration through the same contract. Same
-    # direction as the edges above, so the graph stays acyclic
-    ("electroacoustics", "io"),
-    ("room", "io"),
-    ("speech", "io"),
-    ("psychoacoustics", "io"),
-    ("underwater", "io"),
-    ("emission", "io"),
-    ("environment", "io"),
-    ("materials", "io"),
-    ("building", "io"),
-    # the acceleration and force records go through the same contract as the
-    # pressure ones, except that they take the exemption: their quantity is
-    # not a pressure, so a factor the object carries is never applied
-    ("vibration", "io"),
-    # the EBU R 128 family reads its rate off the object too. This is the one
-    # place the edge goes both ways -- ("io", "broadcast") above -- and it is
-    # still not a cycle at import time, because io's side is deferred into the
-    # writer, so importing phonometry.io never pulls broadcast in
-    ("broadcast", "io"),
-    # a simulation writes its run straight to a video through io's encoder
-    # pipe and options record (write_fdtd_animation and its elastic twin);
-    # the imports are lazy, inside the writers, or under TYPE_CHECKING, but
-    # for the remote wire table's (simulation._remote.wire imports io._video
-    # at module level, and is itself imported only once a run goes to a
-    # node), and io imports nothing from simulation, so the graph stays
-    # acyclic
-    ("simulation", "io"),
 }
 
 
@@ -375,11 +331,868 @@ def test_a_relative_import_reaches_the_package_its_dots_climb_to(
     assert _reached_packages(SRC / rel, node) == reached
 
 
+class _Import(NamedTuple):
+    """A relative ``from ... import`` that runs, read where it stands."""
+
+    #: The module that makes it, as ``<file>:<line>``.
+    where: str
+    #: The module it names, dotted and absolute.
+    target: str
+    #: The names it imports from that module.
+    names: tuple[str, ...]
+    #: Whether it runs when its module is imported, rather than inside a
+    #: function, later.
+    at_import: bool
+
+
+#: The packages of the tree that are not a domain: the helpers every package
+#: shares, the renderers and the report fiches.
+SUPPORT: frozenset[str] = frozenset({"_internal", "_plot", "_report"})
+
+
+def _domains() -> frozenset[str]:
+    """The twenty-one domain packages, as the tree holds them."""
+    return frozenset(
+        path.name
+        for path in SRC.iterdir()
+        if (path / "__init__.py").is_file() and not path.name.startswith("_")
+    )
+
+
+def _module_name(path: Path) -> tuple[str, bool]:
+    """The dotted name of the module at *path*, and whether it is a package."""
+    parts = list(path.relative_to(SRC.parent).with_suffix("").parts)
+    if parts[-1] == "__init__":
+        return ".".join(parts[:-1]), True
+    return ".".join(parts), False
+
+
+def _inside_functions(tree: ast.AST) -> frozenset[int]:
+    """Every node a function or lambda body holds, by its id: what runs later."""
+    return frozenset(
+        id(node)
+        for scope in ast.walk(tree)
+        if isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda))
+        for statement in (scope.body if isinstance(scope.body, list) else [scope.body])
+        for node in ast.walk(statement)
+    )
+
+
+def _import_target(module: str, node: ast.ImportFrom, *, is_package: bool) -> str:
+    """The module a relative import names, dotted and absolute.
+
+    :param module: The dotted name of the module that makes the import.
+    :param is_package: Whether that module is a package's ``__init__``, whose
+        first dot is the package itself.
+    :param node: The import.
+    """
+    base = module.split(".") if is_package else module.split(".")[:-1]
+    anchor = base[: len(base) - node.level + 1]
+    return ".".join([*anchor, *(node.module.split(".") if node.module else [])])
+
+
+@functools.cache
+def runtime_imports(source: str, rel: str) -> tuple[_Import, ...]:
+    """The relative imports of the module *rel* (a path under ``src/phonometry``)
+    that run, at import or later; those only a type checker reads are left out.
+
+    Kept per module: every rule of this file reads them, and reading them
+    again for each would parse the package as many times.
+
+    :param source: The module's text.
+    :param rel: Its path relative to ``src/phonometry``, as ``filters/core.py``.
+    """
+    tree = ast.parse(source)
+    module, is_package = _module_name(SRC / rel)
+    hidden = for_the_type_checker(tree)
+    later = _inside_functions(tree)
+    found: list[_Import] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom) or not node.level or id(node) in hidden:
+            continue
+        found.append(
+            _Import(
+                where=f"{rel}:{node.lineno}",
+                target=_import_target(module, node, is_package=is_package),
+                names=tuple(alias.name for alias in node.names),
+                at_import=id(node) not in later,
+            )
+        )
+    return tuple(found)
+
+
+def _published(domain: str) -> frozenset[str]:
+    """What the domain package publishes, read from the imported package."""
+    import importlib
+
+    return frozenset(importlib.import_module(f"phonometry.{domain}").__all__)
+
+
+def private_reaches(source: str, rel: str) -> list[str]:
+    """Each import of the module *rel* of a domain that reaches another domain
+    by any way but its package's published names.
+
+    A module of a domain imports another domain as ``from ..filters import
+    weighting_filter``: the package, then a name it publishes. Naming a module
+    inside it (``from ..filters.weighting import ...``) takes that module's
+    lock before the package's, and a thread importing the package meanwhile
+    takes them the other way round, which is the deadlock CPython reports as
+    ``_DeadlockError``; a name the package does not publish is its private
+    business. Reaching a domain through the root (``from .. import filters``)
+    is :func:`root_reaches`'s to refuse. What only a type checker reads is
+    left out: it never runs.
+
+    :param source: The module's text.
+    :param rel: Its path relative to ``src/phonometry``.
+    :return: ``<where> <what>`` for each.
+    """
+    domains = _domains()
+    own = rel.split("/")[0]
+    if own not in domains:
+        return []
+    found: list[str] = []
+    for imported in runtime_imports(source, rel):
+        parts = imported.target.split(".")
+        if len(parts) == 1:  # the root package, which root_reaches holds
+            continue
+        head = parts[1]
+        if head == own or head not in domains:
+            continue
+        # phonometry.<domain> has two parts; a third names a module inside it.
+        if len(parts) > 2:  # noqa: PLR2004
+            found.append(
+                f"{imported.where} imports {imported.target}, a module inside "
+                f"phonometry.{head}; import from phonometry.{head} the names it "
+                "publishes, or move a shared kernel to phonometry._internal"
+            )
+            continue
+        unpublished = sorted(set(imported.names) - _published(head))
+        if unpublished:
+            found.append(
+                f"{imported.where} imports {', '.join(unpublished)} from "
+                f"phonometry.{head}, which does not publish "
+                f"{'it' if len(unpublished) == 1 else 'them'}"
+            )
+    return found
+
+
+def root_reaches(source: str, rel: str) -> list[str]:
+    """Each import of the module *rel* that reads a name off the root package.
+
+    The root imports a domain, or a name it publishes on its own, the first
+    time it is read, through its lazy ``__getattr__`` and under a lock
+    (``phonometry._FIRST_TOUCH``) that takes the first reads one at a time. A
+    module of the package that read one (``from .. import io``, ``from ..
+    import Signal``) while it was being imported would run that import in
+    the middle of its own, and wait on the lock while the thread that holds
+    it waits on the module: a deadlock neither CPython nor the lock sees. A
+    function may run while its module is imported, so an import inside one is
+    refused too. The root's own ``__init__`` names them for the type checker
+    only.
+
+    :param source: The module's text.
+    :param rel: Its path relative to ``src/phonometry``.
+    :return: ``<where> <what>`` for each.
+    """
+    if rel == "__init__.py":
+        return []
+    return [
+        f"{imported.where} imports {', '.join(imported.names)} from the root "
+        "package; import it from the package or the module that defines it"
+        for imported in runtime_imports(source, rel)
+        if imported.target == "phonometry"
+    ]
+
+
+def _strongly_connected(graph: dict[str, set[str]]) -> list[list[str]]:
+    """The cycles of *graph*: each strongly connected set of two or more nodes."""
+    index: dict[str, int] = {}
+    low: dict[str, int] = {}
+    stack: list[str] = []
+    on_stack: set[str] = set()
+    found: list[list[str]] = []
+
+    def visit(node: str) -> None:
+        index[node] = low[node] = len(index)
+        stack.append(node)
+        on_stack.add(node)
+        for nxt in sorted(graph.get(node, ())):
+            if nxt not in index:
+                visit(nxt)
+                low[node] = min(low[node], low[nxt])
+            elif nxt in on_stack:
+                low[node] = min(low[node], index[nxt])
+        if low[node] == index[node]:
+            members: list[str] = []
+            while True:
+                member = stack.pop()
+                on_stack.discard(member)
+                members.append(member)
+                if member == node:
+                    break
+            if len(members) > 1:
+                found.append(sorted(members))
+
+    for node in sorted(graph):
+        if node not in index:
+            visit(node)
+    return found
+
+
+def _domain_graph(
+    sources: dict[str, str],
+) -> tuple[dict[str, set[str]], dict[tuple[str, str], str]]:
+    """The domains each domain imports when it is imported, and an import that does.
+
+    An edge is an import that runs when its module is imported (not inside a
+    function, not only for the type checker) from one domain into another.
+
+    :param sources: The text of each module, keyed by its path relative to
+        ``src/phonometry``.
+    :return: The edges out of each domain, and the ``<file>:<line>`` of one
+        import that makes each edge.
+    """
+    domains = _domains()
+    graph: dict[str, set[str]] = {}
+    witness: dict[tuple[str, str], str] = {}
+    for rel, source in sorted(sources.items()):
+        own = rel.split("/")[0]
+        if own not in domains:
+            continue
+        for imported in runtime_imports(source, rel):
+            parts = imported.target.split(".")
+            if not imported.at_import or len(parts) < 2:  # noqa: PLR2004
+                continue
+            head = parts[1]
+            if head in domains and head != own:
+                graph.setdefault(own, set()).add(head)
+                witness.setdefault((own, head), imported.where)
+    return graph, witness
+
+
+def domain_cycles(sources: dict[str, str]) -> list[str]:
+    """The cycles between domains that importing them runs through.
+
+    The edges are :func:`_domain_graph`'s. A cycle of them makes one domain
+    wait on another that waits on it: a thread importing each deadlocks, and
+    one thread alone meets a partly initialised package as soon as the
+    imports go through the packages.
+
+    :param sources: The text of each module, keyed by its path relative to
+        ``src/phonometry``.
+    :return: One line per cycle, with an import that makes each edge.
+    """
+    graph, witness = _domain_graph(sources)
+    found: list[str] = []
+    for members in _strongly_connected(graph):
+        edges = [
+            f"{frm} -> {to} ({witness[frm, to]})"
+            for frm in members
+            for to in sorted(graph.get(frm, ()))
+            if to in members
+        ]
+        found.append("; ".join(edges))
+    return found
+
+
+#: What a module of ``_internal`` may import from outside it, and only inside
+#: a function: the renderer a record it defines draws with, and the language
+#: check of that drawing. ``Signal`` is the one record ``_internal`` defines
+#: that draws.
+INTERNAL_LATER: frozenset[str] = frozenset({"phonometry._plot", "phonometry._i18n"})
+
+
+def internal_reaches(source: str, rel: str) -> list[str]:
+    """Each import of the module *rel* of ``_internal`` that runs and reaches
+    outside it, but for a record's renderer inside the method that draws.
+
+    ``_internal`` is the floor every package stands on, so no import of it
+    may wait on a package above it: what it imports when it runs is its own
+    modules, numpy, scipy and the standard library. Its ``__init__`` imports
+    nothing at all, so a module of it is safe to import before the package.
+
+    :param source: The module's text.
+    :param rel: Its path relative to ``src/phonometry``, under ``_internal/``.
+    :return: ``<where> <what>`` for each.
+    """
+    found: list[str] = []
+    for imported in runtime_imports(source, rel):
+        if rel == "_internal/__init__.py":
+            found.append(f"{imported.where} imports {imported.target} in the package")
+            continue
+        if imported.target.startswith("phonometry._internal"):
+            continue
+        allowed_later = not imported.at_import and any(
+            imported.target == root or imported.target.startswith(f"{root}.")
+            for root in INTERNAL_LATER
+        )
+        if not allowed_later:
+            found.append(f"{imported.where} imports {imported.target}")
+    return found
+
+
+def leaf_first_reaches(sources: dict[str, str]) -> list[str]:
+    """Imports that name a module of a support package its ``__init__`` loads.
+
+    A package of ``_plot``, ``_report`` or ``_internal`` whose ``__init__``
+    imports some of its own modules is entered first by whichever thread
+    imports the package; an import from outside it that names one of those
+    modules takes the module's lock before the package's, the deadlock
+    :func:`private_reaches` keeps out of the domains. Such an import names the
+    package (``from .geometry import _draft``) instead.
+
+    :param sources: The text of each module, keyed by its path relative to
+        ``src/phonometry``.
+    :return: ``<where> <what>`` for each.
+    """
+    modules = {_module_name(SRC / rel)[0]: rel for rel in sources}
+    loaded: dict[str, set[str]] = {}
+    for rel, source in sources.items():
+        name, is_package = _module_name(SRC / rel)
+        if not is_package or rel.split("/")[0] not in SUPPORT:
+            continue
+        pending = [
+            imported.target
+            for imported in runtime_imports(source, rel)
+            if imported.at_import and imported.target.startswith(f"{name}.")
+        ]
+        reached: set[str] = set()
+        while pending:
+            target = pending.pop()
+            if target in reached or target not in modules:
+                continue
+            reached.add(target)
+            pending.extend(
+                imported.target
+                for imported in runtime_imports(
+                    sources[modules[target]], modules[target]
+                )
+                if imported.at_import and imported.target.startswith(f"{name}.")
+            )
+        if reached:
+            loaded[name] = reached
+    found: list[str] = []
+    for rel, source in sorted(sources.items()):
+        name, _ = _module_name(SRC / rel)
+        for imported in runtime_imports(source, rel):
+            for package, inside in loaded.items():
+                if name == package or name.startswith(f"{package}."):
+                    continue
+                if imported.target in inside:
+                    found.append(
+                        f"{imported.where} imports {imported.target}, which "
+                        f"{package} loads; import it from {package}"
+                    )
+    return found
+
+
+#: The packages whose modules draw and print a record: their functions run when
+#: a record of some domain calls them, not when they are imported.
+RENDERERS: frozenset[str] = frozenset({"_plot", "_report"})
+
+#: A function, class or module-level name of a renderer module, as
+#: ``(module, name)``.
+_Unit = tuple[str, str]
+
+
+def _domain_loads(sources: dict[str, str]) -> dict[str, frozenset[str]]:
+    """The domains each domain has loaded once it is imported, itself among them."""
+    graph, _ = _domain_graph(sources)
+    loads: dict[str, frozenset[str]] = {}
+    for domain in _domains():
+        reached = {domain}
+        pending = [domain]
+        while pending:
+            for nxt in graph.get(pending.pop(), ()):
+                if nxt not in reached:
+                    reached.add(nxt)
+                    pending.append(nxt)
+        loads[domain] = frozenset(reached)
+    return loads
+
+
+def _top_level(tree: ast.Module, hidden: frozenset[int]) -> list[ast.stmt]:
+    """The statements of a module's top level, inside its ``if`` and ``try`` too."""
+    found: list[ast.stmt] = []
+    pending: list[ast.stmt] = list(tree.body)
+    while pending:
+        statement = pending.pop(0)
+        if id(statement) in hidden:
+            continue
+        found.append(statement)
+        if isinstance(statement, ast.If):
+            pending[:0] = [*statement.body, *statement.orelse]
+        elif isinstance(statement, ast.Try):
+            pending[:0] = [
+                *statement.body,
+                *(line for handler in statement.handlers for line in handler.body),
+                *statement.orelse,
+                *statement.finalbody,
+            ]
+    return found
+
+
+class _RendererModule(NamedTuple):
+    """What the renderer rule reads of one module of ``_plot`` or ``_report``."""
+
+    #: The names its top-level imports bind, to the ``(module, name)`` each
+    #: names.
+    bindings: dict[str, _Unit]
+    #: Each unit's imports of a module inside a domain, as ``(where, target)``.
+    reaches: dict[str, list[tuple[str, str]]]
+    #: What each unit refers to: a name of its module, a name an import binds,
+    #: or an attribute of a module it imports.
+    refers_to: dict[str, set[_Unit]]
+
+
+@functools.cache
+def _read_renderer(rel: str, source: str) -> _RendererModule:
+    """The units of the renderer module *rel*, what they import and refer to.
+
+    An attribute of a name an import binds is kept as a name of the module
+    that import would name, ``common.draw`` as ``(<module>.common, "draw")``:
+    the rule finds nothing there when no such renderer module exists.
+    """
+    domains = _domains()
+    module, is_package = _module_name(SRC / rel)
+    tree = ast.parse(source)
+    hidden = for_the_type_checker(tree)
+    statements = _top_level(tree, hidden)
+    bindings: dict[str, _Unit] = {}
+    units: dict[str, list[ast.stmt]] = {}
+    for statement in statements:
+        if isinstance(statement, ast.ImportFrom) and statement.level:
+            target = _import_target(module, statement, is_package=is_package)
+            for alias in statement.names:
+                bindings[alias.asname or alias.name] = (target, alias.name)
+        elif isinstance(
+            statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        ):
+            units.setdefault(statement.name, []).append(statement)
+        elif isinstance(statement, (ast.Assign, ast.AnnAssign)):
+            targets = (
+                statement.targets
+                if isinstance(statement, ast.Assign)
+                else [statement.target]
+            )
+            for bound in targets:
+                if isinstance(bound, ast.Name):
+                    units.setdefault(bound.id, []).append(statement)
+    reaches: dict[str, list[tuple[str, str]]] = {}
+    refers_to: dict[str, set[_Unit]] = {}
+    for name, nodes in units.items():
+        local = dict(bindings)
+        found: list[tuple[str, str]] = []
+        refs: set[_Unit] = set()
+        inner = [node for statement in nodes for node in ast.walk(statement)]
+        for node in inner:
+            if (
+                isinstance(node, ast.ImportFrom)
+                and node.level
+                and id(node) not in hidden
+            ):
+                target = _import_target(module, node, is_package=is_package)
+                parts = target.split(".")
+                # phonometry.<domain> has two parts; a third names a module inside it.
+                if len(parts) > 2 and parts[1] in domains:  # noqa: PLR2004
+                    found.append((f"{rel}:{node.lineno}", target))
+                for alias in node.names:
+                    local[alias.asname or alias.name] = (target, alias.name)
+                    refs.add((target, alias.name))
+        for node in inner:
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+                if node.id in units:
+                    refs.add((module, node.id))
+                elif node.id in local:
+                    refs.add(local[node.id])
+            elif isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+                owner = local.get(node.value.id)
+                if owner is not None:
+                    refs.add((".".join(owner), node.attr))
+        reaches[name] = found
+        refers_to[name] = refs
+    return _RendererModule(bindings, reaches, refers_to)
+
+
+def renderer_reaches(sources: dict[str, str]) -> list[str]:
+    """Each import a renderer makes of a module inside a domain that one of
+    the records it draws or prints has not loaded.
+
+    A function of ``_plot`` or ``_report`` runs when a record calls it, so the
+    record's domain is loaded, and every domain that domain imports when it is
+    imported. Importing a module inside one of those (``from
+    ..vibration.structural.building_damage import ...`` for a vibration
+    record) finds the package in place and takes only the module's lock. A
+    module inside any other domain (``from ..filters.frequencies import ...``
+    for a vibration record, which loads no filters) takes the module's lock
+    before its package's, the deadlock :func:`private_reaches` keeps out of
+    the domains: such an import names the package and a name it publishes, or
+    the kernel moves to ``_internal``. The rule follows each function to the
+    modules that call it, through the renderers that call it in turn; one a
+    module of ``_internal`` calls (``Signal.plot``) runs with no domain loaded
+    but its caller's, which may be none.
+
+    :param sources: The text of each module, keyed by its path relative to
+        ``src/phonometry``.
+    :return: ``<where> <what>`` for each.
+    """
+    domains = _domains()
+    loads = _domain_loads(sources)
+    renderers: dict[str, _RendererModule] = {}
+    called: dict[_Unit, set[str]] = {}
+    for rel, source in sources.items():
+        module, _ = _module_name(SRC / rel)
+        top = rel.split("/")[0]
+        if top in RENDERERS:
+            renderers[module] = _read_renderer(rel, source)
+            continue
+        caller = top if top in domains else module
+        for imported in runtime_imports(source, rel):
+            parts = imported.target.split(".")
+            if len(parts) > 1 and parts[1] in RENDERERS:
+                for name in imported.names:
+                    called.setdefault((imported.target, name), set()).add(caller)
+
+    def resolve(unit: _Unit, depth: int = 0) -> set[_Unit]:
+        """The renderer units a reference to *unit* reaches.
+
+        The unit itself, what a package's import of it names, or every unit
+        of a module.
+        """
+        module, name = unit
+        submodule = f"{module}.{name}"
+        if submodule in renderers:
+            return {(submodule, own) for own in renderers[submodule].reaches}
+        read = renderers.get(module)
+        if read is None or depth > len(renderers):
+            return set()
+        if name in read.reaches:
+            return {unit}
+        if name in read.bindings:
+            return resolve(read.bindings[name], depth + 1)
+        return set()
+
+    callers: dict[_Unit, set[str]] = {}
+    pending: list[_Unit] = []
+    for unit, labels in called.items():
+        for reached in resolve(unit):
+            callers.setdefault(reached, set()).update(labels)
+            pending.append(reached)
+    while pending:
+        module, name = pending.pop()
+        labels = callers[module, name]
+        for ref in renderers[module].refers_to[name]:
+            for reached in resolve(ref):
+                known = callers.setdefault(reached, set())
+                if not labels <= known:
+                    known.update(labels)
+                    pending.append(reached)
+    found: list[str] = []
+    for module, read in sorted(renderers.items()):
+        for name, reached_modules in sorted(read.reaches.items()):
+            for where, target in reached_modules:
+                domain = target.split(".")[1]
+                labels = callers.get((module, name), set())
+                if not labels:
+                    found.append(
+                        f"{where} imports {target}, a module inside "
+                        f"phonometry.{domain}, in a function nothing the rule "
+                        "follows calls; call it from a record's method or a "
+                        "function a domain imports"
+                    )
+                strangers = sorted(
+                    f"phonometry.{label}" if label in domains else label
+                    for label in labels
+                    if domain not in loads.get(label, frozenset())
+                )
+                if strangers:
+                    found.append(
+                        f"{where} imports {target}, a module inside "
+                        f"phonometry.{domain}, and runs for {', '.join(strangers)}, "
+                        f"which does not load phonometry.{domain}; import from "
+                        f"phonometry.{domain} the names it publishes, or move the "
+                        "kernel to phonometry._internal"
+                    )
+    return found
+
+
+@functools.cache
+def _package_sources() -> dict[str, str]:
+    """The text of every module of the package, keyed by its path under it."""
+    return {
+        path.relative_to(SRC).as_posix(): path.read_text(encoding="utf-8")
+        for path in sorted(SRC.rglob("*.py"))
+    }
+
+
+@pytest.mark.whole_tree
+def test_a_domain_reaches_another_only_through_its_published_names() -> None:
+    """Two threads importing two domains at once never deadlock on a leaf."""
+    found = [
+        offence
+        for rel, source in _package_sources().items()
+        for offence in private_reaches(source, rel)
+    ]
+    assert not found, "a domain reaching into another:\n  " + "\n  ".join(found)
+
+
+@pytest.mark.whole_tree
+def test_no_cycle_runs_between_domains_at_import() -> None:
+    """Importing the domains follows a graph with no cycle in it."""
+    found = domain_cycles(_package_sources())
+    assert not found, "domains importing each other at import:\n  " + "\n  ".join(found)
+
+
 @pytest.mark.whole_tree
 def test_internal_imports_no_domain_code() -> None:
-    for frm, to, where in _edges():
-        if frm == "_internal":
-            assert to == "_internal", f"_internal must stay leaf-level: {where}"
+    """``_internal`` imports nothing above it when it runs."""
+    found = [
+        offence
+        for rel, source in _package_sources().items()
+        if rel.startswith("_internal/")
+        for offence in internal_reaches(source, rel)
+    ]
+    assert not found, "_internal reaching above itself:\n  " + "\n  ".join(found)
+
+
+@pytest.mark.whole_tree
+def test_no_import_names_a_module_its_support_package_loads() -> None:
+    """A module a support package's ``__init__`` loads is imported through it."""
+    found = leaf_first_reaches(_package_sources())
+    assert not found, "leaf-first imports:\n  " + "\n  ".join(found)
+
+
+@pytest.mark.whole_tree
+def test_a_renderer_reaches_into_a_domain_only_its_records_have_loaded() -> None:
+    """A record that draws or prints itself takes no module lock before its package's."""
+    found = renderer_reaches(_package_sources())
+    assert not found, "renderers reaching into a domain:\n  " + "\n  ".join(found)
+
+
+@pytest.mark.whole_tree
+def test_no_module_reads_a_name_off_the_root() -> None:
+    """No module of the package imports through the root's lazy ``__getattr__``."""
+    found = [
+        offence
+        for rel, source in _package_sources().items()
+        for offence in root_reaches(source, rel)
+    ]
+    assert not found, "imports through the root:\n  " + "\n  ".join(found)
+
+
+def test_the_private_reach_rule_reads_every_way_into_another_domain() -> None:
+    """The rule finds each spelling of the reach, and nothing a type checker alone reads."""
+    planted = textwrap.dedent(
+        """
+        from typing import TYPE_CHECKING
+        from ..filters.weighting import weighting_filter
+        from ..filters import weighting_filter, _require_str
+        from .. import signals
+        from ..filters import nominal_frequencies
+        from .._internal.welch import _welch_pair
+        from .spectra import power_spectral_density
+        if TYPE_CHECKING:
+            from ..fluids.water import SoundSpeedModel
+        def later():
+            from ..room._impulse_response import inverse_filter
+            from ..room import inverse_filter
+        """
+    )
+    found = private_reaches(planted, "electroacoustics/x.py")
+    assert found == [
+        "electroacoustics/x.py:3 imports phonometry.filters.weighting, a module "
+        "inside phonometry.filters; import from phonometry.filters the names it "
+        "publishes, or move a shared kernel to phonometry._internal",
+        "electroacoustics/x.py:4 imports _require_str from phonometry.filters, "
+        "which does not publish it",
+        "electroacoustics/x.py:12 imports phonometry.room._impulse_response, a "
+        "module inside phonometry.room; import from phonometry.room the names it "
+        "publishes, or move a shared kernel to phonometry._internal",
+    ]
+    # A support package is held by its own rule, not this one.
+    assert private_reaches(planted, "_plot/x.py") == []
+
+
+def test_the_root_rule_reads_every_name_off_the_root() -> None:
+    """A domain, a name the root publishes and an import in a function are all reads."""
+    planted = textwrap.dedent(
+        """
+        from typing import TYPE_CHECKING
+        from .. import signals
+        from .. import Signal, ReportMetadata
+        from ..filters import weighting_filter
+        from . import spectra
+        if TYPE_CHECKING:
+            from .. import io
+        def later():
+            from .. import room
+        """
+    )
+    found = root_reaches(planted, "_plot/x.py")
+    assert found == [
+        "_plot/x.py:3 imports signals from the root package; import it from the "
+        "package or the module that defines it",
+        "_plot/x.py:4 imports Signal, ReportMetadata from the root package; "
+        "import it from the package or the module that defines it",
+        "_plot/x.py:10 imports room from the root package; import it from the "
+        "package or the module that defines it",
+    ]
+    assert root_reaches(planted, "__init__.py") == []
+
+
+def test_the_cycle_rule_finds_a_cycle_and_only_at_import() -> None:
+    """Two domains importing each other at import are a cycle; a lazy edge is not."""
+    sources = {
+        "filters/core.py": "from ..metrology import REFERENCE_VALUES\n",
+        "metrology/data.py": "from ..signals import power_spectral_density\n",
+        "signals/levels.py": "from ..filters import weighting_filter\n",
+        "io/_bext.py": "def later():\n    from ..broadcast import integrated\n",
+        "broadcast/meter.py": "from ..io import Signal\n",
+    }
+    assert domain_cycles(sources) == [
+        "filters -> metrology (filters/core.py:1); "
+        "metrology -> signals (metrology/data.py:1); "
+        "signals -> filters (signals/levels.py:1)"
+    ]
+    del sources["signals/levels.py"]
+    assert domain_cycles(sources) == []
+
+
+def test_the_internal_rule_keeps_its_floor_and_its_renderers() -> None:
+    """``_internal`` may draw through ``_plot`` in a method, and nothing more."""
+    planted = textwrap.dedent(
+        """
+        from typing import TYPE_CHECKING
+        from .validation import real_array
+        from ..io import Signal
+        from .._i18n import check_language
+        if TYPE_CHECKING:
+            from ..io._chunks import BroadcastMetadata
+        class Record:
+            def plot(self):
+                from .._i18n import check_language
+                from .._plot.io import plot_signal
+                from ..filters import weighting_filter
+        """
+    )
+    assert internal_reaches(planted, "_internal/record.py") == [
+        "_internal/record.py:4 imports phonometry.io",
+        "_internal/record.py:5 imports phonometry._i18n",
+        "_internal/record.py:12 imports phonometry.filters",
+    ]
+    assert internal_reaches("from . import validation\n", "_internal/__init__.py") == [
+        "_internal/__init__.py:1 imports phonometry._internal in the package"
+    ]
+
+
+def test_the_leaf_first_rule_reads_the_modules_a_package_loads() -> None:
+    """A module the ``__init__`` reaches through another is held too."""
+    sources = {
+        "_plot/__init__.py": "",
+        "_plot/geometry/__init__.py": "from .room import plot_room\n",
+        "_plot/geometry/room.py": "from ._draft import chip\n",
+        "_plot/geometry/_draft.py": "",
+        "_plot/building.py": (
+            "def a():\n    from .geometry._draft import chip\n"
+            "def b():\n    from .geometry import _draft\n"
+        ),
+        "_plot/io.py": "from .geometry.room import plot_room\n",
+    }
+    assert leaf_first_reaches(sources) == [
+        "_plot/building.py:2 imports phonometry._plot.geometry._draft, which "
+        "phonometry._plot.geometry loads; import it from phonometry._plot.geometry",
+        "_plot/io.py:1 imports phonometry._plot.geometry.room, which "
+        "phonometry._plot.geometry loads; import it from phonometry._plot.geometry",
+    ]
+
+
+def test_the_renderer_rule_follows_a_renderer_to_the_records_that_call_it() -> None:
+    """Through a helper, a package's import, a module's attribute and ``_internal``."""
+    planted = {
+        "_internal/signal.py": (
+            "class Signal:\n"
+            "    def plot(self):\n"
+            "        from .._plot.io import plot_signal\n"
+            "        return plot_signal(self)\n"
+        ),
+        "_plot/__init__.py": "",
+        "_plot/io.py": "def plot_signal(signal):\n    from ..signals.levels import P0\n",
+        "_plot/vibration.py": "def plot_record(record):\n    from ..signals.levels import P0\n",
+        "_plot/unused.py": "def orphan():\n    from ..room.modes import modes\n",
+        "_plot/typed.py": (
+            "from typing import TYPE_CHECKING\n"
+            "if TYPE_CHECKING:\n"
+            "    from ..signals.levels import P0\n"
+            "def plot_typed(record):\n"
+            "    return record\n"
+        ),
+        "_plot/geometry/__init__.py": "from .walls import plot_wall\n",
+        "_plot/geometry/walls.py": (
+            "def plot_wall(record):\n    from ...building.walls import WALLS\n"
+        ),
+        "_report/__init__.py": "",
+        "_report/_layout.py": (
+            "def table(rows):\n"
+            "    from ..vibration.structural.damage import LIMITS\n"
+            "    return rows\n"
+        ),
+        "_report/fiche.py": (
+            "from ._layout import table\n"
+            "def render(record):\n"
+            "    return table(_labels(record))\n"
+            "def _labels(record):\n"
+            "    from ..filters.frequencies import label\n"
+            "    return label(record)\n"
+        ),
+        "_report/room_fiche.py": (
+            "def render(record):\n    from ..filters.frequencies import label\n"
+        ),
+        "room/__init__.py": "from ..filters import nominal_frequencies\n",
+        "room/y.py": (
+            "class Room:\n"
+            "    def report(self):\n"
+            "        from .._report.room_fiche import render\n"
+            "        return render(self)\n"
+            "    def plot(self):\n"
+            "        from .._plot.geometry import plot_wall\n"
+            "        return plot_wall(self)\n"
+        ),
+        "vibration/__init__.py": "from .x import Shake\n",
+        "vibration/x.py": (
+            "class Shake:\n"
+            "    def report(self):\n"
+            "        from .._report.fiche import render\n"
+            "        return render(self)\n"
+            "    def plot(self):\n"
+            "        from .._plot import typed, vibration as drawing\n"
+            "        return drawing.plot_record(typed.plot_typed(self))\n"
+        ),
+    }
+    advice = "import from phonometry.{0} the names it publishes, or move the kernel to phonometry._internal"
+    assert renderer_reaches(planted) == [
+        "_plot/geometry/walls.py:2 imports phonometry.building.walls, a module "
+        "inside phonometry.building, and runs for phonometry.room, which does "
+        "not load phonometry.building; " + advice.format("building"),
+        "_plot/io.py:2 imports phonometry.signals.levels, a module inside "
+        "phonometry.signals, and runs for phonometry._internal.signal, which "
+        "does not load phonometry.signals; " + advice.format("signals"),
+        "_plot/unused.py:2 imports phonometry.room.modes, a module inside "
+        "phonometry.room, in a function nothing the rule follows calls; call it "
+        "from a record's method or a function a domain imports",
+        "_plot/vibration.py:2 imports phonometry.signals.levels, a module inside "
+        "phonometry.signals, and runs for phonometry.vibration, which does not "
+        "load phonometry.signals; " + advice.format("signals"),
+        "_report/fiche.py:5 imports phonometry.filters.frequencies, a module "
+        "inside phonometry.filters, and runs for phonometry.vibration, which "
+        "does not load phonometry.filters; " + advice.format("filters"),
+    ]
+
+
+@pytest.mark.whole_tree
+def test_every_allowed_edge_is_still_taken() -> None:
+    """An edge the list allows and no import takes is a stale entry (rule T15)."""
+    taken = {(frm, to) for frm, to, _ in _edges()}
+    assert sorted(ALLOWED_EDGES - taken) == []
 
 
 @pytest.mark.whole_tree
@@ -389,12 +1202,13 @@ def test_cross_package_edges_are_whitelisted() -> None:
         if (
             frm == to
             or to in ("_internal", "root")
-            or frm in ("root", "_plot", "_report")
+            or frm in ("root", "_internal", "_plot", "_report")
         ):
             # root modules are unrestricted during the migration; the facade
             # (__init__) legitimately imports everything. _plot and
             # _report are rendering leaves that reference domain classes only
-            # under TYPE_CHECKING (see the guarantee test below).
+            # under TYPE_CHECKING (see the guarantee test below), and what
+            # _internal may import is test_internal_imports_no_domain_code's.
             continue
         if to in TOOLBOX:
             continue

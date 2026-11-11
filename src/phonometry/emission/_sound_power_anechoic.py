@@ -46,6 +46,7 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
+from .._internal.sound_power import _a_weighting_corrections
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
@@ -57,7 +58,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import advisories_held, warn_caller
-from ._shared import _S0, SoundPowerWarning, _a_weighting_corrections
+from ._shared import _S0, SoundPowerWarning
 
 if TYPE_CHECKING:
     import os

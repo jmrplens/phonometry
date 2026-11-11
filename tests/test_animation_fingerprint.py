@@ -407,7 +407,7 @@ def _library_tree(root: pathlib.Path) -> pathlib.Path:
 
 
 _VIDEO = """
-from ._video_quality import ENCODER_QUALITY, GIF_PALETTE
+from .video_quality import ENCODER_QUALITY, GIF_PALETTE
 
 
 def _pipe(frames):
@@ -429,18 +429,18 @@ GIF_PALETTE = {"standard": (128, "bayer")}
 
 
 def _video_tree(root: pathlib.Path) -> pathlib.Path:
-    """The miniature package, its first clip encoding through io with raw options."""
+    """The miniature package, its first clip encoding through the encode path with raw options."""
     _library_tree(root)
-    io_package = root / "src" / "phonometry" / "io"
-    io_package.mkdir()
-    (io_package / "__init__.py").write_text("", encoding="utf-8")
-    (io_package / "_video.py").write_text(_VIDEO, encoding="utf-8")
-    (io_package / "_video_quality.py").write_text(_VIDEO_QUALITY, encoding="utf-8")
+    internal = root / "src" / "phonometry" / "_internal"
+    internal.mkdir()
+    (internal / "__init__.py").write_text("", encoding="utf-8")
+    (internal / "video.py").write_text(_VIDEO, encoding="utf-8")
+    (internal / "video_quality.py").write_text(_VIDEO_QUALITY, encoding="utf-8")
     edit(
         root,
         "schematics",
         "from .theme import COLOR_PRIMARY",
-        "from phonometry.io._video import write_video\nfrom .theme import COLOR_PRIMARY",
+        "from phonometry._internal.video import write_video\nfrom .theme import COLOR_PRIMARY",
     )
     edit(
         root,
@@ -457,15 +457,15 @@ def _video_tree(root: pathlib.Path) -> pathlib.Path:
     [
         # The encode path a clip's frames go through.
         (
-            "_video.py",
+            "video.py",
             "return [frame for frame in frames]",
             "return list(frames)",
             {"anim_one"},
         ),
         # The encoder presets, which a clip's own encoder and options bypass.
-        ("_video_quality.py", '("-crf", "35")', '("-crf", "30")', set()),
+        ("video_quality.py", '("-crf", "35")', '("-crf", "30")', set()),
         # The GIF palette, which a GIF written with a quality reads.
-        ("_video_quality.py", '(128, "bayer")', '(64, "bayer")', {"anim_one"}),
+        ("video_quality.py", '(128, "bayer")', '(64, "bayer")', {"anim_one"}),
     ],
 )
 def test_the_encode_path_is_followed_and_the_presets_are_not(
@@ -473,7 +473,7 @@ def test_the_encode_path_is_followed_and_the_presets_are_not(
 ) -> None:
     tree = _video_tree(tmp_path)
     before = fp.fingerprints(tree)
-    source = tree / "src" / "phonometry" / "io" / path
+    source = tree / "src" / "phonometry" / "_internal" / path
     text = source.read_text(encoding="utf-8")
     assert text.count(old) == 1, old
     source.write_text(text.replace(old, new), encoding="utf-8")

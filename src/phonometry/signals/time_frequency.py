@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import resolve_fs
 from .._internal.types import own_window
 from .._internal.validation import (
     require_count,
@@ -62,23 +63,22 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import resolve_fs
-from .spectra import (
+from .._internal.welch import (
     _DEFAULT_OVERLAP,
     _noverlap_samples,
     _positive,
-    _validate_scaling,
     _validate_signal,
     _validate_welch_params,
 )
+from .spectra import _validate_scaling
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import WindowSpec
-    from ..io._signal import Signal
 
 __all__ = [
     "SpectrogramResult",

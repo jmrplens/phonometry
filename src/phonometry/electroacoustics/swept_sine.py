@@ -62,6 +62,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import apply_calibration, resolve_fs
 from .._internal.validation import (
     real_array,
     real_number,
@@ -71,7 +72,6 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -80,8 +80,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import TwoPanels
-    from ..io._signal import Signal
 
 __all__ = [
     "SweptSineDistortionResult",
@@ -208,7 +208,7 @@ def synchronized_sweep_signal(
         2.0 * np.pi * f1_v * rate * np.exp(t / rate)
     )
     if fade > 0.0:
-        from ..room._impulse_response import _apply_fade
+        from .._internal.utils import _apply_fade
 
         sweep = _apply_fade(sweep, fade)
     return sweep
@@ -427,7 +427,7 @@ def _deconvolve_farina(
     """
     from scipy import signal as sp_signal
 
-    from ..room._impulse_response import inverse_filter
+    from ..room import inverse_filter
 
     inv = inverse_filter(fs, f1, f2, duration_s, fade=fade)
     conv = sp_signal.fftconvolve(rec, inv)

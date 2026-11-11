@@ -108,6 +108,7 @@ def _text(path: str) -> str:
 
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso10534.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -115,6 +116,7 @@ def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
 
 
 def test_report_with_metadata_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso10534_meta.pdf"
     _result().report(str(out), metadata=_metadata())
     assert_one_page(str(out))
@@ -228,6 +230,7 @@ def test_all_empty_result_is_refused() -> None:
 
 def test_displayed_absorption_matches_oracle(tmp_path: Path) -> None:
     """The fiche prints the closed-form alpha, band labels and geometry."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso10534.pdf"
     _result().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -244,6 +247,7 @@ def test_displayed_absorption_matches_oracle(tmp_path: Path) -> None:
 
 def test_verbose_shows_reflection_column_one_page(tmp_path: Path) -> None:
     """verbose=True adds the |r| column and stays one page."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso10534_verbose.pdf"
     _result().report(str(out), metadata=_metadata(), verbose=True)
     assert_one_page(str(out))
@@ -252,6 +256,7 @@ def test_verbose_shows_reflection_column_one_page(tmp_path: Path) -> None:
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso10534_xml.pdf"
     _result().report(str(out), metadata=_metadata(specimen='Panel <A> & <B> "edge"'))
     assert_one_page(str(out))
@@ -259,6 +264,7 @@ def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
 
 def test_no_metadata_still_renders(tmp_path: Path) -> None:
     """Without metadata the header still shows the measured frequency range."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso10534_bare.pdf"
     _result().report(str(out))
     assert_one_page(str(out))
@@ -266,6 +272,7 @@ def test_no_metadata_still_renders(tmp_path: Path) -> None:
 
 
 def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso10534_es.pdf"
     _result().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))
@@ -298,6 +305,7 @@ def test_a_table_longer_than_the_page_is_refused(tmp_path: Path, points: int) ->
     identity on pages nobody stamped. Past that reportlab gave up with a
     LayoutError naming a flowable and a frame in points.
     """
+    pytest.importorskip("matplotlib")
     base = result_factories._impedance_tube()
     size = np.size(base.frequencies)
     trimmed = dataclasses.replace(
@@ -323,6 +331,7 @@ def test_a_fiche_that_does_not_fit_leaves_the_file_that_was_at_the_name(
     """The sheet was built at the name and removed again when it did not fit,
     so the fiche of an earlier run at that name went with it.
     """
+    pytest.importorskip("matplotlib")
     base = result_factories._impedance_tube()
     size = np.size(base.frequencies)
     trimmed = dataclasses.replace(

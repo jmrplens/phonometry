@@ -68,6 +68,7 @@ def _result() -> psychoacoustics.ZwickerLoudness:
 
 def test_loudness_report_writes_pdf(tmp_path: Path) -> None:
     """A stationary Zwicker loudness result renders a one-page PDF fiche."""
+    pytest.importorskip("matplotlib")
     result = _result()
     assert result.loudness > 0.0
     assert np.isfinite(result.loudness)
@@ -90,6 +91,7 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
 
 def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders a one-page loudness fiche."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         specimen="Household appliance, steady operating noise",
         client="Acoustic Test Client Ltd.",
@@ -108,6 +110,7 @@ def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
 
 def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
     """A PASS and a FAIL maximum-loudness requirement both render one page."""
+    pytest.importorskip("matplotlib")
     result = _result()
     n = result.loudness
     passing = tmp_path / "pass.pdf"
@@ -120,6 +123,7 @@ def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="fan <A> & motor",
@@ -147,6 +151,7 @@ def test_stationary_fiche_states_method_and_field(tmp_path: Path) -> None:
     clause 5, or time-varying, clause 6) and the sound field (free F or
     diffuse D); the boxed value is the total loudness N to one decimal.
     """
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "clause7.pdf"
     result.report(str(out))
@@ -164,6 +169,7 @@ def test_time_varying_fiche_reports_nmax_percentiles_and_nt(tmp_path: Path) -> N
     time-varying sounds and names the reported maximum "loudness (Nmax)";
     the fiche must not label it as the stationary total loudness N.
     """
+    pytest.importorskip("matplotlib")
     fs = 48000
     t = np.arange(fs) / fs
     x = (
@@ -190,6 +196,7 @@ def test_time_varying_fiche_reports_nmax_percentiles_and_nt(tmp_path: Path) -> N
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     result = _result()

@@ -71,6 +71,7 @@ def _extract_text(path: str) -> str:
 # --------------------------------------------------------------------------- #
 def test_attenuation_with_emission_boxes_receiver_level(tmp_path: Path) -> None:
     """With a source emission the fiche boxes the A-weighted downwind level."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "atten.pdf"
     assert _attenuation().report(str(out), source_emission=_emission()) == str(out)
     assert_one_page(str(out))
@@ -86,6 +87,7 @@ def test_attenuation_with_emission_boxes_receiver_level(tmp_path: Path) -> None:
 
 def test_attenuation_without_emission_boxes_total_range(tmp_path: Path) -> None:
     """Without a source emission the fiche boxes the total-attenuation range."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "bare.pdf"
     _attenuation().report(str(out))
     assert_one_page(str(out))
@@ -154,6 +156,7 @@ def test_a_breakdown_covering_no_band_is_refused() -> None:
 
 def test_attenuation_verbose_adds_a_weighted_band(tmp_path: Path) -> None:
     """``verbose=True`` adds the A-weighted band-level column."""
+    pytest.importorskip("matplotlib")
     result = _attenuation()
     emission = _emission()
     plain = tmp_path / "plain.pdf"
@@ -167,6 +170,7 @@ def test_attenuation_verbose_adds_a_weighted_band(tmp_path: Path) -> None:
 
 def test_attenuation_requirement_lower_is_better(tmp_path: Path) -> None:
     """The downwind level passes at or below the declared limit level."""
+    pytest.importorskip("matplotlib")
     result = _attenuation()  # LAT(DW) = 46.5 dB with the flat 100 dB source
     emission = _emission()
     passing = tmp_path / "pass.pdf"
@@ -188,6 +192,7 @@ def test_attenuation_requirement_lower_is_better(tmp_path: Path) -> None:
 
 def test_attenuation_metadata_header_and_distance(tmp_path: Path) -> None:
     """A populated metadata header and the recovered distance print."""
+    pytest.importorskip("matplotlib")
     metadata = ReportMetadata(
         specimen="Industrial fan plant",
         client="Acoustic Consultants Ltd.",
@@ -206,6 +211,7 @@ def test_attenuation_metadata_header_and_distance(tmp_path: Path) -> None:
 
 def test_attenuation_spanish_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish attenuation fiche."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "es.pdf"
@@ -228,6 +234,7 @@ def test_attenuation_spanish_fiche(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------- #
 def test_barrier_report_structure_and_numbers(tmp_path: Path) -> None:
     """The barrier fiche boxes the mean insertion loss and cites the model."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "bar.pdf"
     assert _barrier().report(str(out)) == str(out)
     assert_one_page(str(out))
@@ -244,6 +251,7 @@ def test_barrier_report_structure_and_numbers(tmp_path: Path) -> None:
 
 def test_barrier_verbose_adds_fresnel_number(tmp_path: Path) -> None:
     """``verbose=True`` adds the Fresnel-number column."""
+    pytest.importorskip("matplotlib")
     plain = tmp_path / "plain.pdf"
     _barrier().report(str(plain))
     assert "7.05" not in _extract_text(str(plain))
@@ -255,6 +263,7 @@ def test_barrier_verbose_adds_fresnel_number(tmp_path: Path) -> None:
 
 def test_barrier_requirement_higher_is_better(tmp_path: Path) -> None:
     """The insertion loss passes at or above the required minimum."""
+    pytest.importorskip("matplotlib")
     result = _barrier()  # mean IL = 12.9 dB
     passing = tmp_path / "pass.pdf"
     result.report(str(passing), metadata=ReportMetadata(requirement=8.0))
@@ -267,6 +276,7 @@ def test_barrier_requirement_higher_is_better(tmp_path: Path) -> None:
 
 def test_barrier_kurze_anderson_model_cited(tmp_path: Path) -> None:
     """The Kurze-Anderson method is named in the basis line."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "ka.pdf"
     _barrier(method="kurze_anderson").report(str(out))
     assert_one_page(str(out))
@@ -275,6 +285,7 @@ def test_barrier_kurze_anderson_model_cited(tmp_path: Path) -> None:
 
 def test_barrier_lightweight_without_metadata(tmp_path: Path) -> None:
     """A barrier fiche with no metadata is still a valid one-page prediction."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "bare.pdf"
     _barrier().report(str(out))
     assert_one_page(str(out))
@@ -283,6 +294,7 @@ def test_barrier_lightweight_without_metadata(tmp_path: Path) -> None:
 
 def test_barrier_spanish_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish barrier fiche."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "es.pdf"
     _barrier().report(str(out), language="es")
     assert_one_page(str(out))

@@ -119,7 +119,7 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
+from ...materials import ABSORBER_AIR, delany_bazley, miki
 
 if TYPE_CHECKING:
     import os
@@ -188,7 +188,7 @@ def _normalized_ground_impedance(
     scalar/array is taken as already :math:`\mathrm{e}^{-i \omega t}` and passed
     through.
     """
-    from ...materials.absorbers.porous import PorousMediumResult
+    from ...materials import PorousMediumResult
 
     if (impedance is None) == (flow_resistivity is None):
         msg = "provide exactly one of 'impedance' or 'flow_resistivity_pa_s_m2'."

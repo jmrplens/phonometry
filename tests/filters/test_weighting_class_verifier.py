@@ -15,15 +15,13 @@ import pytest
 from reference_data import IEC61672_TABLE3 as TABLE3
 
 from phonometry import filters
-from phonometry.filters.weighting_compliance import (
-    _WEIGHTING_TABLE3,
-)
+from phonometry._internal.weighting_tables import WEIGHTING_TABLE3
 
 
 def test_masks_match_reference_data() -> None:
     """The module's Table 3 (freq, A, C, class1 upper/lower) equals reference_data."""
-    assert len(_WEIGHTING_TABLE3) == len(TABLE3) == 34
-    for row, ref in zip(_WEIGHTING_TABLE3, TABLE3, strict=True):
+    assert len(WEIGHTING_TABLE3) == len(TABLE3) == 34
+    for row, ref in zip(WEIGHTING_TABLE3, TABLE3, strict=True):
         assert row[:5] == pytest.approx(ref, nan_ok=False), f"mismatch at {ref[0]} Hz"
 
 
@@ -205,7 +203,7 @@ def test_verdict_measures_the_path_a_signal_takes(fs: int, label: float) -> None
         b for b in filters.verify_weighting_class(wf).bands if b["frequency"] == label
     )
     exact = 10.0 ** (round(10.0 * math.log10(label)) / 10.0)
-    design = {row[0]: row[1] for row in _WEIGHTING_TABLE3}[label]
+    design = {row[0]: row[1] for row in WEIGHTING_TABLE3}[label]
     measured = _tone_gain_db(wf, fs, exact) - _tone_gain_db(wf, fs, 1000.0) - design
     assert band["deviation_db"] == pytest.approx(measured, abs=0.05)
 
@@ -286,7 +284,7 @@ def test_deviation_matches_independent_tone_measurement() -> None:
     ref_1k = _tone_gain_db(wf, fs, 1000.0)
     for f0 in (63.0, 250.0, 1000.0, 4000.0, 8000.0):
         measured = _tone_gain_db(wf, fs, f0) - ref_1k
-        design = {row[0]: row[1] for row in _WEIGHTING_TABLE3}[f0]
+        design = {row[0]: row[1] for row in WEIGHTING_TABLE3}[f0]
         assert bands[f0] == pytest.approx(measured - design, abs=0.15), f"{f0} Hz"
 
 

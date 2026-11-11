@@ -2306,6 +2306,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Two threads importing two domains no longer deadlock.** After a plain
+  `import phonometry`, a thread pool that read `phonometry.electroacoustics`
+  and `phonometry.vibration` raised `_DeadlockError` in one of its two
+  threads five times in five, on Python 3.12, 3.13 and 3.14, and 15 of the
+  21 domains could lose such a race to a second thread. A module of one
+  domain imported a module inside another, `from ..filters.weighting import
+  weighting_filter`, and CPython takes a module's lock before its package's,
+  the reverse of the order a thread importing the package takes them in. A
+  domain now imports another only through the package and the names it
+  publishes. The kernels several domains shared without publishing them live
+  in `phonometry._internal`, which imports no domain: the pinned arithmetic
+  and the BS.468-4 prototype of the weighting design, the IEC 61672-1
+  weighting table, the band helpers, the Welch autospectrum, the ISO 9613-1
+  absorption terms, the sound power and loudness statistics, `io.Signal` and
+  the rules that resolve its rate and calibration, and the video writer; and
+  `filters`, `metrology` and `signals` no longer import one another in a
+  cycle. The root imports one domain at a time when threads first read
+  several, and a child forked while another thread held that lock takes a
+  lock of its own. `tests/test_concurrent_imports.py` races every first
+  import of every domain against a second thread on purpose, so a module
+  that reaches into another domain fails it on every run, not now and then,
+  and the architecture tests refuse an import of a module inside another
+  domain or of a name it does not publish, a cycle between domains at
+  import, a module reading a name off the root, and `_internal` importing a
+  domain. A record that draws or prints itself takes the locks in the same
+  order: `TimeWeightedEnvelope.plot()`, `Signal.plot(scale="db")` and the
+  ISO 10846, EN 15657 and ISO 1996-2 tone fiches named a module of a domain
+  their record's had not loaded, and reach it now through its package or
+  `_internal`; the race test drives them, and an architecture test follows
+  every renderer to the records that call it. Every public name keeps its
+  import path, and seven now name another module as their own: `io.Signal`
+  and `io.SignalOrigin` name `phonometry._internal.signal`,
+  `io.VideoOptions` and `io.write_video` `phonometry._internal.video`,
+  `io.VideoEncoderError` and `io.FFmpegNotFoundError`
+  `phonometry._internal.video_encoders`, and
+  `environment.AtmosphericAbsorptionWarning`, in a traceback and a repr,
+  `phonometry.environment`. A `Signal` or a `SignalOrigin` pickled under
+  4.0.0rc1 names a module of `phonometry.io` that no longer exists, so it
+  no longer unpickles and has to be built again.
+
 - **A record's table shows the unit of every field that has one.** The
   notebook table reads a field's unit from its name, and `speed_of_sound`,
   `surface_area`, `absorption_area` and `room_constant`, which the library
@@ -4542,11 +4582,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   which the fit grows into a different filter: the A weighting at 48 kHz had
   three digests on the three platforms of the CI matrix. `exp` and `pow` are
   now glibc's own routines spelled in arithmetic IEEE 754 fixes
-  (`filters._pinned_exp`, in the build glibc picks for a processor with fused
+  (`_internal.pinned_exp`, in the build glibc picks for a processor with fused
   multiply-adds, every multiply-add that build fuses emulated exactly),
   `log10` is glibc's built on the pinned `log`, and the sine, the tangent, the
   arctangent and the magnitude of a complex root are correctly rounded, in
-  the package's own exact integer arithmetic (`filters._pinned_trig`). No
+  the package's own exact integer arithmetic (`_internal.pinned_trig`). No
   routine of the C library is left in the fit. SciPy's bilinear transform,
   whose gain is a product of complex numbers, and the products that
   normalise the prototypes' gains are spelled in separately rounded real
@@ -4591,7 +4631,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   arithmetic. The BS.468-4 prototype's six poles, which `numpy.roots` took
   as eigenvalues from LAPACK, are the correctly rounded roots of the
   network's denominator, which is built from its seven component values in
-  exact rational arithmetic (`filters._pinned_roots`): each part the double
+  exact rational arithmetic (`_internal.pinned_roots`): each part the double
   nearest the exact root's, decided by a certificate in exact arithmetic,
   and within LAPACK's own error of what `numpy.roots` returns. The
   second-order sections, which SciPy's `zpk2sos` formed with
@@ -11628,7 +11668,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   means a different unit. What catches that is the unit in the argument name,
   which is why the helpers are keyword-only.
 
-- The weighting fit takes its logarithms from `filters._pinned_log` instead of
+- The weighting fit takes its logarithms from `_internal.pinned_log` instead of
   from a `math.log` loop, and a cold design costs about 200 ms where it had
   come to cost about 260. The loop was the price of determinism: numpy's `log`
   is dispatched on what the CPU offers and its AVX512 kernels disagree with
@@ -12260,7 +12300,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   referenced to digital full scale and never sees pascals, and a bank carrying
   its own `LevelCalibration` is the explicit knob, so the object's factor is
   not applied on top. The resolution rules move out of `signals/levels.py`
-  into `phonometry.io._resolve`, beside the `Signal` they describe, so that
+  into `phonometry._internal.resolve`, beside the `Signal` they describe, so that
   the surfaces on the contract cannot drift apart.
 
 - Real measurement audio, versioned as functional oracles. Five

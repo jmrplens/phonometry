@@ -85,12 +85,12 @@ def _fmt(value: float, language: Language, decimals: int = 1) -> str:
 def _tonal_adjustment(audibility: float) -> int:
     """The ISO 1996-2:2017 Table J.1 tonal adjustment ``K`` for an audibility.
 
-    Imported lazily from the environmental-measurement domain module (the fiche
-    layer references domain code only at call time, never at import time).
+    Imported when the fiche is printed (the fiche layer runs domain code only
+    then, never at import time), and through the environment package, which
+    publishes it: psychoacoustics does not load environment, and a module
+    inside it would take its lock before the package's.
     """
-    from ..environment.assessment.measurement import (
-        tonal_adjustment_from_mean_audibility,
-    )
+    from ..environment import tonal_adjustment_from_mean_audibility
 
     return tonal_adjustment_from_mean_audibility(audibility)
 

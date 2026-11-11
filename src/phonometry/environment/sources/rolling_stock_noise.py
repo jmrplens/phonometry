@@ -100,6 +100,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
+from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
 from ..._internal.types import as_float_or_array, float_keyed
 from ..._internal.validation import (
     real_array,
@@ -113,8 +114,7 @@ from ..._internal.validation import (
     require_positive_array,
     require_scalar,
 )
-from ...io._resolve import SignalInput, resolve_fs, resolve_samples
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from ._shared import _TOLERANCE
 from .acoustic_roughness import (
     _MINIMUM_FILTERED_TOTAL_M,
@@ -681,7 +681,7 @@ def pass_by_measurement(
     if last <= first:
         msg = "'end_s' must come after 'start_s' by at least one sample."
         raise ValueError(msg)
-    from ...filters.weighting import time_weighting, weighting_filter
+    from ...filters import time_weighting, weighting_filter
 
     weighted = np.asarray(
         weighting_filter(samples, rate, weighting="A"), dtype=np.float64

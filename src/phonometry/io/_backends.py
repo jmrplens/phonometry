@@ -40,6 +40,7 @@ import numpy as np
 
 from .._internal.extras import install_hint
 from .._internal.json_input import escaped
+from .._internal.signal import Signal, SignalOrigin
 from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
@@ -50,7 +51,6 @@ from ._chunks import (
 )
 from ._flac import read_flac_bext
 from ._sidecar import check_sidecar_labels, read_sidecar
-from ._signal import Signal, SignalOrigin
 from ._wav import AudioFileInfo, read_wav, wav_info
 
 if TYPE_CHECKING:

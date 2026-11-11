@@ -109,6 +109,13 @@ from .._internal.catalogue import (
     CatalogueRow,
     Provenance,
 )
+from .._internal.signal import Signal, SignalOrigin
+from .._internal.video import (
+    FFmpegNotFoundError,
+    VideoEncoderError,
+    VideoOptions,
+    write_video,
+)
 from ._backends import LossyCompressionWarning, info, read
 from ._blocks import read_blocks
 from ._catalogue import (
@@ -127,8 +134,6 @@ from ._sidecar import (
     sidecar_path,
     write_sidecar,
 )
-from ._signal import Signal, SignalOrigin
-from ._video import FFmpegNotFoundError, VideoEncoderError, VideoOptions, write_video
 from ._wav import AudioFileInfo
 from ._write import ClippingWarning, write
 

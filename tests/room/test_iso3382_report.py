@@ -112,6 +112,7 @@ def test_synthetic_decay_matches_closed_form() -> None:
 # --------------------------------------------------------------------------
 def test_report_writes_pdf(tmp_path: Path) -> None:
     """A room-acoustics result renders a PDF fiche and returns its path."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "room.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -120,6 +121,7 @@ def test_report_writes_pdf(tmp_path: Path) -> None:
 
 def test_report_with_full_metadata_one_page(tmp_path: Path) -> None:
     """A full ReportMetadata renders a one-page accredited room fiche."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "room_meta.pdf"
     _result().report(str(out), metadata=_full_metadata())
     assert_one_page(str(out))
@@ -127,6 +129,7 @@ def test_report_with_full_metadata_one_page(tmp_path: Path) -> None:
 
 def test_report_bare_without_metadata(tmp_path: Path) -> None:
     """metadata=None renders a bare characterisation fiche (no header)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "bare.pdf"
     _result().report(str(out), metadata=None)
     assert_one_page(str(out))
@@ -153,6 +156,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------
 def test_band_labels_and_reverberation_times_render(tmp_path: Path) -> None:
     """Nominal band labels and the closed-form T30/EDT appear in the PDF."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "values.pdf"
     _result().report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -169,6 +173,7 @@ def test_band_labels_and_reverberation_times_render(tmp_path: Path) -> None:
 
 def test_mid_frequency_descriptor_and_verdict(tmp_path: Path) -> None:
     """The boxed T_mid = 1.15 s and a PASS/FAIL verdict both render."""
+    pytest.importorskip("matplotlib")
     passing = tmp_path / "pass.pdf"
     failing = tmp_path / "fail.pdf"
     _result().report(str(passing), metadata=_full_metadata(requirement=1.30))
@@ -184,6 +189,7 @@ def test_mid_frequency_descriptor_and_verdict(tmp_path: Path) -> None:
 
 def test_report_without_requirement_has_no_verdict(tmp_path: Path) -> None:
     """With no target RT the characterisation fiche omits the verdict row."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "noverdict.pdf"
     _result().report(str(out), metadata=_full_metadata())
     text = _extract_text(str(out))
@@ -226,6 +232,7 @@ def test_third_octave_report_renders(tmp_path: Path) -> None:
     A one-third-octave analysis takes the second, and the boxed descriptor
     must say so instead of wearing the octave "500-1000 Hz" label.
     """
+    pytest.importorskip("matplotlib")
     res = room.room_parameters(_synthetic_ir(), _FS, limits=(100.0, 5000.0), fraction=3)
     out = tmp_path / "thirds.pdf"
     res.report(str(out), metadata=_full_metadata())
@@ -246,6 +253,7 @@ def test_third_octave_verdict_uses_the_six_band_mean(tmp_path: Path) -> None:
     while that two-band mean is 1.31 s, so a 1.32 s requirement was badged
     PASS under a box that exceeded it.
     """
+    pytest.importorskip("matplotlib")
     freq = np.array([398.107, 501.187, 630.957, 794.328, 1000.0, 1258.925])
     t30 = np.array([1.42, 1.38, 1.40, 1.36, 1.24, 1.18])
     res = _synthetic_result(freq, t30=t30, edt=t30.copy())
@@ -259,6 +267,7 @@ def test_third_octave_verdict_uses_the_six_band_mean(tmp_path: Path) -> None:
 
 def test_band_range_without_mid_octaves_names_the_band(tmp_path: Path) -> None:
     """A range missing the mid bands boxes the first finite T30 band by name."""
+    pytest.importorskip("matplotlib")
     res = room.room_parameters(_synthetic_ir(), _FS, limits=(2000.0, 4000.0))
     assert res.frequencies is not None
     assert len(res.frequencies) == 2
@@ -282,6 +291,7 @@ def test_unevaluable_mid_band_falls_back_to_the_first_finite_band(
     (1.10 s, which would have passed the 1.20 s target this fiche must fail),
     and the verdict says plain T30 with no mid-frequency claim.
     """
+    pytest.importorskip("matplotlib")
     freq = np.array([250.0, 500.0, 1000.0])
     t30 = np.array([1.30, np.nan, 1.10])
     res = _synthetic_result(freq, t30=t30, edt=t30.copy())
@@ -302,6 +312,7 @@ def test_edt_label_follows_edts_own_band_coverage(tmp_path: Path) -> None:
     EDT is not evaluable, so the extended term must be the plain EDT of its
     1000 Hz band, never a false "EDT_mid".
     """
+    pytest.importorskip("matplotlib")
     freq = np.array([500.0, 1000.0])
     res = _synthetic_result(freq, t30=np.array([1.2, 1.1]), edt=np.array([np.nan, 1.0]))
     out = tmp_path / "edt_divergent.pdf"
@@ -315,6 +326,7 @@ def test_edt_label_follows_edts_own_band_coverage(tmp_path: Path) -> None:
 
 def test_verdict_uses_display_rounded_values(tmp_path: Path) -> None:
     """T_mid = 1.1502 s prints as 1.15 s and must PASS a 1.15 s target."""
+    pytest.importorskip("matplotlib")
     freq = np.array([500.0, 1000.0])
     res = _synthetic_result(freq, t30=np.array([1.2004, 1.1]), edt=np.array([1.2, 1.1]))
     out = tmp_path / "boundary.pdf"
@@ -334,6 +346,7 @@ def test_no_evaluable_band_withholds_the_verdict(tmp_path: Path) -> None:
     never earned and a PASS the opposite; the fiche still renders, with the
     em-dashed value in the boxed statement saying what happened.
     """
+    pytest.importorskip("matplotlib")
     noise = np.random.default_rng(20268).normal(size=_FS)
     res = room.room_parameters(noise, _FS)
     assert not np.any(np.isfinite(res.t30))
@@ -353,6 +366,7 @@ def test_single_band_is_not_labeled_broadband(tmp_path: Path) -> None:
     Selecting a single octave band leaves one frequency entry (not ``None``),
     so the caption must read "Single-band parameters", never "Broadband".
     """
+    pytest.importorskip("matplotlib")
     res = room.room_parameters(_synthetic_ir(), _FS, limits=(490.0, 510.0), fraction=1)
     assert res.frequencies is not None
     assert len(res.frequencies) == 1
@@ -371,6 +385,7 @@ def test_octave_report_many_bands_renders(tmp_path: Path) -> None:
     wide octave set (11 bands) is still labelled an octave-band set and grouped
     by octave, not by spurious one-third-octave triplets.
     """
+    pytest.importorskip("matplotlib")
     res = room.room_parameters(_synthetic_ir(), _FS, limits=(16.0, 16000.0), fraction=1)
     assert res.frequencies is not None
     assert len(res.frequencies) > 6
@@ -382,6 +397,7 @@ def test_octave_report_many_bands_renders(tmp_path: Path) -> None:
 
 def test_broadband_report_renders(tmp_path: Path) -> None:
     """A broadband (single-band) analysis renders a one-page fiche."""
+    pytest.importorskip("matplotlib")
     res = room.room_parameters(_synthetic_ir(), _FS, limits=None)
     assert res.frequencies is None
     out = tmp_path / "broadband.pdf"
@@ -397,6 +413,7 @@ def test_broadband_makes_no_mid_frequency_claim(tmp_path: Path) -> None:
     descriptor is the plain broadband T30 and the verdict is broadband-aware;
     neither the result box nor the verdict may claim "500-1000 Hz".
     """
+    pytest.importorskip("matplotlib")
     res = room.room_parameters(_synthetic_ir(), _FS, limits=None)
     assert res.frequencies is None
     out = tmp_path / "broadband_claim.pdf"
@@ -414,6 +431,7 @@ def test_broadband_makes_no_mid_frequency_claim(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="hall <A> & foyer",
@@ -430,6 +448,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """language="es" renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "room_es.pdf"

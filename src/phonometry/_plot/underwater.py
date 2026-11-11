@@ -268,7 +268,7 @@ def plot_pile_strike(
     :return: The waveform axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
-    from ..io._resolve import apply_calibration
+    from .._internal.resolve import apply_calibration
 
     # In pascals whatever the stored type: the same reading the result's own
     # metrics were checked against, so the marker and its label agree.

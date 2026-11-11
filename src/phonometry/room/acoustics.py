@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import resolve_fs
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
@@ -54,8 +55,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..filters.core import OctaveFilterBank
-from ..io._resolve import resolve_fs
+from ..filters import OctaveFilterBank
 from ._shared import (
     MIN_LINE_FIT_POINTS,
     TRUST_MARGIN_DB,
@@ -75,9 +75,9 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.signal import Signal
     from .._internal.types import RealScalar, RealValues, ReportEngine, TwoPanels
     from .._report.metadata import ReportMetadata
-    from ..io._signal import Signal
 
 __all__ = [
     "DECAY_UNCERTAINTY_COEFFICIENTS",

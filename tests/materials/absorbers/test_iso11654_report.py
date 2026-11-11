@@ -72,6 +72,7 @@ _THIRD_OCTAVE_ALPHA_S = (
 
 def test_absorption_report_writes_pdf(tmp_path: Path) -> None:
     """A weighted absorption rating renders a PDF fiche."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A1_ALPHA_P)
     out = tmp_path / "absorption.pdf"
     returned = result.report(str(out))
@@ -89,6 +90,7 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
 
 def test_fiche_reproduces_iso11654_annex_a1(tmp_path: Path) -> None:
     """The fiche renders the ISO 11654 Annex A.1 example: alpha_w = 0.60, class C."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A1_ALPHA_P)
     assert result.alpha_w == pytest.approx(_A1_ALPHA_W)
     assert result.absorption_class == _A1_CLASS
@@ -98,6 +100,7 @@ def test_fiche_reproduces_iso11654_annex_a1(tmp_path: Path) -> None:
 
 def test_fiche_reproduces_iso11654_annex_a2(tmp_path: Path) -> None:
     """The fiche renders the Annex A.2 example: alpha_w = 0.60(M) shape indicator."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A2_ALPHA_P)
     assert result.alpha_w == pytest.approx(_A2_ALPHA_W)
     assert result.shape_indicator == _A2_INDICATOR
@@ -110,6 +113,7 @@ def test_third_octave_fiche_renders_and_round_trips(tmp_path: Path) -> None:
     The retained alpha_s round-trips on the result, and the accredited
     one-third-octave table renders a valid one-page PDF.
     """
+    pytest.importorskip("matplotlib")
     result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
     np.testing.assert_allclose(result.third_octave_alpha_s, _THIRD_OCTAVE_ALPHA_S)
     np.testing.assert_allclose(
@@ -139,6 +143,7 @@ def test_third_octave_fiche_renders_and_round_trips(tmp_path: Path) -> None:
 
 def test_third_octave_fiche_with_metadata(tmp_path: Path) -> None:
     """The one-third-octave fiche renders one page with a full metadata header."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
     out = tmp_path / "third_octave_meta.pdf"
     result.report(str(out), metadata=_full_metadata(requirement=0.55))
@@ -191,6 +196,7 @@ def test_statement_writes_shape_indicator_without_space(tmp_path: Path) -> None:
     applies, the 5.3 NOTE recommendation (use alpha_w together with the
     complete curve) is printed as a footnote.
     """
+    pytest.importorskip("matplotlib")
     from pypdf import PdfReader
 
     result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)
@@ -207,6 +213,7 @@ def test_statement_writes_shape_indicator_without_space(tmp_path: Path) -> None:
 
 def test_plain_rating_without_alpha_s_still_renders(tmp_path: Path) -> None:
     """A plain weighted_absorption result (alpha_s None) falls back and renders."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A2_ALPHA_P)
     assert result.third_octave_alpha_s is None
     out = tmp_path / "plain.pdf"
@@ -216,6 +223,7 @@ def test_plain_rating_without_alpha_s_still_renders(tmp_path: Path) -> None:
 
 def test_verbose_renders_evaluation_table(tmp_path: Path) -> None:
     """``verbose=True`` renders the ISO 11654 evaluation-column one-pager."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A2_ALPHA_P)
     out = tmp_path / "verbose.pdf"
     result.report(str(out), verbose=True)
@@ -245,6 +253,7 @@ def _full_metadata(**overrides: object) -> ReportMetadata:
 
 def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
     """A full ReportMetadata renders a one-page accredited absorption fiche."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A2_ALPHA_P)
     out = tmp_path / "meta.pdf"
     result.report(str(out), metadata=_full_metadata())
@@ -253,6 +262,7 @@ def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
 
 def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
     """A PASS and a FAIL alpha_w requirement both render a one-page fiche."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A1_ALPHA_P)  # alpha_w = 0.60
     passing = tmp_path / "pass.pdf"
     failing = tmp_path / "fail.pdf"
@@ -264,6 +274,7 @@ def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
 
 def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     """Metadata with XML specials (& < >) renders without crashing reportlab."""
+    pytest.importorskip("matplotlib")
     result = weighted_absorption(_A1_ALPHA_P)
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
@@ -287,6 +298,7 @@ def _extract_text(path: str) -> str:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     result = weighted_absorption_from_third_octave(_THIRD_OCTAVE_ALPHA_S)

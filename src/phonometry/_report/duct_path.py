@@ -88,7 +88,7 @@ _MIN_SHEET_ROWS = 4
 
 def _band_header(frequencies: np.ndarray, language: Language) -> list[str]:
     """Column headings: the row-code and element columns, then the band centres."""
-    from ..filters.frequencies import _format_nominal_freq
+    from .._internal.bands import _format_nominal_freq
 
     return [t("Ref.", language), t("Element", language)] + [
         decimal_comma(_format_nominal_freq(f), language) for f in frequencies

@@ -28,13 +28,13 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.resolve import SignalInput, apply_calibration, resolve_fs
 from .._internal.validation import (
     real_array,
     require_real,
     require_scalar,
 )
-from ..io._resolve import SignalInput, apply_calibration, resolve_fs
-from ..metrology.reference_values import REFERENCE_VALUES
+from ..metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray

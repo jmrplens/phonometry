@@ -63,7 +63,7 @@ one answer and 0.509 from the other, both inside the routine's documented
 range, the near-one band, the subnormals and the window edges found no other
 kind of divergence. None of it can reach a design: on the design path this
 function is the definition, and its own bits are the same on every
-conforming machine. ``tests/filters/test_pinned_log.py`` pins a
+conforming machine. ``tests/test_internalpinned_log.py`` pins a
 deterministic slice of the comparison, including the inputs an actual design
 evaluates and the found boundary inputs held to one ulp.
 
@@ -83,7 +83,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .validation import real_array
 
 __all__ = ["pinned_log", "pinned_log10"]
 

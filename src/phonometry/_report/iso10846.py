@@ -248,7 +248,7 @@ def _band_level_flow(
     from reportlab.lib.units import mm
     from reportlab.platypus import Spacer
 
-    from ..filters.frequencies import _format_nominal_freq
+    from .._internal.bands import _format_nominal_freq
     from ._i18n import decimal_comma
     from ._layout import band_table_header_style, fiche_paragraph, stacked_table
 

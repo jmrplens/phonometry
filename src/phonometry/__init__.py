@@ -25,6 +25,8 @@ of every diagnostic the library raises, so one
 
 from __future__ import annotations
 
+import os
+import threading
 from importlib import import_module
 from typing import TYPE_CHECKING
 
@@ -119,6 +121,26 @@ __all__ = [
 ]
 
 
+#: Held while the first touch of a name imports it, so threads reading
+#: several domains off the package import them one after another. The domains
+#: import each other only through their packages, and the shared kernels from
+#: ``_internal``, which no thread can deadlock on; the lock keeps the first
+#: touches from interleaving all the same. No module of the package reads a
+#: name off this one (``tests/test_package_architecture.py`` refuses it), which
+#: is what keeps the lock from ever waiting on an import that waits on it.
+_FIRST_TOUCH = threading.RLock()
+
+
+def _forget_the_lock_in_a_child() -> None:
+    """Give a forked child a fresh lock: the thread that held it is not there."""
+    global _FIRST_TOUCH
+    _FIRST_TOUCH = threading.RLock()
+
+
+if hasattr(os, "register_at_fork"):
+    os.register_at_fork(after_in_child=_forget_the_lock_in_a_child)
+
+
 # Defined for the running interpreter only. A type checker that saw a module
 # ``__getattr__`` would read every name the package lacks through it, so a
 # misspelt ``phonometry.stpia`` would type as ``object`` instead of failing;
@@ -131,16 +153,18 @@ if not TYPE_CHECKING:
         PEP 562. Importing every package eagerly cost a second and pulled in
         twelve hundred modules for a caller who wanted one of them; the whole
         library is still one attribute away, and the attribute is cached in
-        the module namespace so the import happens once.
+        the module namespace so the import happens once. The import runs under
+        :data:`_FIRST_TOUCH`, one name at a time.
         """
-        if name in _PACKAGES:
-            value: object = import_module(f".{name}", __name__)
-        elif name in _NAMES:
-            value = getattr(import_module(_NAMES[name], __name__), name)
-        else:
+        if name not in _PACKAGES and name not in _NAMES:
             msg = f"module {__name__!r} has no attribute {name!r}"
             raise AttributeError(msg)
-        globals()[name] = value
+        with _FIRST_TOUCH:
+            if name in _PACKAGES:
+                value: object = import_module(f".{name}", __name__)
+            else:
+                value = getattr(import_module(_NAMES[name], __name__), name)
+            globals()[name] = value
         return value
 
 

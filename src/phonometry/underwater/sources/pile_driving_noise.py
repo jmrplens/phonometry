@@ -32,6 +32,13 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
+from ..._internal.resolve import (
+    SignalInput,
+    apply_calibration,
+    like_input,
+    require_signal_rate,
+    resolve_fs,
+)
 from ..._internal.validation import (
     real_array,
     real_number,
@@ -41,13 +48,6 @@ from ..._internal.validation import (
     require_real,
     require_same_length,
     require_scalar,
-)
-from ...io._resolve import (
-    SignalInput,
-    apply_calibration,
-    like_input,
-    require_signal_rate,
-    resolve_fs,
 )
 from ..acoustics import (
     UNDERWATER_REFERENCE_EXPOSURE_PA2_S,
@@ -66,8 +66,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.signal import Signal
     from ..._internal.types import TwoPanels
-    from ...io._signal import Signal
 
 __all__ = [
     "PileStrikeResult",
@@ -530,7 +530,7 @@ def strike_sel_spectrum(
         or 3, ``limits`` that are not a finite, increasing, positive pair, or
         a pressure or sampling rate the analysis cannot take.
     """
-    from ...filters.frequencies import nominal_frequencies
+    from ...filters import nominal_frequencies
 
     fs = resolve_fs(pressure_pa, fs, name="pressure_pa")
     sig = _validate_pressure(pressure_pa, min_samples=2)

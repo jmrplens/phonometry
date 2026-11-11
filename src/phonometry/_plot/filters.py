@@ -1073,15 +1073,16 @@ def plot_time_weighted_envelope(
     """
     from .._i18n import localize_axes
 
-    # Deferred, not tidiness: signals.levels imports io, which imports this
-    # tree, so reaching for the reference pressure at module level is an
-    # import cycle that the package whitelist test cannot see.
-    from ..signals.levels import _REF_PRESSURE
+    # Inside the function because a renderer runs domain code only when it
+    # draws (A9), and through the package that publishes the table: a module
+    # inside metrology would take its lock before the package's.
+    from ..metrology import REFERENCE_VALUES
 
+    reference_pressure = REFERENCE_VALUES["gas"]["sound_pressure"].value
     envelope = np.atleast_2d(np.asarray(result.mean_square, dtype=np.float64))
     if result.calibrated:
         with np.errstate(divide="ignore"):
-            y = 10.0 * np.log10(envelope / _REF_PRESSURE**2)
+            y = 10.0 * np.log10(envelope / reference_pressure**2)
     else:
         y = envelope
 

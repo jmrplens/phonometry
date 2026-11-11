@@ -60,9 +60,10 @@ Only what can change a frame, and only the part of it the clip reaches:
   unless the code the clip reaches imports that module already (a module
   of the standard library changes nothing a frame is drawn with, and the
   library's own modules outside the walk are its physics, below);
-* and inside ``phonometry.io``, the encode path every clip's frames go
-  through (``write_video`` and the pipe into ffmpeg), except the encoder
-  presets of ``quality``, which a clip's own encoder and options bypass;
+* and the encode path every clip's frames go through, which
+  ``phonometry.io`` publishes and ``phonometry._internal.video`` holds
+  (``write_video`` and the pipe into ffmpeg), except the encoder presets of
+  ``quality``, which a clip's own encoder and options bypass;
 * ``figures.theme.set_theme``, which is not called by the clip but decides
   the palette and the rcParams every frame is drawn with, and everything it
   reaches;
@@ -96,8 +97,9 @@ Known gaps, deliberately
 ------------------------
 
 * **The library's physics.** A clip calls ``phonometry`` for its numbers,
-  and outside ``phonometry._plot`` and ``phonometry.io`` this walk does not
-  follow the library, whether a clip calls a module of it or only imports
+  and outside ``phonometry._plot``, ``phonometry.io`` and the three modules
+  of the encode path in ``phonometry._internal`` this walk does not follow
+  the library, whether a clip calls a module of it or only imports
   one: such an import keeps no effect of its own. Extending it there would
   trade a real but rare miss for a constant stream of false positives from
   refactors that change no pixel, and a library change that moves a number
@@ -169,13 +171,31 @@ _LIBRARY = "phonometry"
 #: root, and the dotted name it is imported under. ``phonometry._plot`` is the
 #: drawing code of the library, which the clips call for their colours and
 #: their axes; the rest of the library is physics (see "Known gaps").
-#: ``phonometry.io`` is the encode path: a clip's frames go through
+#: ``phonometry.io`` publishes the encode path: a clip's frames go through
 #: :func:`phonometry.io.write_video` into ffmpeg, so a change there can change
 #: the file.
 _PACKAGES: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
     (("scripts", "figures"), (_PKG_NAME,)),
     (("src", "phonometry", "_plot"), ("phonometry", "_plot")),
     (("src", "phonometry", "io"), ("phonometry", "io")),
+)
+
+#: The modules of the encode path, which ``phonometry._internal`` holds
+#: because ``phonometry.simulation`` writes its runs through them too: the
+#: pipe into ffmpeg, the choice of encoder and the encoder presets. The walk
+#: follows these three and no other module of ``_internal``, which is the
+#: shared validation and arithmetic of the library's physics (see "Known
+#: gaps").
+_MODULES: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("src", "phonometry", "_internal", "video.py"), "phonometry._internal.video"),
+    (
+        ("src", "phonometry", "_internal", "video_encoders.py"),
+        "phonometry._internal.video_encoders",
+    ),
+    (
+        ("src", "phonometry", "_internal", "video_quality.py"),
+        "phonometry._internal.video_quality",
+    ),
 )
 
 #: Where the clip names are mapped to their builders.
@@ -205,7 +225,7 @@ _IGNORED: frozenset[tuple[str, str]] = frozenset(
         # The encoder presets of write_video's ``quality``: the clips pass
         # their own encoder and options, which bypass them, so a preset
         # edit cannot change a clip and must not call them all stale.
-        ("phonometry.io._video_quality", "ENCODER_QUALITY"),
+        ("phonometry._internal.video_quality", "ENCODER_QUALITY"),
     }
 )
 
@@ -1497,6 +1517,13 @@ class Sources:
                 tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
                 annotations[name] = _annotation_names(tree)
                 parsed[name] = ast.fix_missing_locations(_RuntimeView().visit(tree))
+        for where, name in _MODULES:
+            path = root.joinpath(*where)
+            if not path.is_file():
+                continue
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            annotations[name] = _annotation_names(tree)
+            parsed[name] = ast.fix_missing_locations(_RuntimeView().visit(tree))
         # Every module name has to be known before the imports are resolved:
         # ``from . import media`` reads as a module reference or as a symbol
         # depending on whether ``figures.media`` exists.
@@ -2723,11 +2750,11 @@ _HEADER = """\
 # the clip was written. Each hash covers the clip's builder, everything it
 # reaches inside scripts/figures (the shared clip tail, the theme, the
 # translation machinery), inside phonometry._plot (the drawing helpers it
-# calls) and inside phonometry.io (the encode path), the translation-table
-# entries its own strings select and, for a clip that steps an FDTD engine,
-# the engines' golden digests (engine-digests.json); it is taken over the
-# syntax tree, so comments and docstrings do not move it. See
-# scripts/animation_fingerprint.py.
+# calls) and in the encode path (phonometry.io and the three video modules
+# of phonometry._internal), the translation-table entries its own strings
+# select and, for a clip that steps an FDTD engine, the engines' golden
+# digests (engine-digests.json); it is taken over the syntax tree, so
+# comments and docstrings do not move it. See scripts/animation_fingerprint.py.
 #
 # Each line: the clip, the fingerprint of the code that drew it, and the
 # ffmpeg encoder that wrote its WebM (av1_nvenc or libsvtav1).

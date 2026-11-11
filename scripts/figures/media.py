@@ -26,7 +26,7 @@ import encode_slots
 import matplotlib.pyplot as plt
 
 from phonometry import io as pm_io
-from phonometry.io._video_encoders import find_ffmpeg
+from phonometry._internal.video_encoders import find_ffmpeg
 
 from .i18n import (
     _LANG,

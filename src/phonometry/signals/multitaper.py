@@ -31,26 +31,22 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import resolve_fs
 from .._internal.validation import (
     require_count,
     require_ranks,
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import resolve_fs
-from .spectra import (
-    _positive,
-    _validate_confidence,
-    _validate_scaling,
-    _validate_signal,
-)
+from .._internal.welch import _positive, _validate_signal
+from .spectra import _validate_confidence, _validate_scaling
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
 
 __all__ = [
     "MultitaperSpectralDensityResult",

@@ -22,13 +22,13 @@ from ..._internal.validation import (
     real_array,
     require_choice,
 )
-from ...metrology.reference_values import REFERENCE_VALUES
+from ...metrology import REFERENCE_VALUES
 from ..loudness.zwicker import ZwickerLoudness, loudness_zwicker
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
-    from ...io._signal import Signal
+    from ..._internal.signal import Signal
 
 __all__ = [
     "sharpness_din",

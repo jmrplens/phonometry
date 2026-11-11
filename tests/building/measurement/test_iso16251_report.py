@@ -94,6 +94,7 @@ def _text(path: str) -> str:
 
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -101,6 +102,7 @@ def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
 
 
 def test_report_with_metadata_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_meta.pdf"
     _result().report(str(out), metadata=_metadata())
     assert_one_page(str(out))
@@ -122,6 +124,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 def test_displayed_values_match_oracle(tmp_path: Path) -> None:
     """The fiche prints the weighted improvement, band labels and delta-L."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251.pdf"
     _result().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -137,6 +140,7 @@ def test_displayed_values_match_oracle(tmp_path: Path) -> None:
 
 def test_verbose_shows_reference_floor_column_one_page(tmp_path: Path) -> None:
     """verbose=True adds the reference-floor L_n,r column and stays one page."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_verbose.pdf"
     _result().report(str(out), metadata=_metadata(), verbose=True)
     assert_one_page(str(out))
@@ -148,6 +152,7 @@ def test_verbose_shows_reference_floor_column_one_page(tmp_path: Path) -> None:
 
 def test_requirement_pass_verdict(tmp_path: Path) -> None:
     """A higher weighted improvement passes the requirement."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_pass.pdf"
     _result().report(str(out), metadata=_metadata(requirement=17.0))
     assert "PASS" in _text(str(out))
@@ -155,6 +160,7 @@ def test_requirement_pass_verdict(tmp_path: Path) -> None:
 
 def test_requirement_boundary_verdict(tmp_path: Path) -> None:
     """At equality (requirement == delta_lw) the verdict passes (>= rule)."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_boundary.pdf"
     result = _result()
     assert result.delta_lw == 19
@@ -166,6 +172,7 @@ def test_requirement_boundary_verdict(tmp_path: Path) -> None:
 
 def test_requirement_fail_verdict(tmp_path: Path) -> None:
     """A weighted improvement below the requirement fails."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_fail.pdf"
     _result().report(str(out), metadata=_metadata(requirement=25.0))
     assert "FAIL" in _text(str(out))
@@ -173,6 +180,7 @@ def test_requirement_fail_verdict(tmp_path: Path) -> None:
 
 def test_limited_band_uses_literal_greater_than(tmp_path: Path) -> None:
     """A band at the 1,3 dB limit renders a literal '>' marker, not '&gt;'."""
+    pytest.importorskip("matplotlib")
     bare = np.full(16, 50.0)
     covering = np.full(16, 49.0)
     background = np.full(16, 48.0)  # margin 2 dB < 6 dB -> every band limited
@@ -192,6 +200,7 @@ def test_limited_band_uses_literal_greater_than(tmp_path: Path) -> None:
 
 def test_unlimited_result_not_qualified_as_lower_bound(tmp_path: Path) -> None:
     """A result with no background-limited band prints a plain delta-Lw."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_plain.pdf"
     _result().report(str(out))
     text = _text(str(out))
@@ -201,6 +210,7 @@ def test_unlimited_result_not_qualified_as_lower_bound(tmp_path: Path) -> None:
 
 def test_manual_result_without_ci_delta_omits_adaptation_term(tmp_path: Path) -> None:
     """A hand-built result lacking CI,delta must not print a fabricated (+0)."""
+    pytest.importorskip("matplotlib")
     from phonometry.building.measurement.floor_covering_improvement import (
         FloorCoveringImprovementResult,
     )
@@ -220,6 +230,7 @@ def test_manual_result_without_ci_delta_omits_adaptation_term(tmp_path: Path) ->
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_xml.pdf"
     _result().report(str(out), metadata=_metadata(specimen='Carpet <A> & <B> "edge"'))
     assert_one_page(str(out))
@@ -227,6 +238,7 @@ def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
 
 def test_no_metadata_still_renders(tmp_path: Path) -> None:
     """Without metadata the header still shows the measured frequency range."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_bare.pdf"
     _result().report(str(out))
     assert_one_page(str(out))
@@ -234,6 +246,7 @@ def test_no_metadata_still_renders(tmp_path: Path) -> None:
 
 
 def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "iso16251_es.pdf"
     _result().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))
@@ -242,6 +255,7 @@ def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
 
 def test_characterisation_headline_without_rating_bands(tmp_path: Path) -> None:
     """A spectrum without the 16 rating bands boxes a characterisation, no number."""
+    pytest.importorskip("matplotlib")
     result = building.impact_improvement(
         [1.0, 2.0, 3.0], [0.0, 0.0, 0.0], frequencies=[500.0, 1000.0, 2000.0]
     )

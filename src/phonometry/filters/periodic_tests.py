@@ -111,7 +111,7 @@ from .._internal.validation import (
     require_count,
     require_positive,
 )
-from ..metrology.conformance import ConformanceVerification, verify_conformance
+from ..metrology import ConformanceVerification, verify_conformance
 from .compliance import _map_breakpoint
 
 if TYPE_CHECKING:

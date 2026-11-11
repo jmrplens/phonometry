@@ -55,7 +55,8 @@ import numpy as np
 from scipy import signal
 from scipy.interpolate import PchipInterpolator
 
-from ...io._resolve import apply_calibration, resolve_fs
+from ..._internal.loudness_statistics import ROUGHNESS_SETTLING_FRAMES
+from ..._internal.resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -64,8 +65,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
+    from ..._internal.signal import Signal
     from ..._internal.types import TwoPanels
-    from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
@@ -102,7 +103,6 @@ _DELTA_F = _R_TILDE / _SB_TILDE  # 2.9297 Hz DFT resolution (Formula 76)
 _K_ONE = _SB_TILDE // 2 + 1  # 257 one-sided modulation-rate bins
 _R_S50 = 50.0  # interpolated rate r_s50 (Clause 7.1.7)
 _DZ = 0.5  # critical-band overlap dz (Clause 7.1.9)
-_TRANSIENT = 16  # discard l50 in [0, 15] (Clause 7.1.8)
 _REFERENCE_FREQUENCY = 1000.0  # 1 kHz reference of the Clause 7.1.5 weightings
 _MAX_PEAKS = 10  # keep only the 10 most prominent spectral peaks (Clause 7.1.5.1)
 _HARMONIC_TOL = 0.04  # 4 % harmonic-deviation gate (Formula 90)
@@ -618,10 +618,18 @@ def _aggregate(
     r_time: np.ndarray,
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Average specific roughness, R(l50) and single value (Clause 7.1.8-7.1.10)."""
-    kept = r_time[_TRANSIENT:] if r_time.shape[0] > _TRANSIENT else r_time
+    kept = (
+        r_time[ROUGHNESS_SETTLING_FRAMES:]
+        if r_time.shape[0] > ROUGHNESS_SETTLING_FRAMES
+        else r_time
+    )
     r_spec = np.mean(kept, axis=0) if kept.shape[0] else np.zeros(_CBF)  # 7.1.8
     r_vs_time = _DZ * np.sum(r_time, axis=1)  # Formula 111
-    kept_time = r_vs_time[_TRANSIENT:] if r_vs_time.size > _TRANSIENT else r_vs_time
+    kept_time = (
+        r_vs_time[ROUGHNESS_SETTLING_FRAMES:]
+        if r_vs_time.size > ROUGHNESS_SETTLING_FRAMES
+        else r_vs_time
+    )
     r_single = float(np.percentile(kept_time, 90)) if kept_time.size else 0.0  # 7.1.10
     return r_single, np.asarray(r_spec, dtype=np.float64), r_vs_time
 

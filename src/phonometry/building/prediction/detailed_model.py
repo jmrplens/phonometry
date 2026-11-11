@@ -116,7 +116,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from ...fluids import Fluid
-from ...solids.catalogue import SolidMaterial
+from ...solids import SolidMaterial
 
 if TYPE_CHECKING:
     import os

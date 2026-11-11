@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 from scipy import signal
 
-from ..io._resolve import SignalInput, resolve_fs, resolve_samples
+from .._internal.resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
     import os
@@ -735,7 +735,7 @@ def _prepare_signal(
 
     A NaN or infinity anywhere in the signal would poison every gating
     block, empty the gate and silently read as digital silence (-inf). The
-    refusal is :func:`~phonometry.io._resolve.resolve_samples`', one layer
+    refusal is :func:`~phonometry._internal.resolve.resolve_samples`', one layer
     down, where every entry point on the contract gets the same one.
     """
     x_proc = np.atleast_2d(resolve_samples(x, calibrate=False))

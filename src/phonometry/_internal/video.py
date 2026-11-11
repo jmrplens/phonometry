@@ -53,16 +53,16 @@ from typing import TYPE_CHECKING, Any, Final, cast, get_args
 
 import numpy as np
 
-from .._internal.display import RichDisplay
-from .._internal.extras import install_hint
-from .._internal.json_input import beside_name, escaped, flushed, make_new, mode_of
-from .._internal.validation import (
+from .display import RichDisplay
+from .extras import install_hint
+from .json_input import beside_name, escaped, flushed, make_new, mode_of
+from .validation import (
     is_text,
     require_choice,
     require_positive,
     require_scalar,
 )
-from ._video_encoders import (
+from .video_encoders import (
     CONTAINER_CODECS,
     DEFAULT_VAAPI_DEVICE,
     FFMPEG_NAMES,
@@ -83,7 +83,7 @@ from ._video_encoders import (
     raw_arguments,
     video_arguments,
 )
-from ._video_quality import Quality
+from .video_quality import Quality
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
@@ -913,7 +913,7 @@ def encode(
     """Write *animation* as *request* says; return the name of the encoder that wrote it.
 
     :param ffmpeg: An ffmpeg already found and described
-        (:func:`~phonometry.io._video_encoders.describe`); ``None`` finds it.
+        (:func:`~phonometry._internal.video_encoders.describe`); ``None`` finds it.
     :param choice: An encoder already chosen for this video at its size,
         used without a second trial; ``None`` chooses one when the stream
         opens. Ignored for a GIF and for the caller's own ``ffmpeg_encoder``.

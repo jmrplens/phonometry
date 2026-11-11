@@ -152,6 +152,12 @@ FreeOrDiffuseField = Literal["free", "diffuse"]
 #: coupler) or a free field.
 CalibrationField = Literal["pressure", "free"]
 
+#: The four sound-speed equations of sea water, by the name each is chosen
+#: by: UNESCO (Chen and Millero), Del Grosso, Mackenzie and Medwin.
+#: ``fluids`` computes them and ``underwater`` records which one a profile
+#: was built with, so the choice is written here, where both can read it.
+SoundSpeedModel = Literal["unesco", "del_grosso", "mackenzie", "medwin"]
+
 #: A ground impedance class of the Nordtest classification, by its letter:
 #: ``"A"`` (very soft, snow or moss) to ``"H"`` (very hard, dense concrete),
 #: as CNOSSOS-EU and ECAC Doc 32 Table 5 rate a ground and IEC TS

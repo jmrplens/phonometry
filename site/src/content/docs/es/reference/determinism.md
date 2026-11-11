@@ -72,8 +72,8 @@ CI.
 ## Qué fija phonometry
 
 El camino de diseño determinista responde a cada puerta en su terreno, en
-`filters._weighting_design` y los módulos fijados que lo acompañan,
-`filters._pinned_log`, `filters._pinned_exp` y `filters._pinned_trig`:
+`filters._weighting_design` y los módulos fijados que lee,
+`_internal.pinned_log`, `_internal.pinned_exp` y `_internal.pinned_trig`:
 
 - **Sus propias reducciones.** Cada suma que el ajuste compara o con la que
   resuelve se pliega por pares en una forma que fija el código, y las
@@ -361,14 +361,14 @@ de CI.
 El relato de ingeniería completo vive con el código, en los docstrings de
 módulo de
 [`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py),
-[`filters/_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_log.py),
-[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py),
-[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py)
+[`_internal/pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_log.py),
+[`_internal/pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_exp.py),
+[`_internal/pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_trig.py)
 y
-[`filters/_pinned_roots.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_roots.py),
+[`_internal/pinned_roots.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/_internal/pinned_roots.py),
 y los tests que lo sostienen están en
 [`tests/filters/test_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_weighting_design.py)
-y los cuatro `tests/filters/test_pinned_*.py` que lo acompañan.
+y los cuatro `tests/test_internal_pinned_*.py`.
 
 ## Véase también
 

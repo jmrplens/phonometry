@@ -2,7 +2,7 @@
 """Every electroacoustic measurement takes a ``Signal`` in place of ``(x, fs)``.
 
 Same contract as ``signals``, ``filters`` and ``signals.levels``, held by
-``phonometry.io._resolve``: the object supplies the rate when ``fs`` is
+``phonometry._internal.resolve``: the object supplies the rate when ``fs`` is
 omitted and a disagreeing explicit one raises, a bare array still demands
 its rate by name, and a calibrated Signal is analysed in pascals.
 

@@ -89,6 +89,7 @@ def _text(path: str) -> str:
 
 
 def test_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "airflow.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -102,6 +103,7 @@ def test_displayed_values_match_oracle(tmp_path: Path) -> None:
     of the library: R_s = a + b*u_eval, R = R_s/A, sigma = R_s/d, all evaluated
     at the reference velocity u = 0.5 mm/s.
     """
+    pytest.importorskip("matplotlib")
     assert round(_RS) == 16200
     assert round(_SIGMA) == 324000
     assert round(_R) == 2062648
@@ -121,6 +123,7 @@ def test_displayed_values_match_oracle(tmp_path: Path) -> None:
 
 def test_metadata_and_fit_rows_appear(tmp_path: Path) -> None:
     """The specimen thickness and the through-origin fit coefficients appear."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "airflow.pdf"
     _result().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -132,6 +135,7 @@ def test_metadata_and_fit_rows_appear(tmp_path: Path) -> None:
 
 
 def test_no_metadata_still_renders(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "airflow_bare.pdf"
     _result().report(str(out))
     assert_one_page(str(out))
@@ -140,6 +144,7 @@ def test_no_metadata_still_renders(tmp_path: Path) -> None:
 
 def test_no_thickness_omits_resistivity(tmp_path: Path) -> None:
     """Without a thickness the fiche prints no airflow-resistivity row/term."""
+    pytest.importorskip("matplotlib")
     u = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 12.0]) * 1e-3
     dp = _A_COEFF * u + _B_COEFF * u**2
     result = materials.static_airflow_resistance(u, dp, area=_AREA)
@@ -164,12 +169,14 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "airflow_xml.pdf"
     _result().report(str(out), metadata=_metadata(specimen='Foam <A> & <B> "edge"'))
     assert_one_page(str(out))
 
 
 def test_spanish_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "airflow_es.pdf"
     _result().report(str(out), metadata=_metadata(), language="es")
     assert_one_page(str(out))

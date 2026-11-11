@@ -103,7 +103,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import PhonometryWarning, warn_caller
-from ..room.steady_field import room_constant
+from ..room import room_constant
 from .duct_modes import plane_wave_limit
 
 if TYPE_CHECKING:

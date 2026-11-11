@@ -233,11 +233,8 @@ def _absorption_coefficient(
     """
     import warnings
 
-    from ..environment.propagation.air_absorption import (
-        _FREQ_RANGE,
-        AtmosphericAbsorptionWarning,
-        air_attenuation,
-    )
+    from .._internal.air_absorption import _FREQ_RANGE
+    from ..environment import AtmosphericAbsorptionWarning, air_attenuation
 
     with warnings.catch_warnings():
         if frequencies.max() <= _FREQ_RANGE[1]:

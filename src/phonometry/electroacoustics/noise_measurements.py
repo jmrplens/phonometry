@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ..io._resolve import resolve_fs
+from .._internal.resolve import resolve_fs
 from .distortion import (
     _AES17_BANDWIDTH_HZ,
     _AES17_HIGHPASS_HZ,
@@ -45,8 +45,8 @@ from .distortion import (
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
+    from .._internal.signal import Signal
     from .._internal.types import WindowSpec
-    from ..io._signal import Signal
 
 __all__ = [
     "dynamic_range",

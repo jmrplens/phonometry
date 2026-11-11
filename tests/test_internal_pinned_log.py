@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """The pinned logarithm returns :func:`math.log`'s own bits.
 
-``_pinned_log`` exists so the weighting fit can take its logarithms at numpy
+``pinned_log`` exists so the weighting fit can take its logarithms at numpy
 speed without moving a single shipped coefficient, and that claim is only as
 good as the bit-for-bit agreement with the elementwise :func:`math.log` it
 replaced. These tests pin a deterministic slice of the validation that
@@ -20,8 +20,12 @@ import numpy as np
 import pytest
 from libm_identity import on_the_pinned_libm
 
+from phonometry._internal.pinned_log import (
+    _fused_multiply_add,
+    pinned_log,
+    pinned_log10,
+)
 from phonometry.filters import _weighting_design
-from phonometry.filters._pinned_log import _fused_multiply_add, pinned_log, pinned_log10
 from phonometry.filters.weighting import _analog_weighting_zpk, _fit_band
 
 

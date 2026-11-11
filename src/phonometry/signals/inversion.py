@@ -47,6 +47,9 @@ from typing import TYPE_CHECKING, Any, Protocol
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import SignalInput, apply_calibration
+from .._internal.resolve import resolve_fs as _resolve_signal_fs
+from .._internal.signal import Signal
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     real_number,
@@ -55,9 +58,6 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..io._resolve import SignalInput, apply_calibration
-from ..io._resolve import resolve_fs as _resolve_signal_fs
-from ..io._signal import Signal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

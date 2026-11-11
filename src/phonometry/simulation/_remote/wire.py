@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.validation import real_number
-from ...io._video import VideoOptions
+from ..._internal.video import VideoOptions
 from .. import elastic_fdtd, fdtd
 from ..video import AnimationFrame
 

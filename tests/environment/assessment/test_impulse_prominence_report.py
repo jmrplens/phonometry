@@ -53,6 +53,7 @@ def _extract_text(path: str) -> str:
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
     """An impulse set renders a one-page PDF fiche."""
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "impulse.pdf"
     returned = result.report(str(out))
@@ -83,6 +84,7 @@ def test_report_states_prominence_and_adjustment(tmp_path: Path) -> None:
     adjustment follows Formula 2. The extracted text must carry the boxed
     governing prominence, the adjustment value and the standard basis.
     """
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "impulse.pdf"
     result.report(str(out))
@@ -99,6 +101,7 @@ def test_report_states_prominence_and_adjustment(tmp_path: Path) -> None:
 
 def test_metadata_appears_and_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders one page and prints its fields."""
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         specimen="Pile-driving site, intermittent hammering",
         client="Acoustic Test Client Ltd.",
@@ -124,6 +127,7 @@ def test_metadata_appears_and_one_page(tmp_path: Path) -> None:
 
 def test_requirement_pass_and_fail_both_render(tmp_path: Path) -> None:
     """A PASS and a FAIL prominence limit both render one page."""
+    pytest.importorskip("matplotlib")
     result = _result()
     p = result.prominence
     passing = tmp_path / "pass.pdf"
@@ -143,6 +147,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
     reject a bare ``&`` or ``<``) *and* appear intact in the rendered PDF text,
     so the fiche cannot silently omit or mangle the client's metadata.
     """
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="hammer <A> & pile",
@@ -165,6 +170,7 @@ def test_report_escapes_xml_specials_in_metadata(tmp_path: Path) -> None:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "impulse_es.pdf"
@@ -187,6 +193,7 @@ def test_verdict_compares_unrounded_prominence(tmp_path: Path) -> None:
     of 12.247 is just below it, so the assessment must FAIL even though the
     displayed P would round to the same two decimals as a passing value would.
     """
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "boundary.pdf"
     requirement = result.prominence - 1e-3  # just below the unrounded P
@@ -200,6 +207,7 @@ def test_verdict_compares_unrounded_prominence(tmp_path: Path) -> None:
 
 def test_verdict_passes_at_the_requirement(tmp_path: Path) -> None:
     """A governing prominence at the requirement passes (``<=``)."""
+    pytest.importorskip("matplotlib")
     result = _result()
     out = tmp_path / "atlimit.pdf"
     result.report(str(out), metadata=ReportMetadata(requirement=result.prominence))
@@ -214,6 +222,7 @@ def test_oversized_impulse_set_stays_one_page(tmp_path: Path) -> None:
     highest-prominence rows (including the governing impulse), add an explicit
     ``... plus N more`` note and still render as a single A4 page.
     """
+    pytest.importorskip("matplotlib")
     import warnings
 
     import numpy as np
@@ -279,6 +288,7 @@ def test_non_prominent_impulse_reports_zero_adjustment(tmp_path: Path) -> None:
     zero; the prominence note and boxed KI stay consistent.
     """
     # onset rate 15 dB/s, level difference 5 dB: P = 3*lg(15) + 2*lg(5) = 4.925.
+    pytest.importorskip("matplotlib")
     result = nt.impulse_prominence([15.0], [5.0])
     out = tmp_path / "weak.pdf"
     result.report(str(out))
@@ -299,6 +309,7 @@ def test_non_qualifying_set_justifies_on_the_onset_gate(tmp_path: Path) -> None:
     exceeds 5, so a "P <= 5" justification would contradict the fiche's own
     boxed number.
     """
+    pytest.importorskip("matplotlib")
     with pytest.warns(nt.ImpulseProminenceWarning):
         result = nt.impulse_prominence([10.0, 8.0], [40.0, 30.0])
     assert result.adjustment == 0.0
@@ -314,6 +325,7 @@ def test_non_qualifying_set_justifies_on_the_onset_gate(tmp_path: Path) -> None:
 
 def test_assessment_period_reflects_the_analysed_interval(tmp_path: Path) -> None:
     """The header prints the analysed interval, defaulting to the 30 min default."""
+    pytest.importorskip("matplotlib")
     default_out = tmp_path / "default.pdf"
     _result().report(str(default_out))
     assert "30 min" in _extract_text(str(default_out))

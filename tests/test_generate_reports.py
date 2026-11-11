@@ -84,6 +84,19 @@ def test_every_registered_fiche_is_committed() -> None:
     )
 
 
+def _skip_where_the_figure_needs_matplotlib(error: ImportError) -> None:
+    """Skip a fiche whose figure cannot be drawn because matplotlib is missing.
+
+    A fiche with a figure stops on matplotlib's ``ModuleNotFoundError``, or on
+    the library's install hint raised from it; a fiche without one, as the ISO
+    4871 declaration, renders with the ``report`` extra alone and runs. Any
+    other ``ImportError`` is left to fail.
+    """
+    for raised in (error, error.__cause__):
+        if isinstance(raised, ImportError) and raised.name == "matplotlib":
+            pytest.skip(str(error))
+
+
 @pytest.mark.parametrize(
     "factory", _MODULE._EXAMPLES, ids=lambda factory: factory.__name__.strip("_")
 )
@@ -93,7 +106,11 @@ def test_each_example_writes_a_one_page_pdf_and_preview(
     from PIL import Image
     from pypdf import PdfReader
 
-    written = _MODULE.generate_reports(str(tmp_path), examples=[factory])
+    try:
+        written = _MODULE.generate_reports(str(tmp_path), examples=[factory])
+    except ImportError as error:
+        _skip_where_the_figure_needs_matplotlib(error)
+        raise
     assert len(written) == 1
     p = pathlib.Path(written[0])
     # The factory writes the file it is registered under. This is what lets

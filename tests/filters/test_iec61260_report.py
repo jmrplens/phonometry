@@ -67,6 +67,7 @@ def test_the_filter_verdict_carries_the_bank_data() -> None:
 
 def test_class1_bank_reports_complies(tmp_path: Path) -> None:
     """A class-1 bank renders a valid one-page COMPLIES fiche."""
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(_class1_bank())
     assert result.overall_class == 1
     out = tmp_path / "iec.pdf"
@@ -77,6 +78,7 @@ def test_class1_bank_reports_complies(tmp_path: Path) -> None:
 
 def test_1995_edition_reports_class0(tmp_path: Path) -> None:
     """The 1995 edition keeps class 0; a high-order bank renders a Class 0 fiche."""
+    pytest.importorskip("matplotlib")
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
     result = filters.verify_filter_class(bank, edition="1995")
     assert result.edition == "1995"
@@ -94,6 +96,7 @@ def test_1995_edition_reports_class0(tmp_path: Path) -> None:
 
 def test_full_metadata_renders_one_page(tmp_path: Path) -> None:
     """A populated ReportMetadata renders a one-page filter-compliance fiche."""
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(_class1_bank())
     md = ReportMetadata(
         specimen="1/1-octave filter bank",
@@ -124,6 +127,7 @@ def test_unknown_engine_rejected(tmp_path: Path) -> None:
 
 def test_required_class_pass_and_fail_both_render(tmp_path: Path) -> None:
     """A PASS (class 1 meets required 1) and a FAIL (meets no class) both render."""
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(_class1_bank())
     assert result.overall_class == 1
     passing = tmp_path / "pass.pdf"
@@ -146,6 +150,7 @@ def test_required_class_missing_from_edition_rejected(tmp_path: Path) -> None:
     against a 2014 verification would silently render a meaningless FAIL, so
     it is rejected with a pointer to the 1995 edition.
     """
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(_class1_bank())
     out = str(tmp_path / "class0.pdf")
     meta = ReportMetadata(required_class=0)
@@ -162,6 +167,7 @@ def test_fiche_labels_bands_with_nominal_frequencies(tmp_path: Path) -> None:
     (2014 5.5 / 1995 4.2): the fiche must print 125 Hz and 4 kHz, never the
     exact base-ten 125.89.. / 3981.. Hz behind them.
     """
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(_class1_bank())
     out = tmp_path / "nominal.pdf"
     result.report(str(out))
@@ -180,6 +186,7 @@ def test_range_limited_verdict_prints_qualifying_note(tmp_path: Path) -> None:
     carries ``range_limited`` and the fiche prints the qualification next to
     the stated class.
     """
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(
         filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
     )
@@ -201,6 +208,7 @@ def test_a_full_mask_verdict_prints_no_range_note(tmp_path: Path) -> None:
     breakpoint, so the result is not ``range_limited`` and the fiche states
     the class without the half-sampling-frequency qualification.
     """
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(
         filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 1000])
     )
@@ -224,6 +232,7 @@ def test_the_range_note_does_not_credit_the_decimation(
     A decimated band is graded on its alias images, not excused from them by
     its anti-aliasing filter, so the fiche says the same of both banks.
     """
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(
         filters.OctaveFilterBank(
             fs=48000,
@@ -244,6 +253,7 @@ def test_the_range_note_does_not_credit_the_decimation(
 
 def test_non_compliant_bank_renders(tmp_path: Path) -> None:
     """A low-order bank that meets no class renders its non-compliance fiche."""
+    pytest.importorskip("matplotlib")
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=1, limits=[500, 2000])
     result = filters.verify_filter_class(bank)
     assert result.overall_class is None
@@ -286,6 +296,7 @@ def _extract_text(path: str) -> str:
 
 def test_spanish_report_renders_translated_fiche(tmp_path: Path) -> None:
     """``language="es"`` renders a one-page Spanish fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     result = filters.verify_filter_class(_class1_bank())
@@ -306,6 +317,7 @@ def test_fiche_prints_the_three_requirements(tmp_path: Path) -> None:
     summation of 5.16, each with its class and binding margin, the last two
     with the range of the deviation they grade.
     """
+    pytest.importorskip("matplotlib")
     result = filters.verify_filter_class(_class1_bank())
     out = tmp_path / "requirements.pdf"
     result.report(str(out))
@@ -325,6 +337,7 @@ def test_fiche_names_summation_when_it_binds(tmp_path: Path) -> None:
     48 kHz, sum to +0.802 dB about the input, past the +0.8 dB of 5.16; the
     fiche says which requirement binds.
     """
+    pytest.importorskip("matplotlib")
     bank = filters.OctaveFilterBank(
         fs=48000, fraction=3, order=4, limits=[10000, 20000]
     )
@@ -345,6 +358,7 @@ def test_fiche_of_a_bank_with_no_inner_band_cites_what_it_graded(
     tmp_path: Path,
 ) -> None:
     """Two bands carry no summation, and the basis line does not claim 5.16."""
+    pytest.importorskip("matplotlib")
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 1000])
     result = filters.verify_filter_class(bank)
     out = tmp_path / "two_bands.pdf"
@@ -357,6 +371,7 @@ def test_fiche_of_a_bank_with_no_inner_band_cites_what_it_graded(
 
 def test_1995_fiche_carries_its_requirement_table(tmp_path: Path) -> None:
     """The 1995 edition is graded on Table 1, 4.5.3 and 4.9, by its clause numbers."""
+    pytest.importorskip("matplotlib")
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[250, 4000])
     result = filters.verify_filter_class(bank, edition="1995")
     assert result.requirements == (

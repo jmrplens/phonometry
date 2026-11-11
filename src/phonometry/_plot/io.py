@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
-    from ..io._signal import Signal
+    from .._internal.signal import Signal
 
 from .._internal.validation import require_choice
 from .common import (
@@ -58,13 +58,14 @@ def _db_waveform(y: np.ndarray, *, calibrated: bool) -> np.ndarray:
             "and there is no reference to count decibels from"
         )
         raise ValueError(msg)
-    # Deferred, not tidiness: signals.levels imports io, so reaching for
-    # the reference pressure at module level here is an import cycle that
-    # takes down `import phonometry` outright.
-    from ..signals.levels import _REF_PRESSURE
+    # Inside the function because a renderer runs domain code only when it
+    # draws (A9), and through the package that publishes the table: a module
+    # inside metrology would take its lock before the package's.
+    from ..metrology import REFERENCE_VALUES
 
+    reference_pressure = REFERENCE_VALUES["gas"]["sound_pressure"].value
     with np.errstate(divide="ignore"):
-        return 20.0 * np.log10(np.abs(y) / _REF_PRESSURE)
+        return 20.0 * np.log10(np.abs(y) / reference_pressure)
 
 
 def _draw_channels(

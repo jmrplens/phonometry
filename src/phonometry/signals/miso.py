@@ -61,6 +61,8 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.resolve import resolve_fs, resolve_pair_fs, resolve_samples
+from .._internal.signal import Signal
 from .._internal.types import own_window
 from .._internal.validation import (
     indices_of,
@@ -69,18 +71,15 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..io._resolve import resolve_fs, resolve_pair_fs, resolve_samples
-from ..io._signal import Signal
-from .spectra import (
+from .._internal.welch import (
     _noverlap_samples,
     _positive,
-    _segment_statistics,
-    _validate_scaling,
     _validate_signal,
     _validate_welch_params,
     _welch_autospectrum,
     _welch_cross_spectrum,
 )
+from .spectra import _segment_statistics, _validate_scaling
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

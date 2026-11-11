@@ -78,7 +78,7 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..room.steady_field import room_constant
+from ..room import room_constant
 
 if TYPE_CHECKING:
     import os

@@ -106,6 +106,7 @@ if TYPE_CHECKING:
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, weighted_energy_mean
+from .._internal.sound_power import _a_weighting_corrections
 from .._internal.types import BAND_SET_NAMES, ReportEngine
 from .._internal.validation import (
     check_engine,
@@ -122,8 +123,8 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import advisories_held, warn_caller
-from ..metrology.reference_values import REFERENCE_VALUES
-from ._shared import Grade, SoundPowerWarning, _a_weighting_corrections, _check_grade
+from ..metrology import REFERENCE_VALUES
+from ._shared import Grade, SoundPowerWarning, _check_grade
 from .intensity import dynamic_capability_index
 
 #: Reference sound power, in watts (ISO 9614-2, 3.6.3; ISO 1683:2015 Table 1).

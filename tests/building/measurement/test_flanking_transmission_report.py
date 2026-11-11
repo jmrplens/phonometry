@@ -125,6 +125,7 @@ def _lnf_result() -> building.FlankingImpactLevelResult:
 # --------------------------------------------------------------------------- #
 def test_kij_fiche_renders_single_number_and_basis(tmp_path: Path) -> None:
     """The Kij fiche boxes the Annex A mean and names ISO 10848-1."""
+    pytest.importorskip("matplotlib")
     result = _kij_result()
     out = tmp_path / "kij.pdf"
     result.report(str(out), metadata=ReportMetadata(specimen="Rigid junction"))
@@ -141,6 +142,7 @@ def test_kij_fiche_renders_single_number_and_basis(tmp_path: Path) -> None:
 
 def test_kij_fiche_verbose_adds_membership_column(tmp_path: Path) -> None:
     """``verbose=True`` adds the single-number-membership column."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "kij_verbose.pdf"
     _kij_result().report(str(out), verbose=True)
     assert_one_page(str(out))
@@ -189,6 +191,7 @@ def test_kij_fiche_distinguishes_all_bracketed_from_out_of_range(
     tmp_path: Path,
 ) -> None:
     """An empty mean states why: every in-range band bracketed (M < 0,25)."""
+    pytest.importorskip("matplotlib")
     result = building.vibration_reduction_index(
         _DV,
         junction_length=4.0,
@@ -211,6 +214,7 @@ def test_kij_fiche_distinguishes_all_bracketed_from_out_of_range(
 
 def test_kij_fiche_states_no_bands_in_annex_a_range(tmp_path: Path) -> None:
     """A spectrum entirely outside the Annex A range keeps the range message."""
+    pytest.importorskip("matplotlib")
     high_freqs = [1600.0, 2000.0, 2500.0]
     result = building.vibration_reduction_index(
         [10.0, 11.0, 12.0],
@@ -241,6 +245,7 @@ def test_kij_fiche_without_frequencies_rejected(tmp_path: Path) -> None:
 
 def test_kij_fiche_spanish(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish Kij fiche with comma decimals."""
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "kij_es.pdf"
@@ -256,6 +261,7 @@ def test_kij_fiche_spanish(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------- #
 def test_dnf_fiche_rating_and_basis(tmp_path: Path) -> None:
     """The Dn,f fiche boxes the ISO 717-1 rating and names ISO 10848-2."""
+    pytest.importorskip("matplotlib")
     result = _dnf_result()
     rating = result.rating
     assert rating is not None
@@ -271,6 +277,7 @@ def test_dnf_fiche_rating_and_basis(tmp_path: Path) -> None:
 
 def test_dnf_fiche_verbose_and_verdict(tmp_path: Path) -> None:
     """Verbose annexes the ISO 717 evaluation; the requirement passes."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "dnf_verbose.pdf"
     _dnf_result().report(
         str(out), metadata=ReportMetadata(requirement=55.0), verbose=True
@@ -283,6 +290,7 @@ def test_dnf_fiche_verbose_and_verdict(tmp_path: Path) -> None:
 
 def test_dnf_fiche_part_selects_basis_designation(tmp_path: Path) -> None:
     """``part`` selects the governing ISO 10848 part named in the basis line."""
+    pytest.importorskip("matplotlib")
     result = _dnf_result()
     for part, designation in ((3, "ISO 10848-3:2006"), (4, "ISO 10848-4:2010")):
         out = tmp_path / f"dnf_part{part}.pdf"
@@ -318,6 +326,7 @@ def test_dnf_fiche_without_rating_rejected(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------- #
 def test_lnf_fiche_rating_and_basis(tmp_path: Path) -> None:
     """The Ln,f fiche boxes the ISO 717-2 rating and names ISO 10848-2."""
+    pytest.importorskip("matplotlib")
     result = _lnf_result()
     rating = result.rating
     assert rating is not None
@@ -333,6 +342,7 @@ def test_lnf_fiche_rating_and_basis(tmp_path: Path) -> None:
 
 def test_lnf_fiche_part_selects_basis_designation(tmp_path: Path) -> None:
     """``part=4`` names ISO 10848-4:2010 on the Ln,f basis line."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "lnf_part4.pdf"
     _lnf_result().report(str(out), part=4)
     assert_one_page(str(out))
@@ -343,6 +353,7 @@ def test_lnf_fiche_part_selects_basis_designation(tmp_path: Path) -> None:
 
 def test_lnf_fiche_spanish(tmp_path: Path) -> None:
     """``language="es"`` renders the Spanish Ln,f fiche."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "lnf_es.pdf"
     _lnf_result().report(str(out), language="es")
     assert_one_page(str(out))

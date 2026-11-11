@@ -73,6 +73,7 @@ def _text(path: str) -> str:
 
 
 def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "reverb.pdf"
     returned = _result().report(str(out))
     assert returned == str(out)
@@ -80,12 +81,14 @@ def test_report_writes_one_page_pdf(tmp_path: Path) -> None:
 
 
 def test_report_with_metadata_one_page(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "reverb_meta.pdf"
     _result().report(str(out), metadata=_metadata())
     assert_one_page(str(out))
 
 
 def test_no_metadata_still_renders(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     out = tmp_path / "reverb_bare.pdf"
     _result().report(str(out), metadata=None)
     assert_one_page(str(out))
@@ -107,6 +110,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
 
 def test_all_model_names_render(tmp_path: Path) -> None:
     """The five model column headers appear in the rendered fiche text."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "models.pdf"
     _result().report(str(out), metadata=_metadata())
     text = _text(str(out))
@@ -116,6 +120,7 @@ def test_all_model_names_render(tmp_path: Path) -> None:
 
 def test_band_labels_and_per_model_values_render(tmp_path: Path) -> None:
     """Nominal band labels and closed-form per-model T (2 decimals) render."""
+    pytest.importorskip("matplotlib")
     res = _result()
     out = tmp_path / "values.pdf"
     res.report(str(out), metadata=_metadata())
@@ -131,6 +136,7 @@ def test_band_labels_and_per_model_values_render(tmp_path: Path) -> None:
 
 def test_mid_frequency_prediction_descriptor_renders(tmp_path: Path) -> None:
     """The boxed Arau-Puchades mid-frequency prediction appears in the text."""
+    pytest.importorskip("matplotlib")
     res = _result()
     out = tmp_path / "mid.pdf"
     res.report(str(out), metadata=_metadata())
@@ -144,6 +150,7 @@ def test_mid_frequency_prediction_descriptor_renders(tmp_path: Path) -> None:
 
 def test_prediction_has_no_pass_fail_verdict(tmp_path: Path) -> None:
     """A prediction never invents a PASS/FAIL verdict, even with a target."""
+    pytest.importorskip("matplotlib")
     out = tmp_path / "noverdict.pdf"
     _result().report(str(out), metadata=_metadata(requirement=0.8))
     text = _text(str(out))
@@ -154,6 +161,7 @@ def test_prediction_has_no_pass_fail_verdict(tmp_path: Path) -> None:
 
 
 def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     md = ReportMetadata(
         client="Ac & Co <Ltd>",
         specimen="hall <A> & foyer",
@@ -167,6 +175,7 @@ def test_metadata_xml_specials_do_not_break(tmp_path: Path) -> None:
 
 
 def test_spanish_fiche_uses_comma_decimal(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     import re
 
     out = tmp_path / "reverb_es.pdf"
@@ -186,6 +195,7 @@ def test_a_prediction_without_the_mid_octaves_states_its_first_band(
     """Without both the 500 Hz and the 1 kHz octaves there is no mid-frequency
     mean: the fiche states the first finite band and makes no 500-1000 Hz claim.
     """
+    pytest.importorskip("matplotlib")
     res = room.reverberation_time_models(
         (8.0, 5.0, 3.0),
         (_TREATED[:2], _SIDE[:2], _FLOOR[:2]),

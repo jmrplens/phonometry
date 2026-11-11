@@ -31,8 +31,8 @@ import matplotlib as mpl
 import refusing_disk
 
 from phonometry import io
+from phonometry._internal.video import video_request
 from phonometry.io import VideoOptions
-from phonometry.io._video import video_request
 from phonometry.simulation import (
     AnimationFrame,
     Compute,
@@ -536,7 +536,7 @@ def test_an_interrupt_once_the_answer_is_in_leaves_no_partial_file(
 ) -> None:
     # The whole answer has been read and the file closed; an interrupt then,
     # before the file takes path's place, left it under its hidden name.
-    from phonometry.io import _video as io_video
+    from phonometry._internal import video as io_video
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     target = tmp_path / "kept.webm"
@@ -833,7 +833,7 @@ def test_a_node_s_video_written_over_a_file_is_private_while_written_and_keeps_i
 def test_a_disk_that_refuses_a_node_s_finished_video_s_bits_leaves_what_was_there(
     node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from phonometry.io import _video as io_video
+    from phonometry._internal import video as io_video
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     target = tmp_path / "kept.webm"

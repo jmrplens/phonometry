@@ -42,7 +42,7 @@ air_absorption_area(
 ) -> float
 
 air_absorption_area(
-    m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     volume: float,
     object_fraction: float = 0.0,
 ) -> NDArray[np.float64]
@@ -145,7 +145,17 @@ Total equivalent sound absorption area (Formula 1).
 ## hard_object_absorption
 
 ```python
-hard_object_absorption(object_volume: NumericArrayLike) -> np.ndarray
+hard_object_absorption(
+    object_volume: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+hard_object_absorption(
+    object_volume: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+hard_object_absorption(
+    object_volume: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent absorption area of a hard object (Formula 4).
@@ -159,7 +169,7 @@ furniture) whose equivalent area is not otherwise available.
 | :--- | :--- |
 | `object_volume` | Volume `Vobj` of the hard object(s), m3. |
 
-**Returns:** The equivalent absorption area $A_{\text{obj}} = V_{\text{obj}}^{2/3}$, m2.
+**Returns:** The equivalent absorption area $A_{\text{obj}} = V_{\text{obj}}^{2/3}$, m2; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -202,7 +212,7 @@ reverberation_time(
 ) -> float
 
 reverberation_time(
-    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     volume: float,
     *,
     object_fraction: float = 0.0,
@@ -242,9 +252,9 @@ Reverberation time from the equivalent absorption area (Formula 5).
 
 ```python
 ReverberationResult(
-    frequencies: np.ndarray,
-    absorption_area: np.ndarray,
-    reverberation_time: np.ndarray,
+    frequencies: NDArray[np.float64],
+    absorption_area: NDArray[np.float64],
+    reverberation_time: NDArray[np.float64],
     volume: float,
     object_fraction: float,
 )

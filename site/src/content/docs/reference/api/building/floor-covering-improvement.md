@@ -58,10 +58,22 @@ results (Clause 8 e)) also carries the spectrum adaptation term `CI,Δ` (ISO
 
 ```python
 acceleration_level(
+    acceleration: float | np.floating[Any] | np.integer[Any],
+    *,
+    reference: float = ...,
+) -> float
+
+acceleration_level(
+    acceleration: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    reference: float = ...,
+) -> NDArray[np.float64]
+
+acceleration_level(
     acceleration: NumericArrayLike,
     *,
-    reference: float = 1e-06,
-) -> np.ndarray
+    reference: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Vibratory acceleration level `La` (ISO 16251-1 Formula (1)).
@@ -75,7 +87,7 @@ $L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_
 | `acceleration` | RMS acceleration `a_rms` per band, in m/s² (> 0). |
 | `reference` | Reference acceleration `a0`, in m/s² (default 1e-6). |
 
-**Returns:** The acceleration level `La` per band, in dB.
+**Returns:** The acceleration level `La` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -199,11 +211,11 @@ Requires matplotlib (the `[plot]` extra).
 
 ```python
 FloorCoveringImprovementResult(
-    frequencies: np.ndarray,
-    improvement: np.ndarray,
+    frequencies: NDArray[np.float64],
+    improvement: NDArray[np.float64],
     delta_lw: int | None,
     ci_delta: int | None = None,
-    background_margin_db: np.ndarray | None = None,
+    background_margin_db: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -390,8 +402,8 @@ each octave.
 
 ```python
 OctaveBandSpectrum(
-    frequencies: np.ndarray,
-    values: np.ndarray,
+    frequencies: NDArray[np.float64],
+    values: NDArray[np.float64],
     quantity: Literal['ΔL', 'ΔR', 'Rs', 'LI', 'LI,norm'],
 )
 ```

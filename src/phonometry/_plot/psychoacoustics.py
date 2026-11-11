@@ -28,6 +28,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -556,10 +557,10 @@ def plot_ecma_tonality(
 
 @overload
 def _plot_hms_time_and_heatmap(
-    time: np.ndarray,
-    vs_time: np.ndarray,
-    spec_vs_time: np.ndarray,
-    bark: np.ndarray,
+    time: NDArray[np.float64],
+    vs_time: NDArray[np.float64],
+    spec_vs_time: NDArray[np.float64],
+    bark: NDArray[np.float64],
     ax: None,
     color: str,
     ylabel: str,
@@ -572,10 +573,10 @@ def _plot_hms_time_and_heatmap(
 
 @overload
 def _plot_hms_time_and_heatmap(
-    time: np.ndarray,
-    vs_time: np.ndarray,
-    spec_vs_time: np.ndarray,
-    bark: np.ndarray,
+    time: NDArray[np.float64],
+    vs_time: NDArray[np.float64],
+    spec_vs_time: NDArray[np.float64],
+    bark: NDArray[np.float64],
     ax: Axes,
     color: str,
     ylabel: str,
@@ -587,10 +588,10 @@ def _plot_hms_time_and_heatmap(
 
 
 def _plot_hms_time_and_heatmap(
-    time: np.ndarray,
-    vs_time: np.ndarray,
-    spec_vs_time: np.ndarray,
-    bark: np.ndarray,
+    time: NDArray[np.float64],
+    vs_time: NDArray[np.float64],
+    spec_vs_time: NDArray[np.float64],
+    bark: NDArray[np.float64],
     ax: Axes | None,
     color: str,
     ylabel: str,
@@ -889,14 +890,14 @@ def plot_tone_assessment(
     ratio = float(result.ratio_db)
     criterion = float(result.prominence_limit_db)
 
-    def _tnr(f: np.ndarray) -> np.ndarray:
+    def _tnr(f: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.where(
             f < _CRITERION_PLATEAU_HZ,
             8.0 + 8.33 * np.log10(_CRITERION_PLATEAU_HZ / f),
             8.0,
         )
 
-    def _pr(f: np.ndarray) -> np.ndarray:
+    def _pr(f: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.where(
             f < _CRITERION_PLATEAU_HZ,
             9.0 + 10.0 * np.log10(_CRITERION_PLATEAU_HZ / f),

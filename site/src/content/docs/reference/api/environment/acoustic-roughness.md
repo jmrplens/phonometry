@@ -364,9 +364,33 @@ redistributed_band_energies(
     source_lower: NumericArrayLike,
     source_upper: NumericArrayLike,
     energies: NumericArrayLike,
-    target_lower: NumericArrayLike,
+    target_lower: float | np.floating[Any] | np.integer[Any],
+    target_upper: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+redistributed_band_energies(
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     target_upper: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+redistributed_band_energies(
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: float | np.floating[Any] | np.integer[Any],
+    target_upper: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+redistributed_band_energies(
+    source_lower: NumericArrayLike,
+    source_upper: NumericArrayLike,
+    energies: NumericArrayLike,
+    target_lower: NumericArrayLike,
+    target_upper: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Band energies moved onto other bands in proportion to their overlap (Annex C).
@@ -399,7 +423,7 @@ band is dropped.
 | `target_lower` | Lower edges of the target bands, on the same axis. |
 | `target_upper` | Their upper edges. |
 
-**Returns:** The energy of each target band.
+**Returns:** The energy of each target band. A `float` when `target_lower` and `target_upper` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -111,6 +111,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike, ReportEngine
@@ -192,7 +193,7 @@ _TABLE2_OTHER_ROOM_LOCATIONS = 2
 
 def _octave_frequencies(
     frequencies: NumericArrayLike, n_bands: int, table: str = f"{_STANDARD}, Table B.1"
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The nominal octave mid-band frequencies, one per band, all in Table B.1,
     distinct and ascending.
 
@@ -229,7 +230,9 @@ def _octave_frequencies(
     return freqs
 
 
-def _finite(value: NumericArrayLike, name: str, ndims: tuple[int, ...]) -> np.ndarray:
+def _finite(
+    value: NumericArrayLike, name: str, ndims: tuple[int, ...]
+) -> NDArray[np.float64]:
     """A finite, non-empty float array of one of the admissible ranks.
 
     :raises ValueError: naming the argument, for any other rank or a
@@ -246,7 +249,9 @@ def _finite(value: NumericArrayLike, name: str, ndims: tuple[int, ...]) -> np.nd
     return arr
 
 
-def _k1_eq13(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _k1_eq13(
+    delta: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.bool_]]:
     r"""``K1`` from the background margin, with the three rules of 8.1.3.
 
     Above 15 dB the correction is zero, from 6 dB to 15 dB it is Eq. (13),
@@ -270,7 +275,7 @@ def _k1_eq13(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     )
 
 
-def _margin_met(margin: np.ndarray) -> np.ndarray:
+def _margin_met(margin: NDArray[np.float64]) -> NDArray[np.bool_]:
     """Where a margin over the background reached the 6 dB of 4.5, judged settled.
 
     A band with no background measured carries a ``NaN`` margin and is not met.
@@ -279,7 +284,7 @@ def _margin_met(margin: np.ndarray) -> np.ndarray:
         return np.asarray(settled(margin) >= _K1_VALID_DB, dtype=bool)
 
 
-def _table3_sigma(frequencies: np.ndarray) -> np.ndarray:
+def _table3_sigma(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """Table 3 per band; ``NaN`` at 63 Hz, which the table does not reach."""
     return np.array(
         [
@@ -358,19 +363,19 @@ class HardWalledSoundPowerResult(OwnsArrays):
         {"sigma_r0": "dB", "sigma_r0_a": "dB"}
     )
 
-    frequencies: np.ndarray
-    sound_power_level: np.ndarray
-    sound_energy_level: np.ndarray
-    mean_source_level: np.ndarray
-    mean_reference_level: np.ndarray
-    mean_background_level: np.ndarray
-    reference_power_level: np.ndarray
-    background_correction: np.ndarray
-    reference_background_correction: np.ndarray
-    background_margin_db: np.ndarray
-    reference_background_margin_db: np.ndarray
+    frequencies: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    sound_energy_level: NDArray[np.float64]
+    mean_source_level: NDArray[np.float64]
+    mean_reference_level: NDArray[np.float64]
+    mean_background_level: NDArray[np.float64]
+    reference_power_level: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
+    reference_background_correction: NDArray[np.float64]
+    background_margin_db: NDArray[np.float64]
+    reference_background_margin_db: NDArray[np.float64]
     c2: float
-    sigma_r0: np.ndarray
+    sigma_r0: NDArray[np.float64]
     sigma_r0_a: float
     sigma_omc_db: float
     coverage_factor: float
@@ -421,7 +426,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         require_same_length(self, *bands)
 
     @property
-    def background_requirement_met(self) -> np.ndarray:
+    def background_requirement_met(self) -> NDArray[np.bool_]:
         """Per band, whether both margins over the background reached the 6 dB of 4.5.
 
         ``False`` where no background was measured. Each margin is judged
@@ -434,7 +439,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def upper_bound(self) -> np.ndarray:
+    def upper_bound(self) -> NDArray[np.bool_]:
         """Per band, whether 8.1.3 calls the level an upper bound.
 
         The margin of the source under test was measured and fell below
@@ -449,7 +454,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def sigma_tot(self) -> np.ndarray:
+    def sigma_tot(self) -> NDArray[np.float64]:
         r""":math:`\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 +
         \sigma_\mathrm{omc}^2}` per band (Eq. 22), in decibels; ``NaN`` without
         ``sigma_omc_db`` and at 63 Hz.
@@ -462,7 +467,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         return float(math.hypot(self.sigma_r0_a, self.sigma_omc_db))
 
     @property
-    def expanded_uncertainty(self) -> np.ndarray:
+    def expanded_uncertainty(self) -> NDArray[np.float64]:
         """``U = k sigma_tot`` per band (Eq. 23), in decibels."""
         return np.asarray(self.coverage_factor * self.sigma_tot, dtype=np.float64)
 
@@ -476,14 +481,14 @@ class HardWalledSoundPowerResult(OwnsArrays):
         return float(self.coverage_factor * self.sigma_tot_a)
 
     @property
-    def sound_power_level_at_reference_conditions(self) -> np.ndarray:
+    def sound_power_level_at_reference_conditions(self) -> NDArray[np.float64]:
         """``LW + C2`` under the reference meteorological conditions (Eq. A.1);
         ``NaN`` for an energy determination.
         """
         return np.asarray(self.sound_power_level + self.c2, dtype=np.float64)
 
     @property
-    def sound_energy_level_at_reference_conditions(self) -> np.ndarray:
+    def sound_energy_level_at_reference_conditions(self) -> NDArray[np.float64]:
         """``LJ + C2`` under the reference meteorological conditions (Eq. A.3);
         ``NaN`` for a power determination.
         """
@@ -578,7 +583,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         )
 
 
-def _source_grid(arr: np.ndarray) -> tuple[np.ndarray, bool]:
+def _source_grid(arr: NDArray[np.float64]) -> tuple[NDArray[np.float64], bool]:
     """The levels as ``(NS, NM, NB)``, and whether they came from a traverse.
 
     A 1D spectrum is the time- and space-averaged level of one microphone
@@ -595,7 +600,7 @@ def _source_grid(arr: np.ndarray) -> tuple[np.ndarray, bool]:
 
 def _position_mean(
     value: NumericArrayLike, name: str, n_positions: int, n_bands: int
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The energy mean over the microphone positions of a ``(NB,)`` spectrum
     already averaged, or of one ``(NM, NB)`` row per position (Eq. 11, 12).
 
@@ -632,8 +637,8 @@ def _position_advisory(
 
 
 def _background_advisory(
-    met: np.ndarray,
-    met_ref: np.ndarray,
+    met: NDArray[np.bool_],
+    met_ref: NDArray[np.bool_],
     *,
     measured: bool,
 ) -> None:
@@ -693,8 +698,8 @@ class _Reference:
 def _determine(
     *,
     quantity: Literal["power", "energy"],
-    mean_source: np.ndarray,
-    background_for_source: np.ndarray | None,
+    mean_source: NDArray[np.float64],
+    background_for_source: NDArray[np.float64] | None,
     n_positions: int,
     n_sources: int,
     traverse: bool,
@@ -907,8 +912,8 @@ def sound_power_hard_walled(
 
 
 def _event_grid(
-    arr: np.ndarray, n_events: int | np.integer[Any] | None
-) -> tuple[np.ndarray, bool, int]:
+    arr: NDArray[np.float64], n_events: int | np.integer[Any] | None
+) -> tuple[NDArray[np.float64], bool, int]:
     r"""The single event levels reduced to one event, as ``(NS, NM, NB)``.
 
     Measured one event at a time (``n_events`` ``None``) the events are on the
@@ -1039,7 +1044,7 @@ def sound_energy_hard_walled(
         mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
         if integration_time is not None:
             require_positive(integration_time, "integration_time")
-        exposure: np.ndarray | None = None
+        exposure: NDArray[np.float64] | None = None
         if background_levels is not None:
             if integration_time is None:
                 msg = (
@@ -1149,8 +1154,8 @@ class HardWalledRoomCheck(OwnsArrays):
     room and the box, so a check cannot be built against other ones.
     """
 
-    frequencies: np.ndarray
-    level_range_db: np.ndarray
+    frequencies: NDArray[np.float64]
+    level_range_db: NDArray[np.float64]
     n_orientations: int
     volume: float
     reference_box_volume_m3: float
@@ -1192,7 +1197,7 @@ class HardWalledRoomCheck(OwnsArrays):
         require_positive(self.largest_box_dimension_m, "largest_box_dimension_m")
 
     @property
-    def limit_db(self) -> np.ndarray:
+    def limit_db(self) -> NDArray[np.float64]:
         """The Table 3 standard deviation of reproducibility of each band, in dB.
 
         :return: The spread 4.4 allows each band.
@@ -1231,7 +1236,7 @@ class HardWalledRoomCheck(OwnsArrays):
         return float(_REVERBERANT_DISTANCE_FACTOR * self.volume ** (1 / 3))
 
     @property
-    def band_adequate(self) -> np.ndarray:
+    def band_adequate(self) -> NDArray[np.bool_]:
         """Per band, whether the spread stays within Table 3 (4.4)."""
         return np.asarray(settled(self.level_range_db) <= self.limit_db, dtype=bool)
 
@@ -1432,10 +1437,10 @@ class SourceLocationPlan(OwnsArrays):
     """
 
     standard: Literal["ISO 3743-1:2010", "ISO 3743-2:2018"]
-    frequencies: np.ndarray
-    standard_deviation_db: np.ndarray
-    source_locations: np.ndarray
-    additional_room_locations: np.ndarray
+    frequencies: NDArray[np.float64]
+    standard_deviation_db: NDArray[np.float64]
+    source_locations: NDArray[np.int64]
+    additional_room_locations: NDArray[np.int64]
     n_microphone_positions: int
     a_weighted_standard_deviation_db: float = math.nan
     n_a_weighted_source_locations: int = 0
@@ -1490,8 +1495,8 @@ class SourceLocationPlan(OwnsArrays):
         asks for in the test room, which is the number a single determination
         covering them all has to use.
         """
-        return int(
-            max(np.max(self.source_locations), self.n_a_weighted_source_locations)
+        return max(
+            int(np.max(self.source_locations)), int(self.n_a_weighted_source_locations)
         )
 
     @property

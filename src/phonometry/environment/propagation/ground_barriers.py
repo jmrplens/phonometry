@@ -106,6 +106,7 @@ from numpy.typing import NDArray
 from scipy.special import fresnel, wofz
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_complex_or_array, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     complex_array,
@@ -127,7 +128,12 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
@@ -294,6 +300,42 @@ class SphericalGroundResult(OwnsArrays):
         )
 
 
+@overload
+def spherical_reflection_coefficient[S: RealScalar](
+    normalized_impedance: NumericArrayLike,
+    source_height_m: float,
+    receiver_height_m: float,
+    distance: float,
+    *,
+    frequencies: S,
+    speed_of_sound: float = ...,
+) -> complex: ...
+
+
+@overload
+def spherical_reflection_coefficient[V: RealValues](
+    normalized_impedance: NumericArrayLike,
+    source_height_m: float,
+    receiver_height_m: float,
+    distance: float,
+    *,
+    frequencies: V,
+    speed_of_sound: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def spherical_reflection_coefficient[A: NumericArrayLike](
+    normalized_impedance: NumericArrayLike,
+    source_height_m: float,
+    receiver_height_m: float,
+    distance: float,
+    *,
+    frequencies: A,
+    speed_of_sound: float = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def spherical_reflection_coefficient(
     normalized_impedance: NumericArrayLike,
     source_height_m: float,
@@ -302,7 +344,7 @@ def spherical_reflection_coefficient(
     *,
     frequencies: NumericArrayLike,
     speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Spherical-wave reflection coefficient ``Q`` (Weyl-Van der Pol).
 
     Implements :math:`Q = R_\mathrm{p} + (1 - R_\mathrm{p}) F(w)` (Attenborough Eq. (2.40c);
@@ -322,7 +364,8 @@ def spherical_reflection_coefficient(
     :param receiver_height_m: Receiver height ``hr`` above the ground, in metres.
     :param distance: Horizontal source-receiver distance, in metres.
     :param speed_of_sound: Speed of sound ``c``, in m/s.
-    :return: Complex ``Q`` per frequency.
+    :return: Complex ``Q`` per frequency. A ``complex`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a height is negative, the distance is not positive,
         the impedance is zero, or its shape does not match the frequencies.
     :raises TypeError: if ``distance``, ``receiver_height_m``, ``source_height_m`` or
@@ -348,7 +391,7 @@ def spherical_reflection_coefficient(
     rp = (z * cos_theta - 1.0) / (z * cos_theta + 1.0)
     w = np.sqrt(0.5j * k * r2) * (cos_theta + 1.0 / z)
     f_w = 1.0 + 1j * np.sqrt(np.pi) * w * wofz(w)
-    return np.asarray(rp + (1.0 - rp) * f_w, dtype=np.complex128)
+    return as_complex_or_array(rp + (1.0 - rp) * f_w, like=(frequencies,))
 
 
 @overload
@@ -473,6 +516,39 @@ def ground_effect(
 # --------------------------------------------------------------------------- #
 # B4. Barrier diffraction
 # --------------------------------------------------------------------------- #
+@overload
+def fresnel_number[S: RealScalar](
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
+    frequencies: S,
+    *,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def fresnel_number[V: RealValues](
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
+    frequencies: V,
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def fresnel_number[A: NumericArrayLike](
+    source_to_edge: float,
+    edge_to_receiver: float,
+    direct_distance: float,
+    frequencies: A,
+    *,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def fresnel_number(
     source_to_edge: float,
     edge_to_receiver: float,
@@ -480,7 +556,7 @@ def fresnel_number(
     frequencies: NumericArrayLike,
     *,
     speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Fresnel number :math:`N = (2/\lambda)(A + B - d)` (Bies Eq. (5.134)).
 
     ``A`` and ``B`` are the two segments of the shortest source-edge-receiver
@@ -493,7 +569,8 @@ def fresnel_number(
     :param direct_distance: Straight source-receiver distance ``d``, in metres.
     :param frequencies: Frequencies, in hertz.
     :param speed_of_sound: Speed of sound ``c``, in m/s.
-    :return: Fresnel number ``N`` per frequency.
+    :return: Fresnel number ``N`` per frequency. A ``float`` for a number, an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a distance is not positive.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or ``frequencies``
         holds a text or a value that is not a real number, or ``direct_distance``,
@@ -514,10 +591,28 @@ def fresnel_number(
     f = require_positive_array(frequencies, "frequencies")
     lam = speed_of_sound / f
     delta = source_to_edge + edge_to_receiver - direct_distance
-    return np.asarray(2.0 * delta / lam, dtype=np.float64)
+    return as_float_or_array(2.0 * delta / lam, like=(frequencies,))
 
 
-def kurze_anderson_attenuation(fresnel_number: NumericArrayLike) -> Real:
+@overload
+def kurze_anderson_attenuation[S: RealScalar](fresnel_number: S) -> float: ...
+
+
+@overload
+def kurze_anderson_attenuation[V: RealValues](
+    fresnel_number: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def kurze_anderson_attenuation[A: NumericArrayLike](
+    fresnel_number: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def kurze_anderson_attenuation(
+    fresnel_number: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Kurze-Anderson barrier attenuation (Bies Eq. (5.138); Kurze & Anderson, 1971).
 
     .. math::
@@ -536,7 +631,9 @@ def kurze_anderson_attenuation(fresnel_number: NumericArrayLike) -> Real:
     at 0 dB (a barrier never amplifies).
 
     :param fresnel_number: Fresnel number ``N`` (scalar or array).
-    :return: Attenuation ``Delta``, in decibels (>= 0), matching the input shape.
+    :return: Attenuation ``Delta``, in decibels (>= 0), matching the input shape. A
+        ``float`` for a number, an array for a sequence or an array, a zero-dimensional
+        one included.
     :raises TypeError: for a ``fresnel_number`` that is text, complex or
         otherwise not a number.
     :raises ValueError: for a non-finite or ragged ``fresnel_number``.
@@ -561,7 +658,7 @@ def kurze_anderson_attenuation(fresnel_number: NumericArrayLike) -> Real:
         ratio = np.where(np.abs(x) < _X_OVER_TANH_EPS, 1.0 + 0.0j, x / np.tanh(x))
     delta = 5.0 + 20.0 * np.log10(np.abs(ratio))
     delta = np.where(n <= _MAEKAWA_ILLUMINATED_LIMIT, 0.0, delta)
-    return np.asarray(np.maximum(delta, 0.0), dtype=np.float64)
+    return as_float_or_array(np.maximum(delta, 0.0), like=(fresnel_number,))
 
 
 def _auxiliary_fresnel(x: Real) -> tuple[Real, Real]:

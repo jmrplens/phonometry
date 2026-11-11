@@ -16,6 +16,8 @@ import numpy as np
 from .validation import real_array
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from .types import NumericArrayLike
 
 
@@ -24,12 +26,12 @@ def energy_mean(levels: NumericArrayLike, axis: None = None) -> float: ...
 
 
 @overload
-def energy_mean(levels: NumericArrayLike, axis: int) -> np.ndarray: ...
+def energy_mean(levels: NumericArrayLike, axis: int) -> NDArray[np.float64]: ...
 
 
 def energy_mean(
     levels: NumericArrayLike, axis: int | None = None
-) -> np.ndarray | float:
+) -> NDArray[np.float64] | float:
     """Energy (mean-square) average of decibel levels.
 
     Computes ``10 lg( (1/n) sum_i 10^(Li/10) )`` along *axis*.
@@ -51,10 +53,12 @@ def energy_sum(levels: NumericArrayLike, axis: None = None) -> float: ...
 
 
 @overload
-def energy_sum(levels: NumericArrayLike, axis: int) -> np.ndarray: ...
+def energy_sum(levels: NumericArrayLike, axis: int) -> NDArray[np.float64]: ...
 
 
-def energy_sum(levels: NumericArrayLike, axis: int | None = None) -> np.ndarray | float:
+def energy_sum(
+    levels: NumericArrayLike, axis: int | None = None
+) -> NDArray[np.float64] | float:
     """Energetic sum of decibel levels.
 
     Computes ``10 lg( sum_i 10^(Li/10) )`` along *axis*.
@@ -80,12 +84,12 @@ def weighted_energy_mean(
 @overload
 def weighted_energy_mean(
     levels: NumericArrayLike, weights: NumericArrayLike, axis: int
-) -> np.ndarray: ...
+) -> NDArray[np.float64]: ...
 
 
 def weighted_energy_mean(
     levels: NumericArrayLike, weights: NumericArrayLike, axis: int | None = None
-) -> np.ndarray | float:
+) -> NDArray[np.float64] | float:
     """Weighted energy average of decibel levels.
 
     Computes ``10 lg( sum_i wi 10^(Li/10) / sum_i wi )`` along *axis*.

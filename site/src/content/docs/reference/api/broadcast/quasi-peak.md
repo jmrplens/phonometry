@@ -254,7 +254,7 @@ QuasiPeakResult(
     reading: float,
     level: float,
     reference: float,
-    trace: np.ndarray,
+    trace: NDArray[np.float64],
     fs: float,
     *,
     weighting: Literal['468', 'Z'],

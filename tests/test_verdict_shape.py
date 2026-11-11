@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
+from ndarray_hints import ndarray_scalar
 from numpy.typing import NDArray
 
 import phonometry
@@ -256,11 +257,8 @@ def _members(hint: object) -> tuple[object, ...]:
 
 
 def _is_boolean_array(hint: object) -> bool:
-    if typing.get_origin(hint) is not np.ndarray:
-        return False
-    args = typing.get_args(hint)
-    dtype = typing.get_args(args[-1]) if args else ()
-    return bool(dtype) and dtype[0] is np.bool_
+    """Whether *hint* names an array of booleans, ``NDArray[np.bool_]`` on every NumPy."""
+    return ndarray_scalar(hint) is np.bool_
 
 
 def _raising_bool(cls: type) -> bool:

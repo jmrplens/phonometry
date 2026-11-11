@@ -111,12 +111,13 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
 
 from .._internal.frozen import OwnsArrays, read_only_copy, reduce_with_plain_rows
+from .._internal.types import as_complex_or_array, as_float_if_reduced
 from .._internal.validation import (
     check_engine,
     complex_array,
@@ -139,7 +140,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
 
 #: The device a reactive silencer result describes, as its report names it.
@@ -187,6 +188,9 @@ _Complex = NDArray[np.complex128]
 #: Rank of a four-pole stack: the frequency axis plus the two matrix axes.
 _FOUR_POLE_NDIM = 3
 
+#: Rank of one four-pole matrix, the matrix of a single frequency.
+_ONE_FOUR_POLE_NDIM = 2
+
 
 def _frequencies(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     """Validate a strictly positive, finite 1-D frequency grid (Hz)."""
@@ -198,6 +202,34 @@ def _frequencies(frequencies: NumericArrayLike) -> NDArray[np.float64]:
         msg = "'frequencies' must be positive and finite."
         raise ValueError(msg)
     return f
+
+
+def _matrix_or_stack(stack: _Complex, like: NumericArrayLike) -> _Complex:
+    """The ``(2, 2)`` matrix of one frequency, or the ``(n_freq, 2, 2)`` stack.
+
+    One frequency, a number or a zero-dimensional array, gives the matrix
+    alone, the first and only of *stack*; a sequence or an array of them
+    keeps the stack.
+    """
+    return stack[0] if np.ndim(like) == 0 else stack
+
+
+def _as_stack(matrix: NumericArrayLike, name: str) -> tuple[_Complex, bool]:
+    """A four-pole matrix or stack as a stack, and whether it was one matrix.
+
+    :raises ValueError: If *matrix* is neither a ``(2, 2)`` matrix nor a
+        ``(n_freq, 2, 2)`` stack of them.
+    """
+    arr = complex_array(matrix, name)
+    if arr.ndim == _ONE_FOUR_POLE_NDIM and arr.shape == (2, 2):
+        return arr[np.newaxis], True
+    if arr.ndim != _FOUR_POLE_NDIM or arr.shape[1:] != (2, 2):
+        msg = (
+            f"'{name}' must be a (2, 2) four-pole matrix or a (n_freq, 2, 2) "
+            f"stack of them; got shape {arr.shape}."
+        )
+        raise ValueError(msg)
+    return arr, False
 
 
 def _per_frequency(impedance: NumericArrayLike, name: str, n_freq: int) -> _Complex:
@@ -228,12 +260,14 @@ def duct_matrix(
 ) -> _Complex:
     """Four-pole matrix of a straight duct (Bies Eq. (8.143), no flow).
 
-    :param frequencies: Frequencies ``f``, Hz (1-D array).
+    :param frequencies: Frequencies ``f``, Hz: one, or a 1-D sequence or array.
     :param length: Duct length ``L``, m.
     :param area: Cross-sectional area ``S``, m2.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
-    :return: A ``(n_freq, 2, 2)`` complex transfer-matrix array.
+    :return: The ``(2, 2)`` complex transfer matrix for one frequency, a number
+        or a zero-dimensional array, and a ``(n_freq, 2, 2)`` stack of them for a
+        sequence or an array of frequencies.
     :raises TypeError: if ``area``, ``density``, ``length`` or ``speed_of_sound`` is not
         a single number, or ``frequencies`` holds a text or a value that is not a real
         number.
@@ -252,15 +286,17 @@ def duct_matrix(
     t[:, 0, 1] = 1j * z * sin
     t[:, 1, 0] = 1j * sin / z
     t[:, 1, 1] = cos
-    return t
+    return _matrix_or_stack(t, frequencies)
 
 
 def shunt_matrix(branch_impedance: NumericArrayLike) -> _Complex:
     """Four-pole matrix of a side branch of impedance ``Z_b`` (Bies Eq. (8.144)).
 
     :param branch_impedance: Acoustic impedance ``Z_b`` of the branch,
-        Pa s/m3 (1-D complex array over frequency).
-    :return: A ``(n_freq, 2, 2)`` complex transfer-matrix array.
+        Pa s/m3: one, or a 1-D complex sequence or array over frequency.
+    :return: The ``(2, 2)`` complex transfer matrix for one impedance, a number
+        or a zero-dimensional array, and a ``(n_freq, 2, 2)`` stack of them for a
+        sequence or an array of impedances.
     :raises TypeError: if ``branch_impedance`` holds a text or a value that is not a
         number.
     """
@@ -275,7 +311,7 @@ def shunt_matrix(branch_impedance: NumericArrayLike) -> _Complex:
     with np.errstate(divide="ignore", invalid="ignore"):
         t[:, 1, 0] = 1.0 / zb
     t[:, 1, 1] = 1.0
-    return t
+    return _matrix_or_stack(t, branch_impedance)
 
 
 def _shorting_frequency(
@@ -308,25 +344,43 @@ def cascade(*matrices: NumericArrayLike) -> _Complex:
     state at the inlet equals the compound matrix times the state at the
     outlet), broadcast over the frequency axis.
 
-    :param matrices: One or more ``(n_freq, 2, 2)`` four-pole matrices sharing
-        ``n_freq``, each an array or a nested sequence numpy converts.
-    :return: The compound ``(n_freq, 2, 2)`` array.
-    :raises ValueError: If a matrix is not a ``(n_freq, 2, 2)`` array or the
-        matrices disagree on ``n_freq``.
+    :param matrices: One or more four-pole matrices, each an array or a nested
+        sequence numpy converts: ``(2, 2)`` matrices of one frequency, or
+        ``(n_freq, 2, 2)`` stacks sharing ``n_freq``.
+    :return: The compound ``(2, 2)`` matrix of matrices alone, or the compound
+        ``(n_freq, 2, 2)`` stack of stacks.
+    :raises ValueError: If a matrix is neither a ``(2, 2)`` matrix nor a
+        ``(n_freq, 2, 2)`` stack, if matrices alone and stacks are mixed, or if
+        the stacks disagree on ``n_freq``.
     """
     if not matrices:
         msg = "cascade() needs at least one matrix."
         raise ValueError(msg)
     arrays: list[_Complex] = []
+    alone: list[bool] = []
     for i, matrix in enumerate(matrices):
         arr = complex_array(matrix, "matrices")
+        if arr.ndim == _ONE_FOUR_POLE_NDIM and arr.shape == (2, 2):
+            arrays.append(arr[np.newaxis])
+            alone.append(True)
+            continue
         if arr.ndim != _FOUR_POLE_NDIM or arr.shape[1:] != (2, 2):
             msg = (
-                f"'matrices'[{i}] must be a (n_freq, 2, 2) four-pole array; "
-                f"got shape {arr.shape}."
+                f"'matrices'[{i}] must be a (2, 2) four-pole matrix or a "
+                f"(n_freq, 2, 2) stack of them; got shape {arr.shape}."
             )
             raise ValueError(msg)
         arrays.append(arr)
+        alone.append(False)
+    for i, single in enumerate(alone):
+        if single != alone[0]:
+            kind = "a (2, 2) matrix" if single else "a (n_freq, 2, 2) stack"
+            other = "(n_freq, 2, 2) stacks" if single else "(2, 2) matrices"
+            msg = (
+                f"'matrices'[{i}] is {kind} beside {other}: cascade the "
+                "matrices of one frequency, or the stacks of one grid."
+            )
+            raise ValueError(msg)
     n = arrays[0].shape[0]
     if any(m.shape[0] != n for m in arrays[1:]):
         msg = "cascade() matrices must share the same frequency grid (n_freq)."
@@ -334,17 +388,17 @@ def cascade(*matrices: NumericArrayLike) -> _Complex:
     total = arrays[0]
     for m in arrays[1:]:
         total = np.matmul(total, m)
-    return total
+    return total[0] if alone[0] else total
 
 
 def transmission_loss(
-    transfer_matrix: _Complex,
+    transfer_matrix: NumericArrayLike,
     *,
     inlet_area: float,
     outlet_area: float,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Transmission loss of a four-pole element (Munjal Eq. (3.27), no flow).
 
     .. math::
@@ -359,25 +413,37 @@ def transmission_loss(
     Eq. (8.141) weighting: as printed there the equation fails the
     sudden-expansion limit for unequal port areas (see ``docs/ERRATA.md``).
 
-    :param transfer_matrix: A ``(n_freq, 2, 2)`` compound matrix.
+    :param transfer_matrix: A ``(2, 2)`` compound matrix of one frequency, or a
+        ``(n_freq, 2, 2)`` stack of them.
     :param inlet_area: Inlet pipe area ``S_in``, m2.
     :param outlet_area: Outlet pipe area ``S_out``, m2.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
-    :return: The transmission loss per frequency, dB.
+    :return: The transmission loss, dB: a ``float`` for a matrix alone, one per
+        frequency for a stack.
+    :raises ValueError: If ``transfer_matrix`` is neither a ``(2, 2)`` matrix nor
+        a ``(n_freq, 2, 2)`` stack.
     :raises TypeError: if ``density``, ``inlet_area``, ``outlet_area`` or
-        ``speed_of_sound`` is not a single number.
+        ``speed_of_sound`` is not a single number, or ``transfer_matrix`` holds a
+        text or a value that is not a number.
     """
     s_in = require_positive(inlet_area, "inlet_area")
     s_out = require_positive(outlet_area, "outlet_area")
     c = require_positive(speed_of_sound, "speed_of_sound")
     rho = require_positive(density, "density")
-    z1 = rho * c / s_in
-    zn = rho * c / s_out
-    t11 = transfer_matrix[:, 0, 0]
-    t12 = transfer_matrix[:, 0, 1]
-    t21 = transfer_matrix[:, 1, 0]
-    t22 = transfer_matrix[:, 1, 1]
+    stack, alone = _as_stack(transfer_matrix, "transfer_matrix")
+    loss = _transmission_loss_stack(stack, rho * c / s_in, rho * c / s_out)
+    return as_float_if_reduced(loss[0] if alone else loss)
+
+
+def _transmission_loss_stack(
+    stack: _Complex, z1: float, zn: float
+) -> NDArray[np.float64]:
+    """Munjal Eq. (3.27) over a ``(n_freq, 2, 2)`` stack, one value per frequency."""
+    t11 = stack[:, 0, 0]
+    t12 = stack[:, 0, 1]
+    t21 = stack[:, 1, 0]
+    t22 = stack[:, 1, 1]
     term = t11 + t12 / zn + z1 * t21 + (z1 / zn) * t22
     return np.asarray(
         10.0 * np.log10((zn / z1) * 0.25 * np.abs(term) ** 2),
@@ -386,11 +452,11 @@ def transmission_loss(
 
 
 def insertion_loss(
-    transfer_matrix: _Complex,
+    transfer_matrix: NumericArrayLike,
     *,
     source_impedance: NumericArrayLike,
     radiation_impedance: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Insertion loss of a four-pole element for given end impedances.
 
     The attenuation from inserting the element in place of a direct (zero
@@ -403,26 +469,83 @@ def insertion_loss(
        \left\lvert \frac{T_{11} Z_\mathrm{r} + T_{12} + Z_\mathrm{s} Z_\mathrm{r} T_{21} + Z_\mathrm{s} T_{22}}
        {Z_\mathrm{s} + Z_\mathrm{r}} \right\rvert.
 
-    :param transfer_matrix: A ``(n_freq, 2, 2)`` compound matrix.
+    :param transfer_matrix: A ``(2, 2)`` compound matrix of one frequency, or a
+        ``(n_freq, 2, 2)`` stack of them.
     :param source_impedance: Source internal acoustic impedance ``Z_s``,
         Pa s/m3 (scalar or per-frequency, real or complex).
     :param radiation_impedance: Termination/radiation acoustic impedance
         ``Z_r``, Pa s/m3 (scalar or per-frequency).
-    :return: The insertion loss per frequency, dB.
+    :return: The insertion loss, dB: a ``float`` for a matrix alone, one per
+        frequency for a stack.
+    :raises ValueError: If ``transfer_matrix`` is neither a ``(2, 2)`` matrix nor
+        a ``(n_freq, 2, 2)`` stack, or an impedance is neither a scalar nor one
+        value per analysis frequency.
+    :raises TypeError: if ``radiation_impedance``, ``source_impedance`` or
+        ``transfer_matrix`` holds a text or a value that is not a number.
+    """
+    stack, alone = _as_stack(transfer_matrix, "transfer_matrix")
+    loss = _insertion_loss_stack(stack, source_impedance, radiation_impedance)
+    return as_float_if_reduced(loss[0] if alone else loss)
+
+
+def _insertion_loss_stack(
+    stack: _Complex,
+    source_impedance: NumericArrayLike,
+    radiation_impedance: NumericArrayLike,
+) -> NDArray[np.float64]:
+    """The insertion loss over a ``(n_freq, 2, 2)`` stack, one value per frequency.
+
     :raises ValueError: If an impedance is neither a scalar nor one value per
         analysis frequency.
-    :raises TypeError: if ``radiation_impedance`` or ``source_impedance`` holds a text
-        or a value that is not a number.
     """
-    n = transfer_matrix.shape[0]
+    n = stack.shape[0]
     zs = _per_frequency(source_impedance, "source_impedance", n)
     zr = _per_frequency(radiation_impedance, "radiation_impedance", n)
-    t11 = transfer_matrix[:, 0, 0]
-    t12 = transfer_matrix[:, 0, 1]
-    t21 = transfer_matrix[:, 1, 0]
-    t22 = transfer_matrix[:, 1, 1]
+    t11 = stack[:, 0, 0]
+    t12 = stack[:, 0, 1]
+    t21 = stack[:, 1, 0]
+    t22 = stack[:, 1, 1]
     num = t11 * zr + t12 + zs * zr * t21 + zs * t22
     return np.asarray(20.0 * np.log10(np.abs(num / (zs + zr))), dtype=np.float64)
+
+
+@overload
+def helmholtz_impedance[S: RealScalar](
+    frequencies: S,
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex: ...
+
+
+@overload
+def helmholtz_impedance[V: RealValues](
+    frequencies: V,
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def helmholtz_impedance[A: NumericArrayLike](
+    frequencies: A,
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def helmholtz_impedance(
@@ -434,7 +557,7 @@ def helmholtz_impedance(
     resistance: float = 0.0,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-) -> _Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Acoustic impedance of a Helmholtz side branch (Bies Eq. (8.152)).
 
     :math:`Z = R + j(\rho \omega l_\mathrm{e} / S_{\mathrm{neck}} -
@@ -454,7 +577,8 @@ def helmholtz_impedance(
     :param resistance: Acoustic resistance ``R``, Pa s/m3 (default 0, lossless).
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
-    :return: The complex branch impedance per frequency, Pa s/m3.
+    :return: The complex branch impedance per frequency, Pa s/m3. A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``cavity_volume``, ``density``, ``neck_area``,
         ``neck_length``, ``resistance`` or ``speed_of_sound`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number.
@@ -468,7 +592,40 @@ def helmholtz_impedance(
     rho = require_positive(density, "density")
     omega = 2.0 * np.pi * f
     reactance = rho * omega * le / s_neck - rho * c**2 / (omega * vol)
-    return np.asarray(r + 1j * reactance, dtype=np.complex128)
+    return as_complex_or_array(r + 1j * reactance, like=(frequencies,))
+
+
+@overload
+def quarter_wave_impedance[S: RealScalar](
+    frequencies: S,
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex: ...
+
+
+@overload
+def quarter_wave_impedance[V: RealValues](
+    frequencies: V,
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def quarter_wave_impedance[A: NumericArrayLike](
+    frequencies: A,
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def quarter_wave_impedance(
@@ -478,7 +635,7 @@ def quarter_wave_impedance(
     *,
     speed_of_sound: float = _C_AIR,
     density: float = _RHO_AIR,
-) -> _Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Acoustic impedance of a closed quarter-wave side branch (Bies Eq. (8.146)).
 
     :math:`Z = -j (\rho c / S) \cot(k l_\mathrm{e})`; the reactance vanishes at
@@ -491,7 +648,8 @@ def quarter_wave_impedance(
     :param area: Tube cross-sectional area ``S``, m2.
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param density: Air density ``rho``, kg/m3.
-    :return: The complex branch impedance per frequency, Pa s/m3.
+    :return: The complex branch impedance per frequency, Pa s/m3. A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``area``, ``density``, ``length`` or ``speed_of_sound`` is not
         a single number, or ``frequencies`` holds a text or a value that is not a real
         number.
@@ -507,7 +665,7 @@ def quarter_wave_impedance(
     # (Z -> infinity); the divide-by-zero is expected and its shunt 1/Z is 0.
     with np.errstate(divide="ignore", invalid="ignore"):
         zb = -1j * z / np.tan(k * le)
-    return np.asarray(zb, dtype=np.complex128)
+    return as_complex_or_array(zb, like=(frequencies,))
 
 
 #: The keys :attr:`ReactiveSilencerResult.geometry` may carry: the keys of
@@ -606,13 +764,13 @@ class ReactiveSilencerResult(OwnsArrays):
         :meth:`plot_geometry` draws it.
     """
 
-    frequencies: np.ndarray
-    transmission_loss: np.ndarray
-    insertion_loss: np.ndarray | None
-    transfer_matrix: np.ndarray
+    frequencies: NDArray[np.float64]
+    transmission_loss: NDArray[np.float64]
+    insertion_loss: NDArray[np.float64] | None
+    transfer_matrix: NDArray[np.complex128]
     kind: SilencerKind
     _: KW_ONLY
-    resonances: np.ndarray | None
+    resonances: NDArray[np.float64] | None
     geometry: Mapping[SilencerDimension, float] | None
     plane_wave_limit: float
     chain: SilencerChain | None
@@ -834,20 +992,14 @@ def _result(
         raise ValueError(msg)
     limit = _plane_wave_limit(area=max(areas), speed_of_sound=c)
     _warn_above_plane_wave_limit(f, limit, kind)
-    tl = transmission_loss(
+    tl = _transmission_loss_stack(
         t,
-        inlet_area=inlet_area,
-        outlet_area=outlet_area,
-        speed_of_sound=c,
-        density=rho,
+        rho * c / require_positive(inlet_area, "inlet_area"),
+        rho * c / require_positive(outlet_area, "outlet_area"),
     )
     il: NDArray[np.float64] | None = None
     if source_impedance is not None and radiation_impedance is not None:
-        il = insertion_loss(
-            t,
-            source_impedance=source_impedance,
-            radiation_impedance=radiation_impedance,
-        )
+        il = _insertion_loss_stack(t, source_impedance, radiation_impedance)
     return ReactiveSilencerResult(
         frequencies=f,
         transmission_loss=tl,
@@ -889,7 +1041,8 @@ def expansion_chamber(
         :math:`10 \log_{10}[1 + (1/4)(m - 1/m)^2 \sin^2(kL)]`).
     :raises TypeError: if ``chamber_area``, ``density``, ``pipe_area`` or
         ``speed_of_sound`` is not a single number, or ``frequencies`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``radiation_impedance`` or
+        ``source_impedance`` holds a text or a value that is not a number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -944,7 +1097,8 @@ def helmholtz_resonator(
         :math:`f_0 = (c / 2 \pi) \sqrt{S_{\mathrm{neck}} / (l_\mathrm{e} V)}`.
     :raises TypeError: if ``density``, ``duct_area`` or ``speed_of_sound`` is not a
         single number, or ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``radiation_impedance`` or ``source_impedance`` holds a text or a
+        value that is not a number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -1006,7 +1160,9 @@ def quarter_wave_resonator(
         multiples of :math:`f = c / (4 l_\mathrm{e})` within the frequency range.
     :raises TypeError: if ``density``, ``duct_area``, ``length`` or ``speed_of_sound``
         is not a single number, or ``frequencies`` holds a text or a value that is not a
-        real number, or ``branch_area`` is not a single number.
+        real number, or ``branch_area`` is not a single number, or
+        ``radiation_impedance`` or ``source_impedance`` holds a text or a value that is
+        not a number.
     """
     require_scalar(branch_area, "branch_area")
     f = _frequencies(frequencies)
@@ -1089,7 +1245,8 @@ def extended_tube_chamber(
     :raises TypeError: if ``chamber_area``, ``density``, ``inlet_extension``,
         ``length``, ``outlet_extension``, ``pipe_area`` or ``speed_of_sound`` is not a
         single number, or ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``radiation_impedance`` or ``source_impedance`` holds a text or a
+        value that is not a number.
     """
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -1186,7 +1343,7 @@ class SilencerChainElement(OwnsArrays):
         analysis grid, and for every duct element.
     """
 
-    matrix: np.ndarray
+    matrix: NDArray[np.complex128]
     length: float | None = None
     area: float | None = None
     label: str | None = None
@@ -1357,6 +1514,9 @@ class SilencerChain:
         :return: The result, carrying a snapshot of this chain so that it can
             be drawn as well as plotted and reported.
         :raises ValueError: If the chain is empty.
+        :raises TypeError: if ``inlet_area`` or ``outlet_area`` is not a single
+            number, or ``radiation_impedance`` or ``source_impedance`` holds a text
+            or a value that is not a number.
         """
         areas = [inlet_area, outlet_area]
         areas += [

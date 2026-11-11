@@ -100,7 +100,7 @@ import functools
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy.special import jn_zeros, jv
@@ -108,6 +108,7 @@ from scipy.special import jn_zeros, jv
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
+from .._internal.types import as_complex_or_array
 from .._internal.validation import (
     complex_array,
     real_array,
@@ -134,7 +135,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
     from ..fluids import Fluid
 
 Coupler = Literal["plane_wave", "large_volume"]
@@ -340,12 +347,39 @@ def _gerber_approximation(
     return np.asarray(value, dtype=np.complex128)
 
 
+@overload
+def temperature_transfer_function[S: RealScalar](
+    length_to_diameter_ratio: float,
+    x: S,
+    *,
+    method: Method = ...,
+) -> complex: ...
+
+
+@overload
+def temperature_transfer_function[V: RealValues](
+    length_to_diameter_ratio: float,
+    x: V,
+    *,
+    method: Method = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def temperature_transfer_function[A: NumericArrayLike](
+    length_to_diameter_ratio: float,
+    x: A,
+    *,
+    method: Method = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def temperature_transfer_function(
     length_to_diameter_ratio: float,
     x: NumericArrayLike,
     *,
     method: Method = "exact",
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Gerber's complex temperature transfer function :math:`E_V` of a
     cylindrical cavity (IEC 61094-2:2009 A.2, Formula (A.2) and Table A.1).
 
@@ -374,7 +408,8 @@ def temperature_transfer_function(
     :param length_to_diameter_ratio: :math:`R`, positive.
     :param x: :math:`X`, one value or several, positive.
     :param method: ``"exact"`` or ``"approximation"``.
-    :return: :math:`E_V`, complex, with the shape of ``x``.
+    :return: :math:`E_V`, complex, with the shape of ``x``. A ``complex`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a ratio or an :math:`X` that is not positive and
         finite, or an unknown method.
     :raises TypeError: if ``method`` is not a text, or ``length_to_diameter_ratio`` is
@@ -387,9 +422,11 @@ def temperature_transfer_function(
         msg = "'x' must be positive and finite."
         raise ValueError(msg)
     if method == "approximation":
-        return np.asarray(_gerber_approximation(ratio, values), dtype=np.complex128)
+        return as_complex_or_array(_gerber_approximation(ratio, values), like=(x,))
     flat = [_gerber_exact(ratio, float(value)) for value in values.reshape(-1)]
-    return np.asarray(flat, dtype=np.complex128).reshape(values.shape)
+    return as_complex_or_array(
+        np.asarray(flat, dtype=np.complex128).reshape(values.shape), like=(x,)
+    )
 
 
 @dataclass(frozen=True)
@@ -814,9 +851,27 @@ class ReciprocityMicrophone(RichDisplay):
         omega = 2.0 * math.pi * self.resonance_frequency_hz
         return self.loss_factor / (omega * self.compliance_m3_per_pa)
 
+    @overload
+    def complex_equivalent_volume_m3[S: RealScalar](
+        self,
+        frequencies: S,
+    ) -> complex: ...
+
+    @overload
+    def complex_equivalent_volume_m3[V: RealValues](
+        self,
+        frequencies: V,
+    ) -> NDArray[np.complex128]: ...
+
+    @overload
+    def complex_equivalent_volume_m3[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> complex | NDArray[np.complex128]: ...
+
     def complex_equivalent_volume_m3(
         self, frequencies: NumericArrayLike
-    ) -> NDArray[np.complex128]:
+    ) -> complex | NDArray[np.complex128]:
         r"""The complex equivalent volume :math:`V_\mathrm{e}` of Formula (3),
         in m³, which tends to :attr:`equivalent_volume_m3` at low frequencies:
 
@@ -826,7 +881,9 @@ class ReciprocityMicrophone(RichDisplay):
            = \frac{V_\mathrm{eq}}{1 - (f/f_0)^2 + \mathrm{j}\,d\,f/f_0}
 
         :param frequencies: The frequencies, in Hz.
-        :return: :math:`V_\mathrm{e}` at each frequency, in m³.
+        :return: :math:`V_\mathrm{e}` at each frequency, in m³. A ``complex`` for a
+            number, an array for a sequence or an array, a zero-dimensional one
+            included.
         :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
             number.
         """
@@ -834,30 +891,109 @@ class ReciprocityMicrophone(RichDisplay):
         volume = self.equivalent_volume_m3 / (
             1.0 - ratio**2 + 1.0j * self.loss_factor * ratio
         )
-        return np.asarray(volume, dtype=np.complex128)
+        return as_complex_or_array(volume, like=(frequencies,))
+
+    @overload
+    def acoustic_impedance_pa_s_m3[S: RealScalar](self, frequencies: S) -> complex: ...
+
+    @overload
+    def acoustic_impedance_pa_s_m3[V: RealValues](
+        self,
+        frequencies: V,
+    ) -> NDArray[np.complex128]: ...
+
+    @overload
+    def acoustic_impedance_pa_s_m3[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> complex | NDArray[np.complex128]: ...
 
     def acoustic_impedance_pa_s_m3(
         self, frequencies: NumericArrayLike
-    ) -> NDArray[np.complex128]:
+    ) -> complex | NDArray[np.complex128]:
         r""":math:`Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a}
         + 1/(\mathrm{j}\omega c_\mathrm{a})`, in Pa·s/m³.
 
         :param frequencies: The frequencies, in Hz, positive.
-        :return: :math:`Z_\mathrm{a}` at each frequency, in Pa·s/m³.
+        :return: :math:`Z_\mathrm{a}` at each frequency, in Pa·s/m³. A ``complex`` for a
+            number, an array for a sequence or an array, a zero-dimensional one
+            included.
         :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
             number.
         """
         omega = 2.0 * math.pi * real_array(frequencies, "frequencies")
-        return _reference_stiffness() / (
-            1.0j * omega * self.complex_equivalent_volume_m3(frequencies)
+        return as_complex_or_array(
+            _reference_stiffness()
+            / (1.0j * omega * self.complex_equivalent_volume_m3(frequencies)),
+            like=(frequencies,),
         )
+
+
+@overload
+def microphone_acoustic_impedance[
+    S1: ComplexScalar,
+    S2: ComplexScalar,
+    S3: ComplexScalar,
+](
+    electrical_admittance_s: S1,
+    blocked_impedance_ohm: S2,
+    pressure_sensitivity_v_per_pa: S3,
+) -> complex: ...
+
+
+@overload
+def microphone_acoustic_impedance[
+    V: ComplexValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    electrical_admittance_s: V,
+    blocked_impedance_ohm: A2,
+    pressure_sensitivity_v_per_pa: A3,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def microphone_acoustic_impedance[
+    S1: ComplexScalar,
+    V: ComplexValues,
+    A3: NumericArrayLike,
+](
+    electrical_admittance_s: S1,
+    blocked_impedance_ohm: V,
+    pressure_sensitivity_v_per_pa: A3,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def microphone_acoustic_impedance[
+    S1: ComplexScalar,
+    S2: ComplexScalar,
+    V: ComplexValues,
+](
+    electrical_admittance_s: S1,
+    blocked_impedance_ohm: S2,
+    pressure_sensitivity_v_per_pa: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def microphone_acoustic_impedance[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    electrical_admittance_s: A1,
+    blocked_impedance_ohm: A2,
+    pressure_sensitivity_v_per_pa: A3,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def microphone_acoustic_impedance(
     electrical_admittance_s: NumericArrayLike,
     blocked_impedance_ohm: NumericArrayLike,
     pressure_sensitivity_v_per_pa: NumericArrayLike,
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""The acoustic impedance of a microphone from its electrical admittance
     (IEC 61094-2:2009 E.4, Formula (E.1)).
 
@@ -876,7 +1012,11 @@ def microphone_acoustic_impedance(
     :param electrical_admittance_s: :math:`Y`, complex, in S.
     :param blocked_impedance_ohm: :math:`Z_\mathrm{e,0}`, complex, in Ω.
     :param pressure_sensitivity_v_per_pa: :math:`M_\mathrm{p}`, complex, in V/Pa.
-    :return: :math:`Z_\mathrm{a}`, complex, in Pa·s/m³.
+    :return: :math:`Z_\mathrm{a}`, complex, in Pa·s/m³, an array of the broadcast shape
+        of the three, zero-dimensional for numbers. A ``complex`` when
+        ``electrical_admittance_s``, ``blocked_impedance_ohm`` and
+        ``pressure_sensitivity_v_per_pa`` are all numbers, an array when one of them is
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for an admittance or a sensitivity of zero, or a value
         that is not finite.
     :raises TypeError: if ``blocked_impedance_ohm``, ``electrical_admittance_s`` or
@@ -898,7 +1038,16 @@ def microphone_acoustic_impedance(
     if not (np.all(np.abs(admittance) > 0.0) and np.all(np.abs(sensitivity) > 0.0)):
         msg = "The admittance and the sensitivity must not be zero."
         raise ValueError(msg)
-    return (blocked - 1.0 / admittance) / sensitivity**2
+    # Numbers alone make numpy scalars of these arrays' arithmetic; asarray keeps
+    # the complex array the annotation names, zero-dimensional for numbers.
+    return as_complex_or_array(
+        np.asarray((blocked - 1.0 / admittance) / sensitivity**2),
+        like=(
+            electrical_admittance_s,
+            blocked_impedance_ohm,
+            pressure_sensitivity_v_per_pa,
+        ),
+    )
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -151,13 +151,31 @@ below this grazing angle the wave is totally reflected.
 
 ```python
 reflection_coefficient(
-    grazing_angle_deg: NumericArrayLike,
+    grazing_angle_deg: float | np.floating[Any] | np.integer[Any],
+    *,
+    rho1: float,
+    c1: float,
+    rho2: float,
+    c2: float,
+) -> complex
+
+reflection_coefficient(
+    grazing_angle_deg: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     rho1: float,
     c1: float,
     rho2: float,
     c2: float,
 ) -> NDArray[np.complex128]
+
+reflection_coefficient(
+    grazing_angle_deg: NumericArrayLike,
+    *,
+    rho1: float,
+    c1: float,
+    rho2: float,
+    c2: float,
+) -> complex | NDArray[np.complex128]
 ```
 
 Complex plane-wave pressure reflection coefficient at the seabed.
@@ -172,7 +190,7 @@ Complex plane-wave pressure reflection coefficient at the seabed.
 | `rho2` | Sediment density $\rho_2$. |
 | `c2` | Sound speed in the sediment `c2`, in m/s. |
 
-**Returns:** The complex reflection coefficient per grazing angle.
+**Returns:** The complex reflection coefficient per grazing angle. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

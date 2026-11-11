@@ -217,7 +217,12 @@ from scipy import special
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
-from .._internal.types import CALIBRATION_FIELDS, CalibrationField
+from .._internal.types import (
+    CALIBRATION_FIELDS,
+    CalibrationField,
+    as_complex_or_array,
+    as_float_or_array,
+)
 from .._internal.validation import (
     real_array,
     refuse_text,
@@ -244,7 +249,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from ..fluids import Fluid
     from .reciprocity_calibration import ReciprocityCalibration
 
@@ -3751,6 +3756,45 @@ def impedance_pressure_ratio(
 _AIR_GAP_MASS_FRACTION = 1.0 / 12.0
 
 
+@overload
+def air_gap_series_impedance_pa_s_m3[S: RealScalar](
+    frequencies: S,
+    *,
+    gap_length_m: float,
+    gap_radius_m: float,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    relative_humidity_percent: float = ...,
+    gas: Fluid | None = ...,
+) -> complex: ...
+
+
+@overload
+def air_gap_series_impedance_pa_s_m3[V: RealValues](
+    frequencies: V,
+    *,
+    gap_length_m: float,
+    gap_radius_m: float,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    relative_humidity_percent: float = ...,
+    gas: Fluid | None = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def air_gap_series_impedance_pa_s_m3[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    gap_length_m: float,
+    gap_radius_m: float,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    relative_humidity_percent: float = ...,
+    gas: Fluid | None = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def air_gap_series_impedance_pa_s_m3(
     frequencies: NumericArrayLike,
     *,
@@ -3760,7 +3804,7 @@ def air_gap_series_impedance_pa_s_m3(
     static_pressure_kpa: float = _REFERENCE_STATIC_PRESSURE_KPA,
     relative_humidity_percent: float = _REFERENCE_RELATIVE_HUMIDITY_PERCENT,
     gas: Fluid | None = None,
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""The acoustic impedance of the air between two microphones that each
     acts in series with, in a symmetric coupler driven at its middle
     (IEC 61094-5:2016 Table D.1 and 7.4, by the circuit of Jarvis 1996,
@@ -3813,7 +3857,9 @@ def air_gap_series_impedance_pa_s_m3(
         of specific heats are used instead of those of the IEC 61094-2
         Annex F air at the three conditions, at the same static pressure
         (Default: None). Appendix B takes 1,21 kg/m³, 1,4 and 101 325 Pa.
-    :return: :math:`Z_x` at each frequency, complex, in Pa·s/m³, read-only.
+    :return: :math:`Z_x` at each frequency, complex, in Pa·s/m³, read-only. A
+        ``complex`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: for frequencies that are not positive and increasing,
         a length or radius that is not positive, conditions Annex F refuses,
         or a gas at another pressure.
@@ -3821,18 +3867,20 @@ def air_gap_series_impedance_pa_s_m3(
         is not a single number, or ``relative_humidity_percent`` is not a single number.
     """
     require_scalar(relative_humidity_percent, "relative_humidity_percent")
-    frequencies = _frequency_axis(frequencies)
+    axis = _frequency_axis(frequencies)
     length = require_positive(gap_length_m, "gap_length_m")
     radius = require_positive(gap_radius_m, "gap_radius_m")
     medium = _medium(temperature_c, static_pressure_kpa, relative_humidity_percent, gas)
-    omega = 2.0 * np.pi * frequencies
+    omega = 2.0 * np.pi * axis
     area = np.pi * radius**2
     volume = area * length
     stiffness = float(medium.heat_capacity_ratio) * float(medium.static_pressure_pa)
     compliance = stiffness / (1j * omega * volume / 2.0)
     mass = 1j * omega * _AIR_GAP_MASS_FRACTION * float(medium.density) * length / area
     impedance = mass + mass * compliance / (mass + compliance)
-    return read_only(np.asarray(impedance, dtype=np.complex128))
+    return as_complex_or_array(
+        read_only(np.asarray(impedance, dtype=np.complex128)), like=(frequencies,)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -3886,30 +3934,58 @@ class RectangularPulse(RichDisplay):
         r""":math:`X(0) = 2ab`, the area of the pulse, in V·s."""
         return self.amplitude_v * self.duration_s
 
-    def spectrum_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def spectrum_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def spectrum_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def spectrum_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def spectrum_at(self, frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
         r""":math:`X(f)` of Formula (B.10), in V·s, the transform of the pulse
         centred on the time origin, where it is real.
 
         :param frequencies: Any frequencies, in Hz.
-        :return: :math:`X(f)` at each.
+        :return: :math:`X(f)` at each. A ``float`` for a number, an array for a sequence
+            or an array, a zero-dimensional one included.
         :raises ValueError: for a frequency that is not finite.
         :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
             number.
         """
-        frequencies = require_finite_array(frequencies, "frequencies")
+        f = require_finite_array(frequencies, "frequencies")
         # numpy's sinc is sin(pi x)/(pi x): with x = 2 f b it is (B.10) over 2ab.
-        return self.area_v_s * np.sinc(frequencies * self.duration_s)
+        return as_float_or_array(
+            self.area_v_s * np.sinc(f * self.duration_s), like=(frequencies,)
+        )
 
-    def level_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def level_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def level_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def level_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def level_at(self, frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
         r""":math:`20\lg\lvert X(f)/X(0)\rvert`, how far the spectrum has
         fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 
         :param frequencies: Any frequencies, in Hz.
-        :return: The level at each, in dB.
+        :return: The level at each, in dB. A ``float`` for a number, an array for a
+            sequence or an array, a zero-dimensional one included.
         """
         relative = np.abs(self.spectrum_at(frequencies)) / self.area_v_s
         with np.errstate(divide="ignore"):
-            return 20.0 * np.log10(relative)
+            return as_float_or_array(20.0 * np.log10(relative), like=(frequencies,))
 
     def plot(
         self,
@@ -4174,36 +4250,73 @@ class TimeSelectiveResponse(OwnsArrays):
         """
         return 1.0 / self.window_length_s
 
-    def response_at(self, frequencies: NumericArrayLike) -> NDArray[np.complex128]:
+    @overload
+    def response_at[S: RealScalar](self, frequencies: S) -> complex: ...
+
+    @overload
+    def response_at[V: RealValues](self, frequencies: V) -> NDArray[np.complex128]: ...
+
+    @overload
+    def response_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> complex | NDArray[np.complex128]: ...
+
+    def response_at(
+        self, frequencies: NumericArrayLike
+    ) -> complex | NDArray[np.complex128]:
         r""":math:`H(f)`, Formula (B.2) applied to the windowed response, at
         each frequency, complex, in the unit of the response times seconds
         (divided by the pulse's spectrum, in V·s, when there is one).
 
         :param frequencies: The frequencies, in Hz, increasing.
-        :return: :math:`H(f)` at each.
+        :return: :math:`H(f)` at each. A ``complex`` for a number, an array for a
+            sequence or an array, a zero-dimensional one included.
         :raises ValueError: for frequencies that are not positive and
             increasing, or, with an excitation, a frequency at or above the
             first zero of its spectrum.
         """
         first, last = self._bounds
-        return self._transform(
-            self.windowed_impulse_response[first : last + 1],
-            first,
-            _frequency_axis(frequencies),
+        return as_complex_or_array(
+            self._transform(
+                self.windowed_impulse_response[first : last + 1],
+                first,
+                _frequency_axis(frequencies),
+            ),
+            like=(frequencies,),
         )
+
+    @overload
+    def record_response_at[S: RealScalar](self, frequencies: S) -> complex: ...
+
+    @overload
+    def record_response_at[V: RealValues](
+        self,
+        frequencies: V,
+    ) -> NDArray[np.complex128]: ...
+
+    @overload
+    def record_response_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> complex | NDArray[np.complex128]: ...
 
     def record_response_at(
         self, frequencies: NumericArrayLike
-    ) -> NDArray[np.complex128]:
+    ) -> complex | NDArray[np.complex128]:
         r""":math:`H(f)` of the whole record with no window, the reflections
         included: what the window takes away, for comparison.
 
         :param frequencies: The frequencies, in Hz, increasing.
-        :return: :math:`H(f)` at each.
+        :return: :math:`H(f)` at each. A ``complex`` for a number, an array for a
+            sequence or an array, a zero-dimensional one included.
         :raises ValueError: for frequencies that are not positive and
             increasing.
         """
-        return self._transform(self.impulse_response, 0, _frequency_axis(frequencies))
+        return as_complex_or_array(
+            self._transform(self.impulse_response, 0, _frequency_axis(frequencies)),
+            like=(frequencies,),
+        )
 
     def _transform(
         self,
@@ -4230,23 +4343,55 @@ class TimeSelectiveResponse(OwnsArrays):
             response = response / (pulse.spectrum_at(frequencies) * delay)
         return response
 
-    def level_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def level_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def level_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def level_at[A: NumericArrayLike](
+        self, frequencies: A
+    ) -> float | NDArray[np.float64]: ...
+
+    def level_at(self, frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
         r""":math:`20\lg\lvert H(f)\rvert`, in dB re 1 of the response's unit
         times a second.
 
         :param frequencies: The frequencies, in Hz, increasing.
-        :return: The level at each, in dB.
+        :return: The level at each, in dB. A ``float`` for a number, an array
+            for a sequence or an array, a zero-dimensional one included.
         """
-        return 20.0 * np.log10(np.abs(self.response_at(frequencies)))
+        return as_float_or_array(
+            20.0 * np.log10(np.abs(self.response_at(frequencies))),
+            like=(frequencies,),
+        )
 
-    def phase_deg_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def phase_deg_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def phase_deg_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def phase_deg_at[A: NumericArrayLike](
+        self, frequencies: A
+    ) -> float | NDArray[np.float64]: ...
+
+    def phase_deg_at(
+        self, frequencies: NumericArrayLike
+    ) -> float | NDArray[np.float64]:
         r""":math:`\arg H(f)`, in degrees, with the time origin at the start of
         the record.
 
         :param frequencies: The frequencies, in Hz, increasing.
-        :return: The phase at each, in degrees.
+        :return: The phase at each, in degrees. A ``float`` for a number, an
+            array for a sequence or an array, a zero-dimensional one included.
         """
-        return np.degrees(np.angle(self.response_at(frequencies)))
+        return as_float_or_array(
+            np.degrees(np.angle(self.response_at(frequencies))),
+            like=(frequencies,),
+        )
 
     def free_field_region(
         self,

@@ -248,11 +248,11 @@ DIFFUSE_FIELD_VARIATION_LIMITS = ((5.0, 5.0), (4.5, 4.5), (4.0, 4.0))
 
 ```python
 DiffuseSoundFieldCheck(
-    frequencies: np.ndarray,
-    position_deviation_db: np.ndarray,
-    left_right_difference: np.ndarray,
-    directional_variation_db: np.ndarray,
-    front_to_random_index: np.ndarray | None,
+    frequencies: NDArray[np.float64],
+    position_deviation_db: NDArray[np.float64],
+    left_right_difference: NDArray[np.float64],
+    directional_variation_db: NDArray[np.float64],
+    front_to_random_index: NDArray[np.float64] | None,
     standard: Literal['ISO 8253-2 5.3', 'ISO 4869-3 5.2.2'],
     positions: tuple[Literal['front', 'back', 'left', 'right', 'up', 'down'], ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
@@ -382,9 +382,9 @@ Per band, whether all six positions stay within ±2,5 dB.
 ```python
 FreeSoundFieldCheck(
     field: Literal['free', 'quasi-free'],
-    frequencies: np.ndarray,
-    lateral_deviation_db: np.ndarray,
-    axis_difference: np.ndarray,
+    frequencies: NDArray[np.float64],
+    lateral_deviation_db: NDArray[np.float64],
+    axis_difference: NDArray[np.float64],
     loudspeaker_distance_m: float,
     positions: tuple[Literal['left', 'right', 'up', 'down'], ...] = ('left', 'right', 'up', 'down'),
 )
@@ -539,10 +539,22 @@ For a quasi-free field this is its usable frequency range (5.4).
 
 ```python
 incidence_correction(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    incidence_angle_deg: float,
+) -> float
+
+incidence_correction(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    incidence_angle_deg: float,
+) -> NDArray[np.float64]
+
+incidence_correction(
     frequencies: NumericArrayLike,
     *,
     incidence_angle_deg: float,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 How much louder the nearer ear is with the loudspeaker off axis (Table B.1).
@@ -560,7 +572,7 @@ NOTE 1); how a report uses the increase is left to it.
 | `frequencies` | Test frequencies in hertz, each one of [`INCIDENCE_CORRECTION_FREQUENCIES_HZ`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_correction_frequencies_hz). |
 | `incidence_angle_deg` | 45 or 90. |
 
-**Returns:** The increase per frequency, in dB.
+**Returns:** The increase per frequency, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

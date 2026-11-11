@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..building.measurement.joint_insulation import LaboratoryJointInsulationResult
@@ -117,7 +118,9 @@ def _number(value: float | None, language: Language) -> str | None:
     return None if value is None else fmt_meta(value, language)
 
 
-def _pin_range(axes: Axes, values: np.ndarray, printed: tuple[float, float]) -> None:
+def _pin_range(
+    axes: Axes, values: NDArray[np.float64], printed: tuple[float, float]
+) -> None:
     """Set the printed range of a form's diagram, widened to the next 10 dB.
 
     The forms print their diagram over a fixed range; a curve beyond it

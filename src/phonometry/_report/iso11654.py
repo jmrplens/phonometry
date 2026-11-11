@@ -61,6 +61,7 @@ from ._layout import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.lib.colors import Color
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
@@ -152,10 +153,10 @@ def _metadata_pairs(
 
 
 def _value_table(
-    centers: np.ndarray,
-    measured: np.ndarray,
-    shifted: np.ndarray,
-    deviations: np.ndarray,
+    centers: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    shifted: NDArray[np.float64],
+    deviations: NDArray[np.float64],
     *,
     verbose: bool,
     language: Language = "en",
@@ -220,9 +221,9 @@ def _value_table(
 
 
 def _third_octave_table(
-    bands: np.ndarray,
-    alpha_s: np.ndarray,
-    measured: np.ndarray,
+    bands: NDArray[np.float64],
+    alpha_s: NDArray[np.float64],
+    measured: NDArray[np.float64],
     language: Language = "en",
 ) -> Table:
     """Build the combined one-third-octave ``f | alpha_s | alpha_p`` table.
@@ -311,10 +312,10 @@ def _verdict(
 
 def _left_table(
     result: AbsorptionRatingResult,
-    centers: np.ndarray,
-    measured: np.ndarray,
-    shifted: np.ndarray,
-    deviations: np.ndarray,
+    centers: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    shifted: NDArray[np.float64],
+    deviations: NDArray[np.float64],
     *,
     verbose: bool,
     language: Language,

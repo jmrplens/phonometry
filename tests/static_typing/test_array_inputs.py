@@ -63,10 +63,10 @@ def test_an_integer_array_and_a_list_of_integers_are_signals() -> None:
     floating array, so the case would pass however narrow the parameter were.
     """
     weighted = filters.weighting_filter([0, 1, 0, -1] * 1000, 48000)
-    assert_type(weighted, np.ndarray)
+    assert_type(weighted, NDArray[np.float64])
     integers: NDArray[np.int64] = np.zeros(4000, dtype=np.int64)
     counted = filters.weighting_filter(integers, 48000)
-    assert_type(counted, np.ndarray)
+    assert_type(counted, NDArray[np.float64])
 
 
 def test_a_list_of_one_kind_of_layer_is_a_sequence_of_layers() -> None:

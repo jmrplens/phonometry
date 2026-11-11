@@ -147,13 +147,14 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import optimize
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     holds_complex,
     real_array,
@@ -170,9 +171,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Component = Literal["x", "y", "z", "magnitude"]
 
@@ -306,8 +308,8 @@ _ON_CONDUCTOR = 1.0e-9
 
 
 def _segment_field(
-    start: np.ndarray, end: np.ndarray, points: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+    start: NDArray[np.float64], end: NDArray[np.float64], points: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.bool_] | np.bool_]:
     r"""Field of a unit current along one straight filament, and its singularity.
 
     For a filament from :math:`\mathbf{r}_1` to :math:`\mathbf{r}_2` carrying a
@@ -330,7 +332,8 @@ def _segment_field(
     :param end: End point, shape ``(3,)``.
     :param points: Evaluation points, shape ``(..., 3)``.
     :return: The field, shape ``(..., 3)``, and a boolean mask of the points
-        that lie on the filament.
+        that lie on the filament, shape ``(...)``: a numpy bool for one point
+        of shape ``(3,)``.
     """
     a = start - points
     b = end - points
@@ -346,7 +349,7 @@ def _segment_field(
     return np.where(on_wire[..., np.newaxis], 0.0, field), on_wire
 
 
-def _loop_corners(length_m: float, width_m: float) -> np.ndarray:
+def _loop_corners(length_m: float, width_m: float) -> NDArray[np.float64]:
     """The four corners of the loop, counterclockwise seen from +z."""
     x = length_m / 2.0
     y = width_m / 2.0
@@ -408,21 +411,21 @@ class LoopField(OwnsArrays):
     length_m: float
     width_m: float
     n_turns: int
-    x_m: np.ndarray
-    y_m: np.ndarray
-    z_m: np.ndarray
-    h_x_a_per_m: np.ndarray
-    h_y_a_per_m: np.ndarray
-    h_z_a_per_m: np.ndarray
+    x_m: NDArray[np.float64]
+    y_m: NDArray[np.float64]
+    z_m: NDArray[np.float64]
+    h_x_a_per_m: NDArray[np.float64]
+    h_y_a_per_m: NDArray[np.float64]
+    h_z_a_per_m: NDArray[np.float64]
 
     @property
-    def magnitude_a_per_m(self) -> np.ndarray:
+    def magnitude_a_per_m(self) -> NDArray[np.float64]:
         """The magnitude of the field strength vector, in A/m."""
         return np.asarray(
             np.sqrt(self.h_x_a_per_m**2 + self.h_y_a_per_m**2 + self.h_z_a_per_m**2)
         )
 
-    def level(self, component: Component = "z") -> np.ndarray:
+    def level(self, component: Component = "z") -> NDArray[np.float64]:
         r"""The field strength level of one component, dB re 400 mA/m.
 
         :param component: ``"x"``, ``"y"``, ``"z"`` or ``"magnitude"``.
@@ -437,7 +440,9 @@ class LoopField(OwnsArrays):
             else getattr(self, f"h_{name}_a_per_m")
         )
         with np.errstate(divide="ignore"):
-            return 20.0 * np.log10(np.abs(values) / _REFERENCE_FIELD_STRENGTH_A_PER_M)
+            return np.asarray(
+                20.0 * np.log10(np.abs(values) / _REFERENCE_FIELD_STRENGTH_A_PER_M)
+            )
 
     def plot(
         self,
@@ -842,7 +847,7 @@ def rectangular_loop_inductance(
     return n * n * _MU_0 / math.pi * bracket
 
 
-def _frequencies_to_read(frequency_hz: NumericArrayLike) -> np.ndarray:
+def _frequencies_to_read(frequency_hz: NumericArrayLike) -> NDArray[np.float64]:
     """Frequencies of any shape to read a tabulated quantity at: positive, finite."""
     f = real_array(frequency_hz, "frequency_hz")
     if not np.all(np.isfinite(f)) or np.any(f <= 0.0):
@@ -872,37 +877,68 @@ class LoopImpedance(OwnsArrays):
 
     resistance_ohm: float
     inductance_h: float
-    frequencies: np.ndarray
-    impedance_ohm: np.ndarray
+    frequencies: NDArray[np.float64]
+    impedance_ohm: NDArray[np.float64]
 
     @property
     def corner_frequency_hz(self) -> float:
         """The frequency where the reactance equals the resistance, in hertz."""
         return self.resistance_ohm / (2.0 * math.pi * self.inductance_h)
 
-    def at(self, frequency_hz: NumericArrayLike) -> np.ndarray:
+    @overload
+    def at[S: RealScalar](self, frequency_hz: S) -> float: ...
+
+    @overload
+    def at[V: RealValues](self, frequency_hz: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def at[A: NumericArrayLike](
+        self, frequency_hz: A
+    ) -> float | NDArray[np.float64]: ...
+
+    def at(self, frequency_hz: NumericArrayLike) -> float | NDArray[np.float64]:
         """The magnitude of the impedance at any frequency, in ohms.
 
         :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
-        :return: :math:`|Z|` there, in ohms.
+        :return: :math:`|Z|` there, in ohms; a ``float`` for a number, an array
+            for a sequence or an array, a zero-dimensional one included.
         :raises TypeError: if ``frequency_hz`` holds a text or a value that is not a
             real number.
         """
         f = _frequencies_to_read(frequency_hz)
-        return np.hypot(self.resistance_ohm, 2.0 * math.pi * f * self.inductance_h)
+        return as_float_or_array(
+            np.hypot(self.resistance_ohm, 2.0 * math.pi * f * self.inductance_h),
+            like=(frequency_hz,),
+        )
+
+    @overload
+    def drive_voltage[S: RealScalar](
+        self, current_a: float, frequency_hz: S
+    ) -> float: ...
+
+    @overload
+    def drive_voltage[V: RealValues](
+        self, current_a: float, frequency_hz: V
+    ) -> NDArray[np.float64]: ...
+
+    @overload
+    def drive_voltage[A: NumericArrayLike](
+        self, current_a: float, frequency_hz: A
+    ) -> float | NDArray[np.float64]: ...
 
     def drive_voltage(
         self, current_a: float, frequency_hz: NumericArrayLike
-    ) -> np.ndarray:
+    ) -> float | NDArray[np.float64]:
         """The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 
         :param current_a: RMS loop current, in amperes.
         :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
-        :return: :math:`U = I|Z|`, in volts.
+        :return: :math:`U = I|Z|`, in volts; a ``float`` for a number, an array
+            for a sequence or an array, a zero-dimensional one included.
         :raises TypeError: if ``current_a`` is not a single number.
         """
         current = require_finite(current_a, "current_a")
-        return current * self.at(frequency_hz)
+        return as_float_or_array(current * self.at(frequency_hz), like=(frequency_hz,))
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -985,9 +1021,9 @@ class MaxOutputCurrent(OwnsArrays):
         amperes (5.4.7.3).
     """
 
-    resistor_voltage_v: np.ndarray
-    load_current_a: np.ndarray
-    thd_percent: np.ndarray
+    resistor_voltage_v: NDArray[np.float64]
+    load_current_a: NDArray[np.float64]
+    thd_percent: NDArray[np.float64]
     load_resistance_ohm: float
     rated_thd_percent: float
     max_current_a: float
@@ -1179,7 +1215,7 @@ def amplifier_signal_to_noise_ratio(
     return 10.0 * math.log10(i_r * i_r / (i_n * i_n))
 
 
-def _reference_index(frequencies: np.ndarray, name: str) -> int:
+def _reference_index(frequencies: NDArray[np.float64], name: str) -> int:
     """The index of the 1 kHz entry, which every normalized response needs."""
     matches = np.flatnonzero(
         np.isclose(
@@ -1195,7 +1231,7 @@ def _reference_index(frequencies: np.ndarray, name: str) -> int:
     return int(matches[0])
 
 
-def _ascending(frequencies: np.ndarray, name: str) -> None:
+def _ascending(frequencies: NDArray[np.float64], name: str) -> None:
     """Require strictly ascending frequencies."""
     if frequencies.size > 1 and not np.all(np.diff(frequencies) > 0.0):
         msg = f"'{name}' must be strictly ascending."
@@ -1212,18 +1248,31 @@ class AmplifierFrequencyResponse(OwnsArrays):
         so 0 dB at 1 kHz (5.4.12.3).
     """
 
-    frequencies: np.ndarray
-    output_current_a: np.ndarray
-    response_db: np.ndarray
+    frequencies: NDArray[np.float64]
+    output_current_a: NDArray[np.float64]
+    response_db: NDArray[np.float64]
 
-    def at(self, frequency_hz: NumericArrayLike) -> np.ndarray:
+    @overload
+    def at[S: RealScalar](self, frequency_hz: S) -> float: ...
+
+    @overload
+    def at[V: RealValues](self, frequency_hz: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def at[A: NumericArrayLike](
+        self,
+        frequency_hz: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def at(self, frequency_hz: NumericArrayLike) -> float | NDArray[np.float64]:
         """The response at any frequency inside the measured range, in dB.
 
         Interpolated linearly against the logarithm of frequency, the way a
         response measured at one-third-octave centres is read between them.
 
         :param frequency_hz: Frequency or frequencies, in hertz.
-        :return: The response there, dB re 1 kHz.
+        :return: The response there, dB re 1 kHz. A ``float`` for a number, an array for
+            a sequence or an array, a zero-dimensional one included.
         :raises ValueError: for a frequency that is not finite and positive,
             or lies outside the measured range.
         :raises TypeError: if ``frequency_hz`` holds a text or a value that is not a
@@ -1236,8 +1285,11 @@ class AmplifierFrequencyResponse(OwnsArrays):
         ):
             msg = f"frequency outside the measured range {lo:g} Hz to {hi:g} Hz."
             raise ValueError(msg)
-        return np.asarray(
-            np.interp(np.log(f), np.log(self.frequencies), self.response_db)
+        return as_float_or_array(
+            np.asarray(
+                np.interp(np.log(f), np.log(self.frequencies), self.response_db)
+            ),
+            like=(frequency_hz,),
         )
 
     def plot(
@@ -1293,7 +1345,9 @@ def amplifier_frequency_response(
     )
 
 
-def _range_tables(y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _range_tables(
+    y: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Sparse tables of the running minimum and maximum of ``y``.
 
     Row ``r`` holds the extreme of the ``2**r`` values from each index on,
@@ -1315,7 +1369,9 @@ def _range_tables(y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return table_min, table_max
 
 
-def _widest_window(x: np.ndarray, y: np.ndarray, spread: float) -> tuple[float, float]:
+def _widest_window(
+    x: NDArray[np.float64], y: NDArray[np.float64], spread: float
+) -> tuple[float, float]:
     r"""The widest span of ``x`` over which the broken line through ``y`` varies by at most ``spread``.
 
     Exact on the line drawn straight between the steps. In a widest window
@@ -1344,7 +1400,7 @@ def _widest_window(x: np.ndarray, y: np.ndarray, spread: float) -> tuple[float, 
     highs = np.concatenate([y + spread, y])
     table_min, table_max = _range_tables(y)
 
-    def fits(first: np.ndarray, last: np.ndarray) -> np.ndarray:
+    def fits(first: NDArray[np.intp], last: NDArray[np.intp]) -> NDArray[np.bool_]:
         row = np.frexp(last - first + 1)[1] - 1
         other = last - (1 << row) + 1
         low = np.minimum(table_min[row, first], table_min[row, other])
@@ -1369,8 +1425,8 @@ def _widest_window(x: np.ndarray, y: np.ndarray, spread: float) -> tuple[float, 
     last = below
 
     def crossing(
-        inner: np.ndarray, outer: np.ndarray, beyond: np.ndarray
-    ) -> np.ndarray:
+        inner: NDArray[np.intp], outer: NDArray[np.intp], beyond: NDArray[np.bool_]
+    ) -> NDArray[np.float64]:
         """Where the segment from a step inside to the next one outside leaves the band."""
         y_out = y[outer]
         edge = np.where(y_out < lows, lows, highs)
@@ -1402,8 +1458,8 @@ class AGCCharacteristic(OwnsArrays):
     :ivar agc_range_end_level: The input level where it ends, in dB.
     """
 
-    source_emf_levels: np.ndarray
-    output_level: np.ndarray
+    source_emf_levels: NDArray[np.float64]
+    output_level: NDArray[np.float64]
     agc_range_db: float
     agc_range_start_level: float
     agc_range_end_level: float
@@ -1503,9 +1559,9 @@ class QuadraturePhaseError(OwnsArrays):
         it (5.4.14.4).
     """
 
-    frequencies: np.ndarray
-    phase_difference_deg: np.ndarray
-    deviation_deg: np.ndarray
+    frequencies: NDArray[np.float64]
+    phase_difference_deg: NDArray[np.float64]
+    deviation_deg: NDArray[np.float64]
     max_deviation_deg: float
     max_deviation_frequency_hz: float
 
@@ -1594,7 +1650,9 @@ def quadrature_phase_error(
 # ---------------------------------------------------------------------------
 
 
-def _crossings(f: np.ndarray, response: np.ndarray, level: float) -> tuple[float, ...]:
+def _crossings(
+    f: NDArray[np.float64], response: NDArray[np.float64], level: float
+) -> tuple[float, ...]:
     """Where a response crosses a level, interpolated against log frequency."""
     found: list[float] = []
     shifted = response - level
@@ -1630,13 +1688,13 @@ class NeckLoopCharacteristics(OwnsArrays):
         given as text.
     """
 
-    frequencies: np.ndarray
-    field_strength_level: np.ndarray
-    impedance_ohm: np.ndarray
+    frequencies: NDArray[np.float64]
+    field_strength_level: NDArray[np.float64]
+    impedance_ohm: NDArray[np.float64]
     input_voltage_v: float
     reference_input_voltage_v: float
     min_impedance_ohm: float
-    response_db: np.ndarray
+    response_db: NDArray[np.float64]
     frequencies_3db_hz: tuple[float, ...]
 
     def plot(

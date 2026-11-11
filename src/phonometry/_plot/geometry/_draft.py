@@ -39,6 +39,7 @@ from ..common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Rectangle
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
 
@@ -208,7 +209,7 @@ def _dim(
 
 
 def _dim_extension_lines(
-    ax: Axes, spans: tuple[tuple[np.ndarray, np.ndarray], ...]
+    ax: Axes, spans: tuple[tuple[NDArray[np.float64], NDArray[np.float64]], ...]
 ) -> None:
     """The dashed witness lines from each measured point to its offset twin."""
     for point, moved in spans:
@@ -223,7 +224,7 @@ def _dim_extension_lines(
 
 
 def _dim_label_anchor(
-    shift: np.ndarray, angle: float, *, upright: bool
+    shift: NDArray[np.float64], angle: float, *, upright: bool
 ) -> tuple[str, str, float]:
     """Alignment and rotation of a dimension label.
 

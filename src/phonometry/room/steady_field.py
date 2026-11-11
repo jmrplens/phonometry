@@ -558,10 +558,10 @@ class SteadyFieldResult(OwnsArrays):
     :ivar directivity: Source directivity factor ``Q``.
     """
 
-    distances: np.ndarray
-    direct: np.ndarray
-    reverberant: np.ndarray
-    total: np.ndarray
+    distances: NDArray[np.float64]
+    direct: NDArray[np.float64]
+    reverberant: NDArray[np.float64]
+    total: NDArray[np.float64]
     critical_distance: float
     room_constant: float
     sound_power_level: float

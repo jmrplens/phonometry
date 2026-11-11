@@ -70,7 +70,7 @@ amplitude_modulation_adjustment(
 ) -> float
 
 amplitude_modulation_adjustment(
-    modulation_depth_db: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    modulation_depth_db: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 amplitude_modulation_adjustment(
@@ -311,7 +311,7 @@ logarithmic_wind_speed(
 ) -> float
 
 logarithmic_wind_speed(
-    reference_speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reference_speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     height_m: float,
     reference_height_m: float,
@@ -468,7 +468,7 @@ power_law_wind_speed(
 ) -> float
 
 power_law_wind_speed(
-    reference_speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reference_speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     height_m: float,
     reference_height_m: float,
@@ -480,7 +480,7 @@ power_law_wind_speed(
     *,
     height_m: float,
     reference_height_m: float,
-    shear_exponent: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    shear_exponent: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 power_law_wind_speed(
@@ -1089,7 +1089,7 @@ wind_shear_exponent(
 ) -> float
 
 wind_shear_exponent(
-    speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     reference_speed_m_s: NumericArrayLike,
     *,
     height_m: float,
@@ -1098,7 +1098,7 @@ wind_shear_exponent(
 
 wind_shear_exponent(
     speed_m_s: float | np.floating[Any] | np.integer[Any],
-    reference_speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reference_speed_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     height_m: float,
     reference_height_m: float,
@@ -1324,7 +1324,7 @@ WindShearProfile.speed_at(
 ) -> float
 
 WindShearProfile.speed_at(
-    height_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    height_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 WindShearProfile.speed_at(

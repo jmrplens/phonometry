@@ -82,7 +82,7 @@ octave_filter(
     fs: float | None = None,
     fraction: float | np.integer[Any] = 1,
     order: int | np.integer[Any] = 6,
-    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
+    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]] | None = None,
     *,
     sigbands: bool = False,
     detrend: bool = True,
@@ -141,7 +141,7 @@ OctaveFilterBank(
     fs: float,
     fraction: float | np.integer[Any] = 1,
     order: int | np.integer[Any] = 6,
-    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
+    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]] | None = None,
     *,
     design: FilterDesign = ...,
     calibration: LevelCalibration = ...,
@@ -287,9 +287,9 @@ The upper band-edge frequency of each band, in hertz (read-only).
 
 ```python
 OctaveFilterResult(
-    levels: np.ndarray | None,
+    levels: NDArray[np.float64] | None,
     frequencies: tuple[float, ...] | tuple[str, ...],
-    bands: tuple[Signal, ...] | tuple[np.ndarray, ...] | None = None,
+    bands: tuple[Signal, ...] | tuple[NDArray[np.float64], ...] | None = None,
 )
 ```
 
@@ -346,7 +346,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ### OctaveFilterResult.require_bands()
 
 ```python
-OctaveFilterResult.require_bands() -> tuple[Signal, ...] | tuple[np.ndarray, ...]
+OctaveFilterResult.require_bands() -> tuple[Signal, ...] | tuple[NDArray[np.float64], ...]
 ```
 
 The per-band waveforms, or a clear error when none were kept.
@@ -366,7 +366,7 @@ them says so.
 ### OctaveFilterResult.require_levels()
 
 ```python
-OctaveFilterResult.require_levels() -> np.ndarray
+OctaveFilterResult.require_levels() -> NDArray[np.float64]
 ```
 
 The band levels, or a clear error when the call asked for none.

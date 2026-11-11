@@ -58,6 +58,8 @@ from ._sound_power_fiche import metadata_pairs
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
+
     from .._i18n import Language
     from ..noise_control._duct_path import DuctPathResult
     from ..room.noise_criteria import NCResult, RCResult
@@ -86,7 +88,7 @@ _LABEL_CHARS = 46
 _MIN_SHEET_ROWS = 4
 
 
-def _band_header(frequencies: np.ndarray, language: Language) -> list[str]:
+def _band_header(frequencies: NDArray[np.float64], language: Language) -> list[str]:
     """Column headings: the row-code and element columns, then the band centres."""
     from .._internal.bands import _format_nominal_freq
 

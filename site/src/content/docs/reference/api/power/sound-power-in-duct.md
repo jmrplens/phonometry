@@ -92,13 +92,31 @@ module.
 
 ```python
 flow_modal_correction(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = ...,
+    speed_of_sound: float = ...,
+) -> float
+
+flow_modal_correction(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+flow_modal_correction(
     frequencies: NumericArrayLike,
     flow_velocity: float,
     duct_diameter_m: float,
     *,
-    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = 'sampling-tube',
-    speed_of_sound: float = 340.0,
-) -> np.ndarray
+    shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Combined mean flow velocity and modal correction $C_{3,4}$.
@@ -138,7 +156,7 @@ coefficient in the annex is transcribed and none of them warns.
 | `shield` | `"sampling-tube"` (default), `"nose-cone"` or `"foam-ball"`. |
 | `speed_of_sound` | The $c$ of Eq. (8), in metres per second; the 340 m/s clause 5.3.4.3 states for normal conditions by default. [`sound_power_in_duct`](/phonometry/reference/api/power/sound-power-in-duct/#sound_power_in_duct) passes the duct air's own $c$ instead. Unused by the sampling tube. |
 
-**Returns:** $C_{3,4}$ per band, in decibels.
+**Returns:** $C_{3,4}$ per band, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -150,7 +168,17 @@ coefficient in the annex is transcribed and none of them warns.
 ## in_duct_reproducibility
 
 ```python
-in_duct_reproducibility(frequencies: NumericArrayLike) -> np.ndarray
+in_duct_reproducibility(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+in_duct_reproducibility(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+in_duct_reproducibility(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Standard deviation of reproducibility $\sigma_R$ per band.
@@ -168,7 +196,7 @@ carries those bands says so in `information_only_band`.
 | :--- | :--- |
 | `frequencies` | Nominal one-third-octave centre frequencies, in hertz, 50 Hz to 20 kHz. |
 
-**Returns:** $\sigma_R$ per band, in decibels.
+**Returns:** $\sigma_R$ per band, in decibels. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -181,16 +209,16 @@ carries those bands says so in `information_only_band`.
 
 ```python
 InDuctSoundPowerResult(
-    frequencies: np.ndarray,
-    sound_power_level: np.ndarray,
-    mean_pressure_level: np.ndarray,
-    corrected_pressure_level: np.ndarray,
-    microphone_correction: np.ndarray,
-    shield_correction: np.ndarray,
-    flow_modal_correction: np.ndarray,
-    combined_correction: np.ndarray,
-    reproducibility_standard_deviation: np.ndarray,
-    expanded_uncertainty: np.ndarray,
+    frequencies: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    mean_pressure_level: NDArray[np.float64],
+    corrected_pressure_level: NDArray[np.float64],
+    microphone_correction: NDArray[np.float64],
+    shield_correction: NDArray[np.float64],
+    flow_modal_correction: NDArray[np.float64],
+    combined_correction: NDArray[np.float64],
+    reproducibility_standard_deviation: NDArray[np.float64],
+    expanded_uncertainty: NDArray[np.float64],
     duct_diameter_m: float,
     duct_area: float,
     characteristic_impedance: float,

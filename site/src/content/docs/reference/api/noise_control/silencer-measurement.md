@@ -159,9 +159,24 @@ DENSITY_RATIO_RANGE = (0.98, 1.02)
 
 ```python
 duct_sound_power_level(
-    room_sound_power_level: NumericArrayLike,
+    room_sound_power_level: float | np.floating[Any] | np.integer[Any],
+    end_reflection_loss: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+duct_sound_power_level(
+    room_sound_power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     end_reflection_loss: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+duct_sound_power_level(
+    room_sound_power_level: float | np.floating[Any] | np.integer[Any],
+    end_reflection_loss: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+duct_sound_power_level(
+    room_sound_power_level: NumericArrayLike,
+    end_reflection_loss: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 ISO 5135 Equation (1): back from the room to the duct.
@@ -188,7 +203,7 @@ instead, and then no correction is applied at all.
 | `room_sound_power_level` | $L_W$, the sound power radiated into the room, in dB, from ISO 3741. |
 | `end_reflection_loss` | $\Delta L_\mathrm{r}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
 
-**Returns:** $L_{W\mathrm{duct}}$, in dB, one value per band.
+**Returns:** $L_{W\mathrm{duct}}$, in dB, one value per band. A `float` when `room_sound_power_level` and `end_reflection_loss` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -292,10 +307,34 @@ serves both.
 
 ```python
 flow_noise_power_level(
-    pressure_level: NumericArrayLike,
+    pressure_level: float | np.floating[Any] | np.integer[Any],
+    open_end_loss: float | np.floating[Any] | np.integer[Any],
+    room_correction: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+flow_noise_power_level(
+    pressure_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     open_end_loss: NumericArrayLike,
     room_correction: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+flow_noise_power_level(
+    pressure_level: float | np.floating[Any] | np.integer[Any],
+    open_end_loss: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    room_correction: NumericArrayLike,
+) -> NDArray[np.float64]
+
+flow_noise_power_level(
+    pressure_level: float | np.floating[Any] | np.integer[Any],
+    open_end_loss: float | np.floating[Any] | np.integer[Any],
+    room_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+flow_noise_power_level(
+    pressure_level: NumericArrayLike,
+    open_end_loss: NumericArrayLike,
+    room_correction: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 ISO 7235 Equation (7): the sound power of the flow noise.
@@ -321,7 +360,7 @@ room's volume and reverberation time.
 | `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
 | `room_correction` | $C$, in dB, per band or one value for all. |
 
-**Returns:** $L_W$, in dB, one value per band.
+**Returns:** $L_W$, in dB, one value per band. A `float` when `pressure_level`, `open_end_loss` and `room_correction` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -382,9 +421,24 @@ ISO7235_SPREAD_LIMITS = ((50.0, 10.0), (63.0, 10.0), (80.0, 8.0), (100.0, 8.0), 
 
 ```python
 measured_transmission_loss(
-    insertion_loss: NumericArrayLike,
+    insertion_loss: float | np.floating[Any] | np.integer[Any],
+    open_end_loss: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+measured_transmission_loss(
+    insertion_loss: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     open_end_loss: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+measured_transmission_loss(
+    insertion_loss: float | np.floating[Any] | np.integer[Any],
+    open_end_loss: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+measured_transmission_loss(
+    insertion_loss: NumericArrayLike,
+    open_end_loss: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 ISO 7235 Equation (6): the transmission loss of an air-terminal unit.
@@ -409,7 +463,7 @@ $D_\mathrm{td}$ goes to zero and the two quantities meet.
 | `insertion_loss` | $D_\mathrm{i}$, in dB, from [`substitution_insertion_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#substitution_insertion_loss). |
 | `open_end_loss` | $D_\mathrm{td}$, in dB, from [`open_end_transmission_loss`](/phonometry/reference/api/noise_control/silencer-measurement/#open_end_transmission_loss). |
 
-**Returns:** $D_\mathrm{t}$, in dB, one value per band.
+**Returns:** $D_\mathrm{t}$, in dB, one value per band. A `float` when `insertion_loss` and `open_end_loss` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -723,12 +777,28 @@ the substitution duct, so their energies can be weighted equally here.
 
 ```python
 open_end_reflection_coefficient(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float
+
+open_end_reflection_coefficient(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+open_end_reflection_coefficient(
     frequency: NumericArrayLike,
     area: float,
     *,
-    solid_angle_sr: float = 6.283185307179586,
-    speed_of_sound: float = 343.0,
-) -> NDArray[np.float64]
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 ISO 7235 Equation (B.4): the pressure reflection coefficient there.
@@ -756,7 +826,7 @@ reflection coefficient is no greater than 0,3.
 | `solid_angle_sr` | $\Omega$, in sr. |
 | `speed_of_sound` | $c$, in m/s. |
 
-**Returns:** $r$, dimensionless, one value per frequency.
+**Returns:** $r$, dimensionless, one value per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -769,12 +839,28 @@ reflection coefficient is no greater than 0,3.
 
 ```python
 open_end_transmission_loss(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float
+
+open_end_transmission_loss(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+open_end_transmission_loss(
     frequency: NumericArrayLike,
     area: float,
     *,
-    solid_angle_sr: float = 6.283185307179586,
-    speed_of_sound: float = 343.0,
-) -> NDArray[np.float64]
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 ISO 7235 Equation (B.3): what the open end of a duct keeps in.
@@ -818,7 +904,7 @@ the middle.
 | `solid_angle_sr` | $\Omega$, the solid angle of radiation at the duct end, in sr. The five configurations of Table B.1 are in [`RADIATION_SOLID_ANGLES`](/phonometry/reference/api/noise_control/silencer-measurement/#radiation_solid_angles); the default is a duct flush with one surface. |
 | `speed_of_sound` | $c$, in m/s. |
 
-**Returns:** $D_\mathrm{td}$, in dB, one value per frequency.
+**Returns:** $D_\mathrm{td}$, in dB, one value per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1044,11 +1130,32 @@ transition elements may be fitted.
 
 ```python
 substitution_insertion_loss(
+    substitution_level: float | np.floating[Any] | np.integer[Any],
+    object_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> float
+
+substitution_insertion_loss(
+    substitution_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    object_level: NumericArrayLike,
+    *,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> NDArray[np.float64]
+
+substitution_insertion_loss(
+    substitution_level: float | np.floating[Any] | np.integer[Any],
+    object_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> NDArray[np.float64]
+
+substitution_insertion_loss(
     substitution_level: NumericArrayLike,
     object_level: NumericArrayLike,
     *,
-    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = None,
-) -> NDArray[np.float64]
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The insertion loss of the two test series, band by band.
@@ -1082,7 +1189,7 @@ then the term is zero and the pair can be left out.
 | `object_level` | The band levels of the series run with the test object installed, in dB. |
 | `reverberation_times` | Optionally `(T_1, T_2)` in s, the reverberation times of the substitution series and of the test-object series, for the correction of 6.3. One value stands for every band. |
 
-**Returns:** $D_\mathrm{i}$, in dB, one value per band.
+**Returns:** $D_\mathrm{i}$, in dB, one value per band. A `float` when `substitution_level` and `object_level` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -475,9 +475,9 @@ class TestTransmissionLoss:
 
     def test_the_correction_is_worst_far_from_the_ring_frequency(self) -> None:
         ring = 14860.406
-        near = float(hydro.transmission_loss_correction(ring, ring)[0])
-        low = float(hydro.transmission_loss_correction(50.0, ring)[0])
-        high = float(hydro.transmission_loss_correction(20000.0, ring)[0])
+        near = hydro.transmission_loss_correction(ring, ring)
+        low = hydro.transmission_loss_correction(50.0, ring)
+        high = hydro.transmission_loss_correction(20000.0, ring)
         assert low < high < near
 
     def test_it_takes_a_whole_band_set_at_once(self) -> None:
@@ -604,7 +604,7 @@ class TestBandRoute:
         self, index: int, expected: float
     ) -> None:
         result = _run(index)
-        found = float(hydro.turbulent_distribution(BAND_HZ, result.turbulent_peak)[0])
+        found = hydro.turbulent_distribution(BAND_HZ, result.turbulent_peak)
         assert found == pytest.approx(expected, abs=0.01)
 
     def test_the_third_column_prints_a_distribution_its_peak_does_not_give(
@@ -612,9 +612,9 @@ class TestBandRoute:
     ) -> None:
         # -36,24 needs f_p,turb = 396,0 Hz; the column's own printed
         # 397,93 Hz gives -36,18. Recorded in ``docs/ERRATA.md``.
-        found = float(hydro.turbulent_distribution(BAND_HZ, 397.93)[0])
+        found = hydro.turbulent_distribution(BAND_HZ, 397.93)
         assert found == pytest.approx(-36.18, abs=5e-3)
-        assert float(hydro.turbulent_distribution(BAND_HZ, 396.0)[0]) == pytest.approx(
+        assert hydro.turbulent_distribution(BAND_HZ, 396.0) == pytest.approx(
             -36.24, abs=5e-3
         )
 
@@ -627,9 +627,9 @@ class TestBandRoute:
         # Equation (20a) is f^-1 below the peak and f^3 above it: away from
         # the peak an octave up costs three times what an octave down does.
         peak = 500.0
-        below = float(hydro.turbulent_distribution(peak / 4.0, peak)[0])
-        above = float(hydro.turbulent_distribution(peak * 4.0, peak)[0])
-        centre = float(hydro.turbulent_distribution(peak, peak)[0])
+        below = hydro.turbulent_distribution(peak / 4.0, peak)
+        above = hydro.turbulent_distribution(peak * 4.0, peak)
+        centre = hydro.turbulent_distribution(peak, peak)
         assert (centre - above) > 2.0 * (centre - below)
 
     @pytest.mark.parametrize(("index", "expected"), [(2, -10.51), (3, -6.85)])
@@ -638,7 +638,7 @@ class TestBandRoute:
     ) -> None:
         peak = _run(index).cavitation_peak
         assert peak is not None
-        found = float(hydro.cavitation_distribution(BAND_HZ, peak)[0])
+        found = hydro.cavitation_distribution(BAND_HZ, peak)
         assert found == pytest.approx(expected, abs=5e-3)
 
     def test_the_cavitation_distribution_is_symmetric_about_its_maximum(self) -> None:
@@ -647,8 +647,8 @@ class TestBandRoute:
         # front of the rising branch shifts the maximum half an octave up.
         peak = 1000.0
         top = peak * 4.0 ** (1.0 / 3.0)
-        low = float(hydro.cavitation_distribution(top / 4.0, peak)[0])
-        high = float(hydro.cavitation_distribution(top * 4.0, peak)[0])
+        low = hydro.cavitation_distribution(top / 4.0, peak)
+        high = hydro.cavitation_distribution(top * 4.0, peak)
         assert low == pytest.approx(high, rel=1e-12)
         bands = np.geomspace(peak / 8.0, peak * 8.0, 401)
         found = hydro.cavitation_distribution(bands, peak)
@@ -656,8 +656,8 @@ class TestBandRoute:
 
     def test_it_is_broader_than_the_turbulent_one(self) -> None:
         peak = 1000.0
-        turbulent = float(hydro.turbulent_distribution(peak * 4.0, peak)[0])
-        cavitating = float(hydro.cavitation_distribution(peak * 4.0, peak)[0])
+        turbulent = hydro.turbulent_distribution(peak * 4.0, peak)
+        cavitating = hydro.cavitation_distribution(peak * 4.0, peak)
         assert cavitating > turbulent
 
     @pytest.mark.parametrize(

@@ -261,7 +261,7 @@ def _fit_band(curve: str, fs: int) -> tuple[float, float]:
 #: zeros at the origin are a count, the power of ``s`` the standard writes in
 #: the numerator, because the design holds them there and must not have to
 #: recognise them by their value.
-_Prototype = tuple[int, np.ndarray, np.ndarray, float]
+type _Prototype = tuple[int, NDArray[np.inexact[Any]], NDArray[np.inexact[Any]], float]
 
 
 def _a_weighting_zpk() -> _Prototype:
@@ -276,7 +276,7 @@ def _a_weighting_zpk() -> _Prototype:
     return 4, np.zeros(0), poles, 3.5174303309e13
 
 
-def _u_poles() -> np.ndarray:
+def _u_poles() -> NDArray[np.complex128]:
     """IEC 61012:1990 Table 2: the six poles of the U low-pass, in rad/s.
 
     A double real pole at -12 200 Hz and complex-conjugate pairs at
@@ -284,20 +284,20 @@ def _u_poles() -> np.ndarray:
     the AU weighting of subclause 2.2, for measuring audible sound in the
     presence of ultrasound.
     """
-    return (
-        2
-        * np.pi
-        * np.array(
-            [
-                -12200.0,
-                -12200.0,
-                -7850.0 + 8800.0j,
-                -7850.0 - 8800.0j,
-                -2900.0 + 12150.0j,
-                -2900.0 - 12150.0j,
-            ]
-        )
+    # Named so a type checker reads the dtype numpy gives the complex literals:
+    # it reads ``np.array`` of a list as an array of any dtype, and an array of
+    # any dtype times a float as float64.
+    poles_hz: NDArray[np.complex128] = np.array(
+        [
+            -12200.0,
+            -12200.0,
+            -7850.0 + 8800.0j,
+            -7850.0 - 8800.0j,
+            -2900.0 + 12150.0j,
+            -2900.0 - 12150.0j,
+        ]
     )
+    return 2 * np.pi * poles_hz
 
 
 def _c_weighting_zpk() -> _Prototype:
@@ -412,7 +412,9 @@ def _zeros_at_origin(curve: str) -> int:
     return _prototype(curve)[0]
 
 
-def _analog_weighting_zpk(curve: str) -> tuple[np.ndarray, np.ndarray, float]:
+def _analog_weighting_zpk(
+    curve: str,
+) -> tuple[NDArray[np.inexact[Any]], NDArray[np.inexact[Any]], float]:
     """Analog prototype of *curve*, normalised to 0 dB at its reference.
 
     :param curve: An upper-case name in :data:`_PROTOTYPE_CURVES`.
@@ -430,7 +432,9 @@ def _analog_weighting_zpk(curve: str) -> tuple[np.ndarray, np.ndarray, float]:
 
 
 @lru_cache(maxsize=64)
-def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.ndarray:
+def _cached_weighting_sos(
+    curve: str, fs: int, *, high_accuracy: bool
+) -> NDArray[np.float64]:
     """The shared, read-only design behind :func:`_weighting_sos`."""
     zeros, poles, gain = _analog_weighting_zpk(curve)
     if high_accuracy:
@@ -452,7 +456,7 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
 
 def _weighting_sos(
     curve: str, fs: float, *, high_accuracy: bool | np.bool_
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Second-order sections of *curve* at *fs*, cached on the three inputs.
 
     Two designs live here, and ``high_accuracy`` picks between them:
@@ -614,13 +618,13 @@ class WeightingFilter:
             self.zi = np.array([])
             self._steady_ic = steady_ic
 
-    def _init_filter_state(self, x_proc: np.ndarray) -> None:
+    def _init_filter_state(self, x_proc: NDArray[np.float64]) -> None:
         """Allocate or reallocate ``zi`` to match the input shape."""
         self.zi = _sos_initial_state(
             sos=self.sos, x_proc=x_proc, steady_ic=self._steady_ic
         )
 
-    def _needs_zi_reinit(self, x_proc: np.ndarray) -> bool:
+    def _needs_zi_reinit(self, x_proc: NDArray[np.float64]) -> bool:
         """Check whether ``zi`` must be (re)allocated for *x_proc*."""
         return _sos_state_mismatch(self.zi, x_proc)
 
@@ -628,9 +632,9 @@ class WeightingFilter:
     def filter(self, x: Signal) -> Signal: ...
 
     @overload
-    def filter(self, x: NumericArrayLike) -> np.ndarray: ...
+    def filter(self, x: NumericArrayLike) -> NDArray[np.float64]: ...
 
-    def filter(self, x: Signal | NumericArrayLike) -> Signal | np.ndarray:
+    def filter(self, x: Signal | NumericArrayLike) -> Signal | NDArray[np.float64]:
         """Apply the weighting filter to a signal.
 
         :param x: Input signal (1D or 2D [channels, samples]), or a
@@ -660,12 +664,12 @@ class WeightingFilter:
         else:
             y = signal.sosfilt(self.sos, x_proc, axis=-1)
 
-        return like_input(x, cast(np.ndarray, y))
+        return like_input(x, cast("NDArray[np.float64]", y))
 
 
 def _runtime_frequency_response(
-    wf: WeightingFilter, frequencies: np.ndarray
-) -> np.ndarray:
+    wf: WeightingFilter, frequencies: NDArray[np.float64]
+) -> NDArray[np.complex128]:
     """Complex steady-state response of the *whole* filter path.
 
     The path is one cascade of second-order sections at the input rate, for
@@ -707,22 +711,22 @@ def _cached_weighting_filter(
 
 @overload
 def _as_envelope(
-    x: Signal, mean_square: np.ndarray, fs: float, mode: Mode
+    x: Signal, mean_square: NDArray[np.float64], fs: float, mode: Mode
 ) -> TimeWeightedEnvelope: ...
 
 
 @overload
 def _as_envelope(
-    x: NumericArrayLike, mean_square: np.ndarray, fs: float, mode: Mode
-) -> np.ndarray: ...
+    x: NumericArrayLike, mean_square: NDArray[np.float64], fs: float, mode: Mode
+) -> NDArray[np.float64]: ...
 
 
 def _as_envelope(
     x: Signal | NumericArrayLike,
-    mean_square: np.ndarray,
+    mean_square: NDArray[np.float64],
     fs: float,
     mode: Mode,
-) -> TimeWeightedEnvelope | np.ndarray:
+) -> TimeWeightedEnvelope | NDArray[np.float64]:
     """Wrap the envelope for a Signal input, leave a bare array alone.
 
     Same conditional shape as the rest of the contract: a caller that passed
@@ -765,7 +769,7 @@ class TimeWeightedEnvelope(OwnsArrays):
         which is what decides whether a level read off it means dB SPL.
     """
 
-    mean_square: np.ndarray
+    mean_square: NDArray[np.float64]
     fs: float
     mode: Mode
     _: KW_ONLY
@@ -773,7 +777,7 @@ class TimeWeightedEnvelope(OwnsArrays):
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None
-    ) -> np.ndarray:
+    ) -> NDArray[Any]:
         """Return the envelope as an array (optionally recast)."""
         return np.asarray(self.mean_square, dtype=dtype, copy=copy)
 
@@ -802,12 +806,12 @@ class TimeWeightedEnvelope(OwnsArrays):
         return int(self.mean_square.size)
 
     @property
-    def dtype(self) -> np.dtype[Any]:
+    def dtype(self) -> np.dtype[np.float64]:
         """Data type of the envelope."""
         return self.mean_square.dtype
 
     @property
-    def times(self) -> np.ndarray:
+    def times(self) -> NDArray[np.float64]:
         """Sample times, in seconds from the start of the record."""
         return np.arange(self.mean_square.shape[-1]) / float(self.fs)
 
@@ -849,7 +853,7 @@ def weighting_filter(
     weighting: Weighting = ...,
     *,
     high_accuracy: bool | np.bool_ = ...,
-) -> np.ndarray: ...
+) -> NDArray[np.float64]: ...
 
 
 def weighting_filter(
@@ -858,7 +862,7 @@ def weighting_filter(
     weighting: Weighting = "A",
     *,
     high_accuracy: bool | np.bool_ = True,
-) -> Signal | np.ndarray:
+) -> Signal | NDArray[np.float64]:
     """Apply a frequency weighting to a signal.
 
     :param x: Input signal, or a :class:`phonometry.io.Signal` read from a
@@ -894,9 +898,9 @@ def weighting_filter(
 
 
 def _prepare_time_weighting_initial_state(
-    x_sq: np.ndarray,
+    x_sq: NDArray[np.float64],
     initial_state: InitialState | NumericArrayLike | None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Return the previous output state ``y[-1]`` for time weighting.
 
     A text that is not a ``str`` (a ``bytes``, a text in a sequence or an
@@ -954,11 +958,11 @@ def _prepare_time_weighting_initial_state(
 
 
 def _impulse_kernel_py(
-    x_t: np.ndarray,
+    x_t: NDArray[np.float64],
     alpha_rise: float,
     alpha_fall: float,
-    initial_state: np.ndarray,
-) -> np.ndarray:
+    initial_state: NDArray[np.float64],
+) -> NDArray[np.float64]:
     """Asymmetric time-weighting kernel (pure Python; jitted when numba is present)."""
     y_t = np.zeros_like(x_t)
     curr_y = initial_state.copy()
@@ -993,7 +997,7 @@ def time_weighting(
     fs: float,
     mode: Mode = ...,
     initial_state: InitialState | NumericArrayLike | None = ...,
-) -> np.ndarray: ...
+) -> NDArray[np.float64]: ...
 
 
 def time_weighting(
@@ -1001,7 +1005,7 @@ def time_weighting(
     fs: float | None = None,
     mode: Mode = "fast",
     initial_state: InitialState | NumericArrayLike | None = None,
-) -> TimeWeightedEnvelope | np.ndarray:
+) -> TimeWeightedEnvelope | NDArray[np.float64]:
     """Apply time weighting to a signal (Exponential averaging).
 
     :param x: Input signal (raw pressure/voltage), or a
@@ -1046,7 +1050,7 @@ def time_weighting(
         # We apply the weighting to the squared signal to get the Mean Square value
         zi = np.expand_dims((1 - alpha) * initial, axis=-1)
         y, _ = signal.lfilter(b, a, x_sq, axis=-1, zi=zi)
-        return _as_envelope(x, cast(np.ndarray, y), fs, mode)
+        return _as_envelope(x, cast("NDArray[np.float64]", y), fs, mode)
 
     if mode == "impulse":
         # Time weighting I of the withdrawn IEC 60651: 35 ms rising, 1500 ms falling
@@ -1089,17 +1093,17 @@ class TimeWeighting:
         require_choice(mode, "mode", _TIME_WEIGHTINGS)
         self.fs = fs
         self.mode: Mode = mode
-        self._state: np.ndarray | None = None
+        self._state: NDArray[np.float64] | None = None
 
     @overload
     def process(self, x: Signal) -> TimeWeightedEnvelope: ...
 
     @overload
-    def process(self, x: NumericArrayLike) -> np.ndarray: ...
+    def process(self, x: NumericArrayLike) -> NDArray[np.float64]: ...
 
     def process(
         self, x: Signal | NumericArrayLike
-    ) -> TimeWeightedEnvelope | np.ndarray:
+    ) -> TimeWeightedEnvelope | NDArray[np.float64]:
         """Apply time weighting to a block, continuing from the previous block.
 
         The block form of :func:`time_weighting`, and it returns the same
@@ -1149,7 +1153,7 @@ def linkwitz_riley(
     *,
     frequency: float,
     order: int | np.integer[Any] = ...,
-) -> tuple[np.ndarray, np.ndarray]: ...
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]: ...
 
 
 def linkwitz_riley(
@@ -1158,7 +1162,7 @@ def linkwitz_riley(
     *,
     frequency: float,
     order: int | np.integer[Any] = 4,
-) -> tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]:
+) -> tuple[Signal, Signal] | tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Linkwitz-Riley crossover filter (Butterworth squared).
     Splits signal into low and high bands with flat sum response.
 

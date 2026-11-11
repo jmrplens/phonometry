@@ -122,7 +122,7 @@ class_limits(
     omega: NumericArrayLike,
     *,
     edition: Literal['2014', '1995'] = '2014',
-) -> tuple[np.ndarray, np.ndarray]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 
 Acceptance limits on relative attenuation at normalized frequencies.
@@ -165,8 +165,8 @@ FilterComplianceResult(
     band_margins: tuple[Mapping[str, float | None], ...],
     fraction: int,
     edition: Literal['2014', '1995'],
-    sos: tuple[np.ndarray, ...],
-    frequencies: np.ndarray,
+    sos: tuple[NDArray[np.float64], ...],
+    frequencies: NDArray[np.float64],
     factors: tuple[int, ...],
     fs: float,
     n_points: int,

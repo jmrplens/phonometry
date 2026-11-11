@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from .validation import real_array
+from .validation import complex_array, real_array
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -94,23 +94,45 @@ RealScalar = float | np.floating[Any] | np.integer[Any]
 
 #: Several real numbers: a sequence of them, Python or numpy ones (a list of
 #: ``np.float32`` is no ``Sequence[float]`` to a type checker), or a numpy
-#: array of any shape, a zero-dimensional one included. A function that takes
+#: array of any shape, a zero-dimensional one included, of the dtypes
+#: :func:`~phonometry._internal.validation.real_array` reads as real numbers
+#: (truth values, integers and floats of any width). A function that takes
 #: a number or an array of them returns an array for it. A list that mixes
 #: Python and numpy numbers is no ``ArrayLike`` to numpy's own stubs, so it
-#: is left out here too and reads as the union.
+#: is left out here too and reads as the union, as a complex array does.
 RealValues = (
     Sequence[float]
     | Sequence[np.floating[Any]]
     | Sequence[np.integer[Any]]
-    | NDArray[Any]
+    | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]]
+)
+
+#: One number that may be complex, as a function of a number or an array of
+#: them that reads a complex argument (a mobility, an impedance) is handed
+#: it: a Python ``complex``, ``float`` or ``int``, or a numpy number of any
+#: kind. Such a function returns a Python number for it: a ``float`` where
+#: its result is real, a ``complex`` where it is complex.
+ComplexScalar = complex | np.number[Any]
+
+#: Several numbers that may be complex: a sequence of them, Python or numpy
+#: ones, or a numpy array of numbers or truth values of any shape, a
+#: zero-dimensional one included. A function that takes a number or an array
+#: of them returns an array for it.
+ComplexValues = (
+    Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]]
 )
 
 #: A fixed count of arrays a record holds as one field, a curve's ``(x, y)``
 #: or the ``(x, y, z)`` axes of an elevation model: a sequence of them, each
 #: any array-like of numbers (a tuple of an array and a list), or one array whose rows
 #: they are (``np.vstack((x, y))``), which is no ``Sequence`` to a type
-#: checker and so is named beside it.
-ArrayRows = Sequence[NumericArrayLike] | NDArray[Any]
+#: checker and so is named beside it: an array of real numbers, or an array
+#: of objects that holds each member whole, as rows of different lengths are
+#: held (:func:`~phonometry._internal.validation.arrays_of` reads both).
+ArrayRows = (
+    Sequence[NumericArrayLike]
+    | NDArray[np.bool_ | np.integer[Any] | np.floating[Any] | np.object_]
+)
 
 #: Values keyed by a band centre frequency in hertz (or by another number a
 #: caller writes as an ``int`` as often as a ``float``, an angle in degrees),
@@ -282,6 +304,35 @@ def as_float_or_array(
     if form == "array":
         return result
     return float(one_value(result)) if form == "number" else one_value(result)
+
+
+def as_complex_or_array(
+    values: NumericArrayLike, *, like: tuple[NumericArrayLike | None, ...]
+) -> complex | NDArray[np.complex128]:
+    """Return complex *values* in the form the arguments that decide their shape came in.
+
+    The complex form of :func:`as_float_or_array`, for a function whose
+    result is complex (a mobility, an impedance, a transfer function): a
+    Python ``complex`` only when none of *like* is a numpy array and every
+    one of them is a single number; a sequence or an array among them, a
+    zero-dimensional array included, gives a ``complex128`` array
+    (:func:`answer_form`). A validator that hands a scalar back as a
+    one-element array is read through as :func:`as_float_or_array` reads
+    it, and the values are kept as computed, bit for bit.
+
+    :param values: The complex result of a computation that broadcasts *like*.
+    :param like: Every argument that decides the shape of the result, as the
+        caller was handed it, a tuple always: ``like=(frequency,)``.
+    :return: ``complex`` for numbers in, a ``complex128`` array otherwise.
+    :raises ValueError: If every argument in *like* is a single number and
+        *values* holds more than one.
+    :raises TypeError: if ``values`` holds a text or a value that is not a number.
+    """
+    result = complex_array(values, "values")
+    form = answer_form(like)
+    if form == "array":
+        return result
+    return complex(one_value(result)) if form == "number" else one_value(result)
 
 
 def one_value[T: np.generic](values: NDArray[T]) -> NDArray[T]:

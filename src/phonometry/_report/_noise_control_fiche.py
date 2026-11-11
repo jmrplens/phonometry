@@ -57,6 +57,7 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -90,7 +91,7 @@ PREDICTION_DISCLAIMER = (
 )
 
 
-def mean_finite(values: np.ndarray) -> float:
+def mean_finite(values: NDArray[np.float64]) -> float:
     """Arithmetic mean of the finite entries of a per-band array (``nan`` if none).
 
     :raises TypeError: if ``values`` holds a text or a value that is not a real number.

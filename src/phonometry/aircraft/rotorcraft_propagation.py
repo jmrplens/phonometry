@@ -54,11 +54,12 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_scalar,
     real_array,
@@ -81,7 +82,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import GroundClass, NumericArrayLike
+    from .._internal.types import GroundClass, NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "MeanGroundPlaneResult",
@@ -155,6 +156,42 @@ def spherical_spreading_adjustment(
     return float(-20.0 * np.log10(r / rh))
 
 
+@overload
+def atmospheric_adjustment[S: RealScalar](
+    frequencies: S,
+    distance_m: float,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    reference_distance_m: float = ...,
+) -> float: ...
+
+
+@overload
+def atmospheric_adjustment[V: RealValues](
+    frequencies: V,
+    distance_m: float,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    reference_distance_m: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def atmospheric_adjustment[A: NumericArrayLike](
+    frequencies: A,
+    distance_m: float,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    reference_distance_m: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def atmospheric_adjustment(
     frequencies: NumericArrayLike,
     distance_m: float,
@@ -163,7 +200,7 @@ def atmospheric_adjustment(
     relative_humidity_percent: float = 70.0,
     static_pressure_kpa: float = 101.325,
     reference_distance_m: float = _RH,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Atmospheric-absorption adjustment ``ΔLa`` of the hemisphere level (Eq. 26/27).
 
     The hemisphere already includes absorption out to the reference distance
@@ -204,7 +241,8 @@ def atmospheric_adjustment(
         (default 60). Pass :attr:`RotorcraftHemisphere.distance_m` when the data
         uses a non-standard polar distance.
     :return: The adjustment ``ΔLa`` per band, in dB (added to the level,
-        :math:`\le 0` for :math:`r \ge r_\mathrm{h}`).
+        :math:`\le 0` for :math:`r \ge r_\mathrm{h}`). A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a distance is not strictly positive.
     :raises TypeError: if ``distance_m`` or ``reference_distance_m`` is not a single
         number, or ``frequencies`` holds a text or a value that is not a real number.
@@ -215,7 +253,7 @@ def atmospheric_adjustment(
     alpha = _absorption_coefficient(
         f, temperature_c, relative_humidity_percent, static_pressure_kpa
     )
-    return np.asarray(-alpha * (r - rh), dtype=np.float64)
+    return as_float_or_array(-alpha * (r - rh), like=(frequencies,))
 
 
 def _absorption_coefficient(
@@ -263,6 +301,39 @@ def _delany_bazley_impedance(
     return np.asarray(real + 1j * imag, dtype=np.complex128)
 
 
+@overload
+def ground_effect_adjustment[S: RealScalar](
+    frequencies: S,
+    source_height_m: float,
+    receiver_height_m: float,
+    horizontal_distance_m: float,
+    *,
+    flow_resistivity: float | GroundClass = ...,
+) -> float: ...
+
+
+@overload
+def ground_effect_adjustment[V: RealValues](
+    frequencies: V,
+    source_height_m: float,
+    receiver_height_m: float,
+    horizontal_distance_m: float,
+    *,
+    flow_resistivity: float | GroundClass = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def ground_effect_adjustment[A: NumericArrayLike](
+    frequencies: A,
+    source_height_m: float,
+    receiver_height_m: float,
+    horizontal_distance_m: float,
+    *,
+    flow_resistivity: float | GroundClass = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def ground_effect_adjustment(
     frequencies: NumericArrayLike,
     source_height_m: float,
@@ -270,7 +341,7 @@ def ground_effect_adjustment(
     horizontal_distance_m: float,
     *,
     flow_resistivity: float | GroundClass = "G",
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Ground-effect adjustment ``ΔLg`` over an impedance plane (Eq. 28-35).
 
     A point source over a locally-reacting impedance ground produces interference
@@ -295,7 +366,9 @@ def ground_effect_adjustment(
         :math:`\sigma = 200 \times 10^3` for rural areas (§A.4.3), can be
         passed as numeric values. One of ``"A"``, ``"B"``, ``"C"``, ``"D"``, ``"E"``,
         ``"F"``, ``"G"`` or ``"H"``.
-    :return: The adjustment ``ΔLg`` per band, in dB (added to the level).
+    :return: The adjustment ``ΔLg`` per band, in dB (added to the level). A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``flow_resistivity``, ``horizontal_distance_m``,
         ``receiver_height_m`` or ``source_height_m`` is not a single number, or
@@ -307,7 +380,7 @@ def ground_effect_adjustment(
     dp = require_positive(horizontal_distance_m, "horizontal_distance_m")
     sigma = _resolve_flow_resistivity(flow_resistivity)
     grid = _ground_effect(f, hs, hr, np.asarray([dp], dtype=np.float64), sigma)
-    return np.asarray(grid[0], dtype=np.float64)
+    return as_float_or_array(grid[0], like=(frequencies,))
 
 
 def _resolve_flow_resistivity(flow_resistivity: float | str) -> float:
@@ -421,18 +494,32 @@ class MeanGroundPlaneResult(OwnsArrays):
         require_ranks(self, distances_m=1, heights_m=1)
         require_same_length(self, "distances_m", "heights_m", axis="section vertex")
 
-    def height(self, distance_m: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def height[S: RealScalar](self, distance_m: S) -> float: ...
+
+    @overload
+    def height[V: RealValues](self, distance_m: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def height[A: NumericArrayLike](
+        self,
+        distance_m: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def height(self, distance_m: NumericArrayLike) -> float | NDArray[np.float64]:
         r"""The plane height :math:`a\,d + b` at ``distance_m``, in metres.
 
         :param distance_m: Distance :math:`d` along the section, in metres
             (scalar or array).
-        :return: The height of the plane at each distance, in metres.
+        :return: The height of the plane at each distance, in metres. A ``float`` for a
+            number, an array for a sequence or an array, a zero-dimensional one
+            included.
         :raises TypeError: if ``distance_m`` holds a text or a value that is not a real
             number.
         """
-        return np.asarray(
+        return as_float_or_array(
             self.slope * real_array(distance_m, "distance_m") + self.intercept,
-            dtype=np.float64,
+            like=(distance_m,),
         )
 
     def equivalent_height(self, distance_m: float, height_m: float) -> float:
@@ -559,6 +646,39 @@ def mean_flow_resistivity(
     return float(10.0 ** (np.sum(d * np.log10(sig)) / np.sum(d)))
 
 
+@overload
+def diffraction_attenuation[S: RealScalar](
+    frequencies: S,
+    path_difference: float,
+    *,
+    edge_height_m: float,
+    edge_span: float = ...,
+    capped: bool = ...,
+) -> float: ...
+
+
+@overload
+def diffraction_attenuation[V: RealValues](
+    frequencies: V,
+    path_difference: float,
+    *,
+    edge_height_m: float,
+    edge_span: float = ...,
+    capped: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def diffraction_attenuation[A: NumericArrayLike](
+    frequencies: A,
+    path_difference: float,
+    *,
+    edge_height_m: float,
+    edge_span: float = ...,
+    capped: bool = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def diffraction_attenuation(
     frequencies: NumericArrayLike,
     path_difference: float,
@@ -566,7 +686,7 @@ def diffraction_attenuation(
     edge_height_m: float,
     edge_span: float = 0.0,
     capped: bool = True,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Pure diffraction attenuation ``ΔLd`` per band (guidance Eq. 42-44).
 
     :math:`\Delta L_\mathrm{d} = 10 \cdot C_h \cdot \log_{10}(3 + (40/\lambda)
@@ -602,7 +722,8 @@ def diffraction_attenuation(
     :param capped: Apply the 25 dB upper bound of §A.4.5 (default). The
         image-path terms inside the ground-diffraction weighting (Eq. 46/47)
         are evaluated unbounded.
-    :return: The attenuation ``ΔLd`` per band, in dB (``≥ 0``).
+    :return: The attenuation ``ΔLd`` per band, in dB (``≥ 0``). A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``edge_height_m`` or ``edge_span`` is not a single number, or
         ``frequencies`` holds a text or a value that is not a real number, or
@@ -624,7 +745,7 @@ def diffraction_attenuation(
     ld = np.where(arg >= 1.0, 10.0 * ch * np.log10(np.maximum(arg, 1.0)), 0.0)
     if capped:
         ld = np.minimum(ld, 25.0)
-    return np.asarray(ld, dtype=np.float64)
+    return as_float_or_array(ld, like=(frequencies,))
 
 
 @dataclass(frozen=True)
@@ -915,7 +1036,7 @@ def _cropped_section(
 
 def _upper_hull(points: NDArray[np.float64]) -> NDArray[np.float64]:
     """The upper convex hull of ``(d, z)`` points sorted by ``d``."""
-    hull: list[np.ndarray] = []
+    hull: list[NDArray[np.float64]] = []
     for pt in points:
         # The fewest values the step below can work with, not a quantity.
         while len(hull) >= 2:  # noqa: PLR2004

@@ -903,10 +903,10 @@ arithmetic mean with 8/5/3 dB thresholds and grades the result 0/3/6 dB.
 
 ```python
 TonalCorrectionResult(
-    frequencies: np.ndarray,
-    levels: np.ndarray,
-    differences: np.ndarray,
-    band_corrections: np.ndarray,
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
+    differences: NDArray[np.float64],
+    band_corrections: NDArray[np.float64],
     correction: float,
     governing_frequency: float | None,
 )

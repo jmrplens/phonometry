@@ -167,14 +167,14 @@ reproduces the Eyring reverberation time of the room (Kuttruff Equation
 
 ```python
 ImageSourceResult(
-    ir: np.ndarray,
+    ir: NDArray[np.float64],
     fs: int,
-    frequencies: np.ndarray | None,
-    times: np.ndarray,
-    distances: np.ndarray,
-    orders: np.ndarray,
-    amplitudes: np.ndarray,
-    image_positions: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    times: NDArray[np.float64],
+    distances: NDArray[np.float64],
+    orders: NDArray[np.intp],
+    amplitudes: NDArray[np.float64],
+    image_positions: NDArray[np.float64],
     dimensions: tuple[float, float, float],
     source: tuple[float, float, float],
     receiver: tuple[float, float, float],
@@ -284,7 +284,7 @@ reflection_density(
 ) -> float
 
 reflection_density(
-    time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     volume: float,
     *,
     speed_of_sound: float = 343.0,

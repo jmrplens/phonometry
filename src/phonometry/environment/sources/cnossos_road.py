@@ -52,12 +52,13 @@ from collections.abc import Mapping, Sequence
 from dataclasses import KW_ONLY, dataclass, fields
 from enum import Enum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     floats_of,
     pair_of_floats,
@@ -75,7 +76,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "CNOSSOS_A_WEIGHTING",
@@ -717,8 +718,8 @@ def _bands(values: tuple[float, ...]) -> NDArray[np.float64]:
 
 
 def _combine_rolling_and_propulsion(
-    key: str, rolling: np.ndarray, propulsion: np.ndarray
-) -> np.ndarray:
+    key: str, rolling: NDArray[np.float64], propulsion: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """(2.2.3): the energy sum of the two source terms, in dB.
 
     Categories 4a and 4b carry no rolling term, so their total is the
@@ -1353,9 +1354,27 @@ def road_source_power(
     )
 
 
+@overload
+def line_source_segment_power[S: RealScalar](line_power: S, length: float) -> float: ...
+
+
+@overload
+def line_source_segment_power[V: RealValues](
+    line_power: V,
+    length: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def line_source_segment_power[A: NumericArrayLike](
+    line_power: A,
+    length: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def line_source_segment_power(
     line_power: NumericArrayLike, length: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Sound power of the point source representing a segment of source line.
 
     :math:`L_{W,\mathrm{segment},i} = L'_{W,\mathrm{eq,line},i} + 10 \log_{10}(dL)`. This is
@@ -1367,7 +1386,8 @@ def line_source_segment_power(
     :param line_power: Per-metre line power ``L'_W,eq,line,i``, in dB re 1 pW
         per metre.
     :param length: Length ``dL`` of the segment, in m.
-    :return: The segment sound power, in dB re 1 pW.
+    :return: The segment sound power, in dB re 1 pW. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``length`` is not positive.
     :raises TypeError: if ``length`` is not a single number, or ``line_power`` holds a
         text or a value that is not a real number.
@@ -1376,7 +1396,7 @@ def line_source_segment_power(
     if dl <= 0.0:
         msg = "'length' must be a positive number of metres."
         raise ValueError(msg)
-    return np.asarray(
+    return as_float_or_array(
         np.atleast_1d(real_array(line_power, "line_power")) + 10.0 * np.log10(dl),
-        dtype=np.float64,
+        like=(line_power,),
     )

@@ -82,7 +82,7 @@ room_modal_density(
 room_modal_density(
     dimensions: NumericArrayLike,
     *,
-    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 
@@ -133,7 +133,7 @@ room_mode_count(
 room_mode_count(
     dimensions: NumericArrayLike,
     *,
-    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 
@@ -247,9 +247,9 @@ solution) is excluded.
 
 ```python
 RoomModesResult(
-    orders: np.ndarray,
-    frequencies: np.ndarray,
-    kinds: np.ndarray,
+    orders: NDArray[np.intp],
+    frequencies: NDArray[np.float64],
+    kinds: NDArray[np.str_],
     dimensions: tuple[float, float, float],
     speed_of_sound: float,
     max_frequency: float,
@@ -287,7 +287,7 @@ RoomModesResult.density(
 ) -> float
 
 RoomModesResult.density(
-    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 RoomModesResult.density(

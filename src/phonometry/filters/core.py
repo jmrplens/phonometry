@@ -102,7 +102,7 @@ _MULTIRATE_HALF_LENGTH = 10
 
 
 @lru_cache(maxsize=64)
-def _multirate_lowpass(factor: int) -> np.ndarray:
+def _multirate_lowpass(factor: int) -> NDArray[np.float64]:
     """The anti-aliasing (and anti-imaging) filter of a band decimated by *factor*.
 
     A linear-phase Kaiser-windowed sinc of ``2 * 10 * factor + 1`` taps with
@@ -159,9 +159,9 @@ class OctaveFilterResult(OwnsArrays):
     tuples.
     """
 
-    levels: np.ndarray | None
+    levels: NDArray[np.float64] | None
     frequencies: tuple[float, ...] | tuple[str, ...]
-    bands: tuple[Signal, ...] | tuple[np.ndarray, ...] | None = None
+    bands: tuple[Signal, ...] | tuple[NDArray[np.float64], ...] | None = None
 
     def __post_init__(self) -> None:
         """Hold the band centres and the waveforms as tuples, every array its own."""
@@ -169,7 +169,7 @@ class OctaveFilterResult(OwnsArrays):
         if self.bands is not None:
             object.__setattr__(self, "bands", owned_members(self.bands, "bands", self))
 
-    def require_levels(self) -> np.ndarray:
+    def require_levels(self) -> NDArray[np.float64]:
         """The band levels, or a clear error when the call asked for none.
 
         ``levels`` is ``None`` for a call made with ``calculate_level=False``,
@@ -187,7 +187,7 @@ class OctaveFilterResult(OwnsArrays):
             raise ValueError(msg)
         return self.levels
 
-    def require_bands(self) -> tuple[Signal, ...] | tuple[np.ndarray, ...]:
+    def require_bands(self) -> tuple[Signal, ...] | tuple[NDArray[np.float64], ...]:
         """The per-band waveforms, or a clear error when none were kept.
 
         Splitting a record into bands costs a copy per band, so it only
@@ -573,7 +573,7 @@ def _require_level_mode(mode: object) -> Mode:
     return require_choice(mode, "mode", _LEVEL_MODES)
 
 
-def _require_bank_input(x_proc: np.ndarray) -> None:
+def _require_bank_input(x_proc: NDArray[np.float64]) -> None:
     """Reject shapes the bank has no reading for, naming ``x``.
 
     The shared ``require_1d_signal`` cannot be used here: this bank documents
@@ -761,7 +761,7 @@ class OctaveFilterBank:
         Uses lazy initialization: zi arrays are allocated on first use in
         _filter_and_resample() so the channel count matches the actual input.
         """
-        self.zi: list[np.ndarray] = [np.array([]) for _ in range(self.n_bands)]
+        self.zi: list[NDArray[np.float64]] = [np.array([]) for _ in range(self.n_bands)]
         self._steady_ic = steady_ic
 
     @property
@@ -881,7 +881,7 @@ class OctaveFilterBank:
 
     def _prepare_signal(
         self, x: Signal | NumericArrayLike, *, detrend: bool
-    ) -> tuple[np.ndarray, bool]:
+    ) -> tuple[NDArray[np.float64], bool]:
         """Coerce the input to a 2D ``[channels, samples]`` array for filtering.
 
         Optionally removes the DC offset (warning when that is done on a
@@ -985,7 +985,7 @@ class OctaveFilterBank:
             zero_phase=zero_phase,
         )
         # sigbands=True always fills the band list
-        bands = cast(list[np.ndarray], bands_opt)
+        bands = cast("list[NDArray[np.float64]]", bands_opt)
 
         starts = np.arange(0, n_samples - win + 1, hop)
         times = (starts + win / 2) / self.fs
@@ -1013,14 +1013,14 @@ class OctaveFilterBank:
 
     def _process_bands(
         self,
-        x_proc: np.ndarray,
+        x_proc: NDArray[np.float64],
         num_channels: int,
         *,
         sigbands: bool,
         mode: Mode = "rms",
         calculate_level: bool = True,
         zero_phase: bool = False,
-    ) -> tuple[np.ndarray | None, list[np.ndarray] | None]:
+    ) -> tuple[NDArray[np.float64] | None, list[NDArray[np.float64]] | None]:
         """Process signal through each frequency band.
 
         :param x_proc: Standardized 2D input signal [channels, samples].
@@ -1032,7 +1032,7 @@ class OctaveFilterBank:
         :return: A tuple containing (SPL_array, Optional_List_of_filtered_signals).
         """
         spl = np.zeros([num_channels, self.n_bands]) if calculate_level else None
-        xb: list[np.ndarray] | None = (
+        xb: list[NDArray[np.float64]] | None = (
             [np.array([]) for _ in range(self.n_bands)] if sigbands else None
         )
 
@@ -1061,8 +1061,8 @@ class OctaveFilterBank:
         return spl, xb
 
     def _filter_and_resample(
-        self, x: np.ndarray, idx: int, *, zero_phase: bool = False
-    ) -> np.ndarray:
+        self, x: NDArray[np.float64], idx: int, *, zero_phase: bool = False
+    ) -> NDArray[np.float64]:
         """Resample and filter for a specific band (vectorized)."""
         if not zero_phase and not self.stateful:
             return _decimate_and_filter(x, self.sos[idx], int(self.factor[idx]))
@@ -1096,9 +1096,11 @@ class OctaveFilterBank:
             )
 
         # sosfilt supports axis=-1 by default
-        return cast(np.ndarray, y)
+        return cast("NDArray[np.float64]", y)
 
-    def _calculate_level(self, y: np.ndarray, mode: Mode) -> NDArray[np.float64]:
+    def _calculate_level(
+        self, y: NDArray[np.float64], mode: Mode
+    ) -> NDArray[np.float64]:
         """Calculate the level (RMS or Peak) in dB."""
         if mode == "rms":
             # Use norm for better performance and reduced memory overhead
@@ -1126,7 +1128,9 @@ class OctaveFilterBank:
         )
 
 
-def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndarray:
+def _decimate_and_filter(
+    x: NDArray[np.float64], sos: NDArray[np.float64], factor: int
+) -> NDArray[np.float64]:
     """One band of a stateless bank: decimate by ``factor``, then filter.
 
     The forward, stateless path of :meth:`OctaveFilterBank.filter`, kept at
@@ -1141,10 +1145,12 @@ def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndar
     :param factor: The band's decimation factor (1 filters at full rate).
     :return: The band output at the decimated rate.
     """
-    return cast(np.ndarray, signal.sosfilt(sos, _decimate(x, factor), axis=-1))
+    return cast(
+        "NDArray[np.float64]", signal.sosfilt(sos, _decimate(x, factor), axis=-1)
+    )
 
 
-def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
+def _decimate(x: NDArray[np.float64], factor: int) -> NDArray[np.float64]:
     """Decimate *x* by *factor* through :func:`_multirate_lowpass`.
 
     :param x: The input, samples on the last axis.
@@ -1154,7 +1160,7 @@ def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
     if factor == 1:
         return x
     return cast(
-        np.ndarray,
+        "NDArray[np.float64]",
         signal.resample_poly(x, 1, factor, axis=-1, window=_multirate_lowpass(factor)),
     )
 

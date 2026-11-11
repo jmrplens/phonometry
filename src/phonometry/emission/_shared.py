@@ -70,6 +70,8 @@ from .._internal.validation import (
 from .._internal.warnings import PhonometryWarning, published_by, warn_caller
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from .._internal.types import BandFraction, NumericArrayLike
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
@@ -185,7 +187,7 @@ def _single_event_mean(
     *,
     name: str,
     clause: str = "ISO 3744:2010 8.3.1, ISO 3741:2010 8.5.1",
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Mean single event time-integrated level of one event, per position.
 
     ISO 3744:2010 Eq. (19)/(20), printed again as ISO 3746:2010 Eq. (16)/(17)
@@ -250,7 +252,7 @@ def _single_event_mean(
 
 def _background_exposure(
     background_levels: NumericArrayLike, integration_time: float | None
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The background's single event time-integrated level over ``T``.
 
     The correction Eq. (21) subtracts one energy from another, and the two
@@ -289,7 +291,7 @@ def _reference_power_levels(
     name: str = "reference_sound_power_levels",
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The calibrated sound power of a reference sound source, per band.
 
     A comparison method takes :math:`L_{W(\mathrm{RSS})}` either as the levels
@@ -325,9 +327,11 @@ def _reference_power_levels(
             "ReferenceSourceCalibration."
         )
         raise ValueError(msg)
-    return reference_sound_power_levels.sound_power_level_at(
-        real_array(cast("NumericArrayLike", frequencies), "frequencies"),
-        fraction=fraction,
-        temperature_c=temperature_c,
-        static_pressure_kpa=static_pressure_kpa,
+    return np.atleast_1d(
+        reference_sound_power_levels.sound_power_level_at(
+            real_array(cast("NumericArrayLike", frequencies), "frequencies"),
+            fraction=fraction,
+            temperature_c=temperature_c,
+            static_pressure_kpa=static_pressure_kpa,
+        )
     )

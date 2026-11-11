@@ -57,9 +57,33 @@ air_absorption_correction(
     *,
     volume: float,
     specimen_area_m2: float,
-    attenuation_with_per_m: NumericArrayLike,
+    attenuation_with_per_m: float | np.floating[Any] | np.integer[Any],
+    attenuation_empty_per_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+air_absorption_correction(
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     attenuation_empty_per_m: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+air_absorption_correction(
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: float | np.floating[Any] | np.integer[Any],
+    attenuation_empty_per_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+air_absorption_correction(
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: NumericArrayLike,
+    attenuation_empty_per_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The correction 4.2.1 caps, as an absorption coefficient.
@@ -87,7 +111,7 @@ humidity or more.
 | `attenuation_with_per_m` | $m_2$ per band, in reciprocal metres. |
 | `attenuation_empty_per_m` | $m_1$ per band, in reciprocal metres. |
 
-**Returns:** $\Delta\alpha$ per band.
+**Returns:** $\Delta\alpha$ per band. A `float` when `attenuation_with_per_m` and `attenuation_empty_per_m` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -398,9 +422,19 @@ MOUNTING_TYPES = {'A': 'attached directly against a hard surface, with no air sp
 ## reproducibility_uncertainty
 
 ```python
+reproducibility_uncertainty(frequencies: None = None) -> NDArray[np.float64]
+
+reproducibility_uncertainty(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+reproducibility_uncertainty(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
 reproducibility_uncertainty(
     frequencies: NumericArrayLike | None = None,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Table 1, the reproducibility between European laboratories.
@@ -417,7 +451,7 @@ been investigated for any other absorber or mounting.
 | :--- | :--- |
 | `frequencies` | The nominal octave centres wanted, in hertz; omit for the six the table prints, in order. |
 
-**Returns:** The uncertainty of the absorption coefficient in each band.
+**Returns:** The uncertainty of the absorption coefficient in each band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included, and every band without frequencies.
 
 **Raises**
 

@@ -27,6 +27,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..hearing._earmuff_insertion_loss import (
@@ -250,7 +251,9 @@ def _finish(ax: Axes, language: Language, *, headroom: float = 0.0) -> Axes:
     return ax
 
 
-def _log_frequency_axis(ax: Axes, freqs: np.ndarray, language: Language) -> None:
+def _log_frequency_axis(
+    ax: Axes, freqs: NDArray[np.float64], language: Language
+) -> None:
     """A logarithmic frequency axis over the bands, labelled with centres.
 
     :param ax: The axes.
@@ -719,8 +722,8 @@ def plot_audiogram_cautions(
     check_language(language)
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    flagged_f: list[np.ndarray] = []
-    flagged_l: list[np.ndarray] = []
+    flagged_f: list[NDArray[np.float64]] = []
+    flagged_l: list[NDArray[np.float64]] = []
     if result.air_conduction_threshold_levels is not None:
         air = np.asarray(result.air_conduction_threshold_levels, dtype=np.float64)
         curve = dict(kwargs)

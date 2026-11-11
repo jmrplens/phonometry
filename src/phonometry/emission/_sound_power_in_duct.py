@@ -89,12 +89,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -114,9 +115,10 @@ from ._sound_power_reverberation import _speed_of_sound
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "InDuctSoundPowerResult",
@@ -641,16 +643,16 @@ class InDuctSoundPowerResult(OwnsArrays):
     (negative on the inlet side) and ``shield`` names the microphone shield.
     """
 
-    frequencies: np.ndarray
-    sound_power_level: np.ndarray
-    mean_pressure_level: np.ndarray
-    corrected_pressure_level: np.ndarray
-    microphone_correction: np.ndarray
-    shield_correction: np.ndarray
-    flow_modal_correction: np.ndarray
-    combined_correction: np.ndarray
-    reproducibility_standard_deviation: np.ndarray
-    expanded_uncertainty: np.ndarray
+    frequencies: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    mean_pressure_level: NDArray[np.float64]
+    corrected_pressure_level: NDArray[np.float64]
+    microphone_correction: NDArray[np.float64]
+    shield_correction: NDArray[np.float64]
+    flow_modal_correction: NDArray[np.float64]
+    combined_correction: NDArray[np.float64]
+    reproducibility_standard_deviation: NDArray[np.float64]
+    expanded_uncertainty: NDArray[np.float64]
     duct_diameter_m: float
     duct_area: float
     characteristic_impedance: float
@@ -717,7 +719,7 @@ class InDuctSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def information_only_band(self) -> np.ndarray:
+    def information_only_band(self) -> NDArray[np.bool_]:
         """Per band, whether the standard gives it for information only.
 
         ``True`` above 10 kHz (3.8, clause 4), and in every band when the
@@ -754,7 +756,7 @@ class InDuctSoundPowerResult(OwnsArrays):
         return plot_sound_power(self, ax=ax, language=language, **kwargs)
 
 
-def _nominal_bands(frequencies: NumericArrayLike) -> np.ndarray:
+def _nominal_bands(frequencies: NumericArrayLike) -> NDArray[np.float64]:
     """The band axis, refused unless every entry is a nominal centre.
 
     The coefficients of Annex A, the A-weighting of Table C.1 and the
@@ -781,7 +783,7 @@ def _nominal_bands(frequencies: NumericArrayLike) -> np.ndarray:
     return freqs
 
 
-def _band_keys(frequencies: np.ndarray) -> list[int]:
+def _band_keys(frequencies: NDArray[np.float64]) -> list[int]:
     """The nominal integer key of each validated band centre."""
     return [round(real_number(f, "frequencies")) for f in frequencies]
 
@@ -856,7 +858,9 @@ def _check_flow_velocity(flow_velocity: float, shield: str) -> float:
     return u
 
 
-def _check_informative_bands(frequencies: np.ndarray, flow_velocity: float) -> None:
+def _check_informative_bands(
+    frequencies: NDArray[np.float64], flow_velocity: float
+) -> None:
     r"""Refuse the corner of Annex A the tables leave empty.
 
     Tables A.1 to A.6 are split by a band header. Over 50 Hz to 10 kHz the
@@ -900,7 +904,9 @@ def _annex_a_rows(duct_diameter_m: float) -> _Rows:
     return _ANNEX_A_TABLES[-1][1]
 
 
-def _warn_reconstructed_coefficient(duct_diameter_m: float, freqs: np.ndarray) -> None:
+def _warn_reconstructed_coefficient(
+    duct_diameter_m: float, freqs: NDArray[np.float64]
+) -> None:
     """Say so when a band is answered with a coefficient that is a reading.
 
     One cell of Annex A is not legible: the ``a3`` of the 5 000 Hz row of
@@ -935,6 +941,39 @@ def _annex_a_coefficients(rows: _Rows, band: int) -> tuple[float, ...]:
     return dict(rows)[band]
 
 
+@overload
+def flow_modal_correction[S: RealScalar](
+    frequencies: S,
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: MicrophoneShield = ...,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def flow_modal_correction[V: RealValues](
+    frequencies: V,
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: MicrophoneShield = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flow_modal_correction[A: NumericArrayLike](
+    frequencies: A,
+    flow_velocity: float,
+    duct_diameter_m: float,
+    *,
+    shield: MicrophoneShield = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def flow_modal_correction(
     frequencies: NumericArrayLike,
     flow_velocity: float,
@@ -942,7 +981,7 @@ def flow_modal_correction(
     *,
     shield: MicrophoneShield = "sampling-tube",
     speed_of_sound: float = _C_NORMAL,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Combined mean flow velocity and modal correction :math:`C_{3,4}`.
 
     For the sampling tube, the polynomial of clause 5.3.3.4 with the
@@ -983,7 +1022,8 @@ def flow_modal_correction(
         the 340 m/s clause 5.3.4.3 states for normal conditions by default.
         :func:`sound_power_in_duct` passes the duct air's own :math:`c`
         instead. Unused by the sampling tube.
-    :return: :math:`C_{3,4}` per band, in decibels.
+    :return: :math:`C_{3,4}` per band, in decibels. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band that is not a nominal centre, a diameter
         outside 0,15 m to 2 m, a velocity beyond the shield's limit (60 m/s
         for the sampling tube, 20 m/s for the nose cone, 15 m/s for the foam
@@ -1005,20 +1045,38 @@ def flow_modal_correction(
             raise ValueError(msg)
         # Eq. (8): 10 lg[1/(1 - U/c)^2], one value for every band.
         value = 10.0 * math.log10(1.0 / (1.0 - u / c) ** 2)
-        return np.full(freqs.shape, value, dtype=np.float64)
+        return as_float_or_array(
+            np.full(freqs.shape, value, dtype=np.float64), like=(frequencies,)
+        )
     _check_informative_bands(freqs, u)
     rows = _annex_a_rows(duct_diameter_m)
     _warn_reconstructed_coefficient(duct_diameter_m, freqs)
-    return np.asarray(
+    return as_float_or_array(
         [
             np.polynomial.polynomial.polyval(u, _annex_a_coefficients(rows, band))
             for band in _band_keys(freqs)
         ],
-        dtype=np.float64,
+        like=(frequencies,),
     )
 
 
-def in_duct_reproducibility(frequencies: NumericArrayLike) -> np.ndarray:
+@overload
+def in_duct_reproducibility[S: RealScalar](frequencies: S) -> float: ...
+
+
+@overload
+def in_duct_reproducibility[V: RealValues](frequencies: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_duct_reproducibility[A: NumericArrayLike](
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def in_duct_reproducibility(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Standard deviation of reproducibility :math:`\sigma_R` per band.
 
     Table 2 of ISO 5136:2003 for the sampling tube, 50 Hz to 10 kHz, which is
@@ -1030,14 +1088,17 @@ def in_duct_reproducibility(frequencies: NumericArrayLike) -> np.ndarray:
 
     :param frequencies: Nominal one-third-octave centre frequencies, in
         hertz, 50 Hz to 20 kHz.
-    :return: :math:`\sigma_R` per band, in decibels.
+    :return: :math:`\sigma_R` per band, in decibels. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band that is not a nominal centre.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
     freqs = _nominal_bands(frequencies)
     table = {**_TABLE_2_SIGMA_R, **_TABLE_3_SIGMA_R}
-    return np.asarray([table[band] for band in _band_keys(freqs)], dtype=np.float64)
+    return as_float_or_array(
+        [table[band] for band in _band_keys(freqs)], like=(frequencies,)
+    )
 
 
 def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float, float]:
@@ -1072,7 +1133,7 @@ def _check_air(temperature_c: float, static_pressure_kpa: float) -> tuple[float,
     return c, rho * c
 
 
-def _position_levels(levels: NumericArrayLike, n_bands: int) -> np.ndarray:
+def _position_levels(levels: NumericArrayLike, n_bands: int) -> NDArray[np.float64]:
     r"""The measured levels as ``(positions, bands)`` or a ``(bands,)`` average.
 
     A 2-D array is one row per circumferential microphone position, to be

@@ -1003,10 +1003,34 @@ cavities (7.3.3.1, Figure C.2).
 
 ```python
 microphone_acoustic_impedance(
-    electrical_admittance_s: NumericArrayLike,
+    electrical_admittance_s: complex | np.number[Any],
+    blocked_impedance_ohm: complex | np.number[Any],
+    pressure_sensitivity_v_per_pa: complex | np.number[Any],
+) -> complex
+
+microphone_acoustic_impedance(
+    electrical_admittance_s: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
     blocked_impedance_ohm: NumericArrayLike,
     pressure_sensitivity_v_per_pa: NumericArrayLike,
 ) -> NDArray[np.complex128]
+
+microphone_acoustic_impedance(
+    electrical_admittance_s: complex | np.number[Any],
+    blocked_impedance_ohm: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    pressure_sensitivity_v_per_pa: NumericArrayLike,
+) -> NDArray[np.complex128]
+
+microphone_acoustic_impedance(
+    electrical_admittance_s: complex | np.number[Any],
+    blocked_impedance_ohm: complex | np.number[Any],
+    pressure_sensitivity_v_per_pa: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.complex128]
+
+microphone_acoustic_impedance(
+    electrical_admittance_s: NumericArrayLike,
+    blocked_impedance_ohm: NumericArrayLike,
+    pressure_sensitivity_v_per_pa: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 The acoustic impedance of a microphone from its electrical admittance
@@ -1032,7 +1056,7 @@ $Z_\mathrm{a}$: alternate this with
 | `blocked_impedance_ohm` | $Z_\mathrm{e,0}$, complex, in Ω. |
 | `pressure_sensitivity_v_per_pa` | $M_\mathrm{p}$, complex, in V/Pa. |
 
-**Returns:** $Z_\mathrm{a}$, complex, in Pa·s/m³.
+**Returns:** $Z_\mathrm{a}$, complex, in Pa·s/m³, an array of the broadcast shape of the three, zero-dimensional for numbers. A `complex` when `electrical_admittance_s`, `blocked_impedance_ohm` and `pressure_sensitivity_v_per_pa` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1199,8 +1223,16 @@ times the resonance frequency.
 
 ```python
 ReciprocityMicrophone.acoustic_impedance_pa_s_m3(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+ReciprocityMicrophone.acoustic_impedance_pa_s_m3(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+ReciprocityMicrophone.acoustic_impedance_pa_s_m3(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 $Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a} + 1/(\mathrm{j}\omega c_\mathrm{a})$, in Pa·s/m³.
@@ -1211,7 +1243,7 @@ $Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a} + 1/(\mathrm{j}\ome
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, positive. |
 
-**Returns:** $Z_\mathrm{a}$ at each frequency, in Pa·s/m³.
+**Returns:** $Z_\mathrm{a}$ at each frequency, in Pa·s/m³. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1223,8 +1255,16 @@ $Z_\mathrm{a} = r_\mathrm{a} + \mathrm{j}\omega m_\mathrm{a} + 1/(\mathrm{j}\ome
 
 ```python
 ReciprocityMicrophone.complex_equivalent_volume_m3(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+ReciprocityMicrophone.complex_equivalent_volume_m3(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+ReciprocityMicrophone.complex_equivalent_volume_m3(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 The complex equivalent volume $V_\mathrm{e}$ of Formula (3),
@@ -1240,7 +1280,7 @@ $$
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
 
-**Returns:** $V_\mathrm{e}$ at each frequency, in m³.
+**Returns:** $V_\mathrm{e}$ at each frequency, in m³. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1272,10 +1312,24 @@ $r_\mathrm{a} = d/(2\pi f_0 c_\mathrm{a})$, in Pa·s/m³.
 ```python
 temperature_transfer_function(
     length_to_diameter_ratio: float,
+    x: float | np.floating[Any] | np.integer[Any],
+    *,
+    method: Literal['exact', 'approximation'] = ...,
+) -> complex
+
+temperature_transfer_function(
+    length_to_diameter_ratio: float,
+    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    method: Literal['exact', 'approximation'] = ...,
+) -> NDArray[np.complex128]
+
+temperature_transfer_function(
+    length_to_diameter_ratio: float,
     x: NumericArrayLike,
     *,
-    method: Literal['exact', 'approximation'] = 'exact',
-) -> NDArray[np.complex128]
+    method: Literal['exact', 'approximation'] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Gerber's complex temperature transfer function $E_V$ of a
@@ -1311,7 +1365,7 @@ that is not a right circular cylinder.
 | `x` | $X$, one value or several, positive. |
 | `method` | `"exact"` or `"approximation"`. |
 
-**Returns:** $E_V$, complex, with the shape of `x`.
+**Returns:** $E_V$, complex, with the shape of `x`. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

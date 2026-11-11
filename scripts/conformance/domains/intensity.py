@@ -341,9 +341,9 @@ def _chk_sound_energy_identity_iso3744() -> Outcome:
     "One measurement encompassing Ne = 5 events is 10 lg 5 above one event",
 )
 def _chk_sound_energy_events_eq20() -> Outcome:
-    level = ph.emission.mean_single_event_level(np.array([90.0]), n_events=5)
+    level = ph.emission.mean_single_event_level(90.0, n_events=5)
     return numeric(
-        10.0 * math.log10(5.0), 90.0 - float(level[0]), 1e-12, unit="dB", places=6
+        10.0 * math.log10(5.0), 90.0 - float(level), 1e-12, unit="dB", places=6
     )
 
 
@@ -1112,8 +1112,8 @@ def _chk_iso9295_eyring_room_constant() -> Outcome:
             "R (m2)": round(surface * alpha_room / (1.0 - alpha_room), 6),
         },
         {
-            "alpha_room": round(float(alpha[0]), 9),
-            "R (m2)": round(float(room[0]), 6),
+            "alpha_room": round(float(alpha), 9),
+            "R (m2)": round(float(room), 6),
         },
     )
 
@@ -1222,7 +1222,7 @@ def _chk_iso9295_tone_under_moving_microphone() -> Outcome:
             "Ltot (dB)": round(50.0 + 10.0 * math.log10(3.0), 6),
         },
         {
-            "Delta f (Hz)": round(float(bandwidth[0]), 6),
+            "Delta f (Hz)": round(float(bandwidth), 6),
             "Ltot (dB)": round(total, 6),
         },
     )

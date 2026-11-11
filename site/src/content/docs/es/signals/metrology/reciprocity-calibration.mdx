@@ -203,8 +203,8 @@ hasta el 0,000 01 que el anexo declara para ellas; la
 Fórmula (A.2) es la aproximación, exacta al 0,01 % en módulo para $X > 5$:
 
 ```python
-print(metrology.temperature_transfer_function(1.0, 100.0).round(5))                          # (0.97179+0.02758j)
-print(metrology.temperature_transfer_function(1.0, 100.0, method="approximation").round(5))  # (0.97179+0.02758j)
+print(np.round(metrology.temperature_transfer_function(1.0, 100.0), 5))                      # (0.97179+0.02758j)
+print(np.round(metrology.temperature_transfer_function(1.0, 100.0, method="approximation"), 5))  # (0.97179+0.02758j)
 air = fluids.air(temperature_c=23.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0)
 tube = metrology.capillary_tube_impedance([20.0, 1000.0], length_m=0.05, radius_m=1 / 6000, gas=air)
 print((tube.impedance_pa_s_m3 / 1e9).round(3))   # [3.015+0.097j 8.331+4.288j]

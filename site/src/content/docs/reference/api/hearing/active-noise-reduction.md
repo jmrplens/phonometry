@@ -130,13 +130,13 @@ earmuffs commonly do above 1 kHz; it is kept as it is.
 
 ```python
 ActiveInsertionLossResult(
-    insertion_loss: np.ndarray,
-    per_ear_insertion_loss: np.ndarray | None,
-    mean_insertion_loss: np.ndarray,
-    standard_deviation_db: np.ndarray,
-    standard_uncertainty_db: np.ndarray,
-    expanded_uncertainty_db: np.ndarray,
-    frequencies: np.ndarray,
+    insertion_loss: NDArray[np.float64],
+    per_ear_insertion_loss: NDArray[np.float64] | None,
+    mean_insertion_loss: NDArray[np.float64],
+    standard_deviation_db: NDArray[np.float64],
+    standard_uncertainty_db: NDArray[np.float64],
+    expanded_uncertainty_db: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     n_subjects: int,
 )
 ```
@@ -232,9 +232,9 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 
 ```python
 ANRLinearityResult(
-    external_levels: np.ndarray,
-    ear_levels: np.ndarray,
-    increments_db: np.ndarray,
+    external_levels: NDArray[np.float64],
+    ear_levels: NDArray[np.float64],
+    increments_db: NDArray[np.float64],
 )
 ```
 
@@ -312,12 +312,12 @@ Draw every step at the ear against the 5 dB ± 1 dB it should be.
 
 ```python
 ANRTotalAttenuationResult(
-    total_octave_attenuation: np.ndarray,
-    total_third_octave_attenuation: np.ndarray,
-    reat_third_octave_attenuation: np.ndarray,
-    insertion_loss: np.ndarray,
-    frequencies: np.ndarray,
-    third_octave_frequencies: np.ndarray,
+    total_octave_attenuation: NDArray[np.float64],
+    total_third_octave_attenuation: NDArray[np.float64],
+    reat_third_octave_attenuation: NDArray[np.float64],
+    insertion_loss: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    third_octave_frequencies: NDArray[np.float64],
     assumed_protection: AssumedProtectionResult,
     hml: HMLRatingResult,
     snr: SNRRatingResult,

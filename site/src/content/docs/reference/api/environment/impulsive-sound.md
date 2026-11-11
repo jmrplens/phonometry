@@ -100,7 +100,17 @@ prominence `P`.
 ## impulse_adjustment
 
 ```python
-impulse_adjustment(prominence: NumericArrayLike) -> np.ndarray
+impulse_adjustment(
+    prominence: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+impulse_adjustment(
+    prominence: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+impulse_adjustment(
+    prominence: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Adjustment `KI` to `LAeq` from the prominence (clause 8, Formula 2).
@@ -118,7 +128,7 @@ qualification (> 10 dB/s, clause 4.5) is enforced by
 | :--- | :--- |
 | `prominence` | Predicted prominence `P`. |
 
-**Returns:** The adjustment `KI`, in dB, clamped at zero.
+**Returns:** The adjustment `KI`, in dB, clamped at zero; a `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -215,8 +225,8 @@ Whether the onset rate exceeds 10 dB/s on a rise, so the onset can contribute an
 
 ```python
 ImpulseProminenceResult(
-    onset_rates: np.ndarray,
-    level_differences: np.ndarray,
+    onset_rates: NDArray[np.float64],
+    level_differences: NDArray[np.float64],
     *,
     assessment_period_minutes: float = 30.0,
 )
@@ -388,8 +398,8 @@ together with the source category (Clause 7) and the adjusted `LAeq`.
 
 ```python
 ImpulsiveSoundResult(
-    times: np.ndarray,
-    levels: np.ndarray,
+    times: NDArray[np.float64],
+    levels: NDArray[np.float64],
     dt: float,
     onsets: tuple[ImpulseOnset, ...],
     laeq: float,
@@ -477,7 +487,11 @@ No qualifying onset (gradient > 10 dB/s) was found in the interval.
 ## LevelHistory
 
 ```python
-LevelHistory(times: np.ndarray, levels: np.ndarray, dt: float)
+LevelHistory(
+    times: NDArray[np.float64],
+    levels: NDArray[np.float64],
+    dt: float,
+)
 ```
 
 A frequency- and time-weighted level trace, and the axis it lives on.
@@ -524,9 +538,24 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 predicted_prominence(
+    onset_rate: float | np.floating[Any] | np.integer[Any],
+    level_difference: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+predicted_prominence(
+    onset_rate: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    level_difference: NumericArrayLike,
+) -> NDArray[np.float64]
+
+predicted_prominence(
+    onset_rate: float | np.floating[Any] | np.integer[Any],
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+predicted_prominence(
     onset_rate: NumericArrayLike,
     level_difference: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Predicted prominence `P` of an impulse (NT ACOU 112, clause 7).
@@ -546,7 +575,7 @@ dB/s and the level difference is the level rise over the onset in dB
 | `onset_rate` | Onset rate(s), in dB/s (> 0). |
 | `level_difference` | Level difference(s), in dB (> 0). |
 
-**Returns:** The predicted prominence `P` (scalar inputs give a 0-d array).
+**Returns:** The predicted prominence `P`; a `float` when both are numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

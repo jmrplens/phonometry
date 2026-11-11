@@ -353,6 +353,29 @@ def test_acoustic_impedance_from_the_admittance_inverts_formula_e1() -> None:
     )
 
 
+def test_acoustic_impedance_of_numbers_is_a_complex() -> None:
+    """Complex numbers give a Python ``complex``, a zero-dimensional array one.
+
+    The complex form of the rule of a number or an array: arithmetic on the
+    three zero-dimensional arrays the inputs are read as gives a
+    ``numpy.complex128``, which the function hands back as the Python number
+    it holds, the same bits, and a zero-dimensional array stays one.
+    """
+    expected = (1e5 - 3e4j - 1.0 / (1e-6 + 2e-7j)) / (0.05 + 0.001j) ** 2
+    za = metrology.microphone_acoustic_impedance(
+        1e-6 + 2e-7j, 1e5 - 3e4j, 0.05 + 0.001j
+    )
+    assert type(za) is complex
+    assert za == expected
+    zero = metrology.microphone_acoustic_impedance(
+        np.asarray(1e-6 + 2e-7j), 1e5 - 3e4j, 0.05 + 0.001j
+    )
+    assert isinstance(zero, np.ndarray)
+    assert zero.dtype == np.complex128
+    assert zero.shape == ()
+    assert zero[()] == expected
+
+
 def test_microphone_refuses_a_negative_loss_factor() -> None:
     with pytest.raises(ValueError, match="'loss_factor' must be non-negative"):
         dataclasses.replace(_MICS[0], loss_factor=-0.1)

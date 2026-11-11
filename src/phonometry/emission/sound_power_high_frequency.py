@@ -114,13 +114,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.air_absorption import _EIGHT_686, _KELVIN, _pure_tone_terms, _validate
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     require_choice,
@@ -144,7 +145,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .reference_sound_source import ReferenceSourceCalibration
 
 __all__ = [
@@ -197,13 +198,43 @@ _METHODS = ("direct", "comparison")
 # --- Annex A: air absorption in nepers per metre -----------------------------
 
 
+@overload
+def air_absorption_np_per_m[S: RealScalar](
+    frequencies: S,
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float: ...
+
+
+@overload
+def air_absorption_np_per_m[V: RealValues](
+    frequencies: V,
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_absorption_np_per_m[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def air_absorption_np_per_m(
     frequencies: NumericArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Air absorption coefficient :math:`\alpha` in nepers per metre (ISO 9295 Annex A).
 
     Formulae (A.1) to (A.5) of ISO 9295:2015 are the ISO 9613-1:1993
@@ -224,7 +255,8 @@ def air_absorption_np_per_m(
     :param relative_humidity_percent: Relative humidity ``h_r``, in percent.
     :param static_pressure_kpa: Static pressure ``p_s``, in kilopascals
         (default 101,325 kPa, the pressure Tables 1 and 2 are printed at).
-    :return: :math:`\alpha` in Np/m, with the shape of ``frequencies``.
+    :return: :math:`\alpha` in Np/m, with the shape of ``frequencies``. A ``float`` for
+        a number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency, a temperature at or
         below absolute zero, a relative humidity outside [0, 100] % or a
         non-positive static pressure.
@@ -246,7 +278,7 @@ def air_absorption_np_per_m(
     f2, bracket = _pure_tone_terms(
         freqs, temperature_c + _KELVIN, relative_humidity_percent, static_pressure_kpa
     )
-    return np.asarray(f2 * bracket, dtype=np.float64)
+    return as_float_or_array(f2 * bracket, like=(frequencies,))
 
 
 # --- Room constant: Formulae (4), (5) and (7) --------------------------------
@@ -260,9 +292,36 @@ def _room_geometry(volume: float, surface_area: float) -> tuple[float, float]:
     )
 
 
+@overload
+def room_absorption_coefficient[S: RealScalar](
+    reverberation_time: S,
+    *,
+    volume: float,
+    surface_area: float,
+) -> float: ...
+
+
+@overload
+def room_absorption_coefficient[V: RealValues](
+    reverberation_time: V,
+    *,
+    volume: float,
+    surface_area: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_absorption_coefficient[A: NumericArrayLike](
+    reverberation_time: A,
+    *,
+    volume: float,
+    surface_area: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def room_absorption_coefficient(
     reverberation_time: NumericArrayLike, *, volume: float, surface_area: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Room absorption coefficient from the reverberation time (ISO 9295 Formula (5)).
 
     :math:`\alpha_\mathrm{room} = 1 - \mathrm{e}^{-0{,}16 \, V / (S T)}`, the
@@ -276,7 +335,8 @@ def room_absorption_coefficient(
         three or four points of the microphone path.
     :param volume: Room volume ``V``, in cubic metres.
     :param surface_area: Total room surface ``S``, in square metres.
-    :return: :math:`\alpha_\mathrm{room}` per band, in (0, 1).
+    :return: :math:`\alpha_\mathrm{room}` per band, in (0, 1). A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
     :raises TypeError: if ``surface_area`` or ``volume`` is not a single number, or
@@ -284,14 +344,42 @@ def room_absorption_coefficient(
     """
     t = require_positive_array(reverberation_time, "reverberation_time")
     volume, surface = _room_geometry(volume, surface_area)
-    return np.asarray(
-        1.0 - np.exp(-_EYRING_CONSTANT * volume / (surface * t)), dtype=np.float64
+    return as_float_or_array(
+        1.0 - np.exp(-_EYRING_CONSTANT * volume / (surface * t)),
+        like=(reverberation_time,),
     )
+
+
+@overload
+def room_constant_from_reverberation_time[S: RealScalar](
+    reverberation_time: S,
+    *,
+    volume: float,
+    surface_area: float,
+) -> float: ...
+
+
+@overload
+def room_constant_from_reverberation_time[V: RealValues](
+    reverberation_time: V,
+    *,
+    volume: float,
+    surface_area: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_constant_from_reverberation_time[A: NumericArrayLike](
+    reverberation_time: A,
+    *,
+    volume: float,
+    surface_area: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def room_constant_from_reverberation_time(
     reverberation_time: NumericArrayLike, *, volume: float, surface_area: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Room constant from the measured reverberation time (ISO 9295 Formulae (4), (5)).
 
     :math:`R = S \alpha_\mathrm{room} / (1 - \alpha_\mathrm{room})` with
@@ -303,14 +391,53 @@ def room_constant_from_reverberation_time(
         band, in seconds (scalar or one value per band).
     :param volume: Room volume ``V``, in cubic metres.
     :param surface_area: Total room surface ``S``, in square metres.
-    :return: ``R`` per band, in square metres.
+    :return: ``R`` per band, in square metres. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
     """
     alpha = room_absorption_coefficient(
         reverberation_time, volume=volume, surface_area=surface_area
     )
-    return np.asarray(float(surface_area) * alpha / (1.0 - alpha), dtype=np.float64)
+    return as_float_or_array(
+        float(surface_area) * alpha / (1.0 - alpha), like=(reverberation_time,)
+    )
+
+
+@overload
+def room_constant_from_air_absorption[S: RealScalar](
+    frequencies: S,
+    *,
+    volume: float,
+    surface_area: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float: ...
+
+
+@overload
+def room_constant_from_air_absorption[V: RealValues](
+    frequencies: V,
+    *,
+    volume: float,
+    surface_area: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_constant_from_air_absorption[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    volume: float,
+    surface_area: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def room_constant_from_air_absorption(
@@ -321,7 +448,7 @@ def room_constant_from_air_absorption(
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Room constant from the calculated air absorption (ISO 9295 Formula (7)).
 
     :math:`R = 8 \alpha V / (1 - 8 \alpha V / S)`, the room constant of the
@@ -340,7 +467,8 @@ def room_constant_from_air_absorption(
     :param relative_humidity_percent: Relative humidity in the room, in percent.
     :param static_pressure_kpa: Static pressure in the room, in kilopascals
         (default 101,325 kPa).
-    :return: ``R`` per frequency, in square metres.
+    :return: ``R`` per frequency, in square metres. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive or non-finite volume or surface,
         for the atmospheric inputs :func:`air_absorption_np_per_m` refuses, or
         where :math:`8 \alpha V / S \ge 1`: the air alone would then absorb more
@@ -377,10 +505,37 @@ def room_constant_from_air_absorption(
                 "the method there.",
                 SoundPowerWarning,
             )
-        return np.asarray(area / (1.0 - mean_absorption), dtype=np.float64)
+        return as_float_or_array(area / (1.0 - mean_absorption), like=(frequencies,))
 
 
 # --- Formulae (2) and (3): tones under a moving microphone -------------------
+
+
+@overload
+def min_analyzer_bandwidth[S: RealScalar](
+    tone_frequency_hz: S,
+    *,
+    microphone_speed_m_s: float,
+    speed_of_sound: float,
+) -> float: ...
+
+
+@overload
+def min_analyzer_bandwidth[V: RealValues](
+    tone_frequency_hz: V,
+    *,
+    microphone_speed_m_s: float,
+    speed_of_sound: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def min_analyzer_bandwidth[A: NumericArrayLike](
+    tone_frequency_hz: A,
+    *,
+    microphone_speed_m_s: float,
+    speed_of_sound: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def min_analyzer_bandwidth(
@@ -388,7 +543,7 @@ def min_analyzer_bandwidth(
     *,
     microphone_speed_m_s: float,
     speed_of_sound: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Narrowest analyser bandwidth that holds a tone seen by a moving microphone.
 
     :math:`\Delta f = 2 f v / c`, ISO 9295:2015 Formula (2). The moving
@@ -401,7 +556,8 @@ def min_analyzer_bandwidth(
     :param microphone_speed_m_s: Speed ``v`` of the microphone along its
         path, in metres per second.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
-    :return: The minimum bandwidth :math:`\Delta f`, in hertz.
+    :return: The minimum bandwidth :math:`\Delta f`, in hertz. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive or non-finite input.
     :raises TypeError: if ``microphone_speed_m_s`` or ``speed_of_sound`` is not a single
         number, or ``tone_frequency_hz`` holds a text or a value that is not a real
@@ -410,7 +566,7 @@ def min_analyzer_bandwidth(
     f = require_positive_array(tone_frequency_hz, "tone_frequency_hz")
     v = require_positive(microphone_speed_m_s, "microphone_speed_m_s")
     c = require_positive(speed_of_sound, "speed_of_sound")
-    return np.asarray(2.0 * f * v / c, dtype=np.float64)
+    return as_float_or_array(2.0 * f * v / c, like=(tone_frequency_hz,))
 
 
 def tone_level_from_sidebands(sideband_levels: NumericArrayLike) -> float:
@@ -435,6 +591,39 @@ def tone_level_from_sidebands(sideband_levels: NumericArrayLike) -> float:
 # --- Formula (10): the free-field method beyond 2 m --------------------------
 
 
+@overload
+def free_field_absorption_correction[S: RealScalar](
+    frequencies: S,
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float: ...
+
+
+@overload
+def free_field_absorption_correction[V: RealValues](
+    frequencies: V,
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def free_field_absorption_correction[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    radius: float,
+    temperature_c: float,
+    relative_humidity_percent: float,
+    static_pressure_kpa: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def free_field_absorption_correction(
     frequencies: NumericArrayLike,
     *,
@@ -442,7 +631,7 @@ def free_field_absorption_correction(
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Air absorption correction of the free-field method (ISO 9295 Formula (10)).
 
     :math:`K_\alpha = r \cdot \alpha`, with :math:`\alpha` the air absorption in
@@ -461,7 +650,8 @@ def free_field_absorption_correction(
     :param relative_humidity_percent: Relative humidity, in percent.
     :param static_pressure_kpa: Static pressure, in kilopascals (default
         101,325 kPa).
-    :return: :math:`K_\alpha` per frequency, in decibels.
+    :return: :math:`K_\alpha` per frequency, in decibels. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive radius or the atmospheric inputs
         :func:`air_absorption_np_per_m` refuses.
     :raises TypeError: if ``radius`` is not a single number.
@@ -474,8 +664,8 @@ def free_field_absorption_correction(
         static_pressure_kpa=static_pressure_kpa,
     )
     if radius <= _ABSORPTION_CORRECTION_RADIUS_M:
-        return np.zeros_like(alpha_db_per_m)
-    return np.asarray(radius * alpha_db_per_m, dtype=np.float64)
+        return as_float_or_array(np.zeros_like(alpha_db_per_m), like=(frequencies,))
+    return as_float_or_array(radius * alpha_db_per_m, like=(frequencies,))
 
 
 # --- Formulae (6), (8) and (9): the sound power level ------------------------

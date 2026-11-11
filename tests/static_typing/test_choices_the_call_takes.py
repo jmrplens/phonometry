@@ -50,22 +50,12 @@ def test_a_junction_without_a_straight_section_is_refused(junction: str) -> None
 
 def test_the_type_checker_refuses_the_t2_junction() -> None:
     with pytest.raises(ValueError, match="has no straight section"):
-        vibration.straight_transmission_coefficient(
-            0.0,
-            1.0,
-            1.0,
-            "T2",  # type: ignore[arg-type]
-        )
+        vibration.straight_transmission_coefficient(0.0, 1.0, 1.0, "T2")  # type: ignore[call-overload]
 
 
 def test_the_type_checker_refuses_the_l_junction() -> None:
     with pytest.raises(ValueError, match="has no straight section"):
-        vibration.straight_transmission_coefficient(
-            0.0,
-            1.0,
-            1.0,
-            "L",  # type: ignore[arg-type]
-        )
+        vibration.straight_transmission_coefficient(0.0, 1.0, 1.0, "L")  # type: ignore[call-overload]
 
 
 def test_the_two_straight_junctions_are_taken() -> None:

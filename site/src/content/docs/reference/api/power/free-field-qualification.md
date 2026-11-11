@@ -170,7 +170,7 @@ directionality_positions(
     room: Literal['anechoic', 'hemi-anechoic'],
     *,
     radius: float = 1.5,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Microphone positions of the directionality test (ISO 26101 B.3.2).
@@ -201,10 +201,22 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
 ```python
 directionality_tolerance(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> float
+
+directionality_tolerance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> NDArray[np.float64]
+
+directionality_tolerance(
     frequencies: NumericArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Allowable deviation of the test source directionality (ISO 26101 Table B.1).
@@ -216,7 +228,7 @@ Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 | `frequencies` | One-third octave mid-band frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
-**Returns:** The half-width of the tolerance band, in dB, per frequency.
+**Returns:** The half-width of the tolerance band, in dB, per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -513,10 +525,22 @@ span the frequency range, each with its own mathematical origin, and
 
 ```python
 inverse_square_law_tolerance(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> float
+
+inverse_square_law_tolerance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    room: Literal['anechoic', 'hemi-anechoic'],
+) -> NDArray[np.float64]
+
+inverse_square_law_tolerance(
     frequencies: NumericArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Allowable deviation from the inverse square law per band (Table A.1).
@@ -532,7 +556,7 @@ so a tone at 794 Hz is held to the 800 Hz row.
 | `frequencies` | Test frequencies or band mid-frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
-**Returns:** The half-width of the tolerance band, in dB, per frequency.
+**Returns:** The half-width of the tolerance band, in dB, per frequency. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -545,23 +569,23 @@ so a tone at 794 Hz is held to the 800 Hz row.
 
 ```python
 InverseSquareLawResult(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     room: Literal['anechoic', 'hemi-anechoic'],
-    origin_m: np.ndarray,
+    origin_m: NDArray[np.float64],
     origin_fitted: bool,
-    source_box_m: np.ndarray | None,
+    source_box_m: NDArray[np.float64] | None,
     traverse_names: tuple[str, ...],
     traverse_targets: tuple[tuple[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features'], ...], ...],
-    positions_m: tuple[np.ndarray, ...],
-    distances: tuple[np.ndarray, ...],
-    levels: tuple[np.ndarray, ...],
-    background_margin_db: tuple[np.ndarray | None, ...],
-    source_stability_db: tuple[np.ndarray, ...],
-    source_strength_db: np.ndarray,
-    initial_source_strength_db: np.ndarray,
-    deviations_db: tuple[np.ndarray, ...],
-    traverse_radius_m: np.ndarray,
-    band_radius_m: np.ndarray,
+    positions_m: tuple[NDArray[np.float64], ...],
+    distances: tuple[NDArray[np.float64], ...],
+    levels: tuple[NDArray[np.float64], ...],
+    background_margin_db: tuple[NDArray[np.float64] | None, ...],
+    source_stability_db: tuple[NDArray[np.float64], ...],
+    source_strength_db: NDArray[np.float64],
+    initial_source_strength_db: NDArray[np.float64],
+    deviations_db: tuple[NDArray[np.float64], ...],
+    traverse_radius_m: NDArray[np.float64],
+    band_radius_m: NDArray[np.float64],
 )
 ```
 
@@ -720,7 +744,7 @@ qualification_frequencies(
     low_hz: float = 100.0,
     *,
     high_hz: float = 10000.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 The frequencies ISO 3745:2012/Amd.1:2017 A.2.3 evaluates over a range.
@@ -750,11 +774,11 @@ frequencies.
 
 ```python
 SourceDirectionalityResult(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     room: Literal['anechoic', 'hemi-anechoic'],
-    mean_level: np.ndarray,
-    max_positive_deviation_db: np.ndarray,
-    max_negative_deviation_db: np.ndarray,
+    mean_level: NDArray[np.float64],
+    max_positive_deviation_db: NDArray[np.float64],
+    max_negative_deviation_db: NDArray[np.float64],
 )
 ```
 

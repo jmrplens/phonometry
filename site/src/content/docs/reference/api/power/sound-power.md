@@ -85,10 +85,28 @@ altitude or below 10 degrees C (clauses 8.2.5 and 8.3.6).
 
 ```python
 background_noise_correction(
+    source_levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: float | np.floating[Any] | np.integer[Any],
+    grade: Literal['engineering', 'survey'] = ...,
+) -> float
+
+background_noise_correction(
+    source_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    background_levels: NumericArrayLike,
+    grade: Literal['engineering', 'survey'] = ...,
+) -> NDArray[np.float64]
+
+background_noise_correction(
+    source_levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    grade: Literal['engineering', 'survey'] = ...,
+) -> NDArray[np.float64]
+
+background_noise_correction(
     source_levels: NumericArrayLike,
     background_levels: NumericArrayLike,
-    grade: Literal['engineering', 'survey'] = 'engineering',
-) -> np.ndarray
+    grade: Literal['engineering', 'survey'] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Background-noise correction `K1` per band (ISO 3744:2010 Eq. 16).
@@ -113,7 +131,7 @@ bound (clause 8.2.3).
 | `background_levels` | Background-noise levels, in decibels. |
 | `grade` | `'engineering'` (ISO 3744) or `'survey'` (ISO 3746). |
 
-**Returns:** `K1` per band, in decibels.
+**Returns:** `K1` per band, in decibels. A `float` when `source_levels` and `background_levels` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -137,7 +155,7 @@ environmental_correction(
 environmental_correction(
     surface_area: float,
     *,
-    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     reverberation_time: NumericArrayLike | None = None,
     volume: float | None = None,
     mean_absorption_coefficient: NumericArrayLike | None = None,
@@ -148,7 +166,7 @@ environmental_correction(
     surface_area: float,
     *,
     absorption_area: None = None,
-    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     volume: float | None = None,
     mean_absorption_coefficient: NumericArrayLike | None = None,
     room_surface: float | None = None,
@@ -160,7 +178,7 @@ environmental_correction(
     absorption_area: None = None,
     reverberation_time: None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    mean_absorption_coefficient: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     room_surface: float | None = None,
 ) -> NDArray[np.float64]
 
@@ -224,7 +242,7 @@ mean_single_event_level(
     levels: NumericArrayLike,
     *,
     n_events: int | np.integer[Any] | None = None,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
@@ -258,7 +276,7 @@ are accepted with a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-
 | `levels` | With `n_events=None`, the per-event levels in decibels with the events on the first axis (`(Ne,)`, `(Ne, NB)` or `(Ne, NM, NB)`); otherwise the one measurement encompassing `n_events` events, of any shape. |
 | `n_events` | `None` when each entry of the first axis is one event, else the number of events the single measurement encompasses. |
 
-**Returns:** The level of one event, in decibels: `levels` less its first axis for `n_events=None`, the shape of `levels` otherwise.
+**Returns:** The level of one event, in decibels: `levels` less its first axis for `n_events=None`, a `float` when that leaves one number; otherwise the shape of `levels`, a `float` for a number and an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -276,7 +294,7 @@ measurement_positions(
     n_reflecting_planes: int = 1,
     tones: bool = True,
     grade: Literal['engineering', 'survey'] = 'engineering',
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Normative microphone coordinates on the measurement surface.
@@ -622,13 +640,13 @@ sound power level is combined via ISO 3744 Annex E.
 
 ```python
 SoundEnergyResult(
-    frequencies: np.ndarray | None,
-    sound_energy_level: np.ndarray,
-    surface_event_level: np.ndarray,
-    mean_event_level: np.ndarray,
-    background_correction: np.ndarray,
-    environmental_correction: np.ndarray,
-    directivity_index: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    sound_energy_level: NDArray[np.float64],
+    surface_event_level: NDArray[np.float64],
+    mean_event_level: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
+    environmental_correction: NDArray[np.float64],
+    directivity_index: NDArray[np.float64],
     surface_area: float,
     sound_energy_level_a: float,
     uncertainty: float,
@@ -694,13 +712,13 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 SoundPowerResult(
-    frequencies: np.ndarray | None,
-    sound_power_level: np.ndarray,
-    surface_pressure_level: np.ndarray,
-    mean_pressure_level: np.ndarray,
-    background_correction: np.ndarray,
-    environmental_correction: np.ndarray,
-    directivity_index: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    sound_power_level: NDArray[np.float64],
+    surface_pressure_level: NDArray[np.float64],
+    mean_pressure_level: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
+    environmental_correction: NDArray[np.float64],
+    directivity_index: NDArray[np.float64],
     surface_area: float,
     sound_power_level_a: float,
     uncertainty: float,

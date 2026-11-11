@@ -148,10 +148,22 @@ in time with the record it came from.
 
 ```python
 assessment_weighting_response(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
+) -> float
+
+assessment_weighting_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
 ) -> NDArray[np.float64]
+
+assessment_weighting_response(
+    frequencies: NumericArrayLike,
+    *,
+    building_class: Literal['commercial', 'residential', 'sensitive'],
+) -> float | NDArray[np.float64]
 ```
 
 The target magnitude of an Annex E weighting filter, Table E.1.
@@ -170,7 +182,7 @@ up to the Nyquist frequency rather than stopping at 100 Hz.
 | `frequencies` | Frequencies, in hertz. |
 | `building_class` | The row of DIN 4150-3:1999-02 Table 1, as [`ASSESSMENT_GUIDE_VALUES_MM_S`](/phonometry/reference/api/vibration/vibration-meter/#assessment_guide_values_mm_s) keys it. One of `"commercial"`, `"residential"` or `"sensitive"`. |
 
-**Returns:** The target magnitude, dimensionless, 1 below 10 Hz.
+**Returns:** The target magnitude, dimensionless, 1 below 10 Hz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -306,10 +318,22 @@ BAND_LIMIT_CORNER_FACTOR = 0.8
 
 ```python
 band_limitation_response(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex
+
+band_limitation_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> NDArray[np.complex128]
+
+band_limitation_response(
     frequencies: NumericArrayLike,
     *,
-    working_range: Literal['building', 'railway'] = 'building',
-) -> NDArray[np.complex128]
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 The band limitation of the unweighted signal, Formula (3).
@@ -321,7 +345,7 @@ The band limitation of the unweighted signal, Formula (3).
 | `frequencies` | Frequencies, in hertz. |
 | `working_range` | `"building"` (1 Hz to 80 Hz, the default) or `"railway"` (4 Hz to 315 Hz); see [`WORKING_RANGES_HZ`](/phonometry/reference/api/vibration/vibration-meter/#working_ranges_hz). |
 
-**Returns:** The complex response $H_{u\mathrm{Soll}}$, whose magnitude is Formula (5).
+**Returns:** The complex response $H_{u\mathrm{Soll}}$, whose magnitude is Formula (5). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -490,10 +514,22 @@ KB_TIME_CONSTANT_S = 0.125
 
 ```python
 kb_weighting_response(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex
+
+kb_weighting_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    working_range: Literal['building', 'railway'] = ...,
+) -> NDArray[np.complex128]
+
+kb_weighting_response(
     frequencies: NumericArrayLike,
     *,
-    working_range: Literal['building', 'railway'] = 'building',
-) -> NDArray[np.complex128]
+    working_range: Literal['building', 'railway'] = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 The KB frequency weighting, Formula (4).
@@ -505,7 +541,7 @@ The KB frequency weighting, Formula (4).
 | `frequencies` | Frequencies, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). One of `"building"` or `"railway"`. |
 
-**Returns:** The complex response $H_{B\mathrm{Soll}}$, whose magnitude is Formula (6).
+**Returns:** The complex response $H_{B\mathrm{Soll}}$, whose magnitude is Formula (6). A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

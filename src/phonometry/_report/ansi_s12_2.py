@@ -70,6 +70,7 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Callable
 
+    from numpy.typing import NDArray
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
@@ -191,7 +192,7 @@ def _value_table(
     return table
 
 
-def _nc_contour_column(levels: np.ndarray, language: Language) -> list[str]:
+def _nc_contour_column(levels: NDArray[np.float64], language: Language) -> list[str]:
     """Per-band NC contour value read by the tangency method (verbose NC).
 
     For each band the NC index whose Table 1 curve passes through the measured
@@ -218,7 +219,7 @@ def _nc_contour_column(levels: np.ndarray, language: Language) -> list[str]:
 
 
 def _base_columns(
-    levels: np.ndarray, language: Language
+    levels: NDArray[np.float64], language: Language
 ) -> list[tuple[str, list[str]]]:
     """The two columns every room-noise table opens with (frequency, level)."""
     return [

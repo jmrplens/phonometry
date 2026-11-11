@@ -85,12 +85,13 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -107,7 +108,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "CIRCULAR_CUT_ON_COEFFICIENT",
@@ -404,12 +405,48 @@ def _raise_band_mismatch(counts: dict[str, int]) -> None:
     raise ValueError(msg)
 
 
+@overload
+def substitution_insertion_loss[S1: RealScalar, S2: RealScalar](
+    substitution_level: S1,
+    object_level: S2,
+    *,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> float: ...
+
+
+@overload
+def substitution_insertion_loss[V: RealValues, A2: NumericArrayLike](
+    substitution_level: V,
+    object_level: A2,
+    *,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def substitution_insertion_loss[S1: RealScalar, V: RealValues](
+    substitution_level: S1,
+    object_level: V,
+    *,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def substitution_insertion_loss[A1: NumericArrayLike, A2: NumericArrayLike](
+    substitution_level: A1,
+    object_level: A2,
+    *,
+    reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def substitution_insertion_loss(
     substitution_level: NumericArrayLike,
     object_level: NumericArrayLike,
     *,
     reverberation_times: tuple[NumericArrayLike, NumericArrayLike] | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The insertion loss of the two test series, band by band.
 
     .. math::
@@ -443,7 +480,9 @@ def substitution_insertion_loss(
     :param reverberation_times: Optionally ``(T_1, T_2)`` in s, the
         reverberation times of the substitution series and of the test-object
         series, for the correction of 6.3. One value stands for every band.
-    :return: :math:`D_\mathrm{i}`, in dB, one value per band.
+    :return: :math:`D_\mathrm{i}`, in dB, one value per band. A ``float`` when
+        ``substitution_level`` and ``object_level`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a level is not finite, if the arguments do not all
         carry the same number of bands, or if a reverberation time is not
         positive and finite.
@@ -457,7 +496,7 @@ def substitution_insertion_loss(
     )
     difference = without - with_object
     if reverberation_times is None:
-        return np.asarray(difference, dtype=np.float64)
+        return as_float_or_array(difference, like=(substitution_level, object_level))
     first, second = reverberation_times
     t1 = require_positive_array(first, "reverberation_times[0]")
     t2 = require_positive_array(second, "reverberation_times[1]")
@@ -468,7 +507,9 @@ def substitution_insertion_loss(
             "reverberation_times[1]": t2.size,
         },
     )
-    return np.asarray(difference + 10.0 * np.log10(t2 / t1), dtype=np.float64)
+    return as_float_or_array(
+        difference + 10.0 * np.log10(t2 / t1), like=(substitution_level, object_level)
+    )
 
 
 def octave_insertion_loss(insertion_loss: NumericArrayLike) -> NDArray[np.float64]:
@@ -694,13 +735,43 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
     return float(ratio)
 
 
+@overload
+def open_end_transmission_loss[S: RealScalar](
+    frequency: S,
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def open_end_transmission_loss[V: RealValues](
+    frequency: V,
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def open_end_transmission_loss[A: NumericArrayLike](
+    frequency: A,
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def open_end_transmission_loss(
     frequency: NumericArrayLike,
     area: float,
     *,
     solid_angle_sr: float = 2.0 * math.pi,
     speed_of_sound: float = _SOUND_SPEED_M_S,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""ISO 7235 Equation (B.3): what the open end of a duct keeps in.
 
     .. math::
@@ -742,7 +813,8 @@ def open_end_transmission_loss(
         :data:`RADIATION_SOLID_ANGLES`; the default is a duct flush with one
         surface.
     :param speed_of_sound: :math:`c`, in m/s.
-    :return: :math:`D_\mathrm{td}`, in dB, one value per frequency.
+    :return: :math:`D_\mathrm{td}`, in dB, one value per frequency. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not positive and finite.
     :raises TypeError: if ``area``, ``solid_angle_sr`` or ``speed_of_sound`` is not a
         single number, or ``frequency`` holds a text or a value that is not a real
@@ -753,7 +825,37 @@ def open_end_transmission_loss(
     angle = require_positive(solid_angle_sr, "solid_angle_sr")
     speed = require_positive(speed_of_sound, "speed_of_sound")
     mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
-    return np.asarray(10.0 * np.log10(1.0 + angle / mouth**2), dtype=np.float64)
+    return as_float_or_array(10.0 * np.log10(1.0 + angle / mouth**2), like=(frequency,))
+
+
+@overload
+def open_end_reflection_coefficient[S: RealScalar](
+    frequency: S,
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def open_end_reflection_coefficient[V: RealValues](
+    frequency: V,
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def open_end_reflection_coefficient[A: NumericArrayLike](
+    frequency: A,
+    area: float,
+    *,
+    solid_angle_sr: float = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def open_end_reflection_coefficient(
@@ -762,7 +864,7 @@ def open_end_reflection_coefficient(
     *,
     solid_angle_sr: float = 2.0 * math.pi,
     speed_of_sound: float = _SOUND_SPEED_M_S,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""ISO 7235 Equation (B.4): the pressure reflection coefficient there.
 
     .. math::
@@ -784,7 +886,8 @@ def open_end_reflection_coefficient(
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
     :param solid_angle_sr: :math:`\Omega`, in sr.
     :param speed_of_sound: :math:`c`, in m/s.
-    :return: :math:`r`, dimensionless, one value per frequency.
+    :return: :math:`r`, dimensionless, one value per frequency. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not positive and finite.
     :raises TypeError: if ``area``, ``solid_angle_sr`` or ``speed_of_sound`` is not a
         single number, or ``frequency`` holds a text or a value that is not a real
@@ -795,12 +898,40 @@ def open_end_reflection_coefficient(
     angle = require_positive(solid_angle_sr, "solid_angle_sr")
     speed = require_positive(speed_of_sound, "speed_of_sound")
     mouth = 4.0 * math.pi * bands * math.sqrt(section) / speed
-    return np.asarray((mouth**2 / angle + 1.0) ** -0.5, dtype=np.float64)
+    return as_float_or_array((mouth**2 / angle + 1.0) ** -0.5, like=(frequency,))
+
+
+@overload
+def measured_transmission_loss[S1: RealScalar, S2: RealScalar](
+    insertion_loss: S1,
+    open_end_loss: S2,
+) -> float: ...
+
+
+@overload
+def measured_transmission_loss[V: RealValues, A2: NumericArrayLike](
+    insertion_loss: V,
+    open_end_loss: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def measured_transmission_loss[S1: RealScalar, V: RealValues](
+    insertion_loss: S1,
+    open_end_loss: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def measured_transmission_loss[A1: NumericArrayLike, A2: NumericArrayLike](
+    insertion_loss: A1,
+    open_end_loss: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def measured_transmission_loss(
     insertion_loss: NumericArrayLike, open_end_loss: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""ISO 7235 Equation (6): the transmission loss of an air-terminal unit.
 
     .. math::
@@ -820,7 +951,9 @@ def measured_transmission_loss(
         :func:`substitution_insertion_loss`.
     :param open_end_loss: :math:`D_\mathrm{td}`, in dB, from
         :func:`open_end_transmission_loss`.
-    :return: :math:`D_\mathrm{t}`, in dB, one value per band.
+    :return: :math:`D_\mathrm{t}`, in dB, one value per band. A ``float`` when
+        ``insertion_loss`` and ``open_end_loss`` are both numbers, an array when either
+        is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not finite, or if the two arrays carry
         different numbers of bands. Both are per-band quantities, so neither
         stands in for a whole run.
@@ -832,14 +965,58 @@ def measured_transmission_loss(
     _require_matching_bands(
         {"insertion_loss": insertion.size, "open_end_loss": open_end.size}
     )
-    return np.asarray(insertion + open_end, dtype=np.float64)
+    return as_float_or_array(insertion + open_end, like=(insertion_loss, open_end_loss))
+
+
+@overload
+def flow_noise_power_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    pressure_level: S1,
+    open_end_loss: S2,
+    room_correction: S3,
+) -> float: ...
+
+
+@overload
+def flow_noise_power_level[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
+    pressure_level: V,
+    open_end_loss: A2,
+    room_correction: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flow_noise_power_level[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    pressure_level: S1,
+    open_end_loss: V,
+    room_correction: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flow_noise_power_level[S1: RealScalar, S2: RealScalar, V: RealValues](
+    pressure_level: S1,
+    open_end_loss: S2,
+    room_correction: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flow_noise_power_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    pressure_level: A1,
+    open_end_loss: A2,
+    room_correction: A3,
+) -> float | NDArray[np.float64]: ...
 
 
 def flow_noise_power_level(
     pressure_level: NumericArrayLike,
     open_end_loss: NumericArrayLike,
     room_correction: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""ISO 7235 Equation (7): the sound power of the flow noise.
 
     .. math::
@@ -859,7 +1036,10 @@ def flow_noise_power_level(
     :param open_end_loss: :math:`D_\mathrm{td}`, in dB, from
         :func:`open_end_transmission_loss`.
     :param room_correction: :math:`C`, in dB, per band or one value for all.
-    :return: :math:`L_W`, in dB, one value per band.
+    :return: :math:`L_W`, in dB, one value per band. A ``float`` when
+        ``pressure_level``, ``open_end_loss`` and ``room_correction`` are all numbers,
+        an array when one of them is a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If a value is not finite, if the level and the
         open-end loss carry different numbers of bands, or if the room
         correction is neither a single value nor one per band.
@@ -873,7 +1053,10 @@ def flow_noise_power_level(
         {"pressure_level": level.size, "open_end_loss": open_end.size},
         broadcast={"room_correction": correction.size},
     )
-    return np.asarray(level + open_end + correction, dtype=np.float64)
+    return as_float_or_array(
+        level + open_end + correction,
+        like=(pressure_level, open_end_loss, room_correction),
+    )
 
 
 def modal_filter_cut_on(
@@ -1278,9 +1461,37 @@ def upstream_straight_length(area: float) -> float:
     return float(max(UPSTREAM_STRAIGHT_DIAMETERS * equivalent, UPSTREAM_STRAIGHT_MIN_M))
 
 
+@overload
+def duct_sound_power_level[S1: RealScalar, S2: RealScalar](
+    room_sound_power_level: S1,
+    end_reflection_loss: S2,
+) -> float: ...
+
+
+@overload
+def duct_sound_power_level[V: RealValues, A2: NumericArrayLike](
+    room_sound_power_level: V,
+    end_reflection_loss: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def duct_sound_power_level[S1: RealScalar, V: RealValues](
+    room_sound_power_level: S1,
+    end_reflection_loss: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def duct_sound_power_level[A1: NumericArrayLike, A2: NumericArrayLike](
+    room_sound_power_level: A1,
+    end_reflection_loss: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def duct_sound_power_level(
     room_sound_power_level: NumericArrayLike, end_reflection_loss: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""ISO 5135 Equation (1): back from the room to the duct.
 
     .. math::
@@ -1302,7 +1513,9 @@ def duct_sound_power_level(
         the room, in dB, from ISO 3741.
     :param end_reflection_loss: :math:`\Delta L_\mathrm{r}`, in dB, from
         :func:`open_end_transmission_loss`.
-    :return: :math:`L_{W\mathrm{duct}}`, in dB, one value per band.
+    :return: :math:`L_{W\mathrm{duct}}`, in dB, one value per band. A ``float`` when
+        ``room_sound_power_level`` and ``end_reflection_loss`` are both numbers, an
+        array when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a value is not finite, or if the two arrays carry
         different numbers of bands. Both are per-band quantities, so neither
         stands in for a whole run.
@@ -1317,7 +1530,9 @@ def duct_sound_power_level(
             "end_reflection_loss": reflection.size,
         }
     )
-    return np.asarray(level + reflection, dtype=np.float64)
+    return as_float_or_array(
+        level + reflection, like=(room_sound_power_level, end_reflection_loss)
+    )
 
 
 @dataclass(frozen=True)

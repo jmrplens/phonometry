@@ -157,7 +157,7 @@ turbine_background_correction(
 ) -> float
 
 turbine_background_correction(
-    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 turbine_background_correction(
@@ -502,7 +502,7 @@ TurbineEnvironmentalCorrection(
     method: Literal['absorption', 'reference source'],
     surface_area: float | None = None,
     absorption_area: float | None = None,
-    reference_levels: np.ndarray | None = None,
+    reference_levels: NDArray[np.float64] | None = None,
     calibrated_level: float | None = None,
 )
 ```
@@ -558,9 +558,9 @@ $A/S$, the abscissa of Figure A.3, or `None` (A.3.2).
 TurbineMeasurementSurface(
     *,
     reference_boxes: tuple[TurbineReferenceBox, ...],
-    lengths_m: np.ndarray,
-    widths_m: np.ndarray,
-    heights_m: np.ndarray,
+    lengths_m: NDArray[np.float64],
+    widths_m: NDArray[np.float64],
+    heights_m: NDArray[np.float64],
     area: float,
     measurement_distance_m: float = 1.0,
 )
@@ -658,9 +658,9 @@ Where each parallelepiped starts and ends along the shaft, in metres.
 ```python
 TurbineMicrophoneArray(
     surface: TurbineMeasurementSurface,
-    positions_m: np.ndarray,
+    positions_m: NDArray[np.float64],
     labels: tuple[str, ...],
-    overhead_mask: np.ndarray,
+    overhead_mask: NDArray[np.bool_],
     microphone_height_m: float,
     spacing_m: float,
     n_turbine_boxes: int,
@@ -760,7 +760,7 @@ TurbineNoiseDeclaration(
     measured_at: str,
     tonal: bool,
     operating_conditions: tuple[str, ...],
-    position_levels: tuple[np.ndarray, ...],
+    position_levels: tuple[NDArray[np.float64], ...],
     surface_pressure_levels: tuple[float, ...],
     sound_power_levels: tuple[float, ...],
 )
@@ -884,15 +884,15 @@ width across from where the drawing puts them.
 ```python
 TurbineSoundPowerResult(
     *,
-    pressure_levels: np.ndarray,
-    background_levels: np.ndarray | None,
-    background_corrections: np.ndarray,
-    corrected_levels: np.ndarray,
+    pressure_levels: NDArray[np.float64],
+    background_levels: NDArray[np.float64] | None,
+    background_corrections: NDArray[np.float64],
+    corrected_levels: NDArray[np.float64],
     environmental_correction: float,
     surface_area: float,
     surface_pressure_level: float,
     sound_power_level: float,
-    overhead_mask: np.ndarray | None = None,
+    overhead_mask: NDArray[np.bool_] | None = None,
 )
 ```
 

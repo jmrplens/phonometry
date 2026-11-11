@@ -41,7 +41,7 @@ def _iso9613_table1(point: tuple[float, float, float, float]) -> Outcome:
                 temperature_c=temp,
                 relative_humidity_percent=rh,
                 exact_midband=True,
-            )[()]
+            )
         )
         * 1000.0
     )  # dB/m -> dB/km

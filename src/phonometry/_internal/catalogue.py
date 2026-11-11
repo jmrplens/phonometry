@@ -76,12 +76,22 @@ from decimal import Decimal, InvalidOperation
 from fractions import Fraction
 from itertools import chain
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, NamedTuple, NoReturn, Self
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Literal,
+    NamedTuple,
+    NoReturn,
+    Self,
+    overload,
+)
 
 import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import reduce_with_plain_rows
+from .types import as_float_or_array
 from .validation import real_array
 
 if TYPE_CHECKING:
@@ -89,7 +99,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import NDArray
 
-    from .types import NumericArrayLike
+    from .types import NumericArrayLike, RealScalar, RealValues
 
 _REQUIRED = ("source", "about", "rows")
 
@@ -3041,7 +3051,19 @@ class BandedRow(CatalogueRow):
             self._band_field(band_hz), wanted_by=f"the {band_hz} Hz band"
         )
 
-    def values_at(self, frequencies: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def values_at[S: RealScalar](self, frequencies: S) -> float: ...
+
+    @overload
+    def values_at[V: RealValues](self, frequencies: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def values_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def values_at(self, frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
         """The row's value at each of *frequencies*, or a refusal.
 
         The adapter for a function that takes one value per band by position
@@ -3061,7 +3083,9 @@ class BandedRow(CatalogueRow):
 
         :param frequencies: Band centre frequencies, in hertz, of any
             shape.
-        :return: A new array of the same shape, one value per frequency.
+        :return: The row's value at each frequency, with the shape of
+            *frequencies*. A ``float`` for a number, an array for a sequence or an
+            array, a zero-dimensional one included.
         :raises ValueError: for a frequency that is not finite and positive,
             for one that matches none of the bands, naming the nearest, and
             for a band this row does not print, naming the row, the band and
@@ -3078,7 +3102,9 @@ class BandedRow(CatalogueRow):
             )
             raise ValueError(msg)
         if flat.size == 0:
-            return np.empty(wanted.shape, dtype=np.float64)
+            return as_float_or_array(
+                np.empty(wanted.shape, dtype=np.float64), like=(frequencies,)
+            )
         centres = np.asarray(self._bands_hz, dtype=np.float64)
         octaves = np.abs(np.log2(flat[:, np.newaxis] / centres))
         nearest = np.argmin(octaves, axis=1)
@@ -3095,8 +3121,11 @@ class BandedRow(CatalogueRow):
             raise ValueError(msg)
         bands = [self._bands_hz[int(index)] for index in nearest]
         values = {band: self._in_band(band) for band in dict.fromkeys(bands)}
-        return np.array([values[band] for band in bands], dtype=np.float64).reshape(
-            wanted.shape
+        return as_float_or_array(
+            np.array([values[band] for band in bands], dtype=np.float64).reshape(
+                wanted.shape
+            ),
+            like=(frequencies,),
         )
 
 

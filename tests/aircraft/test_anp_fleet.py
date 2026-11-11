@@ -74,7 +74,7 @@ def test_npd_round_trip_is_exact() -> None:
         for col in dist_cols:
             d_m = float(col[2:-2]) * _FT_M
             expected = float(row[col])
-            got = float(curves.level(power, d_m)[0])
+            got = curves.level(power, d_m)
             assert got == pytest.approx(expected, abs=1e-9), (row["NPD_ID"], col)
             checked += 1
     assert checked > 100  # all three aircraft, both metrics, both operations
@@ -84,7 +84,7 @@ def test_npd_log_midpoint_interpolation() -> None:
     """Between two nodes the level is log-linear in distance (Doc 29 Eq. 4-4)."""
     curves = _DB.npd_curves("747100", "departure", "SEL")
     d0, d1 = curves.distances_m[0], curves.distances_m[1]
-    mid = float(curves.level(curves.powers[0], np.sqrt(d0 * d1))[0])
+    mid = curves.level(curves.powers[0], np.sqrt(d0 * d1))
     assert mid == pytest.approx(
         0.5 * (curves.levels[0, 0] + curves.levels[0, 1]), abs=1e-9
     )

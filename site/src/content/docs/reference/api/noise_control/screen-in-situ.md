@@ -318,9 +318,24 @@ machine's, so the pair is refused rather than computed under
 
 ```python
 screen_background_corrected_level(
-    levels: NumericArrayLike,
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+screen_background_corrected_level(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     background_levels: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+screen_background_corrected_level(
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+screen_background_corrected_level(
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The level with the background taken off, clause 5.7.
@@ -346,7 +361,7 @@ the remedy is to wait for a quieter day rather than to correct harder.
 | `levels` | The level with the sources on, per band, in decibels. |
 | `background_levels` | The level with them off, per band, in decibels. |
 
-**Returns:** The corrected level per band, in decibels.
+**Returns:** The corrected level per band, in decibels. A `float` when `levels` and `background_levels` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

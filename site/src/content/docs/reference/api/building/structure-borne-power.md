@@ -78,10 +78,22 @@ positions with the energy mean of its equation (9), implemented by
 
 ```python
 characteristic_reception_plate_power(
+    blocked_force_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    characteristic_mobility: float = ...,
+) -> float
+
+characteristic_reception_plate_power(
+    blocked_force_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    characteristic_mobility: float = ...,
+) -> NDArray[np.float64]
+
+characteristic_reception_plate_power(
     blocked_force_level: NumericArrayLike,
     *,
-    characteristic_mobility: float = 5e-06,
-) -> np.ndarray
+    characteristic_mobility: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Characteristic reception-plate power level (UNE-EN 15657:2018, Formula 17).
@@ -101,7 +113,7 @@ refers it to the actual receiver).
 | `blocked_force_level` | Equivalent blocked force level `L_Fb,eq` (per band), in dB re 1e-6 N (see [`equivalent_blocked_force_level`](/phonometry/reference/api/building/structure-borne-power/#equivalent_blocked_force_level)). |
 | `characteristic_mobility` | `Y_R,inf,low`, in m/(N.s) (Default: 5e-6, clause 7.2.4). |
 
-**Returns:** The characteristic power level `L_Wsn`, in dB re 1 pW.
+**Returns:** The characteristic power level `L_Wsn`, in dB re 1 pW. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -114,9 +126,24 @@ refers it to the actual receiver).
 
 ```python
 equivalent_blocked_force_level(
+    power_level: float | np.floating[Any] | np.integer[Any],
+    plate_mobility: complex | np.number[Any],
+) -> float
+
+equivalent_blocked_force_level(
+    power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    plate_mobility: NumericArrayLike,
+) -> NDArray[np.float64]
+
+equivalent_blocked_force_level(
+    power_level: float | np.floating[Any] | np.integer[Any],
+    plate_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+equivalent_blocked_force_level(
     power_level: NumericArrayLike,
     plate_mobility: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent blocked force level, squared (UNE-EN 15657:2018, Formula 15).
@@ -134,7 +161,7 @@ arithmetic mean of Re{Y} over the contact points, Formula 16).
 | `power_level` | Injected power level `L_Ws,low` (per band), in dB re 1 pW (see [`structure_borne_power_level`](/phonometry/reference/api/building/structure-borne-power/#structure_borne_power_level)). |
 | `plate_mobility` | Equivalent plate mobility `Y_R,low,eq` (per band), in m/(N.s); complex values use their real part (Formula 16). |
 
-**Returns:** The equivalent blocked force level `L_Fb,eq`, in dB re 1e-6 N.
+**Returns:** The equivalent blocked force level `L_Fb,eq`, in dB re 1e-6 N. A `float` when `power_level` and `plate_mobility` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -147,9 +174,24 @@ arithmetic mean of Re{Y} over the contact points, Formula 16).
 
 ```python
 equivalent_free_velocity_level(
+    power_level: float | np.floating[Any] | np.integer[Any],
+    plate_mobility: complex | np.number[Any],
+) -> float
+
+equivalent_free_velocity_level(
+    power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    plate_mobility: NumericArrayLike,
+) -> NDArray[np.float64]
+
+equivalent_free_velocity_level(
+    power_level: float | np.floating[Any] | np.integer[Any],
+    plate_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+equivalent_free_velocity_level(
     power_level: NumericArrayLike,
     plate_mobility: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent free velocity level of the source (UNE-EN 15657:2018, Formula 18).
@@ -169,7 +211,7 @@ combine through Formula (19) into $|Y_\mathrm{S,eq}| = v_\mathrm{f} / F_\mathrm{
 | `power_level` | Injected power level `L_Ws,high` (per band), in dB re 1 pW. |
 | `plate_mobility` | Equivalent plate mobility `Y_R,high,eq` (per band, complex), in m/(N.s). |
 
-**Returns:** The equivalent free velocity level `L_vf,eq`, in dB re 1e-9 m/s.
+**Returns:** The equivalent free velocity level `L_vf,eq`, in dB re 1e-9 m/s. A `float` when `power_level` and `plate_mobility` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -214,8 +256,20 @@ only the reference differs.
 plate_loss_factor(
     reverberation_time: NumericArrayLike,
     *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+plate_loss_factor(
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+plate_loss_factor(
+    reverberation_time: NumericArrayLike,
+    *,
     frequency: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Plate loss factor $\eta = 2.2 / (f\, T_\mathrm{s})$ (EN 15657, Formula 13).
@@ -230,7 +284,7 @@ ISO 10848 total loss factor.
 | `frequency` | Band centre frequency `f`, in hertz (scalar or per band). |
 | `reverberation_time` | Structural reverberation time `Ts`, in s. |
 
-**Returns:** The loss factor `eta` (dimensionless) per band.
+**Returns:** The loss factor `eta` (dimensionless) per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -285,9 +339,24 @@ quantities.
 
 ```python
 source_mobility_from_levels(
+    free_velocity_level: float | np.floating[Any] | np.integer[Any],
+    blocked_force_level: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+source_mobility_from_levels(
+    free_velocity_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    blocked_force_level: NumericArrayLike,
+) -> NDArray[np.float64]
+
+source_mobility_from_levels(
+    free_velocity_level: float | np.floating[Any] | np.integer[Any],
+    blocked_force_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+source_mobility_from_levels(
     free_velocity_level: NumericArrayLike,
     blocked_force_level: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent source mobility magnitude (UNE-EN 15657:2018, Formula 19).
@@ -304,7 +373,7 @@ $(10^{-9}/10^{-6})^2 = 10^{-6}$.
 | `free_velocity_level` | Equivalent free velocity level `L_vf,eq` (per band), in dB re 1e-9 m/s (Formula 10 or 18). |
 | `blocked_force_level` | Equivalent blocked force level `L_Fb,eq` (per band), in dB re 1e-6 N (Formula 15). |
 
-**Returns:** The source mobility magnitude `|Y_S,eq|`, in m/(N.s).
+**Returns:** The source mobility magnitude `|Y_S,eq|`, in m/(N.s). A `float` when `free_velocity_level` and `blocked_force_level` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -344,14 +413,54 @@ per-position velocity levels.
 
 ```python
 structure_borne_power_level(
+    velocity_level: float | np.floating[Any] | np.integer[Any],
+    mass_per_area: float,
+    area: float,
+    loss_factor: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    reference_velocity: float = ...,
+) -> float
+
+structure_borne_power_level(
+    velocity_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    mass_per_area: float,
+    area: float,
+    loss_factor: NumericArrayLike,
+    *,
+    frequency: NumericArrayLike,
+    reference_velocity: float = ...,
+) -> NDArray[np.float64]
+
+structure_borne_power_level(
+    velocity_level: float | np.floating[Any] | np.integer[Any],
+    mass_per_area: float,
+    area: float,
+    loss_factor: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    frequency: NumericArrayLike,
+    reference_velocity: float = ...,
+) -> NDArray[np.float64]
+
+structure_borne_power_level(
+    velocity_level: float | np.floating[Any] | np.integer[Any],
+    mass_per_area: float,
+    area: float,
+    loss_factor: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    reference_velocity: float = ...,
+) -> NDArray[np.float64]
+
+structure_borne_power_level(
     velocity_level: NumericArrayLike,
     mass_per_area: float,
     area: float,
     loss_factor: NumericArrayLike,
     *,
     frequency: NumericArrayLike,
-    reference_velocity: float = 1e-09,
-) -> np.ndarray
+    reference_velocity: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Structure-borne power injected into the reception plate (EN 15657, Formula 14).
@@ -387,7 +496,7 @@ the EN 12354-5 Annex I mobility correction
 | `loss_factor` | Plate loss factor `eta` (scalar or per band, > 0). |
 | `reference_velocity` | Velocity reference `v0` (Default: 1e-9 m/s). |
 
-**Returns:** The structure-borne sound power level `L_Ws`, in dB re 1 pW.
+**Returns:** The structure-borne sound power level `L_Ws`, in dB re 1 pW. A `float` when `velocity_level`, `loss_factor` and `frequency` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -400,12 +509,12 @@ the EN 12354-5 Annex I mobility correction
 
 ```python
 StructureBornePowerResult(
-    power_level: np.ndarray,
-    velocity_level: np.ndarray,
-    loss_factor: np.ndarray,
+    power_level: NDArray[np.float64],
+    velocity_level: NDArray[np.float64],
+    loss_factor: NDArray[np.float64],
     mass_per_area: float,
     area: float,
-    frequencies: np.ndarray | None = None,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 

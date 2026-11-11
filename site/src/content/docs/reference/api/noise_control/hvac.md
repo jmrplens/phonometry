@@ -835,8 +835,8 @@ outside it the sum means nothing.
 
 ```python
 HVACSpectrumResult(
-    frequencies: np.ndarray,
-    values: np.ndarray,
+    frequencies: NDArray[np.float64],
+    values: NDArray[np.float64],
     quantity: Literal['attenuation', 'sound_power_level'],
     label: str,
 )
@@ -1067,7 +1067,7 @@ plenum_attenuation(
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
-    mean_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    mean_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     angle_rad: float = 0.0,
 ) -> NDArray[np.float64]
@@ -1169,7 +1169,7 @@ room_effect(
 
 room_effect(
     distance: float,
-    room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
@@ -1178,7 +1178,7 @@ room_effect(
     distance: float,
     room_constant: float | np.floating[Any] | np.integer[Any],
     *,
-    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 room_effect(
@@ -1198,7 +1198,7 @@ room_effect(
 room_effect(
     distance: float,
     *,
-    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     directivity: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
@@ -1206,7 +1206,7 @@ room_effect(
     distance: float,
     *,
     absorption_area: float | np.floating[Any] | np.integer[Any],
-    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 room_effect(

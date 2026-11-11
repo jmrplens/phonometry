@@ -108,11 +108,11 @@ long-term loudness of 1.000 sone (40 phon) by definition of the sone.
 
 ```python
 MooreGlasbergTimeVaryingLoudness(
-    times: np.ndarray,
-    short_term_loudness: np.ndarray,
-    long_term_loudness: np.ndarray,
-    short_term_loudness_level: np.ndarray,
-    long_term_loudness_level: np.ndarray,
+    times: NDArray[np.float64],
+    short_term_loudness: NDArray[np.float64],
+    long_term_loudness: NDArray[np.float64],
+    short_term_loudness_level: NDArray[np.float64],
+    long_term_loudness_level: NDArray[np.float64],
     n_max: float,
     loudness_level_max: float,
     percentiles: Mapping[float, float],

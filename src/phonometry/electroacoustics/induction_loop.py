@@ -106,7 +106,7 @@ import itertools
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import optimize, signal
@@ -114,6 +114,7 @@ from scipy import optimize, signal
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_at_most,
     real_array,
@@ -131,9 +132,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
     from .induction_loop_components import AmplifierFrequencyResponse, LoopImpedance
 
 Weighting = Literal["Z", "A"]
@@ -375,7 +377,25 @@ _SMALL_VOLUME_LAYOUTS: tuple[SmallVolumeLayout, ...] = (
 # ---------------------------------------------------------------------------
 
 
-def field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray:
+@overload
+def field_strength_level[S: RealScalar](field_strength_a_per_m: S) -> float: ...
+
+
+@overload
+def field_strength_level[V: RealValues](
+    field_strength_a_per_m: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def field_strength_level[A: NumericArrayLike](
+    field_strength_a_per_m: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def field_strength_level(
+    field_strength_a_per_m: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""The magnetic field strength level, in dB re 400 mA/m (IEC 60118-4:2014 3.1).
 
     .. math::
@@ -383,7 +403,8 @@ def field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray
        L = 20\lg\frac{H}{0{,}4\ \mathrm{A/m}}
 
     :param field_strength_a_per_m: RMS magnetic field strength, in A/m.
-    :return: The level, in dB re 400 mA/m.
+    :return: The level, in dB re 400 mA/m; a ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``field_strength_a_per_m`` holds a text or a value that is not
         a real number.
     """
@@ -391,10 +412,25 @@ def field_strength_level(field_strength_a_per_m: NumericArrayLike) -> np.ndarray
     if not np.all(np.isfinite(h)) or np.any(h <= 0.0):
         msg = "'field_strength_a_per_m' must be positive and finite."
         raise ValueError(msg)
-    return 20.0 * np.log10(h / REFERENCE_FIELD_STRENGTH_A_PER_M)
+    return as_float_or_array(
+        20.0 * np.log10(h / REFERENCE_FIELD_STRENGTH_A_PER_M),
+        like=(field_strength_a_per_m,),
+    )
 
 
-def field_strength(level: NumericArrayLike) -> np.ndarray:
+@overload
+def field_strength[S: RealScalar](level: S) -> float: ...
+
+
+@overload
+def field_strength[V: RealValues](level: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def field_strength[A: NumericArrayLike](level: A) -> float | NDArray[np.float64]: ...
+
+
+def field_strength(level: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""The magnetic field strength of a level in dB re 400 mA/m, in A/m.
 
     The inverse of :func:`field_strength_level`: -12 dB is the 100 mA/m of
@@ -402,17 +438,38 @@ def field_strength(level: NumericArrayLike) -> np.ndarray:
     prints 566 mA/m, which is :math:`400\sqrt{2}`).
 
     :param level: Level, in dB re 400 mA/m (scalar or array).
-    :return: The RMS field strength, in A/m.
+    :return: The RMS field strength, in A/m; a ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``level`` holds a text or a value that is not a real number.
     """
-    level = real_array(level, "level")
-    if not np.all(np.isfinite(level)):
+    levels = real_array(level, "level")
+    if not np.all(np.isfinite(levels)):
         msg = "'level' must be finite."
         raise ValueError(msg)
-    return REFERENCE_FIELD_STRENGTH_A_PER_M * 10.0 ** (level / 20.0)
+    return as_float_or_array(
+        REFERENCE_FIELD_STRENGTH_A_PER_M * 10.0 ** (levels / 20.0), like=(level,)
+    )
 
 
-def magnetic_flux_density(field_strength_a_per_m: NumericArrayLike) -> np.ndarray:
+@overload
+def magnetic_flux_density[S: RealScalar](field_strength_a_per_m: S) -> float: ...
+
+
+@overload
+def magnetic_flux_density[V: RealValues](
+    field_strength_a_per_m: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def magnetic_flux_density[A: NumericArrayLike](
+    field_strength_a_per_m: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def magnetic_flux_density(
+    field_strength_a_per_m: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""The magnetic flux density in air of a field strength (IEC 60118-4:2014 E.6).
 
     :math:`B = \mu_0 \mu_\mathrm{r} H` with :math:`\mu_\mathrm{r} = 1` in air,
@@ -421,7 +478,8 @@ def magnetic_flux_density(field_strength_a_per_m: NumericArrayLike) -> np.ndarra
     7 (see ``docs/ERRATA.md``).
 
     :param field_strength_a_per_m: Magnetic field strength, in A/m.
-    :return: The flux density, in tesla.
+    :return: The flux density, in tesla; a ``float`` for a number, an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``field_strength_a_per_m`` holds a text or a value that is not
         a real number.
     """
@@ -429,10 +487,24 @@ def magnetic_flux_density(field_strength_a_per_m: NumericArrayLike) -> np.ndarra
     if not np.all(np.isfinite(h)):
         msg = "'field_strength_a_per_m' must be finite."
         raise ValueError(msg)
-    return _MU_0 * h
+    return as_float_or_array(_MU_0 * h, like=(field_strength_a_per_m,))
 
 
-def telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray:
+@overload
+def telecoil_response[S: RealScalar](angle_deg: S) -> float: ...
+
+
+@overload
+def telecoil_response[V: RealValues](angle_deg: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def telecoil_response[A: NumericArrayLike](
+    angle_deg: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def telecoil_response(angle_deg: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""The relative response of a telecoil off its axis, in dB (IEC 60118-4:2014 E.2).
 
     A telecoil follows a cosine law, :math:`20\lg|\cos\theta|`: 3 dB down at
@@ -449,7 +521,8 @@ def telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray:
     :param angle_deg: Angle between the telecoil's axis and the field, in
         degrees.
     :return: The response relative to the one on axis, in dB; minus infinity
-        at 90 and 270 degrees.
+        at 90 and 270 degrees. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``angle_deg`` holds a text or a value that is not a real
         number.
     """
@@ -459,8 +532,8 @@ def telecoil_response(angle_deg: NumericArrayLike) -> np.ndarray:
         raise ValueError(msg)
     from_null = np.abs(90.0 - np.mod(angle, 180.0))
     with np.errstate(divide="ignore"):
-        response: np.ndarray = 20.0 * np.log10(np.sin(np.radians(from_null)))
-    return response
+        response = 20.0 * np.log10(np.sin(np.radians(from_null)))
+    return as_float_or_array(response, like=(angle_deg,))
 
 
 # ---------------------------------------------------------------------------
@@ -487,8 +560,8 @@ class FieldStrengthReading(OwnsArrays):
 
     fs: int
     weighting: Weighting
-    times: np.ndarray
-    levels: np.ndarray
+    times: NDArray[np.float64]
+    levels: NDArray[np.float64]
     max_level: float
     equivalent_level: float
 
@@ -565,7 +638,21 @@ def field_strength_meter(
 # ---------------------------------------------------------------------------
 
 
-def band_limit_response(frequencies: NumericArrayLike) -> np.ndarray:
+@overload
+def band_limit_response[S: RealScalar](frequencies: S) -> float: ...
+
+
+@overload
+def band_limit_response[V: RealValues](frequencies: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def band_limit_response[A: NumericArrayLike](
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def band_limit_response(frequencies: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""The theoretical response of the band limiting of the pink noise, in dB.
 
     6.4 band-limits the pink noise with third-order Butterworth high-pass and
@@ -581,7 +668,8 @@ def band_limit_response(frequencies: NumericArrayLike) -> np.ndarray:
     6.4 requires from 100 Hz to 5 kHz holds either way.
 
     :param frequencies: Frequencies, in hertz.
-    :return: The response, in dB.
+    :return: The response, in dB. A ``float`` for a number, an array for a sequence or
+        an array, a zero-dimensional one included.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
@@ -589,10 +677,12 @@ def band_limit_response(frequencies: NumericArrayLike) -> np.ndarray:
     low, high = _BAND_LIMIT_HZ
     n2 = 2 * _BAND_LIMIT_ORDER
     power = 1.0 / ((1.0 + (low / f) ** n2) * (1.0 + (f / high) ** n2))
-    return 10.0 * np.log10(power)
+    return as_float_or_array(10.0 * np.log10(power), like=(frequencies,))
 
 
-def _band_limited_noise(fs: int, n: int, rms: float, seed: int | None) -> np.ndarray:
+def _band_limited_noise(
+    fs: int, n: int, rms: float, seed: int | None
+) -> NDArray[np.float64]:
     """``n`` samples of the pink noise of 6.4 at an RMS of ``rms``."""
     from ..signals import noise_signal
 
@@ -618,7 +708,7 @@ def loop_test_noise(
     *,
     rms: float = 1.0,
     seed: int | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The pink noise test signal of IEC 60118-4:2014 6.4.
 
     Pink noise band-limited by third-order Butterworth high-pass and low-pass
@@ -661,12 +751,12 @@ def loop_test_noise(
     return _band_limited_noise(rate, n, level, seed)
 
 
-def _zero_crossings(x: np.ndarray) -> np.ndarray:
+def _zero_crossings(x: NDArray[np.float64]) -> NDArray[np.intp]:
     """Indices ``k`` where the record changes sign between ``k`` and ``k + 1``."""
     return np.flatnonzero((x[:-1] < 0.0) != (x[1:] < 0.0))
 
 
-def _nearer_zero(x: np.ndarray, k: int) -> int:
+def _nearer_zero(x: NDArray[np.float64], k: int) -> int:
     """Of the two samples either side of the crossing at ``k``, the smaller one."""
     return k + 1 if abs(real_number(x[k + 1], "x")) < abs(real_number(x[k], "x")) else k
 
@@ -678,7 +768,7 @@ def combi_signal(
     noise_s: float = _COMBI_MIN_NOISE_S,
     n_cycles: int | np.integer[Any] = 1,
     seed: int | None = None,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The combi signal of IEC 60118-4:2014 6.6 and Table 2.
 
     Bursts of a 1 kHz sine at an RMS of 1, with 5 ms rise and fall times,
@@ -741,7 +831,7 @@ def combi_signal(
     spare = round(0.02 * rate)
     noise_rms = 10.0 ** (_COMBI_NOISE_RELATIVE_DB / 20.0)
     noise = _band_limited_noise(rate, n_cycles * (n_noise + 2 * spare), noise_rms, seed)
-    pieces: list[np.ndarray] = []
+    pieces: list[NDArray[np.float64]] = []
     for k in range(n_cycles):
         stretch = noise[k * (n_noise + 2 * spare) : (k + 1) * (n_noise + 2 * spare)]
         crossings = _zero_crossings(stretch)
@@ -759,7 +849,7 @@ def combi_signal(
 
 def small_volume_measurement_points(
     layout: PointLayout,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The measurement points of a disabled refuge or a counter (clause 9 as amended).
 
     ``"refuge_small"`` is Figure 2 a), for a magnetic field source of small
@@ -814,7 +904,7 @@ class BackgroundNoiseAssessment(OwnsArrays):
         at low frequencies, which withholds the 22 dB relaxation.
     """
 
-    noise_levels: np.ndarray
+    noise_levels: NDArray[np.float64]
     noise_is_tonal: bool
 
     @property
@@ -1080,7 +1170,7 @@ class InductionLoopVerification(RichDisplay):
         return plot_induction_loop_verification(self, ax, language=language, **kwargs)
 
 
-def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
+def _levels(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """A non-empty array of finite, real levels, of any shape."""
     arr = real_array(values, name)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
@@ -1090,7 +1180,11 @@ def _levels(values: NumericArrayLike, name: str) -> np.ndarray:
 
 
 def _band_requirement(
-    name: RequirementName, clause: str, values: np.ndarray, low: float, high: float
+    name: RequirementName,
+    clause: str,
+    values: NDArray[np.float64],
+    low: float,
+    high: float,
 ) -> LoopRequirement:
     """A requirement with the same limits for every value."""
     flat = tuple(real_number(v, "values") for v in values.ravel())
@@ -1274,7 +1368,7 @@ def verify_induction_loop_system(
 
 
 def _height_coverage(
-    levels: np.ndarray, heights_m: NumericArrayLike | None, name: str
+    levels: NDArray[np.float64], heights_m: NumericArrayLike | None, name: str
 ) -> None:
     """Refuse a useful volume of 9.4 that leaves out a height of 9.2 or 9.3.
 
@@ -1507,8 +1601,8 @@ class AmplifierOverloadVerification(OwnsArrays):
     test_current_a: float
     doubling_frequency_hz: float
     end_frequency_hz: float
-    frequencies: np.ndarray
-    voltage_v: np.ndarray
+    frequencies: NDArray[np.float64]
+    voltage_v: NDArray[np.float64]
     test_frequency_voltage_v: float
     compliance_voltage_v: float
 
@@ -1634,7 +1728,7 @@ def verify_amplifier_overload(
             )
             raise ValueError(msg)
 
-    def voltage(f: float | np.ndarray) -> np.ndarray:
+    def voltage(f: float | NDArray[np.float64]) -> NDArray[np.float64]:
         gain = (
             np.ones_like(real_array(f, "f"))
             if current_response is None

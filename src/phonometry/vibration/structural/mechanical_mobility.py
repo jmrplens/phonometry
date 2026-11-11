@@ -76,6 +76,8 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
+from ..._internal.types import as_complex_or_array, as_float_or_array
+
 if TYPE_CHECKING:
     import os
     from collections.abc import Mapping
@@ -84,7 +86,15 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine, TwoPanels
+    from ..._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+        TwoPanels,
+    )
     from ..._report.metadata import ReportMetadata
 
 
@@ -189,13 +199,53 @@ def _from_receptance(
     return np.asarray(result, dtype=np.complex128)
 
 
+@overload
+def convert_frf[S1: ComplexScalar, S2: RealScalar](
+    value: S1,
+    source: FrfKind,
+    target: FrfKind,
+    *,
+    frequency: S2,
+) -> complex: ...
+
+
+@overload
+def convert_frf[V: ComplexValues, A2: NumericArrayLike](
+    value: V,
+    source: FrfKind,
+    target: FrfKind,
+    *,
+    frequency: A2,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def convert_frf[S1: ComplexScalar, V: RealValues](
+    value: S1,
+    source: FrfKind,
+    target: FrfKind,
+    *,
+    frequency: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def convert_frf[A1: NumericArrayLike, A2: NumericArrayLike](
+    value: A1,
+    source: FrfKind,
+    target: FrfKind,
+    *,
+    frequency: A2,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def convert_frf(
     value: NumericArrayLike,
     source: FrfKind,
     target: FrfKind,
     *,
     frequency: NumericArrayLike,
-) -> np.ndarray:
+) -> complex | NDArray[np.complex128]:
     r"""Convert a frequency-response function between any two kinds (Table 1).
 
     .. note::
@@ -221,7 +271,9 @@ def convert_frf(
     :param target: The FRF kind to convert to (same set). One of ``"receptance"``,
         ``"mobility"``, ``"accelerance"``, ``"dynamic_stiffness"``, ``"impedance"`` or
         ``"apparent_mass"``.
-    :return: The FRF value(s) of kind *target*, as a complex array.
+    :return: The FRF value(s) of kind *target*, as a complex array. A ``complex`` when
+        ``value`` and ``frequency`` are both numbers, an array when either is a sequence
+        or an array, a zero-dimensional one included.
     :raises ValueError: for an unknown FRF name, a non-positive frequency, or
         a zero *value* (dead channel) when the conversion involves a
         force-per-motion reciprocal.
@@ -268,7 +320,9 @@ def convert_frf(
         )
         raise ValueError(msg)
     receptance = _to_receptance(val, omega, source)
-    return np.asarray(_from_receptance(receptance, omega, target), dtype=np.complex128)
+    return as_complex_or_array(
+        _from_receptance(receptance, omega, target), like=(value, frequency)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -277,9 +331,36 @@ def convert_frf(
 # ---------------------------------------------------------------------------
 
 
+@overload
+def sdof_receptance[S: RealScalar](
+    frequency: S,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> complex: ...
+
+
+@overload
+def sdof_receptance[V: RealValues](
+    frequency: V,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def sdof_receptance[A: NumericArrayLike](
+    frequency: A,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def sdof_receptance(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
-) -> np.ndarray:
+) -> complex | NDArray[np.complex128]:
     r"""Receptance of a viscously damped SDOF resonator (closed form).
 
     :math:`H(\omega) = 1 / (k - \omega^2 m + j \omega c)`, the textbook
@@ -290,7 +371,8 @@ def sdof_receptance(
     :param mass: Mass ``m``, in kg.
     :param stiffness: Stiffness ``k``, in N/m.
     :param damping: Viscous damping coefficient ``c``, in N.s/m (>= 0).
-    :return: The complex receptance ``H``, in m/N.
+    :return: The complex receptance ``H``, in m/N. A ``complex`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number,
         or ``frequency`` holds a text or a value that is not a real number.
     """
@@ -299,38 +381,98 @@ def sdof_receptance(
     damping = require_non_negative(damping, "damping")
     omega = _omega(frequency)
     denom = stiffness - omega**2 * mass + 1j * omega * damping
-    return np.asarray(1.0 / denom, dtype=np.complex128)
+    return as_complex_or_array(1.0 / denom, like=(frequency,))
+
+
+@overload
+def sdof_mobility[S: RealScalar](
+    frequency: S,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> complex: ...
+
+
+@overload
+def sdof_mobility[V: RealValues](
+    frequency: V,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def sdof_mobility[A: NumericArrayLike](
+    frequency: A,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def sdof_mobility(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
-) -> np.ndarray:
+) -> complex | NDArray[np.complex128]:
     r"""Mobility of a viscously damped SDOF resonator: :math:`Y = j \omega H`.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param mass: Mass ``m``, in kg.
     :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
-    :return: The complex mobility ``Y``, in m/(N.s).
+    :return: The complex mobility ``Y``, in m/(N.s). A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     """
     h = sdof_receptance(frequency, mass, stiffness, damping)
-    return convert_frf(h, frequency=frequency, source="receptance", target="mobility")
+    return as_complex_or_array(
+        convert_frf(h, frequency=frequency, source="receptance", target="mobility"),
+        like=(frequency,),
+    )
+
+
+@overload
+def sdof_accelerance[S: RealScalar](
+    frequency: S,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> complex: ...
+
+
+@overload
+def sdof_accelerance[V: RealValues](
+    frequency: V,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def sdof_accelerance[A: NumericArrayLike](
+    frequency: A,
+    mass: float,
+    stiffness: float,
+    damping: float,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def sdof_accelerance(
     frequency: NumericArrayLike, mass: float, stiffness: float, damping: float
-) -> np.ndarray:
+) -> complex | NDArray[np.complex128]:
     r"""Accelerance of a viscously damped SDOF resonator: :math:`A = -\omega^2 H`.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param mass: Mass ``m``, in kg.
     :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
-    :return: The complex accelerance ``A``, in 1/kg.
+    :return: The complex accelerance ``A``, in 1/kg. A ``complex`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     """
     h = sdof_receptance(frequency, mass, stiffness, damping)
-    return convert_frf(
-        h, frequency=frequency, source="receptance", target="accelerance"
+    return as_complex_or_array(
+        convert_frf(h, frequency=frequency, source="receptance", target="accelerance"),
+        like=(frequency,),
     )
 
 
@@ -378,8 +520,8 @@ class RigidMassCalibrationResult(OwnsArrays):
     #: The units the field names do not say, as the docstring gives them.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"mass": "kg"})
 
-    frequencies: np.ndarray
-    measured: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured: NDArray[np.float64]
     _: KW_ONLY
     mass: float
     quantity: Quantity
@@ -400,7 +542,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         _omega(self.frequencies, "frequencies")
 
     @property
-    def expected(self) -> np.ndarray:
+    def expected(self) -> NDArray[np.float64]:
         r"""Known correct magnitude of the block per frequency.
 
         :return: :math:`1/m` (accelerance) or :math:`1/(2 \pi f m)` (mobility).
@@ -411,7 +553,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         return np.asarray(1.0 / (_omega(freq) * self.mass), dtype=np.float64)
 
     @property
-    def relative_deviation(self) -> np.ndarray:
+    def relative_deviation(self) -> NDArray[np.float64]:
         """Relative deviation ``measured/expected - 1`` per frequency."""
         measured = np.asarray(self.measured, dtype=np.float64)
         return np.asarray(measured / self.expected - 1.0, dtype=np.float64)
@@ -422,7 +564,7 @@ class RigidMassCalibrationResult(OwnsArrays):
         return _RIGID_MASS_TOLERANCE
 
     @property
-    def within_tolerance(self) -> np.ndarray:
+    def within_tolerance(self) -> NDArray[np.bool_]:
         """Per-frequency pass flag ``|deviation| <= tolerance``.
 
         Judged as a settled share of the tolerance, so that a block exactly
@@ -532,9 +674,30 @@ def verify_rigid_mass_calibration(
     )
 
 
+@overload
+def random_error_percent[S: RealScalar](
+    coherence: S,
+    n_averages: int | np.integer[Any],
+) -> float: ...
+
+
+@overload
+def random_error_percent[V: RealValues](
+    coherence: V,
+    n_averages: int | np.integer[Any],
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def random_error_percent[A: NumericArrayLike](
+    coherence: A,
+    n_averages: int | np.integer[Any],
+) -> float | NDArray[np.float64]: ...
+
+
 def random_error_percent(
     coherence: NumericArrayLike, n_averages: int | np.integer[Any]
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).
 
     :math:`\epsilon = \sqrt{(1 - \gamma^2) / (2 n \gamma^2)}`, the normalized
@@ -550,7 +713,9 @@ def random_error_percent(
     :param coherence: Ordinary coherence :math:`\gamma^2` per frequency, in
         (0, 1].
     :param n_averages: Number of averaged spectra ``n`` (>= 1).
-    :return: The normalized random error, in percent (same shape as input).
+    :return: The normalized random error, in percent (same shape as input). A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: for a coherence outside (0, 1] or ``n_averages < 1``.
     :raises TypeError: if ``n_averages`` is a flag, a text or an array where a count
         goes, or ``coherence`` holds a text or a value that is not a real number.
@@ -565,7 +730,7 @@ def random_error_percent(
         msg = "'coherence' must lie in (0, 1]."
         raise ValueError(msg)
     eps = np.sqrt((1.0 - gamma2) / (2.0 * n * gamma2))
-    return np.asarray(100.0 * eps, dtype=np.float64)
+    return as_float_or_array(100.0 * eps, like=(coherence,))
 
 
 # ---------------------------------------------------------------------------
@@ -582,8 +747,8 @@ class MobilityResult(OwnsArrays):
     :ivar driving_point: ``True`` if response and force are co-located (i = j).
     """
 
-    frequencies: np.ndarray
-    mobility: np.ndarray
+    frequencies: NDArray[np.float64]
+    mobility: NDArray[np.complex128]
     _: KW_ONLY
     driving_point: bool = True
 
@@ -641,16 +806,16 @@ class MobilityResult(OwnsArrays):
                 raise ValueError(msg)
 
     @property
-    def magnitude(self) -> np.ndarray:
+    def magnitude(self) -> NDArray[np.float64]:
         """Mobility magnitude ``|Y|``, in m/(N.s)."""
         return np.asarray(np.abs(self.mobility), dtype=np.float64)
 
     @property
-    def phase_rad(self) -> np.ndarray:
+    def phase_rad(self) -> NDArray[np.float64]:
         """Mobility phase, in radians."""
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 
-    def to(self, target: FrfKind) -> np.ndarray:
+    def to(self, target: FrfKind) -> NDArray[np.complex128]:
         r"""Convert the mobility to another FRF kind (see :func:`convert_frf`).
 
         The force-per-motion kinds are element-wise reciprocals, i.e. the

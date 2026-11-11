@@ -843,7 +843,7 @@ def _relay(caught: Sequence[Warning]) -> None:
         warn_caller(warning)
 
 
-def _fill(session: Session, spec: ArraySpec, target: NDArray[Any]) -> None:
+def _fill(session: Session, spec: ArraySpec, target: NDArray[np.floating[Any]]) -> None:
     """Read the array *spec* describes into *target*, one row of its first axis at a time.
 
     So a large result is never on the host twice: one row's bytes, then the
@@ -893,8 +893,8 @@ def _receive_result(
     request: Compute,
     digest: str,
     expected: Expected,
-    first: NDArray[Any],
-    second: NDArray[Any] | None,
+    first: NDArray[np.float64],
+    second: NDArray[np.floating[Any]] | None,
     sink: SupportsWrite[bytes] | None,
 ) -> RunProvenance:
     """Check the result frame, read its arrays and stream, relay its warnings.
@@ -919,7 +919,7 @@ def _receive_result(
 
 def _check_targets(
     expected: Expected,
-    second: NDArray[Any] | None,
+    second: NDArray[np.floating[Any]] | None,
     sink: SupportsWrite[bytes] | None,
 ) -> None:
     """Refuse a call whose arrays and sink do not match what it expects (a mistake of the caller's code).
@@ -982,8 +982,8 @@ def run_remote(
     request: Compute,
     arguments: Mapping[str, object],
     expected: Expected,
-    first: NDArray[Any],
-    second: NDArray[Any] | None,
+    first: NDArray[np.float64],
+    second: NDArray[np.floating[Any]] | None,
     *,
     sink: SupportsWrite[bytes] | None = None,
 ) -> RunProvenance | None:

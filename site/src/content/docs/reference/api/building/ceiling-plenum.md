@@ -150,10 +150,10 @@ CEILING_ATTENUATION_CONTOUR = {125.0: -16.0, 160.0: -13.0, 200.0: -10.0, 250.0: 
 
 ```python
 CeilingAttenuationResult(
-    frequencies: np.ndarray,
-    measured: np.ndarray,
-    shifted_reference: np.ndarray,
-    deficiencies: np.ndarray,
+    frequencies: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    shifted_reference: NDArray[np.float64],
+    deficiencies: NDArray[np.float64],
     deficiency_sum: float,
     max_deficiency: float,
     rating: int,
@@ -211,12 +211,44 @@ library rounds it up (`floor(measured + 0.5)`). Read from
 
 ```python
 normalized_ceiling_attenuation(
+    level_source: float | np.floating[Any] | np.integer[Any],
+    level_receiving: float | np.floating[Any] | np.integer[Any],
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    *,
+    reference_area: float = ...,
+) -> float
+
+normalized_ceiling_attenuation(
+    level_source: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    level_receiving: NumericArrayLike,
+    absorption_area: NumericArrayLike,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]
+
+normalized_ceiling_attenuation(
+    level_source: float | np.floating[Any] | np.integer[Any],
+    level_receiving: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    absorption_area: NumericArrayLike,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]
+
+normalized_ceiling_attenuation(
+    level_source: float | np.floating[Any] | np.integer[Any],
+    level_receiving: float | np.floating[Any] | np.integer[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]
+
+normalized_ceiling_attenuation(
     level_source: NumericArrayLike,
     level_receiving: NumericArrayLike,
     absorption_area: NumericArrayLike,
     *,
-    reference_area: float = 10.0,
-) -> np.ndarray
+    reference_area: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Normalized ceiling attenuation `Dn,c` (ISO 140-9:1985, clause 3.3).
@@ -236,7 +268,7 @@ ASTM value about 0.79 dB higher for the same rooms.
 | `absorption_area` | Receiving-room equivalent absorption area `A` per band, in m2 (> 0); a scalar is broadcast over the bands. |
 | `reference_area` | Reference area `A0`, in m2 (Default: 10 m2). |
 
-**Returns:** The normalized ceiling attenuation `Dn,c` per band, in dB.
+**Returns:** The normalized ceiling attenuation `Dn,c` per band, in dB. A `float` when `level_source`, `level_receiving` and `absorption_area` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -249,10 +281,22 @@ ASTM value about 0.79 dB higher for the same rooms.
 
 ```python
 partition_referenced_reduction_index(
+    reduction_index: float | np.floating[Any] | np.integer[Any],
+    room_height_m: float,
+    room_length: float,
+) -> float
+
+partition_referenced_reduction_index(
+    reduction_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    room_height_m: float,
+    room_length: float,
+) -> NDArray[np.float64]
+
+partition_referenced_reduction_index(
     reduction_index: NumericArrayLike,
     room_height_m: float,
     room_length: float,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Refer `Rcl` to the partition area instead of the ceiling
@@ -271,7 +315,7 @@ path as transmission factors.
 | `room_height_m` | Sending-room height `HS`, in m (> 0). |
 | `room_length` | Sending-room length `LS`, in m (> 0). |
 
-**Returns:** The partition-referenced `Rcl,p` per band, in dB.
+**Returns:** The partition-referenced `Rcl,p` per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -360,13 +404,13 @@ about 0.24 dB.
 
 ```python
 PlenumFlankingResult(
-    frequencies: np.ndarray | None,
-    reduction_index: np.ndarray,
-    transmission_factor: np.ndarray,
-    reduction_index_source: np.ndarray,
-    reduction_index_receiving: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    reduction_index: NDArray[np.float64],
+    transmission_factor: NDArray[np.float64],
+    reduction_index_source: NDArray[np.float64],
+    reduction_index_receiving: NDArray[np.float64],
     geometry_term: float | None,
-    penalty: np.ndarray,
+    penalty: NDArray[np.float64],
     model: Literal['undamped', 'attenuated'],
     epsilon: float,
     plenum_height_m: float,

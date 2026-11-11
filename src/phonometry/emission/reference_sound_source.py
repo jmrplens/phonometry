@@ -81,13 +81,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.sound_power import _a_weighting_corrections
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -110,9 +111,10 @@ from .free_field_qualification import FreeFieldCheck, _band_index, _nominal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import BandFraction, NumericArrayLike
+    from .._internal.types import BandFraction, NumericArrayLike, RealScalar, RealValues
     from ._sound_power_anechoic import PrecisionSoundPowerResult
 
 RadiationCharacter = Literal["monopole", "dipole", "unknown"]
@@ -229,7 +231,7 @@ def _stepped[T](k: int, rows: tuple[tuple[int, T], ...], low: int, what: str) ->
     return rows[-1][1]
 
 
-def repeatability_standard_deviation(levels: NumericArrayLike) -> np.ndarray:
+def repeatability_standard_deviation(levels: NumericArrayLike) -> NDArray[np.float64]:
     r"""Standard deviation under repeatability conditions (ISO 6926 Formula (1)).
 
     :math:`\sigma_r = \sqrt{\sum_j (L_{X,j} - \overline{L_X})^2 / (N - 1)}` with
@@ -282,6 +284,39 @@ def knee_frequency(d0_m: float, *, speed_of_sound: float = 343.0) -> float:
     return c / (2.0 * math.pi * d0)
 
 
+@overload
+def radiation_impedance_correction[S: RealScalar](
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: RadiationCharacter = ...,
+    frequencies: S | None = None,
+    knee_frequency_hz: float | None = ...,
+) -> float: ...
+
+
+@overload
+def radiation_impedance_correction[V: RealValues](
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: RadiationCharacter = ...,
+    frequencies: V,
+    knee_frequency_hz: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def radiation_impedance_correction[A: NumericArrayLike](
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: RadiationCharacter = ...,
+    frequencies: A | None = None,
+    knee_frequency_hz: float | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def radiation_impedance_correction(
     *,
     temperature_c: float = 23.0,
@@ -289,7 +324,7 @@ def radiation_impedance_correction(
     radiation: RadiationCharacter = "unknown",
     frequencies: NumericArrayLike | None = None,
     knee_frequency_hz: float | None = None,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""The radiation impedance correction :math:`C_2` of ISO 6926 Annex A.
 
     :math:`C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + n \lg(\theta/
@@ -307,7 +342,9 @@ def radiation_impedance_correction(
         monopole or a dipole, whose correction depends on the knee frequency.
     :param knee_frequency_hz: :math:`f_\mathrm{k}` (see
         :func:`knee_frequency`), required for a monopole or a dipole.
-    :return: :math:`C_2` per band, in dB (one value without frequencies).
+    :return: :math:`C_2` per band, in dB. A ``float`` for a number or for no
+        frequencies, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: for an unknown radiation character, a monopole or
         dipole without frequencies and knee frequency, or a dipole band below
         the knee frequency, for which Annex A gives no formula.
@@ -323,7 +360,10 @@ def radiation_impedance_correction(
         count = (
             1 if frequencies is None else np.atleast_1d(np.asarray(frequencies)).size
         )
-        return np.full(count, pressure_term + _C2_UNKNOWN * ratio, dtype=np.float64)
+        return as_float_or_array(
+            np.full(count, pressure_term + _C2_UNKNOWN * ratio, dtype=np.float64),
+            like=(frequencies,),
+        )
     require_choice(radiation, "radiation", ("monopole", "dipole"))
     if frequencies is None or knee_frequency_hz is None:
         msg = (
@@ -341,9 +381,42 @@ def radiation_impedance_correction(
                 "knee frequency (Formula (A.4)); a band lies below it."
             )
             raise ValueError(msg)
-        return np.full(freqs.size, pressure_term + _C2_DIPOLE * ratio)
+        return as_float_or_array(
+            np.full(freqs.size, pressure_term + _C2_DIPOLE * ratio),
+            like=(frequencies,),
+        )
     n = np.where(above, _C2_MONOPOLE_HIGH, _C2_MONOPOLE_LOW)
-    return np.asarray(pressure_term + n * ratio, dtype=np.float64)
+    return as_float_or_array(pressure_term + n * ratio, like=(frequencies,))
+
+
+@overload
+def reference_source_reproducibility[S: RealScalar](
+    frequencies: S,
+    *,
+    environment: CalibrationEnvironment,
+    arrangement: MicrophoneArrangement | None = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float: ...
+
+
+@overload
+def reference_source_reproducibility[V: RealValues](
+    frequencies: V,
+    *,
+    environment: CalibrationEnvironment,
+    arrangement: MicrophoneArrangement | None = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reference_source_reproducibility[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    environment: CalibrationEnvironment,
+    arrangement: MicrophoneArrangement | None = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def reference_source_reproducibility(
@@ -352,7 +425,7 @@ def reference_source_reproducibility(
     environment: CalibrationEnvironment,
     arrangement: MicrophoneArrangement | None = None,
     fraction: BandFraction | np.integer[Any] = 3,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Standard deviation of reproducibility of a calibration (ISO 6926 Table 2).
 
     The one-third octave and octave columns of Table 2 are read separately,
@@ -366,7 +439,8 @@ def reference_source_reproducibility(
         paths); ignored in a reverberation room.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves. One of ``1`` or ``3``.
-    :return: :math:`\sigma_R` per band, in dB.
+    :return: :math:`\sigma_R` per band, in dB. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a band outside Table 2 or an unknown option.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
         ``arrangement`` or ``environment`` is not a text, or ``frequencies`` holds a
@@ -386,7 +460,7 @@ def reference_source_reproducibility(
             msg = f"{float(f):g} Hz is not an octave mid-band frequency."
             raise ValueError(msg)
         values.append(_stepped(k, rows, low, "ISO 6926 Table 2")[column])
-    return np.array(values, dtype=np.float64)
+    return as_float_or_array(np.array(values, dtype=np.float64), like=(frequencies,))
 
 
 def _repeatability_limit(k: int) -> float:
@@ -470,18 +544,18 @@ class ReferenceSourceCalibration(OwnsArrays):
         ``None`` when none was given.
     """
 
-    frequencies: np.ndarray
-    surface_pressure_level: np.ndarray
-    directivity_index: np.ndarray
+    frequencies: NDArray[np.float64]
+    surface_pressure_level: NDArray[np.float64]
+    directivity_index: NDArray[np.float64]
     c1: float
-    c2: np.ndarray
-    c3: np.ndarray
-    expanded_uncertainty_db: np.ndarray
+    c2: NDArray[np.float64]
+    c3: NDArray[np.float64]
+    expanded_uncertainty_db: NDArray[np.float64]
     coverage_factor: float
     arrangement: Literal["paths", "fixed"]
     radiation: RadiationCharacter | None
     knee_frequency_hz: float | None
-    intensity_sound_power_level: np.ndarray | None = None
+    intensity_sound_power_level: NDArray[np.float64] | None = None
     room_qualification: FreeFieldCheck | None = None
 
     def __post_init__(self) -> None:
@@ -494,12 +568,12 @@ class ReferenceSourceCalibration(OwnsArrays):
         if self.intensity_sound_power_level is not None:
             self._annex_b()
 
-    def _bands(self) -> np.ndarray:
+    def _bands(self) -> NDArray[np.int64]:
         return np.array(
             [_band_index(float(f)) for f in self.frequencies], dtype=np.int64
         )
 
-    def _pressure_level_db(self) -> np.ndarray:
+    def _pressure_level_db(self) -> NDArray[np.float64]:
         area = 2.0 * math.pi * _RADIUS_M**2
         return np.asarray(
             self.surface_pressure_level
@@ -510,7 +584,7 @@ class ReferenceSourceCalibration(OwnsArrays):
             dtype=np.float64,
         )
 
-    def _annex_b(self) -> tuple[np.ndarray, bool | None]:
+    def _annex_b(self) -> tuple[NDArray[np.bool_], bool | None]:
         intensity = self.intensity_sound_power_level
         ks = self._bands()
         if intensity is None:
@@ -522,7 +596,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         return _annex_b(ks, self._pressure_level_db(), values)
 
     @property
-    def intensity_bands(self) -> np.ndarray:
+    def intensity_bands(self) -> NDArray[np.bool_]:
         """Per band, whether the level came from the sound intensity of Annex B."""
         return self._annex_b()[0]
 
@@ -535,7 +609,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         return self._annex_b()[1]
 
     @property
-    def sound_power_level(self) -> np.ndarray:
+    def sound_power_level(self) -> NDArray[np.float64]:
         """:math:`L_W` under the reference meteorological conditions, per band, in dB re 1 pW.
 
         Formula (2) from the surface levels and the three corrections; the
@@ -562,7 +636,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         return _room_qualified(self.room_qualification, freqs)
 
     @property
-    def max_directivity_index(self) -> np.ndarray:
+    def max_directivity_index(self) -> NDArray[np.float64]:
         """The highest directivity index over the positions, per band (5.5).
 
         :return: One value per band, in dB.
@@ -601,13 +675,43 @@ class ReferenceSourceCalibration(OwnsArrays):
             energy_sum(self.sound_power_level[inside] + _a_weighting_corrections(freqs))
         )
 
-    def _a_weighted_bands(self) -> np.ndarray:
+    def _a_weighted_bands(self) -> NDArray[np.bool_]:
         ks = np.array([_band_index(float(f)) for f in self.frequencies])
         inside = (ks >= _K_50) & (ks <= _K_10000)
         if not np.any(inside):
             msg = "no band lies within the 50 Hz to 10 kHz of ISO 3744 Annex E."
             raise ValueError(msg)
         return inside
+
+    @overload
+    def sound_power_level_at[S: RealScalar](
+        self,
+        frequencies: S,
+        *,
+        fraction: BandFraction | np.integer[Any] = ...,
+        temperature_c: float | None = ...,
+        static_pressure_kpa: float | None = ...,
+    ) -> float: ...
+
+    @overload
+    def sound_power_level_at[V: RealValues](
+        self,
+        frequencies: V,
+        *,
+        fraction: BandFraction | np.integer[Any] = ...,
+        temperature_c: float | None = ...,
+        static_pressure_kpa: float | None = ...,
+    ) -> NDArray[np.float64]: ...
+
+    @overload
+    def sound_power_level_at[A: NumericArrayLike](
+        self,
+        frequencies: A,
+        *,
+        fraction: BandFraction | np.integer[Any] = ...,
+        temperature_c: float | None = ...,
+        static_pressure_kpa: float | None = ...,
+    ) -> float | NDArray[np.float64]: ...
 
     def sound_power_level_at(
         self,
@@ -616,7 +720,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         fraction: BandFraction | np.integer[Any] = 3,
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
-    ) -> np.ndarray:
+    ) -> float | NDArray[np.float64]:
         r"""The calibrated level in the bands a comparison method asks for.
 
         Without meteorological conditions, :math:`L_W` under the reference
@@ -637,7 +741,8 @@ class ReferenceSourceCalibration(OwnsArrays):
             reference conditions.
         :param static_pressure_kpa: Static pressure at the test, in
             kilopascals, given together with ``temperature_c``.
-        :return: The level per requested band, in dB re 1 pW.
+        :return: The level per requested band, in dB re 1 pW. A ``float`` for a number,
+            an array for a sequence or an array, a zero-dimensional one included.
         :raises ValueError: for a band the calibration does not cover, an
             octave asked at a frequency that is not an octave mid-band, only
             one of the two conditions, or conditions asked of a calibration
@@ -692,7 +797,7 @@ class ReferenceSourceCalibration(OwnsArrays):
                 )
                 raise ValueError(msg)
             out.append(energy_sum([known[w] for w in wanted]))
-        return np.array(out, dtype=np.float64)
+        return as_float_or_array(np.array(out, dtype=np.float64), like=(frequencies,))
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -713,7 +818,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         )
 
 
-def _room_qualified(check: FreeFieldCheck, freqs: np.ndarray) -> bool:
+def _room_qualified(check: FreeFieldCheck, freqs: NDArray[np.float64]) -> bool:
     """8.1: hemi-anechoic, qualified over the pressure-calibrated bands out to 2 m.
 
     ``freqs`` are the bands whose level came from sound pressure: the bands
@@ -738,8 +843,8 @@ def _room_qualified(check: FreeFieldCheck, freqs: np.ndarray) -> bool:
 
 
 def _annex_b(
-    ks: np.ndarray, pressure: np.ndarray, intensity: np.ndarray
-) -> tuple[np.ndarray, bool]:
+    ks: NDArray[np.int64], pressure: NDArray[np.float64], intensity: NDArray[np.float64]
+) -> tuple[NDArray[np.bool_], bool]:
     """Annex B: agreement from 50 Hz to 315 Hz and the bands it replaces."""
     compared = (ks >= _K_50) & (ks <= _K_315)
     if not np.any(compared):
@@ -761,7 +866,9 @@ def _annex_b(
     return replaced, agree
 
 
-def _calibration_bands(frequencies: NumericArrayLike) -> tuple[np.ndarray, np.ndarray]:
+def _calibration_bands(
+    frequencies: NumericArrayLike,
+) -> tuple[NDArray[np.float64], NDArray[np.int64]]:
     """Ascending one-third octave mid-bands from 50 Hz to 20 kHz, and their indices."""
     freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
@@ -779,7 +886,7 @@ def _calibration_bands(frequencies: NumericArrayLike) -> tuple[np.ndarray, np.nd
 
 def _hemisphere_levels(
     levels: NumericArrayLike,
-    freqs: np.ndarray,
+    freqs: NDArray[np.float64],
     background_levels: NumericArrayLike | None,
     max_levels: NumericArrayLike | None,
 ) -> PrecisionSoundPowerResult:
@@ -813,8 +920,8 @@ def _hemisphere_levels(
 
 
 def _c3_correction(
-    air_absorption_db_per_m: NumericArrayLike | None, freqs: np.ndarray
-) -> np.ndarray:
+    air_absorption_db_per_m: NumericArrayLike | None, freqs: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """:math:`C_3` of 8.4 over the 2 m path, zero without an air absorption.
 
     :class:`CalibrationConditions` has already refused an absorption that is
@@ -832,8 +939,10 @@ def _c3_correction(
 
 
 def _with_annex_b(
-    lw: np.ndarray, ks: np.ndarray, intensity_sound_power_level: NumericArrayLike | None
-) -> tuple[np.ndarray, np.ndarray, bool | None]:
+    lw: NDArray[np.float64],
+    ks: NDArray[np.int64],
+    intensity_sound_power_level: NumericArrayLike | None,
+) -> tuple[NDArray[np.float64], NDArray[np.bool_], bool | None]:
     """The levels with Annex B applied, the bands it replaced and the agreement.
 
     :return: :math:`L_W` per band, the bands taken from sound intensity, and
@@ -852,7 +961,7 @@ def _with_annex_b(
 
 def _calibration_directivity(
     precision: PrecisionSoundPowerResult, max_levels: NumericArrayLike | None
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The directivity index of each position, from the traverse maxima if given (8.3.2)."""
     if max_levels is None:
         return precision.directivity_index
@@ -866,7 +975,7 @@ def _calibration_directivity(
 
 
 def _calibration_room_qualified(
-    room_qualification: FreeFieldCheck | None, freqs: np.ndarray
+    room_qualification: FreeFieldCheck | None, freqs: NDArray[np.float64]
 ) -> bool | None:
     """Whether the room qualification covers ``freqs`` at 2 m (8.1), with a warning if not."""
     if room_qualification is None:
@@ -1051,11 +1160,11 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
         ISO 3741", which lifts 5.5.
     """
 
-    frequencies: np.ndarray
-    sound_power_level: np.ndarray
-    repeatability_db: np.ndarray | None
-    supply_variation_db: np.ndarray | None
-    directivity_index: np.ndarray | None
+    frequencies: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    repeatability_db: NDArray[np.float64] | None
+    supply_variation_db: NDArray[np.float64] | None
+    directivity_index: NDArray[np.float64] | None
     reverberation_rooms_only: bool
 
     def __post_init__(self) -> None:
@@ -1082,19 +1191,19 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
                 raise ValueError(msg)
 
     @property
-    def _band_indices(self) -> np.ndarray:
+    def _band_indices(self) -> NDArray[np.int64]:
         return np.array(
             [_band_index(float(f)) for f in np.atleast_1d(self.frequencies)],
             dtype=np.int64,
         )
 
     @property
-    def _core(self) -> np.ndarray:
+    def _core(self) -> NDArray[np.bool_]:
         ks = self._band_indices
         return (ks >= _K_100) & (ks <= _K_10000)
 
     @property
-    def repeatability_limit_db(self) -> np.ndarray:
+    def repeatability_limit_db(self) -> NDArray[np.float64]:
         r"""The Table 1 limit on :math:`\sigma_r` per band, in dB (5.2).
 
         :return: 0,8 dB up to 80 Hz, 0,4 dB up to 160 Hz, 0,2 dB above.
@@ -1110,14 +1219,14 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
         return _SUPPLY_VARIATION_DB
 
     @property
-    def adjacent_step_db(self) -> np.ndarray:
+    def adjacent_step_db(self) -> NDArray[np.float64]:
         """The largest difference from a neighbouring band, per band (5.4), in dB."""
         return _spectrum_steps(
             self._band_indices, np.asarray(self.sound_power_level, np.float64)
         )[0]
 
     @property
-    def adjacent_limit_db(self) -> np.ndarray:
+    def adjacent_limit_db(self) -> NDArray[np.float64]:
         """The step each band is held to (5.4), in dB.
 
         :return: 3 dB from 100 Hz to 10 000 Hz, 4 dB where a neighbour lies in
@@ -1268,7 +1377,9 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
         return plot_reference_sound_source(self, ax=ax, language=language, **kwargs)
 
 
-def _spectrum_steps(ks: np.ndarray, lw: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _spectrum_steps(
+    ks: NDArray[np.int64], lw: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Largest step to a neighbour and the limit it is held to, per band."""
     n = ks.size
     step = np.zeros(n)
@@ -1289,13 +1400,13 @@ def _clause5_levels(
     calibration: ReferenceSourceCalibration | NumericArrayLike,
     frequencies: NumericArrayLike | None,
     directivity_index: NumericArrayLike | None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64] | None]:
     """The bands, levels and directivity a clause 5 verdict reads.
 
     A calibration brings its bands and its directivity; plain levels need
     their bands.
     """
-    fallback: np.ndarray | None
+    fallback: NDArray[np.float64] | None
     if isinstance(calibration, ReferenceSourceCalibration):
         if frequencies is not None:
             msg = "a calibration brings its own bands; omit 'frequencies'."
@@ -1319,8 +1430,8 @@ def _clause5_levels(
 
 
 def _highest_directivity(
-    directivity: np.ndarray | None, freqs: np.ndarray
-) -> np.ndarray | None:
+    directivity: NDArray[np.float64] | None, freqs: NDArray[np.float64]
+) -> NDArray[np.float64] | None:
     """The highest directivity index per band, from one row per position or one row."""
     if directivity is None:
         return None
@@ -1334,7 +1445,7 @@ def _highest_directivity(
 
 def _repeatability_of(
     repeated_levels: NumericArrayLike | None, n_bands: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     r""":math:`\sigma_r` of Formula (1) from three or five repetitions, if given."""
     require_scalar(n_bands, "n_bands")
     if repeated_levels is None:
@@ -1352,8 +1463,8 @@ def _repeatability_of(
 
 
 def _supply_variation_of(
-    supply_variation_db: NumericArrayLike | None, freqs: np.ndarray
-) -> np.ndarray | None:
+    supply_variation_db: NumericArrayLike | None, freqs: NDArray[np.float64]
+) -> NDArray[np.float64] | None:
     """The change over the declared supply range per band (5.2), if given."""
     if supply_variation_db is None:
         return None
@@ -1438,8 +1549,8 @@ class ReferenceSourceDriftResult(OwnsArrays):
     :ivar change_db: The latest level less the reference one, per band.
     """
 
-    frequencies: np.ndarray
-    change_db: np.ndarray
+    frequencies: NDArray[np.float64]
+    change_db: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a result whose changes do not follow its bands.
@@ -1458,7 +1569,7 @@ class ReferenceSourceDriftResult(OwnsArrays):
             _repeatability_limit(_band_index(float(f)))
 
     @property
-    def limit_db(self) -> np.ndarray:
+    def limit_db(self) -> NDArray[np.float64]:
         """2,83 times the Table 1 value of each band (5.6), in dB."""
         return _DRIFT_FACTOR * np.array(
             [

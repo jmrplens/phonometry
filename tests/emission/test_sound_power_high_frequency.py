@@ -298,14 +298,14 @@ def test_annex_a_refuses_a_humidity_above_saturation() -> None:
 def test_eyring_coefficient_closes_on_e() -> None:
     # 0,16 V / (S T) = 1 when V = S and T = 0,16 s.
     alpha = emission.room_absorption_coefficient(0.16, volume=200.0, surface_area=200.0)
-    assert float(alpha[0]) == pytest.approx(1.0 - math.exp(-1.0), rel=1e-15)
+    assert alpha == pytest.approx(1.0 - math.exp(-1.0), rel=1e-15)
 
 
 def test_room_constant_from_reverberation_time_is_formula_4() -> None:
     room = emission.room_constant_from_reverberation_time(
         0.16, volume=200.0, surface_area=200.0
     )
-    assert float(room[0]) == pytest.approx(200.0 * (math.e - 1.0), rel=1e-14)
+    assert room == pytest.approx(200.0 * (math.e - 1.0), rel=1e-14)
 
 
 def test_formulae_4_and_5_keep_the_volume_and_the_surface_apart() -> None:
@@ -315,12 +315,10 @@ def test_formulae_4_and_5_keep_the_volume_and_the_surface_apart() -> None:
     room = emission.room_constant_from_reverberation_time(
         0.70, volume=200.0, surface_area=210.0
     )
-    assert float(alpha[0]) == pytest.approx(alpha_room, rel=1e-15)
-    assert float(alpha[0]) == pytest.approx(0.19562, abs=5e-6)
-    assert float(room[0]) == pytest.approx(
-        210.0 * alpha_room / (1.0 - alpha_room), rel=1e-14
-    )
-    assert float(room[0]) == pytest.approx(51.07, abs=5e-3)
+    assert alpha == pytest.approx(alpha_room, rel=1e-15)
+    assert alpha == pytest.approx(0.19562, abs=5e-6)
+    assert room == pytest.approx(210.0 * alpha_room / (1.0 - alpha_room), rel=1e-14)
+    assert room == pytest.approx(51.07, abs=5e-3)
 
 
 def test_room_constant_is_per_band() -> None:
@@ -695,7 +693,7 @@ def test_formula_2_minimum_bandwidth() -> None:
     bandwidth = emission.min_analyzer_bandwidth(
         16_000.0, microphone_speed_m_s=0.4, speed_of_sound=345.0
     )
-    assert float(bandwidth[0]) == pytest.approx(2.0 * 16_000.0 * 0.4 / 345.0)
+    assert bandwidth == pytest.approx(2.0 * 16_000.0 * 0.4 / 345.0)
 
 
 def test_formula_3_sums_equal_sidebands() -> None:

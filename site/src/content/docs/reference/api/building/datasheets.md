@@ -415,8 +415,16 @@ was.
 
 ```python
 ImpactImprovementSpectrum.values_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+ImpactImprovementSpectrum.values_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+ImpactImprovementSpectrum.values_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The row's value at each of *frequencies*, or a refusal.
@@ -442,7 +450,7 @@ and never filled from its neighbours.
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in hertz, of any shape. |
 
-**Returns:** A new array of the same shape, one value per frequency.
+**Returns:** The row's value at each frequency, with the shape of *frequencies*. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -865,8 +873,16 @@ was.
 
 ```python
 SoundReductionSpectrum.values_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+SoundReductionSpectrum.values_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+SoundReductionSpectrum.values_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The row's value at each of *frequencies*, or a refusal.
@@ -892,7 +908,7 @@ and never filled from its neighbours.
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in hertz, of any shape. |
 
-**Returns:** A new array of the same shape, one value per frequency.
+**Returns:** The row's value at each frequency, with the shape of *frequencies*. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

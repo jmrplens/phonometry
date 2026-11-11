@@ -67,8 +67,16 @@ they are three separate implementations here and share nothing.
 
 ```python
 barrier_background_correction(
-    level_difference: NumericArrayLike,
+    level_difference: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+barrier_background_correction(
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+barrier_background_correction(
+    level_difference: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The background correction of Table 3, in decibels to add.
@@ -91,7 +99,7 @@ one takes off 1. They are two tables and they stay two tables.
 | :--- | :--- |
 | `level_difference` | The difference between the level measured with the source and the level without it, in decibels. |
 
-**Returns:** The correction to add, in decibels, which is zero or negative.
+**Returns:** The correction to add, in decibels, which is zero or negative. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

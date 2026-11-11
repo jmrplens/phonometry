@@ -71,7 +71,7 @@ from ..._internal.resolve import SignalInput, resolve_fs, resolve_samples
 
 # Sex is imported to run, not only to type: typing.get_type_hints resolves the
 # sex field of MultipleShockResult in this module's namespace.
-from ..._internal.types import ReportEngine, Sex, as_float_or_array
+from ..._internal.types import ReportEngine, Sex, as_complex_or_array, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     floats_of,
@@ -173,7 +173,23 @@ def _mz_for_sex(sex: str) -> float:
 # ---------------------------------------------------------------------------
 
 
-def seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray:
+@overload
+def seat_to_spine_transfer[S: RealScalar](frequencies: S) -> complex: ...
+
+
+@overload
+def seat_to_spine_transfer[V: RealValues](frequencies: V) -> NDArray[np.complex128]: ...
+
+
+@overload
+def seat_to_spine_transfer[A: NumericArrayLike](
+    frequencies: A,
+) -> complex | NDArray[np.complex128]: ...
+
+
+def seat_to_spine_transfer(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]:
     r"""Seat-to-spine transfer function :math:`H(\omega)` (clause 5.2,
     Formula 1).
 
@@ -181,7 +197,9 @@ def seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray:
     the vertical spinal response; the transmissibility is unity at 0 Hz.
 
     :param frequencies: Frequencies at which to evaluate ``H``, in hertz.
-    :return: The complex frequency response, aligned with ``frequencies``.
+    :return: The complex frequency response, aligned with ``frequencies``. A ``complex``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
@@ -192,12 +210,12 @@ def seat_to_spine_transfer(frequencies: NumericArrayLike) -> np.ndarray:
     response = 1.0 + 2.0 * z0 * (jw / w0) + (jw / w0) ** 2
     for wk, zk in _TRANSFER_POLES:
         response = response / (1.0 + 2.0 * zk * (jw / wk) + (jw / wk) ** 2)
-    return np.asarray(response, dtype=np.complex128)
+    return as_complex_or_array(response, like=(frequencies,))
 
 
 def spinal_response(
     acceleration_m_s2: SignalInput, fs: float | None = None
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Vertical spinal response :math:`A_\mathrm{z}(t)` (clause 5.2, Formula 2).
 
     Applies the seat-to-spine transfer function to the measured conditioned
@@ -246,7 +264,7 @@ def spinal_response(
     return np.asarray(response, dtype=np.float64)
 
 
-def response_peaks(response: NumericArrayLike) -> np.ndarray:
+def response_peaks(response: NumericArrayLike) -> NDArray[np.float64]:
     r"""Positive response peaks :math:`A_{\mathrm{z},i}` (clause 5.3).
 
     A peak is the maximum value of the response between two consecutive zero
@@ -399,7 +417,25 @@ def static_stress(mz: float = _MZ_MALE) -> float:
     return mz * _GRAVITY
 
 
-def ultimate_strength(age: NumericArrayLike, *, sex: Sex = "male") -> np.ndarray:
+@overload
+def ultimate_strength[S: RealScalar](age: S, *, sex: Sex = "male") -> float: ...
+
+
+@overload
+def ultimate_strength[V: RealValues](
+    age: V, *, sex: Sex = "male"
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def ultimate_strength[A: NumericArrayLike](
+    age: A, *, sex: Sex = "male"
+) -> float | NDArray[np.float64]: ...
+
+
+def ultimate_strength(
+    age: NumericArrayLike, *, sex: Sex = "male"
+) -> float | NDArray[np.float64]:
     r"""Ultimate lumbar strength :math:`S_\mathrm{u}` at an age (Annex C,
     Formula C.4).
 
@@ -407,14 +443,15 @@ def ultimate_strength(age: NumericArrayLike, *, sex: Sex = "male") -> np.ndarray
     :param sex: ``"male"`` or ``"female"`` (sets the age slope
         :math:`S_\text{age}`).
     :return: The ultimate strength
-        :math:`S_\mathrm{u} = 6.75 - S_\text{age} (b+i)`, MPa.
+        :math:`S_\mathrm{u} = 6.75 - S_\text{age} (b+i)`, MPa; a ``float`` for a
+        number; an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``sex`` is not a text, or ``age`` holds a text or a value that
         is not a real number.
     """
     require_choice(sex, "sex", _SEXES)
     slope = _STRENGTH_AGE_SLOPE_MALE if sex == "male" else _STRENGTH_AGE_SLOPE_FEMALE
     years = real_array(age, "age")
-    return _ULTIMATE_STRENGTH_INTERCEPT - slope * years
+    return as_float_or_array(_ULTIMATE_STRENGTH_INTERCEPT - slope * years, like=(age,))
 
 
 def injury_risk(

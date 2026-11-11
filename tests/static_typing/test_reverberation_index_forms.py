@@ -18,6 +18,7 @@ from typing import Final, assert_type
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 from phonometry import building
 
@@ -29,11 +30,11 @@ _ROOM: Final = "furnished"
 
 def test_a_literal_form_gives_the_narrow_type() -> None:
     bands = building.estimate_reverberation_index(_VOLUME_M3, _ROOM)
-    assert_type(bands, np.ndarray)
+    assert_type(bands, NDArray[np.float64])
     bands_named = building.estimate_reverberation_index(
         _VOLUME_M3, _ROOM, weighted=False
     )
-    assert_type(bands_named, np.ndarray)
+    assert_type(bands_named, NDArray[np.float64])
     single = building.estimate_reverberation_index(_VOLUME_M3, _ROOM, weighted=True)
     assert_type(single, float)
     assert bands.shape == (5,)
@@ -44,7 +45,7 @@ def test_a_literal_form_gives_the_narrow_type() -> None:
 @pytest.mark.parametrize("weighted", [False, True])
 def test_a_bool_variable_is_accepted_and_gives_either_form(*, weighted: bool) -> None:
     index = building.estimate_reverberation_index(_VOLUME_M3, _ROOM, weighted=weighted)
-    assert_type(index, np.ndarray | float)
+    assert_type(index, NDArray[np.float64] | float)
     if weighted:
         single = building.estimate_reverberation_index(_VOLUME_M3, _ROOM, weighted=True)
         assert isinstance(index, float)

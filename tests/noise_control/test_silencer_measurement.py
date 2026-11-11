@@ -36,7 +36,7 @@ class TestSubstitutionInsertionLoss:
 
     def test_a_single_band_may_be_given_as_a_scalar(self) -> None:
         found = sm.substitution_insertion_loss(90.0, 65.0)
-        assert found == pytest.approx([25.0])
+        assert found == pytest.approx(25.0)
 
     def test_the_two_printed_subscript_conventions_agree(self) -> None:
         # ISO 7235 Equation (1) writes D_i = L_WII - L_WI with II the
@@ -61,7 +61,7 @@ class TestSubstitutionInsertionLoss:
         corrected = sm.substitution_insertion_loss(
             90.0, 65.0, reverberation_times=(1.0, 2.0)
         )
-        assert corrected - plain == pytest.approx([10.0 * math.log10(2.0)])
+        assert corrected - plain == pytest.approx(10.0 * math.log10(2.0))
 
     def test_an_unchanged_room_leaves_the_difference_alone(self) -> None:
         # 6.3 allows T_2 = T_1 when the test object is outside the room.

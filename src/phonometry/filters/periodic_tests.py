@@ -119,6 +119,7 @@ if TYPE_CHECKING:
     from typing import TypedDict, Unpack
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -253,7 +254,7 @@ _CLAUSE_TITLES: dict[str, str] = {
 }
 
 
-def periodic_test_frequencies(fraction: float) -> np.ndarray:
+def periodic_test_frequencies(fraction: float) -> NDArray[np.float64]:
     r"""The 15 normalized test frequencies of IEC 61260-3:2016 Clause 13.
 
     :math:`\Omega_k` for ``k = -7, -6, ..., 7``, by Formula (1) for

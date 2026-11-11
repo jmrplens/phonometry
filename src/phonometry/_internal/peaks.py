@@ -13,8 +13,13 @@ is the single home of that machinery.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 from scipy import signal
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 # Above this many samples per channel the oversampled waveform is scanned in
 # bounded chunks instead of being materialized whole (an hour of stereo audio
@@ -27,7 +32,7 @@ _CHUNK_SAMPLES = 1 << 20
 _CHUNK_MARGIN = 64
 
 
-def _chunked_peak(x: np.ndarray, factor: int) -> np.ndarray:
+def _chunked_peak(x: NDArray[np.float64], factor: int) -> NDArray[np.float64]:
     """Peak of the oversampled signal, scanned in bounded chunks."""
     n = x.shape[-1]
     peak = np.zeros(x.shape[:-1], dtype=np.float64)
@@ -44,7 +49,7 @@ def _chunked_peak(x: np.ndarray, factor: int) -> np.ndarray:
     return np.asarray(peak)
 
 
-def inter_sample_peak(x: np.ndarray, factor: int) -> np.ndarray:
+def inter_sample_peak(x: NDArray[np.float64], factor: int) -> NDArray[np.float64]:
     """Absolute peak along the last axis after ``factor``-times oversampling.
 
     Zero-stuffs and low-pass interpolates via

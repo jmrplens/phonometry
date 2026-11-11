@@ -73,7 +73,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 
@@ -81,6 +81,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     require_count,
@@ -99,7 +100,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Quantity = Literal["transmission", "insertion"]
 
@@ -379,9 +380,25 @@ def installation_case(number: int | np.integer[Any]) -> InstallationCase:
     return case
 
 
+@overload
+def silencer_background_correction[S: RealScalar](level_difference: S) -> float: ...
+
+
+@overload
+def silencer_background_correction[V: RealValues](
+    level_difference: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def silencer_background_correction[A: NumericArrayLike](
+    level_difference: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def silencer_background_correction(
     level_difference: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The background correction of Table 1, in decibels to subtract.
 
     The table is printed stepped and integer-indexed, and it is **not** the
@@ -401,7 +418,8 @@ def silencer_background_correction(
 
     :param level_difference: The difference between the level measured with
         the source running and the background level alone, in decibels.
-    :return: The correction to subtract, in decibels.
+    :return: The correction to subtract, in decibels. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a margin under
         :data:`ISO11820_MIN_BACKGROUND_MARGIN_DB`, which Table 1 calls invalid.
     :raises TypeError: if ``level_difference`` holds a text or a value that is not a
@@ -422,14 +440,14 @@ def silencer_background_correction(
     # prints 0,5 dB against a margin of 10 dB and nothing above it, so a margin
     # of 10,5 dB is one the standard corrects by nothing, not a 10 dB row.
     rows = np.floor(margin).astype(int)
-    return np.asarray(
+    return as_float_or_array(
         [
             0.0
             if value > ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB
             else ISO11820_BACKGROUND_CORRECTIONS[row]
             for value, row in zip(margin.tolist(), rows.tolist(), strict=True)
         ],
-        dtype=np.float64,
+        like=(level_difference,),
     )
 
 
@@ -583,9 +601,37 @@ def extraneous_corrected_mean_level(
     return result
 
 
+@overload
+def transmission_level_difference[S1: RealScalar, S2: RealScalar](
+    source_levels: S1,
+    receiver_levels: S2,
+) -> float: ...
+
+
+@overload
+def transmission_level_difference[V: RealValues, A2: NumericArrayLike](
+    source_levels: V,
+    receiver_levels: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def transmission_level_difference[S1: RealScalar, V: RealValues](
+    source_levels: S1,
+    receiver_levels: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def transmission_level_difference[A1: NumericArrayLike, A2: NumericArrayLike](
+    source_levels: A1,
+    receiver_levels: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def transmission_level_difference(
     source_levels: NumericArrayLike, receiver_levels: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The level difference across the silencer, Equation (1).
 
     :math:`D_{\mathrm{t}p\mathrm{s}} = \overline{L_{p2}} - \overline{L_{p1}}`, the mean level on
@@ -599,7 +645,9 @@ def transmission_level_difference(
 
     :param source_levels: :math:`\overline{L_{p2}}` per band, in decibels.
     :param receiver_levels: :math:`\overline{L_{p1}}` per band, in decibels.
-    :return: :math:`D_{\mathrm{t}p\mathrm{s}}` per band, in decibels.
+    :return: :math:`D_{\mathrm{t}p\mathrm{s}}` per band, in decibels. A ``float`` when
+        ``source_levels`` and ``receiver_levels`` are both numbers, an array when either
+        is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For spectra that do not match band for band.
     :raises TypeError: if ``receiver_levels`` or ``source_levels`` holds a text or a
         value that is not a real number.
@@ -609,12 +657,40 @@ def transmission_level_difference(
     if source.shape != receiver.shape:
         msg = "'source_levels' and 'receiver_levels' must match band for band."
         raise ValueError(msg)
-    return np.asarray(source - receiver, dtype=np.float64)
+    return as_float_or_array(source - receiver, like=(source_levels, receiver_levels))
+
+
+@overload
+def insertion_level_difference[S1: RealScalar, S2: RealScalar](
+    levels_without: S1,
+    levels_with: S2,
+) -> float: ...
+
+
+@overload
+def insertion_level_difference[V: RealValues, A2: NumericArrayLike](
+    levels_without: V,
+    levels_with: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def insertion_level_difference[S1: RealScalar, V: RealValues](
+    levels_without: S1,
+    levels_with: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def insertion_level_difference[A1: NumericArrayLike, A2: NumericArrayLike](
+    levels_without: A1,
+    levels_with: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def insertion_level_difference(
     levels_without: NumericArrayLike, levels_with: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The level difference the silencer made, Equation (3).
 
     :math:`D_{\mathrm{i}p\mathrm{s}} = L_{p\mathrm{II}} - L_{p\mathrm{I}}`, the level before the silencer was
@@ -624,7 +700,9 @@ def insertion_level_difference(
 
     :param levels_without: :math:`L_{p\mathrm{II}}` per band, in decibels.
     :param levels_with: :math:`L_{p\mathrm{I}}` per band, in decibels.
-    :return: :math:`D_{\mathrm{i}p\mathrm{s}}` per band, in decibels.
+    :return: :math:`D_{\mathrm{i}p\mathrm{s}}` per band, in decibels. A ``float`` when
+        ``levels_without`` and ``levels_with`` are both numbers, an array when either is
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For spectra that do not match band for band.
     :raises TypeError: if ``levels_with`` or ``levels_without`` holds a text or a value
         that is not a real number.
@@ -634,7 +712,34 @@ def insertion_level_difference(
     if without.shape != with_.shape:
         msg = "'levels_without' and 'levels_with' must match band for band."
         raise ValueError(msg)
-    return np.asarray(without - with_, dtype=np.float64)
+    return as_float_or_array(without - with_, like=(levels_without, levels_with))
+
+
+@overload
+def reverberant_surface_area_m2[S: RealScalar](
+    volume_m3: float,
+    reverberation_time_s: S,
+    *,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def reverberant_surface_area_m2[V: RealValues](
+    volume_m3: float,
+    reverberation_time_s: V,
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberant_surface_area_m2[A: NumericArrayLike](
+    volume_m3: float,
+    reverberation_time_s: A,
+    *,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def reverberant_surface_area_m2(
@@ -642,7 +747,7 @@ def reverberant_surface_area_m2(
     reverberation_time_s: NumericArrayLike,
     *,
     speed_of_sound: float = ISO11820_SPEED_OF_SOUND_M_S,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""A quarter of the room absorption, as an area, Equations (6), (10) and (12).
 
     .. math::
@@ -662,7 +767,8 @@ def reverberant_surface_area_m2(
     :param volume_m3: The room volume, in cubic metres.
     :param reverberation_time_s: The reverberation time per band, in seconds.
     :param speed_of_sound: The speed of sound, in metres per second.
-    :return: The area, in square metres.
+    :return: The area, in square metres. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive volume, time or speed.
     :raises TypeError: if ``speed_of_sound`` or ``volume_m3`` is not a single number, or
         ``reverberation_time_s`` holds a text or a value that is not a real number.
@@ -673,7 +779,63 @@ def reverberant_surface_area_m2(
     if np.any(times <= 0.0):
         msg = "'reverberation_time_s' must be strictly positive."
         raise ValueError(msg)
-    return np.asarray(SABINE_AREA_COEFFICIENT * volume / (celerity * times))
+    return as_float_or_array(
+        np.asarray(SABINE_AREA_COEFFICIENT * volume / (celerity * times)),
+        like=(reverberation_time_s,),
+    )
+
+
+@overload
+def silencer_sound_power_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    mean_level: S1,
+    *,
+    area: S2,
+    field_correction: S3 = ...,
+) -> float: ...
+
+
+@overload
+def silencer_sound_power_level[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    mean_level: V,
+    *,
+    area: A2,
+    field_correction: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def silencer_sound_power_level[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    mean_level: S1,
+    *,
+    area: V,
+    field_correction: A3 = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def silencer_sound_power_level[S1: RealScalar, S2: RealScalar, V: RealValues](
+    mean_level: S1,
+    *,
+    area: S2,
+    field_correction: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def silencer_sound_power_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    mean_level: A1,
+    *,
+    area: A2,
+    field_correction: A3 = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def silencer_sound_power_level(
@@ -681,7 +843,7 @@ def silencer_sound_power_level(
     *,
     area: NumericArrayLike,
     field_correction: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""A mean level read as a sound power, Equations (5), (7), (9) and (11).
 
     .. math::
@@ -698,15 +860,17 @@ def silencer_sound_power_level(
     :param mean_level: :math:`\overline{L_p}` per band, in decibels.
     :param area: :math:`S`, in square metres.
     :param field_correction: :math:`K`, in decibels.
-    :return: :math:`L_W` per band, in decibels.
+    :return: :math:`L_W` per band, in decibels. A ``float`` when ``mean_level``,
+        ``area`` and ``field_correction`` are all numbers, an array when one of them is
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive area or mismatched shapes.
     :raises TypeError: if ``area``, ``field_correction`` or ``mean_level`` holds a text
         or a value that is not a real number.
     """
     levels = require_finite_array(mean_level, "mean_level")
-    area = require_finite_array(area, "area")
+    surface = require_finite_array(area, "area")
     correction = require_finite_array(field_correction, "field_correction")
-    if np.any(area <= 0.0):
+    if np.any(surface <= 0.0):
         msg = "'area' must be strictly positive."
         raise ValueError(msg)
     if np.max(np.abs(correction)) > TYPICAL_FIELD_CORRECTION_LIMIT_DB:
@@ -717,7 +881,10 @@ def silencer_sound_power_level(
             f"{float(np.max(np.abs(correction))):.1f} dB."
         )
         warn_caller(msg, SilencerInSituWarning)
-    return np.asarray(levels + 10.0 * np.log10(area) + correction, dtype=np.float64)
+    return as_float_or_array(
+        levels + 10.0 * np.log10(surface) + correction,
+        like=(mean_level, area, field_correction),
+    )
 
 
 def temperature_field_correction(
@@ -934,7 +1101,9 @@ def in_situ_transmission_loss(
         or ``field_correction_difference``, ``frequencies``, ``receiver_area_m2`` or
         ``source_area_m2`` holds a text or a value that is not a real number.
     """
-    difference = transmission_level_difference(source_levels, receiver_levels)
+    difference = np.atleast_1d(
+        transmission_level_difference(source_levels, receiver_levels)
+    )
     entry = None
     if case is not None:
         # Read by this function's name for it, which installation_case calls
@@ -1014,7 +1183,7 @@ def in_situ_insertion_loss(
         or ``area_with_m2``, ``area_without_m2``, ``field_correction_difference`` or
         ``frequencies`` holds a text or a value that is not a real number.
     """
-    difference = insertion_level_difference(levels_without, levels_with)
+    difference = np.atleast_1d(insertion_level_difference(levels_without, levels_with))
     entry = None
     if case is not None:
         # Read by this function's name for it, which installation_case calls
@@ -1189,9 +1358,37 @@ def measurement_distance_downstream_m(
     return distance
 
 
+@overload
+def velocity_pressure_pa[S1: RealScalar, S2: RealScalar](
+    total_pressure_pa: S1,
+    static_pressure_pa: S2,
+) -> float: ...
+
+
+@overload
+def velocity_pressure_pa[V: RealValues, A2: NumericArrayLike](
+    total_pressure_pa: V,
+    static_pressure_pa: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_pressure_pa[S1: RealScalar, V: RealValues](
+    total_pressure_pa: S1,
+    static_pressure_pa: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_pressure_pa[A1: NumericArrayLike, A2: NumericArrayLike](
+    total_pressure_pa: A1,
+    static_pressure_pa: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def velocity_pressure_pa(
     total_pressure_pa: NumericArrayLike, static_pressure_pa: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The velocity pressure, Equation (27).
 
     :math:`p_\mathrm{v} = p_\mathrm{T} - p_\mathrm{S}`, the total pressure less the static pressure, both
@@ -1200,7 +1397,9 @@ def velocity_pressure_pa(
 
     :param total_pressure_pa: :math:`p_\mathrm{T}`, in pascals.
     :param static_pressure_pa: :math:`p_\mathrm{S}`, in pascals.
-    :return: :math:`p_\mathrm{v}`, in pascals.
+    :return: :math:`p_\mathrm{v}`, in pascals. A ``float`` when ``total_pressure_pa``
+        and ``static_pressure_pa`` are both numbers, an array when either is a sequence
+        or an array, a zero-dimensional one included.
     :raises ValueError: For inputs that do not match.
     :raises TypeError: if ``static_pressure_pa`` or ``total_pressure_pa`` holds a text
         or a value that is not a real number.
@@ -1210,19 +1409,43 @@ def velocity_pressure_pa(
     if total.shape != static.shape:
         msg = "'total_pressure_pa' and 'static_pressure_pa' must match."
         raise ValueError(msg)
-    return np.asarray(total - static, dtype=np.float64)
+    return as_float_or_array(
+        total - static, like=(total_pressure_pa, static_pressure_pa)
+    )
+
+
+@overload
+def flow_velocity_m_s[S: RealScalar](
+    velocity_pressure_pa: S,
+    density: float,
+) -> float: ...
+
+
+@overload
+def flow_velocity_m_s[V: RealValues](
+    velocity_pressure_pa: V,
+    density: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def flow_velocity_m_s[A: NumericArrayLike](
+    velocity_pressure_pa: A,
+    density: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def flow_velocity_m_s(
     velocity_pressure_pa: NumericArrayLike, density: float
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The flow velocity a velocity pressure stands for, Equation (28).
 
     :math:`w = \sqrt{2 p_\mathrm{v} / \rho}`.
 
     :param velocity_pressure_pa: :math:`p_\mathrm{v}`, in pascals.
     :param density: :math:`\rho`, in kilograms per cubic metre.
-    :return: :math:`w`, in metres per second.
+    :return: :math:`w`, in metres per second. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive density or a negative velocity
         pressure.
     :raises TypeError: if ``density`` is not a single number, or
@@ -1233,7 +1456,9 @@ def flow_velocity_m_s(
     if np.any(pressure < 0.0):
         msg = "'velocity_pressure_pa' must not be negative; the root has no real value."
         raise ValueError(msg)
-    return np.asarray(np.sqrt(2.0 * pressure / density), dtype=np.float64)
+    return as_float_or_array(
+        np.sqrt(2.0 * pressure / density), like=(velocity_pressure_pa,)
+    )
 
 
 def gas_density_kg_m3(

@@ -21,15 +21,16 @@ measured one frequency at a time; see
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 import numpy as np
 from numpy.typing import NDArray
 
+from ..._internal.types import as_complex_or_array, as_float_or_array
 from ..._internal.validation import real_array
 
 if TYPE_CHECKING:
-    from ..._internal.types import NumericArrayLike, Real
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Complex = NDArray[np.complex128]
 
@@ -42,7 +43,25 @@ __all__ = [
 ]
 
 
-def standing_wave_ratio_from_level(level_difference: NumericArrayLike) -> Real:
+@overload
+def standing_wave_ratio_from_level[S: RealScalar](level_difference: S) -> float: ...
+
+
+@overload
+def standing_wave_ratio_from_level[V: RealValues](
+    level_difference: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def standing_wave_ratio_from_level[A: NumericArrayLike](
+    level_difference: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def standing_wave_ratio_from_level(
+    level_difference: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Standing-wave ratio from a level difference (ISO 10534-1, Eq. (15)).
 
     :math:`s = 10^{\Delta L / 20}` with
@@ -50,7 +69,8 @@ def standing_wave_ratio_from_level(level_difference: NumericArrayLike) -> Real:
 
     :param level_difference: Level difference
         :math:`\Delta L = L_{\max} - L_{\min}`, in dB.
-    :return: Standing-wave ratio ``s`` (>= 1).
+    :return: Standing-wave ratio ``s`` (>= 1). A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``level_difference`` holds a text or a value that is not a
         real number.
     """
@@ -58,7 +78,7 @@ def standing_wave_ratio_from_level(level_difference: NumericArrayLike) -> Real:
     if np.any(dl < 0.0):
         msg = "'level_difference' must be non-negative."
         raise ValueError(msg)
-    return np.asarray(10.0 ** (dl / 20.0), dtype=np.float64)
+    return as_float_or_array(10.0 ** (dl / 20.0), like=(level_difference,))
 
 
 def _check_swr(swr: NDArray[np.float64]) -> None:
@@ -67,21 +87,54 @@ def _check_swr(swr: NDArray[np.float64]) -> None:
         raise ValueError(msg)
 
 
-def standing_wave_reflection_magnitude(swr: NumericArrayLike) -> Real:
+@overload
+def standing_wave_reflection_magnitude[S: RealScalar](swr: S) -> float: ...
+
+
+@overload
+def standing_wave_reflection_magnitude[V: RealValues](
+    swr: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def standing_wave_reflection_magnitude[A: NumericArrayLike](
+    swr: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def standing_wave_reflection_magnitude(
+    swr: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Reflection magnitude from the standing-wave ratio (ISO 10534-1, Eq. (14)).
 
     :math:`|r| = (s - 1) / (s + 1)`.
 
     :param swr: Standing-wave ratio ``s`` (>= 1).
-    :return: Reflection magnitude ``|r|`` in ``[0, 1]``.
+    :return: Reflection magnitude ``|r|`` in ``[0, 1]``. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``swr`` holds a text or a value that is not a real number.
     """
     s = real_array(swr, "swr")
     _check_swr(s)
-    return np.asarray((s - 1.0) / (s + 1.0), dtype=np.float64)
+    return as_float_or_array((s - 1.0) / (s + 1.0), like=(swr,))
 
 
-def standing_wave_absorption(swr: NumericArrayLike) -> Real:
+@overload
+def standing_wave_absorption[S: RealScalar](swr: S) -> float: ...
+
+
+@overload
+def standing_wave_absorption[V: RealValues](swr: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def standing_wave_absorption[A: NumericArrayLike](
+    swr: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def standing_wave_absorption(swr: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""Absorption coefficient from the standing-wave ratio (ISO 10534-1).
 
     Combining :math:`\alpha = 1 - |r|^2` (Eq. (9)) with
@@ -89,12 +142,13 @@ def standing_wave_absorption(swr: NumericArrayLike) -> Real:
     :math:`\alpha = 4s/(s + 1)^2`.
 
     :param swr: Standing-wave ratio ``s`` (>= 1).
-    :return: Absorption coefficient ``alpha`` in ``[0, 1]``.
+    :return: Absorption coefficient ``alpha`` in ``[0, 1]``. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``swr`` holds a text or a value that is not a real number.
     """
     s = real_array(swr, "swr")
     _check_swr(s)
-    return np.asarray(4.0 * s / (s + 1.0) ** 2, dtype=np.float64)
+    return as_float_or_array(4.0 * s / (s + 1.0) ** 2, like=(swr,))
 
 
 def _standing_wave_phase(
@@ -112,12 +166,61 @@ def _standing_wave_phase(
     )
 
 
+@overload
+def standing_wave_reflection[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    swr: S1,
+    first_min_distance: S2,
+    *,
+    wavelength: S3,
+) -> complex: ...
+
+
+@overload
+def standing_wave_reflection[V: RealValues, A2: NumericArrayLike, A3: NumericArrayLike](
+    swr: V,
+    first_min_distance: A2,
+    *,
+    wavelength: A3,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def standing_wave_reflection[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    swr: S1,
+    first_min_distance: V,
+    *,
+    wavelength: A3,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def standing_wave_reflection[S1: RealScalar, S2: RealScalar, V: RealValues](
+    swr: S1,
+    first_min_distance: S2,
+    *,
+    wavelength: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def standing_wave_reflection[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    swr: A1,
+    first_min_distance: A2,
+    *,
+    wavelength: A3,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def standing_wave_reflection(
     swr: NumericArrayLike,
     first_min_distance: NumericArrayLike,
     *,
     wavelength: NumericArrayLike,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Complex reflection factor from the standing wave (ISO 10534-1, Eqs. (17)-(23)).
 
     :math:`r = |r| \mathrm{e}^{j\phi}` with :math:`|r| = (s - 1)/(s + 1)` (Eq. (14))
@@ -128,7 +231,9 @@ def standing_wave_reflection(
     :param first_min_distance: Distance ``x_min1`` from the reference plane to
         the first pressure minimum (toward the source), in metres.
     :param wavelength: Wavelength ``lambda0``, in metres (Eq. (27)).
-    :return: Complex reflection factor ``r``.
+    :return: Complex reflection factor ``r``. A ``complex`` when ``swr``,
+        ``first_min_distance`` and ``wavelength`` are all numbers, an array when one of
+        them is a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``first_min_distance`` or ``wavelength`` holds a text or a
         value that is not a real number.
     """
@@ -137,7 +242,66 @@ def standing_wave_reflection(
         real_array(first_min_distance, "first_min_distance"),
         real_array(wavelength, "wavelength"),
     )
-    return np.asarray(magnitude * np.exp(1j * phase), dtype=np.complex128)
+    return as_complex_or_array(
+        magnitude * np.exp(1j * phase), like=(swr, first_min_distance, wavelength)
+    )
+
+
+@overload
+def standing_wave_normalized_impedance[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    swr: S1,
+    first_min_distance: S2,
+    *,
+    wavelength: S3,
+) -> complex: ...
+
+
+@overload
+def standing_wave_normalized_impedance[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    swr: V,
+    first_min_distance: A2,
+    *,
+    wavelength: A3,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def standing_wave_normalized_impedance[
+    S1: RealScalar,
+    V: RealValues,
+    A3: NumericArrayLike,
+](
+    swr: S1,
+    first_min_distance: V,
+    *,
+    wavelength: A3,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def standing_wave_normalized_impedance[S1: RealScalar, S2: RealScalar, V: RealValues](
+    swr: S1,
+    first_min_distance: S2,
+    *,
+    wavelength: V,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def standing_wave_normalized_impedance[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    swr: A1,
+    first_min_distance: A2,
+    *,
+    wavelength: A3,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def standing_wave_normalized_impedance(
@@ -145,7 +309,7 @@ def standing_wave_normalized_impedance(
     first_min_distance: NumericArrayLike,
     *,
     wavelength: NumericArrayLike,
-) -> Complex:
+) -> complex | NDArray[np.complex128]:
     r"""Normalised impedance from the standing wave (ISO 10534-1, Eqs. (24)-(26)).
 
     :math:`z = Z/Z_0 = (1 + r)/(1 - r)`; the real/imaginary split is
@@ -154,7 +318,11 @@ def standing_wave_normalized_impedance(
     :param swr: Standing-wave ratio ``s`` (>= 1).
     :param first_min_distance: Distance ``x_min1`` to the first minimum, in metres.
     :param wavelength: Wavelength ``lambda0``, in metres.
-    :return: Normalised surface impedance ``z`` (complex).
+    :return: Normalised surface impedance ``z`` (complex). A ``complex`` when ``swr``,
+        ``first_min_distance`` and ``wavelength`` are all numbers, an array when one of
+        them is a sequence or an array, a zero-dimensional one included.
     """
     r = standing_wave_reflection(swr, first_min_distance, wavelength=wavelength)
-    return np.asarray((1.0 + r) / (1.0 - r), dtype=np.complex128)
+    return as_complex_or_array(
+        (1.0 + r) / (1.0 - r), like=(swr, first_min_distance, wavelength)
+    )

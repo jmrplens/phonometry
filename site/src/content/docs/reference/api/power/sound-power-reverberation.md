@@ -132,7 +132,10 @@ octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
 ## OctaveBandLevels
 
 ```python
-OctaveBandLevels(frequencies: np.ndarray, levels: np.ndarray)
+OctaveBandLevels(
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
+)
 ```
 
 Octave-band levels summed from one-third-octave bands (ISO 3741 Annex F).
@@ -177,11 +180,39 @@ A level array of several spectra draws one curve per spectrum.
 
 ```python
 reverberation_background_correction(
-    levels: NumericArrayLike,
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+reverberation_background_correction(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     background_levels: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+reverberation_background_correction(
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    frequencies: NumericArrayLike,
+) -> NDArray[np.float64]
+
+reverberation_background_correction(
+    levels: float | np.floating[Any] | np.integer[Any],
+    background_levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+reverberation_background_correction(
+    levels: NumericArrayLike,
+    background_levels: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Background-noise correction $K_1$, ISO 3741:2010 Equation (14).
@@ -206,7 +237,7 @@ this.
 | `background_levels` | Background levels in the same bands, in decibels. |
 | `frequencies` | Nominal band centre frequencies, in hertz. |
 
-**Returns:** $K_1$ per band, in decibels, to be subtracted from `levels`.
+**Returns:** $K_1$ per band, in decibels, to be subtracted from `levels`. A `float` when `levels`, `background_levels` and `frequencies` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -219,12 +250,12 @@ this.
 
 ```python
 ReverberationSoundEnergyResult(
-    frequencies: np.ndarray | None,
-    sound_energy_level: np.ndarray,
-    mean_event_level: np.ndarray,
-    absorption_area: np.ndarray,
-    waterhouse_correction: np.ndarray,
-    background_correction: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    sound_energy_level: NDArray[np.float64],
+    mean_event_level: NDArray[np.float64],
+    absorption_area: NDArray[np.float64],
+    waterhouse_correction: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
     c1: float,
     c2: float,
     speed_of_sound: float,
@@ -288,12 +319,12 @@ Requires matplotlib (the `[plot]` extra); returns the
 
 ```python
 ReverberationSoundPowerResult(
-    frequencies: np.ndarray | None,
-    sound_power_level: np.ndarray,
-    mean_pressure_level: np.ndarray,
-    absorption_area: np.ndarray,
-    waterhouse_correction: np.ndarray,
-    background_correction: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    sound_power_level: NDArray[np.float64],
+    mean_pressure_level: NDArray[np.float64],
+    absorption_area: NDArray[np.float64],
+    waterhouse_correction: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
     c1: float,
     c2: float,
     speed_of_sound: float,

@@ -37,8 +37,8 @@ def test_normal_incidence_matches_impedance_formula() -> None:
     z2 = 1900.0 * 1650.0
     r_expected = (z2 - z1) / (z2 + z1)  # 0.35275
     r = reflection_coefficient(90.0, **_WATER, **_SAND)
-    assert float(np.real(r[0])) == pytest.approx(r_expected, abs=1e-6)
-    assert float(np.abs(r[0])) == pytest.approx(0.35275, abs=1e-4)
+    assert float(np.real(r)) == pytest.approx(r_expected, abs=1e-6)
+    assert float(np.abs(r)) == pytest.approx(0.35275, abs=1e-4)
 
 
 def test_normal_incidence_bottom_loss() -> None:

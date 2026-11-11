@@ -319,14 +319,14 @@ then follow as in K.4.2.
 
 ```python
 RainfallReferenceCorrection(
-    frequencies: np.ndarray,
-    l_i_reference: np.ndarray,
-    structural_reverberation_time: np.ndarray,
-    loss_factor: np.ndarray,
-    reference_loss_factor: np.ndarray,
-    l_i_m_reference: np.ndarray,
-    l_ic_reference: np.ndarray,
-    correction: np.ndarray,
+    frequencies: NDArray[np.float64],
+    l_i_reference: NDArray[np.float64],
+    structural_reverberation_time: NDArray[np.float64],
+    loss_factor: NDArray[np.float64],
+    reference_loss_factor: NDArray[np.float64],
+    l_i_m_reference: NDArray[np.float64],
+    l_ic_reference: NDArray[np.float64],
+    correction: NDArray[np.float64],
 )
 ```
 
@@ -373,12 +373,12 @@ the laboratory is normalized by. Requires matplotlib
 
 ```python
 RainfallSoundResult(
-    frequencies: np.ndarray,
-    l_i: np.ndarray,
+    frequencies: NDArray[np.float64],
+    l_i: NDArray[np.float64],
     l_ia: float | None,
     method: Literal['pressure', 'intensity'],
-    correction: np.ndarray | None = None,
-    l_i_norm: np.ndarray | None = None,
+    correction: NDArray[np.float64] | None = None,
+    l_i_norm: NDArray[np.float64] | None = None,
     l_ia_norm: float | None = None,
 )
 ```
@@ -450,7 +450,7 @@ Requires matplotlib (the `[plot]` extra); returns the
 ```python
 RainfallSoundResult.sound_power_levels(
     specimen_area_m2: float,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Sound power level radiated by the whole specimen, per band.
@@ -503,8 +503,8 @@ table prints the three lighter classes as "up to" a rate and cloudburst as
 RainGeneratorVerification(
     rain_type: Literal['intense', 'heavy'],
     rainfall_rate_mm_h: float,
-    drop_diameters_mm: np.ndarray | None,
-    fall_velocities_m_s: np.ndarray | None,
+    drop_diameters_mm: NDArray[np.float64] | None,
+    fall_velocities_m_s: NDArray[np.float64] | None,
 )
 ```
 

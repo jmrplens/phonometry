@@ -63,12 +63,13 @@ of meshed Schroeder-type diffusers against the library's Fraunhofer model
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 import numpy as np
 from scipy.special import hankel2
 
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_complex_or_array
 from .._internal.validation import (
     complex_array,
     real_array,
@@ -83,7 +84,7 @@ from ..fluids import Fluid
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "SIMULATION_AIR",
@@ -278,6 +279,39 @@ SIMULATION_AIR = Fluid(
 )
 
 
+@overload
+def far_field_from_contour[S: RealScalar](
+    contour: ContourPhasors,
+    angles_deg: S,
+    *,
+    distance: float | None = ...,
+    origin: tuple[float, float] = ...,
+    fluid: Fluid = ...,
+) -> complex: ...
+
+
+@overload
+def far_field_from_contour[V: RealValues](
+    contour: ContourPhasors,
+    angles_deg: V,
+    *,
+    distance: float | None = ...,
+    origin: tuple[float, float] = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def far_field_from_contour[A: NumericArrayLike](
+    contour: ContourPhasors,
+    angles_deg: A,
+    *,
+    distance: float | None = ...,
+    origin: tuple[float, float] = ...,
+    fluid: Fluid = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def far_field_from_contour(
     contour: ContourPhasors,
     angles_deg: NumericArrayLike,
@@ -285,7 +319,7 @@ def far_field_from_contour(
     distance: float | None = None,
     origin: tuple[float, float] = (0.0, 0.0),
     fluid: Fluid = SIMULATION_AIR,
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""Exterior field of a closed contour: the 2D Kirchhoff-Helmholtz integral.
 
     Evaluates, for each observation angle ``a`` (degrees, measured from the
@@ -341,8 +375,9 @@ def far_field_from_contour(
         origin.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`SIMULATION_AIR`, the air this package's solvers run in).
-    :return: Complex array, one value per angle: the far-field pattern
-        ``F(a)`` (units Pa sqrt(m)), or the pressure [Pa] at ``distance``.
+    :return: Complex array, one value per angle: the far-field pattern ``F(a)`` (units
+        Pa sqrt(m)), or the pressure [Pa] at ``distance``. A ``complex`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: For a ``contour`` that is not a
         :class:`ContourPhasors`, a ``distance`` that is not one real number,
         or ``angles_deg`` or ``origin`` holding a complex number or a text.
@@ -377,9 +412,9 @@ def far_field_from_contour(
         prefactor = -0.25j * np.sqrt(2.0 / (np.pi * k)) * np.exp(0.25j * np.pi)
         kernel = np.exp(1j * k * (u @ pos.T))  # (A, n)
         integrand = 1j * k * (u @ contour.normals.T) * contour.pressure + monopole
-        return np.asarray(
+        return as_complex_or_array(
             prefactor * contour.segment * np.sum(kernel * integrand, axis=1),
-            dtype=np.complex128,
+            like=(angles_deg,),
         )
     require_scalar(distance, "distance")
     refuse_complex(distance, "distance must be real, not complex")
@@ -406,7 +441,7 @@ def far_field_from_contour(
         * np.sum(-sep * contour.normals[np.newaxis, :, :], axis=2)
         / dist
     )
-    return np.asarray(
+    return as_complex_or_array(
         contour.segment * np.sum(contour.pressure * dgdn + monopole * green, axis=1),
-        dtype=np.complex128,
+        like=(angles_deg,),
     )

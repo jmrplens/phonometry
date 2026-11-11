@@ -580,7 +580,9 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     return number
 
 
-def require_above_absolute_zero_array(x: NumericArrayLike, name: str) -> np.ndarray:
+def require_above_absolute_zero_array(
+    x: NumericArrayLike, name: str
+) -> NDArray[np.float64]:
     """Require every temperature in ``x`` to be finite and above absolute zero.
 
     The array companion of :func:`require_above_absolute_zero`. A profile is
@@ -910,7 +912,7 @@ def real_array(
     return _converted(array, np.float64, name, copy=copy)
 
 
-def _wider_than_a_float(dtype: np.dtype[Any]) -> bool:
+def _wider_than_a_float(dtype: np.dtype[np.bool_ | np.number[Any]]) -> bool:
     """Whether *dtype* holds finite numbers past a float's largest.
 
     A long double does where it is wider than a float, and a complex number
@@ -922,7 +924,7 @@ def _wider_than_a_float(dtype: np.dtype[Any]) -> bool:
 
 
 def _array_of_numbers_read[Read: (np.float64, np.complex128)](
-    x: np.ndarray, dtype: type[Read], name: str, *, copy: bool
+    x: NDArray[np.bool_ | np.number[Any]], dtype: type[Read], name: str, *, copy: bool
 ) -> NDArray[Read]:
     """An array of numbers read as *dtype*, refused by name past a float's range.
 
@@ -941,7 +943,7 @@ def _array_of_numbers_read[Read: (np.float64, np.complex128)](
 
 
 def _converted[Read: (np.float64, np.complex128)](
-    array: np.ndarray, dtype: type[Read], name: str, *, copy: bool
+    array: NDArray[Any], dtype: type[Read], name: str, *, copy: bool
 ) -> NDArray[Read]:
     """*array*, as numpy read a caller's value, converted to *dtype* by name.
 
@@ -972,7 +974,11 @@ def _too_large(name: str) -> str:
     return f"'{name}' holds a number too large for a float."
 
 
-def _refuse_beyond_a_float(source: np.ndarray, read: np.ndarray, name: str) -> None:
+def _refuse_beyond_a_float(
+    source: NDArray[Any],
+    read: NDArray[np.float64 | np.complex128],
+    name: str,
+) -> None:
     """Refuse a finite number of *source* that its reading as floats, *read*,
     made an infinity: a long double or a ``Decimal`` past a float's largest,
     which numpy converts to an infinity with no more than a warning.
@@ -1041,7 +1047,7 @@ def complex_array(
     return _converted(array, np.complex128, name, copy=copy)
 
 
-def _numbers_read(x: object, name: str) -> np.ndarray:
+def _numbers_read(x: object, name: str) -> NDArray[Any]:
     """*x* as numpy reads it, refused by name when it holds a text.
 
     What both readers do before they convert: a ``bytearray`` at any depth,
@@ -1069,7 +1075,7 @@ def _numbers_read(x: object, name: str) -> np.ndarray:
     return array
 
 
-def require_positive_array(x: NumericArrayLike, name: str) -> np.ndarray:
+def require_positive_array(x: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce *x* to a 1-D float64 array of strictly positive, finite values.
 
     :param x: The input (scalar or 1-D array-like).
@@ -1092,7 +1098,7 @@ def require_positive_array(x: NumericArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def require_finite_array(x: NumericArrayLike, name: str) -> np.ndarray:
+def require_finite_array(x: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce *x* to a non-empty 1-D float64 array of finite values.
 
     The sign-agnostic sibling of :func:`require_positive_array`, for the
@@ -1116,7 +1122,7 @@ def require_finite_array(x: NumericArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def require_finite_matrix(x: NumericArrayLike, name: str) -> np.ndarray:
+def require_finite_matrix(x: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce *x* to a non-empty 2-D float64 array of finite values.
 
     The two-dimensional sibling of :func:`require_finite_array`, for the level
@@ -1429,7 +1435,9 @@ def require_same_shape(owner: object, *fields: str, quantity: str = "point") -> 
     require_equal_shapes(type(owner).__name__, shapes, quantity)
 
 
-def _as_numeric_field(owner: object, name: str, value: object) -> np.ndarray:
+def _as_numeric_field(
+    owner: object, name: str, value: object
+) -> NDArray[np.inexact[Any]]:
     """A field of *owner* as an array, ``float64`` unless it is complex.
 
     An array of objects that holds a complex number is read as complex, so
@@ -1593,8 +1601,8 @@ def indices_of(value: object, name: str) -> tuple[int, ...]:
 
 
 def require_per_band(
-    x: NumericArrayLike, name: str, bands: np.ndarray, bands_name: str
-) -> np.ndarray:
+    x: NumericArrayLike, name: str, bands: NDArray[np.float64], bands_name: str
+) -> NDArray[np.float64]:
     """Broadcast *x* over the band axis, saying whose length disagrees.
 
     A scalar applies to every band and an array of the band count is taken
@@ -1628,7 +1636,7 @@ def require_per_band(
     return np.broadcast_to(arr, bands.shape).astype(np.float64)
 
 
-def require_1d_signal(x: NumericArrayLike, name: str) -> np.ndarray:
+def require_1d_signal(x: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce *x* to a float64 array and require a 1-D time series.
 
     Multichannel input is rejected rather than silently flattened (a raveled

@@ -34,6 +34,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -50,9 +51,16 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real, ReportEngine
+    from ..._internal.types import (
+        NumericArrayLike,
+        Real,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 
@@ -547,10 +555,38 @@ def _diffusion_coefficient(
     return float(numerator / denominator)
 
 
+@overload
+def normalized_diffusion_coefficient[S1: RealScalar, S2: RealScalar](
+    d_theta: S1,
+    d_theta_reference: S2,
+) -> float: ...
+
+
+@overload
+def normalized_diffusion_coefficient[V: RealValues, A2: NumericArrayLike](
+    d_theta: V,
+    d_theta_reference: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def normalized_diffusion_coefficient[S1: RealScalar, V: RealValues](
+    d_theta: S1,
+    d_theta_reference: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def normalized_diffusion_coefficient[A1: NumericArrayLike, A2: NumericArrayLike](
+    d_theta: A1,
+    d_theta_reference: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def normalized_diffusion_coefficient(
     d_theta: NumericArrayLike,
     d_theta_reference: NumericArrayLike,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Normalised directional diffusion coefficient (ISO 17497-2, Formula (7)).
 
     :math:`d_{\theta,\mathrm{n}} = (d_\theta - d_{\theta,\mathrm{r}}) / (1 - d_{\theta,\mathrm{r}})`,
@@ -563,7 +599,9 @@ def normalized_diffusion_coefficient(
     :param d_theta: Directional diffusion coefficient of the test surface.
     :param d_theta_reference: Directional diffusion coefficient of the
         reference flat surface ``d_theta_r``.
-    :return: Normalised directional diffusion coefficient ``d_theta_n``.
+    :return: Normalised directional diffusion coefficient ``d_theta_n``. A ``float``
+        when ``d_theta`` and ``d_theta_reference`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if any reference coefficient equals 1 (undefined ratio).
     :raises TypeError: if ``d_theta`` or ``d_theta_reference`` holds a text or a value
         that is not a real number.
@@ -574,7 +612,7 @@ def normalized_diffusion_coefficient(
     if np.any(np.isclose(denom, 0.0)):
         msg = "'d_theta_reference' must not equal 1 (division by zero)."
         raise ValueError(msg)
-    return np.asarray((d - d_ref) / denom, dtype=np.float64)
+    return as_float_or_array((d - d_ref) / denom, like=(d_theta, d_theta_reference))
 
 
 def area_factors(

@@ -79,6 +79,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_axis_count,
@@ -95,9 +96,15 @@ from ...metrology import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
 
 __all__ = [
     "TAPPING_DROP_HEIGHT_M",
@@ -369,6 +376,39 @@ def hammer_limiting_frequency(
     return float(z / (2.0 * np.pi * m))
 
 
+@overload
+def force_pulse[S: RealScalar](
+    time: S,
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> float: ...
+
+
+@overload
+def force_pulse[V: RealValues](
+    time: V,
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def force_pulse[A: NumericArrayLike](
+    time: A,
+    contact_stiffness: float,
+    impedance: float,
+    *,
+    mass: float = ...,
+    impact_velocity: float | None = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def force_pulse(
     time: NumericArrayLike,
     contact_stiffness: float,
@@ -376,7 +416,7 @@ def force_pulse(
     *,
     mass: float = TAPPING_HAMMER_MASS_KG,
     impact_velocity: float | None = None,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Force pulse ``F1(t)`` of a single hammer impact (Eqs. 3.95/3.96).
 
     Lindblad's solution of the mass-spring-dashpot of Hopkins Fig. 3.28, the
@@ -406,8 +446,9 @@ def force_pulse(
     :param mass: Hammer mass ``m``, in kg (Default: 0,5).
     :param impact_velocity: Impact velocity ``vo``, in m/s
         (Default: :func:`hammer_impact_velocity`).
-    :return: The force ``F1(t)``, in N, with the same shape as ``time``; never
-        negative.
+    :return: The force ``F1(t)``, in N, with the same shape as ``time``; never negative.
+        A ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite, or ``time``
         contains a negative value.
     :raises TypeError: if ``contact_stiffness``, ``impact_velocity``, ``impedance`` or
@@ -446,19 +487,43 @@ def force_pulse(
             * -np.expm1(-2.0 * gamma * t)
             / (2.0 * gamma)
         )
-        return np.asarray(pulse, dtype=np.float64)
+        return as_float_or_array(pulse, like=(time,))
     if excess < 0.0:
         beta = np.sqrt(omega0_sq - decay**2)
         pulse = v0 * k * np.exp(-decay * t) * np.sin(beta * t) / beta
-        return np.asarray(np.where(t <= np.pi / beta, pulse, 0.0), dtype=np.float64)
+        return as_float_or_array(np.where(t <= np.pi / beta, pulse, 0.0), like=(time,))
     # Critically damped: v0 K t e^-at, the γ → 0 limit of the over-critical
     # expression and the β → 0 limit of the under-critical one.
-    return np.asarray(v0 * k * t * np.exp(-decay * t), dtype=np.float64)
+    return as_float_or_array(v0 * k * t * np.exp(-decay * t), like=(time,))
+
+
+@overload
+def short_pulse_mean_square_force[S: RealScalar](
+    frequencies: S,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float: ...
+
+
+@overload
+def short_pulse_mean_square_force[V: RealValues](
+    frequencies: V,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def short_pulse_mean_square_force[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def short_pulse_mean_square_force(
     frequencies: NumericArrayLike, *, fraction: BandFraction | np.integer[Any] = 3
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Band mean-square force of a short impact
     :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92).
 
@@ -472,14 +537,18 @@ def short_pulse_mean_square_force(
     :param fraction: The band set, 3 for one-third octaves
         (:math:`B = 0.23 f`) or 1 for octaves (:math:`B = 0.707 f`). One of ``1`` or
         ``3``.
-    :return: The band mean-square force ``F²rms``, in N².
+    :return: The band mean-square force ``F²rms``, in N². A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
         ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
-    return np.asarray(_SHORT_PULSE_COEFFICIENT * _band_factor(fraction) * f)
+    return as_float_or_array(
+        np.asarray(_SHORT_PULSE_COEFFICIENT * _band_factor(fraction) * f),
+        like=(frequencies,),
+    )
 
 
 @dataclass(frozen=True)
@@ -511,10 +580,10 @@ class TappingForceResult(OwnsArrays):
     ``m`` (:attr:`over_critical`), so it is not a field.
     """
 
-    frequencies: np.ndarray
-    peak_force: np.ndarray
-    mean_square_force: np.ndarray
-    power_input: np.ndarray
+    frequencies: NDArray[np.float64]
+    peak_force: NDArray[np.float64]
+    mean_square_force: NDArray[np.float64]
+    power_input: NDArray[np.float64]
     cut_off_frequency: float
     limiting_frequency: float
     _: KW_ONLY
@@ -631,7 +700,7 @@ class TappingForceResult(OwnsArrays):
         return _is_over_critical(self.contact_stiffness, self.impedance, self.mass)
 
     @property
-    def power_input_level(self) -> np.ndarray:
+    def power_input_level(self) -> NDArray[np.float64]:
         r"""Power input level :math:`10 \log_{10}(W_\mathrm{in}/1~\text{pW})`, in dB
         (Hopkins Fig. 3.33).
         """
@@ -732,14 +801,14 @@ def tapping_force_spectrum(
 
 
 def _peak_force(
-    f: np.ndarray,
+    f: NDArray[np.float64],
     k: float,
     z: float,
     m: float,
     *,
     impact_velocity: float,
     impact_rate: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""The magnitude :math:`|F_n|` of the tapping machine's force lines.
 
     The Fourier transform of the whole pulse when the oscillation is
@@ -791,13 +860,13 @@ class CoveringImprovementResult(OwnsArrays):
         ``lines``.
     """
 
-    frequencies: np.ndarray
-    improvement: np.ndarray
-    two_line: np.ndarray
+    frequencies: NDArray[np.float64]
+    improvement: NDArray[np.float64]
+    two_line: NDArray[np.float64]
     cut_off_frequency: float
     bare_cut_off_frequency: float
-    lines: np.ndarray
-    line_improvement: np.ndarray
+    lines: NDArray[np.float64]
+    line_improvement: NDArray[np.float64]
     bare: TappingForceResult
     covered: TappingForceResult
 
@@ -1146,8 +1215,8 @@ class FloatingFloorImprovementResult(OwnsArrays):
         model, Formula (C.5) for the other two.
     """
 
-    frequencies: np.ndarray
-    improvement: np.ndarray
+    frequencies: NDArray[np.float64]
+    improvement: NDArray[np.float64]
     resonance_frequency: float
     model: Literal["en12354", "cremer", "cremer_hammer"]
     slope: float
@@ -1328,6 +1397,54 @@ def floating_floor_improvement_spectrum(
     )
 
 
+@overload
+def resilient_mount_improvement[S1: RealScalar, S2: RealScalar](
+    frequencies: S1,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: S2,
+    mount_stiffness: float,
+    mount_density: float,
+) -> float: ...
+
+
+@overload
+def resilient_mount_improvement[V: RealValues, A2: NumericArrayLike](
+    frequencies: V,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: A2,
+    mount_stiffness: float,
+    mount_density: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def resilient_mount_improvement[S1: RealScalar, V: RealValues](
+    frequencies: S1,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: V,
+    mount_stiffness: float,
+    mount_density: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def resilient_mount_improvement[A1: NumericArrayLike, A2: NumericArrayLike](
+    frequencies: A1,
+    *,
+    impedance: float,
+    mass_per_area: float,
+    loss_factor: A2,
+    mount_stiffness: float,
+    mount_density: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def resilient_mount_improvement(
     frequencies: NumericArrayLike,
     *,
@@ -1336,7 +1453,7 @@ def resilient_mount_improvement(
     loss_factor: NumericArrayLike,
     mount_stiffness: float,
     mount_density: float,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Improvement of a floating floor on discrete resilient mounts (Vér).
 
     Vér's two-subsystem SEA model of a walking surface carrying a reverberant
@@ -1385,8 +1502,9 @@ def resilient_mount_improvement(
     :param mount_stiffness: Dynamic stiffness ``k`` of one mount, in N/m.
     :param mount_density: Number of mounts per unit area ``N/S1``, in 1/m²
         (Vigran's ``N``, which is already a density).
-    :return: The improvement ``ΔL`` per band, in dB, and 0 dB at and below
-        ``fo``.
+    :return: The improvement ``ΔL`` per band, in dB, and 0 dB at and below ``fo``. A
+        ``float`` when ``frequencies`` and ``loss_factor`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If an input is not positive and finite.
     :raises TypeError: if ``impedance``, ``mass_per_area``, ``mount_density`` or
         ``mount_stiffness`` is not a single number, or ``frequencies`` or
@@ -1408,4 +1526,6 @@ def resilient_mount_improvement(
     # frequency bands below the band containing fms", printed p. 521) and the
     # way :func:`floating_floor_improvement_spectrum` already does.
     f0 = np.sqrt(n * k / m1) / (2.0 * np.pi)
-    return np.asarray(np.where(f > f0, delta, 0.0), dtype=np.float64)
+    return as_float_or_array(
+        np.where(f > f0, delta, 0.0), like=(frequencies, loss_factor)
+    )

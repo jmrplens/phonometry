@@ -30,6 +30,7 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.lines import Line2D
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -166,7 +167,7 @@ _SECTOR_COLOURS: tuple[str, ...] = (
 
 def _direction_groups(
     directions: NumericArrayLike | None, count: int, language: Language
-) -> list[tuple[str, np.ndarray, str | None]]:
+) -> list[tuple[str, NDArray[np.bool_], str | None]]:
     """Name, member mask and colour of each direction sector, in increasing order.
 
     One group of every point, "All directions", when binned by wind speed
@@ -653,7 +654,7 @@ def plot_turbine_sound_levels(
 def _draw_turbine_levels(
     ax: Axes,
     result: TurbineSoundLevels,
-    x: np.ndarray,
+    x: NDArray[np.float64],
     language: Language,
     kwargs: dict[str, Any],
 ) -> None:
@@ -686,7 +687,7 @@ def _draw_turbine_levels(
 def _draw_turbine_levels_by_sector(
     ax: Axes,
     result: TurbineSoundLevels,
-    x: np.ndarray,
+    x: NDArray[np.float64],
     language: Language,
     kwargs: dict[str, Any],
 ) -> list[Line2D]:

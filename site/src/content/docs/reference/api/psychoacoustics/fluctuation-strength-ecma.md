@@ -104,12 +104,12 @@ pinned by the calibration signal; the confirmed defects are recorded in
 ```python
 EcmaFluctuationStrength(
     fluctuation_strength: float,
-    specific_fluctuation_strength: np.ndarray,
-    bark: np.ndarray,
-    frequencies: np.ndarray,
-    times: np.ndarray,
-    fluctuation_strength_vs_time: np.ndarray,
-    specific_fluctuation_strength_vs_time: np.ndarray,
+    specific_fluctuation_strength: NDArray[np.float64],
+    bark: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    times: NDArray[np.float64],
+    fluctuation_strength_vs_time: NDArray[np.float64],
+    specific_fluctuation_strength_vs_time: NDArray[np.float64],
     field: Literal['free', 'diffuse'],
 )
 ```

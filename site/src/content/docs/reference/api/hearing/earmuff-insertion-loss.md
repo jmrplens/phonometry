@@ -249,17 +249,17 @@ EARMUFF_TEST_BANDS_HZ = (63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 4
 
 ```python
 EarmuffInsertionLossResult(
-    insertion_loss: np.ndarray,
-    repetition_insertion_loss: np.ndarray,
-    open_levels: np.ndarray,
-    occluded_levels: np.ndarray,
-    open_uncertainty_db: np.ndarray,
-    occluded_uncertainty_db: np.ndarray,
+    insertion_loss: NDArray[np.float64],
+    repetition_insertion_loss: NDArray[np.float64],
+    open_levels: NDArray[np.float64],
+    occluded_levels: NDArray[np.float64],
+    open_uncertainty_db: NDArray[np.float64],
+    occluded_uncertainty_db: NDArray[np.float64],
     fixture_uncertainty_db: float,
     sound_field_uncertainty_db: float,
     equipment_uncertainty_db: float,
-    frequencies: np.ndarray,
-    isolation_cup_levels: np.ndarray | None = None,
+    frequencies: NDArray[np.float64],
+    isolation_cup_levels: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -427,7 +427,10 @@ The combined standard uncertainty per band (Formula (B.2)), in dB.
 ## FixtureIsolationVerification
 
 ```python
-FixtureIsolationVerification(frequencies: np.ndarray, isolation: np.ndarray)
+FixtureIsolationVerification(
+    frequencies: NDArray[np.float64],
+    isolation: NDArray[np.float64],
+)
 ```
 
 Whether the test fixture isolates its microphone well enough (5.1.4).
@@ -584,10 +587,10 @@ The five standard uncertainties in the order of Table B.1, in dB.
 
 ```python
 PlaneProgressiveWaveCheck(
-    frequencies: np.ndarray,
-    end_face_difference: np.ndarray,
-    front_to_back_ratio_db: np.ndarray,
-    front_to_rear_index: np.ndarray,
+    frequencies: NDArray[np.float64],
+    end_face_difference: NDArray[np.float64],
+    front_to_back_ratio_db: NDArray[np.float64],
+    front_to_rear_index: NDArray[np.float64],
 )
 ```
 

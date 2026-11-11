@@ -304,12 +304,12 @@ the strictest of the five domains: every absorption below 1.
 
 ```python
 ReverberationModelResult(
-    frequencies: np.ndarray,
-    sabine: np.ndarray,
-    eyring: np.ndarray,
-    millington_sette: np.ndarray,
-    fitzroy: np.ndarray,
-    arau_puchades: np.ndarray,
+    frequencies: NDArray[np.float64],
+    sabine: NDArray[np.float64],
+    eyring: NDArray[np.float64],
+    millington_sette: NDArray[np.float64],
+    fitzroy: NDArray[np.float64],
+    arau_puchades: NDArray[np.float64],
     volume: float,
     surface_area: float,
 )

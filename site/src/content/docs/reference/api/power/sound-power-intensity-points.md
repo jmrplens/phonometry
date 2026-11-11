@@ -199,14 +199,14 @@ determination. Footnote 3 calls the grade-3 figure tentative.
 
 ```python
 DiscretePointIntensityResult(
-    frequencies: np.ndarray | None,
-    normal_intensity: np.ndarray,
-    segment_areas_m2: np.ndarray,
-    f1: np.ndarray | None,
-    f2: np.ndarray | None,
-    f3: np.ndarray | None,
-    f4: np.ndarray | None,
-    pressure_residual_index: np.ndarray | None,
+    frequencies: NDArray[np.float64] | None,
+    normal_intensity: NDArray[np.float64],
+    segment_areas_m2: NDArray[np.float64],
+    f1: NDArray[np.float64] | None,
+    f2: NDArray[np.float64] | None,
+    f3: NDArray[np.float64] | None,
+    f4: NDArray[np.float64] | None,
+    pressure_residual_index: NDArray[np.float64] | None,
     fraction: Literal[1, 3],
     grade: Literal['precision', 'engineering', 'survey'],
 )
@@ -482,10 +482,22 @@ remaining four cells are blank in the print.
 
 ```python
 normal_intensity_from_levels(
+    levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    negative: NumericArrayLike = ...,
+) -> float
+
+normal_intensity_from_levels(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    negative: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+normal_intensity_from_levels(
     levels: NumericArrayLike,
     *,
-    negative: NumericArrayLike = False,
-) -> np.ndarray
+    negative: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Signed normal intensity from printed intensity levels (clause 9.1).
@@ -515,7 +527,7 @@ error, and only the *sum* going negative puts a band outside the method
 | `levels` | Normal intensity levels `XX` in decibels, of any shape. Each is the level of the magnitude, so it is positive for a level above the reference intensity and negative for one below it; the direction of flow is `negative`, never the sign of this number. |
 | `negative` | `True` where the printed level carried the `(-)` prefix, i.e. where the flow is inward. A single bool applies to every level; an array broadcasts against `levels`. |
 
-**Returns:** The signed normal intensity in W/m^2, of the shape of `levels`. `negative` is broadcast onto that shape and never widens it: one flag per level, or one flag for all of them, and a mask of any other shape is refused rather than returning more intensities than levels went in.
+**Returns:** The signed normal intensity in W/m^2, of the shape of `levels`. `negative` is broadcast onto that shape and never widens it: one flag per level, or one flag for all of them, and a mask of any other shape is refused rather than returning more intensities than levels went in. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -117,15 +117,15 @@ outlet), broadcast over the frequency axis.
 
 | Name | Description |
 | :--- | :--- |
-| `matrices` | One or more `(n_freq, 2, 2)` four-pole matrices sharing `n_freq`, each an array or a nested sequence numpy converts. |
+| `matrices` | One or more four-pole matrices, each an array or a nested sequence numpy converts: `(2, 2)` matrices of one frequency, or `(n_freq, 2, 2)` stacks sharing `n_freq`. |
 
-**Returns:** The compound `(n_freq, 2, 2)` array.
+**Returns:** The compound `(2, 2)` matrix of matrices alone, or the compound `(n_freq, 2, 2)` stack of stacks.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a matrix is not a `(n_freq, 2, 2)` array or the matrices disagree on `n_freq`. |
+| ValueError | If a matrix is neither a `(2, 2)` matrix nor a `(n_freq, 2, 2)` stack, if matrices alone and stacks are mixed, or if the stacks disagree on `n_freq`. |
 
 ## duct_matrix
 
@@ -146,13 +146,13 @@ Four-pole matrix of a straight duct (Bies Eq. (8.143), no flow).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies` | Frequencies `f`, Hz (1-D array). |
+| `frequencies` | Frequencies `f`, Hz: one, or a 1-D sequence or array. |
 | `length` | Duct length `L`, m. |
 | `area` | Cross-sectional area `S`, m2. |
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density `rho`, kg/m3. |
 
-**Returns:** A `(n_freq, 2, 2)` complex transfer-matrix array.
+**Returns:** The `(2, 2)` complex transfer matrix for one frequency, a number or a zero-dimensional array, and a `(n_freq, 2, 2)` stack of them for a sequence or an array of frequencies.
 
 **Raises**
 
@@ -197,7 +197,7 @@ Simple expansion-chamber silencer (Bies Eq. (8.111) / four-pole).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `chamber_area`, `density`, `pipe_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `chamber_area`, `density`, `pipe_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `radiation_impedance` or `source_impedance` holds a text or a value that is not a number. |
 
 ## extended_tube_chamber
 
@@ -259,21 +259,43 @@ limit of the cascade; extensions that would overlap are rejected.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `chamber_area`, `density`, `inlet_extension`, `length`, `outlet_extension`, `pipe_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `chamber_area`, `density`, `inlet_extension`, `length`, `outlet_extension`, `pipe_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `radiation_impedance` or `source_impedance` holds a text or a value that is not a number. |
 
 ## helmholtz_impedance
 
 ```python
+helmholtz_impedance(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex
+
+helmholtz_impedance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    neck_area: float,
+    neck_length: float,
+    cavity_volume: float,
+    *,
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]
+
 helmholtz_impedance(
     frequencies: NumericArrayLike,
     neck_area: float,
     neck_length: float,
     cavity_volume: float,
     *,
-    resistance: float = 0.0,
-    speed_of_sound: float = 343.0,
-    density: float = 1.206,
-) -> NDArray[np.complex128]
+    resistance: float = ...,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Acoustic impedance of a Helmholtz side branch (Bies Eq. (8.152)).
@@ -299,7 +321,7 @@ its resistance instead, which is what bounds the peak attenuation.
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density `rho`, kg/m3. |
 
-**Returns:** The complex branch impedance per frequency, Pa s/m3.
+**Returns:** The complex branch impedance per frequency, Pa s/m3. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -348,17 +370,17 @@ Side-branch Helmholtz resonator on a duct (Bies Eqs. (8.144), (8.152)).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `duct_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `density`, `duct_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `radiation_impedance` or `source_impedance` holds a text or a value that is not a number. |
 
 ## insertion_loss
 
 ```python
 insertion_loss(
-    transfer_matrix: NDArray[np.complex128],
+    transfer_matrix: NumericArrayLike,
     *,
     source_impedance: NumericArrayLike,
     radiation_impedance: NumericArrayLike,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Insertion loss of a four-pole element for given end impedances.
@@ -375,18 +397,18 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `transfer_matrix` | A `(n_freq, 2, 2)` compound matrix. |
+| `transfer_matrix` | A `(2, 2)` compound matrix of one frequency, or a `(n_freq, 2, 2)` stack of them. |
 | `source_impedance` | Source internal acoustic impedance `Z_s`, Pa s/m3 (scalar or per-frequency, real or complex). |
 | `radiation_impedance` | Termination/radiation acoustic impedance `Z_r`, Pa s/m3 (scalar or per-frequency). |
 
-**Returns:** The insertion loss per frequency, dB.
+**Returns:** The insertion loss, dB: a `float` for a matrix alone, one per frequency for a stack.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If an impedance is neither a scalar nor one value per analysis frequency. |
-| TypeError | if `radiation_impedance` or `source_impedance` holds a text or a value that is not a number. |
+| ValueError | If `transfer_matrix` is neither a `(2, 2)` matrix nor a `(n_freq, 2, 2)` stack, or an impedance is neither a scalar nor one value per analysis frequency. |
+| TypeError | if `radiation_impedance`, `source_impedance` or `transfer_matrix` holds a text or a value that is not a number. |
 
 ## plot_silencer_geometry
 
@@ -433,13 +455,31 @@ the cube of equal volume with its volume annotated.
 
 ```python
 quarter_wave_impedance(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex
+
+quarter_wave_impedance(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    length: float,
+    area: float,
+    *,
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> NDArray[np.complex128]
+
+quarter_wave_impedance(
     frequencies: NumericArrayLike,
     length: float,
     area: float,
     *,
-    speed_of_sound: float = 343.0,
-    density: float = 1.206,
-) -> NDArray[np.complex128]
+    speed_of_sound: float = ...,
+    density: float = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 Acoustic impedance of a closed quarter-wave side branch (Bies Eq. (8.146)).
@@ -459,7 +499,7 @@ pressure node and shorts the duct.
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density `rho`, kg/m3. |
 
-**Returns:** The complex branch impedance per frequency, Pa s/m3.
+**Returns:** The complex branch impedance per frequency, Pa s/m3. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -504,19 +544,19 @@ Closed quarter-wave side-branch tube on a duct (Bies Eqs. (8.144), (8.146)).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `duct_area`, `length` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `branch_area` is not a single number. |
+| TypeError | if `density`, `duct_area`, `length` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `branch_area` is not a single number, or `radiation_impedance` or `source_impedance` holds a text or a value that is not a number. |
 
 ## ReactiveSilencerResult
 
 ```python
 ReactiveSilencerResult(
-    frequencies: np.ndarray,
-    transmission_loss: np.ndarray,
-    insertion_loss: np.ndarray | None,
-    transfer_matrix: np.ndarray,
+    frequencies: NDArray[np.float64],
+    transmission_loss: NDArray[np.float64],
+    insertion_loss: NDArray[np.float64] | None,
+    transfer_matrix: NDArray[np.complex128],
     kind: Literal['expansion chamber', 'Helmholtz resonator', 'quarter-wave resonator', 'extended-tube chamber', 'element chain'],
     *,
-    resonances: np.ndarray | None,
+    resonances: NDArray[np.float64] | None,
     geometry: Mapping[Literal['length', 'chamber_area', 'pipe_area', 'inlet_extension', 'outlet_extension', 'duct_area', 'neck_area', 'neck_length', 'cavity_volume', 'branch_area'], float] | None,
     plane_wave_limit: float,
     chain: SilencerChain | None,
@@ -653,9 +693,9 @@ Four-pole matrix of a side branch of impedance `Z_b` (Bies Eq. (8.144)).
 
 | Name | Description |
 | :--- | :--- |
-| `branch_impedance` | Acoustic impedance `Z_b` of the branch, Pa s/m3 (1-D complex array over frequency). |
+| `branch_impedance` | Acoustic impedance `Z_b` of the branch, Pa s/m3: one, or a 1-D complex sequence or array over frequency. |
 
-**Returns:** A `(n_freq, 2, 2)` complex transfer-matrix array.
+**Returns:** The `(2, 2)` complex transfer matrix for one impedance, a number or a zero-dimensional array, and a `(n_freq, 2, 2)` stack of them for a sequence or an array of impedances.
 
 **Raises**
 
@@ -829,6 +869,7 @@ them in the chain as duct elements if the drawing is to show them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the chain is empty. |
+| TypeError | if `inlet_area` or `outlet_area` is not a single number, or `radiation_impedance` or `source_impedance` holds a text or a value that is not a number. |
 
 ### SilencerChain.shunt()
 
@@ -879,7 +920,7 @@ The compound four-pole matrix of the chain.
 
 ```python
 SilencerChainElement(
-    matrix: np.ndarray,
+    matrix: NDArray[np.complex128],
     length: float | None = None,
     area: float | None = None,
     label: str | None = None,
@@ -917,13 +958,13 @@ Whether this is a duct element (an element with a declared area).
 
 ```python
 transmission_loss(
-    transfer_matrix: NDArray[np.complex128],
+    transfer_matrix: NumericArrayLike,
     *,
     inlet_area: float,
     outlet_area: float,
     speed_of_sound: float = 343.0,
     density: float = 1.206,
-) -> NDArray[np.float64]
+) -> float | NDArray[np.float64]
 ```
 
 Transmission loss of a four-pole element (Munjal Eq. (3.27), no flow).
@@ -942,16 +983,17 @@ sudden-expansion limit for unequal port areas (see `docs/ERRATA.md`).
 
 | Name | Description |
 | :--- | :--- |
-| `transfer_matrix` | A `(n_freq, 2, 2)` compound matrix. |
+| `transfer_matrix` | A `(2, 2)` compound matrix of one frequency, or a `(n_freq, 2, 2)` stack of them. |
 | `inlet_area` | Inlet pipe area `S_in`, m2. |
 | `outlet_area` | Outlet pipe area `S_out`, m2. |
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 | `density` | Air density `rho`, kg/m3. |
 
-**Returns:** The transmission loss per frequency, dB.
+**Returns:** The transmission loss, dB: a `float` for a matrix alone, one per frequency for a stack.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `inlet_area`, `outlet_area` or `speed_of_sound` is not a single number. |
+| ValueError | If `transfer_matrix` is neither a `(2, 2)` matrix nor a `(n_freq, 2, 2)` stack. |
+| TypeError | if `density`, `inlet_area`, `outlet_area` or `speed_of_sound` is not a single number, or `transfer_matrix` holds a text or a value that is not a number. |

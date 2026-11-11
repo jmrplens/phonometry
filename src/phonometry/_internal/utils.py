@@ -11,6 +11,8 @@ from scipy import signal
 from .validation import real_array
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from .types import NumericArrayLike
 
 # Rank of the cached SOS filter state ``zi`` as ``_sos_initial_state`` lays
@@ -19,7 +21,7 @@ _ZI_NDIM_MONO = 2
 _ZI_NDIM_MULTICHANNEL = 3
 
 
-def _typesignal(x: NumericArrayLike, *, name: str = "x") -> np.ndarray:
+def _typesignal(x: NumericArrayLike, *, name: str = "x") -> NDArray[np.float64]:
     """Ensure signal is a float64 numpy array.
 
     Integer inputs (e.g. int16 audio from ``scipy.io.wavfile.read``) are
@@ -72,12 +74,12 @@ def _typesignal(x: NumericArrayLike, *, name: str = "x") -> np.ndarray:
 
 
 def _resample_to_length(
-    y: np.ndarray,
+    y: NDArray[np.float64],
     factor: int,
     target_length: int,
     *,
-    taps: np.ndarray | None = None,
-) -> np.ndarray:
+    taps: NDArray[np.float64] | None = None,
+) -> NDArray[np.float64]:
     """Resample signal and ensure the output matches target_length exactly.
     Handles both 1D and 2D (channels, samples) arrays.
 
@@ -92,10 +94,13 @@ def _resample_to_length(
         # Nothing to resample: fall through to the slice/pad logic only.
         y_resampled = y
     elif taps is None:
-        y_resampled = cast(np.ndarray, signal.resample_poly(y, factor, 1, axis=-1))
+        y_resampled = cast(
+            "NDArray[np.float64]", signal.resample_poly(y, factor, 1, axis=-1)
+        )
     else:
         y_resampled = cast(
-            np.ndarray, signal.resample_poly(y, factor, 1, axis=-1, window=taps)
+            "NDArray[np.float64]",
+            signal.resample_poly(y, factor, 1, axis=-1, window=taps),
         )
     current_length = y_resampled.shape[-1]
 
@@ -117,7 +122,9 @@ def _resample_to_length(
     return y_resampled
 
 
-def _downsamplingfactor(freq: list[float], fs: float, headroom: float) -> np.ndarray:
+def _downsamplingfactor(
+    freq: list[float], fs: float, headroom: float
+) -> NDArray[np.intp]:
     """Compute the largest downsampling factors that keep each band's headroom.
 
     :param freq: Band upper-edge frequencies.
@@ -129,17 +136,17 @@ def _downsamplingfactor(freq: list[float], fs: float, headroom: float) -> np.nda
     :return: Array of factors.
     """
     factor = (np.floor((fs / 2) / (headroom * np.array(freq)))).astype("int")
-    return cast(np.ndarray, np.clip(factor, 1, 500))
+    return cast("NDArray[np.intp]", np.clip(factor, 1, 500))
 
 
 def _sos_initial_state(
-    sos: np.ndarray, x_proc: np.ndarray, *, steady_ic: bool
-) -> np.ndarray:
+    sos: NDArray[np.float64], x_proc: NDArray[np.float64], *, steady_ic: bool
+) -> NDArray[np.float64]:
     """Initial ``zi`` for an SOS cascade, sized to match the input shape."""
     n_sections = sos.shape[0]
     if x_proc.ndim == 1:
         if steady_ic:
-            return cast(np.ndarray, signal.sosfilt_zi(sos))
+            return cast("NDArray[np.float64]", signal.sosfilt_zi(sos))
         return np.zeros((n_sections, 2))
     n_channels = x_proc.shape[0]
     if steady_ic:
@@ -148,7 +155,7 @@ def _sos_initial_state(
     return np.zeros((n_sections, n_channels, 2))
 
 
-def _sos_state_mismatch(zi: np.ndarray, x_proc: np.ndarray) -> bool:
+def _sos_state_mismatch(zi: NDArray[np.float64], x_proc: NDArray[np.float64]) -> bool:
     """Whether ``zi`` must be (re)allocated for *x_proc*."""
     if zi.size == 0:
         return True
@@ -157,7 +164,7 @@ def _sos_state_mismatch(zi: np.ndarray, x_proc: np.ndarray) -> bool:
     return zi.ndim != _ZI_NDIM_MULTICHANNEL or zi.shape[1] != x_proc.shape[0]
 
 
-def _apply_fade(x: np.ndarray, fade: float) -> np.ndarray:
+def _apply_fade(x: NDArray[np.float64], fade: float) -> NDArray[np.float64]:
     """Apply symmetric half-Hann fade windows to both ends of ``x``."""
     n = x.size
     m = round(fade * n)

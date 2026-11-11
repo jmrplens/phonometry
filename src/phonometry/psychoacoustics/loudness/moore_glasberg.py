@@ -46,6 +46,7 @@ from ..._internal.resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
@@ -282,12 +283,12 @@ _ROEX_G_MAX = 4.0  # Formula (4): drop upper-side components g > 4 (clause 7.4)
 _I_MIN, _I_MAX, _I_STEP = 1.8, 38.9, 0.1  # ERB-number grid (clause 7.4)
 
 
-def _erb_bandwidth(fc: np.ndarray) -> np.ndarray:
+def _erb_bandwidth(fc: NDArray[np.float64]) -> NDArray[np.float64]:
     """Equivalent rectangular bandwidth ERB_n in Hz (Formula 1)."""
     return np.asarray(erb_bandwidth(fc), dtype=np.float64)
 
 
-def _fc_from_cam(i: np.ndarray) -> np.ndarray:
+def _fc_from_cam(i: NDArray[np.float64]) -> NDArray[np.float64]:
     """Centre frequency fc in Hz for ERB-number i (inverse of Formula 6)."""
     return np.asarray(frequency_from_cam(i), dtype=np.float64)
 
@@ -565,9 +566,9 @@ class MooreGlasbergLoudness(OwnsArrays):
 
     loudness: float
     loudness_level: float
-    specific: np.ndarray
-    erb_number: np.ndarray
-    frequencies: np.ndarray
+    specific: NDArray[np.float64]
+    erb_number: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     field: Literal["free", "diffuse", "eardrum"]
     presentation: Presentation
 
@@ -664,7 +665,9 @@ class MooreGlasbergLoudness(OwnsArrays):
 # ---------------------------------------------------------------------------
 
 
-def _cochlea_levels(freqs: np.ndarray, levels: np.ndarray, field: str) -> np.ndarray:
+def _cochlea_levels(
+    freqs: NDArray[np.float64], levels: NDArray[np.float64], field: str
+) -> NDArray[np.float64]:
     """Component levels at the cochlea (clauses 7.2, 7.3).
 
     Adds the outer-ear transfer (free/diffuse field, or zero for an eardrum/
@@ -680,7 +683,9 @@ def _cochlea_levels(freqs: np.ndarray, levels: np.ndarray, field: str) -> np.nda
     return np.asarray(levels + outer + middle, dtype=np.float64)
 
 
-def _source_levels(freqs: np.ndarray, powers: np.ndarray) -> np.ndarray:
+def _source_levels(
+    freqs: NDArray[np.float64], powers: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Excitation-band level X_j of each component (clause 7.4).
 
     X_j is the power (dB re E0) of the input components lying within one
@@ -706,7 +711,9 @@ def _source_levels(freqs: np.ndarray, powers: np.ndarray) -> np.ndarray:
     return np.asarray(10.0 * np.log10(np.maximum(band_power, 1e-300)), dtype=np.float64)
 
 
-def _excitation_pattern(freqs: np.ndarray, levels_cochlea: np.ndarray) -> np.ndarray:
+def _excitation_pattern(
+    freqs: NDArray[np.float64], levels_cochlea: NDArray[np.float64]
+) -> NDArray[np.float64]:
     r"""Excitation ratio E/E0 at every ERB-number filter (clause 7.4).
 
     Each filter is a level-dependent rounded-exponential (roex) filter
@@ -736,7 +743,7 @@ def _excitation_pattern(freqs: np.ndarray, levels_cochlea: np.ndarray) -> np.nda
     return excitation
 
 
-def _specific_loudness(excitation: np.ndarray) -> np.ndarray:
+def _specific_loudness(excitation: NDArray[np.float64]) -> NDArray[np.float64]:
     """Specific loudness N'(i) in sone/Cam from E/E0 (clause 7.5).
 
     Applies the compressive transformation of Formulae (7)-(9) with the
@@ -775,7 +782,7 @@ def _specific_loudness(excitation: np.ndarray) -> np.ndarray:
     return n_spec
 
 
-def _smooth(pattern: np.ndarray) -> np.ndarray:
+def _smooth(pattern: NDArray[np.float64]) -> NDArray[np.float64]:
     """Broadly tuned smoothing of a specific-loudness pattern (Formulae 10/11).
 
     Inert on every validated Annex B case: those are all diotic (identical ears
@@ -793,7 +800,9 @@ def _smooth(pattern: np.ndarray) -> np.ndarray:
     return smoothed
 
 
-def _binaural_loudness(n_left: np.ndarray, n_right: np.ndarray) -> tuple[float, float]:
+def _binaural_loudness(
+    n_left: NDArray[np.float64], n_right: NDArray[np.float64]
+) -> tuple[float, float]:
     """Total loudness in sone with binaural inhibition (clause 8.1).
 
     Returns (loudness_left, loudness_right); their sum is the binaural
@@ -829,8 +838,8 @@ def _loudness_level(loudness: float) -> float:
 
 
 def _result_from_components(
-    freqs: np.ndarray,
-    levels: np.ndarray,
+    freqs: NDArray[np.float64],
+    levels: NDArray[np.float64],
     field: Literal["free", "diffuse", "eardrum"],
     presentation: Presentation,
 ) -> MooreGlasbergLoudness:
@@ -872,7 +881,7 @@ def _validate_conditions(field: object, presentation: object) -> None:
 
 def _as_components(
     components: NumericArrayLike,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Split a sequence of (frequency, level) pairs into arrays and validate."""
     array = real_array(components, "components")
     if array.size == 0:
@@ -931,8 +940,8 @@ def loudness_moore_glasberg_from_spectrum(
 
 
 def _third_octave_components(
-    band_levels: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+    band_levels: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Sinusoidal-component representation of one-third-octave levels
     (clause 5.5).
 
@@ -1001,7 +1010,7 @@ _SIGNAL_FLOOR_DB = 100.0  # discard bins > 100 dB below the spectral peak
 _AUDIBLE_LO, _AUDIBLE_HI = 20.0, 20000.0  # component band retained (clause 7.2)
 
 
-def _signal_components(pressure: np.ndarray, fs: float) -> np.ndarray:
+def _signal_components(pressure: NDArray[np.float64], fs: float) -> NDArray[np.float64]:
     r"""Narrowband sinusoidal-component spectrum of a pressure signal.
 
     ISO 532-2:2017 is a spectrum-based method whose exact input (clauses

@@ -295,7 +295,7 @@ SELDistribution.class_density(
 ) -> float
 
 SELDistribution.class_density(
-    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 SELDistribution.class_density(
@@ -332,7 +332,7 @@ SELDistribution.density(
 ) -> float
 
 SELDistribution.density(
-    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 SELDistribution.density(
@@ -364,7 +364,7 @@ SELDistribution.exceedance(
 ) -> float
 
 SELDistribution.exceedance(
-    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 SELDistribution.exceedance(
@@ -404,7 +404,7 @@ SELDistribution.exceedance_level(
 ) -> float
 
 SELDistribution.exceedance_level(
-    percent: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    percent: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 SELDistribution.exceedance_level(

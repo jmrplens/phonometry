@@ -93,12 +93,28 @@ FLOOR_NATURAL_FREQUENCIES_HZ = (8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 5
 
 ```python
 foundation_to_floor_level_difference(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    floor: Literal['concrete', 'timber'],
+    floor_natural_frequency_hz: float,
+    statistic: Literal['mean', 'lower', 'upper'] = ...,
+) -> float
+
+foundation_to_floor_level_difference(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    floor: Literal['concrete', 'timber'],
+    floor_natural_frequency_hz: float,
+    statistic: Literal['mean', 'lower', 'upper'] = ...,
+) -> NDArray[np.float64]
+
+foundation_to_floor_level_difference(
     frequencies: NumericArrayLike,
     *,
     floor: Literal['concrete', 'timber'],
     floor_natural_frequency_hz: float,
-    statistic: Literal['mean', 'lower', 'upper'] = 'mean',
-) -> NDArray[np.float64]
+    statistic: Literal['mean', 'lower', 'upper'] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The level difference from the foundation to a floor, Tables A.5 and A.6.
@@ -119,7 +135,7 @@ table has no value for gives `nan`.
 | `floor_natural_frequency_hz` | $f_\mathrm{e}$, positive. |
 | `statistic` | `"mean"` (default), `"lower"` or `"upper"`. |
 
-**Returns:** $\Delta L_{v,\mathrm{DF}}$, in decibels, one per band, `nan` outside the table.
+**Returns:** $\Delta L_{v,\mathrm{DF}}$, in decibels, one per band, `nan` outside the table. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -156,11 +172,25 @@ GEOMETRIC_DECAY_EXPONENT_RANGE = (0.2, 0.4)
 
 ```python
 ground_attenuation_coefficient_per_m(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    damping_ratio: float,
+    shear_wave_speed_m_s: float,
+) -> float
+
+ground_attenuation_coefficient_per_m(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     damping_ratio: float,
     shear_wave_speed_m_s: float,
 ) -> NDArray[np.float64]
+
+ground_attenuation_coefficient_per_m(
+    frequencies: NumericArrayLike,
+    *,
+    damping_ratio: float,
+    shear_wave_speed_m_s: float,
+) -> float | NDArray[np.float64]
 ```
 
 The material damping of the ground, $\alpha_R$ of Clause 5.3.
@@ -178,7 +208,7 @@ how it is computed here.
 | `damping_ratio` | $D$, the damping ratio of the ground. |
 | `shear_wave_speed_m_s` | $c_s$, in metres per second. |
 
-**Returns:** $\alpha_R$, in reciprocal metres, one per band.
+**Returns:** $\alpha_R$, in reciprocal metres, one per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -275,14 +305,34 @@ GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES = {'basement': {'lower': (-9.1, -8.2, -8.
 
 ```python
 ground_transmission(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    distance_m: float,
+    reference_distance_m: float,
+    exponent: NumericArrayLike,
+    damping_ratio: float | None = ...,
+    shear_wave_speed_m_s: float | None = ...,
+) -> float
+
+ground_transmission(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    distance_m: float,
+    reference_distance_m: float,
+    exponent: NumericArrayLike,
+    damping_ratio: float | None = ...,
+    shear_wave_speed_m_s: float | None = ...,
+) -> NDArray[np.float64]
+
+ground_transmission(
     frequencies: NumericArrayLike,
     *,
     distance_m: float,
     reference_distance_m: float,
     exponent: NumericArrayLike,
-    damping_ratio: float | None = None,
-    shear_wave_speed_m_s: float | None = None,
-) -> NDArray[np.float64]
+    damping_ratio: float | None = ...,
+    shear_wave_speed_m_s: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The transmission through the ground, Formulae (4) to (6).
@@ -309,7 +359,7 @@ measured with a point excitation.
 | `damping_ratio` | $D$ of the ground; `None` (default) leaves the material damping out. |
 | `shear_wave_speed_m_s` | $c_s$, needed with a damping ratio. |
 
-**Returns:** $\Delta L_{v,\mathrm{BB}}$, in decibels, one per band; negative where the building is further from the source than the reference.
+**Returns:** $\Delta L_{v,\mathrm{BB}}$, in decibels, one per band; negative where the building is further from the source than the reference. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -330,10 +380,28 @@ KB_ASSESSMENT_BANDS_HZ = (4.0, 80.0)
 
 ```python
 kb_weighted_levels(
-    levels: NumericArrayLike,
+    levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+kb_weighted_levels(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     frequencies: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+kb_weighted_levels(
+    levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+kb_weighted_levels(
+    levels: NumericArrayLike,
+    *,
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The KB-weighted third-octave levels, Formula (8) with Table 2.
@@ -350,7 +418,7 @@ refused.
 | `levels` | $L_v$, one level per band, in decibels. |
 | `frequencies` | The band centres, nominal, 4 Hz to 80 Hz. |
 
-**Returns:** $L_{v,KB}$, one per band.
+**Returns:** $L_{v,KB}$, one per band. A `float` when `levels` and `frequencies` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -481,13 +549,31 @@ of Table 1 the line behaviour is the rule.
 
 ```python
 predict_floor_spectrum(
+    emission_levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    ground_level_difference: NumericArrayLike = ...,
+    foundation_level_difference: NumericArrayLike = ...,
+    floor_level_difference: NumericArrayLike = ...,
+    mitigation_level_difference: NumericArrayLike = ...,
+) -> float
+
+predict_floor_spectrum(
+    emission_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    ground_level_difference: NumericArrayLike = ...,
+    foundation_level_difference: NumericArrayLike = ...,
+    floor_level_difference: NumericArrayLike = ...,
+    mitigation_level_difference: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+predict_floor_spectrum(
     emission_levels: NumericArrayLike,
     *,
-    ground_level_difference: NumericArrayLike = 0.0,
-    foundation_level_difference: NumericArrayLike = 0.0,
-    floor_level_difference: NumericArrayLike = 0.0,
-    mitigation_level_difference: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+    ground_level_difference: NumericArrayLike = ...,
+    foundation_level_difference: NumericArrayLike = ...,
+    floor_level_difference: NumericArrayLike = ...,
+    mitigation_level_difference: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The predicted spectrum on a floor, Formula (1).
@@ -514,7 +600,7 @@ foundation term zero (Annex C does exactly that).
 | `floor_level_difference` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
 | `mitigation_level_difference` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
 
-**Returns:** $L_v$, one level per band.
+**Returns:** $L_v$, one level per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -588,11 +674,25 @@ RECOMMENDED_DISTANCES_M = {'freight_soft_soil': {'tunnel': None, 'surface': 200.
 
 ```python
 rescale_emission_for_speed(
-    levels: NumericArrayLike,
+    levels: float | np.floating[Any] | np.integer[Any],
+    *,
+    speed_from_kmh: float,
+    speed_to_kmh: float,
+) -> float
+
+rescale_emission_for_speed(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     speed_from_kmh: float,
     speed_to_kmh: float,
 ) -> NDArray[np.float64]
+
+rescale_emission_for_speed(
+    levels: NumericArrayLike,
+    *,
+    speed_from_kmh: float,
+    speed_to_kmh: float,
+) -> float | NDArray[np.float64]
 ```
 
 An emission spectrum carried to another train speed, Formula (3).
@@ -612,7 +712,7 @@ refused.
 | `speed_from_kmh` | $v_1$, the speed it was measured at. |
 | `speed_to_kmh` | $v_2$, the speed wanted, in the same unit. |
 
-**Returns:** $L_{v,\mathrm{E2}}$.
+**Returns:** $L_{v,\mathrm{E2}}$. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -705,13 +805,31 @@ point exponent below the correction gives a negative result, as printed.
 
 ```python
 train_velocity_ratio(
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+    *,
+    reference_distance_m: float,
+    transition_distance_m: float,
+    point_exponent: float,
+    exponent_correction: float,
+) -> float
+
+train_velocity_ratio(
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     reference_distance_m: float,
     transition_distance_m: float,
     point_exponent: float,
     exponent_correction: float,
 ) -> NDArray[np.float64]
+
+train_velocity_ratio(
+    distance_m: NumericArrayLike,
+    *,
+    reference_distance_m: float,
+    transition_distance_m: float,
+    point_exponent: float,
+    exponent_correction: float,
+) -> float | NDArray[np.float64]
 ```
 
 The decay of a train's vibration with distance, Figure B.1.
@@ -732,7 +850,7 @@ form; this is its reading.
 | `point_exponent` | $n_\mathrm{Punkt}$. |
 | `exponent_correction` | $n_\mathrm{Korr}$, 0,3 to 0,5. |
 
-**Returns:** $v(r) / v(r_0)$, one per distance.
+**Returns:** $v(r) / v(r_0)$, one per distance. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -801,7 +919,17 @@ Requires matplotlib (the `[plot]` extra).
 ## velocity_spectrum_um_s
 
 ```python
-velocity_spectrum_um_s(levels: NumericArrayLike) -> NDArray[np.float64]
+velocity_spectrum_um_s(
+    levels: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+velocity_spectrum_um_s(
+    levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+velocity_spectrum_um_s(
+    levels: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 A level spectrum as a velocity spectrum, Formula (13).
@@ -815,7 +943,7 @@ curves of VDI 2038 Blatt 2 are drawn in.
 | :--- | :--- |
 | `levels` | $L_v$, one level per band, in decibels. |
 
-**Returns:** $v_\mathrm{RMS}$, one per band, in micrometres per second.
+**Returns:** $v_\mathrm{RMS}$, one per band, in micrometres per second. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

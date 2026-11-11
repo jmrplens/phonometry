@@ -48,12 +48,13 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -68,7 +69,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from numpy.typing import NDArray
 
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "AIR_CORRECTION_LIMIT",
@@ -350,13 +351,53 @@ def mounting_type(letter: MountingLetter) -> str:
     return MOUNTING_TYPES[key]
 
 
+@overload
+def air_absorption_correction[S1: RealScalar, S2: RealScalar](
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: S1,
+    attenuation_empty_per_m: S2,
+) -> float: ...
+
+
+@overload
+def air_absorption_correction[V: RealValues, A2: NumericArrayLike](
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: V,
+    attenuation_empty_per_m: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_absorption_correction[S1: RealScalar, V: RealValues](
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: S1,
+    attenuation_empty_per_m: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_absorption_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    *,
+    volume: float,
+    specimen_area_m2: float,
+    attenuation_with_per_m: A1,
+    attenuation_empty_per_m: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def air_absorption_correction(
     *,
     volume: float,
     specimen_area_m2: float,
     attenuation_with_per_m: NumericArrayLike,
     attenuation_empty_per_m: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The correction 4.2.1 caps, as an absorption coefficient.
 
     .. math::
@@ -377,7 +418,9 @@ def air_absorption_correction(
     :param specimen_area_m2: :math:`S` of the specimen, in square metres.
     :param attenuation_with_per_m: :math:`m_2` per band, in reciprocal metres.
     :param attenuation_empty_per_m: :math:`m_1` per band, in reciprocal metres.
-    :return: :math:`\Delta\alpha` per band.
+    :return: :math:`\Delta\alpha` per band. A ``float`` when ``attenuation_with_per_m``
+        and ``attenuation_empty_per_m`` are both numbers, an array when either is a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive volume or area, or coefficients
         that do not match band for band.
     :raises TypeError: if ``specimen_area_m2`` or ``volume`` is not a single number, or
@@ -406,12 +449,34 @@ def air_absorption_correction(
             "reported."
         )
         warn_caller(msg, SuspendedCeilingWarning)
-    return correction
+    return as_float_or_array(
+        correction, like=(attenuation_with_per_m, attenuation_empty_per_m)
+    )
+
+
+@overload
+def reproducibility_uncertainty(frequencies: None = None) -> NDArray[np.float64]: ...
+
+
+@overload
+def reproducibility_uncertainty[S: RealScalar](frequencies: S) -> float: ...
+
+
+@overload
+def reproducibility_uncertainty[V: RealValues](
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reproducibility_uncertainty[A: NumericArrayLike](
+    frequencies: A | None = None,
+) -> float | NDArray[np.float64]: ...
 
 
 def reproducibility_uncertainty(
     frequencies: NumericArrayLike | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """Table 1, the reproducibility between European laboratories.
 
     The figures are an expanded uncertainty: the round robin of Annex A gives a
@@ -422,7 +487,9 @@ def reproducibility_uncertainty(
 
     :param frequencies: The nominal octave centres wanted, in hertz; omit for
         the six the table prints, in order.
-    :return: The uncertainty of the absorption coefficient in each band.
+    :return: The uncertainty of the absorption coefficient in each band. A
+        ``float`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included, and every band without frequencies.
     :raises ValueError: For a frequency Table 1 does not print.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
@@ -442,7 +509,7 @@ def reproducibility_uncertainty(
             msg = f"Table 1 of EN 16487 prints {printed} Hz; got {band:g} Hz."
             raise ValueError(msg)
         out.append(CEILING_UNCERTAINTY[match[0]])
-    return np.asarray(out, dtype=np.float64)
+    return as_float_or_array(out, like=(frequencies,))
 
 
 def _lowest_humidity(

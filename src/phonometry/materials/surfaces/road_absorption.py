@@ -63,7 +63,7 @@ hard-coded as if normative.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
@@ -75,6 +75,7 @@ from ..._internal.resolve import (
     resolve_optional_pair_fs,
     resolve_pair_fs,
 )
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     complex_array,
     real_array,
@@ -91,7 +92,14 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, Real
+    from ..._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        Real,
+        RealScalar,
+        RealValues,
+    )
 
 LeadingEdge = Literal["blackman-harris", "cosine-squared"]
 
@@ -498,7 +506,25 @@ def in_situ_reflection_factor(
     return np.asarray(r, dtype=np.complex128)
 
 
-def in_situ_absorption_from_reflection(reflection: NumericArrayLike) -> Real:
+@overload
+def in_situ_absorption_from_reflection[S: ComplexScalar](reflection: S) -> float: ...
+
+
+@overload
+def in_situ_absorption_from_reflection[V: ComplexValues](
+    reflection: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def in_situ_absorption_from_reflection[A: NumericArrayLike](
+    reflection: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def in_situ_absorption_from_reflection(
+    reflection: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Absorption coefficient from the reflection factor (ISO 13472-1, 4.1).
 
     :math:`\alpha = 1 - \lvert r \rvert^2`. With ``r`` already carrying the
@@ -508,11 +534,12 @@ def in_situ_absorption_from_reflection(reflection: NumericArrayLike) -> Real:
     :func:`in_situ_absorption_coefficient`.
 
     :param reflection: Complex reflection factor ``r``.
-    :return: Absorption coefficient ``alpha`` (real).
+    :return: Absorption coefficient ``alpha`` (real). A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
     r = complex_array(reflection, "reflection")
-    return np.asarray(1.0 - np.abs(r) ** 2, dtype=np.float64)
+    return as_float_or_array(1.0 - np.abs(r) ** 2, like=(reflection,))
 
 
 def power_reflection_coefficient(
@@ -602,10 +629,38 @@ def in_situ_absorption_coefficient(
     return np.asarray(1.0 - qw, dtype=np.float64)
 
 
+@overload
+def absorption_reference_corrected[S1: ComplexScalar, S2: ComplexScalar](
+    road_reflection: S1,
+    reference_reflection: S2,
+) -> float: ...
+
+
+@overload
+def absorption_reference_corrected[V: ComplexValues, A2: NumericArrayLike](
+    road_reflection: V,
+    reference_reflection: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def absorption_reference_corrected[S1: ComplexScalar, V: ComplexValues](
+    road_reflection: S1,
+    reference_reflection: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def absorption_reference_corrected[A1: NumericArrayLike, A2: NumericArrayLike](
+    road_reflection: A1,
+    reference_reflection: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def absorption_reference_corrected(
     road_reflection: NumericArrayLike,
     reference_reflection: NumericArrayLike,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Reference-corrected road absorption (ISO 13472-1:2002, Annex B).
 
     Dividing the road and reference measured pressure reflection factors removes
@@ -630,13 +685,18 @@ def absorption_reference_corrected(
         it cancels).
     :param reference_reflection: Measured reference pressure reflection factor
         ``Qp,ref,meas`` (complex, same geometry and chain).
-    :return: Reference-corrected road absorption coefficient ``alpha_road(f)``.
+    :return: Reference-corrected road absorption coefficient ``alpha_road(f)``. A
+        ``float`` when ``road_reflection`` and ``reference_reflection`` are both
+        numbers, an array when either is a sequence or an array, a zero-dimensional one
+        included.
     :raises TypeError: if ``reference_reflection`` or ``road_reflection`` holds a text
         or a value that is not a number.
     """
     q_road = complex_array(road_reflection, "road_reflection")
     q_ref = complex_array(reference_reflection, "reference_reflection")
-    return np.asarray(1.0 - np.abs(q_road / q_ref) ** 2, dtype=np.float64)
+    return as_float_or_array(
+        1.0 - np.abs(q_road / q_ref) ** 2, like=(road_reflection, reference_reflection)
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -1087,12 +1147,48 @@ def check_spot_frequency_range(frequency: NumericArrayLike) -> None:
         )
 
 
+@overload
+def spot_internal_loss_correction[S1: RealScalar, S2: RealScalar](
+    measured_absorption: S1,
+    system_absorption: S2,
+    *,
+    clip_negative: bool = ...,
+) -> float: ...
+
+
+@overload
+def spot_internal_loss_correction[V: RealValues, A2: NumericArrayLike](
+    measured_absorption: V,
+    system_absorption: A2,
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def spot_internal_loss_correction[S1: RealScalar, V: RealValues](
+    measured_absorption: S1,
+    system_absorption: V,
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def spot_internal_loss_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    measured_absorption: A1,
+    system_absorption: A2,
+    *,
+    clip_negative: bool = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def spot_internal_loss_correction(
     measured_absorption: NumericArrayLike,
     system_absorption: NumericArrayLike,
     *,
     clip_negative: bool = True,
-) -> Real:
+) -> float | NDArray[np.float64]:
     r"""Internal-loss (system) correction (ISO 13472-2:2010, Annex A).
 
     The tube reads all thermal/viscous losses between the microphones and the
@@ -1114,7 +1210,9 @@ def spot_internal_loss_correction(
     :param system_absorption: Reference-plate (system) absorption
         ``alpha_system(f)``, same bands.
     :param clip_negative: Set negative corrected values to zero (default ``True``).
-    :return: Corrected absorption coefficient ``alpha(f)``.
+    :return: Corrected absorption coefficient ``alpha(f)``. A ``float`` when
+        ``measured_absorption`` and ``system_absorption`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the two inputs differ in shape.
     :raises TypeError: if ``measured_absorption`` or ``system_absorption`` holds a text
         or a value that is not a real number.
@@ -1132,7 +1230,7 @@ def spot_internal_loss_correction(
     corrected = alpha_m - alpha_s
     if clip_negative:
         corrected = np.maximum(corrected, 0.0)
-    return np.asarray(corrected, dtype=np.float64)
+    return as_float_or_array(corrected, like=(measured_absorption, system_absorption))
 
 
 def _check_geometry(source_height_m: float, microphone_height_m: float) -> None:

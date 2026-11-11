@@ -17,14 +17,12 @@ function of the package that returns a record or an array to the same rule.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, assert_type
+from typing import assert_type
 
 import numpy as np
+from numpy.typing import NDArray
 
 from phonometry import filters, io
-
-if TYPE_CHECKING:
-    from numpy.typing import NDArray
 
 _FS = 48000.0
 _SAMPLES: NDArray[np.float64] = np.random.default_rng(3).standard_normal(4800)
@@ -36,9 +34,11 @@ def test_a_weighting_filter_types_each_input_as_its_function_does() -> None:
     """The object and the function give a Signal a Signal and an array an array."""
     weighting = filters.WeightingFilter(_FS, "A")
     weighted_take = assert_type(weighting.filter(_TAKE), io.Signal)
-    weighted: NDArray[np.float64] = assert_type(weighting.filter(_SAMPLES), np.ndarray)
+    weighted: NDArray[np.float64] = assert_type(
+        weighting.filter(_SAMPLES), NDArray[np.float64]
+    )
     assert_type(filters.weighting_filter(_TAKE), io.Signal)
-    assert_type(filters.weighting_filter(_SAMPLES, _FS), np.ndarray)
+    assert_type(filters.weighting_filter(_SAMPLES, _FS), NDArray[np.float64])
     assert isinstance(weighted_take, io.Signal)
     assert not isinstance(weighted, io.Signal)
     np.testing.assert_array_equal(
@@ -50,9 +50,13 @@ def test_a_parametric_eq_types_each_input_as_its_function_does() -> None:
     """The cascade and its function agree, input for input."""
     cascade = filters.ParametricEQ(_FS, _SECTION)
     equalized_take = assert_type(cascade.filter(_TAKE), io.Signal)
-    equalized: NDArray[np.float64] = assert_type(cascade.filter(_SAMPLES), np.ndarray)
+    equalized: NDArray[np.float64] = assert_type(
+        cascade.filter(_SAMPLES), NDArray[np.float64]
+    )
     assert_type(filters.parametric_eq(_TAKE, sections=_SECTION), io.Signal)
-    assert_type(filters.parametric_eq(_SAMPLES, _FS, sections=_SECTION), np.ndarray)
+    assert_type(
+        filters.parametric_eq(_SAMPLES, _FS, sections=_SECTION), NDArray[np.float64]
+    )
     assert isinstance(equalized_take, io.Signal)
     assert not isinstance(equalized, io.Signal)
 
@@ -64,9 +68,9 @@ def test_a_time_weighting_types_each_block_as_its_function_does() -> None:
         filters.TimeWeightedEnvelope,
     )
     mean_square: NDArray[np.float64] = assert_type(
-        filters.TimeWeighting(_FS, "fast").process(_SAMPLES), np.ndarray
+        filters.TimeWeighting(_FS, "fast").process(_SAMPLES), NDArray[np.float64]
     )
     assert_type(filters.time_weighting(_TAKE), filters.TimeWeightedEnvelope)
-    assert_type(filters.time_weighting(_SAMPLES, _FS), np.ndarray)
+    assert_type(filters.time_weighting(_SAMPLES, _FS), NDArray[np.float64])
     assert isinstance(envelope, filters.TimeWeightedEnvelope)
     assert not isinstance(mean_square, filters.TimeWeightedEnvelope)

@@ -199,14 +199,14 @@ mass-spring-mass resonance. Feed it to
 
 ```python
 WallTieCouplingResult(
-    frequencies: np.ndarray,
-    coupling_loss_factor: np.ndarray,
+    frequencies: NDArray[np.float64],
+    coupling_loss_factor: NDArray[np.float64],
     mobility1: float,
     mobility2: float,
-    connector_mobility: np.ndarray,
+    connector_mobility: NDArray[np.float64],
     ties_per_area: float,
     tie_stiffness: float | None,
-    rigid_coupling_loss_factor: np.ndarray,
+    rigid_coupling_loss_factor: NDArray[np.float64],
 )
 ```
 

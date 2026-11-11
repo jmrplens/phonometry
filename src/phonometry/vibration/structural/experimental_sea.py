@@ -75,11 +75,12 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_band_fraction,
@@ -94,7 +95,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
 
 __all__ = [
     "PowerInjectionResult",
@@ -143,12 +149,39 @@ def bar_modal_density(length: float, longitudinal_wave_speed: float) -> float:
     return 2.0 * ell / c_l
 
 
+@overload
+def beam_modal_density[S: RealScalar](
+    frequency: S,
+    length: float,
+    mass_per_length: float,
+    bending_stiffness: float,
+) -> float: ...
+
+
+@overload
+def beam_modal_density[V: RealValues](
+    frequency: V,
+    length: float,
+    mass_per_length: float,
+    bending_stiffness: float,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def beam_modal_density[A: NumericArrayLike](
+    frequency: A,
+    length: float,
+    mass_per_length: float,
+    bending_stiffness: float,
+) -> float | NDArray[np.float64]: ...
+
+
 def beam_modal_density(
     frequency: NumericArrayLike,
     length: float,
     mass_per_length: float,
     bending_stiffness: float,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Modal density of a uniform beam in flexure (Norton Eq. 6.24).
 
     :math:`n(f) = L (\rho A / E I)^{1/4} / \sqrt{2\pi f}`: unlike every
@@ -159,7 +192,8 @@ def beam_modal_density(
     :param length: Beam length ``L``, in m (> 0).
     :param mass_per_length: Mass per unit length ``rho A``, in kg/m (> 0).
     :param bending_stiffness: Flexural stiffness ``E I``, in N.m^2 (> 0).
-    :return: The modal density ``n(f)``, in modes per hertz.
+    :return: The modal density ``n(f)``, in modes per hertz. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input.
     :raises TypeError: if ``bending_stiffness``, ``length`` or ``mass_per_length`` is
         not a single number, or ``frequency`` holds a text or a value that is not a real
@@ -169,8 +203,8 @@ def beam_modal_density(
     ell = require_positive(length, "length")
     mu = require_positive(mass_per_length, "mass_per_length")
     ei = require_positive(bending_stiffness, "bending_stiffness")
-    return np.asarray(
-        ell * (mu / ei) ** 0.25 / np.sqrt(2.0 * np.pi * f), dtype=np.float64
+    return as_float_or_array(
+        ell * (mu / ei) ** 0.25 / np.sqrt(2.0 * np.pi * f), like=(frequency,)
     )
 
 
@@ -217,6 +251,42 @@ def ring_frequency(mean_radius: float, longitudinal_wave_speed: float) -> float:
     return c_l / (2.0 * math.pi * a_m)
 
 
+@overload
+def cylindrical_shell_modal_density[S: RealScalar](
+    frequency: S,
+    area: float,
+    thickness_m: float,
+    mean_radius: float,
+    longitudinal_wave_speed: float,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float: ...
+
+
+@overload
+def cylindrical_shell_modal_density[V: RealValues](
+    frequency: V,
+    area: float,
+    thickness_m: float,
+    mean_radius: float,
+    longitudinal_wave_speed: float,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def cylindrical_shell_modal_density[A: NumericArrayLike](
+    frequency: A,
+    area: float,
+    thickness_m: float,
+    mean_radius: float,
+    longitudinal_wave_speed: float,
+    *,
+    fraction: BandFraction | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def cylindrical_shell_modal_density(
     frequency: NumericArrayLike,
     area: float,
@@ -225,7 +295,7 @@ def cylindrical_shell_modal_density(
     longitudinal_wave_speed: float,
     *,
     fraction: BandFraction | np.integer[Any] = 1,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Average modal density of a thin-walled cylinder (Norton 6.27-6.29).
 
     The semi-empirical approximations of Szechenyi, as collected by Clarkson &
@@ -260,7 +330,8 @@ def cylindrical_shell_modal_density(
     :param fraction: The analysis band set, 1 for octaves (Default,
         :math:`F = 1.414`) or 3 for one-third octaves (:math:`F = 1.122`). One of ``1``
         or ``3``.
-    :return: The modal density ``n(f)``, in modes per hertz.
+    :return: The modal density ``n(f)``, in modes per hertz. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input or a band set other than 1
         or 3.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
@@ -294,7 +365,7 @@ def cylindrical_shell_modal_density(
         low,
         np.where(x <= _LINEAR_REGIME_MAX_RING_RATIO, mid, high),
     )
-    return np.asarray(n, dtype=np.float64)
+    return as_float_or_array(n, like=(frequency,))
 
 
 # ---------------------------------------------------------------------------

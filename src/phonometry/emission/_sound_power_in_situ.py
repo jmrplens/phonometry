@@ -218,19 +218,19 @@ class InSituSoundPowerResult(OwnsArrays):
     that was determined (``NaN`` for the other).
     """
 
-    frequencies: np.ndarray
-    sound_power_level: np.ndarray
-    sound_energy_level: np.ndarray
-    mean_source_level: np.ndarray
-    mean_reference_level: np.ndarray
-    reference_levels: np.ndarray
-    reference_power_level: np.ndarray
-    background_correction: np.ndarray
-    reference_background_correction: np.ndarray
-    background_margin_db: np.ndarray
-    reference_background_margin_db: np.ndarray
+    frequencies: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    sound_energy_level: NDArray[np.float64]
+    mean_source_level: NDArray[np.float64]
+    mean_reference_level: NDArray[np.float64]
+    reference_levels: NDArray[np.float64]
+    reference_power_level: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
+    reference_background_correction: NDArray[np.float64]
+    background_margin_db: NDArray[np.float64]
+    reference_background_margin_db: NDArray[np.float64]
     c2: float
-    excess_levels: np.ndarray | None
+    excess_levels: NDArray[np.float64] | None
     directivity_range_db: float | None
     sigma_omc_db: float
     coverage_factor: float
@@ -313,7 +313,7 @@ class InSituSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def background_requirement_met(self) -> np.ndarray:
+    def background_requirement_met(self) -> NDArray[np.bool_]:
         """Per band, whether every margin of both sources reached the 6 dB of 8.1.
 
         ``False`` where no background was measured. The margins are judged
@@ -326,7 +326,7 @@ class InSituSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def upper_bound(self) -> np.ndarray:
+    def upper_bound(self) -> NDArray[np.bool_]:
         """Per band, whether 8.1 calls the level an upper bound.
 
         The margin of the source under test was measured and fell below 6 dB
@@ -368,14 +368,14 @@ class InSituSoundPowerResult(OwnsArrays):
         return float(self.coverage_factor * self.sigma_tot)
 
     @property
-    def sound_power_level_at_reference_conditions(self) -> np.ndarray:
+    def sound_power_level_at_reference_conditions(self) -> NDArray[np.float64]:
         """``LW`` under the reference meteorological conditions, ``LW + C2``
         (ISO 3747:2010 Annex C, Eq. C.1); ``NaN`` for an energy determination.
         """
         return np.asarray(self.sound_power_level + self.c2, dtype=np.float64)
 
     @property
-    def sound_energy_level_at_reference_conditions(self) -> np.ndarray:
+    def sound_energy_level_at_reference_conditions(self) -> NDArray[np.float64]:
         """``LJ`` under the reference meteorological conditions, ``LJ + C2``
         (ISO 3747:2010 Annex C, Eq. C.3); ``NaN`` for a power determination.
         """
@@ -549,7 +549,9 @@ def excess_sound_pressure_level(
     )
 
 
-def _background_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _background_correction(
+    delta: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.bool_]]:
     r"""``K1`` from the signal-to-background margin, elementwise, with the
     three rules of ISO 3747:2010 clause 8.1 around Eq. (7).
 
@@ -575,7 +577,7 @@ def _background_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     )
 
 
-def _margin_met(margin: np.ndarray) -> np.ndarray:
+def _margin_met(margin: NDArray[np.float64]) -> NDArray[np.bool_]:
     """Where a smallest margin over the background reached 6 dB, judged settled.
 
     A band with no background measured carries a ``NaN`` margin and is not met.
@@ -586,7 +588,7 @@ def _margin_met(margin: np.ndarray) -> np.ndarray:
 
 def _finite_grid(
     value: NumericArrayLike, name: str, ndim: tuple[int, ...]
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """A finite float array of one of the admissible ranks, or a refusal
     naming the argument.
     """
@@ -601,7 +603,9 @@ def _finite_grid(
     return arr
 
 
-def _checked_frequencies(frequencies: NumericArrayLike, n_bands: int) -> np.ndarray:
+def _checked_frequencies(
+    frequencies: NumericArrayLike, n_bands: int
+) -> NDArray[np.float64]:
     """The octave mid-band frequencies, one per band and all in Table D.1."""
     freqs = real_array(frequencies, "frequencies")
     if freqs.shape != (n_bands,):
@@ -633,7 +637,7 @@ def _reference_grids(
     reference_sound_power_levels: NumericArrayLike,
     n_positions: int,
     n_bands: int,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The reference-source levels as ``(m, n, bands)`` and its calibrated
     power as ``(m, bands)``, for one location (2D levels, 1D power) or ``m``.
     """
@@ -668,7 +672,7 @@ def _reference_grids(
 
 def _background_grid(
     background: NumericArrayLike | None, name: str, n_positions: int, n_bands: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """The background levels as ``(n, bands)``: one spectrum for every
     position, or one per position; ``None`` when none were given.
     """
@@ -715,7 +719,7 @@ class GradeConditions(OwnsArrays):
 
 def _grade_indicators(
     conditions: GradeConditions | None, n_positions: int
-) -> tuple[np.ndarray | None, float | None]:
+) -> tuple[NDArray[np.float64] | None, float | None]:
     """The two Table 2 indicators, each checked on its own as soon as it is supplied.
 
     A mis-shaped or nonsensical indicator is refused rather than silently
@@ -724,7 +728,7 @@ def _grade_indicators(
     """
     if conditions is None:
         return None, None
-    excess: np.ndarray | None = None
+    excess: NDArray[np.float64] | None = None
     if conditions.excess_levels is not None:
         excess = real_array(conditions.excess_levels, "excess_levels")
     directivity = conditions.directivity_range
@@ -733,7 +737,7 @@ def _grade_indicators(
 
 
 def _check_grade_indicators(
-    excess: np.ndarray | None, directivity: float | None, n_positions: int
+    excess: NDArray[np.float64] | None, directivity: float | None, n_positions: int
 ) -> None:
     """Refuse an excess that is not one finite value per position, or a
     directivity range that is not finite and non-negative.
@@ -752,7 +756,7 @@ def _check_grade_indicators(
         raise ValueError(msg)
 
 
-def _grade_from(excess: np.ndarray | None, directivity: float | None) -> Grade:
+def _grade_from(excess: NDArray[np.float64] | None, directivity: float | None) -> Grade:
     """The grade Table 2 grants: engineering only with the excess of sound
     pressure level at least 7 dB at every position and a directivity range
     within 7 dB; survey whenever either indicator fails or was not determined.
@@ -843,11 +847,11 @@ class _CheckedComparison:
     ``python -W error`` an advisory raised first would take its place).
     """
 
-    frequencies: np.ndarray
-    reference_levels: np.ndarray
-    reference_power: np.ndarray
-    reference_background: np.ndarray | None
-    excess: np.ndarray | None
+    frequencies: NDArray[np.float64]
+    reference_levels: NDArray[np.float64]
+    reference_power: NDArray[np.float64]
+    reference_background: NDArray[np.float64] | None
+    excess: NDArray[np.float64] | None
     directivity: float | None
     sigma_omc_db: float
 
@@ -886,7 +890,7 @@ def _checked_comparison(
 
 
 def _event_shape(
-    arr: np.ndarray, n_events: int | np.integer[Any] | None
+    arr: NDArray[np.float64], n_events: int | np.integer[Any] | None
 ) -> tuple[bool, int, int, int]:
     """Read the two forms of clause 8.4 off the array, and refuse the mixture.
 
@@ -921,13 +925,13 @@ def _event_shape(
 
 
 def _event_background(
-    arr: np.ndarray,
-    bg: np.ndarray | None,
+    arr: NDArray[np.float64],
+    bg: NDArray[np.float64] | None,
     *,
     integration_time: float | None,
     one_at_a_time: bool,
     n_bands: int,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """``K1``, the smallest margin per band and the per-position levels of clause 8.4.
 
     With no background measured there is nothing to correct and nothing that
@@ -967,10 +971,10 @@ def _event_background(
 def _determine(
     *,
     quantity: Literal["power", "energy"],
-    mean_source: np.ndarray,
-    background_correction: np.ndarray,
-    margin_source: np.ndarray,
-    background_levels: np.ndarray | None,
+    mean_source: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
+    margin_source: NDArray[np.float64],
+    background_levels: NDArray[np.float64] | None,
     comparison: _Comparison,
     checked: _CheckedComparison,
 ) -> InSituSoundPowerResult:

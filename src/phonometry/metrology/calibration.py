@@ -14,6 +14,8 @@ from .reference_values import REFERENCE_VALUES
 from .sound_calibrator import _designation, _fluctuation_limit_db
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from .._internal.signal import Signal
     from .sound_calibrator import CalibratorClass
 
@@ -205,7 +207,7 @@ def sensitivity(
 
 
 def _validate_reference_stability(
-    signal_arr: np.ndarray, fs: float, max_fluctuation_db: float
+    signal_arr: NDArray[np.float64], fs: float, max_fluctuation_db: float
 ) -> None:
     """Warn if the F-weighted level of the recording fluctuates too much."""
     from ..filters import time_weighting
@@ -240,7 +242,9 @@ def _validate_reference_stability(
         )
 
 
-def _narrowband_tone_rms(signal_arr: np.ndarray, fs: float, frequency: float) -> float:
+def _narrowband_tone_rms(
+    signal_arr: NDArray[np.float64], fs: float, frequency: float
+) -> float:
     r"""RMS amplitude of the calibration tone via coherent detection.
 
     A Hann-windowed single-frequency (Goertzel) detector locked to the tone

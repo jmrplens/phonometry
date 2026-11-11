@@ -147,7 +147,7 @@ brings a 63 Hz octave value.
 ## corner_level
 
 ```python
-corner_level(corner_levels: NumericArrayLike) -> np.ndarray
+corner_level(corner_levels: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Corner sound pressure level $L_\mathrm{Corner}$ per band.
@@ -194,9 +194,24 @@ own where-list.
 
 ```python
 low_frequency_level(
+    level: float | np.floating[Any] | np.integer[Any],
+    corner: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+low_frequency_level(
+    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    corner: NumericArrayLike,
+) -> NDArray[np.float64]
+
+low_frequency_level(
+    level: float | np.floating[Any] | np.integer[Any],
+    corner: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+low_frequency_level(
     level: NumericArrayLike,
     corner: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Combine the default and corner levels into $L_\mathrm{LF}$.
@@ -220,7 +235,7 @@ level and can never fall further than $10 \lg(2/3) = -1,76$ dB below
 | `level` | Energy-average level `L` from the default procedure, in dB, a scalar or one value per band. |
 | `corner` | Corner level $L_\mathrm{Corner}$ from [`corner_level`](/phonometry/reference/api/building/low-frequency/#corner_level), in dB, same bands. |
 
-**Returns:** $L_\mathrm{LF}$, in dB, one value per band.
+**Returns:** $L_\mathrm{LF}$, in dB, one value per band. A `float` when `level` and `corner` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -309,13 +324,13 @@ neither; Parts 2 and 3 have only a receiving room.
 
 ```python
 LowFrequencyResult(
-    frequencies: np.ndarray,
-    levels: np.ndarray,
-    reverberation_time: np.ndarray | None,
-    low_frequency_bands: np.ndarray,
-    l_default: np.ndarray,
-    l_corner: np.ndarray,
-    l_lf: np.ndarray,
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
+    reverberation_time: NDArray[np.float64] | None,
+    low_frequency_bands: NDArray[np.float64],
+    l_default: NDArray[np.float64],
+    l_corner: NDArray[np.float64],
+    l_lf: NDArray[np.float64],
     volume: float,
     reverberation_63_octave: float | None,
 )

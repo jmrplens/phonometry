@@ -376,7 +376,7 @@ def _chk_6926_annex_a() -> Outcome:
         "(A.2)": round(float(monopole[0]), 9),
         "(A.3)": round(float(monopole[1]), 9),
         "(A.4)": round(float(dipole[0]), 9),
-        "(A.5)": round(float(unknown[0]), 9),
+        "(A.5)": round(unknown, 9),
     }
     return record(expected, computed, unit="dB")
 

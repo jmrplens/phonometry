@@ -55,6 +55,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.typing import ColorType
     from mpl_toolkits.mplot3d.axes3d import Axes3D
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -121,7 +122,7 @@ def _recede_3d_scaffolding(ax: Axes3D, foreground: str) -> None:
 
 
 def _number_points(
-    ax: Axes3D, pts: np.ndarray, colours: str | Sequence[ColorType]
+    ax: Axes3D, pts: NDArray[np.float64], colours: str | Sequence[ColorType]
 ) -> None:
     """Number each point with a chip in that point's own colour.
 

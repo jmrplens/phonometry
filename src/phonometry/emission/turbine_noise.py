@@ -260,7 +260,7 @@ def _round_half_up(value: float) -> int:
     return int(round_half_up(value))
 
 
-def _below_criterion(level_difference: NumericArrayLike) -> np.ndarray:
+def _below_criterion(level_difference: NumericArrayLike) -> NDArray[np.bool_]:
     """Which background level differences are less than 3 dB (4.2)."""
     difference = real_array(level_difference, "level_difference")
     return np.asarray(
@@ -332,9 +332,9 @@ class TurbineMeasurementSurface(OwnsArrays):
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"area": "m²"})
 
     reference_boxes: tuple[TurbineReferenceBox, ...]
-    lengths_m: np.ndarray
-    widths_m: np.ndarray
-    heights_m: np.ndarray
+    lengths_m: NDArray[np.float64]
+    widths_m: NDArray[np.float64]
+    heights_m: NDArray[np.float64]
     area: float
     measurement_distance_m: float = _MEASUREMENT_DISTANCE_M
 
@@ -363,7 +363,7 @@ class TurbineMeasurementSurface(OwnsArrays):
         require_positive(self.area, "area")
 
     @property
-    def x_edges_m(self) -> np.ndarray:
+    def x_edges_m(self) -> NDArray[np.float64]:
         """Where each parallelepiped starts and ends along the shaft, in metres.
 
         :return: ``Z + 1`` abscissae from the front end of the measurement
@@ -522,9 +522,9 @@ class TurbineMicrophoneArray(OwnsArrays):
     """
 
     surface: TurbineMeasurementSurface
-    positions_m: np.ndarray
+    positions_m: NDArray[np.float64]
     labels: tuple[str, ...]
-    overhead_mask: np.ndarray
+    overhead_mask: NDArray[np.bool_]
     microphone_height_m: float
     spacing_m: float
     n_turbine_boxes: int
@@ -567,7 +567,7 @@ class TurbineMicrophoneArray(OwnsArrays):
         return int(np.asarray(self.positions_m).shape[0])
 
     @property
-    def key_mask(self) -> np.ndarray:
+    def key_mask(self) -> NDArray[np.bool_]:
         """Which positions are the five key positions of Figure 2."""
         return np.array([label != "" for label in self.labels], dtype=bool)
 
@@ -613,7 +613,9 @@ class TurbineMicrophoneArray(OwnsArrays):
         )
 
 
-def _outline(edges: np.ndarray, levels: np.ndarray, base: float) -> np.ndarray:
+def _outline(
+    edges: NDArray[np.float64], levels: NDArray[np.float64], base: float
+) -> NDArray[np.float64]:
     """One half of the outline of the surface, from end to end.
 
     In plan (``levels`` the half widths, ``base`` 0) it runs from the centre
@@ -631,13 +633,15 @@ def _outline(edges: np.ndarray, levels: np.ndarray, base: float) -> np.ndarray:
     return np.column_stack((x, y))
 
 
-def _arc_lengths(polyline: np.ndarray) -> np.ndarray:
+def _arc_lengths(polyline: NDArray[np.float64]) -> NDArray[np.float64]:
     """Cumulative length along a polyline, from its first vertex."""
     steps = np.hypot(*np.diff(polyline, axis=0).T)
     return np.concatenate(([0.0], np.cumsum(steps)))
 
 
-def _point_at(polyline: np.ndarray, lengths: np.ndarray, s: float) -> np.ndarray:
+def _point_at(
+    polyline: NDArray[np.float64], lengths: NDArray[np.float64], s: float
+) -> NDArray[np.float64]:
     """The point a distance ``s`` along a polyline."""
     index = int(np.searchsorted(lengths, s, side="right") - 1)
     index = min(max(index, 0), len(polyline) - 2)
@@ -648,7 +652,9 @@ def _point_at(polyline: np.ndarray, lengths: np.ndarray, s: float) -> np.ndarray
 
 
 def _distance_along(
-    polyline: np.ndarray, lengths: np.ndarray, point: np.ndarray
+    polyline: NDArray[np.float64],
+    lengths: NDArray[np.float64],
+    point: NDArray[np.float64],
 ) -> float:
     """How far along a polyline a point on it lies.
 
@@ -785,12 +791,14 @@ def turbine_microphone_positions(
     coupling = require_count(n_turbine_boxes, "n_turbine_boxes")
     x_key, y_key, z_key = _coupling_corner(surface, coupling)
 
-    def runs(line: np.ndarray, key: np.ndarray) -> tuple[list[np.ndarray], ...]:
+    def runs(
+        line: NDArray[np.float64], key: NDArray[np.float64]
+    ) -> tuple[list[NDArray[np.float64]], ...]:
         """The division points from the front end to ``key`` and on to the rear."""
         lengths = _arc_lengths(line)
         s_key = _distance_along(line, lengths, key)
 
-        def run(start: float, stop: float) -> list[np.ndarray]:
+        def run(start: float, stop: float) -> list[NDArray[np.float64]]:
             n = _divisions(stop - start, spacing)
             return [
                 _point_at(line, lengths, start + (stop - start) * k / n)
@@ -968,7 +976,7 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
     method: Literal["absorption", "reference source"]
     surface_area: float | None = None
     absorption_area: float | None = None
-    reference_levels: np.ndarray | None = None
+    reference_levels: NDArray[np.float64] | None = None
     calibrated_level: float | None = None
 
     def __post_init__(self) -> None:
@@ -1324,15 +1332,15 @@ class TurbineSoundPowerResult(OwnsArrays):
     :ivar overhead_mask: Which positions are overhead, or ``None``.
     """
 
-    pressure_levels: np.ndarray
-    background_levels: np.ndarray | None
-    background_corrections: np.ndarray
-    corrected_levels: np.ndarray
+    pressure_levels: NDArray[np.float64]
+    background_levels: NDArray[np.float64] | None
+    background_corrections: NDArray[np.float64]
+    corrected_levels: NDArray[np.float64]
     environmental_correction: float
     surface_area: float
     surface_pressure_level: float
     sound_power_level: float
-    overhead_mask: np.ndarray | None = field(default=None)
+    overhead_mask: NDArray[np.bool_] | None = field(default=None)
 
     def __post_init__(self) -> None:
         """Refuse per-position arrays that disagree and values that are not finite.
@@ -1368,7 +1376,7 @@ class TurbineSoundPowerResult(OwnsArrays):
         )
 
     @property
-    def level_differences(self) -> np.ndarray | None:
+    def level_differences(self) -> NDArray[np.float64] | None:
         """The level with the source operating less the background, per position."""
         if self.background_levels is None:
             return None
@@ -1378,7 +1386,7 @@ class TurbineSoundPowerResult(OwnsArrays):
         return np.asarray(difference, dtype=np.float64)
 
     @property
-    def limited_positions(self) -> np.ndarray | None:
+    def limited_positions(self) -> NDArray[np.bool_] | None:
         """Per position, whether its background was less than 3 dB below (4.2).
 
         :return: One boolean per position, ``True`` where the position makes
@@ -1557,7 +1565,7 @@ def turbine_sound_power(
         raise ValueError(msg)
     area = require_positive(surface_area, "surface_area")
     k = require_finite(environmental_correction, "environmental_correction")
-    background: np.ndarray | None = None
+    background: NDArray[np.float64] | None = None
     corrections = np.zeros_like(levels)
     if background_levels is not None:
         background = require_finite_array(background_levels, "background_levels")
@@ -1568,7 +1576,7 @@ def turbine_sound_power(
             )
             raise ValueError(msg)
         corrections = np.asarray(turbine_background_correction(levels - background))
-    mask: np.ndarray | None = None
+    mask: NDArray[np.bool_] | None = None
     if overhead_mask is not None:
         mask = np.asarray(overhead_mask, dtype=bool)
         if mask.shape != levels.shape:
@@ -1640,7 +1648,7 @@ class TurbineNoiseDeclaration(OwnsArrays):
     measured_at: str
     tonal: bool
     operating_conditions: tuple[str, ...]
-    position_levels: tuple[np.ndarray, ...]
+    position_levels: tuple[NDArray[np.float64], ...]
     surface_pressure_levels: tuple[float, ...]
     sound_power_levels: tuple[float, ...]
 
@@ -1772,7 +1780,7 @@ def turbine_noise_declaration(
         if not text.strip():
             raise ValueError(msg)
     conditions: list[str] = []
-    levels: list[np.ndarray] = []
+    levels: list[NDArray[np.float64]] = []
     surface: list[float] = []
     power: list[float] = []
     for condition, result in determinations.items():

@@ -320,11 +320,25 @@ PLANT_AIR_ABSORPTION_DB_PER_M = {31.5: 0.0, 63.0: 0.0, 125.0: 0.0, 250.0: 0.001,
 
 ```python
 plant_air_absorption_db_per_m(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    temperature_c: float | None = ...,
+    relative_humidity_percent: float | None = ...,
+) -> float
+
+plant_air_absorption_db_per_m(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    temperature_c: float | None = ...,
+    relative_humidity_percent: float | None = ...,
+) -> NDArray[np.float64]
+
+plant_air_absorption_db_per_m(
     frequencies: NumericArrayLike,
     *,
-    temperature_c: float | None = None,
-    relative_humidity_percent: float | None = None,
-) -> NDArray[np.float64]
+    temperature_c: float | None = ...,
+    relative_humidity_percent: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The attenuation coefficient of the air $\alpha$ of 10.7, in dB/m.
@@ -357,7 +371,7 @@ standard sets no number for "markedly".
 | `temperature_c` | Air temperature at the measurement, in °C, or `None` for Table 3. |
 | `relative_humidity_percent` | Relative humidity at the measurement, in percent (0 to 100), or `None` for Table 3. |
 
-**Returns:** $\alpha$ per band, in dB/m.
+**Returns:** $\alpha$ per band, in dB/m. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -382,7 +396,7 @@ plant_background_correction(
 ) -> float
 
 plant_background_correction(
-    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 plant_background_correction(

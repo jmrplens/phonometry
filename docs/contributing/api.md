@@ -635,9 +635,12 @@ def combined_stage_level(*levels: float) -> float: ...
 
 ```python
 import numpy as np
+from numpy.typing import NDArray
 
 
-def energy_average(levels: np.ndarray, *, axis: int = 0) -> np.ndarray:
+def energy_average(
+    levels: NDArray[np.float64], *, axis: int = 0
+) -> NDArray[np.float64]:
     return 10.0 * np.log10(np.mean(10.0 ** (levels / 10.0), axis=axis))
 ```
 
@@ -1467,6 +1470,10 @@ Keep the last lines of the program's standard error for the error message. A new
 
 A function of a number or an array of them is the same case. Eighty-four returned `float | ndarray`, or a grade or an array of grades, with no overload, and a zero-dimensional array came back as a `float`, so neither the type nor the rule followed what the caller handed over. They follow it now, an array in and an array out: a `float` only when every argument that decides the shape is a number, an array as soon as one is a sequence or an array, a zero-dimensional one included, which `as_float_or_array(values, like=(...))` of `phonometry._internal.types` applies. The heads say it in three forms, and one more for each further argument that decides: a number, a sequence or an array, and a last head for what a type checker cannot shape, a `NumericArrayLike` or a nested list, which returns the union. The heads return the value alone and the array alone between them, since a type checker reads only the heads; where the last one stands is mypy's to check (`overload-cannot-match`), and a function with two routes to its input, `room.critical_distance`, has one for each. Each head takes its argument as a type parameter bounded by the form rather than the form itself: mypy reads an argument whose type holds an explicit `Any` (a bare `np.ndarray`, the `dtype[Any]` that `np.array(...)` returns, a shape written `tuple[Any, ...]`) as matching every head it fits, and answers `Any` unless those heads agree on its type, which a type parameter makes them do. `room.room_constant(100.0, np.array([0.2, 0.3]))` reads as `NDArray[np.float64]` with type parameters, and as `Any` with heads written with the plain forms.
 
+A function whose result is complex is the same case in its complex form. Forty-four of them, the single degree of freedom mobilities, the infinite beam impedances and mobilities, the transfer stiffnesses, the program signal filter, the microphone impedance and the impedances and reflection factors of `materials` among them, returned a zero-dimensional complex array for numbers (twenty-seven), a numpy complex (two) or a one-element array (fifteen), under an annotation that named the array alone, often through an alias of a module (`Complex = NDArray[np.complex128]`), so `vibration.sdof_mobility(100.0, ...)` read as an array to a type checker for a call that holds one number. Such a function returns a Python `complex` when every argument that decides the shape is a number and a `complex128` array as soon as one is a sequence or an array, a zero-dimensional one included, which `as_complex_or_array(values, like=(...))` of `phonometry._internal.types` applies beside `as_float_or_array`. Its heads are those of the real form with `complex` and `NDArray[np.complex128]` where it has `float` and `NDArray[np.float64]`, the same type parameters bounded by the same forms (`ComplexScalar` and `ComplexValues` for a deciding argument that is itself complex, a mobility or an impedance), and its case in `tests/test_scalar_or_array_returns.py` says `single=complex`. A single value of one kind of number beside an array of the other, a `float` head beside `NDArray[np.complex128]`, would say the result changes kind with the shape of the input, and the check refuses it.
+
+A function whose check of its arguments makes a number one-dimensional is the same case once more. A hundred and one of them, the weighting factors of ISO 8041-1, the seawater absorption, the Fresnel number of a barrier, the rotorcraft propagation adjustments, the ISO 10848 quantities of flanking transmission and the NPD interpolation of ECAC Doc 29 among them, handed their frequencies, levels or distances to a validator that returns a one-dimensional array, so `underwater.seawater_absorption(1000.0)` gave a one-element array, and a zero-dimensional array gave the same, under an annotation that named the array alone. Such a function hands its result to `as_float_or_array(values, like=(...))`, which reads the one-element array its validator made of a number through to a `float`, gives a zero-dimensional array for a zero-dimensional one and keeps the shape of a sequence, a one-element one included. `like=` names the arguments as the caller handed them, so a body that checks a deciding argument binds the checked array to a name of its own: `levels = real_array(levels, "levels")` hides the form the levels came in, and `checked = real_array(levels, "levels")` beside `like=(levels,)` keeps it. A per-band argument that rides beside the frequencies (a structural reverberation time for each band, the level differences of a floor prediction) is broadcast against them and decides nothing of its own, so the heads take the frequencies alone and a one-element sequence or a zero-dimensional array there gives a `float` beside a number frequency, and arguments of one length that the call reads together decide together. A deciding argument that may be left out is read, when it is, as what the result then is: one number for `emission.radiation_impedance_correction()` without bands and for a row of `building.typical_element_mobility` that reads no frequency, a head with `S | None` saying so, and the whole table for `hearing.reference_threshold()` and `hearing.earphone_reference_level()`, a head with `None` returning the array. The four-pole matrices of `noise_control` follow the rule with a matrix in place of a number: `duct_matrix` and `shunt_matrix` give the `(2, 2)` matrix alone for one frequency or one impedance, a number or a zero-dimensional array, and the `(n_freq, 2, 2)` stack for a sequence or an array; `cascade` multiplies matrices alone into a matrix and stacks into a stack and refuses the two mixed; and `transmission_loss` and `insertion_loss` give a `float` for a matrix alone and an array for a stack, with the rank of the matrix, which no head can read from a `NumericArrayLike`, as their reason in `EXEMPT`.
+
 A function of a `Signal` or an array is the same case again. `filters.weighting_filter`, `filters.parametric_eq` and `filters.time_weighting` had a head for the `Signal` and one for the array, while the reusable objects they wrap said the union for either input: `WeightingFilter.filter` and `ParametricEQ.filter` returned `Signal | ndarray`, `TimeWeighting.process` `TimeWeightedEnvelope | ndarray`, so `y: NDArray[np.float64] = wf.filter(x)` was refused by mypy and pyright for a call that cannot return a `Signal`. A return that names a record of the package and an array, or a tuple of records beside a tuple of arrays (`tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]`), has a head for each, the method as its function does.
 
 **Do**
@@ -1530,18 +1537,56 @@ def doubled(level: NumericArrayLike) -> float | NDArray[np.float64]:
 doubled(3.0), doubled([3.0, 4.0]), doubled(np.array(3.0))
 ```
 
+```python
+from typing import overload
+
+import numpy as np
+from numpy.typing import NDArray
+
+from phonometry._internal.types import (
+    NumericArrayLike,
+    RealScalar,
+    RealValues,
+    as_complex_or_array,
+)
+
+
+@overload
+def mass_mobility[S: RealScalar](frequency: S) -> complex: ...
+
+
+@overload
+def mass_mobility[V: RealValues](frequency: V) -> NDArray[np.complex128]: ...
+
+
+@overload
+def mass_mobility[A: NumericArrayLike](
+    frequency: A,
+) -> complex | NDArray[np.complex128]: ...
+
+
+def mass_mobility(frequency: NumericArrayLike) -> complex | NDArray[np.complex128]:
+    omega = 2.0 * np.pi * np.asarray(frequency, dtype=np.float64)
+    return as_complex_or_array(1.0 / (1j * omega * 2.0), like=(frequency,))
+
+
+mass_mobility(100.0), mass_mobility([100.0, 200.0]), mass_mobility(np.array(100.0))
+```
+
 **Don't**
 
 ```py
-def plot(self, ax: Axes | None = None) -> Axes | np.ndarray:  # the caller narrows what ax decided
+def plot(self, ax: Axes | None = None) -> Axes | NDArray[np.object_]:  # the caller narrows what ax decided
     ...
-def doubled(level: NumericArrayLike) -> float | np.ndarray:  # and narrows what it handed over
+def doubled(level: NumericArrayLike) -> float | NDArray[np.float64]:  # and narrows what it handed over
+    ...
+def mass_mobility(frequency: NumericArrayLike) -> NDArray[np.complex128]:  # a zero-dimensional array for a number
     ...
 ```
 
-**Enforced by:** `scripts/check_return_overloads.py`, `make return-overloads`, `CI: Every return an argument decides is overloaded on it`, `tests/test_check_return_overloads.py::test_the_package_keeps_the_rule`, `tests/test_result_plots.py::test_a_plot_returns_what_its_signature_promises`, `tests/test_result_plots.py::test_every_decided_plot_has_a_built_result`, `tests/test_scalar_or_array_returns.py::test_every_function_of_a_number_or_an_array_has_a_case`
+**Enforced by:** `scripts/check_return_overloads.py`, `make return-overloads`, `CI: Every return an argument decides is overloaded on it`, `tests/test_check_return_overloads.py::test_the_package_keeps_the_rule`, `tests/test_result_plots.py::test_a_plot_returns_what_its_signature_promises`, `tests/test_result_plots.py::test_every_decided_plot_has_a_built_result`, `tests/test_scalar_or_array_returns.py::test_every_function_of_a_number_or_an_array_has_a_case`, `tests/test_census_of_number_returns.py::test_numbers_give_a_number`, `tests/test_census_of_number_returns.py::test_every_function_of_numbers_is_reached_or_named`
 
-**Exceptions.** A return the data decide rather than an argument keeps its union on that one head, with its reason in `EXEMPT` of `scripts/check_return_overloads.py`, keyed by the parameters that tell the head from its siblings (`ZwickerLoudness.plot (overload ax: None)`), so that the other heads are still held to the rule: `ZwickerLoudness.plot` without `ax` draws a second panel only for a time-varying result. `OctaveFilterResult.require_bands` is exempt the same way: its bands are the `Signal`s of a bank that filtered a `Signal` and the arrays of one that filtered an array, which the result holds and no argument of the method says. A private helper that takes the projection from a table row it is handed rather than from an argument of its own is exempt the same way. Of the functions of a number or an array, the exempt ones keep the union with their reason: one that reduces an axis (`signals.leq`, `room.directivity_energy_average`, and `signals.ln_levels`, whose dictionary holds such a level for each percentile), where the rank of the input decides whether one number is left, which `as_float_if_reduced` applies; one whose shape comes from values inside a tuple or a record (`room.sabine_reverberation_time` and its surfaces); a property, which has no argument to overload on; and one where four or more arguments broadcast (`room.steady_state_spl`), whose heads would number more than the union says. Each of them still applies the rule at run time.
+**Exceptions.** A return the data decide rather than an argument keeps its union on that one head, with its reason in `EXEMPT` of `scripts/check_return_overloads.py`, keyed by the parameters that tell the head from its siblings (`ZwickerLoudness.plot (overload ax: None)`), so that the other heads are still held to the rule: `ZwickerLoudness.plot` without `ax` draws a second panel only for a time-varying result. `OctaveFilterResult.require_bands` is exempt the same way: its bands are the `Signal`s of a bank that filtered a `Signal` and the arrays of one that filtered an array, which the result holds and no argument of the method says. A private helper that takes the projection from a table row it is handed rather than from an argument of its own is exempt the same way. Of the functions of a number or an array, the exempt ones keep the union with their reason: one that reduces an axis (`signals.leq`, `room.directivity_energy_average`, and `signals.ln_levels`, whose dictionary holds such a level for each percentile), where the rank of the input decides whether one number is left, which `as_float_if_reduced` applies; one whose shape comes from values inside a tuple or a record (`room.sabine_reverberation_time` and its surfaces); a property, which has no argument to overload on; and one where four or more arguments broadcast (`room.steady_state_spl`), whose heads would number more than the union says. Each of them still applies the rule at run time. The check reads unions, so a function annotated as an array alone that hands a number back as a zero-dimensional array is no union to it: the census of `tests/test_census_of_number_returns.py` calls every public function and method it can call with numbers, each parameter drawn on its own from numbers, `Literal` choices, counts and flags, a function with no required parameter as it stands and an optional parameter of numbers given a number too, on the records its calls return, numbers build, the tables of the package hold and its `FIXTURES` build, and fails such a result, a numpy scalar or a one-element array. It names, each with its reason, the calls whose result is no function of a number (a time record, an output whose length a value sets, a record built from numbers, the bands a record holds), failing an entry the census no longer flags, and in `UNREACHED` every public function and method that returns an array, takes numbers and that no call of the census runs (a table of a given shape, a band axis that refuses a number, a time record, a record it cannot build), failing one it neither reaches nor names and one it reaches, so the list only shrinks. It names no function whose validator makes a number one-dimensional: a function whose check of its arguments does so reads the result through `as_float_or_array` as the rest do.
 
 <a id="a58"></a>
 ### A58. Annotate a parameter with every type its validation accepts
@@ -1888,3 +1933,33 @@ def band_mean(levels: ArrayLike) -> float:  # band_mean("60 62") type-checks
 **Enforced by:** `scripts/check_parameter_annotations.py`, `make parameter-annotations`, `CI: Every public parameter admits what its body converts`, `tests/test_check_parameter_annotations.py::test_an_array_of_numbers_written_as_numpy_array_like_is_refused`, `tests/test_check_parameter_annotations.py::test_an_array_of_labels_is_let_through_by_its_exemption_alone`, `tests/test_check_parameter_annotations.py::test_the_package_keeps_the_rule`, `tests/static_typing/test_numeric_array_inputs.py`, `mypy`
 
 **Exceptions.** The rule reads every public parameter, overload head, field of a public record and constructor a record declares under `TYPE_CHECKING`, at the top and inside a container, a mapping or a tuple, through the package's aliases and the bounds of the type parameters of the function and of its class. numpy's own types (`NDArray[np.float64]`) say a dtype and pass, and so do the arguments a `Callable` hands to a function the caller gives, which take what the package hands them. A parameter that takes an array of labels keeps `ArrayLike` with its reason in `TEXT_ARRAYS` of `scripts/check_parameter_annotations.py`, keyed by file, function and parameter: the `sites` of the four soundscape summaries of `environment` (ISO/TS 12913-3), which read each response's site with `str()`, and the ISO 11819-1 `vehicle_categories` of `environment.statistical_pass_by`; an entry no finding matches fails as stale. A window's tuple takes a text as its first item and is `WindowSpec` ([A58](#a58)). Private helpers are not read: the public parameter in front of them is.
+
+<a id="a66"></a>
+### A66. Write the dtype of every numpy array an annotation names, and the precision of every abstract numpy scalar
+
+**Why.** numpy gives `np.ndarray`, `np.dtype` and its abstract scalar types (`np.floating`, `np.integer`, `np.complexfloating`, `np.number` and the others) default type arguments only from 2.3, and the package runs on numpy from 2.0.2 (2.1.0 on Python 3.13). Below 2.3 a type checker reads a bare `np.ndarray` as `ndarray[Unknown, Unknown]` and a bare `np.floating` as `floating[Unknown]`, so every public name annotated with one is partly unknown to it, and mypy reports a `[type-arg]` error for each. The package wrote 3000 of them, and at NumPy 2.1.0 pyright's `--verifytypes` read 86.9% of its public names as known, while the wheel scored 100% on the newest stack ([A31](#a31)). Each was then read on its own, from what the function builds, returns or accepts, what its callers pass and the arithmetic it goes through, and given the dtype it holds: `NDArray[np.float64]`, `NDArray[np.complex128]`, `NDArray[np.bool_]`, `NDArray[np.int64]`, `np.floating[Any]` for a scalar of any precision. Reading them so found what the bare types hid: `RealValues` ended in `NDArray[Any]`, so a complex or a text array passed the overload head that promises a float64 array back, where the call refuses it. The score is 100% on every NumPy the library accepts.
+
+**Do**
+
+```python
+import numpy as np
+from numpy.typing import NDArray
+
+
+def band_powers(levels: NDArray[np.float64]) -> NDArray[np.float64]:
+    return 10.0 ** (levels / 10.0)
+
+
+band_powers(np.array([60.0, 62.0]))
+```
+
+**Don't**
+
+```py
+def band_powers(levels: np.ndarray) -> np.ndarray:  # ndarray[Unknown, Unknown] below NumPy 2.3
+    ...
+```
+
+**Enforced by:** `scripts/check_bare_array_annotations.py`, `make bare-array-annotations`, `CI: Every numpy type an annotation names carries its type arguments`, `tests/test_check_bare_array_annotations.py::test_the_package_writes_no_bare_numpy_type`, `CI: Fail below a type completeness of 100% at the floors`, `make type-completeness`
+
+**Exceptions.** The check reads every type expression of `src/phonometry`: parameters, `*args` and `**kwargs`, returns, annotated assignments and dataclass fields, type aliases, the bound of a type parameter and the type handed to `cast`, `TypeVar` and `NewType`, a string annotation included, through the imports of the module and of each function around it and the package's own re-exports. An array that really takes several dtypes is `NDArray[Any]`, and `np.generic` names a scalar of any type or the bound of a type parameter that keeps the dtype it is handed (`read_only[S: np.generic]`); the check lists both, as open and as generic, and never fails on them, so each is for review to read: numpy's `__array__` protocol, whose result follows a `DTypeLike` argument, the readers that hold a caller's numbers as numpy read them before a check refuses the wrong dtypes, and the wire format of a remote run, which ships arrays of several dtypes before it checks them. A union of dtypes the array may hold says them (`NDArray[np.bool_ | np.integer[Any] | np.floating[Any]]` for the real arrays `real_array` reads) rather than `Any`.

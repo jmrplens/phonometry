@@ -55,12 +55,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from scipy.special import j1, struve
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_if_reduced, as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_choice,
@@ -76,9 +77,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 #: Default speed of sound in air ``c0``, m/s (20 degC).
 _SPEED_OF_SOUND: float = 343.0
@@ -101,14 +103,33 @@ __all__ = [
 ]
 
 
-def transmission_loss_from_coefficient(tau: NumericArrayLike) -> np.ndarray:
+@overload
+def transmission_loss_from_coefficient[S: RealScalar](tau: S) -> float: ...
+
+
+@overload
+def transmission_loss_from_coefficient[V: RealValues](
+    tau: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def transmission_loss_from_coefficient[A: NumericArrayLike](
+    tau: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def transmission_loss_from_coefficient(
+    tau: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Sound reduction index :math:`R = -10 \log_{10}(\tau)` from a transmission
     coefficient.
 
     :param tau: Transmission coefficient(s) ``tau`` (> 0). Values above 1 (a
         resonating aperture that transmits more than the incident intensity)
         give a negative ``R``.
-    :return: The sound reduction index ``R``, in dB.
+    :return: The sound reduction index ``R``, in dB. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive coefficient.
     :raises TypeError: if ``tau`` holds a text or a value that is not a real number.
     """
@@ -116,7 +137,7 @@ def transmission_loss_from_coefficient(tau: NumericArrayLike) -> np.ndarray:
     if np.any(t <= 0.0):
         msg = "'tau' must be positive."
         raise ValueError(msg)
-    return np.asarray(-10.0 * np.log10(t), dtype=np.float64)
+    return as_float_or_array(-10.0 * np.log10(t), like=(tau,))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -137,8 +158,8 @@ class ApertureTransmissionResult(OwnsArrays):
     #: The units the field names do not say, as the docstring gives them.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"depth": "m"})
 
-    frequencies: np.ndarray
-    transmission_coefficient: np.ndarray
+    frequencies: NDArray[np.float64]
+    transmission_coefficient: NDArray[np.float64]
     kind: Literal["slit", "circular"]
     depth: float
     width_m: float | None = None
@@ -204,7 +225,7 @@ class ApertureTransmissionResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def transmission_loss(self) -> np.ndarray:
+    def transmission_loss(self) -> NDArray[np.float64]:
         r"""Aperture sound reduction index :math:`R = -10 \log_{10}(\tau)` per
         band, dB.
         """
@@ -243,7 +264,7 @@ class ApertureTransmissionResult(OwnsArrays):
         return plot_aperture_result_geometry(self, ax=ax, language=language, **kwargs)
 
 
-def _slit_end_correction(k_big: np.ndarray) -> np.ndarray:
+def _slit_end_correction(k_big: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""End correction :math:`e = (1/\pi)(\ln(8/K) - \gamma)` (Hopkins
     Eq. 4.100).
     """
@@ -327,7 +348,7 @@ def slit_resonance_frequencies(
     *,
     n_orders: int | np.integer[Any] = 3,
     speed_of_sound: float = _SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Slit resonance frequencies :math:`d + 2e = z\lambda/2` (Hopkins
     Eq. 4.101).
 
@@ -425,7 +446,7 @@ def circular_aperture_transmission_coefficient(
 
 def composite_transmission_loss(
     areas: NumericArrayLike, reduction_indices: NumericArrayLike
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Composite sound reduction index of parallel elements (Hopkins
     Eq. 4.92).
 
@@ -443,7 +464,7 @@ def composite_transmission_loss(
     :param reduction_indices: Element sound reduction indices ``R_n``, in dB.
         Either a 1-D array of length ``N`` (one value per element) or a 2-D
         array of shape ``(N, M)`` (``N`` elements over ``M`` bands).
-    :return: The composite ``R``: a scalar array for 1-D input, or one value
+    :return: The composite ``R``: a ``float`` for 1-D input, or one value
         per band (length ``M``) for 2-D input.
     :raises ValueError: for a non-positive area, mismatched shapes, or an
         empty element set.
@@ -469,6 +490,6 @@ def composite_transmission_loss(
     tau = 10.0 ** (-r / 10.0)
     if r.ndim == 1:
         total_1d = float(np.sum(s * tau) / np.sum(s))
-        return np.asarray(-10.0 * np.log10(total_1d), dtype=np.float64)
+        return as_float_if_reduced(-10.0 * np.log10(total_1d))
     total_2d = np.sum(s[:, None] * tau, axis=0) / np.sum(s)
-    return np.asarray(-10.0 * np.log10(total_2d), dtype=np.float64)
+    return as_float_if_reduced(-10.0 * np.log10(total_2d))

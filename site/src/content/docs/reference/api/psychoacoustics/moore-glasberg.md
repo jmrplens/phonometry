@@ -161,9 +161,9 @@ sinusoidal components and the exact method is applied.
 MooreGlasbergLoudness(
     loudness: float,
     loudness_level: float,
-    specific: np.ndarray,
-    erb_number: np.ndarray,
-    frequencies: np.ndarray,
+    specific: NDArray[np.float64],
+    erb_number: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     field: Literal['free', 'diffuse', 'eardrum'],
     presentation: Literal['binaural', 'diotic', 'monaural'],
 )

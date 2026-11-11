@@ -133,7 +133,7 @@ def _nominal_freq_for_band(exact_freq: float, fraction: float) -> float:
     return _iec_e3_round(exact_freq)
 
 
-def _infer_band_fraction(frequency: np.ndarray) -> int:
+def _infer_band_fraction(frequency: NDArray[np.float64]) -> int:
     """Octave (1) or one-third-octave (3) from adjacent band-centre ratios.
 
     Distinguishes the two IEC 61260 band structures by the ratio of adjacent

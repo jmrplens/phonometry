@@ -123,9 +123,9 @@ class DuctModeResult(OwnsArrays):
     """
 
     modes: tuple[tuple[int, int], ...]
-    cut_on: np.ndarray
-    cut_on_no_flow: np.ndarray
-    axial_wavenumber: np.ndarray
+    cut_on: NDArray[np.float64]
+    cut_on_no_flow: NDArray[np.float64]
+    axial_wavenumber: NDArray[np.float64]
     mach: float
     section: Literal["circular", "rectangular"]
     label: str

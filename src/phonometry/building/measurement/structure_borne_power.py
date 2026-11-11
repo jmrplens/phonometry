@@ -72,17 +72,27 @@ positions with the energy mean of its equation (9), implemented by
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
+
+from ..._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        ComplexScalar,
+        ComplexValues,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 
@@ -152,9 +162,33 @@ def spatial_mean_velocity_level(levels: NumericArrayLike) -> float:
     return float(10.0 * np.log10(np.mean(10.0 ** (0.1 * lv))))
 
 
+@overload
+def plate_loss_factor[S: RealScalar](
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: S,
+) -> float: ...
+
+
+@overload
+def plate_loss_factor[V: RealValues](
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def plate_loss_factor[A: NumericArrayLike](
+    reverberation_time: NumericArrayLike,
+    *,
+    frequency: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def plate_loss_factor(
     reverberation_time: NumericArrayLike, *, frequency: NumericArrayLike
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Plate loss factor :math:`\eta = 2.2 / (f\, T_\mathrm{s})` (EN 15657, Formula 13).
 
     Estimated from the plate's structural reverberation time; identical to the
@@ -162,13 +196,85 @@ def plate_loss_factor(
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or per band).
     :param reverberation_time: Structural reverberation time ``Ts``, in s.
-    :return: The loss factor ``eta`` (dimensionless) per band.
+    :return: The loss factor ``eta`` (dimensionless) per band. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``frequency`` or ``reverberation_time`` holds a text or a
         value that is not a real number.
     """
     f = real_array(frequency, "frequency")
     ts = real_array(reverberation_time, "reverberation_time")
-    return total_loss_factor(frequencies=f, structural_reverberation_time=ts)
+    return as_float_or_array(
+        total_loss_factor(frequencies=f, structural_reverberation_time=ts),
+        like=(frequency,),
+    )
+
+
+@overload
+def structure_borne_power_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    velocity_level: S1,
+    mass_per_area: float,
+    area: float,
+    loss_factor: S2,
+    *,
+    frequency: S3,
+    reference_velocity: float = ...,
+) -> float: ...
+
+
+@overload
+def structure_borne_power_level[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    velocity_level: V,
+    mass_per_area: float,
+    area: float,
+    loss_factor: A2,
+    *,
+    frequency: A3,
+    reference_velocity: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_borne_power_level[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    velocity_level: S1,
+    mass_per_area: float,
+    area: float,
+    loss_factor: V,
+    *,
+    frequency: A3,
+    reference_velocity: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_borne_power_level[S1: RealScalar, S2: RealScalar, V: RealValues](
+    velocity_level: S1,
+    mass_per_area: float,
+    area: float,
+    loss_factor: S2,
+    *,
+    frequency: V,
+    reference_velocity: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def structure_borne_power_level[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    velocity_level: A1,
+    mass_per_area: float,
+    area: float,
+    loss_factor: A2,
+    *,
+    frequency: A3,
+    reference_velocity: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def structure_borne_power_level(
@@ -179,7 +285,7 @@ def structure_borne_power_level(
     *,
     frequency: NumericArrayLike,
     reference_velocity: float = _REFERENCE_VELOCITY,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Structure-borne power injected into the reception plate (EN 15657, Formula 14).
 
     The power a resonant reception plate dissipates, expressed as a level re
@@ -209,7 +315,10 @@ def structure_borne_power_level(
     :param area: Plate area ``S``, in m^2 (> 0).
     :param loss_factor: Plate loss factor ``eta`` (scalar or per band, > 0).
     :param reference_velocity: Velocity reference ``v0`` (Default: 1e-9 m/s).
-    :return: The structure-borne sound power level ``L_Ws``, in dB re 1 pW.
+    :return: The structure-borne sound power level ``L_Ws``, in dB re 1 pW. A ``float``
+        when ``velocity_level``, ``loss_factor`` and ``frequency`` are all numbers, an
+        array when one of them is a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: for a non-positive mass, area or reference, a
         frequency or loss factor that is not positive and finite, a
         non-finite velocity level, or per-band inputs whose shapes do not
@@ -243,7 +352,7 @@ def structure_borne_power_level(
         raise ValueError(msg) from None
     offset = 10.0 * np.log10(reference_velocity**2 / _REFERENCE_SOUND_POWER)
     lw = 10.0 * np.log10(2.0 * np.pi * f * eta * mass_per_area * area) + lv + offset
-    return np.asarray(lw, dtype=np.float64)
+    return as_float_or_array(lw, like=(velocity_level, loss_factor, frequency))
 
 
 @dataclass(frozen=True)
@@ -264,12 +373,12 @@ class StructureBornePowerResult(OwnsArrays):
     :ivar area: Plate area ``S``, in m^2.
     """
 
-    power_level: np.ndarray
-    velocity_level: np.ndarray
-    loss_factor: np.ndarray
+    power_level: NDArray[np.float64]
+    velocity_level: NDArray[np.float64]
+    loss_factor: NDArray[np.float64]
     mass_per_area: float
     area: float
-    frequencies: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a plate result whose per-band quantities disagree.
@@ -448,10 +557,38 @@ def reception_plate_power(
     )
 
 
+@overload
+def equivalent_blocked_force_level[S1: RealScalar, S2: ComplexScalar](
+    power_level: S1,
+    plate_mobility: S2,
+) -> float: ...
+
+
+@overload
+def equivalent_blocked_force_level[V: RealValues, A2: NumericArrayLike](
+    power_level: V,
+    plate_mobility: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def equivalent_blocked_force_level[S1: RealScalar, V: ComplexValues](
+    power_level: S1,
+    plate_mobility: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def equivalent_blocked_force_level[A1: NumericArrayLike, A2: NumericArrayLike](
+    power_level: A1,
+    plate_mobility: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def equivalent_blocked_force_level(
     power_level: NumericArrayLike,
     plate_mobility: NumericArrayLike,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Equivalent blocked force level, squared (UNE-EN 15657:2018, Formula 15).
 
     :math:`L_\mathrm{Fb,eq} = L_\mathrm{Ws,low}
@@ -465,7 +602,9 @@ def equivalent_blocked_force_level(
         1 pW (see :func:`structure_borne_power_level`).
     :param plate_mobility: Equivalent plate mobility ``Y_R,low,eq`` (per
         band), in m/(N.s); complex values use their real part (Formula 16).
-    :return: The equivalent blocked force level ``L_Fb,eq``, in dB re 1e-6 N.
+    :return: The equivalent blocked force level ``L_Fb,eq``, in dB re 1e-6 N. A
+        ``float`` when ``power_level`` and ``plate_mobility`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if ``power_level`` is not finite,
         ``Re{plate_mobility}`` is not positive and finite, or the two shapes
         do not broadcast together.
@@ -493,16 +632,41 @@ def equivalent_blocked_force_level(
             f"got shapes {lw.shape} and {y.shape}."
         )
         raise ValueError(msg) from None
-    return np.asarray(
-        lw - 10.0 * np.log10(y_re / _REFERENCE_MOBILITY), dtype=np.float64
+    return as_float_or_array(
+        lw - 10.0 * np.log10(y_re / _REFERENCE_MOBILITY),
+        like=(power_level, plate_mobility),
     )
+
+
+@overload
+def characteristic_reception_plate_power[S: RealScalar](
+    blocked_force_level: S,
+    *,
+    characteristic_mobility: float = ...,
+) -> float: ...
+
+
+@overload
+def characteristic_reception_plate_power[V: RealValues](
+    blocked_force_level: V,
+    *,
+    characteristic_mobility: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def characteristic_reception_plate_power[A: NumericArrayLike](
+    blocked_force_level: A,
+    *,
+    characteristic_mobility: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def characteristic_reception_plate_power(
     blocked_force_level: NumericArrayLike,
     *,
     characteristic_mobility: float = _CHARACTERISTIC_PLATE_MOBILITY,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Characteristic reception-plate power level (UNE-EN 15657:2018, Formula 17).
 
     :math:`L_\mathrm{Wsn} = L_\mathrm{Fb,eq} + 10 \log_{10}(|Y_{\mathrm{R},\infty,\mathrm{low}}|/Y_0)`
@@ -518,7 +682,8 @@ def characteristic_reception_plate_power(
         :func:`equivalent_blocked_force_level`).
     :param characteristic_mobility: ``Y_R,inf,low``, in m/(N.s)
         (Default: 5e-6, clause 7.2.4).
-    :return: The characteristic power level ``L_Wsn``, in dB re 1 pW.
+    :return: The characteristic power level ``L_Wsn``, in dB re 1 pW. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive characteristic mobility.
     :raises TypeError: if ``characteristic_mobility`` is not a single number, or
         ``blocked_force_level`` holds a text or a value that is not a real number.
@@ -527,16 +692,44 @@ def characteristic_reception_plate_power(
         characteristic_mobility, "characteristic_mobility"
     )
     lf = real_array(blocked_force_level, "blocked_force_level")
-    return np.asarray(
+    return as_float_or_array(
         lf + 10.0 * np.log10(characteristic_mobility / _REFERENCE_MOBILITY),
-        dtype=np.float64,
+        like=(blocked_force_level,),
     )
+
+
+@overload
+def equivalent_free_velocity_level[S1: RealScalar, S2: ComplexScalar](
+    power_level: S1,
+    plate_mobility: S2,
+) -> float: ...
+
+
+@overload
+def equivalent_free_velocity_level[V: RealValues, A2: NumericArrayLike](
+    power_level: V,
+    plate_mobility: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def equivalent_free_velocity_level[S1: RealScalar, V: ComplexValues](
+    power_level: S1,
+    plate_mobility: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def equivalent_free_velocity_level[A1: NumericArrayLike, A2: NumericArrayLike](
+    power_level: A1,
+    plate_mobility: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def equivalent_free_velocity_level(
     power_level: NumericArrayLike,
     plate_mobility: NumericArrayLike,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Equivalent free velocity level of the source (UNE-EN 15657:2018, Formula 18).
 
     :math:`L_\mathrm{vf,eq} = L_\mathrm{Ws,high} + 10 \log_{10}\left( |Y_\mathrm{R,high,eq}|^2 /
@@ -552,7 +745,9 @@ def equivalent_free_velocity_level(
         re 1 pW.
     :param plate_mobility: Equivalent plate mobility ``Y_R,high,eq`` (per
         band, complex), in m/(N.s).
-    :return: The equivalent free velocity level ``L_vf,eq``, in dB re 1e-9 m/s.
+    :return: The equivalent free velocity level ``L_vf,eq``, in dB re 1e-9 m/s. A
+        ``float`` when ``power_level`` and ``plate_mobility`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: if ``power_level`` is not finite,
         ``Re{plate_mobility}`` is not positive and finite, or the two shapes
         do not broadcast together.
@@ -581,13 +776,43 @@ def equivalent_free_velocity_level(
         )
         raise ValueError(msg) from None
     term = np.abs(y) ** 2 / (y_re * _REFERENCE_MOBILITY)
-    return np.asarray(lw + 10.0 * np.log10(term) + 60.0, dtype=np.float64)
+    return as_float_or_array(
+        lw + 10.0 * np.log10(term) + 60.0, like=(power_level, plate_mobility)
+    )
+
+
+@overload
+def source_mobility_from_levels[S1: RealScalar, S2: RealScalar](
+    free_velocity_level: S1,
+    blocked_force_level: S2,
+) -> float: ...
+
+
+@overload
+def source_mobility_from_levels[V: RealValues, A2: NumericArrayLike](
+    free_velocity_level: V,
+    blocked_force_level: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def source_mobility_from_levels[S1: RealScalar, V: RealValues](
+    free_velocity_level: S1,
+    blocked_force_level: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def source_mobility_from_levels[A1: NumericArrayLike, A2: NumericArrayLike](
+    free_velocity_level: A1,
+    blocked_force_level: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def source_mobility_from_levels(
     free_velocity_level: NumericArrayLike,
     blocked_force_level: NumericArrayLike,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Equivalent source mobility magnitude (UNE-EN 15657:2018, Formula 19).
 
     :math:`|Y_\mathrm{S,eq}|^2 / Y_0^2 = 10^{(L_\mathrm{vf,eq} - L_\mathrm{Fb,eq})/10} \cdot
@@ -600,7 +825,9 @@ def source_mobility_from_levels(
         (per band), in dB re 1e-9 m/s (Formula 10 or 18).
     :param blocked_force_level: Equivalent blocked force level ``L_Fb,eq``
         (per band), in dB re 1e-6 N (Formula 15).
-    :return: The source mobility magnitude ``|Y_S,eq|``, in m/(N.s).
+    :return: The source mobility magnitude ``|Y_S,eq|``, in m/(N.s). A ``float`` when
+        ``free_velocity_level`` and ``blocked_force_level`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-finite level, or two shapes that do not
         broadcast together.
     :raises TypeError: if ``blocked_force_level`` or ``free_velocity_level`` holds a
@@ -622,10 +849,10 @@ def source_mobility_from_levels(
             f"together; got shapes {lv.shape} and {lf.shape}."
         )
         raise ValueError(msg) from None
-    return np.asarray(
+    return as_float_or_array(
         _REFERENCE_MOBILITY
         * np.sqrt(10.0 ** ((lv - lf) / 10.0) * _MOBILITY_LEVEL_CONSTANT),
-        dtype=np.float64,
+        like=(free_velocity_level, blocked_force_level),
     )
 
 

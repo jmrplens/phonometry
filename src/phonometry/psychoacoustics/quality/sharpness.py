@@ -26,6 +26,8 @@ from ...metrology import REFERENCE_VALUES
 from ..loudness.zwicker import ZwickerLoudness, loudness_zwicker
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
     from ..._internal.signal import Signal
     from ..._internal.types import NumericArrayLike
 
@@ -47,7 +49,7 @@ _K_DIN_MIN = 0.105
 _K_DIN_MAX = 0.115
 
 
-def _g_din(z: np.ndarray) -> np.ndarray:
+def _g_din[S: np.floating[Any]](z: NDArray[S]) -> NDArray[S]:
     """DIN 45692 Eq. (1) weighting: 1 up to 15.8 Bark, rising beyond."""
     g = np.ones_like(z)
     high = z > _G_DIN_KNEE_BARK
@@ -55,7 +57,7 @@ def _g_din(z: np.ndarray) -> np.ndarray:
     return g
 
 
-def _g_bismarck(z: np.ndarray) -> np.ndarray:
+def _g_bismarck[S: np.floating[Any]](z: NDArray[S]) -> NDArray[S]:
     """DIN 45692 Annex B (informative), von Bismarck weighting."""
     g = np.ones_like(z)
     high = z > _G_BISMARCK_KNEE_BARK
@@ -63,15 +65,15 @@ def _g_bismarck(z: np.ndarray) -> np.ndarray:
     return g
 
 
-def _g_aures(z: np.ndarray, total_n: float) -> np.ndarray:
+def _g_aures(z: NDArray[np.floating[Any]], total_n: float) -> NDArray[np.floating[Any]]:
     """DIN 45692 Annex B (informative), Aures loudness-dependent weighting."""
-    g: np.ndarray = (
+    g: NDArray[np.floating[Any]] = (
         0.078 * np.exp(0.171 * z) / z * (total_n / np.log(total_n * 0.05 + 1.0))
     )
     return g
 
 
-def _moment(specific: np.ndarray, method: str) -> float:
+def _moment(specific: NDArray[np.float64], method: str) -> float:
     """Raw g(z)-weighted first moment of the specific-loudness pattern.
 
     Returns the un-normalized moment ``sum(N' g(z) z) dz / sum(N') dz`` for
@@ -97,7 +99,7 @@ def _moment(specific: np.ndarray, method: str) -> float:
 
 def _reference_sound(
     fs: int = 48000, seconds: float = 2.0, seed: int = 45692
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The DIN 45692 clause 6 standard test signal.
 
     Critical-band-wide narrowband noise: 920 Hz to 1080 Hz, 60 dB overall
@@ -113,7 +115,7 @@ def _reference_sound(
     return np.asarray(nb / np.sqrt(np.mean(nb**2)) * _P0 * 10 ** (60.0 / 20))
 
 
-def _reference_specific() -> np.ndarray:
+def _reference_specific() -> NDArray[np.float64]:
     """Specific loudness of the clause 6 reference sound (signal path)."""
     return loudness_zwicker(_reference_sound(), 48000, stationary=True).specific
 

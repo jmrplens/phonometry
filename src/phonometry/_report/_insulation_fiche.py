@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -64,7 +65,7 @@ _COMPACT_LEADING_PT = 8.6
 #: A per-band table column: header markup, values and decimal places. The
 #: values are numbers formatted to that many decimals in the fiche language,
 #: or cells already written as text (a minimum value printed with its sign).
-Column = tuple[str, "np.ndarray | Sequence[str]", int]
+Column = tuple[str, "NDArray[np.float64] | Sequence[str]", int]
 
 
 #: Builder of the left-hand table content for one report: given the reported
@@ -84,7 +85,7 @@ class ColumnsBuilder(Protocol):
     def __call__(
         self,
         value_header: str,
-        curve: np.ndarray,
+        curve: NDArray[np.float64],
         *,
         verbose: bool,
         language: Language,
@@ -142,7 +143,7 @@ def requirement_verdict(
 
 
 def band_value_table(
-    centers: np.ndarray,
+    centers: NDArray[np.float64],
     columns: Sequence[Column],
     language: Language,
     col_widths: list[float] | None = None,
@@ -224,7 +225,11 @@ def iso717_columns_builder(
     """
 
     def build(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
+        value_header: str,
+        curve: NDArray[np.float64],
+        *,
+        verbose: bool,
+        language: Language,
     ) -> tuple[Sequence[Column], str, Any]:
         from reportlab.lib.units import mm
 
@@ -384,7 +389,7 @@ class BandTable:
         under a long header.
     """
 
-    centers: np.ndarray
+    centers: NDArray[np.float64]
     columns: Sequence[Column]
     caption: str
     col_widths: list[float] | None = None

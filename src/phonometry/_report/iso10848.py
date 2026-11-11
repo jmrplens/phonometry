@@ -67,6 +67,7 @@ from .iso717 import _metadata_pairs
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.lib.colors import Color
     from reportlab.lib.styles import StyleSheet1
     from reportlab.platypus import Table
@@ -293,7 +294,7 @@ _KIJ_STATEMENT = (
 )
 
 
-def _kij_fraction(frequencies: np.ndarray) -> int:
+def _kij_fraction(frequencies: NDArray[np.float64]) -> int:
     """1 (octaves) when consecutive centres step by ~2, else 3 (one-third octaves)."""
     if frequencies.size < _MIN_BANDS_TO_INFER_FRACTION:
         return 3
@@ -302,8 +303,10 @@ def _kij_fraction(frequencies: np.ndarray) -> int:
 
 
 def _kij_mean_membership(
-    frequencies: np.ndarray, bracketed: np.ndarray | None, fraction: int | None
-) -> tuple[np.ndarray, float, float]:
+    frequencies: NDArray[np.float64],
+    bracketed: NDArray[np.bool_] | None,
+    fraction: int | None,
+) -> tuple[NDArray[np.bool_], float, float]:
     """Per-band single-number membership plus the Annex A band range.
 
     A band enters the single-number mean when it lies inside the Annex A range
@@ -324,10 +327,10 @@ def _kij_mean_membership(
 
 
 def _kij_value_table(
-    frequencies: np.ndarray,
-    k_ij: np.ndarray,
-    bracketed: np.ndarray | None,
-    in_mean: np.ndarray,
+    frequencies: NDArray[np.float64],
+    k_ij: NDArray[np.float64],
+    bracketed: NDArray[np.bool_] | None,
+    in_mean: NDArray[np.bool_],
     *,
     verbose: bool,
     language: Language,
@@ -370,8 +373,8 @@ def _kij_value_table(
 
 def _kij_result_box(
     result: VibrationReductionResult,
-    bracketed: np.ndarray | None,
-    in_mean: np.ndarray,
+    bracketed: NDArray[np.bool_] | None,
+    in_mean: NDArray[np.bool_],
     band_range: tuple[float, float],
     styles: StyleSheet1,
     accent: Color,

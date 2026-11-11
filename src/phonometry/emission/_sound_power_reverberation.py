@@ -78,9 +78,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
+
+from .._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     import os
@@ -89,7 +91,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -186,12 +188,12 @@ class ReverberationSoundPowerResult(OwnsArrays):
     :ivar method: One of ``"direct"`` or ``"comparison"``.
     """
 
-    frequencies: np.ndarray | None
-    sound_power_level: np.ndarray
-    mean_pressure_level: np.ndarray
-    absorption_area: np.ndarray
-    waterhouse_correction: np.ndarray
-    background_correction: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    sound_power_level: NDArray[np.float64]
+    mean_pressure_level: NDArray[np.float64]
+    absorption_area: NDArray[np.float64]
+    waterhouse_correction: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
     c1: float
     c2: float
     speed_of_sound: float
@@ -320,7 +322,7 @@ def _speed_of_sound(temperature_c: float) -> float:
     return float(20.05 * np.sqrt(273.0 + temperature_c))
 
 
-def _mean_level(levels: NumericArrayLike, name: str = "levels") -> np.ndarray:
+def _mean_level(levels: NumericArrayLike, name: str = "levels") -> NDArray[np.float64]:
     """Energy mean over microphone positions (rows), returning one value per
     band. A 1D input is treated as a single averaged spectrum (ISO 3741
     Eq. 16).
@@ -337,7 +339,9 @@ def _mean_level(levels: NumericArrayLike, name: str = "levels") -> np.ndarray:
     raise ValueError(msg)
 
 
-def _k1_eq14(delta: np.ndarray, frequencies: np.ndarray) -> tuple[np.ndarray, bool]:
+def _k1_eq14(
+    delta: NDArray[np.float64], frequencies: NDArray[np.float64]
+) -> tuple[NDArray[np.float64], bool]:
     r"""Background-noise correction ``K1`` from ``dLp`` (ISO 3741:2010 Eq. 14).
 
     :math:`K_1 = -10 \log_{10}(1 - 10^{-0.1 \Delta L_p})`. The precision-grade
@@ -363,12 +367,69 @@ def _k1_eq14(delta: np.ndarray, frequencies: np.ndarray) -> tuple[np.ndarray, bo
     return np.asarray(k1, dtype=np.float64), bool(np.any(judged < low))
 
 
+@overload
+def reverberation_background_correction[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    levels: S1,
+    background_levels: S2,
+    *,
+    frequencies: S3,
+) -> float: ...
+
+
+@overload
+def reverberation_background_correction[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    levels: V,
+    background_levels: A2,
+    *,
+    frequencies: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_background_correction[
+    S1: RealScalar,
+    V: RealValues,
+    A3: NumericArrayLike,
+](
+    levels: S1,
+    background_levels: V,
+    *,
+    frequencies: A3,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_background_correction[S1: RealScalar, S2: RealScalar, V: RealValues](
+    levels: S1,
+    background_levels: S2,
+    *,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_background_correction[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    levels: A1,
+    background_levels: A2,
+    *,
+    frequencies: A3,
+) -> float | NDArray[np.float64]: ...
+
+
 def reverberation_background_correction(
     levels: NumericArrayLike,
     background_levels: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""Background-noise correction :math:`K_1`, ISO 3741:2010 Equation (14).
 
     :math:`K_1 = -10 \lg (1 - 10^{-0,1 \Delta L_p})`, the decibels to take off
@@ -387,8 +448,10 @@ def reverberation_background_correction(
         decibels.
     :param background_levels: Background levels in the same bands, in decibels.
     :param frequencies: Nominal band centre frequencies, in hertz.
-    :return: :math:`K_1` per band, in decibels, to be subtracted from
-        ``levels``.
+    :return: :math:`K_1` per band, in decibels, to be subtracted from ``levels``. A
+        ``float`` when ``levels``, ``background_levels`` and ``frequencies`` are all
+        numbers, an array when one of them is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: For inputs that do not match band for band, that are
         not finite, or a band centre that is not strictly positive.
     :raises TypeError: if ``background_levels``, ``frequencies`` or ``levels`` holds a
@@ -403,7 +466,7 @@ def reverberation_background_correction(
         )
         raise ValueError(msg)
     k1, _ = _k1_eq14(signal - background, freqs)
-    return k1
+    return as_float_or_array(k1, like=(levels, background_levels, frequencies))
 
 
 def _checked_background(
@@ -411,7 +474,7 @@ def _checked_background(
     background_levels: NumericArrayLike,
     *,
     names: tuple[str, str] = ("levels", "background_levels"),
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """The background in the shape the correction reads, or a refusal naming it.
 
     Per-position 2D ``levels`` take a background of the same shape or one
@@ -460,11 +523,11 @@ def _checked_background(
 def _background_corrected_mean(
     levels: NumericArrayLike,
     background_levels: NumericArrayLike,
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     *,
     reference: bool = False,
     names: tuple[str, str] = ("levels", "background_levels"),
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Background-corrected mean room level and effective per-band ``K1``.
 
     With per-position 2D ``levels`` the correction follows ISO 3741:2010
@@ -541,10 +604,10 @@ def _min_room_volume(lowest_band: float) -> float:
 
 def _room_qualification_warnings(
     levels: NumericArrayLike,
-    t60: np.ndarray,
+    t60: NDArray[np.float64],
     volume: float,
     surface_area: float,
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
 ) -> None:
     r"""Emit advisory :class:`SoundPowerWarning`\ s when the room or the
     microphone sampling fails an ISO 3741 qualification criterion.
@@ -621,12 +684,12 @@ class _DirectTerms:
     and the speed of sound the result reports.
     """
 
-    absorption_area: np.ndarray
-    waterhouse_correction: np.ndarray
+    absorption_area: NDArray[np.float64]
+    waterhouse_correction: NDArray[np.float64]
     c1: float
     c2: float
     speed_of_sound: float
-    bracket: np.ndarray
+    bracket: NDArray[np.float64]
 
 
 def _room_inputs(
@@ -653,7 +716,7 @@ def _room_inputs(
 
 def _band_inputs(
     n_bands: int, t60: NumericArrayLike, frequencies: NumericArrayLike
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The per-band ``T60`` and mid-band frequencies, one value per band."""
     freqs = real_array(frequencies, "frequencies")
     t60_arr = np.broadcast_to(real_array(t60, "t60"), (n_bands,)).copy()
@@ -675,10 +738,10 @@ def _band_inputs(
 
 
 def _direct_terms(
-    t60_arr: np.ndarray,
+    t60_arr: NDArray[np.float64],
     volume: float,
     surface_area: float,
-    freqs: np.ndarray,
+    freqs: NDArray[np.float64],
     temperature_c: float,
     static_pressure_kpa: float,
 ) -> _DirectTerms:
@@ -719,7 +782,7 @@ def _comparison_inputs(
     *,
     temperature_c: float,
     static_pressure_kpa: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64] | None]:
     """The reference source's mean room level, its known ``LW`` and the bands.
 
     A :class:`~phonometry.emission.ReferenceSourceCalibration` is read in the
@@ -749,7 +812,9 @@ def _comparison_inputs(
     return lp_rss, lw_rss, freqs
 
 
-def _require_frequencies(freqs: np.ndarray | None, name: str) -> np.ndarray:
+def _require_frequencies(
+    freqs: NDArray[np.float64] | None, name: str
+) -> NDArray[np.float64]:
     """The band centres the frequency-dependent ``K1`` criterion needs."""
     if freqs is None:
         msg = f"'frequencies' are required to apply '{name}'."
@@ -758,7 +823,7 @@ def _require_frequencies(freqs: np.ndarray | None, name: str) -> np.ndarray:
 
 
 def _a_weighted_total(
-    sound_power_level: np.ndarray, frequencies: np.ndarray | None
+    sound_power_level: NDArray[np.float64], frequencies: NDArray[np.float64] | None
 ) -> float:
     """A-weighted total ``LWA`` (ISO 3741 Annex F Eq. F.2). ``NaN`` for several
     bands without frequencies; equal to ``LW`` for a single band.
@@ -972,7 +1037,7 @@ def _checked_comparison_backgrounds(
     background_levels: NumericArrayLike | None,
     reference_levels: NumericArrayLike,
     reference_background_levels: NumericArrayLike | None,
-    freqs: np.ndarray | None,
+    freqs: NDArray[np.float64] | None,
 ) -> None:
     """Refuse a background of a comparison before any advisory is raised.
 
@@ -993,11 +1058,11 @@ def _checked_comparison_backgrounds(
 
 
 def _reference_source_level(
-    lp_rss: np.ndarray,
+    lp_rss: NDArray[np.float64],
     reference_levels: NumericArrayLike,
     reference_background_levels: NumericArrayLike | None,
-    freqs: np.ndarray | None,
-) -> np.ndarray:
+    freqs: NDArray[np.float64] | None,
+) -> NDArray[np.float64]:
     """The reference source's mean room level, background-corrected if asked.
 
     The reference sound source runs steadily, so its correction is the
@@ -1048,12 +1113,12 @@ class ReverberationSoundEnergyResult(OwnsArrays):
     :ivar method: One of ``"direct"`` or ``"comparison"``.
     """
 
-    frequencies: np.ndarray | None
-    sound_energy_level: np.ndarray
-    mean_event_level: np.ndarray
-    absorption_area: np.ndarray
-    waterhouse_correction: np.ndarray
-    background_correction: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    sound_energy_level: NDArray[np.float64]
+    mean_event_level: NDArray[np.float64]
+    absorption_area: NDArray[np.float64]
+    waterhouse_correction: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
     c1: float
     c2: float
     speed_of_sound: float
@@ -1124,7 +1189,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
 
 def _room_event_levels(
     levels: NumericArrayLike, n_events: int | np.integer[Any] | None
-) -> tuple[np.ndarray, int | None]:
+) -> tuple[NDArray[np.float64], int | None]:
     """The mean single event level of one event behind the three input forms.
 
     A 3-D ``(Ne, NM, NB)`` array holds one event per entry of its first axis
@@ -1423,8 +1488,8 @@ class OctaveBandLevels(OwnsArrays):
         axis.
     """
 
-    frequencies: np.ndarray
-    levels: np.ndarray
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

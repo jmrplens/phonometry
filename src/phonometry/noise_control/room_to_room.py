@@ -277,15 +277,15 @@ class RoomToRoomResult(OwnsArrays):
         2003, 7.5.2), or ``None`` for the reverberant field alone.
     """
 
-    frequencies: np.ndarray
-    source_level: np.ndarray
-    transmission_loss: np.ndarray
+    frequencies: NDArray[np.float64]
+    source_level: NDArray[np.float64]
+    transmission_loss: NDArray[np.float64]
     partition_area: float
-    receiving_absorption: np.ndarray
-    noise_reduction: np.ndarray
-    received_level: np.ndarray
+    receiving_absorption: NDArray[np.float64]
+    noise_reduction: NDArray[np.float64]
+    received_level: NDArray[np.float64]
     flanking_penalty: float
-    source_power_level: np.ndarray | None
+    source_power_level: NDArray[np.float64] | None
     criterion: CriterionFamily
     target: float | None
     label: str
@@ -351,7 +351,7 @@ class RoomToRoomResult(OwnsArrays):
         return rating_of(self)
 
     @property
-    def criterion_curve(self) -> np.ndarray | None:
+    def criterion_curve(self) -> NDArray[np.float64] | None:
         """The design curve of :attr:`target` at the analysis bands, dB.
 
         ``None`` when the chain declared no target. Comparable band by band
@@ -360,7 +360,7 @@ class RoomToRoomResult(OwnsArrays):
         return curve_of(self)
 
     @property
-    def exceedance(self) -> np.ndarray | None:
+    def exceedance(self) -> NDArray[np.float64] | None:
         """How far the receiving room is over the criterion, band by band, dB.
 
         Positive where the curve is exceeded, ``None`` without a target. It is
@@ -379,7 +379,7 @@ class RoomToRoomResult(OwnsArrays):
 
     # -- design inverse ---------------------------------------------------
     @property
-    def required_transmission_loss(self) -> np.ndarray | None:
+    def required_transmission_loss(self) -> NDArray[np.float64] | None:
         r"""Partition ``TL`` that would just meet the criterion, per band, dB.
 
         The chain of Equation (4.101) solved for the transmission loss,

@@ -58,8 +58,8 @@ energetic combination used by the EN 12354-3/-4 facade model of
 ```python
 ApertureTransmissionResult(
     *,
-    frequencies: np.ndarray,
-    transmission_coefficient: np.ndarray,
+    frequencies: NDArray[np.float64],
+    transmission_coefficient: NDArray[np.float64],
     kind: Literal['slit', 'circular'],
     depth: float,
     width_m: float | None = None,
@@ -169,7 +169,7 @@ Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
 composite_transmission_loss(
     areas: NumericArrayLike,
     reduction_indices: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Composite sound reduction index of parallel elements (Hopkins
@@ -191,7 +191,7 @@ A bare opening enters with $R = 0$ ($\tau = 1$).
 | `areas` | Element areas `S_n`, in m^2 (1-D, length `N`, all > 0). |
 | `reduction_indices` | Element sound reduction indices `R_n`, in dB. Either a 1-D array of length `N` (one value per element) or a 2-D array of shape `(N, M)` (`N` elements over `M` bands). |
 
-**Returns:** The composite `R`: a scalar array for 1-D input, or one value per band (length `M`) for 2-D input.
+**Returns:** The composite `R`: a `float` for 1-D input, or one value per band (length `M`) for 2-D input.
 
 **Raises**
 
@@ -260,7 +260,7 @@ slit_resonance_frequencies(
     *,
     n_orders: int | np.integer[Any] = 3,
     speed_of_sound: float = 343.0,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Slit resonance frequencies $d + 2e = z\lambda/2$ (Hopkins
@@ -327,7 +327,17 @@ Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 ## transmission_loss_from_coefficient
 
 ```python
-transmission_loss_from_coefficient(tau: NumericArrayLike) -> np.ndarray
+transmission_loss_from_coefficient(
+    tau: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+transmission_loss_from_coefficient(
+    tau: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+transmission_loss_from_coefficient(
+    tau: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Sound reduction index $R = -10 \log_{10}(\tau)$ from a transmission
@@ -339,7 +349,7 @@ coefficient.
 | :--- | :--- |
 | `tau` | Transmission coefficient(s) `tau` (> 0). Values above 1 (a resonating aperture that transmits more than the incident intensity) give a negative `R`. |
 
-**Returns:** The sound reduction index `R`, in dB.
+**Returns:** The sound reduction index `R`, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

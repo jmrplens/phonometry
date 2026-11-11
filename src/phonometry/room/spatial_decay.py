@@ -89,12 +89,13 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_choice,
     require_finite,
@@ -111,7 +112,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Region = Literal["near", "middle", "far", "whole"]
 #: A region of :data:`Region` read at a conventional distance: all but the
@@ -470,9 +471,30 @@ class SpatialDecayResult(OwnsArrays):
         return plot_spatial_decay(self, ax=ax, language=language, **kwargs)
 
 
+@overload
+def sound_distribution_value[S: RealScalar](
+    levels: S,
+    sound_power_levels: NumericArrayLike,
+) -> float: ...
+
+
+@overload
+def sound_distribution_value[V: RealValues](
+    levels: V,
+    sound_power_levels: NumericArrayLike,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def sound_distribution_value[A: NumericArrayLike](
+    levels: A,
+    sound_power_levels: NumericArrayLike,
+) -> float | NDArray[np.float64]: ...
+
+
 def sound_distribution_value(
     levels: NumericArrayLike, sound_power_levels: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The sound distribution value of a measured point, Equation (1).
 
     .. math::
@@ -486,23 +508,42 @@ def sound_distribution_value(
     :param levels: :math:`L_{pj}(r)` at each position, in decibels.
     :param sound_power_levels: :math:`L_{Wj}` of the source, in decibels,
         as a scalar or one value per position.
-    :return: :math:`D_j(r)`, in decibels.
+    :return: :math:`D_j(r)`, in decibels. A ``float`` for a number, an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: For inputs that are not finite or do not broadcast.
     :raises TypeError: if ``levels`` or ``sound_power_levels`` holds a text or a value
         that is not a real number.
     """
-    levels = require_finite_array(levels, "levels")
+    measured = require_finite_array(levels, "levels")
     power = require_finite_array(sound_power_levels, "sound_power_levels")
-    if power.size not in (1, levels.size):
+    if power.size not in (1, measured.size):
         msg = (
             "'sound_power_levels' must be a scalar or match 'levels' "
             "position for position."
         )
         raise ValueError(msg)
-    return np.asarray(levels - power, dtype=np.float64)
+    return as_float_or_array(measured - power, like=(levels,))
 
 
-def reference_distribution_value(distances: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def reference_distribution_value[S: RealScalar](distances: S) -> float: ...
+
+
+@overload
+def reference_distribution_value[V: RealValues](
+    distances: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reference_distribution_value[A: NumericArrayLike](
+    distances: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def reference_distribution_value(
+    distances: NumericArrayLike,
+) -> float | NDArray[np.float64]:
     r"""The free-field reference curve, Equation (2).
 
     .. math::
@@ -515,16 +556,44 @@ def reference_distribution_value(distances: NumericArrayLike) -> NDArray[np.floa
     used here, because it is the curve the standard draws in its own figures.
 
     :param distances: :math:`r` at each position, in metres.
-    :return: :math:`D_\mathrm{ref}(r)`, in decibels.
+    :return: :math:`D_\mathrm{ref}(r)`, in decibels. A ``float`` for a number, an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a distance that is not strictly positive.
     :raises TypeError: if ``distances`` holds a text or a value that is not a real
         number.
     """
     radii = require_positive_array(distances, "distances")
-    return np.asarray(
+    return as_float_or_array(
         20.0 * np.log10(ISO14257_REFERENCE_DISTANCE_M / radii) - FREE_FIELD_OFFSET_DB,
-        dtype=np.float64,
+        like=(distances,),
     )
+
+
+@overload
+def floor_reference_value[S: RealScalar](
+    distances: S,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float: ...
+
+
+@overload
+def floor_reference_value[V: RealValues](
+    distances: V,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def floor_reference_value[A: NumericArrayLike](
+    distances: A,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def floor_reference_value(
@@ -532,7 +601,7 @@ def floor_reference_value(
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The reference curve over a reflecting plane, Equations (B.2) to (B.4).
 
     .. math::
@@ -550,7 +619,8 @@ def floor_reference_value(
         floor.
     :param path_height_m: :math:`h_\mathrm{P}`, in metres; omit it for a path at the
         source height.
-    :return: :math:`D_\mathrm{floor,ref}(r)`, in decibels.
+    :return: :math:`D_\mathrm{floor,ref}(r)`, in decibels. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a distance that is not strictly positive or a
         negative height.
     :raises TypeError: if ``path_height_m`` or ``source_height_m`` is not a single
@@ -571,7 +641,73 @@ def floor_reference_value(
         raise ValueError(msg)
     squared = radii**2
     bracket = 1.0 + squared / (squared + 4.0 * source * path)
-    return reference_distribution_value(radii) + 10.0 * np.log10(bracket)
+    return as_float_or_array(
+        reference_distribution_value(radii) + 10.0 * np.log10(bracket),
+        like=(distances,),
+    )
+
+
+@overload
+def corrected_distribution_value[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    distribution_levels: S1,
+    measured_reference_levels: S2,
+    distances: S3,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float: ...
+
+
+@overload
+def corrected_distribution_value[
+    V: RealValues,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    distribution_levels: V,
+    measured_reference_levels: A2,
+    distances: A3,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def corrected_distribution_value[S1: RealScalar, V: RealValues, A3: NumericArrayLike](
+    distribution_levels: S1,
+    measured_reference_levels: V,
+    distances: A3,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def corrected_distribution_value[S1: RealScalar, S2: RealScalar, V: RealValues](
+    distribution_levels: S1,
+    measured_reference_levels: S2,
+    distances: V,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def corrected_distribution_value[
+    A1: NumericArrayLike,
+    A2: NumericArrayLike,
+    A3: NumericArrayLike,
+](
+    distribution_levels: A1,
+    measured_reference_levels: A2,
+    distances: A3,
+    *,
+    source_height_m: float = ...,
+    path_height_m: float | None = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def corrected_distribution_value(
@@ -581,7 +717,7 @@ def corrected_distribution_value(
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The Annex B correction for the source's own curve, Equation (B.1).
 
     .. math::
@@ -603,7 +739,10 @@ def corrected_distribution_value(
     :param distances: :math:`r` at each position, in metres.
     :param source_height_m: :math:`h_\mathrm{S}`, in metres.
     :param path_height_m: :math:`h_\mathrm{P}`, in metres.
-    :return: :math:`D_{\mathrm{corr}\,j}(r)`, in decibels.
+    :return: :math:`D_{\mathrm{corr}\,j}(r)`, in decibels. A ``float`` when
+        ``distribution_levels``, ``measured_reference_levels`` and ``distances`` are all
+        numbers, an array when one of them is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: For inputs that do not match position for position, or
         a correction that leaves no energy at all.
     :raises TypeError: if ``distances``, ``distribution_levels`` or
@@ -634,7 +773,10 @@ def corrected_distribution_value(
             "the same position."
         )
         raise ValueError(msg)
-    return np.asarray(10.0 * np.log10(energy), dtype=np.float64)
+    return as_float_or_array(
+        10.0 * np.log10(energy),
+        like=(distribution_levels, measured_reference_levels, distances),
+    )
 
 
 def spectrum_distribution_value(
@@ -829,9 +971,37 @@ def spatial_decay_rate(
     return -DECADE_TO_DOUBLING * slope
 
 
+@overload
+def level_excess[S1: RealScalar, S2: RealScalar](
+    distribution_levels: S1,
+    distances: S2,
+) -> float: ...
+
+
+@overload
+def level_excess[V: RealValues, A2: NumericArrayLike](
+    distribution_levels: V,
+    distances: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def level_excess[S1: RealScalar, V: RealValues](
+    distribution_levels: S1,
+    distances: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def level_excess[A1: NumericArrayLike, A2: NumericArrayLike](
+    distribution_levels: A1,
+    distances: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def level_excess(
     distribution_levels: NumericArrayLike, distances: NumericArrayLike
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The excess over a free field at each position, Equation (6).
 
     .. math::
@@ -840,7 +1010,9 @@ def level_excess(
 
     :param distribution_levels: :math:`D` at each position, in decibels.
     :param distances: :math:`r` at each position, in metres.
-    :return: :math:`\mathrm{DL}_\mathrm{f}` at each position, in decibels.
+    :return: :math:`\mathrm{DL}_\mathrm{f}` at each position, in decibels. A ``float``
+        when ``distribution_levels`` and ``distances`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For inputs that do not match position for position.
     :raises TypeError: if ``distances`` or ``distribution_levels`` holds a text or a
         value that is not a real number.
@@ -849,7 +1021,10 @@ def level_excess(
     radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
-    return np.asarray(values - reference_distribution_value(radii), dtype=np.float64)
+    return as_float_or_array(
+        values - reference_distribution_value(radii),
+        like=(distribution_levels, distances),
+    )
 
 
 def mean_level_excess(

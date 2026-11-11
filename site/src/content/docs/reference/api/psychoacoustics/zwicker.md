@@ -121,12 +121,12 @@ center frequencies 25 Hz to 12.5 kHz (base-ten bands, IEC 61260-1).
 ZwickerLoudness(
     loudness: float,
     loudness_level: float,
-    specific: np.ndarray,
+    specific: NDArray[np.float64],
     field: Literal['free', 'diffuse'],
     n5: float | None = None,
     n10: float | None = None,
-    times: np.ndarray | None = None,
-    loudness_vs_time: np.ndarray | None = None,
+    times: NDArray[np.float64] | None = None,
+    loudness_vs_time: NDArray[np.float64] | None = None,
 )
 ```
 

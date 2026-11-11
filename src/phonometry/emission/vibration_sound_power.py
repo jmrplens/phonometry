@@ -48,17 +48,20 @@ This module feeds the structure-borne source characterisation standards
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
+
+from .._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     import os
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
 
 
@@ -117,23 +120,80 @@ _K1A_ZERO_ABOVE_DB: float = 10.0
 _K1A_CLAMPED_BELOW_DB: float = 3.0
 
 
+@overload
+def velocity_level[S: RealScalar](velocity: S, *, reference: float = ...) -> float: ...
+
+
+@overload
+def velocity_level[V: RealValues](
+    velocity: V,
+    *,
+    reference: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_level[A: NumericArrayLike](
+    velocity: A,
+    *,
+    reference: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def velocity_level(
     velocity: NumericArrayLike, *, reference: float = REFERENCE_VELOCITY_M_S
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Vibratory velocity level (ISO/TS 7849-1, Eq. 3).
 
     :math:`L_v = 20 \log_{10}(v/v_0)` with ``v0`` the reference velocity.
 
     :param velocity: R.m.s. vibratory velocity ``v`` (scalar or array), in m/s.
     :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
-    :return: The velocity level ``L_v``, in dB re ``v0``.
+    :return: The velocity level ``L_v``, in dB re ``v0``. A ``float`` for a number, an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive reference.
     :raises TypeError: if ``reference`` is not a single number, or ``velocity`` holds a
         text or a value that is not a real number.
     """
     reference = require_positive(reference, "reference")
     v = real_array(velocity, "velocity")
-    return np.asarray(20.0 * np.log10(np.abs(v) / reference), dtype=np.float64)
+    return as_float_or_array(20.0 * np.log10(np.abs(v) / reference), like=(velocity,))
+
+
+@overload
+def velocity_level_from_acceleration[S1: RealScalar, S2: RealScalar](
+    peak_acceleration: S1,
+    *,
+    frequency: S2,
+    reference: float = ...,
+) -> float: ...
+
+
+@overload
+def velocity_level_from_acceleration[V: RealValues, A2: NumericArrayLike](
+    peak_acceleration: V,
+    *,
+    frequency: A2,
+    reference: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_level_from_acceleration[S1: RealScalar, V: RealValues](
+    peak_acceleration: S1,
+    *,
+    frequency: V,
+    reference: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_level_from_acceleration[A1: NumericArrayLike, A2: NumericArrayLike](
+    peak_acceleration: A1,
+    *,
+    frequency: A2,
+    reference: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def velocity_level_from_acceleration(
@@ -141,7 +201,7 @@ def velocity_level_from_acceleration(
     *,
     frequency: NumericArrayLike,
     reference: float = REFERENCE_VELOCITY_M_S,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
 
     :math:`L_v = 20 \log_{10}\!\left( \frac{a_{\text{peak}}}{2\pi f v_0 \sqrt{2}}
@@ -152,7 +212,9 @@ def velocity_level_from_acceleration(
         in m/s^2.
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
-    :return: The velocity level ``L_v``, in dB re ``v0``.
+    :return: The velocity level ``L_v``, in dB re ``v0``. A ``float`` when
+        ``peak_acceleration`` and ``frequency`` are both numbers, an array when either
+        is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency or reference.
     :raises TypeError: if ``reference`` is not a single number, or ``frequency`` or
         ``peak_acceleration`` holds a text or a value that is not a real number.
@@ -164,7 +226,9 @@ def velocity_level_from_acceleration(
         msg = "'frequency' must be positive."
         raise ValueError(msg)
     v_rms = np.abs(a) / (2.0 * np.pi * f * np.sqrt(2.0))
-    return np.asarray(20.0 * np.log10(v_rms / reference), dtype=np.float64)
+    return as_float_or_array(
+        20.0 * np.log10(v_rms / reference), like=(peak_acceleration, frequency)
+    )
 
 
 def mean_velocity_level(
@@ -198,13 +262,53 @@ def mean_velocity_level(
     return float(10.0 * np.log10(mean_energy))
 
 
+@overload
+def radiation_factor[S1: RealScalar, S2: RealScalar](
+    sound_power: S1,
+    area: float,
+    mean_square_velocity: S2,
+    *,
+    impedance: float = ...,
+) -> float: ...
+
+
+@overload
+def radiation_factor[V: RealValues, A2: NumericArrayLike](
+    sound_power: V,
+    area: float,
+    mean_square_velocity: A2,
+    *,
+    impedance: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def radiation_factor[S1: RealScalar, V: RealValues](
+    sound_power: S1,
+    area: float,
+    mean_square_velocity: V,
+    *,
+    impedance: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def radiation_factor[A1: NumericArrayLike, A2: NumericArrayLike](
+    sound_power: A1,
+    area: float,
+    mean_square_velocity: A2,
+    *,
+    impedance: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def radiation_factor(
     sound_power: NumericArrayLike,
     area: float,
     mean_square_velocity: NumericArrayLike,
     *,
     impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""A-weighted radiation factor ``epsilon`` (ISO/TS 7849-1 Eq. 4, -2 Eq. 8).
 
     :math:`\epsilon = P / (Z_\mathrm{c} \langle v^2 \rangle S)`, the sound-radiation
@@ -217,7 +321,9 @@ def radiation_factor(
     :param mean_square_velocity: Mean-square vibratory velocity
         :math:`\langle v^2 \rangle`, in (m/s)^2.
     :param impedance: Characteristic impedance ``Z_c`` (Default: 411 N.s/m^3).
-    :return: The radiation factor ``epsilon`` (dimensionless).
+    :return: The radiation factor ``epsilon`` (dimensionless). A ``float`` when
+        ``sound_power`` and ``mean_square_velocity`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive area or impedance.
     :raises TypeError: if ``area`` or ``impedance`` is not a single number, or
         ``mean_square_velocity`` or ``sound_power`` holds a text or a value that is not
@@ -227,7 +333,57 @@ def radiation_factor(
     impedance = require_positive(impedance, "impedance")
     p = real_array(sound_power, "sound_power")
     v2 = real_array(mean_square_velocity, "mean_square_velocity")
-    return np.asarray(p / (impedance * v2 * area), dtype=np.float64)
+    return as_float_or_array(
+        p / (impedance * v2 * area), like=(sound_power, mean_square_velocity)
+    )
+
+
+@overload
+def radiated_sound_power_level[S1: RealScalar, S2: RealScalar](
+    velocity_level: S1,
+    area: float,
+    *,
+    radiation_factor: S2 = ...,
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> float: ...
+
+
+@overload
+def radiated_sound_power_level[V: RealValues, A2: NumericArrayLike](
+    velocity_level: V,
+    area: float,
+    *,
+    radiation_factor: A2 = ...,
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def radiated_sound_power_level[S1: RealScalar, V: RealValues](
+    velocity_level: S1,
+    area: float,
+    *,
+    radiation_factor: V,
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def radiated_sound_power_level[A1: NumericArrayLike, A2: NumericArrayLike](
+    velocity_level: A1,
+    area: float,
+    *,
+    radiation_factor: A2 = ...,
+    reference_area: float = ...,
+    normalized_impedance: float = ...,
+    reference_impedance: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def radiated_sound_power_level(
@@ -238,7 +394,7 @@ def radiated_sound_power_level(
     reference_area: float = _REFERENCE_AREA,
     normalized_impedance: float = NORMALIZED_IMPEDANCE_PA_S_M,
     reference_impedance: float = _REFERENCE_IMPEDANCE,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Radiated sound power level (ISO/TS 7849-1 Eq. 12, -2 Eq. 15).
 
     .. math::
@@ -256,7 +412,9 @@ def radiated_sound_power_level(
     :param reference_area: Reference area ``S0`` (Default: 1 m^2).
     :param normalized_impedance: ``Z_c,n`` (Default: 411 N.s/m^3).
     :param reference_impedance: ``Z_c,0`` (Default: 400 N.s/m^3).
-    :return: The sound power level ``L_W``, in dB re 1 pW.
+    :return: The sound power level ``L_W``, in dB re 1 pW. A ``float`` when
+        ``velocity_level`` and ``radiation_factor`` are both numbers, an array when
+        either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive area, reference area or impedance.
     :raises TypeError: if ``area``, ``normalized_impedance``, ``reference_area`` or
         ``reference_impedance`` is not a single number, or ``radiation_factor`` or
@@ -276,7 +434,7 @@ def radiated_sound_power_level(
         + 10.0 * np.log10(eps)
         + 10.0 * np.log10(normalized_impedance / reference_impedance)
     )
-    return np.asarray(lw, dtype=np.float64)
+    return as_float_or_array(lw, like=(velocity_level, radiation_factor))
 
 
 def extraneous_velocity_correction(level_difference: float) -> float:
@@ -313,11 +471,11 @@ class VibrationSoundPowerResult(OwnsArrays):
     :ivar area: Radiating surface area ``S``, in m^2.
     """
 
-    velocity_level: np.ndarray
-    sound_power_level: np.ndarray
-    radiation_factor: np.ndarray
+    velocity_level: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    radiation_factor: NDArray[np.float64]
     area: float
-    frequencies: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.

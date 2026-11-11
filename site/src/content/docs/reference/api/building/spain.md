@@ -545,10 +545,10 @@ DBHRGlobalIndexResult(
     reported: int,
     name: str,
     spectrum: Literal['pink', 'traffic', 'railway', 'aircraft'],
-    frequencies: np.ndarray,
-    band_values: np.ndarray,
-    spectrum_levels: np.ndarray,
-    band_contributions: np.ndarray,
+    frequencies: NDArray[np.float64],
+    band_values: NDArray[np.float64],
+    spectrum_levels: NDArray[np.float64],
+    band_contributions: NDArray[np.float64],
     reference: str,
 )
 ```

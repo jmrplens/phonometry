@@ -79,11 +79,39 @@ multi-junction adjustment `dK` of clause F.1
 
 ```python
 coupling_term(
+    source_mobility: complex | np.number[Any],
+    receiver_mobility: complex | np.number[Any],
+    *,
+    transfer_mobility: complex | np.number[Any] = ...,
+) -> float
+
+coupling_term(
+    source_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    receiver_mobility: NumericArrayLike,
+    *,
+    transfer_mobility: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+coupling_term(
+    source_mobility: complex | np.number[Any],
+    receiver_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    *,
+    transfer_mobility: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+coupling_term(
+    source_mobility: complex | np.number[Any],
+    receiver_mobility: complex | np.number[Any],
+    *,
+    transfer_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+coupling_term(
     source_mobility: NumericArrayLike,
     receiver_mobility: NumericArrayLike,
     *,
-    transfer_mobility: NumericArrayLike = 0.0,
-) -> np.ndarray
+    transfer_mobility: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Coupling term `D_C` for a point excitation (EN 12354-5, Formula 19b/19e).
@@ -101,7 +129,7 @@ connection, Formula 19b).
 | `receiver_mobility` | Receiver point mobility `Y_i` (complex, positive real part). |
 | `transfer_mobility` | Elastic-support transfer mobility `Y_k` (Default: 0.0). |
 
-**Returns:** The coupling term `D_C`, in dB. Positive whenever the source and receiver mobilities are well mismatched (the usual installed case), but **not** guaranteed non-negative: near a mounting resonance where `Y_s` and `Y_i` are of comparable magnitude and opposite phase the numerator $\lvert Y_\mathrm{s} + Y_i \rvert^2$ collapses and `D_C` goes negative (the installed power then exceeds the characteristic level; e.g. $Y_\mathrm{s} = j \cdot 10^{-4}$, $Y_i = 10^{-5} - j \cdot 10^{-4}$ m/(N·s) gives $D_\mathrm{C} \approx -10$ dB).
+**Returns:** The coupling term `D_C`, in dB. Positive whenever the source and receiver mobilities are well mismatched (the usual installed case), but **not** guaranteed non-negative: near a mounting resonance where `Y_s` and `Y_i` are of comparable magnitude and opposite phase the numerator A `float` when `source_mobility`, `receiver_mobility` and `transfer_mobility` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included. $\lvert Y_\mathrm{s} + Y_i \rvert^2$ collapses and `D_C` goes negative (the installed power then exceeds the characteristic level; e.g. $Y_\mathrm{s} = j \cdot 10^{-4}$, $Y_i = 10^{-5} - j \cdot 10^{-4}$ m/(N·s) gives $D_\mathrm{C} \approx -10$ dB).
 
 **Raises**
 
@@ -114,9 +142,24 @@ connection, Formula 19b).
 
 ```python
 coupling_term_force_source(
+    source_mobility: complex | np.number[Any],
+    receiver_mobility: complex | np.number[Any],
+) -> float
+
+coupling_term_force_source(
+    source_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    receiver_mobility: NumericArrayLike,
+) -> NDArray[np.float64]
+
+coupling_term_force_source(
+    source_mobility: complex | np.number[Any],
+    receiver_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+coupling_term_force_source(
     source_mobility: NumericArrayLike,
     receiver_mobility: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Coupling term for a force source, high source mobility (Formula 19c).
@@ -132,7 +175,7 @@ $$
 | `source_mobility` | Source point mobility `Y_s` (complex, non-zero). |
 | `receiver_mobility` | Receiver point mobility `Y_i` (complex, positive real part). |
 
-**Returns:** The coupling term `D_C`, in dB.
+**Returns:** The coupling term `D_C`, in dB. A `float` when `source_mobility` and `receiver_mobility` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -145,9 +188,24 @@ $$
 
 ```python
 coupling_term_velocity_source(
+    source_mobility: complex | np.number[Any],
+    receiver_impedance: complex | np.number[Any],
+) -> float
+
+coupling_term_velocity_source(
+    source_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    receiver_impedance: NumericArrayLike,
+) -> NDArray[np.float64]
+
+coupling_term_velocity_source(
+    source_mobility: complex | np.number[Any],
+    receiver_impedance: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+coupling_term_velocity_source(
     source_mobility: NumericArrayLike,
     receiver_impedance: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Coupling term for a velocity source, low source mobility (Formula 19d).
@@ -163,7 +221,7 @@ $$
 | `source_mobility` | Source point mobility `Y_s` (complex, non-zero). |
 | `receiver_impedance` | Receiver point impedance `Z_i` (complex, positive real part). |
 
-**Returns:** The coupling term `D_C`, in dB.
+**Returns:** The coupling term `D_C`, in dB. A `float` when `source_mobility` and `receiver_impedance` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -176,11 +234,32 @@ $$
 
 ```python
 installed_power_from_reception_plate(
+    reception_plate_level: float | np.floating[Any] | np.integer[Any],
+    receiver_mobility: complex | np.number[Any],
+    *,
+    plate_mobility: float = ...,
+) -> float
+
+installed_power_from_reception_plate(
+    reception_plate_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    receiver_mobility: NumericArrayLike,
+    *,
+    plate_mobility: float = ...,
+) -> NDArray[np.float64]
+
+installed_power_from_reception_plate(
+    reception_plate_level: float | np.floating[Any] | np.integer[Any],
+    receiver_mobility: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+    *,
+    plate_mobility: float = ...,
+) -> NDArray[np.float64]
+
+installed_power_from_reception_plate(
     reception_plate_level: NumericArrayLike,
     receiver_mobility: NumericArrayLike,
     *,
-    plate_mobility: float = 5e-06,
-) -> np.ndarray
+    plate_mobility: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Mobility correction of the reception-plate power (EN 12354-5, Annex I).
@@ -204,7 +283,7 @@ mobility instead of `Y_inf,i` yields the characteristic level
 | `receiver_mobility` | Characteristic mobility `Y_inf,i` of the receiving element (per band; complex values use their magnitude), in m/(N.s). |
 | `plate_mobility` | Mobility the input level is referred to (Default: the EN 15657 reference plate, $Y_{\infty,\mathrm{rec}} = 5 \cdot 10^{-6}$ m/(N.s); pass the measured plate mobility when the input is a raw Formula (14) level). |
 
-**Returns:** The mobility-corrected power level, in dB re 1 pW.
+**Returns:** The mobility-corrected power level, in dB re 1 pW. A `float` when `reception_plate_level` and `receiver_mobility` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -257,9 +336,24 @@ broadcast to the band count).
 
 ```python
 installed_structure_borne_power_level(
+    characteristic_power_level: float | np.floating[Any] | np.integer[Any],
+    coupling_term: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+installed_structure_borne_power_level(
+    characteristic_power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    coupling_term: NumericArrayLike,
+) -> NDArray[np.float64]
+
+installed_structure_borne_power_level(
+    characteristic_power_level: float | np.floating[Any] | np.integer[Any],
+    coupling_term: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+installed_structure_borne_power_level(
     characteristic_power_level: NumericArrayLike,
     coupling_term: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Installed structure-borne power level (EN 12354-5, Formula 18b).
@@ -275,7 +369,7 @@ $$
 | `characteristic_power_level` | Characteristic level `L_Ws,c` (per band), in dB: the EN 15657 reception-plate level converted with Formulae (15)/(17) and the source-mobility correction (see the module docstring), **not** the raw plate-injected Formula (14) level. |
 | `coupling_term` | Coupling term `D_C,i` (per band), in dB. |
 
-**Returns:** The installed structure-borne power level `L_Ws,inst`, in dB.
+**Returns:** The installed structure-borne power level `L_Ws,inst`, in dB. A `float` when `characteristic_power_level` and `coupling_term` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -287,10 +381,10 @@ $$
 
 ```python
 InstalledSourceResult(
-    path_levels: np.ndarray,
-    total_level: np.ndarray,
-    installed_power_level: np.ndarray,
-    frequencies: np.ndarray | None = None,
+    path_levels: NDArray[np.float64],
+    total_level: NDArray[np.float64],
+    installed_power_level: NDArray[np.float64],
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 
@@ -430,13 +524,49 @@ REFERENCE_AREA_M2 = 10.0
 
 ```python
 structure_borne_pressure_level_path(
+    installed_power_level: float | np.floating[Any] | np.integer[Any],
+    adjustment_term: float | np.floating[Any] | np.integer[Any],
+    flanking_reduction_index: float | np.floating[Any] | np.integer[Any],
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> float
+
+structure_borne_pressure_level_path(
+    installed_power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    adjustment_term: NumericArrayLike,
+    flanking_reduction_index: NumericArrayLike,
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]
+
+structure_borne_pressure_level_path(
+    installed_power_level: float | np.floating[Any] | np.integer[Any],
+    adjustment_term: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    flanking_reduction_index: NumericArrayLike,
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]
+
+structure_borne_pressure_level_path(
+    installed_power_level: float | np.floating[Any] | np.integer[Any],
+    adjustment_term: float | np.floating[Any] | np.integer[Any],
+    flanking_reduction_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    element_area: float,
+    *,
+    reference_area: float = ...,
+) -> NDArray[np.float64]
+
+structure_borne_pressure_level_path(
     installed_power_level: NumericArrayLike,
     adjustment_term: NumericArrayLike,
     flanking_reduction_index: NumericArrayLike,
     element_area: float,
     *,
-    reference_area: float = 10.0,
-) -> np.ndarray
+    reference_area: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Normalised structure-borne SPL for one path i->j (Formula 18a).
@@ -455,7 +585,7 @@ $$
 | `element_area` | Supporting-element area `S_i`, in m^2 (> 0). |
 | `reference_area` | Reference area $S_0 = A_0$ (Default: 10 m^2). |
 
-**Returns:** The normalised path sound pressure level `L_n,s,ij`, in dB.
+**Returns:** The normalised path sound pressure level `L_n,s,ij`, in dB. A `float` when `installed_power_level`, `adjustment_term` and `flanking_reduction_index` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -468,12 +598,36 @@ $$
 
 ```python
 structure_to_airborne_adjustment(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    critical_frequency: float,
+    mass_per_area: float,
+    *,
+    radiation_factor: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+structure_to_airborne_adjustment(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    critical_frequency: float,
+    mass_per_area: float,
+    *,
+    radiation_factor: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+structure_to_airborne_adjustment(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    critical_frequency: float,
+    mass_per_area: float,
+    *,
+    radiation_factor: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+structure_to_airborne_adjustment(
     frequency: NumericArrayLike,
     critical_frequency: float,
     mass_per_area: float,
     *,
-    radiation_factor: NumericArrayLike = 1.0,
-) -> np.ndarray
+    radiation_factor: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Adjustment term `D_sa` of a supporting element (Formula F.3).
@@ -502,7 +656,7 @@ sign included.
 | `mass_per_area` | Mass per unit area `mi` of the element, in kg/m^2 (> 0). |
 | `radiation_factor` | Radiation factor `sigma_i` of the element (Default: 1.0, its value above `fc`; EN 12354-1:2000 Annex B estimates it below). |
 
-**Returns:** The adjustment term `D_sa,i`, in dB.
+**Returns:** The adjustment term `D_sa,i`, in dB. A `float` when `frequency` and `radiation_factor` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -539,10 +693,28 @@ TABLE_F1_OCTAVE_BANDS_HZ = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 400
 
 ```python
 tapping_machine_characteristic_power_level(
+    force_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+tapping_machine_characteristic_power_level(
+    force_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    frequency: NumericArrayLike,
+) -> NDArray[np.float64]
+
+tapping_machine_characteristic_power_level(
+    force_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+tapping_machine_characteristic_power_level(
     force_level: NumericArrayLike,
     *,
     frequency: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Characteristic power level of the tapping machine (Formula D.9a).
@@ -568,7 +740,7 @@ of Table F.1 against its own printed "re 1 pN" caption.
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `force_level` | Force level `L_F`, in dB re 1e-6 N (Table F.1 or [`tapping_machine_force_level_estimate`](/phonometry/reference/api/building/installed-structure-borne/#tapping_machine_force_level_estimate)). |
 
-**Returns:** The characteristic power level `L_Ws,c`, in dB re 1 pW.
+**Returns:** The characteristic power level `L_Ws,c`, in dB re 1 pW. A `float` when `force_level` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -581,11 +753,32 @@ of Table F.1 against its own printed "re 1 pN" caption.
 
 ```python
 tapping_machine_coupling_term(
+    receiver_mobility: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    hammer_mass: float = ...,
+) -> float
+
+tapping_machine_coupling_term(
+    receiver_mobility: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    frequency: NumericArrayLike,
+    hammer_mass: float = ...,
+) -> NDArray[np.float64]
+
+tapping_machine_coupling_term(
+    receiver_mobility: float | np.floating[Any] | np.integer[Any],
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    hammer_mass: float = ...,
+) -> NDArray[np.float64]
+
+tapping_machine_coupling_term(
     receiver_mobility: NumericArrayLike,
     *,
     frequency: NumericArrayLike,
-    hammer_mass: float = 0.5,
-) -> np.ndarray
+    hammer_mass: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Coupling term of the tapping machine (EN 12354-5, Formula D.9b).
@@ -607,7 +800,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 | `receiver_mobility` | Real mobility `Y_i` of the supporting element, in m/(N.s) (> 0). |
 | `hammer_mass` | Source mass `M`, in kilograms (Default: [`TAPPING_HAMMER_MASS_KG`](/phonometry/reference/api/building/resilient-layers/#tapping_hammer_mass_kg), the 0,5 kg of clause D.1.3 and ISO 10140-5). |
 
-**Returns:** The coupling term `D_C,i`, in dB.
+**Returns:** The coupling term `D_C,i`, in dB. A `float` when `receiver_mobility` and `frequency` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -619,7 +812,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 ## tapping_machine_force_level
 
 ```python
-tapping_machine_force_level() -> np.ndarray
+tapping_machine_force_level() -> NDArray[np.float64]
 ```
 
 Tabulated ISO tapping machine force level (EN 12354-5, Table F.1).
@@ -639,10 +832,22 @@ Feed them to [`tapping_machine_characteristic_power_level`](/phonometry/referenc
 
 ```python
 tapping_machine_force_level_estimate(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float
+
+tapping_machine_force_level_estimate(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> NDArray[np.float64]
+
+tapping_machine_force_level_estimate(
     frequency: NumericArrayLike,
     *,
-    fraction: Literal[1, 3] | np.integer[Any] = 1,
-) -> np.ndarray
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Closed form printed under Table F.1 for the tapping machine force level.
@@ -666,7 +871,7 @@ bands the standard does not tabulate.
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `fraction` | The band set, 1 for octaves (default, coefficient 2,5) or 3 for one-third octaves (coefficient 0,8). One of `1` or `3`. |
 
-**Returns:** The force level `L_F`, in dB re 1e-6 N (the standard prints "re 1 pN"; see `docs/ERRATA.md`).
+**Returns:** The force level `L_F`, in dB re 1e-6 N (the standard prints "re 1 pN"; see `docs/ERRATA.md`). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -680,7 +885,7 @@ bands the standard does not tabulate.
 ```python
 total_structure_borne_pressure_level(
     path_levels: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Combine path sound pressure levels energetically (Formula 17).
@@ -695,7 +900,7 @@ $$
 | :--- | :--- |
 | `path_levels` | Path levels `L_n,s,ij`; sum is over the first axis (paths), broadcasting any trailing band axis. |
 
-**Returns:** The total normalised sound pressure level `L_n,s`, in dB.
+**Returns:** The total normalised sound pressure level `L_n,s`, in dB: a `float` for 1-D path levels, one value per band for 2-D ones.
 
 **Raises**
 
@@ -709,17 +914,47 @@ $$
 typical_element_mobility(
     structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
     *,
+    frequency: float | np.floating[Any] | np.integer[Any] | None = None,
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> float
+
+typical_element_mobility(
+    structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> NDArray[np.float64]
+
+typical_element_mobility(
+    structure: Literal['mass', 'bar_end', 'beam', 'plate', 'pipe', 'mass_spring'],
+    *,
     frequency: NumericArrayLike | None = None,
-    mass: float | None = None,
-    density: float | None = None,
-    longitudinal_velocity: float | None = None,
-    thickness_m: float | None = None,
-    width_m: float | None = None,
-    area: float | None = None,
-    radius: float | None = None,
-    stiffness: float | None = None,
-    loss_factor: float | None = None,
-) -> np.ndarray
+    mass: float | None = ...,
+    density: float | None = ...,
+    longitudinal_velocity: float | None = ...,
+    thickness_m: float | None = ...,
+    width_m: float | None = ...,
+    area: float | None = ...,
+    radius: float | None = ...,
+    stiffness: float | None = ...,
+    loss_factor: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Named lookup of EN 12354-5, Table D.1 (mobility of typical elements).
@@ -785,7 +1020,7 @@ which [`coupling_term`](/phonometry/reference/api/building/installed-structure-b
 | `stiffness` | Support stiffness `s`, in N/m (row `"mass_spring"`). |
 | `loss_factor` | Support loss factor `eta` (row `"mass_spring"`). |
 
-**Returns:** The mobility magnitude `|Y|`, in m/(N.s).
+**Returns:** The mobility magnitude `|Y|`, in m/(N.s). A `float` for a number frequency or a row that reads none, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

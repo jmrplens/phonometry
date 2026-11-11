@@ -72,13 +72,14 @@ are bracketed and excluded from the single-number mean when the per-band
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from ..._internal.bands import _OCTAVE_SPACING_MIN_RATIO
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
     real_array,
@@ -103,7 +104,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike, ReportEngine
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+        ReportEngine,
+    )
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -189,7 +196,7 @@ _OCTAVE_CENTRES = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000
 _OCTAVE_STEP_THRESHOLD = _OCTAVE_SPACING_MIN_RATIO
 
 
-def _as_1d(values: NumericArrayLike, name: str) -> np.ndarray:
+def _as_1d(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce to a finite 1-D float array."""
     data = np.atleast_1d(real_array(values, name))
     if data.ndim != 1:
@@ -214,7 +221,7 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def _positive_array(values: NumericArrayLike, name: str) -> np.ndarray:
+def _positive_array(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Validate a 1-D array of positive, finite values."""
     data = _as_1d(values, name)
     if np.any(data <= 0.0):
@@ -226,17 +233,47 @@ def _positive_array(values: NumericArrayLike, name: str) -> np.ndarray:
 # --------------------------------------------------------------------------- #
 # Velocity level differences (Part 1, Clauses 3.6/3.7)
 # --------------------------------------------------------------------------- #
+@overload
+def velocity_level_difference[S1: RealScalar, S2: RealScalar](
+    source_level: S1,
+    receive_level: S2,
+) -> float: ...
+
+
+@overload
+def velocity_level_difference[V: RealValues, A2: NumericArrayLike](
+    source_level: V,
+    receive_level: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_level_difference[S1: RealScalar, V: RealValues](
+    source_level: S1,
+    receive_level: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def velocity_level_difference[A1: NumericArrayLike, A2: NumericArrayLike](
+    source_level: A1,
+    receive_level: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def velocity_level_difference(
     source_level: NumericArrayLike,
     receive_level: NumericArrayLike,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Velocity level difference :math:`D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},j}` (Formula (8)).
 
     :param source_level: Average velocity level ``Lv,i`` of the excited
         element, in dB, per band.
     :param receive_level: Average velocity level ``Lv,j`` of the receiving
         element, in dB, per band.
-    :return: ``Dv,ij`` per band, in dB.
+    :return: ``Dv,ij`` per band, in dB. A ``float`` when ``source_level`` and
+        ``receive_level`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: If the inputs are empty, non-finite, or differ in
         length.
     :raises TypeError: if ``receive_level`` or ``source_level`` holds a text or a value
@@ -249,13 +286,41 @@ def velocity_level_difference(
         {"source_level": lv_i.size, "receive_level": lv_j.size},
         "band",
     )
-    return np.asarray(lv_i - lv_j, dtype=np.float64)
+    return as_float_or_array(lv_i - lv_j, like=(source_level, receive_level))
+
+
+@overload
+def direction_averaged_level_difference[S1: RealScalar, S2: RealScalar](
+    dv_ij: S1,
+    dv_ji: S2,
+) -> float: ...
+
+
+@overload
+def direction_averaged_level_difference[V: RealValues, A2: NumericArrayLike](
+    dv_ij: V,
+    dv_ji: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direction_averaged_level_difference[S1: RealScalar, V: RealValues](
+    dv_ij: S1,
+    dv_ji: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def direction_averaged_level_difference[A1: NumericArrayLike, A2: NumericArrayLike](
+    dv_ij: A1,
+    dv_ji: A2,
+) -> float | NDArray[np.float64]: ...
 
 
 def direction_averaged_level_difference(
     dv_ij: NumericArrayLike,
     dv_ji: NumericArrayLike,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Direction-averaged velocity level difference (Formula (11)).
 
     :math:`\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji})` with
@@ -265,7 +330,9 @@ def direction_averaged_level_difference(
 
     :param dv_ij: ``Dv,ij`` (element ``i`` excited), in dB, per band.
     :param dv_ji: ``Dv,ji`` (element ``j`` excited), in dB, per band.
-    :return: ``D̄v,ij`` per band, in dB.
+    :return: ``D̄v,ij`` per band, in dB. A ``float`` when ``dv_ij`` and ``dv_ji`` are
+        both numbers, an array when either is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: If the inputs are empty, non-finite, or differ in
         length.
     :raises TypeError: if ``dv_ij`` or ``dv_ji`` holds a text or a value that is not a
@@ -278,23 +345,48 @@ def direction_averaged_level_difference(
         {"dv_ij": a.size, "dv_ji": b.size},
         "band",
     )
-    return np.asarray(0.5 * (a + b), dtype=np.float64)
+    return as_float_or_array(0.5 * (a + b), like=(dv_ij, dv_ji))
 
 
 # --------------------------------------------------------------------------- #
 # Structural quantities (Part 1, Clauses 3.5/3.8)
 # --------------------------------------------------------------------------- #
+@overload
+def total_loss_factor[S: RealScalar](
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: S,
+) -> float: ...
+
+
+@overload
+def total_loss_factor[V: RealValues](
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def total_loss_factor[A: NumericArrayLike](
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def total_loss_factor(
     structural_reverberation_time: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Total loss factor :math:`\eta = 2.2 / (f \, T_\mathrm{s})` (Clause 7.3.1).
 
     :param frequencies: Band centre frequency ``f``, in Hz, per band.
     :param structural_reverberation_time: Structural reverberation time
         ``Ts``, in s, per band (or a single value broadcast to all bands).
-    :return: Total loss factor ``η`` (dimensionless) per band.
+    :return: Total loss factor ``η`` (dimensionless) per band. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the inputs are not positive/finite or their band
         counts are incompatible.
     :raises TypeError: if ``frequencies`` or ``structural_reverberation_time`` holds a
@@ -303,7 +395,37 @@ def total_loss_factor(
     f = _positive_array(frequencies, "frequencies")
     ts = _positive_array(structural_reverberation_time, "structural_reverberation_time")
     ts = _broadcast(ts, f.size, "structural_reverberation_time")
-    return np.asarray(_STRUCTURAL_CONSTANT / (f * ts), dtype=np.float64)
+    return as_float_or_array(_STRUCTURAL_CONSTANT / (f * ts), like=(frequencies,))
+
+
+@overload
+def equivalent_absorption_length[S: RealScalar](
+    area: float,
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: S,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def equivalent_absorption_length[V: RealValues](
+    area: float,
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: V,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def equivalent_absorption_length[A: NumericArrayLike](
+    area: float,
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: A,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def equivalent_absorption_length(
@@ -312,7 +434,7 @@ def equivalent_absorption_length(
     *,
     frequencies: NumericArrayLike,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Equivalent absorption length ``aj`` (Formula (12)).
 
     .. math::
@@ -328,7 +450,8 @@ def equivalent_absorption_length(
     :param frequencies: Band centre frequency ``f``, in Hz, per band.
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s
         (default 343 m/s).
-    :return: Equivalent absorption length ``aj``, in m, per band.
+    :return: Equivalent absorption length ``aj``, in m, per band. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If any input is not positive/finite or the band counts
         are incompatible.
     :raises TypeError: if ``area`` or ``speed_of_sound`` is not a single number, or
@@ -340,12 +463,15 @@ def equivalent_absorption_length(
     f = _positive_array(frequencies, "frequencies")
     ts = _positive_array(structural_reverberation_time, "structural_reverberation_time")
     ts = _broadcast(ts, f.size, "structural_reverberation_time")
-    return (
-        _ABSORPTION_LENGTH_CONSTANT * s / (ts * c0) * np.sqrt(_REFERENCE_FREQUENCY / f)
+    return as_float_or_array(
+        _ABSORPTION_LENGTH_CONSTANT * s / (ts * c0) * np.sqrt(_REFERENCE_FREQUENCY / f),
+        like=(frequencies,),
     )
 
 
-def _broadcast(values: np.ndarray, n_bands: int, name: str) -> np.ndarray:
+def _broadcast(
+    values: NDArray[np.float64], n_bands: int, name: str
+) -> NDArray[np.float64]:
     """Broadcast a scalar-per-band array to ``n_bands``, or validate the count."""
     require_scalar(n_bands, "n_bands")
     values = real_array(values, name)
@@ -392,9 +518,9 @@ class VibrationReductionResult(OwnsArrays):
     fields.
     """
 
-    frequencies: np.ndarray | None
-    k_ij: np.ndarray
-    modal_overlap: np.ndarray | None = None
+    frequencies: NDArray[np.float64] | None
+    k_ij: NDArray[np.float64]
+    modal_overlap: NDArray[np.float64] | None = None
     fraction: BandFraction | None = None
 
     def __post_init__(self) -> None:
@@ -426,7 +552,7 @@ class VibrationReductionResult(OwnsArrays):
             )
 
     @property
-    def bracketed(self) -> np.ndarray | None:
+    def bracketed(self) -> NDArray[np.bool_] | None:
         """Per band, whether the modal overlap is below 0,25 (ISO 10848-4 Clause 9).
 
         ``None`` when no modal overlap was supplied.
@@ -471,12 +597,12 @@ class VibrationReductionResult(OwnsArrays):
             raise ValueError(msg)
         groups = self.k_ij.reshape(-1, 3)
         oct_k = -10.0 * np.log10(np.mean(10.0 ** (-groups / 10.0), axis=1))
-        oct_f: np.ndarray | None = None
+        oct_f: NDArray[np.float64] | None = None
         if self.frequencies is not None:
             freq_groups = self.frequencies.reshape(-1, 3)
             _validate_octave_triples(freq_groups)
             oct_f = freq_groups[:, 1]
-        oct_overlap: np.ndarray | None = None
+        oct_overlap: NDArray[np.float64] | None = None
         if self.modal_overlap is not None:
             oct_overlap = np.min(np.asarray(self.modal_overlap).reshape(-1, 3), axis=1)
         return VibrationReductionResult(
@@ -544,7 +670,7 @@ class VibrationReductionResult(OwnsArrays):
         )
 
 
-def _validate_octave_triples(freq_groups: np.ndarray) -> None:
+def _validate_octave_triples(freq_groups: NDArray[np.float64]) -> None:
     r"""Require each frequency triple to be the thirds of one octave band.
 
     Each group of three one-third-octave centres must open on an octave
@@ -570,7 +696,7 @@ def _validate_octave_triples(freq_groups: np.ndarray) -> None:
             raise ValueError(msg)
 
 
-def _detect_fraction(frequencies: np.ndarray | None) -> int:
+def _detect_fraction(frequencies: NDArray[np.float64] | None) -> int:
     """1 (octaves) when consecutive centres step by ~2, else 3 (one-third octaves)."""
     # The fewest values the step below can work with, not a quantity.
     if frequencies is None or frequencies.size < 2:  # noqa: PLR2004
@@ -580,10 +706,10 @@ def _detect_fraction(frequencies: np.ndarray | None) -> int:
 
 
 def _single_number_kij(
-    frequencies: np.ndarray | None,
-    k_ij: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    k_ij: NDArray[np.float64],
     *,
-    bracketed: np.ndarray | None = None,
+    bracketed: NDArray[np.bool_] | None = None,
     fraction: int = 3,
 ) -> float | None:
     """Arithmetic-mean ``K̄ij`` (Annex A), or ``None``.
@@ -706,7 +832,7 @@ def vibration_reduction_index(
         a_i = np.full(dv.size, s_i / _REFERENCE_LENGTH, dtype=np.float64)
         a_j = np.full(dv.size, s_j / _REFERENCE_LENGTH, dtype=np.float64)
 
-    m: np.ndarray | None = None
+    m: NDArray[np.float64] | None = None
     if modal_overlap is not None:
         m = _positive_array(modal_overlap, "modal_overlap")
         m = _broadcast(m, dv.size, "modal_overlap")
@@ -733,7 +859,7 @@ def vibration_reduction_index_from_flanking(
     absorption_length_j: NumericArrayLike,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Indirect ``Kij`` from the normalized flanking level difference.
 
     ISO 10848-1:2006, Clause 4.3.1 Note 2 (unnumbered):
@@ -757,7 +883,11 @@ def vibration_reduction_index_from_flanking(
     :param absorption_length_i: ``ai`` per band, in m.
     :param absorption_length_j: ``aj`` per band, in m.
     :param reference_area: ``A0``, in m² (default 10 m²).
-    :return: ``Kij`` per band, in dB.
+    :return: ``Kij`` per band, in dB. A ``float`` when
+        ``normalized_flanking_level_difference``, ``reduction_index_i``,
+        ``reduction_index_j``, ``absorption_length_i`` and ``absorption_length_j`` are
+        all numbers, an array when one of them is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: On incompatible band counts or non-positive geometry.
     :raises TypeError: if ``area_i``, ``area_j``, ``junction_length`` or
         ``reference_area`` is not a single number, or ``absorption_length_i``,
@@ -793,7 +923,16 @@ def vibration_reduction_index_from_flanking(
         - 10.0 * np.log10(np.sqrt(a_i * a_j) / lij)
         + 10.0 * np.log10(np.sqrt(s_i * s_j) / a0)
     )
-    return np.asarray(k_ij, dtype=np.float64)
+    return as_float_or_array(
+        k_ij,
+        like=(
+            normalized_flanking_level_difference,
+            reduction_index_i,
+            reduction_index_j,
+            absorption_length_i,
+            absorption_length_j,
+        ),
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -808,7 +947,7 @@ class FlankingLevelDifferenceResult(OwnsArrays):
         ``None`` when the band count is neither 16 nor 5.
     """
 
-    d_n_f: np.ndarray
+    d_n_f: NDArray[np.float64]
     rating: WeightedRatingResult | None
 
     def plot(
@@ -895,7 +1034,7 @@ class FlankingImpactLevelResult(OwnsArrays):
         when the band count is neither 16 nor 5.
     """
 
-    l_n_f: np.ndarray
+    l_n_f: NDArray[np.float64]
     rating: ImpactRatingResult | None
 
     def plot(
@@ -1066,7 +1205,7 @@ def normalized_flanking_impact_level(
 
 
 def _maybe_rating(
-    values: np.ndarray, fraction: BandFraction | np.integer[Any] | None
+    values: NDArray[np.float64], fraction: BandFraction | np.integer[Any] | None
 ) -> WeightedRatingResult | None:
     """Form the ISO 717-1 rating when the band count is 16 or 5, else ``None``."""
     if values.size in (16, 5):
@@ -1318,13 +1457,43 @@ def modal_density(
     return np.pi * s * fc / c0**2
 
 
+@overload
+def modal_overlap_factor[S: RealScalar](
+    area: float,
+    critical_frequency: float,
+    structural_reverberation_time: S,
+    *,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def modal_overlap_factor[V: RealValues](
+    area: float,
+    critical_frequency: float,
+    structural_reverberation_time: V,
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def modal_overlap_factor[A: NumericArrayLike](
+    area: float,
+    critical_frequency: float,
+    structural_reverberation_time: A,
+    *,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def modal_overlap_factor(
     area: float,
     critical_frequency: float,
     structural_reverberation_time: NumericArrayLike,
     *,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Modal overlap factor :math:`M = 2.2 \cdot n / T_\mathrm{s}` (Part 4, F. (6)).
 
     With the modal density ``n`` from :func:`modal_density`. Part 4 prefers
@@ -1340,14 +1509,47 @@ def modal_overlap_factor(
     :param structural_reverberation_time: ``Ts``, in s, per band (or a single
         value).
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
-    :return: Modal overlap factor ``M`` per band (dimensionless).
+    :return: Modal overlap factor ``M`` per band (dimensionless). A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If any input is not positive/finite.
     :raises TypeError: if ``structural_reverberation_time`` holds a text or a value that
         is not a real number.
     """
     n = modal_density(area, critical_frequency, speed_of_sound=speed_of_sound)
     ts = _positive_array(structural_reverberation_time, "structural_reverberation_time")
-    return _STRUCTURAL_CONSTANT * n / ts
+    return as_float_or_array(
+        _STRUCTURAL_CONSTANT * n / ts, like=(structural_reverberation_time,)
+    )
+
+
+@overload
+def band_mode_count[S: RealScalar](
+    frequencies: S,
+    area: float,
+    critical_frequency: float,
+    *,
+    speed_of_sound: float = ...,
+) -> float: ...
+
+
+@overload
+def band_mode_count[V: RealValues](
+    frequencies: V,
+    area: float,
+    critical_frequency: float,
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def band_mode_count[A: NumericArrayLike](
+    frequencies: A,
+    area: float,
+    critical_frequency: float,
+    *,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def band_mode_count(
@@ -1356,7 +1558,7 @@ def band_mode_count(
     critical_frequency: float,
     *,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""In-band mode count :math:`N = B \cdot n` (Part 4, Formula (4)).
 
     With the one-third-octave bandwidth approximation
@@ -1369,11 +1571,12 @@ def band_mode_count(
     :param area: Element area ``S``, in m².
     :param critical_frequency: Critical frequency ``fc``, in Hz.
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
-    :return: In-band mode count ``N`` per band (dimensionless).
+    :return: In-band mode count ``N`` per band (dimensionless). A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If any input is not positive/finite.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number.
     """
     f = _positive_array(frequencies, "frequencies")
     n = modal_density(area, critical_frequency, speed_of_sound=speed_of_sound)
-    return 0.23 * f * n
+    return as_float_or_array(0.23 * f * n, like=(frequencies,))

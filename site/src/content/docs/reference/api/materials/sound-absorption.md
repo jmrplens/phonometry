@@ -61,13 +61,31 @@ correction); a caller holding ISO 9613-1 `alpha` values can convert them with
 
 ```python
 absorption_area(
+    t60: float | np.floating[Any] | np.integer[Any],
+    volume: float,
+    *,
+    temperature_c: float = ...,
+    speed_of_sound: float | None = ...,
+    m: NumericArrayLike = ...,
+) -> float
+
+absorption_area(
+    t60: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    volume: float,
+    *,
+    temperature_c: float = ...,
+    speed_of_sound: float | None = ...,
+    m: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+absorption_area(
     t60: NumericArrayLike,
     volume: float,
     *,
-    temperature_c: float = 20.0,
-    speed_of_sound: float | None = None,
-    m: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+    temperature_c: float = ...,
+    speed_of_sound: float | None = ...,
+    m: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent sound absorption area of a room (ISO 354:2003, Eq. (5)/(7)).
@@ -86,7 +104,7 @@ with-specimen area `A2` from `T2` (both equations have identical form).
 | `speed_of_sound` | Explicit speed of sound `c`, in m/s; overrides `temperature_c` and Eq. (6) when supplied. |
 | `m` | Power attenuation coefficient of air `m`, in 1/m (a scalar or an array matching the shape of `t60`; default 0, i.e. no air correction). A per-band `m` whose shape differs from `t60` raises `ValueError`. Obtain it from an ISO 9613-1 attenuation coefficient with [`power_attenuation_from_alpha`](/phonometry/reference/api/materials/sound-absorption/#power_attenuation_from_alpha). |
 
-**Returns:** Equivalent sound absorption area `A`, in square metres, with the shape of `t60`.
+**Returns:** Equivalent sound absorption area `A`, in square metres, with the shape of `t60`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -98,18 +116,60 @@ with-specimen area `A2` from `T2` (both equations have identical form).
 
 ```python
 absorption_coefficient(
+    t1: float | np.floating[Any] | np.integer[Any],
+    t2: float | np.floating[Any] | np.integer[Any],
+    volume: float,
+    sample_area: float,
+    *,
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> float
+
+absorption_coefficient(
+    t1: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    t2: NumericArrayLike,
+    volume: float,
+    sample_area: float,
+    *,
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+absorption_coefficient(
+    t1: float | np.floating[Any] | np.integer[Any],
+    t2: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    volume: float,
+    sample_area: float,
+    *,
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> NDArray[np.float64]
+
+absorption_coefficient(
     t1: NumericArrayLike,
     t2: NumericArrayLike,
     volume: float,
     sample_area: float,
     *,
-    temperature1_c: float = 20.0,
-    temperature2_c: float | None = None,
-    speed_of_sound1: float | None = None,
-    speed_of_sound2: float | None = None,
-    m1: NumericArrayLike = 0.0,
-    m2: NumericArrayLike = 0.0,
-) -> NDArray[np.float64]
+    temperature1_c: float = ...,
+    temperature2_c: float | None = ...,
+    speed_of_sound1: float | None = ...,
+    speed_of_sound2: float | None = ...,
+    m1: NumericArrayLike = ...,
+    m2: NumericArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Sound absorption coefficient of a plane absorber (ISO 354:2003, Eq. (9)).
@@ -149,7 +209,7 @@ advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorpt
 | `m1` | Empty-room air attenuation coefficient `m1`, in 1/m (default 0). |
 | `m2` | With-specimen air attenuation coefficient `m2`, in 1/m (default 0). |
 
-**Returns:** Sound absorption coefficient `alpha_s` with the broadcast shape of `t1` and `t2`.
+**Returns:** Sound absorption coefficient `alpha_s` with the broadcast shape of `t1` and `t2`. A `float` when `t1` and `t2` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -221,8 +281,16 @@ with-specimen climates differ.
 
 ```python
 power_attenuation_from_alpha(
-    attenuation_db_per_m: NumericArrayLike,
+    attenuation_db_per_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+power_attenuation_from_alpha(
+    attenuation_db_per_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+power_attenuation_from_alpha(
+    attenuation_db_per_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Air power attenuation coefficient `m` from the ISO 9613-1 `alpha`.
@@ -245,7 +313,7 @@ step with [`air_power_attenuation_per_m`](/phonometry/reference/api/environment/
 | :--- | :--- |
 | `attenuation_db_per_m` | Attenuation coefficient `alpha` of ISO 9613-1, in dB/m (scalar or per band). |
 
-**Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `attenuation_db_per_m`.
+**Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `attenuation_db_per_m`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

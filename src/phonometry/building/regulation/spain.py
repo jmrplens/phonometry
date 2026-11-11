@@ -101,6 +101,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -407,10 +408,10 @@ class DBHRGlobalIndexResult(OwnsArrays):
     reported: int
     name: str
     spectrum: Spectrum
-    frequencies: np.ndarray
-    band_values: np.ndarray
-    spectrum_levels: np.ndarray
-    band_contributions: np.ndarray
+    frequencies: NDArray[np.float64]
+    band_values: NDArray[np.float64]
+    spectrum_levels: NDArray[np.float64]
+    band_contributions: NDArray[np.float64]
     reference: str
 
     def __post_init__(self) -> None:
@@ -478,7 +479,7 @@ class DBHRGlobalIndexResult(OwnsArrays):
         )
 
 
-def _match_bands(frequencies: np.ndarray) -> np.ndarray:
+def _match_bands(frequencies: NDArray[np.float64]) -> NDArray[np.intp]:
     """Indices of the eighteen DB-HR bands within ``frequencies``."""
     indices: list[int] = []
     for target in DB_HR_FREQUENCIES_HZ:

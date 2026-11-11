@@ -61,6 +61,7 @@ from ._layout import (
 if TYPE_CHECKING:
     import os
 
+    from numpy.typing import NDArray
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -255,10 +256,10 @@ def _metadata_pairs(
 
 
 def _value_table(
-    centers: np.ndarray,
-    measured: np.ndarray,
-    shifted: np.ndarray,
-    deviations: np.ndarray,
+    centers: NDArray[np.float64],
+    measured: NDArray[np.float64],
+    shifted: NDArray[np.float64],
+    deviations: NDArray[np.float64],
     value_header: str,
     *,
     verbose: bool,
@@ -399,7 +400,9 @@ def _extended_terms(
 
 def _validated_curves(
     result: WeightedRatingResult | ImpactRatingResult,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[
+    NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]
+]:
     """Band centres, measured and shifted curves, and the unfavourable deviations.
 
     :raises ValueError: If the three curves do not share a shape.

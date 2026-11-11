@@ -85,7 +85,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.sound_power import _a_weighting_corrections
-from .._internal.types import ReportEngine, as_float_or_array
+from .._internal.types import ReportEngine, as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
     check_engine,
     real_array,
@@ -205,7 +205,7 @@ class RoomEnvironment(OwnsArrays):
 
 # --- ISO 3744:2010 Annex B, normative microphone coordinates (x/r,y/r,z/r) ---
 #: Table B.1 - preferred positions for all sources (including tones).
-_TABLE_B1: np.ndarray = np.array(
+_TABLE_B1: NDArray[np.float64] = np.array(
     [
         [0.16, -0.96, 0.22],
         [0.78, -0.60, 0.20],
@@ -230,7 +230,7 @@ _TABLE_B1: np.ndarray = np.array(
     ]
 )
 #: Table B.2 - positions for a broadband (tone-free) source.
-_TABLE_B2: np.ndarray = np.array(
+_TABLE_B2: NDArray[np.float64] = np.array(
     [
         [-0.99, 0.0, 0.15],
         [0.50, -0.86, 0.15],
@@ -255,7 +255,7 @@ _TABLE_B2: np.ndarray = np.array(
     ]
 )
 #: Table B.3 - source adjacent to three reflecting planes.
-_TABLE_B3: np.ndarray = np.array(
+_TABLE_B3: NDArray[np.float64] = np.array(
     [
         [0.86, -0.50, 0.15],
         [0.45, -0.77, 0.45],
@@ -273,7 +273,7 @@ _TABLE_B3: np.ndarray = np.array(
 #: BS EN ISO 3746:2010, PDF page 34, printed folio 25. Its note says they are a
 #: subset of the broadband positions of ISO 3744, and they are the rows of
 #: those numbers in ISO 3744 Table B.2, not of the tonal Table B.1.
-_ISO3746_TABLE_B1: np.ndarray = read_only(
+_ISO3746_TABLE_B1: NDArray[np.float64] = read_only(
     np.array(
         [
             [-0.45, 0.77, 0.45],
@@ -295,7 +295,7 @@ _ISO3746_TABLE_B1_POSITIONS: tuple[int, ...] = (4, 5, 6, 10, 14, 15, 16, 20)
 #: ISO 3746:2010, PDF page 35, printed folio 26. Positions 14, 15 and 18 are
 #: the same points as the positions of those numbers in ISO 3744 Table B.2;
 #: 21 and 22 are two of the corner array of ISO 3744 Table B.3.
-_ISO3746_TABLE_B2: np.ndarray = read_only(
+_ISO3746_TABLE_B2: NDArray[np.float64] = read_only(
     np.array(
         [
             [0.45, -0.77, 0.45],
@@ -398,13 +398,13 @@ class SoundPowerResult(OwnsArrays):
         {"uncertainty": "dB"}
     )
 
-    frequencies: np.ndarray | None
-    sound_power_level: np.ndarray
-    surface_pressure_level: np.ndarray
-    mean_pressure_level: np.ndarray
-    background_correction: np.ndarray
-    environmental_correction: np.ndarray
-    directivity_index: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    sound_power_level: NDArray[np.float64]
+    surface_pressure_level: NDArray[np.float64]
+    mean_pressure_level: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
+    environmental_correction: NDArray[np.float64]
+    directivity_index: NDArray[np.float64]
     surface_area: float
     sound_power_level_a: float
     uncertainty: float
@@ -626,11 +626,43 @@ class SoundPowerResult(OwnsArrays):
         )
 
 
+@overload
+def background_noise_correction[S1: RealScalar, S2: RealScalar](
+    source_levels: S1,
+    background_levels: S2,
+    grade: Grade = ...,
+) -> float: ...
+
+
+@overload
+def background_noise_correction[V: RealValues, A2: NumericArrayLike](
+    source_levels: V,
+    background_levels: A2,
+    grade: Grade = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_noise_correction[S1: RealScalar, V: RealValues](
+    source_levels: S1,
+    background_levels: V,
+    grade: Grade = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_noise_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    source_levels: A1,
+    background_levels: A2,
+    grade: Grade = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def background_noise_correction(
     source_levels: NumericArrayLike,
     background_levels: NumericArrayLike,
     grade: Grade = "engineering",
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Background-noise correction ``K1`` per band (ISO 3744:2010 Eq. 16).
 
     :math:`K_1 = -10 \log_{10}\left( 1 - 10^{-0.1 \Delta L_p} \right)` with
@@ -648,7 +680,9 @@ def background_noise_correction(
     :param source_levels: Levels with the source operating, in decibels.
     :param background_levels: Background-noise levels, in decibels.
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
-    :return: ``K1`` per band, in decibels.
+    :return: ``K1`` per band, in decibels. A ``float`` when ``source_levels`` and
+        ``background_levels`` are both numbers, an array when either is a sequence or an
+        array, a zero-dimensional one included.
     :raises TypeError: if ``background_levels`` or ``source_levels`` holds a text or a
         value that is not a real number, or ``grade`` is not a text.
     """
@@ -669,7 +703,7 @@ def background_noise_correction(
             "(ISO 3744:2010, 8.2.3).",
             SoundPowerWarning,
         )
-    return np.asarray(k1, dtype=np.float64)
+    return as_float_or_array(k1, like=(source_levels, background_levels))
 
 
 def _require_room_pair(
@@ -892,7 +926,7 @@ def environmental_correction(
 
 def _hemisphere_position_table(
     grade: Grade, n_reflecting_planes: int, *, tones: bool
-) -> tuple[np.ndarray, tuple[int, ...]]:
+) -> tuple[NDArray[np.float64], tuple[int, ...]]:
     """Coordinate table and row selection for the hemisphere key positions.
 
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
@@ -929,7 +963,7 @@ def measurement_positions(
     n_reflecting_planes: int = 1,
     tones: bool = True,
     grade: Grade = "engineering",
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Normative microphone coordinates on the measurement surface.
 
     For a ``'hemisphere'`` the engineering grade reads ISO 3744:2010 Annex B:
@@ -1059,10 +1093,10 @@ def _measurement_surface(
 
 def _surface_background_correction(
     background_levels: NumericArrayLike | None,
-    levels: np.ndarray,
-    mean_level: np.ndarray,
+    levels: NDArray[np.float64],
+    mean_level: NDArray[np.float64],
     grade: Grade,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Per-band background correction ``K1`` of the surface energy mean.
 
     :param background_levels: ``(NM, NB)`` background levels, or a single
@@ -1097,7 +1131,7 @@ def _surface_environmental_correction(
     n_bands: int,
     grade: Grade,
     room: RoomEnvironment,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Per-band environmental correction ``K2`` broadcast over the bands.
 
     :param area: Measurement surface area ``S``, in square metres.
@@ -1126,7 +1160,7 @@ def _surface_environmental_correction(
     return np.broadcast_to(k2_arr, (n_bands,)).astype(np.float64)
 
 
-def _k2_advisory(k2: np.ndarray, grade: Grade) -> None:
+def _k2_advisory(k2: NDArray[np.float64], grade: Grade) -> None:
     """Warn when ``K2`` exceeds the validity limit of the grade (4.3.2).
 
     Called once the determination has checked every argument, so that under
@@ -1145,7 +1179,7 @@ def _k2_advisory(k2: np.ndarray, grade: Grade) -> None:
 
 def _band_frequencies(
     frequencies: NumericArrayLike | None, n_bands: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """The band mid-band frequencies as an array, ``None`` when not given.
 
     :param frequencies: Band mid-band frequencies, in hertz, or ``None``.
@@ -1164,7 +1198,9 @@ def _band_frequencies(
     return freqs
 
 
-def _a_weighted_total(lw: np.ndarray, freqs: np.ndarray | None) -> float:
+def _a_weighted_total(
+    lw: NDArray[np.float64], freqs: NDArray[np.float64] | None
+) -> float:
     """The A-weighted total ``LWA`` of checked bands (ISO 3744 Annex E).
 
     :param lw: Band sound power levels, in decibels.
@@ -1383,13 +1419,13 @@ class SoundEnergyResult(OwnsArrays):
         {"uncertainty": "dB"}
     )
 
-    frequencies: np.ndarray | None
-    sound_energy_level: np.ndarray
-    surface_event_level: np.ndarray
-    mean_event_level: np.ndarray
-    background_correction: np.ndarray
-    environmental_correction: np.ndarray
-    directivity_index: np.ndarray
+    frequencies: NDArray[np.float64] | None
+    sound_energy_level: NDArray[np.float64]
+    surface_event_level: NDArray[np.float64]
+    mean_event_level: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
+    environmental_correction: NDArray[np.float64]
+    directivity_index: NDArray[np.float64]
     surface_area: float
     sound_energy_level_a: float
     uncertainty: float
@@ -1476,7 +1512,7 @@ class SoundEnergyResult(OwnsArrays):
 
 def mean_single_event_level(
     levels: NumericArrayLike, *, n_events: int | np.integer[Any] | None = None
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
 
     Two ways of measuring :math:`N_\mathrm{e}` sound emission events reach the
@@ -1510,11 +1546,16 @@ def mean_single_event_level(
     :param n_events: ``None`` when each entry of the first axis is one event,
         else the number of events the single measurement encompasses.
     :return: The level of one event, in decibels: ``levels`` less its first
-        axis for ``n_events=None``, the shape of ``levels`` otherwise.
+        axis for ``n_events=None``, a ``float`` when that leaves one number;
+        otherwise the shape of ``levels``, a ``float`` for a number and an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for non-finite levels, an empty first axis or a
         non-positive ``n_events``.
     """
-    return _single_event_mean(levels, n_events, name="levels")
+    one_event = _single_event_mean(levels, n_events, name="levels")
+    if n_events is None:
+        return as_float_if_reduced(one_event)
+    return as_float_or_array(one_event, like=(levels,))
 
 
 def _static_pressure_at_altitude(altitude: float) -> float:
@@ -1613,7 +1654,7 @@ def reference_atmosphere_correction(
 
 def _event_position_levels(
     levels_positions: NumericArrayLike, n_events: int | np.integer[Any] | None
-) -> tuple[np.ndarray, int | None]:
+) -> tuple[NDArray[np.float64], int | None]:
     """The ``(NM, NB)`` mean single event levels behind the three input forms.
 
     A 3-D ``(Ne, NM, NB)`` array holds one event per entry of its first axis

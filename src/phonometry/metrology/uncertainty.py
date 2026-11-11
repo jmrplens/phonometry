@@ -249,8 +249,8 @@ class UncertaintyResult(OwnsArrays):
 
     value: float
     combined_uncertainty: float
-    sensitivities: np.ndarray
-    contributions: np.ndarray
+    sensitivities: NDArray[np.float64]
+    contributions: NDArray[np.float64]
     effective_dof: float
     names: tuple[str, ...] = field(default=())
 
@@ -404,7 +404,7 @@ class MonteCarloResult(OwnsArrays):
     interval: tuple[float, float]
     coverage: float
     n_trials: int
-    samples: np.ndarray | None = field(default=None, repr=False)
+    samples: NDArray[np.float64] | None = field(default=None, repr=False)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -426,8 +426,10 @@ class MonteCarloResult(OwnsArrays):
 
 
 def _sensitivity(
-    model: ScalarModel, values: np.ndarray, uncertainties: np.ndarray
-) -> np.ndarray:
+    model: ScalarModel,
+    values: NDArray[np.float64],
+    uncertainties: NDArray[np.float64],
+) -> NDArray[np.float64]:
     r"""Central-difference sensitivities :math:`\partial f/\partial x_i`.
 
     Follows GUM 5.1.3. The step is
@@ -472,7 +474,7 @@ def _sensitivity(
 
 def _validated_correlation(
     correlation: NumericArrayLike | None, n: int
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """Check a caller-supplied correlation matrix of an ``N``-input budget.
 
     :param correlation: The ``N x N`` correlation matrix, or ``None``.
@@ -503,8 +505,8 @@ def _validated_correlation(
 
 
 def _effective_dof(
-    dofs: np.ndarray,
-    contributions: np.ndarray,
+    dofs: NDArray[np.float64],
+    contributions: NDArray[np.float64],
     combined: float,
     *,
     correlated: bool,
@@ -631,7 +633,10 @@ def uncertainty_propagation(
 
 
 def combined_standard_uncertainty(
-    contributions: Sequence[float | Sequence[float] | NDArray[Any]] | NDArray[Any],
+    contributions: Sequence[
+        float | Sequence[float] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]]
+    ]
+    | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> float:
     r"""Combined standard uncertainty of independent contributions, root-sum-square.
 
@@ -718,7 +723,7 @@ def coverage_factor(coverage: float = 0.95, dof: float = math.inf) -> float:
     return float(t.ppf(p, dof))
 
 
-def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
+def _sample(q: Quantity, size: int, rng: np.random.Generator) -> NDArray[np.float64]:
     """Draw ``size`` samples of a quantity from its PDF (Supplement 1, 6.4).
 
     A constant (or numerically negligible) uncertainty collapses every PDF to a

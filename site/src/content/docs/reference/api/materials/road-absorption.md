@@ -69,9 +69,24 @@ hard-coded as if normative.
 
 ```python
 absorption_reference_corrected(
-    road_reflection: NumericArrayLike,
+    road_reflection: complex | np.number[Any],
+    reference_reflection: complex | np.number[Any],
+) -> float
+
+absorption_reference_corrected(
+    road_reflection: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
     reference_reflection: NumericArrayLike,
 ) -> NDArray[np.float64]
+
+absorption_reference_corrected(
+    road_reflection: complex | np.number[Any],
+    reference_reflection: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
+) -> NDArray[np.float64]
+
+absorption_reference_corrected(
+    road_reflection: NumericArrayLike,
+    reference_reflection: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Reference-corrected road absorption (ISO 13472-1:2002, Annex B).
@@ -99,7 +114,7 @@ to have absorption \< 0.05, Annex B).
 | `road_reflection` | Measured road pressure reflection factor `Qp,road,meas` (complex; the `1 / Kr` scaling need not be removed as it cancels). |
 | `reference_reflection` | Measured reference pressure reflection factor `Qp,ref,meas` (complex, same geometry and chain). |
 
-**Returns:** Reference-corrected road absorption coefficient `alpha_road(f)`.
+**Returns:** Reference-corrected road absorption coefficient `alpha_road(f)`. A `float` when `road_reflection` and `reference_reflection` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -308,8 +323,16 @@ is treated as absorbed, so `alpha` may be slightly overestimated
 
 ```python
 in_situ_absorption_from_reflection(
-    reflection: NumericArrayLike,
+    reflection: complex | np.number[Any],
+) -> float
+
+in_situ_absorption_from_reflection(
+    reflection: Sequence[complex] | Sequence[np.number[Any]] | NDArray[np.bool_ | np.number[Any]],
 ) -> NDArray[np.float64]
+
+in_situ_absorption_from_reflection(
+    reflection: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Absorption coefficient from the reflection factor (ISO 13472-1, 4.1).
@@ -326,7 +349,7 @@ $1 / K_\mathrm{r}$ factor
 | :--- | :--- |
 | `reflection` | Complex reflection factor `r`. |
 
-**Returns:** Absorption coefficient `alpha` (real).
+**Returns:** Absorption coefficient `alpha` (real). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -819,11 +842,32 @@ SPOT_FREQUENCY_RANGE_HZ = (250.0, 1600.0)
 
 ```python
 spot_internal_loss_correction(
+    measured_absorption: float | np.floating[Any] | np.integer[Any],
+    system_absorption: float | np.floating[Any] | np.integer[Any],
+    *,
+    clip_negative: bool = ...,
+) -> float
+
+spot_internal_loss_correction(
+    measured_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    system_absorption: NumericArrayLike,
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]
+
+spot_internal_loss_correction(
+    measured_absorption: float | np.floating[Any] | np.integer[Any],
+    system_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    clip_negative: bool = ...,
+) -> NDArray[np.float64]
+
+spot_internal_loss_correction(
     measured_absorption: NumericArrayLike,
     system_absorption: NumericArrayLike,
     *,
-    clip_negative: bool = True,
-) -> NDArray[np.float64]
+    clip_negative: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Internal-loss (system) correction (ISO 13472-2:2010, Annex A).
@@ -850,7 +894,7 @@ one-third-octave results are set to zero when `clip_negative` is true
 | `system_absorption` | Reference-plate (system) absorption `alpha_system(f)`, same bands. |
 | `clip_negative` | Set negative corrected values to zero (default `True`). |
 
-**Returns:** Corrected absorption coefficient `alpha(f)`.
+**Returns:** Corrected absorption coefficient `alpha(f)`. A `float` when `measured_absorption` and `system_absorption` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

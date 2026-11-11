@@ -1869,6 +1869,141 @@ def test_heads_that_say_each_case_let_the_last_resort_through(
     assert not _refused(tmp_path, levels=_SCALAR_HEADS)
 
 
+def test_a_complex_number_or_an_array_without_overloads_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A complex result of a number or an array is the same case as a real one.
+
+    ``vibration.sdof_mobility(100.0, ...)`` returns a Python ``complex`` and
+    ``vibration.sdof_mobility(frequencies, ...)`` a complex array: written as
+    the union alone, the return makes every typed caller narrow it.
+    """
+    refused = _refused(
+        tmp_path,
+        mobility="""
+        def sdof_mobility(
+            frequency: object,
+            mass: float,
+        ) -> (
+            complex
+            | NDArray[np.complex128]
+        ):
+            raise NotImplementedError
+        """,
+    )
+    assert refused == {
+        "sdof_mobility": "returns complex | NDArray[np.complex128], and no "
+        "overload says which argument decides between the value and the array"
+    }
+
+
+_COMPLEX_HEADS = """
+from numpy.typing import ArrayLike
+
+@overload
+def mobility[S: float](f: S) -> complex: ...
+@overload
+def mobility[V: list[float]](f: V) -> NDArray[np.complex128]: ...
+@overload
+def mobility[A: ArrayLike](f: A) -> complex | NDArray[np.complex128]: ...
+def mobility(f: ArrayLike) -> complex | NDArray[np.complex128]:
+    raise NotImplementedError
+"""
+
+
+def test_heads_of_the_complex_form_let_the_last_resort_through(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``complex`` for numbers and a complex array otherwise is the rule's complex form."""
+    assert not _refused(tmp_path, mobility=_COMPLEX_HEADS)
+
+
+@pytest.mark.parametrize(
+    ("before", "after", "kinds"),
+    [
+        (
+            "def mobility[S: float](f: S) -> complex: ...",
+            "def mobility[S: float](f: S) -> float: ...",
+            "a complex and a float for numbers and a complex array",
+        ),
+        (
+            "def mobility[V: list[float]](f: V) -> NDArray[np.complex128]: ...",
+            "def mobility[V: list[float]](f: V) -> NDArray[np.float64]: ...",
+            "a complex for numbers and a complex array and a real array",
+        ),
+    ],
+    ids=["a float beside a complex array", "a complex beside a real array"],
+)
+def test_a_value_and_an_array_of_different_kinds_are_refused(
+    tmp_path: pathlib.Path, before: str, after: str, kinds: str
+) -> None:
+    """A complex result is a ``complex`` for numbers, a real one a ``float``.
+
+    The heads below tell the value from the array as the rule asks, so only
+    the kind of number gives them away: a ``float`` beside complex arrays
+    said that ``mobility(100.0)`` drops the imaginary part an array keeps.
+    """
+    refused = _refused(tmp_path, mobility=_COMPLEX_HEADS.replace(before, after))
+    assert refused == {
+        "mobility": f"returns {kinds} otherwise: a complex result is a complex "
+        "for numbers, a real one a float"
+    }
+
+
+@pytest.mark.parametrize(
+    "array",
+    [
+        "Mobilities",
+        "np.ndarray[Any, np.dtype[np.complex128]]",
+        "NDArray[np.complexfloating[Any]]",
+        "'NDArray[np.cdouble]'",
+    ],
+)
+def test_the_kind_of_an_array_is_read_through_its_spellings(
+    tmp_path: pathlib.Path, array: str
+) -> None:
+    """An alias, an ``np.dtype`` argument and a string annotation hold their kind."""
+    refused = _refused(
+        tmp_path,
+        mobility=f"""
+        Mobilities = NDArray[np.complex128]
+
+        @overload
+        def mobility[S: float](f: S) -> float: ...
+        @overload
+        def mobility[V: list[float]](f: V) -> {array}: ...
+        def mobility(f: object) -> float | {array}:
+            raise NotImplementedError
+        """,
+    )
+    assert list(refused) == ["mobility"]
+    assert "a float for numbers and a complex array" in refused["mobility"]
+
+
+def test_an_array_of_an_open_or_mixed_dtype_names_no_kind(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``NDArray[Any]`` and ``NDArray[np.inexact[Any]]`` hold either kind: no finding."""
+    assert not _refused(
+        tmp_path,
+        mobility="""
+        @overload
+        def mobility[S: float](f: S) -> float: ...
+        @overload
+        def mobility[V: list[float]](f: V) -> NDArray[Any]: ...
+        def mobility(f: object) -> float | NDArray[Any]:
+            raise NotImplementedError
+
+        @overload
+        def factor[S: float](f: S) -> float: ...
+        @overload
+        def factor[V: list[float]](f: V) -> NDArray[np.float64 | np.complex128]: ...
+        def factor(f: object) -> float | NDArray[np.float64 | np.complex128]:
+            raise NotImplementedError
+        """,
+    )
+
+
 @pytest.mark.parametrize(
     ("head", "union"),
     [
@@ -2110,6 +2245,10 @@ def test_the_script_reports_and_fails(
     assert "::error::a return that one argument decides is written as one type" in out
     assert "plots.py:" in out
     assert "plot_pair: returns Axes | np.ndarray" in out
+    # The remedy names both forms of a function of a number or an array.
+    assert "a float for numbers and an NDArray" in out
+    assert "a complex and a complex NDArray where the result is complex" in out
+    assert "a last head taking NumericArrayLike" in out
     assert cro.main([]) == 0
 
 

@@ -103,7 +103,11 @@ from ISO 9613-1 (not computed here); without it $C_3 = 0$.
 ## MeteorologicalCorrection
 
 ```python
-MeteorologicalCorrection(c1: float, c2: float, c3: float | np.ndarray)
+MeteorologicalCorrection(
+    c1: float,
+    c2: float,
+    c3: float | NDArray[np.float64],
+)
 ```
 
 Meteorological corrections C1, C2, C3 (ISO 3745:2012 Eq. 14 block).
@@ -122,7 +126,7 @@ precision_background_correction(
     background_levels: NumericArrayLike,
     *,
     frequencies: NumericArrayLike,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Per-position background correction `K1i` (ISO 3745:2012 Eq. 11).
@@ -164,7 +168,7 @@ precision_positions(
     radius: float,
     array: Literal['general', 'broadband'] = 'general',
     n_positions: int = 40,
-) -> np.ndarray
+) -> NDArray[np.float64]
 ```
 
 Normative ISO 3745:2012 microphone coordinates, scaled by `radius`.
@@ -204,7 +208,7 @@ precision_uncertainty(
 ) -> float
 
 precision_uncertainty(
-    sigma_r0: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    sigma_r0: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
 ) -> NDArray[np.float64]
@@ -243,21 +247,21 @@ $k = 1.6$ (95 %, one-sided, when comparing to a limit).
 
 ```python
 PrecisionSoundPowerResult(
-    frequencies: np.ndarray | None,
-    sound_power_level: np.ndarray,
-    surface_pressure_level: np.ndarray,
-    mean_pressure_level: np.ndarray,
-    background_correction: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    sound_power_level: NDArray[np.float64],
+    surface_pressure_level: NDArray[np.float64],
+    mean_pressure_level: NDArray[np.float64],
+    background_correction: NDArray[np.float64],
     c1: float,
     c2: float,
-    c3: np.ndarray,
-    directivity_index: np.ndarray,
-    non_uniformity_index: np.ndarray,
+    c3: NDArray[np.float64],
+    directivity_index: NDArray[np.float64],
+    non_uniformity_index: NDArray[np.float64],
     surface_area: float,
     surface: Literal['sphere', 'hemisphere'],
     sound_power_level_a: float,
     uncertainty: float,
-    uncertainty_bands: np.ndarray,
+    uncertainty_bands: NDArray[np.float64],
     coverage_factor: float,
 )
 ```

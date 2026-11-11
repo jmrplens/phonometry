@@ -9,6 +9,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from .._internal.signal import Signal
@@ -42,7 +43,7 @@ def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     return s.format(**fmt) if fmt else s
 
 
-def _db_waveform(y: np.ndarray, *, calibrated: bool) -> np.ndarray:
+def _db_waveform(y: NDArray[np.float64], *, calibrated: bool) -> NDArray[np.float64]:
     """Pointwise ``20 lg(|p| / 20 uPa)`` of a calibrated waveform.
 
     :param y: Samples already scaled to pascals.
@@ -70,8 +71,8 @@ def _db_waveform(y: np.ndarray, *, calibrated: bool) -> np.ndarray:
 
 def _draw_channels(
     axw: Axes,
-    t: np.ndarray,
-    y: np.ndarray,
+    t: NDArray[np.float64],
+    y: NDArray[np.float64],
     result: Signal,
     language: Language,
     kwargs: dict[str, Any],

@@ -66,13 +66,31 @@ the ISO 9613-1 `alpha` via $m = \alpha / (10 \log_{10} e)$.
 
 ```python
 air_attenuation(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float
+
+air_attenuation(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> NDArray[np.float64]
+
+air_attenuation(
     frequencies: NumericArrayLike,
     *,
-    temperature_c: float = 20.0,
-    relative_humidity_percent: float = 50.0,
-    static_pressure_kpa: float = 101.325,
-    exact_midband: bool = False,
-) -> NDArray[np.float64]
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Pure-tone atmospheric attenuation coefficient (ISO 9613-1, Eq. (5)).
@@ -93,7 +111,7 @@ vibrational absorption terms (Eq. (5)). Fully vectorized over
 | `static_pressure_kpa` | Ambient atmospheric pressure `pa`, in kilopascals (default 101.325 kPa = one standard atmosphere = `pr`). Above 200 kPa emits an [`AtmosphericAbsorptionWarning`](/phonometry/reference/api/environment/air-absorption/#atmosphericabsorptionwarning); non-positive raises `ValueError`. |
 | `exact_midband` | When `True`, each requested frequency is snapped to the nearest exact one-third-octave midband $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6)) before evaluation, reproducing the frequencies used for Table 1 (Note 5). Default `False` (use `frequencies` verbatim). |
 
-**Returns:** Attenuation coefficient `alpha`, in dB/m, with the shape of `frequencies`.
+**Returns:** Attenuation coefficient `alpha`, in dB/m, with the shape of `frequencies`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -113,13 +131,31 @@ entirely to this `alpha` via $m = \alpha / (10 \log_{10} e)$. Use
 
 ```python
 air_power_attenuation_per_m(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float
+
+air_power_attenuation_per_m(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> NDArray[np.float64]
+
+air_power_attenuation_per_m(
     frequencies: NumericArrayLike,
     *,
-    temperature_c: float = 20.0,
-    relative_humidity_percent: float = 50.0,
-    static_pressure_kpa: float = 101.325,
-    exact_midband: bool = False,
-) -> NDArray[np.float64]
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    exact_midband: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 ISO 354 air power-attenuation coefficient `m` (1/m) from conditions.
@@ -143,7 +179,7 @@ hand-entering `m`.
 | `static_pressure_kpa` | Ambient atmospheric pressure, in kilopascals (default 101.325). |
 | `exact_midband` | Snap frequencies to exact midbands; see [`air_attenuation`](/phonometry/reference/api/environment/air-absorption/#air_attenuation). |
 
-**Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `frequencies`.
+**Returns:** Power attenuation coefficient `m`, in 1/m, with the shape of `frequencies`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ## atmospheric_attenuation
 

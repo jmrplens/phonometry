@@ -159,11 +159,11 @@ in that band (clause A.2.3) and a `ValueError` is raised.
 
 ```python
 FieldIndicators(
-    f2: float | np.ndarray,
-    f3: float | np.ndarray,
-    f4: float | np.ndarray,
-    frequencies: np.ndarray | None = None,
-    f1: float | np.ndarray | None = None,
+    f2: float | NDArray[np.float64],
+    f3: float | NDArray[np.float64],
+    f4: float | NDArray[np.float64],
+    frequencies: NDArray[np.float64] | None = None,
+    f1: float | NDArray[np.float64] | None = None,
 )
 ```
 
@@ -302,13 +302,13 @@ in decimal are at the limit, whichever side of it the last bits fall.
 
 ```python
 IntensityResult(
-    frequencies: np.ndarray | None,
-    intensity: np.ndarray | None,
-    intensity_level: np.ndarray | None,
-    pressure_level: np.ndarray | None,
-    pressure_intensity_index: np.ndarray | None,
-    direction: np.ndarray | None,
-    bias_correction: np.ndarray | None,
+    frequencies: NDArray[np.float64] | None,
+    intensity: NDArray[np.float64] | None,
+    intensity_level: NDArray[np.float64] | None,
+    pressure_level: NDArray[np.float64] | None,
+    pressure_intensity_index: NDArray[np.float64] | None,
+    direction: NDArray[np.intp] | None,
+    bias_correction: NDArray[np.float64] | None,
     total_intensity: float,
     total_intensity_level: float,
     total_pressure_level: float,
@@ -432,7 +432,7 @@ sound_intensity(
     density: float = 1.204,
     speed_of_sound: float = 343.0,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
-    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
+    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]] | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult
 ```

@@ -62,13 +62,14 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.boundary import round_half_even, settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
     require_finite,
@@ -85,7 +86,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "ISO10847_BACKGROUND_CORRECTIONS",
@@ -281,9 +282,25 @@ class BarrierInSituWarning(PhonometryWarning):
     """
 
 
+@overload
+def barrier_background_correction[S: RealScalar](level_difference: S) -> float: ...
+
+
+@overload
+def barrier_background_correction[V: RealValues](
+    level_difference: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def barrier_background_correction[A: NumericArrayLike](
+    level_difference: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def barrier_background_correction(
     level_difference: NumericArrayLike,
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The background correction of Table 3, in decibels to add.
 
     The table has two rows and no formula: 2 dB comes off at a margin of 4 or
@@ -300,7 +317,9 @@ def barrier_background_correction(
 
     :param level_difference: The difference between the level measured with
         the source and the level without it, in decibels.
-    :return: The correction to add, in decibels, which is zero or negative.
+    :return: The correction to add, in decibels, which is zero or negative. A ``float``
+        for a number, an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: For a margin under
         :data:`ISO10847_MIN_BACKGROUND_MARGIN_DB`, which 6.4 calls invalid.
     :raises TypeError: if ``level_difference`` holds a text or a value that is not a
@@ -318,12 +337,12 @@ def barrier_background_correction(
         raise ValueError(msg)
     rows = np.floor(margin).astype(int)
     highest = max(ISO10847_BACKGROUND_CORRECTIONS)
-    return np.asarray(
+    return as_float_or_array(
         [
             0.0 if row > highest else ISO10847_BACKGROUND_CORRECTIONS[row]
             for row in rows.tolist()
         ],
-        dtype=np.float64,
+        like=(level_difference,),
     )
 
 

@@ -140,11 +140,11 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 
 ```python
 AWeightedMaxImpactResult(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     fraction: Literal[1, 3],
-    levels: np.ndarray,
-    a_weighting: np.ndarray,
-    corrected: np.ndarray,
+    levels: NDArray[np.float64],
+    a_weighting: NDArray[np.float64],
+    corrected: NDArray[np.float64],
     unrounded: float,
     rating: int,
 )
@@ -222,10 +222,22 @@ Table A.1 (bang machine).
 
 ```python
 fast_reverberation_correction(
+    reverberation_time: float | np.floating[Any] | np.integer[Any],
+    *,
+    reference_time: float = ...,
+) -> float
+
+fast_reverberation_correction(
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    reference_time: float = ...,
+) -> NDArray[np.float64]
+
+fast_reverberation_correction(
     reverberation_time: NumericArrayLike,
     *,
-    reference_time: float = 0.5,
-) -> np.ndarray
+    reference_time: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Fast time-weighting reverberation correction (Formulae (4), (5), (6)).
@@ -247,7 +259,7 @@ when $T = T_0$.
 | `reverberation_time` | Receiving-room reverberation time `T` per band, in seconds (> 0). |
 | `reference_time` | Reference reverberation time `T0`, in seconds (Default: 0,5 s). |
 
-**Returns:** The correction per band, in dB.
+**Returns:** The correction per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -275,7 +287,7 @@ HEAVY_IMPACT_OCTAVE_BANDS_HZ = (31.5, 63.0, 125.0, 250.0, 500.0)
 ## heavy_impact_octave_levels
 
 ```python
-heavy_impact_octave_levels(levels: NumericArrayLike) -> np.ndarray
+heavy_impact_octave_levels(levels: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Combine one-third-octave maximum levels into octaves (Formula (20)).
@@ -369,7 +381,7 @@ HEAVY_IMPACT_SOURCES = {'rubber_ball': ((39.0, 1.0), (31.0, 1.5), (23.0, 1.5), (
 ```python
 HeavyImpactSourceCheck(
     source: Literal['rubber_ball', 'bang_machine'],
-    measured: np.ndarray,
+    measured: NDArray[np.float64],
 )
 ```
 
@@ -449,9 +461,9 @@ Per-band boolean mask of conforming bands.
 
 ```python
 HeavyImpactSourceLimits(
-    frequencies: np.ndarray,
-    lower: np.ndarray,
-    upper: np.ndarray,
+    frequencies: NDArray[np.float64],
+    lower: NDArray[np.float64],
+    upper: NDArray[np.float64],
 )
 ```
 
@@ -634,13 +646,13 @@ floor excited by the rubber ball. The reverberation term is
 
 ```python
 StandardizedMaxImpactResult(
-    frequencies: np.ndarray | None,
-    measured: np.ndarray,
-    standardized: np.ndarray,
+    frequencies: NDArray[np.float64] | None,
+    measured: NDArray[np.float64],
+    standardized: NDArray[np.float64],
     volume_term: float,
-    reverberation_correction: np.ndarray,
+    reverberation_correction: NDArray[np.float64],
     volume: float,
-    reverberation_time: np.ndarray,
+    reverberation_time: NDArray[np.float64],
 )
 ```
 

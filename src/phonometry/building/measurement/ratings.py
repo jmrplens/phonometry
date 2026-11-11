@@ -103,6 +103,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, BandValues, NumericArrayLike
@@ -404,7 +405,7 @@ def _by_band(
     values: BandValues,
     fraction: BandFraction | np.integer[Any] | None,
     name: str,
-) -> tuple[np.ndarray, BandFraction | None]:
+) -> tuple[NDArray[np.float64], BandFraction | None]:
     """The values in rating order, read from a mapping by band when given one.
 
     A mapping is keyed by band centre frequency in hertz, as
@@ -564,9 +565,9 @@ class WeightedRatingResult(OwnsArrays):
     c: int
     ctr: int
     unfavorable_sum: float
-    frequencies: np.ndarray
-    measured: np.ndarray
-    shifted_reference: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured: NDArray[np.float64]
+    shifted_reference: NDArray[np.float64]
     quantity: Literal["airborne"] = "airborne"
 
     def __post_init__(self) -> None:
@@ -716,9 +717,9 @@ class ImpactRatingResult(OwnsArrays):
     rating: int
     ci: int
     unfavorable_sum: float
-    frequencies: np.ndarray
-    measured: np.ndarray
-    shifted_reference: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured: NDArray[np.float64]
+    shifted_reference: NDArray[np.float64]
     quantity: Literal["impact"] = "impact"
 
     def __post_init__(self) -> None:
@@ -857,7 +858,7 @@ def _render_iso717(
     )
 
 
-def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
+def _round_half_up_tenths(values: NDArray[np.float64]) -> NDArray[np.float64]:
     r"""Reduce levels to one decimal place (ISO 717-1 Clause 4.4, note 1).
 
     Rounds each value to the nearest tenth of a decibel, half away from
@@ -921,8 +922,8 @@ def _resolve_band_set(
 
 
 def _best_shift(
-    measured: np.ndarray,
-    reference: np.ndarray,
+    measured: NDArray[np.float64],
+    reference: NDArray[np.float64],
     limit: float,
     step: float = 1.0,
 ) -> tuple[float, float]:
@@ -964,7 +965,7 @@ def _best_shift(
 
 
 def _adaptation_term(
-    measured: np.ndarray, spectrum: tuple[int, ...], rating: int
+    measured: NDArray[np.float64], spectrum: tuple[int, ...], rating: int
 ) -> int:
     """Spectrum adaptation term ``Xaj - rating`` (Clause 4.5, Formula (2))."""
     x_aj = -energy_sum(real_array(spectrum, "spectrum") - measured)
@@ -1074,7 +1075,7 @@ def _resolve_impact_band_set(
     raise ValueError(msg)
 
 
-def _impact_ci(measured: np.ndarray, rating: int, n_bands: int) -> int:
+def _impact_ci(measured: NDArray[np.float64], rating: int, n_bands: int) -> int:
     r"""Spectrum adaptation term ``CI`` (ISO 717-2 Clause A.2.1).
 
     :math:`C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}` with the energetic sum
@@ -1188,8 +1189,8 @@ class ImpactImprovementRatingResult(OwnsArrays):
     delta_lw: int
     ci_delta: int
     ci_r: int
-    frequencies: np.ndarray
-    improvement: np.ndarray
+    frequencies: NDArray[np.float64]
+    improvement: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         r"""Reject a rating whose terms or curves do not agree.
@@ -1298,8 +1299,8 @@ class ExtendedWeightedRatingResult(OwnsArrays):
     ctr_50_5000: float | None
     ctr_100_5000: float | None
     core: WeightedRatingResult
-    frequencies: np.ndarray
-    measured: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject an enlarged-range rating whose curve and bands disagree.
@@ -1374,8 +1375,8 @@ class ExtendedImpactRatingResult(OwnsArrays):
     ci: float
     ci_50_2500: float | None
     core: ImpactRatingResult
-    frequencies: np.ndarray
-    measured: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject an enlarged-range rating whose curve and bands disagree.
@@ -1436,8 +1437,8 @@ def _reduce(value: float, *, one_decimal: bool) -> float:
 
 
 def _match_bands(
-    frequencies: np.ndarray, targets: tuple[float, ...]
-) -> np.ndarray | None:
+    frequencies: NDArray[np.float64], targets: tuple[float, ...]
+) -> NDArray[np.intp] | None:
     """Indices of ``targets`` within ``frequencies`` (6 % tolerance), or None."""
     indices: list[int] = []
     for target in targets:
@@ -1452,7 +1453,7 @@ def _validated_extended_input(
     owner: str,
     values_by_band: NumericArrayLike,
     frequencies: NumericArrayLike | None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.intp]]:
     """Validate the extended-range input; return (measured, freqs, core_idx).
 
     *owner* is the entry point the caller typed, so that the message about
@@ -1536,7 +1537,7 @@ def weighted_rating_extended(
     shift, _ = _best_shift(core_measured, ref, _MAX_UNFAVOURABLE_THIRD, step)
     rating = float(_REF_THIRD_OCTAVE[_INDEX_500_THIRD]) + shift
 
-    def _term(bands: np.ndarray, spectrum: Sequence[int]) -> float:
+    def _term(bands: NDArray[np.float64], spectrum: Sequence[int]) -> float:
         # The C and Ctr spectra of the standard, a library table no caller hands.
         x_aj = -energy_sum(np.subtract(spectrum, bands))
         return _reduce(value=float(x_aj), one_decimal=one_decimal) - rating
@@ -1615,7 +1616,7 @@ def weighted_impact_rating_extended(
     shift, _ = _best_shift(-core_measured, -ref, _MAX_UNFAVOURABLE_THIRD, step)
     rating = float(_REF_IMPACT_THIRD_OCTAVE[_INDEX_500_THIRD]) - shift
 
-    def _ci_over(bands: np.ndarray) -> float:
+    def _ci_over(bands: NDArray[np.float64]) -> float:
         l_sum = _reduce(value=float(energy_sum(bands)), one_decimal=one_decimal)
         return l_sum - 15.0 - rating
 
@@ -1739,7 +1740,7 @@ _ELEMENT_INDEX: Mapping[str, str] = MappingProxyType(
 )
 
 
-def _reference_floor_curve(reference_floor: object) -> np.ndarray:
+def _reference_floor_curve(reference_floor: object) -> NDArray[np.float64]:
     """A fresh array of the 16 ``Ln,r,0`` values of one reference floor."""
     floor = require_choice(
         reference_floor, "reference_floor", tuple(IMPACT_REFERENCE_FLOORS)
@@ -1748,8 +1749,8 @@ def _reference_floor_curve(reference_floor: object) -> np.ndarray:
 
 
 def _validated_improvement(
-    delta: Sequence[float] | np.ndarray, name: str
-) -> np.ndarray:
+    delta: Sequence[float] | NDArray[np.float64], name: str
+) -> NDArray[np.float64]:
     """The 16 core one-third-octave values of an improvement spectrum."""
     values = real_array(delta, name)
     if values.shape != (_N_THIRD_OCTAVE_BANDS,):

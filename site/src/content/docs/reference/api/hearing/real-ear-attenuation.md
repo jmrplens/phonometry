@@ -152,11 +152,11 @@ B.2).
 
 ```python
 AttenuationDifferenceResult(
-    first_mean_attenuation: np.ndarray,
-    second_mean_attenuation: np.ndarray,
-    first_expanded_uncertainty_db: np.ndarray,
-    second_expanded_uncertainty_db: np.ndarray,
-    frequencies: np.ndarray,
+    first_mean_attenuation: NDArray[np.float64],
+    second_mean_attenuation: NDArray[np.float64],
+    first_expanded_uncertainty_db: NDArray[np.float64],
+    second_expanded_uncertainty_db: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
 )
 ```
 
@@ -291,7 +291,7 @@ min_significant_difference(
 ) -> float
 
 min_significant_difference(
-    expanded_uncertainty_db: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    expanded_uncertainty_db: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 min_significant_difference(
@@ -427,12 +427,12 @@ hearing level give the same difference.
 
 ```python
 RealEarAttenuationResult(
-    attenuation: np.ndarray,
-    mean_attenuation: np.ndarray,
-    standard_deviation_db: np.ndarray,
-    standard_uncertainty_db: np.ndarray,
-    expanded_uncertainty_db: np.ndarray,
-    frequencies: np.ndarray,
+    attenuation: NDArray[np.float64],
+    mean_attenuation: NDArray[np.float64],
+    standard_deviation_db: NDArray[np.float64],
+    standard_uncertainty_db: NDArray[np.float64],
+    expanded_uncertainty_db: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     n_subjects: int,
 )
 ```
@@ -491,11 +491,25 @@ REAT_BETWEEN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUnce
 
 ```python
 reat_expanded_uncertainty(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    protector: Literal['earplug', 'earmuff'],
+    between_laboratories: bool = ...,
+) -> float
+
+reat_expanded_uncertainty(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    protector: Literal['earplug', 'earmuff'],
+    between_laboratories: bool = ...,
+) -> NDArray[np.float64]
+
+reat_expanded_uncertainty(
     frequencies: NumericArrayLike,
     *,
     protector: Literal['earplug', 'earmuff'],
-    between_laboratories: bool = False,
-) -> np.ndarray
+    between_laboratories: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The typical $U_{95}$ of a mean attenuation, band by band (A.2, B.2).
@@ -516,7 +530,7 @@ to one decimal, as the tables print them (see
 | `protector` | `"earplug"` or `"earmuff"`. |
 | `between_laboratories` | `False` (default) for Table A.2, `True` for Table B.2. |
 
-**Returns:** $U_{95}$ per band, in dB.
+**Returns:** $U_{95}$ per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -553,10 +567,10 @@ REAT_WITHIN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUncer
 
 ```python
 REATSoundFieldCheck(
-    frequencies: np.ndarray,
-    position_deviation_db: np.ndarray,
-    left_right_difference: np.ndarray,
-    rotation_variation_db: np.ndarray,
+    frequencies: NDArray[np.float64],
+    position_deviation_db: NDArray[np.float64],
+    left_right_difference: NDArray[np.float64],
+    rotation_variation_db: NDArray[np.float64],
     free_field_rejection: float | None,
     positions: tuple[Literal['front', 'back', 'left', 'right', 'up', 'down'], ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )

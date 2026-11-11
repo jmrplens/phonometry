@@ -95,6 +95,7 @@ from scipy.integrate import quad
 from scipy.special import ellipe
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_band_fraction,
@@ -115,9 +116,15 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction, NumericArrayLike
+    from ..._internal.types import (
+        BandFraction,
+        NumericArrayLike,
+        RealScalar,
+        RealValues,
+    )
     from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
@@ -188,7 +195,7 @@ _NORTON_FIELD_CORRECTION: float = 5.0
 _GRAZING_INCIDENCE_DEG: float = 90.0
 
 
-def _band_axis(frequency: NumericArrayLike) -> np.ndarray:
+def _band_axis(frequency: NumericArrayLike) -> NDArray[np.float64]:
     """Validate a 1-D array of strictly positive band centre frequencies."""
     f = np.atleast_1d(real_array(frequency, "frequency"))
     if f.ndim != 1 or f.size == 0:
@@ -228,6 +235,42 @@ def field_incidence_correction(fraction: BandFraction | np.integer[Any] = 3) -> 
     return _FIELD_CORRECTION[require_band_fraction(fraction, "fraction")]
 
 
+@overload
+def mass_law_transmission_loss[S: RealScalar](
+    frequency: S,
+    mass_per_area: float,
+    *,
+    incidence: Literal["normal", "field"] = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> float: ...
+
+
+@overload
+def mass_law_transmission_loss[V: RealValues](
+    frequency: V,
+    mass_per_area: float,
+    *,
+    incidence: Literal["normal", "field"] = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def mass_law_transmission_loss[A: NumericArrayLike](
+    frequency: A,
+    mass_per_area: float,
+    *,
+    incidence: Literal["normal", "field"] = ...,
+    fraction: BandFraction | np.integer[Any] = ...,
+    field_correction: float | None = ...,
+    fluid: Fluid = ...,
+) -> float | NDArray[np.float64]: ...
+
+
 def mass_law_transmission_loss(
     frequency: NumericArrayLike,
     mass_per_area: float,
@@ -236,7 +279,7 @@ def mass_law_transmission_loss(
     fraction: BandFraction | np.integer[Any] = 3,
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Mass-law transmission loss of a limp panel (Bies Eq. 7.40/7.42).
 
     :math:`\mathrm{TL}_{\mathrm{normal}} = 10 \log_{10}[1 +
@@ -255,7 +298,8 @@ def mass_law_transmission_loss(
         (>= 0), overriding the band table (Default: ``None``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
-    :return: The transmission loss ``TL``, in dB.
+    :return: The transmission loss ``TL``, in dB. A ``float`` for a number, an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive input, an unknown incidence or a
         band set other than 1 or 3.
     :raises TypeError: if ``incidence`` is not a text, or ``field_correction`` or
@@ -274,7 +318,7 @@ def mass_law_transmission_loss(
     tl = 10.0 * np.log10(1.0 + ratio**2)
     if incidence == "field":
         tl = tl - _resolve_field_correction(fraction, field_correction)
-    return np.asarray(tl, dtype=np.float64)
+    return as_float_or_array(tl, like=(frequency,))
 
 
 def _resolve_field_correction(
@@ -329,8 +373,8 @@ class SoundReductionResult(OwnsArrays):
         }
     )
 
-    frequencies: np.ndarray
-    transmission_loss: np.ndarray
+    frequencies: NDArray[np.float64]
+    transmission_loss: NDArray[np.float64]
     model: Literal[
         "sharp-single",
         "cremer-single",
@@ -368,7 +412,7 @@ class SoundReductionResult(OwnsArrays):
         require_same_length(self, "frequencies", "transmission_loss")
 
     @property
-    def transmission_coefficient(self) -> np.ndarray:
+    def transmission_coefficient(self) -> NDArray[np.float64]:
         r"""Transmission coefficient :math:`\tau = 10^{-R/10}` per band."""
         r = np.asarray(self.transmission_loss, dtype=np.float64)
         return np.asarray(10.0 ** (-r / 10.0), dtype=np.float64)
@@ -548,7 +592,7 @@ def single_panel_transmission_loss(
         )
         raise ValueError(msg)
 
-    def _tl_normal(freq: np.ndarray) -> np.ndarray:
+    def _tl_normal(freq: NDArray[np.float64]) -> NDArray[np.float64]:
         return mass_law_transmission_loss(
             freq,
             m2,
@@ -1177,14 +1221,14 @@ def _orthotropic_tau(
 
 
 def _heckl_transmission_loss(
-    f: np.ndarray,
+    f: NDArray[np.float64],
     m2: float,
     fc1: float,
     fc2: float,
     *,
     fluid: Fluid,
     correction: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Heckl's (1960) piecewise orthotropic estimate (Bies 7.2.4.5).
 
     Field-incidence mass law below :math:`f_{\mathrm{c}1}/2`, Bies Eq. (7.59) (= the
@@ -1195,18 +1239,18 @@ def _heckl_transmission_loss(
     """
     z0 = fluid.density * fluid.speed_of_sound
 
-    def mass_law(freq: np.ndarray) -> np.ndarray:
+    def mass_law(freq: NDArray[np.float64]) -> NDArray[np.float64]:
         return (
             mass_law_transmission_loss(freq, m2, incidence="normal", fluid=fluid)
             - correction
         )
 
-    def coincidence(freq: np.ndarray) -> np.ndarray:
+    def coincidence(freq: NDArray[np.float64]) -> NDArray[np.float64]:
         """Bies Eq. (7.59): the flattened plateau of the coincidence range."""
         tau = z0 / (2.0 * np.pi**2 * m2) * fc1 / freq**2 * np.log(4.0 * freq / fc1) ** 2
         return np.asarray(-10.0 * np.log10(tau), dtype=np.float64)
 
-    def recovered(freq: np.ndarray) -> np.ndarray:
+    def recovered(freq: NDArray[np.float64]) -> NDArray[np.float64]:
         """Bies Eq. (7.60): 6 dB per octave again above the whole range."""
         tau = z0 / (2.0 * m2) * math.sqrt(fc1 * fc2) / freq**2
         return np.asarray(-10.0 * np.log10(tau), dtype=np.float64)
@@ -1534,7 +1578,7 @@ def double_wall_transmission_loss(
     )
     f_l = c0 / (2.0 * np.pi * d)
 
-    def _ml(freq: np.ndarray, mass: float) -> np.ndarray:
+    def _ml(freq: NDArray[np.float64], mass: float) -> NDArray[np.float64]:
         return mass_law_transmission_loss(
             freq,
             mass,

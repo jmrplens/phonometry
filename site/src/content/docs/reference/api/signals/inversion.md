@@ -48,11 +48,11 @@ $1/(2\sqrt{\epsilon})$ bound.
 
 ```python
 InverseFilterResult(
-    inverse: np.ndarray,
-    frequencies: np.ndarray,
-    spectrum: np.ndarray,
-    response_spectrum: np.ndarray,
-    regularization: np.ndarray,
+    inverse: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
+    spectrum: NDArray[np.complex128],
+    response_spectrum: NDArray[np.complex128],
+    regularization: NDArray[np.float64],
     f_range: tuple[float, float],
     delay: int,
     fs: float,
@@ -90,7 +90,7 @@ the requested band.
 ### InverseFilterResult.apply()
 
 ```python
-InverseFilterResult.apply(x: NumericArrayLike) -> np.ndarray
+InverseFilterResult.apply(x: NumericArrayLike) -> NDArray[np.float64]
 ```
 
 Equalize a signal with the inverse filter.

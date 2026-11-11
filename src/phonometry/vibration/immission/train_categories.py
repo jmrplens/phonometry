@@ -56,12 +56,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_choice,
     require_finite_array,
@@ -84,7 +85,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from numpy.typing import NDArray
 
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "RAILWAY_CHANGE_TOLERANCE_PERCENT",
@@ -206,7 +207,21 @@ def train_category_rms(kb_fti_zug: NumericArrayLike) -> float:
     return float(np.sqrt(np.mean(values**2)))
 
 
-def train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> NDArray[np.float64]:
+@overload
+def train_kb_fmax[S: RealScalar](kb_ftm_zug: S) -> float: ...
+
+
+@overload
+def train_kb_fmax[V: RealValues](kb_ftm_zug: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def train_kb_fmax[A: NumericArrayLike](
+    kb_ftm_zug: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""The :math:`KB_\mathrm{Fmax,Zug}` of each category, Formula (7).
 
     :math:`KB_\mathrm{Fmax,Zug} = 1{,}5 \cdot KB_\mathrm{FTm,Zug}`, the estimate the
@@ -216,7 +231,8 @@ def train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> NDArray[np.float64]:
     prints as 0,568.
 
     :param kb_ftm_zug: :math:`KB_\mathrm{FTm,Zug}` of each category.
-    :return: :math:`KB_\mathrm{Fmax,Zug}` of each, in the same order.
+    :return: :math:`KB_\mathrm{Fmax,Zug}` of each, in the same order. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For an empty, non-finite or negative input.
     :raises TypeError: if ``kb_ftm_zug`` holds a text or a value that is not a real
         number.
@@ -225,7 +241,7 @@ def train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> NDArray[np.float64]:
     if np.any(values < 0.0):
         msg = "'kb_ftm_zug' must not be negative."
         raise ValueError(msg)
-    return TRAIN_KB_FMAX_FACTOR * values
+    return as_float_or_array(TRAIN_KB_FMAX_FACTOR * values, like=(kb_ftm_zug,))
 
 
 def railway_kb_fmax(kb_ftm_zug: NumericArrayLike) -> float:

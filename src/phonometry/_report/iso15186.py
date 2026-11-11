@@ -54,6 +54,8 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Sequence
 
+    from numpy.typing import NDArray
+
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
     from ..building.measurement.intensity_insulation import (
@@ -204,7 +206,11 @@ def render_iso15186_report(
     )
 
     def build_columns(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
+        value_header: str,
+        curve: NDArray[np.float64],
+        *,
+        verbose: bool,
+        language: Language,
     ) -> tuple[Sequence[Column], str, Any]:
         """The table: ``f | RI`` plus the optional ``RI,M`` / ``FpI`` / ``δpI0``."""
         from reportlab.lib.units import mm
@@ -359,7 +365,11 @@ def render_iso15186_element_report(
     )
 
     def build_columns(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
+        value_header: str,
+        curve: NDArray[np.float64],
+        *,
+        verbose: bool,
+        language: Language,
     ) -> tuple[Sequence[Column], str, Any]:
         """The ISO 717 table; the ``FpI`` / ``δpI0`` columns replace verbose."""
         if not extra:

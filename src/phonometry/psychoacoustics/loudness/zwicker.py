@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.signal import Signal
@@ -159,12 +160,12 @@ class ZwickerLoudness(OwnsArrays):
 
     loudness: float
     loudness_level: float
-    specific: np.ndarray
+    specific: NDArray[np.float64]
     field: Literal["free", "diffuse"]
     n5: float | None = None
     n10: float | None = None
-    times: np.ndarray | None = None
-    loudness_vs_time: np.ndarray | None = None
+    times: NDArray[np.float64] | None = None
+    loudness_vs_time: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Reject a misshapen specific-loudness pattern or loudness-vs-time trace.
@@ -325,7 +326,7 @@ class ZwickerLoudness(OwnsArrays):
 # ---------------------------------------------------------------------------
 
 
-def _filterbank_sos() -> np.ndarray:
+def _filterbank_sos() -> NDArray[np.float64]:
     """Second-order sections of the 28-band filterbank at 48 kHz.
 
     Table A.1 lists the reference section; Table A.2 the per-band/per-stage
@@ -349,8 +350,8 @@ def _band_center_frequency(band: int) -> float:
 
 
 def _third_octave_levels(
-    x: np.ndarray, *, stationary: bool, skip_samples: int = 0
-) -> np.ndarray:
+    x: NDArray[np.float64], *, stationary: bool, skip_samples: int = 0
+) -> NDArray[np.float64]:
     """One-third-octave band levels of a 48 kHz pressure signal.
 
     Implements the filtering, squaring, smoothing and level calculation of
@@ -407,7 +408,7 @@ def _third_octave_levels(
 # ---------------------------------------------------------------------------
 
 
-def _corrected_intensities(levels: np.ndarray) -> np.ndarray:
+def _corrected_intensities(levels: NDArray[np.float64]) -> NDArray[np.float64]:
     """Equal-loudness-contour correction of the lowest 11 bands (Table A.3).
 
     Each band level is reduced by the Table A.3 value DLL of the first
@@ -428,7 +429,7 @@ def _corrected_intensities(levels: np.ndarray) -> np.ndarray:
     return np.asarray(10.0 ** ((low + reduction) / 10.0))
 
 
-def _lcb_levels(intensities: np.ndarray) -> np.ndarray:
+def _lcb_levels(intensities: NDArray[np.float64]) -> NDArray[np.float64]:
     """Levels of the first three critical bands (clause 5.4).
 
     The corrected intensities of the 11 lowest one-third-octave bands are
@@ -449,7 +450,9 @@ def _lcb_levels(intensities: np.ndarray) -> np.ndarray:
     return lcb
 
 
-def _core_loudness(levels: np.ndarray, lcb: np.ndarray, *, diffuse: bool) -> np.ndarray:
+def _core_loudness(
+    levels: NDArray[np.float64], lcb: NDArray[np.float64], *, diffuse: bool
+) -> NDArray[np.float64]:
     """Core loudness of the 20 critical bands (clause 5.4, Tables A.4-A.7).
 
     Applies the a0 transmission correction (Table A.4), optionally the
@@ -477,7 +480,7 @@ def _core_loudness(levels: np.ndarray, lcb: np.ndarray, *, diffuse: bool) -> np.
     return core
 
 
-def _correct_lowest_band(core: np.ndarray) -> None:
+def _correct_lowest_band(core: NDArray[np.float64]) -> None:
     """Threshold-in-quiet correction within the lowest critical band.
 
     Clause 5.4: the specific loudness of the first critical band is scaled
@@ -552,7 +555,7 @@ def _nl_lp_step(
     return uo, u2
 
 
-def _nonlinear_decay(core: np.ndarray, sample_rate: float) -> None:
+def _nonlinear_decay(core: NDArray[np.float64], sample_rate: float) -> None:
     """Nonlinear temporal decay of the core loudness (clause 6.3).
 
     Processes each critical band independently.  Between consecutive 0.5 ms
@@ -715,7 +718,9 @@ def _calc_slopes(core: list[float]) -> tuple[float, list[float]]:
     return total, ns
 
 
-def _slopes_over_time(core: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _slopes_over_time(
+    core: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Apply :func:`_calc_slopes` to every time step.
 
     :param core: Core loudness, shape (21, T).
@@ -735,7 +740,9 @@ def _slopes_over_time(core: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 # ---------------------------------------------------------------------------
 
 
-def _lowpass_interpolated(x: np.ndarray, tau: float, sample_rate: float) -> np.ndarray:
+def _lowpass_interpolated(
+    x: NDArray[np.float64], tau: float, sample_rate: float
+) -> NDArray[np.float64]:
     """First-order low-pass with linear input interpolation (clause 6.3).
 
     The filter runs at ``_LP_ITER`` times the sampling rate on a linearly
@@ -760,7 +767,9 @@ def _lowpass_interpolated(x: np.ndarray, tau: float, sample_rate: float) -> np.n
     return out
 
 
-def _temporal_weighting(loudness: np.ndarray, sample_rate: float) -> np.ndarray:
+def _temporal_weighting(
+    loudness: NDArray[np.float64], sample_rate: float
+) -> NDArray[np.float64]:
     """Duration-dependent weighting of the total loudness (clause 6.3).
 
     Weighted sum of two first-order low-passes (3.5 ms and 70 ms) with
@@ -810,7 +819,9 @@ def _validate_field(field: object) -> bool:
     return require_choice(field, "field", ("free", "diffuse")) == "diffuse"
 
 
-def _core_loudness_from_levels(levels: np.ndarray, *, diffuse: bool) -> np.ndarray:
+def _core_loudness_from_levels(
+    levels: NDArray[np.float64], *, diffuse: bool
+) -> NDArray[np.float64]:
     """Band levels (28, T) -> corrected core loudness (21, T)."""
     intensities = _corrected_intensities(levels)
     lcb = _lcb_levels(intensities)

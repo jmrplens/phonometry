@@ -79,12 +79,28 @@ are bracketed and excluded from the single-number mean when the per-band
 
 ```python
 band_mode_count(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    area: float,
+    critical_frequency: float,
+    *,
+    speed_of_sound: float = ...,
+) -> float
+
+band_mode_count(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    area: float,
+    critical_frequency: float,
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+band_mode_count(
     frequencies: NumericArrayLike,
     area: float,
     critical_frequency: float,
     *,
-    speed_of_sound: float = 343.0,
-) -> np.ndarray
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 In-band mode count $N = B \cdot n$ (Part 4, Formula (4)).
@@ -104,7 +120,7 @@ band is
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s. |
 
-**Returns:** In-band mode count `N` per band (dimensionless).
+**Returns:** In-band mode count `N` per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -206,9 +222,24 @@ Hopkins Eq. 2.201 derives. See `docs/ERRATA.md`.
 
 ```python
 direction_averaged_level_difference(
+    dv_ij: float | np.floating[Any] | np.integer[Any],
+    dv_ji: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+direction_averaged_level_difference(
+    dv_ij: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    dv_ji: NumericArrayLike,
+) -> NDArray[np.float64]
+
+direction_averaged_level_difference(
+    dv_ij: float | np.floating[Any] | np.integer[Any],
+    dv_ji: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+direction_averaged_level_difference(
     dv_ij: NumericArrayLike,
     dv_ji: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Direction-averaged velocity level difference (Formula (11)).
@@ -225,7 +256,7 @@ $\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji
 | `dv_ij` | `Dv,ij` (element `i` excited), in dB, per band. |
 | `dv_ji` | `Dv,ji` (element `j` excited), in dB, per band. |
 
-**Returns:** `D̄v,ij` per band, in dB.
+**Returns:** `D̄v,ij` per band, in dB. A `float` when `dv_ij` and `dv_ji` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -241,9 +272,25 @@ equivalent_absorption_length(
     area: float,
     structural_reverberation_time: NumericArrayLike,
     *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float = ...,
+) -> float
+
+equivalent_absorption_length(
+    area: float,
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+equivalent_absorption_length(
+    area: float,
+    structural_reverberation_time: NumericArrayLike,
+    *,
     frequencies: NumericArrayLike,
-    speed_of_sound: float = 343.0,
-) -> np.ndarray
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent absorption length `aj` (Formula (12)).
@@ -263,7 +310,7 @@ with $f_{\mathrm{ref}} = 1000$ Hz.
 | `frequencies` | Band centre frequency `f`, in Hz, per band. |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s (default 343 m/s). |
 
-**Returns:** Equivalent absorption length `aj`, in m, per band.
+**Returns:** Equivalent absorption length `aj`, in m, per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -276,7 +323,7 @@ with $f_{\mathrm{ref}} = 1000$ Hz.
 
 ```python
 FlankingImpactLevelResult(
-    l_n_f: np.ndarray,
+    l_n_f: NDArray[np.float64],
     rating: ImpactRatingResult | None,
 )
 ```
@@ -356,7 +403,7 @@ measurement statement, an optional requirement verdict and a footer.
 
 ```python
 FlankingLevelDifferenceResult(
-    d_n_f: np.ndarray,
+    d_n_f: NDArray[np.float64],
     rating: WeightedRatingResult | None,
 )
 ```
@@ -468,10 +515,26 @@ Modal density $n = \pi \cdot S \cdot f_\mathrm{c} / c_0^2$ (Part 4, (5)).
 modal_overlap_factor(
     area: float,
     critical_frequency: float,
+    structural_reverberation_time: float | np.floating[Any] | np.integer[Any],
+    *,
+    speed_of_sound: float = ...,
+) -> float
+
+modal_overlap_factor(
+    area: float,
+    critical_frequency: float,
+    structural_reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+modal_overlap_factor(
+    area: float,
+    critical_frequency: float,
     structural_reverberation_time: NumericArrayLike,
     *,
-    speed_of_sound: float = 343.0,
-) -> np.ndarray
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Modal overlap factor $M = 2.2 \cdot n / T_\mathrm{s}$ (Part 4, F. (6)).
@@ -493,7 +556,7 @@ bracketing and single-number exclusion.
 | `structural_reverberation_time` | `Ts`, in s, per band (or a single value). |
 | `speed_of_sound` | Speed of sound in air `c0`, in m/s. |
 
-**Returns:** Modal overlap factor `M` per band (dimensionless).
+**Returns:** Modal overlap factor `M` per band (dimensionless). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -676,8 +739,20 @@ Requires matplotlib (the `[plot]` extra).
 total_loss_factor(
     structural_reverberation_time: NumericArrayLike,
     *,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+total_loss_factor(
+    structural_reverberation_time: NumericArrayLike,
+    *,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+total_loss_factor(
+    structural_reverberation_time: NumericArrayLike,
+    *,
     frequencies: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
@@ -689,7 +764,7 @@ Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
 | `frequencies` | Band centre frequency `f`, in Hz, per band. |
 | `structural_reverberation_time` | Structural reverberation time `Ts`, in s, per band (or a single value broadcast to all bands). |
 
-**Returns:** Total loss factor `η` (dimensionless) per band.
+**Returns:** Total loss factor `η` (dimensionless) per band. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -702,9 +777,24 @@ Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
 
 ```python
 velocity_level_difference(
+    source_level: float | np.floating[Any] | np.integer[Any],
+    receive_level: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+velocity_level_difference(
+    source_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    receive_level: NumericArrayLike,
+) -> NDArray[np.float64]
+
+velocity_level_difference(
+    source_level: float | np.floating[Any] | np.integer[Any],
+    receive_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+velocity_level_difference(
     source_level: NumericArrayLike,
     receive_level: NumericArrayLike,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Velocity level difference $D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},j}$ (Formula (8)).
@@ -716,7 +806,7 @@ Velocity level difference $D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},
 | `source_level` | Average velocity level `Lv,i` of the excited element, in dB, per band. |
 | `receive_level` | Average velocity level `Lv,j` of the receiving element, in dB, per band. |
 
-**Returns:** `Dv,ij` per band, in dB.
+**Returns:** `Dv,ij` per band, in dB. A `float` when `source_level` and `receive_level` are both numbers, an array when either is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -790,7 +880,7 @@ vibration_reduction_index_from_flanking(
     absorption_length_j: NumericArrayLike,
     *,
     reference_area: float = 10.0,
-) -> np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Indirect `Kij` from the normalized flanking level difference.
@@ -819,7 +909,7 @@ The standard warns this holds only for resonant-only transmission; measured
 | `absorption_length_j` | `aj` per band, in m. |
 | `reference_area` | `A0`, in m² (default 10 m²). |
 
-**Returns:** `Kij` per band, in dB.
+**Returns:** `Kij` per band, in dB. A `float` when `normalized_flanking_level_difference`, `reduction_index_i`, `reduction_index_j`, `absorption_length_i` and `absorption_length_j` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -832,9 +922,9 @@ The standard warns this holds only for resonant-only transmission; measured
 
 ```python
 VibrationReductionResult(
-    frequencies: np.ndarray | None,
-    k_ij: np.ndarray,
-    modal_overlap: np.ndarray | None = None,
+    frequencies: NDArray[np.float64] | None,
+    k_ij: NDArray[np.float64],
+    modal_overlap: NDArray[np.float64] | None = None,
     fraction: Literal[1, 3] | None = None,
 )
 ```

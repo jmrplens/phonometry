@@ -72,13 +72,14 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
+from .._internal.types import as_complex_or_array
 from .._internal.validation import (
     real_array,
     real_number,
@@ -102,7 +103,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "AcousticCenter",
@@ -664,6 +665,51 @@ def free_field_reciprocity_pair(
     )
 
 
+@overload
+def free_field_transfer_impedance[S: RealScalar](
+    sensitivity_1_v_per_pa: NumericArrayLike,
+    sensitivity_2_v_per_pa: NumericArrayLike,
+    *,
+    frequencies: S,
+    diaphragm_distance_m: float,
+    temperature_c: float,
+    static_pressure_pa: float,
+    relative_humidity_percent: float,
+    acoustic_centers_m: Sequence[NumericArrayLike] = ...,
+    dispersion: bool = ...,
+) -> complex: ...
+
+
+@overload
+def free_field_transfer_impedance[V: RealValues](
+    sensitivity_1_v_per_pa: NumericArrayLike,
+    sensitivity_2_v_per_pa: NumericArrayLike,
+    *,
+    frequencies: V,
+    diaphragm_distance_m: float,
+    temperature_c: float,
+    static_pressure_pa: float,
+    relative_humidity_percent: float,
+    acoustic_centers_m: Sequence[NumericArrayLike] = ...,
+    dispersion: bool = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def free_field_transfer_impedance[A: NumericArrayLike](
+    sensitivity_1_v_per_pa: NumericArrayLike,
+    sensitivity_2_v_per_pa: NumericArrayLike,
+    *,
+    frequencies: A,
+    diaphragm_distance_m: float,
+    temperature_c: float,
+    static_pressure_pa: float,
+    relative_humidity_percent: float,
+    acoustic_centers_m: Sequence[NumericArrayLike] = ...,
+    dispersion: bool = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def free_field_transfer_impedance(
     sensitivity_1_v_per_pa: NumericArrayLike,
     sensitivity_2_v_per_pa: NumericArrayLike,
@@ -675,7 +721,7 @@ def free_field_transfer_impedance(
     relative_humidity_percent: float,
     acoustic_centers_m: Sequence[NumericArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""The electrical transfer impedance two microphones of known free-field
     sensitivity give (IEC 61094-3:2016 D.4.2, Formula (D.1)).
 
@@ -700,17 +746,18 @@ def free_field_transfer_impedance(
         diaphragms).
     :param dispersion: Whether :math:`k` includes dispersion (Default:
         ``True``).
-    :return: :math:`U_2/i_1`, complex, in Ω, at each frequency.
+    :return: :math:`U_2/i_1`, complex, in Ω, at each frequency. A ``complex`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for a distance that is not positive or that the
         acoustic centres use up, or values that are zero or not finite.
     :raises TypeError: if ``diaphragm_distance_m`` is not a single number.
     """
-    frequencies = _frequency_axis(frequencies)
-    count = frequencies.size
+    axis = _frequency_axis(frequencies)
+    count = axis.size
     distance = require_positive(diaphragm_distance_m, "diaphragm_distance_m")
     x1, x2 = _positions(acoustic_centers_m, count, 2)
     medium = _medium(
-        frequencies,
+        axis,
         temperature_c,
         static_pressure_pa,
         relative_humidity_percent,
@@ -719,13 +766,13 @@ def free_field_transfer_impedance(
     first = _complex_column(sensitivity_1_v_per_pa, "sensitivity_1_v_per_pa", count)
     second = _complex_column(sensitivity_2_v_per_pa, "sensitivity_2_v_per_pa", count)
     unit = _product(
-        frequencies,
+        axis,
         np.ones(count, dtype=np.complex128),
         distance - x1 - x2,
         distance,
         medium,
     )
-    return first * second / unit
+    return as_complex_or_array(first * second / unit, like=(frequencies,))
 
 
 # ---------------------------------------------------------------------------

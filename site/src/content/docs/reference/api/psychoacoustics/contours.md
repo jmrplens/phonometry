@@ -80,10 +80,10 @@ functions.
 
 ```python
 EqualLoudnessContours(
-    frequencies: np.ndarray,
+    frequencies: NDArray[np.float64],
     phons: tuple[float, ...],
-    contours: np.ndarray,
-    threshold: np.ndarray,
+    contours: NDArray[np.float64],
+    threshold: NDArray[np.float64],
 )
 ```
 
@@ -167,8 +167,8 @@ Loudness level of a pure tone (ISO 226:2023 Formula 2).
 
 ```python
 LoudnessContour(
-    frequencies: np.ndarray,
-    levels: np.ndarray,
+    frequencies: NDArray[np.float64],
+    levels: NDArray[np.float64],
     phon: float | None,
 )
 ```

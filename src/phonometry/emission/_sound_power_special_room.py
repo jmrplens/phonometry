@@ -71,18 +71,21 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, overload
 
 import numpy as np
+
+from .._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     import os
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -217,7 +220,9 @@ _TABLE3: Mapping[str, Mapping[str, tuple[int, int, int]]] = MappingProxyType(
 )
 
 
-def _table4_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _table4_correction(
+    delta: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.bool_]]:
     """The Table 4 correction for each margin, and where it was at least 4 dB.
 
     The margin is read at the nearest whole decibel; any margin above 10 dB
@@ -234,9 +239,37 @@ def _table4_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     )
 
 
+@overload
+def special_room_background_correction[S1: RealScalar, S2: RealScalar](
+    levels: S1,
+    background_levels: S2,
+) -> float: ...
+
+
+@overload
+def special_room_background_correction[V: RealValues, A2: NumericArrayLike](
+    levels: V,
+    background_levels: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def special_room_background_correction[S1: RealScalar, V: RealValues](
+    levels: S1,
+    background_levels: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def special_room_background_correction[A1: NumericArrayLike, A2: NumericArrayLike](
+    levels: A1,
+    background_levels: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def special_room_background_correction(
     levels: NumericArrayLike, background_levels: NumericArrayLike
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""The background correction of ISO 3743-2:2018 Table 4 (9.8).
 
     The decibels to subtract from a level measured with the source operating
@@ -256,7 +289,9 @@ def special_room_background_correction(
     :param levels: Levels measured with the source operating, in decibels.
     :param background_levels: Background levels alone, broadcasting against
         ``levels``, in decibels.
-    :return: The correction to subtract, in decibels, of the broadcast shape.
+    :return: The correction to subtract, in decibels, of the broadcast shape. A
+        ``float`` when ``levels`` and ``background_levels`` are both numbers, an array
+        when either is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for non-finite or empty inputs, or shapes that do not
         broadcast.
     :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
@@ -286,7 +321,37 @@ def special_room_background_correction(
             f"meeting the background requirement ({_STANDARD}, 9.8).",
             SoundPowerWarning,
         )
-    return correction
+    return as_float_or_array(correction, like=(levels, background_levels))
+
+
+@overload
+def reverberation_parameter[S: RealScalar](
+    frequencies: S,
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> float: ...
+
+
+@overload
+def reverberation_parameter[V: RealValues](
+    frequencies: V,
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_parameter[A: NumericArrayLike](
+    frequencies: A,
+    volume: float,
+    *,
+    surface_area: float | None = ...,
+    speed_of_sound: float | None = ...,
+) -> float | NDArray[np.float64]: ...
 
 
 def reverberation_parameter(
@@ -295,7 +360,7 @@ def reverberation_parameter(
     *,
     surface_area: float | None = None,
     speed_of_sound: float | None = None,
-) -> np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""The reverberation parameter :math:`R` of ISO 3743-2:2018, 6.3.
 
     .. math::
@@ -325,7 +390,8 @@ def reverberation_parameter(
         with ``speed_of_sound`` it selects the NOTE form.
     :param speed_of_sound: Speed of sound, in metres per second, required
         with ``surface_area`` and refused without it.
-    :return: :math:`R` per frequency.
+    :return: :math:`R` per frequency. A ``float`` for a number, an array for a sequence
+        or an array, a zero-dimensional one included.
     :raises ValueError: for a non-positive frequency, volume, area or speed,
         or only one of the NOTE's two inputs.
     :raises TypeError: if ``speed_of_sound``, ``surface_area`` or ``volume`` is not a
@@ -344,18 +410,25 @@ def reverberation_parameter(
         )
         raise ValueError(msg)
     if surface_area is None or speed_of_sound is None:
-        return np.asarray(1.0 + _R_CONSTANT / (freqs * volume ** (1.0 / 3.0)))
+        return as_float_or_array(
+            np.asarray(1.0 + _R_CONSTANT / (freqs * volume ** (1.0 / 3.0))),
+            like=(frequencies,),
+        )
     area = require_positive(surface_area, "surface_area")
     speed = require_positive(speed_of_sound, "speed_of_sound")
-    return np.asarray(1.0 + speed * area / (8.0 * volume * freqs))
+    return as_float_or_array(
+        np.asarray(1.0 + speed * area / (8.0 * volume * freqs)), like=(frequencies,)
+    )
 
 
-def _tolerance(frequencies: np.ndarray) -> np.ndarray:
+def _tolerance(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """The half-width of the 6.3 tolerance per band: 0,1, or 0,2 above 6,3 kHz."""
     return np.where(frequencies > _HIGH_TOLERANCE_ABOVE_HZ, _TOLERANCE_HIGH, _TOLERANCE)
 
 
-def _centred_scale(ratio: np.ndarray, half_width: np.ndarray) -> float:
+def _centred_scale(
+    ratio: NDArray[np.float64], half_width: NDArray[np.float64]
+) -> float:
     r"""The scale :math:`k = 1/T_\mathrm{nom}` that centres ``ratio`` = T/R.
 
     Centring is read as leaving the most margin: :math:`k` minimises the
@@ -410,9 +483,9 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         {"reverberation_time": "s"}
     )
 
-    frequencies: np.ndarray
-    reverberation_time: np.ndarray
-    reverberation_parameter: np.ndarray
+    frequencies: NDArray[np.float64]
+    reverberation_time: NDArray[np.float64]
+    reverberation_parameter: NDArray[np.float64]
     nominal_reverberation_time_s: float
     centered: bool
     volume: float
@@ -446,7 +519,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         require_same_length(self, *bands)
 
     @property
-    def lower_limit(self) -> np.ndarray:
+    def lower_limit(self) -> NDArray[np.float64]:
         r"""The lower bound on :math:`T/(R\,T_\mathrm{nom})` per band (6.3).
 
         :return: 0,9, or 0,8 above the 6,3 kHz band.
@@ -454,7 +527,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         return np.asarray(1.0 - _tolerance(self.frequencies), dtype=np.float64)
 
     @property
-    def upper_limit(self) -> np.ndarray:
+    def upper_limit(self) -> NDArray[np.float64]:
         r"""The upper bound on :math:`T/(R\,T_\mathrm{nom})` per band (6.3).
 
         :return: 1,1, or 1,2 above the 6,3 kHz band.
@@ -462,7 +535,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         return np.asarray(1.0 + _tolerance(self.frequencies), dtype=np.float64)
 
     @property
-    def normalized_ratio(self) -> np.ndarray:
+    def normalized_ratio(self) -> NDArray[np.float64]:
         r""":math:`T/(R\,T_\mathrm{nom})` per band, which 6.3 bounds."""
         return np.asarray(
             self.reverberation_time
@@ -471,7 +544,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         )
 
     @property
-    def ratio_to_nominal(self) -> np.ndarray:
+    def ratio_to_nominal(self) -> NDArray[np.float64]:
         r""":math:`T/T_\mathrm{nom}` per band, the quantity Figure B.3 draws."""
         return np.asarray(
             self.reverberation_time / self.nominal_reverberation_time_s,
@@ -479,7 +552,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         )
 
     @property
-    def band_within(self) -> np.ndarray:
+    def band_within(self) -> NDArray[np.bool_]:
         """Per band, whether ``T`` lies within the limiting curves."""
         ratio = settled(self.normalized_ratio)
         return np.asarray(
@@ -776,10 +849,10 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
     when those were given.
     """
 
-    frequencies: np.ndarray
-    surface_absorption: np.ndarray
-    floor_absorption: np.ndarray
-    mean_absorption: np.ndarray
+    frequencies: NDArray[np.float64]
+    surface_absorption: NDArray[np.float64]
+    floor_absorption: NDArray[np.float64]
+    mean_absorption: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a check whose arrays disagree.
@@ -802,7 +875,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         )
 
     @property
-    def surface_ratio(self) -> np.ndarray:
+    def surface_ratio(self) -> NDArray[np.float64]:
         """Each wall's and the ceiling's coefficient over the mean, per band;
         1 where the mean is zero, since every surface then absorbs alike.
         """
@@ -818,7 +891,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         )
 
     @property
-    def surface_within(self) -> np.ndarray:
+    def surface_within(self) -> NDArray[np.bool_]:
         """Per wall or ceiling and band, ``(surfaces, bands)``, whether the
         coefficient lies within 0,5 and 1,5 times the mean.
         """
@@ -828,14 +901,14 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         )
 
     @property
-    def surfaces_uniform(self) -> np.ndarray:
+    def surfaces_uniform(self) -> NDArray[np.bool_]:
         """Per band, whether every wall and the ceiling lie within 0,5 and 1,5
         times the mean.
         """
         return np.asarray(np.all(self.surface_within, axis=0), dtype=bool)
 
     @property
-    def floor_reflective(self) -> np.ndarray:
+    def floor_reflective(self) -> NDArray[np.bool_]:
         """Per band, whether the floor absorbs less than 0,06."""
         return np.asarray(
             settled(self.floor_absorption) < _FLOOR_MAX_ABSORPTION, dtype=bool
@@ -879,7 +952,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         )
 
 
-def _coefficients(value: NumericArrayLike, name: str, ndim: int) -> np.ndarray:
+def _coefficients(value: NumericArrayLike, name: str, ndim: int) -> NDArray[np.float64]:
     """Absorption coefficients of the given rank, finite and in [0, 1]."""
     require_scalar(ndim, "ndim")
     arr = real_array(value, name)
@@ -977,9 +1050,9 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
     difference (step 4), read from the bands: the standard's, not a field.
     """
 
-    frequencies: np.ndarray
-    measured_power_level: np.ndarray
-    calibrated_power_level: np.ndarray
+    frequencies: NDArray[np.float64]
+    measured_power_level: NDArray[np.float64]
+    calibrated_power_level: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a check whose per-band arrays disagree or leave Table 1.
@@ -1011,14 +1084,14 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def limit_db(self) -> np.ndarray:
+    def limit_db(self) -> NDArray[np.float64]:
         """The Table 1 bound on the difference per band (step 4), in dB."""
         return np.array(
             [_TABLE1_DB[round(float(f))] for f in self.frequencies], dtype=np.float64
         )
 
     @property
-    def difference(self) -> np.ndarray:
+    def difference(self) -> NDArray[np.float64]:
         """Per band, the level determined in the room less the calibration (step 3)."""
         return np.asarray(
             self.measured_power_level - self.calibrated_power_level,
@@ -1026,7 +1099,7 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
         )
 
     @property
-    def band_within(self) -> np.ndarray:
+    def band_within(self) -> NDArray[np.bool_]:
         """Per band, whether the difference stays within Table 1."""
         return np.asarray(settled(np.abs(self.difference)) <= self.limit_db, dtype=bool)
 
@@ -1066,7 +1139,9 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
         )
 
 
-def _table_bands(frequencies: NumericArrayLike, n_bands: int, table: str) -> np.ndarray:
+def _table_bands(
+    frequencies: NumericArrayLike, n_bands: int, table: str
+) -> NDArray[np.float64]:
     """Octave centres from 125 Hz to 8 kHz, the bands Tables 1, 3 and 5 cover."""
     freqs = _octave_frequencies(frequencies, n_bands, _TABLE_F1)
     if any(round(float(f)) not in _TABLE1_DB for f in freqs):
@@ -1168,7 +1243,7 @@ def _sm_class(s_m: float) -> str:
     return "discrete tone"
 
 
-def _survey_deviation(levels: np.ndarray) -> np.ndarray:
+def _survey_deviation(levels: NDArray[np.float64]) -> NDArray[np.float64]:
     r""":math:`s_\mathrm{M}` of Formula (4) about the mean 9.4 prescribes.
 
     The mean is arithmetic when the range of the levels is not greater than
@@ -1333,18 +1408,18 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         {"sigma_r0": "dB", "sigma_r0_a": "dB"}
     )
 
-    frequencies: np.ndarray
-    sound_power_level: np.ndarray
-    mean_pressure_level: np.ndarray
-    background_correction: np.ndarray
-    background_margin_db: np.ndarray
-    reference_background_margin_db: np.ndarray
-    mean_reference_level: np.ndarray
-    reference_power_level: np.ndarray
+    frequencies: NDArray[np.float64]
+    sound_power_level: NDArray[np.float64]
+    mean_pressure_level: NDArray[np.float64]
+    background_correction: NDArray[np.float64]
+    background_margin_db: NDArray[np.float64]
+    reference_background_margin_db: NDArray[np.float64]
+    mean_reference_level: NDArray[np.float64]
+    reference_power_level: NDArray[np.float64]
     volume: float
     nominal_reverberation_time_s: float
     c2: float
-    sigma_r0: np.ndarray
+    sigma_r0: NDArray[np.float64]
     sigma_r0_a: float
     sigma_omc_db: float
     coverage_factor: float
@@ -1388,7 +1463,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         require_same_length(self, *bands)
 
     @property
-    def background_requirement_met(self) -> np.ndarray:
+    def background_requirement_met(self) -> NDArray[np.bool_]:
         """Per band, whether every margin reached the 4 dB of 6.5 and 9.8.
 
         The source's margins and, for the comparison method, the reference
@@ -1409,7 +1484,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         return bool(_margin_met(np.asarray(self.background_margin_a_db)))
 
     @property
-    def sigma_tot(self) -> np.ndarray:
+    def sigma_tot(self) -> NDArray[np.float64]:
         """Formula (12) per band, in decibels; ``NaN`` without ``sigma_omc_db``."""
         return np.asarray(np.hypot(self.sigma_r0, self.sigma_omc_db), dtype=np.float64)
 
@@ -1419,7 +1494,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         return float(math.hypot(self.sigma_r0_a, self.sigma_omc_db))
 
     @property
-    def expanded_uncertainty(self) -> np.ndarray:
+    def expanded_uncertainty(self) -> NDArray[np.float64]:
         """``U = k sigma_tot`` per band (Formula 13), in decibels."""
         return np.asarray(self.coverage_factor * self.sigma_tot, dtype=np.float64)
 
@@ -1431,7 +1506,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         return float(self.coverage_factor * self.sigma_tot_a)
 
     @property
-    def sound_power_level_at_reference_conditions(self) -> np.ndarray:
+    def sound_power_level_at_reference_conditions(self) -> NDArray[np.float64]:
         """``LW + C2`` under the reference meteorological conditions (E.1)."""
         return np.asarray(self.sound_power_level + self.c2, dtype=np.float64)
 
@@ -1513,7 +1588,9 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         )
 
 
-def _measurement_grid(value: NumericArrayLike, name: str) -> tuple[np.ndarray, bool]:
+def _measurement_grid(
+    value: NumericArrayLike, name: str
+) -> tuple[NDArray[np.float64], bool]:
     """Levels as ``(NS, NM, NB)`` and whether they came from a traverse."""
     arr = _finite(value, name, (1, 2, 3))
     if arr.ndim == 1:
@@ -1526,7 +1603,7 @@ def _measurement_grid(value: NumericArrayLike, name: str) -> tuple[np.ndarray, b
 
 def _background_grid(
     value: NumericArrayLike, name: str, n_positions: int, n_bands: int
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """A background as ``(NM, NB)``: one spectrum for every position, or one
     per position.
     """
@@ -1546,8 +1623,8 @@ def _background_grid(
 
 
 def _corrected_mean(
-    grid: np.ndarray, background: np.ndarray | None
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    grid: NDArray[np.float64], background: NDArray[np.float64] | None
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Formula (8) over every measurement after the Table 4 correction.
 
     :param grid: Levels ``(NS, NM, NB)``.
@@ -1571,7 +1648,7 @@ def _corrected_mean(
     return corrected, raw - corrected, np.asarray(margin, dtype=np.float64)
 
 
-def _margin_met(margin: np.ndarray) -> np.ndarray:
+def _margin_met(margin: NDArray[np.float64]) -> NDArray[np.bool_]:
     """Where a smallest margin over the background reached 4 dB, judged settled.
 
     A margin that was not measured is ``NaN`` and is not met.
@@ -1580,7 +1657,7 @@ def _margin_met(margin: np.ndarray) -> np.ndarray:
         return np.asarray(settled(margin) >= _TABLE4_MIN_DB, dtype=bool)
 
 
-def _table5_sigma(frequencies: np.ndarray) -> np.ndarray:
+def _table5_sigma(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
     """Table 5 per band; ``NaN`` at 63 Hz, which the table does not reach."""
     return np.array(
         [
@@ -1592,7 +1669,7 @@ def _table5_sigma(frequencies: np.ndarray) -> np.ndarray:
 
 
 def _background_advisory(
-    requirement: np.ndarray,
+    requirement: NDArray[np.bool_],
     *,
     measured: bool,
 ) -> None:
@@ -1616,7 +1693,7 @@ def _background_advisory(
 def _room_advisories(
     volume: float,
     nominal: float,
-    freqs: np.ndarray,
+    freqs: NDArray[np.float64],
 ) -> None:
     """Warn when the room of a direct determination is outside 6.2 or 6.3."""
     if volume < _MIN_VOLUME_M3:
@@ -1683,7 +1760,7 @@ def _a_weighted_mean(
     return float(energy_mean((arr - correction).reshape(-1))), float(np.min(delta))
 
 
-def _annex_f_total(level: np.ndarray, freqs: np.ndarray) -> float:
+def _annex_f_total(level: NDArray[np.float64], freqs: NDArray[np.float64]) -> float:
     """The Annex F total of the octave bands (Formula F.1)."""
     return energy_sum(level + _a_weighting_corrections(freqs))
 

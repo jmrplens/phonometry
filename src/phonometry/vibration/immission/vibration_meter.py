@@ -67,13 +67,14 @@ import math
 from dataclasses import dataclass
 from functools import lru_cache
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import signal as sig
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_complex_or_array, as_float_or_array
 from ..._internal.validation import (
     real_array,
     require_choice,
@@ -98,7 +99,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import NumericArrayLike
+    from ..._internal.types import NumericArrayLike, RealScalar, RealValues
 
 __all__ = [
     "ASSESSMENT_GUIDE_VALUES_MM_S",
@@ -393,16 +394,41 @@ def _sample_rate(fs: float, working_range: WorkingRange) -> float:
     return fs
 
 
+@overload
+def band_limitation_response[S: RealScalar](
+    frequencies: S,
+    *,
+    working_range: WorkingRange = ...,
+) -> complex: ...
+
+
+@overload
+def band_limitation_response[V: RealValues](
+    frequencies: V,
+    *,
+    working_range: WorkingRange = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def band_limitation_response[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    working_range: WorkingRange = ...,
+) -> complex | NDArray[np.complex128]: ...
+
+
 def band_limitation_response(
     frequencies: NumericArrayLike, *, working_range: WorkingRange = "building"
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""The band limitation of the unweighted signal, Formula (3).
 
     :param frequencies: Frequencies, in hertz.
     :param working_range: ``"building"`` (1 Hz to 80 Hz, the default) or
         ``"railway"`` (4 Hz to 315 Hz); see :data:`WORKING_RANGES_HZ`.
-    :return: The complex response :math:`H_{u\mathrm{Soll}}`, whose magnitude
-        is Formula (5).
+    :return: The complex response :math:`H_{u\mathrm{Soll}}`, whose magnitude is Formula
+        (5). A ``complex`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: For a non-positive frequency or an unknown range.
     :raises TypeError: if ``working_range`` is not a text, or ``frequencies`` holds a
         text or a value that is not a real number.
@@ -413,26 +439,53 @@ def band_limitation_response(
     high = high - (BAND_LIMIT_CORNER_FACTOR * lower_hz / f) ** 2
     low = 1.0 + 1j * _SQRT2 * (BAND_LIMIT_CORNER_FACTOR * f / upper_hz)
     low = low - (BAND_LIMIT_CORNER_FACTOR * f / upper_hz) ** 2
-    return np.asarray(1.0 / (high * low), dtype=np.complex128)
+    return as_complex_or_array(1.0 / (high * low), like=(frequencies,))
+
+
+@overload
+def kb_weighting_response[S: RealScalar](
+    frequencies: S,
+    *,
+    working_range: WorkingRange = ...,
+) -> complex: ...
+
+
+@overload
+def kb_weighting_response[V: RealValues](
+    frequencies: V,
+    *,
+    working_range: WorkingRange = ...,
+) -> NDArray[np.complex128]: ...
+
+
+@overload
+def kb_weighting_response[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    working_range: WorkingRange = ...,
+) -> complex | NDArray[np.complex128]: ...
 
 
 def kb_weighting_response(
     frequencies: NumericArrayLike, *, working_range: WorkingRange = "building"
-) -> NDArray[np.complex128]:
+) -> complex | NDArray[np.complex128]:
     r"""The KB frequency weighting, Formula (4).
 
     :param frequencies: Frequencies, in hertz.
     :param working_range: See :func:`band_limitation_response`. One of ``"building"`` or
         ``"railway"``.
-    :return: The complex response :math:`H_{B\mathrm{Soll}}`, whose magnitude
-        is Formula (6).
+    :return: The complex response :math:`H_{B\mathrm{Soll}}`, whose magnitude is Formula
+        (6). A ``complex`` for a number, an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: For a non-positive frequency or an unknown range.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number, or ``working_range`` is not a text.
     """
     f = _frequencies(frequencies)
     band = band_limitation_response(f, working_range=working_range)
-    return np.asarray(band / (1.0 - 1j * KB_CORNER_HZ / f), dtype=np.complex128)
+    return as_complex_or_array(
+        band / (1.0 - 1j * KB_CORNER_HZ / f), like=(frequencies,)
+    )
 
 
 def response_tolerance_percent(
@@ -944,9 +997,33 @@ def measure_vibration_immission(
     )
 
 
+@overload
+def assessment_weighting_response[S: RealScalar](
+    frequencies: S,
+    *,
+    building_class: BuildingClass,
+) -> float: ...
+
+
+@overload
+def assessment_weighting_response[V: RealValues](
+    frequencies: V,
+    *,
+    building_class: BuildingClass,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def assessment_weighting_response[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    building_class: BuildingClass,
+) -> float | NDArray[np.float64]: ...
+
+
 def assessment_weighting_response(
     frequencies: NumericArrayLike, *, building_class: BuildingClass
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     """The target magnitude of an Annex E weighting filter, Table E.1.
 
     Each filter is the guideline curve of its building class inverted and
@@ -960,7 +1037,8 @@ def assessment_weighting_response(
     :param building_class: The row of DIN 4150-3:1999-02 Table 1, as
         :data:`ASSESSMENT_GUIDE_VALUES_MM_S` keys it. One of ``"commercial"``,
         ``"residential"`` or ``"sensitive"``.
-    :return: The target magnitude, dimensionless, 1 below 10 Hz.
+    :return: The target magnitude, dimensionless, 1 below 10 Hz. A ``float`` for a
+        number, an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: For a non-positive frequency or an unknown class.
     :raises TypeError: if ``building_class`` is not a text, or ``frequencies`` holds a
         text or a value that is not a real number.
@@ -979,7 +1057,7 @@ def assessment_weighting_response(
     curve[mid] = slope_low * f[mid] + intercept_low
     curve[upper] = slope_high * f[upper] + intercept_high
     curve[above] = slope_high * top_hz + intercept_high
-    return np.asarray(guide / curve, dtype=np.float64)
+    return as_float_or_array(guide / curve, like=(frequencies,))
 
 
 def assessment_weighting_taps(

@@ -194,12 +194,12 @@ class AirborneInsulationResult(OwnsArrays):
         {"t0": "s", "t2": "s"}
     )
 
-    d: np.ndarray
-    dnt: np.ndarray
-    r_prime: np.ndarray | None
-    l1: np.ndarray
-    l2: np.ndarray
-    t2: np.ndarray
+    d: NDArray[np.float64]
+    dnt: NDArray[np.float64]
+    r_prime: NDArray[np.float64] | None
+    l1: NDArray[np.float64]
+    l2: NDArray[np.float64]
+    t2: NDArray[np.float64]
     t0: float
     source_low_frequency: LowFrequencyResult | None = None
     receiver_low_frequency: LowFrequencyResult | None = None
@@ -349,10 +349,10 @@ class ImpactInsulationResult(OwnsArrays):
         {"t0": "s", "t2": "s"}
     )
 
-    l_n_t: np.ndarray
-    l_n: np.ndarray | None
-    li: np.ndarray
-    t2: np.ndarray
+    l_n_t: NDArray[np.float64]
+    l_n: NDArray[np.float64] | None
+    li: NDArray[np.float64]
+    t2: NDArray[np.float64]
     t0: float
     low_frequency: LowFrequencyResult | None = None
 
@@ -498,11 +498,11 @@ class FacadeInsulationResult(OwnsArrays):
         no corner measurements.
     """
 
-    d_2m: np.ndarray
-    d_2m_nt: np.ndarray
-    d_2m_n: np.ndarray | None
-    r_prime: np.ndarray | None
-    frequencies: np.ndarray | None = None
+    d_2m: NDArray[np.float64]
+    d_2m_nt: NDArray[np.float64]
+    d_2m_n: NDArray[np.float64] | None
+    r_prime: NDArray[np.float64] | None
+    frequencies: NDArray[np.float64] | None = None
     method: Method = "loudspeaker"
     low_frequency: LowFrequencyResult | None = None
 
@@ -781,7 +781,7 @@ def energy_average_level(
     return as_float_if_reduced(energy_mean(data, axis=cast("int", axis)))
 
 
-def _as_band_levels(levels: NumericArrayLike, name: str) -> np.ndarray:
+def _as_band_levels(levels: NumericArrayLike, name: str) -> NDArray[np.float64]:
     """Coerce room levels to per-band values, energy-averaging positions.
 
     A one-dimensional input is taken as one already-averaged level per
@@ -806,7 +806,7 @@ def _as_band_levels(levels: NumericArrayLike, name: str) -> np.ndarray:
     return out
 
 
-def _validate_reverberation(t: np.ndarray, t0: float) -> None:
+def _validate_reverberation(t: NDArray[np.float64], t0: float) -> None:
     """Check the receiving-room reverberation time and its reference.
 
     ``t2`` must hold one positive, finite value per band and the reference
@@ -827,7 +827,7 @@ def _validate_reverberation(t: np.ndarray, t0: float) -> None:
 
 def _checked_frequency_axis(
     frequencies: NumericArrayLike | None, band_count: int, owner: str
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """The band-centre vector, checked against the measured band count.
 
     ``frequencies`` exists for the low-frequency procedure alone, but it is
@@ -864,8 +864,8 @@ def _checked_frequency_axis(
 
 
 def _require_frequencies(
-    frequencies: Sequence[float] | np.ndarray | None, owner: str
-) -> np.ndarray:
+    frequencies: Sequence[float] | NDArray[np.float64] | None, owner: str
+) -> NDArray[np.float64]:
     """Demand the band centres the low-frequency procedure needs to place itself.
 
     The measurement functions are otherwise band-agnostic: they map whatever
@@ -917,11 +917,11 @@ def _check_low_frequency_volume(
 
 
 def _apparent_reduction_index(
-    d: np.ndarray,
-    t: np.ndarray,
+    d: NDArray[np.float64],
+    t: NDArray[np.float64],
     area: float | None,
     volume: float | None,
-) -> np.ndarray | None:
+) -> NDArray[np.float64] | None:
     r"""``R'`` of Formula (4) and (5), or ``None`` without the geometry.
 
     ``area`` and ``volume`` travel together: one without the other is a
@@ -1250,7 +1250,7 @@ def impact_insulation(
 
     l_n_t = li_bands - 10.0 * np.log10(t / t0)
 
-    l_n: np.ndarray | None = None
+    l_n: NDArray[np.float64] | None = None
     if volume is not None:
         if not is_positive(volume):
             msg = "'volume' must be positive."
@@ -1485,11 +1485,11 @@ def facade_insulation(
     # Sabine equivalent absorption area A = 0,16 V / T (Clause 3.17).
     absorption = 0.16 * volume / t if volume is not None else None
 
-    d_2m_n: np.ndarray | None = None
+    d_2m_n: NDArray[np.float64] | None = None
     if absorption is not None:
         d_2m_n = d_2m - 10.0 * np.log10(absorption / _A0_FACADE)
 
-    r_prime: np.ndarray | None = None
+    r_prime: NDArray[np.float64] | None = None
     if surf_bands is not None and area is not None and absorption is not None:
         r_prime = (
             surf_bands

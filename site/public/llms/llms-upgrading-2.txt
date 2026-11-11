@@ -7,6 +7,139 @@ Part of https://docs.jmrp.io/phonometry/llms.txt. One page in 2 parts, cut at it
 <!-- source: docs/start/upgrading.md | canonical: https://docs.jmrp.io/phonometry/start/upgrading/ -->
 Source: https://docs.jmrp.io/phonometry/start/upgrading/
 
+## Waveforms inside results come back as the `Signal` they came from
+
+A transform handed a `Signal` has returned a `Signal` since the contract was
+written, but five result objects still stored their waveform as a bare array
+next to a loose `fs`. They now keep the type the input arrived as:
+
+| Field | Is a `Signal` when the input was one |
+| --- | --- |
+| `envelope(...).signal` | at the input's rate |
+| `time_synchronous_average(...).period_waveform` | at the input's rate |
+| `resample_signal(...).signal` | at `fs_new` |
+| `align_impulse_responses(...).aligned`, `.reference` | each one if its own input was |
+| `underwater.pile_strike_metrics(...).pressure` | at the input's rate |
+
+A bare array in still gives a bare array out, so code that passes arrays does
+not notice. Code that passes a `Signal` and does arithmetic on one of these
+fields goes through `np.asarray`, as it does for any `Signal`, and a
+calibrated input comes back with `calibration_factor=1.0`, so the field feeds
+the next function in pascals without the factor being applied again.
+
+## A block stream yields `Signal` blocks
+
+`io.read_blocks` is newer than 3.3.0, and in 4.0.0rc1 it yielded bare float64
+arrays. It now yields a `Signal` per block, carrying the rate, the
+calibration, the channel labels and the provenance `io.read` gives, and it
+takes the same `calibration_factor=` and reads the same sidecar. Two things
+change for a loop written against the release candidate. A block from a
+calibrated file reaches the filters and the level functions in pascals, so a
+`calibration_factor` applied by hand on top of it counts twice. And
+arithmetic on a block, or on what a filter returns for one, goes through
+`np.asarray`, as it does for any `Signal`.
+
+## Published tables refuse writes
+
+Every table the library publishes at module level is read-only in 4.0. In
+3.3.0 published tables were plain dictionaries and published arrays took
+in-place arithmetic, so a line such as `REFERENCE_CURVE[500] = 0.9` or
+`BAND_IMPORTANCE *= 2` changed the number for every caller that ran after it
+in the same process, and nothing raised. The dictionaries are now
+`types.MappingProxyType`, including the ones nested inside another table, and
+the arrays have their `writeable` flag cleared. Reading is unchanged; writing
+raises `TypeError` on a table and `ValueError` on an array.
+
+Code that adjusted a published table has to copy it first:
+
+```python
+from phonometry import room
+from phonometry.materials.absorbers import REFERENCE_CURVE
+
+curve = dict(REFERENCE_CURVE)
+curve[4000] = 1.0
+curves = room.NC_CURVE_LEVELS.copy()
+curves[0, 0] = 0.0
+print(REFERENCE_CURVE[4000], curve[4000], curves[0, 0], room.NC_CURVE_LEVELS[0, 0])
+# 0.9 1.0 0.0 78.0
+```
+
+A table with tables inside it needs each level copied, as in
+`{area: dict(rows) for area, rows in GUIDE_VALUES.items()}`. The same copy is
+needed before a table is pickled, deep-copied or written out as JSON, because
+a read-only mapping supports none of the three.
+
+## A result keeps its own copy of the arrays it was given
+
+In 3.3.0 and in 4.0.0rc1 a result kept the very array it was handed whenever
+that array was already of the type the function reads, `float64` for levels
+and frequencies, because `np.asarray` hands its argument back unchanged in
+that case. Changing the caller's array afterwards, `levels[0] = 0.0` or
+`frequencies *= 2`, changed a result already computed and perhaps already
+printed. In 4.0 every array that a function or a method of the library
+keeps from the arguments it was given is a copy of its own, made read-only
+like the published tables, and the caller's array is left as it was. That
+holds for the objects that keep arrays to hand out later as well: the
+frequency grid of a `noise_control.SilencerChain`, the axes and flight paths
+an `aircraft.ANPDatabase` is built from, and the medium maps of
+`simulation.FDTD2D` and `simulation.ElasticFDTD2D`, whose `c`, `rho`, `c_p`
+and `c_s` now stay the ones the time step was computed from. The maps the
+engines derive from them, `FDTD2D.kappa` and `ElasticFDTD2D.mu` and `.lam`,
+are read-only NumPy copies too: in 4.0.0rc1 an edit to one reached part of the
+step and not the time step, and now it raises `ValueError`, so a different
+medium is a new engine built from edited maps. A `Signal`
+keeps a copy of its own samples too, which stays writeable for processing in
+place, as the samples of a file read with `io.read` always were. A result
+record built by hand, by calling its class directly, makes the same copy:
+every public record that can hold an array copies the arrays it is handed
+when it is built, whoever builds it, also inside a tuple, a list or any
+mapping. A record held inside another one is kept whole and answers for its
+own arrays, and a `Signal` is no exception: the seven results that hand a
+waveform back as a `Signal` (`filters.OctaveFilterResult`,
+`signals.EnvelopeResult`, `signals.ResampledSignalResult`,
+`signals.AlignedImpulseResponseResult`, `signals.SynchronousAverageResult`,
+`environment.DirectSoundSubtraction` and `underwater.PileStrikeResult`) hold
+one of their own when the library builds them, whose samples stay writeable
+like any `Signal`'s, and hold the caller's own when built by hand around it.
+Every other array a result holds refuses in-place writes, the ones it
+computed as well as the ones it was given, where in 3.3.0 most computed
+arrays took them. Writing into one now raises `ValueError`, so code that
+edited one in place has to copy it first:
+
+```python
+import numpy as np
+
+from phonometry import io, room
+
+levels = np.array([60.0, 58.0, 55.0, 52.0, 50.0, 48.0, 45.0, 42.0, 40.0, 38.0])
+nc = room.noise_criterion(levels)
+levels[0] = 0.0
+samples = np.zeros(4)
+signal = io.Signal(samples, fs=48_000)
+samples[0] = 1.0
+measured = np.array([1.0, 0.5, 0.25, 0.125])
+response = room.ImpulseResponseResult(ir=measured, fs=48_000, method="farina")
+measured[0] = 0.0
+edited = nc.levels.copy()
+edited[0] = 62.0
+print(nc.levels[0], nc.levels.flags.writeable, response.ir[0], response.ir.flags.writeable)
+print(signal.data[0, 0], signal.data.flags.writeable)
+# 60.0 False 1.0 False
+# 0.0 True
+```
+
+The window a spectral result was computed with is held the same way.
+`signals.power_spectral_density`, `signals.cross_spectral_density`,
+`signals.coherent_output_spectrum`, `signals.miso_coherence`,
+`signals.spectrogram`, `signals.zoom_fft`, `signals.envelope_spectrum` and
+`signals.window_metrics` store the `window` they were given, and a window
+given with its parameters keeps parameters of its own: the weights of
+`("general_cosine", weights)` given as a list are held as a tuple of the
+same numbers, where 3.3.0 held the caller's list, so
+`result.window == ("general_cosine", (0.5, 0.5))`; given as an array they
+are a read-only copy, as every array a result holds is. A result built by
+hand, or anew by `dataclasses.replace`, holds its window the same way.
+
 ## A catalogue row says what its source claims for each cell
 
 The published catalogues of materials are new in 4.0: neither 3.3.0 nor

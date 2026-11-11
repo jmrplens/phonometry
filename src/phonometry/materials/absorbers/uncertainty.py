@@ -59,6 +59,7 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._internal.types import NumericArrayLike
@@ -158,7 +159,7 @@ def _condition(condition: object) -> Condition:
     return require_choice(condition, "condition", _CONDITIONS)
 
 
-def _finite_bands(values: NumericArrayLike, name: str) -> np.ndarray:
+def _finite_bands(values: NumericArrayLike, name: str) -> NDArray[np.float64]:
     a = np.atleast_1d(real_array(values, name))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
@@ -166,7 +167,7 @@ def _finite_bands(values: NumericArrayLike, name: str) -> np.ndarray:
     return a
 
 
-def _round_report(u: np.ndarray, decimals: int) -> np.ndarray:
+def _round_report(u: NDArray[np.float64], decimals: int) -> NDArray[np.float64]:
     """Round-half-up to *decimals* (numpy rounds half-to-even, unlike ISO 80000)."""
     scale = 10.0**decimals
     return np.floor(real_array(u, "u") * scale + 0.5) / scale
@@ -218,11 +219,11 @@ class AbsorptionUncertaintyResult(OwnsArrays):
         "single_number_rating",
     ]
     condition: Condition
-    frequencies: np.ndarray
-    values: np.ndarray
-    standard_uncertainty: np.ndarray
+    frequencies: NDArray[np.float64]
+    values: NDArray[np.float64]
+    standard_uncertainty: NDArray[np.float64]
     coverage_factor: float
-    expanded_uncertainty: np.ndarray
+    expanded_uncertainty: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a result whose value and uncertainty spectra disagree.
@@ -260,7 +261,7 @@ class AbsorptionUncertaintyResult(OwnsArrays):
             require_same_length(self, "frequencies", "values")
 
     @property
-    def reported_expanded_uncertainty(self) -> np.ndarray:
+    def reported_expanded_uncertainty(self) -> NDArray[np.float64]:
         """``U`` rounded for reporting (Clause 8): two decimals for absorption
         coefficients, one decimal for the equivalent area and ``DLα,NRD``.
         """
@@ -268,12 +269,12 @@ class AbsorptionUncertaintyResult(OwnsArrays):
         return _round_report(self.expanded_uncertainty, decimals)
 
     @property
-    def lower(self) -> np.ndarray:
+    def lower(self) -> NDArray[np.float64]:
         """Lower interval bound ``value − U`` (exact ``U``)."""
         return np.asarray(self.values - self.expanded_uncertainty, dtype=np.float64)
 
     @property
-    def upper(self) -> np.ndarray:
+    def upper(self) -> NDArray[np.float64]:
         """Upper interval bound ``value + U`` (exact ``U``)."""
         return np.asarray(self.values + self.expanded_uncertainty, dtype=np.float64)
 
@@ -295,8 +296,10 @@ class AbsorptionUncertaintyResult(OwnsArrays):
 
 
 def _table_constants(
-    frequencies: np.ndarray, table: dict[float, tuple[float, float]], band_kind: str
-) -> tuple[np.ndarray, np.ndarray]:
+    frequencies: NDArray[np.float64],
+    table: dict[float, tuple[float, float]],
+    band_kind: str,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Look up ``(m, n)`` per band, raising on an untabulated frequency."""
     try:
         mn = np.array([table[float(f)] for f in frequencies], dtype=np.float64)
@@ -311,8 +314,8 @@ def _table_constants(
 
 
 def _band_uncertainty(
-    values: np.ndarray,
-    frequencies: np.ndarray,
+    values: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     table: dict[float, tuple[float, float]],
     *,
     owner: str,

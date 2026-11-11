@@ -85,10 +85,22 @@ No resampling onto an `M`-point angular grid is performed.
 
 ```python
 comb_filter_response(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    period_s: float,
+    n_averages: int | np.integer[Any],
+) -> float
+
+comb_filter_response(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     period_s: float,
     n_averages: int | np.integer[Any],
 ) -> NDArray[np.float64]
+
+comb_filter_response(
+    frequencies: NumericArrayLike,
+    period_s: float,
+    n_averages: int | np.integer[Any],
+) -> float | NDArray[np.float64]
 ```
 
 Magnitude of the N-period synchronous-averaging comb filter.
@@ -107,7 +119,7 @@ not a multiple of `N`.
 | `period_s` | Repetition period `T`, in seconds. |
 | `n_averages` | Number of averaged periods `N` (at least 1). |
 
-**Returns:** The filter magnitude at each frequency (unitless; bounded by 1, though floating-point cancellation immediately beside a tooth can return values above 1 by a few parts in 1e9).
+**Returns:** The filter magnitude at each frequency (unitless; bounded by 1, though floating-point cancellation immediately beside a tooth can return values above 1 by a few parts in 1e9). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

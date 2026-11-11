@@ -36,6 +36,7 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from .._i18n import Language
     from ..building.measurement.joint_insulation import (
@@ -550,7 +551,7 @@ def plot_joint_gap_octaves(
     centres = octaves[0].frequencies
     positions = _band_axis(ax, centres, xlabel=_OCTAVE_LABEL, language=language)
     ax.set_xlabel(_t(_OCTAVE_LABEL, language))
-    sealed: list[np.ndarray] = []
+    sealed: list[NDArray[np.float64]] = []
     for r in result.results:
         maximum = np.asarray(r.r_s_max, dtype=np.float64)
         if not any(np.array_equal(maximum, seen) for seen in sealed):

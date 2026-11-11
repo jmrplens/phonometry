@@ -93,12 +93,13 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, given_repr, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
     is_text,
@@ -128,7 +129,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import NumericArrayLike, ReportEngine
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
     from .uncertainty import Distribution
 
@@ -1882,9 +1883,33 @@ def _maximum_at(frequency: float, clause: int) -> float:
     return _MAXIMUM_UNCERTAINTY_DB[clause][-1][2]
 
 
+@overload
+def max_expanded_uncertainty[S: RealScalar](
+    frequencies: S,
+    *,
+    clause: int | np.integer[Any],
+) -> float: ...
+
+
+@overload
+def max_expanded_uncertainty[V: RealValues](
+    frequencies: V,
+    *,
+    clause: int | np.integer[Any],
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def max_expanded_uncertainty[A: NumericArrayLike](
+    frequencies: A,
+    *,
+    clause: int | np.integer[Any],
+) -> float | NDArray[np.float64]: ...
+
+
 def max_expanded_uncertainty(
     frequencies: NumericArrayLike, *, clause: int | np.integer[Any]
-) -> NDArray[np.float64]:
+) -> float | NDArray[np.float64]:
     r"""The maximum permitted expanded uncertainty of a correction
     (IEC 62585:2012, clauses 9 to 14).
 
@@ -1907,20 +1932,24 @@ def max_expanded_uncertainty(
 
     :param frequencies: The frequencies, in Hz.
     :param clause: The clause, 9 to 14.
-    :return: The maximum at each frequency, in dB, read-only.
+    :return: The maximum at each frequency, in dB, read-only. A ``float`` for a number,
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: for another clause, a frequency that is not positive
         and finite, or, for clause 10, a frequency below 63 Hz.
     :raises TypeError: if ``clause`` is a flag, a text or an array where a count goes,
         or ``frequencies`` holds a text or a value that is not a real number.
     """
     number = _clause(clause)
-    frequencies = require_positive_array(frequencies, "frequencies")
+    bands = require_positive_array(frequencies, "frequencies")
     if number == _MICROPHONE_CLAUSE and np.any(
-        frequencies < _CLAUSE10_LOWEST_HZ / (1.0 + _NOMINAL_TOLERANCE)
+        bands < _CLAUSE10_LOWEST_HZ / (1.0 + _NOMINAL_TOLERANCE)
     ):
         msg = "IEC 62585 clause 10 states its maximum from 63 Hz; 'frequencies' goes below."
         raise ValueError(msg)
-    return read_only(np.array([_maximum_at(float(f), number) for f in frequencies]))
+    return as_float_or_array(
+        read_only(np.array([_maximum_at(float(f), number) for f in bands])),
+        like=(frequencies,),
+    )
 
 
 @dataclass(frozen=True)

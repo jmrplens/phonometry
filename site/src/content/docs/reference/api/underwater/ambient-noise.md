@@ -120,12 +120,28 @@ components, plus an optional caller-supplied shipping spectrum.
 
 ```python
 thermal_noise_spectrum(
+    frequency_hz: float | np.floating[Any] | np.integer[Any],
+    *,
+    temperature_c: float = ...,
+    density: float = ...,
+    speed_of_sound: float = ...,
+) -> float
+
+thermal_noise_spectrum(
+    frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    temperature_c: float = ...,
+    density: float = ...,
+    speed_of_sound: float = ...,
+) -> NDArray[np.float64]
+
+thermal_noise_spectrum(
     frequency_hz: NumericArrayLike,
     *,
-    temperature_c: float = 16.85,
-    density: float = 1025.0,
-    speed_of_sound: float = 1500.0,
-) -> NDArray[np.float64]
+    temperature_c: float = ...,
+    density: float = ...,
+    speed_of_sound: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Molecular thermal-noise spectrum level (Mellen 1952), dB re 1 µPa²/Hz.
@@ -142,7 +158,7 @@ level is $10 \log_{10}(\langle p^2 \rangle / p_0^2)$.
 | `density` | Water density $\rho$, in kg/m³ (default 1025). |
 | `speed_of_sound` | Sound speed `c`, in m/s (default 1500). |
 
-**Returns:** Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
+**Returns:** Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -155,9 +171,19 @@ level is $10 \log_{10}(\langle p^2 \rangle / p_0^2)$.
 
 ```python
 wind_noise_spectrum(
-    frequency_hz: NumericArrayLike,
+    frequency_hz: float | np.floating[Any] | np.integer[Any],
+    wind_speed_kt: float,
+) -> float
+
+wind_noise_spectrum(
+    frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     wind_speed_kt: float,
 ) -> NDArray[np.float64]
+
+wind_noise_spectrum(
+    frequency_hz: NumericArrayLike,
+    wind_speed_kt: float,
+) -> float | NDArray[np.float64]
 ```
 
 Wind / sea-surface noise spectrum level (Wenz rule of fives), dB re
@@ -180,7 +206,7 @@ outside both the formula extrapolates.
 | `frequency_hz` | Frequency, in Hz (scalar or array). |
 | `wind_speed_kt` | Wind speed `U`, in knots. A calm sea (`0`) has no wind-driven noise, returning `-inf` (zero contribution in the energy sum). |
 
-**Returns:** Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
+**Returns:** Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

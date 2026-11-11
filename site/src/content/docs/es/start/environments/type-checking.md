@@ -32,15 +32,14 @@ pressure = engine.numpy_field("p")       # un array de NumPy; engine.p es el del
 print(pressure.shape)
 ```
 
-`mypy --strict` y el modo básico de pyright no señalan nada en este script,
-en Python 3.12 a 3.14 y con cualquier NumPy que la biblioteca acepte en ellos.
-El modo estricto de pyright tampoco señala nada a partir de NumPy 2.3, el más
-antiguo que la biblioteca acepta en Python 3.14. Con NumPy 2.0 a 2.2, que
-Python 3.12 y 3.13 todavía aceptan, `np.ndarray` no tiene argumentos de tipo
-por defecto, así que pyright en modo estricto lee como parcialmente
-desconocidos los arrays que anota phonometry: tres errores en este script,
-de `require_levels()` y `filter()`, y dos más de `numpy_field()` antes de
-NumPy 2.2.
+`mypy --strict` y pyright, en su modo básico y en su modo estricto, no
+señalan nada en este script, en Python 3.12 a 3.14 y con cualquier NumPy que
+la biblioteca acepte en ellos, desde NumPy 2.0.2 en Python 3.12 hasta el más
+reciente. Antes de NumPy 2.3, `np.ndarray` y los tipos escalares abstractos
+como `np.floating` no tienen argumentos de tipo por defecto, y un comprobador
+lee como parcialmente desconocido uno escrito solo; phonometry escribe el
+dtype de cada array que anota (`NDArray[np.float64]`), así que un comprobador
+lee sus tipos igual con cualquier NumPy.
 
 ## Qué detecta un comprobador
 
@@ -95,9 +94,9 @@ y pyright rechaza las mismas cuatro líneas.
 ## Completitud
 
 `pyright --verifytypes phonometry --ignoreexternal` lee el paquete instalado
-como lo hace el comprobador de un usuario y le da un 100 % con NumPy 2.3 o
-posterior: cada símbolo que exporta el paquete tiene un tipo conocido. Con
-NumPy 2.0 a 2.2 le da en torno a un 86 %, por la misma razón por la que
-protesta el modo estricto más arriba. La CI del repositorio ejecuta la misma
-orden sobre el wheel construido, con el NumPy más reciente, y falla por
-debajo del 100 %.
+como lo hace el comprobador de un usuario y le da un 100 % con cualquier
+NumPy que la biblioteca acepte, desde NumPy 2.0.2 en Python 3.12 hasta el más
+reciente: cada símbolo que exporta el paquete tiene un tipo conocido. La CI
+del repositorio ejecuta la misma orden sobre el wheel construido con el NumPy
+más reciente, y sobre el paquete instalado con las versiones más antiguas que
+acepta cada Python, y falla por debajo del 100 %.

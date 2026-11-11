@@ -184,7 +184,7 @@ emission_sound_pressure_level(
 ) -> float
 
 emission_sound_pressure_level(
-    measured_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    measured_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     *,
     background_correction: NumericArrayLike = ...,
     local_correction: NumericArrayLike = ...,
@@ -193,7 +193,7 @@ emission_sound_pressure_level(
 emission_sound_pressure_level(
     measured_level: float | np.floating[Any] | np.integer[Any],
     *,
-    background_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    background_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     local_correction: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
@@ -201,7 +201,7 @@ emission_sound_pressure_level(
     measured_level: float | np.floating[Any] | np.integer[Any],
     *,
     background_correction: float | np.floating[Any] | np.integer[Any] = ...,
-    local_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    local_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 emission_sound_pressure_level(
@@ -323,7 +323,7 @@ environmental_ratio_from_absorption(
 ) -> float
 
 environmental_ratio_from_absorption(
-    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     measurement_surface_m2: float,
     directivity_index: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
@@ -331,7 +331,7 @@ environmental_ratio_from_absorption(
 environmental_ratio_from_absorption(
     absorption_area: float | np.floating[Any] | np.integer[Any],
     measurement_surface_m2: float,
-    directivity_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 environmental_ratio_from_absorption(
@@ -379,13 +379,13 @@ environmental_ratio_from_k2(
 ) -> float
 
 environmental_ratio_from_k2(
-    environmental_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    environmental_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     directivity_index: NumericArrayLike = ...,
 ) -> NDArray[np.float64]
 
 environmental_ratio_from_k2(
     environmental_correction: float | np.floating[Any] | np.integer[Any],
-    directivity_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 environmental_ratio_from_k2(
@@ -479,7 +479,7 @@ local_environmental_correction(
 ) -> float
 
 local_environmental_correction(
-    ratio: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    ratio: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
 
 local_environmental_correction(

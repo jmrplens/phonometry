@@ -73,13 +73,14 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 from scipy import special
 
 from .._internal.frozen import OwnsArrays
 from .._internal.resolve import resolve_fs
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     real_array,
     require_axis_count,
@@ -108,7 +109,7 @@ if TYPE_CHECKING:
 
     from .._i18n import Language
     from .._internal.signal import Signal
-    from .._internal.types import NumericArrayLike
+    from .._internal.types import NumericArrayLike, RealScalar, RealValues
 
 Statistic = Literal["mean_square", "rms", "mean", "variance"]
 Method = Literal["reverse_arrangements", "runs"]
@@ -1388,7 +1389,19 @@ class PeakStatisticsResult(OwnsArrays):
             owner,
         )
 
-    def peak_exceedance(self, z: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def peak_exceedance[S: RealScalar](self, z: S) -> float: ...
+
+    @overload
+    def peak_exceedance[V: RealValues](self, z: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def peak_exceedance[A: NumericArrayLike](
+        self,
+        z: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def peak_exceedance(self, z: NumericArrayLike) -> float | NDArray[np.float64]:
         r""":math:`P[\text{peak} > z]` at the record's irregularity
         factor.
 
@@ -1399,21 +1412,39 @@ class PeakStatisticsResult(OwnsArrays):
         bandwidth limit.
 
         :param z: Standardized peak heights (units of the record RMS).
-        :return: Exceedance probabilities, same shape.
+        :return: Exceedance probabilities, same shape. A ``float`` for a number, an
+            array for a sequence or an array, a zero-dimensional one included.
         :raises TypeError: if ``z`` holds a text or a value that is not a real number.
         """
         za = np.atleast_1d(real_array(z, "z"))
-        return _rice_peak_exceedance(za, self.irregularity_factor)
+        return as_float_or_array(
+            _rice_peak_exceedance(za, self.irregularity_factor), like=(z,)
+        )
 
-    def peak_density(self, z: NumericArrayLike) -> NDArray[np.float64]:
+    @overload
+    def peak_density[S: RealScalar](self, z: S) -> float: ...
+
+    @overload
+    def peak_density[V: RealValues](self, z: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def peak_density[A: NumericArrayLike](
+        self,
+        z: A,
+    ) -> float | NDArray[np.float64]: ...
+
+    def peak_density(self, z: NumericArrayLike) -> float | NDArray[np.float64]:
         """Peak probability density ``w(z)`` (B&P Eq. (5.217)).
 
         :param z: Standardized peak heights (units of the record RMS).
-        :return: Probability density values, same shape.
+        :return: Probability density values, same shape. A ``float`` for a number, an
+            array for a sequence or an array, a zero-dimensional one included.
         :raises TypeError: if ``z`` holds a text or a value that is not a real number.
         """
         za = np.atleast_1d(real_array(z, "z"))
-        return _rice_peak_density(za, self.irregularity_factor)
+        return as_float_or_array(
+            _rice_peak_density(za, self.irregularity_factor), like=(z,)
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

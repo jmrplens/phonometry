@@ -35,8 +35,10 @@ and the class of each band, and store them beside the readings they came
 from, so a result built by hand could hold readings that fail and a flag that
 says they pass. No public result outside the private packages may store a
 field that is a verdict, found two ways: by the class alone, a field annotated
-``bool`` (a bool, an optional bool, an array annotated as one) or named like a
-verdict flag; and by the source, a field some function of the package fills
+``bool`` (a bool, an optional bool, an array annotated as one, but not a
+function whose signature names one: what a function takes and gives is not
+what the field holds) or named like a verdict flag; and by the source, a
+field some function of the package fills
 with an ordering comparison, a combination of them, or a label one chose (a
 per-band mask annotated ``np.ndarray``, a category held as a string, an enum
 member), traced by :mod:`stored_verdicts`. A field either way fails unless
@@ -44,8 +46,9 @@ member), traced by :mod:`stored_verdicts`. A field either way fails unless
 states, a branch the caller chose by what they gave, a fact of an input the
 result does not hold, a property of the file read, the convergence of an
 iterative solver, a column of a published table row, a row a verdict's own
-property builds, the yes/no observations a tester records, or the ISO 8297
-requirement record. A regime or a classification the function reached by
+property builds, the yes/no observations a tester records, the line of a
+layout a function placed each position on, or the ISO 8297 requirement
+record. A regime or a classification the function reached by
 comparing values the result holds, or could hold, with a constant or a
 printed threshold (the over-critical hammer, the cavitating valve, the
 screened section, the identified tone) is a verdict like any other and stays
@@ -61,6 +64,7 @@ verdict reads are held read-only, so a write cannot move it after the fact.
 
 from __future__ import annotations
 
+import ast
 import dataclasses
 import functools
 import importlib
@@ -76,8 +80,11 @@ import stored_verdicts
 import phonometry
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
     from pathlib import Path
+
+    import numpy as np
+    from numpy.typing import NDArray
 
 #: The tests that trace the verdicts of the whole package share what the tracer
 #: and this module keep of it, so they run on one worker (rule T19), and it is
@@ -559,8 +566,42 @@ _FLAG_NAME = re.compile(
 _FLAG_TYPE = re.compile(r"\bbool\b|\bbool_\b")
 
 
+def _is_callable(node: ast.expr) -> bool:
+    """Whether *node* names a function type, ``Callable`` bare or subscripted."""
+    target = node.value if isinstance(node, ast.Subscript) else node
+    if isinstance(target, ast.Attribute):
+        return target.attr == "Callable"
+    return isinstance(target, ast.Name) and target.id == "Callable"
+
+
+def _held_types(annotation: str) -> list[str]:
+    """The members of a field's annotation that hold a value, as text.
+
+    A member of a union that is a function type is left out: a backend's
+    converter typed ``Callable[[NDArray[np.bool_]], ...]`` takes a mask and
+    holds none. An annotation that is no expression (the ``str()`` of a
+    class, ``<class 'bool'>``) is read whole.
+    """
+    try:
+        node = ast.parse(annotation, mode="eval").body
+    except SyntaxError:
+        return [annotation]
+    held: list[str] = []
+    members = [node]
+    while members:
+        member = members.pop()
+        if isinstance(member, ast.BinOp) and isinstance(member.op, ast.BitOr):
+            members.extend((member.left, member.right))
+        elif not _is_callable(member):
+            held.append(ast.unparse(member))
+    return held
+
+
 def _is_flag_field(field: dataclasses.Field[object]) -> bool:
-    return bool(_FLAG_TYPE.search(str(field.type)) or _FLAG_NAME.match(field.name))
+    return bool(
+        any(_FLAG_TYPE.search(held) for held in _held_types(str(field.type)))
+        or _FLAG_NAME.match(field.name)
+    )
 
 
 @functools.cache
@@ -609,6 +650,10 @@ _OBSERVED = (
     "indicator latched, an indication inside the manual's range), judged "
     "against no printed limit"
 )
+_LAYOUT = (
+    "which line of the layout each position stands on, as the function placed "
+    "it, compared against no limit"
+)
 
 #: Boolean or flag-named fields that are no stored verdict, each with why.
 _STATED_FLAGS = {
@@ -650,7 +695,9 @@ _STATED_FLAGS = {
     "phonometry.emission.sound_power_plant.PlantRequirement.holds": _RECORD,
     "phonometry.emission._sound_power_special_room.SpecialRoomReverberationCheck."
     "centered": _CALLER,
+    "phonometry.emission.turbine_noise.TurbineMicrophoneArray.overhead_mask": _LAYOUT,
     "phonometry.emission.turbine_noise.TurbineNoiseDeclaration.tonal": _CALLER,
+    "phonometry.emission.turbine_noise.TurbineSoundPowerResult.overhead_mask": _CALLER,
     "phonometry.environment.assessment.soundscape.QuestionnaireScale.continuous": _ROW,
     "phonometry.environment.assessment.soundscape_binaural.BinauralParameter."
     "average_allowed": _ROW,
@@ -680,6 +727,7 @@ _STATED_FLAGS = {
     "phonometry.filters.periodic_tests.FilterPeriodicVerification."
     "pattern_approval_public": _CALLER,
     "phonometry.filters.weighting.TimeWeightedEnvelope.calibrated": _INPUT,
+    "phonometry.hearing.audiometry.AscendingThresholdResult.responses": _OBSERVED,
     "phonometry.hearing.audiometry.AscendingThresholdResult.shortened": _CALLER,
     "phonometry.io._chunks.WavChunks.has_ixml": _FILE,
     "phonometry._internal.signal.SignalOrigin.lossy": _FILE,
@@ -764,7 +812,8 @@ def test_no_result_stores_a_verdict_flag() -> None:
         "caller gives, a branch the caller chose, a fact of an input the result "
         "does not hold, a property of the file read, the convergence of an "
         "iterative solver, a column of a published table row, a row a verdict's "
-        "property builds, a tester's observations or a requirement record: "
+        "property builds, a tester's observations, the line of a layout the "
+        "function placed a position on or a requirement record: "
         + ", ".join(unexpected)
     )
 
@@ -789,6 +838,25 @@ class _StoredByName:
 
     level: float
     background_ok: object
+
+
+@dataclasses.dataclass(frozen=True)
+class _HoldsAFunction:
+    """A function whose signature names a mask, and a field that may hold a flag."""
+
+    convert: Callable[[NDArray[np.bool_], str], object]
+    either: Callable[[float], bool] | bool
+
+
+def test_a_field_that_holds_a_function_is_no_flag() -> None:
+    # What a function takes and gives is not what the field holds; the bool a
+    # union holds beside the function still is one.
+    flagged = {
+        field.name
+        for field in dataclasses.fields(_HoldsAFunction)
+        if _is_flag_field(field)
+    }
+    assert flagged == {"either"}
 
 
 def test_the_guard_sees_a_stored_flag_by_type_and_by_name() -> None:

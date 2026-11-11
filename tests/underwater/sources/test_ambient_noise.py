@@ -31,17 +31,15 @@ def test_wind_rule_of_fives_anchor() -> None:
     # Wenz/Knudsen: 25 dB re 0.0002 dyn/cm2 (20 uPa) at 1 kHz for 5 knots,
     # i.e. 25 + 20*lg(20) = 51.0206 dB re 1 uPa (ISO 18405 reference).
     expected = 25.0 + 20.0 * np.log10(20.0)
-    assert float(wind_noise_spectrum(1000.0, 5.0)[0]) == pytest.approx(
-        expected, abs=1e-9
-    )
+    assert wind_noise_spectrum(1000.0, 5.0) == pytest.approx(expected, abs=1e-9)
 
 
 def test_wind_matches_published_wenz_chart() -> None:
     # Graphical anchors from the published Wenz chart (Etter 2003, axes in
     # dB re 1 uPa): ~50 dB at 1 kHz for 4-6 kt (Fig. 6.2) and ~35 dB at
     # 10 kHz for the Knudsen sea-state-1/2 curve (Fig. 6.5, ~5 kt).
-    assert float(wind_noise_spectrum(1000.0, 5.0)[0]) == pytest.approx(50.0, abs=3.0)
-    assert float(wind_noise_spectrum(10000.0, 5.0)[0]) == pytest.approx(35.0, abs=3.0)
+    assert wind_noise_spectrum(1000.0, 5.0) == pytest.approx(50.0, abs=3.0)
+    assert wind_noise_spectrum(10000.0, 5.0) == pytest.approx(35.0, abs=3.0)
 
 
 def test_wind_thermal_crossover_near_wenz_chart() -> None:
@@ -63,8 +61,8 @@ def test_wind_minus_five_db_per_octave() -> None:
 
 
 def test_wind_plus_five_db_per_doubling_of_speed() -> None:
-    quiet = float(wind_noise_spectrum(1000.0, 5.0)[0])
-    windy = float(wind_noise_spectrum(1000.0, 10.0)[0])
+    quiet = wind_noise_spectrum(1000.0, 5.0)
+    windy = wind_noise_spectrum(1000.0, 10.0)
     assert windy - quiet == pytest.approx(5.017, abs=1e-3)
 
 
@@ -122,7 +120,7 @@ def test_invalid_inputs_rejected() -> None:
 
 def test_calm_sea_zero_wind_returns_minus_inf() -> None:
     # A calm sea (0 knots) has no wind-driven noise: -inf dB (0 energy).
-    assert float(wind_noise_spectrum(1000.0, 0.0)[0]) == -np.inf
+    assert wind_noise_spectrum(1000.0, 0.0) == -np.inf
     # In the composite, the wind term then drops out (thermal only here).
     res = ocean_ambient_noise([5e4], wind_speed_kt=0.0)
     assert np.isneginf(res.wind[0])

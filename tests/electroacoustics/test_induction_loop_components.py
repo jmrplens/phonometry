@@ -88,6 +88,18 @@ def test_field_levels_and_the_magnitude() -> None:
     )
 
 
+def test_a_single_point_gives_zero_dimensional_levels() -> None:
+    """One point gives zero-dimensional components, and so every level is one too."""
+    field = ea.rectangular_loop_field(1.0, 4.0, 3.0, 0.5, 0.5, 1.2)
+    assert field.h_z_a_per_m.ndim == 0
+    for component in ("x", "y", "z", "magnitude"):
+        level = field.level(component)
+        assert isinstance(level, np.ndarray), component
+        assert level.ndim == 0, component
+    expected = 20 * math.log10(abs(float(field.h_z_a_per_m)) / 0.4)
+    assert float(field.level("z")) == pytest.approx(expected, rel=1e-12)
+
+
 def test_field_arrays_are_read_only() -> None:
     field = ea.rectangular_loop_field(1.0, 5.0, 5.0, [0.0, 1.0], 0.0, 1.4)
     with pytest.raises(ValueError, match="read-only"):

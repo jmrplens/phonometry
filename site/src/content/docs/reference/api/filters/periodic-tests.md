@@ -314,7 +314,7 @@ PERIODIC_TEST_ATTENUATION_LIMITS_DB = {1: ((-0.4, 0.4), (-0.4, 0.5), (-0.4, 0.7)
 ## periodic_test_frequencies
 
 ```python
-periodic_test_frequencies(fraction: float) -> np.ndarray
+periodic_test_frequencies(fraction: float) -> NDArray[np.float64]
 ```
 
 The 15 normalized test frequencies of IEC 61260-3:2016 Clause 13.

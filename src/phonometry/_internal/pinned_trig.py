@@ -57,6 +57,10 @@ from .validation import real_array
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from numpy.typing import NDArray
+
+    from .types import NumericArrayLike
+
 __all__ = ["pinned_atan", "pinned_hypot", "pinned_sin", "pinned_tan"]
 
 #: Bits of :math:`\pi` kept in fixed point. The reduction uses it to the
@@ -366,15 +370,15 @@ def _hypot_scalar(x: float, y: float) -> float:
 
 
 def _elementwise(
-    function: Callable[[float], float], values: np.ndarray | float
-) -> np.ndarray:
+    function: Callable[[float], float], values: NumericArrayLike
+) -> NDArray[np.float64]:
     array = real_array(values, "values")
     flat = array.reshape(-1).tolist()
     out = np.fromiter((function(v) for v in flat), np.float64, len(flat))
     return out.reshape(array.shape)
 
 
-def pinned_sin(values: np.ndarray | float) -> np.ndarray:
+def pinned_sin(values: NumericArrayLike) -> NDArray[np.float64]:
     """``sin`` elementwise, correctly rounded, the same bits on every machine.
 
     :param values: Real values with ``|x| < 1024``.
@@ -385,7 +389,7 @@ def pinned_sin(values: np.ndarray | float) -> np.ndarray:
     return _elementwise(_sin_scalar, values)
 
 
-def pinned_tan(values: np.ndarray | float) -> np.ndarray:
+def pinned_tan(values: NumericArrayLike) -> NDArray[np.float64]:
     """``tan`` elementwise, correctly rounded, the same bits on every machine.
 
     :param values: Real values with ``|x| < 1024``.
@@ -396,7 +400,7 @@ def pinned_tan(values: np.ndarray | float) -> np.ndarray:
     return _elementwise(_tan_scalar, values)
 
 
-def pinned_atan(values: np.ndarray | float) -> np.ndarray:
+def pinned_atan(values: NumericArrayLike) -> NDArray[np.float64]:
     """``atan`` elementwise, correctly rounded, the same bits on every machine.
 
     :param values: Real values; signed zeros, infinities and NaN included.

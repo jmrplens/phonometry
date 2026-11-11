@@ -15,16 +15,24 @@ here.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import numpy as np
+    from numpy.typing import NDArray
 
 __all__ = ["complex_product", "complex_quotient"]
 
 
-def _shifted_to(w_ref: float, roots: np.ndarray) -> list[tuple[float, float]]:
-    """``j w_ref - r`` for each root, as ``(real, imaginary)``, formed as numpy forms it."""
+def _shifted_to(
+    w_ref: float, roots: NDArray[np.inexact[Any]]
+) -> list[tuple[float, float]]:
+    """``j w_ref - r`` for each root, as ``(real, imaginary)``, formed as numpy forms it.
+
+    The roots are ``float64`` for some curves and ``complex128`` for others,
+    and the weighting design types them as either, ``np.inexact``: each item
+    is read through ``tolist()``, whose ``real`` and ``imag`` a float has too.
+    """
     return [(0.0 - root.real, w_ref - root.imag) for root in roots.tolist()]
 
 

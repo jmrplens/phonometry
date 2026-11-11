@@ -213,15 +213,37 @@ its sensitivity level through this module.
 
 ```python
 air_gap_series_impedance_pa_s_m3(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    gap_length_m: float,
+    gap_radius_m: float,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    relative_humidity_percent: float = ...,
+    gas: Fluid | None = ...,
+) -> complex
+
+air_gap_series_impedance_pa_s_m3(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    gap_length_m: float,
+    gap_radius_m: float,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    relative_humidity_percent: float = ...,
+    gas: Fluid | None = ...,
+) -> NDArray[np.complex128]
+
+air_gap_series_impedance_pa_s_m3(
     frequencies: NumericArrayLike,
     *,
     gap_length_m: float,
     gap_radius_m: float,
-    temperature_c: float = 23.0,
-    static_pressure_kpa: float = 101.325,
-    relative_humidity_percent: float = 50.0,
-    gas: Fluid | None = None,
-) -> NDArray[np.complex128]
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    relative_humidity_percent: float = ...,
+    gas: Fluid | None = ...,
+) -> complex | NDArray[np.complex128]
 ```
 
 The acoustic impedance of the air between two microphones that each
@@ -269,7 +291,7 @@ given `coupling_impedance_pa_s_m3` = $Z_x$, exactly.
 | `relative_humidity_percent` | The relative humidity, in % (Default: 50). |
 | `gas` | A [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) whose density and ratio of specific heats are used instead of those of the IEC 61094-2 Annex F air at the three conditions, at the same static pressure (Default: None). Appendix B takes 1,21 kg/m³, 1,4 and 101 325 Pa. |
 
-**Returns:** $Z_x$ at each frequency, complex, in Pa·s/m³, read-only.
+**Returns:** $Z_x$ at each frequency, complex, in Pa·s/m³, read-only. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1694,8 +1716,16 @@ $b$ of Formula (B.10), half the duration, in s.
 
 ```python
 RectangularPulse.level_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+RectangularPulse.level_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+RectangularPulse.level_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $20\lg\lvert X(f)/X(0)\rvert$, how far the spectrum has
@@ -1707,7 +1737,7 @@ fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 | :--- | :--- |
 | `frequencies` | Any frequencies, in Hz. |
 
-**Returns:** The level at each, in dB.
+**Returns:** The level at each, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### RectangularPulse.plot()
 
@@ -1746,8 +1776,16 @@ frequencies of interest.
 
 ```python
 RectangularPulse.spectrum_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+RectangularPulse.spectrum_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+RectangularPulse.spectrum_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $X(f)$ of Formula (B.10), in V·s, the transform of the pulse
@@ -1759,7 +1797,7 @@ centred on the time origin, where it is real.
 | :--- | :--- |
 | `frequencies` | Any frequencies, in Hz. |
 
-**Returns:** $X(f)$ at each.
+**Returns:** $X(f)$ at each. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -2357,8 +2395,16 @@ an impulse response to its frequency step.
 
 ```python
 TimeSelectiveResponse.level_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+TimeSelectiveResponse.level_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+TimeSelectiveResponse.level_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $20\lg\lvert H(f)\rvert$, in dB re 1 of the response's unit
@@ -2370,14 +2416,22 @@ times a second.
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 
-**Returns:** The level at each, in dB.
+**Returns:** The level at each, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### TimeSelectiveResponse.phase_deg_at()
 
 ```python
 TimeSelectiveResponse.phase_deg_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+TimeSelectiveResponse.phase_deg_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+TimeSelectiveResponse.phase_deg_at(
+    frequencies: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 $\arg H(f)$, in degrees, with the time origin at the start of
@@ -2389,7 +2443,7 @@ the record.
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 
-**Returns:** The phase at each, in degrees.
+**Returns:** The phase at each, in degrees. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 ### TimeSelectiveResponse.plot()
 
@@ -2430,8 +2484,16 @@ $H(f)$ with and without the window.
 
 ```python
 TimeSelectiveResponse.record_response_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+TimeSelectiveResponse.record_response_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+TimeSelectiveResponse.record_response_at(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 $H(f)$ of the whole record with no window, the reflections
@@ -2443,7 +2505,7 @@ included: what the window takes away, for comparison.
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 
-**Returns:** $H(f)$ at each.
+**Returns:** $H(f)$ at each. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -2455,8 +2517,16 @@ included: what the window takes away, for comparison.
 
 ```python
 TimeSelectiveResponse.response_at(
-    frequencies: NumericArrayLike,
+    frequencies: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+TimeSelectiveResponse.response_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.complex128]
+
+TimeSelectiveResponse.response_at(
+    frequencies: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 $H(f)$, Formula (B.2) applied to the windowed response, at
@@ -2469,7 +2539,7 @@ each frequency, complex, in the unit of the response times seconds
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 
-**Returns:** $H(f)$ at each.
+**Returns:** $H(f)$ at each. A `complex` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

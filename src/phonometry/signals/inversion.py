@@ -61,7 +61,7 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import DTypeLike
+    from numpy.typing import DTypeLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import NumericArrayLike
@@ -92,7 +92,7 @@ class TimedResponse(Protocol):
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None
-    ) -> np.ndarray: ...
+    ) -> NDArray[Any]: ...
 
 
 def _require_band_flatness(result: InverseFilterResult) -> None:
@@ -190,11 +190,11 @@ class InverseFilterResult(OwnsArrays):
         the regularization allowed where the measurement carries no signal.
     """
 
-    inverse: np.ndarray
-    frequencies: np.ndarray
-    spectrum: np.ndarray
-    response_spectrum: np.ndarray
-    regularization: np.ndarray
+    inverse: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    spectrum: NDArray[np.complex128]
+    response_spectrum: NDArray[np.complex128]
+    regularization: NDArray[np.float64]
     f_range: tuple[float, float]
     delay: int
     fs: float
@@ -271,7 +271,7 @@ class InverseFilterResult(OwnsArrays):
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None
-    ) -> np.ndarray:
+    ) -> NDArray[Any]:
         """Return the inverse-filter samples as an array."""
         return np.asarray(self.inverse, dtype=dtype, copy=copy)
 
@@ -284,7 +284,7 @@ class InverseFilterResult(OwnsArrays):
         """Number of samples in the inverse filter."""
         return int(self.inverse.size)
 
-    def apply(self, x: NumericArrayLike) -> np.ndarray:
+    def apply(self, x: NumericArrayLike) -> NDArray[np.float64]:
         """Equalize a signal with the inverse filter.
 
         Convolves ``x`` with the filter and removes the modeling delay, so
@@ -326,12 +326,12 @@ class InverseFilterResult(OwnsArrays):
 
 
 def _regularization_profile(
-    freqs: np.ndarray,
+    freqs: NDArray[np.float64],
     f_range: tuple[float, float],
     eps_inside: float,
     eps_outside: float,
     transition_octaves: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     r"""Frequency-dependent :math:`\epsilon(f)`: geometric cross-fade.
 
     :math:`\epsilon` equals ``eps_inside`` across all of
@@ -360,7 +360,7 @@ def _regularization_profile(
 
 def _validated_response(
     response: SignalInput | TimedResponse,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Validate the measured impulse response array."""
     h = _typesignal(response, name="response")
     if h.ndim != 1:
@@ -534,7 +534,7 @@ def regularized_inverse_filter(
         regularization_outside * scale,
         transition_octaves,
     )
-    inv_spectrum = np.conj(spectrum_h) / (power + eps)
+    inv_spectrum = spectrum_h.conj() / (power + eps)
     inv_spectrum = inv_spectrum * np.exp(-2j * np.pi * freqs * lag / fs_v)
     inverse = np.fft.irfft(inv_spectrum, n=size)
 

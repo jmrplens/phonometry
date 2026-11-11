@@ -35,7 +35,11 @@ ones included, because a public method returns what its renderer returns:
   apart, one returning the single value alone and one the array alone, so
   that the union head is the one left for the inputs whose shape a type
   checker cannot know (mypy's ``overload-cannot-match`` keeps it behind the
-  heads it would otherwise shadow);
+  heads it would otherwise shadow); and the single value and the array hold
+  numbers of one kind between the heads, a ``float`` beside a real array
+  and a ``complex`` beside a complex one, since a function whose result is
+  complex returns a Python ``complex`` for numbers as a real one returns a
+  ``float`` (a ``float`` head beside ``NDArray[np.complex128]`` is refused);
 * a return annotation that is a union of a record of the package (a class
   it defines, ``Signal`` or ``TimeWeightedEnvelope``) with a numpy array, or
   of a tuple of records with a tuple of arrays, is held to the same: a
@@ -151,6 +155,22 @@ EXEMPT: dict[tuple[str, str], str] = {
         "is handed, not from an argument of its own; its two callers are "
         "overloaded on their quantity Literal and return PolarAxes for "
         "'directivity'"
+    ),
+    (
+        "src/phonometry/building/prediction/aperture_transmission.py",
+        "composite_transmission_loss",
+    ): (
+        "an area-weighted sum over the elements: reduces the first axis of "
+        "the reduction indices, so their rank decides whether one number is "
+        "left (1-D) or one per band (2-D), which as_float_if_reduced applies"
+    ),
+    (
+        "src/phonometry/building/prediction/installed_structure_borne.py",
+        "total_structure_borne_pressure_level",
+    ): (
+        "an energy sum over the transmission paths: reduces the first axis "
+        "of the path levels, so their rank decides whether one number is "
+        "left or one per band, which as_float_if_reduced applies"
     ),
     ("src/phonometry/signals/levels.py", "leq"): (
         "a level of a signal: reduces the last axis of what it is "
@@ -272,6 +292,102 @@ EXEMPT: dict[tuple[str, str], str] = {
         "surfaces tuples and the rows of objects are, which a type "
         "checker reads as one type; each is passed as like"
     ),
+    ("src/phonometry/building/prediction/detailed_model.py", "flanking_impact_level"): (
+        "six arguments broadcast into the result (floor_level, index_i, index_j, velocity_level_difference, delta_l and delta_r_j): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/building/prediction/detailed_model.py",
+        "flanking_impact_level_from_normalized_difference",
+    ): (
+        "six arguments broadcast into the result (floor_level, index_i, index_j, normalized_velocity_level_difference, delta_l and delta_r_j): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/building/prediction/detailed_model.py",
+        "flanking_reduction_index",
+    ): (
+        "five arguments broadcast into the result (index_i, index_j, velocity_level_difference, delta_r_i and delta_r_j): the heads "
+        "that say which one first holds an array would number seven, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/building/prediction/detailed_model.py",
+        "flanking_reduction_index_from_normalized_difference",
+    ): (
+        "five arguments broadcast into the result (index_i, index_j, normalized_velocity_level_difference, delta_r_i and delta_r_j): the heads "
+        "that say which one first holds an array would number seven, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/building/measurement/flanking_transmission.py",
+        "vibration_reduction_index_from_flanking",
+    ): (
+        "five arguments of one value per band each decide the result "
+        "(normalized_flanking_level_difference, reduction_index_i, "
+        "reduction_index_j, absorption_length_i and absorption_length_j): the "
+        "heads that say which one first holds an array would number seven, and "
+        "the union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "absorption_coefficient_uncertainty",
+    ): (
+        "five arguments broadcast into the result (speed_of_sound, t_a, u_a, t_b and u_b): the heads "
+        "that say which one first holds an array would number seven, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "base_plate_scattering",
+    ): (
+        "six arguments broadcast into the result (c1, t1, c3, t3, m1 and m3): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "random_incidence_absorption",
+    ): (
+        "six arguments broadcast into the result (c1, t1, c2, t2, m1 and m2): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    (
+        "src/phonometry/materials/diffusers/reverberation_room_scattering.py",
+        "specular_absorption_coefficient",
+    ): (
+        "six arguments broadcast into the result (c3, t3, c4, t4, m3 and m4): the heads "
+        "that say which one first holds an array would number eight, and the "
+        "union says it as well; each is passed as like, and "
+        "tests/test_scalar_or_array_returns.py holds the runtime to the rule"
+    ),
+    ("src/phonometry/noise_control/silencers.py", "transmission_loss"): (
+        "the rank of the four-pole array decides: a (2, 2) matrix alone gives "
+        "one number and a (n_freq, 2, 2) stack one per frequency, two arrays a "
+        "type checker cannot tell apart, which as_float_if_reduced applies"
+    ),
+    ("src/phonometry/noise_control/silencers.py", "insertion_loss"): (
+        "the rank of the four-pole array decides: a (2, 2) matrix alone gives "
+        "one number and a (n_freq, 2, 2) stack one per frequency, two arrays a "
+        "type checker cannot tell apart, which as_float_if_reduced applies"
+    ),
+    ("src/phonometry/emission/sound_power.py", "mean_single_event_level"): (
+        "an energy average over the events: with n_events=None it reduces "
+        "the first axis of the levels, so their rank decides whether one "
+        "number is left, which as_float_if_reduced applies; with n_events "
+        "the levels keep their shape and pass as like"
+    ),
     ("src/phonometry/room/acoustics.py", "reverberation_time_standard_deviation"): (
         "four arguments broadcast into the result (reverberation_time, "
         "bandwidth, decays, positions): the heads that say which one "
@@ -312,6 +428,11 @@ EXEMPT: dict[tuple[str, str], str] = {
         "the private helper behind every public overload: what it "
         "returns follows the arguments its caller hands it as like, and "
         "the caller's own heads say each case"
+    ),
+    ("src/phonometry/_internal/types.py", "as_complex_or_array"): (
+        "the complex form of as_float_or_array: what it returns follows the "
+        "arguments its caller hands it as like, and the caller's own heads "
+        "say each case"
     ),
     ("src/phonometry/_internal/types.py", "as_float_if_reduced"): (
         "the private helper of the reducers: the rank of what was "
@@ -469,6 +590,40 @@ _SCALARS = frozenset(
         "numpy.void",
         "numpy.record",
         "numpy.object_",
+    }
+)
+
+#: The real floating types, a single value's and an array's dtype alike: what
+#: a ``float`` returned for numbers stands beside.
+_REAL_KIND = frozenset(
+    {
+        "builtins.float",
+        "numpy.floating",
+        "numpy.float16",
+        "numpy.float32",
+        "numpy.float64",
+        "numpy.float96",
+        "numpy.float128",
+        "numpy.half",
+        "numpy.single",
+        "numpy.double",
+        "numpy.longdouble",
+    }
+)
+
+#: The complex types, a single value's and an array's dtype alike: what a
+#: ``complex`` returned for numbers stands beside.
+_COMPLEX_KIND = frozenset(
+    {
+        "builtins.complex",
+        "numpy.complexfloating",
+        "numpy.complex64",
+        "numpy.complex128",
+        "numpy.complex192",
+        "numpy.complex256",
+        "numpy.csingle",
+        "numpy.cdouble",
+        "numpy.clongdouble",
     }
 )
 
@@ -1292,6 +1447,52 @@ class Package:
                 several.append(ast.unparse(member))
         return single, several
 
+    def number_kinds(
+        self, module: str, node: ast.expr | None
+    ) -> tuple[set[str], set[str]]:
+        """The kinds of number, ``"real"`` or ``"complex"``, a return names.
+
+        The first set reads the single values (``float``, ``complex`` and the
+        numpy scalars of either kind), the second the dtype of the arrays
+        (``NDArray[np.complex128]``, ``np.ndarray[Any, np.dtype[np.float64]]``),
+        through the package's aliases. A member of another kind (an integer,
+        a grade, an array whose dtype is open or holds both kinds) names none.
+        """
+        single: set[str] = set()
+        several: set[str] = set()
+        for where, member in self.members(module, node):
+            base = member.value if isinstance(member, ast.Subscript) else member
+            dotted = self.resolve(where, base)
+            if dotted in _SCALARS:
+                kind = _number_kind({dotted})
+                if kind is not None:
+                    single.add(kind)
+            elif dotted in _ARRAYS and isinstance(member, ast.Subscript):
+                kind = self._dtype_kind(where, member)
+                if kind is not None:
+                    several.add(kind)
+        return single, several
+
+    def _dtype_kind(self, module: str, array: ast.Subscript) -> str | None:
+        """The kind of number an array's dtype holds, when it holds one kind."""
+        items = (
+            array.slice.elts if isinstance(array.slice, ast.Tuple) else [array.slice]
+        )
+        dtype = items[-1]
+        if (
+            isinstance(dtype, ast.Subscript)
+            and self.resolve(module, dtype.value) == "numpy.dtype"
+        ):
+            dtype = dtype.slice
+        named: set[str] = set()
+        for where, member in self.members(module, dtype):
+            base = member.value if isinstance(member, ast.Subscript) else member
+            dotted = self.resolve(where, base)
+            if dotted is None:
+                return None
+            named.add(dotted)
+        return _number_kind(named)
+
     def _record_or_array(self, module: str, node: ast.expr) -> str | None:
         """``"record"``, ``"array"`` or ``None``: what one member of a union stands for.
 
@@ -2030,6 +2231,50 @@ def reaching_polar(package: Package) -> set[str]:
     return reached
 
 
+def _number_kind(named: set[str]) -> str | None:
+    """``"real"`` or ``"complex"`` when every type in *named* is of that kind."""
+    if named and named <= _REAL_KIND:
+        return "real"
+    if named and named <= _COMPLEX_KIND:
+        return "complex"
+    return None
+
+
+def _kind_findings(package: Package, function: Function, path: str) -> list[Finding]:
+    """A single value and an array of different kinds of number between the heads.
+
+    A function whose result is complex returns a Python ``complex`` for
+    numbers, as a real one returns a ``float``: a head that returns a
+    ``float`` beside one that returns a complex array, or a ``complex``
+    beside a real array, says the result changes kind with the shape of the
+    input, which no computation of the package does. Read over the heads and
+    the implementation together, each member of each union for itself.
+    """
+    module = function.module
+    single: set[str] = set()
+    several: set[str] = set()
+    for definition in function.definitions:
+        values, arrays = package.number_kinds(module, definition.returns)
+        single |= values
+        several |= arrays
+    if not single or not several or single == several:
+        return []
+    anchor = function.implementation or function.heads[0]
+    value = " and ".join(
+        sorted("a float" if kind == "real" else "a complex" for kind in single)
+    )
+    array = " and ".join(sorted(f"a {kind} array" for kind in several))
+    return [
+        Finding(
+            path,
+            anchor.lineno,
+            function.qualname,
+            f"returns {value} for numbers and {array} otherwise: a complex "
+            "result is a complex for numbers, a real one a float",
+        )
+    ]
+
+
 def _tells_apart(shapes: Sequence[tuple[list[str], list[str]]]) -> bool:
     """Whether some head returns the one case alone and another the other alone."""
     return any(one and not other for one, other in shapes) and any(
@@ -2148,6 +2393,7 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                 )
         for case in _CASES:
             found.extend(_case_findings(package, function, path, case))
+        found.extend(_kind_findings(package, function, path))
         implementation = function.implementation
         if implementation is None or implementation.returns is None:
             continue
@@ -2226,7 +2472,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "typing.overload head per case, each returning the one type it "
             "gives (Axes for a given ax, a tuple of Axes for none; PolarAxes "
             "where the axes is polar; a float for numbers and an NDArray for "
-            "a sequence or an array, with a last head taking ArrayLike; a "
+            "a sequence or an array, a complex and a complex NDArray where the "
+            "result is complex, with a last head taking NumericArrayLike; a "
             "Signal, or the record built from one, for a Signal and an NDArray "
             "for an array), and "
             "keep the union on the implementation; a polar axes the function "

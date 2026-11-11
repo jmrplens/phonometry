@@ -60,14 +60,34 @@ the ARP verification cases.
 
 ```python
 atmospheric_adjustment(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    distance_m: float,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    reference_distance_m: float = ...,
+) -> float
+
+atmospheric_adjustment(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    distance_m: float,
+    *,
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    reference_distance_m: float = ...,
+) -> NDArray[np.float64]
+
+atmospheric_adjustment(
     frequencies: NumericArrayLike,
     distance_m: float,
     *,
-    temperature_c: float = 25.0,
-    relative_humidity_percent: float = 70.0,
-    static_pressure_kpa: float = 101.325,
-    reference_distance_m: float = 60.0,
-) -> NDArray[np.float64]
+    temperature_c: float = ...,
+    relative_humidity_percent: float = ...,
+    static_pressure_kpa: float = ...,
+    reference_distance_m: float = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Atmospheric-absorption adjustment `ΔLa` of the hemisphere level (Eq. 26/27).
@@ -111,7 +131,7 @@ advisory warning propagates, since `α` is large and extrapolated.
 | `static_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
 | `reference_distance_m` | Hemisphere reference distance `rh`, in metres (default 60). Pass [`RotorcraftHemisphere.distance_m`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere) when the data uses a non-standard polar distance. |
 
-**Returns:** The adjustment `ΔLa` per band, in dB (added to the level, $\le 0$ for $r \ge r_\mathrm{h}$).
+**Returns:** The adjustment `ΔLa` per band, in dB (added to the level, $\le 0$ for $r \ge r_\mathrm{h}$). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -124,13 +144,31 @@ advisory warning propagates, since `α` is large and extrapolated.
 
 ```python
 diffraction_attenuation(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    path_difference: float,
+    *,
+    edge_height_m: float,
+    edge_span: float = ...,
+    capped: bool = ...,
+) -> float
+
+diffraction_attenuation(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    path_difference: float,
+    *,
+    edge_height_m: float,
+    edge_span: float = ...,
+    capped: bool = ...,
+) -> NDArray[np.float64]
+
+diffraction_attenuation(
     frequencies: NumericArrayLike,
     path_difference: float,
     *,
     edge_height_m: float,
-    edge_span: float = 0.0,
-    capped: bool = True,
-) -> NDArray[np.float64]
+    edge_span: float = ...,
+    capped: bool = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Pure diffraction attenuation `ΔLd` per band (guidance Eq. 42-44).
@@ -165,7 +203,7 @@ $c = 346.1$ m/s.
 | `edge_span` | Distance `e` between the first and last diffraction edges, in metres (default 0: single diffraction). |
 | `capped` | Apply the 25 dB upper bound of §A.4.5 (default). The image-path terms inside the ground-diffraction weighting (Eq. 46/47) are evaluated unbounded. |
 
-**Returns:** The attenuation `ΔLd` per band, in dB (`≥ 0`).
+**Returns:** The attenuation `ΔLd` per band, in dB (`≥ 0`). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -178,13 +216,31 @@ $c = 346.1$ m/s.
 
 ```python
 ground_effect_adjustment(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    source_height_m: float,
+    receiver_height_m: float,
+    horizontal_distance_m: float,
+    *,
+    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] = ...,
+) -> float
+
+ground_effect_adjustment(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    source_height_m: float,
+    receiver_height_m: float,
+    horizontal_distance_m: float,
+    *,
+    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] = ...,
+) -> NDArray[np.float64]
+
+ground_effect_adjustment(
     frequencies: NumericArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     horizontal_distance_m: float,
     *,
-    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] = 'G',
-) -> NDArray[np.float64]
+    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Ground-effect adjustment `ΔLg` over an impedance plane (Eq. 28-35).
@@ -205,7 +261,7 @@ $\Delta L_\mathrm{g} = 10 \cdot \log_{10}\{1 + (r_1/r_2)^2 \lvert Q \rvert^2 + 2
 | `horizontal_distance_m` | Horizontal source-receiver distance `dp`, in metres (`> 0`). |
 | `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter `"A"`-`"H"`. The default `"G"` (20e6, hard surfaces) is the CNOSSOS class covering the paved surroundings typical of heliports; the guidance's own suggestions, concrete $\sigma = 65 \times 10^6$ for city areas and grass $\sigma = 200 \times 10^3$ for rural areas (§A.4.3), can be passed as numeric values. One of `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, `"F"`, `"G"` or `"H"`. |
 
-**Returns:** The adjustment `ΔLg` per band, in dB (added to the level).
+**Returns:** The adjustment `ΔLg` per band, in dB (added to the level). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -334,8 +390,16 @@ flat-ground equations (§A.4.4).
 
 ```python
 MeanGroundPlaneResult.height(
-    distance_m: NumericArrayLike,
+    distance_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+MeanGroundPlaneResult.height(
+    distance_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+MeanGroundPlaneResult.height(
+    distance_m: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 The plane height $a\,d + b$ at `distance_m`, in metres.
@@ -346,7 +410,7 @@ The plane height $a\,d + b$ at `distance_m`, in metres.
 | :--- | :--- |
 | `distance_m` | Distance $d$ along the section, in metres (scalar or array). |
 
-**Returns:** The height of the plane at each distance, in metres.
+**Returns:** The height of the plane at each distance, in metres. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

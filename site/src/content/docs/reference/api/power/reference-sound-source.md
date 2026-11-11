@@ -149,12 +149,30 @@ which length that is stays with the caller.
 ```python
 radiation_impedance_correction(
     *,
-    temperature_c: float = 23.0,
-    static_pressure_kpa: float = 101.325,
-    radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: Literal['monopole', 'dipole', 'unknown'] = ...,
+    frequencies: float | np.floating[Any] | np.integer[Any] | None = None,
+    knee_frequency_hz: float | None = ...,
+) -> float
+
+radiation_impedance_correction(
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: Literal['monopole', 'dipole', 'unknown'] = ...,
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    knee_frequency_hz: float | None = ...,
+) -> NDArray[np.float64]
+
+radiation_impedance_correction(
+    *,
+    temperature_c: float = ...,
+    static_pressure_kpa: float = ...,
+    radiation: Literal['monopole', 'dipole', 'unknown'] = ...,
     frequencies: NumericArrayLike | None = None,
-    knee_frequency_hz: float | None = None,
-) -> np.ndarray
+    knee_frequency_hz: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The radiation impedance correction $C_2$ of ISO 6926 Annex A.
@@ -176,7 +194,7 @@ calibration used should be the one the user applies.
 | `frequencies` | The band frequencies, in hertz; required for a monopole or a dipole, whose correction depends on the knee frequency. |
 | `knee_frequency_hz` | $f_\mathrm{k}$ (see [`knee_frequency`](/phonometry/reference/api/power/reference-sound-source/#knee_frequency)), required for a monopole or a dipole. |
 
-**Returns:** $C_2$ per band, in dB (one value without frequencies).
+**Returns:** $C_2$ per band, in dB. A `float` for a number or for no frequencies, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -252,12 +270,28 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 
 ```python
 reference_source_reproducibility(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    environment: Literal['hemi-anechoic', 'reverberation-room'],
+    arrangement: Literal['paths', 'fixed'] | None = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float
+
+reference_source_reproducibility(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    environment: Literal['hemi-anechoic', 'reverberation-room'],
+    arrangement: Literal['paths', 'fixed'] | None = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> NDArray[np.float64]
+
+reference_source_reproducibility(
     frequencies: NumericArrayLike,
     *,
     environment: Literal['hemi-anechoic', 'reverberation-room'],
-    arrangement: Literal['paths', 'fixed'] | None = None,
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
-) -> np.ndarray
+    arrangement: Literal['paths', 'fixed'] | None = ...,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Standard deviation of reproducibility of a calibration (ISO 6926 Table 2).
@@ -275,7 +309,7 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 | `arrangement` | In a hemi-anechoic room, `"paths"` (meridional or spiral) or `"fixed"` (20 discrete positions or coaxial circular paths); ignored in a reverberation room. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. One of `1` or `3`. |
 
-**Returns:** $\sigma_R$ per band, in dB.
+**Returns:** $\sigma_R$ per band, in dB. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -288,11 +322,11 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 
 ```python
 ReferenceSoundSourceVerdict(
-    frequencies: np.ndarray,
-    sound_power_level: np.ndarray,
-    repeatability_db: np.ndarray | None,
-    supply_variation_db: np.ndarray | None,
-    directivity_index: np.ndarray | None,
+    frequencies: NDArray[np.float64],
+    sound_power_level: NDArray[np.float64],
+    repeatability_db: NDArray[np.float64] | None,
+    supply_variation_db: NDArray[np.float64] | None,
+    directivity_index: NDArray[np.float64] | None,
     reverberation_rooms_only: bool,
 )
 ```
@@ -453,18 +487,18 @@ The 0,3 dB either way of 5.2, in dB.
 
 ```python
 ReferenceSourceCalibration(
-    frequencies: np.ndarray,
-    surface_pressure_level: np.ndarray,
-    directivity_index: np.ndarray,
+    frequencies: NDArray[np.float64],
+    surface_pressure_level: NDArray[np.float64],
+    directivity_index: NDArray[np.float64],
     c1: float,
-    c2: np.ndarray,
-    c3: np.ndarray,
-    expanded_uncertainty_db: np.ndarray,
+    c2: NDArray[np.float64],
+    c3: NDArray[np.float64],
+    expanded_uncertainty_db: NDArray[np.float64],
     coverage_factor: float,
     arrangement: Literal['paths', 'fixed'],
     radiation: Literal['monopole', 'dipole', 'unknown'] | None,
     knee_frequency_hz: float | None,
-    intensity_sound_power_level: np.ndarray | None = None,
+    intensity_sound_power_level: NDArray[np.float64] | None = None,
     room_qualification: FreeFieldCheck | None = None,
 )
 ```
@@ -586,12 +620,28 @@ A-weighted sound power level over `a_weighted_range_hz` (5.3).
 
 ```python
 ReferenceSourceCalibration.sound_power_level_at(
+    frequencies: float | np.floating[Any] | np.integer[Any],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    temperature_c: float | None = ...,
+    static_pressure_kpa: float | None = ...,
+) -> float
+
+ReferenceSourceCalibration.sound_power_level_at(
+    frequencies: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    temperature_c: float | None = ...,
+    static_pressure_kpa: float | None = ...,
+) -> NDArray[np.float64]
+
+ReferenceSourceCalibration.sound_power_level_at(
     frequencies: NumericArrayLike,
     *,
-    fraction: Literal[1, 3] | np.integer[Any] = 3,
-    temperature_c: float | None = None,
-    static_pressure_kpa: float | None = None,
-) -> np.ndarray
+    fraction: Literal[1, 3] | np.integer[Any] = ...,
+    temperature_c: float | None = ...,
+    static_pressure_kpa: float | None = ...,
+) -> float | NDArray[np.float64]
 ```
 
 The calibrated level in the bands a comparison method asks for.
@@ -615,7 +665,7 @@ calibrated.
 | `temperature_c` | Air temperature at the test, in degrees Celsius; `None` (default), with `static_pressure_kpa`, reads the reference conditions. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals, given together with `temperature_c`. |
 
-**Returns:** The level per requested band, in dB re 1 pW.
+**Returns:** The level per requested band, in dB re 1 pW. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -627,7 +677,10 @@ calibrated.
 ## ReferenceSourceDriftResult
 
 ```python
-ReferenceSourceDriftResult(frequencies: np.ndarray, change_db: np.ndarray)
+ReferenceSourceDriftResult(
+    frequencies: NDArray[np.float64],
+    change_db: NDArray[np.float64],
+)
 ```
 
 Whether a reference sound source has drifted enough to be recalibrated.
@@ -690,7 +743,9 @@ Draw the change of each band against its limit.
 ## repeatability_standard_deviation
 
 ```python
-repeatability_standard_deviation(levels: NumericArrayLike) -> np.ndarray
+repeatability_standard_deviation(
+    levels: NumericArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Standard deviation under repeatability conditions (ISO 6926 Formula (1)).

@@ -29,7 +29,17 @@ measured one frequency at a time; see
 ## standing_wave_absorption
 
 ```python
-standing_wave_absorption(swr: NumericArrayLike) -> NDArray[np.float64]
+standing_wave_absorption(
+    swr: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+standing_wave_absorption(
+    swr: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.float64]
+
+standing_wave_absorption(
+    swr: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Absorption coefficient from the standing-wave ratio (ISO 10534-1).
@@ -44,7 +54,7 @@ $\alpha = 4s/(s + 1)^2$.
 | :--- | :--- |
 | `swr` | Standing-wave ratio `s` (>= 1). |
 
-**Returns:** Absorption coefficient `alpha` in `[0, 1]`.
+**Returns:** Absorption coefficient `alpha` in `[0, 1]`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -56,11 +66,39 @@ $\alpha = 4s/(s + 1)^2$.
 
 ```python
 standing_wave_normalized_impedance(
-    swr: NumericArrayLike,
+    swr: float | np.floating[Any] | np.integer[Any],
+    first_min_distance: float | np.floating[Any] | np.integer[Any],
+    *,
+    wavelength: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+standing_wave_normalized_impedance(
+    swr: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     first_min_distance: NumericArrayLike,
     *,
     wavelength: NumericArrayLike,
 ) -> NDArray[np.complex128]
+
+standing_wave_normalized_impedance(
+    swr: float | np.floating[Any] | np.integer[Any],
+    first_min_distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    wavelength: NumericArrayLike,
+) -> NDArray[np.complex128]
+
+standing_wave_normalized_impedance(
+    swr: float | np.floating[Any] | np.integer[Any],
+    first_min_distance: float | np.floating[Any] | np.integer[Any],
+    *,
+    wavelength: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.complex128]
+
+standing_wave_normalized_impedance(
+    swr: NumericArrayLike,
+    first_min_distance: NumericArrayLike,
+    *,
+    wavelength: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Normalised impedance from the standing wave (ISO 10534-1, Eqs. (24)-(26)).
@@ -76,14 +114,22 @@ Eqs. (25)/(26).
 | `first_min_distance` | Distance `x_min1` to the first minimum, in metres. |
 | `wavelength` | Wavelength `lambda0`, in metres. |
 
-**Returns:** Normalised surface impedance `z` (complex).
+**Returns:** Normalised surface impedance `z` (complex). A `complex` when `swr`, `first_min_distance` and `wavelength` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 ## standing_wave_ratio_from_level
 
 ```python
 standing_wave_ratio_from_level(
-    level_difference: NumericArrayLike,
+    level_difference: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+standing_wave_ratio_from_level(
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+standing_wave_ratio_from_level(
+    level_difference: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Standing-wave ratio from a level difference (ISO 10534-1, Eq. (15)).
@@ -97,7 +143,7 @@ $\Delta L = L_{\max} - L_{\min}$ in decibels.
 | :--- | :--- |
 | `level_difference` | Level difference $\Delta L = L_{\max} - L_{\min}$, in dB. |
 
-**Returns:** Standing-wave ratio `s` (>= 1).
+**Returns:** Standing-wave ratio `s` (>= 1). A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -109,11 +155,39 @@ $\Delta L = L_{\max} - L_{\min}$ in decibels.
 
 ```python
 standing_wave_reflection(
-    swr: NumericArrayLike,
+    swr: float | np.floating[Any] | np.integer[Any],
+    first_min_distance: float | np.floating[Any] | np.integer[Any],
+    *,
+    wavelength: float | np.floating[Any] | np.integer[Any],
+) -> complex
+
+standing_wave_reflection(
+    swr: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
     first_min_distance: NumericArrayLike,
     *,
     wavelength: NumericArrayLike,
 ) -> NDArray[np.complex128]
+
+standing_wave_reflection(
+    swr: float | np.floating[Any] | np.integer[Any],
+    first_min_distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+    *,
+    wavelength: NumericArrayLike,
+) -> NDArray[np.complex128]
+
+standing_wave_reflection(
+    swr: float | np.floating[Any] | np.integer[Any],
+    first_min_distance: float | np.floating[Any] | np.integer[Any],
+    *,
+    wavelength: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
+) -> NDArray[np.complex128]
+
+standing_wave_reflection(
+    swr: NumericArrayLike,
+    first_min_distance: NumericArrayLike,
+    *,
+    wavelength: NumericArrayLike,
+) -> complex | NDArray[np.complex128]
 ```
 
 Complex reflection factor from the standing wave (ISO 10534-1, Eqs. (17)-(23)).
@@ -130,7 +204,7 @@ $\phi = \pi (4 x_{\text{min},1} / \lambda_0 - 1)$ (Eq. (20)).
 | `first_min_distance` | Distance `x_min1` from the reference plane to the first pressure minimum (toward the source), in metres. |
 | `wavelength` | Wavelength `lambda0`, in metres (Eq. (27)). |
 
-**Returns:** Complex reflection factor `r`.
+**Returns:** Complex reflection factor `r`. A `complex` when `swr`, `first_min_distance` and `wavelength` are all numbers, an array when one of them is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -142,8 +216,16 @@ $\phi = \pi (4 x_{\text{min},1} / \lambda_0 - 1)$ (Eq. (20)).
 
 ```python
 standing_wave_reflection_magnitude(
-    swr: NumericArrayLike,
+    swr: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+standing_wave_reflection_magnitude(
+    swr: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[np.bool_ | np.integer[Any] | np.floating[Any]],
 ) -> NDArray[np.float64]
+
+standing_wave_reflection_magnitude(
+    swr: NumericArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Reflection magnitude from the standing-wave ratio (ISO 10534-1, Eq. (14)).
@@ -156,7 +238,7 @@ $|r| = (s - 1) / (s + 1)$.
 | :--- | :--- |
 | `swr` | Standing-wave ratio `s` (>= 1). |
 
-**Returns:** Reflection magnitude `|r|` in `[0, 1]`.
+**Returns:** Reflection magnitude `|r|` in `[0, 1]`. A `float` for a number, an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

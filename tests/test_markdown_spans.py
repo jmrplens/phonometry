@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 import sys
 
 import node_script
@@ -28,6 +29,7 @@ from markdown_fences import page_lines
 from markdown_spans import (
     SPAN_MARK,
     blank_inline_spans,
+    blank_inline_spans_by_block,
     block_starts,
     drop_inline_spans,
     drop_inline_spans_by_block,
@@ -683,3 +685,66 @@ def test_the_site_reads_the_markup_of_every_page_as_the_scripts_do() -> None:
         if _in_code_units(text, page_markup(text, kind=kind)) != other
     ]
     assert (len(paths) > 400, differ) == (True, [])
+
+
+#: A URL and an attribute, two constructs of a reader's own that hold what
+#: they hold: the em dash check reads a page's addresses this way.
+_URL = re.compile(r"[a-z]+://[^\s)>\]]+")
+_ATTRIBUTE = re.compile(r"\bhref=\"[^\"]*\"")
+
+
+@pytest.mark.parametrize(
+    ("text", "shown"),
+    [
+        pytest.param("`http://x` `--y`", " " * 16, id="a URL in a span"),
+        pytest.param("http://x`y` z", " " * 12 + "z", id="a span in a URL"),
+        pytest.param("`a http://x`y` b", " " * 12 + "y` b", id="a span the URL closes"),
+        pytest.param(
+            '`href="` x `"`', " " * 8 + " x " + " " * 3, id="an attribute in a span"
+        ),
+        pytest.param(
+            '<a href="`"> x `y`',
+            "<a " + " " * 8 + "> x " + " " * 3,
+            id="a span in an attribute",
+        ),
+        pytest.param(
+            "a\n\nhttp://x`y\n\n`b` c", "a\n\n" + " " * 10 + "\n\n    c", id="by block"
+        ),
+    ],
+)
+def test_a_construct_read_with_the_spans_wins_where_it_opens_first(
+    text: str, shown: str
+) -> None:
+    """A reader's own constructs and the spans are read in one pass, left to right.
+
+    Whichever opens first holds what it spans: a URL written in a code span is
+    code, and a backtick inside a URL opens no span. Read one after the other,
+    a URL took the backtick that closed its span and every span after it
+    paired with the wrong run.
+    """
+    assert blank_inline_spans_by_block(text, constructs=(_URL, _ATTRIBUTE)) == shown
+
+
+def test_a_construct_is_read_in_a_raw_html_block_too() -> None:
+    """A raw HTML block holds no span, but what a reader reads there is read."""
+    text = '<div href="a--b">\n`x`\n</div>'
+    shown = "<div " + " " * len('href="a--b"') + ">\n`x`\n</div>"
+    assert blank_inline_spans_by_block(text, constructs=(_ATTRIBUTE,)) == shown
+
+
+@pytest.mark.parametrize(
+    ("text", "shown"),
+    [
+        pytest.param("a { /* b */ } c", f"a {SPAN_MARK} c", id="blanks around it"),
+        pytest.param(
+            "{ /*\nb\n\nc\n*/ }\nd",
+            f"{SPAN_MARK}\n\n\n\n\nd",
+            id="over a blank line",
+        ),
+    ],
+)
+def test_an_mdx_comment_may_stand_between_blanks_in_its_braces(
+    text: str, shown: str
+) -> None:
+    """MDX shows nothing of an expression that holds only a comment, blanks and all."""
+    assert drop_inline_spans_by_block(text, comments="mdx") == shown

@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
+import { unified } from '@astrojs/markdown-remark';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightImageZoom from 'starlight-image-zoom';
 import remarkMath from 'remark-math';
@@ -14,6 +15,7 @@ import starlightSidebarTopics from 'starlight-sidebar-topics';
 import { topics } from './src/data/topics.mjs';
 import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
+import { packagesNotListedIn } from './src/lib/bundled-packages.mjs';
 import { basePath, siteUrl } from './src/data/site.mjs';
 import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
@@ -476,10 +478,22 @@ const pagefindUiEntry = (() => {
   return fileURLToPath(new URL(manifest.module, pathToFileURL(manifestPath)));
 })();
 
+// The site's own package.json, whose dependencies are the only packages the
+// prerender bundle may import rather than carry (src/lib/bundled-packages.mjs).
+const siteManifest = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+
 export default defineConfig({
   site: siteUrl,
   base: basePath,
   vite: {
+    // Every package site/package.json does not list goes into the prerender
+    // bundle, as it does in a checkout with no node_modules above it, so that a
+    // node_modules in a parent directory cannot hand the pages a different
+    // copy (src/lib/bundled-packages.mjs). Astro renders the pages in an
+    // environment of its own, `prerender`, which `ssr.noExternal` does not reach.
+    environments: {
+      prerender: { resolve: { noExternal: [packagesNotListedIn(siteManifest)] } },
+    },
     resolve: {
       alias: [
         {
@@ -509,17 +523,23 @@ export default defineConfig({
     // designed, not a regression.
     concurrency: 4,
   },
+  // The plugins go to the processor itself. Astro 7 deprecates
+  // `markdown.remarkPlugins` and `markdown.rehypePlugins`: given those, it
+  // built this same `unified()` on its own and said so in every build and
+  // every type check. The plugins an integration adds still run after these.
   markdown: {
-    remarkPlugins: [remarkMath],
-    // rehypeSingleTextMath must run after rehypeKatex: it rewrites the
-    // elements KaTeX has just produced.
-    rehypePlugins: [
-      rehypeKatex,
-      rehypeSingleTextMath,
-      rehypeWrappableMath,
-      rehypeLocalMedia,
-      rehypeTableAlign,
-    ],
+    processor: unified({
+      remarkPlugins: [remarkMath],
+      // rehypeSingleTextMath must run after rehypeKatex: it rewrites the
+      // elements KaTeX has just produced.
+      rehypePlugins: [
+        rehypeKatex,
+        rehypeSingleTextMath,
+        rehypeWrappableMath,
+        rehypeLocalMedia,
+        rehypeTableAlign,
+      ],
+    }),
   },
   integrations: [
     starlight({

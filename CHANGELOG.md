@@ -2306,6 +2306,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The documentation site's type check fails on a hint, and the site has
+  none.** `pnpm run check:types` passed with 132 hints: 127 uses in
+  `site/src/content.config.ts` of zod helpers that Astro 7 and zod 4
+  deprecate (`z` imported from `astro:content`, `z.string().url()`,
+  `z.ZodIssueCode`, `.merge()`), four bindings in the site's scripts that
+  nothing read, and one read of the deprecated `webkitMaskImage`, each printed
+  with the label "warning" over a summary that counted none. They are gone,
+  and the check runs `astro check --minimumFailingSeverity hint`, so a new one
+  fails the docs workflow.
+
+- **The documentation site hands its remark and rehype plugins to the
+  Markdown processor.** `site/astro.config.mjs` set them as
+  `markdown.remarkPlugins` and `markdown.rehypePlugins`, which Astro 7
+  deprecates, so every build and every type check printed that they were
+  deprecated while Astro moved them onto a `unified()` processor of its own.
+  The config builds that processor itself now, with the same plugins in the
+  same order, and neither prints the notice.
+
+- **The sound-strength guide sets the micro prefix of 20 µPa in the formula's
+  own font.** Its check that $p_0^2 S_0 / \rho c$ is 1 pW wrote the prefix as
+  the character µ inside `\text{}`, which KaTeX has no metrics for: the page
+  took the glyph from a fallback font, and every build printed two
+  strict-mode warnings for each language. It reads `\mu\text{Pa}` now, as the
+  other formulas of the site do, in English, in Spanish and in the `docs/`
+  mirror.
+
+- **The docs workflow fails on a warning the site build prints.** The two
+  notices above rode in every build because a build that passes says nothing
+  about what it printed, and nobody reads a log of a thousand route lines.
+  The workflow keeps the output of `pnpm build`, and
+  `site/scripts/check-build-output.mjs` fails on a warning of Astro's logger,
+  a line that says something is deprecated, KaTeX's strict-mode report or a
+  Node process warning, wherever on its line it is printed. Starlight's lookup
+  of a 404 entry the site does not have is the one warning it lists as known,
+  with the reason, and an entry the build stops printing fails too. Rule F69
+  of the contributor guide states it.
+
+- **The site's audits reach the preview in a stock `node:24` container.**
+  `site/scripts/with-preview.mjs`, which runs pa11y, `check:sidebar` and
+  `check:visual` against `astro preview`, started the preview with no host and
+  polled `http://localhost`. In that container Vite listens on `::1` first
+  while Node's fetch tries `127.0.0.1` alone, so the poll was refused for two
+  minutes and no audit ran. The preview listens on `127.0.0.1` now and is
+  polled there, and the check for a server already on the port, there so that
+  an audit never reads a stale dev server in place of the build, asks both
+  loopbacks: a server on `::1` alone went unseen before. Under an AI coding
+  agent, which Astro 7 reads from the environment, `astro preview` started the
+  server as a detached process and exited, so the runner stopped a process
+  that had already ended, the server kept the port, and the next audit was
+  refused it; the runner now passes `--ignore-lock`, which keeps the preview
+  in the foreground. `pnpm run lighthouse` starts its preview the same way and
+  refuses an occupied port too.
+
+- **The documentation site builds under a directory that has a
+  `node_modules` above it.** Vite left a package out of the prerender bundle
+  whenever its name resolved from `site/`, and that lookup walks up past the
+  checkout: a home directory holding cookie 0.7.2, zod 3, yaml and picomatch
+  handed all four to a build under it, and every page then failed to render
+  with "does not provide an export named 'parseCookie'". The bundle now
+  carries every package `site/package.json` does not list, as it already did
+  in a checkout with nothing above it, so a parent directory cannot change
+  what the pages run (`site/src/lib/bundled-packages.mjs`).
+
+- **The site and the Pyodide smoke test install with pnpm 12.18.0, the
+  newest release.** Both pinned 12.10.1, so pnpm printed its notice of a newer
+  release on a contributor's machine once a day. The two pins and their
+  lockfiles, which pnpm 12 writes its own release into, now have a test that
+  holds them to one release.
+
 - **The test suite runs from a source archive.** A tree unpacked from
   GitHub's "Source code" archive, or a packager's export, has no `.git`, and
   21 tests that ask git about the repository failed there with
@@ -3098,16 +3167,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   destinations and the comments a page does not show (HTML, MDX and
   frontmatter comments), the spaced form in any other published string, and
   the spaced single hyphen after a list item's head outside code and those
-  comments, so none can come back (rule P6); it also reads the entities and
-  the escapes of the em dash (`&mdash;`, `\u2014`) as the character they
-  publish, where they are decoded: an escape in a frontmatter counts in a
-  double-quoted value only, as YAML has it. The API reference fences a code
-  directive's body and a doctest as code, under a fence longer than any run
-  of backticks the example shows, as the check reads them in the docstring.
-  The `fluids` package opens with a sentence naming humid air by IEC 61094-2
-  Annex F, sea water, ideal gases and the fluid states and nonlinearity
-  parameters books print, where its API page read "fluids domain of
-  phonometry (see module docstrings)".
+  comments, so none can come back (rule P6). It reads a page's code spans,
+  comments and addresses in one pass from left to right, as the site does, so
+  a URL or a comment opener written in a code span is code and hides no prose
+  after it, and a backtick inside a URL opens no span; it also reads the
+  entities and the escapes of the em dash (`&mdash;`, `\u2014`) as the
+  character they publish, where they are decoded: an escape in a frontmatter
+  counts in a double-quoted value only, as YAML has it. The API reference
+  fences a code directive's body and a doctest as code, under a fence longer
+  than any run of backticks the example shows, as the check reads them in the
+  docstring. The `fluids` package opens with a sentence naming humid air by
+  IEC 61094-2 Annex F, sea water, ideal gases and the fluid states and
+  nonlinearity parameters books print, where its API page read "fluids domain
+  of phonometry (see module docstrings)".
 
 - **The bundled EASA ANP tables carry EASA's terms and no condition of ours,
   and the PyOctaveBand bridge ships its licence.**

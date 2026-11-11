@@ -1451,6 +1451,101 @@ def test_a_style_attribute_is_not_prose() -> None:
     assert ced.markdown_double_hyphen_hits(text) == []
 
 
+@pytest.mark.parametrize(
+    ("text", "mdx", "hits"),
+    [
+        pytest.param("`http://x` `--y`\n", False, [], id="a URL closes no later span"),
+        pytest.param(
+            "Polled `http://localhost`. Then\nand `--ignore-lock`, which.\n",
+            False,
+            [],
+            id="nor one its paragraph wraps to",
+        ),
+        pytest.param(
+            "See `http://x` then -- here and `y`.\n",
+            False,
+            [1],
+            id="nor hides the prose after it",
+        ),
+        pytest.param(
+            "Write `<!--` then -- here and `-->`.\n", False, [1], id="a comment"
+        ),
+        pytest.param(
+            "Write `{/*` then -- here and `*/}`.\n", True, [1], id="an MDX comment"
+        ),
+        pytest.param("`<http://a` -- here `b>`\n", False, [1], id="an autolink"),
+        pytest.param('`href="` -- here `"`\n', False, [1], id="an attribute"),
+        pytest.param("Write `f[0](`--`)` here.\n", False, [1], id="a link destination"),
+        pytest.param(
+            "Run `a\n[x]: y` -- here `b`.\n", False, [2], id="a reference definition"
+        ),
+    ],
+)
+def test_what_a_code_span_holds_is_code_whatever_it_spells(
+    text: str, *, mdx: bool, hits: list[int]
+) -> None:
+    """A URL, a link destination, a comment or an attribute inside a span is code.
+
+    The site reads a line from left to right, and the construct that opens
+    first wins: a code span that opens on a backtick holds what its runs
+    enclose, whatever it spells. The guard blanked the addresses and the
+    comments of a page before it read its spans, so a URL took the backtick
+    that closed its span, and each span after it paired with the wrong run:
+    a later option (``--ignore-lock``) read as prose, and the prose between
+    two spans read as code.
+    """
+    assert ced.markdown_double_hyphen_hits(text, mdx=mdx) == hits
+
+
+@pytest.mark.parametrize(
+    ("text", "mdx", "hits"),
+    [
+        pytest.param("<http://a`b> -- here `c`\n", False, [1], id="an autolink"),
+        pytest.param("[a](/f`b) -- here `c`\n", False, [1], id="a link destination"),
+        pytest.param("http://x`y -- z `w`\n", False, [1], id="a URL"),
+        pytest.param(
+            "See http://x<!-- an -- aside --> here.\n", False, [], id="up to a `<`"
+        ),
+        pytest.param("<!-- ` --> then -- here `x`.\n", False, [1], id="a comment"),
+        pytest.param('<A href="`" /> -- here `b`\n', True, [1], id="an attribute"),
+        pytest.param(
+            "{ /* old -- wording */ }\nShown.\n", True, [], id="a spaced MDX comment"
+        ),
+        pytest.param(
+            "{ /*\nold -- wording\n\nmore -- old\n*/ }\nShown -- prose.\n",
+            True,
+            [6],
+            id="one that runs over a blank line",
+        ),
+    ],
+)
+def test_a_construct_that_opens_first_holds_its_backtick(
+    text: str, *, mdx: bool, hits: list[int]
+) -> None:
+    """An address or a comment that opens before a backtick holds it, as the site reads it.
+
+    The backtick is the URL's, the destination's, the comment's or the
+    attribute's, and opens no span that would hide the prose after it. A URL
+    ends where GFM ends a bare one, at a blank or a ``<``, so the comment after
+    it is a comment. MDX shows nothing of an expression that holds only a
+    comment, the blanks around it included.
+    """
+    assert ced.markdown_double_hyphen_hits(text, mdx=mdx) == hits
+
+
+@pytest.mark.parametrize("mdx", [False, True])
+def test_a_comment_opener_in_a_code_span_hides_no_list_item(*, mdx: bool) -> None:
+    """A code span that spells a comment's opener opens no comment.
+
+    The guard blanked a page's comments before anything else, so the opener
+    in the head of one item and the closer in the head of the next hid both
+    items, and the hyphen that joins each head to its text with them.
+    """
+    opener, closer = ("{/*", "*/}") if mdx else ("<!--", "-->")
+    text = f"* `{opener}` - the opener.\n* `{closer}` - the closer.\n"
+    assert ced.markdown_bullet_hyphen_hits(text, mdx=mdx) == [1, 2]
+
+
 def test_rules_and_an_empty_cell_are_not_dashes() -> None:
     text = "---\ntitle: A page\n---\n\n| a | b |\n|---|---|\n| x | -- |\n\n---\n"
     assert ced.markdown_double_hyphen_hits(text) == []

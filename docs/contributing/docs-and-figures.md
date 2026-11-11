@@ -1567,7 +1567,7 @@ class, its column's heading and its unit
 <a id="f65"></a>
 ### F65. Read a page's inline code spans through `scripts/markdown_spans.py`, never with a pattern of your own
 
-**Why.** A code span opens on a run of backticks and closes on the next run of exactly as many; a backslash before the opening run escapes its first backtick, and inside the span a backslash escapes nothing (CommonMark 0.31.2, 2.4 and 6.1). Nine scripts that read the prose of a page found spans with a pattern of their own, a backtick, anything but a backtick, a backtick, and each misread a span of two backticks that holds one, an escaped backtick, or a span that ends in a backslash: the prose up to the next backtick was hidden from the check, or code was checked as prose. The curated API table and the translation tables were read that way until this rule.
+**Why.** A code span opens on a run of backticks and closes on the next run of exactly as many; a backslash before the opening run escapes its first backtick, and inside the span a backslash escapes nothing (CommonMark 0.31.2, 2.4 and 6.1). Nine scripts that read the prose of a page found spans with a pattern of their own, a backtick, anything but a backtick, a backtick, and each misread a span of two backticks that holds one, an escaped backtick, or a span that ends in a backslash: the prose up to the next backtick was hidden from the check, or code was checked as prose. The curated API table and the translation tables were read that way until this rule. What a reader takes out of the prose besides its spans, a comment, a URL, a link destination or the value of an attribute, opens where it is written, and whichever of them and the spans opens first wins (CommonMark 0.31.2, 6.1): a URL in a code span is code, and a backtick inside a URL opens no span. So a reader hands them to the same pass, `comments=` for the comments a page does not show and `constructs=` for its own patterns, and takes nothing out before the spans: the em dash check blanked its URLs and comments first, a URL in a span took the backtick that closed it, and every span after it paired with the wrong run, so that an option two spans on read as prose and the prose between two spans read as code.
 
 **Do**
 
@@ -1591,7 +1591,7 @@ spans = [cell[start:end] for start, end in inline_spans(cell)]  # ['``a`b``', '`
 names = re.findall(r"`([^`]+)`", cell)  # ['a', ' and ']: the prose read as code
 ```
 
-**Enforced by:** `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py`
+**Enforced by:** `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py`, `tests/test_markdown_spans.py`, review
 
 **Exceptions.** The site's scripts read spans through `site/scripts/shared/markdown-spans.mjs`, the same reading in JavaScript. A backtick right after a colon opens a role of reStructuredText (`:math:` and its kin), which Markdown does not have, and is not read as a span. A script that reads the docstrings of the library reads reStructuredText, whose inline literal is two backticks, and one that reads a JavaScript template literal reads no span at all: each is listed in `EXEMPT` of the check, keyed by the file, with the reason, and an entry that covers nothing fails. The site's code is read line by line, without a parser, so a pattern built across lines is not seen there. The check knows a span by its opening, a backtick or a run of them written out or with a quantifier, with any white space after it, and by what it holds written as anything but a backtick or as anything at all; a pattern that takes only some characters between two backticks, a word (`\S+?`) or a file name (`[\w./-]+\.json`), reads a token that no span reader stops at, and is left alone: a pattern of that kind that is meant as a span reader is not seen. A pattern built from names bound to several strings (in two branches, to the items of a tuple, by `+=`, or by a loop or a comprehension to each item it walks), or written as a choice (`a if flag else b`, `a or b`), is read as every string it can be; one that can be more than 1024 is refused unread, never read in part. A name is read where Python binds it: a comprehension's variable stands for the items it walks inside the comprehension only, a name a `:=` in a comprehension binds stands for its value in the function around it, one declared `global` or `nonlocal` in the module or in the function that binds it, and a parameter of a lambda or a function for its default, read in the scope around it, as well as for whatever its caller passes, whatever the function or the module binds under that name; a method does not see the names of its class body.
 
@@ -1675,3 +1675,28 @@ def plot_chain_geometry(chain, ax=None, **kwargs):  # of a class that is no reco
 
 **Exceptions.** The renderer is wrapped rather than the method where the method's file is fingerprinted by the GPU proof, as `FDTD2D`'s is. A plotting class that is no record, and a `plot_*` function a public module publishes, is listed in the test with an input it is drawn from, and the test fails on one it does not list or on a published function without the decorator.
 
+
+## What the build prints
+
+<a id="f69"></a>
+### F69. Leave the site build printing no warning
+
+**Why.** A build that passes says nothing about what it printed on the way, and a log of a thousand route lines is read by nobody. Three warnings rode in every build of the site that way: Astro's notice that the Markdown plugins were set through `markdown.remarkPlugins` and `markdown.rehypePlugins`, which it deprecates; KaTeX's report, twice per language, that it had no metrics for the µ written inside `\text{}` on the sound-strength page, which therefore took its glyph from a fallback font; and Starlight's lookup of a 404 entry the site does not have, printed glued to the end of a route line. The first two were ours to fix and stayed until an audit read the log by hand. The docs workflow keeps the build's output, and `site/scripts/check-build-output.mjs` fails on a warning of Astro's logger (which Vite and the integrations log through), on a line that says something is deprecated, on KaTeX's strict-mode report and on a process warning from Node, read from where it starts to the end of its line wherever on the line it starts. Fix what it names where it is printed from: the config, the page, the script.
+
+**Do**
+
+```text
+the formula writes the micro prefix as KaTeX knows it, \mu\text{Pa}, and the
+build prints nothing about it
+```
+
+**Don't**
+
+```text
+the formula writes the character µ inside \text{}, the page builds, and every
+build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
+```
+
+**Enforced by:** `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+
+**Exceptions.** A warning the site cannot silence is listed in `KNOWN` of the check, word for word as the build prints it from where its shape starts, with the reason; an entry the build no longer prints fails, so the list empties as the fixes land upstream. Today it holds Starlight's lookup of a 404 entry (Starlight 0.42.8 with Astro 7.4.4), which a page of the site's own would silence only by adding a page and its Spanish twin to every check that reads the build. The check reads the output of `pnpm build` alone: `pnpm install` and the checks after the build are not read. A warning printed in a shape the check does not know is not seen; a new shape is added to `WARNINGS` with a test.

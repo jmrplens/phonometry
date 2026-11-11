@@ -203,7 +203,7 @@ The library prints what the standard prints. A version that quietly used
 
 Both closed forms also hold at a characteristic impedance of exactly
 400 N·s·m⁻³, which is the value that makes the reference quantities
-consistent: $p_0^2 S_0 / \rho c = (20\ \text{µPa})^2 / 400 = 1$ pW, the
+consistent: $p_0^2 S_0 / \rho c = (20\ \mu\text{Pa})^2 / 400 = 1$ pW, the
 reference sound power. Neither equation prints that caveat. Air at 20 °C
 and 101.325 kPa is nearer 413 N·s·m⁻³, worth 0.14 dB, an order of
 magnitude more than either rounding. The offsets are a convention of the

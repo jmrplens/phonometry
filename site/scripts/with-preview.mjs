@@ -7,8 +7,15 @@
 // the wait is as long as it needs to be and no longer, and it stops the preview
 // on every exit path rather than only the ordinary one.
 //
+// The preview is pinned to the IPv4 loopback and polled there, it is kept in
+// the foreground so that it stops with this runner, and a server already on
+// the port is looked for on both loopbacks (shared/preview.mjs says why): the
+// audits still open http://localhost:<port>.
+//
 // Usage: node scripts/with-preview.mjs [--port 4321] -- <command...>
 import { spawn } from 'node:child_process';
+
+import { PREVIEW_HOST, previewArgs, servedLoopback } from './shared/preview.mjs';
 
 const argv = process.argv.slice(2);
 const split = argv.indexOf('--');
@@ -32,19 +39,19 @@ const POLL_MS = 300;
 // a convenience: `astro preview` would fail to bind and exit, the poll below
 // would be answered by whatever is there, and the audit would report on a
 // different site. A dev server left open on the default port is exactly how
-// that happens.
-try {
-  await fetch(`http://localhost:${port}/`, { signal: AbortSignal.timeout(2000) });
+// that happens. The preview binds only the IPv4 loopback, so a server on the
+// IPv6 one would not stop it from starting, and a browser opening `localhost`
+// could still be served by that server: both are asked.
+const served = await servedLoopback(port);
+if (served !== null) {
   console.error(
-    `with-preview: something is already serving on port ${port}. Stop it, or ` +
+    `with-preview: something is already serving on ${served}:${port}. Stop it, or ` +
       `pass --port with a free one, so the audit reads this build and not that.`,
   );
   process.exit(1);
-} catch {
-  // Nothing listening, which is what we want.
 }
 
-const preview = spawn('./node_modules/.bin/astro', ['preview', '--port', port], {
+const preview = spawn('./node_modules/.bin/astro', previewArgs(port), {
   stdio: ['ignore', 'inherit', 'inherit'],
 });
 
@@ -80,7 +87,7 @@ async function waitForReady(origin) {
 }
 
 try {
-  await waitForReady(`http://localhost:${port}/`);
+  await waitForReady(`http://${PREVIEW_HOST}:${port}/`);
 } catch (error) {
   console.error(`with-preview: ${error.message}`);
   stop();

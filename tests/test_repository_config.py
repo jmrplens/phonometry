@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import builtins
 import io
+import json
 import os
 import pathlib
 import re
@@ -542,6 +543,87 @@ def _names_a_builtin_warning(category: str) -> bool:
         return True
     found = None if "." in category else getattr(builtins, category, None)
     return isinstance(found, type) and issubclass(found, Warning)
+
+
+#: The directories whose package.json pins the pnpm corepack installs: the
+#: documentation site and the Pyodide smoke test.
+_PNPM_PROJECTS = ("site", "tests/pyodide")
+
+#: A corepack pin: a pnpm release and the SHA-512 of its tarball, in hex.
+_PNPM_PIN = re.compile(r"pnpm@(?P<version>\d+\.\d+\.\d+)\+sha512\.[0-9a-f]{128}")
+
+
+def _pnpm_pin_problems(root: pathlib.Path) -> list[str]:
+    """What disagrees among the pnpm pins of the projects under ``root``.
+
+    Each project's ``packageManager`` has to be a release with its hash, its
+    lockfile has to record the same release (pnpm 12 writes the pnpm it
+    installs into ``packageManagerDependencies``), and every project has to
+    pin the same one.
+    """
+    problems: list[str] = []
+    versions: dict[str, str] = {}
+    for project in _PNPM_PROJECTS:
+        manifest = json.loads(
+            (root / project / "package.json").read_text(encoding="utf-8")
+        )
+        pin = str(manifest.get("packageManager", ""))
+        match = _PNPM_PIN.fullmatch(pin)
+        if match is None:
+            problems.append(
+                f"{project}/package.json pins {pin!r}, not pnpm@<release>+sha512.<hex>"
+            )
+            continue
+        versions[project] = match["version"]
+        lockfile = (root / project / "pnpm-lock.yaml").read_text(encoding="utf-8")
+        locked = {
+            str(
+                document["importers"]["."]["packageManagerDependencies"]["pnpm"][
+                    "version"
+                ]
+            )
+            for document in yaml.safe_load_all(lockfile)
+            if isinstance(document, dict)
+            and "packageManagerDependencies"
+            in document.get("importers", {}).get(".", {})
+        }
+        if locked != {match["version"]}:
+            problems.append(
+                f"{project}/pnpm-lock.yaml records pnpm {sorted(locked)}, its package.json "
+                f"pins {match['version']}; run pnpm install --lockfile-only there"
+            )
+    if len(set(versions.values())) > 1:
+        problems.append(f"the projects pin different pnpm releases: {versions}")
+    return problems
+
+
+def test_every_project_pins_one_pnpm_and_locks_the_one_it_pins() -> None:
+    """The site and the Pyodide smoke test install with one pnpm release.
+
+    The two pins were moved by hand, together, each time; nothing held them
+    together or to their lockfiles, and pnpm 12 records its own release in the
+    lockfile beside the dependencies, so a pin moved without the lockfile it
+    goes with leaves the two disagreeing about the pnpm a frozen install runs.
+    """
+    problems = _pnpm_pin_problems(_ROOT)
+    assert problems == [], problems
+
+
+def test_the_pnpm_pin_check_sees_a_pin_moved_alone(tmp_path: pathlib.Path) -> None:
+    """A pin moved in one project, or without its lockfile, is reported."""
+    for project in _PNPM_PROJECTS:
+        (tmp_path / project).mkdir(parents=True)
+        for name in ("package.json", "pnpm-lock.yaml"):
+            shutil.copyfile(_ROOT / project / name, tmp_path / project / name)
+    manifest_path = tmp_path / "site" / "package.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["packageManager"] = "pnpm@99.0.0+sha512." + "0" * 128
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    problems = _pnpm_pin_problems(tmp_path)
+    assert any("site/pnpm-lock.yaml records pnpm" in problem for problem in problems), (
+        problems
+    )
+    assert any("different pnpm releases" in problem for problem in problems), problems
 
 
 def test_the_pytest_configuration_filters_warnings_by_builtin_class() -> None:

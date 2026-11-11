@@ -9,7 +9,25 @@ references:
     edition: "6.ª ed."
     publisher: "CRC Press"
     doi: "10.1201/9781315372150"
-    note: "La teoría estadística del decaimiento que sustenta la integración inversa y las relaciones de Sabine usadas a lo largo de esta página."
+    note: "La teoría estadística del decaimiento que sustenta la integración inversa y las relaciones de Sabine usadas a lo largo de esta página, la construcción por fuentes imagen (apartado 4.1) y la respuesta al impulso que suma (apartado 4.2), la reverberación de Eyring (apartado 5.4), la distancia de reverberación (apartado 5.6) y la frecuencia de Schroeder (apartado 3.6)."
+  - type: book
+    authors: ["Vorländer, M."]
+    year: 2020
+    title: "Auralization: Fundamentals of acoustics, modelling, simulation, algorithms and acoustic virtual reality"
+    edition: "2.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-030-51202-6"
+    note: "El modelo de fuentes especulares de la subsección de fuentes imagen (capítulo 11), con sus expresiones de la imagen especular y del factor de reflexión (Ecs. 11.36 y 11.39)."
+  - type: article
+    authors: ["Allen, J. B.", "Berkley, D. A."]
+    year: 1979
+    title: "Image method for efficiently simulating small-room acoustics"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 65
+    issue: 4
+    pages: "943-950"
+    doi: "10.1121/1.382599"
+    note: "La descomposición del recuento de reflexiones de la retícula de imágenes de la sala rectangular."
   - type: article
     authors: ["Schroeder, M. R."]
     year: 1965
@@ -205,7 +223,7 @@ references:
     edition: "5.ª ed."
     publisher: "CRC Press"
     doi: "10.1201/9781351228152"
-    note: "ISBN 978-1-138-30690-5. Las ecuaciones de ley de masas, coincidencia, pared doble y partición compuesta (7.3, 7.40, 7.44, 7.62, 7.64) de la subsección de predicción de paneles."
+    note: "ISBN 978-1-138-30690-5. El campo estacionario de sala y la constante de sala (apartado 6.4, Ecs. 6.43 y 6.44), y las ecuaciones de ley de masas, coincidencia, pared doble y partición compuesta (7.3, 7.40, 7.44, 7.62, 7.64) de la subsección de predicción de paneles."
   - type: book
     authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
     year: 2005
@@ -220,20 +238,23 @@ sidebar:
 
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
-Esta página reúne la teoría de salas y edificación: la medición de respuestas al impulso y los parámetros de acústica de salas, los criterios de ruido de fondo, el aislamiento a ruido aéreo y a impactos con sus índices globales y su incertidumbre, y la predicción de flancos y de absorción. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/); la dispersión superficial y la caracterización de materiales acústicos están en [Materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
+Esta página reúne la teoría de salas y edificación: la medición de respuestas al impulso y los parámetros de acústica de salas, los modelos de fuentes imagen y de campo estacionario del campo acústico de una sala, los criterios de ruido de fondo, el aislamiento a ruido aéreo y a impactos con sus índices globales y su incertidumbre, y la predicción de flancos y de absorción. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/); la dispersión superficial y la caracterización de materiales acústicos están en [Materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
 
-Cada sección conserva la notación de su propia norma, y cuatro letras llevan más
+Cada sección conserva la notación de su propia norma, y cinco letras llevan más
 de un significado entre ellas:
 
 | Símbolo | Significado | Dónde |
 | :--- | :--- | :--- |
 | $A$ | Área de absorción equivalente, m² ($A_0 = 10$ m² de referencia, $A_\mathrm{T}$ de la probeta, $A_\mathrm{obj}$, $A_\mathrm{air}$) | en toda la página |
-| $m$ | Coeficiente de atenuación en potencia del aire, 1/m | ISO 354 y EN 12354-6 |
+| $m$ | Coeficiente de atenuación en potencia del aire, 1/m | fuentes imagen, ISO 354 y EN 12354-6 |
 | $m$ | Número de mediciones repetidas | solo en la incertidumbre de ISO 12999-1 |
 | $m'$ / $m''$ | Masa por unidad de superficie, kg/m²: EN 12354 escribe $m'$ y la literatura de predicción de paneles $m''$ | flancos y predicción de paneles |
 | $C$ | Claridad, dB (con subíndice 50 u 80) | parámetros de ISO 3382-1 |
 | $C$ | Curvatura del decaimiento, % | validez de ISO 3382-2 |
 | $C$, $C_\mathrm{tr}$ | Términos de adaptación espectral, dB | índices de ISO 717 |
+| $R$ | Constante de sala, m² | campo estacionario de sala |
+| $R_q$ | Factor de reflexión de presión de la pared $q$ | fuentes imagen |
+| $R$, $R'$ | Índice de reducción acústica, dB ($R_\mathrm{w}$ ponderado, $R'$ aparente) | secciones de aislamiento |
 | $T$ | Tiempo de reverberación, s ($T_\mathrm{S}$ es el tiempo central) | en toda la página |
 
 ## Criterios de ruido de salas (ANSI S12.2)
@@ -415,6 +436,54 @@ duplicación y en $r = 4$ m para $L_{p,\mathrm{A,S},4\,\mathrm{m}}$. La recta de
 ajusta frente a $r$ mismo, de forma **lineal**, y se lee donde cruza 0,50 y
 0,20 para las distancias de distracción y de privacidad. Si ese segundo ajuste
 sale plano o creciente, las dos distancias no existen, no es que sean grandes.*
+
+<span id="campo-acustico-de-la-sala-predicho-kuttruff-vorlander-bies"></span>
+
+## Campo acústico de la sala, predicho (Kuttruff, Vorländer, Bies)
+
+<span id="respuesta-al-impulso-de-una-sala-por-fuentes-imagen-kuttruff-41-vorlander-11"></span>
+
+### Respuesta al impulso de una sala por fuentes imagen (Kuttruff 4.1, Vorländer 11)
+
+Una sala rectangular refleja una fuente puntual en sus paredes, y cada reflexión equivale al sonido en campo libre de una **imagen especular** de la fuente. Reflejar la posición de la fuente $S$ en una pared situada a una distancia $d$ y de normal unitaria $\mathbf{n}$ ($S_n = S - 2 d\,\mathbf{n}$, Vorländer Ec. 11.36) convierte la fuente en una retícula regular de imágenes, y la respuesta al impulso de la sala es la suma del sonido directo y un impulso retardado y atenuado por imagen (Kuttruff Ecs. 4.4–4.5),
+
+$$
+g(t) = \sum_n A_n\ \delta(t - t_n), \qquad
+A_n = \frac{1}{4\pi r_n}\ \mathrm{e}^{-m r_n / 2} \prod_{\text{paredes}} R_q^{\,k_{q,n}}, \qquad
+t_n = \frac{r_n}{c},
+$$
+
+con la divergencia esférica $1/(4\pi r_n)$, el producto de los **factores de reflexión de presión** de las paredes $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Ec. 11.39; $|R|^2 = 1-\alpha$ en energía), cada uno elevado al número de reflexiones $k_{q,n}$ que esa imagen hizo en la pared $q$, y la atenuación de la presión en el aire $\mathrm{e}^{-m r_n/2}$ ($m$ el coeficiente de atenuación en potencia de la tabla de arriba, de modo que la intensidad cae como $\mathrm{e}^{-m r}$ y la presión como $\mathrm{e}^{-m r/2}$). A lo largo de un eje, los recuentos de reflexiones de la imagen de índice de retícula $n$ y paridad $p$ son $|n-p|$ y $|n|$ en las dos paredes (Allen y Berkley, 1979), así que el orden total es $\sum_i |2 n_i - p_i|$; una caja de zapatos tiene $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ imágenes audibles hasta el orden $i_0$ (Kuttruff Ec. 9.23), y la densidad de reflexiones crece como $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Ec. 4.6).
+
+La tasa de decaimiento inicial de la energía reverberante especular reproduce el tiempo de reverberación de **Eyring** $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Ec. 5.23), con $S$ aquí el área total del contorno, porque la tasa media de reflexiones $cS/4V$ es igual a $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. La coincidencia solo es estrecha cerca de la geometría cúbica; una sala alargada sostiene la energía a lo largo de su eje largo, así que el decaimiento especular puro es más lento que la estimación de campo difuso de Eyring (la anisotropía que corrigen los modelos de Fitzroy y Arau-Puchades). El modelo es solo especular (sin difracción ni difusión) y exacto solo para factores de reflexión reales e independientes del ángulo.
+
+### Campo estacionario de sala (Bies 6.4, Kuttruff 5.6)
+
+Una fuente de potencia constante establece un nivel estacionario formado por un campo directo que cae con la distancia y un campo **reverberante** difuso que es (aproximadamente) uniforme. Con la **constante de sala** $R = S\bar\alpha/(1-\bar\alpha)$ (Bies Ec. 6.44), en la que $S$ es el área total del contorno y $\bar\alpha$ su coeficiente de absorción medio, y con el factor de directividad $Q$,
+
+$$
+L_p = L_W + 10 \log_{10}\!\left( \frac{Q}{4\pi r^2} + \frac{4}{R} \right) \left[ + 10 \log_{10}\frac{\rho c}{400} \right] \quad \text{(Bies Ec. 6.43)},
+$$
+
+donde el último término, opcional, corrige una impedancia característica $\rho c$ distinta de 400 Pa·s/m. En aire a 20 °C, 101,325 kPa y 50 % de humedad relativa suma 0,13 dB:
+
+```python
+from phonometry import fluids, room
+
+air = fluids.air(
+    temperature_c=20.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0
+)
+rho_c = air.characteristic_impedance  # Pa·s/m
+plain = room.steady_state_spl(90.0, 2.0, room_constant=50.0)
+corrected = room.steady_state_spl(
+    90.0, 2.0, room_constant=50.0, characteristic_impedance=rho_c
+)
+print(round(rho_c, 1), round(corrected - plain, 2))  # 412.5 0.13
+```
+
+La **distancia crítica** $r_\mathrm{c} = \sqrt{Q R / 16\pi}$ es donde se cruzan los dos campos; la distancia de reverberación de Kuttruff (Ec. 5.44, $r_\mathrm{c} = \sqrt{A/16\pi}$ para $Q=1$) usa el área de Sabine $A = S\bar\alpha$ en lugar de $R = A/(1-\bar\alpha)$, y ambas coinciden para $\bar\alpha$ pequeño. La **frecuencia de Schroeder** $f_\mathrm{s} = 2000\sqrt{T/V}$ (Kuttruff Ec. 3.44) marca aproximadamente la transición del régimen modal al difuso, un cruce heurístico y no un corte abrupto: bastante por debajo dominan los modos discretos de la sala y estas relaciones de campo difuso pierden fiabilidad; bastante por encima los modos se solapan y las relaciones se cumplen. En salas límite conviene comprobar banda a banda.
+
+Consulta la guía [Fuentes imagen y campo estacionario de sala](/phonometry/es/buildings/rooms/room-image-sources/) para su uso.
 
 <span id="aislamiento-acustico-y-absorcion-medidos-iso-16283-iso-10140-iso-717-iso-354"></span>
 

@@ -9,7 +9,7 @@ references:
     edition: "6th ed."
     publisher: "CRC Press"
     doi: "10.1201/9781315372150"
-    note: "The image-source construction (§4.1), the Eyring reverberation and reverberation distance (§5.5–5.6) and the Schroeder frequency (§3.6) of this page."
+    note: "The image-source construction (§4.1), the impulse response it sums and the rate of its reflections (§4.2, Equations (4.4) to (4.6)), the Eyring reverberation (§5.4, Equation (5.23)), the reverberation distance (§5.6, Equation (5.44)), the Schroeder frequency (§3.6, Equation (3.44)) and the audible image count (§9.8, Equation (9.23)) of this page."
   - type: book
     authors: ["Vorländer, M."]
     year: 2020
@@ -17,7 +17,7 @@ references:
     edition: "2nd ed."
     publisher: "Springer"
     doi: "10.1007/978-3-030-51202-6"
-    note: "The mirror-source model of §1 (Chapter 11), with the reflection-factor and delay expressions."
+    note: "The mirror-source model of §1 (Chapter 11), with the image positions, delay and reflection-factor expressions of Equations (11.36), (11.38) and (11.39)."
   - type: article
     authors: ["Allen, J. B.", "Berkley, D. A."]
     year: 1979
@@ -35,7 +35,7 @@ references:
     edition: "5th ed."
     publisher: "CRC Press"
     doi: "10.1201/9781351228152"
-    note: "The steady-state room field and the room constant of §2 (§6.4)."
+    note: "The steady-state room field and the room constant of §2 (§6.4, Equations (6.43) and (6.44))."
   - type: book
     authors: ["Long, M."]
     year: 2014
@@ -90,7 +90,11 @@ attenuation coefficient in reciprocal metres of ISO 354 8.1.2.1, so intensity fa
 pressure as $\mathrm{e}^{-m r/2}$: the same $m$ the
 [reverberation-time](/phonometry/buildings/rooms/reverberation-prediction/) and
 [EN 12354-6](/phonometry/buildings/rooms/enclosed-space-absorption/) guides feed
-to their $4mV$ terms). A shoebox has exactly
+to their $4mV$ terms). Along one axis the reflection count off the two walls of
+an image at lattice index $n$ and mirror parity $p$ is $|n - p|$ (wall at 0) and
+$|n|$ (wall at $L$), so the image's total reflection order is
+$|2 n_x - p_x| + |2 n_y - p_y| + |2 n_z - p_z|$ (Allen & Berkley 1979). A
+shoebox has exactly
 $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to reflection order
 $i_0$ (1560 at order 10), and the reflection density grows as
 $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$.
@@ -656,7 +660,11 @@ Sabine absorption area $A = S\bar\alpha$ rather than the room constant
 $R = A/(1-\bar\alpha)$; the two coincide for a small $\bar\alpha$, and this
 module uses $R$ so that $r_\mathrm{c}$ is exactly the crossover of its own
 `steady_state_spl`. Pass `characteristic_impedance=rho_c` to add the Bies
-$10\log_{10}(\rho c / 400)$ term (about +0.14 dB at 20 °C).
+$10\log_{10}(\rho c / 400)$ term, which corrects the level for a characteristic
+impedance other than 400 Pa·s/m (0.13 dB in air at 20 °C and 50 % relative
+humidity, as the
+[theory page computes](/phonometry/reference/theory/rooms-buildings/#steady-state-room-field-bies-64-kuttruff-56));
+by default it is left out.
 
 **Where the statistics fade.** The **Schroeder frequency**
 $f_\mathrm{s} = 2000\sqrt{T/V}$ ($V$ in m³, $T$ in s) roughly marks the modal-to-diffuse

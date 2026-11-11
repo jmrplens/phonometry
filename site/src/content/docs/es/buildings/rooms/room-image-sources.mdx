@@ -9,7 +9,7 @@ references:
     edition: "6.ª ed."
     publisher: "CRC Press"
     doi: "10.1201/9781315372150"
-    note: "La construcción por fuentes imagen (§4.1), la reverberación de Eyring y la distancia de reverberación (§5.5–5.6) y la frecuencia de Schroeder (§3.6) de esta página."
+    note: "La construcción por fuentes imagen (§4.1), la respuesta al impulso que suma y la tasa de sus reflexiones (§4.2, ecuaciones (4.4) a (4.6)), la reverberación de Eyring (§5.4, ecuación (5.23)), la distancia de reverberación (§5.6, ecuación (5.44)), la frecuencia de Schroeder (§3.6, ecuación (3.44)) y el recuento de imágenes audibles (§9.8, ecuación (9.23)) de esta página."
   - type: book
     authors: ["Vorländer, M."]
     year: 2020
@@ -17,7 +17,7 @@ references:
     edition: "2.ª ed."
     publisher: "Springer"
     doi: "10.1007/978-3-030-51202-6"
-    note: "El modelo de fuentes especulares del §1 (capítulo 11), con las expresiones de factor de reflexión y retardo."
+    note: "El modelo de fuentes especulares del §1 (capítulo 11), con las expresiones de la posición de las imágenes, el retardo y el factor de reflexión de las ecuaciones (11.36), (11.38) y (11.39)."
   - type: article
     authors: ["Allen, J. B.", "Berkley, D. A."]
     year: 1979
@@ -35,7 +35,7 @@ references:
     edition: "5.ª ed."
     publisher: "CRC Press"
     doi: "10.1201/9781351228152"
-    note: "El campo estacionario de sala y la constante de sala del §2 (§6.4)."
+    note: "El campo estacionario de sala y la constante de sala del §2 (§6.4, ecuaciones (6.43) y (6.44))."
   - type: book
     authors: ["Long, M."]
     year: 2014
@@ -91,7 +91,11 @@ que la intensidad cae como $\mathrm{e}^{-m r}$ y la presión como $\mathrm{e}^{-
 que las guías de
 [tiempo de reverberación](/phonometry/es/buildings/rooms/reverberation-prediction/)
 y de [EN 12354-6](/phonometry/es/buildings/rooms/enclosed-space-absorption/)
-entregan a sus términos $4mV$). Una caja de zapatos tiene exactamente
+entregan a sus términos $4mV$). A lo largo de un eje, el número de reflexiones
+en las dos paredes de una imagen de índice de retícula $n$ y paridad especular
+$p$ es $|n - p|$ (pared en 0) y $|n|$ (pared en $L$), de modo que el orden total
+de reflexión de la imagen es $|2 n_x - p_x| + |2 n_y - p_y| + |2 n_z - p_z|$
+(Allen y Berkley 1979). Una caja de zapatos tiene exactamente
 $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ imágenes audibles hasta el orden de
 reflexión $i_0$ (1560 en el orden 10), y la densidad de reflexiones crece como
 $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$.
@@ -671,7 +675,11 @@ usa el área de absorción de Sabine $A = S\bar\alpha$ en lugar de la constante 
 sala $R = A/(1-\bar\alpha)$; ambas coinciden para $\bar\alpha$ pequeño, y este
 módulo usa $R$ de modo que $r_\mathrm{c}$ es exactamente el cruce de su propio
 `steady_state_spl`. Pasa `characteristic_impedance=rho_c` para añadir el término
-$10\log_{10}(\rho c / 400)$ de Bies (unos +0,14 dB a 20 °C).
+$10\log_{10}(\rho c / 400)$ de Bies, que corrige el nivel para una impedancia
+característica distinta de 400 Pa·s/m (0,13 dB en aire a 20 °C y 50 % de
+humedad relativa, como
+[calcula la página de teoría](/phonometry/es/reference/theory/rooms-buildings/#campo-estacionario-de-sala-bies-64-kuttruff-56));
+por defecto no se aplica.
 
 **Dónde se difumina la estadística.** La **frecuencia de Schroeder**
 $f_\mathrm{s} = 2000\sqrt{T/V}$ ($V$ en m³, $T$ en s) marca aproximadamente la transición

@@ -238,8 +238,10 @@ $$
 
 with the source directivity factor $Q$ (1 omnidirectional, 2 on a hard floor,
 4 in an edge, 8 in a corner). The optional $10 \log_{10}(\rho c / 400)$ term
-(about +0.14 dB at 20 °C) corrects for a characteristic impedance differing
-from 400 Pa·s/m and is omitted by default. The **critical distance**
+(0.13 dB in air at 20 °C and 50 % relative humidity, as the
+[theory page computes](../../reference/theory/rooms-buildings.md#steady-state-room-field-bies-64-kuttruff-56))
+corrects for a characteristic impedance differing from 400 Pa·s/m and is
+omitted by default. The **critical distance**
 
 $$
 r_\mathrm{c} = \sqrt{Q R / (16 \pi)}
@@ -524,9 +526,10 @@ dimension ratios are discussed, not tabulated.
 
 - Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
   [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  Section 4.1 (image sources, Equations (4.4)–(4.6)), Section 5.5–5.6
-  (Eyring reverberation, reverberation distance, Equations (5.23), (5.44)),
-  Section 3.6 (Schroeder frequency, Equation (3.44)) and Section 9.8 (audible
+  Section 4.1 (image sources), Section 4.2 (the impulse response they sum and
+  the rate of its reflections, Equations (4.4)–(4.6)), Section 5.4 (Eyring
+  reverberation, Equation (5.23)), Section 5.6 (reverberation distance,
+  Equation (5.44)), Section 3.6 (Schroeder frequency, Equation (3.44)) and Section 9.8 (audible
   image count, Equation (9.23)).
 - Vorländer, M. (2020). *Auralization: Fundamentals of acoustics, modelling,
   simulation, algorithms and acoustic virtual reality* (2nd ed.). Springer.

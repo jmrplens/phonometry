@@ -200,13 +200,22 @@ def remote_command(entry: HostEntry, request: Compute, *, loader: bool = False) 
     image = shlex.join([entry.target, *program])
     # The user and the cache are the node's: the shell there expands them. The
     # cache is where the bootstrap looks for it: XDG's, which ignores a
-    # relative XDG_CACHE_HOME, else ~/.cache.
+    # relative XDG_CACHE_HOME, else ~/.cache. A daemon run by root runs the
+    # container as the node's user, so that what it writes in the cache is
+    # the user's. A daemon run by that user (rootless Docker, which lists
+    # name=rootless among its security options, or Podman, whose host says
+    # "rootless":true) already runs the container's root as the user and maps
+    # any other uid, the user's own among them, to one of its subordinate
+    # ids, which cannot write the cache: there the container keeps its root.
     script = (
         'case "$XDG_CACHE_HOME" in /*) base="$XDG_CACHE_HOME" ;; '
         '*) base="$HOME/.cache" ;; esac && '
         'cache="$base/phonometry/remote" && '
         'mkdir -p "$cache" && '
-        f'exec {shlex.join(docker)} --user "$(id -u):$(id -g)" -v "$cache:/cache" {image}'
+        "case \"$(docker info --format '{{json .}}' 2>/dev/null)\" in "
+        "*name=rootless*|*'\"rootless\":true'*) user= ;; "
+        '*) user="--user=$(id -u):$(id -g)" ;; esac && '
+        f'exec {shlex.join(docker)} $user -v "$cache:/cache" {image}'
     )
     return shlex.join(["sh", "-c", script])
 

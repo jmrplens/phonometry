@@ -232,6 +232,16 @@ contenedor que lea y escriba todos los ficheros de la máquina, como advierte
 la propia documentación de Docker. El propietario del nodo solo añade a ese
 grupo una cuenta SSH a la que ya le confía la máquina entera.
 
+Un nodo puede ejecutar en su lugar Docker sin root (rootless), o Podman tras
+una orden `docker`. Ese demonio se ejecuta como tu usuario, no necesita el
+grupo `docker` y ejecuta el root del contenedor como tú, mientras que
+cualquier otro identificador de usuario dentro, el tuyo incluido, pasa a ser
+uno de sus identificadores subordinados, que no puede escribir en la caché:
+el cliente pregunta al demonio, con `docker info`, de qué tipo es, y en uno
+que se ejecuta como tú arranca el contenedor sin `--user`. La orden `docker`
+de una sesión SSH no interactiva tiene que llegar a ese demonio, lo que hace
+un contexto fijado con `docker context use`.
+
 La imagen se construye en el nodo, desde una copia del repositorio en tu
 máquina:
 

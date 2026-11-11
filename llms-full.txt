@@ -73955,6 +73955,15 @@ and writes every file of the machine, as Docker's own documentation warns.
 The node's owner gives that membership only to an SSH account already
 trusted with the whole machine.
 
+A node may run Docker without root instead (rootless Docker), or Podman behind
+a `docker` command. Such a daemon runs as your user, needs no `docker` group,
+and runs the container's root as you, while any other user id inside, yours
+among them, becomes one of its subordinate ids, which cannot write the cache:
+the client asks the daemon, through `docker info`, which kind it is, and on
+one run by you starts the container without `--user`. The `docker` command of
+a non-interactive SSH session has to reach that daemon, which a context set
+with `docker context use` does.
+
 The image is built on the node, from a checkout of the repository on your
 machine:
 

@@ -67,7 +67,7 @@ test('the text a page prints as it is reads the same in its copy, on every page'
     const items = [...shown.html.matchAll(/<li>([^]*?)<\/li>/gu)].map((item) => oneLine(decodeReferences(withoutTags(item[1]))));
     for (const [index, [, work]] of sortedReferences(references, lang).entries()) {
       const note = work.note ? ` ${noteParts(work.note).map((part) => part.text).join('')}` : '';
-      const expected = oneLine(`${opening(work, lang)}${citationParts(work).map((part) => part.text).join('')}${note}`);
+      const expected = oneLine(`${opening(work, lang)}${citationParts(work, lang).map((part) => part.text).join('')}${note}`);
       read += 1;
       if (items[index] !== expected) misread.push(`${path}: the work ${JSON.stringify(expected)} prints as ${JSON.stringify(items[index])}`);
     }

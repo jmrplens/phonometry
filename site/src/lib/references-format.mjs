@@ -10,6 +10,10 @@
  * that drifted from the first; so the wording lives here once, and each of
  * the two only decides how a fragment is marked up.
  *
+ * A data set is cited as APA 7 cites one: its title, then the bracketed
+ * description `[Data set]` (`[Conjunto de datos]` in the Spanish adaptation),
+ * then the repository that publishes it as the source.
+ *
  * Three deliberate departures from strict APA 7, and nothing else:
  *  - a standard prints its designation alone, `(IEC 61672-1:2013)`, rather than
  *    APA's `(IEC Standard No. 61672-1:2013)`, because the designation is how
@@ -33,7 +37,7 @@
  * src/content.config.ts defines it, narrowed to what is printed.
  *
  * @typedef {object} Reference
- * @property {'standard' | 'book' | 'report' | 'web' | 'article'} type
+ * @property {'standard' | 'book' | 'report' | 'web' | 'article' | 'dataset'} type
  * @property {string} title
  * @property {string[]} [authors]
  * @property {string} [organization]
@@ -41,7 +45,9 @@
  * @property {string} [designation]  A standard's.
  * @property {string} [edition]  A book's.
  * @property {string} [number]  A report's.
- * @property {string} [publisher]
+ * @property {string} [publisher]  A book's, a data set's repository, or a
+ *   standard's when it differs from the organization.
+ * @property {string} [license]  A data set's, as the address of its text.
  * @property {string} [institution]
  * @property {string} [siteName]
  * @property {string} [journal]
@@ -126,6 +132,19 @@ export function titleSuffix(ref) {
 }
 
 /**
+ * The bracketed description APA 7 sets after the title of a work that is not
+ * a text, in the page's language, or undefined for one that needs none.
+ *
+ * @param {Reference} ref
+ * @param {string} lang
+ * @returns {string | undefined}
+ */
+export function bracketDescription(ref, lang) {
+  if (ref.type === 'dataset') return isSpanish(lang) ? 'Conjunto de datos' : 'Data set';
+  return undefined;
+}
+
+/**
  * The source segment after the title: publisher, journal locator or site.
  *
  * @param {Reference} ref
@@ -134,6 +153,7 @@ export function titleSuffix(ref) {
 export function sourceParts(ref) {
   switch (ref.type) {
     case 'book':
+    case 'dataset':
       return [{ text: ref.publisher ?? '' }];
     case 'standard':
       // APA omits the publisher when it repeats the authoring organization.
@@ -177,9 +197,11 @@ export function opening(ref, lang) {
  * The rest of the citation as fragments, APA-7 punctuation included.
  *
  * @param {Reference} ref
+ * @param {string} lang The language of the page that prints it, which words
+ *   the bracketed description of a data set.
  * @returns {Part[]}
  */
-export function citationParts(ref) {
+export function citationParts(ref, lang) {
   /** @type {Part[]} */
   const parts = [];
   /** @type {'cite' | undefined} */
@@ -189,6 +211,8 @@ export function citationParts(ref) {
   parts.push({ text: ref.title, italic: italicTitle, href: ref.url });
   const suffix = titleSuffix(ref);
   if (suffix) parts.push({ text: ` (${suffix})` });
+  const description = bracketDescription(ref, lang);
+  if (description) parts.push({ text: ` [${description}]` });
   parts.push({ text: '. ' });
 
   const source = sourceParts(ref);

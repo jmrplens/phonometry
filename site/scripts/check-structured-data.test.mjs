@@ -115,6 +115,20 @@ const book = (url) => ({
 	author: [{ '@type': 'Person', name: 'Roe, R.' }],
 	publisher: { '@type': 'Organization', name: 'A Press' },
 });
+/**
+ * A data set with no DOI, cited by its publisher's address: citations.mjs keys
+ * it on its type, creator, year and title, and gives it the licence of its own
+ * that a page's stub carries too.
+ */
+const dataset = (url) => ({
+	'@id': `${url}#dataset-a-council-2017-a-year-of-levels`,
+	'@type': 'Dataset',
+	name: 'A year of levels',
+	url: 'https://data.example.org/dataset/a-year-of-levels',
+	creator: { '@type': 'Organization', name: 'A Council' },
+	publisher: { '@type': 'Organization', name: 'An open data portal' },
+	license: 'https://creativecommons.org/licenses/by/4.0/',
+});
 const law = (url) => ({
 	'@id': `${url}#std-ley-37-2003`,
 	'@type': 'CreativeWork',
@@ -129,7 +143,7 @@ const law = (url) => ({
 /** What a page says of a work at its first reference (citations.mjs, `STUB_FIELDS`). */
 const stub = (node) =>
 	Object.fromEntries(
-		['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs']
+		['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs', 'license']
 			.filter((key) => node[key] !== undefined)
 			.map((key) => [key, node[key]]),
 	);
@@ -256,7 +270,7 @@ function build({ pages = 4, base: extra = {}, ...options } = {}) {
 	]) {
 		const iso1 = standard(url, 'ISO 1:2000', 1);
 		const iso2 = standard(url, 'ISO 2:2010', 2);
-		const works = [iso1, iso2, book(url), law(url)];
+		const works = [iso1, iso2, book(url), law(url), dataset(url)];
 		if (lang === 'es') {
 			for (const work of works.filter((node) => node.genre === 'Technical standard')) {
 				work.sameAs = work['@id'].replace(ES, EN);
@@ -269,7 +283,7 @@ function build({ pages = 4, base: extra = {}, ...options } = {}) {
 
 		base[`${lang}/guide`] = page(GUIDE, lang, {
 			isBasedOn: [stub(iso1)],
-			citation: [{ '@id': iso1['@id'] }, stub(iso2), stub(book(url))],
+			citation: [{ '@id': iso1['@id'] }, stub(iso2), stub(book(url)), stub(dataset(url))],
 			about: [{ '@id': SITE.software }, { '@id': iso1['@id'] }],
 		});
 		base[`${lang}/report`] = reportPage(lang, iso2);
@@ -285,7 +299,7 @@ function build({ pages = 4, base: extra = {}, ...options } = {}) {
 function listOf(built, lang) {
 	const works = built[`${lang}/bibliography`].nodes
 		.map((node) => node['@id'])
-		.filter((id) => /\/reference\/bibliography\/#(?:std|doi|book|article|report|web)-/.test(String(id)));
+		.filter((id) => /\/reference\/bibliography\/#(?:std|doi|book|article|report|web|dataset)-/.test(String(id)));
 	return works.map((id) => ({
 		fragment: id.slice(id.indexOf('#') + 1),
 		citedBy: Object.values(built)
@@ -783,7 +797,7 @@ test('a build where every cited work is named, and named as the bibliography nam
 	const ran = check(t, build());
 	assert.equal(ran.status, 0, ran.err);
 	assert.match(ran.out, /ok {3}every one of the 2 works pages are based on is named at its first reference in isBasedOn/);
-	assert.match(ran.out, /ok {3}each of the 8 stubs that name a work on a page says what the bibliography says of it/);
+	assert.match(ran.out, /ok {3}each of the 10 stubs that name a work on a page says what the bibliography says of it/);
 	assert.match(ran.out, /each of the 3 Spanish standards names the English node it is/);
 	assert.match(ran.out, /\n0 failing check\(s\)\./);
 });
@@ -847,6 +861,34 @@ test("a work described in a catalogue page's words about its own rows fails, in 
 	const passed = check(t, named);
 	assert.equal(passed.status, 0, passed.err);
 	assert.match(passed.out, /ok {3}\/es\/reference\/bibliography\/: none of the 1 works it describes is described as one catalogue page's rows/);
+});
+
+test('a guide that cites a data set names it as a work, under the licence the bibliography gives it', (t) => {
+	// The two guides' data set stubs are two of the ten; without them, eight.
+	const ran = check(t, build());
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /ok {3}each of the 10 stubs that name a work on a page says what the bibliography says of it/);
+	const without = build();
+	for (const key of ['en/guide', 'es/guide']) without[key].article.citation.pop();
+	const fewer = check(t, without);
+	assert.equal(fewer.status, 0, fewer.err);
+	assert.match(fewer.out, /ok {3}each of the 8 stubs that name a work on a page says what the bibliography says of it/);
+});
+
+test('a page that gives a data set another licence than the bibliography fails', (t) => {
+	const built = build();
+	built['en/guide'].article.citation[3].license = 'https://opensource.org/license/MIT';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL 1 work\(s\) are named on 1 page\(s\) other than as the bibliography defines them: license on 1/);
+});
+
+test('a data set a page points at without naming it fails', (t) => {
+	const built = build();
+	built['es/guide'].article.citation[3] = { '@id': dataset(ES)['@id'] };
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL 1 page\(s\) point at 1 cited work\(s\) that nothing on the page names/);
 });
 
 test('a stub claiming a sameAs the bibliography does not give fails', (t) => {
@@ -2454,9 +2496,9 @@ test('a bibliography that lists every work it describes once, with the pages tha
 	assert.equal(ran.status, 0, ran.err);
 	assert.match(
 		ran.out,
-		/ok {3}\/reference\/bibliography\/: lists each of the 4 works its structured data describes once, with the 3 citations of the pages that cite them/,
+		/ok {3}\/reference\/bibliography\/: lists each of the 5 works its structured data describes once, with the 4 citations of the pages that cite them/,
 	);
-	assert.match(ran.out, /ok {3}\/es\/reference\/bibliography\/: lists each of the 4 works/);
+	assert.match(ran.out, /ok {3}\/es\/reference\/bibliography\/: lists each of the 5 works/);
 });
 
 test('a work the bibliography describes with no entry on the page fails, and names the work', (t) => {
@@ -2466,7 +2508,7 @@ test('a work the bibliography describes with no entry on the page fails, and nam
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL \/reference\/bibliography\/: 1 of the 4 works its structured data describes have no entry on the page \(first: #std-iso-2-2010\)/,
+		/FAIL \/reference\/bibliography\/: 1 of the 5 works its structured data describes have no entry on the page \(first: #std-iso-2-2010\)/,
 	);
 	assert.doesNotMatch(ran.err, /\/es\/reference\/bibliography\/: \d+ of the/);
 });
@@ -2536,7 +2578,7 @@ test('a "Cited by" list that names a citing page twice fails, and the passing la
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL \/reference\/bibliography\/: 1 entries' "Cited by" lists are not the pages that cite the work/);
 	assert.match(ran.err, new RegExp(`#std-iso-1-2000 \\(names /${GUIDE}/ twice\\)`));
-	assert.match(ran.out, /ok {3}\/es\/reference\/bibliography\/: lists each of the 4 works .* with the 3 citations/);
+	assert.match(ran.out, /ok {3}\/es\/reference\/bibliography\/: lists each of the 5 works .* with the 4 citations/);
 });
 
 test('an item of the list written by hand, which no work of the page is, fails and is quoted', (t) => {

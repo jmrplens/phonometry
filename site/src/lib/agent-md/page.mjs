@@ -95,7 +95,7 @@ function partMarkdown(part) {
 export function referencesMarkdown(references, lang) {
   if (!references?.length) return '';
   const entries = sortedReferences(references, lang).map(([, ref]) => {
-    const citation = citationParts(ref).map(partMarkdown).join('');
+    const citation = citationParts(ref, lang).map(partMarkdown).join('');
     const note = ref.note ? `\n  ${lineStart(noteParts(ref.note).map(partMarkdown).join('').trim())}` : '';
     return `- **${fragmentText(opening(ref, lang))}**${citation.trimEnd()}${note}`;
   });

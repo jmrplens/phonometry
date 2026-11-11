@@ -12,7 +12,7 @@ import numpy as np
 from scipy import signal
 
 from .._internal.bands import _format_nominal_freq
-from .._internal.extras import install_hint
+from .._internal.extras import PLOT_INSTALL_HINT
 from .._internal.figures import closes_its_figures
 from .._internal.json_input import writing_beside
 from .._internal.validation import require_scalar
@@ -221,8 +221,7 @@ def _showfilter(
     try:
         import matplotlib.pyplot as plt
     except ImportError as exc:
-        msg = f"Plotting requires matplotlib. Install it with: {install_hint('plot')}"
-        raise ImportError(msg) from exc
+        raise ImportError(PLOT_INSTALL_HINT) from exc
 
     wn = 8192
     w = np.zeros([wn, len(freq)])

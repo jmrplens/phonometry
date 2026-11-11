@@ -54,7 +54,7 @@ from typing import TYPE_CHECKING, Any, Final, cast, get_args
 import numpy as np
 
 from .display import RichDisplay
-from .extras import install_hint
+from .extras import VIDEO_INSTALL_HINT
 from .json_input import beside_name, escaped, flushed, make_new, mode_of
 from .validation import (
     is_text,
@@ -116,10 +116,6 @@ _STOP_TIMEOUT_S: Final = 5.0
 #: (:func:`stop_running_encoders`).
 _RUNNING: set[subprocess.Popen[bytes]] = set()
 _RUNNING_LOCK = threading.Lock()
-
-_MATPLOTLIB_HINT = (
-    f"Writing a video requires matplotlib. Install it with: {install_hint('plot')}"
-)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -969,7 +965,7 @@ def _require_animation(animation: object) -> None:
     try:
         from matplotlib.animation import Animation
     except ImportError as exc:  # pragma: no cover - the base install has no plot
-        raise ImportError(_MATPLOTLIB_HINT) from exc
+        raise ImportError(VIDEO_INSTALL_HINT) from exc
     if not isinstance(animation, Animation):
         msg = (
             "'animation' must be a matplotlib.animation.Animation, "

@@ -16,6 +16,9 @@ levels to a calibrator tone, which is what turns them into a measurement.
 
 ## Installation
 
+The commands below are pip's. [Environments](/phonometry/start/environments/)
+takes uv, conda, Jupyter, JupyterLite, Docker and type checkers in turn.
+
 ### From PyPI (recommended)
 
 ```bash
@@ -91,7 +94,9 @@ Adding that index with `--extra-index-url` is not enough: pip takes the
 newest torch it finds on either index, PyPI's CUDA build included.
 
 [Where a simulation runs](/phonometry/simulation/compute/) says what each device of the FDTD engines
-needs, CuPy's wheel for an NVIDIA GPU among them.
+needs, CuPy's wheel for an NVIDIA GPU among them, and [pip and
+uv](/phonometry/start/environments/pip-and-uv/) what each extra brings and how
+uv installs them.
 
 ### From a clone
 
@@ -100,6 +105,9 @@ git clone https://github.com/jmrplens/phonometry.git
 cd phonometry
 pip install .
 ```
+
+pip builds the wheel without a compiler; [pip and
+uv](/phonometry/start/environments/pip-and-uv/#from-a-clone) has the rest.
 
 ### As a git submodule
 
@@ -488,7 +496,7 @@ many digits come back.
 
 ## In a notebook
 
-Jupyter, JupyterLab, VS Code and Colab display the value of the last line of a
+Jupyter and JupyterLab display the value of the last line of a
 cell, and a result displays as a table of its fields: each with its unit when
 its name carries one (`_db`, `_hz`, `_m`...), names a level or a level
 difference (`insertion_loss` and `band_levels` are in decibels) or is an axis
@@ -564,6 +572,11 @@ ax = bank.plot()    # drawn under the cell; in a script, plt.show()
 
 *The figure `bank.plot()` draws under the cell: the one-third-octave spectrum
 of the 1 kHz tone over noise.*
+
+[Jupyter and JupyterLab](/phonometry/start/environments/jupyter/) carries on
+from here: SVG figures, videos, fiches and how a warning shows in a cell, and
+[JupyterLite and Pyodide](/phonometry/start/environments/jupyterlite/) the same
+notebook in a browser.
 
 ## Where to go next
 

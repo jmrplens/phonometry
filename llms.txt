@@ -41,6 +41,13 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ## Start here
 
 - [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/)
+- [Environments](https://docs.jmrp.io/phonometry/start/environments/)
+- [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/)
+- [conda and mamba](https://docs.jmrp.io/phonometry/start/environments/conda/)
+- [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/)
+- [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/)
+- [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/)
+- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/)
 - [Why phonometry](https://docs.jmrp.io/phonometry/start/why-phonometry/)
 - [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/)
 - [About](https://docs.jmrp.io/phonometry/start/about/)

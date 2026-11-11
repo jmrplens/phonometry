@@ -23,7 +23,9 @@ $L_{\mathrm{A}E}$, $L_\mathrm{Cpeak}$ y los niveles percentiles están en [Const
 sonómetro](/phonometry/es/signals/sound-level-meter/), que recorre la cadena
 entera de principio a fin en una sola página, y [Calibración y
 dBFS](/phonometry/es/signals/metrology/calibration/) es la guía de fondo del
-paso que más importa.
+paso que más importa. [Entornos](/phonometry/es/start/environments/) cuenta
+cómo va la misma instalación con uv o conda, en un cuaderno o en el
+navegador, en un contenedor y bajo un comprobador de tipos.
 
 **Mi código está escrito contra la 3.3 y los imports fallan.**
 [Actualizar de la 3.3 a la 4.0](/phonometry/es/start/upgrading/) es el mapa: la

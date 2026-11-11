@@ -135,6 +135,13 @@ AREAS: tuple[tuple[str, str], ...] = (
 #: fatal now.
 START_ROUTES = (
     "start/getting-started",
+    "start/environments",
+    "start/environments/pip-and-uv",
+    "start/environments/conda",
+    "start/environments/jupyter",
+    "start/environments/jupyterlite",
+    "start/environments/docker",
+    "start/environments/type-checking",
     "start/why-phonometry",
     "start/upgrading",
     "start/about",

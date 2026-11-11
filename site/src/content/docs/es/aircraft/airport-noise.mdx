@@ -183,12 +183,12 @@ la distancia de ese segmento, y se corrige término a término:
 
 | Función | Símbolo | Doc 29 | De qué da cuenta |
 |---|---|---|---|
-| `impedance_adjustment` | $\Delta_{\text{imp}}$ | §4.2.1 | el aire del aeródromo frente a la impedancia de referencia de 409,81 N·s/m³ de las tablas |
-| `duration_correction` | $\Delta_V$ | §4.5.1 | la velocidad del segmento frente a la velocidad de referencia NPD (solo niveles de exposición) |
-| `engine_installation_correction` | $\Delta_\mathrm{I}(\varphi)$ | §4.5.3 | dónde van montados los motores, a través del ángulo de depresión |
-| `lateral_attenuation` | $\Lambda(\beta, \ell)$ | §4.5.4 | el efecto suelo y la refracción para un receptor apartado a un lado |
-| `noise_fraction` | $\Delta_\mathrm{F}$ | §4.5.6 | la parte de la energía de la trayectoria infinita que aporta un segmento finito (solo niveles de exposición) |
-| `start_of_roll_directivity` | $\Delta_{\text{SOR}}(\psi)$ | §4.5.7 | el lóbulo trasero de chorro detrás de un segmento del recorrido de despegue |
+| `impedance_adjustment` | $\Delta_{\text{imp}}$ | §4.2.1, Ecs. 4-6 y 4-7 | el aire del aeródromo frente a la impedancia de referencia de 409,81 N·s/m³ de las tablas |
+| `duration_correction` | $\Delta_V$ | §4.5.1, Ec. 4-14 | la velocidad del segmento frente a la velocidad de referencia NPD (solo niveles de exposición) |
+| `engine_installation_correction` | $\Delta_\mathrm{I}(\varphi)$ | §4.5.3, Ecs. 4-15 y 4-16 | dónde van montados los motores, a través del ángulo de depresión |
+| `lateral_attenuation` | $\Lambda(\beta, \ell)$ | §4.5.4, Ecs. 4-18 y 4-19 | el efecto suelo y la refracción para un receptor apartado a un lado |
+| `noise_fraction` | $\Delta_\mathrm{F}$ | §4.5.6, Ec. 4-20 | la parte de la energía de la trayectoria infinita que aporta un segmento finito (solo niveles de exposición) |
+| `start_of_roll_directivity` | $\Delta_{\text{SOR}}(\psi)$ | §4.5.7, Ecs. 4-22 a 4-25 | el lóbulo trasero de chorro detrás de un segmento del recorrido de despegue |
 
 $\beta$ es el ángulo de elevación de la trayectoria de propagación sobre la
 línea del suelo en el receptor y $\ell$ la distancia perpendicular del receptor
@@ -217,6 +217,11 @@ nivel de evento es la suma energética sobre los segmentos,
 $L_E = 10\lg\sum 10^{L_{E,\text{seg}}/10}$ (Ec. 4-11). Un nivel máximo toma en su
 lugar el mayor valor de segmento (Ec. 4-10) y prescinde de los dos términos que
 solo existen para la exposición, $\Delta_V$ y $\Delta_\mathrm{F}$.
+Detrás de un recorrido de despegue, para un receptor cuyo pie de la perpendicular
+cae antes del inicio de un segmento que la máscara `ground_roll` marca
+($q < 0$), la fracción de ruido toma su forma reducida con $q = 0$ (Ec. 4-21a) y
+se suma $\Delta_{\text{SOR}}$; en cualquier otro caso $\Delta_{\text{SOR}}$ vale
+cero.
 
 Conviene llevar encima sus magnitudes, porque son las que deciden qué término
 importa para un receptor dado.

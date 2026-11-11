@@ -306,7 +306,9 @@ nada garantiza esa coincidencia en general.
 `check_db_hr_requirement()` redondea el valor alcanzado como pide el DB HR
 antes de compararlo (a entero en las magnitudes en dB, a un decimal en el
 tiempo de reverberación) y devuelve el margen; `assess_db_hr()` hace lo mismo
-sobre una lista de pares valor-exigencia.
+sobre una lista de pares valor-exigencia. El `DBHRAssessment` que devuelve dibuja
+con `.plot()` los valores obtenidos frente a sus límites, uno por exigencia
+comprobada.
 
 ## Ventanas y fachadas mixtas
 

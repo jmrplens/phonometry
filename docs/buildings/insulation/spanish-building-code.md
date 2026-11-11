@@ -200,6 +200,7 @@ common areas sharing doors with protected rooms, the equivalent sound
 absorption area must be at least 0.2 m² per cubic metre of volume.
 
 ```python
+import numpy as np
 from phonometry import building
 
 facade = building.db_hr_facade_requirement(65.0, "residential", "bedrooms")
@@ -213,7 +214,13 @@ building.db_hr_party_wall_requirement().limit                         # 40 dBA p
 building.db_hr_party_wall_requirement("DnT,A").limit                  # 50 dBA both together
 building.db_hr_reverberation_requirement("classroom").limit           # 0.7 s
 
-check = building.assess_db_hr([(33.0, facade), (51.44, airborne[0])])
+# The between-rooms requirement is stated in DnT,A, so the party-wall R' above
+# is re-referenced first: V = 50 m3 and T = 0.5 s give A = 16 m2 behind a
+# partition of S = 12 m2, and DnT = R' + 10 lg(A/S) + 10 lg(T/T0).
+d_nt = np.asarray(r_prime) + 10 * np.log10(16.0 / 12.0) + 10 * np.log10(0.5 / 0.5)
+building.dnt_a(d_nt).intermediate                   # 52.7 dBA (R'A was 51.4 dBA)
+
+check = building.assess_db_hr([(33.0, facade), (52.7, airborne[0])])
 check.passes                                      # True
 ```
 

@@ -391,7 +391,10 @@ Table D.1 then reads the weighted improvement off $f_0$, rounded to the
 one-third-octave band it falls in. Below 200 Hz the lining helps, by
 $74.4 - 20\log_{10} f_0 - R_\mathrm{w}/2$ dB, and the better the bare wall the less there is
 to gain. From 200 Hz upwards it costs: 1 dB at 200 Hz falling to 10 dB from
-630 Hz to 1600 Hz, recovering to 5 dB above. Getting the resonance well below
+630 Hz to 1600 Hz, recovering to 5 dB above. The printed table puts 1600 Hz in
+both of its last two rows; `weighted_lining_improvement` charges the 10 dB
+there, as the 2000 edition printed it, and the
+[errata registry](/phonometry/reference/errata/) records the overlap. Getting the resonance well below
 the range of interest is therefore the entire design brief.
 
 ```python

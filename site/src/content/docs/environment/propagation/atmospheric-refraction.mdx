@@ -327,16 +327,19 @@ range-height grid. `atmospheric_parabolic_equation` implements the **Green's
 Function PE** (GFPE, Salomons Appendix H), the atmospheric member of the same
 split-step Fourier family as the ocean
 [`parabolic_equation`](/phonometry/underwater/underwater-solvers/). Each range
-step transforms the field to the vertical-wavenumber domain, applies the
-free-space propagator together with the finite-impedance ground reflection
+step transforms the field to the vertical-wavenumber domain (an FFT),
+applies the free-space propagator
+$\exp(i\,\Delta r\,(\sqrt{k_a^2 - k_z^2} - k_a))$ together with the
+finite-impedance ground reflection
 $R(k_z) = (k_z Z - k_0)/(k_z Z + k_0)$ (Salomons Eq. H.28), transforms back,
-adds the surface-wave residue of the reflection pole (the third term of
-Eq. H.49) and applies the refraction phase screen
+adds the surface-wave residue of the reflection pole at $k_z = -k_0/Z$ (the
+third term of Eq. H.49, present for a passive ground,
+$\operatorname{Im}(Z) > 0$) and applies the refraction phase screen
 $\exp(i\,\Delta r\,(k(z) - k_a))$ (Eq. H.58). The source is a **Gaussian
 starter** with its ground image (Eqs. G.64, G.76) and an **absorbing layer**
-at the top of the grid suppresses top-boundary reflections. The result is the
-**relative sound level** $\Delta L(z, r) = 20\log_{10}(|p| R_1)$ (dB re
-free field) over the whole range-height plane.
+at the top of the grid (Salomons Sec. G.9) suppresses top-boundary reflections.
+The result is the **relative sound level** $\Delta L(z, r) = 20\log_{10}(|p| R_1)$
+(dB re free field, Salomons Eq. 3.6) over the whole range-height plane.
 
 ```python
 from phonometry import environment

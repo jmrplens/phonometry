@@ -452,3 +452,23 @@ def test_every_warning_filter_in_the_suite_names_its_message() -> None:
     )
     stale = sorted(set(_BY_CLASS) - {key for key, _ in found})
     assert not stale, f"exemptions that no longer match a filter: {stale}"
+
+
+def _t28_exceptions() -> str:
+    """The Exceptions paragraph of rule T28 in the contributor guide."""
+    guide = (_ROOT / "docs" / "contributing" / "tests.md").read_text(encoding="utf-8")
+    rule = guide.split("### T28.", 1)[1].split("\n### ", 1)[0]
+    return rule.split("**Exceptions.**", 1)[1].split("\n\n", 1)[0]
+
+
+def test_the_guide_names_the_file_of_every_exemption() -> None:
+    """Rule T28 names each filter that lets warnings through by no message.
+
+    The census of number returns took its exemption with the module that
+    added it while the rule's list of exceptions kept the four before it.
+    """
+    exceptions = _t28_exceptions()
+    unnamed = sorted(
+        key for key in _BY_CLASS if f"`{key.split('::', 1)[0]}`" not in exceptions
+    )
+    assert not unnamed, f"T28 names no file for: {unnamed}"

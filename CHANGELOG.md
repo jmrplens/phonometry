@@ -4844,6 +4844,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The ± 50 % of ISO 4866 D.2 is `vibration.EMPIRICAL_FREQUENCY_ERROR`.**
+  4.0.0rc1 published it as `EMPIRICAL_FREQUENCY_TOLERANCE`, although every
+  other published constant named a tolerance is a bound a value has to stay
+  within, and nothing is held to this one. D.2 prints it as the error an
+  empirical prediction of a building's fundamental frequency typically
+  carries ("errors of ± 50 % are not uncommon, and this is typical of the
+  accuracy which can be expected using empirical formulae"), and
+  `empirical_frequency_bounds` and `BuildingFrequencyEstimate.bounds_hz` only
+  widen a prediction into a band with it. The value is still 0.5, a fraction
+  of the prediction, and the migration guide maps the old name to the new one.
+
 - **The weighting design takes every transcendental from routines that
   return the same bits on every platform, so the macOS and Windows
   coefficients move to the Linux bytes.** `filters.WeightingFilter` and

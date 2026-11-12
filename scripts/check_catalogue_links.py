@@ -8,14 +8,17 @@ A link to the ISO or IEC catalogue carries a number and nothing else
 another document while every page still builds, every link still resolves
 and the reader who follows it lands on a steel sheet or a needle-based
 injector. A review of the tone-burst guide found its reference to
-IEC 60268-1:1985 opening IEC 60264-2-1:1989, and the sweep that followed
-found 89 more links of the pages and their mirrors opening something other
-than what they sat beside, many of them copied from page to page: 84 opened
-another document or none at all (ISO 4871:1996 opened ISO 4878:1981,
-ISO 16283-2:2020 two different plastics standards, each of the five
-standards of the ISO 11200 series something else, and four parts of
-ISO 10140 a number the catalogue does not hold), and 5 opened a later
-edition than the one the page cites. This is the guard for that class.
+IEC 60268-1:1985, in English and in Spanish, opening IEC 60264-2-1:1989,
+and the sweep that followed found 89 more links of the pages and their
+mirrors opening something other than what they sat beside, many of them
+copied from page to page: 84 opened another document or none at all
+(ISO 4871:1996 opened ISO 4878:1981, ISO 16283-2:2020 two different
+plastics standards, each of the five standards of the ISO 11200 series the
+workstation guide cites something else, and four parts of ISO 10140 a
+number the catalogue does not hold), and 5 opened a later edition than the
+one the page cites. A review of this check found 5 more opening
+IEC 60268-5:2003 beside the amended edition, IEC 60268-5:2003+A1:2007,
+that the pages cite. This is the guard for that class.
 
 The number alone cannot be read for its document, so :data:`PINNED`
 (``scripts/catalogue_ids.json``) holds, for every number the pages link, the
@@ -40,11 +43,18 @@ beside that designation, read where the link is written:
   edition names that edition and the entry's own catalogue link names the one
   the entry cites.
 
-The designation is matched by its number and, when the text gives one, its
-year: the catalogue page of ISO 717-2:2013 beside "ISO 717-2:2020" is another
-document, the edition the page does not cite. IEC renumbered its older
-publications by adding 60000 in 1997, so "IEC 651" names what the webstore
-lists as IEC 60651.
+The designation is matched by its number and, when the text gives them, its
+year and its amendments: the catalogue page of ISO 717-2:2013 beside
+"ISO 717-2:2020" is another document, the edition the page does not cite.
+The IEC webstore numbers an edition, that edition consolidated with its
+amendment and the amendment alone apart (IEC 60268-5:2003,
+IEC 60268-5:2003+AMD1:2007 CSV and IEC 60268-5:2003/AMD1:2007), so
+"IEC 60268-5:2003+A1:2007" names the second of them only. ISO's open data
+holds no consolidated edition, and the page of an ISO edition lists its
+amendments, so "ISO 17497-1:2004+A1:2014" names the page of
+ISO 17497-1:2004; an ISO amendment alone (ISO 17497-1:2004/Amd 1:2014) has
+a number of its own. IEC renumbered its older publications by adding 60000
+in 1997, so "IEC 651" names what the webstore lists as IEC 60651.
 
 A number the table does not hold fails, and so does a pinned number no page
 links any more, so the table is the census of what the pages link and
@@ -106,8 +116,18 @@ MARKDOWN_LINK = re.compile(r"\[[^\]\n]*\]\([^)\s]*\)")
 #: The start of a list item, a table row or a heading: a block of its own.
 _BLOCK_START = re.compile(r"\s*(?:[-*+]\s|\d+\.\s|\||#)")
 
-#: The number of a designation and the year right after it.
-_DESIGNATION = re.compile(r"(?<![\w.-])(\d+(?:-\d+)*)(?::(\d{4}))?")
+#: The number of a designation, the year right after it and the amendments
+#: written after that: ``+A1:2007`` (or ``+AMD1:2007``) for the edition with
+#: its amendment, ``/AMD1:2007`` (or ``/Amd 1:2007``) for the amendment
+#: alone.
+_DESIGNATION = re.compile(
+    r"(?<![\w.-])(\d+(?:-\d+)*)(?::(\d{4}))?"
+    r"((?:\s?[+/]\s?(?:AMD|Amd|A)\.?\s?\d+(?::\d{4})?)*)"
+)
+
+#: One amendment of a designation: ``+`` or ``/``, its number and its year.
+_AMENDMENT = re.compile(r"([+/])\s?(?:AMD|Amd|A)\.?\s?(\d+)(?::(\d{4}))?")
+
 
 #: The characters a page may write inside a designation for a space or a
 #: hyphen.
@@ -283,32 +303,80 @@ def links_in(path: str, text: str) -> list[Link]:
     return found
 
 
-def _numbers(designation: str, catalogue: str) -> tuple[set[str], str | None]:
-    """The numbers a text may give a pinned designation, and the year it carries."""
+#: The amendments a designation writes after its year, each as its sign
+#: (``+`` with the edition, ``/`` alone), its number and its year if given.
+type Amendments = tuple[tuple[str, str, str], ...]
+
+
+def _amendments(written: str, catalogue: str) -> Amendments:
+    """The amendments a designation names, as its catalogue numbers them.
+
+    The IEC webstore gives an edition consolidated with its amendments a
+    number of its own (IEC 60268-5:2003+AMD1:2007 CSV, apart from
+    IEC 60268-5:2003), and ISO's open data holds no consolidated edition at
+    all: the catalogue page of an ISO edition lists its amendments, so the
+    ``+A1:2014`` of an ISO designation names the edition itself. An amendment
+    alone (``/Amd 1:2014``) has a number of its own in both.
+    """
+    return tuple(
+        (sign, number, year)
+        for sign, number, year in _AMENDMENT.findall(written)
+        if sign == "/" or catalogue == "iec"
+    )
+
+
+def _numbers(
+    designation: str, catalogue: str
+) -> tuple[set[str], str | None, Amendments]:
+    """The numbers a text may give a pinned designation, its year and amendments."""
     match = _DESIGNATION.search(designation)
     if match is None:
-        return set(), None
+        return set(), None, ()
     number, year = match.group(1), match.group(2)
     numbers = {number}
     head, _, rest = number.partition("-")
     if catalogue == "iec" and len(head) == 5 and head.startswith("60"):
         # IEC 651 is IEC 60651: the 1997 renumbering added 60000.
         numbers.add(str(int(head) - 60000) + ("-" + rest if rest else ""))
-    return numbers, year
+    return numbers, year, _amendments(match.group(3), catalogue)
+
+
+def _same_amendments(written: Amendments, pinned: Amendments) -> bool:
+    """Whether a text names the amendments a pinned designation carries.
+
+    ``+A1:2007`` and ``+AMD1:2007`` are the same amendment, and a year the
+    text leaves out does not tell two apart.
+    """
+    return len(written) == len(pinned) and all(
+        sign == pinned_sign
+        and number == pinned_number
+        and (not year or not pinned_year or year == pinned_year)
+        for (sign, number, year), (pinned_sign, pinned_number, pinned_year) in zip(
+            written, pinned, strict=True
+        )
+    )
 
 
 def names(beside: str, designation: str, catalogue: str) -> bool:
-    """Whether ``beside`` names ``designation``, by number and, when given, year."""
-    numbers, year = _numbers(designation, catalogue)
-    years = [
-        match.group(2)
+    """Whether ``beside`` names ``designation``.
+
+    By its number and, when the text gives them, its year and its
+    amendments: the edition, the edition with its amendment and the
+    amendment alone are three documents, wherever their catalogue numbers
+    them apart.
+    """
+    numbers, year, amended = _numbers(designation, catalogue)
+    written = [
+        (match.group(2), _amendments(match.group(3), catalogue))
         for match in _DESIGNATION.finditer(beside)
         if match.group(1) in numbers
     ]
-    if not years:
-        return False
-    given = [found for found in years if found]
-    return not given or year is None or year in given
+    dated = [found for found in written if found[0]]
+    return any(
+        (year is None or found is None or found == year)
+        and _same_amendments(amendments, amended)
+        for found, amendments in dated or written
+    )
 
 
 def pages(root: pathlib.Path | None = None) -> list[str]:

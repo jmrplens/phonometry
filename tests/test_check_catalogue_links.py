@@ -189,6 +189,80 @@ def test_a_note_names_the_designation_of_the_link_catalogue_only() -> None:
     assert _named(page) == []
 
 
+_AMENDED = {
+    "iso": {"31397": "ISO 17497-1:2004", "60686": "ISO 17497-1:2004/Amd 1:2014"},
+    "iec": {
+        "1222": "IEC 60268-5:2003/AMD1:2007",
+        "1223": "IEC 60268-5:2003",
+        "1224": "IEC 60268-5:2003+AMD1:2007 CSV",
+    },
+}
+
+
+def _amended(designation: str, url: str) -> list[str]:
+    """The problems of a reference beside the amended editions pinned."""
+    page = _FRONTMATTER.format(designation=designation, url=url)
+    return [
+        problem
+        for problem in ccl.problems(ccl.links_in("docs/page.md", page), _AMENDED)
+        if "is linked from no page" not in problem
+    ]
+
+
+@pytest.mark.parametrize(
+    ("designation", "url", "opens"),
+    [
+        (
+            "IEC 60268-5:2003+A1:2007",
+            "https://webstore.iec.ch/en/publication/1223",
+            "IEC 60268-5:2003",
+        ),
+        (
+            "IEC 60268-5:2003",
+            "https://webstore.iec.ch/en/publication/1224",
+            "IEC 60268-5:2003+AMD1:2007 CSV",
+        ),
+        (
+            "IEC 60268-5:2003+A1:2007",
+            "https://webstore.iec.ch/en/publication/1222",
+            "IEC 60268-5:2003/AMD1:2007",
+        ),
+        (
+            "ISO 17497-1:2004+A1:2014",
+            "https://www.iso.org/standard/60686.html",
+            "ISO 17497-1:2004/Amd 1:2014",
+        ),
+    ],
+)
+def test_an_edition_its_amendment_and_their_consolidation_are_told_apart(
+    designation: str, url: str, opens: str
+) -> None:
+    (problem,) = _amended(designation, url)
+    assert f"opens {opens}, which" in problem
+
+
+@pytest.mark.parametrize(
+    ("designation", "url"),
+    [
+        ("IEC 60268-5:2003+A1:2007", "https://webstore.iec.ch/en/publication/1224"),
+        (
+            "IEC 60268-5:2003+AMD1:2007 CSV",
+            "https://webstore.iec.ch/en/publication/1224",
+        ),
+        ("IEC 60268-5:2003", "https://webstore.iec.ch/en/publication/1223"),
+        ("IEC 60268-5:2003/AMD1:2007", "https://webstore.iec.ch/en/publication/1222"),
+        # ISO numbers no consolidated edition: the page of the edition lists
+        # its amendment.
+        ("ISO 17497-1:2004+A1:2014", "https://www.iso.org/standard/31397.html"),
+        ("ISO 17497-1:2004/Amd 1:2014", "https://www.iso.org/standard/60686.html"),
+    ],
+)
+def test_an_amended_designation_names_the_page_its_catalogue_gives_it(
+    designation: str, url: str
+) -> None:
+    assert _amended(designation, url) == []
+
+
 def test_another_edition_of_the_cited_document_is_named() -> None:
     page = _FRONTMATTER.format(
         designation="ISO 3382-3:2022", url="https://www.iso.org/standard/46520.html"

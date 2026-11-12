@@ -283,7 +283,7 @@ fence-names:
 	$(PYTHON) scripts/check_fence_names.py
 
 # A link to the ISO catalogue or the IEC webstore carries only a number, and
-# 91 of them opened another document or another edition than the one their
+# 96 of them opened another document or another edition than the one their
 # page cites before this check. It holds every such link to the designation
 # scripts/catalogue_ids.json pins for its number; `--refresh` pins a new one
 # from the catalogues and is the only step that needs the network. Stdlib only.

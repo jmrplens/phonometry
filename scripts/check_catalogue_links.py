@@ -28,20 +28,25 @@ the pages of the site and in the mirrors under ``docs/`` then has to sit
 beside that designation, read where the link is written:
 
 - in a page's frontmatter, the ``url`` of a reference beside the
-  reference's ``designation``, and a link in its ``note`` beside the note up
-  to the link, with the other links taken out, so that "Since revised as
-  ISO 3382-3:2022 (https://...)" holds the link to the 2022 edition while
-  the reference's own ``url`` stays on the 2012 one it cites; a note that
-  names no designation of the link's catalogue before the link speaks of
-  its own reference, and its link is read beside the reference's
-  ``designation``;
+  reference's ``designation``, and a link in its ``note`` beside its own
+  clause (the note after the link before it, the last semicolon or the last
+  full stop, up to the link), from the last designation of the link's
+  catalogue the clause names: "Adopted in Europe as EN ISO 3382-3:2012, the
+  edition implemented here; since revised as ISO 3382-3:2022 (https://...)"
+  holds the link to the 2022 edition alone, while the reference's own
+  ``url`` stays on the 2012 one it cites; a note link whose clause names no
+  designation of its catalogue speaks of its own reference, and is read
+  beside the reference's ``designation``;
 - in a table, the link's own cell up to the link, or, when that names no
   designation of the link's catalogue, the nearest cell before it in the
   row that names one;
-- anywhere else, the paragraph or list item up to the link, with the text of
-  the other links taken out, so that a "since revised as" link to a newer
-  edition names that edition and the entry's own catalogue link names the one
-  the entry cites.
+- anywhere else, the link's own clause read the same way, or, when that
+  names no designation of the link's catalogue, the paragraph or list item
+  up to the link without the other links and without the clauses that name
+  a later edition ("since revised as ISO 13472-1:2022", "superseded by" and
+  the Spanish "revisada después como" and "sustituida por"), so that an
+  entry's own catalogue link names the edition the entry cites and not the
+  one it was revised as.
 
 The designation is matched by its number and, when the text gives them, its
 year and its amendments: the catalogue page of ISO 717-2:2013 beside
@@ -128,6 +133,20 @@ _DESIGNATION = re.compile(
 #: One amendment of a designation: ``+`` or ``/``, its number and its year.
 _AMENDMENT = re.compile(r"([+/])\s?(?:AMD|Amd|A)\.?\s?(\d+)(?::(\d{4}))?")
 
+#: What stands for a link taken out of the text a link is read beside.
+_LINK_GAP = "\x00"
+
+#: The end of a clause: a link taken out, a semicolon, or a full stop before
+#: a space or a line break.
+_CLAUSE_END = re.compile(r"\x00|;|\.(?=\s)")
+
+#: The words the pages write for a document since revised or superseded, in
+#: English and in Spanish, and the rest of their clause: the edition they
+#: name is a later one, never the one the entry's own link opens.
+_REVISED = re.compile(
+    r"(?i:\b(?:since\s+revised\s+as|revisad[ao]\s+después\s+como"
+    r"|superseded\s+by|sustituid[ao]\s+por)\b)[^;.,)\x00]*"
+)
 
 #: The characters a page may write inside a designation for a space or a
 #: hyphen.
@@ -179,21 +198,44 @@ def _names_a_designation(text: str, catalogue: str) -> bool:
     return _NAMED[catalogue].search(text.translate(_SPACES)) is not None
 
 
-def _links_out(text: str) -> str:
+def _links_out(text: str, gap: str = " ") -> str:
     """The text with its markdown links and bare catalogue addresses taken out."""
-    return LINK.sub(" ", MARKDOWN_LINK.sub(" ", text))
+    return LINK.sub(gap, MARKDOWN_LINK.sub(gap, text))
 
 
-def _read_up_to(written: str) -> str:
+def _own_clause(written: str, catalogue: str) -> str:
+    """The clause a link ends, from the last designation of its catalogue on.
+
+    The clause starts after the link before it, the last semicolon or the
+    last full stop, whichever comes later. Read from its last designation of
+    the link's catalogue, "Adopted in Europe as EN ISO 3382-3:2012, and since
+    revised as ISO 3382-3:2022 (...)" holds the link to the 2022 edition.
+    An empty text when the clause names none: the link then speaks of the
+    entry or the reference it is written in.
+    """
+    clause = _CLAUSE_END.split(_links_out(written, _LINK_GAP))[-1]
+    named = list(_NAMED[catalogue].finditer(clause.translate(_SPACES)))
+    return clause[named[-1].start() :] if named else ""
+
+
+def _read_up_to(written: str, catalogue: str) -> str:
     """What a link is read beside in the text written up to it.
 
-    A link whose label names a designation is read by its label; any other is
-    read beside the text before it, with the other links taken out.
+    A link whose label names a designation is read by its label. Any other
+    is read beside its own clause when that names a designation of the
+    link's catalogue, and otherwise beside the whole text before it, without
+    the other links and without the clauses that name a later edition
+    ("since revised as ISO 13472-1:2022"): an entry's own catalogue link
+    opens the edition the entry cites, not the one it was revised as.
     """
     label = re.search(r"\[([^\]\n]*)\]\($", written)
     if label and _DESIGNATION.search(label.group(1).translate(_SPACES)):
         return label.group(1)
-    return _links_out(written[: label.start()] if label else written)
+    before = written[: label.start()] if label else written
+    own = _own_clause(before, catalogue)
+    if own:
+        return own
+    return _REVISED.sub(" ", _links_out(before, _LINK_GAP)).replace(_LINK_GAP, " ")
 
 
 def _beside_in_frontmatter(text: str, start: int, end: int, catalogue: str) -> str:
@@ -201,19 +243,20 @@ def _beside_in_frontmatter(text: str, start: int, end: int, catalogue: str) -> s
 
     The ``url`` of a reference is read beside the reference's
     ``designation``. A link written in any other field, a ``note`` above all,
-    is read beside that field's text up to the link, with the other links
-    taken out, as a paragraph of the body is: a note that says "Since revised
+    is read beside its own clause in that field, from the last designation
+    of the link's catalogue the clause names: a note that says "Adopted in
+    Europe as EN ISO 3382-3:2012, the edition implemented here; since revised
     as ISO 3382-3:2022 (https://www.iso.org/standard/77437.html)" links the
-    edition it names there, not the one its reference cites, and its link
-    is held to ISO 3382-3:2022.
+    edition it names there, not the one its reference cites, and its link is
+    held to ISO 3382-3:2022 alone. A second link of the note is read after
+    the first, not beside it.
 
-    A note that names no designation of the link's catalogue before the link
-    ("The catalogue page (https://...) lists the corrigenda") speaks of its
-    own reference, so its link is read beside the reference's
-    ``designation``, as the ``url`` is. That still holds the number to a
-    document: refusing the link would ask the note to repeat the designation
-    its reference already gives, and letting it through would leave the
-    number unread.
+    A link whose clause names no designation of its catalogue ("The
+    catalogue page (https://...) lists the corrigenda") speaks of its own
+    reference, so it is read beside the reference's ``designation``, as the
+    ``url`` is. That still holds the number to a document: refusing the
+    link would ask the note to repeat the designation its reference already
+    gives, and letting it through would leave the number unread.
     """
     item_start = text.rfind("\n  - ", 0, start)
     item_end = text.find("\n  - ", start)
@@ -225,8 +268,7 @@ def _beside_in_frontmatter(text: str, start: int, end: int, catalogue: str) -> s
     keys = list(_FRONTMATTER_KEY.finditer(text, item_start + 1, start))
     if not keys or keys[-1].group(1) == "url":
         return own
-    written = _links_out(text[keys[-1].end() : start].lstrip("\"'"))
-    return written if _names_a_designation(written, catalogue) else own
+    return _own_clause(text[keys[-1].end() : start].lstrip("\"'"), catalogue) or own
 
 
 def _beside_in_body(text: str, start: int, catalogue: str) -> str:
@@ -236,13 +278,14 @@ def _beside_in_body(text: str, start: int, catalogue: str) -> str:
     designation of the link's catalogue (a cell that holds only
     "[catalogue](...)"), the nearest cell before it in the row that names
     one, with its links taken out. Anywhere else, the list item or paragraph
-    the link is written in, up to it.
+    the link is written in, up to it. The link's own cell, list item or
+    paragraph is read as :func:`_read_up_to` reads the text up to a link.
     """
     line_start = text.rfind("\n", 0, start) + 1
     line = text[line_start:start]
     if line.lstrip().startswith("|"):
         *cells, cell = _CELL_BORDER.split(line)
-        own = _read_up_to(cell)
+        own = _read_up_to(cell, catalogue)
         if _names_a_designation(own, catalogue):
             return own
         # The text before the row's first border is its indentation.
@@ -259,7 +302,7 @@ def _beside_in_body(text: str, start: int, catalogue: str) -> str:
             break
         lines.insert(0, previous)
         cursor = previous_start
-    return _read_up_to("\n".join(lines))
+    return _read_up_to("\n".join(lines), catalogue)
 
 
 def _without_code(path: str, text: str) -> str:

@@ -189,6 +189,73 @@ def test_a_note_names_the_designation_of_the_link_catalogue_only() -> None:
     assert _named(page) == []
 
 
+@pytest.mark.parametrize(
+    "written",
+    [
+        "Adopted in Europe as EN ISO 3382-3:2012, the edition implemented here;"
+        " since revised as ISO 3382-3:2022",
+        "Adoptada en Europa como EN ISO 3382-3:2012, la edición implementada aquí;"
+        " revisada después como ISO 3382-3:2022",
+        "Adopted in Europe as EN ISO 3382-3:2012, the edition implemented here,"
+        " and since revised as ISO 3382-3:2022",
+    ],
+)
+def test_a_note_link_is_read_beside_the_last_designation_of_its_clause(
+    written: str,
+) -> None:
+    assert _named(_REVISED.format(url="46520", written=written, note="77437")) == []
+    (problem,) = _named(_REVISED.format(url="46520", written=written, note="46520"))
+    assert "page.md:6" in problem
+    assert "opens ISO 3382-3:2012" in problem
+
+
+def test_a_note_link_is_not_read_beside_the_link_before_it() -> None:
+    written = (
+        "Since revised as ISO 3382-3:2022 (https://www.iso.org/standard/77437.html)"
+        " and ISO 12354-1:2017"
+    )
+    assert _named(_REVISED.format(url="46520", written=written, note="70242")) == []
+    (problem,) = _named(_REVISED.format(url="46520", written=written, note="77437"))
+    assert "opens ISO 3382-3:2022, which the link is not written beside" in problem
+    assert problem.endswith("'ISO 12354-1:2017 ('")
+
+
+@pytest.mark.parametrize(
+    ("revised", "label"),
+    [
+        ("the edition\n  implemented here; since revised as", "iso.org catalogue"),
+        ("la edición\n  implementada aquí; revisada después como", "Catálogo iso.org"),
+        ("withdrawn, superseded by", "iso.org catalogue"),
+        ("retirada, sustituida por", "Catálogo iso.org"),
+    ],
+)
+def test_an_entry_link_is_not_read_beside_the_edition_its_entry_names_as_later(
+    revised: str, label: str
+) -> None:
+    entry = (
+        "- International Organization for Standardization. (2012). *Open plan\n"
+        f"  offices* (ISO 3382-3:2012, {revised} ISO 3382-3:2022).\n"
+        f"  [{label}](https://www.iso.org/standard/{{}}.html).\n"
+    )
+    assert _named(entry.format("46520")) == []
+    (problem,) = _named(entry.format("77437"))
+    # The link is on the entry's last line.
+    assert f"page.md:{entry.count(chr(10))}:" in problem
+    assert "opens ISO 3382-3:2022" in problem
+
+
+def test_a_paragraph_link_in_a_since_revised_clause_is_read_beside_that_clause() -> (
+    None
+):
+    paragraph = (
+        "The quantities follow ISO 3382-3:2012. Since revised as ISO 3382-3:2022\n"
+        "(https://www.iso.org/standard/{}.html).\n"
+    )
+    assert _named(paragraph.format("77437")) == []
+    (problem,) = _named(paragraph.format("46520"))
+    assert "opens ISO 3382-3:2012" in problem
+
+
 _AMENDED = {
     "iso": {"31397": "ISO 17497-1:2004", "60686": "ISO 17497-1:2004/Amd 1:2014"},
     "iec": {

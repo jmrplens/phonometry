@@ -198,6 +198,11 @@ def _names_a_designation(text: str, catalogue: str) -> bool:
     return _NAMED[catalogue].search(text.translate(_SPACES)) is not None
 
 
+def _names_any_designation(text: str) -> bool:
+    """Whether a text names some designation of either catalogue."""
+    return any(_names_a_designation(text, catalogue) for catalogue in _NAMED)
+
+
 def _links_out(text: str, gap: str = " ") -> str:
     """The text with its markdown links and bare catalogue addresses taken out."""
     return LINK.sub(gap, MARKDOWN_LINK.sub(gap, text))
@@ -221,15 +226,20 @@ def _own_clause(written: str, catalogue: str) -> str:
 def _read_up_to(written: str, catalogue: str) -> str:
     """What a link is read beside in the text written up to it.
 
-    A link whose label names a designation is read by its label. Any other
-    is read beside its own clause when that names a designation of the
-    link's catalogue, and otherwise beside the whole text before it, without
-    the other links and without the clauses that name a later edition
-    ("since revised as ISO 13472-1:2022"): an entry's own catalogue link
-    opens the edition the entry cites, not the one it was revised as.
+    A link whose label names a designation, a publisher and its number
+    ("[ISO 3382-3:2022](...)"), is read by its label, whichever catalogue the
+    designation belongs to: a label that names an IEC document on an iso.org
+    link tells the reader what it opens, and is held to that. A label that
+    gives a number and no publisher ("[2017 catalogue](...)", "[Part 1](...)")
+    names no document, and the link is read as any other: beside its own
+    clause when that names a designation of the link's catalogue, and
+    otherwise beside the whole text before it, without the other links and
+    without the clauses that name a later edition ("since revised as
+    ISO 13472-1:2022"): an entry's own catalogue link opens the edition the
+    entry cites, not the one it was revised as.
     """
     label = re.search(r"\[([^\]\n]*)\]\($", written)
-    if label and _DESIGNATION.search(label.group(1).translate(_SPACES)):
+    if label and _names_any_designation(label.group(1)):
         return label.group(1)
     before = written[: label.start()] if label else written
     own = _own_clause(before, catalogue)

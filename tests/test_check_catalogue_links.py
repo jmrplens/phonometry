@@ -381,6 +381,16 @@ def test_a_table_cell_that_names_a_designation_is_read_on_its_own() -> None:
     assert "opens ISO 12354-1:2017" in problem
 
 
+@pytest.mark.parametrize("label", ["2017 catalogue", "catálogo de 2017", "Part 1"])
+def test_a_label_naming_no_designation_is_read_beside_the_text_before_it(
+    label: str,
+) -> None:
+    page = "ISO 12354-1:2017. [{}](https://www.iso.org/standard/{}.html).\n"
+    assert _named(page.format(label, "70242")) == []
+    (problem,) = _named(page.format(label, "70238"))
+    assert "opens ISO 13887:2017, which the link is not written beside" in problem
+
+
 def test_the_old_iec_number_names_the_renumbered_publication() -> None:
     page = _FRONTMATTER.format(
         designation="IEC 651:1979", url="https://webstore.iec.ch/en/publication/2777"

@@ -15,6 +15,7 @@ node says reaches the terminal with its control characters escaped.
 
 from __future__ import annotations
 
+import errno
 import io
 import os
 import pathlib
@@ -25,7 +26,7 @@ import tarfile
 import tempfile
 import threading
 import types
-from typing import TYPE_CHECKING, Any, BinaryIO
+from typing import IO, TYPE_CHECKING, Any, BinaryIO
 
 import child_process
 import pytest
@@ -1071,17 +1072,56 @@ def test_a_clip_the_node_never_sent_is_named(tmp_path: pathlib.Path) -> None:
     assert problems == ["anim_x: the node never sent it"]
 
 
+class _GoneReader:
+    """A node's input whose writes fail as a pipe with no reader fails on Windows.
+
+    Windows answers a write to a pipe whose reader has exited, or closed its
+    end, with ``OSError`` and ``EINVAL`` rather than the ``BrokenPipeError``
+    of POSIX; *error* sets the number the write fails with.
+    """
+
+    def __init__(self, stream: IO[bytes], error: int) -> None:
+        self._stream = stream
+        self._error = error
+
+    def write(self, data: bytes) -> int:
+        raise OSError(self._error, os.strerror(self._error))
+
+    def flush(self) -> None:
+        raise OSError(self._error, os.strerror(self._error))
+
+    def close(self) -> None:
+        self._stream.close()
+
+
 def _talk_to(
-    program: str, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    program: str,
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    ended: bool = False,
+    write_error: int | None = None,
 ) -> list[str]:
-    """A check sent to a node that runs *program*, a Python one, and nothing else."""
+    """A check sent to a node that runs *program*, a Python one, and nothing else.
+
+    With *ended*, the node has exited before anything is written to it, so
+    the write meets a pipe without a reader on every run; with
+    *write_error*, each write fails with that error number, as on a system
+    that says so another way.
+    """
     from phonometry.simulation import Compute
     from phonometry.simulation._remote import command
 
     monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
 
     def spawn(argv: list[str], **kwargs: Any) -> subprocess.Popen[bytes]:
-        return subprocess.Popen([sys.executable, "-c", program], **kwargs)
+        process = subprocess.Popen([sys.executable, "-c", program], **kwargs)
+        if ended:
+            process.wait(timeout=60)
+        if write_error is not None:
+            assert process.stdin is not None
+            process.stdin = _GoneReader(process.stdin, write_error)  # type: ignore[assignment]
+        return process
 
     header = clip_transport.job_header(
         [],
@@ -1115,11 +1155,42 @@ def test_a_node_that_dies_before_answering_is_named(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """An import error or a crash on the node is a problem with its exit status, never a yes."""
-    problems = _talk_to("import sys; sys.exit(3)", tmp_path, monkeypatch)
+    problems = _talk_to("import sys; sys.exit(3)", tmp_path, monkeypatch, ended=True)
     assert problems == [
         "the node stopped before it said it was done",
         "the node exited with status 3",
     ]
+
+
+def test_a_node_gone_before_its_program_is_named_on_windows_too(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Windows fails the write to a pipe with no reader with EINVAL: the exit status is still the problem."""
+    problems = _talk_to(
+        "import sys; sys.exit(3)",
+        tmp_path,
+        monkeypatch,
+        ended=True,
+        write_error=errno.EINVAL,
+    )
+    assert problems == [
+        "the node stopped before it said it was done",
+        "the node exited with status 3",
+    ]
+
+
+def test_a_write_that_fails_for_another_reason_is_raised(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Only a pipe whose reader is gone gives way to the node's exit status."""
+    with pytest.raises(OSError, match="Input/output error") as raised:
+        _talk_to(
+            "import sys; sys.stdin.buffer.read()",
+            tmp_path,
+            monkeypatch,
+            write_error=errno.EIO,
+        )
+    assert raised.value.errno == errno.EIO
 
 
 def test_what_the_node_writes_to_its_standard_error_reaches_the_terminal_escaped(

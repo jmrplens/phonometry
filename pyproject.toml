@@ -134,8 +134,12 @@ classifiers = [
 #                 is excluded: it calls pdb.set_trace() where it styles each
 #                 shape it converts, so a .report() stops at a debugger
 #                 prompt, or fails without a terminal; 1.4.1 removed it
-#   soundfile 0.12.0   the first wheel that carries its own libsndfile; 0.11
-#                 needs one installed on the system
+#   soundfile 0.12.0   the first release with a Linux wheel that carries its
+#                 own libsndfile, for x86-64; 0.11 needs one installed on the
+#                 system there. Where no wheel carries it, musl at every
+#                 release, Linux on ARM before 0.13.0 and Windows on ARM
+#                 before 0.14.0, pip takes the pure wheel, which loads the
+#                 system's
 #   torch 2.3.0   2.2.0 to 2.2.2 are built against NumPy 1 and cannot read
 #                 an array of NumPy 2 ("Numpy is not available"); 2.1 has no
 #                 wheel for Python 3.12

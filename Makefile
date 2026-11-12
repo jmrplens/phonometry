@@ -497,7 +497,8 @@ identifier-spelling:
 # to a `Literal` of its options; a string open by its nature is listed with its
 # reason. Each Literal choice reaches require_choice on every path, and a
 # choice written in several parts (a single name, each key and each value of
-# Boundary | Mapping[Side, Boundary | float]) in each of them. Needs the
+# Boundary | Mapping[Side, Boundary | float]) in each of them, and no Literal
+# lists a value every call refuses, whatever the other arguments. Needs the
 # package importable, for the same reason parameter-units does.
 choice-literals:
 	$(PYTHON) scripts/check_choice_literals.py

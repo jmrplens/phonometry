@@ -18,12 +18,14 @@ import ast
 import contextlib
 import dataclasses
 import enum
+import functools
 import importlib.util
 import inspect
 import pathlib
 import sys
 import textwrap
 import typing
+import warnings
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -37,8 +39,10 @@ import check_choice_literals as ccl
 import guard_caches
 import pytest
 
+from phonometry import building, emission, environment, io, vibration
 from phonometry._internal.frozen import OwnsArrays
 from phonometry._internal.validation import require_choice
+from phonometry.environment import RailRoughnessClass
 from phonometry.filters.weighting import time_weighting
 
 #: The tests that read the whole package share what the guard keeps of it, so
@@ -4462,3 +4466,558 @@ def test_a_hand_written_init_runs_the_hook_it_calls_on_self_on_every_path(
             record("medium")  # type: ignore[arg-type]
     else:
         assert record("medium").pace == "medium"  # type: ignore[arg-type]
+
+
+# -- Rule D24: a Literal lists no value every call refuses -------------------
+
+_Gear = Literal["low", "high", "reverse"]
+_Axle = Literal["front", "rear"]
+#: The gears with a ratio of their own; ``"reverse"`` has none here.
+_GEAR_RATIOS = MappingProxyType({"low": 3.0, "high": 1.0})
+#: The ratio of each gear on each axle it drives.
+_PAIRED_RATIOS = MappingProxyType({("low", "front"): 3.0, ("high", "rear"): 1.0})
+#: ``(teeth, ratio)`` of every gear, the ratio ``None`` for one that has none.
+_GEAR_ROWS: Mapping[str, tuple[int, float | None]] = MappingProxyType(
+    {"low": (12, 3.0), "high": (36, 1.0), "reverse": (10, None)}
+)
+
+
+class _GearMember(enum.Enum):
+    LOW = "low"
+    HIGH = "high"
+
+
+class _Lane(enum.Enum):
+    SLOW = "slow"
+    FAST = "fast"
+    CLOSED = "closed"
+
+
+#: The posted speed of each lane open to traffic; the closed lane has none.
+_LANE_SPEEDS = MappingProxyType({"slow": 80.0, "fast": 120.0})
+#: Every lane as its member, the closed one among them.
+_LaneMember = Literal[_Lane.SLOW, _Lane.FAST, _Lane.CLOSED]
+#: The gears and the parking position: a ``Literal`` that lists another.
+_GearOrPark = Literal[_Gear, "park"]
+
+
+def _ratio_by_check(gear: _Gear) -> float:
+    return _GEAR_RATIOS[require_choice(gear, "gear", tuple(_GEAR_RATIOS))]
+
+
+def _ratio_by_membership(gear: _Gear) -> float:
+    if isinstance(gear, str) and gear not in _GEAR_RATIOS:
+        msg = f"gear {gear!r} has no ratio"
+        raise ValueError(msg)
+    return 1.0
+
+
+def _ratio_by_lookup(gear: _Gear) -> float:
+    return _GEAR_RATIOS[gear]
+
+
+def _ratio_handed_on(gear: _Gear, load: float) -> float:
+    return load * _ratio_by_check(gear)
+
+
+def _gear_row(gear: object) -> tuple[int, float | None]:
+    name = require_choice(gear, "gear", tuple(_GEAR_ROWS))
+    return _GEAR_ROWS[name]
+
+
+def _ratio_through_a_row(gear: _Gear) -> float:
+    _, ratio = _gear_row(gear)
+    if ratio is None:
+        msg = f"gear {gear!r} has no ratio"
+        raise ValueError(msg)
+    return ratio
+
+
+def _ratio_by_member(gear: _Gear) -> _GearMember:
+    return _GearMember(gear)
+
+
+def _ratio_by_pair(gear: _Gear, axle: _Axle) -> float:
+    return _PAIRED_RATIOS[(gear, axle)]
+
+
+@dataclass(frozen=True)
+class _Gearbox:
+    gear: _Gear
+
+    def __post_init__(self) -> None:
+        require_choice(self.gear, "gear", ("low", "high"))
+
+
+def _gearbox_of(gear: _Gear) -> _Gearbox:
+    return _Gearbox(gear=gear)
+
+
+def _ratio_beside_another(gear: _Gear, *, towing: bool) -> float:
+    if towing and gear == "reverse":
+        msg = "no towing in reverse"
+        raise ValueError(msg)
+    return 1.0
+
+
+def _ratio_in_a_later_link(gear: _Gear, load: float) -> bool:
+    return 0 < load < _GEAR_RATIOS[gear]
+
+
+def _ratio_tested_in_a_later_link(gear: _Gear, level: float) -> float:
+    if 0 <= level < _GEAR_RATIOS[gear]:
+        return 1.0
+    return 0.0
+
+
+def _ratio_in_the_first_link(gear: _Gear, load: float, limit: float) -> bool:
+    return _GEAR_RATIOS[gear] < load < limit
+
+
+def _ratio_behind_links_that_hold(gear: _Gear) -> bool:
+    return 0 < 1 < _GEAR_RATIOS[gear]
+
+
+def _ratio_on_one_branch(gear: _Gear, *, towing: bool) -> float:
+    if towing:
+        return _GEAR_RATIOS[gear]
+    return 1.0
+
+
+def _ratio_caught(gear: _Gear) -> float:
+    try:
+        return _GEAR_RATIOS[gear]
+    except KeyError:
+        return 0.0
+
+
+def _ratio_after_an_early_return(gear: _Gear) -> float:
+    if gear == "reverse":
+        return -1.0
+    return _GEAR_RATIOS[gear]
+
+
+def _ratio_in_a_loop(gear: _Gear, loads: Sequence[float]) -> float:
+    total = 0.0
+    for load in loads:
+        total += load * _GEAR_RATIOS[gear]
+    return total
+
+
+def _first_load_or_ratio(gear: _Gear, loads: Sequence[float]) -> float:
+    for load in loads:
+        return load
+    return _GEAR_RATIOS[gear]
+
+
+def _ratio_unless_a_load_stops_short(gear: _Gear, loads: Sequence[float]) -> float:
+    total = 0.0
+    for load in loads:
+        if load > 0:
+            total += load
+        else:
+            return total
+    return total * _GEAR_RATIOS[gear]
+
+
+def _speed_of_lane(lane: _LaneMember) -> float:
+    return _LANE_SPEEDS[lane.value]
+
+
+def _ratio_or_park(gear: _GearOrPark) -> float:
+    if gear == "park":
+        return 0.0
+    return _GEAR_RATIOS[gear]
+
+
+def _refusal(function: Callable[..., object], name: str, value: object) -> str | None:
+    return ccl._always_refused(function, name, value, field=False)
+
+
+@pytest.mark.parametrize(
+    ("function", "evidence"),
+    [
+        (_ratio_by_check, "require_choice refuses it"),
+        (_ratio_by_membership, "raises where isinstance(gear, str)"),
+        (_ratio_by_lookup, "_GEAR_RATIOS has no key 'reverse'"),
+        (_ratio_handed_on, "handed to _ratio_by_check, require_choice"),
+        (_ratio_through_a_row, "raises where ratio is None"),
+        (_ratio_by_member, "_GearMember has no member of value 'reverse'"),
+        (_ratio_by_pair, "_PAIRED_RATIOS has no key ('reverse', ?)"),
+        (_gearbox_of, "handed to _Gearbox.__post_init__, require_choice"),
+        (_ratio_in_the_first_link, "_GEAR_RATIOS has no key 'reverse'"),
+        (_ratio_behind_links_that_hold, "_GEAR_RATIOS has no key 'reverse'"),
+    ],
+    ids=[
+        "shared-check",
+        "membership",
+        "table",
+        "handed-on",
+        "row-a-helper-hands-back",
+        "enum",
+        "no-key-holds-it",
+        "record",
+        "first-link",
+        "later-link-behind-links-that-hold",
+    ],
+)
+def test_a_value_every_call_refuses_is_named(
+    function: Callable[..., object], evidence: str
+) -> None:
+    """A value the call refuses whatever else it is handed, at a shared
+    check, a membership test that raises, a fixed table, an ``Enum``, a
+    table keyed by tuples none of which holds it in its place, a function
+    or a record it is handed to, or a test of what a helper hands back for
+    it (the ``j3 is None`` of the junction with no straight section), is
+    named with the refusal; the values the call takes are not. A lookup in
+    the first link of a chained comparison runs whenever the comparison
+    does, and so does one in a later link behind links that always hold.
+    """
+    reason = _refusal(function, "gear", "reverse")
+    assert reason is not None
+    assert evidence in reason
+    assert _refusal(function, "gear", "low") is None
+
+
+def test_a_value_refused_beside_another_argument_is_a_combination() -> None:
+    """A refusal joined with a test of another argument, one in a later link
+    of a chained comparison that runs only when a link testing another
+    argument holds, one on a branch another argument picks, and a tuple key
+    some key holds the value in, are combinations the ``Literal`` cannot
+    say: none is a refusal of the value.
+
+    Every link of a chained comparison was read as running, so the lookup of
+    ``0 < load < _GEAR_RATIOS[gear]`` refused ``"reverse"``, though Python
+    skips it whenever the load is not positive.
+    """
+    assert _refusal(_ratio_beside_another, "gear", "reverse") is None
+    assert _refusal(_ratio_in_a_later_link, "gear", "reverse") is None
+    assert _refusal(_ratio_tested_in_a_later_link, "gear", "reverse") is None
+    assert _refusal(_ratio_on_one_branch, "gear", "reverse") is None
+    assert _refusal(_ratio_by_pair, "gear", "high") is None
+    assert _refusal(_ratio_in_a_loop, "gear", "reverse") is None
+
+
+def test_a_refusal_a_handler_catches_or_a_return_skips_is_none() -> None:
+    """A lookup whose ``KeyError`` a handler turns into a value, one an
+    earlier ``return`` keeps the value from, and one after a loop that may
+    return before it, take the value.
+
+    The walk looked for the loop's ``return`` in each statement of its body
+    as in a scope of its own, which it entered by that statement's body
+    alone: a ``return`` written straight in the loop, or in the ``else`` of
+    a test in it, went unseen, and the lookup after the loop refused
+    ``"reverse"``, though a call with a load returns first.
+    """
+    assert _refusal(_ratio_caught, "gear", "reverse") is None
+    assert _refusal(_ratio_after_an_early_return, "gear", "reverse") is None
+    assert _refusal(_first_load_or_ratio, "gear", "reverse") is None
+    assert _refusal(_ratio_unless_a_load_stops_short, "gear", "reverse") is None
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "return 1.0",
+        "if load:\n    pass\nelse:\n    return 1.0",
+        "try:\n    pass\nexcept KeyError:\n    return 1.0",
+        "try:\n    pass\nfinally:\n    return 1.0",
+        "while load:\n    pass\nelse:\n    return 1.0",
+        "with open(path):\n    return 1.0",
+        "match load:\n    case 0:\n        return 1.0",
+    ],
+    ids=["straight", "else", "handler", "finally", "loop-else", "with", "case"],
+)
+def test_a_return_is_found_wherever_the_statements_hold_it(source: str) -> None:
+    """A ``return`` of the function's own is found in the statements that
+    hold it, written straight among them or in any branch of one: the walk
+    reads a loop that may return, and a ``finally`` that returns, by it.
+    """
+    assert ccl._returns_in(ast.parse(source).body)
+
+
+def test_a_return_of_a_function_or_class_written_inside_is_not_one() -> None:
+    """The ``return`` of a function or a class written among the statements
+    ends a call of that function, not of the one the walk reads.
+    """
+    source = "def inner():\n    return 1.0\nclass Inner:\n    def f(self):\n        return 1.0"
+    assert not ccl._returns_in(ast.parse(source).body)
+
+
+def test_a_return_in_finally_takes_the_value(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ``return`` written straight in ``finally`` swallows the lookup's
+    ``KeyError``, so the call takes the value; one written in a test of it
+    was the only one the walk saw.
+    """
+    source = """
+        from types import MappingProxyType
+
+        _RATIOS = MappingProxyType({"low": 3.0})
+
+        def ratio(gear):
+            try:
+                return _RATIOS[gear]
+            finally:
+                return 0.0
+        """
+    with warnings.catch_warnings():
+        # Python 3.14 warns at a return in finally (PEP 765), which is the
+        # shape planted here.
+        warnings.filterwarnings(
+            "ignore", message="'return' in a 'finally' block", category=SyntaxWarning
+        )
+        _plant_modules(tmp_path, monkeypatch, {"_ratio_in_finally": source})
+    ratio = sys.modules["phonometry._ratio_in_finally"].ratio
+    assert ratio("reverse") == 0.0
+    assert _refusal(ratio, "gear", "reverse") is None
+
+
+def test_each_value_the_literal_lists_is_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The walk reads the ``Literal`` of each parameter through its alias and
+    reports each value every call refuses, the record's field included, and
+    no parameter whose values every call may take.
+    """
+    targets = [
+        (__name__, "_ratio_by_check", _ratio_by_check),
+        (__name__, "_ratio_beside_another", _ratio_beside_another),
+        (__name__, "_Gearbox", _Gearbox),
+    ]
+    monkeypatch.setattr(ccl, "_targets", lambda: iter(targets))
+    found = {(choice.qualname, choice.name): choice for choice in ccl.refused_choices()}
+    assert sorted(found) == [("_Gearbox", "gear"), ("_ratio_by_check", "gear")]
+    assert [
+        evidence.split(":")[0] for evidence in found["_Gearbox", "gear"].evidence
+    ] == ["'reverse'"]
+
+
+def test_each_member_and_each_text_of_a_literal_it_lists_is_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The walk reads a ``Literal`` as the package holds it: an ``Enum``
+    member it lists is read like a text, and so is each text of a ``Literal``
+    it lists in turn.
+
+    The values were read from the text of the annotation, the constants
+    alone, so ``Literal[RailRoughnessClass.WELL_MAINTAINED, ...]`` listed
+    nothing to read, and ``Literal[WeightingName, "band-limiting"]`` listed
+    ``"band-limiting"`` alone.
+    """
+    targets = [
+        (__name__, "_speed_of_lane", _speed_of_lane),
+        (__name__, "_ratio_or_park", _ratio_or_park),
+    ]
+    monkeypatch.setattr(ccl, "_targets", lambda: iter(targets))
+    found = {
+        choice.qualname: [evidence.split(":")[0] for evidence in choice.evidence]
+        for choice in ccl.refused_choices()
+    }
+    assert found == {
+        "_speed_of_lane": ["_Lane.CLOSED"],
+        "_ratio_or_park": ["'reverse'"],
+    }
+
+
+#: A vocabulary of ``Enum`` members, and a function that names it through an
+#: import its module makes for the type checker alone.
+_LANES_FOR_THE_CHECKER = {
+    "_lane_kinds": """
+        import enum
+        from typing import Literal
+
+        class Lane(enum.Enum):
+            SLOW = "slow"
+            CLOSED = "closed"
+
+        LaneMember = Literal[Lane.SLOW, Lane.CLOSED]
+        """,
+    "_lane_speeds": """
+        from __future__ import annotations
+
+        from types import MappingProxyType
+        from typing import TYPE_CHECKING
+
+        if TYPE_CHECKING:
+            from phonometry._lane_kinds import LaneMember
+
+        _SPEEDS = MappingProxyType({"slow": 80.0})
+
+        def speed(lane: LaneMember) -> float:
+            return _SPEEDS[lane.value]
+        """,
+}
+
+
+def test_a_literal_its_module_imports_for_the_type_checker_alone_is_read(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An annotation may name what its module imports under ``if
+    TYPE_CHECKING:``, a name the module never binds when it runs: the walk
+    reads it where the import points.
+    """
+    _plant_modules(tmp_path, monkeypatch, _LANES_FOR_THE_CHECKER)
+    speed = sys.modules["phonometry._lane_speeds"].speed
+    monkeypatch.setattr(
+        ccl, "_targets", lambda: iter([("phonometry._lane_speeds", "speed", speed)])
+    )
+    (choice,) = ccl.refused_choices()
+    assert [evidence.split(":")[0] for evidence in choice.evidence] == ["Lane.CLOSED"]
+
+
+def test_a_literal_the_walk_cannot_read_stops_it_by_name(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ``Literal`` whose values the walk cannot read, the members of an
+    ``Enum`` its module imports from nowhere, stops the walk with the
+    annotation it could not read, where it would pass values it never saw.
+    """
+    source = """
+        from __future__ import annotations
+
+        from typing import TYPE_CHECKING, Literal
+
+        if TYPE_CHECKING:
+            from phonometry._no_such_lanes import Lane
+
+        def speed(lane: Literal[Lane.SLOW] | None = None) -> float:
+            return 80.0
+        """
+    _plant_modules(tmp_path, monkeypatch, {"_lane_of_nowhere": source})
+    speed = sys.modules["phonometry._lane_of_nowhere"].speed
+    monkeypatch.setattr(
+        ccl,
+        "_targets",
+        lambda: iter([("phonometry._lane_of_nowhere", "speed", speed)]),
+    )
+    with pytest.raises(LookupError, match=r"Literal\[Lane\.SLOW\]"):
+        list(ccl.refused_choices())
+
+
+def _shown(value: object) -> str:
+    """*value* as the walk names it: an ``Enum`` member by its class and name."""
+    if isinstance(value, enum.Enum):
+        return f"{type(value).__name__}.{value.name}"
+    return repr(value)
+
+
+def _widened(
+    function: Callable[..., object], name: str, values: tuple[object, ...]
+) -> Callable[..., object]:
+    """*function* with its parameter *name* typed with a ``Literal`` of *values*."""
+
+    @functools.wraps(function)
+    def widened(*args: object, **kwargs: object) -> object:
+        return function(*args, **kwargs)
+
+    signature = inspect.signature(function)
+    listed: object = typing.Literal.__getitem__(values)
+    parameters = [
+        parameter.replace(annotation=listed) if parameter.name == name else parameter
+        for parameter in signature.parameters.values()
+    ]
+    widened.__signature__ = signature.replace(  # type: ignore[attr-defined]
+        parameters=parameters
+    )
+    return widened
+
+
+@pytest.mark.parametrize(
+    ("function", "name", "refused", "taken"),
+    [
+        (
+            vibration.straight_transmission_coefficient,
+            "junction",
+            ("T2", "L"),
+            ("X", "T1"),
+        ),
+        (
+            environment.rail_roughness,
+            "roughness",
+            ("N", "B", RailRoughnessClass.NOT_WELL_MAINTAINED, RailRoughnessClass.BAD),
+            ("E", "M", RailRoughnessClass.WELL_MAINTAINED, RailRoughnessClass.NORMAL),
+        ),
+        (
+            building.improvement_octave_bands,
+            "quantity",
+            ("LI", "LI,norm"),
+            ("ΔL", "Rs"),
+        ),
+        (emission.measurement_positions, "surface", ("box",), ("hemisphere",)),
+        (
+            vibration.construction_guide_values,
+            "area",
+            ("sensitive",),
+            ("industrial", "residential"),
+        ),
+    ],
+    ids=[
+        "junction",
+        "rail-roughness",
+        "octave-quantity",
+        "surface",
+        "construction-area",
+    ],
+)
+def test_the_values_a_narrowed_choice_dropped_are_the_ones_its_call_refuses(
+    function: Callable[..., object],
+    name: str,
+    refused: tuple[object, ...],
+    taken: tuple[object, ...],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Each choice the package narrowed to the values its call takes still
+    refuses the ones it dropped, whatever the other arguments are, and takes
+    the ones it kept; and the walk, handed the same function with its old,
+    wider annotation, names the dropped values and no other, the members of
+    ``RailRoughnessClass`` among them.
+    """
+    for value in refused:
+        assert _refusal(function, name, value) is not None, value
+    for value in taken:
+        assert _refusal(function, name, value) is None, value
+    widened = _widened(function, name, (*taken, *refused))
+    target = (function.__module__, function.__qualname__, widened)
+    monkeypatch.setattr(ccl, "_targets", lambda: iter([target]))
+    (choice,) = ccl.refused_choices()
+    assert [evidence.split(":")[0] for evidence in choice.evidence] == [
+        _shown(value) for value in refused
+    ]
+
+
+@pytest.mark.parametrize(
+    ("function", "name", "value"),
+    [
+        (io.write, "subtype", "PCM_32"),
+        (vibration.junction_transmission, "junction", "T2"),
+        (vibration.guide_values, "area", "sensitive"),
+    ],
+    ids=[
+        "refused-beside-a-flac-file",
+        "taken-though-a-helper-refuses-it",
+        "taken-though-a-sibling-table-refuses-it",
+    ],
+)
+def test_a_value_some_call_takes_passes(
+    function: Callable[..., object], name: str, value: str
+) -> None:
+    """A value some call takes passes. ``io.write`` refuses ``"PCM_32"``
+    beside a FLAC file alone, a combination the ``Literal`` cannot say.
+    ``junction_transmission`` takes every junction, ``"T2"`` among them, and
+    reaches ``straight_transmission_coefficient``, which refuses it, only
+    behind a test of the value that ``"T2"`` does not pass;
+    ``guide_values`` takes the sensitive area with every source, edition and
+    time of day it takes any area with, though Table 2, which
+    ``construction_guide_values`` reads, has no row for it.
+    """
+    assert _refusal(function, name, value) is None
+
+
+@pytest.mark.whole_tree
+def test_no_literal_lists_a_value_every_call_refuses() -> None:
+    """The package passes: every value a public ``Literal`` choice lists is
+    one some call takes (rule D24).
+    """
+    assert list(ccl.refused_choices()) == []

@@ -751,24 +751,31 @@ A split that also renames a public function, rewords its docstring or tidies a b
 ## Choices
 
 <a id="d24"></a>
-### D24. List in the field of a parameter typed with a `Literal` alias every value it takes
+### D24. List in the field of a parameter typed with a `Literal` every value it takes, and in the `Literal` no value its call refuses
 
-**Why.** A choice written once and reused is a type alias (`Mode = Literal["rms", "peak"]`) the package never publishes ([A5](api.md#a5)), and every module reads its annotations as text, so `help()` and the signature a notebook shows print `mode: 'Mode' = 'rms'`: the name of an alias no caller can look up, and not one of the values. Of the 1416 public parameters typed with such an alias, 512 named none or only some of their values in their `:param:` or `:ivar:` field, 237 of them with no field at all, the `language` of 202 plots among them.
+**Why.** A choice written once and reused is a type alias (`Mode = Literal["rms", "peak"]`) the package never publishes ([A5](api.md#a5)), and every module reads its annotations as text, so `help()` and the signature a notebook shows print `mode: 'Mode' = 'rms'`: the name of an alias no caller can look up, and not one of the values. Of the 1416 public parameters typed with such an alias, 512 named none or only some of their values in their `:param:` or `:ivar:` field, 237 of them with no field at all, the `language` of 202 plots among them. The list is a promise, and so is the `Literal` behind it: a value the editor offers, a type checker passes and the field lists is one the call takes. `straight_transmission_coefficient` listed the `"T2"` and `"L"` junctions, which have no straight section; `rail_roughness` listed the `"N"` and `"B"` classes, for which Table G-1b gives no spectrum; `construction_guide_values` listed the `"sensitive"` area, which DIN 4150-2 Table 2 does not apply to. Every call with one of them raised, whatever else it was handed.
 
 **Do**
 
 ```text
 :param mode: The detector. One of ``"rms"`` or ``"peak"``.
 :ivar fractions: The band sets of the analysis. Each one of ``1`` or ``3``.
+
+StraightJunction = Literal["X", "T1"]
+:param junction: ``"X"`` or ``"T1"``, the two junctions with a straight
+    section. The ``"T2"`` and ``"L"`` that the corner coefficient takes are
+    not offered: Hopkins gives no J3 for them.
 ```
 
 **Don't**
 
 ```text
 :param mode: The detector.
+
+junction: Junction = "X"   # Junction lists "T2" and "L", and every call with them raises
 ```
 
-**Enforced by:** `tests/test_choice_values_documented.py`
+**Enforced by:** `tests/test_choice_values_documented.py`, `scripts/check_choice_literals.py`, `make choice-literals`, `CI: Check that every fixed public choice is typed Literal`, `tests/test_check_choice_literals.py::test_no_literal_lists_a_value_every_call_refuses`
 
-**Exceptions.** A record written by `dataclasses` documents its constructor's parameters as the class's `:ivar` fields, and a class whose `__init__` has no docstring as the class's `:param` fields. An inline `Literal[...]` shows its values in the signature and needs no list. A value is written as the caller types it, a text in double quotes inside the code span; an alias that keys a mapping lists its values as the keys ("Keyed by any of"), and one that types the items of a sequence as each item's ("Each one of").
+**Exceptions.** A record written by `dataclasses` documents its constructor's parameters as the class's `:ivar` fields, and a class whose `__init__` has no docstring as the class's `:param` fields. An inline `Literal[...]` shows its values in the signature and needs no list. A value is written as the caller types it, a text in double quotes inside the code span; an alias that keys a mapping lists its values as the keys ("Keyed by any of"), and one that types the items of a sequence as each item's ("Each one of"). The guard reads each text, number or `Enum` member that a `Literal` of the choice itself lists, an alias, one written in place or one it lists in turn, from the annotation's value and not its text, and follows it through the function as it runs, every other argument unknown: a test the value alone decides (`==` or `in` against what the module writes, `isinstance`, and `not`, `and` and `or` of such tests) takes its branch, and a test that asks anything else takes both. The value fails when every path raises and one raises for it: at a shared check that does not take it (`require_choice` against fewer options), a lookup in a fixed table with no key for it, or, for a table keyed by tuples, with no key that holds it in its place, an `Enum` with no member of its value, a `raise` a test of it steered the call to, or a function of the package it is handed to, a record's `__post_init__` among them, that refuses it on every call; what such a function hands back is read the same way (`_, _, j3 = _junction(junction)` then `if j3 is None: raise`). A value refused only beside a value of another argument is a combination the `Literal` cannot say, and stays: `io.write(subtype="PCM_32")` refuses it beside a FLAC file alone, and a refusal on a branch another argument picks, inside a loop, or in a `try` whose handler goes on, passes. A choice whose vocabulary is shared takes a narrower alias of its own (`StraightJunction` of `Junction`, `ConstructionArea` of `Area`), and its field says why the other values are not offered.
 

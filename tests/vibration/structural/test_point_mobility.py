@@ -104,6 +104,21 @@ def test_beam_impedance_reciprocal() -> None:
     assert z * y == pytest.approx(1.0)
 
 
+def test_beam_mobility_of_a_vanishing_impedance_is_the_same_for_a_number() -> None:
+    """An impedance that underflows to zero gives the array's answer for a number too.
+
+    m' c_B is 0.0 for these inputs; the mobility, its reciprocal, came back
+    inf + nan j under NumPy's division warnings for an array and raised
+    ZeroDivisionError for a number. Both forms now warn alike.
+    """
+    divide = "(divide by zero|invalid value) encountered in divide"
+    with pytest.warns(RuntimeWarning, match=divide):
+        array = vibration.infinite_beam_mobility([1e-300], 1e-300, 1e-300)
+    with pytest.warns(RuntimeWarning, match=divide):
+        number = vibration.infinite_beam_mobility(1e-300, 1e-300, 1e-300)
+    np.testing.assert_array_equal([number], array)
+
+
 def test_beam_moment_mobility_phase_plus_45() -> None:
     # Y_M = omega (1 + j)/(4 B kB): +45 degrees.
     y = complex(vibration.infinite_beam_moment_mobility(120.0, B_BEAM, M1))

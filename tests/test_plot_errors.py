@@ -17,6 +17,7 @@ from a small input of its own that a test holds to the published set.
 
 from __future__ import annotations
 
+import builtins
 import importlib
 import inspect
 import pkgutil
@@ -33,6 +34,7 @@ from phonometry._internal.figures import is_plotting_method
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+    from types import ModuleType
 
 plt = pytest.importorskip("matplotlib.pyplot")
 
@@ -321,3 +323,70 @@ def test_a_response_plot_that_cannot_be_saved_closes_its_figure(
     with pytest.raises(FileNotFoundError, match="missing"):
         ph.filters.OctaveFilterBank(48000, response_plot=saved)
     assert not plt.get_fignums()
+
+
+#: What a drawing without matplotlib ends its message with, as the user copies it.
+_PLOT_EXTRA = 'pip install "phonometry[plot]"'
+
+
+def _without_matplotlib(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make every import of a matplotlib module fail as a missing package does."""
+    real_import = builtins.__import__
+
+    def blocked(name: str, *args: object, **kwargs: object) -> ModuleType:
+        if name.split(".")[0] == "matplotlib":
+            msg = f"No module named {name!r}"
+            raise ModuleNotFoundError(msg, name=name)
+        return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(builtins, "__import__", blocked)
+
+
+def _bare_import_errors(draws: dict[str, Callable[[], object]]) -> list[str]:
+    """The draws that let an ImportError out without the install hint of the extra.
+
+    A draw may refuse its input before it reaches matplotlib (a result that
+    keeps no geometry to draw); only an ImportError has to name the extra.
+    """
+    bare: list[str] = []
+    for name, draw in draws.items():
+        try:
+            draw()
+        except ImportError as exc:
+            if _PLOT_EXTRA not in str(exc):
+                bare.append(f"{name}: {exc}")
+        except (AttributeError, TypeError, ValueError):
+            pass
+    return bare
+
+
+@pytest.mark.parametrize(("name", "factory"), _drawn(), ids=[n for n, _ in _drawn()])
+def test_a_plot_without_matplotlib_names_the_extra(
+    name: str, factory: Callable[[], object], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without matplotlib every plotting method of a result says how to install it.
+
+    A plot imports what it draws with (``matplotlib.patches``,
+    ``matplotlib.ticker``) inside the function; thirteen of them, and four
+    ``plot_*`` functions, met such an import before making their figure and
+    raised a bare ModuleNotFoundError.
+    """
+    result = factory()
+    methods = _plots(result)
+    if not methods:
+        pytest.skip(f"{name} builds a result with no plot")
+    _without_matplotlib(monkeypatch)
+    bare = _bare_import_errors({method: getattr(result, method) for method in methods})
+    assert not bare, f"{name}: {bare}"
+
+
+def test_a_published_plot_function_without_matplotlib_names_the_extra(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _without_matplotlib(monkeypatch)
+    draws: dict[str, Callable[[], object]] = dict(_FUNCTIONS)
+    for owner, make in _NOT_RECORDS.items():
+        drawn = make()
+        for method in _plots(drawn):
+            draws[f"{owner}.{method}"] = getattr(drawn, method)
+    assert not _bare_import_errors(draws)

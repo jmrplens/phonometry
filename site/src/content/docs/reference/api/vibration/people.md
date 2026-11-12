@@ -311,7 +311,7 @@ construction_guide_values(
     duration_days: int | np.integer[Any],
     *,
     stage: Literal['I', 'II', 'III'] = 'I',
-    area: Literal['industrial', 'commercial', 'mixed', 'residential', 'sensitive'] = 'residential',
+    area: Literal['industrial', 'commercial', 'mixed', 'residential'] = 'residential',
 ) -> GuideValues
 ```
 
@@ -332,7 +332,7 @@ is not applicable to an especially sensitive area, a hospital for one;
 | :--- | :--- |
 | `duration_days` | $D$, a whole number of working days from 1 to 78. |
 | `stage` | `"I"` (default), `"II"` or `"III"`. |
-| `area` | The area the site is in; a commercial or industrial one has an $A_\mathrm{o}$ of 6 rather than 5, and `"sensitive"` is refused. One of `"industrial"`, `"commercial"`, `"mixed"`, `"residential"` or `"sensitive"`. |
+| `area` | The area the site is in; a commercial or industrial one has an $A_\mathrm{o}$ of 6 rather than 5. One of `"industrial"`, `"commercial"`, `"mixed"` or `"residential"`. The especially sensitive area, the `"sensitive"` that [`guide_values`](/phonometry/reference/api/vibration/people/#guide_values-1) takes, is not offered: 6.5.4.2 applies Table 2 to none, and asks for a separate investigation and agreement there. |
 
 **Returns:** The three values, as a [`GuideValues`](/phonometry/reference/api/vibration/people/#guidevalues).
 
@@ -340,7 +340,7 @@ is not applicable to an especially sensitive area, a hospital for one;
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a duration that is not a whole number of days from 1 to 78, an unknown stage, an unknown area or a sensitive one. |
+| ValueError | For a duration that is not a whole number of days from 1 to 78, an unknown stage, or an unknown area, `"sensitive"` among them. |
 | TypeError | if `duration_days` is a flag, a text or an array where a count goes, or `area` or `stage` is not a text. |
 
 ## CONSTRUCTION_STAGES

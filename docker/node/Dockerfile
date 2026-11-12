@@ -3,8 +3,10 @@
 # GPU, and `cpu`, on plain Ubuntu, for a node without one and for the CI job
 # that proves a remote run equals a local one. It is built on the machine
 # that runs it (make node-image HOST=<name> [TARGET=cpu]); nothing is
-# published to a registry. Each base is pinned by digest, and ffmpeg by URL
-# and SHA-256, so a rebuild cannot change them unseen.
+# published to a registry. Each base is pinned by digest, ffmpeg by URL and
+# SHA-256, and the signing key of the deadsnakes PPA, which Python 3.13 comes
+# from, is a file of the repository checked by its fingerprint, so a rebuild
+# cannot change them unseen.
 #
 # docker/node/provision.sh installs what both stages share: Python 3.13, the
 # pinned requirements with the figure stack, the DejaVu fonts, ffmpeg and
@@ -33,6 +35,20 @@
 # node with make node-image, and check there that ffmpeg -version names the
 # new release and that a libsvtav1 encode reports SVT-AV1 4. A build with
 # another SVT-AV1 major waits until the clips' setting is calibrated on it.
+#
+# The PPA's key, docker/node/deadsnakes.asc, is the export Launchpad gives at
+# https://api.launchpad.net/devel/~deadsnakes/+archive/ubuntu/ppa?ws.op=getSigningKeyData
+# (a JSON string of the armored key), byte for byte. Its fingerprint,
+# F23C5A6CF475977595C89F51BA6932366A755776, is the one the PPA's page on
+# Launchpad shows and the PPA's record in that API gives as
+# signing_key_fingerprint; keyserver.ubuntu.com serves the same key. Both
+# stages copy it in, the build reaches no keyserver, and provision.sh stops
+# the build unless the file holds that one key alone. Should Launchpad sign
+# the PPA with another key, apt stops at the PPA's index: take the new
+# export, check its fingerprint against the PPA's page, and move together
+# the file and every place that names its fingerprint: this paragraph,
+# provision.sh's key and tests/test_node_image.py, which fails while this
+# file or provision.sh names any other key.
 ARG FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-31-12-59/ffmpeg-n9.0.2-39-g7adfbe40dc-linux64-gpl-9.0.tar.xz
 ARG FFMPEG_SHA256=73e29a56974ae5a651133a04584c7483b21afe941e17dc91d79814a758b608d3
 
@@ -41,7 +57,7 @@ ARG FFMPEG_URL
 ARG FFMPEG_SHA256
 ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
-COPY docker/node/provision.sh requirements.txt requirements-figures.txt /tmp/node/
+COPY docker/node/provision.sh docker/node/deadsnakes.asc requirements.txt requirements-figures.txt /tmp/node/
 RUN sh /tmp/node/provision.sh
 RUN apt-get update \
     && apt-get install -y --no-install-recommends cuda-cudart-dev-13-3=13.3.29-1 \
@@ -56,7 +72,7 @@ FROM ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce
 ARG FFMPEG_URL
 ARG FFMPEG_SHA256
 ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1
-COPY docker/node/provision.sh requirements.txt requirements-figures.txt /tmp/node/
+COPY docker/node/provision.sh docker/node/deadsnakes.asc requirements.txt requirements-figures.txt /tmp/node/
 RUN sh /tmp/node/provision.sh
 ENV PATH=/opt/venv/bin:$PATH
 COPY src/phonometry/simulation/_remote/bootstrap.py /usr/local/share/phonometry-node/bootstrap.py

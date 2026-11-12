@@ -2131,6 +2131,7 @@ def _tested(node: ast.expr, parents: Mapping[ast.AST, ast.AST]) -> bool:
     return False
 
 
+@functools.cache
 def _rebound_inside(scope: ast.AST) -> frozenset[str]:
     """The names a function or a class written inside *scope* declares
     ``nonlocal`` and binds again: what *scope* holds under one is what the
@@ -2233,11 +2234,13 @@ def _held_on_every_path(
     something else.
     """
     name, scope = _bound_at(tree, read)
-    if scope is None:
+    if scope is None or name not in _names_stored_under(scope):
         return True
     if name in _rebound_inside(scope):
         return False
-    bindings = bindings_by_name(scope).get(name, [])
+    bindings = _scope_bindings(scope).get(name)
+    if not bindings:
+        return True
     for binding in held_before(scope, bindings, read):
         holder = parents.get(binding)
         if isinstance(holder, ast.AugAssign) and holder.target is binding:
@@ -2248,6 +2251,43 @@ def _held_on_every_path(
         ):
             return False
     return True
+
+
+@functools.cache
+def _names_stored_under(scope: ast.AST) -> frozenset[str]:
+    """Every name a statement anywhere under *scope* binds, the scopes
+    written inside it included: a name outside it is bound nowhere but as a
+    parameter.
+    """
+    found: set[str] = set()
+    for node in ast.walk(scope):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store | ast.Del):
+            found.add(node.id)
+        elif isinstance(node, ast.alias) and node.name != "*":
+            found.add(node.asname or node.name.partition(".")[0])
+        elif isinstance(
+            node,
+            ast.MatchAs
+            | ast.MatchStar
+            | ast.ExceptHandler
+            | ast.FunctionDef
+            | ast.AsyncFunctionDef
+            | ast.ClassDef,
+        ) and isinstance(node.name, str):
+            found.add(node.name)
+        elif isinstance(node, ast.MatchMapping) and node.rest:
+            found.add(node.rest)
+    return frozenset(found)
+
+
+@functools.cache
+def _scope_bindings(scope: ast.AST) -> Mapping[str, Sequence[ast.AST]]:
+    """Each name *scope* binds itself, with the nodes that bind it
+    (:func:`ast_scan.bindings_by_name`), read once for each scope.
+    """
+    return MappingProxyType(
+        {name: tuple(nodes) for name, nodes in bindings_by_name(scope).items()}
+    )
 
 
 #: The most combinations of what the dicts one call spreads may hold that a
@@ -6208,8 +6248,6 @@ def _checks_of(
                 node, callee, spread, namespace
             ).items():
                 value = _held(handed)
-                if not held_alike(value):
-                    variants.append([])
                 keys_kept = _keeps_keys(value, target, options)
                 handed_part = _handed_part(
                     part,
@@ -6221,6 +6259,8 @@ def _checks_of(
                 )
                 if handed_part is False:
                     continue
+                if not held_alike(value):
+                    variants.append([])
                 check = _post_init(record) if record is not None else callee
                 if (
                     record is not None

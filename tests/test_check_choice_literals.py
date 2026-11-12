@@ -1032,6 +1032,37 @@ def test_a_parameter_spread_from_a_dict_is_followed() -> None:
     assert found == ["handed to time_weighting(mode)"]
 
 
+def _spreads_on_one_branch(x: list[float], mode: str, *, quick: bool) -> object:
+    options = {"mode": mode}
+    if quick:
+        options = {"mode": "fast"}
+    return time_weighting(x, 48000, **options)  # type: ignore[call-overload]
+
+
+def _folds_through_a_spread_on_one_branch(mode: _Pace, *, quick: bool) -> str:
+    options: dict[str, str] = {"text": mode}
+    if quick:
+        options = {"text": "fast"}
+    return _validated(_lowered(**options))
+
+
+def test_a_dict_any_binding_of_which_holds_the_choice_hands_it_on() -> None:
+    """A dict spread into a call hands the choice on when any binding of it
+    that may stand at the call holds it: a parameter handed to a function
+    that checks it, and a text handed to one that folds it before the check,
+    are read through a dict the path that skips the branch binds.
+
+    The walk read the last dict the function's source assigns the name, the
+    one with a fixed text, and saw neither.
+    """
+    assert ccl.passed_on_evidence(_spreads_on_one_branch, "mode") == [
+        "handed to time_weighting(mode)"
+    ]
+    assert _cleaned(_folds_through_a_spread_on_one_branch, "mode", options=_PACES) == [
+        "handed to _lowered(text), .lower()"
+    ]
+
+
 @dataclass
 class _Built:
     kind: str
@@ -1969,6 +2000,52 @@ def test_a_choice_is_checked_by_a_shared_validator_on_every_path() -> None:
     assert _verdict_of(_never_checked, "mode") == (
         "never checked, so a misspelling passes"
     )
+
+
+#: No pace: what a dict of keywords starts from before its own entries.
+_NO_PACE: Mapping[str, str] = MappingProxyType({})
+
+
+def _validated_through_a_spread_on_one_branch(mode: _Pace, *, strict: bool) -> str:
+    options: dict[str, str] = {"mode": "fast"}
+    if strict:
+        options = {"mode": mode}
+    return _validated(**options)
+
+
+def _validated_through_a_spread_on_every_branch(mode: _Pace, *, strict: bool) -> str:
+    if strict:
+        options: dict[str, str] = {"mode": mode}
+    else:
+        options = dict(_NO_PACE, mode=mode)
+    return _validated(**options)
+
+
+def _validated_through_a_spread_written_into(mode: _Pace, *, strict: bool) -> str:
+    options: dict[str, str] = {"mode": mode}
+    if not strict:
+        options["mode"] = "fast"
+    return _validated(**options)
+
+
+def test_a_check_through_a_dict_spread_counts_where_the_dict_holds_the_choice() -> None:
+    """A check a dict spread into a call reaches checks the choice on every
+    path only when every binding of the dict that may stand at the call
+    holds the choice there, and nothing writes another value in: one bound
+    on one branch, or written over on one, lets a misspelling past on the
+    other.
+
+    The walk read the last dict the function's source assigns the name, so
+    ``_validated(**options)`` checked the choice on every path, though
+    ``strict=False`` hands it ``"fast"`` and takes ``"fsat"``.
+    """
+    for function in (
+        _validated_through_a_spread_on_one_branch,
+        _validated_through_a_spread_written_into,
+    ):
+        assert function("fsat", strict=False) == "fast"  # type: ignore[arg-type]
+        assert _verdict_of(function, "mode") is not None, function.__name__
+    assert _verdict_of(_validated_through_a_spread_on_every_branch, "mode") is None
 
 
 def _checked_after_an_early_return(mode: _Pace, *, quick: bool) -> _Pace:
@@ -4620,6 +4697,65 @@ def _ratio_unless_a_load_stops_short(gear: _Gear, loads: Sequence[float]) -> flo
     return total * _GEAR_RATIOS[gear]
 
 
+def _ratio_spread_on_one_branch(gear: _Gear, *, strict: bool) -> float:
+    require_choice(gear, "gear", tuple(_GEAR_ROWS))
+    options: dict[str, _Gear] = {"gear": "low"}
+    if strict:
+        options = {"gear": gear}
+    return _ratio_by_lookup(**options)
+
+
+#: No gear: what a dict of keywords starts from before its own entries.
+_NO_GEAR: Mapping[str, _Gear] = MappingProxyType({})
+
+
+def _ratio_spread_on_every_branch(gear: _Gear, *, strict: bool) -> float:
+    if strict:
+        require_choice(gear, "gear", tuple(_GEAR_ROWS))
+        options = {"gear": gear}
+    else:
+        options = dict(_NO_GEAR, gear=gear)
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_spread_written_into(gear: _Gear, *, strict: bool) -> float:
+    options = {"gear": gear}
+    if not strict:
+        options["gear"] = "low"
+    return _ratio_by_lookup(**options)
+
+
+def _soften(options: dict[str, _Gear], *, strict: bool) -> None:
+    if not strict:
+        options["gear"] = "low"
+
+
+def _ratio_spread_handed_on(gear: _Gear, *, strict: bool) -> float:
+    options = {"gear": gear}
+    _soften(options, strict=strict)
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_spread_beside_overrides(
+    gear: _Gear, overrides: Mapping[str, _Gear]
+) -> float:
+    options = {"gear": gear, **overrides}
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_spread_before_a_rebinding(gear: _Gear, *, towing: bool) -> float:
+    held: _Gear = gear if towing else "low"
+    options = {"gear": held}
+    held = gear
+    return _ratio_by_lookup(**options) if held else 0.0
+
+
+def _ratio_spread_of_the_choice_as_given(gear: _Gear) -> float:
+    options = {"gear": gear}
+    gear = "low"
+    return _ratio_by_lookup(**options) / _ratio_by_lookup(gear)
+
+
 def _speed_of_lane(lane: _LaneMember) -> float:
     return _LANE_SPEEDS[lane.value]
 
@@ -4713,6 +4849,126 @@ def test_a_refusal_a_handler_catches_or_a_return_skips_is_none() -> None:
     assert _refusal(_ratio_after_an_early_return, "gear", "reverse") is None
     assert _refusal(_first_load_or_ratio, "gear", "reverse") is None
     assert _refusal(_ratio_unless_a_load_stops_short, "gear", "reverse") is None
+
+
+@pytest.mark.parametrize(
+    ("ratio", "taken"),
+    [
+        (functools.partial(_ratio_spread_on_one_branch, strict=False), 3.0),
+        (functools.partial(_ratio_spread_written_into, strict=False), 3.0),
+        (functools.partial(_ratio_spread_handed_on, strict=False), 3.0),
+        (
+            functools.partial(
+                _ratio_spread_beside_overrides, overrides={"gear": "low"}
+            ),
+            3.0,
+        ),
+        (functools.partial(_ratio_spread_before_a_rebinding, towing=False), 3.0),
+    ],
+    ids=["one-branch", "written-into", "handed-on", "beside-overrides", "rebound"],
+)
+def test_a_dict_spread_hands_what_the_path_bound_it_to(
+    ratio: functools.partial[float], taken: float
+) -> None:
+    """A dict spread into a call hands what the path that reaches the call
+    bound it to, as it was when it was built: a binding on one branch, a key
+    written on one, or by a function it is handed to, a key a later spread
+    may replace, and a name read again after the dict was built, leave the
+    helper's argument unknown, and the call takes the value.
+
+    The walk read the last dict the function's source assigns the name,
+    with each entry read where the call is made, so it handed ``"reverse"``
+    to ``_ratio_by_lookup`` on every path, though each of these calls takes
+    it and returns 3.0.
+    """
+    assert ratio("reverse") == taken
+    assert _refusal(ratio.func, "gear", "reverse") is None
+
+
+def test_a_dict_every_path_binds_hands_its_entries() -> None:
+    """A dict every path binds with the same entries hands them, read where
+    it is built: the value refused on every call is still named, and so is
+    one whose name is bound again after the dict holds it.
+    """
+    for ratio in (_ratio_spread_on_every_branch, _ratio_spread_of_the_choice_as_given):
+        reason = _refusal(ratio, "gear", "reverse")
+        assert reason is not None, ratio.__name__
+        assert "handed to _ratio_by_lookup, _GEAR_RATIOS has no key 'reverse'" in reason
+        assert _refusal(ratio, "gear", "low") is None
+    with pytest.raises(KeyError, match="reverse"):
+        _ratio_spread_of_the_choice_as_given("reverse")
+
+
+#: A helper that looks a gear up in a table without ``"reverse"``, one that
+#: falls back for it, and functions that import them where they run.
+_GEAR_LOOKUPS = {
+    "_gear_lookups": """
+        from types import MappingProxyType
+
+        RATIOS = MappingProxyType({"low": 3.0, "high": 1.0})
+        EVERY_RATIO = MappingProxyType({"low": 3.0, "high": 1.0, "reverse": -1.0})
+
+        def by_table(gear):
+            return RATIOS[gear]
+
+        def by_default(gear):
+            return RATIOS.get(gear, 0.0)
+        """,
+    "_gear_imports": """
+        from phonometry._gear_lookups import by_table
+
+        def by_branch(gear, *, lenient):
+            if lenient:
+                from phonometry._gear_lookups import by_default as lookup
+            else:
+                from phonometry._gear_lookups import by_table as lookup
+            return lookup(gear)
+
+        def by_branch_table(gear, *, lenient):
+            if lenient:
+                from phonometry._gear_lookups import EVERY_RATIO as TABLE
+            else:
+                from phonometry._gear_lookups import RATIOS as TABLE
+            return TABLE[gear]
+
+        def by_own_helper(gear):
+            def by_table(gear):
+                return 0.0
+
+            return by_table(gear)
+
+        def by_import(gear):
+            from phonometry._gear_lookups import by_table as lookup
+
+            return lookup(gear)
+        """,
+}
+
+
+def test_a_name_a_branch_imports_or_the_function_binds_is_read_on_its_path(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A name the function imports on one branch only, or binds itself over
+    one of its module, is what the path that reaches the call bound it to:
+    a helper or a table imported on one branch of two, and a local function
+    named as one of the module, leave the call unknown, and the call takes
+    the value. A helper imported on every path is followed.
+
+    The walk read each name the function calls or looks up in the names of
+    its module and of every import the function makes, the last one written
+    winning, so ``lookup(gear)`` was ``by_table`` on every path and the
+    local ``by_table`` was the module's.
+    """
+    _plant_modules(tmp_path, monkeypatch, _GEAR_LOOKUPS)
+    module = sys.modules["phonometry._gear_imports"]
+    assert module.by_branch("reverse", lenient=True) == 0.0
+    assert module.by_branch_table("reverse", lenient=True) == -1.0
+    assert module.by_own_helper("reverse") == 0.0
+    for taken in (module.by_branch, module.by_branch_table, module.by_own_helper):
+        assert _refusal(taken, "gear", "reverse") is None, taken.__name__
+    reason = _refusal(module.by_import, "gear", "reverse")
+    assert reason is not None
+    assert "handed to by_table, RATIOS has no key 'reverse'" in reason
 
 
 @pytest.mark.parametrize(

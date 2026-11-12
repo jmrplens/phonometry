@@ -157,10 +157,11 @@ jobs:
             local body
             local args=(--fail-with-body --show-error --silent --connect-timeout 10 --max-time 60
               --request "$method" --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}")
-            # Only reads are retried: a write GitLab committed before the
-            # connection dropped would be made twice.
+            # Only reads are retried, a connection that fails included,
+            # which --retry alone gives up on at once: a write GitLab
+            # committed before the connection dropped would be made twice.
             if [ "$method" = GET ]; then
-              args+=(--retry 3 --retry-delay 5)
+              args+=(--retry 3 --retry-delay 5 --retry-all-errors)
             fi
             if [ -n "$payload" ]; then
               args+=(--header "Content-Type: application/json" --data "$payload")
@@ -212,7 +213,7 @@ jobs:
             # To a file for the reason gitlab_request gives.
             body=$(mktemp)
             status=$(curl --silent --show-error --output "$body" --write-out '%{http_code}' \
-              --connect-timeout 10 --max-time 60 --retry 3 --retry-delay 5 \
+              --connect-timeout 10 --max-time 60 --retry 3 --retry-delay 5 --retry-all-errors \
               --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
               "${gitlab_api}/releases/${tag_encoded}")
             case "$status" in

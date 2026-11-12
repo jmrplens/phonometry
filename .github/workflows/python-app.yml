@@ -1974,9 +1974,11 @@ jobs:
         pip install -e .
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v4
-    # The cpu stage fetches a PPA key, the pinned ffmpeg build (checked
-    # against its SHA-256) and the figure stack: kept in the Actions cache by
-    # build step, rebuilt only when its inputs change, the ffmpeg pin included.
+    # The cpu stage fetches the pinned ffmpeg build (checked against its
+    # SHA-256), Python 3.13 from the deadsnakes PPA and the figure stack, and
+    # reaches no keyserver: the PPA's key is a file of the repository, checked
+    # by its fingerprint. All of it is kept in the Actions cache by build
+    # step, rebuilt only when its inputs change, the ffmpeg pin included.
     - name: Build the node image for a CPU
       uses: docker/build-push-action@v7
       env:

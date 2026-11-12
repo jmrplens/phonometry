@@ -28,6 +28,7 @@ _PINNED = {
         "70242": "ISO 12354-1:2017",
         "70238": "ISO 13887:2017",
         "46520": "ISO 3382-3:2012",
+        "77437": "ISO 3382-3:2022",
     },
     "iec": {
         "1204": "IEC 60268-1:1985",
@@ -128,25 +129,64 @@ def test_a_newer_edition_link_does_not_vouch_for_the_entry_link() -> None:
         "  [ISO 3382-3:2022](https://www.iso.org/standard/77437.html)).\n"
         "  [iso.org catalogue](https://www.iso.org/standard/46520.html).\n"
     )
-    pinned = {
-        "iso": {**_PINNED["iso"], "77437": "ISO 3382-3:2022"},
-        "iec": _PINNED["iec"],
-    }
-    links = ccl.links_in("docs/page.md", page)
-    assert [
-        problem for problem in ccl.problems(links, pinned) if "no page" not in problem
-    ] == []
+    assert _named(page) == []
     swapped = page.replace("46520", "77437").replace(
         "[ISO 3382-3:2022](https://www.iso.org/standard/77437",
         "[ISO 3382-3:2022](https://www.iso.org/standard/46520",
     )
-    found = [
-        p
-        for p in ccl.problems(ccl.links_in("docs/page.md", swapped), pinned)
-        if "no page" not in p
-    ]
+    found = _named(swapped)
     assert len(found) == 2
     assert any("opens ISO 3382-3:2022" in problem for problem in found)
+
+
+_REVISED = """---
+references:
+  - type: standard
+    designation: "ISO 3382-3:2012"
+    url: "https://www.iso.org/standard/{url}.html"
+    note: "The quantities this page implements. {written} (https://www.iso.org/standard/{note}.html); the 2012 edition is the implemented one."
+---
+"""
+
+
+def test_a_note_link_to_the_later_edition_it_names_passes() -> None:
+    page = _REVISED.format(
+        url="46520", written="Since revised as ISO 3382-3:2022", note="77437"
+    )
+    assert _named(page) == []
+
+
+def test_a_note_link_to_another_edition_than_the_note_names_is_named() -> None:
+    page = _REVISED.format(
+        url="46520", written="Since revised as ISO 3382-3:2022", note="46520"
+    )
+    (problem,) = _named(page)
+    assert "page.md:6" in problem
+    assert "opens ISO 3382-3:2012" in problem
+
+
+def test_the_reference_url_is_read_beside_its_designation_and_not_its_note() -> None:
+    page = _REVISED.format(
+        url="77437", written="Since revised as ISO 3382-3:2022", note="77437"
+    )
+    (problem,) = _named(page)
+    assert "page.md:5" in problem
+    assert "opens ISO 3382-3:2022" in problem
+
+
+def test_a_note_naming_no_designation_is_read_beside_its_reference() -> None:
+    page = _REVISED.format(url="46520", written="The catalogue page", note="46520")
+    assert _named(page) == []
+    (problem,) = _named(page.replace("standard/46520.html);", "standard/77437.html);"))
+    assert "page.md:6" in problem
+    assert "opens ISO 3382-3:2022" in problem
+
+
+def test_a_note_names_the_designation_of_the_link_catalogue_only() -> None:
+    page = _REVISED.format(
+        url="46520", written="Measured with an IEC 61672-1:2013 meter", note="46520"
+    )
+    assert _named(page) == []
 
 
 def test_another_edition_of_the_cited_document_is_named() -> None:
@@ -211,7 +251,7 @@ def test_a_pinned_number_no_page_links_is_named() -> None:
     stale = [
         problem for problem in _problems(page) if "is linked from no page" in problem
     ]
-    assert len(stale) == 5
+    assert len(stale) == 6
     assert any("1180 (IEC 60264-2-1:1989)" in problem for problem in stale)
 
 

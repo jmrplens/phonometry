@@ -9,12 +9,12 @@ another document while every page still builds, every link still resolves
 and the reader who follows it lands on a steel sheet or a needle-based
 injector. A review of the tone-burst guide found its reference to
 IEC 60268-1:1985 opening IEC 60264-2-1:1989, and the sweep that followed
-found 107 more links of the pages and their mirrors opening something other
+found 89 more links of the pages and their mirrors opening something other
 than what they sat beside, many of them copied from page to page: 84 opened
 another document or none at all (ISO 4871:1996 opened ISO 4878:1981,
 ISO 16283-2:2020 two different plastics standards, each of the five
 standards of the ISO 11200 series something else, and four parts of
-ISO 10140 a number the catalogue does not hold), and 23 opened a later
+ISO 10140 a number the catalogue does not hold), and 5 opened a later
 edition than the one the page cites. This is the guard for that class.
 
 The number alone cannot be read for its document, so :data:`PINNED`
@@ -24,9 +24,15 @@ the title of the webstore's own page for an IEC one. Every catalogue link in
 the pages of the site and in the mirrors under ``docs/`` then has to sit
 beside that designation, read where the link is written:
 
-- in a page's frontmatter, the ``designation`` of the reference that carries
-  the ``url``;
-- in a table, the cell before the link;
+- in a page's frontmatter, the ``url`` of a reference beside the
+  reference's ``designation``, and a link in its ``note`` beside the note up
+  to the link, with the other links taken out, so that "Since revised as
+  ISO 3382-3:2022 (https://...)" holds the link to the 2022 edition while
+  the reference's own ``url`` stays on the 2012 one it cites; a note that
+  names no designation of the link's catalogue before the link speaks of
+  its own reference, and its link is read beside the reference's
+  ``designation``;
+- in a table, the link's own cell up to the link;
 - anywhere else, the paragraph or list item up to the link, with the text of
   the other links taken out, so that a "since revised as" link to a newer
   edition names that edition and the entry's own catalogue link names the one
@@ -107,6 +113,21 @@ _SPACES = str.maketrans(
     {"\u00a0": " ", "\u202f": " ", "\u2009": " ", "\u2011": "-", "\u2010": "-"}
 )
 
+#: A designation of each catalogue as a page writes one: the publisher, the
+#: kind of deliverable if any (ISO/TS, ISO/IEC, IEC TS) and the number. A text
+#: that holds none of the link's catalogue does not say which document the
+#: link opens.
+_NAMED = {
+    catalogue: re.compile(
+        rf"(?<![\w-]){publisher}(?:/[A-Z]+)*(?:\s+(?:TS|TR|PAS|Guide))?\s+\d"
+    )
+    for catalogue, publisher in (("iso", "ISO"), ("iec", "IEC"))
+}
+
+#: A key of a page's frontmatter, at the top level or of a reference, and the
+#: start of its value.
+_FRONTMATTER_KEY = re.compile(r"^(?:  - |    )?([A-Za-z_][\w-]*):[ \t]*", re.MULTILINE)
+
 
 @dataclass(frozen=True)
 class Link:
@@ -127,23 +148,71 @@ def _frontmatter_end(text: str) -> int:
     return max(end, 0)
 
 
-def _beside_in_frontmatter(text: str, start: int, end: int) -> str:
-    """The designation of the reference whose ``url`` is at ``start``."""
+def _names_a_designation(text: str, catalogue: str) -> bool:
+    """Whether a text names some designation of the link's catalogue."""
+    return _NAMED[catalogue].search(text.translate(_SPACES)) is not None
+
+
+def _links_out(text: str) -> str:
+    """The text with its markdown links and bare catalogue addresses taken out."""
+    return LINK.sub(" ", MARKDOWN_LINK.sub(" ", text))
+
+
+def _read_up_to(written: str) -> str:
+    """What a link is read beside in the text written up to it.
+
+    A link whose label names a designation is read by its label; any other is
+    read beside the text before it, with the other links taken out.
+    """
+    label = re.search(r"\[([^\]\n]*)\]\($", written)
+    if label and _DESIGNATION.search(label.group(1).translate(_SPACES)):
+        return label.group(1)
+    return _links_out(written[: label.start()] if label else written)
+
+
+def _beside_in_frontmatter(text: str, start: int, end: int, catalogue: str) -> str:
+    """What a link in a page's frontmatter is read beside.
+
+    The ``url`` of a reference is read beside the reference's
+    ``designation``. A link written in any other field, a ``note`` above all,
+    is read beside that field's text up to the link, with the other links
+    taken out, as a paragraph of the body is: a note that says "Since revised
+    as ISO 3382-3:2022 (https://www.iso.org/standard/77437.html)" links the
+    edition it names there, not the one its reference cites, and its link
+    is held to ISO 3382-3:2022.
+
+    A note that names no designation of the link's catalogue before the link
+    ("The catalogue page (https://...) lists the corrigenda") speaks of its
+    own reference, so its link is read beside the reference's
+    ``designation``, as the ``url`` is. That still holds the number to a
+    document: refusing the link would ask the note to repeat the designation
+    its reference already gives, and letting it through would leave the
+    number unread.
+    """
     item_start = text.rfind("\n  - ", 0, start)
     item_end = text.find("\n  - ", start)
     if item_end < 0 or item_end > end:
         item_end = end
-    item = text[item_start:item_end]
+    item = text[max(item_start, 0) : item_end]
     designation = re.search(r'^\s*designation:\s*"([^"]*)"', item, re.MULTILINE)
-    return designation.group(1) if designation else ""
+    own = designation.group(1) if designation else ""
+    keys = list(_FRONTMATTER_KEY.finditer(text, item_start + 1, start))
+    if not keys or keys[-1].group(1) == "url":
+        return own
+    written = _links_out(text[keys[-1].end() : start].lstrip("\"'"))
+    return written if _names_a_designation(written, catalogue) else own
 
 
 def _beside_in_body(text: str, start: int) -> str:
-    """The cell, list item or paragraph a body link is written in, up to it."""
+    """What a link in a page's body is read beside.
+
+    In a table, the link's own cell up to the link. Anywhere else, the list
+    item or paragraph the link is written in, up to it.
+    """
     line_start = text.rfind("\n", 0, start) + 1
     line = text[line_start:start]
     if line.lstrip().startswith("|"):
-        return line.rsplit("|", 1)[-1]
+        return _read_up_to(line.rsplit("|", 1)[-1])
     lines = [line]
     cursor = line_start
     while not _BLOCK_START.match(lines[0]) and cursor > 0:
@@ -153,7 +222,7 @@ def _beside_in_body(text: str, start: int) -> str:
             break
         lines.insert(0, previous)
         cursor = previous_start
-    return "\n".join(lines)
+    return _read_up_to("\n".join(lines))
 
 
 def _without_code(path: str, text: str) -> str:
@@ -182,18 +251,9 @@ def links_in(path: str, text: str) -> list[Link]:
         catalogue = "iso" if match.group("iso") else "iec"
         number = match.group("iso") or match.group("iec")
         if start < end:
-            beside = _beside_in_frontmatter(text, start, end)
+            beside = _beside_in_frontmatter(text, start, end, catalogue)
         else:
-            body = _beside_in_body(text, start)
-            # A link the label of which names a designation is read by its
-            # label; any other is read beside its text, the other links out.
-            label = re.search(r"\[([^\]\n]*)\]\($", body)
-            if label and _DESIGNATION.search(label.group(1).translate(_SPACES)):
-                beside = label.group(1)
-            else:
-                beside = MARKDOWN_LINK.sub(
-                    " ", body[: label.start()] if label else body
-                )
+            beside = _beside_in_body(text, start)
         found.append(
             Link(
                 path,

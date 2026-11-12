@@ -391,6 +391,55 @@ def test_a_label_naming_no_designation_is_read_beside_the_text_before_it(
     assert "opens ISO 13887:2017, which the link is not written beside" in problem
 
 
+@pytest.mark.parametrize(
+    "page",
+    [
+        # A paragraph that shows the address as an example.
+        "Write `https://www.iso.org/standard/70238.html`, never a bare number.\n",
+        # The same, in a list item and in a table cell.
+        "- An example: `https://www.iso.org/standard/70238.html`.\n",
+        "| Example | `https://www.iso.org/standard/70238.html` |\n| --- | --- |\n",
+        # A span of two backticks, and one that wraps over two lines of its
+        # paragraph.
+        "An example: ``https://www.iso.org/standard/70238.html``.\n",
+        "An example of a\nspan that wraps: `see\nhttps://www.iso.org/standard/70238.html`.\n",
+        # A comment the page does not show.
+        "<!-- https://www.iso.org/standard/70238.html -->\n",
+    ],
+)
+def test_a_catalogue_address_in_inline_code_or_a_comment_is_no_link(page: str) -> None:
+    assert ccl.links_in("docs/page.md", page) == []
+    assert ccl.links_in("site/src/content/docs/page.mdx", page) == []
+
+
+def test_an_address_between_escaped_backticks_is_a_link() -> None:
+    page = "ISO 13887:2017 \\`https://www.iso.org/standard/70238.html\\`.\n"
+    (link,) = ccl.links_in("docs/page.md", page)
+    assert link.number == "70238"
+    assert _named(page) == []
+
+
+def test_an_address_in_inline_code_does_not_end_the_clause_of_a_link() -> None:
+    page = (
+        "ISO 12354-1:2017, unlike `https://www.iso.org/standard/70238.html`,"
+        " [catalogue](https://www.iso.org/standard/70242.html).\n"
+    )
+    (link,) = ccl.links_in("docs/page.md", page)
+    assert "ISO 12354-1:2017" in link.beside
+    assert _named(page) == []
+
+
+def test_a_note_address_between_backticks_is_still_a_link() -> None:
+    # A frontmatter is YAML: the site shows a note as text and links every
+    # address in it, backticks or not.
+    page = _REVISED.format(
+        url="46520", written="Since revised as ISO 3382-3:2022 `", note="46520"
+    ).replace(".html);", ".html)`;")
+    (problem,) = _named(page)
+    assert "page.md:6" in problem
+    assert "opens ISO 3382-3:2012" in problem
+
+
 def test_the_old_iec_number_names_the_renumbered_publication() -> None:
     page = _FRONTMATTER.format(
         designation="IEC 651:1979", url="https://webstore.iec.ch/en/publication/2777"

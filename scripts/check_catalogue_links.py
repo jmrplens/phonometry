@@ -86,7 +86,8 @@ import sys
 import urllib.request
 from dataclasses import dataclass
 
-from markdown_fences import code_lines, page_kind
+from markdown_fences import code_lines, page_kind, page_lines
+from markdown_spans import blank_inline_spans_by_block
 
 #: The repository.
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -315,26 +316,49 @@ def _beside_in_body(text: str, start: int, catalogue: str) -> str:
     return _read_up_to("\n".join(lines), catalogue)
 
 
-def _without_code(path: str, text: str) -> str:
-    """The page with each line of a fenced or indented code block blanked.
+def _blank(text: str) -> str:
+    """The text with every character but a line end a space."""
+    return re.sub(r"[^\n]", " ", text)
 
-    A catalogue address in a code block is an example of one, not a link a
-    reader follows (rule F70 shows a wrong one as its counterexample). The
-    lines keep their length, so every offset still points where it did.
+
+def _without_code(path: str, text: str, end: int) -> str:
+    """The page with its code and its comments blanked, its frontmatter as written.
+
+    A catalogue address in a fenced or indented code block, in an inline code
+    span or in a comment is an example of one or a note to the maintainer,
+    not a link a reader follows (rule F70 shows a wrong one as its
+    counterexample, and a page may show the form of an address in backticks).
+    The body is read as the site reads it, by :mod:`markdown_spans`: a code
+    span opens on a run of backticks and closes on the next run as long, never
+    past its paragraph, list item or table cell, and a backslash before the
+    run shows the backtick and opens nothing; the page's comments are read in
+    the same pass. The frontmatter is YAML, not Markdown: the site shows a
+    reference's note as text and links every address in it, backticks or not,
+    so it is kept whole. Every blanked character but a line end becomes a
+    space, so every offset still points where it did.
+
+    :param end: Where the page's frontmatter ends (:func:`_frontmatter_end`).
     """
-    lines = text.split("\n")
-    return "\n".join(
+    kind = page_kind(path)
+    lines = (_blank(text[:end]) + text[end:]).split("\n")
+    walked = list(page_lines(lines, kind=kind))
+    body = "\n".join(
         " " * len(line) if code else line
         for line, code in zip(
-            lines, code_lines(lines, kind=page_kind(path)), strict=True
+            lines, code_lines(lines, kind=kind, walked=walked), strict=True
         )
     )
+    prose = blank_inline_spans_by_block(body, "`", kind, kind=kind, walked=walked)
+    return text[:end] + prose[end:]
 
 
 def links_in(path: str, text: str) -> list[Link]:
     """Every catalogue link of a page, with the text that should name its document."""
+    if LINK.search(text) is None:
+        # Most pages link no catalogue: they need no reading.
+        return []
     end = _frontmatter_end(text)
-    text = _without_code(path, text)
+    text = _without_code(path, text, end)
     found = []
     for match in LINK.finditer(text):
         start = match.start()

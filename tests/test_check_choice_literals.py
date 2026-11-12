@@ -4765,7 +4765,9 @@ def test_a_return_in_finally_takes_the_value(
     with warnings.catch_warnings():
         # Python 3.14 warns at a return in finally (PEP 765), which is the
         # shape planted here.
-        warnings.simplefilter("ignore", SyntaxWarning)
+        warnings.filterwarnings(
+            "ignore", message="'return' in a 'finally' block", category=SyntaxWarning
+        )
         _plant_modules(tmp_path, monkeypatch, {"_ratio_in_finally": source})
     ratio = sys.modules["phonometry._ratio_in_finally"].ratio
     assert ratio("reverse") == 0.0

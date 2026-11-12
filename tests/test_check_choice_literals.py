@@ -2048,6 +2048,113 @@ def test_a_check_through_a_dict_spread_counts_where_the_dict_holds_the_choice() 
     assert _verdict_of(_validated_through_a_spread_on_every_branch, "mode") is None
 
 
+def _validated_through_a_spread_a_nested_function_rebinds(
+    mode: _Pace, *, strict: bool
+) -> str:
+    options: dict[str, str] = {"mode": mode}
+
+    def soften() -> None:
+        nonlocal options
+        options = {"mode": "fast"}
+
+    if not strict:
+        soften()
+    return _validated(**options)
+
+
+def _soften_the_first_pace(boxes: Sequence[dict[str, str]]) -> None:
+    boxes[0]["mode"] = "fast"
+
+
+def _validated_through_a_spread_handed_on_in_a_list(
+    mode: _Pace, *, strict: bool
+) -> str:
+    options: dict[str, str] = {"mode": mode}
+    if not strict:
+        _soften_the_first_pace([options])
+    return _validated(**options)
+
+
+def test_a_check_through_a_dict_changed_out_of_sight_is_on_some_paths() -> None:
+    """A dict a function written inside the body rebinds with ``nonlocal``,
+    or one handed to a call inside a list, may hold another value where the
+    check runs: the check through it is on some paths only.
+
+    The walk read the dict as holding the choice there, and credited the
+    check on every path, though ``strict=False`` takes ``"fsat"``.
+    """
+    for function in (
+        _validated_through_a_spread_a_nested_function_rebinds,
+        _validated_through_a_spread_handed_on_in_a_list,
+    ):
+        assert function("fsat", strict=False) == "fast"  # type: ignore[arg-type]
+        assert _verdict_of(function, "mode") == (
+            "checked on some paths only, so a misspelling passes on the others"
+        ), function.__name__
+
+
+def _validated_through_a_copy_a_branch_rebinds(mode: _Pace, *, strict: bool) -> str:
+    held: str = mode
+    if not strict:
+        held = "fast"
+    return _validated(held)
+
+
+def _validated_through_a_copy_a_nested_function_rebinds(
+    mode: _Pace, *, strict: bool
+) -> str:
+    held: str = mode
+
+    def soften() -> None:
+        nonlocal held
+        held = "fast"
+
+    if not strict:
+        soften()
+    return _validated(held)
+
+
+def _validated_after_a_branch_rebinds_it(mode: _Pace, *, strict: bool) -> str:
+    if not strict:
+        mode = "fast"
+    return require_choice(mode, "mode", _PACES)
+
+
+def _validated_after_it_is_lowered(mode: str) -> str:
+    mode = mode.lower()
+    return _validated(mode)
+
+
+def _validated_after_a_default(mode: _Pace | None = None) -> str:
+    mode = mode if mode is not None else "fast"
+    return _validated(mode)
+
+
+def test_a_check_of_a_name_a_branch_binds_again_is_on_some_paths() -> None:
+    """A check of the choice through a name, the parameter itself or a copy
+    of it, checks the choice on every path only when every binding of the
+    name that may stand at the check holds the choice or a value worked out
+    from it: a branch that binds it to a fixed text, or a function written
+    inside the body that does so with ``nonlocal``, lets a misspelling past.
+
+    The walk read every read of the name as the choice, so each of these
+    checked it on every path, though ``strict=False`` takes ``"fsat"``.
+    A name every path binds to a value of the choice is still a check on
+    every path.
+    """
+    for function in (
+        _validated_through_a_copy_a_branch_rebinds,
+        _validated_through_a_copy_a_nested_function_rebinds,
+        _validated_after_a_branch_rebinds_it,
+    ):
+        assert function("fsat", strict=False) == "fast"  # type: ignore[arg-type]
+        assert _verdict_of(function, "mode") == (
+            "checked on some paths only, so a misspelling passes on the others"
+        ), function.__name__
+    for function in (_validated_after_it_is_lowered, _validated_after_a_default):
+        assert _verdict_of(function, "mode") is None, function.__name__
+
+
 def _checked_after_an_early_return(mode: _Pace, *, quick: bool) -> _Pace:
     if quick:
         return "fast"
@@ -4897,6 +5004,197 @@ def test_a_dict_every_path_binds_hands_its_entries() -> None:
         assert _refusal(ratio, "gear", "low") is None
     with pytest.raises(KeyError, match="reverse"):
         _ratio_spread_of_the_choice_as_given("reverse")
+
+
+def _ratio_by_keywords(gear: _Gear, **_rest: object) -> float:
+    return _GEAR_RATIOS[gear]
+
+
+def _ratio_merged_after_a_join(gear: _Gear, *, strict: bool) -> float:
+    base = {"gear": gear}
+    if strict:
+        extra: dict[str, object] = {"gear": "low", "towing": True}
+    else:
+        extra = {"axle": "rear"}
+    options = {**base, **extra}
+    return _ratio_by_keywords(**options)  # type: ignore[arg-type]
+
+
+def _ratio_merged_after_an_empty_branch(gear: _Gear, *, strict: bool) -> float:
+    base = {"gear": gear}
+    if strict:
+        extra: dict[str, _Gear] = {"gear": "low"}
+    else:
+        extra = {}
+    options = {**base, **extra}
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_merged_over_an_unread_key(gear: _Gear, key: str) -> float:
+    inner = {key: "low"}
+    options = {"gear": gear, **inner}
+    return _ratio_by_lookup(**options)  # type: ignore[arg-type]
+
+
+def _ratio_merged_over_a_copied_mapping(
+    gear: _Gear, other: Mapping[str, _Gear]
+) -> float:
+    inner = dict(other)
+    options = {"gear": gear, **inner}
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_softened_by_a_nested_function(gear: _Gear, *, strict: bool) -> float:
+    options = {"gear": gear}
+
+    def soften() -> None:
+        nonlocal options
+        options = {"gear": "low"}
+
+    if not strict:
+        soften()
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_of_a_gear_a_nested_function_rebinds(gear: _Gear, *, strict: bool) -> float:
+    held = gear
+
+    def soften() -> None:
+        nonlocal held
+        held = "low"
+
+    if not strict:
+        soften()
+    return _ratio_by_lookup(held)
+
+
+def _soften_the_first(boxes: Sequence[dict[str, _Gear]]) -> None:
+    boxes[0]["gear"] = "low"
+
+
+def _ratio_spread_handed_on_in_a_list(gear: _Gear, *, strict: bool) -> float:
+    options = {"gear": gear}
+    if not strict:
+        _soften_the_first([options])
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_spread_written_through_a_tuple(gear: _Gear, *, strict: bool) -> float:
+    options = {"gear": gear}
+    holder = (options, 1)
+    if not strict:
+        holder[0]["gear"] = "low"
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_spread_written_through_a_conditional_alias(
+    gear: _Gear, *, strict: bool
+) -> float:
+    options = {"gear": gear}
+    target: dict[str, _Gear] = options if not strict else {}
+    target["gear"] = "low"
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_spread_written_in_a_loop(gear: _Gear, *, strict: bool) -> float:
+    options = {"gear": gear}
+    if not strict:
+        for each in (options,):
+            each["gear"] = "low"
+    return _ratio_by_lookup(**options)
+
+
+def _ratio_of_a_row_written_through_a_tuple(gear: _Gear, *, strict: bool) -> float:
+    row = [gear]
+    holder = (row, 1)
+    if not strict:
+        holder[0][0] = "low"
+    return _ratio_by_lookup(row[0])
+
+
+@pytest.mark.parametrize(
+    ("ratio", "taken"),
+    [
+        (functools.partial(_ratio_merged_after_a_join, strict=True), 3.0),
+        (functools.partial(_ratio_merged_after_an_empty_branch, strict=True), 3.0),
+        (functools.partial(_ratio_merged_over_an_unread_key, key="gear"), 3.0),
+        (
+            functools.partial(
+                _ratio_merged_over_a_copied_mapping, other={"gear": "low"}
+            ),
+            3.0,
+        ),
+        (functools.partial(_ratio_softened_by_a_nested_function, strict=False), 3.0),
+        (
+            functools.partial(_ratio_of_a_gear_a_nested_function_rebinds, strict=False),
+            3.0,
+        ),
+        (functools.partial(_ratio_spread_handed_on_in_a_list, strict=False), 3.0),
+        (functools.partial(_ratio_spread_written_through_a_tuple, strict=False), 3.0),
+        (
+            functools.partial(
+                _ratio_spread_written_through_a_conditional_alias, strict=False
+            ),
+            3.0,
+        ),
+        (functools.partial(_ratio_spread_written_in_a_loop, strict=False), 3.0),
+        (
+            functools.partial(_ratio_of_a_row_written_through_a_tuple, strict=False),
+            3.0,
+        ),
+    ],
+    ids=[
+        "merged-after-a-join",
+        "merged-after-an-empty-branch",
+        "merged-over-an-unread-key",
+        "merged-over-a-copied-mapping",
+        "nonlocal-dict",
+        "nonlocal-value",
+        "in-a-list",
+        "through-a-tuple",
+        "through-a-conditional-alias",
+        "in-a-loop",
+        "row-through-a-tuple",
+    ],
+)
+def test_a_binding_the_walk_cannot_vouch_for_hands_nothing_known(
+    ratio: functools.partial[float], taken: float
+) -> None:
+    """A dict whose keys the walk does not all know, merged into another
+    after the keys it does know, leaves those keys unknown there: one two
+    branches build with different keys, one built over a key the walk
+    cannot read, and one copied from a mapping it was handed. A name a
+    function written inside the body rebinds with ``nonlocal``, and a dict
+    or a list written into through a list, a tuple, a conditional alias or
+    a loop, hold nothing the walk can vouch for. Each of these calls takes
+    ``"reverse"`` and returns 3.0, so the value is no refusal.
+
+    The walk read the merged dict as holding the choice under ``"gear"``,
+    and the dict or the list as holding what its one binding put there.
+    """
+    assert ratio("reverse") == taken
+    assert _refusal(ratio.func, "gear", "reverse") is None
+
+
+def _ratio_merged_beside_a_dict_of_other_keys(gear: _Gear, *, strict: bool) -> float:
+    base = {"gear": gear}
+    extra = {"axle": "front"}
+    if strict:
+        extra = {"axle": "rear"}
+    options = {**base, **extra}
+    return _ratio_by_keywords(**options)  # type: ignore[arg-type]
+
+
+def test_a_dict_merged_beside_one_of_known_keys_hands_its_entries() -> None:
+    """A dict every branch builds with the same keys, whatever each holds
+    under them, fills no other key when it is merged into another: the
+    choice merged before it is still handed, and refused on every call.
+    """
+    reason = _refusal(_ratio_merged_beside_a_dict_of_other_keys, "gear", "reverse")
+    assert reason is not None
+    assert "handed to _ratio_by_keywords, _GEAR_RATIOS has no key 'reverse'" in reason
+    with pytest.raises(KeyError, match="reverse"):
+        _ratio_merged_beside_a_dict_of_other_keys("reverse", strict=False)
 
 
 #: A helper that looks a gear up in a table without ``"reverse"``, one that

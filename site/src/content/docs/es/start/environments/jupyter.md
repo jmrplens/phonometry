@@ -31,6 +31,14 @@ locales; cmd no necesita ese paso.
 Ese único entorno contiene JupyterLab, el kernel de IPython que arranca y
 phonometry con todos los extras salvo `[torch]`.
 
+En Windows de 32 bits numba no tiene soporte, ni lo tiene `[full]`, que lo
+incluye: `python -m pip install jupyterlab "phonometry[plot,report,audio]"`
+instala JupyterLab con los otros tres extras. PyPI no tiene wheel para Windows
+de 32 bits de SciPy, matplotlib ni kiwisolver, ni de psutil y pywinpty, que
+JupyterLab necesita allí, ni de PyYAML en Python 3.14, así que pip los compila
+allí desde el código fuente, lo que pide un compilador de C y otro de C++, un
+compilador de Fortran para SciPy y Rust para pywinpty.
+
 ## Un resultado se muestra como tabla
 
 El valor de la última línea de una celda se muestra como una tabla de sus

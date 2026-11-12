@@ -138,6 +138,9 @@ uv run python -c "import phonometry; print(phonometry.__version__)"
 ```
 
 `uv add` resolves the same way in a project for Python 3.12, 3.13 or 3.14.
+On 32-bit Windows, where `[full]` is not supported, name
+`[plot,report,audio]` in its place, with `uv pip install` as with `uv add`;
+uv builds SciPy, matplotlib and kiwisolver from source there, as pip does.
 
 ### torch from the CPU index in a project
 

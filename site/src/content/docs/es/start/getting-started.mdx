@@ -101,7 +101,10 @@ pip install "phonometry[torch]"   # torch + array-api-compat, para que las simul
 Recomiendo `pip install "phonometry[full]"`: instala de una vez matplotlib,
 numba, reportlab, svglib y soundfile, con lo que quedan habilitadas todas las
 funcionalidades de la biblioteca salvo el cálculo de las simulaciones FDTD con
-torch, que añade `[torch]`. La instalación base calcula todas las métricas solo
+torch, que añade `[torch]`. En Windows de 32 bits, donde `[full]` no tiene
+soporte, `pip install "phonometry[plot,report,audio]"` instala los otros tres,
+como se dice más arriba, y compila allí SciPy, matplotlib y kiwisolver desde
+el código fuente. La instalación base calcula todas las métricas solo
 con NumPy y SciPy. Esto incluye leer con `phonometry.io` todo WAV lineal de
 medición (24 bits, multicanal EXTENSIBLE, RF64); lo único que no queda
 disponible son las figuras (`.plot()` y las gráficas de respuesta de los

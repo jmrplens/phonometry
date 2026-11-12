@@ -81,7 +81,10 @@ pip install "phonometry[torch]"   # torch + array-api-compat, so the FDTD engine
 
 I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
+enabled except the torch backend of the FDTD engines, which `[torch]` adds. On
+32-bit Windows, which `[full]` does not support,
+`pip install "phonometry[plot,report,audio]"` brings the other three, as above,
+and builds SciPy, matplotlib and kiwisolver from source there. The
 base install computes every metric on NumPy and SciPy alone, and that includes
 reading every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64)
 through `phonometry.io`; the only things it leaves unavailable are the figures

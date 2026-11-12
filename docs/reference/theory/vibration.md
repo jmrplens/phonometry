@@ -1,8 +1,10 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/reference/theory/vibration.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/reference/theory/vibration/
 
 # Theory: Vibration
 
-This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It is part of the [theory reference](index.md).
+This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It then turns from people to structures: the driving-point mobilities that govern how much power a point force injects into a plate, beam or rod, and the radiation efficiency that turns that vibration back into airborne sound (the pair EN 12354-5 and ISO 7849 rest on). It is part of the [theory reference](index.md).
 
 ## Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)
 
@@ -14,13 +16,33 @@ band-limiting high-pass and low-pass stages (Formulae 1/2), an
 acceleration–velocity transition (Formula 3, carrying the only non-unity gain,
 $K = 1.024$ for Wb) and an upward step (Formula 4), with the Table 3 corner
 frequencies and Q factors; a corner at infinity collapses its stage to unity
-(Table 3 NOTEs). Wk (vertical whole-body) and Wd (horizontal) of
-ISO 2631-1, Wm (buildings, ISO 2631-2), Wb (rail, ISO 2631-4), Wc/We/Wj
-(seat-back, rotational, head) and Wh (hand-arm, ISO 5349-1) plus Wf (motion
-sickness) are all implemented from the exact cascade (the filter is applied
-as the exact complex response via FFT, magnitude *and* phase, not a
-bilinear-warped digital approximation) and the ISO 8041-1 Annex B design-goal
-tables (B.1–B.9) are reproduced to 0.1 %.
+(Table 3 NOTEs). One cascade with nine parameter sets therefore produces the
+whole family, and choosing the member is the first decision a vibration
+measurement forces:
+
+| Weighting | What it weights | Axis or contact point | Standard | Nominal range | Feeds |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `Wk` | Vertical whole-body | z, seat surface or floor | ISO 2631-1 | 0.5–80 Hz | $a_\mathrm{w}$, VDV, $A(8)$ |
+| `Wd` | Horizontal whole-body | x and y, seat surface or floor | ISO 2631-1 | 0.5–80 Hz | $a_\mathrm{w}$, VDV, $A(8)$ |
+| `Wc` | Seat-back | x, backrest | ISO 2631-1 | 0.5–80 Hz | $a_\mathrm{w}$ (comfort) |
+| `We` | Rotational | rx, ry, rz (per rad) | ISO 2631-1 | 0.5–80 Hz | $a_\mathrm{w}$ (comfort) |
+| `Wj` | Recumbent, under the head | z | ISO 2631-1 | 0.5–80 Hz | $a_\mathrm{w}$ (comfort) |
+| `Wm` | Building occupants | all axes | ISO 2631-2 | 1–80 Hz | $a_\mathrm{w}$ |
+| `Wb` | Rail ride comfort | z | ISO 2631-4 | 0.5–80 Hz | $a_\mathrm{w}$ |
+| `Wf` | Motion sickness | z | ISO 2631-1, clause 9 | 0.1–0.5 Hz | MSDV |
+| `Wh` | Hand-transmitted | all three hand axes | ISO 5349-1 | 8–1000 Hz | $a_\mathrm{hv}$, $A(8)$ |
+
+The nominal ranges are the ISO 8041-1 Table 1 columns, not the band-limiting
+corners of Table 3: `Wh` is band-limited at 6.31 Hz and 1258.9 Hz but tabulated
+from 8 Hz to 1 kHz, and the whole-body set is band-limited at 0.4 Hz and 100 Hz
+and tabulated from 0.5 Hz to 80 Hz. Which weighting goes on which axis with
+which multiplying factor is a posture question, answered by the posture map of
+ISO 2631-1 Tables 1 and 2 reproduced in the
+[Human Vibration guide](../../vibration/human/human-vibration.md#which-weighting-on-which-axis).
+All nine are implemented from the exact cascade: the filter is applied as the
+exact complex response via FFT, magnitude *and* phase, not a bilinear-warped
+digital approximation, and the ISO 8041-1 Annex B design-goal tables (B.1–B.9)
+are reproduced to 0.1 %.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_family_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_family.svg" alt="All nine human-vibration weightings in decibels from 0.05 Hz to 1.5 kHz on a log frequency axis, colour-grouped into the whole-body weightings Wk, Wd and Wc, the rotational and recumbent weightings We and Wj, the building and rail weightings Wm and Wb, the motion-sickness weighting Wf peaking at 0.17 Hz, and the hand-arm weighting Wh peaking near 11 Hz; three bars above the curves mark the band each part of the family is tabulated over, 0.1 to 0.5 Hz for Wf, 0.5 to 80 Hz for the whole-body weightings and 6.3 to 1250 Hz for Wh" width="94%"></picture>
 
@@ -32,25 +54,92 @@ below it, because the body is far more compliant horizontally at low frequency;
 decades above, which is why the three sets are tabulated over the three
 different bands drawn above the curves.*
 
+### Getting the acceleration right
+
+None of this survives a transducer in the wrong place. Whole-body vibration is
+measured at the interface where it enters the body (ISO 2631-1, 5.3.1): for a
+seated person the seat surface beneath the ischial tuberosities, the seat back
+at its principal area of support, and the feet; and on a resilient surface the
+transducer is interposed between person and surface in a mount that does not
+greatly alter the pressure distribution (5.3.2), the usual design being the
+semi-rigid disc of ISO 10326-1. The three translational transducers at one
+location sit orthogonally and as close together as practicable, with up to 15°
+of misalignment tolerated where exact alignment is impracticable (5.2.2–5.2.3);
+the location, the orientation of the axes relative to gravity and the
+measurement duration are all reported (5.2.2, 5.3.1, 5.5).
+
+Hand-arm vibration is measured at the middle of the gripping zone where that is
+reachable, and otherwise either side of the hand or on the underside of the
+handle adjacent to it, with two positions averaged where the vibration differs
+across the hand; flexibly mounted side handles are the standard case
+(ISO 5349-2, 6.1.3 as revised by Amd 1:2015). A percussive tool can reach
+20 000 to 50 000 m/s², almost all of it outside the 6.3 Hz to 1250 Hz evaluation
+band, and that overload drives a piezoelectric transducer into **DC-shift**: a
+false low-frequency component, exactly where the weighting has most gain
+(6.2.4). A mechanical filter prevents it (Annex C); the standard's check is to
+convert the unweighted band r.m.s. acceleration to a displacement
+$d = a/(40 f^2)$ and compare it with the motion of the transducer you can
+actually see; and a record showing DC-shift is **discarded**, because the
+distortion contaminates the whole spectrum and deleting the low-frequency bands
+does not rescue it. Magnitudes are averaged over complete operations or work
+cycles, with at least three samples per operation, a total measuring time of at
+least one minute, and samples shorter than about 8 s avoided (5.4.1). The
+[Human Vibration guide](../../vibration/human/human-vibration.md#0-getting-the-numbers)
+carries the mass, attachment and grip-force constraints and the rest of the
+fault list.
+
+### Weighted metrics and daily exposure
+
 The weighted metrics follow ISO 2631-1:1997: running rms with linear or
 exponential integration (Eqs. 2/3), **MTVV** as its maximum (Eq. 4), the
-fourth-power **VDV** $= (\int a_\mathrm{w}^4\, dt)^{1/4}$ in m/s^1.75 (Eq. 5), the crest
-factor with the basic method deemed adequate up to 9 (clause 6.2), and the
-vibration total value $a_\mathrm{v} = \sqrt{\sum_j k_j^2 a_{\mathrm{w}j}^2}$ (Eq. 10). Hand-arm
-exposure follows ISO 5349-1:2001: $a_\mathrm{hv}$ (Eq. 1, all $k = 1$), daily
+fourth-power **VDV** $= (\int a_\mathrm{w}^4\, dt)^{1/4}$ in $\mathrm{m/s}^{1.75}$
+(Eq. 5), and the vibration total value
+$a_\mathrm{v} = \sqrt{\sum_j k_j^2 a_{\mathrm{w}j}^2}$ (Eq. 10), whose multiplying factors $k_j$
+belong to the posture and axis rather than to the metric: for a seated person
+assessed for health, 1.4 on `Wd`-weighted x and y and 1.0 on `Wk`-weighted z
+(clause 7.2.3).
+
+**The crest factor decides which of them to report.** It is the peak of the
+weighted acceleration divided by its rms over the same interval (clause 6.2.1),
+so it measures how much of the exposure is concentrated in short events: a
+steady random vibration sits near 3 to 4, and a value approaching 9 means the
+average is being set by transients the rms understates. ISO 2631-1 clause 6.2.2
+treats the basic rms method as normally sufficient while the crest factor stays
+at or below 9 and sends anything above it to the additional methods of clause
+6.3, because occasional high peaks contribute little to an rms and a great deal
+to a fourth-power dose. Two ratios decide the same question without relying on
+the crest factor alone (clause 6.3.3): report the additional value as well once
+$\mathrm{MTVV}/a_\mathrm{w}$ exceeds 1.5 or $\mathrm{VDV}/(a_\mathrm{w} T^{1/4})$ exceeds 1.75.
+Both are measured over the actual evaluation interval, so splitting a record
+into short blocks lowers the crest factor artificially; and where an additional
+method is used, the basic value is still reported beside it (clause 5.6).
+
+Hand-arm exposure follows ISO 5349-1:2001: $a_\mathrm{hv}$ (Eq. 1, all $k = 1$), daily
 exposure $A(8) = a_\mathrm{hv} \sqrt{T/T_0}$ with $T_0 = 8$ h (Eq. 2), partial
 exposures combined in quadrature (ISO 5349-2:2001, Eqs. 1–3), and the Annex C
 vascular-risk model $D_\mathrm{y} = 31.8\ A(8)^{-1.06}$ for the years to 10 %
-white-finger prevalence. The Directive 2002/44/EC action and limit values are
-built in: hand-arm $A(8)$ 2.5/5.0 m/s², whole-body $A(8)$ 0.5/1.15 m/s² or
-VDV 9.1/21.0 m/s^1.75 (Article 3). The ISO 5349-2 worked examples are
-reproduced (E.2.1: 7.4 m/s² for 2.5 h → $A(8) = 4.1$ m/s²; E.3 forestry,
-three tools → 3.6 m/s²), as are the ISO 5349-1 Table C.1 exposure-duration
-rows.
+white-finger prevalence (unrelated to the acceleration dose $D_\mathrm{z}$ below). The
+Directive 2002/44/EC action and limit values are built in: hand-arm $A(8)$
+2.5/5.0 m/s², whole-body $A(8)$ 0.5/1.15 m/s² or VDV 9.1/21.0
+$\mathrm{m/s}^{1.75}$ (Article 3), the VDV route applying where a member state
+has adopted it.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting.svg" alt="The whole-body vertical weighting Wk in decibels over 0.4 to 100 Hz: a plateau near -6 dB below 2 Hz, a small +0.5 dB peak near 6 Hz and a roll-off to about -21 dB at 100 Hz" width="88%"></picture>
+**The two limits are assessed on two differently built quantities.** Hand-arm
+exposure is assessed on the vector total $a_\mathrm{hv}$, every $k = 1$. Whole-body
+exposure is assessed on the *single dominant axis*: the largest of
+$1.4a_{\mathrm{w}x}$, $1.4a_{\mathrm{w}y}$ and $a_{\mathrm{w}z}$ (Directive Annex Part B, with the clause
+7.2.3 factors; ISO 2631-1 clause 7.2.2 assesses each axis independently), and
+never on the vector total, which is the comfort quantity of clause 8.
+`vibration.wbv_exposure_basis` builds the whole-body basis and
+`vibration.vibration_total_value` the vector total; feeding the second to
+$A(8)$ is the commonest error in an occupational assessment and always inflates
+the answer. For the three axes 0.35, 0.28 and 0.62 m/s², the Directive basis is
+0.62 m/s² and the health-weighted vector total 0.88 m/s², an overstatement of
+42 %.
 
-*The Wk whole-body weighting realized from the ISO 8041-1 cascade.*
+The ISO 5349-2 worked examples are reproduced (E.2.1: 7.4 m/s² for 2.5 h →
+$A(8) = 4.1$ m/s²; E.3 forestry, three tools → 3.6 m/s²), as are the
+ISO 5349-1 Table C.1 exposure-duration rows.
 
 ### Multiple shocks (ISO 2631-5)
 
@@ -92,6 +181,10 @@ See the [Human Vibration guide](../../vibration/human/human-vibration.md) and th
 
 ## Point mobilities and radiation efficiency (Cremer 5, Hopkins 2.9)
 
+The notation restarts here: $S$ is a cross-sectional area, $m'$ a mass per unit
+length and $m''$ a mass per unit area, none of them the stress and dose symbols
+of the human-vibration sections above.
+
 The vibrational power a point force injects into a structure is
 $W = \tfrac12 |F|^2\,\mathrm{Re}\{Y\}$ (Cremer Eq. 5.23), so the driving-point
 **mobility** $Y$ (the reciprocal of the impedance) governs how much energy the
@@ -103,22 +196,22 @@ $Y = (1-\mathrm{j})/(4 m' c_\mathrm{B})$ (a 45-degree phase, falling as $\omega^
 through the bending wave speed $c_\mathrm{B}$), and a longitudinal rod has
 $Z = \rho c_\mathrm{L} S$. These supply the receiver mobility EN 12354-5 needs when no
 measurement exists, and are the theoretical companions of the measured ISO 7626
-mobilities. How efficiently a bending plate then radiates the airborne power is
-its **radiation efficiency** $\sigma$, the power it radiates divided by
-$\rho_0 c_0 S \langle v^2 \rangle$, the power a large baffled piston
-($ka \gg 1$, with $a$ its radius and $k$ the wavenumber in air) of the same
-area $S$ and the same mean-square velocity $\langle v^2 \rangle$ would radiate
-into air of characteristic impedance $\rho_0 c_0$. Below the critical frequency it
-radiates weakly (edge and corner modes), and above it $\sigma \to (1 - f_\mathrm{c}/f)^{-1/2} \to 1$
-(Leppington/Maidanik, Hopkins Eqs 2.227-2.230). Because $\sigma$ is exactly the
-radiation factor $\varepsilon$ of ISO 7849, predicting it closes the sound-power-
-from-vibration chain without a power measurement, and it drives the resonant
-transmission path of the
-[panel sound insulation theory](rooms-buildings.md). Both are clean-room
-from Cremer, Heckl & Petersson (2005) and Hopkins (2007).
+mobilities.
 
-See the [Predicting Panel Sound Insulation guide](../../buildings/design/panel-sound-insulation.md) for
-usage.
+**Where the substitution holds.** No real structure is infinite, and a finite
+one does not have a smooth driving-point mobility: below and around its first
+few modes the measured $|Y|$ swings by tens of decibels between resonance and
+antiresonance. The closed form is the *average* about which it oscillates, so it
+becomes meaningful only once several modes fall inside the analysis band, which
+is why it is used with octave or one-third-octave inputs and never read at a
+single frequency, and why it is defensible in the mid and high bands where
+structure-borne power predictions are usually made and unreliable in the lowest
+bands of a small or lightly damped element. The closed forms also assume
+excitation far from any boundary: driving near an edge or a corner raises the
+local stiffness and lowers the mobility, and driving a ribbed or otherwise
+inhomogeneous plate invalidates the single $B'$ the plate formula rests on. Take
+the receiver mobility from a measurement when the element is small, lightly
+damped, or excited near a boundary.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities.svg" alt="Two stacked panels against frequency from 0.5 Hz to 2 kHz on a log axis. Top: mobility magnitude for a single-degree-of-freedom resonator, which resonates, against three infinite-structure closed forms: a 140 mm concrete plate, flat at about 2.6 times ten to the minus six metres per newton-second; a 100 by 200 mm steel beam falling as the inverse square root of frequency; and a steel strut in longitudinal motion, flat. Bottom: the phase of each, zero for the plate and the rod, minus 45 degrees for the beam" width="92%"></picture>
 
@@ -129,6 +222,36 @@ octaves shown, at a constant −45°; the longitudinal strut is real and flat.
 None of them resonates, which is exactly the difference from a finite structure
 and the reason the closed forms are band-average substitutes rather than
 point-by-point predictions.*
+
+How efficiently a bending plate then radiates the airborne power is its
+**radiation efficiency** $\sigma$: the ratio of the power the plate actually
+radiates to the power a large baffled piston ($ka \gg 1$, with $a$ its radius
+and $k$ the wavenumber in air) of the same area, vibrating with the same
+spatially averaged mean-square velocity, would radiate into the same half-space.
+So $\sigma = 1$ is the fully coupled case, and a small value means the plate is
+short-circuiting itself. Below the critical frequency $f_\mathrm{c}$ (the frequency at
+which the bending wavelength in the plate matches the wavelength in air), the
+bending wavelength is the shorter of the two, so adjacent half-cells of the
+plate pump air back and forth into each other and radiation survives only where
+that cancellation is interrupted, at the edges and the corners. Sub-critical
+$\sigma$ therefore depends on the plate's perimeter and area as well as on its
+material, and it is small: a 12.5 mm plasterboard sheet 4 × 3 m
+($f_\mathrm{c} \approx 2.6$ kHz) runs from $\sigma = 0.0017$ at 31.5 Hz to 0.080 at
+2 kHz, while a 100 mm concrete slab of the same size ($f_\mathrm{c} \approx 180$ Hz) is
+already at 0.12 at 31.5 Hz. Above $f_\mathrm{c}$ the quoted limit
+$\sigma \to (1 - f_\mathrm{c}/f)^{-1/2} \to 1$ (Leppington/Maidanik, Hopkins
+Eqs 2.227-2.230) applies, but it is singular exactly at $f = f_\mathrm{c}$, so the
+coincidence band is evaluated with the separate at-coincidence expression
+(Eq. 2.230) and the peak just above $f_\mathrm{c}$ is finite (1.89 for that concrete
+slab), set by the plate's size and damping. Because $\sigma$ is exactly the
+radiation factor $\varepsilon$ of ISO 7849, predicting it closes the sound-power-
+from-vibration chain without a power measurement, and it drives the resonant
+transmission path of the
+[panel sound insulation theory](rooms-buildings.md#predicted-panel-sound-insulation-bies-72-hopkins-294310-cremer-5),
+where $f_\mathrm{c}$ itself is defined.
+
+See the [Predicting Panel Sound Insulation guide](../../buildings/design/panel-sound-insulation.md)
+for usage.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance" width="82%"></picture>
 
@@ -151,14 +274,17 @@ or lightly damped element.*
 
 ## References
 
-- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
-  ISBN 978-0-12-303041-2.
-  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  The biodynamic and health-effect evidence behind the ISO 8041-1 weightings,
-  the rms/MTVV/VDV dose measures and the spinal-injury rationale of the
-  multiple-shock model.
-- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
-  ISBN 978-0-415-28239-0.
-  [Publisher page](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
-  A compact modern walkthrough of the ISO 2631-1 whole-body and ISO 5349
-  hand-arm evaluation chains summarised on this page.
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+  ISBN 978-3-540-22696-3. The driving-point power W = (1/2) \|F\|^2 Re{Y} (Eq. 5.23) and the closed-form infinite-structure mobilities and impedances (Table 5.1) of the point-mobility section.
+- **Griffin, M. J. (1996).** [*Handbook of human vibration*](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2). Academic Press.
+  ISBN 978-0-12-303041-2. The biodynamic and health-effect evidence behind the ISO 8041-1 weightings, the rms/MTVV/VDV dose measures and the spinal-injury rationale of the multiple-shock model.
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  ISBN 978-0-7506-6526-1. The bending-plate radiation-efficiency theory (Eqs 2.227-2.230, the Leppington/Maidanik high-frequency limit) behind the radiation-efficiency section.
+- **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
+  The radiation factor that equals the radiation efficiency, closing the sound-power-from-vibration chain of the radiation-efficiency section (survey method, fixed radiation factor).
+- **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor*](https://www.iso.org/standard/40538.html) (ISO/TS 7849-2:2009).
+  The engineering method of the same sound-power-from-vibration chain, determining the adequate radiation factor from measurement.
+- **International Organization for Standardization. (2011).** [*Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications*](https://www.iso.org/standard/50426.html) (ISO 7626-1:2011).
+  The measured driving-point mobilities that the closed-form infinite-structure results of the point-mobility section are the theoretical companions of.
+- **Mansfield, N. J. (2004).** [*Human response to vibration*](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390). CRC Press.
+  ISBN 978-0-415-28239-0. A compact modern walkthrough of the ISO 2631-1 whole-body and ISO 5349 hand-arm evaluation chains summarised on this page.

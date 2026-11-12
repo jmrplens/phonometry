@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/perception/
 
 # Hearing and perception
 
@@ -124,31 +126,31 @@ is measured, and how much a hearing protector takes off.
 
 ## What this section does not cover
 
-**No listener is tested here, and no verdict about a person is issued.** Every
-model on these pages predicts what a population, or a standard listener, would
-perceive from a calibrated signal: none of them runs an audiometric session,
-none diagnoses a hearing loss, and ISO 1999 explicitly declines to define a
-hearing handicap or a compensable fence (that line is national regulation),
-and nothing here applies one. Every prominence and audibility verdict is
-likewise the numeric criterion only: ECMA-418-1 also requires aural
-confirmation of a prominent tone, and that stays with you.
+- **Not covered.** **No listener is tested here, and no verdict about a person is issued.** Every
+  model on these pages predicts what a population, or a standard listener, would
+  perceive from a calibrated signal: none of them runs an audiometric session,
+  none diagnoses a hearing loss, and ISO 1999 explicitly declines to define a
+  hearing handicap or a compensable fence (that line is national regulation),
+  and nothing here applies one. Every prominence and audibility verdict is
+  likewise the numeric criterion only: ECMA-418-1 also requires aural
+  confirmation of a prominent tone, and that stays with you.
 
-**Everything is monaural.** The binaural combinations of ECMA-418-2 are not
-implemented, so a two-channel recording is analysed one ear at a time, and
-nothing here models localisation, spatial release from masking or binaural
-loudness summation.
+- **Not covered.** **Everything is monaural.** The binaural combinations of ECMA-418-2 are not
+  implemented, so a two-channel recording is analysed one ear at a time, and
+  nothing here models localisation, spatial release from masking or binaural
+  loudness summation.
 
-**No listening test is replaced.** STOI returns the correlation-based index
-and not a percentage of words understood, because that mapping is fitted per
-listening-test corpus; the SII returns an audibility fraction and not a score;
-and no page predicts annoyance in a community, which is a social-survey
-quantity rather than a psychoacoustic one: the community indicators are
-[Environment and transport](../environment/index.md).
+- **Not covered.** **No listening test is replaced.** STOI returns the correlation-based index
+  and not a percentage of words understood, because that mapping is fitted per
+  listening-test corpus; the SII returns an audibility fraction and not a score;
+  and no page predicts annoyance in a community, which is a social-survey
+  quantity rather than a psychoacoustic one: the community indicators are
+  [Environment and transport](../environment/index.md).
 
-Finally, these models start from a **calibrated** signal or spectrum in
-pascals, because every one of them is level-dependent. Feeding them raw
-soundcard samples produces a number with an arbitrary reference, which is a
-different failure from a wrong answer: it looks plausible.
+- **Not covered.** Finally, these models start from a **calibrated** signal or spectrum in
+  pascals, because every one of them is level-dependent. Feeding them raw
+  soundcard samples produces a number with an arbitrary reference, which is a
+  different failure from a wrong answer: it looks plausible.
 
 ## Before and after these pages
 
@@ -161,6 +163,6 @@ theory](../reference/theory/perception.md), from the equal-loudness contours to 
 modulation transfer function.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

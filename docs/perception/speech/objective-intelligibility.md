@@ -1,69 +1,79 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/speech/objective-intelligibility.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Objective intelligibility (STOI & ESTOI)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/
 
-**STOI** and **ESTOI** are correlation-based objective intelligibility measures.
-Each compares a clean reference to a degraded or processed version of the same
-speech and returns a scalar with a monotonic relation to the fraction of words
-a listener would understand: `1` when the degraded signal equals the clean one,
-and near `0` for uncorrelated noise. Unlike the
-[Speech Transmission Index](speech-transmission.md), which characterises a
-transmission channel, and the [Speech Intelligibility Index](speech-intelligibility.md),
-which predicts audibility from spectra, STOI and ESTOI work directly on the two
+# Objective Intelligibility (STOI & ESTOI)
+
+**STOI** and **ESTOI** are correlation-based objective intelligibility
+measures. Each compares a clean reference to a degraded or processed version of
+the same speech and returns a scalar with a monotonic relation to the fraction
+of words a listener would understand: `1` when the degraded signal equals the
+clean one, and near `0` for uncorrelated noise. They work directly on the two
 waveforms, which makes them the standard yardstick for **time-frequency
 weighted** speech: noise reduction, source separation and binary-mask
 processing, where separating the clean speech from its distortion is not
-straightforward.
-
-- **STOI** (Taal, Hendriks, Heusdens and Jensen, 2011) averages the correlation
-  between the clean and degraded short-time temporal envelopes over
-  one-third-octave bands and 384 ms segments, after a per-segment normalisation
-  and a signal-to-distortion clipping.
-- **ESTOI** (Jensen and Taal, 2016) mean- and variance-normalises the
-  short-time band-by-frame spectrogram over both its rows (band envelopes) and
-  its columns (spectra), so the intermediate measure is a spectral correlation.
-  It tracks intelligibility better under **modulated maskers** and competing
-  talkers, where STOI's band-independent correlation misses the benefit of the
-  quiet gaps.
+straightforward. Neither measure is standardised: both are journal
+algorithms, and the papers that define them (Taal et al. 2011 for STOI, Jensen
+and Taal 2016 for ESTOI) are their normative text.
 
 > [!NOTE]
-> `pystoi` (a public reimplementation of the authors' MATLAB) is used only as
-> an external cross-check in the test suite. phonometry reimplements both
-> measures from the two papers and never imports `pystoi` at runtime; the two
-> agree to well under `1e-3` on shared inputs.
+> **STOI/ESTOI vs STI vs SII.** STOI and ESTOI need the clean reference *and* the
+> degraded signal, and rate the processing between them. The
+> [Speech Transmission Index](speech-transmission.md) rates a
+> transmission channel from its impulse response, and the
+> [Speech Intelligibility Index](speech-intelligibility.md)
+> predicts audibility from speech, noise and hearing-threshold spectra. Use
+> STOI/ESTOI when you have a before/after pair.
+
+> [!WARNING]
+> `pystoi` (a public reimplementation of the authors' MATLAB) is used only as an
+> external cross-check in the test suite. phonometry reimplements both measures
+> from the two papers and never imports `pystoi` at runtime; the two agree to
+> well under `1e-3` on shared inputs.
 
 ## 1. The shared front end
 
 Both measures run the same processing before they diverge (Taal et al. 2011,
-Section II):
+Section II): resampling to **10 kHz**; a 256-sample (25.6 ms) Hann-windowed,
+50 %-overlapping short-time transform zero-padded to 512 points; removal of the
+frames whose *clean* energy is more than **40 dB** below the loudest clean
+frame; a **15-band one-third-octave** grouping of the DFT magnitudes from a
+lowest centre of 150 Hz; and **384 ms** (30-frame) analysis segments as the
+unit of comparison, sliding one frame at a time and long enough to carry the
+slow modulations that matter for intelligibility. The sample rate of the
+inputs is free, the library resamples internally.
 
-1. **Resample to 10 kHz.** A rate chosen to cover the speech-bearing range; the
-   library resamples internally, so the sample rate of the inputs is free.
-2. **Short-time transform.** 256-sample (25.6 ms) frames, 50 % overlap, a Hann
-   window, zero-padded to a 512-point DFT.
-3. **Remove silent frames.** Frames whose *clean* energy is more than 40 dB
-   below the loudest clean frame carry no intelligibility and are dropped from
-   both signals.
-4. **One-third-octave grouping.** The DFT magnitudes are grouped into 15 bands
-   from a lowest centre of 150 Hz, giving a band-by-frame envelope
-   spectrogram.
-5. **384 ms segments.** 30-frame sliding segments are the unit of comparison,
-   long enough to carry the slow modulations that matter for intelligibility.
+Both measures are defined for **running speech**, and the front end is where
+that assumption bites: the 40 dB rule keys off the *clean* signal's dynamic
+range, so it exists to stop the pauses between words from dominating the
+correlation. A signal with no pauses (steady noise, a held tone, gapless
+music) loses nothing to it and the index loses its meaning; a recording that
+is mostly silence loses almost everything and the call raises rather than
+returning a number. At least about **0.4 s of active speech** has to survive.
 
 ```python
 import numpy as np
 from phonometry import speech
 
-fs = 16000
-rng = np.random.default_rng(0)
-# A clean reference and a noisy version at ~5 dB SNR.
-clean = rng.standard_normal(3 * fs)          # stand-in for a speech waveform
-noise = rng.standard_normal(3 * fs)
-degraded = clean + 0.56 * noise
+fs = 10000
+rng = np.random.default_rng(11)
+n = 4 * fs
+t = np.arange(n) / fs
 
-d = speech.stoi(clean, degraded, fs)
-print(round(d.value, 3))              # a scalar in roughly [0, 1]
-print(speech.stoi(clean, clean, fs).value)   # 1.0  (a signal against itself)
+# Speech-like material: band-limited noise under a 3.5 Hz syllabic envelope,
+# so the front end's silent-frame rule has pauses to work on.
+spectrum = np.fft.rfft(rng.standard_normal(n))
+spectrum[(np.fft.rfftfreq(n, 1 / fs) < 200) | (np.fft.rfftfreq(n, 1 / fs) > 4000)] = 0
+carrier = np.fft.irfft(spectrum, n)
+clean = carrier * (0.15 + 0.85 * np.abs(np.sin(2 * np.pi * 3.5 * t)) ** 2)
+
+noise = rng.standard_normal(n)
+noise *= np.sqrt(np.mean(clean ** 2) / np.mean(noise ** 2))   # 0 dB SNR
+degraded = clean + noise
+
+d = speech.stoi(clean, degraded, fs)               # STOI, resampled to 10 kHz inside
+print(round(d.value, 3))                    # 0.708
+print(round(speech.stoi(clean, clean, fs).value, 6))   # 1.0  (a signal against itself)
 ```
 
 Everything up to the 384 ms segments is shared; the two measures only part
@@ -72,27 +82,96 @@ the flat-masker example.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_objective_intelligibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_objective_intelligibility.svg" alt="Block diagram of the STOI and ESTOI processing chain: a clean reference and a degraded version, in the guide's example speech-like material in a flat masker at 0 dB signal-to-noise ratio, are resampled to 10 kilohertz with silent frames dropped, transformed by a short-time DFT of 256-sample Hann frames at 50 percent overlap grouped into 15 one-third-octave bands from 150 hertz, and compared in 384 millisecond segments; the chain then splits into the STOI clipped envelope correlation and the ESTOI row- and column-normalised spectral correlation, and the example reads STOI equal to 0.727, with the lowest band keeping 0.27 of the correlation and the bands above 1.9 kilohertz reaching 0.90" width="92%"></picture>
 
+### Getting a valid pair
+
+The two arguments are not just "two signals". They must be the **same
+utterance**, the **same length**, and **sample-accurate in alignment**. That
+last one is the failure that costs most scores in practice, because
+nothing in the result distinguishes it from genuine degradation. Both measures
+correlate short-time envelopes inside 384 ms segments, so a constant delay
+decorrelates them directly. On the pair above, rolling the degraded signal by
+20 ms takes the score from 0.708 to 0.329; on a *perfect* pair, the same 20 ms
+takes 1.0 to 0.459 and 50 ms drives it negative. Half a syllable is enough to
+turn a good enhancement into a bad one on paper.
+
+The library enforces equal length and nothing else: it does no alignment, so
+the caller compensates any algorithmic latency first. Cross-correlate the
+broadband envelopes (or prepend a short marker chirp), shift, then trim both to
+the common span. If the two signals passed through separate playback and
+capture clocks, watch for *drift* as well: a fixed shift cannot correct a
+sample-rate offset, so resample to the reference clock or record through one
+device. The check worth running once on any new pipeline is the pair of lines
+above: `stoi(x, x, fs).value` is 1.0, and `stoi(x, np.roll(x, k), fs)` collapses
+quickly with `k`.
+
+What you do *not* have to match is level: the per-segment normalisation makes
+both measures invariant to the gain of the degraded signal. Alignment is the
+thing to get right; gain is not.
+
+Three conditions raise instead of returning a value, and they are worth
+recognising: unequal length, non-finite samples, and fewer than 30 short-time
+frames surviving the silent-frame removal, which is the ~0.4 s of active
+speech mentioned above.
+
+### Capturing the degraded signal through a real device
+
+Everything above assumes the degraded signal was produced numerically. Once it
+is captured acoustically (a hearing aid on an artificial ear in a test box, a
+headset, a loudspeaker-and-microphone loop), four things become the caller's
+responsibility:
+
+- **The clean reference stays the original file.** Re-recording it through the
+  same chain removes the very distortion under test, and it also breaks the
+  silent-frame selection, which is derived from the clean signal alone.
+- **The capture chain is scored as degradation.** Loudspeaker response,
+  background noise in the test box and microphone self-noise all enter the
+  measured index, so measure the loop once with the device bypassed and report
+  that number as the floor of the comparison.
+- **Play at the device's operating level.** The *index* is invariant to level;
+  the *device* is not. A compressor or a noise reducer behaves differently at
+  a different input level.
+- **Repeat.** A single capture carries the run-to-run variability of the
+  acoustic path; quote the spread over several captures, not one number.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_stoi_bench_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_stoi_bench.svg" alt="The bench for an acoustically captured pair. A clean speech file forks into two paths: the upper one goes straight to the comparison, labelled the original file and never a re-recording; the lower one goes through a calibrated playback amplifier and loudspeaker into a test box holding the device under test, a hearing aid on an artificial ear or a headset on a torso simulator, and out through a capture microphone and preamplifier. Both paths meet at an align-and-trim block whose callouts read cross-correlate the envelopes, equal length and one clock, and only then enter the STOI and ESTOI chain. A dashed callout under the lower path says to run it once with the device bypassed, because the loudspeaker, the box noise and the microphone are scored as degradation too, and a footer says to play at the device operating level and repeat the capture" width="94%"></picture>
+
 ## 2. STOI: envelope correlation with clipping
 
 For every band and segment STOI normalises the degraded envelope to the clean
-one, clips it at a lower signal-to-distortion bound ($\beta = -15$ dB) so that a
-fully degraded unit cannot drag the score below its floor, and takes the
-sample correlation of the two envelopes (Taal et al. 2011, Eqs. 3-6). The index
-is the average of those intermediate correlations over all bands and segments
-(Eq. 6). Because the normalisation divides out a per-segment gain, STOI is
-**invariant to the overall playback level** of the degraded signal.
+one, clips it at a lower signal-to-distortion bound ($\beta = -15$ dB) so a
+fully degraded unit cannot drag the score below its floor, and takes the sample
+correlation of the two envelopes (Taal et al. 2011, Eqs. 3-6):
+
+$$
+d_{j,m} = \frac{\sum_n (x_j(n) - \bar{x}_j)\,(\bar{y}_j(n) - \bar{\bar{y}}_j)}
+               {\lVert x_j - \bar{x}_j \rVert\,\lVert \bar{y}_j - \bar{\bar{y}}_j \rVert}.
+$$
+
+where $x_j(n)$ is the clean short-time temporal envelope of band $j$ at frame
+$n$ inside the 30-frame segment $m$; $\bar{y}_j(n)$ is the *degraded* envelope
+after the per-segment gain normalisation and the $\beta = -15$ dB clipping, so
+that accent marks the processing and not a mean; a bar over a whole quantity
+($\bar{x}_j$, $\bar{\bar{y}}_j$) is its mean over the segment; and
+$\lVert\cdot\rVert$ is the Euclidean norm over the same 30 frames. So
+$d_{j,m}$ is an ordinary Pearson correlation in $[-1, 1]$.
+
+The index is the average of those intermediate correlations over all bands $j$
+and segments $m$ (Eq. 6). The two marginals of that average are what
+`band_scores` and `segment_scores` expose. Because the normalisation divides out a per-segment
+gain, STOI is **invariant to the overall playback level** of the degraded
+signal, and higher SNR gives a monotonically higher score.
 
 ```python
-import numpy as np
 from phonometry import speech
 
-fs = 10000
-rng = np.random.default_rng(1)
-clean = rng.standard_normal(3 * fs)
-# Higher SNR gives a higher STOI: the relation is monotonic.
+# The speech-like `clean` of section 1, degraded at four signal-to-noise
+# ratios. Keep the reference speech-like: a flat Gaussian reference has no
+# pauses, so the 40 dB rule removes nothing and the index loses its meaning.
 for snr_db in (-10, 0, 10, 20):
     g = 10.0 ** (-snr_db / 20.0)
-    print(snr_db, round(speech.stoi(clean, clean + g * rng.standard_normal(clean.size), fs).value, 3))
+    noisy = clean + g * rng.standard_normal(clean.size)
+    print(snr_db, round(speech.stoi(clean, noisy, fs).value, 3))
+# -10 0.083 | 0 0.484 | 10 0.858 | 20 0.956
 ```
 
 The `STOIResult` carries the per-band mean correlation (`band_scores`) and the
@@ -143,6 +222,48 @@ plt.show()
 
 </details>
 
+The band profile is one marginal of the average; the other is time, and it
+answers a question the band view explicitly cannot:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_segment_scores_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_segment_scores.svg" alt="Two stacked panels over four seconds. Top: the clean reference waveform with syllabic pauses, three of its 311 short-time frames shaded because they fall more than 40 dB below the loudest frame and are discarded, and a 0.35 second dropout region marked. Bottom: the per-segment STOI scores for two degradations of the same reference. Steady noise at 0 dB gives a flat series around 0.77 for a STOI of 0.772; a 0.35 second dropout leaves the series at 1.0 everywhere except a deep collapse to below zero across the dropout, and still averages to a higher STOI of 0.874" width="94%"></picture>
+
+*Two degradations of the same reference, and the scalar ranks them the wrong
+way round: the dropout scores **0.874** against the steady masker's **0.772**,
+because a short catastrophe averages away while a mild degradation everywhere
+does not. The time marginal separates them immediately: one series is flat,
+the other is perfect except for a handful of segments. That is the diagnostic to reach
+for when a low STOI has no obvious cause: a transient, a dropout or a
+processing artefact shows up here and nowhere else. The shaded frames at the
+top are the ones the 40 dB rule discards, which is what "the input must have
+speech dynamics" means concretely.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# The same material as section 1 but with silence between the words, so some
+# frames really do fall 40 dB below the loudest one.
+fig_rng = np.random.default_rng(11)
+freq = np.fft.rfftfreq(n, 1 / fs)
+spec = np.fft.rfft(fig_rng.standard_normal(n))
+spec[(freq < 200) | (freq > 4000)] = 0
+env = np.abs(np.sin(2 * np.pi * 3.5 * t)) ** 2
+ref = np.fft.irfft(spec, n) * np.where(env < 0.08, 0.0, env)
+
+masker = fig_rng.standard_normal(n)
+masker *= np.sqrt(np.mean(ref ** 2) / np.mean(masker ** 2))
+steady = speech.stoi(ref, ref + masker, fs)
+
+hole = np.ones(n)
+hole[int(1.6 * fs):int(1.95 * fs)] = 0.0        # a 0.35 s dropout
+dropout = speech.stoi(ref, ref * hole, fs)
+
+print(round(steady.value, 3), round(dropout.value, 3))   # 0.772 0.874
+print(round(float(dropout.segment_scores.min()), 3))     # -0.078
+```
+
+</details>
+
 The flat masker costs the low bands most, because the speech spectrum falls
 there while the masker does not, and the correlation recovers in the
 consonant-bearing bands above 1 kHz. A band profile that is flat, or that
@@ -152,22 +273,26 @@ under test.
 
 ## 3. ESTOI: spectral correlation for modulated maskers
 
-ESTOI (`extended=True`) replaces the band-independent correlation with a
-joint spectro-temporal one. Within each 384 ms segment it normalises the
-spectrogram rows (the band envelopes) and then the columns (the per-frame
-spectra) to zero mean and unit norm, and averages the correlation of the
+ESTOI (`extended=True`) replaces the band-independent correlation with a joint
+spectro-temporal one. Within each 384 ms segment it mean- and
+variance-normalises the spectrogram **rows** (the band envelopes) and then its
+**columns** (the per-frame spectra), and averages the correlation of the
 normalised columns (Jensen and Taal 2016, Eqs. 4-8). Making the columns compete
 means a masker that leaves quiet gaps, where the clean speech is briefly
 audible, is credited for the speech glimpsed there, which STOI's per-band
 average largely misses.
 
 ```python
-# The same speech-like material and flat masker as above, scored the other way.
-estoi = speech.stoi(clean, clean + gain * masker, fs, extended=True)
-print(round(estoi.value, 3))
+# The steady-masker pair of the per-segment figure above, scored the other
+# way: `extended=True` on the same call selects ESTOI.
+estoi = speech.stoi(ref, ref + masker, fs, extended=True)
+print(round(steady.value, 3), round(estoi.value, 3), estoi.extended)  # 0.772 0.417 True
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_intelligibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_intelligibility.svg" alt="Two panels of intelligibility index versus SNR from -15 to 20 dB. Left (STOI): the stationary-masker and modulated-masker curves nearly overlap, so STOI barely separates the two maskers. Right (ESTOI): the modulated-masker curve sits clearly above the stationary one across the whole SNR range, so ESTOI credits the speech glimpsed in the masker's quiet gaps" width="90%"></picture>
+On the same steady masker ESTOI reads well below STOI: the two indices are not
+on one scale, so compare an ESTOI value with ESTOI values only.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_intelligibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stoi_intelligibility.svg" alt="Two panels of intelligibility index versus SNR from -15 to 20 dB. Left (STOI): the stationary-masker and modulated-masker curves nearly overlap, so STOI barely separates the two maskers. Right (ESTOI): the modulated-masker curve sits clearly above the stationary one across the whole SNR range, so ESTOI credits the speech glimpsed in the masker's quiet gaps" width="94%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -194,11 +319,8 @@ snrs = np.arange(-15.0, 20.1, 5.0)
 
 def curve(masker, extended):
     p_m = np.sqrt(np.mean(masker ** 2))
-    out = []
-    for snr in snrs:
-        g = p_clean / (p_m * 10.0 ** (snr / 20.0))
-        out.append(speech.stoi(clean, clean + g * masker, fs, extended=extended).value)
-    return out
+    return [speech.stoi(clean, clean + (p_clean / (p_m * 10.0 ** (s / 20.0))) * masker,
+                        fs, extended=extended).value for s in snrs]
 
 fig, (a, b) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
 for ax, extended, title in ((a, False, "STOI"), (b, True, "ESTOI")):
@@ -211,6 +333,39 @@ plt.show()
 
 </details>
 
+### `stoi()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `clean` | 1-D array | any | non-empty | The clean reference; the measure is level-invariant, so calibration is irrelevant |
+| `degraded` | 1-D array | any | same length as `clean` | Same utterance, same sample rate, sample-aligned |
+| `fs` | int | Hz | > 0 | Sample rate of *both* signals; resampled to 10 kHz internally |
+| `extended` | bool | — | default `False` | `True` selects ESTOI |
+
+Returns a `STOIResult`: `value`, `band_scores` (15), `segment_scores`,
+`frequencies` and `extended`. It raises on unequal lengths, on non-finite
+input, and when fewer than 30 short-time frames survive the silent-frame
+removal.
+
+### Reading the value
+
+The raw index has no absolute interpretation, and it is not meant to have one.
+The mapping from $d$ to a percentage of words understood is a logistic fitted
+to one corpus and one listener group (which the library deliberately does not
+implement). So the same $d$ predicts different scores for different material,
+and quoting "STOI = 0.73" as an intelligibility is a category error.
+
+The working practice follows from that. Hold the material, the talkers, the
+alignment and the analysis length fixed, and report the **difference** between
+conditions (the ΔSTOI between a processor and its unprocessed input) together
+with the number of utterances it was averaged over, because single-utterance
+values scatter. Mind the shape as well: the index saturates near 1 for mild
+degradations and flattens at the low end, so an improvement from 0.85 to 0.90
+is worth far more in intelligibility than one from 0.35 to 0.40: monotonic
+does not mean linear. And when two conditions score alike, the per-band and
+per-segment views are the diagnostics that say whether they got there the same
+way.
+
 ## 4. Which measure, and when
 
 | | STOI | ESTOI |
@@ -221,72 +376,58 @@ plt.show()
 | Modulated maskers, competing talkers | Underrates the glimpsing benefit | Tracks it |
 | Cost | Lower | A little higher |
 
-For additive stationary noise the two are interchangeable and STOI is the
-lighter default; when the interference fluctuates in time, or when comparing
-processors that reshape the speech in time and frequency, prefer ESTOI.
+For additive stationary noise the two measures are interchangeable and STOI is
+the lighter default; when the interference fluctuates in time, or when
+comparing processors that reshape the speech in time and frequency, prefer
+ESTOI.
 
 Both answer a narrower question than the two standardised speech metrics of
 the library, and the choice between the three families is really a choice of
 what you can measure. STOI and ESTOI need a *clean reference* and the
 degraded signal, so they belong to processing work: noise reduction, source
 separation, codecs, hearing-aid algorithms. The
-[STI](speech-transmission.md) (IEC 60268-16) needs no clean reference, only
-the channel, so it is what rates a room or a public-address system. The
-[SII](speech-intelligibility.md) (ANSI S3.5-1997) needs neither signal, only
-spectra, so it is what predicts audibility for a listener with a given
-hearing threshold. When more than one is available, they answer different
-questions rather than confirming each other: a processor can raise STOI while
-the room keeps the STI poor.
+[STI](speech-transmission.md) (IEC 60268-16) needs no clean
+reference, only the channel, so it is what rates a room or a public-address
+system. The [SII](speech-intelligibility.md)
+(ANSI S3.5-1997) needs neither signal, only spectra, so it is what predicts
+audibility for a listener with a given hearing threshold. When more than one
+is available, they answer different questions rather than confirming each
+other: a processor can raise STOI while the room keeps the STI poor.
 
 ## What this guide covers
 
-**Covered.** Taal et al. (2011) for STOI and Jensen & Taal (2016) for ESTOI,
-both behind `stoi()`: the shared front end of 10 kHz resampling, 256-sample
-Hann frames, 15 one-third-octave bands, 384 ms segments and 40 dB silent-frame
-removal (2011, Eqs. 1-4); the per-band envelope correlation and the averaged
-index (Eqs. 5-6); and, with `extended=True`, the row and column normalisation
-of the spectrogram and the spectral-correlation index (2016, Eqs. 4-8).
+- **Covered.** Taal et al. 2011 (STOI) and Jensen & Taal 2016 (ESTOI), the two
+  correlation-based measures `stoi()` implements: the shared front end of 10 kHz
+  resampling, 256-sample Hann frames, 15 one-third-octave bands, 384 ms segments
+  and 40 dB silent-frame removal (Taal et al. 2011, Eqs. 1-4); the per-band
+  envelope correlation and averaged index (Eqs. 5-6); and, with `extended=True`,
+  the row- and column-normalisation of the spectrogram and the
+  spectral-correlation index (Jensen & Taal 2016, Eqs. 4-8).
 
-**Not covered.** Taal et al. also fit a logistic mapping from the index $d$ to
-a predicted percentage of words understood, calibrated on particular
-listening-test corpora. `stoi()` returns $d$ alone, as `STOIResult.value`;
-there is no percent-correct output and no fitted coefficients in the API. The
-2010 ICASSP paper is cited as the short conference version of the same
-algorithm and adds nothing implemented beyond the equations above.
+- **Not covered.** Taal et al. 2011 also fits a logistic function mapping the index $d$ to a
+  predicted percentage of words understood, calibrated on specific
+  listening-test corpora. `stoi()` returns only $d$, as `STOIResult.value`, not
+  that percentage: the API has no percent-correct output or fitted coefficients.
+  The 2010 ICASSP paper is cited only as the short conference version of the
+  same algorithm, adding nothing implemented beyond the 2011/2016 equations
+  above.
 
 ## See also
 
-- [Speech Transmission Index](speech-transmission.md): rates a transmission
-  channel from its impulse response or a STIPA recording.
-- [Speech Intelligibility Index](speech-intelligibility.md): predicts
-  intelligibility from speech, noise and hearing-threshold spectra.
-- [Filter banks](../../signals/filters/filter-banks.md): the one-third-octave bands the front end
-  groups the DFT into.
+- [Speech Transmission Index](speech-transmission.md): rates a
+  transmission channel from its impulse response or a STIPA recording.
+- [Speech Intelligibility Index](speech-intelligibility.md):
+  predicts intelligibility from speech, noise and hearing-threshold spectra.
+- [Filter Banks](../../signals/filters/filter-banks.md): the one-third-octave bands
+  the front end groups the DFT into.
+- API reference: [`speech.objective_intelligibility`](https://docs.jmrp.io/phonometry/reference/api/speech/objective-intelligibility/).
+- Theory: [Modulation transfer and STI](../../reference/theory/perception.md#modulation-transfer-and-sti-iec-60268-16): the modulation-transfer derivation the intrusive measures on this page are compared against.
 
 ## References
 
-Neither measure is standardised: both are journal algorithms, and the papers
-below are the normative text for them.
-
-- Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2011). An algorithm
-  for intelligibility prediction of time-frequency weighted noisy speech.
-  *IEEE Transactions on Audio, Speech, and Language Processing*, 19(7),
-  2125-2136.
-  [doi:10.1109/TASL.2011.2114881](https://doi.org/10.1109/TASL.2011.2114881).
-  STOI itself: the shared front end (10 kHz, 256-sample Hann frames, 15
-  one-third-octave bands, 384 ms segments), the normalisation and the
-  signal-to-distortion clipping of Equations 1 to 4, the per-band envelope
-  correlation of Equation 5 and the averaged index of Equation 6.
-- Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2010). A short-time
-  objective intelligibility measure for time-frequency weighted noisy speech.
-  *2010 IEEE International Conference on Acoustics, Speech and Signal
-  Processing (ICASSP)*, 4214-4217.
-  [doi:10.1109/ICASSP.2010.5495701](https://doi.org/10.1109/ICASSP.2010.5495701).
-  The conference version of STOI, shorter and easier to read first.
-- Jensen, J., & Taal, C. H. (2016). An algorithm for predicting the
-  intelligibility of speech masked by modulated noise maskers. *IEEE/ACM
-  Transactions on Audio, Speech, and Language Processing*, 24(11), 2009-2022.
-  [doi:10.1109/TASLP.2016.2585878](https://doi.org/10.1109/TASLP.2016.2585878).
-  ESTOI: the row and column mean- and variance-normalisation of the short-time
-  spectrogram (Equations 4 to 7) and the spectral-correlation intermediate
-  index of Equation 8.
+- **Jensen, J., & Taal, C. H. (2016).** An algorithm for predicting the intelligibility of speech masked by modulated noise maskers. *IEEE/ACM Transactions on Audio, Speech, and Language Processing*, *24*(11), 2009-2022. https://doi.org/10.1109/TASLP.2016.2585878
+  ESTOI: the row- and column mean- and variance-normalisation of the short-time spectrogram (Eqs. 4-7) and the spectral-correlation intermediate index (Eq. 8).
+- **Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2010).** A short-time objective intelligibility measure for time-frequency weighted noisy speech. *2010 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)*, 4214-4217. https://doi.org/10.1109/ICASSP.2010.5495701
+  The short conference version of STOI.
+- **Taal, C. H., Hendriks, R. C., Heusdens, R., & Jensen, J. (2011).** An algorithm for intelligibility prediction of time-frequency weighted noisy speech. *IEEE Transactions on Audio, Speech, and Language Processing*, *19*(7), 2125-2136. https://doi.org/10.1109/TASL.2011.2114881
+  STOI: the shared front end (10 kHz, 256-sample Hann frames, 15 one-third-octave bands, 384 ms segments), the normalisation and signal-to-distortion clipping (Eqs. 1-4), the per-band envelope correlation (Eq. 5) and the averaged index (Eq. 6).

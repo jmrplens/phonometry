@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/immission/vibration-meter.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/
 
 # Measuring vibration immission (DIN 45669-1)
 
@@ -324,7 +326,7 @@ disturbances have to be kept out of it. Nearly all of it is judgement written
 down. The little that is a number is here, because a number a measurement is
 planned by belongs where the plan is checked.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling.svg" alt="Section through a building with transducers on the top floor ceiling, at mid-span of a floor, on the foundation facing the source and in the ground near it, with the directions of DIN 45669-2, three insets for coupling on a hard surface, on a soft covering and in the ground, and the DIN 45669-1 chain along the foot" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling.svg" alt="Section through a two-storey building on strip footings, with a machine on its own foundation block to the right as the source. Red transducers with green direction arrows mark four measuring points: on the top floor ceiling next to the outer wall, horizontal x and y; at mid-span of the first floor, vertical z; on the foundation wall facing the source, no higher than 0.5 metres above ground, with x pointing at the source; and on a spike in the ground near the source, at a set distance from it and at least 1.5 times the largest dimension of a manhole away from that manhole, with a note that by a railway the distance is for example 8 metres from the nearest track. A box defines the directions: z vertical, x and y horizontal at right angles along the main axes of the building, x preferably towards the source, and DIN 45672-1 differing by a railway. Three insets show the couplings: a 150 millimetre disc on three rounded feet on a hard surface, loose to 100 hertz vertically and 40 hertz horizontally while peaks stay at or below 3 metres per second squared, and wax on tiles or parquet carrying the horizontal directions to 80 hertz; the same disc on three 15 millimetre hardened steel spikes pressed and tapped through a soft covering, about 35 millimetres high and about 2.5 kilograms with the transducer; and a ground spike about 500 millimetres long made of two angles, pointed over 150 millimetres, under a 60 millimetre plate, with a note that the ground couplings used in practice can be off by up to 15 decibels. Along the foot runs the DIN 45669-1 chain for the 1 to 80 hertz range: band limitation at 0.8 and 100 hertz, KB weighting at 5.6 hertz, a running r.m.s. with a 0.125 second time constant, 30 second clock intervals with one maximum each, and the displayed KB F max and KB FTm, with a box giving KB FTm as the root mean square of the clock maxima, where a maximum of 0.1 or less counts as zero but still counts in N" width="100%"></picture>
 
 A transducer set down without fastening walks or lifts off when the vibration
 is strong, and a coupling that is not force-locked resonates against the
@@ -374,15 +376,35 @@ that the coupling alone can move the reading by up to 15 dB, and that the
 horizontal components suffer most. Which of the four methods of Table 2 to
 use is the one judgement Part 2 leaves entirely to the reader.
 
-**How the measurement goes.** Use a DIN 45669-1 meter with three channels, plus
-a fourth near the source when its signal has to be told apart, and check the
-chain on site. Measure on the foundation nearest the source, no higher than
-0,5 m above ground, and on the top floor ceiling next to the outer wall for the
-building; at mid-span of their floors for the people in it; on the building plot
-for a building still to be built. Point `z` up and `x` preferably towards the
-source, couple the transducer as the diagram shows, measure over the assessment
-time or stretches that represent it, and judge vibration from other sources with
-and without the source running.
+### How the measurement goes
+
+Use a meter that meets DIN 45669-1, with three channels so the three
+directions are recorded together, and a fourth near the source when its signal
+must be told apart from the rest. On site, run at least one check of the chain
+once the meter has had the warm-up time its maker states: a vibration
+calibrator, a tap test, or an electrical signal fed to the input and read
+against the reference indications, the last always together with one of the
+other checks; if the electrical check is more than 10 % off, find out why.
+
+Choose the positions by the question: for the building, the foundation nearest
+the source, no higher than 0,5 m above ground, and the top floor ceiling next
+to the outer wall; for its occupants, their floors at mid-span; for a building
+still to be built, the ground of the plot it will stand on; to find what the
+source itself emits, the ground near it at a set distance, at least 1,5 times
+the largest dimension of a manhole or other disturbing body away from that
+body. Point `z` up and `x` and `y` along the main axes of the building, `x`
+preferably towards the source. Couple the transducer as the insets show, keep
+it and its device to at most a hundredth of the mass vibrating with the
+object, and lay low-noise coaxial cable that cannot move against the object.
+
+Measure over the whole assessment time or stretches that represent it;
+DIN 4150-2 assesses people over 16 h by day and 8 h by night. DIN 45669-2
+prints no background correction: judge vibration from other sources, where you
+can, by comparing the indications with and without the source running, helped
+by a frequency analysis or the channel near the source. Report the purpose,
+the instruments, the positions on a site plan, the directions, the coupling,
+the times, the source, the results, the disturbances and what could be felt or
+heard rattling.
 
 ## 7. What this page is not
 
@@ -394,38 +416,38 @@ planned by.
 
 ## What this guide covers
 
-The **band limitation** of Formula (3) and the **KB weighting** of Formula
-(4), complex, over both working ranges of 5.2.3.1, with the magnitudes of
-Formulae (5) and (6) as their absolute values.
+- **Covered.** The **band limitation** of Formula (3) and the **KB weighting** of Formula
+  (4), complex, over both working ranges of 5.2.3.1, with the magnitudes of
+  Formulae (5) and (6) as their absolute values.
 
-The **weighted vibration severity** $KB_\mathrm{F}(t)$ of Formula (1), its maximum, the
-**clock maxima** of the 30 s intervals of 5.1.6.4 and the **clock maximum
-r.m.s.** of Formula (2), including its two counting rules, and the detection
-limits of 5.2.2.
+- **Covered.** The **weighted vibration severity** $KB_\mathrm{F}(t)$ of Formula (1), its maximum, the
+  **clock maxima** of the 30 s intervals of 5.1.6.4 and the **clock maximum
+  r.m.s.** of Formula (2), including its two counting rules, and the detection
+  limits of 5.2.2.
 
-The **amplitude response tolerances** of Tables 2 and 3 with the deviation of
-Formula (7), as a verdict on a measured response; and the printed check values
-of Table 9, of 6.2.3.12 and of Table 8 in the redraft of Corrigendum 1,
-reproduced by running the chain.
+- **Covered.** The **amplitude response tolerances** of Tables 2 and 3 with the deviation of
+  Formula (7), as a verdict on a measured response; and the printed check values
+  of Table 9, of 6.2.3.12 and of Table 8 in the redraft of Corrigendum 1,
+  reproduced by running the chain.
 
-**Annex E** in full: the three assessment weightings of Table E.1 as a target
-magnitude and as a linear-phase FIR, the assessment velocity they produce and
-the frequency-independent guideline values of Table E.2. And **Annex D**, both
-methods of finding a dominant frequency.
+- **Covered.** **Annex E** in full: the three assessment weightings of Table E.1 as a target
+  magnitude and as a linear-phase FIR, the assessment velocity they produce and
+  the frequency-independent guideline values of Table E.2. And **Annex D**, both
+  methods of finding a dominant frequency.
 
-**No bench.** Clause 6 also grades linearity, overload, crest-factor handling,
-the digital interfaces, temperature, humidity and electromagnetic
-susceptibility. Those are measurements on hardware and a pass on the response
-is not a conformity certificate for an instrument.
+- **Not covered.** **No bench.** Clause 6 also grades linearity, overload, crest-factor handling,
+  the digital interfaces, temperature, humidity and electromagnetic
+  susceptibility. Those are measurements on hardware and a pass on the response
+  is not a conformity certificate for an instrument.
 
-The numbers of **DIN 45669-2**: the loose-mounting limits of 5.3.2 and 5.3.3
-as a verdict, the wax limit of Table 1, the mass loading of 7.2.4 and the
-instrument confidence limits of Table 3.
+- **Covered.** The numbers of **DIN 45669-2**: the loose-mounting limits of 5.3.2 and 5.3.3
+  as a verdict, the wax limit of Table 1, the mass loading of 7.2.4 and the
+  instrument confidence limits of Table 3.
 
-**No measurement procedure in code.** Measurement positions, directions,
-durations, the choice of a ground coupling and the treatment of disturbances
-are the text of DIN 45669-2, described in section 6 and not computed, and the
-assessment of what was measured is DIN 4150-2 and DIN 4150-3.
+- **Not covered.** **No measurement procedure in code.** Measurement positions, directions,
+  durations, the choice of a ground coupling and the treatment of disturbances
+  are the text of DIN 45669-2, described in section 6 and not computed, and the
+  assessment of what was measured is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
@@ -444,30 +466,11 @@ assessment of what was measured is DIN 4150-2 and DIN 4150-3.
 
 ## References
 
-- Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
-  Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
-  The working ranges of 5.2.3.1, the band limitation and frequency weighting of
-  Formulae (3) to (6), the running r.m.s. of Formula (1) and the clock maximum
-  r.m.s. of Formula (2), the display quantities of 5.1.6, the detection limits
-  of 5.2.2, the amplitude response tolerances of Tables 2 and 3 with the
-  deviation of Formula (7), the reference conditions of 5.2.10 and the reference
-  indications of 6.2.3.12 with Table 9, the dominant frequency methods of Annex
-  D, the assessment weightings and guideline values of Annex E with Tables
-  E.1 and E.2, and the channel count of 5.1.2 and the on-site checks of 6.5. The
-  design and type-test clauses that need a bench are not implemented.
-- Deutsches Institut für Normung. (2012). *Messung von Schwingungsimmissionen —
-  Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1*
-  (DIN 45669-1 Ber 1:2012-12).
-  The redraft of Table 8, the eight burst durations of an 80 Hz signal and the
-  KB_Fmax each must show as a percentage of the continuous indication.
-- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
-  Teil 2: Messverfahren* (DIN 45669-2:2005-06).
-  The loose-mounting limits of 5.3.2 and 5.3.3, the wax limit of Table 1, the
-  mass loading of 7.2.4, the ground coupling deviation of 5.3.4.1 and the
-  confidence limits of Table 3. Measurement positions, directions, durations,
-  the choice of a ground coupling and disturbances are text and are not
-  implemented.
-- Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil 3:
-  Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
-  Table 1, whose guideline curve the Annex E weightings invert, the three
-  building classes they are written for, and the measuring points of 5.4.
+- **Deutsches Institut für Normung. (1999).** *Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
+  Table 1, whose guideline curve the Annex E weightings invert, the three building classes they are written for, and the measuring points of 5.4.
+- **Deutsches Institut für Normung. (2005).** *Messung von Schwingungsimmissionen — Teil 2: Messverfahren* (DIN 45669-2:2005-06).
+  The loose-mounting limits of 5.3.2 and 5.3.3, the wax limit of Table 1, the mass loading of 7.2.4, the ground coupling deviation of 5.3.4.1 and the confidence limits of Table 3. Measurement positions, directions, durations, the choice of a ground coupling and disturbances are text and are not implemented.
+- **Deutsches Institut für Normung. (2010).** *Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
+  The working ranges of 5.2.3.1, the band limitation and frequency weighting of Formulae (3) to (6), the running r.m.s. of Formula (1) and the clock maximum r.m.s. of Formula (2), the display quantities of 5.1.6, the detection limits of 5.2.2, the amplitude response tolerances of Tables 2 and 3 with the deviation of Formula (7), the reference conditions of 5.2.10 and the reference indications of 6.2.3.12 with Table 9, the dominant frequency methods of Annex D, the assessment weightings and guideline values of Annex E with Tables E.1 and E.2, and the channel count of 5.1.2 and the on-site checks of 6.5. The design and type-test clauses that need a bench are not implemented.
+- **Deutsches Institut für Normung. (2012).** *Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1* (DIN 45669-1 Ber 1:2012-12).
+  The redraft of Table 8, the eight burst durations of an 80 Hz signal and the KB_Fmax each must show as a percentage of the continuous indication.

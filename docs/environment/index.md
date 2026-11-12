@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/environment/
 
 # Environment and transport
 
@@ -122,28 +124,28 @@ and they have a topic of their own:
 
 ## What this section does not cover
 
-Only the source side of CNOSSOS-EU Annex II is implemented, and only two of
-its four sources. The **industrial source** of section 2.4 and Appendix H, and
-the **aircraft source** of sections 2.6 and 2.7, are not implemented; aircraft
-noise is covered by the ICAO and ECAC methods in [Aircraft
-noise](../aircraft/index.md), which is a different family of models, and a
-non-vehicle machine is characterised as a sound power in [Sources and
-devices](../devices/emission/index.md). The **CNOSSOS propagation method** of
-section 2.5 is not implemented either: the path here is ISO 9613-2, a
-different model, so a chain built from CNOSSOS sources and this library's
-propagation is not a CNOSSOS calculation and should not be reported as one.
+- **Not covered.** Only the source side of CNOSSOS-EU Annex II is implemented, and only two of
+  its four sources. The **industrial source** of section 2.4 and Appendix H, and
+  the **aircraft source** of sections 2.6 and 2.7, are not implemented; aircraft
+  noise is covered by the ICAO and ECAC methods in [Aircraft
+  noise](../aircraft/index.md), which is a different family of models, and a
+  non-vehicle machine is characterised as a sound power in [Sources and
+  devices](../devices/emission/index.md). The **CNOSSOS propagation method** of
+  section 2.5 is not implemented either: the path here is ISO 9613-2, a
+  different model, so a chain built from CNOSSOS sources and this library's
+  propagation is not a CNOSSOS calculation and should not be reported as one.
 
-Nothing here is a mapping engine. There is no terrain model, no city geometry
-and no GIS layer: the propagation functions take one source, one receiver and
-the ground between them, both refraction models assume flat ground at z = 0,
-and how a source line is split into point sources is declared out of scope by
-CNOSSOS itself. On the assessment side, the library starts where the sound
-level meter stops: the ISO 1996-2 receiver positions and façade corrections,
-and the RD 1367/2007 Annex IV measurement procedures (microphone positions,
-series duration, number of measurements), are not implemented, only the
-arithmetic that follows once you have applied them. Acoustic zoning, noise
-maps and action plans under Ley 37/2003 are planning instruments, not
-calculations.
+- **Not covered.** Nothing here is a mapping engine. There is no terrain model, no city geometry
+  and no GIS layer: the propagation functions take one source, one receiver and
+  the ground between them, both refraction models assume flat ground at z = 0,
+  and how a source line is split into point sources is declared out of scope by
+  CNOSSOS itself. On the assessment side, the library starts where the sound
+  level meter stops: the ISO 1996-2 receiver positions and façade corrections,
+  and the RD 1367/2007 Annex IV measurement procedures (microphone positions,
+  series duration, number of measurements), are not implemented, only the
+  arithmetic that follows once you have applied them. Acoustic zoning, noise
+  maps and action plans under Ley 37/2003 are planning instruments, not
+  calculations.
 
 ## Before and after these pages
 
@@ -156,6 +158,6 @@ theory](../reference/theory/environment-transport.md): the ISO 1996-1 descriptor
 NT ACOU 112 prominence criterion and the ISO 9613 attenuation terms.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

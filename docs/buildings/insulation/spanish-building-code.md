@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/insulation/spanish-building-code.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/
 
 # Spanish Building Code (CTE DB-HR)
 
@@ -8,7 +10,7 @@ relatives of, but not identical to, the ISO 717-1 weighted ratings: $R_\mathrm{A
 $R_\mathrm{A,tr}$, $D_{\mathrm{n}T,\mathrm{A}}$ and $D_{2\mathrm{m,n}T,\mathrm{Atr}}$. This page implements the direct
 Annex A route, which is the normative one for DB-HR, the requirement tables of
 clause 2, and the two design calculations most often used with them: the
-window-size correction and the insulation of a composite facade.
+window-size correction and the insulation of a composite façade.
 
 The band spectra it consumes come from field measurement or from prediction;
 the ISO 717 reference-curve engine, which it is worth not confusing this with,
@@ -39,10 +41,10 @@ do not always agree. The band centres are in `DB_HR_FREQUENCIES_HZ`.
 | Aircraft noise, $L_{\mathrm{Aav},i}$ | Table A.2 | $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.6) |
 
 The railway row is the one worth reading twice. Clause 3.1.3.4 point 1 says
-that where railway noise dominates the facade is assessed in
+that where railway noise dominates the façade is assessed in
 $D_{2\mathrm{m,n}T,\mathrm{A}}$ through formula (A.5), and only road traffic and aircraft give
 $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ through (A.6); Table H.1 prints the same split. Because
-Table A.4 is digit for digit Table A.3, a rail-dominant facade comes out at
+Table A.4 is digit for digit Table A.3, a rail-dominant façade comes out at
 the same *number* as a road one, but the quantity the requirement and the
 report are stated in is not the same. That is why `d2m_nt_a()` and
 `d2m_nt_atr()` are separate entry points and each refuses the other's
@@ -68,6 +70,13 @@ index.reported     # 51 dBA, the integer that defines the requirement
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dbhr_global_index_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dbhr_global_index.svg" alt="CTE DB-HR global index R'A: per-band apparent sound reduction index as bars with the pink-noise weighted transmitted level per band, whose energy sum sets the 51.4 dBA index" width="80%"></picture>
+
+*`DBHRGlobalIndexResult.plot()` draws the band insulation together with the
+transmitted level weighted by the normalised spectrum. The point is the second
+curve: it shows at a glance which bands carry the energy sum, and therefore
+where the element has to be improved. Here the weighted transmitted level peaks
+in the low bands where `R'` is weakest, so the 51.4 dBA index is decided well
+below 500 Hz.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -114,11 +123,11 @@ published spectra this page reproduces, the agreement is exact to the integer:
 | Case | Direct route (Annex A) | ISO 717-1 route | Published? |
 | :--- | :--- | :--- | :--- |
 | Separating wall of Ejemplo 7.2 | $R'_\mathrm{A} = 51.4$ dBA, rounded to 51 | $R'_\mathrm{w} = 52$ with $C_{100-5000} = -1$, i.e. 51 | yes, Ejemplo 7.1 prints $R'_\mathrm{w} = 52$, $C = -1$ and the 51 dBA |
-| Facade of Ejercicio 7.1 | $D_{2\mathrm{m,n}T,\mathrm{Atr}} = 32.8$ dBA, rounded to 33 | $D_{2\mathrm{m,n}T,\mathrm{w}} = 38$ with $C_{\mathrm{tr},100-5000} = -5$, i.e. 33 | no, the book prints neither 38 nor $-5$ |
+| Façade of Ejercicio 7.1 | $D_{2\mathrm{m,n}T,\mathrm{Atr}} = 32.8$ dBA, rounded to 33 | $D_{2\mathrm{m,n}T,\mathrm{w}} = 38$ with $C_{\mathrm{tr},100-5000} = -5$, i.e. 33 | no, the book prints neither 38 nor $-5$ |
 
 The two rows are not equally strong evidence. The wall row is a genuine
 external check, because the *Manual* prints the ISO 717-1 numbers as well as
-the direct one. For the facade the book publishes only the 32,8 dBA; the 38
+the direct one. For the façade the book publishes only the 32,8 dBA; the 38
 and the $-5$ come from this library's own ISO 717-1 engine, so that row shows
 the two routes agreeing with each other rather than agreeing with a source.
 
@@ -129,9 +138,9 @@ indices run to 5 kHz while the ISO 717-1 core range stops at 3150 Hz, the
 terms that make (H.1) to (H.3) come out right are the **enlarged-range**
 $C_{100-5000}$ and $C_{\mathrm{tr},100-5000}$; that reading is not in Annex H itself
 but in the *Manual*, in the note to expressions [7.15] and [7.16]. It matters:
-on the facade of Ejercicio 7.1 the core-range $C$ is $-2$ while $C_{100-5000}$
+on the façade of Ejercicio 7.1 the core-range $C$ is $-2$ while $C_{100-5000}$
 is $-1$, so taking the wrong one gives 36 dBA instead of 37 for the
-$D_{2\mathrm{m,n}T,\mathrm{A}}$ of that facade. On the same specimen $C_\mathrm{tr}$ and
+$D_{2\mathrm{m,n}T,\mathrm{A}}$ of that façade. On the same specimen $C_\mathrm{tr}$ and
 $C_{\mathrm{tr},100-5000}$ are both $-5$, so the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ that DB-HR actually
 requires happens not to discriminate between the two readings at all.
 
@@ -156,18 +165,29 @@ DB-HR states its requirements on two kinds of room: the **protected room**
 bedrooms, living areas, classrooms, operating theatres, professional offices)
 and the **habitable room** (*recinto habitable*) in general.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements.svg" alt="Section through a three-storey residential building with each DB-HR requirement on its element: the Table 2.1 D2m,nT,Atr of the facade with the microphone 2 m out, the RA of the partition, DnT,A between dwellings and over a shop, the L′nT,w of the floors, the RA pair of a shared door and the two routes of the party wall, above the Annex A chain from eighteen bands to the rounded number each airborne limit is read against" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements.svg" alt="Section through a three-storey residential building between a street and a party wall, with each DB-HR requirement written on the element it applies to. On the street a car stands for road traffic and a microphone stands 2 m in front of the facade for L1,2m; the bedroom facade carries D2m,nT,Atr of at least 32 dBA, the Table 2.1 value for a bedroom where the Ld of the zone, taken from the noise map, is over 60 and up to 65 dBA. Inside, the partition between a bedroom and a living room carries RA of at least 33 dBA, the wall between two dwellings DnT,A of at least 50 dBA, the floor between two bedrooms of different dwellings L′nT,w of at most 65 dB, and the floor over the ground-floor shop DnT,A of at least 55 dBA under the bedroom and L′nT,w of at most 60 dB under the hall. The hall door onto the common landing carries RA of at least 20 dBA and the wall around it RA of at least 50 dBA, and the party wall takes either D2m,nT,Atr of at least 40 dBA on each leaf or DnT,A of at least 50 dBA for both leaves together. Four lines under the ground add 45 dBA for a habitable room, 30 dBA for a door shared with a protected room, 60 dBA as the Ld of a residential area with no official value, Ld less 10 dBA for a facade not directly exposed to the noise and 4 dBA more on the limit where aircraft dominate. Below, four boxes joined by arrows follow Annex A: the band insulation over eighteen one-third octaves from 100 Hz to 5 kHz, with the sound reduction index from the laboratory and the two standardised level differences normalised to a reference time of 0.5 s; the normalised spectrum of Tables A.2 to A.5, picked by the dominant noise; the energy sum of Formulae A.5 to A.7 for the level differences and A.17 for RA; and the rounding to one decimal while working and to an integer in DnT,A and L′nT,w, with 52.7 dBA becoming 53 dBA against the 50 dBA limit. Two lines note that impact sound goes through the ISO 717-2 reference curve instead and that a catalogue window loses 1 to 3 dB as its area grows past 2.7, 3.6 and 4.6 square metres, and a box at the foot holds the index: minus ten lg of the sum over the bands of ten to the power of the spectrum less the insulation, divided by ten" width="100%"></picture>
 
-**Facades (Table 2.1).** The requirement on $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ is read by bands of
+*Clause 2 on the elements of one building, from the partition inside a dwelling
+to the party wall, and the Annex A chain that turns eighteen bands into the
+rounded number each airborne limit is read against.*
+
+**Façades (Table 2.1).** The requirement on $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ is read by bands of
 the site's day noise index $L_\mathrm{d}$ ($L_\mathrm{d} \le 60$, $60 < L_\mathrm{d} \le 65$,
 $65 < L_\mathrm{d} \le 70$, $70 < L_\mathrm{d} \le 75$ and $L_\mathrm{d} > 75$ dBA):
 
-| Use and room | $\le 60$ | 60-65 | 65-70 | 70-75 | $> 75$ |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Residential and hospital, bedrooms; cultural, health, educational and administrative, living areas | 30 | 32 | 37 | 42 | 47 |
-| Residential and hospital, living areas; cultural, health, educational and administrative, classrooms | 30 | 30 | 32 | 37 | 42 |
+| Use | Room | `db_hr_facade_requirement(ld, use, room)` | $\le 60$ | 60-65 | 65-70 | 70-75 | $> 75$ |
+| :--- | :--- | :--- | ---: | ---: | ---: | ---: | ---: |
+| Residential, hospital | Bedrooms | `"residential"`, `"bedrooms"` | 30 | 32 | 37 | 42 | 47 |
+| Residential, hospital | Living areas | `"residential"`, `"living"` | 30 | 30 | 32 | 37 | 42 |
+| Cultural, health, educational, administrative | Living areas | `"cultural"`, `"living"` | 30 | 32 | 37 | 42 | 47 |
+| Cultural, health, educational, administrative | Classrooms | `"educational"`, `"classrooms"` | 30 | 30 | 32 | 37 | 42 |
 
-Three rules modify the reading: a facade not directly exposed to the dominant
+The same phrase means different things in the two use groups, which is why the
+printed table's single "use and room" column is easy to misread: *living areas*
+carry the stricter row under a cultural or educational use and the more lenient
+one under a residential use.
+
+Three rules modify the reading: a façade not directly exposed to the dominant
 noise (an enclosed courtyard, a quiet surrounding) is assessed with $L_\mathrm{d}$
 reduced by 10 dBA, where aircraft noise dominates the table value is increased
 by 4 dBA, and where no official $L_\mathrm{d}$ exists for the site, 60 dBA is assumed
@@ -214,9 +234,10 @@ building.db_hr_party_wall_requirement().limit                         # 40 dBA p
 building.db_hr_party_wall_requirement("DnT,A").limit                  # 50 dBA both together
 building.db_hr_reverberation_requirement("classroom").limit           # 0.7 s
 
-# The between-rooms requirement is stated in DnT,A, so the party-wall R' above
-# is re-referenced first: V = 50 m3 and T = 0.5 s give A = 16 m2 behind a
-# partition of S = 12 m2, and DnT = R' + 10 lg(A/S) + 10 lg(T/T0).
+# The between-rooms requirement is stated in DnT,A, so the party-wall R' of the
+# field report cannot be checked against it as it stands. Re-reference it first:
+# a receiving room of V = 50 m3 with T = 0.5 s behind a partition of S = 12 m2
+# has A = 0.16 V / T = 16 m2, and DnT = R' + 10 lg(A/S) + 10 lg(T/T0).
 d_nt = np.asarray(r_prime) + 10 * np.log10(16.0 / 12.0) + 10 * np.log10(0.5 / 0.5)
 building.dnt_a(d_nt).intermediate                   # 52.7 dBA (R'A was 51.4 dBA)
 
@@ -224,12 +245,26 @@ check = building.assess_db_hr([(33.0, facade), (52.7, airborne[0])])
 check.passes                                      # True
 ```
 
+The quantity has to match the requirement. DB-HR states the between-rooms limit
+in $D_{\mathrm{n}T,\mathrm{A}}$, and $R'$ and $D_{\mathrm{n}T}$ normalise the same level difference by
+different things: $R' = D + 10\log_{10}(S/A)$ by the partition area and the
+receiving-room absorption, $D_{\mathrm{n}T} = D + 10\log_{10}(T/T_0)$ by the
+reverberation time. So an $R'_\mathrm{A}$ from a field report has to be converted
+through the room's $T$ and the partition area before it means anything against
+the 50 dBA. Only the *tabiquería* requirement ($R_\mathrm{A} \ge 33$ dBA) is stated in
+the $R_\mathrm{A}$ family. Earlier revisions of this page checked the party wall's
+$R'_\mathrm{A} = 51.4$ dBA straight against the $D_{\mathrm{n}T,\mathrm{A}}$ requirement: the verdict
+happened to come out the same here, but the comparison was between two
+different quantities and nothing guarantees the agreement in general.
+
 `check_db_hr_requirement()` rounds the achieved value the way DB-HR asks before
 comparing it (to an integer for the dB quantities, to one decimal for the
 reverberation time) and returns the margin; `assess_db_hr()` does the same over
-a list of value-requirement pairs.
+a list of value-requirement pairs. The `DBHRAssessment` it returns draws the
+achieved values against their limits with `.plot()`, one per checked
+requirement.
 
-## Windows and composite facades
+## Windows and composite façades
 
 The tests that determine the sound reduction index of a window are run on
 specimens of about 1.8 m², and a larger window insulates less. The *Catálogo de
@@ -239,13 +274,13 @@ $R_\mathrm{A}$ and $R_\mathrm{A,tr}$ by total window area: 0 dB up to 2.7 m², $
 sliding window with 4-6-4 glazing, catalogued at $R_\mathrm{A} = 26$ dBA, ends up at
 24 dBA (Ejemplo 7.4).
 
-A real facade is not a homogeneous element: it has a blind part and one or more
+A real façade is not a homogeneous element: it has a blind part and one or more
 openings. The sound reduction index of the whole follows from the
 area-weighted sum of the transmittances, which is what
 `composite_transmission_loss()` does in
-[Predicting Panel Sound Insulation](../design/panel-sound-insulation.md). With the 8 m²
-facade of Ejemplo 7.5, a blind part of 40 dBA and a 2 m² window of 26 dBA, the
-whole comes out at 31.5 dBA:
+[Predicting Panel Sound Insulation](../design/panel-sound-insulation.md).
+With the 8 m² façade of Ejemplo 7.5, a blind part of 40 dBA and a 2 m² window
+of 26 dBA, the whole comes out at 31.5 dBA:
 
 ```python
 from phonometry import building
@@ -258,34 +293,72 @@ composite_transmission_loss([6.0, 2.0], [50.0, 26.0])   # 31.97 dBA: +10 dBA on 
 composite_transmission_loss([6.0, 2.0], [40.0, 31.0])   # 35.63 dBA: +5 dBA on the window
 ```
 
-Those last three lines hold the most useful rule of thumb in facade design:
+Those last three lines hold the most useful rule of thumb in façade design:
 improving the blind part by 10 dBA raises the overall insulation by 0.4 dBA,
 practically nothing, whereas improving the window by 5 dBA raises it by
 4.1 dBA, almost the full increment. The weak element is where the effort pays.
 
-## Plots
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/composite_facade_weak_element_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/composite_facade_weak_element.svg" alt="Overall facade RA against the window RA from 20 to 55 dBA for three blind-part values of 40, 50 and 60 dBA, on the Ejemplo 7.5 geometry of a 6 square metre blind part and a 2 square metre window, with the three printed cases marked and each curve saturating at its own blind-part asymptote" width="88%"></picture>
 
-`DBHRGlobalIndexResult.plot()` draws the band insulation together with the
-transmitted level weighted by the normalised spectrum, as in the figure above:
-it shows at a glance which bands dominate the energy sum, and therefore where
-the element has to be improved. `DBHRAssessment.plot()` draws the achieved
-values against their limits, one per checked requirement.
+*The rule of thumb made general. While the window is the weak element the three
+curves lie on top of each other: the blind part is irrelevant, which is why
+adding 10 dBA to it bought 0.4 dBA, and each curve only lifts off once the
+window comes within a few decibels of it, then flattens onto the blind part's
+own value as its asymptote. Design reads off the x-axis: work on whichever
+element the curve is still following.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+# `composite_transmission_loss` is the import of the block above.
+
+window = np.linspace(20.0, 55.0, 351)
+fig, ax = plt.subplots()
+for blind in (40.0, 50.0, 60.0):
+    overall = [composite_transmission_loss([6.0, 2.0], [blind, float(w)])
+               for w in window]
+    ax.plot(window, overall, label=f"blind part RA = {blind:g} dBA")
+    ax.axhline(blind, linestyle=":", alpha=0.6)
+for w_val, blind in ((26.0, 40.0), (26.0, 50.0), (31.0, 40.0)):
+    ax.plot([w_val], [composite_transmission_loss([6.0, 2.0], [blind, w_val])],
+            "o", color="black")
+ax.set(xlabel="Window RA [dBA]  (2 m2 of an 8 m2 facade)",
+       ylabel="Overall facade RA [dBA]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## What this guide covers
 
-**Covered.** The DB-HR Annex A global index (Formulae A.5 to A.7, A.14, A.17
-and A.18) over the eighteen bands from 100 Hz to 5 kHz with the four normalised
-spectra of Tables A.2 to A.5, the rounding of clause 3.1.3.1 point 4, the
-requirements of clause 2 (Table 2.1 for facades, 2.1.1 airborne and party
-walls, 2.1.2 impact and 2.2 reverberation and absorption) and the window-size
-correction of the *Catálogo de Elementos Constructivos*.
+- **Covered.** The DB-HR Annex A global index (Formulae A.5 to A.7, A.14, A.17 and A.18) over
+  the eighteen bands from 100 Hz to 5 kHz with the four normalised spectra of
+  Tables A.2 to A.5, the rounding of clause 3.1.3.1 point 4, the requirements of
+  clause 2 (Table 2.1 for façades, 2.1.1 airborne and party walls, 2.1.2 impact
+  and 2.2 reverberation and absorption) and the window-size correction of the
+  *Catálogo de Elementos Constructivos*.
 
-**Not covered.** The design options of clause 3 (the simplified option with its
-solution tables, and the general option, which is the EN 12354 prediction) are
-not implemented here: the calculation route of the general option lives in
-[Predicting Sound Insulation (EN 12354)](../design/insulation-prediction.md). The
-execution conditions of clause 5 and the maintenance conditions of clause 6
-are out of scope as well.
+- **Not covered.** The design options of clause 3 (the simplified option with its solution
+  tables, and the general option, which is the EN 12354 prediction) are not
+  implemented here: the calculation route of the general option lives in
+  [Predicting Sound Insulation (EN
+  12354)](../design/insulation-prediction.md). The execution
+  conditions of clause 5 and the maintenance conditions of clause 6 are out of
+  scope as well.
+
+## See also
+
+- [Insulation Ratings (ISO 717)](insulation-ratings.md): the reference-curve route with $R_\mathrm{w}$, $C$, $C_\mathrm{tr}$ and the enlarged-range terms that DB-HR calls simply $C$ and $C_\mathrm{tr}$.
+- [Spanish Noise Regulation (RD 1367/2007)](../../environment/assessment/spanish-noise-regulation.md): where the site's day noise index $L_\mathrm{d}$ that Table 2.1 is entered with comes from.
+- [Façade Sound Insulation](facade-insulation.md): the ISO 16283-3 measurement of $D_{2\mathrm{m,n}T}$ and its EN 12354-3 prediction, which feed the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ index of this page.
+- [Predicting Panel Sound Insulation](../design/panel-sound-insulation.md): the composite-façade calculation and transmission through openings and slits.
+- [Field Insulation Measurement (ISO 16283)](insulation-field.md): the band spectra of $R'$, $D_{\mathrm{n}T}$ and $L'_{\mathrm{n}T}$ that these global quantities summarise.
+- API reference: [`building.regulation.spain`](https://docs.jmrp.io/phonometry/reference/api/building/spain/).
+- Theory: [Sound insulation and absorption, measured](../../reference/theory/rooms-buildings.md#sound-insulation-and-absorption-measured-iso-16283-iso-10140-iso-717-iso-354): the quantities the code requires, derived from ISO 12354 and ISO 717 rather than from the code.
 
 ## Quick answers
 
@@ -298,50 +371,13 @@ and summing energetically over **eighteen** bands (100 Hz to 5 kHz). DB-HR
 accepts the equivalence $R_\mathrm{A} \approx R_\mathrm{w} + C$, but that $C$ is the
 enlarged-range term $C_{100-5000}$, not the core-range one.
 
-## See also
-
-- [Insulation Ratings (ISO 717)](insulation-ratings.md): the reference-curve
-  route with $R_\mathrm{w}$, $C$, $C_\mathrm{tr}$ and the enlarged-range terms that DB-HR
-  calls simply $C$ and $C_\mathrm{tr}$.
-- [Spanish Noise Regulation (RD 1367/2007)](../../environment/assessment/spanish-noise-regulation.md): where
-  the site's day noise index $L_\mathrm{d}$ that Table 2.1 is entered with comes from.
-- [Façade Sound Insulation](facade-insulation.md): the ISO 16283-3 measurement
-  of $D_{2\mathrm{m,n}T}$ and its EN 12354-3 prediction, which feed the $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ index of
-  this page.
-- [Predicting Panel Sound Insulation](../design/panel-sound-insulation.md): the
-  composite-facade calculation and transmission through openings and slits.
-- [Field Insulation Measurement (ISO 16283)](insulation-field.md): the band
-  spectra of $R'$, $D_{\mathrm{n}T}$ and $L'_{\mathrm{n}T}$ that these global quantities summarise.
-- API reference: [`building.regulation.spain`](https://docs.jmrp.io/phonometry/reference/api/building/spain/).
-
 ## References
 
-- Avilés López, R., & Perera Martín, R. (2017). *Manual de acústica ambiental
-  y arquitectónica*. Paraninfo. ISBN 978-84-283-3814-1.
-  Ejemplo 7.2 and Ejercicio 7.1 (pp. 394-395) are the numeric oracles of the
-  global index on this page, and Ejemplos 7.4 and 7.5 (pp. 408-410) the
-  window-size correction and the composite-facade calculation.
-- Ministerio de la Presidencia (Spain). (2007). *Real Decreto 1367/2007,
-  developing Ley 37/2003 del Ruido on acoustic zoning, quality objectives and
-  acoustic emissions* (BOE-A-2007-18397).
-  [BOE consolidated text](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397).
-  The source of the day noise index $L_\mathrm{d}$ that Table 2.1 of DB-HR is read
-  against.
-- Instituto de Ciencias de la Construcción Eduardo Torroja (CSIC). *Catálogo
-  informático de elementos constructivos (CEC)*. Código Técnico de la
-  Edificación.
-  [codigotecnico.org](https://www.codigotecnico.org/Programas/CatalogoElementosConstructivos.html).
-  The building code's catalogue of construction elements, whose correction of
-  a catalogued window's RA and RA,tr by its total area the window section
-  implements.
-
-## Standards
-
-CTE Documento Básico HR *Protección frente al ruido*, the noise part of the
-Spanish building code:
-[codigotecnico.org](https://www.codigotecnico.org/pdf/Documentos/HR/DBHR.pdf).
-The Annex A global index (Formulae A.5 to A.7, A.14, A.17 and A.18) over the
-eighteen bands 100 Hz to 5 kHz with the normalised spectra of Tables A.2 to
-A.5, the rounding rule of clause 3.1.3.1 point 4, and the requirements of
-clause 2: Table 2.1 for facades, 2.1.1 for airborne insulation and party walls,
-2.1.2 for impact sound and 2.2 for reverberation and absorption.
+- **Avilés López, R., & Perera Martín, R. (2017).** *Manual de acústica ambiental y arquitectónica*. Paraninfo.
+  Ejemplo 7.2 and Ejercicio 7.1 (pp. 394-395) are the numeric oracles of the global index on this page, and Ejemplos 7.4 and 7.5 (pp. 408-410) the window-size correction and the composite-façade calculation. ISBN 978-84-283-3814-1.
+- **Instituto de Ciencias de la Construcción Eduardo Torroja (CSIC). (n.d.).** [*Catálogo informático de elementos constructivos (CEC)*](https://www.codigotecnico.org/Programas/CatalogoElementosConstructivos.html). Código Técnico de la Edificación.
+  The building code's catalogue of construction elements, whose correction of a catalogued window's RA and RA,tr by its total area the window section implements.
+- **Ministerio de Fomento (Spain). (2019).** [*Código Técnico de la Edificación, Documento Básico HR Protección frente al ruido*](https://www.codigotecnico.org/pdf/Documentos/HR/DBHR.pdf) (CTE DB-HR).
+  The Annex A global index (Formulae A.5 to A.7, A.14, A.17 and A.18) and its normalised spectra (Tables A.2 to A.5), the rounding of clause 3.1.3.1 point 4 and the requirements of clause 2 (Table 2.1 for façades, 2.1.1 airborne, 2.1.2 impact and 2.2 reverberation).
+- **Ministerio de la Presidencia (Spain). (2007).** [*Real Decreto 1367/2007, developing Ley 37/2003 del Ruido on acoustic zoning, quality objectives and acoustic emissions*](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397) (RD 1367/2007 (BOE-A-2007-18397), consolidated text).
+  The site's day noise index Ld that Table 2.1 of DB-HR is read against comes from the acoustic zoning and the noise maps regulated here.

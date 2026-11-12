@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-turbines.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-turbines/
 
 # Sound Power of Steam Turbine Sets (IEC 61063)
 
@@ -390,35 +392,35 @@ report.plot()
 
 ## What this guide covers
 
-**Covered.** The IEC 61063:1991 determination of the A-weighted sound power level of a
-steam turbine set: the stepped measurement surface 1 m out and its area by
-Equation (1) (with the exact stepped area beside it), the five key positions
-of Figure 2 and the additional positions at equal distances with the check
-of 7.2.2 made per reference box, the stepped background correction of Table 2
-per position,
-the environmental correction of Figure A.3 from the reverberation time or
-from a reference sound source (A.3.2), the 7 dB qualification of A.3.3 and
-the wind limit of 4.3, the surface sound pressure level and the sound power
-level of Equations (2) and (3), the arithmetic average of the NOTE of 8.3,
-the overhead deletion test of 7.2.2, the whole-decibel rounding of 9.4 g, the
-report of clause 10 and the standard deviations of Table 1.
+- **Covered.** The IEC 61063:1991 determination of the A-weighted sound power level of a
+  steam turbine set: the stepped measurement surface 1 m out and its area by
+  Equation (1) (with the exact stepped area beside it), the five key positions
+  of Figure 2 and the additional positions at equal distances with the check
+  of 7.2.2 made per reference box, the stepped background correction of Table 2
+  per position,
+  the environmental correction of Figure A.3 from the reverberation time or
+  from a reference sound source (A.3.2), the 7 dB qualification of A.3.3 and
+  the wind limit of 4.3, the surface sound pressure level and the sound power
+  level of Equations (2) and (3), the arithmetic average of the NOTE of 8.3,
+  the overhead deletion test of 7.2.2, the whole-decibel rounding of 9.4 g, the
+  report of clause 10 and the standard deviations of Table 1.
 
-**Not covered.** The instruments are assumed right: the IEC 651 sound level meter on the slow
-time weighting, the calibrator of 5.2 and the placement that keeps steam,
-air and fields off the microphone (7.4) are the operator's. The reflecting
-plane is not checked against A.2.1 (absorption below 0.1, 4 m beyond the
-surface), the height of the row of microphones is the caller's because
-Figure 2 does not dimension it, and the $L_W$ determinations of a reference
-source are made with the ISO 3746 method
-(`sound_power_pressure(grade="survey")`) before they are passed. How the
-plant below the operating floor or around the set reaches the microphones
-(1.1.3) is outside the standard, and so outside the library. Every reference
-box is taken as centred on one shaft line, so a set whose boxes are flush on
-one long side and step only on the other, as Figure 2 a draws one, is
-modelled symmetrically; Equation (1) does not change. The side row and the
-overhead line are divided each on its own, not in the aligned transverse
-sections the drawings of Figure 2 show, and a reference box that holds several
-casings is checked as one.
+- **Not covered.** The instruments are assumed right: the IEC 651 sound level meter on the slow
+  time weighting, the calibrator of 5.2 and the placement that keeps steam,
+  air and fields off the microphone (7.4) are the operator's. The reflecting
+  plane is not checked against A.2.1 (absorption below 0.1, 4 m beyond the
+  surface), the height of the row of microphones is the caller's because
+  Figure 2 does not dimension it, and the $L_W$ determinations of a reference
+  source are made with the ISO 3746 method
+  (`sound_power_pressure(grade="survey")`) before they are passed. How the
+  plant below the operating floor or around the set reaches the microphones
+  (1.1.3) is outside the standard, and so outside the library. Every reference
+  box is taken as centred on one shaft line, so a set whose boxes are flush on
+  one long side and step only on the other, as Figure 2 a draws one, is
+  modelled symmetrically; Equation (1) does not change. The side row and the
+  overhead line are divided each on its own, not in the aligned transverse
+  sections the drawings of Figure 2 show, and a reference box that holds several
+  casings is checked as one.
 
 ## See also
 
@@ -433,26 +435,7 @@ casings is checked as one.
 
 ## References
 
-- International Electrotechnical Commission. (1991). *Acoustics — Measurement
-  of airborne noise emitted by steam turbines and driven machinery* (IEC
-  61063:1991). Read in its English adoption, BS EN 61063:1996, the text of EN
-  61063:1996, which is IEC 1063:1991 without modification. Equations (1) to
-  (3), Tables 1 and 2, Figure 2, the Figure A.3 of Annex A and the report of
-  clauses 9 and 10 that this guide implements.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise sources
-  using sound pressure — Survey method using an enveloping measurement surface
-  over a reflecting plane* (ISO 3746:2010).
-  [ISO](https://www.iso.org/standard/52056.html). The survey method IEC 61063
-  is built on (it cites the 1979 edition), and the background correction K1A
-  of Equation (12), clause 8.3.3, that Table 2 is compared with.
-
-## Standards
-
-IEC 61063:1991, *Acoustics — Measurement of airborne noise emitted by steam
-turbines and driven machinery*: the measurement surface and its area of
-Equation (1), the microphone positions of Figure 2, the background correction
-of Table 2, the environmental correction of Figure A.3 with the qualification
-of A.3.3, the surface sound pressure level and sound power level of Equations
-(2) and (3), and the report of clauses 9 and 10 with the standard deviations of
-Table 1.
+- **International Electrotechnical Commission. (1991).** *Acoustics — Measurement of airborne noise emitted by steam turbines and driven machinery* (IEC 61063:1991).
+  Read in its English adoption, BS EN 61063:1996, the text of EN 61063:1996, which is IEC 1063:1991 without modification. Equations (1) to (3), Tables 1 and 2, Figure 2, the Figure A.3 of Annex A and the report of clauses 9 and 10 that this guide implements.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Survey method using an enveloping measurement surface over a reflecting plane*](https://www.iso.org/standard/52056.html) (ISO 3746:2010).
+  The survey method IEC 61063 is built on (it cites the 1979 edition), and the background correction K1A of Equation (12), clause 8.3.3, that Table 2 is compared with.

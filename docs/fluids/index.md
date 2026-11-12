@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/fluids/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/fluids/
 
 # The medium
 
@@ -95,21 +97,21 @@ That constant stays frozen where it was published.
 Keeping the three apart is what lets better physics reach a caller without a
 single measurement silently ceasing to reproduce the standard it cites.
 
-**No solids.** A `Fluid` carries no shear speed, and the elastic materials of
-the wave solvers keep their own type with its own precondition. The two are
-different quantities that happen to share the word "medium", and a solid's
-properties are tabulated where a fluid's are computed: they live next door, in
-`phonometry.solids`.
+- **Not covered.** **No solids.** A `Fluid` carries no shear speed, and the elastic materials of
+  the wave solvers keep their own type with its own precondition. The two are
+  different quantities that happen to share the word "medium", and a solid's
+  properties are tabulated where a fluid's are computed: they live next door, in
+  `phonometry.solids`.
 
-**No fields, only states.** A `Fluid` is one fluid at one point. The
-stratified profiles that ray tracers march through stay in the packages that
-own their marchers, in the ocean and in the atmosphere, because a profile is
-a description of a place rather than of a substance.
+- **Not covered.** **No fields, only states.** A `Fluid` is one fluid at one point. The
+  stratified profiles that ray tracers march through stay in the packages that
+  own their marchers, in the ocean and in the atmosphere, because a profile is
+  a description of a place rather than of a substance.
 
-**No frequency dependence.** The speed of sound here is the zero-frequency
-one. Molecular relaxation makes sound speed depend on frequency, and the
-model that describes it lives with the atmospheric absorption that needs it,
-in `phonometry.environment`.
+- **Not covered.** **No frequency dependence.** The speed of sound here is the zero-frequency
+  one. Molecular relaxation makes sound speed depend on frequency, and the
+  model that describes it lives with the atmospheric absorption that needs it,
+  in `phonometry.environment`.
 
 ## What is here
 

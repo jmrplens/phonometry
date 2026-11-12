@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/insulation/service-equipment-noise.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/
 
 # Service-Equipment and Activity Noise (ISO 16032)
 
@@ -634,50 +636,44 @@ When a band of the weighted range was within 4 dB of the background, yes:
 `upper_limit("A")` and `upper_limit("C")` say which single number is, and the
 report has to state it.
 
-## References
-
-- **E DIN EN ISO 16032:2023-05**, *Acoustics — Measurement of sound pressure level from service equipment or activities in buildings — Engineering method (draft international standard)*. The draft ISO/DIS 16032:2023 of the second edition (prEN ISO 16032:2023) in its German publication, German and English text, and cited as a draft. Every clause number on this page is the draft's. Six printed defects are in the errata registry, the C-weighting of Table A.1 among them.
-- **ISO 16032:2004**, *Acoustics — Measurement of sound pressure level from service equipment in buildings — Engineering method*. The first edition, which the draft revises and which is withdrawn. Read in BS EN ISO 16032:2004 for what changed: octave bands only, a position count set by two corner readings, and no activity sources.
-- **ISO 10052:2021**, *Acoustics — Field measurements of airborne and impact sound insulation and of service equipment sound — Survey method* (https://www.iso.org/standard/76560.html). The survey method for the same quantities: three A- or C-weighted readings, no band analysis, and the reverberation index in place of a measured reverberation time.
-
 ## Standards
 
-**Covered.** The engineering method of ISO/DIS 16032:2023, the draft of the second edition
-of ISO 16032, read in E DIN EN ISO 16032:2023-05: the Table 1 quantities, the
-corner search of 7.2 and the distances of 7.3 for a rectangular room, the
-position ladder of 7.4.1 with the corner standard deviation, the additional
-position of 7.9 for a source in the room, the band average
-of Formula (1) rounded to 0.1 dB, the background correction of Clause 9 held
-at 2.2 dB, standardization and normalization by Formulae (5) and (6) over
-50 Hz to 5000 Hz, the A- and C-weighted sums of Formulae (2) and (3) over the
-ranges of 7.8 rounded to whole decibels, Table A.1 (with the misprinted
-C-weighting cells from IEC 61672-1), Table 2, and the operating conditions of
-Annex B as data, the activities of B.10 included. The checks on site: the
-0.2 m from obstacles of 7.2 from a measured distance, the 0.5 dB calibration
-deviation of Clause 5, the 30 s background of 7.6 against the tolerance the
-operator gives, the 10 min to 15 min
-maximum of a varying background and its 10 dB margin (NOTE to Clause 9), the
-5 dB between the maximum and the equivalent level of Clause 9, and the 2 dB
-comparison with the instrument of the NOTE to 7.8.
+- **Covered.** The engineering method of ISO/DIS 16032:2023, the draft of the second edition
+  of ISO 16032, read in E DIN EN ISO 16032:2023-05: the Table 1 quantities, the
+  corner search of 7.2 and the distances of 7.3 for a rectangular room, the
+  position ladder of 7.4.1 with the corner standard deviation, the additional
+  position of 7.9 for a source in the room, the band average
+  of Formula (1) rounded to 0.1 dB, the background correction of Clause 9 held
+  at 2.2 dB, standardization and normalization by Formulae (5) and (6) over
+  50 Hz to 5000 Hz, the A- and C-weighted sums of Formulae (2) and (3) over the
+  ranges of 7.8 rounded to whole decibels, Table A.1 (with the misprinted
+  C-weighting cells from IEC 61672-1), Table 2, and the operating conditions of
+  Annex B as data, the activities of B.10 included. The checks on site: the
+  0.2 m from obstacles of 7.2 from a measured distance, the 0.5 dB calibration
+  deviation of Clause 5, the 30 s background of 7.6 against the tolerance the
+  operator gives, the 10 min to 15 min
+  maximum of a varying background and its 10 dB margin (NOTE to Clause 9), the
+  5 dB between the maximum and the equivalent level of Clause 9, and the 2 dB
+  comparison with the instrument of the NOTE to 7.8.
 
-**Not covered.** The draft is not the published standard: where ISO 16032:2024 differs, this
-page follows the draft. The library does not record the multispectral time
-trace or find the instant of the maximum: it takes the band levels at that
-instant as given. The checks on site judge numbers the operator measures
-and passes in; they do not decide what is not a number: which corner is the
-loudest, whether the background was taken just before or after each set and
-at the same positions, which band is "the middle of the frequency range", or
-whether a source is stable enough for the 5 dB check. "Approximately 30 s"
-has no tolerance in the draft, so the library sets none: the operator names
-the one the report accepts. Nothing checks the room volume of about 300 m³ or
-less that Clause 1
-intends the method for. The "specific frequency range" that 4.2 admits
-beside the two ranges, and that the form of Annex C has a box for, is not
-offered: 7.8 forms the weighted values over the restricted or the extended
-range only, and a band set that does not cover the chosen range is refused.
-No `.report()` fiche is produced: the building fiches are drawn around an
-ISO 717 reference curve that this method does not have. There is no printed
-worked example, so no row reproduces one.
+- **Not covered.** The draft is not the published standard: where ISO 16032:2024 differs, this
+  page follows the draft. The library does not record the multispectral time
+  trace or find the instant of the maximum: it takes the band levels at that
+  instant as given. The checks on site judge numbers the operator measures
+  and passes in; they do not decide what is not a number: which corner is the
+  loudest, whether the background was taken just before or after each set and
+  at the same positions, which band is "the middle of the frequency range", or
+  whether a source is stable enough for the 5 dB check. "Approximately 30 s"
+  has no tolerance in the draft, so the library sets none: the operator names
+  the one the report accepts. Nothing checks the room volume of about 300 m³ or
+  less that Clause 1
+  intends the method for. The "specific frequency range" that 4.2 admits
+  beside the two ranges, and that the form of Annex C has a box for, is not
+  offered: 7.8 forms the weighted values over the restricted or the extended
+  range only, and a band set that does not cover the chosen range is refused.
+  No `.report()` fiche is produced: the building fiches are drawn around an
+  ISO 717 reference curve that this method does not have. There is no printed
+  worked example, so no row reproduces one.
 
 ## See also
 
@@ -695,3 +691,12 @@ worked example, so no row reproduces one.
   defects of the draft this method meets.
 - API reference:
   [`building.measurement.service_equipment`](https://docs.jmrp.io/phonometry/reference/api/building/service-equipment/).
+
+## References
+
+- **International Organization for Standardization. (2004).** *Acoustics — Measurement of sound pressure level from service equipment in buildings — Engineering method* (ISO 16032:2004).
+  The first edition, which the draft revises and which is withdrawn. Read in BS EN ISO 16032:2004 for what changed: octave bands only, a position count set by two corner readings, and no activity sources.
+- **International Organization for Standardization. (2021).** [*Acoustics — Field measurements of airborne and impact sound insulation and of service equipment sound — Survey method*](https://www.iso.org/standard/76560.html) (ISO 10052:2021).
+  The survey method for the same quantities: three A- or C-weighted readings, no band analysis, and the reverberation index in place of a measured reverberation time.
+- **International Organization for Standardization. (2023).** *Acoustics — Measurement of sound pressure level from service equipment or activities in buildings — Engineering method (draft international standard)* (E DIN EN ISO 16032:2023-05).
+  The draft ISO/DIS 16032:2023 of the second edition (prEN ISO 16032:2023) in its German publication, German and English text, and cited as a draft. Every clause number on this page is the draft's. Six printed defects are in the errata registry, the C-weighting of Table A.1 among them.

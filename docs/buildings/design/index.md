@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/design/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/design/
 
 # Insulation design
 
@@ -76,7 +78,7 @@ junctions away.
 The prediction family was published by CEN as EN 12354-1 to -6 and later
 reissued by ISO as a second edition, ISO 12354-1:2017 and ISO 12354-2:2017,
 which is not word for word the earlier text: where a formula changed between the
-prints, the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/) records both. Parts
+prints, the [errata registry](../../ERRATA.md) records both. Parts
 3 to 6 keep their EN designation in the editions used here. Every guide names
 the edition it was read from: EN 12354-1:2000 and EN 12354-2:2000 for the
 simplified models on
@@ -148,33 +150,33 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-**A prediction is only as good as the element data you feed it, and the
-library takes that data as given.** The element ratings, the junction indices
-and the covering improvements are parameters the entry points consume,
-supplied from measurement or computed with this section's own estimators
-(the Annex E junction catalogue, the floating-floor and lining improvement
-laws, the Annex B homogeneous-element chain and the panel-physics models),
-and nothing checks the numbers you pass. Only the structure-to-airborne
-adjustment terms of EN 12354-5 Annexes D and F have no estimator here at all
-and must come from the standard's own tables. The simplified prediction page
-stops at the weighted single numbers by design, and the detailed page is
-where the per-band models live.
+- **Not covered.** **A prediction is only as good as the element data you feed it, and the
+  library takes that data as given.** The element ratings, the junction indices
+  and the covering improvements are parameters the entry points consume,
+  supplied from measurement or computed with this section's own estimators
+  (the Annex E junction catalogue, the floating-floor and lining improvement
+  laws, the Annex B homogeneous-element chain and the panel-physics models),
+  and nothing checks the numbers you pass. Only the structure-to-airborne
+  adjustment terms of EN 12354-5 Annexes D and F have no estimator here at all
+  and must come from the standard's own tables. The simplified prediction page
+  stops at the weighted single numbers by design, and the detailed page is
+  where the per-band models live.
 
-Every panel model carries a validity range it does not extend past, and the
-guides flag each: Sharp's single-panel method is not valid below about 1.5
-times the panel's first resonance, Gomperts' slit model holds only while the
-slit is narrow against the wavelength, only Leppington's method no. 1 is
-implemented for radiation efficiency, and the orthotropic routes are
-infinite-panel models that miss the dip real ribbed cladding shows between 2
-and 4 kHz. On the resilient-layer side, the tapping-machine force model
-assumes a frequency-independent driving-point impedance, so a joisted or
-battened lightweight floor is outside it; soft coverings are treated as linear
-springs; there is no per-band prediction of a lining's improvement, because
-Annex D is a single-number method; and heavy impact sources such as the rubber
-ball are not covered by any of these models at all: their rating is [Heavy
-and Soft Impact
-Sources](../insulation/heavy-impact-sources.md).
+- **Not covered.** Every panel model carries a validity range it does not extend past, and the
+  guides flag each: Sharp's single-panel method is not valid below about 1.5
+  times the panel's first resonance, Gomperts' slit model holds only while the
+  slit is narrow against the wavelength, only Leppington's method no. 1 is
+  implemented for radiation efficiency, and the orthotropic routes are
+  infinite-panel models that miss the dip real ribbed cladding shows between 2
+  and 4 kHz. On the resilient-layer side, the tapping-machine force model
+  assumes a frequency-independent driving-point impedance, so a joisted or
+  battened lightweight floor is outside it; soft coverings are treated as linear
+  springs; there is no per-band prediction of a lining's improvement, because
+  Annex D is a single-number method; and heavy impact sources such as the rubber
+  ball are not covered by any of these models at all: their rating is [Heavy
+  and Soft Impact
+  Sources](../insulation/heavy-impact-sources.md).
 
-Two edition boundaries: only the 2009 edition of EN 12354-5 is implemented,
-not the 2023 revision, and the simplified and detailed pages follow different
-editions of the 12354 family, as the note above says.
+- **Not covered.** Two edition boundaries: only the 2009 edition of EN 12354-5 is implemented,
+  not the 2023 revision, and the simplified and detailed pages follow different
+  editions of the 12354 family, as the note above says.

@@ -1,13 +1,25 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/filters/filter-banks.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/filter-banks/
 
 # Octave and Fractional-Octave Filter Banks
 
 phonometry supports several filter types, each with its own transfer function
 characteristic. Butterworth, Chebyshev II and Bessel place their **−3 dB points
 on the ANSI S1.11 band edges**, so their band levels are directly comparable.
-The two equiripple designs (Chebyshev I, Elliptic) do not: they take those
-edges as the *ripple* edge instead, which widens the band and biases every band
-level by a fixed few tenths of a decibel; see section 1.
+The two equiripple designs (Chebyshev I, Elliptic) do not: they take those edges
+as the *ripple* edge instead, which widens the band and biases every band level
+by a fixed few tenths of a decibel: see section 1, because the bias is
+systematic and does not average out.
+
+By the end of this page you can design a bank for any $1/b$ fraction, read
+every argument off one table, cascade RBJ EQ sections, pull out per-band time
+signals and filter with zero phase. Section 1 is the mathematics the design
+rests on; if you only want to call the function, start at section 3. How the
+five architectures differ is
+[Filter Architecture Gallery](filter-gallery.md), and
+what "class 1" means for the result is
+[Filter Class Verification](filter-compliance.md).
 
 ## How do I compute octave or one-third-octave band levels in Python?
 
@@ -25,26 +37,60 @@ $G = 10^{3/10} \approx 1.99526$ (so "one octave" is *not* exactly 2). For
 band fraction $1/b$, the mid frequencies and band edges follow (5.2-5.5):
 
 $$
-f_\mathrm{m} = 1000 \cdot G^{x/b} \quad (b\ \text{odd}), \qquad
+f_\mathrm{m} = 1000 \cdot G^{x/b}\ (b\ \text{odd}), \qquad
+f_\mathrm{m} = 1000 \cdot G^{(2x+1)/2b}\ (b\ \text{even}), \qquad
 f_1 = f_\mathrm{m} G^{-1/2b}, \quad f_2 = f_\mathrm{m} G^{+1/2b}
 $$
 
 so every 1/3-octave band spans $G^{1/3} \approx 1.2589 \approx 10^{1/10}$:
 ten bands per decade, which is why the nominal frequencies (25, 31.5, 40 …)
 repeat scaled by 10. phonometry designs each band as an SOS cascade on those
-edges, but only three of the five architectures put their −3 dB points on
-$f_1$ and $f_2$. Butterworth's SciPy design frequency *is* its −3 dB point;
-Chebyshev II is designed through its stopband edges, mapped back from the band
-edges analytically, and Bessel is normalized with `norm="mag"`. Both
-corrections exist so that their −3 dB points land on the edges too. Chebyshev I
-and Elliptic are handed the band edges directly, and SciPy reads them as the
-*equiripple passband* edge: at the default `ripple=0.1` the response there is
-−0.10 dB rather than −3 dB, the band is effectively wider, and every band
-level carries a systematic offset: median +0.33 dB (`cheby1`) and +0.25 dB
-(`ellip`) against Butterworth over a one-third-octave bank analysing 20 s of
-white noise. That offset is a *bias*, not scatter: it does not shrink with
-averaging time and it moves every band at once, so choose one architecture per
-campaign and never mix architectures inside one spectrum.
+edges, but where the −3 dB point ends up depends on what the architecture means
+by its design frequency, and only three of the five put it on $f_1$ and $f_2$.
+
+The two forms exist so that the reference frequency 1000 Hz is a band **mid**
+frequency when $b$ is odd and a band **edge** when $b$ is even. That is what
+keeps the odd fractions nested: each octave band is exactly three
+one-third-octave bands, while the even fractions split at the octave
+boundaries; the edge formulas are the same in both cases. The practical
+consequence is easy to trip over: a `fraction=2`, `12` or `24` spectrum has no
+1 kHz band at all, its nominal labels come from the Annex E.3 significant-figure
+rounding rather than from the ISO 266 preferred series, and comparing it band by
+band against a one-third-octave table is meaningless.
+
+### Where each architecture's −3 dB point actually lands
+
+Butterworth's SciPy design frequency *is* its −3 dB point, so it needs no
+correction. Chebyshev II is designed through its stopband edges, mapped back
+from the band edges analytically, and Bessel is normalized with `norm="mag"`
+rather than SciPy's default phase normalization; both corrections exist so that
+their −3 dB points land on the edges too. Chebyshev I and Elliptic are handed
+the band edges directly, and for those two families SciPy reads them as the
+*equiripple passband* edge: the response there is the ripple depth, not −3 dB.
+Measured on the 1 kHz octave band at 48 kHz with order 6 and the default
+`ripple=0.1`:
+
+| Architecture | Response at $f_1$ and $f_2$ | Noise bandwidth / $(f_2 - f_1)$ | Band-level offset |
+| :--- | :---: | :---: | :---: |
+| `butter` | −3.01 dB | 1.003 | reference |
+| `cheby2` | −3.01 dB | 1.003 | −0.02 dB |
+| `bessel` | −3.01 dB | 0.971 | +0.05 dB |
+| `cheby1` | **−0.10 dB** | 1.066 | **+0.33 dB** |
+| `ellip` | **−0.10 dB** | 1.052 | **+0.25 dB** |
+
+The first three columns are the 1 kHz octave band; the last is the median
+band-level difference from Butterworth over a whole 1/3-octave bank analysing
+20 s of white noise. That last column matters because it is a *bias*, not
+scatter: it does not shrink with averaging time, it is larger than the whole
+class 1 passband corridor (±0.4 dB), and it moves every band at once, so a
+spectrum measured with `cheby1` sits bodily above one measured with `butter`.
+Choose one architecture per campaign, and never mix architectures inside one
+spectrum. Raising `order` shrinks the offset, because a narrower transition band
+pulls the −3 dB point back toward the ripple edge; for `cheby1` the median goes
++0.76 dB at order 4, +0.33 dB at order 6, +0.16 dB at order 8 and +0.04 dB at
+order 12. Lowering `design.ripple` does the opposite of what intuition suggests
+and makes the offset *larger* (+0.62 dB at `ripple=0.02`), because at fixed
+order a flatter passband buys a slower roll-off.
 
 ### Poles, zeros and stability
 
@@ -65,6 +111,34 @@ Second-order sections (SOS) defuse half of the problem: each pole pair keeps
 its own coefficients, so rounding errors stay local instead of compounding
 through one high-order polynomial. The other half, the tiny $B / f_\mathrm{s}$ ratio
 itself, is what decimation fixes.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pole_migration_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pole_migration.svg" alt="Three panels for the 25 Hz one-third-octave band of a bank at 48 kHz. Left, the z-plane constellation of the band designed at the full rate: every pole is collapsed onto z = 1, with a zoom inset showing the six poles spread over less than a thousandth of the radius and the annotation 1 minus r equals 8.7e-05. Middle, the same band as the bank actually realizes it, at 906 Hz after decimating by 53: the poles have left z = 1 and sit just inside the unit circle in two tight groups about 10 degrees above and below the real axis, at 1 minus r equals 4.6e-03. Right, the largest pole radius of every band of the bank on log-log axes, the one-rate design rising steadily from 4e-05 at 12.5 Hz to 5e-02 at 16 kHz, while the multirate bank stays between 3.5e-03 and 4.6e-03 from 12.5 Hz to 630 Hz and, from 800 Hz up, where its bands run at the full rate, follows the one-rate curve" width="94%"></picture>
+
+*Selectivity is proximity, and the price is conditioning. At the full rate the
+25 Hz band's poles sit less than $10^{-4}$ from the unit circle and on top of
+each other; the same band realized at its decimated rate has them spread apart
+and 53 times further away. The right panel is the design decision as one
+curve: the multirate bank holds every decimated band at the same distance from
+the unit circle, whatever its centre frequency, and the bands that run at the
+full rate, from 800 Hz up, sit about as far from it or further.*
+
+<details>
+<summary>How this figure was measured</summary>
+
+Both banks come from the parameter table of section 3, one with the default
+`design` and one with `design=FilterDesign(resample=False)`. The pole positions
+are read straight off the bank: `bank.sos[idx]` is the SOS cascade of band
+`idx` and `scipy.signal.sos2zpk` turns it into zeros, poles and gain, so the
+distance from the unit circle is `1 - abs(poles).max()`. For the 25.1 Hz band
+of a 48 kHz one-third-octave bank that distance is **8.73e-05** at the full
+rate and **4.62e-03** at the decimated rate the bank actually uses
+(`bank.factor[idx]` is 53, the largest factor that keeps the band's processing
+Nyquist frequency at least sixteen times its upper band edge, so the band runs
+at 906 Hz). SciPy raises `BadCoefficients` while reading the full-rate design,
+and not the decimated one: that warning is the argument of this section,
+printed by the library that hit it.
+
+</details>
 
 ### Multirate decimation
 
@@ -109,17 +183,30 @@ capture chain delivered:
 
 A band level is not read off a signal, it is *estimated* from it, and the
 narrower the band the longer that takes. The bandwidth of a $1/b$-octave band
-is $B = f_\mathrm{m}\,(G^{1/2b} - G^{-1/2b})$, or $0.231\,f_\mathrm{m}$ for one-third octaves,
-and two consequences follow. The filter has to **settle**: a band rings for a
-few times $1/B$, so that much of the front of the record is transient rather
-than level (about a second in the 12.5 Hz band, twelve milliseconds at 1 kHz).
+is $B = f_\mathrm{m}\,(G^{1/2b} - G^{-1/2b})$, which for one-third octaves is
+$0.231\,f_\mathrm{m}$, and two consequences follow from it.
+
+The filter has to **settle**: a band rings for a few times $1/B$, so that much
+of the front of the record is transient rather than level and must be
+discarded (about a second in the 12.5 Hz band, twelve milliseconds at 1 kHz).
 And the estimate carries a **random error** of about $4.34/\sqrt{BT}$ dB on
-noise-like sound, so a 0.4 dB standard deviation needs $BT = 100$: 35 s of
-record for the 12.5 Hz band, 3.5 s for 125 Hz, 0.4 s for 1 kHz. The rule is
-one line: the lowest band you intend to report sets the record length for the
-whole bank. Analysing a 1 s clip down to 12.5 Hz and reporting the result to
-one decimal is not a measurement of that band, and neither `octave_filter` nor
-`OctaveFilterBank` warns you.
+noise-like sound, so a standard deviation of 0.4 dB needs $BT = 100$:
+
+| Lowest band reported | $B$ [Hz] | $T$ for a 0.4 dB standard deviation |
+| :--- | ---: | ---: |
+| 12.5 Hz | 2.9 | 35 s |
+| 125 Hz | 29 | 3.5 s |
+| 1 kHz | 231 | 0.4 s |
+
+The rule that follows is one line: **the lowest band you intend to report sets
+the record length for the whole bank.** Analysing a 1 s clip down to 12.5 Hz
+and reporting the result to one decimal is not a measurement of that band, and
+neither `octave_filter` nor `OctaveFilterBank` warns you. The general
+$1/\sqrt{BT}$ law is derived in
+[Correlation, time delay and envelope](../spectra/correlation-delay.md);
+the same arithmetic applied per frame instead of per record is the
+`window_time` note of
+[Integrated and Statistical Levels](../levels/levels.md).
 
 The band mathematics above is shared by every architecture. How the
 architectures actually differ, the comparison at the −3 dB crossover, the
@@ -132,7 +219,8 @@ architecture, up to the Linkwitz-Riley crossover, is
 Every call returns an `OctaveFilterResult`: the band `levels`, the
 `frequencies` they sit on, and the per-band `bands` when the call asked for
 them. The fields have names because the alternative was a tuple whose length
-depended on a keyword.
+depended on a keyword, and a reader of `_, _, bands = ...` had to count commas
+to find out what the first two were.
 
 ```python
 import numpy as np
@@ -148,53 +236,85 @@ x = 0.4 * np.sin(2 * np.pi * 1000.0 * t) + 0.05 * noise
 result = filters.octave_filter(x, fs, fraction=3, limits=[20.0, 20000.0])
 print(len(result.frequencies), round(float(result.levels.max()), 1))
 # 31 83.0
-ax = result.plot()            # the band spectrum, on a log frequency axis
+ax = result.plot()            # the spectrum below
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/octave_band_levels_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/octave_band_levels.svg" alt="One-third-octave spectrum drawn by the result object itself: band level in decibels against band centre frequency on a log axis from 16 hertz to 20 kilohertz, with one marked point per band. A 1 kilohertz tone stands at 83 decibels, about forty decibels clear of a noise floor that runs near 43 decibels at the bottom of the range and falls steadily to 17 decibels at the top" width="88%"></picture>
 
-*The one-third-octave spectrum of a 1 kHz tone over noise, drawn by the result
-object itself.*
+*The one-third-octave spectrum of a 1 kHz tone over noise. Any result in the
+library redraws itself this way: `result.plot()` above produced exactly this
+figure.*
 
+Two accessors exist for the fields a call may not have filled.
 `require_levels()` and `require_bands()` return the value or say what the call
-would have had to ask for, which beats meeting a `None` several lines later.
+would have had to ask for, which beats meeting a `None` several lines later:
+
+```python
+bands = filters.octave_filter(x, fs, sigbands=True).require_bands()
+print(len(bands))
+# 11
+
+try:
+    filters.octave_filter(x, fs).require_bands()
+except ValueError as error:
+    print(error)
+# this result kept no band waveforms: call with sigbands=True to have them
+```
 
 ## 3. `octave_filter()` / `OctaveFilterBank` parameters
 
-The advanced options travel in four small frozen dataclasses, so the four
-everyday arguments stay first: `FilterDesign` (`design`), `LevelCalibration`
-(`calibration`), `BlockProcessing` (`block_processing`) and `ResponsePlot`
-(`response_plot`). The table names each option by its bundle.
+The everyday arguments come first and positionally (`x`, `fs`, `fraction`,
+`order`, `limits`), and everything else is grouped into four small frozen
+dataclasses passed by keyword: `design` (`FilterDesign`), `calibration`
+(`LevelCalibration`), `block_processing` (`BlockProcessing`) and
+`response_plot` (`ResponsePlot`). Being frozen, they are hashable, which is
+what lets equal option bundles hit the same design cache. The table below names
+each option by the bundle it travels in.
 
-| Parameter | Type | Units | Range / default | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| `x` | 1D or 2D array, or `Signal` | digital units, or Pa for a calibrated `Signal` | non-empty | 2D is `[channels, samples]`; a `dbfs` bank ignores the calibration and stays in digital units |
-| `fs` | int | Hz | > 0; required by the constructor, and taken from the `Signal` by `octave_filter()` and `bank.filter()` | |
-| `fraction` | int | — | default `1`; common `3`; any $b \ge 1$ | Bands per octave = $b$ |
-| `order` | int | — | default `6` | SOS order per band |
-| `limits` | list `[lo, hi]` | Hz | default `[12, 20000]`, trimmed to the bands $f_\mathrm{s}$ holds | Analysis range; limits past $f_\mathrm{s}/2$ lose their top bands with a `FilterBankWarning`, and a rate that holds none of the bands is refused |
-| `design.filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See the [Filter Architecture Gallery](filter-gallery.md) |
-| `design.ripple` / `design.attenuation` | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation` $\ge 70$ for class 1, since scipy pins its equiripple floor at exactly this value |
-| `design.resample` | bool | — | default `True` | Filter each band on a decimated rate (multirate) |
-| `response_plot.show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
-| `sigbands` | bool | — | default `False` | Also return the per-band time signals |
-| `mode` | str | — | `'rms'` (default) or `'peak'` | Per-band statistic returned |
-| `nominal` | bool | — | default `False` | Return nominal band labels (e.g. `1000`) instead of exact centre frequencies |
-| `detrend` | bool | — | default `True` | Remove the input signal's DC offset once, before filtering (improves low-frequency accuracy) |
-| `calibration.factor` | float | — | default `1.0` | Scales the input to pascals (see the Calibration guide) |
-| `calibration.dbfs` | bool | — | default `False` | Reference levels to digital full scale instead of 20 µPa |
-| `response_plot.file` | str or `None` | — | default `None` | Save the bank-response plot to this path |
-| `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline) |
-| `block_processing.stateful` / `.steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](block-processing.md) |
+Three call sites share this table, and they do not accept the same options, so
+the **Where** column names the one each option belongs to: `octave_filter()` is
+the one-shot function, `OctaveFilterBank(...)` is the constructor, and
+`bank.filter()` is the per-call method.
 
-`mode` has exactly two values. `'rms'` reports the energy-mean level of the
-band over the whole record, which is what every standard means by "band level".
-`'peak'` reports $20\log_{10}$ of the largest absolute sample inside the band:
-an instantaneous, band-limited, unweighted peak, not the C-weighted
-$L_\mathrm{Cpeak}$ of the [Levels](../levels/levels.md) guide, and on
-impulsive signals it is dominated by the filter's own ringing. There is no
-`'sum'` mode: a total across bands is an energy sum the caller performs,
-`10*np.log10(np.sum(10**(spl/10)))`, never an arithmetic mean of decibels.
+| Parameter | Where | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `x` | function, `.filter()` | 1D or 2D array, or `Signal` | digital units, or Pa for a calibrated `Signal` | non-empty | 2D is `[channels, samples]`; a `dbfs` bank ignores the calibration and stays in digital units |
+| `fs` | function, constructor | int | Hz | > 0; required by the constructor, and taken from the `Signal` by `octave_filter()` and `bank.filter()` | |
+| `fraction` | function, constructor | int | — | default `1`; common `3`; any $b \ge 1$ | Bands per octave = $b$ |
+| `order` | function, constructor | int | — | default `6` | SOS order per band |
+| `limits` | function, constructor | list `[lo, hi]` | Hz | default `[12, 20000]`, trimmed to the bands $f_\mathrm{s}$ holds | Analysis range; limits past $f_\mathrm{s}/2$ lose their top bands with a `FilterBankWarning`, and a rate that holds none of the bands is refused |
+| `design.filter_type` | function, constructor | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See the [Filter Architecture Gallery](filter-gallery.md) |
+| `design.ripple` / `design.attenuation` | function, constructor | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation` $\ge 70$ for class 1, since scipy pins its equiripple floor at exactly this value |
+| `design.resample` | function, constructor | bool | — | default `True` | Filter each band on a decimated rate (multirate) |
+| `response_plot.show` | function, constructor | bool | — | default `False` | Plot the bank response (needs matplotlib) |
+| `response_plot.file` | function, constructor | str or `None` | — | default `None` | Save the bank-response plot to this path |
+| `calibration.factor` | function, constructor | float | — | default `1.0` | Scales the input to pascals (see the Calibration guide) |
+| `calibration.dbfs` | function, constructor | bool | — | default `False` | Reference levels to digital full scale instead of 20 µPa |
+| `block_processing.stateful` / `.steady_ic` | constructor only | bool | — | default `False` | Streaming state; see [Block Processing](block-processing.md) |
+| `sigbands` | function, `.filter()` | bool | — | default `False` | Also return the per-band time signals |
+| `mode` | function, `.filter()` | str | — | `'rms'` (default) or `'peak'` | Per-band statistic returned |
+| `nominal` | function, `.filter()` | bool | — | default `False` | Return nominal band labels (e.g. `1000`) instead of exact centre frequencies |
+| `detrend` | function, `.filter()` | bool | — | default `True` | Remove the input signal's DC offset once, before filtering (improves low-frequency accuracy) |
+| `zero_phase` | `.filter()` only | bool | — | default `False` | Forward-backward filtering (offline); see section 6 |
+| `calculate_level` | `.filter()` only | bool | — | default `True` | `False` returns the band signals without computing levels (use with `sigbands=True`) |
+
+The split is not arbitrary: the one-shot `octave_filter()` designs a bank and
+uses it once, so it carries the design-time options only. `zero_phase` and
+`calculate_level` are decided per call and therefore live on
+`OctaveFilterBank.filter()`, while `octave_filter(x, fs, zero_phase=True)` raises
+`TypeError`. Streaming state is fixed when the bank is built.
+
+`mode` has exactly two values. `'rms'` reports the energy-mean level of the band
+over the whole record, which is what every standard means by "band level".
+`'peak'` reports $20\log_{10}$ of the largest absolute sample inside the band,
+against the same 20 µPa reference; it is an instantaneous band peak, not a
+peak-hold reading, it is band-limited and unweighted so it is *not* the
+C-weighted peak $L_\mathrm{Cpeak}$ of the
+[Levels](../levels/levels.md) guide, and on impulsive signals it
+is dominated by the filter's own ringing; it belongs to transient diagnostics,
+not to level reporting. There is no `'sum'` mode: a total across bands is an
+energy sum the caller performs, `10*np.log10(np.sum(10**(spl/10)))`, never an
+arithmetic mean of decibels.
 
 `verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
 Table 1 acceptance limits, the effective bandwidth and the summation of
@@ -202,6 +322,30 @@ adjacent outputs, and reports the class (`1`, `2` or `None` if outside both)
 with per-band margins. The default octave and one-third-octave banks are
 class 1 on all three, decimated or filtered at the full rate; Filter Class
 Verification says why the decimation barely moves the summation.
+
+### What `order` buys, and where it stops buying
+
+`order` is the order of each band-pass section pair, so it sets how fast the
+skirts fall away and therefore how much of a neighbouring band leaks into a
+band level. Order 6 is the default because it clears the IEC 61260-1 mask with
+room to spare for Butterworth, and the arithmetic is worth seeing: at 48 kHz on
+a one-third-octave Butterworth bank, order 2 misses class 1 by 27.03 dB on the
+far stopband, while orders 4, 6, 8 and 10 all pass the Table 1 mask with a
+class 1 margin of exactly +0.40 dB.
+
+That identical margin is not a coincidence and it is the useful half of the
+rule. From order 4 upward the binding constraint has moved out of the stopband
+and into the passband, where a maximally flat design sits at 0 dB deviation and
+the class 1 corridor is ±0.4 dB; so raising the order further buys stopband
+depth but no margin on the mask. What binds from there is the summation of
+adjacent outputs, which IEC 61260-1:2014 grades too (5.16): order 4 misses
+class 1 on it by 0.002 dB and is class 2 overall, while orders 6, 8 and 10
+meet it by 0.04 dB, 0.08 dB and 0.07 dB. A higher order does cost: every
+extra pole pair lengthens
+the ringing (the group-delay peaks of section 5 grow with order), which is why
+transient work and short-window spectrograms prefer low orders. The margin
+arithmetic itself is
+[Filter Class Verification](filter-compliance.md).
 
 ## 4. Parametric EQ (`ParametricEQ`)
 
@@ -235,6 +379,12 @@ axes = res.plot()             # magnitude + phase of the cascade
 
 For block processing pass `stateful=True` (the same convention as
 `WeightingFilter`); the one-shot helper is `parametric_eq(x, fs, sections=...)`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_cascade_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_cascade.svg" alt="Two stacked panels drawn by the result object itself. Above, the magnitude of the three-section cascade of the snippet: plus 4 dB below 100 Hz from the low shelf, a one-octave-wide minus 6 dB bell at 1 kHz, and plus 3 dB above 8 kHz from the high shelf, with each individual section drawn in light grey underneath the thick cascade line. Below, the phase of the same cascade in degrees, swinging about twenty degrees either side of zero around the shelf and bell frequencies" width="88%"></picture>
+
+*The three sections of the snippet (grey) and the cascade they sum to; the
+lower panel is the phase the magnitude costs. Any result in the library redraws
+itself this way, `res.plot()` above produced exactly this figure.*
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_family_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_family.svg" alt="Magnitude responses of the RBJ Audio EQ Cookbook biquad family: peaking, shelves, low/high-pass, band-pass and notch" width="80%"></picture>
 
@@ -271,15 +421,20 @@ plt.show()
 
 Everything above is design. Proving that a designed bank meets a
 performance class of IEC 61260-1, band by band and with its margin in
-decibels, is [Filter class verification](filter-compliance.md): the Table 1
-acceptance mask, the stricter class 0 of the withdrawn 1995 edition, what a
-class buys in a measurement, and the accredited compliance fiche.
+decibels, is
+[Filter Class Verification](filter-compliance.md): the
+Table 1 acceptance mask, the stricter class 0 of the withdrawn 1995 edition,
+what a class buys in a measurement, and the accredited compliance fiche.
 
-## 5. Signal Decomposition and Stability
+## 5. Band signals and group delay
 
-By setting `sigbands=True`, you can retrieve the time-domain components of each
-band. This allows for advanced analysis or comparing how different architectures
-(e.g., Butterworth vs Chebyshev) affect the signal phase and transient response.
+`sigbands=True` returns the per-band time signals alongside the levels, which
+is what makes phase and transient behaviour visible, and what exposes the
+group delay each architecture pays for its selectivity. Stability itself is
+section 1's subject, under
+[Poles, zeros and stability](#poles-zeros-and-stability); what this section
+adds is the evidence, because a filter whose impulse response decays to zero is
+a stable filter.
 
 ```python
 import numpy as np
@@ -305,9 +460,11 @@ spl_c2, xb_cheby2 = filtered.levels, filtered.bands
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_decomposition_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_decomposition.svg" alt="Time-domain band decomposition comparing Butterworth and Chebyshev II, including the impulse response" width="80%"></picture>
 
-*The plot compares the **Butterworth** (solid blue) and **Chebyshev II** (dashed
-red) responses. The bottom plot shows the **Impulse Response**, highlighting the
-differences in stability and transient decay.*
+*The top panel is the input, the middle panels are its band signals under
+**Butterworth** (solid) and **Chebyshev II** (dashed), and the bottom panel is
+the impulse response of the 1 kHz band of each. Both impulse responses decay to
+zero (that is the stability check) but the Chebyshev II ring lasts visibly
+longer, which is the transient price of its steeper skirt.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -328,13 +485,27 @@ filtered = bank_b.filter(y, sigbands=True)
 freq, xb_butter = filtered.frequencies, filtered.bands
 xb_cheby2 = bank_c.filter(y, sigbands=True).bands
 
-fig, axes = plt.subplots(len(freq), 1, figsize=(9, 2 * len(freq)), sharex=True)
-for ax, fc, xb, xc in zip(axes, freq, xb_butter, xb_cheby2):
+# The published figure has two extra panels: the input on top and, at the
+# bottom, the 1 kHz band of a unit impulse through each bank.
+impulse = np.zeros_like(t)
+impulse[0] = 1.0
+imp_butter = bank_b.filter(impulse, sigbands=True).bands
+imp_cheby2 = bank_c.filter(impulse, sigbands=True).bands
+one_k = int(np.argmin(np.abs(np.asarray(freq) - 1000.0)))
+
+fig, axes = plt.subplots(len(freq) + 2, 1, figsize=(9, 2 * (len(freq) + 2)),
+                         sharex=True)
+axes[0].plot(t, y)
+axes[0].set_title("Original signal (250 Hz + 1000 Hz)")
+for ax, fc, xb, xc in zip(axes[1:-1], freq, xb_butter, xb_cheby2):
     ax.plot(t, xb, label="Butterworth")
     ax.plot(t, xc, "--", label="Chebyshev II")
     ax.set_title(f"{fc:.0f} Hz band")
-    ax.set_xlim(0, 0.04)
-axes[0].legend()
+axes[-1].plot(t, imp_butter[one_k], label="Butterworth")
+axes[-1].plot(t, imp_cheby2[one_k], "--", label="Chebyshev II")
+axes[-1].set_title("Impulse response, 1 kHz band")
+axes[1].legend()
+axes[0].set_xlim(0, 0.04)
 axes[-1].set_xlabel("Time [s]")
 plt.tight_layout()
 plt.show()
@@ -395,8 +566,7 @@ For offline analysis you can eliminate group delay entirely:
 `OctaveFilterBank.filter(…, zero_phase=True)` filters each band
 forward-backward (`scipy.signal.sosfiltfilt`), keeping band signals
 time-aligned with the input. It is a per-call option on the bank, not an
-argument of the one-shot `octave_filter()`, which rejects it with a
-`TypeError`. The effective attenuation doubles and the
+argument of the one-shot `octave_filter()`. The effective attenuation doubles and the
 effective passband narrows, lowering the measured broadband band level by
 about 0.4 dB per band (filtering twice squares the magnitude, and an order-6
 Butterworth band then passes 11/12 of its noise bandwidth, −0.38 dB; a pure
@@ -474,19 +644,29 @@ where that package began. Code written for it changes in these places:
 The transition package `pyoctaveband` pins `phonometry>=3.0.0,<4`, so
 `import pyoctaveband` works on 3.x only: code moves to the names above by
 changing its import, not by updating that package.
-[Upgrading from 3.3 to 4.0](../../start/upgrading.md) lists the rest of what
-4.0 changed, and the [changelog](../../../CHANGELOG.md) what 3.0 to 3.3
-changed after PyOctaveBand 2.0.0.
+[Upgrading from 3.3 to 4.0](../../start/upgrading.md) lists the rest of
+what 4.0 changed, and the
+[changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) what 3.0
+to 3.3 changed after PyOctaveBand 2.0.0.
 
-## Quick answers
+## What this guide covers
 
-### How are fractional-octave centre frequencies and band edges defined?
+- **Covered.** IEC 61260-1:2014's band-edge mathematics (clauses 5.2-5.5) and the ISO
+  266:1997 preferred-frequency series behind `nominal_frequencies`. The library
+  designs each band as an SOS cascade across five architectures (Butterworth,
+  Chebyshev I/II, Elliptic, Bessel), plus the RBJ Audio EQ Cookbook's
+  `ParametricEQ`, with band decomposition and zero-phase filtering.
 
-IEC 61260-1:2014 (clauses 5.2-5.5) builds every band from the base-10
-octave ratio $G = 10^{3/10} \approx 1.99526$, so one octave is not exactly
-2. Mid frequencies follow $f_\mathrm{m} = 1000 \cdot G^{x/b}$ (for odd $b$) and the
-edges are $f_1 = f_\mathrm{m} G^{-1/2b}$ and $f_2 = f_\mathrm{m} G^{+1/2b}$; every
-one-third-octave band spans $G^{1/3} \approx 1.2589$, ten bands per decade.
+- **Not covered.** The compared responses of the five architectures, the full 1/1 and 1/3 octave
+  gallery and the per-architecture usage examples, including the Linkwitz-Riley
+  crossover, are [Filter Architecture
+  Gallery](filter-gallery.md). The Table 1 class
+  acceptance masks and their verification have moved to [Filter Class
+  Verification](filter-compliance.md). Near Nyquist,
+  the bilinear transform warps the frequency axis and the bank has no correction
+  for it (unlike `WeightingFilter`'s fitted `high_accuracy` design): keep the top band
+  edge comfortably below Nyquist or raise `fs`, and confirm the margin with
+  `verify_filter_class`.
 
 ## See also
 
@@ -499,38 +679,29 @@ one-third-octave band spans $G^{1/3} \approx 1.2589$, ten bands per decade.
 - API reference: [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/), [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/) and [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/).
 - Theory: [Octave Band Frequencies](../../reference/theory/signal-analysis.md#octave-band-frequencies-ansi-s111--iec-61260): where the base-10 midband grid and the band edges come from, and why the bank is designed on them rather than on nominal labels.
 
+## Quick answers
+
+### How are fractional-octave centre frequencies and band edges defined?
+
+IEC 61260-1:2014 (clauses 5.2-5.5) builds every band from the base-10
+octave ratio $G = 10^{3/10} \approx 1.99526$, so one octave is not exactly
+2. Mid frequencies follow $f_\mathrm{m} = 1000 \cdot G^{x/b}$ for odd $b$ and
+$f_\mathrm{m} = 1000 \cdot G^{(2x+1)/2b}$ for even $b$ (so 1 kHz is a band mid
+frequency in the odd fractions and a band *edge* in the even ones), and the
+edges are $f_1 = f_\mathrm{m} G^{-1/2b}$ and $f_2 = f_\mathrm{m} G^{+1/2b}$ in both cases; every
+one-third-octave band spans $G^{1/3} \approx 1.2589$, ten bands per decade.
+
 ## References
 
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
-  The band-edge mathematics of section 1 and the nominal band labels behind
-  every bank designed here.
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Open Library record](https://openlibrary.org/isbn/9780131988422).
-  The pole-zero, stability and multirate theory condensed in section 1: SOS
-  cascades, the bilinear transform and decimation.
-- Bristow-Johnson, R. *Audio EQ Cookbook*. Republished as a W3C Working
-  Group Note (ed. R. Toy), 8 June 2021.
-  [w3.org/TR/audio-eq-cookbook](https://www.w3.org/TR/audio-eq-cookbook/).
-  The biquad coefficient recipes and the Q / bandwidth / shelf-slope
-  parameterization behind `ParametricEQ` (section 4).
-- Smith, J. O. *Introduction to digital filters with audio applications*
-  (online book). Center for Computer Research in Music and Acoustics (CCRMA),
-  Stanford University.
-  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
-  A free companion treatment of digital-filter design and analysis, from
-  pole-zero geometry to filter stability.
-
-## Standards
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications*: the base-10 mid
-frequencies and band edges of §1 (5.2-5.5) and the nominal band labels; its
-Table 1 class acceptance limits are verified in
-[Filter class verification](filter-compliance.md). ANSI S1.11-2004,
-*Octave-Band and Fractional-Octave-Band … Filters*: the band-edge convention
-on which every bank places its −3 dB points. ISO 266: the preferred-frequency
-series behind the nominal band labels reported by `nominal_frequencies`.
+- **American National Standards Institute. (2004).** [*Specification for octave-band and fractional-octave-band analog and digital filters*](https://webstore.ansi.org/standards/asa/ansis1112004) (ANSI S1.11-2004). Acoustical Society of America.
+  The band-edge convention on which every bank of this guide places its −3 dB points.
+- **Bristow-Johnson, R. (2021).** [*Audio EQ Cookbook*](https://www.w3.org/TR/audio-eq-cookbook/). W3C Working Group Note (ed. R. Toy), 8 June 2021.
+  The biquad coefficient recipes and the Q / bandwidth / shelf-slope parameterization behind ParametricEQ (section 4).
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The band-edge mathematics of section 1 (base-10 mid frequencies and band edges, clauses 5.2-5.5) and the nominal band labels behind every bank designed here.
+- **International Organization for Standardization. (1997).** [*Acoustics — Preferred frequencies*](https://www.iso.org/standard/1350.html) (ISO 266:1997).
+  The preferred-frequency series behind the nominal band labels reported by nominal_frequencies.
+- **Oppenheim, A. V., & Schafer, R. W. (2010).** [*Discrete-time signal processing*](https://openlibrary.org/isbn/9780131988422) (3rd ed.). Pearson.
+  The pole-zero, stability and multirate theory condensed in section 1: SOS cascades, the bilinear transform and decimation (ISBN 978-0-13-198842-2).
+- **Smith, J. O. (n.d.).** [*Introduction to digital filters with audio applications*](https://ccrma.stanford.edu/~jos/filters/). Center for Computer Research in Music and Acoustics (CCRMA), Stanford University.
+  A free online-book companion treatment of digital-filter design and analysis, from pole-zero geometry to filter stability.

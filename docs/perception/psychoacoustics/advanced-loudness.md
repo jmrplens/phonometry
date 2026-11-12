@@ -1,14 +1,17 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/advanced-loudness.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/
 
 # Advanced Loudness (ISO 532-2/-3, ECMA-418-2)
 
 The Zwicker method of ISO 532-1 is the reference route to loudness in sones
-and lives in [Loudness](loudness.md), together with the ISO 226
-equal-loudness contours. This page covers the newer model families
+and lives in [Loudness](loudness.md), together with the
+ISO 226 equal-loudness contours. This page covers the newer model families
 phonometry ships beside it: the **Moore-Glasberg** loudness of
 ISO 532-2/532-3 and the **Sottek Hearing Model** loudness of
 ECMA-418-2:2025, whose shared auditory front-end also powers the tonality
-and roughness metrics of [Sound Quality Metrics](sound-quality.md).
+and roughness metrics of
+[Sound Quality Metrics](sound-quality.md).
 
 The page opens with the choice: which model fits which measurement, and why
 the sone values of the four methods agree at the 1 kHz / 40 dB anchor yet
@@ -31,7 +34,7 @@ auditory filters and their loudness summation.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing close to 1 sone at 40 dB SPL" width="80%"></picture>
 
 *The three models pass through approximately 1 sone at the 40 dB anchor
-(the Sottek front-end documents 0.9845 sone_HMS there) and diverge with level:
+(the Sottek front-end returns 0.9845 sone_HMS there) and diverge with level:
 Zwicker doubles the sone value every +10 phon, while the Sottek model grows
 more slowly (about 1.65× per 10 dB), an intrinsic difference between the
 auditory summations, not a calibration error.*
@@ -69,29 +72,29 @@ plt.show()
 
 </details>
 
-## The ERB_N scale and the Cam axis
+## The ERB<sub>N</sub> scale and the Cam axis
 
-Every model on this page except Zwicker's is written on the
-**ERB<sub>N</sub> number** axis, so it is worth having the scale itself in
-hand. The cochlea behaves as a
-bank of overlapping band-pass **auditory filters**; the width of the one centred
-on a given frequency is summarised by its *equivalent rectangular bandwidth*,
-the bandwidth of the rectangular filter that would pass the same power with the
-same peak response. Fitting notched-noise data for young listeners at moderate
-levels, Glasberg and Moore (1990) make it a straight line in frequency (Moore,
-*An Introduction to the Psychology of Hearing* 6e, p. 76):
+Every model on this page except Zwicker's is written on the **ERB<sub>N</sub>
+number** axis, so it is worth having the scale itself in hand. The cochlea
+behaves as a bank of overlapping band-pass **auditory filters**; the width of
+the one centred on a given frequency is summarised by its *equivalent
+rectangular bandwidth*, the bandwidth of the rectangular filter that would pass
+the same power with the same peak response. Fitting notched-noise data for
+young listeners at moderate levels, Glasberg and Moore (1990) make it a
+straight line in frequency (Moore, *An Introduction to the Psychology of
+Hearing* 6e, p. 76):
 
 $$
-\begin{aligned}
-\mathrm{ERB}_N &= 24.7\,(4.37\,F + 1)\ \text{Hz},\\
-\mathrm{ERB}_N\ \text{number} &= 21.4 \log_{10}(4.37\,F + 1)\ \text{Cam},
-\end{aligned}
-\qquad F \text{ in kHz}.
+\mathrm{ERB}_N = 24.7\,(4.37\,F + 1)\ \text{Hz},\qquad F \text{ in kHz}.
 $$
 
-The second line integrates $df/\mathrm{ERB}_N(f)$, so its unit is one
-auditory-filter width: the **ERB<sub>N</sub> number**, whose unit is called
-the **Cam** (after Cambridge).
+Integrating $df/\mathrm{ERB}_N(f)$ turns that into a frequency scale on which
+one step is one auditory-filter width. The scale is the **ERB<sub>N</sub>
+number** and its unit is the **Cam**, after Cambridge:
+
+$$
+\mathrm{ERB}_N\ \text{number} = 21.4 \log_{10}(4.37\,F + 1)\ \text{Cam}.
+$$
 
 ```python
 from phonometry import psychoacoustics
@@ -104,13 +107,12 @@ print(round(psychoacoustics.frequency_from_cam(cam), 1))     # 1000.0 Hz
 
 The library states the same fit with one more significant digit,
 $\mathrm{ERB}_N = 24.673\,(0.004368 f + 1)$ and
-$21.366 \log_{10}(0.004368 f + 1)$, the precision the ISO 532-2
-implementation uses; the two forms agree to better than 0.2 % over the
-audible range, and the extra digits are what make `frequency_from_cam` an
-exact inverse. The functions are not a private helper of
-the loudness model: `loudness_moore_glasberg` imports these very functions, so
-the Cam grid of a `MooreGlasbergLoudness.erb_number` and a hand-built Cam axis
-cannot drift apart.
+$21.366 \log_{10}(0.004368 f + 1)$, the precision the ISO 532-2 implementation
+uses; the two forms agree to better than 0.2 % over the audible range, and the
+extra digits are what make `frequency_from_cam` an exact inverse. These are not
+private helpers of the loudness model: `loudness_moore_glasberg` calls the same
+three functions, so a `MooreGlasbergLoudness.erb_number` grid and a Cam axis
+you build yourself cannot drift apart.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/erb_bandwidth_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/erb_bandwidth.svg" alt="Auditory-filter bandwidth against centre frequency on log-log axes: the ERB_N line of Glasberg and Moore rising from about 30 Hz at 50 Hz to above 1 kHz at 16 kHz, the constant-percentage one-third-octave bandwidth crossing it near 500 Hz, the 1 kHz point annotated at 15.59 Cam, and a second top axis giving the Cam scale" width="85%"></picture>
 
@@ -119,6 +121,38 @@ it is markedly narrower than a one-third octave, which is why the "old"
 critical-band function, flat at low frequency, fits the direct measurements so
 poorly there; above that it is wider. The top axis counts the same curve in
 Cams, so equal steps along it are equal numbers of auditory filters.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+f = np.geomspace(50.0, 16000.0, 400)
+erb = psychoacoustics.erb_bandwidth(f)
+third_octave = f * (2 ** (1 / 6) - 2 ** (-1 / 6))     # 23 % of f, for scale
+
+fig, ax = plt.subplots()
+ax.loglog(f, erb, label="ERB$_N$ (Glasberg & Moore, 1990)")
+ax.loglog(f, third_octave, "--", label="One-third octave (23 % of f)")
+ax.set(xlabel="Centre frequency [Hz]",
+       ylabel="Equivalent rectangular bandwidth ERB$_N$ [Hz]")
+ax.legend()
+
+# The Cam axis on top: tick where whole ERB_N numbers fall.
+cam_ticks = np.arange(5.0, 40.0, 5.0)
+ax2 = ax.twiny()
+ax2.set_xscale("log")
+ax2.set_xlim(ax.get_xlim())
+ax2.set_xticks(psychoacoustics.frequency_from_cam(cam_ticks))
+ax2.set_xticklabels([f"{c:.0f}" for c in cam_ticks])
+ax2.set_xlabel("ERB$_N$ number [Cam]")
+plt.show()
+```
+
+</details>
 
 ### `erb_bandwidth()`, `cam_from_frequency()`, `frequency_from_cam()` parameters
 
@@ -132,6 +166,47 @@ a zero-dimensional one included. The three
 constants are exported as `ERB_C1_HZ`, `ERB_C2_PER_HZ` and `CAM_C`.
 
 ## Moore-Glasberg loudness (ISO 532-2)
+
+### Which recording maps to which arguments
+
+`field` and `presentation` are not preferences: they are descriptions of how
+the sound reached the listener, and getting them wrong costs more than any
+difference between the models on this page. ISO 532-2 clause 7.2 lists the
+listening situations and the transfer function each needs, and clause 8.1
+fixes what the two ears do with the result.
+
+| How the sound was captured | `field=` | Why |
+| :--- | :--- | :--- |
+| One microphone at the centre of the position the absent listener's head would occupy, one frontal source | `'free'` | Table 1 column 2, the free-field transfer to the tympanic membrane |
+| The same microphone in a reverberant room or in situ | `'diffuse'` | Table 1 column 3, the diffuse-field transfer; also the right choice for diffuse-field earphones |
+| A probe microphone within 10 mm of the eardrum (5 mm when there are strong components above 3 kHz) | `'eardrum'` | Clause 7.2.4: the spectrum is already at the membrane, so no transfer function is applied |
+| A head-and-torso simulator | `'eardrum'`, but only if the simulator is an accurate acoustical model of an average adult | Clause 7.2.5; otherwise it needs its own correction file, which this API cannot express. Equalize the recording to the free or diffuse field first and use the matching option |
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mg_capture_routes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mg_capture_routes.svg" alt="Four capture routes and the arguments each implies: a single microphone where the listener's head would be with one frontal source giving field free, the same microphone in a reverberant field giving field diffuse, a probe microphone within 10 mm of the tympanic membrane giving field eardrum with no transfer function, and a head-and-torso simulator giving field eardrum only if it is an accurate model of an average adult; a footer states that a diotic sound is about 1.5 times as loud as the same sound at one ear" width="92%"></picture>
+
+*The four situations of clause 7.2, with the geometry that decides them. The
+distances in scene 3 are the standard's own: 10 mm from the tympanic membrane,
+5 mm when the sound has strong components above 3 kHz.*
+
+**The failure mode is silent and large.** Applying a free-field transfer to a
+signal that already contains the ear-canal resonance double-counts a gain of
+about 15 dB near 3 kHz: a 3 kHz tone at 70 dB reads 13.8 sone (78.0 phon) with
+`field="free"` and 5.0 sone (62.7 phon) with `field="eardrum"`, and nothing in
+the result says which of the two was appropriate. In the other direction, a
+free-field recording analysed as `'eardrum'` under-reads by the same amount.
+
+**`presentation` is the other factor of two.** `monaural` computes one ear with
+the other silent, `diotic` presents the identical signal to both ears (which
+is what a single free-field microphone recording represents, since both ears
+hear the same field), and `binaural` combines two independent ear signals
+through the standard's inhibition stage. The definitional 1 kHz tone at 40 dB
+is 1.000 sone diotically and 0.667 sone monaurally, the 1.5 ratio clause 8.1
+states, and the inhibition is why two ears give about one and a half times one
+ear rather than exactly twice. For a single-spectrum input `binaural` and
+`diotic` coincide, so the distinction only bites for the two-channel input of
+`loudness_moore_glasberg_time`. Note also that `loudness_ecma()` offers only
+`'free'` and `'diffuse'`, so eardrum-referenced material has to be corrected
+before it reaches the ECMA-418-2 model.
 
 Where Zwicker uses fixed critical bands on the Bark scale, Moore-Glasberg builds
 an **excitation pattern** with level-dependent rounded-exponential (roex)
@@ -196,16 +271,54 @@ plt.show()
 
 </details>
 
-### `loudness_moore_glasberg()` parameters
+### From a one-third-octave spectrum (clause 5.5)
 
-| Parameter | Type | Units | Range / default | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| `x` | 1D array | Pa | non-empty | Calibrated pressure signal (signal wrapper) |
-| `components` | list of `(f, L)` | Hz, dB SPL | — | `_from_spectrum`: discrete sinusoidal components |
-| `band_levels` | 29-vector | dB SPL | 25 Hz .. 16 kHz | `_from_third_octave` input (IEC 61260-1 bands) |
-| `fs` | int | Hz | > 0 | Signal wrapper only |
-| `field` | str | — | `'free'` (default) / `'diffuse'` / `'eardrum'` | Outer-ear transfer |
-| `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
+The exact method wants sinusoidal components, but clause 5.5 defines the input
+a meter actually delivers: the levels of the 29 adjacent one-third-octave bands
+from 25 Hz to 16 kHz on the IEC 61260-1:2014 nominal centres. Each band is
+assumed flat and expanded internally into an equivalent set of components
+before the exact method runs. Two constraints are worth stating plainly:
+exactly 29 values and a fixed grid. A meter that logs 20 Hz to 20 kHz has to
+be trimmed to it, and one that stops at 8 kHz cannot be used at all.
+
+```python
+# `psychoacoustics` is imported by the snippets above.
+# A ventilation spectrum as a sound level meter logs it: 29 one-third-octave
+# bands, 25 Hz to 16 kHz, in dB SPL.
+band_levels = [42.0, 45.0, 48.0, 51.0, 54.0, 56.0, 57.0, 57.0, 56.0, 55.0,
+               54.0, 53.0, 52.0, 51.0, 50.0, 49.0, 48.0, 47.0, 46.0, 45.0,
+               43.0, 41.0, 39.0, 37.0, 34.0, 31.0, 28.0, 25.0, 22.0]
+
+n_mg = psychoacoustics.loudness_moore_glasberg_from_third_octave(
+    band_levels, field="diffuse")
+print(f"{n_mg.loudness:.1f} sone  ({n_mg.loudness_level:.1f} phon)")  # 17.4 sone (81.3 phon)
+
+# The same measurement through ISO 532-1, which stops one band earlier:
+n_zw = psychoacoustics.loudness_zwicker_from_spectrum(
+    band_levels[:28], field="diffuse")
+print(f"{n_zw.loudness:.1f} sone  ({n_zw.loudness_level:.1f} phon)")  # 13.8 sone (77.9 phon)
+```
+
+The two standards do not even agree on where the spectrum ends: ISO 532-2 takes
+29 bands to 16 kHz, ISO 532-1 takes 28 to 12.5 kHz, which is why the slice is
+needed. The rest of the gap is the models: roex excitation and explicit
+binaural summation against the ISO 532-1 core loudness. Use `field="diffuse"`
+for a room measurement made with a free-field-corrected meter; the field
+argument is where band-level users most often go wrong.
+
+### `loudness_moore_glasberg()` and its `_from_spectrum` / `_from_third_octave` variants
+
+The three entry points differ only in how the spectrum is supplied and share
+`field` and `presentation`.
+
+| Parameter | Applies to | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `x` | `loudness_moore_glasberg` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `fs` | `loudness_moore_glasberg` | int | Hz | > 0 | |
+| `components` | `_from_spectrum` | list of `(f, L)` | Hz, dB SPL | — | Discrete sinusoidal components |
+| `band_levels` | `_from_third_octave` | 29-vector | dB SPL | 25 Hz .. 16 kHz | IEC 61260-1 nominal centres; exactly 29 |
+| `field` | all three | str | — | `'free'` (default) / `'diffuse'` / `'eardrum'` | Outer-ear transfer (clause 7.2) |
+| `presentation` | all three | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation (clause 8.1) |
 
 Returns a `MooreGlasbergLoudness`: `loudness` ($N$, sone), `loudness_level`
 (phon), `specific` ($N'(i)$, 372 bins of 0.1 Cam), `erb_number`,
@@ -218,12 +331,6 @@ multi-resolution spectral analysis (six parallel FFTs, updated every 1 ms) and
 two cascaded temporal integrators: the fast **short-term loudness** $S'(t)$
 and the slower **long-term loudness** $S''(t)$. The peak long-term loudness
 $N_\text{max}$ predicts the loudness of sounds up to about 5 s.
-
-One documented deviation: Clause 5 prescribes resampling the input to 32 kHz
-before the running FFT analysis, and this implementation processes at the
-native sampling rate instead. The difference stays inside the standard's
-expanded uncertainty; resample to 32 kHz first if strict clause-by-clause
-conformance matters.
 
 ```python
 import numpy as np
@@ -240,7 +347,24 @@ print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} s
 res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" width="80%"></picture>
+The short-term loudness rises within a few tens of milliseconds and falls back
+slowly, mimicking the ear's fast onset sensitivity and its slower recovery; the
+long-term loudness integrates that trace again with a much longer time
+constant, so it barely reacts to a single syllable and instead tracks the
+overall level of an event. The peak of that slow trace, $N_\text{max}$, is the
+standard's predictor of the loudness of a short sound, and its validity stops
+at roughly 5 s because beyond that a listener stops judging the sound as one
+event. That is also why the percentiles sit beside it: for a sound that
+fluctuates without a clear event structure, a percentile of the long-term
+loudness (typically the 5 % value) is the stable statistic, where
+$N_\text{max}$ would be set by the single worst moment.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a 200 ms 1 kHz burst at 60 dB SPL inside an 0.8 s record: the short-term trace rises to a peak of 4.8 sone within the shaded burst window and releases quickly, while the long-term trace integrates to 3.6 sone and decays slowly after the burst ends" width="80%"></picture>
+
+*A 200 ms 1 kHz burst at 60 dB SPL: the short-term loudness reaches 4.8 sone
+within a few tens of milliseconds and releases quickly, while the long-term
+loudness integrates to 3.6 sone and decays slowly after the burst ends, the
+pair of time constants ISO 532-3 clauses 7.8/7.9 define.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -250,19 +374,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import psychoacoustics
 
-fs = 32000
-t = np.arange(int(1.3 * fs)) / fs
-x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
-res = psychoacoustics.loudness_moore_glasberg_time(x, fs, field="free")
+# The figure is a burst, not a steady tone: 1 kHz at 60 dB SPL, gated on
+# between 200 and 400 ms of an 0.8 s record.
+fs = 48000
+t = np.arange(int(0.8 * fs)) / fs
+sig = np.zeros_like(t)
+on = (t >= 0.2) & (t < 0.4)
+sig[on] = np.sqrt(2) * 2e-5 * 10 ** (60 / 20) * np.sin(2 * np.pi * 1000 * t[on])
+burst = psychoacoustics.loudness_moore_glasberg_time(sig, fs)
+print(round(float(burst.short_term_loudness.max()), 1),
+      round(float(burst.long_term_loudness.max()), 1))   # 4.8  3.6
 
 # The result carries both traces on a 1 ms time axis:
-res.plot()
+burst.plot()
 plt.show()
 
-# Or plot them directly to see the fast STL vs the slow LTL:
+# Or draw the fast short-term and the slow long-term trace by hand:
 fig, ax = plt.subplots()
-ax.plot(res.times, res.short_term_loudness, label="Short-term S'(t)")
-ax.plot(res.times, res.long_term_loudness, label="Long-term S''(t)")
+ax.plot(burst.times, burst.short_term_loudness, label="Short-term S'(t)")
+ax.plot(burst.times, burst.long_term_loudness, label="Long-term S''(t)")
 ax.set_xlabel("Time [s]")
 ax.set_ylabel("Loudness [sone]")
 ax.legend()
@@ -292,11 +422,17 @@ filtering, a 53-band gammatone-like filter bank on the Bark_HMS scale
 with $z = 0.5\ ..\ 26.5$, half-wave rectification, block RMS and a compressive
 nonlinearity, Formula 23) that is **shared** by its loudness, tonality and
 roughness metrics. The loudness $N$ is reported in **sone_HMS**, and the same
-1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.9845,
-with the full Clause 6.2.3 band averaging; the residual's origin is
-documented in the module docstring). `loudness_ecma` is monaural: the
-binaural combination of Formula 118 (Clause 8.1.5) is not implemented, so
-analyse each ear channel separately.
+1 kHz/40 dB anchor calibrates the front-end. The clean-room implementation
+returns 0.9845 sone_HMS for that anchor rather than exactly 1: the 1.55 %
+residual comes from the mandated Clause 6.2.3 band averaging across the
+block-size-boundary bands excited by the tone's lower flank, near 800 to
+900 Hz. Without any band averaging the chain reads 0.955, with averaging
+restricted to same-block-size neighbours 0.996, and with the full
+cross-group recomputation the standard requires 0.9845. The calibration
+constant $c_\mathrm{N}$ is kept at its verbatim tabulated value rather than retuned,
+which is why the deviation is visible at all; the
+[`psychoacoustics.loudness.ecma` API reference](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/ecma/)
+carries the full account.
 
 ```python
 import numpy as np
@@ -307,13 +443,18 @@ t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = psychoacoustics.loudness_ecma(x, fs, field="free")
-print(f"N = {res.loudness:.3f} sone_HMS")   # 0.985 sone_HMS
+print(f"N = {res.loudness:.4f} sone_HMS")   # 0.9845 sone_HMS
 print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
 
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone at 60 dB SPL totalling 2.8 sone_HMS, peaking at the tone's critical band near 9 Bark_HMS and falling away on both sides" width="80%"></picture>
+
+*The 1 kHz tone at 60 dB SPL, N = 2.8 sone_HMS, a louder tone than the 40 dB
+anchor of the snippet above, which gives 0.98 sone_HMS. The loudness is the
+area under $N'(z)$, so a broadband sound spreading a low pattern over many
+bands can outweigh this single peak.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -323,10 +464,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import psychoacoustics
 
+# The figure is the 60 dB tone, not the 40 dB anchor of the snippet above.
 fs = 48000
 t = np.arange(int(1.2 * fs)) / fs
-x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+x = np.sqrt(2) * 2e-5 * 10 ** (60 / 20) * np.sin(2 * np.pi * 1000 * t)
 res = psychoacoustics.loudness_ecma(x, fs, field="free")
+print(f"N = {res.loudness:.1f} sone_HMS")   # 2.8 sone_HMS
 
 # The result carries the average specific loudness over the 53 Bark_HMS bands:
 res.plot()
@@ -394,52 +537,53 @@ print(f"max N_basis = {n_basis.max():.4f} sone_HMS")  # 0.0118 sone_HMS
 print(audible.any())   # True: above the criterion in a block, the library's reading
 ```
 
+## What this guide covers
+
+- **Covered.** The Glasberg and Moore (1990) ERB<sub>N</sub> bandwidth and Cam scale of Moore
+  6e pp. 76-77, via `erb_bandwidth()`, `cam_from_frequency()` and
+  `frequency_from_cam()`. ISO 532-2:2017 (Moore-Glasberg): the roex excitation
+  pattern of clause 7 and the binaural inhibition of clause 8, via
+  `loudness_moore_glasberg()` and its `_from_spectrum`/`_from_third_octave`
+  variants. ISO 532-3:2023 (Moore-Glasberg-Schlittenlacher): the short-term
+  loudness of clause 7.8, the long-term loudness of clause 7.9 and its peak
+  $N_\text{max}$, via `loudness_moore_glasberg_time()`. ECMA-418-2:2025 (Sottek
+  Hearing Model): the loudness assembly of Clause 8, and the total basis
+  loudness of Formula 26 that the audibility criterion of Clause 5.1.9 reads,
+  via `loudness_ecma()`.
+
+- **Not covered.** ECMA-418-2's binaural combination (Formula 118, Clause 8.1.5) is not
+  implemented: `loudness_ecma()` is monaural, so analyse each ear channel
+  separately. The audibility criterion of Clause 5.1.9 is published as a
+  constant and applied by no function: compare the total basis loudness with
+  it, block by block up to `last_evaluated_block`. ISO 532-3 Clause 5
+  prescribes resampling the input to 32 kHz before the running FFT analysis.
+  This implementation processes at the native sampling rate instead, a
+  documented deviation that stays inside the standard's expanded uncertainty.
+  Resample to 32 kHz first if strict clause-by-clause conformance matters.
+
+## See also
+
+- [Loudness](loudness.md): the Zwicker reference method
+  (ISO 532-1), its accredited fiche and the ISO 226 equal-loudness contours.
+- [Sound Quality Metrics](sound-quality.md): the tonality,
+  roughness and fluctuation strength built on the same ECMA-418-2 front-end.
+- [Theory](../../reference/theory/perception.md): the equations behind the loudness models.
+- API reference: [`psychoacoustics.loudness.moore_glasberg`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/ecma/).
+- Theory: [Advanced loudness models and sound quality](../../reference/theory/perception.md#advanced-loudness-models--sound-quality): what the Moore-Glasberg and Sottek models change relative to Zwicker, and why the three disagree where they do.
+
 ## Quick answers
 
 ### Which loudness model should I choose: Zwicker, Moore-Glasberg or Sottek?
 
 The Zwicker method (ISO 532-1:2017) is the reference: stationary and time-varying, one-third-octave input, fast and widely cited. Moore-Glasberg (ISO 532-2:2017) is stationary, builds roex excitation patterns and models binaural summation explicitly; ISO 532-3:2023 adds time-varying short- and long-term loudness with the peak $N_\text{max}$. The Sottek model (ECMA-418-2:2025) reports sone_HMS and shares its auditory front-end with the ECMA tonality and roughness metrics.
 
-## See also
-
-- [Loudness](loudness.md): the Zwicker reference method (ISO 532-1), its
-  accredited fiche and the ISO 226 equal-loudness contours.
-- [Sound Quality Metrics](sound-quality.md): the tonality, roughness and
-  fluctuation strength built on the same ECMA-418-2 front-end.
-- [Theory](../../reference/theory/perception.md): the equations behind the loudness models.
-- API reference: [`psychoacoustics.loudness.moore_glasberg`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg/), [`psychoacoustics.loudness.moore_glasberg_time`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/moore-glasberg-time/) and [`psychoacoustics.loudness.ecma`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/ecma/).
-
 ## References
 
-- Moore, B. C. J. (2013). *An introduction to the psychology of hearing*
-  (6th ed.). Brill.
-  [doi:10.1163/9789004252424](https://doi.org/10.1163/9789004252424).
-  Pages 76–77: the ERB_N auditory-filter bandwidth and the Cam (ERB_N number)
-  scale of Glasberg and Moore (1990).
-- International Organization for Standardization. (2017). *Acoustics —
-  Methods for calculating loudness — Part 2: Moore-Glasberg method*
-  (ISO 532-2:2017).
-  [iso.org catalogue](https://www.iso.org/standard/63078.html).
-  Stationary loudness from roex excitation patterns on the ERB-number scale,
-  with explicit binaural summation.
-- International Organization for Standardization. (2023). *Acoustics —
-  Methods for calculating loudness — Part 3: Moore-Glasberg-Schlittenlacher
-  method* (ISO 532-3:2023).
-  [iso.org catalogue](https://www.iso.org/standard/69856.html).
-  Time-varying short-term and long-term loudness and the peak N_max.
-- Ecma International. (2025). *Psychoacoustic metrics for ITT equipment —
-  Part 2 (methods for describing human perception based on the Sottek
-  Hearing Model)* (ECMA-418-2:2025).
-  [ecma-international.org](https://ecma-international.org/publications-and-standards/standards/ecma-418/).
+- **Ecma International. (2025).** [*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)*](https://ecma-international.org/publications-and-standards/standards/ecma-418/) (ECMA-418-2:2025).
   The Sottek Hearing Model loudness (sone_HMS), in the 4th edition of June 2025.
-
-## Standards
-
-ISO 532-2:2017, *Acoustics — Methods for calculating loudness — Part 2:
-Moore-Glasberg method*: stationary loudness from roex excitation patterns on
-the ERB-number scale, with explicit binaural summation. ISO 532-3:2023,
-*... Part 3: Moore-Glasberg-Schlittenlacher method*: time-varying short-term
-and long-term loudness and the peak N_max. ECMA-418-2:2025, *Psychoacoustic
-metrics for ITT equipment — Part 2 (methods for describing human perception
-based on the Sottek Hearing Model)*: the Sottek Hearing Model loudness
-(sone_HMS).
+- **International Organization for Standardization. (2017).** [*Acoustics — Methods for calculating loudness — Part 2: Moore-Glasberg method*](https://www.iso.org/standard/63078.html) (ISO 532-2:2017).
+  Stationary loudness from roex excitation patterns on the ERB-number scale, with explicit binaural summation.
+- **International Organization for Standardization. (2023).** [*Acoustics — Methods for calculating loudness — Part 3: Moore-Glasberg-Schlittenlacher method*](https://www.iso.org/standard/69856.html) (ISO 532-3:2023).
+  Time-varying short-term and long-term loudness and the peak N_max.
+- **Moore, B. C. J. (2013).** *An introduction to the psychology of hearing* (6th ed.). Brill. https://doi.org/10.1163/9789004252424
+  The ERB_N auditory-filter bandwidth and the Cam (ERB_N number) scale of Glasberg and Moore (1990), pp. 76-77.

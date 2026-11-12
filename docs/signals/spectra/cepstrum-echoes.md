@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/cepstrum-echoes.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Cepstrum, echoes and the envelope spectrum (Havelock / Bendat & Piersol)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/
+
+# Cepstrum, echoes and the envelope spectrum
 
 The [spectral estimators](spectral-analysis.md) describe *what
 frequencies* a signal contains; this page covers what hides in the *shape* of
@@ -18,6 +20,16 @@ multiplicative echo into additive spectral ripple, and the inverse FFT
 collapses that ripple onto a single quefrency spike.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_cepstrum_echoes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_cepstrum_echoes.svg" alt="Block diagram of the cepstrum chain: a signal made of a source wavelet plus an echo with reflection coefficient 0.5 at 8 milliseconds produces a spectrum rippled with a 125 hertz period, taking the log of the squared magnitude turns the multiplicative echo into an additive ripple, and the inverse FFT lands on the quefrency axis, drawn below with the source wavelet concentrated under 2 milliseconds, a spike of height 0.5 at exactly 8 milliseconds, a negative second rahmonic of minus 0.125 at twice the delay, and a dashed lifter cutoff at 4 milliseconds separating the lowpass envelope side from the highpass ripple side; captions give the rahmonic height series and the plus 3.5 and minus 6.0 decibel ripple bounds" width="92%"></picture>
+
+The vocabulary is Bogert's deliberate wordplay on the domain it mirrors, which
+is the one fact that makes the names memorable rather than arbitrary:
+
+| Term | Mirrors | What it is | Units |
+| :--- | :--- | :--- | :--- |
+| cepstrum | spectrum | the spectrum of a log spectrum | signal units |
+| quefrency | frequency | its independent variable | seconds |
+| rahmonics | harmonics | the peaks repeating along it at $n t_0$ | seconds |
+| liftering | filtering | selecting a range of it | — |
 
 ## 1. The cepstrum and its three variants
 
@@ -147,6 +159,14 @@ res.plot()
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/cepstrum_echo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/cepstrum_echo.svg" alt="Power cepstrum of an impulse response with one reflection against quefrency in milliseconds: a sharp positive spike at exactly 8 milliseconds marked as the detected echo, a smaller negative second rahmonic at 16 milliseconds, the low-quefrency source envelope outside the shaded searched band, and a dashed line at the true delay" width="82%"></picture>
 
+*The cepstrum reads the echo off the axis rather than off the waveform: the
+detected peak lands at 8.000 ms and stands 0.488 high against the true
+$a = 0.5$. The confirmation is the small **negative** spike at 16.0 ms, −0.126
+against the series' $-a^2/2 = -0.125$: an unrelated spectral periodicity has no
+reason to produce an alternating rahmonic train, so the second spike is what
+separates an echo from a coincidence. Everything left of the shaded band is the
+source's own envelope, which is why the search starts above it.*
+
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -189,6 +209,54 @@ reverberation spike trains of Havelock Ch. 87 are the same signature at
 geophysical scale. Note the negative second rahmonic at $2 t_0$ in the figure:
 the $-a^2/2$ term of the series, a useful confirmation that a peak really is
 an echo and not an unrelated spectral periodicity.
+
+### From a measured impulse response
+
+Everything above runs on a synthetic click, and the input the method actually
+consumes is an impulse response. Measure it with any of the library's
+excitations (an exponential sweep, an MLS, or the Golay pair of
+[system measurement](system-measurement.md)), and keep the
+direct sound and the reflection inside one record, and pass the impulse response
+straight to `echo_detection`.
+
+**The delay is a path-length difference.** $\Delta d = c\,t_0$, so the page's
+8 ms at 343 m/s means the reflected path is 2.74 m longer than the direct one,
+which fixes the reflector once the source and receiver positions are known.
+Convert with the temperature you measured, not with 343: the speed of sound
+moves by about 0.6 m/s per kelvin, which is 0.2 % on the distance for every
+degree.
+
+**The coefficient is an amplitude ratio at the microphone, not a surface
+property.** $a = 0.5$ means the reflection arrives at half the amplitude of the
+direct sound (a quarter of the energy), and the two together ripple the
+magnitude spectrum between $+3.5$ and $-6.0$ dB, which is the ripple section 3
+isolates. But $a$ already contains the extra spherical spreading of the longer
+path, so the surface's own reflection factor is
+$R = a\,(r_\text{reflected}/r_\text{direct})$. For an 8 ms delay over a 1 m
+direct path that ratio is 3.74, so $R = 3.74\,a$: a number that cannot exceed
+one, which means an apparent $a$ above $1/(1 + c t_0/r_\text{direct})$ is not a
+single specular reflection at all. Where $R$ is valid, the absorption
+coefficient at that angle of incidence is $\alpha = 1 - R^2$; the
+[absorption pages](../../materials/absorbers/absorption-measurement.md) own
+the standardized routes to the same quantity.
+
+**A negative peak is a phase inversion.** A pressure-release boundary (or an
+inverted electrical path) flips the sign of the reflection, and the whole
+rahmonic series flips with it.
+
+Four conditions decide whether the number means anything:
+
+1. `min_quefrency` above the duration of the direct arrival, so the source's own
+   spectral envelope is outside the search band.
+2. The reflection at least 10 dB above the noise floor of the response.
+3. The second rahmonic present at $2t_0$ with the opposite sign: the check that
+   separates a real echo from an unrelated spectral periodicity.
+4. An analysed span several times the delay being sought. The ripple has period
+   $1/t_0$ in frequency and a record of length $T$ resolves the spectrum only to
+   $1/T$; gating the response around the arrivals of interest also keeps later
+   reflections from adding rahmonics of their own.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_echo_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_echo_geometry.svg" alt="Elevation drawn to scale: a source and a measurement microphone 1 m apart at 1.2 m above a hard floor, the direct path of 1.00 m drawn straight and the floor-reflected path of 2.60 m drawn through the image source below the floor plane, giving a path difference of 1.60 m and a delay of 4.7 ms at 343 m per second; a second panel repeats the construction for a side wall 1.37 m away, giving the page's own 8 ms and 2.74 m" width="92%"></picture>
 
 ## 3. Liftering: envelope versus fine structure
 
@@ -303,6 +371,24 @@ and `phase_decomposition` run on that same folding core (Bendat & Piersol
 Sec. 13.1.4; Tohyama in Havelock Ch. 75 edits reverberation by manipulating
 exactly these causal/anticausal parts).
 
+The round trip above is exact to machine precision because the record is
+smooth, noiseless and close to minimum phase. The complex cepstrum is not
+robust in general, and the reason is the phase. It needs an unwrapped phase that
+can be followed continuously across the whole band, and wherever the magnitude
+approaches zero (a deep null, a zero near the unit circle), the phase turns by
+$\pi$ in the space of a bin or two and the unwrapper can jump the wrong way.
+Every quefrency downstream then inherits the error. The power and real cepstra
+are immune, because they never look at phase at all.
+
+Three guards. Zero-pad with `nfft` so the phase is sampled finely enough for the
+unwrapper to track it; keep the record's signal-to-noise ratio high in the bands
+that matter, since additive noise randomises the phase exactly where the
+magnitude is small; and **check the round trip with `invert()` before trusting
+any edited cepstrum**: a failed unwrap shows up immediately as a reconstruction
+error far above 1e-10. When the record cannot support it, use the power cepstrum
+for detection and the real-cepstrum folding of `min_phase` when only a
+magnitude-consistent phase is needed.
+
 ## 5. The envelope spectrum: modulations as lines
 
 Where the cepstrum finds periodicities *of the spectrum*, the **envelope
@@ -315,7 +401,8 @@ through exactly that chain, scaled by the taper's coherent gain so a
 sinusoidal modulation whose frequency falls on an analysis bin reads out as
 a line at its exact amplitude (off-bin lines read low by the taper's
 scalloping loss, up to about 1.4 dB for the default Hann). The optional
-`band=(low, high)` argument reproduces the figure's band-pass front end -
+`band=(low, high)` argument reproduces the band-pass front end of the book's
+Fig. 13.11 -
 the classical bearing-envelope chain: isolate the structural-resonance band
 excited by the defect impacts with a zero-phase band-pass, then envelope
 it - so an out-of-band interferer is strongly attenuated before the
@@ -346,6 +433,14 @@ res.plot()
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/envelope_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/envelope_spectrum.svg" alt="Envelope spectrum of an amplitude-modulated one kilohertz tone in noise against frequency up to one hundred hertz: a single sharp line at the twenty-five hertz modulation frequency reaching exactly the dotted reference at amplitude zero point four, with a flat noise floor elsewhere" width="82%"></picture>
+
+*The line is not proportional to the modulation, it **is** the modulation: with
+$f_\mathrm{m}$ on an analysis bin the magnitude detector reads 0.3996 against the closed
+form $A_0 m = 0.4$, and `mean_level` reads 1.001 against $A_0 = 1$. That is the
+point of the scaling by the taper's coherent gain: the ordinate is a modulation
+depth, not an arbitrary level. Around it the floor sits near 5×10⁻⁴, so the
+line stands about 58 dB clear even with white noise at 3 % of the carrier, which
+is why the chain finds bearing defects that the carrier's own spectrum hides.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -383,6 +478,58 @@ DC step is kept in `mean_level` (the carrier amplitude for the magnitude
 detector), and `remove_dc=False` skips the remover when the absolute DC line
 matters.
 
+### Choosing the band, and mounting the sensor
+
+The band argument is where the bearing chain is won or lost, and neither the
+band nor the transducer is a free choice.
+
+**The band.** Run a plain spectrum of the raw record first and look for the
+broad hump the defect impacts excite: a structural resonance of the housing,
+typically somewhere between 1 and 20 kHz for rolling-element bearings. Put the
+band around that hump. Make it several times wider than the highest repetition
+rate you need to see (three to five times the highest defect frequency, so its
+harmonics survive the detector), and choose $f_\mathrm{s}$ at least 2.56 times the top of
+the band. Where two candidate humps exist, take the one whose envelope spectrum
+gives the higher line-to-floor ratio: the band is a signal-to-noise choice, not
+a physical constant. A band too wide readmits the strong low-frequency
+components the front end exists to remove; one too narrow starves the envelope
+of impact energy; and the zero-phase pass leaves transients at both record
+edges, so trim them before reading amplitudes.
+
+**The mounting.** The usable upper frequency is set by the *mounted* resonance
+of the accelerometer, not by the sensor's own datasheet limit, and that is
+exactly the band the bearing chain needs. Stud mounting or a thin layer of
+adhesive keeps a general-purpose accelerometer usable to roughly 10 kHz; a
+magnet base typically collapses that to a couple of kilohertz and a hand-held
+probe to about 1 kHz: that is, the mounting alone can destroy the band the
+method depends on. Put the sensor on the bearing housing, in the load zone, as
+close to the outer race as the machine allows, with its axis in the load
+direction and the cable strain-relieved. ISO 5348 is the mounting reference.
+
+```python
+# A 3 kHz structural resonance rung at a 120 Hz defect rate, under a 50 Hz
+# line three times as strong: the band-pass is what separates them.
+t_s = np.arange(int(4 * fs)) / fs
+ring = np.sin(2 * np.pi * 3000.0 * t_s) * np.exp(-(t_s % (1 / 120.0)) / 0.001)
+raw = ring + 3.0 * np.sin(2 * np.pi * 50.0 * t_s)
+
+wide = signals.envelope_spectrum(raw, fs)
+narrow = signals.envelope_spectrum(raw, fs, band=(2000.0, 4000.0))
+k120 = int(round(120.0 * wide.nfft / fs))
+print(round(wide.amplitude[k120], 4),        # buried in the wide band
+      round(narrow.amplitude[k120], 4))      # 0.0093 0.1964: 26 dB better in the band
+```
+
+The lines the chain produces are identified by *frequency*, not by amplitude,
+and the kinematic families that name them (ball-pass outer and inner race, ball
+spin, cage, gear mesh and its shaft-rate sidebands) are computed from the
+geometry and the shaft speed at
+[Machine fault frequencies](../../vibration/machinery/machine-diagnostics.md),
+which draws them straight onto an envelope spectrum like this one. Running the
+envelope on the `residual` of a
+[synchronous average](synchronous-averaging.md) first
+removes the deterministic gear components and leaves the bearing lines clear.
+
 ## Relation to the other estimators
 
 The cepstrum starts from the same one-record FFT conventions as the
@@ -399,20 +546,20 @@ is modulated, the domain metrics quantify it normatively.
 
 ## What this guide covers
 
-**Covered.** The three cepstrum variants and liftering of Havelock, Kuwano &
-Vorländer's *Handbook of Signal Processing in Acoustics* (`cepstrum`, `lifter`;
-Chapters 27 and 87), the single-echo delay and reflection coefficient read off
-the power cepstrum (`echo_detection`), the invertible complex cepstrum and its
-homomorphic round trip (`CepstrumResult.invert`), and the Bendat & Piersol
-Chapter 13 envelope spectrum (`envelope_spectrum`) with its closed-form AM tone
-lines.
+- **Covered.** The three cepstrum variants and liftering of Havelock, Kuwano and Vorländer's
+  *Handbook of Signal Processing in Acoustics* (`cepstrum`, `lifter`, Chapters
+  27 and 87), the single-echo delay and reflection coefficient read off the
+  power cepstrum (`echo_detection`), the invertible complex cepstrum and its
+  homomorphic round trip (`CepstrumResult.invert`), and the Bendat & Piersol
+  Chapter 13 envelope spectrum (`envelope_spectrum`) with its closed-form AM
+  tone lines.
 
-**Not covered.** `echo_detection` picks the single largest cepstral peak in the
-band it is given, so a response carrying several overlapping echoes needs
-manual peak-picking or repeated calls on narrowed bands: it is not a multi-echo
-separator. There is no mel-warped or MFCC-style cepstrum for perceptual audio
-features either: `cepstrum` and `lifter` work on the plain linear-frequency
-log spectrum only.
+- **Not covered.** `echo_detection` picks only the single largest cepstral peak in the searched
+  band, so a response with several overlapping echoes needs manual peak-picking
+  or repeated calls on narrowed bands; it is not a multi-echo separator. The
+  module also has no mel-warped or MFCC-style cepstrum for perceptual audio
+  features: `lifter` and `cepstrum` work on the plain linear-frequency log
+  spectrum only.
 
 ## See also
 
@@ -425,18 +572,9 @@ log spectrum only.
 
 ## References
 
-- Havelock, D., Kuwano, S., & Vorländer, M. (Eds.) (2008). *Handbook of
-  Signal Processing in Acoustics*. Springer. ISBN 978-0-387-77698-9.
-  [doi:10.1007/978-0-387-30441-0](https://doi.org/10.1007/978-0-387-30441-0).
-  Chapter 27 (Milner: the cepstral transform as the inverse DFT of the log
-  power spectrum, quefrency, lowpass/highpass liftering), Chapter 87
-  (Neelamani: the complex cepstrum, homomorphic deconvolution, periodic
-  spike trains from reverberation) and Chapter 75 (Tohyama: minimum-phase /
-  all-pass manipulation in the cepstral domain).
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Section 13.1.4 (the Hilbert relation between log magnitude and phase
-  behind the minimum-phase folding) and Section 13.3 with Figure 13.11
-  (envelope detection followed by DC removal, the structure of the
-  envelope spectrum).
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  Section 13.1.4 (the Hilbert relation between log magnitude and phase behind the minimum-phase folding) and Section 13.3 with Figure 13.11 (envelope detection followed by DC removal, the structure of the envelope spectrum). ISBN 978-0-470-24877-5.
+- **Havelock, D., Kuwano, S., & Vorländer, M. (Eds.). (2008).** *Handbook of signal processing in acoustics*. Springer. https://doi.org/10.1007/978-0-387-30441-0
+  Chapter 27 (Milner: the cepstral transform as the inverse DFT of the log power spectrum, quefrency, lowpass/highpass liftering), Chapter 87 (Neelamani: the complex cepstrum, homomorphic deconvolution, periodic spike trains from reverberation) and Chapter 75 (Tohyama: minimum-phase/all-pass manipulation in the cepstral domain). ISBN 978-0-387-77698-9.
+- **International Organization for Standardization. (2021).** [*Mechanical vibration and shock — Mechanical mounting of accelerometers*](https://www.iso.org/standard/78160.html) (ISO 5348:2021).
+  The mounting methods behind the usable upper frequency of an envelope-analysis measurement: stud and adhesive mounting against magnet bases and hand-held probes.

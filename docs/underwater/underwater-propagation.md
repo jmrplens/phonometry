@@ -1,15 +1,35 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/underwater/underwater-propagation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Underwater sound propagation: propagation loss, sound speed, sonar, seabed and ambient noise
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/underwater/underwater-propagation/
 
-Closed-form underwater propagation: the **propagation loss** (geometrical
-spreading plus volume absorption), the **speed of sound** in sea water, the
-**sonar equation**, **seabed reflection loss** and the **ocean ambient-noise**
-spectrum (wind, thermal and shipping-traffic contributions). These complement
-the underwater reference levels (ISO 18405/17208/18406) in
-[Underwater Acoustics](underwater-acoustics.md).
+# Underwater sound propagation
 
-## 1. Propagation loss
+This page computes what the sea does to a sound level in closed form, without
+simulating a field. By the end you can put a number on the propagation loss of
+a path, choose the absorption and sound-speed models that suit your water,
+follow Weston's four shallow-water regimes as the sea floor takes over from
+geometry, balance a passive or active sonar equation and invert it for a
+detection range, evaluate the seabed reflection loss that sets those regimes,
+and build an ambient-noise spectrum from wind, thermal and ship-traffic terms.
+The reference levels every result is expressed in are on the
+[Underwater acoustics](underwater-acoustics.md) page; when
+refraction and boundaries decide the answer, the
+[solvers](underwater-solvers.md) take over.
+
+## Propagation loss
+
+**Two quantities, and ISO 18405 keeps them apart.** *Propagation loss* $N_\mathrm{PL}$
+is the difference between the source level in a specified direction and the
+mean-square sound pressure level at a specified position, $N_\mathrm{PL}(x) = L_\mathrm{S} -
+L_p(x)$, referred to 1 m² (clause 3.4.1.4). *Transmission loss* $\Delta L_\mathrm{TL}$
+is the reduction in a specified level between two specified points (clause
+3.4.1.3). The sonar equation needs the source-referred quantity, so what this
+page computes is a propagation loss, and that is what the function is called.
+The standard deprecates each name as a synonym of the other, in both
+directions, which is why so much of the literature calls this quantity a
+transmission loss and why this library stopped. Either quantity has to be
+quoted with the averaging time and the frequency range it applies to. Weston's
+regimes below are the same quantity on the same axis.
 
 The propagation loss is
 
@@ -18,15 +38,22 @@ PL = \text{spreading} + \alpha R .
 $$
 
 Geometrical spreading is $20 \log_{10} R$ (spherical), $10 \log_{10} R$ (cylindrical) or
-spherical up to a transition range $R_0$ and cylindrical beyond it
-(`"practical"`). The volume absorption coefficient $\alpha$ (dB/km) comes from one of three models: **Francois–Garrison**
-(1982, the default and reference), **Ainslie–McColm** (1998, a legible
-simplification) or **Thorp** (1967, frequency-only).
+spherical up to a transition range $R_0$ and cylindrical beyond it (`"practical"`). The
+volume absorption $\alpha$ (dB/km) comes
+from **Francois-Garrison** (`model="francois-garrison"`, 1982, the default and
+the reference), **Ainslie-McColm** (`"ainslie-mccolm"`, 1998) or **Thorp**
+(`"thorp"`, 1967, frequency-only); the first two agree to within ~10 % across
+100 Hz-1 MHz.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_propagation_loss_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_propagation_loss.svg" alt="Underwater propagation loss versus range at 10 kHz: the total loss with the geometrical-spreading and volume-absorption contributions drawn separately, loss increasing downward" width="82%">
-</picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_propagation_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_propagation_loss.svg" alt="Underwater propagation loss versus range at 10 kHz with the geometrical-spreading and volume-absorption contributions drawn separately, loss increasing downward" width="82%"></picture>
+
+*The two terms trade places with range, which is why they are drawn apart. Out
+to the 1 km transition the loss is spreading and almost nothing else: 61.0 dB
+total against 60.1 dB of spreading. Past it the spreading law halves to
+$10\lg R$ and the $\alpha R$ term takes over the growth: at 20 km, 92.0 dB
+total is 73.0 dB of spreading plus 19.0 dB of absorption at 0.95 dB/km. At
+10 kHz absorption never overtakes spreading over this range; at 100 kHz it
+would have done so inside the first kilometre.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -52,25 +79,79 @@ plt.show()
 import numpy as np
 from phonometry import underwater
 
-# Absorption coefficient at 10 kHz, 10 °C, 35 ppt, 100 m, pH 8 (dB/km).
-# seawater_absorption returns a float for one frequency and an array for several.
-alpha = underwater.seawater_absorption(10e3, temperature_c=10.0, salinity=35.0,
-                               depth=100.0, model="francois-garrison")
-print(f"α = {alpha:.3f} dB/km")
-
 ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical", transition_range=1000.0,
                           temperature_c=10.0, salinity=35.0, depth=100.0)
-print(pl.absorption_db_per_km, pl.pl[-1])
+print(round(pl.absorption_db_per_km, 3), round(float(pl.pl[-1]), 1))
+# 0.95 dB/km, 92.0 dB at 20 km
+
+# The same case on the other two absorption models, so the agreement claim
+# above is checkable rather than asserted:
+for model in ("ainslie-mccolm", "thorp"):
+    other = underwater.propagation_loss(ranges, 10e3, law="practical",
+                              transition_range=1000.0, temperature_c=10.0,
+                              salinity=35.0, depth=100.0, model=model)
+    print(model, round(other.absorption_db_per_km, 3))   # 0.973 / 1.15
+
 pl.plot()   # PL vs range with the spreading/absorption split (needs matplotlib)
 ```
 
-`propagation_loss` returns a `PropagationLossResult` with `pl`, `spreading`,
-`absorption` (arrays), the `frequency` and the `absorption_db_per_km`
-(dB/km). Francois–Garrison and Ainslie–McColm agree to within ~10 % across
-100 Hz–1 MHz, so either is a good cross-check of the other.
+`propagation_loss` returns a `PropagationLossResult`: the total `pl` with its
+`spreading` and `absorption` terms at each `range_m`, and the `frequency`,
+`law`, `model` and `absorption_db_per_km` that produced them.
 
-### 1.1 Weston's shallow-water regimes
+Two arguments in that call decide more than they look. `depth` is only the depth
+at which the absorption coefficient is evaluated (a representative depth along
+the path, because $\alpha$ falls with pressure) and it is **not** the water
+depth and does not set the spreading law. $R_0$ is the range at which the
+wavefront has filled the duct, so it is of the order of the water depth in a
+shallow waveguide, or of the channel thickness in a SOFAR duct: a 100 m channel
+takes $R_0$ near 100 m, not the 1 km used above, which belongs to a deep-water
+path. The choice is not cosmetic. Against the figure of merit of 87 dB worked
+below, spherical-only spreading puts detection at 8.7 km and the practical law
+with $R_0 = 1000$ m at 15.8 km. The same ocean, seven kilometres apart.
+
+The absorption model matters less, and it is worth seeing how much less.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seawater_absorption_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seawater_absorption.svg" alt="Left, the volume absorption coefficient from 10 hertz to 1 megahertz for the Francois-Garrison, Ainslie-McColm and Thorp models at 10 degrees Celsius, 35 parts per thousand and 100 metres, with the boric-acid, magnesium-sulfate and pure-water relaxation regions annotated on the reference curve; right, the departure of the other two models from Francois-Garrison in per cent, with a plus or minus ten per cent band shaded" width="92%"></picture>
+
+*Ainslie-McColm stays inside ±10 % of the Francois-Garrison reference across the
+whole band, which is what makes it a legitimate substitute. Thorp does not: it
+runs about 20 % high below a few hundred hertz and collapses above ~60 kHz,
+because it is a frequency-only fit with 4 °C water near 1000 m baked into it and
+no temperature, salinity or depth to give.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+freqs = np.logspace(1.0, 6.0, 500)
+env = {"temperature_c": 10.0, "salinity": 35.0, "depth": 100.0}
+alpha = {m: np.asarray(underwater.seawater_absorption(freqs, model=m, **env))
+         for m in ("francois-garrison", "ainslie-mccolm", "thorp")}
+
+fig, (ax_a, ax_r) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+for name, style in (("francois-garrison", "-"), ("ainslie-mccolm", "--"),
+                    ("thorp", ":")):
+    ax_a.loglog(freqs, alpha[name], style, label=name)
+    if name != "francois-garrison":
+        ax_r.semilogx(freqs, 100.0 * (alpha[name] / alpha["francois-garrison"] - 1.0),
+                      style, label=name)
+ax_a.set(xlabel="Frequency [Hz]", ylabel="alpha [dB/km]")
+ax_r.set(xlabel="Frequency [Hz]", ylabel="Departure from Francois-Garrison [%]",
+         ylim=(-70, 90))
+for ax in (ax_a, ax_r):
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
+plt.show()
+```
+
+</details>
+
+### Weston's shallow-water regimes
 
 Fixing the spreading law by hand works offshore, but in shallow water the law
 *changes with range* as the sea floor takes over. Weston's energy-flux theory,
@@ -84,19 +165,35 @@ ranges at which they hand over, from the seabed reflectivity alone:
 | Mode stripping | $\sqrt{\pi/(\eta H)}\, r^{-3/2}$ | $15 \log_{10} r$ | $r_\mathrm{MS} = k^2 H_\mathrm{e}^3/(9\pi\eta)$ |
 | Single mode | Eq. (9.54), exponential | steeper than $15 \log_{10} r$ | — |
 
-$\psi_\mathrm{c} = \arccos(c_\mathrm{w}/c_\mathrm{sed})$ is the critical grazing angle, $\eta$ the
-**reflection loss gradient** in nepers per radian ($|R(\theta)| \approx
-\mathrm{e}^{-\eta\theta}$) and $H_\mathrm{e}$ the Weston effective depth, the level a short
-distance below the true seabed at which a pressure-release boundary appears to
-lie. `weston_propagation_loss` assembles the composite loss
-$PL = -10 \log_{10} F$ and returns each regime's own law alongside it; the
-`boundaries` field carries the three transition ranges plus the waveguide
-cut-off frequency and the number of cut-on modes.
+Here $r$ is the range, $H$ the water depth, $k = 2\pi f/c_1$ the acoustic
+wavenumber in the water column, $\psi_\mathrm{c} = \arccos(c_1/c_2)$ the critical grazing
+angle set by the water and sediment sound speeds, $\eta$ the **reflection loss
+gradient** in nepers per radian ($|R(\theta)| \approx \mathrm{e}^{-\eta\theta}$) and
+$H_\mathrm{e}$ the **Weston effective depth**: the level a short distance *below* the
+true seabed at which a pressure-release boundary appears to lie, so $H_\mathrm{e} > H$
+and the two letters are not interchangeable (which is the whole of the errata
+note below).
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weston_regimes_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weston_regimes.svg" alt="Weston's four shallow-water propagation regimes at 250 Hz over medium sand in 50 m of water: the composite propagation loss follows spherical spreading to about 43 m, cylindrical spreading to 412 m, the 15 lg r mode-stripping law to about 20 km and then the exponential single-mode decay, with each individual law drawn for comparison" width="82%">
-</picture>
+`weston_propagation_loss` assembles the composite loss and returns each regime's
+own law alongside it; the `boundaries` field carries the three transition ranges
+plus the waveguide cut-off frequency and the number of cut-on modes. What it
+returns is a **propagation loss** $PL = -10\log_{10} F$: the incoherent,
+range-averaged ratio of the received to the source mean-square pressure, with
+the absorption term added separately. For the geometries of this page it is
+directly comparable with the propagation loss above and with the depth-averaged
+modal result. The difference between the two ISO 18405 quantities is the
+reference-range convention, not the physics, which is why the two are plotted
+on the same axis.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weston_regimes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weston_regimes.svg" alt="Weston's four shallow-water propagation regimes at 250 Hz over medium sand in 50 m of water: the composite propagation loss follows spherical spreading to about 43 m, cylindrical spreading to 412 m, the 15 lg r mode-stripping law to about 20 km and then the exponential single-mode decay, with each individual law drawn for comparison" width="82%"></picture>
+
+*Nothing here was chosen: the three hand-overs at 42.7 m, 411.8 m and 20.1 km
+come out of the seabed alone, through the 33.6° critical angle and the
+0.278 Np/rad reflection-loss gradient of medium sand in 50 m of water. The
+composite is the lower envelope of the four dashed laws, so the loss steepens
+in stages: 32.6 dB at the first boundary, 42.4 dB at the second, 67.7 dB at
+the third. Sand is the reason the middle two regimes exist at all: a harder
+seabed pushes the hand-overs out and a softer one strips the modes sooner.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -112,8 +209,6 @@ res = underwater.weston_propagation_loss(ranges, 250.0, 50.0, seabed="sand",
                                          source_depth=10.0, receiver_depth=25.0)
 b = res.boundaries
 print(f"psi_c = {np.degrees(b.critical_angle_rad):.1f} deg, eta = {b.reflection_loss_gradient_np_per_rad:.2f} Np/rad")
-print(f"boundaries: {b.spherical_to_cylindrical:.0f} / "
-      f"{b.cylindrical_to_mode_stripping:.0f} / {b.mode_stripping_to_single_mode:.0f} m")
 res.plot()   # composite loss with each regime law and the boundaries
 plt.show()
 ```
@@ -121,66 +216,88 @@ plt.show()
 </details>
 
 ```python
-import numpy as np
 from phonometry import underwater
 
 b = underwater.weston_regime_boundaries(250.0, 50.0, seabed="sand")
 print(b.cylindrical_to_mode_stripping)   # r_CS, in metres
 print(b.cutoff_frequency, b.n_modes)  # ducted propagation needs f > f_c
+print(underwater.reflection_loss_gradient("sand"))   # 0.278 Np/rad
 
-# The seabed properties themselves (Ainslie Table 9.1) are addressable:
-print(underwater.WESTON_SEABEDS["sand"].density_ratio)      # 2.1
-print(underwater.reflection_loss_gradient("sand"))          # 0.278 Np/rad
-print(underwater.reflection_loss_gradient("mud", frequency_hz=250.0))
+# The seabed rows themselves (Ainslie Table 9.1) are addressable.
+print(underwater.WESTON_SEABEDS["sand"].density_ratio)            # 2.1
+print(round(underwater.reflection_loss_gradient("mud", frequency_hz=250.0), 2))  # 5.18 Np/rad
 ```
+
+Sand's gradient is fixed by the bottom alone (Ainslie Eq. 9.51). Mud has no
+critical angle: it loses energy by refraction into the sediment instead, so its
+gradient grows in proportion to frequency (Eq. 9.53) and
+`reflection_loss_gradient` refuses it without one.
 
 Because the flux result is *incoherent* it describes the range-averaged field,
 which is exactly what makes it a reference for the numerical solvers of
-[Underwater propagation solvers](underwater-solvers.md). Set the critical angle
-to 90° and the loss gradient to zero and the cylindrical branch reduces to
-$F = \pi/(rH)$, the exact many-mode limit of an ideal waveguide; the
-depth- and range-averaged normal-mode loss lands on it to within a decibel.
+[Underwater propagation solvers](underwater-solvers.md). Set
+the critical angle to 90° and the loss gradient to zero and the cylindrical
+branch reduces to $F = \pi/(rH)$, the exact many-mode limit of an ideal
+waveguide; the depth- and range-averaged normal-mode loss lands on it to within
+a decibel. Averaging over receiver depth is part of that statement: a single
+depth samples each mode shape at one point and carries that bias into the
+range average.
 
 ```python
 import numpy as np
 from phonometry import underwater
 
 ranges = np.linspace(20_000.0, 30_000.0, 2001)
-flux = underwater.weston_propagation_loss(ranges, 100.0, 100.0, critical_angle_deg=90.0,
-                                          reflection_loss_gradient_value_np_per_rad=0.0)
-modes = underwater.normal_modes(100.0, [0.0, 100.0], [1500.0, 1500.0],
-                                source_depth=41.0, receiver_depth=57.0, ranges_m=ranges)
-mean = lambda pl: -10.0 * np.log10(np.mean(10.0 ** (-pl / 10.0)))
-print(mean(flux.propagation_loss), mean(modes.propagation_loss))
+flux = underwater.weston_propagation_loss(
+    ranges, 100.0, 100.0, critical_angle_deg=90.0,
+    reflection_loss_gradient_value_np_per_rad=0.0)
+# Modal energy averaged over range, at nine receiver depths of the 100 m guide.
+energy = [np.mean(10.0 ** (-underwater.normal_modes(
+    100.0, [0.0, 100.0], [1500.0, 1500.0], source_depth=41.0,
+    receiver_depth=float(zr), ranges_m=ranges).propagation_loss / 10.0))
+    for zr in np.linspace(10.0, 90.0, 9)]
+flux_mean = -10.0 * np.log10(np.mean(10.0 ** (-flux.propagation_loss / 10.0)))
+print(round(float(flux_mean), 1), round(float(-10.0 * np.log10(np.mean(energy))), 1))
+# 58.9 58.4 dB: the flux law, then the modes
 ```
 
+> [!NOTE]
 > Ainslie's printed Equation (9.57) for $r_\mathrm{MS}$ reads $k^2H_\mathrm{e}^3/(9\eta)$. Its
 > own derivation rule, equating Equations (9.47) and (9.56) exactly as printed,
 > gives $k^2H_\mathrm{e}^2H/(9\pi\eta)$, smaller by $\pi H_\mathrm{e}/H$. The library implements
 > the derivation-consistent form; see
 > [Errata found in published sources](../ERRATA.md).
 
-## 2. Speed of sound in sea water
+## Speed of sound in sea water
 
-`sea_water_sound_speed(T, S, depth, model=…)` evaluates the sound speed with the
-**UNESCO / Chen–Millero** equation (default, the international standard, in the
-Wong & Zhu 1995 ITS-90 form), **Del Grosso** (1974), **Mackenzie** (1981) or
-**Medwin** (1975). The UNESCO and Del Grosso equations use pressure, so depth is
-first converted with the Leroy & Parthiot (1998) formula (`fluids.depth_to_gauge_pressure_mpa`).
-The four agree to within ~2.5 m/s in their common domain; Mackenzie's canonical
-check value is 1550.744 m/s at 25 °C, 35 ppt, 1000 m.
+`sea_water_sound_speed(T, S, depth, model=…)` uses the **UNESCO / Chen-Millero**
+equation (`model="unesco"`, the default, in the Wong & Zhu 1995 ITS-90 form),
+**Del Grosso** (`"del_grosso"`, note the underscore, unlike the hyphenated
+absorption models above), **Mackenzie** (`"mackenzie"`) or **Medwin**
+(`"medwin"`), all 1974-1981. Depth is converted to pressure with
+Leroy & Parthiot (1998), the conversion `fluids.depth_to_gauge_pressure_mpa`
+evaluates on its own (a gauge pressure in MPa, zero at the surface).
+**Inside the domain all four share they agree to about
+1 m/s**: 0.98 m/s at 25 °C, 35 ppt and 1000 m, and 0.52 m/s over the whole
+upper kilometre of the profile drawn below. The choice is about validity
+range, not accuracy. Mackenzie's canonical check value is 1550.744 m/s at 25 °C,
+35 ppt, 1000 m. Medwin's six-term form is the coarsest of the family and the one
+behind the classic rules of thumb
+$\partial c/\partial T \approx 4.6 - 0.110\,T$ m/s per °C and
+$\partial c/\partial z \approx 0.016$ m/s per metre; it is fitted to about
+1000 m in shallow, warm water, and pushed to 5000 m it leaves the others by
+nearly 6 m/s, which is the one large disagreement in the family and is entirely
+a matter of using it out of domain.
 
-Medwin's six-term form is the simplest of the family and the one worth
-remembering, because its partial derivatives are the classic rules of thumb:
-$\partial c/\partial T \approx 4.6 - 0.110\,T$ m/s per °C (3.5 m/s per °C at
-10 °C) and $\partial c/\partial z \approx 0.016$ m/s per metre. It is a
-deliberately coarse fit and should not be used where the UNESCO standard
-applies.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed.svg" alt="A sea-water sound-speed profile from the UNESCO equation: warm mixed layer, thermocline, a sound-channel axis at the minimum, and the speed rising with pressure at depth" width="60%"></picture>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed.svg" alt="A sea-water sound-speed profile computed with the UNESCO equation: a warm mixed layer near the surface, a thermocline where the speed drops, a sound-channel axis at the minimum, and the speed rising again with pressure at depth" width="62%">
-</picture>
+*Temperature wins above the axis and pressure below it, and the turning point is
+the sound channel. On this profile the speed falls from 1515.79 m/s at the
+surface to a minimum of 1486.05 m/s at 775 m (where the water has already
+reached its deep temperature) and then climbs back to 1517.85 m/s at 3000 m on
+pressure alone, in isothermal water. The whole excursion is 32 m/s, about 2 %,
+which is why refraction and not absorption decides where sound goes in the deep
+ocean.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -205,13 +322,74 @@ import numpy as np
 from phonometry import fluids, underwater
 
 c = fluids.sea_water_sound_speed(25.0, 35.0, 1000.0, model="mackenzie")  # 1550.744
-
-# A profile: warm mixed layer, thermocline, isothermal deep layer.
 depths = np.linspace(0.0, 3000.0, 121)
 temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
 profile = underwater.sound_speed_profile(depths, temps, 35.0, model="unesco")
 profile.plot()   # sound speed vs depth (needs matplotlib)
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_speed_models_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_speed_models.svg" alt="Left, the sound-speed profile computed with the UNESCO, Del Grosso, Mackenzie and Medwin equations on the same temperature and salinity profile from the surface to 5000 metres, the four curves indistinguishable at that scale; right, the difference of each from UNESCO against depth on a plus or minus seven metres per second axis, with the depths beyond Medwin's thousand-metre validity shaded and Medwin departing by nearly six metres per second at 5000 metres" width="92%"></picture>
+
+*At the scale of the profile the four equations are one curve. The difference
+panel is the useful one: Del Grosso and Mackenzie stay within 0.85 m/s of UNESCO
+over the whole column, and all four are within 0.52 m/s down to 1000 m. The one
+large departure is Medwin below its own validity limit, which is a domain error
+rather than a disagreement between models.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+depths = np.linspace(0.0, 5000.0, 251)
+temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
+models = ("unesco", "del_grosso", "mackenzie", "medwin")
+profiles = {m: np.asarray(underwater.sound_speed_profile(
+    depths, temps, 35.0, model=m).speeds_of_sound) for m in models}
+
+fig, (ax_c, ax_d) = plt.subplots(1, 2, figsize=(13.0, 6.2))
+for m in models:
+    ax_c.plot(profiles[m], depths, label=m)
+    if m != "unesco":
+        ax_d.plot(profiles[m] - profiles["unesco"], depths, label=m)
+ax_d.axhspan(1000.0, 5000.0, color="0.9", zorder=0)   # Medwin out of domain
+for ax in (ax_c, ax_d):
+    ax.invert_yaxis()
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+ax_c.set(xlabel="Sound speed c [m/s]", ylabel="Depth [m]")
+ax_d.set(xlabel="Difference from UNESCO [m/s]", ylabel="Depth [m]", xlim=(-7, 7))
+plt.show()
+```
+
+</details>
+
+### Where the numbers come from
+
+Every snippet on this page hard-codes its ocean, and a survey does not. The
+temperature, salinity and depth that `sea_water_sound_speed` and
+`sound_speed_profile` consume come from a **CTD cast** taken close to the survey
+in time as well as in space; an XBT with an assumed salinity is the common
+substitute, and ISO 18406 Clause 8.1.3 lists the sound-speed profile among the
+auxiliary data a survey records for exactly this reason. Which model suits which
+sensor follows from that: Mackenzie takes depth directly, so it fits an
+echo-sounder depth, while UNESCO and Del Grosso convert depth to pressure
+internally through Leroy & Parthiot.
+
+The seabed parameters are not free constants either. The `seabed` class of the
+Weston regimes and the $\rho_2$, $c_2$ of the Rayleigh reflection come from a
+grab sample or a sub-bottom survey, and the classification scheme used has to be
+stated with the result: Folk or similar, as the piling standard requires.
+The Wenz wind term expects a wind speed **with its measurement height and
+averaging period recorded**, not a spot reading off the bridge; and a measured
+ambient spectrum only replaces the Wenz curve where it stands clear of the
+recording system's own self-noise, which for an ordinary system approaches
+sea-state-zero levels near 63 Hz and 125 Hz. Finally, $NL$, $DI$ and $DT$ are
+properties of the receiving array and the detector, not of the sea: they arrive
+from the array specification and the detection statistics, and no oceanographic
+measurement will produce them.
 
 The $c(z)$ minimum acts as a waveguide (the SOFAR channel): wavefronts that
 stray from the axis are refracted back toward it, while sound generated
@@ -219,9 +397,7 @@ outside the channel leaks away to depth, as the simulation below shows with an
 intentionally exaggerated gradient. This trapping is why low-frequency sound
 can cross entire oceans.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ducting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ducting.gif" alt="Animation: a 2D FDTD simulation of a low-frequency pulse in a SOFAR-like underwater sound channel with the sound-speed profile drawn beside the field; launched on the channel axis the wavefronts refract back toward the sound-speed minimum and stay trapped, launched near the surface the energy crosses the channel and leaks away to depth" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ducting.webm)
+**Video:** [Sound trapped in a SOFAR channel, 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_ducting.webm): Two 2D FDTD runs of a low-frequency pulse in a SOFAR-like underwater sound channel, with the c(z) profile drawn beside each field. Launched on the channel axis at 400 m depth the wavefronts keep refracting back toward the sound-speed minimum and stay trapped; launched near the surface at 150 m the energy crosses the channel and leaks away to depth. The closing seconds fade to the time-integrated energy map, showing the whole path history of each run.
 
 At real ocean scale the channel axis sits near 1200 m, and the trapped
 arrivals are rays cycling about the sound-speed minimum over tens of
@@ -229,11 +405,11 @@ kilometres.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sofar_channel_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sofar_channel.svg" alt="The SOFAR channel: a North Atlantic sound-speed profile with 1524 m/s at the surface, a minimum near 1492 m/s at the 1200 m channel axis and 1527 m/s at the 4800 m bottom, beside ray paths from a source on the axis that oscillate about the sound-speed minimum and stay trapped without touching the surface or the bottom" width="92%"></picture>
 
-## 3. Sonar equation
+## Sonar equation
 
-The sonar equation combines the performance terms into the **signal excess**
-$SE$ (detection when $SE \ge 0$) and the **figure of merit** (the maximum
-allowable propagation loss at $SE = 0$):
+The sonar equation gives the **signal excess** $SE$ (detection when
+$SE \ge 0$) and the **figure of merit** (the maximum allowable propagation
+loss at $SE = 0$):
 
 $$
 SE = SL - PL - (NL - DI) - DT \ \ \text{(passive)},
@@ -245,10 +421,25 @@ $$
 
 or reverberation-limited with $RL$ in place of $NL - DI$.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation.svg" alt="The passive sonar equation: signal excess falling with propagation loss, crossing zero (the detection limit) at the figure of merit" width="82%">
-</picture>
+Those two forms are two geometries. In the passive case the target radiates and
+the sound travels one way; in the active case the sonar radiates, the target
+scatters a fraction of what reaches it back, and the loss is paid twice. This
+is why $PL$ appears doubled and $TS$ appears at all. Reverberation is not
+ambient noise: it is the sonar's own transmission scattered back by the surface,
+the volume and the seabed, so it scales with the transmitted level and replaces
+$NL - DI$ rather than adding to it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sonar_equation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sonar_equation.svg" alt="The two sonar geometries: passive, with a radiating target, a one-way propagation loss, an isotropic ambient noise field, a receiving array with its directivity index and a detector with its detection threshold; and active monostatic, with the transmitter and receiver at one point, outbound and return propagation losses, a target strength drawn as a backscattered lobe, and surface, volume and bottom scattering feeding a reverberation level that replaces the noise term" width="92%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation.svg" alt="The passive sonar equation: signal excess falling with propagation loss and crossing zero, the detection limit, at the figure of merit" width="82%"></picture>
+
+*A straight line of slope −1, and its intercept is the whole design. Signal
+excess falls decibel for decibel with propagation loss and crosses zero at
+$FOM = SL - (NL - DI) - DT$ = 140 − (60 − 15) − 8 = 87.0 dB, so the sonar
+detects wherever the channel loses less than 87 dB and nowhere else. Every term
+moves the line vertically and none of them changes its slope: 6 dB more array
+gain buys exactly 6 dB more allowable loss, which the propagation curve then
+converts into a range.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -277,15 +468,52 @@ pl = np.linspace(40.0, 120.0, 400)
 se = underwater.passive_sonar_equation(source_level=140.0, propagation_loss=pl,
                                noise_level=60.0, directivity_index=15.0,
                                detection_threshold=8.0)
-print(se.figure_of_merit)   # max allowable one-way PL at SE = 0
+print(se.figure_of_merit)
 se.plot()   # signal excess vs propagation loss (needs matplotlib)
-
-# Active, monostatic (two-way loss, target strength):
-underwater.active_sonar_equation(220.0, 70.0, target_strength=15.0, noise_level=60.0,
-                         directivity_index=20.0, detection_threshold=10.0)
 ```
 
-### 3.1 Where $DI$ and $DT$ come from
+The active form takes the source level, the one-way propagation loss and the
+target strength, and pays the loss twice, so its figure of merit is the one-way
+loss at which the two-way budget closes:
+
+```python
+from phonometry import underwater
+
+active = underwater.active_sonar_equation(220.0, 70.0, target_strength=15.0,
+                                          noise_level=60.0, directivity_index=20.0,
+                                          detection_threshold=10.0)
+print(active.signal_excess, active.figure_of_merit)   # [45.] 92.5 dB
+```
+
+The terms, once: $SL$ the source level of the target, $PL$ the one-way
+propagation loss, $NL$ the noise level at the receiver, $DI$ the directivity
+index (array gain), $DT$ the detection threshold and, for the active form, $TS$
+the target strength.
+
+**Two references are in play, and ISO 18405 keeps them apart.** Band and
+broadband levels (the ambient level in a band, $NL$, and $SL$ as used in the
+sonar equation) are re 1 µPa. *Spectral densities*, which is what
+`ocean_ambient_noise` and `ship_source_spectrum` return, are re 1 µPa²/Hz. A
+source level carries an extra squared metre from its reference range, which
+ISO 18405 writes re 1 µPa²m² (equivalently "dB re 1 µPa at 1 m").
+
+**Every term must refer to the same bandwidth.** The sonar equation is a level
+balance, so mixing a broadband source level with an ambient *spectrum* level is
+wrong by $10\log_{10} B$, tens of decibels at any useful bandwidth. The
+function cannot catch this because it takes bare decibels. Since the ambient and
+ship-traffic models here are per hertz, the simplest discipline is to work per
+hertz throughout and let the processing bandwidth enter through $DT$; the
+alternative adds $10\log_{10} B$ to a broadband signal *and* to the noise (for
+a tone, to the noise alone, which is the whole of processing gain). The ship
+result carries the decidecade band levels beside its density for exactly this
+conversion.
+
+The figure of merit is quoted below as "dB re m²": Ainslie writes it as a
+maximum *propagation factor* rather than as a loss, and the propagation factor
+has units of m², so the same number that reads as a maximum allowable
+propagation loss in decibels reads as a figure of merit re 1 m².
+
+### Where $DI$ and $DT$ come from
 
 The two terms above were typed in. Both have a model, so neither has to be.
 
@@ -340,24 +568,24 @@ below $10^{-5}$ only 0.8. At $p_\mathrm{fa} = 1/2$ the threshold diverges and
 the call is refused: half the empty beams are already being
 declared detections, and no threshold rescues that.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms.svg" alt="Two panels: the detection threshold at 50 per cent detection probability against the false-alarm probability, falling from 13.2 decibels to 3.2 over eight decades and marked at ten to the minus four where it reads 10.1 decibels; and the array gain of an unshaded line array against its length in wavelengths, for broadside, a 60 degree steer and endfire, rising towards the asymptotes ten lg of two L over lambda and ten lg of four L over lambda and flattening to zero decibels for an array much shorter than a wavelength" width="94%">
-</picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms.svg" alt="Two panels. On the left, the detection threshold at 50 per cent detection probability against the false-alarm probability from ten to the minus eight to ten to the minus one on a logarithmic axis: a curve falling from 13.2 decibels to 3.2, marked at ten to the minus four where it reads 10.1 decibels, with the decade above ten to the minus two shaded as lying outside the plus or minus 0.1 decibel the approximation is stated to. On the right, the array gain of an unshaded line array against its length in wavelengths from 0.1 to 100 on a logarithmic axis, three curves for broadside, a 60 degree steer and endfire, rising towards the two dotted asymptotes ten lg of two L over lambda and ten lg of four L over lambda, and flattening to zero decibels where the array is much shorter than a wavelength" width="94%"></picture>
 
 *The two terms the receiver contributes, each over the one variable it depends
 on. Neither is measured at sea: the threshold is a property of the detector and
-the gain one of the array. The shaded decade is drawn past the $10^{-2}$ the
-book states its accuracy to, so what the curve gives there is an extrapolation
-and not a validated value. The three steer directions share one limit and not
-one asymptote, and the family flattens to 0 dB rather than cutting off.*
+the gain one of the array, and a design choice in each moves the figure of merit
+decibel for decibel. The approximation is drawn past the $10^{-2}$ the book
+states it to, because the reader who works there should see what the formula
+gives and that it is an extrapolation. On the right the three steer directions
+share one limit and not one asymptote: the beam's footprint halves near endfire,
+which is the 3 dB between the two dotted lines, and the whole family flattens to
+0 dB rather than cutting off, a half-wavelength array still returning 1.1 dB.*
 
-### 3.2 Detection range
+### Detection range
 
 Since the figure of merit *is* the maximum allowable propagation loss,
 inverting a loss law at $PL = FOM$ gives the **detection range**, the range at
 which the detection probability is 50 %. `detection_range` inverts the
-closed-form loss of §1, which grows monotonically with range and therefore has
+closed-form loss above, which grows monotonically with range and therefore has
 a single crossing; `detection_range_from_curve` reads the crossing off any
 computed curve, including the oscillating loss of a real waveguide where there
 may be several.
@@ -369,33 +597,97 @@ from phonometry import underwater
 res = underwater.detection_range(82.7, 50e3)
 print(res.detection_range)          # metres
 res.plot()                          # PL vs FOM with the crossing marked
-
-# Off a numerical prediction instead:
-import numpy as np
-modes = underwater.normal_modes(200.0, [0.0, 100.0], [1500.0, 1500.0],
-                                source_depth=40.0, receiver_depth=60.0,
-                                ranges_m=np.linspace(100.0, 20_000.0, 800))
-print(underwater.detection_range_from_curve(60.0, modes.ranges, modes.propagation_loss))
-print(underwater.detection_range_from_curve(60.0, modes.ranges, modes.propagation_loss,
-                                            crossing="last"))
 ```
 
-Sonar, propagation and ambient levels are in dB re a plane wave of 1 µPa rms
-(spectrum levels are referred to a 1 Hz band). Source levels (§6) instead use
-the source convention, dB re 1 µPa²/Hz **at 1 m**.
+That call carries four silent defaults: `law="spherical"`, 10 °C, 35 ppt and
+surface depth, with Francois-Garrison absorption. The spreading assumption alone
+moves the answer by nearly a factor of two, so it is a choice to make
+deliberately rather than one to inherit. At 50 kHz, where absorption
+dominates, the temperature and depth passed to it are not decorative either.
+Reach for `detection_range_from_curve` whenever the loss came from a solver
+instead of a law.
 
-## 4. Seabed reflection loss
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/detection_range_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/detection_range.svg" alt="Left, the closed-form propagation loss for Ainslie's 50 kilohertz active example crossing a figure of merit of 82.7 decibels once, at 1319 metres; right, a 30 hertz normal-mode propagation loss in a 100 metre waveguide crossing a figure of merit of 60 decibels eight times between 1 and 6 kilometres, with the first crossing and the last one marked" width="92%"></picture>
+
+*The closed-form loss grows monotonically, so the crossing is unique and
+`detection_range` can return it. A real waveguide's loss oscillates: here the
+same figure of merit is crossed eight times between 4 and 6 km, and
+`detection_range_from_curve` returns the **first** of them, 4.4 km, by default.
+The loss dips back under the figure of merit as far out as 5.9 km, so quoting
+4.4 km as "the" detection range is a convention rather than a fact, and it needs
+saying in the report.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, (ax_c, ax_m) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+underwater.detection_range(82.7, 50e3).plot(ax=ax_c)
+
+ranges = np.linspace(200.0, 6000.0, 1200)
+modes = underwater.normal_modes(30.0, [0.0, 100.0], [1500.0, 1500.0],
+                                source_depth=25.0, receiver_depth=60.0,
+                                ranges_m=ranges, n_depth_points=800)
+pl = np.asarray(modes.propagation_loss)
+ax_m.plot(ranges / 1000.0, pl, label="Normal-mode PL (30 Hz, 100 m)")
+ax_m.axhline(60.0, linestyle="--", label="Figure of merit = 60 dB")
+print(underwater.detection_range_from_curve(60.0, ranges, pl))   # first crossing
+ax_m.invert_yaxis()
+ax_m.set(xlabel="Range [km]", ylabel="Propagation loss [dB]")
+ax_m.legend()
+plt.show()
+```
+
+</details>
+
+`crossing="last"` reads the far end of the same curve instead, so both ends of
+that convention can go into the report:
+
+```python
+import numpy as np
+from phonometry import underwater
+
+ranges = np.linspace(200.0, 6000.0, 1200)
+modes = underwater.normal_modes(30.0, [0.0, 100.0], [1500.0, 1500.0],
+                                source_depth=25.0, receiver_depth=60.0,
+                                ranges_m=ranges, n_depth_points=800)
+for crossing in ("first", "last"):
+    r50 = underwater.detection_range_from_curve(60.0, ranges, modes.propagation_loss,
+                                                crossing=crossing)
+    print(crossing, round(r50 / 1000.0, 1))   # 4.4 / 5.9 km
+```
+
+## Seabed reflection loss
 
 A plane wave striking the seabed reflects with the fluid–fluid **Rayleigh
-reflection coefficient** (Medwin & Clay). For a faster bottom ($c_2 > c_1$) there
-is a **critical grazing angle** $\varphi_\mathrm{c} = \arccos(c_1/c_2)$, below which
-the wave is totally reflected ($|R| = 1$, zero loss). The bottom loss is
+reflection coefficient** (Medwin & Clay). For a faster bottom ($c_2 > c_1$)
+there is a **critical grazing angle** $\psi_\mathrm{c} = \arccos(c_1/c_2)$: the same
+$\psi_\mathrm{c}$ that fixes the Weston regime boundaries above, below which the wave is
+totally reflected ($|R| = 1$, zero loss). The bottom loss is
 $BL = -20 \log_{10} |R|$.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection.svg" alt="Bottom reflection loss versus grazing angle for a fast sandy seabed: zero loss below the critical grazing angle (total reflection) rising sharply above it" width="82%">
-</picture>
+Total reflection below $\psi_\mathrm{c}$ is a property of the **lossless** fluid-fluid
+idealisation, not of any real sea floor. A real sediment absorbs, so $|R|$ sits
+a little under one at every angle, and in shallow water that small difference is
+the whole answer: a ray reaches long range only after many bounces, so a few
+hundredths of a decibel per reflection accumulate into the dominant range
+dependence. That accumulated quantity is exactly what the Weston reflection loss
+gradient $\eta$ parameterises. Read the two together: the Rayleigh curve
+locates the critical angle and the shape of the loss above it, while the Weston
+gradient answers how far sound gets.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection.svg" alt="Bottom reflection loss versus grazing angle for a fast sandy seabed: zero loss below the critical grazing angle, rising sharply above it" width="82%"></picture>
+
+*A ray that stays shallow pays nothing, and a steep one pays almost everything.
+For this water-over-sand pair the critical angle is 24.62°: below it the loss is
+identically zero, and one degree above it the curve is already climbing, through
+5.21 dB at 30°, 7.89 dB at 45° and 9.05 dB at normal incidence. That step is
+what makes shallow-water propagation an angle-filtering problem, after a few
+bounces only the sub-critical rays survive, which is the mode stripping the
+Weston regimes describe.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -406,8 +698,8 @@ import numpy as np
 from phonometry import underwater
 
 # Rayleigh fluid-fluid reflection: water over a fast sandy bottom.
-phi = np.linspace(0.0, 90.0, 361)
-bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,
+psi = np.linspace(0.0, 90.0, 361)
+bl = underwater.bottom_reflection_loss(psi, rho1=1000.0, c1=1500.0,
                                        rho2=1900.0, c2=1650.0)
 print(f"critical angle = {bl.critical_angle_deg:.1f} deg")   # critical angle = 24.6 deg
 bl.plot()   # bottom loss vs grazing angle
@@ -420,29 +712,44 @@ plt.show()
 import numpy as np
 from phonometry import underwater
 
-phi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
-bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,  # water
-                               rho2=1900.0, c2=1650.0)         # sand
-print(bl.critical_angle_deg)            # 24.6° for this sand/water pair
-bl.plot()                           # bottom loss vs grazing angle (needs matplotlib)
+psi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
+bl = underwater.bottom_reflection_loss(psi, rho1=1000.0, c1=1500.0,   # water
+                               rho2=1900.0, c2=1650.0)          # sand
+print(bl.critical_angle_deg)            # 24.6°
+bl.plot()   # bottom loss vs grazing angle (needs matplotlib)
 ```
 
-`bottom_reflection_loss` returns a `BottomLossResult` with `reflection_loss`,
-the complex `reflection_coefficient` and the `critical_angle_deg` (`None` for a
-slower bottom). `reflection_coefficient(…)` and `critical_angle(c1, c2)` are
-also exposed directly. The model is lossless (real densities and sound speeds);
-sediment attenuation is out of scope.
+`bottom_reflection_loss` returns a `BottomLossResult` with the
+`reflection_loss` (dB), the complex `reflection_coefficient` and the
+`critical_angle_deg`, which is `None` for a slower bottom ($c_2 < c_1$), where
+there is no total reflection. The two ingredients are also callable on their
+own, and `critical_angle(c1, c2)` refuses a slower bottom rather than
+returning an angle that does not exist:
+
+```python
+import numpy as np
+from phonometry import underwater
+
+print(round(underwater.critical_angle(1500.0, 1650.0), 2))   # 24.62°
+r = underwater.reflection_coefficient([90.0], rho1=1000.0, c1=1500.0,
+                                      rho2=1900.0, c2=1650.0)
+print(np.round(r, 3))   # [0.353+0.j] at normal incidence
+```
 
 The companion `seabed_reflection` bundles the complex `reflection_coefficient`,
-its `magnitude` $|R|$, the `bottom_loss` (dB) and the interface parameters into
-a `SeabedReflection` whose `.plot()` draws the reflection-coefficient magnitude
+its `magnitude` $|R|$, the `bottom_loss` (dB) and the interface parameters into a
+`SeabedReflection` whose `.plot()` draws the reflection-coefficient magnitude
 $|R|$ directly (unity below the critical angle, dropping to the normal-incidence
 value at $90°$).
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_coefficient_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_coefficient.svg" alt="Seabed reflection-coefficient magnitude versus grazing angle for a fast sandy seabed: total reflection (|R| = 1) below the critical grazing angle, falling to the normal-incidence value above it" width="82%">
-</picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_coefficient_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_coefficient.svg" alt="Seabed reflection-coefficient magnitude versus grazing angle for a fast sandy seabed: total reflection below the critical grazing angle, falling to the normal-incidence value above it" width="82%"></picture>
+
+*The same interface as the loss above, read as an amplitude. $|R|$ is exactly 1
+out to 24.62°, then falls fast, 0.403 at 45° and 0.353 at normal incidence, the
+plane-wave impedance ratio of the two media. The lossless idealisation is what
+makes the sub-critical part flat: a real absorbing sediment pulls it a few
+hundredths below one, which is invisible on this axis and is the dominant term
+after fifty bounces.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -453,10 +760,10 @@ import numpy as np
 from phonometry import underwater
 
 # Rayleigh reflection-coefficient magnitude: water over a fast sandy bottom.
-phi = np.linspace(0.0, 90.0, 361)
-sr = underwater.seabed_reflection(phi, rho1=1000.0, c1=1500.0,
+psi = np.linspace(0.0, 90.0, 361)
+sr = underwater.seabed_reflection(psi, rho1=1000.0, c1=1500.0,
                                   rho2=1900.0, c2=1650.0)
-print(f"|R| at normal incidence = {sr.magnitude[-1]:.3f}")  # |R| at normal incidence = 0.353
+print(f"|R| at normal incidence = {sr.magnitude[-1]:.3f}")  # 0.353
 sr.plot()   # reflection-coefficient magnitude vs grazing angle
 plt.show()
 ```
@@ -467,48 +774,82 @@ plt.show()
 import numpy as np
 from phonometry import underwater
 
-phi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
-sr = underwater.seabed_reflection(phi, rho1=1000.0, c1=1500.0,  # water
-                          rho2=1900.0, c2=1650.0)         # sand
+psi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
+sr = underwater.seabed_reflection(psi, rho1=1000.0, c1=1500.0,   # water
+                          rho2=1900.0, c2=1650.0)          # sand
 print(sr.magnitude[-1])             # 0.353 = |R| at normal incidence
-sr.plot()                           # |R| vs grazing angle (needs matplotlib)
+sr.plot()   # |R| vs grazing angle (needs matplotlib)
 ```
 
 ### The same interface, as a field
 
-Both curves are read one angle at a time, and a seabed is never struck at one
-angle. In the clip a 100 Hz burst 36 m above the bed sends an expanding front
-whose contact with the seabed starts directly beneath the source at
-$\psi = 90°$ and runs outward, sweeping the grazing angle down through 24.62°
-and on to a few degrees, the whole $|R|(\psi)$ curve traversed once, in
-order. The scene is run twice, changing only the sediment. Over the sand the
-beam entering the bottom switches off at the critical ray, leaving a bright
-evanescent skin that carries nothing away; over a slow mud, which has no
-critical angle, sound enters at every angle to the edge of the frame. Measured
-on the interface itself as the net $\int p\,v_z\,\mathrm{d}t$ per metre of
-seabed, the sand's net beyond the critical ray is **−4.9 %** of what entered
-inside it (0 % from the closed form; the sign is the lateral wave giving
-energy back), and the mud's **+28.3 %** against **+29.7 %** predicted. That
-difference, paid again at every bounce, is what the Weston loss gradient
-$\eta$ accumulates.
+Both curves above are read at *one* angle at a time, and the seabed is never
+struck at one angle: a source radiates every angle at once, and which of them
+strikes where is geometry. The clip below builds that geometry from a single
+100 Hz burst 36 m above the bed. Its expanding front touches the seabed
+directly beneath the source at $\psi = 90°$ and the contact point then runs
+outward, sweeping the grazing angle down through 24.62° and on to a few
+degrees at the edge of the frame, so the whole $|R|(\psi)$ curve is
+traversed once, in order, in a single shot. The scene is then run twice,
+changing nothing but the two numbers that describe the sediment.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_critical_angle_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_critical_angle.gif" alt="Animation: a 100 Hz burst above a flat seabed simulated twice, over fast sand and over slow mud; as the expanding front's contact with the bed sweeps outward the grazing angle falls, and over the sand transmission into the sediment switches off at the critical ray while over the mud it continues at every angle" width="640" height="360" loading="lazy"></picture>
+**Video:** [The critical grazing angle over a fast and a slow seabed (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_critical_angle.webm): A 100 Hz burst 36 metres above a flat seabed, simulated twice: over the fast sand of the figures above and over a slow mud. As the expanding front's contact with the bed sweeps outward the grazing angle falls, and over the sand the beam entering the sediment switches off where the 24.62 degree critical ray meets the bed, leaving only a bright evanescent skin that carries nothing away; over the mud sound enters at every angle right to the edge of the frame. A lower axis fills in the measured net energy flux through the seabed behind the contact point and lands on the closed form.
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_critical_angle.webm)
+*Over the sand, transmission ends at the critical ray and what is left in the
+sediment is an evanescent skin: bright, and carrying nothing away. Measured on
+the interface itself, the net $\int p\,v_z\,\mathrm{d}t$ per metre of seabed,
+which an evanescent field contributes nothing to, the sand's net beyond the
+critical ray is **−4.9 %** of what entered inside it, against 0 % from the
+closed form, and the sign is not a rounding error: past the critical range the
+net flux **reverses**, because the lateral wave born at the critical point
+runs along the interface inside the sediment and radiates back up into the
+water. The mud takes **+28.3 %** beyond that same range against **+29.7 %**
+predicted, and its curve simply carries on falling off the right of the panel.
+That difference, paid again at every bounce, is what the Weston reflection
+loss gradient $\eta$ accumulates.*
 
-## 5. Ocean ambient noise
+Two things the clip deliberately does not show. There is no sea surface in
+it: with one interface the picture has one family of rays and one critical
+range, whereas a real waveguide adds a surface-reflected family whose image
+sits higher and whose own critical range is further out. And it is a single
+bounce, so the angle *filtering* is visible but the accumulation over many
+bounces (the mode stripping of the Weston table) is not. That is the
+quantity $\eta$ stands in for.
 
-The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two
-physically grounded Wenz components: **wind / sea-surface** noise via the "rule
-of fives" ($51.02 - (5/3)\,10\,(\log_{10} f_{\text{kHz}} - \log_{10}(U/5))$: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. $25 + 20 \log_{10} 20 \approx 51.02$ dB re 1 µPa) and
-**Mellen thermal** noise ($4 \pi k T \rho f^2 / c$, dominant above ~50 kHz). A
-**shipping** spectrum may be supplied by the caller, for example one predicted
-by the traffic model in §6.
+## Ocean ambient noise
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise.svg" alt="Wenz ambient-noise spectrum levels for two wind speeds: wind-dominated at mid frequencies falling at 5 dB per octave and thermal noise rising above about 50 kHz" width="82%">
-</picture>
+The ambient-noise spectrum level is the energy sum of the physically grounded
+Wenz components: **wind / sea-surface** noise via the "rule of fives" (the
+historical 25 dB anchor at 1 kHz for 5 knots is re 20 µPa, i.e. ~51 dB re 1 µPa;
+strictly valid ~500 Hz–5 kHz) and **Mellen thermal** noise
+(dominant above ~50 kHz). The wide example range keeps the wind curve plotted
+beyond ~5 kHz only as an extrapolation to show the thermal crossover. A
+**shipping** spectrum may be supplied by the caller.
+
+The "rule of fives" is a mnemonic worth unpacking, because it is where the whole
+wind branch comes from: about 5 dB per octave of falloff, anchored at a 5 knot
+wind and 1 kHz, where the historical figure is 25 dB re 20 µPa. Hence
+`ocean_ambient_noise` returns **51 dB re 1 µPa²/Hz** there. Read the spectrum
+in three bands. Below a couple of hundred hertz a real site is normally owned by
+shipping, which this model leaves to the caller, so the wind curve there is a
+floor and not a prediction. Between a few hundred hertz and a few kilohertz wind
+noise genuinely dominates and the model earns its keep: at 1 kHz it gives 51 dB
+at 5 knots against 64 dB in a 30 knot gale, so wind speed is the one knob and it
+moves the mid band by more than a decade of sea state. Above tens of kilohertz
+nothing beats Mellen thermal noise, which sets the absolute floor of any
+hydrophone measurement: 25 dB re 1 µPa²/Hz at 100 kHz, wind or no wind. A
+composite total outside roughly 30-100 dB re 1 µPa²/Hz over 100 Hz to 100 kHz is
+an input error rather than an unusual ocean.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise.svg" alt="Wenz ambient-noise spectrum levels for two wind speeds, with wind noise falling at 5 dB per octave and thermal noise rising above about 50 kHz" width="82%"></picture>
+
+*The rule of fives, measured: between 500 Hz and 5 kHz the wind branch falls
+5.02 dB per octave, and going from 5 to 20 knots lifts it by 10.03 dB at 1 kHz:
+51.1 dB against 61.1 dB. The two mechanisms then run in opposite directions, so
+the total has a minimum: thermal noise reaches 25.3 dB at 100 kHz and at 5 knots
+is already within 0.7 dB of the total there, while at 20 knots the wind still
+wins. Nothing on this figure is a floor a quieter hydrophone could get below:
+the thermal branch is the water itself.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -541,31 +882,31 @@ freqs = np.logspace(2, 5.5, 300)
 noise = underwater.ocean_ambient_noise(freqs, wind_speed_kt=15.0)
 noise.plot()   # composite spectrum with wind/thermal components (needs matplotlib)
 
-# Individual components are available directly:
-underwater.wind_noise_spectrum(1000.0, 5.0)      # 51.02 dB (rule-of-fives anchor re 1 µPa)
-underwater.thermal_noise_spectrum(5e4)           # molecular thermal-noise limit
+# wind_noise_spectrum and thermal_noise_spectrum are the two components on
+# their own; the rule-of-fives anchor, 1 kHz in a 5 knot wind:
+print(round(float(underwater.wind_noise_spectrum(1000.0, 5.0)), 2))   # 51.02 dB
 ```
 
-The wind component is strictly valid over roughly 500 Hz–5 kHz; the wide example
-range keeps it plotted mainly to show where the thermal component takes over
-above ~50 kHz (the wind curve beyond ~5 kHz is an extrapolation). The
-low-frequency turbulence band and a built-in distant-shipping model are out of
-scope (Wenz notes these bands are strongly variable); a shipping spectrum is
-supplied through the `shipping` argument.
+## Ship-traffic source level
 
-## 6. Ship-traffic source level
+When no measured spectrum is available, a ship's source level can be
+**estimated** from its class, speed and length with **JOMOPANS-ECHO**
+(MacGillivray & de Jong 2021, the default, validated against 1862 measurements),
+**RANDI 3.1** or **Wales & Heitmeyer** (2002). The JOMOPANS-ECHO
+implementation reproduces the authors' own reference calculator (File S1 of
+the paper) to within 0.01 dB, and in it the four cargo classes (bulkers,
+container ships, tankers and vehicle carriers) carry an extra low-frequency
+hump below 100 Hz.
 
-When no measured spectrum is available, a ship's underwater source level can be
-**estimated** from its class, speed and length. Three semi-empirical models are
-available: **JOMOPANS-ECHO** (MacGillivray & de Jong 2021, per vessel class,
-validated against 1862 measurements, the default), **RANDI 3.1** and
-**Wales & Heitmeyer** (2002). All return the source spectral-density level and
-the decidecade-band source level.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise.svg" alt="JOMOPANS-ECHO predicted source-level spectra for a container ship, a cruise ship and a tug, with cargo vessels showing a low-frequency hump below 100 Hz" width="82%"></picture>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise.svg" alt="JOMOPANS-ECHO predicted source-level spectra for a container ship, a cruise ship and a tug: cargo vessels show a low-frequency hump below 100 Hz" width="82%">
-</picture>
+*Class, speed and length are the only inputs, and they span 45 dB. The
+containership peaks at 174.3 dB re 1 µPa²/Hz at 31.6 Hz, the cruise ship at
+158.7 dB at 25.1 Hz, and the tug (slow and short) at 129.5 dB and up at
+125.9 Hz. Two things follow: the fleet's energy is below 100 Hz, which is where
+the wind model of the previous section is weakest, and a single number for
+"shipping noise" is meaningless without the class. These are **source** levels
+at 1 m; the snippet below shows what forgetting that costs.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -592,24 +933,34 @@ plt.show()
 </details>
 
 ```python
+import numpy as np
 from phonometry import underwater
 
-# A container ship at 18 knots, 300 m long (JOMOPANS-ECHO default):
 ship = underwater.ship_source_spectrum(18.0, length_m=300.0, vessel_class="containership")
 ship.plot()                     # source spectral density vs frequency
-
 print(underwater.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
 
-# Feed the predicted spectrum into the ambient noise as the shipping term:
+# `source_psd` is a SOURCE level at 1 m; the `shipping` term of the ambient sum
+# is a RECEIVED spectrum level at the listening position. Propagation is the
+# step between them - here that one ship, 2 km away.
+pl = np.array([float(underwater.propagation_loss(
+    2000.0, float(f), law="practical", transition_range=1000.0).pl[0])
+    for f in ship.frequencies])
+received = ship.source_psd - pl
 noise = underwater.ocean_ambient_noise(ship.frequencies, wind_speed_kt=10.0,
-                               shipping=ship.source_psd)
+                               shipping=received)
+print(round(float(np.interp(100.0, ship.frequencies, noise.spectrum_level)), 1))
+# 97.6 dB re 1 uPa^2/Hz at 100 Hz, against 72.7 for the wind alone. Passing
+# ship.source_psd straight in would print 160.6: a source level is not a
+# received one, and the error is the whole propagation loss.
 ```
 
-`ship_source_spectrum` returns a `ShipTrafficSpectrum` with `source_psd`
-(dB re 1 µPa²/Hz m) and `band_level` (dB re 1 µPa m). Cargo vessels (container
-ships, bulkers, vehicle carriers, tankers) carry an extra low-frequency hump
-below 100 Hz. The implementation is validated to the authors' own reference
-calculator (File S1) to better than 0.01 dB.
+Even that is a single-ship estimate. Measured shipping noise at a site is the
+sum over the whole traffic field, so a realistic term integrates many vessels
+over their ranges and classes, which is why `ocean_ambient_noise` leaves the
+shipping spectrum to the caller instead of building one in. One sanity check
+carries most of the value: a composite ambient spectrum above roughly
+120 dB re 1 µPa²/Hz is a units or geometry error, not a noisy sea.
 
 Every closed form above stops being enough when refraction and boundaries
 decide the answer: a sound-speed minimum that traps energy, surface and
@@ -619,6 +970,37 @@ and the normal-mode, ray-tracing, Gaussian-beam and parabolic-equation
 solvers of the module, together with the guidance for choosing between them
 and these closed forms, have their own guide:
 [Underwater propagation solvers](underwater-solvers.md).
+
+## What this guide covers
+
+- **Covered.** ISO 18405:2017 terminology (propagation loss, source level, levels re 1 µPa)
+  underlies every quantity on this page. `propagation_loss` and
+  `seawater_absorption` implement geometrical spreading plus the
+  Francois-Garrison (1982, default), Ainslie-McColm (1998) or Thorp (1967)
+  absorption models. `sea_water_sound_speed` and `sound_speed_profile` implement
+  the UNESCO/Chen-Millero (Wong & Zhu 1995 ITS-90 form, default), Del Grosso
+  (1974), Mackenzie (1981) and Medwin (1975) sound-speed equations, with the
+  Leroy & Parthiot (1998) depth-to-pressure conversion.
+  `weston_propagation_loss` and `weston_regime_boundaries` implement the four
+  Weston energy-flux regimes and their transition ranges (Ainslie section
+  9.1.1.2, Table 9.1). `passive_sonar_equation` and `active_sonar_equation`
+  implement the passive and monostatic active sonar equations (Urick, via Etter
+  2003), and `detection_range` / `detection_range_from_curve` invert a
+  propagation loss at the figure of merit. `seabed_reflection` and
+  `bottom_reflection_loss` implement the fluid-fluid Rayleigh reflection
+  coefficient and critical angle (Medwin & Clay). `ocean_ambient_noise` sums the
+  Wenz wind "rule of fives" and Mellen thermal-noise components.
+  `ship_source_spectrum` implements the JOMOPANS-ECHO (default), RANDI 3.1 and
+  Wales & Heitmeyer (2002) source-level models.
+
+- **Not covered.** The seabed model is lossless fluid-fluid Rayleigh reflection only, so sediment
+  attenuation is out of scope. `active_sonar_equation` is monostatic only: there
+  is no bistatic geometry. `ocean_ambient_noise` leaves out the low-frequency
+  turbulence band and any built-in distant-shipping model; supply a shipping
+  spectrum yourself, for instance from `ship_source_spectrum` above. The
+  numerical field solvers (`normal_modes`, `ray_trace`, `gaussian_beams`,
+  `parabolic_equation`) are covered in [Underwater propagation
+  solvers](underwater-solvers.md).
 
 ## See also
 
@@ -630,120 +1012,41 @@ and these closed forms, have their own guide:
 
 ## References
 
-- Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
-  measurements: Part I: Pure water and magnesium sulfate contributions.
-  *The Journal of the Acoustical Society of America*, 72(3), 896-907.
-  [doi:10.1121/1.388170](https://doi.org/10.1121/1.388170).
-  The pure-water and magnesium-sulfate halves of the default absorption
-  model of section 1.
-- Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
-  measurements. Part II: Boric acid contribution and equation for total
-  absorption. *The Journal of the Acoustical Society of America*, 72(6),
-  1879-1890.
-  [doi:10.1121/1.388673](https://doi.org/10.1121/1.388673).
-  The boric-acid term and the complete Francois-Garrison total-absorption
-  equation, the implemented default.
-- Ainslie, M. A., & McColm, J. G. (1998). A simplified formula for viscous and
-  chemical absorption in sea water. *The Journal of the Acoustical Society of
-  America*, 103(3), 1671-1672.
-  [doi:10.1121/1.421258](https://doi.org/10.1121/1.421258).
-  The legible simplified absorption model (`"ainslie-mccolm"`).
-- Thorp, W. H. (1967). Analytic description of the low-frequency attenuation
-  coefficient. *The Journal of the Acoustical Society of America*, 42(1), 270.
-  [doi:10.1121/1.1910566](https://doi.org/10.1121/1.1910566).
-  The frequency-only low-frequency absorption formula (`"thorp"`).
-- Chen, C.-T., & Millero, F. J. (1977). Speed of sound in seawater at high
-  pressures. *The Journal of the Acoustical Society of America*, 62(5),
-  1129-1135.
-  [doi:10.1121/1.381646](https://doi.org/10.1121/1.381646).
-  The UNESCO international-standard sound-speed equation of section 2.
-- Wong, G. S. K., & Zhu, S. (1995). Speed of sound in seawater as a function
-  of salinity, temperature, and pressure. *The Journal of the Acoustical
-  Society of America*, 97(3), 1732-1736.
-  [doi:10.1121/1.413048](https://doi.org/10.1121/1.413048).
-  The ITS-90 recast of the UNESCO coefficients, the implemented form.
-- Del Grosso, V. A. (1974). New equation for the speed of sound in natural
-  waters (with comparisons to other equations). *The Journal of the
-  Acoustical Society of America*, 56(4), 1084-1091.
-  [doi:10.1121/1.1903388](https://doi.org/10.1121/1.1903388).
-  The alternative pressure-based sound-speed equation (`"del-grosso"`).
-- Mackenzie, K. V. (1981). Nine-term equation for sound speed in the oceans.
-  *The Journal of the Acoustical Society of America*, 70(3), 807-812.
-  [doi:10.1121/1.386920](https://doi.org/10.1121/1.386920).
+- **Ainslie, M. A. (2010).** *Principles of sonar performance modelling*. Springer. https://doi.org/10.1007/978-3-540-87662-5
+  The Weston shallow-water propagation regimes (section 9.1.1.2, Equations 9.42 to 9.61 and Table 9.1), the Medwin sound-speed formula (Equation 1.2) and the seven numeric sonar worked examples of chapters 3 and 11 that pin the sonar-equation section.
+- **Ainslie, M. A., & McColm, J. G. (1998).** A simplified formula for viscous and chemical absorption in sea water. *The Journal of the Acoustical Society of America*, *103*(3), 1671-1672. https://doi.org/10.1121/1.421258
+  The legible simplified absorption model ("ainslie-mccolm").
+- **Breeding, J. E., Jr., Pflug, L. A., Bradley, M., Walrod, M. H., & McBride, W. (1996).** *Research Ambient Noise Directionality (RANDI) 3.1 physics description* (`NRL/FR/7176--95-9628`). Naval Research Laboratory.
+  The RANDI 3.1 ship source model behind model="randi", which the page computes as MacGillivray & de Jong (2021) reproduce it. Two cells of its Table 2 do not follow from its own Eqs. (2) to (5), which the errata registry records.
+- **Carey, W. M., & Evans, R. B. (2011).** *Ocean ambient noise: Measurement and theory*. Springer. https://doi.org/10.1007/978-1-4419-7832-5
+  The wind "rule of fives" anchor and the Mellen thermal-noise derivation.
+- **Chen, C.-T., & Millero, F. J. (1977).** Speed of sound in seawater at high pressures. *The Journal of the Acoustical Society of America*, *62*(5), 1129-1135. https://doi.org/10.1121/1.381646
+  The UNESCO international-standard sound-speed equation.
+- **Del Grosso, V. A. (1974).** New equation for the speed of sound in natural waters (with comparisons to other equations). *The Journal of the Acoustical Society of America*, *56*(4), 1084-1091. https://doi.org/10.1121/1.1903388
+  The alternative pressure-based sound-speed equation ("del_grosso").
+- **Francois, R. E., & Garrison, G. R. (1982).** Sound absorption based on ocean measurements: Part I: Pure water and magnesium sulfate contributions. *The Journal of the Acoustical Society of America*, *72*(3), 896-907. https://doi.org/10.1121/1.388170
+  The pure-water and magnesium-sulfate halves of the default absorption model of the propagation-loss section.
+- **Francois, R. E., & Garrison, G. R. (1982).** Sound absorption based on ocean measurements. Part II: Boric acid contribution and equation for total absorption. *The Journal of the Acoustical Society of America*, *72*(6), 1879-1890. https://doi.org/10.1121/1.388673
+  The boric-acid term and the complete Francois-Garrison total-absorption equation, the implemented default.
+- **International Organization for Standardization. (2017).** [*Underwater acoustics — Terminology*](https://www.iso.org/standard/62406.html) (ISO 18405:2017).
+  The standardized definitions (propagation loss, source level, sound pressure level re 1 µPa) behind the quantities of this page.
+- **Leroy, C. C., & Parthiot, F. (1998).** Depth-pressure relationships in the oceans and seas. *The Journal of the Acoustical Society of America*, *103*(3), 1346-1352. https://doi.org/10.1121/1.421275
+  The depth-to-pressure conversion feeding the UNESCO and Del Grosso equations.
+- **MacGillivray, A., & de Jong, C. (2021).** A reference spectrum model for estimating source levels of marine shipping based on automated identification system data. *Journal of Marine Science and Engineering*, *9*(4), 369. https://doi.org/10.3390/jmse9040369
+  The JOMOPANS-ECHO ship source-level model (open access); its File S1 calculator is the validation oracle.
+- **Mackenzie, K. V. (1981).** Nine-term equation for sound speed in the oceans. *The Journal of the Acoustical Society of America*, *70*(3), 807-812. https://doi.org/10.1121/1.386920
   The depth-based nine-term equation and its 1550.744 m/s check value.
-- Leroy, C. C., & Parthiot, F. (1998). Depth-pressure relationships in the
-  oceans and seas. *The Journal of the Acoustical Society of America*, 103(3),
-  1346-1352.
-  [doi:10.1121/1.421275](https://doi.org/10.1121/1.421275).
-  The depth-to-pressure conversion feeding the UNESCO and Del Grosso
-  equations.
-- Urick, R. J. (1983). *Principles of underwater sound* (3rd ed.).
-  McGraw-Hill; reprinted 1996 by Peninsula Publishing.
-  ISBN 978-0-932146-62-5.
-  [Open Library record](https://openlibrary.org/books/OL9317725M).
-  The sonar-equation framework (signal excess, figure of merit) of section 3.
-- Medwin, H., & Clay, C. S. (1998). *Fundamentals of acoustical oceanography*.
-  Academic Press. ISBN 978-0-12-487570-8.
-  [Publisher page](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8).
-  The fluid-fluid Rayleigh reflection coefficient and critical grazing angle
-  of section 4.
-- Wenz, G. M. (1962). Acoustic ambient noise in the ocean: Spectra and
-  sources. *The Journal of the Acoustical Society of America*, 34(12),
-  1936-1956.
-  [doi:10.1121/1.1909155](https://doi.org/10.1121/1.1909155).
-  The ambient-noise survey behind the wind and thermal components of
-  section 5.
-- Carey, W. M., & Evans, R. B. (2011). *Ocean ambient noise: Measurement and
-  theory*. Springer.
-  [doi:10.1007/978-1-4419-7832-5](https://doi.org/10.1007/978-1-4419-7832-5).
-  The wind "rule of fives" anchor and the Mellen thermal-noise derivation
-  used by section 5.
-- MacGillivray, A., & de Jong, C. (2021). A reference spectrum model for
-  estimating source levels of marine shipping based on automated
-  identification system data. *Journal of Marine Science and Engineering*,
-  9(4), 369.
-  [doi:10.3390/jmse9040369](https://doi.org/10.3390/jmse9040369).
-  The JOMOPANS-ECHO ship source-level model of section 6 (open access); its
-  File S1 calculator is the validation oracle.
-- Wales, S. C., & Heitmeyer, R. M. (2002). An ensemble source spectra model
-  for merchant ship-radiated noise. *The Journal of the Acoustical Society of
-  America*, 111(3), 1211-1231.
-  [doi:10.1121/1.1427355](https://doi.org/10.1121/1.1427355).
-  The ensemble merchant-ship spectrum model of section 6.
-- Breeding, J. E., Jr., Pflug, L. A., Bradley, M., Walrod, M. H., &
-  McBride, W. (1996). *Research Ambient Noise Directionality (RANDI) 3.1
-  physics description* (`NRL/FR/7176--95-9628`). Naval Research Laboratory.
-  The RANDI 3.1 ship source model behind `model="randi"`, which section 6
-  computes as MacGillivray & de Jong (2021) reproduce it. Two cells of its
-  Table 2 do not follow from its own Eqs. (2) to (5), which the
-  [errata registry](../ERRATA.md) records.
-- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
-  Springer.
-  [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
-  The Weston shallow-water regimes of section 1.1 (§9.1.1.2, Equations 9.42 to
-  9.61 and Table 9.1), the Medwin sound-speed formula of section 2
-  (Equation 1.2) and the seven numeric sonar worked examples of chapters 3 and
-  11 that pin section 3.
-- ISO 18405:2017. *Underwater acoustics — Terminology*.
-  [ISO page](https://www.iso.org/standard/62406.html).
-  The standardized definitions (propagation loss, source level, sound
-  pressure level re 1 µPa) behind the quantities of this page.
-
-## Standards & sources
-
-- Speed of sound: UNESCO / Chen & Millero (1977, Wong & Zhu 1995 ITS-90),
-  Del Grosso (1974), Mackenzie (1981), Medwin (1975), Leroy & Parthiot (1998).
-- Absorption: Francois & Garrison (1982), Ainslie & McColm (1998), Thorp (1967).
-- Shallow-water propagation regimes and the detection-range inversion:
-  Ainslie, *Principles of Sonar Performance Modelling* (Springer 2010),
-  §9.1.1.2 and the worked examples of chapters 3 and 11.
-- Sonar equation: Urick, *Principles of Underwater Sound*.
-- Seabed reflection: Medwin & Clay, *Fundamentals of Acoustical Oceanography*
-  (Rayleigh fluid–fluid reflection coefficient).
-- Ambient noise: Wenz (1962); Carey & Evans, *Ocean Ambient Noise* (2011), for the
-  wind "rule of fives" and the Mellen thermal-noise derivation.
-- Ship-traffic source level: MacGillivray & de Jong (2021),
-  *J. Mar. Sci. Eng.* 9(4) 369 (CC-BY, JOMOPANS-ECHO), which also reproduces
-  RANDI 3.1 and Wales & Heitmeyer (2002).
-- Numerical solvers (normal modes, ray tracing, Gaussian beams, parabolic
-  equation): covered in [Underwater propagation solvers](underwater-solvers.md).
+- **Medwin, H. (1975).** Speed of sound in water: A simple equation for realistic parameters. *The Journal of the Acoustical Society of America*, *58*(6), 1318-1319. https://doi.org/10.1121/1.380790
+  The six-term sound-speed equation ("medwin") behind the rules of thumb of the speed-of-sound section, evaluated as Ainslie (2010) Equation 1.2 prints it.
+- **Medwin, H., & Clay, C. S. (1998).** [*Fundamentals of acoustical oceanography*](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8). Academic Press.
+  ISBN 978-0-12-487570-8. The fluid-fluid Rayleigh reflection coefficient and critical grazing angle of the seabed-reflection section.
+- **Thorp, W. H. (1967).** Analytic description of the low-frequency attenuation coefficient. *The Journal of the Acoustical Society of America*, *42*(1), 270. https://doi.org/10.1121/1.1910566
+  The frequency-only low-frequency absorption formula ("thorp").
+- **Urick, R. J. (1983).** [*Principles of underwater sound*](https://openlibrary.org/books/OL9317725M) (3rd ed.). McGraw-Hill.
+  Reprinted 1996 by Peninsula Publishing. ISBN 978-0-932146-62-5. The sonar-equation framework (signal excess, figure of merit).
+- **Wales, S. C., & Heitmeyer, R. M. (2002).** An ensemble source spectra model for merchant ship-radiated noise. *The Journal of the Acoustical Society of America*, *111*(3), 1211-1231. https://doi.org/10.1121/1.1427355
+  The ensemble merchant-ship spectrum model of the ship-traffic section.
+- **Wenz, G. M. (1962).** Acoustic ambient noise in the ocean: Spectra and sources. *The Journal of the Acoustical Society of America*, *34*(12), 1936-1956. https://doi.org/10.1121/1.1909155
+  The ambient-noise survey behind the wind and thermal components of the ocean ambient-noise section.
+- **Wong, G. S. K., & Zhu, S. (1995).** Speed of sound in seawater as a function of salinity, temperature, and pressure. *The Journal of the Acoustical Society of America*, *97*(3), 1732-1736. https://doi.org/10.1121/1.413048
+  The ITS-90 recast of the UNESCO coefficients, the implemented form.

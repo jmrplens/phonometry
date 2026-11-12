@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/hearing/hearing-threshold.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/
 
 # Hearing threshold (age and reference zero)
 
@@ -7,10 +9,11 @@ gives the **statistical distribution of the hearing threshold with age** for an
 otologically normal population: the slow, high-frequency-first loss known as
 presbycusis. **ISO 389-7:2005** fixes the **reference threshold of hearing**,
 the audiometric zero (0 dB HL) expressed as a sound pressure level under
-free-field and diffuse-field listening. Both are defined over the audiometric
-frequencies from 125 Hz to 8000 Hz.
+free-field and diffuse-field listening. Here both are returned on the same
+eleven audiometric frequencies, 125 Hz to 8000 Hz, so they combine band for
+band.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold.svg" alt="The hearing-threshold model: age, sex and a population fractile feed the ISO 7029 chain (the median deviation from age 18, a times (age minus 18) to the power b, from Table 1 by sex; the upper and lower spreads su and sl, degree-5 polynomials in age minus 18, Tables 2 to 5; and the fractile threshold, median plus the standard-normal quantile z of the fractile times the spread), giving the expected hearing threshold level in dB HL, which is referenced to the audiometric zero, the ISO 389-7 free-field or diffuse-field reference threshold" width="82%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold.svg" alt="The hearing-threshold model: age, sex and a population fractile feed the ISO 7029 chain (the median deviation from age 18, the upper and lower spreads su and sl, and the fractile threshold), giving the expected hearing threshold level in dB HL, referenced to the ISO 389-7 free-field or diffuse-field audiometric zero" width="82%"></picture>
 
 ## 1. Age-related threshold (ISO 7029)
 
@@ -47,6 +50,21 @@ downward-sloping presbycusis audiogram. Men and women follow different
 coefficients (the `sex` argument), and a subset of the audiometric frequencies
 can be requested with `frequencies=`.
 
+**Where the model stops.** ISO 7029:2017 specifies its coefficients for ages
+**18 to 80 years** over the audiometric frequencies 125 Hz to 8000 Hz
+(clause 4.1), and adds a caution of its own: from 3000 Hz to 8000 Hz the values
+above 70 years are informative only, because at those frequencies the threshold
+of many of the oldest subjects could not be measured at all (it ran off the
+audiometer's scale), so the fitted spread there rests on a truncated sample.
+The power law is anchored at 18 years, where the median deviation is zero by
+construction, and an age below that is refused outright, since the quantity is
+defined *as* a deviation from 18. Nothing stops it at the top, though:
+`age_threshold(90, "male")` returns 106.7 dB at 8 kHz, silently, and that is an
+extrapolation the standard does not support. Quote such a value as an
+extrapolation or stop at the limit. The fractile inherits the same weakness:
+it describes a screened population of finite size, so the far tails are least
+supported exactly where the far ages are.
+
 **Who counts as "otologically normal".** The ISO 7029 population is not the
 general population: it is people screened to be in a normal state of health,
 free from signs or symptoms of ear disease and wax obstruction, and (the
@@ -62,15 +80,55 @@ with an actual population rather than isolating the noise effect.
 prediction for a person: `fractile=0.9` returns the threshold that 90 % of
 otologically normal people of that age and sex are *better* than (only the
 worst-hearing tenth exceeds it), and `fractile=0.5` the median: half above,
-half below. The spread is deliberately asymmetric (two half-Gaussians,
-$s_\mathrm{u} > s_\mathrm{l}$): ageing drags a minority far down while the better-hearing half
-stays bunched near the median, so the far percentiles on the bad side move
-much faster with age than the good side ever improves. An individual
-audiogram can sit anywhere in that fan; the model tells you how *surprising*
-it is, not what it should be.
+half below. The spread is deliberately asymmetric (two half-Gaussians, with
+$s_\mathrm{u} > s_\mathrm{l}$ over most of the range): ageing drags a minority far down while the
+better-hearing half stays bunched near the median, so the far percentiles on
+the bad side move much faster with age than the good side ever improves. An
+individual audiogram can sit anywhere in that fan; the model tells you how
+*surprising* it is, not what it should be.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/age_threshold_sex_and_spread_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/age_threshold_sex_and_spread.svg" alt="Two panels at 4000 Hz against age from 18 to 80 years. Left: the ISO 7029 median deviation for men and women, both rising from zero at 18 to 50.0 dB and 43.2 dB at 80, the shaded gap between them widening from 4.9 dB at 60 years to 6.8 dB at 80. Right: the upper and lower spreads for men, the upper spread rising to a peak of 18.8 dB at 64 years and then falling back until it crosses under the lower spread at 75 years, with ages above 70 shaded and marked informative only" width="96%"></picture>
+
+*Both claims of the paragraph above, drawn at 4 kHz. Left: men and women follow
+different coefficients, and the gap grows with age (4.9 dB at 60 years and
+6.8 dB at 80) so a fractile statement without a sex attached is meaningless.
+Right: the asymmetry is real but not permanent. $s_\mathrm{u}$ pulls away from $s_\mathrm{l}$
+until about 64 years, then falls back and crosses under it at 75. That reversal
+is an artefact with a name: from 3 kHz upwards the threshold of many of the
+oldest subjects could not be measured at all, which is why ISO 7029 clause 4.1
+marks everything above 70 years at those frequencies as informative only.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `hearing` is the import of the first snippet on this page.
+ages = np.arange(18.0, 81.0)
+i = 8   # 4000 Hz, the ninth audiometric frequency
+
+fig, (ax_sex, ax_spread) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+for sex, style in (("male", "-"), ("female", "--")):
+    med = [hearing.age_threshold(a, sex, 0.5).median[i] for a in ages]
+    ax_sex.plot(ages, med, style, label=sex)
+ax_sex.legend()
+
+res = [hearing.age_threshold(a, "male", 0.5) for a in ages]
+su = np.array([r.spread_upper[i] for r in res])
+sl = np.array([r.spread_lower[i] for r in res])
+ax_spread.plot(ages, su, "-", label=r"$s_\mathrm{u}$")
+ax_spread.plot(ages, sl, "--", label=r"$s_\mathrm{l}$")
+ax_spread.axvline(70.0, linestyle=":")      # informative only above here
+ax_spread.legend()
+plt.show()
+```
+
+</details>
 
 `AgeThresholdResult.plot()` draws that fan directly: the median, the requested
-fractile and the 10 % to 90 % band between them, on an audiogram axis.
+fractile and the 10 % to 90 % fractile band, on an audiogram axis.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/age_threshold_fractiles_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/age_threshold_fractiles.svg" alt="ISO 7029 hearing-threshold deviation of a 70-year-old man on an inverted audiogram axis from 125 Hz to 8000 Hz: the median deepens from about 10 dB at 125 Hz to 50 dB at 8000 Hz, the requested 90 % fractile from about 22 dB to 74 dB, and the shaded 10 to 90 percent band between them widens steadily toward the high frequencies" width="88%"></picture>
 
@@ -108,16 +166,21 @@ age threshold $H$ with the noise-induced shift $N$ into the threshold a real
 audiogram would show, $H' = H + N - HN/120$, at the same fractile. In
 practice that means the two guides chain: pick the population and fractile
 here, add the exposure there, and compare the result, never the noise
-component alone, against a measured audiogram.
-[Noise-induced hearing loss](noise-induced-hearing-loss.md) picks the chain up
-at that point.
+component alone, against a measured audiogram. The
+[noise-induced hearing loss guide](noise-induced-hearing-loss.md)
+picks the chain up at that point.
 
 ## 2. Reference threshold of hearing (ISO 389-7)
 
 The audiometric zero is not a fixed sound pressure level: it depends on how the
 sound reaches the listener. ISO 389-7:2005 Table 1 gives the reference
 threshold for **free-field** (frontal incidence) and **diffuse-field**
-listening.
+listening. That table is a one-third-octave table of 38 rows running from 20 Hz
+to 18 000 Hz; `reference_threshold` carries only the eleven audiometric rows
+ISO 7029 also uses, so the two functions align band for band and can be added
+without resampling. Any other frequency raises rather than interpolating,
+because the standard tabulates the threshold and defines no interpolation
+between its rows.
 
 ```python
 from phonometry import hearing
@@ -127,11 +190,74 @@ print(hearing.reference_threshold("free"))
 print(hearing.reference_threshold("diffuse")[4])   # 0.8 dB at 1000 Hz
 ```
 
+### What the reference zero is referenced to
+
+These values calibrate **sound-field** audiometry (the loudspeaker-based test
+methods of ISO 8253-2), not earphone audiometry. They hold under the four
+conditions ISO 389-7 clause 1 lists, and only those:
+
+- **The field.** With the listener absent, the field is a free progressive
+  plane wave with the source directly in front (frontal incidence), or a
+  diffuse field qualified as ISO 8253-2 specifies.
+- **The signal.** A pure tone in the free field; a one-third-octave band of
+  white or pink noise in the diffuse field. Up to 8 kHz either column also
+  applies to any other noise band narrower than the critical band.
+- **The measurement point.** The sound pressure level is measured *with the
+  listener absent*, at the point the centre of the listener's head will occupy,
+  not at the ear, and not with the subject in the chair.
+- **The ears.** Listening is binaural.
+
+The values also carry a *procedure*. Definition 3.1 notes that the whole
+ISO 389 series rests on the threshold procedure of ISO 8253-1, and that a test
+procedure with other characteristics can be expected to give thresholds
+differing by up to several decibels on average. A survey therefore records the
+procedure it used, not only the levels it obtained.
+
+The trap is the clinical audiogram. 0 dB HL on an audiometer is the reference
+equivalent threshold sound pressure level of ISO 389-1 (supra-aural), ISO 389-2
+(insert) or ISO 389-8 (circumaural) for the earphone actually fitted, referred
+to an acoustic coupler or an ear simulator, and obtained monaurally. ISO 389-7
+clause 1 states outright that its data differ from those and that a direct
+comparison is not appropriate. `reference_threshold("free")` is the zero
+of a loudspeaker-based test; it is never a conversion factor for a headphone
+audiogram.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundfield_audiometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundfield_audiometry.svg" alt="Three panels of the listening conditions behind ISO 389-7 Table 1. A, free field: a loudspeaker on the reference axis at least 1 m from the reference point at zero degrees azimuth and elevation, a boom-mounted measurement microphone with its capsule exactly at that point, and the listener and chair drawn dashed because both are absent while the level is measured; a dashed square marks the plus or minus 0.15 metre volume that must stay within plus or minus 1 dB up to 4 kHz. B, diffuse field: four loudspeakers around the same absent listener with non-coherent feeds and rays arriving from every direction, the same reference point and microphone. C, for contrast: a listener present, wearing a supra-aural earphone whose level is referred to an IEC 60318-1 coupler, labelled as the reference zero of ISO 389-1, -2 or -8 and never an ISO 389-7 value" width="96%"></picture>
+
 The two fields agree at low frequencies and diverge above about 1 kHz, where
 the ear-canal resonance and head diffraction make the frontal free field the
 more sensitive condition (a lower threshold) around 3–4 kHz.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold.svg" alt="Two panels. Left: the ISO 7029 median hearing-threshold deviation for men at ages 20, 40, 60 and 80, plotted on an inverted (audiogram) axis so worse hearing falls lower, with the 10 to 90 percent fractile band shaded around the 70-year curve; the loss deepens toward the high frequencies and with age. Right: the ISO 389-7 reference threshold of hearing for free-field and diffuse-field listening, which coincide below 1 kHz and diverge above it, dipping to a minimum near 3 to 4 kHz" width="96%"></picture>
+**From a dB HL threshold to a sound pressure level.** Audiometric zero *is* the
+sound pressure level of the reference threshold, so a threshold in dB HL
+becomes a physical level by adding the ISO 389-7 value for the same frequency
+and the same listening condition, $L_p = \mathrm{HL} + T_f$:
+
+```python
+hl = hearing.age_threshold(65, "male", 0.5).median      # dB HL, the §1 median
+free = hl + hearing.reference_threshold("free")
+diffuse = hl + hearing.reference_threshold("diffuse")
+print(hl[8].round(1), free[8].round(1), diffuse[8].round(1))  # 26.2 20.8 22.4
+```
+
+The 65-year-old man's median 26.2 dB HL at 4 kHz is a sound pressure level of
+20.8 dB under frontal free-field listening and 22.4 dB in a diffuse field: the
+same ear needs 1.6 dB less pressure in the free field, because head diffraction
+and the ear-canal resonance give it more gain there. Three things make that
+addition legitimate, and all three belong in the report. The ISO 7029 output is
+a *deviation* from the median 18-year-old, and it is a hearing threshold level
+in dB HL only insofar as the reference zero is that same median (ISO 7029
+clause 1 says exactly this, and its NOTE 2 warns that the two do not always
+coincide, because the reference zeros were established on subjects up to 25 or
+30 years old whose hearing is on average slightly worse). The two standards also
+describe different listening conditions (ISO 7029 monaural through earphones,
+ISO 389-7 binaural in a sound field), so the sum estimates the field level that
+ear would need rather than reproducing a measurement. And the field is a
+listening *condition*, not a measurement option: pick the one that matches how
+the sound actually reaches the listener, and never mix a diffuse-field
+threshold with a free-field speech spectrum in the same calculation.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hearing_threshold.svg" alt="Two panels. Left: the ISO 7029 median hearing-threshold deviation for men at ages 20, 40, 60 and 80 on an inverted audiogram axis, with the 10 to 90 percent fractile band around the 70-year curve; the loss deepens toward high frequencies and with age. Right: the ISO 389-7 free-field and diffuse-field reference threshold, coinciding below 1 kHz and diverging above, dipping to a minimum near 3 to 4 kHz" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -217,57 +343,55 @@ was measured on, and asking for a model the standard does not print raises
 rather than guessing: an HDA 200 belongs to ISO 389-8 and an insert phone to
 ISO 389-2, not here.
 
+## What this guide covers
+
+- **Covered.** ISO 7029:2017's age model: the median power-law deviation from age 18 (clause
+  4.2, Table 1), the asymmetric half-Gaussian spreads $s_\mathrm{u}$ and $s_\mathrm{l}$ (clause
+  4.3, Tables 2–5), and the population-fractile calculation of clause 4.4, all
+  implemented by `age_threshold(age, sex, fractile)`. ISO 389-7:2005 Table 1's
+  free-field and diffuse-field reference threshold of hearing at the eleven
+  audiometric frequencies, returned by `reference_threshold(field)`, together
+  with the clause 1 listening conditions that define it. ISO 389-1:1998's
+  reference equivalent threshold sound pressure levels, the audiometric zero of
+  section 3: the Beyer DT 48 and the Telephonics TDH 39 on an IEC 60303 coupler
+  (Table 1) and any other supra-aural earphone on an IEC 60318 artificial ear
+  (Table 2), returned by `earphone_reference_level(earphone, frequencies)` and
+  added to an audiogram by `hearing_level_to_coupler_spl`.
+
+- **Not covered.** ISO 1999:2013 clause 6.1 Formula (1) combines this age threshold with a
+  noise-induced shift into a real audiogram. That combination *is* implemented,
+  by `htlan`, but it is documented in the [noise-induced hearing
+  loss](noise-induced-hearing-loss.md) guide rather
+  than here; this page stops at the age component. Of ISO 389-7:2005, this
+  module returns only the eleven audiometric rows of Table 1. The other 27 (the
+  third octaves from 20 Hz to 100 Hz, the intermediate third octaves between the
+  audiometric points, and the extended high frequencies from 9 kHz to 18 kHz)
+  are not carried, and neither is Amendment 1:2016, so low-frequency and
+  extended-high-frequency work has to read the table itself. The earphone
+  reference zeros of ISO 389-2 (insert earphones) and ISO 389-8 (circumaural,
+  the HDA 200 among them), the extended high frequencies of ISO 389-5, the
+  sound-field audiometric procedure of
+  ISO 8253-2, and how the ISO 389-7 values were established, are not
+  implemented.
+
 ## See also
 
-- [Noise-induced hearing loss](noise-induced-hearing-loss.md): the ISO 1999 model
-  that adds the noise component on top of this age component.
-- [Speech Intelligibility Index](../speech/speech-intelligibility.md): a raised threshold as
-  an input, and what it costs in speech audibility.
-- [Loudness](../psychoacoustics/loudness.md): the ISO 226:2023 threshold of hearing, the free-field
-  pure-tone counterpart of the audiometric zero of section 2.
-- [Occupational noise exposure](occupational-exposure.md): the ISO 9612 daily
-  exposure level that drives the noise component.
+- [Noise-induced hearing loss](noise-induced-hearing-loss.md): the
+  ISO 1999 model that adds the noise component on top of this age component.
+- [Speech Intelligibility Index](../speech/speech-intelligibility.md): a raised
+  threshold as an input, and what it costs in speech audibility.
+- [Loudness](../psychoacoustics/loudness.md): the ISO 226:2023 threshold of hearing, the
+  free-field pure-tone counterpart of the audiometric zero of section 2.
+- [Occupational noise exposure](occupational-exposure.md): the ISO 9612
+  daily exposure level that drives the noise component.
+- API reference: [`hearing.threshold`](https://docs.jmrp.io/phonometry/reference/api/hearing/threshold/).
+- Theory: [Hearing thresholds and presbycusis](../../reference/theory/perception.md#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029): the ISO 389-7 reference thresholds and the ISO 7029 age statistics, and why the two are different quantities.
 
 ## References
 
-- International Organization for Standardization. (2017). *Acoustics —
-  Statistical distribution of hearing thresholds related to age and gender*
-  (ISO 7029:2017). [iso.org catalogue](https://www.iso.org/standard/42916.html).
-  The age model of section 1: the median power law, the asymmetric spread and
-  the fractile machinery.
-- International Organization for Standardization. (2005). *Acoustics —
-  Reference zero for the calibration of audiometric equipment — Part 7:
-  Reference threshold of hearing under free-field and diffuse-field listening
-  conditions* (ISO 389-7:2005).
-  [iso.org catalogue](https://www.iso.org/standard/38976.html).
-  The audiometric zero of section 2 (Table 1), implemented here through its
-  European adoption EN ISO 389-7:2006.
-
-## Standards
-
-ISO 7029:2017, *Statistical distribution of hearing thresholds
-related to age and gender*: the median (clause 4.2, Table 1), the spread
-around the median (clause 4.3, Tables 2–5) and its application (clause 4.4).
-ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —
-Reference threshold of hearing under free-field and diffuse-field listening
-conditions* (Table 1).
-ISO 389-1:1998, *Reference zero for the calibration of audiometric equipment –
-Reference equivalent threshold sound pressure levels for pure tones and
-supra-aural earphones*: the audiometric zero of section 3, on an IEC 60303
-coupler (Table 1) and on an IEC 60318 artificial ear (Table 2).
-
-**Not covered.** This page stops at the age component. Combining it with a
-noise-induced shift into a real audiogram is **ISO 1999**:2013 clause 6.1
-Formula (1); that combination is implemented, as `htlan`, but it is documented
-in [Noise-induced hearing loss](noise-induced-hearing-loss.md). Of
-ISO 389-7:2005 only the eleven audiometric rows of Table 1 are carried: the
-other 27 (the third octaves from 20 Hz to 100 Hz, the intermediate third
-octaves between the audiometric points and the extended high frequencies from
-9 kHz to 18 kHz) are not, and neither is Amendment 1:2016, so low-frequency
-and extended-high-frequency work must read the table itself. The earphone
-reference zeros of **ISO 389-2** (insert earphones) and **ISO 389-8**
-(circumaural, the HDA 200 among them), the extended high frequencies of
-**ISO 389-5**, the sound-field audiometric procedure of **ISO 8253-2**, and how
-the ISO 389-7 values were established are all outside this module; the
-supra-aural zeros of ISO 389-1 are in it, and are what section 3 is about.
-
+- **International Organization for Standardization. (1998).** [*Acoustics – Reference zero for the calibration of audiometric equipment – Part 1: Reference equivalent threshold sound pressure levels for pure tones and supra-aural earphones*](https://www.iso.org/standard/30443.html) (ISO 389-1:1998).
+  The audiometric zero of section 3: the reference equivalent threshold sound pressure levels of supra-aural earphones on an IEC 60303 coupler (Table 1) and on an IEC 60318 artificial ear (Table 2).
+- **International Organization for Standardization. (2005).** [*Acoustics — Reference zero for the calibration of audiometric equipment — Part 7: Reference threshold of hearing under free-field and diffuse-field listening conditions*](https://www.iso.org/standard/38976.html) (ISO 389-7:2005).
+  The audiometric zero of section 2 (Table 1), implemented here through its European adoption EN ISO 389-7:2006.
+- **International Organization for Standardization. (2017).** [*Acoustics — Statistical distribution of hearing thresholds related to age and gender*](https://www.iso.org/standard/42916.html) (ISO 7029:2017).
+  The age model of section 1: the median power law (clause 4.2, Table 1), the asymmetric spread around the median (clause 4.3, Tables 2–5) and the fractile machinery and its application (clause 4.4).

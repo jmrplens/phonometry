@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/rooms/reporting-and-qualification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/
 
 # Reporting and source qualification (ISO 3382-1)
 
@@ -89,20 +91,32 @@ microphone height of 1,2 m at audience seat locations, positions evenly
 distributed over all the seating, and more of them wherever a hall breaks
 into balconies and under-balcony areas.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves: the source surveyed in a free field, on a turntable or, where no turntable can be used, from seventy-two readings taken every 5 degrees, with one gliding 30 degree arc of six readings and the Table 1 limits, and a 1 000-seat hall in plan and in section with three source positions on the stage at 1,5 m, the microphone positions of Table A.2 at 1,2 m, and more under the balcony" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves. Left, seen from above: a source in a free field on a turntable, and around it the seventy-two bearings of the survey made every 5 degrees where no turntable can be used, with a microphone on that ring at least one and a half metres from the acoustic centre. Six neighbouring readings are picked out as one gliding 30 degree arc, an arrow shows the next arc starting one reading on, and every arc is compared with the 360 degree energetic average in the measurement plane. Under it, Table 1 for octave bands of pink noise: plus or minus 1 dB at 125, 250 and 500 Hz, 3 dB at 1 kHz, 5 dB at 2 kHz and 6 dB at 4 kHz. Right: the plan of a 1 000-seat hall with three source positions on the stage, one on the centre line and one either side of it, eight microphone positions, the fewest Table A.2 asks for at that size, spread over the seating on one side of the centre line, and two more under the balcony, and below the plan a section with the source one and a half metres above the stage floor and a microphone one point two metres above the floor beside a seated listener. Two boxes at the foot carry the deviation of an arc from the reference, and the minimum number of microphone positions as a line through Table A.2, 6 for 500 seats, 8 for 1 000 and 10 for 2 000, kept between 6 and 10" width="100%"></picture>
 
-**How the measurement goes.** Qualify the source first: octave bands of pink
-noise in a free field, the microphone at least 1,5 m away, and the output
-averaged over gliding 30 degree arcs on a turntable or, without one, over six
-neighbouring readings taken every 5 degrees, each arc inside Table 1 against
-the 360 degree energetic average. In the hall, normally use at least three
-source positions on the stage with the acoustic centre 1,5 m up, and the
-minimum microphone positions of Table A.2 at 1,2 m at seats, spread evenly and
-added to where balconies split the seating. Hold the source at least 45 dB
-over the background without synchronous averaging, measure a marginal source
-again turned in at least three steps, and report the source and microphone
-positions with their heights, preferably on a plan, with the fifteen items
-of 9.2.
+### How the measurement goes
+
+Qualify the source first. Drive it with octave bands of pink noise in a free
+field and keep the microphone at least 1,5 m away. On a turntable, average its
+output over gliding 30 degree arcs; without one, take a reading every
+5 degrees and average six neighbouring readings into each arc. Every arc is
+then held against the 360 degree energetic average in the measurement plane:
+from 125 Hz to 4 kHz, none of them may leave Table 1.
+
+Measure with a type 1 instrument to IEC 61672-1, IEC 61260 filters and an
+omnidirectional microphone, preferably with a diaphragm no more than 13 mm
+across, its sensitivity calibrated if $G$ is wanted. Normally use at least
+three source positions on the stage, more with a large stage or an orchestra
+pit, for instance one on the centre line and two at equal distances either
+side, with the acoustic centre 1,5 m above the floor. Take the minimum number
+of microphone positions from Table A.2, 6 for 500 seats up to 10 for 2 000, at
+1,2 m above the floor at seats, about 2 m apart at least, spread evenly, and
+add more where balconies split the seating. Without synchronous averaging,
+hold the source at least 45 dB over the background in every band, or at least
+35 dB when only $T_{20}$ is wanted, and average repeats of any response that
+does not repeat exactly. Measure a source close to its Table 1 limits again,
+turned in at least three steps, and average arithmetically. Report the source
+and microphone positions with their heights, preferably on a plan, the stage
+furnishing and the occupancy, and the rest of the fifteen items of 9.2.
 
 ## 3. The single number, and the two exceptions in it
 
@@ -232,21 +246,40 @@ accredited fiche through the `ReportMetadata` container the
 [room acoustic parameters page](room-acoustics.md)
 fills in.
 
+## What this guide covers
+
+- **Covered.** The printed tables of ISO 3382-1:2009 and the rules around them: Table 1 with
+  the gliding arc survey of 4.2.1, Table A.1 with its per-quantity averaging
+  bands, its one energy-averaged row and its one relative just-noticeable
+  difference, Table A.2 with the line its three rows lie on, the octave pairs of
+  A.5, the two single-number routes of Clause 9.1, and the fifteen items
+  Clause 9.2 says a test report shall include. The
+  [conformance report](../../CONFORMANCE.md) holds Table A.1 and its
+  footnote, Table A.2, the 4.2.1 survey and the Clause 9.1 bands against the
+  printed text.
+
+- **Not covered yet.** The procedures around them: the three-orientation repeat A.4 asks of a source
+  close to its Table 1 limits, the sectional averaging A.5 suggests for a large
+  hall, and the plotting conventions of Clause 9.1, which are about paper rather
+  than about numbers.
+
 ## See also
 
-- [Room Acoustic Parameters](room-acoustics.md): the decay analysis these
-  tables report the results of, and the accredited fiche.
-- [Sound strength G (ISO 3382-1)](sound-strength.md), [Spatial
-  impression](spatial-impression.md) and [Stage support and
-  uncertainty](stage-and-uncertainty.md): the quantities Table A.1 averages.
+- [Room Acoustic Parameters](room-acoustics.md): the
+  decay analysis these tables report the results of, and the accredited fiche.
+- [Sound Strength G](sound-strength.md),
+  [Spatial Impression](spatial-impression.md) and
+  [Stage Support and Uncertainty](stage-and-uncertainty.md):
+  the quantities Table A.1 averages.
 - API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/).
 
-## Standards
+## References
 
-ISO 3382-1:2009: Table 1 with the gliding arc survey of 4.2.1, Table A.1 with
-its per-quantity averaging bands, Table A.2 with A.4's geometry, the octave
-pairs of A.5, and the normative Clause 9 with its two single-number routes and
-its fifteen-item test report. Validated against the printed tables in the
-[conformance report](../../CONFORMANCE.md); the contradiction between Table 1
-and A.4, and the gliding window the clause leaves unphased, are in the
-[errata register](../../ERRATA.md).
+- **Bradley, J. S. (2011).** Review of objective room acoustics measures and future needs. *Applied Acoustics*, *72*(10), 713-720. https://doi.org/10.1016/j.apacoust.2011.04.004
+  A review of what the Table A.1 quantities are for and how their just-noticeable differences came about.
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The band centres every average on this page is taken over.
+- **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
+  Table 1 and 4.2.1, Table A.1, Table A.2 with A.4, A.5 and Clause 9: the tables and the reporting rules of this page.
+- **Witew, I. B., Behler, G. K., & Vorländer, M. (2017).** About just noticeable differences for aspects of spatial impressions in concert halls. *Acoustics Australia*, *45*(2), 195-202. https://doi.org/10.1007/s40857-017-0094-7
+  Why Table A.1 prints no just-noticeable difference for the late lateral sound level.

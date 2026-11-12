@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/simulation/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/
 
 # Wave simulation
 
@@ -153,26 +155,26 @@ so in its own opening.
 
 ## What this section does not cover
 
-**Two dimensions, and no way around it.** Everything a 2D cross-section cannot
-say about a 3D room, neither solver says, and the cylindrical spreading above
-is only the most visible consequence. The open boundary is a quadratic-ramp
-absorbing layer (the simple precursor of a perfectly matched layer, not a PML),
-so grazing incidence is absorbed less cleanly than normal incidence, and the
-elastic solver has no elastic PML at all, which shows most on grazing Rayleigh
-waves. The medium is non-moving: **wind and flow advection are not modelled**,
-so a refraction study here comes from a height-dependent sound-speed profile
-and not from a flow field. The only impedance boundary is a
-frequency-independent real one, so a porous absorber has to be meshed rather
-than declared. On the elastic side the solid is isotropic and purely elastic:
-no anisotropy, and no viscoelastic damping beyond the bulk decay rate, so a
-material loss factor cannot be entered.
+- **Not covered.** **Two dimensions, and no way around it.** Everything a 2D cross-section cannot
+  say about a 3D room, neither solver says, and the cylindrical spreading above
+  is only the most visible consequence. The open boundary is a quadratic-ramp
+  absorbing layer (the simple precursor of a perfectly matched layer, not a PML),
+  so grazing incidence is absorbed less cleanly than normal incidence, and the
+  elastic solver has no elastic PML at all, which shows most on grazing Rayleigh
+  waves. The medium is non-moving: **wind and flow advection are not modelled**,
+  so a refraction study here comes from a height-dependent sound-speed profile
+  and not from a flow field. The only impedance boundary is a
+  frequency-independent real one, so a porous absorber has to be meshed rather
+  than declared. On the elastic side the solid is isotropic and purely elastic:
+  no anisotropy, and no viscoelastic damping beyond the bulk decay rate, so a
+  material loss factor cannot be entered.
 
-And nothing here is a room-acoustics package. There is no geometry importer,
-no ray tracer, no auralisation and no 3D solver: obstacles are rasterised onto
-the grid from shapes you define, a medium is the numbers or maps you give it
-(the elastic solver also takes one of the materials it ships or a solid's
-[catalogue row](elastic-waves.md#a-solid-from-a-catalogue)),
-and the output is a field you analyse yourself.
+- **Not covered.** And nothing here is a room-acoustics package. There is no geometry importer,
+  no ray tracer, no auralisation and no 3D solver: obstacles are rasterised onto
+  the grid from shapes you define, a medium is the numbers or maps you give it
+  (the elastic solver also takes one of the materials it ships or a solid's
+  [catalogue row](elastic-waves.md#a-solid-from-a-catalogue)),
+  and the output is a field you analyse yourself.
 
 ## Before and after these pages
 
@@ -185,6 +187,6 @@ derivations, the stability conditions and the analytic oracles stay inside the
 acoustic and elastic guides above.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

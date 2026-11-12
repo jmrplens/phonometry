@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/psychoacoustics/tone-prominence.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/
 
 # Prominent Discrete Tones (ECMA-418-1)
 
@@ -22,10 +24,20 @@ t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
 tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_frequency=...
 pr = psychoacoustics.prominence_ratio(x, fs, tone_frequency=1000.0)
-print(tnr.ratio_db, tnr.prominence_limit_db, tnr.prominent)
+print(round(tnr.ratio_db, 1), round(tnr.prominence_limit_db, 1), tnr.prominent)  # 45.6 8.0 True
+print(round(pr.ratio_db, 1), round(pr.prominence_limit_db, 1), pr.prominent)     # 45.7 9.0 True
 
 tnr.plot()   # the tone against its prominence criterion (needs matplotlib)
 ```
+
+Three numbers, in that order: the ratio is the tone's excess over its masking
+noise in decibels, the criterion is the frequency-dependent line it has to
+clear, and `prominent` is the comparison of the two. Quote a result as
+"TNR = 45.6 dB against an 8.0 dB criterion at 1 kHz, prominent by 37.6 dB",
+never as a bare boolean: the margin is what tells a reviewer whether the
+verdict survives the measurement uncertainty. (This synthetic tone is
+absurdly prominent; the 250 Hz fan tone further down clears its criterion by
+2.1 dB, which is the interesting case.)
 
 The methods hinge on the **critical band**, the ear's analysis bandwidth,
 $\Delta f_\mathrm{c} = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
@@ -144,16 +156,118 @@ bands no longer estimate the masking at the tone. In practice: prefer TNR
 for a clean, isolated tone, prefer PR for multi-tone complexes sharing a
 band, and report both when they straddle their criteria.
 
-## 2. Where to measure (ECMA-74) and practice
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tnr_pr_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tnr_pr_comparison.svg" alt="Left: the ECMA-418-1 tone-to-noise and prominence criteria over the 89.1 Hz to 11.2 kHz range of interest, with the 250 Hz fan tone marked at 15.1 dB above its 13.0 dB TNR criterion and at 14.9 dB just below its 15.0 dB PR criterion. Right: the tone-to-noise ratio and the prominence ratio of a 1 kHz tone as a second tone grows in the next critical band up, the TNR flat at about 9.2 dB while the PR falls from 9.9 dB through its 9 dB criterion down to below minus 8 dB" width="94%"></picture>
 
-ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device (context only): phonometry implements the ECMA-418-1 assessments, not the ECMA-74 Annex D measurement procedure:
+*Two criteria, two failure modes. Left: the PR criterion sits about 1 to 2 dB
+above the TNR one below 1 kHz, which is enough for the same 250 Hz fan tone to
+be prominent by TNR (15.1 dB against 13.0 dB) and not prominent by PR (14.9 dB
+against 15.0 dB). Right: a tone in the neighbouring critical band leaves the
+TNR untouched and destroys the PR, because the flanking bands it treats as
+noise are no longer noise.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+
+# `psychoacoustics` is imported by the snippets above.
+fs = 48000
+rng = np.random.default_rng(7)
+t = np.arange(8 * fs) / fs
+
+# A 1 kHz tone in broadband noise, plus a second tone at 1160 Hz: outside the
+# 162 Hz critical band around 1 kHz, so inside the upper contiguous band the
+# prominence ratio uses as its noise estimate.
+primary = np.sqrt(2) * 0.012 * np.sin(2 * np.pi * 1000.0 * t)
+noise = 0.05 * rng.standard_normal(t.size)
+for relative_db in (-24.0, -12.0, 0.0, 12.0):
+    second = np.sqrt(2) * 0.012 * 10 ** (relative_db / 20)
+    y = primary + second * np.sin(2 * np.pi * 1160.0 * t) + noise
+    tnr_y = psychoacoustics.tone_to_noise_ratio(y, fs, tone_frequency=1000.0)
+    pr_y = psychoacoustics.prominence_ratio(y, fs, tone_frequency=1000.0)
+    print(relative_db, round(tnr_y.ratio_db, 1), round(pr_y.ratio_db, 1))
+#   -24.0 9.2  9.8
+#   -12.0 9.2  8.7
+#     0.0 9.2  2.5
+#    12.0 9.2 -8.6
+```
+
+</details>
+
+**A tone that will not hold still.** Both methods assume the tone stays at one
+frequency for the whole average. A fan or pump whose speed drifts smears the
+tone across many bins: the tone band widens, part of the tone is counted as
+masking noise, and the TNR reads low, while the PR is affected less but still
+sees a smeared band. Clause 11.2 gives the diagnostic rather than leaving it to
+judgement: if the tone band is wider than 15 % of the critical bandwidth,
+repeat the analysis with a finer resolution, and a tone band that *stays* wider
+than 15 % through that iteration indicates a tone of time-varying frequency or
+another phenomenon. At that point the assessment is invalid rather than merely
+uncertain. The remedies are upstream: stabilise the operating point of the
+equipment under test, shorten each average and average the ratios instead of
+the spectra, or order-track the rotating source. Harmonic complexes deserve the
+same care component by component with `tone_frequency=`, since a drifting
+fundamental drifts proportionally more at every harmonic.
+
+## 2. Where to measure (ECMA-74), and what the ratios need
+
+ECMA-74 is the emission standard that delegates its tone assessments to
+ECMA-418-1, and it also fixes where the microphone goes around a device: one
+operator position and four bystander positions. Phonometry implements the
+ECMA-418-1 assessments, not the ECMA-74 measurement procedure, so the diagram
+below is context for reading an emission declaration rather than something the
+library performs.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" width="92%"></picture>
+
+**Which position's numbers are reported.** ECMA-418-1 clause 6 is explicit. If
+the equipment has an operator position, measure there: at the loudest of them
+when there is more than one, judged by the A-weighted level. If it has none,
+measure at the bystander position with the highest A-weighted level *and* at
+every other bystander position within 0.5 dB of it. The geometry comes from
+ECMA-74:2025 clause 8.6: the operator microphone 0.25 m ± 0.03 m horizontally
+from the reference box at 1.20 m ± 0.03 m seated or 1.50 m ± 0.03 m standing
+(0.50 m for table-top equipment tested without its detachable keyboard, and
+0.125 m at 1.0 m for hand-held equipment); at least four bystander positions
+1.00 m ± 0.03 m from the sides of the reference box at 1.50 m ± 0.03 m above
+the floor, with more added at 1.0 m intervals when a side exceeds 2.0 m. Where
+several positions are measured, clause 6 requires the *highest* TNR and PR to
+be reported together with the position each came from.
+
+**With what.** A class 1 microphone chain per IEC 61672-1 into an FFT analyser
+with linear (not exponential) RMS averaging and a Hanning window, calibrated
+directly in dB re 20 µPa; the microphone oriented so that the incidence angle
+is the one for which its response is flattest, which ECMA-74 clause 8.6.4 takes
+as 30° or 45° below the horizontal in most practical cases. The measurement
+interval must cover at least three operational cycles, or the complete sequence
+for equipment that runs a sequence of varying cycles (ECMA-74 clause 7.7.2 via
+8.7.2), and the background noise is corrected as ISO 11201 accuracy grade 2
+requires.
+
+**Resolution, in actionable terms.** Clause 7 asks for an FFT resolution below
+1 % of the tone frequency, and recommends 0.25 % or better for the
+tone-to-noise ratio, because experience has shown 1 % occasionally fails to
+resolve the tone. At 250 Hz that is 0.63 Hz, so records of a second or more per
+average; the library's 1 Hz default therefore satisfies the recommendation only
+above about 400 Hz and is too coarse below it. Clause 11.2 adds the check that
+matters at the far end: the tone band must not exceed 15 % of the critical
+bandwidth, and if it does, the analysis is repeated finer.
+
+**The weighting trap.** Clause 7 forbids any frequency weighting on the
+analyser input, A-weighting included. Both ratios compare levels inside and
+across critical bands, so a weighting curve tilts the comparison: harmless for
+a TNR at 1 kHz, worth several tenths of a decibel for a PR at low frequency,
+where the A-curve falls steeply across three consecutive critical bands. The
+ratios are indifferent to *absolute* calibration but not to spectral shape,
+which is why "calibration cancels out" is only half the story: the analyser
+should still be calibrated absolutely, because the clause 8/9 threshold screen
+below needs real sound pressure levels.
 
 Proximate secondary tones in the same critical band are combined per
 clause 11.6; for harmonic complexes assess each component (`tone_frequency=`).
 Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
-calibration (the ratios are level differences).
+calibration for the ratio itself (the ratios are level differences).
 
 ### `tone_to_noise_ratio()` / `prominence_ratio()` parameters
 
@@ -168,12 +282,6 @@ Both return a `ToneAssessment(frequency, ratio_db, method)`, where `method`
 says which ratio was taken (`"tone_to_noise_ratio"` or `"prominence_ratio"`);
 `prominence_limit_db` and `prominent` are read from the standard's formula for that
 ratio, so an assessment cannot carry another criterion.
-
-The `prominent` verdict is the numeric criterion only. The standard also
-requires a prominent tone to be confirmed by aural examination (clauses
-11.8/12.8) and to pass the clause 8/9 lower-threshold-of-hearing screen
-(which, unlike the ratios, does need calibrated absolute levels). Both checks
-are left to the caller.
 
 ## 3. Which tonality metric, and when
 
@@ -193,12 +301,13 @@ Read the table as a decision: the *purpose of the report* picks the metric,
 not the convenience of the input. A device emission declaration is an
 ECMA-418-1 prominence verdict; a complaint about a tone from an installation
 is an ISO 1996-2 rating, so it needs the audibility $\Delta L$ that maps to `Kt`
-([tone audibility](tone-audibility.md)); a product comparison where nobody is
-being fined is where the ECMA-418-2 tonality earns its place, because it is a
-magnitude rather than a threshold test ([sound quality](sound-quality.md));
-and a turbine is its own regime, with a measurement procedure in
-IEC 61400-11 that fixes the geometry and the wind bins
-([wind-turbine noise](../../environment/sources/wind-turbine-noise.md)).
+(the [tone-audibility guide](tone-audibility.md));
+a product comparison where nobody is being fined is where the ECMA-418-2
+tonality earns its place, because it is a magnitude rather than a threshold
+test (the [sound-quality guide](sound-quality.md)); and a
+turbine is its own regime, with a measurement procedure in IEC 61400-11 that
+fixes the geometry and the wind bins (the
+[wind-turbine guide](../../environment/sources/wind-turbine-noise.md)).
 
 Two consequences worth keeping in mind. First, the numbers do not convert:
 a TNR of 12 dB is not an audibility of 12 dB, because the masking model, the
@@ -210,40 +319,46 @@ stays moderate throughout because it rates the whole sound and not one
 spectral line. Report the metric the assessment calls for, and quote any
 other only as supporting evidence.
 
+## What this guide covers
+
+- **Covered.** ECMA-418-1:2024 (3rd edition): the tone-to-noise ratio (clause 11, Formulae 9
+  to 12) and prominence ratio (clause 12, Formulae 23 to 26) methods on
+  Hann-windowed, RMS-averaged spectra, the clause 10 critical-band model, the
+  frequency-dependent prominence criteria, and the clause 11.6 combination of
+  secondary tones sharing a band, all through `tone_to_noise_ratio()` and
+  `prominence_ratio()`. The clause 6 microphone positions and clause 7
+  instrumentation requirements are documented in §2 as the conditions the two
+  ratios are defined under.
+
+- **Not covered.** The `prominent` verdict these functions return is the numeric criterion only.
+  The standard also requires a prominent tone to be confirmed by aural
+  examination (clauses 11.8/12.8) and to pass the clause 8/9
+  lower-threshold-of-hearing screen, which needs calibrated absolute levels:
+  both checks are left to the caller. ECMA-74:2025 is covered only as the
+  standard that delegates its tone assessments to ECMA-418-1; its own Annex D
+  measurement procedure and operator/bystander positions (shown above for
+  context) are not implemented here.
+
 ## See also
 
-- [Environmental levels](../../environment/assessment/environmental-levels.md): the ISO 1996-1 rating levels and their Table A.1
+- [Environmental Levels](../../environment/assessment/environmental-levels.md): the ISO 1996-1 rating levels and their Table A.1
   tonal adjustments, whose Kt is justified by the ISO/PAS 20065 audibility
   route; these prominence verdicts are complementary emission screening.
 - [Sound Quality Metrics](sound-quality.md): the ECMA-418-2 psychoacoustic
   tonality T in tu_HMS, the hearing-model counterpart of these FFT ratios.
-- [Objective audibility of tones in noise](tone-audibility.md): the ISO/PAS 20065
-  audibility ΔL that the ISO 1996-2 tonal adjustment Kt is read from.
-- [Wind-turbine noise](../../environment/sources/wind-turbine-noise.md): the IEC 61400-11 tonal audibility,
-  the same question asked per wind-speed bin.
+- [Objective audibility of tones in noise](tone-audibility.md): the
+  ISO/PAS 20065 audibility ΔL that the ISO 1996-2 tonal adjustment Kt is read from.
+- [Wind-turbine noise](../../environment/sources/wind-turbine-noise.md): the IEC 61400-11 tonal
+  audibility, the same question asked per wind-speed bin.
 - [Impulsive-sound prominence](../../environment/assessment/impulsive-sound.md): the NT ACOU 112
   counterpart for impulsive (rather than tonal) character.
 - [Theory](../../reference/theory/perception.md): the critical-band model and criteria derivation.
 - API reference: [`psychoacoustics.quality.tonality`](https://docs.jmrp.io/phonometry/reference/api/psychoacoustics/tonality/).
+- Theory: [Tone prominence: TNR and PR](../../reference/theory/perception.md#tone-prominence-tnr-and-pr-ecma-418-1): the critical-band construction behind TNR and PR, and the criteria that make a tone prominent.
 
 ## References
 
-- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
-  equipment — Part 1: Prominent discrete tones* (3rd ed.).
-  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
-  The implemented standard, freely downloadable: the TNR (clause 11) and PR
-  (clause 12) methods, the critical-band model and the prominence criteria of
-  section 1.
-- Ecma International. (2025). *ECMA-74: Measurement of airborne noise emitted
-  by information technology and telecommunications equipment* (22nd ed.).
-  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf).
-  The parent emission standard, freely downloadable: the operator/bystander
-  measurement positions of section 2, with Annex D delegating the tone
-  assessments to ECMA-418-1.
-
-## Standards
-
-ECMA-418-1:2024 (3rd edition), *Psychoacoustic metrics for ITT
-equipment — Part 1: Prominent discrete tones*: the tone-to-noise ratio
-(clause 11), the prominence ratio (clause 12), the critical-band model and the
-frequency-dependent prominence criteria.
+- **Ecma International. (2024).** [*Psychoacoustic metrics for ITT equipment — Part 1: Prominent discrete tones*](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf) (ECMA-418-1:2024 (3rd ed.)).
+  The implemented standard, freely downloadable (the linked PDF is the free download): the tone-to-noise ratio (clause 11) and prominence ratio (clause 12) methods, the critical-band model and the frequency-dependent prominence criteria of section 1.
+- **Ecma International. (2025).** [*Measurement of airborne noise emitted by information technology and telecommunications equipment*](https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf) (ECMA-74:2025 (22nd ed.)).
+  The parent emission standard, freely downloadable (the linked PDF is the free download): the operator/bystander measurement positions of section 2, with Annex D delegating the tone assessments to ECMA-418-1.

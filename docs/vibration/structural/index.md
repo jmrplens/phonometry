@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/structural/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/structural/
 
 # Structure-borne sources
 
@@ -105,24 +107,24 @@ Pages elsewhere on the site that this section leans on:
 
 ## What this section does not cover
 
-The junction coefficients are a **closed-form idealisation** for a rigid,
-simply supported junction between homogeneous plates, not a measurement: the
-empirical vibration reduction index obtained from a direction-averaged
-velocity level difference is ISO 10848, in [Laboratory flanking
-transmission](../../buildings/insulation/flanking-lab.md). The
-straight-section coefficient is undefined for the T and L geometries, which
-have no collinear third plate, so only the corner path applies there.
+- **Not covered.** The junction coefficients are a **closed-form idealisation** for a rigid,
+  simply supported junction between homogeneous plates, not a measurement: the
+  empirical vibration reduction index obtained from a direction-averaged
+  velocity level difference is ISO 10848, in [Laboratory flanking
+  transmission](../../buildings/insulation/flanking-lab.md). The
+  straight-section coefficient is undefined for the T and L geometries, which
+  have no collinear third plate, so only the corner path applies there.
 
-The FRF page implements ISO 7626-1 and the ISO 7626-2 acceptance criteria for
-an attached exciter, and the impact page ISO 7626-5; the conversions return
-element-wise *free* reciprocals, correct for a driving-point or single-path
-use, not for a full FRF matrix, whose blocked matrix quantities are not built.
-The impact page estimates the damping one mode at a time, so closely spaced
-modes need a multi-mode curve fitter, which is not provided.
+- **Not covered.** The FRF page implements ISO 7626-1 and the ISO 7626-2 acceptance criteria for
+  an attached exciter, and the impact page ISO 7626-5; the conversions return
+  element-wise *free* reciprocals, correct for a driving-point or single-path
+  use, not for a full FRF matrix, whose blocked matrix quantities are not built.
+  The impact page estimates the damping one mode at a time, so closely spaced
+  modes need a multi-mode curve fitter, which is not provided.
 
-On the isolator page, one of the standard's own validity checks is described
-rather than computed: the linearity test (two input spectra 10 dB apart
-must give transfer-stiffness levels within 1.5 dB, clause 7.7 of ISO 10846-2, -4 and -5 and clause 7.6 of
-ISO 10846-3). Finally, nothing here
-designs an isolator or a floating base: the pages characterise elements and
-predict transmission, and the sizing decision stays yours.
+- **Not covered.** On the isolator page, one of the standard's own validity checks is described
+  rather than computed: the linearity test (two input spectra 10 dB apart
+  must give transfer-stiffness levels within 1.5 dB, clause 7.7 of ISO 10846-2, -4 and -5 and clause 7.6 of
+  ISO 10846-3). Finally, nothing here
+  designs an isolator or a floating base: the pages characterise elements and
+  predict transmission, and the sizing decision stays yours.

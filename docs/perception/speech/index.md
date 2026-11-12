@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/speech/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/speech/
 
 # Speech
 
@@ -76,21 +78,21 @@ standard.
 
 ## What this section does not cover
 
-**No listener is tested, and no score is predicted.** STOI returns the
-correlation index and not the percentage of words understood, because the
-logistic mapping is fitted per listening-test corpus; the SII returns an
-audibility fraction rather than a score; and no page here reproduces a
-subjective intelligibility test. **No signal is acquired either**: the STI
-page implements the STIPA direct signal and the indirect computation from an
-impulse response, but the full 14-modulation-frequency direct measurement of
-clause 6.3 is not implemented, so a chain with severe distortion needs
-measuring equipment rather than this library.
+- **Not covered.** **No listener is tested, and no score is predicted.** STOI returns the
+  correlation index and not the percentage of words understood, because the
+  logistic mapping is fitted per listening-test corpus; the SII returns an
+  audibility fraction rather than a score; and no page here reproduces a
+  subjective intelligibility test. **No signal is acquired either**: the STI
+  page implements the STIPA direct signal and the indirect computation from an
+  impulse response, but the full 14-modulation-frequency direct measurement of
+  clause 6.3 is not implemented, so a chain with severe distortion needs
+  measuring equipment rather than this library.
 
-Two coverage limits inside the SII are worth checking before use: the raised,
-loud and shouted speech spectra are carried for the one-third-octave procedure
-only, and the tabulated band-importance functions are each table's
-average-speech compromise, with Annex B's material-specific alternatives left
-to you through the `band_importance=` argument. There is no resampling between
-the four band procedures: each is fed spectra on its own bands. And the
-female speech option is not missing from the STI: Edition 5 of IEC 60268-16
-removed it, so there is nothing left to implement.
+- **Not covered.** Two coverage limits inside the SII are worth checking before use: the raised,
+  loud and shouted speech spectra are carried for the one-third-octave procedure
+  only, and the tabulated band-importance functions are each table's
+  average-speech compromise, with Annex B's material-specific alternatives left
+  to you through the `band_importance=` argument. There is no resampling between
+  the four band procedures: each is fed spectra on its own bands. And the
+  female speech option is not missing from the STI: Edition 5 of IEC 60268-16
+  removed it, so there is nothing left to implement.

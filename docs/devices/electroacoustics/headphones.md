@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/electroacoustics/headphones.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/
 
 # Headphones and Earphones (IEC 60268-7)
 
@@ -508,38 +510,38 @@ plt.show()
 
 ## What this guide covers
 
-**Covered.** IEC 60268-1:1985 Clause 7 with its two amendments of 1988: Table II and its
-Note, the filter of Figure 2 as an exact transfer function, a generator of the
-programme signal with the table's band levels or through the filter, optionally
-clipped to a peak-to-RMS ratio, and the verdict on a one-third-octave spectrum.
-IEC 60268-7:2010: the classification code of Clause 4; the rated impedance and
-the measured range of 8.2; the characteristic voltage (8.3.3), the
-programme signal characteristic voltages of 8.3.4 and 8.3.5 by the power
-summation of the NOTE under Figure 3 with the averaging of 3 to 5 fittings,
-the clipped programme signal of the limiting voltages (8.3.2.2 b) and the
-protection voltage (8.3.6.2 b); the powers of 8.4 and the working sound
-pressure levels of 8.5.2, by the definition or by the method of 8.5.3 c); the
-coupler or ear simulator response (8.6.2), the free-field and diffuse-field
-comparison responses with their panel sizes, referred to the standard
-reference frequency of IEC 60268-1 Clause 3 (8.6.3, 8.6.4), the ear canal
-response by Formula (1) with its fitting and level checks and the 16 persons
-of a reference (8.6.5); the distortion test signals of 8.7.3 and 8.7.4; the
-sound attenuation of 8.11, which is ISO 4869-1 and is computed by
-`hearing.real_ear_attenuation`, with `hearing.anr_total_attenuation` of
-ISO 4869-6 for a headphone with active noise compensation; the crosstalk
-attenuation (8.12); and the probe microphone of Annex B, items a) to e).
+- **Covered.** IEC 60268-1:1985 Clause 7 with its two amendments of 1988: Table II and its
+  Note, the filter of Figure 2 as an exact transfer function, a generator of the
+  programme signal with the table's band levels or through the filter, optionally
+  clipped to a peak-to-RMS ratio, and the verdict on a one-third-octave spectrum.
+  IEC 60268-7:2010: the classification code of Clause 4; the rated impedance and
+  the measured range of 8.2; the characteristic voltage (8.3.3), the
+  programme signal characteristic voltages of 8.3.4 and 8.3.5 by the power
+  summation of the NOTE under Figure 3 with the averaging of 3 to 5 fittings,
+  the clipped programme signal of the limiting voltages (8.3.2.2 b) and the
+  protection voltage (8.3.6.2 b); the powers of 8.4 and the working sound
+  pressure levels of 8.5.2, by the definition or by the method of 8.5.3 c); the
+  coupler or ear simulator response (8.6.2), the free-field and diffuse-field
+  comparison responses with their panel sizes, referred to the standard
+  reference frequency of IEC 60268-1 Clause 3 (8.6.3, 8.6.4), the ear canal
+  response by Formula (1) with its fitting and level checks and the 16 persons
+  of a reference (8.6.5); the distortion test signals of 8.7.3 and 8.7.4; the
+  sound attenuation of 8.11, which is ISO 4869-1 and is computed by
+  `hearing.real_ear_attenuation`, with `hearing.anr_total_attenuation` of
+  ISO 4869-6 for a headphone with active noise compensation; the crosstalk
+  attenuation (8.12); and the probe microphone of Annex B, items a) to e).
 
-**Not covered.** The rated conditions (7.1, 8.6.6, 8.8, 8.13, 8.14) are stated by the
-manufacturer, the frequency responses carry no tolerance to judge (8.6.6
-NOTE 2), and the endurance runs of 8.3.2 are a test schedule, not a
-computation. The preference of 8.3.1 NOTE 3, a rated source e.m.f. no more
-than 10 dB to 15 dB above the characteristic voltage, is a range, so it gets a
-number and no verdict. The external field (8.9) and the unwanted sound
-radiation (8.10) are readings. The free-field response of the head and torso
-simulator of IEC 60959 is an input, not a table the library holds. Annex A is the geometry of a pinna simulator, and
-Annexes C to E are informative practical conditions; the sound pressure level
-limit of 85 dB and the 10 dB signal-to-noise ratio of 8.6.5.2 b) need
-calibrated readings the response function is not given.
+- **Not covered.** The rated conditions (7.1, 8.6.6, 8.8, 8.13, 8.14) are stated by the
+  manufacturer, the frequency responses carry no tolerance to judge (8.6.6
+  NOTE 2), and the endurance runs of 8.3.2 are a test schedule, not a
+  computation. The preference of 8.3.1 NOTE 3, a rated source e.m.f. no more
+  than 10 dB to 15 dB above the characteristic voltage, is a range, so it gets a
+  number and no verdict. The external field (8.9) and the unwanted sound
+  radiation (8.10) are readings. The free-field response of the head and torso
+  simulator of IEC 60959 is an input, not a table the library holds. Annex A is the geometry of a pinna simulator, and
+  Annexes C to E are informative practical conditions; the sound pressure level
+  limit of 85 dB and the 10 dB signal-to-noise ratio of 8.6.5.2 b) need
+  calibrated readings the response function is not given.
 
 ## See also
 
@@ -562,12 +564,13 @@ calibrated readings the response function is not given.
 - API reference: [`electroacoustics.program_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/program-signal/)
   and [`electroacoustics.headphones`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/headphones/).
 
-## Standards
+## References
 
-IEC 60268-7:2010, *Sound system equipment – Part 7: Headphones and earphones*. Edition 3.0. The classification code (Clause 4), the standard conditions and the measurement with the simulated programme signal (7.2, 7.4, Figure 3 and its NOTE), the impedance (8.2), the voltages (8.3: the limiting values with the clipped programme signal, the characteristic voltage, the programme signal characteristic voltages and the protective devices), the powers (8.4), the sound pressure levels (8.5), the frequency responses (8.6: coupler, free-field and diffuse-field comparison, ear canal Formula (1)), the distortion test signals (8.7), the sound attenuation (8.11, by ISO 4869-1), the crosstalk attenuation (8.12) and the probe microphone of Annex B.
-
-IEC 60268-1:1985, *Sound system equipment – Part 1: General*. With Amendment 1 (1988-01) and Amendment 2 (1988-06), neither of which touches Clause 7. The standard reference frequency of Clause 3, and the simulated programme signal: Clause 7 with its Note, Table II (the power spectrum and its tolerances) and Figure 2 (the filter for a pink-noise source).
-
-IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*. The difference-frequency distortion of 14.12.8.1 b), the reading Formula (5) of IEC 60268-7 needs where its brackets are unbalanced.
-
-IEC 61672-1:2013, *Electroacoustics – Sound level meters – Part 1: Specifications*. The A-weighting whose band coefficients the NOTE under Figure 3 of IEC 60268-7 sums with, Table 3.
+- **International Electrotechnical Commission. (1985).** [*Sound system equipment — Part 1: General*](https://webstore.iec.ch/en/publication/1204) (IEC 60268-1:1985).
+  With Amendment 1 (1988-01) and Amendment 2 (1988-06), neither of which touches Clause 7. The standard reference frequency of Clause 3, and the simulated programme signal: Clause 7 with its Note, Table II (the power spectrum and its tolerances) and Figure 2 (the filter for a pink-noise source).
+- **International Electrotechnical Commission. (2010).** *Sound system equipment – Part 7: Headphones and earphones* (IEC 60268-7:2010).
+  Edition 3.0. The classification code (Clause 4), the standard conditions and the measurement with the simulated programme signal (7.2, 7.4, Figure 3 and its NOTE), the impedance (8.2), the voltages (8.3: the limiting values with the clipped programme signal, the characteristic voltage, the programme signal characteristic voltages and the protective devices), the powers (8.4), the sound pressure levels (8.5), the frequency responses (8.6: coupler, free-field and diffuse-field comparison, ear canal Formula (1)), the distortion test signals (8.7), the sound attenuation (8.11, by ISO 4869-1), the crosstalk attenuation (8.12) and the probe microphone of Annex B.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The A-weighting whose band coefficients the NOTE under Figure 3 of IEC 60268-7 sums with, Table 3.
+- **International Electrotechnical Commission. (2013).** [*Sound system equipment – Part 3: Amplifiers*](https://webstore.iec.ch/en/publication/1220) (IEC 60268-3:2013).
+  The difference-frequency distortion of 14.12.8.1 b), the reading Formula (5) of IEC 60268-7 needs where its brackets are unbalanced.

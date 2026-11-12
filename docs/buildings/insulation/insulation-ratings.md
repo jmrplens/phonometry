@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/insulation/insulation-ratings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/
 
 # Insulation Ratings (ISO 717)
 
@@ -14,10 +16,22 @@ because a higher impact level is worse. This guide covers the engines
 themselves: the shifting rule, the spectrum adaptation terms $C$, $C_\mathrm{tr}$
 and $C_\mathrm{I}$, the enlarged-range and one-decimal variants, and the ISO 717
 fiche. The measurements that produce the spectra live in the
-[field](insulation-field.md), [laboratory](insulation-lab.md),
-[intensity](insulation-intensity.md), [survey](insulation-survey.md) and
-[flanking](flanking-lab.md) guides; the prediction that consumes the
-ratings is [EN 12354](../design/insulation-prediction.md).
+[field](insulation-field.md),
+[laboratory](insulation-lab.md),
+[intensity](insulation-intensity.md),
+[survey](insulation-survey.md) and
+[flanking](flanking-lab.md) guides; the prediction that
+consumes the ratings is
+[EN 12354](../design/insulation-prediction.md).
+
+## How do I compute Rw from third-octave sound reduction data in Python?
+
+Pass the 16 one-third-octave values from 100 Hz to 3150 Hz to
+`building.weighted_rating(R)`. It shifts the ISO 717-1 reference curve and
+returns the rating read at 500 Hz, plus the spectrum adaptation terms $C$ and
+$C_\mathrm{tr}$. For the measured spectrum used below, `w.rating, w.c, w.ctr` prints
+`30 -2 -3`: $R_\mathrm{w}\ (C\ ;\ C_\mathrm{tr}) = 30\ (-2\ ;\ -3)$. The same call rates $R'$, $D_\mathrm{n}$ and
+$D_{\mathrm{n}T}$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain.svg" alt="Calculation chain of the ISO 717 single-number ratings. Across the top, a strip of one-third-octave bands from 50 Hz to 5000 Hz: the 16 bands from 100 Hz to 3150 Hz drawn solid with 500 Hz picked out, the five octave bands from 125 Hz to 2000 Hz bracketed under them, and the bands at 50, 63, 80, 4000 and 5000 Hz dashed as an enlarged range that only the adaptation terms read, the 4000 and 5000 Hz bands in ISO 717-1 alone. A box states the rule both parts share: shift the Table 3 curve towards the measurement in 1 dB steps until the sum of unfavourable deviations is as large as possible but not more than 32.0 dB over 16 bands or 10.0 dB over 5, in 0.1 dB steps for the expression of uncertainty, and read the shifted curve at 500 Hz. Below it, two small charts side by side. On the left, ISO 717-1 for airborne sound: the reference curve moved 22 dB down onto a measured sound reduction index, with bars where the measurement falls below it that add up to 31.8 dB, giving Rw = 52 − 22 = 30 dB; C = 28 − 30 = −2 dB from spectrum No. 1, pink noise, and Ctr = 27 − 30 = −3 dB from spectrum No. 2, urban traffic, both over all 16 bands, stated as Rw(C;Ctr) = 30 (−2; −3) dB. On the right, ISO 717-2 for impact sound: the reference curve moved 19 dB up onto a measured normalized impact level, with bars where the measurement rises above it that add up to 28.0 dB, giving Ln,w = 60 + 19 = 79 dB, with 5 dB taken off when the bands are octaves, and CI from the unweighted energy sum of the first 15 bands, without 3150 Hz. Each side lists its enlarged-range terms, and a box at the foot carries Cj = XAj − Xw and CI = Ln,sum − 15 − Ln,w" width="100%"></picture>
 
@@ -38,19 +52,58 @@ method** of ISO 717-1: a fixed reference curve is shifted in 1 dB steps
 toward the measured curve until the sum of *unfavourable* deviations
 (where the measurement falls below the reference) is as large as possible
 but not more than 32.0 dB (16 one-third-octave bands) or 10.0 dB (5 octave
-bands). The rating ($R_\mathrm{w}$, $R'_\mathrm{w}$, $D_{\mathrm{n}T,\mathrm{w}}$ …) is the shifted reference
-read at 500 Hz. The **spectrum adaptation terms** $C$ (pink noise) and $C_\mathrm{tr}$
-(urban traffic) add the low-frequency penalty of a real source.
+bands). The two caps are one rule, not two constants: $32.0 = 2.0 \times 16$
+and $10.0 = 2.0 \times 5$, so what the method actually permits is **an average
+unfavourable deviation of 2 dB per band**. The rating ($R_\mathrm{w}$, $R'_\mathrm{w}$,
+$D_{\mathrm{n}T,\mathrm{w}}$ …) is the shifted reference read at 500 Hz.
 
-The two terms re-rate the same measured curve against the two source spectra
-of ISO 717-1 Annex A: $C$ against A-weighted pink noise, representative of
-living activities (speech, music, radio, television), and $C_\mathrm{tr}$ against
-A-weighted urban road traffic, whose energy sits at low frequency. They are
-defined so that the rating plus the term ($R_\mathrm{w} + C$ for a laboratory index,
+The reference curve itself (ISO 717-1:2020, Table 3) is not arbitrary either.
+It rises 3 dB per one-third octave (9 dB per octave) from 100 Hz to 400 Hz,
+then 1 dB per one-third octave up to 1250 Hz, and is flat from 1250 Hz up. A
+rating engine carrying that shape is deliberately lenient at low frequency and
+unforgiving above 1 kHz, which is why a construction with a low-frequency dip
+can still rate well, and why $C_\mathrm{tr}$ exists to put the penalty back. The
+result object hands you the curve in its shifted position, so the unshifted one
+is a subtraction away:
+
+```python
+import numpy as np
+from phonometry import building
+
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+w = building.weighted_rating(R)
+
+# The curve is shifted until it reads `rating` at 500 Hz; unshifted it reads
+# 52 dB there, so the shift applied was 52 - rating.
+reference = np.asarray(w.shifted_reference) + (52 - w.rating)
+print(w.rating, 52 - w.rating)          # 30 22   (shifted down by 22 dB)
+print(reference.astype(int).tolist())
+# [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56]
+```
+
+The **spectrum adaptation terms** $C$ (pink noise) and $C_\mathrm{tr}$ (urban traffic)
+add the low-frequency penalty of a real source. Both come from one definition
+(Clause 4.5, Formulae (1) and (2)): re-rate the measured spectrum against a
+standard source spectrum and subtract the curve-based rating,
+
+$$
+C_j = X_{\mathrm{A},j} - X_\mathrm{w}, \qquad
+X_{\mathrm{A},j} = -10\log_{10}\sum_i 10^{(L_{i,j} - X_i)/10},
+$$
+
+where $L_{i,j}$ is the level of source spectrum $j$ in band $i$ (both spectra
+are A-weighted and normalised to 0 dB overall) and $X_i$ the measured
+insulation in that band, to one decimal place. The two terms differ **only** in
+which spectrum is substituted: No. 1, A-weighted pink noise, representative of
+living activities (speech, music, radio, television), gives $C$; No. 2,
+A-weighted urban road traffic, whose energy sits at low frequency, gives
+$C_\mathrm{tr}$. So the rating plus the term ($R_\mathrm{w} + C$ for a laboratory index,
 $R'_\mathrm{w} + C$ or $D_{\mathrm{n}T,\mathrm{w}} + C$ for the quantities of the
-  [field guide](insulation-field.md), and
-likewise with $C_\mathrm{tr}$) is the A-weighted level difference achieved against
-that source. Reading them:
+[field guide](insulation-field.md), and likewise
+with $C_\mathrm{tr}$) is the A-weighted level difference the construction achieves
+against that source, which is what makes the sum, and not the rating alone,
+the thing worth specifying. Reading them:
 
 * $C$ stays small for most constructions (0 to −2 dB is typical): the pink
   spectrum is close to the weighting already implicit in the reference
@@ -64,18 +117,96 @@ that source. Reading them:
   road, $D_{\mathrm{n}T,\mathrm{w}} + C$ (or the plain rating, where the regulation says so)
   between dwellings, the two example requirements of ISO 717-1, 5.3.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_adaptation_terms_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_adaptation_terms.svg" alt="Left: the sound reduction index of a 150 mm dense concrete wall and of a 12 kg per square metre metal-stud double leaf with a 90 mm cavity, both against the same shifted ISO 717-1 reference curve at Rw = 49 dB. Right: a grouped bar chart of Rw, Rw + C and Rw + Ctr for the two constructions, identical at Rw and 6 dB apart at Rw + Ctr" width="92%"></picture>
+
+*Two constructions, one rating. Both spectra come from the library's own panel
+models (Sharp's method for the concrete leaf, the mass-air-mass double-wall
+model for the lightweight one), and both rate to $R_\mathrm{w} = 49$ dB, so a
+specification written on $R_\mathrm{w}$ alone treats them as interchangeable. They are
+not: the double leaf enters the rated range still climbing out of its 82 Hz
+mass-air-mass resonance, and against traffic it gives up 6 dB more than the
+concrete wall. $R_\mathrm{w} + C_\mathrm{tr}$ is what a façade on a busy road is actually
+specified on.*
+
+<details>
+<summary>Show the code for this figure</summary>
 
 ```python
-from phonometry import building
+import matplotlib.pyplot as plt
+import numpy as np
+# `building` is the import of the reference-curve block above.
 
-# Single-number rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
-R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
-     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
-w = building.weighted_rating(R)
+freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                  1000, 1250, 1600, 2000, 2500, 3150], dtype=float)
+
+# 150 mm dense concrete: m' = 2300 x 0.15 = 345 kg/m2, fc = 125 Hz.
+heavy = np.round(building.single_panel_transmission_loss(
+    freqs, 345.0, critical_frequency=125.0).transmission_loss, 1)
+# Metal-stud double leaf: 12 kg/m2 per leaf, 90 mm cavity.
+light_result = building.double_wall_transmission_loss(freqs, mass1=12.0,
+                                                      mass2=12.0, gap_m=0.09)
+light = np.round(light_result.transmission_loss, 1)
+
+w_heavy = building.weighted_rating(heavy)
+w_light = building.weighted_rating(light)
+print(w_heavy.rating, w_heavy.c, w_heavy.ctr)   # 49 -2 -7
+print(w_light.rating, w_light.c, w_light.ctr)   # 49 -5 -13
+print(round(light_result.resonance_frequency, 1))            # 81.5 Hz
+
+fig, (ax_spec, ax_bar) = plt.subplots(1, 2, figsize=(13.0, 5.8))
+x = np.arange(16)
+ax_spec.plot(x, w_heavy.shifted_reference, "--", label="shifted reference")
+ax_spec.plot(x, heavy, "-o", label="150 mm dense concrete")
+ax_spec.plot(x, light, "-s", label="double leaf, 12 kg/m2 + 90 mm")
+ax_spec.set_xticks(x, [f"{f:g}" for f in freqs], rotation=45, fontsize=8)
+ax_spec.set(xlabel="Frequency [Hz]", ylabel="Sound reduction index R [dB]")
+ax_spec.legend()
+
+groups = ("Rw", "Rw + C", "Rw + Ctr")
+xb = np.arange(3)
+ax_bar.bar(xb - 0.19, [w_heavy.rating, w_heavy.rating + w_heavy.c,
+                       w_heavy.rating + w_heavy.ctr], width=0.36,
+           label="concrete")
+ax_bar.bar(xb + 0.19, [w_light.rating, w_light.rating + w_light.c,
+                       w_light.rating + w_light.ctr], width=0.36,
+           label="double leaf")
+ax_bar.set_xticks(xb, groups)
+ax_bar.set_ylabel("Single number [dB]")
+ax_bar.legend()
+plt.show()
+```
+
+</details>
+
+Every figure of a rating on this page shows the curve where it came to rest.
+The rule that put it there is iterative, and the two positions that decide the
+answer are the ones a finished figure has already discarded: the last shift
+whose unfavourable sum still exceeded 32.0 dB, and the next shift after the
+answer, which is legal but wastes the allowance. The clip walks both engines
+through those steps on the two worked spectra of this page.
+
+**Video:** [Shifting the ISO 717 reference curve until it just fits](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_iso717_shift.webm): The reference curve steps in 1 dB increments toward the measured spectrum while the unfavourable deviations shade in band by band and their sum falls toward the 32.0 dB cap. The airborne engine stops at 31.8 dB for Rw = 30 dB, one step before the position that would waste the allowance; the impact engine then runs the same rule with the deviation's sign reversed, the curve stepping upward and stopping at 28.0 dB for Ln,w = 79 dB.
+
+*Both walks stop where the standard says: at the largest unfavourable sum that
+does not exceed 32.0 dB. The step before it is rejected for overshooting the
+cap, and the step after it is legal but reads a decibel lower for no reason,
+which is what "as large as possible" in ISO 717-1:2020, 4.4 and
+ISO 717-2:2020, 4.3.1 excludes.*
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
+
+*The shifted reference has come to rest where the shaded unfavourable area
+totals 31.8 dB: one step back would overshoot the cap at 44.1 dB, and one more
+step down would waste the allowance at 20.6 dB. The
+rating is then read off that curve at 500 Hz, not off the measurement: the
+measured spectrum touches 26.6 dB there, and $R_\mathrm{w}$ is 30 dB.*
+
+```python
+# `building`, `R` and `w` come from the reference-curve block above.
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
+print(w.unfavorable_sum)                            # 31.8  (cap 32.0 = 2.0 x 16)
 
-w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
+w.plot()   # measured R vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
 ```
 
 <details>
@@ -96,7 +227,7 @@ plt.show()
 
 # By hand, from the band curve the result now carries:
 fig, ax = plt.subplots()
-ax.semilogx(w.frequencies, w.measured, "o-", label="Measured R'")
+ax.semilogx(w.frequencies, w.measured, "o-", label="Measured R")
 ax.semilogx(w.frequencies, w.shifted_reference, "s--", label="Shifted reference")
 ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 where=w.measured < w.shifted_reference, interpolate=True,
@@ -117,8 +248,10 @@ plt.show()
 | `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured $R$, $R'$, $D_{\mathrm{n}T}$ … per band |
 | `fraction` | int or `None` | — | `3` (one-third octaves) / `1` (octaves) / `None` | `None` infers from the count |
 
-`weighted_rating()` returns a `WeightedRatingResult`
-(`rating`, `c`, `ctr`, `unfavorable_sum`, all integers except the sum).
+`weighted_rating()` returns a `WeightedRatingResult` (`rating`, `c`, `ctr`,
+`unfavorable_sum`, all integers except the sum), plus the three fields the
+figures on this page are drawn from: `frequencies`, `measured` and
+`shifted_reference`, and `quantity` naming what was rated.
 
 ## Impact ratings (ISO 717-2)
 
@@ -127,9 +260,25 @@ but an **unfavourable deviation now occurs where the measurement *exceeds* the
 reference** (impact noise is worse when higher), the sign opposite to
 ISO 717-1. The rating ($L_\mathrm{n,w}$, $L'_\mathrm{n,w}$, $L'_{\mathrm{n}T,\mathrm{w}}$) is the shifted
 reference read at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
-adaptation term $C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}$ uses the energetic sum
-over 100–2500 Hz (the first 15 thirds, excluding 3150 Hz) or 125–2000 Hz
-(octaves).
+adaptation term $C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}$ (ISO 717-2:2020
+Formulae (A.1) to (A.3)) uses the energetic sum over 100–2500 Hz (the first 15
+thirds, excluding 3150 Hz) or 125–2000 Hz (octaves).
+
+The $-15$ dB is a normalising offset, not physics: it is chosen so that
+$C_\mathrm{I}$ comes out **about zero** for a massive floor with an effective covering,
+slightly positive for a timber joist floor whose low-frequency peaks dominate,
+and down to $-15$ dB for a bare or poorly covered concrete floor (Annex A.1).
+Read that way, the $C_\mathrm{I} = -11$ dB of the example below says the measured
+spectrum is far flatter and more high-frequency-weighted than the reference
+contour (a bare slab, not a floor with a covering), so the floor is better at
+the low frequencies footsteps excite than $L_\mathrm{n,w} = 79$ dB alone suggests.
+The corollary is a design trap: a soft covering acts where the reference curve
+is most demanding, so it improves the single number more than it improves what
+the neighbour hears. The unweighted sum $C_\mathrm{I}$ is built on exists precisely
+because it correlates better with A-weighted walking noise than the
+reference-curve rating does, which is why requirements are sometimes written on
+$L'_\mathrm{n,w} + C_\mathrm{I}$ rather than on $L'_\mathrm{n,w}$.
+
 For measurements extended down to 50 Hz,
 `weighted_impact_rating_extended` additionally returns the enlarged-range
 term $C_{\mathrm{I},50\text{–}2500}$ (A.2.1 NOTE), and with `one_decimal=True` the
@@ -137,6 +286,11 @@ term $C_{\mathrm{I},50\text{–}2500}$ (A.2.1 NOTE), and with `one_decimal=True`
 $L_\mathrm{n,r,0,w} = 77.6$ dB and $C_\mathrm{I,r,0} = -10.3$ dB of A.2.2).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating.svg" alt="Measured one-third-octave normalized impact sound pressure level with the shifted ISO 717-2 reference curve and the resulting weighted rating read at 500 Hz" width="80%"></picture>
+
+*The same fitting rule with the sign reversed: the shaded area is where the
+measurement rises **above** the reference, and the curve is shifted up until
+that area reaches 28.0 dB against the same 32.0 dB cap. A floor rated this way
+is worse the higher its number.*
 
 ```python
 import numpy as np
@@ -213,7 +367,8 @@ sixteen bands in that cell and gives $-10$ instead; the registry entry is in
 | `fraction` | int or `None` | — | `3` (one-third octaves) / `1` (octaves) / `None` | `None` infers from the count |
 
 `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
-`ci` integers, `unfavorable_sum` in dB).
+`ci` integers, `unfavorable_sum` in dB), with the same three plotting fields
+as the airborne result: `frequencies`, `measured` and `shifted_reference`.
 
 ## Enlarged frequency ranges and one-decimal ratings
 
@@ -237,8 +392,7 @@ those three bands by several decibels, which can move
 $C_{50\text{–}3150}$ by a whole one. So a requirement written as
 $D_{\mathrm{n}T,\mathrm{w}} + C_{50\text{–}3150}$ is judged on the corner procedure
 whether the report mentions it or not. See
-[Small Rooms: the ISO 16283 Low-Frequency
-Procedure](low-frequency-procedure.md).
+[Small Rooms: the ISO 16283 Low-Frequency Procedure](low-frequency-procedure.md).
 
 ```python
 from phonometry import building
@@ -319,7 +473,10 @@ disclaimer. `WeightedRatingResult.report()` labels the airborne ISO 717-1 fiche
 `ImpactRatingResult.report()` labels the impact ISO 717-2 fiche
 ($L_\mathrm{n,w}(C_\mathrm{I})$, deviations the opposite way).
 `SoundReductionResult.report()` is a convenience that rates the predicted
-$R(f)$ and writes its fiche in one call.
+$R(f)$ and writes its fiche in one call; that result comes from the EN 12354
+panel models of
+[Panel sound insulation](../design/panel-sound-insulation.md),
+so it is the one entry point here whose input was never measured.
 
 The report metadata is supplied as a `ReportMetadata` frozen dataclass (every
 field optional; only the supplied fields are rendered, and the numeric fields
@@ -371,16 +528,16 @@ l_nt = [45.0, 47.0, 48.0, 49.0, 51.0, 52.0, 53.0, 54.0,
 building.weighted_impact_rating(l_nt).report("Lnw_fiche.pdf")  # Ln,w (CI)
 ```
 
-Rendered examples of both fiches, regenerated with `make reports`, are kept in
-the repository. Click either preview to open the PDF:
+Both example fiches are regenerated with `make reports` and kept rendered in the
+repository; click either preview to open the PDF.
 
-[![Airborne ISO 717-1 example report: metadata header, one-third-octave R table beside the measured-versus-shifted-reference plot, boxed Rw (C; Ctr) and a PASS verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.pdf)
+[![Airborne ISO 717-1 example report (PDF): One-page airborne sound insulation fiche: a metadata header (client, specimen, sample area, room volumes, per-room temperature and humidity, ambient pressure and mounting), the one-third-octave R table beside the measured-versus-shifted-reference plot, the boxed Rw (C; Ctr) single-number result and a PASS verdict against the 30 dB requirement.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_airborne_example.pdf)
 
-*Airborne rating fiche (`WeightedRatingResult.report`), $R_\mathrm{w}\ (C\ ;\ C_\mathrm{tr})$.*
+Airborne rating fiche (WeightedRatingResult.report), Rw (C; Ctr).
 
-[![Impact ISO 717-2 example report: the same accredited layout for the normalized impact level Ln, boxed Ln,w (CI) and a FAIL verdict](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.pdf)
+[![Impact ISO 717-2 example report (PDF): One-page impact sound insulation fiche in the same accredited layout for the normalized impact sound pressure level Ln: the metadata header, the one-third-octave Ln table beside the measured-versus-shifted-reference plot with the 500 Hz read-off, the boxed Ln,w (CI) single-number result and a FAIL verdict against the 53 dB requirement (a lower impact level is better).](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso717_impact_example.pdf)
 
-*Impact rating fiche (`ImpactRatingResult.report`), $L_\mathrm{n,w}(C_\mathrm{I})$.*
+Impact rating fiche (ImpactRatingResult.report), Ln,w (CI).
 
 ### Report metadata (`ReportMetadata`)
 
@@ -400,6 +557,60 @@ numeric fields are validated on construction by physical range.
 | `laboratory`, `operator`, `report_id`, `notes` | `str` | Footer: institute, operator signature line, report number and free-form remarks |
 | `requirement` | `float` | Target single number; adds the verdict row (airborne passes at or above it, impact at or below it) |
 
+## What this guide covers
+
+- **Covered.** ISO 717-1:2020's reference-curve airborne rating (the 1 dB shifting rule with
+  the 32.0 dB / 10.0 dB unfavourable-deviation caps, read at 500 Hz) with the
+  Annex A spectrum adaptation terms $C$ and $C_\mathrm{tr}$, via
+  `building.weighted_rating`; ISO 717-2:2020's impact rating with the opposite
+  deviation sign, the octave −5 dB reduction and the $C_\mathrm{I}$ term, via
+  `building.weighted_impact_rating`; the Annex B / A.2.1 enlarged-range terms
+  and the 0.1 dB-step one-decimal variants via
+  `building.weighted_rating_extended` and
+  `building.weighted_impact_rating_extended`; and the ISO 717 fiche through
+  `.report()` with the shared `ReportMetadata` container. Conformance is
+  anchored on the standards' own Annex C worked examples.
+
+- **Not covered.** Nothing on this page measures: every function takes an already-measured (or
+  predicted) band spectrum from the
+  [field](insulation-field.md),
+  [laboratory](insulation-lab.md),
+  [intensity](insulation-intensity.md),
+  [survey](insulation-survey.md) or
+  [flanking](flanking-lab.md) guides. The façade
+  single number of ISO 16283-3 Annex F and the flanking $D_\mathrm{n,f,w}$ reuse these
+  engines from their own guides rather than duplicating them. One member of the
+  ISO 717 family is deliberately absent: the A-weighted maximum impact level of
+  **ISO 717-2:2020 Annex D**, which rates the rubber ball and the bang machine.
+  It shifts no curve at all (it is an energy sum of A-weighted band levels), so
+  it is not produced by either engine on this page and lives with the sources it
+  rates, in [Heavy and Soft Impact
+  Sources](heavy-impact-sources.md).
+
+## See also
+
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](lab-application-rules.md):
+  the improvements $\Delta R_\mathrm{w}$ and $\Delta L_\mathrm{w}$ rated on
+  the reference curves of ISO 717-1 Table E.1 and ISO 717-2 Table 4.
+- [Field Insulation Measurement (ISO 16283)](insulation-field.md):
+  the airborne, impact and façade spectra these engines rate in the field.
+- [Laboratory Insulation Measurement](insulation-lab.md):
+  the laboratory $R$ and $L_\mathrm{n}$ behind $R_\mathrm{w}$ and $L_\mathrm{n,w}$.
+- [Sound Insulation by Intensity (ISO 15186)](insulation-intensity.md):
+  the intensity indices rated with the same airborne engine.
+- [Sound Insulation Survey Method (ISO 10052)](insulation-survey.md):
+  the survey quantities and their automatic ratings.
+- [Laboratory Flanking Transmission (ISO 10848)](flanking-lab.md):
+  the flanking descriptors $D_\mathrm{n,f,w}$ and $L_\mathrm{n,f,w}$.
+- [Floor-Covering Impact Improvement (ISO 16251-1)](../design/impact-improvement.md):
+  the weighted improvement $\Delta L_\mathrm{w}$ built on the ISO 717-2 reference
+  floor.
+- [Predicting Sound Insulation (EN 12354)](../design/insulation-prediction.md):
+  the single-number model that consumes these ratings.
+- [Theory](../../reference/theory/rooms-buildings.md): the
+  reference-curve derivation behind the weighted single-number ratings.
+- API reference: [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/).
+
 ## Quick answers
 
 ### What is the difference between the C and Ctr spectrum adaptation terms?
@@ -413,65 +624,9 @@ road traffic, whose energy sits at low frequency. $C$ is typically 0 to
 
 ## References
 
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  The interpretation of the single-number ratings and what they hide about
-  the underlying band spectra.
-- International Organization for Standardization. (2020). *Acoustics —
-  Rating of sound insulation in buildings and of building elements — Part 1:
-  Airborne sound insulation* (ISO 717-1:2020).
-  [iso.org catalogue](https://www.iso.org/standard/77435.html).
-  The airborne reference-curve rating and the spectrum adaptation terms
-  interpreted above.
-- International Organization for Standardization. (2020). *Acoustics —
-  Rating of sound insulation in buildings and of building elements — Part 2:
-  Impact sound insulation* (ISO 717-2:2020).
-  [iso.org catalogue](https://www.iso.org/standard/69867.html).
-  The impact reference-curve rating and the CI adaptation term, with the
-  enlarged-range CI,50-2500.
-
-## Standards
-
-ISO 717-1:2020 and ISO 717-2:2020, which define the reference-curve
-single-number ratings, the spectrum adaptation terms $C$, $C_\mathrm{tr}$ and $C_\mathrm{I}$,
-the enlarged-range terms of Annex B / A.2.1 and the 0.1 dB-step variant used in
-uncertainty statements. The spectra they rate come from ISO 16283 (field),
-ISO 10140 (laboratory), ISO 15186 (intensity), ISO 10052 (survey) and
-ISO 10848 (flanking); conformance is anchored on the standards' own Annex C
-worked examples.
-
-**Not covered.** Nothing here measures: every function takes an
-already-measured or predicted band spectrum from the field, laboratory,
-intensity, survey or flanking guides. The façade single number of
-**ISO 16283-3** Annex F and the flanking $D_\mathrm{n,f,w}$ reuse these engines from
-their own pages rather than duplicating them. One member of the family is
-deliberately absent: the A-weighted maximum impact level of **ISO 717-2:2020
-Annex D**, which rates the rubber ball and the bang machine. It shifts no curve
-at all (it is an energy sum of A-weighted band levels), so it belongs with the
-sources it rates, in
-[Heavy and soft impact sources](heavy-impact-sources.md).
-
-## See also
-
-- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](lab-application-rules.md):
-  the improvements $\Delta R_\mathrm{w}$ and $\Delta L_\mathrm{w}$ rated on
-  the reference curves of ISO 717-1 Table E.1 and ISO 717-2 Table 4.
-- [Field Insulation Measurement (ISO 16283)](insulation-field.md): the
-  airborne, impact and façade spectra these engines rate in the field.
-- [Laboratory Insulation Measurement](insulation-lab.md): the laboratory
-  $R$ and $L_\mathrm{n}$ behind $R_\mathrm{w}$ and $L_\mathrm{n,w}$.
-- [Sound Insulation by Intensity (ISO 15186)](insulation-intensity.md): the
-  intensity indices rated with the same airborne engine.
-- [Sound Insulation Survey Method (ISO 10052)](insulation-survey.md): the
-  survey quantities and their automatic ratings.
-- [Laboratory Flanking Transmission (ISO 10848)](flanking-lab.md): the
-  flanking descriptors $D_\mathrm{n,f,w}$ and $L_\mathrm{n,f,w}$.
-- [Floor-Covering Impact Improvement (ISO 16251-1)](../design/impact-improvement.md):
-  the weighted improvement $\Delta L_\mathrm{w}$ built on the ISO 717-2 reference
-  floor.
-- [Predicting Sound Insulation (EN 12354)](../design/insulation-prediction.md): the
-  single-number model that consumes these ratings.
-- [Theory](../../reference/theory/rooms-buildings.md): the reference-curve derivation behind
-  the weighted single-number ratings.
-- API reference: [`building.measurement.insulation`](https://docs.jmrp.io/phonometry/reference/api/building/insulation/).
+- **Hopkins, C. (2007).** *Sound insulation*. Butterworth-Heinemann. https://doi.org/10.4324/9780080550473
+  The interpretation of the single-number ratings and what they hide about the underlying band spectra. ISBN 978-0-7506-6526-1.
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/77435.html) (ISO 717-1:2020).
+  The reference-curve rating and the spectrum adaptation terms C and Ctr interpreted above; also the single-number engine for the façade quantity (Annex F).
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
+  The impact reference-curve rating and the spectrum adaptation term CI, with the enlarged-range CI,50-2500 term.

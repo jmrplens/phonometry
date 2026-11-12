@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/levels/special-weightings.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/levels/special-weightings/
 
 # Special Weightings (G, B, D, AU)
 
@@ -11,27 +13,33 @@ comparisons with legacy data, and **AU** (IEC 61012), still in force like the
 G curve, keeps ultrasonic components out of an audible-exposure reading.
 
 All four share the machinery of the IEC 61672-1 curves (0 dB at 1 kHz where
-applicable, multichannel and stateful block processing), and all four take the
-same default `high_accuracy` design: the analog prototype is fitted at the
-sample rate rather than transformed blind, so the bilinear frequency warping
-never reaches the response. For G that keeps its 0.25 Hz to 315 Hz range
-within 0.0001 dB whatever the input rate, which matters exactly where G is
-used: infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits close
-to Nyquist and the warping grows quadratically. `high_accuracy=False` gives
-the plain bilinear design instead, about a decibel low at 315 Hz at fs = 2000
-and exactly on the 0 dB reference at 10 Hz. Unlike before, the flag is
-independent of `stateful`: block processing carries the fitted design too. The
-A, C and Z curves themselves, where they come from, the `high_accuracy` design
-and the class verification against IEC 61672-1 Table 3 are the subject of
+applicable, multichannel and stateful block processing), and B, D and AU also
+take the same default `high_accuracy` design: the analog prototype is fitted
+at the sample rate rather than transformed blind, so the bilinear frequency
+warping never reaches the response. For G that keeps its 0.25 Hz to 315 Hz
+range within 0.0001 dB whatever the input rate, which matters exactly where G
+is used: infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits
+close to Nyquist and the warping grows quadratically. `high_accuracy=False`
+gives the plain bilinear design instead, about a decibel low at 315 Hz at
+fs = 2000 and exactly on the 0 dB reference at 10 Hz. Unlike before, the flag
+is independent of `stateful`: block processing carries the fitted design too.
+The A, C and Z curves themselves, where they come from, the
+`high_accuracy` design and the class verification against IEC 61672-1
+Table 3 are the subject of
 [Frequency Weighting](weighting.md).
 
 ## 1. Infrasound: G-weighting (ISO 7196)
 
 The **G frequency weighting** (ISO 7196:1995) rates infrasound the way A-weighting
-rates audible noise. It is defined by a pole-zero configuration with 0 dB gain at
-10 Hz, rises at 12 dB/octave from 1 Hz to 20 Hz (matching the steep growth of
-perception in that band) and falls off at 24 dB/octave outside it. Use it for
-sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
+rates audible noise. It is defined by a pole-zero configuration
+normalized to 0 dB at 10 Hz, and it has three slopes, not two. Above 20 Hz the
+response falls at 24 dB/octave, which keeps audible-range energy out of an
+infrasound reading; between about 1 Hz and 20 Hz it *rises* at 12 dB/octave,
+following the steep growth of infrasound perception; and below about 1 Hz it
+rolls off again at 24 dB/octave, rejecting the near-static pressure
+fluctuations (wind loading, barometric drift, building sway) that a
+microphone records and nobody hears. Use it for sources with significant
+energy below 20 Hz (wind turbines, HVAC, blasting):
 
 ```python
 import numpy as np
@@ -81,9 +89,66 @@ verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
 `WeightingFilter(fs, "G")` supports the same multichannel and stateful block
 processing as A/C, and streaming costs nothing: the design is the same cascade
 of second-order sections either way, so stitched blocks reproduce a single
-call exactly at any sample rate. Levels measured with the G
-curve are reported as $L_{p\mathrm{G}}$ (or $L_\mathrm{Geq}$ for the equivalent level over
-time).
+call exactly at any sample rate. Levels measured with the G curve are reported as
+$L_{p\mathrm{G}}$ (or $L_\mathrm{Geq}$ for the equivalent level over time).
+
+### Reading an LpG: the scale is not the dB(A) scale
+
+A G-weighted level of 85 dB means nothing until you know what the scale looks
+like, and it does not look like the audible one. ISO 7196's Introduction gives
+the anchors: the normal threshold of perception at 10 Hz is about 100 dB re
+20 µPa; sounds between 1 Hz and 20 Hz that are just perceptible to an average
+listener yield G-weighted levels close to 100 dB; a very loud infrasound yields
+a G-weighted level of the order of 120 dB, only 20 dB above; and G-weighted
+levels below about 90 dB are not normally significant for human perception.
+
+Two consequences follow. First, the useful range spans some 30 dB, not the
+100 dB a reader is used to in dB(A), so **a few decibels matter far more here**:
+an $L_{p\mathrm{G}}$ of 85 dB and one of 105 dB are not "similar", they are inaudible
+and very loud. Second, because the growth of sensation with level is much more
+rapid than in the audible range while the threshold itself varies between
+individuals, a level near 100 dB(G) can be imperceptible to one person and
+clearly perceived by another, which is why infrasound complaints are
+investigated case by case. Compare an $L_{p\mathrm{G}}$ against these perception
+anchors, never against an A-weighted limit, and never combine the two into one
+number.
+
+### Measuring infrasound, not just weighting it
+
+The filter above is exact from 0.25 Hz. Almost no ordinary capture chain is,
+and nothing in the code can tell. ISO 7196 Annex A specifies a chain, not only
+a curve, and its first requirement (A.2) is a microphone with a substantially
+constant or well-defined frequency response over at least 0.25 Hz to 160 Hz,
+preferably to 315 Hz. A general-purpose measurement capsule cannot deliver
+that: its static-pressure equalisation vent behaves as a first-order high-pass,
+and a corner as high as 2 Hz already costs 7.0 dB at 1 Hz and 12.3 dB at
+0.5 Hz. Any low-cut switch on the recorder removes the band being measured.
+The one thing that does *not* matter is capsule size: Annex A notes there is
+no practical limit on the microphone's dimensions, because directional effects
+are negligible at infrasonic wavelengths.
+
+Two actions follow. **Document the chain's own low-frequency corner** and
+report $L_{p\mathrm{G}}$ only down to where the chain is flat; a level quoted to 0.25 Hz
+from a chain that is 12 dB down at 0.5 Hz is not a measurement. **Choose an
+averaging time long enough for the value to be representative**: Annex A.5
+gives an integration time or time constant of 10 s as the usual choice, 1 s
+when the upper part of the 1 Hz to 20 Hz band mainly contributes, and for
+fluctuating noise a rectangular window of at least 1 min, whose result is
+reported as the equivalent G-weighted sound pressure level. That is an order of
+magnitude longer than the 125 ms readers bring from the Fast detector.
+
+Outdoors there is a third problem, and below 20 Hz it is usually the largest:
+the wind on the diaphragm generates more infrasound than the source. The
+microphone therefore sits at the centre of a hard board on the ground, inside a
+primary foam windscreen, with a secondary hemispherical screen added in wind
+and its insertion loss documented and corrected.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_infrasound_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_infrasound_chain.svg" alt="The infrasound measurement chain: a section view of a measurement capsule flush at the centre of a hard ground board with a callout on its static-pressure equalisation vent and the first-order corner that vent imposes, a primary foam windscreen over it and a secondary hemispherical screen around that, then the electrical chain as three boxes, a preamplifier whose corner is far below 0.25 Hz, a recorder with its low-cut switch off, and the G weighting followed by an integrator of at least 10 seconds; on the right an inset response plot from 0.1 Hz to 1 kHz showing the ISO 7196 G curve with its 0.25 to 315 Hz span shaded and the chain's own high-pass corner dashed across it, the overlap annotated as the usable band" width="94%"></picture>
+
+What has to be recorded for the result to be reportable is short: the chain's
+own low-frequency corner, the board and the screens with their corrections, the
+averaging time and window shape, and the $L_{p\mathrm{G}}$ with the analysis bandwidth
+it was computed over.
 
 ## 2. Historical and special-purpose curves: B, D and AU
 
@@ -100,7 +165,8 @@ B (green, dashed) discards less bass than A; D (purple) carries the +11.5 dB
 hump at 3.15 kHz where jet turbomachinery whine annoys most; AU (orange) runs
 inside the A reference up to 10 kHz and then falls away with U, reaching 13 dB
 below A at 16 kHz. The infrasound G curve keeps its own chart in section 1,
-and A, C and Z are in [Frequency Weighting](weighting.md).*
+and A, C and Z are in
+[Frequency Weighting](weighting.md).*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -210,15 +276,35 @@ print(f"the ultrasound inflates LA by {la - la_ref:.1f} dB")
 Ultrasound only reaches a digital filter when the sample rate captures it,
 so measure at 96 kHz or more (at 48 kHz there is nothing above 24 kHz to
 reject); the AU design is fitted over the whole 10 Hz to 40 kHz range of
-IEC 61012 Table 1, which keeps the steep U roll-off within 0.001 dB of the
-prototype at 96 kHz. Levels are reported as $L_\mathrm{AU}$. The
+IEC 61012 Table 1, which keeps the
+steep U roll-off accurate. Levels are reported as $L_\mathrm{AU}$. The
 implementation follows the Table 2 pole locations exactly (they reproduce
 every Table 1 nominal value within 0.05 dB) and is verified in CI against
 the Table 1 tolerances up to 40 kHz.
 
-## 3. Verifying B and AU against their tolerance tables
+The sample rate is only the second requirement. The first is the microphone,
+and the arithmetic above holds only if the capsule and the interface really
+delivered the 25 kHz component with a known response. IEC 61012's Introduction
+puts the problem plainly: a meter whose response happens to extend to the
+operating frequency of the ultrasonic equipment gives *inflated* readings of
+the audible part, which is what U exists to prevent, and where the ultrasonic
+component itself has to be quantified, the same Introduction calls for a
+microphone system known to have a frequency response extending at least to that
+operating frequency. In practice that means a 1/4 inch or 1/8 inch capsule
+rather than the 1/2 inch capsule used for audible work: a 1/2 inch capsule is
+already rolling off and strongly directional above 20 kHz, so it, and not the U
+filter, would decide the reading. Check the converter too: an interface that
+runs at 96 kHz but anti-alias filters at 20 kHz measures nothing to reject. And
+because the near field of a cleaner or a welder changes by several decibels
+over a few centimetres, take the reading at the operator's head position and
+record it. Report $L_\mathrm{AU}$ together with the unweighted level of the ultrasonic
+component and the capsule type: separating those two is the entire point of the
+AU weighting.
 
-The `verify_weighting_class` verifier, described in section 6 of
+## 3. Class verification: B and AU yes, G and D no
+
+Only two of the four curves on this page can return a class verdict, because
+only two have published tolerance tables. The `verify_weighting_class` verifier, described in section 6 of
 [Frequency Weighting](weighting.md), also covers the curves
 of this guide that have published tolerance tables. For `B` it uses
 ANSI S1.4-1983 (Table IV design goals, Table V
@@ -237,55 +323,48 @@ tolerance with no class structure, and the withdrawn IEC 537 left no
 tolerance table behind (both curves are pinned numerically in the CI
 conformance report instead).
 
+## What this guide covers
+
+- **Covered.** ISO 7196:1995 for the G curve (Table 1 pole/zero values, verified against
+  every Table 2 nominal response). ANSI S1.4-1983 for the historical B curve
+  (Appendix C definition, Table IV design goals, Table V tolerance limits). IEC
+  61012:1990 for AU (the U low-pass of Table 2 cascaded with A, verified against
+  Table 1). IEC 537:1976 for the withdrawn aircraft-noise D curve, implemented
+  from its published transfer function and cross-checked against two independent
+  implementations.
+
+- **Not covered.** `verify_weighting_class` does not produce a class verdict for G or D: ISO 7196
+  defines a single ±1 dB tolerance with no class structure, and the withdrawn
+  IEC 537 left no tolerance table behind. Both curves are pinned numerically
+  against their published tables in the CI conformance report instead, not
+  through this public verifier. B and D are provided for historical data and
+  older national codes only; neither is current practice (IEC 61672-1 replaced
+  B, and aircraft-noise certification now reports EPNL or plain A-weighted
+  levels instead of D).
+
+## See also
+
+- [Frequency Weighting](weighting.md): the A, C and Z
+  curves, the `high_accuracy` design and the IEC 61672-1 Table 3 class
+  verification these curves build on.
+- API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
+- Theory: [G-weighting (ISO 7196)](../../reference/theory/signal-analysis.md#g-weighting-iso-7196): the G curve of ISO 7196 and where its normalisation comes from.
+
 ## Quick answers
 
 ### Which weighting should I use for infrasound below 20 Hz?
 
-Use the G frequency weighting of ISO 7196:1995, which rates infrasound the way A-weighting rates audible noise. It has 0 dB gain at 10 Hz, rises at 12 dB/octave from 1 Hz to 20 Hz and falls off at 24 dB/octave outside that band. Apply it to sources such as wind turbines, HVAC and blasting, and report levels as $L_{p\mathrm{G}}$ (or $L_\mathrm{Geq}$ for the equivalent level over time).
-
-## See also
-
-- [Frequency Weighting](weighting.md): the A, C and Z curves, the
-  `high_accuracy` design and the IEC 61672-1 Table 3 class verification
-  these curves build on.
-- API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
+Use the G frequency weighting of ISO 7196:1995, which rates infrasound the way A-weighting rates audible noise. Normalized to 0 dB at 10 Hz, it rises at 12 dB/octave between about 1 Hz and 20 Hz, falls at 24 dB/octave above 20 Hz and rolls off again at 24 dB/octave below about 1 Hz. Apply it to sources such as wind turbines, HVAC and blasting, and report levels as $L_{p\mathrm{G}}$ (or $L_\mathrm{Geq}$ for the equivalent level over time). Read the result against the ISO 7196 perception anchors, never against an A-weighted limit: about 100 dB(G) is the normal threshold, below about 90 dB(G) infrasound is not normally significant, and a very loud infrasound is about 120 dB(G).
 
 ## References
 
-- International Organization for Standardization. (1995). *Acoustics —
-  Frequency-weighting characteristic for infrasound measurements*
-  (ISO 7196:1995). [iso.org catalogue](https://www.iso.org/standard/13813.html).
-  The G-weighting pole/zero definition (Table 1), verified against every
-  Table 2 nominal response value (0.25 Hz to 315 Hz).
-- American National Standards Institute. (1983). *Specification for sound
-  level meters* (ANSI S1.4-1983).
-  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985).
-  The historical B weighting: Appendix C
-  analytic definition (Formula C2), Table IV design goals and Table V
-  tolerance limits checked by `verify_weighting_class` in section 3.
-- International Electrotechnical Commission. (1990). *Filters for the
-  measurement of audible sound in the presence of ultrasound*
-  (IEC 61012:1990). [IEC webstore](https://webstore.iec.ch/en/publication/4296).
-  The AU weighting: U-weighting pole locations (Table 2), nominal responses
-  and tolerances (Table 1) and the combined AU definition of subclause 2.2.
-- International Electrotechnical Commission. (1976). *Frequency weighting
-  for the measurement of aircraft noise (D-weighting)* (IEC 537:1976,
-  withdrawn). Implemented from its published rational transfer function and
-  cross-checked against independent implementations (section 2).
-- Bennett, R. L., & Pearsons, K. S. (1981). *Handbook of Aircraft Noise
-  Metrics* (NASA CR-3406). NASA.
-  [ntrs.nasa.gov](https://ntrs.nasa.gov/citations/19810013341).
-  Republishes the IEC 537 D-weighting table (Table SLD-I) used to pin the
-  D response in CI.
-
-## Standards
-
-ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
-infrasound measurements*: the G-weighting pole/zero definition (Table 1),
-verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).
-ANSI S1.4-1983, *Specification for sound level meters*: the historical B
-weighting (Appendix C, Tables IV and V). IEC 61012:1990, *Filters for the
-measurement of audible sound in the presence of ultrasound*: the AU
-weighting (Tables 1 and 2, subclause 2.2). IEC 537:1976 (withdrawn),
-*Frequency weighting for the measurement of aircraft noise*: the D
-weighting, from its published rational transfer function.
+- **American National Standards Institute. (1983).** [*Specification for sound level meters*](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985) (ANSI S1.4-1983).
+  The historical B weighting: Appendix C analytic definition (Formula C2), Table IV design goals and Table V tolerance limits checked by verify_weighting_class in section 3.
+- **Bennett, R. L., & Pearsons, K. S. (1981).** [*Handbook of Aircraft Noise Metrics*](https://ntrs.nasa.gov/citations/19810013341) (NASA CR-3406). NASA.
+  Republishes the IEC 537 D-weighting table (Table SLD-I) used to pin the D response in CI.
+- **International Electrotechnical Commission. (1976).** *Frequency weighting for the measurement of aircraft noise (D-weighting)* (IEC 537:1976 (withdrawn)).
+  The D weighting, implemented from its published rational transfer function and cross-checked against two independent implementations and the tabulated curve republished in NASA CR-3406 (Table SLD-I).
+- **International Electrotechnical Commission. (1990).** [*Filters for the measurement of audible sound in the presence of ultrasound*](https://webstore.iec.ch/en/publication/4296) (IEC 61012:1990).
+  The AU weighting: U-weighting pole locations (Table 2), nominal responses and tolerances (Table 1) and the combined AU definition of subclause 2.2.
+- **International Organization for Standardization. (1995).** [*Acoustics — Frequency-weighting characteristic for infrasound measurements*](https://www.iso.org/standard/13813.html) (ISO 7196:1995).
+  The G-weighting pole/zero definition (Table 1), verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).

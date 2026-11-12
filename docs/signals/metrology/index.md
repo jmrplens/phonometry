@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/metrology/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/metrology/
 
 # Calibration and uncertainty
 
@@ -140,23 +142,23 @@ budgets that are specialisations of the GUM machinery described here.
 
 ## What this section does not cover
 
-Nothing here measures an instrument or a calibrator. No IEC 60942 test is
-performed: `verify_sound_calibrator` grades the numbers a laboratory measured
-on a calibrator, and the static-pressure correction of an LS/M or 1/M
-pistonphone comes from its manual, so pass an already corrected `target_spl`
-when the manual asks for one; the IEC 61672-3 periodic tests are not run
-either, and `verify_sound_level_meter_periodic` grades the results a
-laboratory returns;
-[Compliance and
-verification](compliance-verification.md) draws
-that boundary precisely, part by part. The dBFS half of the calibration page
-sits outside any standard and makes no physical claim: it is a reference
-frame, not a measurement. Data qualification implements the quantitative core
-of Bendat & Piersol's section 10.3 only: classifying a record's type,
-validating it against physical limits and editing out glitches remain manual
-steps, as the book describes them. And an uncertainty budget is a model of
-*your* measurement: the library propagates whatever you declare, and never
-invents the terms. Where a standard publishes its own budget the guides say
-so, as ISO 9612 does for [occupational
-exposure](../../perception/hearing/occupational-exposure.md) and ISO
-12999-1 for [sound insulation](../../buildings/insulation/index.md).
+- **Not covered.** Nothing here measures an instrument or a calibrator. No IEC 60942 test is
+  performed: `verify_sound_calibrator` grades the numbers a laboratory measured
+  on a calibrator, and the static-pressure correction of an LS/M or 1/M
+  pistonphone comes from its manual, so pass an already corrected `target_spl`
+  when the manual asks for one; the IEC 61672-3 periodic tests are not run
+  either, and `verify_sound_level_meter_periodic` grades the results a
+  laboratory returns;
+  [Compliance and
+  verification](compliance-verification.md) draws
+  that boundary precisely, part by part. The dBFS half of the calibration page
+  sits outside any standard and makes no physical claim: it is a reference
+  frame, not a measurement. Data qualification implements the quantitative core
+  of Bendat & Piersol's section 10.3 only: classifying a record's type,
+  validating it against physical limits and editing out glitches remain manual
+  steps, as the book describes them. And an uncertainty budget is a model of
+  *your* measurement: the library propagates whatever you declare, and never
+  invents the terms. Where a standard publishes its own budget the guides say
+  so, as ISO 9612 does for [occupational
+  exposure](../../perception/hearing/occupational-exposure.md) and ISO
+  12999-1 for [sound insulation](../../buildings/insulation/index.md).

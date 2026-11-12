@@ -1,25 +1,39 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/rooms/open-plan-acoustics.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/
 
 # Open-Plan Office Acoustics (ISO 3382-3)
 
 An open-plan office is not a reverberation problem; it is a privacy
 problem, and a room that flatters the closed-room parameters can still fail
-it. ISO 3382-3 therefore characterises the office with four single numbers
-measured along a line of workstations, walking away from a talker. This
-guide covers that measurement chain: the quantities, the to-scale
-measurement line and the accredited fiche. The impulse responses and levels
+it. ISO 3382-3 therefore characterises the office with four single numbers:
+$r_\mathrm{D}$, $D_\mathrm{2,S}$, $L_{p,\mathrm{A,S},4\,\mathrm{m}}$ and the average background noise
+$L_{p,\mathrm{A,B}}$ (measured along a line of workstations, walking away from a
+talker). This guide covers that measurement chain: the quantities, the to-scale
+measurement line and the accredited fiche. Then it turns the question
+round: at design time, before any office or restaurant exists, Long's crowd
+self-noise model predicts the background an occupied room generates from its
+own occupants, and converts a target speech-to-noise ratio into an absorption
+area per table. Measurement first, design second; the two halves share
+nothing but the room. The impulse responses and levels
 behind it are acquired as in
-[Measuring the Room Impulse Response](room-impulse-response.md); the
-per-position STI comes from the
-[Speech Transmission Index guide](../../perception/speech/speech-transmission.md); the closed-room
-decay parameters live in [Room Acoustics](room-acoustics.md).
+[Measuring the Room Impulse Response](room-impulse-response.md);
+the per-position STI comes from the
+[Speech Transmission Index guide](../../perception/speech/speech-transmission.md);
+the closed-room decay parameters live in
+[Room Acoustics](room-acoustics.md).
 
 ## Speech privacy along a line of workstations
 
 Open-plan acoustics are about **speech privacy**: how fast a talker's speech
 fades to unintelligibility as you walk away. Levels and STI are measured
 along a line of workstations (at least 4 positions, 6–10 preferred), and
-four single-number quantities summarise the room. The **spatial decay
+four single-number quantities summarise the room: the distraction distance
+$r_\mathrm{D}$, the spatial decay rate $D_\mathrm{2,S}$, the speech level at 4 m
+$L_{p,\mathrm{A,S},4\,\mathrm{m}}$ and the average A-weighted background noise $L_{p,\mathrm{A,B}}$
+(Clause 6.4). The privacy distance $r_\mathrm{P}$ and the STI at the nearest workstation
+are optional additions; `open_plan_metrics` returns $D_\mathrm{2,S}$,
+$L_{p,\mathrm{A,S},4\,\mathrm{m}}$, $r_\mathrm{D}$ and $r_\mathrm{P}$. The **spatial decay
 rate** of A-weighted speech is the slope of the level against
 $\log_{10}(r/r_0)$, scaled to a per-doubling figure using only the 2–16 m
 positions,
@@ -30,15 +44,56 @@ $$
 
 with **$L_{p,\mathrm{A,S},4\,\mathrm{m}}$** read off the same line at 4 m. The **distraction
 distance** $r_\mathrm{D}$ (STI = 0.50) and **privacy distance** $r_\mathrm{P}$ (STI = 0.20) come
-from a linear regression of STI against distance. Good offices push $r_\mathrm{D}$
-below ~5 m; poor ones leave speech distracting past 10 m.
+from a linear regression of STI against distance.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan.svg" alt="ISO 3382-3 open-plan measurement line from the source at 1 m along positions from 2 m to 16 m, feeding the four single-number quantities D2,S, Lp,A,S,4m, rD and rP" width="86%"></picture>
+Both distances are read **off the fitted line**, and clause 6.3 allows the
+reading to fall outside the measured span (Figure 3 b) draws the line
+extended to the crossing). So an $r_\mathrm{D}$ that lands inside the line is a
+measurement, while an $r_\mathrm{P}$ well beyond the last position is an
+extrapolation whose confidence decays with distance: quote it with the
+measured span alongside ("$r_\mathrm{P}$ = 17 m, extrapolated from positions to 16 m").
+The standard also anticipates offices where the STI never falls to 0.20
+("it can prove impossible to determine the privacy distance if STI > 0,20 in
+all positions"), and that is what a `nan` means here, not a bug. A
+*non-decreasing* STI along the line usually means the last position sat near a
+reflecting wall, where both level and STI rise; clause 6.2 says to discard
+that position from the $D_\mathrm{2,S}$ and $r_\mathrm{D}$ fits rather than to puzzle over it.
+
+ISO 3382-3 Annex A is informative, but it fixes the two ends of the scale:
+
+| Quantity | Typical poor office | Good target |
+| :--- | :---: | :---: |
+| $D_\mathrm{2,S}$ | < 5 dB | ≥ 7 dB |
+| $L_{p,\mathrm{A,S},4\,\mathrm{m}}$ | > 50 dB | ≤ 48 dB |
+| $r_\mathrm{D}$ | > 10 m | ≤ 5 m |
+
+Those ranges are informative, and national guidance or the client brief
+overrides them. Read $D_\mathrm{2,S}$ and $L_{p,\mathrm{A,S},4\,\mathrm{m}}$ **as a pair**: the decay rate
+is a slope and the 4 m level is its offset, so quoting either alone flatters or
+condemns the room.
+
+$L_{p,\mathrm{A,B}}$ is the fourth required quantity and it is not decoration: the
+background noise is measured in octave bands at every position with the same
+$\ge 10$ s integration, A-weighted, and averaged over the line, and that
+average is the masker the per-position STI is computed against. Spatially
+averaging it is what keeps $r_\mathrm{D}$ and $r_\mathrm{P}$ unambiguous. It is also why
+open-plan design has two levers rather than one: **attenuation** (screens, an
+absorptive ceiling, layout: these raise $D_\mathrm{2,S}$ and lower $L_{p,\mathrm{A,S},4\,\mathrm{m}}$) and
+**masking** (raising the background so speech loses intelligibility sooner).
+This is why the office is measured furnished, unoccupied and with the services
+running. An office measured with the ventilation or the masking system turned
+down returns a higher STI at every position and pushes both distances outward
+by metres with nothing having changed in the room.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan.svg" alt="ISO 3382-3 open-plan measurement line from the source at 1 m along positions from 2 m to 16 m, feeding the four quantities open_plan_metrics returns, D2,S, Lp,A,S,4m, rD and rP, with a note that Clause 4 also requires the average A-weighted background noise Lp,A,B" width="86%"></picture>
 
 ```python
 import numpy as np
 from phonometry import room
 
+# A stand-in line: the levels are built to a clean 7 dB per doubling and the
+# STI to a straight -0.03 per metre, so every printed number can be checked
+# by hand. A measured line is not this tidy (see below).
 r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distances from the talker (m)
 lp = 65.0 - 7.0 * np.log2(r)                          # A-weighted speech level (dB)
 sti = 0.70 - 0.03 * r                                 # STI per position
@@ -48,6 +103,19 @@ print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 m.plot()   # the spatial-decay regression of the figure below
 ```
+
+**Reading this office.** $D_\mathrm{2,S}$ = 7.0 dB is exactly the Annex A good-office
+threshold, but $L_{p,\mathrm{A,S},4\,\mathrm{m}}$ = 51.0 dB is above the 50 dB *poor* line, and
+$r_\mathrm{D}$ still lands at 6.7 m. It is a good decay rate spent from too high a
+starting level, so the fix is attenuation **near the talker** (a screen, an
+absorptive ceiling raft over the workstation), rather than more decay further
+out. A measured line does not look like this one: positions scatter about the
+fitted line, typically by one to two decibels, with the near ones pulled up by
+the direct field and the far ones flattened by the background floor. What is
+reported is the **regression**, not any single position: $L_{p,\mathrm{A,S},4\,\mathrm{m}}$ is read
+off the line even when no microphone stood at 4 m. This is also why six
+positions are preferred: four barely constrain a slope once one of them has to
+be discarded.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay.svg" alt="Open-plan spatial decay: A-weighted speech level and STI against source distance on a log axis, with the D2,S regression, the Lp,A,S,4m marker at 4 m and the rD and rP distance crossings" width="80%"></picture>
 
@@ -113,6 +181,38 @@ plt.show()
 
 </details>
 
+Against the Annex A scale, that one office sits between two very different
+rooms:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_quality_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_quality.svg" alt="Two stacked panels on a shared logarithmic distance axis from 2 to 16 metres. Above, the A-weighted speech level of a treated office decaying at 8 dB per doubling through 47 dB at 4 metres and of an untreated one at 4 dB per doubling through 52 dB, with the Annex A bands shaded: above 50 dB poor, at or below 48 dB the good target. Below, the two STI regressions crossing 0.50 at 4.5 and 11.0 metres, with the good band up to 5 metres and the poor band beyond 10 metres shaded and the STI = 0.20 privacy line marked" width="92%"></picture>
+
+*The two ends of Annex A on one axis. The treated office meets all three
+targets; the untreated one misses all three, and its privacy distance, 24 m
+read off a 16 m line, is exactly the extrapolation warned about above.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+# `room` is the import of the first snippet above.
+
+positions = np.array([2.0, 3.0, 4.0, 6.0, 8.0, 11.0, 16.0])
+for d2s, lp_4m, sti_0, sti_slope in ((8.0, 47.0, 0.62, 0.0267),
+                                     (4.0, 52.0, 0.75, 0.0227)):
+    slope = -d2s / np.log10(2.0)
+    levels = (lp_4m - slope * np.log10(4.0)) + slope * np.log10(positions)
+    res = room.open_plan_metrics(positions, levels, sti_0 - sti_slope * positions)
+    print(round(res.d2s, 1), round(res.lp_as_4m, 1),
+          round(res.rd, 1), round(res.rp, 1))
+    # 8.0 47.0 4.5 15.7   /   4.0 52.0 11.0 24.2
+    plt.semilogx(positions, levels, "o--")
+plt.show()
+```
+
+</details>
+
 The line itself is worth a to-scale plan. `plot_open_plan_geometry` draws the
 source, the microphone line across the workstations and the two distances on
 the axis, and a result that retained its positions redraws its own line with
@@ -142,12 +242,143 @@ plt.show()
 
 </details>
 
+## Measuring the line
+
+Clauses 5.1 and 5.2 fix everything the drawing above leaves implicit.
+
+**The source (5.1.1).** An **omnidirectional** loudspeaker radiating **pink
+noise**, meeting the omnidirectionality requirements of ISO 3382-1 (the
+standard is explicit about why: people in an open-plan office do not
+continuously speak in any fixed direction). A deterministic pink-spectrum
+signal (an MLS or a sweep, acquired as in the
+[room impulse response guide](room-impulse-response.md))
+is an accepted substitute, and the results are derived from the impulse
+response. Its sound power is verified as in ISO 3382-1, with the source at
+1.2 m, and clause 6.2 sets the level: high enough in each octave band that the
+pink noise exceeds the background by **6 dB at the most distant position**.
+
+**The receiving chain (5.1.2).** A sound level meter meeting IEC 61672-1
+**class 1**, an **omnidirectional** microphone (including whatever is attached
+to it), and octave filters to **IEC 61260**. If the signal is recorded for
+off-line processing, the whole chain has to comply.
+
+**The room condition (5.2.1).** Measured **furnished**, with nobody present
+but the operators, and with the HVAC and any **sound-masking system running at
+the power of a typical working day**. The standard states the failure directly:
+if the sources run at reduced power the STI values come out too high, which
+overestimates both $r_\mathrm{D}$ and $r_\mathrm{P}$. Because people are absent, the masking that
+real conversation provides is not in the measurement either. The actual
+distances in use are *shorter* than the measured ones.
+
+**The line (5.2.2).** It crosses the workstations and **need not be straight**.
+**6 to 10** successive positions are preferred and **4** is the minimum, with
+the first at the **nearest workstation**. Source and microphone both stand at
+head height in a workstation, **1.2 m** above the floor (standing working
+positions are out of scope), and at least **0.5 m from tables** and **2.0 m
+from walls and other reflecting surfaces**. **At least two source positions**
+are used; if only one line is possible, it is measured with two sources firing
+in opposite directions. Where the ceiling or the furniture changes, the office
+is treated as separate **zones**, each with its own set of single numbers.
+
+**What is recorded at each point (5.2.3).** Four things: the octave-band
+pink-noise level, the STI, the octave-band background level, and the distance
+to the source, all over **125 Hz to 8 kHz**, with an integration time of **at
+least 10 s** (longer for non-stationary background such as traffic).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_setup.svg" alt="Two panels. Panel a is a plan of a 30 by 12 metre open-plan floor split into an absorbent-raft zone and a plain-plaster zone, with a 2.0 metre keep-out band along every wall, desk clusters carrying 1.2 metre screens, source S1 at a workstation head position and source S2 at the far end firing back, eight measurement positions on a non-straight path with P1 at the nearest workstation, a 0.5 metre clearance callout at a table and the 2 to 16 metre regression window bracketed. Panel b is a section fixing the loudspeaker acoustic centre and the microphone at 1.2 metres beside a seated occupant, with the clause list for the source, the receiving chain, the room condition and the line" width="94%"></picture>
+
+**Why the window stops at 2 m and 16 m.** Clause 6.2 admits only positions
+between 2 m and 16 m into the $D_\mathrm{2,S}$ regression, and both ends have a
+reason. Nearer than 2 m the receiver sits in the talker's direct field, whose
+6 dB per doubling is a property of free space rather than of the office; beyond
+16 m the speech level has normally reached the background, so the regression
+would be fitting noise. A line of six positions from 2 m to 16 m therefore
+keeps at least four points inside the fit even if the last one has to be
+discarded for sitting near a wall.
+
+### From the measured pink noise to $L_{p,\mathrm{A,S},n}$
+
+A loudspeaker is not a talker, so ISO 3382-3 never uses its level directly.
+Clause 6.2 measures the *room* with pink noise and then re-clothes the result
+in the spectrum of a real voice. What is kept from each position is not its
+absolute level but the band-by-band attenuation relative to the source at 1 m
+(Eq. 1-2), so the loudspeaker's output level cancels out and only has to sit
+far enough above the background:
+
+$$
+L_{p,\mathrm{Ls,1m},i} \approx L_{W,\mathrm{Ls},i} - 11\ \text{dB},
+\qquad
+D_{n,i} = L_{p,\mathrm{Ls,1m},i} - L_{p,\mathrm{Ls},n,i} .
+$$
+
+That attenuation is then applied to the normal-effort speech spectrum
+(Eq. 3), A-weighted and summed energetically over the seven octave bands
+(Eq. 4):
+
+$$
+L_{p,\mathrm{S},n,i} = L_{p,\mathrm{S,1m},i} - D_{n,i},
+\qquad
+L_{p,\mathrm{A,S},n} = 10\log_{10}\sum_i 10^{(L_{p,\mathrm{S},n,i} + A_i)/10} .
+$$
+
+Table 1 supplies the omnidirectional normal-effort spectrum and the
+A-weightings:
+
+| Band $i$ | $f$ [Hz] | $L_{p,\mathrm{S,1m},i}$ [dB] | $A_i$ [dB] |
+| ---: | ---: | ---: | ---: |
+| 1 | 125 | 49.9 | −16.1 |
+| 2 | 250 | 54.3 | −8.6 |
+| 3 | 500 | 58.0 | −3.2 |
+| 4 | 1000 | 52.0 | 0.0 |
+| 5 | 2000 | 44.8 | +1.2 |
+| 6 | 4000 | 38.8 | +1.0 |
+| 7 | 8000 | 33.5 | −1.1 |
+
+whose A-weighted total is 57.4 dB (a normal talking voice at 1 m).
+
+**The A-weighted pink-noise reading on the meter is not the input
+`open_plan_metrics` expects.** Feeding it in gives an absolute level that is
+the loudspeaker's, not a talker's, so $L_{p,\mathrm{A,S},4\,\mathrm{m}}$ is wrong outright and
+$D_\mathrm{2,S}$ is biased by the spectral difference between pink noise and speech.
+Run the four-step chain first:
+
+```python
+import numpy as np
+# `room` is the import of the open_plan_metrics block above.
+
+# ISO 3382-3 Table 1: normal-effort unisex speech at 1 m, omnidirectional,
+# and the A-weighting, octave bands 125 Hz to 8 kHz.
+speech_1m = np.array([49.9, 54.3, 58.0, 52.0, 44.8, 38.8, 33.5])
+a_weight = np.array([-16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
+
+# Measured octave-band pink-noise levels, one row per measurement position.
+pink = np.array([
+    [72.0, 71.0, 70.0, 69.0, 67.0, 64.0, 60.0],
+    [67.0, 66.0, 64.5, 63.0, 60.5, 57.0, 52.5],
+    [63.5, 62.0, 60.0, 58.0, 55.0, 51.0, 46.0],
+    [60.0, 58.5, 56.0, 53.5, 50.0, 45.5, 40.0],
+])
+source_1m = np.full(7, 90.0) - 11.0        # Eq. (1): Lp,Ls,1m = Lw,Ls - 11 dB
+
+d_n = source_1m - pink                     # Eq. (2): attenuation per band
+speech_n = speech_1m - d_n                 # Eq. (3): re-clothed in speech
+lp_a_s = 10 * np.log10(np.sum(10 ** ((speech_n + a_weight) / 10), axis=1))
+print(np.round(lp_a_s, 1))                 # [48.  42.4 37.8 33.8]  Eq. (4)
+
+dist = np.array([2.0, 4.0, 8.0, 16.0])
+chain = room.open_plan_metrics(dist, lp_a_s, 0.70 - 0.03 * dist)
+print(round(chain.d2s, 1), round(chain.lp_as_4m, 1))     # 4.7 42.9
+```
+
+The band arithmetic itself (A-weighting and energetic summation) is the
+same as in [Levels](../../signals/levels/levels.md).
+
 ### `open_plan_metrics()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `positions_m` | 1D array | m | ≥ 4 positions, all > 0 | Source-to-receiver distances |
-| `spl_a_speech` | 1D array | dB | same length | A-weighted speech level $L_{p,\mathrm{A,S},n}$ per position |
+| `spl_a_speech` | 1D array | dB | same length | A-weighted speech level $L_{p,\mathrm{A,S},n}$ per position from the Clause 6.2 Eq. (1)-(4) chain (**not** the measured pink-noise dB(A)) |
 | `sti_values` | 1D array | — | same length | STI per position (full IEC 60268-16 method) |
 
 Returns an `OpenPlanResult` with `d2s`, `lp_as_4m`, `rd` and `rp`; its
@@ -158,50 +389,45 @@ fields and marks `rd` / `rp`.
 STI can itself be measured with the STIPA tools in the
 [Speech Transmission Index guide](../../perception/speech/speech-transmission.md).
 
-Two things stay outside the function. The fourth required single number, the
-average A-weighted background noise $L_{p,\mathrm{A,B}}$, is not computed here. It is
-the energetic A-weighted average of the per-position octave-band background
-levels, and it belongs in the report alongside the quantities this page
-produces. And nothing checks the measurement conditions of clauses 5.1 and
-5.2: the function consumes distances, levels and STI values wherever they
-came from, so the source directivity, the furnished-and-unoccupied state and
-the background capture are the operator's responsibility, not the library's.
-
 ## ISO 3382-3 report (`.report()`)
 
 `OpenPlanResult.report(path)` renders a one-page PDF fiche laid out like an
 open-plan-office speech-privacy measurement report: a standard-basis line, an
-optional metadata header block, a compact metrics table of the four
-single-number quantities of Clause 4 ($D_\mathrm{2,S}$,
+optional metadata header block, a compact metrics table of the four quantities
+`open_plan_metrics` returns ($D_\mathrm{2,S}$,
 $L_{p,\mathrm{A,S},4\,\mathrm{m}}$, the distraction distance $r_\mathrm{D}$ and
 the privacy distance $r_\mathrm{P}$) stacked above the full-width spatial-decay
 plot (`.plot()`, the Clause 6.2 regression on the logarithmic distance axis
-with the 4 m read-off and the $r_\mathrm{D}$ / $r_\mathrm{P}$ crossings
-marked), the boxed $D_\mathrm{2,S}$ with the other quantities alongside, and a
-footer with the fixed disclaimer. ISO 3382-3 **characterises** a space rather
-than defining an intrinsic pass/fail, so a verdict row appears only when a
-target spatial decay rate is supplied through the metadata's `requirement`
-field (`ReportMetadata(requirement=...)`, read as the minimum acceptable
-$D_\mathrm{2,S}$ in dB, reflecting the informative quality ranges of Annex A
-where a larger spatial decay is better; the room passes at or above it). It
-uses the same `ReportMetadata` container as the [ISO 3382-1/-2 room-acoustics
-fiche](room-acoustics.md#iso-3382-report-report); the open-plan-specific fields
-`area` (floor area), `n_source_positions` and `n_receiver_positions` (the number of
-measurement positions) populate the header, alongside `client`, `test_room`,
-`specimen`, `instrumentation`, `temperature_c`, `relative_humidity_percent`,
-`static_pressure_kpa`, `measurement_standard`, `test_date`, `laboratory`,
-`operator`, `report_id` and `notes`. Passing `metadata=None` produces a bare
-characterisation fiche. The fiche embeds the spatial-decay chart, so rendering
-needs both reportlab and matplotlib (`pip install "phonometry[report,plot]"`);
-only `engine="reportlab"` is supported. The fiche renders in English by
-default; pass `language="es"` for a Spanish fiche (translated fixed strings and
-a comma decimal separator).
+with the 4 m read-off and the $r_\mathrm{D}$ / $r_\mathrm{P}$ crossings marked,
+the Figure 3 style curve), the boxed $D_\mathrm{2,S}$ with the other quantities
+alongside, and a footer with the fixed disclaimer. ISO 3382-3 **characterises**
+a space rather than defining an intrinsic pass/fail, so a verdict row appears
+only when a target spatial decay rate is supplied through the metadata's
+`requirement` field (`ReportMetadata(requirement=...)`, read as the minimum
+acceptable $D_\mathrm{2,S}$ in dB, reflecting the informative quality ranges of
+Annex A where a larger spatial decay is better; the room passes at or above
+it). It uses the same `ReportMetadata` container and rendering engine as the
+[ISO 3382-1/-2 room-acoustics
+fiche](room-acoustics.md#iso-3382-report-report); the
+open-plan-specific fields `area` (floor area), `n_source_positions` and
+`n_receiver_positions` (the number of measurement positions) populate the header,
+alongside `client`, `test_room` (the office or zone), `specimen` (the
+description and furnishing state), `instrumentation`, `temperature_c`,
+`relative_humidity_percent`, `static_pressure_kpa`, `measurement_standard`,
+`test_date`, `laboratory`, `operator`, `report_id` and `notes`. Passing
+`metadata=None` produces a bare characterisation fiche. The fiche embeds the
+spatial-decay chart, so rendering needs both reportlab and matplotlib (`pip
+install "phonometry[report,plot]"`); only `engine="reportlab"` is supported.
+The fiche renders in English by default; pass `language="es"` for a Spanish
+fiche (translated fixed strings and a comma decimal separator).
 
 ```python
 import numpy as np
 from phonometry import room, ReportMetadata
 
 r = np.array([2.0, 3.0, 4.0, 6.0, 8.0, 11.0, 16.0])   # distances from the talker (m)
+# Another stand-in line, built to a clean 7 dB per doubling as above; a
+# measured one scatters about the fit by a decibel or two.
 lp = 62.0 - 7.0 * np.log2(r)                           # A-weighted speech level (dB)
 sti = 0.65 - 0.03 * r                                  # STI per position
 
@@ -220,28 +446,31 @@ result.report(
 )                                 # D2,S + Lp,A,S,4m, rD, rP and the decay curve
 ```
 
-The example fiche, regenerated with `make reports`, is kept rendered in the
-repository. Click the preview to open the PDF:
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-[![ISO 3382-3 open-plan office acoustics example report: metadata header, the metrics table of the four single-number quantities (D2,S = 7.0 dB per doubling, Lp,A,S,4m = 48.0 dB, rD = 5.0 m, rP = 15.0 m) above the spatial-decay plot on a logarithmic distance axis with the D2,S regression, the 4 m read-off and the rD and rP crossings, boxed D2,S and a PASS verdict against a 7.0 dB target](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3382_3_open_plan_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3382_3_open_plan_example.pdf)
+[![ISO 3382-3 open-plan office acoustics example report (PDF): One-page open-plan-office fiche: a metadata header (client, office/zone, description, floor area, source and measurement positions, instrumentation, temperature, humidity and pressure), the metrics table of the four single-number quantities (D2,S = 7.0 dB per doubling, Lp,A,S,4m = 48.0 dB, rD = 5.0 m, rP = 15.0 m) above the spatial-decay plot on a logarithmic distance axis with the D2,S regression, the 4 m read-off and the rD and rP crossings, the boxed D2,S, and a PASS verdict against the 7.0 dB target.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3382_3_open_plan_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3382_3_open_plan_example.pdf)
 
-*Open-plan office acoustics fiche (`OpenPlanResult.report`), $D_\mathrm{2,S}$, $L_{p,\mathrm{A,S},4\,\mathrm{m}}$, $r_\mathrm{D}$, $r_\mathrm{P}$ and the spatial-decay curve.*
+Open-plan office acoustics fiche (OpenPlanResult.report): D2,S, Lp,A,S,4m, rD, rP and the spatial-decay curve.
 
 ## Crowd self-noise in an occupied room
 
 ISO 3382-3 above **measures** an office. The complementary question at design
 time is a **prediction**: in a room whose only noise source is its own
 occupants, how loud does the background get, and does conversation still work?
-Long (*Architectural Acoustics* 2e, Chapter 17, Equations (17.50) to (17.54))
-sets the two competing levels at a listener:
+Long (*Architectural Acoustics* 2e, Ch. 17, Eqs. (17.50) to (17.54)) sets the
+two competing levels at a listener. The signal is the direct field of the
+person across the table,
 
 $$
-L_p(\text{signal}) = L_W + 10\log_{10}\!\left[\frac{Q}{4\pi r^2}\right]
+L_p(\text{signal}) = L_W + 10\log_{10}\!\left[\frac{Q}{4\pi r^2}\right],
 \quad \text{(Eq. (17.50))}
 $$
 
+and the noise is the reverberant field that $N$ simultaneous talkers build up,
+
 $$
-L_p(\text{noise}) = L_W + 10\log_{10} N + 10\log_{10}\!\left[\frac{4}{N A_\text{tab}}\right]
+L_p(\text{noise}) = L_W + 10\log_{10} N + 10\log_{10}\!\left[\frac{4}{N A_\text{tab}}\right],
 \quad \text{(Eq. (17.51))}
 $$
 
@@ -263,12 +492,11 @@ print(round(room.crowd_noise_level(20, 20.0)))       # 76 dB with 20 tables
 print(round(room.crowd_noise_level(20, 20.0 + 170.0)))   # 66 dB
 ```
 
-Subtracting the two gives the **speech-to-noise ratio**, and this is the result
-worth remembering:
+Subtracting the two gives the **speech-to-noise ratio**, and this is the
+result worth remembering:
 
 $$
-L_\mathrm{SN} = 10\log_{10}\!\left[\frac{Q}{4\pi r^2}\right]
-+ 10\log_{10}\!\left[\frac{A_\text{tab}}{4}\right]
+L_\mathrm{SN} = 10\log_{10}\!\left[\frac{Q}{4\pi r^2}\right] + 10\log_{10}\!\left[\frac{A_\text{tab}}{4}\right].
 \quad \text{(Eq. (17.52))}
 $$
 
@@ -278,20 +506,19 @@ What decides whether a restaurant works is the absorption **per table**, not
 the absorption of the room. Requiring $L_\mathrm{SN} > -6$ dB for adequate
 cross-table communication at a separation $r_\mathrm{s}$, and $L_\mathrm{SN} < -9$ dB so a
 neighbouring table $r_\mathrm{t}$ away is not overheard, turns into a pair of design
-bounds:
+bounds (Eqs. (17.53) and (17.54)):
 
 $$
-A_\text{tab} > 6.31\,r_\mathrm{s}^2 \quad \text{(Eq. (17.53))}, \qquad
-A_\text{tab} < 3.16\,r_\mathrm{t}^2 \quad \text{(Eq. (17.54))},
-\qquad \text{both for } Q = 2
+A_\text{tab} > 6.31\,r_\mathrm{s}^2, \qquad A_\text{tab} < 3.16\,r_\mathrm{t}^2 \qquad (Q = 2).
 $$
 
+> [!WARNING]
 > **The first constant is printed as 6.33.** The closed form above, at the same
-> $Q = 2$ that yields Long's own second constant 3.16 exactly, gives 6.31, and his
-> prose ("6.3 or more square metres, 68 sq ft") converts to 6.317 m². The library
-> computes both bounds from the speech-to-noise ratio rather than hardcoding
-> either constant, so they stay mutually consistent; the misprint is recorded in
-> the [errata registry](../../ERRATA.md).
+> $Q = 2$ that yields Long's own second constant 3.16 exactly, gives 6.31, and
+> his prose ("6.3 or more square metres, 68 sq ft") converts to 6.317 m². The
+> library computes both bounds from the speech-to-noise ratio rather than
+> hardcoding either constant, so they stay mutually consistent; the misprint is
+> recorded in the [errata registry](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md).
 
 ```python
 from phonometry import room
@@ -299,17 +526,101 @@ from phonometry import room
 print(round(room.absorption_per_table(1.0, -6.0), 2))   # 6.31 m2 per table at 1 m
 print(round(room.absorption_per_table(2.5, -9.0), 1))   # 19.8 m2 at 2.5 m spacing
 
+# A real layout: 1.2 m across the table, 2.0 m to the next one.
+print(round(room.absorption_per_table(1.2, -6.0), 2))   # 9.09 m2, the floor
+print(round(room.absorption_per_table(2.0, -9.0), 2))   # 12.66 m2, the ceiling
+
 crowd = room.crowd_noise([20.0, 95.0, 190.0], distance=1.2)
 crowd.plot()      # self-noise vs occupancy, against the -6 dB limit
 ```
 
+The two bounds are a **window**, and it can be empty. Requiring
+$6.31\,r_\mathrm{s}^2 < A_\text{tab} < 3.16\,r_\mathrm{t}^2$ means the window exists only when
+$r_\mathrm{t}/r_\mathrm{s} > \sqrt{6.31/3.16} \approx 1.41$: pack the tables closer than that and
+there is no absorption at all that lets you converse across your own table
+without being overheard at the next one. The layout above passes, with
+$r_\mathrm{t}/r_\mathrm{s} = 1.67$ and 3.6 m² of room between the bounds.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_per_table_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_per_table.svg" alt="Two panels. On the left, absorption per occupied table against separation, with the communication bound 6.31 r squared rising above the privacy bound 3.16 r squared, the two worked points at 1 metre and 2.5 metres marked, and the feasible band from 9.1 to 12.7 square metres shaded for a layout with 1.2 metres across the table and 2.0 metres between tables. On the right, the width of that feasible window against the ratio of table spacing to cross-table separation, crossing zero at 1.41 and reaching 3.6 square metres at the ratio 1.67 of this layout" width="94%"></picture>
+
+*Left: for one layout the two inequalities leave a band of feasible absorption
+per table. Right: how wide that band is as the tables move apart, below
+$r_\mathrm{t}/r_\mathrm{s} = 1.41$ it has negative width, which is the geometric statement that
+conversation and privacy have become incompatible whatever the ceiling is made
+of.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+# `room` is the import of the block above.
+
+span = np.linspace(0.6, 3.2, 200)
+plt.plot(span, room.absorption_per_table(span, -6.0), label="communication")
+plt.plot(span, room.absorption_per_table(span, -9.0), label="privacy")
+
+r_s, r_t = 1.2, 2.0
+lower = float(room.absorption_per_table(r_s, -6.0))
+upper = float(room.absorption_per_table(r_t, -9.0))
+plt.axhspan(lower, upper, alpha=0.2)
+print(round(upper - lower, 1), round(r_t / r_s, 2))     # 3.6 1.67
+print(round(float(np.sqrt(6.31 / 3.16)), 2))            # 1.41: the closure ratio
+plt.legend(); plt.show()
+```
+
+</details>
+
+**Where $A_\text{tab}$ itself comes from.** For a room that exists, measure the
+reverberation time to ISO 3382-2 and invert Sabine: $A = 0.161\,V/T$ (the same
+convention ISO 354 defines). The
+[room impulse response](room-impulse-response.md)
+and [Room Acoustics](room-acoustics.md) guides
+supply $T$. For a room being designed, take it off surface by surface as in
+[Sound absorption in enclosed spaces](enclosed-space-absorption.md).
+Either way $A_\text{tab} = A/N$ with $N$ the number of **simultaneously
+occupied** tables (not the covers, and not the tables installed). That is what
+makes a half-full restaurant a different room from a full one at the same
+absorption, and it is why adding tables at fixed absorption is what pushes a
+room past its limit. It also means a T30 measured in the empty room is enough
+to predict how it will sound full.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/restaurant_crowd_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/restaurant_crowd_noise.svg" alt="Self-generated crowd noise level against the number of simultaneous talkers for three room absorption areas of 20, 95 and 190 metric sabins, with the 60 dB direct speech level at 1.2 m and the 66 dB communication limit drawn as horizontal references" width="85%"></picture>
 
 *The same 20 talkers in three rooms. The hard room (20 m² of absorption)
-crosses the communication limit before the fourth table is occupied; adding the
-absorptive ceiling of Long's example (190 m² in total) keeps all 20 tables below
-it. The curves are parallel because occupancy always costs $10\log_{10} N$: only
-the vertical offset, which is the absorption, is a design variable.*
+crosses the communication limit before the fourth table is occupied; adding
+the absorptive ceiling of Long's example (190 m² in total) keeps all 20 tables
+below it. The curves are parallel because occupancy always costs $10\log_{10} N$:
+only the vertical offset, which is the absorption, is a design variable.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+# One line — the occupancy sweep straight from the result:
+result = room.crowd_noise([20.0, 95.0, 190.0], distance=1.2)
+result.plot()
+plt.show()
+
+# Or draw it by hand from Equation (17.51):
+n = np.arange(1, 21)
+fig, ax = plt.subplots()
+for area in (20.0, 95.0, 190.0):
+    ax.plot(n, room.crowd_noise_level(n, area), label=f"A = {area:.0f} m²")
+signal = room.speech_direct_level(1.2)
+ax.axhline(signal, ls="--", label="Speech at 1.2 m")
+ax.axhline(signal + 6.0, ls=":", label="Communication limit")
+ax.set(xlabel="Simultaneous talkers N", ylabel="Self-generated noise level [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### `crowd_noise()` parameters
 
@@ -322,49 +633,66 @@ the vertical offset, which is the absorption, is a design variable.*
 | `directivity` | float | — | > 0, default 2 | Talker $Q$ |
 
 Returns a `CrowdNoiseResult` (`talkers`, `absorption_areas`, `levels`,
-`signal_level`, `communication_level`, `speech_to_noise()`) with `.plot()`. The
-pieces `speech_direct_level`, `crowd_noise_level`, `speech_to_noise_ratio` and
-`absorption_per_table` are callable directly.
+`signal_level`, `communication_level`, `speech_to_noise()`) with `.plot()`.
+The pieces `speech_direct_level`, `crowd_noise_level`, `speech_to_noise_ratio`
+and `absorption_per_table` are callable directly.
 
-This is a *design* model and deliberately does not model the Lombard reflex: it
-cancels out of `L_SN` as long as everyone raises their voice equally, so the
-model explains why the level spirals upward in a hard room rather than
-predicting where it stops. It also assumes a diffuse reverberant field and a
-single absorption figure per table, so it says nothing about screens, local
-absorption or where in the room a given table sits.
+## What this guide covers
 
-## References
+- **Covered.** ISO 3382-3:2012 Clause 4 and Clause 6.2/6.3 open-plan quantities ($D_\mathrm{2,S}$,
+  $L_{p,\mathrm{A,S},4\,\mathrm{m}}$, $r_\mathrm{D}$, $r_\mathrm{P}$) from `room.open_plan_metrics`, with the to-scale
+  measurement-line drawing (`room.plot_open_plan_geometry` and
+  `.plot_geometry()`) and the one-page ISO 3382-3 fiche through `.report()`. The
+  clause 5.1 and 5.2 measurement conditions and the Annex A quality ranges are
+  quoted here for planning and reading. Long's *Architectural Acoustics* 2e
+  Chapter 17 crowd self-noise model (Eqs. (17.50) to (17.54)) through
+  `room.crowd_noise` and its parts, with the Eq. (17.53)-(17.54) design window
+  and its closure condition. The
+  [conformance report](../../CONFORMANCE.md) holds $D_\mathrm{2,S}$
+  to the standard's own definition of it.
 
-- International Organization for Standardization. (2012). *Acoustics —
-  Measurement of room acoustic parameters — Part 3: Open plan offices*
-  (ISO 3382-3:2012; since revised as
-  [ISO 3382-3:2022](https://www.iso.org/standard/77437.html)).
-  [iso.org catalogue](https://www.iso.org/standard/46520.html).
-  The open-plan speech-privacy quantities this page implements.
-- Long, M. (2014). *Architectural acoustics* (2nd ed.). Academic Press.
-  [doi:10.1016/C2012-0-03257-5](https://doi.org/10.1016/C2012-0-03257-5).
-  Chapter 17 (the crowd self-noise model, Equations (17.50) to (17.54)).
-
-## Standards
-
-ISO 3382-3:2012 (open-plan office speech metrics: the spatial decay rate
-$D_\mathrm{2,S}$, the A-weighted speech level at 4 m, and the distraction and
-privacy distances from STI). Validated against the standard's own quantity
-definitions in the [conformance report](../../CONFORMANCE.md). The
-implemented edition is frozen at ISO 3382-3:2012; the superseding
-ISO 3382-3:2022 revision removes the privacy distance $r_\mathrm{P}$, adds the
-comfort distance $r_\mathrm{C}$ and moves the per-position STI to the indirect
-IEC 60268-16 method, and is not the one checked here.
+- **Not covered.** ISO 3382-3's per-position STI is taken as an input to `open_plan_metrics`
+  rather than computed inside it: measure it with the STIPA tools of the [Speech
+  Transmission Index guide](../../perception/speech/speech-transmission.md).
+  The fourth required single number, the average A-weighted background noise
+  $L_{p,\mathrm{A,B}}$, is likewise not computed here. It is the energetic A-weighted
+  average of the per-position octave-band background levels, and it belongs in
+  the report alongside the three this page produces. Nothing **checks** the
+  measurement conditions of clauses 5.1 and 5.2 either: the function consumes
+  distances, levels and STI values wherever they came from, so the source
+  directivity, the furnished-and-unoccupied state and the background capture are
+  the operator's responsibility, not the library's. The implemented edition is
+  frozen at ISO 3382-3:2012; the superseding ISO 3382-3:2022 revision removes
+  the privacy distance $r_\mathrm{P}$, adds the comfort distance $r_\mathrm{C}$ and moves the
+  per-position STI to the indirect IEC 60268-16 method, and is not the one
+  checked here. The crowd self-noise model is a *design* calculation and
+  deliberately does not model the Lombard reflex: it cancels out of $L_\mathrm{SN}$ as
+  long as everyone raises their voice equally, so the model explains why the
+  level spirals upward in a hard room rather than predicting where it stops. It
+  also assumes a diffuse reverberant field and a single absorption figure per
+  table, so it says nothing about screens, local absorption or where in the room
+  a given table sits.
 
 ## See also
 
-- [Room Acoustics](room-acoustics.md): the ISO 3382-1/2 decay parameters of
-  the same room.
-- [Measuring the Room Impulse Response](room-impulse-response.md): the
-  acquisition behind the per-position levels.
-- [Speech Transmission Index](../../perception/speech/speech-transmission.md): the STI/STIPA
-  measurement that feeds the per-position `sti_values`.
-- [Speech Intelligibility Index](../../perception/speech/speech-intelligibility.md): the ANSI S3.5
-  view of the same intelligibility question.
-- [Levels](../../signals/levels/levels.md): the A-weighted levels behind the spatial decay.
+- [Room Acoustics](room-acoustics.md): the ISO 3382-1/2
+  decay parameters of the same room.
+- [Measuring the Room Impulse Response](room-impulse-response.md):
+  the acquisition behind the per-position levels.
+- [Speech Transmission Index](../../perception/speech/speech-transmission.md): the
+  STI/STIPA measurement that feeds the per-position `sti_values`.
+- [Speech Intelligibility Index](../../perception/speech/speech-intelligibility.md):
+  the ANSI S3.5 view of the same intelligibility question.
+- [Levels](../../signals/levels/levels.md): the A-weighted levels behind the
+  spatial decay.
+- [Theory](../../reference/theory/rooms-buildings.md): the room-acoustic
+  derivations this page builds on.
 - API reference: [`room.open_plan`](https://docs.jmrp.io/phonometry/reference/api/rooms/open-plan/).
+- Theory: [Impulse response and room-acoustic parameters](../../reference/theory/rooms-buildings.md#impulse-response-and-room-acoustic-parameters-iso-18233-iso-3382-1-2-3): the decay and absorption theory the ISO 3382-3 distraction distance is measured against.
+
+## References
+
+- **International Organization for Standardization. (2012).** [*Acoustics — Measurement of room acoustic parameters — Part 3: Open plan offices*](https://www.iso.org/standard/46520.html) (ISO 3382-3:2012).
+  The open-plan speech-privacy quantities this page implements. Since revised as ISO 3382-3:2022 (https://www.iso.org/standard/77437.html); the 2012 edition is the implemented one.
+- **Long, M. (2014).** *Architectural acoustics* (2nd ed.). Academic Press. https://doi.org/10.1016/C2012-0-03257-5
+  The crowd self-noise model of Chapter 17, Equations (17.50) to (17.54).

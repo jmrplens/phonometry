@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/io/material-catalogues.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/io/material-catalogues/
 
 # Your own catalogues
 
@@ -542,7 +544,7 @@ An outdoor ground is far more resistive than the fibrous materials the two
 models were fitted to, so every octave here lies below their published fit
 range, and the call raises a `PorousAbsorberWarning` saying the regression is
 an extrapolation there;
-[Choosing the ground impedance](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/#choosing-the-ground-impedance)
+[Choosing the ground impedance](../environment/propagation/ground-barriers.md#choosing-the-ground-impedance)
 explains what that costs and why Miki is the model to prefer below the range.
 
 ### A wall in the detailed building model
@@ -692,8 +694,7 @@ how the file writes its cells, `"csv": {"delimiter": ";", "decimal": ","}`
 for a spreadsheet set up for a decimal comma, and nothing about the dialect
 is guessed from the file. `write_catalogue` writes the pair when the name
 ends in `.csv`, so a published table is again the quickest template, here
-the
-absorption coefficients of Tabla 6.1 of Arau-Puchades (1999):
+the absorption coefficients of Tabla 6.1 of Arau-Puchades (1999):
 
 ```python
 arau = {
@@ -1082,24 +1083,24 @@ The reader and the rows hold what the document prints and nothing else.
 
 ## What this guide covers
 
-**Covered.** Reading a catalogue of your own from a JSON file or from a CSV file with its
-JSON header (`io.read_catalogue`), or from text or a mapping
-(`io.parse_catalogue`), into the rows every published catalogue hands out,
-with its `io.Provenance`, its notes and every problem of form reported at
-once with a JSON pointer or a line and a column; writing rows, a published
-table among them, back to a JSON or CSV file (`io.write_catalogue`);
-searching yours and the published ones with every `*_named` lookup;
-handing the rows to the porous models, a room model, the plateau method, a
-floating floor, the elastic simulation, the outdoor ground models and the
-ISO 12354 detailed model; and the JSON Schema of a catalogue file, for an
-editor to complete it (`io.catalogue_schema`).
+- **Covered.** Reading a catalogue of your own from a JSON file or from a CSV file with its
+  JSON header (`io.read_catalogue`), or from text or a mapping
+  (`io.parse_catalogue`), into the rows every published catalogue hands out,
+  with its `io.Provenance`, its notes and every problem of form reported at
+  once with a JSON pointer or a line and a column; writing rows, a published
+  table among them, back to a JSON or CSV file (`io.write_catalogue`);
+  searching yours and the published ones with every `*_named` lookup;
+  handing the rows to the porous models, a room model, the plateau method, a
+  floating floor, the elastic simulation, the outdoor ground models and the
+  ISO 12354 detailed model; and the JSON Schema of a catalogue file, for an
+  editor to complete it (`io.catalogue_schema`).
 
-**Not covered.** A spreadsheet's own format (XLSX, ODS) is not read: save the sheet as
-"CSV UTF-8", and write in JSON what one cell cannot say. A rating no
-function of this library works out (an NRC, an STC, an IIC) is held as
-printed and never checked. No
-manufacturer's data ships with the library, and a table pasted into an issue
-or a pull request is never merged.
+- **Not covered.** A spreadsheet's own format (XLSX, ODS) is not read: save the sheet as
+  "CSV UTF-8", and write in JSON what one cell cannot say. A rating no
+  function of this library works out (an NRC, an STC, an IIC) is held as
+  printed and never checked. No
+  manufacturer's data ships with the library, and a table pasted into an issue
+  or a pull request is never merged.
 
 ## See also
 
@@ -1116,30 +1117,21 @@ or a pull request is never merged.
 
 ## References
 
-- Internet Engineering Task Force. (2017). *The JavaScript Object Notation (JSON) Data Interchange Format* (RFC 8259).
-  [rfc-editor.org](https://www.rfc-editor.org/info/rfc8259/).
-  The text a catalogue file is. The reader holds a file to it strictly: a NaN or an Infinity, which only some readers accept, and a name written twice in one object, whose meaning RFC 8259 leaves to the reader, are refused.
-- Internet Engineering Task Force. (2013). *JavaScript Object Notation (JSON) Pointer* (RFC 6901).
-  [rfc-editor.org](https://www.rfc-editor.org/info/rfc6901/).
-  How every problem in a file is located: /rows/1/porosity is the porosity of the second row.
-- Internet Engineering Task Force. (2005). *Common Format and MIME Type for Comma-Separated Values (CSV) Files* (RFC 4180).
-  [rfc-editor.org](https://www.rfc-editor.org/info/rfc4180/).
-  The CSV file a spreadsheet saves: one record per line ending in CRLF, the same number of fields on every line, and a field that holds a line break, a double quote or the delimiter enclosed in double quotes, with a quote inside it doubled. The reader takes a semicolon or a tab as the delimiter too, as the header declares.
-- International Organization for Standardization. (1997). *Acoustics — Sound absorbers for use in buildings — Rating of sound absorption* (ISO 11654:1997).
-  [iso.org catalogue](https://www.iso.org/standard/19583.html).
-  The practical sound absorption coefficient a European data sheet prints, rounded to steps of 0.05 and capped at 1.00: a rating of a reverberation-room measurement and not a Sabine coefficient, which is why it has no place in AbsorptionSpectrum.
-- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation* (ISO 10140-2:2010).
-  [iso.org catalogue](https://www.iso.org/standard/42088.html).
-  The laboratory sound reduction index R a data sheet of a wall or a door prints: one product's specimen, measured in one-third-octave bands in a facility where flanking transmission is negligible and rated with ISO 717-1. It is not the transmission loss a book compiles, which TransmissionLossSpectrum holds.
-- International Organization for Standardization. (1989). *Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings* (EN 29052-1:1992 (ISO 9052-1:1989)).
-  [iso.org catalogue](https://www.iso.org/standard/16620.html).
+- **International Organization for Standardization. (1989).** [*Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings*](https://www.iso.org/standard/16620.html) (EN 29052-1:1992 (ISO 9052-1:1989)).
   The dynamic stiffness s' of an installed layer and the apparent dynamic stiffness s't of a test specimen, two fields of ResilientLayer, and clause 8.2, which turns the second into the first with the lateral airflow resistivity.
-- International Organization for Standardization. (2017). *Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms* (ISO 12354-1:2017).
-  [iso.org catalogue](https://www.iso.org/standard/70242.html).
+- **International Organization for Standardization. (1997).** [*Acoustics — Sound absorbers for use in buildings — Rating of sound absorption*](https://www.iso.org/standard/19583.html) (ISO 11654:1997).
+  The practical sound absorption coefficient a European data sheet prints, rounded to steps of 0.05 and capped at 1.00: a rating of a reverberation-room measurement and not a Sabine coefficient, which is why it has no place in AbsorptionSpectrum.
+- **International Organization for Standardization. (2010).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/42088.html) (ISO 10140-2:2010).
+  The laboratory sound reduction index R a data sheet of a wall or a door prints: one product's specimen, measured in one-third-octave bands in a facility where flanking transmission is negligible and rated with ISO 717-1. It is not the transmission loss a book compiles, which TransmissionLossSpectrum holds.
+- **International Organization for Standardization. (2017).** [*Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms*](https://www.iso.org/standard/70242.html) (ISO 12354-1:2017).
   The homogeneous element HomogeneousElement.from_solid builds from a solid's row: m' = ρt, and the critical frequency of Formula (B.2) with the quasi-longitudinal phase velocity of Table B.3, which is a row's plate speed. The internal walls of the worked building of Annex L are the example.
-- Wright, A., Andrews, H., Hutton, B., & Dennis, G. (2022). *JSON Schema: A Media Type for Describing JSON Documents* (Internet-Draft draft-bhutton-json-schema-01). Internet Engineering Task Force.
-  [json-schema.org](https://json-schema.org/draft/2020-12/json-schema-core).
-  The 2020-12 dialect io.catalogue_schema writes the schema of a catalogue file in, and the published schema is written in.
-- Wright, A., Andrews, H., & Hutton, B. (2022). *JSON Schema Validation: A Vocabulary for Structural Validation of JSON* (Internet-Draft draft-bhutton-json-schema-validation-01). Internet Engineering Task Force.
-  [json-schema.org](https://json-schema.org/draft/2020-12/json-schema-validation).
+- **Internet Engineering Task Force. (2005).** [*Common Format and MIME Type for Comma-Separated Values (CSV) Files*](https://www.rfc-editor.org/info/rfc4180/) (RFC 4180).
+  The CSV file a spreadsheet saves: one record per line ending in CRLF, the same number of fields on every line, and a field that holds a line break, a double quote or the delimiter enclosed in double quotes, with a quote inside it doubled. The reader takes a semicolon or a tab as the delimiter too, as the header declares.
+- **Internet Engineering Task Force. (2013).** [*JavaScript Object Notation (JSON) Pointer*](https://www.rfc-editor.org/info/rfc6901/) (RFC 6901).
+  How every problem in a file is located: /rows/1/porosity is the porosity of the second row.
+- **Internet Engineering Task Force. (2017).** [*The JavaScript Object Notation (JSON) Data Interchange Format*](https://www.rfc-editor.org/info/rfc8259/) (RFC 8259).
+  The text a catalogue file is. The reader holds a file to it strictly: a NaN or an Infinity, which only some readers accept, and a name written twice in one object, whose meaning RFC 8259 leaves to the reader, are refused.
+- **Wright, A., Andrews, H., & Hutton, B. (2022).** [*JSON Schema Validation: A Vocabulary for Structural Validation of JSON*](https://json-schema.org/draft/2020-12/json-schema-validation) (Internet-Draft draft-bhutton-json-schema-validation-01).
   The keywords the schema states the form of a catalogue file with: the types, the words a key may hold, the patterns of a name, the lengths of a text and the limits a field's unit sets.
+- **Wright, A., Andrews, H., Hutton, B., & Dennis, G. (2022).** [*JSON Schema: A Media Type for Describing JSON Documents*](https://json-schema.org/draft/2020-12/json-schema-core) (Internet-Draft draft-bhutton-json-schema-01).
+  The 2020-12 dialect io.catalogue_schema writes the schema of a catalogue file in, and the published schema is written in.

@@ -1,13 +1,23 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/start/getting-started.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/getting-started/
 
 # Getting Started
 
+phonometry is a Python toolkit for acoustic measurement, from fractional
+octave filter banks and frequency weighting to sound levels and standardized
+metrics. Every metric is verified against its governing standard: 1897
+numerical checks in all. Install it with `pip install phonometry`; the first
+example below filters a signal into one-third-octave bands and returns the
+sound pressure level of each band, and the section after it anchors those
+levels to a calibrator tone, which is what turns them into a measurement.
+
 ## Installation
 
-The commands below are pip's. [Environments](environments/index.md) takes uv,
-conda, Jupyter, JupyterLite, Docker and type checkers in turn.
+The commands below are pip's. [Environments](environments/index.md)
+takes uv, conda, Jupyter, JupyterLite, Docker and type checkers in turn.
 
-**Option 1: From PyPI (Recommended)**
+### From PyPI (recommended)
 
 ```bash
 pip install phonometry
@@ -52,26 +62,26 @@ not supported there, nor `[full]`, which holds it;
 `pip install "phonometry[plot,report,audio]"` installs the other three extras
 there. The same holds on 32-bit Linux, where numba's last wheels, of 0.56.4,
 are for Python 3.10 at most and numba supports the platform no longer; [Docker
-and servers](environments/docker.md) says what the other three build
-there. A plain install takes the newest releases, which have wheels on the
-other three platforms but numba's on musl and on macOS on Intel, where a plain
-`[perf]` install builds numba and llvmlite on every Python, and matplotlib's
-on ARM with musl. PyPI has no torch wheel for any of the four, the last for
-macOS on Intel being 2.2.2, older than every floor, and none ever for 32-bit
-Windows, and torch publishes no source distribution, so `[torch]` does not
-install on them from PyPI. On Windows on ARM PyTorch's CPU index has torch
-wheels for Python 3.12, from 2.7.0, and 3.13, from 2.8.0, so installing torch
-from it first, as below, brings `[torch]` there; it has none for Python 3.14
-there, none for Linux with musl or 32-bit Windows, and for macOS on Intel none
-after 2.2.2, as on PyPI. python-soundfile, for `[audio]`, publishes no wheel
-that carries libsndfile for Linux with musl, nor at its floor 0.12.0 for Linux
-on ARM, whose first is 0.13.0, or for Windows on ARM, whose first is 0.14.0,
-so pip installs its pure-Python wheel there, which loads the system's
+and servers](environments/docker.md) says what the other three
+build there. A plain install takes the newest releases, which have wheels on
+the other three platforms but numba's on musl and on macOS on Intel, where a
+plain `[perf]` install builds numba and llvmlite on every Python, and
+matplotlib's on ARM with musl. PyPI has no torch wheel for any of the four,
+the last for macOS on Intel being 2.2.2, older than every floor, and none ever
+for 32-bit Windows, and torch publishes no source distribution, so `[torch]`
+does not install on them from PyPI. On Windows on ARM PyTorch's CPU index has
+torch wheels for Python 3.12, from 2.7.0, and 3.13, from 2.8.0, so installing
+torch from it first, as below, brings `[torch]` there; it has none for Python
+3.14 there, none for Linux with musl or 32-bit Windows, and for macOS on Intel
+none after 2.2.2, as on PyPI. python-soundfile, for `[audio]`, publishes no
+wheel that carries libsndfile for Linux with musl, nor at its floor 0.12.0 for
+Linux on ARM, whose first is 0.13.0, or for Windows on ARM, whose first is
+0.14.0, so pip installs its pure-Python wheel there, which loads the system's
 libsndfile: on Alpine `apk add libsndfile-dev`, since the Python of the
 official Docker image finds that library only under the name `libsndfile.so`,
 which that package adds.
 
-Optional extras:
+### Optional extras
 
 ```bash
 pip install "phonometry[plot]"    # matplotlib, for filter response plots and result .plot() methods
@@ -89,9 +99,9 @@ enabled except the torch backend of the FDTD engines, which `[torch]` adds. On
 `pip install "phonometry[plot,report,audio]"` brings the other three, as
 above, and builds from source SciPy, matplotlib and kiwisolver on Windows, and
 NumPy, SciPy, matplotlib and Pillow among others on Linux. The
-base install computes every metric on NumPy and SciPy alone, and that includes
-reading every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64)
-through `phonometry.io`; the only things it leaves unavailable are the figures
+base install computes every metric on NumPy and SciPy alone, including reading
+every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64) through
+`phonometry.io`; the only things it leaves unavailable are the figures
 (`.plot()` and the filter response plots), the normative PDF fiches
 (`.report()`), the compiled kernel that speeds up the `impulse` time weighting,
 the other audio formats (FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV), and the
@@ -133,10 +143,10 @@ newest torch it finds on either index, PyPI's CUDA build included.
 
 [Where a simulation runs](../simulation/compute.md) says what each device of the FDTD engines
 needs, CuPy's wheel for an NVIDIA GPU among them, and [pip and
-uv](environments/pip-and-uv.md) what each extra brings and how uv installs
-them.
+uv](environments/pip-and-uv.md) what each extra brings and how
+uv installs them.
 
-**Option 2: Cloning and Installing**
+### From a clone
 
 ```bash
 git clone https://github.com/jmrplens/phonometry.git
@@ -147,7 +157,7 @@ pip install .
 pip builds the wheel without a compiler; [pip and
 uv](environments/pip-and-uv.md#from-a-clone) has the rest.
 
-**Option 3: Git Submodule**
+### As a git submodule
 
 ```bash
 git submodule add https://github.com/jmrplens/phonometry.git
@@ -163,14 +173,30 @@ standardized bands, smooth it in time and reduce it to metrics:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain.svg" alt="phonometry processing chain: signal, calibration, frequency weighting, octave filter bank, time weighting and metrics, with the standard verified at each stage" width="92%"></picture>
 
-Each stage is an independent function or class you can use on its own; the
-guides cover them left to right ([Calibration](../signals/metrology/calibration.md) →
+Read it as a sequence of decisions rather than a fixed recipe. **Calibration
+comes first** because everything downstream is a ratio to 20 µPa, so a wrong
+scale factor shifts every later number by the same amount and nothing further
+along can detect it. **Frequency weighting** is defined by IEC 61672-1 as one
+filter applied to the broadband signal; applying band-by-band weighting
+corrections after the bank instead is a shortcut that only holds for a
+stationary signal. **The bank** decides the frequency resolution, and **the
+ballistics and the metrics** decide the time behaviour, both acting on the
+weighted signal, in that order, because exponential time weighting squares the
+signal and so does not commute with anything before it.
+
+The example in the next section runs **Signal → Octave** and nothing else: no
+calibration, so its levels are pascals by assumption rather than by measurement;
+no weighting, so they are Z (unweighted); no ballistics, so each band is one
+r.m.s. value over the whole record. "Give the samples physical meaning" below
+puts the first stage back, and each stage is an independent function or class
+you can use on its own; the guides cover them left to right
+([Calibration](../signals/metrology/calibration.md) →
 [Frequency Weighting](../signals/levels/weighting.md) → [Filter Banks](../signals/filters/filter-banks.md) →
 [Time Weighting](../signals/levels/time-weighting.md) → [Levels](../signals/levels/levels.md)).
 
-## Basic Usage: 1/3 Octave Analysis
+## A first analysis: one-third-octave bands (uncalibrated)
 
-Analyze a signal and get the Sound Pressure Level (SPL) per frequency band.
+Split a signal into one-third-octave bands and read the level of each one.
 
 ```python
 import numpy as np
@@ -188,12 +214,56 @@ print(f"Bands: {result.frequencies}")
 # Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
 print(f"SPL [dB]: {result.levels}")
 # SPL [dB]: [46.77640002 47.81719048 48.93133762 ...]
-# the 100 Hz band reads about 90.7 dB and the 1 kHz band about 90.9 dB
+# the 100 Hz band reads 90.71 dB and the 1 kHz band 90.94 dB
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
+**The band frequencies come out as numbers, not as the labels on an analyser.**
+IEC 61260-1 places the midband frequencies on a base-10 grid,
+$f_m = 1000\cdot 10^{\,x/10b}$ with $b = 3$ for one-third octaves, which is why
+the lowest is 12.589 Hz and the highest 19952.6 Hz. The round numbers a
+hand-held meter prints are the same standard's *nominal* designations for the
+same bands: pass `nominal=True` and `freq` comes back as `['12.5', '16', …,
+'20k']`, which is what you want on an axis or in a report, while the exact
+values are what you want when computing with them. There are 33 bands because
+the default range is 12 Hz to 20 kHz; `limits=[f_min, f_max]` narrows it, and
+narrowing it is usually worth doing; see [Filter
+Banks](../signals/filters/filter-banks.md) for the grid.
 
-*Example of a 1/3 Octave Band spectrum analysis of a complex signal.*
+**Read the spectrum before trusting it.** Two of the 33 bands hold the signal:
+90.71 dB at 100 Hz and 90.94 dB at 1 kHz, both within 0.3 dB of 90.97 dB, the
+level of a unit-amplitude sine read as pascals ($20\log_{10}(0.7071/20\,\mu
+\mathrm{Pa})$). That agreement is the check that the bank is doing arithmetic
+you can defend; the small deficit at 100 Hz is the decimated band filter's
+response at its own centre, not lost energy. Everything else on the plot is the
+filter bank looking at itself: 64.40 dB at 80 Hz and 62.43 dB at 125 Hz, and
+56.91 dB at 800 Hz and 56.58 dB at 1.25 kHz, are the two tones leaking through
+the skirts of the adjacent filters, 26 to 34 dB down; the slow climb from
+46.78 dB at 12.5 Hz to 55.15 dB at 50 Hz is the far stopband of those filters
+plus the numerical floor. The rule of thumb that follows: in a band spectrum,
+treat anything more than about 40 dB below the loudest band as an artefact of
+the analysis until a background measurement says otherwise. [Filter Class
+Verification](../signals/filters/filter-compliance.md) is the mask that
+fixes how far down those skirts must be.
+
+**These are not yet physical levels.** `octave_filter` always returns
+$20\log_{10}(p_\mathrm{rms} / 20\,\mu\mathrm{Pa})$, and with the default
+calibration it takes the numeric value of each sample *to be* the pressure in
+pascals. A unit-amplitude sine is therefore read as 0.7071 Pa rms, which is
+90.97 dB, exactly right for a synthetic signal defined in pascals, and exactly
+wrong for a recording, whose sample values are whatever the converter and the
+gain staging happened to produce. There are two honest ways to get a level you
+can defend. Pass the pascals-per-digital-unit factor obtained from a calibrator
+tone via `calibration=filters.LevelCalibration(factor=S)` (see
+[Calibration and dBFS](../signals/metrology/calibration.md)), or, when
+the signal never had a physical scale, ask for `LevelCalibration(dbfs=True)` and
+read levels relative to digital full scale, which come out negative and cannot
+be mistaken for an SPL.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a six-tone signal with the raw PSD in the background" width="80%"></picture>
+
+*A richer example than the snippet above: six tones (20, 100, 500, 2000, 4000
+and 15000 Hz) at amplitude 100, so the band levels run to about 131 dB. The
+grey curve is the raw-signal PSD, shifted down to share the axis.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -232,14 +302,124 @@ plt.show()
 
 </details>
 
+The same call can also draw the bank it just designed, which is what the
+`[plot]` extra is for: pass `response_plot=filters.ResponsePlot(show=True)` and
+the 33 band filters appear on one axis before the levels come back.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.svg" alt="Butterworth one-third-octave filter bank frequency response, 33 bands from 12.5 Hz to 20 kHz at order 6" width="80%"></picture>
+
+*The default bank: Butterworth, order 6, one-third octave. Each curve crosses
+−3 dB at its own band edges, which is where the skirts of the previous
+paragraph come from, and the IEC 61260-1 class 1 mask is what fixes how fast
+they fall away.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+filtered = filters.octave_filter(
+    signal, fs=fs, fraction=3, response_plot=filters.ResponsePlot(show=True)
+)
+spl, freq = filtered.levels, filtered.frequencies
+```
+
+</details>
+
+[Filter Architecture Gallery](../signals/filters/filter-gallery.md) has
+the same plate for the other four architectures.
+
+## Give the samples physical meaning
+
+The levels above are not a measurement, because nothing connected the numbers in
+the array to a pressure. That connection is a single factor $S$, the
+**sensitivity** in pascals per digital unit, and you obtain it by recording a
+calibrator of known level through the same microphone, preamplifier, interface
+and gain setting you are about to measure with. A class 1 acoustic calibrator
+produces 94 dB re 20 µPa at 1 kHz, which is $2\times10^{-5}\cdot10^{94/20} =
+1.0024$ Pa r.m.s., not 1 Pa, a 0.02 dB difference that is worth getting right
+because it propagates into every level afterwards.
+
+```python
+# What the acquisition chain does to the pressure. This microphone, preamplifier
+# and interface together deliver 0.005 digital units per pascal; in a real
+# measurement you never know this number, which is exactly what the calibrator
+# is for.
+chain = 0.005
+
+# What the calibrator writes to disk: 3 s of 1 kHz at 94 dB re 20 uPa.
+p94 = 2e-5 * 10 ** (94.0 / 20)                       # 1.0024 Pa RMS
+calibrator = chain * np.sqrt(2) * p94 * np.sin(
+    2 * np.pi * 1000 * np.arange(3 * fs) / fs
+)
+
+# ...and the measurement: the same two tones through the same chain.
+recording = chain * signal
+
+# The sensitivity is the known pressure over the RMS of the recorded tone.
+cal = p94 / np.sqrt(np.mean(calibrator ** 2))
+print(f"{cal:.1f} Pa per digital unit")
+# 200.0 Pa per digital unit
+
+filtered = filters.octave_filter(
+    recording, fs=fs, fraction=3, nominal=True,
+    calibration=filters.LevelCalibration(factor=cal),
+)
+spl, bands = filtered.levels, filtered.frequencies
+print(f"{bands[9]} Hz: {spl[9]:.2f} dB SPL, {bands[19]}: {spl[19]:.2f} dB SPL")
+# 100 Hz: 90.71 dB SPL, 1k: 90.94 dB SPL
+```
+
+Two things are worth noticing. The calibrated levels are **the same numbers as
+in the first analysis**, because the synthetic signal there was defined in
+pascals and this recording is that same field seen through a chain the
+calibrator has now undone; but this time they are decibels re 20 µPa because a
+measurement put them there, not because we assumed it. And the same recording
+read without the factor gives 44.92 dB in the 1 kHz band, 46.0 dB low: an
+uncalibrated level is not approximately right, it is off by whatever the gain
+staging happened to be.
+
+In practice you do not divide by hand. `metrology.sensitivity(calibrator,
+target_spl=94.0, fs=fs)` returns the same factor and, on the way, checks the
+recorded tone's short-term stability the way IEC 60942 qualifies the calibrator
+itself, so a badly coupled microphone is caught here instead of silently
+corrupting every level downstream. [Calibration and
+dBFS](../signals/metrology/calibration.md) carries that call, the
+pre/post drift rule and the digital dBFS alternative for signals that never had
+a physical scale.
+
+## One number instead of thirty-three
+
+A meter shows one level, not a spectrum. On a calibrated signal that level is
+one line, because the A weighting and the energy average are both defined on
+the broadband pressure:
+
+```python
+weighted = filters.weighting_filter(cal * recording, fs, weighting="A")
+laeq = 10 * np.log10(np.mean(weighted ** 2) / (2e-5) ** 2)
+print(f"LAeq = {laeq:.2f} dB(A)")
+# LAeq = 91.02 dB(A)
+```
+
+The unweighted level of the same second is 93.98 dB: A weighting takes almost
+3 dB off, essentially all of it from the 100 Hz tone, which the curve attenuates
+by about 19 dB. `signals.laeq(recording, fs, calibration_factor=cal)` is the
+one-line form of the two lines above and applies the weighting internally, so
+never A-weight the signal first and then pass it to a level function; that
+weights it twice. The Fast and Slow envelopes, $L_{\mathrm{A}E}$, $L_\mathrm{Cpeak}$ and the
+percentile levels are the same kind of call: [Time
+Weighting](../signals/levels/time-weighting.md) and [Integrated and
+Statistical Levels](../signals/levels/levels.md) have them, and [Build a
+sound level meter](../signals/sound-level-meter.md) runs the whole chain
+from a calibrator tone to all of them on one page.
+
 ## Read a sound level meter WAV
 
-With a real meter you have two WAVs: the calibrator take and the
-measurement. `phonometry.io` reads both as measurements: native rate
-kept, integer PCM scaled exactly to full scale, channels first, nothing
-normalized. The `Signal` it returns carries the sample rate and, once you
-attach it, the calibration, so the level functions stop asking you to
-repeat either:
+The synthetic signal above stood in for a file. With a real meter you have
+two WAVs (the calibrator take and the measurement), and `phonometry.io`
+reads both as measurements: native rate kept, integer PCM scaled exactly to
+full scale, channels first, nothing normalized. The `Signal` it returns
+carries the sample rate and, once you attach it, the calibration, so the
+level functions stop asking you to repeat either:
 
 ```python
 import numpy as np
@@ -258,30 +438,109 @@ The base install reads everything a meter writes: 24-bit PCM, multichannel
 EXTENSIBLE, overnight RF64. It warns if the file is a compressed listening
 copy rather than a linear recording. Write the factor into the sidecar once
 (`io.write_sidecar("measurement.wav", cal)`) and from then on
-`io.read("measurement.wav")` comes back calibrated with no arguments at all.
-[Reading and writing measurement audio](../io/audio-files.md) is the full
-workflow: provenance, streaming, BWF writing and lossless conversion.
+`io.read("measurement.wav")` comes back calibrated with no arguments at
+all. [Reading and writing measurement audio](../io/audio-files.md)
+is the full workflow: provenance, streaming, BWF writing and lossless
+conversion.
 
 ## Analyzing an audio file
 
+A real measurement is **two** recordings, not one, and the conditions under
+which they are made decide what the levels are worth:
+
+- **Same chain, nothing touched in between.** Record the calibrator tone first,
+  then the measurement, through the same microphone, preamplifier, interface and
+  gain. Lock the gain before the calibrator tone and never move it again: the
+  factor is only valid while the chain stays as it was calibrated, and a touched
+  gain knob is a larger error than any drift.
+- **Keep peaks 10–12 dB below full scale, and switch off everything automatic.**
+  Automatic gain control, noise suppression, limiting and interface EQ all
+  change the level as a function of the level, so a processed sample can no
+  longer be turned into a sound pressure level. A clipped one cannot either.
+- **Record at 48 kHz or more.** At 44.1 kHz the bands above $f_\mathrm{s}/2$ are dropped:
+  the bank returns 32 bands ending at 15848.9 Hz instead of the 33 ending at
+  19952.6 Hz shown above. It trims its default span so without a word; limits
+  you give that reach past $f_\mathrm{s}/2$ are trimmed the same way, and a
+  `filters.FilterBankWarning` names the bands left out.
+- **Repeat the calibrator check at the end.** The pre/post difference is the
+  drift bound for everything captured in between, and a common criterion
+  invalidates the series when it exceeds 0.5 dB.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone at 94.0 dB and 1 kHz, preamplifier, audio interface and the sensitivity that converts digital units into pascals" width="92%"></picture>
+
+*The first of the two recordings: the calibrator coupled onto the capsule at
+94.0 dB / 1 kHz, through the same preamplifier and interface as the measurement
+that follows, producing the pascals-per-digital-unit factor everything
+downstream depends on.*
+
 ```python
+import numpy as np
 from scipy.io import wavfile
 from phonometry import filters
 
-# Load standard WAV file
+# Both files come from the same chain, in this order, with nothing touched.
+fs, calibrator = wavfile.read("calibrator.wav")
 fs, signal = wavfile.read("measurement.wav")
 
-# Analyze
-# Note: To obtain real-world SPL values, you must calibrate the input.
-# See the Calibration guide.
-filtered = filters.octave_filter(signal, fs=fs, fraction=3)
+# wavfile.read returns (samples, channels); the bank expects (channels, samples)
+if calibrator.ndim > 1:
+    calibrator = calibrator[:, 0]
+if signal.ndim > 1:
+    signal = signal[:, 0]        # measurement microphone on channel 1
+
+# Sensitivity in pascals per digital unit, from the 94 dB calibrator tone.
+# metrology.sensitivity(calibrator, target_spl=94.0, fs=fs) is the library call,
+# and it validates the tone's stability as well.
+cal = 2e-5 * 10 ** (94.0 / 20) / np.sqrt(np.mean(calibrator.astype(float) ** 2))
+
+filtered = filters.octave_filter(
+    signal, fs=fs, fraction=3, nominal=True,
+    calibration=filters.LevelCalibration(factor=cal),
+)
 spl, freq = filtered.levels, filtered.frequencies
 ```
 
-Integer audio (e.g. int16 WAV data) is converted to float64 internally, so it
-is safe to pass `wavfile.read` output directly, but note it is *cast*, not
-rescaled to full scale, so keep calibrator and measurement in the same format;
-`io.read` in the previous section scales exactly and removes the concern.
+The two mechanical pitfalls below belong to this raw-scipy route. `io.read`
+in the previous section removes both, scaling integer samples to full scale
+and returning channels first, but they are worth knowing whenever a bare
+array enters the library:
+
+**Reduce a multichannel file to the channel you measured with, or transpose it.**
+The guard above is not decoration: `wavfile.read` returns a `(samples,
+channels)` array, and the bank reads a 2D array as `(channels, samples)`. Pass a
+stereo file as it comes and nothing raises. A 2400-sample stereo array returns
+an `spl` of shape `(2400, 33)`, one spectrum per *pair of samples*, and a
+one-second file takes minutes to produce meaningless numbers. See
+[Multichannel and Performance](../signals/filters/multichannel.md) for
+the convention, and for the case where several calibrated channels are analysed
+at once, each with its own sensitivity.
+
+**Integer audio is cast, not rescaled.** `wavfile.read` output runs without an
+error because integers are converted to float64 internally, but an int16 sample
+of +32767 enters the bank as 32767.0 rather than 1.0. Every level therefore
+comes out $20\log_{10}(32768) = 90.3$ dB above the same signal read as float.
+For example, a unit-amplitude 1 kHz sine peaks at 90.94 dB and the same sine
+written to int16 peaks at 181.25 dB. Divide by the full-scale value
+(`signal / 32768.0` for int16) before analysing, or let the calibration step
+absorb it: a sensitivity determined from a calibrator recording *in the same
+integer format* already carries the factor. Mixing the two (a float-read
+calibrator and an integer-read measurement, or the reverse) is wrong by 90 dB
+with no symptom. The rules are in
+[Calibration and dBFS](../signals/metrology/calibration.md).
+
+**One number per band, over the whole file.** `octave_filter` returns a single
+r.m.s. level per band for the entire array, with the mean removed first
+(`detrend=True`); it answers "how much energy was in each band during this
+recording", which is the right question for a steady source and the wrong one
+for anything that changes. A pass-by, a machine that cycles or a room that
+someone walks through comes back as an energy average nobody asked for. If the
+level moves during the record, slice the signal and call the bank per slice, or
+take the standard route and use the exponential Fast/Slow ballistics that a
+sound level meter shows; `mode="peak"` gives the band peak instead of the
+average, and a band peak is not $L_\mathrm{Cpeak}$. There is a floor on the other side
+too: a band filter needs several cycles of its own centre frequency to settle,
+so a one-second record says very little about the 12.5 or 16 Hz bands however
+many digits come back.
 
 ## In a notebook
 
@@ -317,7 +576,15 @@ bank        # the last line of the cell: the notebook shows its table
 
 Jupyter shows it under the cell as this table:
 
-<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>OctaveFilterResult</strong></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>levels</code></td><td style="text-align:left;vertical-align:top">array 31 float64, 17.125 to 82.986</td><td style="text-align:left;vertical-align:top">dB</td></tr><tr><td style="text-align:left;vertical-align:top"><code>frequencies</code></td><td style="text-align:left;vertical-align:top">tuple of 31 numbers, 19.953 to 19953</td><td style="text-align:left;vertical-align:top">Hz</td></tr><tr><td style="text-align:left;vertical-align:top"><code>bands</code></td><td style="text-align:left;vertical-align:top">None</td><td style="text-align:left;vertical-align:top"></td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
+**OctaveFilterResult**
+
+| field | value | unit |
+| --- | --- | --- |
+| `levels` | array 31 float64, 17.125 to 82.986 | dB |
+| `frequencies` | tuple of 31 numbers, 19.953 to 19953 | Hz |
+| `bands` | None |  |
+
+plot()
 
 A verdict, in a cell of its own, shows its outcome in the title. This one
 applies Annex G.4 of ISO 10140-1 to a [lining test](../buildings/insulation/lab-application-rules.md) on a masonry wall:
@@ -330,7 +597,15 @@ check = building.check_lining_curing(curing_time_days=2.9, time_lag_days=1.0)
 check       # a verdict: its outcome in the title
 ```
 
-<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>LiningCuringCheck</strong><span style="background:#cf222e;color:#ffffff;border-radius:3px;padding:0 6px;margin-left:6px;font-weight:bold">FAIL</span></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>curing_time_days</code></td><td style="text-align:left;vertical-align:top">2.9</td><td style="text-align:left;vertical-align:top">d</td></tr><tr><td style="text-align:left;vertical-align:top"><code>time_lag_days</code></td><td style="text-align:left;vertical-align:top">1</td><td style="text-align:left;vertical-align:top">d</td></tr><tr><td style="text-align:left;vertical-align:top"><code>required_curing_days</code></td><td style="text-align:left;vertical-align:top">14</td><td style="text-align:left;vertical-align:top">d</td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
+**LiningCuringCheck FAIL**
+
+| field | value | unit |
+| --- | --- | --- |
+| `curing_time_days` | 2.9 | d |
+| `time_lag_days` | 1 | d |
+| `required_curing_days` | 14 | d |
+
+plot()
 
 The IPython terminal prints the same tables as text:
 
@@ -362,23 +637,27 @@ ax = bank.plot()    # drawn under the cell; in a script, plt.show()
 *The figure `bank.plot()` draws under the cell: the one-third-octave spectrum
 of the 1 kHz tone over noise.*
 
-[Jupyter and JupyterLab](environments/jupyter.md) carries on from here: SVG
-figures, videos, fiches and how a warning shows in a cell, and [JupyterLite and
-Pyodide](environments/jupyterlite.md) the same notebook in a browser.
+[Jupyter and JupyterLab](environments/jupyter.md) carries on
+from here: SVG figures, videos, fiches and how a warning shows in a cell, and
+[JupyterLite and Pyodide](environments/jupyterlite.md) the same
+notebook in a browser.
 
 ## Where to go next
 
-The octave analysis above uses the `filters` core, one of twenty-one domain
-namespaces; the documentation index walks through the rest, from
-psychoacoustics and room, building and vibration acoustics to environmental,
-aircraft and underwater noise, electroacoustics and FDTD wave simulation.
-Every result object exposes a one-line `.plot(language="en"|"es")` figure and,
-where a standard defines a reporting format, a `.report()` method that renders
-the normative PDF fiche.
+The octave analysis above uses `phonometry.filters`, one of twenty-one import
+namespaces. The documentation groups them into **thirteen areas**, one per sidebar
+topic, from psychoacoustics and room, building and vibration acoustics to
+environmental, aircraft and underwater noise, electroacoustics and FDTD wave
+simulation. Every result object exposes a one-line
+`.plot(language="en"|"es")` figure and, where a standard defines a reporting
+format, a `.report()` method that renders the normative PDF fiche.
 
+- [Build a sound level meter](../signals/sound-level-meter.md): the same chain run end to end, from the calibrator tone to $L_\mathrm{AF}(t)$, $L_\mathrm{Aeq}$, $L_{\mathrm{A}E}$, $L_\mathrm{Cpeak}$, the percentile levels and the class check of every stage
+- [All guides](../README.md): the map, every guide grouped by topic with a line on each
+- [Glossary](../reference/glossary.md): a symbol, its unit, its defining clause and the guide that computes it
 - [Filter Architecture Gallery](../signals/filters/filter-gallery.md): choose an architecture and inspect responses
 - [Calibration and dBFS](../signals/metrology/calibration.md): get real-world SPL values
 - [Why phonometry](why-phonometry.md): the conformance-first design philosophy
 - [Conformance report](../CONFORMANCE.md): the expected and computed value of all 1897 checks
-- [API Reference](../reference/api/index.md): every parameter of every function
+- [API Reference](https://docs.jmrp.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](../reference/bibliography.md): every work the guides cite, with the pages that cite it and its link where it has one

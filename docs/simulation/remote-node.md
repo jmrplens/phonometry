@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/simulation/remote-node.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/remote-node/
 
 # Sending a simulation to a remote node
 
@@ -17,11 +19,12 @@ This page says what happens when a run goes to a node, how to name one, how
 to set up a Docker node or a Python node, what can go wrong and what each
 error says, how to follow a run, what each side trusts of the other, and when
 a run there gives the numbers a run here gives. The device itself, NumPy,
-CuPy or torch, is chosen as [Where a simulation runs](compute.md) explains,
-and it holds on a node that has that library: section 3 says what the image
-holds, and section 4 what a Python node needs.
-[Where heavy work runs](where-it-runs.md) maps the devices, the nodes and the
-encoders in one place.
+CuPy or torch, is chosen as
+[Where a simulation runs](compute.md) explains, and it
+holds on a node that has that library: section 3 says what the image holds,
+and section 4 what a Python node needs.
+[Where heavy work runs](where-it-runs.md) maps the
+devices, the nodes and the encoders in one place.
 
 ## 1. What happens when a run goes to a node
 
@@ -56,7 +59,8 @@ own, and sends back the probe histories and, when the run records them
 snapshots, which are read here into arrays sized from your request and
 allocated before the connection opens. On a large grid the snapshots are most
 of what crosses the link and of the memory this machine needs:
-`snapshot_decimation`, section 7 of [Where a simulation runs](compute.md), and
+`snapshot_decimation`, section 7 of
+[Where a simulation runs](compute.md), and
 `dtype="float32"` shrink them, while the probe histories stay float64. A video
 writer sends its video's bytes instead of snapshots.
 
@@ -168,7 +172,8 @@ print(res.provenance.host, res.provenance.gpu)   # nas, and the card's name
 `elastic_fdtd_simulation(ElasticRun(...), compute=request)` goes to the node
 the same way. A whole script can name the node once, with a
 `simulation.use()` block or with the `PHONOMETRY_COMPUTE` environment
-variable; section 3 of [Where a simulation runs](compute.md) says which wins
+variable; section 3 of
+[Where a simulation runs](compute.md) says which wins
 when more than one names a placement. A `use()` block holds its request for
 every call inside it that passes no `compute=`:
 
@@ -242,9 +247,9 @@ libraries its figures need, the DejaVu fonts the figures are drawn with, and
 ffmpeg, a static build the Dockerfile pins by URL and SHA-256, with SVT-AV1,
 NVENC, VP9 and dav1d, so a node needs no ffmpeg of its own. The GPU build
 adds the CUDA runtime and CuPy 14.2.0, the release the GPU proof of
-[Where a simulation runs](compute.md) ran on. Neither build holds torch, and
-the CPU build holds no CuPy: a torch device takes a Python node or an image of
-your own. Each base image is pinned by digest.
+[Where a simulation runs](compute.md) ran on. Neither
+build holds torch, and the CPU build holds no CuPy: a torch device takes a
+Python node or an image of your own. Each base image is pinned by digest.
 
 Each run gets a container of its own, removed when the run ends, with no
 network, running as your user on the node, so whatever it writes is yours. Its
@@ -417,8 +422,8 @@ same kind of processor and C library. A CI job proves it on every pull
 request, against a node on the same machine. Between two machines, NumPy's
 vectorised functions, such as the exponential of the sponge profile, may round
 differently by one unit in the last place, each CPU taking the instructions it
-has. On a GPU, [Where a simulation runs](compute.md) states what the proof
-on the GPU shows.
+has. On a GPU, [Where a simulation runs](compute.md)
+states what the proof on the GPU shows.
 
 ## 9. For library developers
 
@@ -429,7 +434,7 @@ a run there bit for bit to the run here. `make node-image HOST=<name>` builds
 the image on your node from your checkout, with the Dockerfile and the
 bootstrap as you changed them. After a change to an engine, `make gpu-parity`,
 run from your checkout in that image on the node's GPU, renews the GPU proof
-in [`gpu-parity.lock`](../../gpu-parity.lock).
+in [`gpu-parity.lock`](https://github.com/jmrplens/phonometry/blob/main/gpu-parity.lock).
 
 ### Rendering the documentation clips on a node
 
@@ -444,37 +449,37 @@ publish too.
 
 ## What this guide covers
 
-**Covered.** Running `fdtd_simulation`, `elastic_fdtd_simulation` and the
-two video writers, `write_fdtd_animation` and `write_elastic_fdtd_animation`,
-on another machine over SSH, on a Docker node running the image built from the
-repository's Dockerfile or on a Python environment, with or without a GPU; the
-hosts file that names a node, and the `host` of `Compute` and of
-`PHONOMETRY_COMPUTE`; what the client and the node check, each of what the
-other sends; the errors a remote run raises, the fallback to NumPy here, the
-warnings the node raises, progress on the `phonometry.simulation` logger,
-timeouts and interrupts; and when a remote run gives the numbers of a run
-here.
+- **Covered.** Running `fdtd_simulation`, `elastic_fdtd_simulation` and the two video
+  writers, `write_fdtd_animation` and `write_elastic_fdtd_animation`, on another
+  machine over SSH, on a Docker node running the image built from the
+  repository's Dockerfile or on a Python environment, with or without a GPU; the
+  hosts file that names a node, and the `host` of `Compute` and of
+  `PHONOMETRY_COMPUTE`; what the client and the node check, each of what the
+  other sends; the errors a remote run raises, the fallback to NumPy here, the
+  warnings the node raises, progress on the `phonometry.simulation` logger,
+  timeouts and interrupts; and when a remote run gives the numbers of a run
+  here.
 
-**Not covered.** An engine built directly, `FDTD2D` or `ElasticFDTD2D`,
-steps in this process and does not go to a node, and a node runs the two
-simulation functions and the two video writers only, never code of the
-caller's choosing. ssh is the only transport. A node has no scheduler or queue
-of its own: two runs sent at the same time run side by side. The node image is
-built on the node and published to no registry, and a Windows machine cannot
-be a node. A node encodes the video of a run it steps, but no animation drawn
-here: `io.write_video` runs on this machine only.
+- **Not covered.** An engine built directly, `FDTD2D` or `ElasticFDTD2D`, steps in this process
+  and does not go to a node, and a node runs the two simulation functions and
+  the two video writers only, never code of the caller's choosing. ssh is the
+  only transport. A node has no scheduler or queue of its own: two runs sent at
+  the same time run side by side. The node image is built on the node and
+  published to no registry, and a Windows machine cannot be a node. A node
+  encodes the video of a run it steps, but no animation drawn here:
+  `io.write_video` runs on this machine only.
 
 ## See also
 
-- [Where a simulation runs: NumPy, CuPy and torch](compute.md): the devices
-  a run steps on, here or on a node, and what is promised about the numbers
-  on each.
+- [Where a simulation runs: NumPy, CuPy and torch](compute.md):
+  the devices a run steps on, here or on a node, and what is promised about
+  the numbers on each.
 - [Where heavy work runs: CPU or GPU, here or on a node](where-it-runs.md):
   the devices, the nodes and the encoders in one place.
-- [2D FDTD wave simulation](fdtd-simulation.md): the acoustic run, its
-  sources, probes and boundaries.
-- [Elastic waves and fluid-solid coupling](elastic-waves.md): the elastic
-  run, which goes to a node the same way.
+- [2D FDTD wave simulation](fdtd-simulation.md): the
+  acoustic run, its sources, probes and boundaries.
+- [Elastic waves and fluid-solid coupling](elastic-waves.md):
+  the elastic run, which goes to a node the same way.
 - [Writing animations and FDTD runs to video](../io/videos.md): the two
   writers, and in section 5 the video of a run made on a node.
 - API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/immission/railway-prediction.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/
 
 # Predicting railway vibration (E DIN 45672-3)
 
@@ -290,30 +292,30 @@ normative on one page and informative on its own.
 
 ## What this guide covers
 
-**The chain** of Formula (1), every term added as printed; the **speed
-rescaling** of Formula (3) with its 30 % limit; the **ground transmission**
-of Formulae (4) to (6), spreading and damping with `α_R`; and the
-**mitigation** as the term of Formula (1), added as printed.
+- **Covered.** **The chain** of Formula (1), every term added as printed; the **speed
+  rescaling** of Formula (3) with its 30 % limit; the **ground transmission**
+  of Formulae (4) to (6), spreading and damping with `α_R`; and the
+  **mitigation** as the term of Formula (1), added as printed.
 
-The **six tables of Annex A** read cell by cell off their pages: ground to
-floor for concrete and timber by natural frequency, ground to foundation for
-a basement and a ground floor with both deviations, foundation to floor
-against the ratio to the natural frequency, interpolated in decibels over
-the logarithm of the ratio and `nan` where the print has none.
+- **Covered.** The **six tables of Annex A** read cell by cell off their pages: ground to
+  floor for concrete and timber by natural frequency, ground to foundation for
+  a basement and a ground floor with both deviations, foundation to floor
+  against the ratio to the natural frequency, interpolated in decibels over
+  the logarithm of the ratio and `nan` where the print has none.
 
-**Clause 7 entire**: Table 2 as the KB weighting rounded to a tenth of a
-decibel, Formulae (8) to (13), and Formula (11) with the rule of the draft
-of DIN 4150-2 on a category at or below 0,1, which it prints without. **Annex B**: the transition distance, the exponent correction and
-the piecewise decay of Figure B.1. **Table 1**, the recommended distances.
+- **Covered.** **Clause 7 entire**: Table 2 as the KB weighting rounded to a tenth of a
+  decibel, Formulae (8) to (13), and Formula (11) with the rule of the draft
+  of DIN 4150-2 on a category at or below 0,1, which it prints without. **Annex B**: the transition distance, the exponent correction and
+  the piecewise decay of Figure B.1. **Table 1**, the recommended distances.
 
-**No work plan.** Clause 6, the phases of a prediction from the site visit
-to the choice of a measure, and Annex D, its table, are procedure. The
-second method of Annex B, an admittance summed over the bogies of a train,
-is described without a formula and is not implemented.
+- **Not covered.** **No work plan.** Clause 6, the phases of a prediction from the site visit
+  to the choice of a measure, and Annex D, its table, are procedure. The
+  second method of Annex B, an admittance summed over the bogies of a train,
+  is described without a formula and is not implemented.
 
-**No emission data.** The standard says where an emission spectrum comes
-from and what it depends on; it prints one, at one foundation, and the
-library carries none. The spectrum is the user's.
+- **Not covered.** **No emission data.** The standard says where an emission spectrum comes
+  from and what it depends on; it prints one, at one foundation, and the
+  library carries none. The spectrum is the user's.
 
 ## See also
 
@@ -326,18 +328,10 @@ library carries none. The spectrum is the user's.
   the general decay law this method's Formula (5) is a case of.
 - API reference:
   [`vibration.immission.railway_prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/railway-prediction/).
+
 ## References
 
-- Deutsches Institut für Normung. (2023). *Schwingungsmessung an
-  Schienenverkehrswegen — Teil 3: Prognoseverfahren auf Basis von
-  Terzspektren* (E DIN 45672-3:2023-02). A draft: Part 3 has no published
-  edition. Formula (1) of Clause 5.1, the speed rescaling of Formula (3), the
-  ground transmission of Formulae (4) to (6), the six level-difference tables
-  of Annex A, Table 2 and the chain of Clause 7 from Formula (8) to Formula
-  (13), the recommended distances of Table 1, and Formulae (B.1) and (B.2) of
-  Annex B. Clause 6 and Annex D are work plans and are not implemented.
-  Annex C is the oracle of the conformance rows.
-- Deutsches Institut für Normung. (2023). *Erschütterungen im Bauwesen —
-  Teil 2: Einwirkungen auf Menschen in Gebäuden* (E DIN 4150-2:2023-08). The
-  assessment the prediction feeds: Formula (6) and Table 2, which Part 3
-  takes as its Formula (11) and Table E.1.
+- **Deutsches Institut für Normung. (2023).** *Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden* (E DIN 4150-2:2023-08).
+  The assessment the prediction feeds: Formula (6) and Table 2, which Part 3 takes as its Formula (11) and Table E.1.
+- **Deutsches Institut für Normung. (2023).** *Schwingungsmessung an Schienenverkehrswegen — Teil 3: Prognoseverfahren auf Basis von Terzspektren* (E DIN 45672-3:2023-02).
+  A draft: Part 3 has no published edition. Formula (1) of Clause 5.1, the speed rescaling of Formula (3), the ground transmission of Formulae (4) to (6), the six level-difference tables of Annex A, Table 2 and the chain of Clause 7 from Formula (8) to Formula (13), the recommended distances of Table 1, and Formulae (B.1) and (B.2) of Annex B. Clause 6, the phases of a prediction, and Annex D are work plans and are not implemented. Annex C is the oracle of the conformance rows.

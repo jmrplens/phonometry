@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/filters/multichannel.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/filters/multichannel/
 
 # Multichannel and Performance
 
@@ -24,15 +26,19 @@ and you want per-channel spectra or levels. When the question is *between*
 channels (what is the delay from A to B, how much of B is explained by A),
 that is cross-channel analysis: see
 [Correlation and delay](../spectra/correlation-delay.md) and
-[Multiple and partial coherence](../spectra/miso-coherence.md), the implementations of
-the Bendat & Piersol cross-correlation and multiple-input models.
+[Multiple and partial coherence](../spectra/miso-coherence.md), the
+implementations of the Bendat & Piersol cross-correlation and
+multiple-input models.
 
 ## A stereo analysis in one call
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel.svg" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" width="80%"></picture>
 
-*Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right
-Channel (Log Sine Sweep).*
+*One `octave_filter` call, two channels: pink noise on the left, a logarithmic
+sweep on the right. Both come back flat in one-third-octave bands, pink noise
+because its $1/f$ spectrum has constant energy per fractional-octave band, the
+sweep because it spends proportionally equal time in each, and neither row is
+affected by the other.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -68,6 +74,19 @@ plt.show()
 
 </details>
 
+Read the figure row by row before moving on. The roll-offs at the two ends of
+the right row are the sweep's own 50 Hz and 10 kHz limits, not a filter effect.
+And two conclusions follow from the flatness. A flat fractional-octave spectrum
+corresponds to a $1/f$ power spectral density, so *white* noise does not look
+flat in this display: it rises at 3 dB per octave, because each band is 26 %
+wider than the one below. And two signals with completely different time
+structure (a stationary noise and a sweep that is at 50 Hz at one moment and
+10 kHz five seconds later) map to the same spectrum, which is why the band
+levels of this page answer "how much energy per band" and never "when". The
+octave spectrogram of
+[Integrated and Statistical Levels](../levels/levels.md) is the
+tool that restores the time axis.
+
 The convention is consistent across the whole library: time is always the
 **last axis**. This applies to `octave_filter`, `OctaveFilterBank`,
 `weighting_filter`, `time_weighting`, `leq`, `laeq`, `ln_levels` and
@@ -101,15 +120,10 @@ spl, freq = filtered.levels, filtered.frequencies
 | `(ch, n)` into `spectrogram` | multichannel STFT-style | `(ch, bands, frames)` |
 
 Everything vectorizes across the leading channel axis: one filter design is
-applied to all channels in a single SciPy call. What batching does *not* buy
-is arithmetic: the filtering cost scales linearly with the channel count,
-because each channel has to be filtered by each band, so eight channels cost
-eight channels however the call is written. What it removes is per-call
-Python overhead and the temptation to redesign the bank: it is the
-redesign that actually costs, about 33 ms for a fresh one-third-octave bank,
-an order of magnitude more than one band-filtering pass over a short frame.
-Convention: **channels first**, like most DSP code (`soundfile` returns
-`(n, ch)`: transpose with `x.T`).
+applied to all channels in a single SciPy call. Convention: **channels
+first**, like most DSP code (`soundfile` returns `(n, ch)`: transpose with
+`x.T`). What that buys, and what it does not, is the subject of
+[Performance](#performance-vectorization-and-caching) below.
 
 ## Per-channel semantics
 
@@ -123,16 +137,108 @@ spelling out:
   energies yourself: `10 * np.log10(np.mean(10 ** (spl / 10), axis=0))`,
   never the arithmetic mean of the dB values (see
   [Levels](../levels/levels.md) for why).
-- **One `calibration_factor` means one sensitivity.** The scalar factor
+- **One calibration factor means one sensitivity.** The scalar factor
+  (`calibration=LevelCalibration(factor=...)` on a filter bank,
+  `calibration_factor=` on `leq`, `laeq`, `ln_levels`, `lc_peak` and `sel`)
   multiplies every channel, which is correct only if all channels share the
-  same sensitivity. For an array of microphones with individual
-  calibrations, scale the rows first, `x * factors[:, None]`, and leave
-  `calibration_factor` at 1.
+  same sensitivity. For an array of microphones with individual calibrations,
+  scale the rows first, `x * factors[:, None]`, and leave the factor at its
+  default 1.0.
 - **Stateful classes keep one state per channel.** In block processing the
   state array matches the channel count and a change of channel count
   resets it; see [Block Processing](block-processing.md).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_channel_average_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_channel_average.svg" alt="Upper panel: five thin grey one-third-octave curves from five positions in one room, together with a thick blue energy average and a dashed red arithmetic average of the decibel values. Above about 400 Hz the five positions agree within a decibel and the two averages coincide; below it, in the modal region, the positions scatter by up to fifteen decibels and the dashed red average runs below the blue one. Lower panel: the difference between them per band, zero above 400 Hz and rising to a worst under-read of 3.8 dB at 40 Hz" width="88%"></picture>
+
+*The two lines of code, on a realistic survey. Where the positions agree the
+two averages are the same number; where they disagree, the modal region,
+which is exactly where a room survey has several positions in the first place
+, the arithmetic mean of the decibels under-reads by up to 3.8 dB. The error
+is never negative, so it does not wash out over more positions.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# Five positions of one room, band levels as a (5, bands) array. Here the
+# positions are synthesized; in the field they are five rows of one capture.
+rng = np.random.default_rng(7)
+survey = np.stack([0.02 * (1 + 0.3 * rng.standard_normal())
+                   * rng.standard_normal(2 * fs) for _ in range(5)])
+survey_levels = filters.octave_filter(survey, fs, fraction=3).levels
+
+energetic = 10 * np.log10(np.mean(10 ** (survey_levels / 10), axis=0))
+arithmetic = np.mean(survey_levels, axis=0)
+print(f"worst under-read {np.max(energetic - arithmetic):.2f} dB")
+# worst under-read 2.12 dB
+```
+
+</details>
+
+### Calibrating an array
+
+The sensitivity vector in the bullet above is not arithmetic, it is a
+procedure, and three things decide whether the result is right.
+
+```python
+# One sensitivity per capsule, in Pa per digital unit. Each element comes from
+# metrology.sensitivity(cal_tone[i], target_spl=94.0, fs=fs) on a calibration
+# capture in which the calibrator was coupled to capsule i and nothing else
+# was touched.
+factors = np.array([0.01021, 0.00984, 0.01007, 0.00998])
+survey = np.stack([left, right, left, right])      # your (4, n) capture
+calibrated = survey * factors[:, None]
+filtered = filters.octave_filter(calibrated, fs, fraction=3)
+spl, freq = filtered.levels, filtered.frequencies
+```
+
+**Lock the gains before the first tone and do not touch them again**, because
+every factor is only valid for the gain it was measured at. **Couple the
+calibrator to each capsule in turn** rather than reusing one factor for the
+array: capsules of the same model differ by a few tenths of a decibel, and that
+difference lands directly in a position-averaged level. **Repeat the pass at
+the end of the session** and treat the largest per-channel difference as the
+array's drift bound. Then two invariants that no downstream check can recover
+if they are wrong: every channel must come from **one converter clock** (two
+interfaces are two clocks, and a slow relative drift destroys any
+between-channel analysis), and the **row-to-position map must be written down
+at capture time**, because a swapped pair produces perfectly valid levels
+attributed to the wrong positions.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel_capture_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel_capture.svg" alt="A four-microphone array capture. On the left, four measurement microphones on tripods at room-survey spacing, labelled P1 to P4 with their capsules at 1.2 m above the floor and each stamped with its own sensitivity in millivolts per pascal; a sound calibrator is drawn coupled onto the P2 capsule with a dashed arrow showing it moved from capsule to capsule. In the middle, one four-channel preamplifier and one interface with a highlighted bar spanning all four inputs reading single sample clock, fs equals 48 kHz, and beside it a crossed-out second interface labelled two interfaces equals two clocks, not one array. On the right, the array x drawn as four stacked rows labelled ch0 equals P1 through ch3 equals P4 with the shape (4, N). A footer repeats the three invariants: one clock, locked gains, recorded row-to-position map" width="94%"></picture>
+
+The shape table above is the abstraction of that picture: each row of `x` is
+one microphone, and the mapping from a row index back to a position on the
+floor exists only in your notes.
+
 ## Performance: Vectorization and caching
+
+Start with what batching does *not* buy. The arithmetic scales linearly with
+channels, because each channel has to be filtered by each band, so eight
+channels cost eight channels however the call is written. Measured at 48 kHz
+on 5 s per channel through one reused one-third-octave bank:
+
+| Channels | One call [ms] | Per-channel loop [ms] | Ratio |
+| ---: | ---: | ---: | ---: |
+| 1 | 193 | 173 | 0.90 |
+| 2 | 337 | 352 | 1.04 |
+| 8 | 1394 | 1721 | 1.23 |
+| 32 | 5646 | 5208 | 0.92 |
+
+The ratio hovers around one, which is the honest answer: what batching removes
+is per-call Python overhead and the temptation to redesign the bank, and it is
+the redesign that actually costs: building a fresh one-third-octave bank takes
+about 33 ms, an order of magnitude more than a single band-filtering pass over
+a short frame.
+
+So the cost model is simple. One SOS filtering pass per band per channel
+dominates, which means the time scales with the number of bands (a
+one-third-octave bank is three times a one-octave one), with the record length
+and with the channel count, and nothing else. The actionable rules that
+follow: **build one `OctaveFilterBank` and reuse it**; pass all channels in one
+array for clarity rather than for speed; and when a run is too slow, reach for
+`fraction`, `limits` and record length, because those are the three terms in
+the model.
 
 `OctaveFilterBank` is the tool for repeated or streaming analysis: one bank
 designs its filters once and applies them to every frame, and NumPy
@@ -176,44 +282,37 @@ Additional performance notes:
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
   numba is installed (`pip install "phonometry[perf]"`).
 
+## What this guide covers
+
+- **Covered.** IEC 61260-1:2014 and IEC 61672-1:2013 as far as they constrain each row of a
+  `(channels, samples)` array: the band filters, weightings and detector
+  ballistics applied per channel are the unchanged single-channel designs, and
+  multichannel support adds no normative content of its own. The convention
+  itself follows Bendat & Piersol's procedure for multiple data records (Section
+  10.4.2): analyze each record individually first, and treat anything joint as a
+  separate, explicit step.
+
+- **Not covered.** Cross-channel questions, such as the delay between two channels or how much of
+  one channel a second one explains, are deliberately left out: `octave_filter`,
+  `weighting_filter` and `time_weighting` never mix or combine rows. See
+  [Correlation and delay](../spectra/correlation-delay.md) and
+  [Multiple and partial coherence](../spectra/miso-coherence.md)
+  for the cross-channel tools built on Bendat & Piersol's cross-correlation and
+  multiple-input models.
+
 ## See also
 
-- [Correlation and delay](../spectra/correlation-delay.md): the cross-channel
-  time-domain questions (delay, alignment) the per-channel path deliberately
-  leaves to you.
-- [Multiple and partial coherence](../spectra/miso-coherence.md): which of several
-  correlated channels actually drives a response (Bendat & Piersol Ch. 7).
-- [Block Processing](block-processing.md): the streaming counterpart, with
-  one filter state per channel.
-- [Levels](../levels/levels.md): the per-channel level metrics, and why dB values are
-  combined energetically.
+- [Correlation and delay](../spectra/correlation-delay.md): the cross-channel time-domain questions (delay, alignment) the per-channel path deliberately leaves to you.
+- [Multiple and partial coherence](../spectra/miso-coherence.md): which of several correlated channels actually drives a response (Bendat & Piersol Ch. 7).
+- [Block Processing](block-processing.md): the streaming counterpart, with one filter state per channel.
+- [Levels](../levels/levels.md): the per-channel level metrics, and why dB values are combined energetically.
+- API reference: [`phonometry`](https://docs.jmrp.io/phonometry/reference/api/filters/phonometry/) and [`filters.core`](https://docs.jmrp.io/phonometry/reference/api/filters/core/).
 
 ## References
 
-- Bendat, J. S., & Piersol, A. G. (2010). *Random data: Analysis and
-  measurement procedures* (4th ed.). Wiley.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Section 10.4.2 (the procedure for analyzing multiple data records:
-  individual per-record analysis first, joint cross-record analysis as a
-  separate, deliberate step) and Chapter 7 (the multiple-input/output
-  models that joint step leads to).
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
-  The band definitions each channel is filtered with; the multichannel path
-  batches them unchanged.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The weighting and time-integration semantics applied per channel.
-
-## Standards
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and fractional-octave-band
-filters — Part 1: Specifications*, and IEC 61672-1:2013, *Electroacoustics —
-Sound level meters — Part 1: Specifications*. Multichannel support adds no
-normative content of its own: each channel is filtered, weighted and
-time-integrated exactly as the single-channel standards prescribe (see [Filter
-Banks](filter-banks.md) and [Levels](../levels/levels.md)); the vectorization
-only batches the computation across the channel axis.
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  Section 10.4.2 (the procedure for analyzing multiple data records: individual per-record analysis first, joint cross-record analysis as a separate, deliberate step) and Chapter 7 (the multiple-input/output models that joint step leads to). ISBN 978-0-470-24877-5.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The weighting and time-integration semantics applied per channel, exactly as the single-channel standard prescribes.
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The band definitions each channel is filtered with; the multichannel path batches them unchanged. Multichannel support adds no normative content of its own: each channel is filtered exactly as the single-channel standard prescribes, and the vectorization only batches the computation across the channel axis.

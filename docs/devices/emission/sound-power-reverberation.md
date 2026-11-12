@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/emission/sound-power-reverberation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Sound Power in the Reverberation Room (ISO 3741)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/
+
+# Sound Power in the Reverberation Room
 
 A reverberation room turns its main defect as a listening space into a
 measuring instrument: because the field is diffuse, a handful of microphone
@@ -11,12 +13,37 @@ the laboratory route of choice for steady, broadband sources small enough to
 travel to a qualified room. This guide covers the direct method through the
 Sabine absorption area, the Waterhouse and meteorological corrections, the
 comparison method against a reference sound source, the qualification
-warnings, the accredited-style test fiche and, in section 3, the sound energy
+warnings, the accredited-style test fiche and, in section 4, the sound energy
 level $L_J$ that the same two methods give a single event. Which route fits
 which job, and the pressure and intensity alternatives, are weighed in
 [Sound Power](sound-power.md).
 
 ## 1. Reverberation room, precision grade (ISO 3741)
+
+Both methods are defined over the **one-third-octave bands from 100 Hz to
+10 kHz** (clause 8.1). Annex E extends that range down to 50 Hz informatively;
+nothing extends it upwards. The lower bound is set by the room's mode density,
+which is why Table 1 pairs the lowest band of interest with a minimum volume
+(200 m³ at 100 Hz, 150 m³ at 125 Hz, 100 m³ at 160 Hz, 70 m³ from 200 Hz up)
+and the upper bound is set by air absorption. The source under test must be no
+larger than about **2 % of the room volume** (clause 1.2; up to 5 % only where a
+noise test code says what that costs in uncertainty), so that it does not load
+the field it is being measured in, and it must be steady over the measurement
+interval: Eq. 20 energy-averages and reports a rate of energy flow, so it
+characterises the machine only if the machine is time-invariant while it is
+running. A single event, one press stroke or one door slam, is described by the
+sound energy level $L_J$ of clause 9.2 instead, which section 4 covers.
+
+The background must lie at least **6 dB** below the source level in the
+one-third-octave bands at and below 200 Hz and at and above 6,3 kHz, and at
+least **10 dB** below between 250 Hz and 5 kHz (clause 5.4.1.1), a tighter pair
+of criteria than the flat 6 dB of the enveloping-surface methods, which is what
+"the ISO 3741 criterion is frequency-dependent" in the parameter table below
+means. Below those margins `sound_power_reverberation` clamps $K_1$ to the value
+the criterion itself produces (1.26 dB and 0.46 dB respectively), warns, and the
+band becomes an upper bound rather than a determination. A band whose corrected
+A-weighted contribution is at least 15 dB below the largest may instead be
+dropped from the range of interest altogether (clause 5.4.1.2).
 
 In a qualified hard-walled **reverberation room** the field is diffuse, so a
 handful of microphones sample the whole radiated energy and the method
@@ -42,26 +69,87 @@ C_1 = -10 \log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s}0}} + 5 \log_{10}\frac{273.1
 C_2 = -10 \log_{10}\frac{p_\mathrm{s}}{p_{\mathrm{s}0}} + 15 \log_{10}\frac{273.15 + \theta}{296},
 $$
 
-with the speed of sound $c = 20.05\sqrt{273 + \theta}$. The
-**comparison method** replaces the absorption-area, Waterhouse and $C_1$
-terms by a reference sound source of known power $L_W(\text{RSS})$ measured
-in the same room, so the room need not be characterised:
-$L_W = L_W(\text{RSS}) + (L_p(\text{ST}) - L_p(\text{RSS}) + C_2)$.
+with the speed of sound $c = 20.05\sqrt{273 + \theta}$.
 
-The right-hand panel of the clip below is this method. The same source runs
+Two of the five terms usually go unexplained. The **−6 dB** is the diffuse-field
+relation itself: in a diffuse field the power a source feeds into the room
+equals $\bar{p}^2 A/(4\rho c)$, and expressing that against the two reference
+quantities leaves a constant, which for the references of these standards is
+−6 dB. The **4.34 A/S** term is the first-order correction from the Sabine
+absorption area towards the Eyring value; 4.34 is $10\lg e$ and $A/S$ is the
+room's mean absorption coefficient, so the term is small in a hard room and
+grows as the room is damped. In the example below, $A = 16.1$ m² against
+$S = 220$ m², so it contributes **0.32 dB** in every band, negligible here, and
+the first term to watch when the reverberation time sits near the qualification
+floor. The Waterhouse term runs the other way, **1.68 dB at 100 Hz** and
+0.02 dB at 10 kHz on the same data: the low bands are ruled by the boundary
+energy the interior microphones miss, the high bands by the absorption area.
+
+The right-hand panel of the clip below is the reverberation room. The same
+source runs
 in both rooms; in the anechoic room on the left the microphones see only what
-the source sends their way, so the level falls with distance and the
-free-field route has to integrate over a measurement surface, while in the
-reverberation room on the right the reflected energy fills the space and the
-level stops depending on where a microphone is. That is the whole reason
-Eq. 20 can replace a surface integral with a handful of positions and a room
-constant, and the reason the room, not the array, is what has to be
-qualified. Both routes end on the same $L_W$, because sound power is a
-property of the source and not of the room it is measured in.
+the source sends their way, so the level falls with distance and the free-field
+route has to integrate over a measurement surface, while in the reverberation
+room on the right the reflected energy fills the space and the level stops
+depending on where a microphone is. That is the whole reason Eq. 20 can
+replace a surface integral with a handful of positions and a room constant,
+and the reason the room, not the array, is what has to be qualified. Both
+routes end on the same $L_W$, because sound power is a property of the source
+and not of the room it is measured in.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room producing different microphone pressures, while the free-field and diffuse-field formulas converge to the same sound power level" width="640" height="360" loading="lazy"></picture>
+**Video:** [Same source, two rooms, one sound power](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_power_two_rooms.webm): The same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W.
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_power_two_rooms.webm)
+### Where the microphones and the source go
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reverberation_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reverberation_power.svg" alt="Two plans of the same ISO 3741 reverberation test room with skew hard walls. On the left the direct method: the source under test on the floor at least 1.5 m from every wall and placed asymmetrically, six numbered microphone positions each more than 1.0 m from every room surface and more than d_min from the source with a mutual spacing of at least half a wavelength, a hung diffuser, and a dashed circular path marking the continuous-traverse alternative. On the right the comparison method: the same six positions, the source under test left in place, and the reference sound source on the floor at least 1.5 m from the walls and from the source under test. A footer strip gives d_min = D1 sqrt(V/T60) worked for V = 200 cubic metres and T60 = 2 seconds, the five traverse conditions, the averaging times and the reverberation-time rule" width="96%"></picture>
+
+Everything Eq. 20 does rests on the array being in the reverberant part of the
+field, and the standard fixes that with one distance. The source sits **on the
+floor, at least 1,5 m from any wall**, and in a rectangular room asymmetrically
+(clause 7.3), so that it does not couple preferentially into one mode family.
+The nearest microphone must then stand off by
+
+$$
+d_{\min} = D_1 \sqrt{\frac{V}{T_{60}}}, \qquad D_1 = 0.08 ,
+$$
+
+with $D_1 = 0.16$ strongly recommended below 5 kHz (clause 8.3, Eq. 8). For the
+room of the example below, $V = 200$ m³ and $T_{60} = 2.0$ s, that is
+$d_{\min} = 0.8$ m, or **1.6 m** at the recommended $D_1$, so a microphone
+1 m from the source is already inside the near field this method is not
+measuring.
+
+If the room has not been qualified for discrete tones per Annex D, the array is
+**six discrete positions**, each more than 1,0 m from any room surface, more
+than $d_{\min}$ from the source, and separated from one another by at least half
+a wavelength at the lowest band of interest (1,7 m at 100 Hz). A continuous
+traverse may replace them for the levels themselves, provided every point on it
+keeps $d_{\min}$ from the source and 1,0 m from any room surface, stays 0,5 m
+clear of any diffuser, does not lie in a plane within 10° of a room surface,
+and runs for at least $3\lambda$ or 10,3 m, whichever is the smaller. The six
+discrete positions are still needed to estimate the standard deviations below.
+
+Each level is time-averaged over at least **30 s** in the bands centred at and
+below 160 Hz and at least **10 s** from 200 Hz up (clause 8.4.1): the low bands
+need the longer interval because a diffuse field is a modal average, and there
+are few modes down there to average over. A traversing microphone must cover at
+least two full traverses. The background reading is taken immediately before or
+immediately after the source reading, at the same positions and over the same
+interval; that is what `background_levels` is, and a spectrum measured on
+another day is not it.
+
+The `SoundPowerWarning` at an inter-position spread of 1.5 dB is the entry point
+to the escalation, not a defect in itself. Clause 8.4.2.2 computes the standard
+deviation $s_\mathrm{M}$ of the six initial levels band by band (Eq. 10); above 1,5 dB in
+any band the source is radiating significant discrete components for this room,
+and the answer is *more sampling*, not a different formula: either qualify the
+room per Annex D, or read the required number of positions from Table 4: six
+stays six up to 160 Hz, but 400 Hz to 630 Hz goes to 12 positions for
+$1{,}5 < s_\mathrm{M} \le 3$ dB and 24 above 3 dB, and 800 Hz upwards to 15 and 30, and
+add source positions per Eq. 12 and Table 5. Averaging longer at six positions
+buys nothing here, because the scatter is spatial. The number of positions, the
+traverse geometry and the measurement time interval all belong in the test
+report.
 
 ```python
 import numpy as np
@@ -144,11 +232,51 @@ positions. When the room volume, its reverberation time or the microphone
 count fail an ISO 3741 qualification criterion (Table 1 minimum volume, the
 $V/S$ reverberation floor, fewer than 6 positions, or an inter-position
 spread above 1.5 dB), an advisory `SoundPowerWarning` is emitted and the
-result still returns. Those coarse advisory criteria are the only checks
-made: the reverberation-room qualification itself (Annex C/D,
-eigenfrequency counting or a reference-source comparison) is assumed, not
-performed. The sound energy level $L_J$ of clause 9.2, the single-event
-counterpart of $L_W$ defined in the same clauses, is section 3.
+result still returns.
+
+The five terms of Eq. 20 discussed above are all fields of that same `rev`,
+so the balance between them can simply be drawn:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reverberation_correction_terms_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reverberation_correction_terms.svg" alt="Stacked bars over the 21 one-third-octave bands from 100 Hz to 10 kHz showing what each term of ISO 3741 Eq. 20 contributes to the difference between the sound power level and the mean room level. The absorption-area term is a constant 12.1 dB, the 4.34 A over S term a constant 0.32 dB, the Waterhouse term falls from 1.68 dB at 100 Hz to almost nothing by 10 kHz, the meteorological terms are a fraction of a decibel and the constant minus 6 dB is drawn downwards; a line on top traces the resulting difference from 7.9 dB at 100 Hz to 6.2 dB at 10 kHz" width="92%"></picture>
+
+*The whole of Eq. 20, band by band, on the example below. The absorption area
+carries the determination; the Waterhouse term is the only one with real
+frequency dependence and it lives entirely in the low bands; and the
+meteorological pair is a fraction of a decibel at ordinary conditions, which
+is precisely why it is worth stating that the term everyone omits, 4.34 A/S,
+grows with the room's absorption rather than with frequency.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Every term is a field of the result the first snippet of this page returns.
+absorption = 10.0 * np.log10(rev.absorption_area)
+eyring = 4.34 * rev.absorption_area / 220.0
+terms = [("10 lg(A/A0)", absorption), ("4.34 A/S", eyring),
+         ("Waterhouse", rev.waterhouse_correction),
+         ("C1 + C2", np.full(freqs.size, rev.c1 + rev.c2)),
+         ("-6 dB", np.full(freqs.size, -6.0))]
+
+x = np.arange(freqs.size)
+up = np.zeros(freqs.size)
+down = np.zeros(freqs.size)
+fig, ax = plt.subplots(figsize=(11, 5.6))
+for label, values in terms:
+    ax.bar(x, values, bottom=np.where(values >= 0.0, up, down), width=0.72,
+           label=label)
+    up = up + np.clip(values, 0.0, None)
+    down = down + np.clip(values, None, 0.0)
+ax.plot(x, rev.sound_power_level - lp, "o-", label="LW - Lp")
+ax.set_xticks(x, [f"{f:g}" for f in freqs], rotation=60)
+ax.set(xlabel="Frequency [Hz]", ylabel="Contribution to LW - Lp [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### `sound_power_reverberation()` parameters
 
@@ -159,9 +287,62 @@ counterpart of $L_W$ defined in the same clauses, is section 3.
 | `volume` | float | m³ | > 0 | Room volume $V$ |
 | `surface_area` | float | m² | > 0 | Total room surface $S$ (Waterhouse, $A/S$) |
 | `frequencies` | 1D array | Hz | one per band | Required (Waterhouse needs $f$); enables $L_{W\mathrm{A}}$ |
-| `background_levels` | 1D or 2D array | dB | matches `levels` | $K_{1i}$ per microphone position (Eq. 14/15, before the Eq. 16 average; frequency-dependent criterion) |
+| `background_levels` | 1D or 2D array | dB | matches `levels` | Per-band $K_1$ (frequency-dependent criterion) |
 | `temperature_c` | float | °C | default `23.0` | Sets $c$, $C_1$, $C_2$ |
 | `static_pressure_kpa` | float | kPa | default `101.325` | Sets $C_1$, $C_2$ |
+
+Both this function and the comparison method of section 2 return a
+`ReverberationSoundPowerResult`
+(`sound_power_level`, `mean_pressure_level`, `absorption_area`,
+`waterhouse_correction`, `background_correction`, `c1`, `c2`,
+`speed_of_sound`, `sound_power_level_a`, `method`).
+
+## 2. The comparison method (Eq. 21)
+
+The comparison method replaces the absorption-area, Waterhouse and $C_1$ terms
+by a **reference sound source** of known power $L_W(\text{RSS})$ run in the same
+room, so the room itself never has to be characterised:
+
+$$
+L_W = L_W(\text{RSS}) + \left( L_p(\text{ST}) - L_p(\text{RSS}) + C_2 \right).
+$$
+
+A reference sound source is a small aerodynamic broadband source of stable
+output whose band-wise sound power level has been calibrated to ISO 6926, and it
+is that calibration, not the room, that the determination now rests on. The
+calibrated $L_W(\text{RSS})$ is stated for reference meteorological conditions,
+which is why $C_2$ survives in Eq. 21 while $C_1$ and the room terms cancel.
+
+The procedure is two measurements and two backgrounds. The test source is
+measured first, at the six positions or over the traverse of section 1. The RSS
+is then run **in the same room, at the same microphone positions or the same
+traverse**, with the source under test left standing where it was, and with its
+own background reading (that is what `reference_background_levels` is for). The RSS
+stands on the floor more than 1,5 m from the walls; the preferred position is
+the one the source under test occupies, and where the source cannot be moved the
+RSS goes as close to it as practicable but never closer than 1,5 m
+(clause 8.6.1). One RSS position suffices even when the source under test needs
+several. Both measurements must be made at the same temperature, pressure and
+humidity (clause 8.6.2).
+
+Because the RSS supplies the room constant, the minimum source-to-microphone
+distance may also be taken from the RSS reading itself (clause 8.3, Eq. 9),
+$d_{\min} = D_2 \cdot 10^{0.05 (L_{W\mathrm{r}} - L_{p\mathrm{r}})}$ with $D_2 = 0.4$ and 0,8
+recommended below 5 kHz. On the example below, $L_{W\mathrm{r}} - L_{p\mathrm{r}} = 7$ dB in the
+100 Hz band, so $d_{\min} = 0.90$ m, or 1.8 m at the recommended $D_2$, close
+enough to the 0.8/1.6 m of Eq. 8 to be a useful cross-check.
+
+What it buys and what it costs: no $T_{60}$, no volume, no surface area and no
+Waterhouse term, so a room that has never been surveyed can still return a
+determination, and correspondingly, `absorption_area`,
+`waterhouse_correction` and `c1` come back `NaN`, because the method never
+computes them. What it costs is that the result inherits the RSS calibration
+whole, so a source whose ISO 6926 certificate has expired quietly biases every
+band, and the RSS position has to sample the room the way the test source does
+or the difference $L_p(\text{ST}) - L_p(\text{RSS})$ is measuring the two
+positions rather than the two sources.
+
+### `sound_power_comparison()` parameters
 
 `sound_power_comparison(levels, reference_levels, reference_sound_power_levels, *, frequencies=None,
 background_levels=…, reference_background_levels=…, temperature_c=23.0,
@@ -171,21 +352,15 @@ source's levels and known power.
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `reference_levels` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
-| `reference_sound_power_levels` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source; a [`ReferenceSourceCalibration`](free-field-qualification.md) is read in the one-third octave bands at `frequencies` |
+| `reference_sound_power_levels` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source, from its ISO 6926 calibration; a [`ReferenceSourceCalibration`](free-field-qualification.md) is read in the one-third octave bands at `frequencies` |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | Background for the test source; per-band $K_1$ on $L_p(\text{ST})$ |
 | `reference_background_levels` | 1D or 2D array | dB | matches `reference_levels` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
 
 `reference_background_levels` background-corrects the reference-source room level
 $L_p(\text{RSS})$ exactly as `background_levels` does for the test source;
-both need `frequencies` (the ISO 3741 criterion is frequency-dependent). Both
-return a
-`ReverberationSoundPowerResult`
-(`sound_power_level`, `mean_pressure_level`, `absorption_area`,
-`waterhouse_correction`, `background_correction`, `c1`, `c2`,
-`speed_of_sound`, `sound_power_level_a`, `method`; the absorption/Waterhouse/`c1`
-fields are `NaN` for the comparison method).
+both need `frequencies` (the ISO 3741 criterion is frequency-dependent).
 
-## 2. The measurement report (`.report()`)
+## 3. The measurement report (`.report()`)
 
 The reverberation-room result (`ReverberationSoundPowerResult`, ISO 3741)
 writes a one-page PDF fiche laid out like a sound-power test sheet through
@@ -231,35 +406,30 @@ res.report(
 )   # LWA = 94.3 dB(A) re 1 pW -> declared limit 96 dB(A): PASS
 ```
 
-One caveat on that example: it runs Eq. 20 on **octave** bands for
-compactness, and that is not a conforming ISO 3741 determination. Both
-methods are defined on one-third-octave bands, and octave-band results are
-formed afterwards by summing the one-third-octave band powers per Annex F
-(Eq. F.1), a summation not implemented here (so it has to be done by hand),
-not by feeding octave levels into Eq. 20, whose Waterhouse and absorption
-terms would then be evaluated at the octave mid-frequency instead of at each
-third. Section 1's example, 100 Hz to 10 kHz in thirds, is the conforming
-shape.
+One caveat on that example: it runs Eq. 20 on **octave** bands for compactness,
+and that is not a conforming ISO 3741 determination. Both methods are defined on
+one-third-octave bands, and octave-band results are formed afterwards by summing
+the one-third-octave band powers per Annex F (Eq. F.1), not by feeding octave
+levels into Eq. 20: the Waterhouse and absorption terms are frequency-dependent
+and would then be evaluated at the octave mid-frequency instead of at each third.
+Section 1's example, 100 Hz to 10 kHz in thirds, is the conforming shape.
 
-The example fiche, regenerated with `make reports`, is kept rendered in the
-repository. Click the preview to open the PDF:
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-[![ISO 3741 reverberation-room sound power example report: a header with the client, the noise source, the qualified reverberation test room and the instrumentation and climate, the octave-band table (125 Hz to 8 kHz) of mean room sound-pressure levels Lp and band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 94.3 dB(A) re 1 pW with the total LW = 96.7 dB and the direct determination method, and a PASS verdict against the declared 96 dB(A) limit, closed by a basis strip stating the Eq. 20 correction model with the Sabine absorption area, the Waterhouse boundary term and the meteorological corrections C1 and C2, and the Annex F A-weighting](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3741_reverberation_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3741_reverberation_power_example.pdf)
+[![ISO 3741 reverberation-room sound power example report (PDF): One-page ISO 3741 reverberation-room sound-power determination fiche: a header with the client, the noise source, the qualified reverberation test room and the instrumentation and climate, the octave-band table (125 Hz to 8 kHz) of mean room sound-pressure levels Lp and band sound-power levels LW, the sound-power spectrum LW(f) with a nominal band axis, the boxed A-weighted sound power level LWA = 94.3 dB(A) re 1 pW with the total LW = 96.7 dB and the direct determination method, and a PASS verdict against the declared 96 dB(A) limit, closed by a basis strip stating the Eq. 20 correction model with the Sabine absorption area, the Waterhouse boundary term and the meteorological corrections C1 and C2, and the Annex F A-weighting.](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3741_reverberation_power_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso3741_reverberation_power_example.pdf)
 
-*Reverberation-room sound power fiche (`ReverberationSoundPowerResult.report`),
-an ISO 3741 precision-grade direct-method determination with the Waterhouse and
-$C_1$/$C_2$ corrections and the boxed $L_{W\mathrm{A}}$.*
+Reverberation-room sound power fiche (ReverberationSoundPowerResult.report), an ISO 3741 precision-grade direct-method determination with the Waterhouse and C1/C2 corrections and the boxed LWA.
 
+## 4. Sound energy level of a single event (clause 9.2)
 
-## 3. Sound energy level of a single event (clause 9.2)
-
-Both methods above report a rate of energy flow, so a machine that fires once
-and falls silent has no $L_W$ to determine. Clause 9.2 gives it the **sound
-energy level** $L_J = 10\log_{10}(J/J_0)$, $J_0 = 1$ pJ (clause 3.18), by the
-same two routes with the single event time-integrated sound pressure level
-$L_E$ (clause 3.4) in place of $L_p$: Eq. 30 is Eq. 20 with
-$\overline{L_E(\text{ST})}$ where $\overline{L_p(\text{ST})}$ stood, and Eq. 31
-is Eq. 21 likewise,
+Both methods above energy-average the room level and report a rate of energy
+flow, so a machine that fires once and falls silent has no $L_W$ to determine.
+Clause 9.2 gives it the **sound energy level** $L_J = 10\log_{10}(J/J_0)$,
+$J_0 = 1$ pJ (clause 3.18), and determines it by the same two routes with the
+single event time-integrated sound pressure level $L_E$ (clause 3.4) in place of
+the time-averaged $L_p$: Eq. 30 is Eq. 20 with $\overline{L_E(\text{ST})}$ where
+$\overline{L_p(\text{ST})}$ stood, and Eq. 31 is Eq. 21 likewise,
 
 $$
 L_J = \overline{L_E(\text{ST})} + \left[10\log_{10}\frac{A}{A_0} + 4.34\ \frac{A}{S}
@@ -267,22 +437,29 @@ L_J = \overline{L_E(\text{ST})} + \left[10\log_{10}\frac{A}{A_0} + 4.34\ \frac{A
 L_J = L_W(\text{RSS}) + \left(\overline{L_E(\text{ST})} - \overline{L_p(\text{RSS})}\right) + C_2 .
 $$
 
-The measurement is clause 8.5: at least five events at each position, one at a
-time or as one reading encompassing them all, through an interval that contains
-the whole event including its decay, and no moving microphone for a
-non-repetitive impulse. Clause 9.2.1 reduces both readings to the level of one
-event (Eq. 22, the energy mean of $N_\mathrm{e}$ readings, or Eq. 23, one
-reading less $10\log_{10} N_\mathrm{e}$), clause 9.2.2 corrects each position
-for its own background by the frequency-dependent criterion of 9.1.2
-(Eq. 25/26), and clause 9.2.3 energy-averages the corrected positions
-(Eq. 27). The background is the time-averaged level measured over the same
-integration time $T$ as the events, compared as its exposure over that window,
-$L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$, so that the energies Eq. 25
-subtracts share one reference; `integration_time` is therefore required with
-`background_levels` (the [errata registry](../../ERRATA.md) records the
-reading). Annex F then forms the octave-band levels (Eq. F.4, the energy sum of
-the three thirds of Table F.1 per octave, `octave_band_levels`) and the
-A-weighted total (Eq. F.5, `sound_energy_level_a`).
+The measurement is clause 8.5: at least **five** events at each of the six
+positions, either one at a time or as one reading encompassing them all, through
+an interval that contains every significant part of the event *including its
+decay*, and no moving microphone for a non-repetitive impulse. Clause 9.2.1
+reduces both readings to the level of one event at each position (Eq. 22, the
+energy mean of $N_\mathrm{e}$ single readings, or Eq. 23, one reading less
+$10\log_{10} N_\mathrm{e}$; `mean_single_event_level` on the
+[pressure-methods page](sound-power-pressure.md#five-events-one-at-a-time-or-all-at-once)
+is the same pair). Clause 9.2.2 corrects each position for its own background
+by the frequency-dependent criterion of 9.1.2 (Eq. 25/26), and clause 9.2.3
+energy-averages the corrected positions (Eq. 27). The background is the
+time-averaged level measured over the same integration time $T$ as the events,
+and it is compared as its exposure over that window,
+$L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$, so that the energies Eq. 25 subtracts
+share one reference; `integration_time` is therefore required with
+`background_levels`. The reasons are spelled out on the pressure-methods page
+and in the [errata registry](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md).
+
+`sound_energy_reverberation` and `sound_energy_comparison` take `levels` in the
+forms the sound power functions take, plus one: a 3D `(Ne, NM, NB)` array of the
+events measured one at a time, or a 1D/2D reading with `n_events=Ne` for one
+measurement of several. The room of section 1 and the reference source of
+section 2 serve for both:
 
 ```python
 import numpy as np
@@ -306,16 +483,22 @@ print(slam_lj.n_events, slam_lj.method)                    # 5 direct
 print(np.round(slam_lj.sound_energy_level[:3], 1))       # [96.  94.9 94.2] dB re 1 pJ
 print(round(slam_lj.sound_energy_level_a, 1))            # LJA = 99.0 dB(A)
 
-# Comparison method: the reference source of section 1, run steadily.
+# Comparison method: the reference source of section 2, run steadily.
 slam_cmp = emission.sound_energy_comparison(
     slams, lp_rss, lw_rss, frequencies=thirds, temperature_c=20.0,
 )
 print(round(float(slam_cmp.sound_energy_level[0]), 1), slam_cmp.method)   # 95.0 comparison
 
-# Annex F octave bands, and the identity with the steady chain (LJ = LW + 10 lg(T/T0)).
-bands = emission.octave_band_levels(slam_lj.sound_energy_level, frequencies=thirds)
-octaves, lj_octave = bands.frequencies, bands.levels
-print(octaves)                        # [ 125.  250.  500. 1000. 2000. 4000. 8000.]
+slam_lj.plot()   # LJ per one-third octave, LJA in the title (needs matplotlib)
+```
+
+The identity with the steady chain is exact here too: the mean room level of
+section 1 read as a 10 s window, $L_E = L_p + 10\log_{10}(T/T_0)$ at every
+position, gives $L_J = L_W + 10$ dB in every band through the same absorption
+area, Waterhouse term and $C_1$/$C_2$, which is why Eq. 30 states $L_J$ under
+the reference meteorological conditions exactly as Eq. 20 states $L_W$:
+
+```python
 lp_thirds = np.linspace(80.0, 70.0, thirds.size)     # the mean room SPL of section 1
 steady = emission.sound_power_reverberation(
     lp_thirds, t60_thirds, volume=200.0, surface_area=220.0, frequencies=thirds,
@@ -326,58 +509,91 @@ ten_seconds = emission.sound_energy_reverberation(
     temperature_c=20.0, static_pressure_kpa=101.0,
 )
 print(np.round(ten_seconds.sound_energy_level - steady.sound_power_level, 6)[:3])   # 10.0
-
-slam_lj.plot()   # LJ per one-third octave, LJA in the title (needs matplotlib)
 ```
 
-`sound_energy_reverberation` takes the room arguments of
-`sound_power_reverberation` and `sound_energy_comparison` the reference-source
-arguments of `sound_power_comparison`, both plus `n_events`, `background_levels`
-with `integration_time`; they return a `ReverberationSoundEnergyResult`
-(`sound_energy_level`, `mean_event_level`, `absorption_area`,
-`waterhouse_correction`, `background_correction`, `c1`, `c2`,
-`speed_of_sound`, `sound_energy_level_a`, `method`, `n_events`,
-`integration_time`) with `.plot()`, the same `NaN` fields for the comparison
-method as its sound power twin, and the same qualification warnings. The
-single event results carry no `.report()` fiche, and the averaging over several
-source positions of Eq. 24 is left to the caller.
+### Octave bands and the A-weighted total (Annex F)
+
+Both methods are defined on one-third-octave bands, and Annex F forms the
+octave-band and A-weighted levels afterwards, for sound power (Eq. F.1, F.2) and
+sound energy (Eq. F.4, F.5) alike. The A-weighted total is the
+`sound_energy_level_a` of every result above; the octave bands are the energy
+sum of the three thirds $k = 3i - 2$ to $3i$ that Table F.1 assigns to octave
+$i$, numbered from $k = 1$ at 50 Hz, which `octave_band_levels` applies to any
+band spectrum whose thirds come in complete triplets:
+
+```python
+bands = emission.octave_band_levels(slam_lj.sound_energy_level, frequencies=thirds)
+octaves, lj_octave = bands.frequencies, bands.levels
+print(octaves)                        # [ 125.  250.  500. 1000. 2000. 4000. 8000.]
+print(np.round(lj_octave, 1))         # [99.8 ... 87.7] dB, three thirds summed per octave
+```
+
+### `sound_energy_reverberation()` and `sound_energy_comparison()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels` | 1D, 2D or 3D array | dB | per band, `(NM, NB)` or `(Ne, NM, NB)` | Single event levels: per event on the first axis (Eq. 22), one reading of `n_events` events (Eq. 23), or the mean of one event |
+| `t60`, `volume`, `surface_area`, `frequencies` | as in section 1 | | | Direct method only. `frequencies` is required there; the comparison method takes it only when `background_levels` is given, since the correction is per band |
+| `reference_levels`, `reference_sound_power_levels`, `reference_background_levels` | as in section 2 | | | Comparison method only; the reference source is steady and keeps the 9.1.2 correction |
+| `n_events` | int or None | | `>= 1`, default `None` | $N_\mathrm{e}$ encompassed by one reading (Eq. 23); at least 5 without a warning |
+| `background_levels` | 1D or 2D array | dB | matches `levels` | Time-averaged background over the same window; per-position $K_{1i}$ (Eq. 25/26) |
+| `integration_time` | float | s | > 0, required with `background_levels` | The window $T$; the background is compared as $L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$ |
+| `temperature_c`, `static_pressure_kpa` | float | °C, kPa | defaults `23.0`, `101.325` | Set $c$, $C_1$, $C_2$ as in section 1 |
+
+Both return a `ReverberationSoundEnergyResult` (`sound_energy_level`,
+`mean_event_level`, `absorption_area`, `waterhouse_correction`,
+`background_correction`, `c1`, `c2`, `speed_of_sound`, `sound_energy_level_a`,
+`method`, `n_events`, `integration_time`), with the same `NaN` fields for the
+comparison method as its sound power twin, and the same qualification
+warnings.
+
+## What this guide covers
+
+- **Covered.** The ISO 3741 reverberation-room determination (`sound_power_reverberation`):
+  the direct method (Eq. 20) through the Sabine absorption area, the Waterhouse
+  boundary correction and the $C_1$/$C_2$ meteorological corrections, and the
+  comparison method against a reference sound source (`sound_power_comparison`,
+  Eq. 21), both with per-band background correction and the Annex F A-weighted
+  total, rendered as the accredited-style sound-power fiche through `.report()`.
+  The sound energy level $L_J$ of a single event by the same two methods
+  (`sound_energy_reverberation`, Eq. 30; `sound_energy_comparison`, Eq. 31):
+  the $N_\mathrm{e}$ events reduced to one (Eq. 22/23), the per-position $K_{1i}$
+  of Eq. 25 with the background compared over the same window, the Eq. 27 mean,
+  and the Annex F octave-band (`octave_band_levels`, Eq. F.1/F.4) and A-weighted
+  (Eq. F.2/F.5) levels.
+
+- **Not covered.** The single event results carry no `.report()` fiche, and the averaging over
+  several source positions of Eq. 24 (and Eq. 13 for $L_W$) is left to the
+  caller, who supplies levels already averaged over the positions of clause
+  8.4.2.4. The reverberation-room qualification
+  itself (Annex C/D, eigenfrequency counting or a reference-source comparison)
+  is assumed, not performed; the library only warns on the coarse advisory
+  criteria ISO 3741 states explicitly (the Table 1 minimum volume, the $V/S$
+  reverberation floor, fewer than 6 positions, an inter-position spread above
+  1.5 dB). Choosing among the seven routes, and the ISO 4871 declaration a result
+  feeds, live in [Sound Power](sound-power.md).
 
 ## See also
 
-- [Sound Power](sound-power.md): choosing among the seven determination
-  routes, what the accuracy grades promise, and the ISO 4871 noise-emission
-  declaration a measured $L_{W\mathrm{A}}$ feeds.
+- [Sound Power](sound-power.md): choosing among the seven
+  determination routes, the accuracy grades and the ISO 4871 noise-emission
+  declaration.
 - [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](sound-power-pressure.md):
   the in-situ enveloping surface and the precision anechoic array.
 - [Sound Power by Intensity Scanning (ISO 9614)](sound-power-intensity.md):
   the routes that tolerate steady background noise.
-- [Room Acoustics](../../buildings/rooms/room-acoustics.md): measuring the reverberation time
-  $T_{60}$ that sets the Sabine absorption area.
-- [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
-- [Theory](../../reference/theory/environment-transport.md): the Waterhouse and $C_1$/$C_2$
-  derivations.
+- [Room Acoustics](../../buildings/rooms/room-acoustics.md): measuring the
+  reverberation time $T_{60}$ that sets the Sabine absorption area.
+- [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting
+  behind $L_{W\mathrm{A}}$.
+- [Theory](../../reference/theory/environment-transport.md): the
+  Waterhouse and $C_1$/$C_2$ derivations.
 - API reference: [`emission`: sound power in a reverberation room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/).
+- Theory: [Sound power determination](../../reference/theory/environment-transport.md#sound-power-determination-iso-374437453746-iso-3741-iso-9614-123): the ISO 3741 comparison and direct methods derived from the diffuse-field relation.
 
 ## References
 
-- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
-  transducers*. Academic Press. ISBN 978-0-12-391421-7.
-  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
-  Radiation and sound fields: the diffuse-field relation between pressure
-  and power that the reverberation-room method rests on.
-- International Organization for Standardization. (2010). *Acoustics —
-  Determination of sound power levels and sound energy levels of noise
-  sources using sound pressure — Precision methods for reverberation test
-  rooms* (ISO 3741:2010).
-  [iso.org catalogue](https://www.iso.org/standard/52053.html).
-  The direct (Eq. 20) and comparison (Eq. 21) methods of this guide, with
-  the Waterhouse and meteorological corrections and the Table 1
-  qualification criteria.
-
-## Standards
-
-ISO 3741:2010, *Acoustics — Determination of sound power levels and sound
-energy levels of noise sources using sound pressure — Precision methods for
-reverberation test rooms*: the direct (Eq. 20) and comparison methods with
-the Waterhouse and meteorological corrections, the Table 1 qualification
-criteria and the Annex F A-weighting.
+- **Beranek, L. L., & Mellow, T. J. (2012).** *Acoustics: Sound fields and transducers*. Academic Press. https://doi.org/10.1016/C2011-0-05897-0
+  ISBN 978-0-12-391421-7. Radiation and sound fields: the diffuse-field relation between pressure and power that the reverberation-room method rests on.
+- **International Organization for Standardization. (2010).** [*Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Precision methods for reverberation test rooms*](https://www.iso.org/standard/52053.html) (ISO 3741:2010).
+  The direct (Eq. 20) and comparison (Eq. 21) methods of this guide, with the Waterhouse and meteorological corrections and the Table 1 qualification criteria.

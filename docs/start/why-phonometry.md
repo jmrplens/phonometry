@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/start/why-phonometry.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/why-phonometry/
 
 # Why phonometry
 
@@ -44,23 +46,23 @@ the measurement's nature.
 That equation is also where the reference numbers of the next section come
 from, which is worth doing once rather than taking Table 4 on faith. Integrate
 it from rest over a burst of duration $T_\mathrm{b}$ and the envelope reaches
-$(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$ of the steady value the same tone would eventually
-produce, so the maximum time-weighted level relative to steady state is
+$(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$ of the steady value the same tone would eventually produce,
+so the maximum time-weighted level relative to steady state is
 
 $$
 \delta_{\text{ref}} = 10\lg\!\left(1 - \mathrm{e}^{-T_\mathrm{b}/\tau}\right)
 $$
 
-which is IEC 61672-1:2013 Equation (7). With $\tau_\mathrm{F} = 0.125$ s that
-gives −0.98 dB at 200 ms, −4.82 dB at 50 ms, −11.14 dB at 10 ms and −20.99 dB
-at 1 ms: the whole "IEC target" column of Table 4, to the standard's own
-rounding. CI asserts the identity for every Fast and Slow row
+which is IEC 61672-1:2013 Equation (7). With $\tau_\mathrm{F} = 0.125$ s that gives
+−0.98 dB at 200 ms, −4.82 dB at 50 ms, −11.14 dB at 10 ms and −20.99 dB at
+1 ms: the whole "IEC target" column of Table 4, to the standard's own rounding.
+CI asserts the identity for every Fast and Slow row
 (`test_delta_ref_equation7_consistency`, to within 0.15 dB), so the
 transcription of the table is itself checked rather than trusted.
 
 The consequence carries the rest of this page. Because the response is a smooth
-function of $T_\mathrm{b}/\tau$, a detector that really solves the equation
-tracks the whole column at once; a detector that averages over fixed
+function of $T_\mathrm{b}/\tau$, a detector that really solves the equation tracks the
+whole column at once; a detector that averages over fixed
 125 ms blocks answers with the burst's energy share of whichever blocks it
 lands in, which moves with duration and alignment alike but carries nothing
 of the $T_\mathrm{b}/\tau$ response, and it can only be right where the burst
@@ -77,18 +79,17 @@ level.
 Table 4 fixes the excitation but not the plumbing, so here is the plumbing. A
 4 kHz sine is generated at 48 kHz for 2 s. The **reference** is the steady Fast
 level of that continuous sine, averaged over its last half second. Once the
-integrator has settled, this is $L_\mathrm{A}$ in the standard's notation. The
-burst of the stated duration is then cut out of *the same* sine, so its phase
-and amplitude are identical to the reference tone's, and zeros surround it. The
+integrator has settled, this is $L_\mathrm{A}$ in the standard's notation. The burst of
+the stated duration is then cut out of *the same* sine, so its phase and
+amplitude are identical to the reference tone's, and zeros surround it. The
 **response** is the maximum of the Fast envelope of that burst, expressed
-relative to the reference: $10\log_{10}(\max \text{env} / \text{ref})$, which
-is the standard's $L_\mathrm{AFmax} - L_\mathrm{A}$. Note what this does and
-does not verify: IEC 61672-1 states these limits for the electrical input
-facility over a defined range of steady levels with no overload indicated
-(clauses 5.9.5-5.9.6), so the numbers below verify the *ballistics*, not a
-complete instrument. The same reference values are transcribed in
-`tests/filters/test_iec_compliance.py` for F and S and for the
-$L_{\mathrm{A}E}$ column.
+relative to the reference: $10\log_{10}(\max \text{env} / \text{ref})$, which is
+the standard's $L_\mathrm{AFmax} - L_\mathrm{A}$. Note what this does and does not verify:
+IEC 61672-1 states these limits for the electrical input facility over a defined
+range of steady levels with no overload indicated (clauses 5.9.5-5.9.6), so the
+numbers below verify the *ballistics*, not a complete instrument. The same
+reference values are transcribed in `tests/filters/test_iec_compliance.py` for F
+and S and for the $L_{\mathrm{A}E}$ column.
 
 **phonometry results (Fast weighting):**
 
@@ -131,16 +132,13 @@ corridor for 81 % of them, because a 200 ms burst always fills at least part
 of a block and often fills one completely, and a full block reads the steady
 level, 1.0 dB above the target.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_block_vs_exponential_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_block_vs_exponential.gif" alt="Animation: a 4 kHz tone burst slides across a 125 ms block boundary; the exponential Fast envelope peaks at the same level at every alignment while the block Leq staircase rises and falls with where the burst lands, and a reading-against-alignment panel builds both traces against the shaded class 1 corridor" width="640" height="360" loading="lazy"></picture>
+**Video:** [The same tone burst slid across a 125 ms block boundary](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_block_vs_exponential.webm): A 4 kHz tone burst slides across the boundary between two 125 ms integration blocks. The exponential Fast envelope peaks at the same level at every alignment because the burst duration enters its differential equation, while the block Leq staircase rises and falls with where the burst happens to land, and the reading-against-alignment panel builds up both traces against the shaded class 1 corridor. The second act repeats it for a 200 ms burst, where the corridor is half as wide.
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_block_vs_exponential.webm)
-
-*The exponential trace is flat because $10\lg(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$
-contains $T_\mathrm{b}$ and nothing about the clock; the block trace, at this fixed
-duration, is a picture of the alignment and nothing else. Both readings are computed here
-with `time_weighting(x, fs, mode="fast")` and with `leq` over consecutive
-125 ms slices, against the same steady-tone reference the procedure above
-defines.*
+*The exponential trace is flat because $10\lg(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$ contains
+$T_\mathrm{b}$ and nothing about the clock; the block trace, at this fixed
+duration, is a picture of the alignment and nothing else. Both readings are computed here with
+`time_weighting(x, fs, mode="fast")` and with `leq` over consecutive 125 ms
+slices, against the same steady-tone reference the procedure above defines.*
 
 ## What this means in practice
 
@@ -186,16 +184,16 @@ sample from the metrology core:
 | IEC 61672-3:2013 with IEC 61672-1:2013 Tables 3, 4, 5 and B.1 | The periodic-test verdict of `verify_sound_level_meter_periodic()` just inside, on and just past every acceptance limit a clause reads, for both classes, and on and just past every maximum uncertainty; the exception of 4.4; the four tables cell by cell where the periodic tests read them; and the statements of Clause 22 word for word | `tests/metrology/test_sound_level_meter.py` |
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
-The same discipline applies far beyond the metrology core: today the suite runs
-1897 numerical conformance checks across 111 domains, against
-230 normative designations and 121 further published sources, covering
-psychoacoustics and speech intelligibility, room, building and materials
-acoustics, human and machine vibration, environmental, aircraft, rotorcraft
-and underwater noise, electroacoustics, broadcast loudness, industrial noise
-control, calibrated signal analysis and the FDTD wave solver. The full
-numerical report (the expected value and the value the library computes for
-every check, regenerated on every pull request) is published as
-[CONFORMANCE.md](../CONFORMANCE.md).
+The same discipline applies far beyond the metrology core: today the suite
+runs 1897 numerical conformance checks across 111 domains, against
+230 normative designations and 121 further published sources,
+covering psychoacoustics and speech intelligibility, room, building and
+materials acoustics, human and machine vibration, environmental, aircraft,
+rotorcraft and underwater noise, electroacoustics, broadcast loudness,
+industrial noise control, calibrated signal analysis and the FDTD wave solver.
+The full numerical report (the expected value and the value the
+library computes for every check, regenerated on every pull request) is
+published as [the conformance report](../CONFORMANCE.md).
 
 The same standards-first habit shows up below the level of whole metrics, in
 the numerics. Filter banks place their −3 dB points on the **ANSI S1.11 /
@@ -203,9 +201,9 @@ IEC 61260-1** band edges for the three architectures whose parametrization
 allows it, Butterworth, Chebyshev II and Bessel, the last two through
 corrections scipy's raw parametrization would not apply; Chebyshev I and
 elliptic read the same edges as their equiripple passband edge instead, which
-is stated with its measured cost on
-[Filter Banks](../signals/filters/filter-banks.md). The default Butterworth
-bank is checked against the stricter class 0 of the withdrawn IEC 61260:1995 /
+is stated with its measured cost on [Filter
+Banks](../signals/filters/filter-banks.md). The default Butterworth bank
+is checked against the stricter class 0 of the withdrawn IEC 61260:1995 /
 ANSI S1.11-2004 edition as well as the current class 1. And A/C weighting
 earns class 1 at each of the eight rates the suite grades it at, from 8 to
 192 kHz, at every Table 3 frequency below that rate's Nyquist, because the
@@ -221,17 +219,17 @@ be right. A worked example that contradicts its own normative clause, a
 constant with a digit lost in typesetting, a cross-reference pointing at the
 wrong equation.
 
-Those cases are not quietly patched. Each confirmed one is written down in
-[Standards errata](../ERRATA.md) with the printed edition and the exact location,
-what the document says, why it cannot be right, the independent evidence and
-the reading the library implements. Where that reading changes a number the
-library reports, the entry names the check or test that pins it; where it does
-not, because the defect is a label, a cross-reference or a table the library
-never reads, the entry says so instead.
-There are dozens of them now, across standards, guidance documents, textbooks
-and journal papers, each marked as reported to the issuing body or not. A
-defect listed there is never a defect of the method: in every case the intended
-reading could be established from the document itself or from physics.
+Those cases are not quietly patched. Each confirmed one is written down in the
+[standards errata](../ERRATA.md) with the printed edition and
+the exact location, what the document says, why it cannot be right, the
+independent evidence and the reading the library implements. Where that reading
+changes a number the library reports, the entry names the check or test that
+pins it; where it does not, because the defect is a label, a cross-reference or
+a table the library never reads, the entry says so instead. There are
+351 of them now, across standards, guidance documents, textbooks
+and journal papers, each marked as reported to the issuing body or not. A defect listed there is never a defect of the
+method: in every case the intended reading could be established from the
+document itself or from physics.
 
 That registry is the part of the approach that is hardest to fake. Code ported
 from another implementation inherits whatever the misprint made it do, and
@@ -287,5 +285,5 @@ Where the standard also fixes how the result is to be reported, the result
 object renders that one-page fiche itself with `.report()`, in English or
 Spanish, so the document you hand over carries the same numbers the check does.
 The sources behind all of it are collected in the
-[Bibliography](../reference/bibliography.md), every entry with the pages that cite it and
-its DOI or official publisher link where it has one.
+[Bibliography](../reference/bibliography.md), every entry with the pages
+that cite it and its DOI or official publisher link where it has one.

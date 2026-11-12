@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/start/environments/conda.md: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/start/environments/conda/
 
 # conda and mamba
 
@@ -22,7 +24,8 @@ takes the same arguments: `mamba create -n acoustics -c conda-forge ...`
 builds the same environment. Python 3.12, 3.13 and 3.14 all work.
 conda-forge publishes no Python 3.12 or newer for 32-bit Windows or 32-bit
 Linux, so phonometry installs there with pip alone, `[plot,report,audio]` in
-place of `[full]`, as [pip and uv](pip-and-uv.md) says.
+place of `[full]`, as [pip and uv](pip-and-uv.md)
+says.
 
 ## The extras under their conda-forge names
 

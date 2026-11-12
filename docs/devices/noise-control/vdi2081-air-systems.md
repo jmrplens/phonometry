@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/devices/noise-control/vdi2081-air-systems.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# HVAC noise the German way (VDI 2081)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/devices/noise-control/vdi2081-air-systems/
+
+# HVAC Noise the German Way (VDI 2081)
 
 [Duct-borne noise](duct-path.md) answers the
 same question this page does, and answers it differently. That page is the
@@ -279,18 +281,16 @@ superseded, by the 2022 editions, and neither successor is held; the pair in
 hand is self-consistent, because Part 2:2005 was written against Part 1:2001
 and every cross-reference in its tables resolves there.
 
-## Covered and not covered
+- **Covered.** The fan of Section 4.3 through `fan_sound_power(model="vdi2081")`, the duct,
+  bend, section-change and branch attenuation of Section 6, the flow noise of
+  Equations (16), (17) and (18), the splitter silencer and its self-noise, the end
+  reflection of Section 6.6, the room step of Equation (36) and the assessment
+  curve of Part 2 Section 1.1, all against the worked sheet of Part 2 Table 1.
 
-Covered: The fan of Section 4.3 through `fan_sound_power(model="vdi2081")`, the duct,
-bend, section-change and branch attenuation of Section 6, the flow noise of
-Equations (16), (17) and (18), the splitter silencer and its self-noise, the end
-reflection of Section 6.6, the room step of Equation (36) and the assessment
-curve of Part 2 Section 1.1, all against the worked sheet of Part 2 Table 1.
-
-Not covered: The air-handling unit and the outdoor-propagation chapters the 2019 revision
-added, which are in the editions not held here; the room acoustics VDI 2081
-leaves to VDI 2569; and the vibration isolation of the plant, which Section 7.6
-of Blatt 1 does cover and this library does not.
+- **Not covered.** The air-handling unit and the outdoor-propagation chapters the 2019 revision
+  added, which are in the editions not held here; the room acoustics VDI 2081
+  leaves to VDI 2569; and the vibration isolation of the plant, which Section 7.6
+  of Blatt 1 does cover and this library does not.
 
 ## See also
 
@@ -304,27 +304,7 @@ of Blatt 1 does cover and this library does not.
 
 ## References
 
-- Verein Deutscher Ingenieure. (2001). *Geräuscherzeugung und Lärmminderung in
-  Raumlufttechnischen Anlagen* (VDI 2081 Blatt 1:2001-07).
-  The method: the fan of Section 4.3 with Equations (13) and (15), the duct
-  attenuation of Section 6 with Tables 5 and 7, the flow noise of Equations
-  (16), (17) and (18), the splitter silencer and its self-noise of Equation (49),
-  the end reflection of Section 6.6 and the room step of Equation (36).
-  Superseded by Blatt 1:2022-04, which is not held here.
-- Verein Deutscher Ingenieure. (2005). *Geräuscherzeugung und Lärmminderung in
-  Raumlufttechnischen Anlagen — Beispiele* (VDI 2081 Blatt 2:2005-05).
-  The oracle: one supply air network worked element by element in Table 1,
-  with every intermediate spectrum printed, and the assessment curve of
-  Section 1.1. Superseded by Blatt 2:2022-10, which is not held here.
-
-## Standards
-
-VDI 2081 Blatt 1:2001-07, *Geräuscherzeugung und Lärmminderung in
-Raumlufttechnischen Anlagen*: the fan of Section 4.3, the duct, bend,
-section-change and branch attenuation of Section 6, the flow noise of
-Equations (16), (17) and (18), the splitter silencer and its self-noise of Equation
-(49), the end reflection of Section 6.6 and the room step of Equation (36).
-
-VDI 2081 Blatt 2:2005-05, *Geräuscherzeugung und Lärmminderung in
-Raumlufttechnischen Anlagen — Beispiele*: the worked supply air network of
-Table 1 and the assessment curve of Section 1.1.
+- **Verein Deutscher Ingenieure. (2001).** *Geräuscherzeugung und Lärmminderung in Raumlufttechnischen Anlagen* (VDI 2081 Blatt 1:2001-07).
+  The method: the fan of Section 4.3 with Equations (13) and (15), the duct attenuation of Section 6 with Tables 5 and 7, the flow noise of Equations (16), (17) and (18), the splitter silencer and its self-noise of Equation (49), the end reflection of Section 6.6 and the room step of Equation (36). Superseded by Blatt 1:2022-04, which is not held here.
+- **Verein Deutscher Ingenieure. (2005).** *Geräuscherzeugung und Lärmminderung in Raumlufttechnischen Anlagen — Beispiele* (VDI 2081 Blatt 2:2005-05).
+  The oracle: one supply air network worked element by element in Table 1, with every intermediate spectrum printed, and the assessment curve of Section 1.1. Superseded by Blatt 2:2022-10, which is not held here.

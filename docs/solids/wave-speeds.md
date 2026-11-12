@@ -1,6 +1,15 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/solids/wave-speeds.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/solids/wave-speeds/
 
 # Wave speeds of a solid
+
+- **Covered.** The three longitudinal wave speeds of a homogeneous isotropic solid, each with
+  the inverse that returns Young's modulus, and the product of thickness and
+  critical frequency that materials tables print.
+
+- **Not covered.** Bending and shear waves, anisotropic plates, and any dependence on temperature
+  or on how old the specimen is.
 
 ## The problem this solves
 
@@ -45,14 +54,14 @@ c'_{\mathrm{L}} = \sqrt{\frac{E\,(1-\nu)}{\rho\,(1+\nu)(1-2\nu)}}
 $$
 
 The first two are Hopkins Eqs. (2.20) and (2.21), the third is Norton and
-Karczub Eq. (1.225). At a Poisson ratio of zero the three collapse into one,
-which is the quickest way to remember that the only thing between them is how
-the lateral strain is paid for.
+Karczub Eq. (1.225). At $\nu = 0$ the three collapse into one, which is the
+quickest way to remember that the only thing between them is how the lateral
+strain is paid for.
 
 ## Which one is in your table
 
-Building acoustics prints the **plate** speed. EN 12354-1 Table B.3, Hopkins
-Table A2 both tabulate it, and Hopkins says so in a footnote:
+Building acoustics prints the **plate** speed. EN 12354-1 Table B.3 and
+Hopkins Table A2 both tabulate it, and Hopkins says so in a footnote:
 the values can be used as estimates for beams or plates, which is an admission
 that the two differ and a statement that for these materials the difference is
 inside the spread of the table.
@@ -96,36 +105,54 @@ print(f"{solids.thickness_critical_frequency_product(5270.0):.2f}")  # 12.31
 ```
 
 Hopkins Table A2 prints 12,3 m Hz for that steel and states in its heading that
-the column assumes a speed of sound of 343 m/s.
+the column assumes $c_0 = 343$ m/s.
 
 $$
 h f_\mathrm{c} = \frac{c_0^2 \sqrt{12}}{2 \pi\, c_{\mathrm{L,p}}}
 $$
 
 The constant matters. ISO 12354-1 writes the critical frequency with a rounded
-1,8 in the denominator, which is 2π/√12 = 1,8138 to two figures. The rounded
-form is the standard's own arithmetic and `phonometry.building.critical_frequency`
-keeps it, because a measurement that claims to follow the standard has to. Here
-the exact constant is the right one: it reproduces all twenty-five rows of
-Table A2, and the rounded one misses the steel row by 0,8 per cent.
+1,8 in the denominator, which is $2\pi/\sqrt{12} = 1{,}8138$ to two figures. The
+rounded form is the standard's own arithmetic and
+`phonometry.building.critical_frequency` keeps it, because a measurement that
+claims to follow the standard has to. Here the exact constant is the right one:
+it reproduces all twenty-five rows of Table A2, and the rounded one misses the
+steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` holds two hundred and sixty rows read from nine
-published tables:
-Hopkins **Table A2**, twenty-five building materials; Cremer 3e **Table 4.3**,
-thirteen metals over fifteen rows; and Mechel **Table 3**, thirty-eight
-construction materials, plastics and metals. The key names the table, because
-three of them print a steel and they are not the same steel. Bies 5e
-**Table C.1** adds one hundred and five metals, building materials, woods,
-plastics and honeycomb panels, and its loss factor column is two quantities and
-not a range: the low end is the internal loss factor and the high end the one a
-panel has once it is installed. Norton & Karczub **Appendix 4 A** adds
-twenty-one solids with the bar and the bulk speed in separate columns, their
-**Table 6.1** eleven structural loss factors, and Vigran **Table 3.1** nine
-building materials. Every row is also in the
+Typing the row yourself is the other half of the problem the three speeds
+solve. `PUBLISHED_SOLIDS` holds two hundred and sixty rows read from nine published tables, keyed
+by the table they came from, so a plasterboard partition or a concrete floor
+starts from a number somebody published rather than one you half remember.
+Every one of them is also in the
 [published catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/),
-filterable, with the book and the page each one was read on.
+filterable, with the book and the page each row was read on.
+
+The nine are Hopkins **Table A2**, building materials; Cremer 3e **Table 4.3**,
+thirteen metals, lead and copper each in two variants; Mechel **Table 3**,
+construction materials, plastics and metals; Bies 5e **Table C.1**, metals,
+building materials, woods, plastics and honeycomb panels; Norton & Karczub
+**Appendix 4 A**, solids with the bar and the bulk speed in separate columns,
+and their **Table 6.1**, structural loss factors; Vigran **Table 3.1**,
+building materials; Long's **Table 12.1**; and Arau's **Table 4.1**. Every row
+names its table, so counting them gives what each one brought:
+
+```python
+from collections import Counter
+
+for table, rows in Counter(row.table for row in solids.PUBLISHED_SOLIDS.values()).items():
+    print(table, rows)
+# hopkins-2007-table-a2 25
+# cremer-2005-table-4-3 15
+# mechel-2008-table-3 38
+# bies-2017-table-c1 105
+# long-2014-table-12-1 18
+# arau-1999-table-4-1 18
+# norton-karczub-2003-appendix-4a 21
+# norton-karczub-2003-table-6-1 11
+# vigran-2008-table-3-1 9
+```
 
 ```python
 from phonometry import solids
@@ -137,85 +164,274 @@ print(round(board.youngs_modulus_pa / 1e9, 2))
 # 1.74
 ```
 
-That modulus is not in the table: it is the inverse above run on the row's own
-cells, and `is_derived` and `derived` say so, `derived` down to the Poisson
-ratio Hopkins marks as an estimate, which the modulus rests on. A number this
-library computed is never stored as though a page had printed it.
+That modulus is not in the table. It is the inverse of the section above, run
+on the row's own speed, density and Poisson ratio, and the row says so:
+`board.is_derived("youngs_modulus_pa")` is `True` and
+`board.derived["youngs_modulus_pa"]` names the three cells it came from.
+Hopkins marks this board's Poisson ratio as an estimate, so the text also says
+that the modulus rests on that estimate, beside a speed and a density whose
+basis the page does not state. A number this library computed is never stored
+as though a page had printed it.
 
-`solids_named("Steel")` gives the steel of four books, from Hopkins' 199,6 GPa
-at a Poisson ratio of 0,28 to Cremer's 210 GPa at 0,31 and Long's row with no
-modulus at all, and every row carries all three longitudinal speeds whenever
-its own cells allow it, so the comparison is between the books rather than
-between two waves. Two Hopkins rows, aircrete and brick, print a
-density only as a range and nothing follows from it, so they keep the plate
-speed the page printed and `why_missing` says why the others are absent.
-Cremer's own column is the bar speed: his Eq. (3.32) defines `c_LII` as
-`sqrt(E/rho)`, and the Roman subscript counts the directions along which the
-cross-sectional contraction is unconstrained, so `II` is a rod.
+### The key names the book on purpose
 
-A page gets as far as its own columns allow and no further. Mechel prints a
-modulus and no Poisson ratio, so a row of his gets as far as the bar speed and
-stops: the plate and bulk speeds would need a ratio he does not print, and
-assuming one would put a number in his mouth. Fourteen of his thirty-eight rows
-do not get that far either, because their density or their modulus is printed
-as a range. What crosses between Hopkins and Mechel without any assumption at
-all is `h f_c`, which Hopkins prints as a column and Mechel as `f_cr d`: for
-steel both print 12,3 m Hz, to the digit. Cremer prints no such column, so his
-rows carry a derived one.
+Seven of the nine tables print a row named Steel, and they are not the same
+steel: Hopkins gives a plate speed of 5 270 m/s and a Poisson ratio of 0,28,
+Cremer a modulus of 210 GPa and 0,31, Bies 207 GPa for mild steel and 210 for
+one per cent carbon, Long a speed and a density and no modulus at all, Norton &
+Karczub 195 GPa in their appendix and nothing but a loss factor in their Table
+6.1, and Vigran a modulus printed as a range.
+Mechel prints a steel too and calls it "Steel, cast steel", so the lookup does
+not reach it: matching a material across books is the agreement work's job and
+not the name's. A flat `"steel"` would have to pick one of them without
+saying so, and picking silently between published values is the thing a
+catalogue exists not to do.
 
-Two of the nine tables qualify nothing. Long prints a "Speed of Longitudinal
-Waves" with no modulus and no Poisson ratio beside it, so nothing on the page
-says which of the three it is and the value goes in `longitudinal_speed_m_s`
-rather than in a named one. Comparing it with the tables that do say points at
-the bar speed, because his steel, at 5 050 m/s, is below every steel plate speed
-in the catalogue, but that is a hint and not a reading. Nine of his speed cells print a
-row of dots and one of his loss factors prints "Varies with frequency", and the
-rows say so. Arau prints the critical frequency of a one centimetre plate
-instead of the `h f_c` product, which is a change of unit; on that column he
-and Hopkins agree inside four per cent for aluminium, brick and glass and are
-nineteen per cent apart on steel.
+```python
+for row in solids.solids_named("Steel"):
+    modulus = row.youngs_modulus_pa
+    print(row.table, row.variant or "-", modulus and round(modulus / 1e9, 1))
+# hopkins-2007-table-a2 - 199.6
+# cremer-2005-table-4-3 - 210.0
+# bies-2017-table-c1 mild 207.0
+# bies-2017-table-c1 1% carbon 210.0
+# long-2014-table-12-1 - None
+# norton-karczub-2003-appendix-4a - 195.0
+# norton-karczub-2003-table-6-1 - None
+# vigran-2008-table-3-1 - None
+```
 
-A materials table is not a list of measurements, and these say so. Most of
-Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is
-"Estimate", and only aluminium, glass, mortar and steel print a Poisson ratio
-the book stands behind; each footnoted cell holds `"estimated"` in `basis`,
-which `basis_of(field)` reads, and a cell whose page says nothing about how the
-number was obtained answers with an empty string.
-A cell printed as an interval is in `ranges` and the field is `None`, with
-`why_missing` saying which; a cell printed as a bound is in `bounded_above` too;
-a cell the author rounded on purpose, like Cremer's `≈ 3 · 10⁻⁴` for gold, is in
-`approximate`. Where a page prints two specimens under one name, as Cremer does
-for lead and for copper, they are two rows and `variant` says which is which.
+Long and the loss-factor table print no modulus, and Vigran's is a range, which
+is why the loop asks whether there is one before dividing. A book that gives fewer columns is the normal case here, not
+the exception.
 
-Rows whose columns a book takes from another author keep the credit, and the
+Every row carries all three longitudinal speeds whenever its own cells allow
+it, so the comparison is between the books and not between two waves. Two of
+Hopkins' rows, aircrete and brick, print a density only as a range, and nothing
+follows from a density the page declined to collapse: those two keep the plate
+speed the page printed and `why_missing` says why the other two are absent.
+Cremer's own column is the bar speed, which his Eq. (3.32) defines as
+`sqrt(E/rho)`: the Roman subscript in `c_LII` counts the directions along which
+the cross-sectional contraction is unconstrained, so `II` is a rod and not a
+plate. Against the pure longitudinal speed of an unbounded solid he puts the
+gap at 16 per cent for `nu = 0,3`, which is what the three functions above
+reproduce; the plate speed sits between them, 4,8 per cent above the bar.
+
+### A page gets as far as its own columns allow
+
+Mechel prints a modulus and no Poisson ratio, so a row of his gets as far as
+the bar speed and stops. The plate and the bulk speed would need a ratio he
+does not print, and a 0,3 would reproduce his table nicely and would be a
+number he did not give. Fourteen of his thirty-eight rows do not even get that
+far, because the page prints their density or their modulus as a range and
+nothing follows from a cell the book declined to collapse.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["mechel-2008-table-3/steel"]
+print(steel.poisson_ratio, steel.plate_longitudinal_speed_m_s)
+# None None
+print(round(steel.bar_longitudinal_speed_m_s), steel.is_derived("bar_longitudinal_speed_m_s"))
+# 5064 True
+```
+
+What crosses between Hopkins and Mechel with no assumption at all is `h f_c`,
+the product of a plate's thickness and its critical frequency, which Hopkins
+prints as a column and Mechel as `f_cr d`. It needs no Poisson ratio, no speed
+of sound and no conversion, which makes it the cheapest cross-check there is
+between books that share no other column: for steel, both print 12,3 m Hz.
+Cremer prints no such column, so his rows carry a derived one and join that
+comparison only through the heading assumption Hopkins states. Arau prints the
+critical frequency of a one centimetre plate instead of the product, which is
+a change of unit and not an assumption, so his rows carry `h f_c` too. On that
+column he and Hopkins agree within four per cent for aluminium, brick and
+glass, and are nineteen per cent apart on steel:
+
+```python
+for hopkins_key, arau_key in [("aluminium", "aluminio"), ("brick", "ladrillo_macizo"),
+                              ("glass", "vidrio_monolitico"), ("steel", "acero")]:
+    hopkins = solids.PUBLISHED_SOLIDS[f"hopkins-2007-table-a2/{hopkins_key}"]
+    arau = solids.PUBLISHED_SOLIDS[f"arau-1999-table-4-1/{arau_key}"]
+    h_fc, a_fc = (hopkins.thickness_critical_frequency_product_m_hz,
+                  arau.thickness_critical_frequency_product_m_hz)
+    print(hopkins_key, h_fc, a_fc, f"{abs(a_fc - h_fc) / h_fc:.0%}")
+# aluminium 12.7 12.6 1%
+# brick 24.0 23.8 1%
+# glass 12.5 12.0 4%
+# steel 12.3 10.0 19%
+```
+
+### The most expensive way to misread a table
+
+Bies prints one column headed "Internal-*in situ* Loss factor", and every cell
+in it holds two numbers rather than an interval. His footnote says which is
+which: use the upper limit for panels used in building construction and the
+lower for panels welded together in an enclosure. For steel they are 0,0001 and
+0,01, so reading them as a range of the internal loss factor would be a factor
+of a hundred.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["bies-2017-table-c1/steel_mild"]
+print(steel.loss_factor, steel.in_situ_loss_factor)
+# 0.0001 0.01
+```
+
+His internal end is where the other books put the same number: Cremer measures
+steel's flexural loss factor between 0,2 and 3 times 10⁻⁴, and Mechel prints
+1 times 10⁻⁴.
+
+### When the page does not say which
+
+Long prints a longitudinal speed without saying which of the three it is, and
+both he and Arau print a loss factor without saying which; Arau prints no speed
+at all. Long's column is headed "Speed of Longitudinal Waves" and there is no
+modulus and no Poisson ratio beside it, so nothing on the page can settle
+whether it is the bar, the plate or the unbounded one.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/steel"]
+print(steel.longitudinal_speed_m_s, steel.bar_longitudinal_speed_m_s)
+# 5050.0 None
+```
+
+Comparing it with the four tables that do say points at the bar speed: his
+steel, at 5 050 m/s, is below every steel plate speed in the catalogue, which run
+from 5 270 to 5 458, and his aluminium matches Bies' printed bar speed to the
+digit. That is a hint and not a reading, and a guess
+put into a named field would then be compared against columns that were read,
+so the value stays where the page left it.
+
+The same page prints a row of dots in nine of its speed cells and the words
+"Varies with frequency" in one of its loss factors, and the rows say so rather
+than being quietly empty.
+
+```python
+block = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/hollow_dense_concrete"]
+print(block.loss_factor, block.why_missing("loss_factor"))
+# None the table prints “Varies with frequency” where the number would be
+```
+
+### Four of twenty-five
+
+A materials table is not a list of measurements, and this one says so. Most of
+Hopkins' Poisson ratios and most of his loss factors carry a footnote whose
+whole text is "Estimate": of the twenty-five rows, only aluminium, glass,
+mortar and steel print a Poisson ratio the book stands behind. The catalogue
+keeps that distinction, because a 0,2 read as a measurement will be trusted
+further than Hopkins trusts it. What a source claims for a cell is its
+`basis`, and `basis_of` reads it: `"estimated"` for a footnoted cell, and an
+empty string where the page says nothing about how the number was obtained.
+
+```python
+print(board.basis_of("poisson_ratio"))
+# estimated
+print(board.basis_of("flexural_loss_factor") or "not stated")
+# not stated
+```
+
+Three more things the pages say are not single numbers, and the row carries
+each of them rather than flattening it:
+
+- **A cell printed as an interval.** Aircrete is 400 to 800 kg/m³ and brick
+  1 500 to 2 000, because that is what is known about a block. Those rows have
+  `density_kg_m3` of `None` and the interval in `ranges`, and `why_missing`
+  says which.
+- **A bound rather than a value.** Aluminium and steel print a loss factor as
+  `≤`, and so do Cremer's brass, nickel and silver; all of them are in
+  `bounded_above` as well as in `ranges`.
+- **A number the author rounded on purpose.** Cremer prints `≈ 3 · 10⁻⁴` for
+  gold, which is neither an estimate nor an interval. That is `approximate`.
+
+```python
+aircrete = solids.PUBLISHED_SOLIDS["hopkins-2007-table-a2/aircrete"]
+print(aircrete.density_kg_m3, aircrete.why_missing("density_kg_m3"))
+# None the page prints 400 to 800 and no value
+
+gold = solids.PUBLISHED_SOLIDS["cremer-2005-table-4-3/gold"]
+print(gold.flexural_loss_factor, gold.is_approximate("flexural_loss_factor"))
+# 0.0003 True
+```
+
+Where a page prints two specimens under one name, they are two rows. Cremer's
+lead is chemically pure in one and antimonial in the other, and they share
+every column but the flexural loss factor, where they differ by a factor of
+fifty.
+
+```python
+for key in ("lead_chemically_pure", "lead_antimonial"):
+    row = solids.PUBLISHED_SOLIDS[f"cremer-2005-table-4-3/{key}"]
+    print(row.variant, row.ranges["flexural_loss_factor"])
+# chemically pure (0.05, 0.3)
+# antimonial (0.001, 0.004)
+```
+
+Rows whose columns a book takes from someone else keep the credit, and the
 bracketed numbers Cremer prints are resolved to their authors from his own
 reference list rather than left as `[4.19]`.
 
-Two books printing different numbers for the same material is the catalogue
-working. `check_solid_agreement.py` puts them side by side and fails only when
-two densities are more than 8 per cent apart, which is the one column a table
-cannot get very wrong without describing a different material: every density
-the gate does not already accept agrees with the other books' to within that,
-while the moduli disagree by nineteen per cent on aluminium without anybody
-being wrong, and those it reports and never fails on. Its first full run found
-tin, where Cremer and Mechel print 4,4 GPa, Bies 54 and Norton & Karczub 45,
-while the four densities agree to 0,3 per cent. Each book is consistent with itself, so
-no page contradicts itself and this is not an errata; but a tin of 4,4 GPa
-would carry sound at 780 m/s, among the soft plastics and below every lead row
-here at 1 180 to 1 257 m/s, so the two books that agree are the ones the rest of
-the catalogue argues against, and the fourth book to print a tin sides with the
-rest. That is why it keeps every book's reading and nothing in it votes by
-majority.
+```python
+steel = solids.PUBLISHED_SOLIDS["hopkins-2007-table-a2/steel"]
+print(steel.attributed_to["flexural_loss_factor"])
+# Heckl, 1981
+```
 
-None of this is a specification. Block densities vary by manufacturer, which is
-why the pages print ranges where they do, and Cremer says in as many words that
-the loss factor of a metal cannot be considered a material constant.
+### Where the books disagree
+
+Two books printing different numbers for the same material is the catalogue
+working, not failing. `check_solid_agreement.py` puts them side by side and
+sorts the disagreements into the only three things they can be: a digit
+somebody typed wrong, a difference between the books themselves, or a defect in
+a page. It fails on the first and reports the other two, and the property it
+fails on is density.
+
+Density is the one column a table cannot get very wrong without describing a
+different material. Across these nine tables every density the gate does not
+already accept agrees with the other books' to within 8 per cent, while the
+moduli disagree by nineteen per cent on aluminium without anybody being wrong.
+So a density more than 8 per cent apart is a transcription error, anything
+under that passes without a word, and a modulus twice its neighbour is the
+literature.
+
+The first full run found tin, where the books do not agree about a factor of
+twelve.
+
+```python
+for row in solids.solids_named("Tin"):
+    if row.youngs_modulus_pa is not None:
+        print(row.table.split("-")[0], round(row.youngs_modulus_pa / 1e9, 1), row.density_kg_m3)
+# cremer 4.4 7280.0
+# mechel 4.4 7280.0
+# bies 54.0 7300.0
+# norton 45.0 7300.0
+```
+
+The densities agree to 0,3 per cent, so nobody has confused the material, and
+each book is consistent with itself: Cremer's 4,4 GPa reproduces his own
+printed 780 m/s, his shear modulus and his transverse speed; Bies' 54
+reproduces his printed 2 720 m/s exactly; Norton & Karczub's 45 reproduces
+their printed 2 500 m/s to within one per cent; and Mechel's `h f_c` of 81 m Hz
+follows from 4,4 and not from 54. No page contradicts itself, so this is not an
+errata to register and the catalogue keeps all four readings.
+
+The rest of the catalogue does say which way to look. A tin of 4,4 GPa carries
+sound at 780 m/s, which lands it among the soft plastics, below high-density
+polyethylene at 1 030 and below every lead row here, and those run from 1 180
+to 1 257 m/s although lead is the softer metal and half again as dense. So the two books that agree are the two the
+other two hundred and fifty rows argue against, and the fourth book to print a
+tin sides with the rows, which is the whole reason nothing in this
+catalogue votes by majority: two books agreeing is not evidence, and when they
+share a mistake it is usually because they share an ancestor.
+
+None of this is a specification. Block densities vary by manufacturer and
+boards vary by batch, which is the reason the pages print ranges where they do,
+and Cremer says in as many words that the loss factor of a metal cannot be
+considered a material constant. A row is for reproducing a worked example,
+sanity-checking a measurement or getting an order of magnitude.
 
 ## What the functions refuse
 
 A Poisson ratio of 0,5 describes an incompressible material, and an
 incompressible material has no pure longitudinal wave to have a speed, so
 `bulk_longitudinal_speed` raises rather than dividing by zero. The plate form
-is looser, since it only needs one minus the square of the ratio to stay
-positive, but it refuses a ratio of 1 for the same reason. Both messages name
-the ratio they were given and the term that would have vanished.
+is looser, since it only needs $1-\nu^2$ to stay positive, but it refuses a
+ratio of 1 for the same reason. Both messages name the ratio they were given
+and the term that would have vanished.

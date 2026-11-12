@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/environment/assessment/spanish-noise-regulation.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/
 
 # Spanish Noise Regulation (RD 1367/2007)
 
@@ -12,9 +14,9 @@ annual value, and that value is compared against three different criteria read
 off the same limit table. This page implements that chain end to end.
 
 The per-period levels that feed it come from
-[Integrated & Statistical Levels](../../signals/levels/levels.md), and the European
-$L_\mathrm{den}$/$L_\mathrm{dn}$ indicators they coexist with, from
-[Environmental levels](environmental-levels.md).
+[Integrated and Statistical Levels](../../signals/levels/levels.md), and the
+European $L_\mathrm{den}$/$L_\mathrm{dn}$ indicators they coexist with, from
+[Environmental Levels (ISO 1996-1/-2)](environmental-levels.md).
 
 ## The corrected level LKeq and its three corrections
 
@@ -29,6 +31,34 @@ already corrected for background noise, and the three corrections penalise the
 character of the noise. Each is 0, 3 or 6 dB, and their sum is capped at 9 dB
 (Annex IV A.3.3), a cap exposed as `RD1367_MAX_CORRECTION`. Although the index
 derives from an A-weighted level, the regulation expresses it in dB.
+
+### The background correction every input assumes
+
+$L_{\mathrm{Aeq},T}$ above is the level of *the activity alone*. Everything on
+this page (the three corrections, the phase levels, the verdict) is defined on a
+background-corrected level, and the regulation says so before it says anything
+else. The procedure is the ordinary energy subtraction: measure the residual
+with the activity stopped, over the same evaluation period, and subtract it from
+the total,
+$L = 10\log_{10}(10^{L'/10} - 10^{L_\text{res}/10})$.
+
+It stops being meaningful as the two converge. With the activity 10 dB above the
+residual the correction is 0,4 dB and the residual hardly matters; at 3 dB the
+correction is 3 dB and the answer is as uncertain as the two measurements that
+made it. ISO 1996-2 draws the line there and so should an inspection report: with
+a margin below 3 dB no correction is allowed and the honest statement is the
+**uncorrected** level as an upper bound. `residual_sound_correction()` and the
+percentile-based `gaussian_residual_level()` on
+[Environmental noise levels](environmental-levels.md)
+do the arithmetic and carry that rule (`reportable_upper_bound`,
+`reliable=False`); the RD's own Annex IV procedure for the measurement series
+(how many measurements, how long, what invalidates them) is not implemented here.
+
+Two field consequences. The residual has to be captured **in the same evaluation
+period**, because a night residual is not a day residual. And a phase whose
+margin is too small cannot carry a $K_\mathrm{t}$, $K_\mathrm{f}$ or $K_\mathrm{i}$ verdict either: all
+three are differences of background-corrected levels, so the same margin governs
+the character corrections and not only the level.
 
 | Correction | Input quantity | Thresholds | Function |
 | :--- | :--- | :--- | :--- |
@@ -56,27 +86,113 @@ environment.corrected_level(63.0, kt=6, kf=3, ki=0)          # LKeq = 72.0 dB
 environment.total_correction(kt=6, kf=6, ki=3)               # 9.0 dB: the cap
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_tonal_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_tonal_correction.svg" alt="The one-third-octave spectrum of the snippet drawn as bars from 100 Hz to 1 kHz, with the arithmetic mean of each band's two neighbours marked above it, the 250 Hz band standing 10.5 dB above its own neighbour mean and flagged as the governing band, and the threshold row that applies to it printed beside it" width="86%"></picture>
+
+*The test is a band against the **arithmetic** mean of its two neighbours, not
+against a fitted floor and not against the whole spectrum. Only the 250 Hz band
+clears its threshold, by 10.5 dB against the 5 dB and 8 dB pair that applies in
+the 160 Hz to 400 Hz range, so it governs and $K_\mathrm{t} = 6$ dB. The two edge bands
+have no difference at all, because a neighbour is missing.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# `environment`, `freqs` and `levels` come from the snippet above.
+environment.tonal_correction(levels, frequencies=freqs).plot()
+plt.show()
+```
+
+</details>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_kf_ki_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_kf_ki.svg" alt="The low-frequency and impulsive corrections drawn as step functions of the level difference from 0 to 20 dB: both are zero up to 10 dB, step to 3 dB between 10 and 15 dB and step again to 6 dB above 15 dB, with the worked example's points marked, Lf = 13 dB giving 3 dB and Li = 5 dB giving 0 dB" width="86%"></picture>
+
+*$K_\mathrm{f}$ and $K_\mathrm{i}$ are the same two-step ladder read off two different meter
+differences, and the steps are where the arithmetic gets brittle: a difference of
+15.0 dB scores 3 dB and one of 15.1 dB scores 6 dB, so a tenth of a decibel of
+measurement uncertainty on either side of a step is worth 3 dB on $L_\mathrm{Keq}$.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `environment` is imported above.
+diffs = np.linspace(0.0, 20.0, 400)
+fig, ax = plt.subplots()
+ax.step(diffs, [environment.low_frequency_correction(lceq=63.0 + d, laeq=63.0)
+                for d in diffs], where="post", label="Kf (LCeq - LAeq)")
+ax.step(diffs, [environment.impulsive_correction(laieq=63.0 + d, laeq=63.0)
+                for d in diffs], where="post", ls="--", label="Ki (LAIeq - LAeq)")
+ax.plot([13.0], [3.0], "o", label="worked example: Lf = 13 dB")
+ax.plot([5.0], [0.0], "s", label="worked example: Li = 5 dB")
+ax.set(xlabel="Level difference [dB]", ylabel="Correction [dB]")
+ax.legend(fontsize="small")
+plt.show()
+```
+
+</details>
+
 ## Relationship with the ISO 1996 procedures
 
 The corrections of the regulation resemble ISO 1996 procedures the library
 already implements, but they are **not interchangeable**, which is why this
 module implements the RD's own variants instead of delegating to them:
 
-- `tonal_audibility()` / `tonal_adjustment()` are the engineering method of
+- [`tonal_audibility()` / `tonal_adjustment()`](environmental-levels.md#tonal-adjustment-engineering-method-iso-1996-22007-annex-c) are the engineering method of
   ISO 1996-2 Annex C, based on the audibility $\Delta L_\mathrm{ta}$ within the
   critical band around the tone, and return a **continuous** $K_\mathrm{t}$ between 0
   and 6 dB. The RD works on one-third-octave band differences and produces
   only 0, 3 or 6 dB.
-- `assess_tonal_survey()` (survey method, ISO 1996-2:2017 Annex K) is the
+- [`assess_tonal_survey()`](environmental-levels.md#tonal-adjustment-engineering-method-iso-1996-22007-annex-c) (survey method, ISO 1996-2:2017 Annex K) is the
   closest relative, because it also splits the spectrum at 125 and 400 Hz, but
   it requires the band to exceed **both** neighbours by 15/8/5 dB and only
   says which bands are prominent; the RD compares against the **mean** of the
   neighbours with 8/5/3 dB thresholds and grades the result.
-- `impulsive_sound_adjustment()` is the onset-rate method of ISO/PAS 1996-3 on
+- [`impulsive_sound_adjustment()`](impulsive-sound.md) is the onset-rate method of ISO/PAS 1996-3 on
   a calibrated signal. The RD's $K_\mathrm{i}$ is the classic $L_\mathrm{AIeq} - L_\mathrm{Aeq}$
   difference read off a sound level meter, not the same quantity.
 - $K_\mathrm{f}$ has no counterpart in ISO 1996 at all: the $L_\mathrm{Ceq} - L_\mathrm{Aeq}$
   difference is specific to the Spanish regulation.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_vs_iso_tonal_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_vs_iso_tonal.svg" alt="Two one-third-octave spectra drawn as bars side by side with three verdict rows under each. The left spectrum has a 10.5 dB emergence at 250 Hz and every method agrees a tone is there. The right spectrum has a shallower emergence chosen so the verdicts split: the RD 1367 tonal correction still grades it, while the ISO 1996-2 survey method raises no flag because the band does not exceed both neighbours by the required margin, and the ISO Annex C engineering method returns a smaller continuous Kt" width="90%"></picture>
+
+*The two procedures are close enough to be confused and far enough apart to
+disagree on a real spectrum. A 250 Hz band 7.5 dB above the arithmetic mean
+of its neighbours is graded $K_\mathrm{t} = 3$ dB by the regulation and raises **no flag
+at all** in the ISO survey method, because it beats each neighbour by less than
+the 8 dB that method requires. That is exactly the situation an inspection report
+has to be able to defend: the RD compares against the arithmetic **mean**
+of the neighbours with 8/5/3 dB thresholds and grades the result 0/3/6; the
+survey method requires the band to beat **both** neighbours by 15/8/5 dB and
+returns a flag; the Annex C engineering method works inside a critical band and
+returns a continuous value.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# `environment`, `freqs` and `levels` come from the corrections snippet above.
+shallow = list(levels)
+shallow[4] = 69.0                      # Lt = 7.5 dB instead of 10.5 dB
+
+for spectrum in (levels, shallow):
+    rd = environment.tonal_correction(spectrum, frequencies=freqs)
+    flags = np.asarray(environment.assess_tonal_survey(spectrum, frequencies=freqs).prominent)
+    print(rd.correction, rd.governing_frequency, bool(flags[4]))
+# 6.0 250.0 True     <- both agree
+# 3.0 250.0 False    <- the RD grades it, the survey method does not flag it
+plt.show()
+```
+
+</details>
 
 ## Evaluation periods and noise phases
 
@@ -160,6 +276,8 @@ $L_{\mathrm{Keq},x}$ more than 3 dB above it, and no $L_{\mathrm{Keq},Ti}$ measu
 phase more than 5 dB above it. For the inspection of an activity already in
 operation, Article 25.2 applies only the last two.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rd1367_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_rd1367_chain.svg" alt="Four stages left to right. First a 24 hour strip split into the RD 1367 day, evening and night periods at 07:00, 19:00 and 23:00, with the day strip broken into the worked example's three phases of 2, 6 and 4 hours. Second, each phase carrying LAeq,Ti plus Kt plus Kf plus Ki to LKeq,Ti with the 9 dB cap noted. Third, the duration-weighted energy mean to the period level LKeq,x with round_reported_level applied. Fourth, the operating-day weighted annual mean to LK,x, rounded again, feeding three parallel comparison boxes: the worst phase against the limit plus 5 dB, the daily value against the limit plus 3 dB and the annual value against the limit itself, with a note that Article 25.2 drops the third for an activity already in operation" width="92%"></picture>
+
 ## Worked example: a new activity on residential land
 
 A new activity on residential land (acoustic area type a) opens continuously
@@ -168,7 +286,7 @@ the opening hours the levels are steady, and while the activity is shut down it
 emits nothing. The levels measured outdoors, already corrected for background
 noise, are:
 
-| Phase | $L_\mathrm{Aeq,5s}$ | $K_\mathrm{t}$ | $K_\mathrm{f}$ | $K_\mathrm{i}$ | $K$ | $L_\mathrm{Keq,5s}$ |
+| Phase | $L_{\mathrm{Aeq},T_i}$ | $K_\mathrm{t}$ | $K_\mathrm{f}$ | $K_\mathrm{i}$ | $K$ | $L_{\mathrm{Keq},T_i}$ |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | With the noisy machine | 50 dB | 6 | 3 | 0 | 9 | 59 dB |
 | Rest of the opening hours | 48 dB | 3 | 3 | 0 | 6 | 54 dB |
@@ -202,6 +320,13 @@ verdict.passes                         # False: LK,d exceeds 55 dB
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_activity_assessment_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rd1367_activity_assessment.svg" alt="RD 1367/2007 activity assessment: per-period maximum phase level, daily LKeq,x and annual LK,x against the +5 dB, +3 dB and table limit values, with the day annual level exceeding its limit" width="80%"></picture>
 
+*Three indices per period against three different criteria, and only the
+strictest of them bites. In the day period the worst phase reads 59 dB against
+its 60 dB criterion and the daily $L_\mathrm{Keq,d}$ 57 dB against 58 dB (both pass)
+while the annual $L_\mathrm{K,d}$ of 56 dB fails the 55 dB of Table B1 by one decibel.
+The evening period (54 / 51 / 50 dB) clears all three. Reading only the
+loudest bar would declare this activity compliant.*
+
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -231,8 +356,15 @@ The verdict is the fine point of the example. The measured $L_{\mathrm{Keq},Ti}$
 the annual average of the day period, $L_\mathrm{K,d} = 56$ dB, exceeds the 55 dB of
 the table. A **new** activity does not comply. An activity already in
 operation, judged under Article 25.2, would comply, because only the phase and
-daily values are required of it; building the verdict with
-`new_activity=False` shows exactly that.
+daily values are required of it:
+
+```python
+existing = environment.assess_activity(
+    {"day": day, "evening": evening}, limits, operating_days=303,
+    new_activity=False,
+)
+print(existing.passes)                 # True: the annual criterion does not apply
+```
 
 ## Plots and the inspection report
 
@@ -264,31 +396,36 @@ verdict.plot()                       # the three criteria per period
 verdict.report("acta.pdf")           # acoustic inspection fiche, in Spanish
 ```
 
-The example fiche, regenerated with `make reports`, is kept rendered in the
-repository. Click the preview to open the PDF:
+The example fiche is regenerated with `make reports` and kept rendered in the
+repository; click the preview to open the PDF.
 
-[![RD 1367/2007 activity assessment example report, rendered in Spanish: an identification header, the noise-phase table of the five phases with their Kt, Kf and Ki corrections and the resulting LKeq,Ti (59,0 dB with the noisy machine running, 54,0 dB for the rest of the sources), the per-period assessment against the 55 dB of Annex III Table B1 (day 59/60, 57/58 and 56/55, evening 54/60, 51/58 and 50/55), the bar plot of each period's levels against its three criteria, and the boxed verdict that the activity exceeds the RD 1367/2007 immission limit values, with the day as the governing period, LKeq,x = 57 dB against a limit of 55 dB and LK,x = 56 dB](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/rd1367_activity_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/rd1367_activity_example.pdf)
+[![RD 1367/2007 activity assessment example report (PDF): One-page acoustic inspection fiche, rendered in Spanish: an identification header, the noise-phase table of the five phases with their Kt, Kf and Ki corrections and the resulting LKeq,Ti (59,0 dB with the noisy machine running, 54,0 dB for the rest of the sources), the per-period assessment against the 55 dB of Annex III Table B1 (day 59/60, 57/58 and 56/55, evening 54/60, 51/58 and 50/55), the bar plot of each period's levels against its three criteria, and the boxed verdict that the activity exceeds the RD 1367/2007 immission limit values, with the day as the governing period (LKeq,x = 57 dB against a limit of 55 dB, LK,x = 56 dB).](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/rd1367_activity_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/rd1367_activity_example.pdf)
 
-*Acoustic inspection fiche (`ActivityAssessment.report`), the three per-period
-criteria of RD 1367/2007 and the boxed verdict. The day period clears the
-phase criterion (59 against 60) and the daily one (57 against 58) and fails
-only the annual $L_{\mathrm{K},x}$ (56 against 55), which is why the fiche prints all
-three: any one of them is enough to fail.*
+Acoustic inspection fiche (ActivityAssessment.report), the three per-period criteria of RD 1367/2007 and the boxed verdict.
 
 ## What this guide covers
 
-**Covered.** The corrected level $L_{\mathrm{Keq},T}$ and the $K_\mathrm{t}$, $K_\mathrm{f}$ and $K_\mathrm{i}$
-corrections of RD 1367/2007 (Annex I A.2 c and Annex IV A.3.3), the evaluation
-periods and the noise-phase and annual integration (Annex I A.1 and Annex IV
-A.3.4.2 b) with the regulation's own rounding, the acoustic quality objective
-(Annex II) and immission limit value (Annex III) tables, and the Article 25
-compliance check of activities and port infrastructure.
+- **Covered.** The corrected level $L_{\mathrm{Keq},T}$ and the $K_\mathrm{t}$, $K_\mathrm{f}$ and $K_\mathrm{i}$ corrections of
+  RD 1367/2007 (Annex I A.2 c and Annex IV A.3.3), the evaluation periods and
+  the noise-phase and annual integration (Annex I A.1 and Annex IV A.3.4.2 b)
+  with the regulation's own rounding, the acoustic quality objective (Annex II)
+  and immission limit value (Annex III) tables, and the Article 25 compliance
+  check of activities and port infrastructure.
 
-**Not covered.** The acoustic zoning into acoustic areas, the noise maps and
-the action plans of Ley 37/2003 are planning instruments rather than
-calculations, and are out of scope. The measurement procedures themselves
-(microphone positions, series duration, number of measurements of Annex IV) are
-not implemented either: this page starts where the sound level meter ends.
+- **Not covered.** The acoustic zoning into acoustic areas, the noise maps and the action plans
+  of Ley 37/2003 are planning instruments rather than calculations, and are out
+  of scope. The measurement procedures themselves (microphone positions, series
+  duration, number of measurements of Annex IV) are not implemented either: this
+  page starts where the sound level meter ends.
+
+## See also
+
+- [Environmental Levels (ISO 1996-1/-2)](environmental-levels.md): the $L_\mathrm{den}$ and $L_\mathrm{dn}$ indicators and the ISO 1996-2 adjustments the corrections of the regulation coexist with.
+- [Integrated and Statistical Levels](../../signals/levels/levels.md): the per-phase $L_\mathrm{Aeq}$, $L_\mathrm{Ceq}$ and $L_\mathrm{AIeq}$ levels that feed the three corrections.
+- [Spanish Building Code (CTE DB-HR)](../../buildings/insulation/spanish-building-code.md): the other half of the Spanish framework, which shares the site's day noise index $L_\mathrm{d}$ with this page.
+- [Impulsive-sound prominence](impulsive-sound.md): the ISO/PAS 1996-3 impulsive adjustment, the relative of $K_\mathrm{i}$ that is not interchangeable with it.
+- API reference: [`environment.assessment.spain`](https://docs.jmrp.io/phonometry/reference/api/environment/spain/).
+- Theory: [Environmental descriptors (ISO 1996-1)](../../reference/theory/environment-transport.md#environmental-descriptors-iso-1996-1): the ISO 1996-1 indicators the national indices are built from.
 
 ## Quick answers
 
@@ -300,46 +437,11 @@ and $K_\mathrm{i}$ penalise the presence of emergent tonal, low-frequency and im
 components with 0, 3 or 6 dB each. The sum of the three corrections never
 exceeds 9 dB.
 
-## See also
-
-- [Environmental levels](environmental-levels.md): the $L_\mathrm{den}$ and $L_\mathrm{dn}$
-  indicators and the ISO 1996-2 adjustments the corrections of the regulation
-  coexist with.
-- [Integrated & Statistical Levels](../../signals/levels/levels.md): the per-phase $L_\mathrm{Aeq}$,
-  $L_\mathrm{Ceq}$ and $L_\mathrm{AIeq}$ levels that feed the three corrections.
-- [Spanish Building Code (CTE DB-HR)](../../buildings/insulation/spanish-building-code.md): the other half
-  of the Spanish framework, which shares the site's day noise index $L_\mathrm{d}$ with
-  this page.
-- [Impulsive-sound prominence](impulsive-sound.md): the ISO/PAS 1996-3
-  impulsive adjustment, the relative of $K_\mathrm{i}$ that is not interchangeable with
-  it.
-- API reference: [`environment.assessment.spain`](https://docs.jmrp.io/phonometry/reference/api/environment/spain/).
-
 ## References
 
-- Avilés López, R., & Perera Martín, R. (2017). *Manual de acústica ambiental
-  y arquitectónica*. Paraninfo. ISBN 978-84-283-3814-1.
-  Ejemplos 3.1 to 3.3 (pp. 171-176) are the worked case reproduced here, with
-  the noise-phase breakdown, the annual integration and the Article 25 verdict.
-- Jefatura del Estado (Spain). (2003). *Ley 37/2003, de 17 de noviembre, del
-  Ruido* (BOE-A-2003-20976).
-  [BOE consolidated text](https://www.boe.es/buscar/act.php?id=BOE-A-2003-20976).
-  The act the RD develops: the acoustic area types of Article 7, the figure of
-  the acoustic emitter and the inspection regime of Articles 25 to 27.
-- Ministerio de la Presidencia (Spain). (2007). *Real Decreto 1367/2007,
-  developing Ley 37/2003 del Ruido on acoustic zoning, quality objectives and
-  acoustic emissions* (BOE-A-2007-18397).
-  [BOE consolidated text](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397).
-  The corrected level, the corrections, the evaluation periods, the quality
-  objectives and the immission limit values implemented on this page.
-
-## Standards
-
-RD 1367/2007 (BOE-A-2007-18397), the regulation that develops Ley 37/2003 del
-Ruido on acoustic zoning, quality objectives and acoustic emissions: the
-corrected level $L_{\mathrm{Keq},T}$ and the corrections $K_\mathrm{t}$, $K_\mathrm{f}$ and $K_\mathrm{i}$
-(Annex I A.2 c, Annex
-IV A.3.3), the evaluation periods and the noise-phase integration (Annex I
-A.1, Annex IV A.3.4.2 b), the acoustic quality objectives of Annex II (Table A
-as amended by RD 1038/2012) and the immission limit values of Annex III, with
-the compliance criteria of Article 25.
+- **Avilés López, R., & Perera Martín, R. (2017).** *Manual de acústica ambiental y arquitectónica*. Paraninfo.
+  Ejemplos 3.1 to 3.3 (pp. 171-176) are the worked case reproduced here, with the noise-phase breakdown, the annual integration and the Article 25 verdict. ISBN 978-84-283-3814-1.
+- **Jefatura del Estado (Spain). (2003).** [*Ley 37/2003, de 17 de noviembre, del Ruido*](https://www.boe.es/buscar/act.php?id=BOE-A-2003-20976) (Ley 37/2003 (BOE-A-2003-20976), consolidated text).
+  The act the RD develops: the acoustic area types of Article 7, the figure of the acoustic emitter and the inspection regime of Articles 25 to 27.
+- **Ministerio de la Presidencia (Spain). (2007).** [*Real Decreto 1367/2007, developing Ley 37/2003 del Ruido on acoustic zoning, quality objectives and acoustic emissions*](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397) (RD 1367/2007 (BOE-A-2007-18397), consolidated text).
+  The corrected level LKeq,T and the Kt/Kf/Ki corrections (Annex I A.2 c and Annex IV A.3.3), the evaluation periods (Annex I A.1), the noise-phase integration (Annex IV A.3.4.2 b), the acoustic quality objectives (Annex II) and the immission limit values (Annex III). Table A of Annex II is amended by RD 1038/2012.

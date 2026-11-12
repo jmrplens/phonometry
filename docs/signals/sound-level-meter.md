@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/sound-level-meter.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/signals/sound-level-meter/
 
 # Build a sound level meter
 
@@ -45,6 +47,38 @@ recording[4 * fs : 5 * fs] += 0.2 * np.sqrt(2) * np.sin(
 )
 ```
 
+## 1b. Recording the two files
+
+A sound level meter built in software inherits every defect of the file it is
+handed, and three recorder settings decide whether the numbers below mean
+anything. **Set the input gain by hand and lock it.** Automatic gain control,
+limiting and noise suppression all move the sensitivity the next step measures
+once and step 4 then applies to every sample, so any of them silently voids the
+calibration. **Record uncompressed PCM, 24 bit, at 48 kHz or more.** A lossy
+codec redistributes the high-frequency energy the one-third-octave stage of
+step 5 reports, and a 44.1 kHz file has no band left above 22 kHz in which to
+support the class 1 A-weighting of step 3 near 16 kHz. **Choose the gain from
+the loudest event the measurement must be able to prove**, leaving roughly
+12 dB of headroom above its peak: the $L_\mathrm{Cpeak}$ of step 4 reads the true
+inter-sample peak, and one clipped run invalidates it and the $L_\mathrm{Aeq}$ with
+it.
+
+Two more decisions belong to the session rather than to the recorder. Record
+the calibrator tone through that same locked chain immediately before *and*
+immediately after the measurement, so the pair brackets the drift that step 7
+checks; a factor measured on another day, or after a gain control moved, is not
+a calibration of this file. Outdoors, keep the windscreen fitted and point the
+microphone in the reference direction its free-field calibration assumes.
+
+A field sheet worth copying:
+
+- Gain set by hand and written down; AGC, limiter and noise suppression off.
+- Uncompressed PCM, 24 bit, $f_\mathrm{s} \ge 48$ kHz, one channel per microphone.
+- Peak headroom of about 12 dB above the loudest expected event.
+- Calibrator tone before and after, same gain, same chain, same session.
+- Windscreen fitted, microphone on a tripod, reference direction at the source.
+- Sample rate, gain setting, microphone and calibrator identifiers logged.
+
 ## 2. Calibrate: give the samples physical meaning
 
 Digital samples are dimensionless; the **sensitivity factor** converts them
@@ -62,8 +96,14 @@ cal = metrology.sensitivity(calibrator, target_spl=94.0, fs=fs)
 ```
 
 Deep guide: [Calibration and dBFS](metrology/calibration.md), which
-also covers calibrating from a known microphone sensitivity and the digital
-dBFS mode used when no physical reference exists.
+covers the stability check this call runs on the calibrator recording, the
+integer-format rule, and the digital dBFS mode used when no physical reference
+exists. With no calibrator at all the factor can be computed from the chain's
+rated sensitivity rather than measured: a microphone rated $M$ mV/Pa through a
+preamplifier of linear gain $G$ into a converter whose full scale is $V_\mathrm{FS}$
+volts gives $S = V_\mathrm{FS} / (M G / 1000)$ pascals per digital unit; but a rated
+factor carries the datasheet's tolerance rather than the ±0.4 dB of a class 1
+calibrator, so it cannot be reported as a calibrated measurement.
 
 ## 3. Weight: frequency and time (IEC 61672-1)
 
@@ -81,9 +121,7 @@ laf_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
 # laf_t peaks near 80 dB during the event and settles near 55 dB between.
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_time_weighting.gif" alt="Animation: a tone burst driving the RC exponential detector, the capacitor charging and draining, while the Fast, Slow and Impulse meter needles follow their own ballistics" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_time_weighting.webm)
+**Video:** [The Fast, Slow and Impulse detector ballistics](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_time_weighting.webm): A tone burst drives the RC exponential detector: the capacitor charges and drains while the Fast, Slow and Impulse meter needles follow their own ballistics, and the three level traces build up below to show the fast attack, the slow average and the asymmetric impulse hold.
 
 The needle in the clip is that `time_weighting` call: a first-order low-pass
 charging and draining on the squared signal. The three needles differ in one
@@ -96,8 +134,8 @@ which is why they show no needle movement to follow. The chain is shown here
 because it *is* the meter's display.
 
 Deep guides: [Frequency Weighting (A, C, Z)](levels/weighting.md)
-and [Time Weighting](levels/time-weighting.md), which takes this same clip
-apart against the IEC 61672-1 tone-burst table.
+and [Time Weighting](levels/time-weighting.md), which takes
+this same clip apart against the IEC 61672-1 tone-burst table.
 
 ## 4. Integrate: the numbers a meter reports
 
@@ -119,15 +157,54 @@ print(f"LAeq {la_eq:.1f} dB | L10 {ln[10]:.1f} | L90 {ln[90]:.1f} "
       f"| LAE {lae:.1f} | LCpeak {lc_pk:.1f}")
 ```
 
-Note the arithmetic the numbers encode: the 1 s event dominates $L_\mathrm{Aeq}$ (it
-sits 25 dB above the background, far more than the 9.5 dB ($10\log_{10}9$) the
-nine-times-longer background gets back in duration), $L_{\mathrm{A}E}$ is $L_\mathrm{Aeq}$
-plus $10\log_{10}$ of the 10 s duration, and $L_{90}$ barely notices the event at
-all.
+Note the arithmetic the numbers encode. The event second measures 80.0 dB on its
+own and the nine background seconds 55.0 dB, so in energy the event contributes
+$1 \times 10^{8.00}$ and the background $9 \times 10^{5.50} = 2.9 \times 10^{6}$:
+a ratio of about 35:1, or 15.5 dB. The event's 25 dB head start beats the
+9.5 dB ($10\log_{10}9$) the background wins back on duration, which is why the
+10 s $L_\mathrm{Aeq}$ of 70.1 dB sits only 0.1 dB above the 70.0 dB the event alone
+would give spread over the same 10 s: the background is almost invisible in the
+energy average. $L_{\mathrm{A}E}$ is that $L_\mathrm{Aeq}$ plus $10\log_{10}(10\ \mathrm{s}/1\
+\mathrm{s}) = 10$ dB, the whole energy compressed into one second. The
+percentiles read the other way round: the event fills exactly 10 % of the
+record, so it lifts $L_{10}$ to 78.0 dB and leaves $L_{90}$ at 54.9 dB, the
+background level.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_level_track_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_level_track.svg" alt="Fast A-weighted level history of the ten-second recording of this page, rising from about 55 dB of pink background to 80 dB during the one-second event at four seconds, with horizontal lines at LAeq 70.1 dB, L10 78.0 dB, L50 55.1 dB and L90 54.9 dB, the event second shaded, and an annotation reading LAE 80.1 dB, the whole event energy compressed into one second" width="88%"></picture>
+
+*The readouts of this step drawn on the recording that produced them: the
+event second lifts $L_\mathrm{Aeq}$ and $L_{10}$, and leaves $L_{50}$ and $L_{90}$ on
+the background.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+t = np.arange(recording.size) / fs
+fig, ax = plt.subplots(figsize=(9, 4))
+ax.axvspan(4.0, 5.0, color="C1", alpha=0.15)
+ax.plot(t, laf_t, linewidth=0.8, label=r"$L_\mathrm{AF}(t)$")
+for value, name, style in [(la_eq, "LAeq", "--"), (ln[10], "L10", ":"),
+                           (ln[50], "L50", "-."), (ln[90], "L90", (0, (5, 1)))]:
+    ax.axhline(value, linestyle=style, linewidth=1.0,
+               label=f"{name} = {value:.1f} dB")
+ax.annotate(f"LAE = {lae:.1f} dB: the whole event energy in 1 s",
+            xy=(4.5, lae), xytext=(5.6, lae + 2),
+            arrowprops={"arrowstyle": "->"})
+ax.set(xlabel="Time [s]", ylabel="Level [dB re 20 µPa]", xlim=(0, 10))
+ax.legend(loc="lower right", ncols=2)
+plt.show()
+```
+
+</details>
 
 Deep guide: [Integrated and Statistical Levels](levels/levels.md),
-which adds noise dose and octave spectrograms; the $L_\mathrm{den}$ and rating levels
-continue in [Environmental levels](../environment/assessment/environmental-levels.md).
+which adds the maximum time-weighted level $L_\mathrm{AFmax}$ that this same `laf_t`
+track yields, noise dose and octave spectrograms; the $L_\mathrm{den}$ and rating
+levels continue in
+[Environmental Levels](../environment/assessment/environmental-levels.md).
 
 ## 5. Band-filter: the spectrum view (IEC 61260-1)
 
@@ -146,6 +223,59 @@ spl, bands = filtered.levels, filtered.frequencies
 # The '1k' band holds the event: ~70 dB, while its neighbors stay ~25 dB below.
 print(dict(zip(bands, np.round(spl, 1))))
 ```
+
+These are **unweighted (Z) band levels**: `octave_filter` ran on `recording`,
+not on the `weighted` signal of step 3, so their energy sum reproduces the
+unweighted $L_\mathrm{eq}$ and not the $L_\mathrm{Aeq}$ of step 4. That sum is the sanity
+check worth running once on every measurement:
+
+```python
+print(f"sum of the Z bands  {10 * np.log10(np.sum(10 ** (spl / 10))):.1f} dB")
+print(f"Leq(Z)              {signals.leq(recording, calibration_factor=cal):.1f} dB")
+# sum of the Z bands  70.3 dB
+# Leq(Z)              70.4 dB
+```
+
+The tenth or two of deficit is the energy outside the 12.5 Hz–20 kHz analysis
+range plus the band-edge shapes. A discrepancy larger than about half a decibel
+points at a calibration or a sample-rate mistake rather than at the filters.
+
+To obtain an *A-weighted* spectrum, band-filter the already weighted signal of
+step 3 instead of the raw recording:
+
+```python
+spl_a = filters.octave_filter(weighted, fs, fraction=3, nominal=True).levels
+print(f"sum of the A bands  {10 * np.log10(np.sum(10 ** (spl_a / 10))):.1f} dB")
+# sum of the A bands  70.1 dB -> the LAeq of step 4, to a hundredth of a decibel
+```
+
+That identity closes the loop between the two halves of the meter: the
+weighting stage and the filter stage measure the same energy.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_third_octave_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_third_octave.svg" alt="Thirty-three one-third-octave band levels of the recording of this page as a step plot from 12.5 Hz to 20 kHz, unweighted bands flat near 43 dB with the 1 kHz band highlighted at 70 dB, drawn beside the A-weighted spectrum of the same recording which falls away below 500 Hz and above 4 kHz" width="88%"></picture>
+
+*The same recording read in bands, unweighted and A-weighted. Pink noise gives
+nearly constant fractional-octave band levels, so the flat floor is the
+background and the single bar 27 dB above it is the event; A-weighting tilts
+the floor without touching the 1 kHz band, where the A curve is 0 dB.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+centres = filters.octave_filter(recording, fs, fraction=3).frequencies  # exact centres
+
+fig, ax = plt.subplots(figsize=(9, 4))
+ax.step(centres, spl, where="mid", label="Z (unweighted)")
+ax.step(centres, spl_a, where="mid", linestyle="--", label="A-weighted")
+ax.axvspan(891.3, 1122.5, color="C1", alpha=0.15)   # the 1 kHz band
+ax.set(xscale="log", xlabel="Band centre frequency [Hz]",
+       ylabel="Band level [dB re 20 µPa]")
+ax.legend(loc="lower center")
+plt.show()
+```
+
+</details>
 
 Deep guides: [Filter Banks](filters/filter-banks.md) for the filter
 architectures and zero-phase mode,
@@ -172,10 +302,91 @@ print(filters.verify_filter_class(bank).overall_class)    # 1
 The verdicts also come per band, so you can see exactly where a design would
 leave its class corridor. Deep guides:
 [Frequency Weighting](levels/weighting.md) (section on class
-verification) and [Filter class verification](filters/filter-compliance.md) (the
+verification) and
+[Filter Class Verification](filters/filter-compliance.md) (the
 Table 1 mask, class 0 and the compliance fiche).
 
-## Where to go next
+## 7. Is this measurement valid?
+
+Step 6 verified the *design* of the weighting and filter stages. It says
+nothing about the file. A hardware meter refuses to show a level it cannot
+stand behind: IEC 61672-1 clause 5.11 makes an overload indicator mandatory
+(5.11.5 latches it whenever time-averaged or exposure levels are being
+measured), and clause 5.12 adds an under-range indication.
+A meter assembled from functions has neither, so three checks on the recording
+replace them, and each of the three yields a number that belongs in the report.
+
+```python
+# (a) Overload: any run of two or more samples pinned at full scale.
+at_full_scale = np.flatnonzero(np.abs(recording) >= 1.0 - 1e-6)
+runs = (np.split(at_full_scale, np.flatnonzero(np.diff(at_full_scale) > 1) + 1)
+        if at_full_scale.size else [])
+clipped_runs = sum(1 for run in runs if run.size >= 2)
+
+# (b) Under-range: the same chain capturing its own noise (dummy capsule).
+self_noise = signals.noise_signal(fs, duration_s=3.0, color="pink", rms=2e-4, seed=11)
+margin = la_eq - signals.laeq(self_noise, fs, calibration_factor=cal)
+
+# (c) Drift: the calibrator tone recorded again after the measurement.
+calibrator_post = 0.985 * calibrator          # 1.5 % lower in this session
+cal_post = metrology.sensitivity(calibrator_post, target_spl=94.0, fs=fs)
+drift = abs(20 * np.log10(cal_post / cal))
+
+print(f"clipped runs {clipped_runs} | S/N margin {margin:.1f} dB "
+      f"| drift {drift:.2f} dB")
+# clipped runs 0 | S/N margin 55.3 dB | drift 0.13 dB
+```
+
+Refuse the record if any clipped run exists, require at least 10 dB of margin
+over the chain's self-noise (below that, $L_{90}$ is reading the preamplifier
+rather than the background), and hold the pre/post sensitivity difference to
+the 0.5 dB gate of the
+[calibration guide](metrology/calibration.md), which also
+explains why that same difference is the drift term of the uncertainty budget.
+
+Learn the fingerprint of the failure the broadband level hides. Clipping barely
+moves $L_\mathrm{Aeq}$ (hard-clipping a 1 kHz tone at 80 % of its peak costs 0.9 dB)
+while injecting an odd-harmonic ladder that lifts the 3.15 kHz one-third-octave
+band by 37 dB, the 5 kHz band by 37 dB and the 8 kHz band by 25 dB. A
+one-third-octave spectrum carrying regularly spaced peaks above anything the
+source can plausibly radiate is clipping until proven otherwise. The opposite
+failure looks nothing like it: a signal far below the converter's range gives a
+spectrum that barely changes when the source is switched off, which is what
+check (b) catches.
+
+## What this guide covers
+
+- **Covered.** This page composes stages already implemented elsewhere into the pipeline IEC
+  61672-1:2013 describes: the A frequency weighting and Fast exponential time
+  weighting, $L_\mathrm{Aeq}$, percentile levels, sound exposure level and the
+  C-weighted peak, the IEC 61260-1:2014 octave-band filters of `octave_filter`,
+  and the Table 3 (weighting) and Table 1 (filter) class acceptance limits
+  checked by `verify_weighting_class` and `verify_filter_class`. Each stage's
+  own guide states its coverage in detail. The calibrator the pipeline starts
+  from has a verdict of its own: `metrology.verify_sound_calibrator` grades what
+  a laboratory measured on it against every IEC 60942:2017 requirement that has
+  an acceptance limit, by the conformance rule of IEC TC 29. So has a working
+  meter's periodic test: `metrology.verify_sound_level_meter_periodic` grades
+  what a laboratory measured in the tests of IEC 61672-3:2013, clause by
+  clause ([Periodic tests of a sound level
+  meter](metrology/sound-level-meter-periodic-tests.md)).
+
+- **Not covered.** `verify_weighting_class` and `verify_filter_class` check the
+  frequency-response design of the digital filters against the standards'
+  tables; they do not perform the IEC 61672-2:2013 pattern-evaluation tests a
+  physical instrument needs for type approval, such as self-generated noise,
+  linearity range, overload indication or directional response, nor the IEC
+  61672-3:2013 periodic tests a working instrument receives, whose results a
+  laboratory returns and `verify_sound_level_meter_periodic` grades. A class verdict
+  from this page describes the algorithm, not a built device, and the three
+  checks of step 7 screen the *recording*, not the instrument. The same
+  holds for the calibrator: nothing here performs an IEC 60942:2017 test on
+  one. `verify_sound_calibrator` grades the numbers a laboratory measured, and
+  `sensitivity()` screens the short-term stability of the take against Table 2;
+  the [calibration guide](metrology/calibration.md#verifying-the-calibrator-itself-iec-609422017)
+  says exactly what each checks and what it does not.
+
+## See also
 
 The meter built here is the trunk; the rest of the core grows from it.
 
@@ -188,40 +399,6 @@ The meter built here is the trunk; the rest of the core grows from it.
   two microphones instead of one, and the delay between them.
 - [Block Processing](filters/block-processing.md): turn this page's
   offline meter into a streaming one with carried filter state.
-
-## What this guide covers
-
-**Covered.** This page composes stages implemented elsewhere into the pipeline
-IEC 61672-1:2013 describes: the A frequency weighting and the Fast exponential
-detector, $L_\mathrm{Aeq}$, the percentile levels, the sound exposure level and the
-C-weighted peak, the IEC 61260-1:2014 octave filters of `octave_filter`, and
-the Table 3 (weighting) and Table 1 (filter) class acceptance limits checked by
-`verify_weighting_class` and `verify_filter_class`. Each stage's own guide
-states its coverage in detail. The calibrator the pipeline starts from has a
-verdict of its own: `metrology.verify_sound_calibrator` grades what a
-laboratory measured on it against every IEC 60942:2017 requirement that has an
-acceptance limit, by the conformance rule of IEC TC 29. So has a working
-meter's periodic test: `metrology.verify_sound_level_meter_periodic` grades
-what a laboratory measured in the tests of IEC 61672-3:2013, clause by clause
-([Periodic tests of a sound level meter](metrology/sound-level-meter-periodic-tests.md)).
-
-**Not covered.** `verify_weighting_class` and `verify_filter_class` check the
-frequency-response *design* of the digital filters against the standards'
-tables. They do not run the IEC 61672-2:2013 pattern-evaluation tests a
-physical instrument needs for type approval (self-generated noise, linearity
-range, overload indication, directional response) nor the IEC 61672-3:2013
-periodic tests a working instrument receives, whose results a laboratory
-returns and `verify_sound_level_meter_periodic` grades. A class verdict from this page
-describes an algorithm, not a built device, and the screening checks of the
-last section screen the *recording*, not the instrument. The same holds for
-the calibrator: nothing here performs an IEC 60942:2017 test on one.
-`verify_sound_calibrator` grades the numbers a laboratory measured, and
-`sensitivity()` screens the short-term stability of the take against Table 2;
-[Calibration and dBFS](metrology/calibration.md) says exactly what each checks
-and what it does not.
-
-## See also
-
 - API reference: [`metrology.calibration`](https://docs.jmrp.io/phonometry/reference/api/metrology/calibration/),
   [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/),
   [`signals.levels`](https://docs.jmrp.io/phonometry/reference/api/signals/levels/),
@@ -230,21 +407,9 @@ and what it does not.
 
 ## References
 
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The blueprint of the instrument assembled on this page: the A frequency
-  weighting and the Fast exponential time weighting of the level chain, the
-  C-weighted peak and the sound exposure level, and the Table 3 class
-  acceptance limits checked by `verify_weighting_class`.
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014). [IEC webstore](https://webstore.iec.ch/en/publication/5063).
-  The fractional-octave-band filters behind the spectrum stage, and the
-  Table 1 class acceptance limits checked by `verify_filter_class`.
-- International Electrotechnical Commission. (2017). *Electroacoustics —
-  Sound calibrators* (IEC 60942:2017).
-  [IEC webstore](https://webstore.iec.ch/en/publication/30045).
-  The acoustic calibrator assumed by the sensitivity stage: the 94 dB
-  principal level and the short-term stability check applied to the reference
-  recording.
+- **International Electrotechnical Commission. (2013).** [*Electroacoustics — Sound level meters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5708) (IEC 61672-1:2013).
+  The blueprint of the instrument assembled on this page: the A frequency weighting and the Fast exponential time weighting of the level chain, the C-weighted peak and the sound exposure level, and the Table 3 class acceptance limits checked by verify_weighting_class.
+- **International Electrotechnical Commission. (2014).** [*Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications*](https://webstore.iec.ch/en/publication/5063) (IEC 61260-1:2014).
+  The fractional-octave-band filters behind the spectrum stage, and the Table 1 class acceptance limits checked by verify_filter_class.
+- **International Electrotechnical Commission. (2017).** [*Electroacoustics — Sound calibrators*](https://webstore.iec.ch/en/publication/30045) (IEC 60942:2017).
+  The acoustic calibrator assumed by the sensitivity stage: the 94 dB principal level and the short-term stability check applied to the reference recording.

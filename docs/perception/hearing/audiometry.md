@@ -1,28 +1,36 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/hearing/audiometry.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/audiometry/
 
 # Audiometric Test Methods (ISO 8253-1 and -2)
 
-An audiogram is a set of hearing threshold levels, and each of them rests on a
-room quiet enough not to mask the faintest tone, a rule that turns "heard" and
-"not heard" into one number, and an uncertainty. ISO 8253-1 sets all three out
-for earphones and bone vibrators, and ISO 8253-2 adds what a loudspeaker needs:
-a room whose sound field is known.
+An audiogram is a set of hearing threshold levels, and each of them rests on
+three things the audiometer does not show: a room quiet enough not to mask the
+faintest tone, a rule that turns a series of "heard" and "not heard" into one
+number, and an uncertainty that says how far that number can be trusted.
+ISO 8253-1 sets all three out for earphones and bone vibrators, and ISO 8253-2
+adds what a loudspeaker needs: a room whose sound field is known.
 
 ## Is the room quiet enough? (ISO 8253-1 Clause 11)
 
-Tables 2 and 4 give the maximum permissible ambient sound pressure level
-$L_{S,\mathrm{max}}$ per one-third-octave band from 31.5 Hz to 8 kHz, for air
-conduction with supra-aural earphones and for bone conduction, and for the
-lowest test frequency (125 Hz, 250 Hz or, with earphones, 500 Hz). An earphone
-that excludes more noise adds the difference of the attenuations of Table 3, a
-lowest hearing threshold level other than 0 dB is added band by band, and a
-threshold shift of +5 dB instead of +2 dB adds 8 dB (11.1 and the NOTEs):
+The ambient noise must not mask the lowest test tone. Tables 2 and 4 give the
+maximum permissible ambient sound pressure level $L_{S,\mathrm{max}}$ in each
+one-third-octave band from 31.5 Hz to 8 kHz, for air conduction with typical
+supra-aural earphones and for bone conduction, and for the lowest frequency the
+audiometry tests: 125 Hz, 250 Hz or, with earphones, 500 Hz. They hold for
+hearing threshold levels down to 0 dB with at most +2 dB of threshold shift
+from the noise. Three things move them (11.1 and the NOTEs to the tables):
 
 $$
 L_{S,\mathrm{max}}' = L_{S,\mathrm{max}}
 + \left(A_\mathrm{earphone} - A_\mathrm{supra\text{-}aural}\right)
 + L_\mathrm{HT,min} + \Delta
 $$
+
+an earphone that excludes more noise than the supra-aural one allows the
+difference of the two attenuations in Table 3; a lowest hearing threshold level
+$L_\mathrm{HT,min}$ other than 0 dB is added band by band; and accepting a
+threshold shift of +5 dB instead of +2 dB adds $\Delta$ = 8 dB.
 
 ```python
 import numpy as np
@@ -32,40 +40,84 @@ from phonometry import hearing
 booth = [50, 48, 45, 43, 40, 36, 30, 24, 19, 16, 14, 12, 11,
          10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8]
 supra_aural = hearing.check_audiometric_ambient_noise(booth)
-print(supra_aural.passes, supra_aural.lowest_measurable_hearing_level)  # False 3.0
+print(supra_aural.passes)                               # False
+print(supra_aural.frequencies[~supra_aural.within])     # [ 63.  80. 100. 125. 160.]
+print(supra_aural.lowest_measurable_hearing_level)   # 3.0
+
+# The same booth with insert earphones (Table 3: about 33 dB at low frequency).
 insert = hearing.check_audiometric_ambient_noise(booth, earphone="ER-3A")
-print(insert.passes)                                                       # True
+print(insert.passes)                                    # True
+print(hearing.ambient_noise_limits("air", earphone="ER-3A")[15])  # 45.0 at 1 kHz
+```
+
+The booth's ventilation leaves too much at 63 Hz to 160 Hz for supra-aural
+earphones, by up to 3 dB at 100 Hz, so with them it can only measure down to a
+hearing level of 3 dB: the lowest level the rule of 11.1 allows this room.
+ISO 8253-1 asks no report to state it; ISO 8253-2 11.1 f) asks a sound field
+report to state the same figure when it is not 0 dB. Insert earphones exclude
+that noise, and the same room qualifies. Another earphone enters with its own
+attenuation per band, `earphone_attenuation=`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room.svg" alt="Two panels of the same booth's one-third-octave ambient spectrum from 31.5 Hz to 8 kHz, falling from 50 dB at 31.5 Hz to about 8 dB above 2 kHz, drawn against the maximum permissible level for air conduction audiometry from 125 Hz. Left, with supra-aural earphones: the limit falls from 56 dB to 18 dB between 31.5 Hz and 500 Hz and rises to 36 dB at 4 kHz, and the spectrum crosses it at 63, 80, 100, 125 and 160 Hz, each marked with a cross; the room does not qualify. Right, with ER-3A insert earphones: the limit is raised by the difference in attenuation, to between 37 dB and 89 dB, and the spectrum stays well under it everywhere; the room qualifies" width="92%"></picture>
+
+*One booth, two earphones. The limits of Table 2 are what a supra-aural
+earphone lets through; an insert earphone excludes about 30 dB more below
+500 Hz, and Table 3 turns that into room.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.5, 5.6), sharey=True)
+supra_aural.plot(left)   # limits, measured spectrum, crosses where it exceeds
+insert.plot(right)
+plt.show()
+```
+
+</details>
+
+Bone conduction leaves both ears open, so no earphone shelters them and Table 4
+is stricter than Table 2 by 10 dB at 500 Hz and by 34 dB at 4 kHz; NOTE 2 to it
+warns that levels under 5 dB are hard to measure with most sound level meters.
+The same
+booth, for bone conduction from 250 Hz, allows only a lowest hearing level of
+6 dB, set by the 4 kHz band:
+
+```python
 bone = hearing.check_audiometric_ambient_noise(
     booth, presentation="bone", lowest_test_frequency_hz=250
 )
-print(bone.lowest_measurable_hearing_level)                             # 6.0
+print(bone.passes, bone.lowest_measurable_hearing_level)   # False 6.0
+print(bone.frequencies[np.argmax(bone.exceedance_db)])        # 4000.0
+
+# Measuring only down to 10 dB raises every limit by 10 dB (11.1).
+print(hearing.check_audiometric_ambient_noise(
+    booth, presentation="bone", lowest_test_frequency_hz=250,
+    lowest_hearing_level=10.0,
+).passes)                                                     # True
 ```
 
-`presentation="sound field"` judges the room against ISO 8253-2 Table 2, up to
-12.5 kHz, derived from ISO 8253-1 for binaural listening (footnote a); laid side
-by side, its cells are ISO 8253-1 Table 4 less 3 dB. For narrow-band noise as
-the test signal, footnote b asks for lower limits and prints no figure, so the
-check applies the table as printed. A measurement that leaves bands out does not
-pass, and `noise_floor_levels=` flags the bands within 6 dB of the meter's own floor
-(11.1).
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room.svg" alt="The same booth's ambient spectrum against the air-conduction limits from 125 Hz: with supra-aural earphones it exceeds them from 63 Hz to 160 Hz, marked with crosses; with ER-3A insert earphones the limits are raised by the extra attenuation and the room qualifies" width="92%"></picture>
+A measurement that leaves bands out is judged on those it has and does not
+pass: the room is not shown to meet the bands nobody measured. `noise_floor_levels=`
+flags the bands where the reading is within 6 dB of the meter's own floor,
+which 11.1 forbids; such a reading overstates the room, so a band within its
+limit still is, and one over it may be the meter's.
 
 ## From responses to a threshold (6.2 to 7.5)
 
-- **Ascending method** (6.2.3.2, 6.2.4.2): 10 dB down after each response, 5 dB
-  up after each miss; the threshold is the lowest level answered in more than
-  half of the ascents, once three of at most five end at one level (two of
-  three, shortened). The presentation sequence can be replayed, and the result
-  gives the level to present next.
-- **Bracketing method** (6.2.4.3): the mean of the averaged ascent and descent
-  levels, rounded to the nearest 5 dB step (the library sends a tie up; the
-  clause gives no rule for it).
-- **Automatic recording** (6.3.5): the first reversal and both ends of
-  excursions of 3 dB or less are ignored, and the mean of the averaged peaks and
-  valleys is rounded **up** to the next whole decibel.
-- **Sweep-frequency audiometry** (7.5): the three nearest peaks and valleys on a
-  log-frequency axis, or a running average of six reversals.
+Every method ends in a rule, and each rule has its own test of reliability: a
+spread of more than 10 dB between the levels it combines.
+
+### The ascending method (6.2.3.2, 6.2.4.2)
+
+The first tone sits 10 dB below the lowest level the subject answered during
+familiarization; after no response the level rises 5 dB, after a response it
+drops 10 dB. An **ascent** is a run of rising tones that ends in a response,
+and the series stops when three ascents end at one level, out of at most five.
+The hearing threshold level is the lowest level at which responses occur in
+more than half of the ascents:
 
 ```python
 series = hearing.ascending_method_threshold(
@@ -73,94 +125,337 @@ series = hearing.ascending_method_threshold(
     responses=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
     familiarization_level=40.0,
 )
-print(series.ascent_levels, series.threshold_level)   # [25. 25. 20. 25.] 25.0
-print(hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]).threshold_level)  # 35.0
+print(series.ascent_levels)   # [25. 25. 20. 25.]
+print(series.threshold_level)       # 25.0
+print(series.doubtful)           # False: the ascents span 5 dB, not over 10 dB
+
+# Replayed as it happens, the same rule says what to present next.
+print(hearing.ascending_method_threshold(
+    presentation_levels=[30, 20], responses=[True, False],
+    familiarization_level=40.0,
+).next_level)                 # 25.0
+```
+
+The sequence is checked against the steps of 6.2.3.2, and a tone that breaks
+them is refused with its position, which is what lets the function supply the
+next level to a computer-controlled audiometer (6.4): call it with the
+presentations so far and present `next_level`. The first tone, heard at once, is not an ascent: no
+tone rose to it. After five ascents without three at one level the series is
+exhausted and the next starts 10 dB above the last response. The response levels
+of the ascents can go in alone, and `shortened=True` applies the version that
+stops at two responses out of three ascents. 6.2.3.2 does not say what follows
+a shortened series that ends its three ascents without two responses at one
+level; the library continues it with the full method, a new call on the same
+presentations with `shortened=False`.
+
+### The bracketing method (6.2.4.3)
+
+Ascents and descents alternate in 5 dB steps. The lowest response levels of the
+ascents are averaged, those of the descents are averaged, and the mean of the
+two averages, rounded to the nearest 5 dB step, is the threshold. A mean
+halfway between two steps goes to the higher one, the library's reading of
+"nearest" wherever a standard leaves the tie open:
+
+```python
+bracket = hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35])
+print(bracket.mean_level, bracket.threshold_level)   # 32.5 35.0
+print(bracket.complete, bracket.repeat_advised)  # True False
+```
+
+Three ascents and three descents make a complete series; two of each suffice
+when their four levels are within 5 dB of each other.
+
+### Automatic recording (6.3.5)
+
+The subject holds the level down while the tone is heard and lets it rise when
+it is not, and the tracing zigzags about the threshold. The first reversal after
+a change of frequency is ignored, and so are both reversals of any excursion of
+3 dB or less; the peaks and the valleys are averaged separately, and the mean of
+the two averages, **rounded up** to the next whole decibel, is the threshold:
+
+```python
 tracing = hearing.automatic_audiometry_threshold(
     [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
 )
-print(tracing.mean_level, tracing.threshold_level)          # 25.75 26.0
+print(tracing.peak_levels)                      # [31. 32. 30. 31.]
+print(tracing.valley_levels)                    # [22. 21. 20. 19. 20. 21.]
+print(tracing.mean_level, tracing.threshold_level) # 25.75 26.0
 ```
 
-Each rule carries its clause's reliability test: a spread of more than 10 dB
-between the levels it combines.
+The recording is of doubtful reliability when the peaks or the valleys spread
+over more than 10 dB or fewer than six reversals remain. NOTE 2 to 6.3.5 puts
+automatic thresholds 3 dB below manual ones on average, a property of the method
+this function does not correct.
 
-Three more rules judge the levels once found. `hearing.check_retest_agreement`
-applies Step 3 of 6.2.3.2: the repeat at 1 kHz agrees to 5 dB or less, or a
-change of 10 dB or more sends the test back to the further frequencies.
-`hearing.audiogram_cautions` flags an air-conduction level of 40 dB or more
-(cross-hearing, 6.2.3.2) and a bone-conduction level at the average vibrotactile
-threshold of 8.4, 40, 60 and 70 dB at 250 Hz, 500 Hz and 1 kHz for the mastoid
-and about 10 dB lower for the forehead
-(`hearing.VIBROTACTILE_HEARING_LEVELS`).
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_threshold_rules_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_threshold_rules.svg" alt="Left: twelve presentations of the ascending method as a staircase of hearing level against presentation number, starting at 30 dB, heard tones drawn filled and missed ones open, and the four ascents' ends ringed at 25, 25, 20 and 25 dB; a dashed line marks the threshold of 25 dB. Right: an automatic recording as fourteen reversals zigzagging between about 20 dB and 32 dB, the first reversal and three around a 1 dB wobble drawn grey as ignored, dotted lines at the mean of the peaks, 31 dB, and of the valleys, 20.5 dB, and a dashed line at the threshold of 26 dB" width="92%"></picture>
+
+*Left, the ascending method: three of the four ascents end at 25 dB, which is
+more than half. Right, automatic recording: the peaks average 31 dB and the
+valleys 20.5 dB, and the mean of 25.75 dB is rounded up.*
+
+<details>
+<summary>Show the code for this figure</summary>
 
 ```python
-print(hearing.check_retest_agreement(25.0, 35.0).retest_further_frequencies)  # True
-cautions = hearing.audiogram_cautions(
-    [250, 500, 1000, 2000], air_conduction_threshold_levels=[20, 25, 30, 45],
-    bone_conduction_threshold_levels=[40, 20, 25, 40],
-)
-print(cautions.cross_hearing, cautions.vibrotactile)
-# [False False False  True] [ True False False False]
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+series.plot(left)    # the staircase, heard and missed, ascents ringed
+tracing.plot(right)  # the tracing, its ignored reversals and the averages
+plt.show()
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_threshold_rules_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_threshold_rules.svg" alt="Left: an ascending series of twelve presentations, the four ascents ending at 25, 25, 20 and 25 dB and the threshold of 25 dB. Right: an automatic recording, its ignored reversals grey, the peaks averaging 31 dB, the valleys 20.5 dB and the threshold 26 dB" width="92%"></picture>
+</details>
+
+### Sweep-frequency audiometry (7.5)
+
+The frequency sweeps, normally at 0.5 to 2 octaves per minute, while the
+subject tracks the threshold. At a specified frequency the three peaks and the
+three valleys closest to it are averaged, closest on the logarithmic axis the
+sweep runs on, and the mean is rounded to the nearest decibel. Run along the
+tracing, six consecutive reversals give the threshold at the geometric mean of
+their frequencies:
+
+```python
+reversal_frequencies = np.geomspace(500.0, 4000.0, 18)
+reversal_levels = [34, 24, 33, 23, 35, 25, 36, 24, 38, 27, 40, 29,
+                   43, 31, 46, 34, 48, 37]
+sweep = hearing.sweep_audiometry_threshold(reversal_levels,
+                                           reversal_frequencies=reversal_frequencies)
+print(sweep.frequencies)     # [ 500.  750. 1000. 1500. 2000. 3000. 4000.]
+print(sweep.threshold_level)    # [29. 29. 30. 32. 36. 40. 40.]
+print(np.round(sweep.running_frequencies[:2]))  # [679. 767.]
+```
+
+### The repeat at 1 kHz and the cautions (6.2.3.2, 8.4)
+
+Three more rules judge the levels once they are found. When every frequency of
+the first ear is done, Step 3 of 6.2.3.2 repeats the measurement at 1 kHz: an
+agreement to 5 dB or less moves the test to the other ear, and an improvement
+or a worsening of 10 dB or more sends it back to retest the further
+frequencies, in the same order, until the agreement returns. A hearing level
+of 40 dB or more in either ear calls for caution because the tone may be heard
+by the other ear, and contralateral masking can then be necessary (6.2.3.2).
+And a bone vibrator on the mastoid is felt, on average, at a hearing level of
+about 40 dB at 250 Hz, 60 dB at 500 Hz and 70 dB at 1 kHz (8.4, about 10 dB
+lower when the audiometer is calibrated for the forehead), so a
+bone-conduction response there may be touch rather than hearing:
+
+```python
+repeat = hearing.check_retest_agreement(25.0, 35.0)   # first and repeat at 1 kHz
+print(repeat.passes, repeat.retest_further_frequencies)   # False True
+
+cautions = hearing.audiogram_cautions(
+    [250, 500, 1000, 2000, 4000],
+    air_conduction_threshold_levels=[20, 25, 30, 45, 55],
+    bone_conduction_threshold_levels=[40, 20, 25, 40, 50],
+)
+print(cautions.cross_hearing)   # [False False False  True  True]
+print(cautions.vibrotactile)    # [ True False False False False]
+```
+
+The text is written for the 5 dB steps of a manual audiometer, where a repeat
+either agrees to 5 dB or differs by 10 dB. A finer control can give 7 dB, which
+is not agreement, and for which Step 3 names no action; the check then neither
+passes nor asks for the retest. 8.4 gives levels at three frequencies only and
+warns that individuals vary widely about them, so a flag there is a reason to
+look again, not a verdict; bone conduction gets no cross-hearing flag, because
+8.1 already asks for the other ear to be masked at every level.
+`cautions.plot()` draws the audiogram with the flagged levels crossed.
 
 ## The uncertainty of a threshold (Annex A)
 
-Eight uncorrelated inputs with a sensitivity coefficient of 1:
-$u = \sqrt{\sum u_i^2}$ and $U = 2u$. With the typical values of A.3, air
-conduction below 4 kHz without masking gives the example of Table A.2:
+Annex A models the hearing threshold level as the determined value plus seven
+zero-mean input quantities, for the audiometer, the transducer and its fitting,
+the ambient noise, the masking, the tester, the subject and an unusually
+difficult measurement. None is correlated with another and each has a
+sensitivity coefficient of 1, so
+
+$$
+u = \sqrt{\sum_{i=1}^{8} u_i^2}, \qquad U = 2u
+$$
+
+and A.3 gives typical values: 2.5 dB for repeated air-conduction
+determinations up to 4 kHz, the audiometer's ±3 dB and its 5 dB steps as two
+rectangular distributions, $\sqrt{1.5^2 + 2.5^2}$ = 2.9 dB for the transducer,
+and 2 dB for a room that meets Clause 11. That is the example of Table A.2:
 
 ```python
 budget = hearing.audiometric_uncertainty(1000.0)
-print(np.round(budget.standard_uncertainties_db[:4], 1))                   # [2.5 2.3 2.9 2. ]
+print(np.round(budget.standard_uncertainties_db[:4], 1))           # [2.5 2.3 2.9 2. ]
 print(round(budget.combined_uncertainty_db, 1), round(budget.expanded_uncertainty_db))  # 4.9 10
+
+# Bone conduction above 4 kHz with masking noise: every component grows.
+masked_bone = hearing.audiometric_uncertainty(6000.0, conduction="bone", masked=True)
+print(round(masked_bone.expanded_uncertainty_db, 1))               # 15.3
 ```
+
+An expanded uncertainty of 10 dB is two audiometer steps either way, which is
+what a single audiogram can claim. `environment_uncertainty_db=` replaces the 2 dB of A.3.5
+for a room that exceeds Clause 11, or drops it for thresholds well above 0 dB,
+and `tester_uncertainty_db=`, `subject_uncertainty_db=` and `special_uncertainty_db=` carry the exceptional
+components of A.3.7 to A.3.9; `budget.plot()` draws the eight as bars.
 
 ## The sound field (ISO 8253-2)
 
-`hearing.check_free_sound_field` (5.2: ±1 dB at the lateral positions up to
-4 kHz, ±2 dB above, the axial pair at 0.15 m within ±1 dB of the inverse
-distance law), `hearing.check_quasi_free_sound_field` (5.4: ±2 dB, the axial
-pair at 0.10 m, and a usable frequency range) and
-`hearing.check_diffuse_sound_field` (5.3: six positions within ±2.5 dB, the ear
-sides within 3 dB, and from 500 Hz a directional microphone's variation within
-Table 1) qualify the room band by band; the directional test is a requirement,
-and without it a diffuse field does not pass. The same diffuse-field check
-serves ISO 4869-3 on the [hearing protectors](hearing-protectors.md) page.
-`hearing.incidence_correction` reads the off-axis increases of Annex B, which
-the text announces from 200 Hz and the table prints from 125 Hz (see
-[ERRATA](../../ERRATA.md)).
+With loudspeakers the room is part of the instrument, so ISO 8253-2 qualifies
+it, with the subject and the chair absent and the audiometry's own signals, as
+one of three fields:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_sound_field_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_sound_field.svg" alt="Left: a quasi-free field whose lateral and axial deviations leave 125 Hz and 250 Hz outside the field, usable from 500 Hz to 8000 Hz. Right: a diffuse field within all its limits, its directional variation under the 5 dB of Table 1" width="92%"></picture>
+- a **free field** (5.2): the loudspeaker at least 1 m away, the level 0.15 m
+  to the left, right, above and below the reference point within ±1 dB of the
+  level at it up to 4 kHz and ±2 dB above, the ear-side positions within 3 dB
+  of each other above 4 kHz, and the points 0.15 m in front of and behind it on
+  the loudspeaker's axis within ±1 dB of the inverse distance law,
+  $20 \lg\left((r + d)/(r - d)\right)$. Only an anechoic room meets it, and pure
+  tones need it (4.2);
+- a **quasi-free field** (5.4): the same with ±2 dB at the lateral positions and
+  the axial points 0.10 m out. Its usable frequency range is the range where the
+  requirements hold;
+- a **diffuse field** (5.3): six positions 0.15 m out within ±2.5 dB and the ear
+  sides within 3 dB, and from 500 Hz up the levels a directional microphone
+  reads in the directions of the most and the least incident energy within the
+  variation Table 1 allows for its front-to-random index: 5 dB for an index of
+  5 dB or more, 4.5 dB for 4.5 dB, 4 dB for 4 dB.
 
-## References
+```python
+# A treated room, the loudspeaker 1.2 m away: deviations from the level at
+# the reference point, 125 Hz to 8 kHz, at the four lateral positions.
+lateral = {
+    "left": [2.6, -2.2, 0.8, 0.6, -0.4, 0.5, 0.9, -0.7, 1.2, -1.1, 1.4],
+    "right": [-2.4, 1.9, -0.6, 0.3, 0.7, -0.8, 0.4, 1.1, -1.3, 1.5, -0.9],
+    "up": [1.2, 2.3, 0.5, -0.9, 0.2, 0.6, -0.5, 0.8, 0.4, -1.2, 1.6],
+    "down": [-1.5, -1.8, -0.9, 0.4, -0.6, -0.3, 0.7, -0.4, -0.8, 0.9, -1.7],
+}
+law = 20 * np.log10(1.3 / 1.1)   # the axial difference at 0.10 m, 1.45 dB
+front = law + np.array([1.8, 1.2, 0.4, -0.3, 0.2, -0.4, 0.3, 0.5, -0.2, 0.6, -0.5])
+quasi = hearing.check_quasi_free_sound_field(
+    lateral, np.zeros(11), front_levels=front, back_levels=np.zeros(11),
+    loudspeaker_distance_m=1.2,
+)
+print(quasi.passes)              # False: the room's modes spoil 125 Hz and 250 Hz
+print(quasi.usable_frequencies)  # [ 500.  750. 1000. 1500. 2000. 3000. 4000. 6000. 8000.]
 
-- International Organization for Standardization (2010). *Acoustics —
-  Audiometric test methods — Part 1: Pure-tone air and bone conduction
-  audiometry* (ISO 8253-1:2010). Clause 11 with Tables 2 to 4, the threshold
-  rules of 6.2.4, 6.3.5 and 7.5, the repeat and the cautions of 6.2.3.2 and
-  8.4, and Annex A, validated against Tables 2 to 4, the levels of 8.4 and
-  Table A.2.
-- International Organization for Standardization (2009). *Acoustics —
-  Audiometric test methods — Part 2: Sound field audiometry with pure-tone and
-  narrow-band test signals* (ISO 8253-2:2009). The sound fields of 5.2 to 5.4,
-  the ambient limits of Table 2 and the off-axis increases of Table B.1.
+# Four loudspeakers with uncorrelated narrow bands of noise: the six positions,
+# and a directional microphone of index 5 dB read in two directions.
+six = {
+    "front": [1.4, 0.9, 0.6, -0.8, 0.5, 1.1, -0.4, 0.7, -0.6, 0.9, 1.2],
+    "back": [-1.2, -0.6, 0.8, 0.5, -0.9, -0.7, 0.6, -0.5, 0.8, -1.0, -0.8],
+    "left": [0.8, 1.3, -0.5, 0.9, 0.4, -0.6, 1.0, 0.6, -0.9, 0.5, 1.4],
+    "right": [-0.9, -1.1, 0.7, -0.4, -0.8, 0.9, -0.7, -0.8, 0.7, -0.6, -1.1],
+    "up": [2.1, 1.6, -1.1, 0.6, 1.2, -0.9, 0.8, -1.2, 0.5, 1.3, -0.7],
+    "down": [-1.8, -1.4, 0.9, -1.0, -0.5, 0.8, -1.1, 0.9, -0.4, -0.9, 0.6],
+}
+readings = np.zeros((2, 11))
+readings[1] = [np.nan, np.nan, 3.1, 2.7, 3.4, 2.9, 3.8, 3.2, 3.6, 4.1, 4.3]
+diffuse = hearing.check_diffuse_sound_field(
+    six, np.zeros(11), directional_levels=readings, front_to_random_index=5.0
+)
+print(diffuse.passes)            # True
+```
 
-## Standards
+The directional test of 5.3 b) is a requirement, not an extra: without the
+readings, `diffuse.directionality_judged` is false and so is `passes`, while
+`uniform` and `balanced` still give the verdict of a) band by band. A
+microphone of index 4 dB would allow only 4 dB and fail the 6 kHz and 8 kHz
+bands of the same readings. The sound-field room also has its own ambient limits,
+ISO 8253-2 Table 2 up to 12.5 kHz, derived from ISO 8253-1 for binaural
+listening (footnote a); laid side by side, they are its bone-conduction limits
+less 3 dB: `check_audiometric_ambient_noise(levels, presentation="sound field")`.
+With narrow bands of noise as the test signal, as in this diffuse field,
+footnote b asks for lower limits than the table's and prints no figure, so a
+room that passes the check may still be too loud for them.
 
-ISO 8253-1:2010, which sets the maximum permissible ambient levels of an
-audiometric test room (Clause 11, Tables 2 to 4), the rules that turn responses
-into a hearing threshold level (6.2.4, 6.3.5, 7.5), the repeat at 1 kHz and the
-cautions that judge that level (6.2.3.2, 8.4), and its uncertainty (Annex A). ISO 8253-2:2009, which qualifies a sound field as free,
-quasi-free or diffuse (Clause 5), sets its ambient limits (Clause 6) and prints
-the off-axis increases of Annex B.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_sound_field_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_sound_field.svg" alt="Two panels against frequency from 125 Hz to 8 kHz. Left, a quasi-free field: the largest lateral deviation falls from 2.6 dB at 125 Hz and 2.3 dB at 250 Hz, both crossed as outside the field, to within plus or minus 2 dB from 500 Hz up, between dashed tolerance lines at plus and minus 2 dB; the axial deviation from the inverse distance law falls from 1.8 dB at 125 Hz and 1.2 dB at 250 Hz, both crossed too, to within the dotted plus or minus 1 dB lines from 500 Hz; the title reads usable from 500 Hz to 8000 Hz. Right, a diffuse field: the largest deviation of the six positions stays within plus or minus 2.5 dB, the right-left difference under 3 dB, and the directional variation from 500 Hz between 2.7 dB and 4.3 dB, under the Table 1 limit of 5 dB drawn as dashes; the title reads qualifies" width="92%"></picture>
+
+*Left, 5.4: the usable frequency range of a quasi-free field is where it meets
+its requirements, here 500 Hz to 8 kHz. Right, 5.3: a diffuse field made of four
+loudspeakers, qualified with a directional microphone of index 5 dB.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+fig, (left, right) = plt.subplots(1, 2, figsize=(13.5, 5.6))
+quasi.plot(left)     # lateral and axial deviations, bands outside crossed
+diffuse.plot(right)  # positions, ear sides and directional variation
+plt.show()
+```
+
+</details>
+
+No standardized reference threshold exists for a loudspeaker away from 0°
+(4.8, NOTE 1). Annex B prints how much higher the level is at the ear nearer
+the loudspeaker at 45° and 90°, rounded to 0.5 dB, which is what a report can
+state beside an off-axis threshold:
+
+```python
+print(hearing.incidence_correction([500, 1000, 4000], incidence_angle_deg=90))
+# [ 4.5  5.5 -0.5]
+```
+
+The paragraph above Table B.1 announces it from 200 Hz; the table prints rows
+from 125 Hz, and the library keeps every printed row. The discrepancy is
+registered in [ERRATA](../../ERRATA.md).
+
+## What this guide covers
+
+- **Covered.** ISO 8253-1:2010's maximum permissible ambient levels of Clause 11 (Tables 2 and
+  4) with the earphone allowance of Table 3, the lowest hearing threshold level
+  and the +5 dB relaxation, and the noise-floor margin of 11.1; the threshold
+  rules of the ascending method (6.2.3.2 and 6.2.4.2, with its full and shortened
+  series and the replay of a presentation sequence), the bracketing method
+  (6.2.4.3), automatic recording (6.3.5) and sweep-frequency audiometry (7.5),
+  each with its reliability test; the repeat at 1 kHz of 6.2.3.2 Step 3, the
+  cross-hearing caution of 6.2.3.2 and the vibrotactile levels of 8.4; and the
+  uncertainty budget of Annex A (A.3 to A.5), via
+  `hearing.check_audiometric_ambient_noise`, `hearing.ambient_noise_limits`,
+  `hearing.ascending_method_threshold`, `hearing.bracketing_method_threshold`,
+  `hearing.automatic_audiometry_threshold`, `hearing.sweep_audiometry_threshold`,
+  `hearing.check_retest_agreement`, `hearing.audiogram_cautions` and
+  `hearing.audiometric_uncertainty`. Every cell of Tables 2 to 4, the levels of
+  8.4, the components of A.3.3 and A.3.4 and the budget of Table A.2 (its four
+  components, $u$ = 4.9 dB and $U$ = 10 dB) are reproduced in the test suite and
+  in the conformance report.
+
+- **Covered.** ISO 8253-2:2009's free, quasi-free and diffuse sound fields (5.2 to 5.4, with
+  Table 1), the ambient limits of Clause 6 and Table 2, and the off-axis increases
+  of Annex B (Table B.1), via `hearing.check_free_sound_field`,
+  `hearing.check_quasi_free_sound_field`, `hearing.check_diffuse_sound_field`,
+  `hearing.check_audiometric_ambient_noise` and `hearing.incidence_correction`.
+  Every cell of Tables 2 and B.1 is reproduced in the test suite and in the
+  conformance report, and so is the derivation of Table 2 from ISO 8253-1
+  Table 4. The diffuse-field check is the one ISO 4869-3 applies to the
+  random-incidence field of its test site, on the
+  [hearing protectors](hearing-protectors.md) page.
+
+- **Not covered.** Nothing here presents a tone, drives an audiometer's hardware or judges a
+  subject. The preparation and instruction of the subject (Clause 5), the
+  familiarization of 6.2.2, the masking procedures of 6.2.3.3 and 8.5, the
+  screening test of Clause 9, the audiogram symbols of Clause 10 and the
+  psycho-acoustic check of 11.2 are procedures a tester follows, and the
+  calibration scheme of Clause 12 belongs to IEC 60645-1 and the ISO 389 series.
+  The test signal characteristics of ISO 8253-2 Clause 4, its monaural and
+  binaural testing (8.2, 8.3) and testing with a hearing aid (Clause 9) are
+  likewise taken as given, and so are the lower ambient limits footnote b to its
+  Table 2 asks for narrow-band noise, for which it prints no figure. Speech
+  audiometry is ISO 8253-3, which the library does not implement. The reference zero the thresholds are levels above is on
+  the [hearing threshold](hearing-threshold.md) page.
 
 ## See also
 
-- [Hearing threshold (age and reference zero)](hearing-threshold.md): the
-  audiometric zero the hearing levels are measured from.
-- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](hearing-protectors.md): the
-  same diffuse-field test on the site where an earmuff is screened.
+- [Hearing threshold (age and reference zero)](hearing-threshold.md):
+  the audiometric zero the hearing levels are measured from, and the threshold
+  an otologically normal ear of a given age is expected to show.
+- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](hearing-protectors.md):
+  the same diffuse-field test, applied to the site where an earmuff is screened
+  on its test fixture.
+- [Noise-induced hearing loss (ISO 1999)](noise-induced-hearing-loss.md):
+  what the threshold levels an audiogram records are compared against.
 - API reference: [`hearing.audiometry`](https://docs.jmrp.io/phonometry/reference/api/hearing/audiometry/)
   and [`hearing.sound_field_audiometry`](https://docs.jmrp.io/phonometry/reference/api/hearing/sound-field-audiometry/).
+
+## References
+
+- **International Organization for Standardization. (2009).** *Acoustics — Audiometric test methods — Part 2: Sound field audiometry with pure-tone and narrow-band test signals* (ISO 8253-2:2009).
+  The free, diffuse and quasi-free sound fields of 5.2 to 5.4 with Table 1, the ambient limits of Clause 6 and Table 2, and the off-axis increases of Annex B, validated against every cell of Tables 2 and B.1.
+- **International Organization for Standardization. (2010).** *Acoustics — Audiometric test methods — Part 1: Pure-tone air and bone conduction audiometry* (ISO 8253-1:2010).
+  The implemented standard: the maximum permissible ambient levels of Clause 11 with Tables 2 to 4, the threshold rules of 6.2.4, 6.3.5 and 7.5, and the uncertainty budget of Annex A, validated against every cell of Tables 2 to 4 and against Table A.2. Read in its European adoption BS EN ISO 8253-1:2010, which adopts it without modification.

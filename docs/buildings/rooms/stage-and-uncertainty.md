@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/buildings/rooms/stage-and-uncertainty.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/
 
 # Stage support and uncertainty (ISO 3382-1)
 
@@ -199,27 +201,42 @@ time-reversed, which is what
 [`room_parameters`](room-acoustics.md) does with
 `zero_phase=True`.
 
+## What this guide covers
+
+- **Covered.** The stage support of ISO 3382-1:2009, Annex C: Equations (C.1) and (C.2) with
+  their printed integration limits, the Table C.1 typical ranges, and the two
+  standard deviations C.2.4 estimates. And Clause 7: the standard deviation of a
+  measured reverberation time from Equations (4) and (5), the two printed filter
+  bandwidths, the ten decays Clause 7.2 values an integrated impulse response
+  at, and the lower limits of Equations (6) and (7).
+
+- **Not covered yet.** The measurement plan itself: the source directivity limits of Table 1 with the
+  gliding average that qualifies a source against them, the minimum receiver
+  counts of Table A.2, and the reporting contract of Clause 9.2.
+
 ## See also
 
-- [Room Acoustic Parameters](room-acoustics.md): the decay times this page
-  puts an uncertainty on.
-- [Sound strength G (ISO 3382-1)](sound-strength.md): how loud the hall is,
-  against the same source at 10 m in a free field.
-- [Spatial impression (ISO 3382-1)](spatial-impression.md): where the sound
-  comes from, measured with a second microphone.
-- [Measuring the Room Impulse Response](room-impulse-response.md): the
-  ISO 18233 acquisition of the responses this page measures.
-- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/) and [`room.acoustics`](https://docs.jmrp.io/phonometry/reference/api/rooms/acoustics/).
+- [Room Acoustic Parameters](room-acoustics.md): the
+  decay times this page puts an uncertainty on.
+- [Sound Strength G](sound-strength.md): how loud the
+  hall is, against the same source at 10 m in a free field.
+- [Spatial Impression](spatial-impression.md): where
+  the sound comes from, measured with a second microphone.
+- [Measuring the Room Impulse Response](room-impulse-response.md):
+  the ISO 18233 acquisition of the responses this page measures.
+- [Conformance report](../../CONFORMANCE.md):
+  the closed-form window geometries and the printed coefficients the stage
+  support and the Clause 7 uncertainty are validated against.
+- API reference: [`room.auditorium`](https://docs.jmrp.io/phonometry/reference/api/rooms/auditorium/)
+  and [`room.acoustics`](https://docs.jmrp.io/phonometry/reference/api/rooms/acoustics/).
 
-## Standards
+## References
 
-ISO 3382-1:2009, Annex C (informative): the early and late stage support of
-Equations (C.1) and (C.2), their Table C.1 ranges and the two standard
-deviations of C.2.4. And its normative Clause 7: the standard deviation of a
-measured reverberation time from Equations (4) and (5) with the printed
-filter bandwidths, and the lower limits of Equations (6) and (7). The two
-coefficient pairs are the 20 dB and 30 dB rows of the general form
-ISO 3382-2:2008 prints as its Equation (A.4). Validated against closed-form
-window geometries and the printed coefficients in the
-[conformance report](../../CONFORMANCE.md); the two integration limits the
-prose of Annex C leaves out are in the [errata register](../../ERRATA.md).
+- **Davy, J. L. (1980).** The variance of impulse decays. *Acustica*, *44*(1), 51-56.
+  One of the two references Clause 7.1 derives its coefficients from.
+- **Gade, A. C. (1989).** Investigations of musicians' room acoustic conditions in concert halls. II: Field experiments and synthesis of results. *Acustica*, *69*(6), 249-262.
+  The field work the stage support of Annex C comes from, and the source-receiver geometry it fixes.
+- **International Organization for Standardization. (2008).** [*Acoustics — Measurement of room acoustic parameters — Part 2: Reverberation time in ordinary rooms*](https://www.iso.org/standard/36201.html) (ISO 3382-2:2008).
+  Its Equation (A.4) and Table A.1 are the general form the two coefficients of ISO 3382-1 Clause 7 are one column of.
+- **International Organization for Standardization. (2009).** [*Acoustics — Measurement of room acoustic parameters — Part 1: Performance spaces*](https://www.iso.org/standard/40979.html) (ISO 3382-1:2009).
+  Clause 7 and Annex C: the uncertainty of a measured reverberation time and the two stage supports.

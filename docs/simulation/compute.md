@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/simulation/compute.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/compute/
 
 # Where a simulation runs: NumPy, CuPy and torch
 
@@ -21,8 +23,8 @@ about the numbers on each device. The physics, the sources and the
 boundaries are the same everywhere; they are explained in
 [2D FDTD wave simulation](fdtd-simulation.md) and
 [Elastic waves and fluid-solid coupling](elastic-waves.md).
-[Where heavy work runs](where-it-runs.md) maps the devices, the nodes and the
-encoders in one place.
+[Where heavy work runs](where-it-runs.md) maps the
+devices, the nodes and the encoders in one place.
 
 ## 1. Asking for a device: `Compute`
 
@@ -175,8 +177,8 @@ writers take one: `fdtd_simulation(run, compute=...)` and
 run here returns, and the writers bring back the video too. An engine built
 directly steps in this process, and it raises `ValueError` for a placement
 that names a host, wherever the placement came from.
-[Sending a simulation to a remote node](remote-node.md) says how to name a
-node and set one up.
+[Sending a simulation to a remote node](remote-node.md)
+says how to name a node and set one up.
 
 **Threads and processes.** `use()` holds its record in a context variable.
 Whether a new thread or process sees it depends on how it is started, so give
@@ -334,11 +336,12 @@ decimated snapshots in two of them.
 **NumPy, float64: bit-identical.** Identical inputs give bit-identical outputs
 on the same platform: no random numbers, and every operation in a fixed order.
 The NumPy path is also held to SHA-256 digests of every number those scenarios
-give ([`engine-digests.json`](../../engine-digests.json), checked in CI). A
-frozen copy of the two engines as they stood before they could step anywhere
-else first proved the new engines equal to it bit for bit on every runner, and
-the digests were then taken from the new engines, so the other devices cost the
-NumPy numbers nothing.
+give
+([`engine-digests.json`](https://github.com/jmrplens/phonometry/blob/main/engine-digests.json),
+checked in CI). A frozen copy of the two engines as they stood before they
+could step anywhere else first proved the new engines equal to it bit for bit
+on every runner, and the digests were then taken from the new engines, so the
+other devices cost the NumPy numbers nothing.
 
 **CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX
 4060 with NVIDIA driver 610.57.04, CuPy 14.2.0 (`cupy-cuda13x`, CUDA runtime
@@ -348,14 +351,15 @@ scenarios was bit-identical to NumPy's. The energy, a sum over the whole grid,
 differed by at most 1.79×10⁻¹⁶ relative over those seven runs, because the GPU
 adds the cells in another order; that is the worst of the matrix, and a sum
 over a larger grid can differ more. The measurement is recorded in
-[`gpu-parity.lock`](../../gpu-parity.lock), at the root of the repository, with
-the NVIDIA driver, the CUDA versions, the container image it ran in and a
-fingerprint of the two engines, their backends and the scenario matrix. CI
-checks that fingerprint on every pull request, so an engine that changes
-without a new proof on a GPU fails. The promise is that one measurement: the
-lock records a single proof, on the card, driver and versions above, and
-another GPU, driver or CuPy release is covered only once the maintainer runs a
-new proof on it (`make gpu-parity`) and records it in the lock.
+[`gpu-parity.lock`](https://github.com/jmrplens/phonometry/blob/main/gpu-parity.lock),
+at the root of the repository, with the NVIDIA driver, the CUDA versions, the
+container image it ran in and a fingerprint of the two engines, their backends
+and the scenario matrix. CI checks that fingerprint on every pull request, so
+an engine that changes without a new proof on a GPU fails. The promise is that
+one measurement: the lock records a single proof, on the card, driver and
+versions above, and another GPU, driver or CuPy release is covered only once
+the maintainer runs a new proof on it (`make gpu-parity`) and records it in the
+lock.
 
 **torch, and NumPy in float32: within a published bound over the scenario
 matrix.** The bound is the largest relative difference from the NumPy
@@ -440,25 +444,25 @@ decimated.plot(kind="snapshot")
 
 ## What this guide covers
 
-**Covered.** Where the two FDTD engines step: NumPy in float64 or float32,
-CuPy on an NVIDIA GPU, and torch on a CPU, an NVIDIA GPU or Apple's MPS,
-chosen per call with `compute=`, per block with `use()` or per process with
-`PHONOMETRY_COMPUTE`; the refusals of a request that cannot be met and the
-fallback to NumPy with `ComputeFallbackWarning`; the `RunProvenance` every
-result records; what is promised on each device, bit for bit on NumPy in
-float64, bit for bit as measured on CuPy in float64, and within a bound
-published over the scenario matrix on torch's CPU device, on torch's MPS
-device in float32 and on NumPy in float32; and decimated snapshots.
+- **Covered.** Where the two FDTD engines step: NumPy in float64 or float32, CuPy on an
+  NVIDIA GPU, and torch on a CPU, an NVIDIA GPU or Apple's MPS, chosen per
+  call with `compute=`, per block with `use()` or per process with
+  `PHONOMETRY_COMPUTE`; the refusals of a request that cannot be met and the
+  fallback to NumPy with `ComputeFallbackWarning`; the `RunProvenance` every
+  result records; what is promised on each device, bit for bit on NumPy in
+  float64, bit for bit as measured on CuPy in float64, and within a bound
+  published over the scenario matrix on torch's CPU device, on torch's MPS
+  device in float32 and on NumPy in float32; and decimated snapshots.
 
-**Not covered.** One engine steps on one device: a run is not split across
-GPUs, and `device_index` picks one of them. The other array libraries (JAX,
-MLX, dpnp) are not backends, and the GPU runs the same sequence of standard
-operations as NumPy, with no fused or compiled kernels, which is what keeps
-the CuPy fields bit-identical. This page publishes no timing: a GPU pays a
-fixed cost for every operation it launches, so it helps only on grids large
-enough to earn it back. CuPy in float32 and torch on CUDA have no measured
-bound yet, and no bound covers a run longer or larger than the scenario
-matrix. The rest of phonometry computes on NumPy only.
+- **Not covered.** One engine steps on one device: a run is not split across GPUs, and
+  `device_index` picks one of them. The other array libraries (JAX, MLX, dpnp)
+  are not backends, and the GPU runs the same sequence of standard operations
+  as NumPy, with no fused or compiled kernels, which is what keeps the CuPy
+  fields bit-identical. This page publishes no timing: a GPU pays a fixed cost
+  for every operation it launches, so it helps only on grids large enough to
+  earn it back. CuPy in float32 and torch on CUDA have no measured bound yet,
+  and no bound covers a run longer or larger than the scenario matrix. The rest
+  of phonometry computes on NumPy only.
 
 ## See also
 
@@ -466,8 +470,8 @@ matrix. The rest of phonometry computes on NumPy only.
   acoustic engine, its sources, probes and boundaries, and how to size a run.
 - [Elastic waves and fluid-solid coupling](elastic-waves.md):
   the elastic engine, which takes the same `compute=`.
-- [Sending a simulation to a remote node](remote-node.md): the same run on
-  another machine over SSH, with a `host` in the request.
+- [Sending a simulation to a remote node](remote-node.md):
+  the same run on another machine over SSH, with a `host` in the request.
 - [Writing animations and FDTD runs to video](../io/videos.md): the two
   writers that take the same `compute=` and write a run straight to a video.
 - API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
@@ -511,7 +515,5 @@ request raises `ComputeImportError` or `ComputeDeviceError` instead, or
 
 ## References
 
-- Consortium for Python Data API Standards. *Python array API standard*.
-  [data-apis.org/array-api/latest](https://data-apis.org/array-api/latest/).
-  The operations the FDTD engines step their fields with once they are
-  built, which is what lets one stepping code run on NumPy, CuPy and torch.
+- **Consortium for Python Data API Standards. (n.d.).** [*Python array API standard*](https://data-apis.org/array-api/latest/).
+  The operations the FDTD engines step their fields with once they are built, which is what lets one stepping code run on NumPy, CuPy and torch.

@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/start/index.md: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/
 
 # Start
 
@@ -33,7 +35,7 @@ look a name up, the four places where the obvious fix is the wrong one, and
 the seventy-eight names that are gone.
 
 **I have a job, not a subject. Which page is it?**
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes the library by
+[What do you need to measure?](tasks.md) indexes the library by
 the task instead of the topic: measure a reverberation time, check a wall
 against a building code, rate a machine's sound power, decide whether a worker
 is over the exposure limit.
@@ -87,8 +89,8 @@ part written most bluntly.
 - A first measurement carried end to end: [Build a sound level meter](../signals/sound-level-meter.md).
 - The whole inventory, by topic: [All guides](../README.md).
 - A symbol you have but cannot name: the [glossary](../reference/glossary.md), with its unit, its defining clause and the guide that computes it.
-- Evidence that a number is defensible: the [conformance report](https://docs.jmrp.io/phonometry/reference/conformance/), which prints each standard's own expected value beside the computed one.
-- A printed expected value that disagrees with the library: the [errata registry](https://docs.jmrp.io/phonometry/reference/errata/), which says which of the two is wrong and why.
+- Evidence that a number is defensible: the [conformance report](../CONFORMANCE.md), which prints each standard's own expected value beside the computed one.
+- A printed expected value that disagrees with the library: the [errata registry](../ERRATA.md), which says which of the two is wrong and why.
 
 The assumed starting point is Python 3.12 or newer with working NumPy and
 SciPy, and enough acoustics to know what a one-third-octave band and a sound

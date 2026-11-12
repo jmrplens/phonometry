@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/start/support.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/start/support/
 
 # Support the project
 
@@ -14,8 +16,8 @@ concrete.
 The cheapest support is using the library and reporting the number that does
 not match your reference. A report that names a standard and a clause is the
 most valuable issue this project receives: the
-[errata register](../ERRATA.md) exists because sources get read closely, and
-several of its entries began as a user's raised eyebrow.
+[errata register](../ERRATA.md) exists because sources get
+read closely, and several of its entries began as a user's raised eyebrow.
 [Open an issue](https://github.com/jmrplens/phonometry/issues) with what you
 measured and what you expected.
 
@@ -45,7 +47,8 @@ could find, re-checked on the date shown. Four routes help:
 - **Verify against your licensed copy.** If your lab or employer already
   holds one, you can check the implementation and its reference values
   against your copy. What lands in the tree are the derived numeric values,
-  which is how the [conformance suite](../CONFORMANCE.md) is built.
+  which is how the
+  [conformance suite](../CONFORMANCE.md) is built.
 - **Point me at a channel I missed.** A lending library, an author's own
   copy of a thesis, a proceedings archive that actually resolves.
   [Open an issue](https://github.com/jmrplens/phonometry/issues).

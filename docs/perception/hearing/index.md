@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/perception/hearing/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/perception/hearing/
 
 # Hearing and exposure
 
@@ -80,25 +82,25 @@ In the order the chain runs.
 
 ## What this section does not cover
 
-**Nothing here is a verdict about a person.** ISO 1999 does not define a
-hearing handicap or a compensable fence. That line is set by national
-regulation, and the library applies none of it, so you supply and check the
-criterion yourself. The exposure side stops one step later: the LEX,8h and its
-one-sided 95 % upper limit come out of ISO 9612, and the fiche written by
-`ExposureResult.report()` does compare the LEX,8h against the Directive
-2003/10/EC action and limit values (80, 85 and 87 dB(A)) and issues the
-PASS/FAIL verdict against the limit value. But that is a verdict on an
-unprotected exposure, not on a person: the effective exposure behind hearing
-protectors, and any stricter national transposition, are still yours to check.
+- **Not covered.** **Nothing here is a verdict about a person.** ISO 1999 does not define a
+  hearing handicap or a compensable fence. That line is set by national
+  regulation, and the library applies none of it, so you supply and check the
+  criterion yourself. The exposure side stops one step later: the LEX,8h and its
+  one-sided 95 % upper limit come out of ISO 9612, and the fiche written by
+  `ExposureResult.report()` does compare the LEX,8h against the Directive
+  2003/10/EC action and limit values (80, 85 and 87 dB(A)) and issues the
+  PASS/FAIL verdict against the limit value. But that is a verdict on an
+  unprotected exposure, not on a person: the effective exposure behind hearing
+  protectors, and any stricter national transposition, are still yours to check.
 
-Two implementation boundaries follow the standards. Only **database A** is
-implemented for ISO 1999: `htlan` always draws its age component from ISO
-7029:2017, and substituting a nationally measured control population (clauses
-6.2.3 and 6.2.4) means computing that database elsewhere and passing it in. Of
-ISO 389-7, only the Table 1 reference values are implemented, not the
-procedures by which they were established.
+- **Not covered.** Two implementation boundaries follow the standards. Only **database A** is
+  implemented for ISO 1999: `htlan` always draws its age component from ISO
+  7029:2017, and substituting a nationally measured control population (clauses
+  6.2.3 and 6.2.4) means computing that database elsewhere and passing it in. Of
+  ISO 389-7, only the Table 1 reference values are implemented, not the
+  procedures by which they were established.
 
-And no audiometer's hardware is driven here. Nothing generates a test tone or
-presents it to a subject: ISO 8253's rules turn the responses a tester records into a
-threshold, and judge the room it was measured in, but the responses themselves
-are data, and so are the threshold levels the other pages consume and produce.
+- **Not covered.** And no audiometer's hardware is driven here. Nothing generates a test tone or
+  presents it to a subject: ISO 8253's rules turn the responses a tester records into a
+  threshold, and judge the room it was measured in, but the responses themselves
+  are data, and so are the threshold levels the other pages consume and produce.

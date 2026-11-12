@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/fluids/humid-air.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/fluids/humid-air/
 
 # Humid air
 
@@ -26,7 +28,11 @@ Those are the conditions of the first row of Table F.1, and the numbers are
 the ones the annex prints. Every one of the ten figures it tabulates comes
 back inside the rounding of its last printed digit.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain.svg" alt="The humid-air model as a chain: four conditions in, the water vapour mole fraction first, then the compressibility factor and the density, the speed of sound, the ratio of specific heats and the viscosity, and the thermal diffusivity built from the density and the two expressions of Clause F.6, with the five properties Table F.1 prints a value for marked apart from the two it does not" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain.svg" alt="Flow diagram of the humid-air model of the annex, read from top to bottom. Four input boxes run across the top: the temperature t in degrees Celsius, valid from 15 to 27 degrees; the static pressure ps in pascals, valid from 60 to 110 kilopascals; the relative humidity H, valid from 10 to 90 per cent; and, in a dashed box, the carbon dioxide mole fraction xc, 0.000 4 unless it is measured, with a line under it saying that it enters the density, the speed of sound and the ratio of specific heats. Each measured condition reaches only the steps its own expression names, on a line of its own: the temperature drops into the saturation vapour pressure psv on the left, an exponential in the kelvin temperature with four Table F.2 coefficients, and runs across into the enhancement factor f on the right, with three; the static pressure runs across into f as well and drops into the water vapour mole fraction xw between them; and the relative humidity drops into xw alone. psv and f point into xw from either side. From xw a line branches down into the rows below, labelled with the seven quantities it enters. In the left column the compressibility factor Z, with nine coefficients, points across into the density rho in the middle, and under it the thermal conductivity ka points across into the thermal diffusivity alpha t, which also takes the density from above and the specific heat capacity Cp from below. The right column holds the zero-frequency speed of sound c0 and the ratio of specific heats kappa, with sixteen coefficients each, and the viscosity eta, with six. The five properties Table F.1 tabulates have green borders and carry its values for 23 degrees, 101 325 pascals and 50 per cent: a density of 1.186 084 8 kilograms per cubic metre, a speed of sound of 345.866 52 metres per second, a ratio of 1.400 757 3, a viscosity of 1.826 566 times ten to the minus five pascal seconds and a diffusivity of 2.115 317 times ten to the minus five square metres per second. The conductivity and the specific heat have dashed red borders: they come back from the same call, but Clause F.6 only writes them out and no column of Table F.1 prints a value for them. A key names the three borders. A box at the foot writes out the density equation, the compressibility factor, the water vapour mole fraction and alpha t as ka over rho Cp. Three lines under it say which boxes take the temperature in kelvin; give the relative standard uncertainties the annex quotes on its equations, 22 parts per million for the density, three parts in ten thousand for c0 and 3.2 parts in ten thousand for kappa; and note that dispersion moves the speed of sound by less than that uncertainty" width="100%"></picture>
+
+*The chain the call above runs: the water vapour comes first and every
+quantity after it depends on it, and the five with a printed value carry the
+one Table F.1 gives for those conditions.*
 
 ## The three conditions are not equally important
 
@@ -242,3 +248,8 @@ solver's default medium, and it is deliberately not that: 343 m/s and
 1,2 kg/m³ flat, the round pair a finite-difference grid is set up with, carried
 as a `Fluid` so that a run says which air it was made in rather than leaving
 two floats standing side by side in a call.
+
+## References
+
+- **International Electrotechnical Commission. (2009).** [*Electroacoustics — Measurement microphones — Part 2: Primary method for pressure calibration of laboratory standard microphones by the reciprocity technique*](https://webstore.iec.ch/en/publication/4486) (IEC 61094-2:2009).
+  Annex F carries the humid-air model implemented here, its coefficients in Table F.2 and the two worked condition sets of Table F.1 that pin it. The edition read is its European adoption BS EN 61094-2:2009.

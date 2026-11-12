@@ -1,29 +1,34 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/simulation/elastic-waves.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/simulation/elastic-waves/
 
 # Elastic waves and fluid-solid coupling
 
-A fluid carries one wave; a solid carries a family of them. This guide covers
-the elastic companion of the [2D FDTD wave simulation](fdtd-simulation.md):
-`elastic_fdtd_simulation` integrates the plane-strain velocity-stress system
-of Virieux (1986) on the same staggered grid as the acoustic solver, and with
-it the compressional **P wave**, the shear **S wave**, the **Rayleigh wave**
-of a free surface and the **Scholte wave** of a fluid-solid contact all
-emerge from the same update. Because a fluid is just the shear-free limit of
-the elastic equations, one pair of material maps couples water, air,
-sediment and steel in a single run: oblique reflection with **mode
-conversion**, seabed interface waves and the transmission of immersed plates
-come out of the maps alone, each pinned to its exact closed form by the
-validation suite.
+A fluid carries one wave; a solid carries a family of them. This guide
+covers the elastic companion of the
+[2D FDTD wave simulation](fdtd-simulation.md):
+`elastic_fdtd_simulation` integrates the plane-strain velocity-stress
+system of Virieux (1986) on the same staggered grid as the acoustic solver,
+and with it the compressional **P wave**, the shear **S wave**, the
+**Rayleigh wave** of a free surface and the **Scholte wave** of a
+fluid-solid contact all emerge from the same update. Because a fluid is
+just the shear-free limit of the elastic equations, one pair of material
+maps couples water, air, sediment and steel in a single run: oblique
+reflection with **mode conversion**, seabed interface waves and the
+transmission of immersed plates come out of the maps alone, each pinned to
+its exact closed form by the validation suite.
 
 The guide assumes the acoustic solver's vocabulary (sources, probes,
 obstacle masks, sponges and the Courant bound); read
-[2D FDTD wave simulation](fdtd-simulation.md) first if those are new. The
-closed forms this solver cross-checks live in the building, vibration and
-underwater guides: the mass law of
-[panel sound insulation](../buildings/design/panel-sound-insulation.md), the flexural waves of
+[2D FDTD wave simulation](fdtd-simulation.md) first if
+those are new. The closed forms this solver cross-checks live in the
+building, vibration and underwater guides: the mass law of
+[panel sound insulation](../buildings/design/panel-sound-insulation.md), the
+flexural waves of
 [bending-wave transmission at plate junctions](../vibration/structural/junction-transmission.md),
 and the shear-supporting seabed that the fluid-bottom reflection model of
-[underwater sound propagation](../underwater/underwater-propagation.md) cannot represent.
+[underwater sound propagation](../underwater/underwater-propagation.md)
+cannot represent.
 
 ## 1. The P-SV velocity-stress scheme
 
@@ -54,18 +59,36 @@ machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
 their fields, the snapshot cadence, the snapshot's field and its
 `snapshot_decimation=d`, which keeps one cell in `d` along each axis, as
-section 7 of [Where a simulation runs](compute.md) explains) and how the
-domain ends
+section 7 of [Where a simulation runs](compute.md)
+explains) and how the domain ends
 as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
 acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
-count when it is built. The Courant bound depends only on the fastest
-$c_\mathrm{P}$ in the map (Virieux Eqs. 6-7), while the resolution rule
-uses the slowest wave speed anywhere in the domain (the slowest
-non-zero $c_\mathrm{S}$ of the solid cells or, if a
-fluid region carries a still slower $c_\mathrm{P}$, that fluid speed):
-$\Delta x \le c_\text{min} / (10 f)$ (in a wholly solid map the S wavelength is always
-the shortest; in mixed domains the fluid P wavelength can be shorter, as
-in water at 1480 m/s over a 2000 m/s-shear sediment).
+count when it is built.
+
+Two numbers govern every run, and they read opposite ends of the material
+maps. **Stability**: the time step follows the *fastest* wave in the domain,
+$c_\mathrm{P}^{\max}$, exactly as in the acoustic solver (Virieux Eqs. 6-7).
+**Resolution**: the cell size follows the *slowest*,
+$\Delta x \le c_\text{min}/(10 f)$, where $c_\text{min}$ is the slowest
+non-zero shear speed among the solid cells, or a fluid $P$ speed, if some
+fluid region is slower still. In a wholly solid map the shear wavelength is
+always the shortest; in a mixed map it need not be, as with water at
+1480 m/s over a sediment whose shear speed is 2000 m/s.
+
+Those two ends are what a high-contrast domain costs. Δx is fixed by the
+slowest medium and Δt by the fastest, so the number of steps needed to cover
+a given physical time grows with the *ratio* of the two speeds: a
+water-over-steel domain resolved for the water wavelength still has to step
+at the steel's 5958 m/s, roughly four times more steps than the same domain
+filled with water alone. The slow regions then run at a much lower local
+Courant number, where the dispersion error of the scheme is nearest its
+worst-case bound, so their effective resolution is poorer than the cell
+count suggests, which is why the ten-cell rule is a floor rather than a
+target in high-contrast problems. When only one medium carries the physics
+of interest, replacing the other by a boundary condition is usually far
+cheaper than meshing both: a free side or a sponge here or, if what remains
+is a fluid, an impedance side in the acoustic solver (a number in
+`FDTDBoundaries(sides=...)`), which `ElasticBoundaries` does not offer.
 
 A simulation is one record:
 `ElasticRun(c_p=..., c_s=..., dx=..., duration_s=..., sources=..., rho=..., ...)`
@@ -121,15 +144,21 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's 
 
 With a `host` the same run goes to another machine: see
 [Sending a simulation to a remote node](remote-node.md).
-[Where heavy work runs](where-it-runs.md) maps the devices, the nodes and
-the encoders in one place.
+[Where heavy work runs](where-it-runs.md) maps the
+devices, the nodes and the encoders in one place.
 
 ## 2. Fluids inside the elastic solver
 
 Setting ``c_s = 0`` marks a **fluid** cell: the shear modulus vanishes,
 the system degenerates to the acoustic equations, and with a uniform
 ``c_s = 0`` map the elastic solver reproduces the acoustic one **bit for
-bit** (the regression suite asserts exact equality). A water column over a
+bit** (the regression suite asserts exact equality). That equivalence is a
+correctness guarantee, not a recommendation: this solver carries three
+stress fields where the acoustic one carries a single pressure, so an
+all-fluid problem costs roughly twice the memory and stepping time here.
+Use the acoustic solver unless some part of the domain supports shear.
+
+A water column over a
 steel half-space is therefore just two bands of the material maps: with
 the density averaged arithmetically onto the faces and the shear modulus
 harmonically onto the corners (Moczo et al. 2007, Eqs. 7.37-7.39), the
@@ -140,7 +169,42 @@ $(Z_2 - Z_1)/(Z_2 + Z_1)$ (typically a fraction of a percent) and recovers
 the normal-incidence mass law of a 3 mm immersed steel plate within
 0.3 dB of `mass_law_transmission_loss`.
 
+**Where the contact actually sits, and how to check it.** A region painted
+from row $i$ downward puts the physical interface on the *face* plane at
+$y = i\,\Delta x$, because that is where the density is averaged onto the
+faces and the shear modulus onto the corners. Distances quoted "from the
+contact" should be measured from that plane, and a probe belongs several
+cells clear of it so it never samples the averaged cells. Verify a painted
+map before running it: `plt.imshow(sim.c_s)` with the region borders drawn
+on, or simply asserting the row index of the first solid row. A one-row error
+moves every arrival by $\Delta x / c$ and costs a whole run.
+There is no elastic counterpart of `FDTD2D.plot_geometry`, so this check is
+the reader's own. One more failure is worth knowing in advance: every cell
+must satisfy $c_\mathrm{P}^2 \ge 2 c_\mathrm{S}^2$, which the constructor enforces, and that
+rejection is the first thing to look at when a sediment or composite map
+will not build.
+
 ## 3. Free surfaces and Rayleigh waves
+
+**Every side is rigid unless you declare otherwise, and rigid here means a
+shear-free wall.** The boundary holds the normal velocity and the shear
+stress at zero while the tangential motion slides freely along it, so it
+reflects with the *opposite* polarity of a free surface and supports no
+surface wave at all. That is the right model for a body sliding against
+something much stiffer, and the wrong one for a body in air or in vacuum
+(which is what most structural problems are) or for one bonded to its
+support: no side holds the tangential velocity at zero. A plate, block or
+beam meant to be free must
+therefore have **every** exposed side declared free, and the symptom of
+forgetting is quiet: the wavefronts still look plausible, but the Rayleigh
+train the figure below makes obvious is simply missing, the reflections come
+back inverted, and no free-plate closed form matches. The third option is
+`"absorbing"`, which terminates a half-space so the domain edge is not seen
+at all; the three are chosen per side, which is how the half-space clip
+further down works: free on top, absorbing on the other three (the
+snapshot's code below leaves those three rigid). Since there is no
+elastic counterpart of `FDTD2D.plot_geometry`, read the boundary spec back
+off the `ElasticBoundaries` object before committing to a long run.
 
 A side declared ``"free"`` becomes a traction-free surface through
 **stress imaging** (Moczo et al. Eq. 9.9): the normal stress is pinned to
@@ -163,6 +227,24 @@ the S front (dotted arcs at the exact radii $c_\mathrm{P}(t - t_0)$ and
 $c_\mathrm{S}(t - t_0)$, $t_0 = 32$ µs being the peak of the pulse), and the
 strongest motion travels along the free surface as the Rayleigh wave, a
 whisker slower than S.*
+
+**A sponge is the wrong tool where this page's physics lives.** There is no
+elastic perfectly matched layer here, and the sponge absorbs a grazing
+Rayleigh or Scholte wave far less effectively than a body wave, precisely
+because a surface-guided wave runs *along* the layer instead of into it.
+Three consequences worth acting on. A side cannot be both free and
+absorbing, so where a free surface meets a sponge at a corner the imaged
+stresses and the absorption ramp work against each other: keep the source at
+least a wavelength from that corner and end the run before the surface wave
+reaches it. An interface or surface wave needs a thicker layer than a body
+wave: start at roughly twice the width you would use for P and S, then
+verify by extending the run and watching for a return. And when only the
+early arrivals matter, plain rigid sides with a run shorter than the first
+wall echo are cleaner than any sponge. The snapshot above runs just past
+that limit: the pulse peaks at 32 µs and its P peak reaches the bottom and
+both side walls, all 0.3 m from the source, at 79 µs, so at 73 µs the
+leading edge of the P front is already coming back off the rigid bottom, in
+the band along the lower edge of the frame.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -194,57 +276,60 @@ plt.show()
 
 </details>
 
-One frame is enough for the two body speeds: the dotted arcs are drawn at
-the exact $c_\mathrm{P}(t - t_0)$ and $c_\mathrm{S}(t - t_0)$ radii, so they
-measure rather than label. It is
-not enough for the third wave, whose speed differs from the shear front's by
-6.5 % and whose defining property is that it stays on the surface while the
-body fronts leave. Run the same hit for 196 µs, with sponges on the other
-three sides and the corner between a sponge and the free surface pushed
-outside the frame, and run it twice: top declared `"free"`, then top left at
-the solver default, the shear-free rigid wall. Same aluminium, same hit, same
-two body fronts, no surface train at all in the second.
+The snapshot stops at 73 µs because rigid sides and a short run were the
+cheapest way to get one frame, and one frame is enough for the two body
+speeds: the dotted arcs are drawn at the exact $c_\mathrm{P}(t - t_0)$ and
+$c_\mathrm{S}(t - t_0)$ radii, so
+they are a measurement and not a label. What one frame cannot settle is the
+**third** wave. Nothing analytic is drawn for it, its speed differs from the
+shear front's by 6.5 %, and its defining property (it stays on the surface
+while the body fronts leave) is a statement about what happens next.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.gif" alt="Animation: a vertical hit on an aluminium half-space, with dotted analytic arcs tracking the compressional and shear fronts as they expand and leave the frame, a train of surface lobes following them along the free surface, and no surface train on the rigid-surface panel" width="640" height="360" loading="lazy"></picture>
+So run the same hit for 196 µs instead, with sponges on the other three sides
+and the domain widened until the corner where a sponge meets the free surface
+is outside the frame, and run it twice: once with the top declared `"free"`
+and once with it left at the solver default, the shear-free rigid wall. Same
+aluminium, same hit, same two body fronts; no surface train appears in the
+second. That is the claim of this section, drawn: the boundary condition makes
+the Rayleigh wave, not the material.
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.webm)
+**Video:** [Lamb's problem with a free and with a rigid top surface](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_halfspace_waves.webm): A vertical hit on an aluminium half-space sends out a compressional front and a slower shear front, both drawn with dotted arcs at their exact analytic radii that stay locked to them as they expand and leave the frame. On the free-surface panel a train of strong lobes runs along the surface a step behind the shear front, the strongest motion in the frame once clear of the impact, until it leaves through the sides, and the two probe traces beside it separate by the Rayleigh time of flight. The clip runs on until both body fronts have left the frame. On the rigid-surface panel the same two fronts appear and no surface train follows them.
 
-Both body arcs sink into the block and out of the frame, the compressional
-one by 98 µs and the shear one by 169 µs, though the tail of the shear pulse
-stays in the bottom corners until about 177 µs, and the run goes on until both
-have gone. The surface lobes go nowhere but along the surface, which is the
-whole of "a Rayleigh wave". They run a step behind the shear front and, once
-clear of the impact, are the strongest motion in the frame until the peak of
-the train reaches its sides at 136 µs; the trailing lobe, a third as strong,
+Watch what the fronts do. Both body arcs sink into the block and out of the
+frame, the compressional one by 98 µs and the shear one by 169 µs, though the
+tail of the shear pulse stays in the bottom corners until about 177 µs, and the
+run goes on until both have gone. The surface lobes go nowhere but along the
+surface, a step behind the shear front and at their own slower speed, and once
+clear of the impact they are the strongest motion in the frame until the peak
+of the train reaches its sides at 136 µs; the trailing lobe, a third as strong,
 reaches them at 147 µs, and by about 160 µs the train has left the frame. The
 inset traces two surface probes 0.15 m apart, and the delay between their peaks
 is the measurement: the simulated
-$c_\mathrm{R}$ against 2897 m/s, the root of the exact characteristic
-equation, which the tests pin to within 2 %.
+$c_\mathrm{R}$ against 2897 m/s, the root of the exact Rayleigh characteristic
+equation quoted above, which the tests pin to within 2 %.
 
-The two field panels carry their own colour scales, and say so: a vertical
-force applied *on* a rigid wall nearly cancels against its own image, so
-that run radiates far less than the free one. The probe traces share a single
-scale, which is where the comparison stays quantitative. The missing surface
-arrival is a missing peak, not a rescaled one.
+The two field panels are drawn on **their own colour scales**, and the clip
+says so, because a vertical force applied *on* a rigid wall nearly
+cancels against its own image and that run radiates far less than the free
+one. The probe traces beside them keep a single shared scale, which is where
+the comparison stays quantitative: the missing surface arrival is a missing
+peak, not a rescaled one.
 
 The other wave a free surface makes possible (the **flexural** wave of a
 thin free-free strip, the one pinned to the Kirchhoff dispersion above) is
 worth watching in motion too. The clip below is this same
 solver launching a 4 kHz bending packet along a 10 mm steel plate: on the
-control panel the plate runs straight and the packet simply leaves, and on
-the junction panel a perpendicular plate of the same thickness turns the
-corner into a scatterer. The packet splits there into the reflected and
-transmitted bending waves the closed form prices at $\tau_{12}(0°) = 0.5$,
-plus the fast in-plane precursor that races ahead down the receiving plate.
-This mode conversion the pinned-junction model deliberately leaves out is
-the reason this page needs an elastic solver rather than a flexural one. The
-[bending-wave transmission guide](../vibration/structural/junction-transmission.md) reads
-the same run against the transmission coefficient $\tau_{12}(0°)$.
+control panel the plate runs straight and the packet simply leaves, and on the
+junction panel a perpendicular plate of the same thickness turns the corner
+into a scatterer. The packet splits there into the reflected and transmitted
+bending waves the closed form prices at $\tau_{12}(0°) = 0.5$, plus the fast
+in-plane precursor that races ahead down the receiving plate. This mode
+conversion the pinned-junction model deliberately leaves out is the reason
+this page needs an elastic solver rather than a flexural one. The
+[bending-wave transmission guide](../vibration/structural/junction-transmission.md)
+reads the same run against the transmission coefficient $\tau_{12}(0°)$.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction.gif" alt="Animation: a 4 kHz bending-wave packet running along a 10 mm steel plate, passing straight through on the control panel and splitting at an L-junction into a reflected wave, a transmitted wave descending the perpendicular plate and a faster in-plane precursor" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction.webm)
+**Video:** [Bending waves at an L-junction in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_plate_junction.webm): A 4 kHz tone-burst force launches a bending-wave packet along a 10 mm steel plate. On the straight control plate the packet just runs on and nothing returns. At an L-junction with an identical perpendicular plate it splits: part reflects, part turns the corner as a bending wave descending the vertical plate, and a faster in-plane precursor races ahead, with the closed-form transmission coefficient of 0.50 at normal incidence and the diffuse vibration reduction index of 5.2 dB annotated.
 
 ## 4. Fluid-solid coupling at normal incidence
 
@@ -254,6 +339,35 @@ the whole physics of fluid-solid coupling comes out of the same update. The
 `Material` constants and `ElasticFDTD2D.from_regions` build those layered
 maps without manual array surgery: a background material and a list of
 painted regions.
+
+A `Material` is three measurable numbers: the compressional speed, the
+shear speed and the density. A zero shear speed marks a fluid. Five
+constants ship, and they feed most of the numbers on this page; the sediment
+of section 6 and the video example write their own media out:
+
+| Constant | $c_\mathrm{P}$ [m/s] | $c_\mathrm{S}$ [m/s] | $\rho$ [kg/m³] |
+|---|---|---|---|
+| `AIR` | 343 | 0 | 1.2 |
+| `WATER` | 1480 | 0 | 1000 |
+| `CONCRETE` | 3726.8 | 2282.2 | 2400 |
+| `STEEL` | 5958 | 3184.7 | 7850 |
+| `ALUMINUM` | 6450.5 | 3098.7 | 2700 |
+
+The three solids come off Bies 5e Table C.1 (PDF pages 747 and 748): the
+density is what it prints and the two speeds follow from the modulus and the
+Poisson ratio printed beside it, through the closed forms the same table
+prints at its end. They are representative values for documentation and
+validation, which the book itself says of them, not certified data, so a
+real specimen should still be entered by hand. `AIR` and `WATER` are
+nominal fluid values and cite no page. Section 1 imports `ALUMINUM` rather
+than writing its
+numbers out, because a copy of them here would be free to drift away from
+the page. The constructor enforces one bound,
+$c_\mathrm{P}^2 \ge 2\,c_\mathrm{S}^2$: that is the statement that the first Lamé parameter is
+non-negative, equivalently that Poisson's ratio is not negative. A rejected
+triple usually means a shear speed entered too high, or a compressional
+speed measured on a thin bar rather than in bulk. The thin-bar speed is the
+lower of the two, and substituting one for the other is a common error.
 
 ```python
 import numpy as np
@@ -282,6 +396,40 @@ print(round(float(echo[np.abs(echo).argmax()] / incident), 3))   # 0.939
 # (Z2 - Z1)/(Z2 + Z1) = 0.939: at normal incidence no shear is excited
 # and the steel behaves as a liquid of its rho and c_P (B&G Eq. 4.2.27)
 ```
+
+That 0.939 is a ratio between two events on one trace, and the trace is
+where you see whether the run was clean enough to quote it.
+`ElasticFDTDResult.plot()` draws exactly this by default: probe histories,
+not field maps; the snapshots of sections 3 and 6 are `.plot(kind="snapshot")`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/elastic_probe_traces_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/elastic_probe_traces.svg" alt="Pressure history at a probe in a 6 metre water column over a steel half-space, over 3.4 milliseconds: a single clean Gaussian pulse of unit amplitude passing the probe at 1.02 milliseconds on its way down, a flat quiet stretch, and a second pulse of the same polarity and 0.939 times the amplitude at 3.04 milliseconds, the reflection returning from the steel, with both arrival times marked and the ratio annotated against the closed-form impedance formula" width="92%"></picture>
+
+*The whole measurement on one axis. The probe sits 1.5 m below the source
+and 1.5 m above the contact, so the incident pulse passes it at 1.02 ms and
+the reflection returns at 3.04 ms: both times fixed by the geometry and the
+1480 m/s of water, and both worth checking before the amplitudes are read.
+The two events keep the same polarity, which is what a reflection off a
+*harder* medium does, and their ratio is 0.939 against the exact
+$(Z_2-Z_1)/(Z_2+Z_1) = 0.939$. The flat stretch between them is the evidence
+that nothing else in the domain is contributing.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# The run above, re-read: `res.plot()` on a frozen result draws this
+# directly. Here the trace was accumulated by hand, so plot it by hand.
+plt.plot(t * 1e3, trace)
+plt.axvline((4.5025 - 3.0) / WATER.c_p * 1e3, ls=":")   # incident, 1.02 ms
+plt.axvline((3.0 + 1.4975) / WATER.c_p * 1e3, ls=":")   # echo, 3.04 ms
+plt.xlabel("Time [ms]")
+plt.ylabel("Pressure [Pa]")
+plt.show()
+```
+
+</details>
 
 ### A solid from a catalogue
 
@@ -318,50 +466,112 @@ except ValueError as error:
 
 Away from normal incidence the solid stops being a liquid. The incident
 sound refracts into **two** transmitted waves, P and SV (**mode
-conversion**), each with its own critical angle: for water over steel,
-14.4° (P) and 27.7° (S). Between them the transmitted P is evanescent and
-the shear wave carries the transmitted power, so the reflection dips to
-$|V| = 0.918$ at 20° instead of reflecting totally as a fluid bottom of the
-same $c_\mathrm{P}$ would; beyond the S critical angle the reflection is total,
-$|V| = 1$ with a phase. The validation suite launches oblique carrier beams
-at 10° and 20° and matches the exact reflection coefficient of
-Brekhovskikh & Godin (Eqs. 4.2.22-4.2.26) within a fraction of a percent,
-mode conversion included.
+conversion**), and refraction obeys Snell's law separately for each of them,
+so each has its own critical angle: $\arcsin(c_1/c_{\mathrm{P}2})$ for the
+compressional wave and $\arcsin(c_1/c_{\mathrm{S}2})$ for the shear wave. Both follow
+from the wave speeds alone (density enters only the amplitudes), so they
+are two lines of arithmetic on the material constants of section 4.
 
-The regimes are worth watching rather than tabulating, because "the
-transmitted P is evanescent" is not a shallower beam but the absence of one.
-The clip runs the scene at 10°, 20° and 35°, one incidence from each of the
-first three regimes, driving a sustained phase-graded beam onto the contact.
-Read it as a picture of the regimes, not as a second measurement: each panel
-carries the closed-form $|V|$, because the beam a 90 mm panel can hold is six
-wavelengths wide and at that width a probe sits in the source's near field
-rather than in a formed beam. The measured column above comes from the
-validation suite, which has the room to do it properly.
+```python
+import numpy as np
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_mode_conversion_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_mode_conversion.gif" alt="Animation: a sustained oblique beam in water hitting a steel half-space at three incidences, with two transmitted beams at ten degrees, only a shear beam at twenty degrees, and total reflection at thirty-five degrees" width="640" height="360" loading="lazy"></picture>
+# The two critical angles come out of the speeds alone. Substitute your
+# own Material pair and the same two lines answer for it.
+print(round(float(np.degrees(np.arcsin(WATER.c_p / STEEL.c_p))), 1))   # 14.4
+print(round(float(np.degrees(np.arcsin(WATER.c_p / STEEL.c_s))), 1))   # 27.7
+```
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_mode_conversion.webm)
+The drawing below carries the three arrangements this and the next two
+sections describe, on one interface line and at three incidences, together
+with the thing an off-by-one row error gets wrong: where the contact
+physically sits on the staggered grid.
 
-At 10° two beams leave along the dashed Snell directions, at different angles
-because they travel at different speeds: the slower shear wave at 21.9° from
-the normal, the faster compressional wave bent much further out, to 44.4°. At
-20° nothing departs at the compressional angle; a skin clings to the contact
-instead, and the shear beam alone carries what crosses. At 35° both are
-evanescent and nothing propagates *away* into the steel. What fills the solid
-there runs along the contact and dies with depth, while the water above
-settles into the interference of the incident
-beam with a reflection that is total in amplitude and shifted in phase. Each
-panel draws its steel half with its own annotated display gain: at 10° the
-transmitted energy leaves in two beams and the amplitude anywhere is small,
-while at 35° nothing leaves and the evanescent field piles up against the
-contact, bright and going nowhere. Brightness in the steel is not power. Read
-the printed $|V|$ and the gain factor for that.
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_fluid_solid_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_fluid_solid.svg" alt="Three panels sharing one horizontal fluid-solid interface line, water above and hatched solid below. Panel a, normal incidence: a downward incident arrow, an upward reflected arrow and a single transmitted P arrow, with the reflection coefficient 0.939 given below. Panel b, oblique incidence: an incident ray at an angle from the normal, its reflected ray, and two transmitted rays labelled P and SV leaving at different angles, with a probe drawn on the normal 0.12 metres above the hit point and the critical angles 14.4 and 27.7 degrees given below. Panel c, the Scholte case: an explosive shot ten metres above a water-sediment contact and an oscillating train hugging the interface at 1436 metres per second with dashed evanescent envelopes on both sides. A magnified inset below shows the last fluid row, the first solid row and the face plane between them." width="94%"></picture>
+
+Those two angles cut the range into four regimes. The column headed
+*equivalent fluid* is the same interface modelled as a shear-free bottom of
+the same $c_\mathrm{P}$ and $\rho$ (the model the underwater module carries). The
+difference between the two columns is the whole reason this solver
+exists.
+
+| Incidence | Transmitted waves | \|V\| elastic | \|V\| equivalent fluid | What it means |
+|---|---|---|---|---|
+| 0° | P only | 0.939 | 0.939 | no shear is excited, so the steel is exactly a liquid of its $\rho$ and $c_\mathrm{P}$ |
+| 0° to 14.4° | P and SV | 0.939 falling to 0.938 at 9°, then rising to the critical angle | 0.939 rising to 1 | shear already takes a share of the transmitted power, and the fluid model already returns more |
+| 14.4° to 27.7° | SV only, P evanescent | dips to 0.904 at 16.4°, 0.918 at 20° | 1 (total reflection) | the fluid model over-predicts the returned energy by the whole shear leak |
+| beyond 27.7° | none propagating | 1, with a phase | 1, with a *different* phase | total reflection either way; the phase difference is what a Scholte wave locks onto |
+
+Read the third row twice: between the critical angles an equivalent fluid
+reflects everything, while the real interface leaks close to a tenth of the
+amplitude into a shear wave (|V| falls to 0.904 at 16.4°). The validation suite launches oblique carrier beams at
+10° and 20° and matches the exact reflection coefficient of Brekhovskikh &
+Godin (Eqs. 4.2.22-4.2.26) within a fraction of a percent, mode conversion
+included, so the elastic column above is measured and not only computed.
+
+**How that measurement is made**, because it is a technique worth stealing.
+A tilted Gaussian-carrier beam is written as an initial condition on `txx`
+and `tyy`, with the leapfrog-consistent particle velocity half a time step
+back split into `vx` and `vy` by $\sin\theta$ and $\cos\theta$. This is the same
+one-way trick section 4 uses at normal incidence, rotated. The scene is then
+run **twice**: once with the solid painted, once with the fluid continued
+straight through it, and the reference run is forced onto the same time step
+by scaling its Courant number by $c_\text{water}/c_\text{steel}$ so the two
+traces subtract sample by sample. The difference is the reflected field
+alone, side-wall artefacts included. This is the elastic analogue of the
+ISO 13472-1 subtraction technique. The probe sits directly above the point
+where the beam axis meets the interface, 0.12 m up, so the incident and
+reflected beam centres cross it at symmetric transverse offsets and the
+envelope cancels in the ratio; $|V|$ is then the amplitude-weighted spectral
+ratio over the carrier band, not a peak-to-peak reading.
+
+The drawing above is a **ray** diagram: it says where each wave goes. What a
+ray cannot say is what "P evanescent" looks like, and that is the whole of the
+third row of the table. The clip below runs the scene three times: one
+incidence from each of the first three regimes (10° below both critical
+angles, 20° between them, 35° past the shear one). Each test uses the same
+`WATER` and `STEEL` half-space, driving a sustained phase-graded beam onto
+the contact.
+Read it as a **picture of the regimes**, not as a second measurement: each
+panel is annotated with the closed-form $|V|$ from the table above, because
+the beam a 90 mm panel can hold is six wavelengths wide, and at that width the
+probe sits in
+the source's near field rather than in a formed beam. Widening it until a
+reading is trustworthy would take a panel four times as wide, in which the
+fringes are too fine to see. The measured column of the table comes from the
+validation suite instead, which has the room to do it properly.
+
+**Video:** [Mode conversion at a water-steel contact at three incidences](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_mode_conversion.webm): A sustained oblique beam in water strikes a steel half-space at ten, twenty and thirty-five degrees. At ten degrees two beams leave into the steel along the dashed Snell directions, the shear one plunging near the normal and the compressional one swinging much further out. At twenty degrees nothing departs at the compressional angle and only a thin skin clings to the contact, while the shear beam alone carries power away. At thirty-five degrees neither beam departs and the water above settles into a standing interference pattern between the incident and the totally reflected beam.
+
+At 10° two beams leave the contact along the dashed Snell directions, and they
+leave at different angles because they travel at different speeds: the slower
+shear wave plunging at 21.9° from the normal, the faster compressional wave
+bent much further out, to 44.4°. At 20° the P beam is not a shallower beam: it
+is *gone*. What stands in its place is a skin that clings to the contact and
+dies within a wavelength, carrying nothing downward, while the shear beam
+alone takes what crosses. This shear leak is why the reflection settles
+at 0.918 rather than the 1.000 an equivalent fluid would return. At 35° both
+are evanescent and nothing propagates *away* into the steel: what fills the
+solid there is an inhomogeneous wave running **along** the contact and dying
+with depth, bright and going nowhere. Above the contact, meanwhile, the
+incident beam and a reflection that is total in amplitude but shifted in phase
+resolve into a standing pattern. That phase is what the next section builds a
+Scholte wave out of.
+
+Each panel draws its steel half with its **own** annotated display gain, and
+the reason is worth knowing: water drives steel through a thirtyfold impedance
+step, so the transmitted field carries a small particle velocity even where it
+carries real power. The three panels are unlike each other in a way no
+single gain spans. At 10° the transmitted energy leaves in two beams, so the
+amplitude anywhere is small; at 35° nothing leaves at all and the evanescent
+field piles up against the contact, bright and going nowhere. Brightness in
+the steel is therefore not power. Read the printed $|V|$, and the gain factor
+on each panel, for that.
 
 This is exactly the shear physics that the
 fluid-bottom `reflection_coefficient` of the
-[underwater module](../underwater/underwater-propagation.md) cannot represent, and the
-reason a shear-supporting seabed loses more energy than its
-equivalent-fluid model.
+[underwater module](../underwater/underwater-propagation.md) cannot
+represent, and the reason a shear-supporting seabed loses more energy than
+its equivalent-fluid model.
 
 ## 6. The Scholte interface wave
 
@@ -380,6 +590,12 @@ print(round(scholte_speed(WATER, STEEL), 1))       # 1479.6, 0.03 % below water
 seabed = Material(c_p=3500.0, c_s=2000.0, rho=2500.0)
 print(round(scholte_speed(Material(c_p=1500.0, c_s=0.0, rho=1000.0), seabed), 1))  # 1436.0
 ```
+
+The two cases use different water on purpose. `WATER` is the library
+constant at 1480 m/s, while the sediment case follows the van Vossen
+benchmark, whose fluid is 1500 m/s. The two deficits below, 0.03 % and
+4 %, are each measured against their own fluid, and 1436 m/s should never be
+compared with 1480 m/s.
 
 Those two numbers tell the whole story. Over a **stiff** bed (steel) the
 Scholte wave hugs the water speed (1480 m/s) to within 0.03 % and its
@@ -455,6 +671,42 @@ dip within 0.1 % of the 297.9 kHz resonance. The same suite stress-tests the
 extreme contrast of an air-steel contact (impedance ratio ~$10^5$:1): stable
 over 10 000 steps with the reflected amplitude conserved to 0.5 %.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_immersed_plate_tl_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_immersed_plate_tl.svg" alt="Setup drawing of the immersed-plate transmission run. On the left, a tall narrow vertical strip drawn to scale: 0.75 metres of water with a 10 millimetre steel plate at 0.35 metres, a one-way plane pulse launched downward at 0.25 metres, probe A 30 millimetres above the plate and probe B 50 millimetres below it, with a note that the strip is three cells wide, a one-dimensional problem run in a two-dimensional solver at half a millimetre per cell. On the right, the two probe traces on a common time axis from 0 to 160 microseconds: probe A shows the incident pulse at 47 microseconds inside a shaded 65 microsecond gate and its plate reflection at 88 microseconds outside it, probe B shows only the transmitted ring-down. Below them the transmission-loss formula, and a boxed sketch of the half-wave standing pattern inside the plate with the 297.9 kilohertz first resonance." width="94%"></picture>
+
+**The measurement behind those three numbers.** The scene is a strip three
+cells wide and 0.75 m tall at $\Delta x = 0.5$ mm. This is a one-dimensional
+problem run in a two-dimensional solver. It is filled with `WATER`, with a
+10 mm `STEEL` region painted at 0.35 m by `from_regions`. A Gaussian plane pulse
+1.5 mm wide is written one-way as in section 4, centred at 0.25 m; that
+width is what carries usable energy out to about 340 kHz, which is what puts
+the 297.9 kHz resonance inside the measured band. One probe sits 30 mm above
+the plate and one 50 mm below its lower face, and the run lasts 0.45 ms.
+
+The measurement itself is a time gate, and the geometry hands you the gate
+for free. The upper probe sees the incident pulse at about 47 µs (0.07 m of
+water at 1480 m/s) and its plate reflection at about 88 µs (0.13 m); both
+arrivals are roughly 10 µs long, so a 65 µs gate isolates the incident one
+*exactly* rather than approximately. The lower probe stays echo-free for the
+whole record, so it needs no gate at all. Then
+$\mathrm{TL}(f) = 20\log_{10}|I(f)/T(f)|$ from the two magnitude spectra.
+Two checks a reader can run on their own plate: the 10 kHz value against
+`mass_law_transmission_loss` with water as the ambient fluid, and the dip
+against $f_n = n\,c_\mathrm{P}/(2h)$. The same time-gating logic is what an in-situ
+ISO 13472-1 measurement does with an Adrienne window, so the trick transfers
+straight to a real bench.
+
+**What the 297.9 kHz is actually for.** It is three decades above the
+building-acoustics band, so an audio-frequency panel is *always* in the
+thin-plate limit, where the layer's transmission collapses onto the mass law
+and the thickness resonance can be ignored entirely. This is exactly why
+the closed forms of the panel-insulation guide never mention it. The
+resonance earns its keep in its own band: total transmission at half-wave
+thickness is the principle behind ultrasonic thickness gauging and behind
+the choice of transducer coupling layers, which is why the validation
+deliberately drives the plate to hundreds of kilohertz. The frequency where
+the two regimes meet is one division for any plate: $c_\mathrm{P}/(2h)$, which is
+297.9 kHz for 10 mm of steel and 59.6 kHz for 50 mm of it.
+
 At oblique incidence the plate physics gets richer, and the clip below is
 this solver driving the same 10 mm steel plate, now lying in air, with a
 sustained 45° plane wave arriving on it. The two panels differ in **one
@@ -463,20 +715,18 @@ $2 f_\mathrm{c} = 2410$ Hz on the right, either side of the 1205 Hz coincidence
 frequency `vibration.coincidence_frequency` returns for this plate.
 Everything else, the plate, the angle, the mesh and the colour scale, is
 held fixed. Below $f_\mathrm{c}$ the plate reflects almost everything and the
-transmitted level lands on the oblique mass law; above it the acoustic trace
-wavelength matches the free bending wavelength, the plate re-radiates a 45°
-beam that grows along the lit span, and the transmitted level holds at the
-low-frequency figure where the mass law demanded 12 dB more blocking. The
-air below the plate is drawn on both panels with one display gain, measured
-off the settled field of the two runs together (×150, that is +44 dB) and
-printed on the canvas: read the *annotations* for levels, not the
-brightness. The
-[panel sound insulation guide](../buildings/design/panel-sound-insulation.md) reads the
-same run against the oblique mass law.
+transmitted level lands on the oblique mass law; above it the acoustic
+trace wavelength matches the free bending wavelength, the plate re-radiates
+a 45° beam that grows along the lit span, and the transmitted level holds at
+the low-frequency figure where the mass law demanded 12 dB more blocking.
+The air below the plate is drawn on both panels with one display gain,
+measured off the settled field of the two runs together
+(×150, that is +44 dB) and printed on the canvas: read the *annotations*
+for levels, not the brightness. The
+[panel sound insulation guide](../buildings/design/panel-sound-insulation.md)
+reads the same run against the oblique mass law.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.gif" alt="Animation: two elastic FDTD panels of the same 10 mm steel plate in air under a 45-degree plane wave, at 602 Hz where the plate blocks almost everything and at 2410 Hz where a transmitted beam grows below it" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.webm)
+**Video:** [Coincidence on a 10 mm steel plate in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_coincidence.webm): Two side-by-side elastic FDTD fields of the same 10 mm steel plate lying in air while a sustained plane wave arrives at 45 degrees. At 602 Hz, half the coincidence frequency, the wave reflects almost totally and the faint transmitted level matches the oblique mass law. At 2410 Hz, twice the coincidence frequency, the acoustic trace matches the free bending wavelength and a 45-degree transmitted beam grows below the plate, holding the same level as the low-frequency panel where the mass law predicted 12 dB more insulation, the air below the plate drawn on both panels with an annotated 150-fold display gain (+44 dB) so the transmitted field is legible, with the 1205 Hz coincidence frequency of the library and both measured and mass-law levels annotated.
 
 ## Writing the run to a video
 
@@ -509,18 +759,54 @@ res = simulation.write_elastic_fdtd_animation(
 )
 ```
 
-## What this solver does not do
+## What this guide covers
 
-Everything the 2D acoustic solver cannot do, this one cannot either: the
-domain is a cross-section, so a source is a line source with cylindrical
-$1/\sqrt{r}$ spreading rather than the $1/r$ of a 3D point source, and
-absolute levels and decay rates are not those of a 3D problem. The solid is
-isotropic and purely elastic: no anisotropy, and no viscoelastic damping
-beyond the bulk `damping` decay rate, so material loss factors are not
-modelled. There is no elastic perfectly matched layer: the sponge absorbs
-grazing Rayleigh waves less effectively than body waves. And guided-wave
-dispersion beyond the thin-plate Kirchhoff regime (full Lamb modes) is
-observable in the fields but has no dedicated closed-form oracle here.
+- **Covered.** The elastic P-SV companion of the acoustic FDTD solver: the Virieux (1986)
+  velocity-stress scheme with the Moczo et al. (2007) effective parameters and
+  stress-imaging free surface, exposed through
+  `elastic_fdtd_simulation`/`ElasticFDTD2D` with `ExplosionSource` and
+  `ForceSource`, validated against the body-wave speeds, the exact Rayleigh
+  root, the Kirchhoff flexural dispersion and the bit-exact acoustic limit. The
+  fluid-solid coupling of sections 4-7, with the `Material` constants,
+  `ElasticFDTD2D.from_regions` and `scholte_speed`: oblique reflection with mode
+  conversion against Brekhovskikh & Godin (Eqs. 4.2.22-4.2.26) at sub-critical
+  and between-critical angles, the Scholte-wave speed against the exact
+  characteristic equation (Eq. 4.4.20) and by time of flight in the van Vossen
+  (2002) soft-bed benchmark, the immersed-plate transmission with its first
+  thickness resonance against the three-media closed form (Eqs. 2.4.14-2.4.19),
+  the immersed-panel mass law and the air-steel extreme-contrast stress test.
+  No measurement standard governs this solver: it implements a textbook
+  numerical method, so these closed forms and the benchmark are what it is held
+  to.
+
+- **Not covered.** Everything the 2D acoustic solver cannot do, this one cannot either: the
+  domain is a cross-section (cylindrical $1/\sqrt{r}$ spreading, not $1/r$), so
+  absolute levels and decay rates are not those of a 3D problem. The solid is
+  isotropic and purely elastic: no anisotropy and no viscoelastic damping beyond
+  the bulk decay rate, so material loss factors are not modelled. There is no
+  elastic perfectly matched layer: the sponge absorbs grazing Rayleigh waves
+  less effectively than body waves. Guided-wave dispersion beyond the thin-plate
+  Kirchhoff regime (full Lamb modes) is observable in the fields but has no
+  dedicated closed-form oracle here.
+
+## See also
+
+- [2D FDTD wave simulation](fdtd-simulation.md): the
+  acoustic solver this guide extends, with the staggered grid, the Courant
+  bound, the sources, probes and boundary machinery shared by both.
+- [Where a simulation runs](compute.md): both solvers on
+  an NVIDIA GPU through CuPy or on PyTorch, and what is promised about their
+  numbers.
+- [Predicting Panel Sound Insulation](../buildings/design/panel-sound-insulation.md):
+  the mass law and coincidence closed forms; the immersed-plate run of §7
+  is their full-wave cross-check.
+- [Bending-wave transmission at plate junctions](../vibration/structural/junction-transmission.md):
+  the flexural-wave closed forms of the building model; the Kirchhoff
+  dispersion validated in §3 is the wave they transport.
+- [Underwater sound propagation](../underwater/underwater-propagation.md):
+  the fluid-bottom Rayleigh reflection model whose missing shear physics §5
+  quantifies.
+- API reference: [`simulation.elastic-fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
 
 ## Quick answers
 
@@ -556,76 +842,15 @@ but 4 % below the 1500 m/s ocean water of the sediment example (1436 m/s
 for that water over a 3500/2000/2500 bed), which is why seabed interface
 waves probe the sediment shear stiffness.
 
-## See also
-
-- [2D FDTD wave simulation](fdtd-simulation.md): the acoustic solver this
-  guide extends, with the staggered grid, the Courant bound, the sources,
-  probes and boundary machinery shared by both.
-- [Where a simulation runs](compute.md): both solvers on an NVIDIA GPU
-  through CuPy or on PyTorch, and what is promised about their numbers.
-- [Predicting Panel Sound Insulation](../buildings/design/panel-sound-insulation.md): the mass
-  law and coincidence closed forms; the immersed-plate run of section 7 is
-  their full-wave cross-check.
-- [Bending-wave transmission at plate junctions](../vibration/structural/junction-transmission.md):
-  the flexural-wave closed forms of the building model; the Kirchhoff
-  dispersion validated in section 3 is the wave they transport.
-- [Underwater sound propagation](../underwater/underwater-propagation.md): the
-  fluid-bottom Rayleigh reflection model whose missing shear physics
-  section 5 quantifies.
-- API reference: [`simulation.elastic-fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
-
 ## References
 
-- Virieux, J. (1986). P-SV wave propagation in heterogeneous media:
-  velocity-stress finite-difference method. *Geophysics*, 51(4), 889-901.
-  [doi:10.1190/1.1442147](https://doi.org/10.1190/1.1442147). The elastic
-  solver of section 1: the velocity-stress system (Eq. 2), the fully
-  staggered cell and update (Fig. 1, Eq. 5), the P-only Courant bound
-  (Eqs. 6-7), the dispersion relations (Eqs. 13-14) and the liquid as the
-  shear-free limit.
-- Moczo, P., Kristek, J., Galis, M., Pazak, P., & Balazovjech, M. (2007).
-  The finite-difference and finite-element modeling of seismic wave
-  propagation and earthquake motion. *Acta Physica Slovaca*, 57(2),
-  177-406.
-  [doi:10.2478/v10155-010-0084-x](https://doi.org/10.2478/v10155-010-0084-x).
-  The heterogeneous effective parameters of section 2 (harmonic
-  shear modulus, arithmetic density; Eqs. 7.37-7.39) and the stress-imaging
-  free surface of section 3 (Eq. 9.9).
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3rd ed.). Springer.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728). The analytic
-  oracles of the elastic solver: the exact Rayleigh characteristic
-  equation (Eq. 3.149) and the Kirchhoff flexural dispersion with its
-  thickness correction (Eqs. 3.83-3.89, 3.196b).
-- Brekhovskikh, L. M., & Godin, O. A. (1990). *Acoustics of layered media
-  I: Plane and quasi-plane waves*. Springer.
-  [doi:10.1007/978-3-642-52369-4](https://doi.org/10.1007/978-3-642-52369-4).
-  The fluid-solid oracles of sections 4-7: the oblique reflection
-  coefficient with mode conversion (Eqs. 4.2.22-4.2.26) and its
-  critical-angle limits (Eqs. 4.2.27-4.2.31), the exact Scholte
-  characteristic equation (Eqs. 4.4.18-4.4.20) with the light-fluid
-  asymptotics (Eqs. 4.4.21-4.4.24), and the three-media layer transmission
-  (Eqs. 2.4.10-2.4.19).
-- van Vossen, R., Robertsson, J. O. A., & Chapman, C. H. (2002).
-  Finite-difference modeling of wave propagation in a fluid-solid
-  configuration. *Geophysics*, 67(2), 618-624.
-  [doi:10.1190/1.1468623](https://doi.org/10.1190/1.1468623). The
-  fluid-solid benchmark of the same staggered scheme: the harmonic shear
-  modulus and arithmetic density averages (Eqs. 9-10) that satisfy the
-  interface conditions implicitly, the soft-bed configuration of the
-  Scholte test of section 6 and the >= 15 points-per-wavelength rule for
-  the O(2,2) scheme with an interface wave.
-
-## Standards and sources
-
-No measurement standard governs the elastic solver: it implements the
-textbook velocity-stress method of Virieux (1986) with the
-heterogeneous-medium and free-surface treatments of Moczo et al. (2007).
-Validation is anchored to closed forms: the P and S body-wave speeds, the
-exact Rayleigh root and the Kirchhoff flexural dispersion (Cremer, Heckl &
-Petersson), the bit-exact acoustic limit, the fluid-solid reflection at
-normal and oblique incidence with mode conversion, the exact Scholte-wave
-speed and the immersed-plate transmission with its thickness resonance
-(Brekhovskikh & Godin), the immersed-panel mass law, and the van Vossen
-(2002) soft-bed interface-wave benchmark.
+- **Brekhovskikh, L. M., & Godin, O. A. (1990).** *Acoustics of layered media I: Plane and quasi-plane waves*. Springer. https://doi.org/10.1007/978-3-642-52369-4
+  The fluid-solid oracles of sections 4-7: the oblique reflection coefficient with mode conversion (Eqs. 4.2.22-4.2.26) and its critical-angle limits (Eqs. 4.2.27-4.2.31), the exact Scholte characteristic equation (Eqs. 4.4.18-4.4.20) with the light-fluid asymptotics (Eqs. 4.4.21-4.4.24), and the three-media layer transmission (Eqs. 2.4.10-2.4.19).
+- **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
+  The analytic oracles of the elastic solver: the exact Rayleigh characteristic equation (Eq. 3.149) and the Kirchhoff flexural dispersion with its thickness correction (Eqs. 3.83-3.89, 3.196b).
+- **Moczo, P., Kristek, J., Galis, M., Pazak, P., & Balazovjech, M. (2007).** The finite-difference and finite-element modeling of seismic wave propagation and earthquake motion. *Acta Physica Slovaca*, *57*(2), 177-406. https://doi.org/10.2478/v10155-010-0084-x
+  The heterogeneous effective grid parameters of section 2 (harmonic shear modulus, arithmetic density; Eqs. 7.37-7.39) and the stress-imaging free surface of section 3 (Eq. 9.9).
+- **van Vossen, R., Robertsson, J. O. A., & Chapman, C. H. (2002).** Finite-difference modeling of wave propagation in a fluid-solid configuration. *Geophysics*, *67*(2), 618-624. https://doi.org/10.1190/1.1468623
+  The fluid-solid benchmark of the same staggered scheme: the harmonic shear modulus and arithmetic density averages (Eqs. 9-10) that satisfy the interface conditions implicitly, the soft-bed configuration of the Scholte case of section 6 and the >= 15 points-per-wavelength rule for the O(2,2) scheme with an interface wave.
+- **Virieux, J. (1986).** P-SV wave propagation in heterogeneous media: velocity-stress finite-difference method. *Geophysics*, *51*(4), 889-901. https://doi.org/10.1190/1.1442147
+  The elastic solver of section 1: the velocity-stress system (Eq. 2), the fully staggered cell and update (Fig. 1, Eq. 5), the P-only Courant bound (Eqs. 6-7), the dispersion relations (Eqs. 13-14) and the liquid as the shear-free limit.

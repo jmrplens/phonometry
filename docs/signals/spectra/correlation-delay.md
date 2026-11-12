@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/signals/spectra/correlation-delay.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/
+
+# Correlation, time delay and envelope
 
 Where the [calibrated spectral estimators](spectral-analysis.md) describe a
 signal in frequency, this page covers their time-domain counterparts in
@@ -107,9 +109,17 @@ $$
 
 `res.random_error(signal_bandwidth)` evaluates it per lag with the measured
 coefficient, and the standalone `correlation_random_error` takes an explicit
-coefficient; with $\rho = S/\sqrt{(S+M)(S+N)} = 1/11$, $B = 100\ \text{Hz}$
-and $T = 5\ \text{s}$ it reproduces the $\varepsilon \approx 0.35$ of the
-book's Example 8.5, one of the pinned conformance anchors. Two closed forms
+coefficient. In the book's Example 8.5 a common signal of power $S$ reaches two
+sensors carrying independent noises of power $M$ and $N_2$, so the correlation
+coefficient at the delay is $\rho = S/\sqrt{(S+M)(S+N_2)}$; with both noises
+ten times the signal that is $1/11$, and for $B = 100$ Hz over $T = 5$ s the
+formula returns $\varepsilon \approx 0.35$, one of the pinned conformance
+anchors: `correlation_random_error(1/11, 100.0, 5.0)` prints
+**0.349**, which is the whole of Example 8.5 in one call.
+
+($N$ above is the record length in samples, as the normalization bullets use
+it; the second sensor's noise power is written $N_2$ here to keep the two
+apart.) Two closed forms
 anchor the estimator itself in the tests: the autocorrelation of a sine,
 $(A^2/2)\cos(2\pi f_0\tau)$, and the $\sin(2\pi B\tau)/(2\pi B\tau)$
 autocorrelation of bandwidth-limited white noise (Eq. 8.120).
@@ -139,6 +149,37 @@ locating one peak on the lag axis.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_correlation_delay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_correlation_delay.svg" alt="Diagram of correlation-based time-delay estimation: a loudspeaker source radiates toward two microphones on stands, microphone 1 capturing x of t and microphone 2 capturing y of t equal to alpha times x delayed by tau 0 plus noise, with the wavefront through microphone 1 leaving an extra path of c times tau 0, about 0.84 meters at 343 meters per second, and sine theta equal to c tau 0 over the spacing d; below, a correlogram panel shows the direct correlator as a broad hump and GCC-PHAT with weighting 1 over the magnitude of Gxy as a sharp spike, both at tau 0 equal to 20 samples over 8192 hertz, 2.44 milliseconds; the caption notes sub-sample refinement by parabolic peak interpolation with 16 times local upsampling to below 0.002 samples" width="92%"></picture>
 
+### From delay to geometry
+
+A delay is rarely the answer; it is the intermediate. Multiply it by the speed
+of sound and it becomes a **path difference**, and for a plane wave arriving at
+an angle $\theta$ from broadside on a pair spaced $d$ apart,
+
+$$
+\sin\theta = \frac{c\,\tau_0}{d},
+$$
+
+so the diagram's 2.44 ms at 343 m/s is 0.84 m of extra path, a number that only
+makes sense for a pair spaced at least that far apart. Three limits come with
+it, and all three are checkable:
+
+- **$|c\tau_0| > d$ is unphysical.** If the estimate exceeds the spacing, the
+  estimator locked onto the wrong peak or onto a reflection. Setting
+  `max_delay=d/c` keeps the search inside the range the geometry allows, which
+  is the cheapest guard on the page.
+- **The plane-wave form needs the source in the far field of the pair.** Closer
+  than that, wavefront curvature biases $\theta$, and the two microphones see
+  different angles of the same wavefront.
+- **The angular resolution is worst at endfire.** Differentiating,
+  $\mathrm{d}\theta = c\,\mathrm{d}\tau/(d\cos\theta)$, so a fixed timing
+  uncertainty becomes an ever larger angular error as $\theta$ approaches
+  ±90°, where $\cos\theta \to 0$. A pair is sharp broadside and blind endfire,
+  which is why direction finding uses more than two sensors.
+
+The spacing $d$ therefore fixes both the unambiguous range of the pair and the
+angular resolution it can offer, and it is the first number to choose when the
+delay is going to be turned into a direction.
+
 The weightings of Knapp & Carter's Table I, with the conditions the paper
 attaches to each:
 
@@ -150,7 +191,36 @@ attaches to each:
 | `'phat'` | $1/\lvert G_{xy}\rvert$ | Ideally a delta at the delay for uncorrelated noises (their Eq. 23), but the weight ignores the signal-to-noise ratio, so bands without signal contribute unit-magnitude random phase. It needs signal power across the analysis band. |
 | `'ml'` | $\gamma^2/(\lvert G_{xy}\rvert\,(1-\gamma^2))$ | The Hannan-Thomson maximum-likelihood processor: a PHAT weighted down by the phase variance each band actually carries. Attains the Cramér-Rao bound; the safe default when the signal does not fill the band. |
 
+Knapp & Carter's conditions are all written for *sensor noise*: an anechoic
+pair with independent noise added at each microphone. The degradation an
+acoustician meets indoors is different in kind, because a reflection is a
+**coherent copy** of the signal rather than noise, and it changes the choice:
+
+- **Sensor noise dominates** (a quiet room, an outdoor pair, a long baseline):
+  `'ml'` is optimal, because it down-weights each band by the phase variance
+  that band actually carries.
+- **Reverberation dominates** (a poor direct-to-reverberant ratio): `'phat'` is
+  the standard choice precisely *because* it discards magnitude, so a strong
+  reflection cannot dominate the peak by being loud.
+- **Neither converges**: window the record around the direct arrival and
+  correlate only the first few milliseconds, which is the only move that
+  removes a reflection rather than reweighting it.
+
+The failure signature is worth memorising, because no returned number reports
+it: a correlogram whose main peak is not much taller than its neighbours, or a
+delay that jumps between segments of the same record, means the direct path is
+not dominant and the delay you have is a reflection's. `delay_standard_deviation` will not warn
+you; Eq. 8.129 models the scatter of a single peak, not the choice between two.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" width="82%"></picture>
+
+*Both estimators land on the 2.441 ms delay (2.4413 ms direct, 2.4418 ms
+PHAT), so the argument is not about accuracy on a clean pair but about how much
+the peak can be trusted. Prewhitening narrows the main lobe from 0.73 ms at
+half height to 0.24 ms, two samples at 8192 Hz, because the direct correlator
+convolves the delta with the autocorrelation of a signal that is band-limited
+to 800 Hz while PHAT throws that magnitude away. Read the width, not the
+position: it is what says whether a reflection could be sitting under the peak.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -319,6 +389,27 @@ A(t) = \left[x^2(t) + \tilde{x}^2(t)\right]^{1/2}, \qquad
 f(t) = \frac{1}{2\pi}\frac{d\theta}{dt} .
 $$
 
+These three are physically meaningful **only if the record really is one
+carrier with a slow modulation**: the modulation bandwidth has to stay below the
+carrier frequency, so that the two spectra do not overlap. That is the
+narrowband (Bedrosian) condition, and it is exactly why the exact AM identity
+below holds. Nothing in the call enforces it: `envelope` returns numbers for
+any array you hand it.
+
+A violation is easy to recognise once you know what to look for. The envelope
+stops being smooth and starts tracking individual half-cycles of the waveform,
+and the instantaneous frequency spikes, leaves the signal's band entirely and
+goes negative, which happens every time the analytic signal passes near the
+origin of the complex plane, and is a geometric artefact rather than a physical
+frequency. Applied to speech, to a room impulse response or to broadband noise,
+all three quantities do this. The fix is to make the record narrowband first:
+band-pass around the component of interest, exactly as the
+[envelope spectrum](cepstrum-echoes.md) does with its
+`band=` front end, or read the ridge of a
+[spectrogram](time-frequency.md) when several
+components coexist: the Hilbert construction has no way to represent more than
+one at a time.
+
 For an amplitude-modulated carrier $u(t)\cos(2\pi f_0 t)$ the envelope
 recovers $u(t)$ exactly (Eq. 13.27); the conformance suite pins the
 recovered AM envelope and the Table 13.1 pair $\cos \to \sin$ at the
@@ -401,30 +492,32 @@ the `'phase'` estimator is literally the slope of the
 `CrossSpectralDensityResult` phase, weighted as Eq. 5.101b prescribes.
 
 The Hilbert envelope here is the time-domain companion of the
-[envelope spectrum](cepstrum-echoes.md), which reads the same modulations off
-as discrete lines in frequency; and the sub-sample alignment shares its
-band-limited kernel with the public
+[envelope spectrum](cepstrum-echoes.md), which reads the same
+modulations off as discrete lines in frequency; and the sub-sample alignment
+shares its band-limited kernel with the public
 [fractional-delay and resampling tools](test-signals.md).
 
 ## What this guide covers
 
-**Covered.** Bendat & Piersol Chapter 5, Section 8.4 and Chapter 13:
-`correlation` with the biased, unbiased and coefficient normalizations and
-their random-error formulas (Eqs. 8.109/8.112); `time_delay` with the direct,
-phase-slope and Knapp & Carter (1976) generalized cross-correlation methods,
-including the Roth, SCOT, PHAT and maximum-likelihood weightings of their
-Table I; the peak-location uncertainty of Eq. 8.129; `impulse_response_delay`
-and `align_impulse_responses`; and the Hilbert `envelope` with instantaneous
-phase and frequency (Chapter 13).
+- **Covered.** Bendat & Piersol Chapter 5, Section 8.4 and Chapter 13: `correlation` with the
+  biased, unbiased and coefficient normalizations and their random-error
+  formulas (Eqs. 8.109/8.112); `time_delay` with the direct, phase-slope and
+  Knapp & Carter (1976) generalized cross-correlation methods, including the
+  Roth, SCOT, PHAT and maximum-likelihood weightings of their Table I; the
+  peak-location uncertainty of Eq. 8.129; `impulse_response_delay` and
+  `align_impulse_responses`; and the Hilbert `envelope` with instantaneous phase
+  and frequency (Chapter 13).
 
-**Not covered.** `correlation` and `time_delay` model one common-path delay
-between exactly two sensors, the $y(t) = \alpha\,x(t-\tau_0) + n(t)$ model of
-Eq. 5.21. A record with several arrivals, a direct path plus reflections, is
-not separated: the direct correlator reports the single largest peak, the same
-limitation `echo_detection` carries on the
-[cepstrum](cepstrum-echoes.md). Estimating delays across more than two sensors,
-as an array or a beamformer would, means calling these functions pairwise;
-there is no multi-sensor TDOA solver.
+- **Not covered.** `correlation` and `time_delay` model a single common-path delay between
+  exactly two sensors (the $y(t) = \alpha\,x(t-\tau_0) + n(t)$ model of Eq.
+  5.21). A record with several arrivals (multipath, a direct path plus
+  reflections) is not separated automatically: `time_delay` and the direct
+  correlator report only the single largest peak, the same limitation
+  `echo_detection` names on the cepstrum in [Cepstrum, echoes and the envelope
+  spectrum](cepstrum-echoes.md). Estimating delays
+  across more than two sensors, as an array or beamformer would, means calling
+  these pairwise functions yourself; there is no built-in multi-sensor TDOA
+  solver.
 
 ## See also
 
@@ -436,16 +529,7 @@ there is no multi-sensor TDOA solver.
 
 ## References
 
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Sections 5.1.4 and 5.2.6-5.2.7 (time delay via correlation and
-  cross-spectrum), 8.4 (random errors of correlation estimates and of the
-  peak location), 11.4 (FFT computation with zero padding) and Chapter 13
-  (Hilbert transforms, envelope and instantaneous phase).
-- Knapp, C. H., & Carter, G. C. (1976). The generalized correlation method
-  for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
-  and Signal Processing*, 24(4), 320-327.
-  [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
-  The GCC framework, the Table I weightings and their conditions, and the
-  maximum-likelihood (Hannan-Thomson) processor.
+- **Bendat, J. S., & Piersol, A. G. (2010).** *Random data: Analysis and measurement procedures* (4th ed.). Wiley. https://doi.org/10.1002/9781118032428
+  Sections 5.1.4 and 5.2.6-5.2.7 (time delay via correlation and cross-spectrum), 8.4 (random errors of correlation estimates and of the peak location), 11.4 (FFT computation with zero padding) and Chapter 13 (Hilbert transforms, envelope and instantaneous phase). ISBN 978-0-470-24877-5.
+- **Knapp, C. H., & Carter, G. C. (1976).** The generalized correlation method for estimation of time delay. *IEEE Transactions on Acoustics, Speech, and Signal Processing*, *24*(4), 320-327. https://doi.org/10.1109/TASSP.1976.1162830
+  The GCC framework, the Table I weightings and their conditions, and the maximum-likelihood (Hannan-Thomson) processor.

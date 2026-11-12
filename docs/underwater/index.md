@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/underwater/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/underwater/
 
 # Underwater acoustics
 
@@ -78,50 +80,50 @@ lives inline with the guides rather than in the theory reference.
 
 ## What this section does not cover
 
-**The measurement discipline is not implemented, only its arithmetic.** ISO
-17208-1's four-run, three-hydrophone averaging, its closest-point-of-approach
-and water-depth geometry checks, its ±30° data-window scoring and its
-background-noise correction are the operator's; the library supplies the
-closed-form radiated-noise and monopole source levels that follow. ISO 18406
-itself excludes vibro- and sheet-piling from its scope, so continuous
-pile-driving noise has no closed form here or anywhere in the library.
+- **Not covered.** **The measurement discipline is not implemented, only its arithmetic.** ISO
+  17208-1's four-run, three-hydrophone averaging, its closest-point-of-approach
+  and water-depth geometry checks, its ±30° data-window scoring and its
+  background-noise correction are the operator's; the library supplies the
+  closed-form radiated-noise and monopole source levels that follow. ISO 18406
+  itself excludes vibro- and sheet-piling from its scope, so continuous
+  pile-driving noise has no closed form here or anywhere in the library.
 
-**The seabed is thin.** The closed-form page models it as a lossless
-fluid-fluid Rayleigh reflection, so sediment attenuation is out of scope, and
-all four solvers assume a **range-independent** water column with no
-elastic bottom; the beam solver can bounce off that same
-Rayleigh seabed instead of a perfect reflector, and the two ray-based
-solvers can slope the bottom over a piecewise-linear depth profile: the
-only range dependence there is, kept because that boundary has an exact
-oracle (the ideal wedge's closed fan of images) where a range-dependent
-water column has none. The ray solver still returns paths and
-travel times and no level of its own; `eigenrays` searches its fan for the
-paths that join a source and a receiver and lists their arrivals with
-classical per-path amplitudes, and the field comes from `gaussian_beams`,
-which widens each of those rays into a beam and so answers a finite number at
-a caustic and a graded one in a shadow zone, at three prices: it has no near
-field within about three beam widths of the source; it inherits ray theory's
-own high-frequency regime, so a refracting channel only a few wavelengths
-deep still belongs to `normal_modes`; and the geometric-beam variant with its
-KMAH index and its minimum-width floor is not implemented. The parabolic equation is the standard
-small-angle Tappert form rather than a wide-angle Padé variant. For the
-elastic seabed physics these fluid solvers leave out, the [elastic wave
-solver](../simulation/elastic-waves.md) is the nearest thing the
-library has.
+- **Not covered.** **The seabed is thin.** The closed-form page models it as a lossless
+  fluid-fluid Rayleigh reflection, so sediment attenuation is out of scope, and
+  all four solvers assume a **range-independent** water column with no
+  elastic bottom; the beam solver can bounce off that same
+  Rayleigh seabed instead of a perfect reflector, and the two ray-based
+  solvers can slope the bottom over a piecewise-linear depth profile: the
+  only range dependence there is, kept because that boundary has an exact
+  oracle (the ideal wedge's closed fan of images) where a range-dependent
+  water column has none. The ray solver still returns paths and
+  travel times and no level of its own; `eigenrays` searches its fan for the
+  paths that join a source and a receiver and lists their arrivals with
+  classical per-path amplitudes, and the field comes from `gaussian_beams`,
+  which widens each of those rays into a beam and so answers a finite number at
+  a caustic and a graded one in a shadow zone, at three prices: it has no near
+  field within about three beam widths of the source; it inherits ray theory's
+  own high-frequency regime, so a refracting channel only a few wavelengths
+  deep still belongs to `normal_modes`; and the geometric-beam variant with its
+  KMAH index and its minimum-width floor is not implemented. The parabolic equation is the standard
+  small-angle Tappert form rather than a wide-angle Padé variant. For the
+  elastic seabed physics these fluid solvers leave out, the [elastic wave
+  solver](../simulation/elastic-waves.md) is the nearest thing the
+  library has.
 
-**The exposure page rates hearing, not behaviour.** Only the auditory-effect
-criteria are implemented; behavioural-disturbance thresholds, the ones a
-harassment take estimate turns on, are out of scope. Nothing chooses a hearing
-group or an accumulation period for you, and nothing models the animal moving
-relative to the source, so the cumulative exposure reported is the
-stationary-receiver worst case. There is no audiogram for low-frequency
-cetaceans, because the source publication does not print one of its
-parameters.
+- **Not covered.** **The exposure page rates hearing, not behaviour.** Only the auditory-effect
+  criteria are implemented; behavioural-disturbance thresholds, the ones a
+  harassment take estimate turns on, are out of scope. Nothing chooses a hearing
+  group or an accumulation period for you, and nothing models the animal moving
+  relative to the source, so the cumulative exposure reported is the
+  stationary-receiver worst case. There is no audiogram for low-frequency
+  cetaceans, because the source publication does not print one of its
+  parameters.
 
-Two smaller boundaries: the ambient-noise spectrum leaves out the
-low-frequency turbulence band and has no built-in distant-shipping model
-(supply a shipping spectrum yourself) and the active sonar equation is
-monostatic only.
+- **Not covered.** Two smaller boundaries: the ambient-noise spectrum leaves out the
+  low-frequency turbulence band and has no built-in distant-shipping model
+  (supply a shipping spectrum yourself) and the active sonar equation is
+  monostatic only.
 
 ## Before and after these pages
 
@@ -134,6 +136,6 @@ deliberately not in the theory reference: it lives inline with the four guides
 above, where the quantity system of ISO 18405 is introduced with them.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

@@ -1,4 +1,6 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/start/environments/docker.md: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/start/environments/docker/
 
 # Docker and servers
 
@@ -31,7 +33,8 @@ for ninja and patchelf, and pip would build those from source too, which runs
 the image's own on `PATH`. An Alpine image, built on musl, needs more,
 since python-soundfile has no wheel there that carries libsndfile and numba
 none at all; [Getting
-Started](../getting-started.md#installation) says what each extra takes there.
+Started](../getting-started.md#from-pypi-recommended) says
+what each extra takes there.
 
 ## An image
 

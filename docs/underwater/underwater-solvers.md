@@ -1,24 +1,24 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/underwater/underwater-solvers.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Underwater propagation solvers: modes, rays, beams and the parabolic equation
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/underwater/underwater-solvers/
+
+# Underwater propagation solvers
 
 The closed-form propagation loss of
-[Underwater sound propagation](underwater-propagation.md) knows nothing of
-the sound-speed profile, the seabed or the surface. When refraction and
-boundaries decide the answer, the field has to be **computed**: this guide
-covers the four numerical solvers of the `underwater` module, the physics
-each one discretises, and how to choose between them and the closed forms.
-All four take the same range-independent (horizontally stratified) $c(z)$
-profile and a pressure-release surface, and follow Jensen, Kuperman, Porter &
-Schmidt, *Computational Ocean Acoustics*; the two ray-based solvers can also
-slope the bottom over a piecewise-linear depth profile (section 3), the one
-range dependence in the module.
+[Underwater sound propagation](underwater-propagation.md)
+knows nothing of the sound-speed profile, the seabed or the surface. When
+refraction and boundaries decide the answer, the field has to be
+**computed**: this guide covers the four numerical solvers of the
+`underwater` module, the physics each one discretises, and how to choose
+between them and the closed forms. All four take the same range-independent
+(horizontally stratified) $c(z)$ profile and a pressure-release surface, and
+follow Jensen, Kuperman, Porter & Schmidt, *Computational Ocean Acoustics*;
+the two ray-based solvers can also slope the bottom over a piecewise-linear
+depth profile (section 3), the one range dependence in the module.
 
 ## 1. The four solvers at a glance
 
-For range-independent (horizontally stratified) environments the field can be
-computed numerically. Four solvers are provided (Jensen et al.,
-*Computational Ocean Acoustics*):
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_underwater_waveguide_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_underwater_waveguide.svg" alt="The range-depth waveguide all four solvers take as input: range increasing to the right and depth downward, a pressure-release sea surface, a bottom that is either pressure-release or rigid, the sound-speed profile drawn beside the column with its channel axis, a source at depth z_s, a receiver at depth z and range r, and one ray turning where the local sound speed satisfies Snell's condition, annotated with what each of the four solvers computes in that same frame" width="92%"></picture>
 
 - **`normal_modes`** solves the depth-separated Sturm-Liouville eigenvalue
   problem by finite differences and sums the propagating modes into the
@@ -42,10 +42,17 @@ computed numerically. Four solvers are provided (Jensen et al.,
   Fourier algorithm. Validated against free-field spherical spreading; it agrees
   with the normal-mode propagation loss in trend.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.webp">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.webp" alt="A Munk sound-speed profile, ray paths forming convergence zones, and propagation loss versus range from the normal-mode and parabolic-equation solvers agreeing in trend" width="100%">
-</picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.webp" alt="A Munk sound-speed profile, ray paths forming convergence zones, and normal-mode versus parabolic-equation propagation loss agreeing in trend" width="100%"></picture>
+
+*Three panels, three different questions about the same water. Left, rays in a
+Munk profile whose minimum is 1500.0 m/s at 1271 m against 1548.5 m/s at the
+surface: a 48 m/s spread is enough to fold the ±12° fan back on itself into
+convergence zones, and the ±12° ray still sweeps from 143 m to 3997 m of depth.
+Centre, the same environment as a PE field, where the zones appear as
+interference rather than as lines. Right, the two solvers on a **different**,
+200 m shallow waveguide: they track the same trend with a mean offset of
+1.6 dB, but the per-range difference reaches 25 dB at the interference nulls,
+which is the honest statement of what "agree in trend" means.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -55,16 +62,37 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import underwater
 
-# A Munk deep-water sound-speed profile.
+# A Munk deep-water sound-speed profile for the ray and PE panels.
 z = np.linspace(0.0, 5000.0, 60)
 eta = 2.0 * (z - 1300.0) / 1300.0
 c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))
 
-# Split-step Fourier PE at 50 Hz; a coarse grid keeps the run fast.
-field = underwater.parabolic_equation(50.0, z, c, source_depth=1000.0,
-                                      max_range=50_000.0, range_step=50.0,
-                                      n_depth_points=512)
-field.plot()   # PL(z, r) field showing the convergence zones
+fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+
+# (a) rays through the Munk profile, out to 100 km.
+underwater.ray_trace(z, c, source_depth=1000.0,
+                     launch_angles_deg=np.linspace(-12.0, 12.0, 13),
+                     max_range=100e3, n_steps=6000).plot(ax=axes[0])
+
+# (b) the split-step Fourier PE field over the same environment.
+underwater.parabolic_equation(50.0, z, c, source_depth=1000.0,
+                              max_range=100e3, range_step=25.0,
+                              n_depth_points=1024).plot(ax=axes[1])
+
+# (c) modes against PE in a *different*, shallow 200 m waveguide.
+r = np.linspace(100.0, 20_000.0, 400)
+nm = underwater.normal_modes(50.0, [0.0, 200.0], [1500.0, 1530.0],
+                             source_depth=30.0, receiver_depth=120.0,
+                             ranges_m=r, n_depth_points=800)
+pe = underwater.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1530.0],
+                                   source_depth=30.0, max_range=20e3,
+                                   range_step=20.0, n_depth_points=512)
+zi = int(np.argmin(np.abs(pe.depths - 120.0)))
+axes[2].plot(nm.ranges / 1000.0, nm.propagation_loss, label="Normal modes")
+axes[2].plot(pe.ranges / 1000.0, pe.propagation_loss[zi], label="PE")
+axes[2].invert_yaxis()
+axes[2].set(xlabel="Range [km]", ylabel="Propagation loss [dB]")
+axes[2].legend()
 plt.show()
 ```
 
@@ -97,20 +125,9 @@ field.plot()  # PL field over range x depth (needs matplotlib)
 `travel_times`, `arc_lengths` and per-boundary reflection counts per ray);
 `gaussian_beams` a `GaussianBeamResult` (the `propagation_loss` field, plus
 each beam's central ray and width); `parabolic_equation` a
-`ParabolicEquationResult` (the `propagation_loss` field). All assume a
-range-independent water column with a pressure-release surface. The bottom is
-a perfect reflector by default, pressure-release (or, for the modes and the
-beams, optionally rigid), and the beams can trade it for a lossy fluid seabed
-(below); `ray_trace` and `gaussian_beams` can also slope it over a
-piecewise-linear depth profile (section 3), and that boundary is the only
-range dependence there is. A range-dependent water column $c(r,z)$ is
-excluded deliberately, not merely postponed: every solver here ships pinned
-to an exact published oracle, the sloping boundary has one (the ideal
-wedge's closed fan of images) while $c(r,z)$ has none, and a solver this
-module cannot hold to an oracle is a solver it does not ship. There is no
-elastic bottom and no sediment attenuation either; for the elastic seabed
-physics these fluid solvers leave out, see
-[Elastic waves and fluid-solid coupling](../simulation/elastic-waves.md).
+`ParabolicEquationResult` (the `propagation_loss` field). The four differ in
+what they model, so choosing between them is a regime question: the table in
+section 6 is the short answer.
 
 ## 2. Normal modes: the waveguide as a sum of standing waves
 
@@ -147,7 +164,9 @@ to keep the near-cutoff eigenvalues honest, and warns when a retained mode
 sits too close to its discretisation error band.
 
 The mode count is the physics: an isovelocity channel of depth $D$ carries
-$M \approx kD/\pi$ propagating modes, so low frequency and shallow water
+$M \approx kD/\pi$ propagating modes, so a 200 m channel at 50 Hz carries 13
+and the same channel at 5 kHz would carry over 1300, which is the frequency at
+which rays become the economical description. Low frequency and shallow water
 mean few modes and a compact, essentially exact description. The ideal
 pressure-release waveguide is the validation oracle, with
 $k_{rm} = \sqrt{k^2 - (m\pi/D)^2}$ in closed form:
@@ -164,6 +183,67 @@ k = 2 * np.pi * 50.0 / 1500.0
 print(round(float(modes.wavenumbers[0]), 5))    # 0.20885  computed kr1
 print(round(np.sqrt(k**2 - (np.pi / 200.0) ** 2), 5))   # 0.20885  exact
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/normal_modes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/normal_modes.svg" alt="Left, the first four mode functions of a 200 metre isovelocity waveguide at 50 hertz drawn against depth, each labelled with its computed and exact horizontal wavenumber, with the 50 metre source depth marked; centre, the number of propagating modes against frequency from 10 to 200 hertz as a staircase following the kD over pi line; right, the modal propagation loss against range at the 100 metre receiver depth" width="92%"></picture>
+
+*Mode $m$ has $m-1$ interior nulls, and the source depth decides which modes
+exist in the field at all: the fourth mode has a null at exactly 50 m in a 200 m
+channel, so a source there does not excite it. The staircase in the middle is
+the mode count cutting on one mode at a time as frequency rises, tracking
+$M \approx kD/\pi$; the right-hand panel is the interference of the 13 modes that
+survive at 50 Hz. A computed result draws all three with
+`modes.plot()`.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axes = plt.subplots(1, 3, figsize=(16, 5.4))
+r = np.linspace(100.0, 20_000.0, 500)
+res = underwater.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
+                              source_depth=50.0, receiver_depth=100.0,
+                              ranges_m=r, n_depth_points=800)
+for m in range(4):
+    axes[0].plot(res.mode_functions[m], res.mode_depths, label=f"m = {m + 1}")
+axes[0].axhline(50.0, linestyle="--")
+axes[0].invert_yaxis()
+axes[0].set(xlabel=r"Mode function $\Psi_m(z)$", ylabel="Depth [m]")
+axes[0].legend()
+
+freqs = np.arange(10.0, 201.0, 1.0)
+counts = [underwater.normal_modes(f, [0.0, 200.0], [1500.0, 1500.0],
+                                  source_depth=50.0, receiver_depth=100.0,
+                                  n_depth_points=1200).wavenumbers.size
+          for f in freqs]
+axes[1].step(freqs, counts, where="post", label="modes returned")
+axes[1].plot(freqs, 2.0 * freqs * 200.0 / 1500.0, "--", label="M = kD/pi")
+axes[1].set(xlabel="Frequency [Hz]", ylabel="Propagating modes M")
+axes[1].legend()
+
+res.plot(ax=axes[2])
+plt.show()
+```
+
+</details>
+
+That ideal waveguide plays two roles, and they should not be confused. It is the
+exact oracle the solver is checked against (which is why it is used here), and
+it is also a physically *extreme* bottom: a pressure-release bed reflects with
+unit magnitude and a phase inversion, so it transmits nothing into the sediment
+and absorbs nothing. A modal or PE propagation loss computed over it therefore
+understates the loss of any real seabed, and the gap widens with range because
+it accumulates over bounces. The rigid option is the opposite extreme, offered
+for the same validation reason and not as a sediment model. For a real bottom in
+shallow water, price the seabed with the Weston regimes of
+[Underwater sound propagation](underwater-propagation.md#westons-shallow-water-regimes),
+whose critical angle and reflection-loss gradient encode exactly what these
+boundary conditions omit, and read the modal answer as an upper bound on the
+received level. Or hand `gaussian_beams` the fluid seabed itself (section 4),
+which charges every bottom bounce with the Rayleigh coefficient these two
+extremes idealise away.
 
 ## 3. Ray tracing: turning points and travel times
 
@@ -217,6 +297,48 @@ print(round(t_turn, 3))                                        # 6.171  analytic
 traced = np.interp(r_turn, rays.ranges[0], rays.travel_times[0])
 print(round(float(traced), 3))                                 # 6.171  traced
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ray_turning_point_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ray_turning_point.svg" alt="Left, a linear sound-speed gradient rising from 1490 metres per second at the surface; right, five rays launched at 2, 4, 6, 8 and 10 degrees downward from a source at 100 metres, each turning at its own analytic turning depth marked with a cross, with the exact circular arc of the linear gradient overdrawn dashed on the 6 degree ray and its analytic and traced turning depths annotated" width="92%"></picture>
+
+*Steeper launch means deeper turn: in the same water the 2° ray turns at 154 m
+and the 10° ray at 1454 m. The 6° ray carries the page's own validation, the
+583.3 m analytic turning depth, which the trace reproduces to the tenth of a
+metre it prints, and the dashed overlay is the exact circular arc of radius
+$R = c_0/(g\cos\theta_0)$ the solver is checked against. A result draws its own
+fan with `rays.plot()`.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+c_top, grad, z_source = 1490.0, 0.017, 100.0
+c_source = c_top + grad * z_source
+fig, (ax_c, ax_r) = plt.subplots(1, 2, figsize=(13, 6),
+                                 gridspec_kw={"width_ratios": [1, 3.4]})
+zz = np.linspace(0.0, 2000.0, 200)
+ax_c.plot(c_top + grad * zz, zz)
+ax_c.invert_yaxis()
+ax_c.set(xlabel="c(z) [m/s]", ylabel="Depth [m]")
+
+for angle in (2.0, 4.0, 6.0, 8.0, 10.0):
+    rays = underwater.ray_trace([0.0, 2000.0], [c_top, c_top + grad * 2000.0],
+                                source_depth=z_source,
+                                launch_angles_deg=[angle], max_range=32e3,
+                                n_steps=20000)
+    ax_r.plot(rays.ranges[0] / 1000.0, rays.depths[0], label=f"{angle:.0f} deg")
+    z_turn = (c_source / np.cos(np.radians(angle)) - c_top) / grad
+    print(f"{angle:4.0f} deg -> analytic {z_turn:7.1f} m, "
+          f"traced {float(rays.depths.max()):7.1f} m")
+ax_r.set_ylim(1760.0, -70.0)
+ax_r.set(xlabel="Range [km]", ylabel="Depth [m]")
+ax_r.legend()
+plt.show()
+```
+
+</details>
 
 Rays buy geometry and timing: paths, turning depths, convergence-zone ranges
 and the travel time along every one of them, at a cost independent of
@@ -322,10 +444,7 @@ print(round(float(arr.launch_angles_deg[1]), 2))            # -9.31 degrees: up
 arr.plot()   # the impulse-response skeleton: per-path loss against delay
 ```
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/eigenray_arrivals_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/eigenray_arrivals.svg" alt="The arrival structure at one receiver of a 100 metre isovelocity channel: eleven vertical stems against travel time from 333 to 480 milliseconds, each head marking its own path's propagation loss on an inverted axis, the direct path drawn first and loudest in blue, the reflected paths coloured by their count of boundary reflections from one to five, arriving later, steeper and slightly quieter along the image ladder, with a colour bar giving the count" width="100%">
-</picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/eigenray_arrivals_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/eigenray_arrivals.svg" alt="The arrival structure at one receiver of a 100 metre isovelocity channel: eleven vertical stems against travel time from 333 to 480 milliseconds, each head marking its own path's propagation loss on an inverted axis, the direct path drawn first and loudest in blue, the reflected paths coloured by their count of boundary reflections from one to five, arriving later, steeper and slightly quieter along the image ladder, with a colour bar giving the count" width="92%"></picture>
 
 *The snippet's own channel, drawn: one stem per eigenray, its head at that
 single path's loss. The direct path arrives first and loudest; the first echo
@@ -421,9 +540,9 @@ from phonometry import underwater
 # Jensen's n^2-linear profile, c(z) = c0/sqrt(1 + 2.4 z/c0) (Eq. 3.77). With
 # the source near the bottom the up-going rays turn, their envelope is a
 # caustic, and above it the fan runs out into a shadow zone.
-c0 = 1550.0
+c_bottom_ref = 1550.0
 z_beam = np.linspace(0.0, 1000.0, 201)
-c_beam = c0 / np.sqrt(1.0 + 2.4 * z_beam / c0)
+c_beam = c_bottom_ref / np.sqrt(1.0 + 2.4 * z_beam / c_bottom_ref)
 
 beams = underwater.gaussian_beams(600.0, z_beam, c_beam, source_depth=992.5,
                                   max_range=2500.0, range_step=25.0,
@@ -435,10 +554,7 @@ print(round(float(beams.initial_beam_widths[0]), 1))  # 35.9 m: W0, Eq. (3.86)
 beams.plot()   # the PL field, on the same frame as parabolic_equation
 ```
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gaussian_beam_caustic_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gaussian_beam_caustic.svg" alt="A propagation-loss field over 2.5 kilometres of range and 1000 metres of depth at 600 hertz: a bright dome of level rising from a source near the bottom, bounded above by a sharp arc where the up-going ray fan folds on itself, with the level finite on that arc and fading smoothly into the dark shadow zone above it that no ray reaches, the traced rays drawn as thin grey lines through the field" width="100%">
-</picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gaussian_beam_caustic_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gaussian_beam_caustic.svg" alt="A propagation-loss field over 2.5 kilometres of range and 1000 metres of depth at 600 hertz: a bright dome of level rising from a source near the bottom, bounded above by a sharp arc where the up-going ray fan folds on itself, with the level finite on that arc and fading smoothly into the dark shadow zone above it that no ray reaches, the traced rays drawn as thin grey lines through the field" width="92%"></picture>
 
 *The snippet's own water, on a finer grid: 600 Hz over the $n^2$-linear
 profile, the source 7.5 m off the bottom, 439 beams over ±45°. The up-going fan
@@ -538,33 +654,33 @@ level beyond a few kilometres at sonar frequencies is optimistic. Passing
 `absorption` (`"francois-garrison"`, `"ainslie-mccolm"` or `"thorp"`, or a
 `VolumeAbsorption` naming its own water; the same names, arguments and
 defaults as
-[`seawater_absorption`](underwater-propagation.md)) multiplies each beam by
-$\mathrm{e}^{-\alpha s}$ with $s$ the **arc length along its central ray**, which is
-Jensen §3.6.2 as printed: perturbing the eikonal with the complex sound speed
-a volume loss implies leaves the real rays standing and attaches
-$\mathrm{e}^{-\int_0^s \alpha\,ds'}$ to each (Eq. 3.116). It is not $\alpha r$ over the
-horizontal range, the shortcut the same section notes "is used in many ray
-models": a path at 60° is twice as long as the range it covers, and the steep
-multiple bounces of a waveguide are exactly the arrivals absorption is
-supposed to be draining. The marcher integrates $s$ with the same Runge-Kutta
-stages that place the ray ($ds/dr = 1/(\xi c)$), `ray_trace` exposes it per
-ray as `arc_lengths`, and the coefficient, one $\alpha$ per run evaluated at
-the source frequency and depth, is recorded on the result as
-`absorption_db_per_km`.
+[`seawater_absorption`](underwater-propagation.md#propagation-loss))
+multiplies each beam by $\mathrm{e}^{-\alpha s}$ with $s$ the **arc length along its
+central ray**, which is Jensen §3.6.2 as printed: perturbing the eikonal with
+the complex sound speed a volume loss implies leaves the real rays standing
+and attaches $\mathrm{e}^{-\int_0^s \alpha\,ds'}$ to each (Eq. 3.116). It is not
+$\alpha r$ over the horizontal range, the shortcut the same section notes "is
+used in many ray models": a path at 60° is twice as long as the range it
+covers, and the steep multiple bounces of a waveguide are exactly the
+arrivals absorption is supposed to be draining. The marcher integrates $s$
+with the same Runge-Kutta stages that place the ray ($ds/dr = 1/(\xi c)$),
+`ray_trace` exposes it per ray as `arc_lengths`, and the coefficient, one
+$\alpha$ per run evaluated at the source frequency and depth, is recorded on
+the result as `absorption_db_per_km`.
 
 **A lossy seabed** is the other loss the default leaves out, and in shallow
 water the dominant one: a perfect bottom hands every steep multiple back
 undiminished, when what the seabed keeps is most of what decides real
 shallow-water propagation loss. Passing a `FluidSeabed` as the `bottom`
 (the same fluid description
-[`seabed_reflection`](underwater-propagation.md) takes, with
-`water_density` for the water above it) replaces the perfect reflector with
-the Rayleigh
-coefficient at each beam's own grazing angle: every bottom touch multiplies
-the beam's complex amplitude by $\mathcal{R}$, magnitude and phase together
-(Jensen §3.6.3, Eqs. 3.125-3.126). The phase is not a refinement to skip:
-below the critical angle $|\mathcal{R}| = 1$ and *only* the phase
-distinguishes the lossy seabed from a perfect one, and it moves the
+[`seabed_reflection`](underwater-propagation.md#seabed-reflection-loss)
+takes, with `water_density` for the water above it) replaces the perfect
+reflector
+with the Rayleigh coefficient at each beam's own grazing angle: every bottom
+touch multiplies the beam's complex amplitude by $\mathcal{R}$, magnitude and
+phase together (Jensen §3.6.3, Eqs. 3.125-3.126). The phase is not a
+refinement to skip: below the critical angle $|\mathcal{R}| = 1$ and *only*
+the phase distinguishes the lossy seabed from a perfect one, and it moves the
 interference fringes of every bottom-interacting path. The angle a beam is
 charged at is the one Snell's invariant fixes at the bottom,
 $\cos\theta = \xi\,c(D)$, the same at every touch of that beam whatever the
@@ -709,7 +825,116 @@ ir = np.argmin(np.abs(field.ranges - 1000.0))
 print(round(float(field.propagation_loss[iz, ir]), 2))   # 60.0 = 20 lg 1000
 ```
 
-and it does so to about $10^{-4}$ dB at the default range step.
+and it does so to about $10^{-4}$ dB at the default range step. That is the
+check the PE cannot fail: free field, no boundaries, no steep energy. The
+paraxial limit is only visible where those three are absent.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pe_paraxial_error_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pe_paraxial_error.svg" alt="Left, the propagation loss against range at a 60 metre receiver in a 100 metre waveguide at 50 hertz, computed with normal modes and with the parabolic equation, both drawn faintly as fine structure and boldly as range averages, with the parabolic equation running 1.6 decibels lossier at every range; right, the modal grazing angles of the six propagating modes as bars against the plus or minus 20 degree paraxial band, four of them outside it" width="92%"></picture>
+
+*In a 100 m waveguide at 50 Hz, four of the six propagating modes leave the
+source at 27°, 37°, 49° and 64°: outside the band the standard PE is written
+for. The consequence is on the left: the range-averaged PE loss sits **1.6 dB
+above** the modal reference, at 300 m and still at 5.7 km. The offset does not
+wash out with range, because an ideal waveguide is lossless and strips nothing
+away; in a real seabed the steep modes attenuate first and the gap does close.
+This is the failure mode to look for in your own output: a level that is
+uniformly a little too low, not a wrong shape.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+r = np.linspace(50.0, 6000.0, 700)
+modes = underwater.normal_modes(50.0, [0.0, 100.0], [1500.0, 1500.0],
+                                source_depth=30.0, receiver_depth=60.0,
+                                ranges_m=r, n_depth_points=800)
+pe_field = underwater.parabolic_equation(50.0, [0.0, 100.0], [1500.0, 1500.0],
+                                         source_depth=30.0, max_range=6000.0,
+                                         range_step=5.0, n_depth_points=1024)
+iz2 = int(np.argmin(np.abs(pe_field.depths - 60.0)))
+pe_pl = np.interp(r, pe_field.ranges, pe_field.propagation_loss[iz2])
+
+def range_average(pl, width=61):        # incoherent, in the energy domain
+    return -10.0 * np.log10(np.convolve(10.0 ** (-pl / 10.0),
+                                        np.ones(width) / width, mode="same"))
+
+inner = (r > 300.0) & (r < 5700.0)
+sm_nm = range_average(np.asarray(modes.propagation_loss))
+sm_pe = range_average(pe_pl)
+print(round(float(np.mean(sm_pe[inner] - sm_nm[inner])), 2))   # 1.64 dB
+
+fig, (ax_pl, ax_ang) = plt.subplots(1, 2, figsize=(13.5, 5.6),
+                                    gridspec_kw={"width_ratios": [2, 1]})
+ax_pl.plot(r / 1000.0, modes.propagation_loss, alpha=0.35)
+ax_pl.plot(r / 1000.0, pe_pl, alpha=0.35)
+ax_pl.plot(r[inner] / 1000.0, sm_nm[inner], label="Normal modes, averaged")
+ax_pl.plot(r[inner] / 1000.0, sm_pe[inner], label="PE, averaged")
+ax_pl.set_ylim(30.0, 92.0)
+ax_pl.invert_yaxis()
+ax_pl.set(xlabel="Range [km]", ylabel="Propagation loss [dB]")
+ax_pl.legend()
+
+k0 = 2.0 * np.pi * 50.0 / 1500.0
+grazing = np.degrees(np.arccos(np.clip(modes.wavenumbers / k0, -1.0, 1.0)))
+ax_ang.bar(np.arange(1, grazing.size + 1), grazing)
+ax_ang.axhline(20.0, linestyle="--")
+ax_ang.set(xlabel="Mode index m", ylabel=r"Grazing angle $\arccos(k_{rm}/k)$ [deg]")
+plt.show()
+```
+
+</details>
+
+### Setting up a run
+
+The four solvers are configured by the caller, and every snippet above sets a
+grid without saying why. The rules are short.
+
+**The depth grid.** The sine transform of the PE, and the finite-difference
+eigenproblem of the modes, both alias a spectrum that is steep in depth, so the
+grid is sized in wavelengths. At 50 Hz, $\lambda = 30$ m, and a grid near
+$\lambda/10$ over 5000 m of water means a few thousand interior points, which
+is why the section 1 snippet's `n_depth_points=512` is labelled the coarse, fast
+setting rather than the right one. Refine and re-run before trusting a number.
+
+**The split-step range step.** The refraction half-step is a phase screen
+$\mathrm{e}^{\,i k_0 (n^2 - 1)\Delta r/2}$, so it should turn the phase by well under a
+radian per step, and be tightened wherever the profile has strong gradients. The
+honest test is the same one: halve $\Delta r$ and see whether the field moves.
+
+**When `normal_modes` warns.** The warning says a retained mode sits inside the
+finite-difference error band. The remedy is to raise `n_depth_points`: the
+eigenvalue error is $O(\Delta z^2)$, and near-cutoff modes are its first
+casualties, which are exactly the shallow-angle modes that carry the field to
+long range, so ignoring the warning quietly costs the answer at the ranges you
+care about.
+
+**The ray fan and the ray step.** The launch angles are not a free choice
+either: pick them from Snell's turning condition so the fan spans the rays the
+channel traps, rather than the round $\pm 12°$ of the snippet above. The number
+of steps has to keep the arc length per step small against the vertical scale of
+the profile, or a turning point is stepped straight over.
+
+**The beam fan and the beam width.** `gaussian_beams` takes that same fan and
+adds two knobs to it. `n_beams` decides whether neighbouring beams still overlap
+where they have spread most: adjacent beams are $s\,\delta\theta_0$ apart at
+arc length $s$ while each has spread to $s\lambda/(\pi W_0)$, so the overlap
+condition $\delta\theta_0 \lesssim \lambda/(\pi W_0)$ is range-independent
+and the default takes four times that margin. Too coarse a fan does not read as
+a wrong level but as a periodic ripple in range at the beam spacing, which is
+easy to mistake for physical interference. `beam_width` is the $W_0$ of section
+4, whose default is the optimum only where the channel does not clamp it, so
+pass it explicitly in shallow water. The three travel together as the
+`BeamFan` the solver takes. And opening `max_angle_deg` means cutting
+`range_step` with it, since one step has to resolve $\tan\theta_{\max}$ depth
+units of climb per unit range.
+
+**The convergence discipline.** Refine, re-run, compare; only then compare
+solvers. Agreement between the modes and the PE, which section 6 calls the
+practical convergence test, is worth nothing if neither of them has converged on
+its own grid.
 
 ## 6. Choosing a model
 
@@ -720,8 +945,12 @@ source level, levels re 1 µPa). The sound-speed and absorption models named
 below are implemented and referenced in
 [Underwater sound propagation](underwater-propagation.md).
 
-**Sound speed.** The three equations agree to within about 1 m/s inside their
-common domain, so the choice is about *validity range*, not accuracy. The
+**Sound speed.** The four equations agree to within about 1 m/s inside the
+domain they share: 0.98 m/s at 25 °C, 35 ppt and 1000 m, and 0.52 m/s over the
+upper kilometre of a full profile, as the
+[model comparison](underwater-propagation.md#speed-of-sound-in-sea-water)
+on the propagation page shows, so the choice is about *validity range*, not
+accuracy. The
 default **UNESCO / Chen-Millero** form (as recast by Wong & Zhu 1995) covers
 0–40 °C, 0–40 ppt and 0–1000 bar, the widest envelope, and is the
 international standard. **Del Grosso** (1974) is restricted to 0–30 °C and
@@ -730,7 +959,11 @@ domain (much of the SOFAR-channel literature uses it). **Mackenzie** (1981)
 trades pressure for depth directly (2–30 °C, 25–40 ppt, 0–8000 m), which makes
 it the convenient choice when you have an echo-sounder depth rather than a CTD
 pressure; the other two convert depth to pressure through Leroy & Parthiot
-(1998) internally.
+(1998) internally. **Medwin** (1975) is a six-term simplification valid to about
+1000 m in shallow, warm water; it is the coarsest of the four and the one behind
+the rules of thumb $\partial c/\partial T \approx 4.6 - 0.110\,T$ m/s per °C and
+$\partial c/\partial z \approx 0.016$ m/s per metre, so keep it for mental
+arithmetic and hand checks, not for a budget.
 
 **Absorption.** **Francois–Garrison** (1982) is the reference and the default:
 it carries the boric-acid, magnesium-sulfate and pure-water relaxations with
@@ -750,12 +983,12 @@ and the bottom (or in the SOFAR channel) that can only expand in range. The
 physically of the order of the water (or channel) depth: spherical while the
 wavefront has not yet filled the duct, cylindrical once it has. In the 10 kHz
 example of the
-[propagation-loss section](underwater-propagation.md) the choice is not
-cosmetic: against the same figure of merit of 87 dB, spherical-only spreading
-predicts detection out to about 8.7 km while the practical law with
-$R_0 = 1000$ m stretches it to about 15.8 km. When the spreading law is the
-biggest uncertainty in the budget, that is the cue to stop using a closed
-form and compute the field.
+[propagation-loss section](underwater-propagation.md#propagation-loss) the
+choice is not cosmetic: against the same figure of merit of 87 dB,
+spherical-only spreading predicts detection out to about 8.7 km while the
+practical law with $R_0 = 1000$ m stretches it to about 15.8 km. When the
+spreading law is the biggest uncertainty in the budget, that is the cue to
+stop using a closed form and compute the field.
 
 **Closed form or solver.** The closed-form propagation loss knows nothing of
 the sound-speed profile, the seabed or the surface; it is honest for short,
@@ -767,7 +1000,7 @@ and boundaries decide the answer, pick the solver by frequency and geometry
 |---|---|---|
 | `ray_trace` | High frequency (water depth ≫ λ), deep water | Ray-path geometry, turning depths, travel times, convergence zones, over a level or sloping bottom; cost independent of frequency, and no amplitude |
 | `gaussian_beams` | High frequency, wherever a *level* is wanted from rays | The same geometry turned into PL($z$,$r$): finite at caustics, graded into shadow zones, sloping bottom included, and like the rays it is built on, its cost does not grow with frequency |
-| `normal_modes` | Low frequency, shallow water, range-independent | Finite-difference modal sum with few propagating modes ($m < kD/\pi$); the reference solution for its regime, validated against the ideal waveguide's exact modes |
+| `normal_modes` | Low frequency, shallow water, range-independent | Finite-difference modal sum with few propagating modes ($M \approx kD/\pi$); the reference solution for its regime, validated against the ideal waveguide's exact modes |
 | `parabolic_equation` | Low frequency, long one-way paths | Full-field PL($z$,$r$) with refraction, marched in range over the range-independent $c(z)$ all four solvers assume |
 
 The boundaries blur in practice: rays remain usable at surprisingly low
@@ -781,20 +1014,157 @@ so `gaussian_beams` is the one that stays affordable exactly where the others
 stop being so, and it is also the one whose approximation is best justified
 there.
 
-**A worked sonar budget.** Chain the pieces end to end: a 140 dB re
-1 µPa²/Hz source at 10 kHz, a 60 dB ambient spectrum level, a 15 dB array
-gain and an 8 dB detection threshold give the figure of merit
-$FOM = 140 - (60 - 15) - 8 = 87$ dB computed by `passive_sonar_equation` in
-the [sonar-equation section](underwater-propagation.md) of the propagation
-guide. The propagation-loss curve of that guide's first section (10 °C,
-35 ppt, 100 m, $\alpha = 0.95$ dB/km) crosses 87 dB at about 15.8 km with the
-practical law: that crossing *is* the predicted detection range, and every
-term of the budget moves it. Trim the directivity index to 7.5 dB and the
-figure of merit falls to 79.5 dB, so the range drops to wherever the PL
-curve crosses that value; double the frequency to 20 kHz and $\alpha$ more
-than triples to 3.3 dB/km, pulling the crossing sharply inward. This
-coupling between the absorption model, the spreading law and the sonar
+## 7. A worked sonar budget
+
+Chain the pieces end to end: a 140 dB re 1 µPa²/Hz source at 10 kHz, a 60 dB
+ambient spectrum level, a 15 dB array gain and an 8 dB detection threshold give
+the figure of merit $FOM = 140 - (60 - 15) - 8 = 87$ dB, computed by
+`passive_sonar_equation` in the
+[sonar-equation section](underwater-propagation.md#sonar-equation)
+of the propagation guide. Every term then moves the crossing of the
+propagation-loss curve of that guide's
+[propagation-loss section](underwater-propagation.md#propagation-loss)
+(10 °C, 35 ppt, 100 m), and that crossing *is* the predicted detection range.
+
+```python
+import numpy as np
+
+env = {"temperature_c": 10.0, "salinity": 35.0, "depth": 100.0}
+se = underwater.passive_sonar_equation(
+    source_level=140.0, propagation_loss=np.linspace(40.0, 120.0, 400),
+    noise_level=60.0, directivity_index=15.0, detection_threshold=8.0)
+print(se.figure_of_merit)                                    # 87.0 dB
+
+for law, r0 in (("spherical", None), ("practical", 1000.0)):
+    res = underwater.detection_range(se.figure_of_merit, 10e3, law=law,
+                                     transition_range=r0, **env)
+    print(law, round(float(res.detection_range) / 1000.0, 1))  # 8.7 / 15.8 km
+
+# Two ways to lose it: half the array gain, or double the frequency.
+trim = underwater.passive_sonar_equation(
+    source_level=140.0, propagation_loss=np.linspace(40.0, 120.0, 400),
+    noise_level=60.0, directivity_index=7.5, detection_threshold=8.0)
+print(trim.figure_of_merit)                                  # 79.5 dB
+print(round(float(underwater.detection_range(
+    trim.figure_of_merit, 10e3, law="practical",
+    transition_range=1000.0, **env).detection_range) / 1000.0, 1))       # 10.0 km
+print(round(float(underwater.detection_range(
+    se.figure_of_merit, 20e3, law="practical",
+    transition_range=1000.0, **env).detection_range) / 1000.0, 1))       # 5.9 km
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_budget_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_budget.svg" alt="Propagation loss against range for three cases: 10 kilohertz with spherical spreading only, 10 kilohertz with the practical law and a one kilometre transition range, and 20 kilohertz with the same practical law: crossed by two horizontal figure-of-merit lines at 87 and 79.5 decibels, with each of the six crossings dropped to the range axis and labelled, and an inset listing the source level, noise level, directivity index and detection threshold" width="92%"></picture>
+
+*The same source and the same sea, six answers between 4.1 and 15.8 km. The
+spreading law is the biggest lever: choosing spherical-only over the practical
+law with $R_0 = 1$ km costs 7.1 km at 10 kHz. Halving the array gain costs
+5.8 km; doubling the frequency costs 9.9 km, because $\alpha$ goes from 0.95 to
+3.30 dB/km. When the spreading law is the biggest uncertainty in a budget, that
+is the cue to stop using a closed form and compute the field.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+ranges = np.linspace(50.0, 30_000.0, 800)
+fig, ax = plt.subplots(figsize=(11, 6.4))
+cases = (("10 kHz, spherical only", 10e3, "spherical", None),
+         ("10 kHz, practical R0 = 1 km", 10e3, "practical", 1000.0),
+         ("20 kHz, practical R0 = 1 km", 20e3, "practical", 1000.0))
+for label, freq, law, r0 in cases:
+    ax.plot(ranges / 1000.0,
+            underwater.propagation_loss(ranges, freq, law=law,
+                                         transition_range=r0, **env).pl,
+            label=label)
+for fom in (se.figure_of_merit, trim.figure_of_merit):
+    ax.axhline(fom, linewidth=1.4, label=f"FOM = {fom:.1f} dB")
+    for _label, freq, law, r0 in cases:
+        r50 = float(underwater.detection_range(fom, freq, law=law,
+                                               transition_range=r0,
+                                               **env).detection_range)
+        ax.plot([r50 / 1000.0], [fom], "o")
+ax.set_ylim(40.0, 126.0)
+ax.invert_yaxis()
+ax.set(xlabel="Range [km]", ylabel="Propagation loss [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+One number in that budget deserves a second look. A 60 dB ambient *spectrum*
+level at 10 kHz is well above what the sea alone produces: `ocean_ambient_noise`
+gives 42 dB re 1 µPa²/Hz there in a 15 knot wind. Sixty decibels therefore
+describes a noisy site or a self-noise-limited receiver, not a quiet ocean, and
+noticing that is the difference between a budget and an arithmetic exercise.
+This coupling between the absorption model, the spreading law and the sonar
 equation is why they all live in one module.
+
+## What this guide covers
+
+- **Covered.** `normal_modes`, `ray_trace`, `gaussian_beams` and `parabolic_equation`
+  implement the Jensen et al. (2011) numerical solvers for a range-independent
+  stratified ocean: the
+  finite-difference Sturm-Liouville modal sum (Ch. 5, Eqs. 5.3-5.17), the
+  Runge-Kutta ray-trajectory integration (Ch. 3, Eqs. 3.23-3.24), the Gaussian
+  beam sum built on it (Ch. 3, §3.5, Eqs. 3.88-3.92) and the
+  split-step Fourier standard PE (Ch. 6), with ISO 18405:2017 terminology
+  throughout. `ray_trace` also returns the travel time along each ray,
+  integrated as a third state of the same Runge-Kutta step, and `eigenrays`
+  searches a traced fan for the arrivals that join a source to one receiver,
+  each refined by bisection on fresh traces and charged the classical ray
+  amplitude of Eq. (3.65) with the boundary and caustic phases on record
+  (Eqs. 3.79, 3.125-3.126). `ray_trace` and `gaussian_beams` also accept a
+  piecewise-linear bottom profile, the faceted boundary of Ch. 3 reflecting
+  each ray about the local facet (Eq. 3.121) with the dynamic pair crossing
+  the bounce by Eqs. (3.122)-(3.123). Each is validated
+  against an exact closed form: the ideal pressure-release waveguide's modes and
+  its image-source sum (for the eigenrays, that lattice's complete arrival
+  list, time, angle, count and amplitude per image),
+  the circular-arc rays of a linear gradient together with the published travel
+  time along them (Medwin & Clay 1998, Eq. (3.3.20)), free-field spherical
+  spreading, and, for the sloping bottom, the ideal wedge's exact closed fan
+  of images, plus the mutual agreement of the modal and PE propagation loss.
+  No measurement standard governs these solvers: they implement a textbook
+  numerical method, so these closed forms are what they are held to.
+
+- **Not covered.** All four solvers assume a range-independent water column with a
+  pressure-release surface, and the bottom is a perfect reflector by default,
+  pressure-release or (for the modes and the beams) rigid. The beams can trade
+  it for the lossy fluid seabed of the Rayleigh model (level bottoms only),
+  and the two ray-based solvers can slope the bottom over a piecewise-linear
+  depth profile, which is the only range dependence there is: a
+  range-dependent water column $c(r,z)$ is excluded deliberately, because the
+  sloping boundary has an exact oracle (the ideal wedge's closed image fan)
+  and $c(r,z)$ has none. There is no elastic bottom and no sediment
+  attenuation. The ray solver returns paths and
+  travel times, not amplitudes; the per-path level belongs to `eigenrays`, whose
+  arrival list is classical ray theory and honestly diverges for a receiver
+  standing on a caustic, while `gaussian_beams` is what supplies a finite
+  field, by summing beams rather than by finding rays. Its geometric-beam
+  alternative (Ch. 3, §3.3.5.5) with the KMAH index and the Weinberg-Keenan
+  width floor is not implemented. The PE is the standard small-angle (Tappert)
+  form, not a wide-angle Padé variant. For the elastic seabed physics these fluid solvers
+  leave out, see [Elastic waves and fluid-solid
+  coupling](../simulation/elastic-waves.md).
+
+## See also
+
+- [Underwater sound propagation](underwater-propagation.md):
+  the closed forms these solvers replace when refraction and boundaries
+  matter, and the sound-speed profiles they consume.
+- [Underwater acoustics: radiated noise and pile driving](underwater-acoustics.md):
+  the ISO 18405 reference levels in which every propagation loss here is
+  expressed.
+- [Atmospheric refraction: rays and the GFPE](../environment/propagation/atmospheric-refraction.md):
+  the airborne siblings of these solvers, with the same ray bending and a
+  Green's-function PE marched over ground impedance instead of a seabed.
+- [2D FDTD wave simulation](../simulation/fdtd-simulation.md): the
+  time-domain alternative behind the SOFAR ducting animation of the
+  propagation guide.
+- API reference: [`underwater.propagation.numerical`](https://docs.jmrp.io/phonometry/reference/api/underwater/numerical/).
 
 ## Quick answers
 
@@ -804,12 +1174,13 @@ Pick by frequency and geometry (Jensen et al. 2011, Ch. 1): rays for high
 frequency and deep water (ray-path geometry, travel times and convergence
 zones at a cost independent of frequency, over a level or sloping bottom,
 plus, through `eigenrays`, the per-receiver arrival list), Gaussian beams
-when that same high-frequency geometry has to yield a level (the PL($z$, $r$)
+when that same high-frequency geometry has to yield a level (the PL($z$,$r$)
 field, finite at caustics and graded into shadow zones), normal modes for low
-frequency in shallow water (few propagating modes, $m < kD/\pi$, the reference
-solution for its regime) and the parabolic equation for low-frequency, long
-one-way paths (the full PL($z$, $r$) field with refraction). When two solvers
-agree on a case, that agreement is the practical convergence test.
+frequency in shallow water (few propagating modes, $M \approx kD/\pi$, the
+reference solution for its regime) and the parabolic equation for
+low-frequency, long one-way paths (the full PL($z$,$r$) field with
+refraction). When two solvers agree on a case, that agreement is the practical
+convergence test.
 
 ### When is a closed-form propagation loss no longer enough?
 
@@ -820,52 +1191,13 @@ The closed form $PL = \text{spreading} + \alpha R$ is honest for short,
 direct, boundary-free paths and first-cut sonar budgets; beyond that,
 compute the field.
 
-## See also
-
-- [Underwater sound propagation](underwater-propagation.md): the closed
-  forms these solvers replace when refraction and boundaries matter, and
-  the sound-speed profiles they consume.
-- [Underwater acoustics: radiated noise and pile driving](underwater-acoustics.md):
-  the ISO 18405 reference levels in which every propagation loss here is
-  expressed.
-- [Atmospheric refraction: rays and the GFPE](../environment/propagation/atmospheric-refraction.md):
-  the airborne siblings of these solvers, with the same ray bending and a
-  Green's-function PE marched over ground impedance instead of a seabed.
-- [2D FDTD wave simulation](../simulation/fdtd-simulation.md): the time-domain
-  alternative behind the SOFAR ducting animation of the propagation guide.
-- API reference: [`underwater.propagation.numerical`](https://docs.jmrp.io/phonometry/reference/api/underwater/numerical/).
-
 ## References
 
-- Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).
-  *Computational ocean acoustics* (2nd ed.). Springer.
-  [doi:10.1007/978-1-4419-8678-8](https://doi.org/10.1007/978-1-4419-8678-8).
-  The reference monograph implemented here: the modal derivation of
-  section 2 (Ch. 5, Eqs. 5.3-5.17), the ray equations of section 3
-  (Ch. 3, Eqs. 3.23-3.24), the Gaussian beams of section 4
-  (Ch. 3, §3.5, Eqs. 3.88-3.92), the split-step Fourier parabolic equation of
-  section 5 (Ch. 6) and the model-selection guidance of section 6 (Ch. 1).
-- Munk, W. H. (1974). Sound channel in an exponentially stratified ocean,
-  with application to SOFAR. *The Journal of the Acoustical Society of
-  America*, 55(2), 220-226.
-  [doi:10.1121/1.1914492](https://doi.org/10.1121/1.1914492).
-  The canonical deep-water sound-speed profile used by the section 1
-  figure and snippets.
-- ISO 18405:2017. *Underwater acoustics — Terminology*.
-  [ISO page](https://www.iso.org/standard/62406.html).
-  The standardized definitions (propagation loss, source level, sound
-  pressure level re 1 µPa) behind the quantities of this page.
-
-## Standards & sources
-
-No measurement standard governs the solvers themselves: they are
-implemented clean-room from Jensen, Kuperman, Porter & Schmidt,
-*Computational Ocean Acoustics* (2nd ed., Springer 2011), for normal modes
-(Ch. 5), ray tracing and Gaussian beams (Ch. 3, the latter §3.5) and the
-split-step Fourier parabolic equation
-(Ch. 6), with terminology per ISO 18405:2017. Validation is anchored to
-closed forms: the ideal pressure-release waveguide's exact modes and its
-image-source sum, the
-circular-arc ray paths of a linear sound-speed gradient, free-field
-spherical spreading for the PE and for the beams, and the mutual agreement of the modal and
-PE propagation loss.
+- **International Organization for Standardization. (2017).** [*Underwater acoustics — Terminology*](https://www.iso.org/standard/62406.html) (ISO 18405:2017).
+  The standardized definitions (propagation loss, source level, sound pressure level re 1 µPa) behind the quantities of this page.
+- **Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).** *Computational ocean acoustics* (2nd ed.). Springer. https://doi.org/10.1007/978-1-4419-8678-8
+  The reference monograph implemented here: the modal derivation of section 2 (Ch. 5, Eqs. 5.3-5.17), the ray equations of section 3 (Ch. 3, Eqs. 3.23-3.24) and its eigenray arrivals (§3.3.5, Eqs. 3.65-3.68), the Gaussian beams of section 4 (Ch. 3, §3.5, Eqs. 3.88-3.92), the split-step Fourier parabolic equation of section 5 (Ch. 6) and the model-selection guidance of section 6 (Ch. 1).
+- **Medwin, H., & Clay, C. S. (1998).** [*Fundamentals of acoustical oceanography*](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8). Academic Press.
+  ISBN 978-0-12-487570-8. The closed-form travel time along the circular-arc ray of a linear sound-speed gradient (Equation 3.3.20) that the travel times of section 3 are held to.
+- **Munk, W. H. (1974).** Sound channel in an exponentially stratified ocean, with application to SOFAR. *The Journal of the Acoustical Society of America*, *55*(2), 220-226. https://doi.org/10.1121/1.1914492
+  The canonical deep-water sound-speed profile used by the section 1 figure and snippets.

@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/index.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/
 
 # Vibration and structure-borne sound
 
@@ -134,44 +136,44 @@ assessment it makes possible, and the railway measurements it is used for.
 
 ## What this section does not cover
 
-**An instrument is graded on the clauses that can be computed.** Every
-criterion of ISO 8041-1 that is arithmetic is implemented, on the [meter
-verification](human/meter-verification.md) page: the
-tolerance band around each frequency weighting, the band-limiting stage on its
-own, the characteristic phase deviation, the running r.m.s. decay times and
-the 228 saw-tooth burst indications the standard prints. The rest of that standard, the indication,
-linearity, overload, temperature, humidity and electromagnetic clauses, is a
-set of laboratory tests on hardware, so a pass here is a necessary condition
-for conformity and never a certificate of it.
+- **the clauses that are arithmetic.** **An instrument is graded on the clauses that can be computed.** Every
+  criterion of ISO 8041-1 that is arithmetic is implemented, on the [meter
+  verification](human/meter-verification.md) page: the
+  tolerance band around each frequency weighting, the band-limiting stage on its
+  own, the characteristic phase deviation, the running r.m.s. decay times and
+  the 228 saw-tooth burst indications the standard prints. The rest of that standard, the indication,
+  linearity, overload, temperature, humidity and electromagnetic clauses, is a
+  set of laboratory tests on hardware, so a pass here is a necessary condition
+  for conformity and never a certificate of it.
 
-**No severity verdict is issued for a machine.** The machinery pages predict
-*where* a line would be, never whether it is present or whether the machine is
-in trouble: the amplitude criteria that turn a present line into an assessment
-(crest-factor and kurtosis trending, and the velocity severity bands of ISO
-10816 / ISO 20816) are outside the library, as are rotor balancing (ISO 21940)
-and order tracking.
+- **Not covered.** **No severity verdict is issued for a machine.** The machinery pages predict
+  *where* a line would be, never whether it is present or whether the machine is
+  in trouble: the amplitude criteria that turn a present line into an assessment
+  (crest-factor and kurtosis trending, and the velocity severity bands of ISO
+  10816 / ISO 20816) are outside the library, as are rotor balancing (ISO 21940)
+  and order tracking.
 
-**Nor is one issued for what people feel in a building.** The 2003 edition of
-ISO 2631-2 deleted its predecessor's guidance values on purpose, so for the
-human response to building vibration there are no acceptable magnitudes to
-compare against; what the library gives is the weighted magnitude, and the
-judgement stays with the assessor and the national code. The guideline values
-of [DIN 4150-3](structural/structural-damage.md) are a
-different question and are implemented: they are about damage to the structure,
-and keeping to one is not a certificate any more than exceeding one is a
-finding of damage.
+- **Not covered.** **Nor is one issued for what people feel in a building.** The 2003 edition of
+  ISO 2631-2 deleted its predecessor's guidance values on purpose, so for the
+  human response to building vibration there are no acceptable magnitudes to
+  compare against; what the library gives is the weighted magnitude, and the
+  judgement stays with the assessor and the national code. The guideline values
+  of [DIN 4150-3](structural/structural-damage.md) are a
+  different question and are implemented: they are about damage to the structure,
+  and keeping to one is not a certificate any more than exceeding one is a
+  finding of damage.
 
-Two structural predictions are idealisations rather than measurements. The
-junction transmission coefficients are a closed-form result for a rigid,
-simply supported junction (the *measured* vibration reduction index of ISO
-10848 is [Laboratory flanking
-transmission](../buildings/insulation/flanking-lab.md)) and the FRF
-page returns element-wise free reciprocals, correct for a driving-point or
-single-path use but not a full FRF matrix, with no blocked matrix quantities,
-and the impact page fits one mode at a time. On the isolator page, the
-linearity test of ISO 10846 (clause 7.7 of Parts 2, 4 and 5, clause 7.6 of
-Part 3) is described but not computed for you, and the Figure 11 nomograms of ISO 10846-4 for steel blocking masses are
-not tabulated.
+- **Not covered.** Two structural predictions are idealisations rather than measurements. The
+  junction transmission coefficients are a closed-form result for a rigid,
+  simply supported junction (the *measured* vibration reduction index of ISO
+  10848 is [Laboratory flanking
+  transmission](../buildings/insulation/flanking-lab.md)) and the FRF
+  page returns element-wise free reciprocals, correct for a driving-point or
+  single-path use but not a full FRF matrix, with no blocked matrix quantities,
+  and the impact page fits one mode at a time. On the isolator page, the
+  linearity test of ISO 10846 (clause 7.7 of Parts 2, 4 and 5, clause 7.6 of
+  Part 3) is described but not computed for you, and the Figure 11 nomograms of ISO 10846-4 for steel blocking masses are
+  not tabulated.
 
 ## Before and after these pages
 
@@ -185,6 +187,6 @@ theory](../reference/theory/vibration.md): the human-vibration weightings, the I
 shock model and the point mobilities and radiation efficiency.
 
 If you arrived here from a search and want the shape of the whole library,
-[What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes it by the job
+[What do you need to measure?](../start/tasks.md) indexes it by the job
 and [All guides](../README.md) lists every page with a line on
 each.

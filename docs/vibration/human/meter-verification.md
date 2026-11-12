@@ -1,6 +1,8 @@
-← [Documentation index](../../README.md)
+<!-- Written by `make llms` from site/src/content/docs/vibration/human/meter-verification.mdx: edit that page and its Spanish twin, then run `make llms`. -->
 
-# Verifying a human-vibration meter (ISO 8041-1)
+← [Documentation index](../../README.md) · Published at https://docs.jmrp.io/phonometry/vibration/human/meter-verification/
+
+# Verifying a human-vibration meter
 
 Every other page in this section computes something about a vibration a person
 is exposed to: what a day of it does to the body, what repeated shocks do to
@@ -9,7 +11,8 @@ the spine, what a seat passes on. This one computes something about the
 specification a general-purpose human-vibration meter is designed and tested
 against, and the rest of the section has been quoting one clause of it all
 along, because the nine frequency weightings that [human vibration
-exposure](human-vibration.md) applies are defined here and nowhere else.
+exposure](human-vibration.md) applies are defined
+here and nowhere else.
 
 The **human** in that name is load-bearing. The standard specifies instruments
 "designed to measure vibration values, for the purpose of assessing human
@@ -77,21 +80,36 @@ of the bench measurement added on top; that uncertainty has to fit inside the
 band as well. There is a second sentence about uncertainty, in 13.1 and 14.1,
 and it says something different; section 4 is about telling the two apart.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench.svg" alt="Three bands: the meter's transducer on a calibrated reference on a vibration exciter, with the two readings Formula (9) compares; a generator feeding the maker's substitute for the transducer, with the saw-tooth bursts of Table 6; and where the sweeps and the bursts sit in a 60 dB linear operating range, above a box with Formulae (9), (12) and (10)" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench.svg" alt="Three bands and a formula box. Top, the mechanical test of clause 12.11.2: a signal generator and a power amplifier drive a vibration exciter, and on its table the meter's own transducer sits on a calibrated reference transducer, both mounted as ISO 16063-21 describes; one cable runs to the human-vibration meter, which reads the weighted a_ind, the other to the laboratory reference, which measures the unweighted a_in, and a note says one weighting per application takes both tests. Under it, at the 15.915 Hz reference frequency the band-limited reading is set 20 dB over the lower linearity limit, in one-third-octave steps from 0.5 Hz to 160 Hz a_in is held while a_ind is noted, and a meter that reads a peak, an MTVV or a VDV has its phase checked on a vibration exciter by Annex H. Middle, the electrical test of clauses 12.11.3 and 12.13: a generator carrying a sine and a saw-tooth feeds the maker's substitute for the transducer, a test point, dummy transducer or input adapter, through a single-pole low-pass with a cut-off of, for example, 10 kHz where the saw-tooth needs it, and the meter shows a_ind again while the input signal value u_in is adjusted from 0.25 Hz to 160 Hz, its transducer set aside. Below the chain, two-cycle saw-tooth bursts with the whole-body timing of Table 6, the first at 1 s, one every 10 s, 60 s in all, with a fall time of at most 2 ms. Bottom, a 60 dB linear operating range: both frequency sweeps are set at the reference frequency 20 dB over its lower limit, the first bursts at 50 % of its upper limit and two tenfold steps below that, stopping above three times the lower limit, while from that same first level a single cycle is raised to overload. The box gives Formula (9) with at most 4.5 % expanded uncertainty, Formula (12) with at most 3 %, and Formula (10), which adds the transducer error to the weightings tested only electrically, graded against Table 5 with at most 5 %" width="100%"></picture>
 
-**How the measurement goes.** In a pattern evaluation (clause 12), mount the
-meter's transducer and a calibrated reference transducer on the exciter as
-ISO 16063-21 describes, set the band-limited reading 20 dB above the lower
-linearity limit at the reference frequency, and in one-third-octave steps over
-Table 15 hold that input on the reference and note the reading: Formula (9).
-Repeat through the electrical input, holding the reading and noting the input
-signal value, Formula (12), and add the transducer error of the weighting
-tested both ways to the ones tested only electrically before grading against
-Table 5. For the bursts, start from a steady sine at 50 % of the upper
-linearity limit, apply the Table 6 saw-tooth to every weighting, and step down
-tenfold to three times the lower limit. A one-off instrument is shaken at the
-fixed frequencies of 13.10 instead, and a periodic verification (clause 14)
-keeps only the mechanical checks.
+### How the measurement goes
+
+In a pattern evaluation (clause 12), submit the meter with its transducer,
+mounting, cable and input adaptors, its sensitivity set by its documented
+procedure, and use traceably calibrated bench instruments with every test
+frequency within ±0.2 %. At the reference frequency, take at least three
+readings against a calibrated reference transducer at the same point: no more
+than 3 % apart, their mean inside Table 2.
+
+Per application, one weighting goes through both tests and the others through
+either, a third of an octave apart at most over Table 15. On the exciter, with
+both transducers mounted as ISO 16063-21 describes, set the band-limited
+reading 20 dB above the lower linearity limit at the reference frequency, then
+hold that input on the reference transducer and note the reading at every
+frequency: Formula (9), within 4.5 % expanded uncertainty. Through the
+electrical input, hold the reading and note the input signal value, with signal
+plus noise at least ten times the noise: Formula (12), within 3 %. The
+transducer error of the weighting tested both ways completes the others, graded
+against Table 5 within 5 %. For the bursts, set a steady sine to 50 % of the
+upper linearity limit, apply the Table 6 saw-tooth to every weighting, and
+repeat tenfold lower down to three times the lower limit. A meter reading a
+peak, an MTVV or a VDV also has its phase checked by Annex H; a one-off
+instrument is shaken at the fixed frequencies of 13.10. Report every
+configuration, condition, result and actual uncertainty, and whether the meter
+conforms. A periodic verification (clause 14) is a different bench: it keeps
+only the mechanical sensitivity, linearity and frequency-response checks, for a
+whole-body meter at 1.995, 7.943, 15.85 and 63.10 Hz at 1.00 m/s² with U at
+most 5 %.
 
 ## 2. The nine weightings, and the band that widens around them
 
@@ -1473,44 +1491,48 @@ ends.
 
 ## What this guide covers
 
-The **tolerance band on a frequency weighting**: the four transition
-frequencies of Table 4 built from their printed exponents, the three distinct
-pairs of limits Table 5 carries across them, and the verdict of
-`verify_weighting` on a measured response, with the testing laboratory's
-expanded uncertainty extending the deviation as 13.1 and 14.1 require.
+- **Covered.** The **tolerance band on a frequency weighting**: the four transition
+  frequencies of Table 4 built from their printed exponents, the three distinct
+  pairs of limits Table 5 carries across them, and the verdict of
+  `verify_weighting` on a measured response, with the testing laboratory's
+  expanded uncertainty extending the deviation as 13.1 and 14.1 require.
 
-The **characteristic phase deviation** of Formula (6), computed on the grid
-12.11.1 asks for and graded against the phase column of Table 5, with the peak
-cost of Formula (H.4) beside it.
+- **Covered.** The **characteristic phase deviation** of Formula (6), computed on the grid
+  12.11.1 asks for and graded against the phase column of Table 5, with the peak
+  cost of Formula (H.4) beside it.
 
-The **band-limiting stage on its own**, the **running r.m.s. decay times** of
-Tables 10 and 11 in closed form, and the **228 saw-tooth burst indications**
-of Tables 7 to 9 reproduced from the signal Table 6 defines.
+- **Covered.** The **band-limiting stage on its own**, the **running r.m.s. decay times** of
+  Tables 10 and 11 in closed form, and the **228 saw-tooth burst indications**
+  of Tables 7 to 9 reproduced from the signal Table 6 defines.
 
-The **reference conditions** of Table 1 and the **tolerance of indication** of
-Table 2, published as the window an indication has to land in. They are
-published, not checked: reading a display is a bench measurement.
+- **Covered.** The **reference conditions** of Table 1 and the **tolerance of indication** of
+  Table 2, published as the window an indication has to land in. They are
+  published, not checked: reading a display is a bench measurement.
 
-The **personal vibration exposure meter** of ISO 8041-2:2021: its 228 burst
-cells of Tables 7 to 9, the Part 1 cells to the digit, graded in the
-conformance report against the Part 2 page; its two-row Table 2; and the
-maximum expanded uncertainties its clauses 12 and 13 print.
+- **Covered.** The **personal vibration exposure meter** of ISO 8041-2:2021: its 228 burst
+  cells of Tables 7 to 9, the Part 1 cells to the digit, graded in the
+  conformance report against the Part 2 page; its two-row Table 2; and the
+  maximum expanded uncertainties its clauses 12 and 13 print.
 
-**No bench, anywhere.** Every criterion here is one side of a comparison whose
-other side somebody has to measure on hardware. Accuracy of indication,
-linearity, instrument noise, overload, cross-talk, transducer characteristics,
-mounting and the whole environmental and electromagnetic clause are not
-implemented and are not implementable here.
+- **Not covered.** **No bench, anywhere.** Every criterion here is one side of a comparison whose
+  other side somebody has to measure on hardware. Accuracy of indication (5.5),
+  amplitude linearity (5.7), instrument noise (5.8), overload and under-range
+  indication (5.10 and 5.11), electrical cross-talk (5.16), transducer
+  characteristics (5.17), power supply (5.18), mounting (clause 6) and the whole
+  environmental and electromagnetic clause 7 are not implemented and are not
+  implementable here, and neither are the field vibration calibrator of
+  ISO 8041-1 Annex A, the instrument documentation of Annex G and the
+  uncertainty estimates of Annex I.
 
-**No conformity verdict for an instrument.** A pass on any clause of this page
-is a statement about that clause. Pattern evaluation, periodic verification
-and the in situ check are procedures on a physical meter, and nothing here
-carries a serial number.
+- **Not covered.** **No conformity verdict for an instrument.** A pass on any clause of this page
+  is a statement about that clause. Pattern evaluation, periodic verification
+  and the in situ check are procedures on a physical meter, and nothing here
+  carries a serial number.
 
-**The rest of ISO 8041-2.** The frequency-response arithmetic of its 12.11
-(Formulae (9) to (13)), the 12 h logging test of 12.22, and the logging,
-operator detection, artefact detection (Annex A) and contact force (Annex B)
-clauses are not implemented.
+- **Not covered.** **The rest of ISO 8041-2.** The frequency-response arithmetic of its 12.11
+  (Formulae (9) to (13)), the 12 h logging test of 12.22, and the logging,
+  operator detection, artefact detection (Annex A) and contact force (Annex B)
+  clauses are not implemented.
 
 ## See also
 
@@ -1530,91 +1552,9 @@ clauses are not implemented.
 
 ## References
 
-- International Organization for Standardization. (2017). *Human response to
-  vibration — Measuring instrumentation — Part 1: General purpose vibration
-  meters* (ISO 8041-1:2017).
-  The three levels of performance testing (clause 1), the reference
-  environmental conditions (clause 4), the reference vibration values and
-  frequencies of Table 1, the three rows of Table 2, the weighting parameters
-  of Table 3 and the transfer functions of 5.6, the transition frequencies of
-  Table 4 and the tolerances of Table 5 with their footnote a, the
-  characteristic phase deviation of Formula (6), the saw-tooth signal burst of
-  5.9 with its Table 6 and the printed responses of Tables 7 to 9, the running
-  r.m.s. time averaging of 5.13 with Tables 10 and 11, the maximum expanded
-  uncertainties of 12.1 and the test grid of 12.11.1, the demonstration of
-  compliance of 13.1 and 14.1, the tabulated design-goal weightings and phases
-  of Annex B, and the phase argument of Annex H with its Formulae (H.1),
-  (H.3) and (H.4).
-- International Organization for Standardization. (2021). *Human response to
-  vibration — Measuring instrumentation — Part 2: Personal vibration exposure
-  meters* (ISO 8041-2:2021).
-  The personal vibration exposure meter: the 12 h of 5.1 and 5.12, Table 2
-  with its two rows and the "Not applicable for PVEM" of 5.13, the saw-tooth
-  signal burst of 5.9 with its Table 6 and the printed responses of Tables 7
-  to 9, the maximum expanded uncertainties of clauses 12 and 13, and the
-  decision rule of 12.1 and 13.1.
-- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
-  ISBN 978-0-12-303041-2.
-  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  The measurement chain behind the specification: transducers, mounting,
-  frequency weighting and the instrumentation practice the standard writes
-  requirements for.
-
-## Standards
-
-ISO 8041-1:2017, *Human response to vibration — Measuring instrumentation —
-Part 1: General purpose vibration meters*: the transition frequencies of
-Table 4 and the tolerances on the frequency weightings of Table 5, checked by
-`verify_weighting`, which also applies the testing laboratory's expanded
-uncertainty as 13.1 and 14.1 require, with the permitted maxima of 12.1
-published as `MAX_EXPANDED_UNCERTAINTY_PERCENT` and the coverage factor as
-`ISO8041_COVERAGE_FACTOR`; the reference vibration values and frequencies of
-Table 1 and the first row of Table 2, published as `reference_indication` and
-`indication_tolerance_percent`, with the second row's factor as
-`band_limited_weighting_factor` and the third row's tolerance as
-`RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT`; the band-limiting weighting of
-Formulae (1) and (2) as `band_limiting_response`, `band_limiting_factors` and
-`apply_band_limiting`; the characteristic phase deviation of Formula (6) and
-Annex H, computed by `characteristic_phase_deviation`, graded against the
-Table 5 band by `verify_phase_response` on the grid 12.11.1 asks for, with the
-peak-value cost of Formula (H.4) as `peak_deviation_percent`; the running
-r.m.s. decay of 5.13 and Tables 10 and 11, computed in closed form by
-`running_rms_decay_time` and checked by `verify_running_rms_decay`; the
-saw-tooth signal burst of 5.9, with Table 6 as `SAWTOOTH_BURST_TESTS`, the
-record as `sawtooth_burst`, the printed responses of Tables 7 to 9 as
-`SIGNAL_BURST_RESPONSE`, the reproduction as `signal_burst_indications` and
-the verdict as `verify_signal_burst_response`. The frequency weightings
-themselves (Table 3 and clause 5.6) are covered in
-[human vibration exposure](human-vibration.md).
-
-ISO 8041-2:2021, *Human response to vibration — Measuring instrumentation —
-Part 2: Personal vibration exposure meters*: the saw-tooth signal burst of 5.9
-and 12.13, whose Table 6 and Tables 7 to 9 are the Part 1 tables cell for cell
-and are served by the same functions; Table 2, with its two rows and without
-the running r.m.s. row 5.13 declares not applicable, as
-`PVEM_INDICATION_TOLERANCES_PERCENT`; and the maximum expanded uncertainties
-of clauses 12 and 13 as `PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT`, with the
-coverage factor of 12.1 and 13.1 as `ISO8041_COVERAGE_FACTOR`.
-
-**Two decisions rather than deductions.** The printed burst tables come from a
-simulation nobody published, so two of its conventions were fixed by measuring
-which reading reproduces the page: the continuous row runs from `t = 0` and
-fills the printed duration, and the filtering starts from rest rather than
-wrapping the record onto itself. Section 10 shows both, and what each is worth.
-
-**Not covered.** Everything in the document that is a measurement on hardware:
-the accuracy of indication at the reference frequency (5.5), amplitude
-linearity (5.7), instrument noise (5.8), overload and under-range indication
-(5.10, 5.11), electrical cross-talk (5.16), transducer characteristics (5.17),
-power supply (5.18), mounting (clause 6), the environmental and electromagnetic
-criteria of clause 7, the field vibration calibrator of Annex A, the instrument
-documentation of Annex G and the uncertainty estimates of Annex I. Applying a
-signal to a transducer and reading a display is laboratory work for the burst,
-the decay and the frequency response alike; what is here is the other side of
-each comparison. The pattern evaluation, periodic verification and in situ
-check procedures of the document are not carried out. Of ISO 8041-2:2021, the
-frequency-response arithmetic of 12.11 (Formulae (9) to (13)), the 12 h
-logging test of 12.22, and the logging, operator detection, artefact detection
-(Annex A) and contact force (Annex B) clauses are not implemented.
-A passing verdict on any one of these clauses is a statement about that clause,
-never a conformity certificate for an instrument.
+- **Griffin, M. J. (1996).** [*Handbook of human vibration*](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2). Academic Press.
+  ISBN 978-0-12-303041-2. The measurement chain behind the specification: transducers, mounting, frequency weighting and the instrumentation practice the standard writes requirements for.
+- **International Organization for Standardization. (2017).** [*Human response to vibration — Measuring instrumentation — Part 1: General purpose vibration meters*](https://www.iso.org/standard/70648.html) (ISO 8041-1:2017).
+  The three levels of performance testing (clause 1), the reference environmental conditions (clause 4), the reference vibration values and frequencies of Table 1, the three rows of Table 2, the weighting parameters of Table 3 and the transfer functions of 5.6, the transition frequencies of Table 4 and the tolerances of Table 5 with their footnote a, the characteristic phase deviation of Formula (6), the saw-tooth signal burst of 5.9 with its Table 6 and the printed responses of Tables 7 to 9, the running r.m.s. time averaging of 5.13 with Tables 10 and 11, the maximum expanded uncertainties of 12.1 and the test grid of 12.11.1, the demonstration of compliance of 13.1 and 14.1, the tabulated design-goal weightings and phases of Annex B, and the phase argument of Annex H with its Formulae (H.1), (H.3) and (H.4). The design and type-test clauses that need a bench are not implemented: a pass on any clause here is a statement about that clause and never a conformity certificate for an instrument.
+- **International Organization for Standardization. (2021).** *Human response to vibration — Measuring instrumentation — Part 2: Personal vibration exposure meters* (ISO 8041-2:2021).
+  The personal vibration exposure meter: the 12 h of 5.1 and 5.12, Table 2 with its two rows and the "Not applicable for PVEM" of 5.13, the saw-tooth signal burst of 5.9 with its Table 6 and the printed responses of Tables 7 to 9, the maximum expanded uncertainties of clauses 12 and 13, and the decision rule of 12.1 and 13.1. The frequency-response arithmetic of 12.11 and the 12 h logging test of 12.22 are not implemented.

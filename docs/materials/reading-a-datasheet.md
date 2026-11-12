@@ -1,4 +1,6 @@
-← [Documentation index](../README.md)
+<!-- Written by `make llms` from site/src/content/docs/materials/reading-a-datasheet.mdx: edit that page and its Spanish twin, then run `make llms`. -->
+
+← [Documentation index](../README.md) · Published at https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/
 
 # Reading a material datasheet
 
@@ -527,22 +529,22 @@ flanking level difference) has no field of its own; write it in the row's
 
 ## What this guide covers
 
-**Covered.** Reading a data sheet's practical absorption coefficients
-(`materials.PracticalAbsorptionSpectrum`), a test report's one-third-octave
-coefficients (`materials.ThirdOctaveAbsorptionSpectrum`) with the practical
-coefficients they give, a laboratory sound reduction index
-(`building.SoundReductionSpectrum`) and a reduction of impact sound pressure
-level (`building.ImpactImprovementSpectrum`), each rated again from its bands
-with `rating()`, whose result draws itself with `plot()`; the notes a reader keeps for a value off the ISO 11654 grid
-or above its cap and for a printed rating the bands do not give; and how to
-write a declared level, a mounting, a revision and a word printed where a
-number would be.
+- **Covered.** Reading a data sheet's practical absorption coefficients
+  (`materials.PracticalAbsorptionSpectrum`), a test report's one-third-octave
+  coefficients (`materials.ThirdOctaveAbsorptionSpectrum`) with the practical
+  coefficients they give, a laboratory sound reduction index
+  (`building.SoundReductionSpectrum`) and a reduction of impact sound pressure
+  level (`building.ImpactImprovementSpectrum`), each rated again from its bands
+  with `rating()`, whose result draws itself with `plot()`; the notes a reader keeps for a value off the ISO 11654 grid
+  or above its cap and for a printed rating the bands do not give; and how to
+  write a declared level, a mounting, a revision and a word printed where a
+  number would be.
 
-**Not covered.** The noise reduction coefficient, the sound absorption average, the STC, the
-IIC and any other rating no function of this library works out are held as
-printed or in a note and never checked. No sheet is read from a PDF: the
-numbers are typed from the page. No manufacturer's data ships with the
-library, and a sheet pasted into an issue or a pull request is never merged.
+- **Not covered.** The noise reduction coefficient, the sound absorption average, the STC, the
+  IIC and any other rating no function of this library works out are held as
+  printed or in a note and never checked. No sheet is read from a PDF: the
+  numbers are typed from the page. No manufacturer's data ships with the
+  library, and a sheet pasted into an issue or a pull request is never merged.
 
 ## See also
 
@@ -553,25 +555,19 @@ library, and a sheet pasted into an issue or a pull request is never merged.
 
 ## References
 
-- International Organization for Standardization. (1997). *Acoustics — Sound absorbers for use in buildings — Rating of sound absorption* (ISO 11654:1997).
-  [iso.org catalogue](https://www.iso.org/standard/19583.html).
-  The practical coefficient of Clause 4.1, the mean of three one-third octaves rounded in steps of 0.05 and set to 1.00 above it; the weighted coefficient and its shape indicators of Clauses 4.2 and 4.3; Clause 1, which starts the rating at 250 Hz; Clause 5, which gives every coefficient to two decimals and asks for the depth of construction. Read from BS EN ISO 11654:1997.
-- International Organization for Standardization. (2003). *Acoustics — Measurement of sound absorption in a reverberation room* (ISO 354:2003).
-  [iso.org catalogue](https://www.iso.org/standard/34545.html).
-  The one-third-octave sound absorption coefficient a test report prints, which 3.9 NOTE 2 says can exceed 1.0 because of diffraction effects, and the mountings of Annex B: type A against a room surface, type E over an air space whose number is the distance in millimetres from the specimen's face to the surface behind it.
-- European Committee for Standardization. (2015). *Thermal insulation products for buildings — Factory made mineral wool (MW) products — Specification* (EN 13162:2012+A1:2015).
+- **European Committee for Standardization. (2015).** *Thermal insulation products for buildings — Factory made mineral wool (MW) products — Specification* (EN 13162:2012+A1:2015).
   A product standard under CE marking and what its declarations mean: clause 4.3.9 declares the dynamic stiffness in levels no test result exceeds, 4.3.11 the practical and weighted coefficients in levels no result falls below, 4.3.12 the airflow resistivity likewise, and clause 6 codes them as SDi, APi, AWi and AFri. Read from BS EN 13162:2012+A1:2015.
-- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation* (ISO 10140-2:2010).
-  [iso.org catalogue](https://www.iso.org/standard/42088.html).
-  The laboratory sound reduction index R of a wall or a door, one-third octave by one-third octave, which a test report prints and SoundReductionSpectrum holds.
-- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products* (ISO 10140-1:2010).
+- **International Organization for Standardization. (1997).** [*Acoustics — Sound absorbers for use in buildings — Rating of sound absorption*](https://www.iso.org/standard/19583.html) (ISO 11654:1997).
+  The practical coefficient of Clause 4.1, the mean of three one-third octaves rounded in steps of 0.05 and set to 1.00 above it; the weighted coefficient and its shape indicators of Clauses 4.2 and 4.3; Clause 1, which starts the rating at 250 Hz; Clause 5, which gives every coefficient to two decimals and asks for the depth of construction. Read from BS EN ISO 11654:1997.
+- **International Organization for Standardization. (2003).** [*Acoustics — Measurement of sound absorption in a reverberation room*](https://www.iso.org/standard/34545.html) (ISO 354:2003).
+  The one-third-octave sound absorption coefficient a test report prints, which 3.9 NOTE 2 says can exceed 1.0 because of diffraction effects, and the mountings of Annex B: type A against a room surface, type E over an air space whose number is the distance in millimetres from the specimen's face to the surface behind it.
+- **International Organization for Standardization. (2010).** *Acoustics — Laboratory measurement of sound insulation of building elements — Part 1: Application rules for specific products* (ISO 10140-1:2010).
   Annex H, Equation (H.1): the reduction of impact sound pressure level ΔL = Ln0 − Ln of a floor covering on a reference floor, the difference between the normalized impact levels without and with it, which ImpactImprovementSpectrum holds. Read from BS EN ISO 10140-1:2010+A2:2014.
-- International Organization for Standardization. (2010). *Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation* (ISO 10140-3:2010).
-  [iso.org catalogue](https://www.iso.org/standard/42089.html).
+- **International Organization for Standardization. (2010).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/42088.html) (ISO 10140-2:2010).
+  The laboratory sound reduction index R of a wall or a door, one-third octave by one-third octave, which a test report prints and SoundReductionSpectrum holds.
+- **International Organization for Standardization. (2010).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation*](https://www.iso.org/standard/42089.html) (ISO 10140-3:2010).
   The measurement of the normalized impact sound pressure levels, with the covering and without it, from which Annex H of ISO 10140-1 forms ΔL.
-- International Organization for Standardization. (2020). *Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation* (ISO 717-1:2020).
-  [iso.org catalogue](https://www.iso.org/standard/77435.html).
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation*](https://www.iso.org/standard/77435.html) (ISO 717-1:2020).
   Rw with C and Ctr, and the adaptation terms of the enlarged frequency ranges of Annex B, which a report prints beside R.
-- International Organization for Standardization. (2020). *Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation* (ISO 717-2:2020).
-  [iso.org catalogue](https://www.iso.org/standard/69867.html).
+- **International Organization for Standardization. (2020).** [*Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation*](https://www.iso.org/standard/69867.html) (ISO 717-2:2020).
   The weighted reduction of impact sound pressure level against the reference floor of Table 4, and Clause A.2.2 with CI,Δ = CI,r,0 − CI,r, CI,r,0 = −11 dB (Formula (A.4)).

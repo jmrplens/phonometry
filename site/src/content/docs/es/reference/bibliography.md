@@ -200,7 +200,7 @@ síncrono, Golay por los pares complementarios.
   Citado por [Caracterización de micrófonos](/phonometry/es/devices/electroacoustics/microphones/).
 - International Electrotechnical Commission. (2007). *Sound system equipment —
   Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/1223).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/1224).
   Las características nominales del altavoz: impedancia nominal, rango de
   frecuencias nominal, sensibilidad característica referida a 1 W a 1 m, rango
   de frecuencias efectivo frente a la banda de -10 dB, índice de directividad y

@@ -181,7 +181,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Microphone characterisation](../devices/electroacoustics/microphones.md).
 - International Electrotechnical Commission. (2007). *Sound system equipment —
   Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1223).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1224).
   The rated loudspeaker characteristics: rated impedance, rated frequency
   range, characteristic sensitivity referred to 1 W at 1 m, the effective
   frequency range against the -10 dB band, the directivity index and the total

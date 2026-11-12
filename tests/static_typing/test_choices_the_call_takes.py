@@ -11,8 +11,11 @@ energy instead (ISO 10140-1 Formula (K.3)), and the call always refused
 them. ``rail_roughness`` is typed with the two classes Table G-1b tabulates,
 ``"E"`` and ``"M"`` and their members of ``RailRoughnessClass``: Appendix G
 gives no spectrum for the ``"N"`` and ``"B"`` classes, and the call always
-refused them. A type checker now refuses each of those values, and the call's
-error says why.
+refused them. ``construction_guide_values`` is typed with the four areas
+DIN 4150-2 Table 2 gives guide values for: 6.5.4.2 applies the table to no
+especially sensitive area, and the call always refused the ``"sensitive"``
+that ``guide_values`` takes. A type checker now refuses each of those values,
+and the call's error says why.
 
 Each refused value is written as a caller types it, on a call line of its own
 with the error code mypy reports for it, so that line's ignore becomes unused,
@@ -40,6 +43,7 @@ if TYPE_CHECKING:
 _STRAIGHT: Callable[..., object] = vibration.straight_transmission_coefficient
 _OCTAVE_BANDS: Callable[..., object] = building.improvement_octave_bands
 _RAIL_ROUGHNESS: Callable[..., object] = environment.rail_roughness
+_CONSTRUCTION: Callable[..., object] = vibration.construction_guide_values
 
 
 @pytest.mark.parametrize("junction", ["T2", "L"])
@@ -180,3 +184,28 @@ def test_the_two_tabulated_rail_classes_are_taken() -> None:
         17.1,
         35.0,
     ]
+
+
+def test_a_sensitive_area_is_refused_by_the_construction_table() -> None:
+    with pytest.raises(
+        ValueError, match=r"not applicable to an especially sensitive area"
+    ):
+        _CONSTRUCTION(10, area="sensitive")
+
+
+def test_the_type_checker_refuses_the_sensitive_area() -> None:
+    with pytest.raises(ValueError, match="separate investigation"):
+        vibration.construction_guide_values(
+            10,
+            area="sensitive",  # type: ignore[arg-type]
+        )
+
+
+def test_the_four_areas_of_table_2_are_taken() -> None:
+    a_o = [
+        vibration.construction_guide_values(10, area="industrial").a_o,
+        vibration.construction_guide_values(10, area="commercial").a_o,
+        vibration.construction_guide_values(10, area="mixed").a_o,
+        vibration.construction_guide_values(10, area="residential").a_o,
+    ]
+    assert a_o == [6.0, 6.0, 5.0, 5.0]

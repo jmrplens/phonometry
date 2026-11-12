@@ -180,7 +180,7 @@ Each rule on a page has the same parts:
 | [C5](docstrings.md#c5) | Fix a SonarCloud finding; never suppress it with NOSONAR | review |
 | [D22](docstrings.md#d22) | Judge a module's length by its subject, never by a line count | review |
 | [D23](docstrings.md#d23) | Split a module as a pure move: names, docstrings, bodies and outputs unchanged | `make conformance`, review |
-| [D24](docstrings.md#d24) | List in the field of a parameter typed with a `Literal` alias every value it takes | `tests/test_choice_values_documented.py` |
+| [D24](docstrings.md#d24) | List in the field of a parameter typed with a `Literal` every value it takes, and in the `Literal` no value its call refuses | `tests/test_choice_values_documented.py`, `scripts/check_choice_literals.py`, `make choice-literals`, `CI: Check that every fixed public choice is typed Literal`, `tests/test_check_choice_literals.py::test_no_literal_lists_a_value_every_call_refuses` |
 
 ### Numbers and data
 

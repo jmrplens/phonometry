@@ -32,7 +32,9 @@ beside that designation, read where the link is written:
   names no designation of the link's catalogue before the link speaks of
   its own reference, and its link is read beside the reference's
   ``designation``;
-- in a table, the link's own cell up to the link;
+- in a table, the link's own cell up to the link, or, when that names no
+  designation of the link's catalogue, the nearest cell before it in the
+  row that names one;
 - anywhere else, the paragraph or list item up to the link, with the text of
   the other links taken out, so that a "since revised as" link to a newer
   edition names that edition and the entry's own catalogue link names the one
@@ -128,6 +130,10 @@ _NAMED = {
 #: start of its value.
 _FRONTMATTER_KEY = re.compile(r"^(?:  - |    )?([A-Za-z_][\w-]*):[ \t]*", re.MULTILINE)
 
+#: The border between two cells of a table row: a pipe the page does not
+#: escape.
+_CELL_BORDER = re.compile(r"(?<!\\)\|")
+
 
 @dataclass(frozen=True)
 class Link:
@@ -203,16 +209,27 @@ def _beside_in_frontmatter(text: str, start: int, end: int, catalogue: str) -> s
     return written if _names_a_designation(written, catalogue) else own
 
 
-def _beside_in_body(text: str, start: int) -> str:
+def _beside_in_body(text: str, start: int, catalogue: str) -> str:
     """What a link in a page's body is read beside.
 
-    In a table, the link's own cell up to the link. Anywhere else, the list
-    item or paragraph the link is written in, up to it.
+    In a table, the link's own cell up to the link; when that names no
+    designation of the link's catalogue (a cell that holds only
+    "[catalogue](...)"), the nearest cell before it in the row that names
+    one, with its links taken out. Anywhere else, the list item or paragraph
+    the link is written in, up to it.
     """
     line_start = text.rfind("\n", 0, start) + 1
     line = text[line_start:start]
     if line.lstrip().startswith("|"):
-        return _read_up_to(line.rsplit("|", 1)[-1])
+        *cells, cell = _CELL_BORDER.split(line)
+        own = _read_up_to(cell)
+        if _names_a_designation(own, catalogue):
+            return own
+        # The text before the row's first border is its indentation.
+        for previous in map(_links_out, reversed(cells[1:])):
+            if _names_a_designation(previous, catalogue):
+                return previous
+        return own
     lines = [line]
     cursor = line_start
     while not _BLOCK_START.match(lines[0]) and cursor > 0:
@@ -253,7 +270,7 @@ def links_in(path: str, text: str) -> list[Link]:
         if start < end:
             beside = _beside_in_frontmatter(text, start, end, catalogue)
         else:
-            beside = _beside_in_body(text, start)
+            beside = _beside_in_body(text, start, catalogue)
         found.append(
             Link(
                 path,

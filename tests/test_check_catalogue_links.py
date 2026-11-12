@@ -204,13 +204,40 @@ def test_a_designation_without_a_year_is_matched_by_its_number() -> None:
     assert _named(page) == []
 
 
-def test_a_table_cell_is_read_on_its_own() -> None:
+def test_a_table_link_to_another_document_than_its_row_names_is_named() -> None:
     page = (
         "| Standard | Link |\n| --- | --- |\n"
         "| ISO 12354-1:2017 | [catalogue](https://www.iso.org/standard/70238.html) |\n"
     )
     (problem,) = _named(page)
     assert "opens ISO 13887:2017" in problem
+
+
+def test_a_table_link_is_read_beside_the_designation_in_the_cell_before_it() -> None:
+    page = (
+        "| Standard | Link |\n| --- | --- |\n"
+        "| ISO 12354-1:2017 | [catalogue](https://www.iso.org/standard/70242.html) |\n"
+    )
+    assert _named(page) == []
+
+
+def test_a_table_link_is_read_beside_the_nearest_designation_cell() -> None:
+    row = (
+        "| ISO 13887:2017 | ISO 12354-1:2017 | Part 1 |"
+        " [catalogue](https://www.iso.org/standard/{}.html) |\n"
+    )
+    assert _named(row.format("70242")) == []
+    (problem,) = _named(row.format("70238"))
+    assert "opens ISO 13887:2017" in problem
+
+
+def test_a_table_cell_that_names_a_designation_is_read_on_its_own() -> None:
+    page = (
+        "| ISO 12354-1:2017 | ISO 13887:2017,"
+        " [catalogue](https://www.iso.org/standard/70242.html) |\n"
+    )
+    (problem,) = _named(page)
+    assert "opens ISO 12354-1:2017" in problem
 
 
 def test_the_old_iec_number_names_the_renumbered_publication() -> None:

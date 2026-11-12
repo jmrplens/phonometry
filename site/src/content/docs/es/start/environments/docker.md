@@ -10,18 +10,31 @@ wheel de soundfile. El único paquete del sistema que merece la pena añadir es
 ffmpeg, y solo para los vídeos. La misma etiqueta publica otras seis
 arquitecturas, y Docker descarga la del anfitrión: ARM de 32 bits
 (`linux/arm/v5`, `linux/arm/v7`), x86 de 32 bits (`linux/386`),
-`linux/ppc64le`, `linux/riscv64` y `linux/s390x`. PyPI no tiene para ninguna
-de ellas wheel de Python 3.13 de NumPy, SciPy, numba con el llvmlite que
-necesita, matplotlib ni Pillow, ni para algunas de ellas de contourpy,
-kiwisolver, cffi o lxml, así que pip los compila allí desde el código fuente,
-NumPy y SciPy incluso en una instalación normal. Eso pide lo que la imagen
-ligera deja fuera: un compilador de C y otro de C++ y los archivos de
-desarrollo de las bibliotecas que enlaza cada paquete, un compilador de
-Fortran con BLAS y LAPACK para SciPy, y LLVM 22 para llvmlite.
-python-soundfile instala allí su wheel de Python puro, que carga la
-libsndfile del sistema: `apt-get install libsndfile1`. Una imagen de
-Alpine, hecha sobre musl, necesita más, porque allí python-soundfile no tiene
-ningún wheel que lleve libsndfile y numba no tiene ninguno; [Primeros
+`linux/ppc64le`, `linux/riscv64` y `linux/s390x`. numba ya no da soporte a
+Linux de 32 bits, donde sus últimos wheels, de la 0.56.4, son para Python 3.10
+como mucho, así que ni `[perf]` ni `[full]`, que lo incluye, tienen soporte en
+las tres de 32 bits, donde
+`python -m pip install "phonometry[plot,report,audio]"` instala los otros tres
+extras. torch no publica wheel para ninguna de las seis ni código fuente que
+compilar, así que `[torch]` no se instala en ellas desde PyPI. PyPI no tiene
+para ninguna de las seis wheel de Python 3.13 de NumPy, SciPy, matplotlib ni
+Pillow, ni de numba con el llvmlite que necesita en `linux/ppc64le`,
+`linux/riscv64` y `linux/s390x`, que numba solo atiende en la medida de lo
+posible, ni para algunas de ellas de contourpy, kiwisolver, cffi o lxml, así
+que pip los compila allí desde el código fuente, NumPy y SciPy incluso en una
+instalación normal. Eso pide lo que la imagen ligera deja fuera: un compilador
+de C y otro de C++ y los archivos de desarrollo de las bibliotecas que enlaza
+cada paquete, un compilador de Fortran con BLAS y LAPACK para SciPy, y para
+llvmlite LLVM 22 con `cmake` y `make` en el `PATH`. python-soundfile instala
+allí su wheel de Python puro, que carga la libsndfile del sistema:
+`apt-get install libsndfile1`. En `linux/arm/v5`, cuya ABI de coma flotante
+por software no cubre ningún wheel manylinux, las compilaciones de NumPy, SciPy
+y matplotlib piden además ninja y patchelf, y pip también los compilaría desde
+el código fuente, lo que ejecuta `make` y autoreconf, salvo que
+`apt-get install ninja-build patchelf` haya puesto los de la imagen en el
+`PATH`. Una imagen de Alpine, hecha sobre musl,
+necesita más, porque allí python-soundfile no tiene ningún wheel que lleve
+libsndfile y numba no tiene ninguno; [Primeros
 pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada) dice qué
 pide allí cada extra.
 

@@ -49,32 +49,43 @@ versiones desde el código fuente, lo que requiere compiladores. En Windows en
 ARM los primeros wheels son NumPy 2.3.0, SciPy 1.16.2 y numba 0.68.0 (0.67.0
 en Python 3.14), así que se compilan todas las mínimas de las tres salvo la de
 NumPy en Python 3.14. En Linux con musl, como en Alpine, el primer wheel de
-SciPy en ARM para Python 3.12 y 3.13 es el 1.15.2, y numba, con el llvmlite
-que necesita, no publica ningún wheel para musl, así que `[perf]` se compila
-desde el código fuente en cualquier sistema con musl. En macOS en Intel numba
-no publica wheel desde la 0.63.0, ni llvmlite desde la 0.46.0, y numba ya no
-prueba esa plataforma, que deja al soporte de su comunidad, así que `[perf]`
+SciPy en ARM para Python 3.12 y 3.13 es el 1.15.2, matplotlib no publica ningún
+wheel para musl en ARM, así que `[plot]` lo compila allí, y numba, con el
+llvmlite que necesita, no publica ningún wheel para musl, así que `[perf]` se
+compila desde el código fuente en cualquier sistema con musl. En macOS en Intel
+numba no publica wheel desde la 0.63.0, ni llvmlite desde la 0.46.0, y numba ya
+no prueba esa plataforma, que deja al soporte de su comunidad, así que `[perf]`
 compila los dos en la mínima de Python 3.14; sus últimos wheels allí, numba
 0.62.1 y llvmlite 0.45.1, son para Python 3.12 y 3.13. En Windows de 32 bits
 NumPy tiene wheel en todas las mínimas, pero el último wheel de SciPy allí es
 el 1.9.1, para Python 3.9 como mucho, así que incluso una instalación normal
 compila SciPy allí en todos los Python, y la propia compilación de SciPy avisa
-allí de que se instale un Python de 64 bits. numba dejó de dar soporte a
-Windows de 32 bits en la 0.58.0, por debajo de la mínima de `[perf]`, y sus
-últimos wheels allí, numba 0.57.1 y llvmlite 0.41.1, son para Python 3.10 como
-mucho, así que `[perf]` no tiene soporte allí. Una instalación normal toma las
-versiones más recientes, que tienen wheels en las otras tres plataformas salvo
-numba en musl y en macOS en Intel, donde una instalación normal de `[perf]`
-compila numba y llvmlite en todos los Python. PyPI no tiene wheel de torch
-para ninguna de las cuatro (el último para macOS en Intel es el 2.2.2,
-anterior a todas las mínimas, y para Windows de 32 bits nunca ha habido
-ninguno) y torch no publica distribución de código fuente, así que `[torch]`
-no se instala en ellas desde PyPI. En Windows en ARM el índice de CPU de
-PyTorch tiene wheels de torch para Python 3.12, desde la 2.7.0, y 3.13, desde
-la 2.8.0, así que instalar antes torch desde él, como se explica más abajo,
-trae `[torch]` allí; no tiene ninguno para Python 3.14 allí, ni para Linux con
-musl ni para Windows de 32 bits, y para macOS en Intel ninguno posterior al
-2.2.2, como en PyPI.
+allí de que se instale un Python de 64 bits. matplotlib no publica wheel para
+Windows de 32 bits desde la 3.8.0, ni kiwisolver, que necesita, desde la 1.4.8,
+así que `[plot]` compila los dos allí. numba dejó de dar soporte a Windows de
+32 bits en la 0.58.0, por debajo de la mínima de `[perf]`, y sus últimos wheels
+allí, numba 0.57.1 y llvmlite 0.41.1, son para Python 3.10 como mucho, así que
+`[perf]` no tiene soporte allí, ni `[full]`, que lo incluye;
+`pip install "phonometry[plot,report,audio]"` instala allí los otros tres
+extras. Una instalación normal toma las versiones más recientes, que tienen
+wheels en las otras tres plataformas salvo numba en musl y en macOS en Intel,
+donde una instalación normal de `[perf]` compila numba y llvmlite en todos los
+Python, y matplotlib en ARM con musl. PyPI no tiene wheel de torch para ninguna
+de las cuatro (el último para macOS en Intel es el 2.2.2, anterior a todas las
+mínimas, y para Windows de 32 bits nunca ha habido ninguno) y torch no publica
+distribución de código fuente, así que `[torch]` no se instala en ellas desde
+PyPI. En Windows en ARM el índice de CPU de PyTorch tiene wheels de torch para
+Python 3.12, desde la 2.7.0, y 3.13, desde la 2.8.0, así que instalar antes
+torch desde él, como se explica más abajo, trae `[torch]` allí; no tiene
+ninguno para Python 3.14 allí, ni para Linux con musl ni para Windows de 32
+bits, y para macOS en Intel ninguno posterior al 2.2.2, como en PyPI.
+python-soundfile, para `[audio]`, no publica ningún wheel que lleve libsndfile
+para Linux con musl, ni en su mínima 0.12.0 para Linux en ARM, cuyo primero es
+el 0.13.0, ni para Windows en ARM, cuyo primero es el 0.14.0, así que pip
+instala allí su wheel de Python puro, que carga la libsndfile del sistema: en
+Alpine, `apk add libsndfile-dev`, porque el Python de la imagen oficial de
+Docker solo encuentra esa biblioteca con el nombre `libsndfile.so`, que añade
+ese paquete.
 
 ### Extras opcionales
 
@@ -100,7 +111,9 @@ AIFF, Ogg/Opus, MP3 y WAV comprimido) y el cálculo de las simulaciones FDTD con
 torch (que se calculan con NumPy de todos modos, y en una GPU de NVIDIA en
 cuanto se instala CuPy). Un apunte de licencias sobre `[audio]`: instala
 python-soundfile, cuyo wheel empaqueta **libsndfile bajo LGPL-2.1** (enlazada
-dinámicamente, el mismo patrón que librosa y torchaudio). La instalación base
+dinámicamente, el mismo patrón que librosa y torchaudio), y que carga la
+libsndfile del sistema donde ningún wheel la lleva, como se dice más arriba. La
+instalación base
 se mantiene libre de ella a propósito, y por eso los formatos metrológicos no
 necesitan extra.
 

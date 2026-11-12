@@ -7445,10 +7445,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   last SciPy wheel is 1.9.1, for Python 3.9 at most, so even a plain install
   builds SciPy there on every Python, and numba stopped supporting 32-bit
   Windows at 0.58.0, below the floor of `[perf]`, which is not supported
-  there. PyPI has no torch wheel for any of the four platforms and no torch
-  source distribution, so `[torch]` does not install there from PyPI; on
-  Windows on ARM PyTorch's CPU index has torch for Python 3.12 and 3.13. The
-  install pages say so.
+  there, nor `[full]`, which holds it. matplotlib has published no wheel for
+  32-bit Windows since 3.8.0, nor any for Linux on ARM with musl, so `[plot]`
+  builds it from source on both, on 32-bit Windows with kiwisolver, which has
+  published none there since 1.4.8. PyPI has no torch wheel for any of the
+  four platforms and no torch source distribution, so `[torch]` does not
+  install there from PyPI; on Windows on ARM PyTorch's CPU index has torch
+  for Python 3.12 and 3.13. python-soundfile publishes no wheel that carries
+  libsndfile for Linux with musl, nor at its floor 0.12.0 for Linux on ARM,
+  whose first is 0.13.0, or for Windows on ARM, whose first is 0.14.0, so pip
+  installs its pure-Python wheel there, which loads the system's libsndfile
+  (`apk add libsndfile-dev` on Alpine). The install pages say so.
   The `[report]` floors are the oldest releases that render a fiche in a
   fresh interpreter under `-W error`: reportlab 4.0.4 to 4.2.5 warn when
   they are imported, through importlib's `load_module` and

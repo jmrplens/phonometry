@@ -35,16 +35,16 @@ print(phonometry.__version__)   # la versión que has instalado
 |---|---|---|
 | `[plot]` | matplotlib | `.plot()` y las gráficas de respuesta de los filtros dibujen |
 | `[report]` | reportlab, svglib | `.report()` escriba una ficha PDF; su panel de gráfica necesita también `[plot]` |
-| `[audio]` | python-soundfile, cuyo wheel lleva libsndfile | `phonometry.io` lea FLAC, AIFF, Ogg/Opus, MP3 y WAV comprimido, y escriba FLAC |
+| `[audio]` | python-soundfile, cuyo wheel lleva libsndfile salvo en las plataformas que se nombran más abajo | `phonometry.io` lea FLAC, AIFF, Ogg/Opus, MP3 y WAV comprimido, y escriba FLAC |
 | `[perf]` | numba | la ponderación temporal `impulse` se ejecute compilada |
 | `[full]` | los cuatro anteriores | estén todas las funciones salvo el cálculo con torch |
 | `[torch]` | torch, array-api-compat | las simulaciones FDTD calculen con PyTorch |
 
-Ningún extra necesita un paquete del sistema: en una imagen `python:3.13-slim`
-sin nada más, todos se instalan y funcionan desde sus wheels, también
-`[audio]`. Sin numba, la ponderación temporal `impulse` se ejecuta en Python
-puro y no dice nada. Una función cuyo extra falta dice cuál instalar, con la
-orden de pip y la de conda:
+En una imagen `python:3.13-slim` sin nada más, ningún extra necesita un
+paquete del sistema: todos se instalan y funcionan allí desde sus wheels,
+también `[audio]`. Sin numba, la ponderación temporal `impulse` se ejecuta en
+Python puro y no dice nada. Una función cuyo extra falta dice cuál instalar,
+con la orden de pip y la de conda:
 
 ```text
 ImportError: Plotting requires matplotlib. Install it with: pip install "phonometry[plot]" (conda: conda install -c conda-forge matplotlib-base)
@@ -56,10 +56,17 @@ pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada). En
 Windows en ARM, en Linux con musl, en macOS en Intel y en Windows de 32 bits,
 algunas de esas versiones no tienen wheel, y pip las compila allí desde el
 código fuente, como hace incluso una instalación normal con SciPy en Windows
-de 32 bits; esa sección dice cuáles. numba ya no da soporte a Windows de 32
-bits, y torch no publica código fuente que compilar, así que no se instala en
-ninguna de las cuatro desde PyPI, y en Windows en ARM se instala desde el
-índice de CPU de PyTorch, como hace la sección siguiente.
+de 32 bits, y como hace `[plot]` con matplotlib en Linux en ARM con musl y en
+Windows de 32 bits; esa sección dice cuáles. numba ya no da soporte a Windows
+de 32 bits, así que ni `[perf]` ni `[full]`, que lo incluye, tienen soporte
+allí, donde `python -m pip install "phonometry[plot,report,audio]"` instala los
+otros tres extras. torch no publica código fuente que compilar, así que no se
+instala en ninguna de las cuatro desde PyPI, y en Windows en ARM se instala
+desde el índice de CPU de PyTorch, como hace la sección siguiente.
+python-soundfile no publica ningún wheel que lleve libsndfile para Linux con
+musl, ni en su mínima para Linux en ARM ni para Windows en ARM, así que
+`[audio]` carga allí la libsndfile del sistema: en Alpine,
+`apk add libsndfile-dev`.
 
 ## torch sin CUDA
 

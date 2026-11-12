@@ -3,10 +3,14 @@ title: "Docker and servers"
 description: "Run phonometry in a container or on a server: a slim image with a virtual environment, any user id, a read-only root and ffmpeg for videos."
 ---
 
-phonometry needs nothing from the operating system beyond Python: every
-extra installs from wheels, libsndfile inside the soundfile wheel included,
-so a `python:*-slim` image is enough. The one system package worth adding is
-ffmpeg, and only for videos.
+phonometry needs nothing from the operating system beyond Python on a
+`python:*-slim` image: every extra installs from wheels there, libsndfile
+inside the soundfile wheel included. The one system package worth adding is
+ffmpeg, and only for videos. An Alpine image, built on musl, needs more, since
+python-soundfile has no wheel there that carries libsndfile and numba none at
+all; [Getting
+Started](/phonometry/start/getting-started/#from-pypi-recommended) says
+what each extra takes there.
 
 ## An image
 

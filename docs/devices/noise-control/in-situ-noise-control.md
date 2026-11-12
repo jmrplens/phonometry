@@ -56,7 +56,10 @@ equivalent diameters upstream and the receiver-side one at the distance Equation
 (16) gives, or agree on one when that expression falls to zero. Measure the mean
 level on each surface, take the extraneous sound off by the energy route where
 the sources can be switched, record the temperature on both sides, and measure
-the flow: the pressure loss and a velocity profile uniform within 10 %. Where
+the flow: the pressure loss and the flow velocities, whose actual distribution
+goes in the report where the velocities close to the entrance of the silencer
+deviate from the mean flow velocity by more than 10 % (9.2), a line for the
+report and not for the measurement. Where
 the two temperatures differ, the field correction of Equations (20) and (22) is
 not zero, and both equations print the ratio of the absolute temperatures the
 wrong way up: the correction turns a squared pressure into a sound power, so the

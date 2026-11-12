@@ -9373,7 +9373,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is: the correction at a 3 dB margin, which the subtraction writes unrounded as
   3,0206 dB. The cap is judged on the margin of the two energy means now, so the
   two routes the clause offers agree at the boundary they share, and floating
-  point no longer decides which side of it a printed 3,0 dB pair lands on.
+  point no longer decides which side of it a printed 3,0 dB pair lands on. A
+  margin more than 10⁻⁹ dB under 3 dB is capped and emits a
+  `SilencerInSituWarning`, which prints the margin with as many decimals as it
+  takes to show it under 3 dB, where two decimals wrote a margin a few
+  thousandths short of it as 3.00 dB.
 
   ISO 11821 7.4 c) reports the attenuation of a screen to the nearest whole
   decibel, and `ScreenInSituResult` left that to the caller. Its `rounded`

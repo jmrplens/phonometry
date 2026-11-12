@@ -64,7 +64,8 @@ the energy route of Equations (17) and (18) instead, and cap it: **the maximum
 correction is 3 dB**. A measurement that needs more than that does not yield
 the quantity at all, and the clause says what may be stated instead, which is
 an inequality. [`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) says whether the
-cap was reached so that a capped value cannot be reported as a determination.
+correction went past the cap, so that a capped value cannot be reported as a
+determination.
 
 Clause 9.1.5 is the one prohibition worth reading twice: converting
 one-third-octave data to octave data is permissible **for measured sound
@@ -123,10 +124,11 @@ That is the same condition as a correction of at most
 $-10 \lg(1 - 10^{-0,3})$ dB, and it keeps the two routes of the
 standard in agreement at their shared boundary.
 
-The result's `capped` says whether the cap was reached, so that a capped
-number cannot be written down as a determination, and a capped
-measurement also emits a [`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning). The corrected
-level itself is given either way.
+The result's `capped` says whether the correction went past the cap, a
+margin more than $10^{-9}$ dB under 3 dB, so that a capped number
+cannot be written down as a determination, and a capped measurement also
+emits a [`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning); a margin of exactly 3 dB emits
+nothing. The corrected level itself is given either way.
 
 **Parameters**
 
@@ -153,9 +155,9 @@ ExtraneousCorrectionResult(corrected_level: float, margin_db: float)
 The mean level with the extraneous sound taken off, and whether it is capped.
 
 9.1.1 and 9.1.2 cap the correction at 3 dB, and Table 1 prints where that
-starts: a margin of the two energy means under 3 dB. Whether the cap was
-reached is read from the margin, so it is not a field: a capped level
-cannot be written down as a determination.
+starts: a margin of the two energy means under 3 dB. Whether the
+correction went past the cap is read from the margin, so it is not a
+field: a capped level cannot be written down as a determination.
 
 **Attributes**
 
@@ -168,13 +170,18 @@ cannot be written down as a determination.
 
 *property*
 
-Whether the correction reached the 3 dB cap: a margin under 3 dB.
+Whether the correction went past the 3 dB cap: a margin under 3 dB.
 
 The cap is judged on the margin of the two energy means and not on the
 correction itself: the printed 3 dB is what Table 1 takes off at its
-3 dB row, which the subtraction writes unrounded as 3,0206 dB. A
-margin that floating point leaves a few parts in $10^{14}$ under
-3 dB counts as 3 dB, on the side Table 1 accepts.
+3 dB row, which the subtraction writes unrounded as 3,0206 dB, so a
+margin of exactly 3 dB is not capped. A margin is capped when it is
+more than $10^{-9}$ dB under 3 dB: one closer than that counts
+as 3 dB, on the side Table 1 accepts, since levels written 3,0 dB
+apart come out of the two energy means up to
+$1{,}4 \cdot 10^{-14}$ dB either side of it. That is when
+[`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) emits a
+[`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning).
 
 ## flow_velocity_m_s
 
@@ -987,6 +994,18 @@ The symbol clause 11 reports this as, `"D_ts"` or `"D_is"`.
 ## SilencerInSituWarning
 
 The measurement is outside a condition ISO 11820 states.
+
+Emitted for three conditions:
+
+- an extraneous-sound correction past the 3 dB cap of 9.1.1 and 9.1.2,
+  where clause 4 leaves only an inequality to state: a margin of the two
+  energy means more than $10^{-9}$ dB under 3 dB
+  ([`ExtraneousCorrectionResult.capped`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneouscorrectionresultcapped)). A margin of exactly 3 dB
+  takes off 3,02 dB, the printed 3 dB unrounded, and emits nothing;
+- a field correction over the 3 dB in absolute value NOTE 4 of 3.3
+  expects;
+- a downstream distance Equation (16) cannot give, which 8.3.1 leaves to
+  agreement between the parties.
 
 ## static_pressure_difference_pa
 

@@ -2708,7 +2708,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   imports without its libsndfile, as soundfile 0.14.0 from PyPI does in
   Pyodide, raised the loader's `OSError: sndfile library not found`; it now
   raises the same `ImportError` as a missing extra, with the loader's
-  reason in it. Docstrings name the extra (the `[plot]` extra) instead of a
+  reason in it, and so does the pure wheel of soundfile 0.12.0, the floor
+  of `[audio]`, which pip installs where no wheel of that release carries
+  libsndfile and which raised `AttributeError: module 'sys' has no
+  attribute 'plaform'` on Linux when the system had none. Docstrings name the extra (the `[plot]` extra) instead of a
   pip command, and `scripts/check_quoted_extras.py` refuses an install
   command spelled anywhere in the package but the module that builds the
   hints (style rule A64).

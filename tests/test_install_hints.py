@@ -212,33 +212,44 @@ def test_writing_flac_without_soundfile_says_writing(
     )
 
 
-def _soundfile_without_its_library(monkeypatch: pytest.MonkeyPatch) -> None:
+def _soundfile_without_its_library(
+    monkeypatch: pytest.MonkeyPatch, error: Exception
+) -> None:
     """Make ``import soundfile`` fail as it does where libsndfile is missing.
 
-    soundfile 0.14.0 from PyPI in Pyodide, or a wheel whose platform carries no
-    packaged libsndfile, raises the OSError of its loader while it imports.
+    soundfile 0.14.0 from PyPI in Pyodide, or the pure wheel pip installs where
+    no wheel carries libsndfile, raises the OSError of its loader while it
+    imports when the system has none; the pure wheel of 0.12.0, the floor of
+    the extra, raises an AttributeError there on Linux instead, since its
+    loader reads ``sys.plaform`` once the library is not found.
     """
     real_import = builtins.__import__
 
     def broken(name: str, *args: object, **kwargs: object) -> ModuleType:
         if name.split(".")[0] == "soundfile":
-            msg = "sndfile library not found using ctypes.util.find_library"
-            raise OSError(msg)
+            raise error
         return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
     monkeypatch.delitem(sys.modules, "soundfile", raising=False)
     monkeypatch.setattr(builtins, "__import__", broken)
 
 
+@pytest.mark.parametrize(
+    "error",
+    [
+        OSError("sndfile library not found using ctypes.util.find_library"),
+        AttributeError("module 'sys' has no attribute 'plaform'"),
+    ],
+    ids=["loader", "loader of 0.12.0"],
+)
 def test_a_soundfile_without_libsndfile_reads_as_the_missing_extra(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, error: Exception
 ) -> None:
-    _soundfile_without_its_library(monkeypatch)
+    _soundfile_without_its_library(monkeypatch, error)
     message = _message(lambda: io.write(tmp_path / "x.flac", 0.5 * _tone(), FS))
     assert message == (
         "Writing FLAC requires python-soundfile with its libsndfile library, "
-        "which did not load (sndfile library not found using "
-        f"ctypes.util.find_library). Install it with: {AUDIO}"
+        f"which did not load ({error}). Install it with: {AUDIO}"
     )
 
 

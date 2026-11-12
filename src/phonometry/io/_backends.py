@@ -150,9 +150,13 @@ def _import_soundfile(
     """Import python-soundfile, or say how to install the extra that brings it.
 
     A soundfile that imports without the libsndfile it loads is no soundfile
-    at all here: soundfile 0.14.0 from PyPI in Pyodide, or a wheel built for a
-    platform it ships no libsndfile for, raises its loader's ``OSError``
-    while it imports, and the caller is told what a missing extra tells.
+    at all here: soundfile 0.14.0 from PyPI in Pyodide, or the pure wheel pip
+    installs where no wheel carries libsndfile, as on Linux with musl, raises
+    its loader's ``OSError`` while it imports when the system has no
+    libsndfile, and the caller is told what a missing extra tells. The pure
+    wheel of 0.12.0, the floor of the extra, raises an ``AttributeError``
+    there on Linux instead, since its loader then reads ``sys.plaform``, and
+    is told the same.
 
     :param format_name: The container or codec the file holds, as a message
         names it.
@@ -166,7 +170,7 @@ def _import_soundfile(
     except ImportError as exc:
         msg = f"{action} {format_name} requires python-soundfile. {hint}"
         raise ImportError(msg) from exc
-    except OSError as exc:
+    except (OSError, AttributeError) as exc:
         msg = (
             f"{action} {format_name} requires python-soundfile with its "
             f"libsndfile library, which did not load ({exc}). {hint}"

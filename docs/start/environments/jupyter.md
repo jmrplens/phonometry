@@ -18,6 +18,14 @@ python -m pip install jupyterlab "phonometry[full]"
 jupyter lab
 ```
 
+On Windows the environment is activated with `.venv\Scripts\activate.bat`
+in cmd or `.venv\Scripts\Activate.ps1` in PowerShell in place of
+`source .venv/bin/activate`.
+PowerShell on a Windows client refuses scripts under its default
+execution policy, so `Activate.ps1` runs there once
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` has allowed local ones;
+cmd needs no such step.
+
 That one environment holds JupyterLab, the IPython kernel it starts and
 phonometry with every extra but `[torch]`.
 

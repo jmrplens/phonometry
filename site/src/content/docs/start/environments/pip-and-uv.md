@@ -17,6 +17,14 @@ python -m pip install --upgrade pip
 python -m pip install "phonometry[full]"
 ```
 
+On Windows the environment is activated with `.venv\Scripts\activate.bat`
+in cmd or `.venv\Scripts\Activate.ps1` in PowerShell in place of
+`source .venv/bin/activate`, here and in the block of a clone below.
+PowerShell on a Windows client refuses scripts under its default
+execution policy, so `Activate.ps1` runs there once
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` has allowed local ones;
+cmd needs no such step.
+
 `python -m pip install phonometry` alone brings NumPy and SciPy and nothing
 else; that is enough for every metric of the library. `python -m pip check`
 reports no broken requirement afterwards, with or without extras. Check what

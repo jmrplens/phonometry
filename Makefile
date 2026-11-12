@@ -750,25 +750,17 @@ posters: assets
 brand:
 	$(PYTHON) scripts/generate_brand.py
 
-# Write docs/reference/bibliography.md, the GitHub copy of the bibliography,
-# from the references every page of the site declares, as the site build writes
-# the page (site/scripts/mirror-bibliography.mjs). It needs the site's
-# dependencies (`pnpm install` in site/). Run it after changing a page's
-# references; the docs workflow fails while the copy is stale.
-bibliography-mirror:
-	cd site && $(PNPM) run mirror:bibliography
-
-# llms.txt, from the site's own pages: agent-md.mjs dumps the English routes
-# and the Markdown copy of every page the llms files carry, without the two
-# dated header lines llms.txt does not state, and generate_llms.py writes the
-# index from that dump. The shards and llms-full.txt carry those dates, so the
-# site build writes them (site/package.json `prebuild`) and they are not
-# committed. The two mirror scripts still write the docs/ overviews and
-# glossary from the site.
+# llms.txt and the GitHub edition under docs/, from the site's own pages, in
+# one run of agent-md.mjs: it dumps the English routes and the Markdown copy of
+# every page the llms files carry, without the two dated header lines llms.txt
+# does not state, and writes every page of the edition (docs/<route>.md) from
+# its source; generate_llms.py then writes the index from the dump. The shards
+# and llms-full.txt carry those dates, so the site build writes them
+# (site/package.json `prebuild`) and they are not committed. The run fails
+# before it writes when docs/README.md, which is kept by hand, does not link
+# every page of the edition.
 llms: site-deps
-	$(PYTHON) scripts/mirror_overviews.py
-	$(PYTHON) scripts/mirror_glossary.py
-	cd site && node scripts/agent-md.mjs --dump ../build/agent-md --undated
+	cd site && node scripts/agent-md.mjs --dump ../build/agent-md --undated --docs ../docs
 	$(PYTHON) scripts/generate_llms.py --pages build/agent-md
 
 # Regenerate README_PYPI.md (the PyPI long description) from README.md:
@@ -1016,7 +1008,7 @@ check: lint security test
 .PHONY: install site-deps lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
-	bibliography-mirror llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests type-completeness coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names catalogue-links fence-readers span-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \

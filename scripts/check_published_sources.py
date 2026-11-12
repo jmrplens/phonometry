@@ -548,15 +548,24 @@ NOT_TRANSCRIBED: dict[tuple[str, str], str] = {
     "named for Eq. 6.29, which consumes them",
 }
 
+#: How every entry of the bibliography opens: a list item whose author and
+#: year are in bold, as the site's bibliography prints them and as its GitHub
+#: copy is written from the page (an entry without the bold reads the same).
+#: The three readers of an entry below build on it, so that its shape is
+#: stated once.
+_ENTRY_OPENING = r"^- (?:\*\*)?"
+
 #: One bibliography entry: the lead surname, or the organisation, it opens
-#: with. A person is written ``- Cremer, L., ...`` and a body that authors its
-#: own handbook is written ``- ASHRAE (2019). ...``, which is the APA shape for
-#: a corporate author and was invisible to the first version of this pattern:
-#: it required a comma or a full stop straight after the lead, so every
-#: organisation in the bibliography was missing from the ratchet and a table
-#: transcribed from one of their handbooks could sit in ``src`` uncited while
-#: the gate reported green. Found by ASHRAE Chapter 49.
-_BIBLIOGRAPHY_ENTRY = re.compile(r"^- (?P<lead>[^\s,.]+)(?:[,.]| \()", re.MULTILINE)
+#: with. A person is written ``- **Cremer, L., ...`` and a body that authors
+#: its own handbook is written ``- **ASHRAE (2019). ...``, which is the APA
+#: shape for a corporate author and was invisible to the first version of this
+#: pattern: it required a comma or a full stop straight after the lead, so
+#: every organisation in the bibliography was missing from the ratchet and a
+#: table transcribed from one of their handbooks could sit in ``src`` uncited
+#: while the gate reported green. Found by ASHRAE Chapter 49.
+_BIBLIOGRAPHY_ENTRY = re.compile(
+    _ENTRY_OPENING + r"(?P<lead>[^\s,.*]+)(?:[,.]| \()", re.MULTILINE
+)
 
 #: A body the banners cite by the abbreviation its handbook goes by, with the
 #: name the bibliography lists it under. APA spells a group author out in full
@@ -577,7 +586,9 @@ ABBREVIATED_BODIES: Mapping[str, str] = MappingProxyType(
 def _lists_body(text: str, name: str, year: str = r"[^)]+") -> bool:
     """Whether *text* holds an entry that opens with the body *name* and *year*."""
     return (
-        re.search(rf"^- {re.escape(name)}\. \({year}\)\.", text, re.MULTILINE)
+        re.search(
+            rf"{_ENTRY_OPENING}{re.escape(name)}\. \({year}\)\.", text, re.MULTILINE
+        )
         is not None
     )
 
@@ -773,8 +784,8 @@ def _bibliography_problems(cite: str, parsed: references.Reference) -> list[str]
         if not lead:
             continue
         # The same two shapes ``_BIBLIOGRAPHY_ENTRY`` accepts: a person,
-        # written ``- Cremer, L., ...``, and an organisation that authors
-        # its own handbook, written ``- ASHRAE (2019). ...``. A corporate
+        # written ``- **Cremer, L., ...``, and an organisation that authors
+        # its own handbook, written ``- **ASHRAE (2019). ...``. A corporate
         # designation usually carries its year, so the lead ends up being
         # "ASHRAE (2019)" and the full stop follows it; one written without
         # a year would reach here as "ASHRAE" and be rejected against an
@@ -787,7 +798,9 @@ def _bibliography_problems(cite: str, parsed: references.Reference) -> list[str]
             body = ABBREVIATED_BODIES.get(abbreviated["body"])
             if body is not None and _lists_body(text, body, abbreviated["year"]):
                 continue
-        if not re.search(rf"^- {re.escape(lead)}(?:[,.]| \()", text, re.MULTILINE):
+        if not re.search(
+            rf"{_ENTRY_OPENING}{re.escape(lead)}(?:[,.]| \()", text, re.MULTILINE
+        ):
             problems.append(
                 f"{cite!r} names {designation!r}, which has no entry in "
                 "docs/reference/bibliography.md"

@@ -55,7 +55,7 @@ import { readCommittedText } from '../line-ends.mjs';
 import { codeLines } from '../markdown-fences.mjs';
 import { MARKER } from '../bibliography-entries.mjs';
 import { absolutizeRootLinks, pointDroppedAnchors } from './links.mjs';
-import { escapeMarks, line, plainText as plainMarkdown, table } from './markdown-table.mjs';
+import { escapeMarks, htmlAttribute, line, plainText as plainMarkdown, table } from './markdown-table.mjs';
 import { frontmatterOf, isMdx, parse } from './processor.mjs';
 import { rewrittenSource } from './rewrites.mjs';
 
@@ -157,6 +157,13 @@ export const ASIDES = Object.freeze({
   caution: { en: 'Caution', es: 'Precaución' },
   danger: { en: 'Danger', es: 'Peligro' },
 });
+
+/**
+ * The alert GitHub draws for each aside, in the GitHub edition: the same
+ * four levels, Starlight's caution being GitHub's warning and its danger
+ * GitHub's caution.
+ */
+const GITHUB_ALERTS = Object.freeze({ note: 'NOTE', tip: 'TIP', caution: 'WARNING', danger: 'CAUTION' });
 
 /**
  * Raw HTML tags that are blocks: written inline (inside a paragraph, as MDX
@@ -587,6 +594,9 @@ function createRenderer(source, options, mode) {
 
   /**
    * A Starlight aside: the localized label, its title if any, then the body.
+   * In the GitHub edition, the alert GitHub draws for it (`> [!NOTE]`), every
+   * line of the title and the body quoted under it, a fenced block included,
+   * which GitHub reads inside the quote as it should.
    *
    * @param {MdNode} node
    * @returns {string}
@@ -601,6 +611,11 @@ function createRenderer(source, options, mode) {
     const titled = children[0]?.data?.directiveLabel === true;
     const title = titled ? renderChildren(children[0]).trim() : '';
     const body = joinFlow(titled ? children.slice(1) : children);
+    if (flavour === 'github') {
+      const inner = [title && `**${title}**`, body].filter(Boolean).join('\n\n');
+      const lines = [`[!${GITHUB_ALERTS[/** @type {keyof typeof GITHUB_ALERTS} */ (node.name)]}]`, ...inner.split('\n')];
+      return lines.map((one) => (one ? `> ${one}` : '>')).join('\n');
+    }
     const label = title ? `**${labels[lang]}: ${title}**` : `**${labels[lang]}**`;
     return body ? `${label}\n\n${body}` : label;
   }
@@ -748,7 +763,11 @@ function createRenderer(source, options, mode) {
 
   /**
    * `<details>`: the summary in bold, then the body, which a reader without
-   * a viewport reads whole.
+   * a viewport reads whole. The GitHub edition keeps the collapsible, which
+   * GitHub draws closed as the site does, with the body written as Markdown
+   * inside it (a blank line after `<summary>` lets GitHub read it as such):
+   * the code of a figure stays one click away instead of between the figure
+   * and the next paragraph.
    *
    * @param {MdNode} node
    * @returns {string}
@@ -778,6 +797,9 @@ function createRenderer(source, options, mode) {
       parts.push(renderNode(child));
     }
     const body = parts.filter((part) => part.trim() !== '').join('\n\n');
+    if (flavour === 'github' && summary) {
+      return `<details>\n<summary>${summary}</summary>\n\n${body}\n\n</details>`;
+    }
     if (!summary) return body;
     return body ? `**${summary}**\n\n${body}` : `**${summary}**`;
   }
@@ -813,19 +835,25 @@ function createRenderer(source, options, mode) {
     s: (node) => `~~${renderChildren(node)}~~`,
     small: (node) => renderChildren(node),
     // An empty `<span id>` is an anchor kept for old links (F13): it has no
-    // text, and a Markdown copy has no anchors to keep. Its id is recorded, so
-    // a link to it can be sent to the page, where the anchor still is.
+    // text, and a Markdown copy has no anchors to keep. The GitHub edition
+    // keeps it as the `<a id>` GitHub honours, so a link to it from another
+    // page of the edition lands where it lands on the site; the agent copy
+    // records its id, so a link to it can be sent to the page, where the
+    // anchor still is.
     span(node) {
       const id = ctx.attr(node, 'id');
+      const inner = renderChildren(node);
+      if (flavour === 'github' && id && !inner.trim()) return `<a id="${htmlAttribute(id)}"></a>`;
       if (id && (node.children ?? []).length === 0) droppedAnchors?.add(id);
-      return renderChildren(node);
+      return inner;
     },
     strong: (node) => `**${renderChildren(node)}**`,
-    sub: (node) => `_${renderChildren(node)}`,
+    // GitHub draws both, so the GitHub edition keeps them as the page has them.
+    sub: (node) => (flavour === 'github' ? `<sub>${renderChildren(node)}</sub>` : `_${renderChildren(node)}`),
     summary: (node) => `**${line(renderChildren(node))}**`,
     // Markdown has no superscript; `^` is the plain-text notation for one, and
     // it keeps the exponent attached to its base.
-    sup: (node) => `^${renderChildren(node)}`,
+    sup: (node) => (flavour === 'github' ? `<sup>${renderChildren(node)}</sup>` : `^${renderChildren(node)}`),
     table: renderTable,
     tbody: (node) => renderChildren(node),
     td: (node) => renderChildren(node),

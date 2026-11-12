@@ -56,7 +56,7 @@ passed to a component whose writer does not list it in props
 <a id="f3"></a>
 ### F3. Link every new guide from `docs/README.md`
 
-**Why.** `docs/README.md` is the hand-kept front door of the mirror; a guide not linked from it fails the mirror check and the llms generator.
+**Why.** `docs/README.md` is the hand-kept front door of the GitHub edition under docs/; `make llms`, which writes the edition, fails while a page of it is not linked from the README or the README links a file that is not there. A new guide's route goes into `site/src/lib/agent-md/test/edition-routes.json` as well: `pnpm run test:agent-md` holds the pages of the edition to that list in both directions, so a page that joins or leaves the edition shows in the diff of its pull request.
 
 **Do**
 
@@ -70,7 +70,7 @@ passed to a component whose writer does not list it in props
 docs/buildings/rooms/workroom-sound-decay.md added, docs/README.md unchanged
 ```
 
-**Enforced by:** `scripts/mirror_overviews.py`, `scripts/generate_llms.py`
+**Enforced by:** `site/scripts/agent-md.mjs`, `site/src/lib/agent-md/edition.mjs`, `CI: llms artifacts up to date`
 
 <a id="f4"></a>
 ### F4. Register a new guide in `topics.mjs` and the guides index, counted in figures and words
@@ -98,24 +98,24 @@ The new .mdx page added alone, the sidebar assumed to find it.
 <a id="f5"></a>
 ### F5. Never edit a generated file by hand; change its source and regenerate it
 
-**Why.** The section indexes of docs/ are mirrors of the site overviews written by `scripts/mirror_overviews.py`, and `docs/conformance.json` and `docs/CONFORMANCE.md` are written by `make conformance`: editing one by hand left the mirror stale and failed two CI jobs at once, and a hand edit of the artifact passes a byte diff on one machine and breaks the site build.
+**Why.** The pages of docs/ that stand for a page of the site are its GitHub edition, written from the page's source by `make llms` (`site/scripts/agent-md.mjs --docs`), and `docs/conformance.json` and `docs/CONFORMANCE.md` are written by `make conformance`: a hand edit of either is undone by the next run and fails the job that compares them, and a hand edit of the artifact passes a byte diff on one machine and breaks the site build.
 
 **Do**
 
 ```text
-edit site/src/content/docs/<area>/index.mdx, then make llms
+edit site/src/content/docs/<route>.mdx and es/<route>.mdx, then make llms
 change a conformance script, then make conformance
 ```
 
 **Don't**
 
 ```text
-edit docs/<area>/index.md or docs/conformance.json directly
+edit docs/<route>.md or docs/conformance.json directly
 ```
 
-**Enforced by:** `scripts/mirror_overviews.py`, `scripts/check_conformance_artifact.py`, `make conformance`, `CI: Conformance report up to date`, `CI: llms artifacts up to date`
+**Enforced by:** `site/scripts/agent-md.mjs`, `scripts/check_conformance_artifact.py`, `make conformance`, `CI: Conformance report up to date`, `CI: llms artifacts up to date`
 
-**Exceptions.** Guide pages in docs/ are hand-written twins; only the section indexes and `docs/reference/glossary.md` (`scripts/mirror_glossary.py`) are mirrored. `docs/README.md`, the indexes under `docs/reference/` and `docs/contributing/` are written by hand.
+**Exceptions.** A file of the edition opens with a comment that names the page it is written from. `docs/README.md`, the curated API table `docs/reference/api/index.md`, the errata registers `docs/ERRATA.md` and `docs/ERRATA.es.md` and `docs/contributing/` are written by hand.
 
 <a id="f6"></a>
 ### F6. Never type a conformance count in prose; `make conformance` writes it
@@ -1802,9 +1802,9 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
   Cited by [Calibrated spectral analysis](/phonometry/signals/spectra/spectral-analysis/).
 ```
 
-**Enforced by:** `site/src/lib/remark-bibliography.mjs`, `CI: Site builds and validates`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`, `site/scripts/mirror-bibliography.mjs`, `CI: Check the bibliography's GitHub copy is the one its pages write`, `site/scripts/bibliography-entries.test.mjs`, `site/scripts/check-structured-data.test.mjs`, `site/scripts/mirror-bibliography.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+**Enforced by:** `site/src/lib/remark-bibliography.mjs`, `CI: Site builds and validates`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`, `site/scripts/agent-md.mjs`, `CI: llms artifacts up to date`, `site/scripts/bibliography-entries.test.mjs`, `site/scripts/check-structured-data.test.mjs`, `CI: Test the build checks on small builds made to fail them`
 
-**Exceptions.** A work with nothing written of it still gets its entry, with no note, in the section most of the pages that cite it belong to (`BIBLIOGRAPHY_PREFIXES`). The Spanish page reads the record of the English work it is, whatever its own fragment, and a note carries both languages. The page keeps its headings and the prose under them, each section closed by the comment that marks where its list goes, `<!-- bibliography: signal-analysis -->`. The build stops on a record of a work no page cites, a section the page does not mark or marks twice, a citing page with no title, and a list the page writes itself, the Don't above; check:structured-data then holds the built list to the structured data and to the pages that cite each work, each page once, and fails an item of a list no reference wrote. The GitHub copy, `docs/reference/bibliography.md`, is written from the same pages by the same functions (`make bibliography-mirror`, before `make llms`), and the docs workflow fails while it is stale, so a citation that changes the list reaches the site page, its Spanish twin and the copy together ([F1](#f1)) with nothing written in any of them by hand.
+**Exceptions.** A work with nothing written of it still gets its entry, with no note, in the section most of the pages that cite it belong to (`BIBLIOGRAPHY_PREFIXES`). The Spanish page reads the record of the English work it is, whatever its own fragment, and a note carries both languages. The page keeps its headings and the prose under them, each section closed by the comment that marks where its list goes, `<!-- bibliography: signal-analysis -->`. The build stops on a record of a work no page cites, a section the page does not mark or marks twice, a citing page with no title, and a list the page writes itself, the Don't above; check:structured-data then holds the built list to the structured data and to the pages that cite each work, each page once, and fails an item of a list no reference wrote. The GitHub copy, `docs/reference/bibliography.md`, is the page's file in the GitHub edition, written from the same source and the same pages by `make llms`, and CI fails while it is stale, so a citation that changes the list reaches the site page, its Spanish twin and the copy together ([F1](#f1)) with nothing written in any of them by hand.
 
 ## Markdown copies of the pages
 

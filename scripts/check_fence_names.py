@@ -109,7 +109,7 @@ PLACEHOLDERS: dict[str, frozenset[str]] = {
         }
     ),
     "docs/devices/electroacoustics/electroacoustics": frozenset(
-        {"fs", "idle_output", "output", "signal", "x", "y"}
+        {"fs", "idle", "idle_output", "output", "signal", "x", "y"}
     ),
     "docs/signals/filters/block-processing": frozenset(
         {"audio_blocks", "audio_stream"}

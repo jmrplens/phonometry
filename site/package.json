@@ -6,7 +6,6 @@
   "private": true,
   "scripts": {
     "build": "astro build",
-    "check:bibliography-mirror": "node scripts/mirror-bibliography.mjs --check",
     "check:cited-standards": "node scripts/check-cited-standards.mjs",
     "check:crawl": "node scripts/check-crawl.mjs",
     "check:descriptions": "node scripts/check-descriptions.mjs",
@@ -31,7 +30,6 @@
     "html-validate": "html-validate 'dist/**/*.html'",
     "icons:sheet": "node scripts/icon-sheet.mjs",
     "lighthouse": "node scripts/lighthouse-audit.mjs",
-    "mirror:bibliography": "node scripts/mirror-bibliography.mjs",
     "pa11y": "node scripts/with-preview.mjs -- ./node_modules/.bin/pa11y-ci",
     "postbuild": "node scripts/add-sitemap-lastmod.mjs && node scripts/fix-redirect-stubs.mjs && node scripts/optimize-images.mjs && node scripts/indexnow-diff.mjs manifest",
     "prebuild": "node scripts/stage-media.mjs && node scripts/agent-md.mjs --public --dump ../build/agent-md && python3 ../scripts/generate_llms.py --pages ../build/agent-md --build",
@@ -57,6 +55,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "github-slugger": "^2.0.0",
     "html-validate": "^11.17.0",
     "lighthouse": "^13.6.0",
     "pa11y-ci": "^5.0.0",

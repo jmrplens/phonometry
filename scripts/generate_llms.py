@@ -18,9 +18,10 @@ writes the routes of the English site (``routes.json``: each page's kind,
 title, description and the standards it implements) and the Markdown copy of
 every page these files carry, the same copy the site publishes beside the
 page at ``<page>/index.md``. This script reads that dump (``--pages``) and
-nothing else of the pages: the hand-written mirror under ``docs/``, which
-these files used to be cut from, said less than the site and named its pages
-otherwise.
+nothing else of the pages. These files used to be cut from the plain-Markdown
+copies under ``docs/``, written by hand then, which said less than the site
+and named its pages otherwise; ``docs/`` is written from the site pages too
+now (``agent-md.mjs --docs``, the GitHub edition).
 
 Three kinds of artifact are produced:
 
@@ -189,9 +190,6 @@ CATALOGUES_ROUTE = "reference/catalogues"
 
 #: The bibliography, which has a shard of its own (see :func:`build_shards`).
 BIBLIOGRAPHY_ROUTE = "reference/bibliography"
-
-#: Markdown files under docs/ that are not documentation pages.
-NOT_PAGES = frozenset({"README", "CONFORMANCE", "ERRATA", "ERRATA.es"})
 
 #: The documented topics, in the order the landing page lists them. Each is a
 #: folder of `content/docs/` whose `index` page links the guides inside it, so
@@ -551,50 +549,6 @@ def _page(route: str) -> Page:
         msg = f"generate_llms.py: the dump at {PAGES} has no page {route!r}. {_REDUMP}"
         raise SystemExit(msg)
     return page
-
-
-def _mirror_pages() -> list[str]:
-    """Every page of the hand-written mirror under docs/, as its path there.
-
-    The mirror is laid out like the site, so the route is the path: the page
-    at ``docs/signals/filters/filter-banks.md`` mirrors
-    ``/signals/filters/filter-banks/``. Raises if a mirror page has no page on
-    the site, which would otherwise keep a page of the GitHub edition that the
-    site no longer has.
-    """
-    pages: list[str] = []
-    unmapped: list[str] = []
-    for path in sorted(DOCS.rglob("*.md")):
-        if path.parent == DOCS and path.stem in NOT_PAGES:
-            continue
-        # Files git ignores are somebody's local working notes, not the mirror:
-        # they have no site page by design, and CI never sees them. Without
-        # this the target cannot run at all in a checkout that has any.
-        if _git_ignored(path):
-            continue
-        # The contributor guide is for the repository's readers (people and
-        # coding agents working on phonometry), not the library's: it has no
-        # site page and stays out of the mirror's checks by design.
-        if path.relative_to(DOCS).parts[0] == "contributing":
-            continue
-        route = path.relative_to(DOCS).with_suffix("").as_posix()
-        # A folder's own page is `<folder>/index.md`, as on the site.
-        route = route.removesuffix("/index")
-        published = any(
-            (CONTENT / f"{route}{ext}").exists() for ext in (".md", ".mdx")
-        ) or any((CONTENT / route / f"index{ext}").exists() for ext in (".md", ".mdx"))
-        if not published:
-            unmapped.append(route)
-            continue
-        pages.append(path.relative_to(DOCS).as_posix())
-    if unmapped:
-        raise SystemExit(
-            "generate_llms.py: no site page for "
-            + ", ".join(f"docs/{route}.md" for route in unmapped)
-            + ". The mirror mirrors the site: move the file to the route its "
-            "page has, or delete it if the page is gone."
-        )
-    return pages
 
 
 def _api_routes() -> list[str]:
@@ -1173,8 +1127,8 @@ def _page_entry(route: str) -> str:
 
 
 def _start_section() -> list[str]:
-    # The section's own page and the task index have no mirror page, so they
-    # are listed by their site title, as the guides index is.
+    # The section's own page and the task index are listed apart from
+    # START_ROUTES, by their site title, as the guides index is.
     tasks = "start/tasks"
     lines = [
         "## Start here",
@@ -2230,30 +2184,6 @@ def build_llms_full(llms_txt: str, plan: Sequence[tuple[str, str, list[str]]]) -
     )
 
 
-def _check_readme_covers_the_mirror() -> None:
-    """docs/README.md links every mirror guide page.
-
-    The README is the GitHub front door of the docs, kept by hand, and three
-    pages went missing from it inside one week of merges: nothing looked. The
-    overview index files are exempt because the README's section structure is
-    its own index of the folders, which
-    ``mirror_overviews.py --check`` asserts separately (it requires every
-    generated ``index.md`` to be linked from the README).
-    """
-    readme = (DOCS / "README.md").read_text(encoding="utf-8")
-    missing = [
-        name
-        for name in _mirror_pages()
-        if not name.endswith("/index.md")
-        and not name.startswith("reference/api")
-        and f"({name})" not in readme
-    ]
-    if missing:
-        raise SystemExit(
-            "generate_llms.py: docs/README.md does not link " + ", ".join(missing)
-        )
-
-
 def _check_index_covers_the_site(llms_txt: str) -> None:
     """Every English page of the site but the landing page is linked from the index.
 
@@ -2366,7 +2296,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     PAGES = args.pages.resolve()
 
     _check_areas_cover_the_tree()
-    _check_readme_covers_the_mirror()
     _check_dump_matches_the_tree()
     version = _version()
     plan = _shard_plan()

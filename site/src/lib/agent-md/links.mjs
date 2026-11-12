@@ -42,6 +42,39 @@ const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?\/(?!\/)/u;
 const escapeRegExp = (text) => text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
 
 /**
+ * The offset of the destination of every `link` and `definition` node (and
+ * of every `image` node too when `images` is set) whose URL `wanted` accepts,
+ * with that URL: where the destination's text starts in the document.
+ *
+ * @param {string} markdown
+ * @param {(url: string) => boolean} wanted
+ * @param {{ images?: boolean }} [options]
+ * @returns {{ at: number, url: string }[]}
+ */
+function destinations(markdown, wanted, { images = true } = {}) {
+  const types = images ? LINK_TYPES : new Set(['link', 'definition']);
+  const tree = parse(markdown, { mdx: false });
+  /** @type {{ at: number, url: string }[]} */
+  const found = [];
+  const visit = (node) => {
+    if (types.has(node.type) && wanted(node.url ?? '') && node.position) {
+      const start = node.position.start.offset;
+      const end = node.position.end.offset;
+      // The destination follows the text: `](`, `](<` for a link or image,
+      // `]:` and spacing for a definition. The last such occurrence in the
+      // node is the destination; a title, if any, comes after it.
+      const pattern = new RegExp(String.raw`(\]\(\s*<?|\]:\s*<?)(${escapeRegExp(node.url)})`, 'gu');
+      let match;
+      for (const one of markdown.slice(start, end).matchAll(pattern)) match = one;
+      if (match?.index !== undefined) found.push({ at: start + match.index + match[1].length, url: node.url });
+    }
+    for (const child of node.children ?? []) visit(child);
+  };
+  visit(tree);
+  return found;
+}
+
+/**
  * Every root-relative link in a Markdown document, made absolute.
  *
  * @param {string} markdown
@@ -53,26 +86,32 @@ export function absolutizeRootLinks(markdown, origin) {
   let root = origin;
   while (root.endsWith('/')) root = root.slice(0, -1);
   if (!ROOT_DESTINATION.test(markdown)) return markdown;
-  const tree = parse(markdown, { mdx: false });
-  /** @type {number[]} */
-  const inserts = [];
-  const visit = (node) => {
-    if (LINK_TYPES.has(node.type) && /^\/(?!\/)/u.test(node.url ?? '') && node.position) {
-      const start = node.position.start.offset;
-      const end = node.position.end.offset;
-      // The destination follows the text: `](`, `](<` for a link or image,
-      // `]:` and spacing for a definition. The last such occurrence in the
-      // node is the destination; a title, if any, comes after it.
-      const pattern = new RegExp(String.raw`(\]\(\s*<?|\]:\s*<?)(${escapeRegExp(node.url)})`, 'gu');
-      let found;
-      for (const match of markdown.slice(start, end).matchAll(pattern)) found = match;
-      if (found?.index !== undefined) inserts.push(start + found.index + found[1].length);
-    }
-    for (const child of node.children ?? []) visit(child);
-  };
-  visit(tree);
   let out = markdown;
-  for (const at of inserts.sort((a, b) => b - a)) out = `${out.slice(0, at)}${root}${out.slice(at)}`;
+  const found = destinations(markdown, (url) => /^\/(?!\/)/u.test(url));
+  for (const { at } of found.sort((a, b) => b.at - a.at)) out = `${out.slice(0, at)}${root}${out.slice(at)}`;
+  return out;
+}
+
+/**
+ * Every link and link definition whose destination `rewrite` gives a new
+ * one, rewritten by offset; images are left alone, since a picture is not a
+ * page a reader moves to. The same parse as {@link absolutizeRootLinks}, so a
+ * URL inside code or TeX is never touched.
+ *
+ * @param {string} markdown
+ * @param {(url: string) => string | undefined} rewrite  The new destination,
+ *   or nothing to leave the link as it is.
+ * @param {string} [hint]  Text every destination worth rewriting contains; a
+ *   document without it is returned without being parsed.
+ * @returns {string}
+ */
+export function rewriteLinks(markdown, rewrite, hint) {
+  if (hint !== undefined && !markdown.includes(hint)) return markdown;
+  const found = destinations(markdown, (url) => rewrite(url) !== undefined, { images: false });
+  let out = markdown;
+  for (const { at, url } of found.sort((a, b) => b.at - a.at)) {
+    out = `${out.slice(0, at)}${rewrite(url)}${out.slice(at + url.length)}`;
+  }
   return out;
 }
 

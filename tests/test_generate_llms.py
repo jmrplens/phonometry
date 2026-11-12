@@ -115,15 +115,6 @@ def test_the_intensity_shard_holds_only_the_intensity_routes(slug: str) -> None:
     assert "devices/emission/vibration-sound-power" in members["devices-emission"]
 
 
-def test_the_contributor_guide_stays_out_of_the_mirror_checks() -> None:
-    """docs/contributing/ is repository-only: it has no site page.
-
-    Without the exclusion ``_mirror_pages()`` raises, because a mirror page
-    with no page on the site is exactly what it exists to catch.
-    """
-    assert not any(name.startswith("contributing/") for name in llms._mirror_pages())
-
-
 # The index lists every English page of the site and says what each is about.
 #
 # It used to name the pages docs/ mirrors and a hand-kept few, each by its

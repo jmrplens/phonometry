@@ -25,8 +25,8 @@ _SCRIPTS = str(_ROOT / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
+import markdown_anchors
 import markdown_fences
-import mirror_overviews
 
 #: This file names the absorbed sections and writes a link to a missing anchor
 #: on purpose, to show the checks failing; it is the one file they do not read.
@@ -332,7 +332,7 @@ def link_problems(root: pathlib.Path) -> list[str]:
                 problems.append(
                     f"{path.relative_to(root).as_posix()}: links {page}, which does not exist"
                 )
-            elif fragment and fragment not in mirror_overviews._fragments(target):
+            elif fragment and fragment not in markdown_anchors.fragments(target):
                 problems.append(
                     f"{path.relative_to(root).as_posix()}: links {page}#{fragment}, which is not an anchor there"
                 )

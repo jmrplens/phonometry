@@ -1311,12 +1311,13 @@ def test_a_passes_that_is_no_bool_shows_no_verdict(outcome: object) -> None:
     assert "".join(caption.itertext()) == "_Undecidedno verdict"
 
 
-#: The three editions of the getting-started guide, which show the tables a
-#: notebook displays for its two cells.
+#: The two pages of the getting-started guide, which show the tables a
+#: notebook displays for its two cells. The GitHub edition under ``docs/`` is
+#: written from the English page by ``make llms``, as Markdown tables a reader
+#: on GitHub sees, and is held to it by the check that regenerates it.
 _GUIDES = tuple(
     pathlib.Path(__file__).resolve().parent.parent / path
     for path in (
-        "docs/start/getting-started.md",
         "site/src/content/docs/start/getting-started.mdx",
         "site/src/content/docs/es/start/getting-started.mdx",
     )
@@ -1338,7 +1339,7 @@ def _guide_cells() -> tuple[object, object]:
     return bank, check
 
 
-@pytest.mark.parametrize("guide", _GUIDES, ids=["docs", "site", "site-es"])
+@pytest.mark.parametrize("guide", _GUIDES, ids=["site", "site-es"])
 def test_the_guide_shows_the_tables_the_display_writes(guide: pathlib.Path) -> None:
     """The HTML and the text on the page are what the two cells display."""
     bank, check = _guide_cells()

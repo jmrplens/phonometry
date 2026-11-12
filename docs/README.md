@@ -26,6 +26,10 @@ runs in turn: [pip and uv](start/environments/pip-and-uv.md),
 [Docker and servers](start/environments/docker.md) and
 [Type checking](start/environments/type-checking.md).
 
+If you know the job but not the area that owns it,
+[What do you need to measure?](start/tasks.md) starts from the job and names
+the guide that answers it, with the standard that guide implements.
+
 ### [Signal analysis](signals/index.md)
 
 The chain that turns a digital signal into a standards-compliant number:

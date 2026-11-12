@@ -162,6 +162,20 @@ class TestAbbreviatedBodies:
             "docs/reference/bibliography.md opens with"
         ]
 
+    def test_an_entry_that_opens_in_bold_is_read_as_one(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The bibliography prints each entry's author and year in bold."""
+        self._bibliography(
+            tmp_path,
+            monkeypatch,
+            "- **American Society of Heating, Refrigerating and Air-Conditioning "
+            "Engineers. (2019).** *ASHRAE handbook*. ASHRAE.\n"
+            "- **Cremer, L., & Heckl, M. (1988).** *Structure-borne sound*.\n",
+        )
+        assert {"ASHRAE", "Cremer"} <= set(gate.bibliography_leads())
+        assert gate.abbreviation_problems() == []
+
     def test_the_real_bibliography_lists_every_abbreviated_body(self) -> None:
         assert gate.abbreviation_problems() == []
 

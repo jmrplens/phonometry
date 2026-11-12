@@ -20,9 +20,6 @@
  *
  * Nothing here starts a process or reads a page.
  */
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-
 /**
  * The route a page is served at, from either a content file's path under
  * `src/content/docs/` or a content entry's id.
@@ -48,39 +45,15 @@ export const routeOf = (idOrPath) =>
  * own: the conformance report and the errata registry, in English, and the
  * Spanish edition of the registry. The GitHub copy of one of these routes is
  * the document, because the page renders its rows from data through a
- * component and its own source holds the introduction alone.
+ * component and its own source holds the introduction alone, so the GitHub
+ * edition (src/lib/agent-md/edition.mjs) writes no file for it and a link to
+ * the page from one of its files leads to the document.
  */
 export const TRANSPLANTED = Object.freeze({
   CONFORMANCE: 'reference/conformance',
   ERRATA: 'reference/errata',
   'ERRATA.es': 'es/reference/errata',
 });
-
-/** Whether a route is a Spanish page's. */
-const isSpanish = (route) => route === 'es' || route.startsWith('es/');
-
-/**
- * The file under docs/ that is a route's GitHub copy, or `undefined` for a
- * route with none. The copy the site publishes beside every page is written
- * from the page's own source (scripts/agent-md.mjs --public); this names the
- * plain-Markdown edition GitHub serves, which scripts/mirror-bibliography.mjs
- * writes for the bibliography.
- *
- * The mirror is laid out like the site, so `docs/signals/filters/filter-banks.md`
- * is the copy of `/signals/filters/filter-banks/`, and a section's page is its
- * folder's `index.md`. The mirror is English, so a Spanish route has one only
- * where a {@link TRANSPLANTED} document is published in Spanish.
- *
- * @param {string} route
- * @param {string} docsDir The docs/ folder.
- * @returns {string | undefined}
- */
-export function mirrorOf(route, docsDir) {
-  const document = Object.keys(TRANSPLANTED).find((name) => TRANSPLANTED[name] === route);
-  if (document !== undefined) return join(docsDir, `${document}.md`);
-  if (isSpanish(route)) return undefined;
-  return [join(docsDir, `${route}.md`), join(docsDir, route, 'index.md')].find((path) => existsSync(path));
-}
 
 /**
  * The components that render a page's data rather than wrap its prose: a

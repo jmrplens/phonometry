@@ -1,9 +1,9 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Every page that counts the package's import namespaces counts the ones it has.
 
-The landing page and the getting-started guide, in English, in Spanish and
-in the guide's docs/ mirror, say in words how many import namespaces the
-documentation's areas group. Each is held here to the subpackages of
+The landing page and the getting-started guide, in English and in Spanish,
+say in words how many import namespaces the documentation's areas group (the
+guide's GitHub edition under docs/ is written from the English page). Each is held here to the subpackages of
 ``phonometry`` an import can name, the public ones, so a namespace added or
 retired leaves these pages failing until they say the new count. The landing
 page had come to say nineteen and the English guide twenty where the package
@@ -39,7 +39,6 @@ _PHRASES = [
         "es",
         "uno de los {} espacios de nombres de importación",
     ),
-    ("docs/start/getting-started.md", "en", "one of {} domain namespaces"),
 ]
 
 

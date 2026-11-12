@@ -15,9 +15,11 @@ telling you to go and update the other two. Reading a field out of a document
 that exists to be read is what replaced that.
 
 The Astro page bodies import the numbers from
-``site/src/data/conformance-stats.mjs``, so they cannot drift. What is left is
-the text that has no build step to interpolate through: the plain-markdown
-mirror under ``docs/``, the ``README.md`` and generated ``README_PYPI.md`` at
+``site/src/data/conformance-stats.mjs``, so they cannot drift, and neither can
+the GitHub edition of the guides under ``docs/``, which ``make llms`` writes
+from those pages with the same numbers in place. What is left is the text that
+has no build step to interpolate through: the plain-markdown files of
+``docs/`` written by hand, the ``README.md`` and generated ``README_PYPI.md`` at
 the repository root, the README of the PyOctaveBand transition stub, the
 ``.zenodo.json`` description, and the YAML frontmatter of the site pages (the
 landing-page meta descriptions and the JSON-LD blocks on the conformance
@@ -70,6 +72,8 @@ import pathlib
 import re
 import sys
 from typing import TYPE_CHECKING
+
+from github_edition import is_edition_file
 
 if TYPE_CHECKING:
     from collections.abc import Collection, Mapping, Sequence
@@ -334,8 +338,10 @@ def sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
 
     Four places, for four reasons.
 
-    The guides and their site mirrors, walked from ``docs/`` and
-    ``site/src/content/docs/``.
+    The site's guides and the Markdown of ``docs/``, walked from
+    ``site/src/content/docs/`` and ``docs/``. The files of the GitHub edition
+    among them are listed here and left out by :func:`prose`, which opens
+    each file to tell; this list opens none.
 
     The markdown at the repository root, non-recursively. This is where the
     two most-read pages of prose in the project live, and they were outside
@@ -379,6 +385,21 @@ def sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
     if zenodo.is_file():
         kept.append(zenodo)
     return kept
+
+
+def prose(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
+    """The files of :func:`sources` this script reads and rewrites.
+
+    A file of the GitHub edition under ``docs/`` is left out: ``make llms``
+    writes it from its site page, which is read here, with the numbers of
+    ``site/src/data/conformance-stats.mjs`` in place, so it says what the page
+    says and is written again when they move. Telling one takes its first
+    line, so this list opens every file :func:`sources` names.
+
+    :param root: Repository root to walk.
+    :return: The files to check or rewrite, in a stable order.
+    """
+    return [path for path in sources(root) if not is_edition_file(path)]
 
 
 def claims_in(line: str) -> list[Claim]:
@@ -594,7 +615,7 @@ def wrapped(root: pathlib.Path) -> list[str]:
     return [
         f"{_label(path, root)}:{lineno}: {phrase!r} wraps a count away from its "
         "noun; keep them on one line"
-        for path in sources(root)
+        for path in prose(root)
         for lineno, phrase in wrapped_in(_read(path))
     ]
 
@@ -679,7 +700,7 @@ def refusals(root: pathlib.Path, expected: Mapping[str, int]) -> list[str]:
     """
     groups = citation_groups(root)
     problems: list[str] = []
-    for path in [*sources(root), *generated_sources(root)]:
+    for path in [*prose(root), *generated_sources(root)]:
         problems += [
             f"{_label(path, root)}:{lineno}: counts standards in {phrase!r}; "
             "that figure counted citation groups, so state the split the "
@@ -715,7 +736,7 @@ def describe(label: str, lineno: int, claim: Claim, value: int) -> str:
 def check(root: pathlib.Path, expected: Mapping[str, int]) -> list[str]:
     """Every stale count in the corpus, as printable diagnostics."""
     problems: list[str] = []
-    for path in sources(root):
+    for path in prose(root):
         _, fixed = rewrite_text(_read(path), expected)
         problems += [
             describe(_label(path, root), lineno, claim, expected[claim.field])
@@ -732,7 +753,7 @@ def write(root: pathlib.Path, expected: Mapping[str, int]) -> list[str]:
     :return: A printable description of each substitution made.
     """
     changes: list[str] = []
-    for path in sources(root):
+    for path in prose(root):
         text = _read(path)
         corrected, fixed = rewrite_text(text, expected)
         if not fixed:

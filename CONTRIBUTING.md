@@ -544,15 +544,24 @@ stale:
 
 ```bash
 make api-docs   # site/src/content/docs/reference/api/ and site/src/generated/api-sidebar.mjs
-make llms       # llms.txt, and the section indexes and glossary under docs/
+make llms       # llms.txt, and the GitHub edition of the guides under docs/
 ```
 
-A change to a page's frontmatter `references` changes the bibliography, which
-the site build writes from them. Its GitHub copy, `docs/reference/bibliography.md`,
-is written by `make bibliography-mirror` (it needs the site's dependencies,
-`pnpm install` in `site/`); run it before `make llms`, which cuts the
-bibliography's shards from that copy, and commit both. The docs workflow fails
-while the copy is not what the references write.
+The GitHub edition is every English guide, overview and start page of the
+site and the reference pages written as guides (the glossary, the
+bibliography, the theory pages and the determinism page), less the pages
+`EDITION_LEFT_OUT` names in `site/src/lib/agent-md/edition.mjs`, each with its
+reason; the API reference, the catalogues and the errata families have no file
+in it. Each page is plain Markdown at `docs/<route>.md`, or at
+`docs/<route>/index.md` for a page written as its folder's index, written from
+the page's own source, so a page's GitHub copy changes when the page does:
+commit both. A change to a page's frontmatter `references` changes the
+bibliography, which the site build writes from them, and its copy in the
+edition with it. A new guide joins the edition by its kind, and two lists name
+it: its route goes into `site/src/lib/agent-md/test/edition-routes.json`,
+which `pnpm run test:agent-md` holds the edition to in both directions, and
+its line into `docs/README.md`, the edition's front door, written by hand,
+without which `make llms` fails.
 
 `make api-docs` reads every public module's `__all__` and docstrings, so run it
 after changing a public name, a signature or a docstring. `make llms` reads

@@ -323,6 +323,37 @@ def test_a_count_of_domains_wrapped_in_plain_prose_is_no_wrapped_claim() -> None
     ) == [(1, f"across {OLD_DOMAINS} domains, against")]
 
 
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    corpus: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """``make llms`` writes the edition from its site page, numbers in place.
+
+    The page is read here; its edition is neither reported nor rewritten, even
+    with a count gone stale and a count wrapped from its noun, because the
+    next ``make llms`` writes it again from the page and CI fails while it
+    differs. The hand-written getting-started page of the corpus beside it is
+    still read, so the check stays red.
+    """
+    edition = corpus / "docs" / "signals" / "metrology" / "compliance.md"
+    text = (
+        "<!-- Written by `make llms` from "
+        "site/src/content/docs/signals/metrology/compliance.mdx: edit that "
+        "page and its Spanish twin, then run `make llms`. -->\n\n"
+        f"The suite runs {OLD_TOTAL} numerical conformance checks {OLD_SPLIT},\n"
+        f"against {OLD_DESIGNATIONS} normative designations and {OLD_SOURCES} "
+        "further published\nsources.\n"
+    )
+    _write(edition, text)
+    assert edition in ccc.sources(corpus)
+    assert edition not in ccc.prose(corpus)
+    assert _run(corpus) == 1
+    errors = capsys.readouterr().err
+    assert "docs/signals/metrology/compliance.md" not in errors
+    assert "docs/start/getting-started.md" in errors
+    assert _run(corpus, "--write") == 0
+    assert edition.read_text(encoding="utf8") == text
+
+
 def test_write_is_idempotent(corpus: pathlib.Path) -> None:
     """A second run changes nothing, byte for byte."""
     assert _run(corpus, "--write") == 0
@@ -472,7 +503,7 @@ def test_the_real_corpus_needs_no_rewriting() -> None:
     back unchanged.
     """
     expected = ccc.expected_counts()
-    for path in ccc.sources():
+    for path in ccc.prose():
         text = path.read_text(encoding="utf8")
         corrected, fixed = ccc.rewrite_text(text, expected)
         assert not fixed, f"{path} quotes a stale count: {fixed}"

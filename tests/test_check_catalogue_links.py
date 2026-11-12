@@ -440,6 +440,80 @@ def test_an_address_in_inline_code_does_not_end_the_clause_of_a_link() -> None:
     assert _named(page) == []
 
 
+_PATHS = ("docs/page.md", "site/src/content/docs/page.mdx")
+
+
+@pytest.mark.parametrize("path", _PATHS)
+@pytest.mark.parametrize(
+    "page",
+    [
+        # A label set in code names the document the reader expects.
+        "- Not ISO 13887:2017: the model is"
+        " [`ISO 12354-1:2017`](https://www.iso.org/standard/70238.html).\n",
+        # So does a designation in code before the link, in its own clause.
+        "Unlike ISO 13887:2017, the `ISO 12354-1:2017` model"
+        " ([catalogue](https://www.iso.org/standard/70238.html)).\n",
+    ],
+)
+def test_a_designation_in_inline_code_does_not_let_another_document_pass(
+    page: str, path: str
+) -> None:
+    # The page shows the text of a code span: only an address in one is no
+    # link, and the designation it writes is what the reader reads the link
+    # beside.
+    (problem,) = _named(page, path)
+    assert "opens ISO 13887:2017, which the link is not written beside" in problem
+    assert "ISO 12354-1:2017" in problem
+
+
+@pytest.mark.parametrize("path", _PATHS)
+@pytest.mark.parametrize(
+    "page",
+    [
+        "The building model follows"
+        " [`ISO 12354-1:2017`](https://www.iso.org/standard/70242.html).\n",
+        'Pass `standard="ISO 12354-1:2017"`'
+        " ([catalogue](https://www.iso.org/standard/70242.html)).\n",
+    ],
+)
+def test_a_designation_in_inline_code_names_the_document_its_link_opens(
+    page: str, path: str
+) -> None:
+    (link,) = ccl.links_in(path, page)
+    assert "ISO 12354-1:2017" in link.beside
+    assert _named(page, path) == []
+
+
+@pytest.mark.parametrize("path", _PATHS)
+def test_a_link_written_in_inline_code_is_text_and_not_a_link(path: str) -> None:
+    # The page shows the markdown of a link in a code span as written: its
+    # label is a designation the reader reads, not a link taken out.
+    page = (
+        "Unlike ISO 13887:2017, `[ISO 12354-1:2017](https://example.com)` is"
+        " the form ([catalogue](https://www.iso.org/standard/{}.html)).\n"
+    )
+    assert _named(page.format("70242"), path) == []
+    (problem,) = _named(page.format("70238"), path)
+    assert "opens ISO 13887:2017, which the link is not written beside" in problem
+
+
+@pytest.mark.parametrize("path", _PATHS)
+def test_a_label_holding_a_bracket_in_inline_code_is_read_as_the_label(
+    path: str,
+) -> None:
+    # A bracket in a code span opens and closes no link, so the label still
+    # runs from its own bracket to the link, and the IEC designation it names
+    # is what the reader expects the iso.org link to open.
+    page = (
+        "ISO 12354-1:2017 ([`gains[0]` of IEC 12354-1:2017]"
+        "(https://www.iso.org/standard/70242.html)).\n"
+    )
+    (problem,) = _named(page, path)
+    assert "opens ISO 12354-1:2017, which the link is not written beside" in problem
+    assert problem.endswith("of IEC 12354-1:2017'")
+    assert "gains" in problem
+
+
 def test_a_note_address_between_backticks_is_still_a_link() -> None:
     # A frontmatter is YAML: the site shows a note as text and links every
     # address in it, backticks or not.

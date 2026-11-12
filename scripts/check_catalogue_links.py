@@ -51,9 +51,12 @@ beside that designation, read where the link is written:
 A link whose label names a designation, publisher and number, is read by its
 label alone. A catalogue address in a code block, an inline code span or a
 comment is an example or a note, and no link: the spans and the comments are
-read by ``scripts/markdown_spans.py``, as the site reads them. A frontmatter is
-YAML, whose note the site shows as text with every address in it a link, so
-each address there is read.
+read by ``scripts/markdown_spans.py``, as the site reads them. The rest of an
+inline code span is text the page shows, so a designation written in one
+("[`ISO 12354-1:2017`](...)") is read beside a link as any other, while a
+comment, which the page hides, is read beside none. A frontmatter is YAML,
+whose note the site shows as text with every address in it a link, so each
+address there is read.
 
 The designation is matched by a publisher that publishes it, its number and,
 when the text gives them, its year and its amendments. The publishers are the
@@ -99,7 +102,7 @@ import urllib.request
 from dataclasses import dataclass
 
 from markdown_fences import code_lines, page_kind, page_lines
-from markdown_spans import blank_inline_spans_by_block
+from markdown_spans import replace_inline_spans_by_block
 
 #: The repository.
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -200,6 +203,12 @@ _FRONTMATTER_KEY = re.compile(r"^(?:  - |    )?([A-Za-z_][\w-]*):[ \t]*", re.MUL
 #: The border between two cells of a table row: a pipe the page does not
 #: escape.
 _CELL_BORDER = re.compile(r"(?<!\\)\|")
+
+#: What a code span holds that the check must not read as markup of the page:
+#: a catalogue address, which is an example and no link, and a square
+#: bracket, which opens and closes no link inside a span. The rest of the
+#: span is text the page shows.
+_NOT_MARKUP_IN_CODE = re.compile(rf"{LINK.pattern}|[\[\]]")
 
 
 @dataclass(frozen=True)
@@ -348,8 +357,24 @@ def _blank(text: str) -> str:
     return re.sub(r"[^\n]", " ", text)
 
 
+def _shown(piece: str) -> str:
+    """What the check reads of a code span or a comment of a page's body.
+
+    A comment, which opens on ``<`` or ``{``, is hidden from the reader and
+    is blanked whole. A code span, which opens on a backtick, is text the
+    page shows: a designation written in one ("[`ISO 12354-1:2017`](...)",
+    "Pass `standard='ISO 3744'` ...") is what the reader reads the link
+    beside, so the span is kept but for its catalogue addresses, which are
+    examples and no link, and its square brackets, which open no link in a
+    span and would otherwise end a label read at the link after it.
+    """
+    if not piece.startswith("`"):
+        return _blank(piece)
+    return _NOT_MARKUP_IN_CODE.sub(lambda match: _blank(match.group()), piece)
+
+
 def _without_code(path: str, text: str, end: int) -> str:
-    """The page with its code and its comments blanked, its frontmatter as written.
+    """The page with its code blocks and comments blanked, its frontmatter as written.
 
     A catalogue address in a fenced or indented code block, in an inline code
     span or in a comment is an example of one or a note to the maintainer,
@@ -359,10 +384,13 @@ def _without_code(path: str, text: str, end: int) -> str:
     span opens on a run of backticks and closes on the next run as long, never
     past its paragraph, list item or table cell, and a backslash before the
     run shows the backtick and opens nothing; the page's comments are read in
-    the same pass. The frontmatter is YAML, not Markdown: the site shows a
-    reference's note as text and links every address in it, backticks or not,
-    so it is kept whole. Every blanked character but a line end becomes a
-    space, so every offset still points where it did.
+    the same pass. A code block and a comment are blanked whole; an inline
+    code span keeps its text, which the page shows beside a link, and loses
+    only its addresses and its square brackets (:func:`_shown`). The
+    frontmatter is YAML, not Markdown: the site shows a reference's note as
+    text and links every address in it, backticks or not, so it is kept
+    whole. Every blanked character but a line end becomes a space, so every
+    offset still points where it did.
 
     :param end: Where the page's frontmatter ends (:func:`_frontmatter_end`).
     """
@@ -375,7 +403,9 @@ def _without_code(path: str, text: str, end: int) -> str:
             lines, code_lines(lines, kind=kind, walked=walked), strict=True
         )
     )
-    prose = blank_inline_spans_by_block(body, "`", kind, kind=kind, walked=walked)
+    prose = replace_inline_spans_by_block(
+        body, _shown, "`", kind, kind=kind, walked=walked
+    )
     return text[:end] + prose[end:]
 
 

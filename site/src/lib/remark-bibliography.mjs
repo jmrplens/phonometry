@@ -30,6 +30,13 @@ import { parseFrontmatter } from '@astrojs/markdown-remark';
 import { CITED_BY, MARKER, sectionMarkdown, siteBibliography, withSections } from './bibliography-entries.mjs';
 import { readPageReferences } from './page-references.mjs';
 
+/**
+ * The pages this plugin writes into, below the content tree: the dates of
+ * the site read them (site/date-sources.json), and its test holds each entry
+ * to what this plugin reaches, as it holds a page to what the page imports.
+ */
+export const REWRITES = Object.freeze(['reference/bibliography.md', 'es/reference/bibliography.md']);
+
 /** The bibliography page of either language, by its path, and the content tree above it. */
 const PAGE = /^(.*[\\/]src[\\/]content[\\/]docs)[\\/](es[\\/])?reference[\\/]bibliography\.md$/;
 

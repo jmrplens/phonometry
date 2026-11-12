@@ -977,12 +977,17 @@ test('a data source a merge keeps from one side dates its page by that side\'s c
 	assert.equal(day(dates, 'o.mdx'), '2026-01-03', 'the source the merge took from the side');
 });
 
-test('a count, a text and a line move with a merge that made a version neither side had', async (t) => {
+test('a count, a text, the works the pages cite and a line move with a merge that made a version neither side had', async (t) => {
 	const registry = (...entries) => ['# Errata', '', ...entries.flatMap((entry) => [`## ${entry}`, '', 'What the source prints.', ''])].join('\n');
 	const fiches = (first, second) => page({ body: `<ReportPreview name="one" title="${first}" />\n\nBetween.\n\nMore.\n\nAnd more.\n\n<ReportPreview name="two" title="${second}" />\n` });
 	const standard = { type: 'standard', organization: 'International Organization for Standardization', year: 2000, title: 'Acoustics, ISO 1:2000', designation: 'ISO 1:2000' };
 	const check = (id) => ({ id, domain: 'd', reference: { documents: [{ kind: 'standard', designation: 'ISO 1', edition: '2000' }] } });
 	const checks = (...ids) => `${JSON.stringify({ domains: [{ id: 'd', title: 'Domain D' }], checks: ids.map(check) }, null, 1)}\n`;
+	// A page that cites works, as the bibliography reads it: its title, then
+	// each work at the end of its frontmatter, far enough from the title for
+	// the merge to join a retitling and a new work.
+	const citing = (title, ...works) =>
+		page({ title, extra: ['references:', ...works.flatMap((work) => ['  - type: book', `    title: "${work}"`, '    year: 2001'])] });
 	const cases = [
 		{
 			what: 'a count of lines',
@@ -998,6 +1003,14 @@ test('a count, a text and a line move with a merge that made a version neither s
 			base: (repo) => repo.write('signals/guide.mdx', fiches('One', 'Two')),
 			side: (repo) => repo.write('signals/guide.mdx', fiches('One, retitled', 'Two')),
 			main: (repo) => repo.write('signals/guide.mdx', fiches('One', 'Two, retitled')),
+			merged: () => {},
+		},
+		{
+			what: 'the works the pages cite',
+			entry: { pages: ['site/src/content/docs/a.mdx'], texts: { siteBibliography: { files: ENGLISH_GUIDES, frontmatter: 'references' } } },
+			base: (repo) => repo.write('signals/guide.mdx', citing('A guide', 'A work')),
+			side: (repo) => repo.write('signals/guide.mdx', citing('A guide, retitled', 'A work')),
+			main: (repo) => repo.write('signals/guide.mdx', citing('A guide', 'A work', 'Another work')),
 			merged: () => {},
 		},
 		{
@@ -1413,6 +1426,35 @@ function layoutComponents(site = SITE) {
 	return [...block.matchAll(/^\s*\w+:\s*['"](\.\/src\/[^'"]+)['"]/gm)].map(([, path]) => resolve(site, path));
 }
 
+/**
+ * The Markdown plugins of this site that astro.config.mjs runs over every
+ * page (`markdown`), each with the pages it writes into, which the module
+ * names in `REWRITES` (paths below the content tree), or `null` when it names
+ * none and so may write into any. A page such a plugin writes into shows what
+ * the plugin reaches, though the page's own file imports none of it.
+ *
+ * @param {string} [site]
+ * @returns {Promise<{ file: string, rewrites: string[] | null }[]>}
+ */
+async function markdownPlugins(site = SITE) {
+	let config = '';
+	try {
+		config = readFileSync(join(site, 'astro.config.mjs'), 'utf8');
+	} catch {
+		return [];
+	}
+	const block = /\bmarkdown:\s*\{([\s\S]*?)\n {2}\},/.exec(config)?.[1] ?? '';
+	const used = new Set(block.match(/[\w$]+/g) ?? []);
+	const plugins = [];
+	for (const [, clause, spec] of config.matchAll(IMPORT)) {
+		if (!spec.startsWith('./src/') || !boundNames(clause).some((name) => used.has(name))) continue;
+		const file = resolveImport(join(site, 'astro.config.mjs'), spec);
+		const module = await import(pathToFileURL(file).href);
+		plugins.push({ file, rewrites: Array.isArray(module.REWRITES) ? [...module.REWRITES] : null });
+	}
+	return plugins;
+}
+
 /** Every page of the site, as file paths. */
 function sitePages(dir = join(SITE, CONTENT_DIR), out = []) {
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -1454,9 +1496,11 @@ const REPO = resolve(SITE, '..');
  *
  * @param {string} [site]
  * @param {Record<string, Record<string, string[] | 'count' | 'text'>>} [reads]
+ * @param {Awaited<ReturnType<typeof markdownPlugins>>} [plugins] The Markdown plugins
+ *   of the config: a page one writes into reaches what the plugin reaches.
  * @returns {{ problems: string[], built: number }}
  */
-function auditDateSources(site = SITE, reads = READS) {
+function auditDateSources(site = SITE, reads = READS, plugins = []) {
 	const file = join(site, DATE_SOURCES);
 	const raw = JSON.parse(readFileSync(file, 'utf8')).entries;
 	const entries = readDateSources(file);
@@ -1485,6 +1529,10 @@ function auditDateSources(site = SITE, reads = READS) {
 		const path = relative(repo, page).split(sep).join('/');
 		const bound = new Map();
 		const behind = reach(page, site, new Map(), new Set(), bound, true);
+		const below = relative(join(site, CONTENT_DIR), page).split(sep).join('/');
+		for (const plugin of plugins) {
+			if (plugin.rewrites === null || plugin.rewrites.includes(below)) reach(plugin.file, site, behind, new Set(), bound, true);
+		}
 		const owners = entries.flatMap((entry, index) =>
 			!layoutEntries.includes(index) && entry.pages.some((spec) => matches(spec, path)) ? [index] : [],
 		);
@@ -1524,8 +1572,8 @@ function auditDateSources(site = SITE, reads = READS) {
 			if (!reached[index].has(module)) problems.push(`${where}: "_via" names ${module}, which none of its pages reaches`);
 			if (typeof why !== 'string' || why.trim() === '') {
 				problems.push(`${where}: "_via" gives ${module} neither a source nor a reason`);
-			} else if (!/\s/.test(why) && !named(why) && !Object.hasOwn(entry.counts, why)) {
-				problems.push(`${where}: "_via" dates ${module} by ${why}, which is neither a source nor a count of the entry`);
+			} else if (!/\s/.test(why) && !named(why) && !Object.hasOwn(entry.counts, why) && !Object.hasOwn(entry.texts, why)) {
+				problems.push(`${where}: "_via" dates ${module} by ${why}, which is neither a source, a count nor a text of the entry`);
 			}
 		}
 		// A reason (a sentence) stands for the exports it names in backticks, and
@@ -1602,7 +1650,7 @@ test('a listed page has to name every module it reaches, in "sources" or in "_vi
 		'entry 2 (site/src/content/docs/b.mdx): its pages show the pages of the content collection that are read by site/src/components/Index.astro, and neither "sources" nor "_via" names it',
 	]);
 	assert.deepEqual(audit(a, { ...b, _via: { 'site/src/components/Index.astro': page('a.mdx') } }), [
-		'entry 2 (site/src/content/docs/b.mdx): "_via" dates site/src/components/Index.astro by site/src/content/docs/a.mdx, which is neither a source nor a count of the entry',
+		'entry 2 (site/src/content/docs/b.mdx): "_via" dates site/src/components/Index.astro by site/src/content/docs/a.mdx, which is neither a source, a count nor a text of the entry',
 	]);
 	assert.deepEqual(audit({ ...a, _via: { ...a._via, 'site/src/data/numbers.mjs': 'the number of rows', 'site/src/data/gone.mjs': 'a module no page imports' } }, b), [
 		'entry 1 (site/src/content/docs/a.mdx): "_via" explains site/src/data/numbers.mjs, which "sources" already names',
@@ -1707,7 +1755,7 @@ test('what the layout shows of other files is on every page, and the entry of th
 });
 
 test('every page that renders data from outside its file is listed in date-sources.json with all of it, and no other', async () => {
-	const { problems, built } = auditDateSources();
+	const { problems, built } = auditDateSources(SITE, READS, await markdownPlugins());
 	assert.ok(built > 0, 'the scan found no page built from data, so it is not looking');
 	assert.deepEqual(problems, [], `${DATE_SOURCES} has to say what these pages are built from`);
 	// The table of what each export is read from covers every export, so a
@@ -1773,9 +1821,10 @@ test('each count in date-sources.json is the number the page shows: files as rep
 	}
 });
 
-test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides, the tables catalogue-pages.ts reads off the catalogue pages', async (t) => {
+test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides, the tables catalogue-pages.ts reads off the catalogue pages, the works the bibliography lists', async (t) => {
 	const reports = await import(pathToFileURL(join(SITE, 'src', 'data', 'reports.mjs')).href);
-	const texts = readDateSources(join(SITE, DATE_SOURCES)).flatMap((entry) => Object.entries(entry.texts));
+	const entries = readDateSources(join(SITE, DATE_SOURCES));
+	const texts = entries.flatMap((entry) => Object.entries(entry.texts)).filter(([, set]) => set.pattern !== undefined);
 	assert.ok(texts.some(([name]) => Object.hasOwn(READS['site/src/data/reports.mjs'], name)), 'the index of fiches shows what the guides say of each fiche');
 	assert.ok(texts.some(([name]) => name === 'cataloguePages'), 'the finder and the overview count the rows of the tables each catalogue page renders');
 	/** Each file a text reads, as HEAD holds it. */
@@ -1785,6 +1834,37 @@ test('each text in date-sources.json is the one the page shows: the fiches repor
 			assert.equal(head.status, 0, head.stderr);
 			return { file, text: head.stdout };
 		});
+	// A text of the works the pages cite is read off the pages the bibliography
+	// of its language is written from, with their titles: the English pages for
+	// the English one, the Spanish pages for the Spanish one. The Spanish one
+	// also reads each work by the English one it is, so it reads the English
+	// pages for their works alone ("frontmatter": "works"), no title of theirs
+	// showing on it.
+	const bibliography = await import(pathToFileURL(join(SITE, 'src', 'lib', 'bibliography-entries.mjs')).href);
+	const content = sitePages().map((file) => relative(REPO, file).split(sep).join('/'));
+	const cited = entries.flatMap((entry) =>
+		Object.entries(entry.texts).flatMap(([name, set]) => (set.frontmatter === undefined ? [] : [[entry, name, set]])),
+	);
+	assert.ok(cited.length > 0, 'the bibliography lists what the pages cite');
+	for (const [entry, name, set] of cited) {
+		assert.equal(typeof bibliography[name], 'function', `${name} is no export of src/lib/bibliography-entries.mjs`);
+		const spanish = entry.pages.every((spec) => spec.startsWith('site/src/content/docs/es/')) && set.frontmatter === 'references';
+		const dirty = spawnSync('git', ['status', '--porcelain', '--', ...set.files], { cwd: REPO, encoding: 'utf8' });
+		if (dirty.stdout.trim() !== '') {
+			t.diagnostic(`${name}: uncommitted changes under its files, not compared`);
+			continue;
+		}
+		assert.deepEqual(
+			filesAtHead(REPO, set.files).sort(),
+			content.filter((path) => spanish === path.startsWith('site/src/content/docs/es/')).sort(),
+			`${name} of ${entry.pages[0]}: the pages its bibliography is written from`,
+		);
+	}
+	for (const entry of new Set(cited.map(([entry]) => entry))) {
+		const kinds = Object.values(entry.texts).map((set) => set.frontmatter);
+		const spanish = entry.pages.every((spec) => spec.startsWith('site/src/content/docs/es/'));
+		assert.deepEqual(kinds.sort(), spanish ? ['references', 'works'] : ['references'], `${entry.pages[0]}: what it reads of each language`);
+	}
 	for (const [name, set] of texts) {
 		const module = Object.keys(READS).find((path) => READS[path][name] === 'text');
 		assert.ok(module, `${name} is no text an export the test knows reads`);
@@ -1895,6 +1975,80 @@ test('the catalogue pages move with a commit that changes only the words of the 
 			const dates = await repo.dates();
 			for (const path of pages) assert.equal(day(dates, path), '2026-01-02', `${path} after a commit to ${component} alone`);
 		}
+	}
+});
+
+test('the bibliography moves with a commit that changes the works a page cites, the title of a page of its language that cites or the bibliography data, and with none that changes only the rest of a page', async (t) => {
+	// The site's own entries for the two bibliographies. Their lists are written
+	// at build time from every page's references (src/lib/remark-bibliography.mjs),
+	// each entry closed by the pages that cite its work, named by their titles,
+	// so neither page's own file changes when a list does.
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	const cited = (title, work, body = 'The text.\n', ...fields) =>
+		page({ title, body, extra: ['references:', '  - type: book', `    title: "${work}"`, '    year: 2001', ...fields] });
+	// A work src/data/bibliography.mjs holds a note for: the bibliography
+	// shows that note, never the page's.
+	const described = (note) =>
+		page({
+			title: 'A guide',
+			body: 'The text.\n',
+			extra: ['references:', '  - type: book', '    authors: ["Kinsler, L. E."]', '    title: "Fundamentals of Acoustics"', '    year: 2000', '    publisher: Wiley', `    note: "${note}"`],
+		});
+	for (const path of ['reference/bibliography.md', 'es/reference/bibliography.md']) {
+		const entry = raw.entries.find((candidate) => candidate.pages.includes(`site/src/content/docs/${path}`));
+		assert.ok(entry, `an entry of ${DATE_SOURCES} lists ${path}`);
+		const citing = path.startsWith('es/') ? 'es/signals/guide.mdx' : 'signals/guide.mdx';
+		const cases = [
+			['a page cites another work', (repo) => repo.write(citing, cited('A guide', 'Another work')), '2026-01-02'],
+			['a page that cites is retitled', (repo) => repo.write(citing, cited('A better guide', 'A work')), '2026-01-02'],
+			[
+				'the notes and sections of the bibliography change',
+				(repo) => repo.writeFile('site/src/data/bibliography.mjs', 'two\n'),
+				'2026-01-02',
+			],
+			['a page that cites changes its text alone', (repo) => repo.write(citing, cited('A guide', 'A work', 'Other text.\n')), '2026-01-01'],
+			// What a page marks on a work reaches no entry: its chips, its
+			// structured data and its catalogue tables are the page's.
+			[
+				'a page marks the work it cites primary, not implemented, or the source of a table',
+				(repo) => repo.write(citing, cited('A guide', 'A work', 'The text.\n', '    primary: true', '    tables: ["a-2001-table-1"]')),
+				'2026-01-01',
+			],
+			['a page changes its note on a work the data has no note for', (repo) => repo.write(citing, cited('A guide', 'A work', 'The text.\n', '    note: "Why."')), '2026-01-02'],
+			['a page that cites nothing is retitled', (repo) => repo.write('signals/other.mdx', page({ title: 'Other, retitled' })), '2026-01-01'],
+			// The Spanish lists name Spanish pages only, and read an English page
+			// for the works it cites alone, so an English title moves only the
+			// English bibliography.
+			[
+				'an English page that cites is retitled',
+				(repo) => repo.write('signals/english.mdx', cited('A better English guide', 'A work')),
+				path.startsWith('es/') ? '2026-01-01' : '2026-01-02',
+			],
+			['an English page cites another work', (repo) => repo.write('signals/english.mdx', cited('An English guide', 'Another work')), '2026-01-02'],
+		];
+		for (const [what, change, expected] of cases) {
+			const repo = repository(t);
+			repo.write(path, page({ title: 'Bibliography' }));
+			for (const spec of entry.sources.filter((spec) => !spec.endsWith('/'))) repo.writeFile(spec, 'one\n');
+			repo.write(citing, cited('A guide', 'A work'));
+			repo.write('signals/english.mdx', cited('An English guide', 'A work'));
+			repo.write('signals/other.mdx', page({ title: 'Other' }));
+			writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [entry] }));
+			repo.commit(1);
+			change(repo);
+			repo.commit(2, what);
+			assert.equal(day(await repo.dates(), path), expected, `${path}: ${what}`);
+		}
+		const repo = repository(t);
+		repo.write(path, page({ title: 'Bibliography' }));
+		for (const spec of entry.sources.filter((spec) => !spec.endsWith('/'))) repo.writeFile(spec, 'one\n');
+		repo.write(citing, described('Why the guide cites it.'));
+		repo.write('signals/english.mdx', cited('An English guide', 'A work'));
+		writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [entry] }));
+		repo.commit(1);
+		repo.write(citing, described('Why the guide cites it, reworded.'));
+		repo.commit(2, 'a page rewords its note on a work the bibliography describes itself');
+		assert.equal(day(await repo.dates(), path), '2026-01-01', `${path}: a note the bibliography replaces`);
 	}
 });
 

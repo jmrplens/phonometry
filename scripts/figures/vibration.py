@@ -2826,8 +2826,8 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
 
     ax_fit.fill_between(
         heights,
-        fit * (1.0 - vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
-        fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+        fit * (1.0 - vibration.EMPIRICAL_FREQUENCY_ERROR),
+        fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_ERROR),
         color=theme_fill(COLOR_PRIMARY, ax_fit),
         zorder=0,
         label="$\\pm$50 %, which D.2 calls not uncommon",

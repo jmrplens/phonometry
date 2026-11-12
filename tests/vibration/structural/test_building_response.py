@@ -118,7 +118,7 @@ def test_the_fit_refuses_a_height_that_is_not_one(bad: float) -> None:
 
 def test_the_error_band_is_the_fifty_percent_the_annex_prints() -> None:
     """D.2: "errors of ± 50 % are not uncommon"."""
-    assert br.EMPIRICAL_FREQUENCY_TOLERANCE == pytest.approx(0.5)
+    assert br.EMPIRICAL_FREQUENCY_ERROR == pytest.approx(0.5)
     assert br.empirical_frequency_bounds(2.0) == pytest.approx((1.0, 3.0))
 
 

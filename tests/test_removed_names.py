@@ -976,6 +976,19 @@ def test_the_iso_11820_velocity_line_says_it_asks_for_a_report() -> None:
     )
 
 
+def test_the_iso_4866_band_says_it_is_an_error() -> None:
+    """The ± 50 % of ISO 4866 D.2 is the error an empirical prediction carries.
+
+    4.0.0rc1 shipped it as ``EMPIRICAL_FREQUENCY_TOLERANCE``, although every
+    other published constant named a tolerance is a bound a value has to stay
+    within; nothing is held to this one, it only widens a prediction into a
+    band.
+    """
+    for home in (ph.vibration, ph.vibration.structural):
+        assert not hasattr(home, "EMPIRICAL_FREQUENCY_TOLERANCE")
+        assert home.EMPIRICAL_FREQUENCY_ERROR == pytest.approx(0.5)
+
+
 # --------------------------------------------------------------------------- #
 # 4.0 an answer of several quantities is a record: the two members that only
 # repacked a record's own fields into a tuple are gone, and the records that

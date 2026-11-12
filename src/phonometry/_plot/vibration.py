@@ -1989,7 +1989,7 @@ def plot_building_frequency(
     """
     from .._i18n import format_number, localize_axes
     from ..vibration.structural.building_response import (
-        EMPIRICAL_FREQUENCY_TOLERANCE,
+        EMPIRICAL_FREQUENCY_ERROR,
         height_fundamental_frequency,
     )
 
@@ -2000,8 +2000,8 @@ def plot_building_frequency(
     ax.plot(fit, span, color=_C_PRIMARY, lw=2.0, label=_t(_LABEL_HEIGHT_FIT, language))
     ax.fill_betweenx(
         span,
-        fit * (1.0 - EMPIRICAL_FREQUENCY_TOLERANCE),
-        fit * (1.0 + EMPIRICAL_FREQUENCY_TOLERANCE),
+        fit * (1.0 - EMPIRICAL_FREQUENCY_ERROR),
+        fit * (1.0 + EMPIRICAL_FREQUENCY_ERROR),
         color=_C_PRIMARY,
         alpha=0.15,
         label=_t(r"$\pm$50 %, which D.2 calls not uncommon", language),

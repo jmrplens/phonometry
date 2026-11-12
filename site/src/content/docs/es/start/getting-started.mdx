@@ -67,25 +67,29 @@ así que `[plot]` compila los dos allí. numba dejó de dar soporte a Windows de
 allí, numba 0.57.1 y llvmlite 0.41.1, son para Python 3.10 como mucho, así que
 `[perf]` no tiene soporte allí, ni `[full]`, que lo incluye;
 `pip install "phonometry[plot,report,audio]"` instala allí los otros tres
-extras. Una instalación normal toma las versiones más recientes, que tienen
-wheels en las otras tres plataformas salvo numba en musl y en macOS en Intel,
-donde una instalación normal de `[perf]` compila numba y llvmlite en todos los
-Python, y matplotlib en ARM con musl. PyPI no tiene wheel de torch para ninguna
-de las cuatro (el último para macOS en Intel es el 2.2.2, anterior a todas las
-mínimas, y para Windows de 32 bits nunca ha habido ninguno) y torch no publica
-distribución de código fuente, así que `[torch]` no se instala en ellas desde
-PyPI. En Windows en ARM el índice de CPU de PyTorch tiene wheels de torch para
-Python 3.12, desde la 2.7.0, y 3.13, desde la 2.8.0, así que instalar antes
-torch desde él, como se explica más abajo, trae `[torch]` allí; no tiene
-ninguno para Python 3.14 allí, ni para Linux con musl ni para Windows de 32
-bits, y para macOS en Intel ninguno posterior al 2.2.2, como en PyPI.
-python-soundfile, para `[audio]`, no publica ningún wheel que lleve libsndfile
-para Linux con musl, ni en su mínima 0.12.0 para Linux en ARM, cuyo primero es
-el 0.13.0, ni para Windows en ARM, cuyo primero es el 0.14.0, así que pip
-instala allí su wheel de Python puro, que carga la libsndfile del sistema: en
-Alpine, `apk add libsndfile-dev`, porque el Python de la imagen oficial de
-Docker solo encuentra esa biblioteca con el nombre `libsndfile.so`, que añade
-ese paquete.
+extras. Lo mismo vale para Linux de 32 bits, donde los últimos wheels de
+numba, de la 0.56.4, son para Python 3.10 como mucho y numba ya no da soporte
+a la plataforma; [Docker y
+servidores](/phonometry/es/start/environments/docker/) dice qué compilan allí
+los otros tres. Una instalación normal toma las versiones más recientes, que
+tienen wheels en las otras tres plataformas salvo numba en musl y en macOS en
+Intel, donde una instalación normal de `[perf]` compila numba y llvmlite en
+todos los Python, y matplotlib en ARM con musl. PyPI no tiene wheel de torch
+para ninguna de las cuatro (el último para macOS en Intel es el 2.2.2,
+anterior a todas las mínimas, y para Windows de 32 bits nunca ha habido
+ninguno) y torch no publica distribución de código fuente, así que `[torch]`
+no se instala en ellas desde PyPI. En Windows en ARM el índice de CPU de
+PyTorch tiene wheels de torch para Python 3.12, desde la 2.7.0, y 3.13, desde
+la 2.8.0, así que instalar antes torch desde él, como se explica más abajo,
+trae `[torch]` allí; no tiene ninguno para Python 3.14 allí, ni para Linux con
+musl ni para Windows de 32 bits, y para macOS en Intel ninguno posterior al
+2.2.2, como en PyPI. python-soundfile, para `[audio]`, no publica ningún wheel
+que lleve libsndfile para Linux con musl, ni en su mínima 0.12.0 para Linux en
+ARM, cuyo primero es el 0.13.0, ni para Windows en ARM, cuyo primero es el
+0.14.0, así que pip instala allí su wheel de Python puro, que carga la
+libsndfile del sistema: en Alpine, `apk add libsndfile-dev`, porque el Python
+de la imagen oficial de Docker solo encuentra esa biblioteca con el nombre
+`libsndfile.so`, que añade ese paquete.
 
 ### Extras opcionales
 
@@ -101,10 +105,11 @@ pip install "phonometry[torch]"   # torch + array-api-compat, para que las simul
 Recomiendo `pip install "phonometry[full]"`: instala de una vez matplotlib,
 numba, reportlab, svglib y soundfile, con lo que quedan habilitadas todas las
 funcionalidades de la biblioteca salvo el cálculo de las simulaciones FDTD con
-torch, que añade `[torch]`. En Windows de 32 bits, donde `[full]` no tiene
-soporte, `pip install "phonometry[plot,report,audio]"` instala los otros tres,
-como se dice más arriba, y compila allí SciPy, matplotlib y kiwisolver desde
-el código fuente. La instalación base calcula todas las métricas solo
+torch, que añade `[torch]`. En Windows y Linux de 32 bits, donde `[full]` no
+tiene soporte, `pip install "phonometry[plot,report,audio]"` instala los otros
+tres, como se dice más arriba, y compila desde el código fuente SciPy,
+matplotlib y kiwisolver en Windows, y NumPy, SciPy, matplotlib y Pillow, entre
+otros, en Linux. La instalación base calcula todas las métricas solo
 con NumPy y SciPy. Esto incluye leer con `phonometry.io` todo WAV lineal de
 medición (24 bits, multicanal EXTENSIBLE, RF64); lo único que no queda
 disponible son las figuras (`.plot()` y las gráficas de respuesta de los

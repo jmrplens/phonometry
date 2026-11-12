@@ -33,6 +33,16 @@ phonometry[full]`` resolves numba 0.67.0 with NumPy 2.5.2, so the ceiling,
 the consequence and the workaround were all wrong at once. The number came
 from another project's metadata, which nothing here regenerates and nothing
 here can gate, so the prose keeps the mechanism and drops the number.
+
+Next to it, the pages that say what pip builds from source where PyPI has no
+wheel are held to name each tool such a build runs from ``PATH``. The Jupyter
+page named Rust for pywinpty, whose build also runs ``nuget.exe`` and panics
+without it, and the Docker page named LLVM for llvmlite, whose build runs
+``cmake`` and then ``make``. Neither said that on ``linux/arm/v5``, which no
+manylinux wheel serves, NumPy's build backend asks for ninja and patchelf and
+pyzmq's for cmake, which pip then builds from source with ``make`` and
+autoreconf. A reader who installed what the pages listed reached a build that
+stopped.
 """
 
 import pathlib
@@ -83,6 +93,46 @@ _NUMPY_BOUND = re.compile(
     r"numpy\s*(?:[<>]=?|[=!~]=)\s*\d"
     r"|numpy\s+(?:below|under|above|over|por debajo de|por encima de)\s+\d",
     re.IGNORECASE,
+)
+
+#: What a build from source needs on ``PATH`` and pip does not install, for
+#: each thing a paragraph of the Environments pages names: a package pip
+#: builds where PyPI has no wheel for it, or a platform where pip builds the
+#: build tools too. pywinpty's build.rs (3.1.2, and winpty-rs 1.0.8 under it)
+#: runs ``nuget.exe`` to fetch the ConPTY binaries its sdist leaves out and
+#: panics without it. llvmlite's ffi/build.py (0.50.0, whose sdist declares no
+#: build requirement) refuses to start without ``cmake`` and has it write Unix
+#: Makefiles, which ``make`` runs. ``linux/arm/v5`` is soft-float, so pip
+#: takes no manylinux wheel there: meson-python, which builds NumPy, SciPy and
+#: matplotlib, asks for ninja and patchelf when they are not on ``PATH``, and
+#: scikit-build-core, which builds pyzmq for JupyterLab, asks for cmake and
+#: ninja, and pip builds each of those from its sdist with ``make`` and
+#: autoreconf unless the system's own are on ``PATH``. The Docker page installs
+#: no pyzmq, so it names no cmake there. No version is held here: a release
+#: number belongs to those projects, and the tool a build runs is what the
+#: reader has to install.
+_SOURCE_BUILD_TOOLS = {
+    ("jupyter", "pywinpty"): ("Rust", "`nuget.exe`"),
+    ("jupyter", "`linux/arm/v5`"): ("ninja", "patchelf", "cmake"),
+    ("docker", "llvmlite"): ("LLVM", "`cmake`", "`make`"),
+    ("docker", "`linux/arm/v5`"): ("ninja", "patchelf"),
+}
+
+#: The three copies of each Environments page: the docs/ mirror and the site
+#: page in English and in Spanish. llms-full.txt and site/public/llms/ are
+#: derived from the site pages, so holding these holds them.
+_ENVIRONMENT_PAGE_COPIES = (
+    "docs/start/environments/{}.md",
+    "site/src/content/docs/start/environments/{}.md",
+    "site/src/content/docs/es/start/environments/{}.md",
+)
+
+#: Every page that says what one of those builds takes, with what it says it
+#: of and the tools that build runs.
+_SOURCE_BUILD_PAGES = tuple(
+    (copy.format(page), subject, tools)
+    for (page, subject), tools in _SOURCE_BUILD_TOOLS.items()
+    for copy in _ENVIRONMENT_PAGE_COPIES
 )
 
 
@@ -304,6 +354,37 @@ def test_the_full_extra_caveat_quotes_no_numpy_version() -> None:
             "another project's metadata; nothing here regenerates it, so state "
             "the mechanism instead of the number"
         )
+
+
+@pytest.mark.parametrize(
+    ("name", "subject", "tools"),
+    _SOURCE_BUILD_PAGES,
+    ids=[f"{name}:{subject.strip('`')}" for name, subject, _ in _SOURCE_BUILD_PAGES],
+)
+def test_a_build_from_source_names_every_tool_it_runs(
+    name: str, subject: str, tools: tuple[str, ...]
+) -> None:
+    """A page that says pip builds a package names each tool that build runs.
+
+    A build that does not find a tool on ``PATH`` stops there, whatever
+    compilers are installed, so a list of what the build takes that leaves
+    one out sends the reader into a failed build. The Jupyter page named Rust
+    alone for pywinpty and the Docker page LLVM alone for llvmlite, and
+    neither said that on ``linux/arm/v5`` NumPy's build backend asks for
+    ninja and patchelf and pyzmq's for cmake, which pip then builds with
+    ``make`` and autoreconf.
+    """
+    text = (_ROOT / name).read_text(encoding="utf-8")
+    paragraphs = [" ".join(block.split()) for block in text.split("\n\n")]
+    naming = [paragraph for paragraph in paragraphs if subject in paragraph]
+    assert naming, f"{name} no longer says what the builds of {subject} take"
+    missing = [
+        tool for tool in tools if not any(tool in paragraph for paragraph in naming)
+    ]
+    assert missing == [], (
+        f"{name} says pip builds from source for {subject} without naming "
+        f"{', '.join(missing)}, which that build runs from PATH"
+    )
 
 
 def test_pinning_leaves_unrelated_urls_alone() -> None:

@@ -51,10 +51,13 @@ print(phonometry.__version__)   # la versión que has instalado
 En una imagen `python:3.13-slim` para x86-64 o ARM64 sin nada más, ningún
 extra necesita un paquete del sistema: todos se instalan y funcionan allí
 desde sus wheels, también `[audio]`. Las otras seis arquitecturas de la imagen
-no tienen wheel de NumPy, SciPy, numba, matplotlib ni Pillow, así que pip los
-compila allí desde el código fuente, y `[audio]` carga la libsndfile del
-sistema; [Docker y servidores](/phonometry/es/start/environments/docker/) dice
-qué pide eso. Sin numba, la ponderación temporal `impulse` se ejecuta en
+no tienen wheel de NumPy, SciPy, matplotlib ni Pillow, así que pip los compila
+allí desde el código fuente, y `[audio]` carga la libsndfile del sistema.
+numba no da soporte a ninguna de sus tres de 32 bits, así que `[perf]` y
+`[full]` no tienen soporte allí, y torch no publica wheel para ninguna de las
+seis ni código fuente, así que `[torch]` no se instala allí desde PyPI;
+[Docker y servidores](/phonometry/es/start/environments/docker/) dice qué pide
+lo demás. Sin numba, la ponderación temporal `impulse` se ejecuta en
 Python puro y no dice nada. Una función cuyo extra falta dice cuál instalar,
 con la orden de pip y la de conda:
 
@@ -70,8 +73,9 @@ algunas de esas versiones no tienen wheel, y pip las compila allí desde el
 código fuente, como hace incluso una instalación normal con SciPy en Windows
 de 32 bits, y como hace `[plot]` con matplotlib en Linux en ARM con musl y en
 Windows de 32 bits; esa sección dice cuáles. numba ya no da soporte a Windows
-de 32 bits, así que ni `[perf]` ni `[full]`, que lo incluye, tienen soporte
-allí, donde `python -m pip install "phonometry[plot,report,audio]"` instala los
+de 32 bits, ni a Linux de 32 bits, así que ni `[perf]` ni `[full]`, que lo
+incluye, tienen soporte en ninguno de los dos, donde
+`python -m pip install "phonometry[plot,report,audio]"` instala los
 otros tres extras. torch no publica código fuente que compilar, así que no se
 instala en ninguna de las cuatro desde PyPI, y en Windows en ARM se instala
 desde el índice de CPU de PyTorch, como hace la sección siguiente.
@@ -140,10 +144,12 @@ uv run python -c "import phonometry; print(phonometry.__version__)"
 ```
 
 `uv add` resuelve igual en un proyecto para Python 3.12, 3.13 o 3.14.
-En Windows de 32 bits, donde `[full]` no tiene soporte, nombra
+En Windows y Linux de 32 bits, donde `[full]` no tiene soporte, nombra
 `[plot,report,audio]` en su lugar, tanto con `uv pip install` como con
-`uv add`; uv compila allí SciPy, matplotlib y kiwisolver desde el código
-fuente, como hace pip.
+`uv add`; uv compila allí desde el código fuente lo mismo que pip, SciPy,
+matplotlib y kiwisolver en Windows de 32 bits, y en Linux de 32 bits los
+paquetes que nombra [Docker y
+servidores](/phonometry/es/start/environments/docker/).
 
 ### torch desde el índice de CPU en un proyecto
 

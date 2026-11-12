@@ -22,11 +22,18 @@ acceleration
 
    A_\mathrm{z}(t) = F^{-1}[H(\omega) \, F[a_\mathrm{z}(t)]] \tag{Formula 2}
 
-The standard assumes a *conditioned* input: :math:`H` has unity
-transmissibility at 0 Hz, so any DC offset in the record (e.g. the gravity
-component of a non-AC-coupled accelerometer) passes straight into
-:math:`A_\mathrm{z}(t)` and corrupts the response peaks; remove the mean (high-pass)
-before processing. The acceleration dose is
+The standard assumes the record conditioned as clause 5.1.3 sets out, and
+the conditioning is the caller's: :math:`H` has unity transmissibility at
+0 Hz, so an offset left in the record (e.g. the gravity component of a
+non-AC-coupled accelerometer) passes straight into :math:`A_\mathrm{z}(t)` and
+corrupts the response peaks. The clause asks for an offset correction so
+that the recorded acceleration, with the accelerometer at rest (or with a
+symmetric signal), is (0 ± 0.1) m/s2, and notes that subtraction of the mean
+may not be appropriate if the recorded acceleration is asymmetric. It then
+band-limits the offset-corrected record with a second-order Butterworth
+high-pass filter at 0.01 Hz and a fourth-order Butterworth low-pass filter
+at 80 Hz; the band-limiting and weighting filters of ISO 2631-1 should not
+be applied. The acceleration dose is
 
 .. math::
 
@@ -222,15 +229,28 @@ def spinal_response(
     seat acceleration in the frequency domain and returns the time-domain
     response by the inverse transform.
 
-    The input must be **conditioned (DC-removed)**: the transfer function is
-    unity at 0 Hz by design (clause 5.2), so a DC offset (e.g. the 1 g
+    The input must already be **conditioned as clause 5.1.3 sets out**; this
+    function does not condition it. The transfer function is unity at 0 Hz
+    by design (clause 5.2), so an offset left in the record (e.g. the 1 g
     gravity component of a DC-coupled accelerometer) is passed unattenuated
     and produces a spurious constant shift in :math:`A_\mathrm{z}(t)` that corrupts
-    the positive response peaks of the dose. Subtract the mean (or
-    high-pass) of :math:`a_\mathrm{z}(t)` before calling.
+    the positive response peaks of the dose. The clause checks that upward
+    is positive, cuts out the parts with no contact between the seat pad and
+    the subject and conditions each remaining part separately, checks the
+    anti-aliasing of a resampled record, and corrects the offset so that the
+    recorded acceleration, with the accelerometer at rest (or with a
+    symmetric signal), is (0 ± 0.1) m/s2; it notes that subtraction of the
+    mean may not be appropriate if the recorded acceleration is asymmetric.
+    A record whose accelerometer was in motion at its start or end may be
+    tapered, and the offset-corrected record is then band-limited with a
+    second-order Butterworth high-pass filter at 0.01 Hz and a fourth-order
+    Butterworth low-pass filter at 80 Hz; the band-limiting and weighting
+    filters of ISO 2631-1 should not be applied. NOTE 2 of the clause
+    explains the low corner: a 0.5 Hz high-pass shifts a free fall back to
+    zero before the impact and offsets the impact peak by up to +1 g.
 
-    :param acceleration_m_s2: Measured, conditioned (zero-mean) vertical seat
-        acceleration :math:`a_\mathrm{z}(t)`, m/s2. Accepts a
+    :param acceleration_m_s2: Measured vertical seat acceleration
+        :math:`a_\mathrm{z}(t)`, conditioned as clause 5.1.3 sets out, m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -310,11 +330,11 @@ def acceleration_dose(acceleration_m_s2: SignalInput, fs: float | None = None) -
 
     Filters the acceleration through the seat-to-spine transfer function
     (Formula 2), takes the positive response peaks and combines them by
-    Formula 3. The input must be conditioned (DC-removed); see
+    Formula 3. The input must be conditioned as clause 5.1.3 sets out; see
     :func:`spinal_response`.
 
-    :param acceleration_m_s2: Measured, conditioned (zero-mean) vertical seat
-        acceleration :math:`a_\mathrm{z}(t)`, m/s2. Accepts a
+    :param acceleration_m_s2: Measured vertical seat acceleration
+        :math:`a_\mathrm{z}(t)`, conditioned as clause 5.1.3 sets out, m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.
@@ -779,16 +799,16 @@ def multiple_shock_assessment(
     Chains the Clause 5 dose and the Annex C risk: spinal response
     (Formula 2), acceleration dose (Formula 3), daily dose (Formula 4),
     compressive stress (C.1), stress variable :math:`R` (C.3) and injury
-    probability (C.5). The input must be conditioned (DC-removed); see
-    :func:`spinal_response`.
+    probability (C.5). The input must be conditioned as clause 5.1.3 sets
+    out; see :func:`spinal_response`.
 
     The model is vertical-axis only (clause 4a of the 2018 edition); for
     horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
     (:func:`~phonometry.vibration.weighted_acceleration`,
     :func:`~phonometry.vibration.vibration_dose_value`).
 
-    :param acceleration_m_s2: Measured, conditioned (zero-mean) vertical seat
-        acceleration :math:`a_\mathrm{z}(t)`, m/s2. Accepts a
+    :param acceleration_m_s2: Measured vertical seat acceleration
+        :math:`a_\mathrm{z}(t)`, conditioned as clause 5.1.3 sets out, m/s2. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this quantity is an
         acceleration in m/s2 and not a pressure.

@@ -16955,7 +16955,7 @@ the whole of the migration.
   identity and the zoom demodulation chain; a new "Time-frequency analysis"
   guide (English and Spanish) documents both estimators.
 - `metrology.tone_burst` and `metrology.ToneBurstResult` generate the gated
-  sine burst of IEC 60268-1:1985 (Annex A, Clause A2): the tone starts at a
+  sine burst of IEC 60268-1:1985 (Appendix A, Clause A2): the tone starts at a
   zero crossing and lasts an integral number of full periods, as a single
   burst or as the repetitive train of Clause A2.2 with a stated repetition
   rate. The result carries the rectangular gating envelope and the exact

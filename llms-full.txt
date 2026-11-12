@@ -3609,7 +3609,7 @@ this page, or the full ISO 10140-3 floor, is the reference, and the
   — Estimation of acoustic performance of buildings from the performance of
   elements — Part 2: Impact sound insulation between rooms*
   (ISO 12354-2:2017).
-  [iso.org catalogue](https://www.iso.org/standard/70239.html).
+  [iso.org catalogue](https://www.iso.org/standard/70243.html).
   The informative Annex C floating-floor estimate reproduced above (Formulae
   C.1 to C.4) and the worked floor of Annex G.
 
@@ -7290,7 +7290,7 @@ repository. Click a preview to open the PDF:
   Measurement of sound insulation in buildings and of building elements —
   Part 9: Laboratory measurement of room-to-room airborne sound insulation of
   a suspended ceiling with a plenum above it* (ISO 140-9:1985).
-  [iso.org catalogue](https://www.iso.org/standard/3944.html).
+  [iso.org catalogue](https://www.iso.org/standard/3965.html).
   The normalized ceiling attenuation $D_\mathrm{n,c}$ (clause 3.3) and the plenum
   test facility.
 - ASTM International. (2022). *Classification for Rating Sound Insulation*
@@ -8846,7 +8846,7 @@ steel of the stated thickness. It too is in [ERRATA](https://docs.jmrp.io/phonom
   Measurement of sound insulation in buildings and of building elements
   using sound intensity — Part 3: Laboratory measurements at low
   frequencies* (ISO 15186-3:2002).
-  [iso.org catalogue](https://www.iso.org/standard/33962.html).
+  [iso.org catalogue](https://www.iso.org/standard/31395.html).
   The low-frequency variant: the source level is read on the surface of the
   specimen and 9 dB is subtracted instead of 6, with the normative limp-panel
   qualification of Annex A.
@@ -11508,13 +11508,13 @@ report mentions it or not.
 - International Organization for Standardization. (2020). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 2: Impact sound insulation* (ISO 16283-2:2020).
-  [iso.org catalogue](https://www.iso.org/standard/74162.html).
+  [iso.org catalogue](https://www.iso.org/standard/77436.html).
   Clause 8, whose heading confines the procedure to the tapping machine, with
   Formulae (15) and (16). Two defects of this print are in the errata registry.
 - International Organization for Standardization. (2016). *Acoustics — Field
   measurement of sound insulation in buildings and of building elements —
   Part 3: Façade sound insulation* (ISO 16283-3:2016).
-  [iso.org catalogue](https://www.iso.org/standard/55998.html).
+  [iso.org catalogue](https://www.iso.org/standard/59748.html).
   Clause 7.3, which numbers no corner formula, with Formula (5) for the
   combination; Clause 6 restricts the procedure to the loudspeaker methods.
 - International Organization for Standardization. (2020). *Acoustics — Rating
@@ -18531,7 +18531,7 @@ calibrated readings the response function is not given.
   the sound attenuation of 8.11, measured by ISO 4869-1 on test subjects, and
   the active noise reduction of ISO 4869-6.
 - [Test signals and sample-rate tools](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/):
-  the tone bursts of IEC 60268-1 Annex A, the other part of that standard the
+  the tone bursts of IEC 60268-1 Appendix A, another part of that standard the
   library implements.
 - API reference: [`electroacoustics.program_signal`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/program-signal/)
   and [`electroacoustics.headphones`](https://docs.jmrp.io/phonometry/reference/api/electroacoustics/headphones/).
@@ -27461,7 +27461,7 @@ per-band field indicators then decide the grade actually achieved.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
   The declaration section: the dual/single-number forms,
   $L_{W\mathrm{Ad}} = L_{W\mathrm{A}} + K_{W\mathrm{A}}$ (clause 3.15) and the clause 6.2 verification.
 
@@ -29814,7 +29814,16 @@ equivalent diameters upstream and the receiver-side one at the distance Equation
 (16) gives, or agree on one when that expression falls to zero. Measure the mean
 level on each surface, take the extraneous sound off by the energy route where
 the sources can be switched, record the temperature on both sides, and measure
-the flow: the pressure loss and a velocity profile uniform within 10 %.
+the flow: the pressure loss and the flow velocities, whose actual distribution
+goes in the report where the velocities close to the entrance of the silencer
+deviate from the mean flow velocity by more than 10 % (9.2), a line for the
+report and not for the measurement. Where
+the two temperatures differ, the field correction of Equations (20) and (22) is
+not zero, and both equations print the ratio of the absolute temperatures the
+wrong way up: the correction turns a squared pressure into a sound power, so the
+hotter side takes the larger one. `temperature_field_correction` returns the
+equations as printed, and the [errata register](https://docs.jmrp.io/phonometry/reference/errata/) records the
+evidence and the reading the characteristic impedance asks for.
 
 A silencer sits between two of four things: a duct, a room with a diffuse field,
 a room without one, and open space. Sixteen pairs are transmission measurements
@@ -29949,9 +29958,9 @@ Equations (1) to (3) to the flow quantities of Equations (27) to (31), with the
 twenty installations of Figure 1; the attenuation, background window, directivity
 test, microphone geometry, impulse rule and reporting rounding of ISO 11821; and the direct and
 indirect methods, background table, wind and cloud classes, short-distance test,
-reference microphone height and hemi-free-field clearance of ISO 10847. Two
-defects in the print of ISO 10847 are recorded in the
-[errata register](https://docs.jmrp.io/phonometry/reference/errata/), along with a note that the two stepped
+reference microphone height and hemi-free-field clearance of ISO 10847. One
+defect in the print of ISO 11820 and two in that of ISO 10847 are recorded in
+the [errata register](https://docs.jmrp.io/phonometry/reference/errata/), along with a note that the two stepped
 background tables are a difference and not an erratum. Not implemented: the
 prediction of a barrier insertion loss or a silencer attenuation, which are
 separate pages; the instrument and windscreen requirements; the judgement of site
@@ -29969,8 +29978,10 @@ equivalence; and the report templates.
 - [Outdoor sound propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/):
   the ISO 9613-2 barrier attenuation term a prediction computes for the barrier
   ISO 10847 measures.
-- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): an upwind wind class printed
-  with a positive lower bound, and one prime asked to mean two different things.
+- [Errata in published sources](https://docs.jmrp.io/phonometry/reference/errata/): a temperature ratio of
+  ISO 11820 Equations (20) and (22) printed the wrong way up, an upwind wind
+  class printed with a positive lower bound, and one prime asked to mean two
+  different things.
 - API reference: [`noise_control.silencer_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/silencer-in-situ/),
   [`noise_control.screen_in_situ`](https://docs.jmrp.io/phonometry/reference/api/noise_control/screen-in-situ/)
   and [`environment.propagation.barrier_in_situ`](https://docs.jmrp.io/phonometry/reference/api/environment/barrier-in-situ/).
@@ -36437,7 +36448,7 @@ against the exact half-plane and coherent-ground models.
   Software for the calculation of sound outdoors — Part 3: Recommendations for
   quality assured implementation of ISO 9613-2 in software according to
   ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/63697.html).
+  [iso.org catalogue](https://www.iso.org/standard/66128.html).
   The nineteen worked test cases, the +/-0,05 dB envelope they are judged by,
   and the two reductions of section 2: the region ground factors and the mean
   path height.
@@ -36918,7 +36929,7 @@ Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-pro
   Software for the calculation of sound outdoors — Part 3: Recommendations for
   quality assured implementation of ISO 9613-2 in software according to
   ISO 17534-1* (ISO/TR 17534-3:2015).
-  [iso.org catalogue](https://www.iso.org/standard/63697.html). Test case T03,
+  [iso.org catalogue](https://www.iso.org/standard/66128.html). Test case T03,
   Table 6, row L_A.
 - Deutsches Institut für Normung. (2006). *Akustik — Software-Erzeugnisse zur
   Berechnung der Geräuschimmission im Freien — Qualitätsanforderungen und
@@ -54200,9 +54211,9 @@ documents, one page per module.
 | `extraneous_corrected_mean_level` / `ExtraneousCorrectionResult` / `silencer_background_correction` / `ISO11820_BACKGROUND_CORRECTIONS` / `MAX_EXTRANEOUS_CORRECTION` / `ISO11820_MIN_BACKGROUND_MARGIN_DB` / `ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` | `function` / `dataclass` / `function` / `mapping` / `constant` | **The two routes ISO 11820 offers around extraneous sound, 9.1.1 to 9.1.3.**<br>• `extraneous_corrected_mean_level(levels, extraneous_levels)`: the energy subtraction of Eqs. (17) and (18) as an `ExtraneousCorrectionResult` (`corrected_level`, `margin_db`), whose `capped` says whether it hit the 3 dB cap past which the quantity is not determined, judged on the margin of the two energy means as Table 1 draws it: a 3 dB margin, a 3,02 dB correction, is still determined<br>• `silencer_background_correction(level_difference)`: Table 1, in decibels to take off, stepped from 3 dB at a margin of 3 dB to 0,5 dB at 9 or 10<br>• a margin under 3 dB is refused; above 10 dB nothing is corrected, and 10 dB itself still takes off 0,5 dB | `noise_control.silencer_background_correction([4.0, 9.0])  # 2.0, 0.5` |
 | `temperature_field_correction` / `TYPICAL_FIELD_CORRECTION_LIMIT_DB` / `ISO11820_SPEED_OF_SOUND_M_S` | `function` / `constant` | **What a difference of temperature does to the field correction, Eqs. (20) and (22).**<br>• `K₂ − K₁ = 5 lg[(273 + θ₁)/(273 + θ₂)]`, the standard's own 273 rather than 273,15<br>• the same expression serves the insertion measurement, with the with-silencer run as the receiver side<br>• NOTE 4 expects K to stay under 3 dB in absolute value once the areas are the ones 3.3 and 3.4 define | `noise_control.temperature_field_correction(receiver_temperature_c=20.0, source_temperature_c=120.0)` |
 | `octave_levels_from_third_octave` / `ISO11820_OCTAVE_BAND_RANGE_HZ` / `ISO11820_OCTAVE_BAND_EXTENDED_RANGE_HZ` / `ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ` / `ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ` | `function` / `constant` | **The bands ISO 11820 measures in, 9.1.5 and 8.1.**<br>• `octave_levels_from_third_octave(levels)`: threes folded into octaves, the route the clause allows when the narrower bands were measured<br>• 63 Hz to 4 kHz in octaves, 50 Hz to 5 kHz in one-third octaves, with the extended ranges the clause names for a silencer that works outside them | `noise_control.octave_levels_from_third_octave(third_octave_levels)` |
-| `total_pressure_loss_pa` / `static_pressure_difference_pa` / `velocity_pressure_pa` / `flow_velocity_m_s` / `gas_density_kg_m3` / `silencer_flow_velocity_m_s` / `ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K` / `ISO11820_AIR_GAS_CONSTANT_J_KG_K` / `ISO11820_ATMOSPHERIC_PRESSURE_PA` / `VELOCITY_UNIFORMITY_TOLERANCE_PERCENT` | `function` / `constant` | **The flow side of the measurement, Eqs. (13) to (16) and (27) to (31).**<br>• pressure loss Δp_T, the static difference Δp_S behind a change of area, the velocity pressure and the velocity it stands for<br>• `gas_density_kg_m3(temperature_c=, molar_mass_kg_kmol=None)`: ρ = M p_amb / [R (273 + θ)], with R/M = 287 N m per kg K for air<br>• `silencer_flow_velocity_m_s`: the upstream mean velocity scaled by S_u/S_f, which is the velocity the regenerated noise answers to<br>• 9.2 asks the velocity profile to be uniform within 10 % | `noise_control.gas_density_kg_m3(temperature_c=120.0)` |
+| `total_pressure_loss_pa` / `static_pressure_difference_pa` / `velocity_pressure_pa` / `flow_velocity_m_s` / `gas_density_kg_m3` / `silencer_flow_velocity_m_s` / `ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K` / `ISO11820_AIR_GAS_CONSTANT_J_KG_K` / `ISO11820_ATMOSPHERIC_PRESSURE_PA` / `VELOCITY_UNIFORMITY_TOLERANCE_PERCENT` | `function` / `constant` | **The flow side of the measurement, Eqs. (13) to (16) and (27) to (31).**<br>• pressure loss Δp_T, the static difference Δp_S behind a change of area, the velocity pressure and the velocity it stands for<br>• `gas_density_kg_m3(temperature_c=, molar_mass_kg_kmol=None)`: ρ = M p_amb / [R (273 + θ)], with R/M = 287 N m per kg K for air<br>• `silencer_flow_velocity_m_s`: the upstream mean velocity scaled by S_u/S_f, which is the velocity the regenerated noise answers to<br>• 9.2 asks for the actual velocity distribution in the report where the velocities near the entrance deviate from the mean by more than 10 % (`VELOCITY_UNIFORMITY_TOLERANCE_PERCENT`) | `noise_control.gas_density_kg_m3(temperature_c=120.0)` |
 | `measurement_distance_upstream_m` / `measurement_distance_downstream_m` / `UPSTREAM_DISTANCE_DIAMETERS` / `DOWNSTREAM_DISTANCE_COEFFICIENTS` | `function` / `constant` | **Where the measurement surfaces stand along the duct, Eqs. (15) and (16).**<br>• upstream: one and a half equivalent diameters of the measurement cross-section<br>• downstream: 12 √S_d − 10 √S_f, which can fall to zero for a silencer whose free area is most of the duct, and 8.3.1 then sends the parties to agree<br>• S_f is the free cross-section, which NOTE 18 warns is not the intake one | `noise_control.measurement_distance_downstream_m(0.9, 0.45)` |
-| `SilencerInSituWarning` | `warning class` | **The measurement is outside a condition ISO 11820 states.**<br>• a downstream distance the geometry cannot give, a field correction past what NOTE 4 expects, a velocity profile outside the 10 % the standard asks for | `warnings.catch_warnings()`<br>Emitted by `noise_control.silencer_in_situ` |
+| `SilencerInSituWarning` | `warning class` | **The measurement is outside a condition ISO 11820 states.**<br>• a downstream distance Equation (16) cannot give, which 8.3.1 leaves to agreement between the parties<br>• a field correction over the 3 dB in absolute value NOTE 4 expects<br>• an extraneous-sound correction at the 3 dB cap of 9.1.1 and 9.1.2, where clause 4 leaves only an inequality to state | `warnings.catch_warnings()`<br>Emitted by `noise_control.silencer_in_situ` |
 | `screen_attenuation` / `ScreenInSituResult` | `function` / `dataclass` | **What a removable screen is worth where it stands, ISO 11821 clauses 5.8 and 5.9.**<br>• `unscreened_levels`, `screened_levels` [dB], `frequencies` [Hz], `distance`<br>• `source_kind`: 'actual' (Default) or 'artificial'<br>• `a_weighted_unscreened_level` / `a_weighted_screened_level`: the pair of 5.9, refused with an artificial source because the spectrum would be the loudspeaker's<br>• result: `attenuation`, `a_weighted_attenuation`, `.plot()`<br>• `.rounded` and `.rounded_a_weighted` (read-only): the whole decibels 7.4 c) reports, an exact half to the even one | `noise_control.screen_attenuation(without, with_screen, frequencies=f)` |
 | `screen_background_corrected_level` / `BACKGROUND_CORRECTION_WINDOW_DB` / `ISO11821_MIN_BACKGROUND_MARGIN_DB` / `ISO11821_PREFERRED_BACKGROUND_MARGIN_DB` | `function` / `constant` | **The background correction ISO 11821 boxes, clause 5.7.**<br>• `L_p = 10 lg(10^(L_ps/10) − 10^(L_pb/10))`, the plain energy subtraction, band by band and position by position<br>• over 10 dB of margin nothing is corrected; under 6 dB the conditions are "not acceptable", which is a refusal, because the background it names includes wind noise<br>• where ISO 11820 corrects from a stepped table, this standard prints the formula | `noise_control.screen_background_corrected_level(levels, background)` |
 | `screen_source_directivity_index` / `DIRECTIVITY_POSITIONS` / `DIRECTIVITY_INDEX_LIMIT_DB` / `DIRECTIVITY_CIRCLE_RADIUS_M` | `function` / `constant` | **Is this loudspeaker omnidirectional enough? ISO 11821 definition 3.10 and 5.2.2.**<br>• twelve positions evenly spaced on a horizontal circle of about 1,5 m radius<br>• `DI_i = L₃₆₀ − L₃₀,i`, the logarithmic mean less the position, so the index is positive where the position is quieter than the mean<br>• the source qualifies while no position falls more than 8 dB below the mean | `noise_control.screen_source_directivity_index(levels_at_twelve)` |
@@ -55613,7 +55624,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/).
 - International Electrotechnical Commission. (2014). *Sound system equipment —
   Part 4: Microphones* (IEC 60268-4:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/32039).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1221).
   The rated microphone characteristics: free-field sensitivity and its level
   re 1 V/Pa, the frequency response and the effective frequency range against
   the tolerance limits, the directional pattern and the directivity index, the
@@ -55622,7 +55633,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Microphone characterisation](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/).
 - International Electrotechnical Commission. (2007). *Sound system equipment —
   Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1223).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1224).
   The rated loudspeaker characteristics: rated impedance, rated frequency
   range, characteristic sensitivity referred to 1 W at 1 m, the effective
   frequency range against the -10 dB band, the directivity index and the total
@@ -55630,7 +55641,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Loudspeaker characterisation](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/).
 - International Electrotechnical Commission. (1982). *Scales and sizes for
   plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1218).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1176).
   The scale proportions of the characteristic graphs: one frequency decade
   equal to 25 dB on the ordinate, and the polar diagram on a 25 dB
   reference-circle radius.
@@ -55639,7 +55650,7 @@ it; the list grows as guides gain their References sections.
 - International Electrotechnical Commission. (1985). *Sound system
   equipment — Part 1: General* (IEC 60268-1:1985).
   [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Annex A, Clause A2: tone bursts starting at the zero crossing of the tone
+  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone
   with an integral number of full periods, repetitive burst trains at a
   stated repetition rate, and the Table AII burst durations.
   Cited by [Test signals and sample-rate tools](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/).
@@ -55747,7 +55758,7 @@ it; the list grows as guides gain their References sections.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
   What a manufacturer publishes once the power level is measured: the dual
   and single-number declaration forms, the declared value
   $L_{WAd} = L_{WA} + K_{WA}$ and the clause 6.2 verification procedure.
@@ -70873,15 +70884,16 @@ smearing them.
 
 ## What this guide covers
 
-**Covered.** IEC 60268-1:1985 Annex A, Clause A2: the tone burst that starts at
-a zero crossing of the tone and consists of an integral number of full periods
-(A2.1) and the repetitive burst train of A2.2, implemented by `tone_burst` and
-hand-checked against the Table AII durations. Bendat & Piersol Section 10.2's
-anti-alias requirement, turned into an explicit, checkable specification by
-`resample_signal`'s stopband attenuation and transition width.
+**Covered.** IEC 60268-1:1985 Appendix A, Clause A2: the tone burst that
+starts at a zero crossing of the tone and consists of an integral number of
+full periods (A2.1) and the repetitive burst train of A2.2, implemented by
+`tone_burst` and hand-checked against the Table AII durations. Bendat &
+Piersol Section 10.2's anti-alias requirement, turned into an explicit,
+checkable specification by `resample_signal`'s stopband attenuation and
+transition width.
 
 **Not covered.** IEC 60268-1:1985 is a general standard for sound system
-equipment; only the Annex A tone-burst clauses are implemented on this page.
+equipment; only the Appendix A tone-burst clauses are implemented on this page.
 Its Clause 7, the simulated programme signal, is in
 `electroacoustics.program_signal` and has its walk-through in the
 [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/)
@@ -70912,7 +70924,7 @@ accuracy claims are closed-form, not normative.
 - International Electrotechnical Commission. (1985). *Sound system
   equipment — Part 1: General* (IEC 60268-1:1985).
   [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Annex A, Clause A2: tone bursts starting at the zero crossing of the tone
+  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone
   with an integral number of full periods (A2.1), repetitive burst trains
   at a stated repetition rate (A2.2), and the Table AII burst durations the
   sample counts are hand-checked against.
@@ -84249,7 +84261,7 @@ belong to the Annex A finite-element model. In case of doubt the delineation
 is quantitative: when the band-limited vertical peak acceleration exceeds
 9.81 m/s² (1 g, the free-fall threshold), clause 5 and Annex C apply.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t), band-limited per ISO 2631-1, through the spinal response Az(t) from the seat-to-spine transfer function (one zero, six poles), the acceleration dose Dz = 1.07 times the sixth root of the sum of the positive response peaks to the sixth power and the daily dose Dzd, the compressive stress Sd = mz times Dzd, the age-cumulated stress variable R, and finally the Weibull probability of lumbar injury" width="86%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t), conditioned as clause 5.1.3 requires with a second-order 0.01 Hz high pass and a fourth-order 80 Hz low pass and not with the ISO 2631-1 0.4 to 100 Hz filters, through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" width="86%"></picture>
 
 ## 1. Spinal response (clause 5.2)
 
@@ -84262,13 +84274,26 @@ $$
 A_\mathrm{z}(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_\mathrm{z}(t)]\right].
 $$
 
-The input record must be **conditioned (DC-removed)**: because $H$ is unity at
-0 Hz by design, a DC offset (e.g. the 1 g gravity component of a DC-coupled
-accelerometer) passes straight into $A_\mathrm{z}(t)$ and corrupts the positive
-response peaks of the dose. Subtract the mean (or high-pass) before processing.
-The rest of the conditioning chain is the caller's too: `spinal_response`
-assumes a record that has already been sign-checked, split at the
-loss-of-contact boundaries, offset-corrected, tapered and band-limited.
+The input record must be **conditioned as clause 5.1.3 sets out**: because $H$
+is unity at 0 Hz by design, an offset left in the record (the 1 g gravity
+component of a DC-coupled accelerometer, say) passes straight into
+$A_\mathrm{z}(t)$ and corrupts the positive response peaks of the dose. The
+clause asks for an offset correction so that the recorded acceleration reads
+(0 ± 0.1) m/s² with the accelerometer at rest (or with a symmetric signal), and
+warns that subtraction of the mean **may not be appropriate** if the recorded
+acceleration is asymmetric, which a shock record is by construction. Where the
+accelerometer was moving at the start or the end of the record, the clause
+adds that tapering it, with a cosine taper over several seconds for instance,
+may be appropriate before the band limiting. The offset-corrected record is
+then band-limited with a second-order Butterworth
+high pass at 0.01 Hz and a fourth-order Butterworth low pass at 80 Hz; the
+band-limiting and weighting filters of ISO 2631-1 should **not** be applied,
+because NOTE 2 shows a 0.5 Hz high pass dragging the −1 g of a free fall back
+to zero before the impact and offsetting the impact peak by up to +1 g. The
+whole conditioning chain is the caller's: `spinal_response` assumes a record
+that has already been sign-checked, split at the loss-of-contact boundaries,
+offset-corrected, tapered if its accelerometer was moving at its start or end
+and a taper was judged appropriate, and band-limited.
 
 ```python
 from phonometry import vibration

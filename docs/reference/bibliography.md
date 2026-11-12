@@ -172,7 +172,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Calibration and dBFS](../signals/metrology/calibration.md).
 - International Electrotechnical Commission. (2014). *Sound system equipment —
   Part 4: Microphones* (IEC 60268-4:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/32039).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1221).
   The rated microphone characteristics: free-field sensitivity and its level
   re 1 V/Pa, the frequency response and the effective frequency range against
   the tolerance limits, the directional pattern and the directivity index, the
@@ -181,7 +181,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Microphone characterisation](../devices/electroacoustics/microphones.md).
 - International Electrotechnical Commission. (2007). *Sound system equipment —
   Part 5: Loudspeakers* (IEC 60268-5:2003+A1:2007).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1223).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1224).
   The rated loudspeaker characteristics: rated impedance, rated frequency
   range, characteristic sensitivity referred to 1 W at 1 m, the effective
   frequency range against the -10 dB band, the directivity index and the total
@@ -189,7 +189,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Loudspeaker characterisation](../devices/electroacoustics/loudspeakers.md).
 - International Electrotechnical Commission. (1982). *Scales and sizes for
   plotting frequency characteristics and polar diagrams* (IEC 60263:1982).
-  [IEC webstore](https://webstore.iec.ch/en/publication/1218).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1176).
   The scale proportions of the characteristic graphs: one frequency decade
   equal to 25 dB on the ordinate, and the polar diagram on a 25 dB
   reference-circle radius.
@@ -198,7 +198,7 @@ it; the list grows as guides gain their References sections.
 - International Electrotechnical Commission. (1985). *Sound system
   equipment — Part 1: General* (IEC 60268-1:1985).
   [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Annex A, Clause A2: tone bursts starting at the zero crossing of the tone
+  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone
   with an integral number of full periods, repetitive burst trains at a
   stated repetition rate, and the Table AII burst durations.
   Cited by [Test signals and sample-rate tools](../signals/spectra/test-signals.md).
@@ -306,7 +306,7 @@ it; the list grows as guides gain their References sections.
 - International Organization for Standardization. (1996). *Acoustics —
   Declaration and verification of noise emission values of machinery and
   equipment* (ISO 4871:1996).
-  [iso.org catalogue](https://www.iso.org/standard/10868.html).
+  [iso.org catalogue](https://www.iso.org/standard/10855.html).
   What a manufacturer publishes once the power level is measured: the dual
   and single-number declaration forms, the declared value
   $L_{WAd} = L_{WA} + K_{WA}$ and the clause 6.2 verification procedure.

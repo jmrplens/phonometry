@@ -63,8 +63,9 @@ además inclinar el fondo con un perfil de profundidad lineal a trozos
   misma integración. Validado contra los arcos de círculo de un gradiente
   lineal y contra la forma cerrada del tiempo de propagación a lo largo de
   ellos. `eigenrays` busca después en ese abanico trazado los caminos que
-  unen la fuente con un receptor y lista sus llegadas, validado contra la red
-  de imágenes de la guía de ondas ideal, donde cada llegada es forma cerrada.
+  unen la fuente con un receptor y lista sus llegadas, validado contra la
+  retícula de imágenes de la guía de ondas ideal, donde cada llegada es forma
+  cerrada.
 - **`gaussian_beams`** cuelga un haz gaussiano de cada uno de esos rayos y los
   suma en un campo de pérdida de propagación, que se mantiene finito en las
   cáusticas donde la amplitud clásica de un rayo es infinita y decae en las
@@ -523,7 +524,7 @@ $\mathcal{R}$ de Rayleigh del ángulo rasante propio de cada rayo, módulo y
 fase), y el $(-i)^m$ de la Ec. (3.79) por cada cáustica cruzada, la forma
 discreta del $-\pi/2$ que la rama de la raíz cuadrada del método de haces
 gasta de forma continua. Validado contra el único entorno cuya estructura de
-llegadas es forma cerrada entera, la red de imágenes de la guía de ondas
+llegadas es forma cerrada entera, la retícula de imágenes de la guía de ondas
 ideal: el censo coincide imagen por imagen, y tiempos, ángulos y amplitudes
 concuerdan hasta $10^{-13}$ s, $10^{-11}$ grados y $10^{-13}$ relativo; y
 contra el rayo parabólico exacto del perfil $n^2$-lineal (Ec. 3.195), cuyo
@@ -693,7 +694,7 @@ $10^{-3}$ dB, que es la única comparación que fija a la vez la normalización 
 la amplitud y el convenio de fase; el campo de dos rayos del espejo de Lloyd
 con una reflexión en superficie, hasta 0,01 dB; y la suma de fuentes imagen de
 la guía de ondas ideal de presión nula, hasta 0,0004 dB con el abanico abierto
-a 88 grados. Sobre un lecho disipativo la misma red de imágenes lleva
+a 88 grados. Sobre un lecho disipativo la misma retícula de imágenes lleva
 $\mathcal{R}(\theta)^n$ al ángulo en forma cerrada de cada imagen, y los
 haces la siguen hasta 0,07 dB en el peor caso a ambos lados del ángulo
 crítico. Esa misma guía desarrollada sobre sus modos en vez de sobre sus
@@ -757,7 +758,7 @@ perfil de encima entre medias, así que su coeficiente se evalúa una sola
 vez, exacto, y se eleva al recuento de toques en el fondo del integrador;
 `ray_trace` expone esos recuentos por contorno junto a sus longitudes de
 arco, que es todo lo que una amplitud necesita de la geometría. Validado
-contra la red de imágenes con $\mathcal{R}(\theta)^n$ al ángulo en forma
+contra la retícula de imágenes con $\mathcal{R}(\theta)^n$ al ángulo en forma
 cerrada de cada imagen: 0,07 dB en el peor caso en distancias cuyas imágenes
 dominantes caen por encima y por debajo del ángulo crítico, donde despojar a
 la $\mathcal{R}$ del oráculo de su fase lo mueve 5,7 dB.
@@ -1220,7 +1221,7 @@ refleja cada rayo sobre la faceta local (Ec. 3.121) con el par dinámico
 cruzando el rebote según las Ecs. (3.122)-(3.123). Cada uno está validado contra una
 forma cerrada exacta: los modos de la guía de ondas ideal de presión nula y su
 suma de fuentes imagen (para los eigenrayos, la lista completa de llegadas de
-esa red: tiempo, ángulo, contadores y amplitud por imagen), los
+esa retícula: tiempo, ángulo, contadores y amplitud por imagen), los
 rayos en arco de círculo de un gradiente lineal junto con el tiempo de
 propagación publicado a lo largo de ellos (Medwin y Clay 1998, Ec. (3.3.20)),
 la divergencia esférica en campo libre y, para el fondo en pendiente, el

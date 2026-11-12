@@ -22,7 +22,7 @@ references:
     title: "Mechanical vibration — Laboratory method for evaluating vehicle seat vibration — Part 1: Basic requirements"
     designation: "ISO 10326-1:2016"
     implemented: false
-    url: "https://www.iso.org/standard/63149.html"
+    url: "https://www.iso.org/standard/67659.html"
     note: "El disco de acelerómetros sobre la almohadilla de asiento que exige el apartado 5.1.2: su diámetro, su altura y su dureza, y el disco metálico que sostiene los transductores (5.2.3)."
 ---
 
@@ -105,8 +105,9 @@ para tener una probabilidad razonable de capturarlos. Un ciclo de trabajo
 completo es representativo en una tarea repetible, como la de un dúmper de mina;
 en las no repetibles (marcha campo a través, transporte militar) la duración
 suficiente depende de la variabilidad del terreno. Los ensayos que exponen a
-personas a choques repetidos necesitan su propia evaluación de riesgos, y
-medidas más cortas primero.
+personas a choques repetidos probablemente necesitan una evaluación de riesgos
+cuidadosa, y puede ser apropiado empezar con medidas más cortas para ganar
+confianza en que la exposición no será excesiva.
 
 ## 2. Acondicionar el registro (apartado 5.1.3)
 
@@ -125,16 +126,19 @@ consejo que un lector se daría a sí mismo.
    de datos aplican filtros adecuados de forma automática, pero de que es
    importante verificar que lo hicieron.
 4. **Corrige el offset** para que la aceleración registrada marque
-   (0 ± 0,1) m/s² con el acelerómetro en reposo. El apartado añade después la
-   advertencia: restar la media **puede no ser apropiado** si la aceleración
-   registrada es asimétrica, y un registro de choques es asimétrico por
-   construcción, que es justo el caso en el que restar la media se equivoca.
-5. **Aplica una ventana de entrada y salida** (una ventana coseno de varios
-   segundos, por ejemplo) si el acelerómetro estaba en movimiento al principio o
-   al final de la grabación, antes de limitar la banda.
+   (0 ± 0,1) m/s² con el acelerómetro en reposo (o con una señal simétrica). El
+   apartado añade después la advertencia: restar la media **puede no ser
+   apropiado** si la aceleración registrada es asimétrica, y un registro de
+   choques es asimétrico por construcción, que es justo el caso en el que restar
+   la media se equivoca.
+5. **Valora una ventana de entrada y salida** si el acelerómetro estaba en
+   movimiento al principio o al final de la grabación: el apartado dice que
+   aplicarla, una ventana coseno de varios segundos por ejemplo, puede ser
+   apropiado antes de limitar la banda. Un registro que empieza y acaba en
+   reposo se limita en banda tal como está.
 6. **Limita la banda** con un paso alto Butterworth de segundo orden a 0,01 Hz y
    un paso bajo Butterworth de cuarto orden a 80 Hz. Los filtros de limitación de
-   banda y de ponderación de la ISO 2631-1 **no** deben aplicarse.
+   banda y de ponderación de la ISO 2631-1 **no** deberían aplicarse.
 
 El último paso es donde se gana o se pierde el número. La NOTA 2 da la razón con
 números: se han observado periodos de caída libre de más de 0,5 s en
@@ -343,8 +347,10 @@ for sex, mz in (("male", 0.029), ("female", 0.025)):
 La tensión compresiva más baja cae en la banda más alta, porque los umbrales
 femeninos de la Tabla C.2 son todavía más bajos. La NOTA 5 del Anexo C recoge el
 mismo resultado para esta exposición y cita $R$ = 0,97 frente al 0,96 calculado
-aquí, un redondeo de su propio $S_\mathrm{d}$ impreso; la banda, y por tanto el veredicto,
-es la misma. Los coeficientes $\alpha$ y $\beta$ de la Fórmula (C.5) y los
+aquí. Su $S_\mathrm{d}$ impreso coincide con los 1,40 MPa de este cálculo, así
+que la errata está en la última cifra del $R$ impreso, como recoge el
+[registro de erratas](/phonometry/es/reference/errata/); la banda, y por tanto
+el veredicto, es la misma. Los coeficientes $\alpha$ y $\beta$ de la Fórmula (C.5) y los
 umbrales de la Tabla C.2 para sujetos femeninos se apoyan en un conjunto de datos
 más pequeño, como anota la norma al pie de ambas tablas.
 
@@ -543,7 +549,8 @@ humanos](/phonometry/es/vibration/human/human-vibration/). La cadena de
 acondicionamiento de la sección 2 es cosa de quien llama: `spinal_response` da
 por supuesto un registro al que ya se le ha comprobado el signo, se ha partido
 en las fronteras de pérdida de contacto, se le ha corregido el offset, se le
-ha aplicado la ventana y se le ha limitado la banda.
+ha aplicado la ventana si el acelerómetro se movía al principio o al final y la
+ventana se juzgó apropiada, y se le ha limitado la banda.
 </ScopeClaim>
 </Scope>
 

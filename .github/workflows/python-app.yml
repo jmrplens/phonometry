@@ -943,6 +943,14 @@ jobs:
       # the CHANGELOG) quotes the requirement that carries extras. Static,
       # stdlib only, so it runs here with the markdown checks.
       run: python scripts/check_quoted_extras.py
+    - name: Every catalogue link opens the document beside it
+      # A link to the ISO catalogue or the IEC webstore carries only a number,
+      # so a slip opens another document while every page builds and every
+      # link resolves. This holds each such link of the pages and the mirrors
+      # to the designation scripts/catalogue_ids.json pins for its number.
+      # Static, stdlib only, and it reads nothing from the network, so it runs
+      # here with the markdown checks.
+      run: python scripts/check_catalogue_links.py
     - name: Every Spanish label keeps its accents, eñes and glossary terms
       # A translation typed without the Spanish keyboard layout reads fine to
       # every other gate, and twenty-nine figure labels shipped as

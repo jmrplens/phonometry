@@ -398,7 +398,7 @@ repository. Click a preview to open the PDF:
   Measurement of sound insulation in buildings and of building elements —
   Part 9: Laboratory measurement of room-to-room airborne sound insulation of
   a suspended ceiling with a plenum above it* (ISO 140-9:1985).
-  [iso.org catalogue](https://www.iso.org/standard/3944.html).
+  [iso.org catalogue](https://www.iso.org/standard/3965.html).
   The normalized ceiling attenuation $D_\mathrm{n,c}$ (clause 3.3) and the plenum
   test facility.
 - ASTM International. (2022). *Classification for Rating Sound Insulation*

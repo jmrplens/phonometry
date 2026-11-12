@@ -1507,7 +1507,7 @@ que daba; los valores son los mismos.
 
 ## Una frecuencia de muestreo es un `float`, y un recuento admite un entero de NumPy
 
-La frecuencia de muestreo de una `Signal` es el `float` que se le dio, así
+La frecuencia de muestreo de un `Signal` es el `float` que se le dio, así
 que un comprobador de tipos lee `sig.fs` como un `float`, donde leía un
 `int`, y toda función que funciona a cualquier frecuencia positiva admite un
 `float`: la frecuencia que devuelve una función es la que admite la
@@ -1518,14 +1518,14 @@ frecuencia en la cabecera del archivo, las señales de prueba de
 `room.image_source_rir`, `psychoacoustics.loudness_zwicker`,
 `psychoacoustics.sharpness_din`,
 `psychoacoustics.psychoacoustic_annoyance_from_signal` y `speech.stoi`.
-`vibration.evaluate_train_passage`, `signals.resample_signal` con una Signal
+`vibration.evaluate_train_passage`, `signals.resample_signal` con un `Signal`
 y el banco del método B de `environment` también rechazaban una frecuencia
 fraccionaria, con el argumento de que el banco de filtros necesitaba una
 entera, y no la necesita: funcionan a cualquier frecuencia.
 
 | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- |
-| `psychoacoustics.loudness_zwicker(x, sig.fs)` pasaba la comprobación de tipos, con `sig.fs` leída como un `int` | se entrega la Signal, `loudness_zwicker(sig)`, o `int(sig.fs)` |
+| `psychoacoustics.loudness_zwicker(x, sig.fs)` pasaba la comprobación de tipos, con `sig.fs` leído como un `int` | se entrega el `Signal`, `loudness_zwicker(sig)`, o `int(sig.fs)` |
 | `io.write(path, io.Signal(x, 44100.5))` fallaba dentro de la cabecera con `struct.error` | lanza `ValueError` nombrando `fs`, como lo hace `fs=44100.5` |
 | `filters.OctaveFilterBank(fs, order=2.5)`, `room.mls_signal(10.5)` y los demás recuentos que solo se comprobaban como un número funcionaban con una fracción o un booleano | una fracción lanza `ValueError: 'order' must be a whole number`, un booleano un `TypeError`; se pasa el número entero |
 | `emission.sound_intensity(p1, p2, fs, spacing_m=d, fraction=1.0)` funcionaba | lanza `TypeError`, como toda fracción de banda; se pasa `1` o `3` |
@@ -1550,7 +1550,7 @@ declarado de ese tipo admite ahora `NumericArrayLike`: un número, una
 secuencia de números anidada a cualquier profundidad, o un array de NumPy, o
 cualquier objeto con un `__array__`, de tipo de dato numérico o booleano, y
 ningún texto. Una lista, una tupla, una lista anidada, un array de cualquier
-tipo de dato numérico y una Signal pasan la comprobación de tipos como
+tipo de dato numérico y un `Signal` pasan la comprobación de tipos como
 antes, y las llamadas se ejecutan como se ejecutaban.
 
 | 3.3.0 o 4.0.0rc1 | 4.0 |
@@ -1918,14 +1918,14 @@ calculó el paso de tiempo. Los mapas que las simulaciones derivan de ellos,
 lectura en NumPy: en la 4.0.0rc1 editar uno llegaba a parte del avance y no
 al paso de tiempo, y ahora lanza
 `ValueError`, así que otro medio es una simulación nueva construida con los
-mapas editados. Una `Signal` también guarda una copia propia de sus
+mapas editados. Un `Signal` también guarda una copia propia de sus
 muestras, que sigue siendo escribible para procesarla en su sitio, como
 siempre lo fueron las muestras de un fichero leído con `io.read`. Un registro
 de resultado construido a mano, llamando directamente a su clase, hace la
 misma copia: todo registro público que puede guardar un array copia los
 arrays que recibe al construirse, lo construya quien lo construya, también
 dentro de una tupla, una lista o cualquier diccionario. Un registro guardado
-dentro de otro se guarda entero y responde de sus propios arrays, y una
+dentro de otro se guarda entero y responde de sus propios arrays, y un
 `Signal` no es una excepción: los siete resultados que devuelven una forma de
 onda como `Signal` (`filters.OctaveFilterResult`, `signals.EnvelopeResult`,
 `signals.ResampledSignalResult`, `signals.AlignedImpulseResponseResult`,

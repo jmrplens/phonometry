@@ -225,15 +225,16 @@ smearing them.
 
 ## What this guide covers
 
-**Covered.** IEC 60268-1:1985 Annex A, Clause A2: the tone burst that starts at
-a zero crossing of the tone and consists of an integral number of full periods
-(A2.1) and the repetitive burst train of A2.2, implemented by `tone_burst` and
-hand-checked against the Table AII durations. Bendat & Piersol Section 10.2's
-anti-alias requirement, turned into an explicit, checkable specification by
-`resample_signal`'s stopband attenuation and transition width.
+**Covered.** IEC 60268-1:1985 Appendix A, Clause A2: the tone burst that
+starts at a zero crossing of the tone and consists of an integral number of
+full periods (A2.1) and the repetitive burst train of A2.2, implemented by
+`tone_burst` and hand-checked against the Table AII durations. Bendat &
+Piersol Section 10.2's anti-alias requirement, turned into an explicit,
+checkable specification by `resample_signal`'s stopband attenuation and
+transition width.
 
 **Not covered.** IEC 60268-1:1985 is a general standard for sound system
-equipment; only the Annex A tone-burst clauses are implemented on this page.
+equipment; only the Appendix A tone-burst clauses are implemented on this page.
 Its Clause 7, the simulated programme signal, is in
 `electroacoustics.program_signal` and has its walk-through in the
 [Headphones and Earphones (IEC 60268-7)](../../devices/electroacoustics/headphones.md)
@@ -264,7 +265,7 @@ accuracy claims are closed-form, not normative.
 - International Electrotechnical Commission. (1985). *Sound system
   equipment — Part 1: General* (IEC 60268-1:1985).
   [IEC webstore](https://webstore.iec.ch/en/publication/1204).
-  Annex A, Clause A2: tone bursts starting at the zero crossing of the tone
+  Appendix A, Clause A2: tone bursts starting at the zero crossing of the tone
   with an integral number of full periods (A2.1), repetitive burst trains
   at a stated repetition rate (A2.2), and the Table AII burst durations the
   sample counts are hand-checked against.

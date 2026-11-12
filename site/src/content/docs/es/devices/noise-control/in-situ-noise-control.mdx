@@ -201,9 +201,20 @@ la máquina, mida el nivel medio en cada superficie, y mida el sonido ajeno con
 las fuentes que se puedan apagar apagadas, porque la vía energética de las
 ecuaciones (17) y (18) es mejor que la tabla escalonada y las dos rechazan por
 debajo de 3 dB de todas formas. Anote la temperatura de los dos lados: si
-difieren, la corrección de campo de las ecuaciones (20) y (22) no es cero.
-Después mida el flujo, la pérdida de presión total del silenciador y el perfil
-de velocidad en el conducto, que 9.2 pide uniforme dentro del 10 %.
+difieren, la corrección de campo de las ecuaciones (20) y (22) no es cero. Las
+dos ecuaciones imprimen al revés el cociente de las dos temperaturas absolutas:
+la corrección convierte el cuadrado de una presión en una potencia acústica, así
+que al lado más caliente le toca la mayor, y lo impreso da la inversa.
+`temperature_field_correction` devuelve las ecuaciones tal como están impresas,
+para que su número sea el que da la norma, y
+[el registro de erratas](/phonometry/es/reference/errata/) recoge la evidencia y
+la lectura que pide la impedancia característica. Después mida el flujo, la
+pérdida de presión total del silenciador y las velocidades de flujo en el
+conducto. El 10 % de 9.2 marca lo que va al informe, no lo que vale como
+medida: si las velocidades próximas a la entrada del silenciador se desvían de
+la velocidad de flujo media en más del 10 %, o 8.3.3 muestra una distribución
+igual de poco uniforme, incluya la distribución real en el informe, porque un
+flujo así puede aumentar la pérdida de presión y el ruido regenerado.
 
 ## 4. La pantalla que se puede apartar
 
@@ -313,7 +324,14 @@ El **método indirecto** toma prestada la campaña "antes" de un emplazamiento
 sustituto que se juzgue equivalente en perfil del terreno, condiciones del suelo
 y fuente, lo que lo convierte en una estimación, y la norma lo dice. Cada campaña
 lleva una corrección por el tipo de posición de receptor, 0 dB en campo semilibre
-y 6 dB contra una fachada, donde la presión se duplica.
+y 6 dB contra una fachada, donde la presión se duplica. El apartado 8.2.2
+imprime la segunda corrección con una prima, la misma prima que sus ecuaciones
+dan a la campaña "después", así que leído al pie de la letra ataría cada campaña
+a un tipo de posición; la NOTA que cierra el apartado pide posiciones en las que las dos
+correcciones sean prácticamente iguales, lo que sólo tiene sentido si cada campaña
+toma la suya. `measured_insertion_loss_indirect` recibe un tipo de receptor para
+cada campaña, y [el registro de erratas](/phonometry/es/reference/errata/) da la
+lectura.
 
 El micrófono de referencia se pone al menos 1,5 m por encima del borde superior
 de la barrera, medidos desde su punto más alto cuando el remate no es un borde
@@ -343,7 +361,11 @@ Dos campañas separadas por meses son dos días de tiempo distinto, y el apartad
 se va casi entero en eso. El viento entra como la componente vectorial de la
 velocidad media sobre la línea que va de la fuente al receptor, positiva a favor.
 La tabla 1 da una clase a favor y una de calma a cualquier distancia, y añade una
-clase a contraviento sólo para distancias cortas.
+clase a contraviento sólo para distancias cortas. Esa fila a contraviento está
+impresa como «+ 1 to − 5», un intervalo cuyos extremos van al revés y cuyo extremo
+inferior es donde empieza la clase a favor; `wind_class` la lee como de −5 m/s a
+−1 m/s, el reflejo de la fila a favor, y
+[el registro de erratas](/phonometry/es/reference/errata/) da la evidencia.
 
 ```python
 print(environment.wind_class(2.5))                        # downwind

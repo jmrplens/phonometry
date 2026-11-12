@@ -28,11 +28,18 @@ $$
 A_\mathrm{z}(t) = F^{-1}[H(\omega) \, F[a_\mathrm{z}(t)]] \tag{Formula 2}
 $$
 
-The standard assumes a *conditioned* input: $H$ has unity
-transmissibility at 0 Hz, so any DC offset in the record (e.g. the gravity
-component of a non-AC-coupled accelerometer) passes straight into
-$A_\mathrm{z}(t)$ and corrupts the response peaks; remove the mean (high-pass)
-before processing. The acceleration dose is
+The standard assumes the record conditioned as clause 5.1.3 sets out, and
+the conditioning is the caller's: $H$ has unity transmissibility at
+0 Hz, so an offset left in the record (e.g. the gravity component of a
+non-AC-coupled accelerometer) passes straight into $A_\mathrm{z}(t)$ and
+corrupts the response peaks. The clause asks for an offset correction so
+that the recorded acceleration, with the accelerometer at rest (or with a
+symmetric signal), is (0 ± 0.1) m/s2, and notes that subtraction of the mean
+may not be appropriate if the recorded acceleration is asymmetric. It then
+band-limits the offset-corrected record with a second-order Butterworth
+high-pass filter at 0.01 Hz and a fourth-order Butterworth low-pass filter
+at 80 Hz; the band-limiting and weighting filters of ISO 2631-1 should not
+be applied. The acceleration dose is
 
 $$
 D_\mathrm{z} = 1.07 \left( \sum_i A_{\mathrm{z},i}^6 \right)^{1/6} \tag{Formula 3}
@@ -80,14 +87,14 @@ Acceleration dose $D_\mathrm{z}$ from a seat acceleration time history.
 
 Filters the acceleration through the seat-to-spine transfer function
 (Formula 2), takes the positive response peaks and combines them by
-Formula 3. The input must be conditioned (DC-removed); see
+Formula 3. The input must be conditioned as clause 5.1.3 sets out; see
 [`spinal_response`](/phonometry/reference/api/vibration/multiple-shock/#spinal_response).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `acceleration_m_s2` | Measured, conditioned (zero-mean) vertical seat acceleration $a_\mathrm{z}(t)$, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The acceleration dose $D_\mathrm{z}$, m/s2.
@@ -306,8 +313,8 @@ history.
 Chains the Clause 5 dose and the Annex C risk: spinal response
 (Formula 2), acceleration dose (Formula 3), daily dose (Formula 4),
 compressive stress (C.1), stress variable $R$ (C.3) and injury
-probability (C.5). The input must be conditioned (DC-removed); see
-[`spinal_response`](/phonometry/reference/api/vibration/multiple-shock/#spinal_response).
+probability (C.5). The input must be conditioned as clause 5.1.3 sets
+out; see [`spinal_response`](/phonometry/reference/api/vibration/multiple-shock/#spinal_response).
 
 The model is vertical-axis only (clause 4a of the 2018 edition); for
 horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
@@ -318,7 +325,7 @@ horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
 
 | Name | Description |
 | :--- | :--- |
-| `acceleration_m_s2` | Measured, conditioned (zero-mean) vertical seat acceleration $a_\mathrm{z}(t)$, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `start_age` | Age `b` at which the exposure started, in years. |
 | `exposure_duration_years` | Number of exposure years `n`. |
@@ -531,18 +538,31 @@ Applies the seat-to-spine transfer function to the measured conditioned
 seat acceleration in the frequency domain and returns the time-domain
 response by the inverse transform.
 
-The input must be **conditioned (DC-removed)**: the transfer function is
-unity at 0 Hz by design (clause 5.2), so a DC offset (e.g. the 1 g
+The input must already be **conditioned as clause 5.1.3 sets out**; this
+function does not condition it. The transfer function is unity at 0 Hz
+by design (clause 5.2), so an offset left in the record (e.g. the 1 g
 gravity component of a DC-coupled accelerometer) is passed unattenuated
 and produces a spurious constant shift in $A_\mathrm{z}(t)$ that corrupts
-the positive response peaks of the dose. Subtract the mean (or
-high-pass) of $a_\mathrm{z}(t)$ before calling.
+the positive response peaks of the dose. The clause checks that upward
+is positive, cuts out the parts with no contact between the seat pad and
+the subject and conditions each remaining part separately, checks the
+anti-aliasing of a resampled record, and corrects the offset so that the
+recorded acceleration, with the accelerometer at rest (or with a
+symmetric signal), is (0 ± 0.1) m/s2; it notes that subtraction of the
+mean may not be appropriate if the recorded acceleration is asymmetric.
+A record whose accelerometer was in motion at its start or end may be
+tapered, and the offset-corrected record is then band-limited with a
+second-order Butterworth high-pass filter at 0.01 Hz and a fourth-order
+Butterworth low-pass filter at 80 Hz; the band-limiting and weighting
+filters of ISO 2631-1 should not be applied. NOTE 2 of the clause
+explains the low corner: a 0.5 Hz high-pass shifts a free fall back to
+zero before the impact and offsets the impact peak by up to +1 g.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `acceleration_m_s2` | Measured, conditioned (zero-mean) vertical seat acceleration $a_\mathrm{z}(t)$, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
+| `acceleration_m_s2` | Measured vertical seat acceleration $a_\mathrm{z}(t)$, conditioned as clause 5.1.3 sets out, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
 **Returns:** The spinal response acceleration $A_\mathrm{z}(t)$, m/s2, same length.

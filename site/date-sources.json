@@ -44,7 +44,7 @@
         "site/src/lib/page-evidence.ts": "verifiedBy",
         "site/src/data/conformance-stats.mjs": "verifiedBy",
         "site/src/lib/bibliography-works.ts": "the works the bibliography page's structured data defines in full, read from every page's references, and the works an errata page's structured data says it corrects: data for machines, which no reader of a page reads",
-        "site/src/data/bibliography.mjs": "the notes and areas of the bibliography's lists, which the head writes into the bibliography page's source to count its words for the structured data's wordCount: data for machines, which no reader of a page reads",
+        "site/src/data/bibliography.mjs": "the notes and areas of the bibliography's lists, which the head writes into the bibliography page's source to count its words for the structured data's wordCount, and whose notes describe the works the structured data defines (describedWorks): data for machines, which no reader of a page reads",
         "site/src/data/repo-stats.mjs": "`version` and `targetPlatform`, the release and the Python an API page's structured data names, data for machines, and `version` again in the BibTeX entry citation.mjs builds, which the page actions hold in an attribute to copy, the same on every page and no part of any one: no reader of a page reads either as its text",
         "site/src/lib/catalogue-pages.ts": "`cataloguePages` and `catalogueOverview`, the catalogue pages the structured data of a catalogue page and of the catalogue overview names: data for machines, which no reader of a page reads",
         "site/src/generated/catalogues.mjs": "the columns the Dataset of a catalogue page says it measures: data for machines, which no reader of a page reads",

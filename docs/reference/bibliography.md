@@ -736,9 +736,9 @@ Attenborough and Van Renterghem is the modern reference for outdoor sound
 and the source of the refraction material; Embleton's review is the shortest
 route into ground effect. The barrier papers are the two ends of the same
 subject, Kurze and Anderson as the closed-form fit engineering uses and Hadden
-and Pierce as the exact wedge solution it approximates. The last three entries
-measure what a barrier reflects rather than what it screens: EN 1793-5 is the
-in situ method, and the two papers by Garai and Guidorzi are the window
+and Pierce as the exact wedge solution it approximates. EN 1793-5 and the two
+papers by Garai and Guidorzi measure what a barrier reflects rather than what
+it screens: the standard is the in situ method, and the papers are the window
 construction behind its low frequency limit and the revision its 2016 edition
 adopted.
 
@@ -858,9 +858,10 @@ adopted.
 
 ## Aircraft noise
 
-The certification documents come first here, because the quantity is defined
-by them and not by a textbook; the SAE practices are the atmospheric and
-spectral machinery they call up. Read ECAC Doc 29 when the question is a
+Start with ICAO Annex 16 and its environmental technical manual, the
+certification documents, because the quantity is defined by them and not by a
+textbook; the SAE practices are the atmospheric and spectral machinery they
+call up. Read ECAC Doc 29 when the question is a
 contour around an airport rather than a level under a flight path.
 
 - Chien, C. F., & Soroka, W. W. (1975). Sound propagation along an impedance plane. *Journal of Sound and Vibration*, *43*(1), 9-20. https://doi.org/10.1016/0022-460X(75)90200-X
@@ -997,9 +998,9 @@ models of decreasing scope rather than three alternatives.
 These are the works behind emission rather than immission. Munjal is the
 reference for ducts and mufflers and the source of the transfer-matrix
 formulation; Fahy is the one to open for intensity, where the finite-difference
-approximation and its errors are derived rather than asserted. The last six
-entries are the broadcast-loudness chain, which is a normative stack of its own:
-ITU-R BS.1770 defines the algorithms, EBU R 128 fixes the target level and the
+approximation and its errors are derived rather than asserted. The
+broadcast-loudness chain is a normative stack of its own: ITU-R BS.1770 defines
+the algorithms, EBU R 128 fixes the target level and the
 ceiling, and the three EBU Tech documents supply the meter behaviour, the
 loudness range and the production practice, together with the test signals the
 implementation is validated against.
@@ -1171,9 +1172,8 @@ implementation is validated against.
 ## Wave simulation
 
 There is no governing standard for this area, so its literature is its
-evidence. Bilbao is the way in for finite-difference schemes in acoustics,
-Virieux the original staggered-grid elastic formulation, and Moczo et al. the
-review that collects the stability and dispersion analysis the solvers are
+evidence. Virieux is the original staggered-grid elastic formulation, and
+Moczo et al. the review that collects the stability and dispersion analysis the solvers are
 checked against.
 
 - Brekhovskikh, L. M., & Godin, O. A. (1990). *Acoustics of layered media I: Plane and quasi-plane waves*. Springer. https://doi.org/10.1007/978-3-642-52369-4

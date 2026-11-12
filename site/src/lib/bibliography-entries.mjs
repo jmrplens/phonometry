@@ -32,12 +32,15 @@
  * Nothing here starts a process or reads a file; the caller hands in the
  * pages.
  */
+import { inlineSpans } from '../../scripts/shared/markdown-spans.mjs';
 import { citationMarkdown, literalText } from '../../scripts/shared/page-twin.mjs';
 import { BIBLIOGRAPHY_PREFIXES, BIBLIOGRAPHY_SECTIONS, BIBLIOGRAPHY_WORKS } from '../data/bibliography.mjs';
 import { basePath, siteUrl } from '../data/site.mjs';
 import { topics } from '../data/topics.mjs';
+import { plainText } from './catalogue-datasets.mjs';
 import { citedWorks, englishStandardIds, referenceId } from './citations.mjs';
 import { codeLines } from './markdown-fences.mjs';
+import { plainText as mathsText } from './maths-text.mjs';
 import { sortedReferences } from './references-format.mjs';
 
 /**
@@ -264,6 +267,59 @@ export function bibliographySections(
     ).map(([index]) => entries[index]);
     return { key: section.key, entries: sorted };
   });
+}
+
+/**
+ * A note of the bibliography as plain text, the way a node's `description`
+ * carries it: each `$...$` with its maths written out (src/lib/maths-text.mjs),
+ * then the rest read as the page shows it (`plainText` of
+ * src/lib/catalogue-datasets.mjs, the reader the catalogue datasets describe
+ * their tables with): a code span its text without the backticks, a link its
+ * text, emphasis and strong emphasis what they mark, an escape or a character
+ * reference the character it stands for.
+ *
+ * @param {string} note A note as src/data/bibliography.mjs writes it.
+ * @returns {string}
+ */
+export function noteText(note) {
+  // A code span and an escaped character are text, not maths: they are set
+  // aside before the `$...$` runs are read, so `$L_{p}$` between backticks and
+  // an escaped `\$` reach the reader of the page as they are written.
+  const kept = [];
+  const hold = (piece) => `\uE000${kept.push(piece) - 1}\uE001`;
+  let masked = '';
+  let at = 0;
+  for (const [start, end] of inlineSpans(note)) {
+    masked += note.slice(at, start).replace(/\\[\s\S]/g, hold) + hold(note.slice(start, end));
+    at = end;
+  }
+  masked += note.slice(at).replace(/\\[\s\S]/g, hold);
+  const restored = mathsText(masked).replace(/\uE000(\d+)\uE001/g, (_, index) => kept[Number(index)]);
+  return plainText([restored]);
+}
+
+/**
+ * The works one language's structured data describes (`citedWorks`), each
+ * with the description the bibliography's own entry gives it.
+ *
+ * `citedWorks` describes a work by the note of the first page that cites it,
+ * which says why that page cites the work. The bibliography's entry says why
+ * the work matters to the library when src/data/bibliography.mjs holds a note
+ * for it, and the node the bibliography page defines the work with then says
+ * the same, as plain text. A work with no note in the data keeps the citing
+ * page's.
+ *
+ * @param {Map<string, object>} works Each `@id` to its reference, as `citedWorks` gives them.
+ * @param {ReturnType<typeof bibliographySections>} sections That language's bibliography.
+ * @returns {Map<string, object>} The same works, in the same order.
+ */
+export function describedWorks(works, sections) {
+  const notes = new Map(
+    sections.flatMap((section) => section.entries.filter((entry) => entry.note).map((entry) => [entry.id, entry.note])),
+  );
+  return new Map(
+    [...works].map(([id, ref]) => [id, notes.has(id) ? { ...ref, note: noteText(notes.get(id)) } : ref]),
+  );
 }
 
 /**

@@ -27,7 +27,7 @@ import {
   standardsBody,
 } from '../lib/citations.mjs';
 import { bibliographyWorks, referencesOfEveryPage } from '../lib/bibliography-works';
-import { siteBibliography, withSections } from '../lib/bibliography-entries.mjs';
+import { describedWorks, siteBibliography, withSections } from '../lib/bibliography-entries.mjs';
 import { pageEvidence } from '../lib/page-evidence';
 import { conformanceDataset } from '../lib/conformance-dataset.mjs';
 import { loadContentDates } from '../lib/content-dates.mjs';
@@ -372,7 +372,10 @@ if (isBibliography) {
     lang === 'es' ? englishStandardIds(pages, bibliographyUrl, englishBibliographyUrl) : new Map();
   // Only this locale's works (src/lib/bibliography-works.ts says why), the
   // set an errata page names the works it corrects from.
-  const works = [...(await bibliographyWorks(lang, bibliographyUrl))].map(([id, ref]) => {
+  // Each work is described as its entry on the page describes it, when the
+  // bibliography's data writes a note for it (describedWorks).
+  const described = describedWorks(await bibliographyWorks(lang, bibliographyUrl), siteBibliography(pages, lang));
+  const works = [...described].map(([id, ref]) => {
     // The body is defined on the English bibliography's address in both
     // languages: one identity for ISO, not one per page that names it.
     const body = standardsBody(ref, englishBibliographyUrl);

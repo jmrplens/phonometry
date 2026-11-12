@@ -24,11 +24,15 @@ import remarkMath from 'remark-math';
 
 import { BIBLIOGRAPHY_PREFIXES, BIBLIOGRAPHY_SECTIONS, BIBLIOGRAPHY_WORKS } from '../src/data/bibliography.mjs';
 import { topics } from '../src/data/topics.mjs';
+import { citedWorks } from '../src/lib/citations.mjs';
+import { plainText as mathsText } from '../src/lib/maths-text.mjs';
 import {
   bibliographySections,
+  describedWorks,
   englishWorkIds,
   MARKER,
   navigationOrder,
+  noteText,
   sectionMarkdown,
   withSections,
 } from '../src/lib/bibliography-entries.mjs';
@@ -162,6 +166,34 @@ test('a note left for a work no page cites, or a section the page does not have,
 test('a page that cites a work and has no title to be named by stops the build', () => {
   const pages = [{ id: 'signals/a', references: [iso('ISO 1:2000')] }];
   assert.throws(() => bibliographySections(pages, options()), /signals\/a cites std-iso-1-2000 and has no title/);
+});
+
+test("a work's description in the structured data is the bibliography's own note when it has one, as plain text, and the citing page's otherwise", () => {
+  const pages = [
+    {
+      id: 'signals/a',
+      title: 'A',
+      references: [iso('ISO 1:2000', { note: 'What page A says of the standard.' }), { ...book, note: 'What page A says of the book.' }],
+    },
+    { id: 'es/signals/a', title: 'A', references: [iso('ISO 1:2000', { note: 'Lo que dice la página.' }), book] },
+  ];
+  const note =
+    'Why it matters: `level()` reads $L_{p}$, as the [list](https://example.org/list/) says, printed in the *Journal* and **its** \\*errata\\* &amp; notes.';
+  const works = {
+    'std-iso-1-2000': { note: { en: note, es: 'Por qué importa: lo lee `level()`, como dice el *Manual* (Xiang, *Digital Sequences*).' } },
+  };
+  for (const [lang, url, said] of [
+    ['en', EN, `Why it matters: level() reads ${mathsText('$L_{p}$')}, as the list says, printed in the Journal and its *errata* & notes.`],
+    ['es', ES, 'Por qué importa: lo lee level(), como dice el Manual (Xiang, Digital Sequences).'],
+  ]) {
+    const own = pages.filter((page) => page.id.startsWith('es/') === (lang === 'es'));
+    const sections = bibliographySections(pages, options({ lang, bibliographyUrl: url, works }));
+    const described = describedWorks(citedWorks(own, url), sections);
+    assert.equal(described.get(`${url}#std-iso-1-2000`).note, said, `${lang}: the data's note, as plain text`);
+    assert.equal(described.get(`${url}#std-iso-1-2000`).designation, 'ISO 1:2000', `${lang}: the rest of the reference is the page's`);
+    const bookId = [...described.keys()].find((id) => id !== `${url}#std-iso-1-2000`);
+    assert.equal(described.get(bookId).note, lang === 'en' ? 'What page A says of the book.' : undefined, `${lang}: no note in the data, the page's`);
+  }
 });
 
 test('two pages that describe one work two ways stop the build, as the structured data does', () => {
@@ -437,4 +469,10 @@ test('a list the page writes itself, an entry added by hand, stops the build, wh
     render(docs, `${marked}\n> 1. A numbered entry, quoted.\n`, DATA),
     /holds a list src\/data\/bibliography\.mjs did not write, from "A numbered entry, quoted\."/,
   );
+});
+
+test('a note keeps a code span and an escaped dollar as written, and writes out only its maths', () => {
+  assert.equal(noteText('Use `$L_{p}$` for literal TeX.'), 'Use $L_{p}$ for literal TeX.');
+  assert.equal(noteText('Priced at \\$5 and \\$10.'), 'Priced at $5 and $10.');
+  assert.equal(noteText('The level $L_{p}$ and `code`.'), `The level ${mathsText('$L_{p}$')} and code.`);
 });

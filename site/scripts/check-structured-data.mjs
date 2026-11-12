@@ -2233,8 +2233,11 @@ for (const file of files) {
 					'the Spanish state issuers whose texts the BOE prints',
 			);
 		}
-		// A work's description is the note of one page that cites it
-		// (src/lib/citations.mjs, citedWorks). A catalogue page's note speaks
+		// A work's description is the note the bibliography's data writes for
+		// it (src/data/bibliography.mjs, read by describedWorks in
+		// src/lib/bibliography-entries.mjs) or, for a work it writes none for,
+		// the note of one page that cites it (src/lib/citations.mjs,
+		// citedWorks). A catalogue page's note speaks
 		// of that page's own rows, and read on the bibliography "the rows of
 		// this catalogue" points at no catalogue at all: four books were
 		// described that way, by whichever catalogue page sorted first.

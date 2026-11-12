@@ -963,6 +963,19 @@ def test_the_tone_prominence_limit_and_the_omc_deviation_say_what_they_are() -> 
     assert "sigma_omc_db" in parameters
 
 
+def test_the_iso_11820_velocity_line_says_it_asks_for_a_report() -> None:
+    """The 10 % of ISO 11820 9.2 is a deviation past which the report says more.
+
+    Its first name called it a uniformity tolerance, the word ISO 7235's
+    ``VELOCITY_PROFILE_TOLERANCE_PERCENT`` beside it uses for a profile the
+    measurement has to meet. No release shipped that name.
+    """
+    assert not hasattr(ph.noise_control, "VELOCITY_UNIFORMITY_TOLERANCE_PERCENT")
+    assert ph.noise_control.FLOW_VELOCITY_REPORT_DEVIATION_PERCENT == pytest.approx(
+        10.0
+    )
+
+
 # --------------------------------------------------------------------------- #
 # 4.0 an answer of several quantities is a record: the two members that only
 # repacked a record's own fields into a tuple are gone, and the records that

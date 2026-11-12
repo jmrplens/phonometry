@@ -172,6 +172,7 @@ from .screen_in_situ import (
 )
 from .silencer_in_situ import (
     DOWNSTREAM_DISTANCE_COEFFICIENTS,
+    FLOW_VELOCITY_REPORT_DEVIATION_PERCENT,
     INSTALLATION_CASES,
     ISO11820_AIR_GAS_CONSTANT_J_KG_K,
     ISO11820_ATMOSPHERIC_PRESSURE_PA,
@@ -188,7 +189,6 @@ from .silencer_in_situ import (
     SABINE_AREA_COEFFICIENT,
     TYPICAL_FIELD_CORRECTION_LIMIT_DB,
     UPSTREAM_DISTANCE_DIAMETERS,
-    VELOCITY_UNIFORMITY_TOLERANCE_PERCENT,
     ExtraneousCorrectionResult,
     InstallationCase,
     SilencerInSituResult,
@@ -474,6 +474,7 @@ __all__ = [
     "flow_noise_straight_duct_overall",
     "flow_regime",
     "flow_velocity_m_s",
+    "FLOW_VELOCITY_REPORT_DEVIATION_PERCENT",
     "gas_density_kg_m3",
     "GasStream",
     "GLOBE_CONTRACTION_COEFFICIENT",
@@ -693,7 +694,6 @@ __all__ = [
     "SPECTRAL_CORRECTION",
     "velocity_pressure_pa",
     "VELOCITY_PROFILE_TOLERANCE_PERCENT",
-    "VELOCITY_UNIFORMITY_TOLERANCE_PERCENT",
     "vena_contracta_velocity",
     "volume_flow_rate",
     "WALL_CLEARANCE_FACTOR",

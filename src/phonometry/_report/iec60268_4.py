@@ -54,6 +54,7 @@ from ._layout import (
 from .iec60268_5 import (
     _DB_PER_DECADE,
     _OHM,
+    _agg_figure,
     _drawing_from_figure,
     _freq,
     _metadata_pairs,
@@ -195,14 +196,10 @@ def _response_drawing(
     IEC 60263 clause 2 proportion: one frequency decade equals 25 dB on the
     ordinate (:data:`.iec60268_5._DB_PER_DECADE`).
     """
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-
+    fig = _agg_figure((5.6, 4.2))
     from .._plot.electroacoustics import _draw_microphone_response
 
     f = result.frequencies
-    fig = Figure(figsize=(5.6, 4.2))
-    FigureCanvasAgg(fig)
     ax = fig.subplots()
     _draw_microphone_response(result, ax, language=language)
     decades = response_decades(f, "IEC 60268-4 microphone fiche")
@@ -222,9 +219,6 @@ def _secondary_drawing(
     :func:`phonometry._plot.electroacoustics` renderers, so the fiche and the
     ``.plot()`` data sheet never diverge.
     """
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-
     from .._plot.electroacoustics import (
         _draw_datasheet_polar,
         _draw_microphone_distortion,
@@ -242,8 +236,7 @@ def _secondary_drawing(
     if panels == 0:
         return None
 
-    fig = Figure(figsize=(5.6 * panels / 2.4 + 0.8, 2.35))
-    FigureCanvasAgg(fig)
+    fig = _agg_figure((5.6 * panels / 2.4 + 0.8, 2.35))
     idx = 1
     if has_polar:
         # `add_subplot` is typed as returning a plain Axes; the polar

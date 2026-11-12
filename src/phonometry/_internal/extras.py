@@ -16,7 +16,13 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Final, Literal
 
-__all__ = ["TORCH_CPU_WHEELS", "install_hint", "package_hint"]
+__all__ = [
+    "PLOT_INSTALL_HINT",
+    "TORCH_CPU_WHEELS",
+    "VIDEO_INSTALL_HINT",
+    "install_hint",
+    "package_hint",
+]
 
 type Extra = Literal["audio", "perf", "plot", "report", "torch"]
 
@@ -70,6 +76,19 @@ def install_hint(*extras: Extra, pip_first: str | None = None) -> str:
         package for extra in extras for package in _CONDA_FORGE_PACKAGES[extra]
     )
     return _with_conda(pip, packages)
+
+
+#: What a drawing says when matplotlib cannot be imported: every plot, and
+#: the wrapper of every public one, hands the user this message.
+PLOT_INSTALL_HINT: Final = (
+    f"Plotting requires matplotlib. Install it with: {install_hint('plot')}"
+)
+#: What a video writer says when matplotlib cannot be imported: the writer
+#: of frames and the search for ffmpeg, which reads matplotlib's rcParams,
+#: both hand the user this message.
+VIDEO_INSTALL_HINT: Final = (
+    f"Writing a video requires matplotlib. Install it with: {install_hint('plot')}"
+)
 
 
 def package_hint(pip_package: str, conda_package: str) -> str:

@@ -418,8 +418,14 @@ def infinite_beam_mobility(
     :raises ValueError: for a non-positive input or unknown location.
     :raises TypeError: if ``location`` is not a text.
     """
-    z = infinite_beam_impedance(
-        frequency, bending_stiffness, mass_per_length, location=location
+    # The impedance of a number is a Python complex, whose division by zero
+    # raises where an array's gives inf: the reciprocal is taken of the
+    # array, so a number and an array answer alike.
+    z = np.asarray(
+        infinite_beam_impedance(
+            frequency, bending_stiffness, mass_per_length, location=location
+        ),
+        dtype=np.complex128,
     )
     return as_complex_or_array(1.0 / z, like=(frequency,))
 

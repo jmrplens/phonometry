@@ -11,6 +11,12 @@ the call, the one an axes the caller handed it belongs to among them, is the
 caller's and stays. :class:`~phonometry._internal.display.RichDisplay` wraps
 the ``plot`` and ``plot_*`` methods of every record this way as the class is
 made, and a plotting class that is no record takes the decorator itself.
+
+The same wrapper names the extra when matplotlib is missing: a plot imports
+what it draws with (``matplotlib.patches``, ``matplotlib.ticker``) inside the
+function, and such an import met before the figure is made raised a bare
+``ModuleNotFoundError``; the wrapper raises the install hint in its place,
+with the missing module as its cause.
 """
 
 from __future__ import annotations
@@ -18,6 +24,8 @@ from __future__ import annotations
 import functools
 import sys
 from typing import TYPE_CHECKING, Any, cast
+
+from .extras import PLOT_INSTALL_HINT
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -41,6 +49,13 @@ def _open_figures() -> set[int]:
     return {int(number) for number in pyplot.get_fignums()}
 
 
+def _without_matplotlib(error: BaseException) -> bool:
+    """Whether *error* is the import of a matplotlib module that is not there."""
+    if not isinstance(error, ModuleNotFoundError) or error.name is None:
+        return False
+    return error.name == "matplotlib" or error.name.startswith("matplotlib.")
+
+
 def is_plotting_method(name: str) -> bool:
     """Whether a method called *name* draws: ``plot`` or ``plot_*``."""
     return name == "plot" or name.startswith("plot_")
@@ -48,6 +63,9 @@ def is_plotting_method(name: str) -> bool:
 
 def closes_its_figures[F: Callable[..., Any]](plot: F) -> F:
     """*plot*, closing every figure it opened when it raises.
+
+    A matplotlib module that cannot be imported is raised as the install
+    hint of the ``[plot]`` extra, with the missing module as its cause.
 
     :param plot: A function or method that may open figures.
     :return: The wrapped function, with *plot*'s name, signature and
@@ -61,11 +79,13 @@ def closes_its_figures[F: Callable[..., Any]](plot: F) -> F:
         before = _open_figures()
         try:
             return plot(*args, **kwargs)
-        except BaseException:
+        except BaseException as exc:
             pyplot = sys.modules.get("matplotlib.pyplot")
             if pyplot is not None:
                 for number in sorted(_open_figures() - before):
                     pyplot.close(number)
+            if _without_matplotlib(exc):
+                raise ImportError(PLOT_INSTALL_HINT) from exc
             raise
 
     setattr(drawn, _MARK, True)

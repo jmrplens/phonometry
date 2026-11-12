@@ -165,13 +165,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   whose bootstrap the client runs as the container's entrypoint through the
   `python` on the image's `PATH`; either way it runs the caller's own
   phonometry, which the client sends once per version and the node keeps in
-  a cache. ssh runs with no terminal and no agent, X11 or port forwarding,
-  delegates no Kerberos credentials and runs no `RemoteCommand` or
-  `LocalCommand`, whatever `~/.ssh/config` says; every byte the node sends
-  back is checked against what the request implies before it is read, and
-  its words reach the caller with their control characters escaped. The run
-  travels as data, field by field, never as code, and checks itself again on
-  the node: a waveform travels as the `.value` of a `GaussianPulse`,
+  a cache. A Docker node runs the container in the node's own user namespace
+  (`--userns=host`), as the node's user under a daemon run by root and as the
+  container's root, which is that user, under one run by the user (rootless
+  Docker, or rootless Podman behind a `docker` command), as `docker info`
+  describes it. ssh runs with no terminal and no agent, X11 or
+  port forwarding, delegates no Kerberos credentials and runs no
+  `RemoteCommand` or `LocalCommand`, whatever `~/.ssh/config` says; every byte
+  the node sends back is checked against what the request implies before it is
+  read, and its words reach the caller with their control characters escaped.
+  The run travels as data, field by field, never as code, and checks itself
+  again on the node: a waveform travels as the `.value` of a `GaussianPulse`,
   `CWSource` or `SignalSource`, and any other callable is refused with
   `TypeError` before anything connects. A failure of the connection or of
   the node raises `simulation.ComputeRemoteError`, which carries the node's
@@ -2323,6 +2327,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The standing-wave impedance and the room constant of ISO 9295 keep their
+  digits where a reflection or an absorption rounds to one.**
+  `materials.standing_wave_normalized_impedance` formed $(1 + r)/(1 - r)$
+  from the reflection factor, whose $1 - r$ keeps only the digits
+  $1 - |r| = 2/(s + 1)$ leaves it: up to 4e-6 of the result was lost for a
+  ratio of 1e4 to 1e15 with the first minimum near a quarter wavelength, and
+  past $s \approx 10^{16}$, where $|r|$ rounds to 1, a minimum a quarter
+  wavelength out gave inf + nan j for an array and raised
+  `ZeroDivisionError` for a number, for an impedance that is $s$ itself. It
+  computes Eqs. (25) and (26) with Eq. (14) put in, $z' = s/D$ and
+  $z'' = (s^2 - 1)\sin(\phi/2)\cos(\phi/2)/D$ with
+  $D = 1 + (s^2 - 1)\sin^2(\phi/2)$, scaled so that no product overflows,
+  within 5e-16 of the formula read in 60 digits.
+  `emission.room_constant_from_reverberation_time` divided by
+  $1 - \alpha_\mathrm{room}$, which is nothing once the exponent of Formula
+  (5) passes about 37; it computes $R = S\,(\mathrm{e}^{0{,}16 V/(S T)} - 1)$,
+  the two formulae read together. `vibration.infinite_beam_mobility` takes
+  the reciprocal of the impedance as an array, so an impedance that underflows
+  to zero gives a number what it gives an array.
+
+- **Every plot and fiche that finds no matplotlib says how to install it.**
+  Seventeen of them, the plots of thirteen results (the p-p probe of an
+  `emission.IntensityResult`, the amplitude modulation bins, the service
+  equipment positions, the soundscape pleasantness and eventfulness, the
+  directivity factor of a sound level meter, the calibration correction
+  budget, the transmission through an aperture, the free-field check, the
+  plant contour, the special room suitability, the wind turbine sound power,
+  the sound calibrator and the ear canal microphone) and
+  `building.plot_aperture_geometry`,
+  `electroacoustics.plot_sound_reinforcement_geometry`,
+  `emission.plot_pp_probe_geometry` and `noise_control.plot_plenum_geometry`,
+  imported a module of matplotlib before making their figure and raised a bare
+  `ModuleNotFoundError`, and so did the `.report()` of a microphone and of a
+  loudspeaker, which draw their own panels. The wrapper every public plot
+  already goes through raises the install hint of the `[plot]` extra in its
+  place, with the missing module as its cause, and the two fiches make their
+  panels through the hint the other fiches give.
+
 - **The documentation site's type check fails on a hint, and the site has
   none.** `pnpm run check:types` passed with 132 hints: 127 uses in
   `site/src/content.config.ts` of zod helpers that Astro 7 and zod 4
@@ -2666,7 +2708,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   imports without its libsndfile, as soundfile 0.14.0 from PyPI does in
   Pyodide, raised the loader's `OSError: sndfile library not found`; it now
   raises the same `ImportError` as a missing extra, with the loader's
-  reason in it. Docstrings name the extra (the `[plot]` extra) instead of a
+  reason in it, and so does the pure wheel of soundfile 0.12.0, the floor
+  of `[audio]`, which pip installs where no wheel of that release carries
+  libsndfile and which raised `AttributeError: module 'sys' has no
+  attribute 'plaform'` on Linux when the system had none. Docstrings name the extra (the `[plot]` extra) instead of a
   pip command, and `scripts/check_quoted_extras.py` refuses an install
   command spelled anywhere in the package but the module that builds the
   hints (style rule A64).
@@ -7393,6 +7438,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and torch 2.9.0 on 3.14. The Python 3.13 wheel of torch 2.5.0 is for Linux
   on x86-64 only, where the job runs; on macOS on ARM, Windows on x86-64 and
   Linux on ARM the first is torch 2.6.0, the oldest that installs there.
+  On Windows on ARM the first wheels are NumPy 2.3.0, SciPy 1.16.2 and numba
+  0.68.0 (0.67.0 on Python 3.14), on Linux with musl the first SciPy wheel on
+  ARM for Python 3.12 and 3.13 is 1.15.2 and numba publishes none, and on
+  macOS on Intel numba publishes none from 0.63.0 on, when it stopped testing
+  that platform, and llvmlite none from 0.46.0 on, so pip held to the floors
+  builds those releases from source there, and a plain `[perf]` install builds
+  numba on musl and on macOS on Intel on every Python. On 32-bit Windows the
+  last SciPy wheel is 1.9.1, for Python 3.9 at most, so even a plain install
+  builds SciPy there on every Python, and numba stopped supporting 32-bit
+  Windows at 0.58.0, below the floor of `[perf]`, which is not supported
+  there, nor `[full]`, which holds it. matplotlib has published no wheel for
+  32-bit Windows since 3.8.0, nor any for Linux on ARM with musl, so `[plot]`
+  builds it from source on both, on 32-bit Windows with kiwisolver, which has
+  published none there since 1.4.8. PyPI has no torch wheel for any of the
+  four platforms and no torch source distribution, so `[torch]` does not
+  install there from PyPI; on Windows on ARM PyTorch's CPU index has torch
+  for Python 3.12 and 3.13. python-soundfile publishes no wheel that carries
+  libsndfile for Linux with musl, nor at its floor 0.12.0 for Linux on ARM,
+  whose first is 0.13.0, or for Windows on ARM, whose first is 0.14.0, so pip
+  installs its pure-Python wheel there, which loads the system's libsndfile
+  (`apk add libsndfile-dev` on Alpine). The install pages say so.
   The `[report]` floors are the oldest releases that render a fiche in a
   fresh interpreter under `-W error`: reportlab 4.0.4 to 4.2.5 warn when
   they are imported, through importlib's `load_module` and

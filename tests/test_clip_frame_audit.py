@@ -13,6 +13,7 @@ render process the audit leaves exactly as it found it.
 
 from __future__ import annotations
 
+import gc
 import json
 import os
 import pathlib
@@ -53,7 +54,8 @@ if TYPE_CHECKING:
 # The figure, diagram and badge tooling is tied to the pinned figure stack its
 # artefacts are drawn with, so the minimum-versions job deselects this module.
 # A test that stands in for the encoder never renders the animation it is
-# handed, and matplotlib says so when that animation is collected.
+# handed, and matplotlib says so when that animation is collected: the
+# fixture below collects it before the test ends, under this filter.
 pytestmark = [
     pytest.mark.pinned_stack,
     # The audit draws the frames in a forked copy of the render process and
@@ -80,12 +82,18 @@ def _render_mode(
     Each draws with the generator's settings, light and English
     (``figure_theme``), which a render through the pool path changes in this
     process and never puts back: the fixture does, so the next test does not
-    read ink against the page this one left.
+    read ink against the page this one left. An animation a stand-in encoder
+    was handed sits in a reference cycle, so only the garbage collector frees
+    it; collected here, while the filter above still applies, it says nothing,
+    where left to itself it may be freed during a test of another module and
+    fail that test with matplotlib's "Animation was deleted without rendering
+    anything".
     """
     for name in (cfa.AUDIT_ENV, cfa.GATE_ENV, cfa.AUDITED_ENV):
         monkeypatch.delenv(name, raising=False)
     yield
     plt.close("all")
+    gc.collect()
 
 
 def _clip(

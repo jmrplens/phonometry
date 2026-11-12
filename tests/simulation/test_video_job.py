@@ -24,6 +24,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
 from phonometry import io
+from phonometry._internal.extras import install_hint
 from phonometry._internal.video_encoders import FFMPEG_NAMES, describe
 from phonometry.io import VideoOptions
 from phonometry.simulation import (
@@ -337,7 +338,10 @@ def test_a_node_without_matplotlib_simulates_and_refuses_to_animate() -> None:
     assert done.returncode == 0, done.stderr
     simulated, refusal = done.stdout.splitlines()
     assert simulated == "True True"
-    assert refusal.startswith("this node has no matplotlib")
+    assert refusal == (
+        "this node has no matplotlib, so it cannot draw a video; rebuild the node "
+        f"image, or install it in its Python with: {install_hint('plot')}"
+    )
 
 
 @pytest.mark.parametrize(

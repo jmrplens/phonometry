@@ -124,6 +124,14 @@ python -m pip install jupyterlite-core jupyterlite-pyodide-kernel jupyter-server
 jupyter lite build --contents content --output-dir _output
 ```
 
+En Windows, el entorno se activa con `.venv\Scripts\activate.bat` en cmd o
+con `.venv\Scripts\Activate.ps1` en PowerShell en lugar de
+`source .venv/bin/activate`.
+En un equipo cliente de Windows, PowerShell rechaza los scripts con la
+directiva de ejecución predeterminada, así que `Activate.ps1` se ejecuta allí
+cuando `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` ha permitido los
+locales; cmd no necesita ese paso.
+
 `content` contiene los cuadernos y `_output` es el sitio que hay que servir.
 La construcción imprime además dos avisos, sobre `libarchive-c` y sobre
 `jupyterlab_server`, que no cambian nada del sitio. Un wheel puesto en una

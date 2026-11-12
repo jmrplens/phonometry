@@ -73955,6 +73955,21 @@ and writes every file of the machine, as Docker's own documentation warns.
 The node's owner gives that membership only to an SSH account already
 trusted with the whole machine.
 
+A node may run Docker without root instead (rootless Docker), or Podman as your
+user (rootless Podman) behind a `docker` command; Podman run as root counts as
+Docker run as root. A daemon run by you needs no `docker` group and runs the
+container's root as you, while any other user id inside, yours and one an image
+names with `USER` among them, becomes one of its subordinate ids, which cannot
+write the cache: the client asks the daemon, through `docker info`, which kind
+it is, and on one run by you starts the container as its root, with
+`--user=0:0`. Every run also passes `--userns=host`, which keeps the container
+in the node's own user namespace: under a daemon that remaps user ids the
+container would otherwise run as a subordinate id, which cannot write the cache
+under Docker's `userns-remap` and, under a Podman set to `userns = "keep-id"`,
+leaves files there that you cannot remove. The `docker` command of a
+non-interactive SSH session has to reach that daemon, which a context set with
+`docker context use` does.
+
 The image is built on the node, from a checkout of the repository on your
 machine:
 
@@ -74996,10 +75011,13 @@ Source: https://docs.jmrp.io/phonometry/start/environments/docker/
 
 # Docker and servers
 
-phonometry needs nothing from the operating system beyond Python: every
-extra installs from wheels, libsndfile inside the soundfile wheel included,
-so a `python:*-slim` image is enough. The one system package worth adding is
-ffmpeg, and only for videos.
+phonometry needs nothing from the operating system beyond Python on a
+`python:*-slim` image: every extra installs from wheels there, libsndfile
+inside the soundfile wheel included. The one system package worth adding is
+ffmpeg, and only for videos. An Alpine image, built on musl, needs more, since
+python-soundfile has no wheel there that carries libsndfile and numba none at
+all; [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation)
+says what each extra takes there.
 
 ## An image
 
@@ -75219,6 +75237,14 @@ python -m pip install --upgrade pip
 python -m pip install jupyterlab "phonometry[full]"
 jupyter lab
 ```
+
+On Windows the environment is activated with `.venv\Scripts\activate.bat`
+in cmd or `.venv\Scripts\Activate.ps1` in PowerShell in place of
+`source .venv/bin/activate`.
+PowerShell on a Windows client refuses scripts under its default
+execution policy, so `Activate.ps1` runs there once
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` has allowed local ones;
+cmd needs no such step.
 
 That one environment holds JupyterLab, the IPython kernel it starts and
 phonometry with every extra but `[torch]`.
@@ -75459,6 +75485,14 @@ python -m pip install jupyterlite-core jupyterlite-pyodide-kernel jupyter-server
 jupyter lite build --contents content --output-dir _output
 ```
 
+On Windows the environment is activated with `.venv\Scripts\activate.bat`
+in cmd or `.venv\Scripts\Activate.ps1` in PowerShell in place of
+`source .venv/bin/activate`.
+PowerShell on a Windows client refuses scripts under its default
+execution policy, so `Activate.ps1` runs there once
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` has allowed local ones;
+cmd needs no such step.
+
 `content` holds the notebooks, and `_output` is the site to serve. The build
 also prints two notices, about `libarchive-c` and `jupyterlab_server`, that
 change nothing in the site. A wheel placed in a `pypi` folder of the
@@ -75487,6 +75521,14 @@ python -m pip install --upgrade pip
 python -m pip install "phonometry[full]"
 ```
 
+On Windows the environment is activated with `.venv\Scripts\activate.bat`
+in cmd or `.venv\Scripts\Activate.ps1` in PowerShell in place of
+`source .venv/bin/activate`, here and in the block of a clone below.
+PowerShell on a Windows client refuses scripts under its default
+execution policy, so `Activate.ps1` runs there once
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` has allowed local ones;
+cmd needs no such step.
+
 `python -m pip install phonometry` alone brings NumPy and SciPy and nothing
 else; that is enough for every metric of the library. `python -m pip check`
 reports no broken requirement afterwards, with or without extras. Check what
@@ -75504,31 +75546,45 @@ print(phonometry.__version__)   # the release you installed
 |---|---|---|
 | `[plot]` | matplotlib | `.plot()` and the filter response plots draw |
 | `[report]` | reportlab, svglib | `.report()` writes a PDF fiche; its figure panel also needs `[plot]` |
-| `[audio]` | python-soundfile, whose wheel carries libsndfile | `phonometry.io` reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV, and writes FLAC |
+| `[audio]` | python-soundfile, whose wheel carries libsndfile except on the platforms named below | `phonometry.io` reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV, and writes FLAC |
 | `[perf]` | numba | the `impulse` time weighting runs compiled |
 | `[full]` | all four above | every feature but the torch backend |
 | `[torch]` | torch, array-api-compat | the FDTD engines step on PyTorch |
 
-No extra needs a system package: on a bare `python:3.13-slim` image every one
-of them installs and runs from its wheels, `[audio]` included. Without numba
-the `impulse` time weighting runs as plain Python and says nothing about it.
-A feature whose extra is missing says which one to install, with its pip and
-its conda spelling:
+On a bare `python:3.13-slim` image no extra needs a system package: every one
+of them installs and runs from its wheels there, `[audio]` included. Without
+numba the `impulse` time weighting runs as plain Python and says nothing about
+it. A feature whose extra is missing says which one to install, with its pip
+and its conda spelling:
 
 ```text
 ImportError: Plotting requires matplotlib. Install it with: pip install "phonometry[plot]" (conda: conda install -c conda-forge matplotlib-base)
 ```
 
 The oldest release of each dependency the library is tested with, on each
-Python, is listed in [Getting
-Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation).
+Python, is listed in [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation). On
+Windows on ARM, on Linux with musl, on macOS on Intel and on 32-bit Windows,
+some of those releases have no wheel, and pip builds them from source there,
+as even a plain install does with SciPy on 32-bit Windows, and as `[plot]`
+does with matplotlib on Linux on ARM with musl and on 32-bit Windows; that
+section names which. numba no longer supports 32-bit Windows, so neither
+`[perf]` nor `[full]`, which holds it, is supported there, where
+`python -m pip install "phonometry[plot,report,audio]"` installs the other
+three extras. torch publishes no source to build, so it installs on none of
+the four from PyPI, and on Windows on ARM from PyTorch's CPU index, as the
+next section does. python-soundfile publishes no wheel that carries libsndfile
+for Linux with musl, nor at its floor for Linux on ARM or Windows on ARM, so
+`[audio]` loads the system's libsndfile there: on Alpine,
+`apk add libsndfile-dev`.
 
 ## torch without CUDA
 
 `[full]` leaves `[torch]` out, because the torch wheels PyPI serves on Linux
 bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
 install torch from PyTorch's CPU index first, then the extra, which keeps the
-torch it finds, in the virtual environment made above:
+torch it finds, in the virtual environment made above. On Windows on ARM,
+where PyPI has no torch, the same two commands bring `[torch]` on Python 3.12
+and 3.13, from torch 2.7.0 and 2.8.0:
 
 ```bash
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -75744,6 +75800,46 @@ The Python 3.13 wheel of torch 2.5.0 is for Linux on x86-64 only, where the
 job runs; on macOS on ARM, Windows on x86-64 and Linux on ARM the first is
 torch 2.6.0, the oldest that installs there.
 
+Windows on ARM, Linux with musl, macOS on Intel and 32-bit Windows have no
+wheel at some of those floors, and pip held to them builds those releases from
+source there, which takes compilers. On Windows on ARM the first wheels are
+NumPy 2.3.0, SciPy 1.16.2 and numba 0.68.0 (0.67.0 on Python 3.14), so every
+floor of the three but NumPy's on Python 3.14 is built. On Linux with musl, as
+in Alpine, the first SciPy wheel on ARM for Python 3.12 and 3.13 is 1.15.2,
+matplotlib publishes no wheel for musl on ARM at all, so `[plot]` builds it
+there, and numba, with the llvmlite it needs, publishes no musl wheel at all,
+so `[perf]` builds from source on any musl system. On macOS on Intel numba
+publishes no wheel from 0.63.0 on, nor llvmlite from 0.46.0 on, and numba no
+longer tests that platform, which it leaves to community support, so `[perf]`
+builds both at the floor of Python 3.14; their last wheels there, numba 0.62.1
+and llvmlite 0.45.1, are for Python 3.12 and 3.13. On 32-bit Windows NumPy has
+a wheel at every floor, but the last SciPy wheel there is 1.9.1, for Python
+3.9 at most, so even a plain install builds SciPy there on every Python, and
+SciPy's own build warns there to install a 64-bit Python. matplotlib has
+published no 32-bit Windows wheel since 3.8.0, nor kiwisolver, which it needs,
+since 1.4.8, so `[plot]` builds both there. numba stopped supporting 32-bit
+Windows at 0.58.0, below the floor of `[perf]`, and its last wheels there,
+numba 0.57.1 and llvmlite 0.41.1, are for Python 3.10 at most, so `[perf]` is
+not supported there, nor `[full]`, which holds it;
+`pip install "phonometry[plot,report,audio]"` installs the other three extras
+there. A plain install takes the newest releases, which have wheels on the
+other three platforms but numba's on musl and on macOS on Intel, where a plain
+`[perf]` install builds numba and llvmlite on every Python, and matplotlib's
+on ARM with musl. PyPI has no torch wheel for any of the four, the last for
+macOS on Intel being 2.2.2, older than every floor, and none ever for 32-bit
+Windows, and torch publishes no source distribution, so `[torch]` does not
+install on them from PyPI. On Windows on ARM PyTorch's CPU index has torch
+wheels for Python 3.12, from 2.7.0, and 3.13, from 2.8.0, so installing torch
+from it first, as below, brings `[torch]` there; it has none for Python 3.14
+there, none for Linux with musl or 32-bit Windows, and for macOS on Intel none
+after 2.2.2, as on PyPI. python-soundfile, for `[audio]`, publishes no wheel
+that carries libsndfile for Linux with musl, nor at its floor 0.12.0 for Linux
+on ARM, whose first is 0.13.0, or for Windows on ARM, whose first is 0.14.0,
+so pip installs its pure-Python wheel there, which loads the system's
+libsndfile: on Alpine `apk add libsndfile-dev`, since the Python of the
+official Docker image finds that library only under the name `libsndfile.so`,
+which that package adds.
+
 Optional extras:
 
 ```bash
@@ -75767,7 +75863,8 @@ the other audio formats (FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV), and the
 torch backend of the FDTD engines (which run on NumPy either way, and on an
 NVIDIA GPU once CuPy is installed). One licensing note on `[audio]`: it
 installs python-soundfile, whose wheel bundles **libsndfile under the
-LGPL-2.1** (dynamically linked, the same pattern as librosa and torchaudio).
+LGPL-2.1** (dynamically linked, the same pattern as librosa and torchaudio),
+and which loads the system's libsndfile where no wheel carries one, as above.
 The base install deliberately stays free of it, which is why the metrological
 formats need no extra.
 
@@ -75784,10 +75881,12 @@ neither is writable, as for a service account or a container user with no home,
 it compiles the kernel once in each process instead; point `NUMBA_CACHE_DIR` at
 a writable directory to keep it.
 
-`[full]` leaves `[torch]` out on purpose: the torch wheels PyPI serves on Linux
-bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
-install torch from PyTorch's CPU index first, then the extra, which keeps
-the torch it finds, and those libraries stay out:
+`[full]` leaves `[torch]` out on purpose: the torch wheels PyPI serves on
+Linux bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA
+GPU, install torch from PyTorch's CPU index first, then the extra, which keeps
+the torch it finds, and those libraries stay out; on Windows on ARM, where
+PyPI has no torch, the same two commands bring `[torch]` on Python 3.12 and
+3.13:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu

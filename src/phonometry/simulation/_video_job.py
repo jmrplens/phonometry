@@ -31,6 +31,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Final, get_args
 
+from .._internal.extras import install_hint
 from .._internal.validation import require_choice
 from .._internal.video import stop_running_encoders
 from .._internal.video_encoders import Container
@@ -196,7 +197,7 @@ def _check_font() -> None:
     except ImportError as exc:
         msg = (
             "this node has no matplotlib, so it cannot draw a video; rebuild the node "
-            'image, or install "phonometry[plot]" in its Python'
+            f"image, or install it in its Python with: {install_hint('plot')}"
         )
         raise NodeCannotAnimateError(msg) from exc
     try:

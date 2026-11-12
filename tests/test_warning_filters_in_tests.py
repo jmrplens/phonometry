@@ -8,14 +8,19 @@ warning, undoes that for whatever else the call meets: a new advisory of the
 library, a new deprecation of a dependency, a NumPy overflow. So a filter
 that ignores, or shows without raising, names the message it means:
 ``warnings.filterwarnings`` with ``message=``, a ``filterwarnings`` mark
-with its message part. ``warnings.simplefilter`` takes no message and
-passes only where it hands each warning to a recorder the test reads, inside
-``warnings.catch_warnings(record=True)`` or ``pytest.warns``, and so does
+with its message part. ``warnings.simplefilter`` takes no message and passes
+only where it hands each warning to a recorder the test reads,
+``pytest.warns`` or a ``warnings.catch_warnings(record=True)`` bound by
+``as`` to a name the test reads before it binds that name again, and so does
 ``warnings.resetwarnings``, which drops the configuration's errors with
-every other filter. A filter whose action, or whose mark, the text does not
-settle is one the check cannot clear: a name bound once, at module level,
-to a constant is read as its value, and anything else, a loop variable or
-an argument, stands in the table below with its reason.
+every other filter. A recorder bound to no name, or to one nothing reads
+while it holds the list, hides what its block meets. A comprehension or a
+class body reads the name where it stands; a function reads it when it is
+called, at a time the text does not say, so its read counts only where
+nothing else binds that name. A filter whose action, or whose mark, the text
+does not settle is one the check cannot clear: a name bound once, at module
+level, to a constant is read as its value, and anything else, a loop
+variable or an argument, stands in the table below with its reason.
 """
 
 from __future__ import annotations
@@ -28,7 +33,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterator, Mapping
 
 _ROOT = Path(__file__).resolve().parents[1]
 _TESTS = _ROOT / "tests"
@@ -201,18 +206,298 @@ def _function(
     return None
 
 
+#: The nodes whose body runs when something calls it, not where it stands.
+_DEFERRED = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+#: The comprehensions, each a scope of its own; all but a generator's run where they stand.
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+
+
+def _parameters(arguments: ast.arguments) -> list[ast.arg]:
+    """Every parameter *arguments* declares, by position, by keyword or gathered."""
+    gathered = [
+        each for each in (arguments.vararg, arguments.kwarg) if each is not None
+    ]
+    return [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs, *gathered]
+
+
+def _defaults(arguments: ast.arguments) -> list[ast.expr]:
+    """The default values *arguments* gives, which Python evaluates where the function stands."""
+    return [*arguments.defaults, *(each for each in arguments.kw_defaults if each)]
+
+
+def _binds_itself(node: ast.AST, name: str) -> bool:
+    """Whether the comprehension or class *node* binds *name* in its own scope.
+
+    A comprehension binds its loop targets; a class body binds whatever
+    its own statements do, its functions and comprehensions apart.
+    """
+    if isinstance(node, _COMPREHENSIONS):
+        roots: list[ast.AST] = [each.target for each in node.generators]
+    elif isinstance(node, ast.ClassDef):
+        roots = list(node.body)
+    else:
+        return False
+    return any(
+        _binding(each, name) is not None
+        or (
+            isinstance(each, ast.Name)
+            and each.id == name
+            and not isinstance(each.ctx, ast.Load)
+        )
+        or (isinstance(each, (ast.Global, ast.Nonlocal)) and name in each.names)
+        for root in roots
+        for each in (root, *_in_place(root, name, opaque=True))
+    )
+
+
+def _in_place(scope: ast.AST, name: str, *, opaque: bool) -> Iterator[ast.AST]:
+    """The nodes under *scope* that run where they stand, in the order of the text.
+
+    A function or a lambda runs when something calls it: it is yielded
+    whole, and only its decorators and the defaults of its parameters are
+    opened, which Python evaluates where it stands. A class body and a
+    list, set or dict comprehension run where they stand and are opened,
+    unless they bind *name* themselves: then only the parts that read the
+    enclosing scope are, a class's decorators, bases and keywords and a
+    comprehension's first iterable. A generator expression evaluates its
+    first iterable where it stands and the rest as it is consumed, so only
+    that iterable is opened and the expression is yielded whole. With
+    *opaque*, *scope* is a class body, whose names no comprehension or
+    class in it reads past its first iterable or its header.
+    """
+    for child in ast.iter_child_nodes(scope):
+        yield child
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            parts: list[ast.AST] = [*child.decorator_list, *_defaults(child.args)]
+        elif isinstance(child, ast.Lambda):
+            parts = list(_defaults(child.args))
+        elif isinstance(child, ast.ClassDef):
+            parts = [*child.decorator_list, *child.bases, *child.keywords]
+            if not opaque and not _binds_itself(child, name):
+                parts.extend(child.body)
+        elif isinstance(child, _COMPREHENSIONS):
+            if (
+                opaque
+                or isinstance(child, ast.GeneratorExp)
+                or _binds_itself(child, name)
+            ):
+                parts = [child.generators[0].iter]
+            else:
+                parts = list(ast.iter_child_nodes(child))
+        else:
+            yield from _in_place(child, name, opaque=opaque)
+            continue
+        for part in parts:
+            yield part
+            yield from _in_place(part, name, opaque=opaque)
+
+
+#: The nodes that open a scope of their own.
+_SCOPES = (*_DEFERRED, ast.ClassDef, *_COMPREHENSIONS)
+
+
+def _scope_code(node: ast.AST) -> list[ast.AST]:
+    """What runs inside the scope *node* opens, rather than in the scope around it.
+
+    A function's or a class's body and a lambda's expression; for a
+    comprehension, everything but its first iterable, which the scope
+    around it evaluates.
+    """
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return list(node.body)
+    if isinstance(node, ast.Lambda):
+        return [node.body]
+    if isinstance(node, _COMPREHENSIONS):
+        first, *rest = node.generators
+        heads = [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
+        return [
+            *heads,
+            first.target,
+            *first.ifs,
+            *(part for each in rest for part in ast.iter_child_nodes(each)),
+        ]
+    return []
+
+
+def _own_nodes(node: ast.AST, name: str) -> Iterator[ast.AST]:
+    """The nodes that run in the scope *node* opens, each scope inside it yielded whole."""
+    holder = ast.Module(body=_scope_code(node), type_ignores=[])
+    return _in_place(holder, name, opaque=True)
+
+
+def _walrus_binds(node: ast.AST, name: str) -> bool:
+    """Whether an assignment expression in the comprehension *node* binds *name* in the scope around it.
+
+    Python binds the target of ``:=`` in a comprehension, or in one nested
+    in it, in the nearest scope that is no comprehension.
+    """
+    return any(
+        (
+            isinstance(each, ast.NamedExpr)
+            and isinstance(each.target, ast.Name)
+            and each.target.id == name
+        )
+        or (isinstance(each, _COMPREHENSIONS) and _walrus_binds(each, name))
+        for each in _own_nodes(node, name)
+    )
+
+
+def _reads_later(node: ast.AST, name: str) -> tuple[bool, bool]:
+    """Whether the scope *node* opens reads *name* from the scope around it, and whether it binds it there.
+
+    Each scope is read on its own, as Python resolves a name: the scope
+    reads the enclosing name when it, or a scope inside it, reads the name
+    and no scope between binds it as a parameter, a target, an import, a
+    ``def`` or a class of its own, unless that scope declares it
+    ``nonlocal`` or ``global``. It binds the enclosing name when it
+    declares it so and binds it, or a scope inside it does so through it.
+    A class body is a scope the functions and comprehensions inside it
+    pass over, as Python passes over it; a comprehension leaves the target
+    of an assignment expression to the scope around it.
+    """
+    comprehension = isinstance(node, _COMPREHENSIONS)
+    local = isinstance(node, _DEFERRED) and any(
+        each.arg == name for each in _parameters(node.args)
+    )
+    declared = reads = inner_reads = inner_binds = False
+    leaked: set[int] = set()
+    for each in _own_nodes(node, name):
+        if isinstance(each, _SCOPES):
+            read_inside, bound_inside = _reads_later(each, name)
+            inner_reads = inner_reads or read_inside
+            inner_binds = inner_binds or bound_inside
+            local = local or (
+                isinstance(each, _COMPREHENSIONS) and _walrus_binds(each, name)
+            )
+        if comprehension and isinstance(each, ast.NamedExpr):
+            leaked.add(id(each.target))
+        if _binding(each, name) is not None:
+            local = True
+        if isinstance(each, (ast.Global, ast.Nonlocal)) and name in each.names:
+            declared = True
+        if isinstance(each, ast.Name) and each.id == name:
+            if isinstance(each.ctx, ast.Load):
+                reads = True
+            elif id(each) not in leaked:
+                local = True
+    passes = declared or not local
+    if isinstance(node, ast.ClassDef):
+        return (reads and passes) or inner_reads, (declared and local) or inner_binds
+    return (reads or inner_reads) and passes, (declared and local) or (
+        inner_binds and passes
+    )
+
+
+def _end(node: ast.AST) -> tuple[int, int]:
+    """Where *node* ends in the text, as a line and a column."""
+    line = getattr(node, "end_lineno", None) or getattr(node, "lineno", 0)
+    column = getattr(node, "end_col_offset", None)
+    return line, getattr(node, "col_offset", 0) if column is None else column
+
+
+def _evaluated_first(node: ast.AST) -> Iterator[tuple[ast.expr, ast.expr]]:
+    """Each target *node* binds, with the expression Python evaluates before it binds it."""
+    if isinstance(node, ast.Assign):
+        for target in node.targets:
+            yield target, node.value
+    elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and node.value is not None:
+        yield node.target, node.value
+    elif isinstance(node, (ast.For, ast.AsyncFor)):
+        yield node.target, node.iter
+    elif isinstance(node, ast.withitem) and node.optional_vars is not None:
+        yield node.optional_vars, node.context_expr
+
+
+def _binding(node: ast.AST, name: str) -> tuple[int, int] | None:
+    """Where *node* binds *name* other than as a target of an assignment, or ``None``.
+
+    A function or a class binds its name once its statement has run; an
+    import, an ``except`` clause and a pattern of ``match`` bind theirs
+    where they stand.
+    """
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return _end(node) if node.name == name else None
+    if isinstance(node, ast.alias):
+        bound = (node.asname or node.name).partition(".")[0]
+    elif isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
+        bound = node.name or ""
+    elif isinstance(node, ast.MatchMapping):
+        bound = node.rest or ""
+    else:
+        return None
+    return (node.lineno, node.col_offset) if bound == name else None
+
+
+def _read_while_bound(owner: ast.AST, item: ast.withitem) -> bool:
+    """Whether *owner* reads the list *item* binds before its name holds anything else.
+
+    A read that runs where it stands counts when it follows the binding
+    with no other binding of the name between them, in the order Python
+    runs a statement: the value of an assignment, the iterable of a loop
+    and the manager of a ``with`` before their targets, and the target of
+    an augmented assignment read before it is bound. A comprehension and a
+    class body read where they stand. A function, a lambda or the body of a
+    generator expression reads the name when it is called or consumed, at
+    a time the text does not say, so its read counts only when nothing in
+    *owner* but *item* binds the name; in a class body it never does, since
+    Python looks a name up past the class.
+    """
+    target = item.optional_vars
+    if not isinstance(target, ast.Name):
+        return False
+    name = target.id
+    opaque = isinstance(owner, ast.ClassDef)
+    bound_after: dict[int, tuple[int, int]] = {}
+    read_first: set[int] = set()
+    events: list[tuple[tuple[int, int], bool]] = []
+    read_later = bound_elsewhere = False
+    for node in _in_place(owner, name, opaque=opaque):
+        if isinstance(node, (*_DEFERRED, ast.GeneratorExp)):
+            reads, binds = _reads_later(node, name)
+            read_later = read_later or (reads and not opaque)
+            bound_elsewhere = bound_elsewhere or binds
+        if (where := _binding(node, name)) is not None:
+            events.append((where, False))
+        for bound, value in _evaluated_first(node):
+            for each in ast.walk(bound):
+                bound_after[id(each)] = _end(value)
+        if isinstance(node, ast.AugAssign):
+            read_first.add(id(node.target))
+        if not isinstance(node, ast.Name) or node.id != name or node is target:
+            continue
+        where = (node.lineno, node.col_offset)
+        if isinstance(node.ctx, ast.Load) or id(node) in read_first:
+            events.append((where, True))
+        else:
+            events.append((bound_after.get(id(node), where), False))
+    later = sorted(event for event in events if event[0] > _end(item.context_expr))
+    if later and later[0][1]:
+        return True
+    bound_elsewhere = bound_elsewhere or any(not read for _, read in events)
+    return read_later and not bound_elsewhere
+
+
 def _records(
     item: ast.withitem,
     modules: frozenset[str],
     bare: frozenset[str],
     known: Mapping[str, object],
+    owner: ast.AST,
 ) -> bool:
-    """Whether the context manager of *item* records the warnings of its block."""
+    """Whether the context manager of *item* records the warnings of its block for the test.
+
+    ``catch_warnings(record=True)`` does only when its list is bound by ``as``
+    to a name that *owner*, the function, class or module the ``with``
+    stands in, reads before it binds the name again: a list no one reads
+    hides every warning of the block.
+    """
     call = item.context_expr
     if not isinstance(call, ast.Call):
         return False
     if _function(call, modules, bare) == "catch_warnings":
-        return _constant(_argument(call, "record", 0), known) is True
+        return _constant(
+            _argument(call, "record", 0), known
+        ) is True and _read_while_bound(owner, item)
     func = call.func
     return isinstance(func, ast.Attribute) and func.attr in _RECORDERS
 
@@ -259,7 +544,6 @@ def _lets_through(
         spelled = _argument(call, "action", None)
         if spelled is None:
             return None
-        recording = recording or _constant(_argument(call, "record", 0), known) is True
     else:
         return None
     action = _constant(spelled, known)
@@ -279,20 +563,25 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
     known = _module_constants(tree)
     found: list[tuple[str, str]] = []
 
-    def visit(node: ast.AST, scope: str, *, recording: bool) -> None:
+    def visit(node: ast.AST, scope: str, owner: ast.AST, *, recording: bool) -> None:
         key = f"{where}::{scope or '<module>'}"
         for child in ast.iter_child_nodes(node):
-            inner, records = scope, recording
+            inner, inner_owner, records = scope, owner, recording
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 inner = f"{scope}.{child.name}" if scope else child.name
+                inner_owner = child
                 records = False
             if isinstance(child, (ast.With, ast.AsyncWith)) and any(
-                _records(item, modules, bare, known) for item in child.items
+                _records(item, modules, bare, known, owner) for item in child.items
             ):
+                # Python enters the items in order, so a recorder an item
+                # opens also records the warnings of every item after it.
+                entered = recording
                 for item in child.items:
-                    visit(item, inner, recording=recording)
+                    entered = entered or _records(item, modules, bare, known, owner)
+                    visit(item, inner, owner, recording=entered)
                 for statement in child.body:
-                    visit_one(statement, inner, recording=True)
+                    visit_one(statement, inner, owner, recording=True)
                 continue
             if isinstance(child, ast.Call):
                 what = _function(child, modules, bare)
@@ -300,13 +589,15 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
                     how := _lets_through(child, what, recording=records, known=known)
                 ):
                     found.append((key, f"line {child.lineno}: {how}"))
-            visit(child, inner, recording=records)
+            visit(child, inner, inner_owner, recording=records)
 
-    def visit_one(statement: ast.AST, scope: str, *, recording: bool) -> None:
+    def visit_one(
+        statement: ast.AST, scope: str, owner: ast.AST, *, recording: bool
+    ) -> None:
         holder = ast.Module(body=[statement], type_ignores=[])  # type: ignore[list-item]
-        visit(holder, scope, recording=recording)
+        visit(holder, scope, owner, recording=recording)
 
-    visit(tree, "", recording=False)
+    visit(tree, "", tree, recording=False)
     return found
 
 
@@ -337,6 +628,31 @@ def _filters_in(source: str, where: str) -> list[tuple[str, str]]:
         "warnings.filterwarnings(*spec)",
         "warnings.simplefilter(action)",
         "with warnings.catch_warnings(record=True):\n    warnings.simplefilter(action)",
+        "with warnings.catch_warnings(record=True):\n    warnings.simplefilter('default', UserWarning)",
+        "with warnings.catch_warnings(record=True):\n    warnings.simplefilter('always')\n    call()",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen = []",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\ndef other(seen):\n    assert seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nwith warnings.catch_warnings(record=True) as seen:\n    pass\nassert not seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen = []\nassert not seen",
+        "seen = []\nassert not seen\nwith warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check(seen):\n        assert seen\n    check([])",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        return lambda seen: seen\n    check()",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        return [seen for seen in range(2)]\n    check()",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nfor seen in cases:\n    assert seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen = []\nassert not [w for w in seen]",
+        "seen = []\nassert not [w for w in seen]\nwith warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen = []\nassert not any(w for w in seen)",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen = []\nclass Check:\n    found = seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\npending = (seen for _ in range(1))\nseen = []\nassert not next(pending)",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nassert not [seen for seen in cases]",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    seen = []\n    def check():\n        assert not seen\n    check()",
+        "class TestIt:\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def test_it(self):\n        assert not seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\ndef seen():\n    pass\nassert seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\ntry:\n    call()\nexcept OSError as seen:\n    assert seen",
+        "with warnings.catch_warnings(action='always', record=True):\n    pass",
+        "with warnings.catch_warnings(action='always'), warnings.catch_warnings(record=True) as seen:\n    pass\nassert not seen",
+        "with warnings.catch_warnings(record=True):\n    warnings.resetwarnings()",
         "warnings.catch_warnings(action=chosen)",
         "pytest.mark.filterwarnings(spec)",
         "ACTION = 'ignore'\nwarnings.simplefilter(ACTION, UserWarning)",
@@ -359,13 +675,29 @@ def test_a_filter_that_names_no_message_is_found(source: str) -> None:
         "warnings.filterwarnings('ignore', message=re.escape(text))",
         "pytest.mark.filterwarnings('ignore:Low sampling rate:UserWarning')",
         "pytest.mark.filterwarnings('error::UserWarning')",
-        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')",
-        "with warnings.catch_warnings(record=True):\n    warnings.simplefilter('default', UserWarning)",
-        "with warnings.catch_warnings(action='always', record=True):\n    pass",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nassert not seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('default', UserWarning)\nassert len(seen) == 1",
+        "with warnings.catch_warnings(action='always', record=True) as seen:\n    pass\nassert not seen",
+        "with warnings.catch_warnings(record=True) as seen, warnings.catch_warnings(action='always'):\n    pass\nassert not seen",
+        "with pytest.warns(UserWarning), warnings.catch_warnings(action='always'):\n    pass",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        assert seen\n    check()",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        assert not seen\n        return lambda seen: seen\n    check()",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        assert not seen\n        def inner():\n            seen = 1\n            return seen\n        return [seen for seen in range(2)], inner\n    check()",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check():\n        class Kept:\n            seen = 1\n        return (lambda: seen)()\n    assert not check()",
         "with pytest.warns(UserWarning):\n    warnings.simplefilter('always')",
         "warnings.catch_warnings()",
         "text.filterwarnings('ignore')",
-        "with warnings.catch_warnings(record=True):\n    warnings.resetwarnings()",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.resetwarnings()\nassert not seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\n    call()\n    assert not seen",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen = [w.message for w in seen]",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nfor seen in seen:\n    pass",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nseen += []",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nassert not [w for w in seen]",
+        "def test_it():\n    def check():\n        assert not seen\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    check()",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nassert not any(w for w in seen)",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nassert not [seen for _ in range(1)][0]",
+        "with warnings.catch_warnings(record=True) as seen:\n    warnings.simplefilter('always')\nclass Check:\n    found = seen",
+        "def test_it():\n    with warnings.catch_warnings(record=True) as seen:\n        warnings.simplefilter('always')\n    def check(found=seen):\n        assert not found\n    seen = []\n    check()",
         "warnings.filterwarnings(action, message='Low sampling rate')",
         "ACTION = 'error'\nwarnings.simplefilter(ACTION, UserWarning)",
         "SPEC = 'ignore:Low rate:UserWarning'\npytest.mark.filterwarnings(SPEC)",
@@ -379,11 +711,12 @@ def test_a_filter_that_names_its_message_or_records_passes(source: str) -> None:
 def test_a_recorder_covers_its_own_block_and_no_function_defined_in_it() -> None:
     source = (
         "def test_it():\n"
-        "    with warnings.catch_warnings(record=True):\n"
+        "    with warnings.catch_warnings(record=True) as seen:\n"
         "        warnings.simplefilter('always')\n"
         "        def helper():\n"
         "            warnings.simplefilter('always')\n"
         "    warnings.simplefilter('always')\n"
+        "    assert not seen\n"
     )
     found = _filters_in(source, "tests/example.py")
     assert found == [
@@ -452,3 +785,23 @@ def test_every_warning_filter_in_the_suite_names_its_message() -> None:
     )
     stale = sorted(set(_BY_CLASS) - {key for key, _ in found})
     assert not stale, f"exemptions that no longer match a filter: {stale}"
+
+
+def _t28_exceptions() -> str:
+    """The Exceptions paragraph of rule T28 in the contributor guide."""
+    guide = (_ROOT / "docs" / "contributing" / "tests.md").read_text(encoding="utf-8")
+    rule = guide.split("### T28.", 1)[1].split("\n### ", 1)[0]
+    return rule.split("**Exceptions.**", 1)[1].split("\n\n", 1)[0]
+
+
+def test_the_guide_names_the_file_of_every_exemption() -> None:
+    """Rule T28 names each filter that lets warnings through by no message.
+
+    The census of number returns took its exemption with the module that
+    added it while the rule's list of exceptions kept the four before it.
+    """
+    exceptions = _t28_exceptions()
+    unnamed = sorted(
+        key for key in _BY_CLASS if f"`{key.split('::', 1)[0]}`" not in exceptions
+    )
+    assert not unnamed, f"T28 names no file for: {unnamed}"

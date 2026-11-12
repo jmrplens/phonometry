@@ -223,7 +223,7 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
     docker = words[words.index("exec") + 1 :]
     # No log: Docker would copy the result stream, the container's standard
     # output, into a log on the node's disk.
-    assert docker[:10] == [
+    assert docker[:11] == [
         "docker",
         "run",
         "--rm",
@@ -234,9 +234,11 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
         "none",
         "--log-driver",
         "none",
+        "--userns=host",
     ]
     assert docker[docker.index("--gpus") + 1] == "device=1"
-    assert docker[docker.index("--user") + 1] == "$(id -u):$(id -g)"
+    assert docker[docker.index("-v") - 1] == "$user"
+    assert 'user="--user=$(id -u):$(id -g)"' in script
     assert docker[docker.index("-v") + 1] == "$cache:/cache"
     assert docker[-3:] == ["phonometry-node:gpu", "-I", bootstrap.IMAGE_PATH]
     assert 'mkdir -p "$cache"' in script
@@ -323,10 +325,110 @@ def test_a_docker_node_s_shell_runs_no_word_of_the_hosts_file(tmp_path: Path) ->
     cache = tmp_path / ".cache" / "phonometry" / "remote"
     assert words[-3:] == [odd.target, "-I", bootstrap.IMAGE_PATH]
     assert words[words.index("--entrypoint") + 1] == "python"
-    assert words[words.index("--user") + 1] == f"{os.getuid()}:{os.getgid()}"
+    assert f"--user={os.getuid()}:{os.getgid()}" in words
     assert words[words.index("-v") + 1] == f"{cache}:/cache"
     assert cache.is_dir()
     assert not (tmp_path / "injected").exists()
+
+
+#: A stand-in for the node's ``docker``: ``info`` prints what $INFO holds, as
+#: ``docker info --format '{{json .}}'`` prints the daemon's description, and
+#: any other command writes each word it is given, ended by a NUL.
+_DOCKER_WITH_INFO = (
+    "#!/bin/sh\n"
+    'if [ "$1" = info ]; then printf \'%s\' "$INFO"; exit "${INFO_STATUS:-0}"; fi\n'
+    'for word in "$@"; do printf \'%s\\0\' "$word"; done\n'
+)
+
+#: What ``docker info --format '{{json .}}'`` holds of a daemon's security,
+#: measured on Docker 29.9 run by root, run by root with ``--userns-remap``
+#: and run by a user (``dockerd-rootless.sh``), and on Podman 5.4, which
+#: answers the same command with the ``rootless`` flag of its host.
+_INFO = {
+    "docker as root": '{"SecurityOptions":["name=apparmor,profile=default",'
+    '"name=seccomp,profile=builtin","name=cgroupns"]}',
+    "docker as root remapping user ids": '{"SecurityOptions":['
+    '"name=apparmor,profile=default","name=seccomp,profile=builtin",'
+    '"name=userns","name=cgroupns"]}',
+    "docker without root": '{"SecurityOptions":["name=seccomp,profile=builtin",'
+    '"name=rootless","name=cgroupns"]}',
+    "podman as root": '{"host":{"security":{"rootless":false}}}',
+    "podman without root": '{"host":{"security":{"rootless":true}}}',
+}
+
+
+def _docker_words(tmp_path: Path, info: str, status: int = 0) -> list[str]:
+    """The words a Docker node's ``docker run`` gets from a daemon that describes itself as *info*."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    docker = bin_dir / "docker"
+    docker.write_text(_DOCKER_WITH_INFO, encoding="utf-8")
+    docker.chmod(0o755)
+    return _through_a_shell(
+        command.remote_command(_DOCKER, Compute(host="nas")),
+        tmp_path,
+        f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
+        {"INFO": info, "INFO_STATUS": str(status)},
+    )
+
+
+@_posix_only
+@pytest.mark.parametrize(
+    "daemon", ["docker as root", "docker as root remapping user ids", "podman as root"]
+)
+def test_a_docker_node_run_by_root_runs_the_container_as_the_node_s_user(
+    tmp_path: Path, daemon: str
+) -> None:
+    words = _docker_words(tmp_path, _INFO[daemon])
+    assert f"--user={os.getuid()}:{os.getgid()}" in words
+
+
+@_posix_only
+@pytest.mark.parametrize("daemon", ["docker without root", "podman without root"])
+def test_a_docker_node_without_root_runs_the_container_as_its_root(
+    tmp_path: Path, daemon: str
+) -> None:
+    """A daemon run by the node's user runs the container's root as that user.
+
+    Any other uid, the user's own among them and one an image names with
+    ``USER``, maps to one of its subordinate ids, which cannot write the cache
+    the node mounts: measured on Docker 29.9 and Podman 5.4 without root, an
+    image whose ``USER`` is 1000 failed to write the cache with no ``--user``
+    and wrote it as the node's user with ``--user=0:0``.
+    """
+    words = _docker_words(tmp_path, _INFO[daemon])
+    assert [word for word in words if word.startswith("--user=")] == ["--user=0:0"]
+    assert words[words.index("-v") + 1].endswith(":/cache")
+
+
+@_posix_only
+@pytest.mark.parametrize("daemon", [*_INFO, "a daemon that does not answer"])
+def test_a_docker_node_runs_the_container_in_the_node_s_own_user_namespace(
+    tmp_path: Path, daemon: str
+) -> None:
+    """``--userns=host`` keeps the ids of the container the node's own, whatever the daemon.
+
+    Measured: under Docker 29.9 with ``--userns-remap``, ``--user`` with the
+    node's uid failed to write the cache and wrote it as the node's user
+    with ``--userns=host``; under Podman 5.4 without root set to
+    ``userns = "keep-id"``, ``--user=0:0`` wrote it as a subordinate id the
+    node's user cannot remove, and as that user with ``--userns=host``.
+    Docker run by root and Docker run by a user take the flag and run as
+    before.
+    """
+    info = _INFO.get(daemon, "")
+    words = _docker_words(tmp_path, info, status=0 if info else 1)
+    assert words.count("--userns=host") == 1
+    assert words.index("--userns=host") < words.index("-v")
+
+
+@_posix_only
+def test_a_docker_node_whose_daemon_does_not_answer_keeps_the_user(
+    tmp_path: Path,
+) -> None:
+    """No description, as from a daemon the user cannot reach: ``docker run`` says why."""
+    words = _docker_words(tmp_path, "", status=1)
+    assert f"--user={os.getuid()}:{os.getgid()}" in words
 
 
 @_posix_only

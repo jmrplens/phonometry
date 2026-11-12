@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal, cast, overload
 
 import numpy as np
 
-from .._internal.extras import install_hint
+from .._internal.extras import PLOT_INSTALL_HINT
 from .._internal.validation import real_number, require_scalar
 
 if TYPE_CHECKING:
@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from ..emission.sound_power import SoundEnergyResult, SoundPowerResult
     from ..room.acoustics import RoomAcousticsResult
 
-_INSTALL_HINT = f"Plotting requires matplotlib. Install it with: {install_hint('plot')}"
+_INSTALL_HINT = PLOT_INSTALL_HINT
 
 #: Nominal octave-band centres used by the STI computation (125 Hz - 8 kHz).
 _STI_BAND_CENTERS = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)

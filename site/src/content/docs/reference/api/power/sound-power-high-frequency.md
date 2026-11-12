@@ -658,6 +658,12 @@ $\alpha_\mathrm{room}$ from [`room_absorption_coefficient`](/phonometry/referenc
 the room constant of the method of clause 6. It goes into
 [`high_frequency_sound_power`](/phonometry/reference/api/power/sound-power-high-frequency/#high_frequency_sound_power) as `room_constant`.
 
+Formula (5) makes $1 - \alpha_\mathrm{room} = \mathrm{e}^{-0{,}16 \, V / (S T)}$, so the two read together are
+$R = S \, (\mathrm{e}^{0{,}16 \, V / (S T)} - 1)$, which is how
+`R` is computed: the quotient of Formula (4) divides by nothing once
+$\alpha_\mathrm{room}$ rounds to 1, for a decay short enough
+that the exponent passes about 37, where `R` is still a number.
+
 **Parameters**
 
 | Name | Description |
@@ -673,6 +679,7 @@ the room constant of the method of clause 6. It goes into
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite time, volume or surface. |
+| TypeError | if `surface_area` or `volume` is not a single number, or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## tone_level_from_sidebands
 

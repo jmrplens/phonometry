@@ -185,6 +185,12 @@ def remote_command(entry: HostEntry, request: Compute, *, loader: bool = False) 
         # standard output. The attached client still gets every byte.
         "--log-driver",
         "none",
+        # The node's own user namespace, whatever the daemon is set to: under
+        # one that remaps the container's ids the container would run as a
+        # subordinate id, which cannot write the cache under Docker's
+        # userns-remap and, under Podman set to keep the user's id, leaves
+        # files there the node's user cannot remove.
+        "--userns=host",
     ]
     if request.device in _GPU_DEVICES:
         docker += ["--gpus", f"device={request.device_index}"]
@@ -200,13 +206,23 @@ def remote_command(entry: HostEntry, request: Compute, *, loader: bool = False) 
     image = shlex.join([entry.target, *program])
     # The user and the cache are the node's: the shell there expands them. The
     # cache is where the bootstrap looks for it: XDG's, which ignores a
-    # relative XDG_CACHE_HOME, else ~/.cache.
+    # relative XDG_CACHE_HOME, else ~/.cache. A daemon run by root runs the
+    # container as the node's user, so that what it writes in the cache is
+    # the user's. A daemon run by that user (rootless Docker, which lists
+    # name=rootless among its security options, or rootless Podman, whose
+    # host says "rootless":true) runs the container's root as the user and
+    # maps any other uid, the user's own and one an image names with USER
+    # among them, to one of its subordinate ids, which cannot write the
+    # cache: there the container runs as its root.
     script = (
         'case "$XDG_CACHE_HOME" in /*) base="$XDG_CACHE_HOME" ;; '
         '*) base="$HOME/.cache" ;; esac && '
         'cache="$base/phonometry/remote" && '
         'mkdir -p "$cache" && '
-        f'exec {shlex.join(docker)} --user "$(id -u):$(id -g)" -v "$cache:/cache" {image}'
+        "case \"$(docker info --format '{{json .}}' 2>/dev/null)\" in "
+        "*name=rootless*|*'\"rootless\":true'*) user=--user=0:0 ;; "
+        '*) user="--user=$(id -u):$(id -g)" ;; esac && '
+        f'exec {shlex.join(docker)} "$user" -v "$cache:/cache" {image}'
     )
     return shlex.join(["sh", "-c", script])
 

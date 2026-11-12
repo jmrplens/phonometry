@@ -48,9 +48,21 @@ beside that designation, read where the link is written:
   entry's own catalogue link names the edition the entry cites and not the
   one it was revised as.
 
-The designation is matched by its number and, when the text gives them, its
-year and its amendments: the catalogue page of ISO 717-2:2013 beside
-"ISO 717-2:2020" is another document, the edition the page does not cite.
+A link whose label names a designation, publisher and number, is read by its
+label alone. A catalogue address in a code block, an inline code span or a
+comment is an example or a note, and no link: the spans and the comments are
+read by ``scripts/markdown_spans.py``, as the site reads them. A frontmatter is
+YAML, whose note the site shows as text with every address in it a link, so
+each address there is read.
+
+The designation is matched by a publisher that publishes it, its number and,
+when the text gives them, its year and its amendments. The publishers are the
+ones the catalogue's own designation writes: "IEC 12354-1:2017" does not name
+ISO 12354-1:2017, while either publisher names a joint document
+(ISO/IEC Guide 98-3:2008) in either catalogue, and IEC alone names one of the
+IEC documents ISO's catalogue lists under their own designation. The catalogue
+page of ISO 717-2:2013 beside "ISO 717-2:2020" is another document, the
+edition the page does not cite.
 The IEC webstore numbers an edition, that edition consolidated with its
 amendment and the amendment alone apart (IEC 60268-5:2003,
 IEC 60268-5:2003+AMD1:2007 CSV and IEC 60268-5:2003/AMD1:2007), so
@@ -155,16 +167,31 @@ _SPACES = str.maketrans(
     {"\u00a0": " ", "\u202f": " ", "\u2009": " ", "\u2011": "-", "\u2010": "-"}
 )
 
+#: The kind of deliverable a designation may write after its publishers and
+#: before its number (IEC TS 61094-8, ISO/IEC Guide 98-3; the IEC webstore
+#: writes GUIDE).
+_KIND = r"(?:\s+(?:TS|TR|PAS|Guide|GUIDE))?"
+
 #: A designation of each catalogue as a page writes one: the publisher, the
 #: kind of deliverable if any (ISO/TS, ISO/IEC, IEC TS) and the number. A text
 #: that holds none of the link's catalogue does not say which document the
 #: link opens.
 _NAMED = {
-    catalogue: re.compile(
-        rf"(?<![\w-]){publisher}(?:/[A-Z]+)*(?:\s+(?:TS|TR|PAS|Guide))?\s+\d"
-    )
+    catalogue: re.compile(rf"(?<![\w-]){publisher}(?:/[A-Z]+)*{_KIND}\s+\d")
     for catalogue, publisher in (("iso", "ISO"), ("iec", "IEC"))
 }
+
+#: The two publishers whose catalogues the check reads, by catalogue.
+PUBLISHERS = {"iso": "ISO", "iec": "IEC"}
+
+#: The publishers a designation writes right before its number: ISO, IEC or
+#: both, alone or joined by slashes to each other or to the kind of
+#: deliverable (ISO/IEC, IEC/ISO, ISO/TS, ISO/IEC/IEEE), with a kind after
+#: them if any (IEC TS, ISO/IEC Guide). An adoption keeps the publisher it
+#: adopts in front of the number (EN ISO 3382-3, UNE-EN ISO 717-1).
+_PUBLISHED_BY = re.compile(
+    rf"(?<![\w-])((?:[A-Z]+/)*(?:ISO|IEC)(?:/[A-Z]+)*){_KIND}\s+$"
+)
 
 #: A key of a page's frontmatter, at the top level or of a reference, and the
 #: start of its value.
@@ -402,20 +429,43 @@ def _amendments(written: str, catalogue: str) -> Amendments:
     )
 
 
+def _publishers(text: str, at: int) -> frozenset[str]:
+    """The publishers, of ISO and IEC, a text writes right before the number at ``at``.
+
+    None when the number stands alone: "717-2" in "ISO 717-1 and 717-2"
+    names no publisher, and so no document of either catalogue.
+    """
+    written = _PUBLISHED_BY.search(text[:at])
+    if written is None:
+        return frozenset()
+    return frozenset(written.group(1).split("/")) & frozenset(PUBLISHERS.values())
+
+
 def _numbers(
     designation: str, catalogue: str
-) -> tuple[set[str], str | None, Amendments]:
-    """The numbers a text may give a pinned designation, its year and amendments."""
+) -> tuple[set[str], str | None, Amendments, frozenset[str]]:
+    """The numbers a text may give a pinned designation, its year, its
+    amendments and the publishers that name it.
+
+    The publishers are those the catalogue's own designation writes: ISO
+    alone for ISO 12354-1:2017, both for ISO/IEC Guide 98-3:2008, which
+    either names, and IEC alone for IEC 60974-1:1998, one of the IEC
+    documents ISO's catalogue lists under their own designation. A
+    designation that writes neither is the catalogue's own publisher's.
+    """
     match = _DESIGNATION.search(designation)
     if match is None:
-        return set(), None, ()
+        return set(), None, (), frozenset()
     number, year = match.group(1), match.group(2)
     numbers = {number}
     head, _, rest = number.partition("-")
     if catalogue == "iec" and len(head) == 5 and head.startswith("60"):
         # IEC 651 is IEC 60651: the 1997 renumbering added 60000.
         numbers.add(str(int(head) - 60000) + ("-" + rest if rest else ""))
-    return numbers, year, _amendments(match.group(3), catalogue)
+    publishers = _publishers(designation, match.start()) or frozenset(
+        {PUBLISHERS[catalogue]}
+    )
+    return numbers, year, _amendments(match.group(3), catalogue), publishers
 
 
 def _same_amendments(written: Amendments, pinned: Amendments) -> bool:
@@ -437,16 +487,20 @@ def _same_amendments(written: Amendments, pinned: Amendments) -> bool:
 def names(beside: str, designation: str, catalogue: str) -> bool:
     """Whether ``beside`` names ``designation``.
 
-    By its number and, when the text gives them, its year and its
-    amendments: the edition, the edition with its amendment and the
-    amendment alone are three documents, wherever their catalogue numbers
-    them apart.
+    By a publisher that publishes it, its number and, when the text gives
+    them, its year and its amendments. "IEC 12354-1:2017" does not name
+    ISO 12354-1:2017: a number is read only behind a publisher the
+    catalogue's designation writes (:func:`_numbers`), so the IEC number of
+    an iso.org link, or an ISO one of a webstore link, names another
+    document. The edition, the edition with its amendment and the amendment
+    alone are three documents, wherever their catalogue numbers them apart.
     """
-    numbers, year, amended = _numbers(designation, catalogue)
+    beside = beside.translate(_SPACES)
+    numbers, year, amended, publishers = _numbers(designation, catalogue)
     written = [
         (match.group(2), _amendments(match.group(3), catalogue))
         for match in _DESIGNATION.finditer(beside)
-        if match.group(1) in numbers
+        if match.group(1) in numbers and _publishers(beside, match.start()) & publishers
     ]
     dated = [found for found in written if found[0]]
     return any(

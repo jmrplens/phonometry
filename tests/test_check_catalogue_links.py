@@ -391,6 +391,17 @@ def test_a_label_naming_no_designation_is_read_beside_the_text_before_it(
     assert "opens ISO 13887:2017, which the link is not written beside" in problem
 
 
+def test_a_label_naming_a_designation_of_the_other_catalogue_is_read_by_its_label() -> (
+    None
+):
+    # The text before it names the document the link opens, but the label
+    # tells the reader it opens another one.
+    page = "ISO 12354-1:2017 ([IEC 12354-1:2017](https://www.iso.org/standard/70242.html)).\n"
+    (problem,) = _named(page)
+    assert "opens ISO 12354-1:2017, which" in problem
+    assert problem.endswith("'IEC 12354-1:2017'")
+
+
 @pytest.mark.parametrize(
     "page",
     [
@@ -438,6 +449,80 @@ def test_a_note_address_between_backticks_is_still_a_link() -> None:
     (problem,) = _named(page)
     assert "page.md:6" in problem
     assert "opens ISO 3382-3:2012" in problem
+
+
+@pytest.mark.parametrize(
+    "page",
+    [
+        "IEC 12354-1:2017 [catalogue](https://www.iso.org/standard/70242.html).\n",
+        "See [IEC 12354-1:2017](https://www.iso.org/standard/70242.html).\n",
+        "| IEC 12354-1:2017 | [catalogue](https://www.iso.org/standard/70242.html) |\n",
+        _FRONTMATTER.format(
+            designation="IEC 12354-1:2017",
+            url="https://www.iso.org/standard/70242.html",
+        ),
+        "ISO 60268-1:1985 [catalogue](https://webstore.iec.ch/en/publication/1204).\n",
+    ],
+)
+def test_a_designation_of_another_publisher_does_not_vouch_for_the_link(
+    page: str,
+) -> None:
+    (problem,) = _named(page)
+    assert "which the link is not written beside" in problem
+
+
+@pytest.mark.parametrize(
+    "written",
+    [
+        "ISO 12354-1:2017",
+        "EN ISO 12354-1:2017",
+        "UNE-EN ISO 12354-1:2017",
+        "ISO/IEC 12354-1:2017",
+        "IEC/ISO 12354-1:2017",
+        "ISO\u00a012354-1:2017",
+    ],
+)
+def test_a_designation_that_names_the_publisher_of_the_link_passes(
+    written: str,
+) -> None:
+    page = f"{written}. [catalogue](https://www.iso.org/standard/70242.html).\n"
+    assert _named(page) == []
+
+
+_JOINT = {
+    "iso": {"50461": "ISO/IEC Guide 98-3:2008", "2430": "IEC 60974-1:1998"},
+    "iec": {"1176": "ISO/IEC GUIDE 98-3:2008", "2777": "IEC 60651:1979"},
+}
+
+
+@pytest.mark.parametrize(
+    ("written", "url", "passes"),
+    [
+        # A joint document is named by either of its publishers, in either
+        # catalogue.
+        ("ISO/IEC Guide 98-3:2008", "https://www.iso.org/standard/50461.html", True),
+        ("ISO/IEC Guide 98-3:2008", "https://webstore.iec.ch/publication/1176", True),
+        ("IEC Guide 98-3:2008", "https://www.iso.org/standard/50461.html", True),
+        ("ISO Guide 98-3:2008", "https://webstore.iec.ch/publication/1176", True),
+        # ISO's catalogue lists some IEC documents on their own: the IEC
+        # designation names them, an ISO one does not.
+        ("IEC 60974-1:1998", "https://www.iso.org/standard/2430.html", True),
+        ("ISO 60974-1:1998", "https://www.iso.org/standard/2430.html", False),
+        # The 1997 renumbering still holds, under its own publisher only.
+        ("IEC 651:1979", "https://webstore.iec.ch/publication/2777", True),
+        ("ISO 651:1979", "https://webstore.iec.ch/publication/2777", False),
+    ],
+)
+def test_the_publishers_that_name_a_document_are_those_its_catalogue_gives(
+    written: str, url: str, *, passes: bool
+) -> None:
+    page = _FRONTMATTER.format(designation=written, url=url)
+    found = [
+        problem
+        for problem in ccl.problems(ccl.links_in("docs/page.md", page), _JOINT)
+        if "is linked from no page" not in problem
+    ]
+    assert (found == []) is passes
 
 
 def test_the_old_iec_number_names_the_renumbered_publication() -> None:

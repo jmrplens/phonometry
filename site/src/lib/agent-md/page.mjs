@@ -27,7 +27,7 @@ import { join, relative, sep } from 'node:path';
 
 import { author, siteTitle } from '../../data/site.mjs';
 import { catalogueSlugs } from '../../data/topics.mjs';
-import { installCommand, version } from '../../data/repo-stats.mjs';
+import { installCommand, preRelease, version } from '../../data/repo-stats.mjs';
 import { implementedStandards } from '../reference-chips.ts';
 import { isoDay } from '../date-rules.mjs';
 import { markdownCopyPath, routeOf } from '../page-markdown.mjs';
@@ -184,7 +184,7 @@ export async function pageMarkdown(file, { registry, dates, flavour = 'agent', c
         lang,
         canonical: pageUrl(route),
         alternate: fileOfRoute(other, contentDir) ? SITE.url(markdownCopyPath(other, SITE.base)) : undefined,
-        release: { version, install: installCommand },
+        release: { version, install: installCommand, preRelease },
         author,
         published: dates?.publishedOf(file),
         updated: dates ? isoDay(dates.dateOf(file)) : undefined,

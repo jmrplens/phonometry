@@ -120,7 +120,8 @@ export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';
 
 /**
  * The header lines of a copy that name the release rather than the page: the
- * version it documents and the command that installs it. A copy opens with a
+ * version it documents, the command that installs it and, while the version
+ * is a pre-release, the line that says it is not on PyPI yet. A copy opens with a
  * block of `Key: value` lines, and a release changes these two on every page
  * at once while no page says anything new.
  *
@@ -130,7 +131,7 @@ export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';
  * writer (src/lib/agent-md/header.mjs) writes its release lines from this
  * list and has no list of its own, so that the two cannot drift apart.
  */
-export const releaseHeaderKeys = Object.freeze(['Version', 'Install']);
+export const releaseHeaderKeys = Object.freeze(['Version', 'Install', 'Pre-release']);
 
 /** One `Key: value` line of a copy's header. */
 const HEADER_FIELD = /^([A-Z][A-Za-z-]*): /;

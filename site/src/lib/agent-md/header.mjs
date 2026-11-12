@@ -47,7 +47,7 @@ import { line } from './markdown-table.mjs';
  * @property {'en' | 'es'} lang
  * @property {string} canonical  The page's own address.
  * @property {string} [alternate]  The address of the copy in the other language.
- * @property {{ version: string, install: string }} release
+ * @property {{ version: string, install: string, preRelease?: boolean }} release
  * @property {{ name: string, orcid: string }} [author]
  * @property {string} [published]  `YYYY-MM-DD`.
  * @property {string} [updated]  `YYYY-MM-DD`.
@@ -93,24 +93,42 @@ export const LIST_SEPARATOR = '; ';
  * and a release line written under a key it does not hold would move every
  * copy on every release.
  *
- * @param {{ version: string, install: string }} release
+ * A pre-release (`preRelease`, read from VERSION by PEP 440 in
+ * src/data/repo-stats.mjs) adds a line that says the version is not on PyPI
+ * yet, since the install line installs the last release there; it names no
+ * version PyPI serves, so it cannot go stale, and it goes at the stamp with
+ * nothing to change.
+ *
+ * @param {{ version: string, install: string, preRelease?: boolean }} release
+ * @param {'en' | 'es'} lang
  * @returns {[string, string][]}
  */
-function releaseLines(release) {
-  /** @type {Record<string, string>} */
-  const values = { Version: `phonometry ${release.version}`, Install: release.install };
+function releaseLines(release, lang) {
+  /** @type {Record<string, string | undefined>} */
+  const values = {
+    Version: `phonometry ${release.version}`,
+    Install: release.install,
+    'Pre-release': release.preRelease ? PRE_RELEASE[lang](release.version) : undefined,
+  };
   for (const key of Object.keys(values)) {
     if (!releaseHeaderKeys.includes(key)) {
       throw new Error(`header: ${key} names the release and is not in releaseHeaderKeys (src/lib/page-markdown.mjs)`);
     }
   }
-  return releaseHeaderKeys.map((key) => {
+  return releaseHeaderKeys.flatMap((key) => {
     if (!(key in values)) {
       throw new Error(`header: releaseHeaderKeys lists ${key}, and the header has no value for it`);
     }
-    return [key, values[key]];
+    const value = values[key];
+    return value === undefined ? [] : [/** @type {[string, string]} */ ([key, value])];
   });
 }
+
+/** The `Pre-release:` value in each language. */
+export const PRE_RELEASE = Object.freeze({
+  en: (version) => `phonometry ${version} is not on PyPI yet`,
+  es: (version) => `phonometry ${version} aún no está en PyPI`,
+});
 
 /**
  * The `Verified:` value in the page's language.
@@ -138,7 +156,7 @@ export function header(fields) {
     ['Canonical', fields.canonical],
     ['Language', fields.lang],
     ['Alternate', fields.alternate],
-    ...releaseLines(fields.release),
+    ...releaseLines(fields.release, fields.lang),
     ['Author', fields.author ? `${fields.author.name} (${fields.author.orcid})` : undefined],
     ['Published', fields.published],
     ['Updated', fields.updated],

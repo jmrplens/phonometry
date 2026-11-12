@@ -216,8 +216,8 @@ test('a previous manifest that cannot be read sends every URL, and says why, whe
 	assert.deepEqual(sent.urls, Object.keys(BASE).map(url).sort());
 });
 
-test('a copy that differs only in its Version: and Install: lines hashes the same', (t) => {
-	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install']);
+test('a copy that differs only in its release lines (Version:, Install:, Pre-release:) hashes the same', (t) => {
+	assert.deepEqual([...releaseHeaderKeys], ['Version', 'Install', 'Pre-release']);
 	const stamped = (version) =>
 		Object.fromEntries(
 			Object.keys(BASE).map((route) => [
@@ -227,6 +227,27 @@ test('a copy that differs only in its Version: and Install: lines hashes the sam
 		);
 	const sent = submit(t, stamped('4.0.0'), stamped('4.0.1'));
 	assert.deepEqual(sent.urls, []);
+});
+
+test('the stamp of a pre-release, which takes its Pre-release: line away, moves no copy', (t) => {
+	// While VERSION is a pre-release every copy says it is not on PyPI yet
+	// (src/lib/agent-md/header.mjs); stamping 4.0.0rc1 as 4.0.0 drops that
+	// line from all of them at once and changes nothing a page says.
+	const stamped = (version, pre) =>
+		Object.fromEntries(
+			Object.keys(BASE).map((route) => [
+				route,
+				guide(route, {
+					header: [
+						`Version: phonometry ${version}`,
+						'Install: pip install "phonometry[full]"',
+						...(pre ? [`Pre-release: phonometry ${version} is not on PyPI yet`] : []),
+						'License: MIT',
+					],
+				}),
+			]),
+		);
+	assert.deepEqual(submit(t, stamped('4.0.0rc1', true), stamped('4.0.0', false)).urls, []);
 });
 
 test('every other header line, and the same words in the body, still move a page', (t) => {

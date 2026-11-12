@@ -37,6 +37,7 @@ import {
   pythonFloor as floorOf,
   readProject,
 } from '../lib/pyproject.mjs';
+import { isPreRelease } from '../lib/pep440.mjs';
 import { parseToml } from '../lib/toml.mjs';
 import { domainIds } from './topics.mjs';
 
@@ -111,6 +112,9 @@ export const version = (() => {
     );
   }
 })();
+
+/** Whether {@link version} is a pre-release, which is not on PyPI yet. */
+export const preRelease = isPreRelease(version);
 
 /**
  * The `[project]` table of pyproject.toml, read once for everything below.

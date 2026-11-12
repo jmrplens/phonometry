@@ -19,7 +19,8 @@ import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { PAGE_CLASSES, REMEDIES, checkMarkdownTwins, headerOf, textProblems } from '../../../../scripts/check-markdown-twins.mjs';
-import { version } from '../../../data/repo-stats.mjs';
+import { preRelease, version } from '../../../data/repo-stats.mjs';
+import { PRE_RELEASE } from '../header.mjs';
 import { VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
 
 const CHECK = fileURLToPath(new URL('../../../../scripts/check-markdown-twins.mjs', import.meta.url));
@@ -74,7 +75,10 @@ function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
  * @param {string} route
  * @param {{ lang?: string, title?: string, other?: string, updated?: string, verified?: boolean, body?: string, published?: string | null, license?: boolean, summary?: string, release?: string | null, install?: string | null, author?: string | null }} [options]
  */
-function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
+/** The `Pre-release:` value a copy of `lang` carries while VERSION is a pre-release. */
+const preReleaseLine = (lang) => (preRelease ? PRE_RELEASE[lang](version) : undefined);
+
+function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', pre = preReleaseLine(lang), author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
   return [
     `# ${title}`,
     '',
@@ -85,6 +89,7 @@ function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
     ...(other ? [`Alternate: ${SITE}${other}index.md`] : []),
     ...(release ? [`Version: ${release}`] : []),
     ...(install ? [`Install: ${install}`] : []),
+    ...(pre ? [`Pre-release: ${pre}`] : []),
     ...(author ? [`Author: ${author}`] : []),
     ...(published ? [`Published: ${published}`] : []),
     `Updated: ${updated}`,

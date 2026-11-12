@@ -68,10 +68,11 @@ import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { parse as parseYaml } from 'yaml';
 
-import { version } from '../src/data/repo-stats.mjs';
+import { preRelease, version } from '../src/data/repo-stats.mjs';
 import { basePath, siteTitle, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { fileOfRoute } from '../src/lib/agent-md/content.mjs';
+import { PRE_RELEASE } from '../src/lib/agent-md/header.mjs';
 import { REFERENCES_HEADING } from '../src/lib/agent-md/page.mjs';
 import { CONTENT_DIR } from '../src/lib/agent-md/render.mjs';
 import { rewrittenSource } from '../src/lib/agent-md/rewrites.mjs';
@@ -571,8 +572,13 @@ function checkPage(page, pageClass, { dist, copies, dates, add }) {
       add('header', `${copy} ${said('Canonical')}, and the page's canonical is ${canonical}`);
     }
     if (fields.get('Language') !== lang) add('header', `${copy} ${said('Language')}, not ${lang}`);
-    for (const key of [...releaseHeaderKeys, 'Author']) {
+    for (const key of [...releaseHeaderKeys.filter((key) => key !== 'Pre-release' || preRelease), 'Author']) {
       if (!fields.has(key)) add('header', `${copy} has no "${key}:" line`);
+    }
+    // Read in the copy's own language, so a copy in the wrong one fails once, on Language:.
+    const preLine = preRelease ? PRE_RELEASE[fields.get('Language') === 'es' ? 'es' : 'en'](version) : undefined;
+    if (fields.get('Pre-release') !== preLine) {
+      add('header', `${copy} ${said('Pre-release')}, and ${version} is ${preRelease ? `a pre-release: "Pre-release: ${preLine}"` : 'no pre-release'}`);
     }
     if (fields.has('Version') && fields.get('Version') !== `phonometry ${version}`) {
       add('header', `${copy} says "Version: ${fields.get('Version')}", and the build is of phonometry ${version}`);

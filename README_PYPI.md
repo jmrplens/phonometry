@@ -97,23 +97,26 @@ Windows at 0.58.0, below the floor of `[perf]`, and its last wheels there,
 numba 0.57.1 and llvmlite 0.41.1, are for Python 3.10 at most, so `[perf]` is
 not supported there, nor `[full]`, which holds it;
 `pip install "phonometry[plot,report,audio]"` installs the other three extras
-there. A plain install takes the newest releases, which have wheels on the
-other three platforms but numba's on musl and on macOS on Intel, where a plain
-`[perf]` install builds numba and llvmlite on every Python, and matplotlib's
-on ARM with musl. PyPI has no torch wheel for any of the four, the last for
-macOS on Intel being 2.2.2, older than every floor, and none ever for 32-bit
-Windows, and torch publishes no source distribution, so `[torch]` does not
-install on them from PyPI. On Windows on ARM PyTorch's CPU index has torch
-wheels for Python 3.12, from 2.7.0, and 3.13, from 2.8.0, so installing torch
-from it first, as below, brings `[torch]` there; it has none for Python 3.14
-there, none for Linux with musl or 32-bit Windows, and for macOS on Intel none
-after 2.2.2, as on PyPI. python-soundfile, for `[audio]`, publishes no wheel
-that carries libsndfile for Linux with musl, nor at its floor 0.12.0 for Linux
-on ARM, whose first is 0.13.0, or for Windows on ARM, whose first is 0.14.0,
-so pip installs its pure-Python wheel there, which loads the system's
-libsndfile: on Alpine `apk add libsndfile-dev`, since the Python of the
-official Docker image finds that library only under the name `libsndfile.so`,
-which that package adds.
+there. The same holds on 32-bit Linux, where numba's last wheels, of 0.56.4,
+are for Python 3.10 at most and numba supports the platform no longer; [Docker
+and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) says
+what the other three build there. A plain install takes the newest releases,
+which have wheels on the other three platforms but numba's on musl and on
+macOS on Intel, where a plain `[perf]` install builds numba and llvmlite on
+every Python, and matplotlib's on ARM with musl. PyPI has no torch wheel for
+any of the four, the last for macOS on Intel being 2.2.2, older than every
+floor, and none ever for 32-bit Windows, and torch publishes no source
+distribution, so `[torch]` does not install on them from PyPI. On Windows on
+ARM PyTorch's CPU index has torch wheels for Python 3.12, from 2.7.0, and
+3.13, from 2.8.0, so installing torch from it first, as below, brings
+`[torch]` there; it has none for Python 3.14 there, none for Linux with musl
+or 32-bit Windows, and for macOS on Intel none after 2.2.2, as on PyPI.
+python-soundfile, for `[audio]`, publishes no wheel that carries libsndfile
+for Linux with musl, nor at its floor 0.12.0 for Linux on ARM, whose first is
+0.13.0, or for Windows on ARM, whose first is 0.14.0, so pip installs its
+pure-Python wheel there, which loads the system's libsndfile: on Alpine
+`apk add libsndfile-dev`, since the Python of the official Docker image finds
+that library only under the name `libsndfile.so`, which that package adds.
 
 Optional extras: `phonometry[plot]` (matplotlib for response plots and result
 `.plot()` methods), `phonometry[perf]` (numba for faster impulse ballistics),
@@ -132,9 +135,10 @@ index and those libraries stay out.
 I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
 enabled except the torch backend of the FDTD engines, which `[torch]` adds. On
-32-bit Windows, which `[full]` does not support,
-`pip install "phonometry[plot,report,audio]"` brings the other three, as above,
-and builds SciPy, matplotlib and kiwisolver from source there. The
+32-bit Windows and 32-bit Linux, which `[full]` does not support,
+`pip install "phonometry[plot,report,audio]"` brings the other three, as
+above, and builds from source SciPy, matplotlib and kiwisolver on Windows, and
+NumPy, SciPy, matplotlib and Pillow among others on Linux. The
 base install computes every metric on NumPy and SciPy alone: it includes
 reading every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64)
 through `phonometry.io`; the only things it leaves unavailable are the figures

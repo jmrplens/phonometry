@@ -435,23 +435,16 @@ function quotationFrom(lines, read, start, kind) {
 }
 
 /**
- * The pages that restate the citation, as repository-relative paths.
- *
- * The two Starlight pages are the ones the site renders. `docs/start/about.md`
- * is the plain-markdown mirror, written by hand for people reading the
- * repository on GitHub, and it restates the citation verbatim: the same APA
- * reference and the same BibTeX entry, version included. It is checked here
- * for the same reason the other two are, and it needs it more: the snippet
- * checker deliberately does not pair the `docs/` mirror with anything, so
- * nothing else in the build ever looks at it. Without this line a release
- * would bump `VERSION`, `CITATION.cff` and both Starlight pages, and leave the
- * mirror quietly citing the previous version on the very file a reader
- * browsing the repository lands on.
+ * The pages that restate the citation, as repository-relative paths: the two
+ * Starlight pages the site renders. The GitHub copy of the English one,
+ * `docs/start/about.md`, restates the citation too, and is written from that
+ * page by `make llms`; the drift checks of CI fail while it differs from what
+ * the page writes, so a release that bumps `VERSION` and `CITATION.cff` cannot
+ * leave it citing the previous version, and it is not read again here.
  */
 const citingPages = [
   'site/src/content/docs/start/about.md',
   'site/src/content/docs/es/start/about.md',
-  'docs/start/about.md',
 ];
 
 for (const path of citingPages) {

@@ -16,18 +16,22 @@
 // It also flags the delimiter shape that caused it, in the sources rather than
 // in the output, because that failure is silent by construction: a display
 // block must open and close on its own line. Every one of the site's other
-// display blocks already does.
+// display blocks already does. The sources are the site's pages and the files
+// of docs/ written by hand; a file of the GitHub edition, which `make llms`
+// writes from its site page and marks with its opening comment, is left to
+// that page, where a stray delimiter is reported once and can be fixed.
 //
 // And it reads the glossary's cards for a formula that never reached KaTeX at
 // all: a field the card prints as typed keeps its dollar signs, and no parse
 // error says so.
 //
-// Usage: node scripts/check-math-render.mjs [--dist dist] [--sources ../docs ../site]
+// Usage: node scripts/check-math-render.mjs [--dist dist]
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { isEditionFile } from '../src/lib/agent-md/edition.mjs';
 import { codeLines, pageLines, splitLines } from '../src/lib/markdown-fences.mjs';
 import { shownLines, strayDelimiter } from './shared/page-prose.mjs';
 
@@ -81,12 +85,20 @@ function renderFailures(distDir) {
  *
  * Inline `$$...$$` complete on one line is fine; what breaks the parser is a
  * block that opens or closes on a line carrying other content.
+ *
+ * A file of the GitHub edition is skipped: its formulas are its site page's,
+ * read there, and a hand edit of the copy is undone by `make llms`.
+ *
+ * @param {string[]} sourceDirs  The directories to walk for `.md` and `.mdx` pages.
+ * @returns {{ file: string, line: number, text: string }[]}
  */
-function delimiterProblems(sourceDirs) {
+export function delimiterProblems(sourceDirs) {
   const problems = [];
   for (const dir of sourceDirs) {
     for (const file of walk(dir, ['.md', '.mdx'])) {
-      const lines = splitLines(readFileSync(file, 'utf8'));
+      const text = readFileSync(file, 'utf8');
+      if (isEditionFile(text)) continue;
+      const lines = splitLines(text);
       const mdx = file.endsWith('.mdx');
       const kind = mdx ? 'mdx' : 'md';
       // A formula shown inside a code block is a sample, not a formula.
@@ -232,86 +244,91 @@ function glossaryAsTyped(distDir) {
   return { cards, found };
 }
 
-const args = process.argv.slice(2);
-const distArg = args.indexOf('--dist');
-const distDir = resolve(SITE, distArg === -1 ? 'dist' : args[distArg + 1]);
-const sourceDirs = [join(REPO, 'docs'), join(SITE, 'src', 'content')];
+/** Read the build and the sources, report what failed, and exit 0 or 1. */
+function main() {
+  const args = process.argv.slice(2);
+  const distArg = args.indexOf('--dist');
+  const distDir = resolve(SITE, distArg === -1 ? 'dist' : args[distArg + 1]);
+  const sourceDirs = [join(REPO, 'docs'), join(SITE, 'src', 'content')];
 
-const failures = renderFailures(distDir);
-const problems = delimiterProblems(sourceDirs);
-const mismatches = stylesheetMismatch(distDir);
-const glossary = glossaryAsTyped(distDir);
+  const failures = renderFailures(distDir);
+  const problems = delimiterProblems(sourceDirs);
+  const mismatches = stylesheetMismatch(distDir);
+  const glossary = glossaryAsTyped(distDir);
 
-if (
-  failures.length === 0 &&
-  problems.length === 0 &&
-  mismatches.length === 0 &&
-  glossary.cards > 0 &&
-  glossary.found.length === 0
-) {
-  console.log(
-    'Math renders: no KaTeX parse errors in the build, no stray display\n' +
-      `delimiters, no formula printed as typed on the ${glossary.cards} glossary cards or\n` +
-      'their symbol index, and the stylesheet matches the markup the renderer emits.',
-  );
-  process.exit(0);
-}
-
-if (failures.length > 0) {
-  console.error(
-    `\n${failures.length} built page(s) contain a formula KaTeX could not parse.\n` +
-      'The page still ships, and everything after the bad block may be swallowed:\n',
-  );
-  for (const failure of failures) {
-    console.error(`  ${failure.file}: ${failure.count} error(s)`);
-    for (const message of failure.messages) console.error(`      ${message}`);
+  if (
+    failures.length === 0 &&
+    problems.length === 0 &&
+    mismatches.length === 0 &&
+    glossary.cards > 0 &&
+    glossary.found.length === 0
+  ) {
+    console.log(
+      'Math renders: no KaTeX parse errors in the build, no stray display\n' +
+        `delimiters, no formula printed as typed on the ${glossary.cards} glossary cards or\n` +
+        'their symbol index, and the stylesheet matches the markup the renderer emits.',
+    );
+    process.exit(0);
   }
-}
 
-if (problems.length > 0) {
-  console.error(
-    `\n${problems.length} display-math delimiter(s) share a line with content.\n` +
-      'A `$$` block must open and close on its own line, or the parser runs on\n' +
-      'past the end of the formula and eats the rest of the document:\n',
-  );
-  for (const problem of problems) {
-    console.error(`  ${problem.file}:${problem.line}: ${problem.text}`);
-  }
-}
-
-if (mismatches.length > 0) {
-  console.error(
-    '\nThe KaTeX stylesheet does not match the markup the renderer emits.\n' +
-      'Every formula on the site is missing the rules for the classes below.\n' +
-      'site/package.json and the override in site/pnpm-workspace.yaml must both\n' +
-      "read `katex` from its catalog entry (`katex: 'catalog:'`); check that\n" +
-      'neither was replaced by a literal version. To see which katex the renderer\n' +
-      'resolves: `node -e \'console.log(require.resolve("katex", {paths: [require.resolve("rehype-katex")]}))\'`\n' +
-      'The classes that do not match:\n',
-  );
-  for (const mismatch of mismatches) {
+  if (failures.length > 0) {
     console.error(
-      `  ${mismatch.page}: markup emits class="${mismatch.emitted}", ` +
-        `stylesheet has ${mismatch.served} (wanted \`${mismatch.wanted}\`)`,
+      `\n${failures.length} built page(s) contain a formula KaTeX could not parse.\n` +
+        'The page still ships, and everything after the bad block may be swallowed:\n',
+    );
+    for (const failure of failures) {
+      console.error(`  ${failure.file}: ${failure.count} error(s)`);
+      for (const message of failure.messages) console.error(`      ${message}`);
+    }
+  }
+
+  if (problems.length > 0) {
+    console.error(
+      `\n${problems.length} display-math delimiter(s) share a line with content.\n` +
+        'A `$$` block must open and close on its own line, or the parser runs on\n' +
+        'past the end of the formula and eats the rest of the document:\n',
+    );
+    for (const problem of problems) {
+      console.error(`  ${problem.file}:${problem.line}: ${problem.text}`);
+    }
+  }
+
+  if (mismatches.length > 0) {
+    console.error(
+      '\nThe KaTeX stylesheet does not match the markup the renderer emits.\n' +
+        'Every formula on the site is missing the rules for the classes below.\n' +
+        'site/package.json and the override in site/pnpm-workspace.yaml must both\n' +
+        "read `katex` from its catalog entry (`katex: 'catalog:'`); check that\n" +
+        'neither was replaced by a literal version. To see which katex the renderer\n' +
+        'resolves: `node -e \'console.log(require.resolve("katex", {paths: [require.resolve("rehype-katex")]}))\'`\n' +
+        'The classes that do not match:\n',
+    );
+    for (const mismatch of mismatches) {
+      console.error(
+        `  ${mismatch.page}: markup emits class="${mismatch.emitted}", ` +
+          `stylesheet has ${mismatch.served} (wanted \`${mismatch.wanted}\`)`,
+      );
+    }
+  }
+
+  if (glossary.cards === 0) {
+    console.error(
+      '\nThe build has no glossary card (<article class="glossary-term">), so no\n' +
+        'card could be read for maths printed as typed. If src/components/Glossary.astro\n' +
+        'renamed the class, rename it in glossaryAsTyped() too.',
     );
   }
+
+  if (glossary.found.length > 0) {
+    console.error(
+      `\n${glossary.found.length} glossary card(s) or index print a formula as typed, dollar signs\n` +
+        'and all. src/components/Glossary.astro typesets a field only through notation();\n' +
+        'a field it prints as text shows its TeX:\n',
+    );
+    for (const { place, text } of glossary.found) console.error(`  ${place}: "${text}"`);
+  }
+
+  process.exit(1);
 }
 
-if (glossary.cards === 0) {
-  console.error(
-    '\nThe build has no glossary card (<article class="glossary-term">), so no\n' +
-      'card could be read for maths printed as typed. If src/components/Glossary.astro\n' +
-      'renamed the class, rename it in glossaryAsTyped() too.',
-  );
-}
-
-if (glossary.found.length > 0) {
-  console.error(
-    `\n${glossary.found.length} glossary card(s) or index print a formula as typed, dollar signs\n` +
-      'and all. src/components/Glossary.astro typesets a field only through notation();\n' +
-      'a field it prints as text shows its TeX:\n',
-  );
-  for (const { place, text } of glossary.found) console.error(`  ${place}: "${text}"`);
-}
-
-process.exit(1);
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

@@ -47,11 +47,12 @@ ANNEX_A_FORMULA = {
     "RA,tr": 18,
 }
 
-#: The guide in both languages and its plain-markdown mirror.
+#: The guide in both languages. Its GitHub edition,
+#: docs/buildings/insulation/spanish-building-code.md, is written from the
+#: English page by ``make llms``, so holding the pages holds it.
 GUIDE_PAGES = (
     "site/src/content/docs/buildings/insulation/spanish-building-code.mdx",
     "site/src/content/docs/es/buildings/insulation/spanish-building-code.mdx",
-    "docs/buildings/insulation/spanish-building-code.md",
 )
 
 #: The public function of each global index, by the quantity it returns.

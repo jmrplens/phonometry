@@ -30,7 +30,13 @@ vacuous.
    split and recomposed by :mod:`conformance.references`, character for
    character, and then has to have an entry in ``docs/reference/bibliography.md``.
    A book cited from ``src`` and missing from the bibliography is a source the
-   reader cannot resolve; the sweep that added this guard found one.
+   reader cannot resolve; the sweep that added this guard found one. That file
+   is the site's bibliography as ``make llms`` writes it for GitHub, read here
+   because it is the one place the list exists as text: the site page builds
+   its entries from the references of the pages that cite each work, so its
+   source holds none, and CI fails while the file differs from what the site
+   would write. A missing work is added to the references of a page that cites
+   it, and ``make llms`` writes it here.
 
 3. **The registry, so the guard has something to be true of.**
    :data:`SOURCED` names every table in ``src`` transcribed from a book or a
@@ -100,6 +106,7 @@ if TYPE_CHECKING:
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PACKAGE = pathlib.Path(phonometry.__file__).resolve().parent
+#: The site's bibliography written out (rule 2 of the module docstring).
 BIBLIOGRAPHY = ROOT / "docs" / "reference" / "bibliography.md"
 
 #: The field a record uses to say where it was read.

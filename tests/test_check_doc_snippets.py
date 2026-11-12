@@ -33,6 +33,8 @@ check_doc_snippets = importlib.util.module_from_spec(_spec)
 sys.modules["check_doc_snippets"] = check_doc_snippets
 _spec.loader.exec_module(check_doc_snippets)
 
+from github_edition import EDITION_MARK
+
 
 def _page(tmp_path: pathlib.Path, *blocks: str, name: str = "page.md") -> pathlib.Path:
     body = "\n".join(f"```python\n{b.strip()}\n```\n" for b in blocks)
@@ -166,19 +168,19 @@ def test_a_skip_entry_stays_while_one_edition_still_fails(
 ) -> None:
     """An entry names a guide, and a guide is written twice.
 
-    The site page and the hand-written mirror under ``docs/`` share a stem, so
-    one entry covers both. Reporting it stale the moment either one runs would
-    turn the report into a failing page on the next run.
+    The English page and its Spanish twin share a stem, so one entry covers
+    both. Reporting it stale the moment either one runs would turn the report
+    into a failing page on the next run.
     """
-    site = _page(tmp_path, "print('runs fine')", name="fine.md")
-    mirror_dir = tmp_path / "mirror"
-    mirror_dir.mkdir()
-    mirror = _page(mirror_dir, "raise SystemExit('still broken')", name="fine.md")
+    english = _page(tmp_path, "print('runs fine')", name="fine.md")
+    spanish_dir = tmp_path / "es"
+    spanish_dir.mkdir()
+    spanish = _page(spanish_dir, "raise SystemExit('still broken')", name="fine.md")
     monkeypatch.setitem(check_doc_snippets._SKIP, "fine", "reason")
-    assert check_doc_snippets.check_execution([site, mirror]) == []
+    assert check_doc_snippets.check_execution([english, spanish]) == []
     # Once both editions run, the entry has to go, and it is reported once.
-    mirror.write_text("```python\nprint('now fine too')\n```\n", encoding="utf-8")
-    failures = check_doc_snippets.check_execution([site, mirror])
+    spanish.write_text("```python\nprint('now fine too')\n```\n", encoding="utf-8")
+    failures = check_doc_snippets.check_execution([english, spanish])
     assert len(failures) == 1
     assert "runs now" in failures[0]
 
@@ -993,7 +995,7 @@ def test_a_spanish_page_reads_a_decimal_comma_from_its_path() -> None:
     assert "35" in failure
 
 
-def test_the_spanish_pages_run_with_the_english_and_the_mirror() -> None:
+def test_the_spanish_pages_run_with_the_english_and_the_files_of_docs() -> None:
     root = check_doc_snippets._ROOT
     pages = [
         check_doc_snippets._SITE / "start" / "page.mdx",
@@ -1006,6 +1008,37 @@ def test_the_spanish_pages_run_with_the_english_and_the_mirror() -> None:
     assert pages[1] in runnable
     assert pages[2] in runnable
     assert pages[3] not in runnable
+
+
+def test_a_file_of_the_github_edition_is_read_at_its_site_page(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``make llms`` writes the edition's fences from the English page, byte for byte.
+
+    The page is read and run, the file of docs/ written from it is neither, and
+    a file of docs/ written by hand is both.
+    """
+    site = tmp_path / "site"
+    (site / "es").mkdir(parents=True)
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    block = "```python\nprint(1)\n```\n"
+    (site / "page.mdx").write_text(block, encoding="utf-8")
+    edition = docs / "page.md"
+    edition.write_text(
+        f"{EDITION_MARK}page.mdx: edit that page. -->\n\n{block}", encoding="utf-8"
+    )
+    by_hand = docs / "notes.md"
+    by_hand.write_text(block, encoding="utf-8")
+    monkeypatch.setattr(check_doc_snippets, "_ROOT", tmp_path)
+    monkeypatch.setattr(check_doc_snippets, "_SITE", site)
+    monkeypatch.setattr(check_doc_snippets, "_SITE_ES", site / "es")
+    monkeypatch.setattr(check_doc_snippets, "_DOCS", docs)
+    monkeypatch.setattr(check_doc_snippets, "_HOME", tmp_path / "home.ts")
+    pages, _ = check_doc_snippets._pages()
+    assert site / "page.mdx" in pages
+    assert by_hand in pages
+    assert edition not in pages
 
 
 def test_a_comment_that_opens_on_the_word_the_print_writes_is_held(

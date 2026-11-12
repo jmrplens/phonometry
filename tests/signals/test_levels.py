@@ -419,12 +419,11 @@ def test_sound_exposure_rejects_nonpositive_duration() -> None:
 # The guide's parameter tables must not overstate what they list
 # ---------------------------------------------------------------------------
 
-#: The levels guide exists three times over: the plain-markdown edition under
-#: ``docs/`` that GitHub and the llms artifacts read, and the two published
-#: site editions. They are written by hand, one per language, so a table
-#: drifts in one copy at a time; every check below runs on all three.
+#: The levels guide is written twice, one site page per language, so a table
+#: drifts in one copy at a time; every check below runs on both. The GitHub
+#: edition under ``docs/`` and the llms files are written from the English
+#: page by ``make llms``.
 _LEVELS_GUIDE_COPIES = (
-    "docs/signals/levels/levels.md",
     "site/src/content/docs/signals/levels/levels.mdx",
     "site/src/content/docs/es/signals/levels/levels.mdx",
 )

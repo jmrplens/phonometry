@@ -94,7 +94,7 @@ FIELDS = {
 
 #: Prose patterns that assert a count. Each captures the number in group 1 and
 #: names the report field it must equal. Both languages, since the Spanish
-#: mirror carries the same claims.
+#: twins carry the same claims.
 #:
 #: This tuple is the whole map of where the numbers live: the check reads it to
 #: find stale values and the writer reads it to fix them, from the same entry,

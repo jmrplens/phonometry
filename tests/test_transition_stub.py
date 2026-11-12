@@ -61,7 +61,7 @@ _STUB_LICENSE = _STUB / "LICENSE"
 _LICENSE = _ROOT / "LICENSE"
 _WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
 _ROOT_PYPROJECT = _ROOT / "pyproject.toml"
-_GUIDE = _ROOT / "docs" / "start" / "upgrading.md"
+_GUIDE = _ROOT / "site" / "src" / "content" / "docs" / "start" / "upgrading.mdx"
 
 # A claim that some gate never reached the shim, made in the same sentence as
 # linting. The lint step has covered `stub/` since the shim was committed, so

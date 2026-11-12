@@ -43,6 +43,7 @@ if _SCRIPTS not in sys.path:
 import check_parameter_annotations as cpa
 import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
+from github_edition import is_edition_file
 from markdown_fences import page_kind, python_fences
 
 #: The tests that read the package share it, the module fixture ``reader``, so
@@ -94,10 +95,11 @@ def test_the_records_a_caller_builds_cover_the_named_ones(reader: cpa.Reader) ->
         assert name not in reader.input_records, name
 
 
-#: Where the guides live: the plain-markdown mirror GitHub serves, both
-#: languages of the site, and the two front pages. The API reference the
-#: site generates from the docstrings is left out: it states signatures, it
-#: builds nothing.
+#: Where the guides live: both languages of the site, the files of docs/
+#: written by hand, and the two front pages. The API reference the site
+#: generates from the docstrings is left out: it states signatures, it builds
+#: nothing; and so is the GitHub edition under docs/, which ``make llms``
+#: writes from the English pages, fences and all.
 _GUIDES = (ROOT / "docs", ROOT / "site" / "src" / "content" / "docs")
 _FRONT_PAGES = (ROOT / "README.md", ROOT / "README_PYPI.md")
 
@@ -108,7 +110,9 @@ def _guide_pages() -> list[pathlib.Path]:
         for folder in _GUIDES
         for page in sorted(folder.rglob("*.md*"))
         # docs/superpowers is gitignored scratch space, not documentation.
-        if "superpowers" not in page.parts and "reference/api" not in page.as_posix()
+        if "superpowers" not in page.parts
+        and "reference/api" not in page.as_posix()
+        and not is_edition_file(page)
     ]
     return pages + [page for page in _FRONT_PAGES if page.exists()]
 
@@ -206,16 +210,16 @@ def test_every_record_a_guide_builds_is_read_as_built_by_a_caller(
 @pytest.mark.whole_tree
 def test_the_guide_reading_finds_a_record_built_through_its_domain() -> None:
     guides = guide_built_records()
-    # transfer-stiffness.md builds it as vibration.TransferStiffnessResult(...),
-    # upgrading.md as room.ImpulseResponseResult(...).
+    # transfer-stiffness.mdx builds it as vibration.TransferStiffnessResult(...),
+    # upgrading.mdx as room.ImpulseResponseResult(...).
     assert (
-        "docs/vibration/structural/transfer-stiffness.md"
+        "site/src/content/docs/vibration/structural/transfer-stiffness.mdx"
         in guides[
             "phonometry.vibration.structural.transfer_stiffness.TransferStiffnessResult"
         ]
     )
     assert (
-        "docs/start/upgrading.md"
+        "site/src/content/docs/start/upgrading.mdx"
         in guides["phonometry.room._impulse_response.ImpulseResponseResult"]
     )
 

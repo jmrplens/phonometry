@@ -9,7 +9,7 @@ bytes that are themselves committed, so two runs on different hardware render
 the same file even when the underlying computation wobbles in its last digit.
 
 It is also what makes the report testable on a three-check fixture instead of
-only end to end on 552, and what stops the Markdown mirror and the site page
+only end to end on 552, and what stops the Markdown report and the site page
 from ever disagreeing: both read one document.
 
 The reader gets the headline count, the filters and weightings showcase, then

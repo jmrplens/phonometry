@@ -78,7 +78,6 @@ _GUIDE_PHRASES: dict[str, tuple[str, ...]] = {
 #: The guide's pages and their language.
 _PAGES = {
     "site/src/content/docs/io/videos.mdx": "en",
-    "docs/io/videos.md": "en",
     "site/src/content/docs/es/io/videos.mdx": "es",
 }
 

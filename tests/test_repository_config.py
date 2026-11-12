@@ -130,6 +130,23 @@ def test_the_python_checks_know_the_edition_by_the_comment_it_is_written_with() 
     assert github_edition.EDITION_MARK == f"{mark.group(1)}site/src/content/docs/"
 
 
+def test_only_a_markdown_file_is_opened_to_tell_the_edition(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The gates ask of every file they walk; only a ``.md`` file is the edition's.
+
+    A module, a site page or a data file that happened to open with the same
+    characters is not a file of the edition, and is not opened to find out.
+    """
+    opening = f"{github_edition.EDITION_MARK}page.mdx: edit that page. -->\n"
+    for name in ("page.md", "page.mdx", "module.py"):
+        (tmp_path / name).write_text(opening, encoding="utf-8")
+    assert github_edition.is_edition_file(tmp_path / "page.md")
+    assert not github_edition.is_edition_file(tmp_path / "page.mdx")
+    assert not github_edition.is_edition_file(tmp_path / "module.py")
+    assert not github_edition.is_edition_file(tmp_path / "absent.json")
+
+
 @pytest.mark.whole_tree
 def test_the_generated_page_rules_cover_only_the_edition() -> None:
     """The rules that say "will be overwritten" must match the edition and nothing else.
@@ -1278,8 +1295,8 @@ def test_the_docs_workflow_triggers_on_every_script_it_runs() -> None:
     """A script the site build runs has to be able to trigger that build.
 
     The docs workflow runs Python scripts of the repository before and after
-    the build (the mirror checks, the llms generator, the static check of the
-    llms files), and ``pnpm build`` runs the llms generator again. A script
+    the build (the llms generator, the static check of the llms files, the
+    conformance claims), and ``pnpm build`` runs the llms generator again. A script
     outside the workflow's paths can be broken by a pull request that never
     runs the workflow, and the site build then fails on the next pull request
     that touches site/, which changed nothing at fault. The modules those
@@ -2134,8 +2151,6 @@ _MYPY_STATED_IN = (
 #: that outlived its page fails.
 _TYPE_CHECKS_OF_A_USERS_CODE = dict.fromkeys(
     (
-        "docs/start/environments/index.md",
-        "docs/start/environments/type-checking.md",
         "site/src/content/docs/start/environments/index.md",
         "site/src/content/docs/start/environments/type-checking.md",
         "site/src/content/docs/es/start/environments/index.md",
@@ -2300,7 +2315,10 @@ def _stated_files() -> dict[str, str]:
     """The text of every tracked file that may tell anyone to run the type check.
 
     Workflows and actions, Makefiles, shell scripts and hooks, and pages. The
-    CHANGELOG is left out: it records the commands of past releases.
+    CHANGELOG is left out: it records the commands of past releases. So is the
+    GitHub edition under ``docs/``: ``make llms`` writes each of its files from
+    a site page read here, and an entry keyed by its path would be a second
+    entry for one page.
     """
     names = _tracked(
         ".github/*.yml",
@@ -2316,7 +2334,7 @@ def _stated_files() -> dict[str, str]:
     return {
         name: (_ROOT / name).read_text(encoding="utf-8")
         for name in names
-        if name != "CHANGELOG.md"
+        if name != "CHANGELOG.md" and not github_edition.is_edition_file(_ROOT / name)
     }
 
 

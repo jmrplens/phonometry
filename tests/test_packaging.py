@@ -73,11 +73,11 @@ _REPO_URL = re.compile(
 
 #: Every authored copy of the ``[full]`` NumPy caveat, in both languages, plus
 #: the generator that writes it into the llms artifacts. README_PYPI.md,
-#: llms.txt and the shards and llms-full.txt the site build writes are derived
-#: from these, so holding the sources holds every copy.
+#: llms.txt, the GitHub edition under docs/ and the shards and llms-full.txt
+#: the site build writes are derived from these, so holding the sources holds
+#: every copy.
 _INSTALL_CAVEAT_PAGES = (
     "README.md",
-    "docs/start/getting-started.md",
     "site/src/content/docs/start/getting-started.mdx",
     "site/src/content/docs/es/start/getting-started.mdx",
     "scripts/generate_llms.py",
@@ -118,11 +118,11 @@ _SOURCE_BUILD_TOOLS = {
     ("docker", "`linux/arm/v5`"): ("ninja", "patchelf"),
 }
 
-#: The three copies of each Environments page: the docs/ mirror and the site
-#: page in English and in Spanish. llms-full.txt and site/public/llms/ are
-#: derived from the site pages, so holding these holds them.
+#: The two copies of each Environments page written by hand: the site page in
+#: English and in Spanish. The GitHub edition under docs/, llms-full.txt and
+#: site/public/llms/ are written from the English page, so holding these holds
+#: them.
 _ENVIRONMENT_PAGE_COPIES = (
-    "docs/start/environments/{}.md",
     "site/src/content/docs/start/environments/{}.md",
     "site/src/content/docs/es/start/environments/{}.md",
 )
@@ -347,8 +347,8 @@ def test_the_full_extra_caveat_quotes_no_numpy_version() -> None:
     for name in _INSTALL_CAVEAT_PAGES:
         text = (_ROOT / name).read_text(encoding="utf-8")
         assert any(opening in text for opening in _CAVEAT_OPENINGS), (
-            f"{name} no longer carries the `[full]` caveat; the mirrored copies "
-            "must stay in step"
+            f"{name} no longer carries the `[full]` caveat; the copies written "
+            "by hand must stay in step"
         )
         quoted = _NUMPY_BOUND.search(text)
         assert quoted is None, (

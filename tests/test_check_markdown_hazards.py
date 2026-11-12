@@ -31,6 +31,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_markdown_hazards as cmh
+from github_edition import EDITION_MARK
 
 _GLUED = "no tag name starts with"
 
@@ -741,3 +742,17 @@ def test_a_code_span_across_a_line_break_hides_its_dollar_from_both_lines() -> N
         "x.md:3: inline maths opened on line 2 is cut off by a block marker; "
         "rewrap so the line does not start with '- '"
     ]
+
+
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``make llms`` writes the edition from the site page, which is read here."""
+    edition = tmp_path / "page.md"
+    edition.write_text(
+        f"{EDITION_MARK}page.mdx: edit that page. -->\n\nText.\n", encoding="utf-8"
+    )
+    by_hand = tmp_path / "notes.md"
+    by_hand.write_text("Text.\n", encoding="utf-8")
+    monkeypatch.setattr(cmh, "_ROOTS", (tmp_path,))
+    assert cmh.pages() == [by_hand]

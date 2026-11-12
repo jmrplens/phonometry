@@ -28,8 +28,38 @@ EDITION_MARK = "<!-- Written by `make llms` from site/src/content/docs/"
 def is_edition_file(path: Path) -> bool:
     """Whether *path* is a file of the GitHub edition.
 
-    :param path: A Markdown file under ``docs/``.
-    :return: True when it opens with the edition's comment.
+    Only a ``.md`` file is opened, so a check that walks modules, site pages
+    and data beside the Markdown of ``docs/`` can ask of every file it reads.
+
+    :param path: A file a check reads.
+    :return: True when it is Markdown that opens with the edition's comment.
     """
+    if path.suffix != ".md":
+        return False
     with path.open(encoding="utf-8") as handle:
         return handle.read(len(EDITION_MARK)) == EDITION_MARK
+
+
+#: The source pages whose text a component writes from data that no check
+#: reads, by their path under ``site/src/content/docs/``. The glossary page
+#: is one tag, ``<Glossary />``, and its cards (the symbols and formulas the
+#: subscript, Euler-number and digit-grouping checks hold) live in
+#: ``site/src/data/glossary.mjs``; the edition's copy is where they are read.
+DATA_PAGES = frozenset({"reference/glossary.mdx"})
+
+
+def is_edition_copy(path: Path) -> bool:
+    """Whether *path* is an edition file whose source a check has read.
+
+    A file of the edition written from a page of :data:`DATA_PAGES` is not:
+    its text comes from data the checks do not read, so they read it here.
+
+    :param path: A file a check reads.
+    :return: True when it is an edition file a check may skip.
+    """
+    if not is_edition_file(path):
+        return False
+    with path.open(encoding="utf-8") as handle:
+        first = handle.readline()
+    source = first[len(EDITION_MARK) :].split(":", 1)[0]
+    return source not in DATA_PAGES

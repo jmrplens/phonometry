@@ -26,6 +26,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_digit_grouping as gate
+from github_edition import EDITION_MARK
 
 NNBSP = gate.NARROW_NO_BREAK_SPACE
 
@@ -133,3 +134,20 @@ def test_a_literal_in_a_docstring_is_quoted_as_it_is_written(
         encoding="utf-8",
     )
     assert gate._findings(path) == [(5, "2 200")]
+
+
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``make llms`` writes the edition from the site page, which is read here."""
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    edition = docs / "page.md"
+    edition.write_text(
+        f"{EDITION_MARK}page.mdx: edit that page. -->\n\n101 325 Pa\n", encoding="utf-8"
+    )
+    by_hand = docs / "notes.md"
+    by_hand.write_text("101 325 Pa\n", encoding="utf-8")
+    monkeypatch.setattr(gate, "_REPO", tmp_path)
+    monkeypatch.setattr(gate, "_ROOTS", ("docs",))
+    assert gate._files() == [by_hand]

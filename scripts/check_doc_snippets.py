@@ -18,13 +18,11 @@ wrong thing. Four checks, cheapest first:
    takes from ``phonometry`` have to match its English twin exactly, name for
    name. Comparing whole token streams was tried first and is wrong: it fails
    on the ``language="es"`` argument, which is the one difference the pages
-   are supposed to have. The ``docs/`` mirror is not paired with anything: it
-   is written by hand for GitHub and does not carry the same set of examples,
-   so it is not held to the imports of a twin.
+   are supposed to have.
 
-3. **Execution.** Every page's blocks, in English, in Spanish and in the
-   ``docs/`` mirror, plus those of the README, of ``llms.txt`` and of the
-   site's home page, are concatenated in reading order (a guide is a
+3. **Execution.** Every page's blocks, in English and in Spanish, plus those
+   of the README, of ``llms.txt``, of the hand-written files of ``docs/`` and
+   of the site's home page, are concatenated in reading order (a guide is a
    narrative: later blocks use the variables the earlier ones bound) and run
    in a subprocess. A page that reads a file the reader brings runs on one
    :data:`_FIXTURES` writes first. Pages that cannot run standalone are
@@ -88,6 +86,7 @@ from decimal import (
 from typing import TYPE_CHECKING, NamedTuple, TypeGuard
 
 import ast_scan
+from github_edition import is_edition_file
 from markdown_fences import fences, page_kind
 
 if TYPE_CHECKING:
@@ -2048,10 +2047,10 @@ def check_execution(pages: list[pathlib.Path]) -> list[str]:
             failures += disagreements
         # A page that starts running must leave the skip list, or the list
         # quietly grows into a list of pages nobody checks. An entry covers a
-        # guide, and a guide is written three times, as the site page in each
-        # language and as the hand-written mirror under docs/; the entry is
-        # stale only once every edition runs, since dropping it while one of
-        # them still fails would turn a stale-skip report into a failing page.
+        # guide, and a guide is written twice, as the site page in each
+        # language; the entry is stale only once both run, since dropping it
+        # while one of them still fails would turn a stale-skip report into a
+        # failing page.
         fixtures = [_FIXTURES.get(page.stem, "") for page in skipped]
         for page, error, _ in pool.map(_run_page, skipped, fixtures):
             if error:
@@ -2113,11 +2112,13 @@ def _pages() -> tuple[list[pathlib.Path], list[tuple[pathlib.Path, pathlib.Path]
         if "/es/" not in p.as_posix() and "reference/api" not in p.as_posix()
     ]
     # `superpowers/` is gitignored scratch space, as in
-    # scripts/check_conformance_claims.py; it is not documentation.
-    mirror = sorted(
+    # scripts/check_conformance_claims.py; it is not documentation. The
+    # GitHub edition of the guides is written by `make llms` from the English
+    # pages above, code and all, so its blocks are read once, at the page.
+    hand_written = sorted(
         p
         for p in _DOCS.rglob("*.md")
-        if "superpowers" not in p.relative_to(_DOCS).parts
+        if "superpowers" not in p.relative_to(_DOCS).parts and not is_edition_file(p)
     )
     pairs: list[tuple[pathlib.Path, pathlib.Path]] = []
     for page in site_en:
@@ -2126,7 +2127,7 @@ def _pages() -> tuple[list[pathlib.Path], list[tuple[pathlib.Path, pathlib.Path]
             pairs.append((page, twin))
     everything = (
         site_en
-        + mirror
+        + hand_written
         + _published()
         + _restated()
         + [p for _, p in pairs if p.is_relative_to(_SITE_ES)]
@@ -2137,16 +2138,18 @@ def _pages() -> tuple[list[pathlib.Path], list[tuple[pathlib.Path, pathlib.Path]
 def _runnable(pages: list[pathlib.Path]) -> list[pathlib.Path]:
     """The pages of *pages* the execution and output checks run.
 
-    Every edition a reader can copy from: the site page in both languages,
-    and the hand-written mirror under docs/ that GitHub serves, with the
-    published surfaces. The mirror is not a copy -- 105 of its 171 pages
-    carry different code from their site page, mostly reworded comments but
-    not only -- so running the site page proves nothing about it, and its 835
-    blocks were the largest body of published example code nothing executed.
-    The Spanish page translates its strings and its comments, the output
-    comments among them, and 42 of its pages bind more than that differently
-    from their English twin, so what it prints is known only by running it.
-    The generated dumps restate guide text and are not run.
+    Every page a reader can copy from that is written by hand: the site page
+    in both languages, the hand-written files under docs/, and the published
+    surfaces. The Spanish page translates its strings and its comments, the
+    output comments among them, and 42 of its pages bind more than that
+    differently from their English twin, so what it prints is known only by
+    running it. The GitHub edition under docs/ is not among them: ``make
+    llms`` writes each of its files from its English page, code blocks
+    byte for byte, and fails the drift check of CI when one has been edited
+    since, so running the page runs the edition. It replaced a hand-written
+    mirror whose code had drifted from the site's on 105 of its 171 pages, the
+    largest body of published example code nothing executed until this check
+    ran it. The generated dumps restate guide text and are not run.
     """
     return (
         [p for p in pages if p.is_relative_to(_SITE)]

@@ -24,8 +24,10 @@ The number alone cannot be read for its document, so :data:`PINNED`
 (``scripts/catalogue_ids.json``) holds, for every number the pages link, the
 designation its catalogue gives it: ISO's open data for an iso.org number,
 the title of the webstore's own page for an IEC one. Every catalogue link in
-the pages of the site and in the mirrors under ``docs/`` then has to sit
-beside that designation, read where the link is written:
+the pages of the site and in the files of ``docs/`` written by hand then has
+to sit beside that designation, read where the link is written (a file of the
+GitHub edition under ``docs/`` is written from a site page by ``make llms``
+and carries that page's links, so it is left to its page and its generator):
 
 - in a page's frontmatter, the ``url`` of a reference beside the
   reference's ``designation``, and a link in its ``note`` beside its own
@@ -108,6 +110,7 @@ import sys
 import urllib.request
 from dataclasses import dataclass
 
+from github_edition import is_edition_file
 from markdown_fences import code_lines, page_kind, page_lines
 from markdown_spans import replace_inline_spans_by_block
 
@@ -115,7 +118,8 @@ from markdown_spans import replace_inline_spans_by_block
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 #: The trees whose pages are read: the site's pages, in both languages, and
-#: the mirrors GitHub serves.
+#: the files of ``docs/``, of which :func:`pages` keeps the ones written by
+#: hand.
 PAGE_ROOTS = ("site/src/content/docs", "docs")
 
 #: The pinned designations, by catalogue and number.
@@ -667,11 +671,14 @@ def names(beside: str, designation: str, catalogue: str) -> bool:
 
 
 def pages(root: pathlib.Path | None = None) -> list[str]:
-    """The tracked pages of :data:`PAGE_ROOTS`.
+    """The tracked pages of :data:`PAGE_ROOTS`, the GitHub edition left out.
 
     Read as git writes the names with ``-z``, whole: a plain listing quotes
     a name that holds a character outside ASCII, and the quoted name ends in
-    no ``.md``.
+    no ``.md``. A file of the GitHub edition under ``docs/``
+    (:func:`github_edition.is_edition_file`) is left to the site page it is
+    written from: its links are that page's, read there, and a fix goes into
+    the page, from which ``make llms`` writes the file again.
     """
     root = ROOT if root is None else root
     listed = subprocess.run(
@@ -682,7 +689,12 @@ def pages(root: pathlib.Path | None = None) -> list[str]:
         check=True,
         timeout=60,
     ).stdout.split("\0")
-    return sorted(path for path in listed if path.endswith((".md", ".mdx")))
+    return sorted(
+        path
+        for path in listed
+        if path.endswith((".md", ".mdx"))
+        and not (path.startswith("docs/") and is_edition_file(root / path))
+    )
 
 
 def read_links(root: pathlib.Path | None = None) -> list[Link]:

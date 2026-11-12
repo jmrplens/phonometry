@@ -320,27 +320,30 @@ def test_a_checkout_has_a_git_directory_or_file(tmp_path: Path) -> None:
 
 
 def test_a_helper_that_takes_the_refusal_as_an_answer_needs_no_mark(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """``generate_llms`` lists what git ignores, and a refusal is an empty list."""
-    _plant(
-        tmp_path,
-        f"""
-        import sys
+    """A git that a helper in ``TOLERATES_NO_CHECKOUT`` starts is charged to no test.
 
-        sys.path.insert(0, {str(_ROOT / "scripts")!r})
+    No helper stands there today, so the audit hook is fed the event a helper
+    of this file would raise, on a repository of the test's own.
+    """
+    (tmp_path / ".git").mkdir()
+    runs = git_checkout.GitRuns(tmp_path)
+    event = ("git", ["git", "status"], str(tmp_path), None)
 
-        import generate_llms
+    def helper() -> list[str]:
+        noted: list[str] = []
+        with runs.recording(noted):
+            runs.audit("subprocess.Popen", event)
+        return noted
 
-
-        def test_the_ignored_files():
-            assert isinstance(generate_llms._ignored_paths(), frozenset)
-        """,
+    assert helper() == ["git status"]
+    monkeypatch.setitem(
+        git_checkout.TOLERATES_NO_CHECKOUT,
+        f"tests/test_git_checkout.py::{helper.__qualname__}",
+        "takes git's refusal as an answer",
     )
-
-    done = _run(tmp_path)
-
-    assert done.returncode == pytest.ExitCode.OK, done.stdout + done.stderr
+    assert helper() == []
 
 
 def test_a_process_is_charged_to_the_code_that_started_it() -> None:

@@ -30,6 +30,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_em_dashes as ced
+from github_edition import EDITION_MARK
 
 
 def test_prose_dash_is_refused() -> None:
@@ -2127,3 +2128,26 @@ def test_a_code_span_across_a_line_break_hides_its_dash() -> None:
     opening backtick and the dash after it as prose.
     """
     assert ced.markdown_hits("Text `a —\nb` more.\n") == []
+
+
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``make llms`` writes the edition from the site page, which is read here.
+
+    A walked directory leaves the edition's file out and reads a file written
+    by hand beside it; a file named as a root is read as named.
+    """
+    prose = "A clause \u2014 hung off a dash.\n"
+    edition = tmp_path / "page.md"
+    edition.write_text(
+        f"{EDITION_MARK}page.mdx: edit that page. -->\n\n{prose}", encoding="utf-8"
+    )
+    by_hand = tmp_path / "notes.md"
+    by_hand.write_text(prose, encoding="utf-8")
+    walked = ced.published_files((str(tmp_path),))
+    assert by_hand in walked
+    assert edition not in walked
+    assert edition in ced.iter_files((str(tmp_path),)), "listed, then left out"
+    assert ced.findings(edition), "the edition's dash is there to be found"
+    assert ced.published_files((str(edition),)) == [edition]

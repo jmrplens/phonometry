@@ -68,7 +68,6 @@ import functools
 import json
 import pathlib
 import re
-import subprocess
 import tomllib
 from typing import TYPE_CHECKING
 
@@ -82,50 +81,8 @@ if TYPE_CHECKING:
     from generate_site_reports import FamilyPage
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DOCS = ROOT / "docs"
-
-
-@functools.cache
-def _ignored_paths() -> frozenset[str]:
-    """Everything under :data:`DOCS` that git ignores, as repo-relative paths.
-
-    Nothing for a :data:`DOCS` outside the repository, as the tests point it
-    at a tree of their own: git ignores no file there, and the repository's
-    listing names other files. The names are read as git writes them with
-    ``-z``, whole, where a plain listing quotes a name that holds a character
-    outside ASCII.
-    """
-    if not DOCS.is_relative_to(ROOT):
-        return frozenset()
-    result = subprocess.run(
-        [
-            "git",
-            "ls-files",
-            "--others",
-            "--ignored",
-            "--exclude-standard",
-            "-z",
-            "--",
-            DOCS.relative_to(ROOT).as_posix(),
-        ],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        cwd=ROOT,
-        check=False,
-    )
-    return frozenset(name for name in result.stdout.split("\0") if name)
-
-
-def _git_ignored(path: pathlib.Path) -> bool:
-    """Is this page of the mirror one git ignores (a local plan, a scratch note)?
-
-    The page is named as :func:`_ignored_paths` lists it, by its path in the
-    repository; a page outside the repository is one git ignores nothing of.
-    """
-    if not path.is_relative_to(ROOT):
-        return False
-    return path.relative_to(ROOT).as_posix() in _ignored_paths()
+#: The conformance artefact the counts of the summary are read from.
+CONFORMANCE_JSON = ROOT / "docs" / "conformance.json"
 
 
 def _shown(path: pathlib.Path) -> pathlib.Path:
@@ -427,7 +384,7 @@ def _conformance_counts() -> tuple[int, int, int, int]:
     being seven of them, and the summary stated that figure as a count of
     standards.
     """
-    source = DOCS / "conformance.json"
+    source = CONFORMANCE_JSON
     try:
         counts = json.loads(source.read_text(encoding="utf-8"))["counts"]
         return (

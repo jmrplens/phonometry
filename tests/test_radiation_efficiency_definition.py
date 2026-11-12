@@ -32,15 +32,21 @@ theory pages said "a piston" alone.
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 import pytest
 
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(_ROOT / "scripts"))
+
+from github_edition import is_edition_file
+
 pytestmark = pytest.mark.whole_tree
 
-_ROOT = Path(__file__).resolve().parent.parent
-
-#: The trees of published prose, in both languages and the mirror.
+#: The trees of published prose: the site's pages in both languages, and the
+#: files of docs/, of which :func:`_pages` keeps the ones written by hand.
 _TREES = ("docs", "site/src/content/docs")
 
 #: The term in bold, in either language.
@@ -85,12 +91,19 @@ def _blocks(text: str) -> list[str]:
 
 
 def _pages() -> list[Path]:
-    """The published pages, the glossaries left to their own test."""
+    """The published pages, the glossaries left to their own test.
+
+    A file of the GitHub edition under docs/ is left to the site page it is
+    written from (:func:`github_edition.is_edition_file`): the page is read
+    here, and ``make llms`` writes the file again from it.
+    """
     return [
         path
         for tree in _TREES
         for path in sorted((_ROOT / tree).rglob("*"))
-        if path.suffix in {".md", ".mdx"} and "glossary" not in path.name
+        if path.suffix in {".md", ".mdx"}
+        and "glossary" not in path.name
+        and not is_edition_file(path)
     ]
 
 

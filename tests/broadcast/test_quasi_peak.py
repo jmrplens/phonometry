@@ -605,8 +605,9 @@ def test_a_stage_that_falls_faster_than_it_rises_is_refused() -> None:
 # The published identifiability statement
 # ---------------------------------------------------------------------------
 #
-# The module and all three editions of its page publish how far each constant
-# can move before one of the eleven windows fails. That is a claim about the
+# The module and both editions of its page (the GitHub copy is written from
+# the English one) publish how far each constant can move before one of the
+# eleven windows fails. That is a claim about the
 # standard, so it is pinned from both sides: each published edge must conform,
 # and a step beyond it must not. Without the second half the range could be
 # quietly narrowed and nothing would notice.
@@ -759,8 +760,9 @@ def test_the_window_is_read_from_the_table_not_from_the_row() -> None:
 # ---------------------------------------------------------------------------
 #
 # The module docstring, the helper that fixes the clause 2.6 scale, the
-# verifier's docstring and all three editions of the page say in words how
-# much the chain moves between the five rates of RATES. Each figure is worked
+# verifier's docstring and both editions of the page (the GitHub copy is
+# written from the English one) say in words how much the chain moves between
+# the five rates of RATES. Each figure is worked
 # out here from the chain and looked for, at the digits the prose writes it
 # to, in every place that gives it: a change to the chain that moves one of
 # them fails until the prose says the new figure, and so does prose edited to
@@ -769,11 +771,11 @@ def test_the_window_is_read_from_the_table_not_from_the_row() -> None:
 _ROOT = Path(__file__).resolve().parents[2]
 _PAGE = Path("devices") / "broadcast" / "quasi-peak"
 _GUIDES = Path("site") / "src" / "content" / "docs"
-#: The three editions of the page, each held to its own wording.
+#: The two editions of the page, each held to its own wording; the GitHub
+#: copy under docs/ is written from the English one by ``make llms``.
 _EDITIONS = {
     "en": _GUIDES / _PAGE.with_suffix(".mdx"),
     "es": _GUIDES / "es" / _PAGE.with_suffix(".mdx"),
-    "mirror": Path("docs") / _PAGE.with_suffix(".md"),
 }
 
 

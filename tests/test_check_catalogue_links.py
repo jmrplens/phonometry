@@ -851,6 +851,35 @@ def test_a_page_whose_name_holds_a_character_outside_ascii_is_read(
     assert ccl.pages(tmp_path) == sorted(names)
 
 
+def test_a_file_of_the_github_edition_is_left_to_its_generator(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A file under ``docs/`` that opens with the edition's comment is not read.
+
+    Its links are the ones of the site page it is written from, read at that
+    page; a hand-written file of ``docs/`` beside it and the site's pages are
+    read as before, whatever they link.
+    """
+    from github_edition import EDITION_MARK
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True, timeout=60)
+    wrong = "See [ISO 12354-1:2017](https://www.iso.org/standard/70238.html).\n"
+    files = {
+        "docs/guide.md": f"{EDITION_MARK}guide.mdx -->\n{wrong}",
+        "docs/README.md": wrong,
+        "site/src/content/docs/guide.mdx": wrong,
+    }
+    for name, text in files.items():
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    subprocess.run(["git", "-C", str(tmp_path), "add", *files], check=True, timeout=60)
+    assert ccl.pages(tmp_path) == ["docs/README.md", "site/src/content/docs/guide.mdx"]
+    assert [link.path for link in ccl.read_links(tmp_path)] == [
+        "docs/README.md",
+        "site/src/content/docs/guide.mdx",
+    ]
+
+
 def test_main_names_each_link_and_fails(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -918,5 +947,8 @@ def test_refresh_pins_from_the_catalogues_and_drops_what_no_page_links(
 @pytest.mark.git_checkout
 def test_every_catalogue_link_of_the_pages_opens_the_document_beside_it() -> None:
     links = ccl.read_links()
-    assert len(links) > 800
+    # The site's pages, in both languages, link 612 catalogue pages; the
+    # GitHub edition under docs/ carries the English pages' links again and is
+    # left to them, so it adds none.
+    assert len(links) > 500
     assert ccl.problems(links, ccl.load_pinned()) == []

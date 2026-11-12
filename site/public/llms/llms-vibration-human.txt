@@ -580,15 +580,19 @@ $A_\mathrm{z}(t)$ and corrupts the positive response peaks of the dose. The
 clause asks for an offset correction so that the recorded acceleration reads
 (0 ± 0.1) m/s² with the accelerometer at rest (or with a symmetric signal), and
 warns that subtraction of the mean **may not be appropriate** if the recorded
-acceleration is asymmetric, which a shock record is by construction. The
-offset-corrected record is then band-limited with a second-order Butterworth
+acceleration is asymmetric, which a shock record is by construction. Where the
+accelerometer was moving at the start or the end of the record, the clause
+adds that tapering it, with a cosine taper over several seconds for instance,
+may be appropriate before the band limiting. The offset-corrected record is
+then band-limited with a second-order Butterworth
 high pass at 0.01 Hz and a fourth-order Butterworth low pass at 80 Hz; the
 band-limiting and weighting filters of ISO 2631-1 should **not** be applied,
 because NOTE 2 shows a 0.5 Hz high pass dragging the −1 g of a free fall back
 to zero before the impact and offsetting the impact peak by up to +1 g. The
 whole conditioning chain is the caller's: `spinal_response` assumes a record
 that has already been sign-checked, split at the loss-of-contact boundaries,
-offset-corrected, tapered and band-limited.
+offset-corrected, tapered if its accelerometer was moving at its start or end
+and a taper was judged appropriate, and band-limited.
 
 ```python
 from phonometry import vibration

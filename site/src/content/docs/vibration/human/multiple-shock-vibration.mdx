@@ -123,9 +123,10 @@ reader would otherwise give themselves.
    adds the warning: subtraction of the mean **may not be appropriate** if the
    recorded acceleration is asymmetric, and a shock record is asymmetric by
    construction, which is exactly the case a mean subtraction gets wrong.
-5. **Taper** (a cosine taper over several seconds, for instance) if the
-   accelerometer was in motion at the start or the end of the recording, before
-   the band limiting.
+5. **Consider a taper** if the accelerometer was in motion at the start or the
+   end of the recording: the clause says that tapering the signal, with a cosine
+   taper over several seconds for instance, may be appropriate before the band
+   limiting. A record that starts and ends at rest is band-limited as it is.
 6. **Band-limit** with a second-order Butterworth high pass at 0.01 Hz and a
    fourth-order Butterworth low pass at 80 Hz. The band-limiting and weighting
    filters of ISO 2631-1 should **not** be applied.
@@ -520,7 +521,8 @@ horizontal whole-body exposure goes to the r.m.s., running-r.m.s./MTVV and VDV
 metrics of [Human Vibration](/phonometry/vibration/human/human-vibration/).
 The conditioning chain of section 2 is the caller's: `spinal_response` assumes
 a record that has already been sign-checked, split at the loss-of-contact
-boundaries, offset-corrected, tapered and band-limited.
+boundaries, offset-corrected, tapered if its accelerometer was moving at its
+start or end and a taper was judged appropriate, and band-limited.
 </ScopeClaim>
 </Scope>
 

@@ -131,9 +131,11 @@ consejo que un lector se daría a sí mismo.
    apropiado** si la aceleración registrada es asimétrica, y un registro de
    choques es asimétrico por construcción, que es justo el caso en el que restar
    la media se equivoca.
-5. **Aplica una ventana de entrada y salida** (una ventana coseno de varios
-   segundos, por ejemplo) si el acelerómetro estaba en movimiento al principio o
-   al final de la grabación, antes de limitar la banda.
+5. **Valora una ventana de entrada y salida** si el acelerómetro estaba en
+   movimiento al principio o al final de la grabación: el apartado dice que
+   aplicarla, una ventana coseno de varios segundos por ejemplo, puede ser
+   apropiado antes de limitar la banda. Un registro que empieza y acaba en
+   reposo se limita en banda tal como está.
 6. **Limita la banda** con un paso alto Butterworth de segundo orden a 0,01 Hz y
    un paso bajo Butterworth de cuarto orden a 80 Hz. Los filtros de limitación de
    banda y de ponderación de la ISO 2631-1 **no** deberían aplicarse.
@@ -547,7 +549,8 @@ humanos](/phonometry/es/vibration/human/human-vibration/). La cadena de
 acondicionamiento de la sección 2 es cosa de quien llama: `spinal_response` da
 por supuesto un registro al que ya se le ha comprobado el signo, se ha partido
 en las fronteras de pérdida de contacto, se le ha corregido el offset, se le
-ha aplicado la ventana y se le ha limitado la banda.
+ha aplicado la ventana si el acelerómetro se movía al principio o al final y la
+ventana se juzgó apropiada, y se le ha limitado la banda.
 </ScopeClaim>
 </Scope>
 

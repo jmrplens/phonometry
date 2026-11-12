@@ -1098,8 +1098,12 @@ sección anterior (`threshold_level`, `corrected_levels`, `emission_levels`),
 una diferencia de niveles toma su propio sustantivo
 (`floor_level_difference`, `mean_attenuation`, `min_isolation`) y cualquier
 otra magnitud conserva `_db` tras su sustantivo (`fixture_uncertainty_db`,
-`lower_tolerance_db`, `prominence_limit_db`). La mayoría de estos nombres son
-posteriores a 4.0.0rc1; los que se publicaron son estos.
+`lower_tolerance_db`, `prominence_limit_db`). Un nombre sin decibelios toma
+también el sustantivo de su magnitud: una tolerancia es un límite que un valor
+tiene que respetar, y el ± 50 % que ISO 4866 D.2 considera típico de una
+predicción empírica de la frecuencia fundamental de un edificio no limita
+nada, así que se llama error. La mayoría de estos nombres son posteriores a
+4.0.0rc1; los que se publicaron son estos.
 
 | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- |
@@ -1109,6 +1113,7 @@ posteriores a 4.0.0rc1; los que se publicaron son estos.
 | `signals.LifterResult.liftered_db` | `liftered_spectrum_db`, junto a `spectrum_db` |
 | `operating_db=` en `emission.total_standard_deviation` | `sigma_omc_db=`, el nombre que toda función de potencia sonora da a la desviación típica de las condiciones de funcionamiento y montaje |
 | `polar_db` de `electroacoustics.MicrophoneCharacteristics` y `electroacoustics.LoudspeakerCharacteristics` | `polar_response_db` |
+| `vibration.EMPIRICAL_FREQUENCY_TOLERANCE` | `EMPIRICAL_FREQUENCY_ERROR`, el mismo 0,5, junto a la `empirical_frequency_bounds` que lo aplica |
 
 ```python
 from phonometry import emission, signals

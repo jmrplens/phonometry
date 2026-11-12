@@ -77743,8 +77743,12 @@ what the number is. Each now carries the noun of what it holds. A level takes
 (`threshold_level`, `corrected_levels`, `emission_levels`), a level
 difference takes its own noun (`floor_level_difference`, `mean_attenuation`,
 `min_isolation`), and any other quantity keeps `_db` after its noun
-(`fixture_uncertainty_db`, `lower_tolerance_db`, `prominence_limit_db`). Most
-of these names are newer than 4.0.0rc1; the ones that shipped are these.
+(`fixture_uncertainty_db`, `lower_tolerance_db`, `prominence_limit_db`). A
+name without decibels takes the noun of its quantity too: a tolerance is a
+bound a value has to stay within, and the ± 50 % that ISO 4866 D.2 calls
+typical of an empirical prediction of a building's fundamental frequency
+bounds nothing, so it is named an error. Most of these names are newer than
+4.0.0rc1; the ones that shipped are these.
 
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
@@ -77754,6 +77758,7 @@ of these names are newer than 4.0.0rc1; the ones that shipped are these.
 | `signals.LifterResult.liftered_db` | `liftered_spectrum_db`, beside `spectrum_db` |
 | `operating_db=` on `emission.total_standard_deviation` | `sigma_omc_db=`, the name every sound power function gives the standard deviation of the operating and mounting conditions |
 | `polar_db` of `electroacoustics.MicrophoneCharacteristics` and `electroacoustics.LoudspeakerCharacteristics` | `polar_response_db` |
+| `vibration.EMPIRICAL_FREQUENCY_TOLERANCE` | `EMPIRICAL_FREQUENCY_ERROR`, the same 0.5, beside the `empirical_frequency_bounds` that applies it |
 
 ```python
 from phonometry import emission, signals

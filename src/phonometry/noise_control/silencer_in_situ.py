@@ -221,7 +221,8 @@ DOWNSTREAM_DISTANCE_COEFFICIENTS: tuple[float, float] = (12.0, 10.0)
 
 #: 9.2: past this deviation from the mean the velocity distribution is
 #: reported, because the pressure loss and the regenerated sound change with
-#: it.
+#: it. 9.2 asks for it too where the flow velocity measurements of 8.3.3 show
+#: a comparably non-uniform distribution, which no number bounds.
 VELOCITY_UNIFORMITY_TOLERANCE_PERCENT: float = 10.0
 
 InSituQuantity = Literal["transmission", "insertion"]

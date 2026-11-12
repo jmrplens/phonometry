@@ -298,11 +298,13 @@ def problems(links: list[Link], pinned: dict[str, dict[str, str]]) -> list[str]:
 
 def _iec_designation(number: str) -> str:
     """The designation the IEC webstore's own page gives a publication number."""
-    request = urllib.request.Request(  # noqa: S310 - a fixed https URL of the IEC webstore
+    # A fixed https URL of the IEC webstore, with only the number filled in.
+    request = urllib.request.Request(  # noqa: S310
         IEC_PAGE.format(number=number),
         headers={"User-Agent": "Mozilla/5.0 (catalogue link check)"},
     )
-    with urllib.request.urlopen(request, timeout=60) as response:  # noqa: S310 - same URL
+    # The same URL.
+    with urllib.request.urlopen(request, timeout=60) as response:  # noqa: S310
         page = response.read().decode("utf-8", "replace")
     title = re.search(r"<title>\s*(IEC[^<|]+?)\s*(?:\|[^<]*)?</title>", page)
     return title.group(1) if title else ""
@@ -313,8 +315,9 @@ def _iso_designations(
 ) -> dict[str, str]:
     """The designations ISO's open data gives the catalogue numbers asked for."""
     if open_data is None:
-        request = urllib.request.Request(ISO_OPEN_DATA)  # noqa: S310 - a fixed https URL of ISO
-        with urllib.request.urlopen(request, timeout=600) as response:  # noqa: S310 - same URL
+        request = urllib.request.Request(ISO_OPEN_DATA)
+        # A fixed https URL of ISO's open data.
+        with urllib.request.urlopen(request, timeout=600) as response:  # noqa: S310
             lines = response.read().decode("utf-8").splitlines()
     else:
         lines = open_data.read_text(encoding="utf-8").splitlines()

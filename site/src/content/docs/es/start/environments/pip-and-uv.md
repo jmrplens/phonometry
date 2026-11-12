@@ -48,9 +48,13 @@ print(phonometry.__version__)   # la versión que has instalado
 | `[full]` | los cuatro anteriores | estén todas las funciones salvo el cálculo con torch |
 | `[torch]` | torch, array-api-compat | las simulaciones FDTD calculen con PyTorch |
 
-En una imagen `python:3.13-slim` sin nada más, ningún extra necesita un
-paquete del sistema: todos se instalan y funcionan allí desde sus wheels,
-también `[audio]`. Sin numba, la ponderación temporal `impulse` se ejecuta en
+En una imagen `python:3.13-slim` para x86-64 o ARM64 sin nada más, ningún
+extra necesita un paquete del sistema: todos se instalan y funcionan allí
+desde sus wheels, también `[audio]`. Las otras seis arquitecturas de la imagen
+no tienen wheel de NumPy, SciPy, numba, matplotlib ni Pillow, así que pip los
+compila allí desde el código fuente, y `[audio]` carga la libsndfile del
+sistema; [Docker y servidores](/phonometry/es/start/environments/docker/) dice
+qué pide eso. Sin numba, la ponderación temporal `impulse` se ejecuta en
 Python puro y no dice nada. Una función cuyo extra falta dice cuál instalar,
 con la orden de pip y la de conda:
 

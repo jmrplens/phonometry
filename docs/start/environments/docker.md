@@ -3,11 +3,22 @@
 # Docker and servers
 
 phonometry needs nothing from the operating system beyond Python on a
-`python:*-slim` image: every extra installs from wheels there, libsndfile
-inside the soundfile wheel included. The one system package worth adding is
-ffmpeg, and only for videos. An Alpine image, built on musl, needs more, since
-python-soundfile has no wheel there that carries libsndfile and numba none at
-all; [Getting Started](../getting-started.md#installation)
+`python:*-slim` image for x86-64 or ARM64 (`linux/amd64`, `linux/arm64`):
+every extra installs from wheels there, libsndfile inside the soundfile wheel
+included. The one system package worth adding is ffmpeg, and only for videos.
+The same tag publishes six more architectures, and Docker pulls the one of
+the host: 32-bit ARM (`linux/arm/v5`, `linux/arm/v7`), 32-bit x86
+(`linux/386`), `linux/ppc64le`, `linux/riscv64` and `linux/s390x`. PyPI has
+no Python 3.13 wheel for any of them of NumPy, SciPy, numba and the llvmlite
+it needs, matplotlib or Pillow, nor for some of them of contourpy,
+kiwisolver, cffi or lxml, so pip builds those from source there, NumPy and
+SciPy even for a plain install. That takes what the slim image leaves out: a C
+and a C++ compiler and the development files of the libraries each one links,
+a Fortran compiler with BLAS and LAPACK for SciPy, and LLVM 22 for llvmlite.
+python-soundfile installs its pure-Python wheel there, which loads the
+system's libsndfile: `apt-get install libsndfile1`. An Alpine image, built on
+musl, needs more, since python-soundfile has no wheel there that carries
+libsndfile and numba none at all; [Getting Started](../getting-started.md#installation)
 says what each extra takes there.
 
 ## An image

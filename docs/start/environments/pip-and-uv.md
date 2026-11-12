@@ -46,8 +46,12 @@ print(phonometry.__version__)   # the release you installed
 | `[full]` | all four above | every feature but the torch backend |
 | `[torch]` | torch, array-api-compat | the FDTD engines step on PyTorch |
 
-On a bare `python:3.13-slim` image no extra needs a system package: every one
-of them installs and runs from its wheels there, `[audio]` included. Without
+On a bare `python:3.13-slim` image for x86-64 or ARM64 no extra needs a
+system package: every one of them installs and runs from its wheels there,
+`[audio]` included. The image's six other architectures have no wheel of
+NumPy, SciPy, numba, matplotlib or Pillow, so pip builds them from source
+there, and `[audio]` loads the system's libsndfile; [Docker and
+servers](docker.md) says what that takes. Without
 numba the `impulse` time weighting runs as plain Python and says nothing about
 it. A feature whose extra is missing says which one to install, with its pip
 and its conda spelling:

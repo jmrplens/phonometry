@@ -4,9 +4,22 @@ description: "Ejecuta phonometry en un contenedor o un servidor: una imagen lige
 ---
 
 phonometry no necesita del sistema operativo nada más que Python en una imagen
-`python:*-slim`: todos los extras se instalan allí desde wheels, incluida la
-libsndfile que va dentro del wheel de soundfile. El único paquete del sistema
-que merece la pena añadir es ffmpeg, y solo para los vídeos. Una imagen de
+`python:*-slim` para x86-64 o ARM64 (`linux/amd64`, `linux/arm64`): todos los
+extras se instalan allí desde wheels, incluida la libsndfile que va dentro del
+wheel de soundfile. El único paquete del sistema que merece la pena añadir es
+ffmpeg, y solo para los vídeos. La misma etiqueta publica otras seis
+arquitecturas, y Docker descarga la del anfitrión: ARM de 32 bits
+(`linux/arm/v5`, `linux/arm/v7`), x86 de 32 bits (`linux/386`),
+`linux/ppc64le`, `linux/riscv64` y `linux/s390x`. PyPI no tiene para ninguna
+de ellas wheel de Python 3.13 de NumPy, SciPy, numba con el llvmlite que
+necesita, matplotlib ni Pillow, ni para algunas de ellas de contourpy,
+kiwisolver, cffi o lxml, así que pip los compila allí desde el código fuente,
+NumPy y SciPy incluso en una instalación normal. Eso pide lo que la imagen
+ligera deja fuera: un compilador de C y otro de C++ y los archivos de
+desarrollo de las bibliotecas que enlaza cada paquete, un compilador de
+Fortran con BLAS y LAPACK para SciPy, y LLVM 22 para llvmlite.
+python-soundfile instala allí su wheel de Python puro, que carga la
+libsndfile del sistema: `apt-get install libsndfile1`. Una imagen de
 Alpine, hecha sobre musl, necesita más, porque allí python-soundfile no tiene
 ningún wheel que lleve libsndfile y numba no tiene ninguno; [Primeros
 pasos](/phonometry/es/start/getting-started/#desde-pypi-recomendada) dice qué

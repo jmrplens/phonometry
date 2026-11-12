@@ -75287,11 +75287,22 @@ Source: https://docs.jmrp.io/phonometry/start/environments/docker/
 # Docker and servers
 
 phonometry needs nothing from the operating system beyond Python on a
-`python:*-slim` image: every extra installs from wheels there, libsndfile
-inside the soundfile wheel included. The one system package worth adding is
-ffmpeg, and only for videos. An Alpine image, built on musl, needs more, since
-python-soundfile has no wheel there that carries libsndfile and numba none at
-all; [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation)
+`python:*-slim` image for x86-64 or ARM64 (`linux/amd64`, `linux/arm64`):
+every extra installs from wheels there, libsndfile inside the soundfile wheel
+included. The one system package worth adding is ffmpeg, and only for videos.
+The same tag publishes six more architectures, and Docker pulls the one of
+the host: 32-bit ARM (`linux/arm/v5`, `linux/arm/v7`), 32-bit x86
+(`linux/386`), `linux/ppc64le`, `linux/riscv64` and `linux/s390x`. PyPI has
+no Python 3.13 wheel for any of them of NumPy, SciPy, numba and the llvmlite
+it needs, matplotlib or Pillow, nor for some of them of contourpy,
+kiwisolver, cffi or lxml, so pip builds those from source there, NumPy and
+SciPy even for a plain install. That takes what the slim image leaves out: a C
+and a C++ compiler and the development files of the libraries each one links,
+a Fortran compiler with BLAS and LAPACK for SciPy, and LLVM 22 for llvmlite.
+python-soundfile installs its pure-Python wheel there, which loads the
+system's libsndfile: `apt-get install libsndfile1`. An Alpine image, built on
+musl, needs more, since python-soundfile has no wheel there that carries
+libsndfile and numba none at all; [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation)
 says what each extra takes there.
 
 ## An image
@@ -75435,11 +75446,11 @@ each, with commands that were run there.
 
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|
-| [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | nothing is left out |
+| [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows, where `[plot,report,audio]` installs the other three extras |
 | [conda and mamba](https://docs.jmrp.io/phonometry/start/environments/conda/) | the dependencies from conda-forge, then `python -m pip install "phonometry[full]"` | everything, pytorch from conda-forge included | nothing is left out |
-| [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error` |
+| [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error`; `[full]` on 32-bit Windows, where `[plot,report,audio]` takes its place |
 | [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
-| [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp` | nothing is left out |
+| [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp`, from wheels on x86-64 and ARM64 | the wheels on the image's six other architectures, where pip builds NumPy, SciPy and most extras from source |
 | [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode, on every NumPy the library accepts | the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
 
 ## Warnings as errors
@@ -75523,6 +75534,14 @@ cmd needs no such step.
 
 That one environment holds JupyterLab, the IPython kernel it starts and
 phonometry with every extra but `[torch]`.
+
+On 32-bit Windows numba is not supported, and neither is `[full]`, which
+holds it: `python -m pip install jupyterlab "phonometry[plot,report,audio]"`
+installs JupyterLab with the other three extras. PyPI has no 32-bit Windows
+wheel of SciPy, matplotlib or kiwisolver, nor of psutil and pywinpty, which
+JupyterLab needs there, nor of PyYAML on Python 3.14, so pip builds those
+from source there, which takes a C and a C++ compiler, a Fortran compiler for
+SciPy and Rust for pywinpty.
 
 ## A result shows a table
 
@@ -75826,8 +75845,12 @@ print(phonometry.__version__)   # the release you installed
 | `[full]` | all four above | every feature but the torch backend |
 | `[torch]` | torch, array-api-compat | the FDTD engines step on PyTorch |
 
-On a bare `python:3.13-slim` image no extra needs a system package: every one
-of them installs and runs from its wheels there, `[audio]` included. Without
+On a bare `python:3.13-slim` image for x86-64 or ARM64 no extra needs a
+system package: every one of them installs and runs from its wheels there,
+`[audio]` included. The image's six other architectures have no wheel of
+NumPy, SciPy, numba, matplotlib or Pillow, so pip builds them from source
+there, and `[audio]` loads the system's libsndfile; [Docker and
+servers](https://docs.jmrp.io/phonometry/start/environments/docker/) says what that takes. Without
 numba the `impulse` time weighting runs as plain Python and says nothing about
 it. A feature whose extra is missing says which one to install, with its pip
 and its conda spelling:
@@ -75912,6 +75935,9 @@ uv run python -c "import phonometry; print(phonometry.__version__)"
 ```
 
 `uv add` resolves the same way in a project for Python 3.12, 3.13 or 3.14.
+On 32-bit Windows, where `[full]` is not supported, name
+`[plot,report,audio]` in its place, with `uv pip install` as with `uv add`;
+uv builds SciPy, matplotlib and kiwisolver from source there, as pip does.
 
 ### torch from the CPU index in a project
 
@@ -76128,7 +76154,10 @@ pip install "phonometry[torch]"   # torch + array-api-compat, so the FDTD engine
 
 I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
+enabled except the torch backend of the FDTD engines, which `[torch]` adds. On
+32-bit Windows, which `[full]` does not support,
+`pip install "phonometry[plot,report,audio]"` brings the other three, as above,
+and builds SciPy, matplotlib and kiwisolver from source there. The
 base install computes every metric on NumPy and SciPy alone, and that includes
 reading every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64)
 through `phonometry.io`; the only things it leaves unavailable are the figures

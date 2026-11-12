@@ -282,12 +282,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   videos, fiches and how a warning shows in a cell), JupyterLite and Pyodide
   (which extras micropip installs, what runs in a browser and what does not,
   and a JupyterLite site of your own), Docker and servers (a slim image that
-  runs under any user id and on a read-only root, and ffmpeg for videos) and
-  type checking (what mypy and pyright check, and where a type is wider than
-  its value). Every command and example on the pages was run in the place it
-  is written for; Getting Started links them from its install and notebook
-  sections, and no longer says that VS Code and Colab show the record
-  tables, which nothing had tried.
+  runs under any user id and on a read-only root, ffmpeg for videos, and which
+  of the eight architectures of `python:3.13-slim` install every extra from
+  wheels: x86-64 and ARM64, where on the other six pip builds NumPy, SciPy,
+  numba, matplotlib and Pillow from source and `[audio]` loads the system's
+  libsndfile) and type checking (what mypy and pyright check, and where a type
+  is wider than its value). Every command and example on the pages was run in
+  the place it is written for, and every page that prints a `[full]` install
+  command gives 32-bit Windows, which `[full]` does not support, the
+  `[plot,report,audio]` one with what pip builds there; Getting Started links
+  them from its install and notebook sections, and no longer says that VS Code
+  and Colab show the record tables, which nothing had tried.
 
 - **Contributors and coding agents have one written style guide.**
   `docs/contributing/` says how phonometry names things, shapes its public API,

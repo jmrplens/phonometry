@@ -458,9 +458,9 @@ repository.
   `ReportPreview.astro` author the raw URL and `src/lib/media.mjs` rewrites it
   to the local copy. A missing assets checkout stops the build rather than
   warning, since a site without its videos is broken.
-- **The GitHub README and the guide twins under `docs/`** load figures from
-  this repository and clips from the assets repository, both at `main`,
-  through `raw.githubusercontent.com`, because GitHub renders them with no
+- **The GitHub README and the GitHub edition of the guides under `docs/`**
+  load figures from this repository and clips from the assets repository,
+  both through `raw.githubusercontent.com`, because GitHub renders them with no
   build step.
 - **The PyPI README** is generated from the GitHub one by `make pypi-readme`,
   which pins every link into this repository to the release tag and every
@@ -510,7 +510,7 @@ integers are authoritative. Nothing else states them by hand:
 - the Astro pages import them from `site/src/data/conformance-stats.mjs`, which
   reads that document at build time;
 - everything with no build step to interpolate through (`.zenodo.json`, the
-  plain-markdown mirror under `docs/`, the READMEs at the root and the one the
+  files of `docs/` written by hand, the READMEs at the root and the one the
   PyOctaveBand stub publishes, the landing-page meta descriptions and the
   JSON-LD blocks in the site frontmatter) is rewritten by the second step
   of `make conformance`, which is
@@ -704,8 +704,8 @@ bibliography, so the document an entry corrects has to be cited by a page:
 the edition its heading prints, for a standard, and the works its `SOURCES`
 row lists, for any other source. `make site-reports` stops on one that no
 page cites, and `python scripts/generate_site_reports.py --list-unmatched`
-lists them all: add each to the references of the guide that implements it,
-its Spanish twin and its docs/ mirror. Where the registry spells a cited
+lists them all: add each to the references of the guide that implements it
+and its Spanish twin, then run `make llms`. Where the registry spells a cited
 document otherwise than the guides and the two are one text, add the
 spelling to `DESIGNATED_AS` instead; an adoption whose defects may be its
 own, a translation above all, is cited under its own designation

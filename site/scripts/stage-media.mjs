@@ -15,8 +15,8 @@
 //   *.webp   copied, then recompressed in dist by optimize-images.mjs,
 //            except the animation posters, which arrive at their quality.
 //   *.webm   copied verbatim. Video, nothing here can improve it.
-//   *.gif    NOT staged. The GIFs exist only for the markdown mirror on
-//            GitHub, which cannot play WebM; the site uses the WebM.
+//   *.gif    NOT staged. The GIFs exist only for the README GitHub
+//            shows, which cannot play WebM; the site uses the WebM.
 //
 // The clips and their posters are not in this repository. They live in
 // jmrplens/phonometry-assets (scripts/assets_dir.py says why), and are taken

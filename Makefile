@@ -199,7 +199,7 @@ subscripts:
 # beside pi, and an italic e is a variable. KaTeX and mathtext set a bare letter
 # italic, so the exponential is upright only where the source writes
 # \mathrm{e}, and the corpus had both, a few lines apart on one page. This
-# reads every formula of the docstrings, the three editions of the guides and
+# reads every formula of the docstrings, the guides in both languages and
 # the errata register, and the label source of every figure and plate, and
 # fails on an exponent hung on an italic e. Static and dependency-free.
 euler-number:
@@ -770,8 +770,8 @@ llms: site-deps
 pypi-readme:
 	$(PYTHON) scripts/generate_pypi_readme.py
 
-# Run every Python snippet the guides print, in both languages and the docs/
-# mirror, hold each output comment to what its print wrote, hold the two
+# Run every Python snippet the guides print, in both languages and in the files
+# of docs/ written by hand, hold each output comment to what its print wrote, hold the two
 # languages to the same API and reject a block that shadows a name it imported
 # (see the doc-snippets job in python-app.yml). `make snippets-static` skips
 # the execution and output passes, which are the slow half.
@@ -904,8 +904,8 @@ reports:
 # same artefact, so the count on the banner is always the tree's own; it is
 # deliberately not under `graphs`, which empties .github/images of SVGs before
 # every figure run. The claims step rewrites the counts in the prose that has no
-# build step to interpolate them through (.zenodo.json, the plain-markdown
-# mirror under docs/, the site frontmatter); the Astro page bodies import them
+# build step to interpolate them through (.zenodo.json, the files of docs/
+# written by hand, the site frontmatter); the Astro page bodies import them
 # from site/src/data/conformance-stats.mjs and need nothing. The last two steps
 # are the read-only validations CI also runs: the artefact against itself, and
 # its vocabularies against the site that has to accept and word them. CI fails

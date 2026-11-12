@@ -15,9 +15,9 @@ indent_size = 4
 [*.{py,pyi}]
 max_line_length = 88
 
-# Markdown is deliberately outside the formatter: its fenced snippets are
-# mirrored by hand into the site in English and Spanish, and they align
-# trailing comments to show expected output. Trailing whitespace is still
+# Markdown is deliberately outside the formatter: the guides' fenced snippets
+# are written in the site's pages, copied byte for byte into the GitHub edition
+# under docs/, and they align trailing comments to show expected output. Trailing whitespace is still
 # trimmed everywhere except here, where two spaces mean a line break.
 [*.{md,mdx}]
 trim_trailing_whitespace = false

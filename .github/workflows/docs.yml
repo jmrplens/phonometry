@@ -187,7 +187,7 @@ jobs:
       # merges, and pinning to the lock is what keeps the published site
       # showing the clips its code was rendered against. Sparse to the WebM
       # and the WebP posters the site serves (the GIFs are for the GitHub
-      # mirror only), blobless so only those arrive: 344 files, ten seconds.
+      # README only), blobless so only those arrive: 344 files, ten seconds.
       - name: Check out the published clips at the locked commit
         run: |
           dir="$GITHUB_WORKSPACE/../phonometry-assets"
@@ -288,7 +288,7 @@ jobs:
         # sitemap stamp that must fail on a URL with no source or a build with
         # no sitemap. The reader the site takes the package's requirements from
         # is held to the tomllib of the runner's python3 on the whole of
-        # pyproject.toml. The Markdown copy of a page with no docs/ mirror is
+        # pyproject.toml. The Markdown copy of a page is
         # tested on pages made for each case, and the pages that publish none
         # on the site's own tree. The list IndexNow is sent at deploy has its
         # tests here too, on pairs of builds: one changed page sends that page

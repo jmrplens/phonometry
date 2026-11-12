@@ -6,7 +6,8 @@
  * Every run starts by removing the copies the last one left, or a page that
  * moved would keep publishing its old copy. The directory it writes into is
  * public/ by default and any `--out` it is given otherwise, and an `index.md`
- * there may be no copy at all: docs/ holds 42 of them written by hand. A copy
+ * there may be no copy at all: docs/ holds 43, the GitHub edition's, the API
+ * table's and the contributor guide's, which open otherwise. A copy
  * is told apart by its opening, the title and then the sentence every header
  * starts with (src/lib/agent-md/header.mjs `LEAD_OPENING`), and a file that
  * does not open that way is left where it is.

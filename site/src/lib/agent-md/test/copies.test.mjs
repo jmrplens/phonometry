@@ -2,7 +2,7 @@
 // copies the last run left, and no other file named index.md.
 //
 // The run can be pointed at any directory with `--out`, and one that already
-// holds index.md files of its own (docs/ holds 42 written by hand) must keep
+// holds index.md files of its own (docs/ holds 43 that open otherwise) must keep
 // them: the old removal took every index.md under the directory.
 //
 // Usage (from site/, after `pnpm install`): pnpm run test:agent-md

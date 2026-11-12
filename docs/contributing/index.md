@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size, the processes a page may start and the schema.org vocabulary of its structured data.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the GitHub edition `make llms` writes from them under `docs/`, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size, the processes a page may start and the schema.org vocabulary of its structured data.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -94,7 +94,7 @@ Each rule on a page has the same parts:
 | [A11](api.md#a11) | Import the package's own modules relatively inside `src` | review |
 | [A12](api.md#a12) | Give every source directory an `__init__.py` | `ruff INP001` |
 | [A13](api.md#a13) | Remove a renamed or retired name outright, with no alias, shim or warning, before 4.0.0 | `tests/test_removed_names.py`, `scripts/check_api_reference.py`, `tests/test_package_architecture.py::test_a_module_getattr_is_hidden_from_the_type_checker`, `tests/static_typing/test_root_names.py` |
-| [A14](api.md#a14) | Record every shipped name you rename or remove in the migration guide's three copies | review |
+| [A14](api.md#a14) | Record every shipped name you rename or remove in both pages of the migration guide | review |
 | [A15](api.md#a15) | Move every caller of a renamed name in the same commit | `scripts/check_doc_snippets.py`, review |
 | [A16](api.md#a16) | After 4.0.0, keep a renamed shipped name working for one release with a `DeprecationWarning` | review |
 | [A17](api.md#a17) | Take a frequency or wavelength axis by keyword beside the values it labels | `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_writes_every_function_axis_by_name` |
@@ -245,7 +245,7 @@ Each rule on a page has the same parts:
 
 | Rule | Statement | Enforced by |
 |---|---|---|
-| [F1](docs-and-figures.md#f1) | Change a guide's English page, Spanish twin and docs/ mirror together | `site/scripts/check-i18n-parity.mjs`, review |
+| [F1](docs-and-figures.md#f1) | Change a guide's English page and its Spanish twin together; its copies are generated from them | `site/scripts/check-i18n-parity.mjs`, `CI: llms artifacts up to date`, review |
 | [F2](docs-and-figures.md#f2) | Give every component a page uses a Markdown writer beside it | `site/scripts/check-markdown-writers.mjs`, `CI: Check every component a page uses has a Markdown writer`, `site/src/lib/agent-md/test/check-markdown-writers.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them` |
 | [F3](docs-and-figures.md#f3) | Link every new guide from `docs/README.md` | `site/scripts/agent-md.mjs`, `site/src/lib/agent-md/edition.mjs`, `CI: llms artifacts up to date` |
 | [F4](docs-and-figures.md#f4) | Register a new guide in `topics.mjs` and the guides index, counted in figures and words | `site/scripts/check-guides-index.mjs`, `CI: Site builds and validates` |
@@ -318,6 +318,7 @@ Each rule on a page has the same parts:
 | [F71](docs-and-figures.md#f71) | Give a JSON-LD property only to a type schema.org allows it on, and only a value of a type it allows | `site/scripts/check-schema-vocabulary.mjs`, `CI: Check the structured data against the schema.org vocabulary`, `site/scripts/check-schema-vocabulary.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 | [F72](docs-and-figures.md#f72) | Write a bibliography note and section as data keyed by the work, never an entry of the list by hand | `site/src/lib/remark-bibliography.mjs`, `CI: Site builds and validates`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`, `site/scripts/agent-md.mjs`, `CI: llms artifacts up to date`, `site/scripts/bibliography-entries.test.mjs`, `site/scripts/check-structured-data.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 | [F73](docs-and-figures.md#f73) | Publish beside every page a Markdown copy that carries what the page carries | `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them` |
+| [F74](docs-and-figures.md#f74) | Leave a file of the GitHub edition to its generator: a check that walks `docs/` tells it by its opening comment | `tests/test_github_edition.py::test_every_script_that_walks_docs_knows_the_edition`, `tests/test_github_edition.py::test_every_module_of_the_site_that_walks_docs_knows_the_edition` |
 
 ### Prose, commits and pull requests
 
@@ -354,7 +355,7 @@ These rules are held by review alone, or a check covers only part of them, and a
 - [N34](naming.md#n34): refuse a module-level `Literal` or `TypeAlias` assignment whose name is not PascalCase.
 - [A4](api.md#a4): scan `docs/`, the site guides, `scripts/figures`, `scripts/conformance` and `tests` for `from phonometry.<path> import <name>` where the name is not a module, and for imports through a private module path.
 - [A11](api.md#a11): refuse an absolute `phonometry` import inside `src/phonometry`.
-- [A14](api.md#a14): diff the public names of the last release tag against the branch and require a row in the three copies of the migration guide for every name gone.
+- [A14](api.md#a14): diff the public names of the last release tag against the branch and require a row in the two pages of the migration guide for every name gone.
 - [A15](api.md#a15): search the docs, the site guides and `scripts/` for every name `tests/test_removed_names.py` pins as gone.
 - [A16](api.md#a16): after 4.0, require every `DeprecationWarning` to carry a message naming the version it was deprecated in, the version it goes in and the replacement.
 - [A25](api.md#a25): refuse a variadic public function outside an exemption table with reasons (`cascade`, `combine_fault_lines`, `catalogue_schema`, and `Signal.pipe`, which forwards the arguments of another function).
@@ -383,8 +384,6 @@ These rules are held by review alone, or a check covers only part of them, and a
 - [T12](tests.md#t12): fail a public result class with a `.plot()` and no row in `_KWARG_PLOT_CASES`.
 - [T14](tests.md#t14): require every `scripts/check_*.py` to be imported by a test file.
 - [T15](tests.md#t15): a test over every guard: each exemption table maps a location key to a non-empty reason and has a staleness check.
-- [F1](docs-and-figures.md#f1): compare the imports and headings of each site guide with its `docs/` mirror, beside the i18n parity check.
-- [F2](docs-and-figures.md#f2): refuse frontmatter and Astro components (`<ThemeImage>`, `<ScopeClaim>`) in `docs/**/*.md`, and a relative image path in a `<picture>`.
 - [F10](docs-and-figures.md#f10): refuse an underscore in the module segment of a `reference/api` link in `docs/` and in the site content.
 - [F11](docs-and-figures.md#f11): refuse a relative link or image path in `README.md`.
 - [F25](docs-and-figures.md#f25): count the snippets inside each `<details>` block of `docs/` and the site that shows the code of a figure.

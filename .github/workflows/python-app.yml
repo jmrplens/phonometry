@@ -303,8 +303,8 @@ jobs:
     - name: Regenerate the conformance artefact, the report and the quoted counts
       run: make conformance
     # `make conformance` now writes as well as reads: it regenerates the report
-    # and rewrites the counts quoted in .zenodo.json, the docs/ mirror and the
-    # site frontmatter. So the staleness gate has to cover the whole tree, not
+    # and rewrites the counts quoted in .zenodo.json, the files of docs/
+    # written by hand and the site frontmatter. So the staleness gate has to cover the whole tree, not
     # just the report. Diffing only docs/CONFORMANCE.md would let the rewrite
     # fix the prose in the runner's checkout and pass, while the branch keeps
     # the stale numbers.
@@ -893,7 +893,7 @@ jobs:
   # name, which Python does not warn about and no other gate can see. The
   # script also holds the English and Spanish pages to the same API, holds
   # every output comment ("print(x)  # 5958.0") to what that print wrote in
-  # the same run, in English, Spanish and the docs/ mirror, and skips, with a
+  # the same run, in English and in Spanish, and skips, with a
   # written reason, the pages whose blocks are excerpts of a workflow rather
   # than a script.
   doc-snippets:
@@ -974,7 +974,7 @@ jobs:
       run: python scripts/check_span_readers.py
     - name: No em dash in the published prose
       # The house style writes its prose without the em dash, in the pages,
-      # the mirrors, the CHANGELOG, the docstrings, the figure labels and the
+      # the files of docs/ written by hand, the CHANGELOG, the docstrings, the figure labels and the
       # site's robots.txt alike; a standard's title reproduced as printed
       # keeps its own. The double hyphen is the same dash in ASCII, which the
       # site's smartypants publishes as the em dash, and is refused outside

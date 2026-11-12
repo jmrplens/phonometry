@@ -26,8 +26,8 @@
  * contents stay where they were, and marks where each section's list goes
  * with a comment, `<!-- bibliography: signal-analysis -->`. The remark plugin
  * of src/lib/remark-bibliography.mjs puts the list there when the site is
- * built, and the Markdown copy of the Spanish page and the docs/ mirror write
- * the same lists from the same functions.
+ * built, and the Markdown copies of both pages, the English one's GitHub copy
+ * under docs/ among them, write the same lists from the same functions.
  *
  * Nothing here starts a process or reads a file; the caller hands in the
  * pages.

@@ -34,15 +34,36 @@
 // be in neither manifest the next build compares, so its removal would never
 // be sent.
 //
+// A job can submit and still keep no record: the deployments cannot be
+// listed, a newer push cancels the run between the submission and the record,
+// the upload of the record fails, or the submission reaches IndexNow and the
+// step fails after it. A page that deploy added and the next one removes is
+// then in no record, and the record alone would never send its removal. So the
+// build also reads the list the newest deploy after the record handed its
+// IndexNow job (`indexnow-urls`, uploaded before the deploy, or on a deploy
+// re-run by that job before it submits, and kept as long as a record is), and
+// sends as removed every page that list or its manifest names and this build
+// no longer has. The other way round, a page that list removed, gave other
+// content or was to send, and this build has as the record has it, is sent
+// too, as new or as changed: IndexNow was last told what the list said, or was
+// never told it, and the record holds neither. The list a build hands on, like
+// the one the job of a deploy re-run works out again and hands on, carries
+// those removals and those pages in turn, until a job keeps a record, so a
+// chain of deploys that kept no record loses none of them.
+//
 // A deploy job re-run after a newer deploy, as "Re-run failed jobs" runs it
 // on a run whose deploy failed, puts its run's pages back on the site after
 // that deploy, and the list its build handed on, worked out before it,
 // against the record of the build's time, says nothing of the pages that
 // deploy changed and this one puts back. When the deploy job ran in a later
 // attempt than the build, the IndexNow job works the list out again: it
-// compares the manifest the build handed on with the newest record, as a
-// build would, and submits that. Its deploy is then the newest, so it keeps
-// its record like any other, while no deploy has gone out after it.
+// compares the manifest the build handed on with the newest record and the
+// newest list handed on after it, its own run's left out, as a build would,
+// hands that list on in place of the build's and submits it. No later build
+// reads the build's list, older than the newest record, so a job that
+// submitted and kept no record would otherwise leave what it sent in no list.
+// Its deploy is then the newest, so it keeps its record like any other, while
+// no deploy has gone out after it.
 //
 // What a page says is read from the build, the way an engine reads it: its
 // title, its meta description, the date the sitemap gives it (the last commit
@@ -65,20 +86,24 @@
 // Usage:
 //   node scripts/indexnow-diff.mjs manifest [dist]
 //     writes <dist>/indexnow-manifest.json (package.json `postbuild`, last)
-//   node scripts/indexnow-diff.mjs last-submitted
+//   node scripts/indexnow-diff.mjs last-submitted [--except-run <id>]
 //     asks the GitHub API (GITHUB_API_URL, GITHUB_REPOSITORY, GITHUB_TOKEN)
 //     for the newest record an IndexNow job kept, and writes the id of its run
 //     as `run-id` to $GITHUB_OUTPUT, for the workflow to download it from;
-//     writes nothing when there is none
-//   node scripts/indexnow-diff.mjs diff [--dist <dir> | --current <manifest>] --previous <file or URL> [--out <dir>]
+//     writes nothing when there is none; and the run of the newest list a
+//     deploy handed IndexNow after that record, as `pending-run-id`, leaving
+//     out the list of run <id>, the one a deploy re-run of that run works
+//     out again
+//   node scripts/indexnow-diff.mjs diff [--dist <dir> | --current <manifest>] --previous <file or URL> [--pending <dir>] [--out <dir>]
 //     checks the published manifest against the pages, or reads the manifest
 //     a build handed on (`--current`, where there are no pages: the IndexNow
 //     job of a deploy re-run), compares it with the previous one (a record,
 //     or a URL such as the live site's manifest, to compare a local build
-//     with), prints the changed, new and removed URLs, and writes into <dir>
-//     the URLs to submit (urls.json: {"urls": [...]} and the lists behind it)
-//     and the manifest they were worked out from, which the IndexNow job
-//     keeps once it has submitted them
+//     with) and with the list a later deploy handed IndexNow (the folder
+//     `--out` wrote), prints the changed, new and removed URLs, and writes
+//     into <dir> the URLs to submit (urls.json: {"urls": [...]} and the
+//     lists behind it) and the manifest they were worked out from, which the
+//     IndexNow job keeps once it has submitted them
 //   node scripts/indexnow-diff.mjs keep-record --deployed-at <time>
 //     asks the GitHub API (GITHUB_GRAPHQL_URL as well) for the deployments of
 //     the site made after <time>, when this run's pages went out, and writes
@@ -117,6 +142,16 @@ const FETCH_TIMEOUT_MS = 30_000;
  * through, and the next build compares with the newest one.
  */
 export const SUBMITTED_ARTIFACT = 'indexnow-submitted';
+/**
+ * The artifact a build hands its IndexNow job the list in (urls.json and the
+ * manifest), uploaded before the deploy, so before any submission: the next
+ * build reads the newest one after the record for the pages it was to submit,
+ * which a job that kept no record may have submitted or may never have, and
+ * sends them again. The IndexNow job of a deploy re-run uploads the list it
+ * works out again under the same name, in place of the build's, before it
+ * submits.
+ */
+export const HANDED_ARTIFACT = 'indexnow-urls';
 /** The branch the site deploys from: the IndexNow jobs of its runs are the only ones that submit. */
 export const DEPLOY_BRANCH = 'main';
 /** The most artifacts the GitHub API lists on one page. */
@@ -339,19 +374,71 @@ export async function loadPrevious(source) {
 }
 
 /**
- * What to submit, given the current pages and the previous ones (or none):
- * the URLs whose digest changed, the new ones and the removed ones, each list
- * in URL order; with no previous pages, every current URL.
+ * What to submit, given the current pages, the previous ones (or none) and
+ * the list a later deploy handed IndexNow (or none), `{ pages, removed, new,
+ * urls }`: the URLs whose digest changed, the new ones and the removed ones,
+ * each list in URL order. A page is removed when the previous pages, the
+ * handed list's pages, its removals or the pages it was to send name it and
+ * the current pages do not. A current page is new when the previous pages
+ * lack it, or the handed list removed it or was to send it as new, and
+ * changed when its digest differs from theirs or from the handed list's, or
+ * the list was to send it otherwise: what IndexNow was last told of a page
+ * may be the handed list's, a page that list removed or changed and this
+ * build puts back as the previous pages had it differs from what IndexNow
+ * holds, and a page the list was to send may never have reached IndexNow,
+ * its job having kept no record. With no previous pages, every current URL,
+ * and the removals still.
  */
-export function urlsToSubmit(current, previous) {
+export function urlsToSubmit(current, previous, pending) {
 	const urls = Object.keys(current).sort();
-	if (!previous) return { full: true, changed: [], added: [], removed: [], urls };
-	const changed = urls.filter((url) => Object.hasOwn(previous, url) && previous[url] !== current[url]);
-	const added = urls.filter((url) => !Object.hasOwn(previous, url));
-	const removed = Object.keys(previous)
-		.filter((url) => !Object.hasOwn(current, url))
-		.sort();
+	const handed = pending?.pages ?? {};
+	const handedRemoved = new Set(pending?.removed ?? []);
+	const handedNew = new Set(pending?.new ?? []);
+	const handedSent = new Set(pending?.urls ?? []);
+	const named = new Set([...Object.keys(previous ?? {}), ...Object.keys(handed), ...handedRemoved, ...handedSent]);
+	const removed = [...named].filter((url) => !Object.hasOwn(current, url)).sort();
+	if (!previous) return { full: true, changed: [], added: [], removed, urls: [...urls, ...removed].sort() };
+	const added = urls.filter((url) => !Object.hasOwn(previous, url) || handedRemoved.has(url) || handedNew.has(url));
+	const changed = urls.filter(
+		(url) =>
+			Object.hasOwn(previous, url) &&
+			!handedRemoved.has(url) &&
+			!handedNew.has(url) &&
+			(previous[url] !== current[url] || handedSent.has(url) || (Object.hasOwn(handed, url) && handed[url] !== current[url])),
+	);
 	return { full: false, changed, added, removed, urls: [...changed, ...added, ...removed].sort() };
+}
+
+/**
+ * The list a deploy handed IndexNow, from the folder `diff --out` wrote:
+ * `{ pages, removed, new, urls, from }`, `{ absent, from }` when there is no
+ * such folder (no deploy after the record handed one, or its download was set
+ * aside), or `{ reason, from }` when it cannot be read, or its removals or
+ * the pages it was to send are not a list of pages of the site.
+ * Nothing here fails the build either: the record is still compared with.
+ */
+export function loadPending(dir) {
+	const from = dir;
+	if (!existsSync(dir)) return { from, absent: true };
+	let urls;
+	try {
+		urls = JSON.parse(readFileSync(join(dir, URLS_NAME), 'utf8'));
+	} catch (error) {
+		return { from, reason: error.code === 'ENOENT' ? `there is no ${URLS_NAME}` : `its ${URLS_NAME} is no list (${error.code ?? error.message})` };
+	}
+	const ofSite = (list) => Array.isArray(list) && list.every((url) => typeof url === 'string' && url.startsWith(`${ORIGIN}/`));
+	const { removed, new: added, urls: sent } = urls ?? {};
+	if (!ofSite(removed)) return { from, reason: `its ${URLS_NAME} names no removed pages of ${ORIGIN}/` };
+	if (!ofSite(added) || !ofSite(sent)) return { from, reason: `its ${URLS_NAME} names no pages of ${ORIGIN}/ to send` };
+	let text;
+	try {
+		text = readFileSync(join(dir, MANIFEST_NAME), 'utf8');
+	} catch (error) {
+		return { from, reason: `its ${MANIFEST_NAME} could not be read (${error.code ?? error.message})` };
+	}
+	const manifest = parseManifest(text);
+	if (manifest.reason) return { from, reason: `its ${MANIFEST_NAME}: ${manifest.reason}` };
+	return { from, pages: manifest.pages, removed, new: added, urls: sent };
 }
 
 /**
@@ -376,6 +463,34 @@ export function lastSubmitted(artifacts) {
 			artifact.created_at > newest.created_at ||
 			(artifact.created_at === newest.created_at && artifact.id > newest.id);
 		if (later) newest = artifact;
+	}
+	return newest;
+}
+
+/** Whether artifact `a` was created after `b`: later, or in the same second with a larger id. */
+const createdAfter = (a, b) => a.created_at > b.created_at || (a.created_at === b.created_at && a.id > b.id);
+
+/**
+ * The list to read beside the record, out of the artifacts the GitHub API
+ * lists: the newest {@link HANDED_ARTIFACT} that has not expired, uploaded by
+ * a run of this repository's {@link DEPLOY_BRANCH} after the record was kept
+ * (any, with no record). The record's own run handed its list before it kept
+ * the record, which holds the same pages, so only a deploy after it can have
+ * submitted pages no record holds. The list of the run `exceptRun` names is
+ * left out: the IndexNow job of a deploy re-run works that run's list out
+ * again, and reads the lists of the other deploys.
+ *
+ * @returns the artifact, or undefined when there is none after the record
+ */
+export function pendingList(artifacts, record, exceptRun) {
+	let newest;
+	for (const artifact of artifacts) {
+		const run = artifact.workflow_run;
+		if (artifact.name !== HANDED_ARTIFACT || artifact.expired !== false || !run) continue;
+		if (run.head_branch !== DEPLOY_BRANCH || run.head_repository_id !== run.repository_id) continue;
+		if (exceptRun !== undefined && run.id === exceptRun) continue;
+		if (record !== undefined && !createdAfter(artifact, record)) continue;
+		if (newest === undefined || createdAfter(artifact, newest)) newest = artifact;
 	}
 	return newest;
 }
@@ -422,13 +537,14 @@ async function fromApi(url, token, init = {}) {
 }
 
 /**
- * Every artifact named {@link SUBMITTED_ARTIFACT} of a repository, read from
- * the GitHub API a page at a time until it has listed as many as it counts.
+ * Every artifact named `name` ({@link SUBMITTED_ARTIFACT} by default) of a
+ * repository, read from the GitHub API a page at a time until it has listed as
+ * many as it counts.
  */
-export async function submittedArtifacts({ api, repository, token }) {
+export async function submittedArtifacts({ api, repository, token }, name = SUBMITTED_ARTIFACT) {
 	const artifacts = [];
 	for (let page = 1; page <= MAX_PAGES; page += 1) {
-		const url = `${api}/repos/${repository}/actions/artifacts?name=${SUBMITTED_ARTIFACT}&per_page=${PER_PAGE}&page=${page}`;
+		const url = `${api}/repos/${repository}/actions/artifacts?name=${name}&per_page=${PER_PAGE}&page=${page}`;
 		const listed = await fromApi(url, token);
 		if (!Array.isArray(listed?.artifacts) || !Number.isInteger(listed.total_count)) {
 			throw new Error(`the API answered ${url} with no list of artifacts`);
@@ -436,7 +552,7 @@ export async function submittedArtifacts({ api, repository, token }) {
 		artifacts.push(...listed.artifacts);
 		if (listed.artifacts.length < PER_PAGE || artifacts.length >= listed.total_count) return artifacts;
 	}
-	throw new Error(`the API lists more than ${MAX_PAGES * PER_PAGE} artifacts named ${SUBMITTED_ARTIFACT}`);
+	throw new Error(`the API lists more than ${MAX_PAGES * PER_PAGE} artifacts named ${name}`);
 }
 
 /** The deployments of an environment, newest first, a page after the cursor `after`. */
@@ -498,17 +614,27 @@ function writeManifest(args) {
 }
 
 /**
- * `last-submitted`: name the run whose IndexNow job kept the newest record, in
- * the step output `run-id`, for the workflow to download the record from. A
- * record that cannot be listed is not a reason to stop a deploy: with no
- * `run-id` the build compares with nothing and the full list goes out, as it
- * always did, with a warning on the run.
+ * `last-submitted [--except-run <id>]`: name the run whose IndexNow job kept
+ * the newest record, in the step output `run-id`, for the workflow to
+ * download the record from, and the run of the newest list a deploy handed
+ * IndexNow after it (see {@link pendingList}), in `pending-run-id`, leaving
+ * out the list of run `<id>`, which the IndexNow job of a deploy re-run of
+ * that run holds already. A record that cannot be listed is not a reason to
+ * stop a deploy: with no `run-id` the build compares with nothing and the
+ * full list goes out, as it always did, with a warning on the run; lists that
+ * cannot be listed leave the record alone to compare with, with a warning
+ * too.
  */
-async function findLastSubmitted() {
+async function findLastSubmitted(args) {
 	const { GITHUB_API_URL: api = 'https://api.github.com', GITHUB_REPOSITORY: repository, GITHUB_TOKEN: token, GITHUB_OUTPUT: output } = process.env;
 	if (!repository || !token || !output) {
 		throw new ManifestError('last-submitted reads the GitHub API from a workflow step: it needs GITHUB_REPOSITORY, GITHUB_TOKEN and GITHUB_OUTPUT.');
 	}
+	const except = option(args, '--except-run');
+	if (except !== undefined && !/^[1-9]\d*$/.test(except)) {
+		throw new ManifestError(`--except-run takes the id of a run, as $GITHUB_RUN_ID gives it, not ${JSON.stringify(except)}.`);
+	}
+	const exceptRun = except === undefined ? undefined : Number(except);
 	let artifacts;
 	try {
 		artifacts = await submittedArtifacts({ api, repository, token });
@@ -522,11 +648,29 @@ async function findLastSubmitted() {
 			`[indexnow] no IndexNow job of a run of ${DEPLOY_BRANCH} has kept a record that has not expired ` +
 				`(${artifacts.length} artifacts named ${SUBMITTED_ARTIFACT} listed): the full list goes out.`,
 		);
+	} else {
+		const run = record.workflow_run;
+		console.log(`[indexnow] the pages were last submitted by run ${run.id}, of commit ${run.head_sha}, on ${record.created_at}.`);
+		appendFileSync(output, `run-id=${run.id}\n`);
+	}
+	let lists;
+	try {
+		lists = await submittedArtifacts({ api, repository, token }, HANDED_ARTIFACT);
+	} catch (error) {
+		console.log(
+			`::warning::[indexnow] the lists the deploys handed IndexNow could not be listed (${error.cause?.code ?? error.message}): ` +
+				'a page a deploy since the record submitted and this one removed is not sent as removed, nor one such a deploy removed or changed and this one puts back.',
+		);
 		return;
 	}
-	const run = record.workflow_run;
-	console.log(`[indexnow] the pages were last submitted by run ${run.id}, of commit ${run.head_sha}, on ${record.created_at}.`);
-	appendFileSync(output, `run-id=${run.id}\n`);
+	if (exceptRun !== undefined) console.log(`[indexnow] the list run ${exceptRun} handed IndexNow is left out: it is the list this job works out again.`);
+	const pending = pendingList(lists, record, exceptRun);
+	if (pending === undefined) {
+		console.log(`[indexnow] no deploy of ${DEPLOY_BRANCH} handed IndexNow a list after ${record === undefined ? 'its last' : 'that'} record.`);
+		return;
+	}
+	console.log(`[indexnow] run ${pending.workflow_run.id} handed IndexNow a list on ${pending.created_at}, after that record: its pages, its removals and the pages it was to send are read too.`);
+	appendFileSync(output, `pending-run-id=${pending.workflow_run.id}\n`);
 }
 
 /**
@@ -540,8 +684,10 @@ async function findLastSubmitted() {
  * site then serves. Deployments that cannot be listed keep nothing either,
  * and neither does a run whose deploy job named no time, as one made before
  * the job wrote it: the next deploy then compares with the record before this
- * one and sends these pages again, where keeping a stale record could leave a
- * removed page out for good.
+ * one and sends these pages again, and reads this run's handed list (on a
+ * deploy re-run, the one its job worked out again) for the pages it removes
+ * from them, where keeping a stale record could leave a removed page out for
+ * good.
  */
 async function keepRecord(args) {
 	const {
@@ -558,7 +704,7 @@ async function keepRecord(args) {
 	if (deployedAt === '') {
 		console.log(
 			'::warning::[indexnow] the deploy job named no time its pages went out, as the deploy job of a run made before it wrote one names none: ' +
-				'this manifest is not kept, and the next deploy sends these pages again.',
+				'this manifest is not kept, and the next deploy sends these pages again, and the pages it removes from them.',
 		);
 		appendFileSync(output, 'keep=false\n');
 		return;
@@ -572,7 +718,7 @@ async function keepRecord(args) {
 	} catch (error) {
 		console.log(
 			`::warning::[indexnow] the deployments of the site could not be listed (${error.cause?.code ?? error.message}): ` +
-				'this manifest is not kept, and the next deploy sends these pages again.',
+				'this manifest is not kept, and the next deploy sends these pages again, and the pages it removes from them.',
 		);
 		appendFileSync(output, 'keep=false\n');
 		return;
@@ -635,11 +781,27 @@ async function diff(args) {
 	const source = option(args, '--previous');
 	if (!source) throw new ManifestError('say where the previous manifest is: --previous <file or URL>.');
 	const previous = await loadPrevious(source);
-	const result = urlsToSubmit(current.pages, previous.pages);
+	const pendingDir = option(args, '--pending');
+	let pending;
+	if (pendingDir !== undefined) {
+		const handed = loadPending(pendingDir);
+		if (handed.absent) {
+			console.log(`[indexnow] no list a later deploy handed IndexNow at ${handed.from}: the record alone is compared with.`);
+		} else if (handed.reason) {
+			console.log(
+				`::warning::[indexnow] the list a deploy handed IndexNow, at ${handed.from}, cannot be read (${handed.reason}): ` +
+					'a page it named and this build no longer has is not sent as removed, nor one it removed, changed or was to send and this build has as the record has it.',
+			);
+		} else {
+			pending = handed;
+			console.log(`[indexnow] read the list a later deploy handed IndexNow, at ${handed.from} (${Object.keys(handed.pages).length} pages, ${handed.removed.length} removed, ${handed.urls.length} to send).`);
+		}
+	}
+	const result = urlsToSubmit(current.pages, previous.pages, pending);
 	const total = Object.keys(current.pages).length;
 	if (result.full) {
 		console.log(`[indexnow] no previous manifest to compare with from ${previous.from}: ${previous.reason}.`);
-		console.log(`[indexnow] the full list goes out: ${result.urls.length} URLs.`);
+		console.log(`[indexnow] the full list goes out: ${result.urls.length} URLs, ${result.removed.length} of them removed.`);
 	} else {
 		console.log(`[indexnow] compared with ${previous.from} (${Object.keys(previous.pages).length} pages).`);
 		console.log(
@@ -666,7 +828,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 	const [command, ...args] = process.argv.slice(2);
 	try {
 		if (command === 'manifest') writeManifest(args);
-		else if (command === 'last-submitted') await findLastSubmitted();
+		else if (command === 'last-submitted') await findLastSubmitted(args);
 		else if (command === 'diff') await diff(args);
 		else if (command === 'keep-record') await keepRecord(args);
 		else throw new ManifestError(`unknown command ${JSON.stringify(command)}: use \`manifest\`, \`last-submitted\`, \`diff\` or \`keep-record\`.`);

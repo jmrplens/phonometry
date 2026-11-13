@@ -9,7 +9,7 @@
 > **Auto-generated conformance report - do not hand-edit.** Produced by
 > `make conformance` from the library's own computations checked against the
 > referenced standards, and rendered from
-> [`docs/conformance.json`](https://github.com/jmrplens/phonometry/blob/main/docs/conformance.json),
+> [`docs/conformance.json`](conformance.json),
 > which carries the same rows as data. CI regenerates it on every pull request
 > and fails if it is out of date, so edit the checks in
 > `scripts/conformance/domains/`, not this file. Each row pins a standard and clause to its expected normative value and
@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1897/1897 conformance checks pass** across 111 domains, against 227 normative designations and 125 further published sources - filters class 1 - weightings within IEC 61672-1 class 1.
+**1897/1897 conformance checks pass** across 111 domains, against 230 normative designations and 121 further published sources - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 

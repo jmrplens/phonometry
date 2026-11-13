@@ -492,7 +492,10 @@ def render_markdown(document: Mapping[str, Any] | None = None) -> tuple[str, int
 
 # Header prepended to the committed docs/CONFORMANCE.md (via `--file-header`,
 # used by `make conformance`). Emitted only for the committed file, not for the
-# CI PR-comment body, so the PR comment stays header-free.
+# CI PR-comment body, so the PR comment stays header-free. The link to the
+# data the rows are rendered from is relative, so a copy of this file read at
+# a commit (the one the site's Dataset hands out) links the data of that same
+# commit, and not whatever the branch holds by then.
 _DOC_HEADER = """<!--
   AUTO-GENERATED FILE - DO NOT EDIT BY HAND.
   The chain is: scripts/conformance/domains/ -> docs/conformance.json -> this
@@ -504,7 +507,7 @@ _DOC_HEADER = """<!--
 > **Auto-generated conformance report - do not hand-edit.** Produced by
 > `make conformance` from the library's own computations checked against the
 > referenced standards, and rendered from
-> [`docs/conformance.json`](https://github.com/jmrplens/phonometry/blob/main/docs/conformance.json),
+> [`docs/conformance.json`](conformance.json),
 > which carries the same rows as data. CI regenerates it on every pull request
 > and fails if it is out of date, so edit the checks in
 > `scripts/conformance/domains/`, not this file. Each row pins a standard and clause to its expected normative value and

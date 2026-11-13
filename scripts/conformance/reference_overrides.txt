@@ -34,3 +34,11 @@ NORAH2 guidance screening path difference (§A.4.5)	report	NORAH2 guidance	-	scr
 # repository, not clauses of a document.
 CIRCABC CNOSSOS-EU road emission test set	web	CIRCABC CNOSSOS-EU	-	road emission test set
 CIRCABC CNOSSOS-EU railway emission test set	web	CIRCABC CNOSSOS-EU	-	railway emission test set
+# The amplitude-modulation checks read the IOA AMWG reference code against the
+# clauses of IEC TS 61400-11-2:2024 the wind turbine guide implements; the code
+# opens like no document, so the split falls to the whole string and the
+# standard after it went unread.
+IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.2.2	derivation	IOA AMWG reference code v1.4	-	-
+IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.2.2	standard	IEC TS 61400-11-2	2024	13.6.2.2	 with 	-
+IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.3	derivation	IOA AMWG reference code v1.4	-	-
+IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.3	standard	IEC TS 61400-11-2	2024	13.6.3	 with 	-

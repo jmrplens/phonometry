@@ -31,7 +31,9 @@
  * book, an article, a report or a web page the report names is a source of
  * the numbers, and the line does not count it, even on a page that cites it;
  * a standard the report filed under one of those kinds would be left out of
- * the line and of the Dataset with nothing to say so.
+ * the line and of the Dataset with nothing to say so, which is why the
+ * report's own tests refuse one (tests/test_conformance_artifact.py, "no
+ * standard is filed under another kind").
  *
  * A standard a check names is the work a page cites when the two designations
  * name the same document and edition: the punctuation of the year, a

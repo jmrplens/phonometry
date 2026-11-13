@@ -9,8 +9,8 @@
     "domains": 111,
     "citation_groups": 523,
     "citations": 1343,
-    "designations": 227,
-    "sources": 125
+    "designations": 230,
+    "sources": 121
   },
   "units": [
     "%",
@@ -32465,8 +32465,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, Table C.1"
           }
         ]
@@ -32497,8 +32498,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, C.3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, C.3"
           }
         ]
@@ -32528,8 +32530,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, C.3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, C.3"
           }
         ]
@@ -32559,8 +32562,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, C.3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, C.3"
           }
         ]
@@ -32591,8 +32595,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, C.3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, C.3"
           }
         ]
@@ -32622,8 +32627,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, C.3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, C.3"
           }
         ]
@@ -32653,8 +32659,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, Table C.1"
           }
         ]
@@ -32685,8 +32692,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, Table C.1"
           }
         ]
@@ -32717,8 +32725,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, Table C.1"
           }
         ]
@@ -32749,8 +32758,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex C, Table C.1"
           }
         ]
@@ -32781,8 +32791,9 @@
         "cite": "E DIN 45672-3:2023-02 Table 2",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Table 2"
           }
         ]
@@ -32813,8 +32824,9 @@
         "cite": "E DIN 45672-3:2023-02 Table 2",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Table 2"
           }
         ]
@@ -32845,8 +32857,9 @@
         "cite": "E DIN 45672-3:2023-02 Table 2",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Table 2"
           }
         ]
@@ -32877,8 +32890,9 @@
         "cite": "E DIN 45672-3:2023-02 Table 2",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Table 2"
           }
         ]
@@ -32909,8 +32923,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex A",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex A"
           }
         ]
@@ -32941,8 +32956,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex A",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex A"
           }
         ]
@@ -32973,8 +32989,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex A",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex A"
           }
         ]
@@ -33005,8 +33022,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex A",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex A"
           }
         ]
@@ -33037,8 +33055,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex A",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex A"
           }
         ]
@@ -33069,8 +33088,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex A",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex A"
           }
         ]
@@ -33101,8 +33121,9 @@
         "cite": "E DIN 45672-3:2023-02 Annex A",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 45672-3:2023-02",
+            "kind": "standard",
+            "designation": "E DIN 45672-3",
+            "edition": "2023-02",
             "clause": "Annex A"
           }
         ]
@@ -33133,8 +33154,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Example 8",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Example 8"
           }
         ]
@@ -33164,8 +33186,9 @@
         "cite": "E DIN 4150-2:2023-08 Table 1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Table 1"
           }
         ]
@@ -33195,8 +33218,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33226,8 +33250,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33257,8 +33282,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33288,8 +33314,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33319,8 +33346,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33350,8 +33378,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33381,8 +33410,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33412,8 +33442,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Table B.1"
           }
         ]
@@ -33443,8 +33474,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Example 9",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Example 9"
           }
         ]
@@ -33474,8 +33506,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Example 9",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Example 9"
           }
         ]
@@ -33505,8 +33538,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Example 9",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Example 9"
           }
         ]
@@ -33536,8 +33570,9 @@
         "cite": "E DIN 4150-2:2023-08 Annex B, Example 9",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Annex B, Example 9"
           }
         ]
@@ -33567,8 +33602,9 @@
         "cite": "E DIN 4150-2:2023-08 Table 3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Table 3"
           }
         ]
@@ -33598,8 +33634,9 @@
         "cite": "E DIN 4150-2:2023-08 Table 3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Table 3"
           }
         ]
@@ -33629,8 +33666,9 @@
         "cite": "E DIN 4150-2:2023-08 Table 3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Table 3"
           }
         ]
@@ -33660,8 +33698,9 @@
         "cite": "E DIN 4150-2:2023-08 Table 3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Table 3"
           }
         ]
@@ -33691,8 +33730,9 @@
         "cite": "E DIN 4150-2:2023-08 Table 3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Table 3"
           }
         ]
@@ -33722,8 +33762,9 @@
         "cite": "E DIN 4150-2:2023-08 Table 3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN 4150-2:2023-08",
+            "kind": "standard",
+            "designation": "E DIN 4150-2",
+            "edition": "2023-08",
             "clause": "Table 3"
           }
         ]
@@ -44647,7 +44688,15 @@
         "documents": [
           {
             "kind": "derivation",
-            "designation": "IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.2.2"
+            "designation": "IOA AMWG reference code v1.4"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "13.6.2.2",
+            "lead": " with ",
+            "relation": "supplies"
           }
         ]
       },
@@ -44718,7 +44767,15 @@
         "documents": [
           {
             "kind": "derivation",
-            "designation": "IOA AMWG reference code v1.4 with IEC TS 61400-11-2:2024 13.6.3"
+            "designation": "IOA AMWG reference code v1.4"
+          },
+          {
+            "kind": "standard",
+            "designation": "IEC TS 61400-11-2",
+            "edition": "2024",
+            "clause": "13.6.3",
+            "lead": " with ",
+            "relation": "supplies"
           }
         ]
       },
@@ -54185,8 +54242,9 @@
         "cite": "E DIN EN 62489-1/A2:2017-10 Annex D, D.1.2 and D.1.3",
         "documents": [
           {
-            "kind": "book",
-            "designation": "E DIN EN 62489-1/A2:2017-10",
+            "kind": "standard",
+            "designation": "E DIN EN 62489-1/A2",
+            "edition": "2017-10",
             "clause": "Annex D, D.1.2 and D.1.3"
           }
         ]

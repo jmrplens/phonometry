@@ -158,7 +158,9 @@ print(building.weighted_rating(ins.r_prime).rating)  # 38  R'w
 
 Compute `l1`, `l2` and `t2` on the same 16 one-third-octave bands from
 100 Hz to 3150 Hz (obtain `t2` from
-`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t30`, for example) and
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t20`, for example;
+[The receiving-room reverberation time](#the-receiving-room-reverberation-time-clause-10)
+says how the standard wants it measured) and
 pass them to `airborne_insulation`. Feed that function's `dnt` (or `r_prime`)
 spectrum to `weighted_rating`, so every band aligns index-by-index with the
 ISO 717-1 reference curve.
@@ -192,6 +194,20 @@ The functions consume band levels; the standard says where those levels come
 from, and getting that wrong changes the answer more than any of the
 arithmetic above.
 
+**The instruments (Clause 4).** Everything that measures a sound pressure
+level, the microphones with their cables, windscreens and recorders, meets
+class 0 or 1 of IEC 61672-1 for random incidence; the filters are class 0 or 1
+of IEC 61260, and the reverberation time equipment complies with ISO 3382-2.
+Check the whole chain with a class 0 or 1 sound calibrator (IEC 60942) at the
+beginning and at the end of every measurement session, and at least at the
+beginning and the end of each measurement day, and note each reading in the
+field record. If two consecutive checks differ by more than 0.5 dB, with no
+adjustment in between, everything measured since the last satisfactory check
+is discarded (Clause 4.2). Clause 4.3 recommends having the calibrator
+calibrated every year at most, and the meter and the filter set verified every
+two. Clause 4 of ISO 16283-2 and of ISO 16283-3 sets the same classes and the
+same 0.5 dB rule.
+
 **The source (Clause 7.1, 7.2).** Sound is generated with loudspeakers
 operated simultaneously in at least two positions, or with a single
 loudspeaker moved to at least two positions. Multiple loudspeakers must be of
@@ -211,9 +227,53 @@ its base sits at least 1.0 m above the floor.
 **The microphones (Clause 7.3).** A minimum of **five** positions per room,
 and, with a single loudspeaker moved between positions, five per room *per
 loudspeaker position*. No two positions may lie in the same plane relative to
-the room boundaries, and the set must not form a regular grid.
+the room boundaries, and the set must not form a regular grid. A fixed
+position is a microphone on a tripod with nobody in the room, or with an
+operator present, holding it or not, whose trunk stays at least an arm's
+length from the microphone (Clause 7.3.1). Clause 7.6 sets the minimum
+distances, to be exceeded wherever possible: 0.7 m between fixed microphone
+positions, 0.5 m from any microphone position to the room boundaries, and
+1.0 m from any microphone position to the loudspeaker.
+
+**A moving microphone instead (Clauses 7.4, 7.5).** The fixed positions may be
+replaced by a mechanized continuously moving microphone: a circle, or a sweep
+of 270° to 360° about a fixed axis, with a radius of at least 0.7 m, in a
+plane inclined to cover a large part of the permitted space and at least 10°
+away from every room surface, each traverse lasting at least 15 s
+(Clause 7.4.1). Or by a manual scan along one of the four paths of Figure 1,
+at about 20°/s at most: a circle of 270° to 360° at arm's length, a helix of
+at least two turns that rises from 0.5 m above the floor, a cylindrical-type
+path traced with a 0.3 m to 0.9 m extension rod, or, where the room leaves no
+space for those, three semicircles about 45° to 60° apart (Clause 7.5). With
+loudspeakers operating simultaneously one traverse or scan is the minimum;
+with a single loudspeaker it is one for each loudspeaker position, the
+operator of a manual scan standing somewhere else for each (Clauses 7.4.2,
+7.5.6). In case of dispute the result measured with nobody in either room is
+the reference one (Clause 6).
+
+**Averaging times (Clause 7.7).** At each fixed position, at least 6 s in the
+bands from 100 Hz to 400 Hz, at least 4 s from 500 Hz to 5000 Hz, and at least
+15 s from 50 Hz to 80 Hz. A moving microphone or a manual scan averages over a
+whole number of complete traverses or paths, for at least 30 s from 100 Hz to
+5000 Hz and at least 60 s from 50 Hz to 80 Hz.
 
 ### Correcting for background noise (Clause 9.2)
+
+**Before the correction (Clause 9.1).** The background is everything that is
+not the signal: sound from outside the room, electrical noise in the receiving
+system, the drive of a moving microphone, and the operator. Whoever stays in
+the receiving room, beside a fixed microphone, holding one or scanning, has to
+look for their own noise (clothing, shoes, arm and knee joints) by at least
+one of three means: the time history of the A-weighted level with Fast time
+weighting, the difference between the Fast maximum and the equivalent
+continuous level in each band, or listening, where no hearing protection is
+worn. The operator's movement is to be the same during the background
+measurement as during the signal one, and a manual scan follows the same type
+of path for both. The averaging times are at least those of Clause 7.7, and
+longer when the background is not steady and continuous. To check the
+electrical noise, or the cross-talk between the source and the receiving
+systems, replace the microphone by a dummy microphone or the loudspeaker by an
+equivalent impedance.
 
 Measure the receiving room again with the source off, at the same positions
 and with the same averaging, and compare band by band with the combined
@@ -283,6 +343,42 @@ l2m = building.energy_average_level(np.vstack([l2a, l2b]), axis=0)
 naive = building.airborne_insulation(l1m, l2m, t2, area=10.0, volume=50.0)
 print(round(float(naive.dnt[0]), 1), building.weighted_rating(naive.dnt).rating)  # 43.0 43
 ```
+
+### The receiving-room reverberation time (Clause 10)
+
+Every normalisation on this page needs the reverberation time of the receiving
+room in each band, and Clause 10 says how it is measured. ISO 16283-2 prints
+the same clause for the impact measurement, so what follows holds for both.
+
+Measure it by the interrupted noise method or by the integrated impulse
+response method, as ISO 3382-2 and ISO 18233 describe them; the engineering
+method is preferred and the precision method allowed (Clause 10.1). Evaluate
+the decay from 5 dB below the initial level, over 20 dB by preference, which
+makes $T_{20}$ the preferred quantity, and keep the bottom of the evaluation
+range at least 10 dB above the overall background noise. The loudspeaker
+stands at a fixed position, meets the directivity requirement of Annex A, and
+radiates a steady signal with a continuous spectrum (Clause 10.2).
+
+With **interrupted noise** each band needs at least six decays: one
+loudspeaker position at least, with three fixed microphone positions and two
+decays at each, or six fixed positions and one decay at each; a mechanized
+moving microphone takes its six along the traverse (Clause 10.5). With the
+**integrated impulse response** the microphones are fixed, never moving,
+hand-held or scanned, and an impulse source needs at least one source position
+and six fixed microphone positions; the decay is the reverse-time integral of
+the squared impulse response (Clauses 6 and 10.6). Either way the six become
+one value per band as Clause 8 of ISO 3382-2 allows, by taking the mean of the
+individual reverberation times or by ensemble-averaging the decays.
+
+An operator who was in the receiving room while the levels were measured is in
+it for the reverberation time too, at least an arm's length from the
+microphone (Clause 10.1).
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t20` evaluates that
+20 dB range on one impulse response; the acquisition is in
+[Measuring the Room Impulse Response](/phonometry/buildings/rooms/room-impulse-response/)
+and the decay analysis in
+[Room Acoustics](/phonometry/buildings/rooms/room-acoustics/). A receiving
+room under 25 m³ changes the three lowest bands, as the next section says.
 
 ### Small rooms: the low-frequency procedure (Clause 8)
 
@@ -464,6 +560,104 @@ resilient layer or a decoupled ceiling, not a carpet; see
 [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/)
 and
 [Predicting resilient-layer performance](/phonometry/buildings/design/resilient-layers/).
+
+### Taking the impact measurement (ISO 16283-2:2020 Clauses 4, 7, 9 and 10)
+
+`impact_insulation()` consumes $L_\mathrm{i}$ per band; as on the airborne
+side, the standard says where those levels come from.
+
+**The instruments (Clause 4).** The instrument classes, the calibrator check at
+both ends of every session and the 0.5 dB rule are those of
+[the airborne measurement](#taking-the-measurement-iso-16283-1-clauses-7-and-9),
+sentence for sentence. The impact part adds that the tapping machine meets its
+Annex A.
+
+**The tapping machine (Clause 7.2.2).** At least **four** positions,
+distributed at random over the floor under test, each at least 0.5 m from the
+edges of the floor. An anisotropic floor, with beams or ribs, can need more
+positions, and on it the line of the hammers should lie at 45° to the
+direction of the beams or ribs. The level can drift after the machine starts,
+as it does when a soft or fragile surface changes under the hammers: wait
+until it is steady, and if it is not after 5 min, measure over a well-defined
+period and report that period. On a soft floor covering the machine has to
+meet the special requirements of Annex A, which also advises on how to mount
+it.
+
+**Fixed microphones (Clauses 7.3.1, 7.3.2, 7.6).** The rules are the ones the
+rubber ball follows in
+[Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/#measuring-in-the-field-iso-16283-22020-clauses-6-to-9):
+a tripod with nobody in the room, or an operator whose trunk stays at least an
+arm's length from the microphone; positions spread through the permitted
+space, no two in the same plane relative to the room boundaries and no regular
+grid. The count follows the machine. The number of microphone positions equals
+the number of machine positions or an integer multiple of it, and every
+machine position gets the same number. With four or five machine positions,
+at least two measurements for each, at two different microphone positions;
+with six or more, one measurement for each is enough, at a different
+microphone position each time. Four machine positions therefore mean at least
+eight measurements, and six mean at least six. The minimum distances, to be
+exceeded where possible, are 0.7 m between fixed microphone positions, 0.5 m
+from any microphone position to the room boundaries, and 1.0 m to the
+partition the machine is exciting, which for a floor measured from the room
+below is the ceiling of the receiving room.
+
+**Averaging times (Clause 7.7).** Those of the airborne part: at each fixed
+position at least 6 s in the bands from 100 Hz to 400 Hz, at least 4 s from
+500 Hz to 5000 Hz and at least 15 s from 50 Hz to 80 Hz; over a whole number
+of complete traverses or paths, at least 30 s from 100 Hz to 5000 Hz and at
+least 60 s from 50 Hz to 80 Hz.
+
+**A moving microphone instead (Clauses 7.4, 7.5).** The tapping machine, unlike
+the rubber ball, may be measured with a moving microphone. The mechanized
+traverse is that of the airborne part: a circle or a sweep of 270° to 360°,
+a radius of at least 0.7 m, a plane at least 10° away from every room surface,
+at least 15 s per traverse (Clause 7.4.1). The manual scan follows the same
+four paths, a circle, a helix, a cylindrical-type path or three semicircles,
+at about 20°/s at most (Clause 7.5). Each machine position gets at least one
+traverse or scan and all get the same number (Clauses 7.4.2, 7.5.2); with six
+or more machine positions, the fixed point of the traverse or of the scan may
+change between them. The two parts differ in one number. The helix of
+ISO 16283-2:2020 finishes "at least 0,5 m from the ceiling" (Clause 7.5.5), a
+change its foreword lists against the previous edition, while ISO 16283-1:2014
+prints "no more than 0,5 m from the ceiling" for the same path
+(Clause 7.5.3). In case of dispute the result measured with nobody in the
+receiving room is the reference one (Clause 6).
+
+**Combining the machine positions (Clause 7.3.3).** For each machine position
+in turn, energy-average its microphone positions (Formula (11)), correct the
+result for background noise and form $L'_{\mathrm{n}T,j}$, or $L'_{\mathrm{n},j}$.
+Then combine the $m$ positions with Formula (7), or Formula (8) for $L'_\mathrm{n}$:
+
+$$
+L'_{\mathrm{n}T} = 10\log_{10}\left[\frac{1}{m}\sum_{j=1}^{m} 10^{L'_{\mathrm{n}T,j}/10}\right].
+$$
+
+This is an energy average of levels, with a **positive** exponent, not the
+average of transmission factors with a negative exponent that
+[Formula (6)](#averaging-over-loudspeaker-positions-formula-6) applies to the
+airborne result. Both let the worst position weigh most; the sign differs
+because a high impact level is the bad one and a high level difference the
+good one. All the positions share the one receiving-room reverberation time,
+so Formula (7) is the energy average of the corrected $L_{\mathrm{i},j}$ followed by a
+single normalisation: pass `impact_insulation()` a 2D `li` whose rows are the
+background-corrected levels of each machine position and it returns exactly
+that.
+
+**Background noise (Clauses 9.1, 9.2).** What
+[Correcting for background noise](#correcting-for-background-noise-clause-92)
+says of the airborne measurement holds here: the operator's check for
+self-generated noise, the same type of path for the background as for the
+signal, the averaging times of Clause 7.7 or longer, and a dummy microphone in
+place of the microphone to check the electrical noise. Formula (17) is
+Formula (14) under another number, with the same three regimes: nothing at a
+margin of 10 dB or more, the energy subtraction between 6 dB and 10 dB, and
+the fixed 1.3 dB correction, flagged in the report, at 6 dB or less. The
+three-regime expression of that section is the one to apply; the warning there
+about `building.background_correction` holds for impact levels as well.
+
+**The reverberation time (Clause 10).** Measured as
+[The receiving-room reverberation time](#the-receiving-room-reverberation-time-clause-10)
+describes, with a loudspeaker that meets Annex B of this part.
 
 ### `impact_insulation()` parameters
 
@@ -764,11 +958,16 @@ operator's job, and nothing here verifies that the 6 dB floor was met; the
 correction itself is three lines of NumPy, written out under [Correcting for
 background noise](#correcting-for-background-noise-clause-92) above.
 (`building.background_correction` is the ISO 10140-4 *laboratory* variant and
-does not match the field thresholds.) ISO 16283-1/-2's own position
-requirements (the counts, distances and placements of [Taking the
-measurement](#taking-the-measurement-iso-16283-1-clauses-7-and-9)) are
+does not match the field thresholds.) ISO 16283-1/-2's own requirements on
+the measurement (the instrument classes and the calibrator check, the counts,
+distances, placements and averaging times of [Taking the
+measurement](#taking-the-measurement-iso-16283-1-clauses-7-and-9) and of
+[Taking the impact
+measurement](#taking-the-impact-measurement-iso-16283-22020-clauses-4-7-9-and-10),
+and the Clause 10 procedure for the reverberation time) are
 documented here and checked nowhere: energy-averaging happens once positions
-are supplied, but nothing verifies how many were taken or where. The
+are supplied, but nothing verifies how many were taken, where or for how long,
+and the reverberation times are taken as given. The
 low-frequency procedure of [Small
 rooms](/phonometry/buildings/insulation/low-frequency-procedure/) *is* implemented:
 the 25 m³ trigger, Formula (12), Formula (13) and the 63 Hz octave

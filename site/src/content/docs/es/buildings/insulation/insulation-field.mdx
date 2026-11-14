@@ -160,7 +160,9 @@ print(building.weighted_rating(ins.r_prime).rating)  # 38  R'w
 
 Calcula `l1`, `l2` y `t2` en las mismas 16 bandas de tercio de octava de
 100 Hz a 3150 Hz (obtén `t2` de
-`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t30`, por ejemplo) y
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t20`, por ejemplo;
+[El tiempo de reverberación del recinto receptor](#tiempo-de-reverberacion-del-recinto-receptor)
+dice cómo quiere la norma que se mida) y
 pásalos a `airborne_insulation`. Alimenta el espectro `dnt` (o `r_prime`) de esa
 función a `weighted_rating`, de modo que cada banda quede alineada índice a
 índice con la curva de referencia ISO 717-1.
@@ -197,6 +199,20 @@ Las funciones consumen niveles por banda; la norma dice de dónde salen esos
 niveles, y equivocarse ahí cambia el resultado más que cualquiera de las
 operaciones anteriores.
 
+**Los instrumentos (apartado 4).** Todo lo que mide un nivel de presión
+sonora, los micrófonos con sus cables, pantallas antiviento y registradores,
+cumple la clase 0 o 1 de IEC 61672-1 para incidencia aleatoria; los filtros son
+de clase 0 o 1 según IEC 61260, y el equipo de tiempo de reverberación cumple
+ISO 3382-2. Comprueba la cadena completa con un calibrador acústico de clase 0
+o 1 (IEC 60942) al principio y al final de cada sesión de medición, y como
+mínimo al principio y al final de cada día de medición, y anota cada lectura
+en el registro de campo. Si dos comprobaciones consecutivas difieren en más de
+0,5 dB, sin ningún ajuste entre ellas, se descarta todo lo medido desde la
+última comprobación satisfactoria (apartado 4.2). El apartado 4.3 recomienda
+calibrar el calibrador cada año como máximo y verificar el sonómetro y el
+conjunto de filtros cada dos. El apartado 4 de ISO 16283-2 y el de ISO 16283-3
+fijan las mismas clases y la misma regla de 0,5 dB.
+
 **La fuente (apartados 7.1 y 7.2).** El sonido se genera con altavoces
 funcionando simultáneamente en dos posiciones como mínimo, o con un único
 altavoz desplazado a dos posiciones como mínimo. Si son varios altavoces han de
@@ -217,12 +233,59 @@ recinto superior, su base queda a 1,0 m como mínimo sobre el suelo.
 **Los micrófonos (apartado 7.3).** Un mínimo de **cinco** posiciones por
 recinto, y, con un único altavoz desplazado entre posiciones, cinco por
 recinto *y por posición de altavoz*. No puede haber dos posiciones en el mismo
-plano respecto a los paramentos del recinto, y el conjunto no debe formar una
-retícula regular.
+plano respecto a los límites del recinto, y el conjunto no debe formar una
+retícula regular. Una posición fija es un micrófono en trípode sin nadie en
+el recinto, o con un operador presente, lo sostenga o no, cuyo tronco se
+mantiene al menos a la distancia de un brazo del micrófono (apartado 7.3.1).
+El apartado 7.6 fija las distancias mínimas, que deben superarse siempre que
+se pueda: 0,7 m entre posiciones fijas de micrófono, 0,5 m entre cualquier
+posición de micrófono y los límites del recinto, y 1,0 m entre cualquier
+posición de micrófono y el altavoz.
+
+**Un micrófono móvil en su lugar (apartados 7.4 y 7.5).** Las posiciones fijas
+pueden sustituirse por un micrófono motorizado en movimiento continuo: un
+círculo, o un barrido de 270° a 360° alrededor de un eje fijo, con un radio de
+0,7 m como mínimo, en un plano inclinado para cubrir gran parte del espacio
+permitido y a 10° como mínimo de cualquier superficie del recinto, con una
+duración de 15 s como mínimo por recorrido (apartado 7.4.1). O por un barrido
+manual a lo largo de una de las cuatro trayectorias de la Figura 1, a unos
+20°/s como máximo: un círculo de 270° a 360° con el brazo extendido, una
+hélice de al menos dos vueltas que sube desde 0,5 m sobre el suelo, una
+trayectoria de tipo cilíndrico trazada con una varilla de prolongación de 0,3 m a
+0,9 m o, donde el recinto no deja sitio para esas, tres semicírculos separados
+entre sí unos 45° a 60° (apartado 7.5). Con altavoces funcionando
+simultáneamente basta un recorrido o un barrido; con un único altavoz es uno
+por cada posición de altavoz, y el operador de un barrido manual se coloca en
+un sitio distinto para cada una (apartados 7.4.2 y 7.5.6). En caso de
+discrepancia, el resultado de referencia es el medido sin nadie en ninguno de
+los dos recintos (apartado 6).
+
+**Tiempos de promediado (apartado 7.7).** En cada posición fija, 6 s como
+mínimo en las bandas de 100 Hz a 400 Hz, 4 s como mínimo de 500 Hz a 5000 Hz y
+15 s como mínimo de 50 Hz a 80 Hz. Un micrófono móvil o un barrido manual
+promedian sobre un número entero de recorridos o trayectorias completos,
+durante 30 s como mínimo de 100 Hz a 5000 Hz y 60 s como mínimo de 50 Hz a
+80 Hz.
 
 <span id="correccion-por-ruido-de-fondo"></span>
 
 ### Corrección por ruido de fondo (apartado 9.2)
+
+**Antes de la corrección (apartado 9.1).** El ruido de fondo es todo lo que no
+es la señal: el sonido que llega de fuera del recinto, el ruido eléctrico del
+sistema de recepción, el accionamiento de un micrófono móvil y el operador.
+Quien se queda en el recinto receptor, junto a un micrófono fijo, sosteniendo
+uno o barriendo, tiene que buscar su propio ruido (ropa, calzado,
+articulaciones de brazos y rodillas) por al menos uno de tres medios: la
+historia temporal del nivel ponderado A con ponderación temporal Fast, la
+diferencia entre el máximo Fast y el nivel continuo equivalente en cada banda,
+o la escucha, donde no se lleve protección auditiva. El operador ha de moverse
+igual durante la medición del ruido de fondo que durante la de la señal, y un
+barrido manual sigue el mismo tipo de trayectoria en las dos. Los tiempos de
+promediado son como mínimo los del apartado 7.7, y más largos cuando el ruido
+de fondo no es estable y continuo. Para comprobar el ruido eléctrico, o la
+diafonía entre los sistemas de emisión y de recepción, sustituye el micrófono
+por un micrófono simulado o el altavoz por una impedancia equivalente.
 
 Mide otra vez el recinto receptor con la fuente apagada, en las mismas
 posiciones y con el mismo promediado, y compara banda a banda con el nivel
@@ -256,6 +319,8 @@ energía en la franja de margen de 10-15 dB en la que ISO 16283-1 no pide nada
 (hasta 0,458 dB con un margen de 10 dB), y, como actúa sobre el recinto
 receptor, eso acaba siendo aislamiento declarado de más, banda a banda, en $D$.
 Para niveles de campo usa la expresión de tres regímenes de arriba.
+
+<span id="promediado-sobre-posiciones-de-altavoz"></span>
 
 ### Promediado sobre posiciones de altavoz (Fórmula 6)
 
@@ -293,6 +358,49 @@ l2m = building.energy_average_level(np.vstack([l2a, l2b]), axis=0)
 naive = building.airborne_insulation(l1m, l2m, t2, area=10.0, volume=50.0)
 print(round(float(naive.dnt[0]), 1), building.weighted_rating(naive.dnt).rating)  # 43.0 43
 ```
+
+<span id="tiempo-de-reverberacion-del-recinto-receptor"></span>
+
+### El tiempo de reverberación del recinto receptor (apartado 10)
+
+Todas las normalizaciones de esta página necesitan el tiempo de reverberación
+del recinto receptor en cada banda, y el apartado 10 dice cómo se mide.
+ISO 16283-2 imprime el mismo apartado para la medición de impactos, así que lo
+que sigue vale para las dos.
+
+Mídelo por el método del ruido interrumpido o por el de la respuesta al impulso
+integrada, tal como los describen ISO 3382-2 e ISO 18233; se prefiere el
+método de ingeniería y se admite el de precisión (apartado 10.1). Evalúa el
+decaimiento desde 5 dB por debajo del nivel inicial, sobre 20 dB
+preferentemente, lo que hace de $T_{20}$ la magnitud preferente, y mantén el
+fondo del rango de evaluación al menos 10 dB por encima del ruido de fondo
+global. El altavoz está en una posición fija, cumple el requisito de
+directividad del Anexo A y radia una señal estacionaria de espectro continuo
+(apartado 10.2).
+
+Con **ruido interrumpido** cada banda necesita al menos seis decaimientos: una
+posición de altavoz como mínimo, con tres posiciones fijas de micrófono y dos
+decaimientos en cada una, o seis posiciones fijas y un decaimiento en cada
+una; un micrófono motorizado en movimiento continuo toma los seis a lo largo
+de su recorrido (apartado 10.5). Con la **respuesta al impulso integrada** los
+micrófonos son fijos, nunca móviles, sostenidos a mano ni de barrido, y una
+fuente impulsiva necesita al menos una posición de fuente y seis posiciones
+fijas de micrófono; el decaimiento es la integral en tiempo inverso de la
+respuesta al impulso al cuadrado (apartados 6 y 10.6). En los dos casos los
+seis se reducen a un valor por banda como permite el apartado 8 de ISO 3382-2:
+con la media de los tiempos de reverberación individuales o con el promedio de
+conjunto de los decaimientos.
+
+Un operador que estuvo en el recinto receptor mientras se medían los niveles
+está también en él para el tiempo de reverberación, al menos a la distancia de
+un brazo del micrófono (apartado 10.1).
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t20` evalúa ese rango
+de 20 dB sobre una respuesta al impulso; la adquisición está en
+[Medición de la respuesta al impulso](/phonometry/es/buildings/rooms/room-impulse-response/)
+y el análisis del decaimiento en
+[Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/). Un recinto receptor de
+menos de 25 m³ cambia las tres bandas más bajas, como dice la sección
+siguiente.
 
 <span id="recintos-pequenos-apartado-8"></span>
 
@@ -480,6 +588,110 @@ moqueta; véanse
 [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/buildings/design/insulation-prediction/)
 y
 [Predicción del comportamiento de capas elásticas](/phonometry/es/buildings/design/resilient-layers/).
+
+<span id="la-medicion-de-impactos"></span>
+
+### La medición de impactos (apartados 4, 7, 9 y 10 de ISO 16283-2:2020)
+
+`impact_insulation()` consume $L_\mathrm{i}$ por banda; igual que en el lado
+aéreo, la norma dice de dónde salen esos niveles.
+
+**Los instrumentos (apartado 4).** Las clases de los instrumentos, la
+comprobación con el calibrador en los dos extremos de cada sesión y la regla
+de 0,5 dB son las de [la medición a ruido aéreo](#la-medicion-iso-16283-1),
+frase por frase. La parte de impactos añade que la máquina de impactos cumple
+su Anexo A.
+
+**La máquina de impactos (apartado 7.2.2).** **Cuatro** posiciones como
+mínimo, repartidas al azar sobre el forjado ensayado, cada una a 0,5 m como
+mínimo de los bordes del forjado. Un forjado anisótropo, con vigas o nervios,
+puede necesitar más posiciones, y en él la línea de los martillos debería
+quedar a 45° de la dirección de las vigas o los nervios. El nivel puede variar
+después de arrancar la máquina, como ocurre cuando una superficie blanda o
+frágil cambia bajo los martillos: espera a que sea estable y, si no lo es al
+cabo de 5 min, mide durante un periodo bien definido e informa de ese periodo.
+Sobre un revestimiento de suelo blando la máquina tiene que cumplir los
+requisitos especiales del Anexo A, que también aconseja cómo montarla.
+
+**Micrófonos fijos (apartados 7.3.1, 7.3.2 y 7.6).** Las reglas son las que
+sigue la pelota de caucho en
+[Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/#la-medicion-in-situ):
+un trípode sin nadie en el recinto, o un operador cuyo tronco se mantiene al
+menos a la distancia de un brazo del micrófono; posiciones repartidas por el
+espacio permitido, sin dos en el mismo plano respecto a los límites del
+recinto y sin retícula regular. El recuento sigue a la máquina. El número de
+posiciones de micrófono es igual al de posiciones de máquina, o un múltiplo
+entero de él, y cada posición de máquina recibe el mismo número. Con cuatro o
+cinco posiciones de máquina, al menos dos mediciones para cada una, en dos
+posiciones de micrófono distintas; con seis o más, basta una medición para
+cada una, en una posición de micrófono distinta cada vez. Cuatro posiciones de
+máquina suponen así ocho mediciones como mínimo, y seis suponen seis como
+mínimo. Las distancias mínimas, que deben superarse siempre que se pueda, son
+0,7 m entre posiciones fijas de micrófono, 0,5 m entre cualquier posición de
+micrófono y los límites del recinto, y 1,0 m al elemento que la máquina
+excita, que para un forjado medido desde el recinto inferior es el techo del
+recinto receptor.
+
+**Tiempos de promediado (apartado 7.7).** Los de la parte de ruido aéreo: en
+cada posición fija, 6 s como mínimo en las bandas de 100 Hz a 400 Hz, 4 s como
+mínimo de 500 Hz a 5000 Hz y 15 s como mínimo de 50 Hz a 80 Hz; sobre un
+número entero de recorridos o trayectorias completos, 30 s como mínimo de
+100 Hz a 5000 Hz y 60 s como mínimo de 50 Hz a 80 Hz.
+
+**Un micrófono móvil en su lugar (apartados 7.4 y 7.5).** La máquina de
+impactos, al contrario que la pelota de caucho, puede medirse con un micrófono
+móvil. El recorrido motorizado es el de la parte de ruido aéreo: un círculo o
+un barrido de 270° a 360°, un radio de 0,7 m como mínimo, un plano a 10° como
+mínimo de cualquier superficie del recinto y 15 s como mínimo por recorrido
+(apartado 7.4.1). El barrido manual sigue las mismas cuatro trayectorias, un
+círculo, una hélice, una trayectoria de tipo cilíndrico o tres semicírculos, a
+unos 20°/s como máximo (apartado 7.5). Cada posición de máquina recibe al
+menos un recorrido o un barrido, y todas el mismo número (apartados 7.4.2 y
+7.5.2); con seis o más posiciones de máquina, el punto fijo del recorrido o
+del barrido puede cambiar de una a otra. Las dos partes difieren en un número.
+La hélice de ISO 16283-2:2020 termina a 0,5 m del techo como mínimo
+(apartado 7.5.5), un cambio que su prólogo enumera frente a la edición
+anterior, mientras que ISO 16283-1:2014 imprime para la misma trayectoria que
+termina a no más de 0,5 m del techo (apartado 7.5.3). En caso de discrepancia, el resultado de
+referencia es el medido sin nadie en el recinto receptor (apartado 6).
+
+**Combinar las posiciones de máquina (apartado 7.3.3).** Para cada posición de
+máquina, una tras otra, promedia en energía sus posiciones de micrófono
+(Fórmula (11)), corrige el resultado por ruido de fondo y forma
+$L'_{\mathrm{n}T,j}$, o $L'_{\mathrm{n},j}$. Después combina las $m$ posiciones con
+la Fórmula (7), o con la Fórmula (8) para $L'_\mathrm{n}$:
+
+$$
+L'_{\mathrm{n}T} = 10\log_{10}\left[\frac{1}{m}\sum_{j=1}^{m} 10^{L'_{\mathrm{n}T,j}/10}\right].
+$$
+
+Es un promedio en energía de niveles, con exponente **positivo**, no el
+promedio de factores de transmisión con exponente negativo que la
+[Fórmula (6)](#promediado-sobre-posiciones-de-altavoz) aplica al resultado
+aéreo. Las dos dejan que la peor posición pese más; el signo cambia porque en
+impactos el nivel alto es el malo y en ruido aéreo la diferencia de niveles
+alta es la buena. Todas las posiciones comparten el único tiempo de
+reverberación del recinto receptor, así que la Fórmula (7) es el promedio en
+energía de los $L_{\mathrm{i},j}$ corregidos seguido de una sola normalización: pasa
+a `impact_insulation()` un `li` 2D cuyas filas sean los niveles corregidos por
+ruido de fondo de cada posición de máquina y devuelve exactamente eso.
+
+**Ruido de fondo (apartados 9.1 y 9.2).** Lo que
+[Corrección por ruido de fondo](#correccion-por-ruido-de-fondo) dice de la
+medición a ruido aéreo vale aquí: la comprobación del ruido propio del
+operador, el mismo tipo de trayectoria para el ruido de fondo que para la
+señal, los tiempos de promediado del apartado 7.7 o más largos, y un micrófono
+simulado en lugar del micrófono para comprobar el ruido eléctrico. La
+Fórmula (17) es la Fórmula (14) con otro número, con los mismos tres
+regímenes: nada con un margen de 10 dB o más, la resta en energía entre 6 dB y
+10 dB, y la corrección fija de 1,3 dB, señalada en el informe, con 6 dB o
+menos. La expresión de tres regímenes de esa sección es la que hay que
+aplicar; la advertencia que allí se hace sobre
+`building.background_correction` vale también para los niveles de impacto.
+
+**El tiempo de reverberación (apartado 10).** Se mide como describe
+[El tiempo de reverberación del recinto receptor](#tiempo-de-reverberacion-del-recinto-receptor),
+con un altavoz que cumpla el Anexo B de esta parte.
 
 ### Parámetros de `impact_insulation()`
 
@@ -793,10 +1005,15 @@ dB; la corrección en sí son tres líneas de NumPy, escritas en [Corrección po
 ruido de fondo](#correccion-por-ruido-de-fondo) más arriba.
 (`building.background_correction` es la variante de *laboratorio* de ISO
 10140-4 y no coincide con los umbrales de campo.) Los propios requisitos de
-posición de la ISO 16283-1/-2 (los recuentos, las distancias y la colocación de
-[La medición](#la-medicion-iso-16283-1)) están documentados aquí y no se
+la ISO 16283-1/-2 sobre la medición (las clases de los instrumentos y la
+comprobación con el calibrador, los recuentos, las distancias, la colocación y
+los tiempos de promediado de [La medición](#la-medicion-iso-16283-1) y de
+[La medición de impactos](#la-medicion-de-impactos), y el procedimiento del
+apartado 10 para el tiempo de reverberación) están documentados aquí y no se
 comprueban en ninguna parte: el promediado en energía ocurre una vez que se
-proporcionan las posiciones, pero nada verifica cuántas se tomaron ni dónde. El
+proporcionan las posiciones, pero nada verifica cuántas se tomaron, dónde ni
+durante cuánto tiempo, y los tiempos de reverberación se toman tal como
+llegan. El
 procedimiento de baja frecuencia de [Recintos
 pequeños](/phonometry/es/buildings/insulation/low-frequency-procedure/) *sí* está implementado (el disparador
 de los 25 m³, la Fórmula (12), la Fórmula (13) y el tiempo de reverberación de

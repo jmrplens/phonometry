@@ -120,6 +120,14 @@ function repository(t) {
 			assert.equal(ran.status, 0, ran.stderr);
 			return git('rev-parse', 'HEAD');
 		},
+		/**
+		 * Start merging `branch` into the branch checked out, with the merge
+		 * left open, so that what is written next and `commit` make the merge
+		 * commit: two parents, and whatever the merge wrote itself.
+		 */
+		merge(branch, ...options) {
+			git('merge', '-q', '--no-ff', '--no-commit', ...options, branch);
+		},
 		/** Write `site/date-ignore-revs.txt`. */
 		ignore(...lines) {
 			writeFileSync(join(site, 'date-ignore-revs.txt'), `${lines.join('\n')}\n`);
@@ -815,6 +823,240 @@ test('the day a page was published is its first commit\'s day in UTC, as the day
 	assert.equal(ran.status, 0, ran.stderr);
 	assert.equal(ran.stdout.trim(), '2026-07-01');
 	assert.equal(day(await repo.dates(), 'late.mdx'), '2026-07-01');
+});
+
+// --- Histories with merges ------------------------------------------------
+//
+// `git log` writes no change for a merge commit unless it is asked to, so a
+// history read without asking sees a merge as a commit that changed nothing.
+// Each test here makes a branch, commits on it and on main, and merges it with
+// the merge left open, so that the merge commit holds a version of a file that
+// neither of its parents holds: one it wrote itself, or the two sides joined.
+
+/** A page whose body has two paragraphs far enough apart for git to join an edit of each. */
+const twoParagraphs = (first, second, options = {}) =>
+	page({ ...options, body: `${first}\n\nA line between.\n\nAnother line between.\n\nAnd a third.\n\n${second}\n` });
+
+test('a page a merge commit adds is dated by the merge, and one the merge moves unchanged keeps its date', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', page());
+	repo.write('moved.mdx', page({ title: 'Moved' }));
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.write('b.mdx', page({ title: 'B' }));
+	repo.commit(2, 'a page added on the side branch');
+	repo.git('checkout', '-q', 'main');
+	repo.write('a.mdx', page({ body: 'Edited on main.\n' }));
+	repo.commit(3);
+	repo.merge('side');
+	repo.write('merged.mdx', page({ title: 'Written in the merge' }));
+	repo.move('moved.mdx', 'here/moved.mdx');
+	repo.commit(4, 'the merge adds a page of its own and moves another');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'merged.mdx'), '2026-01-04', 'the page only the merge holds');
+	assert.equal(day(dates, 'here/moved.mdx'), '2026-01-01', 'a page the merge moved unchanged');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-02', 'a page the side branch added, which the merge took as it was');
+	assert.equal(day(dates, 'a.mdx'), '2026-01-03');
+});
+
+test('a page whose two sides a merge joined is dated by the merge, unless one side changed only its frontmatter', async (t) => {
+	const repo = repository(t);
+	repo.write('joined.mdx', twoParagraphs('First.', 'Second.'));
+	repo.write('described.mdx', twoParagraphs('First.', 'Second.'));
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.write('joined.mdx', twoParagraphs('First, edited on the side.', 'Second.'));
+	repo.write('described.mdx', twoParagraphs('First.', 'Second.', { description: 'Described on the side.' }));
+	repo.commit(2);
+	repo.git('checkout', '-q', 'main');
+	repo.write('joined.mdx', twoParagraphs('First.', 'Second, edited on main.'));
+	repo.write('described.mdx', twoParagraphs('First.', 'Second, edited on main.'));
+	repo.commit(3);
+	repo.merge('side');
+	repo.commit(4, 'the merge joins both sides of each page');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'joined.mdx'), '2026-01-04', 'a text neither side had until the merge');
+	// The merge's version differs from main's in the description alone, so its
+	// text is main's, and main's commit dates it.
+	assert.equal(day(dates, 'described.mdx'), '2026-01-03', 'the text main wrote, under the side branch\'s description');
+
+	// The docs job's clone has none of the old versions, and reads a merge's
+	// the way it reads any commit's: fetched in a round, never one by one.
+	repo.git('config', 'uploadpack.allowFilter', 'true');
+	repo.git('config', 'uploadpack.allowAnySHA1InWant', 'true');
+	const clone = join(repo.root, 'blobless');
+	const ran = spawnSync('git', ['clone', '-q', '--filter=blob:none', `file://${repo.work}`, clone], { env: repo.env, encoding: 'utf8' });
+	assert.equal(ran.status, 0, ran.stderr);
+	const fromClone = await loadContentDates({ siteRoot: join(clone, 'site') });
+	assert.equal(day(fromClone, 'joined.mdx'), '2026-01-04');
+	assert.equal(day(fromClone, 'described.mdx'), '2026-01-03');
+});
+
+test('a count, a text and a line move with a merge that made a version neither side had', async (t) => {
+	const registry = (...entries) => ['# Errata', '', ...entries.flatMap((entry) => [`## ${entry}`, '', 'What the source prints.', ''])].join('\n');
+	const fiches = (first, second) => page({ body: `<ReportPreview name="one" title="${first}" />\n\nBetween.\n\nMore.\n\nAnd more.\n\n<ReportPreview name="two" title="${second}" />\n` });
+	const standard = { type: 'standard', organization: 'International Organization for Standardization', year: 2000, title: 'Acoustics, ISO 1:2000', designation: 'ISO 1:2000' };
+	const check = (id) => ({ id, domain: 'd', reference: { documents: [{ kind: 'standard', designation: 'ISO 1', edition: '2000' }] } });
+	const checks = (...ids) => `${JSON.stringify({ domains: [{ id: 'd', title: 'Domain D' }], checks: ids.map(check) }, null, 1)}\n`;
+	const cases = [
+		{
+			what: 'a count of lines',
+			entry: { pages: ['site/src/content/docs/a.mdx'], counts: { errataEntries: { file: 'docs/ERRATA.md', lines: '^## .+$' } } },
+			base: (repo) => repo.writeFile('docs/ERRATA.md', registry('One', 'Two')),
+			side: (repo) => repo.writeFile('docs/ERRATA.md', registry('Zero', 'One', 'Two')),
+			main: (repo) => repo.writeFile('docs/ERRATA.md', registry('One', 'Two', 'Three')),
+			merged: () => {},
+		},
+		{
+			what: 'a text',
+			entry: { pages: ['site/src/content/docs/a.mdx'], texts: { reportsByArea: { files: ENGLISH_GUIDES, pattern: FICHE } } },
+			base: (repo) => repo.write('signals/guide.mdx', fiches('One', 'Two')),
+			side: (repo) => repo.write('signals/guide.mdx', fiches('One, retitled', 'Two')),
+			main: (repo) => repo.write('signals/guide.mdx', fiches('One', 'Two, retitled')),
+			merged: () => {},
+		},
+		{
+			what: 'a count of files',
+			entry: { pages: ['site/src/content/docs/a.mdx'], counts: { fiches: [':(glob)site/fiches/*.pdf'] } },
+			base: (repo) => repo.writeFile('site/fiches/one.pdf', 'one\n'),
+			side: (repo) => repo.writeFile('site/fiches/one.pdf', 'one, redrawn on the side\n'),
+			main: (repo) => repo.writeFile('site/fiches/notes.txt', 'not counted\n'),
+			merged: (repo) => repo.writeFile('site/fiches/two.pdf', 'a fiche the merge adds\n'),
+		},
+		{
+			what: 'a line',
+			entry: { pages: ['site/src/content/docs/'], counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } } },
+			base: (repo) => {
+				repo.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+				repo.writeFile('docs/report.json', checks('d/1', 'd/5'));
+			},
+			side: (repo) => repo.writeFile('docs/report.json', checks('d/0', 'd/1', 'd/5')),
+			main: (repo) => repo.writeFile('docs/report.json', checks('d/1', 'd/5', 'd/9')),
+			merged: () => {},
+		},
+	];
+	const dated = {};
+	for (const { what, entry, base, side, main, merged } of cases) {
+		const repo = repository(t);
+		repo.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`] }));
+		base(repo);
+		repo.sources(entry);
+		repo.commit(1);
+		repo.git('checkout', '-q', '-b', 'side');
+		side(repo);
+		repo.commit(2);
+		repo.git('checkout', '-q', 'main');
+		main(repo);
+		repo.commit(3);
+		repo.merge('side');
+		merged(repo);
+		repo.commit(4, `the merge makes ${what} neither side had`);
+		dated[what] = day(await repo.dates(), 'a.mdx');
+	}
+	assert.deepEqual(dated, Object.fromEntries(cases.map(({ what }) => [what, '2026-01-04'])));
+});
+
+test('the commits to the report read for the line are those made after the component in the history, not beside it on another branch', async (t) => {
+	// The component is added on a branch while main adds a check: main's commit
+	// changed no line, since main drew none, and the merge that brings the line
+	// takes main's report unchanged.
+	const standard = { type: 'standard', organization: 'International Organization for Standardization', year: 2000, title: 'Acoustics, ISO 1:2000', designation: 'ISO 1:2000' };
+	const check = (id) => ({ id, domain: 'd', reference: { documents: [{ kind: 'standard', designation: 'ISO 1', edition: '2000' }] } });
+	const checks = (...ids) => `${JSON.stringify({ domains: [{ id: 'd', title: 'Domain D' }], checks: ids.map(check) }, null, 1)}\n`;
+	const repo = repository(t);
+	repo.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`] }));
+	repo.writeFile('docs/report.json', checks('d/1'));
+	repo.sources({ pages: ['site/src/content/docs/'], counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } } });
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+	repo.commit(2, 'the line is drawn on the side branch');
+	repo.git('checkout', '-q', 'main');
+	repo.writeFile('docs/report.json', checks('d/1', 'd/2'));
+	repo.commit(3, 'a check more on main, which draws no line');
+	repo.merge('side');
+	repo.commit(4, 'the line arrives with the merge');
+	assert.equal(day(await repo.dates(), 'a.mdx'), '2026-01-01');
+
+	// The mirror: main draws the line, and a branch forked before the
+	// component adds the check. The merge takes the branch's report, so the
+	// line main showed changes at the merge, which no commit that drew a line
+	// made before it: the merge dates the page.
+	const mirror = repository(t);
+	mirror.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`] }));
+	mirror.writeFile('docs/report.json', checks('d/1'));
+	mirror.sources({ pages: ['site/src/content/docs/'], counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } } });
+	mirror.commit(1);
+	mirror.git('checkout', '-q', '-b', 'side');
+	mirror.writeFile('docs/report.json', checks('d/1', 'd/2'));
+	mirror.commit(3, 'a check more on a branch forked before the component');
+	mirror.git('checkout', '-q', 'main');
+	mirror.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+	mirror.commit(2, 'the line is drawn on main');
+	mirror.merge('side');
+	mirror.commit(4, 'the check arrives under the line main draws');
+	assert.equal(day(await mirror.dates(), 'a.mdx'), '2026-01-04');
+});
+
+test('a page a branch moves unchanged while main edits it keeps the date of the edit the merge carries', async (t) => {
+	// git's merge writes the moved page with main's text: the merge holds a
+	// version main held at the old path, so main's edit dates it, as a move
+	// with no merge would.
+	const repo = repository(t);
+	repo.write('a.mdx', page({ body: 'l1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\n' }));
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.move('a.mdx', 'b.mdx');
+	repo.commit(2, 'the side branch moves the page unchanged');
+	repo.git('checkout', '-q', 'main');
+	repo.write('a.mdx', page({ body: 'l1\nl2\nl3\nl4\nl5\nl6\nl7\nl8, edited on main\n' }));
+	const edit = repo.commit(3, 'main edits it');
+	repo.merge('side');
+	repo.commit(5, 'the merge writes nothing of its own');
+	assert.equal(repo.git('rev-parse', `${edit}:site/src/content/docs/a.mdx`), repo.git('rev-parse', 'HEAD:site/src/content/docs/b.mdx'));
+	assert.equal(day(await repo.dates(), 'b.mdx'), '2026-01-03');
+});
+
+test('a merge that keeps one side\'s version dates the page and the text by that side\'s history, not by a change it threw away', async (t) => {
+	// The side branch changes later (day 3) than main (day 2), and the merge
+	// keeps main's version (-X ours) while it takes the side's other files, so
+	// the merge holds a tree neither side held and git reads both sides.
+	const fiches = (title) => page({ body: `<ReportPreview name="one" title="${title}" />\n` });
+	const registry = (...entries) => ['# Errata', '', ...entries.flatMap((entry) => [`## ${entry}`, '', 'What the source prints.', ''])].join('\n');
+	const repo = repository(t);
+	repo.write('p.mdx', page({ body: 'Base text.\n' }));
+	repo.write('q.mdx', page({ body: 'Other.\n' }));
+	repo.write('a.mdx', page());
+	repo.write('e.mdx', page());
+	repo.write('signals/guide.mdx', fiches('One'));
+	repo.write('signals/other.mdx', page({ body: 'Other guide.\n' }));
+	repo.writeFile('docs/ERRATA.md', registry('One'));
+	repo.writeFile('docs/notes.md', 'Notes.\n');
+	repo.sources(
+		{ pages: ['site/src/content/docs/a.mdx'], texts: { reportsByArea: { files: ENGLISH_GUIDES, pattern: FICHE } } },
+		{ pages: ['site/src/content/docs/e.mdx'], counts: { errataEntries: { file: 'docs/ERRATA.md', lines: '^## .+$' } } },
+	);
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.write('p.mdx', page({ body: 'Side text.\n' }));
+	repo.write('q.mdx', page({ body: 'Other, from the side.\n' }));
+	repo.write('signals/guide.mdx', fiches('One, retitled on the side'));
+	repo.write('signals/other.mdx', page({ body: 'Other guide, from the side.\n' }));
+	repo.writeFile('docs/ERRATA.md', registry('One', 'Two', 'Three'));
+	repo.writeFile('docs/notes.md', 'Notes, from the side.\n');
+	repo.commit(3, 'the side branch, later');
+	repo.git('checkout', '-q', 'main');
+	repo.write('p.mdx', page({ body: 'Main text.\n' }));
+	repo.write('signals/guide.mdx', fiches('One, retitled on main'));
+	repo.writeFile('docs/ERRATA.md', registry('One', 'Two'));
+	repo.commit(2, 'main, earlier');
+	repo.merge('side', '-X', 'ours');
+	repo.commit(4, 'the merge keeps main\'s version of what both changed');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'p.mdx'), '2026-01-02', 'a page whose text the merge took from main');
+	assert.equal(day(dates, 'q.mdx'), '2026-01-03', 'a page the merge took from the side');
+	assert.equal(day(dates, 'a.mdx'), '2026-01-02', 'a text whose match the merge took from main');
+	assert.equal(day(dates, 'e.mdx'), '2026-01-02', 'a count of lines the merge took from main');
 });
 
 // --- The site's own list of pages built from other files -----------------

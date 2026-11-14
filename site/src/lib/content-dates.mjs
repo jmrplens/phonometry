@@ -24,7 +24,11 @@
  * history is read from trees alone: `--raw` names each changed file with its
  * old and new blob ids, and `--no-renames` keeps git from looking for renames
  * by content, which needs the blobs (a move with the same blob is followed
- * here by its id). Only the blob pairs that decide a date are read, fetched
+ * here by its id). Each commit comes with the commits it follows
+ * (`--parents`), and a merge with what it changed from each of them, so every
+ * reader walks back from HEAD along the versions HEAD holds, through a merge
+ * to the parent whose version it kept, and never reads a side's change the
+ * merge threw away. Only the blob pairs that decide a date are read, fetched
  * in one request per round: a page is dated by its newest change most of the
  * time, and a page whose newest changes were frontmatter-only asks for twice
  * as many pairs in each round that follows, so a run of n such commits costs
@@ -34,10 +38,10 @@
  * rounds, until one changed the number, and a text reads the versions of its
  * files the same way, until one changed a match. The "Verified by" line of
  * each guide is read the same way from the versions of the conformance
- * report committed since the component that draws it was added, joined with
- * the references the pages cite now (src/lib/page-references.mjs), until
- * every page that shows one is dated or older than its own date. Every git
- * call streams its output,
+ * report that hold the component that draws it, joined with the references
+ * the pages cite now (src/lib/page-references.mjs), until every page that
+ * shows one is dated or older than its own date. Every git call streams its
+ * output,
  * and any failure throws: a build that cannot read the dates stops instead
  * of publishing guesses.
  *
@@ -148,33 +152,73 @@ function nulFields(onField) {
 }
 
 /**
- * The history of some paths from trees alone: each commit, newest first, with
- * the files it changed under them and their old and new blob ids.
+ * One changed file of a commit from one of its parents, read from the raw line
+ * git writes for it: `:`, the old and new mode, the old and new blob and the
+ * status, `A` for a file the parent did not hold, `D` for one the commit
+ * deleted, `M` for one it changed and `T` for one whose type it changed.
+ *
+ * @param {string} meta The raw line, without its path.
+ * @returns {{ status: string, from: string, to: string }} `from` is the blob
+ *   the parent held, and `to` the one the commit holds.
+ */
+function parseChange(meta) {
+  const [, , from, to, letters] = meta.slice(1).split(' ');
+  return { status: letters[0], from, to };
+}
+
+/**
+ * @typedef {{ status: string, from: string, to: string }} Change
+ * @typedef {{ sha: string, date: Date, parents: string[], diffs: Array<Map<string, Change>> }} Commit
+ *   `diffs[i]` is what the commit changed from `parents[i]`, by path; a commit
+ *   with no parent has one, every path it holds, added.
+ * @typedef {{ head: Commit | null, commits: Map<string, Commit>, order: Commit[] }} History
+ *   `head` stands for HEAD: the newest commit that changed the paths on the
+ *   way to it, whose version of them is HEAD's. `order` lists every commit
+ *   before the commits it follows.
+ */
+
+/**
+ * The history of some paths from trees alone: each commit that changed them,
+ * the commits it follows and what it changed from each.
+ *
+ * git simplifies the history to the paths. A commit that changed none of them
+ * is left out, and the commit after it follows the commit before it in its
+ * place (`--parents`), whose version of the paths is the same. A merge that
+ * holds the paths as one parent held them is left out with the commits only
+ * the other parents reached, since none of them made what HEAD holds. A merge
+ * that holds them as no parent did, one it wrote itself or the two sides
+ * joined, is kept, and what it changed from each parent is read on its own
+ * (`git diff-tree`), so a reader can tell, path by path, which parent's
+ * version it holds and follow that parent's history and no other. Without
+ * that, a merge that kept one side's version of a page while it took the
+ * other side's other files left the discarded side's newer edit to date the
+ * page.
  *
  * @param {string} repo
  * @param {string[]} pathspecs
- * @param {string} [since] A commit: only the commits HEAD reaches and it does
- *   not are read, those made after it whatever their dates say.
- * @returns {Promise<Array<{ sha: string, date: Date, changes: Array<{ status: string, from: string, to: string, path: string }> }>>}
+ * @returns {Promise<History>}
  */
-async function readHistory(repo, pathspecs, since) {
-  const commits = [];
+async function readHistory(repo, pathspecs) {
+  /** @type {Commit[]} */
+  const order = [];
   let meta = null; // The raw line waiting for its path.
-  let expectDate = false;
+  let expect = null; // The field of the commit line that comes next.
   const fields = nulFields((field) => {
     const token = field.replace(/^\n/, '');
-    if (expectDate) {
-      commits.at(-1).date = new Date(token);
-      expectDate = false;
+    if (expect === 'parents') {
+      order.at(-1).parents = token === '' ? [] : token.split(' ');
+      expect = 'date';
+    } else if (expect === 'date') {
+      order.at(-1).date = new Date(token);
+      expect = null;
     } else if (meta !== null) {
-      const [, , from, to, status] = meta.slice(1).split(' ');
-      commits.at(-1).changes.push({ status: status[0], from, to, path: token });
+      order.at(-1).diffs[0].set(token, parseChange(meta));
       meta = null;
     } else if (token.startsWith(':')) {
       meta = token;
     } else if (FULL_SHA.test(token)) {
-      commits.push({ sha: token, date: null, changes: [] });
-      expectDate = true;
+      order.push({ sha: token, date: null, parents: [], diffs: [new Map()] });
+      expect = 'parents';
     } else if (token !== '') {
       throw new Error(`git log: unexpected field "${token.slice(0, 80)}"`);
     }
@@ -186,24 +230,160 @@ async function readHistory(repo, pathspecs, since) {
       'core.quotePath=false',
       'log',
       '--no-show-signature',
-      '--format=%H%x00%cI',
+      '--format=%H%x00%P%x00%cI',
       '--raw',
+      '--diff-merges=off',
       '--no-abbrev',
       '--no-renames',
+      '--topo-order',
+      '--parents',
       '-z',
-      ...(since === undefined ? [] : [`${since}..HEAD`]),
       '--',
       ...pathspecs,
     ],
     { onData: (chunk) => fields.push(chunk) },
   );
   fields.end();
-  for (const commit of commits) {
+  for (const commit of order) {
     if (!(commit.date instanceof Date) || Number.isNaN(commit.date.getTime())) {
       throw new Error(`git log: no committer date for ${commit.sha}`);
     }
   }
-  return commits;
+  const merges = order.filter((commit) => commit.parents.length > 1);
+  if (merges.length > 0) await readMergeDiffs(repo, pathspecs, merges);
+  const commits = new Map(order.map((commit) => [commit.sha, commit]));
+  const followed = new Set(order.flatMap((commit) => commit.parents));
+  for (const sha of followed) {
+    if (!commits.has(sha)) throw new Error(`git log: ${sha} is a parent no commit of the history is. A damaged clone?`);
+  }
+  const heads = order.filter((commit) => !followed.has(commit.sha));
+  if (heads.length > 1) throw new Error(`git log: the history has ${heads.length} ends, ${heads[0].sha} and ${heads[1].sha}, not one`);
+  return { head: heads[0] ?? null, commits, order };
+}
+
+/**
+ * What each merge changed from each of its parents, read in one `git
+ * diff-tree` (`<merge> <parent>` on each line diffs the parent to the merge):
+ * every merge's `diffs`, one per parent, in its parents' order.
+ *
+ * @param {string} repo
+ * @param {string[]} pathspecs
+ * @param {Commit[]} merges
+ */
+async function readMergeDiffs(repo, pathspecs, merges) {
+  const pairs = merges.flatMap((merge) => merge.parents.map((parent, index) => ({ merge, parent, index })));
+  for (const merge of merges) merge.diffs = merge.parents.map(() => new Map());
+  let block = -1;
+  let meta = null;
+  const fields = nulFields((field) => {
+    const token = field.replace(/^\n/, '');
+    if (meta !== null) {
+      const { merge, index } = pairs[block];
+      merge.diffs[index].set(token, parseChange(meta));
+      meta = null;
+    } else if (token.startsWith(':')) {
+      if (block < 0) throw new Error('git diff-tree: a change before any commit');
+      meta = token;
+    } else if (FULL_SHA.test(token)) {
+      block += 1;
+      if (pairs[block]?.merge.sha !== token) throw new Error(`git diff-tree: ${token} out of turn`);
+    } else if (token !== '') {
+      throw new Error(`git diff-tree: unexpected field "${token.slice(0, 80)}"`);
+    }
+  });
+  await git(
+    repo,
+    ['-c', 'core.quotePath=false', 'diff-tree', '--stdin', '--always', '-r', '--raw', '--no-abbrev', '--no-renames', '-z', '--', ...pathspecs],
+    { input: pairs.map(({ merge, parent }) => `${merge.sha} ${parent}\n`).join(''), onData: (chunk) => fields.push(chunk) },
+  );
+  fields.end();
+  if (block !== pairs.length - 1) throw new Error(`git diff-tree: ${block + 1} of ${pairs.length} diffs of merges read`);
+}
+
+/**
+ * Walk one line of a history back, a step at a time, reading the blobs a step
+ * needs in rounds that each read ahead twice as far as the last, so the usual
+ * walk, which stops at its first step, costs one request.
+ *
+ * @template S
+ * @param {S} state Where the walk starts.
+ * @param {(state: S) => { next: S } | { stop: Commit | null } | { wants: string[], guess: S | null }} step
+ *   One step back: on to `next`; a stop at the commit that made the version
+ *   the walk follows, or `null` once the walk runs past the first commit with
+ *   nothing made; or the blobs it needs read before it can tell, with where it
+ *   would go on if the commit made nothing (`guess`), to read ahead along.
+ * @param {(oids: string[]) => Promise<void>} read Reads blobs into what `step` reads them from.
+ * @param {{ size: number }} budget How many steps that need blobs a round reads
+ *   for; doubled by each round, and shared by the walks of one reader.
+ * @returns {Promise<Commit | null>}
+ */
+async function followLine(state, step, read, budget) {
+  for (;;) {
+    const result = step(state);
+    if ('next' in result) {
+      state = result.next;
+      continue;
+    }
+    if ('stop' in result) return result.stop;
+    const wanted = new Set(result.wants);
+    let ahead = result.guess;
+    for (let asked = 1; ahead !== null && asked < budget.size; ) {
+      const further = step(ahead);
+      if ('next' in further) ahead = further.next;
+      else if ('stop' in further) break;
+      else {
+        for (const oid of further.wants) wanted.add(oid);
+        ahead = further.guess;
+        asked += 1;
+      }
+    }
+    await read([...wanted]);
+    budget.size *= 2;
+  }
+}
+
+/**
+ * A step of a walk that follows what some files read, `value` of each blob,
+ * back along the line of versions HEAD holds: on to the first parent whose
+ * version reads as the commit's, a file at a time (a file a parent did not
+ * hold, or one the commit deleted, reads as `value` of no blob), or a stop at
+ * a commit no parent's version reads as. A commit with no parent made what it
+ * reads unless that is what no file reads.
+ *
+ * @param {History} history
+ * @param {(oid: string) => unknown} value `undefined` for a blob not read yet.
+ * @returns {(commit: Commit) => ReturnType<Parameters<typeof followLine>[1]>}
+ */
+function valueStep(history, value) {
+  return (commit) => {
+    const unread = [];
+    for (const [index, diff] of commit.diffs.entries()) {
+      let same = true;
+      for (const change of diff.values()) {
+        const before = value(change.from);
+        const after = value(change.to);
+        if (before === undefined || after === undefined) {
+          for (const oid of [change.from, change.to]) if (value(oid) === undefined) unread.push(oid);
+          same = undefined;
+          continue;
+        }
+        if (before !== after) {
+          same = false;
+          break;
+        }
+      }
+      if (same === undefined) {
+        // The parents are read in order, so this one has to be told first.
+        for (const later of commit.diffs.slice(index + 1)) {
+          for (const change of later.values()) for (const oid of [change.from, change.to]) if (value(oid) === undefined) unread.push(oid);
+        }
+        const parent = commit.parents[index];
+        return { wants: [...new Set(unread)], guess: parent === undefined ? null : history.commits.get(parent) };
+      }
+      if (same) return commit.parents.length === 0 ? { stop: null } : { next: history.commits.get(commit.parents[index]) };
+    }
+    return { stop: commit };
+  };
 }
 
 /**
@@ -285,14 +465,14 @@ async function readBlobs(repo, oids) {
  * The date each committed page last changed, keyed by its path relative to
  * the repository.
  *
- * @param {{ repo: string, pathspec: string, ignore: Set<string>, pages: string[] }} options
+ * @param {{ repo: string, pathspec: string, ignore: Set<string>, pages: string[], heads: Map<string, string> }} options
+ *   `heads` is the blob each page has at HEAD.
  * @returns {Promise<{ dates: Map<string, Date>, rounds: number, blobs: number }>}
  */
-async function resolveDates({ repo, pathspec, ignore, pages }) {
+async function resolveDates({ repo, pathspec, ignore, pages, heads }) {
   const history = await readHistory(repo, [pathspec]);
 
-  const touched = new Set(history.map((commit) => commit.sha));
-  const stale = [...ignore].filter((sha) => !touched.has(sha));
+  const stale = [...ignore].filter((sha) => !history.commits.has(sha));
   if (stale.length > 0) {
     throw new Error(
       `${IGNORE_REVS} lists ${stale.join(', ')}, which changed no page of ${pathspec}: ` +
@@ -300,66 +480,105 @@ async function resolveDates({ repo, pathspec, ignore, pages }) {
     );
   }
 
-  /** path -> [{ index, change }], newest first. */
-  const byPath = new Map();
-  history.forEach((commit, index) => {
-    for (const change of commit.changes) {
-      if (!byPath.has(change.path)) byPath.set(change.path, []);
-      byPath.get(change.path).push({ index, change });
+  /** For each diff, the path each blob it deleted stood at: where a page it added with that blob came from. */
+  const deletedAt = new WeakMap();
+  const originOf = (diff, blob) => {
+    if (!deletedAt.has(diff)) {
+      deletedAt.set(diff, new Map([...diff].filter(([, change]) => change.status === 'D').map(([path, change]) => [change.from, path])));
     }
-  });
+    return deletedAt.get(diff).get(blob);
+  };
 
-  /** The page a deleted blob came from, per commit: for exact renames. */
-  const deleted = history.map(
-    (commit) =>
-      new Map(commit.changes.filter((c) => c.status === 'D').map((c) => [c.from, c.path])),
-  );
+  /**
+   * What each parent of a commit held of a page the commit holds at `path`
+   * as `blob`: the same version (`same`), at that path or, moved unchanged,
+   * at the one it came from; another version at the path (`changed`); or no
+   * version the commit could have kept (`absent`: a page it created, or one
+   * whose type it changed).
+   */
+  const sidesOf = (commit, path, blob) =>
+    commit.diffs.map((diff) => {
+      const change = diff.get(path);
+      if (change === undefined) return { kind: 'same', path, blob };
+      if (change.status === 'M') return { kind: 'changed', path, blob: change.from };
+      if (change.status === 'A') {
+        const origin = originOf(diff, blob);
+        if (origin !== undefined) return { kind: 'same', path: origin, blob };
+      }
+      return { kind: 'absent' };
+    });
 
   const dates = new Map();
   const texts = new Map();
 
+  /** Move a walk to the parent `index` of `commit`, at that parent's version of the page. */
+  const follow = (state, commit, index, side) => {
+    state.sha = commit.parents[index];
+    state.path = side.path;
+    state.blob = side.blob;
+  };
+
   /**
    * Walk a page back from where `state` stands, moving `state` along, until a
-   * commit dates it. A change whose blobs are not read yet goes to `unknown`,
-   * which says whether to pass over it as if it changed only frontmatter
-   * (true) or to stop in front of it (false, and the walk returns null).
+   * commit dates it. A change whose blobs are not read yet goes to `unknown`
+   * with the blobs it needs, which says whether to pass over it as if it
+   * changed only frontmatter (true) or to stop in front of it (false, and the
+   * walk returns null).
+   *
+   * The walk follows the versions of the page HEAD holds, one commit at a
+   * time, and never another side's. A commit with one parent dates the page
+   * unless that parent held the same text: the same blob, the same blob at
+   * another path (a page moved unchanged, whose history carries on there), or
+   * a blob that differs in frontmatter alone. A merge that holds a version of
+   * the page a parent held, at the page's path or moved there, follows that
+   * parent, the first such in its parents' order, and leaves the other sides
+   * and their changes behind, however much newer, since none of them is the
+   * text the page shows. A merge that holds a version no parent held dates
+   * the page, unless one parent's version differs from it in frontmatter
+   * alone, whose history then dates it.
    */
   const walk = (state, unknown) => {
     for (;;) {
-      const entry = (byPath.get(state.path) ?? [])[state.at];
-      if (entry === undefined) {
+      const commit = history.commits.get(state.sha);
+      if (commit === undefined) {
         throw new Error(
           `content dates: the history of ${state.page} (followed to ${state.path}) ends ` +
             'without the commit that created it. A damaged clone?',
         );
       }
-      const { index, change } = entry;
-      const commit = history[index];
-      state.at += 1;
-      if (index <= state.after) continue; // Newer than the move followed: another file.
-      if (change.status === 'D') continue;
-      if (change.status === 'A') {
-        const origin = deleted[index].get(change.to);
-        if (origin === undefined) return commit.date;
-        // Moved unchanged: carry on at the old address, with older commits only.
-        state.path = origin;
-        state.after = index;
-        state.at = 0;
+      if (commit.parents.length === 0) return commit.date;
+      const sides = sidesOf(commit, state.path, state.blob);
+      const kept = sides.findIndex((side) => side.kind === 'same');
+      if (kept !== -1) {
+        follow(state, commit, kept, sides[kept]);
         continue;
       }
-      if (change.status !== 'M') return commit.date; // A type change, say: it counts.
-      if (ignore.has(commit.sha) || change.from === change.to) continue;
-      if (!texts.has(change.from) || !texts.has(change.to)) {
-        if (unknown(change)) continue;
-        state.at -= 1; // Come back to this change once its blobs are read.
-        return null;
+      // The parents that held another version of the page here: the ones whose text it may keep.
+      const held = sides.flatMap((side, index) => (side.kind === 'changed' ? [{ ...side, index }] : []));
+      if (held.length === 0) return commit.date; // Created here, or a type change: it counts.
+      if (ignore.has(commit.sha)) {
+        follow(state, commit, held[0].index, held[0]);
+        continue;
       }
-      if (!frontmatterOnly(texts.get(change.from), texts.get(change.to))) return commit.date;
+      const needed = [state.blob, ...held.map(({ blob }) => blob)];
+      if (needed.some((oid) => !texts.has(oid))) {
+        if (unknown(needed)) {
+          follow(state, commit, held[0].index, held[0]);
+          continue;
+        }
+        return null; // Come back to this commit once its blobs are read.
+      }
+      const text = held.find(({ blob }) => frontmatterOnly(texts.get(blob), texts.get(state.blob)));
+      if (text === undefined) return commit.date;
+      follow(state, commit, text.index, text);
     }
   };
 
+  if (history.head === null) {
+    throw new Error(`content dates: no commit of the history changed ${pathspec}, which HEAD holds. A damaged clone?`);
+  }
   /** Pages still walking: where each one is in its history. */
-  let walking = pages.map((page) => ({ page, path: page, at: 0, after: -1 }));
+  let walking = pages.map((page) => ({ page, sha: history.head.sha, path: page, blob: heads.get(page) }));
   let rounds = 0;
   while (walking.length > 0) {
     // Most pages are dated by their newest change; the few with a run of
@@ -377,8 +596,8 @@ async function resolveDates({ repo, pathspec, ignore, pages }) {
       waiting.push(state);
       let pairs = 0;
       try {
-        walk({ ...state }, (change) => {
-          for (const oid of [change.from, change.to]) if (!texts.has(oid)) wanted.add(oid);
+        walk({ ...state }, (needed) => {
+          for (const oid of needed) if (!texts.has(oid)) wanted.add(oid);
           pairs += 1;
           return pairs < budget;
         });
@@ -421,48 +640,42 @@ async function filesAtHead(repo, pathspecs) {
 const NO_BLOB = /^0+$/;
 
 /**
- * The date a count of the lines of one file last changed: the newest commit
- * whose version of the file has a different number of matching lines from
- * the version before it. A rewrap or an edit inside an entry leaves the
- * number the page shows, and so its date. The versions are read newest
- * first, in rounds that each ask for twice as many commits as the last, so
- * the usual case, where the newest commit to the file is the one that
- * changed the count, costs one request for one version.
+ * The date a count of the lines of one file last changed: the commit that
+ * made the number HEAD's version has, walking back along the versions HEAD
+ * holds, the first whose version has a different number of matching lines
+ * from every parent's. A rewrap or an edit inside an entry leaves the number
+ * the page shows, and so its date. The versions are read newest first, in
+ * rounds that each read twice as far ahead as the last, so the usual case,
+ * where the newest commit to the file is the one that changed the count,
+ * costs one request for one version.
  *
  * @param {string} repo
  * @param {{ file: string, lines: string }} count
  * @returns {Promise<Date | undefined>}
  */
 async function lineCountDate(repo, { file, lines }) {
-  const changes = (await readHistory(repo, [file])).flatMap((commit) =>
-    commit.changes.filter((change) => change.path === file).map((change) => ({ date: commit.date, change })),
-  );
+  const history = await readHistory(repo, [file]);
+  if (history.head === null) return undefined;
   const pattern = new RegExp(lines, 'gm');
   const counted = new Map();
   const count = (oid) => (NO_BLOB.test(oid) ? 0 : counted.get(oid));
-  for (let next = 0, budget = 1; next < changes.length; next += budget, budget *= 2) {
-    const batch = changes.slice(next, next + budget);
-    const wanted = [...new Set(batch.flatMap(({ change }) => [change.from, change.to]))].filter(
-      (oid) => !NO_BLOB.test(oid) && !counted.has(oid),
-    );
-    if (wanted.length > 0) {
-      for (const [oid, text] of await readBlobs(repo, wanted)) counted.set(oid, text.match(pattern)?.length ?? 0);
-    }
-    const moved = batch.find(({ change }) => count(change.from) !== count(change.to));
-    if (moved !== undefined) return moved.date;
-  }
-  return undefined;
+  const read = async (oids) => {
+    for (const [oid, text] of await readBlobs(repo, oids)) counted.set(oid, text.match(pattern)?.length ?? 0);
+  };
+  const made = await followLine(history.head, valueStep(history, count), read, { size: 1 });
+  return made?.date;
 }
 
 /**
- * The date a text a page shows of other files last changed: the newest
- * commit that changed a match of the pattern in one of the files, each
- * match read with every run of white space as one space, so a rewrap inside
- * a match leaves the text, and so does an edit anywhere else in the file. A
- * file added or deleted goes from no match or to none, so a guide moved to
- * another folder, which moves its line to another heading of the index,
- * moves the page. The versions are read newest first, in the same doubling
- * rounds as a count of lines, so the usual case costs one request.
+ * The date a text a page shows of other files last changed: the commit that
+ * made the text HEAD's versions show, walking back along them, the first that
+ * changed a match of the pattern in one of the files from every parent's
+ * version, each match read with every run of white space as one space, so a
+ * rewrap inside a match leaves the text, and so does an edit anywhere else in
+ * the file. A file added or deleted goes from no match or to none, so a guide
+ * moved to another folder, which moves its line to another heading of the
+ * index, moves the page. The versions are read newest first, in the same
+ * doubling rounds as a count of lines, so the usual case costs one request.
  *
  * @param {string} repo
  * @param {{ files: string[], pattern: string }} text
@@ -470,23 +683,17 @@ async function lineCountDate(repo, { file, lines }) {
  */
 async function textDate(repo, { files, pattern }) {
   const history = await readHistory(repo, files);
+  if (history.head === null) return undefined;
   const regex = new RegExp(pattern, 'gm');
   const matched = new Map();
   const matches = (oid) => (NO_BLOB.test(oid) ? '' : matched.get(oid));
-  for (let next = 0, budget = 1; next < history.length; next += budget, budget *= 2) {
-    const batch = history.slice(next, next + budget);
-    const wanted = [...new Set(batch.flatMap((commit) => commit.changes.flatMap(({ from, to }) => [from, to])))].filter(
-      (oid) => !NO_BLOB.test(oid) && !matched.has(oid),
-    );
-    if (wanted.length > 0) {
-      for (const [oid, text] of await readBlobs(repo, wanted)) {
-        matched.set(oid, (text.match(regex) ?? []).map((match) => match.replace(/\s+/g, ' ')).join('\n'));
-      }
+  const read = async (oids) => {
+    for (const [oid, text] of await readBlobs(repo, oids)) {
+      matched.set(oid, (text.match(regex) ?? []).map((match) => match.replace(/\s+/g, ' ')).join('\n'));
     }
-    const moved = batch.find((commit) => commit.changes.some(({ from, to }) => matches(from) !== matches(to)));
-    if (moved !== undefined) return moved.date;
-  }
-  return undefined;
+  };
+  const made = await followLine(history.head, valueStep(history, matches), read, { size: 1 });
+  return made?.date;
 }
 
 /**
@@ -542,16 +749,24 @@ const lineSource = (report) =>
   ]);
 
 /**
- * The date each page's "Verified by" line last changed: the newest commit to
- * the report whose version draws the page a different line from the version
- * before it, the page's references being what they are now. Only the
- * commits made after the component that draws the line was last added are
- * read, by their place in the history and not by their dates, which a rebase
- * can tie or put out of order: before then no page showed a line for a commit
- * to change. A page is not walked further once no commit left to read is
+ * The date each page's "Verified by" line last changed: the commit that made
+ * the line the page shows at HEAD, walking back along the versions of the
+ * report HEAD holds, the page's references being what they are now. Only the
+ * commits that hold the component that draws the line are read, by their
+ * place in the history and not by their dates, which a rebase can tie or put
+ * out of order: before it, no page showed a line for a commit to change. So a
+ * commit dates a page when its version of the report draws the page another
+ * line than its parent's, and its parent holds the component too; the commit
+ * that added the component dates no page, nor does a merge through which the
+ * component arrived. A merge follows the first parent that holds the
+ * component and draws the page the same line, wherever it took the report
+ * from; and when none does, it dates the page if its first parent drew it a
+ * line, the line main showed changing there, which no commit that drew one
+ * made before it. A page is not walked further once no commit left to read is
  * dated later than its own content, since none of them could date it later
- * than it is; the walk ends when no page is left. The versions are read newest first, in rounds that each ask for
- * twice as many commits as the last, as a count of lines reads its file.
+ * than it is. The versions are read newest first, in rounds that each read
+ * twice as far ahead as the last, as a count of lines reads its file, and
+ * shared by every page.
  *
  * @param {{ repo: string, contentDir: string, file: string, drawnBy: string, pages: string[], dates: Map<string, Date> }} options
  *   `pages` are the pages the count is for, as git names them, and `dates`
@@ -560,60 +775,70 @@ const lineSource = (report) =>
  */
 async function verifiedLineDates({ repo, contentDir, file, drawnBy, pages, dates }) {
   const result = new Map();
-  const added = (await readHistory(repo, [drawnBy])).find((commit) =>
-    commit.changes.some((change) => change.path === drawnBy && change.status === 'A'),
-  )?.sha;
-  if (added === undefined) return result;
-  const changes = (await readHistory(repo, [file], added)).flatMap((commit) =>
-    commit.changes.filter((change) => change.path === file).map((change) => ({ date: commit.date, change })),
-  );
-  /** The latest date of each change and the ones older than it: none of them can date a page later. */
-  const latest = changes.map(({ date }) => date);
-  for (let at = latest.length - 2; at >= 0; at -= 1) if (latest[at + 1] > latest[at]) latest[at] = latest[at + 1];
-  const newest = latest[0];
-  if (newest === undefined || !pages.some((page) => dates.get(page) < newest)) return result;
+  const history = await readHistory(repo, [file, drawnBy]);
+  if (history.head === null) return result;
+  /** The latest date of each commit and of every commit it follows: none of them can date a page later. */
+  const latest = new Map();
+  for (let at = history.order.length - 1; at >= 0; at -= 1) {
+    const commit = history.order[at];
+    latest.set(commit.sha, commit.parents.map((parent) => latest.get(parent)).reduce(later, commit.date));
+  }
+  const newest = latest.get(history.head.sha);
+  if (!pages.some((page) => dates.get(page) < newest)) return result;
   const wanted = new Set(pages);
   const cited = (await readPageReferences(contentDir))
     .map((page) => ({ ...page, key: relative(repo, page.file).split(sep).join('/') }))
-    .filter((page) => page.references.length > 0 && wanted.has(page.key));
+    .filter((page) => page.references.length > 0 && wanted.has(page.key) && dates.has(page.key));
   if (cited.length === 0) return result;
   const none = new Map();
   /** Blob id to the lines its version draws; versions alike in what lines are drawn from share one reading. */
   const lines = new Map();
   const byLineSource = new Map();
   const linesOf = (oid) => (NO_BLOB.test(oid) ? none : lines.get(oid));
-  const pending = new Set(cited.map((page) => page.key).filter((key) => dates.has(key)));
-  for (let next = 0, budget = 1; next < changes.length && pending.size > 0; next += budget, budget *= 2) {
-    const batch = changes.slice(next, next + budget);
-    for (const key of pending) if (dates.get(key) >= latest[next]) pending.delete(key);
-    if (pending.size === 0) break;
-    const oids = [...new Set(batch.flatMap(({ change }) => [change.from, change.to]))].filter(
-      (oid) => !NO_BLOB.test(oid) && !lines.has(oid),
-    );
-    if (oids.length > 0) {
-      for (const [oid, text] of await readBlobs(repo, oids)) {
-        let report;
-        try {
-          report = JSON.parse(text);
-        } catch {
-          lines.set(oid, none);
-          continue;
-        }
-        const source = lineSource(report);
-        if (!byLineSource.has(source)) byLineSource.set(source, verifiedLines(report, cited));
-        lines.set(oid, byLineSource.get(source));
+  const read = async (oids) => {
+    for (const [oid, text] of await readBlobs(repo, oids)) {
+      let report;
+      try {
+        report = JSON.parse(text);
+      } catch {
+        lines.set(oid, none);
+        continue;
       }
+      const source = lineSource(report);
+      if (!byLineSource.has(source)) byLineSource.set(source, verifiedLines(report, cited));
+      lines.set(oid, byLineSource.get(source));
     }
-    for (const [offset, { date, change }] of batch.entries()) {
-      for (const key of pending) {
-        if (dates.get(key) >= latest[next + offset]) pending.delete(key);
-        else if (linesOf(change.from).get(key) !== linesOf(change.to).get(key)) {
-          result.set(key, date);
-          pending.delete(key);
+  };
+  const budget = { size: 1 };
+  for (const { key } of cited) {
+    const own = dates.get(key);
+    const step = (commit) => {
+      if (own >= latest.get(commit.sha)) return { stop: null };
+      if (commit.parents.length === 0) return { stop: null }; // The component came with the first commit.
+      // Which parents drew a line, and for those, whether it was this one.
+      const draws = commit.diffs.map((diff) => diff.get(drawnBy)?.status !== 'A');
+      const unread = [];
+      const same = commit.diffs.map((diff, index) => {
+        if (!draws[index]) return false;
+        const change = diff.get(file);
+        if (change === undefined) return true;
+        const before = linesOf(change.from);
+        const after = linesOf(change.to);
+        if (before === undefined || after === undefined) {
+          for (const oid of [change.from, change.to]) if (linesOf(oid) === undefined) unread.push(oid);
+          return undefined;
         }
+        return before.get(key) === after.get(key);
+      });
+      const first = same.findIndex((answer) => answer !== false);
+      if (first !== -1 && same[first] === undefined) {
+        return { wants: unread, guess: history.commits.get(commit.parents[first]) };
       }
-      if (pending.size === 0) break;
-    }
+      if (first !== -1) return { next: history.commits.get(commit.parents[first]) };
+      return { stop: draws[0] ? commit : null };
+    };
+    const made = await followLine(history.head, step, read, budget);
+    if (made !== null) result.set(key, made.date);
   }
   return result;
 }
@@ -667,8 +892,10 @@ async function applySources({ repo, pathspec, contentDir, pages, dates, entries 
     const tracked = await filesAtHead(repo, files);
     const missing = files.find((spec) => !tracked.some((path) => names(spec, path)));
     if (missing !== undefined) throw stale(`the source ${missing}`);
-    for (const commit of await readHistory(repo, files)) {
-      for (const { path } of commit.changes) {
+    for (const commit of (await readHistory(repo, files)).order) {
+      // A merge changed a file only where it holds a version none of its parents held.
+      const [first, ...others] = commit.diffs;
+      for (const path of [...first.keys()].filter((name) => others.every((diff) => diff.has(name)))) {
         for (const spec of files) {
           if (newest.has(spec) || !names(spec, path)) continue;
           newest.set(spec, commit.date);
@@ -710,14 +937,19 @@ async function applySources({ repo, pathspec, contentDir, pages, dates, entries 
       continue;
     }
     if ((await filesAtHead(repo, set)).length === 0) throw stale(`the counted files ${set.join(' ')}`);
-    for (const commit of await readHistory(repo, set)) {
-      const added = commit.changes.filter((change) => change.status === 'A').length;
-      const deleted = commit.changes.filter((change) => change.status === 'D').length;
-      if (added !== deleted) {
-        newest.set(key, commit.date);
-        break;
-      }
-    }
+    const history = await readHistory(repo, set);
+    // A version counts as many files as its parent's when it added as many as it deleted.
+    const step = (commit) => {
+      const index = commit.diffs.findIndex((diff) => {
+        let balance = 0;
+        for (const change of diff.values()) balance += change.status === 'A' ? 1 : change.status === 'D' ? -1 : 0;
+        return balance === 0;
+      });
+      if (index === -1) return { stop: commit };
+      return commit.parents.length === 0 ? { stop: null } : { next: history.commits.get(commit.parents[index]) };
+    };
+    const made = history.head === null ? null : await followLine(history.head, step, async () => {}, { size: 1 });
+    if (made !== null) newest.set(key, made.date);
   }
 
   // A text moves only with a commit that changed one of its matches.
@@ -832,8 +1064,16 @@ async function readContentDates(siteRoot) {
   const entries = readDateSources(join(siteRoot, DATE_SOURCES));
 
   const pages = [];
-  const listing = nulFields((path) => path && pages.push(path));
-  await git(repo, ['ls-tree', '-r', '-z', '--name-only', 'HEAD', '--', pathspec], {
+  /** The blob each page has at HEAD, where its walk back starts. */
+  const heads = new Map();
+  const listing = nulFields((entry) => {
+    const tab = entry.indexOf('\t');
+    if (tab === -1) return;
+    const path = entry.slice(tab + 1);
+    pages.push(path);
+    heads.set(path, entry.slice(0, tab).split(' ')[2]);
+  });
+  await git(repo, ['ls-tree', '-r', '-z', 'HEAD', '--', pathspec], {
     onData: (chunk) => listing.push(chunk),
   });
   listing.end();
@@ -842,7 +1082,7 @@ async function readContentDates(siteRoot) {
   }
   const committed = new Set(pages);
 
-  const { dates, rounds, blobs } = await resolveDates({ repo, pathspec, ignore, pages });
+  const { dates, rounds, blobs } = await resolveDates({ repo, pathspec, ignore, pages, heads });
   const { sourced, raised, commits } = await applySources({ repo, pathspec, contentDir, pages, dates, entries });
 
   return {

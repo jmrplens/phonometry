@@ -3484,6 +3484,22 @@ _ES_EXACT = {
     "same information, different domain: sweep ⊛ inverse filter = impulse"
     " response": "la misma información en otro dominio: barrido ⊛ filtro inverso ="
     " respuesta al impulso",
+    # --- anim_sweep_harmonics: the harmonic ridges and their collapse ---
+    "One sweep, every harmonic: the ridges and their collapse": "Un barrido, todos los armónicos: las crestas y su colapso",
+    "recorded response (spectrogram)": "respuesta grabada (espectrograma)",
+    "after the inverse filter": "tras el filtro inverso",
+    "Time re linear response [s]": "Tiempo re respuesta lineal [s]",
+    "Level re $h_1$ peak [dB]": "Nivel re pico de $h_1$ [dB]",
+    "the device answers each frequency $f$ with $2f$, $3f$ and $4f$ as well": "el dispositivo responde a cada frecuencia $f$ también con $2f$, $3f$ y $4f$",
+    r"the sweep reaches $nf$ a time $L\,\ln n$ after it passed $f$: the ridges"
+    " run parallel": r"el barrido llega a $nf$ un tiempo $L\,\ln n$ después de pasar por $f$:"
+    " las crestas son paralelas",
+    "the inverse filter takes from each frequency the time the sweep took to"
+    " reach it": "el filtro inverso quita a cada frecuencia el tiempo que el barrido"
+    " tardó en alcanzarla",
+    r"each order lands in its own impulse response, $L\,\ln n$ ahead of the"
+    " linear one": r"cada orden cae en su propia respuesta al impulso, $L\,\ln n$ antes"
+    " que la lineal",
     r"Specific loudness $N^{\prime}(z)$ and its integral (ISO 532-1)": "Sonoridad específica $N^{\\prime}(z)$ y su integral (ISO 532-1)",
     "1 kHz ≈ 8.5 Bark": "1 kHz ≈ 8,5 Bark",
     "upward spread of masking": "extensión del enmascaramiento hacia agudos",
@@ -5640,6 +5656,8 @@ _ES_PATTERNS = [
         r"^first node \$1/N\$ = (\d+)\.(\d+) orders from each tooth$",
         r"primer nodo a $1/N$ = \1,\2 órdenes de cada diente",
     ),
+    # --- anim_sweep_harmonics: the lead of each ridge, from the library ---
+    (r"^\$L\\,\\ln (\d)\$ = (\d+)\.(\d+) s$", r"$L\\,\\ln \1$ = \2,\3 s"),
     # --- anim_feedback_howl: readouts rewritten on every frame ---
     (
         r"^\$Z_\\mathrm\{S\}\$ = (.+) dB, (\d+) open microphone\(s\)$",

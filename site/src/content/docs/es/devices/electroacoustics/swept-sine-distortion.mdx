@@ -44,6 +44,7 @@ import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Un solo barrido sinusoidal exponencial caracteriza a la vez la respuesta
 lineal y todos los órdenes de distorsión armónica de un sistema débilmente
@@ -92,6 +93,27 @@ respuesta lineal con sus adelantos fijos.
 $L = T/\ln(f_2/f_1) = 0{,}70$ s) y no el dispositivo, que es la razón de que
 las mismas ventanas sirvan para cualquier sistema débilmente no lineal y de
 que alargar el barrido sea lo que compra separación.*
+
+El esquema es el estado final. El clip muestra cómo llega la grabación hasta
+ahí: mientras suena el barrido, la respuesta dibuja una cresta por orden en el
+plano tiempo-frecuencia, rectas y paralelas sobre un eje de frecuencia
+logarítmico y cada una $L\ln n$ por delante del barrido, y el filtro inverso
+las endereza después en llegadas separadas.
+
+<Video
+  name="anim_sweep_harmonics"
+  width={2400}
+  height={1350}
+  title="Las crestas armónicas de una grabación de barrido sinusoidal y su colapso"
+  description="Un barrido exponencial de 20 Hz a 6 kHz suena durante 4 s mientras se construye el espectrograma de la respuesta sobre un eje de frecuencia logarítmico: la cresta fundamental y, más tenues y paralelas a ella, las crestas al doble, al triple y al cuádruple de la frecuencia. Unas flechas miden después cuánto se adelanta al barrido cada cresta armónica: 0,49 s, 0,77 s y 0,97 s. El filtro inverso quita a cada frecuencia el tiempo que el barrido tardó en alcanzarla, las cuatro crestas se enderezan en líneas verticales, y a su lado aparece la respuesta al impulso de cada orden 0,49 s, 0,77 s y 0,97 s antes que la lineal."
+/>
+
+*La grabación es el barrido de esta sección a través del mismo polinomio sin
+memoria con un término de cuarto orden añadido, para que exista una cuarta
+cresta. El colapso se dibuja como el desplazamiento que el retardo de grupo
+del filtro, $L\ln(f/f_1)$, aplica a cada fila del mapa grabado; las llegadas de
+la derecha son las respuestas enventanadas que devuelve
+`swept_sine_distortion`, como envolventes en decibelios.*
 
 ```python
 import numpy as np

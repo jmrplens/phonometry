@@ -2356,6 +2356,358 @@ def animate_sweep_deconvolution(output_dir: str) -> None:
     _render_clip(fig, update, output_dir, "anim_sweep_deconvolution")
 
 
+@lru_cache(maxsize=1)
+def _sweep_harmonics_data() -> dict[str, Any]:
+    """The recording, its spectrogram and its deconvolution for the clip.
+
+    The sweep and the per-order impulse responses are the library's
+    (``synchronized_sweep_signal``, ``swept_sine_distortion``), on the
+    numbers of the guide: 20 Hz to 6 kHz in 4 s at 48 kHz, through the
+    guide's memoryless polynomial with a fourth-order term added so that a
+    fourth ridge exists. The spectrogram is one map on a logarithmic
+    frequency axis, where an exponential sweep is a straight line: each row
+    is read from the short-time spectra whose window is nearest the one
+    that resolves a ridge of that slope best, ``2 sqrt(L/f)`` long (a
+    longer window smears the sweep across the frequencies it crosses, a
+    shorter one widens the line), blended between the two nearest window
+    lengths so that no seam shows.
+    """
+    from scipy.signal import hilbert, spectrogram
+
+    from phonometry import electroacoustics
+
+    fs, f1, f2, seconds, fade = 48000, 20.0, 6000.0, 4.0, 0.02
+    sweep = electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds, fade=fade)
+    recorded = sweep + 0.12 * sweep**2 + 0.08 * sweep**3 + 0.05 * sweep**4
+    result = electroacoustics.swept_sine_distortion(
+        np.concatenate([recorded, np.zeros(int(0.4 * fs))]),
+        fs,
+        f1=f1,
+        f2=f2,
+        duration_s=seconds,
+        n_harmonics=4,
+        fade=fade,
+    )
+    rate = float(result.rate)
+
+    lead = 1.2  # silence drawn before the sweep, where the orders will land
+    times = np.arange(-lead, 4.4, 0.008)
+    rows = np.geomspace(f1, fs / 2.0, 300)
+    padded = np.concatenate(
+        [np.zeros(int(lead * fs)), recorded, np.zeros(int(0.6 * fs))]
+    )
+    lengths = (512, 1024, 2048, 4096, 8192, 16384)
+    spectra = []
+    for n in lengths:
+        f_n, t_n, s_n = spectrogram(
+            padded,
+            fs,
+            window="hann",
+            nperseg=n,
+            noverlap=n - n // 8,
+            nfft=2 * max(n, 8192),
+            scaling="spectrum",
+        )
+        spectra.append((f_n, t_n - lead, s_n))
+
+    def row_of(index: int, frequency: float) -> NDArray[np.float64]:
+        f_n, t_n, s_n = spectra[index]
+        j = int(np.clip(np.searchsorted(f_n, frequency), 1, f_n.size - 1))
+        w = (frequency - f_n[j - 1]) / (f_n[j] - f_n[j - 1])
+        band = (1.0 - w) * s_n[j - 1] + w * s_n[j]
+        return np.asarray(np.interp(times, t_n, band, left=0.0, right=0.0))
+
+    power = np.empty((rows.size, times.size))
+    for i, frequency in enumerate(rows):
+        # position of the best window length among the six, in octaves
+        u = float(
+            np.clip(
+                np.log2(2.0 * np.sqrt(rate / frequency) * fs / lengths[0]),
+                0.0,
+                len(lengths) - 1.0,
+            )
+        )
+        lo = min(int(u), len(lengths) - 2)
+        power[i] = (1.0 - (u - lo)) * row_of(lo, frequency) + (u - lo) * row_of(
+            lo + 1, frequency
+        )
+    level = 10.0 * np.log10(np.maximum(power, power.max() * 1e-7) / power.max())
+
+    # the envelope of each order's impulse response, in its own window
+    irs = np.asarray(result.harmonic_irs)
+    envelope = np.abs(hilbert(irs, axis=1))
+    window_t = (np.arange(irs.shape[1]) - irs.shape[1] // 2) / fs
+    return {
+        "f1": f1,
+        "rate": rate,
+        "duration": float(result.duration_s),
+        "delays": np.asarray(result.delays),
+        "times": times,
+        "rows": rows,
+        "level": level,
+        "window_t": window_t,
+        "envelope_db": 20.0 * np.log10(np.maximum(envelope, 1e-12) / envelope[0].max()),
+    }
+
+
+def animate_sweep_harmonics(output_dir: str) -> None:
+    r"""Swept-sine distortion (Farina 2000; Novak, Lotton and Simon 2015):
+    the harmonic ridges of the recorded sweep and their collapse.
+
+    While the exponential sweep plays, the spectrogram of the response
+    builds on a logarithmic frequency axis: the fundamental ridge and,
+    fainter and parallel to it, the ridges at 2f, 3f and 4f, each
+    :math:`L \ln n` ahead of the sweep. The inverse filter then takes from
+    every frequency the time the sweep took to reach it,
+    :math:`L \ln(f/f_1)`, which is drawn as that shift growing on each row
+    of the recorded map: the ridges stand up into four vertical lines, and
+    the per-order impulse responses the library returns appear at
+    :math:`-L \ln n`.
+    """
+    from matplotlib.colors import Normalize
+
+    T = _translate_str
+    data = _sweep_harmonics_data()
+    f1, rate, duration = data["f1"], data["rate"], data["duration"]
+    delays, times, rows, level = (
+        data["delays"],
+        data["times"],
+        data["rows"],
+        data["level"],
+    )
+    orders = range(1, delays.size + 1)
+    floor = float(level.min())
+    row_shift = rate * np.log(rows / f1)  # what the filter takes from each row
+
+    fig = _anim_figure()
+    fig.suptitle(T("One sweep, every harmonic: the ridges and their collapse"))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.3, 1.0])
+
+    # --- the recorded map: a log frequency axis over an image drawn in a
+    # child axes, whose rows are already spaced logarithmically ---
+    # The fourth ridge ends on the last row, so the axis runs a little past
+    # it, over the colour of the map's floor: its mark and its label stay
+    # inside the frame.
+    f_top = 1.2 * float(rows[-1])
+    ax_s = fig.add_subplot(gs[0, 0])
+    ax_s.grid(visible=False)
+    ax_s.set_facecolor(plt.get_cmap("magma")(0.0))
+    ax_s.set_xlim(float(times[0]), float(times[-1]))
+    ax_s.set_ylim(float(rows[0]), f_top)
+    format_frequency_axis(
+        ax_s, float(rows[0]), f_top, minor=None, language=_LANG, axis="y"
+    )
+    ax_s.set_xlabel(T("Time [s]"), fontsize=8)
+    ax_s.set_ylabel(T("Frequency [Hz]"), fontsize=8)
+    ax_s.tick_params(labelsize=7)
+    ax_s.set_title(T("recorded response (spectrogram)"), fontsize=9)
+    ax_m = ax_s.inset_axes(
+        (0.0, 0.0, 1.0, float(np.log(rows[-1] / rows[0]) / np.log(f_top / rows[0]))),
+        zorder=0.5,
+    )
+    ax_m.axis("off")
+    disp = np.full_like(level, floor)
+    im = ax_m.imshow(
+        disp,
+        origin="lower",
+        aspect="auto",
+        extent=(float(times[0]), float(times[-1]), 0.0, 1.0),
+        cmap="magma",
+        norm=Normalize(-60.0, 0.0),
+        interpolation="bilinear",
+    )
+    # the instant being played: one mark per order, joined by the cursor
+    (cursor,) = ax_s.plot([], [], color="white", lw=0.9, alpha=0.8)
+    (marks,) = ax_s.plot([], [], "o", color="white", ms=3.0)
+    order_labels = [
+        ax_s.annotate(
+            "$f$" if n == 1 else f"${n}f$",
+            xy=(0.0, f1),
+            xytext=(5.0, 0.0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            color="white",
+            fontsize=7.5,
+            visible=False,
+        )
+        for n in orders
+    ]
+    readout = ax_s.text(
+        0.97,
+        0.15,
+        "",
+        transform=ax_s.transAxes,
+        ha="right",
+        va="bottom",
+        color="white",
+        fontsize=8,
+        family="monospace",
+    )
+    # how far ahead of the sweep each harmonic ridge runs, read along one
+    # frequency each: the sweep passes it L ln n after the ridge did
+    leads = []
+    for n, at in zip(orders[1:], (1000.0, 500.0, 250.0), strict=True):
+        t_sweep = rate * float(np.log(at / f1))
+        arrow = ax_s.annotate(
+            "",
+            xy=(t_sweep, at),
+            xytext=(t_sweep - float(delays[n - 1]), at),
+            arrowprops={
+                "arrowstyle": "<->",
+                "color": "white",
+                "lw": 0.9,
+                "shrinkA": 0.0,
+                "shrinkB": 0.0,
+            },
+            visible=False,
+        )
+        # Clear of the fundamental ridge's glow: at 0.12 s the first letters
+        # stood on its yellow edge.
+        label = ax_s.text(
+            t_sweep + 0.25,
+            at,
+            T(f"$L\\,\\ln {n}$ = {delays[n - 1]:.2f} s"),
+            ha="left",
+            va="center",
+            color="white",
+            fontsize=8,
+            visible=False,
+        )
+        leads.append((arrow, label))
+    landed = [
+        ax_s.text(
+            -float(delays[n - 1]) + 0.05,
+            0.9 * n * f1 * float(np.exp(duration / rate)),
+            f"$h_{n}$",
+            ha="left",
+            va="top",
+            color="white",
+            fontsize=8,
+            visible=False,
+        )
+        for n in orders
+    ]
+
+    # --- what the library returns: one impulse response per order ---
+    ax_i = fig.add_subplot(gs[0, 1])
+    _grid_axes(ax_i)
+    ax_i.set_xlim(-float(delays[-1]) - 0.16, 0.2)
+    ax_i.set_ylim(-95.0, 12.0)
+    ax_i.set_xticks(
+        [-float(d) for d in delays],
+        labels=[
+            "0" if n == 1 else _fmt_minus(-float(delays[n - 1]), ".2f") for n in orders
+        ],
+    )
+    ax_i.set_xlabel(T("Time re linear response [s]"), fontsize=8)
+    ax_i.set_ylabel(T("Level re $h_1$ peak [dB]"), fontsize=8)
+    ax_i.tick_params(labelsize=7)
+    ax_i.set_title(T("after the inverse filter"), fontsize=9)
+    traces = [ax_i.plot([], [], color=COLOR_PRIMARY, lw=1.0)[0] for _ in orders]
+    peaks = [
+        ax_i.text(
+            -float(delays[n - 1]),
+            float(data["envelope_db"][n - 1].max()) + 3.0,
+            f"$h_{n}$",
+            ha="center",
+            va="bottom",
+            color=COLOR_FG,
+            fontsize=9,
+            visible=False,
+        )
+        for n in orders
+    ]
+    caption = fig.supxlabel(" ", fontsize=9.5, fontstyle="italic", color=COLOR_FG)
+
+    play_end, lead_t, shear_t, shear_s, reveal_t = 4.4, 4.6, 6.3, 2.4, 8.8
+    action_frames = _ANIM_FRAMES - _ANIM_HOLD
+    captions = (
+        (0.0, "the device answers each frequency $f$ with $2f$, $3f$ and $4f$ as well"),
+        (
+            play_end,
+            "the sweep reaches $nf$ a time $L\\,\\ln n$ after it passed $f$:"
+            " the ridges run parallel",
+        ),
+        (
+            shear_t,
+            "the inverse filter takes from each frequency the time the sweep"
+            " took to reach it",
+        ),
+        (
+            reveal_t,
+            "each order lands in its own impulse response, $L\\,\\ln n$ ahead"
+            " of the linear one",
+        ),
+    )
+
+    def update(kf: int) -> tuple[Any, ...]:
+        tc = min(kf, action_frames - 1) / _ANIM_FPS
+        t_sig = min(tc / play_end, 1.0) * float(times[-1])
+        playing = tc < shear_t
+        # the map: built column by column while the sweep plays, then every
+        # row moved back by the share of its shift the filter has applied
+        u = float(np.clip((tc - shear_t) / shear_s, 0.0, 1.0))
+        share = u * u * (3.0 - 2.0 * u)
+        if share > 0.0:
+            for i in range(rows.size):
+                disp[i] = np.interp(
+                    times + share * row_shift[i],
+                    times,
+                    level[i],
+                    left=floor,
+                    right=floor,
+                )
+        else:
+            n_col = int(np.searchsorted(times, t_sig))
+            disp[:, :n_col] = level[:, :n_col]
+            disp[:, n_col:] = floor
+        im.set_data(disp)
+        # the marks ride the ridges, and wait at their ends once it is over
+        t_mark = min(t_sig, duration)
+        shown = playing and t_sig > 0.0
+        f_now = f1 * float(np.exp(t_mark / rate))
+        at = [n * f_now for n in orders]
+        cursor.set_data([t_mark, t_mark], [at[0], at[-1]])
+        marks.set_data([t_mark] * len(at), at)
+        cursor.set_visible(shown)
+        marks.set_visible(shown)
+        for text, f_n in zip(order_labels, at, strict=True):
+            text.xy = (t_mark, f_n)
+            text.set_visible(shown)
+        readout.set_text(f"$f$ = {f_now:5.0f} Hz" if shown and tc < play_end else "")
+        for k, (arrow, label) in enumerate(leads):
+            on = playing and tc >= lead_t + 0.5 * k
+            arrow.set_visible(on)
+            label.set_visible(on)
+        for arrival in landed:
+            arrival.set_visible(share >= 1.0)
+        # the impulse responses appear once the ridges stand
+        reveal = float(np.clip((tc - reveal_t) / 0.9, 0.0, 1.0))
+        x_lo, x_hi = ax_i.get_xlim()
+        edge = x_lo + reveal * (x_hi - x_lo)
+        for n, (trace, peak) in enumerate(zip(traces, peaks, strict=True)):
+            t_n = data["window_t"] - float(delays[n])
+            keep = t_n <= edge if reveal > 0.0 else np.zeros(t_n.size, dtype=bool)
+            trace.set_data(t_n[keep], data["envelope_db"][n][keep])
+            peak.set_visible(reveal >= 1.0)
+        caption.set_text(T([text for start, text in captions if tc >= start][-1]))
+        return (
+            im,
+            cursor,
+            marks,
+            *order_labels,
+            readout,
+            *(artist for pair in leads for artist in pair),
+            *landed,
+            *traces,
+            *peaks,
+            caption,
+        )
+
+    _render_clip(fig, update, output_dir, "anim_sweep_harmonics")
+
+
 def animate_specific_loudness(output_dir: str) -> None:
     """ISO 532-1 specific loudness: the N'(z) pattern of a 1 kHz narrowband
     sound builds along the Bark axis as the band level steps up, and the

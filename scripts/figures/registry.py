@@ -609,6 +609,7 @@ from .schematics import (
     animate_schroeder,
     animate_specific_loudness,
     animate_sweep_deconvolution,
+    animate_sweep_harmonics,
     animate_synchronous_averaging,
     animate_time_weighting_ballistics,
 )
@@ -1701,6 +1702,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_flanking_paths": animate_flanking_paths,
     "anim_intensity_scan_power": animate_intensity_scan_power,
     "anim_sweep_deconvolution": animate_sweep_deconvolution,
+    "anim_sweep_harmonics": animate_sweep_harmonics,
     "anim_specific_loudness": animate_specific_loudness,
     "anim_power_two_rooms": animate_power_two_rooms,
     "anim_comb_filtering": animate_comb_filtering,
@@ -2187,6 +2189,7 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_fdtd_pillar_hall": 200.0,
     "anim_standing_wave_tube": 130.0,
     "anim_sweep_deconvolution": 90.0,
+    "anim_sweep_harmonics": 90.0,
     "anim_power_two_rooms": 80.0,
     "anim_specific_loudness": 80.0,
     "anim_comb_filtering": 70.0,

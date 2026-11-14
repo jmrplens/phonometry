@@ -13,6 +13,7 @@ wrong.
 
 from __future__ import annotations
 
+import itertools
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -636,5 +637,325 @@ def _d_immersed_plate_tl(s: SVG, th: Theme) -> None:
         572,
         "the plate goes transparent there, three decades above audio",
         11,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Where each field lives on the staggered grid of the two solvers
+# ---------------------------------------------------------------------------
+
+
+def _edge_hatch(s: SVG, th: Theme, x0: float, y0: float, length: float) -> None:
+    """Hatch outside the top and the left side of a patch: the domain edge."""
+    for k in range(int(length // 12) + 1):
+        s.line(x0 + 12 * k, y0, x0 + 12 * k + 8, y0 - 8, th.muted, 0.9)
+        s.line(x0, y0 + 12 * k, x0 - 8, y0 + 12 * k + 8, th.muted, 0.9)
+
+
+def _staggered_patch(
+    s: SVG, th: Theme, x0: float, y0: float, cell: float, n: int, *, elastic: bool
+) -> None:
+    """The top-left ``n`` by ``n`` cells of a domain, with every field marked.
+
+    The layout of ``FDTD2D`` and ``ElasticFDTD2D``: a dot at each cell centre
+    (``p``, or ``txx`` and ``tyy``), an arrow across each interior x-face
+    (``vx``) and each interior y-face (``vy``) and, for the elastic solver, a
+    diamond on each interior corner (``txy``). The top and the left side are
+    the domain edge, drawn thick and hatched, and carry no mark: neither
+    engine stores a face or a corner there. The right and the bottom side
+    run on, so their faces and corners are interior ones.
+    """
+    size, tail = n * cell, 14.0
+    s.rect(x0, y0, size, size, th.panel)
+    for k in range(1, n + 1):
+        s.line(x0 + k * cell, y0, x0 + k * cell, y0 + size + tail, th.muted, 1.0)
+        s.line(x0, y0 + k * cell, x0 + size + tail, y0 + k * cell, th.muted, 1.0)
+    _edge_hatch(s, th, x0, y0, size + tail)
+    s.line(x0, y0, x0 + size + tail, y0, th.fg, 2.6)
+    s.line(x0, y0, x0, y0 + size + tail, th.fg, 2.6)
+    centres = [(k + 0.5) * cell for k in range(n)]
+    faces = [k * cell for k in range(1, n + 1)]
+    for cy in centres:
+        for cx in centres:
+            s.circle(x0 + cx, y0 + cy, 6.5, th.primary)
+        for fx in faces:
+            s.arrow(x0 + fx - 14, y0 + cy, x0 + fx + 14, y0 + cy, th.secondary, 2.2)
+    for fy in faces:
+        for cx in centres:
+            s.arrow(x0 + cx, y0 + fy - 14, x0 + cx, y0 + fy + 14, th.accent, 2.2)
+    if elastic:
+        for fy in faces:
+            for fx in faces:
+                x, y = x0 + fx, y0 + fy
+                s.path(
+                    f"M {x - 7:.1f} {y:.1f} L {x:.1f} {y - 7:.1f} "
+                    f"L {x + 7:.1f} {y:.1f} L {x:.1f} {y + 7:.1f} Z",
+                    fill=th.fg,
+                    stroke=th.bg,
+                    sw=1.2,
+                )
+    for k, c in enumerate(centres):
+        s.text(x0 + c, y0 - 20, f"ix = {k}" if k == 0 else str(k), 11, th.muted)
+        s.text(
+            x0 - 16, y0 + c + 4, f"iy = {k}" if k == 0 else str(k), 11, th.muted, "end"
+        )
+
+
+def _d_fdtd_staggered_cell(s: SVG, th: Theme) -> None:
+    """Where ``FDTD2D`` keeps pressure and velocity, in space and in time.
+
+    Left, the top-left cells of a domain as the engine stores them: ``p`` at
+    the cell centres, shape ``(ny, nx)``; ``vx`` on the interior x-faces,
+    shape ``(ny, nx - 1)``; ``vy`` on the interior y-faces, shape
+    ``(ny - 1, nx)``; no face on the domain edge, which is what makes it a
+    rigid wall (Attenborough & Van Renterghem 2021, Eq. 4.32, and the cell
+    centres and faces of page 123). Right, the leapfrog of Eqs. 4.11-4.12,
+    with the pressure at whole steps and the velocity half a step later, and
+    the one face an impedance side adds: the wall-face velocity ``vb``, whose
+    gradient is taken over half a cell and closed by the surface impedance
+    (Eqs. 4.33-4.35).
+    """
+    x0, y0, cell, n = 80.0, 100.0, 116.0, 3
+    size = n * cell
+    _staggered_patch(s, th, x0, y0, cell, n, elastic=False)
+    mid = 1.5 * cell
+    s.text(x0 + mid, y0 + mid + 26, "p", 13, th.primary, bold=True, mono=True)
+    # Each tag beside a mark of a cell of its own: three in one cell read as
+    # one label.
+    s.text(
+        x0 + cell + 8,
+        y0 + cell / 2 - 14,
+        "vx",
+        13,
+        th.secondary,
+        "start",
+        bold=True,
+        mono=True,
+    )
+    s.text(
+        x0 + 2.5 * cell + 10,
+        y0 + cell - 20,
+        "vy",
+        13,
+        th.accent,
+        "start",
+        bold=True,
+        mono=True,
+    )
+    # The dimension sits clear of the vy arrowheads on the bottom faces.
+    s.dim(x0 + cell, y0 + size + 44, x0 + 2 * cell, y0 + size + 44, "$dx$", size=12)
+    s.text(
+        x0 + size / 2,
+        y0 + size + 76,
+        "rows grow downward, as an image is drawn",
+        11,
+        th.muted,
+    )
+
+    # --- What is stored, and where ----------------------------------------
+    lx = 500.0
+    s.text(lx, 90, "What is stored, and where", 14, th.fg, "start", bold=True)
+    rows = (
+        (
+            "p at the cell centres, shape (ny, nx)",
+            "centre of cell (ix, iy): ((ix + 1/2)·dx, (iy + 1/2)·dx)",
+        ),
+        (
+            "vx on the interior x-faces, shape (ny, nx − 1)",
+            "vx[iy, ix] lies between p[iy, ix] and p[iy, ix + 1]",
+        ),
+        (
+            "vy on the interior y-faces, shape (ny − 1, nx)",
+            "vy[iy, ix] lies between p[iy, ix] and p[iy + 1, ix]",
+        ),
+        (
+            "no face is stored on the domain edge:",
+            "zero normal velocity, a rigid wall (Eq. 4.32)",
+        ),
+    )
+    for k, (head, tail) in enumerate(rows):
+        y = 120.0 + 46 * k
+        if k == 0:
+            s.circle(lx + 10, y - 4, 6.5, th.primary)
+        elif k == 1:
+            s.arrow(lx - 2, y - 4, lx + 22, y - 4, th.secondary, 2.2)
+        elif k == 2:
+            s.arrow(lx + 10, y - 16, lx + 10, y + 8, th.accent, 2.2)
+        else:
+            s.line(lx - 2, y - 2, lx + 22, y - 2, th.fg, 2.6)
+            for h in range(3):
+                s.line(lx + 8 * h, y - 2, lx + 8 * h + 7, y - 9, th.muted, 0.9)
+        s.text(lx + 34, y, head, 12, th.fg, "start")
+        s.text(lx + 34, y + 17, tail, 11, th.muted, "start")
+
+    # --- Half a step apart in time ----------------------------------------
+    ty = 326.0
+    s.text(
+        lx,
+        ty,
+        "Half a step apart in time (Eqs. 4.11-4.12)",
+        14,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    axis_y, mark_y = ty + 82, ty + 50
+    ticks = (540.0, 640.0, 740.0, 840.0)
+    s.line(510, axis_y, 870, axis_y, th.fg, 1.4)
+    for x, label in zip(
+        ticks, ("$n$", "$n$ + 1/2", "$n$ + 1", "$n$ + 3/2"), strict=True
+    ):
+        s.line(x, axis_y - 5, x, axis_y + 5, th.fg, 1.4)
+        s.text(x, axis_y + 22, label, 12, th.fg)
+    for k, x in enumerate(ticks):
+        if k % 2 == 0:
+            s.circle(x, mark_y, 6.5, th.primary)
+            s.text(x, mark_y - 16, "p", 12, th.primary, bold=True, mono=True)
+        else:
+            s.arrow(x - 12, mark_y, x + 12, mark_y, th.secondary, 2.2)
+            s.text(x, mark_y - 16, "vx, vy", 12, th.secondary, bold=True, mono=True)
+    for (xa, xb), label in zip(
+        itertools.pairwise(ticks), ("Eq. 4.11", "Eq. 4.12", "Eq. 4.11"), strict=True
+    ):
+        s.arrow(xa + 20, mark_y, xb - 20, mark_y, th.muted, 1.2)
+        s.text((xa + xb) / 2, mark_y + 18, label, 10, th.muted)
+
+    # --- The one face an impedance side adds ------------------------------
+    by = 470.0
+    s.text(
+        lx, by, "An impedance side keeps one more face", 14, th.fg, "start", bold=True
+    )
+    bx, top, side = 520.0, by + 22, 70.0
+    wall = bx + side
+    s.rect(bx, top, side, side, th.panel, th.muted, sw=1.0)
+    for k in range(6):
+        s.line(wall, top + 12 * k + 8, wall + 8, top + 12 * k, th.muted, 0.9)
+    s.line(wall, top - 6, wall, top + side + 6, th.fg, 2.6)
+    s.circle(bx + side / 2, top + side / 2, 6.5, th.primary)
+    s.arrow(wall - 14, top + side / 2, wall + 16, top + side / 2, th.secondary, 2.2)
+    s.text(
+        wall + 22,
+        top + side / 2 + 4,
+        "vb",
+        13,
+        th.secondary,
+        "start",
+        bold=True,
+        mono=True,
+    )
+    s.dim(bx + side / 2, top + side + 22, wall, top + side + 22, "$dx$/2", size=11)
+    notes = (
+        "the wall face stores its own velocity vb;",
+        "the pressure gradient is taken over half",
+        "a cell, and $p_{surf} = Z·v_{out}$ closes it",
+        "(Eqs. 4.33-4.35)",
+    )
+    note_size = s.fit_size(notes, (11, 10), 236.0, upright=("p_surf",))
+    for k, line in enumerate(notes):
+        s.text(
+            648,
+            top + 14 + 17 * k,
+            line,
+            note_size,
+            th.fg,
+            "start",
+            upright=("p_surf",),
+        )
+
+
+def _d_elastic_staggered_cell(s: SVG, th: Theme) -> None:
+    """The staggered cell of the acoustic solver beside that of the elastic one.
+
+    (a) is the cell of ``FDTD2D`` and (b) that of ``ElasticFDTD2D``: the cell
+    of Virieux (1986, Fig. 1) shifted half a cell, so that the normal stresses
+    ``txx`` and ``tyy`` fall on the cell centres where the acoustic pressure
+    lives, ``vx`` and ``vy`` on the same faces and the shear stress ``txy`` on
+    the interior corners, shape ``(ny - 1, nx - 1)``. The notes under (b)
+    are the effective parameters the engine builds its maps with: the
+    density averaged arithmetically onto each face (Moczo et al. 2007,
+    Eq. 7.39) and the shear modulus harmonically onto each corner, zero when
+    any of the four cells is a fluid (Eq. 7.38). Both leapfrog alike,
+    velocities half a step from the pressure or the stresses (Virieux's
+    explicit scheme, Eq. 5).
+    """
+    y0, cell, n = 118.0, 120.0, 2
+    size = n * cell
+    panels = (
+        (80.0, "(a) acoustic: p, vx, vy", False),
+        (520.0, "(b) elastic: Virieux's cell, shifted half a cell", True),
+    )
+    for x0, head, elastic in panels:
+        _staggered_patch(s, th, x0, y0, cell, n, elastic=elastic)
+        s.text(x0 + size / 2, y0 - 48, head, 14, th.fg, bold=True)
+        s.text(
+            x0 + cell / 2,
+            y0 + cell / 2 + 26,
+            "txx, tyy" if elastic else "p",
+            13,
+            th.primary,
+            bold=True,
+            mono=True,
+        )
+        s.text(
+            x0 + cell + 8,
+            y0 + cell / 2 - 14,
+            "vx",
+            13,
+            th.secondary,
+            "start",
+            bold=True,
+            mono=True,
+        )
+        s.text(
+            x0 + 1.5 * cell + 10,
+            y0 + cell - 20,
+            "vy",
+            13,
+            th.accent,
+            "start",
+            bold=True,
+            mono=True,
+        )
+        if elastic:
+            s.text(
+                x0 + cell + 12,
+                y0 + cell + 20,
+                "txy",
+                13,
+                th.fg,
+                "start",
+                bold=True,
+                mono=True,
+            )
+
+    ny = y0 + size + 56
+    acoustic = (
+        "p at the cell centres, shape (ny, nx)",
+        "vx on the interior x-faces, shape (ny, nx − 1)",
+        "vy on the interior y-faces, shape (ny − 1, nx)",
+        "no face on the domain edge: a rigid wall",
+    )
+    elastic_notes = (
+        "txx and tyy at the cell centres, where p lives",
+        "vx and vy on the same faces as in (a)",
+        "txy on the interior corners, shape (ny − 1, nx − 1)",
+        "$ρ$ onto a face: arithmetic mean of its two cells",
+        "(Moczo et al. 2007, Eq. 7.39)",
+        "$μ$ onto a corner: harmonic mean of its four cells,",
+        "zero when any of them is a fluid (Eq. 7.38)",
+        "no txy on the domain edge: a shear-free rigid wall",
+    )
+    for k, line in enumerate(acoustic):
+        s.text(40, ny + 20 * k, line, 12, th.fg, "start")
+    size_b = s.fit_size(elastic_notes, (12, 11), 420.0)
+    for k, line in enumerate(elastic_notes):
+        s.text(456, ny + 20 * k, line, size_b, th.fg, "start")
+    s.text(
+        450,
+        ny + 20 * len(elastic_notes) + 24,
+        "Both leapfrog alike: vx and vy half a step from p or from the stresses "
+        "(Virieux 1986, Eq. 5)",
+        12,
         th.muted,
     )

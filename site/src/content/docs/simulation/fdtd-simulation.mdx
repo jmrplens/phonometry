@@ -114,6 +114,12 @@ collocated grid (Eq. 4.9 vs 4.10) and allows in-place updates. Because only
 interior faces are stored, the domain edge is a perfectly **rigid wall**
 (zero normal velocity, Eq. 4.32) unless another boundary is requested.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_staggered_cell.svg" alt="Left, the nine cells at the top-left corner of an FDTD domain, three by three, with the top and the left side drawn as the hatched domain edge: a blue dot at each cell centre for the pressure p, a red arrow across each interior x-face for vx and a green arrow across each interior y-face for vy, and no mark on the edge. A legend gives the shapes, (ny, nx) for p, (ny, nx − 1) for vx and (ny − 1, nx) for vy, puts the centre of cell (ix, iy) at ((ix + 1/2)·dx, (iy + 1/2)·dx), and says that no face is stored on the edge, a rigid wall by Eq. 4.32. A time axis marks p at steps n and n + 1 and vx and vy at n + 1/2 and n + 3/2, joined by arrows labelled Eq. 4.11 and Eq. 4.12. An inset shows one cell against an impedance wall, with the wall-face velocity vb half a cell from the cell centre and the relation p_surf = Z·v_out of Eqs. 4.33-4.35" width="92%" />
+
+*Where `FDTD2D` keeps each field. A source or a probe at `(ix, iy)` acts on
+the dot of that cell; `vx[iy, ix]` and `vy[iy, ix]` are the faces to its
+right and below it, and an impedance side adds one face on the wall.*
+
 The explicit scheme is stable only while a wavefront crosses at most one cell
 per time step. With square cells the **Courant number** (Eq. 4.13) is
 

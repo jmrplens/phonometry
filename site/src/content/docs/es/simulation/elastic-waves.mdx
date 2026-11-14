@@ -107,7 +107,16 @@ sobre la misma disposición escalonada que el esquema acústico: los
 esfuerzos normales ``txx``/``tyy`` comparten los centros de celda donde
 vive la presión acústica, las velocidades ocupan las caras y el esfuerzo
 de cizalla ``txy`` las esquinas (la celda totalmente escalonada de
-Virieux, desplazada media celda). La API replica `fdtd_simulation` pieza a
+Virieux, desplazada media celda).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_staggered_cell.svg" alt="Dos paneles, cada uno con las cuatro celdas de la esquina superior izquierda de un dominio, con los lados superior e izquierdo dibujados como el borde rayado del dominio. En (a), el esquema acústico: un punto azul en cada centro de celda para p, una flecha roja a través de cada cara x interior para vx y una flecha verde a través de cada cara y interior para vy. En (b), el esquema elástico, la celda de Virieux desplazada media celda: los puntos de los centros de celda son txx y tyy, las mismas flechas en las mismas caras son vx y vy, y un rombo en cada esquina interior es txy. Las notas bajo (a) dan las formas (ny, nx), (ny, nx − 1) y (ny − 1, nx); las notas bajo (b) añaden la forma (ny − 1, nx − 1) de txy, la densidad promediada aritméticamente a cada cara (Moczo et al. 2007, Ec. 7.39), el módulo de cizalla promediado armónicamente a cada esquina y nulo si alguna de sus cuatro celdas es un fluido (Ec. 7.38), y ningún txy en el borde del dominio, una pared rígida sin cizalla. Una línea al pie dice que los dos esquemas avanzan igual en leapfrog, vx y vy a medio paso de p o de los esfuerzos (Virieux 1986, Ec. 5)" width="100%" />
+
+*Una misma celda para los dos esquemas: donde el acústico guarda `p`, el
+elástico guarda `txx` y `tyy`, y añade `txy` en las esquinas. Las dos medias
+bajo (b) son las que ponen un contacto fluido-sólido sobre un plano de caras
+(sección 2).*
+
+La API replica `fdtd_simulation` pieza a
 pieza: mapas de velocidades `c_p` y `c_s` (más `rho`) en lugar de `c`,
 `ExplosionSource` (una inyección isótropa de esfuerzo) y `ForceSource`
 (una fuerza de cuerpo direccional) como fuentes, sondas que registran

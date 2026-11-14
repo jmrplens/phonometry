@@ -105,6 +105,9 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "the algorithm behind it",
     "shape (4, N)": "a numpy attribute and its value, as the reader sees it printed",
     "OctaveFilterBank": "a class name; translating it would name a class that does not exist",
+    "txx, tyy": "the two normal stress fields of ElasticFDTD2D, named as the reader types "
+    "them",
+    "txy": "the shear stress field of ElasticFDTD2D, named as the reader types it",
     "francois-garrison": "the model= literal of seawater_absorption, quoted as the reader "
     "would type it",
     "ainslie-mccolm": "the model= literal of seawater_absorption, quoted as the reader "

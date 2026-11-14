@@ -101,7 +101,15 @@ $$
 on the same staggered layout as the acoustic solver: the normal stresses
 ``txx``/``tyy`` share the cell centres where the acoustic pressure lives,
 the velocities sit on the faces and the shear stress ``txy`` on the
-corners (Virieux's fully staggered cell, shifted half a cell). The API
+corners (Virieux's fully staggered cell, shifted half a cell).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_elastic_staggered_cell.svg" alt="Two panels, each the four cells at the top-left corner of a domain with the top and the left side drawn as the hatched domain edge. In (a), the acoustic solver: a blue dot at each cell centre for p, a red arrow across each interior x-face for vx and a green arrow across each interior y-face for vy. In (b), the elastic solver, Virieux's cell shifted half a cell: the dots at the cell centres are txx and tyy, the same arrows on the same faces are vx and vy, and a diamond on each interior corner is txy. Notes under (a) give the shapes (ny, nx), (ny, nx − 1) and (ny − 1, nx); notes under (b) add the shape (ny − 1, nx − 1) of txy, the density averaged arithmetically onto each face (Moczo et al. 2007, Eq. 7.39), the shear modulus averaged harmonically onto each corner and zero when any of its four cells is a fluid (Eq. 7.38), and no txy on the domain edge, a shear-free rigid wall. A line at the foot says both solvers leapfrog alike, vx and vy half a step from p or from the stresses (Virieux 1986, Eq. 5)" width="100%" />
+
+*One cell for both solvers: where the acoustic one keeps `p`, the elastic one
+keeps `txx` and `tyy`, and it adds `txy` on the corners. The two averages
+under (b) are what puts a fluid-solid contact on a face plane (section 2).*
+
+The API
 mirrors `fdtd_simulation` piece by piece: wave-speed maps `c_p` and `c_s`
 (plus `rho`) instead of `c`, `ExplosionSource` (an isotropic stress
 injection) and `ForceSource` (a directional body force) as sources, probes

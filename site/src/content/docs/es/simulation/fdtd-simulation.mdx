@@ -120,6 +120,13 @@ actualizaciones in situ. Como solo se almacenan las caras interiores, el
 borde del dominio es una **pared perfectamente rígida** (velocidad normal
 nula, Ec. 4.32) salvo que se pida otro contorno.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_staggered_cell.svg" alt="A la izquierda, las nueve celdas de la esquina superior izquierda de un dominio FDTD, tres por tres, con los lados superior e izquierdo dibujados como el borde rayado del dominio: un punto azul en cada centro de celda para la presión p, una flecha roja a través de cada cara x interior para vx y una flecha verde a través de cada cara y interior para vy, y ninguna marca en el borde. Una leyenda da las formas, (ny, nx) para p, (ny, nx − 1) para vx y (ny − 1, nx) para vy, sitúa el centro de la celda (ix, iy) en ((ix + 1/2)·dx, (iy + 1/2)·dx) y dice que en el borde no se guarda ninguna cara, una pared rígida según la Ec. 4.32. Un eje de tiempo marca p en los pasos n y n + 1 y vx y vy en n + 1/2 y n + 3/2, unidos por flechas rotuladas Ec. 4.11 y Ec. 4.12. Un recuadro muestra una celda contra una pared de impedancia, con la velocidad de la cara de la pared vb a media celda del centro y la relación p_surf = Z·v_out de las Ecs. 4.33-4.35" width="92%" />
+
+*Dónde guarda `FDTD2D` cada campo. Una fuente o una sonda en `(ix, iy)` actúa
+sobre el punto de esa celda; `vx[iy, ix]` y `vy[iy, ix]` son las caras a su
+derecha y debajo de ella, y un lado de impedancia añade una cara sobre la
+pared.*
+
 El esquema explícito solo es estable mientras un frente de onda cruce como
 mucho una celda por paso temporal. Con celdas cuadradas, el **número de
 Courant** (Ec. 4.13) es

@@ -202,7 +202,9 @@ from .signals import (
 )
 from .simulation import (
     _d_elastic_fluid_solid,
+    _d_elastic_staggered_cell,
     _d_fdtd,
+    _d_fdtd_staggered_cell,
     _d_immersed_plate_tl,
     _d_ntff_contour,
 )
@@ -1228,6 +1230,16 @@ DIAGRAMS = {
         _d_humid_air_chain,
         "Humid air from four inputs, step by step (IEC 61094-2 Annex F)",
         938,
+    ),
+    "diagram_fdtd_staggered_cell": (
+        _d_fdtd_staggered_cell,
+        "The staggered grid: where pressure and velocity live",
+        600,
+    ),
+    "diagram_elastic_staggered_cell": (
+        _d_elastic_staggered_cell,
+        "One staggered cell, two solvers: acoustic and elastic",
+        624,
     ),
 }
 

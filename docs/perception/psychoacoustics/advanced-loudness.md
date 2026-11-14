@@ -429,9 +429,9 @@ The Zwicker method (ISO 532-1:2017) is the reference: stationary and time-varyin
   Time-varying short-term and long-term loudness and the peak N_max.
 - Ecma International. (2025). *Psychoacoustic metrics for ITT equipment —
   Part 2 (methods for describing human perception based on the Sottek
-  Hearing Model)* (ECMA-418-2, 4th ed.).
+  Hearing Model)* (ECMA-418-2:2025).
   [ecma-international.org](https://ecma-international.org/publications-and-standards/standards/ecma-418/).
-  The Sottek Hearing Model loudness (sone_HMS).
+  The Sottek Hearing Model loudness (sone_HMS), in the 4th edition of June 2025.
 
 ## Standards
 

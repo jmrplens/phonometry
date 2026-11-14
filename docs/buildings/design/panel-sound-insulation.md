@@ -830,8 +830,8 @@ need the whole room-plate-cavity-plate-room chain.
 
 ## References
 
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering Noise
-  Control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
+  control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
   Section 7.2: the mass law, coincidence frequency, Sharp's single-panel method
   and the double-wall model.
@@ -840,12 +840,13 @@ need the whole room-plate-cavity-plate-room chain.
   [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
   Section 2.9 (plate radiation efficiency) and Section 4.3.10 (slits, holes and
   apertures, composite transmission).
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-Borne Sound*
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
   (3rd ed.). Springer. ISBN 978-3-540-22696-3.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
   Chapter 5, Table 5.1: the point impedances and mobilities of infinite
   structures and the injected-power relation.
-- Vigran, T. E. (2008). *Building Acoustics*. Taylor & Francis.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
   [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
   Sections 3.7.3.3 (orthotropic plate eigenfrequencies, Eqs 3.113-3.115 after

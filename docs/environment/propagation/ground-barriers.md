@@ -475,8 +475,10 @@ reciprocal, but it is not a boundary-element solution.
   [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
   Chapter 3 and Appendix D (the two-ray field, the plane- and spherical-wave
   reflection coefficients, and the numerical distance).
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering Noise
-  Control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0. Sections 5.2.3
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
+  control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
+  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
+  Sections 5.2.3
   (spherical-wave ground reflection) and 5.3.5-5.3.7 (Fresnel number,
   Kurze-Anderson, thin- and thick-barrier diffraction and terrain shielding).
 - Kurze, U. J., & Anderson, G. S. (1971). Sound attenuation by barriers.

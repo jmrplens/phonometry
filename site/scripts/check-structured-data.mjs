@@ -159,8 +159,95 @@ const EDITED_FLOOR = 0.1;
 /** The nodes astro.config.mjs puts on every page for the per-page ones to join. */
 const SITE_NODES = ['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceCode'];
 
+/**
+ * The most bytes the site-wide ld+json block may take, the one astro.config.mjs
+ * writes on every page around the Person it splices from jmrp.io verbatim.
+ *
+ * That Person is most of the block, and it changes when jmrp.io changes, with
+ * no diff in this repository: four profile links added there grew every page
+ * here by 132 bytes, and an earlier change there doubled the Person. The block
+ * was 23,545 bytes on 2026-11-07, 16,320 of them the Person. The budget leaves
+ * room for a few more links or topics and none for a second copy of a list,
+ * so a growth of that kind stops the build and is decided here, by raising the
+ * budget or by trimming the source, instead of shipping on every page unseen.
+ */
+const SITE_BLOCK_BUDGET = 25_000;
+
 /** Every JSON-LD block of a document, whatever else the script tag carries. */
 const LD_JSON = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
+
+/**
+ * Whether an `@id` is a work a page cites: a standard, book, paper, report or
+ * web page defined on a bibliography page (src/lib/citations.mjs). The
+ * bibliography's own article and the standards bodies hang off the same
+ * address and are not works.
+ */
+const isCitedWork = (id) =>
+	typeof id === 'string' && /\/reference\/bibliography\/#(?:std|doi|book|article|report|web)-/.test(id);
+
+/**
+ * The types src/lib/citations.mjs gives a cited work. A stub typed anything
+ * else, an Organization say, is not naming a work, whatever its name says.
+ */
+const WORK_TYPES = new Set(['CreativeWork', 'Book', 'ScholarlyArticle', 'Report', 'WebPage']);
+
+/** Whether a reference to a work says what the work is, not only where it is defined. */
+const isNamed = (item) =>
+	typeof item?.name === 'string' &&
+	item.name.trim() !== '' &&
+	item['@type'] !== undefined &&
+	typesOf(item).every((type) => WORK_TYPES.has(type));
+
+/**
+ * The fields a page's stub shares with the bibliography's node for the same
+ * work (src/lib/citations.mjs, `STUB_FIELDS`), compared value for value.
+ * `sameAs` is compared apart: the Spanish bibliography adds the English node
+ * to it, which a page's stub does not carry.
+ */
+const STUB_FIELDS = ['@type', 'name', 'identifier', 'reportNumber', 'url'];
+
+/** A value as JSON with its keys in order, so two equal nodes compare equal. */
+const canonical = (value) =>
+	value === undefined
+		? 'undefined'
+		: JSON.stringify(value, (_, v) =>
+				v && typeof v === 'object' && !Array.isArray(v)
+					? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)))
+					: v,
+			);
+
+/** Every object under `value` that refers to a cited work, in document order. */
+function citedWorkReferences(value, out = []) {
+	if (Array.isArray(value)) {
+		for (const item of value) citedWorkReferences(item, out);
+	} else if (value && typeof value === 'object') {
+		if (isCitedWork(value['@id'])) out.push(value);
+		for (const child of Object.values(value)) citedWorkReferences(child, out);
+	}
+	return out;
+}
+
+/**
+ * Where every standards body is defined, once for both languages: the English
+ * bibliography, whichever page names the body.
+ */
+const BODY_PREFIX = `${ORIGIN}/reference/bibliography/#org-`;
+/** Where the English bibliography defines each standard. */
+const ENGLISH_STANDARD_PREFIX = `${ORIGIN}/reference/bibliography/#std-`;
+/**
+ * The bodies that publish no texts of their own: the Spanish state issuers,
+ * whose texts the Boletín Oficial del Estado prints and each of those
+ * references links (src/lib/citations.mjs, STANDARDS_BODIES). Every other body
+ * a standard names carries its official site.
+ */
+const BODIES_WITHOUT_SITE = new Set(
+	['es-ministerio-de-la-presidencia', 'es-ministerio-de-fomento', 'es-jefatura-del-estado'].map(
+		(id) => `${BODY_PREFIX}${id}`,
+	),
+);
+
+/** The numbers of a designation, in order: what a translation of it leaves alone. */
+const numbersOf = (designation) => (String(designation ?? '').match(/\d+/g) ?? []).join(' ');
 
 const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
@@ -177,6 +264,9 @@ const seen = {
 	unlisted: 0,
 	articles: 0,
 	edited: 0,
+	basedOn: 0,
+	cited: 0,
+	citing: 0,
 };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
@@ -194,6 +284,16 @@ const missingSection = [];
 const wrongSection = [];
 /** Each distinct `operatingSystem` of the software node, as JSON, and the pages that carry it. */
 const platformLists = new Map();
+/** Each distinct size of the site-wide block, in bytes, with the Person's share and the pages. */
+const siteBlocks = new Map();
+/** Pages whose `isBasedOn` points at a work without naming it, with the count. */
+const unnamedBasis = [];
+/** Pages that point at a cited work nothing on the page names, with the count. */
+const unnamedCited = [];
+/** Every reference to a cited work that says more than its `@id`, with its page. */
+const stubs = [];
+/** What each language's bibliography page defines, for the check across the two. */
+const bibliographies = new Map();
 
 for (const file of files) {
 	const html = readFileSync(join(DIST, file), 'utf8');
@@ -260,6 +360,15 @@ for (const file of files) {
 				continue;
 			}
 			nodes.push(node);
+		}
+		// The site-wide block is the one that carries the Person, measured as
+		// published: the bytes every page pays before its own graph.
+		const person = graph.find((node) => node && typeof node === 'object' && typesOf(node).includes('Person'));
+		if (person) {
+			const size = Buffer.byteLength(body, 'utf8');
+			const entry = siteBlocks.get(size) ?? { person: Buffer.byteLength(JSON.stringify(person), 'utf8'), pages: 0 };
+			entry.pages += 1;
+			siteBlocks.set(size, entry);
 		}
 	}
 
@@ -339,9 +448,8 @@ for (const file of files) {
 	// resolves to nothing on the page that makes it is the failure the single
 	// `@graph` in Head.astro exists to prevent: a plain JSON-LD processor
 	// expands each script as its own document, and there the target is a node
-	// with no properties at all. (`about` also cites the bibliography, whose
-	// nodes are defined on the bibliography page, so only its first entry, the
-	// software, is answerable here.)
+	// with no properties at all. (`about` goes on to name the works the page
+	// implements, which the check of cited works below holds to the same.)
 	const defined = new Set(ids);
 	const joins = {
 		author: article.author,
@@ -354,6 +462,89 @@ for (const file of files) {
 		if (target && !defined.has(target)) {
 			fail(`${route}: article ${key} points at ${target}, which no node on the page defines`);
 		}
+	}
+
+	// The works the page cites, named on the page. They used to be bare `@id`s
+	// into the bibliography, which defines them on a page of its own: the
+	// reader this markup is for takes one document at a time, and there the
+	// standard a guide is based on was an address with nothing at it. The first
+	// reference to a work in `isBasedOn` says what it is, with its type and
+	// name; a later one may point back. Every other reference, in `about` and
+	// `citation`, has to resolve to a work named somewhere on the same page.
+	const references = citedWorkReferences(article);
+	if (references.length > 0) seen.citing += 1;
+	for (const item of references) {
+		if (Object.keys(item).some((key) => key !== '@id')) stubs.push({ route, item });
+	}
+	const namedHere = new Set(references.filter(isNamed).map((item) => item['@id']));
+	const firstInBasis = new Set();
+	let bareBasis = 0;
+	for (const item of [article.isBasedOn ?? []].flat()) {
+		const id = item?.['@id'];
+		if (!isCitedWork(id) || firstInBasis.has(id)) continue;
+		firstInBasis.add(id);
+		seen.basedOn += 1;
+		if (!isNamed(item)) bareBasis += 1;
+	}
+	if (bareBasis > 0) unnamedBasis.push([route, bareBasis]);
+	const works = new Set(references.map((item) => item['@id']));
+	seen.cited += works.size;
+	const unnamed = [...works].filter((id) => !namedHere.has(id));
+	if (unnamed.length > 0) unnamedCited.push([route, unnamed.length]);
+
+	// The bibliography page defines every work in full, and names each
+	// standard's publisher by the one identity the body has on the English
+	// bibliography, in both languages. A body written out as an anonymous
+	// Organization in every node that named it was 146 unrelated ISOs on the
+	// English page alone. The check across the two languages runs after the
+	// loop, once both pages have been read.
+	if (slug === 'reference/bibliography') {
+		const byId = new Map(nodes.filter((node) => node['@id']).map((node) => [node['@id'], node]));
+		const standards = nodes.filter((node) => node.genre === 'Technical standard');
+		const anonymous = new Map();
+		const siteless = new Set();
+		for (const standard of standards) {
+			const id = standard.publisher?.['@id'];
+			const body = typeof id === 'string' ? byId.get(id) : undefined;
+			const identified =
+				typeof id === 'string' &&
+				id.startsWith(BODY_PREFIX) &&
+				body !== undefined &&
+				typesOf(body).includes('Organization') &&
+				typeof body.name === 'string' &&
+				body.name !== '';
+			if (!identified) {
+				const name = standard.publisher?.name ?? id ?? '(no publisher)';
+				anonymous.set(name, (anonymous.get(name) ?? 0) + 1);
+			} else if (!BODIES_WITHOUT_SITE.has(id) && !/^https:\/\/\S+$/.test(String(body.url ?? ''))) {
+				// One identity per body is half of it; the other half is where the
+				// body lives, which is what tells two bodies of one name apart.
+				siteless.add(id);
+			}
+		}
+		if (anonymous.size > 0) {
+			const count = [...anonymous.values()].reduce((sum, n) => sum + n, 0);
+			fail(
+				`${route}: ${count} of ${standards.length} standards name a publisher with no identity of its own ` +
+					`under ${BODY_PREFIX}: ${[...anonymous].map(([name, n]) => `${name} (${n})`).join(', ')}`,
+			);
+		} else {
+			ok(`${route}: each of the ${standards.length} standards names its publisher by the body's one identity`);
+		}
+		if (siteless.size > 0) {
+			fail(
+				`${route}: ${siteless.size} of the bodies its standards name carry no https url of their official ` +
+					'site: ' +
+					[...siteless].map((id) => id.slice(BODY_PREFIX.length)).join(', '),
+			);
+		} else if (standards.length > 0) {
+			const bodies = new Set(standards.map((standard) => standard.publisher?.['@id']));
+			ok(
+				`${route}: each of the ${bodies.size} bodies its standards name carries its official site, save ` +
+					'the Spanish state issuers whose texts the BOE prints',
+			);
+		}
+		bibliographies.set(lang, { route, defined, standards, byId });
 	}
 
 	// The two locales are one work. English pages point forward to their
@@ -496,11 +687,162 @@ for (const [platforms, pages] of platformLists) {
 	}
 }
 
+// The site-wide block, judged once per distinct size: it is the same bytes on
+// every page, so a growth shows as one size on every page at once.
+if (siteBlocks.size === 0) {
+	fail('no page carries the site-wide ld+json block with the Person: the site graph changed under this check');
+}
+for (const [size, { person, pages }] of [...siteBlocks].sort(([a], [b]) => b - a)) {
+	if (size > SITE_BLOCK_BUDGET) {
+		fail(
+			`${pages} page(s): the site-wide ld+json block is ${size} bytes, over its budget of ${SITE_BLOCK_BUDGET}; ` +
+				`the Person spliced from jmrp.io is ${person} of them. Trim the source, or raise SITE_BLOCK_BUDGET ` +
+				'in scripts/check-structured-data.mjs if the growth is wanted',
+		);
+	} else {
+		ok(
+			`the site-wide ld+json block is ${size} bytes on ${pages} pages, within its budget of ` +
+				`${SITE_BLOCK_BUDGET}; the Person is ${person} of them`,
+		);
+	}
+}
+
 const editedLine = `${seen.edited} of the ${seen.articles} articles were last edited after the day they were first published`;
 if (seen.edited < seen.articles * EDITED_FLOOR) {
 	fail(`${editedLine}: src/lib/page-dates.mjs read no history, from a shallow checkout or a failed git log`);
 } else {
 	ok(editedLine);
+}
+
+/** The first few routes of a list of [route, count] pairs, with the counts. */
+const firstOf = (pairs) => pairs.slice(0, 3).map(([route, n]) => `${route} (${n})`).join(', ');
+const total = (pairs) => pairs.reduce((sum, [, n]) => sum + n, 0);
+
+if (unnamedBasis.length > 0) {
+	fail(
+		`${unnamedBasis.length} page(s) give ${total(unnamedBasis)} work(s) they are based on as a bare @id: ` +
+			'the first reference to each work in isBasedOn has to carry its @type and name',
+	);
+	console.error(`     first: ${firstOf(unnamedBasis)}`);
+} else if (seen.basedOn === 0) {
+	// A check that found nothing to read would pass everything.
+	fail('no page says what it is based on: the citation properties changed under this check');
+} else {
+	ok(`every one of the ${seen.basedOn} works pages are based on is named at its first reference in isBasedOn`);
+}
+if (unnamedCited.length > 0) {
+	fail(
+		`${unnamedCited.length} page(s) point at ${total(unnamedCited)} cited work(s) that nothing on the page names`,
+	);
+	console.error(`     first: ${firstOf(unnamedCited)}`);
+} else {
+	ok(`every one of the ${seen.cited} works ${seen.citing} pages cite is named on the page that cites it`);
+}
+
+// The two bibliographies define one set of works in two languages. A Spanish
+// standard says which English node it is with `sameAs`, and that node has to
+// exist: an edition note is translated with the page ("4.ª ed.", "4th ed."),
+// so the two `@id`s are not always the locale apart, and a guessed address
+// would point at nothing.
+{
+	const en = bibliographies.get('en');
+	const es = bibliographies.get('es');
+	if (!en || !es) {
+		fail(`the bibliography page was not found in ${en ? 'Spanish' : 'English'}: build the site first`);
+	} else if (en.standards.length === 0 || es.standards.length === 0) {
+		fail(
+			`the bibliography defines ${en.standards.length} standards in English and ${es.standards.length} in ` +
+				'Spanish: the standard nodes changed under this check',
+		);
+	} else {
+		const untied = [];
+		const dangling = [];
+		const mismatched = [];
+		for (const standard of es.standards) {
+			const targets = [standard.sameAs ?? []]
+				.flat()
+				.filter((url) => typeof url === 'string' && url.startsWith(ENGLISH_STANDARD_PREFIX));
+			if (targets.length === 0) untied.push(standard.identifier);
+			for (const url of targets) {
+				const target = en.byId.get(url);
+				if (!target) dangling.push(url);
+				// The pairing is read off the built nodes, not off citations.mjs: a
+				// translated designation keeps its numbers, in their order, and a
+				// Spanish standard naming another English one does not.
+				else if (numbersOf(target.identifier) !== numbersOf(standard.identifier)) {
+					mismatched.push(`${standard.identifier} as ${target.identifier}`);
+				}
+			}
+		}
+		if (untied.length > 0) {
+			fail(
+				`${es.route}: ${untied.length} of ${es.standards.length} standards name no English node as the same ` +
+					`work (first: ${untied.slice(0, 3).join('; ')})`,
+			);
+		}
+		if (dangling.length > 0) {
+			fail(
+				`${es.route}: ${dangling.length} sameAs point at English standards ${en.route} does not define ` +
+					`(first: ${dangling.slice(0, 3).join(', ')})`,
+			);
+		}
+		if (mismatched.length > 0) {
+			fail(
+				`${es.route}: ${mismatched.length} standards name as the same work an English standard whose ` +
+					`designation carries other numbers (first: ${mismatched.slice(0, 3).join('; ')})`,
+			);
+		}
+		if (untied.length === 0 && dangling.length === 0 && mismatched.length === 0) {
+			ok(
+				`each of the ${es.standards.length} Spanish standards names the English node it is, among the ` +
+					`${en.standards.length} the English bibliography defines, with the same numbers in its designation`,
+			);
+		}
+
+		// A page names a work from its own references and the bibliography from
+		// whichever page it read first, so the two could say different things
+		// of one @id: two catalogue addresses for one standard, one paper's
+		// title on another's identifier. citations.mjs refuses to build that;
+		// this is the same promise read off what was built.
+		const differing = new Map();
+		const fieldCounts = new Map();
+		const FIELD_ORDER = [...STUB_FIELDS, 'sameAs', '(defined on no bibliography)'];
+		for (const { route, item } of stubs) {
+			const lang = item['@id'].startsWith(`${ORIGIN}/es/`) ? 'es' : 'en';
+			const node = bibliographies.get(lang).byId.get(item['@id']);
+			const wrong = node
+				? STUB_FIELDS.filter((field) => canonical(item[field]) !== canonical(node[field]))
+				: ['(defined on no bibliography)'];
+			const known = new Set([node?.sameAs ?? []].flat());
+			if (node && [item.sameAs ?? []].flat().some((value) => !known.has(value))) wrong.push('sameAs');
+			if (wrong.length === 0) continue;
+			if (!differing.has(item['@id'])) differing.set(item['@id'], { routes: [], fields: new Set() });
+			const entry = differing.get(item['@id']);
+			entry.routes.push(route);
+			for (const field of wrong) {
+				if (!entry.fields.has(field)) fieldCounts.set(field, (fieldCounts.get(field) ?? 0) + 1);
+				entry.fields.add(field);
+			}
+		}
+		if (stubs.length === 0) {
+			fail('no page names a cited work: the citation markup changed under this check');
+		} else if (differing.size > 0) {
+			const pages = new Set([...differing.values()].flatMap(({ routes }) => routes));
+			fail(
+				`${differing.size} work(s) are named on ${pages.size} page(s) other than as the bibliography ` +
+					`defines them: ${[...fieldCounts]
+						.sort(([a], [b]) => FIELD_ORDER.indexOf(a) - FIELD_ORDER.indexOf(b))
+						.map(([field, n]) => `${field} on ${n}`)
+						.join(', ')}`,
+			);
+			const first = [...differing]
+				.slice(0, 3)
+				.map(([id, { routes, fields }]) => `${routes[0]} ${id.slice(id.indexOf('#'))} (${[...fields].join(', ')})`);
+			console.error(`     first: ${first.join('; ')}`);
+		} else {
+			ok(`each of the ${stubs.length} stubs that name a work on a page says what the bibliography says of it`);
+		}
+	}
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);

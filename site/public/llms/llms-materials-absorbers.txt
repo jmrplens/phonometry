@@ -2649,8 +2649,8 @@ found in the sources during this work are recorded in the
   [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
   Sections D.3–D.6 (layer reflection, multilayer scheme, diffuse-field
   integrals) and G.11 (empirical porous relations).
-- Allard, J. F., & Atalla, N. (2009). *Propagation of Sound in Porous Media:
-  Modelling Sound Absorbing Materials* (2nd ed.). Wiley.
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2nd ed.). Wiley.
   ISBN 978-0-470-74661-5.
   [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
   Chapter 6: the Biot theory of an elastic-framed porous material, its elastic

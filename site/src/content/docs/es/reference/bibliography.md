@@ -1529,13 +1529,13 @@ implementación.
   [Distorsión con barridos y utilidades de fase](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
 - International Telecommunication Union. (2023). *Algorithms to measure audio
   programme loudness and true-peak audio level*
-  (Recomendación UIT-R BS.1770-5 (11/2023)).
-  [Publicación UIT-R](https://www.itu.int/rec/R-REC-BS.1770).
+  (Recomendación UIT-R BS.1770-5).
+  [Publicación UIT-R](https://www.itu.int/rec/R-REC-BS.1770/en).
   El prefiltro de ponderación K (Anexo 1, Tablas 1-2), la sonoridad ponderada
   por canal y sus puertas en dos etapas (Anexo 1, Fórmulas 1-7 y Tabla 3), las
   directrices de estimación del pico verdadero (Anexo 2) y las ponderaciones de
   canal dependientes de la posición para sistemas de sonido avanzados
-  (Anexo 3, Tablas 4-5).
+  (Anexo 3, Tablas 4-5), en la edición aprobada en noviembre de 2023.
   Citado por [Sonoridad de programa y pico verdadero](/phonometry/es/devices/broadcast/program-loudness/).
 - European Broadcasting Union. (2023). *Loudness normalisation and permitted
   maximum level of audio signals* (EBU R 128).

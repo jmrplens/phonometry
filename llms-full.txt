@@ -3319,8 +3319,9 @@ of the energy, and the four flanking paths the rest.*
   The physical background of every term of the detailed model: radiation
   efficiency, structural reverberation time, the equivalent absorption length
   and the statistical-energy-analysis footing of the path summation.
-- Vigran, T. E. (2008). *Building acoustics*. Taylor & Francis.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
   The homogeneous-element transmission model and the impact-level closed form
   behind Annex B of both parts.
 
@@ -5365,8 +5366,8 @@ need the whole room-plate-cavity-plate-room chain.
 
 ## References
 
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering Noise
-  Control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
+  control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
   [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
   Section 7.2: the mass law, coincidence frequency, Sharp's single-panel method
   and the double-wall model.
@@ -5375,12 +5376,13 @@ need the whole room-plate-cavity-plate-room chain.
   [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
   Section 2.9 (plate radiation efficiency) and Section 4.3.10 (slits, holes and
   apertures, composite transmission).
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-Borne Sound*
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
   (3rd ed.). Springer. ISBN 978-3-540-22696-3.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
   Chapter 5, Table 5.1: the point impedances and mobilities of infinite
   structures and the injected-power relation.
-- Vigran, T. E. (2008). *Building Acoustics*. Taylor & Francis.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
   [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
   Sections 3.7.3.3 (orthotropic plate eigenfrequencies, Eqs 3.113-3.115 after
@@ -17235,7 +17237,7 @@ this implementation.
 - International Telecommunication Union. (2023). *Algorithms to measure
   audio programme loudness and true-peak audio level* (Recommendation
   ITU-R BS.1770-5).
-  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770).
+  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770/en).
   The K-weighting, channel weights, gating and true-peak algorithms.
 - European Broadcasting Union. (2023). *Loudness normalisation and permitted
   maximum level of audio signals* (EBU R 128).
@@ -17260,7 +17262,7 @@ this implementation.
 
 ## Standards
 
-ITU-R BS.1770-5 (11/2023), *Algorithms to measure audio programme loudness
+Recommendation ITU-R BS.1770-5, *Algorithms to measure audio programme loudness
 and true-peak audio level*: the K-weighting pre-filter (Annex 1, Tables
 1-2), the channel-weighted loudness and two-stage gating (Annex 1, Formulae
 1-7, Table 3), the true-peak estimation guidelines (Annex 2 and its
@@ -17577,13 +17579,15 @@ fitted. The conformity evidence is real and it is published, in
 
 ## References
 
-- International Telecommunication Union. (2002). *Measurement of
+- International Telecommunication Union. (1986). *Measurement of
   audio-frequency noise voltage level in sound broadcasting* (Recommendation
-  ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468).
+  ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468/en).
   The weighting network of clause 1 and the quasi-peak detector of clause 2.
-- International Electrotechnical Commission. (1985). *Sound system equipment -
-  Part 1: General* (IEC 60268-1:1985), Appendix A, with Amendment 1:1988. The
-  same network and meter, as Table AI, Fig. A1 and Tables AII and AIII.
+- International Electrotechnical Commission. (1985). *Sound system equipment —
+  Part 1: General* (IEC 60268-1:1985).
+  [IEC webstore](https://webstore.iec.ch/en/publication/1204).
+  Appendix A, with Amendment 1:1988: the same network and meter, as Table AI,
+  Fig. A1 and Tables AII and AIII.
 - Audio Engineering Society. (2015). *AES standard method for digital audio
   engineering - Measurement of digital audio equipment* (AES17-2015),
   clause 5.2.7. The same curve shifted by −5.63 dB and read with an r.m.s.
@@ -35539,8 +35543,10 @@ reciprocal, but it is not a boundary-element solution.
   [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
   Chapter 3 and Appendix D (the two-ray field, the plane- and spherical-wave
   reflection coefficients, and the numerical distance).
-- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering Noise
-  Control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0. Sections 5.2.3
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2017). *Engineering noise
+  control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
+  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
+  Sections 5.2.3
   (spherical-wave ground reflection) and 5.3.5-5.3.7 (Fresnel number,
   Kurze-Anderson, thin- and thick-barrier diffraction and terrain shielding).
 - Kurze, U. J., & Anderson, G. S. (1971). Sound attenuation by barriers.
@@ -44527,8 +44533,8 @@ found in the sources during this work are recorded in the
   [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
   Sections D.3–D.6 (layer reflection, multilayer scheme, diffuse-field
   integrals) and G.11 (empirical porous relations).
-- Allard, J. F., & Atalla, N. (2009). *Propagation of Sound in Porous Media:
-  Modelling Sound Absorbing Materials* (2nd ed.). Wiley.
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2nd ed.). Wiley.
   ISBN 978-0-470-74661-5.
   [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
   Chapter 6: the Biot theory of an elastic-framed porous material, its elastic
@@ -49557,9 +49563,9 @@ The Zwicker method (ISO 532-1:2017) is the reference: stationary and time-varyin
   Time-varying short-term and long-term loudness and the peak N_max.
 - Ecma International. (2025). *Psychoacoustic metrics for ITT equipment —
   Part 2 (methods for describing human perception based on the Sottek
-  Hearing Model)* (ECMA-418-2, 4th ed.).
+  Hearing Model)* (ECMA-418-2:2025).
   [ecma-international.org](https://ecma-international.org/publications-and-standards/standards/ecma-418/).
-  The Sottek Hearing Model loudness (sone_HMS).
+  The Sottek Hearing Model loudness (sone_HMS), in the 4th edition of June 2025.
 
 ## Standards
 
@@ -52417,8 +52423,8 @@ mechanisms are in play, compute both.
 
 ## Standards
 
-ANSI S3.5-1997 (R2017), *American National Standard Methods for
-the Calculation of the Speech Intelligibility Index*: the four band procedures
+ANSI S3.5-1997 (R2017), *Methods for calculation of the speech
+intelligibility index*: the four band procedures
 (critical band, 21 bands, Table 1; equally-contributing critical band, 17
 bands, Table 2; one-third octave, 18 bands, Table 3; octave, 6 bands, Table 4)
 with their band-importance functions, standard speech spectrum levels and
@@ -55584,7 +55590,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Swept-sine distortion and phase utilities](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
 - Müller, S., & Massarani, P. (2001). Transfer-function measurement with
   sweeps. *Journal of the Audio Engineering Society*, 49(6), 443-471.
-  [AES E-Library record](https://www.aes.org/e-lib/browse.cfm?elib=10189).
+  [AES E-Library record](https://aes.org/publications/elibrary-page/?id=10189).
   The sweep-measurement monograph behind the practice notes: inverse
   filters, fades and distortion rejection.
   Cited by [Swept-sine distortion and phase utilities](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
@@ -55660,7 +55666,7 @@ it; the list grows as guides gain their References sections.
 - International Telecommunication Union. (2023). *Algorithms to measure
   audio programme loudness and true-peak audio level* (Recommendation
   ITU-R BS.1770-5).
-  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770).
+  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770/en).
   The K-weighting, channel weights, gating and true-peak algorithms.
   Cited by [Programme loudness & true peak](https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/).
 - European Broadcasting Union. (2023). *Loudness normalisation and permitted
@@ -63388,8 +63394,10 @@ Use the G frequency weighting of ISO 7196:1995, which rates infrasound the way A
   (ISO 7196:1995). [iso.org catalogue](https://www.iso.org/standard/13813.html).
   The G-weighting pole/zero definition (Table 1), verified against every
   Table 2 nominal response value (0.25 Hz to 315 Hz).
-- American National Standards Institute. (1983). *Specification for Sound
-  Level Meters* (ANSI S1.4-1983). The historical B weighting: Appendix C
+- American National Standards Institute. (1983). *Specification for sound
+  level meters* (ANSI S1.4-1983).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985).
+  The historical B weighting: Appendix C
   analytic definition (Formula C2), Table IV design goals and Table V
   tolerance limits checked by `verify_weighting_class` in section 3.
 - International Electrotechnical Commission. (1990). *Filters for the
@@ -63412,7 +63420,7 @@ Use the G frequency weighting of ISO 7196:1995, which rates infrasound the way A
 ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
 infrasound measurements*: the G-weighting pole/zero definition (Table 1),
 verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).
-ANSI S1.4-1983, *Specification for Sound Level Meters*: the historical B
+ANSI S1.4-1983, *Specification for sound level meters*: the historical B
 weighting (Appendix C, Tables IV and V). IEC 61012:1990, *Filters for the
 measurement of audible sound in the presence of ultrasound*: the AU
 weighting (Tables 1 and 2, subclause 2.2). IEC 537:1976 (withdrawn),
@@ -63723,7 +63731,7 @@ built on these envelopes, and [Why phonometry](https://docs.jmrp.io/phonometry/s
   Table 4 toneburst responses the ballistics are verified against in CI.
 - American National Standards Institute. (1983). *Specification for sound
   level meters* (ANSI S1.4-1983).
-  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas11983).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985).
   The classic analog meter specification: the FAST/SLOW dynamic
   characteristics the F and S constants descend from, and the IMPULSE
   characteristic (35 ms rise, slow decay) that IEC 61672-1 no longer
@@ -72311,7 +72319,8 @@ waves probe the sediment shear stiffness.
   shear modulus, arithmetic density; Eqs. 7.37-7.39) and the stress-imaging
   free surface of section 3 (Eq. 9.9).
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound* (3rd ed.). Springer.
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3rd ed.). Springer.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728). The analytic
   oracles of the elastic solver: the exact Rayleigh characteristic
   equation (Eq. 3.149) and the Kirchhoff flexural dispersion with its
@@ -80172,8 +80181,8 @@ piling campaign's weighted exposure falls below a criterion.
   3026, SSC Pacific.
   The band-pass filter form and the audiogram equation both criteria sets
   adopt.
-- Ainslie, M. A. (2010). *Principles of Sonar Performance Modelling*.
-  Springer/Praxis.
+- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
+  Springer.
   [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
   The orca audiogram of section 2 (Equation 11.159, after Wensveen &
   Van Roij 2007) and the orca-versus-salmon worked example.
@@ -81170,8 +81179,8 @@ and these closed forms, have their own guide:
   America*, 111(3), 1211-1231.
   [doi:10.1121/1.1427355](https://doi.org/10.1121/1.1427355).
   The ensemble merchant-ship spectrum model of section 6.
-- Ainslie, M. A. (2010). *Principles of Sonar Performance Modelling*.
-  Springer/Praxis.
+- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
+  Springer.
   [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
   The Weston shallow-water regimes of section 1.1 (§9.1.1.2, Equations 9.42 to
   9.61 and Table 9.1), the Medwin sound-speed formula of section 2
@@ -89718,8 +89727,10 @@ consistency check the reader makes, not one the library automates.
 
 ## References
 
-- Cremer, L., Heckl, M., & Ungar, E. E. (1973). *Structure-borne sound* (1st
-  ed.). Springer.
+- Cremer, L., Heckl, M., & Ungar, E. E. (1973). *Structure-borne sound:
+  Structural vibrations and sound radiation at audio frequencies* (1st ed.).
+  Springer.
+  [doi:10.1007/978-3-662-10118-6](https://doi.org/10.1007/978-3-662-10118-6).
 - Craik, R. J. M. (1996). *Sound transmission through buildings using
   statistical energy analysis*. Gower.
 - Hopkins, C. (2007). *Sound insulation* (Section 5.2.1.3).

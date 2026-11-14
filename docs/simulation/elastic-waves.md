@@ -590,7 +590,8 @@ waves probe the sediment shear stiffness.
   shear modulus, arithmetic density; Eqs. 7.37-7.39) and the stress-imaging
   free surface of section 3 (Eq. 9.9).
 - Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound* (3rd ed.). Springer.
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3rd ed.). Springer.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728). The analytic
   oracles of the elastic solver: the exact Rayleigh characteristic
   equation (Eq. 3.149) and the Kirchhoff flexural dispersion with its

@@ -1481,12 +1481,13 @@ implementation is validated against.
   [Swept-sine distortion and phase utilities](/phonometry/devices/electroacoustics/swept-sine-distortion/).
 - International Telecommunication Union. (2023). *Algorithms to measure audio
   programme loudness and true-peak audio level*
-  (Recommendation ITU-R BS.1770-5 (11/2023)).
-  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770).
+  (Recommendation ITU-R BS.1770-5).
+  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770/en).
   The K-weighting pre-filter (Annex 1, Tables 1-2), the channel-weighted
   loudness and its two-stage gating (Annex 1, Formulae 1-7 and Table 3), the
   true-peak estimation guidelines (Annex 2) and the position-dependent channel
-  weights for advanced sound systems (Annex 3, Tables 4-5).
+  weights for advanced sound systems (Annex 3, Tables 4-5), in the edition
+  approved in November 2023.
   Cited by [Programme Loudness & True Peak](/phonometry/devices/broadcast/program-loudness/).
 - European Broadcasting Union. (2023). *Loudness normalisation and permitted
   maximum level of audio signals* (EBU R 128).

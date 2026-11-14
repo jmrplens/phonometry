@@ -710,8 +710,8 @@ and these closed forms, have their own guide:
   America*, 111(3), 1211-1231.
   [doi:10.1121/1.1427355](https://doi.org/10.1121/1.1427355).
   The ensemble merchant-ship spectrum model of section 6.
-- Ainslie, M. A. (2010). *Principles of Sonar Performance Modelling*.
-  Springer/Praxis.
+- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
+  Springer.
   [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
   The Weston shallow-water regimes of section 1.1 (§9.1.1.2, Equations 9.42 to
   9.61 and Table 9.1), the Medwin sound-speed formula of section 2

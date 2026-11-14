@@ -511,6 +511,12 @@ one. Neither of those is visible in the index.
   1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
   The modulation-transfer framework of section 1 and the $m$ ↔ STI mapping the
   index is built on.
+- International Electrotechnical Commission. (2011). *Sound system equipment
+  — Part 16: Objective rating of speech intelligibility by speech
+  transmission index* (IEC 60268-16:2011). The fourth edition, whose normative
+  text the implementation is built on beside the fifth. The
+  [errata registry](../../ERRATA.md) records three defects of its Annex M
+  worked example, Table M.1.
 
 ## Standards
 

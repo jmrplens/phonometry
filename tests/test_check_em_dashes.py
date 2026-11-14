@@ -623,6 +623,72 @@ def test_a_frontmatter_value_hides_no_double_hyphen(text: str, hits: list[int]) 
     assert ced.markdown_double_hyphen_hits(text) == hits
 
 
+#: A page citing one report, its number written ``{number}`` and its note
+#: ``{note}``, and a key of the page's own after the list.
+_REPORT_PAGE = (
+    "---\n"
+    'title: "A page"\n'
+    "references:\n"
+    "  - type: report\n"
+    '    title: "{title}"\n'
+    '    number: "{number}"\n'
+    "    doi: {doi}\n"
+    '    note: "{note}"\n'
+    "  - {first}\n"
+    'description: "{description}"\n'
+    "---\n"
+    "The body.\n"
+)
+
+
+@pytest.mark.parametrize(
+    ("fields", "hits"),
+    [
+        pytest.param({}, [], id="identifiers as they are issued"),
+        pytest.param({"number": "NRL -- 95-9628"}, [6], id="a spaced run is a dash"),
+        pytest.param({"number": "--95-9628"}, [6], id="a run at the edge"),
+        pytest.param({"number": "---95-9628"}, [6], id="a longer run at the edge"),
+        pytest.param({"number": "95-9628---"}, [6], id="a longer run at the end"),
+        pytest.param({"number": "NRL--- 95-9628"}, [6], id="a longer run by a blank"),
+        pytest.param({"number": "NRL/FR/7176---95"}, [], id="a longer run inside"),
+        pytest.param({"note": "Its Table 2--the source"}, [8], id="the note is prose"),
+        pytest.param({"title": "Physics--description"}, [5], id="so is the title"),
+        pytest.param({"description": "NRL/FR/7176--95"}, [10], id="the page's own"),
+    ],
+)
+def test_an_identifier_of_a_reference_keeps_its_hyphens(
+    fields: dict[str, str], hits: list[int]
+) -> None:
+    """A reference's number, DOI, ISBN or address is printed as written.
+
+    The References section prints those fields outside the text smartypants
+    reads, so the Naval Research Laboratory's NRL/FR/7176--95-9628 is a report
+    number and no dash. A run with a blank on either side, or at the edge of
+    the value, is a dash written in ASCII still, however many hyphens it holds,
+    and so is one in any other field of the entry or in a key of the page after
+    the list.
+    """
+    values = {
+        "title": "Physics description",
+        "number": "NRL/FR/7176--95-9628",
+        "doi": "10.1000/a--b",
+        "note": "Its Table 2.",
+        "first": 'isbn: "0-00--000000-0"',
+        "description": "A page.",
+    }
+    page = _REPORT_PAGE.format(**(values | fields))
+    assert ced.markdown_double_hyphen_hits(page) == hits
+    assert ced.markdown_double_hyphen_hits(page, mdx=True) == hits
+
+
+def test_an_identifier_key_off_the_references_is_read_as_prose() -> None:
+    """Only an entry of ``references`` holds a reference's identifiers."""
+    page = '---\nnumber: "A--1"\nextra:\n  - number: "B--2"\n---\n'
+    assert ced.markdown_double_hyphen_hits(page) == [2, 4]
+    listed = '---\nreferences:\n  - number: "A--1"\n    url: "x--y"\n---\n'
+    assert ced.markdown_double_hyphen_hits(listed) == []
+
+
 @pytest.mark.parametrize(
     "text",
     [

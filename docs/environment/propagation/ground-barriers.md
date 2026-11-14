@@ -488,3 +488,11 @@ reciprocal, but it is not a boundary-element solution.
   wedges for arbitrary point source locations. *Journal of the Acoustical
   Society of America*, 69(5), 1266-1276.
   [doi:10.1121/1.385809](https://doi.org/10.1121/1.385809).
+- European Committee for Standardization. (2012). *Railway applications —
+  Track — Noise barriers and related devices acting on airborne sound
+  propagation — Test method for determining the acoustic performance —
+  Part 3-1: Normalized railway noise spectrum and single number ratings for
+  diffuse field applications* (EN 16272-3-1:2012). Table 1, the normalized
+  railway noise spectrum, and the single-number ratings of Clauses 5 and 6
+  weighted by it, for a barrier beside a track. Read from the BS EN
+  16272-3-1:2012 edition.

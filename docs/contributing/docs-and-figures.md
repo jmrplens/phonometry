@@ -1350,9 +1350,9 @@ and a catalogue page shows it in both languages
 a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_data.py
 ```
 
-**Enforced by:** `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`, `site/src/lib/catalogue-pages.ts`
+**Enforced by:** `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`, `site/src/lib/catalogue-pages.ts`, `site/scripts/catalogue-sources.test.mjs`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`
 
-**Exceptions.** A mapping deliberately kept off the page goes in `EXEMPT` with the reason, and only when showing it would mislead, never because registering it is work (empty). Registering means: the generator names it with its columns, a page under `site/src/content/docs/reference/catalogues/` renders it in both languages (a new catalogue gets a page of its own, listed in `catalogueSlugs` in `site/src/data/topics.mjs`; a table that belongs beside another, as the absorption areas belong beside the absorption coefficients, joins that page), and its key joins the union in `site/src/components/Catalogues.astro`. The guard sees only the generator; the site build fails on the rest, a catalogue the generator writes that no page of a language renders and a page under `reference/catalogues/` missing from `catalogueSlugs`.
+**Exceptions.** A mapping deliberately kept off the page goes in `EXEMPT` with the reason, and only when showing it would mislead, never because registering it is work (empty). Registering means: the generator names it with its columns, a page under `site/src/content/docs/reference/catalogues/` renders it in both languages (a new catalogue gets a page of its own, listed in `catalogueSlugs` in `site/src/data/topics.mjs`; a table that belongs beside another, as the absorption areas belong beside the absorption coefficients, joins that page), and its key joins the union in `site/src/components/Catalogues.astro`. The page's frontmatter `references` name the work behind every table its rows come from, in both languages, each entry listing in `tables` the keys of the tables it printed (the `table` every row carries), so the bibliography describes every book a row cites; the airs the library fixes itself (`phonometry-...`) name none. A key starts with its work, the first word of the first author's surname or of the organization (`ORGANIZATION_KEYS` in `site/src/lib/catalogue-sources.mjs` holds a short name such as `ashrae`) with the year, or a standard's issuer and number, and only that work's entry may claim it: for a standard, an entry whose designation carries the key's number. The issuer is not held, since one text carries the designations of several bodies (`en-12354-annex-a` is claimed by ISO 12354-1:2017, which Europe publishes as EN ISO 12354-1:2017). Each entry's note names its catalogue ("the source of the rows of the catalogue of carpets that cite it"), never "this catalogue": a work only catalogue pages cite is described on the bibliography by those notes, and the structured data check fails on a description that points at a catalogue it does not name. The guard sees only the generator; the site build fails on the rest, a catalogue the generator writes that no page of a language renders, a page under `reference/catalogues/` missing from `catalogueSlugs`, a printed table no entry of the page's references claims or two entries claim, a claim on a key of another work, and `tables` on a page that is not a catalogue page.
 
 ## Errata entries
 
@@ -1401,12 +1401,12 @@ ISO 9613-1 prints a = 2.2560 × 10⁻⁵ m⁻¹ (`a = 2.256e-5`)
 <a id="f59"></a>
 ### F59. Add or remove an errata entry in docs/ERRATA.md and docs/ERRATA.es.md together
 
-**Why.** The Spanish register is translated entry for entry, and the evidence pages are generated from both.
+**Why.** The Spanish register is translated entry for entry, and the evidence pages are generated from both. Each page names the documents it corrects by their bibliography entry, so the generator stops on a document no page cites (`--list-unmatched` lists them).
 
 **Do**
 
 ```text
-One commit adds the entry to docs/ERRATA.md and its translation, same position, same document named in the heading, to docs/ERRATA.es.md.
+One commit adds the entry to docs/ERRATA.md and its translation, same position, same document named in the heading, to docs/ERRATA.es.md; and, if no page cites that document yet, adds it to the references of the guide that implements it (Spanish twin and docs/ mirror too).
 ```
 
 **Don't**
@@ -1416,6 +1416,8 @@ A commit that adds the English entry and leaves the Spanish register for later.
 ```
 
 **Enforced by:** `make site-reports`, `CI: Generated evidence pages up to date`
+
+**Exceptions.** A document no guide implements goes in the references of the bibliography page itself. Where the registry writes a cited document otherwise than the guides do, its spelling goes in `DESIGNATED_AS` in `scripts/generate_site_reports.py`, never a second entry, and only for the same text: one amendment written two ways, or an identical-text adoption whose defect the registry shows in the original. A translation or any other adoption whose errata may be its own is cited under its own designation, in an entry of its own, marked `implemented: false` when the guide implements the original. A book or a paper's family names its works in its `SOURCES` row.
 
 ## Clip frames
 

@@ -419,7 +419,10 @@ jobs:
   # site can never show a hand-copied or stale version of them. The
   # conformance pages are no longer transplanted - they render from
   # docs/conformance.json through src/components/Conformance.astro, which the
-  # `conformance` job gates instead.
+  # `conformance` job gates instead. It also stops, before it compares any
+  # errata page, when an errata family corrects a work no page cites, so the
+  # bibliography has nothing to name it by (rule F59): a guide edit that
+  # drops a reference can fail here.
   site-reports:
     name: Generated evidence pages up to date
     runs-on: ubuntu-26.04

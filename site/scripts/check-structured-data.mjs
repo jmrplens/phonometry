@@ -246,6 +246,12 @@ const BODIES_WITHOUT_SITE = new Set(
 	),
 );
 
+/**
+ * Words that tie a description to the catalogue page it was written on, in
+ * either language: "this catalogue", "these catalogues", "este catálogo".
+ */
+const CATALOGUE_BOUND = /\b(?:this|these) catalogues?\b|\best(?:e|os) catálogos?(?![\p{L}])/iu;
+
 /** The numbers of a designation, in order: what a translation of it leaves alone. */
 const numbersOf = (designation) => (String(designation ?? '').match(/\d+/g) ?? []).join(' ');
 
@@ -543,6 +549,22 @@ for (const file of files) {
 				`${route}: each of the ${bodies.size} bodies its standards name carries its official site, save ` +
 					'the Spanish state issuers whose texts the BOE prints',
 			);
+		}
+		// A work's description is the note of one page that cites it
+		// (src/lib/citations.mjs, citedWorks). A catalogue page's note speaks
+		// of that page's own rows, and read on the bibliography "the rows of
+		// this catalogue" points at no catalogue at all: four books were
+		// described that way, by whichever catalogue page sorted first.
+		const described = nodes.filter((node) => isCitedWork(node['@id']) && typeof node.description === 'string');
+		const pageBound = described.filter((node) => CATALOGUE_BOUND.test(node.description));
+		if (pageBound.length > 0) {
+			fail(
+				`${route}: ${pageBound.length} of the ${described.length} works it describes take the words of a ` +
+					`catalogue page about its own rows: ` +
+					pageBound.map((node) => node['@id'].slice(node['@id'].indexOf('#'))).join(', '),
+			);
+		} else if (described.length > 0) {
+			ok(`${route}: none of the ${described.length} works it describes is described as one catalogue page's rows`);
 		}
 		bibliographies.set(lang, { route, defined, standards, byId });
 	}

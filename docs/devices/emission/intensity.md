@@ -832,12 +832,27 @@ for absolute scaling of the two channels.
   rule
   (Note 1), the frequency ranges of clause 6.1 and the component-combination
   rule of clause 8.
+- Asociación Española de Normalización y Certificación. (1999).
+  *Electroacústica — Instrumentos para la medida de la intensidad acústica —
+  Medida por medio de un par de micrófonos de presión* (UNE-EN 61043:1999).
+  The Spanish adoption of IEC 61043:1993, read beside it. Its clause 6.1
+  gives class 2 processors only the octave-band range, where the English text
+  also allows one-third octave bands: a defect of the translation that the
+  [errata registry](../../ERRATA.md) records. The library implements the
+  English text.
 - International Organization for Standardization. (1993). *Acoustics —
   Determination of sound power levels of noise sources using sound
   intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
   [iso.org catalogue](https://www.iso.org/standard/17427.html).
   The field indicators $F_1$ to $F_4$, the dynamic-capability criterion and
   the 0.5 m surface-distance rule.
+- Asociación Española de Normalización y Certificación. (2010). *Acústica —
+  Determinación de los niveles de potencia acústica de las fuentes de ruido a
+  partir de la intensidad del sonido — Parte 1: Medición en puntos discretos*
+  (UNE-EN ISO 9614-1:2010). The Spanish adoption of ISO 9614-1:1993, read
+  beside it. The [errata registry](../../ERRATA.md) records four places where
+  its text departs from the original (clauses 9.1, 10.5 c) and A.2.3, and
+  Note 11 to B.1.3); the library implements the ISO text.
 
 ## Standards
 

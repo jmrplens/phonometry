@@ -1781,7 +1781,8 @@ the summation of 4.9, its alias images graded too.
   Octave-band and fractional-octave-band filters* (IEC 61260:1995).
   [IEC webstore](https://webstore.iec.ch/en/publication/5065).
   The withdrawn first edition whose Table 1 supplies the stricter class 0
-  mask offered by `edition="1995"`.
+  mask offered by `edition="1995"`. Read in BS EN 61260:1996, its European
+  adoption EN 61260:1995 with amendment A1.
 - American National Standards Institute. (2004). *Specification for
   octave-band and fractional-octave-band analog and digital filters*
   (ANSI S1.11-2004). Acoustical Society of America.

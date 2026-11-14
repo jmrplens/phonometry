@@ -84,8 +84,11 @@ export function standardFamily(designation: string): string {
 	text = text.replace(/^Recommendation\s+/i, '');
 	// Trailing edition year first ("ANSI/ASA S12.2-2019"), then part number
 	// ("ISO 10140-2"). A three-digit or longer tail is part of the number
-	// itself ("NIOSH Publication No. 98-126") and stays.
-	text = text.replace(/-\d{4}$/, '');
+	// itself ("NIOSH Publication No. 98-126") and stays, and so do four digits
+	// that are no year of the last two centuries: the serial a report is
+	// numbered by ("NASA CR-3406", "NRL/FR/7176--95-9628"), which read as a
+	// year left "NASA CR" and "NRL/FR/7176-".
+	text = text.replace(/-(?:19|20)\d{2}$/, '');
 	text = text.replace(/-\d{1,2}$/, '');
 	return text.trim();
 }

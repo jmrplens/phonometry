@@ -660,6 +660,18 @@ the script does not read (`ISO/IEC 17025:2017`) stops it too, and asks for
 the prefix to be taught to `_DESIGNATION` rather than for a row, which would
 file a standard among the books.
 
+Each page names the documents it corrects through their entry in the site's
+bibliography, so the document an entry corrects has to be cited by a page:
+the edition its heading prints, for a standard, and the works its `SOURCES`
+row lists, for any other source. `make site-reports` stops on one that no
+page cites, and `python scripts/generate_site_reports.py --list-unmatched`
+lists them all: add each to the references of the guide that implements it,
+its Spanish twin and its docs/ mirror. Where the registry spells a cited
+document otherwise than the guides and the two are one text, add the
+spelling to `DESIGNATED_AS` instead; an adoption whose defects may be its
+own, a translation above all, is cited under its own designation
+([F59](docs/contributing/docs-and-figures.md#f59)).
+
 A second script is a contributor tool rather than a gate:
 
 ```bash

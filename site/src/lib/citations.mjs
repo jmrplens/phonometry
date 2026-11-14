@@ -22,6 +22,8 @@
  * never fetched.
  */
 
+import { isCataloguePage } from './catalogue-sources.mjs';
+
 /** Slugify a designation or title into an `@id` fragment. */
 function slug(value) {
   return String(value)
@@ -64,9 +66,9 @@ function withoutDoi(ref) {
 /**
  * Fields of a reference that are about the page citing the work, not the
  * work: what it anchors there, whether the page marks it, whether the page
- * implements it.
+ * implements it, and which of the page's catalogue tables it is the source of.
  */
-const PAGE_FIELDS = new Set(['note', 'primary', 'implemented']);
+const PAGE_FIELDS = new Set(['note', 'primary', 'implemented', 'tables']);
 
 /**
  * Standards of one body whose designations carry the same numbers in one year
@@ -129,14 +131,24 @@ export function designationBase(ref) {
  * language included, unless `separateStandards` lists them with the reason
  * they are not.
  *
+ * The `note` the bibliography's node takes as its description is the first
+ * one a page that is not a catalogue page writes. A catalogue page's note
+ * says which of its tables the work printed, which is the page's business:
+ * taken from whichever page came first, it described Harris's handbook by the
+ * carpets alone and contradicted what the bibliography page says of it. A
+ * work only catalogue pages cite takes every one of their notes, in page
+ * order, so its description names each table it is the source of.
+ *
  * @param {Iterable<{id: string, references?: object[]}>} pages The content
  *   entries of one language.
  * @param {string} bibliographyUrl Absolute URL of that language's bibliography.
  * @param {{separateStandards?: readonly {designations: string[], reason: string}[]}} [options]
  *   The standards known to be different works despite one base and year;
  *   `SEPARATE_STANDARDS` unless a caller says otherwise.
- * @returns {Map<string, object>} Each `@id` to the first reference to it, the
- *   one whose `note` the bibliography prints.
+ * @returns {Map<string, object>} Each `@id` to the reference whose `note` the
+ *   bibliography prints: the first one on a page that is not a catalogue page,
+ *   or, for a work only catalogue pages cite, the first one with the notes of
+ *   all of them.
  * @throws {Error} Listing every `@id` described two ways, every DOI under two
  *   `@id`s, every work cited with its DOI on one page and without it on
  *   another, and every standard cited under two designations.
@@ -193,7 +205,22 @@ export function citedWorks(pages, bibliographyUrl, { separateStandards = SEPARAT
         problems.join('\n  '),
     );
   }
-  return new Map([...works].map(([id, [first]]) => [id, first.ref]));
+  return new Map([...works].map(([id, citing]) => [id, describing(citing)]));
+}
+
+/**
+ * The reference whose `note` describes a work on the bibliography (`citedWorks`).
+ *
+ * @param {{page: string, ref: object}[]} citing Every reference to one work, in
+ *   page order.
+ * @returns {object}
+ */
+function describing(citing) {
+  const elsewhere = citing.find(({ page }) => !isCataloguePage(page));
+  if (elsewhere) return elsewhere.ref;
+  const byPage = [...citing].sort((a, b) => a.page.localeCompare(b.page));
+  const notes = [...new Set(byPage.map(({ ref }) => ref.note).filter(Boolean))];
+  return notes.length > 1 ? { ...byPage[0].ref, note: notes.join(' ') } : byPage[0].ref;
 }
 
 /**
@@ -288,7 +315,16 @@ const STANDARDS_BODIES = [
   { id: 'sae', name: 'SAE International', url: 'https://www.sae.org/' },
   { id: 'icao', name: 'International Civil Aviation Organization', alternateName: 'ICAO', url: 'https://www.icao.int/' },
   { id: 'vdi', name: 'Verein Deutscher Ingenieure', alternateName: 'VDI', url: 'https://www.vdi.de/' },
-  { id: 'une', name: 'Asociación Española de Normalización', alternateName: 'UNE', url: 'https://www.une.org/' },
+  // The Spanish standards body. Its editions before 2017 name it AENOR, the
+  // association that then issued the UNE standards and handed that work to
+  // UNE; one body, under the name each edition prints.
+  {
+    id: 'une',
+    name: 'Asociación Española de Normalización',
+    alternateName: 'UNE',
+    url: 'https://www.une.org/',
+    spelled: ['Asociación Española de Normalización', 'Asociación Española de Normalización y Certificación'],
+  },
   {
     id: 'ahri',
     name: 'Air-Conditioning, Heating, and Refrigeration Institute',

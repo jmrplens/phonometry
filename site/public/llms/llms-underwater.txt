@@ -1437,6 +1437,13 @@ and these closed forms, have their own guide:
   America*, 111(3), 1211-1231.
   [doi:10.1121/1.1427355](https://doi.org/10.1121/1.1427355).
   The ensemble merchant-ship spectrum model of section 6.
+- Breeding, J. E., Jr., Pflug, L. A., Bradley, M., Walrod, M. H., &
+  McBride, W. (1996). *Research Ambient Noise Directionality (RANDI) 3.1
+  physics description* (`NRL/FR/7176--95-9628`). Naval Research Laboratory.
+  The RANDI 3.1 ship source model behind `model="randi"`, which section 6
+  computes as MacGillivray & de Jong (2021) reproduce it. Two cells of its
+  Table 2 do not follow from its own Eqs. (2) to (5), which the
+  [errata registry](https://docs.jmrp.io/phonometry/reference/errata/) records.
 - Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
   Springer.
   [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).

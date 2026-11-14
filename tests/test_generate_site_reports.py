@@ -15,6 +15,7 @@ import pathlib
 import sys
 
 import pytest
+import yaml
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -477,3 +478,223 @@ def test_an_empty_introduction_is_mdx_safe() -> None:
     the two raised a ``ValueError`` where nothing is unsafe.
     """
     assert generate_site_reports._mdx_safe("", where="test") == ""
+
+
+# ---------------------------------------------------------------------------
+# The works a family corrects, in the site's bibliography.
+# ---------------------------------------------------------------------------
+
+
+def _iso(designation: str) -> dict[str, object]:
+    return {
+        "type": "standard",
+        "organization": "International Organization for Standardization",
+        "designation": designation,
+        "title": f"Title of {designation}",
+    }
+
+
+@pytest.mark.whole_tree
+def test_the_reader_reads_every_page_as_a_yaml_parser_does() -> None:
+    """The stdlib reader and PyYAML agree on every page's references.
+
+    The generator runs with the standard library alone (the CI job installs
+    nothing), so it reads the frontmatter with a narrow reader of its own. This
+    holds the reader to a real YAML parser over the whole site, so a page
+    written in a shape it would misread fails here and not as a silently
+    missing bibliography entry.
+    """
+    content = generate_site_reports.CONTENT
+    pages = sorted([*content.rglob("*.md"), *content.rglob("*.mdx")])
+    cited = 0
+    for path in pages:
+        text = path.read_text(encoding="utf8")
+        expected: list[dict[str, object]] = []
+        if text.startswith("---\n"):
+            frontmatter = yaml.safe_load(text[4 : text.find("\n---", 3)]) or {}
+            expected = frontmatter.get("references") or []
+        assert generate_site_reports.read_references(path) == expected, path
+        cited += len(expected)
+    assert cited > 0
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "    note: >",
+        "    title: 'single quoted'",
+        "  - {type: standard}",
+        "      - nested item",
+        "- type: book",
+        "# a comment at the margin\n  - type: book",
+    ],
+)
+def test_the_reader_stops_on_a_line_it_cannot_follow(
+    tmp_path: pathlib.Path, line: str
+) -> None:
+    """A references line in any other shape stops the run, naming the line."""
+    page = tmp_path / "page.md"
+    page.write_text(
+        f'---\ntitle: "A page"\nreferences:\n  - type: standard\n{line}\n---\n',
+        encoding="utf8",
+    )
+    with pytest.raises(SystemExit, match="page.md:5"):
+        generate_site_reports.read_references(page)
+
+
+@pytest.mark.parametrize(
+    ("frontmatter", "line"),
+    [
+        # A list written at the margin, valid YAML the reader would read as empty.
+        (
+            'references:\n- type: book\n  authors: ["Rossing, T. D. (Ed.)"]\n'
+            "  year: 2014\n",
+            4,
+        ),
+        # A list written on the line of its key.
+        ("references: [{type: book, year: 2014}]\n", 3),
+    ],
+)
+def test_the_reader_stops_on_a_list_it_would_read_as_empty(
+    tmp_path: pathlib.Path, frontmatter: str, line: int
+) -> None:
+    """A references list in a shape the reader does not follow is never no list."""
+    page = tmp_path / "page.md"
+    page.write_text(f'---\ntitle: "A page"\n{frontmatter}---\n', encoding="utf8")
+    assert yaml.safe_load(frontmatter)["references"]
+    with pytest.raises(SystemExit, match=f"page.md:{line}"):
+        generate_site_reports.read_references(page)
+
+
+def test_the_reader_reads_on_past_a_blank_line_and_stops_at_the_next_key(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A blank line between entries is no end of the list; the next key is."""
+    page = tmp_path / "page.md"
+    frontmatter = (
+        'references:\n  - type: standard\n    designation: "ISO 1:2002"\n\n'
+        '  - type: book\n    year: 2014\nsidebar:\n  label: "x"\n'
+    )
+    page.write_text(f'---\ntitle: "A page"\n{frontmatter}---\n', encoding="utf8")
+    expected = yaml.safe_load(frontmatter)["references"]
+    assert generate_site_reports.read_references(page) == expected
+    assert len(expected) == 2
+
+
+@pytest.mark.whole_tree
+def test_every_corrected_work_has_one_bibliography_entry() -> None:
+    """Every work a family corrects is named once in each language's bibliography.
+
+    The shipped registry against the shipped pages: the guard that the CI job
+    runs through ``--check``.
+    """
+    pages = generate_site_reports.family_pages()
+    assert generate_site_reports.check_bibliography(pages) == []
+    corrected = [
+        work for page in pages for work in generate_site_reports.corrected_works(page)
+    ]
+    assert len(corrected) > len(pages) // 2
+
+
+def test_every_family_but_the_closing_list_corrects_a_work() -> None:
+    """A family that named no work would pass the guard by naming nothing."""
+    for page in generate_site_reports.family_pages():
+        works = generate_site_reports.corrected_works(page)
+        assert bool(works) == (page.family.group != "not-errata"), page.family.slug
+
+
+def test_a_work_no_page_cites_is_listed_in_both_languages() -> None:
+    """A designation the bibliography does not hold is listed once per language."""
+    pages = generate_site_reports.plan_families(
+        ["ISO 9613-2:1996, 7.3 (a ground factor)", "Rossing (2014), Table 8.1 (a year)"]
+    )
+    bibliography: list[dict[str, object]] = [_iso("ISO 9613-2:1996")]
+    unmatched = generate_site_reports.unmatched_works(
+        pages, {"en": bibliography, "es": []}
+    )
+    assert [(item.family, item.lang, item.found) for item in unmatched] == [
+        ("iso-9613", "es", 0),
+        ("rossing", "en", 0),
+        ("rossing", "es", 0),
+    ]
+    assert str(unmatched[1]) == (
+        "rossing (en): book by Rossing (2014) has no bibliography entry"
+    )
+
+
+def test_a_work_two_entries_match_is_listed_as_ambiguous() -> None:
+    """Two distinct works under one description would make the page point at either."""
+    page = generate_site_reports.plan_families(["Jarvis (1996), Appendix B (a unit)"])
+    reports: list[dict[str, object]] = [
+        {"type": "report", "authors": ["Jarvis, D. R."], "year": 1996, "title": t}
+        for t in ("First report", "Second report")
+    ]
+    unmatched = generate_site_reports.unmatched_works(
+        page, {"en": reports, "es": reports}
+    )
+    assert [item.found for item in unmatched] == [2, 2]
+    assert "matches 2 bibliography entries" in str(unmatched[0])
+
+
+def test_one_work_cited_on_many_pages_is_one_match() -> None:
+    """The same entry repeated on every page that cites it is still one work."""
+    page = generate_site_reports.plan_families(
+        ["Long, Architectural Acoustics 2e (2014), Eq. (1)"]
+    )
+    long = {
+        "type": "book",
+        "authors": ["Long, M."],
+        "year": 2014,
+        "title": "Architectural acoustics",
+        "doi": "10.1016/C2012-0-03257-5",
+    }
+    assert (
+        generate_site_reports.unmatched_works(page, {"en": [long, long], "es": [long]})
+        == []
+    )
+
+
+def test_a_registry_spelling_is_read_as_the_guides_spell_it() -> None:
+    """An alias names the bibliography's designation, in each language."""
+    page = generate_site_reports.plan_families(
+        ["ITU-R BS.468-4, Table 2, 5 ms upper limit (a cell)"]
+    )[0]
+    (work,) = generate_site_reports.corrected_works(page)
+    english = _iso("Recommendation ITU-R BS.468-4")
+    spanish = _iso("Recomendación UIT-R BS.468-4")
+    assert work.matches(english, "en")
+    assert not work.matches(spanish, "en")
+    assert work.matches(spanish, "es")
+    assert not work.matches(english, "es")
+
+
+def test_every_alias_names_a_designation_the_registry_prints() -> None:
+    """An alias for a spelling no heading uses any more is dead and goes."""
+    printed = {
+        edition
+        for page in generate_site_reports.family_pages()
+        for edition in page.editions
+    }
+    assert set(generate_site_reports.DESIGNATED_AS) <= printed
+
+
+def test_list_unmatched_prints_the_works_and_fails(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """``--list-unmatched`` prints one line per work and exits 1 while any is left."""
+    missing = generate_site_reports.Unmatched(
+        "randi",
+        "en",
+        generate_site_reports.Work(kind="report", who="Breeding", year=1996),
+        0,
+    )
+    monkeypatch.setattr(
+        generate_site_reports, "check_bibliography", lambda pages: [missing]
+    )
+    assert generate_site_reports.main(["--list-unmatched"]) == 1
+    out = capsys.readouterr().out
+    assert "randi (en): report by Breeding (1996) has no bibliography entry" in out
+    assert generate_site_reports.main(["--check"]) == 1
+    assert "randi (en)" in capsys.readouterr().err
+    monkeypatch.setattr(generate_site_reports, "check_bibliography", lambda pages: [])
+    assert generate_site_reports.main(["--list-unmatched"]) == 0

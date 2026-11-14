@@ -25,6 +25,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import ast_scan
+import guard_caches
 
 _SOURCE = """
 def outer(keep, x):
@@ -2231,3 +2232,47 @@ def test_the_calls_a_function_makes_on_every_path_that_returns() -> None:
     ]
     assert names == ["first", "third"]
     assert ast_scan.first_parameter(function) == "self"
+
+
+def test_forgetting_the_trees_clears_every_cache_of_the_reader(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The reader's caches are keyed by the trees they read, and the autouse
+    fixture of ``tests/conftest.py`` lets them go after every test, so that a
+    test that points a global of the reader elsewhere, as one here counts the
+    scopes it walks, leaves no answer read under it to the next. That holds
+    while :func:`ast_scan.forget_trees` clears every cache the module keeps:
+    each ``functools`` cache, and each dict, set or list the module starts
+    empty and fills with what it read, which holds the trees themselves. One
+    it leaves out would carry what a test read into the tests after it, and
+    keep the trees of every file a guard read for as long as the process runs.
+    """
+    cleared: list[str] = []
+    cached = sorted(
+        name
+        for name, value in vars(ast_scan).items()
+        if callable(getattr(value, "cache_clear", None))
+        and getattr(value, "__module__", None) == ast_scan.__name__
+    )
+    assert cached, "the reader keeps no cache to clear"
+    for name in cached:
+        monkeypatch.setattr(
+            getattr(ast_scan, name),
+            "cache_clear",
+            lambda name=name: cleared.append(name),
+        )
+    filled = guard_caches.containers_filled_as_it_runs(ast_scan)
+    assert filled, "the reader keeps no container of its own to clear"
+    for name in filled:
+        container = getattr(ast_scan, name)
+        if isinstance(container, dict):
+            container[object()] = object()
+        elif isinstance(container, set):
+            container.add(object())
+        else:
+            container.append(object())
+    ast_scan.forget_trees()
+    assert sorted(cleared) == cached
+    assert [name for name in filled if getattr(ast_scan, name)] == [], (
+        "forget_trees leaves these containers holding what was read"
+    )

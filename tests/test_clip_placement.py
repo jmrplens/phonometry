@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from multiprocessing.context import BaseContext
     from typing import Self
 
+    from guard_caches import FreshCaches
     from numpy.typing import NDArray
 
     from phonometry.simulation._backends import DeviceArray
@@ -662,21 +663,14 @@ def _stand_in_pairs(
     return pair
 
 
-@pytest.fixture
-def fresh_metadiffuser_field() -> Iterator[None]:
-    """The metadiffuser's field cache, empty before the test and after it."""
-    from figures.fields import metadiffuser
-
-    metadiffuser._metadiffuser_fields.cache_clear()
-    yield
-    metadiffuser._metadiffuser_fields.cache_clear()
-
-
-@pytest.mark.usefixtures("fresh_metadiffuser_field")
 def test_the_metadiffuser_on_a_gpu_steps_its_pairs_in_turn_freeing_each(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, fresh_caches: FreshCaches
 ) -> None:
-    """A pair is what the free GPU memory holds, and its blocks go back before the next."""
+    """A pair is what the free GPU memory holds, and its blocks go back before the next.
+
+    The field is cached by its frame count, so the test reads it with the
+    metadiffuser's caches empty on both sides.
+    """
     from figures.fields import metadiffuser
 
     def host_bytes() -> int:
@@ -689,7 +683,7 @@ def test_the_metadiffuser_on_a_gpu_steps_its_pairs_in_turn_freeing_each(
     monkeypatch.setattr(
         clip_placement, "release_device", lambda: calls.append("release")
     )
-    monkeypatch.setattr(metadiffuser, "_meta_pair", _stand_in_pairs(calls))
+    fresh_caches(metadiffuser, _meta_pair=_stand_in_pairs(calls))
     tot, _, _ = metadiffuser._metadiffuser_fields(4)
     assert calls == [
         ("flat", 4, placed),
@@ -704,9 +698,8 @@ def test_the_metadiffuser_on_a_gpu_steps_its_pairs_in_turn_freeing_each(
     assert tot[:, 0, 0, 0].tolist() == [1.0, 2.0, 3.0]
 
 
-@pytest.mark.usefixtures("fresh_metadiffuser_field")
 def test_the_metadiffuser_on_numpy_pools_as_many_pairs_as_the_ram_holds(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, fresh_caches: FreshCaches
 ) -> None:
     """18 GiB holds two pairs of 8.55 GB: the pool is made of two spawned workers."""
     import concurrent.futures as cf
@@ -736,7 +729,7 @@ def test_the_metadiffuser_on_numpy_pools_as_many_pairs_as_the_ram_holds(
     monkeypatch.setattr(cf, "ProcessPoolExecutor", _InTurn)
     monkeypatch.setattr(clip_placement, "compute_for", lambda clip: placed)
     monkeypatch.setattr(clip_placement, "host_bytes", lambda: available)
-    monkeypatch.setattr(metadiffuser, "_meta_pair", _stand_in_pairs(calls))
+    fresh_caches(metadiffuser, _meta_pair=_stand_in_pairs(calls))
     tot, _, _ = metadiffuser._metadiffuser_fields(4)
     assert pools == [(metadiffuser._meta_workers(available), "spawn")]
     assert pools[0][0] == 2
@@ -752,9 +745,8 @@ def test_the_metadiffuser_on_numpy_pools_as_many_pairs_as_the_ram_holds(
 _DEAD_POOL_S = 120.0
 
 
-@pytest.mark.usefixtures("fresh_metadiffuser_field")
 def test_a_metadiffuser_pair_whose_process_dies_ends_the_field_with_an_error(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, fresh_caches: FreshCaches
 ) -> None:
     """A pair the kernel kills for its memory breaks the pool, which no longer waits for it."""
     from concurrent.futures.process import BrokenProcessPool
@@ -767,7 +759,7 @@ def test_a_metadiffuser_pair_whose_process_dies_ends_the_field_with_an_error(
         clip_placement, "compute_for", lambda clip: types.SimpleNamespace(device="cpu")
     )
     monkeypatch.setattr(clip_placement, "host_bytes", lambda: 40 << 30)
-    monkeypatch.setattr(metadiffuser, "_meta_pair", killed_worker.killed)
+    fresh_caches(metadiffuser, _meta_pair=killed_worker.killed)
     caught: list[pytest.ExceptionInfo[BrokenProcessPool]] = []
     failed: list[BaseException] = []
 

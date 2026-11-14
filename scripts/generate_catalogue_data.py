@@ -1450,7 +1450,8 @@ def section(
 class MissingSpanishError(Exception):
     """The Spanish page would print a row's words in English, or keep dead ones.
 
-    :ivar missing: The English strings with no entry in :data:`SPANISH`.
+    :ivar missing: The English strings with no entry in :data:`SPANISH`, or
+        with a blank one.
     :ivar unused: The entries of :data:`SPANISH` no row prints any more.
     """
 
@@ -1459,8 +1460,8 @@ class MissingSpanishError(Exception):
         self.unused = unused
         lines = [
             f"{len(missing)} strings on the catalogues page have no Spanish in "
-            f"{SPANISH.name}, and {len(unused)} of its entries are no longer "
-            "printed. Run `python scripts/generate_catalogue_data.py "
+            f"{SPANISH.name} (no entry, or a blank one), and {len(unused)} of "
+            "its entries are no longer printed. Run `python scripts/generate_catalogue_data.py "
             "--untranslated` for the missing ones as a stub to fill in."
         ]
         lines += [f"  missing: {text!r}" for text in sorted(missing)[:20]]
@@ -1480,8 +1481,9 @@ def in_spanish(document: dict[str, Any], spanish: Mapping[str, str]) -> None:
 
     :param document: What :func:`render` is about to write, changed in place.
     :param spanish: English to Spanish, as :data:`SPANISH` holds it.
-    :raises MissingSpanishError: When a word the page prints has no Spanish,
-        or an entry translates something no row prints any more, so the
+    :raises MissingSpanishError: When a word the page prints has no Spanish
+        or a blank one, or an entry translates something no row prints any
+        more, so the
         Spanish page can neither fall back to English in silence nor carry
         translations of rows that were renamed.
     """
@@ -1495,7 +1497,13 @@ def in_spanish(document: dict[str, Any], spanish: Mapping[str, str]) -> None:
             missing.add(text)
             return None
         used.add(text)
-        return spanish[text] if spanish[text] != text else None
+        entry = spanish[text]
+        if not entry.strip():
+            # A blank entry is no translation: the Spanish page would print
+            # nothing where the English page prints the word.
+            missing.add(text)
+            return None
+        return entry if entry != text else None
 
     for table in document.values():
         for row in table["rows"]:

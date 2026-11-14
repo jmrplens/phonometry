@@ -705,6 +705,22 @@ def test_a_word_with_no_spanish_stops_the_generator() -> None:
     assert caught.value.missing == {"annealed"}
 
 
+@pytest.mark.parametrize("blank", ["", " ", "\t", "\u00a0"])
+def test_a_blank_spanish_entry_stops_the_generator(blank: str) -> None:
+    """A blank entry is no translation: the Spanish page would print nothing.
+
+    It was taken for one, so the row's name and the cell's note went to the
+    Spanish page empty, with no error and nothing missing reported.
+    """
+    document = _one_row(cells=[{"text": "", "kind": "absent", "note": "no value"}])
+
+    with pytest.raises(gcd.MissingSpanishError, match="have no Spanish") as caught:
+        gcd.in_spanish(document, {"Lead": blank, "no value": "sin valor"})
+
+    assert caught.value.missing == {"Lead"}
+    assert caught.value.unused == set()
+
+
 def test_a_translation_no_row_prints_stops_the_generator() -> None:
     """A renamed row leaves its old translation behind; it has to go."""
     document = _one_row()

@@ -115,6 +115,7 @@ from .environment import (
     _d_atmospheric_refraction,
     _d_barrier_four_paths,
     _d_barrier_in_situ,
+    _d_barrier_reflection_setup,
     _d_cnossos_rail,
     _d_cnossos_road,
     _d_env_positions,
@@ -1220,6 +1221,11 @@ DIAGRAMS = {
         _d_barrier_in_situ,
         "How an outdoor barrier is measured once it is built (ISO 10847)",
         750,
+    ),
+    "diagram_barrier_reflection_setup": (
+        _d_barrier_reflection_setup,
+        "How a noise barrier's reflection is measured in situ (EN 1793-5)",
+        950,
     ),
     "diagram_open_end_solid_angles": (
         _d_open_end_solid_angles,

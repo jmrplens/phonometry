@@ -63,6 +63,17 @@ micrófonos, de 3 por 3 y separados 0,40 m, con su centro (el micrófono 5) a
 como los ve el altavoz: del 1 al 3 en la fila de arriba, del 7 al 9 en la de
 abajo.
 
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_reflection_setup.svg"
+  alt="Tres vistas del montaje de la EN 1793-5 y una lista de lo que registra. Primero, una vista lateral a escala de un dispositivo de 4 m: el altavoz sobre un soporte a media altura del dispositivo, con su panel frontal a 1,50 m del plano de referencia, la rejilla de medida a 0,25 m del plano con un micrófono de cada fila dibujado, el sonido directo que recorre 1,25 m hasta el micrófono 5, la reflexión que recorre 1,75 m y dos llegadas indeseadas a trazos, una difractada en el borde superior que baja hasta la fila de arriba y otra reflejada en el suelo que sube hasta la fila de abajo. Segundo, la muestra de 4 m por 4 m tal como la ve el altavoz: nueve micrófonos separados 0,40 m, numerados del 1 al 3 en la fila de arriba y del 7 al 9 en la de abajo, los micrófonos 1 a 6 marcados como usados en todas las bandas y los 7 a 9 solo desde la banda de 200 Hz, todos dentro del círculo a trazos del área muestreada del micrófono 5, de 1,96 m de radio. Tercero, el registro en campo libre: el mismo altavoz y la misma rejilla, todavía a 1,25 m, vueltos hacia donde no hay ningún objeto ni el suelo. La lista nombra cinco registros con sus apartados: la directividad del altavoz, nueve respuestas al impulso delante del dispositivo por cada posición de la rejilla, otras nueve en campo libre, la comprobación con una placa reflectante y la comprobación de ganancia."
+  width="100%"
+/>
+
+*La media altura deja el altavoz tan lejos del suelo como del borde superior,
+y a las dos llegadas a trazos vuelve el resto de la página: por ellas la fila
+de abajo queda fuera por debajo de 200 Hz (sección 4) y un dispositivo más bajo
+no puede medirse tan abajo en frecuencia (sección 5).*
+
 Cada micrófono oye el sonido directo y, algo más de un milisegundo después, la
 reflexión. La reflexión ha recorrido más camino, 1,75 m frente a 1,25 m en el
 micrófono 5, y se ha repartido sobre una esfera mayor; la fórmula (2) lo
@@ -100,6 +111,57 @@ print((check.deviations_m * 1e3).round())         # al micrófono 7 le faltan 27
 
 El veredicto es `passes`; el objeto se niega a hacer sus veces dentro de un
 `if`, para que una comprobación nunca se lea como aprobada por descuido.
+
+### El orden del trabajo (apartado 5.10)
+
+La norma enumera la medición paso a paso, y sus pasos a) a j) son los que se
+hacen en campo. En el mismo orden:
+
+1. **Las condiciones (apartado 5.7).** La superficie de la muestra está seca,
+   y se comprueba que sus poros lo están si tiene un contenido de huecos
+   apreciable; su temperatura está entre 0 °C y 70 °C, la del aire entre 0 °C
+   y 40 °C, y el viento en los micrófonos no pasa de 5 m/s. Fuera de ellas no
+   se mide.
+2. **El equipo en su sitio (apartado 5.6).** El altavoz tiene un solo
+   transductor, sin conducto de sintonía ni filtro de cruce (apartado 5.4.2),
+   y los micrófonos son como mínimo de tipo 2 según la EN 61672-1 y de media
+   pulgada como máximo (apartado 5.4.1). Altavoz y rejilla ocupan las posiciones de
+   referencia del diagrama, con el micrófono 5 a la misma distancia de los
+   postes de uno y otro lado (apartado 5.6.2.2). Un dispositivo que no es
+   plano se mide en tres posiciones, A, B y C, con el micrófono 5 frente a su
+   parte más saliente, a medio camino y frente a la menos saliente; uno plano
+   pero no homogéneo, en dos posiciones o más, con el micrófono 5 frente a un
+   material distinto en cada una; en los dos casos dentro de un periodo de su
+   patrón (apartado 5.6.2.3), y en cuatro posiciones o más cuando el patrón se
+   repite en dos direcciones (apartado 5.6.2.4). El altavoz y la rejilla se
+   mueven juntos.
+3. **Las posiciones comprobadas (apartados 5.6.2.5 y 5.6.2.6).** Son las dos
+   comprobaciones del fragmento de arriba, con una placa reflectante plana de
+   1,60 m por 1,60 m como mínimo. La segunda lleva tiempo en obra, y el
+   apartado 5.6.2.6 permite prescindir de ella con un montaje construido para
+   garantizar las posiciones; el informe muestra fotografías del montaje.
+4. **El área muestreada despejada (apartados 5.6.1 y 5.6.3).** Se calcula el
+   radio de la fórmula (8), y dentro de él, o más cerca del micrófono que ese
+   radio, no hay nada más que refleje: barreras de seguridad, vallas, rocas,
+   coches aparcados. Si lo hay, no se mide.
+5. **La señal de ensayo (apartados 5.4.3 y 5.5.2).** Es determinista y
+   exactamente repetible, y los micrófonos se muestrean a 44 kHz o más.
+6. **Los registros delante del dispositivo.** Nueve respuestas al impulso por
+   cada posición de la rejilla, promediadas más o tomadas de nuevo mientras el
+   ruido de fondo deje la relación señal/ruido efectiva en 10 dB o menos
+   (apartado 5.5.3).
+7. **Los registros en campo libre.** Uno por cada posición de micrófono, con
+   el montaje vuelto hacia el espacio libre y su geometría intacta (apartados
+   3.16 y 5.6.2.2).
+
+Los pasos k) a r) son el procesado de las secciones 2 a 6. Dos registros
+quedan fuera de la lista: la directividad del altavoz, que se mide una vez por
+altavoz (apartado 5.2), y la comprobación de ganancia de la sección 4, que se
+hace al menos una vez por cada posición de la rejilla (apartado 5.5.1). La
+NOTA 2 del apartado 5.6.2.3 da la razón para no entretenerse: con un equipo
+multicanal los nueve registros de una rejilla y sus equivalentes en campo
+libre se toman normalmente en menos de 20 minutos, de modo que la temperatura,
+y con ella el tiempo de vuelo, no tiene ocasión de cambiar entre unos y otros.
 
 ## 2. Quitar el sonido directo
 
@@ -251,8 +313,9 @@ Una reflexión de 0,35 veces la amplitud vuelve como 0,12, su cuadrado, y baja
 donde el suavizado quitó la parte alta. El resultado guarda el
 índice de cada micrófono (`microphone_values`, `nan` donde el apartado 5.5.5
 deja fuera un micrófono), cada factor de ganancia y cada factor de reducción,
-para que un informe pueda declararlos. Varias posiciones de la rejilla, las A,
-B y C de un dispositivo que no es plano u homogéneo (apartado 5.6.2.3), entran
+para que un informe pueda declararlos. Varias posiciones de la rejilla, las de
+los apartados 5.6.2.3 y 5.6.2.4 para un dispositivo que no es plano o no es
+homogéneo, entran
 como una matriz `(posiciones, 9, N)` y se promedian sobre cada micrófono de cada
 posición. Los registros también pueden llegar como los `Signal` de nueve canales
 que devuelve el lector, uno por posición de la rejilla: la frecuencia de
@@ -484,8 +547,9 @@ Obtener las respuestas al impulso, por MLS o barrido y deconvolución (apartado
 salas](/phonometry/es/buildings/rooms/room-impulse-response/); el filtro
 antisolapamiento del apartado 5.5.2 y la relación señal/ruido del 5.5.3, que un
 laboratorio declara en lugar de calcular; las condiciones meteorológicas y de
-la superficie del apartado 5.7; y los indicadores de campo lejano del anexo C,
-que la norma deja a los informes de QUIESST. El límite de baja frecuencia sigue
+la superficie del apartado 5.7 y el orden del trabajo del 5.10, que la
+sección 1 enumera y ninguna función comprueba; y los indicadores de campo
+lejano del anexo C, que la norma deja a los informes de QUIESST. El límite de baja frecuencia sigue
 la figura 14 en el micrófono 5 y no en los micrófonos 2 y 8, así que no elige la
 banda fiable más baja: esa decisión queda en el informe.
 </ScopeClaim>

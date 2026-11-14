@@ -159,6 +159,11 @@ _SCRIPT_COMMENTS = ("//", "/*", "*", "<!--")
 #: Readers that keep their own fence logic, and why, keyed by the file relative
 #: to the repository and the name of the function that holds the reading.
 EXEMPT: dict[tuple[str, str], str] = {
+    ("site/src/lib/agent-md/test/check-markdown-writers.test.mjs", "<script>"): (
+        "fixtures: the page this test hands the census of components shows an "
+        "import inside a fenced example, because what it checks is that an import "
+        "in code is never counted; nothing in it reads a fence"
+    ),
     ("site/scripts/check-structured-data.test.mjs", "<script>"): (
         "fixtures: the guide this test hands the word count carries a fenced block, "
         "because what it checks is that code is left out of the words a page shows; "

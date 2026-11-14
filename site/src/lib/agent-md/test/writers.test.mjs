@@ -287,6 +287,18 @@ describe('Home', () => {
     assert.doesNotMatch(markdown, /<[a-z]+[ >]/u);
   });
 
+  test('an area no standard governs says so in its row, in each language, as the landing does', () => {
+    for (const [content, lang] of [[en, 'en'], [es, 'es']]) {
+      const { markdown } = write(page(lang), { scope: new Map([[lang, content]]), lang });
+      const empty = content.coverage.areas.filter((area) => area.standards.length === 0);
+      assert.ok(empty.length > 0, `${lang}: an area with no standard`);
+      for (const area of empty) {
+        const row = markdown.split('\n').find((one) => one.startsWith(`| [${area.name}](`));
+        assert.ok(row?.endsWith(`| ${content.coverage.noStandard} |`), `${lang}: ${row}`);
+      }
+    }
+  });
+
   test('the Spanish landing reads the Spanish content', () => {
     const { markdown, issues } = write(page('es'), { scope: new Map([['es', es]]), lang: 'es' });
     assert.deepEqual(issues, []);

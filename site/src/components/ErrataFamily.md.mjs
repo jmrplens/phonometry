@@ -18,7 +18,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { bracketText, line } from '../lib/agent-md/markdown-table.mjs';
+import { line, literalText } from '../lib/agent-md/markdown-table.mjs';
 import { parse } from '../lib/agent-md/processor.mjs';
 import { CONTENT_DIR } from '../lib/agent-md/render.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
@@ -63,7 +63,7 @@ export default markdownFor({
     }
     const headings = entryHeadings(readCommittedText(file));
     if (headings.length === 0) ctx.issue(node, `${id}.md has no entry heading (##) to list`);
-    const title = `${ctx.heading(3, `[${bracketText(name)}](${ctx.site.url(`/${id}/`)})`)} (${COUNT[ctx.lang](headings.length)})`;
+    const title = `${ctx.heading(3, `[${literalText(name)}](${ctx.site.url(`/${id}/`)})`)} (${COUNT[ctx.lang](headings.length)})`;
     return [title, headings.map((heading) => `- ${heading}`).join('\n')].filter(Boolean).join('\n\n');
   },
 });

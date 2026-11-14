@@ -75,3 +75,43 @@ export function absolutizeRootLinks(markdown, origin) {
   for (const at of inserts.sort((a, b) => b - a)) out = `${out.slice(0, at)}${root}${out.slice(at)}`;
   return out;
 }
+
+/**
+ * Every fragment link to one of `anchors`, ids the copy leaves out, sent to
+ * the page itself: `[x](#old-id)` becomes `[x](<page>#old-id)`. The copy is
+ * parsed, as {@link absolutizeRootLinks} parses it, so a fragment written in
+ * code is left alone; a fragment to any other id is left as written.
+ *
+ * @param {string} markdown
+ * @param {ReadonlySet<string>} anchors
+ * @param {string} pageUrl  The page's address, ending in `/`.
+ * @returns {string}
+ */
+export function pointDroppedAnchors(markdown, anchors, pageUrl) {
+  if (anchors.size === 0 || !markdown.includes('](#')) return markdown;
+  const tree = parse(markdown, { mdx: false });
+  /** @type {number[]} */
+  const inserts = [];
+  const visit = (node) => {
+    const url = node.url ?? '';
+    if (LINK_TYPES.has(node.type) && url.startsWith('#') && node.position) {
+      let id = url.slice(1);
+      try {
+        id = decodeURIComponent(id);
+      } catch {
+        // A fragment that is no valid escape is compared as written.
+      }
+      if (anchors.has(id)) {
+        const start = node.position.start.offset;
+        const text = markdown.slice(start, node.position.end.offset);
+        const at = text.lastIndexOf(`(${url}`);
+        if (at >= 0) inserts.push(start + at + 1);
+      }
+    }
+    for (const child of node.children ?? []) visit(child);
+  };
+  visit(tree);
+  let out = markdown;
+  for (const at of inserts.sort((a, b) => b - a)) out = `${out.slice(0, at)}${pageUrl}${out.slice(at)}`;
+  return out;
+}

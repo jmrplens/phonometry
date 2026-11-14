@@ -14,7 +14,10 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 import { describe, test } from 'node:test';
 
-import { checkMarkdownWriters, isParseError, openingProblem } from '../../../../scripts/check-markdown-writers.mjs';
+import { census } from '../../../../scripts/agent-md.mjs';
+import { checkMarkdownWriters, isParseError, openingProblem, REMEDIES } from '../../../../scripts/check-markdown-writers.mjs';
+import { codeLines, splitLines } from '../../markdown-fences.mjs';
+import { markdownPlugins } from '../rewrites.mjs';
 import { pageFiles } from '../content.mjs';
 import { parse } from '../processor.mjs';
 import { writerFiles, WRITER_SUFFIX } from '../registry.mjs';
@@ -171,6 +174,12 @@ describe('what the check refuses', () => {
     assert.deepEqual(listed(result), ['stale Old.md.mjs']);
   });
 
+  test('a site checked out with carriage returns passes as it does with line feeds', async (t) => {
+    const crlf = (text) => text.replaceAll('\n', '\r\n');
+    const result = await check(t, { 'a.mdx': crlf(`${BOX}<Box kind="x" />\n`) }, { 'Box.md.mjs': crlf(writer('Box', { props: ['kind'] })) });
+    assert.deepEqual(listed(result), []);
+  });
+
   test('a writer without its keep/drop comment', async (t) => {
     const bare = `import { markdownFor } from '${TYPES}';\nexport default markdownFor({ tag: 'Box', props: [], toMarkdown: () => '' });\n`;
     const result = await check(t, { 'a.mdx': `${BOX}<Box />\n` }, { 'Box.md.mjs': bare });
@@ -209,12 +218,85 @@ describe('the opening comment', () => {
   });
 });
 
+/**
+ * The components a page imports, read off its lines that are not code: an
+ * import line a fenced example shows is no import of the page.
+ *
+ * @param {string} text
+ * @returns {string[]}
+ */
+function componentImports(text) {
+  const lines = splitLines(text);
+  const code = codeLines(lines);
+  const prose = lines.map((one, at) => (code[at] ? '' : one)).join('\n');
+  return [...prose.matchAll(/^import\s+(\w+)\s+from\s+(["'])[^"'\n]*\/components\/[^"'\n]+\.astro\2;?[ \t]*$/gmu)].map((match) => match[1]);
+}
+
+test('an import line a fenced example shows is not an import of the page', () => {
+  const page = "import Box from '../components/Box.astro';\n\n```mdx\nimport Shown from '../components/Shown.astro';\n```\n";
+  assert.deepEqual(componentImports(page), ['Box']);
+});
+
+test('an import of a component is read in either quote, with or without its semicolon, and over two lines', () => {
+  const page = 'import Box from "../components/Box.astro";\nimport Card from \'../components/Card.astro\'\nimport Wide\n  from "../components/Wide.astro";\n';
+  assert.deepEqual(componentImports(page), ['Box', 'Card', 'Wide']);
+});
+
+test('every kind of failure the check reports has its remedy', () => {
+  const sources = ['../../../../scripts/check-markdown-writers.mjs', '../render.mjs'].map((path) =>
+    readFileSync(new URL(path, import.meta.url), 'utf8'),
+  );
+  const kinds = new Set(sources.flatMap((text) => [...text.matchAll(/\bkind: '(\w+)'|\breport\('(\w+)'/gu)].map((m) => m[1] ?? m[2])));
+  for (const kind of ['parse', 'import', 'plugin', 'stale', 'opening']) assert.ok(kinds.has(kind), kind);
+  for (const kind of kinds) assert.equal(typeof REMEDIES[kind], 'string', `no remedy for ${kind}`);
+});
+
+describe('the Markdown plugins of the site', () => {
+  const site = (t, config) => {
+    const root = mkdtempSync(join(tmpdir(), 'agent-md-plugins-'));
+    t.after(() => rmSync(root, { recursive: true, force: true }));
+    if (config !== undefined) writeFileSync(join(root, 'astro.config.mjs'), config);
+    return root;
+  };
+
+  test('a site with no config has none, the real one has its two', async (t) => {
+    assert.deepEqual(await markdownPlugins(site(t)), []);
+    assert.deepEqual(
+      (await markdownPlugins(SITE_DIR)).map((plugin) => plugin.module),
+      ['src/lib/remark-bibliography.mjs', 'src/lib/wrappable-math.mjs'],
+    );
+  });
+
+  test('a config whose markdown block is not where it is read, or that cannot be read, stops the check', async (t) => {
+    const real = readFileSync(join(SITE_DIR, 'astro.config.mjs'), 'utf8');
+    const reindented = real.replace(/\bmarkdown:\s*\{[\s\S]*?\n {2}\},/u, (block) => block.replaceAll('\n', '\n    '));
+    assert.notEqual(reindented, real);
+    await assert.rejects(markdownPlugins(site(t, reindented)), /no `markdown: \{ \.\.\. \},` block/u);
+    const unreadable = site(t);
+    mkdirSync(join(unreadable, 'astro.config.mjs'));
+    await assert.rejects(markdownPlugins(unreadable), /EISDIR/u);
+  });
+});
+
+test('the census reports a page that does not parse and goes on to the others', async (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'agent-md-census-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const good = join(root, 'good.mdx');
+  const broken = join(root, 'broken.mdx');
+  writeFileSync(good, '# Good\n\nText.\n');
+  writeFileSync(broken, '# Broken\n\n<div>\n\nNever closed.\n');
+  const lines = [];
+  await census({ files: [broken, good], registry: new Map(), log: (line) => lines.push(line) });
+  const out = lines.join('\n');
+  assert.match(out, /^2 pages written: 1 with no issue, 1 with at least one\./mu);
+  assert.match(out, /\[parse\] .*closing tag for `<div>`/u);
+  assert.match(out, /Issues: 1 \(parse 1\)/u);
+});
+
 test('the writers are exactly the components the pages import', () => {
   const imported = new Set();
   for (const file of pageFiles(CONTENT_DIR)) {
-    for (const match of readFileSync(file, 'utf8').matchAll(/^import (\w+) from '[^']*\/components\/[^']+\.astro';$/gmu)) {
-      imported.add(match[1]);
-    }
+    for (const name of componentImports(readFileSync(file, 'utf8'))) imported.add(name);
   }
   const writers = new Set(writerFiles().map((file) => basename(file, WRITER_SUFFIX)));
   assert.deepEqual([...writers].sort(), [...imported].sort());

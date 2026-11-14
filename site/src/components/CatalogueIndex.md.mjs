@@ -12,9 +12,23 @@
  * Dropped: nothing the page shows.
  */
 import { readEntries } from '../lib/agent-md/content.mjs';
-import { bracketText, plainText } from '../lib/agent-md/markdown-table.mjs';
+import { literalText } from '../lib/agent-md/markdown-table.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
 import { catalogueIndex, rowCount } from '../lib/catalogue-page-list.mjs';
+
+/**
+ * One item of the list: the catalogue's label linked to its page, how many
+ * rows it holds, then what they are, the label and the description written as
+ * the overview prints them ({@link literalText}).
+ *
+ * @param {{ label: string, url: string, count: string, description: string }} catalogue
+ * @returns {string}
+ */
+export function catalogueItem({ label, url, count, description }) {
+  const lead = `- [${literalText(label)}](${url}) (${count})`;
+  const what = literalText(description);
+  return what ? `${lead}: ${what}` : lead;
+}
 
 export default markdownFor({
   tag: 'CatalogueIndex',
@@ -30,11 +44,9 @@ export default markdownFor({
       return '';
     }
     return pages
-      .map((page) => {
-        const what = plainText(page.description);
-        const lead = `- [${bracketText(page.label)}](${ctx.site.url(page.href)}) (${rowCount(page.rows, lang)})`;
-        return what ? `${lead}: ${what}` : lead;
-      })
+      .map((page) =>
+        catalogueItem({ label: page.label, url: ctx.site.url(page.href), count: rowCount(page.rows, lang), description: page.description }),
+      )
       .join('\n');
   },
 });

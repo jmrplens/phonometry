@@ -47,15 +47,15 @@
  * @module
  */
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { basePath, siteUrl } from '../../data/site.mjs';
+import { readCommittedText } from '../line-ends.mjs';
 import { codeLines } from '../markdown-fences.mjs';
 import { MARKER } from '../bibliography-entries.mjs';
-import { absolutizeRootLinks } from './links.mjs';
-import { line, table } from './markdown-table.mjs';
+import { absolutizeRootLinks, pointDroppedAnchors } from './links.mjs';
+import { escapeMarks, line, plainText as plainMarkdown, table } from './markdown-table.mjs';
 import { frontmatterOf, isMdx, parse } from './processor.mjs';
 import { rewrittenSource } from './rewrites.mjs';
 
@@ -246,12 +246,16 @@ function dedent(text, column) {
   return lines.map((one) => one.slice(min)).join('\n');
 }
 
+/** A line indented as a line of indented code is: four spaces or a tab. */
+const INDENTED = /^(?: {4}|\t)/u;
+
 /**
- * Runs of blank lines collapsed to one, outside fenced code.
+ * Runs of blank lines collapsed to one, outside code.
  *
  * Inside a fence a blank line is content: two of them between two Python
  * functions are what PEP 8 asks for, and a copy must not change the bytes of
- * an example.
+ * an example. So is a run between two indented lines, which indented code
+ * holds the same way (a triple-quoted string with two blank lines in it).
  *
  * @param {string} text
  * @returns {string}
@@ -259,10 +263,18 @@ function dedent(text, column) {
 function collapseBlankRuns(text) {
   const lines = text.split('\n');
   const code = codeLines(lines);
+  const blank = (at) => !code[at] && lines[at].trim() === '';
   /** @type {string[]} */
   const out = [];
   lines.forEach((one, at) => {
-    if (!code[at] && one.trim() === '' && out.length > 0 && out.at(-1)?.trim() === '') return;
+    if (blank(at) && out.length > 0 && out.at(-1)?.trim() === '') {
+      let next = at;
+      while (next < lines.length && blank(next)) next += 1;
+      let before = at;
+      while (before >= 0 && blank(before)) before -= 1;
+      const insideIndentedCode = before >= 0 && next < lines.length && INDENTED.test(lines[before]) && INDENTED.test(lines[next]);
+      if (!insideIndentedCode) return;
+    }
     out.push(one);
   });
   return out.join('\n');
@@ -348,7 +360,28 @@ function evaluate(node, scope) {
  *   back through `ctx.markdown`; its line numbers are not the page's.
  */
 function createRenderer(source, options, mode) {
-  const { registry, scope, issues, lang, flavour, frontmatter } = options;
+  const { registry, scope, issues, lang, flavour, frontmatter, droppedAnchors } = options;
+
+  /**
+   * How many `<code>` or `<kbd>` elements the node being written sits in: a
+   * string expression there is code, printed as it is, never escaped.
+   */
+  let codeDepth = 0;
+
+  /**
+   * The children of a code element, written with {@link codeDepth} raised.
+   *
+   * @param {MdNode} node
+   * @returns {string}
+   */
+  const codeChildren = (node) => {
+    codeDepth += 1;
+    try {
+      return renderChildren(node);
+    } finally {
+      codeDepth -= 1;
+    }
+  };
 
   /**
    * @param {RenderIssue['kind']} kind
@@ -433,7 +466,10 @@ function createRenderer(source, options, mode) {
         tree = parse(fragment, { mdx: true });
       } catch (error) {
         report('writer', undefined, `a data string does not parse as MDX (${error.message}): ${line(fragment).slice(0, 80)}`);
-        return line(fragment.replaceAll(/<[^>]+>/g, ''));
+        // Written as text, every mark escaped (markdown-table.mjs, `plainText`):
+        // a `<` that could open a tag gets a backslash, so no markup survives,
+        // and the issue above still fails the check.
+        return plainMarkdown(fragment);
       }
       return createRenderer(fragment, options, { fragment: true }).renderRoot(tree);
     },
@@ -536,7 +572,10 @@ function createRenderer(source, options, mode) {
     const program = node.data?.estree;
     if (program && (program.body ?? []).length === 0) return '';
     const value = evaluate(soleExpression(program), scope);
-    if (typeof value === 'string') return value;
+    // A string prints as the page prints it: its marks escaped, so that
+    // `{"*a*"}` is not emphasis in the copy, but its spaces kept, so that
+    // `{" "}` stays the space between two words. Inside code it is code.
+    if (typeof value === 'string') return codeDepth > 0 ? value : escapeMarks(value, { pipe: false });
     if (typeof value === 'number' && Number.isFinite(value)) return String(value);
     report(
       'expression',
@@ -620,6 +659,50 @@ function createRenderer(source, options, mode) {
   }
 
   /**
+   * The checks {@link renderElement} makes of an element, for an element a
+   * rule consumes without writing it through that path (a table's rows and
+   * cells, its caption, a summary): a component with no writer, a tag with no
+   * rule, a spread, an undeclared prop and an unreadable expression are each
+   * reported here as anywhere else.
+   *
+   * @param {MdNode} node
+   */
+  function checkElement(node) {
+    const name = node.name ?? '';
+    if (!name) return;
+    const spec = registry.get(name);
+    if (spec) {
+      checkAttributes(node, { tag: spec.tag, reader: `${spec.tag}.md.mjs`, props: spec.props });
+      return;
+    }
+    if (/^[A-Z]/.test(name)) {
+      report('component', node, `<${name}> has no Markdown writer: add ${name}.md.mjs beside the component`);
+      return;
+    }
+    checkAttributes(node, { tag: name, reader: 'agent-md/render.mjs' });
+    if (!Object.hasOwn(HTML_RULES, name)) report('html', node, `<${name}> is raw HTML with no rule in agent-md/render.mjs`);
+  }
+
+  /**
+   * A caption's text on one line, the parts of its elements spaced apart
+   * (`<strong>A</strong><span>B</span>` reads "A B"), every element in it
+   * checked as {@link checkElement} checks one.
+   *
+   * @param {MdNode} node
+   * @returns {string}
+   */
+  function captionText(node) {
+    const walk = (current) => {
+      for (const child of current.children ?? []) {
+        if (ELEMENT_TYPES.has(child.type)) checkElement(child);
+        walk(child);
+      }
+    };
+    walk(node);
+    return line(spacedText(node));
+  }
+
+  /**
    * A raw `<table>`: a Markdown table under its caption in bold.
    *
    * @param {MdNode} node
@@ -635,9 +718,20 @@ function createRenderer(source, options, mode) {
           visit(child);
           continue;
         }
-        if (child.name === 'caption') caption = line(spacedText(child));
+        checkElement(child);
+        if (child.name === 'caption') caption = captionText(child);
         else if (child.name === 'tr') {
-          rows.push((child.children ?? []).filter((c) => c.name === 'td' || c.name === 'th'));
+          /** @type {MdNode[]} */
+          const row = [];
+          for (const one of child.children ?? []) {
+            if (!ELEMENT_TYPES.has(one.type)) continue;
+            checkElement(one);
+            if (one.name === 'td' || one.name === 'th') row.push(one);
+            else if (Object.hasOwn(HTML_RULES, one.name ?? '')) {
+              report('html', one, `<${one.name}> sits in a <tr> outside any cell, and a Markdown table has nowhere to put it`);
+            }
+          }
+          rows.push(row);
         } else visit(child);
       }
     };
@@ -673,6 +767,7 @@ function createRenderer(source, options, mode) {
             ? (child.children ?? []).find((c) => c.name === 'summary')
             : undefined;
       if (!summary && found) {
+        checkElement(found);
         summary = line(renderChildren(found));
         if (found !== child) {
           const others = (child.children ?? []).filter((c) => c !== found);
@@ -706,20 +801,25 @@ function createRenderer(source, options, mode) {
     abbr: (node) => renderChildren(node),
     b: (node) => `**${renderChildren(node)}**`,
     br: () => '\n',
-    caption: (node) => `**${line(spacedText(node))}**`,
-    code: (node) => codeSpan(renderChildren(node)),
+    caption: (node) => `**${captionText(node)}**`,
+    code: (node) => codeSpan(codeChildren(node)),
     del: (node) => `~~${renderChildren(node)}~~`,
     details: renderDetails,
     div: (node) => renderChildren(node),
     em: (node) => `*${renderChildren(node)}*`,
     i: (node) => `*${renderChildren(node)}*`,
-    kbd: (node) => codeSpan(renderChildren(node)),
+    kbd: (node) => codeSpan(codeChildren(node)),
     mark: (node) => renderChildren(node),
     s: (node) => `~~${renderChildren(node)}~~`,
     small: (node) => renderChildren(node),
     // An empty `<span id>` is an anchor kept for old links (F13): it has no
-    // text, and a Markdown copy has no anchors to keep.
-    span: (node) => renderChildren(node),
+    // text, and a Markdown copy has no anchors to keep. Its id is recorded, so
+    // a link to it can be sent to the page, where the anchor still is.
+    span(node) {
+      const id = ctx.attr(node, 'id');
+      if (id && (node.children ?? []).length === 0) droppedAnchors?.add(id);
+      return renderChildren(node);
+    },
     strong: (node) => `**${renderChildren(node)}**`,
     sub: (node) => `_${renderChildren(node)}`,
     summary: (node) => `**${line(renderChildren(node))}**`,
@@ -814,6 +914,17 @@ function createRenderer(source, options, mode) {
     return children.map((child) => renderNode(child)).join('');
   }
 
+  /**
+   * The written text without what surrounds it: a fragment a writer hands
+   * back trimmed whole, a page only of its leading blank lines and its
+   * trailing blanks, since the indentation of its first line can be
+   * structure (an indented code block that opens a `.md` page).
+   *
+   * @param {string} text
+   * @returns {string}
+   */
+  const outerTrim = (text) => (mode.fragment ? text.trim() : text.replace(/^(?:[ \t]*\n)+/u, '').trimEnd());
+
   return {
     ctx,
     /**
@@ -827,13 +938,13 @@ function createRenderer(source, options, mode) {
       const inline = children.length > 0 && children.every((child) => INLINE_TYPES.has(child.type));
       if (!eachBlock || inline) {
         const whole = renderChildren(tree);
-        return collapseBlankRuns(eachBlock ? eachBlock(whole) : whole).trim();
+        return outerTrim(collapseBlankRuns(eachBlock ? eachBlock(whole) : whole));
       }
       const blocks = children
         .map((child) => renderNode(child, { dedented: false }))
         .filter((part) => part.trim() !== '')
         .map(eachBlock);
-      return collapseBlankRuns(blocks.join('\n\n')).trim();
+      return outerTrim(collapseBlankRuns(blocks.join('\n\n')));
     },
   };
 }
@@ -846,6 +957,10 @@ function createRenderer(source, options, mode) {
  * @property {Map<string, unknown>} scope  Names bound by allow-listed imports.
  * @property {RenderIssue[]} issues  Collects what could not be written.
  * @property {Record<string, unknown>} frontmatter  The page's frontmatter.
+ * @property {Set<string>} [droppedAnchors]  The ids of the empty anchors the
+ *   copy leaves out, gathered while it is written.
+ * @property {string} [pageUrl]  The page's address on the site, where a link
+ *   to an anchor the copy leaves out is sent.
  */
 
 /**
@@ -865,14 +980,22 @@ export function renderTree(tree, source, options) {
     issues: [],
     frontmatter: frontmatterOf(tree),
     ...options,
+    droppedAnchors: new Set(),
   };
   // Links are made absolute block by block: no link crosses from one
   // top-level block into the next, and a block that holds none (the
   // conformance report's hundreds of kilobytes of tables) is then never
   // parsed again for links (links.mjs says why that matters).
-  const body = createRenderer(source, full, { fragment: false }).renderRoot(tree, (block) =>
+  const written = createRenderer(source, full, { fragment: false }).renderRoot(tree, (block) =>
     absolutizeRootLinks(block, SITE.origin),
   );
+  // A link to an anchor only an empty span carried leads nowhere in the copy,
+  // which leaves the span out: it goes to the page, where the span still is.
+  // The GitHub edition keeps such anchors, so this is the agent copy's alone.
+  const body =
+    full.flavour === 'agent' && full.pageUrl
+      ? pointDroppedAnchors(written, full.droppedAnchors ?? new Set(), full.pageUrl)
+      : written;
   return `${body}\n`;
 }
 
@@ -966,6 +1089,20 @@ export async function loadScope(tree, { file, registry, issues }) {
 }
 
 /**
+ * The address on the site of the page a content file builds, or undefined
+ * for a file outside the content directory.
+ *
+ * @param {string} file
+ * @returns {string | undefined}
+ */
+export function pageUrlOf(file) {
+  if (!file.startsWith(CONTENT_DIR)) return undefined;
+  const path = relative(CONTENT_DIR, file).split(sep).join('/').replace(/\.mdx?$/u, '');
+  const route = path === 'index' ? '' : path.replace(/\/index$/u, '');
+  return SITE.url(`/${route}${route ? '/' : ''}`);
+}
+
+/**
  * Reads, parses and writes one content file.
  *
  * @param {string} file  Absolute path of a page under `src/content/docs`.
@@ -978,12 +1115,15 @@ export async function loadScope(tree, { file, registry, issues }) {
 export async function renderFile(file, { registry, flavour = 'agent', issues = [], lang = langOf(file) }) {
   // What a Markdown plugin of the site writes into the page before Astro
   // renders it is written into the source first (./rewrites.mjs): the
-  // bibliography's lists, which its source holds only as markers.
-  const source = await rewrittenSource(file, await readFile(file, 'utf8'), { lang });
+  // bibliography's lists, which its source holds only as markers. The file
+  // is read as the commit holds it, with line feeds whatever the checkout
+  // gave it: the renderer copies code and tables out of the source by
+  // position, so a carriage return left in would reach the copy.
+  const source = await rewrittenSource(file, readCommittedText(file), { lang });
   const mdx = isMdx(file);
   const tree = parse(source, { mdx });
   const scope = mdx ? await loadScope(tree, { file, registry, issues }) : new Map();
   const frontmatter = frontmatterOf(tree);
-  const markdown = renderTree(tree, source, { registry, flavour, scope, issues, frontmatter, lang });
+  const markdown = renderTree(tree, source, { registry, flavour, scope, issues, frontmatter, lang, pageUrl: pageUrlOf(file) });
   return { markdown, frontmatter, issues, tree };
 }

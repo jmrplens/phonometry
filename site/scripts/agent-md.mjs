@@ -21,12 +21,14 @@
 //       `es/signals/filters/filter-banks`, or `` / `es` for the two homes.
 //       Issues go to stderr, and any issue makes the exit status 1.
 import { existsSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import { pageFiles } from '../src/lib/agent-md/content.mjs';
 import { CONTENT_DIR, renderFile } from '../src/lib/agent-md/render.mjs';
 import { loadRegistry } from '../src/lib/agent-md/registry.mjs';
+import { unreadPage } from './check-markdown-writers.mjs';
 
 /** A content path as the census prints it. */
 const shown = (file) => relative(CONTENT_DIR, file).split(sep).join('/');
@@ -69,9 +71,18 @@ class Tally extends Map {
   }
 }
 
-async function census() {
-  const registry = await loadRegistry();
-  const files = pageFiles();
+/**
+ * Writes every page and reports what the pages use and every issue. A page
+ * that does not parse, or imports a module that fails to load, is one of the
+ * pages with an issue, of kind `parse` or `import` with the parser's reason
+ * and line, and the census goes on to the next page.
+ *
+ * @param {{ files?: string[], registry?: Map<string, import('../src/lib/agent-md/types.mjs').ComponentMarkdown>,
+ *   log?: (line: string) => void }} [options]  Every page of the site, its
+ *   writers and the console, unless a test hands in its own.
+ */
+export async function census({ files = pageFiles(), registry, log = console.log } = {}) {
+  registry ??= await loadRegistry();
   const uses = new Tally();
   const pagesUsing = new Map();
   const html = new Tally();
@@ -79,7 +90,17 @@ async function census() {
   const report = [];
   const troubled = new Set();
   for (const file of files) {
-    const { issues, tree } = await renderFile(file, { registry });
+    let rendered;
+    try {
+      rendered = await renderFile(file, { registry });
+    } catch (error) {
+      const failure = unreadPage(error, shown(file));
+      troubled.add(file);
+      kinds.add(failure.kind);
+      report.push(`  ${failure.where}  [${failure.kind}] ${failure.message}`);
+      continue;
+    }
+    const { issues, tree } = rendered;
     const walk = (node) => {
       if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
         const name = node.name ?? '';
@@ -98,19 +119,19 @@ async function census() {
       report.push(`  ${shown(file)}${issue.line ? `:${issue.line}` : ''}  [${issue.kind}] ${issue.message}`);
     }
   }
-  console.log(
+  log(
     `${files.length} pages written: ${files.length - troubled.size} with no issue, ${troubled.size} with at least one.`,
   );
-  console.log(`\nComponents the pages use (${uses.size}; ${registry.size} writers):`);
+  log(`\nComponents the pages use (${uses.size}; ${registry.size} writers):`);
   for (const [name, count] of [...uses].sort((a, b) => b[1] - a[1])) {
     const pages = pagesUsing.get(name).size;
-    console.log(`  ${name.padEnd(16)} ${String(count).padStart(5)} uses on ${String(pages).padStart(4)} pages  ${registry.has(name) ? 'writer' : 'NO WRITER'}`);
+    log(`  ${name.padEnd(16)} ${String(count).padStart(5)} uses on ${String(pages).padStart(4)} pages  ${registry.has(name) ? 'writer' : 'NO WRITER'}`);
   }
   const stale = [...registry.keys()].filter((tag) => !uses.has(tag));
-  if (stale.length) console.log(`\nWriters no page uses: ${stale.join(', ')}`);
-  console.log(`\nRaw HTML the pages carry: ${[...html].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', ')}`);
-  console.log(`\nIssues: ${report.length}${kinds.size ? ` (${[...kinds].map(([k, v]) => `${k} ${v}`).join(', ')})` : ''}`);
-  for (const row of report) console.log(row);
+  if (stale.length) log(`\nWriters no page uses: ${stale.join(', ')}`);
+  log(`\nRaw HTML the pages carry: ${[...html].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', ')}`);
+  log(`\nIssues: ${report.length}${kinds.size ? ` (${[...kinds].map(([k, v]) => `${k} ${v}`).join(', ')})` : ''}`);
+  for (const row of report) log(row);
 }
 
 async function page(route, flavour) {
@@ -128,12 +149,14 @@ async function page(route, flavour) {
   return issues.length > 0 ? 1 : 0;
 }
 
-const args = process.argv.slice(2);
+const args = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url) ? process.argv.slice(2) : null;
 const option = (name) => {
   const at = args.indexOf(name);
   return at === -1 ? undefined : args[at + 1];
 };
-if (args.includes('--census')) {
+if (args === null) {
+  // Imported, by a test: nothing runs.
+} else if (args.includes('--census')) {
   await census();
 } else if (args.includes('--page')) {
   const flavour = option('--flavour') ?? 'agent';

@@ -13,7 +13,7 @@
  * and tell apart the thumbnails on the page.
  */
 import { mediaUrl } from '../lib/media.mjs';
-import { bracketText, line } from '../lib/agent-md/markdown-table.mjs';
+import { line, lineStart, literalText } from '../lib/agent-md/markdown-table.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
 
 /** The fiches as ReportPreview.astro names them. */
@@ -32,15 +32,15 @@ export default markdownFor({
       ctx.issue(node, 'ReportPreview needs a name and a title');
       return '';
     }
-    const caption = line(ctx.attr(node, 'caption'));
+    const caption = lineStart(literalText(ctx.attr(node, 'caption')));
     let entry;
     if (ctx.flavour === 'github') {
       const alt = description ? `${title}: ${description}` : title;
-      entry = `[![${bracketText(alt)}](${REPORTS}/${name}.webp)](${REPORTS}/${name}.pdf)`;
+      entry = `[![${literalText(alt)}](${REPORTS}/${name}.webp)](${REPORTS}/${name}.pdf)`;
     } else {
       const pdf = mediaUrl(`${REPORTS}/${name}.pdf`, `${ctx.site.origin}${ctx.site.base}`);
-      const lead = `**${LABEL[ctx.lang]}:** [${bracketText(title)}](${pdf})`;
-      entry = description ? `${lead}: ${description}` : lead;
+      const lead = `**${LABEL[ctx.lang]}:** [${literalText(title)}](${pdf})`;
+      entry = description ? `${lead}: ${literalText(description)}` : lead;
     }
     return caption ? `${entry}\n\n${caption}` : entry;
   },

@@ -23,7 +23,7 @@
  */
 import { glossary } from '../data/glossary.mjs';
 import { pageTitle } from '../lib/agent-md/content.mjs';
-import { bracketText, line } from '../lib/agent-md/markdown-table.mjs';
+import { line, literalText } from '../lib/agent-md/markdown-table.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
 
 /** The words around a term, in each language. */
@@ -61,7 +61,7 @@ export function termItem(term, lang, guide) {
   const lead = `**${label}**${qualifier ? ` (${qualifier})` : ''}`;
   const where = [localized(term.standard, lang), localized(term.clause, lang)].filter(Boolean).join(', ');
   const after = [unit && `${words.unit}: ${sentence(unit)}`, where && `${words.definedIn}: ${sentence(where)}`];
-  const link = guide ? ` ${words.guide}: [${bracketText(guide.title)}](${guide.url}).` : '';
+  const link = guide ? ` ${words.guide}: [${literalText(guide.title)}](${guide.url}).` : '';
   return `- ${lead}: ${[sentence(definition), ...after.filter(Boolean)].join(' ')}${link}`;
 }
 

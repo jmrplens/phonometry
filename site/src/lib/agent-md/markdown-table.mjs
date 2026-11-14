@@ -39,13 +39,16 @@ const SPACES = /[ \t\n\v\f\r]+/gu;
 const flatten = (text) => text.replaceAll(SPACES, ' ').replace(/^ /u, '').replace(/ $/u, '');
 
 /**
- * One table cell: whitespace flattened to single spaces, pipes escaped.
+ * One table cell: whitespace flattened to single spaces, pipes escaped. A pipe
+ * a child writer has escaped already (an image whose alt text holds one) keeps
+ * its one backslash: escaping it again would leave the backslash escaped and
+ * the pipe bare, and split the cell.
  *
  * @param {CellValue} value
  * @returns {string}
  */
 export function cell(value) {
-  return flatten(String(value ?? '')).replaceAll('|', String.raw`\|`);
+  return flatten(String(value ?? '')).replace(/(\\*)\|/gu, (match, slashes) => (slashes.length % 2 === 1 ? match : `${slashes}\\|`));
 }
 
 /**
@@ -79,12 +82,51 @@ export function line(value) {
 }
 
 /**
- * Data that is plain text, not Markdown, made safe to print as Markdown: on
- * one line, with the characters that would turn part of it into something
- * else escaped. A transcribed table prints `200 mm CMU*` and `~0,65 to
- * 0,68`; written raw, two asterisks in one cell would italicize the words
- * between them, two tildes would strike them through, a `$` would open
- * maths, a backtick code and a `<` before a letter a tag.
+ * Text a page prints as it is, written so that Markdown prints it as it is:
+ * each character escaped that would open emphasis (a `*`, and a `_` that is
+ * not inside a word), code, maths, strikethrough, a link or an image, a tag or
+ * an autolink, or end the brackets of a link's text or an image's alt, and an
+ * `&` that opens a character reference, so that `&amp;` prints as written. A
+ * `_`, a `<` or an `&` at an edge of the text is escaped whatever stands
+ * beyond it, since the text is joined to what the writer puts after it. A `|`
+ * is escaped when `pipe` is set, the default.
+ *
+ * The values of a component's attributes reach the writers as the MDX parser
+ * decodes them, character references read, so they take this form too: the
+ * text is the one the page prints.
+ *
+ * @param {string} text
+ * @param {{ pipe?: boolean }} [options]
+ * @returns {string}
+ */
+export const escapeMarks = (text, { pipe = true } = {}) =>
+  text
+    .replaceAll(pipe ? /[\\`*~$[\]|]/gu : /[\\`*~$[\]]/gu, String.raw`\$&`)
+    .replaceAll(/(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])/gu, String.raw`\_`)
+    .replaceAll(/<(?=[A-Za-z/!?]|$)/gu, String.raw`\<`)
+    .replaceAll(/&(?=#\d+;|#[xX][\da-fA-F]+;|[A-Za-z][A-Za-z\d]*;|$)/gu, String.raw`\&`);
+
+/**
+ * Text a page prints as it is, written for a link's text, an image's alt or a
+ * run of prose: on one line ({@link line}), its marks escaped as
+ * {@link escapeMarks} says, the pipe that would split a table cell and the
+ * brackets that would end a link's text among them.
+ *
+ * @param {string | undefined | null} value
+ * @returns {string}
+ */
+export function literalText(value) {
+  return escapeMarks(line(value));
+}
+
+/**
+ * Data that is plain text, not Markdown, made safe to print as Markdown: a
+ * table cell or a note of a transcribed table, which prints `200 mm CMU*` and
+ * `~0,65 to 0,68`; written raw, two asterisks in one cell would italicize the
+ * words between them, two tildes would strike them through, a `$` would open
+ * maths, a backtick code and a `<` before a letter a tag. It is
+ * {@link literalText} with the pipe left to {@link cell}, which escapes it in
+ * a table, where it splits a cell.
  *
  * Strings a page or a data module holds as Markdown (with TeX in `$...$`, as
  * the glossary does) must not go through this: their markup is meant.
@@ -93,21 +135,21 @@ export function line(value) {
  * @returns {string}
  */
 export function plainText(value) {
-  return line(value)
-    .replaceAll(/([\\`*~$])/gu, String.raw`\$1`)
-    .replaceAll(/<(?=[A-Za-z/!?])/gu, String.raw`\<`);
+  return escapeMarks(line(value), { pipe: false });
 }
 
 /**
- * Text for the inside of `[...]`, a link's text or an image's alt: on one
- * line, with the brackets that would end it and the pipe that would split a
- * table cell escaped.
+ * Markdown written as a line of its own, a paragraph or the line under a list
+ * item, with the mark that opens it escaped where it would open a heading, a
+ * quotation, a list, a thematic break or a heading's underline.
  *
- * @param {string | undefined | null} value
+ * @param {string} markdown
  * @returns {string}
  */
-export function bracketText(value) {
-  return line(value).replaceAll(/([\\[\]|])/gu, String.raw`\$1`);
+export function lineStart(markdown) {
+  return markdown.replace(/^(?:([#>+=-])|(\d{1,9})([.)]))/u, (_whole, mark, digits, delimiter) =>
+    mark ? `\\${mark}` : `${digits}\\${delimiter}`,
+  );
 }
 
 /**

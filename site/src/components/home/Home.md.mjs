@@ -139,7 +139,7 @@ export default markdownFor({
       line(coverage.lead),
       table(
         coverage.headers,
-        coverage.areas.map((area) => [`[${line(area.name)}](${area.href}): ${line(area.summary)}`, area.standards.join(', ')]),
+        coverage.areas.map((area) => [`[${line(area.name)}](${area.href}): ${line(area.summary)}`, area.standards.length > 0 ? area.standards.join(', ') : coverage.noStandard]),
       ),
     );
 

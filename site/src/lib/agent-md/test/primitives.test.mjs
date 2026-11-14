@@ -8,10 +8,11 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { describe, test } from 'node:test';
 
-import { bracketText, cell, htmlAttribute, line, listItem, plainText, table } from '../markdown-table.mjs';
+import { cell, htmlAttribute, line, listItem, literalText, plainText, table } from '../markdown-table.mjs';
 import { frontmatterOf, isMdx, parse } from '../processor.mjs';
 import { buildRegistry, COMPONENTS_DIR, loadRegistry, writerFiles } from '../registry.mjs';
 import { markdownFor } from '../types.mjs';
+import { readCommittedText } from '../../line-ends.mjs';
 
 describe('the parser reads a page as the site does', () => {
   test('MDX with frontmatter, TeX braces, an aside and a component', () => {
@@ -42,6 +43,10 @@ describe('table and list primitives', () => {
   test('a cell is one line with its pipes escaped', () => {
     assert.equal(cell('a | b\n  c'), String.raw`a \| b c`);
     assert.equal(cell(undefined), '');
+    // A pipe a child writer escaped keeps one backslash; a doubled backslash
+    // before a bare pipe is a backslash, and the pipe is escaped.
+    assert.equal(cell(String.raw`![Band \| levels](a.svg)`), String.raw`![Band \| levels](a.svg)`);
+    assert.equal(cell(String.raw`a \\| b`), String.raw`a \\\| b`);
     assert.equal(cell(3.5), '3.5');
   });
 
@@ -50,7 +55,7 @@ describe('table and list primitives', () => {
   });
 
   test('link text and HTML attributes are escaped for where they go', () => {
-    assert.equal(bracketText('a [b] | c\nd'), String.raw`a \[b\] \| c d`);
+    assert.equal(literalText('a [b] | c\nd'), String.raw`a \[b\] \| c d`);
     assert.equal(htmlAttribute('say "a" & <b>'), 'say &quot;a&quot; &amp; &lt;b&gt;');
     assert.equal(line('  a\n\tb  '), 'a b');
   });
@@ -62,7 +67,7 @@ describe('table and list primitives', () => {
     // inside, in fourteen errata headings among others.
     assert.equal(line('6\u202F300 Hz\nand 20\u00A0µPa '), '6\u202F300 Hz and 20\u00A0µPa');
     assert.equal(cell(' 1\u202F200 | 3\t'), '1\u202F200 \\| 3');
-    assert.equal(bracketText('6\u202F300 Hz'), '6\u202F300 Hz');
+    assert.equal(literalText('6\u202F300 Hz'), '6\u202F300 Hz');
     assert.equal(line('\u00A0kept at both ends\u202F'), '\u00A0kept at both ends\u202F');
   });
 
@@ -117,7 +122,7 @@ describe('the registry', () => {
     for (const file of writerFiles()) {
       const astro = file.replace(/\.md\.mjs$/u, '.astro');
       assert.doesNotThrow(() => readFileSync(astro), `${file} has no ${basename(astro)} beside it`);
-      assert.match(readFileSync(file, 'utf8'), /^\/\*\*\n \* \S/u, `${basename(file)} opens with its keep/drop comment`);
+      assert.match(readCommittedText(file), /^\/\*\*\n \* \S/u, `${basename(file)} opens with its keep/drop comment`);
     }
     assert.ok(registry.size >= 12, `expected the writers under ${COMPONENTS_DIR}`);
   });

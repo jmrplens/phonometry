@@ -75,15 +75,26 @@ function placeOf(file) {
  *
  * @param {string} siteDir
  * @returns {Promise<{ module: string, rewrites: string[] | null }[]>}
+ * @throws {Error}  When the config cannot be read for any reason but its
+ *   absence, or holds no `markdown:` block where it is looked for.
  */
 export async function markdownPlugins(siteDir) {
   let config;
   try {
     config = readFileSync(join(siteDir, 'astro.config.mjs'), 'utf8');
-  } catch {
-    return [];
+  } catch (error) {
+    // A tree with no config (a test's) has no plugins; any other failure to
+    // read it would hide every plugin from the check.
+    if (/** @type {NodeJS.ErrnoException} */ (error)?.code === 'ENOENT') return [];
+    throw error;
   }
-  const block = /\bmarkdown:\s*\{([\s\S]*?)\n {2}\},/.exec(config)?.[1] ?? '';
+  const block = /\bmarkdown:\s*\{([\s\S]*?)\n {2}\},/.exec(config)?.[1];
+  if (block === undefined) {
+    throw new Error(
+      `${join(siteDir, 'astro.config.mjs')}: no \`markdown: { ... },\` block indented by two spaces, ` +
+        'so the Markdown plugins the copies have to follow cannot be read',
+    );
+  }
   const used = new Set(block.match(/[\w$]+/g) ?? []);
   const plugins = [];
   for (const [, clause, spec] of config.matchAll(/^import\s+([^;]*?)\s+from\s+['"]([^'"]+)['"];?$/gm)) {

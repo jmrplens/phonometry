@@ -5,7 +5,8 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { codeSpan, SITE } from '../render.mjs';
+import { codeSpan, renderTree, SITE } from '../render.mjs';
+import { parse } from '../processor.mjs';
 import { Box, Show, registryOf, render } from './helpers.mjs';
 
 describe('what is kept byte for byte', () => {
@@ -30,6 +31,12 @@ describe('what is kept byte for byte', () => {
     const source = '```python\ndef a():\n    pass\n\n\ndef b():\n    pass\n```\n\n\n\nText.\n';
     const { markdown } = render(source);
     assert.equal(markdown, '```python\ndef a():\n    pass\n\n\ndef b():\n    pass\n```\n\nText.\n');
+  });
+
+  test('two blank lines inside indented code of a Markdown page stay two', () => {
+    const source = 'Text.\n\n    s = \"\"\"a\n\n\n    b\"\"\"\n\n\n\nMore.\n';
+    const { markdown } = render(source, { mdx: false });
+    assert.equal(markdown, 'Text.\n\n    s = \"\"\"a\n\n\n    b\"\"\"\n\nMore.\n');
   });
 
   test('TeX keeps its braces, inline and in display', () => {
@@ -297,5 +304,64 @@ describe('helpers', () => {
       toMarkdown: (_node, ctx) => ctx.markdown('Run <code>.plot()</code> on <a href="https://pypi.org/">PyPI</a>.'),
     };
     assert.equal(render('<Data />\n', { registry: registryOf(Data) }).markdown, 'Run `.plot()` on [PyPI](https://pypi.org/).\n');
+  });
+});
+
+describe('what the per-element checks reach', () => {
+  const kinds = (source) => render(source).issues.map((issue) => issue.kind);
+
+  test('a spread on a cell, a row or a summary is reported as anywhere else', () => {
+    assert.deepEqual(kinds('<table><tr><td {...{title: "x"}}>value</td></tr></table>\n'), ['prop']);
+    assert.deepEqual(kinds('<table><tr {...{a: 1}}><td>v</td></tr></table>\n'), ['prop']);
+    assert.deepEqual(kinds('<table><thead {...{a: 1}}><tr><td>v</td></tr></thead></table>\n'), ['prop']);
+    assert.deepEqual(kinds('<details>\n<summary {...{title: "x"}}>sum</summary>\n\nBody.\n\n</details>\n'), ['prop']);
+  });
+
+  test('a tag with no rule or a component with no writer inside a caption or a row is reported', () => {
+    assert.deepEqual(kinds('<table><caption><Unknown>cap</Unknown></caption><tr><td>v</td></tr></table>\n'), ['component']);
+    assert.deepEqual(kinds('<table><caption><blink>x</blink></caption><tr><td>v</td></tr></table>\n'), ['html']);
+    assert.deepEqual(kinds('<table><tr><blink>x</blink><td>v</td></tr></table>\n'), ['html']);
+    assert.deepEqual(kinds('<table><blink><tr><td>v</td></tr></blink></table>\n'), ['html']);
+  });
+});
+
+describe('expressions print what the page prints', () => {
+  test('a string with Markdown marks prints as written, a space stays a space, and code is left as it is', () => {
+    assert.equal(render('The marker is {"*not emphasis*"}.\n').markdown, 'The marker is \\*not emphasis\\*.\n');
+    assert.equal(render('a{" "}b\n').markdown, 'a b\n');
+    assert.equal(render('<code>{"a*b*"}</code>\n').markdown, '`a*b*`\n');
+  });
+});
+
+describe('the body keeps its first line', () => {
+  test('an indented code block that opens a Markdown page keeps its indentation', () => {
+    assert.equal(render('    beta = 1\n\nprose\n', { mdx: false }).markdown, '    beta = 1\n\nprose\n');
+    assert.equal(render('\n\n    beta = 1\n', { mdx: false }).markdown, '    beta = 1\n');
+  });
+});
+
+describe('anchors the copy drops', () => {
+  test('a link to an id only an empty span carried leads to the page, where the span still is', () => {
+    const source = '<span id="tubo-o-camara"></span>\n\n## Tubo o cámara\n\nSee [the tube](#tubo-o-camara) and [the heading](#tubo-o-cámara).\n';
+    const issues = [];
+    const markdown = renderTree(parse(source, { mdx: true }), source, {
+      registry: new Map(),
+      issues,
+      lang: 'es',
+      pageUrl: 'https://docs.jmrp.io/phonometry/es/a/',
+    });
+    assert.match(markdown, /\[the tube\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\/a\/#tubo-o-camara\)/);
+    assert.match(markdown, /\[the heading\]\(#tubo-o-cámara\)/);
+    assert.deepEqual(issues, []);
+  });
+});
+
+describe('a data string that does not parse', () => {
+  test('is reported and written as text, no tag left in it', () => {
+    const Data = { tag: 'Data', props: [], toMarkdown: (_node, ctx) => ctx.markdown('An <script unclosed <b>bold') };
+    const { markdown, issues } = render('<Data />\n', { registry: registryOf(Data) });
+    assert.deepEqual(issues.map((issue) => issue.kind), ['writer']);
+    assert.doesNotMatch(markdown, /(?<!\\)<[A-Za-z]/);
+    assert.match(markdown, /\\<script/);
   });
 });

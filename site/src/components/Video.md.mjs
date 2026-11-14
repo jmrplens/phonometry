@@ -19,7 +19,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { mediaUrl } from '../lib/media.mjs';
-import { bracketText, line } from '../lib/agent-md/markdown-table.mjs';
+import { lineStart, literalText } from '../lib/agent-md/markdown-table.mjs';
 import { REPO_DIR } from '../lib/agent-md/render.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
 
@@ -36,8 +36,8 @@ export default markdownFor({
   props: ['name', 'title', 'description', 'width', 'height', 'displayWidth', 'caption', 'id'],
   toMarkdown(node, ctx) {
     const name = ctx.attr(node, 'name');
-    const title = line(ctx.attr(node, 'title'));
-    const description = line(ctx.attr(node, 'description'));
+    const title = literalText(ctx.attr(node, 'title'));
+    const description = literalText(ctx.attr(node, 'description'));
     if (!name || !title) {
       ctx.issue(node, 'Video needs a name and a title');
       return '';
@@ -47,8 +47,8 @@ export default markdownFor({
       ctx.flavour === 'github'
         ? `https://raw.githubusercontent.com/jmrplens/phonometry-assets/${lockedCommit()}/images/${file}`
         : mediaUrl(`${IMAGES}/${file}`, `${ctx.site.origin}${ctx.site.base}`);
-    const lead = `**${LABEL[ctx.lang]}:** [${bracketText(title)}](${url})`;
-    const caption = line(ctx.attr(node, 'caption'));
+    const lead = `**${LABEL[ctx.lang]}:** [${title}](${url})`;
+    const caption = lineStart(literalText(ctx.attr(node, 'caption')));
     const entry = description ? `${lead}: ${description}` : lead;
     return caption ? `${entry}\n\n${caption}` : entry;
   },

@@ -11,7 +11,7 @@
  */
 import { reportsByArea, reportsByAreaEs } from '../data/reports.mjs';
 import { COPY, areaName, sortedAreas } from '../data/report-index-copy.mjs';
-import { bracketText, line } from '../lib/agent-md/markdown-table.mjs';
+import { literalText } from '../lib/agent-md/markdown-table.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
 
 /** Where ReportIndex.astro links each fiche. */
@@ -31,9 +31,9 @@ export default markdownFor({
     return sortedAreas(groups, lang)
       .map(([area, list]) => {
         const items = list.map((report) => {
-          const what = line(report.description);
-          const link = `[${bracketText(report.title)}](${RAW}/${report.name}.pdf)`;
-          const where = `${copy.source} [${bracketText(report.pageTitle)}](${report.page}).`;
+          const what = literalText(report.description);
+          const link = `[${literalText(report.title)}](${RAW}/${report.name}.pdf)`;
+          const where = `${copy.source} [${literalText(report.pageTitle)}](${report.page}).`;
           return what ? `- ${link}: ${sentence(what)} ${where}` : `- ${link}. ${where}`;
         });
         return `${ctx.heading(2, `${areaName(area, lang)} (${copy.count(list.length)})`)}\n\n${items.join('\n')}`;

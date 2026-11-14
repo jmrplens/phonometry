@@ -19,7 +19,7 @@
  * Dropped: `loading` (when the browser fetches the figure).
  */
 import { mediaUrl } from '../lib/media.mjs';
-import { bracketText, htmlAttribute, line } from '../lib/agent-md/markdown-table.mjs';
+import { htmlAttribute, line, literalText } from '../lib/agent-md/markdown-table.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
 
 /** `figure.svg` with a suffix before the extension, as the component does. */
@@ -45,6 +45,6 @@ export default markdownFor({
         `<img src="${localised}" alt="${htmlAttribute(alt)}"${width ? ` width="${htmlAttribute(width)}"` : ''}></picture>`
       );
     }
-    return `![${bracketText(alt)}](${mediaUrl(localised, `${ctx.site.origin}${ctx.site.base}`)})`;
+    return `![${literalText(alt)}](${mediaUrl(localised, `${ctx.site.origin}${ctx.site.base}`)})`;
   },
 });

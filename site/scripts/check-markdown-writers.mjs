@@ -43,7 +43,6 @@
 // dependencies so that it can run before the install.
 //
 // Usage (from site/, after `pnpm install`): node scripts/check-markdown-writers.mjs
-import { readFileSync } from 'node:fs';
 import { basename, relative, sep } from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
@@ -52,6 +51,7 @@ import { pageFiles } from '../src/lib/agent-md/content.mjs';
 import { COMPONENTS_DIR, loadRegistry, WRITER_SUFFIX, writerFiles } from '../src/lib/agent-md/registry.mjs';
 import { CONTENT_DIR, DATA_MODULES, renderFile, SITE_DIR } from '../src/lib/agent-md/render.mjs';
 import { markdownPlugins, PLUGIN_REWRITES } from '../src/lib/agent-md/rewrites.mjs';
+import { readCommittedText } from '../src/lib/line-ends.mjs';
 
 /**
  * What to do about each kind of failure, printed once under its list.
@@ -69,6 +69,8 @@ export const REMEDIES = {
   parse: 'the page does not parse as the site build reads it; fix the syntax at that line',
   import: 'a data module the page imports failed to load, as it would in the site build; the message says what it could not read',
   stale: 'no page uses the component: delete its writer (and the component, if nothing else renders it)',
+  plugin:
+    'give the plugin a rule in PLUGIN_REWRITES in src/lib/agent-md/rewrites.mjs that writes into the copy what the plugin writes into the page',
   opening:
     "open the writer with a /** ... */ comment whose first line is '<Name>: ...' and which says what it keeps and what it drops on purpose; a writer that writes nothing opens with '<Name>: dropped on purpose.' and says why",
 };
@@ -86,6 +88,24 @@ export const isParseError = (error) =>
 
 /** Where a parse error happened when it gives no line of its own: `(3:1-3:15)` in its reason. */
 const PLACE = /\((\d+):\d+(?:-\d+:\d+)?\)/u;
+
+/**
+ * What a page that could not be read is reported as: a `parse` failure at
+ * the line the parser names, with its reason, or an `import` failure with
+ * the message of the module that did not load. The check and the census
+ * (scripts/agent-md.mjs) read an unreadable page the same way.
+ *
+ * @param {unknown} error  What renderFile threw.
+ * @param {string} shown  The page as the report names it.
+ * @returns {Failure}
+ */
+export function unreadPage(error, shown) {
+  if (isParseError(error)) {
+    const at = error.line ?? error.place?.line ?? error.place?.start?.line ?? PLACE.exec(error.reason)?.[1];
+    return { where: at ? `${shown}:${at}` : shown, kind: 'parse', message: error.reason };
+  }
+  return { where: shown, kind: 'import', message: /** @type {Error} */ (error)?.message ?? String(error) };
+}
 
 /** The first line of a writer's opening comment: `/**`, then ` * <Name>: ...`. */
 const OPENING = /^\/\*\*\n \* ([A-Z][A-Za-z0-9]*): (\S[^\n]*)/u;
@@ -146,7 +166,9 @@ export async function checkMarkdownWriters({ contentDir = CONTENT_DIR, component
 
   for (const file of writerFiles(componentsDir)) {
     const tag = basename(file, WRITER_SUFFIX);
-    const problem = openingProblem(readFileSync(file, 'utf8'), tag);
+    // Read as the commit holds it: on a checkout with carriage returns the
+    // opening comment would match no pattern, and every writer would fail.
+    const problem = openingProblem(readCommittedText(file), tag);
     if (problem) {
       failures.push({ where: relative(componentsDir, file).split(sep).join('/'), kind: 'opening', message: `${tag}${WRITER_SUFFIX} ${problem}` });
     }
@@ -174,12 +196,7 @@ export async function checkMarkdownWriters({ contentDir = CONTENT_DIR, component
       ({ tree } = await renderFile(file, { registry, issues, lang: shown.startsWith('es/') ? 'es' : 'en' }));
     } catch (error) {
       unread += 1;
-      if (isParseError(error)) {
-        const at = error.line ?? error.place?.line ?? error.place?.start?.line ?? PLACE.exec(error.reason)?.[1];
-        failures.push({ where: at ? `${shown}:${at}` : shown, kind: 'parse', message: error.reason });
-      } else {
-        failures.push({ where: shown, kind: 'import', message: error.message });
-      }
+      failures.push(unreadPage(error, shown));
       continue;
     }
     for (const issue of issues) {

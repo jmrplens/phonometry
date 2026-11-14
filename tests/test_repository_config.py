@@ -1141,6 +1141,67 @@ def test_a_workflow_written_as_yaml_is_read(tmp_path: pathlib.Path) -> None:
     assert _deletes_an_artifact(steps[0][2]) == "an API call that deletes an artifact"
 
 
+def _input_of(step: dict[str, object], name: str, default: str) -> str:
+    """The input *name* a step gives its action, or the action's *default*."""
+    inputs = step.get("with")
+    return str((inputs if isinstance(inputs, dict) else {}).get(name, default))
+
+
+def test_the_deploy_takes_the_pages_of_the_build_it_needs() -> None:
+    """A build re-run hands the deploy its own pages, under a name of its attempt.
+
+    A run keeps the artifacts of every attempt, and a later attempt may
+    upload one of a name an earlier attempt used. The pages a build hands the
+    deploy went under the one name ``actions/upload-pages-artifact`` gives
+    them unless told otherwise, so a build re-run in a later attempt ("Re-run
+    all jobs") uploaded a second artifact of that name, and
+    ``actions/deploy-pages`` refuses a run that holds two of the name it
+    deploys ("Multiple artifacts named ... were unexpectedly found for this
+    workflow run"). The build names its pages after the attempt it ran in,
+    and the deploy takes those of the attempt the build it needs ran in,
+    which a re-run of the deploy job alone reads too.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    jobs: dict[str, dict[str, object]] = workflow["jobs"]
+    build: list[dict[str, object]] = workflow["jobs"]["build"]["steps"]
+    deploy: list[dict[str, object]] = workflow["jobs"]["deploy"]["steps"]
+    _, upload = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(build)
+            if str(step.get("uses", "")).startswith("actions/upload-pages-artifact@")
+        ],
+        "hand the pages to the deploy",
+    )
+    _, deployment = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(deploy)
+            if str(step.get("uses", "")).startswith("actions/deploy-pages@")
+        ],
+        "deploy the pages",
+    )
+    attempt = "${{ github.run_attempt }}"
+    outputs = jobs["build"].get("outputs")
+    assert isinstance(outputs, dict)
+    assert outputs.get("attempt") == attempt, (
+        "the build job does not say which attempt it ran in"
+    )
+    assert "build" in _needs(jobs["deploy"])
+    uploaded = _input_of(upload, "name", "github-pages")
+    deployed = _input_of(deployment, "artifact_name", "github-pages")
+    assert attempt in uploaded, (
+        f"the pages go under {uploaded!r}, a name that does not change with the "
+        "attempt, so a build re-run leaves the run two artifacts of it and the "
+        "deploy refuses both"
+    )
+    of_the_build = uploaded.replace(attempt, "${{ needs.build.outputs.attempt }}")
+    assert deployed == of_the_build, (
+        f"the deploy takes {deployed!r}, and the build it needs hands its pages "
+        f"on as {uploaded!r}"
+    )
+
+
 def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
     """The 3.14 job explains itself by quoting pyproject's numba floor.
 

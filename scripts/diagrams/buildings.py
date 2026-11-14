@@ -861,6 +861,187 @@ def _d_tapping_positions_scan_paths(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
+# The suspended ceiling test facility of ISO 140-9, and the symbols of the
+# one-dimensional plenum model (Vigran, Figure 9.10)
+# ---------------------------------------------------------------------------
+
+
+def _d_ceiling_plenum_facility(s: SVG, th: Theme) -> None:
+    # ---- Panel A: the facility in section, 80 px to the metre ----
+    s.text(
+        50,
+        66,
+        "A · The test facility of ISO 140-9 in section (5.1.2 to 5.1.5)",
+        16,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    shell = 12.0
+    ox0, oy0, ox1, oy1 = 50.0, 90.0, 762.0, 402.0
+    ix0, ix1 = ox0 + shell, ox1 - shell
+    deck = oy0 + shell  # underside of the facility ceiling
+    tile_top, tile_bot = deck + 56.0, deck + 64.0  # the suspended ceiling
+    floor = oy1 - shell
+    s.rect(ox0, oy0, ox1 - ox0, oy1 - oy0, th.bg, th.fg, sw=2.0)
+    for x0, y0, x1, y1 in (
+        (ox0, oy0, ox1, deck),
+        (ox0, floor, ox1, oy1),
+        (ox0, deck, ix0, floor),
+        (ix1, deck, ox1, floor),
+    ):
+        _hatch_rect(s, x0, y0, x1, y1, 7.0, th.muted)
+    s.rect(ix0, deck, ix1 - ix0, floor - deck, th.panel, th.fg, sw=1.6)
+
+    # The dividing wall stops under the suspended ceiling; its head is
+    # bevelled down to the 100 mm of 5.1.3.
+    wx0, wx1 = ix0 + 320.0, ix0 + 336.0
+    s.path(
+        f"M {wx0} {floor} L {wx0} {tile_bot} L {wx0 + 8} {tile_bot} "
+        f"L {wx1} {tile_bot + 24} L {wx1} {floor} Z",
+        fill=th.muted,
+        stroke=th.fg,
+        sw=1.4,
+    )
+    # The absorbent lining of the two end walls of the plenum (5.1.5).
+    for lx in (ix0, ix1 - 12.0):
+        s.rect(lx, deck, 12.0, tile_top - deck, th.accent, th.fg, sw=1.0)
+    # The suspended ceiling under test, continuous over the wall.
+    s.rect(ix0, tile_top, ix1 - ix0, tile_bot - tile_top, th.secondary, th.fg, sw=1.2)
+
+    s.text(ix0 + 28, deck + 34, "plenum", 13, th.muted, "start", italic=True)
+    s.text(ix0, oy0 - 9, "absorbent lining ≤ 150 mm", 12, th.accent, "start")
+    s.text(
+        ix1 - 74, tile_bot + 20, "suspended ceiling under test", 12, th.secondary, "end"
+    )
+    s.text(ix0 + 62, floor - 62, "source room", 15, th.fg, "start", bold=True)
+    s.text(ix0 + 62, floor - 40, "$V$ ≥ 50 m³", 13, th.fg, "start")
+    s.text(wx1 + 24, floor - 62, "receiving room", 15, th.fg, "start", bold=True)
+    s.text(wx1 + 24, floor - 40, "$V$ ≥ 50 m³", 13, th.fg, "start")
+    s.line(wx0 + 12, tile_bot + 10, wx1 + 22, tile_bot + 50, th.muted, 1.0)
+    s.text(wx1 + 26, tile_bot + 58, "head ≤ 100 mm thick,", 12, th.fg, "start")
+    s.text(wx1 + 26, tile_bot + 74, "bevel ≤ 30° from the vertical", 12, th.fg, "start")
+
+    # The path the facility isolates: up through the ceiling, along the
+    # plenum over the wall, down through the ceiling.
+    up, down, run = ix0 + 170.0, ix0 + 628.0, deck + 30.0
+    s.arrow(up, floor - 96, up, run, th.accent, 2.4)
+    s.arrow(up, run, down, run, th.accent, 2.4)
+    s.arrow(down, run, down, floor - 96, th.accent, 2.4)
+    s.text(up + 14, run - 9, "the path measured", 13, th.accent, "start", italic=True)
+
+    s.dim(
+        ix0 + 34,
+        tile_bot,
+        ix0 + 34,
+        floor,
+        "2.8 m ± 0.2 m",
+        size=13,
+        label_side="right",
+    )
+    s.dim(ox1, deck, ox1, tile_top, "", offset=16)
+    s.text(ox1 + 26, deck + 24, "650 mm", 13, th.fg, "start")
+    s.text(ox1 + 26, deck + 42, "to 760 mm", 13, th.fg, "start")
+
+    # ---- The plenum in plan, and what each clause asks ----
+    px0, py0, px1, py1 = 50.0, 452.0, 290.0, 578.0
+    s.text(px0, py0 - 12, "the plenum in plan", 13, th.fg, "start", bold=True)
+    s.rect(px0, py0, px1 - px0, py1 - py0, th.panel, th.fg, sw=1.6)
+    for x0, y0, w, h in (
+        (px0, py0, px1 - px0, 8.0),
+        (px0, py0, 8.0, py1 - py0),
+        (px1 - 8.0, py0, 8.0, py1 - py0),
+    ):
+        s.rect(x0, y0, w, h, th.accent, th.fg, sw=0.8)
+    wall_x = px0 + (px1 - px0) * 328.0 / 688.0
+    s.line(wall_x, py0 + 12, wall_x, py1 - 4, th.muted, 1.4, dash="6,4")
+    s.dim(px1 - 18, py0 + 8, px1 - 18, py1, "4.5 m ± 0.5 m", size=12)
+    s.text(px0 + 16, py1 - 12, "lined", 12, th.accent, "start")
+
+    cx, tx = 320.0, 372.0
+    notes = (
+        (
+            "5.1.2",
+            (
+                "each room $V$ ≥ 50 m³ (down to 40 m³ is admitted with diffusers),",
+                "and the two volumes differ by ≥ 10 % with the ceiling in place",
+            ),
+        ),
+        (
+            "5.1.3",
+            (
+                "the dividing wall ends under the suspended ceiling, its head",
+                "≤ 100 mm thick and bevelled ≤ 30° from the vertical",
+            ),
+        ),
+        (
+            "5.1.4",
+            (
+                "plenum depth: from the top of the suspended ceiling to the",
+                "underside of the facility ceiling",
+            ),
+        ),
+        (
+            "5.1.5",
+            (
+                "one side wall and both end walls of the plenum lined, ≤ 150 mm:",
+                "$α_s$ ≥ 0.65 at 125 Hz, ≥ 0.80 from 250 Hz to 4000 Hz; "
+                "elsewhere $α$ < 0.10",
+            ),
+        ),
+    )
+    y = 454.0
+    for clause, lines in notes:
+        s.text(cx, y, clause, 13, th.muted, "start", bold=True)
+        for line in lines:
+            s.text(tx, y, line, 13, th.fg, "start")
+            y += 17.0
+        y += 7.0
+
+    # ---- Panel B: the symbols of the one-dimensional model ----
+    s.text(
+        50,
+        632,
+        "B · The symbols of the one-dimensional model (Vigran, Figure 9.10): "
+        "no part of the standard",
+        16,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    mx0, my0, mx1, my1 = 96.0, 686.0, 416.0, 806.0
+    plenum, room = my0 + 30.0, my0 + 34.0
+    mid = (mx0 + mx1) / 2
+    s.rect(mx0, my0, mx1 - mx0, my1 - my0, th.panel, th.fg, sw=1.8)
+    s.rect(mx0, plenum, mx1 - mx0, room - plenum, th.secondary, th.fg, sw=1.0)
+    s.line(mid, room, mid, my1, th.fg, 3.0)
+    model = ("L_S", "H_S", "R_S")
+    s.dim(mx0, my0, mid, my0, "$L_S$", offset=-16, size=14, upright=model)
+    s.dim(mid, my0, mx1, my0, "$L_R$", offset=-16, size=14)
+    s.dim(mx0, room, mx0, my1, "$H_S$", offset=-18, size=14, upright=model)
+    s.dim(mx1, my0, mx1, plenum, "", offset=18)
+    s.text(mx1 + 30, my0 + 20, "$h$", 14, th.fg, "start")
+    s.arrow(mx0 + 80, my1 - 30, mx0 + 80, my0 + 12, th.accent, 2.0)
+    s.text(mx0 + 90, room + 30, "$R_S$", 14, th.accent, "start", upright=model)
+    s.arrow(mx1 - 80, my0 + 12, mx1 - 80, my1 - 30, th.accent, 2.0)
+    s.text(mx1 - 70, room + 30, "$R_R$", 14, th.accent, "start")
+
+    kx = 468.0
+    for row, (line, keys) in enumerate(
+        (
+            ("$L_S$, $L_R$: length of the ceiling in each room", ("L_S",)),
+            ("$H_S$: height of the source room;  $h$: depth of the plenum", ("H_S",)),
+            ("$R_S$, $R_R$: reduction index of the ceiling on each side", ("R_S",)),
+            ("$ε$ = 2 for totally reflecting plenum sidewalls,", ()),
+            ("$ε$ = 1 for totally absorbing ones", ()),
+            ("Vigran's example: $L_S$ = $L_R$ = 4.75 m, $h$ = 0.43 m,", ("L_S",)),
+            ("shallower than the 650 mm the facility begins at", ()),
+        )
+    ):
+        s.text(kx, 692 + 19 * row, line, 13, th.fg, "start", upright=keys)
+
+
+# ---------------------------------------------------------------------------
 # d13 - EN 12354 direct + flanking transmission paths across a junction
 # ---------------------------------------------------------------------------
 

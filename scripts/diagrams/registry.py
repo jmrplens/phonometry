@@ -23,6 +23,7 @@ from .aircraft import (
     _d_rotorcraft_hemisphere,
 )
 from .buildings import (
+    _d_ceiling_plenum_facility,
     _d_db_hr_requirements,
     _d_decay_range,
     _d_directivity_factor,
@@ -315,6 +316,11 @@ DIAGRAMS = {
         _d_impact,
         "ISO 16283-2 impact sound insulation setup",
         726,
+    ),
+    "diagram_ceiling_plenum_facility": (
+        _d_ceiling_plenum_facility,
+        "The suspended ceiling test facility (ISO 140-9) and the plenum model",
+        826,
     ),
     "diagram_tapping_positions_scan_paths": (
         _d_tapping_positions_scan_paths,

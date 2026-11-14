@@ -8,7 +8,7 @@
 // keeps the text either side of it apart, as the page shows it apart.
 
 import { codeLines, pageLines, splitLines } from '../../src/lib/markdown-fences.mjs';
-import { dropInlineSpans, dropInlineSpansByBlock, SPAN_MARK } from './markdown-spans.mjs';
+import { dropInlineSpans, dropInlineSpansByBlock, linkLabel, pageDefinitions, SPAN_MARK } from './markdown-spans.mjs';
 
 /**
  * A backslash and the ASCII punctuation character it escapes (CommonMark 2.4),
@@ -41,21 +41,15 @@ const INLINE_IMAGE = /!\[[^\]]*\]\(/;
 /** A markdown image by reference: `![alt][label]`, `![alt][]` or `![label]`. */
 const REFERENCE_IMAGE = /!\[([^\]]*)\](?:\[([^\]]*)\])?(?![[(])/g;
 
-/** A link reference definition, `[label]: destination`, at the start of a line. */
-const DEFINITION = /^ {0,3}\[([^\]]+)\]:/gm;
-
-/** A label as CommonMark matches one: case folded, inner whitespace one space. */
-function normalised(label) {
-  return label.trim().replace(/\s+/g, ' ').toLowerCase();
-}
-
 /**
  * Whether a page writes a figure of its own, as markdown or as HTML.
  *
  * A markdown image written inline, `![alt](src)`, is one wherever it stands.
  * One by reference, `![alt][label]`, `![alt][]` or the shortcut `![label]`,
  * is one only when the page defines its label: CommonMark shows one whose
- * label nothing defines as the text it is. An HTML image is a tag named
+ * label nothing defines as the text it is, and a definition is one only where
+ * the walk of the page reads one, opening a paragraph and alone on its lines
+ * (`pageDefinitions` of markdown-spans.mjs). An HTML image is a tag named
  * `img` in any case of its letters, as HTML reads a tag's name, and not a
  * longer name such as `img-card`. A backslash before the `!` or the `<`
  * shows it and opens neither, but on the lines of a raw HTML block of a
@@ -78,10 +72,11 @@ export function authorsFigure(markdown, { mdx = false } = {}) {
     .map((line, index) => (RAW_ROLES.has(read[index].role) ? line : dropEscapes(line)))
     .join('\n');
   if (INLINE_IMAGE.test(source) || HTML_IMAGE.test(source)) return true;
-  const defined = new Set(Array.from(source.matchAll(DEFINITION), (m) => normalised(m[1])));
+  const defined = pageDefinitions(read, { kind });
   for (const match of source.matchAll(REFERENCE_IMAGE)) {
     const label = match[2] ? match[2] : match[1];
-    if (defined.has(normalised(label))) return true;
+    const line = source.slice(0, match.index).split('\n').length - 1;
+    if (defined.at(line).has(linkLabel(label))) return true;
   }
   return false;
 }

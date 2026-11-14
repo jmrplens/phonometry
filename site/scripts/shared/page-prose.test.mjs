@@ -129,6 +129,45 @@ test('an image by reference is one only when the page defines its label', () => 
   assert.ok(authorsFigure('Texto ![alt](x.png) fin.'));
 });
 
+test('a label is defined only by a definition the page reads as one', () => {
+  // CommonMark 0.31.2, 4.7: a definition cannot interrupt a paragraph, stands
+  // in a quotation as well as on the page, and takes nothing after its title
+  // or its address on their line.
+  assert.equal(authorsFigure('Texto ![logo] fin.\n[logo]: x.png\n', { mdx: true }), false);
+  assert.equal(authorsFigure('Texto ![logo] fin.\n\n> [logo]: x.png\n', { mdx: true }), true);
+  assert.equal(authorsFigure('Texto ![logo] fin.\n\n[logo]: x.png extra\n', { mdx: true }), false);
+  assert.equal(authorsFigure('Texto ![logo] fin.\n\n[logo]:\n  x.png\n', { mdx: true }), true);
+  // A definition in a code block defines nothing.
+  assert.equal(authorsFigure('Texto ![logo] fin.\n\n```\n[logo]: x.png\n```\n', { mdx: true }), false);
+});
+
+test('a definition inside an aside defines the label only for what the parser reads after it', () => {
+  // remark-directive reads an aside's content after the paragraphs around
+  // it: a paragraph before the aside is read before the aside's definitions
+  // are, and does not see them, while one after it, and every paragraph in
+  // the aside itself, does. An aside inside an aside is read later still.
+  // Measured with remark-parse, -gfm, -directive, -math and -mdx.
+  const after = 'Intro.\n\n![Figure][fig]\n\n:::note\n[fig]: /x.png\n:::\n';
+  assert.equal(authorsFigure(after), false);
+  assert.equal(authorsFigure(after, { mdx: true }), false);
+  const before = ':::note\n[fig]: /x.png\n:::\n\n![Figure][fig]\n';
+  assert.equal(authorsFigure(before), true);
+  assert.equal(authorsFigure(before, { mdx: true }), true);
+  // In the aside itself, before the definition or after it, and in another aside.
+  assert.equal(authorsFigure(':::note\n![Figure][fig]\n\n[fig]: /x.png\n:::\n'), true);
+  assert.equal(authorsFigure(':::tip\n![Figure][fig]\n:::\n\n:::note\n[fig]: /x.png\n:::\n'), true);
+  // A definition in an aside inside an aside is read after the page's own paragraphs.
+  assert.equal(authorsFigure('::::note\n:::tip\n[fig]: /x.png\n:::\n::::\n\n![Figure][fig]\n'), false);
+});
+
+test('a definition indented four spaces defines its label on an MDX page, which reads no indented code', () => {
+  const after = 'Intro.\n\n![Figure][fig]\n\n    [fig]: /x.png\n';
+  assert.equal(authorsFigure(after, { mdx: true }), true);
+  // On a Markdown page the line is indented code, and defines nothing.
+  assert.equal(authorsFigure(after), false);
+  assert.equal(authorsFigure('      [fig]: /x.png\n\n![Figure][fig]\n', { mdx: true }), true);
+});
+
 test('a pair of display delimiters with a third after it is stray', () => {
   assert.equal(strayDelimiter('$$x$$ text $$'), '$$x$$ text $$');
   // Two pairs on one line are two inline maths, not a stray delimiter.

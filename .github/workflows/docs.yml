@@ -259,9 +259,11 @@ jobs:
         # sitemap stamp that must fail on a URL with no source or a build with
         # no sitemap. The reader the site takes the package's requirements from
         # is held to the tomllib of the runner's python3 on the whole of
-        # pyproject.toml. Node's own test runner, after the install: the
-        # structured-data check and the guides' dates read a page's frontmatter
-        # with the parser the content collection uses, from
+        # pyproject.toml. The Markdown copy of a page with no docs/ mirror is
+        # tested on pages made for each case, and the pages that publish none
+        # on the site's own tree. Node's own test runner, after the install:
+        # the structured-data check and the guides' dates read a page's
+        # frontmatter with the parser the content collection uses, from
         # @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
@@ -276,6 +278,11 @@ jobs:
         # text, so it runs before the build.
         run: pnpm run check:render-spawns
         working-directory: site
+      # The postbuild writes each page's Markdown copy and stops the build on
+      # a copy written from a page's source that misses its title, a line of
+      # its code, a count it prints, an absolute link, a figure, clip or fiche
+      # it renders, a catalogue it lists or a work it cites
+      # (scripts/shared/page-twin.mjs, copyDefects).
       - name: Build site
         # The build's output is kept for the step after this one, which reads
         # it for warnings. bash, so that pipefail hands a failed build its exit

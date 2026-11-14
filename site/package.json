@@ -56,6 +56,7 @@
     "lighthouse": "^13.6.0",
     "pa11y-ci": "^5.0.0",
     "puppeteer": "25.16.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "yaml": "^2.9.1"
   }
 }

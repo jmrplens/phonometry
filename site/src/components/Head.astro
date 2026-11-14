@@ -447,8 +447,10 @@ const jsonLd = graph.length
     scripts/emit-page-markdown.mjs). Advertising it lets an agent fetch the
     prose without parsing ~90% chrome out of the HTML. The address comes from
     src/routeData.ts, which knows which pages the generator wrote one for: it
-    is absent on the splash pages and on the 404, and on a page served as
-    fallback content it is the copy of the entry actually rendered here. */}
+    is absent on the 404 and on the pages src/lib/page-markdown.mjs withholds
+    (the splash pages, and the pages that show their data through a component
+    with no copy in docs/), and on a page served as fallback content it is
+    the copy of the entry actually rendered here. */}
 {route?.markdownCopy && (
   <link rel="alternate" type="text/markdown" href={route.markdownCopy} />
 )}

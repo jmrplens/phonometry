@@ -9,27 +9,15 @@
  * field, never out of the bibliography.
  * The matching "On this page" entry is added by src/routeData.ts.
  *
- * Three deliberate departures from strict APA 7, and nothing else:
- *  - a standard prints its designation alone, `(IEC 61672-1:2013)`, rather than
- *    APA's `(IEC Standard No. 61672-1:2013)`, because the designation is how
- *    the rest of the site and the conformance tables name the document;
- *  - the title carries the link when a catalogue or store URL exists, so the
- *    link text is descriptive instead of a bare URL trailing the entry;
- *  - an entry may carry a note, which follows as an annotation line,
- *    annotated-bibliography style.
- *
- * The DOI form is not one of them: `https://doi.org/<doi>` with nothing after
- * it, not even a period, is what APA 7 asks for.
+ * The citations themselves (author position, year, title, source, DOI, note,
+ * order) are worded in src/lib/references-format.mjs, which says where they
+ * depart from APA 7 and why. The page's Markdown copy prints the same section
+ * from the same module (referencesMarkdown in scripts/shared/page-twin.mjs), so
+ * the two cannot word an entry differently; this component only decides the
+ * markup.
  */
+import { citationParts, noteParts, opening, sortedReferences } from '../lib/references-format.mjs';
 import { referenceAnchors, type Reference } from '../lib/reference-chips';
-
-/** One rendered fragment of a citation: plain, italicized or linked text. */
-interface Part {
-	text: string;
-	/** 'cite' for work titles, 'i' for typographic italics (journal volume). */
-	italic?: 'cite' | 'i';
-	href?: string;
-}
 
 const { entry, lang } = Astro.locals.starlightRoute;
 const references: Reference[] = entry.data.references ?? [];
@@ -38,130 +26,6 @@ const t = Astro.locals.t;
 const HEADING_ID = 'references';
 const heading = t('phonometry.references.title');
 
-/**
- * "Fastl, H." + "Zwicker, E." -> "Fastl, H., & Zwicker, E.". The Spanish
- * adaptation of APA-7 joins the last author with "y" (and no comma) instead
- * of the ampersand: "Fastl, H. y Zwicker, E."
- */
-function joinAuthors(authors: readonly string[]): string {
-	if (authors.length === 1) return authors[0]!;
-	const separator = lang.startsWith('es') ? ' y ' : ', & ';
-	return `${authors.slice(0, -1).join(', ')}${separator}${authors[authors.length - 1]}`;
-}
-
-function who(ref: Reference): string {
-	if ('authors' in ref && ref.authors?.length) return joinAuthors(ref.authors);
-	if ('organization' in ref && ref.organization) return ref.organization;
-	// The schema (superRefine in content.config.ts) guarantees an author
-	// position for every entry type, so this is unreachable for valid content.
-	throw new Error(`reference "${ref.title}" has neither authors nor organization`);
-}
-
-function yearLabel(ref: Reference): string {
-	if (ref.year === undefined) return lang.startsWith('es') ? 's. f.' : 'n.d.';
-	return String(ref.year);
-}
-
-/** Parenthetical right after the title: edition, designation or report number. */
-function titleSuffix(ref: Reference): string | undefined {
-	switch (ref.type) {
-		case 'standard':
-			return ref.designation;
-		case 'book':
-			return ref.edition;
-		case 'report':
-			return ref.number;
-		default:
-			return undefined;
-	}
-}
-
-/** The source segment after the title: publisher, journal locator or site. */
-function sourceParts(ref: Reference): Part[] {
-	switch (ref.type) {
-		case 'book':
-			return [{ text: ref.publisher }];
-		case 'standard':
-			// APA omits the publisher when it repeats the authoring organization.
-			return ref.publisher && ref.publisher !== ref.organization
-				? [{ text: ref.publisher }]
-				: [];
-		case 'report':
-			return ref.institution && ref.institution !== ref.organization
-				? [{ text: ref.institution }]
-				: [];
-		case 'web':
-			return ref.siteName ? [{ text: ref.siteName }] : [];
-		case 'article': {
-			const parts: Part[] = [{ text: ref.journal, italic: 'cite' }];
-			if (ref.volume !== undefined) {
-				parts.push({ text: ', ' }, { text: String(ref.volume), italic: 'i' });
-				if (ref.issue !== undefined) parts.push({ text: `(${ref.issue})` });
-			}
-			if (ref.pages) parts.push({ text: `, ${ref.pages}` });
-			return parts;
-		}
-		default:
-			return [];
-	}
-}
-
-/**
- * The "Author. (Year)." that opens every entry, kept apart from the rest so the
- * template can give it the weight a reader scans a bibliography for. It is
- * always plain text: neither the author position nor the year is ever a link or
- * italicised, so unlike the rest of the citation it needs no fragments.
- */
-function opening(ref: Reference): string {
-	const author = who(ref);
-	return `${author.endsWith('.') ? author : `${author}.`} (${yearLabel(ref)}).`;
-}
-
-/** The rest of the citation as fragments, APA-7 punctuation included. */
-function citationParts(ref: Reference): Part[] {
-	const parts: Part[] = [];
-	const italicTitle = ref.type === 'article' ? undefined : ('cite' as const);
-
-	parts.push({ text: ' ' });
-	parts.push({ text: ref.title, italic: italicTitle, href: ref.url });
-	const suffix = titleSuffix(ref);
-	if (suffix) parts.push({ text: ` (${suffix})` });
-	parts.push({ text: '. ' });
-
-	const source = sourceParts(ref);
-	if (source.length) {
-		parts.push(...source);
-		parts.push({ text: '. ' });
-	}
-	if (ref.doi) {
-		// APA-7: nothing follows a DOI, not even a period.
-		const doiUrl = `https://doi.org/${ref.doi}`;
-		parts.push({ text: doiUrl, href: doiUrl });
-	}
-	return parts;
-}
-
-/**
- * Note text split so bare URLs become links (e.g. a revision or index page).
- * The final character class keeps trailing sentence punctuation (".", ","...)
- * out of the link when the URL ends a clause.
- */
-function noteParts(note: string): Part[] {
-	return note
-		.split(/(https?:\/\/[^\s)]*[^\s.,;:)])/)
-		.filter((piece) => piece !== '')
-		.map((piece) => (piece.startsWith('http') ? { text: piece, href: piece } : { text: piece }));
-}
-
-/**
- * APA orders alphabetically by first author surname or organization; no-date
- * entries precede dated ones for the same author, then year, then title.
- */
-function sortKey(ref: Reference): string {
-	const year = ref.year === undefined ? '' : String(ref.year);
-	return `${who(ref)} ${year} ${ref.title}`.toLowerCase();
-}
-
 /*
   Each entry carries a stable fragment id so the page header chips
   (PageChips.astro) can link straight to it. The ids are derived from the
@@ -169,9 +33,7 @@ function sortKey(ref: Reference): string {
   change them.
 */
 const anchors = referenceAnchors(references);
-const sorted = [...references.entries()].sort(([, a], [, b]) =>
-	sortKey(a).localeCompare(sortKey(b), lang, { sensitivity: 'base' }),
-);
+const sorted = sortedReferences(references, lang);
 ---
 
 {
@@ -195,7 +57,7 @@ const sorted = [...references.entries()].sort(([, a], [, b]) =>
 			<ul role="list">
 				{sorted.map(([index, ref]) => (
 					<li id={anchors[index]}>
-						<span class="ref-who">{opening(ref)}</span>
+						<span class="ref-who">{opening(ref, lang)}</span>
 						{citationParts(ref).map((part) => {
 							const inner =
 								part.italic === 'cite' ? (

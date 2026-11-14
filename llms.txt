@@ -40,392 +40,395 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 ## Start here
 
-- [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/)
-- [Environments](https://docs.jmrp.io/phonometry/start/environments/)
-- [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/)
-- [conda and mamba](https://docs.jmrp.io/phonometry/start/environments/conda/)
-- [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/)
-- [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/)
-- [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/)
-- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/)
-- [Why phonometry](https://docs.jmrp.io/phonometry/start/why-phonometry/)
-- [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/)
-- [About](https://docs.jmrp.io/phonometry/start/about/)
-- [Support the project](https://docs.jmrp.io/phonometry/start/support/)
-- [Guides index](https://docs.jmrp.io/phonometry/start/guides/)
-- [Glossary of quantities](https://docs.jmrp.io/phonometry/reference/glossary/)
+- [Overview](https://docs.jmrp.io/phonometry/start/): Where to begin with phonometry: the first analysis end to end, the task index, the map of all the guides, why the library exists and who maintains it.
+- [What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/): The task-shaped door into the guides: a job on the left, the guide that answers it on the right, with the standard it implements.
+- [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/): Install phonometry, run your first one-third-octave analysis and calibrate it.
+- [Environments](https://docs.jmrp.io/phonometry/start/environments/): Where phonometry runs and how to install it there: pip and uv, conda, Jupyter, JupyterLite, Docker and type checkers, with what each one supports.
+- [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/): Install phonometry with pip or uv on Python 3.12 to 3.14: each extra and what it brings, torch without CUDA, a uv project and an install from a clone.
+- [conda and mamba](https://docs.jmrp.io/phonometry/start/environments/conda/): Use phonometry in a conda or mamba environment: its dependencies from conda-forge under their names there, then phonometry itself with pip.
+- [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/): Use phonometry in Jupyter and JupyterLab: the kernel and the extras, record tables, inline and SVG figures, videos, fiches and warnings in a cell.
+- [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/): phonometry in a browser through JupyterLite or Pyodide: the extras micropip can install, what runs there, what cannot, and a JupyterLite site of your own.
+- [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/): Run phonometry in a container or on a server: a slim image with a virtual environment, any user id, a read-only root and ffmpeg for videos.
+- [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/): Type-check code that uses phonometry with mypy or pyright: the wheel ships py.typed, choices and numbers are checked, and the FDTD fields are typed Any.
+- [Why phonometry](https://docs.jmrp.io/phonometry/start/why-phonometry/): Conformance first: an IEC 61672-1 time-weighting case study, the conformance suite, defects in the standards, and phonometry's place in Python.
+- [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/): Upgrade to 4.0: what moved, was renamed or removed and how to find its new spelling, the root trim, split modules and units in parameter names.
+- [About](https://docs.jmrp.io/phonometry/start/about/): About phonometry: who maintains it, how each metric is built from its governing standard and checked in CI, how to report an error and how to cite it.
+- [Support the project](https://docs.jmrp.io/phonometry/start/support/): Support for phonometry: reporting numbers that look wrong, sponsoring the work and helping obtain primary sources that no legitimate route has yielded.
+- [Guides index](https://docs.jmrp.io/phonometry/start/guides/): All 168 guides of phonometry in the thirteen topics it covers: what each area is for, the standards it implements and a one-line summary of every guide.
+- [Glossary of quantities](https://docs.jmrp.io/phonometry/reference/glossary/): Acoustic quantities the guides compute most, each with symbol, one-sentence definition, unit, defining standard and clause, and the guide computing it.
 
 ## Signal analysis
 
-- [Overview](https://docs.jmrp.io/phonometry/signals/)
-- [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/)
+- [Overview](https://docs.jmrp.io/phonometry/signals/): Measurement core: octave filter banks, frequency and time weighting, levels, calibrated spectra, calibration, uncertainty and a sound level meter in code.
+- [Build a sound level meter](https://docs.jmrp.io/phonometry/signals/sound-level-meter/): Sound level meter built from the API: IEC 60942 calibration, IEC 61672-1 weightings, Leq, SEL, percentiles, IEC 61260-1 bands and class checks.
 
 ### Octave filtering
 
-- [Overview](https://docs.jmrp.io/phonometry/signals/filters/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-filters.txt)
-- [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/)
-- [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/)
-- [Filter class verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/)
-- [Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/)
-- [Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/)
+- [Overview](https://docs.jmrp.io/phonometry/signals/filters/): Fractional octave analysis: ANSI S1.11 / IEC 61260-1 filter banks, architectures, class verification, block processing and multichannel analysis. · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-filters.txt)
+- [Octave and Fractional-Octave Filter Banks](https://docs.jmrp.io/phonometry/signals/filters/filter-banks/): Octave and fractional-octave band levels in Python: band mathematics, the octave_filter parameters, the parametric EQ, band signals and zero-phase filtering.
+- [Filter Architecture Gallery](https://docs.jmrp.io/phonometry/signals/filters/filter-gallery/): Five band-filter architectures compared at the band edges, their 1/1 and 1/3 octave responses, usage examples and the Linkwitz-Riley crossover.
+- [Filter class verification (IEC 61260-1)](https://docs.jmrp.io/phonometry/signals/filters/filter-compliance/): Filter class by IEC 61260-1:2014: the Table 1 mask, IEC 61260-2 bandwidth and summation, class 0 (1995) and IEC 61260-3 periodic tests.
+- [Block Processing](https://docs.jmrp.io/phonometry/signals/filters/block-processing/): Streaming with carried filter state: blocks bit-identical to one pass, per-channel state, the pitfalls and a real-time level meter.
+- [Multichannel and Performance](https://docs.jmrp.io/phonometry/signals/filters/multichannel/): Per-channel processing of multichannel recordings: the (channels, samples) convention, calibrating an array capsule by capsule, and where the time goes.
 
 ### Levels and weighting
 
-- [Overview](https://docs.jmrp.io/phonometry/signals/levels/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-levels.txt)
-- [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/)
-- [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/)
-- [Time Weighting and Integration](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/)
-- [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/)
+- [Overview](https://docs.jmrp.io/phonometry/signals/levels/): IEC 61672-1 and special weightings, Fast/Slow/Impulse, integrated, statistical and dose levels, and the ISO 1996 indicators built on them. · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-levels.txt)
+- [Frequency Weighting (A, C, Z)](https://docs.jmrp.io/phonometry/signals/levels/weighting/): A/C/Z frequency weighting by IEC 61672-1, class 1 with a high-frequency accuracy mode, verified against the Table 3 tolerances.
+- [Special Weightings (G, B, D, AU)](https://docs.jmrp.io/phonometry/signals/levels/special-weightings/): G-weighting for infrasound (ISO 7196), historical B (ANSI S1.4-1983) and D (IEC 537), AU (IEC 61012) in the presence of ultrasound, and B and AU checks.
+- [Time Weighting and Integration](https://docs.jmrp.io/phonometry/signals/levels/time-weighting/): IEC 61672-1:2013 exponential detector: Fast and Slow, the dropped Impulse ballistics, tone-burst verification (Table 4), initial state and streaming.
+- [Integrated and Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/): Leq, LAeq, L10/L50/L90 percentile levels, LCpeak/SEL and noise dose (IEC 61252), and octave spectrograms, with the ISO 1996 indicators in their own guide.
 
 ### Signals and spectra
 
-- [Overview](https://docs.jmrp.io/phonometry/signals/spectra/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-spectra.txt)
-- [Calibrated spectral analysis (Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/)
-- [Multiple and partial coherence (Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/spectra/miso-coherence/)
-- [Time-frequency analysis](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/)
-- [Cepstrum, echoes and the envelope spectrum (Havelock / Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/)
-- [Time synchronous averaging (McFadden 1987)](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/)
-- [Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/)
-- [Test signals and sample-rate tools (IEC 60268-1)](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/)
-- [System measurement: Golay, shaped sweeps, inversion](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/)
+- [Overview](https://docs.jmrp.io/phonometry/signals/spectra/): Frequency- and time-domain analysis: calibrated Welch spectra and their quality, cepstrum and echoes, the envelope spectrum, correlation and time delay. · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-spectra.txt)
+- [Calibrated spectral analysis (Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/): Welch spectra (Bendat & Piersol) with random errors, confidence intervals, coherent output, smoothing, colored noise and multitaper.
+- [Multiple and partial coherence (Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/spectra/miso-coherence/): Ordinary, multiple and partial coherence of correlated sources driving one response (Bendat & Piersol), to find which source dominates each band.
+- [Time-frequency analysis](https://docs.jmrp.io/phonometry/signals/spectra/time-frequency/): Calibrated STFT spectrogram in dB SPL, the time-frequency trade-off, and the Bendat & Piersol zoom FFT for tones closer than a bin.
+- [Cepstrum, echoes and the envelope spectrum (Havelock / Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/spectra/cepstrum-echoes/): Power, real and complex cepstrum: echoes and their reflection coefficient, liftering, the homomorphic round trip and the envelope spectrum.
+- [Time synchronous averaging (McFadden 1987)](https://docs.jmrp.io/phonometry/signals/spectra/synchronous-averaging/): Synchronous averaging of a periodic waveform in asynchronous noise (McFadden 1987): the comb filter, the square-root law and non-integer periods.
+- [Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/): Bendat & Piersol correlation, time delay by correlator, phase slope or Knapp & Carter GCC, sub-sample alignment and the Hilbert envelope.
+- [Test signals and sample-rate tools (IEC 60268-1)](https://docs.jmrp.io/phonometry/signals/spectra/test-signals/): IEC 60268-1 tone bursts with exact gating, colored noise, polyphase resampling with explicit anti-alias, and fractional delay.
+- [System measurement: Golay, shaped sweeps, inversion](https://docs.jmrp.io/phonometry/signals/spectra/system-measurement/): Impulse responses from Golay pairs with exactly noise-free deconvolution, sweeps shaped to a target spectrum, and Kirkeby-regularized inversion.
 
 ### Calibration and uncertainty
 
-- [Overview](https://docs.jmrp.io/phonometry/signals/metrology/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-metrology.txt)
-- [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/)
-- [Measurement uncertainty (GUM and Monte Carlo)](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/)
-- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/)
-- [Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/)
-- [Random-incidence and diffuse-field response (IEC 61183)](https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/)
-- [Free-field corrections of a sound level meter (IEC 62585)](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/)
-- [Periodic tests of a sound level meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/)
+- [Overview](https://docs.jmrp.io/phonometry/signals/metrology/): Defensible measurement: SPL calibration versus dBFS, GUM and Monte Carlo uncertainty, record qualification and class verifiers. · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-metrology.txt)
+- [Calibration and dBFS](https://docs.jmrp.io/phonometry/signals/metrology/calibration/): Sensitivity factor from digital units to pascals: an IEC 60942 calibrator or a rated microphone sensitivity, the calibrator's own verdict, and dBFS.
+- [Measurement uncertainty (GUM and Monte Carlo)](https://docs.jmrp.io/phonometry/signals/metrology/gum-uncertainty/): GUM law of propagation (ISO/IEC Guide 98-3:2008) and Monte Carlo (Supplement 1): combined and expanded uncertainty, Type B, coverage intervals.
+- [Compliance and verification](https://docs.jmrp.io/phonometry/signals/metrology/compliance-verification/): Classes of IEC 61672-1 and IEC 61260-1: what they claim, design verifiers, the IEC TC 29 rule, the conformance report and what needs a laboratory.
+- [Data qualification: stationarity, level crossings and peaks (Bendat & Piersol)](https://docs.jmrp.io/phonometry/signals/metrology/data-qualification/): Qualification of a random record before analysis: Bendat & Piersol stationarity (reverse arrangements, runs) and Rice peak statistics.
+- [Random-incidence and diffuse-field response (IEC 61183)](https://docs.jmrp.io/phonometry/signals/metrology/random-incidence/): Random incidence on a sound level meter: the IEC 61183:1994 directivity factor, and the random-incidence and diffuse-field sensitivity levels.
+- [Free-field corrections of a sound level meter (IEC 62585)](https://docs.jmrp.io/phonometry/signals/metrology/free-field-corrections/): IEC 62585:2012 corrections for a sound level meter's periodic test: the adjustment value, free-field corrections, Annex I uncertainty, verdict and fiche.
+- [Periodic tests of a sound level meter (IEC 61672-3)](https://docs.jmrp.io/phonometry/signals/metrology/sound-level-meter-periodic-tests/): IEC 61672-3:2013 verdict on a working sound level meter from a laboratory's periodic tests, clause by clause against IEC 61672-1.
 
 ### Microphone calibration (IEC 61094)
 
-- [Overview](https://docs.jmrp.io/phonometry/signals/metrology/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-metrology-microphones.txt)
-- [Microphone calibration by comparison (IEC 61094-5 and IEC 61094-8)](https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/)
-- [Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/)
+- [Overview](https://docs.jmrp.io/phonometry/signals/metrology/): Defensible measurement: SPL calibration versus dBFS, GUM and Monte Carlo uncertainty, record qualification and class verifiers. · [full text](https://docs.jmrp.io/phonometry/llms/llms-signals-metrology-microphones.txt)
+- [Microphone calibration by comparison (IEC 61094-5 and IEC 61094-8)](https://docs.jmrp.io/phonometry/signals/metrology/comparison-calibration/): Calibration by comparison (IEC 61094-5/-8): a reference sensitivity carried to a working standard in level and phase, corrections and uncertainty.
+- [Microphone calibration by reciprocity (IEC 61094-2 and IEC 61094-3)](https://docs.jmrp.io/phonometry/signals/metrology/reciprocity-calibration/): Calibration by reciprocity (IEC 61094-2/-3): laboratory standard microphones without a reference, three pair measurements, coupler or free field.
 
 ## The medium
 
-- [Overview](https://docs.jmrp.io/phonometry/fluids/)
-- [Humid air](https://docs.jmrp.io/phonometry/fluids/humid-air/)
+- [Overview](https://docs.jmrp.io/phonometry/fluids/): Medium of propagation computed from measured, not assumed, conditions: humid air by IEC 61094-2:2009 Annex F, and why every domain uses it.
+- [Humid air](https://docs.jmrp.io/phonometry/fluids/humid-air/): Humid air by IEC 61094-2:2009 Annex F (CIPM-2007): density, speed of sound, ratio of specific heats, viscosity and thermal diffusivity.
 
 ## Elastic solids
 
-- [Overview](https://docs.jmrp.io/phonometry/solids/)
-- [Wave speeds of a solid](https://docs.jmrp.io/phonometry/solids/wave-speeds/)
+- [Overview](https://docs.jmrp.io/phonometry/solids/): Elastic constants of a solid and the three longitudinal wave speeds they give: which one a printed table holds and how to get from one to another.
+- [Wave speeds of a solid](https://docs.jmrp.io/phonometry/solids/wave-speeds/): Beam, plate and unbounded: the three longitudinal wave speeds of a solid, which one a printed table holds, and the inverse that returns Young's modulus.
 
 ## Files
 
-- [Overview](https://docs.jmrp.io/phonometry/io/)
-- [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/)
-- [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/)
-- [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/)
+- [Overview](https://docs.jmrp.io/phonometry/io/): File layer of a measurement: calibrated WAV, block streaming, BWF with bext provenance, the calibration sidecar, material catalogues and video.
+- [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/): Audio files as measurement records: a meter's WAV into a calibrated Signal, overnight recordings in blocks, BWF with bext and the calibration sidecar.
+- [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/): Data sheets, declarations of performance, test reports or your own measurements as JSON or CSV catalogue files that the library's models read.
+- [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/): Any matplotlib animation to WebM, MP4 or GIF through ffmpeg: the encoder found by a trial encode, hardware first, and FDTD runs written straight to video.
 
 ## Hearing and perception
 
-- [Overview](https://docs.jmrp.io/phonometry/perception/)
+- [Overview](https://docs.jmrp.io/phonometry/perception/): Perception of sound and what noise does to hearing: loudness, sharpness, roughness, tonality, annoyance, STI and SII, thresholds and exposure.
 
 ### Psychoacoustics
 
-- [Overview](https://docs.jmrp.io/phonometry/perception/psychoacoustics/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-psychoacoustics.txt)
-- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/)
-- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/)
-- [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/)
-- [Prominent Discrete Tones (ECMA-418-1)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/)
-- [Objective audibility of tones in noise (ISO/PAS 20065)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/)
-- [Psychoacoustic annoyance and fluctuation strength (Fastl & Zwicker)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/)
+- [Overview](https://docs.jmrp.io/phonometry/perception/psychoacoustics/): Loudness (ISO 532, ECMA-418-2), sharpness, tonality, roughness, fluctuation strength, tonal assessment (ECMA-418-1, ISO/PAS 20065) and annoyance. · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-psychoacoustics.txt)
+- [Loudness](https://docs.jmrp.io/phonometry/perception/psychoacoustics/loudness/): Zwicker loudness in sones (ISO 532-1) and the ISO 226:2023 equal-loudness contours, with the ISO 532-2/-3 and ECMA-418-2 models in their own guide.
+- [Advanced Loudness (ISO 532-2/-3, ECMA-418-2)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/advanced-loudness/): ERB_N and the Cam scale, Moore-Glasberg loudness (ISO 532-2), time-varying loudness (ISO 532-3), Sottek loudness (ECMA-418-2) and which model to choose.
+- [Sound Quality Metrics](https://docs.jmrp.io/phonometry/perception/psychoacoustics/sound-quality/): Sharpness in acum (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality (tu_HMS), roughness (asper) and fluctuation strength (vacil_HMS).
+- [Prominent Discrete Tones (ECMA-418-1)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-prominence/): ECMA-418-1 tone-to-noise and prominence ratios: FFT verdicts for discrete tones, ECMA-74 positions and how to choose among four tonality metrics.
+- [Objective audibility of tones in noise (ISO/PAS 20065)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/tone-audibility/): ISO/PAS 20065:2016 audibility ΔL of a tone above its masking threshold: critical band, masking, peak detection and the ISO 1996-2 adjustment.
+- [Psychoacoustic annoyance and fluctuation strength (Fastl & Zwicker)](https://docs.jmrp.io/phonometry/perception/psychoacoustics/psychoacoustic-annoyance/): Fastl & Zwicker psychoacoustic annoyance (loudness, sharpness, roughness, fluctuation strength), its AM-noise closed form and the Osses 2016 model.
 
 ### Speech
 
-- [Overview](https://docs.jmrp.io/phonometry/perception/speech/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-speech.txt)
-- [Speech Transmission Index (IEC 60268-16)](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/)
-- [Speech Intelligibility Index (SII)](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/)
-- [Objective intelligibility (STOI & ESTOI)](https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/)
+- [Overview](https://docs.jmrp.io/phonometry/perception/speech/): Three speech intelligibility measures: IEC 60268-16 STI rates a channel, ANSI S3.5 SII a listening condition, and STOI/ESTOI a processor. · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-speech.txt)
+- [Speech Transmission Index (IEC 60268-16)](https://docs.jmrp.io/phonometry/perception/speech/speech-transmission/): IEC 60268-16 speech transmission index (STI): modulation transfer function, the indirect method from an impulse response and direct STIPA.
+- [Speech Intelligibility Index (SII)](https://docs.jmrp.io/phonometry/perception/speech/speech-intelligibility/): ANSI S3.5-1997 Speech Intelligibility Index (SII) in its four band procedures: band importance, audibility, noise and hearing loss.
+- [Objective intelligibility (STOI & ESTOI)](https://docs.jmrp.io/phonometry/perception/speech/objective-intelligibility/): Correlation-based objective intelligibility of time-frequency weighted noisy speech: STOI (Taal et al. 2011) and ESTOI (Jensen & Taal 2016).
 
 ### Hearing and exposure
 
-- [Overview](https://docs.jmrp.io/phonometry/perception/hearing/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-hearing.txt)
-- [Hearing threshold (age and reference zero)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/)
-- [Audiometric Test Methods (ISO 8253-1 and -2)](https://docs.jmrp.io/phonometry/perception/hearing/audiometry/)
-- [Occupational Noise Exposure (ISO 9612)](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/)
-- [Noise-induced hearing loss (ISO 1999)](https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/)
-- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/)
+- [Overview](https://docs.jmrp.io/phonometry/perception/hearing/): Hearing and noise damage: ISO 7029 and ISO 389-7 thresholds, ISO 8253 audiometry, ISO 1999 hearing loss, ISO 9612 exposure and ISO 4869 protectors. · [full text](https://docs.jmrp.io/phonometry/llms/llms-perception-hearing.txt)
+- [Hearing threshold (age and reference zero)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-threshold/): Hearing threshold by age and sex (ISO 7029:2017 median, spread and fractiles) and the ISO 389-7:2005 free- and diffuse-field reference zero.
+- [Audiometric Test Methods (ISO 8253-1 and -2)](https://docs.jmrp.io/phonometry/perception/hearing/audiometry/): Audiometric rooms and thresholds: room noise and sound field (ISO 8253-1, -2), four test methods for the hearing threshold level, and its uncertainty.
+- [Occupational Noise Exposure (ISO 9612)](https://docs.jmrp.io/phonometry/perception/hearing/occupational-exposure/): ISO 9612 task-based, job-based and full-day strategies for LEX,8h, with the Annex C uncertainty budget and the one-sided 95 % upper limit.
+- [Noise-induced hearing loss (ISO 1999)](https://docs.jmrp.io/phonometry/perception/hearing/noise-induced-hearing-loss/): ISO 1999:2013 noise-induced permanent threshold shift (NIPTS) by level, duration and frequency, combined with ISO 7029 age into HTLAN, 500 to 6000 Hz.
+- [Hearing Protectors (ISO 4869-1, -2, -3 and -6)](https://docs.jmrp.io/phonometry/perception/hearing/hearing-protectors/): ISO 4869 hearing protectors: attenuation on sixteen subjects (-1), effective A-weighted level (-2), insertion loss (-3) and active earmuffs (-6).
 
 ## Rooms and buildings
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/): Room acoustics measured and predicted (ISO 3382, EN 12354-6), and sound insulation measured in the field and the laboratory and predicted by EN 12354.
 
 ### Room acoustics
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/rooms/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms.txt)
-- [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/)
-- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)
-- [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/)
-- [Image sources and the steady-state room field (Kuttruff / Vorländer / Bies)](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/)
-- [Spatial sound decay in workrooms (ISO 14257, ISO 11690-3)](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/)
-- [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/)
-- [Reverberation-time prediction (Sabine · Eyring · Fitzroy · Arau-Puchades)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/)
-- [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/rooms/): Room acoustics: ISO 18233 impulse responses, ISO 3382 parameters, open-plan offices, image sources, ANSI S12.2 noise and EN 12354-6 reverberation. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms.txt)
+- [Measuring the Room Impulse Response](https://docs.jmrp.io/phonometry/buildings/rooms/room-impulse-response/): Room impulse response measurement with the ISO 18233 excitations: the exponential sine sweep, MLS, and source and microphone placement.
+- [Room Acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/): Decay analysis of a room impulse response by ISO 3382-1/2: Schroeder curve, EDT, T20, T30, clarity, definition, centre time and the fiche.
+- [Open-Plan Office Acoustics (ISO 3382-3)](https://docs.jmrp.io/phonometry/buildings/rooms/open-plan-acoustics/): Open-plan office speech privacy (ISO 3382-3): D2,S, level at 4 m, distraction and privacy distances, the fiche and Long's occupant-noise prediction.
+- [Image sources and the steady-state room field (Kuttruff / Vorländer / Bies)](https://docs.jmrp.io/phonometry/buildings/rooms/room-image-sources/): Image-source impulse response of a rectangular room, steady-state level, room constant, critical distance, Schroeder frequency and the room modes.
+- [Spatial sound decay in workrooms (ISO 14257, ISO 11690-3)](https://docs.jmrp.io/phonometry/buildings/rooms/workroom-sound-decay/): Spatial sound decay in workrooms: the ISO 14257 curve, its descriptors DL2 and DLf, the Annex B correction and ISO 11690-3 prediction.
+- [Room-noise criteria (NC / RC Mark II)](https://docs.jmrp.io/phonometry/buildings/rooms/room-noise/): Room-noise ratings (ANSI/ASA S12.2-2019): NC curves with the tangency fallback, and RC Mark II with its rumble, hiss or neutral tag.
+- [Reverberation-time prediction (Sabine · Eyring · Fitzroy · Arau-Puchades)](https://docs.jmrp.io/phonometry/buildings/rooms/reverberation-prediction/): Reverberation-time prediction from volume, areas and absorption: Sabine, Eyring, Millington-Sette, Fitzroy and Arau-Puchades, with air absorption.
+- [Sound absorption in enclosed spaces (EN 12354-6)](https://docs.jmrp.io/phonometry/buildings/rooms/enclosed-space-absorption/): EN 12354-6:2003 prediction of a room's absorption area and reverberation time from its surfaces, objects and air (the Clause 4 model).
 
 ### Auditorium measures of the ISO 3382-1 annexes
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/rooms/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms-auditorium.txt)
-- [Sound strength G (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/)
-- [Spatial impression (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/)
-- [Stage support and uncertainty (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/)
-- [Reporting and source qualification (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/rooms/): Room acoustics: ISO 18233 impulse responses, ISO 3382 parameters, open-plan offices, image sources, ANSI S12.2 noise and EN 12354-6 reverberation. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms-auditorium.txt)
+- [Sound strength G (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/sound-strength/): Sound strength G (ISO 3382-1): impulse-response energy against the same source at 10 m in free field, and three routes without a 10 m anechoic room.
+- [Spatial impression (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/spatial-impression/): Spatial impression (ISO 3382-1) with a second microphone: early lateral energy fraction, late lateral level and interaural cross correlation.
+- [Stage support and uncertainty (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/stage-and-uncertainty/): Stage support and uncertainty (ISO 3382-1): two measures with the source a metre away, and what a random excitation costs a reverberation time.
+- [Reporting and source qualification (ISO 3382-1)](https://docs.jmrp.io/phonometry/buildings/rooms/reporting-and-qualification/): Printed tables of ISO 3382-1: source directivity, how many microphone positions a hall needs, the bands of each single number, and the report.
 
 ### Laboratory insulation measurement
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-laboratory.txt)
-- [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/)
-- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/)
-- [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/)
-- [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-laboratory.txt)
+- [Laboratory Insulation Measurement](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-lab/): Building elements in the laboratory (ISO 10140): sound reduction index R and impact level Ln without flanking, background correction and fiches.
+- [Linings, Floor Coverings, Joints and Rain (ISO 10140-1)](https://docs.jmrp.io/phonometry/buildings/insulation/lab-application-rules/): Four application rules of ISO 10140-1:2021 (Annexes G, H, J and K): wall linings, floor coverings, sealed joints and artificial rain.
+- [Sound Insulation by Intensity (ISO 15186)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-intensity/): Sound insulation by intensity (ISO 15186): RI from scanning the radiating face, Kc adaptation to ISO 10140, small-element level difference and fiches.
+- [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/): Flanking transmission measured in the laboratory by ISO 10848: Kij, Dn,f, Ln,f, the Part 4 modal-overlap checks and the ceiling plenum path with Dn,c.
 
 ### Sound insulation
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation.txt)
-- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/)
-- [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/)
-- [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/)
-- [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/)
-- [Service-Equipment and Activity Noise (ISO 16032)](https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation.txt)
+- [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): Field sound insulation by ISO 16283-1/-2: airborne D, DnT and R', impact L'nT and L'n, the Clause 14 test report and the ISO 12999-1 uncertainty.
+- [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/): Corner procedure that ISO 16283 requires below 25 m³: corner level, combination and 63 Hz reverberation time, for airborne, impact and façade.
+- [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/): Rubber ball and bang machine: force exposure level, the ISO 16283-2 and JIS A 1418-2 checks, Fast maximum level and the ISO 717-2 Annex D rating.
+- [Sound Insulation Survey Method (ISO 10052)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-survey/): ISO 10052 survey method: octave bands, a hand-held meter and the reverberation index, for airborne, impact, façade and service-equipment quantities.
+- [Service-Equipment and Activity Noise (ISO 16032)](https://docs.jmrp.io/phonometry/buildings/insulation/service-equipment-noise/): Service-equipment noise by the ISO/DIS 16032:2023 draft: corner and reverberant positions, background correction, standardization, A and C single numbers.
 
 ### Insulation ratings and the envelope
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-ratings.txt)
-- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/)
-- [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/)
-- [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-ratings.txt)
+- [Insulation Ratings (ISO 717)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-ratings/): ISO 717-1 airborne and ISO 717-2 impact single-number ratings with C, Ctr and CI terms, the enlarged-range and one-decimal variants, and the ISO 717 fiche.
+- [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/): Façade insulation measured by ISO 16283-3 (loudspeaker and road-traffic methods) and predicted by EN 12354-3, with EN 12354-4 outdoor radiation.
+- [Spanish Building Code (CTE DB-HR)](https://docs.jmrp.io/phonometry/buildings/insulation/spanish-building-code/): CTE DB-HR global index: the Annex A formula over eighteen one-third-octave bands, normalized spectra, rounding, requirements and window correction.
 
 ### Insulation design
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/design/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-design.txt)
-- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/)
-- [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/)
-- [Predicting Panel Sound Insulation (mass law, coincidence, double walls)](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/)
-- [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/)
-- [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/)
-- [Structure-borne sound power of building equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/)
-- [Installed structure-borne sound from equipment (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/design/): Sound insulation before it is built: EN/ISO 12354 flanking, panels, resilient layers, and service-equipment sound from EN 15657 to EN 12354-5. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-design.txt)
+- [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/): EN 12354 prediction of in-situ insulation between rooms from element data: airborne and impact flanking, vibration reduction indices and fiches.
+- [Detailed Per-Band Prediction (ISO 12354)](https://docs.jmrp.io/phonometry/buildings/design/detailed-prediction/): ISO 12354-1/-2:2017 detailed model: in-situ element and junction data, flanking band by band, and the per-path contributions to R'w and L'n,w.
+- [Predicting Panel Sound Insulation (mass law, coincidence, double walls)](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/): Airborne insulation of panels from their properties: mass law, coincidence, orthotropic sheets, double walls, wall ties, slits, radiation and mobility.
+- [Floor-Covering Impact Improvement (ISO 16251-1)](https://docs.jmrp.io/phonometry/buildings/design/impact-improvement/): Floor-covering impact improvement on the ISO 16251-1 mock-up: acceleration levels, ISO 717-2 weighted improvement, fiche and ISO 12354-2 estimate.
+- [Predicting Resilient-Layer Performance](https://docs.jmrp.io/phonometry/buildings/design/resilient-layers/): Resilient-layer prediction: the tapping machine, soft coverings, the 30 lg and 40 lg floating-floor laws and ISO 12354-1 Annex D wall linings.
+- [Structure-borne sound power of building equipment (EN 15657)](https://docs.jmrp.io/phonometry/buildings/design/structure-borne-power/): UNE-EN 15657:2018 reception-plate method: injected power L_Ws, blocked force, characteristic power, and the free velocity and mobility of the source.
+- [Installed structure-borne sound from equipment (EN 12354-5)](https://docs.jmrp.io/phonometry/buildings/design/installed-structure-borne/): Receiving-room level from structure-borne service-equipment sound (EN 12354-5:2009): coupling term D_C, installed power, per-path and total level.
 
 ## Materials and surfaces
 
-- [Overview](https://docs.jmrp.io/phonometry/materials/)
-- [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/)
+- [Overview](https://docs.jmrp.io/phonometry/materials/): Materials and surfaces: ISO 354 absorption, ISO 9053 airflow resistance, ISO 10534 tube, absorber models, ISO 17497 diffusers and resilient layers.
+- [Reading a material datasheet](https://docs.jmrp.io/phonometry/materials/reading-a-datasheet/): Numbers on a data sheet, a declaration of performance or a test report: what they are and how to write them into a catalogue of your own.
 
 ### Absorbers
 
-- [Overview](https://docs.jmrp.io/phonometry/materials/absorbers/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-absorbers.txt)
-- [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/)
-- [Suspended ceilings: the EN 16487 test code](https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/)
-- [Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/)
-- [Impedance Tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/)
-- [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/)
-- [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/)
+- [Overview](https://docs.jmrp.io/phonometry/materials/absorbers/): Absorber characterisation and prediction: ISO 11654 rating, ISO 9053 airflow resistance, ISO 10534 / ASTM E2611 tube, porous and metamaterial models. · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-absorbers.txt)
+- [Sound Absorption Measurement and Rating](https://docs.jmrp.io/phonometry/materials/absorbers/absorption-measurement/): Sound absorption in a reverberation room (ISO 354), its rating as alpha_w with a class (ISO 11654) and the uncertainty of both (ISO 12999-2).
+- [Suspended ceilings: the EN 16487 test code](https://docs.jmrp.io/phonometry/materials/absorbers/suspended-ceilings/): EN 16487 for suspended ceilings: what it fixes so two laboratories agree, type E mounting 200 mm deep, the air-absorption correction and reproducibility.
+- [Airflow Resistance](https://docs.jmrp.io/phonometry/materials/absorbers/airflow-resistance/): Airflow resistance, specific airflow resistance and resistivity of porous materials by the static (ISO 9053-1) and alternating (ISO 9053-2) methods.
+- [Impedance Tube](https://docs.jmrp.io/phonometry/materials/absorbers/impedance-tube/): Normal-incidence absorption and impedance in the tube: ISO 10534-1 standing wave, ISO 10534-2 two microphones and ASTM E2611 transmission loss.
+- [Porous and Multilayer Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/): Absorption prediction from material parameters: Delany-Bazley, Miki, Johnson-Champoux-Allard, transfer-matrix multilayers and the Biot layer.
+- [Metamaterial Absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/metamaterial-absorbers/): Perfect absorption with deep-subwavelength panels: critical coupling and the slow-sound slit panel with Helmholtz resonators.
 
 ### Diffusers and surfaces
 
-- [Overview](https://docs.jmrp.io/phonometry/materials/diffusers/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-diffusers.txt)
-- [Diffusers and Their Coefficients](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/)
-- [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/)
+- [Overview](https://docs.jmrp.io/phonometry/materials/diffusers/): Surfaces graded and designed by what they reflect: ISO 17497 scattering and diffusion, Schroeder diffusers, metadiffusers and ISO 13472 road surfaces. · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-diffusers.txt)
+- [Diffusers and Their Coefficients](https://docs.jmrp.io/phonometry/materials/diffusers/diffusers/): Diffuser measurement and design: scattering (ISO 17497-1) and diffusion (ISO 17497-2), Schroeder quadratic-residue design and coefficient tables.
+- [Metadiffusers](https://docs.jmrp.io/phonometry/materials/diffusers/metadiffusers/): Metadiffusers: with Helmholtz resonators in the slits, a 2 cm panel scatters like a 27 cm Schroeder diffuser, evaluated with ISO 17497-2.
 
 ### Surfaces measured in place
 
-- [Overview](https://docs.jmrp.io/phonometry/materials/surfaces/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-surfaces.txt)
-- [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/)
+- [Overview](https://docs.jmrp.io/phonometry/materials/surfaces/): Surfaces without a sample: why a pavement is characterised where it lies, ISO 13472-1 subtraction against the ISO 13472-2 spot tube, scope and editions. · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-surfaces.txt)
+- [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/): Road-surface absorption measured in situ: ISO 13472-1 subtraction with the Adrienne window, the ISO 13472-2 spot tube, and how to choose between them.
 
 ### Resilient layers
 
-- [Overview](https://docs.jmrp.io/phonometry/materials/resilient/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-resilient.txt)
-- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/)
+- [Overview](https://docs.jmrp.io/phonometry/materials/resilient/): Dynamic stiffness of a resilient layer, what a floating floor is designed around: its EN 29052-1 measurement and the natural frequency under a screed. · [full text](https://docs.jmrp.io/phonometry/llms/llms-materials-resilient.txt)
+- [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/): Dynamic stiffness per unit area of resilient layers under floating floors by EN 29052-1:1992, and the floor's natural frequency.
 
 ## Vibration and structure-borne sound
 
-- [Overview](https://docs.jmrp.io/phonometry/vibration/)
+- [Overview](https://docs.jmrp.io/phonometry/vibration/): Vibration in buildings, people and machines: ISO 7626 FRFs, ISO 10846 isolators, ISO 2631 and ISO 5349 metrics, and fault frequencies.
 
 ### Structure-borne sources
 
-- [Overview](https://docs.jmrp.io/phonometry/vibration/structural/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-structural.txt)
-- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/)
-- [Mobility by impact excitation (ISO 7626-5)](https://docs.jmrp.io/phonometry/vibration/structural/impact-mobility/)
-- [Bending-wave transmission at plate junctions (Cremer / Craik / Hopkins)](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/)
-- [Dynamic transfer stiffness of resilient elements (ISO 10846)](https://docs.jmrp.io/phonometry/vibration/structural/transfer-stiffness/)
-- [Vibration damage to structures (DIN 4150-3)](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/)
-- [Predicting a building's own frequency (ISO 4866)](https://docs.jmrp.io/phonometry/vibration/structural/building-response/)
+- [Overview](https://docs.jmrp.io/phonometry/vibration/structural/): Chain from machine vibration to noise in other rooms: ISO 7626 FRFs, ISO 10846 isolators, ISO/TS 7849 radiated power, EN 15657, EN 12354-5 and DIN 4150-3. · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-structural.txt)
+- [Mechanical mobility and the FRF family (ISO 7626-1)](https://docs.jmrp.io/phonometry/vibration/structural/mechanical-mobility/): ISO 7626-1:2011 FRF family: receptance, mobility, accelerance and their reciprocals, conversion, the SDOF resonator and ISO 7626-2 acceptance.
+- [Mobility by impact excitation (ISO 7626-5)](https://docs.jmrp.io/phonometry/vibration/structural/impact-mobility/): Mobility measured with an impact hammer by ISO 7626-5:2019: force and exponential windows, averaged H1 and coherence, and the Annex A damping correction.
+- [Bending-wave transmission at plate junctions (Cremer / Craik / Hopkins)](https://docs.jmrp.io/phonometry/vibration/structural/junction-transmission/): Two routes to the coupling loss factor: bending waves and Kij at rigid X, T, L and in-line plate junctions, and experimental SEA.
+- [Dynamic transfer stiffness of resilient elements (ISO 10846)](https://docs.jmrp.io/phonometry/vibration/structural/transfer-stiffness/): ISO 10846 dynamic transfer stiffness of resilient elements: its level and loss factor, and the direct, indirect and driving-point methods (Parts 2 to 5).
+- [Vibration damage to structures (DIN 4150-3)](https://docs.jmrp.io/phonometry/vibration/structural/structural-damage/): DIN 4150-3 guideline values: peak particle velocity by building class and frequency, buried pipes, long-term values and the bending stress.
+- [Predicting a building's own frequency (ISO 4866)](https://docs.jmrp.io/phonometry/vibration/structural/building-response/): Empirical predictors of ISO 4866 Annex D: the storey rule, three code forms for the period, the f = 46/h fit to 163 buildings and damping.
 
 ### Human vibration
 
-- [Overview](https://docs.jmrp.io/phonometry/vibration/human/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-human.txt)
-- [Human Vibration: Whole-Body and Hand-Arm Exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/)
-- [Multiple-shock whole-body vibration (ISO 2631-5)](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/)
-- [What a seat does to the vibration (ISO 10326-1)](https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/)
-- [Verifying a human-vibration meter (ISO 8041-1)](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/)
+- [Overview](https://docs.jmrp.io/phonometry/vibration/human/): Vibration transmitted to people: ISO 8041-1 weightings, ISO 2631-1 whole-body metrics, ISO 5349 hand-arm exposure and ISO 2631-5 repeated shocks. · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-human.txt)
+- [Human Vibration: Whole-Body and Hand-Arm Exposure](https://docs.jmrp.io/phonometry/vibration/human/human-vibration/): Whole-body and hand-arm vibration: ISO 8041-1 weightings, ISO 2631-1 r.m.s. and doses (VDV, MTVV, MSDV), A(8), ISO 5349 and Directive 2002/44/EC.
+- [Multiple-shock whole-body vibration (ISO 2631-5)](https://docs.jmrp.io/phonometry/vibration/human/multiple-shock-vibration/): Multiple shocks by ISO 2631-5:2018: the spinal model, seat-to-spine transfer, acceleration dose, compressive stress, R and lumbar-injury risk.
+- [What a seat does to the vibration (ISO 10326-1)](https://docs.jmrp.io/phonometry/vibration/human/seat-vibration/): ISO 10326-1 laboratory seat test: SEAT factor, three runs within 5 %, input correction and transmissibility at resonance.
+- [Verifying a human-vibration meter (ISO 8041-1)](https://docs.jmrp.io/phonometry/vibration/human/meter-verification/): Human-vibration meter verification by ISO 8041-1: tolerances with the laboratory's uncertainty, phase, decay times and bursts.
 
 ### Machinery
 
-- [Overview](https://docs.jmrp.io/phonometry/vibration/machinery/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-machinery.txt)
-- [Machine fault frequencies (Norton & Karczub)](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/)
-- [Evaluating machine vibration (ISO 20816-1)](https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/)
+- [Overview](https://docs.jmrp.io/phonometry/vibration/machinery/): Machine diagnosis from vibration: bearing, gear, motor and blade-passing families from the geometry, and the band-pass and envelope route to a defect. · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-machinery.txt)
+- [Machine fault frequencies (Norton & Karczub)](https://docs.jmrp.io/phonometry/vibration/machinery/machine-diagnostics/): Fault frequencies of rotating machinery (Norton & Karczub, Section 8.4): bearing, gear-mesh, induction-motor and blade-pass families on an envelope.
+- [Evaluating machine vibration (ISO 20816-1)](https://docs.jmrp.io/phonometry/vibration/machinery/machine-vibration-evaluation/): Machine grading from one broad-band measurement: ISO 20816-1 zones and change criterion, and ISO 10816-3 boundaries, ALARM and TRIP above 15 kW.
 
 ### Vibration immission
 
-- [Overview](https://docs.jmrp.io/phonometry/vibration/immission/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-immission.txt)
-- [Measuring vibration immission (DIN 45669-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/)
-- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/)
-- [Vibration and people in buildings (DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/)
-- [Railway vibration by category of train (E DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/)
-- [Predicting railway vibration (E DIN 45672-3)](https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/)
-- [Predicting vibration before measuring (DIN 4150-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/)
+- [Overview](https://docs.jmrp.io/phonometry/vibration/immission/): German immission chain: the DIN 45669-1 meter, the DIN 45672 reduction of a train passage and the DIN 4150-2 assessment for people in buildings. · [full text](https://docs.jmrp.io/phonometry/llms/llms-vibration-immission.txt)
+- [Measuring vibration immission (DIN 45669-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-meter/): DIN 45669-1 meter behind DIN 4150-2 and -3: KB weighting, KB_F severity, tolerances, the Annex E velocity and DIN 45669-2 planning.
+- [Vibration next to a railway (DIN 45672)](https://docs.jmrp.io/phonometry/vibration/immission/railway-vibration/): Train passage reduced by DIN 45672-2: running r.m.s., hourly event value, one-third-octave and narrow-band spectra, and DIN 45672-1 ground constants.
+- [Vibration and people in buildings (DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/people-in-buildings/): DIN 4150-2 for people in buildings: Table 1 guide values by area and time of day, the assessment severity and the rules for blasting, traffic and sites.
+- [Railway vibration by category of train (E DIN 4150-2)](https://docs.jmrp.io/phonometry/vibration/immission/railway-categories/): Draft E DIN 4150-2 (August 2023) for railways: one interval per passage, KB_Fmax per category, weighting per train, new and altered lines.
+- [Predicting railway vibration (E DIN 45672-3)](https://docs.jmrp.io/phonometry/vibration/immission/railway-prediction/): Railway vibration in a building predicted by E DIN 45672-3: from emission to floor, the Annex A tables and the DIN 4150-2 KB values.
+- [Predicting vibration before measuring (DIN 4150-1)](https://docs.jmrp.io/phonometry/vibration/immission/vibration-prediction/): Vibration prediction by DIN 4150-1: decay with distance, foundations and floors, blasts, falling masses, machine halls and tracks.
 
 ## Environment and transport
 
-- [Overview](https://docs.jmrp.io/phonometry/environment/)
+- [Overview](https://docs.jmrp.io/phonometry/environment/): Sound outdoors and its sources: ISO 9613 propagation, ISO 1996 rating, soundscape, CNOSSOS-EU traffic, wind turbines, noise barriers and trains.
 
 ### Assessment and regulation
 
-- [Overview](https://docs.jmrp.io/phonometry/environment/assessment/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-assessment.txt)
-- [Environmental Levels (ISO 1996-1/-2)](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/)
-- [Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/)
-- [Spanish Noise Regulation (RD 1367/2007)](https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/)
-- [Impulsive sound exposure statistics (ISO 13474)](https://docs.jmrp.io/phonometry/environment/assessment/sel-distribution/)
-- [Soundscape analysis (ISO/TS 12913)](https://docs.jmrp.io/phonometry/environment/assessment/soundscape/)
+- [Overview](https://docs.jmrp.io/phonometry/environment/assessment/): Environmental noise rating: ISO 1996 rating level, impulsive sound, blast statistics, a national application and ISO/TS 12913 soundscape. · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-assessment.txt)
+- [Environmental Levels (ISO 1996-1/-2)](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): Lden, Ldn and the composite rating levels of ISO 1996-1, with the ISO 1996-2 tonal adjustment, residual-noise correction and measurement uncertainty budget.
+- [Impulsive-sound prominence (NT ACOU 112)](https://docs.jmrp.io/phonometry/environment/assessment/impulsive-sound/): NT ACOU 112:2002 Nordtest method: the predicted prominence P of each impulsive sound, the graduated adjustment KI added to LAeq, and the rating level.
+- [Spanish Noise Regulation (RD 1367/2007)](https://docs.jmrp.io/phonometry/environment/assessment/spanish-noise-regulation/): Corrected level LKeq of Real Decreto 1367/2007: Kt, Kf and Ki, evaluation periods, quality objectives, immission limits and compliance.
+- [Impulsive sound exposure statistics (ISO 13474)](https://docs.jmrp.io/phonometry/environment/assessment/sel-distribution/): ISO 13474:2009 distribution of a distant blast's sound exposure level: long-term and rating levels, turbulence spread and exceedance levels.
+- [Soundscape analysis (ISO/TS 12913)](https://docs.jmrp.io/phonometry/environment/assessment/soundscape/): Soundscape by ISO/TS 12913-2 and -3: questionnaire scales, pleasantness and eventfulness, correlations, binaural metrics and the reporting record.
 
 ### Outdoor sound
 
-- [Overview](https://docs.jmrp.io/phonometry/environment/propagation/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation.txt)
-- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/)
-- [Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/)
-- [Atmospheric refraction: ray tracing and the parabolic equation (Salomons / Attenborough)](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/)
-- [Sound reflection of a noise barrier in situ (EN 1793-5)](https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/)
-- [Quality of outdoor sound software (ISO 17534-1)](https://docs.jmrp.io/phonometry/environment/propagation/software-quality/)
+- [Overview](https://docs.jmrp.io/phonometry/environment/propagation/): Sound in open air: ISO 9613 propagation, ground effect, barriers, refraction, EN 1793-5 barrier reflection and ISO 17534-1 software checks. · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation.txt)
+- [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): Outdoor sound propagation from a point source by ISO 9613-1 and -2: divergence, air absorption, ground, barriers and meteorology, per term and octave band.
+- [Spherical ground effect and advanced barriers (Attenborough / Salomons / Bies)](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/): Weyl-Van der Pol spherical-wave reflection over finite-impedance ground and wave-theory diffraction: Kurze-Anderson, rigid half-plane, thick barriers.
+- [Atmospheric refraction: ray tracing and the parabolic equation (Salomons / Attenborough)](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/): Ray tracing and the Green's Function parabolic equation (GFPE) in a refracting atmosphere: sound-speed profiles, curved rays and shadow zones.
+- [Sound reflection of a noise barrier in situ (EN 1793-5)](https://docs.jmrp.io/phonometry/environment/propagation/barrier-reflection/): EN 1793-5 sound reflection index of a road noise barrier measured in situ: signal subtraction, Adrienne window, DL_RI and the low frequency limit.
+- [Quality of outdoor sound software (ISO 17534-1)](https://docs.jmrp.io/phonometry/environment/propagation/software-quality/): Outdoor sound software checked by ISO 17534-1:2015: certified test cases, quantiles of a faster configuration and precision across programs.
 
 ### Environmental sources
 
-- [Overview](https://docs.jmrp.io/phonometry/environment/sources/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-sources.txt)
-- [CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/)
-- [CNOSSOS-EU railway source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/)
-- [Railway rolling-stock noise: the ISO 3095 type test](https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/)
-- [Road-surface noise: the statistical pass-by method (ISO 11819-1)](https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/)
-- [Wind-turbine noise: apparent sound power and tonal audibility (IEC 61400-11)](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/)
-- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/)
+- [Overview](https://docs.jmrp.io/phonometry/environment/sources/): Source descriptors for prediction: CNOSSOS-EU road and rail emission, ISO 11819-1 road surfaces, ISO 3095 rail vehicles and IEC 61400-11 wind turbines. · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-sources.txt)
+- [CNOSSOS-EU road traffic source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-road-emission/): CNOSSOS-EU road traffic emission (Directive 2002/49/EC Annex II): rolling and propulsion power per vehicle category, corrections and power per metre.
+- [CNOSSOS-EU railway source emission](https://docs.jmrp.io/phonometry/environment/sources/cnossos-rail-emission/): CNOSSOS-EU railway emission (Directive 2002/49/EC Annex II): roughness, contact filter, impact, squeal, traction, aerodynamic noise and bridges.
+- [Railway rolling-stock noise: the ISO 3095 type test](https://docs.jmrp.io/phonometry/environment/sources/rolling-stock-noise/): Train, locomotive and wagon noise by the ISO 3095:2013 type test: stationary, constant-speed, starting and braking tests on an EN 15610/EN 15461 track.
+- [Road-surface noise: the statistical pass-by method (ISO 11819-1)](https://docs.jmrp.io/phonometry/environment/sources/road-surface-pass-by/): Road-surface noise by the ISO 11819-1 statistical pass-by method: how much a surface adds, level against log speed, the SPBI and the Annex E example.
+- [Wind-turbine noise: apparent sound power and tonal audibility (IEC 61400-11)](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-noise/): IEC 61400-11 wind-turbine emission: apparent sound power level at the rotor centre, and the tonal-audibility chain that decides if a tone is audible.
+- [Wind turbine sound at a dwelling (IEC TS 61400-11-2)](https://docs.jmrp.io/phonometry/environment/sources/wind-turbine-receptor/): Wind turbine sound at a dwelling by IEC TS 61400-11-2:2024: wind shear, indoor low frequency, emergence, amplitude modulation and rating level.
 
 ## Aircraft noise
 
-- [Overview](https://docs.jmrp.io/phonometry/aircraft/)
-- [Aircraft noise: Effective Perceived Noise Level (ICAO Annex 16 / IEC 61265)](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/)
-- [Airport noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/)
-- [Rotorcraft noise: the hemisphere method (ECAC Doc 32 / NORAH2)](https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/)
-- [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/)
-- [NPD data for the air at the airport](https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/)
+- [Overview](https://docs.jmrp.io/phonometry/aircraft/): Aircraft noise with international metrics: ICAO Annex 16 EPNL, ECAC Doc 29 airport contours, ECAC Doc 32 rotorcraft and the EASA ANP database.
+- [Aircraft noise: Effective Perceived Noise Level (ICAO Annex 16 / IEC 61265)](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/): ICAO Annex 16 Vol. I Appendix 2 EPNL: perceived noisiness, PNL, tone correction by the slope method, duration correction and the IEC 61265 verifier.
+- [Airport noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/): Airport noise by ECAC Doc 29: the noise-power-distance engine, per-segment corrections of a single event and SEL contours on a ground grid.
+- [Rotorcraft noise: the hemisphere method (ECAC Doc 32 / NORAH2)](https://docs.jmrp.io/phonometry/aircraft/rotorcraft-noise/): Rotorcraft noise by the ECAC Doc 32 / NORAH2 hemisphere method: source, propagation, flight-condition interpolation, SEL, LASmax and EPNL contours.
+- [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/): ECAC Doc 29 chain for a real aircraft: the EASA ANP database of NPD curves and default trajectories, fixed-point profiles, event levels and contours.
+- [NPD data for the air at the airport](https://docs.jmrp.io/phonometry/aircraft/npd-atmosphere/): ANP NPD curves recalculated for a study's temperature, humidity and pressure by ECAC Doc 29 Vol. 2 Appendix D, with SAE ARP 5534 or 866A absorption.
 
 ## Underwater acoustics
 
-- [Overview](https://docs.jmrp.io/phonometry/underwater/)
-- [Underwater acoustics: radiated noise and pile driving (ISO 18405 / 17208 / 18406)](https://docs.jmrp.io/phonometry/underwater/underwater-acoustics/)
-- [Underwater sound propagation: propagation loss, sound speed, sonar, seabed and ambient noise](https://docs.jmrp.io/phonometry/underwater/underwater-propagation/)
-- [Underwater propagation solvers: modes, rays, beams and the parabolic equation](https://docs.jmrp.io/phonometry/underwater/underwater-solvers/)
-- [Marine-mammal noise exposure: audiograms, auditory weighting and injury criteria](https://docs.jmrp.io/phonometry/underwater/marine-mammal-exposure/)
+- [Overview](https://docs.jmrp.io/phonometry/underwater/): Sound in the sea: ISO 18405 levels, ISO 17208 ship noise, ISO 18406 pile driving, propagation up to numerical solvers, and marine-mammal criteria.
+- [Underwater acoustics: radiated noise and pile driving (ISO 18405 / 17208 / 18406)](https://docs.jmrp.io/phonometry/underwater/underwater-acoustics/): ISO 18405 levels re 1 µPa, ship radiated noise and monopole source level by Lloyd's mirror (ISO 17208), and pile-driving exposure (ISO 18406).
+- [Underwater sound propagation: propagation loss, sound speed, sonar, seabed and ambient noise](https://docs.jmrp.io/phonometry/underwater/underwater-propagation/): Closed-form underwater propagation: spreading, absorption, Weston's four regimes, sound speed, the sonar equation and ambient noise.
+- [Underwater propagation solvers: modes, rays, beams and the parabolic equation](https://docs.jmrp.io/phonometry/underwater/underwater-solvers/): Underwater fields beyond closed forms: normal modes, ray and Gaussian beam tracing, eigenrays, sloping bottoms and the split-step parabolic equation.
+- [Marine-mammal noise exposure: audiograms, auditory weighting and injury criteria](https://docs.jmrp.io/phonometry/underwater/marine-mammal-exposure/): Marine mammals: Southall et al. (2019) audiograms, NMFS 2024, NMFS 2018 or Southall weightings, TTS and injury criteria, pile-driving exposure.
 
 ## Sources and devices
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/): Sources and devices: sound power (ISO 3740 family, ISO 9614), IEC 60268 audio, hearing loops, silencers and noise control, and BS.1770 loudness.
 
 ### Sound power and intensity
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/emission/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission.txt)
-- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/)
-- [Sound Power in a Duct (ISO 5136)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-duct/)
-- [Sound Power of Multisource Industrial Plants (ISO 8297)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-plant/)
-- [Sound power from surface vibration (ISO/TS 7849)](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/)
-- [Emission Sound Pressure at a Work Station (ISO 11200 group)](https://docs.jmrp.io/phonometry/devices/emission/workstation-emission/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/emission/): Sound power by pressure, reverberation room, duct, intensity or vibration (ISO 3740 family, ISO 9614), its ISO 4871 declaration, and IEC 61043 intensity. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission.txt)
+- [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): Sound power level by ten standardized routes (ISO 3741 to 3747, ISO 9614, ISO/TS 7849): how to choose, their grades and the ISO 4871 declaration.
+- [Sound Power in a Duct (ISO 5136)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-duct/): Fan sound power by the ISO 5136 in-duct method: averaged level, the C1, C2 and C3,4 corrections, the A-weighted total and reproducibility.
+- [Sound Power of Multisource Industrial Plants (ISO 8297)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-plant/): Sound power of petrochemical complexes, quarries or crushing plants by ISO 8297: contour, microphone positions, corrections and uncertainty.
+- [Sound power from surface vibration (ISO/TS 7849)](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/): Sound power from surface vibration by ISO/TS 7849: velocity level, radiation factor, the Part 1 limit and the Part 2 value.
+- [Emission Sound Pressure at a Work Station (ISO 11200 group)](https://docs.jmrp.io/phonometry/devices/emission/workstation-emission/): Emission sound pressure level at a work station by the ISO 11200 group: background and environmental corrections, K3, grades 2 and 3, ISO 4871 uncertainty.
 
 ### Sound power on an enveloping surface
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/emission/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission-enveloping.txt)
-- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/)
-- [Free Field and Reference Sources (ISO 26101 / ISO 6926)](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/)
-- [Sound Power of Steam Turbine Sets (IEC 61063)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-turbines/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/emission/): Sound power by pressure, reverberation room, duct, intensity or vibration (ISO 3740 family, ISO 9614), its ISO 4871 declaration, and IEC 61043 intensity. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission-enveloping.txt)
+- [Sound Power by Pressure Methods (ISO 3744 / ISO 3746 / ISO 3745)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-pressure/): Sound power from sound pressure: ISO 3744 and ISO 3746 enveloping surfaces with K1 and K2, the ISO 3745 precision method, and a burst's energy level.
+- [Free Field and Reference Sources (ISO 26101 / ISO 6926)](https://docs.jmrp.io/phonometry/devices/emission/free-field-qualification/): Qualification of an anechoic or hemi-anechoic room (ISO 26101 against ISO 3745 Annex A), and calibration and verdict of a reference source (ISO 6926).
+- [Sound Power of Steam Turbine Sets (IEC 61063)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-turbines/): Airborne noise of steam turbine sets by the IEC 61063 test code: measurement surface, key microphone positions, background and environmental corrections.
 
 ### Sound power in a reverberant field
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/emission/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission-reverberant.txt)
-- [Sound Power in the Reverberation Room (ISO 3741)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/)
-- [Sound Power in Small Test Rooms (ISO 3743)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/)
-- [Sound Power in Situ by Comparison (ISO 3747)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/)
-- [Sound Power in the 16 kHz Octave (ISO 9295)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/emission/): Sound power by pressure, reverberation room, duct, intensity or vibration (ISO 3740 family, ISO 9614), its ISO 4871 declaration, and IEC 61043 intensity. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission-reverberant.txt)
+- [Sound Power in the Reverberation Room (ISO 3741)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-reverberation/): Sound power in a qualified reverberation room by ISO 3741: the direct method with corrections, the comparison method, and a burst's energy level.
+- [Sound Power in Small Test Rooms (ISO 3743)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-test-rooms/): Sound power of small sources in a hard-walled room (ISO 3743-1) or a special reverberation room (ISO 3743-2), with room qualification.
+- [Sound Power in Situ by Comparison (ISO 3747)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-in-situ/): Sound power of a machine where it works, by comparison with a reference source (ISO 3747): background correction, grade and uncertainty.
+- [Sound Power in the 16 kHz Octave (ISO 9295)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-high-frequency/): Sound power in the 16 kHz octave by ISO 9295: room constant, direct level, comparison with a reference source, and 43 misprinted table cells.
 
 ### Sound intensity and sound power from it
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/emission/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission-intensity.txt)
-- [Sound Power by Intensity Scanning (ISO 9614-2 / ISO 9614-3)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/)
-- [Sound Intensity (p-p method)](https://docs.jmrp.io/phonometry/devices/emission/intensity/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/emission/): Sound power by pressure, reverberation room, duct, intensity or vibration (ISO 3740 family, ISO 9614), its ISO 4871 declaration, and IEC 61043 intensity. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-emission-intensity.txt)
+- [Sound Power by Intensity Scanning (ISO 9614-2 / ISO 9614-3)](https://docs.jmrp.io/phonometry/devices/emission/sound-power-intensity/): Sound power from scanned intensity: the ISO 9614-2 engineering and survey methods with field indicators and achieved grade, and ISO 9614-3 precision.
+- [Sound Intensity (p-p method)](https://docs.jmrp.io/phonometry/devices/emission/intensity/): Two-microphone sound intensity per IEC 61043 with the ISO 9614-1 field indicators.
 
 ### Electroacoustics
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/electroacoustics/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-electroacoustics.txt)
-- [Electroacoustics: distortion and frequency response (IEC 60268-3 / Bendat & Piersol)](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/)
-- [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/)
-- [Microphone Characterisation (IEC 60268-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/)
-- [Swept-sine distortion and phase utilities (Farina / Novak)](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/)
-- [Audio-Frequency Induction Loops (IEC 60118-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/induction-loops/)
-- [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/electroacoustics/): Devices that make sound: IEC 60268 distortion, loudspeakers, microphones and headphones, IEC 60118-4 hearing loops, swept-sine THD and BS.1770 loudness. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-electroacoustics.txt)
+- [Electroacoustics: distortion and frequency response (IEC 60268-3 / Bendat & Piersol)](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/): IEC 60268-3 distortion: THD, THD+N and SINAD in the AES17 bandwidth, intermodulation, DIM, weighted THD, dynamic range, H1/H2 responses and coherence.
+- [Loudspeaker Characterisation (IEC 60268-5)](https://docs.jmrp.io/phonometry/devices/electroacoustics/loudspeakers/): Loudspeaker characterisation by IEC 60268-5: sensitivity at 1 W / 1 m, the baffled piston, the data sheet and gain before feedback.
+- [Microphone Characterisation (IEC 60268-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/microphones/): Microphone characterisation by IEC 60268-4: sensitivity in mV/Pa, directional patterns, inherent noise in dB(A) and dB(468), and the data sheet.
+- [Swept-sine distortion and phase utilities (Farina / Novak)](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/): Harmonic-distortion separation from one exponential sweep (Farina, Novak): THD against frequency, minimum phase, group delay and excess phase.
+- [Audio-Frequency Induction Loops (IEC 60118-4)](https://docs.jmrp.io/phonometry/devices/electroacoustics/induction-loops/): Hearing loops by IEC 60118-4 and IEC 62489-1: the 400 mA/m reference, loop field, test signals and meter, verdicts and the overload test.
+- [Headphones and Earphones (IEC 60268-7)](https://docs.jmrp.io/phonometry/devices/electroacoustics/headphones/): Headphones by IEC 60268-7 with the IEC 60268-1 programme signal: impedance, characteristic voltages, coupler and ear responses, and crosstalk.
 
 ### Broadcast
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/broadcast/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-broadcast.txt)
-- [Programme loudness and true peak (ITU-R BS.1770 / EBU R 128)](https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/)
-- [Quasi-peak programme meter (ITU-R BS.468-4)](https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/broadcast/): Two broadcast meters: ITU-R BS.1770 gated loudness in LUFS with the EBU R 128 target and true peak, and the ITU-R BS.468-4 quasi-peak meter. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-broadcast.txt)
+- [Programme loudness and true peak (ITU-R BS.1770 / EBU R 128)](https://docs.jmrp.io/phonometry/devices/broadcast/program-loudness/): Programme loudness by ITU-R BS.1770-5 and EBU R 128: gated LUFS, momentary and short-term meters, loudness range and true peak.
+- [Quasi-peak programme meter (ITU-R BS.468-4)](https://docs.jmrp.io/phonometry/devices/broadcast/quasi-peak/): ITU-R BS.468-4 quasi-peak detector: tone-burst acceptance windows instead of a time constant, and the 0.775 V calibration behind dBqps.
 
 ### Noise control
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/noise-control/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-noise-control.txt)
-- [Duct-borne noise: fan to room](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/)
-- [Room to room: partition, receiving room, criterion](https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/)
-- [Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/)
-- [Industrial noise control: HVAC and enclosures](https://docs.jmrp.io/phonometry/devices/noise-control/noise-control/)
-- [HVAC noise the German way (VDI 2081)](https://docs.jmrp.io/phonometry/devices/noise-control/vdi2081-air-systems/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/noise-control/): Industrial noise control on the path: fan-to-room duct calculation, room-to-room chain, reactive silencers and machine enclosures. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-noise-control.txt)
+- [Duct-borne noise: fan to room](https://docs.jmrp.io/phonometry/devices/noise-control/duct-path/): HVAC duct noise from fan to room: fan power, attenuation, regenerated noise, room effect and NC verdict, checked on Long's Table 14.9.
+- [Room to room: partition, receiving room, criterion](https://docs.jmrp.io/phonometry/devices/noise-control/room-to-room/): Room-to-room noise reduction: source-room level, partition transmission loss, receiving-room absorption and NC verdict (Norton & Karczub).
+- [Silencers](https://docs.jmrp.io/phonometry/devices/noise-control/silencers/): Reactive silencers by four-pole matrices (expansion chamber, Helmholtz, quarter-wave and extended-tube resonators) compared with dissipative ones.
+- [Industrial noise control: HVAC and enclosures](https://docs.jmrp.io/phonometry/devices/noise-control/noise-control/): HVAC duct attenuation and flow noise (end reflection, elbows, plenums) and machine-enclosure insertion loss, from Bies, Hansen & Howard.
+- [HVAC noise the German way (VDI 2081)](https://docs.jmrp.io/phonometry/devices/noise-control/vdi2081-air-systems/): VDI 2081 from a fan's duty point to the room level: duct attenuation and flow noise, splitter silencer and room, with the Part 2 worked example.
 
 ### Measuring a device that is already built
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/noise-control/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-noise-control-measured.txt)
-- [Measuring a silencer (ISO 7235 and ISO 11691)](https://docs.jmrp.io/phonometry/devices/noise-control/silencer-measurement/)
-- [Enclosures and cabins measured (ISO 11546, ISO 11957)](https://docs.jmrp.io/phonometry/devices/noise-control/enclosure-cabin-insulation/)
-- [Silencers, screens and barriers in situ (ISO 11820, ISO 11821, ISO 10847)](https://docs.jmrp.io/phonometry/devices/noise-control/in-situ-noise-control/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/noise-control/): Industrial noise control on the path: fan-to-room duct calculation, room-to-room chain, reactive silencers and machine enclosures. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-noise-control-measured.txt)
+- [Measuring a silencer (ISO 7235 and ISO 11691)](https://docs.jmrp.io/phonometry/devices/noise-control/silencer-measurement/): Catalogue insertion loss of a silencer: the ISO 7235 substitution measurement, its survey sibling ISO 11691, the octave fold and repeatability.
+- [Enclosures and cabins measured (ISO 11546, ISO 11957)](https://docs.jmrp.io/phonometry/devices/noise-control/enclosure-cabin-insulation/): Machine enclosures (ISO 11546) and operator cabins (ISO 11957) measured: two determinations, substitute sources, the room check and acceptance.
+- [Silencers, screens and barriers in situ (ISO 11820, ISO 11821, ISO 10847)](https://docs.jmrp.io/phonometry/devices/noise-control/in-situ-noise-control/): Silencers (ISO 11820), removable screens (ISO 11821) and barriers (ISO 10847) measured in situ, and why their background corrections are never merged.
 
 ### Control valve noise (IEC 60534-8)
 
-- [Overview](https://docs.jmrp.io/phonometry/devices/noise-control/) · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-noise-control-valves.txt)
-- [Control valve noise (IEC 60534-8-3)](https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/)
-- [Hydrodynamic valve noise (IEC 60534-8-4)](https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/)
+- [Overview](https://docs.jmrp.io/phonometry/devices/noise-control/): Industrial noise control on the path: fan-to-room duct calculation, room-to-room chain, reactive silencers and machine enclosures. · [full text](https://docs.jmrp.io/phonometry/llms/llms-devices-noise-control-valves.txt)
+- [Control valve noise (IEC 60534-8-3)](https://docs.jmrp.io/phonometry/devices/noise-control/control-valve-noise/): Control valve noise by IEC 60534-8-3: five flow regimes, the peak frequency, the pipe transmission loss and the level 1 m outside.
+- [Hydrodynamic valve noise (IEC 60534-8-4)](https://docs.jmrp.io/phonometry/devices/noise-control/valve-cavitation/): Noise of a control valve in a liquid line by IEC 60534-8-4: whether it cavitates, two acoustical efficiencies, two peak frequencies and the level at 1 m.
 
 ## Wave simulation
 
-- [Overview](https://docs.jmrp.io/phonometry/simulation/)
-- [Where heavy work runs: CPU or GPU, here or on a node](https://docs.jmrp.io/phonometry/simulation/where-it-runs/)
-- [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/)
-- [Elastic waves and fluid-solid coupling](https://docs.jmrp.io/phonometry/simulation/elastic-waves/)
-- [Where a simulation runs: NumPy, CuPy and torch](https://docs.jmrp.io/phonometry/simulation/compute/)
-- [Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/)
+- [Overview](https://docs.jmrp.io/phonometry/simulation/): Sound field computed by a deterministic 2D FDTD solver and its elastic P-SV companion, with Rayleigh and Scholte waves and fluid-solid coupling.
+- [Where heavy work runs: CPU or GPU, here or on a node](https://docs.jmrp.io/phonometry/simulation/where-it-runs/): Where phonometry's simulations and videos run: here or on a node over SSH, on a CPU or GPU, which device and encoder to ask for, and the page for each.
+- [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/): Deterministic 2D acoustic FDTD solver: sources, probes, obstacles, rigid, impedance and absorbing boundaries, following Attenborough & Van Renterghem.
+- [Elastic waves and fluid-solid coupling](https://docs.jmrp.io/phonometry/simulation/elastic-waves/): Elastic P-SV waves by FDTD: the Virieux (1986) scheme, Rayleigh and Scholte waves, and fluid-solid coupling validated against Brekhovskikh & Godin.
+- [Where a simulation runs: NumPy, CuPy and torch](https://docs.jmrp.io/phonometry/simulation/compute/): Acoustic and elastic FDTD engines on NumPy, CuPy on an NVIDIA GPU or PyTorch: Compute, use(), PHONOMETRY_COMPUTE, the NumPy fallback and provenance.
+- [Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/): Remote runs of fdtd_simulation and elastic_fdtd_simulation over SSH: the hosts file, Docker or Python nodes, the NumPy fallback and security.
 
 ## Theory and reference
 
 The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms/llms-theory.txt), the glossary in another (https://docs.jmrp.io/phonometry/llms/llms-glossary.txt), and the rest of the reference in https://docs.jmrp.io/phonometry/llms/llms-reference.txt.
 
-- [API Reference](https://docs.jmrp.io/phonometry/reference/api/)
-- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/)
-- [Same bits on every machine](https://docs.jmrp.io/phonometry/reference/determinism/)
-- [Glossary](https://docs.jmrp.io/phonometry/reference/glossary/)
-- [Theoretical Background](https://docs.jmrp.io/phonometry/reference/theory/)
-- [Theory: Environment and Transport](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/)
-- [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/)
-- [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/)
-- [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/)
-- [Theory: Signal Analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/)
-- [Theory: Vibration](https://docs.jmrp.io/phonometry/reference/theory/vibration/)
+- [Overview](https://docs.jmrp.io/phonometry/reference/): Theory, evidence and vocabulary: derivations behind the modules, the conformance report, defects found in the sources, the bibliography and the glossary.
+- [API Reference](https://docs.jmrp.io/phonometry/reference/api/): Every public function, class and constant in phonometry, generated from the source docstrings.
+- [Bibliography](https://docs.jmrp.io/phonometry/reference/bibliography/): Every source the guides cite, by area: standards with their catalogue records, books and papers with a verified DOI or publisher link, each with a note.
+- [Same bits on every machine](https://docs.jmrp.io/phonometry/reference/determinism/): Determinism: why floating point drifts, how a designed filter stays byte-identical on any CPU, BLAS or thread count, what still differs, and the evidence.
+- [Glossary](https://docs.jmrp.io/phonometry/reference/glossary/): Acoustic quantities the guides compute most, each with symbol, one-sentence definition, unit, defining standard and clause, and the guide computing it.
+- [Theoretical Background](https://docs.jmrp.io/phonometry/reference/theory/): Derivations by domain: six pages tracing each shared method to its clause, equation and table, and the areas whose theory stays in its guide.
+- [Theory: Environment and Transport](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/): Environmental descriptors, impulsive-sound adjustments, outdoor propagation, occupational exposure and sound power determination behind phonometry.
+- [Theory: Materials and Surfaces](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/): Surface scattering and diffusion, in-situ road-surface absorption and acoustic material characterisation behind phonometry.
+- [Theory: Perception and Hearing](https://docs.jmrp.io/phonometry/reference/theory/perception/): Equal-loudness contours, loudness models, sound-quality metrics, tone prominence, speech intelligibility and hearing statistics behind phonometry.
+- [Theory: Rooms and Buildings](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/): Room acoustics, noise criteria, sound insulation and flanking prediction behind phonometry.
+- [Theory: Signal Analysis](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/): Filter bank design, frequency weightings, time integration, level and exposure metrics, sound intensity and the GUM uncertainty framework behind phonometry.
+- [Theory: Vibration](https://docs.jmrp.io/phonometry/reference/theory/vibration/): Human vibration weightings and metrics, the multiple-shock spinal model, and the point mobility and radiation efficiency of structure-borne sound.
 
 ## Evidence and provenance
 
@@ -444,6 +447,138 @@ The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms
 - [Cite this software](https://github.com/jmrplens/phonometry/blob/main/CITATION.cff)
 - [Archived release (DOI)](https://doi.org/10.5281/zenodo.21215280)
 - [Licence: MIT](https://opensource.org/license/MIT)
+
+## Errata by source
+
+The errata register has one page per document family, each with the defects found in that family's printed text, the evidence and what the library does about each (index: https://docs.jmrp.io/phonometry/reference/errata/).
+
+- [Errata in Ainslie (2010)](https://docs.jmrp.io/phonometry/reference/errata/ainslie/): 2 entries
+- [Errata in Allard & Atalla (2009)](https://docs.jmrp.io/phonometry/reference/errata/allard-atalla/): 8 entries
+- [Errata in ANSI S1.4](https://docs.jmrp.io/phonometry/reference/errata/ansi-s1-4/): 1 entry
+- [Errata in ANSI S3.5](https://docs.jmrp.io/phonometry/reference/errata/ansi-s3-5/): 2 entries
+- [Errata in ASHRAE (2019)](https://docs.jmrp.io/phonometry/reference/errata/ashrae/): 1 entry
+- [Errata in Attenborough & Van Renterghem (2021)](https://docs.jmrp.io/phonometry/reference/errata/attenborough-van-renterghem/): 2 entries
+- [Errata in Barham, Barrera-Figueroa & Avison (2014)](https://docs.jmrp.io/phonometry/reference/errata/barham-barrera-figueroa-avison/): 1 entry
+- [Errata in Bies, Hansen & Howard (2017)](https://docs.jmrp.io/phonometry/reference/errata/bies-hansen-howard/): 4 entries
+- [Errata in Cox & D'Antonio (2017)](https://docs.jmrp.io/phonometry/reference/errata/cox-dantonio/): 3 entries
+- [Errata in DIN 4150](https://docs.jmrp.io/phonometry/reference/errata/din-4150/): 15 entries
+- [Errata in DIN 45669](https://docs.jmrp.io/phonometry/reference/errata/din-45669/): 2 entries
+- [Errata in DIN 45672](https://docs.jmrp.io/phonometry/reference/errata/din-45672/): 9 entries
+- [Errata in DIN 45681](https://docs.jmrp.io/phonometry/reference/errata/din-45681/): 2 entries
+- [Errata in Directive (EU) 2015/996](https://docs.jmrp.io/phonometry/reference/errata/directive-eu-2015-996/): 6 entries
+- [Errata in ECAC Doc 29](https://docs.jmrp.io/phonometry/reference/errata/ecac-doc-29/): 5 entries
+- [Errata in ECMA-418](https://docs.jmrp.io/phonometry/reference/errata/ecma-418/): 8 entries
+- [Errata in EN 15610](https://docs.jmrp.io/phonometry/reference/errata/en-15610/): 2 entries
+- [Errata in EN 15657](https://docs.jmrp.io/phonometry/reference/errata/en-15657/): 1 entry
+- [Errata in EN 16272](https://docs.jmrp.io/phonometry/reference/errata/en-16272/): 1 entry
+- [Errata in EN 1793](https://docs.jmrp.io/phonometry/reference/errata/en-1793/): 6 entries
+- [Errata in EN 61043](https://docs.jmrp.io/phonometry/reference/errata/en-61043/): 1 entry
+- [Errata in Harris (1995)](https://docs.jmrp.io/phonometry/reference/errata/harris/): 2 entries
+- [Errata in ICAO Annex 16](https://docs.jmrp.io/phonometry/reference/errata/icao-annex-16/): 1 entry
+- [Errata in IEC 60118](https://docs.jmrp.io/phonometry/reference/errata/iec-60118/): 9 entries
+- [Errata in IEC 60268](https://docs.jmrp.io/phonometry/reference/errata/iec-60268/): 15 entries
+- [Errata in IEC 60534](https://docs.jmrp.io/phonometry/reference/errata/iec-60534/): 10 entries
+- [Errata in IEC 61063](https://docs.jmrp.io/phonometry/reference/errata/iec-61063/): 1 entry
+- [Errata in IEC 61094 and EN 61094](https://docs.jmrp.io/phonometry/reference/errata/iec-61094/): 9 entries
+- [Errata in IEC 61183](https://docs.jmrp.io/phonometry/reference/errata/iec-61183/): 1 entry
+- [Errata in IEC 61260 and EN 61260](https://docs.jmrp.io/phonometry/reference/errata/iec-61260/): 6 entries
+- [Errata in IEC TS 61400](https://docs.jmrp.io/phonometry/reference/errata/iec-61400/): 9 entries
+- [Errata in IEC 61672](https://docs.jmrp.io/phonometry/reference/errata/iec-61672/): 1 entry
+- [Errata in IEC 62489](https://docs.jmrp.io/phonometry/reference/errata/iec-62489/): 4 entries
+- [Errata in IEC 62585](https://docs.jmrp.io/phonometry/reference/errata/iec-62585/): 3 entries
+- [Errata in ISO 10052](https://docs.jmrp.io/phonometry/reference/errata/iso-10052/): 1 entry
+- [Errata in ISO 10140](https://docs.jmrp.io/phonometry/reference/errata/iso-10140/): 3 entries
+- [Errata in ISO 10846](https://docs.jmrp.io/phonometry/reference/errata/iso-10846/): 2 entries
+- [Errata in ISO 10847](https://docs.jmrp.io/phonometry/reference/errata/iso-10847/): 2 entries
+- [Errata in ISO 10848](https://docs.jmrp.io/phonometry/reference/errata/iso-10848/): 1 entry
+- [Errata in ISO 11200](https://docs.jmrp.io/phonometry/reference/errata/iso-11200/): 1 entry
+- [Errata in ISO 11546](https://docs.jmrp.io/phonometry/reference/errata/iso-11546/): 6 entries
+- [Errata in ISO 11690](https://docs.jmrp.io/phonometry/reference/errata/iso-11690/): 2 entries
+- [Errata in ISO 11819](https://docs.jmrp.io/phonometry/reference/errata/iso-11819/): 2 entries
+- [Errata in ISO 11820](https://docs.jmrp.io/phonometry/reference/errata/iso-11820/): 1 entry
+- [Errata in ISO 11957](https://docs.jmrp.io/phonometry/reference/errata/iso-11957/): 4 entries
+- [Errata in ISO 12354 and EN 12354](https://docs.jmrp.io/phonometry/reference/errata/iso-12354/): 17 entries
+- [Errata in ISO/TS 12913](https://docs.jmrp.io/phonometry/reference/errata/iso-12913/): 7 entries
+- [Errata in ISO 12999](https://docs.jmrp.io/phonometry/reference/errata/iso-12999/): 3 entries
+- [Errata in ISO 13474](https://docs.jmrp.io/phonometry/reference/errata/iso-13474/): 3 entries
+- [Errata in ISO 14257](https://docs.jmrp.io/phonometry/reference/errata/iso-14257/): 4 entries
+- [Errata in ISO 15186](https://docs.jmrp.io/phonometry/reference/errata/iso-15186/): 2 entries
+- [Errata in ISO/DIS 16032](https://docs.jmrp.io/phonometry/reference/errata/iso-16032/): 6 entries
+- [Errata in ISO 16283](https://docs.jmrp.io/phonometry/reference/errata/iso-16283/): 3 entries
+- [Errata in ISO 17208](https://docs.jmrp.io/phonometry/reference/errata/iso-17208/): 1 entry
+- [Errata in ISO/TR 17534](https://docs.jmrp.io/phonometry/reference/errata/iso-17534/): 2 entries
+- [Errata in ISO/PAS 1996](https://docs.jmrp.io/phonometry/reference/errata/iso-1996/): 1 entry
+- [Errata in ISO/PAS 20065](https://docs.jmrp.io/phonometry/reference/errata/iso-20065/): 1 entry
+- [Errata in ISO 2631](https://docs.jmrp.io/phonometry/reference/errata/iso-2631/): 1 entry
+- [Errata in ISO 3095](https://docs.jmrp.io/phonometry/reference/errata/iso-3095/): 3 entries
+- [Errata in ISO 3382](https://docs.jmrp.io/phonometry/reference/errata/iso-3382/): 5 entries
+- [Errata in ISO 3743](https://docs.jmrp.io/phonometry/reference/errata/iso-3743/): 15 entries
+- [Errata in ISO 3744](https://docs.jmrp.io/phonometry/reference/errata/iso-3744/): 3 entries
+- [Errata in ISO 3745](https://docs.jmrp.io/phonometry/reference/errata/iso-3745/): 1 entry
+- [Errata in ISO 3747](https://docs.jmrp.io/phonometry/reference/errata/iso-3747/): 5 entries
+- [Errata in ISO 3891](https://docs.jmrp.io/phonometry/reference/errata/iso-3891/): 1 entry
+- [Errata in ISO 4869](https://docs.jmrp.io/phonometry/reference/errata/iso-4869/): 3 entries
+- [Errata in ISO 5136](https://docs.jmrp.io/phonometry/reference/errata/iso-5136/): 8 entries
+- [Errata in ISO 6926](https://docs.jmrp.io/phonometry/reference/errata/iso-6926/): 1 entry
+- [Errata in ISO 717](https://docs.jmrp.io/phonometry/reference/errata/iso-717/): 3 entries
+- [Errata in ISO 7235](https://docs.jmrp.io/phonometry/reference/errata/iso-7235/): 1 entry
+- [Errata in ISO 8041](https://docs.jmrp.io/phonometry/reference/errata/iso-8041/): 4 entries
+- [Errata in ISO 8253](https://docs.jmrp.io/phonometry/reference/errata/iso-8253/): 4 entries
+- [Errata in ISO 8297](https://docs.jmrp.io/phonometry/reference/errata/iso-8297/): 4 entries
+- [Errata in ISO 9053](https://docs.jmrp.io/phonometry/reference/errata/iso-9053/): 1 entry
+- [Errata in ISO 9295](https://docs.jmrp.io/phonometry/reference/errata/iso-9295/): 2 entries
+- [Errata in ISO 9613](https://docs.jmrp.io/phonometry/reference/errata/iso-9613/): 1 entry
+- [Errata in ISO 9614](https://docs.jmrp.io/phonometry/reference/errata/iso-9614/): 7 entries
+- [Errata in ITU-R BS.468](https://docs.jmrp.io/phonometry/reference/errata/itu-r-bs-468/): 1 entry
+- [Errata in Jarvis (1996)](https://docs.jmrp.io/phonometry/reference/errata/jarvis/): 1 entry
+- [Errata in Jiménez et al. (2017)](https://docs.jmrp.io/phonometry/reference/errata/jimenez/): 2 entries
+- [Errata in Long (2014)](https://docs.jmrp.io/phonometry/reference/errata/long/): 4 entries
+- [Errata in Maa (1998)](https://docs.jmrp.io/phonometry/reference/errata/maa/): 1 entry
+- [Errata in Mechel (2008)](https://docs.jmrp.io/phonometry/reference/errata/mechel/): 1 entry
+- [Errata in Medwin & Clay (1998)](https://docs.jmrp.io/phonometry/reference/errata/medwin-clay/): 2 entries
+- [Errata in NMFS (2024)](https://docs.jmrp.io/phonometry/reference/errata/nmfs/): 1 entry
+- [Errata in NORAH2 rotorcraft guidance](https://docs.jmrp.io/phonometry/reference/errata/norah2/): 8 entries
+- [Errata in Norton & Karczub (2003)](https://docs.jmrp.io/phonometry/reference/errata/norton-karczub/): 5 entries
+- [Errata in Osses, García & Kohlrausch (2016)](https://docs.jmrp.io/phonometry/reference/errata/osses-garcia-kohlrausch/): 1 entry
+- [Errata in RANDI 3.1 Physics Description](https://docs.jmrp.io/phonometry/reference/errata/randi/): 1 entry
+- [Errata in Real Decreto 1367/2007](https://docs.jmrp.io/phonometry/reference/errata/real-decreto-1367-2007/): 1 entry
+- [Errata in Rossing (2014)](https://docs.jmrp.io/phonometry/reference/errata/rossing/): 6 entries
+- [Errata in Southall et al. (2019)](https://docs.jmrp.io/phonometry/reference/errata/southall/): 1 entry
+- [Errata in VDI 2081](https://docs.jmrp.io/phonometry/reference/errata/vdi-2081/): 6 entries
+- [Errata in Ver & Beranek (2006)](https://docs.jmrp.io/phonometry/reference/errata/ver-beranek/): 4 entries
+- [Errata in Vigran (2008)](https://docs.jmrp.io/phonometry/reference/errata/vigran/): 3 entries
+
+## Properties that are not errata
+
+- [Source properties that are not errata](https://docs.jmrp.io/phonometry/reference/errata/not-errata/): Properties of the published sources that look like misprints and are not, recorded so that nobody corrects the library to match them.
+
+## Published catalogues
+
+Every material, gas and fluid the library reads from a printed page, from elastic constants to fluid states, with its source table and what its cell said. One page per catalogue, each listed here with the rows it tables (index: https://docs.jmrp.io/phonometry/reference/catalogues/).
+
+- [Catalogue of absorption coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/) (459 rows): What finishes absorbed in a reverberation room, band by band, with the mounting and the source of each row, and the absorption area of audiences and air.
+- [Catalogue of air attenuation](https://docs.jmrp.io/phonometry/reference/catalogues/air-attenuation/) (6 rows): The air attenuation coefficient, band by band, for the six temperature and humidity conditions a building standard's room model tabulates, in neper per metre.
+- [Catalogue of carpets](https://docs.jmrp.io/phonometry/reference/catalogues/carpets/) (19 rows): Nineteen carpets rated by their noise reduction coefficient, on bare concrete and on a hair pad, with the weight, height, surface and fibre of the pile.
+- [Catalogue of damping materials](https://docs.jmrp.io/phonometry/reference/catalogues/damping-materials/) (17 rows): Seventeen commercial damping materials: the peak loss factor, the temperature of the peak at 10 Hz, 100 Hz and 1 kHz, and the storage and loss moduli.
+- [Catalogue of damping treatments](https://docs.jmrp.io/phonometry/reference/catalogues/damping-treatments/) (8 rows): Eight asphalt felt treatments rated by how fast they damp a standard steel plate at 160 Hz, in decibels per second, from 1 dB/s to 400.
+- [Catalogue of diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/) (87 rows): Diffusion coefficients of semicylinders, semiellipses, triangles and other surfaces, computed with a two-dimensional boundary element model.
+- [Catalogue of duct walls](https://docs.jmrp.io/phonometry/reference/catalogues/duct-walls/) (46 rows): Forty-six measurements of the sound that leaves a sheet metal duct through its wall and the sound that enters it, by size, shape, gauge and lining.
+- [Catalogue of dynamic moduli of resilient materials](https://docs.jmrp.io/phonometry/reference/catalogues/dynamic-modulus-of-resilient-materials/) (6 rows): The dynamic modulus of six resilient materials a floating floor is laid on, printed as ranges and measured under a static load of about 2 kPa.
+- [Catalogue of fluids](https://docs.jmrp.io/phonometry/reference/catalogues/fluids/) (25 rows): Named fluid states: liquids and gases at the temperature each page states, read from two books, and four airs fixed by the models and standards that use them.
+- [Catalogue of gases](https://docs.jmrp.io/phonometry/reference/catalogues/gases/) (43 rows): The molar mass and the ratio of specific heats of gases, which close the ideal-gas state at any temperature and pressure, as two books print them.
+- [Catalogue of ground surfaces](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/) (105 rows): The effective flow resistivity the outdoor propagation models take for a ground, with the model each value was fitted with, and the ground classes A to H.
+- [Catalogue of impact insulation](https://docs.jmrp.io/phonometry/reference/catalogues/impact-insulation/) (71 rows): The impact insulation class of floor-ceiling constructions, and the improvement surface treatments and floor finishes give over a bare concrete floor.
+- [Catalogue of the nonlinearity parameter B/A](https://docs.jmrp.io/phonometry/reference/catalogues/nonlinearity-parameter-ba/) (164 rows): A hundred and sixty-four values of the nonlinearity parameter B/A of water, organic liquids, liquid metals and liquefied gases, each with its paper.
+- [Catalogue of the nonlinearity parameter of solids](https://docs.jmrp.io/phonometry/reference/catalogues/nonlinearity-parameter-of-solids/) (8 rows): The ultrasonic nonlinearity parameter of eight solids at room temperature, averaged over the three pure longitudinal directions of a cubic crystal.
+- [Catalogue of orthotropic wood](https://docs.jmrp.io/phonometry/reference/catalogues/orthotropic-wood/) (2 rows): The four elastic constants of a thin orthotropic plate for the two woods a stringed instrument is made of, with the author's own guesses marked.
+- [Catalogue of plateau-method constants](https://docs.jmrp.io/phonometry/reference/catalogues/plateau-method-constants/) (8 rows): The three numbers the plateau method sketches a single panel's transmission loss with: mass per millimetre, plateau height and plateau width.
+- [Catalogue of porous materials](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/) (194 rows): Porosity, flow resistivity, tortuosity and the other inputs of the equivalent-fluid and poroelastic models, as measured specimens and as compiled ranges.
+- [Catalogue of predicted scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/) (119 rows): Scattering coefficients computed with two- and three-dimensional boundary element models, kept apart from the measured ones, with the solver of each row.
+- [Catalogue of resilient layers](https://docs.jmrp.io/phonometry/reference/catalogues/resilient-layers/) (15 rows): Fifteen resilient layers a floating floor is laid on, each with the dynamic stiffness per unit area measured on it, its density and its thickness.
+- [Catalogue of resistive facings](https://docs.jmrp.io/phonometry/reference/catalogues/resistive-facings/) (29 rows): Twenty-nine wire meshes, glass cloths and sintered metal sheets, each with the flow resistance of unit area of it, which is not a resistivity per metre.
+- [Catalogue of scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/) (46 rows): Measured scattering coefficients of surfaces, band by band, each row credited to the paper it came from: the values a room modeller starts from.
+- [Catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/) (260 rows): Elastic constants, wave speeds and loss factors of solids, read from nine tables in eight books, each row with the table and the page it came from.
+- [Catalogue of transmission loss](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/) (255 rows): What partitions did in a laboratory, band by band, and the sound transmission class of walls, doors, windows and floor-ceiling systems.
 
 ## Full text
 
@@ -507,6 +642,10 @@ One file per area, each small enough to fetch whole. A page too long for one fet
 ## Spanish
 
 Every page above also exists in Spanish under the `/es/` prefix, for example https://docs.jmrp.io/phonometry/es/start/getting-started/. The two trees are kept at parity by a build check.
+
+## Markdown copies
+
+Every page listed here but the ones named at the end of this section has a Markdown copy beside it at `<page>/index.md`, for example https://docs.jmrp.io/phonometry/start/getting-started/index.md, and its Spanish twin under `/es/` has one too where the page is translated. The 269 pages of the API reference are in English only: at the Spanish address the site shows the English page, which points to its English copy. The 52 pages that show their data through a component publish none and are read on the page itself: the two landing pages, the 23 catalogues and the "Report fiches" page in both languages and the Spanish "Conformance report" and "Glossary" pages.
 
 ## Optional
 

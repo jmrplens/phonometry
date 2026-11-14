@@ -246,6 +246,7 @@ from .vibration import (
     _d_transfer_stiffness_rig,
     _d_vibration_meter_coupling,
     _d_vibration_prediction_path,
+    _d_whole_body_axes,
 )
 
 DIAGRAMS = {
@@ -501,7 +502,12 @@ DIAGRAMS = {
     "diagram_human_vibration": (
         _d_human_vibration,
         "Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)",
-        580,
+        600,
+    ),
+    "diagram_whole_body_axes": (
+        _d_whole_body_axes,
+        "Whole-body vibration: where it is measured and how each axis is weighted",
+        966,
     ),
     "diagram_hand_arm_vibration": (
         _d_hand_arm_vibration,

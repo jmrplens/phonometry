@@ -62,9 +62,22 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
     s.arrow(ox + 9, oy, ox + 62, oy, th.accent, 2.0)  # x (fore-aft)
     # Above the arrow's head, clear of the cushion's edge it sat on.
     s.text(ox + 62, oy - 8, "$x$", 15, th.accent, "start", bold=True)
-    s.arrow(ox - 7, oy + 6, ox - 44, oy + 34, th.accent, 2.0)  # y (lateral)
-    s.text(ox - 52, oy + 44, "$y$", 15, th.accent, "end", bold=True)
+    # y points to the left side of the body (ISO 2631-1, Figure 1): the
+    # figure faces right, so that is away from the reader, into the page, and
+    # not towards the reader as it once was. Drawn as the crossed circle of
+    # the axes plate, not as an oblique arrow, which the forearm would cut.
+    _axis_into_page(s, th, ox, oy)
+    s.text(ox - 13, oy - 3, "$y$", 15, th.accent, "end", bold=True)
     s.text(150, gy + 34, "Seat/body interface", 15, th.fg, "middle")
+    _axis_into_page(s, th, 46, gy + 56)
+    s.text(
+        60,
+        gy + 61,
+        "$y$ points into the page, to the left side of the body (Figure 1)",
+        13,
+        th.muted,
+        "start",
+    )
 
     # --- Right: the vertical signal-processing chain ---
     # 348 px on "Limitación de banda + Wk / Wd", 317 px at the stage title
@@ -107,6 +120,390 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
         15,
         th.secondary,
         "middle",
+    )
+
+
+def _axis_into_page(s: SVG, th: Theme, x: float, y: float) -> None:
+    """The axis that leaves the drawing away from the reader: a crossed circle."""
+    r, d = 6.0, 3.6
+    s.circle(x, y, r, th.bg, th.accent, 1.6)
+    s.line(x - d, y - d, x + d, y + d, th.accent, 1.4)
+    s.line(x - d, y + d, x + d, y - d, th.accent, 1.4)
+
+
+def _weighting_rows(
+    s: SVG,
+    th: Theme,
+    y: float,
+    columns: tuple[float, float, float, float],
+    rows: Sequence[tuple[str, str, str, str]],
+) -> None:
+    """Rows of axis, weighting and the two multiplying factors of one point.
+
+    ``columns`` holds the x of the axis cell (set from its left edge) and the
+    centres of the weighting, health and comfort cells; a cell with no text is
+    a factor the print does not give, drawn as a short rule.
+    """
+    x_axis, x_weighting, x_health, x_comfort = columns
+    for i, (axis, weighting, health, comfort) in enumerate(rows):
+        yy = y + 20.0 * i
+        s.text(x_axis, yy, axis, 14, th.fg, "start")
+        s.text(x_weighting, yy, weighting, 14, th.primary, "middle", bold=True)
+        for x, value in ((x_health, health), (x_comfort, comfort)):
+            if x <= 0.0:
+                continue
+            if value:
+                s.text(x, yy, value, 14, th.fg, "middle")
+            else:
+                s.line(x - 7, yy - 5, x + 7, yy - 5, th.muted, 1.2)
+
+
+def _d_whole_body_axes(s: SVG, th: Theme) -> None:
+    """Where whole-body vibration is measured, and what each point is weighted with.
+
+    ISO 2631-1:1997: the basicentric axes of Figure 1 in its three postures,
+    the contact areas of 5.3.1, the weightings of Tables 1 and 2 and the
+    multiplying factors of 7.2.3 (health) and 8.2.2.1 to 8.2.2.3 (comfort).
+    Every figure faces right and the recumbent one lies with the head on the
+    left, so the y axis, which points to the left side of the body, leaves
+    every view into the page. Motion sickness (Wf, clause 9) is one axis,
+    z at the supporting surface, for sitting and standing persons only
+    (9.2.2, NOTE 3), and is not drawn.
+    """
+    block = th.secondary
+
+    def triad(ox: float, oy: float, *tips: tuple[float, float]) -> None:
+        """The axes in the plane of the drawing from ``(ox, oy)``, y into it."""
+        for dx, dy in tips:
+            n = math.hypot(dx, dy)
+            s.arrow(ox + 8 * dx / n, oy + 8 * dy / n, ox + dx, oy + dy, th.accent, 2.0)
+        _axis_into_page(s, th, ox, oy)
+
+    # ===== a) Seated =========================================================
+    s.text(36, 70, "(a) Seated", 16, th.fg, "start", bold=True)
+    gy = 328.0
+    s.ground(gy, 40, 340)
+    s.rect(98, 118, 14, 150, th.panel, th.fg, rx=3, sw=2)  # seat-back
+    s.rect(112, 252, 88, 16, th.panel, th.fg, rx=3, sw=2)  # seat pan
+    s.line(160, 268, 160, gy, th.fg, 2.4)  # pedestal
+    # The body: the lines are its middle, so each contact lies half a limb
+    # away from them, which is where the transducers are drawn.
+    s.circle(140, 95, 16, th.muted)
+    s.line(140, 111, 140, 230, th.muted, 3)  # trunk
+    s.line(140, 230, 236, 230, th.muted, 2.4)  # thigh
+    s.line(236, 230, 236, gy - 8, th.muted, 2.4)  # shin
+    s.line(236, gy - 8, 264, gy - 8, th.muted, 2.4)  # foot
+    s.line(140, 132, 200, 198, th.muted, 2.4)  # arm
+    # 1: seat surface, beneath the ischial tuberosities.
+    s.rect(141, 238, 16, 14, block, th.fg, rx=2, sw=1.5)
+    triad(149, 245, (50, 0), (0, -49))
+    s.text(206, 250, "$x$", 14, th.accent, "start", bold=True)
+    s.text(156, 207, "$z$", 14, th.accent, "start", bold=True)
+    s.text(135, 246, "$y$", 14, th.accent, "end", bold=True)
+    _numbered(s, 138, 286, "1", block)
+    # 2: seat-back, in the area of principal support.
+    s.rect(112, 175, 14, 22, block, th.fg, rx=2, sw=1.5)
+    triad(119, 186, (49, 0), (0, -53))
+    s.text(158, 180, "$x$", 14, th.accent, "middle", bold=True)
+    s.text(126, 145, "$z$", 14, th.accent, "start", bold=True)
+    # Above the x arrow and under z, beside its own transducer: below the
+    # block it stood level with the z of point 1 and read as one pair with it.
+    s.text(127, 172, "$y$", 14, th.accent, "start", bold=True)
+    _numbered(s, 80, 186, "2", block)
+    # 3: feet, on the surface that supports them.
+    s.rect(270, gy - 16, 16, 16, block, th.fg, rx=2, sw=1.5)
+    triad(278, gy - 8, (50, 0), (0, -50))
+    s.text(322, gy - 18, "$x$", 14, th.accent, "middle", bold=True)
+    s.text(285, gy - 48, "$z$", 14, th.accent, "start", bold=True)
+    s.text(267, gy - 22, "$y$", 14, th.accent, "end", bold=True)
+    _numbered(s, 278, gy + 24, "3", block)
+
+    seated = (392.0, 560.0, 668.0, 800.0)
+    s.text(seated[0], 84, "axis", 13, th.muted, "start")
+    s.text(seated[1], 84, "weighting", 13, th.muted, "middle")
+    s.text(seated[2], 84, "$k$ health (7.2.3)", 13, th.muted, "middle")
+    s.text(seated[3], 84, "$k$ comfort (8.2.2.1)", 13, th.muted, "middle")
+    _numbered(s, 372, 107, "1", block)
+    s.text(
+        390,
+        112,
+        "Seat surface, beneath the ischial tuberosities",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(
+        s,
+        th,
+        134,
+        seated,
+        (
+            ("$x$, $y$", "Wd", "1.4", "1"),
+            ("$z$", "Wk", "1", "1"),
+            ("$r_x$, $r_y$, $r_z$", "We", "", "0.63, 0.4, 0.2 m/rad"),
+        ),
+    )
+    _numbered(s, 372, 203, "2", block)
+    s.text(
+        390,
+        208,
+        "Seat-back, in the area of principal support",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(
+        s,
+        th,
+        230,
+        seated,
+        (
+            ("$x$", "Wc", "(0.8)", "0.8"),
+            ("$y$", "Wd", "", "0.5"),
+            ("$z$", "Wd", "", "0.4"),
+        ),
+    )
+    _numbered(s, 372, 299, "3", block)
+    s.text(
+        390,
+        304,
+        "Feet, on the surface that supports them",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(
+        s,
+        th,
+        326,
+        seated,
+        (
+            ("$x$, $y$", "Wk", "", "0.25"),
+            ("$z$", "Wk", "", "0.4"),
+        ),
+    )
+    s.text(
+        372,
+        372,
+        "(0.8): encouraged, outside the Annex B health assessment (7.2.3, NOTE)",
+        13,
+        th.muted,
+        "start",
+    )
+
+    # ===== b) Standing =======================================================
+    yb = 388.0
+    s.line(30, yb, 870, yb, th.muted, 0.9, dash="3,4")
+    s.text(36, yb + 26, "(b) Standing", 16, th.fg, "start", bold=True)
+    fb = yb + 204
+    s.ground(fb, 40, 216)
+    s.circle(104, fb - 152, 14, th.muted)
+    s.line(104, fb - 138, 104, fb - 72, th.muted, 3)  # trunk
+    s.line(104, fb - 72, 104, fb - 8, th.muted, 2.4)  # leg
+    s.line(104, fb - 8, 130, fb - 8, th.muted, 2.4)  # foot
+    s.line(104, fb - 126, 116, fb - 74, th.muted, 2.4)  # arm
+    # 4: the floor beneath the feet.
+    s.rect(140, fb - 16, 16, 16, block, th.fg, rx=2, sw=1.5)
+    triad(148, fb - 8, (50, 0), (0, -50))
+    s.text(192, fb - 18, "$x$", 14, th.accent, "middle", bold=True)
+    s.text(155, fb - 48, "$z$", 14, th.accent, "start", bold=True)
+    s.text(137, fb - 22, "$y$", 14, th.accent, "end", bold=True)
+    _numbered(s, 148, fb + 24, "4", block)
+
+    standing = (236.0, 306.0, 0.0, 424.0)
+    _numbered(s, 244, yb + 57, "4", block)
+    s.text(262, yb + 62, "Floor", 15, th.fg, "start", bold=True)
+    s.text(standing[0], yb + 88, "axis", 13, th.muted, "start")
+    s.text(standing[1], yb + 88, "weighting", 13, th.muted, "middle")
+    s.text(standing[3], yb + 88, "$k$ comfort (8.2.2.2)", 13, th.muted, "middle")
+    _weighting_rows(
+        s,
+        th,
+        yb + 112,
+        standing,
+        (
+            ("$x$, $y$", "Wd", "", "1"),
+            ("$z$", "Wk", "", "1"),
+        ),
+    )
+
+    # ===== d) Aligning the transducer (5.2.2) ================================
+    s.text(
+        490,
+        yb + 26,
+        "(d) Aligning the transducer (5.2.2)",
+        16,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    # Left: the sensitive axis may sit up to 15 degrees off the basicentric one.
+    tilt = math.radians(15.0)
+    ax, ay = 548.0, fb - 16
+    s.line(506, fb, 590, fb, th.fg, 2.2)
+    s.rect(ax - 8, fb - 16, 16, 16, block, th.fg, rx=2, sw=1.5)
+    s.arrow(ax, ay, ax, ay - 96, th.accent, 2.0)
+    s.line(
+        ax,
+        ay,
+        ax + 96 * math.sin(tilt),
+        ay - 96 * math.cos(tilt),
+        block,
+        1.8,
+        dash="6,4",
+    )
+    s.path(
+        f"M {ax:.1f} {ay - 66:.1f} A 66 66 0 0 1 "
+        f"{ax + 66 * math.sin(tilt):.1f} {ay - 66 * math.cos(tilt):.1f}",
+        stroke=th.fg,
+        sw=1.3,
+    )
+    s.text(ax - 8, ay - 84, "$z$", 14, th.accent, "end", bold=True)
+    s.text(ax + 30, ay - 62, "≤ 15°", 14, th.fg, "start")
+    s.text(ax, fb + 28, "sensitive axis up to 15°", 13, th.muted, "middle")
+    s.text(ax, fb + 45, "off the basicentric axis", 13, th.muted, "middle")
+    # Right: on an inclined seat the z axis follows the body, not the vertical.
+    lean = math.radians(25.0)
+    rise = math.radians(10.0)
+    back = (-math.sin(lean), -math.cos(lean))  # up the seat-back
+    pan = (math.cos(rise), -math.sin(rise))  # forward along the pan
+    out = (-math.sin(rise), -math.cos(rise))  # off the pan, towards the body
+    rx0, ry0 = 730.0, fb - 44
+
+    def at(a: float, b: float, c: float = 0.0) -> tuple[float, float]:
+        """The point ``a`` along the pan, ``b`` off it and ``c`` up the back."""
+        return (
+            rx0 + a * pan[0] + b * out[0] + c * back[0],
+            ry0 + a * pan[1] + b * out[1] + c * back[1],
+        )
+
+    s.ground(fb, 690, 866)
+    s.line(rx0, ry0, *at(0, 0, 112), th.fg, 5)  # seat-back
+    s.line(rx0, ry0, *at(86, 0), th.fg, 5)  # pan
+    px, py = at(44, 0)
+    s.line(px, py + 3, px, fb, th.fg, 2.4)  # pedestal
+    hip = at(22, 15)
+    neck = at(22, 15, 78)
+    head = at(22, 15, 91)
+    knee = at(88, 15)
+    s.circle(head[0], head[1], 12, th.muted)
+    s.line(*hip, *neck, th.muted, 3)
+    s.line(*hip, *knee, th.muted, 2.4)
+    s.line(*knee, knee[0] + 6, fb - 8, th.muted, 2.4)
+    s.line(knee[0] + 6, fb - 8, knee[0] + 28, fb - 8, th.muted, 2.4)
+    ox, oy = at(50, 7)
+    s.line(ox, oy, ox, oy - 78, th.muted, 1.4, dash="5,4")  # the vertical
+    s.arrow(ox, oy, ox + 70 * back[0], oy + 70 * back[1], th.accent, 2.0)
+    s.path(
+        f"M {ox:.1f} {oy - 48:.1f} A 48 48 0 0 0 "
+        f"{ox + 48 * back[0]:.1f} {oy + 48 * back[1]:.1f}",
+        stroke=th.fg,
+        sw=1.3,
+    )
+    s.circle(ox, oy, 5, block, th.fg, 1.3)
+    s.text(
+        ox + 70 * back[0] + 9,
+        oy + 70 * back[1] - 2,
+        "$z$",
+        14,
+        th.accent,
+        "start",
+        bold=True,
+    )
+    s.text(ox + 7, oy - 68, "vertical", 13, th.muted, "start")
+    s.text(766, fb + 28, "inclined seat: $z$ follows the body,", 13, th.muted, "middle")
+    s.text(766, fb + 45, "note its angle to gravity", 13, th.muted, "middle")
+
+    # ===== c) Recumbent ======================================================
+    yc = yb + 262
+    s.line(30, yc, 870, yc, th.muted, 0.9, dash="3,4")
+    s.text(36, yc + 26, "(c) Recumbent", 16, th.fg, "start", bold=True)
+    cy = yc + 122  # top of the couch
+    by = cy - 26  # middle of the body
+    s.rect(30, cy, 440, 14, th.panel, th.fg, rx=3, sw=2)
+    s.circle(98, by - 8, 14, th.muted)
+    s.line(111, by - 3, 124, by, th.muted, 3)  # neck
+    s.line(124, by, 262, by, th.muted, 3)  # trunk
+    s.line(262, by, 424, by, th.muted, 2.4)  # legs
+    s.line(424, by, 424, by - 20, th.muted, 2.4)  # feet
+    # 7, 6 and 5: under the head, the back and the pelvis.
+    for bx in (90.0, 164.0, 254.0):
+        s.rect(bx, cy - 20, 16, 20, block, th.fg, rx=2, sw=1.5)
+    triad(262, cy - 10, (-50, 0), (0, -58))
+    s.text(206, cy - 6, "$z$", 14, th.accent, "end", bold=True)
+    s.text(269, cy - 56, "$x$", 14, th.accent, "start", bold=True)
+    s.text(277, cy - 8, "$y$", 14, th.accent, "start", bold=True)
+    _numbered(s, 262, cy + 32, "5", block)
+    _numbered(s, 172, cy + 32, "6", block)
+    _numbered(s, 98, cy + 32, "7", block)
+
+    lying = (526.0, 668.0, 0.0, 800.0)
+    s.text(lying[0], yc + 30, "axis", 13, th.muted, "start")
+    s.text(lying[1], yc + 30, "weighting", 13, th.muted, "middle")
+    s.text(lying[3], yc + 30, "$k$ comfort (8.2.2.3)", 13, th.muted, "middle")
+    _numbered(s, 508, yc + 53, "5", block)
+    s.text(526, yc + 58, "Under the pelvis", 15, th.fg, "start", bold=True)
+    _weighting_rows(
+        s,
+        th,
+        yc + 80,
+        lying,
+        (
+            ("horizontal", "Wd", "", "1"),
+            ("vertical", "Wk", "", "1"),
+        ),
+    )
+    _numbered(s, 508, yc + 127, "6", block)
+    s.text(526, yc + 132, "Under the back", 15, th.fg, "start", bold=True)
+    s.text(
+        526,
+        yc + 153,
+        "weighted as Table 1: vertical Wk, horizontal Wd;",
+        13,
+        th.muted,
+        "start",
+    )
+    s.text(526, yc + 170, "no $k$ is printed for it (8.2.2.3)", 13, th.muted, "start")
+    _numbered(s, 508, yc + 197, "7", block)
+    s.text(
+        526,
+        yc + 202,
+        "Under the head, with no soft pillow",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    _weighting_rows(s, th, yc + 224, lying, (("vertical", "Wj", "", "1"),))
+
+    # ===== The key ===========================================================
+    _axis_into_page(s, th, 44, yc + 256)
+    s.text(
+        58,
+        yc + 261,
+        "$y$ points into the page, to the left side of the body (Figure 1)",
+        13,
+        th.muted,
+        "start",
+    )
+    s.text(
+        36,
+        yc + 281,
+        "Health (clause 7) is assessed on the seat surface of a seated person;",
+        13,
+        th.muted,
+        "start",
+    )
+    s.text(
+        36,
+        yc + 298,
+        "every other point carries comfort factors only.",
+        13,
+        th.muted,
+        "start",
     )
 
 

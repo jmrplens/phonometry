@@ -407,7 +407,11 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 	*/}
 	<section class="conformance-banner">
 		<p class="banner-headline">
-			<b>{counts.passing}/{counts.checks}</b>
+			{/* The headline is a flex row, which draws no space between its two
+			    parts; this one is for a reader with no stylesheet, who would
+			    otherwise read "1897/1897conformance checks pass". The domain
+			    summaries below write theirs for the same reason. */}
+			<b>{counts.passing}/{counts.checks}</b>{' '}
 			<span>
 				{t.bannerCaption}
 				{counts.failing > 0 && t.bannerFailing(counts.failing)}
@@ -605,7 +609,7 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 				*/}
 				<summary>
 					<span data-mark={green ? 'pass' : 'fail'}></span>
-					<b>{domain.title}</b>
+					<b>{domain.title}</b>{' '}
 					<span class="tally">
 						{domain.passing}/{domain.checks}
 					</span>

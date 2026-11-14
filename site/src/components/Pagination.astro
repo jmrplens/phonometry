@@ -84,11 +84,19 @@ const links = [
 			const trail = context(link.href);
 			return (
 				<a href={link.href} rel={rel}>
+					{/* The parts stack in a flex column, which draws no space
+					    between them; the written ones are for a reader with no
+					    stylesheet, who would otherwise run one link's title into
+					    the next one's "Next page". */}
 					<Icon name={icon} size="1.25rem" />
 					<span class="ph-pag-text">
-						<span class="ph-pag-relation">{relation}</span>
-						{trail && <span class="ph-pag-trail">{trail}</span>}
-						<span class="link-title">{link.label}</span>
+						<span class="ph-pag-relation">{relation}</span>{' '}
+						{trail && (
+							<>
+								<span class="ph-pag-trail">{trail}</span>{' '}
+							</>
+						)}
+						<span class="link-title">{link.label}</span>{' '}
 					</span>
 				</a>
 			);

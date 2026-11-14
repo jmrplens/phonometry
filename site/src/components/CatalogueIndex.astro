@@ -23,11 +23,13 @@ const rowCount = (rows: number) =>
 	lang === 'es' ? `${rows} ${rows === 1 ? 'fila' : 'filas'}` : `${rows} ${rows === 1 ? 'row' : 'rows'}`;
 ---
 
+{/* The space after each name is written, because the build drops the line
+    break between the two tags and a crawler would read "Solids260 rows". */}
 <ul class="catalogue-index" data-catalogue-index>
 	{
 		pages.map((page) => (
 			<li>
-				<a href={page.href}>{page.label}</a>
+				<a href={page.href}>{page.label}</a>{' '}
 				<span class="rows">{rowCount(page.rows)}</span>
 				<p>{page.description}</p>
 			</li>

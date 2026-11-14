@@ -102,7 +102,7 @@ partial coherence](https://docs.jmrp.io/phonometry/signals/spectra/miso-coherenc
 <!-- source: docs/signals/filters/filter-banks.md | canonical: https://docs.jmrp.io/phonometry/signals/filters/filter-banks/ -->
 Source: https://docs.jmrp.io/phonometry/signals/filters/filter-banks/
 
-# Filter Banks
+# Octave and Fractional-Octave Filter Banks
 
 phonometry supports several filter types, each with its own transfer function
 characteristic. Butterworth, Chebyshev II and Bessel place their **−3 dB points
@@ -110,6 +110,15 @@ on the ANSI S1.11 band edges**, so their band levels are directly comparable.
 The two equiripple designs (Chebyshev I, Elliptic) do not: they take those
 edges as the *ripple* edge instead, which widens the band and biases every band
 level by a fixed few tenths of a decibel; see section 1.
+
+## How do I compute octave or one-third-octave band levels in Python?
+
+`result = filters.octave_filter(x, fs, fraction=3)` filters a signal `x`
+sampled at `fs` hertz into one-third-octave bands (`fraction=1` gives octaves):
+`result.levels` holds the level of each band in decibels and
+`result.frequencies` the exact mid-band frequency of each.
+[Section 2](#2-what-a-call-gives-back) calls it on a 1 kHz tone over noise
+and draws the spectrum the result holds.
 
 ## 1. Fractional octave bands: the math
 
@@ -545,6 +554,31 @@ plt.show()
 ```
 
 </details>
+
+## Coming from PyOctaveBand
+
+phonometry was published as PyOctaveBand until 3.0.0, and this filter bank is
+where that package began. Code written for it changes in these places:
+
+| PyOctaveBand | phonometry 4.0 |
+| --- | --- |
+| `from pyoctaveband import octavefilter` | `from phonometry import filters` |
+| `spl, freq = octavefilter(x, fs, fraction=3)` | `result = filters.octave_filter(x, fs, fraction=3)`, then `result.levels` and `result.frequencies` |
+| `spl, freq, xb = octavefilter(x, fs, fraction=3, sigbands=True)` | the same call with `sigbands=True`, then `result.bands` for the band signals |
+| `spl, freq = bank.filter(x)` on an `OctaveFilterBank` | `result = bank.filter(x)`, read the same way |
+| `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)` | `bands = filters.nominal_frequencies(3)`, then `bands.frequencies`, `bands.lower_edges`, `bands.upper_edges` and `bands.labels` |
+| `normalizedfreq(3)` | `filters.normalized_frequencies(3)` |
+| `filter_type=`, `ripple=`, `attenuation=` | `design=filters.FilterDesign(filter_type=..., ripple=..., attenuation=...)` |
+| `filter_type="cheby2"` or `"ellip"` with the default `attenuation`, 60 dB | the default has been 72 dB since 3.1, which makes the default `cheby2` bank class 1; `design=filters.FilterDesign(filter_type=..., attenuation=60.0)` gives the old numbers |
+| `calibration_factor=`, `dbfs=` | `calibration=filters.LevelCalibration(factor=..., dbfs=...)` |
+| `show=`, `plot_file=` | `response_plot=filters.ResponsePlot(show=..., file=...)` |
+
+The transition package `pyoctaveband` pins `phonometry>=3.0.0,<4`, so
+`import pyoctaveband` works on 3.x only: code moves to the names above by
+changing its import, not by updating that package.
+[Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/) lists the rest of what
+4.0 changed, and the [changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) what 3.0 to 3.3
+changed after PyOctaveBand 2.0.0.
 
 ## Quick answers
 

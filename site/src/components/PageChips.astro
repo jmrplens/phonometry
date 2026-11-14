@@ -29,13 +29,18 @@ const labels = isEs
 {
 	(standards.length > 0 || references.length > 0) && (
 		<p class="page-chips">
+			{/* The runs and the chips are flex items, between which no space is
+			    drawn; the written ones are for a reader with no stylesheet, who
+			    would otherwise read "ISO 16283ISO 717". */}
 			{standards.length > 0 && (
 				<span class="chip-run chip-run-standard">
 					<span class="sr-only">{labels.standards} </span>
 					{standards.map((chip) => (
-						<a class="page-chip chip-standard" href={`#${chip.anchor}`}>
-							{chip.text}
-						</a>
+						<>
+							<a class="page-chip chip-standard" href={`#${chip.anchor}`}>
+								{chip.text}
+							</a>{' '}
+						</>
 					))}
 				</span>
 			)}
@@ -43,9 +48,11 @@ const labels = isEs
 				<span class="chip-run chip-run-reference">
 					<span class="sr-only">{labels.references} </span>
 					{references.map((chip) => (
-						<a class="page-chip chip-theory" href={`#${chip.anchor}`}>
-							{chip.text}
-						</a>
+						<>
+							<a class="page-chip chip-theory" href={`#${chip.anchor}`}>
+								{chip.text}
+							</a>{' '}
+						</>
 					))}
 				</span>
 			)}

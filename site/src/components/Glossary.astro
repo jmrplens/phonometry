@@ -155,12 +155,18 @@ const t =
 	<div>
 		{indexRows.map(([letter, entries]) => (
 			<p class="symbol-index-row">
-				<b>{letter}</b>
+				{/* The row and the card footers below are flex boxes, which draw
+				    no space between their items; the written ones are for a
+				    reader with no stylesheet, who would otherwise read
+				    "C50C80" and a clause number run into a guide's title. */}
+				<b>{letter}</b>{' '}
 				{entries.map((entry) => (
-					<a href={`#${entry.id}`}>
-						{entry.scan}
-						{entry.qualifier && <span class="qualifier"> ({entry.qualifier})</span>}
-					</a>
+					<>
+						<a href={`#${entry.id}`}>
+							{entry.scan}
+							{entry.qualifier && <span class="qualifier"> ({entry.qualifier})</span>}
+						</a>{' '}
+					</>
 				))}
 			</p>
 		))}
@@ -190,7 +196,7 @@ const t =
 								<span class="standard">
 									{t.definedIn}: <Fragment set:html={notation(term.standardText ?? '')} />
 									{term.clauseText && <>, <Fragment set:html={notation(term.clauseText)} /></>}
-								</span>
+								</span>{' '}
 								{term.href && (
 									<a class="guide" href={term.href}>
 										{term.guideTitle}

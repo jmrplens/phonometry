@@ -1,6 +1,6 @@
 ---
-title: "Bancos de filtros"
-description: "Matemáticas de bandas de fracción de octava, parámetros de octave_filter, EQ paramétrico, descomposición por bandas y filtrado de fase cero."
+title: "Bancos de filtros de octava y de fracción de octava"
+description: "Niveles por bandas de octava y fracción de octava en Python: matemáticas de banda, parámetros de octave_filter, EQ paramétrico, señales por banda y fase cero."
 references:
   - type: standard
     organization: "International Electrotechnical Commission"
@@ -45,6 +45,8 @@ references:
     siteName: "Center for Computer Research in Music and Acoustics (CCRMA), Stanford University"
     url: "https://ccrma.stanford.edu/~jos/filters/"
     note: "Libro en línea gratuito y complementario sobre diseño y análisis de filtros digitales, de la geometría de polos y ceros a la estabilidad."
+sidebar:
+  label: "Bancos de filtros"
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -70,6 +72,15 @@ arquitecturas es la
 [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/),
 y qué significa «clase 1» para el resultado es
 [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/).
+
+## ¿Cómo calculo niveles por bandas de octava o de tercio de octava en Python?
+
+`result = filters.octave_filter(x, fs, fraction=3)` filtra una señal `x`
+muestreada a `fs` hercios en bandas de tercio de octava (`fraction=1` da
+octavas): `result.levels` guarda el nivel de cada banda en decibelios y
+`result.frequencies` la frecuencia central exacta de cada una. El
+[apartado 2](#2-que-devuelve-una-llamada) la llama sobre un tono de 1 kHz
+con ruido y dibuja el espectro que guarda el resultado.
 
 ## 1. Bandas de fracción de octava: las matemáticas
 
@@ -273,6 +284,8 @@ Cómo difieren realmente las arquitecturas, la comparación en el cruce a
 −3 dB, la galería completa de respuestas en octava y tercio de octava y los
 ejemplos de uso por arquitectura, hasta el crossover Linkwitz-Riley, es la
 [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/).
+
+<span id="2-que-devuelve-una-llamada"></span>
 
 ## 2. Qué devuelve una llamada
 
@@ -695,6 +708,33 @@ plt.show()
 ```
 
 </details>
+
+## Si vienes de PyOctaveBand
+
+phonometry se publicó como PyOctaveBand hasta la 3.0.0, y este banco de
+filtros es donde empezó aquel paquete. El código escrito para él cambia en
+estos puntos:
+
+| PyOctaveBand | phonometry 4.0 |
+| --- | --- |
+| `from pyoctaveband import octavefilter` | `from phonometry import filters` |
+| `spl, freq = octavefilter(x, fs, fraction=3)` | `result = filters.octave_filter(x, fs, fraction=3)`, y después `result.levels` y `result.frequencies` |
+| `spl, freq, xb = octavefilter(x, fs, fraction=3, sigbands=True)` | la misma llamada con `sigbands=True`, y después `result.bands` para las señales por banda |
+| `spl, freq = bank.filter(x)` sobre un `OctaveFilterBank` | `result = bank.filter(x)`, que se lee igual |
+| `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)` | `bands = filters.nominal_frequencies(3)`, y después `bands.frequencies`, `bands.lower_edges`, `bands.upper_edges` y `bands.labels` |
+| `normalizedfreq(3)` | `filters.normalized_frequencies(3)` |
+| `filter_type=`, `ripple=`, `attenuation=` | `design=filters.FilterDesign(filter_type=..., ripple=..., attenuation=...)` |
+| `filter_type="cheby2"` o `"ellip"` con la `attenuation` por defecto, 60 dB | desde la 3.1 vale 72 dB, lo que hace de clase 1 el banco `cheby2` por defecto; `design=filters.FilterDesign(filter_type=..., attenuation=60.0)` da los números de antes |
+| `calibration_factor=`, `dbfs=` | `calibration=filters.LevelCalibration(factor=..., dbfs=...)` |
+| `show=`, `plot_file=` | `response_plot=filters.ResponsePlot(show=..., file=...)` |
+
+El paquete de transición `pyoctaveband` fija `phonometry>=3.0.0,<4`, así que
+`import pyoctaveband` solo funciona en la 3.x: el código pasa a los nombres de
+arriba cambiando su import, no actualizando ese paquete.
+[Actualizar de la 3.3 a la 4.0](/phonometry/es/start/upgrading/) recoge el
+resto de lo que cambió en la 4.0, y el
+[registro de cambios](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) lo
+que cambió de la 3.0 a la 3.3 después de PyOctaveBand 2.0.0.
 
 ## Qué cubre esta guía
 

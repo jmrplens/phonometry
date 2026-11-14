@@ -926,7 +926,11 @@ for (const path of [
 // searches: the cells a row shows, the key of its table and the words it
 // carries in `data-also`, and not a list of the fields the generator writes.
 // A page with two tables suggests the words of its first one; the second
-// keeps its own, and they have to find its rows too.
+// keeps its own, and they have to find its rows too. A row is also found by
+// what its first cell shows typed as one phrase: the first row of each table
+// with a variant by its name and variant, and the first with a group by its
+// group and name, though the cell writes a space at the edge of each and
+// joins its words with another.
 for (const slug of catalogueSlugs) {
 	for (const path of [`/${slug}/`, `/es/${slug}/`]) {
 		const page = await open(path);
@@ -935,8 +939,25 @@ for (const slug of catalogueSlugs) {
 			const sections = [...document.querySelectorAll('[data-catalogue]')];
 			if (!search || sections.length === 0) return { shown: false, lost: [] };
 			const lost = [];
+			const typed = [];
 			let words = 0;
+			const find = (section, row, query) => {
+				search.value = query;
+				search.dispatchEvent(new Event('input'));
+				if (row.hidden) typed.push(`${section.dataset.catalogue}: "${query}"`);
+			};
 			for (const section of sections) {
+				const rows = [...section.querySelectorAll('tbody tr')].map((row) => {
+					const shown = row.cells[0].querySelector(':scope > span');
+					const piece = (selector) => shown?.querySelector(selector)?.textContent.trim() ?? '';
+					const name = shown?.cloneNode(true);
+					name?.querySelectorAll('.group, .variant').forEach((element) => element.remove());
+					return { row, group: piece('.group'), variant: piece('.variant'), name: name?.textContent.trim() ?? '' };
+				});
+				const withVariant = rows.find(({ name, variant }) => name && variant);
+				if (withVariant) find(section, withVariant.row, `${withVariant.name} ${withVariant.variant}`);
+				const withGroup = rows.find(({ name, group }) => name && group);
+				if (withGroup) find(section, withGroup.row, `${withGroup.group} ${withGroup.name}`);
 				for (const word of (section.dataset.placeholder ?? '').split(', ').filter(Boolean)) {
 					words += 1;
 					search.value = word;
@@ -951,9 +972,11 @@ for (const slug of catalogueSlugs) {
 			return {
 				shown: words > 0 && search.placeholder === sections[0].dataset.placeholder,
 				lost,
+				typed,
 			};
 		});
-		expect(`${path}: every word the filter suggests finds a row of its catalogue`, got, { shown: true, lost: [] });
+		expect(`${path}: every word the filter suggests finds a row of its catalogue`, { shown: got.shown, lost: got.lost }, { shown: true, lost: [] });
+		expect(`${path}: a name typed with its variant, and a group with its name, finds its row`, got.typed, []);
 		await page.close();
 	}
 }

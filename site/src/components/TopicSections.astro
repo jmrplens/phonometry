@@ -79,7 +79,10 @@ const t =
 				{rows.map((row) => (
 					<li>
 						<a href={row.href}>
-							<span class="label">{row.label}</span>
+							{/* The row is a flex box, which draws no space between the
+							    two; the one written here is for a reader with no
+							    stylesheet, who would otherwise read "Theory7 pages". */}
+							<span class="label">{row.label}</span>{' '}
 							{row.count > 1 && <span class="count">{t.pages(row.count)}</span>}
 						</a>
 					</li>

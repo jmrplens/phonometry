@@ -143,6 +143,7 @@ def test_nothing_the_scan_skips_is_text() -> None:
         capture_output=True,
         check=True,
         text=True,
+        encoding="utf-8",
         timeout=120,
     ).stdout
     tracked = [root / name for name in listed.split("\0") if name]

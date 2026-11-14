@@ -68,6 +68,7 @@ def _load() -> list[dict[str, Any]]:
         [node, "--input-type=module", "-e", program],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=False,
     )
     if result.returncode != 0:

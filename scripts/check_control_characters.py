@@ -163,6 +163,7 @@ def tracked_files() -> list[pathlib.Path]:
         capture_output=True,
         check=True,
         text=True,
+        encoding="utf-8",
     ).stdout
     return [
         ROOT / name

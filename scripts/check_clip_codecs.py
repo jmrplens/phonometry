@@ -70,6 +70,7 @@ def probe(
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         timeout=PROBE_TIMEOUT_S,
     ).stdout

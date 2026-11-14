@@ -390,6 +390,8 @@ def free_gpu_bytes(index: int = 0, *, run: Callable[..., Any] = subprocess.run) 
         stdin=subprocess.DEVNULL,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=True,
         timeout=_FREE_GPU_PROBE_S,
     ).stdout

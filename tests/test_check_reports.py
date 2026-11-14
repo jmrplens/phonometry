@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import importlib.util
 import pathlib
+import subprocess
 import sys
 
 import numpy as np
@@ -26,7 +27,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_reports as cr
-from generated_assets import raster_problem
+from generated_assets import raster_problem, tracked_files
 
 #: A stand-in for a fiche preview: a white page with a shaded band and a line,
 #: at the aspect ratio the generator writes (A4 at 1000 px wide).
@@ -194,3 +195,42 @@ def test_a_fiche_named_in_a_frontmatter_behind_its_opening_is_not_shown(
         '<ReportPreview name="shown" />\n'
     )
     assert cr.shown_fiches(page) == {"shown"}
+
+
+def test_a_tracked_file_whose_name_holds_a_character_outside_ascii_is_listed(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """git quotes such a name in a plain listing; the file is listed by its name all the same.
+
+    A figure or fiche so named was otherwise missing from what HEAD tracks,
+    and its gate compared it with nothing.
+    """
+
+    def git(*args: str) -> None:
+        subprocess.run(
+            ["git", "-C", str(tmp_path), *args],
+            check=True,
+            capture_output=True,
+            timeout=60,
+        )
+
+    git("init", "-q")
+    names = {"images/acústica.svg", "images/two words.svg"}
+    for name in names:
+        (tmp_path / name).parent.mkdir(exist_ok=True)
+        (tmp_path / name).write_text("<svg/>\n", encoding="utf-8")
+    git("add", *names)
+    git(
+        "-c",
+        "user.name=reports test",
+        "-c",
+        "user.email=reports@example.invalid",
+        "-c",
+        "commit.gpgsign=false",
+        "commit",
+        "-q",
+        "-m",
+        "seed",
+    )
+    monkeypatch.chdir(tmp_path)
+    assert tracked_files("images") == names

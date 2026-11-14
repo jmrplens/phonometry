@@ -272,22 +272,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the `ComputeImportError` an engine raises when torch is missing: these two
   commands for `torch:cpu`, the extra alone for `torch:cuda` and `torch:mps`.
 
-- **The documentation says how to install and run phonometry in each place
-  it goes.** A new section of Start, Environments, takes them one page each,
-  in English and Spanish and in the `docs/` mirror: pip and uv (each extra
-  and what it brings, torch from PyTorch's CPU index, a uv project and the
+- **The documentation says how to install and run phonometry in each place it
+  goes.** A new section of Start, Environments, takes them one page each, in
+  English and Spanish and in the `docs/` mirror: pip and uv (each extra and
+  what it brings, torch from PyTorch's CPU index, a uv project and the
   `pyproject.toml` that keeps its torch off CUDA), conda and mamba (the
   dependencies under their conda-forge names, then phonometry with pip in the
   same environment), Jupyter and JupyterLab (tables, inline and SVG figures,
   videos, fiches and how a warning shows in a cell), JupyterLite and Pyodide
   (which extras micropip installs, what runs in a browser and what does not,
   and a JupyterLite site of your own), Docker and servers (a slim image that
-  runs under any user id and on a read-only root, and ffmpeg for videos) and
-  type checking (what mypy and pyright check, and where a type is wider than
-  its value). Every command and example on the pages was run in the place it
-  is written for; Getting Started links them from its install and notebook
-  sections, and no longer says that VS Code and Colab show the record
-  tables, which nothing had tried.
+  runs under any user id and on a read-only root, ffmpeg for videos, and which
+  of the eight architectures of `python:3.13-slim` install every extra from
+  wheels: x86-64 and ARM64, while on the other six pip builds NumPy, SciPy,
+  matplotlib and Pillow from source, `[audio]` loads the system's libsndfile
+  and `[torch]` does not install, and on the three 32-bit ones, which numba no
+  longer supports, neither do `[perf]` and `[full]`) and type checking (what
+  mypy and pyright check, and where a type is wider than its value). Every
+  command and example on the pages was run in the place it is written for, and
+  every page that prints a `[full]` install command, the home page and
+  `llms.txt` among them, gives 32-bit Windows and 32-bit Linux, which `[full]`
+  does not support, the `[plot,report,audio]` one with what pip builds there,
+  and the conda page says that conda-forge has no Python 3.12 or newer for
+  either; Getting Started links them from its install and notebook sections,
+  and no longer says that VS Code and Colab show the record tables, which
+  nothing had tried.
 
 - **Contributors and coding agents have one written style guide.**
   `docs/contributing/` says how phonometry names things, shapes its public API,
@@ -9364,7 +9373,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is: the correction at a 3 dB margin, which the subtraction writes unrounded as
   3,0206 dB. The cap is judged on the margin of the two energy means now, so the
   two routes the clause offers agree at the boundary they share, and floating
-  point no longer decides which side of it a printed 3,0 dB pair lands on.
+  point no longer decides which side of it a printed 3,0 dB pair lands on. A
+  margin more than 10⁻⁹ dB under 3 dB is capped and emits a
+  `SilencerInSituWarning`, which prints the margin with as many decimals as it
+  takes to show it under 3 dB, where two decimals wrote a margin a few
+  thousandths short of it as 3.00 dB.
 
   ISO 11821 7.4 c) reports the attenuation of a screen to the nearest whole
   decibel, and `ScreenInSituResult` left that to the caller. Its `rounded`

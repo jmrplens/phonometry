@@ -50,6 +50,9 @@ Windows at 0.58.0, below the floor of `[perf]`, and its last wheels there,
 numba 0.57.1 and llvmlite 0.41.1, are for Python 3.10 at most, so `[perf]` is
 not supported there, nor `[full]`, which holds it;
 `pip install "phonometry[plot,report,audio]"` installs the other three extras
+there. The same holds on 32-bit Linux, where numba's last wheels, of 0.56.4,
+are for Python 3.10 at most and numba supports the platform no longer; [Docker
+and servers](environments/docker.md) says what the other three build
 there. A plain install takes the newest releases, which have wheels on the
 other three platforms but numba's on musl and on macOS on Intel, where a plain
 `[perf]` install builds numba and llvmlite on every Python, and matplotlib's
@@ -81,7 +84,11 @@ pip install "phonometry[torch]"   # torch + array-api-compat, so the FDTD engine
 
 I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
+enabled except the torch backend of the FDTD engines, which `[torch]` adds. On
+32-bit Windows and 32-bit Linux, which `[full]` does not support,
+`pip install "phonometry[plot,report,audio]"` brings the other three, as
+above, and builds from source SciPy, matplotlib and kiwisolver on Windows, and
+NumPy, SciPy, matplotlib and Pillow among others on Linux. The
 base install computes every metric on NumPy and SciPy alone, and that includes
 reading every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64)
 through `phonometry.io`; the only things it leaves unavailable are the figures

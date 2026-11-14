@@ -12,11 +12,11 @@ each, with commands that were run there.
 
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|
-| [pip and uv](pip-and-uv.md) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | nothing is left out |
+| [pip and uv](pip-and-uv.md) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` installs the other three extras |
 | [conda and mamba](conda.md) | the dependencies from conda-forge, then `python -m pip install "phonometry[full]"` | everything, pytorch from conda-forge included | nothing is left out |
-| [Jupyter and JupyterLab](jupyter.md) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error` |
+| [Jupyter and JupyterLab](jupyter.md) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error`; `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` takes its place |
 | [JupyterLite and Pyodide](jupyterlite.md) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
-| [Docker and servers](docker.md) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp` | nothing is left out |
+| [Docker and servers](docker.md) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp`, from wheels on x86-64 and ARM64 | the wheels on the image's six other architectures, where pip builds NumPy, SciPy and most extras from source; `[perf]` and `[full]` on its three 32-bit ones, where `[plot,report,audio]` installs the other three extras; `[torch]` on all six |
 | [Type checking](type-checking.md) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode, on every NumPy the library accepts | the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
 
 ## Warnings as errors

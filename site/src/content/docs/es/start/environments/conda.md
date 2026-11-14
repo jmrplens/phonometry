@@ -21,6 +21,10 @@ muestra entonces phonometry con el canal `pypi` junto a los paquetes de
 conda-forge, y `python -m pip check` no encuentra nada roto. mamba acepta los
 mismos argumentos: `mamba create -n acoustics -c conda-forge ...` construye el
 mismo entorno. Funcionan Python 3.12, 3.13 y 3.14.
+conda-forge no publica Python 3.12 ni posterior para Windows ni para Linux de
+32 bits, así que allí phonometry se instala solo con pip, con
+`[plot,report,audio]` en lugar de `[full]`, como dice [pip y
+uv](/phonometry/es/start/environments/pip-and-uv/).
 
 ## Los extras con sus nombres de conda-forge
 

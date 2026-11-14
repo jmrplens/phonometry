@@ -44,7 +44,8 @@ because the private ``_check_guidance(guidance)`` it calls compares the text
 with a set; a parameter handed to one that is already a ``Literal`` is caught
 by ``mypy`` as well, since a ``str`` does not fit it. The parameter is followed
 when it is handed on by keyword, by position, inside a dict spread into the
-call (``f(**options)``), and into a function the body imports itself; and a
+call (``f(**options)``, through each binding of the dict that may stand at
+the call), and into a function the body imports itself; and a
 table handed on beside it (``_area_key(area_type, _ACTIVITY_LIMITS)``) is
 known to the receiving function by its keys, so the helper's ``key not in
 table`` is the closed set it is.
@@ -64,6 +65,13 @@ builds with code (``MappingProxyType({**_rows(...)})``) is read off the
 imported module. A record field is followed out of the ``__post_init__`` into
 the helper it is handed to, and a comparison of ``<record>.<field>`` with a
 string in any function of the record's module closes it as well.
+
+A local holds what its binding put there only where the guard can vouch for
+it: a name a function written inside the body binds again with ``nonlocal``
+holds anything (:func:`_rebound_inside`), and so do a dict, a list or a set
+read in any way other than to look into it (:func:`_changed_names`), since a
+call it is handed to, a list or a tuple it is put in, another name bound to
+it or a loop that yields it may write into it.
 
 An annotation is read through the type aliases of the module that writes it
 (:func:`expanded`), the ones under ``if TYPE_CHECKING:`` and the imported
@@ -91,7 +99,11 @@ test against a wider set fails too; against one row of a table picked when
 the code runs, it is held to the row closest to the ``Literal``. The text is
 followed into every function it is handed to, six calls deep, and a record
 field from its ``__post_init__`` into every function of its module that
-reads it.
+reads it. A check reached through a name, the parameter itself, a copy of
+it or a dict of keywords spread into a call, checks the choice on every path
+only when every binding of the name that may stand at the check holds the
+choice or a value worked out from it (:func:`_held_on_every_path`,
+:func:`_spread_variants`).
 
 A ``Literal`` lists only values its call takes (rule D24,
 :func:`refused_choices`): a value every call refuses, whatever the other
@@ -100,12 +112,16 @@ value it lists, a text, a number or an ``Enum`` member, is taken from the
 annotation's value and not its text (:func:`_listed_values`), and read
 through the function as it runs (:class:`_ValueReader`), every other argument
 unknown: a test the value alone decides takes its branch, a test that asks
-anything else takes both, and the value fails when every path raises and one
-of them raises for it, at a shared check that does not take it, a fixed table
-with no key for it, an ``Enum`` with no member of it, a ``raise`` a test of
-it steered the call to, or a function of the package it is handed to that
-refuses it in turn. A value refused only beside a value of another argument
-is a combination the ``Literal`` cannot say, and passes.
+anything else takes both, a local, an import and a dict of keywords spread
+into a call hold what the path that reaches them bound them to (a dict two
+branches build with different keys, or one built over a key or a ``**``
+mapping the path cannot read, is open, and fills any key written before it
+where it is merged into another), and the value fails when every path
+raises and one of them raises for it, at a shared check that does not take
+it, a fixed table with no key for it, an ``Enum`` with no member of it, a
+``raise`` a test of it steered the call to, or a function of the package it
+is handed to that refuses it in turn. A value refused only beside a value of
+another argument is a combination the ``Literal`` cannot say, and passes.
 """
 
 from __future__ import annotations
@@ -1995,30 +2011,313 @@ def _from_imports(node: ast.ImportFrom, package: str) -> dict[str, object]:
     }
 
 
-def _spread_dicts(tree: ast.AST) -> dict[str, dict[str, ast.expr]]:
-    """The dicts of keyword arguments a body builds to spread into a call."""
-    found: dict[str, dict[str, ast.expr]] = {}
-    for binding in _bindings(tree):
-        name = _one_name(binding)
-        if name is None:
+def _keyword_entries(value: ast.expr) -> tuple[dict[str, ast.expr], bool] | None:
+    """The keywords a dict display or a ``dict(...)`` call binds, by name,
+    each with the expression that fills it, and whether every one of them
+    holds once the dict is built; ``None`` for any other value.
+
+    Read in the order Python fills the dict: a ``**`` mapping, a positional
+    mapping of ``dict(...)``, or a key no text spells, may fill a key written
+    before it, so ``{"mode": mode, **overrides}`` holds ``mode`` only when
+    ``overrides`` has no ``"mode"``; written before every entry, it fills
+    only keys no entry names.
+    """
+    pairs: list[tuple[ast.expr | None, ast.expr]]
+    if isinstance(value, ast.Dict):
+        pairs = list(zip(value.keys, value.values, strict=True))
+    elif isinstance(value, ast.Call) and _is_dict_call(value):
+        pairs = [(None, argument) for argument in value.args]
+        pairs.extend(
+            (
+                None if keyword.arg is None else ast.Constant(value=keyword.arg),
+                keyword.value,
+            )
+            for keyword in value.keywords
+        )
+    else:
+        return None
+    entries: dict[str, ast.expr] = {}
+    holds = True
+    for key, item in pairs:
+        if isinstance(key, ast.Constant) and isinstance(key.value, str):
+            entries[key.value] = item
+        elif entries and not isinstance(key, ast.Constant):
+            holds = False
+    return entries, holds
+
+
+@functools.cache
+def _changed_names(scope: ast.AST) -> frozenset[str]:
+    """The names whose value *scope* may change after binding it, the
+    functions and classes written inside it included.
+
+    A name every read of which only looks into what it holds
+    (:func:`_looks_into`) keeps what its binding put there: a dict spread
+    with ``**``, read by key or through a method that changes nothing, or
+    tested. Any other read may hand the value to something that writes into
+    it: a call it is handed to, a list, a tuple or a dict it is put in,
+    another name bound to it, a conditional expression or a loop that
+    yields it. A name a function or a class written inside *scope* binds
+    again with ``nonlocal`` (:func:`_rebound_inside`) holds what a call of
+    it may have put there.
+    """
+    parents = _parents(scope)
+    read_otherwise = {
+        node.id
+        for node in ast.walk(scope)
+        if isinstance(node, ast.Name)
+        and isinstance(node.ctx, ast.Load)
+        and not _looks_into(node, parents)
+    }
+    return frozenset(read_otherwise) | _rebound_inside(scope)
+
+
+def _looks_into(node: ast.Name, parents: Mapping[ast.AST, ast.AST]) -> bool:
+    """Whether the read *node* only looks into what its name holds.
+
+    A ``**`` spread into a call or a dict display, which copies the
+    entries; an operand of a comparison or of ``in``; the receiver of a
+    method that changes nothing (:data:`_PURE_METHODS`); a test
+    (:func:`_tested`); and a lookup by key or by index, unless what it
+    finds is written into in turn (``options["axle"]["side"] = "left"``,
+    ``rows[0].append(gear)``).
+    """
+    parent = parents.get(node)
+    if isinstance(parent, ast.keyword):
+        return parent.arg is None
+    if isinstance(parent, ast.Dict):
+        return any(
+            key is None and value is node
+            for key, value in zip(parent.keys, parent.values, strict=True)
+        )
+    if isinstance(parent, ast.Compare):
+        return True
+    if isinstance(parent, ast.Attribute):
+        return isinstance(parent.ctx, ast.Load) and parent.attr in _PURE_METHODS
+    if isinstance(parent, ast.Subscript) and parent.value is node:
+        found = parent
+        while isinstance(found.ctx, ast.Load):
+            above = parents.get(found)
+            if not (isinstance(above, ast.Subscript) and above.value is found):
+                break
+            found = above
+        if not isinstance(found.ctx, ast.Load):
+            return False
+        holder = parents.get(found)
+        return not (
+            isinstance(holder, ast.Attribute)
+            and (
+                not isinstance(holder.ctx, ast.Load) or holder.attr in _WRITING_METHODS
+            )
+        )
+    return _tested(node, parents)
+
+
+def _tested(node: ast.expr, parents: Mapping[ast.AST, ast.AST]) -> bool:
+    """Whether *node* is read for its truth alone: the test of an ``if``, a
+    ``while``, an ``assert``, a conditional expression or a comprehension's
+    ``if``, the operand of ``not``, or an operand of ``and`` and ``or``
+    read for its truth in turn.
+    """
+    parent = parents.get(node)
+    if isinstance(parent, ast.If | ast.While | ast.Assert | ast.IfExp):
+        return parent.test is node
+    if isinstance(parent, ast.comprehension):
+        return any(test is node for test in parent.ifs)
+    if isinstance(parent, ast.UnaryOp):
+        return isinstance(parent.op, ast.Not)
+    if isinstance(parent, ast.BoolOp):
+        return _tested(parent, parents)
+    return False
+
+
+@functools.cache
+def _rebound_inside(scope: ast.AST) -> frozenset[str]:
+    """The names a function or a class written inside *scope* declares
+    ``nonlocal`` and binds again: what *scope* holds under one is what the
+    last call of that function left there, if any ran.
+    """
+    names: set[str] = set()
+    for node in ast.walk(scope):
+        if node is scope or not isinstance(
+            node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+        ):
             continue
-        value = binding.value
-        entries: dict[str, ast.expr] = {}
-        if isinstance(value, ast.Dict):
-            entries = {
-                key.value: item
-                for key, item in zip(value.keys, value.values, strict=True)
-                if isinstance(key, ast.Constant) and isinstance(key.value, str)
-            }
-        elif isinstance(value, ast.Call) and _is_dict_call(value):
-            entries = {
-                keyword.arg: keyword.value
-                for keyword in value.keywords
-                if keyword.arg is not None
-            }
-        if entries:
-            found[name] = entries
-    return found
+        declared = {
+            name
+            for part in scope_nodes(node)
+            if isinstance(part, ast.Nonlocal)
+            for name in part.names
+        }
+        if declared:
+            names.update(declared & set().union(*map(_stored_names, node.body)))
+    return frozenset(names)
+
+
+def _spread_bindings(
+    tree: ast.AST, read: ast.Name, call: ast.Call
+) -> list[dict[str, ast.expr]]:
+    """What the dict *read* names may hold where *call* spreads it with ``**``.
+
+    The entries of each binding of the name that may stand at the call
+    (:func:`ast_scan.held_before`), a dict display or a ``dict(...)`` call
+    (:func:`_keyword_entries`); nothing known (an empty map) for any other
+    binding, and for none. One whose entries may not all hold when the call
+    runs is read as holding them or not: one a later ``**`` mapping fills,
+    and the dict of a name the function changes after binding it
+    (:func:`_changed_names`). The dict holds its entries as they were where
+    it was built; a name an entry reads, bound again before the call, is
+    another value than the call reads.
+    """
+    root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
+    _, scope = binding_of(root, read, read.id)
+    if scope is None:
+        return [{}]
+    live = held_before(scope, bindings_by_name(scope).get(read.id, []), call)
+    if not live:
+        return [{}]
+    parents = _parents(scope)
+    changed = read.id in _changed_names(scope)
+    found: list[dict[str, ast.expr]] = []
+    for node in live:
+        holder = parents.get(node)
+        value = _bound_value(holder, node)
+        read_off = _keyword_entries(value) if value is not None else None
+        if read_off is None:
+            found.append({})
+            continue
+        entries, holds = read_off
+        found.append(entries)
+        if changed or not holds:
+            found.append({})
+    unique: dict[str, dict[str, ast.expr]] = {}
+    for entries in found:
+        unique.setdefault(
+            repr(sorted((key, ast.dump(item)) for key, item in entries.items())),
+            entries,
+        )
+    return list(unique.values())
+
+
+def _bound_value(holder: ast.AST | None, target: ast.AST) -> ast.expr | None:
+    """What *holder*, the node around the name *target* binds, binds it to
+    alone: an assignment of one name, annotated or not, or a ``:=``.
+    """
+    if isinstance(holder, ast.Assign) and holder.targets == [target]:
+        return holder.value
+    if (
+        isinstance(holder, ast.AnnAssign | ast.NamedExpr)
+        and holder.target is target
+        and holder.value is not None
+    ):
+        return holder.value
+    return None
+
+
+def _held_on_every_path(
+    tree: ast.AST,
+    read: ast.Name,
+    choice: Callable[[ast.expr], bool],
+    parents: Mapping[ast.AST, ast.AST],
+) -> bool:
+    """Whether the name *read* holds the choice, or a value worked out from
+    it, on every path that reaches the read.
+
+    It does when every binding of the name that may stand there
+    (:func:`ast_scan.held_before`) assigns a value that reads the choice
+    (*choice*, the parameter or a copy of it), or adds to what the name
+    held; a parameter no statement binds again holds it from the start. A
+    branch that binds the name to a fixed text or to anything else, a
+    binding of a loop, a ``with`` or a handler, and a function written
+    inside the body that binds it again with ``nonlocal``
+    (:func:`_rebound_inside`) leave a path on which the read holds
+    something else.
+    """
+    name, scope = _bound_at(tree, read)
+    if scope is None or name not in _names_stored_under(scope):
+        return True
+    if name in _rebound_inside(scope):
+        return False
+    bindings = _scope_bindings(scope).get(name)
+    if not bindings:
+        return True
+    for binding in held_before(scope, bindings, read):
+        holder = parents.get(binding)
+        if isinstance(holder, ast.AugAssign) and holder.target is binding:
+            continue
+        value = _bound_value(holder, binding)
+        if value is None or not any(
+            isinstance(part, ast.expr) and choice(part) for part in ast.walk(value)
+        ):
+            return False
+    return True
+
+
+@functools.cache
+def _names_stored_under(scope: ast.AST) -> frozenset[str]:
+    """Every name a statement anywhere under *scope* binds, the scopes
+    written inside it included: a name outside it is bound nowhere but as a
+    parameter.
+    """
+    found: set[str] = set()
+    for node in ast.walk(scope):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store | ast.Del):
+            found.add(node.id)
+        elif isinstance(node, ast.alias) and node.name != "*":
+            found.add(node.asname or node.name.partition(".")[0])
+        elif isinstance(
+            node,
+            ast.MatchAs
+            | ast.MatchStar
+            | ast.ExceptHandler
+            | ast.FunctionDef
+            | ast.AsyncFunctionDef
+            | ast.ClassDef,
+        ) and isinstance(node.name, str):
+            found.add(node.name)
+        elif isinstance(node, ast.MatchMapping) and node.rest:
+            found.add(node.rest)
+    return frozenset(found)
+
+
+@functools.cache
+def _scope_bindings(scope: ast.AST) -> Mapping[str, Sequence[ast.AST]]:
+    """Each name *scope* binds itself, with the nodes that bind it
+    (:func:`ast_scan.bindings_by_name`), read once for each scope.
+    """
+    return MappingProxyType(
+        {name: tuple(nodes) for name, nodes in bindings_by_name(scope).items()}
+    )
+
+
+#: The most combinations of what the dicts one call spreads may hold that a
+#: reader follows; a call past it is read as spreading nothing it knows.
+_SPREAD_VARIANTS = 64
+
+
+def _spread_variants(
+    tree: ast.AST, call: ast.Call
+) -> list[dict[str, dict[str, ast.expr]]]:
+    """What the dicts *call* spreads with ``**`` may hold, one map from each
+    spread name to its entries for each combination of what each may hold
+    there (:func:`_spread_bindings`); the one empty map for a call that
+    spreads none of its function's own.
+
+    A reader that asks whether some call hands on the choice reads each; one
+    that asks whether every call does holds a check to all of them.
+    """
+    variants: list[dict[str, dict[str, ast.expr]]] = [{}]
+    for keyword in call.keywords:
+        if keyword.arg is not None or not isinstance(keyword.value, ast.Name):
+            continue
+        name = keyword.value.id
+        held = _spread_bindings(tree, keyword.value, call)
+        variants = [
+            {**variant, name: entries} for variant in variants for entries in held
+        ]
+        if len(variants) > _SPREAD_VARIANTS:
+            return [{}]
+    return variants
 
 
 def _is_dict_call(node: ast.expr) -> bool:
@@ -2030,7 +2329,7 @@ def _is_dict_call(node: ast.expr) -> bool:
 
 
 def _callee(
-    node: ast.Call, namespace: dict[str, object], home: str = "phonometry"
+    node: ast.Call, namespace: Mapping[str, object], home: str = "phonometry"
 ) -> FunctionType | None:
     """The function a call names, looked up in *namespace*.
 
@@ -2091,20 +2390,23 @@ def _call_target(node: ast.Call, namespace: Mapping[str, object]) -> object | No
     return target
 
 
-def _arguments(
+def _arguments[Entry](
     node: ast.Call,
     callee: FunctionType,
-    spread: dict[str, dict[str, ast.expr]],
+    spread: Mapping[str, Mapping[str, Entry]],
     namespace: Mapping[str, object],
-) -> dict[str, ast.expr]:
+) -> dict[str, ast.expr | Entry]:
     """What a call hands each parameter of *callee*, by the parameter's name.
 
     By position, by keyword, and from a dict of keywords the body built and
-    spreads into the call (``f(**options)``). The first parameter is the
-    receiver's when the call fills it itself (:func:`_fills_the_first`),
-    whatever it is called, ``def __init__(instance, pace)`` too, and the
-    call's first argument when it does not, as in a function or a static
-    method, or a method called through its class.
+    spreads into the call (``f(**options)``), whose entries *spread* holds
+    by the name it is spread by: what one reader of the call knows the dict
+    holds there (:func:`_spread_variants`, :class:`_ValueReader`). The first
+    parameter is the receiver's when the call fills it itself
+    (:func:`_fills_the_first`), whatever it is called, ``def
+    __init__(instance, pace)`` too, and the call's first argument when it
+    does not, as in a function or a static method, or a method called
+    through its class.
     """
     try:
         parameters = list(inspect.signature(callee).parameters)
@@ -2112,7 +2414,7 @@ def _arguments(
         return {}
     if parameters and _fills_the_first(node, namespace):
         parameters = parameters[1:]
-    handed: dict[str, ast.expr] = {}
+    handed: dict[str, ast.expr | Entry] = {}
     for index, argument in enumerate(node.args):
         if isinstance(argument, ast.Starred) or index >= len(parameters):
             break
@@ -2419,7 +2721,6 @@ def passed_on_evidence(  # noqa: PLR0913
         constants = _module_constants(sys.modules.get(module_name))
     namespace = _namespace(function, tree, module_name)
     matches = _following(tree, target or _the_name(name, tree))
-    spread = _spread_dicts(tree)
     known = {**constants, **_local_tables(tree, constants)}
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -2427,31 +2728,36 @@ def passed_on_evidence(  # noqa: PLR0913
         callee = _callee(node, namespace, module_name)
         if callee is None:
             continue
-        handed = _arguments(node, callee, spread, namespace)
-        received = next(
-            (parameter for parameter, value in handed.items() if matches(value)),
-            None,
-        )
-        key = f"{getattr(callee, '__qualname__', '')}.{received}"
-        if received is None or key in seen:
-            continue
-        callee_constants = {
-            **_module_constants(sys.modules.get(callee.__module__)),
-            **_bound_tables(handed, known),
-        }
-        label = f"handed to {callee.__qualname__}({received})"
-        if _checks_received(callee, received, callee_constants, collection=collection):
-            return [label]
-        deeper = passed_on_evidence(
-            callee,
-            received,
-            depth + 1,
-            seen | {key},
-            callee_constants,
-            collection=collection,
-        )
-        if deeper:
-            return [f"{label}, {deeper[0]}"]
+        # A dict spread into the call hands the choice on when any binding
+        # of it that may stand there holds it.
+        for spread in _spread_variants(tree, node):
+            handed = _arguments(node, callee, spread, namespace)
+            received = next(
+                (parameter for parameter, value in handed.items() if matches(value)),
+                None,
+            )
+            key = f"{getattr(callee, '__qualname__', '')}.{received}"
+            if received is None or key in seen:
+                continue
+            callee_constants = {
+                **_module_constants(sys.modules.get(callee.__module__)),
+                **_bound_tables(handed, known),
+            }
+            label = f"handed to {callee.__qualname__}({received})"
+            if _checks_received(
+                callee, received, callee_constants, collection=collection
+            ):
+                return [label]
+            deeper = passed_on_evidence(
+                callee,
+                received,
+                depth + 1,
+                seen | {key},
+                callee_constants,
+                collection=collection,
+            )
+            if deeper:
+                return [f"{label}, {deeper[0]}"]
     return []
 
 
@@ -3208,11 +3514,12 @@ class _Reader(NamedTuple):
     namespace: dict[str, object]
     module_name: str
     constants: dict[str, ast.expr]
-    spread: dict[str, dict[str, ast.expr]]
     options: frozenset[str]
     collection: bool
     depth: int
-    #: The function's tree, whose own names hide a check's (:func:`_names_for_call`).
+    #: The function's tree, whose own names hide a check's (:func:`_names_for_call`),
+    #: and whose bindings say what a dict spread into a call holds there
+    #: (:func:`_spread_variants`).
     tree: ast.AST = ast.Module(body=[], type_ignores=[])
 
 
@@ -3250,7 +3557,6 @@ def _spelling(  # noqa: PLR0913
         namespace=namespace,
         module_name=module_name,
         constants=constants,
-        spread=_spread_dicts(tree),
         options=options,
         collection=collection,
         depth=depth,
@@ -3322,10 +3628,16 @@ def _read_handed_on(
     folds: list[tuple[tuple[int, int], str]],
     checks: list[tuple[int, int]],
 ) -> None:
-    """Add what *callee* does with the choice a call hands it."""
-    for parameter, value in _arguments(
-        node, callee, reader.spread, reader.namespace
-    ).items():
+    """Add what *callee* does with the choice a call hands it, through any
+    binding of a dict it spreads that may stand there (:func:`_spread_variants`).
+    """
+    handed: dict[tuple[str, int], tuple[str, ast.expr]] = {}
+    for spread in _spread_variants(reader.tree, node):
+        for parameter, value in _arguments(
+            node, callee, spread, reader.namespace
+        ).items():
+            handed.setdefault((parameter, id(value)), (parameter, value))
+    for parameter, value in handed.values():
         if not reader.matches(value):
             continue
         inner = _received(
@@ -5800,7 +6112,6 @@ def _checks_of(
         return ()
     module_name = getattr(function, "__module__", "") or ""
     namespace = _namespace(function, tree, module_name)
-    spread = _spread_dicts(tree)
     base = _field_of_self(name) if field else _the_name(name, tree)
     target = _with_copies(tree, base, options)
     whole = part in {None, _WHOLE}
@@ -5862,6 +6173,18 @@ def _checks_of(
     )
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
+
+    def held_alike(node: ast.expr) -> bool:
+        """Whether every read of the choice in *node* holds it, or a value
+        worked out from it, on every path that reaches the read
+        (:func:`_held_on_every_path`).
+        """
+        return all(
+            _held_on_every_path(tree, part, target, parents)
+            for part in ast.walk(node)
+            if isinstance(part, ast.Name) and target(part)
+        )
+
     # Each place the choice meets a check, with the checks it meets there.
     sites: list[tuple[ast.AST, tuple[_Check, ...]]] = []
     for node in ast.walk(tree):
@@ -5880,7 +6203,10 @@ def _checks_of(
             and is_raw(node.args[0])
             and _is_validator(node, namespace, tree, module_name)
         ):
-            sites.append((node, (_Check(every_path=True, validator=True),)))
+            # A name a branch binds to something else holds the choice on
+            # the other paths only.
+            every_path = held_alike(node.args[0])
+            sites.append((node, (_Check(every_path=every_path, validator=True),)))
             continue
         called = _call_target(node, namespace)
         callee = _function_of(called, module_name)
@@ -5910,65 +6236,89 @@ def _checks_of(
             if inspect.isclass(called) and dataclasses.is_dataclass(called)
             else _record_constructor(callee)
         )
-        for parameter, handed in _arguments(node, callee, spread, namespace).items():
-            value = _held(handed)
-            keys_kept = _keeps_keys(value, target, options)
-            handed_part = _handed_part(
-                part,
-                value,
-                target,
-                is_raw,
-                keys_kept=keys_kept,
-                wrapped=whole_of if part == _WHOLE else _never,
-            )
-            if handed_part is False:
-                continue
-            check = _post_init(record) if record is not None else callee
-            if (
-                record is not None
-                and check is not callee
-                and _parsed(inspect.unwrap(callee)) is not None
-            ):
-                # An ``__init__`` written by hand, which the record runs in
-                # place of the one ``@dataclass`` writes, checks what it is
-                # handed as any function does, beside the hook it may run.
-                inner.extend(
-                    _checks_of(
-                        callee,
-                        parameter,
-                        field=False,
-                        collection=collection and (target(value) or keys_kept),
-                        depth=depth + 1,
-                        options=options,
-                        part=handed_part,
-                        **_as_handed(
-                            forms,
-                            nontext=nontext,
-                            whole=base(value) and handed_part == part,
-                        ),
+        # A dict spread into the call may hold the choice on some paths only
+        # (:func:`_spread_variants`): a check it reaches runs on every path
+        # only when each thing it may hold reaches one. So does a name of
+        # the choice a branch binds to something else: on that path the
+        # call hands the check nothing of the choice (:func:`_held_on_every_path`).
+        variants: list[list[_Check]] = []
+        for spread in _spread_variants(tree, node):
+            reached: list[_Check] = []
+            for parameter, handed in _arguments(
+                node, callee, spread, namespace
+            ).items():
+                value = _held(handed)
+                keys_kept = _keeps_keys(value, target, options)
+                handed_part = _handed_part(
+                    part,
+                    value,
+                    target,
+                    is_raw,
+                    keys_kept=keys_kept,
+                    wrapped=whole_of if part == _WHOLE else _never,
+                )
+                if handed_part is False:
+                    continue
+                if not held_alike(value):
+                    variants.append([])
+                check = _post_init(record) if record is not None else callee
+                if (
+                    record is not None
+                    and check is not callee
+                    and _parsed(inspect.unwrap(callee)) is not None
+                ):
+                    # An ``__init__`` written by hand, which the record runs in
+                    # place of the one ``@dataclass`` writes, checks what it is
+                    # handed as any function does, beside the hook it may run.
+                    reached.extend(
+                        _checks_of(
+                            callee,
+                            parameter,
+                            field=False,
+                            collection=collection and (target(value) or keys_kept),
+                            depth=depth + 1,
+                            options=options,
+                            part=handed_part,
+                            **_as_handed(
+                                forms,
+                                nontext=nontext,
+                                whole=base(value) and handed_part == part,
+                            ),
+                        )
                     )
-                )
-            if check is None:
-                continue
-            inner.extend(
-                _checks_of(
-                    check,
-                    parameter,
-                    field=record is not None,
-                    collection=collection and (target(value) or keys_kept),
-                    depth=depth + 1,
-                    options=options,
-                    part=handed_part,
-                    # The value itself, handed on whole, takes the forms it
-                    # took here, and the values its annotation lists; a copy
-                    # or a part of it, its own.
-                    **_as_handed(
-                        forms,
-                        nontext=nontext,
-                        whole=base(value) and handed_part == part,
-                    ),
-                )
-            )
+                if check is not None:
+                    reached.extend(
+                        _checks_of(
+                            check,
+                            parameter,
+                            field=record is not None,
+                            collection=collection and (target(value) or keys_kept),
+                            depth=depth + 1,
+                            options=options,
+                            part=handed_part,
+                            # The value itself, handed on whole, takes the forms
+                            # it took here, and the values its annotation lists;
+                            # a copy or a part of it, its own.
+                            **_as_handed(
+                                forms,
+                                nontext=nontext,
+                                whole=base(value) and handed_part == part,
+                            ),
+                        )
+                    )
+            variants.append(reached)
+        if len(variants) > 1 and not all(
+            any(check.validator and check.every_path for check in reached)
+            for reached in variants
+        ):
+            variants = [
+                [
+                    _Check(every_path=False, validator=check.validator)
+                    for check in reached
+                ]
+                for reached in variants
+            ]
+        inner.extend(check for reached in variants for check in reached)
         if inner:
             sites.append((node, tuple(inner)))
     validated = [
@@ -6349,20 +6699,53 @@ class _Handed(NamedTuple):
     fields: tuple[tuple[str, _Held, bool], ...] = ()
 
 
+class _Entry(NamedTuple):
+    """What one key of a dict a path built holds, as the path knew it where
+    the dict was built, and whether it was worked out from the choice.
+    """
+
+    value: object
+    derived: bool
+
+
+class _Built(NamedTuple):
+    """A dict of keywords a path built: what each key the path knows holds
+    there (:class:`_Entry`), and whether those are all its keys.
+
+    A dict is open (*closed* false) when it may hold a key the path does
+    not know: one built over a ``**`` mapping or a key the path cannot
+    read, or one two paths built with different keys. Its *entries* still
+    hold, but merged into another dict after keys written before it, it may
+    fill any of them.
+    """
+
+    entries: Mapping[str, _Entry]
+    closed: bool
+
+
+#: The dicts no path has built.
+_NO_SPREADS: Mapping[str, _Built] = MappingProxyType({})
+
+
 class _Path(NamedTuple):
     """What the paths that reach a statement know.
 
     *values* are the locals they bind on the way, each as it is or
-    :data:`_UNKNOWN`; *derived* the locals worked out from the choice, and
-    *fields* the fields of ``self`` that still hold what the constructor put
-    there; *steer* the last test of the choice they took, which a ``raise``
-    they meet refuses the choice under.
+    :data:`_UNKNOWN`, an import among them; *derived* the locals worked out
+    from the choice, and *fields* the fields of ``self`` that still hold
+    what the constructor put there; *steer* the last test of the choice they
+    took, which a ``raise`` they meet refuses the choice under. *spreads*
+    are the dicts of keywords each of them built, by the local that holds
+    one, with what each key held where it was built and whether those are
+    all its keys (:class:`_Built`): what a call that spreads it
+    (``f(**options)``) hands the parameter of the key.
     """
 
     values: Mapping[str, object]
     derived: frozenset[str]
     fields: frozenset[str]
     steer: str | None
+    spreads: Mapping[str, _Built] = _NO_SPREADS
 
 
 class _Flow(NamedTuple):
@@ -6429,6 +6812,51 @@ def _joined(paths: Sequence[_Path]) -> _Path | None:
         frozenset().union(*(path.derived for path in paths)),
         frozenset.intersection(*(path.fields for path in paths)),
         first.steer if len(steers) == 1 else None,
+        _joined_spreads(paths),
+    )
+
+
+def _joined_spreads(paths: Sequence[_Path]) -> Mapping[str, _Built]:
+    """The dicts every one of *paths* built, each with the keys they all
+    hold, and what they hold there when they hold it alike.
+
+    A dict one path built and another did not is none the paths know. A key
+    every path holds, under values that differ, holds a value no call that
+    spreads the dict is known to hand; a key some paths hold and others do
+    not leaves the dict open (:class:`_Built`), since merged into another
+    it may fill a key written before it on one path and not on another.
+    """
+    first, *rest = paths
+    joined: dict[str, _Built] = {}
+    for name, built in first.spreads.items():
+        others = [path.spreads.get(name) for path in rest]
+        if any(other is None for other in others):
+            continue
+        every = [built, *(other for other in others if other is not None)]
+        keys = set(built.entries)
+        closed = all(one.closed and set(one.entries) == keys for one in every)
+        kept: dict[str, _Entry] = {}
+        for key, entry in built.entries.items():
+            held = [one.entries.get(key) for one in every]
+            if any(one is None for one in held):
+                continue
+            alike = all(
+                one is not None and _same(entry.value, one.value) for one in held
+            )
+            kept[key] = _Entry(
+                entry.value if alike else _UNKNOWN,
+                any(one.derived for one in held if one is not None),
+            )
+        joined[name] = _Built(MappingProxyType(kept), closed=closed)
+    return MappingProxyType(joined)
+
+
+def _without(spreads: Mapping[str, _Built], names: Set[str]) -> Mapping[str, _Built]:
+    """*spreads* but the dicts of *names*, which something else is bound to."""
+    if names.isdisjoint(spreads):
+        return spreads
+    return MappingProxyType(
+        {name: entries for name, entries in spreads.items() if name not in names}
     )
 
 
@@ -6542,8 +6970,9 @@ def _names_handed_to_calls(root: ast.AST) -> frozenset[str]:
 
 def _stored_names(node: ast.AST) -> set[str]:
     """The names *node* binds in the scope it runs in: its targets, ``:=``,
-    ``with ... as``, ``except ... as``, a ``match`` capture, ``del``, and the
-    name of a function or a class it defines, whose body binds its own.
+    ``with ... as``, ``except ... as``, a ``match`` capture, ``del``, an
+    import, and the name of a function or a class it defines, whose body
+    binds its own.
     """
     found: set[str] = set()
     pending = [node]
@@ -6551,6 +6980,8 @@ def _stored_names(node: ast.AST) -> set[str]:
         part = pending.pop()
         if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Store | ast.Del):
             found.add(part.id)
+        elif isinstance(part, ast.alias) and part.name != "*":
+            found.add(part.asname or part.name.partition(".")[0])
         elif isinstance(part, ast.MatchAs | ast.MatchStar) and part.name:
             found.add(part.name)
         elif isinstance(part, ast.MatchMapping) and part.rest:
@@ -6644,7 +7075,18 @@ class _Facts(NamedTuple):
     written: frozenset[str]
     #: The names it hands to a call (:func:`_names_handed_to_calls`).
     escaping: frozenset[str]
-    spread: dict[str, dict[str, ast.expr]]
+    #: The names whose value it may change after binding them
+    #: (:func:`_changed_names`): a dict of one holds no entries the guard
+    #: can vouch for where a call spreads it, nor a list, a dict or a set
+    #: one holds anything it can vouch for where it is read.
+    changed: frozenset[str]
+    #: The names a function or a class written inside it binds again with
+    #: ``nonlocal`` (:func:`_rebound_inside`), which hold nothing the guard
+    #: can vouch for.
+    rebound: frozenset[str]
+    #: The names of its module, which a name it binds nowhere reads; not
+    #: those a function written inside it imports for itself.
+    module_names: Mapping[str, object]
     #: The names each call it makes reads its first name in
     #: (:func:`_names_for_call`), filled as the calls are met.
     call_names: dict[int, Mapping[str, object] | None]
@@ -6675,7 +7117,9 @@ def _facts(function: Callable[..., object]) -> _Facts | None:
         receiver=first_parameter(root),
         written=_written_into(root),
         escaping=_names_handed_to_calls(root),
-        spread=_spread_dicts(tree),
+        changed=_changed_names(root),
+        rebound=_rebound_inside(root),
+        module_names=getattr(inspect.unwrap(function), "__globals__", {}),
         call_names={},
         reads={},
         stores={},
@@ -6711,7 +7155,6 @@ class _ValueReader:
         self.receiver = facts.receiver
         self.written = facts.written
         self.escaping = facts.escaping
-        self.spread = facts.spread
         self.handed = handed
         self.depth = depth
         self.fields = {name: held.value for name, held, _ in handed.fields}
@@ -6945,21 +7388,29 @@ class _ValueReader:
             values=MappingProxyType(values),
             derived=path.derived - names,
             fields=fields,
+            spreads=_without(path.spreads, names),
         )
 
     def _bound(self, statement: ast.stmt, path: _Path) -> _Path:
-        """*path* after a simple statement binds what it binds."""
+        """*path* after a simple statement binds what it binds: an assignment
+        what it assigns, a dict of keywords the entries it builds
+        (:meth:`_spread_of`), and an import what it imports.
+        """
         values = dict(path.values)
         derived = set(path.derived)
-        for name in self._stores(statement):
+        stored = self._stores(statement)
+        for name in stored:
             values[name] = _UNKNOWN
             derived.discard(name)
+        spreads = dict(_without(path.spreads, stored))
         targets: list[ast.expr] = []
         source: ast.expr | None = None
         if isinstance(statement, ast.Assign):
             targets, source = statement.targets, statement.value
         elif isinstance(statement, ast.AnnAssign) and statement.value is not None:
             targets, source = [statement.target], statement.value
+        elif isinstance(statement, ast.Import | ast.ImportFrom):
+            values.update(self._imported(statement, stored))
         if source is not None:
             held = self.evaluate(source, path)
             from_choice = self._mentions(source, path)
@@ -6967,12 +7418,80 @@ class _ValueReader:
                 values[target] = value
                 if from_choice:
                     derived.add(target)
+            built = self._spread_of(source, path)
+            if (
+                built is not None
+                and len(targets) == 1
+                and isinstance(targets[0], ast.Name)
+                and targets[0].id not in self.facts.changed
+            ):
+                spreads[targets[0].id] = built
         return _Path(
             MappingProxyType(values),
             frozenset(derived),
             path.fields - self._fields_written(statement),
             path.steer,
+            MappingProxyType(spreads),
         )
+
+    def _imported(
+        self, statement: ast.Import | ast.ImportFrom, names: Set[str]
+    ) -> dict[str, object]:
+        """What an import binds each of *names* to, unknown where it cannot
+        be imported.
+        """
+        found = _local_imports(
+            ast.Module(body=[statement], type_ignores=[]), self.module_name
+        )
+        return {name: found.get(name, _UNKNOWN) for name in names}
+
+    def _spread_of(self, value: ast.expr, path: _Path) -> _Built | None:
+        """The entries a dict display or a ``dict(...)`` call builds, each as
+        *path* holds it there, and whether they are all its keys; ``None``
+        for any other value.
+
+        Read in the order Python fills the dict: a ``**`` mapping (or the
+        positional mapping of ``dict(...)``) the path built with every key
+        known adds its entries; any other, an open one among them
+        (:class:`_Built`), or a key the path cannot read, may fill a key
+        written before it, which is left out, and leaves the dict open.
+        """
+        pairs: list[tuple[ast.expr | None, ast.expr]]
+        if isinstance(value, ast.Dict):
+            pairs = list(zip(value.keys, value.values, strict=True))
+        elif isinstance(value, ast.Call) and _is_dict_call(value):
+            pairs = [(None, argument) for argument in value.args]
+            pairs.extend(
+                (
+                    None if keyword.arg is None else ast.Constant(value=keyword.arg),
+                    keyword.value,
+                )
+                for keyword in value.keywords
+            )
+        else:
+            return None
+        entries: dict[str, _Entry] = {}
+        closed = True
+        for key, item in pairs:
+            if key is None:
+                built = (
+                    path.spreads.get(item.id) if isinstance(item, ast.Name) else None
+                )
+                if built is None or not built.closed:
+                    entries.clear()
+                    closed = False
+                if built is not None:
+                    entries.update(built.entries)
+                continue
+            text = self.evaluate(key, path)
+            if isinstance(text, str):
+                entries[text] = _Entry(
+                    self.evaluate(item, path), self._mentions(item, path)
+                )
+            elif text is _UNKNOWN:
+                entries.clear()
+                closed = False
+        return _Built(MappingProxyType(entries), closed=closed)
 
     def _unpacked(
         self, targets: Sequence[ast.expr], held: object
@@ -7172,18 +7691,29 @@ class _ValueReader:
         the record checks what it is handed in its ``__post_init__``, as the
         fields of ``self``, or there as the parameters of an ``InitVar``.
         """
-        callee = _callee(node, self.namespace, self.module_name)
-        if callee is None or self.depth >= _REFUSAL_DEPTH:
+        if self.depth >= _REFUSAL_DEPTH:
+            return None
+        namespace = self._call_namespace(node, path)
+        callee = (
+            _callee(node, namespace, self.module_name)
+            if namespace is not None
+            else None
+        )
+        if callee is None or namespace is None:
             return None
         parameters: list[tuple[str, _Held, bool]] = []
-        for parameter, argument in _arguments(
-            node, callee, self.spread, self.namespace
-        ).items():
-            held = self.evaluate(argument, path)
+        # A dict spread into the call hands each key what the path held
+        # there when it built the dict (:meth:`_spread_of`); a key it may
+        # hold that the path does not know fills no parameter it knows.
+        spread = {name: built.entries for name, built in path.spreads.items()}
+        for parameter, argument in _arguments(node, callee, spread, namespace).items():
+            if isinstance(argument, _Entry):
+                held, derived = argument
+            else:
+                held = self.evaluate(argument, path)
+                derived = self._mentions(argument, path)
             if held is not _UNKNOWN:
-                parameters.append(
-                    (parameter, _Held(held), self._mentions(argument, path))
-                )
+                parameters.append((parameter, _Held(held), derived))
         if not any(derived for _, _, derived in parameters):
             return None
         record = _record_constructor(callee)
@@ -7197,6 +7727,26 @@ class _ValueReader:
             tuple(part for part in parameters if part[0] in takes),
             tuple(part for part in parameters if part[0] not in takes),
         )
+
+    def _call_namespace(
+        self, node: ast.Call, path: _Path
+    ) -> Mapping[str, object] | None:
+        """The names a call is looked up in, its first name read as *path*
+        holds it (:meth:`_name`): a function or a table the function binds
+        or imports for itself on one branch, or another than its module's
+        of the same name, is what the path bound it to, and ``None`` when
+        the path does not know it. ``self`` and ``cls`` are the class the
+        method is read in (:func:`_namespace`).
+        """
+        head: ast.expr = node.func
+        while isinstance(head, ast.Attribute):
+            head = head.value
+        if not isinstance(head, ast.Name) or head.id in {"self", "cls"}:
+            return self.namespace
+        held = self._name(head.id, path)
+        if held is _UNKNOWN:
+            return None
+        return collections.ChainMap({head.id: held}, self.namespace)
 
     def _checked(self, node: ast.Call, check: object, path: _Path) -> _Raised | None:
         """A shared check that refuses the choice, run on what it is handed."""
@@ -7361,7 +7911,10 @@ class _ValueReader:
             if not bound:
                 return _UNKNOWN
             values.update(bound)
-            inner = path._replace(values=MappingProxyType(values))
+            inner = path._replace(
+                values=MappingProxyType(values),
+                spreads=_without(path.spreads, {name for name, _ in bound}),
+            )
             kept = [self.truth(test, inner) for test in clause.ifs]
             if _unknown_among(kept):
                 return _UNKNOWN
@@ -7390,21 +7943,36 @@ class _ValueReader:
         return made if isinstance(node, ast.ListComp) else tuple(made)
 
     def _name(self, name: str, path: _Path) -> object:
-        if name in self.written:
+        """What *name* holds on the paths *path* stands for.
+
+        What the paths bound it to, an import among them; unknown for a name
+        the function binds that the paths have not bound alike, and for one
+        a function written inside it binds again with ``nonlocal``; and, for
+        one it binds nowhere, what its module or the builtins hold, never
+        what a function written inside it imports for itself.
+        """
+        if name in self.written or name in self.facts.rebound:
             return _UNKNOWN
         if name in path.values:
             value = path.values[name]
-            # A list, a dict or a set the function hands on may come back
-            # holding something else.
-            if isinstance(value, _MUTABLE_TYPES) and name in self.escaping:
+            # A list, a dict or a set the function hands on, or reads other
+            # than to look into it, may come back holding something else;
+            # what an import binds is its module's, read as the module's own
+            # names are.
+            if (
+                isinstance(value, _MUTABLE_TYPES)
+                and (name in self.escaping or name in self.facts.changed)
+                and self.own.how(name) != "import"
+            ):
                 return _UNKNOWN
             return value
-        if self.own.binds(name) and name not in self.own.imported:
+        if self.own.binds(name):
             return _UNKNOWN
-        if name in self.namespace:
+        names = self.facts.module_names
+        if name in names:
             if name in _rewritten_globals(self.module_name):
                 return _UNKNOWN
-            return self.namespace[name]
+            return names[name]
         return vars(builtins).get(name, _UNKNOWN)
 
     def _attribute(self, node: ast.Attribute, path: _Path) -> object:

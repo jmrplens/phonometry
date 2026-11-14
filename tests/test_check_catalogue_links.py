@@ -402,6 +402,91 @@ def test_a_label_naming_a_designation_of_the_other_catalogue_is_read_by_its_labe
     assert problem.endswith("'IEC 12354-1:2017'")
 
 
+_NOTE_LINK = """---
+references:
+  - type: standard
+    designation: "{designation}"
+    url: "https://www.iso.org/standard/{url}.html"
+    note: "The quantities this page implements. {written}(https://www.iso.org/standard/{note}.html); the 2012 edition is the implemented one."
+---
+"""
+
+
+@pytest.mark.parametrize(
+    ("page", "label"),
+    [
+        # A cell before it names the document the link opens.
+        (
+            "| ISO 12354-1:2017 |"
+            " [IEC 12354-1:2017](https://www.iso.org/standard/70242.html) |\n",
+            "IEC 12354-1:2017",
+        ),
+        (
+            "| ISO 12354-1:2017 | Part 1 |"
+            " [IEC 12354-1:2017](https://www.iso.org/standard/70242.html) |\n",
+            "IEC 12354-1:2017",
+        ),
+        # So does the reference's designation, and the clause of the note.
+        (
+            _NOTE_LINK.format(
+                designation="ISO 3382-3:2022",
+                url="77437",
+                written="The catalogue page [IEC 3382-3:2022]",
+                note="77437",
+            ),
+            "IEC 3382-3:2022",
+        ),
+        (
+            _NOTE_LINK.format(
+                designation="ISO 3382-3:2012",
+                url="46520",
+                written="Since revised as ISO 3382-3:2022, see [IEC 3382-3:2022]",
+                note="77437",
+            ),
+            "IEC 3382-3:2022",
+        ),
+    ],
+)
+def test_a_label_naming_another_document_is_read_by_its_label_in_a_table_or_a_note(
+    page: str, label: str
+) -> None:
+    # The label tells the reader which document the link opens, wherever the
+    # link is written: a cell or a reference before it that names the right
+    # one does not vouch for a label that names another.
+    (problem,) = _named(page)
+    assert "which the link is not written beside" in problem
+    assert problem.endswith(f"{label!r}")
+
+
+@pytest.mark.parametrize(
+    ("page", "number"),
+    [
+        (
+            "| ISO 13887:2017 |"
+            " [ISO 12354-1:2017](https://www.iso.org/standard/{}.html) |\n",
+            "70242",
+        ),
+        (
+            _NOTE_LINK.format(
+                designation="ISO 3382-3:2012",
+                url="46520",
+                written="The later edition [ISO 3382-3:2022]",
+                note="{}",
+            ),
+            "77437",
+        ),
+    ],
+)
+def test_a_label_naming_the_document_is_read_by_its_label_in_a_table_or_a_note(
+    page: str, number: str
+) -> None:
+    # A cell before it, or the reference, naming another document does not
+    # hold a link whose label names the one it opens.
+    assert _named(page.format(number)) == []
+    (problem,) = _named(page.format("70238"))
+    assert "opens ISO 13887:2017, which the link is not written beside" in problem
+
+
 @pytest.mark.parametrize(
     "page",
     [

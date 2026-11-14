@@ -285,14 +285,19 @@ def _body(function: object) -> _Body | None:
         return None
     module = getattr(function, "__module__", "") or ""
     namespace = ccl._namespace(function, tree, module)
-    spread = ccl._spread_dicts(tree)
     calls: list[tuple[object, dict[str, ast.expr]]] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
         callee = ccl._callee(node, namespace, module)
-        if callee is not None and callee.__module__ != _GUARDS:
-            calls.append((callee, ccl._arguments(node, callee, spread, namespace)))
+        if callee is None or callee.__module__ == _GUARDS:
+            continue
+        # A dict spread into the call hands the parameter on through any
+        # binding of it that may stand there, as the choice guard reads it.
+        calls.extend(
+            (callee, ccl._arguments(node, callee, spread, namespace))
+            for spread in ccl._spread_variants(tree, node)
+        )
     return _Body(tree, tuple(_text_branches(tree)), tuple(calls))
 
 

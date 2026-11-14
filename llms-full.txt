@@ -18,7 +18,7 @@ pip install "phonometry[full]"      # all of the above (recommended)
 pip install "phonometry[torch]"     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]
 ```
 
-I recommend `pip install "phonometry[full]"`, which enables every feature except the torch backend of the FDTD engines, which `[torch]` adds. The base install computes every metric on NumPy and SciPy alone; without the extras only the `.plot()` figures, the `.report()` PDF fiches (whose figure panel needs matplotlib as well as reportlab and svglib), the compressed audio formats and the torch backend of the FDTD engines are unavailable. The `impulse` time weighting still works without numba, on a pure-Python kernel that is only slower, and the FDTD engines run on NumPy either way, and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch out because the torch wheels PyPI serves on Linux bring gigabytes of CUDA libraries; on a Linux machine without an NVIDIA GPU, running `pip install torch --index-url https://download.pytorch.org/whl/cpu` before `pip install "phonometry[torch]"` takes the CPU wheels instead.
+I recommend `pip install "phonometry[full]"`, which enables every feature except the torch backend of the FDTD engines, which `[torch]` adds. On 32-bit Windows and 32-bit Linux, where numba, and so `[full]`, is not supported, `pip install "phonometry[plot,report,audio]"` installs the other three extras. The base install computes every metric on NumPy and SciPy alone; without the extras only the `.plot()` figures, the `.report()` PDF fiches (whose figure panel needs matplotlib as well as reportlab and svglib), the compressed audio formats and the torch backend of the FDTD engines are unavailable. The `impulse` time weighting still works without numba, on a pure-Python kernel that is only slower, and the FDTD engines run on NumPy either way, and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch out because the torch wheels PyPI serves on Linux bring gigabytes of CUDA libraries; on a Linux machine without an NVIDIA GPU, running `pip install torch --index-url https://download.pytorch.org/whl/cpu` before `pip install "phonometry[torch]"` takes the CPU wheels instead.
 
 One caveat about `[full]`: numba is the only extra that caps NumPy, and it raises that cap only once it supports a new NumPy minor, so in the weeks after a NumPy minor release `phonometry[full]` (like `phonometry[perf]`) can resolve one minor behind what a plain install gets. numba only makes the `impulse` time weighting faster, so install `phonometry[plot,report]` instead if you need the newest NumPy the day it ships.
 
@@ -36,7 +36,7 @@ la = signals.laeq(x, fs)                                 # A-weighted Leq
 stats = signals.ln_levels(x, fs, n=(10, 50, 90))         # statistical levels
 ```
 
-If you are an AI assistant setting this up for a user: install from PyPI (no system dependencies), remember integer audio (e.g. wavfile.read int16) is handled automatically, use `calibration_factor` from `sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over repeated `octave_filter()` calls in tight loops (although designs are cached either way). The library computes standardized quantities; it is not a certified instrument and does not acquire data from hardware.
+If you are an AI assistant setting this up for a user: install from PyPI (no system dependencies on Linux with glibc on x86-64 or ARM64, on macOS on ARM or on 64-bit Windows; Getting Started says what other platforms build from source), remember integer audio (e.g. wavfile.read int16) is handled automatically, use `calibration_factor` from `sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over repeated `octave_filter()` calls in tight loops (although designs are cached either way). The library computes standardized quantities; it is not a certified instrument and does not acquire data from hardware.
 
 ## Start here
 
@@ -29981,8 +29981,9 @@ level on each surface, take the extraneous sound off by the energy route where
 the sources can be switched, record the temperature on both sides, and measure
 the flow: the pressure loss and the flow velocities, whose actual distribution
 goes in the report where the velocities close to the entrance of the silencer
-deviate from the mean flow velocity by more than 10 % (9.2), a line for the
-report and not for the measurement. Where
+deviate from the mean flow velocity by more than 10 %, or where the flow
+velocity measurements of 8.3.3 show a comparably non-uniform distribution
+(9.2): two lines for the report and not for the measurement. Where
 the two temperatures differ, the field correction of Equations (20) and (22) is
 not zero, and both equations print the ratio of the absolute temperatures the
 wrong way up: the correction turns a squared pressure into a sound power, so the
@@ -54410,12 +54411,12 @@ documents, one page per module.
 | `installation_case` / `InstallationCase` / `INSTALLATION_CASES` | `function` / `dataclass` / `mapping` | **The twenty installations of Figure 1 as data, with the area rules clause 9 gives each.**<br>• `number` 1 to 20, `source_side` / `receiver_side`: 'duct', 'room' or 'outdoors'<br>• `quantity`: 'transmission' for 1 to 16, 'insertion' for 17 to 20<br>• `source_area_rule` / `receiver_area_rule`: the duct cross-section, a quarter of the room absorption, a hemisphere or the aperture in the wall | `noise_control.installation_case(7).receiver_area_rule` |
 | `transmission_level_difference` / `insertion_level_difference` / `silencer_mean_sound_pressure_level` | `function` | **The level differences ISO 11820 builds everything else from, Eqs. (1), (3) and (2).**<br>• `transmission_level_difference(source_levels, receiver_levels)`: across the silencer<br>• `insertion_level_difference(levels_without, levels_with)`: between the run without it and the run with it<br>• `silencer_mean_sound_pressure_level(levels)`: the energy mean over the measuring points | `noise_control.silencer_mean_sound_pressure_level([71.2, 73.4, 72.0])` |
 | `silencer_sound_power_level` / `reverberant_surface_area_m2` / `SABINE_AREA_COEFFICIENT` | `function` / `function` / `constant` | **From a mean level to a sound power, Eqs. (5), (7), (9) and (11), and the area a reverberant room stands in for, Eqs. (6), (10) and (12).**<br>• `L_W = L̄_p + 10 lg(S/S₀) + K`, with S₀ = 1 m² and S whichever area the case calls for<br>• `reverberant_surface_area_m2(volume_m3, reverberation_time_s, speed_of_sound=340.0)`: S = 6 ln10 V / (c T), a quarter of the Sabine absorption area<br>• `SABINE_AREA_COEFFICIENT` is that 6 ln10, the 13,8 the three equations share | `noise_control.reverberant_surface_area_m2(320.0, t20)` |
-| `extraneous_corrected_mean_level` / `ExtraneousCorrectionResult` / `silencer_background_correction` / `ISO11820_BACKGROUND_CORRECTIONS` / `MAX_EXTRANEOUS_CORRECTION` / `ISO11820_MIN_BACKGROUND_MARGIN_DB` / `ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` | `function` / `dataclass` / `function` / `mapping` / `constant` | **The two routes ISO 11820 offers around extraneous sound, 9.1.1 to 9.1.3.**<br>• `extraneous_corrected_mean_level(levels, extraneous_levels)`: the energy subtraction of Eqs. (17) and (18) as an `ExtraneousCorrectionResult` (`corrected_level`, `margin_db`), whose `capped` says whether it hit the 3 dB cap past which the quantity is not determined, judged on the margin of the two energy means as Table 1 draws it: a 3 dB margin, a 3,02 dB correction, is still determined<br>• `silencer_background_correction(level_difference)`: Table 1, in decibels to take off, stepped from 3 dB at a margin of 3 dB to 0,5 dB at 9 or 10<br>• a margin under 3 dB is refused; above 10 dB nothing is corrected, and 10 dB itself still takes off 0,5 dB | `noise_control.silencer_background_correction([4.0, 9.0])  # 2.0, 0.5` |
+| `extraneous_corrected_mean_level` / `ExtraneousCorrectionResult` / `silencer_background_correction` / `ISO11820_BACKGROUND_CORRECTIONS` / `MAX_EXTRANEOUS_CORRECTION` / `ISO11820_MIN_BACKGROUND_MARGIN_DB` / `ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` | `function` / `dataclass` / `function` / `mapping` / `constant` | **The two routes ISO 11820 offers around extraneous sound, 9.1.1 to 9.1.3.**<br>• `extraneous_corrected_mean_level(levels, extraneous_levels)`: the energy subtraction of Eqs. (17) and (18) as an `ExtraneousCorrectionResult` (`corrected_level`, `margin_db`), whose `capped` says whether it went past the 3 dB cap, past which the quantity is not determined, judged on the margin of the two energy means as Table 1 draws it: a margin more than 10⁻⁹ dB under 3 dB is capped, while a 3 dB margin, a 3,02 dB correction, is still determined<br>• `silencer_background_correction(level_difference)`: Table 1, in decibels to take off, stepped from 3 dB at a margin of 3 dB to 0,5 dB at 9 or 10<br>• a margin under 3 dB is refused; above 10 dB nothing is corrected, and 10 dB itself still takes off 0,5 dB | `noise_control.silencer_background_correction([4.0, 9.0])  # 2.0, 0.5` |
 | `temperature_field_correction` / `TYPICAL_FIELD_CORRECTION_LIMIT_DB` / `ISO11820_SPEED_OF_SOUND_M_S` | `function` / `constant` | **What a difference of temperature does to the field correction, Eqs. (20) and (22).**<br>• `K₂ − K₁ = 5 lg[(273 + θ₁)/(273 + θ₂)]`, the standard's own 273 rather than 273,15<br>• the same expression serves the insertion measurement, with the with-silencer run as the receiver side<br>• NOTE 4 expects K to stay under 3 dB in absolute value once the areas are the ones 3.3 and 3.4 define | `noise_control.temperature_field_correction(receiver_temperature_c=20.0, source_temperature_c=120.0)` |
 | `octave_levels_from_third_octave` / `ISO11820_OCTAVE_BAND_RANGE_HZ` / `ISO11820_OCTAVE_BAND_EXTENDED_RANGE_HZ` / `ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ` / `ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ` | `function` / `constant` | **The bands ISO 11820 measures in, 9.1.5 and 8.1.**<br>• `octave_levels_from_third_octave(levels)`: threes folded into octaves, the route the clause allows when the narrower bands were measured<br>• 63 Hz to 4 kHz in octaves, 50 Hz to 5 kHz in one-third octaves, with the extended ranges the clause names for a silencer that works outside them | `noise_control.octave_levels_from_third_octave(third_octave_levels)` |
-| `total_pressure_loss_pa` / `static_pressure_difference_pa` / `velocity_pressure_pa` / `flow_velocity_m_s` / `gas_density_kg_m3` / `silencer_flow_velocity_m_s` / `ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K` / `ISO11820_AIR_GAS_CONSTANT_J_KG_K` / `ISO11820_ATMOSPHERIC_PRESSURE_PA` / `VELOCITY_UNIFORMITY_TOLERANCE_PERCENT` | `function` / `constant` | **The flow side of the measurement, Eqs. (13) to (16) and (27) to (31).**<br>• pressure loss Δp_T, the static difference Δp_S behind a change of area, the velocity pressure and the velocity it stands for<br>• `gas_density_kg_m3(temperature_c=, molar_mass_kg_kmol=None)`: ρ = M p_amb / [R (273 + θ)], with R/M = 287 N m per kg K for air<br>• `silencer_flow_velocity_m_s`: the upstream mean velocity scaled by S_u/S_f, which is the velocity the regenerated noise answers to<br>• 9.2 asks for the actual velocity distribution in the report where the velocities near the entrance deviate from the mean by more than 10 % (`VELOCITY_UNIFORMITY_TOLERANCE_PERCENT`) | `noise_control.gas_density_kg_m3(temperature_c=120.0)` |
+| `total_pressure_loss_pa` / `static_pressure_difference_pa` / `velocity_pressure_pa` / `flow_velocity_m_s` / `gas_density_kg_m3` / `silencer_flow_velocity_m_s` / `ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K` / `ISO11820_AIR_GAS_CONSTANT_J_KG_K` / `ISO11820_ATMOSPHERIC_PRESSURE_PA` / `VELOCITY_UNIFORMITY_TOLERANCE_PERCENT` | `function` / `constant` | **The flow side of the measurement, Eqs. (13) to (16) and (27) to (31).**<br>• pressure loss Δp_T, the static difference Δp_S behind a change of area, the velocity pressure and the velocity it stands for<br>• `gas_density_kg_m3(temperature_c=, molar_mass_kg_kmol=None)`: ρ = M p_amb / [R (273 + θ)], with R/M = 287 N m per kg K for air<br>• `silencer_flow_velocity_m_s`: the upstream mean velocity scaled by S_u/S_f, which is the velocity the regenerated noise answers to<br>• 9.2 asks for the actual velocity distribution in the report where the velocities near the entrance deviate from the mean by more than 10 % (`VELOCITY_UNIFORMITY_TOLERANCE_PERCENT`), or where the flow velocity measurements of 8.3.3 show a comparably non-uniform distribution | `noise_control.gas_density_kg_m3(temperature_c=120.0)` |
 | `measurement_distance_upstream_m` / `measurement_distance_downstream_m` / `UPSTREAM_DISTANCE_DIAMETERS` / `DOWNSTREAM_DISTANCE_COEFFICIENTS` | `function` / `constant` | **Where the measurement surfaces stand along the duct, Eqs. (15) and (16).**<br>• upstream: one and a half equivalent diameters of the measurement cross-section<br>• downstream: 12 √S_d − 10 √S_f, which can fall to zero for a silencer whose free area is most of the duct, and 8.3.1 then sends the parties to agree<br>• S_f is the free cross-section, which NOTE 18 warns is not the intake one | `noise_control.measurement_distance_downstream_m(0.9, 0.45)` |
-| `SilencerInSituWarning` | `warning class` | **The measurement is outside a condition ISO 11820 states.**<br>• a downstream distance Equation (16) cannot give, which 8.3.1 leaves to agreement between the parties<br>• a field correction over the 3 dB in absolute value NOTE 4 expects<br>• an extraneous-sound correction at the 3 dB cap of 9.1.1 and 9.1.2, where clause 4 leaves only an inequality to state | `warnings.catch_warnings()`<br>Emitted by `noise_control.silencer_in_situ` |
+| `SilencerInSituWarning` | `warning class` | **The measurement is outside a condition ISO 11820 states.**<br>• a downstream distance Equation (16) cannot give, which 8.3.1 leaves to agreement between the parties<br>• a field correction over the 3 dB in absolute value NOTE 4 expects<br>• an extraneous-sound correction past the 3 dB cap of 9.1.1 and 9.1.2, where clause 4 leaves only an inequality to state: a margin of the two energy means more than 10⁻⁹ dB under 3 dB (`ExtraneousCorrectionResult.capped`); a 3 dB margin, which takes off 3,02 dB, emits nothing | `warnings.catch_warnings()`<br>Emitted by `noise_control.silencer_in_situ` |
 | `screen_attenuation` / `ScreenInSituResult` | `function` / `dataclass` | **What a removable screen is worth where it stands, ISO 11821 clauses 5.8 and 5.9.**<br>• `unscreened_levels`, `screened_levels` [dB], `frequencies` [Hz], `distance`<br>• `source_kind`: 'actual' (Default) or 'artificial'<br>• `a_weighted_unscreened_level` / `a_weighted_screened_level`: the pair of 5.9, refused with an artificial source because the spectrum would be the loudspeaker's<br>• result: `attenuation`, `a_weighted_attenuation`, `.plot()`<br>• `.rounded` and `.rounded_a_weighted` (read-only): the whole decibels 7.4 c) reports, an exact half to the even one | `noise_control.screen_attenuation(without, with_screen, frequencies=f)` |
 | `screen_background_corrected_level` / `BACKGROUND_CORRECTION_WINDOW_DB` / `ISO11821_MIN_BACKGROUND_MARGIN_DB` / `ISO11821_PREFERRED_BACKGROUND_MARGIN_DB` | `function` / `constant` | **The background correction ISO 11821 boxes, clause 5.7.**<br>• `L_p = 10 lg(10^(L_ps/10) − 10^(L_pb/10))`, the plain energy subtraction, band by band and position by position<br>• over 10 dB of margin nothing is corrected; under 6 dB the conditions are "not acceptable", which is a refusal, because the background it names includes wind noise<br>• where ISO 11820 corrects from a stepped table, this standard prints the formula | `noise_control.screen_background_corrected_level(levels, background)` |
 | `screen_source_directivity_index` / `DIRECTIVITY_POSITIONS` / `DIRECTIVITY_INDEX_LIMIT_DB` / `DIRECTIVITY_CIRCLE_RADIUS_M` | `function` / `constant` | **Is this loudspeaker omnidirectional enough? ISO 11821 definition 3.10 and 5.2.2.**<br>• twelve positions evenly spaced on a horizontal circle of about 1,5 m radius<br>• `DI_i = L₃₆₀ − L₃₀,i`, the logarithmic mean less the position, so the index is positive where the position is quieter than the mean<br>• the source qualifies while no position falls more than 8 dB below the mean | `noise_control.screen_source_directivity_index(levels_at_twelve)` |
@@ -75237,6 +75238,9 @@ only. `conda list` then shows phonometry with the channel `pypi` beside the
 conda-forge packages, and `python -m pip check` reports nothing broken. mamba
 takes the same arguments: `mamba create -n acoustics -c conda-forge ...`
 builds the same environment. Python 3.12, 3.13 and 3.14 all work.
+conda-forge publishes no Python 3.12 or newer for 32-bit Windows or 32-bit
+Linux, so phonometry installs there with pip alone, `[plot,report,audio]` in
+place of `[full]`, as [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/) says.
 
 ## The extras under their conda-forge names
 
@@ -75287,12 +75291,35 @@ Source: https://docs.jmrp.io/phonometry/start/environments/docker/
 # Docker and servers
 
 phonometry needs nothing from the operating system beyond Python on a
-`python:*-slim` image: every extra installs from wheels there, libsndfile
-inside the soundfile wheel included. The one system package worth adding is
-ffmpeg, and only for videos. An Alpine image, built on musl, needs more, since
-python-soundfile has no wheel there that carries libsndfile and numba none at
-all; [Getting Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation)
-says what each extra takes there.
+`python:*-slim` image for x86-64 or ARM64 (`linux/amd64`, `linux/arm64`):
+every extra installs from wheels there, libsndfile inside the soundfile wheel
+included. The one system package worth adding is ffmpeg, and only for videos.
+The same tag publishes six more architectures, and Docker pulls the one of
+the host: 32-bit ARM (`linux/arm/v5`, `linux/arm/v7`), 32-bit x86
+(`linux/386`), `linux/ppc64le`, `linux/riscv64` and `linux/s390x`. numba no
+longer supports 32-bit Linux, where its last wheels, of 0.56.4, are for Python
+3.10 at most, so neither `[perf]` nor `[full]`, which holds it, is supported
+on the three 32-bit ones, where
+`python -m pip install "phonometry[plot,report,audio]"` installs the other
+three extras. torch publishes no wheel for any of the six and no source to
+build, so `[torch]` does not install on them from PyPI. PyPI has no Python
+3.13 wheel for any of the six of NumPy, SciPy, matplotlib or Pillow, nor of
+numba and the llvmlite it needs on `linux/ppc64le`, `linux/riscv64` and
+`linux/s390x`, which numba supports on a best-effort basis only, nor for some
+of them of contourpy, kiwisolver, cffi or lxml, so pip builds those from
+source there, NumPy and SciPy even for a plain install. That takes what the
+slim image leaves out: a C and a C++ compiler and the development files of the
+libraries each one links, a Fortran compiler with BLAS and LAPACK for SciPy,
+and for llvmlite LLVM 22 with `cmake` and `make` on `PATH`. python-soundfile
+installs its pure-Python wheel there, which loads the system's libsndfile:
+`apt-get install libsndfile1`. On `linux/arm/v5`, whose soft-float ABI no
+manylinux wheel targets, the builds of NumPy, SciPy and matplotlib also ask
+for ninja and patchelf, and pip would build those from source too, which runs
+`make` and autoreconf, unless `apt-get install ninja-build patchelf` has put
+the image's own on `PATH`. An Alpine image, built on musl, needs more,
+since python-soundfile has no wheel there that carries libsndfile and numba
+none at all; [Getting
+Started](https://docs.jmrp.io/phonometry/start/getting-started/#installation) says what each extra takes there.
 
 ## An image
 
@@ -75435,11 +75462,11 @@ each, with commands that were run there.
 
 | Where | How phonometry arrives | What runs | What does not |
 |---|---|---|---|
-| [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | nothing is left out |
+| [pip and uv](https://docs.jmrp.io/phonometry/start/environments/pip-and-uv/) | `python -m pip install "phonometry[full]"` in a virtual environment, or `uv add "phonometry[full]"` | everything; `[torch]` adds the FDTD engines on PyTorch | `[perf]` and `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` installs the other three extras |
 | [conda and mamba](https://docs.jmrp.io/phonometry/start/environments/conda/) | the dependencies from conda-forge, then `python -m pip install "phonometry[full]"` | everything, pytorch from conda-forge included | nothing is left out |
-| [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error` |
+| [Jupyter and JupyterLab](https://docs.jmrp.io/phonometry/start/environments/jupyter/) | `python -m pip install jupyterlab "phonometry[full]"` | record tables, inline figures, fiches, videos once ffmpeg is installed | a kernel started with `PYTHONWARNINGS=error`; `[full]` on 32-bit Windows and 32-bit Linux, where `[plot,report,audio]` takes its place |
 | [JupyterLite and Pyodide](https://docs.jmrp.io/phonometry/start/environments/jupyterlite/) | `%pip install "phonometry[plot,report,audio]"` in the first cell | metrics, record tables, figures, fiches, WAV and FLAC, FDTD on NumPy | `[perf]`, `[torch]` and `[full]`, video, every compute device but `"cpu"` |
-| [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp` | nothing is left out |
+| [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) | a virtual environment inside a `python:3.13-slim` image | everything, under any user id and on a read-only root with a writable `/tmp`, from wheels on x86-64 and ARM64 | the wheels on the image's six other architectures, where pip builds NumPy, SciPy and most extras from source; `[perf]` and `[full]` on its three 32-bit ones, where `[plot,report,audio]` installs the other three extras; `[torch]` on all six |
 | [Type checking](https://docs.jmrp.io/phonometry/start/environments/type-checking/) | nothing to add: the wheel ships `py.typed` | `mypy --strict` and pyright's strict mode, on every NumPy the library accepts | the FDTD field arrays and the keyword arguments `.plot()` hands to matplotlib, typed `Any` |
 
 ## Warnings as errors
@@ -75523,6 +75550,27 @@ cmd needs no such step.
 
 That one environment holds JupyterLab, the IPython kernel it starts and
 phonometry with every extra but `[torch]`.
+
+On 32-bit Windows and 32-bit Linux numba is not supported, and neither is
+`[full]`, which holds it:
+`python -m pip install jupyterlab "phonometry[plot,report,audio]"` installs
+JupyterLab with the other three extras. PyPI has no 32-bit Windows wheel of
+SciPy, matplotlib or kiwisolver, nor of psutil and pywinpty, which JupyterLab
+needs there, nor of PyYAML on Python 3.14, so pip builds those from source
+there, which takes a C and a C++ compiler, a Fortran compiler with BLAS and
+LAPACK for SciPy, and for pywinpty Rust and the NuGet command-line tool,
+`nuget.exe`, on `PATH`. On 32-bit Linux, measured on the
+32-bit images of `python:3.13-slim`, PyPI has no wheel of NumPy, SciPy,
+matplotlib, Pillow, contourpy, kiwisolver, psutil, PyYAML, tornado or
+argon2-cffi-bindings, nor of cffi and pyzmq on ARM, of MarkupSafe on
+`linux/386` and `linux/arm/v5`, or of lxml and rpds-py on `linux/arm/v5`, so
+pip builds those there, with the same compilers, the development files of the
+libraries they link and Rust for rpds-py. On `linux/arm/v5`, whose soft-float
+ABI no manylinux wheel targets, the builds of NumPy, SciPy, matplotlib and
+pyzmq also ask for ninja, patchelf and cmake, and pip would build those from
+source too, which runs `make` and autoreconf, unless
+`apt-get install ninja-build patchelf cmake` has put the image's own on
+`PATH`.
 
 ## A result shows a table
 
@@ -75826,11 +75874,17 @@ print(phonometry.__version__)   # the release you installed
 | `[full]` | all four above | every feature but the torch backend |
 | `[torch]` | torch, array-api-compat | the FDTD engines step on PyTorch |
 
-On a bare `python:3.13-slim` image no extra needs a system package: every one
-of them installs and runs from its wheels there, `[audio]` included. Without
-numba the `impulse` time weighting runs as plain Python and says nothing about
-it. A feature whose extra is missing says which one to install, with its pip
-and its conda spelling:
+On a bare `python:3.13-slim` image for x86-64 or ARM64 no extra needs a
+system package: every one of them installs and runs from its wheels there,
+`[audio]` included. The image's six other architectures have no wheel of
+NumPy, SciPy, matplotlib or Pillow, so pip builds them from source there, and
+`[audio]` loads the system's libsndfile. numba supports none of its three
+32-bit ones, so `[perf]` and `[full]` are not supported there, and torch
+publishes no wheel for any of the six and no source, so `[torch]` does not
+install there from PyPI; [Docker and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) says what the rest
+takes. Without numba the `impulse` time weighting runs as plain Python and
+says nothing about it. A feature whose extra is missing says which one to
+install, with its pip and its conda spelling:
 
 ```text
 ImportError: Plotting requires matplotlib. Install it with: pip install "phonometry[plot]" (conda: conda install -c conda-forge matplotlib-base)
@@ -75842,14 +75896,14 @@ Windows on ARM, on Linux with musl, on macOS on Intel and on 32-bit Windows,
 some of those releases have no wheel, and pip builds them from source there,
 as even a plain install does with SciPy on 32-bit Windows, and as `[plot]`
 does with matplotlib on Linux on ARM with musl and on 32-bit Windows; that
-section names which. numba no longer supports 32-bit Windows, so neither
-`[perf]` nor `[full]`, which holds it, is supported there, where
-`python -m pip install "phonometry[plot,report,audio]"` installs the other
-three extras. torch publishes no source to build, so it installs on none of
-the four from PyPI, and on Windows on ARM from PyTorch's CPU index, as the
-next section does. python-soundfile publishes no wheel that carries libsndfile
-for Linux with musl, nor at its floor for Linux on ARM or Windows on ARM, so
-`[audio]` loads the system's libsndfile there: on Alpine,
+section names which. numba no longer supports 32-bit Windows, nor 32-bit
+Linux, so neither `[perf]` nor `[full]`, which holds it, is supported on
+either, where `python -m pip install "phonometry[plot,report,audio]"` installs
+the other three extras. torch publishes no source to build, so it installs on
+none of the four from PyPI, and on Windows on ARM from PyTorch's CPU index, as
+the next section does. python-soundfile publishes no wheel that carries
+libsndfile for Linux with musl, nor at its floor for Linux on ARM or Windows
+on ARM, so `[audio]` loads the system's libsndfile there: on Alpine,
 `apk add libsndfile-dev`.
 
 ## torch without CUDA
@@ -75912,6 +75966,11 @@ uv run python -c "import phonometry; print(phonometry.__version__)"
 ```
 
 `uv add` resolves the same way in a project for Python 3.12, 3.13 or 3.14.
+On 32-bit Windows and 32-bit Linux, where `[full]` is not supported, name
+`[plot,report,audio]` in its place, with `uv pip install` as with `uv add`; uv
+builds from source there what pip does, SciPy, matplotlib and kiwisolver on
+32-bit Windows, and on 32-bit Linux the packages [Docker and
+servers](https://docs.jmrp.io/phonometry/start/environments/docker/) names.
 
 ### torch from the CPU index in a project
 
@@ -76097,6 +76156,9 @@ Windows at 0.58.0, below the floor of `[perf]`, and its last wheels there,
 numba 0.57.1 and llvmlite 0.41.1, are for Python 3.10 at most, so `[perf]` is
 not supported there, nor `[full]`, which holds it;
 `pip install "phonometry[plot,report,audio]"` installs the other three extras
+there. The same holds on 32-bit Linux, where numba's last wheels, of 0.56.4,
+are for Python 3.10 at most and numba supports the platform no longer; [Docker
+and servers](https://docs.jmrp.io/phonometry/start/environments/docker/) says what the other three build
 there. A plain install takes the newest releases, which have wheels on the
 other three platforms but numba's on musl and on macOS on Intel, where a plain
 `[perf]` install builds numba and llvmlite on every Python, and matplotlib's
@@ -76128,7 +76190,11 @@ pip install "phonometry[torch]"   # torch + array-api-compat, so the FDTD engine
 
 I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
+enabled except the torch backend of the FDTD engines, which `[torch]` adds. On
+32-bit Windows and 32-bit Linux, which `[full]` does not support,
+`pip install "phonometry[plot,report,audio]"` brings the other three, as
+above, and builds from source SciPy, matplotlib and kiwisolver on Windows, and
+NumPy, SciPy, matplotlib and Pillow among others on Linux. The
 base install computes every metric on NumPy and SciPy alone, and that includes
 reading every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64)
 through `phonometry.io`; the only things it leaves unavailable are the figures

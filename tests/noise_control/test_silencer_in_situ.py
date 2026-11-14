@@ -822,7 +822,7 @@ def test_no_printed_three_decibel_margin_trips_the_cap() -> None:
             assert capped is False
 
 
-def test_the_margin_window_is_the_declared_thousandth_of_a_nanodecibel() -> None:
+def test_the_margin_window_is_the_declared_nanodecibel() -> None:
     """A margin two nanodecibels short of 3 dB is short of it, not equal to it.
 
     The window that keeps a printed 3,0 dB margin out of the cap is the
@@ -841,6 +841,26 @@ def test_the_margin_window_is_the_declared_thousandth_of_a_nanodecibel() -> None
                 [CARRIER_DB], [CARRIER_DB - (3.0 - deficit)]
             ).capped
         assert capped is expected
+
+
+@pytest.mark.parametrize("deficit", [2e-9, 1e-4, 0.004, 0.1])
+def test_the_advisory_prints_a_capped_margin_under_three_decibels(
+    deficit: float,
+) -> None:
+    """The margin the advisory prints is the one that tripped it, under 3 dB.
+
+    A margin of 3 dB still determines the level, so a capped margin printed
+    as 3.00 dB would contradict the cap it reports; the advisory writes as
+    many decimals as it takes to show the margin under 3 dB.
+    """
+    with pytest.warns(SilencerInSituWarning, match=_CAPPED) as caught:
+        margin = noise_control.extraneous_corrected_mean_level(
+            [CARRIER_DB], [CARRIER_DB - (3.0 - deficit)]
+        ).margin_db
+    (advisory,) = (str(record.message) for record in caught)
+    printed = advisory.split(" stands ", 1)[1].split(" dB over", 1)[0]
+    assert float(printed) < 3.0
+    assert math.isclose(float(printed), margin, rel_tol=0.0, abs_tol=0.005)
 
 
 def test_two_worked_background_subtractions() -> None:

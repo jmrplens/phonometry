@@ -8,7 +8,7 @@ references:
     title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
     designation: "IEC 61260-1:2014"
     url: "https://webstore.iec.ch/en/publication/5063"
-    note: "The band-edge mathematics of section 1 (base-10 mid frequencies and band edges, clauses 5.2-5.5) and the nominal band labels behind every bank designed here."
+    note: "The band-edge mathematics of section 1 (base-10 mid frequencies and band edges, clauses 5.2-5.6) and the nominal band labels behind every bank designed here."
   - type: standard
     organization: "American National Standards Institute"
     year: 2004
@@ -23,7 +23,7 @@ references:
     title: "Acoustics — Preferred frequencies"
     designation: "ISO 266:1997"
     url: "https://www.iso.org/standard/1350.html"
-    note: "The preferred-frequency series behind the nominal band labels reported by nominal_frequencies."
+    note: "The preferred-frequency series behind the octave and one-third-octave band labels reported by nominal_frequencies."
   - type: book
     authors: ["Oppenheim, A. V.", "Schafer, R. W."]
     year: 2010
@@ -84,7 +84,7 @@ and draws the spectrum the result holds.
 
 IEC 61260-1:2014 builds every band from the base-10 octave ratio
 $G = 10^{3/10} \approx 1.99526$ (so "one octave" is *not* exactly 2). For
-band fraction $1/b$, the mid frequencies and band edges follow (5.2-5.5):
+band fraction $1/b$, the mid frequencies and band edges follow (5.2-5.6):
 
 $$
 f_\mathrm{m} = 1000 \cdot G^{x/b}\ (b\ \text{odd}), \qquad
@@ -99,14 +99,24 @@ edges, but where the −3 dB point ends up depends on what the architecture mean
 by its design frequency, and only three of the five put it on $f_1$ and $f_2$.
 
 The two forms exist so that the reference frequency 1000 Hz is a band **mid**
-frequency when $b$ is odd and a band **edge** when $b$ is even. That is what
-keeps the odd fractions nested: each octave band is exactly three
-one-third-octave bands, while the even fractions split at the octave
-boundaries; the edge formulas are the same in both cases. The practical
-consequence is easy to trip over: a `fraction=2`, `12` or `24` spectrum has no
-1 kHz band at all, its nominal labels come from the Annex E.3 significant-figure
-rounding rather than from the ISO 266 preferred series, and comparing it band by
-band against a one-third-octave table is meaningless.
+frequency when $b$ is odd and a band **edge** when $b$ is even (5.4, NOTE 2).
+Either way the edges of the octave bands are edges of every fraction, so an
+octave band is exactly two half-octave bands or three one-third-octave bands;
+the edge formulas are the same in both cases.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fractional_octave_band_ruler.svg" alt="Three octaves about 1 kHz, from 354.8 Hz to 2818.4 Hz on a logarithmic frequency axis, cut into four rows of bands, each band carrying its exact mid-band frequency and, in bold, its label. Octave, b = 1: three bands centred on 501.2, 1000.0 and 1995.3 Hz, labelled 500, 1k and 2k. Half octave, b = 2: six bands, the two that meet at 1 kHz centred on 841.4 and 1188.5 Hz and labelled 841 and 1.19k. One-third octave, b = 3: nine bands from 398.1 to 2511.9 Hz, the middle one centred on 1000.0 Hz and the next one, 1258.9 Hz, labelled 1.25k. One-sixth octave, b = 6: eighteen bands, the two that meet at 1 kHz centred on 944.1 and 1059.3 Hz and labelled 940 and 1.06k. A dashed line marks the reference frequency of 1 kHz: it meets a mid-band frequency in the two rows of odd b and runs along a band edge in the two rows of even b, where no band is centred on it" width="100%" />
+
+The practical consequence is easy to trip over: a spectrum of an even fraction
+(`fraction=2`, `6`, `12` or `24`) has no 1 kHz band at all, and comparing it
+band by band against a one-third-octave table is meaningless. Its labels are
+not preferred frequencies either. Only the octave and one-third-octave labels
+are the nominal frequencies of Table E.1, which are the ISO 266 series. A
+half-octave label is the exact centre rounded to three significant digits
+(Annex E.2), and from 1/4 to 1/24 octave the label keeps three digits when the
+leading digit is 1 to 4 and two when it is 5 to 9 (Annex E.3), which is how the
+band centred on 1059.3 Hz comes to be labelled `1.06k`. Finer than 1/24 octave,
+E.3.5 adds significant digits until no label repeats within a decade: one more
+at 1/48 octave.
 
 ### Where each architecture's −3 dB point actually lands
 
@@ -704,8 +714,9 @@ to 3.3 changed after PyOctaveBand 2.0.0.
 
 <Scope>
 <ScopeClaim status="covered" label="Covered">
-IEC 61260-1:2014's band-edge mathematics (clauses 5.2-5.5) and the ISO
-266:1997 preferred-frequency series behind `nominal_frequencies`. The library
+IEC 61260-1:2014's band-edge mathematics (clauses 5.2-5.6), its nominal band
+labels (Annex E) and the ISO 266:1997 preferred-frequency series behind the
+octave and one-third-octave labels of `nominal_frequencies`. The library
 designs each band as an SOS cascade across five architectures (Butterworth,
 Chebyshev I/II, Elliptic, Bessel), plus the RBJ Audio EQ Cookbook's
 `ParametricEQ`, with band decomposition and zero-phase filtering.
@@ -744,7 +755,7 @@ edge comfortably below Nyquist or raise `fs`, and confirm the margin with
 
 ### How are fractional-octave centre frequencies and band edges defined?
 
-IEC 61260-1:2014 (clauses 5.2-5.5) builds every band from the base-10
+IEC 61260-1:2014 (clauses 5.2-5.6) builds every band from the base-10
 octave ratio $G = 10^{3/10} \approx 1.99526$, so one octave is not exactly
 2. Mid frequencies follow $f_\mathrm{m} = 1000 \cdot G^{x/b}$ for odd $b$ and
 $f_\mathrm{m} = 1000 \cdot G^{(2x+1)/2b}$ for even $b$ (so 1 kHz is a band mid

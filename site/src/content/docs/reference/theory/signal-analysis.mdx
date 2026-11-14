@@ -113,13 +113,40 @@ $$
 f_1 = f_\mathrm{m} \cdot G^{-1/(2b)}, \quad f_2 = f_\mathrm{m} \cdot G^{1/(2b)}
 $$
 
-**Exact centre against printed label.** The $f_\mathrm{m}$ above is the exact midband
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fractional_octave_band_ruler.svg" alt="Three octaves about 1 kHz, from 354.8 Hz to 2818.4 Hz on a logarithmic frequency axis, cut into four rows of bands, each band carrying its exact mid-band frequency and, in bold, its label. Octave, b = 1: three bands centred on 501.2, 1000.0 and 1995.3 Hz, labelled 500, 1k and 2k. Half octave, b = 2: six bands, the two that meet at 1 kHz centred on 841.4 and 1188.5 Hz and labelled 841 and 1.19k. One-third octave, b = 3: nine bands from 398.1 to 2511.9 Hz, the middle one centred on 1000.0 Hz and the next one, 1258.9 Hz, labelled 1.25k. One-sixth octave, b = 6: eighteen bands, the two that meet at 1 kHz centred on 944.1 and 1059.3 Hz and labelled 940 and 1.06k. A dashed line marks the reference frequency of 1 kHz: it meets a mid-band frequency in the two rows of odd b and runs along a band edge in the two rows of even b, where no band is centred on it" width="100%" />
+
+The ruler draws the three octaves about 1 kHz as `nominal_frequencies` returns
+them for `fraction=1`, `2`, `3` and `6`, each band from $f_1$ to $f_2$. Every
+row shares the edges of the octave bands, so an octave band is exactly two
+half-octave, three one-third-octave or six one-sixth-octave bands. The rows
+differ at the reference: the odd ones have a band centred on it, the even ones
+a band edge.
+
+**Exact centre against printed label.** The $f_\mathrm{m}$ above is the exact mid-band
 frequency; what an instrument prints (and what `nominal_frequencies` returns as
-its `labels`, or `octave_filter(..., nominal=True)`) is the ISO 266 preferred
-number nearest to it. The one-third-octave band whose exact centre is 1258.9 Hz
-is labelled 1250 Hz, and the sixth-octave band centred on 1059.3 Hz is labelled
-1.06k. Compare band levels between tools by index or by exact centre, never by
-matching label strings: different tools round the labels differently.
+its `labels`, or `octave_filter(..., nominal=True)`) is the *nominal* mid-band
+frequency of IEC 61260-1:2014 (5.5 and Annex E), and how it is rounded depends
+on the fraction:
+
+- **Octave and one-third octave.** The nominal frequencies of Table E.1, which
+  are the preferred frequencies of ISO 266: the one-third-octave band whose
+  exact centre is 1258.9 Hz is labelled 1250 Hz (`1.25k`).
+- **Half octave.** The exact centre rounded to its first three significant
+  digits (E.2): 841.4 Hz is labelled `841`.
+- **From 1/4 to 1/24 octave.** Three significant digits when the leading digit
+  of the exact centre is 1 to 4, and two when it is 5 to 9 (E.3.2 and E.3.3):
+  the sixth-octave bands centred on 944.1 Hz and 1059.3 Hz are labelled `940`
+  and `1.06k`.
+- **Finer than 1/24 octave.** E.3.5 asks for more significant digits until no
+  two labels in a decade are the same, and `nominal_frequencies` adds the
+  fewest that do it to both counts of E.3: none up to 1/36 octave, one at 1/48,
+  where the band centred on 497.6 Hz is labelled `497.6` and the next one, at
+  504.8 Hz, `505`.
+
+ISO 266 lists preferred frequencies for the octave and the one-third octave
+only, so the label of any other fraction is not a preferred number. Compare
+band levels between tools by index or by exact centre, never by matching label
+strings: different tools round the labels differently.
 
 ## Frequency Resolution vs FFT Bin Spacing
 

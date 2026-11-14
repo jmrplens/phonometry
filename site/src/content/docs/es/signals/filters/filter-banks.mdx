@@ -8,7 +8,7 @@ references:
     title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
     designation: "IEC 61260-1:2014"
     url: "https://webstore.iec.ch/en/publication/5063"
-    note: "Las matemáticas de bordes de banda de la sección 1 (frecuencias centrales y bordes de banda en base 10, apartados 5.2-5.5) y las etiquetas nominales de banda de todos los bancos que se diseñan aquí."
+    note: "Las matemáticas de bordes de banda de la sección 1 (frecuencias centrales y bordes de banda en base 10, apartados 5.2-5.6) y las etiquetas nominales de banda de todos los bancos que se diseñan aquí."
   - type: standard
     organization: "American National Standards Institute"
     year: 2004
@@ -23,7 +23,7 @@ references:
     title: "Acoustics — Preferred frequencies"
     designation: "ISO 266:1997"
     url: "https://www.iso.org/standard/1350.html"
-    note: "La serie de frecuencias preferentes en la que se basan las etiquetas nominales de banda que devuelve nominal_frequencies."
+    note: "La serie de frecuencias preferentes en la que se basan las etiquetas de banda de octava y de tercio de octava que devuelve nominal_frequencies."
   - type: book
     authors: ["Oppenheim, A. V.", "Schafer, R. W."]
     year: 2010
@@ -87,7 +87,7 @@ con ruido y dibuja el espectro que guarda el resultado.
 IEC 61260-1:2014 construye cada banda a partir de la razón de octava en base 10
 $G = 10^{3/10} \approx 1{,}99526$ (es decir, «una octava» *no* es exactamente 2).
 Para la fracción de banda $1/b$, las frecuencias centrales y los bordes de
-banda siguen (5.2-5.5):
+banda siguen (5.2-5.6):
 
 $$
 f_\mathrm{m} = 1000 \cdot G^{x/b}\ (b\ \text{impar}), \qquad
@@ -104,14 +104,26 @@ frecuencia de diseño, y solo tres de las cinco lo ponen en $f_1$ y $f_2$.
 
 Las dos formas existen para que la frecuencia de referencia de 1000 Hz sea una
 frecuencia **central** de banda cuando $b$ es impar y un **borde** de banda
-cuando $b$ es par. Eso es lo que mantiene anidadas las fracciones impares (cada
-banda de octava son exactamente tres bandas de tercio de octava) mientras que
-las pares parten justo en las fronteras de octava; las fórmulas de los bordes
-son las mismas en ambos casos. La consecuencia práctica es fácil de pisar: un
-espectro con `fraction=2`, `12` o `24` no tiene banda de 1 kHz en absoluto, sus
-etiquetas nominales salen del redondeo a cifras significativas del Anexo E.3 y
-no de la serie preferente de ISO 266, y compararlo banda a banda con una tabla
-de tercios de octava no significa nada.
+cuando $b$ es par (5.4, NOTA 2). En los dos casos los bordes de las bandas de
+octava son bordes de todas las fracciones, así que una banda de octava son
+exactamente dos bandas de media octava o tres de tercio de octava; las fórmulas
+de los bordes son las mismas en ambos casos.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fractional_octave_band_ruler.svg" alt="Tres octavas en torno a 1 kHz, de 354,8 Hz a 2818,4 Hz sobre un eje de frecuencia logarítmico, cortadas en cuatro filas de bandas, cada banda con su frecuencia central exacta y, en negrita, su etiqueta. Octava, b = 1: tres bandas centradas en 501,2, 1000,0 y 1995,3 Hz, etiquetadas 500, 1k y 2k. Media octava, b = 2: seis bandas; las dos que se tocan en 1 kHz están centradas en 841,4 y 1188,5 Hz y etiquetadas 841 y 1,19k. Tercio de octava, b = 3: nueve bandas de 398,1 a 2511,9 Hz; la del medio está centrada en 1000,0 Hz y la siguiente, la de 1258,9 Hz, se etiqueta 1,25k. Sexto de octava, b = 6: dieciocho bandas; las dos que se tocan en 1 kHz están centradas en 944,1 y 1059,3 Hz y etiquetadas 940 y 1,06k. Una línea discontinua marca la frecuencia de referencia de 1 kHz: coincide con una frecuencia central en las dos filas de b impar y recorre un borde de banda en las dos filas de b par, donde ninguna banda está centrada en ella" width="100%" />
+
+La consecuencia práctica es fácil de pisar: un espectro de fracción par
+(`fraction=2`, `6`, `12` o `24`) no tiene banda de 1 kHz en absoluto, y
+compararlo banda a banda con una tabla de tercios de octava no significa nada.
+Sus etiquetas tampoco son frecuencias preferentes. Solo las etiquetas de octava
+y de tercio de octava son las frecuencias nominales de la Tabla E.1, que son la
+serie de ISO 266. Una etiqueta de media octava es el centro exacto redondeado a
+tres cifras significativas (Anexo E.2), y de 1/4 a 1/24 de octava la etiqueta
+conserva tres cifras cuando la primera va de 1 a 4 y dos cuando va de 5 a 9
+(Anexo E.3), y así la banda centrada en 1059,3 Hz acaba etiquetada `1.06k`
+(la cadena que devuelve `labels`, con punto decimal; la regla de arriba la
+escribe 1,06k). Más fina que 1/24 de octava, E.3.5 añade cifras significativas
+hasta que ninguna etiqueta se repita dentro de una década: una más a 1/48 de
+octava.
 
 ### Dónde cae de verdad el punto de −3 dB de cada arquitectura
 
@@ -740,8 +752,9 @@ que cambió de la 3.0 a la 3.3 después de PyOctaveBand 2.0.0.
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
-La matemática de bordes de banda de la IEC 61260-1:2014 (apartados 5.2-5.5) y
-la serie de frecuencias preferentes de la ISO 266:1997 tras
+La matemática de bordes de banda de la IEC 61260-1:2014 (apartados 5.2-5.6),
+sus etiquetas nominales de banda (Anexo E) y la serie de frecuencias preferentes
+de la ISO 266:1997 tras las etiquetas de octava y de tercio de octava de
 `nominal_frequencies`. La biblioteca diseña cada banda como una cascada SOS en
 cinco arquitecturas (Butterworth, Chebyshev I/II, elíptico, Bessel), más el
 `ParametricEQ` del RBJ Audio EQ Cookbook, con la descomposición por bandas y
@@ -784,7 +797,7 @@ respecto a Nyquist, o sube `fs`, y confirma el margen con
 
 ### ¿Cómo se definen las frecuencias centrales y los bordes de banda de fracción de octava?
 
-IEC 61260-1:2014 (apartados 5.2-5.5) construye cada banda a partir de la
+IEC 61260-1:2014 (apartados 5.2-5.6) construye cada banda a partir de la
 razón de octava en base 10 $G = 10^{3/10} \approx 1{,}99526$, de modo que
 una octava no es exactamente 2. Las frecuencias centrales siguen
 $f_\mathrm{m} = 1000 \cdot G^{x/b}$ para $b$ impar y

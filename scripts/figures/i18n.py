@@ -4967,6 +4967,24 @@ _ES_EXACT = {
     "§17.4: the input 5 dB above it, on each level range, the reference one first": "§17.4: la entrada 5 dB por encima de ella, en cada rango de niveles, primero el de referencia",
     "§17.3: the input held at the reference sound level, read on each other range that displays it": "§17.3: la entrada mantenida en el nivel de referencia, leída en cada uno de los demás rangos que lo muestran",
     "on the reference range §17.3 has nothing to read: the anticipated level is the one §17.2 set (IEC 61672-1, 5.6.3)": "en el rango de referencia el §17.3 no tiene nada que leer: el nivel previsto es el que fijó el §17.2 (IEC 61672-1, 5.6.3)",
+    # The band ruler of IEC 61260-1: four fractions over three octaves.
+    "Fractional-octave bands about 1 kHz (IEC 61260-1)": (
+        "Bandas de fracción de octava en torno a 1 kHz (IEC 61260-1)"
+    ),
+    "in each band: its exact mid-band frequency in hertz and, in bold, its label": (
+        "en cada banda: su frecuencia central exacta en hercios y, en negrita, su etiqueta"
+    ),
+    "octave, $b$ = 1": "octava, $b$ = 1",
+    "half octave, $b$ = 2": "media octava, $b$ = 2",
+    "one-third octave, $b$ = 3": "tercio de octava, $b$ = 3",
+    "one-sixth octave, $b$ = 6": "sexto de octava, $b$ = 6",
+    "odd $b$: 1 kHz is a mid-band frequency": (
+        "$b$ impar: 1 kHz es una frecuencia central de banda"
+    ),
+    "even $b$: 1 kHz is a band edge, and no band is centred on it": (
+        "$b$ par: 1 kHz es un borde de banda, y ninguna banda está centrada en él"
+    ),
+    "reference frequency, 1 kHz": "frecuencia de referencia, 1 kHz",
 }
 
 

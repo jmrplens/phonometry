@@ -640,6 +640,7 @@ from .signals import (
     generate_filter_summation,
     generate_filter_time_invariance,
     generate_filter_type_comparison,
+    generate_fractional_octave_band_ruler,
     generate_g_weighting_response,
     generate_group_delay_comparison,
     generate_leakage_floor,
@@ -785,6 +786,7 @@ from .vibration import (
 
 _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_filter_type_comparison,
+    generate_fractional_octave_band_ruler,
     generate_filter_responses,
     generate_signal_responses,
     generate_multichannel_response,

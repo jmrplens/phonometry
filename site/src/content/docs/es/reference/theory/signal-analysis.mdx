@@ -120,14 +120,43 @@ $$
 f_1 = f_\mathrm{m} \cdot G^{-1/(2b)}, \quad f_2 = f_\mathrm{m} \cdot G^{1/(2b)}
 $$
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fractional_octave_band_ruler.svg" alt="Tres octavas en torno a 1 kHz, de 354,8 Hz a 2818,4 Hz sobre un eje de frecuencia logarítmico, cortadas en cuatro filas de bandas, cada banda con su frecuencia central exacta y, en negrita, su etiqueta. Octava, b = 1: tres bandas centradas en 501,2, 1000,0 y 1995,3 Hz, etiquetadas 500, 1k y 2k. Media octava, b = 2: seis bandas; las dos que se tocan en 1 kHz están centradas en 841,4 y 1188,5 Hz y etiquetadas 841 y 1,19k. Tercio de octava, b = 3: nueve bandas de 398,1 a 2511,9 Hz; la del medio está centrada en 1000,0 Hz y la siguiente, la de 1258,9 Hz, se etiqueta 1,25k. Sexto de octava, b = 6: dieciocho bandas; las dos que se tocan en 1 kHz están centradas en 944,1 y 1059,3 Hz y etiquetadas 940 y 1,06k. Una línea discontinua marca la frecuencia de referencia de 1 kHz: coincide con una frecuencia central en las dos filas de b impar y recorre un borde de banda en las dos filas de b par, donde ninguna banda está centrada en ella" width="100%" />
+
+La regla dibuja las tres octavas en torno a 1 kHz tal como las devuelve
+`nominal_frequencies` con `fraction=1`, `2`, `3` y `6`, cada banda de $f_1$ a
+$f_2$. Todas las filas comparten los bordes de las bandas de octava, así que una
+banda de octava son exactamente dos bandas de media octava, tres de tercio de
+octava o seis de sexto de octava. Las filas difieren en la referencia: las
+impares tienen una banda centrada en ella y las pares, un borde de banda.
+
 **Centro exacto frente a etiqueta impresa.** El $f_\mathrm{m}$ de arriba es la frecuencia
 central exacta; lo que imprime un instrumento (y lo que `nominal_frequencies`
-devuelve en `labels`, o `octave_filter(..., nominal=True)`) es el
-número preferente de ISO 266 más próximo a ella. La banda de tercio de octava
-cuyo centro exacto es 1258,9 Hz se etiqueta 1250 Hz, y la banda de sexto de
-octava centrada en 1059,3 Hz se etiqueta 1.06k. Los niveles de banda se comparan
-entre herramientas por índice o por centro exacto, nunca casando cadenas de
-etiqueta: cada herramienta redondea las etiquetas a su manera.
+devuelve en `labels`, o `octave_filter(..., nominal=True)`) es la frecuencia
+central *nominal* de IEC 61260-1:2014 (5.5 y Anexo E), y cómo se redondea
+depende de la fracción (las etiquetas entre comillas de código son las cadenas
+que devuelve `labels`, con punto decimal; la regla de arriba escribe las mismas
+con coma, `1.06k` es su 1,06k):
+
+- **Octava y tercio de octava.** Las frecuencias nominales de la Tabla E.1, que
+  son las frecuencias preferentes de ISO 266: la banda de tercio de octava cuyo
+  centro exacto es 1258,9 Hz se etiqueta 1250 Hz (`1.25k`).
+- **Media octava.** El centro exacto redondeado a sus tres primeras cifras
+  significativas (E.2): 841,4 Hz se etiqueta `841`.
+- **De 1/4 a 1/24 de octava.** Tres cifras significativas cuando la primera
+  cifra del centro exacto va de 1 a 4, y dos cuando va de 5 a 9 (E.3.2 y
+  E.3.3): las bandas de sexto de octava centradas en 944,1 Hz y 1059,3 Hz se
+  etiquetan `940` y `1.06k`.
+- **Más fina que 1/24 de octava.** E.3.5 pide más cifras significativas hasta
+  que ninguna etiqueta se repita dentro de una década, y `nominal_frequencies`
+  añade a las dos cuentas de E.3 las menos que lo consiguen: ninguna hasta 1/36
+  de octava y una a 1/48, donde la banda centrada en 497,6 Hz se etiqueta
+  `497.6` y la siguiente, en 504,8 Hz, `505`.
+
+ISO 266 solo da frecuencias preferentes para la octava y el tercio de octava,
+así que la etiqueta de cualquier otra fracción no es un número preferente. Los
+niveles de banda se comparan entre herramientas por índice o por centro exacto,
+nunca casando cadenas de etiqueta: cada herramienta redondea las etiquetas a su
+manera.
 
 <span id="resolucion-frecuencial-vs-separacion-de-bins-fft"></span>
 

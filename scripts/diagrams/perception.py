@@ -1317,12 +1317,21 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
     geometry that qualifies them; panel C is the earphone condition the
     values are *not* referenced to, which is the mistake the guide warns
     about.
+
+    Panel A is a side elevation, so it holds four of the six points of
+    ISO 8253-2, 5.2: the two above and below the reference point, which
+    5.2 b) holds to the level at it, and the two on the reference axis,
+    which 5.2 c) holds to the inverse distance law instead. The two of
+    5.2 b) to the left and right are out of its plane, and its note says so.
     """
+    import math
+
     gy = 400.0  # common floor line
     pw = 282.0  # panel width
     px0 = (24.0, 309.0, 594.0)  # panel left edges
-    scale = 112.0  # px per metre
-    note_y = (424.0, 442.0, 460.0)  # the three note lines under each panel
+    scale = 140.0  # px per metre
+    head_r = 0.1 * scale  # an absent head, to the scale of the 0.15 m points
+    note_y = (424.0, 442.0, 460.0, 478.0)  # the note lines under each panel
 
     def room(x: float, title: str, sub: str, color: str) -> None:
         s.rect(x, 112, pw, gy - 112, "none", th.muted, rx=6, sw=1.4)
@@ -1330,15 +1339,39 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
         s.text(x + pw / 2, 90, sub, 12, th.muted)
 
     def notes(x: float, color: str, *rows: str) -> None:
-        for y, row in zip(note_y, rows, strict=True):
+        for y, row in zip(note_y, rows, strict=False):
             s.text(x + pw / 2, y, row, 11, color)
 
-    def ghost_subject(x: float) -> float:
-        """The listener who will sit there, drawn absent (5.2 b / 5.3).
+    def keyed_note(x: float, y: float, row: str, color: str, mark: str) -> None:
+        """A note that opens with the marker it explains, centred as one."""
+        shift = 8.0
+        s.text(x + pw / 2 + shift, y, row, 11, color)
+        mx = x + pw / 2 + shift - s.text_width(row, 11) / 2 - 10.0
+        if mark == "lateral":
+            lateral(mx, y - 4.0)
+        else:
+            axial(mx, y - 4.0)
+
+    def lateral(x: float, y: float) -> None:
+        """A point of 5.2 b): off the axis, held to the level at the centre."""
+        s.circle(x, y, 4.0, th.accent)
+
+    def axial(x: float, y: float, h: float = 5.0) -> None:
+        """A point of 5.2 c): on the axis, held to the inverse distance law."""
+        s.path(
+            f"M {x:.1f} {y - h:.1f} L {x + h:.1f} {y:.1f} "
+            f"L {x:.1f} {y + h:.1f} L {x - h:.1f} {y:.1f} Z",
+            fill=th.primary,
+        )
+
+    def ghost_subject(x: float, *, volume: bool) -> float:
+        """The listener who will sit there, drawn absent (5.2 / 5.3).
 
         Everything about the qualification is measured with the subject and
         the chair out of the room, so both are dashed and the microphone that
-        replaces them is solid.
+        replaces them is solid. ``volume`` draws the dashed square of the
+        diffuse field, whose six points all take one tolerance (5.3 a); the
+        free field tells its points apart, so panel A marks them one by one.
         """
         ref_y = gy - 190.0 + 22.0  # head centre = ear-canal midpoint
         seat_y = gy - 78.0
@@ -1347,16 +1380,40 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
         s.line(x - 24, seat_y, x - 24, gy, th.muted, 2.0, dash=d)
         s.line(x + 58, seat_y, x + 58, gy, th.muted, 2.0, dash=d)
         s.line(x - 28, seat_y, x - 28, ref_y + 16, th.muted, 2.0, dash=d)
-        s.ellipse(x, ref_y, 22, 22, "none", th.muted, 2.0, dash=d)
-        s.line(x, ref_y + 22, x + 6, seat_y, th.muted, 2.0, dash=d)
+        s.ellipse(x, ref_y, head_r, head_r, "none", th.muted, 2.0, dash=d)
+        s.line(x, ref_y + head_r, x + 6, seat_y, th.muted, 2.0, dash=d)
         s.line(x + 6, seat_y, x + 52, seat_y, th.muted, 2.0, dash=d)
         s.line(x + 52, seat_y, x + 52, gy, th.muted, 2.0, dash=d)
         q = 0.15 * scale
-        s.rect(
-            x - q, ref_y - q, 2 * q, 2 * q, "none", th.accent, rx=3, sw=1.4, dash="5,4"
-        )
+        if volume:
+            s.rect(
+                x - q,
+                ref_y - q,
+                2 * q,
+                2 * q,
+                "none",
+                th.accent,
+                rx=3,
+                sw=1.4,
+                dash="5,4",
+            )
         s.circle(x, ref_y, 4.0, th.secondary)
         return ref_y
+
+    def raised_mic(x: float, y: float) -> None:
+        """The same microphone coming down at 45 degrees to (x, y).
+
+        Along the axis, as in panel B, its body would lie over the point
+        behind the reference point; from above and behind it clears all four.
+        """
+        c = math.sqrt(0.5)
+        x1, y1 = x - 58.0 * c, y - 58.0 * c
+        s.line(x - 64, y1, x1, y1, th.primary, 2.4)  # boom arm
+        s.line(x1, y1, x - 40.0 * c, y - 40.0 * c, th.primary, 2.4)
+        s.line(x - 42.0 * c, y - 42.0 * c, x - 8.0 * c, y - 8.0 * c, th.fg, 11.0)
+        s.circle(x, y, 5.0, th.primary)  # capsule tip
+        s.line(x - 64, y1, x - 64, gy, th.fg, 2.2)  # stand
+        s.line(x - 78, gy, x - 50, gy, th.fg, 2.2)  # base
 
     def meas_mic(x: float, y: float) -> None:
         """Boom-mounted measurement microphone, capsule tip at (x, y)."""
@@ -1370,36 +1427,61 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
     xa = px0[0]
     room(xa, "A · Free field", "pure tone · frontal · binaural", th.primary)
     s.ground(gy, xa, xa + pw)
-    sx = xa + 96.0
-    ref_y = ghost_subject(sx)
+    sx = xa + 84.0
+    ref_y = ghost_subject(sx, volume=False)
     lx = sx + scale  # loudspeaker reference point
+    q = 0.15 * scale
     s.rect(lx - 20, ref_y - 42, 40, 84, th.panel, th.primary, rx=5, sw=2)
     s.circle(lx, ref_y, 14, "none", th.primary, 2)
     s.circle(lx, ref_y, 5, th.primary)
     s.line(lx, ref_y + 42, lx, gy, th.fg, 2.2)
     s.line(lx - 18, gy, lx + 18, gy, th.fg, 2.2)
-    s.line(sx + 36, ref_y, lx - 24, ref_y, th.primary, 1.2, dash="7,4")
+    # The reference axis, through the two points 5.2 c) puts on it.
+    s.line(sx - q - 14, ref_y, lx - 24, ref_y, th.primary, 1.2, dash="7,4")
     # Under the reference line, from the absent head to the loudspeaker's
     # stand: drawn above, its witness line and the dimension itself ran
     # through the two lines of the caption.
-    s.dim(sx, ref_y + 50, lx, ref_y + 50, "≥ 1 m", offset=0, size=15)
-    meas_mic(sx, ref_y)
-    s.text(xa + 104, 148, "level measured here,", 11, th.primary)
-    s.text(xa + 104, 166, "subject and chair absent", 11, th.primary)
-    notes(
+    s.dim(sx, ref_y + 50, lx, ref_y + 50, "≥ 1 m  (5.2 a)", offset=0, size=13)
+    lateral(sx, ref_y - q)
+    lateral(sx, ref_y + q)
+    axial(sx - q, ref_y)
+    axial(sx + q, ref_y)
+    raised_mic(sx, ref_y)
+    s.text(xa + 118, 148, "level measured here,", 11, th.primary)
+    s.text(xa + 118, 166, "subject and chair absent", 11, th.primary)
+    keyed_note(
         xa,
+        note_y[0],
+        "0.15 m above and below, and left and right",
         th.accent,
-        "on the reference axis, 0° azimuth",
-        "and elevation, ≥ 1 m  (5.2 a)",
-        "± 0.15 m: within ± 1 dB to 4 kHz  (5.2 b)",
+        "lateral",
+    )
+    s.text(
+        xa + pw / 2,
+        note_y[1],
+        "out of the plane: ± 1 dB to 4 kHz  (5.2 b)",
+        11,
+        th.accent,
+    )
+    keyed_note(
+        xa, note_y[2], "0.15 m in front and behind, on the axis:", th.primary, "axial"
+    )
+    s.text(
+        xa + pw / 2,
+        note_y[3],
+        "the inverse distance law ± 1 dB  (5.2 c)",
+        11,
+        th.primary,
     )
 
     # ---------------- B - diffuse sound field (ISO 8253-2, 5.3) -----------
     xb = px0[1]
     room(xb, "B · Diffuse field", "third-octave noise band · binaural", th.accent)
     s.ground(gy, xb, xb + pw)
-    sx = xb + pw / 2 + 20.0
-    ref_y = ghost_subject(sx)
+    # Off centre so the subject faces into the room, but no further than
+    # keeps the right-hand loudspeakers inside the panel.
+    sx = xb + pw / 2 + 10.0
+    ref_y = ghost_subject(sx, volume=True)
     for dx, dy in ((-112.0, -96.0), (108.0, -100.0), (104.0, 62.0), (-108.0, 58.0)):
         bx, by = sx + dx, ref_y + dy
         s.rect(bx - 16, by - 12, 32, 24, th.panel, th.accent, rx=4, sw=1.8)
@@ -1420,15 +1502,15 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
         xb,
         th.accent,
         "several loudspeakers, non-coherent feeds",
-        "≥ 500 Hz: loudest and quietest directions",
-        "within 5 dB  (Table 1)",
+        "≥ 500 Hz: the loudest and the quietest",
+        "directions within 5 dB  (Table 1)",
     )
 
     # ---------------- C - the earphone condition, for contrast ------------
     xc = px0[2]
     room(xc, "C · Earphone", "supra-aural or insert · monaural", th.secondary)
     s.ground(gy, xc, xc + pw)
-    sx = xc + 74.0
+    sx = xc + 66.0
     s.person(sx, gy, 190.0, seated=True)
     ref_y = gy - 190.0 + 19.0
     s.path(
@@ -1438,11 +1520,11 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
         sw=2.6,
     )
     s.rect(sx + 15, ref_y - 13, 13, 26, th.panel, th.secondary, rx=3, sw=2)
-    cx0 = sx + 96.0
-    s.rect(cx0, ref_y - 36, 104, 72, th.panel, th.secondary, rx=8, sw=2)
-    s.text(cx0 + 52, ref_y - 12, "IEC 60318-1", 12, th.fg, bold=True)
-    s.text(cx0 + 52, ref_y + 8, "coupler /", 11, th.muted)
-    s.text(cx0 + 52, ref_y + 26, "ear simulator", 11, th.muted)
+    cx0, cw = sx + 90.0, 116.0
+    s.rect(cx0, ref_y - 36, cw, 72, th.panel, th.secondary, rx=8, sw=2)
+    s.text(cx0 + cw / 2, ref_y - 12, "IEC 60318-1", 12, th.fg, bold=True)
+    s.text(cx0 + cw / 2, ref_y + 8, "coupler /", 11, th.muted)
+    s.text(cx0 + cw / 2, ref_y + 26, "ear simulator", 11, th.muted)
     s.arrow(sx + 32, ref_y, cx0 - 6, ref_y, th.secondary, 1.6)
     s.text(xc + pw / 2, 148, "not this standard: the level lives", 11, th.secondary)
     s.text(xc + pw / 2, 166, "in a coupler, not a point in a room", 11, th.secondary)
@@ -1455,10 +1537,10 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
     )
 
     # ---------------- shared caption strip --------------------------------
-    s.rect(24, 486, 852, 68, "none", th.fg, rx=10, sw=1.4, dash="6,5")
+    s.rect(24, 496, 852, 68, "none", th.fg, rx=10, sw=1.4, dash="6,5")
     s.text(
         450,
-        514,
+        524,
         "Reference point: the midpoint of the line joining the "
         "listener's ear-canal openings",
         14,
@@ -1467,7 +1549,7 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
     )
     s.text(
         450,
-        540,
+        550,
         "the listener in the listening position; in A and B the "
         "level is measured there with the subject and chair absent",
         12,

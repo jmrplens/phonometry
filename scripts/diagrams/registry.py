@@ -573,7 +573,7 @@ DIAGRAMS = {
     "diagram_soundfield_audiometry": (
         _d_soundfield_audiometry,
         "Sound-field audiometry and the ISO 389-7 reference zero",
-        580,
+        590,
     ),
     "diagram_soundfield_qualification": (
         _d_soundfield_qualification,

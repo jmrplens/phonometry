@@ -4760,10 +4760,62 @@ _ES_EXACT = {
     # EN 15461 track decay rates: the two directions read the same in Spanish.
     "Vertical": "Vertical",
     "Lateral": "Lateral",
+    # IEC 61672-3 level linearity steps of the periodic tests guide
+    # (signals/metrology/sound-level-meter-periodic-tests).
+    "Level linearity in a periodic test: the steps of IEC 61672-3": "Linealidad de nivel en un ensayo periódico: los escalones de IEC 61672-3",
+    "Clause 16 · the reference level range at 8 kHz": "Apartado 16 · el rango de niveles de referencia a 8 kHz",
+    "frequency weighting A; every indication is recorded beside its anticipated level (§16.1)": "ponderación frecuencial A; cada indicación se registra junto a su nivel previsto (§16.1)",
+    "Anticipated level [dB]": "Nivel previsto [dB]",
+    "up first": "primero sube",
+    "then down": "después baja",
+    "linear operating range": "rango de funcionamiento lineal",
+    "the manual states for 8 kHz:": "que declara el manual a 8 kHz:",
+    "which the steps stop short of": "que los escalones no alcanzan",
+    "within 5 dB of the upper boundary,": "a menos de 5 dB del límite superior,",
+    "within 5 dB of the lower boundary,": "a menos de 5 dB del límite inferior,",
+    "The steps of §16.3": "Los escalones del §16.3",
+    "up from the starting point by 5 dB at most,\nand by 1 dB once within 5 dB of the upper\nboundary; then from the starting point down\nthe same way; smaller steps are accepted": (
+        "desde el punto de partida, hacia arriba de\n5 dB como mucho, y de 1 dB a menos de 5 dB\n"
+        "del límite superior; luego hacia abajo del\nmismo modo; se aceptan escalones más finos"
+    ),
+    "A step too wide": "Un escalón demasiado ancho",
+    "Clause 17 · the level range control at 1 kHz, on two level ranges": "Apartado 17 · el control de rango de niveles a 1 kHz, con dos rangos de niveles",
+    "frequency weighting A; drawn without a scale, the manual states each range; deviations are indicated minus anticipated level (§17.5)": "ponderación frecuencial A; sin escala, cada rango lo declara el manual; la desviación es el nivel indicado menos el previsto (§17.5)",
+    "reference sound level": "nivel de referencia",
+    "reference level range": "rango de niveles de referencia",
+    "the other level range": "el otro rango de niveles",
+    "§17.2 sets it here": "el §17.2 lo fija aquí",
+    "§17.3": "§17.3",
+    "§17.4": "§17.4",
+    "the first indication of under-range on that level range": "la primera indicación de «por debajo del rango» en ese rango de niveles",
+    "§17.4: the input 5 dB above it, on each level range, the reference one first": "§17.4: la entrada 5 dB por encima de ella, en cada rango de niveles, primero el de referencia",
+    "§17.3: the input held at the reference sound level, read on each other range that displays it": "§17.3: la entrada mantenida en el nivel de referencia, leída en cada uno de los demás rangos que lo muestran",
+    "on the reference range §17.3 has nothing to read: the anticipated level is the one §17.2 set (IEC 61672-1, 5.6.3)": "en el rango de referencia el §17.3 no tiene nada que leer: el nivel previsto es el que fijó el §17.2 (IEC 61672-1, 5.6.3)",
 }
 
 
 _ES_PATTERNS = [
+    # slm_periodic_linearity: the levels of the guide's Clause 16 record.
+    (
+        r"^(\d+) dB: first indication of overload,$",
+        r"\1 dB: primera indicación de sobrecarga,",
+    ),
+    (
+        r"^(\d+) dB: first indication of under-range,$",
+        r"\1 dB: primera indicación de «por debajo del rango»,",
+    ),
+    (r"^from (\d+) dB: steps of 1 dB$", r"desde \1 dB: escalones de 1 dB"),
+    (
+        r"^starting point of the manual, (\d+) dB \(§16\.2\)$",
+        r"punto de partida del manual, \1 dB (§16.2)",
+    ),
+    (r"^(\d+) dB to (\d+) dB$", r"de \1 dB a \2 dB"),
+    (
+        r"^without its (\d+) dB step\nthe rise goes (\d+) dB where\n"
+        r"§16\.3 allows (\d+) dB, and the\nverdict lists Clause 16\nas incomplete$",
+        r"sin el escalón de \1 dB\nla subida da \2 dB donde\nel §16.3 admite \3 dB, y el\n"
+        r"dictamen deja incompleto\nel apartado 16",
+    ),
     # road_device_ratings: the legends carry the computed rating and category.
     (
         r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",

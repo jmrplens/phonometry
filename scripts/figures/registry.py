@@ -470,6 +470,7 @@ from .metrology import (
     generate_rice_nongaussian_screen,
     generate_rice_peak_distribution,
     generate_runs_test,
+    generate_slm_periodic_linearity,
     generate_slm_periodic_toneburst,
     generate_slm_periodic_verdict,
     generate_stationarity_glide_blind_spot,
@@ -807,6 +808,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # IEC 61672-3:2013: the verdict on a sound level meter's periodic tests.
     generate_slm_periodic_verdict,
     generate_slm_periodic_toneburst,
+    generate_slm_periodic_linearity,
     # The audio-files guide: the calibrated waveform a measurement WAV comes
     # back as, next to the bext provenance card that arrived with it.
     generate_signal_provenance,

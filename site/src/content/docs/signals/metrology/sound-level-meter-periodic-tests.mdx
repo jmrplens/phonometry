@@ -328,6 +328,19 @@ the features whose results it holds, and the verdict holds it to them:
 - the environmental conditions within 80 kPa to 105 kPa, 20 °C to 26 °C and
   25 % to 70 % (7.1), recorded at the start and the end at least (7.2).
 
+The two level linearity items, drawn for the record of section 3: above, the
+25 levels of `linearity_levels` in the order 16.3 takes them, and below, where
+the readings of `range_linearity_deviations_db` fall on the two level ranges.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/slm_periodic_linearity.svg" alt="Two panels. The upper one plots the anticipated level of the Clause 16 test at 8 kHz on a vertical axis ticked from 40 dB to 120 dB, with the linear operating range of the manual, 40 dB to 120 dB, shaded. From the starting point at 94 dB a staircase rises in 5 dB steps through 99, 104, 109, 114 and 119 dB and then in 1 dB steps through 120, 121 and 122 dB, and ends at a cross at 123 dB, the first indication of overload; a second staircase falls from the same starting point in 5 dB steps from 89 dB to 44 dB and in 1 dB steps from 43 dB to 38 dB, and ends at a cross at 37 dB, the first indication of under-range. Brackets mark the 5 dB below the upper boundary and the 5 dB above the lower one, where the steps become 1 dB. An inset draws the rise from 119 dB to 121 dB without the 120 dB step, 2 dB where 16.3 allows 1 dB, which the verdict lists as incomplete. The lower panel draws the two level ranges of the Clause 17 test at 1 kHz as two bars without a scale: on each, a cross at the first indication of under-range and a dot 5 dB above it for 17.4; a dashed line at the reference sound level crosses both bars, with an open circle where 17.2 sets it on the reference level range and a dot where 17.3 reads it on the other" width="100%" />
+
+*The steps of Clauses 16 and 17, read off the record of section 3 by the
+library. The staircase is `linearity_levels` from `linearity_starting_level`,
+the two crosses `linearity_overload_level` and `linearity_under_range_level`,
+and the inset is the verdict on the same record without its 120 dB step; the
+lower panel is the one reading of 17.3 and the two of 17.4 that
+`range_linearity_deviations_db` holds.*
+
 What a record cannot show is a feature the meter lacks: a meter with one
 level range and a record that left Clause 17 out read the same, and so do a
 meter without C-weighted peak and a record without Clause 19. The instruction

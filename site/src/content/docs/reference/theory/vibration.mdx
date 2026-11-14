@@ -58,6 +58,7 @@ sidebar:
 ---
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import Video from '../../../../components/Video.astro';
 
 This page collects the theory behind human vibration: the ISO 8041-1 frequency weightings, the whole-body and hand-arm metrics of ISO 2631-1 and ISO 5349, the action and limit values of Directive 2002/44/EC, and the ISO 2631-5 multiple-shock spinal model. It then turns from people to structures: the driving-point mobilities that govern how much power a point force injects into a plate, beam or rod, and the radiation efficiency that turns that vibration back into airborne sound (the pair EN 12354-5 and ISO 7849 rest on). It is part of the [theory reference](/phonometry/reference/theory/).
 
@@ -337,6 +338,18 @@ from-vibration chain without a power measurement, and it drives the resonant
 transmission path of the
 [panel sound insulation theory](/phonometry/reference/theory/rooms-buildings/#predicted-panel-sound-insulation-bies-72-hopkins-294310-cremer-5),
 where $f_\mathrm{c}$ itself is defined.
+
+The clip from the [Sound Power from Vibration guide](/phonometry/devices/emission/vibration-sound-power/) runs the two regimes on one 10 mm steel plate in air ($f_\mathrm{c} = 1205$ Hz), driven along its whole length, once at $f_\mathrm{c}/2$ and once at $2f_\mathrm{c}$.
+
+<Video
+  name="anim_elastic_radiation_efficiency"
+  width={2400}
+  height={1350}
+  title="A steel plate driven below and above its coincidence frequency"
+  description="A bending wave runs to the right along a steel plate with air above it. In the lower-frequency panel the plate ripples with a wavelength shorter than the sound wavelength and the pressure above it forms alternating lobes that cling to the plate and fade out within a few centimetres, so nothing leaves. In the higher-frequency panel the plate ripples with a longer wavelength and a plane beam of pressure departs at forty-five degrees along the whole driven span, growing as it goes."
+/>
+
+*What the clip shows is the infinite-plate mechanism alone (Hopkins 2.9.2). At 602 Hz the bending wavelength, 0.40 m, is shorter than the 0.57 m of sound in air, no angle satisfies $\sin\theta = \lambda/\lambda_\mathrm{B}$, and the air carries only a skin of alternating lobes that decays with a height of $1/\sqrt{k_\mathrm{B}^2 - k_0^2} = 0.091$ m and takes no power away (Eq. 2.216); at 2410 Hz the bending wavelength, 0.20 m, is longer than the 0.14 m in air and a plane beam leaves at 45° (Eq. 2.203). It does not show the other half of the paragraph above: the scene is an effectively infinite plate, with no edge that radiates, so the sub-critical radiation that survives at the edges and corners of a finite plate, the part that makes a real $\sigma$ small and not zero, is not in it.*
 
 See the [Predicting Panel Sound Insulation guide](/phonometry/buildings/design/panel-sound-insulation/)
 for usage.

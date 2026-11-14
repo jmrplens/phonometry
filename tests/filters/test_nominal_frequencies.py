@@ -81,7 +81,78 @@ def test_nominal_freq_below_the_base_table() -> None:
 
 
 def test_nominal_freq_other_fraction() -> None:
-    assert _nominal_freq_for_band(706.0, 2) == pytest.approx(710.0)
+    assert _nominal_freq_for_band(706.0, 6) == pytest.approx(710.0)
+
+
+def test_half_octave_labels_keep_three_significant_digits() -> None:
+    """IEC 61260-1:2014 E.2: a one-half-octave nominal mid-band frequency is
+    the exact one rounded "to the first three significant digits", whatever
+    its leading digit. The two-digit rounding of E.3.3 starts at 1/4.
+    """
+    bands = nominal_frequencies(2, [500.0, 2000.0])
+    assert [f"{f:.1f}" for f in bands.frequencies.tolist()] == [
+        "421.7",
+        "595.7",
+        "841.4",
+        "1188.5",
+        "1678.8",
+        "2371.4",
+    ]
+    assert bands.labels == ("422", "596", "841", "1.19k", "1.68k", "2.37k")
+    for exact in nominal_frequencies(2, [1.0, 20000.0]).frequencies.tolist():
+        assert _nominal_freq_for_band(exact, 2) == pytest.approx(
+            float(f"{exact:.3g}"), rel=1e-12
+        )
+
+
+def test_sixth_octave_labels_drop_to_two_digits_from_a_leading_five() -> None:
+    """E.3.2 and E.3.3: three significant digits up to a leading 4, two from 5."""
+    bands = nominal_frequencies(6, [900.0, 1100.0])
+    assert [f"{f:.1f}" for f in bands.frequencies.tolist()] == ["944.1", "1059.3"]
+    assert bands.labels == ("940", "1.06k")
+
+
+@pytest.mark.parametrize("fraction", [25, 30, 36, 48, 64, 96])
+def test_labels_above_a_twenty_fourth_are_unique_in_every_decade(
+    fraction: int,
+) -> None:
+    """E.3.5: above 1/24 the digits grow until no 10:1 ratio repeats a label.
+
+    Three decades hold every arrangement of the base-ten centres, since
+    G^10 = 10^3, so a bank over 10 Hz to 10 kHz meets every decade window.
+    """
+    labels = nominal_frequencies(fraction, [10.0, 10000.0]).labels
+    assert len(set(labels)) == len(labels)
+
+
+def test_forty_eighth_octave_labels_take_one_more_digit() -> None:
+    """At 1/48 the rounding of E.3.2 and E.3.3 repeats labels (530, 570 and
+    640 each twice between 500 and 1000 Hz), so E.3.5 adds one digit to both:
+    four significant digits from a leading 1 to 4, three from 5 to 9.
+    """
+    bands = nominal_frequencies(48, [500.0, 600.0])
+    assert [f"{f:.2f}" for f in bands.frequencies.tolist()[:6]] == [
+        "497.59",
+        "504.81",
+        "512.12",
+        "519.55",
+        "527.08",
+        "534.72",
+    ]
+    assert bands.labels[:6] == ("497.6", "505", "512", "520", "527", "535")
+    old_rule = [_iec_e3_round(f) for f in bands.frequencies.tolist()]
+    assert len(set(old_rule)) < len(old_rule)
+
+
+@pytest.mark.parametrize("fraction", [4, 12, 24])
+def test_labels_up_to_a_twenty_fourth_keep_the_rounding_of_e32_and_e33(
+    fraction: int,
+) -> None:
+    """E.3.1: from 1/4 to 1/24 the labels are E.3.2 and E.3.3 as they stand."""
+    bands = nominal_frequencies(fraction, [10.0, 10000.0])
+    assert [_nominal_freq_for_band(f, fraction) for f in bands.frequencies] == [
+        _iec_e3_round(f) for f in bands.frequencies.tolist()
+    ]
 
 
 # --- _format_nominal_freq ---

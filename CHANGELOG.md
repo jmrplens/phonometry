@@ -2374,6 +2374,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   place, with the missing module as its cause, and the two fiches make their
   panels through the hint the other fiches give.
 
+- **A half-octave band is labelled with three significant digits, and a band
+  finer than 1/24 octave with as many as keep its labels apart, as IEC
+  61260-1 Annex E asks.** `filters.nominal_frequencies(2, ...)` and every
+  bank built with `fraction=2` labelled their bands by the rule of Annex E.3,
+  which drops to two digits from a leading 5 and applies from 1/4 octave down:
+  the bands centred on 595.7 Hz and 841.4 Hz read `600` and `840`. Annex E.2
+  gives the half octave a rule of its own, "rounding to the first three
+  significant digits", so they now read `596` and `841`. Above 1/24 octave,
+  where E.3.1 stops, the two-digit rounding repeated labels: a 1/48-octave
+  bank between 500 Hz and 1 kHz read `530`, `570` and `640` twice each. E.3.5
+  asks for more significant digits there until no decade repeats a label, so
+  every fraction above 24 now takes the fewest digits that do it: none up to
+  1/36, one more at 1/48 (`497.6`, `505`, `512`, ...). The centres, the edges
+  and the levels are untouched, and so are the labels of 1/1, 1/3 and 1/4 to
+  1/24.
+
 - **The documentation site's type check fails on a hint, and the site has
   none.** `pnpm run check:types` passed with 132 hints: 127 uses in
   `site/src/content.config.ts` of zod helpers that Astro 7 and zod 4

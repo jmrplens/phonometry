@@ -225,7 +225,7 @@ def _chk_rd1367_activity_verdict() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "CTE DB-HR Annex A, Formula (A.5)",
+    "CTE DB-HR Annex A, Formula (A.14)",
     "Global index R'A for pink noise (Manual Ejemplo 7.2)",
 )
 def _chk_dbhr_ra() -> Outcome:

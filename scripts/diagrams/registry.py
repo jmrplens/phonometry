@@ -165,6 +165,7 @@ from .perception import (
     _d_slm_workstation,
     _d_sound_quality,
     _d_soundfield_audiometry,
+    _d_soundfield_qualification,
     _d_speech_intelligibility,
     _d_sti_chain,
     _d_sti_setup,
@@ -573,6 +574,11 @@ DIAGRAMS = {
         _d_soundfield_audiometry,
         "Sound-field audiometry and the ISO 389-7 reference zero",
         580,
+    ),
+    "diagram_soundfield_qualification": (
+        _d_soundfield_qualification,
+        "Qualifying a sound field: where the microphone goes (ISO 8253-2, ISO 4869)",
+        950,
     ),
     "diagram_slm_workstation_iso9612": (
         _d_slm_workstation,

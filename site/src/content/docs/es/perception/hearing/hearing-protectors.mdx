@@ -182,6 +182,13 @@ sujetos.
 
 ### La sala de ensayo (4.2.2)
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundfield_qualification.svg" alt="Dos salas, cada una dibujada en planta y en alzado, con el oyente y la silla a trazos porque los dos están fuera de la sala. A, un altavoz sobre su eje, para el campo libre y el cuasi libre de la ISO 8253-2: el altavoz está a la altura de la cabeza de un oyente sentado, con su eje de referencia por el punto de referencia y a una distancia r de 1 m como mínimo; cuatro puntos quedan a 0,15 m a izquierda, derecha, arriba y abajo del punto de referencia, y dos más sobre el eje a una distancia d delante y detrás de él. B, sonido desde todos los lados, para el campo difuso de la ISO 8253-2 y los lugares de ensayo de la ISO 4869: más de un altavoz alrededor del punto de referencia, seis puntos sobre los tres ejes a su alrededor y un micrófono direccional girado en el punto de referencia. Bajo cada dibujo, lo que pide cada apartado. Campo libre, 5.2: los cuatro puntos laterales dentro de más o menos 1 dB hasta 4 kHz y de 2 dB por encima, izquierda y derecha a 3 dB entre sí por encima de 4 kHz, y con d igual a 0,15 m el nivel de delante menos el de detrás dentro de más o menos 1 dB de la ley de la inversa de la distancia. Campo cuasi libre, 5.4: más o menos 2 dB y d igual a 0,10 m. Onda plana progresiva, ISO 4869-3 5.2.3: los dos puntos que ocuparán los centros de las caras del montaje, separados 145 mm, a 2 dB uno de otro, y desde 500 Hz un micrófono direccional que lee al menos 10 dB más de cara a la fuente que de espaldas. Campo difuso, 5.3: seis puntos a 0,15 m dentro de más o menos 2,5 dB con un micrófono omnidireccional siempre en la misma orientación, y desde 500 Hz las direcciones de nivel máximo y mínimo a 5 dB con un índice frontal-aleatorio de 5 dB o más. Lugar de ensayo de protectores auditivos, ISO 4869-1 4.2.2: seis puntos a 15 cm y el micrófono girado 360 grados en el plano horizontal. Campo de incidencia aleatoria, ISO 4869-3 5.2.2: seis posiciones a 150 mm sin el montaje" width="96%" />
+
+*El panel B es esta sala de ensayo: seis puntos a 15 cm del punto de referencia
+sobre los tres ejes, y un micrófono direccional girado 360° en él. Las listas
+bajo los dibujos ponen sus cifras junto a las de la ISO 8253-2 y a las de los
+dos lugares de la ISO 4869-3, más abajo en esta página.*
+
 El campo sonoro se cualifica sin el sujeto ni la silla. El nivel a 15 cm del
 punto de referencia sobre los tres ejes se queda dentro de ±2,5 dB del nivel en
 él, las posiciones derecha e izquierda a menos de 3 dB entre sí, y desde 500 Hz
@@ -641,11 +648,15 @@ comprueban que la señal de ensayo se mantuvo dentro de ±1 dB y que dos bandas
 contiguas de ella no difieren más de 5 dB.
 
 El lugar de ensayo se cualifica como campo de incidencia aleatoria o como onda
-plana progresiva (5.2). El campo de incidencia aleatoria es el campo difuso de la
-ISO 8253-2 ([métodos de ensayo audiométricos](/phonometry/es/perception/hearing/audiometry/))
-con la Tabla 1 propia de esta norma, y el anexo A señala que el propio montaje
-puede hacer de micrófono direccional donde su índice frontal-aleatorio llega a
-4 dB:
+plana progresiva (5.2), sin el montaje. El campo de incidencia aleatoria es el
+campo difuso de la ISO 8253-2
+([métodos de ensayo audiométricos](/phonometry/es/perception/hearing/audiometry/))
+con la Tabla 1 propia de esta norma: seis posiciones a 150 mm del punto de
+referencia, que aquí es el punto medio entre las caras del montaje (3.9). Son
+los puntos del panel B del dibujo de [la sala de ensayo](#la-sala-de-ensayo-422),
+cuyas listas recogen los dos lugares de esta norma. El anexo A señala que el
+propio montaje puede hacer de micrófono direccional donde su índice
+frontal-aleatorio llega a 4 dB:
 
 ```python
 index = [hearing.ATF_FRONT_TO_RANDOM_INDEX.get(f, np.nan) for f in bands]

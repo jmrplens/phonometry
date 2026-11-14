@@ -343,6 +343,13 @@ como uno de tres campos:
   sensibilidad (*front-to-random sensitivity index*): 5 dB para un índice de
   5 dB o más, 4,5 dB para 4,5 dB, 4 dB para 4 dB.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundfield_qualification.svg" alt="Dos salas, cada una dibujada en planta y en alzado, con el oyente y la silla a trazos porque los dos están fuera de la sala. A, un altavoz sobre su eje, para el campo libre y el cuasi libre de la ISO 8253-2: el altavoz está a la altura de la cabeza de un oyente sentado, con su eje de referencia por el punto de referencia y a una distancia r de 1 m como mínimo; cuatro puntos quedan a 0,15 m a izquierda, derecha, arriba y abajo del punto de referencia, y dos más sobre el eje a una distancia d delante y detrás de él. B, sonido desde todos los lados, para el campo difuso de la ISO 8253-2 y los lugares de ensayo de la ISO 4869: más de un altavoz alrededor del punto de referencia, seis puntos sobre los tres ejes a su alrededor y un micrófono direccional girado en el punto de referencia. Bajo cada dibujo, lo que pide cada apartado. Campo libre, 5.2: los cuatro puntos laterales dentro de más o menos 1 dB hasta 4 kHz y de 2 dB por encima, izquierda y derecha a 3 dB entre sí por encima de 4 kHz, y con d igual a 0,15 m el nivel de delante menos el de detrás dentro de más o menos 1 dB de la ley de la inversa de la distancia. Campo cuasi libre, 5.4: más o menos 2 dB y d igual a 0,10 m. Onda plana progresiva, ISO 4869-3 5.2.3: los dos puntos que ocuparán los centros de las caras del montaje, separados 145 mm, a 2 dB uno de otro, y desde 500 Hz un micrófono direccional que lee al menos 10 dB más de cara a la fuente que de espaldas. Campo difuso, 5.3: seis puntos a 0,15 m dentro de más o menos 2,5 dB con un micrófono omnidireccional siempre en la misma orientación, y desde 500 Hz las direcciones de nivel máximo y mínimo a 5 dB con un índice frontal-aleatorio de 5 dB o más. Lugar de ensayo de protectores auditivos, ISO 4869-1 4.2.2: seis puntos a 15 cm y el micrófono girado 360 grados en el plano horizontal. Campo de incidencia aleatoria, ISO 4869-3 5.2.2: seis posiciones a 150 mm sin el montaje" width="96%" />
+
+*Dónde va el micrófono, en planta y en alzado. A es la sala de 5.2 y 5.4: un
+altavoz, cuatro puntos fuera de su eje y dos sobre él. B es la sala de 5.3, cuyos
+seis puntos y micrófono girado piden la ISO 4869-1 y la ISO 4869-3 a sus propios
+lugares de ensayo.*
+
 ```python
 # Una sala tratada, el altavoz a 1,2 m: desviaciones respecto al nivel en el
 # punto de referencia, 125 Hz a 8 kHz, en las cuatro posiciones laterales.

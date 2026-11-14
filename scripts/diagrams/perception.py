@@ -1476,6 +1476,385 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Where the microphone goes when a sound field is qualified
+# (ISO 8253-2 5.2 to 5.4, ISO 4869-1 4.2.2, ISO 4869-3 5.2.2 and 5.2.3)
+# ---------------------------------------------------------------------------
+
+
+def _d_soundfield_qualification(s: SVG, th: Theme) -> None:
+    """The microphone positions that qualify a sound-field room.
+
+    Two rooms, each in plan and in elevation on one horizontal scale: the
+    single loudspeaker of the free and the quasi-free field of ISO 8253-2,
+    and the sound from every side of its diffuse field, which is also the
+    test site of ISO 4869-1 and the random-incidence field of ISO 4869-3.
+    The listener and the chair are dashed because both are out of the room
+    while it is measured. Under each drawing, what each clause asks at the
+    points it marks.
+    """
+    import math
+
+    pw = 420.0  # panel width
+    xa, xb = 24.0, 456.0  # panel left edges
+    top = 108.0  # top of the two rooms
+    gy = 532.0  # common floor line of the elevations
+    y_plan = 190.0  # the reference axis in the plans
+    y_split = 276.0  # where a plan ends and its elevation starts
+    scale = 160.0  # px per metre, plan and elevation alike
+    y_elev = gy - 1.2 * scale  # ear height of a seated listener, 1.2 m
+    off = 0.15 * scale  # the 0.15 m every clause places its points at
+    reach = 1.2 * scale  # reference point to loudspeaker, drawn at 1.2 m
+    head_r = 0.095 * scale  # half the length of a head, front to back
+    head_w = 0.075 * scale  # half its breadth, ear to ear
+
+    def room(x: float, title: str, sub: str, color: str) -> None:
+        s.text(x + pw / 2, 66, title, 18, color, bold=True)
+        s.text(x + pw / 2, 90, sub, 12, th.muted)
+        s.rect(x, top, pw, gy - top, "none", th.muted, rx=6, sw=1.4)
+        s.line(x + 10, y_split, x + pw - 10, y_split, th.muted, 0.9, dash="2,5")
+        s.text(x + 12, top + 18, "plan, from above", 11, th.muted, "start", italic=True)
+        s.text(
+            x + 12,
+            y_split + 18,
+            "elevation, from the side",
+            11,
+            th.muted,
+            "start",
+            italic=True,
+        )
+        s.ground(gy, x, x + pw)
+
+    def lateral(x: float, y: float) -> None:
+        s.circle(x, y, 4.5, th.accent)
+
+    def axial(x: float, y: float, h: float = 5.6) -> None:
+        s.path(
+            f"M {x:.1f} {y - h:.1f} L {x + h:.1f} {y:.1f} "
+            f"L {x:.1f} {y + h:.1f} L {x - h:.1f} {y:.1f} Z",
+            fill=th.primary,
+        )
+
+    def turned(x: float, y: float, r: float, *, dash: str = "") -> None:
+        """An arc with an arrowhead: the directional microphone being turned."""
+        a0, a1 = math.radians(-118.0), math.radians(205.0)
+        x0, y0 = x + r * math.cos(a0), y + r * math.sin(a0)
+        x1, y1 = x + r * math.cos(a1), y + r * math.sin(a1)
+        s.path(
+            f"M {x0:.1f} {y0:.1f} A {r:.1f} {r:.1f} 0 1 1 {x1:.1f} {y1:.1f}",
+            stroke=th.secondary,
+            sw=1.4,
+            dash=dash,
+        )
+        # The head, along the tangent of a clockwise turn on the sheet.
+        tx, ty = -math.sin(a1), math.cos(a1)
+        nx, ny = math.cos(a1), math.sin(a1)
+        length, half = 0.9 * min(r, 10.0), 0.36 * min(r, 10.0)
+        tipx, tipy = x1 + 0.5 * length * tx, y1 + 0.5 * length * ty
+        bx, by = x1 - 0.5 * length * tx, y1 - 0.5 * length * ty
+        s.path(
+            f"M {tipx:.1f} {tipy:.1f} L {bx + half * nx:.1f} {by + half * ny:.1f} "
+            f"L {bx - half * nx:.1f} {by - half * ny:.1f} Z",
+            fill=th.secondary,
+        )
+
+    def head_from_above(x: float, y: float) -> None:
+        """The absent listener's head in plan, an ear on each side.
+
+        The reference point is midway between the two ear-canal openings,
+        so the ears are what the plan has to show; the lateral points sit
+        0.15 m out, clear of them.
+        """
+        s.ellipse(x, y, head_r, head_w, "none", th.muted, 1.6, dash="5,4")
+        for side in (-1.0, 1.0):
+            s.ellipse(x - 1, y + side * (head_w + 1), 3.2, 2.2, "none", th.muted, 1.4)
+
+    def seated_from_the_side(x: float, y: float) -> None:
+        """The absent listener and chair in elevation, facing right."""
+        d = "6,4"
+        seat = gy - 0.48 * scale
+        s.ellipse(x, y, head_r, head_r, "none", th.muted, 1.8, dash=d)
+        s.line(x - 10, y + head_r + 1, x - 14, seat, th.muted, 1.8, dash=d)
+        s.line(x - 14, seat, x + 52, seat, th.muted, 1.8, dash=d)
+        s.line(x + 52, seat, x + 52, gy, th.muted, 1.8, dash=d)
+        s.line(x - 30, seat + 7, x + 44, seat + 7, th.muted, 1.8, dash=d)
+        s.line(x - 30, seat + 7, x - 30, y + 62, th.muted, 1.8, dash=d)
+        s.line(x - 26, seat + 7, x - 26, gy, th.muted, 1.8, dash=d)
+        s.line(x + 40, seat + 7, x + 40, gy, th.muted, 1.8, dash=d)
+
+    def cross(x: float, y: float, reach_px: float) -> None:
+        """The axis the lateral points lie on, through the reference point."""
+        s.line(x, y - reach_px, x, y + reach_px, th.muted, 0.9, dash="3,3")
+
+    def heading(x: float, y: float, name: str, clause: str) -> None:
+        s.text(x, y, name, 12, th.fg, "start", bold=True)
+        s.text(
+            x + s.text_width(name, 12, bold=True) + 8,
+            y,
+            clause,
+            11,
+            th.muted,
+            "start",
+        )
+
+    def row(x: float, y: float, mark: str, *lines: str) -> float:
+        """One requirement under a drawing, keyed by the marker it concerns."""
+        if mark == "lateral":
+            lateral(x + 6, y - 4)
+        elif mark == "axial":
+            axial(x + 6, y - 4)
+        elif mark == "turned":
+            turned(x + 6, y - 4, 4.6)
+        else:
+            s.circle(x + 6, y - 4, 1.8, th.muted)
+        for line in lines:
+            s.text(x + 18, y, line, 11, th.fg, "start")
+            y += 16.0
+        return y
+
+    # ---------------- A - one loudspeaker on the axis ----------------------
+    room(
+        xa,
+        "A · One loudspeaker, on its axis",
+        "free and quasi-free field · ISO 8253-2, 5.2 and 5.4",
+        th.primary,
+    )
+    x0 = xa + 150.0
+    xs = x0 + reach  # the loudspeaker's front
+    for y in (y_plan, y_elev):
+        s.line(x0 - 76, y, xs - 4, y, th.primary, 1.1, dash="7,4")
+        cross(x0, y, 40.0)
+    # Plan: the loudspeaker box from above, the head, the six points.
+    s.rect(xs, y_plan - 24, 30, 48, th.panel, th.primary, rx=4, sw=2)
+    s.ellipse(xs, y_plan, 4, 15, th.primary)
+    head_from_above(x0, y_plan)
+    s.dim(x0, y_plan, xs, y_plan, "$r$ ≥ 1 m", offset=58, size=13)
+    lateral(x0, y_plan - off)
+    lateral(x0, y_plan + off)
+    axial(x0 - off, y_plan)
+    axial(x0 + off, y_plan)
+    s.circle(x0, y_plan, 4.0, th.secondary)
+    s.text(x0 + 10, y_plan - off - 2, "left, 0.15 m", 11, th.accent, "start")
+    s.text(x0 + 10, y_plan + off + 10, "right, 0.15 m", 11, th.accent, "start")
+    s.text(x0 - off - 9, y_plan - 8, "behind, $d$", 11, th.primary, "end")
+    s.text(x0 + off + 9, y_plan - 8, "in front, $d$", 11, th.primary, "start")
+    s.text(xs - 6, y_plan + 16, "reference axis", 11, th.primary, "end")
+    # Elevation: the same arrangement from the side, at head height.
+    seated_from_the_side(x0, y_elev)
+    s.rect(xs, y_elev - 30, 30, 60, th.panel, th.primary, rx=4, sw=2)
+    s.ellipse(xs, y_elev, 4, 15, th.primary)
+    s.line(xs + 15, y_elev + 30, xs + 15, gy, th.fg, 2.2)
+    s.line(xs - 3, gy, xs + 33, gy, th.fg, 2.2)
+    lateral(x0, y_elev - off)
+    lateral(x0, y_elev + off)
+    axial(x0 - off, y_elev)
+    axial(x0 + off, y_elev)
+    s.circle(x0, y_elev, 4.0, th.secondary)
+    s.text(x0 + 10, y_elev - off - 2, "above, 0.15 m", 11, th.accent, "start")
+    s.text(x0 + 10, y_elev + off + 10, "below, 0.15 m", 11, th.accent, "start")
+    s.text(x0 - off - 9, y_elev - 8, "behind, $d$", 11, th.primary, "end")
+    s.text(x0 + off + 9, y_elev - 8, "in front, $d$", 11, th.primary, "start")
+    s.text(
+        xa + pw - 12,
+        y_elev - 44,
+        "at the head height of a seated listener",
+        11,
+        th.primary,
+        "end",
+    )
+
+    # ---------------- B - sound from every side ----------------------------
+    room(
+        xb,
+        "B · Sound from every side",
+        "diffuse field, ISO 8253-2, 5.3 · the test sites of ISO 4869",
+        th.accent,
+    )
+    x0 = xb + pw / 2
+    arc_r = off + 13.0
+    s.line(x0 - arc_r + 3, y_plan, x0 + arc_r - 3, y_plan, th.muted, 0.9, dash="3,3")
+    cross(x0, y_plan, arc_r - 3)
+    s.line(x0 - 40, y_elev, x0 + 40, y_elev, th.muted, 0.9, dash="3,3")
+    cross(x0, y_elev, 40.0)
+    for dx, dy in ((-166.0, -44.0), (166.0, -44.0), (-166.0, 50.0), (166.0, 50.0)):
+        bx, by = x0 + dx, y_plan + dy
+        s.rect(bx - 15, by - 11, 30, 22, th.panel, th.accent, rx=4, sw=1.8)
+        s.arrow(
+            bx - 0.12 * dx,
+            by - 0.12 * dy,
+            x0 + 0.42 * dx,
+            y_plan + 0.42 * dy,
+            th.accent,
+            1.2,
+        )
+    head_from_above(x0, y_plan)
+    turned(x0, y_plan, arc_r, dash="4,3")
+    for dx, dy in ((0.0, -off), (0.0, off), (-off, 0.0), (off, 0.0)):
+        lateral(x0 + dx, y_plan + dy)
+    s.circle(x0, y_plan, 4.0, th.secondary)
+    s.text(x0, y_plan - arc_r - 7, "left", 11, th.accent)
+    s.text(x0, y_plan + arc_r + 15, "right", 11, th.accent)
+    s.text(x0 - arc_r - 8, y_plan + 4, "behind", 11, th.accent, "end")
+    s.text(x0 + arc_r + 8, y_plan + 4, "in front", 11, th.accent, "start")
+    s.text(
+        xb + pw - 12,
+        top + 18,
+        "more than one loudspeaker  (Table 1, note b)",
+        11,
+        th.accent,
+        "end",
+    )
+    s.text(
+        x0,
+        y_split - 10,
+        "a directional microphone, turned at the reference point",
+        11,
+        th.secondary,
+    )
+    seated_from_the_side(x0, y_elev)
+    for bx, by in ((xb + 44.0, gy - 0.5 * scale), (xb + pw - 44.0, gy - 1.42 * scale)):
+        s.rect(bx - 15, by - 11, 30, 22, th.panel, th.accent, rx=4, sw=1.8)
+        s.line(bx, by + 11, bx, gy, th.fg, 2.2)
+        s.line(bx - 16, gy, bx + 16, gy, th.fg, 2.2)
+        dx, dy = bx - x0, by - y_elev
+        s.arrow(
+            bx - 0.12 * dx,
+            by - 0.12 * dy,
+            x0 + 0.55 * dx,
+            y_elev + 0.55 * dy,
+            th.accent,
+            1.2,
+        )
+    for dx, dy in ((0.0, -off), (0.0, off), (-off, 0.0), (off, 0.0)):
+        lateral(x0 + dx, y_elev + dy)
+    s.circle(x0, y_elev, 4.0, th.secondary)
+    s.text(x0 + 10, y_elev - off - 2, "above", 11, th.accent, "start")
+    s.text(x0 + 10, y_elev + off + 10, "below", 11, th.accent, "start")
+    s.text(x0 - off - 9, y_elev - 8, "behind", 11, th.accent, "end")
+    s.text(x0 + off + 9, y_elev - 8, "in front", 11, th.accent, "start")
+
+    # ---------------- what each clause asks at those points ----------------
+    ya = yb = gy + 36.0
+    xl = xa + 4.0
+    heading(xl, ya, "Free field", "ISO 8253-2, 5.2")
+    ya = row(
+        xl,
+        ya + 18,
+        "lateral",
+        "left, right, above, below: ± 1 dB up to 4 kHz, ± 2 dB above;",
+        "left and right within 3 dB of each other above 4 kHz",
+    )
+    ya = row(
+        xl,
+        ya,
+        "axial",
+        "$d$ = 0.15 m: front less back within ± 1 dB of the inverse",
+        "distance law, 20 lg[($r$ + $d$) / ($r$ − $d$)] dB",
+    )
+    heading(xl, ya + 8, "Quasi-free field", "ISO 8253-2, 5.4")
+    ya = row(xl, ya + 26, "lateral", "left, right, above, below: ± 2 dB")
+    ya = row(
+        xl,
+        ya,
+        "axial",
+        "$d$ = 0.10 m: the same law, ± 1 dB; the field is usable",
+        "over the frequencies where both hold",
+    )
+    heading(xl, ya + 8, "Plane progressive wave", "ISO 4869-3, 5.2.3")
+    ya = row(
+        xl,
+        ya + 26,
+        "",
+        "the two points the centres of the fixture's end faces will",
+        "occupy, 145 mm apart: within 2 dB of each other",
+    )
+    ya = row(
+        xl,
+        ya,
+        "turned",
+        "from 500 Hz, a directional microphone facing the source",
+        "reads at least 10 dB more than turned away from it;",
+        "its front-to-rear index over 15 dB",
+    )
+
+    xl = xb + 4.0
+    heading(xl, yb, "Diffuse field", "ISO 8253-2, 5.3")
+    yb = row(
+        xl,
+        yb + 18,
+        "lateral",
+        "six points at 0.15 m: ± 2.5 dB; left and right within 3 dB;",
+        "an omnidirectional microphone, its orientation kept the same",
+    )
+    yb = row(
+        xl,
+        yb,
+        "turned",
+        "from 500 Hz, loudest and quietest directions within 5 dB for a",
+        "front-to-random index of 5 dB or more, 4.5 dB for 4.5 dB,",
+        "4 dB for 4 dB  (Table 1)",
+    )
+    heading(xl, yb + 8, "Hearing protector test site", "ISO 4869-1, 4.2.2")
+    yb = row(
+        xl,
+        yb + 26,
+        "lateral",
+        "six points at 15 cm: ± 2.5 dB; right and left within 3 dB",
+    )
+    yb = row(
+        xl,
+        yb,
+        "turned",
+        "from 500 Hz, turned through 360° in the horizontal plane:",
+        "within 5, 10, 15 or 20 dB for a free-field rejection from",
+        "10, 15, 20 or 25 dB  (Table 1)",
+    )
+    heading(xl, yb + 8, "Random-incidence field", "ISO 4869-3, 5.2.2")
+    yb = row(
+        xl,
+        yb + 26,
+        "lateral",
+        "six positions at 150 mm, the fixture removed: ± 2.5 dB;",
+        "right and left within 3 dB",
+    )
+    yb = row(
+        xl,
+        yb,
+        "turned",
+        "from 500 Hz, any two directions within 5 dB for a front-to-random",
+        "index of at least 5 dB, 4 dB for 4 dB to 5 dB  (Table 1)",
+    )
+
+    # ---------------- shared caption strip ---------------------------------
+    y0 = max(ya, yb) + 6.0
+    s.rect(24, y0, 852, 86, "none", th.fg, rx=10, sw=1.4, dash="6,5")
+    title = (
+        "Reference point: midway between the listener's ear-canal openings, "
+        "or between the end faces of the fixture"
+    )
+    # The Spanish of this line runs a tenth longer than the English.
+    size = s.fit_size([title], (13, 12), 790.0, bold=True)
+    half = s.text_width(title, size, bold=True) / 2
+    s.circle(450 - half - 12, y0 + 23, 4.0, th.secondary)
+    s.text(450, y0 + 28, title, size, th.fg, bold=True)
+    s.text(
+        450,
+        y0 + 50,
+        "every level is read there and around it with the listener and the "
+        "chair, or the fixture, out of the room",
+        11,
+        th.muted,
+    )
+    s.text(
+        450,
+        y0 + 68,
+        "ISO 8253-2, 5.1: on the signals of the audiometry itself, with a sound "
+        "level meter of IEC 61672-1 type 1 except for the directional readings",
+        11,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
 # ISO 9612 Clause 12.4: the sound level meter geometry at a workstation
 # ---------------------------------------------------------------------------
 

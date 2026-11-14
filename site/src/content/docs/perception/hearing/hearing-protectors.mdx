@@ -177,6 +177,13 @@ disagree mostly on how their subjects fit the protector.
 
 ### The test room (4.2.2)
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_soundfield_qualification.svg" alt="Two rooms, each drawn in plan and in elevation with the listener and the chair dashed because both are out of the room. A, one loudspeaker on its axis, for the free and the quasi-free field of ISO 8253-2: the loudspeaker stands at the head height of a seated listener, its reference axis through the reference point and a distance r of at least 1 m from it; four points lie 0.15 m to the left, right, above and below the reference point, and two more on the axis a distance d in front of it and behind it. B, sound from every side, for the diffuse field of ISO 8253-2 and the test sites of ISO 4869: more than one loudspeaker around the reference point, six points on the three axes around it, and a directional microphone turned at the reference point. Under each drawing, what each clause asks. Free field, 5.2: the four lateral points within plus or minus 1 dB up to 4 kHz and 2 dB above, left and right within 3 dB of each other above 4 kHz, and with d equal to 0.15 m the level in front less the level behind within plus or minus 1 dB of the inverse distance law. Quasi-free field, 5.4: plus or minus 2 dB and d equal to 0.10 m. Plane progressive wave, ISO 4869-3 5.2.3: the two points the centres of the fixture's end faces will occupy, 145 mm apart, within 2 dB, and from 500 Hz a directional microphone reading at least 10 dB more facing the source than turned away. Diffuse field, 5.3: six points at 0.15 m within plus or minus 2.5 dB with an omnidirectional microphone kept in one orientation, and from 500 Hz the loudest and quietest directions within 5 dB for a front-to-random index of 5 dB or more. Hearing protector test site, ISO 4869-1 4.2.2: six points at 15 cm and the microphone turned through 360 degrees in the horizontal plane. Random-incidence field, ISO 4869-3 5.2.2: six positions at 150 mm with the fixture removed" width="96%" />
+
+*Panel B is this test room: six points 15 cm from the reference point on the
+three axes, and a directional microphone turned through 360° at it. The lists
+under the drawings set its numbers beside those of ISO 8253-2 and of the two
+sites of ISO 4869-3, further down this page.*
+
 The sound field is qualified with the subject and the chair absent. The level
 15 cm from the reference point on the three axes stays within ±2.5 dB of the
 level at it, the right and left positions within 3 dB of each other, and from
@@ -624,10 +631,15 @@ and `level_stable` and `response_smooth` check that the test signal held within
 ±1 dB and that no two adjacent bands of it differ by more than 5 dB.
 
 The test site is qualified as a random-incidence field or a plane progressive
-wave (5.2). The random-incidence field is the diffuse field of ISO 8253-2
+wave (5.2), with the fixture removed. The random-incidence field is the diffuse
+field of ISO 8253-2
 ([audiometric test methods](/phonometry/perception/hearing/audiometry/)) with
-this standard's own Table 1, and Annex A notes that the fixture itself can be
-the directional microphone where its front-to-random index reaches 4 dB:
+this standard's own Table 1: six positions 150 mm from the reference point,
+which here is midway between the end faces of the fixture (3.9). They are the
+points of panel B in the drawing under [the test room](#the-test-room-422),
+whose lists carry both sites of this standard. Annex A notes that the fixture
+itself can be the directional microphone where its front-to-random index
+reaches 4 dB:
 
 ```python
 index = [hearing.ATF_FRONT_TO_RANDOM_INDEX.get(f, np.nan) for f in bands]

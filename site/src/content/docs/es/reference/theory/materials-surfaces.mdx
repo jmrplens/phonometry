@@ -53,7 +53,7 @@ references:
     title: "Acoustics — Sound-scattering properties of surfaces — Part 1: Measurement of the random-incidence scattering coefficient in a reverberation room"
     designation: "ISO 17497-1:2004+A1:2014"
     url: "https://www.iso.org/standard/31397.html"
-    note: "La edición implementada aquí: el método del coeficiente de dispersión con mesa giratoria y su cadena de incertidumbre del Anexo A."
+    note: "La edición implementada aquí: el método del coeficiente de dispersión con plataforma giratoria y su cadena de incertidumbre del Anexo A."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2012
@@ -130,7 +130,7 @@ dispersa». Los difusores reales rara vez superan un coeficiente de difusión de
 Una superficie rugosa reparte la energía reflejada en una parte especular y
 otra dispersa; el coeficiente de dispersión $s$ es la fracción de energía no
 especular. ISO 17497-1:2004+A1:2014 lo mide en una cámara reverberante con la
-muestra sobre una mesa giratoria: cuatro tiempos de reverberación, con la
+muestra sobre una plataforma giratoria: cuatro tiempos de reverberación, con la
 mesa parada y girando, cada uno sin y con la muestra (Tabla 2), dan la
 absorción a incidencia aleatoria $\alpha_\mathrm{s}$ (apartado 8.1.1, Fórmula 1) y la
 absorción *especular* $\alpha_\mathrm{spec}$ (apartado 8.1.2, Fórmula 4). La
@@ -161,8 +161,8 @@ rotación se muestrea bien y la muestra es lo bastante grande como para ser una
 superficie y no un objeto. A escala real ($N = 1$) la muestra es circular con un
 diámetro de al menos 3,0 m, o cuadrada con 2,65 m de lado sobre una placa base
 de al menos 3,75 m de diámetro, y su profundidad estructural tiene que quedar
-por debajo de $d/16$ del diámetro de la mesa giratoria o el método deja de medir
-rugosidad (apartados 6.3.1–6.3.2); ninguna parte de la mesa giratoria se acerca
+por debajo de $d/16$ del diámetro de la plataforma giratoria o el método deja de medir
+rugosidad (apartados 6.3.1–6.3.2); ninguna parte de la plataforma giratoria se acerca
 a menos de 1,0 m de una pared de la sala (6.2), y una muestra con simetría de
 rotación se desplaza del eje de giro al menos $d/8$ (6.3.3). Toda dimensión
 lineal, y el volumen de sala de $V \ge 200$ m³, escalan por $1/N$ (por $N^{-3}$
@@ -179,6 +179,12 @@ ser invariante en el tiempo durante todo el conjunto: difusores fijos, sin
 paletas giratorias, sin ventilación ni circulación de aire en marcha (6.1.1), y
 temperatura y humedad relativa medidas antes y después de cada una de las cuatro
 situaciones (7.4).
+
+La disposición de ISO 17497-1 dibuja esa exigencia: la plataforma giratoria es lo
+único que se mueve, y las dos posiciones de altavoz y las tres de micrófono
+quedan fijas.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una cámara reverberante con la muestra de ensayo sobre una plataforma giratoria y su placa base a al menos 1 m de las paredes, dos posiciones fijas de altavoz y tres posiciones fijas de micrófono, siendo la plataforma lo único que se mueve, y el mapeo de la Tabla 2 de T1 a T4 sobre los coeficientes de absorción de incidencia aleatoria y especular a partir de los cuales se deriva el coeficiente de dispersión" width="92%" />
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="El coeficiente de dispersión de incidencia aleatoria s de una superficie difusora sobre las 13 bandas de tercio de octava de 250 a 4000 Hz, creciendo suavemente desde casi cero a baja frecuencia hasta 0,84 a 4 kHz" width="88%" />
 

@@ -6952,3 +6952,312 @@ def animate_fan_lobe_patterns(output_dir: str) -> None:
         "anim_fan_lobe_patterns",
         frames=_FLP_FRAMES + _ANIM_HOLD,
     )
+
+
+def animate_scattering_average(output_dir: str) -> None:
+    """Synchronous averaging over the turntable (ISO 17497-1, Clause 4 and 7.5).
+
+    A model, not a measurement, in the manner of the standard's Figure 1: each
+    response is one part that is the same at every orientation of the sample
+    plus one drawn afresh for each, and the two together decay as one
+    orientation does, with the reverberation time T2. The part every
+    orientation shares decays faster, with T4, because what the sample
+    scatters leaves it at each reflection. Averaging the responses sample by
+    sample therefore keeps the shared part and divides the energy of the
+    rest by the number averaged, which is what Clause 4 assumes when it calls
+    the scattered components statistically independent.
+
+    Left, the response of the orientation just added over the running
+    average, on axes without numbers as Figure 1 has them: the carrier is
+    slow enough for the cycles to show, so the two coincide at the start and
+    part later. Right, the backward-integrated decay of that average over
+    the whole response, so that its second, slower decay shows under the
+    first as the average grows to the 72 orientations 7.3 prefers; an inset
+    in its corner plots the energy of the scattered part left in the average
+    against n beside the 1/n that independence predicts. The clip
+    closes on what 7.5 reads: the same average integrated only from where
+    the response has fallen 30 dB, and the line fitted to its first decay
+    from −5 dB to −20 dB, drawn with its own intercept. The two
+    reverberation times read that way go to the library with the base
+    plate's of the guide's example (V = 200 m3, S = 10 m2, T1 = 8.0 s,
+    T3 = 7.5 s), and it returns the coefficients the closing frames print.
+    The band is narrow so the cycles show, and one narrow band reads its
+    decays short of the times the model is built with (about 2.7 s and
+    5.2 s for 3.0 s and 6.0 s), so the readout prints both.
+    """
+    from phonometry import materials
+    from phonometry._i18n import format_number
+
+    T = _translate_str
+    orientations = 72  # 7.3: the preferred number, steps of 5 degrees
+    volume, area, speed = 200.0, 10.0, 343.2  # the room of the guide's example
+    t1, t3 = 8.0, 7.5  # its base plate, still and turning
+    t2, t4 = 6.0, 3.0  # the model sample: one orientation, and the shared part
+    fs, seconds, carrier, width = 200, 12.0, 8.0, 3.5
+    t = np.arange(int(seconds * fs)) / fs
+    rng = np.random.default_rng(17497)
+    freqs = np.fft.rfftfreq(t.size, 1.0 / fs)
+    band = np.exp(-0.5 * ((freqs - carrier) / width) ** 2)
+    white = rng.standard_normal((orientations + 1, t.size))
+    parts = np.fft.irfft(np.fft.rfft(white, axis=1) * band, n=t.size, axis=1)
+    parts /= np.sqrt(np.mean(parts**2, axis=1, keepdims=True))
+    whole = np.exp(-13.8155 * t / t2)  # energy of one orientation's response
+    shared = np.exp(-13.8155 * t / t4)  # energy of the part they all share
+    responses = parts[0] * np.sqrt(shared) + parts[1:] * np.sqrt(whole - shared)
+    counts = np.arange(1, orientations + 1)
+    averages = np.cumsum(responses, axis=0) / counts[:, None]
+    energy = np.cumsum(averages[:, ::-1] ** 2, axis=1)[:, ::-1]
+    levels = 10.0 * np.log10(energy / energy[:, :1])
+    # The scattered part each orientation adds, and what is left of it in
+    # the average of n: its energy against n is what Clause 4's independence
+    # predicts to fall as 1/n.
+    scattered = parts[1:] * np.sqrt(whole - shared)
+    residue = np.cumsum(scattered, axis=0) / counts[:, None]
+    # Relative to the mean energy of one orientation's scattered part, so the
+    # first point is one realisation's spread about 1 and not 1 by fiat.
+    residue_energy = np.sum(residue**2, axis=1) / np.mean(np.sum(scattered**2, axis=1))
+
+    def _first_decay(n: int) -> tuple[float, float, float, NDArray[np.float64]]:
+        """What 7.5 reads from the average of *n* responses.
+
+        The backward integration starts where the response has fallen
+        30 dB, and the straight line is fitted to that integration between
+        -5 dB and -20 dB. Returned: the reverberation time, the fitted line's
+        slope and intercept, and the integrated level up to that point.
+        """
+        expected = shared + (whole - shared) / n
+        stop = int(np.argmax(10.0 * np.log10(expected) < -30.0))
+        tail = np.cumsum(averages[n - 1, :stop][::-1] ** 2)[::-1]
+        level = 10.0 * np.log10(tail / tail[0])
+        mask = (level <= -5.0) & (level >= -20.0)
+        slope, intercept = np.polyfit(t[:stop][mask], level[mask], 1)
+        return -60.0 / float(slope), float(slope), float(intercept), level
+
+    t2_read = _first_decay(1)[0]
+    t4_read, fit_slope, fit_intercept, truncated = _first_decay(orientations)
+    alpha_s = float(
+        materials.random_incidence_absorption(
+            volume, area, c1=speed, t1=t1, c2=speed, t2=t2_read
+        )
+    )
+    alpha_spec = float(
+        materials.specular_absorption_coefficient(
+            volume, area, c3=speed, t3=t3, c4=speed, t4=t4_read
+        )
+    )
+    scattering = float(materials.scattering_coefficient(alpha_spec, alpha_s))
+
+    fig = _anim_figure()
+    fig.suptitle(T("Synchronous averaging over the turntable (ISO 17497-1)"))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.1, 1.0])
+    ax_p = fig.add_subplot(gs[0])
+    span_p, span_d = 3.4, 5.0
+    near = t <= span_p
+    peak = float(np.max(np.abs(responses[:, near])))
+    ax_p.set_xlim(0.0, span_p)
+    ax_p.set_ylim(-1.3 * peak, 1.3 * peak)
+    ax_p.set_xticks([])
+    ax_p.set_yticks([])
+    ax_p.set_xlabel(T("Time"), fontsize=9)
+    ax_p.set_ylabel(T("Sound pressure"), fontsize=9)
+    quiet_gray = theme_line("gray", ax_p, quiet=0.4)
+    (one,) = ax_p.plot([], [], color=quiet_gray, lw=0.9, label=T("one orientation"))
+    (mean,) = ax_p.plot(
+        [], [], color=COLOR_PRIMARY, lw=1.6, label=T("synchronous average")
+    )
+    # Small enough to stay clear of the turntable readout at its widest, the
+    # Spanish one at the last orientation.
+    ax_p.legend(loc="upper right", fontsize=8, handlelength=1.6)
+    # The strips above and below the responses are the only places nothing
+    # reaches: the turntable readout rides the upper one, the closing notes
+    # the lower.
+    step_txt = ax_p.text(
+        0.02,
+        0.975,
+        "",
+        transform=ax_p.transAxes,
+        ha="left",
+        va="top",
+        family="monospace",
+        fontsize=9.5,
+        color=COLOR_FG,
+        zorder=4,
+        bbox=_page_chip(0.2),
+    )
+    # Under the legend, where the responses have died down: the readout of
+    # the closing frames takes the lower strip whole.
+    ax_p.text(
+        0.98,
+        0.8,
+        T("model responses"),
+        transform=ax_p.transAxes,
+        ha="right",
+        va="top",
+        style="italic",
+        fontsize=8.5,
+        color=COLOR_MUTED,
+        zorder=4,
+        bbox=_page_chip(0.2),
+    )
+    notes = ax_p.text(
+        0.98,
+        0.03,
+        "",
+        transform=ax_p.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=8.5,
+        linespacing=1.35,
+        color=COLOR_FG,
+        zorder=4,
+        bbox=_page_chip(0.25),
+    )
+
+    ax_d = fig.add_subplot(gs[1])
+    _grid_axes(ax_d)
+    far = t <= span_d
+    ax_d.set_xlim(0.0, span_d)
+    ax_d.set_ylim(-50.0, 2.0)
+    ax_d.set_xlabel(T("Time [s]"), fontsize=9)
+    ax_d.set_ylabel(T("Level [dB]"), fontsize=9)
+    fill_alpha = 0.5 if _FILENAME_SUFFIX else 0.35
+    window = ax_d.axhspan(-20.0, -5.0, color=COLOR_TERTIARY, alpha=fill_alpha, lw=0)
+    limit = ax_d.axhline(-30.0, color=COLOR_FG, lw=1.0, ls=":")
+    # Each closing mark is named on itself, at the right where the decays
+    # have already fallen below it: the window along its lower edge, the
+    # integration limit above its dotted line.
+    window_txt = ax_d.text(
+        span_d - 0.08,
+        -19.4,
+        T("read from −5 dB to −20 dB"),
+        ha="right",
+        va="bottom",
+        fontsize=8.5,
+        color=COLOR_FG,
+        zorder=4,
+    )
+    limit_txt = ax_d.text(
+        span_d - 0.08,
+        -29.3,
+        T("integration stopped\nat −30 dB"),
+        ha="right",
+        va="bottom",
+        linespacing=1.2,
+        fontsize=8.5,
+        color=COLOR_FG,
+        zorder=4,
+    )
+    (gray,) = ax_d.plot(
+        t[far], levels[0, far], color=quiet_gray, lw=1.4, label=T("one orientation")
+    )
+    (curve,) = ax_d.plot(
+        [], [], color=COLOR_PRIMARY, lw=2.4, label=T("synchronous average")
+    )
+    # What 7.5 reads: the same average integrated only from where it has
+    # fallen 30 dB, and the line fitted to it in the window, drawn with its
+    # own intercept over the curve it was fitted on.
+    (cut,) = ax_d.plot(
+        [],
+        [],
+        color=COLOR_QUATERNARY,
+        lw=1.6,
+        label=T("integrated to −30 dB"),
+    )
+    (fit,) = ax_d.plot(
+        [], [], color=COLOR_SECONDARY, ls="--", lw=1.7, label=T("fitted first decay")
+    )
+    # The inset takes the corner under the decays, left of where the
+    # integration to -30 dB drops away.
+    ax_n = ax_d.inset_axes((0.035, 0.06, 0.18, 0.17))
+    ax_n.set_facecolor(plt.rcParams["axes.facecolor"])
+    ax_n.set_xscale("log")
+    ax_n.set_yscale("log")
+    ax_n.set_xlim(1.0, 100.0)
+    ax_n.set_ylim(0.005, 2.0)
+    ax_n.set_xticks([1.0, 10.0, 72.0])
+    ax_n.set_xticklabels(["1", "10", "72"])
+    # The 1/n line is the scale: the axes carry ticks on n alone, so no
+    # label reaches out to the decay axes' own spine.
+    ax_n.set_yticks([0.01, 0.1, 1.0])
+    ax_n.set_yticklabels([])
+    ax_n.minorticks_off()
+    ax_n.tick_params(labelsize=7, length=2.5, pad=1.5)
+    ax_n.set_title(
+        T("scattered energy\nleft in the\naverage"),
+        fontsize=7.5,
+        pad=4,
+        linespacing=1.15,
+        loc="left",
+    )
+    ax_n.plot(counts, 1.0 / counts, color=COLOR_FG, lw=0.9, ls="--", label="$1/n$")
+    (residue_line,) = ax_n.plot([], [], color=COLOR_PRIMARY, lw=1.4)
+    ax_n.legend(loc="lower left", fontsize=7, handlelength=1.6, borderpad=0.3)
+    # Drawn down to the limit only: past it the truncated integral plunges
+    # to the stopping point, which 7.5 does not read.
+    above_limit = truncated[:-1] >= -30.0
+    cut_t = t[: truncated.size - 1][above_limit]
+    cut_level = truncated[:-1][above_limit]
+    # The fitted line, a little past each end of the window it was fitted in.
+    fit_level = np.array([-2.0, -24.0])
+    fit_t = (fit_level - fit_intercept) / fit_slope
+    legend_open = ax_d.legend(handles=[gray, curve], loc="upper right", fontsize=8)
+    ax_d.add_artist(legend_open)
+    legend_closing = ax_d.legend(
+        handles=[gray, curve, cut, fit], loc="upper right", fontsize=8
+    )
+
+    reveal = int(_ANIM_FRAMES * 0.8)
+
+    def _seconds(value: float) -> str:
+        return format_number(value, _LANG, decimals=1)
+
+    closing_notes = "\n".join(
+        (
+            T(f"first decay: $T_4$ = {_seconds(t4_read)} s"),
+            T(f"one orientation: $T_2$ = {_seconds(t2_read)} s"),
+            T(f"model built with $T_4$ = {_seconds(t4)} s, $T_2$ = {_seconds(t2)} s"),
+            T(f"specular absorption {alpha_spec:.2f}"),
+            T(f"random-incidence absorption {alpha_s:.2f}"),
+            T(f"scattering coefficient {scattering:.2f}"),
+        )
+    )
+
+    def update(k: int) -> tuple[Any, ...]:
+        n = 1 + (orientations - 1) * min(k, reveal - 1) // (reveal - 1)
+        one.set_data(t[near], responses[n - 1, near])
+        mean.set_data(t[near], averages[n - 1, near])
+        curve.set_data(t[far], levels[n - 1, far])
+        residue_line.set_data(counts[:n], residue_energy[:n])
+        step_txt.set_text(
+            T(f"turntable at {5 * (n - 1)}°") + "\n" + T(f"average of {n} of 72")
+        )
+        closing = k >= reveal
+        for artist in (window, limit, window_txt, limit_txt, legend_closing):
+            artist.set_visible(closing)
+        legend_open.set_visible(not closing)
+        if closing:
+            cut.set_data(cut_t, cut_level)
+            fit.set_data(fit_t, fit_level)
+            notes.set_text(closing_notes)
+        else:
+            cut.set_data([], [])
+            fit.set_data([], [])
+            notes.set_text("")
+        return (
+            one,
+            mean,
+            curve,
+            residue_line,
+            step_txt,
+            window,
+            limit,
+            window_txt,
+            limit_txt,
+            cut,
+            fit,
+            notes,
+            legend_open,
+            legend_closing,
+        )
+
+    _render_clip(fig, update, output_dir, "anim_scattering_average")

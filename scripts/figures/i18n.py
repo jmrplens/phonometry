@@ -3493,6 +3493,17 @@ _ES_EXACT = {
     "T30 fit": "ajuste T30",
     "Schroeder backward integration (ISO 3382)": "Integración inversa de Schroeder (ISO 3382)",
     "← integrate from the tail": "← integrar desde la cola",
+    # anim_scattering_average: the synchronous average of ISO 17497-1.
+    "Synchronous averaging over the turntable (ISO 17497-1)": "Promediado síncrono sobre la plataforma giratoria (ISO 17497-1)",
+    "one orientation": "una orientación",
+    "synchronous average": "media síncrona",
+    "model responses": "respuestas de un modelo",
+    "Time": "Tiempo",
+    "read from −5 dB to −20 dB": "se lee de −5 dB a −20 dB",
+    "integrated to −30 dB": "integrada hasta −30 dB",
+    "fitted first decay": "primer decaimiento ajustado",
+    "scattered energy\nleft in the\naverage": "energía dispersada\nque queda\nen la media",
+    "integration stopped\nat −30 dB": "integración detenida\nen −30 dB",
     "squared impulse response $p^2$": "respuesta al impulso al cuadrado $p^2$",
     "tail energy": "energía de la cola",
     "Room modes in a rigid 5 m × 3.5 m room (2D FDTD)": "Modos propios en una sala rígida de 5 m × 3,5 m (FDTD 2D)",
@@ -6424,6 +6435,20 @@ _ES_PATTERNS = [
     (r"^10-90 % band \((\d+) yr\)$", r"banda 10-90 % (\1 años)"),
     # Tier-1 animation dynamic labels
     (r"^remaining energy: (.+) %$", r"energía restante: \1 %"),
+    (r"^turntable at (\d+)°$", r"plataforma giratoria a \1°"),
+    (r"^average of (\d+) of 72$", r"media de \1 de 72"),
+    (r"^first decay: \$T_4\$ = (.+) s$", r"primer decaimiento: $T_4$ = \1 s"),
+    (r"^one orientation: \$T_2\$ = (.+) s$", r"una orientación: $T_2$ = \1 s"),
+    (
+        r"^model built with \$T_4\$ = (.+) s, \$T_2\$ = (.+) s$",
+        r"modelo construido con $T_4$ = \1 s, $T_2$ = \2 s",
+    ),
+    (r"^specular absorption (\d\.\d+)$", r"absorción especular \1"),
+    (
+        r"^random-incidence absorption (\d\.\d+)$",
+        r"absorción de incidencia aleatoria \1",
+    ),
+    (r"^scattering coefficient (\d\.\d+)$", r"coeficiente de dispersión \1"),
     (
         r"^\$\\langle p\\cdot u\\rangle\$ = ([+−-])(\d+)\.(\d+)$",
         r"$\\langle p\\cdot u\\rangle$ = \1\2,\3",

@@ -332,6 +332,24 @@ envueltas. Un registro que se corta con el barrido pliega la cola sobre la
 cabecera y sesga todos los $T$ y todos los valores de claridad que salen de ahí,
 en silencio y siempre en el mismo sentido.
 
+El esquema siguiente dimensiona las dos excitaciones para una sala con
+$T = 1{,}2$ s. Para el barrido, el Anexo B considera práctica normalmente segura,
+con ruido de fondo moderado, una longitud de dos a cuatro veces el tiempo de
+reverberación más largo seguida de un hueco de silencio igual a ese tiempo
+(B.3.1), y duplicar la duración del barrido suma normalmente 3 dB de relación
+señal-ruido efectiva (B.6). Para la MLS, el periodo de una secuencia de orden
+$N$ es $(2^N - 1)/f_\mathrm{s}$: a 48 kHz, el orden 17 dura 2,73 s y cumple la
+Fórmula 10, mientras que el orden 15 dura 0,68 s y no la cumple. El Anexo A
+supone que la secuencia se reproduce periódicamente (A.2), y la sala solo
+responde de forma periódica cuando un periodo entero la ha recorrido, así que
+en la práctica se descarta el primer periodo reproducido y se conserva el
+segundo; ese paso es práctica de medida, que la norma no enuncia. El tercer
+carril es lo que devuelve la
+deconvolución del barrido: la respuesta lineal en el tiempo cero y, por delante
+de ella, los paquetes de armónicos.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_budget.svg" alt="Tres carriles temporales para una sala con T = 1,2 s. El primero muestra el barrido reproducido de 4,0 segundos, tres veces y un tercio T, seguido de un hueco de silencio de aproximadamente un T y una ventana de grabación acotada de 5,2 segundos. El segundo muestra una MLS periódica de orden 17, de periodo 2,73 segundos, con el primer periodo marcado como calentamiento y descartado y el segundo conservado, y debajo un periodo corto de orden 15 de 0,68 segundos marcado como más corto que T, de modo que la cola se pliega sobre la cabeza. El tercero muestra lo que devuelve la deconvolución: la respuesta al impulso lineal y su cola en el tiempo cero con la parte causal conservada, los paquetes de armónicos segundo, tercero y cuarto en tiempos de llegada negativos, y la propia cola de ruido decreciente de la deconvolución" width="94%" />
+
 La hipótesis que primero se rompe es la invariancia temporal, y el apartado 6.1
 es explícito al respecto: mover la fuente o un micrófono durante la medición no
 es aceptable, y tampoco lo es el movimiento del aire ni un cambio de la velocidad
@@ -386,6 +404,14 @@ $d_{\min} = 2\sqrt{V/(c\,T)}$, para que el sonido directo no domine el
 decaimiento temprano. Las posiciones más juntas que eso no son las posiciones
 independientes que cuenta la Tabla 1, y un $T$ promediado sobre ellas no tiene
 grado ninguno.
+
+El esquema siguiente dibuja esas reglas sobre una sala de 10 m por 6 m y 3,5 m de
+altura, en la que $V = 210$ m³ y un $T$ esperado de 0,6 s dan
+$d_{\min} = 2{,}0$ m. Añade las dos alturas de ISO 3382-1 (apartado 4.3): el
+centro acústico de la fuente a 1,5 m del suelo y, en salas para palabra y
+música, los micrófonos a 1,2 m, la altura del oído de un oyente sentado.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" width="94%" />
 
 <span id="claridad-definicion-y-tiempo-central-iso-3382-1-anexo-a"></span>
 
@@ -594,11 +620,24 @@ rígido, una cámara de aire o unos bordes enmarcados cambian la respuesta, que 
 la razón por la que un $\alpha_\mathrm{s}$ de catálogo sin su código de montaje no sirve, y
 por la que un mismo producto da curvas distintas en laboratorios distintos. Cada
 $T$ es el promedio de al menos 12 decaimientos espacialmente independientes,
-desde al menos 3 posiciones de micrófono y 2 de fuente, con los micrófonos
-separados al menos 1,5 m entre sí, a 2 m de cualquier fuente y a 1 m de cualquier
-superficie de la cámara y de la probeta (7.1.4, 7.1.3). Las dos mediciones se
-hacen entre el 30 % y el 90 % de humedad relativa y por encima de 15 °C, con un
-clima prácticamente igual (6.3.2).
+desde al menos 3 posiciones de micrófono y 2 de fuente (7.1.4), con los
+micrófonos separados al menos 1,5 m entre sí, a 2 m de cualquier fuente y a 1 m
+de cualquier superficie de la cámara y de la probeta (7.1.2), y con las
+posiciones de fuente separadas al menos 3 m (7.1.3). Las dos mediciones se hacen
+entre el 30 % y el 90 % de humedad relativa y a 15 °C o más, con un clima
+prácticamente igual (6.3.2).
+
+El esquema siguiente dibuja esa disposición para una cámara de 200 m³ y una
+probeta de 10,8 m². Muestra además lo que el párrafo deja al texto de la norma:
+los difusores del Anexo A, láminas de entre 0,8 m² y 3 m² aproximadamente y unos
+5 kg/m²; el área de absorción de la cámara vacía $A_1$, que tiene que quedar por
+debajo del límite de la Tabla 1 (6.1.4), con $T_1$ medido sin el marco de la
+probeta (6.2.1.3); cada decaimiento evaluado sobre 20 dB a partir de 5 dB por
+debajo del nivel inicial (7.4.1); y dos de los montajes del Anexo B, el tipo A
+directamente contra el suelo y el tipo E-400, con 400 mm entre la cara expuesta
+y la superficie que queda detrás.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso354_room.svg" alt="Planta de una cámara reverberante ISO 354 con paredes no paralelas: la probeta rectangular de 10,8 metros cuadrados sobre el suelo, con sus bordes deliberadamente no paralelos a los bordes de la sala y una separación de 0,75 metros acotada hasta el paramento más cercano, tres posiciones de micrófono y dos posiciones de altavoz con sus reglas de separación, paneles difusores suspendidos cerca del techo, un recuadro que muestra la sala vacía dando T1 y A1 sobre la sala con la probeta dando T2 y A2, y una franja que compara en sección los montajes de tipo A y de tipo E-400" width="92%" />
 
 Esa última condición no es una cuestión de orden. El resultado es la *diferencia*
 de dos áreas de absorción grandes y casi iguales, así que todo lo que cambie

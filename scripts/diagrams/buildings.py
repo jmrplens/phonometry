@@ -195,7 +195,7 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
     s.text(
         x0,
         80,
-        "1  What you play, and how long you keep recording",
+        "1 What you play, and how long you keep recording",
         15,
         th.fg,
         "start",
@@ -254,10 +254,12 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
 
     # --- Lane 2: the MLS period against the reverberation time -------------
     y2 = 296.0
+    # 8 px higher than the lane's other rows would put it: the heading runs
+    # over the dimension label of the period, which it crowded at 228.
     s.text(
         x0,
-        228,
-        "2  If the excitation repeats, the period must exceed $T$ (6.2.2.2)",
+        220,
+        "2 If the excitation repeats, the period must be at least $T$ (6.2.2.2)",
         15,
         th.fg,
         "start",
@@ -322,9 +324,7 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
     # --- Lane 3: what the deconvolution returns ----------------------------
     y3 = 470.0
     origin = 1.2  # the axis starts at -1.2 s
-    s.text(
-        x0, 386, "3  After linear deconvolution (B.5)", 15, th.fg, "start", bold=True
-    )
+    s.text(x0, 386, "3 After linear deconvolution (B.5)", 15, th.fg, "start", bold=True)
     zero = x0 + origin * ppm
     # Harmonic packets at t = -T_sweep ln N / ln(f2/f1), f2/f1 = 1000.
     import math
@@ -1313,19 +1313,22 @@ def _d_room_measurement(s: SVG, th: Theme) -> None:
         "start",
         bold=True,
     )
+    # The table keeps the 60 px margin of the room plan on both sides of the
+    # 900 px canvas: at 840 px wide it ran to the right edge and lost half
+    # its border. The columns are spaced for the Spanish headings, the wider.
     cols = [
         (70.0, "Method", "start"),
-        (330.0, "Source pos.", "middle"),
-        (470.0, "Mic pos.", "middle"),
-        (630.0, "Source–mic comb.", "middle"),
-        (820.0, "Decays / comb.", "middle"),
+        (290.0, "Source pos.", "middle"),
+        (430.0, "Mic pos.", "middle"),
+        (585.0, "Source–mic comb.", "middle"),
+        (760.0, "Decays / comb.", "middle"),
     ]
     rows = [
         ("Survey", "≥ 1", "≥ 2", "2", "1"),
         ("Engineering", "≥ 2", "≥ 2", "6", "2"),
         ("Precision", "≥ 2", "≥ 3", "12", "3"),
     ]
-    tw, th_row = 840.0, 40.0
+    tw, th_row = 780.0, 40.0
     s.rect(60, ty, tw, th_row * (len(rows) + 1), "none", th.fg, rx=6, sw=1.8)
     s.rect(60, ty, tw, th_row, th.panel, th.fg, rx=6, sw=1.8)
     for cx, label, anchor in cols:

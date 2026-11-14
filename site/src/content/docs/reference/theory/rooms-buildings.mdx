@@ -324,6 +324,21 @@ that stops with the sweep folds the tail back onto the head and biases every
 $T$ and every clarity value derived from it, silently and always in the same
 direction.
 
+The diagram below sizes both excitations for a room with $T = 1.2$ s. For the
+sweep, Annex B (B.3.1) considers a length of two to four times the longest
+reverberation time, followed by a silent gap equal to that time, normally safe
+under moderate background noise, and doubling the sweep duration normally adds
+3 dB of effective signal-to-noise ratio (B.6). For the MLS, the period of an
+order-$N$ sequence is $(2^N - 1)/f_\mathrm{s}$: at 48 kHz, order 17 lasts 2.73 s
+and satisfies Formula 10, while order 15 lasts 0.68 s and does not. Annex A
+takes the sequence as replayed periodically (A.2), and the room answers
+periodically only once a whole period has run through it, so in practice the
+first period played is discarded and the second is kept; that step is
+measurement practice, which the standard does not state. The third lane is what the deconvolution of the sweep
+returns, the linear response at time zero and the harmonic packets ahead of it.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_budget.svg" alt="Three time lanes for a room with T = 1.2 s. The first shows the played sweep of 4.0 seconds, three and a third times T, followed by a silent gap of about one T and a bracketed record window of 5.2 seconds. The second shows a periodic MLS of order 17, period 2.73 seconds, with the first period marked as warm-up and discarded and the second kept, and below it a short order-15 period of 0.68 seconds marked as shorter than T so the tail folds onto the head. The third shows what the deconvolution returns: the linear impulse response and its tail at time zero with the causal part kept, the second, third and fourth harmonic packets at negative arrival times, and the deconvolution's own decaying noise tail" width="94%" />
+
 The assumption that breaks first is time invariance, and clause 6.1 is explicit
 about it: moving the source or a microphone during the measurement is not
 acceptable, and neither air movement nor a change in the speed of sound through
@@ -370,6 +385,14 @@ floor, never symmetric, and no closer to a source than
 $d_{\min} = 2\sqrt{V/(c\,T)}$, so that direct sound does not dominate the early
 decay. Positions packed closer than that are not the independent positions
 Table 1 counts, and a $T$ averaged over them carries no grade at all.
+
+The diagram below draws those rules on a room of 10 m by 6 m, 3.5 m high, for
+which $V = 210$ m³ and an expected $T$ of 0.6 s give $d_{\min} = 2.0$ m. It adds
+the two heights of ISO 3382-1 (clause 4.3): the acoustic centre of the source
+1.5 m above the floor and, in rooms for speech and music, the microphones at
+1.2 m, the ear height of a seated listener.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" width="94%" />
 
 ### Clarity, definition and centre time (ISO 3382-1, Annex A)
 
@@ -554,10 +577,22 @@ backing, air gap or framed edges change the answer, which is why a catalogue
 $\alpha_\mathrm{s}$ without its mounting code is not usable and why the same product
 gives different curves in different laboratories. Each $T$ is the average of at
 least 12 spatially independent decays, from at least 3 microphone and 2 source
-positions, with microphones at least 1.5 m apart, 2 m from any source and 1 m
-from any room surface and from the specimen (7.1.4, 7.1.3). Both measurements
-are made between 30 % and 90 % relative humidity and above 15 °C, at nearly the
-same climate (6.3.2).
+positions (7.1.4), with microphones at least 1.5 m apart, 2 m from any source
+and 1 m from any room surface and from the specimen (7.1.2), and source
+positions at least 3 m apart (7.1.3). Both measurements are made between 30 %
+and 90 % relative humidity and at 15 °C or more, at nearly the same climate
+(6.3.2).
+
+The diagram below draws that arrangement for a 200 m³ room and a 10.8 m² specimen.
+It also shows what the paragraph leaves to the standard's own text: the
+diffusers of Annex A, sheets of roughly 0.8 m² to 3 m² and about 5 kg/m²; the
+empty-room absorption area $A_1$ that must stay under the Table 1 limit
+(6.1.4), with $T_1$ measured without the frame of the specimen (6.2.1.3); each
+decay evaluated over 20 dB starting 5 dB below the initial level (7.4.1); and
+two of the Annex B mountings, Type A directly against the floor and Type E-400
+with 400 mm between the exposed face and the surface behind it.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso354_room.svg" alt="Plan of an ISO 354 reverberation room with non-parallel walls: the 10.8 square metre rectangular specimen on the floor with its edges deliberately not parallel to the room edges and a 0.75 metre clearance dimensioned to the nearest boundary, three microphone positions and two loudspeaker positions with their separation rules, suspended diffuser panels near the ceiling, an inset showing the empty room giving T1 and A1 above the room with the specimen giving T2 and A2, and a strip comparing the Type A and Type E-400 mountings in section" width="92%" />
 
 That last condition is not housekeeping. The result is the *difference* of two
 large and nearly equal absorption areas, so everything that changes between the

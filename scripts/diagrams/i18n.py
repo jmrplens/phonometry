@@ -663,14 +663,14 @@ _ES: dict[str, str] = {
     "capsule, ≤ 13 mm preferred": "omnidireccional, ≤ 13 mm preferible",
     # Dimensioning the ISO 18233 excitation (T = 1.2 s)
     "Dimensioning the excitation for a room with T = 1.2 s (ISO 18233)": "Dimensionado de la excitación para una sala con T = 1,2 s (ISO 18233)",
-    "1  What you play, and how long you keep recording": "1  Qué se reproduce, y cuánto se sigue grabando",
+    "1 What you play, and how long you keep recording": "1 Qué se reproduce, y cuánto se sigue grabando",
     "sweep, 4.0 s = 3.3 × $T$": "barrido, 4,0 s = 3,3 × $T$",
     "silence $≈ T$": "silencio $≈ T$",
     "record window 5.2 s": "ventana de grabación 5,2 s",
     "B.3.1: sweep 2–4 × $T$, silent gap $≈ T$   |   B.6: +3 dB effective SNR "
     "per doubling": "B.3.1: barrido 2–4 × $T$, silencio $≈ T$   |   B.6: +3 dB de S/R "
     "efectiva por duplicación",
-    "2  If the excitation repeats, the period must exceed $T$ (6.2.2.2)": "2  Si la excitación se repite, el periodo debe superar $T$ (6.2.2.2)",
+    "2 If the excitation repeats, the period must be at least $T$ (6.2.2.2)": "2 Si la excitación se repite, el periodo debe ser al menos $T$ (6.2.2.2)",
     "period 1, warm-up: discarded": "periodo 1, arranque: se descarta",
     "period 2, kept": "periodo 2, se conserva",
     "order 17 → 2.73 s $≥ T$": "orden 17 → 2,73 s $≥ T$",
@@ -678,7 +678,7 @@ _ES: dict[str, str] = {
     "order 15 is shorter than $T$: the tail folds onto the head and $T$ comes "
     "out short": "el orden 15 es más corto que $T$: la cola se pliega sobre el inicio y "
     "$T$ sale corto",
-    "3  After linear deconvolution (B.5)": "3  Tras la deconvolución lineal (B.5)",
+    "3 After linear deconvolution (B.5)": "3 Tras la deconvolución lineal (B.5)",
     "kept by default: the linear impulse response and its tail": "se conserva por defecto: la respuesta al impulso lineal y su cola",
     "discarded, or read as distortion": "se descarta o es distorsión",
     "the linear deconvolution's own decaying noise tail, not the room": "la cola de ruido decreciente de la propia deconvolución, no la sala",

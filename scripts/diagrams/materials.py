@@ -1636,7 +1636,9 @@ def _d_iso354_room(s: SVG, th: Theme) -> None:
         )
         if top > 200:
             s.rect(690, top + 34, 92, 26, th.bg, th.secondary, sw=1.8)
-            for hx in range(696, 782, 12):
+            # Each stroke climbs 14 px, so the last one starts by 766 to end
+            # inside the 690 to 782 specimen; from 780 it ran past its edge.
+            for hx in range(694, 768, 12):
                 s.line(hx, top + 57, hx + 14, top + 37, th.secondary, 0.9)
         s.text(750, top + 106, note, 16, col, bold=True)
     s.text(750, 412, "$α_s = (A_2 − A_1) / S$", 16, th.accent, bold=True)

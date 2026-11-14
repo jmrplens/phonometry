@@ -592,6 +592,7 @@ from .room import (
     generate_workroom_spatial_decay,
 )
 from .schematics import (
+    animate_bearing_load_zone,
     animate_block_vs_exponential,
     animate_comb_filtering,
     animate_dynamic_stiffness_sweep,
@@ -1729,6 +1730,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_block_vs_exponential": animate_block_vs_exponential,
     "anim_feedback_howl": animate_feedback_howl,
     "anim_synchronous_averaging": animate_synchronous_averaging,
+    "anim_bearing_load_zone": animate_bearing_load_zone,
 }
 
 
@@ -2224,6 +2226,7 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_block_vs_exponential": 75.0,
     "anim_feedback_howl": 65.0,
     "anim_synchronous_averaging": 70.0,
+    "anim_bearing_load_zone": 150.0,
 }
 
 # A clip rename must not silently drop its scheduling weight; fail fast.

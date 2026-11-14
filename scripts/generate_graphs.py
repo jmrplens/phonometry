@@ -390,6 +390,7 @@ from figures.room import (
     generate_steady_state_field,
 )
 from figures.schematics import (
+    animate_bearing_load_zone,
     animate_block_vs_exponential,
     animate_comb_filtering,
     animate_dynamic_stiffness_sweep,
@@ -547,6 +548,7 @@ __all__ = [
     "_FIGURE_FUNCS",
     "_RASTER_FIGURES",
     "_VARIANTS",
+    "animate_bearing_load_zone",
     "animate_block_vs_exponential",
     "animate_comb_filtering",
     "animate_dynamic_stiffness_sweep",

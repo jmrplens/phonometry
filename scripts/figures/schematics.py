@@ -6282,3 +6282,421 @@ def animate_synchronous_averaging(output_dir: str) -> None:
         fig.set_layout_engine("none")
 
     _render_clip(fig, update, output_dir, "anim_synchronous_averaging", measure=settle)
+
+
+# --- a bearing fault read through its load zone -----------------------------
+#
+# The three localised faults of a rolling bearing ring the same housing
+# resonance; what tells them apart is what the load zone does to the train of
+# impacts. Randall & Antoni (2011), section 1: "The strength of the bursts
+# depends on the load borne by the rolling element(s), and this is normally
+# modulated by the rate at which the fault is passing through the load
+# zone", at shaft speed for an inner-race fault and cage speed for a
+# rolling-element fault, while "for unidirectional load, an outer race fault
+# would not be modulated" (section 6). The clip plays the three one after
+# another on the bearing of the page, timed by the library and slowed down:
+# one frame is one millisecond of the machine.
+#
+# The load each impact carries is the Stribeck distribution of McFadden &
+# Smith (1984), Eqs. (3) and (4): q(theta) = q0 [1 - (1 - cos theta) /
+# (2 epsilon)]^n inside the load zone and zero outside it, with n = 10/9 for
+# a roller bearing. The load distribution factor epsilon depends on the
+# clearance and the load of a real bearing, which the page does not have, so
+# the clip takes the half-circle zone, epsilon = 0.5, and says it is a sketch.
+
+_BLZ_SPAN_MS = 150.0  # machine time of each act
+_BLZ_ACT_FRAMES = 150  # frames of each act: one frame is one millisecond
+_BLZ_FS = 20_000.0  # sampling rate of the traces, the page's own record
+_BLZ_RING_HZ = 3000.0  # the housing resonance the page's record rings
+_BLZ_RING_TAU = 6.0e-4  # its decay time [s], as in the page's record
+_BLZ_EPSILON = 0.5  # Stribeck load distribution factor: a half-circle zone
+_BLZ_EXPONENT = 10.0 / 9.0  # McFadden & Smith (1984), Eq. (3): rollers
+
+
+def _stribeck_load(theta: NDArray[np.float64]) -> NDArray[np.float64]:
+    """Load at *theta* from the load line over the peak load.
+
+    McFadden & Smith (1984), Eqs. (3) and (4): the Stribeck distribution
+    inside the load zone and nothing outside it.
+    """
+    base = 1.0 - (1.0 - np.cos(theta)) / (2.0 * _BLZ_EPSILON)
+    return np.asarray(np.clip(base, 0.0, None) ** _BLZ_EXPONENT, dtype=float)
+
+
+@lru_cache(maxsize=1)
+def _bearing_load_zone_data() -> dict[str, Any]:
+    """The three impact trains of the page's bearing, one per damaged part.
+
+    Angles run from the load line, positive the way the shaft turns. Every
+    act starts half an impact period before its first strike.
+    """
+    from phonometry import vibration
+
+    faults = vibration.bearing_fault_frequencies(
+        2000.0, 15, 6.0, 34.0, contact_angle_deg=12.96
+    )
+    shaft = float(faults.shaft_rate)
+    ftf, bsf = float(faults["FTF"]), float(faults["BSF"])
+    bpfo, bpfi, bdf = float(faults["BPFO"]), float(faults["BPFI"]), float(faults["BDF"])
+    n_rollers = 15
+    span = _BLZ_SPAN_MS / 1000.0
+    t = np.arange(round(span * _BLZ_FS)) / _BLZ_FS
+    tau = np.arange(round(0.004 * _BLZ_FS)) / _BLZ_FS
+    ring = np.exp(-tau / _BLZ_RING_TAU) * np.sin(2.0 * np.pi * _BLZ_RING_HZ * tau)
+    ring /= float(np.max(np.abs(ring)))
+    two_pi = 2.0 * np.pi
+
+    def act(rate: float, cage0: float, shaft0: float, where: str) -> dict[str, Any]:
+        times = (np.arange(int(span * rate) + 1) + 0.5) / rate
+        times = times[times < span]
+        if where == "outer":
+            angle_at = np.zeros_like(times)
+            envelope = np.ones_like(t)
+        elif where == "inner":
+            angle_at = shaft0 + two_pi * shaft * times
+            envelope = _stribeck_load(shaft0 + two_pi * shaft * t)
+        else:
+            angle_at = cage0 + two_pi * ftf * times
+            envelope = _stribeck_load(cage0 + two_pi * ftf * t)
+        loads = _stribeck_load(angle_at)
+        impulses = np.zeros_like(t)
+        index = np.minimum(np.round(times * _BLZ_FS).astype(int), t.size - 1)
+        np.add.at(impulses, index, loads)
+        return {
+            "where": where,
+            "cage0": cage0,
+            "shaft0": shaft0,
+            "times": times,
+            "angles": angle_at,
+            "loads": loads,
+            "trace": np.convolve(impulses, ring)[: t.size],
+            "envelope": envelope,
+        }
+
+    step = np.pi / n_rollers
+    return {
+        "shaft": shaft,
+        "ftf": ftf,
+        "bsf": bsf,
+        "bpfo": bpfo,
+        "bpfi": bpfi,
+        "bdf": bdf,
+        "n": n_rollers,
+        "t_ms": 1000.0 * t,
+        "acts": (
+            # A roller reaches the spall half a pass after the start.
+            act(bpfo, -step, 0.0, "outer"),
+            # The spall starts opposite the load and catches the roller
+            # half a pass ahead of it.
+            act(bpfi, np.pi + step, np.pi, "inner"),
+            # The damaged roller starts opposite the load, its spall a
+            # quarter of a spin short of the outer race.
+            act(bdf, np.pi, 0.0, "roller"),
+        ),
+    }
+
+
+def animate_bearing_load_zone(output_dir: str) -> None:
+    """The load zone of a bearing, and what it does to each fault's impacts.
+
+    Three acts on the bearing of the machine-diagnostics page: a spall on the
+    outer race, fixed under the load, strikes alike at every roller pass; on
+    the inner race it turns with the shaft in and out of the load zone; on a
+    roller it rides round with the cage and strikes the two races in turn.
+    Each strike flashes and writes a burst, scaled by the load at that
+    angle, on the trace of its act.
+    """
+    from matplotlib.patches import Annulus, Circle, Polygon
+
+    T = _translate_str
+
+    d = _bearing_load_zone_data()
+    acts = d["acts"]
+    shaft, ftf, bsf, n = d["shaft"], d["ftf"], d["bsf"], d["n"]
+    t_ms = d["t_ms"]
+    two_pi = 2.0 * np.pi
+    frame_s = _BLZ_SPAN_MS / 1000.0 / _BLZ_ACT_FRAMES
+    slow = 1.0 / (_ANIM_FPS * frame_s)
+
+    # The geometry of the page's bearing, in millimetres: 6 mm rollers on a
+    # 34 mm pitch circle and a 20 mm bore. The outer diameter is drawn, not
+    # quoted.
+    r_pitch, r_roller, r_bore, r_outside = 17.0, 3.0, 10.0, 24.0
+    r_outer, r_inner = r_pitch + r_roller, r_pitch - r_roller
+
+    fig = _anim_figure()
+    fig.suptitle(T("How the load zone modulates a bearing fault"))
+    gs = fig.add_gridspec(3, 2, width_ratios=[1.0, 1.32])
+
+    # --- left: the bearing in end view, the load zone above it -----------
+    ax_b = fig.add_subplot(gs[:, 0])
+    _schematic_axes(ax_b, (-33.0, 33.0), (-39.0, 38.0), equal=True)
+    zone = np.linspace(-np.pi / 2.0, np.pi / 2.0, 121)
+    reach = r_outside + 7.0 * _stribeck_load(zone)
+    # A band on the outside of the outer ring, closed back along the ring.
+    lobe = np.column_stack(
+        [
+            np.concatenate([reach * np.sin(zone), r_outside * np.sin(zone[::-1])]),
+            np.concatenate([reach * np.cos(zone), r_outside * np.cos(zone[::-1])]),
+        ]
+    )
+    ax_b.add_patch(
+        Polygon(
+            lobe,
+            closed=True,
+            facecolor=theme_fill(COLOR_QUATERNARY, ax_b),
+            edgecolor=COLOR_QUATERNARY,
+            lw=1.0,
+        )
+    )
+    ax_b.text(
+        0.0,
+        33.0,
+        T("load zone (Stribeck, a sketch)"),
+        ha="center",
+        va="bottom",
+        color=COLOR_QUATERNARY,
+        fontsize=8.5,
+    )
+    solid = _solid_fill(ax_b)
+    for radius, width in (
+        (r_outside, r_outside - r_outer),
+        (r_inner, r_inner - r_bore),
+    ):
+        ax_b.add_patch(
+            Annulus(
+                (0.0, 0.0),
+                radius,
+                width,
+                facecolor=solid,
+                edgecolor=COLOR_FG,
+                lw=1.2,
+            )
+        )
+    rollers = [
+        Circle((0.0, 0.0), r_roller, facecolor="none", edgecolor=COLOR_PRIMARY, lw=1.3)
+        for _ in range(n)
+    ]
+    rollers[0].set_facecolor(theme_fill(COLOR_TERTIARY, ax_b))
+    rollers[0].set_edgecolor(COLOR_TERTIARY)
+    for roller in rollers:
+        ax_b.add_patch(roller)
+    (key_mark,) = ax_b.plot([], [], color=COLOR_FG, lw=1.6, solid_capstyle="butt")
+    (race_spall,) = ax_b.plot(
+        [], [], color=COLOR_SECONDARY, lw=3.2, solid_capstyle="butt", zorder=4
+    )
+    (roller_spall,) = ax_b.plot(
+        [], [], ls="none", marker="o", ms=4.2, color=COLOR_SECONDARY, zorder=4
+    )
+    (flash,) = ax_b.plot(
+        [],
+        [],
+        ls="none",
+        marker=(8, 1, 0),
+        color=COLOR_SECONDARY,
+        markeredgecolor=COLOR_SECONDARY,
+        zorder=5,
+    )
+    # The key and the rates, under the bearing where nothing moves.
+    ax_b.plot(
+        [-15.5, -12.5],
+        [-28.0, -28.0],
+        color=COLOR_SECONDARY,
+        lw=3.2,
+        solid_capstyle="butt",
+    )
+    ax_b.text(-10.0, -28.0, T("spall"), ha="left", va="center", fontsize=8.5)
+    ax_b.add_patch(
+        Circle(
+            (-14.0, -32.2),
+            1.5,
+            facecolor=theme_fill(COLOR_TERTIARY, ax_b),
+            edgecolor=COLOR_TERTIARY,
+            lw=1.3,
+        )
+    )
+    ax_b.text(
+        -10.0, -32.2, T("one roller, marked"), ha="left", va="center", fontsize=8.5
+    )
+    ax_b.text(
+        0.0,
+        -36.6,
+        T(f"shaft {shaft:.1f} Hz, cage {ftf:.1f} Hz, slowed {slow:.0f} times"),
+        ha="center",
+        va="center",
+        color=COLOR_MUTED,
+        fontsize=8.5,
+    )
+
+    # --- right: the trace each act writes --------------------------------
+    names = (T("outer race"), T("inner race"), T("roller"))
+    # One impact period on the first trace, one turn of the shaft on the
+    # second and one of the cage on the third, each between two crests.
+    half = 500.0 / d["bpfo"]
+    brackets = (
+        (9 * half, 11 * half, T(f"1/BPFO = {2.0 * half:.2f} ms")),
+        (
+            1500.0 / shaft,
+            2500.0 / shaft,
+            T(rf"$1/f_\mathrm{{s}}$ = {1000.0 / shaft:.1f} ms"),
+        ),
+        (500.0 / ftf, 1500.0 / ftf, T(f"1/FTF = {1000.0 / ftf:.1f} ms")),
+    )
+    panels: list[dict[str, Any]] = []
+    for row in range(3):
+        ax = fig.add_subplot(gs[row, 1])
+        _grid_axes(ax)
+        ax.set_xlim(0.0, _BLZ_SPAN_MS)
+        ax.set_ylim(-1.2, 2.3)
+        ax.set_yticks([])
+        ax.tick_params(labelsize=8, labelbottom=row == 2)
+        (envelope,) = ax.plot([], [], color=COLOR_MUTED, lw=1.0, ls="--")
+        (trace,) = ax.plot([], [], color=COLOR_PRIMARY, lw=0.9)
+        ax.text(
+            0.012,
+            0.93,
+            names[row],
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            color=COLOR_FG,
+            fontsize=8.5,
+        )
+        left, right, label = brackets[row]
+        (span_line,) = ax.plot(
+            [left, right],
+            [1.42, 1.42],
+            color=COLOR_SECONDARY,
+            lw=1.2,
+            marker="|",
+            ms=6.0,
+            visible=False,
+        )
+        # Beside the first bracket, which is one impact period wide; above
+        # the other two, which are wide enough to carry their label.
+        span_txt = ax.text(
+            right + 3.0 if row == 0 else 0.5 * (left + right),
+            1.42 if row == 0 else 1.68,
+            label,
+            ha="left" if row == 0 else "center",
+            va="center" if row == 0 else "bottom",
+            color=COLOR_SECONDARY,
+            fontsize=8,
+            visible=False,
+        )
+        panels.append(
+            {
+                "ax": ax,
+                "trace": trace,
+                "envelope": envelope,
+                "span": span_line,
+                "span_txt": span_txt,
+                "shown_at": right,
+            }
+        )
+    panels[0]["ax"].text(
+        0.988,
+        0.93,
+        T("dashed: the load on the spall"),
+        transform=panels[0]["ax"].transAxes,
+        ha="right",
+        va="top",
+        color=COLOR_MUTED,
+        fontsize=8,
+    )
+    panels[2]["ax"].set_xlabel(T("Machine time [ms]"), fontsize=8.5)
+    captions = (
+        T("Fixed under the load: every impact is alike"),
+        T("Turning with the shaft, in and out of the load zone"),
+        T("Riding the cage, striking both races in turn"),
+        T("The modulation rate names the damaged part"),
+    )
+
+    def at(radius: float, angle: float) -> tuple[float, float]:
+        """The point at *radius* and *angle* from the load line, drawn clockwise."""
+        return radius * float(np.sin(angle)), radius * float(np.cos(angle))
+
+    def strike(a: dict[str, Any], m: int) -> tuple[float, float]:
+        """Where impact *m* of act *a* lands."""
+        if a["where"] == "outer":
+            return at(r_outer, 0.0)
+        if a["where"] == "inner":
+            return at(r_inner, float(a["angles"][m]))
+        # The outer race on the even strikes and the inner one on the odd.
+        return at(r_outer if m % 2 == 0 else r_inner, float(a["angles"][m]))
+
+    def update(kf: int) -> tuple[Any, ...]:
+        done = kf >= 3 * _BLZ_ACT_FRAMES
+        which = 2 if done else kf // _BLZ_ACT_FRAMES
+        k = _BLZ_ACT_FRAMES if done else kf - which * _BLZ_ACT_FRAMES
+        a = acts[which]
+        now = k * frame_s
+        cage = a["cage0"] + two_pi * ftf * now
+        turned = a["shaft0"] + two_pi * shaft * now
+        for i, roller in enumerate(rollers):
+            roller.center = at(r_pitch, cage + two_pi * i / n)
+        (x0, y0), (x1, y1) = at(r_bore, turned), at(r_inner, turned)
+        key_mark.set_data([x0, x1], [y0, y1])
+        if a["where"] == "outer":
+            (x0, y0), (x1, y1) = at(r_outer, 0.0), at(r_outer + 2.6, 0.0)
+            race_spall.set_data([x0, x1], [y0, y1])
+            roller_spall.set_data([], [])
+        elif a["where"] == "inner":
+            (x0, y0), (x1, y1) = at(r_inner - 2.6, turned), at(r_inner, turned)
+            race_spall.set_data([x0, x1], [y0, y1])
+            roller_spall.set_data([], [])
+        else:
+            # The roller spins against the cage, a quarter of a turn short
+            # of the outer race at the start.
+            spin = np.pi / 2.0 - two_pi * bsf * now
+            cx, cy = at(r_pitch, cage)
+            dx, dy = at(0.78 * r_roller, cage + spin)
+            race_spall.set_data([], [])
+            roller_spall.set_data([cx + dx], [cy + dy])
+
+        # The last strike, for the three frames after it lands.
+        struck = int(np.searchsorted(a["times"], now, side="right")) - 1
+        flash.set_data([], [])
+        if struck >= 0 and not done:
+            age = (now - float(a["times"][struck])) / frame_s
+            load = float(a["loads"][struck])
+            if age < 3.0 and load > 0.02:
+                fx, fy = strike(a, struck)
+                flash.set_data([fx], [fy])
+                flash.set_markersize((6.0 + 9.0 * load) * (1.0 - age / 3.0))
+
+        arts: list[Any] = [*rollers, key_mark, race_spall, roller_spall, flash]
+        for row, panel in enumerate(panels):
+            if row < which or done:
+                upto = t_ms.size
+            elif row == which:
+                upto = int(np.searchsorted(t_ms, 1000.0 * now, side="right"))
+            else:
+                upto = 0
+            panel["trace"].set_data(t_ms[:upto], acts[row]["trace"][:upto])
+            panel["envelope"].set_data(t_ms[:upto], acts[row]["envelope"][:upto])
+            reached = upto > 0 and t_ms[upto - 1] >= panel["shown_at"]
+            panel["span"].set_visible(bool(reached))
+            panel["span_txt"].set_visible(bool(reached))
+            arts += [
+                panel["trace"],
+                panel["envelope"],
+                panel["span"],
+                panel["span_txt"],
+            ]
+        panels[0]["ax"].set_title(
+            captions[3 if done else which],
+            fontsize=8.5,
+            fontstyle="italic",
+            color=COLOR_FG,
+        )
+        arts.append(panels[0]["ax"].title)
+        return tuple(arts)
+
+    _render_clip(
+        fig,
+        update,
+        output_dir,
+        "anim_bearing_load_zone",
+        frames=3 * _BLZ_ACT_FRAMES + _ANIM_HOLD,
+    )

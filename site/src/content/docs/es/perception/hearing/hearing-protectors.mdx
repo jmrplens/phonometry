@@ -445,6 +445,19 @@ $$
 con $L_{\mathrm{passive}}$ el nivel en el oído con el circuito apagado y
 $L_{\mathrm{active}}$ el nivel con él encendido.
 
+Las dos lecturas de un oído se toman una justo después de la otra, sin tocar el
+ajuste de la orejera ni los micrófonos de los oídos (5.4.3), en el campo de
+incidencia aleatoria de la ISO 4869-1 (5.2). Se entregan cuatro pares de
+orejeras, y cada uno lo ensayan cuatro de los dieciséis sujetos (5.1, 5.4.1).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anr_insertion_loss.svg" alt="A la izquierda, una cabeza vista de frente con una orejera, dibujada dos veces con el sonido llegando desde todos los lados: en modo pasivo, con el circuito apagado y las copas vacías, y en modo activo, con el circuito encendido y las copas rellenas; un punto en cada oído marca un micrófono en el oído con el conducto auditivo cerrado, y una nota entre las dos cabezas, sobre una flecha de doble sentido, dice que no se tocan ni el ajuste ni los micrófonos y que una lectura sigue a la otra lo antes posible. Una lista debajo da la pérdida por inserción activa como el nivel en modo pasivo menos el nivel en modo activo en cada oído y banda, el ruido de banda ancha con un nivel ponderado A de 85 dB a 95 dB leído en bandas de tercio de octava de 50 Hz o 100 Hz a 10 kHz, los dieciséis sujetos con los dos oídos, los cuatro pares de orejeras ensayados cada uno por cuatro sujetos, y los 10 dB en que cada banda bajo la orejera tiene que superar su nivel con el ruido apagado. A la derecha, la comprobación de linealidad del 5.4.4 como dos escaleras frente a los escalones del ruido exterior: el nivel exterior ponderado A sube en escalones iguales hasta una línea de trazos rotulada 110 dB como máximo, el nivel en el oído lo sigue escalón a escalón hasta el último, dibujado corto y rotulado como no lineal, y un punto marca el mayor nivel exterior con el que el oído todavía lo seguía. Una lista debajo da el ruido rojo con el máximo en el tercio de octava de 125 Hz, los escalones de 5 dB, los 5 dB más o menos 1 dB que tiene que subir el nivel en el oído en la banda de octava de 125 Hz, y lo que se informa. Una franja al pie da la atenuación total como la atenuación pasiva de la ISO 4869-1 más la pérdida por inserción activa del oído con el valor menor, sumadas sujeto a sujeto" width="96%" />
+
+*A la izquierda, las dos lecturas del 5.4.3 sobre un usuario, con un micrófono
+en cada oído. A la derecha, la comprobación del
+[5.4.4](#funcionamiento-lineal-544), más abajo en esta página: las escaleras
+son niveles sin escala, y el último escalón de la del oído está dibujado corto
+para enseñar lo que la comprobación busca.*
+
 El anexo A trata su incertidumbre como la ISO 4869-1 trata la de la
 atenuación, sobre los dieciséis valores del oído con la menor pérdida por
 inserción, e imprime un ejemplo, la Tabla A.3:
@@ -600,7 +613,7 @@ También pueden entrar los tres niveles de tercio de octava en el oído, como
 ## Orejeras sobre un montaje de ensayo (ISO 4869-3)
 
 Dieciséis sujetos son una semana de laboratorio. La ISO 4869-3 mide una orejera
-sin ninguno: el montaje de ensayo acústico es un cilindro metálico de 135 mm de
+sin ninguno: el montaje de ensayo acústico es un cilindro no magnético de 135 mm de
 diámetro con sus caras separadas 145 mm y un micrófono de presión enrasado con
 una de ellas (5.1), y la **pérdida por inserción** es el nivel en ese micrófono
 sin la orejera menos el nivel con ella asentada en el montaje, en bandas de
@@ -618,6 +631,28 @@ be quoted as representing the real-ear sound attenuation of an ear-muff, nor the
 protection provided by the ear-muff» (apartado 1). Así que nada de aquí lleva una
 pérdida por inserción a los métodos de la ISO 4869-2 de más arriba, que toman la
 atenuación en oído real de dieciséis sujetos.
+
+El montaje le da a la orejera la anchura de una cabeza y un sitio donde apoyar
+la diadema, y nada más de un usuario. Su eje es horizontal; cada cara se inclina
+4,5° respecto a la vertical, de modo que las dos quedan más separadas por
+arriba, y un separador sobre el cilindro acaba en un taco de goma para la
+diadema (5.1.2, 5.1.3). La medición son tres lecturas del mismo micrófono. La
+primera se toma sin nada sobre el montaje. Para la segunda se coloca la orejera
+con las almohadillas centradas en las caras y la diadema apretada hasta que
+justo toca su apoyo (5.4.1), y el nivel se lee cuando lleva colocada unos 30 s
+(5.4.2); la diferencia es la pérdida por inserción de esa colocación, y se hacen
+al menos tres colocaciones salvo que la repetibilidad del dispositivo ya se
+conozca por experiencia (5.4.3). La tercera pone una copa de aislamiento en el
+lugar de la orejera y tiene que quedar al menos 10 dB por debajo de la ocluida
+(5.3), que es lo que distingue el sonido que atravesó la orejera del ruido de
+fondo del montaje y del sistema de medida:
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_earmuff_test_fixture.svg" alt="Arriba, el montaje de ensayo acústico de la ISO 4869-3 dibujado a escala en dos vistas. A lo largo de su eje es un círculo de 135 mm más o menos 5 mm de diámetro con el micrófono en el centro, dos círculos de trazos y dos diámetros marcados en la cara, un separador encima con un taco de goma de 50 mm de ancho y 6 mm de grosor, y debajo un pie corto sobre un muelle. De lado el cilindro es un trapecio, con sus dos caras separadas 145 mm más o menos 1 mm entre centros e inclinadas cada una 4,5 grados más o menos 0,5 grados respecto a la vertical, de modo que quedan más separadas por arriba; el micrófono va dentro, en el eje, con el diafragma en el plano de la cara derecha, y el separador llega a 123 mm más o menos 1 mm del eje bajo un taco curvo de 77 mm de largo. Una lista junto a las vistas recoge lo que piden el 5.1.2 y el 5.1.3: un cilindro no magnético con el eje horizontal, un micrófono de presión WS1P o WS2P de la IEC 61094-4, marcas de colocación en cada cara, un soporte elástico y un separador con el extremo libre de 100 mm de radio bajo un taco de 30 a 85 IRHD. Abajo, tres lecturas en el mismo micrófono, cada una con una barra para su nivel. Uno, abierto: nada sobre el montaje, la barra más alta. Dos, ocluido: una orejera con las almohadillas centradas en las caras y la diadema tocando justo el taco, leída tras unos 30 s colocada y colocada al menos tres veces; su barra es más baja, y la bajada está rotulada como pérdida por inserción. Tres, copa de aislamiento: una copa pequeña con material absorbente sellada sobre el micrófono en lugar de la orejera; su barra baja al menos 10 dB más. Una franja al pie da la pérdida por inserción como el nivel abierto menos el nivel ocluido en bandas de tercio de octava desde al menos 63 Hz hasta 8 kHz, los requisitos del 5.3 sobre la señal de ensayo, el aislamiento acústico del 5.1.4 y los dos lugares de ensayo del 5.2" width="96%" />
+
+*Arriba, el montaje a escala en las dos vistas de la Figura 1 a), con las
+dimensiones que le dan el 5.1.2 y el 5.1.3. Abajo, las tres lecturas: las barras
+son niveles sin escala, dibujadas por su orden y por las dos diferencias que
+nombra la norma.*
 
 ```python
 # Una orejera colocada tres veces en el montaje (5.4.3), de 63 Hz a 8 kHz.

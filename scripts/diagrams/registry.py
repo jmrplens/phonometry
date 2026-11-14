@@ -153,7 +153,9 @@ from .materials import (
     _d_suspended_ceiling_specimen,
 )
 from .perception import (
+    _d_anr_insertion_loss,
     _d_dosimeter,
+    _d_earmuff_test_fixture,
     _d_emission_positions,
     _d_hearing_protector_chain,
     _d_hearing_threshold,
@@ -624,6 +626,16 @@ DIAGRAMS = {
         _d_hearing_protector_chain,
         "From sixteen subjects to the effective A-weighted level (ISO 4869-2)",
         910,
+    ),
+    "diagram_earmuff_test_fixture": (
+        _d_earmuff_test_fixture,
+        "An earmuff on the acoustic test fixture (ISO 4869-3)",
+        850,
+    ),
+    "diagram_anr_insertion_loss": (
+        _d_anr_insertion_loss,
+        "Active insertion loss of an earmuff, read in the ear (ISO 4869-6)",
+        600,
     ),
     "diagram_ntacou112": (
         _d_impulse_prominence,

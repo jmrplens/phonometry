@@ -157,3 +157,17 @@ def test_the_tolerance_is_set_for_the_decimals_written(decimals: int) -> None:
     """Move one without the other and this says so."""
     quantum = 10.0**-decimals
     assert quantum < check_figures.SVG_TOL.absolute < 2 * quantum
+
+
+def test_a_figure_checked_out_with_carriage_returns_is_the_committed_figure() -> None:
+    """A clone made with ``core.autocrlf=true`` writes each SVG with CRLF.
+
+    The check compared the checkout's bytes with the committed ones, so on
+    such a checkout every figure was "changed beyond tolerance" before
+    anything had been regenerated. A line end is not a figure's content.
+    """
+    committed = b'<svg viewBox="0 0 10 10">\n<path d="M 1.25 2.5 L 3 4"/>\n</svg>\n'
+    checked_out = committed.replace(b"\n", b"\r\n")
+    assert check_figures.same_figure(committed, checked_out)
+    moved = committed.replace(b"1.25", b"1.75").replace(b"\n", b"\r\n")
+    assert not check_figures.same_figure(committed, moved)

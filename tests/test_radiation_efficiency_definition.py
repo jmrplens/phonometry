@@ -127,3 +127,28 @@ def test_every_page_introducing_the_radiation_efficiency_names_its_divisor() -> 
                 wrong.append(f"{where}: a piston, not a large one (ka >> 1)")
     assert read > 0, "no page introduces the radiation efficiency"
     assert wrong == [], "\n".join(wrong)
+
+
+#: A power per squared velocity or squared pressure, written as the quantity.
+_POWER_PER_SQUARE = re.compile(
+    r"per\s+unit\s+mean-square\s+(?:surface\s+)?(?:velocity|pressure)|"
+    r"por\s+unidad\s+de\s+(?:velocidad|presi[oó]n)\s+cuadr[aá]tica",
+    re.IGNORECASE,
+)
+
+
+def test_no_page_writes_a_quantity_as_a_power_per_unit_mean_square() -> None:
+    """The same slip outside the radiation efficiency.
+
+    A power per unit mean-square pressure is in m^4 s/kg, not the square
+    metres of an equivalent absorption area: the room-to-room guide wrote
+    ``A = S alpha`` that way, where Norton and Karczub (2003), Equation
+    (4.98), multiply it by the wall intensity <p^2>/(4 rho0 c0) to give the
+    absorbed power.
+    """
+    wrong = [
+        path.relative_to(_ROOT).as_posix()
+        for path in _pages()
+        if _POWER_PER_SQUARE.search(path.read_text(encoding="utf-8"))
+    ]
+    assert wrong == [], "\n".join(wrong)

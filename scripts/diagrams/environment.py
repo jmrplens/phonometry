@@ -1829,6 +1829,192 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _d_rd1367_inspection(s: SVG, th: Theme) -> None:
+    """Where the meter stands and what it reads when an activity is inspected.
+
+    The chain plate beside this one starts at a phase level; this is how the
+    level gets there. Every figure is the consolidated BOE text of RD
+    1367/2007 (BOE-A-2007-18397): the indoor positions are Annex I A.3 b (PDF
+    page 22) through Annex IV A.3.4 d (page 27), the series of a noise phase
+    is A.3.4.2 b (page 28), the precautions are A.3.5 (page 29) and the
+    instrument is Article 30 (page 16). A.3.4.2 gives the microphone of an
+    activity no height outdoors (the 4 m of A.3.4.1 c belong to the quality
+    objectives of an area), so the outdoor panel draws none.
+    """
+    # --- (a) indoors: one position of the receiving room, in section ------
+    scale = 70.0
+    x0, floor = 70.0, 300.0
+    x1, ceiling = x0 + 4.2 * scale, floor - 2.5 * scale
+    s.text(
+        40,
+        72,
+        "(a) Indoors: the receiving room",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    s.rect(x0, ceiling, x1 - x0, floor - ceiling, th.panel, th.fg, sw=3.0)
+    # The window in one wall and the door in the other, both shut.
+    s.rect(x0 - 5, floor - 2.1 * scale, 10, 1.2 * scale, th.bg, th.primary, sw=2.0)
+    s.rect(x1 - 5, floor - 2.0 * scale, 10, 2.0 * scale, th.bg, th.muted, sw=2.0)
+    s.text(x0 + 2, ceiling - 12, "window, closed", 13, th.primary, anchor="start")
+    s.text(x1 - 2, ceiling - 12, "door, closed", 13, th.muted, anchor="end")
+    mic_x = x0 + 1.5 * scale
+    mic_y = floor - 1.35 * scale
+    s.mic(mic_x, mic_y, floor, scale=0.8)
+    s.dim(x0 + 6, mic_y - 14, mic_x, mic_y - 14, "≈ 1.5 m", size=13)
+    s.dim(mic_x, mic_y - 14, x1 - 6, mic_y - 14, "≥ 1 m", size=13)
+    s.dim(
+        mic_x + 34,
+        floor,
+        mic_x + 34,
+        mic_y,
+        "1.2 m to 1.5 m",
+        size=13,
+        label_side="right",
+    )
+    s.line(mic_x + 6, mic_y, mic_x + 34, mic_y, th.muted, 0.9, dash="3,3")
+    indoor = (
+        (th.fg, "doors and windows closed (A.3.4 d)"),
+        (th.fg, "three positions or more, each like this one;"),
+        (th.muted, "if they do not fit, the centre of the room (Annex I A.3 b)"),
+    )
+    size = s.fit_size([label for _, label in indoor], [13, 12], 400)
+    for k, (colour, label) in enumerate(indoor):
+        s.text(40, floor + 28 + 18 * k, label, size, colour, anchor="start")
+
+    # --- (b) outdoors: incident sound at the point of highest level --------
+    s.text(
+        480,
+        72,
+        "(b) Outdoors: the evaluation point",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    s.ground(floor, 480, 862)
+    s.rect(492, floor - 80, 80, 80, th.panel, th.fg, rx=3, sw=2.0)
+    s.circle(532, floor - 40, 14, th.fg)
+    s.circle(532, floor - 40, 5, th.bg)
+    s.text(532, floor - 92, "the activity", 13, th.fg, bold=True)
+    s.rect(806, floor - 180, 44, 180, th.panel, th.fg, sw=2.0)
+    for y in (floor - 158, floor - 98):
+        s.rect(815, y, 14, 28, th.bg, th.muted, sw=1.4)
+    s.text(828, floor - 192, "façade", 13, th.fg)
+    out_x, out_y = 700.0, floor - 53.0
+    # The reflection off the façade, which the reading is corrected for. It
+    # leaves the activity above the microphone, so the outgoing leg clears the
+    # windscreen, and meets the façade where the image construction puts it:
+    # on the line from the source to the mirror image, in the face x = 806, of
+    # the point where it reaches the windscreen.
+    wall = 806.0
+    start_x, start_y = 575.0, floor - 78.0
+    end_x, end_y = out_x + 9.0, out_y - 2.0
+    image_x = 2.0 * wall - end_x
+    bounce_y = start_y + (end_y - start_y) * (wall - start_x) / (image_x - start_x)
+    s.path(
+        f"M {start_x} {start_y} L {wall} {bounce_y:.2f} L {end_x} {end_y}",
+        stroke=th.secondary,
+        sw=1.7,
+        dash="6,4",
+    )
+    back = (end_x - wall, end_y - bounce_y)
+    reach = (back[0] ** 2 + back[1] ** 2) ** 0.5
+    s.arrow(
+        end_x - 12.0 * back[0] / reach,
+        end_y - 12.0 * back[1] / reach,
+        end_x,
+        end_y,
+        th.secondary,
+        1.7,
+    )
+    s.arrow(575, floor - 40, out_x - 13, out_y + 5.5, th.primary, 2.0)
+    s.mic(out_x, out_y, floor, scale=0.85)
+    s.circle(out_x, out_y + 5, 11, th.panel, th.fg, 1.3)
+    outdoor = (
+        (th.primary, "", "incident sound: the one assessed (Annex I A.4)"),
+        (th.secondary, "6,4", "reflection off a façade: corrected out (A.3.2)"),
+        ("", "", "microphone, in its windscreen, where the"),
+        ("", "", "level is highest (A.3.4.2 b, A.3.5 d)"),
+    )
+    size = s.fit_size([row[2] for row in outdoor], [13, 12], 350)
+    for k, (colour, dash, label) in enumerate(outdoor):
+        y = floor + 28 + 18 * k
+        if colour:
+            s.line(480, y - 4.5, 504, y - 4.5, colour, 2.0, dash=dash)
+        s.text(512, y, label, size, th.fg if colour else th.muted, anchor="start")
+
+    # --- (c) the series of one noise phase ---------------------------------
+    s.line(40, 404, 860, 404, th.muted, 1.0, dash="6,5")
+    s.text(
+        40,
+        436,
+        "(c) One noise phase: the series of A.3.4.2 b",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    base = 550.0
+    s.arrow(60, base, 452, base, th.fg, 1.6)
+    tops = (base - 68, base - 60, base - 76)
+    centres = (98.0, 218.0, 338.0)
+    highest = min(tops)
+    for x, top in zip(centres, tops, strict=True):
+        fill = th.primary if top == highest else th.muted
+        s.rect(x - 8, top, 16, base - top, fill, rx=2)
+        s.text(x, base + 18, "≥ 5 s", 12, th.fg)
+    s.dim(centres[0], base + 44, centres[1], base + 44, "≥ 3 min", size=13)
+    s.dim(centres[1], base + 44, centres[2], base + 44, "≥ 3 min", size=13)
+    # The spread the three readings have to keep within.
+    for y in (highest, max(tops)):
+        s.line(78, y, 372, y, th.secondary, 1.0, dash="4,3")
+    s.line(372, highest, 372, max(tops), th.secondary, 1.6)
+    s.text(
+        380,
+        (highest + max(tops)) / 2 + 4.5,
+        "≤ 6 dBA",
+        13,
+        th.secondary,
+        anchor="start",
+    )
+    s.text(centres[2], highest - 10, "the result", 13, th.primary, bold=True)
+    rules = (
+        (
+            "three readings of $L_{Keq,Ti}$ or more in each phase,",
+            "5 s or longer each and 3 min or more apart",
+        ),
+        ("valid within 6 dBA; beyond it, three more",),
+        (
+            "one reading far from the rest: find its source",
+            "and repeat up to five times with it running",
+        ),
+        ("the result is the highest reading",),
+        ("background: the same with the activity stopped",),
+    )
+    size = s.fit_size([line for rule in rules for line in rule], [13, 12], 348)
+    y = 468.0
+    for rule in rules:
+        s.circle(500, y - 4.5, 3.2, th.primary)
+        for line in rule:
+            s.text(512, y, line, size, th.fg, anchor="start")
+            y += 18
+        y += 5
+
+    # --- the instrument and the weather -------------------------------------
+    s.rect(40, 630, 820, 84, th.panel, th.fg, rx=6, sw=1.6)
+    kit = (
+        "type 1/class 1 sound level meter and calibrator, class 1 one-third-octave filters (Article 30)",
+        "calibrator check before and after every measurement: within 0.3 dB of the initial reference value (A.3.5 c)",
+        "outdoors: windscreen always, no measurement in rain, none with wind above 5 m/s (A.3.5 b, d)",
+    )
+    size = s.fit_size(kit, [13, 12, 11], 790)
+    for k, line in enumerate(kit):
+        s.text(56, 654 + 22 * k, line, size, th.fg, anchor="start")
+
+
 def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:
     # --- plan, 12 px per metre -------------------------------------------
     # Figure 3's two-lane road: the measuring lane on the roadside of

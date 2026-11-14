@@ -125,6 +125,7 @@ from .environment import (
     _d_impulse_prominence,
     _d_outdoor,
     _d_rd1367_chain,
+    _d_rd1367_inspection,
     _d_rolling_stock_site,
     _d_statistical_pass_by_site,
     _d_wind_turbine,
@@ -1171,6 +1172,11 @@ DIAGRAMS = {
         _d_rd1367_chain,
         "RD 1367/2007: from a noise phase to the three acceptance criteria",
         580,
+    ),
+    "diagram_rd1367_inspection": (
+        _d_rd1367_inspection,
+        "RD 1367/2007: where and how an activity is measured (Annex IV)",
+        734,
     ),
     "diagram_room_image_sources": (
         _d_room_image_sources,

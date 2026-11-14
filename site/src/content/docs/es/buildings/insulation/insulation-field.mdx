@@ -253,7 +253,9 @@ manual a lo largo de una de las cuatro trayectorias de la Figura 1, a unos
 hélice de al menos dos vueltas que sube desde 0,5 m sobre el suelo, una
 trayectoria de tipo cilíndrico trazada con una varilla de prolongación de 0,3 m a
 0,9 m o, donde el recinto no deja sitio para esas, tres semicírculos separados
-entre sí unos 45° a 60° (apartado 7.5). Con altavoces funcionando
+entre sí unos 45° a 60° (apartado 7.5; el panel B de la figura de
+[La medición de impactos](#la-medicion-de-impactos) dibuja las cuatro). Con
+altavoces funcionando
 simultáneamente basta un recorrido o un barrido; con un único altavoz es uno
 por cada posición de altavoz, y el operador de un barrido manual se coloca en
 un sitio distinto para cada una (apartados 7.4.2 y 7.5.6). En caso de
@@ -549,7 +551,7 @@ máximo con ponderación Fast y la suma ponderada A del Anexo D de ISO 717-2, no
 una curva de referencia desplazada. Tiene guía propia,
 [Fuentes de impacto pesadas y blandas](/phonometry/es/buildings/insulation/heavy-impact-sources/).
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Montaje de aislamiento a impactos en campo: una máquina de impactos normalizada sobre el suelo del recinto emisor superior, micrófonos promediados en energía en el recinto receptor inferior, y el tiempo de reverberación del recinto receptor" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Montaje de aislamiento a impactos en campo, en sección: una máquina de impactos normalizada sobre el suelo del recinto emisor superior, tres posiciones de micrófono a distinta altura en el recinto receptor inferior con las distancias mínimas del apartado 7.6 (0,7 m entre posiciones fijas, 0,5 m a los límites del recinto, 1,0 m al techo que la máquina excita), y las fórmulas que estandarizan o normalizan el nivel promediado en energía" width="92%" />
 
 ```python
 import numpy as np
@@ -594,7 +596,13 @@ y
 ### La medición de impactos (apartados 4, 7, 9 y 10 de ISO 16283-2:2020)
 
 `impact_insulation()` consume $L_\mathrm{i}$ por banda; igual que en el lado
-aéreo, la norma dice de dónde salen esos niveles.
+aéreo, la norma dice de dónde salen esos niveles. El dibujo en sección que abre
+la parte de impactos de esta guía lleva las distancias del recinto receptor; la
+planta de abajo es el suelo sobre el que se coloca la máquina, y bajo ella
+están las cuatro trayectorias que puede seguir un micrófono llevado a mano en
+cualquiera de las dos partes de la norma.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tapping_positions_scan_paths.svg" alt="Dos paneles. A: el suelo ensayado visto desde arriba, con cuatro posiciones de la máquina de impactos repartidas al azar fuera de la franja de 0,5 m junto a sus bordes, cada una con su línea de martillos a 45° de las vigas. B: las cuatro trayectorias de barrido manual de la Figura 1, un círculo, una hélice, una trayectoria de tipo cilíndrico y tres semicírculos, dibujadas cada una alrededor de un operador de pie entre el suelo y el techo, con el apartado que la regula en ISO 16283-1 y en ISO 16283-2" width="92%" />
 
 **Los instrumentos (apartado 4).** Las clases de los instrumentos, la
 comprobación con el calibrador en los dos extremos de cada sesión y la regla
@@ -603,11 +611,11 @@ frase por frase. La parte de impactos añade que la máquina de impactos cumple
 su Anexo A.
 
 **La máquina de impactos (apartado 7.2.2).** **Cuatro** posiciones como
-mínimo, repartidas al azar sobre el forjado ensayado, cada una a 0,5 m como
-mínimo de los bordes del forjado. Un forjado anisótropo, con vigas o nervios,
-puede necesitar más posiciones, y en él la línea de los martillos debería
-quedar a 45° de la dirección de las vigas o los nervios. El nivel puede variar
-después de arrancar la máquina, como ocurre cuando una superficie blanda o
+mínimo, repartidas al azar sobre el suelo ensayado, cada una a 0,5 m como
+mínimo de los bordes del suelo (panel A). Un suelo anisótropo, con vigas o
+nervios, puede necesitar más posiciones, y en él la línea de los martillos
+debería quedar a 45° de la dirección de las vigas o los nervios. El nivel puede
+variar después de arrancar la máquina, como ocurre cuando una superficie blanda o
 frágil cambia bajo los martillos: espera a que sea estable y, si no lo es al
 cabo de 5 min, mide durante un periodo bien definido e informa de ese periodo.
 Sobre un revestimiento de suelo blando la máquina tiene que cumplir los
@@ -645,15 +653,20 @@ un barrido de 270° a 360°, un radio de 0,7 m como mínimo, un plano a 10° com
 mínimo de cualquier superficie del recinto y 15 s como mínimo por recorrido
 (apartado 7.4.1). El barrido manual sigue las mismas cuatro trayectorias, un
 círculo, una hélice, una trayectoria de tipo cilíndrico o tres semicírculos, a
-unos 20°/s como máximo (apartado 7.5). Cada posición de máquina recibe al
+unos 20°/s como máximo (apartado 7.5, panel B). Cada posición de máquina recibe al
 menos un recorrido o un barrido, y todas el mismo número (apartados 7.4.2 y
 7.5.2); con seis o más posiciones de máquina, el punto fijo del recorrido o
 del barrido puede cambiar de una a otra. Las dos partes difieren en un número.
 La hélice de ISO 16283-2:2020 termina a 0,5 m del techo como mínimo
 (apartado 7.5.5), un cambio que su prólogo enumera frente a la edición
-anterior, mientras que ISO 16283-1:2014 imprime para la misma trayectoria que
-termina a no más de 0,5 m del techo (apartado 7.5.3). En caso de discrepancia, el resultado de
-referencia es el medido sin nadie en el recinto receptor (apartado 6).
+anterior, mientras que ISO 16283-1:2014 sigue imprimiendo para la misma
+trayectoria que termina a no más de 0,5 m del techo (apartado 7.5.3), un
+máximo al que su propio apartado 7.6 responde con un mínimo de 0,5 m a todo
+límite del recinto; la comparación está en el
+[registro de erratas](/phonometry/es/reference/errata/). Termina la hélice a
+0,5 m del techo como mínimo en cualquiera de las dos partes. En caso de
+discrepancia, el resultado de referencia es el medido sin nadie en el recinto
+receptor (apartado 6).
 
 **Combinar las posiciones de máquina (apartado 7.3.3).** Para cada posición de
 máquina, una tras otra, promedia en energía sus posiciones de micrófono

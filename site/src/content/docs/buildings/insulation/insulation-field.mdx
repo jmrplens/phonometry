@@ -244,7 +244,10 @@ away from every room surface, each traverse lasting at least 15 s
 at about 20°/s at most: a circle of 270° to 360° at arm's length, a helix of
 at least two turns that rises from 0.5 m above the floor, a cylindrical-type
 path traced with a 0.3 m to 0.9 m extension rod, or, where the room leaves no
-space for those, three semicircles about 45° to 60° apart (Clause 7.5). With
+space for those, three semicircles about 45° to 60° apart (Clause 7.5; panel B
+of the figure in
+[Taking the impact measurement](#taking-the-impact-measurement-iso-16283-22020-clauses-4-7-9-and-10)
+draws the four). With
 loudspeakers operating simultaneously one traverse or scan is the minimum;
 with a single loudspeaker it is one for each loudspeaker position, the
 operator of a manual scan standing somewhere else for each (Clauses 7.4.2,
@@ -522,7 +525,7 @@ different engine entirely: a Fast-weighted maximum level and the A-weighted sum
 of ISO 717-2 Annex D, not a shifted reference curve. It has its own guide,
 [Heavy and Soft Impact Sources](/phonometry/buildings/insulation/heavy-impact-sources/).
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Field impact insulation setup: a standardized tapping machine on the floor of the source room above, microphones energy-averaged in the receiving room below, and the receiving-room reverberation time" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Field impact insulation setup in section: a standardized tapping machine on the floor of the source room above, three microphone positions at different heights in the receiving room below with the minimum distances of Clause 7.6 (0.7 m between fixed positions, 0.5 m to the room boundaries, 1.0 m to the ceiling the machine excites), and the formulas that standardize or normalize the energy-averaged level" width="92%" />
 
 ```python
 import numpy as np
@@ -564,7 +567,12 @@ and
 ### Taking the impact measurement (ISO 16283-2:2020 Clauses 4, 7, 9 and 10)
 
 `impact_insulation()` consumes $L_\mathrm{i}$ per band; as on the airborne
-side, the standard says where those levels come from.
+side, the standard says where those levels come from. The drawing in section
+that opens the impact part of this guide carries the distances of the receiving
+room; the plan below is the floor the machine stands on, and under it are the
+four paths a hand-held microphone may follow in either part of the standard.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tapping_positions_scan_paths.svg" alt="Two panels. A: the floor under test seen from above, with four tapping machine positions scattered at random outside the 0.5 m band along its edges, each with its line of hammers at 45° to the beams. B: the four manual scanning paths of Figure 1, a circle, a helix, a cylindrical-type path and three semicircles, each drawn around a standing operator between the floor and the ceiling, with the clause that rules it in ISO 16283-1 and in ISO 16283-2" width="92%" />
 
 **The instruments (Clause 4).** The instrument classes, the calibrator check at
 both ends of every session and the 0.5 dB rule are those of
@@ -574,7 +582,7 @@ Annex A.
 
 **The tapping machine (Clause 7.2.2).** At least **four** positions,
 distributed at random over the floor under test, each at least 0.5 m from the
-edges of the floor. An anisotropic floor, with beams or ribs, can need more
+edges of the floor (panel A). An anisotropic floor, with beams or ribs, can need more
 positions, and on it the line of the hammers should lie at 45° to the
 direction of the beams or ribs. The level can drift after the machine starts,
 as it does when a soft or fragile surface changes under the hammers: wait
@@ -613,14 +621,17 @@ traverse is that of the airborne part: a circle or a sweep of 270° to 360°,
 a radius of at least 0.7 m, a plane at least 10° away from every room surface,
 at least 15 s per traverse (Clause 7.4.1). The manual scan follows the same
 four paths, a circle, a helix, a cylindrical-type path or three semicircles,
-at about 20°/s at most (Clause 7.5). Each machine position gets at least one
+at about 20°/s at most (Clause 7.5, panel B). Each machine position gets at least one
 traverse or scan and all get the same number (Clauses 7.4.2, 7.5.2); with six
 or more machine positions, the fixed point of the traverse or of the scan may
 change between them. The two parts differ in one number. The helix of
 ISO 16283-2:2020 finishes "at least 0,5 m from the ceiling" (Clause 7.5.5), a
 change its foreword lists against the previous edition, while ISO 16283-1:2014
-prints "no more than 0,5 m from the ceiling" for the same path
-(Clause 7.5.3). In case of dispute the result measured with nobody in the
+still prints "no more than 0,5 m from the ceiling" for the same path
+(Clause 7.5.3), a maximum that its own Clause 7.6 answers with a minimum of
+0.5 m to every room boundary; the comparison is in the
+[errata registry](/phonometry/reference/errata/). End the helix at least 0.5 m
+below the ceiling in either part. In case of dispute the result measured with nobody in the
 receiving room is the reference one (Clause 6).
 
 **Combining the machine positions (Clause 7.3.3).** For each machine position

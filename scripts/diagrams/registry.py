@@ -60,6 +60,7 @@ from .buildings import (
     _d_source_qualification,
     _d_survey_sweep,
     _d_sweep_budget,
+    _d_tapping_positions_scan_paths,
     _d_workroom_path,
 )
 from .canvas import _write
@@ -312,7 +313,12 @@ DIAGRAMS = {
     "diagram_impact_setup": (
         _d_impact,
         "ISO 16283-2 impact sound insulation setup",
-        600,
+        726,
+    ),
+    "diagram_tapping_positions_scan_paths": (
+        _d_tapping_positions_scan_paths,
+        "Tapping machine positions and manual scanning paths (ISO 16283)",
+        830,
     ),
     "diagram_facade_setup": (
         _d_facade_setup,

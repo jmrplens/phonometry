@@ -387,10 +387,10 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
 
 
 def _d_impact(s: SVG, th: Theme) -> None:
-    bx0, bx1 = 90.0, 620.0  # building left / right walls
-    top = 82.0
-    floor_top, floor_bot = 292.0, 316.0  # separating floor slab
-    bot = 512.0  # receiving-room floor
+    bx0, bx1 = 90.0, 640.0  # building left / right walls
+    top = 76.0
+    floor_top, floor_bot = 246.0, 270.0  # separating floor slab
+    bot = 548.0  # receiving-room floor
 
     # Building shell and the two stacked rooms.
     s.rect(bx0, top, bx1 - bx0, floor_top - top, th.panel, th.fg, sw=2.5)
@@ -449,21 +449,41 @@ def _d_impact(s: SVG, th: Theme) -> None:
             stroke=th.accent,
             sw=1.6,
         )
-    s.text(mx, bot - 44, "radiated impact sound", 13, th.accent, italic=True)
+    s.text(mx, floor_bot + 152, "radiated impact sound", 13, th.accent, italic=True)
 
-    # Microphone positions on the receiving-room floor.
-    for off in (300, 400, 500):
-        s.mic(bx0 + off, bot - 120, bot, 0.95)
-    s.text(bx0 + 400, floor_bot + 42, "Microphone positions", 14, th.muted)
+    # Microphone positions in the receiving room, each at its own height: no
+    # two may lie in the same plane relative to the room boundaries (7.3.1).
+    mics = ((388.0, 440.0), (478.0, 400.0), (568.0, 420.0))
+    for mic_x, mic_y in mics:
+        s.mic(mic_x, mic_y, bot, 0.95)
+    s.text(mics[1][0] - 40, floor_bot + 34, "Microphone positions", 14, th.muted)
 
-    # Normative relations (right column); no invented spacing dimensions.
-    lx = 648.0
-    s.text(lx, 118, "Impact sound insulation", 15, th.fg, bold=True, anchor="start")
+    # The three minimum distances of ISO 16283-2:2020, 7.6, each on the span
+    # it measures. They are normative, so the section carries them as the
+    # airborne plan carries its own: a) between two fixed positions, b) to a
+    # room boundary, and c) to the partition the machine excites, which from
+    # the room below is the ceiling and therefore a height.
+    s.dim(
+        mics[0][0],
+        mics[0][1],
+        mics[1][0],
+        mics[1][1],
+        "≥ 0.7 m",
+        offset=-50,
+        size=14,
+        aligned=True,
+    )
+    s.dim(mics[2][0], floor_bot, mics[2][0], mics[2][1], "≥ 1.0 m", size=14)
+    s.dim(mics[2][0] + 6, mics[2][1] + 6, bx1, mics[2][1] + 6, "≥ 0.5 m", size=14)
+
+    # Normative relations (right column).
+    lx = 668.0
+    s.text(lx, 112, "Impact sound insulation", 15, th.fg, bold=True, anchor="start")
     box_items = [
-        (160, "$L′_{nT} = L_i − 10 log_{10}(T/T_0)$", th.primary),
-        (192, "$L′_n = L_i + 10 log_{10}(A/A_0)$", th.primary),
-        (224, "$A = 0.16 V/T$  (Sabine)", th.muted),
-        (256, "$T_0$ = 0.5 s , $A_0$ = 10 m²", th.accent),
+        (150, "$L′_{nT} = L_i − 10 log_{10}(T/T_0)$", th.primary),
+        (180, "$L′_n = L_i + 10 log_{10}(A/A_0)$", th.primary),
+        (210, "$A = 0.16 V/T$  (Sabine)", th.muted),
+        (240, "$T_0$ = 0.5 s , $A_0$ = 10 m²", th.accent),
     ]
     # ISO 16283-2 prints the impact level L_i and the normalized L'_n with
     # upright i and n, and ISO 717-2 the C_I of the impact spectrum.
@@ -472,14 +492,14 @@ def _d_impact(s: SVG, th: Theme) -> None:
         s.text(
             lx, y, txt, 12, col, anchor="start", bold=(col != th.muted), upright=impact
         )
-    s.rect(lx - 10, 292, 236, 100, "none", th.muted, rx=10, dash="6,5")
+    s.rect(lx - 10, 268, 236, 100, "none", th.muted, rx=10, dash="6,5")
     s.text(
-        lx, 320, "$L_i$ = energy-averaged", 13, th.fg, anchor="start", upright=impact
+        lx, 296, "$L_i$ = energy-averaged", 13, th.fg, anchor="start", upright=impact
     )
-    s.text(lx, 342, "band level (Formula 10)", 13, th.fg, anchor="start")
+    s.text(lx, 318, "band level (Formula 10)", 13, th.fg, anchor="start")
     s.text(
         lx,
-        374,
+        350,
         "ISO 717-2 → $L_{n,w}$ , $C_I$",
         14,
         th.secondary,
@@ -487,6 +507,376 @@ def _d_impact(s: SVG, th: Theme) -> None:
         bold=True,
         upright=impact,
     )
+
+    # Clause legend: the distances drawn above, and how many microphone
+    # positions each machine position takes.
+    for y, txt in (
+        (582, "7.6 a) ≥ 0.7 m between fixed microphone positions"),
+        (606, "7.6 b) ≥ 0.5 m from any microphone position to the room boundaries"),
+        (
+            630,
+            "7.6 c) ≥ 1.0 m from any microphone position to the partition "
+            "the machine excites",
+        ),
+        (
+            654,
+            "7.3.1 no two positions in the same plane relative to the room "
+            "boundaries, and no regular grid",
+        ),
+        (
+            678,
+            "7.3.2 four or five machine positions: ≥ 2 microphone positions "
+            "for each of them",
+        ),
+        (
+            702,
+            "7.3.2 six or more machine positions: ≥ 1 for each, at a different "
+            "position each time",
+        ),
+    ):
+        s.text(80, y, txt, 15, th.fg, anchor="start")
+
+
+# ---------------------------------------------------------------------------
+# ISO 16283-2 tapping machine positions, and the manual scanning paths of
+# Figure 1 of ISO 16283-1 and ISO 16283-2
+# ---------------------------------------------------------------------------
+
+
+def _polyline(
+    s: SVG,
+    points: Sequence[tuple[float, float]],
+    colour: str,
+    sw: float = 2.2,
+    dash: str = "",
+) -> None:
+    """Open path through *points*, for a curve the canvas has no primitive for."""
+    head, *tail = points
+    d = f"M {head[0]:.1f} {head[1]:.1f} " + " ".join(
+        f"L {x:.1f} {y:.1f}" for x, y in tail
+    )
+    s.path(d, stroke=colour, sw=sw, dash=dash)
+
+
+def _path_head(
+    s: SVG, points: Sequence[tuple[float, float]], colour: str, sw: float = 2.2
+) -> None:
+    """Arrowhead on the last point of a sampled curve, along its last chord."""
+    (x1, y1), (x2, y2) = points[-2], points[-1]
+    norm = math.hypot(x2 - x1, y2 - y1)
+    back = 11.0 / norm
+    s.arrow(x2 - (x2 - x1) * back, y2 - (y2 - y1) * back, x2, y2, colour, sw)
+
+
+def _scan_operator(
+    s: SVG,
+    th: Theme,
+    x: float,
+    feet: float,
+    hand: tuple[float, float],
+    height: float = 126.0,
+) -> tuple[float, float]:
+    """Standing operator who holds a microphone out at *hand*; ``(x, feet)``.
+
+    Returns the shoulder, which is the centre every hand-held path turns about.
+    """
+    r = height * 0.085
+    shoulder = feet - height * 0.80
+    hip = feet - height * 0.45
+    s.circle(x, feet - height + r, r, th.muted)
+    s.line(x, feet - height + 2 * r, x, hip, th.muted, 3)
+    s.line(x, hip, x - height * 0.10, feet, th.muted, 2.4)
+    s.line(x, hip, x + height * 0.10, feet, th.muted, 2.4)
+    s.line(x, shoulder, hand[0], hand[1], th.muted, 2.4)
+    return x, shoulder
+
+
+def _tapping_machine_plan(
+    s: SVG, th: Theme, cx: float, cy: float, angle: float, half: float = 21.0
+) -> None:
+    """Tapping machine seen from above: body and line of five hammers.
+
+    *angle* turns the hammer line from the x axis, in degrees, anticlockwise
+    on the sheet.
+    """
+    a = math.radians(angle)
+    ux, uy = math.cos(a), -math.sin(a)
+    px, py = -uy, ux
+    wide = 7.0
+    corners = [
+        (cx + i * half * ux + j * wide * px, cy + i * half * uy + j * wide * py)
+        for i, j in ((-1, -1), (1, -1), (1, 1), (-1, 1))
+    ]
+    s.path(
+        "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in corners) + " Z",
+        fill=th.primary,
+        stroke=th.fg,
+        sw=1.6,
+    )
+    for k in range(-2, 3):
+        s.circle(cx + k * 8.0 * ux, cy + k * 8.0 * uy, 2.2, th.fg)
+
+
+def _d_tapping_positions_scan_paths(s: SVG, th: Theme) -> None:
+    # ---- Panel A: the floor under test, from above (ISO 16283-2, 7.2.2) ----
+    s.text(
+        40,
+        66,
+        "A · Where the tapping machine stands (ISO 16283-2:2020, 7.2.2)",
+        16,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    fx0, fy0, fx1, fy1 = 110.0, 92.0, 510.0, 352.0
+    band = 40.0  # the 0.5 m along every edge that takes no machine
+    s.rect(fx0, fy0, fx1 - fx0, fy1 - fy0, th.panel, th.fg, sw=2.5)
+    for x0, y0, x1, y1 in (
+        (fx0, fy0, fx1, fy0 + band),
+        (fx0, fy1 - band, fx1, fy1),
+        (fx0, fy0 + band, fx0 + band, fy1 - band),
+        (fx1 - band, fy0 + band, fx1, fy1 - band),
+    ):
+        _hatch_rect(s, x0, y0, x1, y1, 9.0, th.muted)
+    s.rect(
+        fx0 + band,
+        fy0 + band,
+        fx1 - fx0 - 2 * band,
+        fy1 - fy0 - 2 * band,
+        "none",
+        th.muted,
+        sw=1.2,
+        dash="6,4",
+    )
+    # Beams or ribs under the floor, running up the sheet.
+    beams = [fx0 + 50.0 * k for k in range(1, 8)]
+    for bx in beams:
+        s.line(bx, fy0 + 6, bx, fy1 - 6, th.secondary, 1.4, dash="9,6")
+
+    # Four positions scattered over the floor, never a grid, each with its
+    # hammer line at 45° to the beams. The second one stands on a beam, where
+    # the angle can be drawn; the first sits at the minimum from the edge.
+    first = (fx0 + band + 20.0, fy0 + 104.0)
+    on_beam = (beams[3], fy0 + 178.0)
+    machines = (
+        (first[0], first[1], 45.0),
+        (on_beam[0], on_beam[1], 45.0),
+        (fx0 + 262.0, fy0 + 82.0, -45.0),
+        (fx0 + 326.0, fy0 + 196.0, 45.0),
+    )
+    for mx, my, angle in machines:
+        _tapping_machine_plan(s, th, mx, my, angle)
+    # The angle between the beam and the hammer line.
+    bx, by = on_beam
+    s.path(
+        f"M {bx:.1f} {by - 34:.1f} A 34 34 0 0 1 "
+        f"{bx + 34 * math.sin(math.radians(45)):.1f} "
+        f"{by - 34 * math.cos(math.radians(45)):.1f}",
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.text(bx + 12, by - 40, "45°", 13, th.fg, "start")
+    # The minimum distance, from the edge to the nearest point of a machine.
+    s.dim(fx0, first[1] + 34, first[0] - 20.0, first[1] + 34, "", size=13)
+    s.line(fx0 + band, first[1] + 14, fx0 + band, first[1] + 40, th.muted, 0.9, "3,3")
+    s.text(fx0 - 10, first[1] + 39, "≥ 0.5 m", 14, th.fg, "end")
+
+    nx = 540.0
+    for y, txt in (
+        (118, "≥ 4 positions, distributed at random"),
+        (142, "each one ≥ 0.5 m from the edges of the floor"),
+        (166, "a floor with beams or ribs can need more,"),
+        (190, "its hammer line at 45° to their direction"),
+    ):
+        s.text(nx, y, txt, 14, th.fg, "start")
+    # What each mark of the plan is.
+    _hatch_rect(s, nx, 228, nx + 34, 246, 9.0, th.muted)
+    s.rect(nx, 228, 34, 18, "none", th.muted, sw=1.0)
+    s.text(nx + 46, 242, "0.5 m along the edges: no machine", 13, th.fg, "start")
+    s.line(nx, 273, nx + 34, 273, th.secondary, 1.4, dash="9,6")
+    s.text(nx + 46, 278, "beams or ribs", 13, th.fg, "start")
+    _tapping_machine_plan(s, th, nx + 17, 309, 0.0, half=17.0)
+    s.text(nx + 46, 314, "tapping machine and its hammer line", 13, th.fg, "start")
+
+    # ---- Panel B: the four manual scanning paths (Figure 1 of both parts) ----
+    s.text(
+        40,
+        396,
+        "B · The four manual scanning paths (Figure 1 of ISO 16283-1 and ISO 16283-2)",
+        16,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    ceiling, floor = 444.0, 624.0  # a 2.5 m room, 72 px to the metre
+    half_metre = 36.0
+    columns = (135.0, 345.0, 555.0, 765.0)
+    heads = (
+        "1 · Circle",
+        "2 · Helix",
+        "3 · Cylindrical-type",
+        "4 · Three semicircles",
+    )
+    for cx, head in zip(columns, heads, strict=True):
+        s.text(cx, 428, head, 14, th.fg, bold=True)
+        s.line(cx - 95, ceiling, cx + 95, ceiling, th.fg, 2.2)
+        hx = cx - 95
+        while hx < cx + 90:
+            s.line(hx, ceiling, hx + 8, ceiling - 9, th.muted, 1.1)
+            hx += 18
+        s.ground(floor, cx - 95, cx + 95, 18)
+    path = th.primary
+
+    # 1 - circle: the body turns through 270° to 360° with the arm stretched
+    # out, in a plane tilted off every room surface.
+    cx = columns[0]
+    tilt = math.radians(-16.0)
+
+    def on_circle(t: float) -> tuple[float, float]:
+        ex, ey = 62.0 * math.cos(t), 22.0 * math.sin(t)
+        return (
+            cx + ex * math.cos(tilt) - ey * math.sin(tilt),
+            shoulder_y + ex * math.sin(tilt) + ey * math.cos(tilt),
+        )
+
+    shoulder_y = floor - 126.0 * 0.80
+    _scan_operator(s, th, cx, floor, on_circle(0.0))
+    turn = [on_circle(math.radians(a)) for a in range(0, 271, 6)]
+    _polyline(s, turn, path)
+    _path_head(s, turn, path)
+    _polyline(
+        s, [on_circle(math.radians(a)) for a in range(282, 355, 6)], path, 1.6, "5,4"
+    )
+    s.circle(*on_circle(0.0), 4.0, th.fg)
+
+    # 2 - helix: from 0.5 m above the floor, at least two turns from crouched
+    # to standing. Where it ends is the one number the two parts differ in
+    # (no more than 0.5 m from the ceiling in ISO 16283-1:2014, 7.5.3; at
+    # least 0.5 m in ISO 16283-2:2020, 7.5.5), so the plate draws the 0.5 m
+    # and leaves the direction to the note below.
+    ax = columns[1] - 18.0
+    low, high = floor - half_metre, ceiling + half_metre
+
+    def on_helix(t: float) -> tuple[float, float]:
+        return (
+            ax + 50.0 * math.cos(t),
+            low - (low - high) * t / (4 * math.pi) + 13.0 * math.sin(t),
+        )
+
+    _scan_operator(s, th, ax, floor, on_helix(2 * math.pi))
+    helix = [on_helix(math.radians(a)) for a in range(0, 721, 6)]
+    _polyline(s, helix, path)
+    _path_head(s, helix, path)
+    s.circle(*on_helix(2 * math.pi), 4.0, th.fg)
+    s.dim(ax + 64, floor, ax + 64, low, "0.5 m", size=12, label_side="right")
+    s.dim(ax + 64, ceiling, ax + 64, high, "0.5 m", size=12, label_side="right")
+
+    # 3 - cylindrical-type: a sweep of about 220° level with the floor, 0.5 m
+    # above it, straight up to 0.5 m from the ceiling, about 220° back and
+    # straight down again, the microphone on an extension rod.
+    ax = columns[2] - 18.0
+
+    def on_cylinder(t: float, level: float) -> tuple[float, float]:
+        return ax + 56.0 * math.cos(t), level + 15.0 * math.sin(t)
+
+    sweep = [math.radians(a) for a in range(200, -21, -5)]
+    lower = [on_cylinder(t, low) for t in sweep]
+    upper = [on_cylinder(t, high) for t in reversed(sweep)]
+    hand = (ax + 24.0, floor - 76.0)
+    _scan_operator(s, th, ax, floor, hand)
+    tip = on_cylinder(math.radians(40.0), low)
+    s.line(hand[0], hand[1], tip[0], tip[1], th.fg, 1.8)
+    _polyline(s, lower, path)
+    _path_head(s, lower[: len(lower) // 2], path)
+    rise = [lower[-1], (lower[-1][0], (low + high) / 2), upper[0]]
+    _polyline(s, rise, path)
+    _path_head(s, rise[:2], path)
+    _polyline(s, upper, path)
+    _path_head(s, upper[: len(upper) // 2], path)
+    fall = [upper[-1], (upper[-1][0], (low + high) / 2), lower[0]]
+    _polyline(s, fall, path)
+    _path_head(s, fall[:2], path)
+    s.circle(tip[0], tip[1], 4.0, th.fg)
+    s.dim(ax + 70, floor, ax + 70, low, "0.5 m", size=12, label_side="right")
+    s.dim(ax + 70, ceiling, ax + 70, high, "0.5 m", size=12, label_side="right")
+
+    # 4 - three semicircles about 45° to 60° apart, for the room that leaves
+    # no space for the other three: seen from the front, three half ellipses
+    # on one diameter, 55° from each to the next.
+    cx = columns[3]
+    reach = 60.0
+    arcs = (70.0, 15.0, -40.0)  # elevation of each plane above the horizontal
+    middle = reach * math.sin(math.radians(arcs[1]))
+    grip = math.radians(40.0)
+    hand = (
+        cx + reach * math.cos(grip),
+        shoulder_y - middle * math.sin(grip),
+    )
+    _scan_operator(s, th, cx, floor, hand)
+    for elevation in arcs:
+        bulge = reach * math.sin(math.radians(elevation))
+        s.path(
+            f"M {cx - reach:.1f} {shoulder_y:.1f} "
+            f"A {reach:.1f} {abs(bulge):.1f} 0 0 {1 if bulge > 0 else 0} "
+            f"{cx + reach:.1f} {shoulder_y:.1f}",
+            stroke=path,
+            sw=2.2,
+        )
+    s.circle(hand[0], hand[1], 4.0, th.fg)
+
+    # What the two parts say of each path, under the path it belongs to.
+    notes = (
+        (
+            "7.5.2 | 7.5.4",
+            "arm stretched out,",
+            "270° to 360° about the body,",
+            "plane ≥ 10° from",
+            "every room surface",
+        ),
+        (
+            "7.5.3 | 7.5.5",
+            "from 0.5 m above the floor,",
+            "≥ 2 turns, from crouched",
+            "to standing, up to 0.5 m",
+            "from the ceiling",
+        ),
+        (
+            "7.5.4 | 7.5.6",
+            "rod of 0.3 m to 0.9 m,",
+            "two sweeps of ≈ 220°,",
+            "the straight sections",
+            "at ≈ 0.25 m/s at most",
+        ),
+        (
+            "7.5.5 | 7.5.7",
+            "arm stretched out,",
+            "≈ 45° to 60° apart,",
+            "each plane ≥ 10° from",
+            "every room surface",
+        ),
+    )
+    for cx, lines in zip(columns, notes, strict=True):
+        for row, line in enumerate(lines):
+            s.text(cx, 656 + 18 * row, line, 12, th.muted if row == 0 else th.fg)
+
+    for y, txt in (
+        (
+            764,
+            "Clause numbers: ISO 16283-1:2014 | ISO 16283-2:2020. Every path at a "
+            "constant angular speed, ≈ 20°/s at most.",
+        ),
+        (
+            786,
+            "The helix ends no more than 0.5 m from the ceiling in ISO 16283-1:2014, "
+            "at least 0.5 m from it in ISO 16283-2:2020.",
+        ),
+        (
+            808,
+            "The three semicircles are the path for a room with no space for the "
+            "other three.",
+        ),
+    ):
+        s.text(40, y, txt, 13, th.fg, "start")
 
 
 # ---------------------------------------------------------------------------

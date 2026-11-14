@@ -17,8 +17,8 @@
 # `.report()` tests. Generated from the maintainer's venv that produced the
 # committed fiches.
 reportlab==5.1.0
-svglib==2.3.2
-pypdfium2==5.14.0
+svglib==2.4.0
+pypdfium2==5.15.0
 lxml==6.1.3
 cssselect2==0.10.1
 tinycss2==1.5.1

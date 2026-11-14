@@ -761,6 +761,27 @@ def test_markup_moves_no_line() -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "joined",
+    [
+        pytest.param("<<b>em>", id="a tag taken out joins a tag"),
+        pytest.param("<*em>", id="a mark taken out joins a tag"),
+        pytest.param("<<code>em>", id="a code tag taken out joins a tag"),
+    ],
+)
+def test_markup_a_deletion_joins_up_hides_no_count(joined: str) -> None:
+    """What is left once markup is out is read again until nothing changes.
+
+    A ``<`` before a tag or a mark is no tag of its own, and taking the tag or
+    the mark out joins it to what follows into ``<em>``, which one pass would
+    leave between the count and its noun.
+    """
+    text = f"It runs {TOTAL} conformance checks against {CITATION_GROUPS}{joined} standards.\n"
+    assert ccc.refused_in(text, CITATION_GROUPS) == [
+        (1, f"{CITATION_GROUPS} standards", ccc.FORBIDDEN[0][1])
+    ]
+
+
 def test_the_citation_group_figure_is_found_in_any_sentence() -> None:
     """:func:`figures_in` is the half of the refusal that needs no wording."""
     text = (

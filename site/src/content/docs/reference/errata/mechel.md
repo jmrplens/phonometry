@@ -2,6 +2,8 @@
 title: "Errata in Mechel (2008)"
 description: "Errata in Mechel (2008): 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "doi-10-1007-978-3-540-76833-3"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

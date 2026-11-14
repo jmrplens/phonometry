@@ -2,6 +2,8 @@
 title: "Erratas de Barham, Barrera-Figueroa & Avison (2014)"
 description: "Erratas de Barham, Barrera-Figueroa & Avison (2014): 1 defecto del texto impreso, con la evidencia y lo que hace phonometry al respecto."
 searchTitle: ""
+corrects:
+  - "doi-10-1088-0026-1394-51-3-129"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

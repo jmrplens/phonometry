@@ -2,6 +2,8 @@
 title: "Errata in Real Decreto 1367/2007"
 description: "Errata in Real Decreto 1367/2007: 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "std-rd-1367-2007-boe-a-2007-18397-consolidated-text"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

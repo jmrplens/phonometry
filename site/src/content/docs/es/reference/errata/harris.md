@@ -2,6 +2,8 @@
 title: "Erratas de Harris (1995)"
 description: "Erratas de Harris (1995): 2 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "book-harris-1995-manual-de-medidas-acusticas-y-control-del-ruido"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

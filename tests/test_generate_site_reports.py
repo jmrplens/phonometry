@@ -11,6 +11,9 @@ accepts.
 
 from __future__ import annotations
 
+import dataclasses
+import functools
+import hashlib
 import pathlib
 import sys
 
@@ -352,6 +355,7 @@ def test_every_shipped_page_fits_the_site_limits() -> None:
         assert len(set(titles)) == len(titles)
 
 
+@pytest.mark.whole_tree
 def test_every_entry_lands_on_exactly_one_page_in_both_languages() -> None:
     """Nothing is dropped or duplicated by the split, in either edition."""
     pages = generate_site_reports.rendered_pages()
@@ -478,6 +482,173 @@ def test_an_empty_introduction_is_mdx_safe() -> None:
     the two raised a ``ValueError`` where nothing is unsafe.
     """
     assert generate_site_reports._mdx_safe("", where="test") == ""
+
+
+# ---------------------------------------------------------------------------
+# The index: its own introduction, then what only the registry's says.
+# ---------------------------------------------------------------------------
+
+
+def _index_text(lang: str) -> str:
+    """The index page of one language as the generator writes it, as a reader reads it."""
+    edition = next(e for e in generate_site_reports.EDITIONS if e.lang == lang)
+    pages = generate_site_reports.rendered_pages()
+    text = pages[generate_site_reports.CONTENT / edition.index]
+    return " ".join(text.replace("*", "").split()).lower()
+
+
+@pytest.mark.whole_tree
+@pytest.mark.parametrize(
+    ("lang", "claim"),
+    [
+        ("en", "a defect of the method"),
+        ("en", "clean-room"),
+        ("en", "covers every kind of published source"),
+        ("en", "the authoritative one"),
+        ("en", "same entries in the same order"),
+        ("es", "un defecto del método"),
+        ("es", "sala limpia"),
+        ("es", "todos los tipos de fuente publicada"),
+        ("es", "la redacción autoritativa es la inglesa"),
+        ("es", "mismas entradas"),
+    ],
+)
+def test_the_index_says_each_thing_of_its_introduction_once(
+    lang: str, claim: str
+) -> None:
+    """The index's introduction and the registry's are not printed one after the other.
+
+    Both used to be: the index opened with its own introduction, written for
+    the site, and the generator transplanted the registry's below it, so the
+    page said twice that the registry comes from a clean-room implementation
+    and that a defect listed is not a defect of the method, and the Spanish
+    page twice that the English wording is the authoritative one and that the
+    two editions hold the same entries in the same order.
+    """
+    assert _index_text(lang).count(claim) == 1
+
+
+@pytest.mark.whole_tree
+def test_the_index_keeps_what_only_the_registry_says() -> None:
+    """The status legend and the evidence rule, which every family page points to."""
+    english, spanish = _index_text("en"), _index_text("es")
+    assert "status legend: unreported" in english
+    assert "verified against the page as printed" in english
+    assert "a spanish edition of this registry" in english
+    assert "leyenda de estados: sin notificar" in spanish
+    assert "contra la página tal como está impresa" in spanish
+
+
+def _edition(
+    said: tuple[generate_site_reports.SaidOnIndex, ...],
+) -> generate_site_reports.Edition:
+    return generate_site_reports.Edition(
+        lang="en",
+        source=generate_site_reports.DOCS / "ERRATA.md",
+        start=generate_site_reports.EDITIONS[0].start,
+        said_on_index=said,
+    )
+
+
+_PREAMBLE = generate_site_reports.Registry(
+    preamble=(
+        "The registry records each case.\nIt is long.\n\n"
+        "Status legend: unreported.\n\n"
+        "A new paragraph nobody listed."
+    ),
+    entries=(),
+)
+
+#: The first paragraph of :data:`_PREAMBLE` as a reader sees it, hashed here
+#: rather than by the function under test.
+_PINNED = hashlib.sha256(b"The registry records each case. It is long.").hexdigest()
+
+
+def _said(
+    opening: str = "The registry records",
+    digest: str = _PINNED,
+    words: str = "records each case",
+) -> generate_site_reports.SaidOnIndex:
+    return generate_site_reports.SaidOnIndex(opening, digest, words)
+
+
+def test_only_a_paragraph_the_index_says_is_left_out() -> None:
+    """A paragraph is left out while the index says it; one added later is kept."""
+    kept = generate_site_reports.index_preamble(
+        _edition((_said(),)), _PREAMBLE, "The index\nrecords each case, wrapped."
+    )
+    assert kept == "Status legend: unreported.\n\nA new paragraph nobody listed."
+
+
+def test_a_paragraph_rewrapped_still_reads_as_pinned() -> None:
+    """The digest is of the words, so wrapping the lines otherwise changes nothing."""
+    rewrapped = dataclasses.replace(
+        _PREAMBLE,
+        preamble=_PREAMBLE.preamble.replace("case.\nIt is", "case. It\nis"),
+    )
+    kept = generate_site_reports.index_preamble(
+        _edition((_said(),)), rewrapped, "records each case"
+    )
+    assert kept.startswith("Status legend")
+
+
+def test_a_paragraph_listed_by_words_it_no_longer_opens_with_stops_the_run() -> None:
+    """A reworded paragraph would be transplanted again in silence."""
+    edition = _edition((_said(opening="The register records"),))
+    with pytest.raises(SystemExit, match="no paragraph of the registry's introduction"):
+        generate_site_reports.index_preamble(edition, _PREAMBLE, "records each case")
+
+
+def test_a_paragraph_the_index_no_longer_says_stops_the_run() -> None:
+    """Left out while the index said it, the paragraph would be said nowhere."""
+    edition = _edition((_said(),))
+    with pytest.raises(SystemExit, match="no longer says 'records each case'"):
+        generate_site_reports.index_preamble(edition, _PREAMBLE, "says something else")
+
+
+def test_an_edit_inside_a_paragraph_left_out_stops_the_run() -> None:
+    """An edit to a paragraph the index leaves out would reach no page.
+
+    The paragraph still opens with the words it is listed by, and the index
+    still says them, so neither of the other two stops would fire: a rule
+    added to the registry's introduction would stay on GitHub, and the site's
+    introduction would disagree with it without anything saying so.
+    """
+    edited = dataclasses.replace(
+        _PREAMBLE,
+        preamble=_PREAMBLE.preamble.replace(
+            "It is long.",
+            "It is long. A NEW RULE: every entry is reported within 30 days.",
+        ),
+    )
+    edition = _edition((_said(),))
+    with pytest.raises(
+        SystemExit,
+        match=r"opening 'The registry records' changed\..*index\.mdx says it in its own words",
+    ):
+        generate_site_reports.index_preamble(edition, edited, "records each case")
+
+
+@pytest.mark.parametrize(
+    "edition", generate_site_reports.EDITIONS, ids=lambda e: e.lang
+)
+def test_every_paragraph_left_out_is_pinned_as_the_registry_reads(
+    edition: generate_site_reports.Edition,
+) -> None:
+    """Each paragraph the index leaves out is the registry's paragraph, word for word.
+
+    Three in English and four in Spanish: the clean-room paragraph, what the
+    registry covers and what an entry describes, and in Spanish the note that
+    the English wording is the authoritative one.
+    """
+    registry = generate_site_reports.read_registry(edition)
+    paragraphs = [
+        " ".join(part.split()) for part in registry.preamble.split("\n\n") if part
+    ]
+    assert len(edition.said_on_index) == {"en": 3, "es": 4}[edition.lang]
+    for item in edition.said_on_index:
+        (paragraph,) = [text for text in paragraphs if text.startswith(item.opening)]
+        assert hashlib.sha256(paragraph.encode()).hexdigest() == item.digest
 
 
 # ---------------------------------------------------------------------------
@@ -678,6 +849,7 @@ def test_every_alias_names_a_designation_the_registry_prints() -> None:
     assert set(generate_site_reports.DESIGNATED_AS) <= printed
 
 
+@pytest.mark.whole_tree
 def test_list_unmatched_prints_the_works_and_fails(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -689,12 +861,187 @@ def test_list_unmatched_prints_the_works_and_fails(
         0,
     )
     monkeypatch.setattr(
-        generate_site_reports, "check_bibliography", lambda pages: [missing]
+        generate_site_reports,
+        "check_bibliography",
+        lambda pages, bibliographies=None: [missing],
     )
     assert generate_site_reports.main(["--list-unmatched"]) == 1
     out = capsys.readouterr().out
     assert "randi (en): report by Breeding (1996) has no bibliography entry" in out
     assert generate_site_reports.main(["--check"]) == 1
     assert "randi (en)" in capsys.readouterr().err
-    monkeypatch.setattr(generate_site_reports, "check_bibliography", lambda pages: [])
+    monkeypatch.setattr(
+        generate_site_reports,
+        "check_bibliography",
+        lambda pages, bibliographies=None: [],
+    )
     assert generate_site_reports.main(["--list-unmatched"]) == 0
+
+
+@pytest.mark.parametrize(
+    ("ref", "fragment"),
+    [
+        (_iso("ISO 3743-1:2010"), "std-iso-3743-1-2010"),
+        (
+            {"type": "standard", "designation": "Recomendación UIT-R BS.468-4"},
+            "std-recomendacion-uit-r-bs-468-4",
+        ),
+        (
+            {"type": "book", "doi": "10.1002/9780470747339", "title": "Propagation"},
+            "doi-10-1002-9780470747339",
+        ),
+        (
+            {
+                "type": "book",
+                "authors": ["Harris, C. M."],
+                "year": 1995,
+                "title": "Manual de medidas acústicas y control del ruido",
+            },
+            "book-harris-1995-manual-de-medidas-acusticas-y-control-del-ruido",
+        ),
+        (
+            {
+                "type": "report",
+                "organization": "National Marine Fisheries Service",
+                "year": 2024,
+                "title": "Technical guidance (version 3.0)",
+            },
+            "report-national-marine-fisheries-service-2024-technical-guidance-version-3-0",
+        ),
+        ({"type": "web", "title": "A page"}, "web-nd-a-page"),
+    ],
+)
+def test_a_fragment_is_the_one_the_site_gives_the_work(
+    ref: dict[str, object], fragment: str
+) -> None:
+    """The fragment is ``referenceId``'s in ``site/src/lib/citations.mjs``.
+
+    The site stops the build on a fragment its bibliography does not define,
+    which holds the two to each other on every page; these pin the cases that
+    differ: a translated designation with an accent, a DOI, a first author
+    written with initials, an organization, a work with no year.
+    """
+    assert generate_site_reports.reference_fragment(ref) == fragment
+
+
+def _frontmatter(text: str) -> dict[str, object]:
+    loaded = yaml.safe_load(text.split("---\n")[1])
+    assert isinstance(loaded, dict)
+    return loaded
+
+
+@functools.cache
+def _corrects() -> dict[tuple[str, str], tuple[str, ...]]:
+    """Each family page's ``corrects`` as the generator writes it, by language and slug."""
+    rendered = generate_site_reports.rendered_pages()
+    out: dict[tuple[str, str], tuple[str, ...]] = {}
+    for edition in generate_site_reports.EDITIONS:
+        for page in generate_site_reports.family_pages():
+            path = (
+                generate_site_reports.CONTENT
+                / edition.folder
+                / f"{page.family.slug}.md"
+            )
+            front = _frontmatter(rendered[path])
+            assert "references" not in front, path.name
+            corrects = front.get("corrects", [])
+            assert isinstance(corrects, list), path.name
+            out[edition.lang, page.family.slug] = tuple(map(str, corrects))
+    return out
+
+
+@pytest.mark.whole_tree
+def test_every_family_page_names_the_works_it_corrects() -> None:
+    """Each family page carries ``corrects``, one fragment per work it corrects.
+
+    The site names them in the page's structured data, so a search engine
+    reads an errata page as about the documents it corrects; and only there,
+    not in ``references``, which would rank it with the guides. The count is
+    of the distinct works the page corrects, not of what wrote the field: two
+    headings that print one edition twice (``VDI 2081 Blatt 1:2001`` and
+    ``VDI 2081 Blatt 1:2001-07``) name it once.
+    """
+    bibliographies: dict[generate_site_reports.Lang, list[dict[str, object]]] = {
+        "en": generate_site_reports.read_bibliography("en"),
+        "es": generate_site_reports.read_bibliography("es"),
+    }
+    corrects = _corrects()
+    for edition in generate_site_reports.EDITIONS:
+        for page in generate_site_reports.family_pages():
+            named = corrects[edition.lang, page.family.slug]
+            where = f"{edition.lang}/{page.family.slug}"
+            works = set(generate_site_reports.corrected_works(page))
+            assert len(named) == len(works), where
+            assert len(set(named)) == len(named), where
+            assert named == generate_site_reports.corrected_fragments(
+                page, edition.lang, bibliographies[edition.lang]
+            ), where
+            assert bool(named) == (page.family.group != "not-errata"), where
+
+
+@pytest.mark.whole_tree
+@pytest.mark.parametrize(
+    ("lang", "slug", "fragments"),
+    [
+        ("en", "iso-3743", ("std-iso-3743-1-2010", "std-iso-3743-2-2018")),
+        ("es", "iso-3743", ("std-iso-3743-1-2010", "std-iso-3743-2-2018")),
+        *[
+            (
+                lang,
+                "iso-12354",
+                (
+                    "std-en-12354-1-2000",
+                    "std-iso-12354-1-2017",
+                    "std-en-12354-2-2000",
+                    "std-en-12354-3-2000",
+                    "std-en-12354-5-2009",
+                    "std-iso-12354-2-2017",
+                ),
+            )
+            for lang in ("en", "es")
+        ],
+        ("en", "icao-annex-16", ("std-icao-annex-16-vol-i-8th-ed",)),
+        ("es", "icao-annex-16", ("std-icao-annex-16-vol-i-8-ed",)),
+        *[
+            (
+                lang,
+                "harris",
+                ("book-harris-1995-manual-de-medidas-acusticas-y-control-del-ruido",),
+            )
+            for lang in ("en", "es")
+        ],
+        ("en", "iec-62489", ("std-iec-62489-1-2010-amd1-2014",)),
+        (
+            "en",
+            "vdi-2081",
+            ("std-vdi-2081-blatt-1-2001-07", "std-vdi-2081-blatt-2-2005-05"),
+        ),
+        ("en", "not-errata", ()),
+    ],
+)
+def test_a_family_page_names_these_works(
+    lang: str, slug: str, fragments: tuple[str, ...]
+) -> None:
+    """The works of a few families, written out, so a regression cannot pass as itself.
+
+    Every edition of a family on one page and in the order the registry
+    names them (ISO 12354, six); a designation the Spanish bibliography
+    translates (ICAO Annex 16, "8.ª ed."); a book with no DOI (Harris); and
+    the two families whose headings print one edition under two spellings,
+    each named once: IEC 62489-1:2010 and the amendment the guides cite it
+    with, and VDI 2081 Blatt 1 with and without the month.
+    """
+    assert _corrects()[lang, slug] == fragments
+
+
+@pytest.mark.whole_tree
+@pytest.mark.parametrize("lang", ["en", "es"])
+def test_the_family_pages_of_a_language_name_133_works(lang: str) -> None:
+    """In each language, 95 family pages name 133 works in all."""
+    named = {
+        slug: works
+        for (language, slug), works in _corrects().items()
+        if language == lang
+    }
+    assert sum(1 for works in named.values() if works) == 95
+    assert sum(len(works) for works in named.values()) == 133

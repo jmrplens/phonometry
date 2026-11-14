@@ -2,6 +2,8 @@
 title: "Erratas de Mechel (2008)"
 description: "Erratas de Mechel (2008): 1 defecto del texto impreso, con la evidencia y lo que hace phonometry al respecto."
 searchTitle: ""
+corrects:
+  - "doi-10-1007-978-3-540-76833-3"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

@@ -2,6 +2,8 @@
 title: "Errata in ICAO Annex 16"
 description: "Errata in ICAO Annex 16: 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "std-icao-annex-16-vol-i-8th-ed"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

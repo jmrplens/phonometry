@@ -14,18 +14,18 @@
 // for, so the graph is assembled here instead of hoping it is reassembled
 // downstream.
 import Default from '@astrojs/starlight/components/Head.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
 import { breadcrumbsFor } from '../lib/breadcrumbs.mjs';
 import { topicForSlug } from '../data/topics.mjs';
 import { firstPublished } from '../lib/page-dates.mjs';
 import { isoDay } from '../lib/date-rules.mjs';
 import {
   citationsFor,
-  citedWorks,
+  correctedWorks,
   englishStandardIds,
   referenceNode,
   standardsBody,
 } from '../lib/citations.mjs';
+import { bibliographyWorks, referencesOfEveryPage } from '../lib/bibliography-works';
 import { pageStandardTokens } from '../lib/standard-search.mjs';
 import { prose } from '../lib/markdown-fences.mjs';
 import { personId as PERSON_ID, siteUrl } from '../data/site.mjs';
@@ -67,6 +67,8 @@ interface RouteData {
       description?: string;
       references?: ReferenceEntry[];
       searchTitle?: string;
+      /** The works an errata page corrects, by their `@id` fragment (src/content.config.ts). */
+      corrects?: string[];
     };
   };
   lastUpdated?: Date;
@@ -239,6 +241,16 @@ const wordCount = proseBody.split(/\s+/).filter(Boolean).length;
 // `about`, beside the software.
 const { governingWorks, ...cited } = citationsFor({ references: data.references, bibliographyUrl });
 
+// An errata page is about the works its entries correct, which it names in
+// `about` beside the software, each as the bibliography describes it
+// (src/lib/citations.mjs, correctedWorks). They come from the page's own
+// `corrects`, never from `references`, which would also make the page's chips
+// and its search tokens and rank it with the guides written to those works.
+const corrected = data.corrects?.length
+  ? correctedWorks(data.corrects, await bibliographyWorks(lang, bibliographyUrl), bibliographyUrl)
+  : [];
+const aboutWorks = [...(governingWorks ?? []), ...corrected];
+
 const article =
   isHome || is404
     ? null
@@ -290,9 +302,10 @@ const article =
         // `isBasedOn` and `citation`, in that order, then `about`: each work is
         // named where it is first referenced and pointed at after, so the
         // standards the page is based on are named where a reader looks for
-        // them, and `about` lists the same ones beside the software.
+        // them, and `about` lists the same ones beside the software. An errata
+        // page cites nothing, and its `about` names the works it corrects.
         ...cited,
-        about: governingWorks ? [{ '@id': SOFTWARE_ID }, ...governingWorks] : { '@id': SOFTWARE_ID },
+        about: aboutWorks.length ? [{ '@id': SOFTWARE_ID }, ...aboutWorks] : { '@id': SOFTWARE_ID },
       };
 
 // The bibliography page is where every cited work is defined in full. Other
@@ -301,26 +314,14 @@ const article =
 let bibliographyNodes: unknown[] = [];
 if (isBibliography) {
   const bodies = new Map<string, unknown>();
-  const docs: CollectionEntry<'docs'>[] = await getCollection('docs');
-  const pages = docs.map((entry) => ({
-    id: entry.id,
-    references: (entry.data as { references?: ReferenceEntry[] }).references ?? [],
-  }));
+  const pages = await referencesOfEveryPage();
   // A Spanish standard names the English node it is (`sameAs`), so the two
   // bibliographies read as one set of works in two languages.
   const twins =
     lang === 'es' ? englishStandardIds(pages, bibliographyUrl, englishBibliographyUrl) : new Map();
-  // Only this locale's pages. The `@id`s are per-locale (they hang off this
-  // page's URL), and the `note` that becomes each node's `description` is
-  // written in the page's own language, so mixing the two locales puts
-  // Spanish prose on the English entities. `citedWorks` fails the build when
-  // two of those pages describe one work differently, which is what lets
-  // every other page name a work from its own references and still say what
-  // this page says.
-  const ownLanguage = pages.filter(
-    (page) => (page.id === 'es' || page.id.startsWith('es/')) === (lang === 'es'),
-  );
-  const works = [...citedWorks(ownLanguage, bibliographyUrl)].map(([id, ref]) => {
+  // Only this locale's works (src/lib/bibliography-works.ts says why), the
+  // set an errata page names the works it corrects from.
+  const works = [...(await bibliographyWorks(lang, bibliographyUrl))].map(([id, ref]) => {
     // The body is defined on the English bibliography's address in both
     // languages: one identity for ISO, not one per page that names it.
     const body = standardsBody(ref, englishBibliographyUrl);

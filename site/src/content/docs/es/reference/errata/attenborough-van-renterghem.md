@@ -2,6 +2,8 @@
 title: "Erratas de Attenborough & Van Renterghem (2021)"
 description: "Erratas de Attenborough & Van Renterghem (2021): 2 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-1201-9780429470806"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

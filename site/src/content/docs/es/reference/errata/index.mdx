@@ -10,11 +10,19 @@ defectos en las propias fuentes: un ejemplo resuelto que contradice su
 articulado, una constante a la que la composición tipográfica le comió un
 dígito, una referencia cruzada que apunta a la ecuación equivocada.
 
-Este es el registro de esos hallazgos. Cada entrada nombra la edición
-impresa y el punto exacto, cita lo que dice el documento, muestra por qué no
-puede ser correcto, aporta la evidencia independiente y declara qué lectura
-implementa la biblioteca y qué test de regresión la fija. Un defecto listado
-aquí nunca es un defecto del *método*: en todos los casos la lectura
+Este es el registro de esos hallazgos. Cubre todos los tipos de fuente
+publicada de los que parte la biblioteca: normas (ISO, IEC, EN), documentos
+de guía e informes técnicos (EASA, ECAC, NRL), libros y artículos de revista.
+Las fuentes no normativas quedan marcadas como tales en su entrada.
+
+Cada entrada nombra la edición impresa y el punto exacto, cita lo que dice el
+documento, muestra por qué no puede ser correcto, aporta la evidencia
+independiente y declara qué lectura implementa la biblioteca. Cuando esa
+lectura cambia algún número que da la biblioteca, la entrada nombra la
+comprobación o el test de regresión que lo fija; cuando el defecto es una
+etiqueta, una referencia cruzada o una tabla que la biblioteca nunca lee, la
+entrada deja constancia de que no hizo falta ningún cambio. Un defecto
+listado aquí nunca es un defecto del *método*: en todos los casos la lectura
 pretendida se ha podido establecer a partir del propio documento o de la
 física.
 
@@ -42,36 +50,15 @@ El registro vive en
 [`docs/ERRATA.md`](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md)
 con su edición española en
 [`docs/ERRATA.es.md`](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.es.md),
-y esta última se trasplanta a estas páginas en tiempo de compilación con
-`make site-reports`, que además exige que las dos ediciones lleven las mismas
-entradas en el mismo orden, así que ninguna pareja puede discrepar.
+y las entradas de esta última se trasplantan a estas páginas en tiempo de
+compilación con `make site-reports`, que además exige que las dos ediciones
+lleven las mismas entradas en el mismo orden, así que ninguna pareja puede
+discrepar.
 
 {/* BEGIN GENERATED BODY - transplanted from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never the text below. */}
 
 import ErrataFamily from '../../../../../components/ErrataFamily.astro';
 import ErrataRouter from '../../../../../components/ErrataRouter.astro';
-
-Durante la implementación en sala limpia de esta biblioteca, cada fórmula,
-constante y ejemplo resuelto se vuelve a deducir y a recalcular de forma
-independiente a partir de los documentos fuente. Ese proceso saca a la luz, de
-cuando en cuando, defectos de las propias fuentes: erratas de imprenta,
-ejemplos resueltos que contradicen su propio texto normativo y redacciones
-ambiguas. Este fichero registra cada caso confirmado con la evidencia, lo que
-hace la biblioteca al respecto y si se ha notificado.
-
-El registro cubre todos los tipos de fuente publicada de los que parte la
-biblioteca: normas (ISO, IEC, EN), documentos de guía e informes técnicos
-(EASA, ECAC, NRL), libros y artículos de revista. Las fuentes no normativas
-quedan marcadas como tales en su entrada.
-
-Las entradas describen las ediciones impresas concretas que se citan. Un
-defecto listado aquí no es un defecto del método; en todos los casos la
-lectura pretendida se ha podido establecer a partir del propio documento o de
-la física, y la biblioteca implementa esa lectura. Cuando la lectura cambia
-algún número que la biblioteca da, la entrada nombra la comprobación o el test
-que lo fija; cuando el defecto es una etiqueta, una referencia cruzada o una
-tabla que la biblioteca nunca lee, la entrada deja constancia de que no hizo
-falta ningún cambio.
 
 Leyenda de estados: **sin notificar** (registrado solo aquí) / **notificado**
 (comunicado al organismo emisor, con fecha y referencia).
@@ -90,13 +77,6 @@ frases, lo dicen en un aviso inicial o figuran en la lista de excepciones de
 [`scripts/check_errata_evidence.py`](https://github.com/jmrplens/phonometry/blob/main/scripts/check_errata_evidence.py),
 que es la comprobación que hace cumplir la regla; véase
 [CONTRIBUTING.md](https://github.com/jmrplens/phonometry/blob/main/CONTRIBUTING.md#6-filing-an-errata-entry).
-
-Esta edición española traduce la prosa del registro entrada a entrada. La
-redacción autoritativa es la inglesa de [ERRATA.md](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md), que es la que
-se ha comunicado o se comunicará a los organismos emisores; las citas
-textuales, las matemáticas y los valores impresos se reproducen aquí sin
-traducir, tal como los imprime cada fuente. `make site-reports` mantiene las
-dos ediciones con las mismas entradas y en el mismo orden.
 
 ## Normas
 

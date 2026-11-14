@@ -2,6 +2,8 @@
 title: "Errata in Allard & Atalla (2009)"
 description: "Errata in Allard & Atalla (2009): 8 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "doi-10-1002-9780470747339"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

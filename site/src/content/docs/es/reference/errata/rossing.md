@@ -2,6 +2,8 @@
 title: "Erratas de Rossing (2014)"
 description: "Erratas de Rossing (2014): 6 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-1007-978-1-4939-0755-7"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

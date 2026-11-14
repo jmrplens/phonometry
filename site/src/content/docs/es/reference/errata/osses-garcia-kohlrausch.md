@@ -2,6 +2,8 @@
 title: "Erratas de Osses, García & Kohlrausch (2016)"
 description: "Erratas de Osses, García & Kohlrausch (2016): 1 defecto del texto impreso, con la evidencia y lo que hace phonometry al respecto."
 searchTitle: ""
+corrects:
+  - "doi-10-1121-2-0000410"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

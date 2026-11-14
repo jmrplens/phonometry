@@ -670,7 +670,18 @@ its Spanish twin and its docs/ mirror. Where the registry spells a cited
 document otherwise than the guides and the two are one text, add the
 spelling to `DESIGNATED_AS` instead; an adoption whose defects may be its
 own, a translation above all, is cited under its own designation
-([F59](docs/contributing/docs-and-figures.md#f59)).
+([F59](docs/contributing/docs-and-figures.md#f59)). The generator writes
+those works into each page's `corrects` field, and the site names them in the
+page's structured data as what the page is about, beside the software; a work
+the bibliography of the page's language does not define stops the site build,
+and `check:structured-data` fails a page whose structured data names other
+works than its `corrects` lists, or in another order.
+
+The registry's introduction is also the introduction of the errata index on
+the site, less the paragraphs the index says in its own words, which
+`said_on_index` in the generator lists. An edit to one of those would reach no
+page, so `make site-reports` stops on it: carry the edit to the index's
+introduction above the marker, then pin the digest the stop prints.
 
 A second script is a contributor tool rather than a gate:
 

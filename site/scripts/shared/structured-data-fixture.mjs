@@ -151,8 +151,10 @@ export function build({ pages = 10, dated = pages, published = '2026-07-01', pla
 }
 
 /**
- * Write `built` as HTML files into a directory of their own, run the check on
- * them the way CI does, and say how it ended.
+ * Write `built` as HTML files into a directory of their own, and its
+ * `content` (path to text) as the content tree in another, run the check on
+ * the two the way CI does, and say how it ended. A build with no `content`
+ * gets an empty tree, so the check holds it to no page of the site's.
  *
  * Each page carries two blocks, as the built site does: the site-wide nodes
  * astro.config.mjs puts on every page, and the page's own graph from
@@ -163,16 +165,25 @@ export function build({ pages = 10, dated = pages, published = '2026-07-01', pla
  *
  * @param {import('node:test').TestContext} t The test, which removes the build when it ends.
  * @param {Record<string, {path: string, nodes: object[], text?: string, blocks?: (object|string)[]}>|object[]} built
- *   The pages.
+ *   The pages, and under `content` the pages of the content tree they are built from.
  * @returns {{status: number|null, out: string, err: string}} The check's exit status and what it printed.
  */
 export function check(t, built) {
 	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
-	t.after(() => rmSync(dist, { recursive: true, force: true }));
+	const tree = mkdtempSync(join(tmpdir(), 'check-structured-data-content-'));
+	t.after(() => {
+		rmSync(dist, { recursive: true, force: true });
+		rmSync(tree, { recursive: true, force: true });
+	});
+	const { content = {}, ...pages } = built;
+	for (const [path, text] of Object.entries(content)) {
+		mkdirSync(dirname(join(tree, path)), { recursive: true });
+		writeFileSync(join(tree, path), text);
+	}
 	const block = (body) => `<script type="application/ld+json">${body}</script>`;
 	const script = (nodes) => block(JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes }));
 	const further = (doc) => block(typeof doc === 'string' ? doc : JSON.stringify(doc));
-	for (const { path, nodes, text = '', blocks = [] } of Object.values(built)) {
+	for (const { path, nodes, text = '', blocks = [] } of Object.values(pages)) {
 		const site = nodes.filter((node) => SITE_TYPES.has(node['@type']));
 		const own = nodes.filter((node) => !SITE_TYPES.has(node['@type']));
 		mkdirSync(dirname(join(dist, path)), { recursive: true });
@@ -182,6 +193,6 @@ export function check(t, built) {
 				`<body><main>${text}</main>${blocks.map(further).join('')}</body></html>`,
 		);
 	}
-	const ran = spawnSync(process.execPath, [CHECK, dist], { encoding: 'utf8' });
+	const ran = spawnSync(process.execPath, [CHECK, dist, tree], { encoding: 'utf8' });
 	return { status: ran.status, out: ran.stdout, err: ran.stderr };
 }

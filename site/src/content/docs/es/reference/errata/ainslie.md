@@ -2,6 +2,8 @@
 title: "Erratas de Ainslie (2010)"
 description: "Erratas de Ainslie (2010): 2 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-1007-978-3-540-87662-5"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

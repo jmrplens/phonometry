@@ -2,6 +2,8 @@
 title: "Erratas de Long (2014)"
 description: "Erratas de Long (2014): 4 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-1016-c2012-0-03257-5"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

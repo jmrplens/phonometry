@@ -688,3 +688,207 @@ test('catalogue pages and an overview at a route topics.mjs does not list fail, 
 		assert.match(ran.err, new RegExp(`FAIL ${prefix}/reference/tables/: publishes a DataCatalog, and is not the overview`));
 	}
 });
+
+// ---------------------------------------------------------------------------
+// The errata pages and the works they correct
+// ---------------------------------------------------------------------------
+
+/** The family page of the fixture, the one page under the errata index that corrects a work. */
+const ERRATA_FAMILY = 'reference/errata/iso-1';
+
+/** A page of the content tree as scripts/generate_site_reports.py writes it, with what it corrects. */
+const errataSource = (title, corrects = []) =>
+	`---\ntitle: "${title}"\n${corrects.length > 0 ? `corrects:\n${corrects.map((fragment) => `  - "${fragment}"\n`).join('')}` : ''}---\n\nThe page.\n`;
+
+/** The `about` of an errata family page in `lang` naming `fragments` of its bibliography, as the build writes it. */
+const aboutNaming = (built, lang, fragments) => {
+	const url = lang === 'es' ? ES : EN;
+	return [{ '@id': SITE.software }, ...fragments.map((fragment) => stub(nodeAt(built, `${lang}/bibliography`, `${url}#${fragment}`)))];
+};
+
+/**
+ * A build with the errata registry in both languages: the pages of `build()`
+ * and, per language, the registry's index, one family page whose `about` names
+ * the standard it corrects beside the software, and the page of properties
+ * that are not errata, which corrects nothing; and the content tree the three
+ * are built from, the family page's `corrects` listing that standard.
+ */
+function errataBuild() {
+	const built = build();
+	built.content = {};
+	for (const lang of ['en', 'es']) {
+		const prefix = lang === 'es' ? 'es/' : '';
+		for (const slug of ['reference/errata', ERRATA_FAMILY, 'reference/errata/not-errata']) {
+			built[`${lang}/${slug}`] = page(slug, lang, {
+				about: slug === ERRATA_FAMILY ? aboutNaming(built, lang, ['std-iso-1-2000']) : { '@id': SITE.software },
+			});
+		}
+		built.content[`${prefix}reference/errata/index.mdx`] = errataSource('Errata');
+		built.content[`${prefix}${ERRATA_FAMILY}.md`] = errataSource('Errata in ISO 1', ['std-iso-1-2000']);
+		built.content[`${prefix}reference/errata/not-errata.md`] = errataSource('Not errata');
+	}
+	return built;
+}
+
+/** Take the errata pages of `lang` out of `built`, but those at `keep`. */
+const unbuildErrata = (built, lang, keep = []) => {
+	for (const key of Object.keys(built)) {
+		const slug = key.slice(lang.length + 1);
+		if (key.startsWith(`${lang}/reference/errata`) && !keep.includes(slug)) delete built[key];
+	}
+};
+
+test('a build whose every errata family page names the work it corrects passes', (t) => {
+	const ran = check(t, errataBuild());
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		/ok {3}each of the 2 errata family pages names in about, in order, the works its corrects lists, 2 in all/,
+	);
+});
+
+test('an errata family page naming fewer works than its corrects lists fails', (t) => {
+	// What a regression that keeps the first work of each page builds: every
+	// page still names a work, and the six editions of ISO 12354 come to one.
+	const built = errataBuild();
+	built.content[`${ERRATA_FAMILY}.md`] = errataSource('Errata in ISO 1', ['std-iso-1-2000', 'std-iso-2-2010']);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL 1 errata page\\(s\\) name in about other works than their corrects lists, or in another order ' +
+				`\\(first: /reference/errata/iso-1/ names 1 work\\(s\\) and its corrects lists 2; at position 2 it names nothing ` +
+				`where corrects lists ${RegExp.escape(EN)}#std-iso-2-2010\\)`,
+		),
+	);
+	assert.match(ran.err, /FAIL the en errata family pages name 1 work\(s\) in about, and their corrects list 2/);
+});
+
+test('an errata family page naming its works in another order, or one its corrects does not list, fails', (t) => {
+	const built = errataBuild();
+	built.content[`es/${ERRATA_FAMILY}.md`] = errataSource('Errata en ISO 1', ['std-iso-2-2010', 'std-iso-1-2000']);
+	built[`es/${ERRATA_FAMILY}`].article.about = aboutNaming(built, 'es', ['std-iso-1-2000', 'std-iso-2-2010']);
+	built[`en/${ERRATA_FAMILY}`].article.about = aboutNaming(built, 'en', ['std-iso-1-2000', 'std-iso-2-2010']);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL 2 errata page\(s\) name in about other works than their corrects lists, or in another order/);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`/es/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 2; at position 1 it names ${RegExp.escape(ES)}#std-iso-1-2000 where corrects lists ${RegExp.escape(ES)}#std-iso-2-2010`,
+		),
+	);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 1; at position 2 it names ${RegExp.escape(EN)}#std-iso-2-2010 where corrects lists nothing`,
+		),
+	);
+	assert.match(ran.err, /FAIL the en errata family pages name 2 work\(s\) in about, and their corrects list 1/);
+});
+
+test('an errata page of the content tree the build does not hold, or one built from no page, fails', (t) => {
+	// A family page that stopped being built would leave every count above
+	// agreeing with a build that has one page fewer.
+	const built = errataBuild();
+	built.content['reference/errata/iso-2.md'] = errataSource('Errata in ISO 2', ['std-iso-2-2010']);
+	built['es/reference/errata/iso-3'] = page('reference/errata/iso-3', 'es', { about: aboutNaming(built, 'es', ['std-iso-2-2010']) });
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the en build holds 2 of the 3 errata pages under .*reference\/errata \(first missing: iso-2\)/);
+	assert.match(ran.err, /FAIL \/es\/reference\/errata\/iso-3\/: an errata page with no page under .*es\/reference\/errata to say what it corrects/);
+});
+
+test('an errata index of the content tree the build does not hold fails', (t) => {
+	const built = errataBuild();
+	unbuildErrata(built, 'es');
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the es errata index is under .*es\/reference\/errata and the build does not hold it/);
+	assert.match(ran.err, /FAIL the es build holds 0 of the 2 errata pages under .*es\/reference\/errata \(first missing: iso-1, not-errata\)/);
+});
+
+test('a corrects field written in a shape the check cannot read fails', (t) => {
+	// Read as nothing, the field would let the page name no work at all.
+	const built = errataBuild();
+	built.content[`${ERRATA_FAMILY}.md`] = '---\ntitle: "Errata in ISO 1"\ncorrects: ["std-iso-1-2000"]\n---\n';
+	built.content[`es/${ERRATA_FAMILY}.md`] = '---\ntitle: "Errata en ISO 1"\ncorrects:\n  - std-iso-1-2000\n---\n';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL .*reference\/errata\/iso-1\.md: corrects is written in a shape this check cannot read: corrects: \["std-iso-1-2000"\]/);
+	assert.match(ran.err, /FAIL .*es\/reference\/errata\/iso-1\.md: a line of corrects this check cannot read: - std-iso-1-2000/);
+});
+
+test('an errata family page whose about names the software alone fails', (t) => {
+	const built = errataBuild();
+	built[`es/${ERRATA_FAMILY}`].article.about = { '@id': SITE.software };
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL 1 errata page\(s\) name no work they correct in about, only the software \(first: \/es\/reference\/errata\/iso-1\/\)/,
+	);
+});
+
+test('the page of properties that are not errata fails when it names a work it corrects', (t) => {
+	const built = errataBuild();
+	built['en/reference/errata/not-errata'].article.about = [
+		{ '@id': SITE.software },
+		stub(nodeAt(built, 'en/bibliography', `${EN}#std-iso-2-2010`)),
+	];
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/errata\/not-errata\/: the page of properties that are not errata corrects nothing and names 1 work\(s\) in about/,
+	);
+});
+
+test("an errata page that names a corrected work on the other language's bibliography fails", (t) => {
+	const built = errataBuild();
+	built[`es/${ERRATA_FAMILY}`].article.about = [
+		{ '@id': SITE.software },
+		stub(nodeAt(built, 'en/bibliography', `${EN}#std-iso-1-2000`)),
+	];
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/errata\/iso-1\/: the errata page names 1 work\(s\) it corrects on another language's bibliography/,
+	);
+});
+
+test("an errata page whose about opens with a work, or names what is not one, fails", (t) => {
+	const built = errataBuild();
+	const { article } = built[`en/${ERRATA_FAMILY}`];
+	article.about = [article.about[1], { '@id': SITE.software }, { '@id': SITE.person }];
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/errata\/iso-1\/: the errata page's about opens with .*#std-iso-1-2000, not the software/);
+	assert.match(ran.err, /FAIL \/reference\/errata\/iso-1\/: the errata page's about names 2 thing\(s\) that are not a cited work/);
+});
+
+test('an errata index built without its family pages or the page of properties that are not errata fails', (t) => {
+	// The routes moved under the check: every errata assertion would read
+	// nothing, and the build pass.
+	const built = errataBuild();
+	unbuildErrata(built, 'es', ['reference/errata']);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the es errata index was built with no family page under it/);
+	assert.match(ran.err, /FAIL the es errata index was built without reference\/errata\/not-errata, the page of properties that are not errata/);
+});
+
+test('an errata content tree checked out with CRLF line endings is read as the LF one', (t) => {
+	// A checkout with core.autocrlf=true, or the generator run on Windows,
+	// writes the errata pages with CRLF; the build reads them as it reads LF.
+	const built = errataBuild();
+	for (const [path, text] of Object.entries(built.content)) built.content[path] = text.replaceAll('\n', '\r\n');
+	const ran = check(t, built);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		/ok {3}each of the 2 errata family pages names in about, in order, the works its corrects lists, 2 in all/,
+	);
+});

@@ -2,6 +2,8 @@
 title: "Errata in Southall et al. (2019)"
 description: "Errata in Southall et al. (2019): 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "doi-10-1578-am-45-2-2019-125"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

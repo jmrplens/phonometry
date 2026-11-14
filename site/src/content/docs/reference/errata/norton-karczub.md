@@ -2,6 +2,8 @@
 title: "Errata in Norton & Karczub (2003)"
 description: "Errata in Norton & Karczub (2003): 5 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "doi-10-1017-cbo9781139163927"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

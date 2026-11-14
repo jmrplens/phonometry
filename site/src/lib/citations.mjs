@@ -521,6 +521,39 @@ export function referenceStub(ref, bibliographyUrl) {
   return Object.fromEntries(STUB_FIELDS.filter((key) => full[key] !== undefined).map((key) => [key, full[key]]));
 }
 
+/**
+ * The works an errata page corrects, named as its `about` names them.
+ *
+ * An errata page is about the documents its entries correct, and its
+ * structured data used to say it was about the software alone: 95 pages per
+ * language whose subject, for a search engine, was nothing but phonometry.
+ * The page cannot cite those documents in its `references`, which also make
+ * its References section, its header chips and the search tokens of what it
+ * implements, and would rank it with the guides written to the documents. So
+ * the errata generator writes each document's `@id` fragment into the page's
+ * `corrects` (scripts/generate_site_reports.py), and the page names each one
+ * here as the bibliography of its language describes it, a short node every
+ * other page names a work with (`referenceStub`).
+ *
+ * @param {readonly string[]} fragments The page's `corrects`: the fragment of
+ *   each work's `@id`, `std-iso-3743-1-2010`.
+ * @param {Map<string, object>} works `citedWorks` of the page's language.
+ * @param {string} bibliographyUrl Absolute URL of that language's bibliography.
+ * @returns {object[]} One named stub per work, in the page's order.
+ * @throws {Error} Naming every fragment the bibliography does not define.
+ */
+export function correctedWorks(fragments, works, bibliographyUrl) {
+  const missing = fragments.filter((fragment) => !works.has(`${bibliographyUrl}#${fragment}`));
+  if (missing.length > 0) {
+    throw new Error(
+      `an errata page corrects ${missing.length} work(s) the bibliography at ${bibliographyUrl} does not ` +
+        `define: ${missing.join(', ')}. Run \`make site-reports\`, which writes \`corrects\` from the pages' ` +
+        'references and stops on a work no page cites.',
+    );
+  }
+  return fragments.map((fragment) => referenceStub(works.get(`${bibliographyUrl}#${fragment}`), bibliographyUrl));
+}
+
 /** The numbers of a designation, in order: what a translation leaves alone. */
 const numbersOf = (designation) => (String(designation).match(/\d+/g) ?? []).join(' ');
 

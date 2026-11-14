@@ -2,6 +2,8 @@
 title: "Errata in Harris (1995)"
 description: "Errata in Harris (1995): 2 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "book-harris-1995-manual-de-medidas-acusticas-y-control-del-ruido"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

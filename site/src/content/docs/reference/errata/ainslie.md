@@ -2,6 +2,8 @@
 title: "Errata in Ainslie (2010)"
 description: "Errata in Ainslie (2010): 2 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "doi-10-1007-978-3-540-87662-5"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

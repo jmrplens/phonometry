@@ -2,6 +2,9 @@
 title: "Erratas de Jiménez et al. (2017)"
 description: "Erratas de Jiménez et al. (2017): 2 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-3390-app7060618"
+  - "doi-10-1038-s41598-017-05710-5"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

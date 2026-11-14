@@ -2,6 +2,8 @@
 title: "Errata in Jarvis (1996)"
 description: "Errata in Jarvis (1996): 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "report-jarvis-1996-methods-for-determining-the-pressure-sensitivity-of-working-standard-microphones-a-report-on-euromet-project-a311"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

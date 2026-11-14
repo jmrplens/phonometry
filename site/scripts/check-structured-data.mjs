@@ -21,7 +21,7 @@
 // what the page emits. A check that read Head.astro's idea of the answer would
 // have agreed with the defect.
 //
-// Usage: node scripts/check-structured-data.mjs [dist-directory]
+// Usage: node scripts/check-structured-data.mjs [dist-directory] [content-directory]
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,6 +38,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 // An explicit directory is for reproducing a defect against a build kept aside;
 // with none, the check reads the build that is there.
 const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist');
+// The pages whose frontmatter says what an errata page corrects; another
+// directory is for the tests of this check, which write pages of their own.
+const CONTENT = process.argv[3] ? resolve(process.argv[3]) : join(here, '..', 'src', 'content', 'docs');
 const ORIGIN = `${siteUrl}${basePath}`;
 
 /**
@@ -360,6 +363,81 @@ const variableNames = (key, lang) =>
 		),
 	);
 
+/**
+ * The errata registry's index, and the one page under it that corrects no
+ * work: the properties of the sources that look like misprints and are not
+ * (NOT_ERRATA_SLUG in scripts/generate_site_reports.py). Every other page
+ * under the index is the page of one document family.
+ */
+const ERRATA_INDEX = 'reference/errata';
+const NOT_ERRATA = `${ERRATA_INDEX}/not-errata`;
+
+/**
+ * The fragments one errata page's frontmatter lists under `corrects`, in order.
+ *
+ * scripts/generate_site_reports.py writes the field one quoted fragment per
+ * line, and nothing else writes it; a line under it in another shape, or the
+ * field written on one line, is reported rather than read as nothing. The
+ * page is read with its line endings normalised, as the build reads it: a
+ * checkout with core.autocrlf=true, or the generator run on Windows, writes
+ * it with CRLF.
+ *
+ * @param {string} file The page's path, for the report.
+ * @returns {string[]} The fragments; none when the page has no `corrects`.
+ */
+function correctsOf(file) {
+	const where = relative(join(here, '..'), file);
+	const fence = /^---\n([\s\S]*?)\n---(?:\n|$)/.exec(readFileSync(file, 'utf8').replace(/\r\n?/g, '\n'));
+	if (!fence) {
+		fail(`${where}: an errata page with no frontmatter`);
+		return [];
+	}
+	const lines = fence[1].split('\n');
+	const at = lines.findIndex((line) => /^corrects\s*:/.test(line));
+	if (at === -1) return [];
+	if (lines[at] !== 'corrects:') fail(`${where}: corrects is written in a shape this check cannot read: ${lines[at]}`);
+	const fragments = [];
+	for (const line of lines.slice(at + 1)) {
+		if (!/^\s/.test(line)) break;
+		const item = /^ {2}- "([a-z0-9]+(?:-[a-z0-9]+)*)"$/.exec(line);
+		if (item) fragments.push(item[1]);
+		else fail(`${where}: a line of corrects this check cannot read: ${line.trim()}`);
+	}
+	return fragments;
+}
+
+/**
+ * What the content tree holds under one language's errata index: whether the
+ * index is there, and each page under it with the fragments it corrects.
+ *
+ * The build is held to it page for page: read from the build alone, a page
+ * naming one of the six editions it corrects would pass as a page that names
+ * a work, and a family page that stopped being built would pass as one that
+ * was never written.
+ *
+ * @param {string} lang `en` or `es`.
+ * @returns {{folder: string, index: boolean, pages: Map<string, string[]>}}
+ */
+function errataContent(lang) {
+	const folder = join(CONTENT, ...(lang === 'es' ? ['es'] : []), ...ERRATA_INDEX.split('/'));
+	const pages = new Map();
+	let index = false;
+	let names = [];
+	try {
+		names = readdirSync(folder).sort();
+	} catch {
+		// No errata folder in this language: nothing to hold the build to.
+	}
+	for (const name of names) {
+		const page = /^(.+)\.mdx?$/.exec(name);
+		if (!page) continue;
+		if (page[1] === 'index') index = true;
+		else pages.set(page[1], correctsOf(join(folder, name)));
+	}
+	return { folder: relative(join(here, '..'), folder), index, pages };
+}
+const errataPages = { en: errataContent('en'), es: errataContent('es') };
+
 const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
@@ -383,6 +461,7 @@ const seen = {
 	datasetUndated: 0,
 	datasetShown: 0,
 	datasetUnshown: 0,
+	corrected: 0,
 };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
@@ -418,6 +497,18 @@ const listedDatasets = { en: undefined, es: undefined };
 const cataloguePagesSeen = { en: 0, es: 0 };
 /** Every dataset's link to its twin, checked once both languages are read. */
 const datasetTwins = [];
+/**
+ * Per language: whether the errata index was built, every page built under
+ * it, how many family pages and the works they name, the not-errata page.
+ */
+const errataSeen = {
+	en: { index: false, built: new Set(), families: 0, corrected: 0, notErrata: false },
+	es: { index: false, built: new Set(), families: 0, corrected: 0, notErrata: false },
+};
+/** Errata family pages whose `about` names no work they correct. */
+const errataWithoutWorks = [];
+/** Errata family pages whose `about` names other works than their `corrects`, with what differs. */
+const errataMisnamed = [];
 
 for (const file of files) {
 	const html = readFileSync(join(DIST, file), 'utf8');
@@ -755,6 +846,63 @@ for (const file of files) {
 			);
 		}
 	}
+	// An errata page is about the works its entries correct, and says so in
+	// `about`, beside the software (src/lib/citations.mjs, correctedWorks).
+	// Every one of them used to name the software alone, so to a search
+	// engine 95 pages per language were about phonometry and about none of
+	// the documents they correct. Each family page names the works its
+	// `corrects` lists, those and no others, in that order, on its own
+	// language's bibliography; the page of properties that are not errata
+	// corrects nothing and names none. Whether each is named as the
+	// bibliography describes it is the check of every stub, below.
+	if (slug === ERRATA_INDEX) errataSeen[lang].index = true;
+	if (slug.startsWith(`${ERRATA_INDEX}/`)) {
+		const name = slug.slice(ERRATA_INDEX.length + 1);
+		const corrects = errataPages[lang].pages.get(name);
+		errataSeen[lang].built.add(name);
+		if (corrects === undefined) {
+			fail(`${route}: an errata page with no page under ${errataPages[lang].folder} to say what it corrects`);
+		}
+		const [software, ...rest] = [article.about ?? []].flat();
+		const works = rest.filter((item) => isCitedWork(item?.['@id']));
+		const ownBibliography = `${ORIGIN}${lang === 'es' ? '/es' : ''}/reference/bibliography/#`;
+		const application = nodeOfType(nodes, 'SoftwareApplication')?.['@id'];
+		if (software?.['@id'] !== application) {
+			fail(`${route}: the errata page's about opens with ${software?.['@id']}, not the software, ${application}`);
+		}
+		if (rest.length !== works.length) {
+			fail(`${route}: the errata page's about names ${rest.length - works.length} thing(s) that are not a cited work`);
+		}
+		if (slug === NOT_ERRATA) {
+			errataSeen[lang].notErrata = true;
+			if (works.length > 0) {
+				fail(`${route}: the page of properties that are not errata corrects nothing and names ${works.length} work(s) in about`);
+			}
+		} else {
+			errataSeen[lang].families += 1;
+			errataSeen[lang].corrected += works.length;
+			if (works.length === 0) errataWithoutWorks.push(route);
+			seen.corrected += works.length;
+			const named = works.map((item) => String(item['@id']));
+			const listed = (corrects ?? []).map((fragment) => `${ownBibliography}${fragment}`);
+			const at = named.findIndex((id, i) => id !== listed[i]);
+			if (works.length > 0 && corrects !== undefined && (at !== -1 || named.length !== listed.length)) {
+				const position = at === -1 ? Math.min(named.length, listed.length) : at;
+				errataMisnamed.push(
+					`${route} names ${named.length} work(s) and its corrects lists ${listed.length}; at position ` +
+						`${position + 1} it names ${named[position] ?? 'nothing'} where corrects lists ${listed[position] ?? 'nothing'}`,
+				);
+			}
+			const foreign = works.filter((item) => !String(item['@id']).startsWith(ownBibliography));
+			if (foreign.length > 0) {
+				fail(
+					`${route}: the errata page names ${foreign.length} work(s) it corrects on another language's ` +
+						`bibliography (first: ${foreign[0]['@id']})`,
+				);
+			}
+		}
+	}
+
 	if (slug !== CATALOGUE_OVERVIEW && nodes.some((node) => typesOf(node).includes('DataCatalog'))) {
 		fail(`${route}: publishes a DataCatalog, and is not the overview of the catalogues, ${CATALOGUE_OVERVIEW}`);
 	}
@@ -1102,6 +1250,63 @@ for (const lang of ['en', 'es']) {
 	if (seen.datasetBasis > 0) {
 		ok(`the datasets name each of the ${seen.datasetBasis} works they are based on where they cite it`);
 	}
+}
+
+// Every errata family page names the works it corrects. A build that holds no
+// errata index in a language (the small builds the tests of this check write)
+// has nothing to count; one that does holds its family pages and the page of
+// properties that are not errata under it, or the routes moved under this
+// check and every test above read nothing.
+if (errataWithoutWorks.length > 0) {
+	fail(
+		`${errataWithoutWorks.length} errata page(s) name no work they correct in about, only the software ` +
+			`(first: ${errataWithoutWorks.slice(0, 3).join(', ')})`,
+	);
+}
+if (errataMisnamed.length > 0) {
+	fail(
+		`${errataMisnamed.length} errata page(s) name in about other works than their corrects lists, or in another ` +
+			`order (first: ${errataMisnamed.slice(0, 3).join('; ')})`,
+	);
+}
+// What the content tree holds under each errata index, the build holds, and
+// the works its family pages name add up to what their `corrects` lists.
+let errataAgree = errataWithoutWorks.length === 0 && errataMisnamed.length === 0;
+for (const lang of ['en', 'es']) {
+	const { index, built, families, corrected, notErrata } = errataSeen[lang];
+	const content = errataPages[lang];
+	if (content.index && !index) {
+		fail(`the ${lang} errata index is under ${content.folder} and the build does not hold it`);
+		errataAgree = false;
+	}
+	const unbuilt = [...content.pages.keys()].filter((name) => !built.has(name));
+	if (unbuilt.length > 0) {
+		fail(
+			`the ${lang} build holds ${content.pages.size - unbuilt.length} of the ${content.pages.size} errata pages ` +
+				`under ${content.folder} (first missing: ${unbuilt.slice(0, 3).join(', ')})`,
+		);
+		errataAgree = false;
+	}
+	if (!index) continue;
+	if (families === 0) fail(`the ${lang} errata index was built with no family page under it`);
+	if (!notErrata) {
+		fail(
+			`the ${lang} errata index was built without ${NOT_ERRATA}, the page of properties that are not errata ` +
+				'(scripts/generate_site_reports.py, NOT_ERRATA_SLUG)',
+		);
+	}
+	const listed = [...content.pages.values()].reduce((sum, fragments) => sum + fragments.length, 0);
+	if (corrected !== listed) {
+		fail(`the ${lang} errata family pages name ${corrected} work(s) in about, and their corrects list ${listed}`);
+	}
+	if (families === 0 || !notErrata || corrected !== listed) errataAgree = false;
+}
+if (errataAgree && seen.corrected > 0) {
+	const families = errataSeen.en.families + errataSeen.es.families;
+	ok(
+		`each of the ${families} errata family pages names in about, in order, the works its corrects lists, ` +
+			`${seen.corrected} in all`,
+	);
 }
 
 // The two bibliographies define one set of works in two languages. A Spanish

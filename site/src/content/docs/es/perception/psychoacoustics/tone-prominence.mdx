@@ -121,6 +121,31 @@ plt.show()
 
 </details>
 
+Los dos métodos cortan el mismo espectro de dos maneras distintas, y ese corte
+es lo que hay que reproducir para comprobar un resultado a mano. En la relación
+tono-ruido se hace dentro de la banda crítica: la banda del tono es el tramo de
+líneas entre los mínimos de cada lado del pico, buscados dentro del 15 % del
+ancho de banda crítico, y solo cuenta como tono lo que queda por encima de la
+recta entre sus dos líneas extremas (apartado 11.2, Fórmula 9).
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_to_noise_partition.svg"
+  alt="Dos paneles sobre el espectro promediado de un tono de 1 kHz en ruido. A la izquierda, la banda crítica del tono, de 162,2 Hz de ancho entre 922,2 Hz y 1084,4 Hz, sombreada bajo el espectro como nivel total, con la ventana del 15 % de ese ancho marcada en torno al pico. A la derecha, esa ventana línea a línea, de 988 Hz a 1012 Hz: la banda del tono son las siete líneas entre los mínimos de cada lado del pico, una recta discontinua une sus dos líneas extremas l1 y l2, y el área entre esa recta y el espectro está sombreada como tono. El encabezado da un nivel del tono de menos 28,0 dB, un nivel del ruido enmascarante de menos 40,0 dB y una relación tono-ruido de 12,0 dB"
+  width="100%"
+/>
+
+En la relación de prominencia el corte se hace en tres bandas: la banda
+crítica del tono y las dos que la tocan, cuyos bordes exteriores salen de las
+Fórmulas ajustadas 21 y 22. Un tono en 171,4 Hz o por debajo tiene la banda
+inferior cortada en 20 Hz, y la Fórmula 24 escala lo que queda de ella a
+100 Hz.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prominence_ratio_partition.svg"
+  alt="Dos paneles, cada uno un espectro promediado cortado en tres bandas sombreadas con el nivel de cada una escrito dentro. A la izquierda, un tono de 1 kHz: banda inferior de 782,5 Hz a 922,2 Hz con menos 40,5 dB, banda central de 922,2 Hz a 1084,4 Hz con menos 27,8 dB y el tono dentro, banda superior de 1084,4 Hz a 1261,5 Hz con menos 39,5 dB, y una relación de prominencia de 12,2 dB por la Fórmula 23. A la derecha, un tono de 120 Hz: la banda inferior está cortada en 20 Hz y llega a 69,5 Hz, con 49 Hz de ancho y menos 45,0 dB, la banda central va de 69,5 Hz a 170,5 Hz con menos 32,9 dB, la banda superior de 170,5 Hz a 274,8 Hz con menos 42,0 dB, y la relación de prominencia es de 9,0 dB por la Fórmula 24, que escala la banda inferior por 100 Hz entre su ancho"
+  width="100%"
+/>
+
 Un TNR igual o superior a $8 + 8{,}33\log_{10}(1000/f_\mathrm{t})$ dB por debajo de
 1 kHz (8 dB constantes para $f_\mathrm{t} \ge 1$ kHz) clasifica el tono como
 *prominente*; el criterio del PR es $9 + 10\log_{10}(1000/f_\mathrm{t})$ dB por debajo

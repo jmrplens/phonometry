@@ -4985,6 +4985,40 @@ _ES_EXACT = {
         "$b$ par: 1 kHz es un borde de banda, y ninguna banda está centrada en él"
     ),
     "reference frequency, 1 kHz": "frecuencia de referencia, 1 kHz",
+    # The two partitions of ECMA-418-1: the tone band of clause 11 and the
+    # three contiguous bands of clause 12.
+    "Tone-to-noise ratio: the tone band inside its critical band (ECMA-418-1, clause 11)": (
+        "Relación tono-ruido: la banda del tono dentro de su banda crítica "
+        "(ECMA-418-1, apartado 11)"
+    ),
+    "The critical band, $f_1$ to $f_2$": "La banda crítica, de $f_1$ a $f_2$",
+    "Inside the window, line by line": "Dentro de la ventana, línea a línea",
+    r"critical band of the tone, $L_\mathrm{tot}$; less the tone, the noise $L_\mathrm{n}$": (
+        r"banda crítica del tono, $L_\mathrm{tot}$; sin el tono, el ruido $L_\mathrm{n}$"
+    ),
+    r"15 % of $\Delta f_\mathrm{c}$": r"15 % de $\Delta f_\mathrm{c}$",
+    r"tone: what stands above the line, $L_\mathrm{t}$": (
+        r"tono: lo que queda por encima de la recta, $L_\mathrm{t}$"
+    ),
+    "line between the two end lines, $l_1$ and $l_2$": (
+        "recta entre las dos líneas extremas, $l_1$ y $l_2$"
+    ),
+    "lowest line inside the window: on its edge": (
+        "línea más baja dentro de la ventana: en su borde"
+    ),
+    "The minimum on the window edge: the search goes on to the next "
+    "local minimum (ECMA-418-1, 11.2)": (
+        "El mínimo en el borde de la ventana: la búsqueda sigue hasta el "
+        "siguiente mínimo local (ECMA-418-1, apartado 11.2)"
+    ),
+    "Prominence ratio: the band of the tone against its two neighbours "
+    "(ECMA-418-1, clause 12)": (
+        "Relación de prominencia: la banda del tono frente a sus dos vecinas "
+        "(ECMA-418-1, apartado 12)"
+    ),
+    "three whole critical bands (Formula 23)": (
+        "tres bandas críticas enteras (Fórmula 23)"
+    ),
 }
 
 
@@ -5012,6 +5046,17 @@ _ES_PATTERNS = [
     ),
     # anim_fan_lobe_patterns: the running count of crests past the wall point.
     (r"^lobes past the point: (\d+)$", r"lóbulos por el punto: \1"),
+    # The partition figures of ECMA-418-1: widths the library counts in lines.
+    (
+        r"^tone band, \$\\Delta f_\\mathrm\{t\}\$ = (\d+) Hz$",
+        r"banda del tono, $\\Delta f_\\mathrm{t}$ = \1 Hz",
+    ),
+    (
+        r"^lower band cut at 20 Hz: \$\\Delta f_\\mathrm\{L\}\$ = (\d+) Hz,\n"
+        r"scaled by 100 Hz / \$\\Delta f_\\mathrm\{L\}\$ \(Formula 24\)$",
+        r"banda inferior cortada en 20 Hz: $\\Delta f_\\mathrm{L}$ = \1 Hz,\n"
+        r"escalada por 100 Hz / $\\Delta f_\\mathrm{L}$ (Fórmula 24)",
+    ),
     # road_device_ratings: the legends carry the computed rating and category.
     (
         r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",

@@ -518,6 +518,7 @@ from .perception import (
     generate_nipts_audiogram,
     generate_nipts_level_growth,
     generate_noise_induced_hearing_loss,
+    generate_prominence_ratio_partition,
     generate_psychoacoustic_annoyance,
     generate_sharpness_pair_and_targets,
     generate_sharpness_weighting,
@@ -546,7 +547,9 @@ from .perception import (
     generate_tone_audibility,
     generate_tone_audibility_levels,
     generate_tone_audibility_uncertainty,
+    generate_tone_band_window_edge,
     generate_tone_prominence_assessment,
+    generate_tone_to_noise_partition,
     generate_two_tone_separation,
     generate_zwicker_time_varying,
 )
@@ -855,6 +858,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_rd1367_activity_assessment,
     generate_dbhr_global_index,
     generate_tonality_spectrum,
+    generate_tone_to_noise_partition,
+    generate_tone_band_window_edge,
+    generate_prominence_ratio_partition,
     # Psychoacoustics / intensity plots (loudness, STI, p-p intensity)
     generate_loudness_pattern,
     generate_zwicker_time_varying,

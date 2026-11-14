@@ -395,7 +395,44 @@ $$
 \mathrm{TNR}_{\text{crit}} = \begin{cases} 8.0 + 8.33 \log_{10}(1000/f_\mathrm{t}) \ \text{dB} & f_\mathrm{t} < 1\ \text{kHz} \\ 8.0 \ \text{dB} & f_\mathrm{t} \ge 1\ \text{kHz} \end{cases}
 $$
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_to_noise_partition.svg" alt="Two panels on the averaged spectrum of a 1 kHz tone in noise. Left, the critical band of the tone, 162.2 Hz wide from 922.2 Hz to 1084.4 Hz, shaded under the spectrum as the total level, with the window of 15 % of that width marked about the peak. Right, that window line by line, from 988 Hz to 1012 Hz: the tone band is the seven lines between the minima on either side of the peak, a dashed straight line joins its two end lines l1 and l2, and the area between that line and the spectrum is shaded as the tone. The heading gives a tone level of minus 28.0 dB, a masking noise level of minus 40.0 dB and a tone-to-noise ratio of 12.0 dB" width="100%" />
+
+*The split of clause 11 on a 1 kHz tone, with the 1 Hz line spacing the library
+defaults to. Left, the critical band, 162.2 Hz wide, and the window of 15 % of
+that width about the peak. Right, the window line by line: the tone band runs
+between the minima on either side of the peak, seven lines here, and Formula 9
+keeps as tone only what stands above the straight line that joins its two end
+lines. A minimum that falls on the edge of the window sends the search on to
+the nearest local minimum beyond it (clause 11.2), as the next figure draws.
+What is left of the critical band is the masking noise, which Formula 10
+scales to the whole bandwidth.*
+
+When the spectrum is still falling where the window ends, the lowest line
+inside the window is the edge line itself, and clause 11.2 then searches on to
+the nearest local minimum beyond it:
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_band_window_edge.svg" alt="The averaged spectrum, line by line, of a narrow hump of noise at 1 kHz. The window of 15 % of the critical bandwidth runs from 988 Hz to 1012 Hz, and on both sides its lowest line is the edge line itself, marked with a square. The tone band runs on to the nearest local minima beyond the window, at 980 Hz and 1015 Hz, 36 Hz wide; a dashed straight line joins those two end lines l1 and l2, and the area between it and the spectrum is shaded as the tone. The heading gives a tone level of minus 24.9 dB, a masking noise level of minus 33.4 dB and a tone-to-noise ratio of 8.5 dB" width="100%" />
+
+*The same split on a peak whose skirt is still falling at both edges of the
+window: white noise through a resonance 3 Hz wide at 1 kHz, standing in for the
+"tone of time-varying frequency or another phenomenon" that clause 11.2 takes a
+tone band wider than the window to indicate. Inside the window the lowest line
+on each side is the edge line, so the search goes on to the nearest local
+minimum beyond it, at 980 Hz and 1015 Hz, and the tone band is 36 lines wide
+where the window holds 25. The edges, the straight line and the 8.5 dB are those
+`tone_to_noise_ratio` returns for the same signal.*
+
 **PR** (clause 12) compares the level of the critical band centred on the tone, $L_\mathrm{M}$, with the mean power of the two **contiguous** critical bands $L_\mathrm{L}$, $L_\mathrm{U}$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_\mathrm{M} - 10\log_{10}\left[(P_\mathrm{L} + P_\mathrm{U})/2\right]$ (Formula 23). For $f_\mathrm{t} \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_\mathrm{t} \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_\mathrm{t})$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prominence_ratio_partition.svg" alt="Two panels, each an averaged spectrum cut into three shaded bands with the level of each written in it. Left, a 1 kHz tone: lower band from 782.5 Hz to 922.2 Hz at minus 40.5 dB, middle band from 922.2 Hz to 1084.4 Hz at minus 27.8 dB with the tone in it, upper band from 1084.4 Hz to 1261.5 Hz at minus 39.5 dB, and a prominence ratio of 12.2 dB by Formula 23. Right, a 120 Hz tone: the lower band is cut at 20 Hz and runs to 69.5 Hz, 49 Hz wide, at minus 45.0 dB, the middle band runs from 69.5 Hz to 170.5 Hz at minus 32.9 dB, the upper band from 170.5 Hz to 274.8 Hz at minus 42.0 dB, and the prominence ratio is 9.0 dB by Formula 24, which scales the lower band by 100 Hz over its width" width="100%" />
+
+*The three bands of clause 12, each with its level. Left, a 1 kHz tone: the
+critical band of the tone between a lower band that starts at 782.5 Hz and an
+upper one that ends at 1261.5 Hz, the two edges Formulae 21 and 22 fit; the
+ratio is the level of the middle band less that of the mean power of the other
+two. Right, a 120 Hz tone: its lower band would start below 20 Hz, so it is
+cut there (clause 12.3), and the 49 Hz that are left are scaled to the 100 Hz
+of a whole critical band before the mean is taken (Formula 24).*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_prominence_assessment.svg" alt="Tone-to-noise ratio of a 250 Hz fan tone plotted against the ECMA-418-1 prominence criterion: the criterion falls from about 17 dB at 89 Hz to a flat 8 dB above 1 kHz, and the assessed tone sits at 15.1 dB, 2.1 dB above the 13.0 dB criterion at 250 Hz, so it is prominent" width="88%" />
 

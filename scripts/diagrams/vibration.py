@@ -22,6 +22,7 @@ from .parts import (
     _plate_up,
     _rot_arrow,
     _spring_v,
+    _tapping_machine_plan,
 )
 
 if TYPE_CHECKING:
@@ -1905,6 +1906,153 @@ def _d_junction_rig(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
+
+
+# ---------------------------------------------------------------------------
+# Where to excite and where to measure on a junction element
+# (ISO 10848-1:2017, 7.2.5)
+# ---------------------------------------------------------------------------
+
+
+def _span_between(
+    s: SVG,
+    th: Theme,
+    p: tuple[float, float],
+    q: tuple[float, float],
+    clear: float = 11.0,
+) -> None:
+    """Dimension line between two marks that share neither a row nor a column.
+
+    ``SVG.dim`` measures along one axis of the sheet; a distance between two
+    positions scattered over a plate lies along neither, so the line is drawn
+    from one to the other, stopping *clear* px short of each mark.
+    """
+    length = math.hypot(q[0] - p[0], q[1] - p[1])
+    ux, uy = (q[0] - p[0]) / length, (q[1] - p[1]) / length
+    mid = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2)
+    for end, sign in ((p, 1.0), (q, -1.0)):
+        s.arrow(
+            mid[0] - sign * 4 * ux,
+            mid[1] - sign * 4 * uy,
+            end[0] + sign * clear * ux,
+            end[1] + sign * clear * uy,
+            th.muted,
+            1.2,
+        )
+
+
+def _d_junction_positions(s: SVG, th: Theme) -> None:
+    # The source element i in plan, 100 px to the metre, with the receiving
+    # element j unfolded beside it across the junction under test.
+    ix0, iy0, ix1, iy1 = 70.0, 96.0, 490.0, 416.0
+    jx1 = 700.0
+    s.rect(ix0, iy0, ix1 - ix0, iy1 - iy0, th.panel, th.fg, sw=2.2)
+    s.rect(ix1, iy0, jx1 - ix1, iy1 - iy0, th.panel, th.fg, sw=2.2)
+    s.line(ix1, iy0 - 8, ix1, iy1 + 8, th.accent, 4.0)
+    s.text(ix1, iy0 - 16, "junction under test", 14, th.accent, bold=True)
+    s.text(ix1 - 14, iy1 - 12, "source element $i$", 14, th.primary, "end", bold=True)
+    s.text(
+        ix1 + 14,
+        iy1 - 12,
+        "receiving element $j$",
+        14,
+        th.secondary,
+        "start",
+        bold=True,
+    )
+
+    # Four excitation positions, the minimum on a Type A element, scattered
+    # so that none is closer than 1.0 m to another, 0.5 m to a boundary or
+    # 1.0 m to the junction.
+    excitation = ((132.0, 160.0), (388.0, 150.0), (215.0, 318.0), (372.0, 350.0))
+    # The measurement positions of excitation position 1: three on each
+    # plate, at random and never a grid, 1.0 m or more from the excitation,
+    # 0.25 m or more from a boundary and 0.5 m or more from each other.
+    on_i = ((285.0, 240.0), (350.0, 275.0), (100.0, 370.0))
+    on_j = ((545.0, 172.0), (632.0, 268.0), (566.0, 350.0))
+
+    # The six minimum distances, each on a span it rules.
+    e1, e2, e3, _ = excitation
+    s.dim(e1[0], iy0, e1[0], e1[1] - 11, "≥ 0.5 m", size=13, label_side="right")
+    s.dim(e2[0] + 11, e2[1], ix1 - 3, e2[1], "≥ 1.0 m", size=13)
+    _span_between(s, th, e1, e3)
+    s.text(e1[0] + 24, e1[1] + 96, "≥ 1.0 m", 13, th.fg, "end")
+    _span_between(s, th, e1, on_i[0], 11.0)
+    s.text(e1[0] + 88, e1[1] + 28, "≥ 1.0 m", 13, th.fg, "start")
+    _span_between(s, th, on_i[0], on_i[1], 9.0)
+    s.text(on_i[1][0] + 14, on_i[1][1] - 14, "≥ 0.5 m", 13, th.fg, "start")
+    s.dim(
+        on_i[2][0],
+        on_i[2][1] + 8,
+        on_i[2][0],
+        iy1,
+        "≥ 0.25 m",
+        size=13,
+        label_side="right",
+    )
+
+    for number, (ex, ey) in enumerate(excitation, start=1):
+        s.circle(ex, ey, 9.0, th.primary, th.fg, 1.4)
+        s.circle(ex, ey, 2.6, th.bg)
+        side = "start" if number == 3 else "end"
+        dx = 15.0 if number == 3 else -15.0
+        s.text(ex + dx, ey + 5, str(number), 13, th.primary, side, bold=True)
+    for ax, ay in (*on_i, *on_j):
+        s.rect(ax - 6.5, ay - 6.5, 13, 13, th.secondary, th.fg, rx=2.5, sw=1.2)
+
+    # Key and the framed floor, to the right of the plan.
+    kx = 724.0
+    s.circle(kx + 9, 108, 9.0, th.primary, th.fg, 1.4)
+    s.circle(kx + 9, 108, 2.6, th.bg)
+    s.text(kx + 26, 113, "excitation position", 12, th.fg, "start")
+    s.rect(kx + 2.5, 131.5, 13, 13, th.secondary, th.fg, rx=2.5, sw=1.2)
+    s.text(kx + 26, 143, "measurement position", 12, th.fg, "start")
+
+    fx0, fy0, fx1, fy1 = kx, 190.0, kx + 150.0, 300.0
+    s.rect(fx0, fy0, fx1 - fx0, fy1 - fy0, th.panel, th.fg, sw=1.6)
+    for bx in (fx0 + 25.0, fx0 + 75.0, fx0 + 125.0):
+        s.line(bx, fy0 + 4, bx, fy1 - 4, th.secondary, 1.4, dash="9,6")
+    mx, my = fx0 + 75.0, fy0 + 66.0
+    _tapping_machine_plan(s, th, mx, my, 45.0)
+    s.path(
+        f"M {mx:.1f} {my - 34:.1f} A 34 34 0 0 1 "
+        f"{mx + 34 * math.sin(math.radians(45)):.1f} "
+        f"{my - 34 * math.cos(math.radians(45)):.1f}",
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.text(mx + 12, my - 40, "45°", 12, th.fg, "start")
+    for row, line in enumerate(
+        (
+            "framed floor: the axis of",
+            "the tapping machine at 45°",
+            "to its beams or joists",
+        )
+    ):
+        s.text(fx0, fy1 + 20 + 17 * row, line, 12, th.fg, "start")
+
+    for y, txt in (
+        (
+            456,
+            "≥ 4 excitation positions on a Type A source element, ≥ 6 on a Type B one",
+        ),
+        (
+            480,
+            "≥ 3 measurement positions on each plate for every excitation "
+            "position: those of position 1 are drawn",
+        ),
+        (
+            504,
+            "measurement positions distributed at random over each element; "
+            "some may fall on the frame",
+        ),
+        (
+            528,
+            "between two excitation positions: ≥ 1.0 m on a Type A element, "
+            "≥ 0.7 m on a Type B one",
+        ),
+    ):
+        s.text(ix0, y, txt, 14, th.fg, "start")
 
 
 # ---------------------------------------------------------------------------

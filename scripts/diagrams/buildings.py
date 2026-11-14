@@ -15,7 +15,14 @@ import math
 from typing import TYPE_CHECKING
 
 from .canvas import signed
-from .parts import _accel, _accel_wall, _hatch_rect, _rot_arrow, _spring_v
+from .parts import (
+    _accel,
+    _accel_wall,
+    _hatch_rect,
+    _rot_arrow,
+    _spring_v,
+    _tapping_machine_plan,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -589,32 +596,6 @@ def _scan_operator(
     s.line(x, hip, x + height * 0.10, feet, th.muted, 2.4)
     s.line(x, shoulder, hand[0], hand[1], th.muted, 2.4)
     return x, shoulder
-
-
-def _tapping_machine_plan(
-    s: SVG, th: Theme, cx: float, cy: float, angle: float, half: float = 21.0
-) -> None:
-    """Tapping machine seen from above: body and line of five hammers.
-
-    *angle* turns the hammer line from the x axis, in degrees, anticlockwise
-    on the sheet.
-    """
-    a = math.radians(angle)
-    ux, uy = math.cos(a), -math.sin(a)
-    px, py = -uy, ux
-    wide = 7.0
-    corners = [
-        (cx + i * half * ux + j * wide * px, cy + i * half * uy + j * wide * py)
-        for i, j in ((-1, -1), (1, -1), (1, 1), (-1, 1))
-    ]
-    s.path(
-        "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in corners) + " Z",
-        fill=th.primary,
-        stroke=th.fg,
-        sw=1.6,
-    )
-    for k in range(-2, 3):
-        s.circle(cx + k * 8.0 * ux, cy + k * 8.0 * uy, 2.2, th.fg)
 
 
 def _d_tapping_positions_scan_paths(s: SVG, th: Theme) -> None:

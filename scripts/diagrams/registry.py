@@ -228,6 +228,7 @@ from .vibration import (
     _d_hand_arm_vibration,
     _d_human_vibration,
     _d_iso2631_5_setup,
+    _d_junction_positions,
     _d_junction_rig,
     _d_machine_diagnostics,
     _d_machine_vibration_positions,
@@ -831,6 +832,11 @@ DIAGRAMS = {
         _d_junction_rig,
         "Junction vibration measurement on L- and T-junctions (ISO 10848)",
         620,
+    ),
+    "diagram_junction_positions": (
+        _d_junction_positions,
+        "Where to excite and where to measure on a junction element (ISO 10848-1)",
+        552,
     ),
     "diagram_power_injection_rig": (
         _d_power_injection_rig,

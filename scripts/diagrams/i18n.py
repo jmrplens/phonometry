@@ -2104,6 +2104,21 @@ _ES: dict[str, str] = {
     "$K_{ij} = D̄_{v,ij} + 10 log_{10}( l_{ij} / √(a_i·a_j) )$,   $a_i$ = "
     "equivalent absorption length": "$K_{ij} = D̄_{v,ij} + 10 log_{10}( l_{ij} / √(a_i·a_j) )$,   "
     "$a_i$ = long. de absorción equiv.",
+    # Where to excite and where to measure on a junction element (ISO 10848-1, 7.2.5)
+    "Where to excite and where to measure on a junction element (ISO 10848-1)": "Dónde excitar y dónde medir en un elemento de la unión (ISO 10848-1)",
+    "junction under test": "unión ensayada",
+    "source element $i$": "elemento emisor $i$",
+    "receiving element $j$": "elemento receptor $j$",
+    "≥ 0.25 m": "≥ 0,25 m",
+    "excitation position": "posición de excitación",
+    "measurement position": "posición de medición",
+    "framed floor: the axis of": "forjado entramado: el eje",
+    "the tapping machine at 45°": "de la máquina de impactos",
+    "to its beams or joists": "a 45° de vigas o viguetas",
+    "≥ 4 excitation positions on a Type A source element, ≥ 6 on a Type B one": "≥ 4 posiciones de excitación en un elemento emisor de tipo A, ≥ 6 en uno de tipo B",
+    "≥ 3 measurement positions on each plate for every excitation position: those of position 1 are drawn": "≥ 3 posiciones de medición en cada placa por cada posición de excitación: se dibujan las de la posición 1",
+    "measurement positions distributed at random over each element; some may fall on the frame": "posiciones de medición repartidas al azar sobre cada elemento; alguna puede caer sobre el entramado",
+    "between two excitation positions: ≥ 1.0 m on a Type A element, ≥ 0.7 m on a Type B one": "entre dos posiciones de excitación: ≥ 1,0 m en un elemento de tipo A, ≥ 0,7 m en uno de tipo B",
     # Sound power from surface vibration (ISO/TS 7849)
     "Sound power from surface vibration (ISO/TS 7849)": "Potencia acústica a partir de la vibración superficial (ISO/TS 7849)",
     "Vibrating measurement surface $S$": "Superficie de medición vibrante $S$",

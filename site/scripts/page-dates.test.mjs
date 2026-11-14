@@ -141,7 +141,7 @@ function bloblessClone(t) {
 	};
 }
 
-test('a page is dated by the commit that added it, on the day its committer wrote', async (t) => {
+test('a page is dated by the commit that added it, on that commit\'s day in UTC', async (t) => {
 	const repo = repository(t);
 	repo.write('a.mdx', body('a'));
 	repo.commit('2024-03-01');
@@ -156,7 +156,9 @@ test('a page is dated by the commit that added it, on the day its committer wrot
 	chdir(t, repo.site);
 	const firstPublished = await fresh();
 	assert.equal(firstPublished(repo.path('a.mdx')), '2024-03-01');
-	assert.equal(firstPublished(repo.path('late.mdx')), '2024-06-01');
+	// Half past eleven at night five hours behind UTC is half past four the next
+	// morning in UTC, the day the modified date reads too.
+	assert.equal(firstPublished(repo.path('late.mdx')), '2024-06-02');
 });
 
 test('a page renamed twice keeps the date of the commit that first added it', async (t) => {

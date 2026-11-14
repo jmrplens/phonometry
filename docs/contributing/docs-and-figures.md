@@ -1615,7 +1615,7 @@ after it reads the map that pass built
 each page runs git log --follow on its own file while it renders its head
 ```
 
-**Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+**Enforced by:** `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `site/scripts/content-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them`
 
 **Exceptions.** A file whose process does run once per build is listed in `ONCE_PER_BUILD` of the check, with the reason, the number of calls it holds and what it exports; a call the entry does not count, an export it does not name, which would hand the process to every page, and an entry that covers nothing, fail. The check reads what a page can run: everything under `site/src/`, `site/astro.config.mjs` and what those import from elsewhere in the site, found the way Vite finds them. The scripts the build runs before and after it renders start what they need, because each runs once. The check reads text, so that it needs no install: a module name built up at run time is not seen, a call under an alias is not counted, and it does not read the dependencies. The packages it knows to wrap `child_process` are a closed list, `SPAWNER`: a package not on it is not seen, and a new wrapper has to be added to it.
 

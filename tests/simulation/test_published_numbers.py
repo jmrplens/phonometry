@@ -112,6 +112,8 @@ class _Page:
     versions: tuple[str, ...]
     #: The sentences that describe the scenario matrix, from :func:`_matrix`.
     matrix: tuple[str, ...]
+    #: The language the page dates the CuPy proof in, a key of :data:`_PROOF_DATES`.
+    language: str
 
 
 _ENGLISH_VERSIONS = (
@@ -150,6 +152,45 @@ _PROVENANCE_EXAMPLE = (
     "gpu='{gpu}'",
 )
 
+#: How each language dates the CuPy proof, ``{}`` standing for the day, the
+#: month's name and the year of ``measured_on``, and the month names it uses.
+_PROOF_DATES: dict[str, tuple[str, tuple[str, ...]]] = {
+    "en": (
+        "measured on {day} {month} {year}",
+        (
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ),
+    ),
+    "es": (
+        "en la medida del {day} de {month} de {year}",
+        (
+            "enero",
+            "febrero",
+            "marzo",
+            "abril",
+            "mayo",
+            "junio",
+            "julio",
+            "agosto",
+            "septiembre",
+            "octubre",
+            "noviembre",
+            "diciembre",
+        ),
+    ),
+}
+
 _PAGES = (
     _Page(
         "site/src/content/docs/simulation/compute.mdx",
@@ -157,6 +198,7 @@ _PAGES = (
         "not published yet",
         _ENGLISH_VERSIONS + _PROVENANCE_EXAMPLE,
         _ENGLISH_MATRIX,
+        "en",
     ),
     _Page(
         "site/src/content/docs/es/simulation/compute.mdx",
@@ -164,6 +206,7 @@ _PAGES = (
         "aún sin publicar",
         _SPANISH_VERSIONS + _PROVENANCE_EXAMPLE,
         _SPANISH_MATRIX,
+        "es",
     ),
     _Page(
         "docs/simulation/compute.md",
@@ -171,6 +214,7 @@ _PAGES = (
         "not published yet",
         _ENGLISH_VERSIONS + _PROVENANCE_EXAMPLE,
         _ENGLISH_MATRIX,
+        "en",
     ),
 )
 _PAGE_IDS = [page.path for page in _PAGES]
@@ -419,6 +463,44 @@ def test_the_guide_names_the_versions_the_proof_ran_on(page: _Page) -> None:
         if phrase.format(**_lock_words()) not in text
     ]
     assert not missing, f"{page.path} does not say {missing} (gpu-parity.lock)"
+
+
+def _proof_date(language: str) -> str:
+    """The day of the CuPy proof, ``measured_on``, as a page in *language* words it."""
+    template, months = _PROOF_DATES[language]
+    year, month, day = (int(part) for part in str(_LOCK["measured_on"]).split("-"))
+    return template.format(day=day, month=months[month - 1], year=year)
+
+
+def _proof_dates_given(text: str, language: str) -> list[str]:
+    """Every day *text* dates the proof on, in its language's wording."""
+    template, months = _PROOF_DATES[language]
+    pattern = re.escape(template).replace(re.escape("{day}"), r"\d{1,2}")
+    pattern = pattern.replace(re.escape("{month}"), "(?:" + "|".join(months) + ")")
+    pattern = pattern.replace(re.escape("{year}"), r"\d{4}")
+    return re.findall(pattern, text)
+
+
+@pytest.mark.parametrize("page", _PAGES, ids=_PAGE_IDS)
+def test_the_guide_dates_the_gpu_proof_as_recorded(page: _Page) -> None:
+    """The day of the proof is the one ``gpu-parity.lock`` records, and no other.
+
+    A card, a driver and a CuPy release say what the proof ran on, and not
+    when: a reader cannot tell a measurement of last week from one of last
+    year, and a new proof that leaves the page's date behind passes every
+    other test here. So the page dates it, and a new ``measured_on`` fails
+    until the page says so.
+    """
+    text = _flat(_read(page.path))
+    wanted = _proof_date(page.language)
+    given = _proof_dates_given(text, page.language)
+    assert given, (
+        f"{page.path} does not date the GPU proof ({wanted!r}, gpu-parity.lock)"
+    )
+    assert set(given) == {wanted}, (
+        f"{page.path} dates the GPU proof {sorted(set(given))}, and gpu-parity.lock "
+        f"records {wanted!r}"
+    )
 
 
 @pytest.mark.parametrize("page", _PAGES, ids=_PAGE_IDS)

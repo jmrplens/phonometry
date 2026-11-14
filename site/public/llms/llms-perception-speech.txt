@@ -1212,6 +1212,13 @@ mechanisms are in play, compute both.
   [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
   The articulation-band experiments that the band-importance function of
   section 1 descends from.
+- Pavlovic, C. (Acoustical Society of America, Working Group S3-79). *C
+  program developer's kit for the Speech Intelligibility Index (SII.C)*.
+  Support site for the Speech Intelligibility Index.
+  [sii.to](https://www.sii.to/html/programs.html).
+  The working group's reference implementation of ANSI S3.5-1997 and its test
+  cases: the equivalent masking spectrum of clause 5.4 and the SII with a
+  hearing loss of clause 6 are checked against it.
 
 ## Standards
 

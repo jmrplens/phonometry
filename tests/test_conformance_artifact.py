@@ -989,6 +989,121 @@ def test_a_series_designation_keeps_its_body_kind() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("cite", "designation", "edition", "clause"),
+    [
+        (
+            "E DIN 4150-2:2023-08 Annex B, Example 8",
+            "E DIN 4150-2",
+            "2023-08",
+            "Annex B, Example 8",
+        ),
+        ("E DIN 45672-3:2023-02 Table 2", "E DIN 45672-3", "2023-02", "Table 2"),
+        (
+            "E DIN EN 62489-1/A2:2017-10 Annex D, D.1.2 and D.1.3",
+            "E DIN EN 62489-1/A2",
+            "2017-10",
+            "Annex D, D.1.2 and D.1.3",
+        ),
+    ],
+)
+def test_a_draft_standard_is_a_standard(
+    cite: str, designation: str, edition: str, clause: str
+) -> None:
+    """DIN publishes its drafts as E DIN, and the parser filed all three as books.
+
+    A book is no work a guide implements, so the 42 checks of the drafts the
+    railway and induction-loop guides implement reached none of them, and the
+    report counted the drafts among its other sources.
+    """
+    document = _first(cite)
+    assert document.kind is references.ReferenceKind.STANDARD
+    assert (document.designation, document.edition, document.clause) == (
+        designation,
+        edition,
+        clause,
+    )
+
+
+#: Where a designation can open inside another: at a capital that continues no
+#: word, number or hyphenated name ("UNE-EN" opens at "UNE" and nowhere else).
+_WORD_START = re.compile(r"(?<![\w./-])[A-Z]")
+
+
+def _names_a_standard(designation: str) -> bool:
+    """Does *designation* hold a standard, as the report's parser reads one?
+
+    The parser is asked at every word: a body it knows followed by a document
+    number, as it would split a citation that opened there. Its own list of
+    bodies, and its own reading of a number written after a letter or a point
+    (ANSI S3.5, ASTM E1414, ITU-R BS.1770), are what a second hand-kept pattern
+    falls behind.
+    """
+    for word in _WORD_START.finditer(designation):
+        inside = references._as_standard(designation[word.start() :])
+        if (
+            inside is not None
+            and inside.kind is references.ReferenceKind.STANDARD
+            and references._DOCUMENT_NUMBER.search(inside.designation)
+        ):
+            return True
+    return False
+
+
+def _standards_filed_under_another_kind(document: dict) -> list[str]:
+    """Each document filed under a kind other than standard whose designation names a standard."""
+    return sorted(
+        {
+            f"{cited['kind']}: {cited['designation']}"
+            for check in document["checks"]
+            for cited in check["reference"]["documents"]
+            if cited["kind"] != "standard" and _names_a_standard(cited["designation"])
+        }
+    )
+
+
+def test_no_standard_is_filed_under_another_kind(committed: dict) -> None:
+    """A standard the report files as a book or a derivation verifies no guide.
+
+    The site's "Verified by" line and the report's Dataset are built from the
+    standards the documents of each check name, so a standard filed under
+    another kind (the E DIN drafts as books, IEC TS 61400-11-2:2024 inside the
+    derivation an amplitude-modulation check names) is left out of both.
+    """
+    filed = _standards_filed_under_another_kind(committed)
+    assert filed == [], "standards the report files under another kind:\n" + "\n".join(
+        filed
+    )
+
+
+@pytest.mark.parametrize(
+    ("kind", "designation"),
+    [
+        ("book", "E DIN 4150-2"),
+        ("derivation", "Reference code with IEC TS 61400-11-2:2024 13.6.3"),
+        ("book", "Reference code v1 with ITU-R BS.1770-5"),
+        ("derivation", "Loudness model with ANSI S3.5-1997"),
+        ("derivation", "Reference code with ECMA-418-2:2025 5.1"),
+        ("derivation", "Reference code with ASTM E1414-11"),
+    ],
+)
+def test_a_standard_filed_under_another_kind_is_found(
+    kind: str, designation: str
+) -> None:
+    """Whatever body the standard is of, and however its number is written.
+
+    A hand list of bodies, each followed by a space or a slash and a digit,
+    missed the bodies it did not name (ECMA, EBU, AES, SAE) and the numbers
+    written after a letter or a point (ANSI S3.5, ASTM E1414, ITU-R BS.1770).
+    """
+    planted = {
+        "checks": [
+            {"reference": {"documents": [{"kind": kind, "designation": designation}]}}
+        ]
+    }
+    assert _standards_filed_under_another_kind(planted) == [f"{kind}: {designation}"]
+
+
 def test_a_standard_splits_into_designation_edition_and_clause() -> None:
     document = _first("IEC 61260-1:2014 Table 1")
     assert document.kind is references.ReferenceKind.STANDARD

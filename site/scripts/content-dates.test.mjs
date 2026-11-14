@@ -412,6 +412,29 @@ test('a page is dated by a source that its description-only commit also changed'
 	assert.equal(dates.raised, 1);
 });
 
+test('a data source gives the commit that last changed it, and a path no entry names as a source fails', async (t) => {
+	const repo = repository(t);
+	repo.write('report.mdx', page());
+	repo.writeFile('docs/report.json', '{"rows": 1}\n');
+	const first = repo.commit(1);
+	repo.writeFile('docs/report.json', '{"rows": 2}\n');
+	const second = repo.commit(2);
+	// A later commit to the page alone leaves the data's commit where it was.
+	repo.write('report.mdx', page({ body: 'Rewritten.\n' }));
+	repo.commit(3);
+	repo.sources({ pages: ['site/src/content/docs/report.mdx'], sources: ['docs/report.json'] });
+	const dates = await repo.dates();
+	const commit = dates.sourceCommit('docs/report.json');
+	assert.notEqual(second, first);
+	assert.equal(commit.sha, second, 'the commit that last changed the data');
+	assert.equal(isoDay(commit.date), '2026-01-02');
+	assert.equal(day(dates, 'report.mdx'), '2026-01-03', 'the page is dated by its own change');
+	// The report page names the commit of the data it renders; a file no entry
+	// lists has no commit read for it, and asking for one is a mistake to say.
+	assert.throws(() => dates.sourceCommit('docs/other.json'), /docs\/other\.json is no source date-sources\.json names/);
+	assert.throws(() => dates.sourceCommit('site/src/content/docs/report.mdx'), /is no source/);
+});
+
 test('a later commit that changed only a source moves the page, and an earlier one does not', async (t) => {
 	const repo = repository(t);
 	repo.write('a.mdx', page());
@@ -546,6 +569,126 @@ test('a guide moved to another folder, or a fiche added or taken out, moves the 
 	}
 });
 
+test('a commit to the report moves a page only once the line is drawn, and only when it changed the line that page shows', async (t) => {
+	const repo = repository(t);
+	const standard = (designation, year) => ({
+		type: 'standard',
+		organization: 'International Organization for Standardization',
+		year,
+		title: `Acoustics, ${designation}`,
+		designation,
+	});
+	// JSON is YAML, so the references are written as JSON.
+	const cites = (...refs) => page({ extra: [`references: ${JSON.stringify(refs)}`] });
+	const check = (id, domain, designation, edition, extra = {}) => ({
+		id,
+		domain,
+		...extra,
+		reference: { documents: [{ kind: 'standard', designation, edition }] },
+	});
+	const report = (checks, titles = { d: 'Domain D', e: 'Domain E' }) =>
+		`${JSON.stringify({ domains: Object.entries(titles).map(([id, title]) => ({ id, title })), checks }, null, 1)}\n`;
+	const one = check('d/1', 'd', 'ISO 1', '2000');
+	const two = check('e/1', 'e', 'ISO 2', '2010');
+	repo.write('a.mdx', cites(standard('ISO 1:2000', 2000)));
+	repo.write('b.mdx', cites(standard('ISO 2:2010', 2010)));
+	repo.write('c.mdx', page());
+	repo.writeFile('docs/report.json', report([one, two]));
+	repo.commit(1);
+	repo.writeFile('docs/report.json', report([one, check('d/2', 'd', 'ISO 1', '2000'), two]));
+	repo.commit(2, "a check more for a's standard, before any page shows a line: no page moves");
+	repo.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+	repo.commit(3, 'the line is drawn from here on');
+	const three = check('e/2', 'e', 'ISO 2', '2010');
+	repo.writeFile('docs/report.json', report([one, check('d/2', 'd', 'ISO 1', '2000'), two, three]));
+	repo.commit(4, "a check more for b's standard: b's line changes");
+	repo.writeFile('docs/report.json', report([one, check('d/2', 'd', 'ISO 1', '2000', { computed: 1 }), two, three]));
+	repo.commit(5, 'a value changes: no line does');
+	repo.writeFile('docs/report.json', report([one, check('d/2', 'd', 'ISO 1', '2000', { computed: 1 }), two, three], { d: 'Renamed D', e: 'Domain E' }));
+	repo.commit(6, "a's domain is renamed: a's line names it");
+	repo.sources({
+		pages: ['site/src/content/docs/'],
+		counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } },
+	});
+	repo.commit(7, 'the list, for the clone below');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'a.mdx'), '2026-01-06', 'the commit that renamed the domain its line links');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-04', 'the commit that added a check of its standard, and not the later ones');
+	assert.equal(day(dates, 'c.mdx'), '2026-01-01', 'a page with no line');
+
+	// The docs job's clone has no old version of the report: they are fetched
+	// newest first, in doubling rounds, and only as far as a page is left.
+	repo.git('config', 'uploadpack.allowFilter', 'true');
+	repo.git('config', 'uploadpack.allowAnySHA1InWant', 'true');
+	const clone = join(repo.root, 'blobless');
+	const ran = spawnSync('git', ['clone', '-q', '--filter=blob:none', `file://${repo.work}`, clone], { env: repo.env, encoding: 'utf8' });
+	assert.equal(ran.status, 0, ran.stderr);
+	const fromClone = await loadContentDates({ siteRoot: join(clone, 'site') });
+	assert.equal(day(fromClone, 'a.mdx'), '2026-01-06');
+	assert.equal(day(fromClone, 'b.mdx'), '2026-01-04');
+});
+
+test('the commits to the report read for the line are those made after the component in the history, whatever their dates', async (t) => {
+	// A rebase writes a run of commits in one second, and a kept date can put
+	// a commit before its parent: the place in the history says which commits
+	// came after the line was drawn, and the date does not.
+	const standard = (designation, year) => ({
+		type: 'standard',
+		organization: 'International Organization for Standardization',
+		year,
+		title: `Acoustics, ${designation}`,
+		designation,
+	});
+	const cites = (...refs) => page({ extra: [`references: ${JSON.stringify(refs)}`] });
+	const check = (id, designation, edition) => ({ id, domain: 'd', reference: { documents: [{ kind: 'standard', designation, edition }] } });
+	const report = (checks) => `${JSON.stringify({ domains: [{ id: 'd', title: 'Domain D' }], checks }, null, 1)}\n`;
+	const one = check('d/1', 'ISO 1', '2000');
+	const counts = { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } };
+	const dated = {};
+	for (const order of ['after', 'before']) {
+		const repo = repository(t);
+		repo.write('a.mdx', cites(standard('ISO 1:2000', 2000)));
+		repo.writeFile('docs/report.json', report([one]));
+		repo.sources({ pages: ['site/src/content/docs/'], counts });
+		repo.commit(1);
+		const line = () => repo.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+		const more = () => repo.writeFile('docs/report.json', report([one, check('d/2', 'ISO 1', '2000')]));
+		if (order === 'after') {
+			line();
+			repo.commit(3, 'the line is drawn from here on');
+			more();
+			repo.commit(3, "a check more for a's standard in the same second: a's line changes");
+		} else {
+			more();
+			repo.commit(5, "a check more for a's standard, before the line is drawn, dated later than the commit after it");
+			line();
+			repo.commit(3, 'the line is drawn from here on');
+		}
+		dated[order] = day(await repo.dates(), 'a.mdx');
+	}
+	assert.deepEqual(dated, { after: '2026-01-03', before: '2026-01-01' });
+});
+
+test('a report commit dated after the commits above it still dates the page whose line it changed', async (t) => {
+	const standard = { type: 'standard', organization: 'International Organization for Standardization', year: 2000, title: 'Acoustics, ISO 1:2000', designation: 'ISO 1:2000' };
+	const check = (id, extra = {}) => ({ id, domain: 'd', ...extra, reference: { documents: [{ kind: 'standard', designation: 'ISO 1', edition: '2000' }] } });
+	const report = (checks) => `${JSON.stringify({ domains: [{ id: 'd', title: 'Domain D' }], checks }, null, 1)}\n`;
+	const repo = repository(t);
+	repo.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`] }));
+	repo.writeFile('docs/report.json', report([check('d/1')]));
+	repo.sources({ pages: ['site/src/content/docs/'], counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } } });
+	repo.commit(1);
+	repo.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+	repo.commit(2, 'the line is drawn from here on');
+	repo.writeFile('docs/report.json', report([check('d/1'), check('d/2')]));
+	repo.commit(5, "a check more: a's line changes");
+	repo.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`], body: 'The text, edited.\n' }));
+	repo.commit(4, 'a edited, dated before its parent');
+	repo.writeFile('docs/report.json', report([check('d/1'), check('d/2', { computed: 1 })]));
+	repo.commit(3, 'a value changes: no line does');
+	assert.equal(day(await repo.dates(), 'a.mdx'), '2026-01-05');
+});
+
 test('a directory of the content tree stands for its pages, each dated by the page rule', async (t) => {
 	const repo = repository(t);
 	repo.write('errata/index.mdx', page({ title: 'Errata' }));
@@ -620,6 +763,13 @@ test('date-sources.json takes paths from the repository root, and an entry with 
 	assert.throws(read({ entries: [{ pages, texts: { fiches: { files: fiches.files } } }] }), /texts\.fiches\.pattern is the pattern of the text it shows/);
 	assert.throws(read({ entries: [{ pages, texts: { fiches: { ...fiches, pattern: '(' } } }] }), /texts\.fiches\.pattern: Invalid regular expression/);
 	assert.throws(read({ entries: [{ pages, texts: { fiches: { ...fiches, lines: 'x' } } }] }), /unknown key\(s\) lines in texts\.fiches/);
+	// The "Verified by" line: a report and the component that draws it, both files.
+	const line = { report: 'docs/conformance.json', drawnBy: 'site/src/components/VerifiedBy.astro' };
+	assert.deepEqual(read({ entries: [{ pages, counts: { line } }] })(), [{ pages, sources: [], counts: { line }, texts: {} }]);
+	assert.throws(read({ entries: [{ pages, counts: { line: { report: line.report } } }] }), /counts\.line\.drawnBy is missing/);
+	assert.throws(read({ entries: [{ pages, counts: { line: { ...line, report: 'docs/' } } }] }), /counts\.line\.report names a file, not "docs\/"/);
+	assert.throws(read({ entries: [{ pages, counts: { line: { ...line, drawnBy: '../VerifiedBy.astro' } } }] }), /"counts\.line\.drawnBy" takes paths from the repository root/);
+	assert.throws(read({ entries: [{ pages, counts: { line: { ...line, lines: '^x' } } }] }), /unknown key\(s\) lines in counts\.line/);
 	assert.throws(read({ entries: [{ pages }] }), /entry 1 names no source/);
 	assert.throws(read({ entries: [{ sources: ['a.json'] }] }), /entry 1 names no page/);
 });
@@ -671,6 +821,12 @@ test('the day a page was published is its first commit\'s day in UTC, as the day
 
 /** Modules that hold no text a page shows: the site's address and the icon shapes. */
 const NOT_CONTENT = new Set(['src/data/site.mjs', 'src/data/icons.mjs']);
+/**
+ * A call that reads the pages of the content collection: Astro's, in the
+ * build, and src/lib/page-references.mjs's, which reads their frontmatter
+ * from disk for what runs outside it.
+ */
+const COLLECTION_READ = /\b(getCollection|getEntry|readPageReferences)\s*\(/;
 /** An import that brings a value, with what it binds: `import type` brings none. */
 const IMPORT = /^\s*import\s+(?!type\s)([^;]*?)\s*from\s+['"]([^'"]+)['"]/gm;
 
@@ -777,7 +933,7 @@ function reach(file, site = SITE, out = new Map(), seen = new Set(), bound = new
 	} catch {
 		return out; // A package or a virtual module: not this site's data.
 	}
-	if (/\b(getCollection|getEntry)\s*\(/.test(text)) {
+	if (COLLECTION_READ.test(text)) {
 		out.set(path, 'collection');
 		carries = true;
 	}
@@ -809,6 +965,25 @@ function resolveImport(from, spec) {
 	return target;
 }
 
+/**
+ * The components the layout mounts on every page in Starlight's place, as
+ * astro.config.mjs names them (`components`): what they show of other files
+ * is on every page, so a page's own imports are not all it reaches.
+ *
+ * @param {string} [site]
+ * @returns {string[]} Their file paths.
+ */
+function layoutComponents(site = SITE) {
+	let config = '';
+	try {
+		config = readFileSync(join(site, 'astro.config.mjs'), 'utf8');
+	} catch {
+		return [];
+	}
+	const block = /\bcomponents:\s*\{([\s\S]*?)\n\s*\},/.exec(config)?.[1] ?? '';
+	return [...block.matchAll(/^\s*\w+:\s*['"](\.\/src\/[^'"]+)['"]/gm)].map(([, path]) => resolve(site, path));
+}
+
 /** Every page of the site, as file paths. */
 function sitePages(dir = join(SITE, CONTENT_DIR), out = []) {
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -834,7 +1009,19 @@ const REPO = resolve(SITE, '..');
  * code, not by the pages it reads. A "_via" key that none of the entry's
  * pages reaches, or that "sources" already names, is wrong too. And an
  * export of a module that reads the repository at build time (`reads`)
- * that the pages import has to be dated by what it is read from.
+ * that the pages import has to be dated by what it is read from, unless
+ * the reason "_via" gives that module names it in backticks: a reason stands
+ * for the exports it names, each read where the pages take it and found to
+ * move no page, and for no other, and one that names an export the pages do
+ * not take is wrong too.
+ *
+ * Every page is also drawn in the layout (`layoutComponents`), so what the
+ * layout reaches is on every page: the entry that lists the whole content
+ * tree answers for it, with the same rules, and a layout that reaches data
+ * with no such entry fails. That entry is not a page's own: a page it alone
+ * lists, and that reaches nothing through its own file, is not "listed for
+ * nothing", and a page that reaches data through its own file still needs an
+ * entry of its own.
  *
  * @param {string} [site]
  * @param {Record<string, Record<string, string[] | 'count' | 'text'>>} [reads]
@@ -850,11 +1037,28 @@ function auditDateSources(site = SITE, reads = READS) {
 	const reached = entries.map(() => new Map());
 	const imported = entries.map(() => new Map());
 	let built = 0;
+	// The layout's own reach, answered for by the entry of the whole tree.
+	const tree = `${relative(repo, join(site, CONTENT_DIR)).split(sep).join('/')}/`;
+	const layoutEntries = entries.flatMap((entry, index) => (entry.pages.includes(tree) ? [index] : []));
+	const layoutBound = new Map();
+	const layoutBehind = new Map();
+	for (const component of layoutComponents(site)) reach(component, site, layoutBehind, new Set(), layoutBound);
+	if (layoutBehind.size > 0 && layoutEntries.length === 0) {
+		problems.push(
+			`the layout every page is drawn in shows what ${[...layoutBehind.keys()].join(', ')} hold(s), and no entry lists ${tree}`,
+		);
+	}
+	for (const index of layoutEntries) {
+		for (const [module, kind] of layoutBehind) reached[index].set(module, kind);
+		for (const [module, names] of layoutBound) imported[index].set(module, new Set(names));
+	}
 	for (const page of sitePages(join(site, CONTENT_DIR))) {
 		const path = relative(repo, page).split(sep).join('/');
 		const bound = new Map();
 		const behind = reach(page, site, new Map(), new Set(), bound, true);
-		const owners = entries.flatMap((entry, index) => (entry.pages.some((spec) => matches(spec, path)) ? [index] : []));
+		const owners = entries.flatMap((entry, index) =>
+			!layoutEntries.includes(index) && entry.pages.some((spec) => matches(spec, path)) ? [index] : [],
+		);
 		if (behind.size > 0) built += 1;
 		if (behind.size > 0 && owners.length === 0) {
 			problems.push(`${path} shows what ${[...behind.keys()].join(', ')} hold(s), and no entry lists it`);
@@ -871,7 +1075,10 @@ function auditDateSources(site = SITE, reads = READS) {
 	entries.forEach((entry, index) => {
 		const where = `entry ${index + 1} (${entry.pages[0]})`;
 		const via = raw[index]._via ?? {};
-		const named = (path) => entry.sources.some((spec) => matches(spec, path));
+		// A report a count of lines is drawn from dates what it shows, as a source would.
+		const named = (path) =>
+			entry.sources.some((spec) => matches(spec, path)) ||
+			Object.values(entry.counts).some((set) => set?.report === path);
 		for (const [module, kind] of reached[index]) {
 			if (kind !== 'collection' && named(module)) {
 				if (Object.hasOwn(via, module)) problems.push(`${where}: "_via" explains ${module}, which "sources" already names`);
@@ -892,11 +1099,23 @@ function auditDateSources(site = SITE, reads = READS) {
 				problems.push(`${where}: "_via" dates ${module} by ${why}, which is neither a source nor a count of the entry`);
 			}
 		}
+		// A reason (a sentence) stands for the exports it names in backticks, and
+		// for no other: an export the pages take later is dated by what it is read
+		// from until a reason names it too, and a name no page takes is stale.
 		for (const [module, exports] of Object.entries(reads)) {
 			const names = imported[index].get(module) ?? new Set();
-			for (const name of names.has('*') ? Object.keys(exports) : names) {
+			const taken = names.has('*') ? Object.keys(exports) : [...names];
+			const reason = typeof via[module] === 'string' && /\s/.test(via[module]) ? via[module] : '';
+			const reasoned = (name) => reason.includes(`\`${name}\``);
+			for (const name of Object.keys(exports)) {
+				if (reasoned(name) && !taken.includes(name)) {
+					problems.push(`${where}: "_via" gives ${module} a reason for ${name}, which its pages do not take`);
+				}
+			}
+			for (const name of taken) {
 				const from = exports[name];
 				if (from === undefined) problems.push(`${where}: its pages show ${name} of ${module}, and the test does not say what that is read from`);
+				else if (reasoned(name)) continue;
 				else if (from === 'count' && !Object.hasOwn(entry.counts, name)) {
 					problems.push(`${where}: its pages show ${name} of ${module}, a count the entry does not carry`);
 				} else if (from === 'text' && !Object.hasOwn(entry.texts, name)) {
@@ -1008,6 +1227,56 @@ test('a listed page has to name every module it reaches, in "sources" or in "_vi
 	]);
 });
 
+test('what the layout shows of other files is on every page, and the entry of the whole tree has to say what dates it', (t) => {
+	const root = mkdtempSync(join(tmpdir(), 'content-dates-'));
+	t.after(() => rmSync(root, { recursive: true, force: true }));
+	const site = join(root, 'repo', 'site');
+	const write = (path, text) => {
+		mkdirSync(dirname(join(site, path)), { recursive: true });
+		writeFileSync(join(site, path), text);
+	};
+	// A title override that mounts a line drawn from a report, as
+	// PageTitle.astro mounts VerifiedBy.astro, and a page that imports nothing.
+	write('astro.config.mjs', "export default { integrations: [starlight({ components: {\n  PageTitle: './src/components/Title.astro',\n}, }), ], };\n");
+	write('src/components/Title.astro', "---\nimport Line from './Line.astro';\n---\n<Line />\n");
+	write('src/components/Line.astro', "---\nimport { report } from '../data/stats.mjs';\n---\n<p>{report.checks.length}</p>\n");
+	write('src/data/stats.mjs', 'export const report = { checks: [] };\n');
+	write('src/content/docs/a.mdx', 'Plain text.\n');
+	const audit = (reads, ...entries) => {
+		write(DATE_SOURCES, JSON.stringify({ entries }));
+		return auditDateSources(site, reads).problems;
+	};
+	const reads = { 'site/src/data/stats.mjs': { report: ['docs/report.json'] } };
+	assert.deepEqual(audit(reads), [
+		'the layout every page is drawn in shows what site/src/data/stats.mjs hold(s), and no entry lists site/src/content/docs/',
+	]);
+	const tree = { pages: ['site/src/content/docs/'], counts: { line: { report: 'docs/report.json', drawnBy: 'site/src/components/Line.astro' } } };
+	assert.deepEqual(audit(reads, tree), [
+		'entry 1 (site/src/content/docs/): its pages show the data of site/src/data/stats.mjs, and neither "sources" nor "_via" names it',
+	]);
+	// The count of the line dates what the report holds, as a source would.
+	assert.deepEqual(audit(reads, { ...tree, _via: { 'site/src/data/stats.mjs': 'line' } }), []);
+	assert.deepEqual(audit({ 'site/src/data/stats.mjs': { report: ['docs/other.json'] } }, { ...tree, _via: { 'site/src/data/stats.mjs': 'line' } }), [
+		'entry 1 (site/src/content/docs/): its pages show report of site/src/data/stats.mjs, read from docs/other.json, which "sources" does not name',
+	]);
+	// A reason stands for the exports it names, each read where the pages take
+	// it: the head of every page may name a release no reader sees. An export it
+	// does not name is dated by what it is read from, and one it names that no
+	// page takes is a reason left behind.
+	const other = { 'site/src/data/stats.mjs': { report: ['docs/other.json'], total: ['docs/other.json'] } };
+	const reasoned = (reason) => audit(other, { ...tree, _via: { 'site/src/data/stats.mjs': reason } });
+	assert.deepEqual(reasoned('`report`, data for machines, which no reader of a page reads'), []);
+	assert.deepEqual(reasoned('data for machines, which no reader of a page reads'), [
+		'entry 1 (site/src/content/docs/): its pages show report of site/src/data/stats.mjs, read from docs/other.json, which "sources" does not name',
+	]);
+	assert.deepEqual(reasoned('`report` and `total`, data for machines, which no reader of a page reads'), [
+		'entry 1 (site/src/content/docs/): "_via" gives site/src/data/stats.mjs a reason for total, which its pages do not take',
+	]);
+	// The whole tree's entry is the layout's, and no page's own: the page that
+	// reaches nothing through its own file is not listed for nothing.
+	assert.doesNotMatch(audit(reads, { ...tree, _via: { 'site/src/data/stats.mjs': 'line' } }).join('\n'), /is listed, and renders nothing/);
+});
+
 test('every page that renders data from outside its file is listed in date-sources.json with all of it, and no other', async () => {
 	const { problems, built } = auditDateSources();
 	assert.ok(built > 0, 'the scan found no page built from data, so it is not looking');
@@ -1020,13 +1289,37 @@ test('every page that renders data from outside its file is listed in date-sourc
 	}
 });
 
-test('each count in date-sources.json is the number the page shows: files as repo-stats.mjs counts them, lines as conformance-stats.mjs does', async (t) => {
+test('each count in date-sources.json is the number the page shows: files as repo-stats.mjs counts them, lines as conformance-stats.mjs does, a line as the layout draws it', async (t) => {
 	const stats = await import(pathToFileURL(join(SITE, 'src', 'data', 'repo-stats.mjs')).href);
 	const conformance = await import(pathToFileURL(join(SITE, 'src', 'data', 'conformance-stats.mjs')).href);
 	const counts = readDateSources(join(SITE, DATE_SOURCES)).flatMap((entry) => Object.entries(entry.counts));
 	assert.ok(counts.some(([, set]) => Array.isArray(set)), 'the landing page counts guides, API pages and fiches');
-	assert.ok(counts.some(([, set]) => !Array.isArray(set)), 'the guide on why phonometry counts the errata entries');
+	assert.ok(counts.some(([, set]) => !Array.isArray(set) && set.lines !== undefined), 'the guide on why phonometry counts the errata entries');
+	assert.ok(counts.some(([, set]) => set.report !== undefined), 'every guide is dated by its "Verified by" line');
 	for (const [name, set] of counts) {
+		if (set.report !== undefined) {
+			// The line of each page: the component that draws it is one the
+			// layout mounts (through any chain of components), so the count
+			// dates the line a reader sees, and the report is the one it reads.
+			const drawnBy = resolve(REPO, set.drawnBy);
+			const mounted = new Set();
+			const walk = (file) => {
+				if (mounted.has(file)) return;
+				mounted.add(file);
+				let text = '';
+				try {
+					text = readFileSync(file, 'utf8');
+				} catch {
+					return;
+				}
+				for (const [, , spec] of text.matchAll(IMPORT)) if (spec.startsWith('.')) walk(resolveImport(file, spec));
+			};
+			for (const component of layoutComponents()) walk(component);
+			assert.ok(mounted.has(drawnBy), `${name}: ${set.drawnBy} is no component the layout mounts`);
+			assert.ok(reach(drawnBy).has('site/src/data/conformance-stats.mjs'), `${name}: ${set.drawnBy} does not read the report`);
+			assert.equal(set.report, 'docs/conformance.json', `${name}: the report conformance-stats.mjs reads`);
+			continue;
+		}
 		if (!Array.isArray(set)) {
 			assert.equal(typeof conformance[name], 'number', `${name} is no number src/data/conformance-stats.mjs exports`);
 			const head = spawnSync('git', ['show', `HEAD:${set.file}`], { cwd: REPO, encoding: 'utf8', maxBuffer: 1 << 28 });

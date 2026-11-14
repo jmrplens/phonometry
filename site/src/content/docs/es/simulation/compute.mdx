@@ -359,32 +359,36 @@ obstáculo), sobre mallas de 32 por 40 a 64 por 48 celdas avanzadas entre 60 y
 120 pasos, con instantáneas diezmadas en dos de ellas.
 
 **NumPy, float64: idéntico bit a bit.** Las mismas entradas dan salidas
-idénticas bit a bit en la misma plataforma: sin números aleatorios y con
-todas las operaciones en un orden fijo. El camino de NumPy se compara además
-con digests SHA-256 de cada número que dan esos escenarios
-(`engine-digests.json`, comprobado en CI). Una copia congelada de los dos
-motores tal como eran antes de poder calcular en otro sitio demostró primero,
-en todos los runners, que los motores nuevos coincidían con ella bit a bit, y
-los digests se tomaron después de los motores nuevos, de modo que los demás
-dispositivos no le han costado nada a los números de NumPy.
+idénticas bit a bit en la misma plataforma: sin números aleatorios y con todas
+las operaciones en un orden fijo. El camino de NumPy se compara además con
+digests SHA-256 de cada número que dan esos escenarios
+([`engine-digests.json`](https://github.com/jmrplens/phonometry/blob/main/engine-digests.json),
+comprobado en CI). Una copia congelada de los dos motores tal como eran antes
+de poder calcular en otro sitio demostró primero, en todos los runners, que los
+motores nuevos coincidían con ella bit a bit, y los digests se tomaron después
+de los motores nuevos, de modo que los demás dispositivos no le han costado
+nada a los números de NumPy.
 
 **CuPy, float64: campos idénticos bit a bit, según lo medido.** En una NVIDIA
 GeForce RTX 4060 con el controlador de NVIDIA 610.57.04, CuPy 14.2.0
 (`cupy-cuda13x`, runtime de CUDA 13.2, API del controlador 13.3) y Python 3.13,
-todos los campos, fotogramas de instantáneas, campos colocalizados y fasores de
-contorno de los siete escenarios fueron idénticos bit a bit a los de NumPy. La
-energía, una suma sobre toda la malla, difirió como mucho en 1,79×10⁻¹⁶
-relativo en esas siete ejecuciones, porque la GPU suma las celdas en otro
-orden; es el peor valor de la matriz, y una suma sobre una malla más grande
-puede diferir más. La medida está registrada en `gpu-parity.lock`, en la raíz
-del repositorio, con el controlador de NVIDIA, las versiones de CUDA, la imagen
-de contenedor en la que se hizo y una huella de los dos motores, de sus
-backends y de la matriz de escenarios. La CI comprueba esa huella en cada pull
-request, así que un motor que cambia sin una prueba nueva en GPU falla.
-La promesa es esa única medida: el fichero registra una sola prueba, con la
-tarjeta, el controlador y las versiones de arriba, y otra GPU, otro controlador
-u otra versión de CuPy solo quedan cubiertos cuando el mantenedor hace con
-ellos una prueba nueva (`make gpu-parity`) y la registra en el fichero.
+en la medida del 9 de noviembre de 2026, todos los campos, fotogramas de
+instantáneas, campos colocalizados y fasores de contorno de los siete
+escenarios fueron idénticos bit a bit a los de NumPy. La energía, una suma
+sobre toda la malla, difirió como mucho en 1,79×10⁻¹⁶ relativo en esas siete
+ejecuciones, porque la GPU suma las celdas en otro orden; es el peor valor de
+la matriz, y una suma sobre una malla más grande puede diferir más. La medida
+está registrada en
+[`gpu-parity.lock`](https://github.com/jmrplens/phonometry/blob/main/gpu-parity.lock),
+en la raíz del repositorio, con el controlador de NVIDIA, las versiones de
+CUDA, la imagen de contenedor en la que se hizo y una huella de los dos
+motores, de sus backends y de la matriz de escenarios. La CI comprueba esa
+huella en cada pull request, así que un motor que cambia sin una prueba nueva
+en GPU falla. La promesa es esa única medida: el fichero registra una sola
+prueba, con la tarjeta, el controlador y las versiones de arriba, y otra GPU,
+otro controlador u otra versión de CuPy solo quedan cubiertos cuando el
+mantenedor hace con ellos una prueba nueva (`make gpu-parity`) y la registra en
+el fichero.
 
 **torch, y NumPy en float32: dentro de una cota publicada sobre la matriz de
 escenarios.** La cota es la mayor diferencia relativa respecto de la

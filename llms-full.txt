@@ -1,6 +1,6 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1897 numerical conformance checks enforced in CI, against 227 normative designations and 125 further published sources.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1897 numerical conformance checks enforced in CI, against 230 normative designations and 121 further published sources.
 
 phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.12). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1897 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 111 domains.
 
@@ -12602,6 +12602,13 @@ enlarged-range term $C_{100-5000}$, not the core-range one.
   [BOE consolidated text](https://www.boe.es/buscar/act.php?id=BOE-A-2007-18397).
   The source of the day noise index $L_\mathrm{d}$ that Table 2.1 of DB-HR is read
   against.
+- Instituto de Ciencias de la Construcción Eduardo Torroja (CSIC). *Catálogo
+  informático de elementos constructivos (CEC)*. Código Técnico de la
+  Edificación.
+  [codigotecnico.org](https://www.codigotecnico.org/Programas/CatalogoElementosConstructivos.html).
+  The building code's catalogue of construction elements, whose correction of
+  a catalogued window's RA and RA,tr by its total area the window section
+  implements.
 
 ## Standards
 
@@ -39809,6 +39816,11 @@ libsndfile under the LGPL, which the base install deliberately avoids.
   The `bext` chunk this page reads and writes field by field: originator,
   the sample-accurate since-midnight time reference, CodingHistory, and the
   five EBU R 128 loudness values of version 2.
+- European Broadcasting Union. (1999). *Format for CodingHistory field in
+  Broadcast Wave Format files, BWF* (EBU R 98).
+  [EBU](https://tech.ebu.ch/publications/r098).
+  The grammar of the CodingHistory line every written chunk carries, and of
+  the line a conversion appends to it.
 - International Telecommunication Union. (2025). *Long-form file format for
   the international exchange of audio programme materials with metadata*
   (Recommendation ITU-R BS.2088-2).
@@ -48269,6 +48281,10 @@ around the median (clause 4.3, Tables 2–5) and its application (clause 4.4).
 ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —
 Reference threshold of hearing under free-field and diffuse-field listening
 conditions* (Table 1).
+ISO 389-1:1998, *Reference zero for the calibration of audiometric equipment –
+Reference equivalent threshold sound pressure levels for pure tones and
+supra-aural earphones*: the audiometric zero of section 3, on an IEC 60303
+coupler (Table 1) and on an IEC 60318 artificial ear (Table 2).
 
 **Not covered.** This page stops at the age component. Combining it with a
 noise-induced shift into a real audiogram is **ISO 1999**:2013 clause 6.1
@@ -52448,6 +52464,13 @@ mechanisms are in play, compute both.
   [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
   The articulation-band experiments that the band-importance function of
   section 1 descends from.
+- Pavlovic, C. (Acoustical Society of America, Working Group S3-79). *C
+  program developer's kit for the Speech Intelligibility Index (SII.C)*.
+  Support site for the Speech Intelligibility Index.
+  [sii.to](https://www.sii.to/html/programs.html).
+  The working group's reference implementation of ANSI S3.5-1997 and its test
+  cases: the equivalent masking spectrum of clause 5.4 and the SII with a
+  hearing loss of clause 6 are checked against it.
 
 ## Standards
 
@@ -71583,24 +71606,25 @@ medium under a free surface, and elastic force sources around an obstacle),
 on grids of 32 by 40 to 64 by 48 cells stepped 60 to 120 times, with
 decimated snapshots in two of them.
 
-**NumPy, float64: bit-identical.** Identical inputs give bit-identical
-outputs on the same platform: no random numbers, and every operation in a
-fixed order. The NumPy path is also held to SHA-256 digests of every number
-those scenarios give (`engine-digests.json`, checked in CI). A frozen copy of
-the two engines as they stood before they could step anywhere else first
-proved the new engines equal to it bit for bit on every runner, and the
-digests were then taken from the new engines, so the other devices cost the
+**NumPy, float64: bit-identical.** Identical inputs give bit-identical outputs
+on the same platform: no random numbers, and every operation in a fixed order.
+The NumPy path is also held to SHA-256 digests of every number those scenarios
+give ([`engine-digests.json`](https://github.com/jmrplens/phonometry/blob/main/engine-digests.json), checked in CI). A
+frozen copy of the two engines as they stood before they could step anywhere
+else first proved the new engines equal to it bit for bit on every runner, and
+the digests were then taken from the new engines, so the other devices cost the
 NumPy numbers nothing.
 
 **CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX
 4060 with NVIDIA driver 610.57.04, CuPy 14.2.0 (`cupy-cuda13x`, CUDA runtime
-13.2, driver API 13.3) and Python 3.13, every field, snapshot frame, collocated
-field and contour phasor of the seven scenarios was bit-identical to NumPy's.
-The energy, a sum over the whole grid, differed by at most 1.79×10⁻¹⁶ relative
-over those seven runs, because the GPU adds the cells in another order; that is
-the worst of the matrix, and a sum over a larger grid can differ more. The
-measurement is recorded in `gpu-parity.lock`, at the root of the repository,
-with the NVIDIA driver, the CUDA versions, the container image it ran in and a
+13.2, driver API 13.3) and Python 3.13, measured on 9 November 2026, every
+field, snapshot frame, collocated field and contour phasor of the seven
+scenarios was bit-identical to NumPy's. The energy, a sum over the whole grid,
+differed by at most 1.79×10⁻¹⁶ relative over those seven runs, because the GPU
+adds the cells in another order; that is the worst of the matrix, and a sum
+over a larger grid can differ more. The measurement is recorded in
+[`gpu-parity.lock`](https://github.com/jmrplens/phonometry/blob/main/gpu-parity.lock), at the root of the repository, with
+the NVIDIA driver, the CUDA versions, the container image it ran in and a
 fingerprint of the two engines, their backends and the scenario matrix. CI
 checks that fingerprint on every pull request, so an engine that changes
 without a new proof on a GPU fails. The promise is that one measurement: the
@@ -74241,7 +74265,7 @@ a run there bit for bit to the run here. `make node-image HOST=<name>` builds
 the image on your node from your checkout, with the Dockerfile and the
 bootstrap as you changed them. After a change to an engine, `make gpu-parity`,
 run from your checkout in that image on the node's GPU, renews the GPU proof
-in `gpu-parity.lock`.
+in [`gpu-parity.lock`](https://github.com/jmrplens/phonometry/blob/main/gpu-parity.lock).
 
 ### Rendering the documentation clips on a node
 
@@ -79715,7 +79739,7 @@ sample from the metrology core:
 
 The same discipline applies far beyond the metrology core: today the suite runs
 1897 numerical conformance checks across 111 domains, against
-227 normative designations and 125 further published sources, covering
+230 normative designations and 121 further published sources, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

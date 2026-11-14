@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -23,6 +24,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import generate_llms as llms
+
+if TYPE_CHECKING:
+    from guard_caches import FreshCaches
 
 _HEAD_END = "\n---\n"
 _SOURCE = re.compile(r"^Source: \S+$", re.MULTILINE)
@@ -62,9 +66,9 @@ def _write_page(docs: Path, name: str, sections: list[tuple[str, int]]) -> str:
 
 
 @pytest.fixture
-def docs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """An empty mirror tree the generator reads its pages from."""
-    monkeypatch.setattr(llms, "DOCS", tmp_path)
+def docs(tmp_path: Path, fresh_caches: FreshCaches) -> Path:
+    """An empty mirror tree the generator reads its pages from, its caches kept to the test."""
+    fresh_caches(llms, DOCS=tmp_path)
     return tmp_path
 
 

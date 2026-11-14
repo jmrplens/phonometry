@@ -24,6 +24,7 @@
  */
 
 import type { CollectionEntry } from 'astro:content';
+import { authorDate, surname } from './author-date.mjs';
 
 export type Reference = NonNullable<CollectionEntry<'docs'>['data']['references']>[number];
 
@@ -68,11 +69,6 @@ function slug(value: string): string {
 		.replace(/^-+|-+$/g, '');
 }
 
-/** Surname out of an APA-formatted name ("Schroeder, M. R." -> "Schroeder"). */
-function surname(author: string): string {
-	return author.split(',')[0]!.trim();
-}
-
 /**
  * Designation reduced to the family that a reader recognises:
  * "ISO 10140-2:2010" -> "ISO 10140", "ANSI S3.5-1997 (R2017)" -> "ANSI S3.5",
@@ -96,21 +92,6 @@ export function standardFamily(designation: string): string {
 /** An "8th ed." style designation names an edition, not a document. */
 function isEditionOnly(text: string): boolean {
 	return /^\d+\s*(st|nd|rd|th|\.ª|ª|a)?\s*ed\.?$/i.test(text) || !/\d/.test(text);
-}
-
-function authorDate(
-	authors: readonly string[] | undefined,
-	year: number | string | undefined,
-	isEs: boolean,
-): string | undefined {
-	if (!authors?.length) return undefined;
-	const names =
-		authors.length === 1
-			? surname(authors[0]!)
-			: authors.length === 2
-				? `${surname(authors[0]!)} ${isEs ? 'y' : '&'} ${surname(authors[1]!)}`
-				: `${surname(authors[0]!)} et al.`;
-	return year === undefined ? names : `${names} ${year}`;
 }
 
 function chipFor(ref: Reference, isEs: boolean): { text: string; kind: ChipKind } | undefined {

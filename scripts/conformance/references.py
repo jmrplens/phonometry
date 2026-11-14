@@ -143,6 +143,11 @@ def documents(reference: Reference) -> tuple[Cited, ...]:
 # the document number fell into the clause. Longest first, since the
 # alternation takes the first branch that matches.
 _BODIES = (
+    # DIN publishes its draft standards as "E DIN" (Entwurf): a draft is a
+    # standard, and without the prefix the parser filed the three the guides
+    # implement as books.
+    "E DIN EN",
+    "E DIN",
     "BS EN ISO",
     "BS EN",
     "UNE-EN ISO",

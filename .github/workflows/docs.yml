@@ -219,6 +219,12 @@ jobs:
           python3 scripts/mirror_overviews.py --check
           python3 scripts/mirror_glossary.py --check
           python3 scripts/generate_llms.py
+      - name: Install the site's dependencies
+        # Here, before the first pnpm script, which would otherwise install
+        # them on its own: pnpm 12 installs on a run that finds them missing.
+        # The tests of the build checks below need them.
+        run: pnpm install --frozen-lockfile
+        working-directory: site
       - name: Check the icon sheet is not stale
         # The sheet is the index of the site's own icons and the only place a
         # changed drawing is visible in a diff. It costs nothing to keep in
@@ -253,8 +259,10 @@ jobs:
         # sitemap stamp that must fail on a URL with no source or a build with
         # no sitemap. The reader the site takes the package's requirements from
         # is held to the tomllib of the runner's python3 on the whole of
-        # pyproject.toml. Node's own test runner and no dependencies, so it
-        # runs before the install.
+        # pyproject.toml. Node's own test runner, after the install: the
+        # structured-data check and the guides' dates read a page's frontmatter
+        # with the parser the content collection uses, from
+        # @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own
@@ -265,7 +273,7 @@ jobs:
         # green, because nothing fails on a build that is merely slow. This reads
         # the site's source for anything that reaches for a process and fails
         # unless the file is listed with why it runs once per build. It reads
-        # text, so it runs before the install.
+        # text, so it runs before the build.
         run: pnpm run check:render-spawns
         working-directory: site
       - name: Build site
@@ -274,7 +282,6 @@ jobs:
         # status through the tee.
         shell: bash
         run: |
-          pnpm install --frozen-lockfile
           pnpm build 2>&1 | tee "$RUNNER_TEMP/site-build.log"
         working-directory: site
         env:

@@ -40,13 +40,16 @@
 // Each test here writes a build into a directory of its own: the two
 // bibliographies and one guide in each language, every cited work named as the
 // bibliography names it, and as many plain pages besides as a test asks for.
-// It puts one defect into that build, runs the check on it the way CI does, and
-// reads the exit status and the lines it printed. The pages, the site-wide
+// Beside it go the conformance report and the pages' frontmatter the build was
+// made from, which the check joins to say what the report's Dataset has to be
+// based on. It puts one defect into that build, runs the check on it the way
+// CI does, and reads the exit status and the lines it printed. The pages, the site-wide
 // nodes and the writing of the build come from
 // shared/structured-data-fixture.mjs, which every suite of the check shares.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { glossary } from '../src/data/glossary.mjs';
@@ -63,7 +66,7 @@ import {
 	aboutPage,
 	apiPage,
 	build as wholeBuild,
-	check,
+	check as checkBuild,
 	commitDay,
 	FIRST_COMMIT,
 	LIBRARY_MODIFIED,
@@ -72,6 +75,7 @@ import {
 	SITE,
 	SITE_TYPES,
 	siteNodes,
+	SOFTWARE_DOI,
 	TARGET_PLATFORM,
 	VERSION,
 } from './shared/structured-data-fixture.mjs';
@@ -130,10 +134,110 @@ const stub = (node) =>
 			.map((key) => [key, node[key]]),
 	);
 
+/** The library the committed report was generated for, which the report's Dataset gives as its version. */
+const LIBRARY = JSON.parse(readFileSync(new URL('../../docs/conformance.json', import.meta.url), 'utf8')).library;
+
+/** The day the report's rows last changed, which its banner prints and its Dataset gives. */
+const DATA_DAY = '2026-09-15';
+
+/** The commit the report's rows are of, which its banner names and every repository address of its Dataset is at. */
+const DATA_COMMIT = '0123456789abcdef0123456789abcdef01234567';
+
+/** An address in the repository at the commit the report's rows are of. */
+const atCommit = (path, host = 'raw') =>
+	host === 'raw'
+		? `https://raw.githubusercontent.com/jmrplens/phonometry/${DATA_COMMIT}/${path}`
+		: `https://github.com/jmrplens/phonometry/blob/${DATA_COMMIT}/${path}`;
+
+/** The banner line of the report page that names the commit and the day its rows are of (Conformance.astro). */
+const provenance = (day) =>
+	'<p class="banner-provenance" data-report-provenance>Generated for phonometry <b data-report-library>4.0.0</b>; ' +
+	`its rows last changed in commit <a href="https://github.com/jmrplens/phonometry/commit/${DATA_COMMIT}"><code data-report-commit="${DATA_COMMIT}">${DATA_COMMIT.slice(0, 9)}</code></a>, ` +
+	`on <time datetime="${day}">${day}</time>.</p>`;
+
+/** What the report's Dataset says in each language. */
+const REPORT_TEXT = {
+	en: { name: 'The report', description: 'Checks.', technique: 'Comparison.', column: ['Standard', 'The standard'] },
+	es: { name: 'El informe', description: 'Comprobaciones.', technique: 'Comparación.', column: ['Norma', 'La norma'] },
+};
+
 /**
- * A build the check has nothing to report on: the two bibliographies and a
- * guide in each language, where every cited work is named as the bibliography
- * names it, then plain English pages up to `pages` in all.
+ * The conformance report in `lang`: an article whose main entity is the
+ * Dataset of the report, generated for the committed library, dated by its
+ * data before the page, written in the page's language and based on the
+ * script that writes it and on the standard `work`, named as the
+ * bibliography names it.
+ */
+function reportPage(lang, work) {
+	const text = REPORT_TEXT[lang];
+	const report = page('reference/conformance', lang);
+	report.article.mainEntity = {
+		'@type': 'Dataset',
+		'@id': `${report.article.url}#dataset`,
+		name: text.name,
+		description: text.description,
+		inLanguage: lang,
+		version: LIBRARY,
+		dateModified: DATA_DAY,
+		license: 'https://opensource.org/license/MIT',
+		measurementTechnique: text.technique,
+		variableMeasured: [{ '@type': 'PropertyValue', name: text.column[0], description: text.column[1] }],
+		distribution: [
+			{ '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: atCommit('docs/conformance.json') },
+			{ '@type': 'DataDownload', encodingFormat: 'text/markdown', contentUrl: atCommit('docs/CONFORMANCE.md') },
+		],
+		isBasedOn: [atCommit('scripts/conformance_report.py', 'blob'), stub(work)],
+	};
+	report.text = provenance(DATA_DAY);
+	return report;
+}
+
+/** A standard as a guide's frontmatter cites it, the one the bibliography's `standard()` node defines. */
+const cited = (designation, year) => ({
+	type: 'standard',
+	organization: 'International Organization for Standardization',
+	year,
+	title: `Acoustics, ${designation}`,
+	designation,
+});
+
+/**
+ * What the build was made from, as far as the report's Dataset goes: the
+ * conformance report, whose checks are based on the standards `documents`
+ * names (each `[designation, edition]`), and the frontmatter of the guide in
+ * each language, which cites ISO 1:2000 and ISO 2:2010. By default the checks
+ * are based on ISO 2:2010 alone, the one work the Dataset of `build()` names.
+ */
+const sources = (documents = [['ISO 2', '2010']]) => ({
+	report: {
+		library: LIBRARY,
+		domains: [{ id: 'domain', title: 'A domain' }],
+		checks: documents.map(([designation, edition], i) => ({
+			id: `domain/${i}`,
+			domain: 'domain',
+			reference: { documents: [{ kind: 'standard', designation, edition }] },
+		})),
+	},
+	references: [cited('ISO 1:2000', 2000), cited('ISO 2:2010', 2010)],
+});
+
+/**
+ * Run the check on `built`, made from what `from` gives: the conformance
+ * report, and the frontmatter of the guide in each language, written into the
+ * content tree the build carries beside any page of it a test wrote (JSON is
+ * YAML, so the frontmatter is written as JSON).
+ */
+function check(t, built, from = sources()) {
+	const frontmatter = `---\ntitle: A guide\nreferences: ${JSON.stringify(from.references)}\n---\n\nText.\n`;
+	const content = { ...built.content, 'guide.mdx': frontmatter, 'es/guide.mdx': frontmatter };
+	return checkBuild(t, { ...built, content, report: from.report });
+}
+
+/**
+ * A build the check has nothing to report on: the two bibliographies, a
+ * guide and the conformance report in each language, where every cited work
+ * is named as the bibliography names it, then plain English pages up to
+ * `pages` in all.
  *
  * The first `dated` pages, in that order, are published on `published` and the
  * rest on the day of their last edit, 2026-10-01. `platforms` gives the
@@ -164,6 +268,7 @@ function build({ pages = 4, base: extra = {}, ...options } = {}) {
 			citation: [{ '@id': iso1['@id'] }, stub(iso2), stub(book(url))],
 			about: [{ '@id': SITE.software }, { '@id': iso1['@id'] }],
 		});
+		base[`${lang}/report`] = reportPage(lang, iso2);
 	}
 	return wholeBuild({ pages, ...options, base: { ...base, ...extra } });
 }
@@ -226,37 +331,37 @@ test('a software node that names no operating system, or one twice, fails', (t) 
 
 test('a malformed block on a page leaves the software node of its valid block counted', (t) => {
 	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/6'].blocks = ['{"@context": '];
+	built['page/8'].blocks = ['{"@context": '];
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-6\/: an ld\+json block is not valid JSON/);
+	assert.match(ran.err, /FAIL \/page-8\/: an ld\+json block is not valid JSON/);
 	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
 });
 
 test('a block that parses to no JSON-LD object is reported as one that does not parse', (t) => {
 	// `null` parses, and reading its @context threw, so the check stopped before
 	// it reported the page or tallied any software node.
-	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/6'].blocks = ['null'];
-	built['page/7'].blocks = ['[]'];
-	built['page/8'].blocks = ['5'];
+	const built = build({ pages: 11, dated: 9, platforms: Array(11).fill('Windows, Linux, macOS') });
+	built['page/8'].blocks = ['null'];
+	built['page/9'].blocks = ['[]'];
+	built['page/10'].blocks = ['5'];
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	for (const page of [6, 7, 8]) {
+	for (const page of [8, 9, 10]) {
 		assert.match(ran.err, new RegExp(`FAIL /page-${page}/: an ld\\+json block is not a JSON-LD object`));
 	}
-	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
+	assert.match(ran.err, /FAIL 11 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
 	assert.doesNotMatch(ran.err, /TypeError/);
 });
 
 test('a malformed block on a page leaves two nodes of its valid blocks that share an @id reported', (t) => {
 	const twin = { '@context': 'https://schema.org', '@type': 'Thing', '@id': `${ORIGIN}/#thing` };
 	const built = build({ pages: 10, dated: 9 });
-	built['page/6'].blocks = [twin, twin, '{'];
+	built['page/8'].blocks = [twin, twin, '{'];
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-6\/: an ld\+json block is not valid JSON/);
-	assert.match(ran.err, /FAIL \/page-6\/: .*\/#thing defined more than once/);
+	assert.match(ran.err, /FAIL \/page-8\/: an ld\+json block is not valid JSON/);
+	assert.match(ran.err, /FAIL \/page-8\/: .*\/#thing defined more than once/);
 });
 
 // The software's history and the About page. Every page carries the same
@@ -343,10 +448,10 @@ test("the software's creation date is the UTC day of the first commit, not the d
 
 test("a page without one of the software's nodes fails by name, and the history is not said of every page", (t) => {
 	const built = build({ pages: 10 });
-	built['page/6'].nodes = built['page/6'].nodes.filter((node) => node['@type'] !== 'SoftwareSourceCode');
+	built['page/8'].nodes = built['page/8'].nodes.filter((node) => node['@type'] !== 'SoftwareSourceCode');
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-6\/: no SoftwareSourceCode node/);
+	assert.match(ran.err, /FAIL \/page-8\/: no SoftwareSourceCode node/);
 	assert.doesNotMatch(ran.out, /give its history/);
 });
 
@@ -642,7 +747,7 @@ test('a build where every cited work is named, and named as the bibliography nam
 	const ran = check(t, build());
 	assert.equal(ran.status, 0, ran.err);
 	assert.match(ran.out, /ok {3}every one of the 2 works pages are based on is named at its first reference in isBasedOn/);
-	assert.match(ran.out, /ok {3}each of the 6 stubs that name a work on a page says what the bibliography says of it/);
+	assert.match(ran.out, /ok {3}each of the 8 stubs that name a work on a page says what the bibliography says of it/);
 	assert.match(ran.out, /each of the 3 Spanish standards names the English node it is/);
 	assert.match(ran.out, /\n0 failing check\(s\)\./);
 });
@@ -798,6 +903,7 @@ test('a build where no page names a cited work fails rather than passing on noth
 		delete article.citation;
 		article.about = { '@id': SITE.software };
 	}
+	for (const key of ['en/report', 'es/report']) built[key].article.mainEntity.isBasedOn.pop();
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL no page names a cited work: the citation markup changed under this check/);
@@ -806,7 +912,7 @@ test('a build where no page names a cited work fails rather than passing on noth
 test('the site-wide block within its byte budget passes, and says its size and how much of it the Person is', (t) => {
 	const ran = check(t, build());
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /ok {3}the site-wide ld\+json block is \d+ bytes on 6 pages, within its budget of \d+; the Person is \d+ of them/);
+	assert.match(ran.out, /ok {3}the site-wide ld\+json block is \d+ bytes on 8 pages, within its budget of \d+; the Person is \d+ of them/);
 });
 
 test('a site-wide block over its byte budget fails, and says how much of it the Person is', (t) => {
@@ -821,7 +927,7 @@ test('a site-wide block over its byte budget fails, and says how much of it the 
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL 6 page\(s\): the site-wide ld\+json block is \d+ bytes, over its budget of \d+; the Person spliced from jmrp\.io is \d+ of them/,
+		/FAIL 8 page\(s\): the site-wide ld\+json block is \d+ bytes, over its budget of \d+; the Person spliced from jmrp\.io is \d+ of them/,
 	);
 });
 
@@ -2055,4 +2161,236 @@ test('an API page that names no release, another release or another Python fails
 	assert.match(ran.err, /FAIL 1 API page\(s\) name the release "3\.3\.0" and the platform "Python >= 3\.12"/);
 	assert.match(ran.err, /FAIL 1 API page\(s\) name the release "[^"]+" and the platform "Python >= 3\.11"/);
 	assert.doesNotMatch(ran.out, /name the release/);
+});
+
+// ---------------------------------------------------------------------------
+// The conformance report
+// ---------------------------------------------------------------------------
+
+test('a report whose Dataset is its main entity, versioned, dated by its data, based on named standards and written in each language passes', (t) => {
+	const ran = check(t, build());
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		new RegExp(
+			`ok {3}the conformance report's Dataset is the main entity of both report pages, versioned ${RegExp.escape(LIBRARY)}, ` +
+				'dated by the day its rows last changed, based on the 1 work the standards of its checks resolve to, named in each language, ' +
+				'and written in each page\'s language \\(5 texts\\)',
+		),
+	);
+});
+
+test('a report whose Dataset is a block of its own, beside the article and not its main entity, fails', (t) => {
+	const built = build();
+	for (const key of ['en/report', 'es/report']) {
+		const { article, nodes } = built[key];
+		nodes.push(article.mainEntity);
+		delete article.mainEntity;
+	}
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/conformance\/: the conformance report's Dataset: the article has no Dataset as its mainEntity/);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: the article has no Dataset as its mainEntity/);
+});
+
+test('a report that keeps a Dataset of its own beside the one that is its main entity fails', (t) => {
+	const built = build();
+	const { article, nodes } = built['es/report'];
+	nodes.push({ ...article.mainEntity });
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: a Dataset of its own beside the article, which says what the report is a second time/,
+	);
+	assert.doesNotMatch(ran.err, /FAIL \/reference\/conformance\//);
+});
+
+test("a report Dataset that gives the software's DOI as its own identifier fails", (t) => {
+	const built = build();
+	built['en/report'].article.mainEntity.identifier = { '@type': 'PropertyValue', propertyID: 'DOI', value: SOFTWARE_DOI };
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, new RegExp(`FAIL /reference/conformance/: the conformance report's Dataset: it gives the software's DOI ${RegExp.escape(SOFTWARE_DOI)} as its own identifier`));
+});
+
+test('a report Dataset with no version, another one, or no day its data changed fails', (t) => {
+	const built = build();
+	delete built['en/report'].article.mainEntity.version;
+	built['es/report'].article.mainEntity.version = '0.0.1';
+	delete built['es/report'].article.mainEntity.dateModified;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/conformance\/: the conformance report's Dataset: its version is undefined, and docs\/conformance\.json was generated for /);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: its version is "0\.0\.1"/);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: its dateModified is undefined, not a day/);
+});
+
+test('a report Dataset whose data changed after the page did fails', (t) => {
+	const built = build();
+	built['en/report'].article.mainEntity.dateModified = '2026-10-02';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/conformance\/: the conformance report's Dataset: its data changed on 2026-10-02, after the page's own last change, 2026-10-01/);
+});
+
+test('a report Dataset based on its script alone, or on a work it does not name, fails', (t) => {
+	const built = build();
+	built['en/report'].article.mainEntity.isBasedOn = [atCommit('scripts/conformance_report.py', 'blob')];
+	built['es/report'].article.mainEntity.isBasedOn.push({ '@id': `${ES}#std-iso-1-2000` });
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/conformance\/: the conformance report's Dataset: it names no standard it is based on/);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: 1 of what it is based on is not a work the bibliography defines, named/);
+});
+
+test('a Spanish report Dataset that says in English what the English one says fails, text by text', (t) => {
+	const built = build();
+	const spanish = built['es/report'].article.mainEntity;
+	spanish.name = REPORT_TEXT.en.name;
+	spanish.variableMeasured[0].description = REPORT_TEXT.en.column[1];
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset says in English what the English page says: name, variableMeasured\[0\]\.description/,
+	);
+});
+
+test('a report Dataset that leaves a text out, or leaves it empty, fails, and names it', (t) => {
+	const built = build();
+	const spanish = built['es/report'].article.mainEntity;
+	delete spanish.variableMeasured[0].description;
+	spanish.description = ' ';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset writes no text for description, variableMeasured\[0\]\.description/,
+	);
+	assert.doesNotMatch(ran.err, /says in English/);
+	assert.doesNotMatch(ran.err, /FAIL \/reference\/conformance\//);
+});
+
+test('a report Dataset with a column the other language does not describe fails, on both pages', (t) => {
+	const built = build();
+	const spanish = built['es/report'].article.mainEntity;
+	spanish.variableMeasured.push({ '@type': 'PropertyValue', name: REPORT_TEXT.en.column[0], description: REPORT_TEXT.en.column[1] });
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the conformance report's Dataset describes 1 column in English and 2 in Spanish/);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset writes no text for variableMeasured\[1\]\.name, variableMeasured\[1\]\.description/,
+	);
+});
+
+test('a build with no conformance report fails rather than passing on nothing', (t) => {
+	const built = build();
+	delete built['en/report'];
+	delete built['es/report'];
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL no page at \/reference\/conformance\/ was found: build the site first/);
+});
+
+test('a report Dataset that leaves out a work its checks are based on fails, and names it', (t) => {
+	// The checks are based on ISO 1:2000 and ISO 2:2010, and the Dataset of
+	// either page names ISO 2:2010 alone.
+	const ran = check(t, build(), sources([['ISO 1', '2000'], ['ISO 2', '2010']]));
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: it leaves out 1 of the 2 works its checks are based on: #std-iso-1-2000/,
+	);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: it leaves out 1 of the 2 works/);
+});
+
+test('a report Dataset that names a work no check is based on fails, and names it', (t) => {
+	const built = build();
+	built['en/report'].article.mainEntity.isBasedOn.push(stub(standard(EN, 'ISO 1:2000', 1)));
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: it names 1 work no check is based on: #std-iso-1-2000/,
+	);
+	assert.doesNotMatch(ran.err, /FAIL \/es\/reference\/conformance\//);
+});
+
+test('report Datasets that name a different number of works in the two languages fail', (t) => {
+	const built = build();
+	for (const [key, url] of [['en/report', EN], ['es/report', ES]]) {
+		const iso1 = standard(url, 'ISO 1:2000', 1);
+		if (key === 'es/report') iso1.sameAs = iso1['@id'].replace(ES, EN);
+		if (key === 'en/report') built[key].article.mainEntity.isBasedOn.push(stub(iso1));
+	}
+	const ran = check(t, built, sources([['ISO 1', '2000'], ['ISO 2', '2010']]));
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the conformance report's Dataset names 2 works in English and 1 in Spanish/);
+});
+
+test('a report Dataset dated by the page and not by the day its rows last changed fails', (t) => {
+	const built = build();
+	// The page's own date, 2026-10-01, the variant that would date the data by
+	// a change to how the rows are drawn.
+	built['en/report'].article.mainEntity.dateModified = '2026-10-01';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: its dateModified is 2026-10-01, and the page says its rows last changed on 2026-09-15/,
+	);
+	assert.doesNotMatch(ran.err, /FAIL \/es\/reference\/conformance\//);
+});
+
+test('a report page that prints no day its rows last changed fails', (t) => {
+	const built = build();
+	built['es/report'].text = '';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: the page prints no day its rows last changed \(\[data-report-provenance\] with a <time datetime>\)/,
+	);
+});
+
+test("a report Dataset that hands out a file of another commit than the one its banner names fails, address by address", (t) => {
+	const built = build();
+	const english = built['en/report'].article.mainEntity;
+	english.distribution[0].contentUrl = 'https://raw.githubusercontent.com/jmrplens/phonometry/main/docs/conformance.json';
+	const spanish = built['es/report'].article.mainEntity;
+	delete spanish.distribution;
+	spanish.isBasedOn[0] = 'https://github.com/jmrplens/phonometry/blob/main/scripts/conformance_report.py';
+	spanish.sameAs = 'https://github.com/jmrplens/phonometry/tree/main/docs';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	const commit = RegExp.escape(DATA_COMMIT);
+	assert.match(
+		ran.err,
+		new RegExp(
+			"FAIL /reference/conformance/: the conformance report's Dataset: https://raw\\.githubusercontent\\.com/jmrplens/phonometry/main/docs/conformance\\.json " +
+				`is of main, not of commit ${commit}, the one the page says its rows are of`,
+		),
+	);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: it hands out no file of the report \(distribution\)/);
+	assert.match(
+		ran.err,
+		new RegExp(
+			"FAIL /es/reference/conformance/: the conformance report's Dataset: https://github\\.com/jmrplens/phonometry/blob/main/scripts/conformance_report\\.py " +
+				`is of main, not of commit ${commit}`,
+		),
+	);
+	assert.match(ran.err, /FAIL \/es\/reference\/conformance\/: the conformance report's Dataset: https:\/\/github\.com\/jmrplens\/phonometry\/tree\/main\/docs is of main/);
+});
+
+test('a report page that names no commit its rows are of fails', (t) => {
+	const built = build();
+	built['en/report'].text = built['en/report'].text.replace(/ data-report-commit="[^"]*"/, '');
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/reference\/conformance\/: the conformance report's Dataset: the page names no commit its rows are of \(\[data-report-provenance\] with a data-report-commit of 40 hexadecimal digits\)/,
+	);
 });

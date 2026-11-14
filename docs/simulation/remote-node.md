@@ -429,7 +429,7 @@ a run there bit for bit to the run here. `make node-image HOST=<name>` builds
 the image on your node from your checkout, with the Dockerfile and the
 bootstrap as you changed them. After a change to an engine, `make gpu-parity`,
 run from your checkout in that image on the node's GPU, renews the GPU proof
-in `gpu-parity.lock`.
+in [`gpu-parity.lock`](../../gpu-parity.lock).
 
 ### Rendering the documentation clips on a node
 

@@ -32,7 +32,12 @@
  * trees alone too: their dates need no blob. A count of the lines of a file
  * reads the versions of that one file, newest first and in the same doubling
  * rounds, until one changed the number, and a text reads the versions of its
- * files the same way, until one changed a match. Every git call streams its output,
+ * files the same way, until one changed a match. The "Verified by" line of
+ * each guide is read the same way from the versions of the conformance
+ * report committed since the component that draws it was added, joined with
+ * the references the pages cite now (src/lib/page-references.mjs), until
+ * every page that shows one is dated or older than its own date. Every git
+ * call streams its output,
  * and any failure throws: a build that cannot read the dates stops instead
  * of publishing guesses.
  *
@@ -46,6 +51,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, realpathSync, statSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
+import { conformanceEvidence } from './conformance-evidence.mjs';
 import {
   CONTENT_DIR,
   DATE_SOURCES,
@@ -55,6 +61,8 @@ import {
   readDateSources,
   readIgnoreRevs,
 } from './date-rules.mjs';
+import { readPageReferences } from './page-references.mjs';
+import { basePath, siteUrl } from '../data/site.mjs';
 
 /**
  * Run git in `cwd` and hand its stdout to `onData` chunk by chunk.
@@ -145,9 +153,11 @@ function nulFields(onField) {
  *
  * @param {string} repo
  * @param {string[]} pathspecs
+ * @param {string} [since] A commit: only the commits HEAD reaches and it does
+ *   not are read, those made after it whatever their dates say.
  * @returns {Promise<Array<{ sha: string, date: Date, changes: Array<{ status: string, from: string, to: string, path: string }> }>>}
  */
-async function readHistory(repo, pathspecs) {
+async function readHistory(repo, pathspecs, since) {
   const commits = [];
   let meta = null; // The raw line waiting for its path.
   let expectDate = false;
@@ -181,6 +191,7 @@ async function readHistory(repo, pathspecs) {
       '--no-abbrev',
       '--no-renames',
       '-z',
+      ...(since === undefined ? [] : [`${since}..HEAD`]),
       '--',
       ...pathspecs,
     ],
@@ -478,6 +489,135 @@ async function textDate(repo, { files, pattern }) {
   return undefined;
 }
 
+/**
+ * The "Verified by" line each page would draw from one version of the
+ * conformance report: page path to the line, as the join gives it
+ * (src/lib/conformance-evidence.mjs), for every page that would show one.
+ * The join reads the report as far as it resolves: a document a version
+ * cites that no page cites now counts nowhere, and a version the join cannot
+ * read at all, one from before the checks named their documents, draws no
+ * line on any page.
+ *
+ * @param {object} report The parsed report.
+ * @param {Array<{ key: string, lang: 'en' | 'es', references: object[] }>} pages
+ * @returns {Map<string, string>}
+ */
+function verifiedLines(report, pages) {
+  const lines = new Map();
+  for (const lang of ['en', 'es']) {
+    const own = pages.filter((page) => page.lang === lang);
+    if (own.length === 0) continue;
+    const prefix = lang === 'es' ? '/es' : '';
+    let evidence;
+    try {
+      evidence = conformanceEvidence({
+        report,
+        pages: own,
+        bibliographyUrl: `${siteUrl}${basePath}${prefix}/reference/bibliography/`,
+        reportPath: `${basePath}${prefix}/reference/conformance/`,
+        lang,
+        strict: false,
+      });
+    } catch {
+      continue;
+    }
+    for (const page of own) {
+      const line = evidence.verifiedBy(page.references);
+      if (line) lines.set(page.key, JSON.stringify(line));
+    }
+  }
+  return lines;
+}
+
+/**
+ * What a version of the report says that the lines are drawn from: each
+ * check's domain and documents, and each domain's title. A commit that
+ * changed only values, verdicts or names of checks leaves this as it was,
+ * and so every line, and the join is not made again for it.
+ */
+const lineSource = (report) =>
+  JSON.stringify([
+    (report?.domains ?? []).map((domain) => [domain?.id, domain?.title]),
+    (report?.checks ?? []).map((check) => [check?.id, check?.domain, check?.reference?.documents]),
+  ]);
+
+/**
+ * The date each page's "Verified by" line last changed: the newest commit to
+ * the report whose version draws the page a different line from the version
+ * before it, the page's references being what they are now. Only the
+ * commits made after the component that draws the line was last added are
+ * read, by their place in the history and not by their dates, which a rebase
+ * can tie or put out of order: before then no page showed a line for a commit
+ * to change. A page is not walked further once no commit left to read is
+ * dated later than its own content, since none of them could date it later
+ * than it is; the walk ends when no page is left. The versions are read newest first, in rounds that each ask for
+ * twice as many commits as the last, as a count of lines reads its file.
+ *
+ * @param {{ repo: string, contentDir: string, file: string, drawnBy: string, pages: string[], dates: Map<string, Date> }} options
+ *   `pages` are the pages the count is for, as git names them, and `dates`
+ *   the date each one's own content last changed.
+ * @returns {Promise<Map<string, Date>>} The pages a commit to the report dates.
+ */
+async function verifiedLineDates({ repo, contentDir, file, drawnBy, pages, dates }) {
+  const result = new Map();
+  const added = (await readHistory(repo, [drawnBy])).find((commit) =>
+    commit.changes.some((change) => change.path === drawnBy && change.status === 'A'),
+  )?.sha;
+  if (added === undefined) return result;
+  const changes = (await readHistory(repo, [file], added)).flatMap((commit) =>
+    commit.changes.filter((change) => change.path === file).map((change) => ({ date: commit.date, change })),
+  );
+  /** The latest date of each change and the ones older than it: none of them can date a page later. */
+  const latest = changes.map(({ date }) => date);
+  for (let at = latest.length - 2; at >= 0; at -= 1) if (latest[at + 1] > latest[at]) latest[at] = latest[at + 1];
+  const newest = latest[0];
+  if (newest === undefined || !pages.some((page) => dates.get(page) < newest)) return result;
+  const wanted = new Set(pages);
+  const cited = (await readPageReferences(contentDir))
+    .map((page) => ({ ...page, key: relative(repo, page.file).split(sep).join('/') }))
+    .filter((page) => page.references.length > 0 && wanted.has(page.key));
+  if (cited.length === 0) return result;
+  const none = new Map();
+  /** Blob id to the lines its version draws; versions alike in what lines are drawn from share one reading. */
+  const lines = new Map();
+  const byLineSource = new Map();
+  const linesOf = (oid) => (NO_BLOB.test(oid) ? none : lines.get(oid));
+  const pending = new Set(cited.map((page) => page.key).filter((key) => dates.has(key)));
+  for (let next = 0, budget = 1; next < changes.length && pending.size > 0; next += budget, budget *= 2) {
+    const batch = changes.slice(next, next + budget);
+    for (const key of pending) if (dates.get(key) >= latest[next]) pending.delete(key);
+    if (pending.size === 0) break;
+    const oids = [...new Set(batch.flatMap(({ change }) => [change.from, change.to]))].filter(
+      (oid) => !NO_BLOB.test(oid) && !lines.has(oid),
+    );
+    if (oids.length > 0) {
+      for (const [oid, text] of await readBlobs(repo, oids)) {
+        let report;
+        try {
+          report = JSON.parse(text);
+        } catch {
+          lines.set(oid, none);
+          continue;
+        }
+        const source = lineSource(report);
+        if (!byLineSource.has(source)) byLineSource.set(source, verifiedLines(report, cited));
+        lines.set(oid, byLineSource.get(source));
+      }
+    }
+    for (const [offset, { date, change }] of batch.entries()) {
+      for (const key of pending) {
+        if (dates.get(key) >= latest[next + offset]) pending.delete(key);
+        else if (linesOf(change.from).get(key) !== linesOf(change.to).get(key)) {
+          result.set(key, date);
+          pending.delete(key);
+        }
+      }
+      if (pending.size === 0) break;
+    }
+  }
+  return result;
+}
+
 /** Whether a path from site/date-sources.json names `path`: the file, or a directory holding it. */
 const names = (spec, path) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec);
 
@@ -489,11 +629,12 @@ const later = (a, b) => (a === undefined || (b !== undefined && b > a) ? b : a);
  * change of what it is built from, when that is later than its own: a
  * source, a count or a text.
  *
- * @param {{ repo: string, pathspec: string, pages: string[], dates: Map<string, Date>, entries: ReturnType<typeof readDateSources> }} options
- * @returns {Promise<{ sourced: number, raised: number }>} How many pages have
- *   sources, and how many of them a source dates.
+ * @param {{ repo: string, pathspec: string, contentDir: string, pages: string[], dates: Map<string, Date>, entries: ReturnType<typeof readDateSources> }} options
+ * @returns {Promise<{ sourced: number, raised: number, commits: Map<string, { sha: string, date: Date }> }>}
+ *   How many pages have sources, how many of them a source dates, and the
+ *   commit that last changed each source outside the content tree.
  */
-async function applySources({ repo, pathspec, pages, dates, entries }) {
+async function applySources({ repo, pathspec, contentDir, pages, dates, entries }) {
   const content = `${pathspec}/`;
   const stale = (what) =>
     new Error(`${DATE_SOURCES} names ${what}, which HEAD does not have: a file moved or renamed?`);
@@ -518,15 +659,21 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
   }
 
   // Any other source is data: every commit that changed it counts, and its
-  // history is read from trees alone.
+  // history is read from trees alone. The commit is kept with its date: the
+  // conformance report names the one that last changed the data it renders.
   const files = sources.filter((spec) => !spec.startsWith(content));
+  const commits = new Map();
   if (files.length > 0) {
     const tracked = await filesAtHead(repo, files);
     const missing = files.find((spec) => !tracked.some((path) => names(spec, path)));
     if (missing !== undefined) throw stale(`the source ${missing}`);
     for (const commit of await readHistory(repo, files)) {
       for (const { path } of commit.changes) {
-        for (const spec of files) if (!newest.has(spec) && names(spec, path)) newest.set(spec, commit.date);
+        for (const spec of files) {
+          if (newest.has(spec) || !names(spec, path)) continue;
+          newest.set(spec, commit.date);
+          commits.set(spec, { sha: commit.sha, date: commit.date });
+        }
       }
       if (newest.size === sources.length) break;
     }
@@ -538,7 +685,25 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
   const sets = new Map(
     entries.flatMap((entry) => Object.values(entry.counts)).map((set) => [JSON.stringify(set), set]),
   );
+  /** A count each page has of its own: set as JSON to the date of each page it dates. */
+  const ownCounts = new Map();
   for (const [key, set] of sets) {
+    if (set.report !== undefined) {
+      const tracked = await filesAtHead(repo, [set.report, set.drawnBy]);
+      for (const path of [set.report, set.drawnBy]) if (!tracked.includes(path)) throw stale(`the counted file ${path}`);
+      const counted = pages.filter((page) =>
+        entries.some(
+          (entry) =>
+            Object.values(entry.counts).some((other) => JSON.stringify(other) === key) &&
+            entry.pages.some((spec) => names(spec, page)),
+        ),
+      );
+      ownCounts.set(
+        key,
+        await verifiedLineDates({ repo, contentDir, file: set.report, drawnBy: set.drawnBy, pages: counted, dates: walked }),
+      );
+      continue;
+    }
     if (!Array.isArray(set)) {
       if (!(await filesAtHead(repo, [set.file])).includes(set.file)) throw stale(`the counted file ${set.file}`);
       newest.set(key, await lineCountDate(repo, set));
@@ -567,20 +732,23 @@ async function applySources({ repo, pathspec, pages, dates, entries }) {
   const sourced = new Set();
   const raised = new Set();
   for (const entry of entries) {
-    const when = [
+    const shared = [
       ...entry.sources.map((spec) => newest.get(spec)),
       ...Object.values(entry.counts).map((set) => newest.get(JSON.stringify(set))),
       ...Object.values(entry.texts).map((set) => newest.get(JSON.stringify(set))),
     ].reduce(later, undefined);
     for (const page of pages.filter((path) => entry.pages.some((spec) => names(spec, path)))) {
       sourced.add(page);
+      const when = Object.values(entry.counts)
+        .map((set) => ownCounts.get(JSON.stringify(set))?.get(page))
+        .reduce(later, shared);
       if (when !== undefined && when > dates.get(page)) {
         dates.set(page, when);
         raised.add(page);
       }
     }
   }
-  return { sourced: sourced.size, raised: raised.size };
+  return { sourced: sourced.size, raised: raised.size, commits };
 }
 
 /** Memoised per site root: the build asks once per page. */
@@ -620,13 +788,16 @@ function realPath(path) {
  *   build runs from it.
  * @returns {Promise<{
  *   dateOf: (filePath: string) => Date,
+ *   sourceCommit: (source: string) => { sha: string, date: Date },
  *   pages: number, rounds: number, blobs: number, sourced: number, raised: number,
  * }>} `dateOf` takes a content file's path, absolute or relative to the site
  *   root, and returns the date its content last changed. A file git has never
  *   seen (a page being written, not committed yet) is dated by the file
  *   itself; a committed one without a date, or a path that is no page, throws.
- *   `sourced` counts the pages date-sources.json lists and `raised` those of
- *   them a source dates.
+ *   `sourceCommit` takes a source date-sources.json names outside the content
+ *   tree, as it names it, and returns the commit that last changed it; any
+ *   other path throws. `sourced` counts the pages date-sources.json lists and
+ *   `raised` those of them a source dates.
  */
 export function loadContentDates({ siteRoot = process.cwd() } = {}) {
   const root = realPath(resolve(siteRoot));
@@ -672,7 +843,7 @@ async function readContentDates(siteRoot) {
   const committed = new Set(pages);
 
   const { dates, rounds, blobs } = await resolveDates({ repo, pathspec, ignore, pages });
-  const { sourced, raised } = await applySources({ repo, pathspec, pages, dates, entries });
+  const { sourced, raised, commits } = await applySources({ repo, pathspec, contentDir, pages, dates, entries });
 
   return {
     pages: dates.size,
@@ -680,6 +851,14 @@ async function readContentDates(siteRoot) {
     blobs,
     sourced,
     raised,
+    sourceCommit(source) {
+      const commit = commits.get(source);
+      if (commit) return commit;
+      throw new Error(
+        `content dates: ${source} is no source ${DATE_SOURCES} names outside the content tree, so no commit of it ` +
+          'was read; list it as a source of the page that shows it.',
+      );
+    },
     dateOf(filePath) {
       const absolute = isAbsolute(filePath) ? realPath(filePath) : join(siteRoot, filePath);
       const key = relative(repo, absolute).split(sep).join('/');

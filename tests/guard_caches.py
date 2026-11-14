@@ -9,15 +9,22 @@ together, on one worker (``xdist_group``, rule T19 of
 ``docs/contributing/tests.md``), and once the worker leaves their module nothing
 asks again: a module-scoped fixture of the module calls :func:`forget` there, so
 that the next guard's caches do not pile up on top of them for the rest of the
-session.
+session. The ``fresh_caches`` fixture of ``tests/conftest.py`` calls it on both
+sides of a test that points a module's globals at a tree of its own, so that
+the test reads no answer kept from another tree and leaves none of its own.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from types import ModuleType
+
+#: What the ``fresh_caches`` fixture hands a test: ``(module, NAME=value, ...)``
+#: points those globals of the module elsewhere for the test.
+FreshCaches = Callable[..., None]
 
 
 def forget(*modules: ModuleType) -> None:

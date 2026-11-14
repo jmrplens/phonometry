@@ -8,8 +8,12 @@
 // it: the search still finds a row by the citation as the source writes it,
 // a citation of several documents pasted whole included, the domain and
 // failing filters still narrow the tables, a link to one row still opens the
-// section that holds it, and the marks are still drawn, each section heading
-// keeping Starlight's disclosure chevron beside its own.
+// section that holds it, as does a link to the section itself from a guide's
+// "Verified by" line, and the marks are still drawn, each section heading
+// keeping Starlight's disclosure chevron beside its own. That line, under the
+// title of each guide whose standards the report checks, is read as a reader
+// reads it: a sentence, with a space before each domain it links and counts
+// that add up.
 //
 // The errata registry became an index and one page per document family. A
 // link written against the old single page, `/reference/errata/#<entry>`,
@@ -292,6 +296,74 @@ for (const path of ['/reference/conformance/', '/es/reference/conformance/']) {
 		});
 		await page.close();
 	}
+
+	// A link to a whole domain, which is what a guide's "Verified by" line
+	// gives (src/components/VerifiedBy.astro), opens that domain's section and
+	// brings it into view: the section is the element the fragment names, and
+	// it starts closed when all of its checks pass.
+	{
+		const probe = await open(path);
+		const domain = await probe.evaluate(
+			() =>
+				[...document.querySelectorAll('details[data-domain-section]')].find((section) => !section.open)?.dataset
+					.domainSection ?? null,
+		);
+		await probe.close();
+		const page = await open(`${path}#${domain}`);
+		const got = await page.evaluate((id) => {
+			const section = document.getElementById(id);
+			const box = section?.getBoundingClientRect();
+			return {
+				named: section?.matches('details[data-domain-section]') ?? false,
+				open: !!section?.open,
+				onScreen: !!box && box.top < innerHeight && box.bottom > 0,
+			};
+		}, domain);
+		expect(`${path}: a link to a closed domain section opens it and shows it`, got, {
+			named: true,
+			open: true,
+			onScreen: true,
+		});
+		await page.close();
+	}
+}
+
+// --- The line under a guide's title ------------------------------------------
+
+// The "Verified by" line (src/components/VerifiedBy.astro) is a sentence with
+// its domains as links in it. A template that leaves no text between an
+// expression and the element after it glues the two ("6 inHearing
+// threshold"), which no check of the markup sees, so the line is read here as
+// a reader reads it: a space before each link, the count of each domain in
+// front of it, and the counts adding up to the total the line opens with. The
+// pages are one guide in one domain and one in several, in both languages.
+for (const path of [
+	'/perception/hearing/hearing-threshold/',
+	'/es/perception/hearing/hearing-threshold/',
+	'/signals/metrology/compliance-verification/',
+	'/es/signals/metrology/compliance-verification/',
+]) {
+	const page = await open(path);
+	const got = await page.evaluate(() => {
+		const line = document.querySelector('[data-verified-by]');
+		if (!line) return { line: false };
+		const links = [...line.querySelectorAll('a')];
+		const before = links.map((link) => link.previousSibling?.textContent ?? '');
+		const counts = before.map((text) => Number(/(\d+) \S+\s$/.exec(text)?.[1] ?? Number.NaN));
+		return {
+			line: true,
+			glued: links.filter((_, i) => !/\s$/.test(before[i])).map((link) => link.textContent),
+			counted: counts.every(Number.isInteger),
+			adds: counts.reduce((sum, n) => sum + n, 0) === Number(line.getAttribute('data-verified-by')),
+		};
+	});
+	expect(`${path}: the "Verified by" line keeps a space before each domain, counts it, and adds up`, got, {
+		line: true,
+		glued: [],
+		counted: true,
+		adds: true,
+	});
+	await page.close();
 }
 
 // --- The errata registry -----------------------------------------------------

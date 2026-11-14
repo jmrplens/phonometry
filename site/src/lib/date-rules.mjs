@@ -31,9 +31,15 @@
  * of a directory or a registry, moves only with a commit that changed it: a
  * count of files with one that changed how many there are, a count of the
  * lines of a file that match a pattern with one that changed how many do.
- * So does a text, the matches of a pattern in some files, which is all the
- * index of fiches shows of the guides: a commit that changed one of them
- * moves the page, and one that changed the rest of a guide does not.
+ * One count is a page's own: the "Verified by" line under a guide's title
+ * (src/components/VerifiedBy.astro) is drawn from the conformance report and
+ * the page's references, so a commit to the report moves a page only when it
+ * changed the line that page shows, and leaves every other page where it is.
+ * A commit to the report from before the component that draws the line was
+ * added changed no line anyone saw, and moves no page.
+ * A text, the matches of a pattern in some files, which is all the index of
+ * fiches shows of the guides, moves with a commit that changed one of them,
+ * and not with one that changed the rest of a guide.
  * The build fails on a page or a source that HEAD does not have, and
  * site/scripts/content-dates.test.mjs fails on a page that reaches data
  * without being listed, and on an entry that leaves out a module its pages
@@ -162,16 +168,27 @@ export function readIgnoreRevs(file) {
  */
 
 /**
+ * The "Verified by" line each page draws from a conformance report: how many
+ * of its checks are based on the works the page cites, and in which domains
+ * (src/lib/conformance-evidence.mjs), drawn by the component `drawnBy`. A
+ * count of each page on its own.
+ *
+ * @typedef {{ report: string, drawnBy: string }} VerifiedCount
+ */
+
+/**
  * The entries of `site/date-sources.json`: each names pages (`pages`), the
  * files they are built from (`sources`), the numbers they show of other
  * files (`counts`, under the name of each number) and the text they show of
  * other files (`texts`, under the name of each text). A count is either a
- * list of git pathspecs, whose number is how many files they match, or
+ * list of git pathspecs, whose number is how many files they match,
  * `{ "file": path, "lines": pattern }`, whose number is how many lines of
- * that file the regular expression matches, read with the `m` flag. A text
- * is `{ "files": pathspecs, "pattern": pattern }`: every match of the
- * regular expression, read with the `m` flag, in each file the pathspecs
- * match. Paths
+ * that file the regular expression matches, read with the `m` flag, or
+ * `{ "report": path, "drawnBy": path }`, the "Verified by" line each page
+ * draws from that conformance report, which is each page's own, since the
+ * component `drawnBy` was added. A text is `{ "files": pathspecs,
+ * "pattern": pattern }`: every match of the regular expression, read with
+ * the `m` flag, in each file the pathspecs match. Paths
  * are from the repository root, as git names them, and one ending in `/` is
  * a directory. A pathspec of a count that holds `{topic}` stands for one
  * per topic, so a count over the topic directories follows the navigation
@@ -182,7 +199,7 @@ export function readIgnoreRevs(file) {
  * @param {string} file
  * @param {{ topics?: readonly string[] }} [options] What `{topic}` stands
  *   for: the topics the navigation teaches unless a caller says otherwise.
- * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[] | LineCount>, texts: Record<string, MatchedText> }>}
+ * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[] | LineCount | VerifiedCount>, texts: Record<string, MatchedText> }>}
  */
 export function readDateSources(file, { topics = domainIds } = {}) {
   if (!existsSync(file)) return [];
@@ -246,9 +263,24 @@ export function readDateSources(file, { topics = domainIds } = {}) {
       if (path.endsWith('/')) throw new Error(`${where}: counts.${name}.file names a file, not ${JSON.stringify(path)}.`);
       return { file: path, lines: pattern(set.lines, `counts.${name}.lines`, 'the lines it counts') };
     };
+    const verifiedCount = (name, set) => {
+      const unknownKeys = Object.keys(set).filter((key) => !['report', 'drawnBy'].includes(key));
+      if (unknownKeys.length > 0) {
+        throw new Error(`${where}: unknown key(s) ${unknownKeys.join(', ')} in counts.${name}.`);
+      }
+      const [report, drawnBy] = ['report', 'drawnBy'].map((key) => {
+        if (set[key] === undefined) throw new Error(`${where}: counts.${name}.${key} is missing.`);
+        const [path] = paths([set[key]], `counts.${name}.${key}`);
+        if (path.endsWith('/')) throw new Error(`${where}: counts.${name}.${key} names a file, not ${JSON.stringify(path)}.`);
+        return path;
+      });
+      return { report, drawnBy };
+    };
     const counts = Object.fromEntries(
       Object.entries(counted).map(([name, set]) => {
-        if (typeof set === 'object' && set !== null && !Array.isArray(set)) return [name, lineCount(name, set)];
+        if (typeof set === 'object' && set !== null && !Array.isArray(set)) {
+          return [name, Object.hasOwn(set, 'report') ? verifiedCount(name, set) : lineCount(name, set)];
+        }
         const specs = paths(set, `counts.${name}`, { magic: true }).flatMap((spec) => {
           if (!spec.includes(TOPIC)) return [spec];
           if (topics.length === 0) {

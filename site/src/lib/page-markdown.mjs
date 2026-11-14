@@ -45,3 +45,12 @@ export const hasMarkdownCopy = (route) => route !== '' && route !== 'es';
 
 /** The address of the copy for a route, under the site's base path. */
 export const markdownCopyPath = (route, base = '') => `${base}/${route}/index.md`;
+
+/**
+ * The attribute the element that states a page's conformance checks carries
+ * (the "Verified by N conformance checks" line under the title,
+ * src/components/VerifiedBy.astro). A reader of the built page, a check or a
+ * copy of the page that has to say the same, finds the line by it rather than
+ * by its words, which are the page's language.
+ */
+export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';

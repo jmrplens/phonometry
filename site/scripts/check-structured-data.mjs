@@ -74,10 +74,15 @@
 // giving 2020 for a research role the node starts in 2019, with nothing to say
 // so.
 //
+// The conformance report's Dataset is the one place the check reads more than
+// the build: it joins docs/conformance.json with the pages' frontmatter
+// (src/lib/conformance-evidence.mjs) to know which works the report's checks
+// are based on, and holds the Dataset of each language to exactly those.
+//
 // Usage: node scripts/check-structured-data.mjs [dist-directory] [content-directory]
-//          [--glossary=<glossary.mjs>]
-//        (the content tree and the glossary entries the build was made from;
-//        by default the repository's)
+//          [--report=<conformance.json>] [--glossary=<glossary.mjs>]
+//        (the content tree, the report and the glossary entries the build
+//        was made from; by default the repository's)
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
@@ -93,21 +98,30 @@ import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
+import { referenceId } from '../src/lib/citations.mjs';
+import { SAME_WORKS, conformanceEvidence, governingDocuments } from '../src/lib/conformance-evidence.mjs';
+import { readPageReferences } from '../src/lib/page-references.mjs';
 import { requirementDefects } from './shared/requirement-defects.mjs';
 
 import { decode, markupOf, markupText } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
+const args = process.argv.slice(2);
+/** The value of `--name=value`, if given. */
+const option = (name) => args.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+const positional = args.filter((arg) => !arg.startsWith('--'));
 // An explicit directory is for reproducing a defect against a build kept aside;
 // with none, the check reads the build that is there.
-const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist');
-// The pages whose frontmatter says what an errata page corrects; another
-// directory is for the tests of this check, which write pages of their own.
-const CONTENT = process.argv[3] ? resolve(process.argv[3]) : join(here, '..', 'src', 'content', 'docs');
+const DIST = positional[0] ? resolve(positional[0]) : join(here, '..', 'dist');
+// The pages whose frontmatter says what an errata page corrects and what
+// each guide cites, and the conformance report: another directory and another
+// report are for the tests of this check, which write pages of their own.
+const CONTENT = positional[1] ? resolve(positional[1]) : join(here, '..', 'src', 'content', 'docs');
+const REPORT_FILE = option('report') ? resolve(option('report')) : join(here, '..', '..', 'docs', 'conformance.json');
 // The glossary entries the pages are held to, a module that exports `glossary`
 // as src/data/glossary.mjs does; another module is for the tests of this
 // check, which hold the pages to entries the site's own do not write.
-const GLOSSARY_MODULE = process.argv.find((arg) => arg.startsWith('--glossary='))?.slice('--glossary='.length);
+const GLOSSARY_MODULE = option('glossary');
 const GLOSSARY_GROUPS = GLOSSARY_MODULE ? (await import(pathToFileURL(resolve(GLOSSARY_MODULE)).href)).glossary : glossary;
 const ORIGIN = `${siteUrl}${basePath}`;
 
@@ -967,6 +981,75 @@ function errataContent(lang) {
 }
 const errataPages = { en: errataContent('en'), es: errataContent('es') };
 
+/** The route of the conformance report, without its locale. */
+const REPORT = 'reference/conformance';
+
+/**
+ * The library the committed report was generated for: what the report's
+ * Dataset has to give as its `version`. Read from the artefact, not from the
+ * code that writes the Dataset.
+ */
+const CONFORMANCE = JSON.parse(readFileSync(REPORT_FILE, 'utf8'));
+const REPORT_LIBRARY = CONFORMANCE.library;
+
+/**
+ * The day the report page prints as the one its rows last changed: the
+ * `<time datetime>` of its `[data-report-provenance]` line, which
+ * Conformance.astro writes from the last commit of docs/conformance.json.
+ */
+const provenanceLine = (html) => /<p\b[^>]*\bdata-report-provenance\b[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1];
+const provenanceDay = (html) => {
+	const line = provenanceLine(html);
+	return line === undefined ? undefined : /<time\b[^>]*\bdatetime="(\d{4}-\d{2}-\d{2})"/.exec(line)?.[1];
+};
+
+/** The commit the report page names as the one its rows are of: the `data-report-commit` of the same line. */
+const provenanceCommit = (html) => {
+	const line = provenanceLine(html);
+	return line === undefined ? undefined : /\bdata-report-commit="([0-9a-f]{40})"/.exec(line)?.[1];
+};
+
+/**
+ * Every address into the repository a node holds, at any depth, with the ref
+ * it is read at: the branch, tag or commit after `raw.githubusercontent.com/
+ * <owner>/<repo>/` or after `github.com/<owner>/<repo>/{blob,tree,raw,commit}/`.
+ */
+const REPOSITORY_ADDRESS =
+	/^https:\/\/(?:raw\.githubusercontent\.com\/jmrplens\/phonometry|github\.com\/jmrplens\/phonometry\/(?:blob|tree|raw|commit))\/([^/?#]+)/;
+const repositoryAddresses = (node, found = []) => {
+	if (typeof node === 'string') {
+		const ref = REPOSITORY_ADDRESS.exec(node)?.[1];
+		if (ref !== undefined) found.push([node, ref]);
+	} else if (Array.isArray(node)) {
+		for (const item of node) repositoryAddresses(item, found);
+	} else if (node && typeof node === 'object') {
+		for (const value of Object.values(node)) repositoryAddresses(value, found);
+	}
+	return found;
+};
+
+/** Every DOI a node gives as its `identifier`, whichever shape it uses. */
+const doisOf = (node) =>
+	[node?.identifier ?? []]
+		.flat()
+		.map((id) => (typeof id === 'object' ? id?.value : id))
+		.filter((value) => typeof value === 'string' && /^10\.\S+$/.test(value));
+
+/** The texts of the report's Dataset a reader of its language reads. */
+const datasetTexts = (dataset) => ({
+	name: dataset.name,
+	description: dataset.description,
+	measurementTechnique: dataset.measurementTechnique,
+	...Object.fromEntries(
+		[dataset.variableMeasured ?? []]
+			.flat()
+			.flatMap((variable, i) => [
+				[`variableMeasured[${i}].name`, variable?.name],
+				[`variableMeasured[${i}].description`, variable?.description],
+			]),
+	),
+});
+
 const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
@@ -994,6 +1077,7 @@ const seen = {
 	history: 0,
 	languages: 0,
 	definedTerms: 0,
+	reports: 0,
 };
 
 /** The About pages found in each language, and how many of them are typed AboutPage. */
@@ -1429,6 +1513,8 @@ const errataSeen = {
 const errataWithoutWorks = [];
 /** Errata family pages whose `about` names other works than their `corrects`, with what differs. */
 const errataMisnamed = [];
+/** The Dataset each language's conformance report is about, for the check across the two. */
+const reportDatasets = new Map();
 
 for (const file of files) {
 	const html = readFileSync(join(DIST, file), 'utf8');
@@ -1891,6 +1977,88 @@ for (const file of files) {
 			fail(`${route}: the DataCatalog claims ${DATASET_CLAIMS.filter((field) => article[field] !== undefined).join(', ')}`);
 		}
 		listedDatasets[lang] = { route, listed };
+	}
+
+	// The conformance report is a Dataset, and the article that renders it is
+	// about it. It used to be a block of its own in the page's frontmatter, in
+	// English on both pages, with no version and no date, the software's DOI as
+	// its identifier and the script that writes it as the one thing it was
+	// based on. Now it is the article's main entity, says which library it was
+	// generated for and the day its data last changed, which can be no later
+	// than the page's own, and names the standards its values are quoted from,
+	// each as a named work, so its licence is read as covering the report.
+	if (slug === REPORT) {
+		seen.reports += 1;
+		const dataset = article.mainEntity;
+		const problems = [];
+		if (!dataset || typeof dataset !== 'object' || !typesOf(dataset).includes('Dataset')) {
+			problems.push('the article has no Dataset as its mainEntity');
+		} else {
+			if (dataset['@id'] !== `${canonical}#dataset`) problems.push(`its @id is ${dataset['@id']}, not ${canonical}#dataset`);
+			if (dataset.inLanguage !== lang) problems.push(`its inLanguage is ${JSON.stringify(dataset.inLanguage)}, not ${lang}`);
+			if (dataset.version !== REPORT_LIBRARY) {
+				problems.push(`its version is ${JSON.stringify(dataset.version)}, and docs/conformance.json was generated for ${REPORT_LIBRARY}`);
+			}
+			// Dated by its data: the day the page prints as the one its rows
+			// last changed, not the page's own date, which a change to how the
+			// rows are drawn or to the page's text moves as well.
+			const dataDay = provenanceDay(html);
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dataset.dateModified ?? ''))) {
+				problems.push(`its dateModified is ${JSON.stringify(dataset.dateModified)}, not a day`);
+			} else {
+				if (article.dateModified && dataset.dateModified > article.dateModified) {
+					problems.push(`its data changed on ${dataset.dateModified}, after the page's own last change, ${article.dateModified}`);
+				}
+				if (dataDay !== undefined && dataset.dateModified !== dataDay) {
+					problems.push(`its dateModified is ${dataset.dateModified}, and the page says its rows last changed on ${dataDay}`);
+				}
+			}
+			if (dataDay === undefined) {
+				problems.push('the page prints no day its rows last changed ([data-report-provenance] with a <time datetime>)');
+			}
+			// Of the commit its rows are of: the files it hands out and the
+			// script it names are read at the commit the banner prints, as the
+			// version and the date are, and not at a branch that moves on
+			// after the page is built, which would hand out a newer file than
+			// the one the record describes with nothing in it to say so.
+			const commit = provenanceCommit(html);
+			if (commit === undefined) {
+				problems.push('the page names no commit its rows are of ([data-report-provenance] with a data-report-commit of 40 hexadecimal digits)');
+			}
+			const downloads = [dataset.distribution ?? []].flat();
+			if (downloads.length === 0) problems.push('it hands out no file of the report (distribution)');
+			for (const download of downloads) {
+				if (!REPOSITORY_ADDRESS.test(String(download?.contentUrl ?? ''))) {
+					problems.push(`it hands out ${JSON.stringify(download?.contentUrl)}, which is no file of the repository read at a commit`);
+				}
+			}
+			if (commit !== undefined) {
+				for (const [address, ref] of repositoryAddresses(dataset)) {
+					if (ref !== commit) problems.push(`${address} is of ${ref}, not of commit ${commit}, the one the page says its rows are of`);
+				}
+			}
+			const software = nodeOfType(nodes, 'SoftwareApplication');
+			const borrowed = doisOf(dataset).filter((doi) => doisOf(software).includes(doi));
+			if (borrowed.length > 0) problems.push(`it gives the software's DOI ${borrowed.join(', ')} as its own identifier`);
+			const basis = [dataset.isBasedOn ?? []].flat().filter((item) => typeof item === 'object');
+			const works = basis.filter((item) => isCitedWork(item?.['@id']) && isNamed(item));
+			if (works.length === 0) problems.push('it names no standard it is based on');
+			const unnamed = basis.length - works.length;
+			if (unnamed > 0) problems.push(`${unnamed} of what it is based on is not a work the bibliography defines, named`);
+			const named = new Set(basis.map((item) => item?.['@id']).filter(isCitedWork));
+			reportDatasets.set(lang, { route, dataset, works: works.length, named, problems });
+		}
+		// The block of its own the page used to carry, kept beside the main
+		// entity, would describe the report twice, the second time with what the
+		// first one no longer says.
+		const loose = nodes.filter((node) => typesOf(node).includes('Dataset')).length;
+		if (loose > 0) {
+			problems.push(
+				`${loose === 1 ? 'a Dataset' : `${loose} Datasets`} of its own beside the article, which says what the report is a second time`,
+			);
+		}
+		// Reported once the works the checks are based on are known, below.
+		if (!reportDatasets.has(lang)) for (const problem of problems) fail(`${route}: the conformance report's Dataset: ${problem}`);
 	}
 
 	// The bibliography page defines every work in full, and names each
@@ -2486,6 +2654,106 @@ if (
 			`standard and clause write and keeps the same of its entry, and its own ` +
 			`guide's article node, which all ${glossarySubjects.length} resolve to in this build`,
 	);
+}
+
+// The report's Dataset in the two languages: the Spanish page used to name
+// it, describe its technique and its eight columns in English. Every text a
+// reader reads has to be the page's own, so none is the same in both.
+{
+	const en = reportDatasets.get('en');
+	const es = reportDatasets.get('es');
+	// What each language's Dataset has to be based on: the works the join of
+	// the report with that language's pages resolves the checks' standards
+	// to, the join the build itself makes, read here from the report and the
+	// frontmatter the build was made from, not from what the build wrote.
+	let governing = new Map();
+	if (reportDatasets.size > 0) {
+		try {
+			const pages = await readPageReferences(CONTENT);
+			// The pairings the report's documents need; whether every entry is
+			// still needed is the build's to say, and it does.
+			const documents = governingDocuments(CONFORMANCE);
+			const sameWorks = SAME_WORKS.filter((entry) => documents.has(entry.document));
+			governing = new Map(
+				[...reportDatasets.keys()].map((lang) => {
+					const bibliography = `${ORIGIN}${lang === 'es' ? '/es' : ''}/reference/bibliography/`;
+					const evidence = conformanceEvidence({
+						report: CONFORMANCE,
+						pages: pages.filter((page) => page.lang === lang),
+						bibliographyUrl: bibliography,
+						reportPath: `${basePath}/${REPORT}/`,
+						sameWorks,
+						lang,
+					});
+					return [lang, evidence.governing.map((ref) => referenceId(ref, bibliography))];
+				}),
+			);
+		} catch (error) {
+			fail(`the works the conformance report's checks are based on cannot be read from ${CONTENT}: ${error.message}`);
+		}
+	}
+	const fragments = (ids) => ids.map((id) => id.slice(id.indexOf('#'))).join(', ');
+	for (const [lang, { route, named, problems }] of reportDatasets) {
+		const due = governing.get(lang);
+		if (due) {
+			const missing = due.filter((id) => !named.has(id));
+			const extra = [...named].filter((id) => !due.includes(id));
+			if (missing.length > 0) {
+				problems.push(`it leaves out ${missing.length} of the ${due.length} works its checks are based on: ${fragments(missing.slice(0, 8))}${missing.length > 8 ? ', ...' : ''}`);
+			}
+			if (extra.length > 0) {
+				problems.push(`it names ${extra.length} work${extra.length === 1 ? '' : 's'} no check is based on: ${fragments(extra.slice(0, 8))}${extra.length > 8 ? ', ...' : ''}`);
+			}
+		}
+		for (const problem of problems) fail(`${route}: the conformance report's Dataset: ${problem}`);
+	}
+	if (seen.reports === 0) {
+		fail(`no page at /${REPORT}/ was found: build the site first`);
+	} else if (en && es) {
+		const english = datasetTexts(en.dataset);
+		const spanish = datasetTexts(es.dataset);
+		// Both pages are held to every text either one writes, each a text
+		// with words in it: a text one page leaves out, or leaves empty, is
+		// not a translation of the other's, and a column one page describes
+		// and the other does not is a column the other leaves out.
+		const written = (value) => typeof value === 'string' && value.trim() !== '';
+		const keys = [...new Set([...Object.keys(english), ...Object.keys(spanish)])];
+		const unwritten = [];
+		for (const [{ route }, texts] of [
+			[en, english],
+			[es, spanish],
+		]) {
+			const left = keys.filter((key) => !written(texts[key]));
+			if (left.length > 0) {
+				unwritten.push(route);
+				fail(`${route}: the conformance report's Dataset writes no text for ${left.join(', ')}`);
+			}
+		}
+		const columns = (dataset) => [dataset.variableMeasured ?? []].flat().length;
+		const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+		const described = columns(en.dataset) === columns(es.dataset);
+		if (!described) {
+			fail(
+				`the conformance report's Dataset describes ${plural(columns(en.dataset), 'column')} in English ` +
+					`and ${columns(es.dataset)} in Spanish`,
+			);
+		}
+		const same = keys.filter((key) => written(english[key]) && english[key] === spanish[key]);
+		// The two pages render one report, so they name one set of works,
+		// each in its own language's bibliography.
+		const counted = en.named.size === es.named.size;
+		if (!counted) fail(`the conformance report's Dataset names ${plural(en.named.size, 'work')} in English and ${es.named.size} in Spanish`);
+		if (same.length > 0) {
+			fail(`${es.route}: the conformance report's Dataset says in English what the English page says: ${same.join(', ')}`);
+		} else if (counted && described && unwritten.length === 0 && en.problems.length === 0 && es.problems.length === 0) {
+			ok(
+				`the conformance report's Dataset is the main entity of both report pages, versioned ${REPORT_LIBRARY}, ` +
+					`dated by the day its rows last changed, based on the ${en.named.size} work${en.named.size === 1 ? '' : 's'} ` +
+					`the standards of its checks resolve to, named in each language, and written in each page's language ` +
+					`(${keys.length} texts)`,
+			);
+		}
+	}
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);

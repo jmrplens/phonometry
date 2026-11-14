@@ -70,6 +70,12 @@ TOLERATES_NO_CHECKOUT: dict[str, str] = {
         "check=False: a tree with no .git holds none, and the empty answer "
         "git's refusal gives is the right one"
     ),
+    "scripts/generate_llms.py::_repository_files": (
+        "lists the files git keeps, so that a link of the mirror names one of "
+        "them, with check=False: a tree with no .git holds the repository's "
+        "files and nothing git ignores, and the refusal sends the check to "
+        "the files on disk"
+    ),
 }
 
 #: The files whose frames start a process for someone else: the standard

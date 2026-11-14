@@ -46,6 +46,9 @@ import type { z } from 'astro/zod';
 import type { conformanceSchema } from '../content.config';
 
 import { markOf, markStyle } from '../lib/verdict-marks.mjs';
+import { loadContentDates } from '../lib/content-dates.mjs';
+import { isoDay } from '../lib/date-rules.mjs';
+import { releases } from '../data/releases.mjs';
 
 interface Props {
 	/** Locale of the page the report is rendered on. */
@@ -72,6 +75,25 @@ if (!entry) {
 }
 const report: ConformanceReport = entry.data;
 const { counts, domains, checks, panels } = report;
+
+/**
+ * Which report this is. The artefact names the library it was generated for
+ * and nothing more, on purpose: a commit it wrote into itself would always be
+ * the one before. The commit that last changed it is read from the history
+ * at build time, through the same one reading of the history that dates
+ * every page (src/lib/content-dates.mjs), so the line names the exact code
+ * the rows came from and the day they last changed.
+ */
+const generated = (await loadContentDates()).sourceCommit('docs/conformance.json');
+const generatedDay = isoDay(generated.date);
+const commitUrl = `https://github.com/jmrplens/phonometry/commit/${generated.sha}`;
+const longDate = (day: string) =>
+	new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+		timeZone: 'UTC',
+	}).format(new Date(`${day}T00:00:00Z`));
 
 /**
  * How much of its published tolerance a check consumes, as a fraction of one.
@@ -220,6 +242,11 @@ const t =
 					`${n} ${n === 1 ? 'designación normativa' : 'designaciones normativas'}`,
 				bannerSources: (n: number) =>
 					`${n} ${n === 1 ? 'fuente publicada adicional' : 'fuentes publicadas adicionales'}`,
+				generatedFor: 'Generado para phonometry',
+				generatedCommit: '; sus filas cambiaron por última vez en el commit',
+				generatedOn: ', el',
+				archived: 'Informes archivados con cada versión:',
+				archivedFor: (version: string) => `phonometry ${version}`,
 				legend: 'Marcas de veredicto',
 				legendNote:
 					'Cada marca acompaña a la palabra que tiene al lado, nunca la sustituye, y las siluetas se distinguen tanto como los colores, así que quien no separe los tonos las sigue diferenciando.',
@@ -273,6 +300,11 @@ const t =
 					`${n} ${n === 1 ? 'normative designation' : 'normative designations'}`,
 				bannerSources: (n: number) =>
 					`${n} ${n === 1 ? 'further published source' : 'further published sources'}`,
+				generatedFor: 'Generated for phonometry',
+				generatedCommit: '; its rows last changed in commit',
+				generatedOn: ', on',
+				archived: 'Reports archived with each release:',
+				archivedFor: (version: string) => `phonometry ${version}`,
 				legend: 'Verdict marks',
 				legendNote:
 					'Each mark accompanies the word beside it and never replaces it, and the silhouettes differ as much as the colours do, so a reader who cannot separate the hues can still tell them apart.',
@@ -390,6 +422,28 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 				<span class="bar-fail" style={`width:${100 - passedShare}%`}></span>
 			)}
 		</div>
+		{/*
+			Which code and which day the rows are of. The words sit beside the
+			values, each in an element of its own, and the spaces between them
+			are text, so a reader with no style still reads them apart.
+		*/}
+		<p class="banner-provenance" data-report-provenance>
+			{t.generatedFor} <b data-report-library>{report.library}</b>{t.generatedCommit}{' '}
+			<a href={commitUrl}><code data-report-commit={generated.sha}>{generated.sha.slice(0, 9)}</code></a>{t.generatedOn}{' '}
+			<time datetime={generatedDay}>{longDate(generatedDay)}</time>.
+		</p>
+		{releases.length > 0 && (
+			<p class="banner-provenance">
+				{t.archived}{' '}
+				{releases.map((release, i) => (
+					<Fragment>
+						{i > 0 && ', '}
+						<a href={`https://doi.org/${release.doi}`}>{t.archivedFor(release.version)}</a>{' '}
+						(<time datetime={release.date}>{longDate(release.date)}</time>)
+					</Fragment>
+				))}
+			</p>
+		)}
 	</section>
 
 	{/*
@@ -541,7 +595,7 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 		const domainRows = byDomain.get(domain.id) ?? [];
 		const green = domain.passing === domain.checks;
 		return (
-			<details class="conformance-domain" data-domain-section={domain.id} open={!green}>
+			<details class="conformance-domain" id={domain.id} data-domain-section={domain.id} open={!green}>
 				{/*
 					Decorative mark: the tally beside it already says how many
 					passed. It is an empty child of its own and not the summary's
@@ -935,6 +989,12 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 	.conformance-banner .banner-stats {
 		margin: 0.15rem 0 0;
 		font-variant-numeric: tabular-nums;
+	}
+
+	.conformance-banner .banner-provenance {
+		margin: 0.5rem 0 0;
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-sm);
 	}
 
 	/* Flex with a gap, so the two segments are separated by a sliver of the

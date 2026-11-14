@@ -692,6 +692,11 @@ libsndfile under the LGPL, which the base install deliberately avoids.
   The `bext` chunk this page reads and writes field by field: originator,
   the sample-accurate since-midnight time reference, CodingHistory, and the
   five EBU R 128 loudness values of version 2.
+- European Broadcasting Union. (1999). *Format for CodingHistory field in
+  Broadcast Wave Format files, BWF* (EBU R 98).
+  [EBU](https://tech.ebu.ch/publications/r098).
+  The grammar of the CodingHistory line every written chunk carries, and of
+  the line a conversion appends to it.
 - International Telecommunication Union. (2025). *Long-form file format for
   the international exchange of audio programme materials with metadata*
   (Recommendation ITU-R BS.2088-2).

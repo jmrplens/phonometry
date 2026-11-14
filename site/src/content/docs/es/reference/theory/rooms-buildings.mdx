@@ -237,6 +237,7 @@ sidebar:
 ---
 
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Esta página reúne la teoría de salas y edificación: la medición de respuestas al impulso y los parámetros de acústica de salas, los modelos de fuentes imagen y de campo estacionario del campo acústico de una sala, los criterios de ruido de fondo, el aislamiento a ruido aéreo y a impactos con sus índices globales y su incertidumbre, y la predicción de flancos y de absorción. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/); la dispersión superficial y la caracterización de materiales acústicos están en [Materiales y superficies](/phonometry/es/reference/theory/materials-surfaces/).
 
@@ -375,6 +376,18 @@ $$
 
 es decir, una suma acumulada invertida en tiempo discreto. La integración inversa cancela la fluctuación aleatoria de una única respuesta al impulso al cuadrado: para un decaimiento de energía puramente exponencial $p^2(t) = \mathrm{e}^{-a t}$ da $E(t) = \mathrm{e}^{-a t}/a$, una recta exactamente $L(t) = -(10 a / \ln 10)\ t$. El ruido de fondo aplana $E(t)$, así que la integración se trunca en el cruce $t_1$ de la recta de decaimiento ajustada con el nivel de ruido y la cola que falta se compensa con una exponencial de la pendiente ajustada; sin ese término la integral finita **subestima** sistemáticamente $T$.
 
+El clip ejecuta esa suma invertida: la energía de la cola se rellena desde el
+final del registro mientras la curva de decaimiento se traza hacia $t = 0$, y la
+cierran las rectas de regresión T20 y T30 del siguiente apartado.
+
+<Video
+  name="anim_schroeder"
+  width={2400}
+  height={1350}
+  title="Integración inversa de Schroeder de la respuesta al impulso al cuadrado"
+  description="La energía de la cola de la respuesta al impulso al cuadrado se rellena desde el final mientras la integral inversa avanza hacia t = 0, y la curva de decaimiento de Schroeder emerge en un eje inferior, terminando con las rectas de regresión T20 y T30."
+/>
+
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.webp" alt="Respuesta al impulso al cuadrado con su curva de decaimiento por integración inversa de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" width="80%" />
 
 *Una respuesta al impulso al cuadrado, su integral inversa de Schroeder y las ventanas de regresión EDT/T20/T30 del siguiente apartado.*
@@ -481,6 +494,20 @@ $$
 
 con la divergencia esférica $1/(4\pi r_n)$, el producto de los **factores de reflexión de presión** de las paredes $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Ec. 11.39; $|R|^2 = 1-\alpha$ en energía), cada uno elevado al número de reflexiones $k_{q,n}$ que esa imagen hizo en la pared $q$, y la atenuación de la presión en el aire $\mathrm{e}^{-m r_n/2}$ ($m$ el coeficiente de atenuación en potencia de la tabla de arriba, de modo que la intensidad cae como $\mathrm{e}^{-m r}$ y la presión como $\mathrm{e}^{-m r/2}$). A lo largo de un eje, los recuentos de reflexiones de la imagen de índice de retícula $n$ y paridad $p$ son $|n-p|$ y $|n|$ en las dos paredes (Allen y Berkley, 1979), así que el orden total es $\sum_i |2 n_i - p_i|$; una caja de zapatos tiene $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ imágenes audibles hasta el orden $i_0$ (Kuttruff Ec. 9.23), y la densidad de reflexiones crece como $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Ec. 4.6).
 
+Integrada desde $t = 0$, esa densidad es un recuento: la esfera de radio $ct$
+en torno al receptor contiene $N(t) = \tfrac{4\pi}{3}(ct)^3/V$ imágenes, una por
+volumen de sala. El clip barre con esa esfera la retícula de una sala de 7 m por
+5 m y 3 m de altura, y cuenta las llegadas frente a la ley:
+
+<Video
+  name="anim_image_source_buildup"
+  width={2400}
+  height={1350}
+  title="Una esfera que se expande desde el receptor barriendo la retícula de salas espejo"
+  description="A la izquierda, la sala de 7 por 5 metros ocupa el centro de su retícula de salas espejo a trazos, con la fuente como estrella y el receptor como triángulo. Un círculo se expande desde el receptor a la velocidad del sonido; según alcanza cada fuente imagen, esa imagen se enciende con el color de su orden de reflexión y traza una línea recta de vuelta al receptor. A la derecha, el reflectograma se rellena en el mismo instante: cada imagen que el círculo alcanza escribe un vástago en su tiempo de llegada y en su nivel relativo al sonido directo, bajo la envolvente de divergencia uno partido por r a trazos. Debajo, un recuento de llegadas sube en paralelo a la ley analítica a trazos, y los dos se mantienen juntos mientras el recuento pasa por 44 a los 30 milisegundos, 108 a los 40, 202 a los 50 y 344 a los 60, donde la ley marca 348."
+  caption="El reflectograma es una retícula que se barre, no una señal que decae. Como la esfera que se expande gana volumen con el cubo del tiempo mientras las imágenes están espaciadas a una por volumen de sala, las llegadas se acumulan con el cubo del tiempo y su ritmo crece con su cuadrado: las reflexiones tempranas discretas y la cola difusa tardía son la misma construcción leída a dos densidades."
+/>
+
 La tasa de decaimiento inicial de la energía reverberante especular reproduce el tiempo de reverberación de **Eyring** $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Ec. 5.23), con $S$ aquí el área total del contorno, porque la tasa media de reflexiones $cS/4V$ es igual a $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. La coincidencia solo es estrecha cerca de la geometría cúbica; una sala alargada sostiene la energía a lo largo de su eje largo, así que el decaimiento especular puro es más lento que la estimación de campo difuso de Eyring (la anisotropía que corrigen los modelos de Fitzroy y Arau-Puchades). El modelo es solo especular (sin difracción ni difusión) y exacto solo para factores de reflexión reales e independientes del ángulo.
 
 ### Campo estacionario de sala (Bies 6.4, Kuttruff 5.6)
@@ -535,6 +562,28 @@ esas tres bandas: un índice de un recinto pequeño calculado sin el procedimien
 de esquinas no es comparable con otro que sí lo usó.
 
 El índice de un solo número (ISO 717-1, apartado 4.4) desplaza la **curva de referencia** de la Tabla 3 en pasos de 1 dB hacia la curva medida hasta que la suma de desviaciones *desfavorables* $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas); el índice $R_\mathrm{w}$ es la referencia desplazada a 500 Hz. Los **términos de adaptación espectral** son $C = X_{\mathrm{A}1} - X_\mathrm{w}$ y $C_\mathrm{tr} = X_{\mathrm{A}2} - X_\mathrm{w}$ con $X_{\mathrm{A}j} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (espectros de la Tabla 4: n.º 1 ruido rosa, n.º 2 tráfico urbano), cada uno redondeado a un entero. El ejemplo resuelto del Anexo C de ISO 717-1 ($R_\mathrm{w} = 30$, $C = -2$, $C_\mathrm{tr} = -3$, suma desfavorable 31,8 dB) se reproduce exactamente.
+
+La búsqueda es iterativa, y las dos posiciones que la deciden son justo las que
+una figura terminada ya ha descartado: el último desplazamiento cuya suma
+desfavorable todavía se pasaba de 32,0 dB y el desplazamiento siguiente a la
+respuesta, que es válido pero regala un decibelio. El clip recorre esos pasos
+con el espectro del Anexo C de ISO 717-1 y después con el forjado pesado
+desnudo del Anexo C de ISO 717-2, con la regla en espejo del siguiente apartado.
+
+<Video
+  name="anim_iso717_shift"
+  width={2400}
+  height={1350}
+  title="Desplazar la curva de referencia ISO 717 hasta que encaja justo"
+  description="La curva de referencia avanza en pasos de 1 dB hacia el espectro medido mientras las desviaciones desfavorables se sombrean banda a banda y su suma se acerca al tope de 32,0 dB. El motor aéreo se detiene en 31,8 dB para Rw = 30 dB, un paso antes de la posición que desaprovecharía el margen; el motor de impactos ejecuta después la misma regla con el signo de la desviación invertido, con la curva subiendo paso a paso y deteniéndose en 28,0 dB para Ln,w = 79 dB."
+/>
+
+*Los dos recorridos se detienen donde manda la norma, en la mayor suma
+desfavorable que no pasa de 32,0 dB: 31,8 dB para $R_\mathrm{w} = 30$ dB y 28,0 dB
+para $L_\mathrm{n,w} = 79$ dB. El paso anterior se rechaza por pasarse del tope, y
+el siguiente es válido pero valora el elemento un decibelio peor sin motivo (un
+$R_\mathrm{w}$ menor, un $L_\mathrm{n,w}$ mayor), que es lo que excluye el «lo mayor
+posible» del apartado 4.4 de ISO 717-1:2020 y del 4.3.1 de ISO 717-2:2020.*
 
 **Cómo se leen $C$ y $C_\mathrm{tr}$.** El índice ponderado condensa una curva entera
 frente a una única curva de referencia fija, así que responde por la fuente de
@@ -861,13 +910,37 @@ puntuales de la [teoría de vibración](/phonometry/es/reference/theory/vibratio
 
 *Los cuatro comportamientos del párrafo anterior, uno por panel. Arriba a la
 izquierda, la ley de masas subiendo 6 dB por octava con la caída del aislamiento en la coincidencia
-de Sharp recortado en $f_\mathrm{c}$. Arriba a la derecha, la pared doble: no mejor que
+de Sharp recortada en $f_\mathrm{c}$. Arriba a la derecha, la pared doble: no mejor que
 la masa combinada por debajo de $f_0$, y luego el término de cámara subiendo
 hasta saturar. Abajo a la izquierda, la eficiencia de radiación que decide
 cuánta de la vibración de la placa se convierte en sonido. Abajo a la derecha,
 el techo que impone una fuga: un área abierta del 1 % deja la composición en
 $10\log_{10}(S/S_\mathrm{a}) = 20$ dB por buena que sea la pared, que es el panel que
 merece la pena enseñar a un cliente.*
+
+La caída del panel de arriba a la izquierda es un encaje de longitudes de onda,
+y se puede ver. En $f_\mathrm{c}$ la longitud de onda de flexión libre iguala la
+traza de una onda a incidencia rasante; para cualquier ángulo de incidencia
+menor hay una frecuencia por encima de $f_\mathrm{c}$ en la que las dos vuelven a
+encajar (Bies 7.2.1). Con una traza de $\lambda/\sin\theta$ a un ángulo $\theta$
+de la normal, y una longitud de onda de flexión que baja como $1/\sqrt{f}$, esa
+frecuencia es $f_\mathrm{c}/\sin^2\theta$, es decir $2 f_\mathrm{c}$ a 45°. El clip lanza
+una onda plana sostenida a 45° sobre una placa de acero de 10 mm, para la que la
+biblioteca da $f_\mathrm{c} = 1205$ Hz, a la mitad de esa frecuencia y al doble:
+
+<Video
+  name="anim_elastic_coincidence"
+  width={2400}
+  height={1350}
+  title="Coincidencia en una placa de acero de 10 mm en una simulación FDTD elástica 2D"
+  description="Dos campos FDTD elásticos lado a lado de la misma placa de acero de 10 mm tendida en aire mientras llega una onda plana sostenida a 45 grados. A 602 Hz, la mitad de la frecuencia de coincidencia, la onda se refleja casi por completo y el débil nivel transmitido coincide con la ley de masas oblicua. A 2410 Hz, el doble de la frecuencia de coincidencia, la traza acústica iguala la longitud de onda de flexión libre y un haz transmitido a 45 grados crece bajo la placa, manteniendo el mismo nivel que el panel de baja frecuencia donde la ley de masas predecía 12 dB más de aislamiento; el aire bajo la placa se dibuja en los dos paneles con una ganancia de representación anotada de 150 veces (+44 dB) para que el campo transmitido sea legible, con la frecuencia de coincidencia de 1205 Hz de la biblioteca y los niveles medidos y de la ley de masas anotados."
+/>
+
+*A 602 Hz la placa deja pasar −47 dB, donde la ley de masas oblicua predice
+−48 dB. A 2410 Hz sigue dejando pasar −47 dB, donde la ley de masas decía
+−60 dB: los 12 dB que tenían que haber sumado dos octavas han desaparecido. El
+aire bajo la placa se dibuja con una ganancia de 150 (+44 dB) en los dos paneles
+para que el campo transmitido se vea.*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aperture_slit_geometry.svg" alt="Sección a escala de una rendija de 2 mm a través de una pared de 100 mm: la pared rayada dibujada en sección con la estrecha ranura de aire horizontal a media altura, una flecha de sonido incidente que apunta a la ranura desde la izquierda, las cotas de los 100 mm de espesor de pared y los 2 mm de ancho de rendija, y frentes de onda circulares transmitidos esbozados expandiéndose desde la salida de la rendija a la derecha" width="80%" />
 

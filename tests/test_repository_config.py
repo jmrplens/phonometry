@@ -46,6 +46,19 @@ import mirror_overviews
 _CODERABBIT = _ROOT / ".coderabbit.yaml"
 _DOCS_WORKFLOW = _ROOT / ".github" / "workflows" / "docs.yml"
 _PYTHON_WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
+
+
+def _workflow_files(root: pathlib.Path | None = None) -> list[pathlib.Path]:
+    """Every workflow of the repository, sorted by path.
+
+    GitHub runs a workflow written as ``.yml`` or as ``.yaml``, so a check
+    over the workflows reads both: one that read ``*.yml`` alone passed a
+    ``.yaml`` workflow unread.
+    """
+    folder = (_ROOT if root is None else root) / ".github" / "workflows"
+    return sorted([*folder.glob("*.yml"), *folder.glob("*.yaml")])
+
+
 _CITATION_MODULE = _ROOT / "site" / "src" / "data" / "citation.mjs"
 _REPO_STATS_MODULE = _ROOT / "site" / "src" / "data" / "repo-stats.mjs"
 _STRUCTURED_DATA_CHECK = _ROOT / "site" / "scripts" / "check-structured-data.mjs"
@@ -760,12 +773,16 @@ def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() ->
     the newest record and the newest list handed on after it, its own run's
     left out, downloads both from the runs the finding step names, as the
     build does, sets aside one that cannot be downloaded, works the list out
-    again over the one it was handed, and hands it on in place of the
-    build's before it submits it: the build's list is older than the record
-    it was compared with, so no later build reads it, and a job that submits
-    and keeps no record would leave the pages it sent to no one. On any
-    other run none of those steps runs, and the job may read another run's
-    artifacts only for them.
+    again over the one it was handed, and hands it on beside the build's
+    before it submits it: the build's list is older than the record it was
+    compared with, so no later build reads it, and a job that submits and
+    keeps no record would leave the pages it sent to no one. It deletes no
+    list to make room for its own: a list replaced (``overwrite``) is deleted
+    before its replacement is uploaded, and an upload that failed in between,
+    on a re-run of this job alone after one that submitted and kept no
+    record, would leave the run with no list of the pages that job sent. On
+    any other run none of those steps runs, and the job may read another
+    run's artifacts only for them.
     """
     workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
     jobs: dict[str, dict[str, object]] = workflow["jobs"]
@@ -902,10 +919,11 @@ def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() ->
         < sent_at
     ), "the list is worked out again out of order, or after the submission"
 
-    # The list worked out again is handed on before the submission, in place
-    # of the one the build handed on, as long as a record is kept, so the
+    # The list worked out again is handed on before the submission, beside
+    # the ones the run handed on before, as long as a record is kept, so the
     # next build reads it when this job submits and keeps no record, and a
-    # later attempt of this job downloads it with the manifest it keeps.
+    # later attempt of this job downloads it, the run's newest, with the
+    # manifest it keeps.
     hand_at, hand = _the_one(
         _steps_using(indexnow, "actions/upload-artifact", handed_name.group(1)),
         "hand the list worked out again on",
@@ -918,8 +936,9 @@ def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() ->
     assert _shell_path(hand_inputs["path"]) == folder, (
         "the IndexNow job hands on another list than the one it worked out again"
     )
-    assert hand_inputs.get("overwrite") is True, (
-        "the list worked out again does not replace the one the build handed on"
+    assert hand_inputs.get("overwrite") in (None, False, "false"), (
+        "the list worked out again deletes the one the run handed on before it is "
+        "uploaded, so an upload that fails in between leaves the run with neither"
     )
     assert hand_inputs.get("if-no-files-found") == "error"
     _, keep = _the_one(
@@ -936,6 +955,190 @@ def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() ->
     )
     for step in (find, again, hand):
         assert not step.get("continue-on-error")
+
+
+def _workflow_steps(
+    root: pathlib.Path | None = None,
+) -> Iterator[tuple[str, str, dict[str, object]]]:
+    """Every step of every workflow, as ``(file, job, step)``."""
+    for path in _workflow_files(root):
+        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for job_id, job in (workflow.get("jobs") or {}).items():
+            for step in job.get("steps") or []:
+                yield path.name, str(job_id), step
+
+
+#: An HTTP DELETE as curl, gh api, wget and PowerShell spell it: ``-X DELETE``,
+#: ``-XDELETE``, ``--request DELETE``, ``--method=DELETE``, ``-Method Delete``.
+_DELETE_METHOD = re.compile(
+    r"(?:-X\s*|--request[=\s]+|--method[=\s]+|-Method\s+)['\"]?DELETE\b", re.IGNORECASE
+)
+
+#: Where a deletion names the artifacts of the API: the REST path, or the
+#: method of the client ``actions/github-script`` hands its script.
+_ARTIFACTS_ENDPOINT = re.compile(r"actions/artifacts")
+_SCRIPT_DELETES = re.compile(
+    r"\bdeleteArtifact\b|DELETE\s+/repos/[^\s'\"]*/actions/artifacts", re.IGNORECASE
+)
+
+
+def _logical_commands(run: str) -> list[str]:
+    """The commands of a ``run:``, a line continued with a backslash joined to the next."""
+    return re.sub(r"\\[ \t]*\r?\n", " ", run).splitlines()
+
+
+def _deletes_an_artifact(step: dict[str, object]) -> str | None:
+    """How a step deletes an artifact, or None when it deletes none.
+
+    By the ``overwrite`` input of ``actions/upload-artifact``, by an action
+    that deletes artifacts, by a command of its ``run:`` that sends DELETE
+    to the artifacts endpoint, or by a script of ``actions/github-script``
+    that calls the API's deleteArtifact.
+    """
+    uses = str(step.get("uses", ""))
+    inputs = step.get("with")
+    given = inputs if isinstance(inputs, dict) else {}
+    if uses.startswith("actions/upload-artifact@") and given.get("overwrite") not in (
+        None,
+        False,
+        "false",
+    ):
+        return "overwrite"
+    if "delete-artifact" in uses:
+        return uses
+    for command in _logical_commands(str(step.get("run", ""))):
+        if _DELETE_METHOD.search(command) and _ARTIFACTS_ENDPOINT.search(command):
+            return "an API call that deletes an artifact"
+    if _SCRIPT_DELETES.search(str(given.get("script", ""))):
+        return "a script that deletes an artifact through the API"
+    return None
+
+
+def test_no_workflow_deletes_an_artifact_before_its_replacement_exists() -> None:
+    """A step hands an artifact on beside the one before, never in its place.
+
+    ``overwrite`` on ``actions/upload-artifact`` deletes the run's newest
+    artifact of the name and then uploads, with nothing between to put the
+    old one back: an upload that fails there leaves the run with neither.
+    The IndexNow job of a deploy re-run handed its list on so, and a re-run
+    of that job alone, after one that submitted and kept no record, could
+    delete the only list of the pages that job sent and hand on none, so no
+    later deploy would send a page it removed from them. A run keeps the
+    artifacts of every attempt and its readers take the newest of a name, so
+    no step deletes one, by that input, by an action that deletes artifacts,
+    or through the API, from a command or from a script.
+    """
+    deleting = [
+        f"{name}, job {job}, step {step.get('name') or step.get('uses')}: {how}"
+        for name, job, step in _workflow_steps()
+        if (how := _deletes_an_artifact(step)) is not None
+    ]
+    assert deleting == [], (
+        "these steps delete an artifact before its replacement is uploaded, so a "
+        f"failure in between leaves the run with neither: {deleting}"
+    )
+
+
+@pytest.mark.parametrize(
+    ("step", "how"),
+    [
+        (
+            {
+                "uses": "actions/upload-artifact@v7",
+                "with": {"name": "a", "overwrite": True},
+            },
+            "overwrite",
+        ),
+        ({"uses": "geekyeggo/delete-artifact@v5"}, "geekyeggo/delete-artifact@v5"),
+        (
+            {"run": 'gh api -X DELETE "repos/o/r/actions/artifacts/${ID}"'},
+            "an API call that deletes an artifact",
+        ),
+        (
+            {
+                "run": 'gh api \\\n  -X DELETE \\\n  "repos/o/r/actions/artifacts/${ID}"\n'
+            },
+            "an API call that deletes an artifact",
+        ),
+        (
+            {"run": 'gh api --method=DELETE "repos/o/r/actions/artifacts/${ID}"'},
+            "an API call that deletes an artifact",
+        ),
+        (
+            {
+                "run": 'curl -XDELETE -H "Authorization: x" "$API/repos/o/r/actions/artifacts/$ID"'
+            },
+            "an API call that deletes an artifact",
+        ),
+        (
+            {"run": 'curl --request DELETE "$API/repos/o/r/actions/artifacts/$ID"'},
+            "an API call that deletes an artifact",
+        ),
+        (
+            {
+                "run": 'Invoke-RestMethod -Method Delete -Uri "$api/actions/artifacts/$id"'
+            },
+            "an API call that deletes an artifact",
+        ),
+        (
+            {
+                "uses": "actions/github-script@v8",
+                "with": {
+                    "script": "await github.rest.actions.deleteArtifact({owner, repo, artifact_id})"
+                },
+            },
+            "a script that deletes an artifact through the API",
+        ),
+        (
+            {
+                "uses": "actions/github-script@v8",
+                "with": {
+                    "script": "await github.request('DELETE /repos/{owner}/{repo}/actions/artifacts/{id}')"
+                },
+            },
+            "a script that deletes an artifact through the API",
+        ),
+    ],
+)
+def test_each_way_a_step_deletes_an_artifact_is_found(
+    step: dict[str, object], how: str
+) -> None:
+    """A step that deletes an artifact, whichever way it is written."""
+    assert _deletes_an_artifact(step) == how
+
+
+@pytest.mark.parametrize(
+    "step",
+    [
+        {"uses": "actions/upload-artifact@v7", "with": {"name": "a"}},
+        {
+            "uses": "actions/upload-artifact@v7",
+            "with": {"name": "a", "overwrite": "false"},
+        },
+        {"run": 'gh api "repos/o/r/actions/artifacts" --jq ".artifacts[].name"'},
+        {"run": 'gitlab_request DELETE "$link"'},
+        {"run": 'gh api -X DELETE "repos/o/r/git/refs/tags/x"\necho actions/artifacts'},
+    ],
+)
+def test_a_step_that_deletes_no_artifact_passes(step: dict[str, object]) -> None:
+    """An upload that keeps the one before, a read of the list, a DELETE of something else."""
+    assert _deletes_an_artifact(step) is None
+
+
+def test_a_workflow_written_as_yaml_is_read(tmp_path: pathlib.Path) -> None:
+    """GitHub runs ``.yaml`` workflows too, so the steps of one are read."""
+    folder = tmp_path / ".github" / "workflows"
+    folder.mkdir(parents=True)
+    (folder / "deploy.yaml").write_text(
+        "jobs:\n  a:\n    steps:\n      - name: caught\n"
+        '        run: gh api -X DELETE "repos/o/r/actions/artifacts/1"\n',
+        encoding="utf-8",
+    )
+    steps = list(_workflow_steps(tmp_path))
+    assert [(name, job, step.get("name")) for name, job, step in steps] == [
+        ("deploy.yaml", "a", "caught")
+    ]
+    assert _deletes_an_artifact(steps[0][2]) == "an API call that deletes an artifact"
 
 
 def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
@@ -1157,7 +1360,7 @@ def test_every_action_is_pinned_to_a_release_tag() -> None:
     and what a reader can check against the action's releases.
     """
     unpinned = []
-    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+    for path in _workflow_files():
         for action, ref in re.findall(
             r"uses:\s*([\w.-]+/[\w./-]+)@(\S+)", path.read_text(encoding="utf-8")
         ):
@@ -1203,7 +1406,7 @@ def test_no_workflow_runs_on_the_moving_ubuntu_label() -> None:
     """
     moving: list[str] = []
     unnamed: list[str] = []
-    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+    for path in _workflow_files():
         workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
         for text in _strings(workflow):
             if "ubuntu-latest" in text:
@@ -1234,7 +1437,7 @@ def test_every_workflow_that_runs_pip_turns_its_version_notice_off() -> None:
     sits in the workflow's own ``env``, so a job added later inherits it.
     """
     missing = []
-    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+    for path in _workflow_files():
         text = path.read_text(encoding="utf-8")
         if "pip install" not in text and "-m pip" not in text:
             continue
@@ -1402,7 +1605,7 @@ def test_every_job_that_installs_with_pip_upgrades_it_first() -> None:
     first install.
     """
     late = []
-    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+    for path in _workflow_files():
         jobs = yaml.safe_load(path.read_text(encoding="utf-8")).get("jobs") or {}
         for name, job in jobs.items():
             upgraded: set[str] = set()
@@ -1452,7 +1655,7 @@ def test_every_job_that_runs_corepack_turns_its_download_prompt_off() -> None:
     from the job's environment, the workflow's or the step's.
     """
     missing = []
-    for path in sorted((_ROOT / ".github" / "workflows").glob("*.yml")):
+    for path in _workflow_files():
         workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
         workflow_env = workflow.get("env") or {}
         for name, job in (workflow.get("jobs") or {}).items():

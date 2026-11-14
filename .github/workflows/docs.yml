@@ -666,10 +666,11 @@ jobs:
       # The URLs come from the build this run deployed, through the list its
       # last steps wrote (site/scripts/indexnow-diff.mjs), or, on a deploy
       # re-run, from the list the steps below work out again from the
-      # manifest that build handed on, and which a later attempt of this job
-      # downloads here in its place. This job used to read the sitemap from
-      # the live site a moment after the deploy, where the edge could still
-      # be serving the copy of the deploy before.
+      # manifest that build handed on. This step takes the run's newest list:
+      # the build's, or on a later attempt of this job one an earlier attempt
+      # handed on, each with that manifest. This job used to read the sitemap
+      # from the live site a moment after the deploy, where the edge could
+      # still be serving the copy of the deploy before.
       - name: Fetch the list of changed pages the build wrote
         uses: actions/download-artifact@v8
         with:
@@ -681,9 +682,9 @@ jobs:
       # deploy changed and this one puts back. When the deploy job ran in a
       # later attempt than the build, the steps below find the newest record
       # and the newest list a deploy handed on after it, as the build does,
-      # leaving out this run's own list, work the list out again over the
+      # leaving out this run's own lists, work the list out again over the
       # one above, from the manifest the build handed on, and hand that list
-      # on in place of the build's. No later build reads the build's list,
+      # on beside the build's. No later build reads the build's list,
       # older than the record it was compared with, so a job that submits
       # and keeps no record would otherwise leave what it sent in no list.
       # The job then submits that list and keeps the manifest under the same
@@ -739,16 +740,23 @@ jobs:
           --out "indexnow"
       - name: Hand on the list worked out again, on a deploy re-run
         # Before the submission, as the build hands its list on before the
-        # deploy, and kept as long as a record is. It replaces the list the
-        # build handed on (`overwrite`), so a later attempt of this job
-        # downloads this one above, with the manifest the build handed on.
+        # deploy, and kept as long as a record is. A run keeps the artifacts
+        # of every attempt, and each attempt may upload one of a name an
+        # earlier attempt used, so this list goes beside the build's, and
+        # beside any an earlier attempt of this job handed on, under the same
+        # name: every reader takes the run's newest list, the step above as a
+        # later build does. Nothing deletes one, so the list before stays
+        # until this one exists. Replacing it (`overwrite`) would delete the
+        # run's newest list first, and an upload that failed after that, on a
+        # re-run of this job alone after one that submitted and kept no
+        # record, would leave the run with no list of the pages that job
+        # sent: no later deploy would send a page it removed from them.
         if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
         uses: actions/upload-artifact@v7
         with:
           name: indexnow-urls
           path: indexnow/
           if-no-files-found: error
-          overwrite: true
           retention-days: 90
       - name: Submit the changed pages to IndexNow
         env:

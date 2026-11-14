@@ -104,7 +104,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"::error::{problem}", file=sys.stderr)
     if problems:
         return 1
-    args.sbom.write_text(json.dumps(sbom, indent=2) + "\n", encoding="utf-8")
+    args.sbom.write_text(
+        json.dumps(sbom, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     listed = ", ".join(f"{c['name']} {c.get('version')}" for c in sbom["components"])
     print(f"SBOM of phonometry {version}: {listed}.")
     return 0

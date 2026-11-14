@@ -2801,7 +2801,7 @@ def write_manifest(stamps: dict[str, str], encoders: dict[str, str]) -> None:
         + "\n"
         for clip in sorted(stamps)
     )
-    MANIFEST.write_text(_HEADER + body, encoding="utf-8")
+    MANIFEST.write_text(_HEADER + body, encoding="utf-8", newline="\n")
 
 
 @contextlib.contextmanager

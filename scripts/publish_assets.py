@@ -146,7 +146,7 @@ def publish(*, dry_run: bool) -> int:
     _git(checkout, "commit", "-q", "-m", text)
     _git(checkout, "push", "-q", "origin", "main")
     commit = _git(checkout, "rev-parse", "HEAD")
-    assets_dir.LOCK.write_text(commit + "\n", encoding="utf-8")
+    assets_dir.LOCK.write_text(commit + "\n", encoding="utf-8", newline="\n")
     print(f"published {len(names)} file(s) as {assets_dir.REPOSITORY}@{commit[:12]}")
     print(f"recorded in {assets_dir.LOCK.name}; commit it with the fingerprint lock")
     return 0

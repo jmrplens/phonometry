@@ -1897,8 +1897,8 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"{OUTPUT.name} is current.")
         return 0
-    OUTPUT.write_text(fresh, encoding="utf-8")
-    TYPES_OUTPUT.write_text(fresh_types, encoding="utf-8")
+    OUTPUT.write_text(fresh, encoding="utf-8", newline="\n")
+    TYPES_OUTPUT.write_text(fresh_types, encoding="utf-8", newline="\n")
     counts = {
         "solids": len(PUBLISHED_SOLIDS),
         "damping materials": len(PUBLISHED_DAMPING),

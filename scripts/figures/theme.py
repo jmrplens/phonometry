@@ -436,7 +436,7 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     if ext == "svg":
         fig = plt.gcf()
         # A ``str`` path, for the reason given at the stem above.
-        with open(path, "w", encoding="utf-8") as handle:  # noqa: PTH123
+        with open(path, "w", encoding="utf-8", newline="\n") as handle:  # noqa: PTH123
             handle.write(svg_text(fig, **kwargs))
         # ``pyplot.savefig``, which wrote the figures before ``svg_text``
         # did, repaints the canvas after the save; kept, so a generator that

@@ -826,7 +826,7 @@ def generate_all() -> None:
         # lockup's type, inheriting the text colour around it.
         (brand / "wordmark.svg", wordmark_svg()),
     ):
-        path.write_text(svg, encoding="utf-8")
+        path.write_text(svg, encoding="utf-8", newline="\n")
         _report(path)
 
     print("Generating app icons...")
@@ -863,7 +863,7 @@ def generate_all() -> None:
     # because GitHub serves README images through its own proxy and an SVG with
     # an embedded raster is not worth the risk on the page everybody sees first.
     for path, svg in ((brand / "banner.svg", card_svg(banner, banner_art)),):
-        path.write_text(svg, encoding="utf-8")
+        path.write_text(svg, encoding="utf-8", newline="\n")
         _report(path)
     card_png(brand / "banner.webp", banner, banner_art, scale=2)
     # The site-wide fallback, for the docstring-generated API pages that get no

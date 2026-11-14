@@ -414,7 +414,7 @@ def main(argv: list[str] | None = None) -> int:
     text = json.dumps(result, indent=1, sort_keys=True) + "\n"
     sys.stdout.write(text)
     if args.write:
-        _LOCK.write_text(text, encoding="utf-8")
+        _LOCK.write_text(text, encoding="utf-8", newline="\n")
     return 0
 
 

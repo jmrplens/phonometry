@@ -167,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         print(f"::error::{exc}.", file=sys.stderr)
         return 1
-    args.output.write_text(body, encoding="utf-8")
+    args.output.write_text(body, encoding="utf-8", newline="\n")
     print(
         f"Release notes for {version}: {len(body)} characters written to {args.output}."
     )

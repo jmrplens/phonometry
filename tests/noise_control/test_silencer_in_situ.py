@@ -510,6 +510,8 @@ def test_the_printed_thresholds() -> None:
     assert noise_control.MAX_EXTRANEOUS_CORRECTION == 3.0
     assert noise_control.ISO11820_OCTAVE_BAND_RANGE_HZ == (63.0, 4000.0)
     assert noise_control.ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ == (50.0, 5000.0)
+    # 9.2: past 10 % the report gives the distribution; nothing is refused.
+    assert noise_control.FLOW_VELOCITY_REPORT_DEVIATION_PERCENT == 10.0
 
 
 def test_the_plot_draws_the_difference_and_the_loss() -> None:

@@ -109,6 +109,7 @@ __all__ = [
     "ISO11820_AIR_GAS_CONSTANT_J_KG_K",
     "ISO11820_BACKGROUND_CORRECTIONS",
     "DOWNSTREAM_DISTANCE_COEFFICIENTS",
+    "FLOW_VELOCITY_REPORT_DEVIATION_PERCENT",
     "INSTALLATION_CASES",
     "MAX_EXTRANEOUS_CORRECTION",
     "ISO11820_MIN_BACKGROUND_MARGIN_DB",
@@ -123,7 +124,6 @@ __all__ = [
     "TYPICAL_FIELD_CORRECTION_LIMIT_DB",
     "ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K",
     "UPSTREAM_DISTANCE_DIAMETERS",
-    "VELOCITY_UNIFORMITY_TOLERANCE_PERCENT",
     "ExtraneousCorrectionResult",
     "InstallationCase",
     "SilencerInSituResult",
@@ -223,7 +223,7 @@ DOWNSTREAM_DISTANCE_COEFFICIENTS: tuple[float, float] = (12.0, 10.0)
 #: reported, because the pressure loss and the regenerated sound change with
 #: it. 9.2 asks for it too where the flow velocity measurements of 8.3.3 show
 #: a comparably non-uniform distribution, which no number bounds.
-VELOCITY_UNIFORMITY_TOLERANCE_PERCENT: float = 10.0
+FLOW_VELOCITY_REPORT_DEVIATION_PERCENT: float = 10.0
 
 InSituQuantity = Literal["transmission", "insertion"]
 #: What stands on one side of a silencer in situ (9.1.3, 9.1.4).

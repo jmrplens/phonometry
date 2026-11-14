@@ -705,7 +705,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     **_exempt(
         _A_FRACTION,
         "vibration.structural.building_response",
-        "EMPIRICAL_FREQUENCY_TOLERANCE",
+        "EMPIRICAL_FREQUENCY_ERROR",
     ),
     **_exempt(
         _A_FRACTION,

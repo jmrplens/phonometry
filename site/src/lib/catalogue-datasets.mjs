@@ -78,10 +78,6 @@ const SECTION_HEADING = /^##[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/;
  */
 const MDX_ESM = /^(?:import|export)\s/;
 
-/** A line the walk read as opening an aside (`:::note`), and one that closes it. */
-const ASIDE_OPENS = /^:{3,}[A-Za-z0-9]/;
-const ASIDE_CLOSES = /^:{3,}[ \t]*$/;
-
 /**
  * The first character of the private use area, from which each piece of a
  * paragraph that is read before its marks (a code span, an escaped
@@ -347,7 +343,9 @@ export function catalogueSections(body) {
   // The lines of the paragraph being read, when the page itself holds it.
   let paragraph = null;
   let opensSection = false;
-  // The asides and the elements open around the line, and the line past the flow read last.
+  // The elements open around the line, and the line past the flow read last. The
+  // asides open around it are the walk's to count: one ends with the quotation or
+  // the list item it opened in as well as on its own fence.
   let depth = 0;
   let flowEnd = 0;
   const endParagraph = () => {
@@ -391,7 +389,7 @@ export function catalogueSections(body) {
     }
     endParagraph();
     // Where the page itself holds the line, with no container of the walk's around it.
-    const onPage = depth === 0 && line.rest === line.text;
+    const onPage = depth === 0 && line.asides === 0 && line.rest === line.text;
     const written = pastBlanks(line.rest);
     if (line.role === 'paragraph' && onPage && !keys && !MDX_ESM.test(written)) {
       paragraph = [line.rest];
@@ -399,10 +397,6 @@ export function catalogueSections(body) {
     } else if (line.role === 'heading' && onPage) {
       const title = SECTION_HEADING.exec(written);
       if (title) startSection(readInline([title[1]]));
-    } else if (line.role === 'single' && ASIDE_OPENS.test(written)) {
-      depth += 1;
-    } else if (line.role === 'single' && ASIDE_CLOSES.test(written)) {
-      depth = Math.max(depth - 1, 0);
     } else if (line.role === 'single' && index >= flowEnd && /^[<{]/.test(written)) {
       const flow = flowOf([written, ...lines.slice(index + 1)].join('\n'));
       if (flow !== null) {

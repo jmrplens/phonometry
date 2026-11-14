@@ -257,6 +257,33 @@ test('a section that opens with an aside, a list, a quotation, a table or a figu
   }
 });
 
+test('an aside ends with the quotation or the list item it opened in, so the paragraph after them describes the section', () => {
+  // remark-directive closes the aside where its container ends, with no
+  // closing fence: the paragraph after the blank line stands on the page.
+  for (const opening of [
+    ['> :::note', '> A note.'],
+    ['- :::note', '  A note.'],
+    ['> - :::note', '>   A note.'],
+    ['> :::note', '> A note.', 'A paragraph of its own, which ends the quotation.'],
+  ]) {
+    assert.deepEqual(
+      secondSection(opening),
+      {
+        key: 'absorptionAreas',
+        heading: 'Areas',
+        lead: opening.length === 3 ? opening[2] : 'The paragraph that describes it.',
+      },
+      opening.join(' / '),
+    );
+  }
+  // An aside on the page itself still holds what follows it up to its fence.
+  assert.deepEqual(secondSection([':::note', '> A quotation in the aside.', '', 'Still in the aside.', ':::']), {
+    key: 'absorptionAreas',
+    heading: 'Areas',
+    lead: 'The paragraph that describes it.',
+  });
+});
+
 test('a paragraph that opens with an inline tag keeps its first line, and shows what the tag holds', () => {
   const sections = catalogueSections(
     [

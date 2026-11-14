@@ -280,11 +280,16 @@ function cellCount(row) {
  *   and past those it opens.
  * @property {boolean} item Whether the last container it opens is a list item, so
  *   that `rest` opens with the item's text.
+ * @property {number} asides How many asides (`:::note`) stand open once the line is
+ *   read: the one it opens among them, the one it closes not. An aside ends with
+ *   the container it opened in, a quotation or a list item, as well as on its own
+ *   closing fence, so a reader that counts their fences alone keeps one open that
+ *   the page has closed.
  */
 
 /** @returns {PageLine} */
 function pageLine(text, role, rest, info = '', indent = 0) {
-  return { text, role, rest, info, indent, item: false };
+  return { text, role, rest, info, indent, item: false, asides: 0 };
 }
 
 /** What stands open at each line of a page, read a line at a time. */
@@ -651,7 +656,11 @@ export function flowOf(text) {
  */
 export function pageLines(lines, { kind = 'mdx' } = {}) {
   const walk = new Walk(Array.from(lines), kind);
-  return walk.lines.map((_, index) => walk.read(index));
+  return walk.lines.map((_, index) => {
+    const line = walk.read(index);
+    line.asides = walk.asides.length;
+    return line;
+  });
 }
 
 /**

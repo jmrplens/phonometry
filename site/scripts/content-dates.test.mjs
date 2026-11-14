@@ -892,6 +892,88 @@ test('a page whose two sides a merge joined is dated by the merge, unless one si
 	assert.equal(day(fromClone, 'described.mdx'), '2026-01-03');
 });
 
+test('a data source gives the commit that made the version HEAD has, the merge that made it included', async (t) => {
+	const report = (a, b) => `{\n "a": ${a},\n "between": 0,\n "and": 0,\n "more": 0,\n "b": ${b}\n}\n`;
+	const cases = [
+		{
+			how: 'the merge joins the two sides',
+			side: () => report(2, 1),
+			main: () => report(1, 3),
+			options: [],
+			holds: 'merge',
+		},
+		{
+			// The two sides change the same line, and the merge keeps the side
+			// branch's: main's commit is the newer, and its report is not the one
+			// HEAD renders. A component main changed as well keeps the merge from
+			// being the same as either side, so git log reads both of them.
+			how: 'the merge keeps the older side',
+			side: () => report(2, 1),
+			main: () => report(3, 1),
+			options: ['-X', 'theirs'],
+			holds: 'side',
+		},
+	];
+	const named = {};
+	const expected = {};
+	for (const { how, side, main, options, holds } of cases) {
+		const repo = repository(t);
+		repo.write('report.mdx', page());
+		repo.writeFile('docs/report.json', report(1, 1));
+		repo.writeFile('site/src/components/Report.astro', '<table />\n');
+		repo.sources({ pages: ['site/src/content/docs/report.mdx'], sources: ['docs/report.json', 'site/src/components/Report.astro'] });
+		repo.commit(1);
+		repo.git('checkout', '-q', '-b', 'side');
+		repo.writeFile('docs/report.json', side());
+		const shas = { side: repo.commit(2) };
+		repo.git('checkout', '-q', 'main');
+		repo.writeFile('docs/report.json', main());
+		repo.writeFile('site/src/components/Report.astro', '<table class="wide" />\n');
+		shas.main = repo.commit(3);
+		repo.merge('side', ...options);
+		shas.merge = repo.commit(4, how);
+		const commit = (await repo.dates()).sourceCommit('docs/report.json');
+		named[how] = Object.keys(shas).find((name) => shas[name] === commit.sha) ?? commit.sha;
+		expected[how] = holds;
+		assert.equal(repo.git('show', `${holds === 'merge' ? shas.merge : shas.side}:docs/report.json`), repo.git('show', 'HEAD:docs/report.json'), how);
+	}
+	assert.deepEqual(named, expected, 'the commit each case names holds the report HEAD renders');
+});
+
+test('a data source a merge keeps from one side dates its page by that side\'s commit, the commit its Dataset names', async (t) => {
+	// The page's source is read in one history with another page's source,
+	// which the merge takes from the side branch: the merge holds a version of
+	// the two neither side held, and git reads both sides. The side changed
+	// the page's source later (day 3) than main (day 2), and the merge kept
+	// main's version (-X ours).
+	const repo = repository(t);
+	repo.write('r.mdx', page());
+	repo.write('o.mdx', page());
+	repo.writeFile('docs/report.json', '{"a": 1}\n');
+	repo.writeFile('docs/other.json', '{"o": 1}\n');
+	repo.sources(
+		{ pages: ['site/src/content/docs/r.mdx'], sources: ['docs/report.json'] },
+		{ pages: ['site/src/content/docs/o.mdx'], sources: ['docs/other.json'] },
+	);
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.writeFile('docs/report.json', '{"a": 3}\n');
+	repo.writeFile('docs/other.json', '{"o": 3}\n');
+	repo.commit(3, 'the side branch, later');
+	repo.git('checkout', '-q', 'main');
+	repo.writeFile('docs/report.json', '{"a": 2}\n');
+	const main = repo.commit(2, 'main, earlier');
+	repo.merge('side', '-X', 'ours');
+	repo.commit(4, 'the merge keeps main\'s report and takes the side\'s other source');
+	assert.equal(repo.git('show', 'HEAD:docs/report.json'), '{"a": 2}');
+	const dates = await repo.dates();
+	const commit = dates.sourceCommit('docs/report.json');
+	assert.equal(commit.sha, main, 'the commit of the rows the page renders');
+	assert.equal(day(dates, 'r.mdx'), '2026-01-02', 'the page is dated by that commit, not by the change the merge threw away');
+	assert.equal(isoDay(commit.date), day(dates, 'r.mdx'));
+	assert.equal(day(dates, 'o.mdx'), '2026-01-03', 'the source the merge took from the side');
+});
+
 test('a count, a text and a line move with a merge that made a version neither side had', async (t) => {
 	const registry = (...entries) => ['# Errata', '', ...entries.flatMap((entry) => [`## ${entry}`, '', 'What the source prints.', ''])].join('\n');
 	const fiches = (first, second) => page({ body: `<ReportPreview name="one" title="${first}" />\n\nBetween.\n\nMore.\n\nAnd more.\n\n<ReportPreview name="two" title="${second}" />\n` });

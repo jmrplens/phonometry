@@ -855,9 +855,10 @@ const later = (a, b) => (a === undefined || (b !== undefined && b > a) ? b : a);
  * source, a count or a text.
  *
  * @param {{ repo: string, pathspec: string, contentDir: string, pages: string[], dates: Map<string, Date>, entries: ReturnType<typeof readDateSources> }} options
- * @returns {Promise<{ sourced: number, raised: number, commits: Map<string, { sha: string, date: Date }> }>}
- *   How many pages have sources, how many of them a source dates, and the
- *   commit that last changed each source outside the content tree.
+ * @returns {Promise<{ sourced: number, raised: number, commits: Map<string, { sha: string, date: Date } | null> }>}
+ *   How many pages have sources, how many of them a source dates, and for
+ *   each source outside the content tree the commit that made the version
+ *   HEAD has (null when no commit read made it).
  */
 async function applySources({ repo, pathspec, contentDir, pages, dates, entries }) {
   const content = `${pathspec}/`;
@@ -884,25 +885,33 @@ async function applySources({ repo, pathspec, contentDir, pages, dates, entries 
   }
 
   // Any other source is data: every commit that changed it counts, and its
-  // history is read from trees alone. The commit is kept with its date: the
-  // conformance report names the one that last changed the data it renders.
+  // history is read from trees alone. Each source is followed back along the
+  // versions HEAD holds to the commit that made HEAD's version: the first
+  // that changed it from every parent's, a file or anything under a
+  // directory. That commit dates the pages it is a source of, and is kept
+  // with its date: the conformance report names it as the commit of the rows
+  // it renders, and the Dataset hands out its files there. Past a merge that
+  // kept one side's version, the other side's commits are not followed,
+  // however much newer, since the page shows none of their rows, so the page
+  // is dated by the commit its Dataset names.
   const files = sources.filter((spec) => !spec.startsWith(content));
   const commits = new Map();
   if (files.length > 0) {
     const tracked = await filesAtHead(repo, files);
     const missing = files.find((spec) => !tracked.some((path) => names(spec, path)));
     if (missing !== undefined) throw stale(`the source ${missing}`);
-    for (const commit of (await readHistory(repo, files)).order) {
-      // A merge changed a file only where it holds a version none of its parents held.
-      const [first, ...others] = commit.diffs;
-      for (const path of [...first.keys()].filter((name) => others.every((diff) => diff.has(name)))) {
-        for (const spec of files) {
-          if (newest.has(spec) || !names(spec, path)) continue;
-          newest.set(spec, commit.date);
-          commits.set(spec, { sha: commit.sha, date: commit.date });
-        }
-      }
-      if (newest.size === sources.length) break;
+    const history = await readHistory(repo, files);
+    for (const spec of files) {
+      const step = (commit) => {
+        const index = commit.diffs.findIndex((diff) => ![...diff.keys()].some((path) => names(spec, path)));
+        if (index === -1) return { stop: commit };
+        return commit.parents.length === 0 ? { stop: null } : { next: history.commits.get(commit.parents[index]) };
+      };
+      // A history in which no commit made HEAD's version is one this clone
+      // does not have whole; the source is named, and asking for its commit fails.
+      const made = history.head === null ? null : await followLine(history.head, step, async () => {}, { size: 1 });
+      if (made !== null) newest.set(spec, made.date);
+      commits.set(spec, made === null ? null : { sha: made.sha, date: made.date });
     }
   }
 
@@ -1027,9 +1036,11 @@ function realPath(path) {
  *   seen (a page being written, not committed yet) is dated by the file
  *   itself; a committed one without a date, or a path that is no page, throws.
  *   `sourceCommit` takes a source date-sources.json names outside the content
- *   tree, as it names it, and returns the commit that last changed it; any
- *   other path throws. `sourced` counts the pages date-sources.json lists and
- *   `raised` those of them a source dates.
+ *   tree, as it names it, and returns the commit that made the version HEAD
+ *   has, a merge that joined two sides of it included, so that the files at
+ *   that commit are the ones the page renders, and the page is dated by it;
+ *   any other path throws. `sourced` counts the pages date-sources.json lists
+ *   and `raised` those of them a source dates.
  */
 export function loadContentDates({ siteRoot = process.cwd() } = {}) {
   const root = realPath(resolve(siteRoot));
@@ -1094,6 +1105,12 @@ async function readContentDates(siteRoot) {
     sourceCommit(source) {
       const commit = commits.get(source);
       if (commit) return commit;
+      if (commits.has(source)) {
+        throw new Error(
+          `content dates: no commit of the history holds the version of ${source} HEAD has, so the commit ` +
+            'of what the page renders cannot be named. A damaged clone?',
+        );
+      }
       throw new Error(
         `content dates: ${source} is no source ${DATE_SOURCES} names outside the content tree, so no commit of it ` +
           'was read; list it as a source of the page that shows it.',

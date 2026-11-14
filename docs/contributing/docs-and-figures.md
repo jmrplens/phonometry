@@ -2,7 +2,7 @@
 
 # Documentation and figures
 
-This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues pages; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; the description a search result shows for each page; how much HTML a page may weigh; and the processes a page may start. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
+This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues pages; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; the description a search result shows for each page; how much HTML a page may weigh; the processes a page may start; and which schema.org properties its structured data may use. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
 
 ## Guides and the docs mirror
 
@@ -1729,3 +1729,42 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 **Enforced by:** `scripts/check_catalogue_links.py`, `make catalogue-links`, `CI: Every catalogue link opens the document beside it`, `tests/test_check_catalogue_links.py`
 
 **Exceptions.** A document the catalogue no longer lists (IEC 651:1979 has no page on the webstore) is cited without a link. A later edition is linked under its own designation, as a "since revised as" link in an entry or in a reference's `note`, and the entry's catalogue link and the reference's `url` stay on the edition the page cites. Only the ISO and IEC catalogues are read: their numbers are opaque, where the other publishers the pages link put the designation in the address; the two CEN project links are read by review.
+
+## Structured data
+
+<a id="f71"></a>
+### F71. Give a JSON-LD property only to a type schema.org allows it on, and only a value of a type it allows
+
+**Why.** schema.org lists, for each property, the types it may sit on (`domainIncludes`) and the types its value may have (`rangeIncludes`). A consumer that reads the vocabulary drops a property it finds anywhere else, so the page says less than its source does, and nothing that reads the build noticed: the guides hub's ItemList carried `inLanguage`, the journal articles in the bibliography carried `volumeNumber` and `issueNumber`, as far as their reference named them, and the 536 API pages, the English ones and their Spanish fallbacks, carried `codeRepository` and `programmingLanguage`, none of them on a type its property allows. A property that belongs to a related node goes on that node: the volume and the issue of an article are the `PublicationVolume` and `PublicationIssue` it is part of, and the repository and the language of the library are said once, on the software node that every page's `about` names.
+
+**Do**
+
+```json
+{
+  "@type": "ScholarlyArticle",
+  "isPartOf": {
+    "@type": "PublicationIssue",
+    "issueNumber": "1",
+    "isPartOf": {
+      "@type": "PublicationVolume",
+      "volumeNumber": "64",
+      "isPartOf": { "@type": "Periodical", "name": "Applied Acoustics" }
+    }
+  }
+}
+```
+
+**Don't**
+
+```json
+{
+  "@type": "ScholarlyArticle",
+  "isPartOf": { "@type": "Periodical", "name": "Applied Acoustics" },
+  "volumeNumber": "64",
+  "issueNumber": "1"
+}
+```
+
+**Enforced by:** `site/scripts/check-schema-vocabulary.mjs`, `CI: Check the structured data against the schema.org vocabulary`, `site/scripts/check-schema-vocabulary.test.mjs`, `CI: Test the build checks on small builds made to fail them`
+
+**Exceptions.** The software node carries `codeRepository` and `programmingLanguage`, which schema.org defines on SoftwareSourceCode only: jmrp.io publishes the same node, `@id` for `@id`, with both, and its software drift check compares the values this site publishes with its own. `DOMAIN_EXCEPTIONS` in the check names each with that reason, and the check fails on an exception no page uses any more. The Person node is jmrp.io's: the build fetches it from jmrp.io's main branch and splices it in as published, so a change made there reaches this site's next build with nothing changed here. On that node, and on every node nested in it, a value outside its range fails, as it does in jmrp.io's own check, but a type or a property schema.org does not define, a property outside its domain and a node with no type are reported and do not fail, so that change cannot stop this site from deploying. The check knows that node by its `@id`, `personId` in `site/src/data/site.mjs`, the one each page's head names the maintainer by; every other node is this site's writing, whatever its `@id`, and fails on every finding. A literal stands for Text in any property, and a Role stands in for the value it qualifies and carries the property it qualifies, as the Schema Markup Validator accepts. A node with no `@type` of its own that adds properties to a node typed elsewhere, by its `@id`, is held to that node's types; one whose `@id` names a node of another site is reported as a reference to it, and is still held to what does not depend on a type: each property defined, each node value in its range. The JSON-LD keywords are read as a JSON-LD processor reads them: a value object is a literal whatever datatype its `@type` names, each member of a `@list` or a `@set` is held to the range on its own, a property under `@reverse` holds the node under it to the domain and the node that carries it to the range, and the properties a node groups under `@nest` are its own. The vocabulary is one pinned release in `site/scripts/schema-vocabulary.json`, written by `site/scripts/generate-schema-vocabulary.mjs`; moving to a newer one is a change of its own, reviewed as the terms that changed.

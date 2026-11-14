@@ -47,6 +47,23 @@ export const tags = (html, name) =>
 export const markupOf = (html) =>
 	html.replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, '<$1></$1>');
 
+/**
+ * One piece of built markup at a time: a comment, a doctype, a start or end
+ * tag, whose quoted attribute values may hold a `>` that ends no tag, or a
+ * run of text, captured. A `<` that opens none of them is text too.
+ */
+const PIECE = /<!--[\s\S]*?-->|<![^>]*>|<\/?[a-zA-Z][\w:-]*(?:[^>"']|"[^"]*"|'[^']*')*>|([^<]+|<)/g;
+
+/**
+ * The text of a stretch of built markup as a reader sees it: its runs of text
+ * read in order and joined, with nothing of its tags, comments or doctype.
+ * Character references stay as written, for `decode`.
+ *
+ * @param {string} markup Markup of a built page, or of one of its elements.
+ * @returns {string} The text the markup shows.
+ */
+export const markupText = (markup) => Array.from(markup.matchAll(PIECE), ([, text = '']) => text).join('');
+
 /** Whether a built file is one of the stubs that send a retired address on. */
 export const isRedirectStub = (html) => /http-equiv="refresh"/.test(html);
 

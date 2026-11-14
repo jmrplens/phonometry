@@ -346,14 +346,73 @@ function firstOpened(text, at, end, kind, reads) {
 }
 
 /**
- * The `[start, end]` of each part of `text` the page shows as text or hides,
- * read left to right over each block of the page and each cell of a row on its
- * own: at each character the first of a code or maths span, a backslash escape,
- * a comment, a tag and an expression that opens there takes what follows. A tag
- * the page renders is markup, and the rest is read again from its end. A tag and
- * an expression may run on over the lines after their block. The spans of a
- * piece are read once and taken in turn, and read again only past what else
- * opened; the next opener is looked for again only once a span has held it.
+ * An expression that holds nothing but blanks and comments, which MDX renders
+ * as nothing: `{/* a note *\/}`, two of them side by side, a line comment that
+ * runs to the end of its line (`{// a note` and `}` on the next), or no
+ * comment at all (`{}`). Each block comment ends at the first `*\/` after it
+ * opens, so an expression that opens and ends on a comment and holds a name
+ * between them is no comment.
+ */
+const ONLY_COMMENTS = /^\{(?:\s|\/\*(?:(?!\*\/)[\s\S])*\*\/|\/\/[^\n]*\n)*\}$/;
+
+/**
+ * What a part of a page that renders no markup is, by what opens it: a
+ * backslash escape, a comment (an HTML one, or on an `.mdx` page an expression
+ * that holds nothing but blanks and comments), or an expression.
+ */
+function hiddenKind(text, start, end, kind) {
+  if (text[start] === '\\') return 'escape';
+  if (text[start] === '<') return 'comment';
+  return kind === 'mdx' && ONLY_COMMENTS.test(text.slice(start, end)) ? 'comment' : 'expression';
+}
+
+/**
+ * The parts of one piece of a block, `text[at..last]`, pushed onto `found` as
+ * `[start, end, what]`, read left to right: at each character the first of a
+ * code or maths span, a backslash escape, a comment, a tag and an expression
+ * that opens there takes what follows. A tag the page renders is markup, no
+ * part, and the rest is read again from its end; a tag and an expression may
+ * run on past `last`. The spans of the piece are read once and taken in turn,
+ * and read again only past what else opened; the next opener is looked for
+ * again only once a span has held it. Returns where the reading stopped.
+ */
+function readPiece(text, at, last, kind, reads, markers, found) {
+  let spans = null;
+  let opened = null;
+  let looked = false;
+  while (at < last) {
+    if (spans === null) {
+      const from = at;
+      spans = inlineSpans(text.slice(from, last), markers)
+        .map(([a, b]) => [from + a, from + b])
+        .reverse();
+    }
+    if (!looked || (opened !== null && opened[0] < at)) {
+      opened = firstOpened(text, at, last, kind, reads);
+      looked = true;
+    }
+    const span = spans.length ? spans[spans.length - 1] : null;
+    if (span !== null && (opened === null || span[0] < opened[0])) {
+      spans.pop();
+      found.push([span[0], span[1], text[span[0]] === '$' ? 'maths' : 'code']);
+      at = span[1];
+    } else if (opened !== null) {
+      if (!opened[2]) found.push([opened[0], opened[1], hiddenKind(text, opened[0], opened[1], kind)]);
+      at = opened[1];
+      spans = null;
+      looked = false;
+    } else {
+      break;
+    }
+  }
+  return at;
+}
+
+/**
+ * The `[start, end, what]` of each part of `text` the page shows as text or
+ * hides, read over each block of the page and each cell of a row on its own,
+ * each piece as {@link readPiece} reads it. `what` is one of the kinds
+ * {@link inlineParts} names.
  */
 function unrendered(text, kind, walked) {
   const found = [];
@@ -369,36 +428,35 @@ function unrendered(text, kind, walked) {
     if (block.reads === 'code') continue;
     const markers = block.reads === 'raw' ? '' : '`$';
     for (const [first, last] of pieces) {
-      at = Math.max(at, first);
-      let spans = null;
-      let opened = null;
-      let looked = false;
-      while (at < last) {
-        if (spans === null) {
-          spans = inlineSpans(text.slice(at, last), markers)
-            .map(([a, b]) => [at + a, at + b])
-            .reverse();
-        }
-        if (!looked || (opened !== null && opened[0] < at)) {
-          opened = firstOpened(text, at, last, kind, block.reads);
-          looked = true;
-        }
-        const span = spans.length ? spans[spans.length - 1] : null;
-        if (span !== null && (opened === null || span[0] < opened[0])) {
-          found.push(spans.pop());
-          at = span[1];
-        } else if (opened !== null) {
-          if (!opened[2]) found.push([opened[0], opened[1]]);
-          at = opened[1];
-          spans = null;
-          looked = false;
-        } else {
-          break;
-        }
-      }
+      at = readPiece(text, Math.max(at, first), last, kind, block.reads, markers, found);
     }
   }
   return found;
+}
+
+/**
+ * Every part of one run of inline text (the lines of a paragraph, or the text
+ * of a heading) that the page does not show as prose or as markup, with what it
+ * is, read left to right as {@link pageMarkup} reads the run: the first of a
+ * code or maths span, a backslash escape, a comment, a tag and an expression
+ * that opens takes what follows. A tag is read whole and is no part, so what
+ * its attributes write opens nothing.
+ *
+ * `what` is `code`, an inline code span; `maths`, an inline maths span;
+ * `escape`, a backslash and the character it escapes; `comment`, an HTML
+ * comment, or on an `.mdx` page an expression that holds nothing but blanks
+ * and comments; and `expression`, on an `.mdx` page. The indexes are those of
+ * `text`, whose line ends stay where the page writes them, so that a line
+ * comment ends where its line does.
+ *
+ * @param {string} text The run, its lines joined by line feeds.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
+ * @returns {Array<{ start: number, end: number, what: 'code' | 'maths' | 'escape' | 'comment' | 'expression' }>}
+ */
+export function inlineParts(text, { kind = 'mdx' } = {}) {
+  const found = [];
+  readPiece(text, 0, text.length, kind, 'text', '`$', found);
+  return found.map(([start, end, what]) => ({ start, end, what }));
 }
 
 /**

@@ -45,7 +45,10 @@ const referenceBase = {
    * said to be based on in its structured data (src/lib/citations.mjs). The
    * build is held to all of that by scripts/check-cited-standards.mjs (chips,
    * structured data, the entry still printed) and
-   * scripts/check-search-designation.mjs (the search field).
+   * scripts/check-search-designation.mjs (the search field). A catalogue's
+   * dataset is not the page, and still names a standard whose table its rows
+   * were read from among the works it is based on
+   * (src/lib/catalogue-datasets.mjs).
    *
    * Absent means implemented, so only the exceptions carry it, and `false` is
    * the one value it takes. Allowed only where a designation exists to be
@@ -61,8 +64,10 @@ const referenceBase = {
    * table no entry claims, a claim on a table the page does not print, and a
    * claim on a key of another work (a key starts with its work's first
    * author or organization and its year, or a standard's number) stop it
-   * (src/lib/catalogue-sources.mjs). Read nowhere else, and refused on any
-   * other page.
+   * (src/lib/catalogue-sources.mjs). The dataset each catalogue is in the
+   * page's structured data names, from it, the works its rows were read from
+   * (src/lib/catalogue-datasets.mjs). Read on catalogue pages only, and
+   * refused on any other page.
    */
   tables: z
     .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'a table key is the lowercase key its rows carry'))

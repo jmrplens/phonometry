@@ -27,9 +27,12 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
-import { topicForSlug, topicSections } from '../src/data/topics.mjs';
+import { catalogueSlugs, topicForSlug, topicSections, topics } from '../src/data/topics.mjs';
+import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
+
+import { decode, markupOf, markupText } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // An explicit directory is for reproducing a defect against a build kept aside;
@@ -255,6 +258,108 @@ const CATALOGUE_BOUND = /\b(?:this|these) catalogues?\b|\best(?:e|os) catálogos
 /** The numbers of a designation, in order: what a translation of it leaves alone. */
 const numbersOf = (designation) => (String(designation ?? '').match(/\d+/g) ?? []).join(' ');
 
+/**
+ * The catalogues the generator writes (src/generated/catalogues.mjs), each of
+ * which a catalogue page of each language publishes as a Dataset.
+ */
+const CATALOGUE_KEYS = Object.keys(catalogues);
+
+/**
+ * The catalogue pages, by their route in either language: the list
+ * src/data/topics.mjs keeps, which the sidebar, the finder and the build read
+ * too. A route written here as a pattern would stay behind if they moved, and
+ * every check of a dataset below would pass having read nothing.
+ */
+const CATALOGUE_PAGES = new Set(catalogueSlugs);
+
+/**
+ * The overview of the catalogues: the one page their sidebar group in
+ * src/data/topics.mjs holds besides the catalogue pages themselves.
+ *
+ * @param {unknown[]} items A level of the navigation tree.
+ * @returns {string | undefined} The overview's route, without the language.
+ */
+function catalogueOverviewIn(items) {
+	for (const item of items) {
+		if (!Array.isArray(item?.items)) continue;
+		const slugs = item.items.map((entry) => (typeof entry === 'string' ? entry : entry?.slug));
+		if (catalogueSlugs.every((slug) => slugs.includes(slug))) {
+			const others = slugs.filter((slug) => slug !== undefined && !CATALOGUE_PAGES.has(slug));
+			if (others.length !== 1) {
+				throw new Error(
+					`the sidebar group of the catalogue pages in src/data/topics.mjs holds ${others.length} other pages, ` +
+						'and the overview of the catalogues is the one page it holds besides them',
+				);
+			}
+			return others[0];
+		}
+		const found = catalogueOverviewIn(item.items);
+		if (found !== undefined) return found;
+	}
+	return undefined;
+}
+const CATALOGUE_OVERVIEW = catalogueOverviewIn(topics);
+if (CATALOGUE_OVERVIEW === undefined) {
+	throw new Error('no sidebar group of src/data/topics.mjs lists the catalogue pages, so their overview is unknown');
+}
+
+/** The catalogue a node's `@id` names as `#dataset-<key>`, when it is one the generator writes. */
+const datasetKeyOf = (id) => {
+	const key = /#dataset-(\w+)$/.exec(String(id ?? ''))?.[1];
+	return key !== undefined && key in catalogues ? key : undefined;
+};
+
+/** A heading that is a band and nothing else: `125 Hz`, `1,25 kHz`. */
+const BAND_HEADING = /^\d+(?:[.,]\d+)? k?Hz$/;
+
+/**
+ * Fields a dataset of transcribed tables must not carry. The rows are read
+ * off works that keep their own rights, so the site grants no licence over
+ * them, and it serves them on the page and nowhere else.
+ */
+const DATASET_CLAIMS = ['license', 'contentUrl', 'distribution', 'encoding'];
+
+/**
+ * Text with what the site's typographer sets undone, its blanks one space:
+ * remark-smartypants, which Astro runs on every page, curls the straight
+ * quotes, sets three dots as an ellipsis and two hyphens as a dash. A dataset
+ * says what the page's source says; the page sets it.
+ */
+const unset = (text) =>
+	String(text)
+		.replace(/[\u2018\u2019]/g, "'")
+		.replace(/[\u201c\u201d]/g, '"')
+		.replace(/\u2026/g, '...')
+		.replace(/[\u2013\u2014]/g, '--')
+		.replace(/[ \t\r\n]+/g, ' ')
+		.trim();
+
+/** The text a reader sees of an element's markup: its runs of text, its references decoded. */
+const shownText = (inner) => unset(decode(markupText(inner)));
+
+/**
+ * What a page shows a dataset could be named or described by: the text of
+ * its title and its `##` headings, and of its paragraphs.
+ *
+ * @param {string} html A built page.
+ * @returns {{headings: Set<string>, paragraphs: Set<string>}}
+ */
+function pageTexts(html) {
+	const markup = markupOf(html);
+	return {
+		headings: new Set([...markup.matchAll(/<h([12])\b[^>]*>([\s\S]*?)<\/h\1>/gi)].map(([, , inner]) => shownText(inner))),
+		paragraphs: new Set([...markup.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)].map(([, inner]) => shownText(inner))),
+	};
+}
+
+/** What each catalogue's columns call the variables a dataset of it measures, per language. */
+const variableNames = (key, lang) =>
+	new Set(
+		catalogues[key].columns.map((column) =>
+			lang === 'es' ? (column.quantityEs ?? column.headingEs) : (column.quantity ?? column.heading),
+		),
+	);
+
 const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
@@ -273,6 +378,11 @@ const seen = {
 	basedOn: 0,
 	cited: 0,
 	citing: 0,
+	datasetBasis: 0,
+	datasetDated: 0,
+	datasetUndated: 0,
+	datasetShown: 0,
+	datasetUnshown: 0,
 };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
@@ -300,6 +410,14 @@ const unnamedCited = [];
 const stubs = [];
 /** What each language's bibliography page defines, for the check across the two. */
 const bibliographies = new Map();
+/** Per language: each catalogue's dataset, by key, with the page that publishes it. */
+const datasetsByLanguage = { en: new Map(), es: new Map() };
+/** Per language: what the overview of the catalogues lists, by `@id`. */
+const listedDatasets = { en: undefined, es: undefined };
+/** Per language: how many catalogue pages the build holds. */
+const cataloguePagesSeen = { en: 0, es: 0 };
+/** Every dataset's link to its twin, checked once both languages are read. */
+const datasetTwins = [];
 
 for (const file of files) {
 	const html = readFileSync(join(DIST, file), 'utf8');
@@ -497,6 +615,165 @@ for (const file of files) {
 	seen.cited += works.size;
 	const unnamed = [...works].filter((id) => !namedHere.has(id));
 	if (unnamed.length > 0) unnamedCited.push([route, unnamed.length]);
+
+	// Every published catalogue is a Dataset of the page that renders it, and
+	// the overview of the catalogues is the DataCatalog that lists them
+	// (src/lib/catalogue-datasets.mjs). Read here off what was built: each
+	// dataset is the article's main entity, points at its table on the page,
+	// names the variables its columns hold and the works its rows were read
+	// from, is dated as its page, and claims no licence over rows other works
+	// printed. The count across the pages, every catalogue the generator
+	// writes once in each language, is checked after the loop.
+	if (CATALOGUE_PAGES.has(slug)) {
+		cataloguePagesSeen[lang] += 1;
+		/** What the page shows, read once a dataset needs it. */
+		let pageText;
+		const datasets = nodes.filter((node) => typesOf(node).includes('Dataset'));
+		if (datasets.length === 0) fail(`${route}: a catalogue page publishes no Dataset`);
+		const mainEntities = [article.mainEntity ?? []].flat().map((item) => item?.['@id']);
+		const datasetIds = datasets.map((node) => node['@id']);
+		if (JSON.stringify(mainEntities) !== JSON.stringify(datasetIds)) {
+			fail(
+				`${route}: the article's mainEntity is ${JSON.stringify(mainEntities)}, not the page's datasets ` +
+					`${JSON.stringify(datasetIds)}`,
+			);
+		}
+		for (const dataset of datasets) {
+			const id = String(dataset['@id']);
+			const key = id.startsWith(`${canonical}#dataset-`) ? id.slice(`${canonical}#dataset-`.length) : undefined;
+			if (!key || !(key in catalogues)) {
+				fail(`${route}: a Dataset's @id, ${dataset['@id']}, names no catalogue the generator writes`);
+				continue;
+			}
+			const seenOn = datasetsByLanguage[lang].get(key);
+			if (seenOn) fail(`${route}: the catalogue ${key} is a Dataset of ${seenOn.route} as well`);
+			datasetsByLanguage[lang].set(key, { route, node: dataset });
+			const at = `${route} ${key}`;
+			if (dataset.url !== `${canonical}#catalogue-${key}`) {
+				fail(`${at}: the dataset's url is ${dataset.url}, not its table, ${canonical}#catalogue-${key}`);
+			} else if (!html.includes(`id="catalogue-${key}"`)) {
+				fail(`${at}: the dataset's url points at #catalogue-${key}, and the page holds no such table`);
+			}
+			for (const field of ['name', 'description']) {
+				if (typeof dataset[field] !== 'string' || dataset[field].trim() === '') {
+					fail(`${at}: the dataset has no ${field}`);
+				}
+			}
+			// What a dataset says is what its page shows: its name is the page's
+			// title or the `##` heading of its section, and its description a
+			// paragraph of the page, or the page's own description where the page
+			// renders one catalogue alone. Read off the built page, so a reading of
+			// the page's source that took markup for text, or the lines of an
+			// admonition for a paragraph (its `:::` markers are no text the page
+			// shows), fails here whatever the reader did. Any paragraph of the page
+			// counts, one an aside holds too, written `:::note` or `<Aside>`, and one
+			// of a list: the tags of an `<Aside>` are markup the reader drops, so
+			// its lines read as the paragraph it holds. Keeping those out is the
+			// reader's part, src/lib/catalogue-datasets.mjs and its tests.
+			pageText ??= pageTexts(html);
+			const nameShown = pageText.headings.has(unset(dataset.name ?? ''));
+			const descriptionShown =
+				pageText.paragraphs.has(unset(dataset.description ?? '')) ||
+				(datasets.length === 1 && dataset.description === article.description);
+			if (!nameShown) fail(`${at}: the dataset's name, ${JSON.stringify(dataset.name)}, is no heading of its page`);
+			if (!descriptionShown) {
+				fail(
+					`${at}: the dataset's description is no paragraph of its page` +
+						`${datasets.length === 1 ? ' and not its description' : ''}: ` +
+						JSON.stringify(String(dataset.description ?? '').slice(0, 120)),
+				);
+			}
+			seen[nameShown && descriptionShown ? 'datasetShown' : 'datasetUnshown'] += 1;
+			// A page of several catalogues describes them all, so its description
+			// says of one dataset what belongs to another.
+			if (datasets.length > 1 && dataset.description === article.description) {
+				fail(`${at}: the dataset takes the page's description, which speaks of all ${datasets.length} catalogues it renders`);
+			}
+			if (dataset.inLanguage !== lang) {
+				fail(`${at}: the dataset's inLanguage is ${JSON.stringify(dataset.inLanguage)}, not ${lang}`);
+			}
+			const claims = DATASET_CLAIMS.filter((field) => dataset[field] !== undefined);
+			if (claims.length > 0) {
+				fail(`${at}: the dataset claims ${claims.join(', ')} over rows other works printed`);
+			}
+			const overview = `${ORIGIN}${lang === 'es' ? '/es' : ''}/${CATALOGUE_OVERVIEW}/#article`;
+			if (dataset.includedInDataCatalog?.['@id'] !== overview) {
+				fail(`${at}: the dataset is included in ${dataset.includedInDataCatalog?.['@id']}, not ${overview}`);
+			}
+			// A dataset is its page's text and the rows the page renders, so it
+			// changed when its page did: it carries the article's dateModified.
+			if (typeof dataset.dateModified !== 'string' || dataset.dateModified !== article.dateModified) {
+				fail(
+					`${at}: the dataset's dateModified is ${JSON.stringify(dataset.dateModified)}, not its page's ` +
+						`${JSON.stringify(article.dateModified)}`,
+				);
+				seen.datasetUndated += 1;
+			} else {
+				seen.datasetDated += 1;
+			}
+			const twinKey = lang === 'en' ? 'workTranslation' : 'translationOfWork';
+			datasetTwins.push({ at, lang, key, twin: dataset[twinKey]?.['@id'] });
+			// The variables are the columns: every column names one, by its
+			// quantity where the page heads it by its band alone, and a band is
+			// never a variable's whole name.
+			const variables = [dataset.variableMeasured ?? []].flat();
+			const named = new Set(
+				variables.filter((item) => typesOf(item ?? {}).includes('PropertyValue')).map((item) => item.name),
+			);
+			const missing = [...variableNames(key, lang)].filter((name) => !named.has(name));
+			if (variables.length === 0 || missing.length > 0) {
+				fail(
+					`${at}: the dataset's variableMeasured names ${variables.length === 0 ? 'nothing' : `no variable for ${missing.join(', ')}`}`,
+				);
+			}
+			const bands = [...named].filter((name) => BAND_HEADING.test(String(name)));
+			if (bands.length > 0) fail(`${at}: variables named by a band alone: ${bands.join(', ')}`);
+			// The works its rows were read from, each named where the dataset names
+			// it, and held to what the bibliography says of it like any other stub.
+			const basis = [dataset.isBasedOn ?? []].flat();
+			if (basis.length === 0) fail(`${at}: the dataset names no work it is based on`);
+			for (const item of basis) {
+				if (!isCitedWork(item?.['@id']) || !isNamed(item)) {
+					fail(`${at}: the dataset is based on ${item?.['@id'] ?? JSON.stringify(item)} without naming it`);
+				} else {
+					stubs.push({ route, item });
+					seen.datasetBasis += 1;
+				}
+			}
+		}
+	} else {
+		// Nowhere else does a catalogue's dataset or table appear: a catalogue
+		// page that sits at a route topics.mjs does not list would leave every
+		// check above with nothing to read, and the build green.
+		const strayDatasets = nodes.filter((node) => typesOf(node).includes('Dataset') && datasetKeyOf(node['@id']));
+		const strayTables = CATALOGUE_KEYS.filter((key) => html.includes(`id="catalogue-${key}"`));
+		if (strayDatasets.length > 0 || strayTables.length > 0) {
+			fail(
+				`${route}: publishes ${strayDatasets.length} catalogue dataset(s) and holds ${strayTables.length} catalogue ` +
+					`table(s) (first: ${[...strayDatasets.map((node) => node['@id']), ...strayTables].slice(0, 3).join(', ')}), ` +
+					'and is not a catalogue page of catalogueSlugs in src/data/topics.mjs',
+			);
+		}
+	}
+	if (slug !== CATALOGUE_OVERVIEW && nodes.some((node) => typesOf(node).includes('DataCatalog'))) {
+		fail(`${route}: publishes a DataCatalog, and is not the overview of the catalogues, ${CATALOGUE_OVERVIEW}`);
+	}
+	if (slug === CATALOGUE_OVERVIEW) {
+		if (!typesOf(article).includes('DataCatalog')) {
+			fail(`${route}: the overview of the catalogues is typed ${JSON.stringify(article['@type'])}, not a DataCatalog`);
+		}
+		const listed = new Map();
+		for (const item of [article.dataset ?? []].flat()) {
+			if (!typesOf(item ?? {}).includes('Dataset') || typeof item.name !== 'string' || item.name === '') {
+				fail(`${route}: the DataCatalog lists ${item?.['@id'] ?? JSON.stringify(item)} without naming it as a Dataset`);
+			}
+			listed.set(item?.['@id'], item);
+		}
+		if (DATASET_CLAIMS.some((field) => article[field] !== undefined)) {
+			fail(`${route}: the DataCatalog claims ${DATASET_CLAIMS.filter((field) => article[field] !== undefined).join(', ')}`);
+		}
+		listedDatasets[lang] = { route, listed };
+	}
 
 	// The bibliography page defines every work in full, and names each
 	// standard's publisher by the one identity the body has on the English
@@ -759,6 +1036,72 @@ if (unnamedCited.length > 0) {
 	console.error(`     first: ${firstOf(unnamedCited)}`);
 } else {
 	ok(`every one of the ${seen.cited} works ${seen.citing} pages cite is named on the page that cites it`);
+}
+
+// Every catalogue the generator writes is a Dataset once in each language,
+// and the overview of the catalogues lists exactly those. A build that holds
+// no catalogue page at all (the small builds the tests of this check write)
+// has nothing to count. It is one that holds none anywhere: the routes are the
+// ones topics.mjs lists, and a catalogue's dataset or table at any other
+// route, or a DataCatalog anywhere but the overview, has failed above.
+for (const lang of ['en', 'es']) {
+	if (cataloguePagesSeen[lang] === 0 && listedDatasets[lang] === undefined) continue;
+	const found = datasetsByLanguage[lang];
+	const missing = CATALOGUE_KEYS.filter((key) => !found.has(key));
+	if (missing.length > 0) {
+		fail(
+			`the ${lang} catalogue pages publish ${found.size} of the ${CATALOGUE_KEYS.length} catalogues as a Dataset; ` +
+				`none is ${missing.join(', ')}`,
+		);
+	} else {
+		ok(`each of the ${CATALOGUE_KEYS.length} catalogues is a Dataset of one ${lang} catalogue page, claiming no licence`);
+	}
+	const overview = listedDatasets[lang];
+	if (!overview) {
+		fail(`the ${lang} overview of the catalogues was not found: build the site first`);
+		continue;
+	}
+	const ids = new Set([...found.values()].map(({ node }) => node['@id']));
+	const unlisted = [...ids].filter((id) => !overview.listed.has(id));
+	const stray = [...overview.listed.keys()].filter((id) => !ids.has(id));
+	const misnamed = [...found.values()].filter(
+		({ node }) => overview.listed.has(node['@id']) && overview.listed.get(node['@id']).name !== node.name,
+	);
+	if (unlisted.length > 0 || stray.length > 0 || misnamed.length > 0) {
+		fail(
+			`${overview.route}: the DataCatalog leaves out ${unlisted.length}, lists ${stray.length} no catalogue page ` +
+				`publishes and names ${misnamed.length} otherwise than its page (first: ` +
+				`${[...unlisted, ...stray, ...misnamed.map(({ node }) => node['@id'])].slice(0, 3).join(', ')})`,
+		);
+	} else {
+		ok(`${overview.route}: the DataCatalog lists the ${ids.size} datasets of its language, each by its own name`);
+	}
+}
+{
+	const twinless = datasetTwins.filter(({ lang, key, twin }) => {
+		const other = datasetsByLanguage[lang === 'en' ? 'es' : 'en'].get(key);
+		return !other || other.node['@id'] !== twin;
+	});
+	if (twinless.length > 0) {
+		fail(
+			`${twinless.length} dataset(s) name as their translation a dataset the other language does not publish ` +
+				`(first: ${twinless.slice(0, 3).map(({ at, twin }) => `${at} -> ${twin}`).join('; ')})`,
+		);
+	} else if (datasetTwins.length > 0) {
+		ok(`each of the ${datasetTwins.length} datasets names its twin in the other language`);
+	}
+	if (seen.datasetDated > 0 && seen.datasetUndated === 0) {
+		ok(`each of the ${seen.datasetDated} datasets is dated as the page that renders it`);
+	}
+	if (seen.datasetShown > 0 && seen.datasetUnshown === 0) {
+		ok(
+			`each of the ${seen.datasetShown} datasets is named by a heading of its page and described by a paragraph ` +
+				'of it, or by the description of a page of one catalogue',
+		);
+	}
+	if (seen.datasetBasis > 0) {
+		ok(`the datasets name each of the ${seen.datasetBasis} works they are based on where they cite it`);
+	}
 }
 
 // The two bibliographies define one set of works in two languages. A Spanish

@@ -49,6 +49,10 @@ export interface CatalogueColumn {
 	heading: string;
 	headingEs: string;
 	unit: string;
+	/** The quantity a column headed by its band alone holds. */
+	quantity?: string;
+	/** The same quantity, in Spanish. */
+	quantityEs?: string;
 }
 
 /**

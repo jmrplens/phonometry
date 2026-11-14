@@ -67345,43 +67345,57 @@ export const catalogues = {
         "field": "absorption_coefficient_63",
         "heading": "63 Hz",
         "headingEs": "63 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Absorption coefficient",
+        "quantityEs": "Coeficiente de absorción"
       },
       {
         "field": "absorption_coefficient_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Absorption coefficient",
+        "quantityEs": "Coeficiente de absorción"
       },
       {
         "field": "absorption_coefficient_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Absorption coefficient",
+        "quantityEs": "Coeficiente de absorción"
       },
       {
         "field": "absorption_coefficient_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Absorption coefficient",
+        "quantityEs": "Coeficiente de absorción"
       },
       {
         "field": "absorption_coefficient_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Absorption coefficient",
+        "quantityEs": "Coeficiente de absorción"
       },
       {
         "field": "absorption_coefficient_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Absorption coefficient",
+        "quantityEs": "Coeficiente de absorción"
       },
       {
         "field": "absorption_coefficient_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Absorption coefficient",
+        "quantityEs": "Coeficiente de absorción"
       }
     ],
     "rows": [
@@ -95793,49 +95807,65 @@ export const catalogues = {
         "field": "transmission_loss_63",
         "heading": "63 Hz",
         "headingEs": "63 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_8000",
         "heading": "8 kHz",
         "headingEs": "8 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       }
     ],
     "rows": [
@@ -120871,49 +120901,65 @@ export const catalogues = {
         "field": "transmission_loss_63",
         "heading": "63 Hz",
         "headingEs": "63 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_8000",
         "heading": "8 kHz",
         "headingEs": "8 kHz",
-        "unit": "dB"
+        "unit": "dB",
+        "quantity": "Transmission loss",
+        "quantityEs": "Pérdida por transmisión"
       }
     ],
     "rows": [
@@ -125010,109 +125056,145 @@ export const catalogues = {
         "field": "scattering_coefficient_100",
         "heading": "100 Hz",
         "headingEs": "100 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_160",
         "heading": "160 Hz",
         "headingEs": "160 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_200",
         "heading": "200 Hz",
         "headingEs": "200 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_315",
         "heading": "315 Hz",
         "headingEs": "315 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_400",
         "heading": "400 Hz",
         "headingEs": "400 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_630",
         "heading": "630 Hz",
         "headingEs": "630 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_800",
         "heading": "800 Hz",
         "headingEs": "800 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_1250",
         "heading": "1.25 kHz",
         "headingEs": "1,25 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_1600",
         "heading": "1.6 kHz",
         "headingEs": "1,6 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_2500",
         "heading": "2.5 kHz",
         "headingEs": "2,5 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_3150",
         "heading": "3.15 kHz",
         "headingEs": "3,15 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_5000",
         "heading": "5 kHz",
         "headingEs": "5 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       }
     ],
     "rows": [
@@ -130518,109 +130600,145 @@ export const catalogues = {
         "field": "diffusion_coefficient_100",
         "heading": "100 Hz",
         "headingEs": "100 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_160",
         "heading": "160 Hz",
         "headingEs": "160 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_200",
         "heading": "200 Hz",
         "headingEs": "200 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_315",
         "heading": "315 Hz",
         "headingEs": "315 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_400",
         "heading": "400 Hz",
         "headingEs": "400 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_630",
         "heading": "630 Hz",
         "headingEs": "630 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_800",
         "heading": "800 Hz",
         "headingEs": "800 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_1250",
         "heading": "1.25 kHz",
         "headingEs": "1,25 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_1600",
         "heading": "1.6 kHz",
         "headingEs": "1,6 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_2500",
         "heading": "2.5 kHz",
         "headingEs": "2,5 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_3150",
         "heading": "3.15 kHz",
         "headingEs": "3,15 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       },
       {
         "field": "diffusion_coefficient_5000",
         "heading": "5 kHz",
         "headingEs": "5 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Diffusion coefficient",
+        "quantityEs": "Coeficiente de difusión"
       }
     ],
     "rows": [
@@ -141165,109 +141283,145 @@ export const catalogues = {
         "field": "scattering_coefficient_100",
         "heading": "100 Hz",
         "headingEs": "100 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_160",
         "heading": "160 Hz",
         "headingEs": "160 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_200",
         "heading": "200 Hz",
         "headingEs": "200 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_315",
         "heading": "315 Hz",
         "headingEs": "315 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_400",
         "heading": "400 Hz",
         "headingEs": "400 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_630",
         "heading": "630 Hz",
         "headingEs": "630 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_800",
         "heading": "800 Hz",
         "headingEs": "800 Hz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_1250",
         "heading": "1.25 kHz",
         "headingEs": "1,25 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_1600",
         "heading": "1.6 kHz",
         "headingEs": "1,6 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_2500",
         "heading": "2.5 kHz",
         "headingEs": "2,5 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_3150",
         "heading": "3.15 kHz",
         "headingEs": "3,15 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       },
       {
         "field": "scattering_coefficient_5000",
         "heading": "5 kHz",
         "headingEs": "5 kHz",
-        "unit": ""
+        "unit": "",
+        "quantity": "Scattering coefficient",
+        "quantityEs": "Coeficiente de dispersión"
       }
     ],
     "rows": [
@@ -155799,37 +155953,49 @@ export const catalogues = {
         "field": "absorption_area_125_m2",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": "m²"
+        "unit": "m²",
+        "quantity": "Equivalent absorption area",
+        "quantityEs": "Área de absorción equivalente"
       },
       {
         "field": "absorption_area_250_m2",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": "m²"
+        "unit": "m²",
+        "quantity": "Equivalent absorption area",
+        "quantityEs": "Área de absorción equivalente"
       },
       {
         "field": "absorption_area_500_m2",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": "m²"
+        "unit": "m²",
+        "quantity": "Equivalent absorption area",
+        "quantityEs": "Área de absorción equivalente"
       },
       {
         "field": "absorption_area_1000_m2",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": "m²"
+        "unit": "m²",
+        "quantity": "Equivalent absorption area",
+        "quantityEs": "Área de absorción equivalente"
       },
       {
         "field": "absorption_area_2000_m2",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": "m²"
+        "unit": "m²",
+        "quantity": "Equivalent absorption area",
+        "quantityEs": "Área de absorción equivalente"
       },
       {
         "field": "absorption_area_4000_m2",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": "m²"
+        "unit": "m²",
+        "quantity": "Equivalent absorption area",
+        "quantityEs": "Área de absorción equivalente"
       }
     ],
     "rows": [
@@ -157008,43 +157174,57 @@ export const catalogues = {
         "field": "air_attenuation_125_np_m",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
-        "unit": "mNp/m"
+        "unit": "mNp/m",
+        "quantity": "Air attenuation coefficient",
+        "quantityEs": "Coeficiente de atenuación del aire"
       },
       {
         "field": "air_attenuation_250_np_m",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
-        "unit": "mNp/m"
+        "unit": "mNp/m",
+        "quantity": "Air attenuation coefficient",
+        "quantityEs": "Coeficiente de atenuación del aire"
       },
       {
         "field": "air_attenuation_500_np_m",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
-        "unit": "mNp/m"
+        "unit": "mNp/m",
+        "quantity": "Air attenuation coefficient",
+        "quantityEs": "Coeficiente de atenuación del aire"
       },
       {
         "field": "air_attenuation_1000_np_m",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
-        "unit": "mNp/m"
+        "unit": "mNp/m",
+        "quantity": "Air attenuation coefficient",
+        "quantityEs": "Coeficiente de atenuación del aire"
       },
       {
         "field": "air_attenuation_2000_np_m",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
-        "unit": "mNp/m"
+        "unit": "mNp/m",
+        "quantity": "Air attenuation coefficient",
+        "quantityEs": "Coeficiente de atenuación del aire"
       },
       {
         "field": "air_attenuation_4000_np_m",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
-        "unit": "mNp/m"
+        "unit": "mNp/m",
+        "quantity": "Air attenuation coefficient",
+        "quantityEs": "Coeficiente de atenuación del aire"
       },
       {
         "field": "air_attenuation_8000_np_m",
         "heading": "8 kHz",
         "headingEs": "8 kHz",
-        "unit": "mNp/m"
+        "unit": "mNp/m",
+        "quantity": "Air attenuation coefficient",
+        "quantityEs": "Coeficiente de atenuación del aire"
       }
     ],
     "rows": [

@@ -37,7 +37,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { topicForSlug } from '../src/data/topics.mjs';
+import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
+import { variablesMeasured } from '../src/lib/catalogue-datasets.mjs';
 import { build as wholeBuild, check, ORIGIN, page, SITE } from './shared/structured-data-fixture.mjs';
 
 const EN = `${ORIGIN}/reference/bibliography/`;
@@ -420,4 +422,269 @@ test('a build with no site-wide block fails rather than passing the budget on no
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL no page carries the site-wide ld\+json block/);
+});
+
+// ---------------------------------------------------------------------------
+// The catalogues as datasets
+// ---------------------------------------------------------------------------
+
+/** The catalogue page every dataset of the fixture sits on: one page may hold several. */
+const CATALOGUE_PAGE = 'reference/catalogues/solids';
+
+/**
+ * A build whose every catalogue is a Dataset of a catalogue page in each
+ * language, listed by that language's overview: the pages of `build()` and,
+ * per language, the overview and one catalogue page that holds all the
+ * datasets with a table for each.
+ *
+ * @param {{pageSlug?: string, overviewSlug?: string}} [at] Where the catalogue
+ *   page and the overview sit, which a test moves to a route topics.mjs does
+ *   not list.
+ */
+function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/catalogues' } = {}) {
+	const built = build();
+	for (const [lang, url] of [
+		['en', EN],
+		['es', ES],
+	]) {
+		const prefix = lang === 'es' ? '/es' : '';
+		const twin = lang === 'es' ? '' : '/es';
+		const pageUrl = `${ORIGIN}${prefix}/${pageSlug}/`;
+		const overviewUrl = `${ORIGIN}${prefix}/${overviewSlug}/`;
+		const datasets = Object.keys(catalogues).map((key) => ({
+			'@type': 'Dataset',
+			'@id': `${pageUrl}#dataset-${key}`,
+			name: `Catalogue ${key}`,
+			description: `The rows of ${key}.`,
+			url: `${pageUrl}#catalogue-${key}`,
+			inLanguage: lang,
+			includedInDataCatalog: { '@type': 'DataCatalog', '@id': `${overviewUrl}#article`, name: 'Catalogues', url: overviewUrl },
+			[lang === 'en' ? 'workTranslation' : 'translationOfWork']: {
+				'@id': `${ORIGIN}${twin}/${pageSlug}/#dataset-${key}`,
+			},
+			variableMeasured: variablesMeasured(catalogues[key].columns, lang),
+			isBasedOn: [stub(book(url))],
+			// The day page() says the page was last edited.
+			dateModified: '2026-10-01',
+		}));
+		const catalogue = page(pageSlug, lang, {
+			mainEntity: datasets.map((node) => ({ '@id': node['@id'] })),
+			citation: [stub(book(url))],
+		});
+		catalogue.nodes.push(...datasets);
+		// The page shows what its datasets say: the first is named by its
+		// title, every later one by the heading of its section, and each is
+		// described by the paragraph above its table.
+		catalogue.text =
+			`<h1 id="_top">${datasets[0].name}</h1>` +
+			datasets
+				.map(
+					(node, i) =>
+						`${i > 0 ? `<h2 id="h-${i}">${node.name}</h2>` : ''}<p>${node.description}</p>` +
+						`<section id="${node.url.split('#')[1]}"></section>`,
+				)
+				.join('');
+		built[`${lang}/catalogue`] = catalogue;
+		built[`${lang}/overview`] = page(overviewSlug, lang, {
+			'@type': ['TechArticle', 'DataCatalog'],
+			name: 'Catalogues',
+			dataset: datasets.map((node) => ({ '@type': 'Dataset', '@id': node['@id'], name: node.name, url: node.url })),
+		});
+	}
+	return built;
+}
+
+/** The dataset of `key` on the catalogue page of `lang`. */
+const datasetOf = (built, lang, key) =>
+	built[`${lang}/catalogue`].nodes.find((node) => node['@id']?.endsWith(`#dataset-${key}`));
+
+test('a build whose every catalogue is a dataset of its page, listed by the overview, passes', (t) => {
+	const ran = check(t, catalogueBuild());
+	assert.equal(ran.status, 0, ran.err);
+	const count = Object.keys(catalogues).length;
+	assert.match(ran.out, new RegExp(`ok {3}each of the ${count} catalogues is a Dataset of one en catalogue page`));
+	assert.match(ran.out, new RegExp(`the DataCatalog lists the ${count} datasets of its language`));
+	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets names its twin in the other language`));
+	assert.match(ran.out, new RegExp(`each of the ${count * 2} datasets is dated as the page that renders it`));
+	assert.match(
+		ran.out,
+		new RegExp(`each of the ${count * 2} datasets is named by a heading of its page and described by a paragraph of it`),
+	);
+});
+
+test('a catalogue page that publishes no Dataset fails, and so does the count', (t) => {
+	const built = catalogueBuild();
+	const catalogue = built['es/catalogue'];
+	catalogue.nodes = catalogue.nodes.filter((node) => node['@type'] !== 'Dataset');
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/es\/reference\/catalogues\/solids\/: a catalogue page publishes no Dataset/);
+	assert.match(ran.err, /FAIL the es catalogue pages publish 0 of the 24 catalogues as a Dataset; none is solids/);
+});
+
+test('a dataset that claims a licence or a download over the rows fails', (t) => {
+	const built = catalogueBuild();
+	datasetOf(built, 'en', 'carpets').license = 'https://creativecommons.org/licenses/by/4.0/';
+	datasetOf(built, 'es', 'solids').contentUrl = 'https://example.org/solids.json';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /solids\/ carpets: the dataset claims license over rows other works printed/);
+	assert.match(ran.err, /solids\/ solids: the dataset claims contentUrl over rows other works printed/);
+});
+
+test('a dataset whose source is a bare @id, or that names none, fails', (t) => {
+	const built = catalogueBuild();
+	datasetOf(built, 'en', 'gases').isBasedOn = [{ '@id': stub(book(EN))['@id'] }];
+	delete datasetOf(built, 'en', 'fluids').isBasedOn;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /gases: the dataset is based on \S+#doi-10-1000-book without naming it/);
+	assert.match(ran.err, /fluids: the dataset names no work it is based on/);
+});
+
+test('a dataset that names its band columns by their band, or leaves a column out, fails', (t) => {
+	const built = catalogueBuild();
+	datasetOf(built, 'en', 'absorption').variableMeasured = catalogues.absorption.columns.map((column) => ({
+		'@type': 'PropertyValue',
+		name: column.heading,
+	}));
+	datasetOf(built, 'es', 'solids').variableMeasured.splice(0, 1);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /absorption: the dataset's variableMeasured names no variable for Absorption coefficient/);
+	assert.match(ran.err, /absorption: variables named by a band alone: 63 Hz, 125 Hz/);
+	assert.match(ran.err, /solids: the dataset's variableMeasured names no variable for Densidad/);
+});
+
+test('a dataset with no date, or another date than its page, fails', (t) => {
+	const built = catalogueBuild();
+	delete datasetOf(built, 'en', 'gases').dateModified;
+	// The rows changed after the page last did, and the page was never told.
+	datasetOf(built, 'es', 'fluids').dateModified = '2026-10-29';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /solids\/ gases: the dataset's dateModified is undefined, not its page's "2026-10-01"/);
+	assert.match(ran.err, /solids\/ fluids: the dataset's dateModified is "2026-10-29", not its page's "2026-10-01"/);
+	assert.doesNotMatch(ran.out, /datasets is dated as the page that renders it/);
+});
+
+test('a dataset whose url points at no table on its page fails', (t) => {
+	const built = catalogueBuild();
+	const catalogue = built['en/catalogue'];
+	catalogue.text = catalogue.text.replace('<section id="catalogue-plateau"></section>', '');
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /plateau: the dataset's url points at #catalogue-plateau, and the page holds no such table/);
+});
+
+test('an overview that is not a DataCatalog, or lists other datasets than the pages publish, fails', (t) => {
+	const built = catalogueBuild();
+	const english = built['en/overview'].article;
+	english['@type'] = 'TechArticle';
+	english.dataset.pop();
+	built['es/overview'].article.dataset[0].name = 'Otro nombre';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /\/reference\/catalogues\/: the overview of the catalogues is typed "TechArticle", not a DataCatalog/);
+	assert.match(ran.err, /\/reference\/catalogues\/: the DataCatalog leaves out 1, lists 0 no catalogue page publishes/);
+	assert.match(ran.err, /\/es\/reference\/catalogues\/: the DataCatalog leaves out 0, lists 0 no catalogue page publishes and names 1/);
+});
+
+test("an article whose mainEntity is not its page's datasets fails", (t) => {
+	const built = catalogueBuild();
+	built['en/catalogue'].article.mainEntity.pop();
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /\/reference\/catalogues\/solids\/: the article's mainEntity is /);
+});
+
+test("a dataset that takes the page's description on a page of several catalogues fails", (t) => {
+	const built = catalogueBuild();
+	// The page's description speaks of every catalogue the page renders.
+	datasetOf(built, 'en', 'absorption').description = built['en/catalogue'].article.description;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/\/reference\/catalogues\/solids\/ absorption: the dataset takes the page's description, which speaks of all 24 catalogues it renders/,
+	);
+});
+
+test('a dataset whose name is no heading of its page, or whose description no paragraph of it, fails', (t) => {
+	const built = catalogueBuild();
+	// What a reader of the page's source took for text, and the page shows otherwise.
+	datasetOf(built, 'en', 'gases').description = 'The rows of \\*gases\\*.';
+	datasetOf(built, 'es', 'fluids').name = 'Catalogue <abbr>fluids</abbr>';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/catalogues\/solids\/ gases: the dataset's description is no paragraph of its page: "The rows of \\\\\*gases\\\\\*\."/);
+	assert.match(ran.err, /FAIL \/es\/reference\/catalogues\/solids\/ fluids: the dataset's name, "Catalogue <abbr>fluids<\/abbr>", is no heading of its page/);
+	assert.doesNotMatch(ran.out, /datasets is named by a heading of its page/);
+});
+
+/** An aside as the site renders one, `:::note[title]` or `<Aside title>` alike, holding one paragraph. */
+const renderedAside = (title, paragraph) =>
+	`<aside aria-label="${title}" class="starlight-aside starlight-aside--note">` +
+	`<p class="starlight-aside__title" aria-hidden="true">${title}</p>` +
+	`<div class="starlight-aside__content"><p>${paragraph}</p></div></aside>`;
+
+test('a dataset described by the lines of an admonition, its markers with them, fails', (t) => {
+	const built = catalogueBuild();
+	const catalogue = built['en/catalogue'];
+	catalogue.text = catalogue.text.replace(
+		'<p>The rows of gases.</p>',
+		`<p>The rows of gases.</p>${renderedAside('Where the rows come from', 'The book prints them in three parts.')}`,
+	);
+	// What a reader makes of `:::note[...]`, its paragraph and `:::` when it
+	// takes the lines of the admonition for a paragraph.
+	datasetOf(built, 'en', 'gases').description = ':::note[Where the rows come from] The book prints them in three parts. :::';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/reference\/catalogues\/solids\/ gases: the dataset's description is no paragraph of its page: ":::note\[Where/);
+});
+
+test("a dataset described by the paragraph an aside holds passes: keeping it out is the page reader's part", (t) => {
+	const built = catalogueBuild();
+	const catalogue = built['en/catalogue'];
+	catalogue.text = catalogue.text.replace(
+		'<p>The rows of gases.</p>',
+		`<p>The rows of gases.</p>${renderedAside('Where the rows come from', 'The book prints them in three parts.')}`,
+	);
+	// What a reader makes of `<Aside title="...">`, its paragraph and
+	// `</Aside>`: the component's tags are markup it drops.
+	datasetOf(built, 'en', 'gases').description = 'The book prints them in three parts.';
+	const ran = check(t, built);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /datasets is named by a heading of its page and described by a paragraph of it/);
+});
+
+test("a dataset's text is what its page shows, with the typographer's quotes and the page's character references read back", (t) => {
+	const built = catalogueBuild();
+	datasetOf(built, 'en', 'gases').description = 'The book\'s rows of gases & "air", in three parts...';
+	const catalogue = built['en/catalogue'];
+	catalogue.text = catalogue.text.replace(
+		'<p>The rows of gases.</p>',
+		'<p>The book\u2019s rows of\n<em>gases</em> &#x26; \u201cair\u201d, in three parts\u2026</p>',
+	);
+	const ran = check(t, built);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /datasets is named by a heading of its page and described by a paragraph of it/);
+});
+
+test('catalogue pages and an overview at a route topics.mjs does not list fail, rather than leave nothing to check', (t) => {
+	// The catalogue routes moved, and nothing told the check: every dataset
+	// assertion above would read no page, and the count after them none.
+	const ran = check(t, catalogueBuild({ pageSlug: 'reference/tables/solids', overviewSlug: 'reference/tables' }));
+	assert.equal(ran.status, 1);
+	const count = Object.keys(catalogues).length;
+	for (const prefix of ['', '/es']) {
+		assert.match(
+			ran.err,
+			new RegExp(
+				`FAIL ${prefix}/reference/tables/solids/: publishes ${count} catalogue dataset\\(s\\) and holds ${count} catalogue ` +
+					'table\\(s\\) .*and is not a catalogue page of catalogueSlugs',
+			),
+		);
+		assert.match(ran.err, new RegExp(`FAIL ${prefix}/reference/tables/: publishes a DataCatalog, and is not the overview`));
+	}
 });

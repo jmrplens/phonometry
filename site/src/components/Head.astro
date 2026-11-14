@@ -30,6 +30,10 @@ import { pageStandardTokens } from '../lib/standard-search.mjs';
 import { prose } from '../lib/markdown-fences.mjs';
 import { personId as PERSON_ID, siteUrl } from '../data/site.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../lib/fallback-routes.mjs';
+import { catalogueOverview, cataloguePages } from '../lib/catalogue-pages';
+import { datasetNode, datasetStub } from '../lib/catalogue-datasets.mjs';
+import { isCataloguePage } from '../lib/catalogue-sources.mjs';
+import { catalogues } from '../generated/catalogues.mjs';
 
 const SITE = import.meta.env.SITE ?? siteUrl;
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -136,6 +140,8 @@ const isGuide = topic?.isDomain ?? false;
 // Human-readable section for articleSection, in the page's own language.
 const articleSection = topic?.label[lang];
 const isBibliography = slug === 'reference/bibliography';
+// The overview of the published catalogues, which lists them all.
+const isCatalogueOverview = slug === 'reference/catalogues';
 
 const bibliographyUrl = `${SITE}${BASE}${lang === 'es' ? '/es' : ''}/reference/bibliography/`;
 const englishBibliographyUrl = `${SITE}${BASE}/reference/bibliography/`;
@@ -162,13 +168,62 @@ const articleType = isApiPage
     ? ['TechArticle', 'LearningResource']
     : isHub
       ? ['CollectionPage', 'TechArticle']
-      : 'TechArticle';
+      : isCatalogueOverview
+        ? ['TechArticle', 'DataCatalog']
+        : 'TechArticle';
+
+// Every published catalogue is a Dataset of the page that renders it, and
+// the overview of the catalogues is the DataCatalog that lists them
+// (src/lib/catalogue-datasets.mjs says what a dataset carries and why it
+// claims no licence). A catalogue page's article names its datasets as its
+// `mainEntity`; the datasets themselves are nodes of the page's graph, each
+// dated as the page is.
+const catalogueCatalog =
+  isCataloguePage(entryId) || isCatalogueOverview ? await catalogueOverview(lang) : undefined;
+const dataCatalog = catalogueCatalog
+  ? {
+      '@id': `${new URL(catalogueCatalog.href, SITE).href}#article`,
+      name: catalogueCatalog.title,
+      url: new URL(catalogueCatalog.href, SITE).href,
+    }
+  : undefined;
+const cataloguePage = isCataloguePage(entryId)
+  ? (await cataloguePages(lang)).find((page) => page.id === entryId)
+  : undefined;
+const datasets =
+  cataloguePage && dataCatalog
+    ? cataloguePage.datasets.map((dataset) =>
+        datasetNode({
+          dataset,
+          catalogue: catalogues[dataset.key],
+          references: data.references ?? [],
+          lang,
+          pageUrl: canonical,
+          twinUrl: `${SITE}${BASE}${lang === 'en' ? '/es' : ''}/${slug}/`,
+          bibliographyUrl,
+          dataCatalog,
+          dateModified: modified,
+        }),
+      )
+    : [];
+const catalogueListing = isCatalogueOverview
+  ? (await cataloguePages(lang)).flatMap((page) =>
+      page.datasets.map((dataset) => datasetStub(dataset, new URL(page.href, SITE).href)),
+    )
+  : undefined;
+const datasetIds = datasets.map((dataset) => ({ '@id': dataset['@id'] }));
 
 // The guides hub already publishes its areas as a hand-authored ItemList in
 // the page frontmatter; CollectionPage.mainEntity is the hook that ties the
-// page node to that list instead of leaving two disconnected nodes.
-const hubMainEntity =
-  slug === 'start/guides' ? { '@id': `${canonical}#areas` } : undefined;
+// page node to that list instead of leaving two disconnected nodes. A
+// catalogue page's main entity is its catalogue, or its two on the page that
+// renders two.
+const mainEntity =
+  slug === 'start/guides'
+    ? { '@id': `${canonical}#areas` }
+    : datasetIds.length > 1
+      ? datasetIds
+      : datasetIds[0];
 
 // Word count of the page source, with the machinery that is not prose (MDX
 // imports, component tags, fenced code) stripped first. An approximation, but
@@ -191,6 +246,8 @@ const article =
         '@type': articleType,
         '@id': `${canonical}#article`,
         headline: title,
+        // A DataCatalog is named, as every dataset it lists is.
+        ...(isCatalogueOverview ? { name: title } : {}),
         ...(description ? { description } : {}),
         inLanguage: lang,
         url: canonical,
@@ -205,7 +262,8 @@ const article =
         ...(modified ? { dateModified: modified } : {}),
         ...(wordCount ? { wordCount } : {}),
         ...(articleSection ? { articleSection } : {}),
-        ...(hubMainEntity ? { mainEntity: hubMainEntity } : {}),
+        ...(mainEntity ? { mainEntity } : {}),
+        ...(catalogueListing ? { dataset: catalogueListing } : {}),
         ...(isGuide ? { learningResourceType: 'Guide' } : {}),
         // The language and the repository are the software's, said once on
         // the node `about` names: schema.org defines programmingLanguage and
@@ -329,7 +387,7 @@ const breadcrumbList = crumbs
 // every token with nothing in the build to notice. The head always exists.
 const standardTokens = pageStandardTokens(data.references);
 
-const graph = [article, homePage, breadcrumbList, ...bibliographyNodes].filter(Boolean);
+const graph = [article, homePage, breadcrumbList, ...datasets, ...bibliographyNodes].filter(Boolean);
 const jsonLd = graph.length
   ? JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })
   : null;

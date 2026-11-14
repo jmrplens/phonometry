@@ -27,17 +27,42 @@
  * or a claim on a key of another work stops the build too
  * (src/lib/catalogue-sources.mjs says why), and so does a `tables` on a page
  * that is not a catalogue page, where nothing reads it.
+ *
+ * And each catalogue a page renders is a dataset in the page's structured
+ * data (src/lib/catalogue-datasets.mjs), named and described by the page: the
+ * first by its title, and by its description when it is the page's only
+ * catalogue or else by the paragraph that opens the page, every later one by
+ * the `##` heading it sits under and the paragraph that opens it. A first
+ * catalogue of several with no paragraph before it, a later one with no
+ * heading of its own, or a heading with no paragraph under it would be a
+ * dataset with no name, nothing to say, or the page's words about rows it
+ * does not hold, and a name or a description that holds a component, an
+ * expression or a formula would publish it as written: each stops the build
+ * too.
  */
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
-import { pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 import { basePath } from '../data/site.mjs';
 import { catalogueSlugs } from '../data/topics.mjs';
 import { catalogues } from '../generated/catalogues.mjs';
+import { catalogueDatasets, catalogueSections } from './catalogue-datasets.mjs';
 import { catalogueSourceProblems, printedTables, strayTableClaims } from './catalogue-sources.mjs';
+
+/** What a catalogue's dataset is called and what it says it holds. */
+export interface CatalogueDataset {
+	/** The catalogue: `absorption`, `absorptionAreas`. */
+	key: keyof typeof catalogues;
+	/** Its name: the page's title, or the heading it sits under. */
+	name: string;
+	/** Its description: the page's when it is the page's only catalogue, or else
+	    the paragraph that opens the page or its own section. */
+	description: string;
+}
 
 /** One catalogue's page, in one language. */
 export interface CataloguePage {
+	/** Its content entry: `reference/catalogues/porous-materials`, `es/...`. */
+	id: string;
 	/** The last segment of its address: `porous-materials`. */
 	slug: string;
 	/** Its address, with the site's base path and the locale. */
@@ -50,12 +75,17 @@ export interface CataloguePage {
 	keys: (keyof typeof catalogues)[];
 	/** How many rows those catalogues hold between them. */
 	rows: number;
+	/** The dataset each of those catalogues is, in the same order. */
+	datasets: CatalogueDataset[];
 }
 
-/** The catalogues a page renders, read off its source in order: read as the
-    site renders it (`pageMarkup`), so a tag quoted in a fence, a code span, a
-    comment or an expression, or written behind a backslash, renders none. */
-const KEYS = /<Catalogues\s+catalogue="(\w+)"/g;
+/** The overview of the catalogues, in one language: the `DataCatalog` of them all. */
+export interface CatalogueOverview {
+	/** Its title. */
+	title: string;
+	/** Its address, with the site's base path and the locale. */
+	href: string;
+}
 
 /** The pages of each language, read once per build: the finder, the overview's
     list and the router all ask for them on the pages they render. The dev
@@ -106,6 +136,10 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 			.map((entry) => ({ id: entry.id, references: (entry.data.references ?? []) as { tables?: string[] }[] })),
 	);
 
+	/* What stops a catalogue from being a dataset with a name and a
+	   description, gathered the same way. */
+	const datasetProblems: string[] = [];
+
 	const pages = await Promise.all(
 		catalogueSlugs.map(async (path) => {
 			const id = `${prefix}${path}`;
@@ -116,7 +150,8 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 						'Every catalogue has a page in both languages.',
 				);
 			}
-			const keys = [...pageMarkup(entry.body ?? '').matchAll(KEYS)].map(([, key]) => key);
+			const sections = catalogueSections(entry.body ?? '');
+			const keys = sections.map(({ key }) => key);
 			const unknown = keys.filter((key) => !(key in catalogues));
 			if (keys.length === 0 || unknown.length > 0) {
 				throw new Error(
@@ -131,13 +166,22 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 					tables: printedTables(known.map((key) => catalogues[key])),
 				}),
 			);
+			const { datasets, problems } = catalogueDatasets({
+				id,
+				title: entry.data.title,
+				description: entry.data.description ?? '',
+				sections,
+			});
+			datasetProblems.push(...problems);
 			return {
+				id,
 				slug: path.split('/').at(-1) ?? path,
 				href: `${basePath}/${id}/`,
 				label: entry.data.sidebar?.label ?? entry.data.title,
 				description: entry.data.description ?? '',
 				keys: known,
 				rows: known.reduce((total, key) => total + catalogues[key].rows.length, 0),
+				datasets: datasets as CatalogueDataset[],
 			};
 		}),
 	);
@@ -149,6 +193,19 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 				'Give each catalogue page a `references` entry for every work its tables were read from, and list ' +
 				'in that entry\'s `tables` the keys of the tables it printed (the `table` of each row in ' +
 				'src/generated/catalogues.mjs), the same on the English page and its Spanish twin.',
+		);
+	}
+
+	if (datasetProblems.length > 0) {
+		throw new Error(
+			`[catalogue-pages] the ${lang === 'es' ? 'Spanish' : 'English'} catalogue pages leave a catalogue ` +
+				`without a name or a description for its dataset, in ${datasetProblems.length} place(s):\n  ` +
+				`${datasetProblems.join('\n  ')}\n` +
+				'The first catalogue a page renders takes the page\'s title, and its description too unless the ' +
+				'page renders more than one, when the paragraph that opens the page describes it; give every ' +
+				'later one a `##` heading of its own, after the catalogue before it, and open its section with ' +
+				'a paragraph that says what it holds, written on the page itself and not inside an aside, a list ' +
+				'or a component, in words alone: a dataset carries no component, expression or formula.',
 		);
 	}
 
@@ -164,4 +221,12 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 		);
 	}
 	return pages;
+}
+
+/** The overview of the catalogues of `lang`, which lists them all. */
+export async function catalogueOverview(lang: 'en' | 'es'): Promise<CatalogueOverview> {
+	const id = `${lang === 'es' ? 'es/' : ''}reference/catalogues`;
+	const entry = await getEntry('docs', id);
+	if (!entry) throw new Error(`[catalogue-pages] there is no page ${id}, the overview of the catalogues.`);
+	return { title: entry.data.title, href: `${basePath}/${id}/` };
 }

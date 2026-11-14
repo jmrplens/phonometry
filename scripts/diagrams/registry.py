@@ -238,6 +238,7 @@ from .vibration import (
     _d_multiple_shock,
     _d_people_in_buildings,
     _d_power_injection_rig,
+    _d_railway_change_rule,
     _d_railway_cross_section,
     _d_railway_monitoring,
     _d_railway_prediction_chain,
@@ -894,6 +895,11 @@ DIAGRAMS = {
         _d_railway_monitoring,
         "How railway vibration is measured in a building (E DIN 4150-2)",
         890,
+    ),
+    "diagram_railway_change_rule": (
+        _d_railway_change_rule,
+        "The 25 % rule for an altered railway line (E DIN 4150-2, 6.5.3.6)",
+        728,
     ),
     "diagram_people_in_buildings": (
         _d_people_in_buildings,

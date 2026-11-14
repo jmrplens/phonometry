@@ -3636,6 +3636,144 @@ def _d_railway_cross_section(s: SVG, th: Theme) -> None:
     )
 
 
+def _d_railway_change_rule(s: SVG, th: Theme) -> None:
+    """E DIN 4150-2:2023-08, 6.5.3.6: the 25 % rule as the library walks it.
+
+    The planned case of an altered or extended line is first held to the
+    guide values in the order of 6.3 and Figure 2: a KB_Fmax at or below A_u
+    meets the requirements on its own. Past that, each quantity has its own
+    condition, the two halves of 6.5.3.6 a) and b) for KB_Fmax and c) for
+    KB_FTr: it keeps to its guide value, or it exceeds it and grows by less
+    than 25 % against the case without the project. The clause is printed
+    with "eine der folgenden Bedingungen", one of them; Example 9 of Annex B
+    (B.9.3.3, B.9.4) leaves KB_Fmax unchanged, has KB_FTr more than 25 %
+    up above A_r and sends the project to mitigation, so the two lanes meet
+    in an "and" here, which is the reading of ``assess_railway_change``.
+    6.5.3.6 a) and b) print "below A_o"; at A_o itself the plate keeps the
+    condition, as 6.3 does, where only a KB_Fmax above A_o fails.
+    Nothing on the plate is a computed value: the 25 % and the night-time
+    A_o of the foot are the print's.
+    """
+
+    def diamond(cx: float, cy: float, w: float, h: float) -> None:
+        s.path(
+            f"M {cx} {cy - h / 2} L {cx + w / 2} {cy} L {cx} {cy + h / 2} "
+            f"L {cx - w / 2} {cy} Z",
+            th.panel,
+            th.fg,
+            sw=1.8,
+        )
+
+    mid, left, right = 450.0, 230.0, 670.0
+    s.text(
+        mid,
+        80,
+        "the planned case, with the project, against the guide values of its period",
+        13,
+        th.muted,
+    )
+
+    # --- KB_Fmax at or below A_u settles it on its own (6.3) -----------------
+    y1 = 128.0
+    diamond(mid, y1, 200, 60)
+    s.text(mid, y1 + 5, "$KB_{Fmax}$ ≤ $A_u$ ?", 13, th.fg)
+    met_y = 578.0
+    s.line(mid + 100, y1, 868, y1, th.accent, 1.8)
+    s.line(868, y1, 868, met_y, th.accent, 1.8)
+    s.arrow(868, met_y, 602, met_y, th.accent, 1.8)
+    s.text(mid + 108, y1 - 8, "yes", 11, th.accent, "start")
+    s.line(mid, y1 + 30, mid, 184, th.fg, 1.6)
+    s.line(left, 184, right, 184, th.fg, 1.6)
+    s.text(mid + 8, y1 + 48, "no", 11, th.muted, "start")
+
+    # --- One lane per quantity: its guide value, then its growth -------------
+    y2, y3, hold_y = 248.0, 362.0, 478.0
+    lanes: tuple[tuple[float, str, str, str, str, float], ...] = (
+        (
+            left,
+            "$KB_{Fmax}$ ≤ $A_o$ ?",
+            "$KB_{Fmax}$ grows by",
+            "$KB_{Fmax}$ condition holds",
+            "6.5.3.6 a) by day, b) by night",
+            -1.0,
+        ),
+        (
+            right,
+            "$KB_{FTr}$ ≤ $A_r$ ?",
+            "$KB_{FTr}$ grows by",
+            "$KB_{FTr}$ condition holds",
+            "6.5.3.6 c)",
+            1.0,
+        ),
+    )
+    for cx, keeps, grows, holds, clause, side in lanes:
+        s.arrow(cx, 184, cx, y2 - 33, th.fg, 1.6)
+        diamond(cx, y2, 200, 64)
+        s.text(cx, y2 + 5, keeps, 13, th.fg, upright=("A_r",) if side > 0 else ())
+        s.text(
+            cx + side * 12, 208, clause, 11, th.muted, "start" if side > 0 else "end"
+        )
+        # Keeping to the guide value passes the growth by.
+        out = cx + side * 172
+        s.line(cx + side * 100, y2, out, y2, th.accent, 1.8)
+        s.line(out, y2, out, hold_y, th.accent, 1.8)
+        s.arrow(out, hold_y, cx + side * 113, hold_y, th.accent, 1.8)
+        s.text(
+            cx + side * 108,
+            y2 - 8,
+            "yes",
+            11,
+            th.accent,
+            "start" if side > 0 else "end",
+        )
+        s.arrow(cx, y2 + 32, cx, y3 - 37, th.fg, 1.6)
+        s.text(cx + 8, y2 + 50, "no", 11, th.muted, "start")
+        diamond(cx, y3, 210, 72)
+        s.text(cx, y3 - 2, grows, 12, th.fg)
+        s.text(cx, y3 + 14, "less than 25 % ?", 12, th.fg)
+        s.arrow(cx, y3 + 36, cx, hold_y - 16, th.accent, 1.8)
+        s.text(cx + 8, y3 + 58, "yes", 11, th.accent, "start")
+        # Growing by 25 % or more above the guide value is the one way out.
+        s.arrow(cx - side * 105, y3, mid + side * 86, y3, th.secondary, 1.8)
+        s.text(cx - side * 119, y3 - 8, "no", 11, th.secondary)
+        s.rect(cx - 112, hold_y - 15, 224, 30, th.panel, th.accent, rx=15, sw=1.8)
+        s.text(cx, hold_y + 5, holds, 13, th.accent)
+        s.line(cx, hold_y + 15, cx, 528, th.accent, 1.8)
+    s.rect(mid - 85, y3 - 16, 170, 32, th.panel, th.secondary, rx=16, sw=2)
+    s.text(mid, y3 + 5, "look into mitigation", 12, th.secondary)
+    s.text(mid, y3 + 36, "either one is enough", 11, th.muted)
+
+    # --- Both conditions, not one of them ------------------------------------
+    s.line(left, 528, right, 528, th.accent, 1.8)
+    s.arrow(mid, 528, mid, met_y - 17, th.accent, 1.8)
+    s.text(mid, 518, "both have to hold", 12, th.fg, bold=True)
+    s.rect(mid - 150, met_y - 16, 300, 32, th.panel, th.accent, rx=16, sw=2)
+    s.text(mid, met_y + 5, "requirements count as met", 13, th.accent, bold=True)
+
+    # --- Foot: what grows against what, the night-time A_o, and the print ----
+    for k, line in enumerate(
+        (
+            "growth: the planned case against the case without the project, "
+            "the existing line on its present or forecast timetable",
+            "by night $A_o$ is 0.6 on the surface in any area; underground, "
+            "that of Table 1 in rows 1 and 2 and 0.3 in rows 3 to 5",
+            "as printed, one of the conditions is enough, yet Example 9 "
+            "leaves $KB_{Fmax}$ as it was and, with $KB_{FTr}$",
+            "above its guide value and more than 25 % up, goes to mitigation: "
+            "both conditions are asked for here",
+            "6.5.3.6 asks for a value below $A_o$; at $A_o$ itself the plate "
+            "follows 6.3, where only a value above $A_o$ fails",
+        )
+    ):
+        s.text(
+            mid,
+            628 + 18 * k,
+            line,
+            12,
+            th.muted,
+        )
+
+
 def _d_people_in_buildings(s: SVG, th: Theme) -> None:
     """The DIN 4150-2 measurement, from the floor panel to the verdict.
 

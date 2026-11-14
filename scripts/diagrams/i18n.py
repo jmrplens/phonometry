@@ -4075,6 +4075,36 @@ _ES: dict[str, str] = {
     "events?": "y breves?",
     "form $KB_{FTr}$": "formar $KB_{FTr}$",
     "requirement met": "requisito cumplido",
+    # diagram_railway_change_rule: the 25 % rule of E DIN 4150-2:2023-08,
+    # 6.5.3.6, as assess_railway_change walks it.
+    "The 25 % rule for an altered railway line (E DIN 4150-2, 6.5.3.6)": "La regla del 25 % para una vía férrea modificada (E DIN 4150-2, 6.5.3.6)",
+    "the planned case, with the project, against the guide values of its period": "el caso planificado, con el proyecto, frente a los valores guía de su periodo",
+    "$KB_{Fmax}$ grows by": "¿$KB_{Fmax}$ crece",
+    "$KB_{FTr}$ grows by": "¿$KB_{FTr}$ crece",
+    "less than 25 % ?": "menos de un 25 %?",
+    "$KB_{Fmax}$ condition holds": "condición de $KB_{Fmax}$ cumplida",
+    "$KB_{FTr}$ condition holds": "condición de $KB_{FTr}$ cumplida",
+    "6.5.3.6 a) by day, b) by night": "6.5.3.6 a) de día, b) de noche",
+    "6.5.3.6 c)": "6.5.3.6 c)",
+    "look into mitigation": "estudiar la mitigación",
+    "either one is enough": "basta con una de las dos",
+    "both have to hold": "tienen que cumplirse las dos",
+    "requirements count as met": "requisitos dados por cumplidos",
+    "growth: the planned case against the case without the project, "
+    "the existing line on its present or forecast timetable": "crecimiento: el caso planificado frente al caso sin proyecto, "
+    "la línea existente con su horario actual o previsto",
+    "by night $A_o$ is 0.6 on the surface in any area; underground, "
+    "that of Table 1 in rows 1 and 2 and 0.3 in rows 3 to 5": "de noche $A_o$ es 0,6 en superficie en cualquier zona; bajo tierra, "
+    "el de la Tabla 1 en las filas 1 y 2 y 0,3 en las filas 3 a 5",
+    "as printed, one of the conditions is enough, yet Example 9 "
+    "leaves $KB_{Fmax}$ as it was and, with $KB_{FTr}$": "tal como está impreso basta una de las condiciones, pero el ejemplo 9 "
+    "deja $KB_{Fmax}$ como estaba y, con $KB_{FTr}$",
+    "above its guide value and more than 25 % up, goes to mitigation: "
+    "both conditions are asked for here": "por encima de su valor guía y más de un 25 % de crecimiento, va a mitigación: "
+    "aquí se piden las dos condiciones",
+    "6.5.3.6 asks for a value below $A_o$; at $A_o$ itself the plate "
+    "follows 6.3, where only a value above $A_o$ fails": "6.5.3.6 pide un valor por debajo de $A_o$; en el propio $A_o$ la lámina "
+    "sigue el 6.3, donde solo falla un valor por encima de $A_o$",
     "not met": "no cumplido",
     "0.25 > 0.15": "0,25 > 0,15",
     "0.25 ≤ 3": "0,25 ≤ 3",

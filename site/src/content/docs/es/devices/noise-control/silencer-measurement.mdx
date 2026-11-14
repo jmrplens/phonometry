@@ -485,26 +485,44 @@ zeta = noise_control.average_pressure_loss_coefficient(
 print(round(zeta, 3))             # 1.9
 ```
 
-Cinco caudales por serie, repartidos por igual sobre el intervalo, y el más
-bajo tiene que producir más de 10 Pa para que el número más pequeño del
-promedio siga siendo una medida y no la resolución del manómetro. La
-biblioteca lo dice por partida doble: `average_pressure_loss_coefficient` avisa
+Cinco caudales por serie como mínimo, repartidos por igual sobre el intervalo
+(6.5.2.2.1). El método simplificado del 6.5.2.1, que mide el objeto solo,
+añade que el caudal más bajo tiene que producir una diferencia de presión
+mayor que 10 Pa, para que el número más pequeño del promedio siga siendo una
+medida y no la resolución del manómetro. La biblioteca lo dice por partida
+doble: `average_pressure_loss_coefficient` avisa
 por debajo de cinco puntos, y `pressure_loss_coefficient` avisa con una pérdida
 de 10 Pa o menos, el propio límite incluido, porque la cláusula dice *mayor
-que*.
+que*. El banco está dibujado debajo, con las reglas de cada método al lado.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_pressure_loss.svg" alt="Dos tramos apilados sobre un mismo eje de conducto, con el flujo de izquierda a derecha. En el de arriba, la serie uno, un ventilador alimenta un caudalímetro y después un conducto recto aguas arriba, acotado como recto en cinco diámetros equivalentes o dos metros, lo que sea mayor; un plano 1 discontinuo con tomas de presión cruza ese conducto 1,5 diámetros equivalentes antes del objeto de ensayo, un silenciador dibujado con sus bafles; y un plano 2 discontinuo cruza el conducto aguas abajo a más de seis espesores de bafle tras él. Un manómetro une los dos planos y lee la diferencia de presión estática entre ellos. El de abajo, la serie dos, es el mismo banco con el conducto de sustitución en lugar del objeto, sobre los mismos planos y con el mismo manómetro. Debajo, una sección cuadrada del conducto en el plano 1 muestra una toma en el centro de cada lado unidas por un anillo, los dos ejes perpendiculares de la exploración y un margen discontinuo junto a las paredes. A su lado, las reglas: cuatro tomas unidas en un anillo piezométrico en el plano 1; allí, una exploración de velocidad en diez posiciones equidistantes a lo largo de un par de ejes perpendiculares, dentro del más menos 10 % de la media y sin los 15 mm junto a las paredes; el plano 2 a más de seis espesores de bafle tras el objeto, o la presión de la cámara reverberante a la que da el conducto; para el método fundamental, las dos series con cinco caudales o más cada una, repartidos por igual, y el coeficiente de pérdida con las Ecuaciones 15 a 17 en un caudal de la mitad del intervalo; para el método simplificado, cinco caudales, el menor con una diferencia de presión de más de 10 Pa, y el caudal corregido con las Ecuaciones 9 y 10 cuando el cociente de densidades queda fuera de 0,98 a 1,02. Una caja al pie, titulada como las ecuaciones del método simplificado, lleva la Ecuación 11, la presión total como la presión estática más la presión dinámica, la Ecuación 12, la pérdida de presión total como la diferencia estática más la presión dinámica de entrada por uno menos el cociente de áreas al cuadrado, y la Ecuación 14, el coeficiente de pérdida como la pérdida total entre la presión dinámica de entrada." width="92%" />
+
+*El banco de la Figura 6 con los números del apartado 6.5 encima. Todo lo que
+hay aguas arriba del objeto existe para entregarle un flujo asentado y
+uniforme; los dos planos son donde se lee la pérdida.*
 
 Lo que tiene que ser el flujo antes de que nada de eso cuente es cuestión de
 geometría. El conducto aguas arriba va recto cinco diámetros equivalentes o
 dos metros, lo que sea mayor, para que el perfil de velocidad se haya
 asentado; tiene que ser uniforme al ±10 % de la media sobre la sección,
 excluidos los 15 mm más cercanos a las paredes, recorrido en diez puntos sobre
-cada uno de dos ejes perpendiculares a unos $1{,}5\,d_e$ aguas arriba. Las dos
+cada uno de dos ejes perpendiculares a unos $1{,}5\,d_\mathrm{e}$ aguas arriba. Las dos
 reglas de longitud se cruzan en un diámetro equivalente de 0,4 m:
 
 ```python
 print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
 print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
 ```
+
+La presión estática del plano 1 se toma en esa misma sección, 1,5 diámetros
+equivalentes antes del objeto, por cuatro tomas unidas en un anillo
+piezométrico: una en el centro de cada lado de un conducto rectangular, o
+repartidas por igual alrededor de uno circular. Se lee frente a una presión
+aguas abajo del objeto, bien en el conducto de ensayo, donde la leyenda de la
+Figura 6 pone las tomas a más de seis espesores de bafle tras el objeto, bien
+en la cámara reverberante a la que da el conducto. La temperatura del aire se
+mide en el caudalímetro y dos diámetros equivalentes antes del objeto, y no
+puede variar más de 3 K durante el ensayo.
 
 ## 11. La tercera norma, y la fórmula que comparte
 

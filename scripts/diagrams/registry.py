@@ -96,6 +96,7 @@ from .devices import (
     _d_screen_in_situ,
     _d_silencer_in_situ,
     _d_silencer_iso7235,
+    _d_silencer_pressure_loss,
     _d_small_test_rooms,
     _d_sound_power_in_situ,
     _d_surfaces,
@@ -1168,6 +1169,11 @@ DIAGRAMS = {
         _d_silencer_iso7235,
         "How a silencer is measured: the ISO 7235 substitution method",
         710,
+    ),
+    "diagram_silencer_pressure_loss": (
+        _d_silencer_pressure_loss,
+        "How the pressure loss of a silencer is measured (ISO 7235, 6.5)",
+        812,
     ),
     "diagram_silencer_in_situ": (
         _d_silencer_in_situ,

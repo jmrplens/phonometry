@@ -111,9 +111,10 @@ computational route of 6.5.2.2.3 does it on the coefficients rather than
 on the pressures, so the two series need not be run at matching flow
 rates and need not even have the same number of points.
 
-Each series is at least five airflow rates spread over the test range,
-and the lowest has to produce more than
-[`MIN_PRESSURE_DIFFERENCE_PA`](/phonometry/reference/api/noise_control/silencer-measurement/#min_pressure_difference_pa).
+Each series is at least five airflow rates spread over the test range
+(6.5.2.2.1). The 10 Pa floor on the lowest rate,
+[`MIN_PRESSURE_DIFFERENCE_PA`](/phonometry/reference/api/noise_control/silencer-measurement/#min_pressure_difference_pa), belongs to the simplified method of
+6.5.2.1, and [`pressure_loss_coefficient`](/phonometry/reference/api/noise_control/silencer-measurement/#pressure_loss_coefficient) is where it is checked.
 
 **Parameters**
 
@@ -1054,7 +1055,7 @@ of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
 
 | Warning | When |
 | :--- | :--- |
-| SilencerMeasurementWarning | If the loss does not exceed the 10 Pa 6.5.2.1 asks even the lowest airflow rate of a series to produce. The clause reads *greater than*, so a point sitting exactly on 10 Pa is one the series may not be built from and warns like any below it. |
+| SilencerMeasurementWarning | If the loss does not exceed the 10 Pa the simplified method of 6.5.2.1 asks its lowest airflow rate to produce. The clause reads *greater than*, so a point sitting exactly on 10 Pa is one that method may not be built from and warns like any below it. |
 
 ## RADIATION_SOLID_ANGLES
 

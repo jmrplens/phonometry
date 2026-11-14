@@ -6632,3 +6632,248 @@ def _d_free_field_traverses(s: SVG, th: Theme) -> None:
         12,
         th.muted,
     )
+
+
+#: ISO 7235 prints the e of the equivalent diameter, the b of the baffle
+#: thickness and the d of the dynamic pressure upright (BS EN ISO 7235:2009,
+#: key of Figure 6 and Equations (13), (14) and 6.5.2.2.1).
+_LOSS_UPRIGHT = ("d_e", "t_b", "p_d")
+
+
+def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
+    """The ISO 7235 total-pressure-loss rig of 6.5, both series on one axis.
+
+    The arrangement is that of Figure 6: a fan, a flow meter, a straight
+    upstream duct, the upstream static-pressure plane, the test object or the
+    substitution duct, and the downstream static-pressure plane, with one
+    manometer across the two planes. The annotations are the numbers of
+    6.5.2.2.1 (upstream duct straight for 5 equivalent diameters or 2 m,
+    plane 1 and the velocity survey 1.5 equivalent diameters ahead of the
+    object, four taps in a piezometric ring, the profile uniform to 10 %
+    outside the 15 mm by the walls) and of the key of Figure 6 (plane 2 more
+    than 6 baffle thicknesses past the object). Each method keeps its own
+    rules: the two series of the fundamental method (6.5.2.2) at five flow
+    rates or more and its Equations (15) to (17), and the simplified method
+    of 6.5.2.1 with its 10 Pa floor, its 0.98 to 1.02 density window and its
+    Equations (11), (12) and (14), which the strip at the foot carries.
+    """
+    x_fan = 82.0
+    x_fm, w_fm = 132.0, 50.0
+    x_up = x_fm + w_fm
+    x_p1 = 372.0
+    x_ob, w_ob = 440.0, 150.0
+    x_p2 = 702.0
+    x_end = 850.0
+    duct_h = 56.0
+
+    def span(x1: float, x2: float, y: float, label: str, colour: str) -> None:
+        s.line(x1, y, x2, y, colour, 1.2)
+        s.line(x1, y - 5, x1, y + 5, colour, 1.2)
+        s.line(x2, y - 5, x2, y + 5, colour, 1.2)
+        s.text((x1 + x2) / 2, y - 7, label, 12, colour, upright=_LOSS_UPRIGHT)
+
+    for row, (y, title, obj, colour) in enumerate(
+        (
+            (190.0, "Series I: test object installed", "test object", th.primary),
+            (402.0, "Series II: substitution duct", "substitution duct", th.secondary),
+        )
+    ):
+        ax = y + duct_h / 2
+        bottom = y + duct_h
+        s.text(
+            50,
+            y - (74 if row == 0 else 44),
+            title,
+            15,
+            colour,
+            anchor="start",
+            bold=True,
+        )
+
+        # fan, flow meter and the straight upstream duct
+        s.circle(x_fan, ax, 26, th.panel, th.fg, 2.2)
+        for dx, dy in ((0, -17), (15, 9), (-15, 9)):
+            s.line(x_fan, ax, x_fan + dx, ax + dy, th.fg, 2.4)
+        s.circle(x_fan, ax, 4, th.fg)
+        s.line(x_fan + 26, ax, x_fm, ax, th.fg, 2.0)
+        s.rect(x_fm, y, w_fm, duct_h, th.panel, th.fg, sw=2.0)
+        s.line(x_fm + w_fm / 2, y + 2, x_fm + w_fm / 2, y + 18, th.accent, 3.0)
+        s.line(
+            x_fm + w_fm / 2, bottom - 18, x_fm + w_fm / 2, bottom - 2, th.accent, 3.0
+        )
+        s.rect(x_up, y, x_ob - x_up, duct_h, th.panel, th.fg, sw=2.0)
+        s.arrow(x_up + 24, ax + 10, x_up + 84, ax + 10, th.fg, 2.0)
+        s.text(x_up + 54, ax - 4, "flow", 12, th.muted)
+
+        # the object, then the downstream duct
+        s.rect(x_ob + w_ob, y, x_end - x_ob - w_ob, duct_h, th.panel, th.fg, sw=2.0)
+        s.rect(x_ob, y - 10, w_ob, duct_h + 20, th.panel, colour, rx=4, sw=2.6)
+        if row == 0:
+            for k in range(4):
+                s.rect(x_ob + 14, y - 3 + 19 * k, w_ob - 28, 9, colour, rx=2)
+        s.text(x_ob + w_ob / 2, y - 18, obj, 12, colour, bold=True)
+
+        # the two static-pressure planes and the manometer across them
+        for x in (x_p1, x_p2):
+            s.line(x, y - 6, x, bottom + 6, th.accent, 1.6, dash="4,3")
+            s.circle(x, y, 4, th.accent)
+            s.circle(x, bottom, 4, th.accent)
+        y_m = bottom + 44
+        s.line(x_p1, bottom + 6, x_p1, y_m, th.accent, 1.4)
+        s.line(x_p2, bottom + 6, x_p2, y_m, th.accent, 1.4)
+        s.line(x_p1, y_m, x_p2, y_m, th.accent, 1.4)
+        s.rect((x_p1 + x_p2) / 2 - 16, y_m - 11, 32, 22, th.bg, th.accent, rx=5, sw=1.8)
+        s.text(
+            (x_p1 + x_p2) / 2,
+            y_m + 30,
+            "manometer: $Δp_s$ between the two planes"
+            if row == 0
+            else "the same planes, the same manometer",
+            12,
+            th.accent,
+        )
+        if row == 0:
+            s.text(x_fan, bottom + 26, "fan", 12, th.muted)
+            # One line lower than the fan's: in Spanish the two names ran
+            # together on one baseline.
+            s.text(x_fm + w_fm / 2, bottom + 44, "flow meter", 12, th.muted)
+            s.text(
+                x_p1 - 8,
+                bottom + 26,
+                "plane 1: $p_{s1}$, $S_1$",
+                12,
+                th.accent,
+                anchor="end",
+            )
+            s.text(
+                x_p2 + 8,
+                bottom + 26,
+                "plane 2: $p_{s2}$, $S_2$",
+                12,
+                th.accent,
+                anchor="start",
+            )
+            span(
+                x_up,
+                x_ob,
+                y - 42,
+                "straight: 5 $d_e$ or 2 m, whichever is greater",
+                th.fg,
+            )
+            span(x_p1, x_ob, y - 16, "1.5 $d_e$", th.fg)
+            span(x_ob + w_ob, x_p2, y - 16, "> 6 $t_b$", th.fg)
+
+    # --- the section at plane 1 ---------------------------------------------
+    x_s, y_s, side = 70.0, 572.0, 104.0
+    s.rect(x_s - 10, y_s - 10, side + 20, side + 20, "none", th.accent, rx=14, sw=1.4)
+    s.rect(x_s, y_s, side, side, th.panel, th.fg, sw=2.2)
+    s.rect(x_s + 9, y_s + 9, side - 18, side - 18, "none", th.muted, sw=1.1, dash="3,3")
+    s.line(
+        x_s + 9,
+        y_s + side / 2,
+        x_s + side - 9,
+        y_s + side / 2,
+        th.primary,
+        1.4,
+        dash="6,3",
+    )
+    s.line(
+        x_s + side / 2,
+        y_s + 9,
+        x_s + side / 2,
+        y_s + side - 9,
+        th.primary,
+        1.4,
+        dash="6,3",
+    )
+    for cx, cy in (
+        (x_s + side / 2, y_s),
+        (x_s + side / 2, y_s + side),
+        (x_s, y_s + side / 2),
+        (x_s + side, y_s + side / 2),
+    ):
+        s.circle(cx, cy, 5, th.accent)
+    s.text(x_s + side / 2, y_s + side + 32, "section at plane 1", 12, th.muted)
+
+    x_n, y_n = 222.0, 566.0
+    notes = (
+        (
+            "Plane 1, 1.5 $d_e$ ahead of the object: four taps joined in a piezometric ring",
+            th.accent,
+        ),
+        (
+            "Velocity survey there: ten equally spaced positions along a pair of",
+            th.primary,
+        ),
+        (
+            "perpendicular axes, within ±10 % of the mean; 15 mm by the walls left out",
+            th.primary,
+        ),
+        (
+            "Plane 2: more than 6 baffle thicknesses $t_b$ past the object (Figure 6),",
+            th.accent,
+        ),
+        (
+            "or the pressure of the reverberation room the duct opens into",
+            th.accent,
+        ),
+        (
+            "Fundamental method (6.5.2.2), both series: at least five flow rates each, spread evenly,",
+            th.fg,
+        ),
+        (
+            "and $ζ$ from Equations (15) to (17) at a flow rate in the middle of the range",
+            th.fg,
+        ),
+        (
+            "Simplified method (6.5.2.1): five flow rates, the lowest giving a pressure difference above 10 Pa,",
+            th.fg,
+        ),
+        (
+            "and $q_V$ corrected by Equations (9) and (10) when $ρ_1/ρ_2$ is outside 0.98 to 1.02",
+            th.fg,
+        ),
+    )
+    nsize = s.fit_size([line for line, _ in notes], (12, 11), 850 - x_n)
+    for k, (line, colour) in enumerate(notes):
+        s.text(
+            x_n,
+            y_n + 19 * k,
+            line,
+            nsize,
+            colour,
+            anchor="start",
+            upright=_LOSS_UPRIGHT,
+        )
+
+    # The strip carries the simplified method's equations, named as such: the
+    # fundamental method evaluates with Equations (15) to (17) instead.
+    s.text(
+        50,
+        744,
+        "Equations of the simplified method (6.5.2.1)",
+        12,
+        th.fg,
+        anchor="start",
+        bold=True,
+    )
+    y_f = 778.0
+    s.rect(50, y_f - 24, 800, 38, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(70, y_f, "$p_t = p_s + ρ·(q_V/S)^2/2$  (11)", 13, th.fg, anchor="start")
+    s.text(
+        450,
+        y_f,
+        "$Δp_t = Δp_s + p_{d1}·[1 − (S_1/S_2)^2]$  (12)",
+        13,
+        th.fg,
+        upright=_LOSS_UPRIGHT,
+    )
+    s.text(
+        830,
+        y_f,
+        "$ζ = Δp_t/p_{d1}$  (14)",
+        13,
+        th.fg,
+        anchor="end",
+        upright=_LOSS_UPRIGHT,
+    )

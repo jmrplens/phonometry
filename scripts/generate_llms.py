@@ -109,6 +109,11 @@ def _git_ignored(path: pathlib.Path) -> bool:
     return path.relative_to(ROOT).as_posix() in _ignored_paths()
 
 
+def _shown(path: pathlib.Path) -> pathlib.Path:
+    """*path* as a message names it: relative to the repository, or whole when it lies outside, as a tree of a test's own does."""
+    return path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+
+
 @functools.cache
 def _repository_files() -> frozenset[str] | None:
     """Every file of the repository, kept or new, that git does not ignore, as repo-relative paths.
@@ -367,7 +372,7 @@ def _frontmatter_field(path: pathlib.Path, name: str) -> str:
     every page of the site.
     """
     text = path.read_text(encoding="utf-8")
-    shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+    shown = _shown(path)
     head = re.match(r"---\n(.*?)\n---\n", text, re.DOTALL)
     found = head and re.search(
         rf"""^{name}:[ \t]*(?:"((?:[^"\\]|\\.)*)"|'((?:[^']|'')*)'|([^\s"'|>\[{{&*!%@`#][^\n]*?))(?:[ \t]+\#[^\n]*)?[ \t]*$""",
@@ -1312,7 +1317,7 @@ def _catalogue_rows() -> dict[str, int]:
     )
     if found is None:
         msg = (
-            f"generate_llms.py: {CATALOGUE_DATA.relative_to(ROOT)} is not the "
+            f"generate_llms.py: {_shown(CATALOGUE_DATA)} is not the "
             "`export const catalogues = {...};` module generate_catalogue_data.py writes"
         )
         raise SystemExit(msg)
@@ -1346,8 +1351,8 @@ def _catalogue_section() -> list[str]:
         unknown = [name for name in names if name not in rows]
         if not names or unknown:
             msg = (
-                f"generate_llms.py: {path.relative_to(ROOT)} tables "
-                f"{unknown or 'no catalogue'} of {CATALOGUE_DATA.relative_to(ROOT)}"
+                f"generate_llms.py: {_shown(path)} tables "
+                f"{unknown or 'no catalogue'} of {_shown(CATALOGUE_DATA)}"
             )
             raise SystemExit(msg)
         title = _frontmatter_field(path, "title")

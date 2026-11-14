@@ -216,11 +216,19 @@ def fresh_caches(monkeypatch: pytest.MonkeyPatch) -> Iterator[guard_caches.Fresh
     the test; once the test is done the caches are cleared again, before
     ``monkeypatch`` puts the names back. Called with the module alone, it
     clears its caches on both sides of a test that replaces something else
-    they read.
+    they read. A module that keeps what it read in a dict, set or list of
+    its own, which no ``cache_clear`` reaches, is refused, naming it.
     """
     touched: list[ModuleType] = []
 
     def point(module: ModuleType, **values: object) -> None:
+        kept = guard_caches.containers_filled_as_it_runs(module)
+        if kept:
+            pytest.fail(
+                f"{module.__name__} keeps what it reads in {', '.join(kept)}, which "
+                "fresh_caches cannot clear: give the module a function that empties "
+                "them and call it here, as ast_scan.forget_trees does"
+            )
         guard_caches.forget(module)
         touched.append(module)
         for name, value in values.items():

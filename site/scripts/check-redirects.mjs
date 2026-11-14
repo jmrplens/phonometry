@@ -21,6 +21,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
+import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { redirects as committed } from '../src/data/redirects.mjs';
 import { cloudflareItems } from './cloudflare-redirects.mjs';
 import {
@@ -49,7 +50,7 @@ if (unresolved.length > 0) {
 	ok(`every address the site has published is either served or redirected`);
 }
 
-if (readFileSync(TARGET, 'utf8') === redirectModuleSource(redirects)) {
+if (readCommittedText(TARGET) === redirectModuleSource(redirects)) {
 	ok(`src/data/redirects.mjs matches the history: ${redirects.size} redirects`);
 } else {
 	const derived = new Set(redirects.keys());

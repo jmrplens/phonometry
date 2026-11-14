@@ -32,11 +32,12 @@
  * When it was written both sets held the same seventy-one names.
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
+import { readCommittedText } from '../lib/line-ends.mjs';
 
 /** The repository root, found the way `repo-stats.mjs` finds it. */
 function findRoot() {
@@ -118,7 +119,7 @@ function collect(root) {
   /** @type {Map<string, Report>} */
   const found = new Map();
   for (const path of pages(root)) {
-    const text = readFileSync(path, 'utf8');
+    const text = readCommittedText(path);
     for (const match of pageMarkup(text).matchAll(/<ReportPreview\b([^>]*?)\/>/gs)) {
       const [tag] = match;
       const name = prop(tag, 'name');

@@ -188,11 +188,14 @@ export function stripMdx(
   return closeUp(kept + text.slice(done), kind).trim();
 }
 
-/** `text` with each run of empty lines outside code closed up to one, on a page of `kind`. */
+/**
+ * `text` with each run of empty lines outside code closed up to one, on a page
+ * of `kind`; a line holding only the carriage return of its line end is empty.
+ */
 function closeUp(text, kind) {
   const lines = text.split('\n');
   const code = codeLines(lines, { kind });
-  const blank = (index) => lines[index] === '' && !code[index];
+  const blank = (index) => (lines[index] === '' || lines[index] === '\r') && !code[index];
   return lines.filter((_, index) => !(index > 0 && blank(index) && blank(index - 1))).join('\n');
 }
 

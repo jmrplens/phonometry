@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { catalogueSections } from '../src/lib/catalogue-datasets.mjs';
+import { withLineFeeds } from '../src/lib/line-ends.mjs';
 import {
   catalogueSourceProblems,
   isCataloguePage,
@@ -282,7 +283,7 @@ test('every catalogue page of both languages names the work behind every table i
   for (const prefix of ['', 'es/']) {
     for (const slug of catalogueSlugs) {
       const file = path.join(contentDir, `${prefix}${slug}.mdx`);
-      const text = await readFile(file, 'utf8');
+      const text = withLineFeeds(await readFile(file, 'utf8'));
       // The catalogues it renders, read off its source as catalogue-pages.ts does.
       const keys = catalogueSections(text).map(({ key }) => key);
       assert.ok(keys.length > 0, `${file} renders no catalogue`);
@@ -314,7 +315,7 @@ async function contentPages(dir = contentDir, prefix = '') {
 test('no page of either language but a catalogue page carries tables', async () => {
   const pages = await contentPages();
   const read = await Promise.all(
-    pages.map(async ({ id, file }) => ({ id, references: readReferences(await readFile(file, 'utf8'), file) })),
+    pages.map(async ({ id, file }) => ({ id, references: readReferences(withLineFeeds(await readFile(file, 'utf8')), file) })),
   );
   assert.deepEqual(strayTableClaims(read), []);
   const cited = read.filter((page) => !isCataloguePage(page.id) && page.references.length > 0);

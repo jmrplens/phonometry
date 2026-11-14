@@ -295,11 +295,14 @@ function pageLine(text, role, rest, info = '', indent = 0) {
 /** What stands open at each line of a page, read a line at a time. */
 class Walk {
   /**
-   * @param {string[]} lines The lines, without their line ends.
+   * @param {string[]} lines The lines, without their line ends. A carriage
+   *   return that ends one is the rest of its line end, left by a reader that
+   *   split a checkout with carriage returns on its line feeds, and is read as
+   *   such: a blank line stays blank and a fence's marker stays a marker.
    * @param {string} kind The page's kind.
    */
   constructor(lines, kind) {
-    this.lines = lines;
+    this.lines = lines.map((line) => (line.endsWith('\r') ? line.slice(0, -1) : line));
     this.markdown = kind === 'md';
     this.held = [];
     this.fresh = false;
@@ -649,7 +652,8 @@ export function flowOf(text) {
 /**
  * Every line of a page with its part in the page, read in one walk.
  *
- * @param {Iterable<string>} lines The lines, without their line ends.
+ * @param {Iterable<string>} lines The lines, without their line ends; a
+ *   carriage return left at the end of one is read as part of its line end.
  * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind, which decides what
  *   indentation and a tag mean; a reader that does not know it reads `mdx`.
  * @returns {PageLine[]} One entry per line.

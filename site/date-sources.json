@@ -45,7 +45,7 @@
         "site/src/data/conformance-stats.mjs": "verifiedBy",
         "site/src/lib/bibliography-works.ts": "the works the bibliography page's structured data defines in full, read from every page's references, and the works an errata page's structured data says it corrects: data for machines, which no reader of a page reads",
         "site/src/data/repo-stats.mjs": "`version` and `targetPlatform`, the release and the Python an API page's structured data names, data for machines, and `version` again in the BibTeX entry citation.mjs builds, which the page actions hold in an attribute to copy, the same on every page and no part of any one: no reader of a page reads either as its text",
-        "site/src/lib/catalogue-pages.ts": "the catalogue pages the structured data of a catalogue page and of the catalogue overview names: data for machines, which no reader of a page reads",
+        "site/src/lib/catalogue-pages.ts": "`cataloguePages` and `catalogueOverview`, the catalogue pages the structured data of a catalogue page and of the catalogue overview names: data for machines, which no reader of a page reads",
         "site/src/generated/catalogues.mjs": "the columns the Dataset of a catalogue page says it measures: data for machines, which no reader of a page reads",
         "site/src/data/topics.mjs": "the navigation the sidebar, the breadcrumbs, a topic's mark beside its title and a topic's own section list draw, which moves no page's date, as a page's sidebar entry does not",
         "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from: navigation, which moves no page's date",
@@ -149,7 +149,7 @@
       }
     },
     {
-      "_why": "Each catalogue page renders its tables from the generated catalogue data, and the finder on every page and the list on the overview name each catalogue with its rows. CatalogueFinder.astro and CatalogueIndex.astro write those words, so a commit to either moves the pages. The directory stands for every page under it, the overview included, so a commit to Catalogues.astro moves the overview and one to CatalogueIndex.astro moves the catalogue pages, though neither shows what that component writes.",
+      "_why": "Each catalogue page renders its tables from the generated catalogue data, and the finder on every page and the list on the overview name each catalogue with its rows. CatalogueFinder.astro and CatalogueIndex.astro write those words, so a commit to either moves the pages. Which tables each page renders, and so the rows the finder and the overview count for it, is the page's own <Catalogues catalogue=...> tags, which catalogue-pages.ts reads off every catalogue page: texts.cataloguePages reads the same tags, so a table moved from one catalogue page to another moves every page that counts their rows, where the catalogue data does not change. The directory stands for every page under it, the overview included, so a commit to Catalogues.astro moves the overview and one to CatalogueIndex.astro moves the catalogue pages, though neither shows what that component writes.",
       "pages": ["site/src/content/docs/reference/catalogues/"],
       "sources": [
         "site/src/generated/catalogues.mjs",
@@ -157,15 +157,21 @@
         "site/src/components/CatalogueFinder.astro",
         "site/src/components/CatalogueIndex.astro"
       ],
+      "texts": {
+        "cataloguePages": {
+          "files": ["site/src/content/docs/reference/catalogues/"],
+          "pattern": "(?<=<Catalogues(?![\\w.:$-])[^>]*?\\scatalogue=)([\"'])\\w+\\1"
+        }
+      },
       "_via": {
         "site/src/components/CatalogueRouter.astro": "the routes from the anchors of the old single catalogues page to each catalogue's page, which it writes into a script and no reader sees as text",
-        "site/src/lib/catalogue-pages.ts": "the label, description and catalogue keys of every catalogue page, which the finder and the overview list: a label or a description moves no page's date anywhere on the site, and a catalogue key arrives with its rows in catalogues.mjs, a source",
-        "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue joins it with its rows in catalogues.mjs, a source",
+        "site/src/lib/catalogue-pages.ts": "the label and description of every catalogue page, which the finder and the overview list, and a label or a description moves no page's date anywhere on the site; the tables each page renders are texts.cataloguePages",
+        "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue page joins it with the tables it renders, which texts.cataloguePages reads off the new page",
         "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which these pages show"
       }
     },
     {
-      "_why": "The Spanish catalogue pages render the same tables, the finder and the overview with their Spanish text.",
+      "_why": "The Spanish catalogue pages render the same tables, the finder and the overview with their Spanish text, and texts.cataloguePages reads the tables each Spanish page renders, as the English entry reads the English pages.",
       "pages": ["site/src/content/docs/es/reference/catalogues/"],
       "sources": [
         "site/src/generated/catalogues.mjs",
@@ -174,10 +180,16 @@
         "site/src/components/CatalogueIndex.astro",
         "site/src/data/catalogue-es.json"
       ],
+      "texts": {
+        "cataloguePages": {
+          "files": ["site/src/content/docs/es/reference/catalogues/"],
+          "pattern": "(?<=<Catalogues(?![\\w.:$-])[^>]*?\\scatalogue=)([\"'])\\w+\\1"
+        }
+      },
       "_via": {
         "site/src/components/CatalogueRouter.astro": "the routes from the anchors of the old single catalogues page to each catalogue's page, which it writes into a script and no reader sees as text",
-        "site/src/lib/catalogue-pages.ts": "the label, description and catalogue keys of every catalogue page, which the finder and the overview list: a label or a description moves no page's date anywhere on the site, and a catalogue key arrives with its rows in catalogues.mjs, a source",
-        "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue joins it with its rows in catalogues.mjs, a source",
+        "site/src/lib/catalogue-pages.ts": "the label and description of every catalogue page, which the finder and the overview list, and a label or a description moves no page's date anywhere on the site; the tables each page renders are texts.cataloguePages",
+        "site/src/data/topics.mjs": "the order of the catalogue pages (catalogueSlugs), which the finder and the overview follow; a catalogue page joins it with the tables it renders, which texts.cataloguePages reads off the new page",
         "site/src/generated/api-sidebar.mjs": "the API groups topics.mjs builds the sidebar from, none of which these pages show"
       }
     },

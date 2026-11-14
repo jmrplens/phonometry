@@ -874,7 +874,9 @@ reports:
 # builds leaves the committed bytes alone - which is what lets the Markdown keep
 # a byte diff, being a pure function of bytes that are themselves committed.
 #
-# The --file-header flag prepends the "do not hand-edit" note. The badges step
+# The --file-header flag prepends the "do not hand-edit" note, and --output has
+# the script write the file itself with line feeds: printed through a redirect,
+# the report took a carriage return before every line feed on Windows. The badges step
 # redraws the verdict marks and the summary banner under .github/badges from the
 # same artefact, so the count on the banner is always the tree's own; it is
 # deliberately not under `graphs`, which empties .github/images of SVGs before
@@ -886,7 +888,7 @@ reports:
 # its vocabularies against the site that has to accept and word them. CI fails
 # if any output drifts (see the `conformance` job in python-app.yml).
 conformance:
-	$(PYTHON) scripts/conformance_report.py --file-header > docs/CONFORMANCE.md
+	$(PYTHON) scripts/conformance_report.py --file-header --output docs/CONFORMANCE.md
 	$(PYTHON) scripts/conformance_badges.py
 	$(PYTHON) scripts/check_conformance_claims.py --write
 	$(PYTHON) scripts/check_conformance_artifact.py

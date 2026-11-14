@@ -15,7 +15,7 @@
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -31,6 +31,7 @@ import {
 } from './check-schema-vocabulary.mjs';
 import { VOCABULARY_PATH, compactVocabulary, serializeVocabulary } from './generate-schema-vocabulary.mjs';
 import { personId } from '../src/data/site.mjs';
+import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { referenceNode } from '../src/lib/citations.mjs';
 
 const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-schema-vocabulary.mjs');
@@ -81,7 +82,7 @@ test('the committed vocabulary is schema.org, with the relations the site relies
 });
 
 test("the committed vocabulary is in the generator's format: keys sorted, one term per line, each list sorted", () => {
-	const text = readFileSync(VOCABULARY_PATH, 'utf8');
+	const text = readCommittedText(VOCABULARY_PATH);
 	const { release, source, sha256, classes, properties } = JSON.parse(text);
 	assert.equal(serializeVocabulary({ release, source, sha256 }, { classes, properties }), text);
 	// The generator sorts every list by code point and a term appears once in

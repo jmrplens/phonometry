@@ -228,6 +228,7 @@ def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
         ["git", "-C", str(root), "ls-files", "-z", "--", *paths],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         timeout=120,
     ).stdout
@@ -241,6 +242,7 @@ def _git(root: pathlib.Path, *args: str) -> None:
         ["git", "-C", str(root), *args],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         timeout=120,
     )

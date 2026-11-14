@@ -2019,7 +2019,7 @@ def main(argv: list[str] | None = None) -> int:
         stale.append(str(path.relative_to(CONTENT)))
         if not args.check:
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(text, encoding="utf8")
+            path.write_text(text, encoding="utf8", newline="\n")
     for path in stale_pages(pages):
         stale.append(f"{path.relative_to(CONTENT)} (no longer generated)")
         if not args.check:

@@ -11,6 +11,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { normalizeDesignationQuery } from '../../src/lib/designation-query.mjs';
+import { withLineFeeds } from '../../src/lib/line-ends.mjs';
 import { STARLIGHT_RANKING_DEFAULTS } from '../../src/lib/search-ranking.mjs';
 import { declaredDesignation, foldPartWords } from '../../src/lib/standard-search.mjs';
 
@@ -84,7 +85,7 @@ export async function readDeclaredDesignations(contentDir) {
   const routes = new Set();
   const problems = [];
   for (const file of await filesUnder(contentDir, (name) => /\.mdx?$/.test(name))) {
-    const text = await readFile(file, 'utf8');
+    const text = withLineFeeds(await readFile(file, 'utf8'));
     if (!text.startsWith('---')) continue;
     const end = text.indexOf('\n---', 3);
     if (end < 0) continue;

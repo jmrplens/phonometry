@@ -24,11 +24,24 @@ long on the wall for an input eight times as large, and 7 times as long by the
 CPU time of the process, as on an idle machine. Other processes lengthen the
 CPU time of a reading too, since they share the caches and the cores, but they
 lengthen both readings much alike, so their ratio stays well under the bound.
-Where the system counts that time in coarse steps (Windows counts it in steps
-of the scheduler's tick, some 16 ms), a reading calls the reader as many times
-over as spans :data:`_STEPS_PER_READING` steps, counted once for each size
-before the readings start, and takes the time of one call; where one call
-spans them, as on Linux and macOS, one call is a reading.
+
+A reading spans :data:`_READING_SPAN_S` of CPU time at least, some 16 ms, and
+:data:`_STEPS_PER_READING` steps of the clock where the system counts that
+time in coarse steps (Windows counts it in steps of the scheduler's tick, some
+16 ms, so ten of them come to some 160 ms): a reader quicker than that is
+called as many times over as span it, counted once for each size before the
+readings start, and the reading is the time of one call. Linux and macOS count
+the time in steps of a microsecond, where one call would be a reading of half
+a millisecond for the quickest reader timed, and a stretch of a few
+milliseconds in which the process runs slower, on a core it shares with other
+work or on a slower core of the machine, lengthens every reading it covers
+several times over: on a macOS runner a refusal that takes as long for either
+size read 0.55 ms for the smaller and 1.71 ms for the larger, a ratio of 3.1
+past the bound of 2.8 for work that does not grow. Averaged over 16 ms of
+calls, the same stretch lengthens a reading by a fraction of itself, and the
+readings of the two sizes, taken in turn, span 200 ms or so between them, so a
+stretch must last most of that to lengthen every reading of one size and none
+of the other.
 
 Each size is read ``repeats`` times, the two in turn, and the shortest
 reading of each is kept: what else the process does only ever lengthens a
@@ -46,9 +59,10 @@ that restores it shows the test failing. A reading that is part linear and
 part quadratic grows by a ratio between the two, and fails only once its
 quadratic part is some three quarters of the larger reading, so the larger the
 size, the smaller the constant of a quadratic term the test catches. A test
-that the time does not grow cannot lengthen its reading by the size, and the
-reading may stay under a millisecond; it chooses the sizes so that the work
-the fix removed would be most of the larger reading.
+that the time does not grow cannot lengthen its reading by the size, and one
+call may take well under a millisecond, which the helper calls over and over
+until it spans a reading; the test chooses the sizes so that the work the fix
+removed would be most of the larger reading.
 """
 
 from __future__ import annotations
@@ -74,6 +88,11 @@ REPEATS = 5
 #: How many steps of the CPU-time clock a reading spans at least, so that a
 #: step it misses or gains is a tenth of it at most.
 _STEPS_PER_READING = 10
+
+#: The CPU time a reading spans at least, 1/64 s [s]: a stretch of a few
+#: milliseconds in which the process runs slower is then a fraction of a
+#: reading, where it would be several times one call of a quick reader.
+_READING_SPAN_S = 2.0**-6
 
 
 def _cpu_time() -> float:
@@ -119,16 +138,16 @@ class Growth[R]:
         return self.large_s / self.small_s
 
 
-def _calls_per_reading[T](work: Callable[[T], object], case: T, step: float) -> int:
-    """How many calls of *work* over *case* span :data:`_STEPS_PER_READING`
-    steps of the clock, which advances by *step*; one at least.
+def _calls_per_reading[T](work: Callable[[T], object], case: T, span_s: float) -> int:
+    """How many calls of *work* over *case* span *span_s* of CPU time; one at
+    least.
     """
     calls = 0
     start = _cpu_time()
     while True:
         work(case)
         calls += 1
-        if _cpu_time() - start >= _STEPS_PER_READING * step:
+        if _cpu_time() - start >= span_s:
             return calls
 
 
@@ -169,15 +188,15 @@ def measure_growth[T, R](
         msg = f"needs a factor of 2 or more and a repeat, got {factor}, {repeats}"
         raise ValueError(msg)
     small, large = build(size), build(factor * size)
-    step = _clock_step()
+    span_s = max(_READING_SPAN_S, _STEPS_PER_READING * _clock_step())
     best_small = best_large = math.inf
     collecting = gc.isenabled()
     gc.disable()
     try:
-        small_calls = _calls_per_reading(work, small, step)
+        small_calls = _calls_per_reading(work, small, span_s)
         # A larger input takes no less than the smaller one: when one call of
-        # the smaller spans the steps, one call of the larger does too.
-        large_calls = 1 if small_calls == 1 else _calls_per_reading(work, large, step)
+        # the smaller spans a reading, one call of the larger does too.
+        large_calls = 1 if small_calls == 1 else _calls_per_reading(work, large, span_s)
         for _ in range(repeats):
             best_small = min(best_small, _reading(work, small, small_calls)[0])
             elapsed, result = _reading(work, large, large_calls)

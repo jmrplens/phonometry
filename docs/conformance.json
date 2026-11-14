@@ -3300,15 +3300,15 @@
       "verdict": "pass"
     },
     {
-      "id": "room-building-acoustics/cte-db-hr-annex-a-formula-a-5/global-index-r-a-for-pink-noise-manual-ejemplo-7-2",
+      "id": "room-building-acoustics/cte-db-hr-annex-a-formula-a-14/global-index-r-a-for-pink-noise-manual-ejemplo-7-2",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "CTE DB-HR Annex A, Formula (A.5)",
+        "cite": "CTE DB-HR Annex A, Formula (A.14)",
         "documents": [
           {
             "kind": "standard",
             "designation": "CTE DB-HR",
-            "clause": "Annex A, Formula (A.5)"
+            "clause": "Annex A, Formula (A.14)"
           }
         ]
       },

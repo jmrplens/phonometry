@@ -166,14 +166,19 @@ def committed_bytes(path: str) -> bytes | None:
 
 
 def tracked_files(directory: str) -> set[str]:
-    """Return the set of paths under ``directory`` tracked at HEAD."""
+    """Return the set of paths under ``directory`` tracked at HEAD.
+
+    Read as git writes the names with ``-z``, whole: a plain listing quotes
+    a name that holds a character outside ASCII.
+    """
     result = subprocess.run(
-        ["git", "ls-tree", "-r", "--name-only", "HEAD", directory],
+        ["git", "ls-tree", "-r", "-z", "--name-only", "HEAD", directory],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
     )
-    return {line for line in result.stdout.splitlines() if line}
+    return {name for name in result.stdout.split("\0") if name}
 
 
 def raster_problem(old: bytes, new: bytes, tol: RasterTolerance) -> str | None:

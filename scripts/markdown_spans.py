@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import bisect
 import re
+import string
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -260,8 +261,56 @@ def _unclosed(
     return closer.match("\n".join(block).lstrip()) is None
 
 
+def _escaped_since(text: str, at: int, done: int) -> bool:
+    """Whether a backslash escapes ``text[at]``, its run counted back no further than *done*.
+
+    *done* is where the last span, comment or construct read ended: a backslash
+    one of them holds escapes nothing after it.
+    """
+    count = 0
+    while at - count > done and text[at - count - 1] == "\\":
+        count += 1
+    return count % 2 == 1
+
+
+def _escaped_match(match: re.Match[str], text: str, done: int) -> bool:
+    r"""Whether a backslash escapes the ASCII punctuation character *match* opens on.
+
+    ``\{`` and ``\<`` show the character and open nothing (CommonMark 0.31.2,
+    2.4), so a comment or a construct that opens there is no comment or
+    construct, and what follows it is prose. A backslash before any other
+    character escapes nothing.
+    """
+    start = match.start()
+    return (
+        start < len(text)
+        and text[start] in string.punctuation
+        and _escaped_since(text, start, done)
+    )
+
+
+def _search_unescaped(
+    pattern: re.Pattern[str], text: str, done: int, stop: int
+) -> tuple[re.Match[str] | None, int | None]:
+    """The first match of *pattern* at or past *done* that no backslash escapes.
+
+    :return: The match, or ``None``, and where the first escaped match it passed
+        over stands, or ``None``, since that one opens after all once the
+        reading ends a span right after its backslash.
+    """
+    at = done
+    skipped = None
+    while (match := pattern.search(text, at, stop)) is not None:
+        if not _escaped_match(match, text, done):
+            return match, skipped
+        if skipped is None:
+            skipped = match.start()
+        at = match.start() + 1
+    return None, skipped
+
+
 def _first_found(
-    found: list[re.Match[str] | None],
+    found: list[tuple[re.Match[str] | None, int | None]],
     others: Sequence[re.Pattern[str]],
     text: str,
     done: int,
@@ -269,14 +318,19 @@ def _first_found(
 ) -> re.Match[str] | None:
     """The match of *others* that opens first at or past *done*, the earlier listed on a tie.
 
-    *found* holds each pattern's next match, kept from one call to the next so
-    that a pattern is searched again only once the reading has passed its match.
+    *found* holds each pattern's next match and the escaped one it passed over,
+    kept from one call to the next so that a pattern is searched again only once
+    the reading has passed its match, or once a backslash may escape it or no
+    longer escape the one it passed over.
     """
     for index, pattern in enumerate(others):
-        match = found[index]
-        if match is not None and match.start() < done:
-            found[index] = pattern.search(text, done, stop)
-    present = [match for match in found if match is not None]
+        match, skipped = found[index]
+        stale = match is not None and (
+            match.start() < done or _escaped_match(match, text, done)
+        )
+        if stale or (skipped is not None and skipped >= done):
+            found[index] = _search_unescaped(pattern, text, done, stop)
+    present = [match for match, _ in found if match is not None]
     return min(present, key=lambda match: match.start()) if present else None
 
 
@@ -290,8 +344,9 @@ def _spans_and_others(
     """The spans of a piece of a block and what *others* find there, read left to right.
 
     Whichever opens first wins: a comment or a construct opened in a span is
-    code, and a backtick in a comment or a construct is its own. The spans past
-    a comment or a construct that holds a run are read again from its end, since
+    code, and a backtick in a comment or a construct is its own. One that opens
+    on a character a backslash escapes opens nothing there. The spans past a
+    comment or a construct that holds a run are read again from its end, since
     that run no longer opens or closes one.
 
     :param text: The block, its lines joined.
@@ -314,7 +369,7 @@ def _spans_and_others(
     if not others:
         return spans_from(start)
     found: list[tuple[int, int]] = []
-    matches = [pattern.search(text, start, stop) for pattern in others]
+    matches = [_search_unescaped(pattern, text, start, stop) for pattern in others]
     spans = spans_from(start)
     upcoming = 0
     done = start

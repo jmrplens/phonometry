@@ -284,15 +284,17 @@ for row in chain.table():
 
 Two similarly named functions do two different jobs in that snippet, and
 swapping them is silent. $A = S\alpha$, `equivalent_absorption_area`, is the
-power the room removes per unit mean-square pressure, and it is what appears in
-the receiving-room balance of Equation (4.101). $R = S\alpha/(1-\alpha)$,
-`room_constant`, is the room constant of the steady-state relation, which also
-accounts for the energy that survives its first reflection and goes on feeding
-the reverberant field, and it is what $L_{p1} = L_W + 10\log_{10}(4/R)$ needs on
-the source side. The two coincide for a live room and diverge as $\alpha$ grows
-(they differ by $10\log_{10}[1/(1-\alpha)]$, 0.5 dB at $\alpha = 0.1$ and
-3.0 dB at $\alpha = 0.5$), and using the absorption area where the room constant
-belongs biases the answer towards predicting *too much* noise reduction.
+area that turns the diffuse-field intensity on the walls,
+$\langle p^2 \rangle/(4\rho_0 c_0)$, into the power the room removes (Norton and
+Karczub, Equation (4.98)), and it is what appears in the receiving-room balance
+of Equation (4.101). $R = S\alpha/(1-\alpha)$, `room_constant`, is the room
+constant of the steady-state relation, which also accounts for the energy that
+survives its first reflection and goes on feeding the reverberant field, and it
+is what $L_{p1} = L_W + 10\log_{10}(4/R)$ needs on the source side. The two
+coincide for a live room and diverge as $\alpha$ grows (they differ by
+$10\log_{10}[1/(1-\alpha)]$, 0.5 dB at $\alpha = 0.1$ and 3.0 dB at
+$\alpha = 0.5$), and using the absorption area where the room constant belongs
+biases the answer towards predicting *too much* noise reduction.
 `equivalent_absorption_area` also takes discrete objects and an air-absorption
 term, which is how furniture, people and, in a large room, the air itself enter
 the receiving side.

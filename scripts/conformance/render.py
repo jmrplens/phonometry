@@ -28,6 +28,7 @@ drops the evidence columns off the right of the row.
 from __future__ import annotations
 
 import argparse
+import pathlib
 import re
 import sys
 from typing import TYPE_CHECKING, Any
@@ -519,13 +520,18 @@ _DOC_HEADER = """<!--
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run every check, refresh the artefact, and print the report.
+    """Run every check, refresh the artefact, and print or write the report.
 
     Two steps, in this order and never the other: the checks produce
     ``docs/conformance.json``, and the Markdown is rendered from whatever is on
     disk afterwards. When the fresh run agrees with the committed artefact
     within tolerance the file is left untouched, so the Markdown printed here
     is a function of committed bytes and a byte diff of it means something.
+
+    With ``--output`` the report is written to that file with line feeds,
+    whatever the platform: printed and redirected, it would take a carriage
+    return before every line feed on Windows, where standard output
+    translates them as any text file does.
     """
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -538,12 +544,20 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="render from the committed artefact without running the checks",
     )
+    parser.add_argument(
+        "--output",
+        type=pathlib.Path,
+        help="write the report to this file, with line feeds, instead of printing it",
+    )
     args = parser.parse_args(argv)
 
     document = load() if args.no_artifact else write()[0]
     markdown, passed, total = render_markdown(document)
     output = _DOC_HEADER + markdown if args.file_header else markdown
-    print(output)
+    if args.output is None:
+        print(output)
+    else:
+        args.output.write_text(output + "\n", encoding="utf-8", newline="\n")
     print(
         f"\n[conformance] {passed}/{total} checks passed, artefact at "
         f"{ARTIFACT_PATH.relative_to(_ROOT)}",

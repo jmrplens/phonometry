@@ -31,6 +31,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
+import { readCommittedText } from '../lib/line-ends.mjs';
 import { fences, pageLines, quotationMarks, splitLines } from '../lib/markdown-fences.mjs';
 import { version } from './repo-stats.mjs';
 
@@ -117,7 +118,7 @@ function readCitationFile(text) {
 
 const unquote = (value) => value.trim().replace(/^(["'])(.*)\1$/, '$2');
 
-const cff = readCitationFile(readFileSync(root('CITATION.cff'), 'utf8'));
+const cff = readCitationFile(readCommittedText(root('CITATION.cff')));
 
 for (const field of ['title', 'doi', 'url', 'license', 'authors', 'version', 'date-released']) {
   if (!cff[field]?.length) {
@@ -181,7 +182,7 @@ export const doiUrl = `https://doi.org/${doi}`;
  * disagree about what a heading says.
  */
 const changelogHeadings = (() => {
-  const changelog = readFileSync(root('CHANGELOG.md'), 'utf8');
+  const changelog = readCommittedText(root('CHANGELOG.md'));
   return [...changelog.matchAll(/^## \[([^\]]+)\] - (\d{4}-\d{2}-\d{2})$/gm)].map(
     ([, headingVersion, date]) => ({ version: headingVersion, date }),
   );
@@ -454,7 +455,7 @@ const citingPages = [
 ];
 
 for (const path of citingPages) {
-  const source = readFileSync(root(path), 'utf8');
+  const source = readCommittedText(root(path));
   const fail = (problem) => {
     throw new Error(`${path}: ${problem}`);
   };

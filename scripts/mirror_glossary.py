@@ -68,6 +68,7 @@ def _load() -> list[dict[str, Any]]:
         [node, "--input-type=module", "-e", program],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=False,
     )
     if result.returncode != 0:
@@ -226,7 +227,7 @@ def main() -> int:
         print(f"glossary mirror up to date: {terms} quantities.")
         return 0
     MIRROR.parent.mkdir(parents=True, exist_ok=True)
-    MIRROR.write_text(text, encoding="utf-8")
+    MIRROR.write_text(text, encoding="utf-8", newline="\n")
     print(f"glossary mirror written: {terms} quantities.")
     return 0
 

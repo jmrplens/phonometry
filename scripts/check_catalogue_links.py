@@ -575,15 +575,21 @@ def names(beside: str, designation: str, catalogue: str) -> bool:
 
 
 def pages(root: pathlib.Path | None = None) -> list[str]:
-    """The tracked pages of :data:`PAGE_ROOTS`."""
+    """The tracked pages of :data:`PAGE_ROOTS`.
+
+    Read as git writes the names with ``-z``, whole: a plain listing quotes
+    a name that holds a character outside ASCII, and the quoted name ends in
+    no ``.md``.
+    """
     root = ROOT if root is None else root
     listed = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "--", *PAGE_ROOTS],
+        ["git", "-C", str(root), "ls-files", "-z", "--", *PAGE_ROOTS],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         timeout=60,
-    ).stdout.split("\n")
+    ).stdout.split("\0")
     return sorted(path for path in listed if path.endswith((".md", ".mdx")))
 
 
@@ -691,7 +697,9 @@ def refresh(links: list[Link], *, every: bool, open_data: pathlib.Path | None) -
         for catalogue in ("iso", "iec")
     }
     PINNED.write_text(
-        json.dumps(kept, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(kept, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
 

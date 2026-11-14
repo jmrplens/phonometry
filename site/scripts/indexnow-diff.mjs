@@ -59,11 +59,14 @@
 // attempt than the build, the IndexNow job works the list out again: it
 // compares the manifest the build handed on with the newest record and the
 // newest list handed on after it, its own run's left out, as a build would,
-// hands that list on in place of the build's and submits it. No later build
-// reads the build's list, older than the newest record, so a job that
-// submitted and kept no record would otherwise leave what it sent in no list.
-// Its deploy is then the newest, so it keeps its record like any other, while
-// no deploy has gone out after it.
+// hands that list on beside the build's and submits it. No later build reads
+// the build's list, older than the newest record, so a job that submitted and
+// kept no record would otherwise leave what it sent in no list. Its deploy is
+// then the newest, so it keeps its record like any other, while no deploy has
+// gone out after it. Nothing deletes a list: a run holds one per attempt that
+// handed one on, under one name, and every reader takes the newest, so a list
+// stays until a newer one exists, and an upload that fails leaves the one
+// before it to be read.
 //
 // What a page says is read from the build, the way an engine reads it: its
 // title, its meta description, the date the sitemap gives it (the last commit
@@ -148,8 +151,10 @@ export const SUBMITTED_ARTIFACT = 'indexnow-submitted';
  * build reads the newest one after the record for the pages it was to submit,
  * which a job that kept no record may have submitted or may never have, and
  * sends them again. The IndexNow job of a deploy re-run uploads the list it
- * works out again under the same name, in place of the build's, before it
- * submits.
+ * works out again under the same name, beside the build's, before it
+ * submits. A run thus holds one list per attempt that handed one on, and no
+ * step deletes one: the workflow downloads a run's newest, and
+ * {@link pendingList} reads the newest of all.
  */
 export const HANDED_ARTIFACT = 'indexnow-urls';
 /** The branch the site deploys from: the IndexNow jobs of its runs are the only ones that submit. */
@@ -476,9 +481,11 @@ const createdAfter = (a, b) => a.created_at > b.created_at || (a.created_at === 
  * a run of this repository's {@link DEPLOY_BRANCH} after the record was kept
  * (any, with no record). The record's own run handed its list before it kept
  * the record, which holds the same pages, so only a deploy after it can have
- * submitted pages no record holds. The list of the run `exceptRun` names is
- * left out: the IndexNow job of a deploy re-run works that run's list out
- * again, and reads the lists of the other deploys.
+ * submitted pages no record holds. A run that handed on several lists, one
+ * per attempt, is read through its newest, which is the one the workflow
+ * downloads from it. The lists of the run `exceptRun` names are left out: the
+ * IndexNow job of a deploy re-run works that run's list out again, and reads
+ * the lists of the other deploys.
  *
  * @returns the artifact, or undefined when there is none after the record
  */

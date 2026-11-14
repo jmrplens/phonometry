@@ -168,7 +168,7 @@ def main() -> None:
     tag = f"v{version()}"
     assets = assets_commit()
     out = _ROOT / "README_PYPI.md"
-    out.write_text(pypi_readme(readme, tag, assets), encoding="utf-8")
+    out.write_text(pypi_readme(readme, tag, assets), encoding="utf-8", newline="\n")
     print(
         f"wrote {out} (repository links pinned to {tag}, posters to "
         f"phonometry-assets@{assets[:12]})"

@@ -30,8 +30,11 @@ import { delimiter, dirname, join, relative, resolve, sep } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import ts from 'typescript';
+
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { domainIds } from '../src/data/topics.mjs';
+import { catalogueSections } from '../src/lib/catalogue-datasets.mjs';
 import { loadContentDates } from '../src/lib/content-dates.mjs';
 import {
 	CONTENT_DIR,
@@ -119,6 +122,14 @@ function repository(t) {
 			});
 			assert.equal(ran.status, 0, ran.stderr);
 			return git('rev-parse', 'HEAD');
+		},
+		/**
+		 * Start merging `branch` into the branch checked out, with the merge
+		 * left open, so that what is written next and `commit` make the merge
+		 * commit: two parents, and whatever the merge wrote itself.
+		 */
+		merge(branch, ...options) {
+			git('merge', '-q', '--no-ff', '--no-commit', ...options, branch);
 		},
 		/** Write `site/date-ignore-revs.txt`. */
 		ignore(...lines) {
@@ -817,6 +828,322 @@ test('the day a page was published is its first commit\'s day in UTC, as the day
 	assert.equal(day(await repo.dates(), 'late.mdx'), '2026-07-01');
 });
 
+// --- Histories with merges ------------------------------------------------
+//
+// `git log` writes no change for a merge commit unless it is asked to, so a
+// history read without asking sees a merge as a commit that changed nothing.
+// Each test here makes a branch, commits on it and on main, and merges it with
+// the merge left open, so that the merge commit holds a version of a file that
+// neither of its parents holds: one it wrote itself, or the two sides joined.
+
+/** A page whose body has two paragraphs far enough apart for git to join an edit of each. */
+const twoParagraphs = (first, second, options = {}) =>
+	page({ ...options, body: `${first}\n\nA line between.\n\nAnother line between.\n\nAnd a third.\n\n${second}\n` });
+
+test('a page a merge commit adds is dated by the merge, and one the merge moves unchanged keeps its date', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', page());
+	repo.write('moved.mdx', page({ title: 'Moved' }));
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.write('b.mdx', page({ title: 'B' }));
+	repo.commit(2, 'a page added on the side branch');
+	repo.git('checkout', '-q', 'main');
+	repo.write('a.mdx', page({ body: 'Edited on main.\n' }));
+	repo.commit(3);
+	repo.merge('side');
+	repo.write('merged.mdx', page({ title: 'Written in the merge' }));
+	repo.move('moved.mdx', 'here/moved.mdx');
+	repo.commit(4, 'the merge adds a page of its own and moves another');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'merged.mdx'), '2026-01-04', 'the page only the merge holds');
+	assert.equal(day(dates, 'here/moved.mdx'), '2026-01-01', 'a page the merge moved unchanged');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-02', 'a page the side branch added, which the merge took as it was');
+	assert.equal(day(dates, 'a.mdx'), '2026-01-03');
+});
+
+test('a page whose two sides a merge joined is dated by the merge, unless one side changed only its frontmatter', async (t) => {
+	const repo = repository(t);
+	repo.write('joined.mdx', twoParagraphs('First.', 'Second.'));
+	repo.write('described.mdx', twoParagraphs('First.', 'Second.'));
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.write('joined.mdx', twoParagraphs('First, edited on the side.', 'Second.'));
+	repo.write('described.mdx', twoParagraphs('First.', 'Second.', { description: 'Described on the side.' }));
+	repo.commit(2);
+	repo.git('checkout', '-q', 'main');
+	repo.write('joined.mdx', twoParagraphs('First.', 'Second, edited on main.'));
+	repo.write('described.mdx', twoParagraphs('First.', 'Second, edited on main.'));
+	repo.commit(3);
+	repo.merge('side');
+	repo.commit(4, 'the merge joins both sides of each page');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'joined.mdx'), '2026-01-04', 'a text neither side had until the merge');
+	// The merge's version differs from main's in the description alone, so its
+	// text is main's, and main's commit dates it.
+	assert.equal(day(dates, 'described.mdx'), '2026-01-03', 'the text main wrote, under the side branch\'s description');
+
+	// The docs job's clone has none of the old versions, and reads a merge's
+	// the way it reads any commit's: fetched in a round, never one by one.
+	repo.git('config', 'uploadpack.allowFilter', 'true');
+	repo.git('config', 'uploadpack.allowAnySHA1InWant', 'true');
+	const clone = join(repo.root, 'blobless');
+	const ran = spawnSync('git', ['clone', '-q', '--filter=blob:none', `file://${repo.work}`, clone], { env: repo.env, encoding: 'utf8' });
+	assert.equal(ran.status, 0, ran.stderr);
+	const fromClone = await loadContentDates({ siteRoot: join(clone, 'site') });
+	assert.equal(day(fromClone, 'joined.mdx'), '2026-01-04');
+	assert.equal(day(fromClone, 'described.mdx'), '2026-01-03');
+});
+
+test('a data source gives the commit that made the version HEAD has, the merge that made it included', async (t) => {
+	const report = (a, b) => `{\n "a": ${a},\n "between": 0,\n "and": 0,\n "more": 0,\n "b": ${b}\n}\n`;
+	const cases = [
+		{
+			how: 'the merge joins the two sides',
+			side: () => report(2, 1),
+			main: () => report(1, 3),
+			options: [],
+			holds: 'merge',
+		},
+		{
+			// The two sides change the same line, and the merge keeps the side
+			// branch's: main's commit is the newer, and its report is not the one
+			// HEAD renders. A component main changed as well keeps the merge from
+			// being the same as either side, so git log reads both of them.
+			how: 'the merge keeps the older side',
+			side: () => report(2, 1),
+			main: () => report(3, 1),
+			options: ['-X', 'theirs'],
+			holds: 'side',
+		},
+	];
+	const named = {};
+	const expected = {};
+	for (const { how, side, main, options, holds } of cases) {
+		const repo = repository(t);
+		repo.write('report.mdx', page());
+		repo.writeFile('docs/report.json', report(1, 1));
+		repo.writeFile('site/src/components/Report.astro', '<table />\n');
+		repo.sources({ pages: ['site/src/content/docs/report.mdx'], sources: ['docs/report.json', 'site/src/components/Report.astro'] });
+		repo.commit(1);
+		repo.git('checkout', '-q', '-b', 'side');
+		repo.writeFile('docs/report.json', side());
+		const shas = { side: repo.commit(2) };
+		repo.git('checkout', '-q', 'main');
+		repo.writeFile('docs/report.json', main());
+		repo.writeFile('site/src/components/Report.astro', '<table class="wide" />\n');
+		shas.main = repo.commit(3);
+		repo.merge('side', ...options);
+		shas.merge = repo.commit(4, how);
+		const commit = (await repo.dates()).sourceCommit('docs/report.json');
+		named[how] = Object.keys(shas).find((name) => shas[name] === commit.sha) ?? commit.sha;
+		expected[how] = holds;
+		assert.equal(repo.git('show', `${holds === 'merge' ? shas.merge : shas.side}:docs/report.json`), repo.git('show', 'HEAD:docs/report.json'), how);
+	}
+	assert.deepEqual(named, expected, 'the commit each case names holds the report HEAD renders');
+});
+
+test('a data source a merge keeps from one side dates its page by that side\'s commit, the commit its Dataset names', async (t) => {
+	// The page's source is read in one history with another page's source,
+	// which the merge takes from the side branch: the merge holds a version of
+	// the two neither side held, and git reads both sides. The side changed
+	// the page's source later (day 3) than main (day 2), and the merge kept
+	// main's version (-X ours).
+	const repo = repository(t);
+	repo.write('r.mdx', page());
+	repo.write('o.mdx', page());
+	repo.writeFile('docs/report.json', '{"a": 1}\n');
+	repo.writeFile('docs/other.json', '{"o": 1}\n');
+	repo.sources(
+		{ pages: ['site/src/content/docs/r.mdx'], sources: ['docs/report.json'] },
+		{ pages: ['site/src/content/docs/o.mdx'], sources: ['docs/other.json'] },
+	);
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.writeFile('docs/report.json', '{"a": 3}\n');
+	repo.writeFile('docs/other.json', '{"o": 3}\n');
+	repo.commit(3, 'the side branch, later');
+	repo.git('checkout', '-q', 'main');
+	repo.writeFile('docs/report.json', '{"a": 2}\n');
+	const main = repo.commit(2, 'main, earlier');
+	repo.merge('side', '-X', 'ours');
+	repo.commit(4, 'the merge keeps main\'s report and takes the side\'s other source');
+	assert.equal(repo.git('show', 'HEAD:docs/report.json'), '{"a": 2}');
+	const dates = await repo.dates();
+	const commit = dates.sourceCommit('docs/report.json');
+	assert.equal(commit.sha, main, 'the commit of the rows the page renders');
+	assert.equal(day(dates, 'r.mdx'), '2026-01-02', 'the page is dated by that commit, not by the change the merge threw away');
+	assert.equal(isoDay(commit.date), day(dates, 'r.mdx'));
+	assert.equal(day(dates, 'o.mdx'), '2026-01-03', 'the source the merge took from the side');
+});
+
+test('a count, a text and a line move with a merge that made a version neither side had', async (t) => {
+	const registry = (...entries) => ['# Errata', '', ...entries.flatMap((entry) => [`## ${entry}`, '', 'What the source prints.', ''])].join('\n');
+	const fiches = (first, second) => page({ body: `<ReportPreview name="one" title="${first}" />\n\nBetween.\n\nMore.\n\nAnd more.\n\n<ReportPreview name="two" title="${second}" />\n` });
+	const standard = { type: 'standard', organization: 'International Organization for Standardization', year: 2000, title: 'Acoustics, ISO 1:2000', designation: 'ISO 1:2000' };
+	const check = (id) => ({ id, domain: 'd', reference: { documents: [{ kind: 'standard', designation: 'ISO 1', edition: '2000' }] } });
+	const checks = (...ids) => `${JSON.stringify({ domains: [{ id: 'd', title: 'Domain D' }], checks: ids.map(check) }, null, 1)}\n`;
+	const cases = [
+		{
+			what: 'a count of lines',
+			entry: { pages: ['site/src/content/docs/a.mdx'], counts: { errataEntries: { file: 'docs/ERRATA.md', lines: '^## .+$' } } },
+			base: (repo) => repo.writeFile('docs/ERRATA.md', registry('One', 'Two')),
+			side: (repo) => repo.writeFile('docs/ERRATA.md', registry('Zero', 'One', 'Two')),
+			main: (repo) => repo.writeFile('docs/ERRATA.md', registry('One', 'Two', 'Three')),
+			merged: () => {},
+		},
+		{
+			what: 'a text',
+			entry: { pages: ['site/src/content/docs/a.mdx'], texts: { reportsByArea: { files: ENGLISH_GUIDES, pattern: FICHE } } },
+			base: (repo) => repo.write('signals/guide.mdx', fiches('One', 'Two')),
+			side: (repo) => repo.write('signals/guide.mdx', fiches('One, retitled', 'Two')),
+			main: (repo) => repo.write('signals/guide.mdx', fiches('One', 'Two, retitled')),
+			merged: () => {},
+		},
+		{
+			what: 'a count of files',
+			entry: { pages: ['site/src/content/docs/a.mdx'], counts: { fiches: [':(glob)site/fiches/*.pdf'] } },
+			base: (repo) => repo.writeFile('site/fiches/one.pdf', 'one\n'),
+			side: (repo) => repo.writeFile('site/fiches/one.pdf', 'one, redrawn on the side\n'),
+			main: (repo) => repo.writeFile('site/fiches/notes.txt', 'not counted\n'),
+			merged: (repo) => repo.writeFile('site/fiches/two.pdf', 'a fiche the merge adds\n'),
+		},
+		{
+			what: 'a line',
+			entry: { pages: ['site/src/content/docs/'], counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } } },
+			base: (repo) => {
+				repo.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+				repo.writeFile('docs/report.json', checks('d/1', 'd/5'));
+			},
+			side: (repo) => repo.writeFile('docs/report.json', checks('d/0', 'd/1', 'd/5')),
+			main: (repo) => repo.writeFile('docs/report.json', checks('d/1', 'd/5', 'd/9')),
+			merged: () => {},
+		},
+	];
+	const dated = {};
+	for (const { what, entry, base, side, main, merged } of cases) {
+		const repo = repository(t);
+		repo.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`] }));
+		base(repo);
+		repo.sources(entry);
+		repo.commit(1);
+		repo.git('checkout', '-q', '-b', 'side');
+		side(repo);
+		repo.commit(2);
+		repo.git('checkout', '-q', 'main');
+		main(repo);
+		repo.commit(3);
+		repo.merge('side');
+		merged(repo);
+		repo.commit(4, `the merge makes ${what} neither side had`);
+		dated[what] = day(await repo.dates(), 'a.mdx');
+	}
+	assert.deepEqual(dated, Object.fromEntries(cases.map(({ what }) => [what, '2026-01-04'])));
+});
+
+test('the commits to the report read for the line are those made after the component in the history, not beside it on another branch', async (t) => {
+	// The component is added on a branch while main adds a check: main's commit
+	// changed no line, since main drew none, and the merge that brings the line
+	// takes main's report unchanged.
+	const standard = { type: 'standard', organization: 'International Organization for Standardization', year: 2000, title: 'Acoustics, ISO 1:2000', designation: 'ISO 1:2000' };
+	const check = (id) => ({ id, domain: 'd', reference: { documents: [{ kind: 'standard', designation: 'ISO 1', edition: '2000' }] } });
+	const checks = (...ids) => `${JSON.stringify({ domains: [{ id: 'd', title: 'Domain D' }], checks: ids.map(check) }, null, 1)}\n`;
+	const repo = repository(t);
+	repo.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`] }));
+	repo.writeFile('docs/report.json', checks('d/1'));
+	repo.sources({ pages: ['site/src/content/docs/'], counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } } });
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+	repo.commit(2, 'the line is drawn on the side branch');
+	repo.git('checkout', '-q', 'main');
+	repo.writeFile('docs/report.json', checks('d/1', 'd/2'));
+	repo.commit(3, 'a check more on main, which draws no line');
+	repo.merge('side');
+	repo.commit(4, 'the line arrives with the merge');
+	assert.equal(day(await repo.dates(), 'a.mdx'), '2026-01-01');
+
+	// The mirror: main draws the line, and a branch forked before the
+	// component adds the check. The merge takes the branch's report, so the
+	// line main showed changes at the merge, which no commit that drew a line
+	// made before it: the merge dates the page.
+	const mirror = repository(t);
+	mirror.write('a.mdx', page({ extra: [`references: ${JSON.stringify([standard])}`] }));
+	mirror.writeFile('docs/report.json', checks('d/1'));
+	mirror.sources({ pages: ['site/src/content/docs/'], counts: { verifiedBy: { report: 'docs/report.json', drawnBy: 'site/src/components/VerifiedBy.astro' } } });
+	mirror.commit(1);
+	mirror.git('checkout', '-q', '-b', 'side');
+	mirror.writeFile('docs/report.json', checks('d/1', 'd/2'));
+	mirror.commit(3, 'a check more on a branch forked before the component');
+	mirror.git('checkout', '-q', 'main');
+	mirror.writeFile('site/src/components/VerifiedBy.astro', '<p data-verified-by />\n');
+	mirror.commit(2, 'the line is drawn on main');
+	mirror.merge('side');
+	mirror.commit(4, 'the check arrives under the line main draws');
+	assert.equal(day(await mirror.dates(), 'a.mdx'), '2026-01-04');
+});
+
+test('a page a branch moves unchanged while main edits it keeps the date of the edit the merge carries', async (t) => {
+	// git's merge writes the moved page with main's text: the merge holds a
+	// version main held at the old path, so main's edit dates it, as a move
+	// with no merge would.
+	const repo = repository(t);
+	repo.write('a.mdx', page({ body: 'l1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\n' }));
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.move('a.mdx', 'b.mdx');
+	repo.commit(2, 'the side branch moves the page unchanged');
+	repo.git('checkout', '-q', 'main');
+	repo.write('a.mdx', page({ body: 'l1\nl2\nl3\nl4\nl5\nl6\nl7\nl8, edited on main\n' }));
+	const edit = repo.commit(3, 'main edits it');
+	repo.merge('side');
+	repo.commit(5, 'the merge writes nothing of its own');
+	assert.equal(repo.git('rev-parse', `${edit}:site/src/content/docs/a.mdx`), repo.git('rev-parse', 'HEAD:site/src/content/docs/b.mdx'));
+	assert.equal(day(await repo.dates(), 'b.mdx'), '2026-01-03');
+});
+
+test('a merge that keeps one side\'s version dates the page and the text by that side\'s history, not by a change it threw away', async (t) => {
+	// The side branch changes later (day 3) than main (day 2), and the merge
+	// keeps main's version (-X ours) while it takes the side's other files, so
+	// the merge holds a tree neither side held and git reads both sides.
+	const fiches = (title) => page({ body: `<ReportPreview name="one" title="${title}" />\n` });
+	const registry = (...entries) => ['# Errata', '', ...entries.flatMap((entry) => [`## ${entry}`, '', 'What the source prints.', ''])].join('\n');
+	const repo = repository(t);
+	repo.write('p.mdx', page({ body: 'Base text.\n' }));
+	repo.write('q.mdx', page({ body: 'Other.\n' }));
+	repo.write('a.mdx', page());
+	repo.write('e.mdx', page());
+	repo.write('signals/guide.mdx', fiches('One'));
+	repo.write('signals/other.mdx', page({ body: 'Other guide.\n' }));
+	repo.writeFile('docs/ERRATA.md', registry('One'));
+	repo.writeFile('docs/notes.md', 'Notes.\n');
+	repo.sources(
+		{ pages: ['site/src/content/docs/a.mdx'], texts: { reportsByArea: { files: ENGLISH_GUIDES, pattern: FICHE } } },
+		{ pages: ['site/src/content/docs/e.mdx'], counts: { errataEntries: { file: 'docs/ERRATA.md', lines: '^## .+$' } } },
+	);
+	repo.commit(1);
+	repo.git('checkout', '-q', '-b', 'side');
+	repo.write('p.mdx', page({ body: 'Side text.\n' }));
+	repo.write('q.mdx', page({ body: 'Other, from the side.\n' }));
+	repo.write('signals/guide.mdx', fiches('One, retitled on the side'));
+	repo.write('signals/other.mdx', page({ body: 'Other guide, from the side.\n' }));
+	repo.writeFile('docs/ERRATA.md', registry('One', 'Two', 'Three'));
+	repo.writeFile('docs/notes.md', 'Notes, from the side.\n');
+	repo.commit(3, 'the side branch, later');
+	repo.git('checkout', '-q', 'main');
+	repo.write('p.mdx', page({ body: 'Main text.\n' }));
+	repo.write('signals/guide.mdx', fiches('One, retitled on main'));
+	repo.writeFile('docs/ERRATA.md', registry('One', 'Two'));
+	repo.commit(2, 'main, earlier');
+	repo.merge('side', '-X', 'ours');
+	repo.commit(4, 'the merge keeps main\'s version of what both changed');
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'p.mdx'), '2026-01-02', 'a page whose text the merge took from main');
+	assert.equal(day(dates, 'q.mdx'), '2026-01-03', 'a page the merge took from the side');
+	assert.equal(day(dates, 'a.mdx'), '2026-01-02', 'a text whose match the merge took from main');
+	assert.equal(day(dates, 'e.mdx'), '2026-01-02', 'a count of lines the merge took from main');
+});
+
 // --- The site's own list of pages built from other files -----------------
 
 /** Modules that hold no text a page shows: the site's address and the icon shapes. */
@@ -879,7 +1206,109 @@ const READS = {
 		reportsByAreaEs: 'text',
 		reportCount: 'count',
 	},
+	// Every catalogue page, read off the pages: the tables each one renders
+	// (its <Catalogues catalogue=...> tags), and so the rows the finder and
+	// the overview count for it; and the overview's title.
+	'site/src/lib/catalogue-pages.ts': {
+		cataloguePages: 'text',
+		catalogueOverview: 'text',
+	},
 };
+
+/**
+ * The names a module exports: imported where node can import it, and read
+ * from its source where it cannot, as a TypeScript module that imports
+ * Astro's own modules is.
+ */
+async function exportNames(module) {
+	const file = join(REPO, module);
+	if (!file.endsWith('.ts')) return Object.keys(await import(pathToFileURL(file).href)).filter((name) => name !== 'default');
+	return typeScriptExports(readFileSync(file, 'utf8'), file);
+}
+
+/** The identifiers a binding pattern of a declaration binds, `{ a, b: [c] }` giving a and c. */
+function boundIdentifiers(name) {
+	if (ts.isIdentifier(name)) return [name.text];
+	return name.elements.flatMap((element) => (ts.isOmittedExpression(element) ? [] : boundIdentifiers(element.name)));
+}
+
+/**
+ * The values a TypeScript module exports, read from its syntax tree by
+ * TypeScript's own parser, so that every form of export is read: a
+ * declaration (`export const`, a destructuring one included, `export
+ * function`, `export class`, `export enum`), an export list (`export { a,
+ * b as c }`) and a re-export (`export { a } from`, `export * from`, whose
+ * names are those of the module it names, read the same way). A type, an
+ * interface and a default export carry no value a page takes by name, and
+ * are left out, as `exportNames` leaves `default` out of a module node
+ * imports. Any other export (`export =`, an `export import`) is refused
+ * by name instead of passed over.
+ *
+ * @param {string} source
+ * @param {string} file The module's path, for the modules it re-exports.
+ * @returns {Promise<string[]>}
+ */
+async function typeScriptExports(source, file) {
+	const tree = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+	const names = [];
+	const exported = (node) => ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+	const isDefault = (node) => (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.DefaultKeyword);
+	const where = (node) => `${relative(REPO, file)}:${tree.getLineAndCharacterOfPosition(node.getStart()).line + 1}`;
+	for (const statement of tree.statements) {
+		if (ts.isExportDeclaration(statement)) {
+			if (statement.isTypeOnly) continue;
+			const { exportClause, moduleSpecifier } = statement;
+			if (exportClause === undefined) {
+				// export * from '...': the names of the module it names.
+				const target = resolve(dirname(file), moduleSpecifier.text);
+				const module = relative(REPO, target).split(sep).join('/');
+				names.push(...(await exportNames(module)));
+			} else if (ts.isNamespaceExport(exportClause)) {
+				names.push(exportClause.name.text);
+			} else {
+				for (const element of exportClause.elements) if (!element.isTypeOnly) names.push(element.name.text);
+			}
+			continue;
+		}
+		if (ts.isExportAssignment(statement)) {
+			if (!statement.isExportEquals) continue; // export default: no name a page imports.
+			throw new Error(`${where(statement)}: an export = this reader does not read`);
+		}
+		if (!exported(statement)) continue;
+		if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) continue;
+		if (isDefault(statement)) continue;
+		if (ts.isVariableStatement(statement)) {
+			names.push(...statement.declarationList.declarations.flatMap((declaration) => boundIdentifiers(declaration.name)));
+		} else if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) {
+			names.push(statement.name.text);
+		} else {
+			throw new Error(`${where(statement)}: an export this reader does not read (${ts.SyntaxKind[statement.kind]})`);
+		}
+	}
+	return names;
+}
+
+test('the exports of a TypeScript module are read whatever form they take', async () => {
+	const file = join(REPO, 'site', 'src', 'lib', 'planted.ts');
+	const read = (source) => typeScriptExports(source, file);
+	assert.deepEqual(await read('export const a = 1;\nexport async function b() {}\nexport function* g() {}\nexport class C {}\nexport let d = 2, e = 3;'), ['a', 'b', 'g', 'C', 'd', 'e']);
+	assert.deepEqual(await read('const total = 1;\nexport { total };'), ['total']);
+	assert.deepEqual(await read('const pages = 1;\nexport { pages as alias };'), ['alias']);
+	assert.deepEqual(await read("export { reports } from '../data/reports.mjs';"), ['reports']);
+	assert.deepEqual(await read('export const { length: rows, x: [first] } = make();'), ['rows', 'first']);
+	assert.deepEqual(await read('export enum Kind { A }'), ['Kind']);
+	assert.deepEqual(await read("export * as all from '../data/reports.mjs';"), ['all']);
+	// A re-export of everything gives the names of the module it names.
+	const reports = await exportNames('site/src/data/reports.mjs');
+	assert.ok(reports.length > 0);
+	assert.deepEqual(await read("export * from '../data/reports.mjs';"), reports);
+	// Types, interfaces and a default carry no value a page takes by name.
+	assert.deepEqual(await read('export interface I { a: number }\nexport type T = string;\nexport type { I as J };\nexport default 1;\nexport default function f() {}'), []);
+	await assert.rejects(typeScriptExports('export = 1;', file), /export = this reader does not read/);
+});
+
+/** The catalogue a <Catalogues> tag renders, as the text of the catalogue pages matches it: the key in its quotes. */
+const catalogueKey = (match) => match.slice(1, -1);
 
 /** The names an import clause binds from its module; `*` for all of them. */
 function boundNames(clause) {
@@ -1284,7 +1713,7 @@ test('every page that renders data from outside its file is listed in date-sourc
 	// The table of what each export is read from covers every export, so a
 	// number added to one of these modules has to say where it comes from.
 	for (const [module, exports] of Object.entries(READS)) {
-		const names = Object.keys(await import(pathToFileURL(join(REPO, module)).href)).filter((name) => name !== 'default');
+		const names = await exportNames(module);
 		assert.deepEqual(names.sort(), Object.keys(exports).sort(), `what each export of ${module} is read from`);
 	}
 });
@@ -1344,23 +1773,46 @@ test('each count in date-sources.json is the number the page shows: files as rep
 	}
 });
 
-test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides', async (t) => {
+test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides, the tables catalogue-pages.ts reads off the catalogue pages', async (t) => {
 	const reports = await import(pathToFileURL(join(SITE, 'src', 'data', 'reports.mjs')).href);
 	const texts = readDateSources(join(SITE, DATE_SOURCES)).flatMap((entry) => Object.entries(entry.texts));
-	assert.ok(texts.length > 0, 'the index of fiches shows what the guides say of each fiche');
+	assert.ok(texts.some(([name]) => Object.hasOwn(READS['site/src/data/reports.mjs'], name)), 'the index of fiches shows what the guides say of each fiche');
+	assert.ok(texts.some(([name]) => name === 'cataloguePages'), 'the finder and the overview count the rows of the tables each catalogue page renders');
+	/** Each file a text reads, as HEAD holds it. */
+	const atHead = (set) =>
+		filesAtHead(REPO, set.files).map((file) => {
+			const head = spawnSync('git', ['show', `HEAD:${file}`], { cwd: REPO, encoding: 'utf8', maxBuffer: 1 << 28 });
+			assert.equal(head.status, 0, head.stderr);
+			return { file, text: head.stdout };
+		});
 	for (const [name, set] of texts) {
-		assert.ok(Object.hasOwn(READS['site/src/data/reports.mjs'], name), `${name} is no export of src/data/reports.mjs`);
+		const module = Object.keys(READS).find((path) => READS[path][name] === 'text');
+		assert.ok(module, `${name} is no text an export the test knows reads`);
 		// The comparison is at HEAD, which is what the dates read.
 		const dirty = spawnSync('git', ['status', '--porcelain', '--', ...set.files], { cwd: REPO, encoding: 'utf8' });
 		if (dirty.stdout.trim() !== '') {
 			t.diagnostic(`${name}: uncommitted changes under its files, not compared`);
 			continue;
 		}
+		const pattern = new RegExp(set.pattern, 'gm');
+		if (module === 'site/src/lib/catalogue-pages.ts') {
+			// The tables each catalogue page renders, in its order, as the
+			// reader catalogue-pages.ts calls finds them in the page's body.
+			assert.equal(name, 'cataloguePages', `${name}: the text of the catalogue pages is the one cataloguePages reads`);
+			let pages = 0;
+			for (const { file, text } of atHead(set)) {
+				const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+				const read = catalogueSections(body).map(({ key }) => key);
+				if (read.length > 0) pages += 1;
+				assert.deepEqual([...text.matchAll(pattern)].map(([match]) => catalogueKey(match)), read, `${name}: the tables ${file} renders`);
+			}
+			assert.ok(pages > 0, `${name}: ${set.files.join(' ')} holds no catalogue page`);
+			continue;
+		}
+		assert.equal(module, 'site/src/data/reports.mjs', `${name}: the test does not say how ${module} reads it`);
 		const matched = new Set();
-		for (const file of filesAtHead(REPO, set.files)) {
-			const head = spawnSync('git', ['show', `HEAD:${file}`], { cwd: REPO, encoding: 'utf8', maxBuffer: 1 << 28 });
-			assert.equal(head.status, 0, head.stderr);
-			for (const [match] of head.stdout.matchAll(new RegExp(set.pattern, 'gm'))) {
+		for (const { file, text } of atHead(set)) {
+			for (const [match] of text.matchAll(pattern)) {
 				const fiche = /\bname="([^"]*)"/.exec(match);
 				assert.ok(fiche, `${name}: ${file} matches ${set.pattern} with no fiche named in it`);
 				matched.add(fiche[1]);
@@ -1444,6 +1896,36 @@ test('the catalogue pages move with a commit that changes only the words of the 
 			for (const path of pages) assert.equal(day(dates, path), '2026-01-02', `${path} after a commit to ${component} alone`);
 		}
 	}
+});
+
+test('every catalogue page moves with a commit that moves a table from one catalogue page to another', async (t) => {
+	// The site's own entries for the catalogue pages, on a history where no
+	// catalogue data and no component changes: a table leaves one page for
+	// another, so the rows the finder on every page and the overview's list
+	// count for those two pages change, on the pages that did not change too.
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	const tag = (key, lang) => `<Catalogues catalogue="${key}" lang="${lang}" />`;
+	const catalogue = (lang, ...keys) => page({ body: `${keys.map((key) => `## ${key}\n\nWhat ${key} holds.\n\n${tag(key, lang)}\n`).join('\n')}` });
+	const dated = {};
+	for (const [prefix, lang] of [['', 'en'], ['es/', 'es']]) {
+		const dir = `${prefix}reference/catalogues/`;
+		const entry = raw.entries.find((candidate) => candidate.pages.includes(`site/src/content/docs/${dir}`));
+		assert.ok(entry, `an entry for site/src/content/docs/${dir}`);
+		const repo = repository(t);
+		repo.write(`${dir}index.mdx`, page({ title: 'Catalogues' }));
+		repo.write(`${dir}carpets.mdx`, catalogue(lang, 'carpets', 'underlays'));
+		repo.write(`${dir}floors.mdx`, catalogue(lang, 'floors'));
+		repo.write(`${dir}solids.mdx`, catalogue(lang, 'solids'));
+		for (const spec of entry.sources) repo.writeFile(spec, 'one\n');
+		writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [entry] }));
+		repo.commit(1);
+		repo.write(`${dir}carpets.mdx`, catalogue(lang, 'carpets'));
+		repo.write(`${dir}floors.mdx`, catalogue(lang, 'floors', 'underlays'));
+		repo.commit(2, 'the underlays table moves from the carpets page to the floors page');
+		const dates = await repo.dates();
+		for (const name of ['index.mdx', 'solids.mdx']) dated[`${dir}${name}`] = day(dates, `${dir}${name}`);
+	}
+	assert.deepEqual(dated, Object.fromEntries(Object.keys(dated).map((path) => [path, '2026-01-02'])));
 });
 
 test('the landing page moves with a commit that changes only how its numbers are computed', async (t) => {

@@ -19,6 +19,8 @@ import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { parse } from 'yaml';
+
 import { hasMarkdownCopy, releaseHeaderKeys, withheldRoutes, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
 import {
 	DEPLOY_BRANCH,
@@ -904,6 +906,29 @@ test('the handed list read is the newest one a run of main uploaded after the re
 	assert.equal(indexnow.pendingList([sameSecond], record), sameSecond, 'a list of the same second with a larger id is after the record');
 });
 
+/**
+ * One run hands on a list per attempt that hands one on: its build's, and on
+ * a deploy re-run, the one each attempt of its IndexNow job works out again.
+ * They share a name and none is deleted, and the workflow downloads a run's
+ * newest list of that name, which is the one read here: a newer list of the
+ * run would be read in its place.
+ */
+test("of the lists one run handed on, the newest is read, and the one before it while no newer one was uploaded", () => {
+	const record = artifact(1, '2026-11-10T11:31:00Z');
+	const built = handed(5, '2026-11-10T10:00:00Z', { id: 100 });
+	const again = handed(6, '2026-11-10T12:05:00Z', { id: 100 });
+	const retried = handed(7, '2026-11-10T12:40:00Z', { id: 100 });
+	for (const order of [[built, again, retried], [retried, built, again], [again, retried, built]]) {
+		assert.equal(indexnow.pendingList(order, record), retried);
+	}
+	// The upload of the retry failed: the list of the attempt before it is read.
+	assert.equal(indexnow.pendingList([built, again], record), again);
+	// The build's list, older than the record, is never read after it.
+	assert.equal(indexnow.pendingList([built], record), undefined);
+	// A deploy re-run of that run leaves every one of its lists out.
+	assert.equal(indexnow.pendingList([built, again, retried], record, 100), undefined);
+});
+
 test('the run of the newest handed list after the record is named for the workflow to download it from', (t) => {
 	const found = lastSubmittedAgainst(t, {
 		[SUBMITTED_ARTIFACT]: [{ total_count: 1, artifacts: [artifact(7, '2026-11-06T08:00:00Z')] }],
@@ -1094,6 +1119,27 @@ test('the manifest a build handed IndexNow is compared as it is, and one that ca
 	assert.match(both.err, /--dist or --current, not both/);
 });
 
+/** The workflow that builds the site, deploys it and tells IndexNow. */
+const WORKFLOW = join(HERE, '..', '..', '.github', 'workflows', 'docs.yml');
+
+/**
+ * Whether the IndexNow job of docs.yml deletes a list its run handed on
+ * before it uploads the one it worked out again: `overwrite` on that upload,
+ * which upload-artifact carries out by deleting the run's newest artifact of
+ * the name and then uploading, so that an upload that fails in between leaves
+ * the run with neither list.
+ */
+function handOffDeletes() {
+	const steps = parse(readFileSync(WORKFLOW, 'utf8')).jobs.indexnow.steps;
+	const uploads = steps.filter((step) => String(step.uses ?? '').startsWith('actions/upload-artifact@') && step.with?.name === indexnow.HANDED_ARTIFACT);
+	assert.equal(uploads.length, 1, `the IndexNow job of docs.yml has ${uploads.length} steps that hand a list on`);
+	return [true, 'true'].includes(uploads[0].with.overwrite);
+}
+
+/** {@link handOffDeletes}, read from docs.yml once for the thousands of runs a test plays. */
+let docsDeletes;
+const handOffDeletesOnce = () => (docsDeletes ??= handOffDeletes());
+
 /**
  * One page of the site, the engines and the runs of docs.yml, played in the
  * order a test gives. A build compares its run's pages with the newest record
@@ -1103,15 +1149,17 @@ test('the manifest a build handed IndexNow is compared as it is, and one that ca
  * deploy has gone out after its run's. When the deploy job ran in a later
  * attempt than the build, the job works the list out again first, against
  * the newest record and the newest list handed on after it, its own run's
- * left out, and hands that list on in place of the one its build handed on
- * before it submits, as docs.yml does; `again` set to false is a job that
- * submits the list it was handed whatever the attempt, and set to 'always',
- * one that works it out again on every run, with `ownLeftOut` false reading
- * its own run's list too, and `handsOn` set to false is a job that works the
- * list out again and hands nothing on. A URL submitted has the engines fetch
+ * left out, and hands that list on beside the ones its run handed on before
+ * it submits, as docs.yml does; `again` set to false is a job that submits
+ * the list it was handed whatever the attempt, and set to 'always', one that
+ * works it out again on every run, with `ownLeftOut` false reading its own
+ * run's list too, and `handsOn` set to false is a job that works the list out
+ * again and hands nothing on. `deletes`, which is what docs.yml does unless a
+ * test says otherwise, is a job that deletes its run's newest list before it
+ * uploads its own, as `overwrite` does. A URL submitted has the engines fetch
  * what the site serves then.
  */
-function engines({ again = true, ownLeftOut = true, handsOn = true } = {}) {
+function engines({ again = true, ownLeftOut = true, handsOn = true, deletes = handOffDeletesOnce() } = {}) {
 	const records = [];
 	const lists = [];
 	const held = new Map();
@@ -1159,17 +1207,19 @@ function engines({ again = true, ownLeftOut = true, handsOn = true } = {}) {
 		/**
 		 * The IndexNow job of `run`, doing one of {@link A_JOBS}: the URLs it
 		 * submitted, or null when it failed before it did. The list it hands
-		 * on replaces its run's, as `overwrite` does.
+		 * on goes beside its run's, or, with `deletes`, after the newest of
+		 * them is deleted, and an upload that fails leaves nothing of its own.
 		 */
 		job(run, mode = 'keeps its record') {
 			if (mode === 'fails') return null;
 			const works = again === 'always' || (again && run.deployed > run.built);
 			const list = works ? compare(run.pages, ownLeftOut ? run.id : undefined) : run.list;
 			if (works && handsOn) {
-				lists.splice(0, lists.length, ...lists.filter((handed) => handed.workflow_run.id !== run.id));
-				hand(run, list);
+				const replaced = deletes ? lists.findLast((handed) => handed.workflow_run.id === run.id) : undefined;
+				if (replaced !== undefined) lists.splice(lists.indexOf(replaced), 1);
+				if (mode !== 'fails while handing its list on') hand(run, list);
 			}
-			if (mode === 'fails after handing its list on') return null;
+			if (mode === 'fails after handing its list on' || mode === 'fails while handing its list on') return null;
 			for (const page of list.urls) {
 				if (Object.hasOwn(served, page)) told[page] = served[page];
 				else delete told[page];
@@ -1193,17 +1243,22 @@ const B_JOBS = ['keeps its record', 'keeps no record', 'fails', 'fails, then is 
  * What A's last IndexNow job does: keep its record; submit and keep none, as
  * when the deployments cannot be listed or a push cancels the run after the
  * submission; fail after it handed its list on and before it submitted, as
- * when IndexNow refuses the submission (only the job of a deploy re-run hands
- * a list on); or fail before either.
+ * when IndexNow refuses the submission; fail while it hands its list on, as
+ * when the upload fails, which with `overwrite` comes after the list before
+ * it was deleted (only the job of a deploy re-run hands a list on); or fail
+ * before any of these.
  */
-const A_JOBS = ['keeps its record', 'keeps no record', 'fails after handing its list on', 'fails'];
+const A_JOBS = ['keeps its record', 'keeps no record', 'fails after handing its list on', 'fails while handing its list on', 'fails'];
 
 /**
  * The orders a re-run comes in, for runs A and B of one page each: A's
  * deploy fails, B deploys, and A's deploy job is re-run (F1); A's IndexNow
  * job fails, B deploys, and that job alone is re-run (F2); A's deploy job is
  * re-run before any other deploy (F3); nothing is re-run (F4); A is re-run
- * whole, its build too, after B (F5). A's last IndexNow job does `aJob`.
+ * whole, its build too, after B (F5); F1 and F3 again, where the IndexNow job
+ * of A's deploy re-run submits and keeps no record, as when the upload of the
+ * record fails, and that job alone is then re-run (F6 and F7). A's last
+ * IndexNow job does `aJob`.
  */
 const FAMILIES = {
 	F1(world, a, b, bJob, aJob) {
@@ -1248,7 +1303,28 @@ const FAMILIES = {
 		world.job(a, aJob);
 		if (bJob === 'fails, then is re-run last') world.job(b);
 	},
+	F6(world, a, b, bJob, aJob) {
+		world.build(a);
+		world.deploy(a, { fails: true });
+		world.build(b);
+		world.deploy(b);
+		world.job(b, bJob === 'fails, then is re-run last' ? 'fails' : bJob);
+		world.deploy(a, { rerun: true });
+		world.job(a, 'keeps no record');
+		world.job(a, aJob);
+		if (bJob === 'fails, then is re-run last') world.job(b);
+	},
+	F7(world, a, _b, _bJob, aJob) {
+		world.build(a);
+		world.deploy(a, { fails: true });
+		world.deploy(a, { rerun: true });
+		world.job(a, 'keeps no record');
+		world.job(a, aJob);
+	},
 };
+
+/** The families with no run B in them. */
+const WITHOUT_B = new Set(['F3', 'F4', 'F7']);
 
 /** A case's label, read back: the page in the record, A, B and C, and what B's and A's last jobs did. */
 const LABEL = /^r=(\S+) a=(\S+) b=(\S+) c=(\S+) B's job (.*), A's job (.*)$/;
@@ -1270,7 +1346,7 @@ function wrongIn(family, rule) {
 	const values = ['-', 'p0', 'p1'];
 	const wrong = { cases: 0, afterRerun: [], afterC: [], afterD: [] };
 	for (const r of values) for (const av of values) for (const bv of values) for (const cv of values) {
-		for (const bJob of family === 'F3' || family === 'F4' ? ['-'] : B_JOBS) {
+		for (const bJob of WITHOUT_B.has(family) ? ['-'] : B_JOBS) {
 			for (const aJob of A_JOBS) {
 				const world = engines(rule);
 				world.seed(onePage(r));
@@ -1352,7 +1428,7 @@ test('in every order of deploys, failures and re-runs, and whatever the IndexNow
 	// record, those where B's job kept its record and C and D have the page
 	// as that record has it and A otherwise, nothing sends it again.
 	const unhanded = wrongIn('F1', { handsOn: false });
-	assert.equal(unhanded.cases, 1296);
+	assert.equal(unhanded.cases, 1620);
 	assert.equal(unhanded.afterD.length, 18);
 	for (const label of unhanded.afterD) {
 		const [, , a, b, c, bJob, aJob] = LABEL.exec(label);
@@ -1365,11 +1441,41 @@ test('in every order of deploys, failures and re-runs, and whatever the IndexNow
 	// re-run differs from A's record.
 	const asHanded = wrongIn('F1', { again: false });
 	const keptByA = (labels) => labels.filter((label) => label.endsWith("A's job keeps its record"));
-	assert.equal(asHanded.cases, 1296);
+	assert.equal(asHanded.cases, 1620);
 	assert.equal(keptByA(asHanded.afterRerun).length, 36);
 	assert.equal(keptByA(asHanded.afterD).length, 12);
 	for (const label of keptByA(asHanded.afterD)) {
 		const [, r, a, b, c, bJob] = LABEL.exec(label);
 		assert.ok(r === a && a === c && b !== a && ['keeps its record', 'keeps no record'].includes(bJob), label);
+	}
+});
+
+/**
+ * A list handed on is never deleted to make room for the next. With
+ * `overwrite`, as docs.yml handed the IndexNow job's list on before, the job
+ * of a deploy re-run that submitted and kept no record left the pages it sent
+ * in the list it handed on, and a re-run of that job alone deleted that list
+ * and, its own upload failing, handed on none. The deploys after it that have
+ * the page as the newest record has it then find no list to send it from, and
+ * the engines keep what that first job told them: in 18 of the 324 cases of F6
+ * and 18 of the 81 of F7 where the re-run fails while handing its list on,
+ * those where A has the page otherwise than the newest record (B's in F6, the
+ * one the site started from in F7).
+ */
+test('a list handed on stays until the next one is uploaded, so a job that fails while handing its list on loses no page', () => {
+	for (const family of ['F6', 'F7']) {
+		const deleting = wrongIn(family, { deletes: true });
+		assert.deepEqual(deleting.afterC, deleting.afterD, family);
+		assert.equal(deleting.afterD.length, 18, family);
+		for (const label of deleting.afterD) {
+			const [, r, a, b, c, bJob, aJob] = LABEL.exec(label);
+			const recorded = family === 'F6' ? b : r;
+			assert.ok(
+				aJob === 'fails while handing its list on' && c === recorded && a !== recorded && (family === 'F7' || bJob === 'keeps its record'),
+				`${family}: ${label}`,
+			);
+		}
+		const keeping = wrongIn(family, { deletes: false });
+		assert.deepEqual([...keeping.afterC, ...keeping.afterD], [], family);
 	}
 });

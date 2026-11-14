@@ -49,7 +49,7 @@
  * serves the rows on the page and nowhere else.
  */
 
-import { inlineParts, pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
+import { inlineParts, leadingDefinitions, pageDefinitions, pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
 import { referenceStub } from './citations.mjs';
 import { printedTables } from './catalogue-sources.mjs';
 import { flowOf, MDX_TAG, NOT_INLINE_ROLES, pageLines, splitLines } from './markdown-fences.mjs';
@@ -78,10 +78,6 @@ const SECTION_HEADING = /^##[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/;
  */
 const MDX_ESM = /^(?:import|export)\s/;
 
-/** A line the walk read as opening an aside (`:::note`), and one that closes it. */
-const ASIDE_OPENS = /^:{3,}[A-Za-z0-9]/;
-const ASIDE_CLOSES = /^:{3,}[ \t]*$/;
-
 /**
  * The first character of the private use area, from which each piece of a
  * paragraph that is read before its marks (a code span, an escaped
@@ -109,15 +105,6 @@ const REFERENCE = /&(?:#(\d{1,7})|#[xX]([\da-fA-F]{1,6})|([A-Za-z][A-Za-z\d]{0,3
 /** Every tag of a paragraph, as the walk of the page reads a tag. */
 const INLINE_TAG = new RegExp(MDX_TAG.source, 'g');
 
-/**
- * A link or an image, `[text](address "title")` (CommonMark 6.3 and 6.4): its
- * text may hold brackets one level deep, its address parentheses one level
- * deep or anything but a line end between angle brackets, and its title
- * stands in quotes or parentheses.
- */
-const LINK =
-  /!?\[((?:[^[\]]|\[[^[\]]*\])*)\]\([ \t]*(?:<[^<>\n]*>|(?:[^()\s]|\([^()\s]*\))*)(?:[ \t]+(?:"[^"]*"|'[^']*'|\([^()]*\)))?[ \t]*\)/g;
-
 /** Emphasis and strong emphasis by asterisks, the marks around the text they mark. */
 const STARS = /(\*{1,2})(\S(?:.*?\S)?)\1/g;
 
@@ -136,6 +123,9 @@ const STRUCK = /(~{1,2})(\S(?:.*?\S)?)\1/g;
  * expression, or a character reference by a name it does not decode.
  */
 const UNREAD = /<[^<>]*>?|\{[^{}]*\}?|\}|&[A-Za-z][A-Za-z\d]*;/g;
+
+/** A backslash before a line end, which breaks the line where nothing else holds it. */
+const LINE_BREAK = /\\\n/g;
 
 /** The blanks a page's source runs together into one space between words. */
 const BLANKS = /[ \t\r\n]+/g;
@@ -163,68 +153,73 @@ function referenceOf(decimal, hexadecimal, name) {
     : '\ufffd';
 }
 
-/** Whether a line ends on a backslash that breaks it: one no other backslash escapes. */
-const breaksOnBackslash = (line) => /(?<!\\)(?:\\\\)*\\$/.test(line);
-
 /**
  * What the page shows of a run of inline text, and what in it the page shows
  * as something other than text.
  *
  * The text is read once, left to right, as the page reads it, through
  * `inlineParts` of site/scripts/shared/markdown-spans.mjs: whichever of a code
- * span, a formula, a backslash escape (CommonMark 2.4), a comment, a tag and
- * an expression opens first takes what follows, so a comment owns a formula or
- * a backtick it holds, and a tag what its attributes write. What a code span
+ * span, a formula, a backslash escape (CommonMark 2.4), a comment, a tag, an
+ * expression and a link's closing bracket opens first takes what follows, so a
+ * comment owns a formula or a backtick it holds, a tag what its attributes
+ * write, and a link its address, its title or its label. What a code span
  * holds is code, and no mark inside one is read; a formula is not text; an
- * escape is the character it stands for, which opens nothing; and a comment,
- * or an expression that holds nothing but blanks and comments, shows nothing.
- * Then each character reference (2.5) is the character it stands for; a tag
- * around text shows the text; a link and an image show their text; and
- * emphasis, strong emphasis and struck text show what they mark, read until
- * no mark is left. A backslash at the end of a line breaks the line, and the
- * blanks between words are one space. Unicode spaces the page shows, a
- * non-breaking one or a thin one, stay as written.
+ * escape is the character it stands for, which opens nothing; a comment, or an
+ * expression that holds nothing but blanks and comments, shows nothing; and a
+ * link or an image shows its text, a reference one (6.3) only where the page
+ * defines its label, and its brackets as written where it does not. Then each
+ * character reference (2.5) is the character it stands for; a tag around text
+ * shows the text; and emphasis, strong emphasis and struck text show what they
+ * mark, read until no mark is left. A backslash at the end of a line breaks the
+ * line, unless a code span holds it, and the blanks between words are one
+ * space. Unicode spaces the page shows, a non-breaking one or a thin one, stay
+ * as written.
  *
  * Left as written, and named in `markup`: a formula, a tag that renders a
  * component of its own (`<Badge text="new" />`), an expression (`{x}`) and a
  * character reference by a name the reader does not decode (`&shy;`).
  *
  * @param {string[]} lines The lines of a paragraph, or a heading's text.
+ * @param {{definitions?: Set<string>}} [options] The labels the page's link
+ *   reference definitions define (`pageDefinitions` of markdown-spans.mjs).
  * @returns {{text: string, markup: string[]}}
  */
-export function readInline(lines) {
+export function readInline(lines, { definitions = new Set() } = {}) {
   const held = [];
   const markup = [];
   const hold = (shown) => String.fromCharCode(HELD + held.push(shown) - 1);
   // The parts are read with the line ends where the page writes them, so a
-  // line comment ends where its line does; the text around them reads each
-  // line end as the blank it is, at the same index.
-  const written = lines
-    .map((line, index) => (index < lines.length - 1 && breaksOnBackslash(line) ? line.slice(0, -1) : line))
-    .join('\n');
+  // line comment ends where its line does, and a code span keeps a backslash
+  // before its line end; what a part holds reads each line end as the blank
+  // it is, at the same index.
+  const written = lines.join('\n');
   const text = written.replaceAll('\n', ' ');
   let marked = '';
   let done = 0;
-  for (const { start, end, what } of inlineParts(written)) {
+  for (const { start, end, what } of inlineParts(written, { links: true, definitions })) {
     const part = text.slice(start, end);
     let shown = '';
     if (what === 'code') shown = hold(codeOf(text, start, end));
     else if (what === 'escape') shown = hold(part[1]);
-    else if (what !== 'comment') {
+    else if (what === 'maths' || what === 'expression') {
       // A formula or an expression: not text, and named in `markup`.
       markup.push(part);
       shown = hold(part);
     }
-    marked += text.slice(done, start) + shown;
+    marked += written.slice(done, start) + shown;
     done = end;
   }
-  let read = (marked + text.slice(done))
+  // Outside every part, a backslash before a line end breaks the line
+  // (CommonMark 0.31.2, 6.7): one inside a code span is the code's, and one an
+  // escape takes is the backslash it shows, both held by now.
+  let read = (marked + written.slice(done))
+    .replace(LINE_BREAK, ' ')
+    .replaceAll('\n', ' ')
     .replace(REFERENCE, (reference, decimal, hexadecimal, name) => {
       const shown = referenceOf(decimal, hexadecimal, name);
       return shown === undefined ? reference : hold(shown);
     })
-    .replace(INLINE_TAG, (tag) => (tag.endsWith('/>') ? tag : ''))
-    .replace(LINK, '$1');
+    .replace(INLINE_TAG, (tag) => (tag.endsWith('/>') ? tag : ''));
   for (let before; before !== read; ) {
     before = read;
     read = read.replace(STARS, '$2').replace(UNDERSCORES, '$2').replace(STRUCK, '$2');
@@ -302,6 +297,16 @@ function cataloguesByLine(rendered) {
   return byLine;
 }
 
+/**
+ * The lines of a paragraph past the link reference definitions it opens with,
+ * which the page does not show: none when it holds nothing else.
+ */
+function pastDefinitions(lines) {
+  const text = lines.join('\n');
+  const { end } = leadingDefinitions(text);
+  return end >= text.length ? [] : splitLines(text.slice(end));
+}
+
 /** A section's reading of a heading or a paragraph: its text, and its markup if any. */
 function asRead(field, { text, markup }) {
   return { [field]: text, ...(markup.length > 0 ? { [`${field}Markup`]: markup } : {}) };
@@ -327,8 +332,13 @@ function asRead(field, { text, markup }) {
  * aside (`:::note`) or component (`<Aside>`), so what those hold never
  * describes a dataset. A heading ends the paragraph above it, with no blank
  * line between them, and so does any other block; a line underlined with
- * hyphens is a `##` heading too. A heading or a lead whose text holds markup
- * carries it as `headingMarkup` or `leadMarkup` (`readInline`).
+ * hyphens is a `##` heading too. The link reference definitions a paragraph
+ * opens with are no text the page shows, and a paragraph of them alone is
+ * none; the labels they define are the page's wherever they stand, save
+ * one an aside defines for a paragraph above that aside, which the parser
+ * reads before it (`pageDefinitions`), and a reference link to one shows its
+ * text. MDX reads no indented code, so a definition indented four spaces is one. A heading or a lead whose text holds
+ * markup carries it as `headingMarkup` or `leadMarkup` (`readInline`).
  *
  * @param {string} body The page's source, without its frontmatter.
  * @returns {{key: string, heading?: string, lead?: string, headingMarkup?: string[], leadMarkup?: string[]}[]}
@@ -339,6 +349,11 @@ export function catalogueSections(body) {
   // the lines and the columns where the page writes them.
   const rendered = splitLines(pageMarkup(body));
   const tags = cataloguesByLine(rendered);
+  const walked = pageLines(lines);
+  const definitions = pageDefinitions(walked);
+  // A label is the page's for a line once the parser has read its definition
+  // (an aside's after the paragraphs before it): read at the line the text starts on.
+  const read = (text, line) => readInline(text, { definitions: definitions.at(line) });
   const sections = [];
   let heading;
   let lead;
@@ -346,12 +361,16 @@ export function catalogueSections(body) {
   let open = true;
   // The lines of the paragraph being read, when the page itself holds it.
   let paragraph = null;
+  let paragraphLine = 0;
   let opensSection = false;
-  // The asides and the elements open around the line, and the line past the flow read last.
+  // The elements open around the line, and the line past the flow read last. The
+  // asides open around it are the walk's to count: one ends with the quotation or
+  // the list item it opened in as well as on its own fence.
   let depth = 0;
   let flowEnd = 0;
   const endParagraph = () => {
-    if (paragraph !== null && opensSection && lead === undefined) lead = readInline(paragraph);
+    const shown = paragraph === null ? [] : pastDefinitions(paragraph);
+    if (shown.length > 0 && opensSection && lead === undefined) lead = read(shown, paragraphLine);
     paragraph = null;
   };
   const startSection = (title) => {
@@ -362,7 +381,7 @@ export function catalogueSections(body) {
       open = true;
     }
   };
-  pageLines(lines).forEach((line, index) => {
+  walked.forEach((line, index) => {
     if (NOT_INLINE_ROLES.has(line.role)) {
       endParagraph();
       return;
@@ -385,24 +404,22 @@ export function catalogueSections(body) {
     }
     if (line.role === 'underline' && paragraph !== null) {
       // The paragraph above was a heading all along: `##` under hyphens, `#` under equals signs.
-      if (pastBlanks(line.rest).startsWith('-')) startSection(readInline(paragraph));
+      const shown = pastDefinitions(paragraph);
+      if (shown.length > 0 && pastBlanks(line.rest).startsWith('-')) startSection(read(shown, paragraphLine));
       paragraph = null;
       return;
     }
     endParagraph();
     // Where the page itself holds the line, with no container of the walk's around it.
-    const onPage = depth === 0 && line.rest === line.text;
+    const onPage = depth === 0 && line.asides === 0 && line.rest === line.text;
     const written = pastBlanks(line.rest);
     if (line.role === 'paragraph' && onPage && !keys && !MDX_ESM.test(written)) {
       paragraph = [line.rest];
+      paragraphLine = index;
       opensSection = open && lead === undefined;
     } else if (line.role === 'heading' && onPage) {
       const title = SECTION_HEADING.exec(written);
-      if (title) startSection(readInline([title[1]]));
-    } else if (line.role === 'single' && ASIDE_OPENS.test(written)) {
-      depth += 1;
-    } else if (line.role === 'single' && ASIDE_CLOSES.test(written)) {
-      depth = Math.max(depth - 1, 0);
+      if (title) startSection(read([title[1]], index));
     } else if (line.role === 'single' && index >= flowEnd && /^[<{]/.test(written)) {
       const flow = flowOf([written, ...lines.slice(index + 1)].join('\n'));
       if (flow !== null) {

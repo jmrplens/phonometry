@@ -289,7 +289,7 @@ def write_baseline(path: pathlib.Path, found: dict[str, set[str]]) -> None:
         for stem in sorted(found)
         for text in sorted(found[stem])
     )
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def untranslated(recorded: dict[str, dict[str, set[str]]]) -> dict[str, set[str]]:

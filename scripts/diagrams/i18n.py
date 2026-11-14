@@ -4996,7 +4996,9 @@ def lookup(s: str, *, translate: bool) -> str:
     from a label that reads the same in both languages. See
     ``scripts/figure_language_audit.py``.
     """
-    if s in _ES:
+    # A blank entry is no translation: the plate would draw nothing where the
+    # English one draws the label, so it is reported as a miss like no entry.
+    if s in _ES and _ES[s].strip():
         return _ES[s] if translate else s
     _audit.untranslated(s)
     return s

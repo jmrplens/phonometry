@@ -13811,7 +13811,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Spanish building code CTE DB-HR (`building/spanish_building_code.py`): the
   A-weighted global indices `RA`, `RA,tr`, `DnT,A`, `D2m,nT,A` and
-  `D2m,nT,Atr` computed by the direct Annex A formulae (A.5) to (A.7) over the
+  `D2m,nT,Atr` computed by the direct Annex A formulae ((A.17), (A.18), (A.7),
+  (A.5) and (A.6), with `R'A` of (A.14) from an apparent `R'`) over the
   eighteen one-third-octave bands 100 Hz to 5 kHz, two more than the sixteen
   of ISO 717-1, with the four normalised source spectra of Tables A.2 to A.5
   (pink noise, road traffic, railway and aircraft). The facade quantity

@@ -198,6 +198,32 @@ function unclosed(block, comments) {
   return !pattern.test(block.join('\n').trimStart());
 }
 
+/**
+ * Whether a backslash escapes `text[at]`: an odd run of them stands right before
+ * it, counted no further back than `from`, where the last span or comment read
+ * ended. A backslash a span or a comment holds escapes nothing after it.
+ */
+function escapedSince(text, at, from) {
+  let count = 0;
+  while (at - count > from && text[at - count - 1] === '\\') count += 1;
+  return count % 2 === 1;
+}
+
+/**
+ * The first comment of `block` that opens at or past `done`, or `null`. One whose
+ * `<` or `{` a backslash escapes is no comment (CommonMark 0.31.2, 2.4): the page
+ * shows the character, and what follows it is prose.
+ */
+function commentFrom(block, comments, done) {
+  const pattern = new RegExp(COMMENTS[comments].source, 'g');
+  pattern.lastIndex = done;
+  for (let comment = pattern.exec(block); comment !== null; comment = pattern.exec(block)) {
+    if (!escapedSince(block, comment.index, done)) return comment;
+    pattern.lastIndex = comment.index + 1;
+  }
+  return null;
+}
+
 /** The spans of a piece of a block, and its comments with `comments`, left to right. */
 function spansAndComments(block, markers, comments) {
   if (!comments) return inlineSpans(block, markers);
@@ -205,9 +231,7 @@ function spansAndComments(block, markers, comments) {
   let done = 0;
   for (;;) {
     const spans = inlineSpans(block.slice(done), markers);
-    const pattern = new RegExp(COMMENTS[comments].source, 'g');
-    pattern.lastIndex = done;
-    const comment = pattern.exec(block);
+    const comment = commentFrom(block, comments, done);
     let next = spans.length ? [spans[0][0] + done, spans[0][1] + done] : null;
     if (comment && (!next || comment.index < next[0])) {
       next = [comment.index, comment.index + comment[0].length];
@@ -376,6 +400,289 @@ function hiddenKind(text, start, end, kind) {
   return kind === 'mdx' && ONLY_COMMENTS.test(text.slice(start, end)) ? 'comment' : 'expression';
 }
 
+/** Whether `character` is ASCII punctuation, which a backslash escapes (CommonMark 0.31.2, 2.4). */
+const isEscapable = (character) => character !== undefined && /[!-\/:-@[-`{-~]/.test(character);
+
+/** The blanks a link's parts may stand apart by: spaces or tabs, with one line end at most. */
+const LINK_BLANKS = /[ \t]*(?:\n[ \t]*)?/y;
+
+/** Where the blanks at `text[at]` end ({@link LINK_BLANKS}). */
+function pastLinkBlanks(text, at) {
+  LINK_BLANKS.lastIndex = at;
+  LINK_BLANKS.exec(text);
+  return LINK_BLANKS.lastIndex;
+}
+
+/**
+ * Where a link's address that starts at `text[at]` ends, or -1 (CommonMark
+ * 0.31.2, 6.3): between angle brackets, anything but a line end or another
+ * angle bracket; else no blank or control character, and parentheses only in
+ * pairs, nested 32 deep at most, as micromark reads them. A backslash escapes
+ * the punctuation after it. A bare address may be empty, which a resource
+ * allows and a definition does not.
+ */
+function linkDestinationEnd(text, at) {
+  if (text[at] === '<') {
+    for (let i = at + 1; i < text.length; i += 1) {
+      if (text[i] === '\\' && isEscapable(text[i + 1])) i += 1;
+      else if (text[i] === '>') return i + 1;
+      else if (text[i] === '<' || text[i] === '\n') return -1;
+    }
+    return -1;
+  }
+  let depth = 0;
+  let i = at;
+  for (; i < text.length; i += 1) {
+    const character = text[i];
+    if (character === '\\' && isEscapable(text[i + 1])) i += 1;
+    else if (character === '(') {
+      depth += 1;
+      if (depth > 32) return -1;
+    } else if (character === ')') {
+      if (depth === 0) break;
+      depth -= 1;
+    } else if (character <= ' ' || character === '\x7f') break;
+  }
+  return depth === 0 ? i : -1;
+}
+
+/** Where a link's title that opens at `text[at]` ends, in quotes or parentheses, or -1. */
+function linkTitleEnd(text, at) {
+  const opens = text[at];
+  if (opens !== '"' && opens !== "'" && opens !== '(') return -1;
+  const closes = opens === '(' ? ')' : opens;
+  for (let i = at + 1; i < text.length; i += 1) {
+    if (text[i] === '\\' && isEscapable(text[i + 1])) i += 1;
+    else if (text[i] === closes) return i + 1;
+    else if (opens === '(' && text[i] === '(') return -1;
+  }
+  return -1;
+}
+
+/**
+ * Where the resource of a link or an image, `(address "title")`, that opens at
+ * `text[at]` ends, or -1 (CommonMark 0.31.2, 6.3).
+ */
+function linkResourceEnd(text, at) {
+  if (text[at] !== '(') return -1;
+  const address = pastLinkBlanks(text, at + 1);
+  if (text[address] === ')') return address + 1;
+  const addressEnd = linkDestinationEnd(text, address);
+  if (addressEnd < 0) return -1;
+  let after = pastLinkBlanks(text, addressEnd);
+  if (text[after] === ')') return after + 1;
+  if (after === addressEnd) return -1;
+  const titleEnd = linkTitleEnd(text, after);
+  if (titleEnd < 0) return -1;
+  after = pastLinkBlanks(text, titleEnd);
+  return text[after] === ')' ? after + 1 : -1;
+}
+
+/**
+ * Where a link label that opens at `text[at]` ends, past its closing bracket, or
+ * -1: no bracket in it a backslash does not escape, and 999 characters at most.
+ */
+function linkLabelEnd(text, at) {
+  for (let i = at + 1; i < text.length && i - at <= 1000; i += 1) {
+    if (text[i] === '\\' && isEscapable(text[i + 1])) i += 1;
+    else if (text[i] === '[') return -1;
+    else if (text[i] === ']') return i + 1;
+  }
+  return -1;
+}
+
+/**
+ * A link label as micromark matches it against the page's definitions
+ * (micromark-util-normalize-identifier): its blanks one space, none at either
+ * end, and its case folded.
+ *
+ * @param {string} label The label as written, between its brackets.
+ * @returns {string}
+ */
+export function linkLabel(label) {
+  return label
+    .replace(/[\t\n\r ]+/g, ' ')
+    .replace(/^ | $/g, '')
+    .toLowerCase()
+    .toUpperCase();
+}
+
+/**
+ * Where a link reference definition that starts at `text[at]` ends, past the
+ * line end after it, and the label it defines; `null` when none starts there
+ * (CommonMark 0.31.2, 4.7). Its label, a colon, its address, and a title on
+ * the same line or the next, alone on what is left of its line: a title the
+ * line goes on past is no title, and the definition ends with its address if
+ * the title stood on a line of its own. On a Markdown page it is indented
+ * three spaces at most, since four make indented code; MDX reads no indented
+ * code, so there any indentation leaves it a definition.
+ *
+ * @param {string} text
+ * @param {number} at
+ * @param {'md' | 'mdx'} kind
+ */
+function definitionAt(text, at, kind) {
+  let start = at;
+  if (kind === 'mdx') while (text[start] === ' ' || text[start] === '\t') start += 1;
+  else while (start < at + 3 && text[start] === ' ') start += 1;
+  if (text[start] !== '[') return null;
+  const labelEnd = linkLabelEnd(text, start);
+  if (labelEnd < 0 || text[labelEnd] !== ':') return null;
+  const label = text.slice(start + 1, labelEnd - 1);
+  if (!/\S/.test(label)) return null;
+  const address = pastLinkBlanks(text, labelEnd + 1);
+  const addressEnd = linkDestinationEnd(text, address);
+  if (addressEnd < 0 || (addressEnd === address && text[address] !== '<')) return null;
+  const lineEnd = (from) => {
+    let i = from;
+    while (text[i] === ' ' || text[i] === '\t') i += 1;
+    return i >= text.length || text[i] === '\n' ? Math.min(i + 1, text.length) : -1;
+  };
+  const title = pastLinkBlanks(text, addressEnd);
+  const titleEnd = title > addressEnd ? linkTitleEnd(text, title) : -1;
+  const end = titleEnd >= 0 && lineEnd(titleEnd) >= 0 ? lineEnd(titleEnd) : lineEnd(addressEnd);
+  return end < 0 ? null : { label: linkLabel(label), end };
+}
+
+/**
+ * The link reference definitions a paragraph opens with, which the page does
+ * not show (CommonMark 0.31.2, 4.7): the labels they define, as
+ * {@link linkLabel} reads them, and where the paragraph itself starts, the
+ * length of `text` when it holds nothing else.
+ *
+ * @param {string} text The lines of a paragraph, joined by line feeds.
+ * @param {{ kind?: 'md' | 'mdx' }} [options] Whether the page is Markdown or MDX.
+ * @returns {{labels: string[], end: number}}
+ */
+export function leadingDefinitions(text, { kind = 'mdx' } = {}) {
+  const labels = [];
+  let end = 0;
+  for (let found = definitionAt(text, end, kind); found !== null; found = definitionAt(text, end, kind)) {
+    labels.push(found.label);
+    end = found.end;
+  }
+  return { labels, end };
+}
+
+/**
+ * The labels a page's link reference definitions define, and for which of its
+ * lines: at the start of each paragraph the walk of the page reads, a
+ * quotation's or a list item's among them, past the marks of what holds it. A
+ * line that looks like one but carries a paragraph on is the paragraph's text,
+ * since a definition cannot interrupt a paragraph.
+ *
+ * A definition of the page itself, or of a quotation or a list item, defines
+ * its label for every line. One inside an aside (`:::note`) does not: the
+ * parser (remark-directive over micromark) reads an aside's content after
+ * the paragraphs around it, so a definition in an aside, `n` asides deep, is
+ * read once every paragraph `n - 1` asides deep is, those before it in the
+ * page and not those after. A paragraph `m` asides deep thus sees every
+ * definition at most `m` asides deep, and one `m + 1` deep only from a line
+ * above it. Measured with remark-parse, -gfm, -directive, -math and -mdx: a
+ * reference above an aside that defines its label stays text, one below it
+ * links, and one in an aside links whatever aside defines the label.
+ *
+ * @param {Array<{role: string, rest: string, asides?: number}>} walked The walk of the page (`pageLines`).
+ * @param {{ kind?: 'md' | 'mdx' }} [options] Whether the page is Markdown or MDX.
+ * @returns {{ at: (line: number) => Set<string> }} `at(line)`: the labels
+ *   defined for a reference on that line of the walk, as {@link linkLabel} reads them.
+ */
+export function pageDefinitions(walked, { kind = 'mdx' } = {}) {
+  /** @type {Array<{label: string, line: number, depth: number}>} */
+  const found = [];
+  let paragraph = null;
+  const end = () => {
+    if (paragraph !== null) {
+      for (const label of leadingDefinitions(paragraph.lines.join('\n'), { kind }).labels) {
+        found.push({ label, line: paragraph.line, depth: paragraph.depth });
+      }
+    }
+    paragraph = null;
+  };
+  walked.forEach((line, index) => {
+    if (line.role === 'text' && paragraph !== null) {
+      paragraph.lines.push(line.rest);
+      return;
+    }
+    end();
+    if (line.role === 'paragraph') paragraph = { lines: [line.rest], line: index, depth: line.asides ?? 0 };
+  });
+  end();
+  return {
+    at(line) {
+      const depth = walked[line]?.asides ?? 0;
+      return new Set(
+        found
+          .filter((definition) => definition.depth <= depth || (definition.depth === depth + 1 && definition.line < line))
+          .map((definition) => definition.label),
+      );
+    },
+  };
+}
+
+/**
+ * The brackets of a piece's text, read as the page reads links (CommonMark
+ * 0.31.2, 6.3 and 6.4): each `[` opens a link's text, an image's after a `!`,
+ * and the `]` that closes it makes a link when a resource follows, or a label
+ * the page defines, or when its own text is such a label. What a code span, an
+ * escape, a comment, a tag or an expression holds is no bracket of the text,
+ * so only the text between them is read. A link holds no link, so one that
+ * forms leaves the brackets that opened before it no link; an image may hold
+ * one.
+ */
+class LinkBrackets {
+  constructor(text, last, definitions) {
+    this.text = text;
+    this.last = last;
+    this.definitions = definitions;
+    this.openers = [];
+  }
+
+  /**
+   * The first link that `text[from..until]` closes: its opening bracket (with
+   * the `!` of an image), its closing bracket and where what follows that ends.
+   */
+  scan(from, until) {
+    for (let i = from; i < until; i += 1) {
+      const character = this.text[i];
+      if (character === '[') {
+        this.openers.push({ at: i, image: i > from && this.text[i - 1] === '!', active: true });
+      } else if (character === ']' && this.openers.length > 0) {
+        const opener = this.openers.pop();
+        const end = opener.active ? this.tail(opener, i) : -1;
+        if (end < 0) continue;
+        if (!opener.image) for (const earlier of this.openers) if (!earlier.image) earlier.active = false;
+        return { open: opener.image ? opener.at - 1 : opener.at, text: opener.at + 1, close: i, end };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Where a link whose text closes at `text[close]` ends, or -1, as micromark
+   * reads it: a resource, a label the page defines, an empty label when the
+   * link's own text is defined, or that text alone, defined, before anything
+   * but a label.
+   */
+  tail(opener, close) {
+    const { text, last, definitions } = this;
+    const defined = definitions.has(linkLabel(text.slice(opener.at + 1, close)));
+    if (text[close + 1] === '(') {
+      const end = linkResourceEnd(text, close + 1);
+      if (end >= 0 && end <= last) return end;
+      return defined ? close + 1 : -1;
+    }
+    if (text[close + 1] === '[') {
+      const end = linkLabelEnd(text, close + 1);
+      if (end < 0 || end > last) return -1;
+      const label = text.slice(close + 2, end - 1);
+      if (/\S/.test(label) && definitions.has(linkLabel(label))) return end;
+      return defined && label === '' ? end : -1;
+    }
+    return defined ? close + 1 : -1;
+  }
+}
+
 /**
  * The parts of one piece of a block, `text[at..last]`, pushed onto `found` as
  * `[start, end, what]`, read left to right: at each character the first of a
@@ -384,12 +691,17 @@ function hiddenKind(text, start, end, kind) {
  * part, and the rest is read again from its end; a tag and an expression may
  * run on past `last`. The spans of the piece are read once and taken in turn,
  * and read again only past what else opened; the next opener is looked for
- * again only once a span has held it. Returns where the reading stopped.
+ * again only once a span has held it. With `links`, the brackets of the text
+ * between them are read as links too ({@link LinkBrackets}): a link's closing
+ * bracket opens what follows it, so its address, title or label is the link's
+ * and nothing opens in it, and its brackets are parts named `link`. Returns
+ * where the reading stopped.
  */
-function readPiece(text, at, last, kind, reads, markers, found) {
+function readPiece(text, at, last, kind, reads, markers, found, links = null) {
   let spans = null;
   let opened = null;
   let looked = false;
+  const brackets = links === null ? null : new LinkBrackets(text, last, links.definitions ?? new Set());
   while (at < last) {
     if (spans === null) {
       const from = at;
@@ -402,7 +714,14 @@ function readPiece(text, at, last, kind, reads, markers, found) {
       looked = true;
     }
     const span = spans.length ? spans[spans.length - 1] : null;
-    if (span !== null && (opened === null || span[0] < opened[0])) {
+    const spanFirst = span !== null && (opened === null || span[0] < opened[0]);
+    const link = brackets?.scan(at, spanFirst ? span[0] : (opened?.[0] ?? last)) ?? null;
+    if (link !== null) {
+      found.push([link.open, link.text, 'link'], [link.close, link.end, 'link']);
+      at = link.end;
+      spans = null;
+      looked = false;
+    } else if (spanFirst) {
       spans.pop();
       found.push([span[0], span[1], text[span[0]] === '$' ? 'maths' : 'code']);
       at = span[1];
@@ -455,18 +774,23 @@ function unrendered(text, kind, walked) {
  * `what` is `code`, an inline code span; `maths`, an inline maths span;
  * `escape`, a backslash and the character it escapes; `comment`, an HTML
  * comment, or on an `.mdx` page an expression that holds nothing but blanks
- * and comments; and `expression`, on an `.mdx` page. The indexes are those of
- * `text`, whose line ends stay where the page writes them, so that a line
- * comment ends where its line does.
+ * and comments; `expression`, on an `.mdx` page; and with `links`, `link`, the
+ * marks of a link or an image that shows its text alone: its opening bracket,
+ * with the `!` of an image, and its closing bracket with the resource or the
+ * label after it, in which nothing opens. The indexes are those of `text`,
+ * whose line ends stay where the page writes them, so that a line comment ends
+ * where its line does. The parts come in the order they start.
  *
  * @param {string} text The run, its lines joined by line feeds.
- * @param {{ kind?: 'md' | 'mdx' }} [options] The page's kind.
- * @returns {Array<{ start: number, end: number, what: 'code' | 'maths' | 'escape' | 'comment' | 'expression' }>}
+ * @param {{ kind?: 'md' | 'mdx', links?: boolean, definitions?: Set<string> }} [options]
+ *   The page's kind; whether to read its links; and the labels its link
+ *   reference definitions define, as {@link linkLabel} reads them.
+ * @returns {Array<{ start: number, end: number, what: 'code' | 'maths' | 'escape' | 'comment' | 'expression' | 'link' }>}
  */
-export function inlineParts(text, { kind = 'mdx' } = {}) {
+export function inlineParts(text, { kind = 'mdx', links = false, definitions = new Set() } = {}) {
   const found = [];
-  readPiece(text, 0, text.length, kind, 'text', '`$', found);
-  return found.map(([start, end, what]) => ({ start, end, what }));
+  readPiece(text, 0, text.length, kind, 'text', '`$', found, links ? { definitions } : null);
+  return found.map(([start, end, what]) => ({ start, end, what })).sort((a, b) => a.start - b.start);
 }
 
 /**

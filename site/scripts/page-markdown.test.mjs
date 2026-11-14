@@ -22,8 +22,20 @@ import { dirname, join, relative, sep } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { parse as parseYaml } from 'yaml';
+
 import { DATA_COMPONENTS, hasMarkdownCopy, mirrorOf, routeOf, withheldRoutes } from '../src/lib/page-markdown.mjs';
-import { COMPONENT_READINGS, COPY_FORMS } from './shared/page-twin.mjs';
+import { citationParts, noteParts, opening, sortedReferences } from '../src/lib/references-format.mjs';
+import { TAG, decodeReferences, oneLine, printed } from './shared/markdown-reader.mjs';
+import { pageMarkup } from './shared/markdown-spans.mjs';
+import {
+  COMPONENT_READINGS,
+  COPY_FORMS,
+  figureMarkdown,
+  frontmatterSource,
+  referencesMarkdown,
+  stripFrontmatter,
+} from './shared/page-twin.mjs';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTENT = join(SITE, 'src', 'content', 'docs');
@@ -131,4 +143,57 @@ test('every component a page imports is read one way by the copy, and every read
 test('every component the copy writes out is one the copy check counts', () => {
   const written = Object.keys(COMPONENT_READINGS).filter((name) => COMPONENT_READINGS[name] === 'written').sort();
   assert.deepEqual(Object.keys(COPY_FORMS).sort(), written, 'a component the copy writes out needs its form in COPY_FORMS');
+});
+
+/** An attribute of a component tag written as a string, as MDX reads it: its character references read. */
+function attributeValue(tag, name) {
+  const found = tag.match(new RegExp(String.raw`\b${name}="([^"]*)"`));
+  return found ? decodeReferences(found[1]) : undefined;
+}
+
+test('the text a page prints as it is reads the same in the copy written from its source, on every such page', async () => {
+  // Read back by the site's own Markdown pipeline (shared/markdown-reader.mjs):
+  // a figure's alt, a clip's and a fiche's title, description and caption, and
+  // every work of the References section, on every page whose copy is written
+  // from its source. The Spanish seat-vibration guide printed `a*wS = SEAT por
+  // a*wP` in an alt, and the copy printed `awS = SEAT por awP`.
+  const misread = [];
+  let read = 0;
+  for (const path of contentPages()) {
+    const route = routeOf(path);
+    if (!hasMarkdownCopy(route) || mirrorOf(route, DOCS) !== undefined) continue;
+    const lang = route === 'es' || route.startsWith('es/') ? 'es' : 'en';
+    const page = readFileSync(join(CONTENT, path), 'utf8');
+    const kind = path.endsWith('.mdx') ? 'mdx' : 'md';
+    const source = stripFrontmatter(page);
+    if (kind === 'mdx') {
+      for (const found of pageMarkup(source, { kind }).matchAll(/<(ThemeImage|Video|ReportPreview)\b[^>]*\/>/g)) {
+        const tag = source.slice(found.index, found.index + found[0].length);
+        const shown = await printed(figureMarkdown(tag, { lang, base: 'https://docs.jmrp.io/phonometry' }));
+        read += 1;
+        if (found[1] === 'ThemeImage') {
+          const alt = oneLine(attributeValue(tag, 'alt'));
+          if (shown.alts[0] !== alt) misread.push(`${path}: the alt ${JSON.stringify(alt)} prints as ${JSON.stringify(shown.alts[0])}`);
+          continue;
+        }
+        const lead = { Video: { en: 'Video', es: 'Vídeo' }, ReportPreview: { en: 'Report', es: 'Informe' } }[found[1]][lang];
+        const caption = attributeValue(tag, 'caption');
+        const words = [`${lead}: ${attributeValue(tag, 'title')}: ${attributeValue(tag, 'description')}`, caption ?? ''];
+        const expected = oneLine(words.join(' '));
+        if (shown.text !== expected) misread.push(`${path}: ${JSON.stringify(expected)} prints as ${JSON.stringify(shown.text)}`);
+      }
+    }
+    const frontmatter = parseYaml(frontmatterSource(page)) ?? {};
+    if (!frontmatter.references?.length) continue;
+    const shown = await printed(referencesMarkdown(frontmatter.references, lang, 'References'));
+    const items = [...shown.html.matchAll(/<li>([^]*?)<\/li>/g)].map((item) => oneLine(decodeReferences(item[1].replace(TAG, ''))));
+    for (const [index, [, work]] of sortedReferences(frontmatter.references, lang).entries()) {
+      const note = work.note ? ` ${noteParts(work.note).map((part) => part.text).join('')}` : '';
+      const expected = oneLine(`${opening(work, lang)}${citationParts(work).map((part) => part.text).join('')}${note}`);
+      read += 1;
+      if (items[index] !== expected) misread.push(`${path}: the work ${JSON.stringify(expected)} prints as ${JSON.stringify(items[index])}`);
+    }
+  }
+  assert.ok(read > 1000, `only ${read} pieces read: the census lost its pages`);
+  assert.deepEqual(misread, []);
 });

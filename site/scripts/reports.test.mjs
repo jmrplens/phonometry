@@ -13,7 +13,7 @@
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -21,15 +21,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** The module and the readers it imports, by their place under the site. */
-const MODULES = ['src/data/reports.mjs', 'scripts/shared/markdown-spans.mjs', 'src/lib/markdown-fences.mjs'];
+const MODULES = ['src/data/reports.mjs', 'scripts/shared/markdown-spans.mjs', 'src/lib/markdown-fences.mjs', 'src/lib/line-ends.mjs'];
 
-/** Import the reports module in a repository whose one guide is `guide`. */
-async function reportsOf(t, guide) {
+/** Import the reports module in a repository whose one guide is `guide` and whose fiches are `fiches`. */
+async function reportsOf(t, guide, fiches = ['iso_x']) {
   const root = mkdtempSync(join(tmpdir(), 'reports-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   writeFileSync(join(root, 'VERSION'), '4.0.0\n');
   mkdirSync(join(root, '.github', 'reports'), { recursive: true });
-  writeFileSync(join(root, '.github', 'reports', 'iso_x.pdf'), '');
+  for (const fiche of fiches) writeFileSync(join(root, '.github', 'reports', `${fiche}.pdf`), '');
   for (const language of ['', 'es']) {
     const dir = join(root, 'site', 'src', 'content', 'docs', language, 'guides');
     mkdirSync(dir, { recursive: true });
@@ -43,6 +43,18 @@ async function reportsOf(t, guide) {
 }
 
 const FICHE = '<ReportPreview name="iso_x" title="A fiche" description="What it shows" />';
+
+test('every fiche a guide renders is listed from a checkout with carriage returns', async (t) => {
+  // A clone made with core.autocrlf=true writes a carriage return before each
+  // line feed. The sound power guide's blank lines were then read as text, so
+  // its code examples ran into its prose as one paragraph, a closing fence
+  // opened a code span, and the fiche after it was shown by no guide.
+  const guide = readFileSync(join(SITE, 'src', 'content', 'docs', 'devices', 'emission', 'sound-power-pressure.mdx'), 'utf8');
+  const fiches = [...guide.matchAll(/<ReportPreview\s+name="([^"]+)"/g)].map((found) => found[1]);
+  assert.ok(fiches.length >= 2, 'the guide renders its fiches');
+  const { reports } = await reportsOf(t, guide.replace(/\r?\n/g, '\r\n'), fiches);
+  assert.deepEqual(reports.map((report) => report.name).sort(), [...fiches].sort());
+});
 
 test('a fiche a guide renders is listed with that guide', async (t) => {
   const { reports, reportsEs } = await reportsOf(t, `---\ntitle: Guide\n---\n\n${FICHE}\n`);

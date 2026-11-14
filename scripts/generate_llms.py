@@ -68,7 +68,16 @@ DOCS = ROOT / "docs"
 
 @functools.cache
 def _ignored_paths() -> frozenset[str]:
-    """Everything under docs/ that git ignores, as repo-relative paths."""
+    """Everything under :data:`DOCS` that git ignores, as repo-relative paths.
+
+    Nothing for a :data:`DOCS` outside the repository, as the tests point it
+    at a tree of their own: git ignores no file there, and the repository's
+    listing names other files. The names are read as git writes them with
+    ``-z``, whole, where a plain listing quotes a name that holds a character
+    outside ASCII.
+    """
+    if not DOCS.is_relative_to(ROOT):
+        return frozenset()
     result = subprocess.run(
         [
             "git",
@@ -76,24 +85,33 @@ def _ignored_paths() -> frozenset[str]:
             "--others",
             "--ignored",
             "--exclude-standard",
+            "-z",
             "--",
-            "docs",
+            DOCS.relative_to(ROOT).as_posix(),
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=ROOT,
         check=False,
     )
-    return frozenset(result.stdout.split())
+    return frozenset(name for name in result.stdout.split("\0") if name)
 
 
 def _git_ignored(path: pathlib.Path) -> bool:
     """Is this page of the mirror one git ignores (a local plan, a scratch note)?
 
-    The page is named as :func:`_ignored_paths` lists it, ``docs/`` and its
-    path under :data:`DOCS`, wherever the tree it is read from lies.
+    The page is named as :func:`_ignored_paths` lists it, by its path in the
+    repository; a page outside the repository is one git ignores nothing of.
     """
-    return f"docs/{path.relative_to(DOCS).as_posix()}" in _ignored_paths()
+    if not path.is_relative_to(ROOT):
+        return False
+    return path.relative_to(ROOT).as_posix() in _ignored_paths()
+
+
+def _shown(path: pathlib.Path) -> pathlib.Path:
+    """*path* as a message names it: relative to the repository, or whole when it lies outside, as a tree of a test's own does."""
+    return path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
 
 
 @functools.cache
@@ -118,6 +136,7 @@ def _repository_files() -> frozenset[str] | None:
                 ["git", "ls-files", *which, "-z"],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
                 cwd=ROOT,
                 check=False,
             )
@@ -353,7 +372,7 @@ def _frontmatter_field(path: pathlib.Path, name: str) -> str:
     every page of the site.
     """
     text = path.read_text(encoding="utf-8")
-    shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+    shown = _shown(path)
     head = re.match(r"---\n(.*?)\n---\n", text, re.DOTALL)
     found = head and re.search(
         rf"""^{name}:[ \t]*(?:"((?:[^"\\]|\\.)*)"|'((?:[^']|'')*)'|([^\s"'|>\[{{&*!%@`#][^\n]*?))(?:[ \t]+\#[^\n]*)?[ \t]*$""",
@@ -1298,7 +1317,7 @@ def _catalogue_rows() -> dict[str, int]:
     )
     if found is None:
         msg = (
-            f"generate_llms.py: {CATALOGUE_DATA.relative_to(ROOT)} is not the "
+            f"generate_llms.py: {_shown(CATALOGUE_DATA)} is not the "
             "`export const catalogues = {...};` module generate_catalogue_data.py writes"
         )
         raise SystemExit(msg)
@@ -1332,8 +1351,8 @@ def _catalogue_section() -> list[str]:
         unknown = [name for name in names if name not in rows]
         if not names or unknown:
             msg = (
-                f"generate_llms.py: {path.relative_to(ROOT)} tables "
-                f"{unknown or 'no catalogue'} of {CATALOGUE_DATA.relative_to(ROOT)}"
+                f"generate_llms.py: {_shown(path)} tables "
+                f"{unknown or 'no catalogue'} of {_shown(CATALOGUE_DATA)}"
             )
             raise SystemExit(msg)
         title = _frontmatter_field(path, "title")
@@ -2087,8 +2106,10 @@ def main() -> None:
     )
     _check_index_covers_the_site(llms)
     _check_index_budget(llms)
-    (ROOT / "llms.txt").write_text(llms, encoding="utf-8")
-    (ROOT / "llms-full.txt").write_text(build_llms_full(llms), encoding="utf-8")
+    (ROOT / "llms.txt").write_text(llms, encoding="utf-8", newline="\n")
+    (ROOT / "llms-full.txt").write_text(
+        build_llms_full(llms), encoding="utf-8", newline="\n"
+    )
 
     # Remove shards this run no longer produces. Regrouping a section renames
     # its shard, and an orphan left behind would keep serving text that
@@ -2109,7 +2130,9 @@ def main() -> None:
 
     sizes: dict[str, int] = {}
     for name, text in files.items():
-        (SHARDS_DIR / f"llms-{name}.txt").write_text(text, encoding="utf-8")
+        (SHARDS_DIR / f"llms-{name}.txt").write_text(
+            text, encoding="utf-8", newline="\n"
+        )
         sizes[name] = len(text.encode("utf-8"))
 
     print(

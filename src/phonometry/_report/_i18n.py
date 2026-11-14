@@ -1202,7 +1202,12 @@ def t(text: str, language: Language = "en") -> str:
     :param language: ``"en"`` (default) or ``"es"``.
     :return: The translated string (English unchanged for any other language).
     """
-    return _STRINGS.get(text, text) if language == "es" else text
+    if language != "es":
+        return text
+    # A blank entry is no translation: the Spanish report would print nothing
+    # where the English one prints the string.
+    translated = _STRINGS.get(text, "")
+    return translated if translated.strip() else text
 
 
 def format_number(

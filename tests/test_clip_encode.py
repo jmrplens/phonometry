@@ -29,6 +29,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 from figures import media
 
 if TYPE_CHECKING:
+    from guard_caches import FreshCaches
     from matplotlib.lines import Line2D
 
 pytestmark = pytest.mark.pinned_stack
@@ -92,12 +93,13 @@ def test_the_svt_av1_version_is_read_from_its_own_message() -> None:
 
 
 def test_the_svt_av1_asked_is_that_of_the_ffmpeg_that_encodes(
-    monkeypatch: pytest.MonkeyPatch,
+    fresh_caches: FreshCaches,
 ) -> None:
     """write_video runs the ffmpeg matplotlib's ``animation.ffmpeg_path`` names, so the probe asks that one.
 
     Any program stands in for it here: the probe that would run it is
-    replaced, and only the program it is handed is looked at.
+    replaced, and only the program it is handed is looked at. The version is
+    cached by program, so the test asks with the cache empty on both sides.
     """
     asked: list[str] = []
 
@@ -105,13 +107,9 @@ def test_the_svt_av1_asked_is_that_of_the_ffmpeg_that_encodes(
         asked.append(ffmpeg)
         return "4.2.0"
 
-    monkeypatch.setattr(media, "read_svt_av1_version", read)
-    media._svt_av1_version.cache_clear()
-    try:
-        with mpl.rc_context({"animation.ffmpeg_path": sys.executable}):
-            options = media._clip_options("libsvtav1")
-    finally:
-        media._svt_av1_version.cache_clear()
+    fresh_caches(media, read_svt_av1_version=read)
+    with mpl.rc_context({"animation.ffmpeg_path": sys.executable}):
+        options = media._clip_options("libsvtav1")
     assert asked == [shutil.which(sys.executable)]
     assert options[options.index("-crf") + 1] == "51"
 

@@ -2123,13 +2123,13 @@ export const glossary = [
         },
         standard: "Hopkins (2007)",
         clause: {
-          en: "Equations 2.227 to 2.230; no governing standard",
-          es: "Ecuaciones 2.227 a 2.230; sin norma aplicable",
+          en: "Equation 2.198 and Equations 2.227 to 2.230; no governing standard",
+          es: "Ecuación 2.198 y Ecuaciones 2.227 a 2.230; sin norma aplicable",
         },
         guide: "buildings/design/panel-sound-insulation",
         definition: {
-          en: "Radiation efficiency of a plate: the airborne power radiated per unit mean-square surface velocity, normalised by the plane-wave value.",
-          es: "Eficiencia de radiación de una placa: la potencia aérea radiada por unidad de velocidad cuadrática media de la superficie, normalizada por el valor de onda plana.",
+          en: "Radiation efficiency of a plate: the airborne power radiated divided by the product of the characteristic impedance of air, the plate area and the mean-square surface velocity, which is the power a large baffled piston of the same area and velocity radiates.",
+          es: "Eficiencia de radiación de una placa: la potencia aérea radiada dividida entre el producto de la impedancia característica del aire, la superficie de la placa y la velocidad cuadrática media de la superficie, que es la potencia que radia un pistón grande montado en pantalla de la misma superficie y velocidad.",
         },
       },
       {

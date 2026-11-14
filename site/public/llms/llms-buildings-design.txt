@@ -1748,10 +1748,15 @@ compared level for level.
 
 ## Radiation efficiency of a bending plate (Hopkins 2.9)
 
-How much airborne power a vibrating plate radiates per unit mean-square velocity
-is its **radiation efficiency** $\sigma$, the radiation factor $\varepsilon$
-that [Sound Power from Surface Vibration](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/) (ISO 7849)
-otherwise takes as a measured input. Below the critical frequency the plate
+The airborne power a vibrating plate radiates, divided by the characteristic
+impedance of air $\rho_0 c_0$, the plate area $S$ and its mean-square velocity
+$\langle v^2 \rangle$, is its **radiation efficiency**
+$\sigma = W/(\rho_0 c_0 S \langle v^2 \rangle)$ (Hopkins Eq. 2.198), the
+radiation factor $\varepsilon$ that [Sound Power from Surface
+Vibration](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/) (ISO 7849) otherwise
+takes as a measured input. The divisor is the power a large baffled piston of
+the same area and the same mean-square velocity would radiate, so $\sigma = 1$
+means "as efficient as a piston". Below the critical frequency the plate
 radiates weakly; above it $\sigma \to 1$ (Leppington/Maidanik, Eqs 2.227-2.230):
 $\sigma = (1 - f_\mathrm{c}/f)^{-1/2}$ for $f > f_\mathrm{c}$.
 

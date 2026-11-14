@@ -5341,10 +5341,15 @@ compared level for level.
 
 ## Radiation efficiency of a bending plate (Hopkins 2.9)
 
-How much airborne power a vibrating plate radiates per unit mean-square velocity
-is its **radiation efficiency** $\sigma$, the radiation factor $\varepsilon$
-that [Sound Power from Surface Vibration](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/) (ISO 7849)
-otherwise takes as a measured input. Below the critical frequency the plate
+The airborne power a vibrating plate radiates, divided by the characteristic
+impedance of air $\rho_0 c_0$, the plate area $S$ and its mean-square velocity
+$\langle v^2 \rangle$, is its **radiation efficiency**
+$\sigma = W/(\rho_0 c_0 S \langle v^2 \rangle)$ (Hopkins Eq. 2.198), the
+radiation factor $\varepsilon$ that [Sound Power from Surface
+Vibration](https://docs.jmrp.io/phonometry/devices/emission/vibration-sound-power/) (ISO 7849) otherwise
+takes as a measured input. The divisor is the power a large baffled piston of
+the same area and the same mean-square velocity would radiate, so $\sigma = 1$
+means "as efficient as a piston". Below the critical frequency the plate
 radiates weakly; above it $\sigma \to 1$ (Leppington/Maidanik, Eqs 2.227-2.230):
 $\sigma = (1 - f_\mathrm{c}/f)^{-1/2}$ for $f > f_\mathrm{c}$.
 
@@ -57679,7 +57684,7 @@ check that pins each quantity to its standard's own expected value.
 | $\Delta R_\mathrm{w}$ | Weighted sound reduction index improvement: the gain in airborne insulation a lining or additional layer contributes, added to the element rating in the prediction. | dB | EN 12354-1:2000, Formulae 27 and 28a | [Predicting Sound Insulation (EN 12354)](https://docs.jmrp.io/phonometry/buildings/design/insulation-prediction/) |
 | $K_{ij}$ | Vibration reduction index of a junction: the direction-averaged velocity level difference corrected by the junction length and the equivalent absorption lengths. | dB | ISO 10848-1:2006, Formula (13) | [Laboratory Flanking Transmission (ISO 10848)](https://docs.jmrp.io/phonometry/buildings/insulation/flanking-lab/) |
 | $f_\mathrm{c}$ | Critical frequency: the frequency at which the bending wavelength of a panel equals the wavelength in air, where the coincidence dip appears. | Hz | Bies, Hansen and Howard (2017), Equation 7.3; no governing standard | [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) |
-| $\sigma$ | Radiation efficiency of a plate: the airborne power radiated per unit mean-square surface velocity, normalised by the plane-wave value. | dimensionless | Hopkins (2007), Equations 2.227 to 2.230; no governing standard | [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) |
+| $\sigma$ | Radiation efficiency of a plate: the airborne power radiated divided by the product of the characteristic impedance of air, the plate area and the mean-square surface velocity, which is the power a large baffled piston of the same area and velocity radiates. | dimensionless | Hopkins (2007), Equation 2.198 and Equations 2.227 to 2.230; no governing standard | [Predicting Panel Sound Insulation](https://docs.jmrp.io/phonometry/buildings/design/panel-sound-insulation/) |
 | $D_{2\mathrm{m,n}T}$ | Standardized facade level difference: the level 2 m in front of the facade minus the indoor level, standardized to a reference reverberation time of 0,5 s for dwellings. The 2 m position sits in the field the facade itself reflects, so it is not a free-field level, and the notation records the source ($D_{\mathrm{tr},2\mathrm{m,n}T}$ for road traffic, $D_{\mathrm{ls},2\mathrm{m,n}T}$ for a loudspeaker). | dB | ISO 16283-3:2016, 3.15 | [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/) |
 | $D_{\mathrm{ls},2\mathrm{m,n}T,\mathrm{w}}$ | Weighted standardized facade level difference, loudspeaker method: $D_{2\mathrm{m,n}T}$ measured with a loudspeaker and put through the ISO 717-1 reference-curve procedure. The $\mathrm{ls}$ subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other. | dB | ISO 717-1:2020 | [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/) |
 | $R'_{45°}$ | Apparent sound reduction index of a facade element, loudspeaker at 45 degrees: the level difference corrected by the specimen area over the receiving-room absorption area, with a further $-1{,}5$ dB that carries the single-angle geometry. It is apparent, so flanking and any other component of the facade are inside the number. | dB | ISO 16283-3:2016, 3.12 | [Façade Sound Insulation](https://docs.jmrp.io/phonometry/buildings/insulation/facade-insulation/) |
@@ -60069,8 +60074,12 @@ through the bending wave speed $c_\mathrm{B}$), and a longitudinal rod has
 $Z = \rho c_\mathrm{L} S$. These supply the receiver mobility EN 12354-5 needs when no
 measurement exists, and are the theoretical companions of the measured ISO 7626
 mobilities. How efficiently a bending plate then radiates the airborne power is
-its **radiation efficiency** $\sigma$: below the critical frequency it radiates
-weakly (edge and corner modes), and above it $\sigma \to (1 - f_\mathrm{c}/f)^{-1/2} \to 1$
+its **radiation efficiency** $\sigma$, the power it radiates divided by
+$\rho_0 c_0 S \langle v^2 \rangle$, the power a large baffled piston
+($ka \gg 1$, with $a$ its radius and $k$ the wavenumber in air) of the same
+area $S$ and the same mean-square velocity $\langle v^2 \rangle$ would radiate
+into air of characteristic impedance $\rho_0 c_0$. Below the critical frequency it
+radiates weakly (edge and corner modes), and above it $\sigma \to (1 - f_\mathrm{c}/f)^{-1/2} \to 1$
 (Leppington/Maidanik, Hopkins Eqs 2.227-2.230). Because $\sigma$ is exactly the
 radiation factor $\varepsilon$ of ISO 7849, predicting it closes the sound-power-
 from-vibration chain without a power measurement, and it drives the resonant

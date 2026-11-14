@@ -104,8 +104,12 @@ through the bending wave speed $c_\mathrm{B}$), and a longitudinal rod has
 $Z = \rho c_\mathrm{L} S$. These supply the receiver mobility EN 12354-5 needs when no
 measurement exists, and are the theoretical companions of the measured ISO 7626
 mobilities. How efficiently a bending plate then radiates the airborne power is
-its **radiation efficiency** $\sigma$: below the critical frequency it radiates
-weakly (edge and corner modes), and above it $\sigma \to (1 - f_\mathrm{c}/f)^{-1/2} \to 1$
+its **radiation efficiency** $\sigma$, the power it radiates divided by
+$\rho_0 c_0 S \langle v^2 \rangle$, the power a large baffled piston
+($ka \gg 1$, with $a$ its radius and $k$ the wavenumber in air) of the same
+area $S$ and the same mean-square velocity $\langle v^2 \rangle$ would radiate
+into air of characteristic impedance $\rho_0 c_0$. Below the critical frequency it
+radiates weakly (edge and corner modes), and above it $\sigma \to (1 - f_\mathrm{c}/f)^{-1/2} \to 1$
 (Leppington/Maidanik, Hopkins Eqs 2.227-2.230). Because $\sigma$ is exactly the
 radiation factor $\varepsilon$ of ISO 7849, predicting it closes the sound-power-
 from-vibration chain without a power measurement, and it drives the resonant

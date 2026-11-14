@@ -382,3 +382,29 @@ test('a definition that states a rule of one-third-octave bands says what octave
 	assert.ok(read > 0, 'no definition of a band-dependent rating was read');
 	assert.deepEqual(missing, [], `definitions that give the one-third-octave rule alone:\n${missing.join('\n')}`);
 });
+
+/** A radiation efficiency or radiation factor, by the words of its name. */
+const RADIATION = { en: /\bradiation (?:efficiency|factor)\b/i, es: /(?:eficiencia|factor) de radiaci[oó]n/iu };
+
+/** What the radiated power is divided by: the impedance of air with the area and velocity. */
+const AGAINST_AIR = { en: /\bcharacteristic impedance\b/i, es: /impedancia caracter[ií]stica/iu };
+
+/** The loose reading, a power per squared velocity, which carries kilograms per second. */
+const PER_UNIT_VELOCITY = { en: /\bper unit mean-square\b/i, es: /por unidad de velocidad cuadr[aá]tica/iu };
+
+test('a radiation efficiency divides the power by the characteristic impedance of air, the area and the mean-square velocity, in either language', () => {
+	const wrong = [];
+	let read = 0;
+	for (const term of TERMS) {
+		for (const language of LANGUAGES) {
+			if (!RADIATION[language].test(term.quantity[language])) continue;
+			read += 1;
+			const definition = term.definition[language];
+			if (!AGAINST_AIR[language].test(definition) || PER_UNIT_VELOCITY[language].test(definition)) {
+				wrong.push(`${term.id} (${language}): ${definition.slice(0, 90)}`);
+			}
+		}
+	}
+	assert.ok(read > 0, 'no radiation efficiency was read');
+	assert.deepEqual(wrong, [], `definitions that do not say what the power is divided by:\n${wrong.join('\n')}`);
+});

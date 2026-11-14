@@ -423,6 +423,77 @@ test('plain text reads character references, line breaks, struck and nested mark
   assert.equal(plainText(['1\u202f250 Hz,', 'at\u00a0once.']), '1\u202f250 Hz, at\u00a0once.');
 });
 
+test("a link's address and title are the link's: a dollar sign, a backtick or a brace there opens nothing", () => {
+  // CommonMark 0.31.2, 6.3: the address and the title are read where the
+  // link's closing bracket is, before anything after them opens.
+  assert.deepEqual(readInline(['See [the table](https://example.com/a$b) and $x$ here.']), {
+    text: 'See the table and $x$ here.',
+    markup: ['$x$'],
+  });
+  assert.equal(plainText(['See [the table](https://example.com/a`b) and `x` here.']), 'See the table and x here.');
+  assert.deepEqual(readInline(['See [the table](https://example.com/ "a $ title") and $x$.']).markup, ['$x$']);
+  assert.equal(plainText(['See [the table](https://example.com/ "a ` title") and `x`.']), 'See the table and x.');
+  assert.equal(plainText(['See [the table](https://example.com/ "a', '`title`") and `x`.']), 'See the table and x.');
+  assert.deepEqual(readInline(['See [the table](https://example.com/{x}) here.']), { text: 'See the table here.', markup: [] });
+  // What opens before the closing bracket owns it: a code span that opens in
+  // the text and closes in the address leaves no link.
+  assert.equal(plainText(['[not a `link](/foo`)']), '[not a link](/foo)');
+  // A link holds no link, an image does, and an address whose parentheses do
+  // not pair is no address.
+  assert.equal(plainText(['Read [a [b](x) c](y).']), 'Read [a b c](y).');
+  assert.equal(plainText(['An ![image [l](x)](y) here.']), 'An image l here.');
+  assert.equal(plainText(['Unbalanced [a](b(c) stays.']), 'Unbalanced [a](b(c) stays.');
+});
+
+test('a reference link shows its text where the page defines its label, and its brackets where it does not', () => {
+  const sections = catalogueSections(
+    [
+      'Read in [Bies][bies], [Bies][], [bies], [Cox] and [Kut][kut].',
+      '',
+      '<Catalogues catalogue="absorption" lang="en" />',
+      '',
+      '## Areas from [Bies]',
+      '',
+      '[cox]: https://example.org "Cox"',
+      'Rows [bies][nope] and [bies](not a resource.',
+      '',
+      '<Catalogues catalogue="absorptionAreas" lang="en" />',
+      '',
+      '[bies]: https://example.com',
+    ].join('\n'),
+  );
+  assert.deepEqual(sections, [
+    { key: 'absorption', lead: 'Read in Bies, Bies, bies, Cox and [Kut][kut].' },
+    { key: 'absorptionAreas', heading: 'Areas from Bies', lead: 'Rows [bies][nope] and bies(not a resource.' },
+  ]);
+  // A paragraph of definitions alone is none the page shows.
+  assert.deepEqual(secondSection(['[bies]: https://example.com', '[cox]:', '  https://example.org', '  "Cox"']), {
+    key: 'absorptionAreas',
+    heading: 'Areas',
+    lead: 'The paragraph that describes it.',
+  });
+});
+
+test('a reference link shows its text where the parser has read the definition first, an aside\'s after the paragraphs before it', () => {
+  // remark-directive reads an aside's content after the page's paragraphs
+  // before it, so a definition inside an aside defines no reference above it.
+  const lead = (text) => catalogueSections(text).map((section) => section.lead);
+  assert.deepEqual(lead('See [Bies][bies] for more.\n\n:::note\n[bies]: https://example.org\n:::\n\n<Catalogues catalogue="absorption" lang="en" />\n'), [
+    'See [Bies][bies] for more.',
+  ]);
+  assert.deepEqual(lead(':::note\n[bies]: https://example.org\n:::\n\nSee [Bies][bies] for more.\n\n<Catalogues catalogue="absorption" lang="en" />\n'), [
+    'See Bies for more.',
+  ]);
+  // MDX reads no indented code, so a definition indented four spaces is one,
+  // which the page does not show and which defines its label.
+  assert.deepEqual(lead('See [Bies][bies] for more.\n\n    [bies]: https://example.org\n\n<Catalogues catalogue="absorption" lang="en" />\n'), [
+    'See Bies for more.',
+  ]);
+  assert.deepEqual(lead('    [bies]: https://example.org\n\nSee [Bies][bies] for more.\n\n<Catalogues catalogue="absorption" lang="en" />\n'), [
+    'See Bies for more.',
+  ]);
+});
+
 test('a backslash at the end of a line breaks it only outside a code span, where it is a character of the code', () => {
   // CommonMark 0.31.2, 6.1 and 6.7: a code span holds its backslashes as
   // written, and its line end is a space.

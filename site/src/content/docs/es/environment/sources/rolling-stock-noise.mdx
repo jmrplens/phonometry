@@ -402,7 +402,10 @@ largo del carril, en decibelios por metro, un valor por banda de tercio de
 octava (EN 15461, 3.6). Un acelerómetro se fija al carril en el centro de un
 vano entre traviesas y un martillo golpea el carril en las posiciones de la
 figura 2, cada cuarto de vano hasta dos vanos y medio y luego más espaciadas,
-hasta 66 vanos (6.7, `track_decay_excitation_positions`). A partir de las
+hasta 66 vanos (`track_decay_excitation_positions`). El texto del apartado
+6.7 detiene los pasos de cuarto de vano en el vano 2, lo que da 28
+posiciones; la figura 2 los dibuja hasta el vano 2,5, lo que da 29, y la
+biblioteca sigue a la figura. A partir de las
 magnitudes por banda $|A(x_n)|$ de las respuestas, con la directa $A(x_0)$ en
 primer lugar, la fórmula 1 estima la tasa a partir de la integral de la
 respuesta al cuadrado y no de una pendiente ajustada,
@@ -417,6 +420,25 @@ donde $\Delta x_n$ es la longitud de carril que representa cada posición
 por debajo de $\mathrm{DR}_\mathrm{min} = 4{,}343 / x_\mathrm{max}$ (fórmula 2), y una banda cuya tasa no
 llega al menos al doble de ese valor no es apta; además la respuesta más
 lejana tiene que quedar 10 dB por debajo de la directa (6.7).
+
+Sobre esa rejilla se toman dos series, la respuesta vertical a una fuerza
+vertical y la lateral a una fuerza lateral, que la norma llama transversal,
+cada respuesta promediada sobre cuatro impactos válidos como mínimo (6.6); el
+acelerómetro vertical va preferentemente en la cabeza del carril, o en el
+patín si no se puede fijar en ella, y el lateral en la cara exterior de la
+cabeza (6.3). La figura dibuja la rejilla para el vano de
+0,6 m por defecto, con el $\Delta x_n$ que la biblioteca da a cada posición.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_track_decay_grid.svg"
+  alt="Dos dibujos de la rejilla de impactos de la EN 15461 sobre un carril con traviesas cada 0,6 m. Arriba, el campo cercano a escala, del acelerómetro en el centro del vano 0 al vano 8: once impactos separados un cuarto de vano hasta el vano 2,5, luego en 3, 3,5 y 4, y luego uno por vano hasta el 8, rellenos donde el impacto cae sobre una traviesa y huecos donde cae entre dos; bajo el carril, un corchete por posición con el tramo de carril que representa, 0,075 m para la respuesta directa, 0,15 m en el tramo de cuartos de vano, 0,3 m en el de medios vanos y 0,6 m en el de vanos enteros. Abajo, la rejilla entera a escala comprimida, con el campo cercano sombreado y los impactos del campo lejano en los vanos 10, 12, 16, 20, 24, 30, 36, 42, 48, 54 y 66, el último en x max = 39,6 m con un intervalo de 7,2 m simétrico respecto a él. Al lado, la sección del carril con la fuerza vertical en la cabeza y el acelerómetro vertical en la cabeza, donde el apartado 6.3 lo prefiere, y la fuerza y el acelerómetro transversales en las caras de la cabeza, y tres notas: dos series de respuestas con cuatro impactos válidos o más por posición, un suelo DR min = 4,343/x max = 0,11 dB/m con esta rejilla, y la respuesta en la posición más lejana al menos 10 dB por debajo de la directa en cada banda"
+  width="100%"
+/>
+
+*Las 29 posiciones de impacto de la figura 2 con un vano de 0,6 m, leídas de
+`TRACK_DECAY_EXCITATION_INDICES`, con el tramo de carril $\Delta x_n$ que la
+fórmula 1 da a cada una: el campo cercano a escala y, debajo, la rejilla
+entera comprimida.*
 
 ```python
 bands = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0,

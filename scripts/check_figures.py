@@ -123,6 +123,22 @@ def _svg_within_tolerance(old: bytes, new: bytes) -> bool:
     )
 
 
+def same_figure(old: bytes, new: bytes) -> bool:
+    """Whether an SVG on disk is the committed one, its line ends set aside.
+
+    A clone made with ``core.autocrlf=true`` checks every SVG out with a
+    carriage return before each line feed, and the committed bytes have
+    none, so the line ends are read as line feeds on both sides before the
+    figures are compared byte for byte and then within tolerance.
+
+    :param old: The committed SVG.
+    :param new: The SVG on disk.
+    :return: True when the two draw the same figure.
+    """
+    old, new = old.replace(b"\r\n", b"\n"), new.replace(b"\r\n", b"\n")
+    return old == new or _svg_within_tolerance(old, new)
+
+
 def main() -> int:
     disk = {str(p) for p in Path(IMG_DIR).rglob("*") if p.is_file()}
     tracked = tracked_files(IMG_DIR)
@@ -145,7 +161,7 @@ def main() -> int:
         if old == new:
             continue  # byte-identical: fast path, no tolerance needed
         if path.endswith(".svg"):
-            if not _svg_within_tolerance(old, new):
+            if not same_figure(old, new):
                 problems.append(f"SVG changed beyond tolerance: {path}")
         elif path.endswith((".webp", ".png")):
             reason = raster_problem(old, new, RASTER_TOL)

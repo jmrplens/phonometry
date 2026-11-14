@@ -127,6 +127,7 @@ from .environment import (
     _d_rd1367_chain,
     _d_rd1367_inspection,
     _d_rolling_stock_site,
+    _d_soundscape_study,
     _d_statistical_pass_by_site,
     _d_wind_turbine,
     _d_wind_turbine_board,
@@ -1177,6 +1178,11 @@ DIAGRAMS = {
         _d_rd1367_inspection,
         "RD 1367/2007: where and how an activity is measured (Annex IV)",
         734,
+    ),
+    "diagram_soundscape_study": (
+        _d_soundscape_study,
+        "A soundscape study: what is collected and what is made of it",
+        768,
     ),
     "diagram_room_image_sources": (
         _d_room_image_sources,

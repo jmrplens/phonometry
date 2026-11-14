@@ -2015,6 +2015,249 @@ def _d_rd1367_inspection(s: SVG, th: Theme) -> None:
         s.text(56, 654 + 22 * k, line, size, th.fg, anchor="start")
 
 
+def _d_soundscape_study(s: SVG, th: Theme) -> None:
+    """What a soundscape study collects, and what the analysis makes of it.
+
+    The collection is ISO/TS 12913-2:2018: the soundwalk with predefined
+    assessment sites of C.2.3 (PDF page 18), the instructions of Method B in
+    C.3.2.2 (page 23), the questionnaires of C.3.1 and C.3.2.3 to C.3.2.5
+    (pages 19 to 25) and the binaural measurement of Annex D (pages 30 and
+    31): the microphones 1.6 m ± 0.1 m above the ground and at least 1 m from
+    reflecting structures (D.2), 3 min or longer (D.3), equalized for the
+    sound field (D.4), a wind shield outdoors (D.5), 44.1 kHz or more (D.6).
+    The analysis is ISO/TS 12913-3:2019, Annexes A, B and D (PDF pages 11 to
+    19). The head is drawn where the participants stand and facing where they
+    look, which is what C.3.2.2.2 asks of it; nothing here says when it
+    records, because the specification does not.
+    """
+    # --- (a) the soundwalk, in plan ----------------------------------------
+    s.text(
+        40, 72, "(a) The soundwalk (C.2.3)", 15, th.primary, anchor="start", bold=True
+    )
+    for x, y, w, h in (
+        (48, 92, 96, 34),
+        (236, 88, 84, 56),
+        (120, 176, 104, 52),
+        (330, 184, 90, 44),
+        (404, 92, 56, 34),
+    ):
+        s.rect(x, y, w, h, th.panel, th.muted, rx=3, sw=1.0)
+    route = ((52, 160), (112, 148), (196, 136), (286, 172), (368, 148), (456, 152))
+    d = f"M {route[0][0]} {route[0][1]}"
+    for k in range(len(route) - 1):
+        before = route[max(k - 1, 0)]
+        here, there = route[k], route[k + 1]
+        after = route[min(k + 2, len(route) - 1)]
+        c1 = (
+            here[0] + (there[0] - before[0]) / 6,
+            here[1] + (there[1] - before[1]) / 6,
+        )
+        c2 = (there[0] - (after[0] - here[0]) / 6, there[1] - (after[1] - here[1]) / 6)
+        d += f" C {c1[0]:.1f} {c1[1]:.1f} {c2[0]:.1f} {c2[1]:.1f} {there[0]} {there[1]}"
+    s.path(d, stroke=th.primary, sw=2.2, dash="7,5")
+    for number, (x, y) in enumerate(route[1:5], start=1):
+        s.circle(x, y, 11, th.primary, th.bg, 1.6)
+        s.text(x, y + 4.5, str(number), 13, th.bg, bold=True)
+    walk = (
+        "the area and the assessment sites (1 to 4) are set beforehand",
+        "a moderator leads groups of up to five, who walk in silence",
+        "and all fill in the questionnaire at every site",
+        "20 or more independent observations of each site",
+    )
+    size = s.fit_size(walk, [13, 12], 424)
+    for k, line in enumerate(walk):
+        s.text(40, 258 + 18 * k, line, size, th.fg, anchor="start")
+
+    # --- (b) one assessment site, in elevation ------------------------------
+    s.text(
+        500,
+        72,
+        "(b) At each site (C.3.2.2, D.2)",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    ground = 232.0
+    s.ground(ground, 500, 860)
+    for x in (522, 550, 578):
+        s.person(x, ground, 78)
+    s.arrow(512, 134, 598, 134, th.accent, 1.6)
+    s.text(555, 126, "viewing direction", 12, th.accent)
+    # The artificial head on its tripod, the ear canal entrance 1.6 m up.
+    head_x, ear_y = 652.0, ground - 74.0
+    for foot in (-17.0, 0.0, 17.0):
+        s.line(head_x, ground - 40, head_x + foot, ground, th.fg, 2.0)
+    s.line(head_x, ground - 40, head_x, ear_y + 22, th.fg, 2.4)
+    s.rect(head_x - 13, ear_y + 15, 26, 8, th.muted, rx=3)
+    s.ellipse(head_x, ear_y, 9.5, 11.5, th.panel, th.fg, 1.8)
+    s.path(
+        f"M {head_x + 9} {ear_y - 3} L {head_x + 14} {ear_y + 3} L {head_x + 9} {ear_y + 4}",
+        stroke=th.fg,
+        sw=1.8,
+    )
+    s.circle(head_x, ear_y, 3.2, th.primary)
+    s.line(head_x + 4, ear_y, head_x + 34, ear_y, th.muted, 0.9, dash="3,3")
+    s.dim(
+        head_x + 34,
+        ground,
+        head_x + 34,
+        ear_y,
+        "1.6 m ± 0.1 m",
+        size=13,
+        label_side="right",
+    )
+    s.rect(814, ground - 126, 46, 126, th.panel, th.fg, sw=2.0)
+    s.text(860, ground - 134, "reflecting structure", 12, th.muted, anchor="end")
+    s.dim(head_x + 14, ground - 104, 814, ground - 104, "≥ 1 m", size=13)
+    site = (
+        "the participants listen in silence for a set time,",
+        "e.g. 3 min, then answer without leaving the spot",
+        "artificial head on a tripod, facing where they look",
+        "and not moved while it measures (C.3.2.2.2)",
+    )
+    size = s.fit_size(site, [13, 12], 360)
+    for k, line in enumerate(site):
+        s.text(500, 258 + 18 * k, line, size, th.fg, anchor="start")
+
+    # --- (c) to (e): what each record is, and what is made of it ------------
+    s.line(40, 332, 860, 332, th.muted, 1.0, dash="6,5")
+    lanes = (
+        (
+            "(c) Method A (C.3.1)",
+            "four parts, five boxes each:",
+            (
+                "1  sources heard (Figures C.2, C.3)",
+                "2  eight attributes (Figure C.4)",
+                "3  overall quality (Figure C.5)",
+                "4  appropriateness (Figure C.6)",
+            ),
+            "Annex A",
+            (
+                ("scale values of each part (Table A.1)", "method_a_scale_values"),
+                ("median and range per site (A.2)", "method_a_summary"),
+                ("$P$ and $E$ (Formulas A.1 and A.2)", "pleasantness_eventfulness"),
+                ("Spearman against the levels (A.4)", "spearman_rank_correlation"),
+                ("every scale is ordinal (A.2)", ""),
+            ),
+        ),
+        (
+            "(d) Method B (C.3.2)",
+            "the soundwalk sheet, in this order:",
+            (
+                "1  continuous scales (Figure C.7)",
+                "2  sources, by rank (Figure C.8):",
+                "    up to eight, the most noticeable first",
+                "3  free comments (Figure C.9)",
+            ),
+            "Annex B",
+            (
+                ("value 1 to 5, to one decimal (B.2)", "method_b_scale_values"),
+                ("mean, deviation, 95 % interval (B.2)", "method_b_summary"),
+                ("median rank of each source (B.2)", "method_b_source_ranking"),
+                ("Pearson against the levels (B.3)", "pearson_correlation"),
+                ("comments: qualitative analysis (B.2)", ""),
+            ),
+        ),
+        (
+            "(e) Binaural recording (Annex D)",
+            "two channels, one for each ear:",
+            (
+                "3 min or longer (D.3)",
+                "44.1 kHz or more, uncompressed (D.6)",
+                "wind shield outdoors (D.5)",
+                "equalized for the sound field (D.4)",
+            ),
+            "Annex D",
+            (
+                ("each metric of Table D.1 at each ear:", "binaural_indicators"),
+                ("levels, loudness, sharpness, tonality,", ""),
+                ("roughness and fluctuation strength", ""),
+                ("the higher of the two ears' values", ""),
+                ("is the representative value (D.2)", ""),
+                ("a percentile ratio such as $N_5$/$N_{95}$", ""),
+                ("tells the variation over time (D.2)", ""),
+            ),
+        ),
+    )
+    quiet_lines = (
+        "every scale is ordinal (A.2)",
+        "comments: qualitative analysis (B.2)",
+    )
+    width, top, mid, card = 260.0, 384.0, 532.0, 172.0
+    heads = s.fit_size([lane[0] for lane in lanes], [15, 14, 13], width, bold=True)
+    body = s.fit_size(
+        [
+            line
+            for lane in lanes
+            for line in (lane[1], *lane[2], *(item[0] for item in lane[4]))
+        ],
+        [13, 12, 11],
+        width - 30,
+    )
+    for k, (head, lead, parts, annex, items) in enumerate(lanes):
+        left = 40.0 + 280 * k
+        s.text(left, 362, head, heads, th.primary, anchor="start", bold=True)
+        s.rect(left, top, width, 108, th.panel, th.fg, rx=6, sw=1.4)
+        s.text(left + 14, top + 22, lead, body, th.muted, anchor="start")
+        for row, line in enumerate(parts):
+            # A line indented under an item carries on that item.
+            indent = 18 if line.startswith(" ") else 0
+            s.text(
+                left + 14 + indent,
+                top + 42 + 18 * row,
+                line.strip(),
+                body,
+                th.fg,
+                anchor="start",
+            )
+        s.arrow(left + 30, top + 108, left + 30, mid - 2, th.fg, 1.6)
+        s.text(
+            left + 44,
+            (top + 108 + mid) / 2 + 4.5,
+            f"ISO/TS 12913-3, {annex}",
+            12,
+            th.muted,
+            anchor="start",
+        )
+        s.rect(left, mid, width, card, th.bg, th.primary, rx=6, sw=1.6)
+        line_y = mid + 22
+        for label, function in items:
+            quiet = label in quiet_lines
+            s.text(
+                left + 14,
+                line_y,
+                label,
+                body,
+                th.muted if quiet else th.fg,
+                anchor="start",
+            )
+            if function:
+                s.text(
+                    left + 14,
+                    line_y + 15,
+                    function,
+                    11,
+                    th.primary,
+                    anchor="start",
+                    mono=True,
+                )
+            line_y += 33 if function else 18
+    # The levels the answers are correlated with come from the recording.
+    bus = mid + card + 22
+    s.line(40 + 2 * 280 + 130, mid + card, 40 + 2 * 280 + 130, bus, th.accent, 1.8)
+    s.line(170, bus, 40 + 2 * 280 + 130, bus, th.accent, 1.8)
+    for foot in (170.0, 450.0):
+        s.arrow(foot, bus, foot, mid + card + 2, th.accent, 1.8)
+    s.text(
+        450,
+        bus + 20,
+        "the acoustic data the answers are set against (A.4, B.3)",
+        13,
+        th.accent,
+    )
+
+
 def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:
     # --- plan, 12 px per metre -------------------------------------------
     # Figure 3's two-lane road: the measuring lane on the roadside of

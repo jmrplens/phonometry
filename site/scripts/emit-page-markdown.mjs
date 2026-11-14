@@ -35,7 +35,7 @@ import { TRANSPLANTED, hasMarkdownCopy, mirrorOf, routeOf } from "../src/lib/pag
 import { basePath, siteUrl } from "../src/data/site.mjs";
 import { catalogueSlugs } from "../src/data/topics.mjs";
 import {
-  bracketText,
+  catalogueItem,
   copyDefects,
   figureMarkdown,
   frontmatterSource,
@@ -43,6 +43,7 @@ import {
   referencesMarkdown,
   stripFrontmatter,
   stripMdx,
+  titleMarkdown,
 } from "./shared/page-twin.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -72,7 +73,7 @@ function catalogueIndex(lang) {
       const frontmatter = parseYaml(frontmatterSource(page)) ?? {};
       const label = String(frontmatter.sidebar?.label ?? frontmatter.title ?? "");
       const description = String(frontmatter.description ?? "");
-      return `- [${bracketText(label)}](${SITE_URL}/${prefix}${slug}/): ${description}`;
+      return catalogueItem({ label, url: `${SITE_URL}/${prefix}${slug}/`, description });
     })
     .join("\n");
 }
@@ -166,7 +167,7 @@ function sourceCopy(file, route) {
   const title = String(frontmatter.title ?? "").trim();
   if (!title) throw new Error(`${relative(siteRoot, file)} has no title for its Markdown copy to open with`);
   const heading = REFERENCES_HEADING[lang];
-  const copy = [`# ${title}`, body, referencesMarkdown(frontmatter.references, lang, heading)].filter(Boolean).join("\n\n");
+  const copy = [titleMarkdown(title), body, referencesMarkdown(frontmatter.references, lang, heading)].filter(Boolean).join("\n\n");
   const checked = {
     source,
     kind,

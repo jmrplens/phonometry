@@ -150,6 +150,7 @@ def commit_time(root: pathlib.Path = _ROOT) -> int:
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=GIT_S,
     ).stdout
     return int(out.strip())
@@ -171,6 +172,7 @@ def checkout_changes(root: pathlib.Path = _ROOT) -> list[str]:
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=GIT_S,
     ).stdout
     return [line for line in out.splitlines() if line.strip()]

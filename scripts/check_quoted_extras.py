@@ -168,6 +168,7 @@ def tracked_files(root: pathlib.Path) -> list[pathlib.Path]:
         ["git", "-C", str(root), "ls-files", "-z"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         timeout=_GIT_S,
     ).stdout

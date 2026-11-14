@@ -131,6 +131,7 @@ def _repository_files() -> frozenset[str] | None:
                 ["git", "ls-files", *which, "-z"],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
                 cwd=ROOT,
                 check=False,
             )

@@ -743,6 +743,19 @@ def test_a_link_in_a_code_block_is_an_example_and_not_read() -> None:
     assert ccl.links_in("docs/page.md", page) == []
 
 
+def test_a_page_whose_name_holds_a_character_outside_ascii_is_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """git quotes such a name in a plain listing; the page is read by its name all the same."""
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True, timeout=60)
+    names = ["docs/acústica.md", "docs/two words.md"]
+    for name in names:
+        (tmp_path / name).parent.mkdir(exist_ok=True)
+        (tmp_path / name).write_text("# A page\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(tmp_path), "add", *names], check=True, timeout=60)
+    assert ccl.pages(tmp_path) == sorted(names)
+
+
 def test_main_names_each_link_and_fails(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,

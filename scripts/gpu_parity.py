@@ -335,7 +335,14 @@ def _nvidia_driver(index: int) -> str:
         "--query-gpu=driver_version",
         "--format=csv,noheader",
     ]
-    done = subprocess.run(query, capture_output=True, text=True, check=False)
+    done = subprocess.run(
+        query,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
     if done.returncode != 0:
         msg = f"nvidia-smi failed ({done.returncode}): {done.stderr.strip()}"
         raise ParityError(msg)

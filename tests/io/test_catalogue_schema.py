@@ -1048,6 +1048,7 @@ def test_an_editors_validator_reads_every_pattern_as_python_does(
         [str(_NODE), "-e", script, str(given)],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=120,
         check=False,
     )

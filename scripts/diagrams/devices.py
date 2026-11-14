@@ -489,6 +489,235 @@ def _methods_pic_scan(s: SVG, th: Theme, cxc: float, py: float, col: str) -> Non
 
 
 # ---------------------------------------------------------------------------
+# The decision path of the sound power overview: six questions, in order
+# ---------------------------------------------------------------------------
+
+#: The slope keys of the decision path. ISO 3747:2010, 3.19, prints the f of
+#: the excess of sound pressure level italic; ISO 3740:2019, Formula (C.1),
+#: prints omc upright, as it does tot and R0.
+_PATH_SLOPED = ("ΔL_f",)
+_PATH_UPRIGHT = ("σ_omc",)
+
+
+def _d_power_decision_path(s: SVG, th: Theme) -> None:
+    """The guide's own path to a method, drawn as the flow its list describes.
+
+    Question 1 is a gate (it fixes the grade, it names no standard) and
+    question 6 a closing check every route passes through; the four between
+    them are the decisions, each with its exits on the right. The order is
+    the page's, not that of ISO 3740:2019, Figure 1, which asks the
+    structural-vibration question first and has neither the gate nor the
+    check. The numbers are those of the basic standards: ISO 3744:2010, 4.2.1.1
+    and 4.3.1 (6 dB, preferably more than 15 dB; K2A at most 4 dB),
+    ISO 3746:2010, 4.2 and 4.3 (3 dB; K2A at most 7 dB) and ISO 3747:2010, 4.1
+    (an excess of sound pressure level of at least 7 dB). The last yes of
+    question 5 falls back on intensity because ISO 3746:2010, 4.3, NOTE 1,
+    sends a room too reverberant for it to ISO 3747 or ISO 9614, and
+    ISO 3740:2019, Figure 1, lists ISO 9614 in every in situ exit.
+    """
+    spine, dw, dh = 180.0, 150.0, 56.0  # diamonds: centre x, half width, half height
+    ex, ew, bus = 366.0, 454.0, 850.0  # exits: left edge, width; the collector's x
+
+    questions = (
+        ("2 · Can the source", "travel to a laboratory?"),
+        ("3 · How quiet and", "how dry is the site?"),
+        ("4 · Is the background", "the problem?"),
+        ("5 · Can a microphone", "be put there at all?"),
+    )
+    # One size for the four diamonds, chosen on the longest line of the
+    # eight: the Spanish of question 3 is half again as long as its English,
+    # and a spine whose questions change size reads as a ranking of them.
+    qsize = s.fit_size(
+        [line for pair in questions for line in pair],
+        (12, 11, 10),
+        2 * dw * (1 - 16 / dh) - 12,
+        bold=True,
+    )
+
+    def diamond(cy: float, number: int) -> None:
+        s.path(
+            f"M {spine - dw} {cy} L {spine} {cy - dh} L {spine + dw} {cy} "
+            f"L {spine} {cy + dh} Z",
+            fill=th.panel,
+            stroke=th.fg,
+            sw=2,
+        )
+        l1, l2 = questions[number - 2]
+        s.text(spine, cy - 3, l1, qsize, th.fg, bold=True)
+        s.text(spine, cy + 13, l2, qsize, th.fg, bold=True)
+
+    def exit_box(top: float, height: float) -> None:
+        s.rect(ex, top, ew, height, th.panel, th.accent, rx=10, sw=2.2)
+        mid = top + height / 2
+        s.line(ex + ew, mid, bus, mid, th.muted, 1.4)
+
+    def route(y: float, name: str, what: str, grade: str) -> None:
+        s.text(ex + 16, y, name, 13, th.fg, anchor="start", bold=True)
+        if what:
+            s.text(ex + 136, y, what, 12, th.fg, anchor="start")
+        s.text(ex + ew - 14, y, grade, 12, th.accent, anchor="end", bold=True)
+
+    def condition(y: float, txt: str) -> None:
+        s.text(ex + 16, y, txt, 11, th.muted, anchor="start", sloped=_PATH_SLOPED)
+
+    # --- 1: the gate. It fixes the grade and names no standard. ------------
+    s.rect(30, 54, 840, 92, "none", th.primary, rx=12, sw=2, dash="7,5")
+    s.text(
+        450,
+        78,
+        "1 · What is the number for? The answer fixes the grade, not the standard",
+        14,
+        th.fg,
+        bold=True,
+    )
+    for x0, head, use in (
+        (42.0, "Grade 2 (engineering)", "a declaration, a check against a limit"),
+        (316.0, "Grade 1 (precision)", "a reference source, a ranking, a dispute"),
+        (590.0, "Grade 3 (survey)", "a first walk-through of a noisy plant"),
+    ):
+        s.rect(x0, 90, 268, 46, th.panel, th.primary, rx=8, sw=1.4)
+        s.text(x0 + 134, 109, head, 13, th.fg, bold=True)
+        s.text(x0 + 134, 127, use, 11, th.muted)
+    s.text(
+        540,
+        166,
+        "grade 1 is reached only by ISO 3741, ISO 3745, ISO 9614-1 and ISO 9614-3",
+        11,
+        th.muted,
+    )
+
+    # --- 2: the laboratory routes ------------------------------------------
+    q2, q3, q4, q5 = 238.0, 418.0, 578.0, 726.0
+    s.arrow(spine, 146, spine, q2 - dh - 2, th.fg, 1.8)
+    diamond(q2, 2)
+    s.arrow(spine + dw, q2, ex - 2, q2, th.accent, 1.8)
+    s.text(spine + dw + 17, q2 - 8, "yes", 12, th.accent, bold=True)
+    exit_box(q2 - 46, 92)
+    route(q2 - 20, "ISO 3741", "qualified reverberation room", "grade 1")
+    route(q2 + 4, "ISO 3745", "anechoic or hemi-anechoic room", "grade 1")
+    route(q2 + 28, "ISO 3743-1, -2", "small test rooms", "grade 2")
+
+    # --- 3: the enveloping surface in situ, and the comparison --------------
+    s.arrow(spine, q2 + dh, spine, q3 - dh - 2, th.fg, 1.8)
+    s.text(spine + 12, q2 + dh + 26, "no", 12, th.secondary, anchor="start", bold=True)
+    diamond(q3, 3)
+    s.line(spine + dw, q3, ex - 18, q3, th.accent, 1.8)
+    s.line(ex - 18, q3 - 58, ex - 18, q3 + 58, th.accent, 1.8)
+    for dy, name, what, grade, cond in (
+        (
+            -58.0,
+            "ISO 3744",
+            "enveloping surface",
+            "grade 2",
+            "background ≥ 6 dB below the source (preferably > 15 dB), $K_2$ ≤ 4 dB",
+        ),
+        (
+            0.0,
+            "ISO 3746",
+            "the same surface, looser limits",
+            "grade 3",
+            "background ≥ 3 dB below the source, $K_2$ ≤ 7 dB",
+        ),
+        (
+            58.0,
+            "ISO 3747",
+            "comparison in situ",
+            "grade 2 or 3",
+            "too reverberant for both: a reference sound source, $ΔL_f$ ≥ 7 dB",
+        ),
+    ):
+        s.arrow(ex - 18, q3 + dy, ex - 2, q3 + dy, th.accent, 1.8)
+        exit_box(q3 + dy - 25, 50)
+        route(q3 + dy - 5, name, what, grade)
+        condition(q3 + dy + 14, cond)
+
+    # --- 4: intensity -------------------------------------------------------
+    s.arrow(spine, q3 + dh, spine, q4 - dh - 2, th.fg, 1.8)
+    s.text(
+        spine + 12, q3 + dh + 26, "none", 12, th.secondary, anchor="start", bold=True
+    )
+    diamond(q4, 4)
+    s.arrow(spine + dw, q4, ex - 2, q4, th.accent, 1.8)
+    s.text(spine + dw + 17, q4 - 8, "yes", 12, th.accent, bold=True)
+    exit_box(q4 - 40, 80)
+    # ISO 3740:2019 names Parts 1 and 2 where the background is the obstacle
+    # (Figures 1 and 2); Part 3 enters in situ only in special cases.
+    route(q4 - 15, "ISO 9614-1, -2", "", "grade 1, 2 or 3")
+    s.text(
+        ex + 16,
+        q4 + 5,
+        "intensity at discrete points or by scanning",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    condition(
+        q4 + 24, "steady extraneous noise tolerated; the field indicators set the grade"
+    )
+
+    # --- 5: no acoustic measurement at all ----------------------------------
+    s.arrow(spine, q4 + dh, spine, q5 - dh - 2, th.fg, 1.8)
+    s.text(spine + 12, q4 + dh + 22, "no", 12, th.secondary, anchor="start", bold=True)
+    diamond(q5, 5)
+    s.line(spine + dw, q5, ex + 30, q5, th.accent, 1.8)
+    s.arrow(ex + 30, q5, ex + 30, q4 + 42, th.accent, 1.8)
+    s.text(spine + dw + 32, q5 - 8, "yes", 12, th.accent, bold=True)
+    s.text(
+        ex + 44,
+        q5 - 50,
+        "then intensity: ISO 9614 works in almost any environment",
+        11,
+        th.muted,
+        anchor="start",
+    )
+    s.arrow(spine, q5 + dh, spine, 820, th.fg, 1.8)
+    s.text(spine + 12, q5 + dh + 24, "no", 12, th.secondary, anchor="start", bold=True)
+    s.rect(30, 822, 790, 62, th.panel, th.accent, rx=10, sw=2.2)
+    s.line(820, 853, bus, 853, th.muted, 1.4)
+    s.text(46, 847, "ISO/TS 7849-1, -2", 13, th.fg, anchor="start", bold=True)
+    s.text(
+        190,
+        847,
+        "surface velocity of the casing and a radiation factor",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    s.text(806, 847, "survey / engineering", 12, th.accent, anchor="end", bold=True)
+    s.text(
+        46,
+        868,
+        "the sound the structure radiates only, blind to openings; Part 1 assumes "
+        "$ε$ = 1 and returns an upper limit",
+        11,
+        th.muted,
+        anchor="start",
+    )
+
+    # --- 6: the closing check every route passes through --------------------
+    s.line(bus, q2, bus, 912, th.muted, 1.4)
+    s.arrow(bus, 912, bus, 926, th.muted, 1.4)
+    s.rect(30, 928, 840, 72, "none", th.primary, rx=12, sw=2, dash="7,5")
+    s.text(
+        450,
+        954,
+        "6 · Whichever route: how repeatable is the machine itself?",
+        14,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        450,
+        980,
+        "$σ_{tot} = √(σ_{R0}^2 + σ_{omc}^2)$: no grade bounds $σ_{omc}$; estimate it "
+        "from repeated determinations first",
+        12,
+        th.fg,
+        upright=_PATH_UPRIGHT,
+    )
+
+
+# ---------------------------------------------------------------------------
 # d19 - ISO 3745 precision sound power (anechoic / hemi-anechoic room)
 # ---------------------------------------------------------------------------
 

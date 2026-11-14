@@ -83,6 +83,7 @@ from .devices import (
     _d_noise_declaration_chain,
     _d_open_end_solid_angles,
     _d_plant_contour,
+    _d_power_decision_path,
     _d_pp_probe,
     _d_precision_anechoic,
     _d_program_loudness,
@@ -341,6 +342,11 @@ DIAGRAMS = {
         860,
     ),
     "sound_power_methods": (_d_methods, "Sound power methods compared", 944),
+    "diagram_sound_power_decision_path": (
+        _d_power_decision_path,
+        "This guide's decision path to a sound power method",
+        1020,
+    ),
     "diagram_noise_declaration_chain": (
         _d_noise_declaration_chain,
         "Declaring and verifying a sound power level (ISO 4871)",

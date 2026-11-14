@@ -232,7 +232,8 @@ def enforcer_problem(item: str, root: pathlib.Path) -> str | None:
         job = target.removeprefix("CI: ").strip().strip('"')
         workflows = "\n".join(
             p.read_text(encoding="utf-8")
-            for p in (root / ".github" / "workflows").glob("*.yml")
+            for pattern in ("*.yml", "*.yaml")
+            for p in sorted((root / ".github" / "workflows").glob(pattern))
         )
         return (
             None

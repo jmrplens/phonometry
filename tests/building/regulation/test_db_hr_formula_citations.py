@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import inspect
 import re
-import sys
 from pathlib import Path
 
 import pytest
@@ -250,10 +249,10 @@ def test_the_general_index_names_the_formula_of_every_quantity_it_computes() -> 
         assert short == [], f"{where}:\n" + "\n".join(short)
 
 
-def test_each_conformance_row_of_a_global_index_cites_its_formula() -> None:
-    scripts = str(_ROOT / "scripts")
-    if scripts not in sys.path:
-        sys.path.insert(0, scripts)
+def test_each_conformance_row_of_a_global_index_cites_its_formula(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.syspath_prepend(str(_ROOT / "scripts"))
     import conformance_report
 
     wrong = []

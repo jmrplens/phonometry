@@ -2087,8 +2087,10 @@ def main() -> None:
     )
     _check_index_covers_the_site(llms)
     _check_index_budget(llms)
-    (ROOT / "llms.txt").write_text(llms, encoding="utf-8")
-    (ROOT / "llms-full.txt").write_text(build_llms_full(llms), encoding="utf-8")
+    (ROOT / "llms.txt").write_text(llms, encoding="utf-8", newline="\n")
+    (ROOT / "llms-full.txt").write_text(
+        build_llms_full(llms), encoding="utf-8", newline="\n"
+    )
 
     # Remove shards this run no longer produces. Regrouping a section renames
     # its shard, and an orphan left behind would keep serving text that
@@ -2109,7 +2111,9 @@ def main() -> None:
 
     sizes: dict[str, int] = {}
     for name, text in files.items():
-        (SHARDS_DIR / f"llms-{name}.txt").write_text(text, encoding="utf-8")
+        (SHARDS_DIR / f"llms-{name}.txt").write_text(
+            text, encoding="utf-8", newline="\n"
+        )
         sizes[name] = len(text.encode("utf-8"))
 
     print(

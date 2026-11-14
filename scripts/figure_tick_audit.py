@@ -371,6 +371,7 @@ def _dump() -> None:
     (path / f"{os.getpid()}.json").write_text(
         json.dumps(_FOUND, ensure_ascii=False, indent=1, sort_keys=True),
         encoding="utf-8",
+        newline="\n",
     )
 
 

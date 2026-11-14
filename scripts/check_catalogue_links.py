@@ -691,7 +691,9 @@ def refresh(links: list[Link], *, every: bool, open_data: pathlib.Path | None) -
         for catalogue in ("iso", "iec")
     }
     PINNED.write_text(
-        json.dumps(kept, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(kept, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
 

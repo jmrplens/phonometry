@@ -537,7 +537,7 @@ def write(
     paths: list[pathlib.Path] = []
     for name, source in written.items():
         path = target / name
-        path.write_text(source, encoding="utf8")
+        path.write_text(source, encoding="utf8", newline="\n")
         paths.append(path)
     return paths
 

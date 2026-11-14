@@ -265,10 +265,10 @@ def main(argv: list[str] | None = None) -> int:
     got = measure()
     text = json.dumps(got, indent=1, sort_keys=True) + "\n"
     if args.write:
-        DIGESTS_FILE.write_text(text, encoding="utf-8")
+        DIGESTS_FILE.write_text(text, encoding="utf-8", newline="\n")
         return 0
     if args.output is not None:
-        args.output.write_text(text, encoding="utf-8")
+        args.output.write_text(text, encoding="utf-8", newline="\n")
     want = recorded()
     problems = [f"moved: {problem}" for problem in differences(want, got)]
     if want["environment"] != got["environment"]:

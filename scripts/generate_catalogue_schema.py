@@ -94,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{OUTPUT.name} is current.")
         return 0
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(fresh, encoding="utf-8")
+    OUTPUT.write_text(fresh, encoding="utf-8", newline="\n")
     print(
         f"wrote {OUTPUT.relative_to(ROOT)} ({len(published_row_classes())} row classes)"
     )

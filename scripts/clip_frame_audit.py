@@ -521,7 +521,7 @@ def _pass(
         if last is not None and last[0] == digest:
             hits = last[1]
         else:
-            path.write_text(text, encoding="utf-8")
+            path.write_text(text, encoding="utf-8", newline="\n")
             hits = inspect(path, fig, language=language, dark=dark)
             state["inspected"] += 1
             state["last"] = (digest, hits)
@@ -640,12 +640,16 @@ def audit(
                     stop_at_first=every_frame is None,
                     workdir=workdir,
                 )
-                result_file.write_text(json.dumps(result), encoding="utf-8")
+                result_file.write_text(
+                    json.dumps(result), encoding="utf-8", newline="\n"
+                )
             except BaseException:
                 code = 1
                 with contextlib.suppress(BaseException):
                     result_file.write_text(
-                        json.dumps({"error": traceback.format_exc()}), encoding="utf-8"
+                        json.dumps({"error": traceback.format_exc()}),
+                        encoding="utf-8",
+                        newline="\n",
                     )
             finally:
                 os._exit(code)
@@ -670,7 +674,9 @@ def audit(
     if directory is not None:
         directory.mkdir(parents=True, exist_ok=True)
         (directory / f"{drawing}.json").write_text(
-            json.dumps(result, indent=1, ensure_ascii=False), encoding="utf-8"
+            json.dumps(result, indent=1, ensure_ascii=False),
+            encoding="utf-8",
+            newline="\n",
         )
         return
     lines = _failure(result)

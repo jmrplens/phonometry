@@ -19,6 +19,14 @@ references:
     doi: "10.1201/9781315372150"
     note: "La sección 3.5 sitúa los métodos ondulatorios en el dominio del tiempo entre las aproximaciones numéricas a la ecuación de onda en recintos, y el capítulo 3 da los modos normales de sala rígida usados como oráculo analítico."
   - type: book
+    authors: ["Mechel, F. P. (Ed.)"]
+    year: 2008
+    title: "Formulas of acoustics"
+    edition: "2.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-76833-3"
+    note: "Sección D.5: la absorción de un plano de reacción local a incidencia oblicua (el integrando de la Ec. 6) y sus medias de campo difuso en dos y tres dimensiones (Ecs. 1, 2 y 4), contra las que la sección 2 lee un borde de impedancia."
+  - type: book
     authors: ["Williams, E. G."]
     year: 1999
     title: "Fourier acoustics: Sound radiation and nearfield acoustical holography"
@@ -351,10 +359,31 @@ incidencia normal son dos pasos: la magnitud de la reflexión es
 $|R| = \sqrt{1-\alpha}$, y para una impedancia real
 $Z = \rho c\,(1+R)/(1-R)$, así que $\alpha = 0{,}5$ pide
 $Z \approx 5{,}83\,\rho c$ y $\alpha = 0{,}9$ alrededor de $1{,}92\,\rho c$. La
-salvedad viene con ello: $R$ solo es exacto a incidencia normal, así que un
-borde de reacción local absorbe menos cuanto más oblicua es la incidencia, y
-una sala rodeada de bordes así decae más despacio de lo que sugiere su
-$\alpha$ nominal.
+salvedad viene con ello: esa $R$ es la reflexión solo a incidencia normal. El
+borde ata la presión en la cara de la pared a la velocidad normal en ella,
+$p = Z v_n$ (Ec. 4.34), llegue la onda de donde llegue, y eso lo hace un plano
+de reacción local. A un ángulo $\theta$ de la normal, un plano así refleja
+$R(\theta) = (Z\cos\theta - \rho c)/(Z\cos\theta + \rho c)$ y absorbe
+$\alpha(\theta) = 4z\cos\theta/(1 + z\cos\theta)^2$, con $z = Z/\rho c$
+(Mechel, sec. D.5). Para $Z > \rho c$, que es lo que da todo objetivo por
+debajo de $\alpha = 1$, la absorción **sube** con la oblicuidad. Es total
+donde $\cos\theta = \rho c/Z$ (80,1° para $5{,}83\,\rho c$, 58,7° para
+$1{,}92\,\rho c$), que es donde la reflexión cambia de signo; se mantiene por
+encima de su valor a incidencia normal hasta $\cos\theta = (\rho c/Z)^2$
+(88,3° y 74,3°), y solo cae a cero en los últimos grados antes de la
+incidencia rasante. Promediados sobre las direcciones de un campo difuso, esos
+dos bordes absorben 0,61 y 0,93 en el plano de este esquema (Mechel, sec. D.5,
+Ec. 1) y 0,67 y 0,94 en tres dimensiones (Ec. 2, la integral de Paris, en la
+forma cerrada de la Ec. 4), no 0,5 y 0,9, así que una sala rodeada de bordes
+como estos dos decae **más deprisa** de lo que sugiere su $\alpha$ nominal. La
+ganancia no llega al final de la escala: por encima de un $\alpha$ nominal de
+unos 0,96 en el plano, y de 0,95 en tres dimensiones, donde ningún plano de
+reacción local promedia más de 0,951, el valor en campo difuso vuelve a quedar
+por debajo del nominal. Un borde absorbe menos cuanto más oblicua es la
+incidencia solo cuando $Z \le \rho c$: el anecoico $Z = \rho c$ se lo lleva
+todo a incidencia normal, devuelve un tercio de la amplitud a 60° y promedia
+0,95 en el plano y 0,91 en tres dimensiones. La batería de tests sujeta el
+borde a $R(\theta)$ de 20° a 80°, dentro de 0,02.
 
 **Pérdidas volumétricas: el mapa `damping`.** `damping` es una tasa de caída
 de amplitud $\sigma$ por celda, en s⁻¹, aplicada a la vez a la presión y a

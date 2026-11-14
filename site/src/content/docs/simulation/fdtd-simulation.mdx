@@ -19,6 +19,14 @@ references:
     doi: "10.1201/9781315372150"
     note: "Section 3.5 places time-domain wave-based methods among the numerical approaches to the wave equation in enclosures, and chapter 3 gives the rigid-room normal modes used as the analytic oracle."
   - type: book
+    authors: ["Mechel, F. P. (Ed.)"]
+    year: 2008
+    title: "Formulas of acoustics"
+    edition: "2nd ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-76833-3"
+    note: "Section D.5: the absorption of a locally reacting plane at oblique incidence (the integrand of Eq. 6) and its diffuse-field averages in two and three dimensions (Eqs. 1, 2 and 4), which section 2 reads an impedance edge against."
+  - type: book
     authors: ["Williams, E. G."]
     year: 1999
     title: "Fourier acoustics: Sound radiation and nearfield acoustical holography"
@@ -333,9 +341,31 @@ conversion from a target normal-incidence absorption coefficient is two
 steps: the reflection magnitude is $|R| = \sqrt{1-\alpha}$, and for a real
 impedance $Z = \rho c\,(1+R)/(1-R)$, so $\alpha = 0.5$ needs
 $Z \approx 5.83\,\rho c$ and $\alpha = 0.9$ about $1.92\,\rho c$. The caveat
-comes with it: $R$ is exact only at normal incidence, so a locally reacting
-edge absorbs less as the incidence gets more oblique and a room bounded by
-such edges decays more slowly than its nominal $\alpha$ suggests.
+comes with it: that $R$ is the reflection at normal incidence only. The edge
+ties the pressure on the wall face to the normal velocity there,
+$p = Z v_n$ (Eq. 4.34), whatever direction the wave arrives from, which makes
+it a locally reacting plane. At an angle $\theta$ from the normal such a plane
+reflects $R(\theta) = (Z\cos\theta - \rho c)/(Z\cos\theta + \rho c)$ and
+absorbs $\alpha(\theta) = 4z\cos\theta/(1 + z\cos\theta)^2$, with
+$z = Z/\rho c$ (Mechel, Sect. D.5). For $Z > \rho c$, which every target
+below $\alpha = 1$ gives, the absorption **rises** with obliquity. It is total
+where $\cos\theta = \rho c/Z$ (80.1° for $5.83\,\rho c$, 58.7° for
+$1.92\,\rho c$), where the reflection changes sign; it stays above its
+normal-incidence value up to $\cos\theta = (\rho c/Z)^2$ (88.3° and 74.3°),
+and it falls to zero only in the last degrees before grazing. Averaged over
+the directions of a diffuse field, those two edges absorb 0.61 and 0.93 in
+the plane of this solver (Mechel, Sect. D.5, Eq. 1) and 0.67 and 0.94 in
+three dimensions (Eq. 2, the Paris integral, in the closed form of Eq. 4),
+not 0.5 and 0.9, so a room bounded by edges like these two decays **faster**
+than its nominal $\alpha$ suggests. The gain does not reach the top of the
+scale: above a nominal $\alpha$ of about 0.96 in the plane, and 0.95 in three
+dimensions, where no locally reacting plane averages more than 0.951, the
+diffuse-field value falls below the nominal one again.
+An edge absorbs less as the incidence gets more oblique only when
+$Z \le \rho c$: the anechoic $Z = \rho c$ takes everything at normal
+incidence, sends back a third of the amplitude at 60°, and averages 0.95 in
+the plane and 0.91 in three dimensions. The test suite holds the edge to
+$R(\theta)$ from 20° to 80°, within 0.02.
 
 **Volumetric loss: the `damping` map.** `damping` is a per-cell amplitude
 decay rate $\sigma$ in s⁻¹, applied to the pressure and to both velocity

@@ -4,8 +4,9 @@
 The tests that time a reader hand the helper only readers that pass, so a
 change that let quadratic work through, read a coarse clock one call at a
 time, read one size every time before the other, kept a reading other
-processes lengthened or left the garbage collector off would pass them all.
-These tests hand it work whose cost they set, timed on a clock they drive:
+processes lengthened, let a stretch of other work that lands in each reading
+of one size make most of it, or left the garbage collector off would pass them
+all. These tests hand it work whose cost they set, timed on a clock they drive:
 :class:`_Clock` stands in for the CPU time of the process, each call of
 :class:`_Work` moves it on by what its input costs, and it reads in steps, as
 the system's clock does. Every cost and every step is a power of two, so every
@@ -37,6 +38,8 @@ _COARSE_STEP_S = 2.0**-6
 _FINE_STEP_S = 2.0**-20
 #: What a call over the smaller input costs, about a millisecond [s].
 _COST_S = 2.0**-10
+#: How many calls over the smaller input span a reading on a fine clock.
+_CALLS = int(time_growth._READING_SPAN_S / _COST_S)
 #: The size of the smaller input.
 _SIZE = 16
 #: The size of the larger input.
@@ -107,6 +110,14 @@ def _as_built(size: int) -> int:
     return size
 
 
+def _run_of_calls(run: int, calls: int) -> range:
+    """The places among the calls over one size, from 0, of its run *run* of
+    *calls* calls: run 0 counts how many calls make a reading, and each run
+    after it is a reading.
+    """
+    return range(run * calls, (run + 1) * calls)
+
+
 def _spin(seconds: float) -> None:
     """Keep the calling thread at work until it has taken *seconds* of CPU time."""
     start = time.thread_time()
@@ -142,13 +153,13 @@ def test_growth_under_the_bound_passes_and_hands_back_what_was_read(
     """Linear work and work that does not grow pass, and so does work that grows
     just under the bound: 22.5 times against 8 ** 1.5 = 22.63, and 2.75 times
     against 8 ** 0.5 = 2.83. What is handed back is what the last call over the
-    larger input returned, the fifth.
+    larger input returned.
     """
     clock = _clock(monkeypatch, _FINE_STEP_S)
     work = _Work(clock, {_SIZE: _COST_S, _LARGE: ratio * _COST_S})
     growth = assertion(_as_built, work, _SIZE)
     assert (growth.size, growth.factor) == (_SIZE, time_growth.FACTOR)
-    assert growth.result == (_LARGE, time_growth.REPEATS - 1)
+    assert growth.result == (_LARGE, work.calls[_LARGE] - 1)
     assert (growth.small_s, growth.large_s) == (_COST_S, ratio * _COST_S)
     assert growth.ratio == ratio
 
@@ -238,17 +249,20 @@ def test_the_factor_and_the_repeats_a_test_asks_for_are_the_ones_read(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """A test that asks for an input four times as large, read three times, has
-    the larger input built four times as large, each size read three times, and
-    its growth held under 4 ** 1.5 = 8 or 4 ** 0.5 = 2: work that grows as the
-    bound allows passes, and work that grows just past it fails, where it would
-    pass under the bounds of a factor of 8.
+    the larger input built four times as large, each size counted once and read
+    three times, and its growth held under 4 ** 1.5 = 8 or 4 ** 0.5 = 2: work
+    that grows as the bound allows passes, and work that grows just past it
+    fails, where it would pass under the bounds of a factor of 8.
     """
     clock = _clock(monkeypatch, _FINE_STEP_S)
     larger = 4 * _SIZE
     work = _Work(clock, {_SIZE: _COST_S, larger: growing * _COST_S})
     growth = assertion(_as_built, work, _SIZE, factor=4, repeats=3)
     assert (growth.size, growth.factor, growth.ratio) == (_SIZE, 4, growing)
-    assert work.calls == {_SIZE: 1 + 3, larger: 3}
+    assert work.calls == {
+        _SIZE: _CALLS * (1 + 3),
+        larger: int(_CALLS / growing) * (1 + 3),
+    }
     work = _Work(clock, {_SIZE: _COST_S, larger: past * _COST_S})
     with pytest.raises(pytest.fail.Exception, match=f"^{re.escape(said)}$"):
         assertion(_as_built, work, _SIZE, factor=4, repeats=3)
@@ -261,13 +275,17 @@ def test_the_shortest_reading_of_each_size_is_kept(
     five readings of each size four times as long, as other processes would make
     them, the helper still sees what the work costs, and linear work passes.
 
-    On a fine clock the first call over the smaller input counts how many calls
-    make a reading, and its five readings are the calls after it; the larger
-    input is not counted, so its readings are its first five calls.
+    On a fine clock the first calls over each size, as many as span a reading,
+    count how many make one, and its five readings are the calls after them:
+    the second, third, fifth and sixth run of calls are lengthened, the fourth
+    is not.
     """
     clock = _clock(monkeypatch, _FINE_STEP_S)
-    lengthened = {(_SIZE, place): 3 * _COST_S for place in (1, 2, 4, 5)} | {
-        (_LARGE, place): 3 * _LINEAR_S[_LARGE] for place in (0, 1, 3, 4)
+    lengthened = {
+        (size, place): 3 * cost_s
+        for size, cost_s in _LINEAR_S.items()
+        for run in (1, 2, 4, 5)
+        for place in _run_of_calls(run, int(time_growth._READING_SPAN_S / cost_s))
     }
     work = _Work(clock, _LINEAR_S, extra_s=lengthened)
     growth = time_growth.assert_linear_time(_as_built, work, _SIZE)
@@ -279,7 +297,7 @@ def test_a_load_that_starts_partway_lengthens_both_sizes_alike(
 ) -> None:
     """The two sizes are read in turn, so a load that starts partway through the
     readings and stays lengthens the readings of both alike. Here it starts after
-    the third call, the untimed first one and a reading of each size, and makes
+    the untimed calls that count each size and a reading of each size, and makes
     every call after it four times as long: one short reading of each is left,
     and linear work passes. Were all the readings of one size taken before those
     of the other, the larger input would read as 32 times as long as the smaller
@@ -287,10 +305,11 @@ def test_a_load_that_starts_partway_lengthens_both_sizes_alike(
     """
     clock = _clock(monkeypatch, _FINE_STEP_S)
     sizes_read: list[int] = []
+    unloaded = 2 * (_CALLS + _CALLS // time_growth.FACTOR)
 
     def loaded(size: int) -> int:
         sizes_read.append(size)
-        clock.now_s += (4.0 if len(sizes_read) > 3 else 1.0) * _LINEAR_S[size]
+        clock.now_s += (4.0 if len(sizes_read) > unloaded else 1.0) * _LINEAR_S[size]
         return size
 
     growth = time_growth.assert_linear_time(_as_built, loaded, _SIZE)
@@ -301,11 +320,12 @@ def test_on_a_coarse_clock_a_reading_calls_the_work_over_ten_steps(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Read one call at a time, a call of a millisecond on a clock that counts in
-    steps of 15.6 ms reads as no time or as a whole step. A call over the smaller
-    input is a sixteenth of a step, so ten steps take 160 calls, and one over the
-    larger input half a step, so they take 20: each size is counted once, then
-    read five times, and each reading is the time of one call. What is handed
-    back is what the last of the 120 calls over the larger input returned.
+    steps of 15.6 ms reads as no time or as a whole step. Ten steps are longer
+    than the 1/64 s a reading spans at least, so they make a reading: a call over
+    the smaller input is a sixteenth of a step, so ten steps take 160 calls, and
+    one over the larger input half a step, so they take 20; each size is counted
+    once, then read five times, and each reading is the time of one call. What is
+    handed back is what the last of the 120 calls over the larger input returned.
     """
     clock = _clock(monkeypatch, _COARSE_STEP_S)
     work = _Work(clock, _LINEAR_S)
@@ -316,16 +336,61 @@ def test_on_a_coarse_clock_a_reading_calls_the_work_over_ten_steps(
     assert growth.result == (_LARGE, 20 * readings - 1)
 
 
-def test_on_a_fine_clock_one_call_is_a_reading(
+def test_on_a_fine_clock_a_reading_calls_the_work_over_a_sixty_fourth_of_a_second(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Where one call over the smaller input spans the ten steps, one call is a
-    reading, and the larger input, which takes no less, is not counted at all.
+    """Ten steps of a clock that counts in microseconds span a hundredth of a
+    call of a millisecond, so a reading spans the 1/64 s it spans at least: 16
+    calls over the smaller input, whose call takes 1/1024 s, and 2 over the
+    larger, whose call takes 1/128 s, each size counted once, then read five
+    times, and each reading the time of one call.
     """
     clock = _clock(monkeypatch, _FINE_STEP_S)
     work = _Work(clock, _LINEAR_S)
-    time_growth.measure_growth(_as_built, work, _SIZE)
+    growth = time_growth.measure_growth(_as_built, work, _SIZE)
+    assert (growth.small_s, growth.large_s) == (_COST_S, _LINEAR_S[_LARGE])
+    readings = 1 + time_growth.REPEATS
+    assert work.calls == {_SIZE: 16 * readings, _LARGE: 2 * readings}
+
+
+def test_a_call_that_spans_a_reading_alone_is_a_reading(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Where one call over the smaller input spans 1/64 s, one call is a reading,
+    and the larger input, which takes no less, is not counted at all.
+    """
+    clock = _clock(monkeypatch, _FINE_STEP_S)
+    costs_s = {_SIZE: time_growth._READING_SPAN_S, _LARGE: 2.0**-3}
+    work = _Work(clock, costs_s)
+    growth = time_growth.measure_growth(_as_built, work, _SIZE)
+    assert (growth.small_s, growth.large_s) == (costs_s[_SIZE], costs_s[_LARGE])
     assert work.calls == {_SIZE: 1 + time_growth.REPEATS, _LARGE: time_growth.REPEATS}
+
+
+def test_a_burst_of_other_work_in_each_reading_of_one_size_is_a_fraction_of_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A stretch of other work, or of slower running, that lands in every reading
+    of the larger input and in none of the smaller lengthens each by what it
+    costs, whatever the size: a refusal of a millisecond that does not grow,
+    with a burst of two milliseconds in the first call over the larger input
+    after each run of calls over the smaller, reads 3 times as long one call at
+    a time, past the bound of 8 ** 0.5 = 2.83. A reading spans 1/64 s: the
+    burst and 13 calls of a millisecond after it span it, so each reading of
+    the larger input is 14 calls in 16 ms, and the work passes, read 8/7 times
+    as long.
+    """
+    clock = _clock(monkeypatch, _FINE_STEP_S)
+    sizes_read: list[int] = []
+
+    def bursting(size: int) -> int:
+        burst = size == _LARGE and sizes_read[-1:] != [_LARGE]
+        sizes_read.append(size)
+        clock.now_s += _COST_S + (2 * _COST_S if burst else 0.0)
+        return size
+
+    growth = time_growth.assert_time_does_not_grow(_as_built, bursting, _SIZE)
+    assert (growth.small_s, growth.large_s) == (_COST_S, 16 * _COST_S / 14)
 
 
 def test_neither_the_build_nor_the_first_call_is_charged_to_a_reading(

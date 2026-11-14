@@ -15,6 +15,7 @@ import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import Video from '../../../../components/Video.astro';
 
 Part 1 of DIN 4150 is the first question of the series. Before a quarry is
 blasted, a chimney felled, a pile driven or a line built, someone has to
@@ -96,6 +97,30 @@ ax.legend()
 ```
 
 </details>
+
+The decay law starts from the surface wave because, as the standard says
+under Formula (1), the vibration of a source near the surface travels
+predominantly along the ground surface, as a Rayleigh wave. The animation
+shows it on the half-space of the elastic solver: a hit on the free surface
+sends a compressional and a shear front down into the body, and along the
+surface the train that follows them is the strongest motion and the last to
+pass.
+
+<Video
+  name="anim_elastic_halfspace_waves"
+  width={2400}
+  height={1350}
+  title="Lamb's problem with a free and with a rigid top surface"
+  description="A vertical hit on an aluminium half-space sends out a compressional front and a slower shear front, both drawn with dotted arcs at their exact analytic radii that stay locked to them as they expand and leave the frame. On the free-surface panel a train of strong lobes runs along the surface a step behind the shear front, the strongest motion in the frame once clear of the impact, until it leaves through the sides, and the two probe traces beside it separate by the Rayleigh time of flight. The clip runs on until both body fronts have left the frame. On the rigid-surface panel the same two fronts appear and no surface train follows them."
+/>
+
+*Along the surface the Rayleigh train comes after the two body fronts and
+carries the strongest motion. It is the wave in whose wavelengths Formula (1)
+measures the near field, and the one Figure 1 of DIN 4150-1:2001-06 starts
+from. The half-space of the clip is
+aluminium, not soil: it is the clip of the
+[elastic waves guide](/phonometry/simulation/elastic-waves/), and it shows the
+kinds of wave, not a decay to read numbers from.*
 
 The damping alone is worth drawing, and Figure 2 draws it for a damping
 ratio of 0,01 and a wave speed of 200 m/s: over 100 m the ground takes
@@ -291,6 +316,9 @@ distance.
   what the predicted numbers are judged against.
 - [Vibration next to a railway (DIN 45672)](/phonometry/vibration/immission/railway-vibration/):
   the wave speeds of the ground that the wavelength here comes from.
+- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+  the solver behind the animation of section 1, and Lamb's problem with a
+  free and with a rigid surface.
 - API reference:
   [`vibration.immission.prediction`](/phonometry/reference/api/vibration/prediction/).
 

@@ -1298,6 +1298,54 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ambas salas en ISO 16283-1 y el punto de entrada aéreo ofrece ambas.
 - **Estado:** sin notificar.
 
+## ISO 16283-1:2014, apartado 7.5.3 (una hélice que termina «no more than 0,5 m from the ceiling»)
+
+- **Ubicación:** apartado 7.5.3 «Helix», primer párrafo (p. 10 impresa).
+- **El impreso:** «The operator holds the microphone or sound level meter with
+  outstretched arm at a starting position that is 0,5 m above the floor then
+  rotates the body at least twice through 360° from a crouched to a standing
+  position, finishing with the microphone at a position that is **no more
+  than** 0,5 m from the ceiling.»
+- **El problema:** la frase fija un máximo donde el mismo documento fija un
+  mínimo. El apartado 7.6 enumera «0,5 m between any microphone position and
+  the room boundaries» entre unas distancias de separación que «are minimum
+  values and shall be exceeded where possible», y el techo es un límite del
+  recinto. Leídas juntas, las dos dejan al final de la hélice una sola altura,
+  exactamente 0,5 m bajo el techo, que es la altura que el apartado 7.6 pide
+  superar. La trayectoria impresa a continuación no lleva ese conflicto: la de
+  tipo cilíndrico del apartado 7.5.4 sube «until the microphone is 0,5 m from
+  the ceiling», una distancia sin dirección, como lo es el «0,5 m above the
+  floor» del que parte la propia hélice. ISO 16283-2 llevó la misma frase (su
+  primera edición, en la traducción española UNE-EN ISO 16283-2:2016, dice
+  «en una posición no más alejada de 0,5 m del techo») hasta su tercera
+  edición, cuyo apartado 7.5.5 imprime «at a position that is **at least**
+  0,5 m from the ceiling» y cuyo prólogo enumera, entre los cambios
+  principales respecto a la edición anterior, «in the helical path (7.5.5)
+  distance of the microphone position to the ceiling changed to minimum
+  0,5 m». La frase se corrigió, pues, en la parte de impactos y se dejó en pie
+  en la Parte 1, y en la Parte 3: el apartado 7.2.3.3 de ISO 16283-3:2016
+  también imprime «no more than 0,5 m from the ceiling». La lectura
+  pretendida es la que ISO 16283-2:2020 imprime ahora: la hélice termina a
+  0,5 m del techo como mínimo, como el apartado 7.6 exige de toda posición de
+  micrófono.
+- **Evidencia:** una comparación de frases, cada una leída en su página: el
+  apartado 7.5.3 en la página 16 del PDF (p. 10 impresa) y el apartado 7.6 en
+  la página 18 del PDF (p. 12 impresa) de ISO 16283-1:2014, el primero
+  idéntico en la página 18 del PDF (p. 10 impresa) de BS EN ISO 16283-1:2014;
+  el apartado 7.5.5 en la página 16 del PDF (p. 10 impresa) y el prólogo en
+  la página 5 del PDF (p. v impresa) de ISO 16283-2:2020; el apartado 7.5.5
+  en la página 18 del PDF (p. 18 impresa) de UNE-EN ISO 16283-2:2016; y el
+  apartado 7.2.3.3 en la página 18 del PDF (p. 12 impresa) de
+  ISO 16283-3:2016. No se dispuso de ISO 16283-1:2014/Amd 1:2017, así que la
+  entrada describe el texto de 2014 y no dice nada del modificado.
+- **Comportamiento de la biblioteca:** no hizo falta ningún cambio: la
+  biblioteca calcula a partir de niveles por banda y no comprueba ninguna
+  posición de micrófono. La guía de aislamiento in situ cita las dos
+  redacciones con sus apartados y ediciones, y su dibujo de las cuatro
+  trayectorias de barrido acota el final de la hélice como 0,5 m del techo y
+  escribe las dos redacciones a su lado.
+- **Estado:** sin notificar.
+
 ## ISO 16283-2:2020, apartado 8.3 (una sala emisora en una medición de impacto)
 
 - **Ubicación:** apartado 8.3 «Microphone positions», último párrafo (p. 15

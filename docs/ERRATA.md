@@ -1206,6 +1206,51 @@ in the same order.
   ISO 16283-1 and the airborne entry point offers both.
 - **Status:** unreported.
 
+## ISO 16283-1:2014, Clause 7.5.3 (a helix that ends "no more than 0,5 m from the ceiling")
+
+- **Location:** Clause 7.5.3 "Helix", first paragraph (printed p. 10).
+- **The print:** "The operator holds the microphone or sound level meter with
+  outstretched arm at a starting position that is 0,5 m above the floor then
+  rotates the body at least twice through 360° from a crouched to a standing
+  position, finishing with the microphone at a position that is **no more
+  than** 0,5 m from the ceiling."
+- **The problem:** the sentence sets a maximum where the same document sets a
+  minimum. Clause 7.6 lists "0,5 m between any microphone position and the
+  room boundaries" among separation distances that "are minimum values and
+  shall be exceeded where possible", and the ceiling is a room boundary. Read
+  together, the two leave the end of the helix one height only, exactly 0.5 m
+  below the ceiling, which is the height Clause 7.6 asks to exceed. The path
+  printed after it carries no such conflict: the cylindrical-type path of
+  Clause 7.5.4 rises "until the microphone is 0,5 m from the ceiling", a
+  distance with no direction, as is the "0,5 m above the floor" the helix
+  itself starts from. ISO 16283-2 carried the same sentence (its first
+  edition, in the Spanish translation UNE-EN ISO 16283-2:2016, reads "en una
+  posición no más alejada de 0,5 m del techo") until its third edition, whose
+  Clause 7.5.5 prints "at a position that is **at least** 0,5 m from the
+  ceiling" and whose foreword lists, among the main changes compared to the
+  previous edition, "in the helical path (7.5.5) distance of the microphone
+  position to the ceiling changed to minimum 0,5 m". The sentence was
+  therefore corrected in the impact part and left standing in Part 1, and in
+  Part 3: Clause 7.2.3.3 of ISO 16283-3:2016 prints "no more than 0,5 m from
+  the ceiling" too. The intended reading is the one ISO 16283-2:2020 now
+  prints: the helix ends at least 0.5 m from the ceiling, as Clause 7.6
+  requires of every microphone position.
+- **Evidence:** a comparison of sentences, each read on its page: Clause 7.5.3
+  on PDF page 16 (printed p. 10) and Clause 7.6 on PDF page 18 (printed p. 12)
+  of ISO 16283-1:2014, the former identical on PDF page 18 (printed p. 10) of
+  BS EN ISO 16283-1:2014; Clause 7.5.5 on PDF page 16 (printed p. 10) and the
+  foreword on PDF page 5 (printed p. v) of ISO 16283-2:2020; Clause 7.5.5 on
+  PDF page 18 (printed p. 18) of UNE-EN ISO 16283-2:2016; and Clause 7.2.3.3
+  on PDF page 18 (printed p. 12) of ISO 16283-3:2016. ISO 16283-1:2014/Amd
+  1:2017 was not at hand, so the entry describes the 2014 text and says
+  nothing of the amended one.
+- **Library behaviour:** no change was required: the library computes from
+  band levels and checks no microphone position. The field insulation guide
+  quotes both wordings with their clauses and editions, and its drawing of the
+  four scanning paths dimensions the end of the helix as 0.5 m from the
+  ceiling and writes the two wordings beside it.
+- **Status:** unreported.
+
 ## ISO 16283-2:2020, Clause 8.3 (a source room in an impact measurement)
 
 - **Location:** Clause 8.3 "Microphone positions", last paragraph (printed p.

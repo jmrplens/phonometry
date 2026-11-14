@@ -110,14 +110,21 @@ _ES: dict[str, str] = {
     # ISO 9613-2 ground regions (environment/propagation/outdoor-propagation).
     "ISO 9613-2 ground regions and the ground factor G": "Regiones de suelo y factor de suelo G (ISO 9613-2)",
     "$G$ is the porous fraction of its region": "$G$ es la fracción porosa de su región",
+    # The worked numbers of the same plate, with the decimal comma of the
+    # Spanish plates.
+    "$h_s$ = 1.5 m": "$h_s$ = 1,5 m",
+    "$h_r$ = 1.5 m": "$h_r$ = 1,5 m",
+    "$G_s = 25/45$ = 0.56": "$G_s = 25/45$ = 0,56",
+    "$G_m = 70/110$ = 0.64   $G_r$ = 1.00": "$G_m = 70/110$ = 0,64   $G_r$ = 1,00",
+    "$q = 1 − 30(h_s + h_r)/d_p$ = 0.55": "$q = 1 − 30(h_s + h_r)/d_p$ = 0,55",
     "grass, $G = 1$": "hierba, $G = 1$",
     "asphalt, $G = 0$": "asfalto, $G = 0$",
     "source region": "región de la fuente",
     "$30 h_s$ = 45 m": "$30 h_s$ = 45 m",
-    "middle region  110 m": "región intermedia  110 m",
+    "middle region  110 m": "región media  110 m",
     "receiver region": "región del receptor",
     "$30 h_r$ = 45 m": "$30 h_r$ = 45 m",
-    "$d_p$ = 60 m: the regions overlap, so there is no middle region": "$d_p$ = 60 m: las regiones se solapan y no hay región intermedia",
+    "$d_p$ = 60 m: the regions overlap, so there is no middle region": "$d_p$ = 60 m: las regiones se solapan y no hay región media",
     "below $30(h_s + h_r)$ = 90 m: $q = 0$, $A_m = 0$": "bajo $30(h_s + h_r)$ = 90 m: $q = 0$, $A_m = 0$",
     "and ground_middle is ignored entirely": "y ground_middle se ignora por completo",
     # EN 1793-5 set-up (environment/propagation/barrier-reflection).

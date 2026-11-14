@@ -794,7 +794,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.circle(x0, gy - hs, 9, th.secondary)
     s.line(x0, gy - hs, x0, gy, th.fg, 2.0)
     s.text(x0 + 12, gy - hs - 40, "Source", 17, th.fg, anchor="start", bold=True)
-    s.text(x0 + 12, gy - hs - 18, "$h_s$ = 1,5 m", 15, th.muted, anchor="start")
+    s.text(x0 + 12, gy - hs - 18, "$h_s$ = 1.5 m", 15, th.muted, anchor="start")
     s.mic(x1, gy - hs, gy, 1.0)
     s.text(x1 - 12, gy - hs - 40, "Receiver", 17, th.fg, anchor="end", bold=True)
     # The r of the receiver and the p of the projected distance d_p are
@@ -803,7 +803,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.text(
         x1 - 12,
         gy - hs - 18,
-        "$h_r$ = 1,5 m",
+        "$h_r$ = 1.5 m",
         15,
         th.muted,
         anchor="end",
@@ -857,11 +857,11 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
-    s.text(84.0, by + 54, "$G_s = 25/45$ = 0,55", 15, th.fg, anchor="start")
+    s.text(84.0, by + 54, "$G_s = 25/45$ = 0.56", 15, th.fg, anchor="start")
     s.text(
         84.0,
         by + 78,
-        "$G_m = 70/110$ = 0,64   $G_r$ = 1,00",
+        "$G_m = 70/110$ = 0.64   $G_r$ = 1.00",
         15,
         th.fg,
         anchor="start",
@@ -872,7 +872,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
     s.text(
         484.0,
         by + 28,
-        "$q = 1 − 30(h_s + h_r)/d_p$ = 0,55",
+        "$q = 1 − 30(h_s + h_r)/d_p$ = 0.55",
         16,
         th.fg,
         anchor="start",

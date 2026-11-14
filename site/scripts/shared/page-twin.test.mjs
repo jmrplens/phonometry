@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  catalogueItem,
   copyDefects,
   figureMarkdown,
   frontmatterSource,
@@ -19,7 +20,9 @@ import {
   referencesMarkdown,
   stripFrontmatter,
   stripMdx,
+  titleMarkdown,
 } from './page-twin.mjs';
+import { printed } from './markdown-reader.mjs';
 
 const FENCE = '```';
 
@@ -207,6 +210,73 @@ test('a clip and a fiche are a line: the title linked to what this site serves, 
   assert.throws(() => figureMarkdown('<ThemeImage src="x.svg" />', { lang: 'en', base: BASE }), /without its src or its alt/);
 });
 
+// The text a page prints as it is, written into the copy's Markdown. The
+// Spanish seat-vibration guide gives a figure the alt `... a*wS = SEAT por
+// a*wP.`, and a Markdown reader took the text between the two asterisks for
+// emphasis and printed `awS = SEAT por awP`, a different formula. Each piece is
+// read back by the site's own Markdown pipeline (shared/markdown-reader.mjs),
+// never compared with the string the writer meant to write.
+
+/** Every inline mark in one text, as a page may print it. */
+const MARKED = 'a*wS = SEAT por a*wP, a*_wS, _b_ and __c__, `d`, $e$, ~~f~~, ~2 dB, [0, 1], 20 lg|H|, <g>, <https://x.y>, a\\b, n_1 and n_2';
+
+/** Text that opens a block when it opens a line, as a caption or a note may. */
+const OPENERS = ['# Not a heading', '> Not a quotation', '- Not a list', '+ Not a list', '1. Not a list', '2) Not a list', '--- not a rule'];
+
+test("a figure's alt prints as the page prints it, whatever marks it holds", async () => {
+  for (const lang of ['en', 'es']) {
+    const tag = `<ThemeImage src="x.svg" alt="${MARKED}" width="94%" />`;
+    const { alts, text } = await printed(figureMarkdown(tag, { lang, base: BASE }));
+    assert.deepEqual(alts, [MARKED], lang);
+    assert.equal(text, '', lang);
+  }
+  // MDX reads a character reference in an attribute as Markdown reads it, so
+  // it prints as the page prints it, decoded once.
+  const reference = await printed(figureMarkdown('<ThemeImage src="x.svg" alt="A &amp; B, &#916;L" />', { lang: 'en', base: BASE }));
+  assert.deepEqual(reference.alts, ['A & B, ΔL']);
+  // The narrow no-break space that groups the digits of a number stays one:
+  // the copy read every white space as one plain space.
+  const grouped = await printed(figureMarkdown('<ThemeImage src="x.svg" alt="15\u202f000 m, 1,186\u202f084 kg" />', { lang: 'es', base: BASE }));
+  assert.deepEqual(grouped.alts, ['15\u202f000 m, 1,186\u202f084 kg']);
+});
+
+test("a clip's and a fiche's title, description and caption print as the page prints them", async () => {
+  for (const [component, lead] of [['Video', 'Video'], ['ReportPreview', 'Report']]) {
+    const tag = `<${component} name="n" title="${MARKED}" description="${MARKED}" caption="${MARKED}" />`;
+    const { text, html } = await printed(figureMarkdown(tag, { lang: 'en', base: BASE }));
+    assert.equal(text, `${lead}: ${MARKED}: ${MARKED} ${MARKED}`, component);
+    assert.equal((html.match(/<p>/g) ?? []).length, 2, `${component}: the line and the caption, each a paragraph`);
+    for (const opener of OPENERS) {
+      const block = await printed(figureMarkdown(`<${component} name="n" title="T" description="D" caption="${opener}" />`, { lang: 'en', base: BASE }));
+      assert.equal(block.text, `${lead}: T: D ${opener}`, `${component}: ${opener}`);
+      assert.match(block.html, /^<p>[^]*<\/p>\n<p>[^]*<\/p>$/, `${component}: ${opener} stays a paragraph`);
+    }
+  }
+});
+
+test('a work in the References section prints its title and its note as the page prints them', async () => {
+  for (const note of [MARKED, ...OPENERS]) {
+    const work = { type: 'book', title: MARKED, authors: ['Doe, J.'], year: 2001, publisher: 'A &amp; B', note };
+    const markdown = referencesMarkdown([work], 'en', 'References');
+    const { text, html } = await printed(markdown);
+    assert.equal(text, `References Doe, J. (2001). ${MARKED}. A &amp; B. ${note}`, note);
+    assert.match(html, /^<h2\b[^>]*>References<\/h2>\n<ul>\n<li><strong>[^]*<\/li>\n<\/ul>$/, `${note}: one item, its note inside it`);
+    assert.doesNotMatch(html, /<(?:h1|blockquote|ol|hr)\b|<ul>[^]*<ul>/, `${note}: no block of its own`);
+  }
+});
+
+test("a page's title and a catalogue of the list of catalogues print as the page prints them", async () => {
+  for (const title of [MARKED, 'A &amp; B', 'Notes #', 'C# ##', '# Not two headings']) {
+    const { html, text } = await printed(titleMarkdown(title));
+    assert.equal(text, title, title);
+    assert.match(html, /^<h1\b[^]*<\/h1>$/, `${title}: one heading`);
+    assert.equal((html.match(/<h1\b/g) ?? []).length, 1, `${title}: one heading`);
+  }
+  const { text, html } = await printed(catalogueItem({ label: MARKED, url: `${BASE}/reference/catalogues/solids/`, description: `${MARKED} &amp;` }));
+  assert.equal(text, `${MARKED}: ${MARKED} &amp;`);
+  assert.match(html, /^<ul>\n<li><a href="[^"]+">[^]*<\/li>\n<\/ul>$/);
+});
+
 const REFERENCES = [
   {
     type: 'article',
@@ -285,6 +355,16 @@ test('a copy that misses its title, keeps a comment or a link from the root, pri
   }
   const offset = copyDefects(good.replace('import numpy as np\n', ''), { ...PAGE, firstLine: 5 });
   assert.ok(offset.some((line) => /lost line 10 of the page's code/.test(line)), JSON.stringify(offset));
+});
+
+test('a copy whose title holds a mark opens with the title when the mark is escaped, and is told so when it is not', () => {
+  const page = { ...PAGE, references: [], title: 'a*wS = SEAT por a*wP, Notes #' };
+  const copy = (first) => `${first}\n\n${stripMdx(SOURCE, { value, origin: ORIGIN })}`;
+  assert.deepEqual(copyDefects(copy(titleMarkdown(page.title)), page), []);
+  for (const first of ['# a*wS = SEAT por a*wP, Notes #', '# a\\*wS = SEAT por a\\*wP, Notes #', `# ${page.title} \\`]) {
+    const found = copyDefects(copy(first), page);
+    assert.ok(found.some((line) => /opens with .*not with the page's title/.test(line)), `${first}: ${JSON.stringify(found)}`);
+  }
 });
 
 // What the copy writes for a figure, a clip, a fiche and the list of

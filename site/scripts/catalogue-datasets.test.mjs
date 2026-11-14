@@ -423,6 +423,15 @@ test('plain text reads character references, line breaks, struck and nested mark
   assert.equal(plainText(['1\u202f250 Hz,', 'at\u00a0once.']), '1\u202f250 Hz, at\u00a0once.');
 });
 
+test('a backslash at the end of a line breaks it only outside a code span, where it is a character of the code', () => {
+  // CommonMark 0.31.2, 6.1 and 6.7: a code span holds its backslashes as
+  // written, and its line end is a space.
+  assert.equal(plainText(['Kept in `C:\\', 'tables` here.']), 'Kept in C:\\ tables here.');
+  assert.equal(plainText(['A ``span\\', 'of two`` and a break\\', 'after it.']), 'A span\\ of two and a break after it.');
+  // An escaped backslash before the line end is the backslash, and breaks nothing.
+  assert.equal(plainText(['Ends in \\\\', 'one.']), 'Ends in \\ one.');
+});
+
 // A paragraph is read once, left to right, as the page reads it: whichever of
 // a code or maths span, an escape, a comment, a tag and an expression opens
 // first takes what follows, so what a comment or a tag's attributes hold is

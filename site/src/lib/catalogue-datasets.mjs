@@ -133,6 +133,9 @@ const STRUCK = /(~{1,2})(\S(?:.*?\S)?)\1/g;
  */
 const UNREAD = /<[^<>]*>?|\{[^{}]*\}?|\}|&[A-Za-z][A-Za-z\d]*;/g;
 
+/** A backslash before a line end, which breaks the line where nothing else holds it. */
+const LINE_BREAK = /\\\n/g;
+
 /** The blanks a page's source runs together into one space between words. */
 const BLANKS = /[ \t\r\n]+/g;
 
@@ -159,9 +162,6 @@ function referenceOf(decimal, hexadecimal, name) {
     : '\ufffd';
 }
 
-/** Whether a line ends on a backslash that breaks it: one no other backslash escapes. */
-const breaksOnBackslash = (line) => /(?<!\\)(?:\\\\)*\\$/.test(line);
-
 /**
  * What the page shows of a run of inline text, and what in it the page shows
  * as something other than text.
@@ -177,9 +177,9 @@ const breaksOnBackslash = (line) => /(?<!\\)(?:\\\\)*\\$/.test(line);
  * Then each character reference (2.5) is the character it stands for; a tag
  * around text shows the text; a link and an image show their text; and
  * emphasis, strong emphasis and struck text show what they mark, read until
- * no mark is left. A backslash at the end of a line breaks the line, and the
- * blanks between words are one space. Unicode spaces the page shows, a
- * non-breaking one or a thin one, stay as written.
+ * no mark is left. A backslash at the end of a line breaks the line, unless a
+ * code span holds it, and the blanks between words are one space. Unicode
+ * spaces the page shows, a non-breaking one or a thin one, stay as written.
  *
  * Left as written, and named in `markup`: a formula, a tag that renders a
  * component of its own (`<Badge text="new" />`), an expression (`{x}`) and a
@@ -193,11 +193,10 @@ export function readInline(lines) {
   const markup = [];
   const hold = (shown) => String.fromCharCode(HELD + held.push(shown) - 1);
   // The parts are read with the line ends where the page writes them, so a
-  // line comment ends where its line does; the text around them reads each
-  // line end as the blank it is, at the same index.
-  const written = lines
-    .map((line, index) => (index < lines.length - 1 && breaksOnBackslash(line) ? line.slice(0, -1) : line))
-    .join('\n');
+  // line comment ends where its line does, and a code span keeps a backslash
+  // before its line end; what a part holds reads each line end as the blank
+  // it is, at the same index.
+  const written = lines.join('\n');
   const text = written.replaceAll('\n', ' ');
   let marked = '';
   let done = 0;
@@ -211,10 +210,15 @@ export function readInline(lines) {
       markup.push(part);
       shown = hold(part);
     }
-    marked += text.slice(done, start) + shown;
+    marked += written.slice(done, start) + shown;
     done = end;
   }
-  let read = (marked + text.slice(done))
+  // Outside every part, a backslash before a line end breaks the line
+  // (CommonMark 0.31.2, 6.7): one inside a code span is the code's, and one an
+  // escape takes is the backslash it shows, both held by now.
+  let read = (marked + written.slice(done))
+    .replace(LINE_BREAK, ' ')
+    .replaceAll('\n', ' ')
     .replace(REFERENCE, (reference, decimal, hexadecimal, name) => {
       const shown = referenceOf(decimal, hexadecimal, name);
       return shown === undefined ? reference : hold(shown);

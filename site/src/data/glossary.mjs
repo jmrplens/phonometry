@@ -2010,8 +2010,8 @@ export const glossary = [
         standard: "ISO 717-2:2020",
         guide: "buildings/insulation/insulation-ratings",
         definition: {
-          en: "Weighted impact sound pressure levels: the single-number ratings of the normalized and the standardized impact sound pressure levels, read at 500 Hz off a reference curve shifted toward the measured spectrum until the unfavourable deviations reach their allowed sum. Unlike the airborne ratings, an unfavourable deviation is one where the measurement exceeds the reference.",
-          es: "Niveles globales de presión acústica de impactos: los índices globales de los niveles de presión acústica de impactos normalizado y estandarizado, leídos en 500 Hz sobre una curva de referencia desplazada hacia el espectro medido hasta que las desviaciones desfavorables alcanzan su suma admisible. A diferencia de los índices a ruido aéreo, una desviación desfavorable es aquella en la que la medida supera a la referencia.",
+          en: "Weighted impact sound pressure levels: the single-number ratings of the normalized and the standardized impact sound pressure levels, read at 500 Hz off a reference curve shifted toward the measured spectrum until the unfavourable deviations reach their allowed sum. A field measurement in octave bands is rated 5 dB below that reading. Unlike the airborne ratings, an unfavourable deviation is one where the measurement exceeds the reference.",
+          es: "Niveles globales de presión acústica de impactos: los índices globales de los niveles de presión acústica de impactos normalizado y estandarizado, leídos en 500 Hz sobre una curva de referencia desplazada hacia el espectro medido hasta que las desviaciones desfavorables alcanzan su suma admisible. Una medición in situ en bandas de octava se valora con esa lectura disminuida en 5 dB. A diferencia de los índices a ruido aéreo, una desviación desfavorable es aquella en la que la medida supera a la referencia.",
         },
       },
       {
@@ -2028,8 +2028,8 @@ export const glossary = [
         },
         guide: "buildings/insulation/insulation-ratings",
         definition: {
-          en: "Impact spectrum adaptation term, from the energetic sum over 100 Hz to 2500 Hz. The enlarged-range $C_{\\mathrm{I},50\\text{–}2500}$ extends it down to 50 Hz.",
-          es: "Término de adaptación espectral de impactos, a partir de la suma energética entre 100 Hz y 2500 Hz. El término de rango ampliado $C_{\\mathrm{I},50\\text{–}2500}$ lo extiende hasta 50 Hz.",
+          en: "Impact spectrum adaptation term, from the energetic sum over the one-third-octave bands 100 Hz to 2500 Hz, or over the octave bands 125 Hz to 2000 Hz. The enlarged-range $C_{\\mathrm{I},50\\text{–}2500}$ extends it down to 50 Hz, and $C_{\\mathrm{I},63\\text{–}2000}$ down to the 63 Hz octave.",
+          es: "Término de adaptación espectral de impactos, a partir de la suma energética en las bandas de tercio de octava de 100 Hz a 2500 Hz, o en las bandas de octava de 125 Hz a 2000 Hz. El término de rango ampliado $C_{\\mathrm{I},50\\text{–}2500}$ lo extiende hasta 50 Hz, y $C_{\\mathrm{I},63\\text{–}2000}$ hasta la octava de 63 Hz.",
         },
       },
       {

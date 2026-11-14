@@ -166,8 +166,9 @@ MIN_BACKGROUND_MARGIN_DB: Mapping[Grade, float] = MappingProxyType(
 )
 
 #: Largest local environmental correction, in decibels, that still earns
-#: accuracy grade 2. Above it the result is grade 3 (ISO 11202:2010 A.1.3, and
-#: the same boundary reached through Condition (A.6) in A.2.5).
+#: accuracy grade 2. Above it the result is grade 3 (ISO 11202:2010 A.1.3).
+#: Method A.2 is stricter: Condition (A.6) adds the margin of A.2.5 to the
+#: right-hand side, and that margin is not applied here.
 GRADE_2_MAX_K3 = 4.0
 
 #: Cap on :math:`K_3`, in decibels, and the ratio it applies below
@@ -760,8 +761,11 @@ def grade_from_local_correction(local_correction: NumericArrayLike) -> Grade:
     ISO 11202:2010 A.1.3 puts the boundary at
     :data:`GRADE_2_MAX_K3`: a greatest possible :math:`K_3` of 4 dB or less
     is grade 2 (engineering), and more than that is grade 3 (survey). Method A.2
-    reaches the same boundary by a different road, Condition (A.6), which is
-    algebraically the same 4 dB once (A.4) and (A.5) are substituted into it.
+    is stricter: Condition (A.6) of A.2.5 adds a margin of 0.5 dB, 1 dB or
+    1.5 dB, by the largest dimension of the source, so that once (A.4) and (A.5)
+    are substituted it holds for :math:`K_3` up to about 3.3 dB, 2.8 dB or
+    2.4 dB. This function applies the 4 dB boundary of A.1.3 alone, and does not
+    apply that margin.
 
     The worst band decides, since a determination is only as good as its
     weakest part.

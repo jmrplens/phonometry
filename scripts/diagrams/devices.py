@@ -4853,6 +4853,34 @@ def _d_workstation_microphone(s: SVG, th: Theme) -> None:
         th.muted,
     )
 
+    # --- the background and the repetitions, by the same clauses ------------
+    top3, h3 = top2 + h2 + 76, 92.0
+    w3 = (900.0 - 2 * left - gap) / 2.0
+    for k, (title, lines) in enumerate(
+        (
+            (
+                "Background at the position (5.4)",
+                (
+                    "source off: at least 10 dB down (grade 1), 6 dB (grade 2)",
+                    "more than 15 dB down: $K_1$ = 0; closer: Equation (5)",
+                ),
+            ),
+            (
+                "Repeating a measurement (10.2.2)",
+                (
+                    "source off and on, microphone taken away and set again,",
+                    "same conditions; how many times: the noise test code",
+                ),
+            ),
+        )
+    ):
+        x = left + k * (w3 + gap)
+        s.rect(x, top3, w3, h3, th.panel, th.muted, rx=6, sw=1.4)
+        s.text(x + w3 / 2, top3 + 26, title, 13, th.fg, bold=True)
+        size = s.fit_size(lines, (12, 11, 10), w3 - 24)
+        for j, line in enumerate(lines):
+            s.text(x + w3 / 2, top3 + 52 + 20 * j, line, size, th.muted)
+
 
 def _d_in_duct_rig(s: SVG, th: Theme) -> None:
     """The ISO 5136 test arrangement of Figure 5: one fan, a test duct each side.

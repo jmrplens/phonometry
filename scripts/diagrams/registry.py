@@ -1197,7 +1197,7 @@ DIAGRAMS = {
     "diagram_workstation_microphone": (
         _d_workstation_microphone,
         "Where the microphone goes at a work station (ISO 11201 Clause 9)",
-        600,
+        710,
     ),
     "diagram_in_duct_rig": (
         _d_in_duct_rig,

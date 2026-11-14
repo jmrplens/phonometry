@@ -3593,6 +3593,12 @@ _ES: dict[str, str] = {
     # Where the microphone goes at a work station (devices/emission/
     # workstation-emission): the five cases of ISO 11201 Clause 9.
     "Where the microphone goes at a work station (ISO 11201 Clause 9)": "Dónde va el micrófono en un puesto de trabajo (ISO 11201, capítulo 9)",
+    "Background at the position (5.4)": "Fondo en la posición (5.4)",
+    "source off: at least 10 dB down (grade 1), 6 dB (grade 2)": "fuente parada: al menos 10 dB por debajo (grado 1), 6 dB (grado 2)",
+    "more than 15 dB down: $K_1$ = 0; closer: Equation (5)": "más de 15 dB por debajo: $K_1$ = 0; más cerca: Ecuación (5)",
+    "Repeating a measurement (10.2.2)": "Repetir una medición (10.2.2)",
+    "source off and on, microphone taken away and set again,": "fuente parada y arrancada, micrófono retirado y repuesto,",
+    "same conditions; how many times: the noise test code": "mismas condiciones; cuántas veces: el código de ensayo de ruido",
     "The emission level belongs to a position, and this is the position": "El nivel de emisión es de una posición, y esta es la posición",
     "Operator present": "Con operador presente",
     "centre plane": "plano central",

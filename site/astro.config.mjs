@@ -17,6 +17,7 @@ import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
 import { packagesNotListedIn } from './src/lib/bundled-packages.mjs';
 import { basePath, siteUrl } from './src/data/site.mjs';
+import { isoDay } from './src/lib/date-rules.mjs';
 import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
 import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
@@ -190,21 +191,44 @@ const socialImage = {
 // Single-sourced version: read from the package, never duplicated here.
 const version = readFileSync(new URL('../VERSION', import.meta.url), 'utf8').trim();
 
-// Freshness signals for the SoftwareApplication node. `datePublished` is the
-// first public release (v1.0.0) and is intentionally fixed. To avoid stamping
-// a false "modified today" on every rebuild, `dateModified` tracks the last
-// repository change (HEAD commit date), falling back to build time only when
-// git history is unavailable.
-const datePublished = '2026-01-06';
-const dateModified = (() => {
-  try {
-    return execFileSync('git', ['log', '-1', '--format=%cI'], { encoding: 'utf8' })
-      .trim()
-      .slice(0, 10);
-  } catch {
-    return new Date().toISOString().slice(0, 10);
+// The software's history, for the SoftwareApplication node. `dateCreated` is
+// the repository's first commit, in June 2020, when the code was published as
+// PyOctave, a name that became PyOctaveBand that July. `datePublished` is the
+// first release, v1.0.0 on GitHub on 2026-01-06, the day PyOctaveBand 1.0.1
+// reached PyPI, and is fixed. `dateModified` is the last commit that changed
+// the library itself, under src/. It used to be the commit at HEAD, so a
+// dependency bump of this site announced a new library.
+//
+// A commit's date is the UTC day of its timestamp, the day every page of this
+// site is dated by, not the day the committer's clock wrote: the first commit
+// was made at one in the morning two hours ahead of UTC, on the 29th by that
+// clock and the 28th in UTC. The src/ path is absolute because git reads a
+// pathspec from the directory it runs in, and the build runs in site/, whose
+// own src/ is this site's source. There is no fallback date: a build with no
+// git history at all stops here rather than publish one it made up. A shallow
+// clone still names commits, the oldest one it fetched among them, and would
+// date the software from them; that build is caught by
+// check-structured-data.mjs, which refuses a shallow clone, reads the same
+// commits to hold the built pages to them, and runs before the site deploys.
+const commitDay = (args, what) => {
+  const printed = execFileSync('git', ['log', '--format=%ct', ...args], { encoding: 'utf8' })
+    .trim()
+    .split('\n')
+    .at(-1);
+  if (!/^\d+$/.test(printed ?? '')) {
+    throw new Error(
+      `[dates] git names no commit for ${what}, so the software's history is unknown. ` +
+        'The build needs the repository history (a checkout with fetch-depth 0).',
+    );
   }
-})();
+  return isoDay(new Date(Number(printed) * 1000));
+};
+const dateCreated = commitDay(['--max-parents=0', 'HEAD'], 'the first commit');
+const datePublished = '2026-01-06';
+const dateModified = commitDay(
+  ['-1', '--', fileURLToPath(new URL('../src/', import.meta.url))],
+  'the last change under src/',
+);
 
 const softwareRequirements = 'Python >= 3.12 with NumPy and SciPy (matplotlib and numba optional).';
 
@@ -405,8 +429,12 @@ const jsonLd = JSON.stringify({
         propertyID: 'DOI',
         value: doi,
       },
+      dateCreated,
       datePublished,
       dateModified,
+      // What changed in each version, and where to read how to use it.
+      releaseNotes: `${repositoryUrl}/releases`,
+      softwareHelp: { '@id': websiteId },
       softwareRequirements,
       // Derived from the nine documented areas in src/data/scope.mjs. The
       // hand-written versions of these three fields described the filter bank
@@ -429,7 +457,14 @@ const jsonLd = JSON.stringify({
       // node states one consistent set instead of a partial one per document.
       creator: { '@id': authorId },
       maintainer: { '@id': authorId },
-      sameAs: ['https://pypi.org/project/phonometry/', doiUrl, `${fullUrl}/`],
+      // The package of the former name is listed too: it is where the
+      // project's first releases are, and it installs phonometry today.
+      sameAs: [
+        'https://pypi.org/project/phonometry/',
+        'https://pypi.org/project/PyOctaveBand/',
+        doiUrl,
+        `${fullUrl}/`,
+      ],
     },
     {
       '@type': 'SoftwareSourceCode',
@@ -439,7 +474,14 @@ const jsonLd = JSON.stringify({
       programmingLanguage: 'Python',
       runtimePlatform: 'Windows, Linux, macOS',
       license: 'https://opensource.org/license/MIT',
+      dateCreated,
+      // Software Heritage keeps every visit of the repository under this one
+      // address, so the code stays readable whatever becomes of GitHub.
+      archivedAt: `https://archive.softwareheritage.org/browse/origin/?origin_url=${repositoryUrl}`,
       isPartOf: { '@id': softwareId },
+      // The application this code builds, which schema.org names from the
+      // code's side with its own property.
+      targetProduct: { '@id': softwareId },
       author: { '@id': authorId },
       // Same three agents jmrp.io/projects/ emits for this @id, so the merged
       // node states one consistent set instead of a partial one per document.

@@ -38,6 +38,14 @@ const changelog = {
 	text: lang === 'es' ? 'Registro de cambios' : 'Changelog',
 };
 
+// This site's own page about the maintainer: who he is, the record that backs
+// it, and how the library's numbers are made. The credit's name links his
+// personal site; this link keeps a reader on the page that answers for this
+// project.
+const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const aboutUrl = `${base}${lang === 'es' ? '/es' : ''}/start/about/`;
+const aboutText = lang === 'es' ? 'Acerca del mantenedor' : 'About the maintainer';
+
 // Icon links carry their name in `aria-label` and in `title`, since the mark
 // itself says nothing to a screen reader and nothing to a reader who does not
 // recognise it. The repository and the package are works, so neither takes
@@ -63,6 +71,7 @@ const marks = [
 			))
 		}
 		<a class="orcid" href="https://orcid.org/0000-0003-1250-6212" rel="me">ORCID</a>
+		<a class="about" href={aboutUrl}>{aboutText}</a>
 		<a class="release" href={releaseNotes.href}>{releaseNotes.text}</a>
 		<a class="release" href={changelog.href}>{changelog.text}</a>
 		<a class="projects" href={projectsUrl}>{projectsText}</a>
@@ -117,6 +126,7 @@ const marks = [
 		font-size: var(--sl-text-2xs);
 		letter-spacing: 0.08em;
 	}
+	.about,
 	.release,
 	.projects,
 	.orcid {

@@ -1,13 +1,14 @@
 // Small builds for the tests of check-structured-data.mjs.
 //
 // The check reads a whole build, and some of what it asks is asked of the
-// whole site at once: the software node on every page, the site-wide block
-// under its byte budget, a share of pages edited since they were first
-// published. A test that hands it a build of a few pages has to give it all
-// of that, or every test fails on what it did not mean to test. So the pages
-// are written here, once, whole by default, and every test file of the check
-// builds on them: a check that adds a site-wide requirement adds it to this
-// file, and each suite keeps testing only its own defect.
+// whole site at once: the software node and its history on every page, the
+// site-wide block under its byte budget, the About page in both languages, a
+// share of pages edited since they were first published. A test that hands it
+// a build of a few pages has to give it all of that, or every test fails on
+// what it did not mean to test. So the pages are written here, once, whole by
+// default, and every test file of the check builds on them: a check that adds
+// a site-wide requirement adds it to this file, and each suite keeps testing
+// only its own defect.
 //
 // A page is data until the build is written: its article node, every node of
 // its graph and what it says, which a test changes in place before `check`
@@ -17,7 +18,7 @@
 // test gives whole, or as written when it means one not to parse.
 //
 // Nothing here is installed: the tests run before the site's dependencies are.
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -28,9 +29,35 @@ import { topicForSlug } from '../../src/data/topics.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const CHECK = join(here, '..', 'check-structured-data.mjs');
+const REPOSITORY_ROOT = join(here, '..', '..', '..');
 
 /** The site's own address, as every URL of a page starts. */
 export const ORIGIN = `${siteUrl}${basePath}`;
+
+/**
+ * The day of the last commit `git log` lists with these arguments, as
+ * `YYYY-MM-DD`: in UTC, from the commit's timestamp, the way the check reads
+ * it, or as the committer's clock wrote it, which a test gives the check to
+ * see it refused.
+ *
+ * @param {'%ct'|'%cI'} format `%ct` for the UTC day, `%cI` for the committer's.
+ * @param {...string} args Arguments after `git -C <repository root> log`.
+ * @returns {string} The day.
+ */
+export const commitDay = (format, ...args) => {
+	const printed = execFileSync('git', ['-C', REPOSITORY_ROOT, 'log', `--format=${format}`, ...args], {
+		encoding: 'utf8',
+	})
+		.trim()
+		.split('\n')
+		.at(-1);
+	return format === '%ct' ? new Date(Number(printed) * 1000).toISOString().slice(0, 10) : printed.slice(0, 10);
+};
+
+/** The UTC day of the repository's first commit, which the software's `dateCreated` has to give. */
+export const FIRST_COMMIT = commitDay('%ct', '--max-parents=0', 'HEAD');
+/** The UTC day of the last commit under src/, which the software's `dateModified` has to give. */
+export const LIBRARY_MODIFIED = commitDay('%ct', '-1', '--', 'src');
 
 /** The platforms the software node names when a test does not say otherwise. */
 export const PLATFORMS = ['Linux', 'macOS', 'Windows'];
@@ -48,23 +75,96 @@ export const SITE = {
 /** The types of the nodes astro.config.mjs writes in a block of their own on every page. */
 export const SITE_TYPES = new Set(['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceCode']);
 
+/** The years of the maintainer's research role, as the Person node dates it and the About page states it. */
+export const RESEARCH = { start: '2019', end: '2023' };
+
+/** The year the maintainer's master's degree was awarded, the one date the Person node gives it. */
+export const MASTER_END = '2019';
+
 /**
- * The four nodes astro.config.mjs puts on every page.
+ * The four nodes astro.config.mjs puts on every page, whole: the software's
+ * history the check reads from git, and the maintainer's dated roles as the
+ * Person node jmrp.io publishes gives them: the research role and the sound
+ * technician's, with a start and an end, and the master's degree, dated by
+ * the year it was awarded alone, as the node dates every degree.
  *
  * @param {unknown} [operatingSystem] What the software node names; null leaves the property out.
  * @returns {object[]} Person, WebSite, SoftwareApplication and SoftwareSourceCode.
  */
 export function siteNodes(operatingSystem = PLATFORMS) {
 	return [
-		{ '@type': 'Person', '@id': SITE.person, name: 'The maintainer' },
+		{
+			'@type': 'Person',
+			'@id': SITE.person,
+			name: 'The maintainer',
+			alumniOf: [
+				{
+					'@type': 'OrganizationRole',
+					alumniOf: {
+						'@type': 'EducationalOrganization',
+						name: 'Universitat Politècnica de València',
+						alternateName: 'UPV',
+					},
+					startDate: RESEARCH.start,
+					endDate: RESEARCH.end,
+				},
+				{
+					'@type': 'OrganizationRole',
+					roleName: "Master's degree in acoustical engineering",
+					alumniOf: { '@type': 'EducationalOrganization', name: 'Universitat Politècnica de València' },
+					endDate: MASTER_END,
+				},
+			],
+			hasOccupation: [
+				{
+					'@type': 'Role',
+					startDate: RESEARCH.start,
+					endDate: RESEARCH.end,
+					hasOccupation: {
+						'@type': 'Occupation',
+						name: [
+							{ '@value': 'Acoustics researcher', '@language': 'en' },
+							{ '@value': 'Investigador en acústica', '@language': 'es' },
+						],
+					},
+				},
+				{
+					'@type': 'Role',
+					startDate: '2011',
+					endDate: '2018',
+					hasOccupation: {
+						'@type': 'Occupation',
+						name: [
+							{ '@value': 'Sound technician', '@language': 'en' },
+							{ '@value': 'Técnico de sonido', '@language': 'es' },
+						],
+					},
+				},
+			],
+		},
 		{ '@type': 'WebSite', '@id': SITE.website, name: 'phonometry', url: `${ORIGIN}/` },
 		{
 			'@type': 'SoftwareApplication',
 			'@id': SITE.software,
 			name: 'phonometry',
+			alternateName: 'PyOctaveBand',
+			codeRepository: REPOSITORY,
+			releaseNotes: `${REPOSITORY}/releases`,
+			softwareHelp: { '@id': SITE.website },
+			sameAs: ['https://pypi.org/project/phonometry/', 'https://pypi.org/project/PyOctaveBand/'],
+			dateCreated: FIRST_COMMIT,
+			dateModified: LIBRARY_MODIFIED,
 			...(operatingSystem === null ? {} : { operatingSystem }),
 		},
-		{ '@type': 'SoftwareSourceCode', '@id': SITE.source, name: 'phonometry' },
+		{
+			'@type': 'SoftwareSourceCode',
+			'@id': SITE.source,
+			name: 'phonometry',
+			codeRepository: REPOSITORY,
+			dateCreated: FIRST_COMMIT,
+			targetProduct: { '@id': SITE.software },
+			archivedAt: `https://archive.softwareheritage.org/browse/origin/?origin_url=${REPOSITORY}`,
+		},
 	];
 }
 
@@ -123,8 +223,33 @@ export function page(slug, lang, extra = {}) {
 }
 
 /**
- * A build the check has nothing to report on: the pages in `base`, then
- * plain English pages up to `pages` in all.
+ * What each About page says of the master's degree and the research role, in
+ * its own language and in the two forms the real page writes its years in.
+ */
+export const ABOUT_TEXT = {
+	en:
+		`<p>I took the master's degree at the UPV (2018-${MASTER_END}) and worked as an acoustics ` +
+		`researcher there from ${RESEARCH.start} to ${RESEARCH.end}.</p>`,
+	es:
+		`<p>Cursé el máster en la UPV (2018-${MASTER_END}) y trabajé allí como investigador en acústica ` +
+		`de ${RESEARCH.start} a ${RESEARCH.end}.</p>`,
+};
+
+/**
+ * The About page of one language, typed and worded as the check asks.
+ *
+ * @param {'en'|'es'} lang The page's language.
+ * @param {object} [extra] Fields of the article node, as `page()` takes them.
+ * @returns {{path: string, article: object, nodes: object[], text: string}} The page.
+ */
+export function aboutPage(lang, extra = {}) {
+	return { ...page('start/about', lang, { '@type': ['AboutPage', 'TechArticle'], ...extra }), text: ABOUT_TEXT[lang] };
+}
+
+/**
+ * A build the check has nothing to report on: the pages in `base`, then the
+ * About page in English and in Spanish, which the check asks of every build,
+ * then plain English pages up to `pages` in all.
  *
  * The first `dated` pages, in that order, are published on `published` and
  * the rest on the day of their last edit, 2026-10-01. `platforms` gives the
@@ -137,7 +262,7 @@ export function page(slug, lang, extra = {}) {
  * @returns {Record<string, {path: string, article: object, nodes: object[], text: string}>} Each page by its key.
  */
 export function build({ pages = 10, dated = pages, published = '2026-07-01', platforms = [], base = {} } = {}) {
-	const built = { ...base };
+	const built = { ...base, 'en/about': aboutPage('en'), 'es/about': aboutPage('es') };
 	for (let i = Object.keys(built).length; i < pages; i += 1) built[`page/${i}`] = page(`page-${i}`, 'en');
 	Object.values(built).forEach(({ article, nodes }, i) => {
 		article.datePublished = i < dated ? published : '2026-10-01';

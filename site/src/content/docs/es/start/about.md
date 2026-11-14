@@ -45,6 +45,20 @@ otra vez niveles de bandas de octava y magnitudes de sonómetro que pudiera
 defender frente a una tabla de tolerancias, así que los construí bien una sola
 vez en lugar de volver a deducirlos en cada proyecto.
 
+## Historia
+
+Publiqué el código en GitHub en junio de 2020 con el nombre PyOctave, como
+un filtro de bandas de octava y de fracción de octava para señales en el
+dominio del tiempo, y en julio de ese año lo renombré PyOctaveBand. Su
+primera publicación en PyPI, PyOctaveBand 1.0.1, llegó en enero de 2026. En
+julio de 2026, con la versión 3.0.0, la biblioteca pasó a llamarse
+phonometry. PyOctaveBand sigue en PyPI como envoltorio sobre phonometry, y
+acoustic-toolbox, el sucesor comunitario de python-acoustics, depende de él.
+Cada versión de la biblioteca desde la 2.0.0, publicada ese mismo julio,
+queda archivada en Zenodo bajo un único DOI de concepto, el que aparece más
+abajo en Cómo citar este software. Un artículo que describe la biblioteca
+está enviado al Journal of Open Source Software, donde sigue pendiente.
+
 ## Cómo construyo la biblioteca
 
 El método es la razón de ser del proyecto, y es deliberadamente estrecho:

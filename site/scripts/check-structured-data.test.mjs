@@ -40,7 +40,20 @@ import { topicForSlug } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { variablesMeasured } from '../src/lib/catalogue-datasets.mjs';
-import { build as wholeBuild, check, ORIGIN, page, SITE } from './shared/structured-data-fixture.mjs';
+import {
+	ABOUT_TEXT,
+	aboutPage,
+	build as wholeBuild,
+	check,
+	commitDay,
+	FIRST_COMMIT,
+	LIBRARY_MODIFIED,
+	ORIGIN,
+	page,
+	SITE,
+	SITE_TYPES,
+	siteNodes,
+} from './shared/structured-data-fixture.mjs';
 
 const EN = `${ORIGIN}/reference/bibliography/`;
 const ES = `${ORIGIN}/es/reference/bibliography/`;
@@ -192,10 +205,10 @@ test('a software node that names no operating system, or one twice, fails', (t) 
 
 test('a malformed block on a page leaves the software node of its valid block counted', (t) => {
 	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/4'].blocks = ['{"@context": '];
+	built['page/6'].blocks = ['{"@context": '];
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-4\/: an ld\+json block is not valid JSON/);
+	assert.match(ran.err, /FAIL \/page-6\/: an ld\+json block is not valid JSON/);
 	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
 });
 
@@ -203,12 +216,12 @@ test('a block that parses to no JSON-LD object is reported as one that does not 
 	// `null` parses, and reading its @context threw, so the check stopped before
 	// it reported the page or tallied any software node.
 	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/4'].blocks = ['null'];
-	built['page/5'].blocks = ['[]'];
-	built['page/6'].blocks = ['5'];
+	built['page/6'].blocks = ['null'];
+	built['page/7'].blocks = ['[]'];
+	built['page/8'].blocks = ['5'];
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	for (const page of [4, 5, 6]) {
+	for (const page of [6, 7, 8]) {
 		assert.match(ran.err, new RegExp(`FAIL /page-${page}/: an ld\\+json block is not a JSON-LD object`));
 	}
 	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
@@ -218,11 +231,386 @@ test('a block that parses to no JSON-LD object is reported as one that does not 
 test('a malformed block on a page leaves two nodes of its valid blocks that share an @id reported', (t) => {
 	const twin = { '@context': 'https://schema.org', '@type': 'Thing', '@id': `${ORIGIN}/#thing` };
 	const built = build({ pages: 10, dated: 9 });
-	built['page/4'].blocks = [twin, twin, '{'];
+	built['page/6'].blocks = [twin, twin, '{'];
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-4\/: an ld\+json block is not valid JSON/);
-	assert.match(ran.err, /FAIL \/page-4\/: .*\/#thing defined more than once/);
+	assert.match(ran.err, /FAIL \/page-6\/: an ld\+json block is not valid JSON/);
+	assert.match(ran.err, /FAIL \/page-6\/: .*\/#thing defined more than once/);
+});
+
+// The software's history and the About page. Every page carries the same
+// site-wide nodes, so a defect in them is one line with the number of pages it
+// stands on; the About page is asked for once in each language, typed as the
+// page about the maintainer, and every span of years it writes, in whatever
+// form, has to be the years of a role the Person node dates.
+
+/**
+ * Build ten pages, the bibliographies and guides every build of this file
+ * holds, the two About pages and plain articles, all edited since they were
+ * first published, and run the check on them.
+ *
+ * `nodes`, when given, are the site-wide nodes of every page. `about` replaces
+ * an About page by its language: another page to build instead, or null to
+ * leave it out.
+ */
+function history(t, { nodes, about = {} } = {}) {
+	const built = build({ pages: 10 });
+	for (const [lang, entry] of Object.entries(about)) {
+		if (entry === null) delete built[`${lang}/about`];
+		else built[`${lang}/about`] = entry;
+	}
+	if (nodes) {
+		for (const entry of Object.values(built)) {
+			entry.nodes = [...structuredClone(nodes), ...entry.nodes.filter((node) => !SITE_TYPES.has(node['@type']))];
+		}
+	}
+	return check(t, built);
+}
+
+/** The About page of `lang` saying `text`. */
+const saying = (lang, text) => ({ ...aboutPage(lang), text });
+
+/** The site-wide nodes with the one of `type` changed by `change`, which edits a copy. */
+function changed(type, change) {
+	return siteNodes().map((node) => {
+		if (node['@type'] !== type) return node;
+		const copy = structuredClone(node);
+		change(copy);
+		return copy;
+	});
+}
+
+/** The day before `day`, as `YYYY-MM-DD`. */
+const dayBefore = (day) => new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+
+test('a build whose software nodes give the whole history passes, and says what it read', (t) => {
+	const ran = history(t);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		new RegExp(
+			`ok {3}the software's nodes on all 10 pages give its history: created ${FIRST_COMMIT}, ` +
+				`library last changed ${LIBRARY_MODIFIED}, release notes, help, its former package and its archive`,
+		),
+	);
+	assert.match(ran.out, /ok {3}the About page in English and its Spanish twin are both typed AboutPage/);
+	assert.equal(ran.err, '');
+});
+
+test("the software's creation date is the UTC day of the first commit, not the day the committer's clock wrote", (t) => {
+	// The first commit was made at one in the morning two hours ahead of UTC,
+	// so the two days differ; if history ever made them agree, this test
+	// would prove nothing, and says so.
+	const local = commitDay('%cI', '--max-parents=0', 'HEAD');
+	assert.notEqual(local, FIRST_COMMIT, "the first commit's own day and its UTC day agree");
+	const ran = history(t, {
+		nodes: siteNodes().map((node) =>
+			node['@type'] === 'SoftwareApplication' || node['@type'] === 'SoftwareSourceCode'
+				? { ...node, dateCreated: local }
+				: node,
+		),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL SoftwareApplication dateCreated is "${local}", not ${FIRST_COMMIT}, ` +
+				"the UTC day of the repository's first commit \\(on 10 pages\\)",
+		),
+	);
+});
+
+test("a page without one of the software's nodes fails by name, and the history is not said of every page", (t) => {
+	const built = build({ pages: 10 });
+	built['page/6'].nodes = built['page/6'].nodes.filter((node) => node['@type'] !== 'SoftwareSourceCode');
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL \/page-6\/: no SoftwareSourceCode node/);
+	assert.doesNotMatch(ran.out, /give its history/);
+});
+
+test('a software node with no creation date, or source code created on another day, fails by name', (t) => {
+	const nodes = siteNodes();
+	delete nodes.find((node) => node['@type'] === 'SoftwareApplication').dateCreated;
+	nodes.find((node) => node['@type'] === 'SoftwareSourceCode').dateCreated = dayBefore(FIRST_COMMIT);
+	const ran = history(t, { nodes });
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL SoftwareApplication dateCreated is undefined, not ${FIRST_COMMIT}, ` +
+				"the UTC day of the repository's first commit \\(on 10 pages\\)",
+		),
+	);
+	assert.match(ran.err, new RegExp(`FAIL SoftwareSourceCode dateCreated is "${dayBefore(FIRST_COMMIT)}"`));
+});
+
+test('a software node dated by a commit that did not change the library fails', (t) => {
+	const ran = history(t, {
+		nodes: changed('SoftwareApplication', (node) => {
+			node.dateModified = dayBefore(LIBRARY_MODIFIED);
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL SoftwareApplication dateModified is "${dayBefore(LIBRARY_MODIFIED)}", ` +
+				`not ${LIBRARY_MODIFIED}, the UTC day of the last commit under src/ \\(on 10 pages\\)`,
+		),
+	);
+});
+
+test('release notes that point at the latest release only, or no help, fail', (t) => {
+	const ran = history(t, {
+		nodes: changed('SoftwareApplication', (node) => {
+			node.releaseNotes = `${node.codeRepository}/releases/latest`;
+			delete node.softwareHelp;
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL SoftwareApplication releaseNotes is "https:\/\/github\.com\/jmrplens\/phonometry\/releases\/latest", not https:\/\/github\.com\/jmrplens\/phonometry\/releases/,
+	);
+	assert.match(ran.err, /FAIL SoftwareApplication softwareHelp is undefined, not the WebSite node /);
+});
+
+test('release notes cannot be held to a repository the software node does not name', (t) => {
+	const ran = history(t, {
+		nodes: changed('SoftwareApplication', (node) => {
+			delete node.codeRepository;
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL SoftwareApplication names no codeRepository, so its releaseNotes cannot be held to the repository's releases/,
+	);
+});
+
+test('a software node that leaves out the package of its former name, or the name, fails', (t) => {
+	const left = history(t, {
+		nodes: changed('SoftwareApplication', (node) => {
+			node.sameAs = node.sameAs.filter((url) => !url.includes('PyOctaveBand'));
+		}),
+	});
+	assert.equal(left.status, 1);
+	assert.match(
+		left.err,
+		/FAIL SoftwareApplication sameAs leaves out https:\/\/pypi\.org\/project\/PyOctaveBand\/, the package of its former name/,
+	);
+	const unnamed = history(t, {
+		nodes: changed('SoftwareApplication', (node) => {
+			delete node.alternateName;
+		}),
+	});
+	assert.equal(unnamed.status, 1);
+	assert.match(
+		unnamed.err,
+		/FAIL SoftwareApplication names no alternateName, the former name its first releases carry/,
+	);
+});
+
+test('source code that does not name the application it builds fails', (t) => {
+	const ran = history(t, {
+		nodes: changed('SoftwareSourceCode', (node) => {
+			delete node.targetProduct;
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL SoftwareSourceCode targetProduct is undefined, not the SoftwareApplication https:\/\/github\.com\/jmrplens\/phonometry#software/,
+	);
+});
+
+test('source code with no archive, or another archive than its repository at Software Heritage, fails', (t) => {
+	const archive =
+		'https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/jmrplens/phonometry';
+	const none = history(t, {
+		nodes: changed('SoftwareSourceCode', (node) => {
+			delete node.archivedAt;
+		}),
+	});
+	assert.equal(none.status, 1);
+	assert.match(
+		none.err,
+		new RegExp(
+			`FAIL SoftwareSourceCode archivedAt is undefined, not ${RegExp.escape(archive)}, ` +
+				'the Software Heritage archive of its repository',
+		),
+	);
+	const other = history(t, {
+		nodes: changed('SoftwareSourceCode', (node) => {
+			node.archivedAt = 'https://doi.org/10.5281/zenodo.21215280';
+		}),
+	});
+	assert.equal(other.status, 1);
+	assert.match(
+		other.err,
+		/FAIL SoftwareSourceCode archivedAt is "https:\/\/doi\.org\/10\.5281\/zenodo\.21215280", not /,
+	);
+	const unrepositoried = history(t, {
+		nodes: changed('SoftwareSourceCode', (node) => {
+			delete node.codeRepository;
+		}),
+	});
+	assert.equal(unrepositoried.status, 1);
+	assert.match(
+		unrepositoried.err,
+		/FAIL SoftwareSourceCode names no codeRepository, so its archivedAt cannot be held to the repository's archive/,
+	);
+});
+
+test('a build without the Spanish About page fails, and so does an About page typed as a plain article', (t) => {
+	const typed = /typed AboutPage$/m;
+	const missing = history(t, { about: { es: null } });
+	assert.equal(missing.status, 1);
+	assert.match(missing.err, /FAIL found 1 About page\(s\) in English and 0 in Spanish, not the English one and its Spanish twin/);
+	assert.doesNotMatch(missing.out, typed);
+	const plain = history(t, { about: { en: aboutPage('en', { '@type': 'TechArticle' }) } });
+	assert.equal(plain.status, 1);
+	assert.match(plain.err, /FAIL \/start\/about\/: the About page's article node is not typed AboutPage/);
+	assert.doesNotMatch(plain.out, typed);
+});
+
+test('two English About pages are not the English one and its Spanish twin', (t) => {
+	// start/about.html is served at /start/about/ as well.
+	const ran = history(t, { about: { es: { ...aboutPage('en'), path: 'start/about.html' } } });
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL found 2 About page\(s\) in English and 0 in Spanish/);
+	assert.doesNotMatch(ran.out, /typed AboutPage$/m);
+});
+
+test('an About page that dates the research role otherwise than the Person node fails, in either language', (t) => {
+	const ran = history(t, {
+		about: {
+			en: saying('en', '<p>I worked as an acoustics researcher at the UPV from 2020 to 2023.</p>'),
+			es: saying('es', '<p>Trabajé como investigador en acústica en la UPV de 2020 a 2023.</p>'),
+		},
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/start\/about\/: the page says "from 2020 to 2023", and no role the Person node dates runs from 2020 to 2023/,
+	);
+	assert.match(
+		ran.err,
+		/FAIL \/es\/start\/about\/: the page says "de 2020 a 2023", and no role the Person node dates runs from 2020 to 2023/,
+	);
+});
+
+test('a Person node whose role moved, with the About page left as it was, fails', (t) => {
+	const ran = history(t, {
+		nodes: changed('Person', (node) => {
+			node.hasOccupation[0].startDate = '2018';
+			node.alumniOf[0].startDate = '2018';
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/start\/about\/: the page says "from 2019 to 2023", and no role the Person node dates runs from 2019 to 2023 or ends in 2023 with no start given/,
+	);
+	assert.match(ran.err, /FAIL \/es\/start\/about\/: the page says "de 2019 a 2023"/);
+});
+
+/** Run the check on the About pages saying `en` and `es`, the fixture's own text where left out. */
+const sayingBoth = (t, { en = ABOUT_TEXT.en, es = ABOUT_TEXT.es } = {}) =>
+	history(t, { about: { en: saying('en', en), es: saying('es', es) } });
+
+/** The failure a wrong span of `route`'s About page prints, up to the years. */
+const wrongSpan = (route, span) => new RegExp(`FAIL ${route}: the page says "${span}", and no role the Person node dates`);
+
+test('a wrong span beside right ones fails in every form a page writes years in, in any case', (t) => {
+	const ran = sayingBoth(t, {
+		en:
+			`${ABOUT_TEXT.en}<p>I studied at the Universidad de Alicante (2012-2018).</p>` +
+			'<p>From 2020 to 2021 I taught at the UPV, between 2012 and 2018 I mixed sound, ' +
+			'and in 2012-18 I toured.</p><p>I worked as an acoustics researcher at the UPV (2020\u20132023).</p>',
+		es:
+			`${ABOUT_TEXT.es}<p>Fui técnico de sonido desde 2012 hasta 2018, entre 2012 y 2018 ` +
+			'y del 2012 al 2018.</p>',
+	});
+	assert.equal(ran.status, 1);
+	for (const span of ['2012-2018', 'From 2020 to 2021', 'between 2012 and 2018', '2012-18', '2020\u20132023']) {
+		assert.match(ran.err, wrongSpan('/start/about/', span));
+	}
+	for (const span of ['desde 2012 hasta 2018', 'entre 2012 y 2018', 'del 2012 al 2018']) {
+		assert.match(ran.err, wrongSpan('/es/start/about/', span));
+	}
+	assert.doesNotMatch(ran.err, /the page says "(?:2018-2019|from 2019 to 2023|de 2019 a 2023)"/);
+});
+
+test('research years moved into a parenthesis fail though another span of the page is right', (t) => {
+	const ran = sayingBoth(t, {
+		en:
+			'<p>I worked as an acoustics researcher at the UPV (2020\u20132023).</p>' +
+			'<p>I was a sound technician from 2011 to 2018.</p>',
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/start\/about\/: the page says "2020\u20132023", and no role the Person node dates runs from 2020 to 2023 or ends in 2023 with no start given/,
+	);
+});
+
+test('a span ending the year a role the node dates by its end alone passes on its end year, and says so', (t) => {
+	const ran = sayingBoth(t);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		/ok {3}the About page in English writes 2 spans of years, each the years of a role the Person node dates; 1 of them only by its end year, the node giving that role no start/,
+	);
+	const moved = sayingBoth(t, { en: ABOUT_TEXT.en.replace('2018-2019', '2018-2020') });
+	assert.equal(moved.status, 1);
+	assert.match(
+		moved.err,
+		/FAIL \/start\/about\/: the page says "2018-2020", and no role the Person node dates runs from 2018 to 2020 or ends in 2020 with no start given/,
+	);
+});
+
+test("a year inside an identifier, an ORCID iD or a standard's number, is no span", (t) => {
+	const ran = sayingBoth(t, {
+		en:
+			`${ABOUT_TEXT.en}<p>ORCID 0000-0003-1250-6212; IEC 61672-1:2013, ISO 1996-2:2017 ` +
+			'and https://example.org/2011-2012/.</p>',
+	});
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /ok {3}the About page in English writes 2 spans of years/);
+});
+
+test('an About page that names a dated role without its years passes', (t) => {
+	const ran = history(t, {
+		about: {
+			en: saying(
+				'en',
+				'<p>I worked as an acoustics researcher at the UPV from 2019 to 2023.</p>' +
+					'<p>Before that I was a sound technician.</p>',
+			),
+		},
+	});
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		/ok {3}the About page in English writes 1 span of years, each the years of a role the Person node dates/,
+	);
+});
+
+test('an About page that writes the years of no dated role fails, so the years check cannot go quiet', (t) => {
+	const ran = history(t, {
+		about: { en: saying('en', '<p>I worked as an acoustics researcher at the UPV for four years after my master.</p>') },
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/FAIL \/start\/about\/: the page writes the years of none of the 4 roles the Person node dates, so they cannot be held to it/,
+	);
+	assert.match(
+		ran.out,
+		/ok {3}the About page in Spanish writes 2 spans of years, each the years of a role the Person node dates/,
+	);
 });
 
 test('the fixture names a guide the navigation tree lists', () => {
@@ -397,7 +785,7 @@ test('a build where no page names a cited work fails rather than passing on noth
 test('the site-wide block within its byte budget passes, and says its size and how much of it the Person is', (t) => {
 	const ran = check(t, build());
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /ok {3}the site-wide ld\+json block is \d+ bytes on 4 pages, within its budget of \d+; the Person is \d+ of them/);
+	assert.match(ran.out, /ok {3}the site-wide ld\+json block is \d+ bytes on 6 pages, within its budget of \d+; the Person is \d+ of them/);
 });
 
 test('a site-wide block over its byte budget fails, and says how much of it the Person is', (t) => {
@@ -412,7 +800,7 @@ test('a site-wide block over its byte budget fails, and says how much of it the 
 	assert.equal(ran.status, 1);
 	assert.match(
 		ran.err,
-		/FAIL 4 page\(s\): the site-wide ld\+json block is \d+ bytes, over its budget of \d+; the Person spliced from jmrp\.io is \d+ of them/,
+		/FAIL 6 page\(s\): the site-wide ld\+json block is \d+ bytes, over its budget of \d+; the Person spliced from jmrp\.io is \d+ of them/,
 	);
 });
 

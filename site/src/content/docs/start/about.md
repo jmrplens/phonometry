@@ -44,6 +44,19 @@ octave-band levels and sound level meter quantities that I could defend
 against a tolerance table, so I built them once, properly, instead of
 re-deriving them for each project.
 
+## History
+
+I published the code on GitHub in June 2020 as PyOctave, an octave-band and
+fractional-octave-band filter for signals in the time domain, and renamed it
+PyOctaveBand that July. Its first release on PyPI, PyOctaveBand 1.0.1, came
+in January 2026. In July 2026, with release 3.0.0, the library took the name
+phonometry. PyOctaveBand stays on PyPI as a shim over phonometry, and
+acoustic-toolbox, the community successor to python-acoustics, depends on
+it. Every release of the library since 2.0.0, published that same July, is
+archived on Zenodo under one concept DOI, the one given below under Cite
+this software. A paper describing the library has been submitted to the
+Journal of Open Source Software, where it is still pending.
+
 ## How I build the library
 
 The method is the whole point of the project, and it is deliberately narrow:

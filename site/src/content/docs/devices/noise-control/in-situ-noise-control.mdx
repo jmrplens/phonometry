@@ -235,10 +235,11 @@ equations as printed, so that its number is the one the standard gives, and
 [the errata register](/phonometry/reference/errata/) records the evidence and
 the reading the characteristic impedance asks for. Then measure the flow, the
 total pressure loss across the silencer and the flow velocities in the duct.
-The 10 % of 9.2 is a line for the report, not for the measurement: where the
-velocities close to the entrance of the silencer deviate from the mean flow
-velocity by more than 10 %, or 8.3.3 shows a distribution as uneven, report
-the actual distribution, since such a flow may raise the pressure loss and the
+The two conditions of 9.2 are lines for the report, not for the measurement:
+where the velocities close to the entrance of the silencer deviate from the
+mean flow velocity by more than 10 %, or where the flow velocity measurements
+of 8.3.3 show a comparably non-uniform distribution, report the actual
+distribution, since such a flow may raise the pressure loss and the
 regenerated sound.
 
 ## 4. The screen you can take away
@@ -459,7 +460,7 @@ sources it works on can be switched off and measured on their own: the energy
 subtraction of Equations (17) and (18), capped at 3 dB. Past the cap the quantity
 is not determined, and what may be stated instead is the inequality of clause 4.
 `extraneous_corrected_mean_level` returns the corrected level, the margin it was
-read at and whether the cap was reached (`capped`), so that a capped number
+read at and whether the correction went past the cap (`capped`), so that a capped number
 cannot be written down as a determination. The cap is judged on the margin, where Table 1 draws it. At a
 margin of exactly 3 dB the subtraction takes off 3,02 dB, which is the printed
 3 dB unrounded and the correction Table 1 applies at that row, so the level is

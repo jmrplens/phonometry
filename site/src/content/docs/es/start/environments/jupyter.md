@@ -31,6 +31,28 @@ locales; cmd no necesita ese paso.
 Ese único entorno contiene JupyterLab, el kernel de IPython que arranca y
 phonometry con todos los extras salvo `[torch]`.
 
+En Windows y Linux de 32 bits numba no tiene soporte, ni lo tiene `[full]`,
+que lo incluye:
+`python -m pip install jupyterlab "phonometry[plot,report,audio]"` instala
+JupyterLab con los otros tres extras. PyPI no tiene wheel para Windows de 32
+bits de SciPy, matplotlib ni kiwisolver, ni de psutil y pywinpty, que
+JupyterLab necesita allí, ni de PyYAML en Python 3.14, así que pip los compila
+allí desde el código fuente, lo que pide un compilador de C y otro de C++, un
+compilador de Fortran con BLAS y LAPACK para SciPy, y para pywinpty Rust y la
+herramienta de línea de órdenes de NuGet, `nuget.exe`, en el `PATH`. En
+Linux de 32 bits, medido en las imágenes de 32 bits de `python:3.13-slim`,
+PyPI no tiene wheel de NumPy, SciPy, matplotlib, Pillow, contourpy,
+kiwisolver, psutil, PyYAML, tornado ni argon2-cffi-bindings, ni de
+cffi y pyzmq en ARM, de MarkupSafe en `linux/386` y `linux/arm/v5`, o de lxml
+y rpds-py en `linux/arm/v5`, así que pip los compila allí, con los mismos
+compiladores, los archivos de desarrollo de las bibliotecas que enlazan y Rust
+para rpds-py. En `linux/arm/v5`, cuya ABI de coma flotante por software no
+cubre ningún wheel manylinux, las compilaciones de NumPy, SciPy, matplotlib y
+pyzmq piden además ninja, patchelf y cmake, y pip también los compilaría desde
+el código fuente, lo que ejecuta `make` y autoreconf, salvo que
+`apt-get install ninja-build patchelf cmake` haya puesto los de la imagen en
+el `PATH`.
+
 ## Un resultado se muestra como tabla
 
 El valor de la última línea de una celda se muestra como una tabla de sus

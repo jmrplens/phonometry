@@ -49,10 +49,13 @@ beside that designation, read where the link is written:
   one it was revised as.
 
 A link whose label names a designation, publisher and number, is read by its
-label alone. A catalogue address in a code block, an inline code span or a
-comment is an example or a note, and no link: the spans and the comments are
-read by ``scripts/markdown_spans.py``, as the site reads them. The rest of an
-inline code span is text the page shows, so a designation written in one
+label alone, wherever it is written: in a table cell and in a reference's note
+as much as in a paragraph, so that a cell before it, or the reference's
+``designation``, naming the document the link opens does not vouch for a label
+that names another. A catalogue address in a code block, an inline code span
+or a comment is an example or a note, and no link: the spans and the comments
+are read by ``scripts/markdown_spans.py``, as the site reads them. The rest of
+an inline code span is text the page shows, so a designation written in one
 ("[`ISO 12354-1:2017`](...)") is read beside a link as any other, while a
 comment, which the page hides, is read beside none. A frontmatter is YAML,
 whose note the site shows as text with every address in it a link, so each
@@ -133,6 +136,9 @@ LINK = re.compile(
 #: A markdown link, label and destination, taken out of the text a catalogue
 #: link is read beside.
 MARKDOWN_LINK = re.compile(r"\[[^\]\n]*\]\([^)\s]*\)")
+
+#: The label of the link a text written up to that link ends at.
+_LABEL = re.compile(r"\[([^\]\n]*)\]\($")
 
 #: The start of a list item, a table row or a heading: a block of its own.
 _BLOCK_START = re.compile(r"\s*(?:[-*+]\s|\d+\.\s|\||#)")
@@ -260,24 +266,39 @@ def _own_clause(written: str, catalogue: str) -> str:
     return clause[named[-1].start() :] if named else ""
 
 
+def _designation_label(written: str) -> str | None:
+    """The label of the link the text ends at, when it names a designation.
+
+    A label that names a designation, a publisher and its number
+    ("[ISO 3382-3:2022](...)"), tells the reader which document the link
+    opens, whichever catalogue the designation belongs to: a label that names
+    an IEC document on an iso.org link is held to that, and the link is read
+    by its label alone wherever it is written, a table cell and a reference's
+    note among them. None when the text ends at no label, or at one that gives
+    a number and no publisher ("[2017 catalogue](...)", "[Part 1](...)"),
+    which names no document.
+    """
+    label = _LABEL.search(written)
+    if label and _names_any_designation(label.group(1)):
+        return label.group(1)
+    return None
+
+
 def _read_up_to(written: str, catalogue: str) -> str:
     """What a link is read beside in the text written up to it.
 
-    A link whose label names a designation, a publisher and its number
-    ("[ISO 3382-3:2022](...)"), is read by its label, whichever catalogue the
-    designation belongs to: a label that names an IEC document on an iso.org
-    link tells the reader what it opens, and is held to that. A label that
-    gives a number and no publisher ("[2017 catalogue](...)", "[Part 1](...)")
-    names no document, and the link is read as any other: beside its own
+    A link whose label names a designation is read by its label
+    (:func:`_designation_label`). Any other link is read beside its own
     clause when that names a designation of the link's catalogue, and
     otherwise beside the whole text before it, without the other links and
     without the clauses that name a later edition ("since revised as
     ISO 13472-1:2022"): an entry's own catalogue link opens the edition the
     entry cites, not the one it was revised as.
     """
-    label = re.search(r"\[([^\]\n]*)\]\($", written)
-    if label and _names_any_designation(label.group(1)):
-        return label.group(1)
+    named = _designation_label(written)
+    if named is not None:
+        return named
+    label = _LABEL.search(written)
     before = written[: label.start()] if label else written
     own = _own_clause(before, catalogue)
     if own:
@@ -304,6 +325,12 @@ def _beside_in_frontmatter(text: str, start: int, end: int, catalogue: str) -> s
     ``url`` is. That still holds the number to a document: refusing the
     link would ask the note to repeat the designation its reference already
     gives, and letting it through would leave the number unread.
+
+    A note link written with a label that names a designation ("see
+    [ISO 3382-3:2022](https://...)", which the site shows as text beside the
+    address it links) is read by that label alone
+    (:func:`_designation_label`), so neither its clause nor its reference
+    vouches for a label that names another document.
     """
     item_start = text.rfind("\n  - ", 0, start)
     item_end = text.find("\n  - ", start)
@@ -315,7 +342,11 @@ def _beside_in_frontmatter(text: str, start: int, end: int, catalogue: str) -> s
     keys = list(_FRONTMATTER_KEY.finditer(text, item_start + 1, start))
     if not keys or keys[-1].group(1) == "url":
         return own
-    return _own_clause(text[keys[-1].end() : start].lstrip("\"'"), catalogue) or own
+    written = text[keys[-1].end() : start].lstrip("\"'")
+    named = _designation_label(written)
+    if named is not None:
+        return named
+    return _own_clause(written, catalogue) or own
 
 
 def _beside_in_body(text: str, start: int, catalogue: str) -> str:
@@ -326,14 +357,17 @@ def _beside_in_body(text: str, start: int, catalogue: str) -> str:
     "[catalogue](...)"), the nearest cell before it in the row that names
     one, with its links taken out. Anywhere else, the list item or paragraph
     the link is written in, up to it. The link's own cell, list item or
-    paragraph is read as :func:`_read_up_to` reads the text up to a link.
+    paragraph is read as :func:`_read_up_to` reads the text up to a link, so
+    a link whose label names a designation is read by its label alone, in a
+    table as anywhere else: a cell before it that names the document the
+    link opens does not vouch for a label that names another.
     """
     line_start = text.rfind("\n", 0, start) + 1
     line = text[line_start:start]
     if line.lstrip().startswith("|"):
         *cells, cell = _CELL_BORDER.split(line)
         own = _read_up_to(cell, catalogue)
-        if _names_a_designation(own, catalogue):
+        if _designation_label(cell) is not None or _names_a_designation(own, catalogue):
             return own
         # The text before the row's first border is its indentation.
         for previous in map(_links_out, reversed(cells[1:])):

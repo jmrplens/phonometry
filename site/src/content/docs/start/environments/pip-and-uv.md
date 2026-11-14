@@ -47,11 +47,18 @@ print(phonometry.__version__)   # the release you installed
 | `[full]` | all four above | every feature but the torch backend |
 | `[torch]` | torch, array-api-compat | the FDTD engines step on PyTorch |
 
-On a bare `python:3.13-slim` image no extra needs a system package: every one
-of them installs and runs from its wheels there, `[audio]` included. Without
-numba the `impulse` time weighting runs as plain Python and says nothing about
-it. A feature whose extra is missing says which one to install, with its pip
-and its conda spelling:
+On a bare `python:3.13-slim` image for x86-64 or ARM64 no extra needs a
+system package: every one of them installs and runs from its wheels there,
+`[audio]` included. The image's six other architectures have no wheel of
+NumPy, SciPy, matplotlib or Pillow, so pip builds them from source there, and
+`[audio]` loads the system's libsndfile. numba supports none of its three
+32-bit ones, so `[perf]` and `[full]` are not supported there, and torch
+publishes no wheel for any of the six and no source, so `[torch]` does not
+install there from PyPI; [Docker and
+servers](/phonometry/start/environments/docker/) says what the rest takes.
+Without numba the `impulse` time weighting runs as plain Python and says
+nothing about it. A feature whose extra is missing says which one to install,
+with its pip and its conda spelling:
 
 ```text
 ImportError: Plotting requires matplotlib. Install it with: pip install "phonometry[plot]" (conda: conda install -c conda-forge matplotlib-base)
@@ -64,8 +71,8 @@ on ARM, on Linux with musl, on macOS on Intel and on 32-bit Windows, some of
 those releases have no wheel, and pip builds them from source there, as even a
 plain install does with SciPy on 32-bit Windows, and as `[plot]` does with
 matplotlib on Linux on ARM with musl and on 32-bit Windows; that section
-names which. numba no longer supports 32-bit Windows, so neither `[perf]`
-nor `[full]`, which holds it, is supported there, where
+names which. numba no longer supports 32-bit Windows, nor 32-bit Linux, so
+neither `[perf]` nor `[full]`, which holds it, is supported on either, where
 `python -m pip install "phonometry[plot,report,audio]"` installs the other
 three extras. torch publishes no source to build, so it installs on none of
 the four from PyPI, and on Windows on ARM from PyTorch's CPU index, as the
@@ -134,6 +141,11 @@ uv run python -c "import phonometry; print(phonometry.__version__)"
 ```
 
 `uv add` resolves the same way in a project for Python 3.12, 3.13 or 3.14.
+On 32-bit Windows and 32-bit Linux, where `[full]` is not supported, name
+`[plot,report,audio]` in its place, with `uv pip install` as with `uv add`; uv
+builds from source there what pip does, SciPy, matplotlib and kiwisolver on
+32-bit Windows, and on 32-bit Linux the packages [Docker and
+servers](/phonometry/start/environments/docker/) names.
 
 ### torch from the CPU index in a project
 

@@ -29,6 +29,27 @@ cmd needs no such step.
 That one environment holds JupyterLab, the IPython kernel it starts and
 phonometry with every extra but `[torch]`.
 
+On 32-bit Windows and 32-bit Linux numba is not supported, and neither is
+`[full]`, which holds it:
+`python -m pip install jupyterlab "phonometry[plot,report,audio]"` installs
+JupyterLab with the other three extras. PyPI has no 32-bit Windows wheel of
+SciPy, matplotlib or kiwisolver, nor of psutil and pywinpty, which JupyterLab
+needs there, nor of PyYAML on Python 3.14, so pip builds those from source
+there, which takes a C and a C++ compiler, a Fortran compiler with BLAS and
+LAPACK for SciPy, and for pywinpty Rust and the NuGet command-line tool,
+`nuget.exe`, on `PATH`. On 32-bit Linux, measured on the
+32-bit images of `python:3.13-slim`, PyPI has no wheel of NumPy, SciPy,
+matplotlib, Pillow, contourpy, kiwisolver, psutil, PyYAML, tornado or
+argon2-cffi-bindings, nor of cffi and pyzmq on ARM, of MarkupSafe on
+`linux/386` and `linux/arm/v5`, or of lxml and rpds-py on `linux/arm/v5`, so
+pip builds those there, with the same compilers, the development files of the
+libraries they link and Rust for rpds-py. On `linux/arm/v5`, whose soft-float
+ABI no manylinux wheel targets, the builds of NumPy, SciPy, matplotlib and
+pyzmq also ask for ninja, patchelf and cmake, and pip would build those from
+source too, which runs `make` and autoreconf, unless
+`apt-get install ninja-build patchelf cmake` has put the image's own on
+`PATH`.
+
 ## A result shows a table
 
 The value on the last line of a cell displays as a table of its fields, with

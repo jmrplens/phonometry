@@ -859,7 +859,7 @@ _ES: dict[str, str] = {
     "vibration total value (Eq. (1))": "valor total de vibración (Ec. (1))",
     "$T_i$ is total contact time per day (5.5)": "$T_i$ es el tiempo total de contacto diario (5.5)",
     "one per hand, two significant figures (clause 8)": "una por mano, dos cifras significativas (capítulo 8)",
-    "EAV 2.5 m/s²   ·   ELV 5 m/s²": "EAV 2,5 m/s²   ·   ELV 5 m/s²",
+    "EAV 2.5 m/s²   ·   ELV 5 m/s²": "VAE 2,5 m/s²   ·   VLE 5 m/s²",
     "Directive 2002/44/EC, Article 3": "Directiva 2002/44/CE, artículo 3",
     "transducer and mount below 5 % of the": "transductor y montaje por debajo del",
     "mass they are fixed to (6.1.5)": "5 % de la masa sobre la que van (6.1.5)",

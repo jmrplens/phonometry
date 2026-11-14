@@ -153,6 +153,29 @@ humanos](/phonometry/es/vibration/human/human-vibration/#0-obtener-los-numeros)
 lleva las restricciones de masa, fijación y fuerza de agarre y el resto de la
 lista de fallos.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hand_arm_vibration.svg" alt="Izquierda: una empuñadura delantera de motosierra de 30 mm de diámetro agarrada por una mano sobre una zona de agarre de unos 100 mm, con tres posiciones numeradas de acelerómetro (bajo la mano en el centro de la zona de agarre, a ambos lados de la mano y en la parte inferior de la empuñadura junto a la mano), el cable fijado con cinta a la empuñadura junto al transductor, la fuerza de agarre, y el sistema basicéntrico x_h y_h z_h girado para que y_h siga el eje de la empuñadura. Derecha: la cadena de evaluación desde las tres magnitudes por eje ponderadas con Wh hasta el valor total de vibración a_hv, las exposiciones parciales A_i(8) sobre los tiempos de contacto y la A(8) frente al valor de exposición que da lugar a una acción de 2,5 y el valor límite de exposición de 5 m/s^2 de la Directiva 2002/44/CE, con un recuadro que da las reglas de masa, promediado, muestreo y rango" width="94%" />
+
+*Tres posiciones de acelerómetro de 6.1.3 sobre una misma empuñadura, aquí la
+delantera de una motosierra. Los números del 1 al 3 son del dibujo, no de la
+norma: 6.1.3 no numera ninguna, y el Anexo A de la misma modificación llama
+posiciones 1 y 2 a otros dos lugares, los de las normas de emisión. La posición
+1, bajo la mano en el centro de la zona de agarre, es la más representativa y la
+que necesita un adaptador. Las posiciones 2, a ambos lados de la mano, y 3, la
+parte inferior de la empuñadura junto al centro de la mano, son juntas donde
+6.1.3 dice que se colocan los acelerómetros en la mayoría de las medidas
+prácticas, y en una empuñadura lateral recomienda uno a cada lado de la mano y
+el promedio de los dos. El cable va fijado con cinta a la empuñadura junto al
+transductor porque un cable que la vibración deforma produce una señal propia
+(6.2.3), y el sistema de ejes es el basicéntrico de la Figura 1 de ISO 5349-1,
+girado para que $y_\mathrm{h}$ siga el eje de la empuñadura. El recuadro reúne
+las reglas que debe cumplir un registro: transductor y montaje por debajo del
+5 % de la masa sobre la que van (6.1.5), promediado lineal sobre ciclos de
+trabajo completos (6.1.11), la regla de muestreo de 5.4.1 ya citada y el rango
+de entrada más bajo que no sature, hallado por tanteo (6.1.10). La cadena de la
+derecha es la que desarrolla la sección siguiente: tres ejes ponderados con
+$W_\mathrm{h}$, el valor total $a_\mathrm{hv}$, una exposición parcial por
+operación y su suma cuadrática $A(8)$, que se compara con 2,5 y 5 m/s².*
+
 <span id="metricas-ponderadas-y-exposicion-diaria"></span>
 
 ### Métricas ponderadas y exposición diaria
@@ -165,6 +188,18 @@ $a_\mathrm{v} = \sqrt{\sum_j k_j^2 a_{\mathrm{w}j}^2}$ (Ec. 10), cuyos factores 
 $k_j$ pertenecen a la postura y al eje y no a la métrica: en una persona sentada
 evaluada por salud, 1,4 sobre x e y ponderadas con `Wd` y 1,0 sobre z ponderada
 con `Wk` (apartado 7.2.3).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_human_vibration.svg" alt="Cadena de medida de vibración de cuerpo entero: un acelerómetro triaxial en la interfaz asiento/cuerpo de una persona sentada mide la aceleración x, y y z, con y hacia dentro de la página, al lado izquierdo del cuerpo; cada eje se limita en banda y se pondera en frecuencia (Wk vertical, Wd horizontal) según ISO 8041-1, se reduce a un valor eficaz ponderado a_w y VDV según ISO 2631-1, y el mayor valor por eje ponderado en frecuencia max(1,4 a_wx, 1,4 a_wy, a_wz) se normaliza a la exposición diaria A(8) y se evalúa frente al VAE y el VLE de la Directiva 2002/44/CE" width="94%" />
+
+*La cadena de cuerpo entero sobre un asiento. El acelerómetro triaxial va en la
+interfaz asiento/cuerpo, la única de las tres ubicaciones de 5.3.1 que el dibujo
+muestra (no dibuja transductor en el respaldo ni bajo los pies); cada eje se
+limita en banda y se pondera, con `Wd` en x e y, con `Wk` en z, y se reduce a un valor
+eficaz ponderado y a un VDV. El último bloque es donde actúan los factores del
+apartado 7.2.3: la exposición diaria se construye sobre el mayor de
+$1{,}4a_{\mathrm{w}x}$, $1{,}4a_{\mathrm{w}y}$ y $a_{\mathrm{w}z}$, un solo eje y
+no el total vectorial, que es la distinción sobre la que giran los párrafos
+siguientes.*
 
 **El factor de cresta decide cuál de ellas se declara.** Es el pico de la
 aceleración ponderada dividido por su valor eficaz en el mismo intervalo

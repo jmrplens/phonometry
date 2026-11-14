@@ -551,6 +551,33 @@ _ES_EXACT = {
     "$T_2$ from the narrow band, Formula (23) and Table 1": "$T_2$ desde la banda estrecha, fórmula (23) y tabla 1",
     "Velocity level [dB re 5·10⁻⁸ m/s]": "Nivel de velocidad [dB re 5·10⁻⁸ m/s]",
     "Compression-wave speed over shear-wave speed (DIN 45672-1)": "Velocidad de la onda de compresión sobre la de cizalla (DIN 45672-1)",
+    # solid_wave_speeds: one steel as a beam, a plate and an unbounded solid.
+    # The three speeds and the two steps between them come from
+    # phonometry.solids at draw time, so each is an exact entry (F32): a
+    # change in the library draws a string with no entry here, and the
+    # language gate says so. A speed is drawn with the body it travels in:
+    # a key of digits and " m/s" alone is written by every clip that prints
+    # a speed, and would mark each of them stale.
+    "One steel, three longitudinal wave speeds: the wave travels along $x$,"
+    " into the page": "Un acero, tres velocidades de onda longitudinal: la onda viaja"
+    " según $x$, hacia dentro de la página",
+    "$E$ = 200 GPa, $\\rho$ = 7800 kg/m³, $\\nu$ = 0.28."
+    " Dashed: the slice at rest. The spread is drawn far larger than it is.": "$E$ = 200 GPa,"
+    " $\\rho$ = 7800 kg/m³, $\\nu$ = 0,28."
+    " A trazos: la rebanada en reposo. El ensanchamiento está dibujado mucho mayor de lo que es.",
+    "a) Beam": "a) Viga",
+    "b) Plate": "b) Placa",
+    "c) Unbounded solid": "c) Sólido extenso",
+    "free on every side": "libre por todos lados",
+    "held across its width,\nfree through its thickness": "sujeta a lo ancho,\nlibre a través del espesor",
+    "held on every side": "sujeto por todos lados",
+    "free face": "cara libre",
+    "held face": "cara sujeta",
+    "5064 m/s along a beam": "5064 m/s a lo largo de una viga",
+    "5275 m/s along a plate": "5275 m/s a lo largo de una placa",
+    "5725 m/s through the solid": "5725 m/s a través del sólido",
+    "4.2 % above the beam": "un 4,2 % por encima de la viga",
+    "8.5 % above the plate": "un 8,5 % por encima de la placa",
     "unbounded continuum, the inverse of Formula (3)": "continuo ilimitado, la inversa de la fórmula (3)",
     "Formula (1) as printed, second radical": "fórmula (1) impresa, segundo radical",
     "Formula (1) as printed, $\\sqrt{E/\\rho}$ of a thin rod": "fórmula (1) impresa, $\\sqrt{E/\\rho}$ de una barra delgada",

@@ -5,6 +5,7 @@ description: "Viga, placa y sólido extenso: las tres velocidades longitudinales
 
 import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
@@ -53,6 +54,21 @@ print(f"{beam:.0f} {plate:.0f} {bulk:.0f}")  # 5064 5275 5725
 El orden es siempre el mismo, y es el de cuánto está sujeto el material: una
 viga puede contraerse de lado libremente, una placa está sujeta a lo ancho, y
 un sólido extenso está sujeto por todos lados.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/solid_wave_speeds.svg" alt="Tres secciones transversales del mismo acero, vistas según la dirección en que viaja la onda, con y a lo ancho y z a través del espesor. Panel a, una viga: una rebanada rectangular con el contorno a trazos de su tamaño en reposo dentro de ella y una flecha verde que sale de cada una de sus cuatro caras, todas libres; las tensiones sigma y y sigma z son cero, la velocidad es la raíz cuadrada de E entre rho, 5064 metros por segundo. Panel b, una placa: la rebanada está dentro de una franja de placa que sigue a izquierda y a derecha; salen flechas verdes de sus caras superior e inferior, que están libres y han avanzado más allá de las líneas a trazos, y flechas rojas desde la placa de cada lado empujan sus dos caras laterales, que están sujetas; la deformación épsilon y y la tensión sigma z son cero, la velocidad es la raíz cuadrada de E entre rho por uno menos nu al cuadrado, 5275 metros por segundo, un 4,2 por ciento por encima de la viga. Panel c, un sólido extenso: la rebanada está rodeada de material por todos lados y una flecha roja empuja cada una de sus cuatro caras, todas sujetas, sin que la rebanada sea mayor que en reposo; las deformaciones épsilon y y épsilon z son cero, la velocidad es la raíz cuadrada de E por uno menos nu entre rho por uno más nu por uno menos dos nu, 5725 metros por segundo, un 8,5 por ciento por encima de la placa" width="96%" />
+
+*Una rebanada del acero de arriba, vista según la dirección en que viaja la
+onda y dibujada en la mitad del ciclo que la comprime. Comprimido según $x$, el
+material intenta ensancharse hacia los lados. En una viga nada se lo impide, y
+Hopkins lo escribe como $\sigma_y = \sigma_z = 0$ camino de la Ec. (2.20). En
+una placa la propia placa sujeta el ancho a cada lado y sólo el espesor queda
+libre, $\varepsilon_y = 0$ y $\sigma_z = 0$, que es lo que pone $1-\nu^2$ bajo
+la Ec. (2.21). Dentro de un sólido extenso ningún lado puede moverse, y con
+$\varepsilon_y = \varepsilon_z = 0$ las mismas relaciones entre tensión y
+deformación dan el módulo de la Ec. (1.225). Cada cara sujeta empuja de vuelta,
+así que la rebanada es más rígida según $x$ y la onda va más deprisa. El
+ensanchamiento está dibujado mucho mayor que cualquier deformación real, y las
+tres velocidades son las que imprime el bloque de arriba.*
 
 $$
 c_{\mathrm{L,b}} = \sqrt{\frac{E}{\rho}}

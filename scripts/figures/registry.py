@@ -765,6 +765,7 @@ from .vibration import (
     generate_rigid_mass_calibration,
     generate_seat_vibration_test,
     generate_shock_dose_measures,
+    generate_solid_wave_speeds,
     generate_spinal_response_peaks,
     generate_structural_damage_guidelines,
     generate_transfer_stiffness,
@@ -1143,6 +1144,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_railway_passage,
     generate_railway_spectra,
     generate_ground_wave_speeds,
+    # Solids: one steel as a beam, a plate and an unbounded solid, with what
+    # holds the cross-section in each and the three speeds the library gives.
+    generate_solid_wave_speeds,
     # People in buildings (DIN 4150-2): the guide values of Table 1 and
     # Figure D.1, trains an hour against the assessment value.
     generate_people_guide_values,

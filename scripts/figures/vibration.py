@@ -5,7 +5,8 @@ Vibration as a measured quantity and as a transmission path: the human
 exposure weightings and daily exposure, mechanical mobility and dynamic
 stiffness, structure-borne sound power, the SEA coupling loss factors, and the
 bearing-fault envelope that reads a machine's condition. Everything here is
-embedded by a page under ``vibration/``.
+embedded by a page under ``vibration/``, but for the three longitudinal wave
+speeds of a solid, which the guide under ``solids/`` embeds.
 """
 
 import math
@@ -6451,6 +6452,301 @@ def generate_ground_wave_speeds(output_dir: str) -> None:
     ax.legend(loc="upper left", fontsize=10)
     plt.tight_layout()
     save_figure(output_dir, "ground_wave_speeds.svg")
+    plt.close()
+
+
+def _torn_edge(
+    start: tuple[float, float], end: tuple[float, float], teeth: int = 5
+) -> list[tuple[float, float]]:
+    """A zigzag from *start* to *end*: the edge of a body that carries on.
+
+    The points run from *start* to just short of *end* (the next edge starts
+    there), each odd one pushed a tooth outwards on the right of the walk.
+    """
+    (x0, y0), (x1, y1) = start, end
+    length = math.hypot(x1 - x0, y1 - y0)
+    nx, ny = (y1 - y0) / length, -(x1 - x0) / length
+    points = []
+    for k in range(2 * teeth):
+        t = k / (2 * teeth)
+        out = 0.09 if k % 2 else 0.0
+        points.append((x0 + t * (x1 - x0) + out * nx, y0 + t * (y1 - y0) + out * ny))
+    return points
+
+
+def generate_solid_wave_speeds(output_dir: str) -> None:
+    """One steel, three longitudinal speeds, and what holds the cross-section.
+
+    Three cross-sections seen along the direction of propagation, x, with y
+    across the width and z through the thickness, the axes of Hopkins (2007),
+    section 2.3.1. Each is drawn in the compressed half of the cycle, when
+    the squeezed slice tries to spread sideways: the beam spreads both ways
+    (sigma_y = sigma_z = 0, p. 115), the plate only through its thickness
+    because the plate beside the slice holds its width (epsilon_y = 0 and
+    sigma_z = 0, p. 116), and the slice inside an unbounded solid not at all
+    (epsilon_y = epsilon_z = 0, the conditions that turn Eq. 2.3 into the
+    longitudinal modulus B of Norton and Karczub, Eq. 1.225). The spread is
+    drawn far larger than any real strain; what is to scale is that the
+    plate, held one way, spreads 1/(1 - nu) as much the other way as the
+    beam does.
+
+    The three speeds and the two steps between them are computed here from
+    ``phonometry.solids`` with the steel of the guide's first code block, so
+    the figure prints what that block prints.
+    """
+    print("Generating solid_wave_speeds...")
+    from matplotlib.patches import Circle, Polygon
+
+    from phonometry import solids
+
+    modulus, density, poisson = 2.0e11, 7800.0, 0.28
+    beam = solids.beam_longitudinal_speed(modulus, density_kg_m3=density)
+    plate = solids.plate_longitudinal_speed(
+        modulus, density_kg_m3=density, poisson_ratio=poisson
+    )
+    bulk = solids.bulk_longitudinal_speed(
+        modulus, density_kg_m3=density, poisson_ratio=poisson
+    )
+
+    half_w, z_low, z_high = 0.8, -0.35, 0.95  # the slice at rest
+    z_mid = 0.5 * (z_low + z_high)
+    spread = 0.14  # the beam's lateral growth per face, drawn, not to scale
+    # Held across its width, the plate spreads 1/(1 - nu) as much through its
+    # thickness as the beam does, for the same longitudinal strain (Eq. 2.3
+    # with epsilon_y = 0 and sigma_z = 0).
+    grow = {
+        "beam": (spread, spread),
+        "plate": (0.0, spread / (1.0 - poisson)),
+        "bulk": (0.0, 0.0),
+    }
+    panels: tuple[tuple[str, str, str, str, str, str, str], ...] = (
+        (
+            "beam",
+            "a) Beam",
+            "free on every side",
+            r"$\sigma_y = \sigma_z = 0$",
+            r"$c_\mathrm{L,b} = \sqrt{E/\rho}$",
+            f"{beam:.0f} m/s along a beam",
+            "",
+        ),
+        (
+            "plate",
+            "b) Plate",
+            "held across its width,\nfree through its thickness",
+            r"$\varepsilon_y = 0$, $\sigma_z = 0$",
+            r"$c_\mathrm{L,p} = \sqrt{E/(\rho\,(1-\nu^2))}$",
+            f"{plate:.0f} m/s along a plate",
+            f"{100.0 * (plate / beam - 1.0):.1f} % above the beam",
+        ),
+        (
+            "bulk",
+            "c) Unbounded solid",
+            "held on every side",
+            r"$\varepsilon_y = \varepsilon_z = 0$",
+            r"$c^{\prime}_\mathrm{L} = \sqrt{E\,(1-\nu)/(\rho\,(1+\nu)(1-2\nu))}$",
+            f"{bulk:.0f} m/s through the solid",
+            f"{100.0 * (bulk / plate - 1.0):.1f} % above the plate",
+        ),
+    )
+
+    fig, axes = plt.subplots(1, 3, figsize=(11.0, 5.4))
+    for ax, (kind, title, words, condition, formula, speed, step) in zip(
+        axes, panels, strict=True
+    ):
+        ax.set_xlim(-2.9, 2.9)
+        ax.set_ylim(-4.25, 2.3)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        ax.set_title(title, fontsize=12, pad=4)
+        body = theme_fill(COLOR_MUTED, ax)
+        slice_fill = theme_fill(COLOR_PRIMARY, ax)
+        grow_y, grow_z = grow[kind]
+        left, right = -half_w - grow_y, half_w + grow_y
+        low, high = z_low - grow_z, z_high + grow_z
+
+        # The material beside the slice: none round a beam, the plate to
+        # both sides, the solid all round. A torn edge says it carries on.
+        if kind == "plate":
+            outline = [
+                (-2.6, low),
+                *_torn_edge((2.6, low), (2.6, high), teeth=3),
+                (2.6, high),
+                *_torn_edge((-2.6, high), (-2.6, low), teeth=3),
+            ]
+            ax.add_patch(
+                Polygon(
+                    outline, closed=True, facecolor=body, edgecolor=COLOR_FG, lw=1.2
+                )
+            )
+        elif kind == "bulk":
+            corners = [(-2.6, -1.45), (2.6, -1.45), (2.6, 1.95), (-2.6, 1.95)]
+            outline = []
+            for start, end in zip(corners, corners[1:] + corners[:1], strict=True):
+                outline.extend(_torn_edge(start, end, teeth=6))
+            ax.add_patch(
+                Polygon(
+                    outline, closed=True, facecolor=body, edgecolor=COLOR_FG, lw=1.2
+                )
+            )
+
+        # The slice as the wave has squeezed it, and where it stood at rest.
+        ax.add_patch(
+            Polygon(
+                [(left, low), (right, low), (right, high), (left, high)],
+                closed=True,
+                facecolor=slice_fill,
+                edgecolor=COLOR_PRIMARY,
+                lw=2.0,
+                zorder=3,
+            )
+        )
+        if kind != "bulk":
+            rest_left, rest_right = (
+                (-2.6, 2.6) if kind == "plate" else (-half_w, half_w)
+            )
+            for z in (z_low, z_high):
+                ax.plot(
+                    [rest_left, rest_right],
+                    [z, z],
+                    color=COLOR_FG,
+                    lw=1.0,
+                    linestyle=(0, (4, 3)),
+                    zorder=4,
+                )
+            if kind == "beam":
+                for y in (-half_w, half_w):
+                    ax.plot(
+                        [y, y],
+                        [z_low, z_high],
+                        color=COLOR_FG,
+                        lw=1.0,
+                        linestyle=(0, (4, 3)),
+                        zorder=4,
+                    )
+
+        # A face that is free moves out, green; a face that is held is
+        # pushed back by the material beside it, red.
+        free = {"arrowstyle": "-|>", "color": COLOR_TERTIARY, "lw": 2.2}
+        held = {"arrowstyle": "-|>", "color": COLOR_SECONDARY, "lw": 2.2}
+        reach = 0.85
+        free_y, free_z = kind == "beam", kind != "bulk"
+        for sign in (-1.0, 1.0):
+            edge_y = sign * (half_w + grow_y)
+            tail, head = (
+                (edge_y, edge_y + sign * reach)
+                if free_y
+                else (edge_y + sign * reach, edge_y)
+            )
+            ax.annotate(
+                "",
+                xy=(head, z_mid),
+                xytext=(tail, z_mid),
+                arrowprops=free if free_y else held,
+                zorder=5,
+            )
+            edge_z = high if sign > 0 else low
+            tail, head = (
+                (edge_z, edge_z + sign * reach)
+                if free_z
+                else (edge_z + sign * reach, edge_z)
+            )
+            ax.annotate(
+                "",
+                xy=(0.0, head),
+                xytext=(0.0, tail),
+                arrowprops=free if free_z else held,
+                zorder=5,
+            )
+        ax.text(
+            0.16,
+            high + 0.5,
+            "free face" if free_z else "held face",
+            color=COLOR_FG,
+            fontsize=10,
+            ha="left",
+            va="center",
+        )
+        ax.text(
+            half_w + grow_y + 0.12,
+            z_mid + 0.16,
+            "free face" if free_y else "held face",
+            color=COLOR_FG,
+            fontsize=10,
+            ha="left",
+            va="bottom",
+        )
+
+        ax.text(0.0, -2.0, words, fontsize=10, color=COLOR_FG, ha="center", va="center")
+        ax.text(
+            0.0,
+            -2.62,
+            condition,
+            fontsize=10.5,
+            color=COLOR_FG,
+            ha="center",
+            va="center",
+        )
+        ax.text(
+            0.0, -3.22, formula, fontsize=11, color=COLOR_FG, ha="center", va="center"
+        )
+        ax.text(
+            0.0,
+            -3.82,
+            speed,
+            fontsize=13,
+            color=COLOR_FG,
+            ha="center",
+            va="center",
+        )
+        if step:
+            ax.text(
+                0.0, -4.2, step, fontsize=9.5, color=COLOR_FG, ha="center", va="center"
+            )
+
+    # The axes, once: y across the width, z through the thickness, and the
+    # wave leaving the reader along x.
+    ax = axes[0]
+    ox, oz = -2.45, -1.3
+    axis = {"arrowstyle": "-|>", "color": COLOR_FG, "lw": 1.2}
+    ax.annotate("", xy=(ox + 0.75, oz), xytext=(ox, oz), arrowprops=axis)
+    ax.annotate("", xy=(ox, oz + 0.75), xytext=(ox, oz), arrowprops=axis)
+    ax.text(ox + 0.88, oz, "$y$", fontsize=10, color=COLOR_FG, ha="left", va="center")
+    ax.text(ox, oz + 0.86, "$z$", fontsize=10, color=COLOR_FG, ha="center", va="bottom")
+    # x leaves the reader: the tail of an arrow seen from behind.
+    ax.add_patch(
+        Circle(
+            (ox, oz), 0.13, facecolor=COLOR_PANEL, edgecolor=COLOR_FG, lw=1.2, zorder=6
+        )
+    )
+    for dy in (-1.0, 1.0):
+        ax.plot(
+            [ox - 0.09, ox + 0.09],
+            [oz - dy * 0.09, oz + dy * 0.09],
+            color=COLOR_FG,
+            lw=1.2,
+            zorder=7,
+        )
+    ax.text(
+        ox - 0.2, oz - 0.2, "$x$", fontsize=10, color=COLOR_FG, ha="right", va="top"
+    )
+    fig.suptitle(
+        "One steel, three longitudinal wave speeds: the wave travels along $x$,"
+        " into the page",
+        fontsize=12,
+        y=0.985,
+    )
+    fig.text(
+        0.5,
+        0.925,
+        r"$E$ = 200 GPa, $\rho$ = 7800 kg/m³, $\nu$ = 0.28."
+        " Dashed: the slice at rest. The spread is drawn far larger than it is.",
+        fontsize=9.5,
+        color=COLOR_FG,
+        ha="center",
+        va="center",
+    )
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.86, bottom=0.01, wspace=0.02)
+    save_figure(output_dir, "solid_wave_speeds.svg")
     plt.close()
 
 

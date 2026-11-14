@@ -5,6 +5,7 @@ description: "Beam, plate and unbounded: the three longitudinal wave speeds of a
 
 import Scope from '../../../components/Scope.astro';
 import ScopeClaim from '../../../components/ScopeClaim.astro';
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 <Scope>
 <ScopeClaim status="covered" label="Covered">
@@ -52,6 +53,20 @@ print(f"{beam:.0f} {plate:.0f} {bulk:.0f}")  # 5064 5275 5725
 The order is always the same, and it is the order of how much the material is
 held: a beam can contract sideways freely, a plate is held across its width,
 and an unbounded solid is held on every side.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/solid_wave_speeds.svg" alt="Three cross-sections of the same steel, seen along the direction the wave travels, with y across the width and z through the thickness. Panel a, a beam: a rectangular slice with a dashed outline of its size at rest inside it and a green arrow leaving each of its four faces, every face free; stresses sigma y and sigma z are zero, the speed is the square root of E over rho, 5064 metres per second. Panel b, a plate: the slice sits inside a strip of plate that carries on to the left and to the right; green arrows leave its top and bottom faces, which are free and have moved out past the dashed lines, and red arrows from the plate on either side push on its two side faces, which are held; strain epsilon y and stress sigma z are zero, the speed is the square root of E over rho times one minus nu squared, 5275 metres per second, 4.2 per cent above the beam. Panel c, an unbounded solid: the slice is surrounded by material on every side and a red arrow pushes on each of its four faces, all held, the slice no larger than at rest; strains epsilon y and epsilon z are zero, the speed is the square root of E times one minus nu over rho times one plus nu times one minus two nu, 5725 metres per second, 8.5 per cent above the plate" width="96%" />
+
+*One slice of the steel above, seen along the direction the wave travels and
+drawn in the half of the cycle that squeezes it. Squeezed along $x$, the
+material tries to spread sideways. In a beam nothing stops it, and Hopkins
+writes that as $\sigma_y = \sigma_z = 0$ on the way to Eq. (2.20). In a plate
+the plate on either side holds the width and only the thickness is free,
+$\varepsilon_y = 0$ and $\sigma_z = 0$, which is what puts $1-\nu^2$ under
+Eq. (2.21). Inside an unbounded solid no side can move, and with
+$\varepsilon_y = \varepsilon_z = 0$ the same stress-strain relations give the
+modulus of Eq. (1.225). Every face that is held pushes back, so the slice is
+stiffer along $x$ and the wave is faster. The spread is drawn far larger than
+any real strain, and the three speeds are the ones the block above prints.*
 
 $$
 c_{\mathrm{L,b}} = \sqrt{\frac{E}{\rho}}

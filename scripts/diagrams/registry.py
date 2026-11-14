@@ -19,6 +19,7 @@ from .aircraft import (
     _d_aircraft_noise_station,
     _d_anp_records,
     _d_doc29_segment_geometry,
+    _d_flight_path_adjustment,
     _d_rotorcraft_certification,
     _d_rotorcraft_hemisphere,
 )
@@ -983,6 +984,11 @@ DIAGRAMS = {
         _d_anp_records,
         "From an ANP aircraft record to an event level (ECAC Doc 29)",
         866,
+    ),
+    "diagram_flight_path_adjustment": (
+        _d_flight_path_adjustment,
+        "The two sound paths of the Annex 16 adjustment (Figure A2-10)",
+        518,
     ),
     "diagram_rotorcraft_hemisphere": (
         _d_rotorcraft_hemisphere,

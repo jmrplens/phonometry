@@ -1172,6 +1172,229 @@ def _d_aircraft_noise_station(s: SVG, th: Theme) -> None:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Measured and reference flight paths (ICAO Annex 16 Vol. I, Appendix 2, 8.1.3)
+# ---------------------------------------------------------------------------
+
+#: The points of Figure A2-10 are printed in roman type with an italic r:
+#: Q, K, X and Y upright on the baseline, and the r of the reference path
+#: sloped although the same letter abbreviates a word on other plates.
+_PATH_UPRIGHT = ("Q", "K", "X", "Y", "V", "V_GR")
+_PATH_SLOPED = ("Q_r", "K_r", "X_r", "Y_r")
+
+
+def _emission_point(
+    start: tuple[float, float],
+    end: tuple[float, float],
+    station: tuple[float, float],
+    theta_deg: float,
+) -> tuple[float, float]:
+    """The point of the path ``start`` to ``end`` that sees ``station`` under θ.
+
+    θ is the sound emission angle of 8.1.3.1: the angle between the direction
+    of flight and the line from the aircraft to the station.
+    """
+    length = math.hypot(end[0] - start[0], end[1] - start[1])
+    ux, uy = (end[0] - start[0]) / length, (end[1] - start[1]) / length
+    along = (station[0] - start[0]) * ux + (station[1] - start[1]) * uy
+    foot = (start[0] + along * ux, start[1] + along * uy)
+    offset = math.hypot(station[0] - foot[0], station[1] - foot[1])
+    past = -offset / math.tan(math.radians(theta_deg))
+    return foot[0] + past * ux, foot[1] + past * uy
+
+
+def _d_flight_path_adjustment(s: SVG, th: Theme) -> None:
+    """The two sound propagation paths the adjustment of 8.3 is written in.
+
+    ICAO Annex 16 Volume I (2017), Appendix 2: 8.1.3.1 names the points (page
+    APP 2-33, PDF page 171) and Figure A2-10 draws them for a microphone
+    beneath the flight path (APP 2-34, PDF page 172); 8.3.2.1 and 8.3.4.2 are
+    the terms they enter (APP 2-37 and APP 2-38). The figure of the print is
+    a perspective, because the measured ground track need not follow the
+    extended runway centre line the station sits on; this is the elevation of
+    it, and 8.1.3.3 asks for the angle in three dimensions. Both panels share
+    one scale and one sound emission angle, which is what fixes the second
+    point from the first.
+    """
+    theta = 128.0
+    ground = 300.0
+    panels = (
+        (
+            "(a) Measured flight path, test day",
+            40.0,
+            (62.0, 166.0),
+            (418.0, 120.0),
+            150.0,
+            th.secondary,
+            ("X", "Y", "Q", "K"),
+            ("QK", "$α(i)$, test day"),
+        ),
+        (
+            "(b) Reference flight path, reference day",
+            470.0,
+            (492.0, 202.0),
+            (848.0, 166.0),
+            580.0,
+            th.primary,
+            ("$X_r$", "$Y_r$", "$Q_r$", "$K_r$"),
+            ("$Q_r$$K_r$", "$α_{R}(i)$, reference day"),
+        ),
+    )
+    heads = s.fit_size([panel[0] for panel in panels], [15, 14, 13], 384, bold=True)
+    for head, left, start, end, station_x, colour, names, slant in panels:
+        s.text(left, 72, head, heads, th.primary, anchor="start", bold=True)
+        s.ground(ground, left, left + 390)
+        station = (station_x, ground - 28.0)
+        s.mic(station_x, station[1], ground, scale=0.6)
+        point = _emission_point(start, end, station, theta)
+        heading = math.degrees(math.atan2(start[1] - end[1], end[0] - start[0]))
+        s.arrow(start[0], start[1], end[0], end[1], colour, 2.4)
+        s.circle(start[0], start[1], 3.4, colour)
+        s.line(point[0], point[1], station[0], station[1] + 2, th.accent, 2.0)
+        _arc(s, point[0], point[1], 26.0, heading - theta, heading, th.fg, 1.3)
+        tx, ty = _polar(point[0], point[1], 39.0, heading - theta / 2)
+        s.text(tx, ty + 5, "$θ$", 15, th.fg)
+        _plane_glyph(s, point[0], point[1], -heading, 0.62)
+        s.text(
+            start[0],
+            start[1] - 12,
+            names[0],
+            15,
+            th.fg,
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+        s.text(
+            end[0],
+            end[1] - 12,
+            names[1],
+            15,
+            th.fg,
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+        s.text(
+            point[0] - 4,
+            point[1] - 16,
+            names[2],
+            15,
+            th.fg,
+            bold=True,
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+        s.text(
+            station_x - 16,
+            ground - 8,
+            names[3],
+            15,
+            th.fg,
+            bold=True,
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+        mid = ((point[0] + station[0]) / 2, (point[1] + station[1]) / 2)
+        s.text(
+            mid[0] - 16,
+            mid[1] - 4,
+            slant[0],
+            15,
+            th.accent,
+            "end",
+            bold=True,
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+        s.text(
+            mid[0] - 16,
+            mid[1] + 15,
+            slant[1],
+            13,
+            th.fg,
+            "end",
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+    notes = (
+        (
+            40.0,
+            "Q: where the aircraft was when it emitted the",
+            "sound heard as PNLTM at the measurement point K",
+        ),
+        (
+            470.0,
+            "$Q_r$: the point of the reference path that sees the",
+            "reference point $K_r$ under the same emission angle $θ$",
+        ),
+    )
+    size = s.fit_size([line for note in notes for line in note[1:]], [13, 12], 380)
+    for left, first, second in notes:
+        s.text(
+            left,
+            ground + 34,
+            first,
+            size,
+            th.fg,
+            "start",
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+        s.text(
+            left,
+            ground + 52,
+            second,
+            size,
+            th.fg,
+            "start",
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+
+    # --- where the two lengths enter ----------------------------------------
+    s.rect(40, 376, 820, 124, th.panel, th.fg, rx=6, sw=1.6)
+    terms = (
+        (
+            "0.01 [$α(i)$ − $α_{R}(i)$] QK",
+            "the two days' absorption, over the measured sound path (8.3.2.1)",
+        ),
+        (
+            "0.01 $α_{R}(i)$ (QK − $Q_r$$K_r$)",
+            "the reference absorption, over the change of length (8.3.2.1)",
+        ),
+        (
+            "20 lg (QK/$Q_r$$K_r$)",
+            "spherical spreading, over the change of length (8.3.2.1)",
+        ),
+        (
+            "−7.5 lg (QK/$Q_r$$K_r$) + 10 lg ($V_G$/$V_{GR}$)",
+            "$Δ_2$: the duration, by length and ground speed (8.3.4.2)",
+        ),
+    )
+    size = s.fit_size([meaning for _, meaning in terms], [13, 12, 11], 440)
+    for k, (term, meaning) in enumerate(terms):
+        y = 402 + 27 * k
+        s.text(
+            56,
+            y,
+            term,
+            14,
+            th.accent,
+            "start",
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+        s.text(
+            398,
+            y,
+            meaning,
+            size,
+            th.fg,
+            "start",
+            upright=_PATH_UPRIGHT,
+            sloped=_PATH_SLOPED,
+        )
+
+
 def _heli_glyph(
     s: SVG, x: float, y: float, *, side: bool = True, scale: float = 1.0
 ) -> None:

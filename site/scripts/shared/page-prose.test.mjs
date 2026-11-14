@@ -147,6 +147,21 @@ test('a comment holding a backtick hides no figure after it', () => {
   assert.equal(authorsFigure('A `<!--` span.\n\n![fig](a.png)\n'), true);
 });
 
+test('a backslash before a comment escapes its opening character, so the comment is text the page shows', () => {
+  // CommonMark 0.31.2, 2.4: `\{` and `\<` show the brace and the bracket and
+  // open nothing, so what follows them is prose; two backslashes are one shown,
+  // and the comment after them is one.
+  assert.equal(authorsFigure('Texto \\{/* ![alt](x.png) */} fin.\n', { mdx: true }), true);
+  assert.equal(authorsFigure('Texto \\<!-- ![alt](x.png) --> fin.\n'), true);
+  assert.equal(authorsFigure('Texto \\<!-- ![alt](x.png) --> fin.\n', { mdx: true }), true);
+  assert.equal(authorsFigure('Texto \\\\{/* ![alt](x.png) */} fin.\n', { mdx: true }), false);
+  assert.equal(authorsFigure('Texto \\\\<!-- ![alt](x.png) --> fin.\n'), false);
+  // A backslash a code span holds escapes nothing after the span.
+  assert.equal(authorsFigure('Texto `a\\`{/* ![alt](x.png) */} fin.\n', { mdx: true }), false);
+  const lines = ['Un \\{/* $$ */} texto'];
+  assert.equal(strayDelimiter(shownLines(lines, [false], { mdx: true })[0]), 'Un \\{/* $$ */} texto');
+});
+
 test('the maths check reads a comment with the code spans', () => {
   const lines = ['<!-- a `', '$$x$$ text $$ -->', 'Prose `y` here.'];
   const shown = shownLines(lines, [false, false, false]);

@@ -198,6 +198,32 @@ function unclosed(block, comments) {
   return !pattern.test(block.join('\n').trimStart());
 }
 
+/**
+ * Whether a backslash escapes `text[at]`: an odd run of them stands right before
+ * it, counted no further back than `from`, where the last span or comment read
+ * ended. A backslash a span or a comment holds escapes nothing after it.
+ */
+function escapedSince(text, at, from) {
+  let count = 0;
+  while (at - count > from && text[at - count - 1] === '\\') count += 1;
+  return count % 2 === 1;
+}
+
+/**
+ * The first comment of `block` that opens at or past `done`, or `null`. One whose
+ * `<` or `{` a backslash escapes is no comment (CommonMark 0.31.2, 2.4): the page
+ * shows the character, and what follows it is prose.
+ */
+function commentFrom(block, comments, done) {
+  const pattern = new RegExp(COMMENTS[comments].source, 'g');
+  pattern.lastIndex = done;
+  for (let comment = pattern.exec(block); comment !== null; comment = pattern.exec(block)) {
+    if (!escapedSince(block, comment.index, done)) return comment;
+    pattern.lastIndex = comment.index + 1;
+  }
+  return null;
+}
+
 /** The spans of a piece of a block, and its comments with `comments`, left to right. */
 function spansAndComments(block, markers, comments) {
   if (!comments) return inlineSpans(block, markers);
@@ -205,9 +231,7 @@ function spansAndComments(block, markers, comments) {
   let done = 0;
   for (;;) {
     const spans = inlineSpans(block.slice(done), markers);
-    const pattern = new RegExp(COMMENTS[comments].source, 'g');
-    pattern.lastIndex = done;
-    const comment = pattern.exec(block);
+    const comment = commentFrom(block, comments, done);
     let next = spans.length ? [spans[0][0] + done, spans[0][1] + done] : null;
     if (comment && (!next || comment.index < next[0])) {
       next = [comment.index, comment.index + comment[0].length];

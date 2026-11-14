@@ -117,8 +117,8 @@ fit = np.asarray(vibration.height_fundamental_frequency(heights))
 fig, ax = plt.subplots()
 ax.fill_between(
     heights,
-    fit * (1.0 - vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
-    fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
+    fit * (1.0 - vibration.EMPIRICAL_FREQUENCY_ERROR),
+    fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_ERROR),
     alpha=0.2,
     label=r"$\pm$50 %",
 )

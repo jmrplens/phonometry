@@ -222,6 +222,14 @@ $w = \sqrt{2 p_\mathrm{v} / \rho}$.
 | ValueError | For a non-positive density or a negative velocity pressure. |
 | TypeError | if `density` is not a single number, or `velocity_pressure_pa` holds a text or a value that is not a real number. |
 
+## FLOW_VELOCITY_REPORT_DEVIATION_PERCENT
+
+*Constant* (`float`).
+
+```python
+FLOW_VELOCITY_REPORT_DEVIATION_PERCENT = 10.0
+```
+
 ## gas_density_kg_m3
 
 ```python
@@ -1248,11 +1256,3 @@ asks.
 | :--- | :--- |
 | ValueError | For inputs that do not match. |
 | TypeError | if `static_pressure_pa` or `total_pressure_pa` holds a text or a value that is not a real number. |
-
-## VELOCITY_UNIFORMITY_TOLERANCE_PERCENT
-
-*Constant* (`float`).
-
-```python
-VELOCITY_UNIFORMITY_TOLERANCE_PERCENT = 10.0
-```

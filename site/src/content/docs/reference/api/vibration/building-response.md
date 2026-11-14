@@ -145,12 +145,12 @@ The ± 50 % band D.2 puts around an empirical prediction, in hertz.
 | ValueError | If the frequency is not positive and finite. |
 | TypeError | if `frequency_hz` is not a single number. |
 
-## EMPIRICAL_FREQUENCY_TOLERANCE
+## EMPIRICAL_FREQUENCY_ERROR
 
 *Constant* (`float`).
 
 ```python
-EMPIRICAL_FREQUENCY_TOLERANCE = 0.5
+EMPIRICAL_FREQUENCY_ERROR = 0.5
 ```
 
 ## estimate_fundamental_frequency

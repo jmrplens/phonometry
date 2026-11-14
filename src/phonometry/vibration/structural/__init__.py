@@ -81,7 +81,7 @@ from .building_damage import (
 )
 from .building_response import (
     DAMPING_RATIO_RANGE,
-    EMPIRICAL_FREQUENCY_TOLERANCE,
+    EMPIRICAL_FREQUENCY_ERROR,
     HEIGHT_FREQUENCY_CONSTANT_HZ_M,
     HEIGHT_PERIOD_COEFFICIENT_S_PER_M,
     PERIOD_COEFFICIENT_RANGES,
@@ -176,7 +176,7 @@ __all__ = [
     "DoubleHitCheck",
     "DrivingPointStiffnessResult",
     "DrivingPointUncertainty",
-    "EMPIRICAL_FREQUENCY_TOLERANCE",
+    "EMPIRICAL_FREQUENCY_ERROR",
     "EffectiveBlockingMass",
     "ExponentialWindowCorrection",
     "FLOOR_VERTICAL_MM_S",

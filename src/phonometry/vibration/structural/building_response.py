@@ -75,7 +75,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "DAMPING_RATIO_RANGE",
-    "EMPIRICAL_FREQUENCY_TOLERANCE",
+    "EMPIRICAL_FREQUENCY_ERROR",
     "HEIGHT_FREQUENCY_CONSTANT_HZ_M",
     "HEIGHT_PERIOD_COEFFICIENT_S_PER_M",
     "PERIOD_COEFFICIENT_RANGES",
@@ -128,9 +128,11 @@ HEIGHT_FREQUENCY_CONSTANT_HZ_M: float = 46.0
 #: is the precision the annex prints it to.
 HEIGHT_PERIOD_COEFFICIENT_S_PER_M: float = 0.022
 
-#: D.2: "errors of ± 50 % are not uncommon, and this is typical of the
-#: accuracy which can be expected using empirical formulae".
-EMPIRICAL_FREQUENCY_TOLERANCE: float = 0.5
+#: D.2: the error an empirical prediction of the fundamental frequency
+#: carries, as a fraction of the prediction: "errors of ± 50 % are not
+#: uncommon, and this is typical of the accuracy which can be expected using
+#: empirical formulae".
+EMPIRICAL_FREQUENCY_ERROR: float = 0.5
 
 #: D.4: the damping ratios measured on buildings where soil-structure
 #: interaction was negligible, as a fraction of critical rather than a
@@ -320,8 +322,8 @@ def empirical_frequency_bounds(frequency_hz: float) -> tuple[float, float]:
     """
     f = require_positive(frequency_hz, "frequency_hz")
     return (
-        f * (1.0 - EMPIRICAL_FREQUENCY_TOLERANCE),
-        f * (1.0 + EMPIRICAL_FREQUENCY_TOLERANCE),
+        f * (1.0 - EMPIRICAL_FREQUENCY_ERROR),
+        f * (1.0 + EMPIRICAL_FREQUENCY_ERROR),
     )
 
 

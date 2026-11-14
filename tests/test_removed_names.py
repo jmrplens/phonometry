@@ -963,6 +963,32 @@ def test_the_tone_prominence_limit_and_the_omc_deviation_say_what_they_are() -> 
     assert "sigma_omc_db" in parameters
 
 
+def test_the_iso_11820_velocity_line_says_it_asks_for_a_report() -> None:
+    """The 10 % of ISO 11820 9.2 is a deviation past which the report says more.
+
+    Its first name called it a uniformity tolerance, the word ISO 7235's
+    ``VELOCITY_PROFILE_TOLERANCE_PERCENT`` beside it uses for a profile the
+    measurement has to meet. No release shipped that name.
+    """
+    assert not hasattr(ph.noise_control, "VELOCITY_UNIFORMITY_TOLERANCE_PERCENT")
+    assert ph.noise_control.FLOW_VELOCITY_REPORT_DEVIATION_PERCENT == pytest.approx(
+        10.0
+    )
+
+
+def test_the_iso_4866_band_says_it_is_an_error() -> None:
+    """The ± 50 % of ISO 4866 D.2 is the error an empirical prediction carries.
+
+    4.0.0rc1 shipped it as ``EMPIRICAL_FREQUENCY_TOLERANCE``, although every
+    other published constant named a tolerance is a bound a value has to stay
+    within; nothing is held to this one, it only widens a prediction into a
+    band.
+    """
+    for home in (ph.vibration, ph.vibration.structural):
+        assert not hasattr(home, "EMPIRICAL_FREQUENCY_TOLERANCE")
+        assert home.EMPIRICAL_FREQUENCY_ERROR == pytest.approx(0.5)
+
+
 # --------------------------------------------------------------------------- #
 # 4.0 an answer of several quantities is a record: the two members that only
 # repacked a record's own fields into a tuple are gone, and the records that

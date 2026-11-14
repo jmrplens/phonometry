@@ -73,6 +73,7 @@ from .devices import (
     _d_high_frequency_room,
     _d_in_duct_rig,
     _d_induction_loop_measurement,
+    _d_intensity_discrete_points,
     _d_intensity_scan,
     _d_loudspeaker_freefield,
     _d_loudspeaker_polar,
@@ -426,6 +427,11 @@ DIAGRAMS = {
         _d_intensity_scan,
         "Precision sound intensity scanning (ISO 9614-3)",
         600,
+    ),
+    "diagram_intensity_discrete_points": (
+        _d_intensity_discrete_points,
+        "How sound power is measured at discrete points (ISO 9614-1)",
+        580,
     ),
     "diagram_reverberation_power": (
         _d_reverberation_power,

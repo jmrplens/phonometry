@@ -901,6 +901,167 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
+# ISO 9614-1: the discrete-point surface and the loop of Figure B.1
+# ---------------------------------------------------------------------------
+
+#: The slope keys of the discrete-point plate: ISO 9614-1 prints the n of the
+#: normal intensity and the d of the dynamic capability index upright.
+_POINTS_UPRIGHT = ("I_n", "L_d")
+
+
+def _d_intensity_discrete_points(s: SVG, th: Theme) -> None:
+    """ISO 9614-1 as a place and as a loop.
+
+    Left, the measurement surface of clause 8.2: a box over a reflecting
+    floor, cut into segments with one held position in each face in view
+    (front, side and top), the source standing inside it more than 0.5 m from
+    the surface on average, and the probe at one position on the side face
+    with its two microphones on the normal to that face. Right, the scheme of
+    Figure B.1 in its order: the short-time samples at one typical position
+    give F1 first, and only when F1 passes are the N positions measured and
+    the three remaining gates walked; every gate fails into the action codes
+    Table B.3 prints for it and back to the top, never to the gate below.
+    """
+    # ===== a: the surface and its positions =====
+    s.text(250, 74, "a · The surface and its positions (clause 8.2)", 15, bold=True)
+    bx, gy, hw, ht, dp = 230.0, 440.0, 130.0, 260.0, 120.0
+    dx, dy = dp * 0.72, dp * 0.55  # the oblique of _box_wire
+    fl, fr, ft = bx - hw, bx + hw, gy - ht
+    s.ground(gy, 40, 470)
+    _box_wire(s, bx, gy, hw, dp, ht, th.primary)
+    # The source stands inside the surface, its front face set back by d0
+    # along the depth: drawn over the hidden back edges, under the front face.
+    d0, ds, hws, hs = 44.0, 24.0, 40.0, 62.0
+    # Centred between the two columns of the front face, so that no position
+    # stands on it.
+    sxl = bx - (2 * hws + 0.72 * ds) / 2
+    scx, sgy = sxl + hws, gy - d0 * 0.55
+    _box_solid(s, th, scx, sgy, hws, ds, hs)
+    s.text(sxl + hws / 2, sgy - 10, "source", 10, th.fg)
+    # The front face: two columns and three rows, the divider running across
+    # the source because the face stands in front of it.
+    s.line(bx, ft, bx, gy, th.muted, 1.1, dash="4,4")
+    rows = [ft + (i + 0.5) * ht / 3 for i in range(3)]
+    for k in (1, 2):
+        y = ft + k * ht / 3
+        s.line(fl, y, fr, y, th.muted, 1.1, dash="4,4")
+        s.line(fr, y, fr + dx, y - dy, th.muted, 1.1, dash="4,4")
+    s.line(bx, ft, bx + dx, ft - dy, th.muted, 1.1, dash="4,4")
+    front = [(x, y) for y in rows for x in (bx - hw / 2, bx + hw / 2)]
+    side = [(fr + dx / 2, y - dy / 2) for y in rows]
+    top = [(x + dx / 2, ft - dy / 2) for x in (bx - hw / 2, bx + hw / 2)]
+    for x, y in front + side + top:
+        s.circle(x, y, 5.0, th.accent)
+        s.circle(x, y, 1.8, th.bg)
+    s.text(
+        bx + dx / 2, ft - dy - 12, "measurement surface, segments $S_i$", 13, th.primary
+    )
+    for y in rows:
+        s.arrow(fl, y, fl - 34, y + 8, th.secondary, 2.0)
+    s.text(
+        fl - 40,
+        rows[1] + 30,
+        "$I_n$",
+        13,
+        th.secondary,
+        anchor="end",
+        bold=True,
+        upright=_POINTS_UPRIGHT,
+    )
+    # The probe at the middle position of the side face: its two microphones
+    # straddle the position on the normal to that face, the handle outside.
+    px, py = side[1]
+    s.circle(px - 12, py, 3.4, th.fg)
+    s.circle(px + 12, py, 3.4, th.fg)
+    s.line(px - 8.6, py, px - 5.6, py, th.fg, 1.6)
+    s.line(px + 15.4, py, px + 50, py, th.fg, 2.4)
+    s.text(px + 56, py + 4, "p-p probe", 11, th.fg, anchor="start")
+    # The dimension runs on the floor along the depth, from the source's
+    # front face to the front face of the surface.
+    s.arrow(sxl - 0.36 * d0, gy - 0.275 * d0, sxl, sgy, th.muted, 1.2)
+    s.arrow(sxl - 0.36 * d0, gy - 0.275 * d0, sxl - 0.72 * d0, gy, th.muted, 1.2)
+    # Its label under the floor at the arrow's foot: above it, the oblique
+    # edge of the surface and the lowest position leave no room.
+    s.text(sxl - 0.72 * d0, gy + 21, "> 0.5 m", 11, th.fg)
+    notes = (
+        "≥ 1 position per m² and ≥ 10 in all, spread evenly by segment area",
+        "probe held still at each one, its axis normal to the surface",
+        "a hard floor closes the surface: no positions on it, its area left out",
+        "more than 0.5 m from the source on average",
+    )
+    nsize = s.fit_size(notes, (12, 11, 10), 440)
+    for k, txt in enumerate(notes):
+        s.text(40, 482 + k * 20, txt, nsize, th.muted, anchor="start")
+
+    # ===== b: the scheme of Figure B.1 =====
+    cx, gw = 640.0, 240.0
+    s.text(690, 74, "b · The loop of Figure B.1", 15, bold=True)
+    s.rect(cx - gw / 2, 92, gw, 40, th.panel, th.primary, rx=8, sw=2)
+    s.text(cx, 109, "short-time $I_n$ → $F_1$", 12, bold=True, upright=_POINTS_UPRIGHT)
+    s.text(cx, 125, "at one typical position on the surface", 11, th.muted)
+
+    def gate(y: float, label: str, action: str) -> None:
+        s.rect(cx - gw / 2, y, gw, 30, th.panel, th.fg, rx=15, sw=1.8)
+        s.text(cx, y + 20, label, 13, bold=True, upright=_POINTS_UPRIGHT)
+        s.arrow(cx + gw / 2, y + 15, 790, y + 15, th.secondary, 1.6)
+        s.text(775, y + 9, "no", 11, th.secondary, bold=True)
+        s.rect(792, y + 1, 62, 28, th.bg, th.secondary, rx=6, sw=1.6)
+        s.text(823, y + 20, action, 12, th.secondary, bold=True)
+        s.line(854, y + 15, 866, y + 15, th.secondary, 1.6)
+
+    def down(y: float, *, yes: bool) -> None:
+        s.arrow(cx, y - 16, cx, y - 2, th.fg, 1.6)
+        if yes:
+            s.text(cx - 14, y - 4, "yes", 11, th.accent, anchor="end", bold=True)
+
+    down(148, yes=False)
+    gate(148, "$F_1$ ≤ 0.6", "e")
+    down(194, yes=True)
+    s.rect(cx - gw / 2, 194, gw, 32, th.panel, th.primary, rx=8, sw=2)
+    s.text(
+        cx,
+        215,
+        "$I_n$ and $L_p$ at the $N$ positions",
+        12,
+        bold=True,
+        upright=_POINTS_UPRIGHT,
+    )
+    gates = (
+        ("$L_d > F_2$  (criterion 1)", "a or b"),
+        ("$F_3 − F_2$ ≤ 3 dB", "a or b"),
+        ("$N > C·F_4^2$  (criterion 2)", "c or d"),
+    )
+    for k, (label, action) in enumerate(gates):
+        y = 242 + k * 48
+        down(y, yes=k > 0)
+        gate(y, label, action)
+    # Every action returns to the top of the scheme, as the line of Figure
+    # B.1 does: never to the gate below it.
+    s.line(866, 242 + 2 * 48 + 15, 866, 112, th.secondary, 1.6)
+    s.arrow(866, 112, cx + gw / 2 + 2, 112, th.secondary, 1.6)
+    s.text(860, 128, "act, then", 11, th.secondary, anchor="end")
+    s.text(860, 141, "measure again", 11, th.secondary, anchor="end")
+    yend = 384.0
+    down(yend, yes=True)
+    s.rect(cx - gw / 2, yend, gw, 46, th.panel, th.accent, rx=8, sw=2.2)
+    s.text(cx, yend + 19, "grade reached, stated (10.6)", 12, bold=True)
+    s.text(cx, yend + 37, "$F_1$ again before and after (B.1.4)", 11, th.muted)
+    actions = (
+        "a  surface closer, to 0.25 m at the least, or out to 1 m",
+        "b  shield the surface, or cut the reflections",
+        "c  more positions, spread evenly",
+        "d  surface farther out, or more positions on it",
+        "e  a steadier field, or longer at each position",
+    )
+    s.text(
+        500, 458, "Table B.3, what each action changes", 12, bold=True, anchor="start"
+    )
+    asize = s.fit_size(actions, (11, 10), 370)
+    for k, txt in enumerate(actions):
+        s.text(500, 478 + k * 18, txt, asize, th.muted, anchor="start")
+
+
+# ---------------------------------------------------------------------------
 # ISO 3741 reverberation test room: the direct and the comparison methods
 # ---------------------------------------------------------------------------
 

@@ -105,7 +105,7 @@ references:
     title: "Sound system equipment — Part 16: Objective rating of speech intelligibility by speech transmission index"
     designation: "IEC 60268-16:2020 (Edición 5)"
     url: "https://webstore.iec.ch/en/publication/26771"
-    note: "La sección del STI: las frecuencias de modulación del A.2.2, la conversión a índice del A.5.4/A.5.5, los pesos de banda de la Tabla A.1, los datos de enmascaramiento y de umbral de recepción de las Tablas A.2/A.3, el método STIPA del Anexo B y las bandas de calificación del Anexo F."
+    note: "La sección del STI: las frecuencias de modulación (A.1.4; A.2.2 en la Ed. 4), la conversión a índice (A.5.4/A.5.5 en la numeración de la Ed. 4 que cita la página), los pesos de banda de la Tabla A.1, los datos de enmascaramiento y de umbral de recepción de las Tablas A.2/A.3, el método STIPA del Anexo B y las bandas de calificación del Anexo F."
   - type: standard
     organization: "American National Standards Institute"
     year: 1997
@@ -154,6 +154,7 @@ sidebar:
 ---
 
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Esta página reúne la teoría de la audición y la psicoacústica: las líneas isofónicas, los modelos de sonoridad de Zwicker, Moore-Glasberg y Sottek, las métricas de calidad sonora (tonalidad, aspereza y agudeza), la prominencia tonal, las métricas del habla STI y SII, y la estadística de los umbrales de audición y de la pérdida auditiva. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
 
@@ -248,6 +249,18 @@ Consulta la [guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudn
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" width="80%" />
 
 *Sonoridad específica N′(z) sobre el eje de Bark: la energía repartida entre muchas bandas críticas suma más sonios que el mismo nivel de banda concentrado en una sola.*
+
+Esa figura está dibujada a un solo nivel, y la etapa 5 es la que depende del nivel. El clip de la [guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) sube el nivel de banda del mismo sonido de banda estrecha de 1 kHz de 45 a 85 dB:
+
+<Video
+  name="anim_specific_loudness"
+  width={2400}
+  height={1350}
+  title="Cómo la sonoridad específica se integra en la sonoridad total"
+  description="El patrón de sonoridad específica de una banda estrecha de 1 kHz se construye sobre el eje de Bark mientras el nivel de banda sube de 45 a 85 dB, y el área bajo el patrón se integra en la sonoridad total en sonios."
+/>
+
+*La pendiente superior en acción (la Tabla A.9 da su inclinación según el rango de sonoridad específica y la banda crítica). El lóbulo principal se queda en las bandas críticas en torno a 8,5 Bark mientras el flanco de su lado de alta frecuencia llega más lejos por el eje de Bark al subir el nivel, hasta unos 14 Bark a 45 dB y casi 20 Bark a 85 dB, lo que el clip rotula como extensión del enmascaramiento hacia agudos. El área bajo el patrón pasa de 1,3 sonios a 45 dB a 4,9 sonios a 65 dB y a 19,8 sonios a 85 dB.*
 
 ## Modelos avanzados de sonoridad y calidad sonora
 
@@ -484,7 +497,7 @@ Consulta la [guía de tonos discretos prominentes](/phonometry/es/perception/psy
 
 ## Transferencia de modulación y STI (IEC 60268-16)
 
-La inteligibilidad del habla viaja en las modulaciones lentas de intensidad de la envolvente del habla. Los números de apartado que siguen son los de IEC 60268-16 Ed. 5 (2020). La **función de transferencia de modulación (MTF)** $m(F)$ de un canal de transmisión es la razón entre la profundidad de modulación recibida y la emitida de la envolvente de intensidad por banda de octava a la frecuencia de modulación $F$; el STI completo la evalúa en las 14 frecuencias de modulación en tercios de octava de 0,63 a 12,5 Hz en las siete bandas de octava de 125 Hz a 8 kHz (A.2.2). Desde una respuesta al impulso medida, la **forma cerrada de Schroeder** la da directamente (método indirecto):
+La inteligibilidad del habla viaja en las modulaciones lentas de intensidad de la envolvente del habla. Los números de tabla que siguen son los de IEC 60268-16 Ed. 5 (2020); los apartados de la cadena de cálculo se citan con su numeración de la Ed. 4 (2011), como los cita la biblioteca, porque la Ed. 5 reordenó el Anexo A (su A.5 es la generación de la señal de ensayo). La **función de transferencia de modulación (MTF)** $m(F)$ de un canal de transmisión es la razón entre la profundidad de modulación recibida y la emitida de la envolvente de intensidad por banda de octava a la frecuencia de modulación $F$; el STI completo la evalúa en las 14 frecuencias de modulación en tercios de octava de 0,63 a 12,5 Hz en las siete bandas de octava de 125 Hz a 8 kHz (A.2.2 de la Ed. 4; A.1.4 en la Ed. 5). Desde una respuesta al impulso medida, la **forma cerrada de Schroeder** la da directamente (método indirecto):
 
 $$
 m_k(f_m) = \frac{\left| \int_0^{\infty} h_k^2(t)\ \mathrm{e}^{-j 2 \pi f_m t}\ dt \right|}{\int_0^{\infty} h_k^2(t)\ dt}
@@ -509,6 +522,17 @@ $$
 $$
 
 truncado a 1,0.
+
+El clip de la [guía de transmisión del habla](/phonometry/es/perception/speech/speech-transmission/) pone las dos degradaciones sobre una misma envolvente: una sonda de 4 Hz con modulación plena, recibida a través de la banda de octava de 1 kHz y dibujada con la media recibida constante. Primero el tiempo de reverberación barre de 0,30 a 2,50 s sin ruido: actúa sobre la propia $m$, a través de la integral de arriba, y la profundidad a 4 Hz cae de 0,90 a 0,26 y el STI de 0,84 a 0,40. Después, con 1,00 s fijo, la relación señal-ruido baja de 25 a 0 dB: actúa a través del factor $1/(1 + 10^{-\mathrm{SNR}/10})$, que vale un medio a 0 dB, y la profundidad termina en 0,28 y el STI en 0,36.
+
+<Video
+  name="anim_modulation_transfer"
+  width={2400}
+  height={1350}
+  title="La reverberación y el ruido desmontando una envolvente al ritmo del habla"
+  description="Una envolvente de intensidad de cuatro hercios con modulación plena se recibe a través de la banda de octava de un kilohercio de una sala. Mientras el tiempo de reverberación barre de 0,30 a 2,50 segundos los picos bajan y los valles se rellenan hacia una línea media que no se mueve, y la profundidad de modulación medida cae de 0,90 a 0,26; la curva de transferencia de modulación de al lado baja en cada una de las catorce frecuencias de modulación, los siete índices de transferencia de modulación por banda caen con ella y el índice de transmisión del habla recorre desde 0,84 hasta 0,40. Después, con un tiempo de reverberación fijo de un segundo, la relación señal-ruido de habla barre de 25 a 0 decibelios: en su lugar sube un suelo de ruido sombreado bajo la traza, la media sigue sin moverse y la profundidad vuelve a caer, hasta 0,28, para un índice de transmisión del habla de 0,36."
+  caption="Dos mecanismos, una sola magnitud. La reverberación esparce energía por los huecos, así que la envolvente se encoge en torno a su media; el ruido estacionario rellena los huecos desde abajo, así que sube un suelo por debajo. Ninguno de los dos cambia el nivel medio, y los dos destruyen el contraste con el que quien escucha segmenta las sílabas."
+/>
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_band_mti.svg" alt="Índice de transmisión de modulación por banda de octava de 125 Hz a 8 kHz para una sala con 0,9 s de tiempo de reverberación y una relación habla-ruido de 15 dB: las siete barras quedan próximas entre sí, entre unos 0,54 y 0,60, y dan STI = 0,58 con la valoración E del Anexo F" width="88%" />
 

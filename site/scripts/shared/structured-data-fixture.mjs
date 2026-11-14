@@ -14,8 +14,9 @@
 // its graph and what it says, which a test changes in place before `check`
 // writes the build. Each page carries two ld+json blocks, as the built site
 // does: the site-wide nodes astro.config.mjs puts on every page, and the
-// page's own graph from Head.astro. A page may carry further blocks, which a
-// test gives whole, or as written when it means one not to parse.
+// page's own graph from Head.astro. A page may carry further blocks, as the
+// glossary writes its terms in one of its own; a test gives each whole, or as
+// written when it means one not to parse.
 //
 // Nothing here is installed: the tests run before the site's dependencies are.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -279,7 +280,9 @@ export function build({ pages = 10, dated = pages, published = '2026-07-01', pla
  * Write `built` as HTML files into a directory of their own, and its
  * `content` (path to text) as the content tree in another, run the check on
  * the two the way CI does, and say how it ended. A build with no `content`
- * gets an empty tree, so the check holds it to no page of the site's.
+ * gets an empty tree, so the check holds it to no page of the site's; its
+ * `glossary`, when it gives one, is the glossary entries it was made from, in
+ * the shape src/data/glossary.mjs exports them.
  *
  * Each page carries two blocks, as the built site does: the site-wide nodes
  * astro.config.mjs puts on every page, and the page's own graph from
@@ -290,7 +293,8 @@ export function build({ pages = 10, dated = pages, published = '2026-07-01', pla
  *
  * @param {import('node:test').TestContext} t The test, which removes the build when it ends.
  * @param {Record<string, {path: string, nodes: object[], text?: string, blocks?: (object|string)[]}>|object[]} built
- *   The pages, and under `content` the pages of the content tree they are built from.
+ *   The pages, under `content` the pages of the content tree they are built from, and under
+ *   `glossary` the glossary entries.
  * @returns {{status: number|null, out: string, err: string}} The check's exit status and what it printed.
  */
 export function check(t, built) {
@@ -300,7 +304,7 @@ export function check(t, built) {
 		rmSync(dist, { recursive: true, force: true });
 		rmSync(tree, { recursive: true, force: true });
 	});
-	const { content = {}, ...pages } = built;
+	const { content = {}, glossary, ...pages } = built;
 	for (const [path, text] of Object.entries(content)) {
 		mkdirSync(dirname(join(tree, path)), { recursive: true });
 		writeFileSync(join(tree, path), text);
@@ -318,6 +322,14 @@ export function check(t, built) {
 				`<body><main>${text}</main>${blocks.map(further).join('')}</body></html>`,
 		);
 	}
-	const ran = spawnSync(process.execPath, [CHECK, dist, tree], { encoding: 'utf8' });
+	const args = [CHECK, dist, tree];
+	if (glossary !== undefined) {
+		const folder = mkdtempSync(join(tmpdir(), 'check-structured-data-glossary-'));
+		t.after(() => rmSync(folder, { recursive: true, force: true }));
+		const file = join(folder, 'glossary.mjs');
+		writeFileSync(file, `export const glossary = ${JSON.stringify(glossary)};\n`);
+		args.push(`--glossary=${file}`);
+	}
+	const ran = spawnSync(process.execPath, args, { encoding: 'utf8' });
 	return { status: ran.status, out: ran.stdout, err: ran.stderr };
 }

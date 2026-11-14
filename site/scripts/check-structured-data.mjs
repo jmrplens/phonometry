@@ -21,6 +21,27 @@
 // what the page emits. A check that read Head.astro's idea of the answer would
 // have agreed with the defect.
 //
+// The glossary's terms are held to src/data/glossary.mjs, the data the page
+// is built from, field by field: a DefinedTerm is named by its entry's
+// quantity, a symbol is its code and alternate name, a named entry's alternate
+// name is the alias it declares, and the guide is the one the entry names.
+// The code itself is not recomputed here: comparing it with what the page's
+// own maths-to-text step produces would agree with that step's defects. It is
+// held instead to the symbol it is written from, read from the symbol alone:
+// it writes, in order, every Latin letter, digit, Greek letter, prime and sign
+// the symbol writes as itself, a Greek letter's command being the letter, a
+// function's its name, `\prime` the prime and a spacing command the space it
+// sets, if any; and every Greek letter, named function, root and exponent the
+// symbol writes is still in it, and so is every comma, less the thin spaces,
+// which are spaces. A step that dropped every command it did not know wrote
+// "s" for the absorption coefficient's "$\alpha_\mathrm{s}$" and "-1010" for
+// "$-10\log_{10}$", and passed a check that only asked for no TeX and no
+// blank; "wrong" for "$L_\mathrm{Aeq}$" passed one that only counted, since
+// it writes no Greek letter, function, exponent or comma, and neither does
+// the symbol. The description is held to the fields it is written from the
+// same way: it writes what its definition writes, then what its unit writes,
+// and ends on what its standard and clause write.
+//
 // Two things the built HTML cannot answer on its own are read from git: the
 // SoftwareApplication's `dateCreated` is the UTC day of the repository's first
 // commit, and its `dateModified` the UTC day of the last commit that changed
@@ -37,11 +58,15 @@
 // so.
 //
 // Usage: node scripts/check-structured-data.mjs [dist-directory] [content-directory]
+//          [--glossary=<glossary.mjs>]
+//        (the content tree and the glossary entries the build was made from;
+//        by default the repository's)
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { glossary } from '../src/data/glossary.mjs';
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { catalogueSlugs, topicForSlug, topicSections, topics } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
@@ -58,6 +83,11 @@ const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist
 // The pages whose frontmatter says what an errata page corrects; another
 // directory is for the tests of this check, which write pages of their own.
 const CONTENT = process.argv[3] ? resolve(process.argv[3]) : join(here, '..', 'src', 'content', 'docs');
+// The glossary entries the pages are held to, a module that exports `glossary`
+// as src/data/glossary.mjs does; another module is for the tests of this
+// check, which hold the pages to entries the site's own do not write.
+const GLOSSARY_MODULE = process.argv.find((arg) => arg.startsWith('--glossary='))?.slice('--glossary='.length);
+const GLOSSARY_GROUPS = GLOSSARY_MODULE ? (await import(pathToFileURL(resolve(GLOSSARY_MODULE)).href)).glossary : glossary;
 const ORIGIN = `${siteUrl}${basePath}`;
 
 const REPOSITORY_ROOT = join(here, '..', '..');
@@ -756,6 +786,7 @@ const seen = {
 	datasetUnshown: 0,
 	corrected: 0,
 	history: 0,
+	definedTerms: 0,
 };
 
 /** The About pages found in each language, and how many of them are typed AboutPage. */
@@ -763,6 +794,383 @@ const about = { en: { found: 0, typed: 0 }, es: { found: 0, typed: 0 } };
 
 /** Each language's name, as an ok line writes it. */
 const LANGUAGE = { en: 'English', es: 'Spanish' };
+
+/**
+ * Every article node `@id` the build defines, whichever page defines it, so a
+ * reference from another page can be resolved once every page has been read.
+ */
+const articleIds = new Set();
+
+/** The glossary's references to the guides that compute each term, resolved after the walk. */
+const glossarySubjects = [];
+/** How many of the glossary's checks failed, so its summary line is only printed when none did. */
+let glossaryDefects = 0;
+
+/** Every glossary entry by its id: what each DefinedTerm of the built pages answers to. */
+const GLOSSARY = new Map(GLOSSARY_GROUPS.flatMap((group) => group.terms).map((entry) => [entry.id, entry]));
+
+/** The guides the glossary's entries name, each a route in either language. */
+const GLOSSARY_GUIDES = new Set([...GLOSSARY.values()].map((entry) => entry.guide));
+
+/**
+ * The glossary pages found in each language, and how many of the guides its
+ * entries name each language's pages publish.
+ */
+const glossaryPages = { en: { found: 0, guides: 0 }, es: { found: 0, guides: 0 } };
+
+/** A field an entry stores once for both languages, or as `{ en, es }`, in `lang`. */
+const fieldIn = (value, lang) =>
+	value !== null && typeof value === 'object' && !Array.isArray(value) ? value[lang] : value;
+
+/** The alternate name a named entry's declared aliases give in `lang`: none, one, or the list. */
+const declaredAlias = (entry, lang) => {
+	const aliases = [fieldIn(entry.alias, lang) ?? []].flat();
+	return aliases.length > 1 ? aliases : aliases[0];
+};
+
+/** What is left of TeX in a string written for machines: a code has none of it. */
+const TEX_IN_CODE = /[$\\{}^_]/;
+
+/**
+ * What is left of TeX in a description. A caret is not on the list: an
+ * exponent with no superscript form is written `m/s^1.75`, on purpose.
+ */
+const TEX_IN_TEXT = /[$\\{}_]/;
+
+/**
+ * Where a dropped symbol leaves a hole: two spaces, a space before the
+ * punctuation after it or after an opening bracket, or a text that starts
+ * with a space, a punctuation mark or a prime.
+ */
+const HOLE = /\s{2}|\s[,.;:)]|\(\s|^[\s,.;:'′]/;
+
+/**
+ * The TeX commands for Greek letters, each with the letter it is. Each is a
+ * letter of the Greek block in text, U+0370 to U+03FF, whatever the step that
+ * writes it.
+ */
+const GREEK_LETTER_OF = Object.freeze({
+	alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ϵ', varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ',
+	vartheta: 'ϑ', iota: 'ι', kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', pi: 'π', varpi: 'ϖ', rho: 'ρ',
+	varrho: 'ϱ', sigma: 'σ', varsigma: 'ς', tau: 'τ', upsilon: 'υ', phi: 'ϕ', varphi: 'φ', chi: 'χ', psi: 'ψ',
+	omega: 'ω', Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Xi: 'Ξ', Pi: 'Π', Sigma: 'Σ', Upsilon: 'Υ',
+	Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω',
+});
+
+/** The TeX commands for Greek letters. */
+const GREEK_COMMANDS = Object.keys(GREEK_LETTER_OF);
+
+/** A letter of the Greek block. */
+const GREEK_LETTER = /[\u0370-\u03FF]/gu;
+
+/** The named functions of TeX, each written as its name. */
+const FUNCTION_COMMANDS = [
+	'arccos', 'arcsin', 'arctan', 'arg', 'cos', 'cosh', 'cot', 'coth', 'csc', 'deg', 'det', 'dim', 'exp', 'gcd',
+	'hom', 'inf', 'ker', 'lg', 'lim', 'liminf', 'limsup', 'ln', 'log', 'max', 'min', 'Pr', 'sec', 'sin', 'sinh',
+	'sup', 'tan', 'tanh',
+];
+
+/** The characters a root, a relation or another symbol of TeX stands for, with the commands that write each. */
+const SYMBOL_COMMANDS = new Map([
+	['√', ['sqrt']],
+	['∞', ['infty']],
+	['∂', ['partial']],
+	['≤', ['le', 'leq']],
+	['≥', ['ge', 'geq']],
+	['≠', ['ne', 'neq']],
+	['≈', ['approx']],
+	['±', ['pm']],
+	['×', ['times']],
+	['·', ['cdot']],
+]);
+
+/** A run of superscript characters, which is how a text writes an exponent that has them. */
+const SUPERSCRIPT_RUN = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾]+/gu;
+
+/** How many times `what`, a string or a global regular expression, occurs in `text`. */
+const occurrences = (text, what) =>
+	typeof what === 'string' ? text.split(what).length - 1 : (text.match(what) ?? []).length;
+
+/** How many times the control word `\name` occurs in `source`, and not a longer one it begins. */
+const commandCount = (source, name) => occurrences(source, new RegExp(`\\\\${name}(?![a-zA-Z])`, 'g'));
+
+/** How many exponents a string writes: a caret each, or a run of superscript characters. */
+const exponents = (text) => occurrences(text, /\^/g) + occurrences(text, SUPERSCRIPT_RUN);
+
+/**
+ * A superscript of primes alone, `^{\prime}` or `^\prime`, which TeX sets as
+ * the prime: no exponent, and a text writes it as the prime.
+ */
+const PRIME_SUPERSCRIPT = /\^\s*(?:\{\s*(?:\\prime(?![a-zA-Z])\s*)+\}|\\prime(?![a-zA-Z]))/g;
+
+/** The commas a text written from TeX keeps of its source: all of them, less the thin spaces `\,`. */
+const keptCommas = (source) => occurrences(source, ',') - occurrences(source, '\\,');
+
+/**
+ * What a text lost of the fields it was written from, counted from those
+ * fields alone: each Greek letter, named function, root or other symbol a
+ * command stands for, and each exponent, is in the text at least as many
+ * times as the fields write it, as a command or as the character itself. A
+ * superscript of primes alone is the prime, and no exponent.
+ *
+ * @param {string} text The text the page publishes.
+ * @param {string[]} sources The fields it is written from, with their inline maths.
+ * @returns {string[]} What is missing, each said in a few words; empty when nothing is.
+ */
+function lostFrom(text, sources) {
+	const source = sources.join('\n');
+	// What of the source stands as written once its control words are taken out.
+	const literal = source.replace(/\\[a-zA-Z]+/g, ' ');
+	const lost = [];
+	const greek =
+		GREEK_COMMANDS.reduce((sum, name) => sum + commandCount(source, name), 0) + occurrences(literal, GREEK_LETTER);
+	const greekWritten = occurrences(text, GREEK_LETTER);
+	if (greekWritten < greek) lost.push(`${greek - greekWritten} of its ${greek} Greek letter(s)`);
+	for (const name of FUNCTION_COMMANDS) {
+		const commands = commandCount(source, name);
+		if (commands > 0 && occurrences(text, name) < commands + occurrences(literal, name)) lost.push(`\\${name}`);
+	}
+	for (const [character, names] of SYMBOL_COMMANDS) {
+		const commands = names.reduce((sum, name) => sum + commandCount(source, name), 0);
+		if (commands > 0 && occurrences(text, character) < commands + occurrences(literal, character)) {
+			lost.push(`the ${character} of \\${names[0]}`);
+		}
+	}
+	const exponentsWanted = exponents(source) - occurrences(source, PRIME_SUPERSCRIPT);
+	const exponentsWritten = exponents(text);
+	if (exponentsWritten < exponentsWanted) lost.push(`${exponentsWanted - exponentsWritten} exponent(s)`);
+	return lost;
+}
+
+/**
+ * The two shapes of one letter, the superscript form of a digit or a sign, the
+ * prime and the micro sign, each read as the one character a reader takes it
+ * for.
+ */
+const SAME_CHARACTER = Object.freeze({
+	'ϵ': 'ε', 'ϑ': 'θ', 'ϖ': 'π', 'ϱ': 'ρ', 'ς': 'σ', 'ϕ': 'φ', '−': '-', '⁻': '-', '⁺': '+', '⁼': '=',
+	'⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', '′': "'",
+	'µ': 'μ',
+});
+
+/**
+ * What a text writes as itself, in order: its Latin letters, digits, Greek
+ * letters, primes and the marks + - = < > ! : ° %, each read as
+ * SAME_CHARACTER reads it. These a step that writes maths as text copies from
+ * its source. Spaces, brackets, slashes, carets, roots and dots are left out,
+ * since the step writes them of its own for a fraction, a root, an exponent
+ * or a product; a comma is held exactly by the comma count.
+ */
+const asItself = (text) =>
+	(
+		[...text]
+			.map((character) => SAME_CHARACTER[character] ?? character)
+			.join('')
+			.match(/[\p{Script=Latin}\p{Nd}\u0370-\u03FF+\-=<>'!:°%]/gu) ?? []
+	).join('');
+
+/**
+ * What a control word writes as itself: a Greek letter's command the letter,
+ * a named function's its name, `\prime` the prime, and any other nothing.
+ */
+const controlWord = (name) => {
+	if (Object.hasOwn(GREEK_LETTER_OF, name)) return GREEK_LETTER_OF[name];
+	if (FUNCTION_COMMANDS.includes(name)) return ` ${name} `;
+	return name === 'prime' ? '′' : ' ';
+};
+
+/**
+ * What a control symbol, a backslash and the one character after it that is
+ * no letter, writes as itself: `\,`, `\:`, `\>`, `\;` and a backslash before
+ * a blank set a space, `\!` takes a thin space away and writes nothing, and
+ * any other, `\%` or `\#`, is its character.
+ */
+const controlSymbol = (character) => (/^[\s,:>;]$/.test(character) ? ' ' : character === '!' ? '' : character);
+
+/**
+ * What a field of the entry writes as itself, read from the field alone and a
+ * control sequence at a time, as TeX reads it: each control word and control
+ * symbol as above, and everything else as written.
+ */
+const writtenAsItself = (source) =>
+	asItself(
+		source.replace(/\\(?:([a-zA-Z]+)|([^a-zA-Z]))/g, (_, name, character) =>
+			name === undefined ? controlSymbol(character) : controlWord(name),
+		),
+	);
+
+/** The first few items of a list, for a report line that stays one line. */
+const sample = (list) => `${list.slice(0, 5).join(', ')}${list.length > 5 ? ', ...' : ''}`;
+
+/**
+ * Hold one glossary page's DefinedTerms to src/data/glossary.mjs, and fail
+ * once for each kind of defect, with the terms it was found on.
+ *
+ * @param {string} route The page's route, which names it in the report.
+ * @param {string} canonical The page's own address, every term's `@id` prefix.
+ * @param {'en' | 'es'} lang The page's language.
+ * @param {object[]} nodes Every node of the page's graph.
+ */
+function checkGlossary(route, canonical, lang, nodes) {
+	/** What is wrong, said of some DefinedTerms, mapped to the terms it is wrong on. */
+	const problems = new Map();
+	const note = (what, where) => problems.set(what, [...(problems.get(what) ?? []), where]);
+	const terms = nodeOfType(nodes, 'DefinedTermSet')?.hasDefinedTerm ?? [];
+	seen.definedTerms += terms.length;
+	if (terms.length === 0) {
+		fail(`${route}: the glossary publishes no DefinedTerm`);
+		glossaryDefects += 1;
+		return;
+	}
+	const published = new Set();
+	for (const term of terms) {
+		const id = String(term['@id'] ?? '');
+		const label = id.startsWith(`${canonical}#`) ? id.slice(canonical.length + 1) : `(${id || 'no @id'})`;
+		const entry = GLOSSARY.get(label);
+		if (!entry) {
+			note('have no entry in src/data/glossary.mjs', label);
+			continue;
+		}
+		if (published.has(label)) {
+			note('are published more than once', label);
+			continue;
+		}
+		published.add(label);
+
+		// The name is the quantity, as the entry spells it in this language. The
+		// one defect this check was written for, a term named by its symbol,
+		// gets a message of its own because it is the one most likely to return.
+		const quantity = entry.quantity[lang];
+		if (term.name !== quantity) {
+			const what =
+				term.termCode !== undefined && term.name === term.termCode
+					? 'are named by their termCode instead of the quantity'
+					: 'are not named by the quantity their entry gives';
+			note(what, `${label} (${JSON.stringify(term.name)}, not ${JSON.stringify(quantity)})`);
+		}
+
+		if (entry.symbol !== undefined) {
+			// A symbol is the term's code and its alternate name, the same string,
+			// read as a machine reads it: no TeX left, nothing blank, no hole,
+			// nothing the symbol writes lost on the way, and the letters, digits,
+			// Greek letters, primes and signs it writes those of the symbol, in
+			// order.
+			const code = term.termCode;
+			const symbol = fieldIn(entry.symbol, lang);
+			if (typeof code !== 'string' || code.trim() === '' || code !== code.trim()) {
+				note('have a symbol and no usable termCode', `${label} (${JSON.stringify(code)})`);
+			} else {
+				if (TEX_IN_CODE.test(code)) note('carry TeX in their termCode', `${label} (${JSON.stringify(code)})`);
+				if (HOLE.test(code)) {
+					note('have a hole in their termCode where a symbol was dropped', `${label} (${JSON.stringify(code)})`);
+				}
+				const lost = lostFrom(code, [symbol]);
+				if (lost.length > 0) {
+					note(
+						'have a termCode that lost what their symbol writes',
+						`${label} (${JSON.stringify(code)}: ${lost.join(', ')})`,
+					);
+				}
+				const commas = occurrences(code, ',');
+				if (commas !== keptCommas(symbol)) {
+					note(
+						'have a termCode whose commas are not those of their symbol, a thin space read as one or a comma lost',
+						`${label} (${JSON.stringify(code)}: ${commas}, the symbol ${keptCommas(symbol)})`,
+					);
+				}
+				const written = writtenAsItself(symbol);
+				if (asItself(code) !== written) {
+					note(
+						'have a termCode that does not write what their symbol writes',
+						`${label} (${JSON.stringify(code)}, the symbol ${JSON.stringify(written)})`,
+					);
+				}
+			}
+			if (term.alternateName !== code) {
+				note(
+					'have an alternateName that is not their termCode',
+					`${label} (${JSON.stringify(term.alternateName)} for ${JSON.stringify(code)})`,
+				);
+			}
+		} else {
+			if (term.termCode !== undefined) {
+				note(
+					'are named rather than symbolised and still carry a termCode',
+					`${label} (${JSON.stringify(term.termCode)})`,
+				);
+			}
+			const alias = declaredAlias(entry, lang);
+			if (JSON.stringify(term.alternateName) !== JSON.stringify(alias)) {
+				note(
+					'carry an alternateName that is not the alias their entry declares',
+					`${label} (${JSON.stringify(term.alternateName)} for ${JSON.stringify(alias)})`,
+				);
+			}
+		}
+
+		// A command the maths-to-text step does not know leaves a hole where it
+		// stood, two spaces or a space before the punctuation after it, or the
+		// TeX itself; and a symbol it drops cleanly, "-1010" for
+		// "$-10\log_{10}$", is missing from the count of what the entry writes.
+		// The description is the definition, the unit, then the standard and
+		// the clause, these two joined by a comma: it opens on what the
+		// definition writes as itself, ends on what the standard and the clause
+		// write, and writes the unit's between them, read from the entry alone.
+		const description = String(term.description ?? '');
+		const fields = ['definition', 'unit', 'standard', 'clause'].map((field) => fieldIn(entry[field], lang) ?? '');
+		const [, , standard, clause] = fields;
+		const around = (at) => `${label} ("${description.slice(Math.max(0, at - 12), at + 8)}")`;
+		if (description.trim() === '') note('have no description', label);
+		else {
+			const hole = HOLE.exec(description);
+			if (hole) note('have a hole in their description where a symbol was dropped', around(hole.index));
+			if (TEX_IN_TEXT.test(description)) note('carry TeX in their description', around(description.search(TEX_IN_TEXT)));
+			const lost = lostFrom(description, fields);
+			if (lost.length > 0) note('have a description that lost what their entry writes', `${label} (${lost.join(', ')})`);
+			const commas = occurrences(description, ',');
+			const kept = fields.reduce((sum, field) => sum + keptCommas(field), 0) + (standard && clause ? 1 : 0);
+			if (commas !== kept) {
+				note(
+					'have a description whose commas are not those of their entry, a thin space read as one or a comma lost',
+					`${label} (${commas}, the entry ${kept})`,
+				);
+			}
+			const [definition, unit] = fields;
+			const text = asItself(description);
+			const opening = writtenAsItself(definition);
+			const closing = writtenAsItself(standard) + writtenAsItself(clause);
+			const between = text.length >= opening.length + closing.length ? text.slice(opening.length, text.length - closing.length) : undefined;
+			if (!text.startsWith(opening) || !text.endsWith(closing) || between === undefined || !between.includes(writtenAsItself(unit))) {
+				note('have a description that does not write what their entry writes', label);
+			}
+		}
+
+		// The guide is the one the entry names, in the page's own language, and
+		// the term points at the article node that page publishes.
+		const url = `${ORIGIN}${lang === 'es' ? '/es' : ''}/${entry.guide}/`;
+		const subject = term.subjectOf;
+		if (subject === undefined) note('do not point at the guide that computes them', label);
+		else if (subject.url !== url || subject['@id'] !== `${url}#article`) {
+			note(
+				"point at another page than their entry's guide, or not at its article node",
+				`${label} (${JSON.stringify(subject['@id'])}, not ${url}#article)`,
+			);
+		} else if (typeof subject.name !== 'string' || subject.name.trim() === '') {
+			note('point at their guide without naming it', label);
+		} else {
+			glossarySubjects.push({ route, term: label, target: subject['@id'] });
+		}
+	}
+	for (const [what, where] of problems) {
+		fail(`${route}: ${where.length} of ${terms.length} DefinedTerm(s) ${what}: ${sample(where)}`);
+		glossaryDefects += 1;
+	}
+	const missing = [...GLOSSARY.keys()].filter((id) => !published.has(id));
+	if (missing.length > 0) {
+		fail(`${route}: ${missing.length} entr(y/ies) of src/data/glossary.mjs have no DefinedTerm: ${sample(missing)}`);
+		glossaryDefects += 1;
+	}
+}
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
 const LISTED = new Set(knownSlugs());
@@ -945,6 +1353,17 @@ for (const file of files) {
 		}
 	}
 
+	// The glossary publishes one DefinedTerm per entry, and each is quoted on
+	// its own. It used to be named by its symbol alone, the same string as its
+	// termCode, so the node for LAeq never said "A-weighted equivalent
+	// continuous sound pressure level"; and the guide it points at named no
+	// `@id`, so nothing joined it to the article that guide publishes.
+	if (slug === 'reference/glossary') {
+		glossaryPages[lang].found += 1;
+		checkGlossary(route, canonical, lang, nodes);
+	}
+	if (GLOSSARY_GUIDES.has(slug)) glossaryPages[lang].guides += 1;
+
 	// The error page is not an article and must not be indexed as one, which is
 	// the whole reason Head.astro special-cases it.
 	if (is404) {
@@ -988,6 +1407,7 @@ for (const file of files) {
 		fail(`${route}: article @id is ${article['@id']}, not ${canonical}#article`);
 	}
 	if (article.url !== canonical) fail(`${route}: article url is ${article.url}, not ${canonical}`);
+	articleIds.add(article['@id']);
 	if (article.inLanguage !== lang) {
 		fail(`${route}: article inLanguage is ${JSON.stringify(article.inLanguage)}, not ${lang}`);
 	}
@@ -1771,6 +2191,47 @@ if (about.en.found !== 1 || about.es.found !== 1) {
 	);
 } else if (about.en.typed === 1 && about.es.typed === 1) {
 	ok('the About page in English and its Spanish twin are both typed AboutPage');
+}
+
+// A glossary term's guide is another page, so its article node can only be
+// looked for once every page has been read.
+const unresolved = glossarySubjects.filter((subject) => !articleIds.has(subject.target));
+if (unresolved.length > 0) {
+	fail(`${unresolved.length} glossary term(s) point at an article node no page of the build defines:`);
+	for (const subject of unresolved.slice(0, 5)) {
+		console.error(`     ${subject.route}#${subject.term} -> ${subject.target}`);
+	}
+}
+// The glossary indexes the quantities its guides compute, so a build that
+// publishes one of those guides publishes the glossary in that language too,
+// once. Its route is matched by name above: were the page to move, its checks
+// would stop with nothing to say so, and this is what says so. A build of a
+// few pages that publishes none of the guides, as the tests of the other
+// checks write, has no glossary to answer for, and gets no line about one.
+for (const [lang, { found, guides }] of Object.entries(glossaryPages)) {
+	if (found > 1 || (found === 0 && guides > 0)) {
+		fail(
+			`found ${found} glossary pages in ${LANGUAGE[lang]}, not one, in a build that publishes ` +
+				`${guides} of the ${GLOSSARY_GUIDES.size} guides its entries name in that language`,
+		);
+	}
+}
+if (
+	glossaryPages.en.found === 1 &&
+	glossaryPages.es.found === 1 &&
+	glossaryDefects === 0 &&
+	unresolved.length === 0
+) {
+	ok(
+		`checked the ${seen.definedTerms} DefinedTerms of the glossary in both languages against ` +
+			`src/data/glossary.mjs: one per entry, each named by its entry's quantity, a symbol as its ` +
+			`termCode and alternateName with no TeX and no hole left that writes, in order, the letters, ` +
+			`digits, Greek letters, primes and signs of the symbol and keeps every Greek letter, named ` +
+			`function, root, exponent and comma of it, a named entry with no code and only its declared ` +
+			`alias, a description with no hole and no TeX that writes, in order, what its definition, unit, ` +
+			`standard and clause write and keeps the same of its entry, and its own ` +
+			`guide's article node, which all ${glossarySubjects.length} resolve to in this build`,
+	);
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);

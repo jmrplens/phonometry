@@ -24,6 +24,10 @@
 // paired with the wrong English one or a page naming a work otherwise than the
 // bibliography would stay green there for good.
 //
+// The glossary's terms are each held to the entry of src/data/glossary.mjs
+// they are built from, and the real build only ever hands the check a
+// glossary that passes.
+//
 // Each test here writes a build into a directory of its own: the two
 // bibliographies and one guide in each language, every cited work named as the
 // bibliography names it, and as many plain pages besides as a test asks for.
@@ -36,10 +40,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { glossary } from '../src/data/glossary.mjs';
 import { topicForSlug } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { variablesMeasured } from '../src/lib/catalogue-datasets.mjs';
+import { glossaryTermSet } from '../src/lib/glossary-structured-data.mjs';
 import {
 	ABOUT_TEXT,
 	aboutPage,
@@ -119,7 +125,7 @@ const stub = (node) =>
  * software node's `operatingSystem` on each page by the same index; a page
  * past its end names the default platforms.
  */
-function build({ pages = 4, ...options } = {}) {
+function build({ pages = 4, base: extra = {}, ...options } = {}) {
 	const base = {};
 	for (const [lang, url] of [
 		['en', EN],
@@ -144,7 +150,7 @@ function build({ pages = 4, ...options } = {}) {
 			about: [{ '@id': SITE.software }, { '@id': iso1['@id'] }],
 		});
 	}
-	return wholeBuild({ pages, ...options, base });
+	return wholeBuild({ pages, ...options, base: { ...base, ...extra } });
 }
 
 /** The node with `id` among a built page's nodes. */
@@ -1266,6 +1272,459 @@ test('an errata index built without its family pages or the page of properties t
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL the es errata index was built with no family page under it/);
 	assert.match(ran.err, /FAIL the es errata index was built without reference\/errata\/not-errata, the page of properties that are not errata/);
+});
+
+// The glossary. The real build only ever hands the check a glossary that
+// passes, so a check that stopped comparing a term's name with its quantity,
+// or let a code keep its TeX, would stay green there for good. It did let six
+// defects through when it only compared a term's name with its own code: a
+// name that was the symbol with the code deleted, the other language's
+// quantity, the quantity in lower case, a trailing space, terms with no code
+// at all and a term with no guide.
+//
+// These builds add to the shared pages the two glossary pages, each carrying
+// the DefinedTermSet src/lib/glossary-structured-data.mjs gives it in a block
+// of its own, as the page writes it, and the page of every guide a term
+// points at, in both languages. That build passes. Each defect is then made
+// on it, the way it would reach a real build, and the check has to fail on it
+// by name.
+
+/** Every guide a glossary entry names. */
+const GUIDES = [...new Set(glossary.flatMap((group) => group.terms).map((term) => term.guide))];
+
+/**
+ * The shared pages, with the two glossary pages and the page of every guide
+ * their terms point at, in both languages, every page edited since it was
+ * first published. `mutate` is given the two DefinedTermSets and the list of
+ * guides to publish, to break first.
+ */
+function glossaryBuild(mutate = () => {}) {
+	const sets = {
+		en: glossaryTermSet('en', (slug) => `Guide ${slug}`),
+		es: glossaryTermSet('es', (slug) => `Guía ${slug}`),
+	};
+	const guides = [...GUIDES];
+	mutate(sets, guides);
+	const base = {};
+	for (const lang of ['en', 'es']) {
+		base[`${lang}/glossary`] = { ...page('reference/glossary', lang), blocks: [sets[lang]] };
+		for (const slug of guides) base[`${lang}/${slug}`] = page(slug, lang);
+	}
+	return build({ base, pages: 0, dated: Number.POSITIVE_INFINITY });
+}
+
+/** Run the check on the glossary build, broken first by `mutate`. */
+const glossaryCheck = (t, mutate) => check(t, glossaryBuild(mutate));
+
+/** The DefinedTerm of entry `id` in a set. */
+const termOf = (set, id) => set.hasDefinedTerm.find((term) => term['@id'].endsWith(`#${id}`));
+
+/** Assert the check failed, and on the glossary page of `lang` for `what`. */
+function failsWith(ran, lang, what) {
+	assert.equal(ran.status, 1, `the check passed:\n${ran.out}`);
+	const route = lang === 'es' ? '/es/reference/glossary/' : '/reference/glossary/';
+	const line = ran.err.split('\n').find((text) => text.startsWith(`FAIL ${route}:`) && what.test(text));
+	assert.ok(line, `no FAIL line on ${route} matching ${what}:\n${ran.err}`);
+	return line;
+}
+
+/** The line the check prints when the whole glossary passes. */
+const GLOSSARY_OK = /ok {3}checked the \d+ DefinedTerms of the glossary in both languages/;
+
+test('the glossary as the site publishes it passes, with every term joined to its guide', (t) => {
+	const ran = glossaryCheck(t);
+	assert.equal(ran.status, 0, ran.err);
+	const terms = glossary.flatMap((group) => group.terms).length;
+	assert.match(ran.out, new RegExp(`ok {3}checked the ${2 * terms} DefinedTerms of the glossary in both languages`));
+	assert.match(ran.out, new RegExp(`which all ${2 * terms} resolve to in this build`));
+	assert.equal(ran.err, '');
+});
+
+test('a term named by its symbol, with its code and alternate name gone, fails', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		const term = termOf(en, 'l-aeq');
+		term.name = 'LAeq';
+		delete term.termCode;
+		delete term.alternateName;
+	});
+	assert.match(failsWith(ran, 'en', /not named by the quantity/), /l-aeq \("LAeq", not "A-weighted equivalent/);
+	assert.match(failsWith(ran, 'en', /have a symbol and no usable termCode/), /l-aeq \(undefined\)/);
+});
+
+test('terms named by their code, as every symbolised term used to be, fail by that name', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		for (const term of en.hasDefinedTerm) if (term.termCode) term.name = term.termCode;
+	});
+	assert.match(failsWith(ran, 'en', /named by their termCode instead of the quantity/), /186 of 198/);
+});
+
+test('terms with no code and no alternate name at all fail', (t) => {
+	const ran = glossaryCheck(t, ({ es }) => {
+		for (const term of es.hasDefinedTerm) {
+			delete term.termCode;
+			delete term.alternateName;
+		}
+	});
+	assert.match(failsWith(ran, 'es', /have a symbol and no usable termCode/), /186 of 198/);
+	assert.match(failsWith(ran, 'es', /alternateName that is not the alias their entry declares/), /6 of 198 .*itu-r-468/);
+});
+
+test('a term with no guide fails', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		delete termOf(en, 'l-aeq').subjectOf;
+	});
+	assert.match(failsWith(ran, 'en', /do not point at the guide that computes them/), /1 of 198 DefinedTerm\(s\).*: l-aeq$/);
+});
+
+test("the other language's quantity, the quantity in lower case and a trailing space all fail as names", (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		termOf(en, 'l-aeq').name = 'Nivel de presión acústica continuo equivalente ponderado A';
+		termOf(en, 'l-eq').name = 'equivalent continuous sound pressure level';
+		termOf(en, 'l-p').name = 'Sound pressure level ';
+	});
+	const line = failsWith(ran, 'en', /3 of 198 DefinedTerm\(s\) are not named by the quantity/);
+	for (const id of ['l-aeq', 'l-eq', 'l-p']) assert.match(line, new RegExp(`${id} \\(`));
+});
+
+test('TeX left in a code, or a code that is not the alternate name, fails', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		const tex = termOf(en, 'l-aeq');
+		tex.termCode = 'L_\\mathrm{Aeq}';
+		tex.alternateName = tex.termCode;
+		termOf(en, 'l-eq').alternateName = 'Leq, the equivalent level';
+	});
+	assert.match(failsWith(ran, 'en', /carry TeX in their termCode/), /l-aeq/);
+	assert.match(failsWith(ran, 'en', /alternateName that is not their termCode/), /l-eq/);
+});
+
+test('a named term with a code, or with its label for an alternate name, fails', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		termOf(en, 'pml').termCode = 'PML';
+		termOf(en, 'pml').alternateName = 'PML (perfectly matched layer)';
+		termOf(en, 'cepstrum').alternateName = 'Cepstrum and quefrency';
+	});
+	assert.match(failsWith(ran, 'en', /named rather than symbolised and still carry a termCode/), /pml/);
+	const line = failsWith(ran, 'en', /alternateName that is not the alias their entry declares/);
+	assert.match(line, /pml \("PML \(perfectly matched layer\)" for "PML"\)/);
+	assert.match(line, /cepstrum \("Cepstrum and quefrency" for undefined\)/);
+});
+
+test('a term with no entry, an entry with no term and a term published twice fail', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		const extra = structuredClone(termOf(en, 'l-p'));
+		extra['@id'] = extra['@id'].replace('#l-p', '#no-such-term');
+		const twice = structuredClone(termOf(en, 'l-eq'));
+		en.hasDefinedTerm = en.hasDefinedTerm.filter((term) => !term['@id'].endsWith('#l-aeq'));
+		en.hasDefinedTerm.push(extra, twice);
+	});
+	assert.match(failsWith(ran, 'en', /have no entry in src\/data\/glossary\.mjs/), /no-such-term/);
+	assert.match(failsWith(ran, 'en', /published more than once/), /l-eq/);
+	assert.match(failsWith(ran, 'en', /entr\(y\/ies\) of src\/data\/glossary\.mjs have no DefinedTerm/), /l-aeq/);
+});
+
+test('a guide in the other language, or not its article node, fails, and so does one the build lacks', (t) => {
+	const ran = glossaryCheck(t, ({ es }, guides) => {
+		const english = `${ORIGIN}/signals/levels/levels/`;
+		termOf(es, 'l-aeq').subjectOf = { ...termOf(es, 'l-aeq').subjectOf, url: english, '@id': `${english}#article` };
+		const own = termOf(es, 'l-eq').subjectOf;
+		termOf(es, 'l-eq').subjectOf = { ...own, '@id': own.url };
+		guides.splice(guides.indexOf('signals/metrology/calibration'), 1);
+	});
+	const line = failsWith(ran, 'es', /point at another page than their entry's guide/);
+	assert.match(line, /l-aeq/);
+	assert.match(line, /l-eq/);
+	assert.match(ran.err, /FAIL \d+ glossary term\(s\) point at an article node no page of the build defines/);
+	assert.match(ran.err, /es\/signals\/metrology\/calibration\/#article/);
+});
+
+test('a hole or TeX left in a description fails', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		termOf(en, 'k-2').description = termOf(en, 'k-2').description.replace('≤', '');
+		termOf(en, 'tau').description = 'a $\\tau$ of 10-5 is a 50 dB partition.';
+	});
+	assert.match(failsWith(ran, 'en', /hole in their description/), /k-2 \("[^"]*K2A {2}4/);
+	assert.match(failsWith(ran, 'en', /carry TeX in their description/), /tau/);
+});
+
+// What a step that writes maths as text loses on the way. The step the page
+// used before dropped every command it did not know: of the 26 codes and the
+// 17 descriptions in each language it misread, the check saw only the 12
+// codes left blank or opening with a space and the 6 descriptions with two
+// spaces in a row, and said every code had no TeX left and every description
+// no hole. A code or a description that loses a Greek letter, a named
+// function, a root or an exponent cleanly, or reads a thin space as a comma,
+// is missing something its entry writes, and the check counts what the entry
+// writes.
+
+/** The code and alternate name of entry `id` in a set, written as `code`. */
+function plantCode(set, id, code) {
+	termOf(set, id).termCode = code;
+	termOf(set, id).alternateName = code;
+}
+
+/** The description of entry `id` in a set, with `published` written as `misread`. */
+function plantDescription(set, id, published, misread) {
+	const term = termOf(set, id);
+	assert.ok(term.description.includes(published), `${id}: "${published}" is not in "${term.description}"`);
+	term.description = term.description.replace(published, misread);
+}
+
+test('a code that lost a Greek letter, has a hole, or reads a thin space as a comma fails by name', (t) => {
+	const ran = glossaryCheck(t, ({ en }) => {
+		plantCode(en, 'alpha-s', 's');
+		plantCode(en, 'se', 'SE,  LSE');
+		plantCode(en, 'l-p-a-s-4m', 'Lp,A,S,4,m');
+	});
+	const lost = failsWith(ran, 'en', /have a termCode that lost what their symbol writes/);
+	assert.match(lost, /alpha-s \("s": 1 of its 1 Greek letter\(s\)\)/);
+	assert.match(lost, /se \("SE, {2}LSE": 1 of its 1 Greek letter\(s\)\)/);
+	assert.match(failsWith(ran, 'en', /have a hole in their termCode/), /se \("SE, {2}LSE"\)/);
+	const commas = failsWith(ran, 'en', /termCode whose commas are not those of their symbol/);
+	assert.match(commas, /l-p-a-s-4m \("Lp,A,S,4,m": 4, the symbol 3\)/);
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+test('a description that lost a Greek letter, a function name or an exponent fails by name', (t) => {
+	const ran = glossaryCheck(t, ({ es }) => {
+		plantDescription(es, 'eta-tot', 'Ts = 2,2/(f ηtot)', 'Ts = 2,2/(f,tot)');
+		plantDescription(es, 'k-1', '-10 log10(1 - 10^(-0,1ΔLp))', '-1010(1 - 10-0,1 Lp)');
+	});
+	const lost = failsWith(ran, 'es', /have a description that lost what their entry writes/);
+	assert.match(lost, /eta-tot \(1 of its 1 Greek letter\(s\)\)/);
+	assert.match(lost, /k-1 \(1 of its 1 Greek letter\(s\), \\log, 1 exponent\(s\)\)/);
+	const commas = failsWith(ran, 'es', /description whose commas are not those of their entry/);
+	assert.match(commas, /eta-tot \(\d+, the entry \d+\)/);
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+/**
+ * The step the page used to write its maths as text with: the argument of a
+ * font command kept, every other command dropped, and the TeX characters
+ * deleted.
+ */
+const droppingStep = (source) =>
+	source
+		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{([^}]*)\}/g, '$1')
+		.replace(/\\[a-zA-Z]+/g, '')
+		.replace(/[$\\{}_^]/g, '');
+
+test('every code and description the step that dropped commands wrote fails, in both languages', (t) => {
+	const entries = new Map(glossary.flatMap((group) => group.terms).map((entry) => [entry.id, entry]));
+	const ran = glossaryCheck(t, (sets) => {
+		for (const [lang, set] of Object.entries(sets)) {
+			for (const term of set.hasDefinedTerm) {
+				const entry = entries.get(term['@id'].split('#').pop());
+				if (entry.symbol) plantCode(set, entry.id, droppingStep(entry.symbol));
+				// The definition the step misread, and the unit and the standard
+				// after it as the page writes them.
+				const definition = typeof entry.definition === 'string' ? entry.definition : entry.definition[lang];
+				const end = term.description.indexOf(lang === 'es' ? ' Definida en: ' : ' Defined in: ');
+				const unit = term.description.lastIndexOf(lang === 'es' ? ' Unidad: ' : ' Unit: ', end);
+				term.description = `${droppingStep(definition)}${term.description.slice(unit < 0 ? end : unit)}`;
+			}
+		}
+	});
+	for (const lang of ['en', 'es']) {
+		failsWith(ran, lang, /have a termCode that lost what their symbol writes/);
+		failsWith(ran, lang, /termCode whose commas are not those of their symbol/);
+		failsWith(ran, lang, /have a description that lost what their entry writes/);
+	}
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+// A count cannot tell a code from another that writes as many of each:
+// "wrong" for $L_\mathrm{Aeq}$ writes no Greek letter, function, exponent or
+// comma, and neither does the symbol, so it passed with the ok line, as did a
+// code with a letter, a digit or a prime dropped and a Greek letter written as
+// another. A code and a description are held to what they write as
+// themselves, in order, read from the entry's own fields.
+
+/** The ids planted below, each with the code it is given and what its symbol writes. */
+const MISWRITTEN = {
+	en: [
+		['l-aeq', 'wrong', 'LAeq'],
+		['l-eq', 'L', 'Leq'],
+		['k-1', 'K', 'K1'],
+		['alpha-s', 'βs', 'αs'],
+		['thd-n', 'THDN', 'THD+N'],
+	],
+	es: [
+		['r-2', 'R', "R'"],
+		['l-nt', 'LnT', "L'nT"],
+		['sigma', 'ρ', 'σ'],
+	],
+};
+
+test('a code that writes other letters, digits, primes, Greek letters or signs than its symbol fails by name', (t) => {
+	const ran = glossaryCheck(t, (sets) => {
+		for (const [lang, planted] of Object.entries(MISWRITTEN)) {
+			for (const [id, code] of planted) plantCode(sets[lang], id, code);
+		}
+	});
+	for (const [lang, planted] of Object.entries(MISWRITTEN)) {
+		const line = failsWith(ran, lang, /have a termCode that does not write what their symbol writes/);
+		assert.match(line, new RegExp(`: ${planted.length} of \\d+ DefinedTerm`));
+		for (const [id, code, written] of planted) {
+			assert.ok(line.includes(`${id} (${JSON.stringify(code)}, the symbol ${JSON.stringify(written)})`), `${id} in ${line}`);
+		}
+	}
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+// A field is read as TeX writes it, one control sequence at a time: a
+// spacing command is the space it sets, or nothing for `\!`, and `\prime` is
+// the prime, on its own or as a superscript. "$4\:\mathrm{m}$" writes what
+// "$4\,\mathrm{m}$" does, "$L_{W\!A}$" what "$L_{WA}$" does and "$s^{\prime}$"
+// what "$s'$" does. The check took the colon and the exclamation mark of the
+// two spacing commands as written, dropped `\prime` and counted the caret
+// before it as an exponent, so an entry that wrote any of them failed beside
+// the codes and descriptions the page writes from it.
+
+/** Entries written another way TeX allows: the id, the field, the text the site writes and the one planted. */
+const TEX_FORMS = [
+	['l-p-a-s-4m', 'symbol', '4\\,\\mathrm{m}', '4\\:\\mathrm{m}'],
+	['l-wa', 'symbol', 'L_{WA}', 'L_{W\\!A}'],
+	['n-2', 'symbol', "N'", 'N\\prime'],
+	['s-2', 'symbol', "s'", 's^{\\prime}'],
+	['courant-number', 'definition', 'c\\,\\Delta t', 'c\\:\\Delta t'],
+	['nr-2', 'definition', 'L_{p1} - L_{p2}', 'L_{p1}\\! - L_{p2}'],
+];
+
+test('an entry written with a spacing command or with \\prime passes beside the codes and descriptions the page writes from it', (t) => {
+	const groups = structuredClone(glossary);
+	const entries = new Map(groups.flatMap((group) => group.terms).map((entry) => [entry.id, entry]));
+	for (const [id, field, written, planted] of TEX_FORMS) {
+		const edit = (text) => {
+			assert.ok(text.includes(written), `${id}: "${written}" is not in "${text}"`);
+			return text.replace(written, planted);
+		};
+		const value = entries.get(id)[field];
+		entries.get(id)[field] =
+			typeof value === 'string' ? edit(value) : Object.fromEntries(Object.entries(value).map(([lang, text]) => [lang, edit(text)]));
+	}
+	// The page writes `\prime` as the prime, where the site's "'" stays as typed.
+	const built = glossaryBuild((sets) => {
+		for (const set of Object.values(sets)) {
+			plantCode(set, 'n-2', 'N′');
+			plantCode(set, 's-2', 's′');
+		}
+	});
+	const ran = check(t, { ...built, glossary: groups });
+	assert.equal(ran.status, 0, `the check failed:\n${ran.err}`);
+	assert.match(ran.out, GLOSSARY_OK);
+});
+
+test('a description that writes other text than its definition, or drops a sign or its unit, fails by name', (t) => {
+	const ran = glossaryCheck(t, ({ en, es }) => {
+		const lp = termOf(en, 'l-p');
+		lp.description = `wrong.${lp.description.slice(lp.description.indexOf(' Unit: '))}`;
+		plantDescription(en, 'l-cpeak', 'µPa', 'Pa');
+		plantDescription(en, 'imd', ' Unit: %.', '');
+		plantDescription(es, 'k-2', 'K2A ≤ 4', 'K2 ≤ 4');
+	});
+	const en = failsWith(ran, 'en', /have a description that does not write what their entry writes/);
+	assert.match(en, /: 3 of \d+ DefinedTerm\(s\) .*: (?=.*\bl-p\b)(?=.*\bl-cpeak\b)(?=.*\bimd\b)/);
+	assert.match(failsWith(ran, 'es', /have a description that does not write what their entry writes/), /: 1 of \d+ DefinedTerm\(s\) .*: k-2$/);
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+/**
+ * A step that drops a font command with its argument, so that "$L_\mathrm{Aeq}$"
+ * comes out "L" and keeps every Greek letter, function, exponent and comma.
+ */
+const droppingArguments = (source) =>
+	source
+		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{[^}]*\}/g, '')
+		.replace(/\\[a-zA-Z]+/g, '')
+		.replace(/[$\\{}_^]/g, '');
+
+test('every code written as one word, and every code and description that dropped its font arguments, fails in both languages by count', (t) => {
+	const entries = new Map(glossary.flatMap((group) => group.terms).map((entry) => [entry.id, entry]));
+	const symbolised = { en: 0, es: 0 };
+	const wrong = glossaryCheck(t, (sets) => {
+		for (const [lang, set] of Object.entries(sets)) {
+			for (const term of set.hasDefinedTerm) {
+				const entry = entries.get(term['@id'].split('#').pop());
+				if (entry.symbol) {
+					plantCode(set, entry.id, 'wrong');
+					symbolised[lang] += 1;
+				}
+			}
+		}
+	});
+	for (const lang of ['en', 'es']) {
+		const line = failsWith(wrong, lang, /have a termCode that does not write what their symbol writes/);
+		assert.match(line, new RegExp(`: ${symbolised[lang]} of \\d+ DefinedTerm`));
+	}
+	const dropped = glossaryCheck(t, (sets) => {
+		for (const [lang, set] of Object.entries(sets)) {
+			for (const term of set.hasDefinedTerm) {
+				const entry = entries.get(term['@id'].split('#').pop());
+				if (entry.symbol) plantCode(set, entry.id, droppingArguments(entry.symbol));
+				const definition = typeof entry.definition === 'string' ? entry.definition : entry.definition[lang];
+				const end = term.description.indexOf(lang === 'es' ? ' Definida en: ' : ' Defined in: ');
+				const unit = term.description.lastIndexOf(lang === 'es' ? ' Unidad: ' : ' Unit: ', end);
+				term.description = `${droppingArguments(definition)}${term.description.slice(unit < 0 ? end : unit)}`;
+			}
+		}
+	});
+	for (const lang of ['en', 'es']) {
+		failsWith(dropped, lang, /have a termCode that does not write what their symbol writes/);
+		failsWith(dropped, lang, /have a description that does not write what their entry writes/);
+	}
+	assert.doesNotMatch(wrong.out, GLOSSARY_OK);
+	assert.doesNotMatch(dropped.out, GLOSSARY_OK);
+});
+
+// The glossary is found by its route. Were the page to move, its checks would
+// stop with nothing to say so; a build that publishes the guides its entries
+// name has to publish it, once in each language, and a build of a few pages
+// that publishes none of them, as every other suite here writes, has no
+// glossary to answer for.
+
+test('a build that publishes the guides without the Spanish glossary fails, and says no more of the glossary', (t) => {
+	const built = glossaryBuild();
+	delete built['es/glossary'];
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL found 0 glossary pages in Spanish, not one, in a build that publishes ' +
+				`${GUIDES.length} of the ${GUIDES.length} guides its entries name in that language`,
+		),
+	);
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+test('two English glossary pages are not the English one and its Spanish twin', (t) => {
+	// reference/glossary.html is served at /reference/glossary/ as well.
+	const built = glossaryBuild();
+	built['es/glossary'] = { ...built['en/glossary'], path: 'reference/glossary.html' };
+	const ran = check(t, built);
+	assert.equal(ran.status, 1, `the check passed:\n${ran.out}`);
+	assert.match(ran.err, /FAIL found 2 glossary pages in English, not one/);
+	assert.match(ran.err, /FAIL found 0 glossary pages in Spanish, not one/);
+	assert.doesNotMatch(ran.out, GLOSSARY_OK);
+});
+
+test('one guide a glossary entry names is enough to ask for the glossary of its language', (t) => {
+	const ran = check(t, build({ base: { guide: page(GUIDES[0], 'en') } }));
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL found 0 glossary pages in English, not one, in a build that publishes ' +
+				`1 of the ${GUIDES.length} guides its entries name in that language`,
+		),
+	);
+	assert.doesNotMatch(ran.err, /glossary pages in Spanish/);
+});
+
+test('a build of a few pages that publishes none of the guides has no glossary to answer for', (t) => {
+	const ran = check(t, build());
+	assert.equal(ran.status, 0, ran.err);
+	assert.doesNotMatch(`${ran.out}${ran.err}`, /glossary/i);
 });
 
 test('an errata content tree checked out with CRLF line endings is read as the LF one', (t) => {

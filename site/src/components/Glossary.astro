@@ -24,7 +24,9 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import katex from 'katex';
 import { glossary } from '../data/glossary.mjs';
-import { basePath, siteUrl } from '../data/site.mjs';
+import { basePath } from '../data/site.mjs';
+import { glossaryTermSet } from '../lib/glossary-structured-data.mjs';
+import { GREEK_LETTERS, plainText } from '../lib/maths-text.mjs';
 
 interface Props {
 	/** Locale of the page the glossary is rendered on. */
@@ -32,11 +34,10 @@ interface Props {
 }
 const { lang = 'en' } = Astro.props;
 
-// The two site-wide strings live in one place, which is where astro.config.mjs
-// and the audit scripts read them from; a second copy here would be a second
-// thing to remember on a move.
+// The base path lives in one place, which is where astro.config.mjs and the
+// audit scripts read it from; a second copy here would be a second thing to
+// remember on a move.
 const BASE = basePath;
-const SITE = `${siteUrl}${basePath}`;
 /** The locale prefix this page's URLs carry, after the base. */
 const LOCALE = lang === 'es' ? '/es' : '';
 
@@ -54,9 +55,10 @@ const titleOf = new Map(
 );
 
 /**
- * Inline maths in a notation string, as HTML. The notation is written the way
+ * Inline maths in a field of the glossary, as HTML. A field is written the way
  * the page reads it, `$L_{Aeq}$, SEL`, so the text between the delimiters is
- * text and only the delimited runs are typeset.
+ * text and only the delimited runs are typeset. Every field the card shows
+ * goes through it: printed as typed, "(unit of $x$)²/Hz" kept its dollar signs.
  */
 function notation(source: string): string {
 	return source
@@ -90,59 +92,11 @@ const terms = glossary.flatMap((group) =>
 			clauseText: localized(term.clause),
 			qualifierText: localized(term.qualifier),
 			definitionText: localized(term.definition) as string,
-			// The path without the base: the href a browser follows carries it, the
-			// absolute URL in the structured data carries it too, and building both
-			// from the slug keeps neither from having to strip it back off.
-			path: guide ? `${LOCALE}/${guide}/` : undefined,
 			href: guide ? `${BASE}${LOCALE}/${guide}/` : undefined,
 			guideTitle: title,
 		};
 	}),
 );
-
-/**
- * The notation as a machine reads it: the maths syntax removed, not just the
- * delimiters, so `$L_{Aeq}$` is the "LAeq" a search engine can match against a
- * query and not the TeX that produced it.
- */
-const termCode = (label: string) => plain(label);
-
-/**
- * A string as a machine reads it: the maths syntax removed, not just the
- * delimiters, so `$L_{Aeq}$` is the "LAeq" a search engine can match against a
- * query, and a definition carrying `$\mathrm{THD}_F$` reads as "THDF" rather
- * than as the TeX that produced it.
- */
-function plain(source: string): string {
-	return source
-		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{([^}]*)\}/g, '$1')
-		.replace(/\\[a-zA-Z]+/g, '')
-		.replace(/[$\\{}_^]/g, '');
-}
-
-/**
- * The character a reader is actually holding. `plain()` drops a Greek command
- * along with the rest of the TeX, which is right for a search index and wrong
- * for a symbol index: someone scanning for the sigma on a datasheet has to find
- * a row that says sigma. This keeps the letter and drops everything else.
- */
-const GREEK: Record<string, string> = {
-	alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', Delta: 'Δ', epsilon: 'ε',
-	varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ', vartheta: 'ϑ', kappa: 'κ',
-	lambda: 'λ', Lambda: 'Λ', mu: 'µ', nu: 'ν', xi: 'ξ', pi: 'π', rho: 'ρ',
-	sigma: 'σ', Sigma: 'Σ', tau: 'τ', upsilon: 'υ', phi: 'φ', varphi: 'φ',
-	Phi: 'Φ', chi: 'χ', psi: 'ψ', omega: 'ω', Omega: 'Ω', infty: '∞',
-};
-
-function scannable(source: string): string {
-	return source
-		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{([^}]*)\}/g, '$1')
-		.replace(/\\([a-zA-Z]+)/g, (_match, name: string) => GREEK[name] ?? '')
-		.replace(/[$\\{}^]/g, '')
-		.replace(/_/g, '');
-}
-
-const GREEK_LETTERS = new Set(Object.values(GREEK));
 
 /**
  * The bucket a symbol files under: its first Latin letter, its own character if
@@ -151,42 +105,16 @@ const GREEK_LETTERS = new Set(Object.values(GREEK));
  * grouping below cannot serve.
  */
 function indexKey(label: string): string {
-	for (const character of scannable(label)) {
+	for (const character of plainText(label)) {
 		if (GREEK_LETTERS.has(character)) return character;
 		if (/[A-Za-z]/.test(character)) return character.toUpperCase();
 	}
 	return '#';
 }
 
-const jsonld = {
-	'@context': 'https://schema.org',
-	'@type': 'DefinedTermSet',
-	'@id': `${SITE}${LOCALE}/reference/glossary/#glossary`,
-	name: lang === 'es' ? 'Glosario acústico de phonometry' : 'phonometry acoustic glossary',
-	url: `${SITE}${LOCALE}/reference/glossary/`,
-	inLanguage: lang,
-	hasDefinedTerm: terms.map((term) => {
-		const code = termCode(term.label);
-		const where = [term.standardText, term.clauseText]
-			.filter((value): value is string => Boolean(value))
-			.map(plain)
-			.join(', ');
-		const unit = term.unitText
-			? ` ${lang === 'es' ? 'Unidad' : 'Unit'}: ${plain(term.unitText)}.`
-			: '';
-		return {
-			'@type': 'DefinedTerm',
-			'@id': `${SITE}${LOCALE}/reference/glossary/#${term.id}`,
-			name: code,
-			termCode: code,
-			description: `${plain(term.definitionText)}${unit} ${lang === 'es' ? 'Definida en' : 'Defined in'}: ${where}.`,
-			inDefinedTermSet: { '@id': `${SITE}${LOCALE}/reference/glossary/#glossary` },
-			...(term.path && term.guideTitle
-				? { subjectOf: { '@type': 'TechArticle', name: term.guideTitle, url: `${SITE}${term.path}` } }
-				: {}),
-		};
-	}),
-};
+// The structured data comes from the same array, built where the check's own
+// tests can build it too (src/lib/glossary-structured-data.mjs).
+const jsonld = glossaryTermSet(lang, (slug) => titleOf.get(slug));
 
 // The symbol index: Latin letters first, then the Greek ones, each row holding
 // every entry whose notation starts with that character.
@@ -194,7 +122,11 @@ const index = new Map<string, { id: string; scan: string; qualifier?: string }[]
 for (const term of terms) {
 	const key = indexKey(term.label);
 	const row = index.get(key) ?? [];
-	row.push({ id: term.id, scan: scannable(term.label), qualifier: term.qualifierText });
+	row.push({
+		id: term.id,
+		scan: plainText(term.label),
+		qualifier: term.qualifierText ? plainText(term.qualifierText) : undefined,
+	});
 	index.set(key, row);
 }
 const indexRows = [...index.entries()].sort(([a], [b]) => {
@@ -247,15 +179,17 @@ const t =
 							<header>
 								<h3 class="notation">
 									<Fragment set:html={notation(term.label)} />
-									{term.qualifierText && <span class="qualifier">({term.qualifierText})</span>}
+									{term.qualifierText && (
+										<span class="qualifier" set:html={`(${notation(term.qualifierText)})`} />
+									)}
 								</h3>
-								{term.unitText && <span class="unit">{term.unitText}</span>}
+								{term.unitText && <span class="unit" set:html={notation(term.unitText)} />}
 							</header>
 							<p class="definition" set:html={notation(term.definitionText)} />
 							<footer>
 								<span class="standard">
-									{t.definedIn}: {term.standardText}
-									{term.clauseText && <>, {term.clauseText}</>}
+									{t.definedIn}: <Fragment set:html={notation(term.standardText ?? '')} />
+									{term.clauseText && <>, <Fragment set:html={notation(term.clauseText)} /></>}
 								</span>
 								{term.href && (
 									<a class="guide" href={term.href}>

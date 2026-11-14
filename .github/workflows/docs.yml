@@ -415,7 +415,10 @@ jobs:
         # sits on a content line is worse than mis-rendered, because the
         # parser then eats the rest of the document; that silently cost one
         # guide six sections in both locales. HTML validation and the
-        # accessibility audit both pass on such a page.
+        # accessibility audit both pass on such a page. It also reads the
+        # glossary's cards for a formula printed as typed, which KaTeX never
+        # saw: the unit and the standard kept their dollar signs on two cards
+        # in each language.
         run: pnpm run check:math
         working-directory: site
       - name: Check every social card title breaks where its rules say

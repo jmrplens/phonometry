@@ -18,6 +18,10 @@
 // block must open and close on its own line. Every one of the site's other
 // display blocks already does.
 //
+// And it reads the glossary's cards for a formula that never reached KaTeX at
+// all: a field the card prints as typed keeps its dollar signs, and no parse
+// error says so.
+//
 // Usage: node scripts/check-math-render.mjs [--dist dist] [--sources ../docs ../site]
 
 import { readdirSync, readFileSync } from 'node:fs';
@@ -168,6 +172,66 @@ function stylesheetMismatch(distDir) {
   return mismatches;
 }
 
+/**
+ * A card's markup one piece at a time: a formula's MathML annotation, whose
+ * TeX the page does not show, whole; a comment; a start or end tag, whose
+ * quoted attribute values may hold a `>` that ends no tag; or a run of text,
+ * captured. A `<` that opens none of them is text too.
+ */
+const CARD_PIECE =
+  /<annotation\b[^>]*>[\s\S]*?<\/annotation>|<!--[\s\S]*?-->|<\/?[a-zA-Z][\w:-]*(?:[^>"']|"[^"]*"|'[^']*')*>|([^<]+|<)/g;
+
+/** What a reader sees of a card: its runs of text, read in order, and nothing of its tags or its TeX. */
+const cardText = (inner) => Array.from(inner.matchAll(CARD_PIECE), ([, run = '']) => run).join('');
+
+/**
+ * Inline maths the glossary printed as typed.
+ *
+ * The glossary's cards and its symbol index are written by
+ * src/components/Glossary.astro from src/data/glossary.mjs, where a field is
+ * text with its maths between dollar signs, and the component hands KaTeX the
+ * fields it chooses to typeset. It typeset the symbol, the qualifier and the
+ * definition and printed the unit and the standard as typed, so
+ * "(unit of $x$)²/Hz" and "Annex I uses $L_{90}$ as the residual level"
+ * reached the page with their dollar signs, in both languages. KaTeX never
+ * saw them, so it reported nothing, and neither did any other check.
+ *
+ * The text of every card and of the index, once the TeX each formula keeps in
+ * its MathML annotation is taken out, has no dollar sign left. The cards are
+ * found by their class, and a build with none is reported: a renamed class
+ * would otherwise leave this with nothing to read and nothing to say.
+ */
+function glossaryAsTyped(distDir) {
+  const found = [];
+  let cards = 0;
+  for (const file of walk(distDir, ['.html'])) {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('glossary-term')) continue;
+    const blocks = [];
+    for (const [, attributes, inner] of html.matchAll(
+      /<article\b([^>]*\bclass="glossary-term\b[^"]*"[^>]*)>([\s\S]*?)<\/article>/g,
+    )) {
+      cards += 1;
+      blocks.push({ where: `#${/\bid="([^"]*)"/.exec(attributes)?.[1] ?? '(no id)'}`, inner });
+    }
+    for (const [, inner] of html.matchAll(
+      /<details\b[^>]*\bclass="symbol-index\b[^"]*"[^>]*>([\s\S]*?)<\/details>/g,
+    )) {
+      blocks.push({ where: ' (symbol index)', inner });
+    }
+    for (const { where, inner } of blocks) {
+      const text = cardText(inner);
+      const at = text.indexOf('$');
+      if (at < 0) continue;
+      found.push({
+        place: `${relative(REPO, file)}${where}`,
+        text: text.slice(Math.max(0, at - 30), at + 30).replace(/\s+/g, ' '),
+      });
+    }
+  }
+  return { cards, found };
+}
+
 const args = process.argv.slice(2);
 const distArg = args.indexOf('--dist');
 const distDir = resolve(SITE, distArg === -1 ? 'dist' : args[distArg + 1]);
@@ -176,11 +240,19 @@ const sourceDirs = [join(REPO, 'docs'), join(SITE, 'src', 'content')];
 const failures = renderFailures(distDir);
 const problems = delimiterProblems(sourceDirs);
 const mismatches = stylesheetMismatch(distDir);
+const glossary = glossaryAsTyped(distDir);
 
-if (failures.length === 0 && problems.length === 0 && mismatches.length === 0) {
+if (
+  failures.length === 0 &&
+  problems.length === 0 &&
+  mismatches.length === 0 &&
+  glossary.cards > 0 &&
+  glossary.found.length === 0
+) {
   console.log(
     'Math renders: no KaTeX parse errors in the build, no stray display\n' +
-      'delimiters, and the stylesheet matches the markup the renderer emits.',
+      `delimiters, no formula printed as typed on the ${glossary.cards} glossary cards or\n` +
+      'their symbol index, and the stylesheet matches the markup the renderer emits.',
   );
   process.exit(0);
 }
@@ -223,6 +295,23 @@ if (mismatches.length > 0) {
         `stylesheet has ${mismatch.served} (wanted \`${mismatch.wanted}\`)`,
     );
   }
+}
+
+if (glossary.cards === 0) {
+  console.error(
+    '\nThe build has no glossary card (<article class="glossary-term">), so no\n' +
+      'card could be read for maths printed as typed. If src/components/Glossary.astro\n' +
+      'renamed the class, rename it in glossaryAsTyped() too.',
+  );
+}
+
+if (glossary.found.length > 0) {
+  console.error(
+    `\n${glossary.found.length} glossary card(s) or index print a formula as typed, dollar signs\n` +
+      'and all. src/components/Glossary.astro typesets a field only through notation();\n' +
+      'a field it prints as text shows its TeX:\n',
+  );
+  for (const { place, text } of glossary.found) console.error(`  ${place}: "${text}"`);
 }
 
 process.exit(1);

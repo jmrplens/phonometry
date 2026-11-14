@@ -94,6 +94,7 @@ import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 A partir de la **resistividad al flujo** de un material poroso (la magnitud
 que mide el [banco de flujo](/phonometry/es/materials/absorbers/airflow-resistance/)) los modelos
@@ -883,6 +884,8 @@ print(round(res.absorption[i], 3))               # 0.937 a 1 kHz
 res.plot()   # alpha(f) con |R| superpuesto
 ```
 
+<span id="separar-la-capa-de-la-pared"></span>
+
 **Separar la capa de la pared.** La jugada más habitual del diseño de
 absorbentes no es más material, es una cámara, y la razón está en la condición
 de contorno. Una capa porosa disipa a través de la velocidad de partícula de sus
@@ -917,6 +920,31 @@ propaga lateralmente por dentro en incidencia oblicua. Esta es la contraparte de
 predicción de los
 [montajes tipo E-*xxx* y G-*xxx*](/phonometry/es/materials/absorbers/absorption-measurement/#12-la-probeta-y-su-montaje-apartado-62-y-anexo-b)
 de ISO 354, cuyo sufijo es exactamente esta $d$.
+
+<Video
+  name="anim_porous_air_gap"
+  width={2400}
+  height={1350}
+  title="Una capa porosa separada de una pared rígida, a 250 Hz y en incidencia normal"
+  description="Una capa porosa de 50 mm delante de una pared rígida a 250 Hz, dibujada a escala con la pared a la derecha y el sonido llegando por la izquierda. El panel superior representa, frente a la distancia a la pared y respecto a la onda incidente, la velocidad de partícula a lo largo de un periodo, su envolvente y la envolvente de la presión: detrás de la capa la velocidad es nula en la pared y crece hacia un cuarto de longitud de onda, 343 mm, de ella. La capa empieza sobre la pared, donde la velocidad media en su interior es 0,27 y absorbe 0,26. Al abrirse la cámara de detrás hasta 100 mm, la velocidad en la capa sube a 0,58 y el coeficiente de absorción a 0,78. La cámara sigue abriéndose: el coeficiente alcanza su máximo de 0,87 con unos 250 mm de aire, baja a 0,13 cerca de 650 mm y vuelve a 0,26 a media longitud de onda, 686 mm, donde la cara trasera de la capa queda otra vez en un nodo de velocidad. El panel inferior dibuja el coeficiente de absorción frente a la cámara, cada punto bajo la cara trasera de la capa."
+/>
+
+*La manta del fragmento de arriba (Miki, 20 kPa·s/m², 50 mm) a 250 Hz y en
+incidencia normal, con todos los números leídos de `materials.miki` y
+`materials.layered_absorber`: 0,26 sobre la pared y 0,78 con la cámara de
+100 mm son la segunda columna de las dos filas impresas. Las amplitudes son
+relativas a la onda incidente. Entre la pared y la capa el aire es una onda
+estacionaria sobre una pared rígida haga lo que haga la capa: sin velocidad en
+la pared, con la máxima a un cuarto de longitud de onda (343 mm) y otra vez
+nula a media longitud de onda (686 mm). Lo que cambia al mover la capa es
+cuánta velocidad le toca, de 0,27 sobre la pared a 0,58 con la cámara de
+100 mm. El coeficiente alcanza su máximo de 0,87 con unos 250 mm de aire, antes
+de que la cara trasera de la capa llegue al cuarto de longitud de onda (el
+efecto de la propia presencia de la capa que menciona el párrafo anterior); y a
+media longitud de onda la cámara devuelve a la cara trasera la velocidad nula
+de la pared, así que el coeficiente vuelve a 0,26. Es el límite de la media
+onda del párrafo anterior, visto a una sola frecuencia. El escalón de la
+envolvente de la presión es la caída de presión a través de la capa.*
 
 El modelo multicapa evalúa las magnitudes físicas mediante una recursión de
 admitancias numéricamente robusta (inmune al desbordamiento

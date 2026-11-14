@@ -3504,6 +3504,22 @@ _ES_EXACT = {
     "fitted first decay": "primer decaimiento ajustado",
     "scattered energy\nleft in the\naverage": "energía dispersada\nque queda\nen la media",
     "integration stopped\nat −30 dB": "integración detenida\nen −30 dB",
+    # anim_porous_air_gap: the porous layer moved off the wall. The three
+    # absorption coefficients are the library's for the guide's blanket, on
+    # the wall, 100 mm off it and half a wavelength off it.
+    "A porous layer moved off a rigid wall (250 Hz, normal incidence)": "Una capa porosa separada de una pared rígida (250 Hz, incidencia normal)",
+    "Relative amplitude": "Amplitud relativa",
+    "Distance from the rigid wall [mm]": "Distancia a la pared rígida [mm]",
+    "50 mm porous layer": "capa porosa de 50 mm",
+    "incident sound": "sonido incidente",
+    "velocity over one period": "velocidad a lo largo de un periodo",
+    "envelope of the velocity": "envolvente de la velocidad",
+    "envelope of the pressure": "envolvente de la presión",
+    "each point is drawn under": "cada punto se dibuja bajo",
+    "the back face of the layer": "la cara trasera de la capa",
+    "on the wall: 0.26": "sobre la pared: 0,26",
+    "100 mm gap: 0.78": "cámara de 100 mm:\n0,78",
+    "half a wavelength: 0.26": "media longitud de onda: 0,26",
     "squared impulse response $p^2$": "respuesta al impulso al cuadrado $p^2$",
     "tail energy": "energía de la cola",
     "Room modes in a rigid 5 m × 3.5 m room (2D FDTD)": "Modos propios en una sala rígida de 5 m × 3,5 m (FDTD 2D)",
@@ -6449,6 +6465,9 @@ _ES_PATTERNS = [
         r"absorción de incidencia aleatoria \1",
     ),
     (r"^scattering coefficient (\d\.\d+)$", r"coeficiente de dispersión \1"),
+    (r"^gap behind the layer (\d+) mm$", r"cámara tras la capa \1 mm"),
+    (r"^velocity in the layer (\d\.\d+)$", r"velocidad en la capa \1"),
+    (r"^the layer absorbs (\d\.\d+)$", r"la capa absorbe \1"),
     (
         r"^\$\\langle p\\cdot u\\rangle\$ = ([+−-])(\d+)\.(\d+)$",
         r"$\\langle p\\cdot u\\rangle$ = \1\2,\3",

@@ -7261,3 +7261,316 @@ def animate_scattering_average(output_dir: str) -> None:
         )
 
     _render_clip(fig, update, output_dir, "anim_scattering_average")
+
+
+def animate_porous_air_gap(output_dir: str) -> None:
+    """A porous layer moved off a rigid wall, at 250 Hz and normal incidence.
+
+    The 50 mm blanket of the porous absorbers guide (Miki, 20 kPa s/m2) in
+    front of a rigid wall, drawn to scale with the wall on the right and the
+    sound arriving from the left. The gap behind the layer opens from nothing
+    to 100 mm, the case the guide computes, and on to half a wavelength,
+    where the layer is back in a velocity node.
+
+    Every number is the library's: the characteristic impedance and the
+    wavenumber of the layer from ``materials.miki``, and the reflection
+    factor and the absorption coefficient of each gap from
+    ``materials.layered_absorber``. The field is what those leave no choice
+    about: in front of the face the incident wave and the reflection, and
+    behind it the pressure and the particle velocity carried through the
+    layer and the cavity by the transfer matrix of a plane wave (Cox and
+    D'Antonio, Eq. 6.37), which lands on zero velocity at the wall for the
+    reflection factor the library returned.
+
+    Above, the particle velocity over one period, its envelope and that of
+    the pressure, all relative to the incident wave. Below, on the same
+    axis, the absorption coefficient drawn where the back face of the layer
+    stands, so that the point being added is under the layer.
+    """
+    from matplotlib.patches import Rectangle
+
+    from phonometry import materials
+
+    T = _translate_str
+    frequency, resistivity, thickness = 250.0, 20_000.0, 0.05
+    medium = materials.miki(np.array([frequency]), resistivity)
+    z_layer = complex(medium.characteristic_impedance[0])
+    k_layer = complex(medium.wavenumber[0])
+    speed = float(medium.speed_of_sound)
+    z_air = float(medium.air_density) * speed
+    k_air = 2.0 * np.pi * frequency / speed
+    quarter_mm = 1000.0 * speed / (4.0 * frequency)
+    half_mm = 2.0 * quarter_mm
+    gaps_mm = np.arange(0.0, half_mm + 0.5)  # every millimetre up to half a wave
+    layer = materials.PorousLayer(thickness_m=thickness, medium=medium)
+    reflection = np.empty(gaps_mm.size, dtype=complex)
+    alpha = np.empty(gaps_mm.size)
+    for i, gap_mm in enumerate(gaps_mm):
+        stack: list[Any] = [layer]
+        if gap_mm > 0.0:
+            stack.append(materials.AirLayer(thickness_m=gap_mm / 1000.0))
+        result = materials.layered_absorber([frequency], stack)
+        reflection[i] = result.reflection[0]
+        alpha[i] = result.absorption[0]
+
+    span_mm = 1150.0
+    x_mm = np.linspace(0.0, span_mm, 576)  # distance from the rigid wall
+    inside = np.linspace(0.0, thickness, 41)  # depths through the layer
+
+    def _through(
+        p: complex, u: complex, k: complex, z: complex, depth: NDArray[np.float64]
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
+        """Pressure and velocity *depth* further along a layer (Eq. 6.37)."""
+        cos, sin = np.cos(k * depth), np.sin(k * depth)
+        return p * cos - 1j * z * u * sin, u * cos - 1j * p * sin / z
+
+    def _field(
+        i: int,
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128], float]:
+        """Complex pressure and velocity over ``x_mm``, and the layer's mean."""
+        gap = float(gaps_mm[i]) / 1000.0
+        face = gap + thickness
+        x = x_mm / 1000.0
+        r = complex(reflection[i])
+        ahead = np.clip(x - face, 0.0, None)
+        coming, going = np.exp(1j * k_air * ahead), r * np.exp(-1j * k_air * ahead)
+        p, u = coming + going, (coming - going) / z_air
+        p_face, u_face = 1.0 + r, (1.0 - r) / z_air
+        in_layer = (x <= face) & (x >= gap)
+        p[in_layer], u[in_layer] = _through(
+            p_face, u_face, k_layer, z_layer, face - x[in_layer]
+        )
+        p_inside, u_inside = _through(p_face, u_face, k_layer, z_layer, inside)
+        in_gap = x < gap
+        p[in_gap], u[in_gap] = _through(
+            complex(p_inside[-1]), complex(u_inside[-1]), k_air, z_air, gap - x[in_gap]
+        )
+        return p, u * z_air, float(np.mean(np.abs(u_inside))) * z_air
+
+    fig = _anim_figure()
+    fig.suptitle(T("A porous layer moved off a rigid wall (250 Hz, normal incidence)"))
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.2, 1.0])
+    ax_w = fig.add_subplot(gs[0])
+    ax_a = fig.add_subplot(gs[1], sharex=ax_w)
+    _grid_axes(ax_w)
+    _grid_axes(ax_a)
+    reach = 2.05  # the waves stay inside; the strips beyond carry the labels
+    ax_w.set_xlim(span_mm, -60.0)
+    ax_w.set_ylim(-3.05, 2.95)
+    ax_w.set_yticks([-2.0, -1.0, 0.0, 1.0, 2.0])
+    ax_w.set_ylabel(T("Relative amplitude"), fontsize=9)
+    ax_w.tick_params(labelbottom=False)
+    ax_a.set_ylim(0.0, 1.0)
+    ax_a.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
+    ax_a.set_xlabel(T("Distance from the rigid wall [mm]"), fontsize=9)
+    ax_a.set_ylabel(T("Absorption coefficient"), fontsize=9)
+    quiet = theme_line("gray", ax_w, quiet=0.4)
+    for ax, low, high in ((ax_w, -reach, reach), (ax_a, 0.0, 1.0)):
+        ax.add_patch(
+            Rectangle(
+                (-60.0, low),
+                60.0,
+                high - low,
+                facecolor=_solid_fill(ax),
+                edgecolor=COLOR_FG,
+                lw=1.0,
+                hatch="///",
+                zorder=1,
+            )
+        )
+        for mark in (quarter_mm, half_mm):
+            ax.plot([mark, mark], [low, high], color=quiet, lw=1.1, ls=":", zorder=1)
+    for mark, name in ((quarter_mm, r"$\lambda/4$"), (half_mm, r"$\lambda/2$")):
+        ax_a.text(
+            mark + 9.0, 0.07, name, ha="right", va="center", fontsize=9, color=COLOR_FG
+        )
+
+    slab = Rectangle(
+        (0.0, -reach),
+        1000.0 * thickness,
+        2.0 * reach,
+        facecolor=theme_fill(COLOR_TERTIARY, ax_w),
+        edgecolor=COLOR_FG,
+        lw=1.0,
+        zorder=2,
+    )
+    ax_w.add_patch(slab)
+    slab_txt = ax_w.text(
+        0.0,
+        2.5,
+        T("50 mm porous layer"),
+        ha="center",
+        va="center",
+        fontsize=8.5,
+        color=COLOR_FG,
+    )
+    arrow = _make_arrow(ax_w, COLOR_FG, scale=11.0)
+    arrow.set_linewidth(1.4)
+    arrow.set_positions((span_mm - 15.0, 2.5), (span_mm - 85.0, 2.5))
+    ax_w.text(
+        span_mm - 95.0,
+        2.5,
+        T("incident sound"),
+        ha="left",
+        va="center",
+        fontsize=8.5,
+        color=COLOR_FG,
+    )
+    (velocity,) = ax_w.plot(
+        [],
+        [],
+        color=COLOR_PRIMARY,
+        lw=2.0,
+        zorder=4,
+        label=T("velocity over one period"),
+    )
+    (envelope,) = ax_w.plot(
+        [],
+        [],
+        color=COLOR_FG,
+        lw=1.0,
+        ls="--",
+        zorder=3,
+        label=T("envelope of the velocity"),
+    )
+    (envelope_low,) = ax_w.plot([], [], color=COLOR_FG, lw=1.0, ls="--", zorder=3)
+    (pressure,) = ax_w.plot(
+        [],
+        [],
+        color=COLOR_SECONDARY,
+        lw=1.3,
+        ls="-.",
+        zorder=3,
+        label=T("envelope of the pressure"),
+    )
+    ax_w.legend(
+        loc="lower center",
+        ncol=3,
+        fontsize=8,
+        frameon=False,
+        borderaxespad=0.15,
+        handlelength=2.4,
+        columnspacing=2.2,
+    )
+
+    (curve,) = ax_a.plot([], [], color=COLOR_PRIMARY, lw=2.2, zorder=3)
+    (cursor,) = ax_a.plot(
+        [], [], marker="o", ms=6.5, ls="none", color=COLOR_PRIMARY, zorder=5
+    )
+    (marks,) = ax_a.plot(
+        [],
+        [],
+        marker="o",
+        ms=5.5,
+        ls="none",
+        mfc=plt.rcParams["figure.facecolor"],
+        mec=COLOR_FG,
+        mew=1.3,
+        zorder=4,
+    )
+    stops = (0, 100, gaps_mm.size - 1)  # on the wall, the guide's gap, half a wave
+    stop_notes = (
+        T(f"on the wall: {alpha[stops[0]]:.2f}"),
+        T(f"100 mm gap: {alpha[stops[1]]:.2f}"),
+        T(f"half a wavelength: {alpha[stops[2]]:.2f}"),
+    )
+    stop_at = ((14.0, 0.17), (104.0, 0.60), (half_mm + 14.0, 0.17))
+    stop_txt = [
+        ax_a.text(x, y, "", ha="right", va="center", fontsize=8.5, color=COLOR_FG)
+        for x, y in stop_at
+    ]
+    readout = ax_a.text(
+        0.012,
+        0.95,
+        "",
+        transform=ax_a.transAxes,
+        ha="left",
+        va="top",
+        family="monospace",
+        fontsize=8.5,
+        linespacing=1.35,
+        color=COLOR_FG,
+    )
+    ax_a.text(
+        0.012,
+        0.36,
+        T("each point is drawn under") + "\n" + T("the back face of the layer"),
+        transform=ax_a.transAxes,
+        ha="left",
+        va="center",
+        style="italic",
+        fontsize=8,
+        linespacing=1.3,
+        color=COLOR_MUTED,
+    )
+
+    # 16 s: on the wall, out to the guide's 100 mm, a pause there, on to half
+    # a wavelength, and the closing hold.
+    still, first, pause, second = 50, 80, 50, 100
+    frames = still + first + pause + second + _ANIM_HOLD
+    turns = 0.7  # periods of the display oscillation per second
+    state = {"half": 0.0}
+
+    def _measure() -> None:
+        state["half"] = _half_width(fig, ax_w, slab_txt)
+
+    def _gap_index(kf: int) -> int:
+        if kf < still:
+            return 0
+        if kf < still + first:
+            s = (kf - still + 1) / first
+            return round(stops[1] * s * s * (3.0 - 2.0 * s))
+        if kf < still + first + pause:
+            return stops[1]
+        s = min(1.0, (kf - still - first - pause + 1) / second)
+        return round(stops[1] + (stops[2] - stops[1]) * s * s * (3.0 - 2.0 * s))
+
+    def update(kf: int) -> tuple[Any, ...]:
+        i = _gap_index(kf)
+        gap_mm = float(gaps_mm[i])
+        p, u, mean_u = _field(i)
+        phase = np.exp(2j * np.pi * turns * kf / _ANIM_FPS)
+        velocity.set_data(x_mm, np.real(u * phase))
+        envelope.set_data(x_mm, np.abs(u))
+        envelope_low.set_data(x_mm, -np.abs(u))
+        pressure.set_data(x_mm, np.abs(p))
+        slab.set_x(gap_mm)
+        centre = gap_mm + 500.0 * thickness
+        slab_txt.set_x(max(centre, state["half"] - 45.0))
+        curve.set_data(gaps_mm[: i + 1], alpha[: i + 1])
+        cursor.set_data([gap_mm], [alpha[i]])
+        reached = [s for s in stops if s <= i]
+        marks.set_data(gaps_mm[reached], alpha[reached])
+        for txt, note, stop in zip(stop_txt, stop_notes, stops, strict=True):
+            txt.set_text(note if stop <= i else "")
+        readout.set_text(
+            "\n".join(
+                (
+                    T(f"gap behind the layer {gap_mm:.0f} mm"),
+                    T(f"velocity in the layer {mean_u:.2f}"),
+                    T(f"the layer absorbs {alpha[i]:.2f}"),
+                )
+            )
+        )
+        return (
+            velocity,
+            envelope,
+            envelope_low,
+            pressure,
+            slab,
+            slab_txt,
+            curve,
+            cursor,
+            marks,
+            readout,
+            *stop_txt,
+        )
+
+    _render_clip(
+        fig,
+        update,
+        output_dir,
+        "anim_porous_air_gap",
+        frames=frames,
+        measure=_measure,
+    )

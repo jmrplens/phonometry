@@ -94,6 +94,7 @@ import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
+import Video from '../../../../components/Video.astro';
 
 Given a porous material's **flow resistivity** (the quantity the
 [flow rig](/phonometry/materials/absorbers/airflow-resistance/) measures) the classical equivalent-fluid models
@@ -844,6 +845,8 @@ print(round(res.absorption[i], 3))               # 0.937 at 1 kHz
 res.plot()   # alpha(f) with |R| overlaid
 ```
 
+<span id="spacing-the-layer-off-the-wall"></span>
+
 **Spacing the layer off the wall.** The commonest move in absorber design is
 not more material, it is a cavity, and the reason is in the boundary
 condition. A porous layer dissipates through the particle velocity in its
@@ -877,6 +880,30 @@ the cavity must be partitioned or the field propagates laterally inside it at
 oblique incidence. This is the prediction counterpart of ISO 354's
 [Type E-*xxx* and G-*xxx* mountings](/phonometry/materials/absorbers/absorption-measurement/#12-the-specimen-and-its-mounting-clause-62-and-annex-b),
 whose suffix is exactly this $d$.
+
+<Video
+  name="anim_porous_air_gap"
+  width={2400}
+  height={1350}
+  title="A porous layer moved off a rigid wall, at 250 Hz and normal incidence"
+  description="A 50 mm porous layer in front of a rigid wall at 250 Hz, drawn to scale with the wall on the right and the sound arriving from the left. The upper panel plots, against the distance from the wall and relative to the incident wave, the particle velocity over one period, its envelope and the envelope of the pressure: behind the layer the velocity is zero at the wall and grows towards a quarter of a wavelength, 343 mm, from it. The layer starts on the wall, where the mean velocity inside it is 0.27 and it absorbs 0.26. As the gap behind it opens to 100 mm the velocity in the layer rises to 0.58 and the absorption coefficient to 0.78. The gap then keeps opening: the coefficient peaks at 0.87 with about 250 mm of air, dips to 0.13 near 650 mm and is back at 0.26 at half a wavelength, 686 mm, where the back of the layer stands in a velocity node again. The lower panel draws the absorption coefficient against the gap, each point under the back face of the layer."
+/>
+
+*The blanket of the snippet above (Miki, 20 kPa·s/m², 50 mm) at 250 Hz and
+normal incidence, with every number read from `materials.miki` and
+`materials.layered_absorber`: 0.26 on the wall and 0.78 over the 100 mm gap
+are the second column of the two printed rows. Amplitudes are relative to the
+incident wave. Between the wall and the layer the air is a standing wave on a
+rigid wall whatever the layer does: no velocity at the wall, the largest a
+quarter of a wavelength out (343 mm), none again at half a wavelength
+(686 mm). What moving the layer changes is how much velocity it stands in,
+from 0.27 on the wall to 0.58 with the 100 mm gap. The coefficient peaks at
+0.87 with about 250 mm of air, before the back of the layer reaches the
+quarter wavelength (the pull of the layer's own presence that the paragraph
+above mentions); and at half a wavelength the cavity puts the wall's zero
+velocity back on the back face, so the coefficient returns to 0.26. That is
+the half-wave limit of the paragraph above, seen at one frequency. The step in
+the pressure envelope is the pressure drop across the layer.*
 
 The solver evaluates the physical quantities through a numerically robust
 admittance recursion (immune to the $\mathrm{e}^{|\mathrm{Im}(k_x)| d}$ overflow of

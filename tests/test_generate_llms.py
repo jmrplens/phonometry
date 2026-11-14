@@ -438,3 +438,51 @@ def test_every_title_and_description_reads_as_the_sites_yaml_parser_reads_it() -
                 assert llms._frontmatter_field(path, name) == data[name], (path, name)
                 read += 1
     assert read > 1000
+
+
+# A page git ignores (a local plan, a scratch note) is left out of the mirror.
+# The generator asked git about the repository's docs/ and looked a page up by
+# ``docs/`` and its path under ``DOCS``, wherever ``DOCS`` pointed, so a tree
+# of a test's own had the repository's ignored files laid over it; and it split
+# git's listing at spaces, where git quotes a name that holds a character
+# outside ASCII, so a page so named was never found ignored.
+
+
+def _repository_ignoring(root: Path, *pages: str) -> Path:
+    """A git repository at *root* whose ``docs/notes/`` git ignores, holding *pages* there."""
+    subprocess.run(["git", "init", "-q", str(root)], check=True, timeout=60)
+    (root / ".gitignore").write_text("docs/notes/\n", encoding="utf-8")
+    for page in pages:
+        (root / "docs" / "notes" / page).parent.mkdir(parents=True, exist_ok=True)
+        (root / "docs" / "notes" / page).write_text("# A note\n", encoding="utf-8")
+    return root
+
+
+def test_a_tree_outside_the_repository_has_nothing_git_ignores(
+    tmp_path: Path, fresh_caches: FreshCaches
+) -> None:
+    """A page of a tree outside the repository is not taken for one git ignores in it.
+
+    The repository ignores its ``docs/notes/plan.md``; a tree elsewhere holds
+    ``notes/plan.md`` too, and that page is the tree's own, not ignored.
+    """
+    repository = _repository_ignoring(tmp_path / "repository", "plan.md")
+    elsewhere = tmp_path / "elsewhere"
+    (elsewhere / "notes").mkdir(parents=True)
+    (elsewhere / "notes" / "plan.md").write_text("# A page\n", encoding="utf-8")
+
+    fresh_caches(llms, ROOT=repository, DOCS=repository / "docs")
+    assert llms._git_ignored(repository / "docs" / "notes" / "plan.md")
+    fresh_caches(llms, DOCS=elsewhere)
+    assert not llms._git_ignored(elsewhere / "notes" / "plan.md")
+
+
+def test_a_page_git_ignores_is_found_whatever_characters_its_name_holds(
+    tmp_path: Path, fresh_caches: FreshCaches
+) -> None:
+    """A space and a character outside ASCII are read as git writes them."""
+    names = ("plan de acústica.md", "two words.md")
+    repository = _repository_ignoring(tmp_path, *names)
+    fresh_caches(llms, ROOT=repository, DOCS=repository / "docs")
+    for name in names:
+        assert llms._git_ignored(repository / "docs" / "notes" / name), name

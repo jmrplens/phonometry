@@ -68,7 +68,16 @@ DOCS = ROOT / "docs"
 
 @functools.cache
 def _ignored_paths() -> frozenset[str]:
-    """Everything under docs/ that git ignores, as repo-relative paths."""
+    """Everything under :data:`DOCS` that git ignores, as repo-relative paths.
+
+    Nothing for a :data:`DOCS` outside the repository, as the tests point it
+    at a tree of their own: git ignores no file there, and the repository's
+    listing names other files. The names are read as git writes them with
+    ``-z``, whole, where a plain listing quotes a name that holds a character
+    outside ASCII.
+    """
+    if not DOCS.is_relative_to(ROOT):
+        return frozenset()
     result = subprocess.run(
         [
             "git",
@@ -76,24 +85,28 @@ def _ignored_paths() -> frozenset[str]:
             "--others",
             "--ignored",
             "--exclude-standard",
+            "-z",
             "--",
-            "docs",
+            DOCS.relative_to(ROOT).as_posix(),
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         cwd=ROOT,
         check=False,
     )
-    return frozenset(result.stdout.split())
+    return frozenset(name for name in result.stdout.split("\0") if name)
 
 
 def _git_ignored(path: pathlib.Path) -> bool:
     """Is this page of the mirror one git ignores (a local plan, a scratch note)?
 
-    The page is named as :func:`_ignored_paths` lists it, ``docs/`` and its
-    path under :data:`DOCS`, wherever the tree it is read from lies.
+    The page is named as :func:`_ignored_paths` lists it, by its path in the
+    repository; a page outside the repository is one git ignores nothing of.
     """
-    return f"docs/{path.relative_to(DOCS).as_posix()}" in _ignored_paths()
+    if not path.is_relative_to(ROOT):
+        return False
+    return path.relative_to(ROOT).as_posix() in _ignored_paths()
 
 
 @functools.cache

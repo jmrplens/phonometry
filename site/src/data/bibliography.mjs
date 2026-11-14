@@ -1500,8 +1500,8 @@ export const BIBLIOGRAPHY_WORKS = Object.freeze({
   "doi-10-1190-1-1468623": Object.freeze({
     section: "wave-simulation",
     note: Object.freeze({
-      en: "The fluid-solid benchmark of the staggered scheme: the effective-parameter averages, the soft-bed Scholte configuration and the points-per-wavelength rule for interface waves.",
-      es: "El benchmark fluido-sólido del esquema escalonado: las medias de los parámetros efectivos, la configuración de fondo blando de Scholte y la regla de puntos por longitud de onda para las ondas de interfase.",
+      en: "The fluid-solid benchmark of the staggered scheme: the effective-parameter averages, the Scholte configuration of water over a 3500/2000/2500 seabed and the points-per-wavelength rule for interface waves.",
+      es: "El benchmark fluido-sólido del esquema escalonado: las medias de los parámetros efectivos, la configuración de Scholte del agua sobre un lecho 3500/2000/2500 y la regla de puntos por longitud de onda para las ondas de interfase.",
     }),
   }),
   "std-jcgm-100-2008-the-gum": Object.freeze({

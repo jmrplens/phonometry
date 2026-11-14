@@ -46,7 +46,7 @@ references:
     issue: "2"
     pages: "618-624"
     doi: "10.1190/1.1468623"
-    note: "The fluid-solid benchmark of the same staggered scheme: the harmonic shear modulus and arithmetic density averages (Eqs. 9-10) that satisfy the interface conditions implicitly, the soft-bed configuration of the Scholte case of section 6 and the >= 15 points-per-wavelength rule for the O(2,2) scheme with an interface wave."
+    note: "The fluid-solid benchmark of the same staggered scheme: the harmonic shear modulus and arithmetic density averages (Eqs. 9-10) that satisfy the interface conditions implicitly, the water over a 3500/2000/2500 seabed of the Scholte case of section 6 and the >= 15 points-per-wavelength rule for the O(2,2) scheme with an interface wave."
 ---
 
 import Scope from '../../../components/Scope.astro';
@@ -680,15 +680,20 @@ evanescent tail reaches ~7 wavelengths up into the water: it is essentially
 a grazing water wave and cannot be separated by time of flight in any
 reasonable domain
 (over air-solid contacts the deficit collapses to ~$10^{-12}$ of $c$ and the
-wave is unobservable outright). Over a **soft** sediment the speed drops
-well below the water speed and the wave squeezes to within half a
-wavelength of the contact, which is why measured seabed interface waves are
-a standard probe of sediment shear speed. The snapshot below runs that soft
-case: an explosive shot just above the bottom, and the strongest late
-feature is the interface-hugging Scholte train, timed by the test suite at
+wave is unobservable outright). The softer the bed, the further the speed
+drops below the water speed. Over a **soft** sediment, whose shear speed lies
+well below the water's, it follows the shear speed down and the wave squeezes
+to within half a wavelength of the contact, which is why measured seabed
+interface waves are a standard probe of sediment shear speed: on the
+towed-streamer bed of van Vossen et al. (shear speed 400 m/s under water at
+1460 m/s) `scholte_speed` gives 347 m/s. The snapshot below runs the other
+bed of that paper, the benchmark seabed, which is not soft in this sense: its
+shear speed, 2000 m/s, is above the water's, and its Scholte train runs only
+4 % under the water speed. An explosive shot just above the bottom, and the
+strongest late feature is the interface-hugging Scholte train, timed by the test suite at
 1436 m/s within 2 % between two contact probes.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave.webp" alt="Snapshot of the vertical particle velocity in a 500 by 200 metre domain of water over a soft sediment half-space, 0.2 seconds after an explosive shot 10 metres above the contact: the direct water wavefront arcs up and to the right, oblique wavefronts radiate into the sediment, and the strongest lobes form a compact train hugging the dotted interface line, labelled as the Scholte wave, evanescent on both sides" width="96%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave.webp" alt="Snapshot of the vertical particle velocity in a 500 by 200 metre domain of water over a sediment half-space, 0.2 seconds after an explosive shot 10 metres above the contact: the direct water wavefront arcs up and to the right, oblique wavefronts radiate into the sediment, and the strongest lobes form a compact train hugging the dotted interface line, labelled as the Scholte wave, evanescent on both sides" width="96%" />
 
 *The van Vossen benchmark media (water over a 3500/2000/2500 sediment):
 the Scholte train crawls along the contact at 1436 m/s, evanescent into
@@ -702,7 +707,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from phonometry import simulation
 
-# Water over a soft seabed; explosive 50 Hz Ricker 10 m above the contact.
+# Water over the van Vossen seabed; explosive 50 Hz Ricker 10 m above the contact.
 ny, nx, dx = 200, 500, 1.0
 c_p = np.full((ny, nx), 1500.0)
 c_s = np.zeros((ny, nx))
@@ -731,6 +736,41 @@ plt.show()
 ```
 
 </details>
+
+One frame leaves three things unsaid, and each of them is about time. The
+water front the caption names does run ahead, but only 64 m/s faster: at the
+instant of the snapshot it leads the train by 13 m, less than half of the
+28.7 m of a Scholte wavelength at 50 Hz, and the two are still one knot. That
+the train is the strongest *late* feature is a statement about what fades and
+what does not. And 1436 m/s is a time of flight. The clip below runs the same
+shot on a 0.5 m grid, in a view widened to 880 m and for 573 ms, with a dotted
+arc at the exact $c_\mathrm{w}(t - t_0)$ of the water front, a dot at the
+exact Scholte root, and three pressure probes: two on the contact, 100 m and
+400 m from the shot, and one 30 m above the second.
+
+<Video
+  name="anim_elastic_scholte"
+  width={2400}
+  height={1350}
+  title="A Scholte train along a water-seabed contact, timed and left behind by the water front"
+  description="An explosive shot 10 metres above a water-seabed contact, in a view 880 metres long and 160 metres deep. The compressional front in the seabed leaves the frame first and the shear front after it. A compact train of lobes rides the dotted contact line to the right with a dot at the exact Scholte speed on it, while a dotted arc, the exact water front, draws slowly ahead: the readout of the gap between the two on the contact grows from a few metres to about 35, past the 28.7 metres of one Scholte wavelength. Below the field, three pressure traces: the pulses of two contact probes 300 metres apart are nearly the same height, a bar between their peaks gives the time of flight and the speed it makes beside the exact 1436 metres per second, and the probe 30 metres above the contact shows a much smaller pulse."
+/>
+
+Watch the gap between the arc and the dot. It opens at 64 m/s, reaches one
+Scholte wavelength once the train has run 644 m, and stands at about 35 m when
+the clip ends with the train 780 m out. An interface wave 4 % slower than the
+fluid above it needs that much room before the two can be told apart, which is
+why the test times the train between two probes rather than from the shot. The
+compressional front in the seabed leaves the frame about 270 ms into the run, before
+it is half over, and the shear front at about 450 ms, four fifths of the way
+through;
+every body front thins as it spreads, as $1/\sqrt{r}$ in this two-dimensional
+scene. The train does not spread at all: the pulses of the two contact probes,
+300 m apart, stand nearly the same height on one shared scale, and the delay
+between the peaks of their envelopes is the speed printed beside them. The
+third trace is the evanescence. Thirty metres into the water, about one
+Scholte wavelength, the passage of the train is a small fraction of what the
+contact sees below it.
 
 ## 7. Immersed plates and the mass law
 
@@ -857,7 +897,7 @@ fluid-solid coupling of sections 4-7, with the `Material` constants,
 conversion against Brekhovskikh & Godin (Eqs. 4.2.22-4.2.26) at sub-critical
 and between-critical angles, the Scholte-wave speed against the exact
 characteristic equation (Eq. 4.4.20) and by time of flight in the van Vossen
-(2002) soft-bed benchmark, the immersed-plate transmission with its first
+(2002) benchmark seabed, the immersed-plate transmission with its first
 thickness resonance against the three-media closed form (Eqs. 2.4.14-2.4.19),
 the immersed-panel mass law and the air-steel extreme-contrast stress test.
 No measurement standard governs this solver: it implements a textbook

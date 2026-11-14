@@ -258,6 +258,7 @@ from figures.fields import (
     animate_fdtd_transmission_tube,
     animate_standing_wave_tube,
 )
+from figures.fields.scholte import animate_elastic_scholte
 from figures.i18n import set_lang
 from figures.materials import (
     generate_absorber_stack_geometry,
@@ -551,6 +552,7 @@ __all__ = [
     "animate_elastic_mode_conversion",
     "animate_elastic_plate_junction",
     "animate_elastic_radiation_efficiency",
+    "animate_elastic_scholte",
     "animate_epnl_flyover",
     "animate_fdtd_absorption_placement",
     "animate_fdtd_aperture_slit",

@@ -46,7 +46,7 @@ references:
     issue: "2"
     pages: "618-624"
     doi: "10.1190/1.1468623"
-    note: "El benchmark fluido-sólido del mismo esquema escalonado: las medias armónica del módulo de cizalla y aritmética de la densidad (Ecs. 9-10) que satisfacen implícitamente las condiciones de interfase, la configuración de fondo blando del caso de Scholte de la sección 6 y la regla de >= 15 puntos por longitud de onda para el esquema O(2,2) con una onda de interfase."
+    note: "El benchmark fluido-sólido del mismo esquema escalonado: las medias armónica del módulo de cizalla y aritmética de la densidad (Ecs. 9-10) que satisfacen implícitamente las condiciones de interfase, el agua sobre un lecho 3500/2000/2500 del caso de Scholte de la sección 6 y la regla de >= 15 puntos por longitud de onda para el esquema O(2,2) con una onda de interfase."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -727,16 +727,22 @@ hasta un 0,03 % y su cola evanescente alcanza ~7 longitudes de onda dentro
 del agua: es en esencia una onda de agua rasante y no puede separarse por
 tiempo de vuelo en ningún dominio razonable (sobre contactos aire-sólido
 el déficit se desploma a ~$10^{-12}$ de $c$ y la onda es directamente
-inobservable). Sobre un sedimento **blando** la velocidad cae muy por
-debajo de la del agua y la onda queda confinada a menos de media longitud
-de onda del contacto, y por eso las ondas de interfase medidas en el lecho
-marino son una herramienta estándar para sondear la velocidad de cizalla
-del sedimento. La instantánea de abajo ejecuta ese caso blando: una
-explosión justo sobre el fondo, y el rasgo tardío más intenso es el tren de
+inobservable). Cuanto más blando es el lecho, más cae la velocidad por
+debajo de la del agua. Sobre un sedimento **blando**, cuya velocidad de
+cizalla queda muy por debajo de la del agua, la sigue hacia abajo y la onda
+queda confinada a menos de media longitud de onda del contacto, y por eso las
+ondas de interfase medidas en el lecho marino son una herramienta estándar
+para sondear la velocidad de cizalla del sedimento: sobre el lecho de
+streamer remolcado de van Vossen et al. (cizalla de 400 m/s bajo agua a
+1460 m/s) `scholte_speed` da 347 m/s. La instantánea de abajo ejecuta el otro
+lecho de ese artículo, el del benchmark, que no es blando en este sentido: su
+velocidad de cizalla, 2000 m/s, supera la del agua, y su tren de Scholte va
+solo un 4 % por debajo de la velocidad del agua. Una explosión justo sobre el
+fondo, y el rasgo tardío más intenso es el tren de
 Scholte pegado a la interfase, cronometrado por la batería de tests a
 1436 m/s dentro del 2 % entre dos sondas en el contacto.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave.webp" alt="Instantánea de la velocidad de partícula vertical en un dominio de 500 por 200 metros de agua sobre un semiespacio de sedimento blando, 0,2 segundos después de una explosión 10 metros por encima del contacto: el frente directo del agua se arquea hacia arriba y a la derecha, frentes oblicuos radian hacia el sedimento, y los lóbulos más intensos forman un tren compacto pegado a la línea punteada de la interfase, etiquetado como la onda de Scholte, evanescente a ambos lados" width="96%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scholte_interface_wave.webp" alt="Instantánea de la velocidad de partícula vertical en un dominio de 500 por 200 metros de agua sobre un semiespacio de sedimento, 0,2 segundos después de una explosión 10 metros por encima del contacto: el frente directo del agua se arquea hacia arriba y a la derecha, frentes oblicuos radian hacia el sedimento, y los lóbulos más intensos forman un tren compacto pegado a la línea punteada de la interfase, etiquetado como la onda de Scholte, evanescente a ambos lados" width="96%" />
 
 *Los medios del benchmark de van Vossen (agua sobre un sedimento
 3500/2000/2500): el tren de Scholte repta por el contacto a 1436 m/s,
@@ -751,7 +757,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from phonometry import simulation
 
-# Agua sobre un lecho blando; Ricker explosivo de 50 Hz a 10 m del contacto.
+# Agua sobre el lecho de van Vossen; Ricker explosivo de 50 Hz a 10 m del contacto.
 ny, nx, dx = 200, 500, 1.0
 c_p = np.full((ny, nx), 1500.0)
 c_s = np.zeros((ny, nx))
@@ -780,6 +786,42 @@ plt.show()
 ```
 
 </details>
+
+Una sola instantánea deja tres cosas sin decir, y las tres son cuestión de
+tiempo. El frente del agua que cita el pie de la figura sí corre por delante, pero solo 64 m/s más
+rápido: en el instante de la instantánea aventaja al tren en 13 m, menos de la
+mitad de los 28,7 m de una longitud de onda de Scholte a 50 Hz, y los dos
+siguen siendo un mismo nudo. Que el tren sea el rasgo *tardío* más intenso es
+una afirmación sobre qué se desvanece y qué no. Y 1436 m/s es un tiempo de
+vuelo. El clip de abajo ejecuta el mismo disparo en una malla de 0,5 m, con el
+encuadre ensanchado a 880 m y durante 573 ms, con un arco punteado en el
+$c_\mathrm{w}(t - t_0)$ exacto del frente del agua, un punto en la raíz exacta
+de Scholte y tres sondas de presión: dos en el contacto, a 100 m y a 400 m del
+disparo, y una 30 m por encima de la segunda.
+
+<Video
+  name="anim_elastic_scholte"
+  width={2400}
+  height={1350}
+  title="Un tren de Scholte a lo largo de un contacto agua-sedimento, cronometrado y dejado atrás por el frente del agua"
+  description="Una explosión 10 metros por encima de un contacto agua-sedimento, en un encuadre de 880 metros de largo y 160 de alto. El frente de compresión del sedimento sale primero del encuadre y el de cizalla después. Un tren compacto de lóbulos recorre hacia la derecha la línea punteada del contacto con un punto a la velocidad exacta de Scholte sobre él, mientras un arco punteado, el frente exacto del agua, se adelanta despacio: la lectura de la separación entre ambos sobre el contacto crece de unos pocos metros a unos 35, más allá de los 28,7 metros de una longitud de onda de Scholte. Bajo el campo, tres trazas de presión: los pulsos de dos sondas del contacto separadas 300 metros tienen casi la misma altura, una barra entre sus picos da el tiempo de vuelo y la velocidad que resulta junto a los 1436 metros por segundo exactos, y la sonda situada 30 metros por encima del contacto muestra un pulso mucho menor."
+/>
+
+Fíjate en la separación entre el arco y el punto. Se abre a 64 m/s, alcanza
+una longitud de onda de Scholte cuando el tren ha recorrido 644 m, y es de
+unos 35 m cuando el clip termina con el tren a 780 m. Una onda de interfase un
+4 % más lenta que el fluido que tiene encima necesita todo ese recorrido para
+que las dos puedan distinguirse, y por eso el test cronometra el tren entre
+dos sondas y no desde el disparo. El frente de compresión del sedimento sale
+del encuadre hacia los 270 ms, antes de la mitad de la ejecución, y el de
+cizalla hacia los 450 ms, a los cuatro quintos de la ejecución; todo frente de cuerpo se adelgaza
+al extenderse, como $1/\sqrt{r}$ en esta escena bidimensional. El
+tren no se extiende en absoluto: los pulsos de las dos sondas del contacto,
+separadas 300 m, tienen casi la misma altura en una escala común, y el retardo
+entre los picos de sus envolventes es la velocidad impresa a su lado. La
+tercera traza es la evanescencia. Treinta metros dentro del agua, más o menos
+una longitud de onda de Scholte, el paso del tren es una pequeña fracción de
+lo que ve el contacto debajo.
 
 ## 7. Placas sumergidas y la ley de masas
 
@@ -917,7 +959,7 @@ constantes `Material`, `ElasticFDTD2D.from_regions` y `scholte_speed`: la
 reflexión oblicua con conversión de modo contra Brekhovskikh y Godin (Ecs.
 4.2.22-4.2.26) en ángulos subcríticos y entre críticos, la velocidad de la
 onda de Scholte contra la ecuación característica exacta (Ec. 4.4.20) y por
-tiempo de vuelo en el benchmark de fondo blando de van Vossen (2002), la
+tiempo de vuelo en el lecho del benchmark de van Vossen (2002), la
 transmisión de la placa sumergida con su primera resonancia de espesor contra
 la forma cerrada de tres medios (Ecs. 2.4.14-2.4.19), la ley de masas del
 panel sumergido y la prueba de robustez con el contraste extremo aire-acero.

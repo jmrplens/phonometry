@@ -4526,6 +4526,20 @@ _ES_EXACT = {
     "depth [m]": "profundidad [m]",
     "distance from the impact [m]": "distancia al impacto [m]",
     "surface $v_y$ at 0.15 and 0.30 m": "$v_y$ en la superficie a 0,15 y 0,30 m",
+    # Scholte clip (simulation/elastic-waves).
+    "Scholte wave: the train a water-seabed contact keeps (elastic 2D FDTD)": "Onda de Scholte: el tren que retiene un contacto agua-sedimento "
+    "(FDTD elástico 2D)",
+    "depth below the contact [m]": "profundidad bajo el contacto [m]",
+    "range from the shot [m]": "distancia al disparo [m]",
+    "pressure in the water": "presión en el agua",
+    "on the contact, 100 m from the shot": "en el contacto, a 100 m del disparo",
+    "on the contact, 400 m": "en el contacto, a 400 m",
+    "30 m above the contact, 400 m": "30 m sobre el contacto, a 400 m",
+    "one Scholte wavelength at 50 Hz: 28.7 m": "una longitud de onda de Scholte a 50 Hz: 28,7 m",
+    "dotted arc: the water front, $c_\\mathrm{w}(t - t_0)$ round the shot; dot: the Scholte root, "
+    "$v_\\mathrm{Sch}(t - t_0)$ along the contact, 1436 m/s (B&G Eq. 4.4.20)": "arco punteado: el frente del agua, "
+    "$c_\\mathrm{w}(t - t_0)$ en torno al disparo; punto: la raíz de Scholte, $v_\\mathrm{Sch}(t - t_0)$ a lo largo "
+    "del contacto, 1436 m/s (B&G Ec. 4.4.20)",
     # Mode-conversion clip (simulation/elastic-waves).
     "Mode conversion: water on steel, three incidences (elastic 2D FDTD)": "Conversión de modo: agua sobre acero, tres incidencias "
     "(FDTD elástico 2D)",
@@ -6794,6 +6808,24 @@ _ES_PATTERNS = [
             r"\(C&H Eq\. 3\.149\)$"
         ),
         r"aluminio: $c_\\mathrm{P}$ = \1, $c_\\mathrm{S}$ = \2, $c_\\mathrm{R}$ = \3 m/s (C&H ec. 3.149)",
+    ),
+    # Scholte clip: the measured time of flight, speed and evanescence, and
+    # the running lead of the water front.
+    (
+        r"^(\d+) m between the contact probes in (\d+)\.(\d+) ms$",
+        r"\1 m entre las dos sondas en \2,\3 ms",
+    ),
+    (
+        r"^the train timed at (\d+) m/s; the Scholte root is (\d+) m/s$",
+        r"el tren cronometrado a \1 m/s; la raíz de Scholte es \2 m/s",
+    ),
+    (
+        r"^30 m above the contact: (\d+)\.(\d+) of its amplitude$",
+        r"30 m sobre el contacto: \1,\2 de su amplitud",
+    ),
+    (
+        r"^water front ahead of the Scholte root: (\d+)\.(\d+) m$",
+        r"frente del agua por delante de la raíz de Scholte: \1,\2 m",
     ),
     # Mode-conversion clip: the display gain and the measured reflection.
     (r"^steel drawn ×(\d+) \(\+(\d+) dB\)$", r"acero dibujado ×\1 (+\2 dB)"),

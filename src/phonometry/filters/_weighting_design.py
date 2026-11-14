@@ -105,10 +105,11 @@ output:
   bit), and ``sin``, ``tan``, ``atan`` and the magnitude of a complex root,
   correctly rounded, in :mod:`~phonometry._internal.pinned_trig`. No routine
   of the C library is left in the fit; :func:`_scalar_arctan` says what the
-  last of them cost. No library step is left after it either: the
-  second-order sections SciPy's ``zpk2sos`` formed through the BLAS, pairing
-  roots by numpy's complex magnitude, are :func:`second_order_sections`, and
-  the BS.468-4 prototype's poles, which ``numpy.roots`` took from LAPACK, are
+  last of them cost. No library step is left outside it either: after it,
+  the second-order sections SciPy's ``zpk2sos`` formed through the BLAS,
+  pairing roots by numpy's complex magnitude, are
+  :func:`second_order_sections`, and before it the BS.468-4 prototype's
+  poles, which ``numpy.roots`` took from LAPACK and the fit starts from, are
   the correctly rounded roots of
   :mod:`~phonometry._internal.pinned_roots`. What is left of ``numpy`` on the
   path is arithmetic IEEE 754 pins, and ``sqrt``, which the standard

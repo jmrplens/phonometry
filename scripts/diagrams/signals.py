@@ -4414,3 +4414,118 @@ def _d_reciprocity_setup(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# The deterministic weighting design path, stage by stage
+# ---------------------------------------------------------------------------
+
+
+def _d_weighting_design_path(s: SVG, th: Theme) -> None:
+    """The weighting design path of the determinism page, as one column.
+
+    Above, the three doors through which a result drifts between machines.
+    Below, the path in the order ``design_sos`` runs it, each stage beside the
+    library step it replaced, down to the bytes one digest holds on the three
+    platforms of the CI matrix. Every label is a statement of that page; the
+    plate adds none of its own.
+    """
+    # --- The three doors ---------------------------------------------------
+    s.text(40, 72, "Three doors a bit leaves by", 14, th.fg, "start", bold=True)
+    doors = (
+        ("Reductions reassociate", "a BLAS orders a sum by its registers"),
+        ("Transcendentals dispatch", "numpy picks log, exp, tan by the CPU"),
+        ("The platform's own libm", "glibc, Apple, musl, Windows round apart"),
+    )
+    door_head = s.fit_size([s.tr(d[0]) for d in doors], (14, 13, 12), 240, bold=True)
+    door_sub = s.fit_size([s.tr(d[1]) for d in doors], (12, 11, 10), 240)
+    for i, (head, sub) in enumerate(doors):
+        x0 = 40.0 + 280.0 * i
+        s.rect(x0, 84, 260, 64, th.panel, th.secondary, rx=12, sw=1.8, dash="7,5")
+        s.text(x0 + 130, 111, head, door_head, th.fg, bold=True)
+        s.text(x0 + 130, 133, sub, door_sub, th.muted)
+
+    # --- The path, each stage beside what it replaced ----------------------
+    s.text(40, 180, "The design path", 14, th.fg, "start", bold=True)
+    s.text(580, 180, "the library step it replaced", 13, th.muted, "start")
+    stages = (
+        (
+            "Analog prototype of the printed curve",
+            "BS.468-4 poles: exact roots, correctly rounded",
+            "numpy.roots",
+            "LAPACK eigenvalues of the companion matrix",
+            True,
+        ),
+        (
+            "Frequency grid, term for term",
+            "257 points, endpoints pinned",
+            "numpy.geomspace",
+            "10 ** linspace, a dispatched power",
+            True,
+        ),
+        (
+            "Target curve, in real arithmetic",
+            "the printed response at each grid frequency",
+            "numpy complex products",
+            "fused or not, by CPU and compiler",
+            False,
+        ),
+        (
+            "Fit: Lawson rounds of Levenberg-Marquardt steps",
+            "pinned log, exp, pow · pairwise sums · elimination written out",
+            "libm and numpy log, exp, pow",
+            "BLAS sums · LAPACK dgesv",
+            False,
+        ),
+        (
+            "Bilinear transform and gain, in real arithmetic",
+            "numpy's own steps, each rounded once",
+            "SciPy bilinear_zpk",
+            "a product of complex numbers",
+            True,
+        ),
+        (
+            "Second-order sections, step for step",
+            "each product rounded once, each magnitude correctly rounded",
+            "SciPy zpk2sos",
+            "numpy.convolve through the BLAS",
+            True,
+        ),
+    )
+    head_size = s.fit_size([s.tr(r[0]) for r in stages], (14, 13, 12), 486, bold=True)
+    sub_size = s.fit_size([s.tr(r[1]) for r in stages], (12, 11, 10), 486)
+    was_size = s.fit_size([s.tr(r[3]) for r in stages], (12, 11, 10), 260)
+    top, pitch, box = 192.0, 74.0, 58.0
+    for i, (head, sub, was, was_how, is_call) in enumerate(stages):
+        y0 = top + pitch * i
+        s.rect(40, y0, 510, box, th.panel, th.primary, rx=12, sw=2)
+        s.text(295, y0 + 25, head, head_size, th.fg, bold=True)
+        s.text(295, y0 + 45, sub, sub_size, th.muted)
+        s.line(550, y0 + box / 2, 580, y0 + box / 2, th.muted, 1.4, dash="5,4")
+        s.rect(580, y0, 280, box, "none", th.muted, rx=12, sw=1.4, dash="5,4")
+        s.text(720, y0 + 25, was, 12 if is_call else 13, th.fg, mono=is_call)
+        s.text(720, y0 + 45, was_how, was_size, th.muted)
+        s.arrow(295, y0 + box, 295, y0 + pitch, th.fg, 2.0)
+
+    # --- What comes out, and what holds it ---------------------------------
+    y_out = top + pitch * len(stages)
+    s.rect(40, y_out, 820, 62, "none", th.accent, rx=12, sw=2.4)
+    s.text(450, y_out + 26, "The same SOS bytes on every machine", 16, th.fg, bold=True)
+    held = (
+        "the CI matrix holds every curve at 48 kHz to one SHA-256 digest "
+        "on Linux, macOS and Windows"
+    )
+    s.text(
+        450, y_out + 48, held, s.fit_size([s.tr(held)], (13, 12, 11), 790), th.accent
+    )
+    rounded = (
+        "sin, tan, arctan and the magnitude of a complex root: "
+        "correctly rounded in exact integer arithmetic (Ziv's loop)"
+    )
+    s.text(
+        450,
+        y_out + 88,
+        rounded,
+        s.fit_size([s.tr(rounded)], (12, 11, 10), 820),
+        th.muted,
+    )

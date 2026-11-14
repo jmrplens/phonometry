@@ -212,6 +212,7 @@ from .signals import (
     _d_uncertainty,
     _d_uncertainty_sources,
     _d_verification_regimes,
+    _d_weighting_design_path,
 )
 from .simulation import (
     _d_compute_map,
@@ -1297,6 +1298,11 @@ DIAGRAMS = {
         _d_vdi2081_sheet,
         "The VDI 2081 worked sheet as a place, and where each number comes from",
         596,
+    ),
+    "diagram_weighting_design_path": (
+        _d_weighting_design_path,
+        "The deterministic weighting design path",
+        750,
     ),
     "diagram_slm_pipeline": (
         _d_slm_pipeline,

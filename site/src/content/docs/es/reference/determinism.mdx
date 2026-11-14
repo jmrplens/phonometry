@@ -3,6 +3,8 @@ title: "Los mismos bits en cualquier máquina"
 description: "Determinismo: por qué deriva la coma flotante, cómo un filtro sigue igual byte a byte en cualquier CPU, BLAS o número de hilos, qué difiere y la evidencia."
 ---
 
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
 Un filtro de ponderación diseñado por phonometry es el mismo filtro, byte a
 byte, sean cuales sean la biblioteca C, el BLAS, el LAPACK, el número de
 hilos o la semilla de hash con que se diseñe, sea cual sea el compilador
@@ -14,7 +16,7 @@ correctamente redondeada en aritmética entera exacta, así que glibc, la
 libm de Apple, musl y el runtime de Windows, y las rutinas de glibc para
 x86-64, compiladas con multiply-add fusionado o sin él, no tienen voz en sus
 bits. Los dos pasos
-posteriores al ajuste que antes pasaban por una biblioteca numérica son
+de fuera del ajuste que antes pasaban por una biblioteca numérica son
 también aritmética propia del paquete: los polos del prototipo de BS.468-4,
 que hallaba LAPACK, son las raíces correctamente redondeadas del polinomio
 exacto de la red, y las secciones de segundo orden, que SciPy formaba a
@@ -119,7 +121,7 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
 - **La rejilla deletreada.** La rejilla geométrica de frecuencias se genera
   término a término con los extremos fijados, así que el ajuste evalúa las
   mismas frecuencias en todas partes.
-- **Ningún paso de biblioteca después del ajuste.** Los seis polos del
+- **Ningún paso de biblioteca fuera del ajuste.** Los seis polos del
   prototipo de BS.468-4 eran las raíces polinómicas de numpy: valores
   propios de la matriz compañera, que LAPACK halla con una iteración cuyas
   sumas el BLAS y el compilador pueden ordenar y fusionar a su gusto. El
@@ -140,6 +142,21 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
   exactamente a la misma distancia de un polo toma el primero, como hace
   una ordenación estable, donde la elección de SciPy pasa por la ordenación
   por defecto de numpy, cuyo orden de empates depende del procesador.
+
+El mismo camino como una sola columna, en el orden en que lo recorre el código,
+cada etapa junto al paso de biblioteca que sustituyó:
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_weighting_design_path.svg" alt="Una lámina en dos partes. Arriba, tres recuadros discontinuos nombran las puertas por las que un resultado deriva entre máquinas: las reducciones que se reasocian, las trascendentes vectorizadas que numpy despacha según la CPU y la libm de cada plataforma. Abajo, el camino de diseño como una columna de seis etapas, cada una junto al paso de biblioteca que sustituyó: el prototipo analógico, con los polos de BS.468-4 como raíces exactas correctamente redondeadas, en lugar de numpy.roots; la rejilla de frecuencias de 257 puntos, escrita término a término, en lugar de numpy.geomspace; la curva objetivo en aritmética real, en lugar de los productos complejos de numpy; el ajuste, rondas de Lawson de pasos de Levenberg-Marquardt con log, exp y pow fijados, sumas por pares y eliminación escrita, en lugar de la libm y del log, exp y pow de numpy, las sumas del BLAS y el dgesv de LAPACK; la transformación bilineal y su ganancia en aritmética real, en lugar del bilinear_zpk de SciPy; y las secciones de segundo orden, escritas paso a paso, en lugar del zpk2sos de SciPy. La columna termina en un recuadro: los mismos bytes de SOS en cualquier máquina, que la matriz de CI mantiene en un único digest SHA-256 por curva a 48 kHz en Linux, macOS y Windows. Una nota bajo la columna dice que sin, tan, arctan y el módulo de una raíz compleja se redondean correctamente en aritmética entera exacta, con el bucle de Ziv" width="92%" />
+
+*El orden es el del código, no el de la lista de arriba. El prototipo va
+primero, porque el ajuste parte de sus polos, así que los dos pasos que la
+lista nombra al final quedan uno a cada lado del ajuste: los polos de BS.468-4
+antes y las secciones de segundo orden después. Los recuadros discontinuos de
+la derecha son lo que llamaba antes cada etapa, y las tres puertas se cierran
+por el camino: la rejilla y las trascendentes fijadas cierran la segunda y la
+tercera, las sumas por pares y la eliminación escrita cierran la primera, y la
+aritmética real le quita los productos complejos al compilador que puede
+fusionarlos o no.*
 
 ## La evidencia
 
@@ -346,7 +363,7 @@ siguen siendo reproducibles en una misma máquina pero pueden diferir en los
 el tratamiento determinista se aplica donde importa la identidad de un
 filtro.
 
-Tampoco después del ajuste queda nada de una biblioteca. Los polos del
+Tampoco fuera del ajuste queda nada de una biblioteca. Los polos del
 prototipo de BS.468-4 y las secciones de segundo orden fueron los dos
 últimos pasos que lo eran, las raíces que hallaba LAPACK y las secciones
 que SciPy formaba a través del BLAS, y en ARM de 64 bits con OpenBLAS

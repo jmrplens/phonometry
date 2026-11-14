@@ -12,11 +12,12 @@
 // else entirely: a smiling face, a pair of horns, a map pin.
 //
 // Usage: node scripts/icon-sheet.mjs [--check]
-import { readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { topicIcons } from '../src/data/icons.mjs';
+import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { topics } from '../src/data/topics.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -84,7 +85,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${
 `;
 
 if (process.argv.includes('--check')) {
-  const committed = readFileSync(OUT, 'utf8');
+  const committed = readCommittedText(OUT);
   if (committed !== svg) {
     console.error('icon-sheet: src/assets/icon-sheet.svg is stale. Run pnpm run icons:sheet.');
     process.exit(1);

@@ -748,3 +748,51 @@ def test_an_mdx_comment_may_stand_between_blanks_in_its_braces(
 ) -> None:
     """MDX shows nothing of an expression that holds only a comment, blanks and all."""
     assert drop_inline_spans_by_block(text, comments="mdx") == shown
+
+
+@pytest.mark.parametrize(
+    ("text", "comments", "shown"),
+    [
+        pytest.param(
+            r"a \{/* b `c` */} d", "mdx", rf"a \{{/* b {SPAN_MARK} */}} d", id="mdx"
+        ),
+        pytest.param(r"a \<!-- b --> c", "md", r"a \<!-- b --> c", id="md"),
+        pytest.param(
+            r"a \\{/* b */} c", "mdx", rf"a \\{SPAN_MARK} c", id="an escaped backslash"
+        ),
+        pytest.param(
+            r"a `b\`{/* c */} d",
+            "mdx",
+            f"a {SPAN_MARK}{SPAN_MARK} d",
+            id="after a span",
+        ),
+    ],
+)
+def test_a_backslash_before_a_comment_shows_its_opening_character(
+    text: str, comments: str, shown: str
+) -> None:
+    r"""``\{`` and ``\<`` show the character and open nothing (CommonMark 2.4).
+
+    What follows them is prose the page shows, a code span among it; two
+    backslashes are one shown, and a backslash a code span holds escapes
+    nothing after the span.
+    """
+    assert drop_inline_spans_by_block(text, comments=comments) == shown
+
+
+def test_a_backslash_before_a_construct_of_punctuation_escapes_it() -> None:
+    r"""An address that opens on ``]`` behind a backslash is no link's address.
+
+    A backslash before a letter escapes nothing, so a URL after one is read.
+    """
+    address = re.compile(r"\]\([^)\s]*\)")
+    url = re.compile(r"[a-z]+://\S+")
+    assert blank_inline_spans_by_block(r"a \](b) c", constructs=(address,)) == (
+        r"a \](b) c"
+    )
+    assert blank_inline_spans_by_block(r"a \\](b) c", constructs=(address,)) == (
+        r"a \\" + " " * 4 + " c"
+    )
+    assert blank_inline_spans_by_block(r"a \http://x b", constructs=(url,)) == (
+        "a \\" + " " * 8 + " b"
+    )

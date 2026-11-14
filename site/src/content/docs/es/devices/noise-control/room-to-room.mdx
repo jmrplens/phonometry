@@ -289,17 +289,19 @@ for row in chain.table():
 ```
 
 Dos funciones de nombre parecido hacen dos trabajos distintos en ese fragmento,
-y confundirlas es silencioso. $A = S\alpha$, `equivalent_absorption_area`, es la
-potencia que el recinto retira por unidad de presión cuadrática media, y es lo
-que aparece en el balance del recinto receptor de la Ecuación (4.101).
-$R = S\alpha/(1-\alpha)$, `room_constant`, es la constante de recinto de la
-relación de régimen estacionario, que además tiene en cuenta la energía que
-sobrevive a su primera reflexión y sigue alimentando el campo reverberante, y es
-lo que necesita $L_{p1} = L_W + 10\log_{10}(4/R)$ en el lado emisor. Las dos
-coinciden en un recinto muy reflectante y divergen a medida que $\alpha$ crece
-(se separan en $10\log_{10}[1/(1-\alpha)]$, 0,5 dB con $\alpha = 0{,}1$ y
-3,0 dB con $\alpha = 0{,}5$), y usar el área de absorción donde va la constante
-de recinto sesga la respuesta hacia predecir *demasiada* reducción de ruido.
+y confundirlas es silencioso. $A = S\alpha$, `equivalent_absorption_area`, es el
+área que convierte la intensidad del campo difuso sobre las paredes,
+$\langle p^2 \rangle/(4\rho_0 c_0)$, en la potencia que el recinto retira
+(Norton y Karczub, Ecuación (4.98)), y es lo que aparece en el balance del
+recinto receptor de la Ecuación (4.101). $R = S\alpha/(1-\alpha)$,
+`room_constant`, es la constante de recinto de la relación de régimen
+estacionario, que además tiene en cuenta la energía que sobrevive a su primera
+reflexión y sigue alimentando el campo reverberante, y es lo que necesita
+$L_{p1} = L_W + 10\log_{10}(4/R)$ en el lado emisor. Las dos coinciden en un
+recinto muy reflectante y divergen a medida que $\alpha$ crece (se separan en
+$10\log_{10}[1/(1-\alpha)]$, 0,5 dB con $\alpha = 0{,}1$ y 3,0 dB con
+$\alpha = 0{,}5$), y usar el área de absorción donde va la constante de recinto
+sesga la respuesta hacia predecir *demasiada* reducción de ruido.
 `equivalent_absorption_area` admite además objetos discretos y un término de
 absorción del aire, que es por donde entran el mobiliario, las personas y, en un
 recinto grande, el propio aire en el lado receptor.

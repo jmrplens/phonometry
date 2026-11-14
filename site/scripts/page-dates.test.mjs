@@ -209,6 +209,39 @@ test('a page added on two branches takes the older add', async (t) => {
 	assert.equal(firstPublished(repo.path('twice.mdx')), '2024-02-01');
 });
 
+test('a page only a merge adds is dated by the merge, and a page a merge moves keeps its date', async (t) => {
+	// `git log` writes nothing for a merge unless asked, so a page the merge
+	// commit wrote itself, or moved, had no add to go back to.
+	const repo = repository(t);
+	repo.write('base.mdx', body('base'));
+	repo.write('moved.mdx', body('moved in the merge'));
+	repo.write('edited.mdx', body('moved and edited in the merge'));
+	repo.commit('2024-01-01');
+	repo.git(['checkout', '-q', '-b', 'side']);
+	repo.write('side.mdx', body('from the side branch'));
+	repo.commit('2024-02-01');
+	repo.git(['checkout', '-q', 'main']);
+	repo.write('base.mdx', `${body('base')}and an edit on main\n`);
+	repo.commit('2024-03-01');
+	repo.git(['merge', '-q', '--no-ff', '--no-commit', 'side']);
+	repo.write('merged.mdx', body('written in the merge'));
+	mkdirSync(join(repo.docs, 'deep'));
+	renameSync(join(repo.docs, 'moved.mdx'), join(repo.docs, 'deep/moved.mdx'));
+	rmSync(join(repo.docs, 'edited.mdx'));
+	repo.write('deep/edited.mdx', `${body('moved and edited in the merge')}and a line the merge added\n`);
+	repo.commit('2024-04-01');
+	chdir(t, repo.site);
+	const firstPublished = await fresh();
+	const names = ['merged.mdx', 'deep/moved.mdx', 'deep/edited.mdx', 'side.mdx', 'base.mdx'];
+	assert.deepEqual(Object.fromEntries(names.map((name) => [name, firstPublished(repo.path(name))])), {
+		'merged.mdx': '2024-04-01',
+		'deep/moved.mdx': '2024-01-01',
+		'deep/edited.mdx': '2024-01-01',
+		'side.mdx': '2024-02-01',
+		'base.mdx': '2024-01-01',
+	});
+});
+
 test('a page written from another gets its own date, not the date of the page it came from', async (t) => {
 	const repo = repository(t);
 	repo.write('guide.mdx', body('guide'));

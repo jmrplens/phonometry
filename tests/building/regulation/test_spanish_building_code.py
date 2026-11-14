@@ -5,9 +5,10 @@ Two independent oracle families anchor this module.
 
 **The code itself** (CTE Documento Básico HR "Protección frente al ruido"):
 the four normalised A-weighted source spectra of Annex A Tables A.2 to A.5,
-the global-index formulae (A.5) to (A.7), the facade requirement Table 2.1,
-the airborne and impact requirements of clauses 2.1.1 and 2.1.2, the
-reverberation limits of clause 2.2 and the rounding rule of 3.1.3.1 point 4.
+the global-index formulae (A.5) to (A.7), (A.14), (A.17) and (A.18), the
+facade requirement Table 2.1, the airborne and impact requirements of clauses
+2.1.1 and 2.1.2, the reverberation limits of clause 2.2 and the rounding rule
+of 3.1.3.1 point 4.
 
 **Avilés López & Perera Martín, Manual de acústica ambiental y arquitectónica
 (Paraninfo), chapter 7**: Ejemplo 7.2 (printed pages 394-395) publishes a full
@@ -85,7 +86,7 @@ _D2M_NT = (
 # Annex A: the normalised source spectra
 # --------------------------------------------------------------------------- #
 def test_band_set_is_the_eighteen_bands_of_annex_a() -> None:
-    """Formulae (A.5)-(A.7) run over the 1/3-octave bands 100 Hz to 5 kHz."""
+    """Each Annex A global-index formula sums the 1/3-octave bands 100 Hz to 5 kHz."""
     assert len(hr.DB_HR_FREQUENCIES_HZ) == 18
     assert hr.DB_HR_FREQUENCIES_HZ[0] == 100.0
     assert hr.DB_HR_FREQUENCIES_HZ[-1] == 5000.0

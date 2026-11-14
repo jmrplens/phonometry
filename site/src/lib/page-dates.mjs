@@ -67,6 +67,13 @@ function older(current, candidate) {
  * oldest first: `C <time>` for a commit, then a status and its paths,
  * every field ended by a NUL so that no file name needs quoting.
  *
+ * A merge writes what it changed from all of its parents at once: a status
+ * letter per parent, then the path in each parent and the path it holds. It
+ * lists only a file it holds as no parent did, so a file it took from a
+ * parent goes back to that parent's add, and one it wrote itself, or moved,
+ * is read here: a letter `A` for a parent that did not hold it, which the
+ * merge adds, and any other for one that did, whose add it keeps.
+ *
  * @param {string} log
  * @returns {Map<string, {time: number, date: string}>} Repo-relative path to add.
  */
@@ -81,6 +88,17 @@ function addsIn(log) {
     if (field.startsWith('C ')) {
       const time = Number(field.slice(2));
       commit = { time, date: isoDay(new Date(time * 1000)) };
+    } else if (/^[A-Z]{2,}$/.test(field)) {
+      // A merge, read before a one-parent status that starts with the same
+      // letter: one letter per parent, its path in each, and the path it holds.
+      const letters = [...field];
+      const from = fields.slice(i + 1, i + 1 + letters.length);
+      const to = fields[(i += letters.length + 1)];
+      if (letters.every((letter) => letter === 'D')) continue;
+      for (const [index, letter] of letters.entries()) {
+        const add = letter === 'A' ? commit : (added.get(from[index]) ?? commit);
+        added.set(to, older(added.get(to), add));
+      }
     } else if (field === 'A') {
       // A file resurrected after a delete has several adds; the oldest is the
       // publication date.
@@ -140,7 +158,10 @@ function readHistory() {
     // will reach once it passes a thousand pages and the search for one file never
     // could. The rest because it depends on seeing every add: --full-history keeps
     // a branch whose merge left the tree as it was, --root keeps the first commit,
-    // and --topo-order puts each add before the renames of the file it added.
+    // --topo-order puts each add before the renames of the file it added, and
+    // --diff-merges=combined with --combined-all-paths writes the files a merge
+    // added or moved itself, with the path each parent held them at, where
+    // git log writes nothing for a merge by default.
     const log = git(
       '-C',
       root,
@@ -152,6 +173,8 @@ function readHistory() {
       '--root',
       '-M',
       '-l0',
+      '--diff-merges=combined',
+      '--combined-all-paths',
       '--name-status',
       '-z',
       '--format=C %ct',

@@ -455,6 +455,10 @@ _WALKS = (
     "   :::note\n    2. a\n   :::\n",
     "> :::note\n>   a\n> :::\n",
     "  :::note\n\t- a\n  :::\n",
+    "> :::note\n> a\n\nb\n",
+    "- :::note\n  a\n\nb\n",
+    "> - :::note\n>   a\n\nb\n",
+    ":::note\n:::tip\na\n:::\nb\n:::\nc\n",
     "::x\na\n",
     "-\n\n  a\n",
     "-\n  a\n",
@@ -524,7 +528,7 @@ def test_the_site_reads_every_page_as_the_scripts_do(kind: str) -> None:
 )
 @pytest.mark.parametrize("kind", ["md", "mdx"])
 def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
-    """Each line's role and what the walk leaves of it, on each kind of page."""
+    """Each line's role, what the walk leaves of it and the asides open around it."""
     pages = [*_pages(), *_WALKS]
     script = (
         "import {pageLines, splitLines} from "
@@ -533,12 +537,12 @@ def test_the_site_walks_every_page_as_the_scripts_do(kind: str) -> None:
         "for await (const chunk of process.stdin) input += chunk;"
         "process.stdout.write(JSON.stringify(JSON.parse(input).map((text) => "
         f"  pageLines(splitLines(text), {{kind: {json.dumps(kind)}}})"
-        "    .map((line) => [line.role, line.rest, line.item]))));"
+        "    .map((line) => [line.role, line.rest, line.item, line.asides]))));"
     )
     javascript = node_script.answer(script, pages, timeout=300)
     python = [
         [
-            [line.role, line.rest, line.item]
+            [line.role, line.rest, line.item, line.asides]
             for line in page_lines(_split_as_the_site_does(text), kind=kind)
         ]
         for text in pages
@@ -556,6 +560,29 @@ def test_only_the_end_the_markdown_parser_reads_ends_a_comment() -> None:
     lines = ["<!-- a --!>", "b", "c -->", "d"]
     roles = [line.role for line in page_lines(lines, kind="md")]
     assert roles == ["html", "raw", "raw", "paragraph"]
+
+
+@pytest.mark.parametrize(
+    ("text", "asides"),
+    [
+        pytest.param(":::note\na\n:::\nb\n", [1, 1, 0, 0], id="closed by its fence"),
+        pytest.param(
+            "> :::note\n> a\n\nb\n", [1, 1, 0, 0], id="closed by its quotation"
+        ),
+        # A blank line leaves an item open, for an indented line may carry it on.
+        pytest.param("- :::note\n  a\n\nb\n", [1, 1, 1, 0], id="closed by its item"),
+        pytest.param(
+            ":::note\n:::tip\na\n:::\nb\n:::\nc\n",
+            [1, 2, 2, 1, 1, 0, 0],
+            id="one inside another",
+        ),
+    ],
+)
+def test_the_walk_counts_the_asides_open_around_each_line(
+    text: str, asides: list[int]
+) -> None:
+    """An aside ends with the container it opened in, as remark-directive ends it."""
+    assert [line.asides for line in page_lines(text.splitlines())] == asides
 
 
 #: Lines whose quotation marks the two languages have to read alike: marks

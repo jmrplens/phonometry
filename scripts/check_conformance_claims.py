@@ -456,17 +456,24 @@ def plain_text(text: str) -> str:
     """``text`` as the refusal reads it: no markup, every hard space a space.
 
     Deletes the :data:`_MARKS` and the inline :data:`_TAG` and reads each of
-    the :data:`_HARD_SPACES`, however it is written, as one space. It touches
-    no line break, so a line number counted in the result is a line number of
+    the :data:`_HARD_SPACES`, however it is written, as one space, and reads
+    what is left again until nothing changes: taking a tag or a mark out can
+    join what is around it into a tag, ``<<b>em>`` or ``<*em>`` into ``<em>``,
+    which one pass would leave between a count and its noun. It touches no
+    line break, so a line number counted in the result is a line number of
     ``text``.
 
     :param text: A whole file.
     :return: The text with the markup a count of standards could hide behind
         taken out.
     """
-    spaced = _ESCAPE.sub(_space_if_hard, text.translate(_PLAIN_SPACES))
-    untagged = _TAG.sub(_drop_if_inline, spaced)
-    return _MARKS.sub("", untagged)
+    plain = text
+    while True:
+        spaced = _ESCAPE.sub(_space_if_hard, plain.translate(_PLAIN_SPACES))
+        again = _MARKS.sub("", _TAG.sub(_drop_if_inline, spaced))
+        if again == plain:
+            return plain
+        plain = again
 
 
 def _space_if_hard(escape: re.Match[str]) -> str:

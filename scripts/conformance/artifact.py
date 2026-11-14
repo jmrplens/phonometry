@@ -650,7 +650,7 @@ def write(path: pathlib.Path | None = None) -> tuple[dict[str, Any], bool]:
         committed = json.loads(target.read_text(encoding="utf8"))
         if not document_problems(committed, fresh):
             return committed, False
-    target.write_text(dumps(fresh), encoding="utf8")
+    target.write_text(dumps(fresh), encoding="utf8", newline="\n")
     return fresh, True
 
 

@@ -523,6 +523,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         arguments.json.write_text(
             json.dumps([asdict(finding) for finding in findings], indent=1) + "\n",
             encoding="utf-8",
+            newline="\n",
         )
     listed = [
         finding

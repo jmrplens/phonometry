@@ -411,6 +411,7 @@ def test_the_lint_gate_reaches_the_shim() -> None:
         cwd=_ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=False,
         timeout=120,
     )

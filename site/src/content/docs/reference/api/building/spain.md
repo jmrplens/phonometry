@@ -12,18 +12,21 @@ Técnico de la Edificación states its requirements in A-weighted global
 quantities that are close relatives of, but not identical to, the ISO 717-1
 weighted ratings: `RA`, `RA,tr`, `DnT,A` and `D2m,nT,Atr`.
 
-**The global index (Annex A, Formulae (A.5) to (A.7)).** Instead of shifting a
-reference curve, DB-HR weights the measured one-third-octave insulation with a
-normalised A-weighted source spectrum and sums it energetically:
+**The global index (Annex A, Formulae (A.5) to (A.7), (A.14), (A.17) and
+(A.18)).** Instead of shifting a reference curve, DB-HR weights the measured
+one-third-octave insulation with a normalised A-weighted source spectrum and
+sums it energetically:
 
 $$
 I_x = -10 \log_{10} \sum_i 10^{(L_{x,i} - X_i)/10} \quad [\mathrm{dBA}]
 $$
 
 where `X_i` is the band insulation (`R`, `R'`, `DnT`, `D2m,nT` ...)
-and `L_x,i` the normalised spectrum of the source. The sum runs over the
-**eighteen** one-third-octave bands 100 Hz to 5 kHz, two more than ISO 717-1's
-sixteen: the 4 kHz and 5 kHz bands.
+and `L_x,i` the normalised spectrum of the source. Annex A prints this sum
+once for each quantity: `D2m,nT,A` in Formula (A.5), `D2m,nT,Atr` in
+(A.6), `DnT,A` in (A.7), `R'A` in (A.14), `RA` in (A.17) and `RA,tr`
+in (A.18). The sum runs over the **eighteen** one-third-octave bands 100 Hz to
+5 kHz, two more than ISO 717-1's sixteen: the 4 kHz and 5 kHz bands.
 
 **Which quantity a facade is assessed in (clause 3.1.3.4 point 1).** The name
 of the global quantity depends on the dominant outdoor noise, and it is not a
@@ -52,8 +55,9 @@ reading that they must be the *enlarged-range* terms `C100-5000` and
 `Ctr,100-5000`, because the DB-HR indices run to 5 kHz while the ISO 717-1
 core range stops at 3150 Hz, is the one the Spanish literature makes explicit
 (Avilés López & Perera Martín, note to expressions [7.15] and [7.16]). The
-library keeps both routes: this module implements the direct Formula
-(A.5)-(A.7) route, which is the normative one for DB-HR, and
+library keeps both routes: this module implements the direct Annex A route
+(Formulae (A.5) to (A.7), (A.14), (A.17) and (A.18)), which is the normative
+one for DB-HR, and
 [`weighted_rating_extended`](/phonometry/reference/api/building/ratings/#weighted_rating_extended) supplies the
 ISO 717-1 route with the enlarged-range adaptation terms.
 
@@ -327,7 +331,8 @@ db_hr_global_index(
 A-weighted global insulation index per DB-HR Annex A.
 
 $I_x = -10 \log_{10} \sum_i 10^{(L_{x,i} - X_i)/10}$ over the eighteen
-one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7)).
+one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7), (A.14),
+(A.17) and (A.18), one for each quantity).
 
 **Parameters**
 
@@ -656,7 +661,10 @@ ra(
 ) -> DBHRGlobalIndexResult
 ```
 
-A-weighted global sound reduction index `RA` for pink noise.
+A-weighted global sound reduction index `RA` for pink noise (Formula (A.17)).
+
+Given the apparent index `R'` measured in the building, the same sum is
+`R'A` of Formula (A.14); the result is still named `"RA"`.
 
 **Parameters**
 
@@ -684,7 +692,7 @@ ra_tr(
 ) -> DBHRGlobalIndexResult
 ```
 
-A-weighted global sound reduction index `RA,tr` for road-traffic noise.
+A-weighted global sound reduction index `RA,tr` for road traffic (Formula (A.18)).
 
 **Parameters**
 

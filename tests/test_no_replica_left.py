@@ -108,6 +108,7 @@ def _tracked_names() -> tuple[str, ...]:
         ["git", "-C", str(_ROOT), "ls-files", "-z"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
         timeout=120,
     ).stdout

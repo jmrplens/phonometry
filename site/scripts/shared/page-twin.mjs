@@ -188,38 +188,92 @@ export function stripMdx(
   return closeUp(kept + text.slice(done), kind).trim();
 }
 
-/** `text` with each run of empty lines outside code closed up to one, on a page of `kind`. */
+/**
+ * `text` with each run of empty lines outside code closed up to one, on a page
+ * of `kind`; a line holding only the carriage return of its line end is empty.
+ */
 function closeUp(text, kind) {
   const lines = text.split('\n');
   const code = codeLines(lines, { kind });
-  const blank = (index) => lines[index] === '' && !code[index];
+  const blank = (index) => (lines[index] === '' || lines[index] === '\r') && !code[index];
   return lines.filter((_, index) => !(index > 0 && blank(index) && blank(index - 1))).join('\n');
 }
 
-/** Text on one line, each run of white space one space. */
-const oneLine = (text) => text.replace(/\s+/g, ' ').trim();
+/**
+ * Text on one line, each run of the white space a browser collapses (spaces,
+ * tabs and line breaks) one space. A no-break space stays: the page prints it,
+ * as it prints the narrow one that groups the digits of `15 000`.
+ */
+const oneLine = (text) => text.replace(/[ \t\n\v\f\r]+/g, ' ').trim();
 
 /**
- * Text for the inside of `[...]`, a link's text or an image's alt: the
- * characters that would end it or open a table cell escaped.
- *
- * @param {string} text
- * @returns {string}
+ * Text a page prints as it is, written so that Markdown prints it as it is,
+ * each character escaped that would open emphasis (a `*`, and a `_` that is
+ * not inside a word), code, maths, strikethrough, a link or an image, a tag or
+ * an autolink, or a table cell, or end the brackets of a link's text or an
+ * image's alt. An `&` that opens a character reference is escaped too, so that
+ * `&amp;` prints as written, except in the value of a component's attribute
+ * (`attribute`): MDX reads the references of a value as Markdown reads them,
+ * so they are left for the reader to read alike. A `_`, a `<` or an `&` at an
+ * edge of the text is escaped whatever stands beyond it, since a fragment of a
+ * citation is joined to the next one: `x <` before a link to `https://...`
+ * would open an autolink.
  */
-export const bracketText = (text) => oneLine(text).replace(/([\\[\]|])/g, '\\$1');
+const escapeMarks = (text, attribute) => {
+  const escaped = text
+    .replace(/[\\`*~$[\]|]/g, '\\$&')
+    .replace(/(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])/gu, '\\_')
+    .replace(/<(?=[A-Za-z/!?]|$)/g, '\\<');
+  return attribute ? escaped : escaped.replace(/&(?=#\d+;|#[xX][\da-fA-F]+;|[A-Za-z][A-Za-z\d]*;|$)/g, '\\&');
+};
 
 /**
- * Plain text made safe to print as Markdown: the characters that would turn
- * part of it into emphasis, code, maths, a link or a tag escaped.
+ * Text a page prints as it is, written for a link's text, an image's alt or a
+ * run of prose: on one line ({@link oneLine}), its marks escaped as
+ * `escapeMarks` says, with `attribute: true` for the value of a component's
+ * attribute.
  *
  * @param {string} text
+ * @param {{ attribute?: boolean }} [options]
  * @returns {string}
  */
-const plainText = (text) =>
-  text
-    .replace(/[ \t\n\v\f\r]+/g, ' ')
-    .replace(/([\\`*~$[\]])/g, '\\$1')
-    .replace(/<(?=[A-Za-z/!?])/g, '\\<');
+export const literalText = (text, { attribute = false } = {}) => escapeMarks(oneLine(text), attribute);
+
+/**
+ * A fragment of a line, a part of a citation: {@link literalText} with the
+ * space at its edges kept, which joins it to the next fragment.
+ */
+const fragmentText = (text) => escapeMarks(text.replace(/[ \t\n\v\f\r]+/g, ' '), false);
+
+/**
+ * Markdown written as a line of its own, a paragraph or the line under a list
+ * item, with the mark that opens it escaped where it would open a heading, a
+ * quotation, a list, a thematic break or a heading's underline.
+ */
+const lineStart = (markdown) =>
+  markdown.replace(/^(?:([#>+=-])|(\d{1,9})([.)]))/, (_whole, mark, digits, delimiter) =>
+    mark ? `\\${mark}` : `${digits}\\${delimiter}`,
+  );
+
+/**
+ * The line a copy written from a page's source opens with: the page's title
+ * as a heading, in {@link literalText}, with a closing run of `#` escaped,
+ * which Markdown would take for the end of the heading's syntax.
+ *
+ * @param {string} title The page's title, from its frontmatter.
+ * @returns {string}
+ */
+export const titleMarkdown = (title) => `# ${literalText(title).replace(/(^|[ \t])(#+)$/, '$1\\$2')}`;
+
+/**
+ * One item of the list of catalogues the copy writes for CatalogueIndex: the
+ * catalogue's label linked to its page, then what it holds, each read from its
+ * frontmatter and written in {@link literalText}.
+ *
+ * @param {{ label: string, url: string, description: string }} catalogue
+ * @returns {string}
+ */
+export const catalogueItem = ({ label, url, description }) => `- [${literalText(label)}](${url}): ${literalText(description)}`;
 
 /** One attribute of a component tag written as a string or as a number. */
 function attribute(tag, name) {
@@ -289,7 +343,7 @@ export function figureMarkdown(tag, { lang, base }) {
     const alt = attribute(tag, 'alt');
     if (!src || !alt) throw new Error(`a figure without its src or its alt: ${oneLine(tag)}`);
     const localised = lang === 'es' ? suffixed(src, '_es') : src;
-    return `![${bracketText(alt)}](${mediaUrl(localised, base)})`;
+    return `![${literalText(alt, { attribute: true })}](${mediaUrl(localised, base)})`;
   }
   if (component === 'Video' || component === 'ReportPreview') {
     const name = attribute(tag, 'name');
@@ -301,8 +355,9 @@ export function figureMarkdown(tag, { lang, base }) {
         : mediaUrl(`${FICHES}/${name}.pdf`, base);
     const description = attribute(tag, 'description');
     const caption = attribute(tag, 'caption');
-    const line = `**${LEAD[component][lang]}:** [${bracketText(title)}](${url})${description ? `: ${oneLine(description)}` : ''}`;
-    return caption ? `${line}\n\n${oneLine(caption)}` : line;
+    const written = description ? `: ${literalText(description, { attribute: true })}` : '';
+    const line = `**${LEAD[component][lang]}:** [${literalText(title, { attribute: true })}](${url})${written}`;
+    return caption ? `${line}\n\n${lineStart(literalText(caption, { attribute: true }))}` : line;
   }
   return undefined;
 }
@@ -316,7 +371,7 @@ const destination = (url) => (/[\s()<>]/.test(url) ? `<${url.replaceAll('<', '%3
 /** One fragment of a citation as Markdown: a bare URL stays bare, a title in italics, a link around what it carries. */
 function partMarkdown(part) {
   if (part.href && part.text === part.href) return part.href;
-  const text = plainText(part.text);
+  const text = fragmentText(part.text);
   const marked = part.italic && text.trim() ? `*${text}*` : text;
   return part.href ? `[${marked}](${destination(part.href)})` : marked;
 }
@@ -337,10 +392,47 @@ export function referencesMarkdown(references, lang, heading) {
   if (!references?.length) return '';
   const entries = sortedReferences(references, lang).map(([, ref]) => {
     const citation = citationParts(ref).map(partMarkdown).join('');
-    const note = ref.note ? `\n  ${noteParts(ref.note).map(partMarkdown).join('').trim()}` : '';
-    return `- **${plainText(opening(ref, lang))}**${citation.trimEnd()}${note}`;
+    const note = ref.note ? `\n  ${lineStart(noteParts(ref.note).map(partMarkdown).join('').trim())}` : '';
+    return `- **${fragmentText(opening(ref, lang))}**${citation.trimEnd()}${note}`;
   });
   return `## ${heading}\n\n${entries.join('\n')}`;
+}
+
+/**
+ * The text Markdown prints for the content of an ATX heading line, read on its
+ * own for {@link copyDefects}: a closing run of `#` taken off as Markdown
+ * takes it off, and each backslash escape of an ASCII punctuation character
+ * read as that character. A character {@link literalText} escapes that stands
+ * unescaped could be read as markup, so the line then reads as nothing
+ * (`undefined`).
+ *
+ * @param {string} written What follows `# ` on the line.
+ * @returns {string | undefined}
+ */
+function headingText(written) {
+  const content = written.replace(/(^|[ \t])#+[ \t]*$/, '$1').trim();
+  let text = '';
+  for (let at = 0; at < content.length; at += 1) {
+    const char = content[at];
+    const next = content[at + 1] ?? '';
+    if (char === '\\' && /[!-/:-@[-`{-~]/.test(next)) {
+      text += next;
+      at += 1;
+      continue;
+    }
+    const before = content[at - 1] ?? '';
+    const word = (c) => /[\p{L}\p{N}]/u.test(c);
+    if (
+      /[\\`*~$[\]|]/.test(char) ||
+      (char === '_' && !(word(before) && word(next))) ||
+      (char === '<' && /[A-Za-z/!?]/.test(next)) ||
+      (char === '&' && /^&(?:#\d+|#[xX][\da-fA-F]+|[A-Za-z][A-Za-z\d]*);/.test(content.slice(at)))
+    ) {
+      return undefined;
+    }
+    text += char;
+  }
+  return text;
 }
 
 /** `text` with the characters a regular expression reads as syntax escaped. */
@@ -393,7 +485,8 @@ export const COPY_FORMS = Object.freeze({
  * through the reading that wrote the copy, so a writer that goes wrong cannot
  * pass by agreeing with itself:
  *
- * - the copy opens with `# <title>`;
+ * - the copy opens with a heading that prints the page's title, a mark of
+ *   the title escaped (headingText);
  * - it holds no comment outside its code;
  * - it holds no link from the site's root outside its code, in any syntax: the
  *   site's base path where no host comes before it;
@@ -427,7 +520,9 @@ export const COPY_FORMS = Object.freeze({
 export function copyDefects(copy, { source, kind, title, references = [], heading, site, catalogues = 0, firstLine = 1 }) {
   const defects = [];
   const first = copy.slice(0, copy.indexOf('\n') === -1 ? copy.length : copy.indexOf('\n'));
-  if (first !== `# ${title}`) defects.push(`it opens with ${JSON.stringify(first)}, not with the page's title`);
+  if (!first.startsWith('# ') || headingText(first.slice(2)) !== oneLine(title)) {
+    defects.push(`it opens with ${JSON.stringify(first)}, not with the page's title`);
+  }
   const parts = pageParts(copy, { kind: 'md' });
   for (const part of parts.filter(({ what }) => what === 'comment')) {
     defects.push(`it keeps the comment ${JSON.stringify(oneLine(copy.slice(part.start, part.end)).slice(0, 80))}`);

@@ -1986,9 +1986,9 @@ def _run_page(
     script, lines = _script(page, fixture)
     with tempfile.TemporaryDirectory() as tmp:
         path = pathlib.Path(tmp) / "snippet.py"
-        path.write_text(script, encoding="utf-8")
+        path.write_text(script, encoding="utf-8", newline="\n")
         (pathlib.Path(tmp) / "_snippet_recorder.py").write_text(
-            _RECORDER, encoding="utf-8"
+            _RECORDER, encoding="utf-8", newline="\n"
         )
         # The recorder tells two calls on one line apart by their columns,
         # which the interpreter drops when asked not to keep them.

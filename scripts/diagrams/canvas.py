@@ -1523,7 +1523,7 @@ def _write(
             svg = SVG(900, height, th, lang)
             build(svg, th)
             path = Path(output_dir) / f"{name}{lang_suffix}{th.suffix}.svg"
-            with path.open("w", encoding="utf-8") as fh:
+            with path.open("w", encoding="utf-8", newline="\n") as fh:
                 # The same pass the matplotlib figures take (see
                 # generated_assets.compact_svg): this renderer already writes
                 # short numbers and no indentation, so it changes little here,

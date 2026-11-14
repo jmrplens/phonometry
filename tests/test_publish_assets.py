@@ -39,6 +39,7 @@ def _git(cwd: pathlib.Path, *args: str) -> str:
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=120,
     ).stdout.rstrip("\n")
 

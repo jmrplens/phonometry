@@ -205,7 +205,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
-| CTE DB-HR Annex A, Formula (A.5) | Global index R'A for pink noise (Manual Ejemplo 7.2) | 51.4 dBA (+/-0.05 dBA) | 51.4 dBA | 0 dBA | 0 % | ![Pass][cv-pass] Pass |
+| CTE DB-HR Annex A, Formula (A.14) | Global index R'A for pink noise (Manual Ejemplo 7.2) | 51.4 dBA (+/-0.05 dBA) | 51.4 dBA | 0 dBA | 0 % | ![Pass][cv-pass] Pass |
 | CTE DB-HR Annex A, Formula (A.6) | Global index D2m,nT,Atr for road traffic (Manual Ejercicio 7.1) | 32.8 dBA (+/-0.05 dBA) | 32.8 dBA | 0 dBA | 0 % | ![Pass][cv-pass] Pass |
 | Manual de acústica ambiental y arquitectónica, Ejemplo 7.1 | Reported R'A of the field-test wall (printed 51 dBA = R'w 52 + C -1) | 51 dBA (+/-0 dBA) | 51 dBA | 0 dBA | 0 % | ![Pass][cv-pass] Pass |
 | Manual de acústica ambiental y arquitectónica, Ejemplo 7.1 | Reported R'A,tr of the same wall (printed 47 dBA = R'w 52 + Ctr -5) | 47 dBA (+/-0 dBA) | 47 dBA | 0 dBA | 0 % | ![Pass][cv-pass] Pass |

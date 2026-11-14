@@ -36,6 +36,14 @@
 // quantity (51.4 dBA for the index of the guide's worked example, -51.4 dBA
 // for the level it transmits under the normalised spectrum).
 //
+// A standard that rates octave bands by a rule of its own has it stated
+// where a definition gives the one-third-octave rule. ISO 717-2 reads the
+// shifted curve at 500 Hz for one-third octaves (4.3.1) and takes 5 dB off
+// that reading for octaves (4.3.2); the impact ratings were defined by the
+// 500 Hz reading alone, which rates an octave-band field measurement 5 dB
+// too high, and CI by its one-third-octave range alone (A.2.1 sums the
+// octaves 125 Hz to 2000 Hz).
+//
 // These tests read the data the page and the structured data are both built
 // from, so they fail before a build does. check-structured-data.mjs holds the
 // built nodes to the same names.
@@ -320,4 +328,83 @@ test('a reduction, a level difference, a loss or an attenuation is not defined a
 	}
 	assert.ok(read > 0, 'no quantity of this kind was read');
 	assert.deepEqual(wrong, []);
+});
+
+/**
+ * The standards whose print rates octave bands by a rule of its own, each
+ * with what a definition can state that holds for one-third-octave bands
+ * alone. ISO 717-2 reads the shifted curve at 500 Hz for one-third octaves
+ * (4.3.1) and takes 5 dB off that reading for octaves (4.3.2), and sums CI
+ * over 100 Hz to 2500 Hz or over the octaves 125 Hz to 2000 Hz (A.2.1, with
+ * 50 Hz or the 63 Hz octave for the enlarged range). ISO 717-1 reads the
+ * curve at 500 Hz for both (4.4), so there only the one-third-octave ranges
+ * and the 32.0 dB sum are its own.
+ */
+const OCTAVE_RULE = [
+	{ standard: /ISO 717-2/, thirdsOnly: /\b500 Hz|\b(?:50|100|2500|3150) Hz\b|\b32(?:[.,]0)? dB\b/ },
+	{ standard: /ISO 717-1/, thirdsOnly: /\b(?:50|100|3150|5000) Hz\b|\b32(?:[.,]0)? dB\b/ },
+];
+
+/** Octave bands named as such, which "one-third-octave bands" does not do. */
+const OCTAVE_BANDS = {
+	en: /(?<!third[- ])\boctave(?:s\b|[- ]bands?\b)/i,
+	es: /bandas? de octava|(?<!tercios? de )\boctavas\b/iu,
+};
+
+/** The standard an entry names in one language. */
+const standardOf = (term, language) =>
+	typeof term.standard === 'string' ? term.standard : (term.standard?.[language] ?? '');
+
+test('octave bands are told apart from one-third-octave bands in either language', () => {
+	assert.match('or over the octave bands 125 Hz to 2000 Hz', OCTAVE_BANDS.en);
+	assert.match('a field measurement in octaves', OCTAVE_BANDS.en);
+	assert.doesNotMatch('over eighteen one-third-octave bands', OCTAVE_BANDS.en);
+	assert.doesNotMatch('the sixteen one-third octaves', OCTAVE_BANDS.en);
+	assert.match('o en las bandas de octava de 125 Hz a 2000 Hz', OCTAVE_BANDS.es);
+	assert.doesNotMatch('en las bandas de tercio de octava', OCTAVE_BANDS.es);
+	assert.doesNotMatch('dieciséis tercios de octava', OCTAVE_BANDS.es);
+});
+
+test('a definition that states a rule of one-third-octave bands says what octave bands do, in either language', () => {
+	const missing = [];
+	let read = 0;
+	for (const term of TERMS) {
+		for (const language of LANGUAGES) {
+			const rule = OCTAVE_RULE.find(({ standard }) => standard.test(standardOf(term, language)));
+			const prose = outsideMaths(term.definition[language]);
+			if (!rule || !rule.thirdsOnly.test(prose)) continue;
+			read += 1;
+			if (!OCTAVE_BANDS[language].test(prose)) {
+				missing.push(`${term.id} (${language}): "${rule.thirdsOnly.exec(prose)[0]}" in ${prose.slice(0, 70)}`);
+			}
+		}
+	}
+	assert.ok(read > 0, 'no definition of a band-dependent rating was read');
+	assert.deepEqual(missing, [], `definitions that give the one-third-octave rule alone:\n${missing.join('\n')}`);
+});
+
+/** A radiation efficiency or radiation factor, by the words of its name. */
+const RADIATION = { en: /\bradiation (?:efficiency|factor)\b/i, es: /(?:eficiencia|factor) de radiaci[oó]n/iu };
+
+/** What the radiated power is divided by: the impedance of air with the area and velocity. */
+const AGAINST_AIR = { en: /\bcharacteristic impedance\b/i, es: /impedancia caracter[ií]stica/iu };
+
+/** The loose reading, a power per squared velocity, which carries kilograms per second. */
+const PER_UNIT_VELOCITY = { en: /\bper unit mean-square\b/i, es: /por unidad de velocidad cuadr[aá]tica/iu };
+
+test('a radiation efficiency divides the power by the characteristic impedance of air, the area and the mean-square velocity, in either language', () => {
+	const wrong = [];
+	let read = 0;
+	for (const term of TERMS) {
+		for (const language of LANGUAGES) {
+			if (!RADIATION[language].test(term.quantity[language])) continue;
+			read += 1;
+			const definition = term.definition[language];
+			if (!AGAINST_AIR[language].test(definition) || PER_UNIT_VELOCITY[language].test(definition)) {
+				wrong.push(`${term.id} (${language}): ${definition.slice(0, 90)}`);
+			}
+		}
+	}
+	assert.ok(read > 0, 'no radiation efficiency was read');
+	assert.deepEqual(wrong, [], `definitions that do not say what the power is divided by:\n${wrong.join('\n')}`);
 });

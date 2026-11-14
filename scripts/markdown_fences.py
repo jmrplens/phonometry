@@ -274,6 +274,11 @@ class PageLine:
         past those it opens.
     :param item: Whether the last container it opens is a list item, so that
         *rest* opens with the item's text.
+    :param asides: How many asides (``:::note``) stand open once the line is
+        read: the one it opens among them, the one it closes not. An aside ends
+        with the container it opened in, a quotation or a list item, as well as
+        on its own closing fence, so a reader that counts their fences alone
+        keeps one open that the page has closed.
     """
 
     text: str
@@ -283,6 +288,7 @@ class PageLine:
     inner: str = ""
     rest: str = ""
     item: bool = False
+    asides: int = 0
 
 
 class _Walk:
@@ -637,7 +643,8 @@ def page_lines(lines: Iterable[str], *, kind: str = "mdx") -> Iterator[PageLine]
     """
     walk = _Walk(list(lines), kind)
     for index in range(len(walk.lines)):
-        yield walk.read(index)
+        line = walk.read(index)
+        yield replace(line, asides=len(walk.asides)) if walk.asides else line
 
 
 def code_lines(

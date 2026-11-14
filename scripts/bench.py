@@ -325,7 +325,7 @@ def _write_golden() -> None:
         print(f"captured {name}: {arr.size} values")
     lines.append("}")
     lines.append("")
-    _GOLDEN_PATH.write_text("\n".join(lines), encoding="utf-8")
+    _GOLDEN_PATH.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print(f"wrote {_GOLDEN_PATH}")
 
 

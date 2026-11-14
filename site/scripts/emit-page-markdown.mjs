@@ -33,9 +33,10 @@ import { parse as parseYaml } from "yaml";
 import * as conformanceStats from "../src/data/conformance-stats.mjs";
 import { TRANSPLANTED, hasMarkdownCopy, mirrorOf, routeOf } from "../src/lib/page-markdown.mjs";
 import { basePath, siteUrl } from "../src/data/site.mjs";
+import { readCommittedText } from "../src/lib/line-ends.mjs";
 import { catalogueSlugs } from "../src/data/topics.mjs";
 import {
-  bracketText,
+  catalogueItem,
   copyDefects,
   figureMarkdown,
   frontmatterSource,
@@ -43,6 +44,7 @@ import {
   referencesMarkdown,
   stripFrontmatter,
   stripMdx,
+  titleMarkdown,
 } from "./shared/page-twin.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -68,11 +70,11 @@ function catalogueIndex(lang) {
   const prefix = lang === "es" ? "es/" : "";
   return catalogueSlugs
     .map((slug) => {
-      const page = readFileSync(join(contentDir, `${prefix}${slug}.mdx`), "utf8");
+      const page = readCommittedText(join(contentDir, `${prefix}${slug}.mdx`));
       const frontmatter = parseYaml(frontmatterSource(page)) ?? {};
       const label = String(frontmatter.sidebar?.label ?? frontmatter.title ?? "");
       const description = String(frontmatter.description ?? "");
-      return `- [${bracketText(label)}](${SITE_URL}/${prefix}${slug}/): ${description}`;
+      return catalogueItem({ label, url: `${SITE_URL}/${prefix}${slug}/`, description });
     })
     .join("\n");
 }
@@ -143,7 +145,7 @@ function valuesOf(source, file) {
 function sourceCopy(file, route) {
   const lang = route === "es" || route.startsWith("es/") ? "es" : "en";
   const kind = file.endsWith(".mdx") ? "mdx" : "md";
-  const page = readFileSync(file, "utf8");
+  const page = readCommittedText(file);
   const frontmatter = parseYaml(frontmatterSource(page)) ?? {};
   const source = stripFrontmatter(page);
   // The page's line the source opens on, so that a message names the line of the file.
@@ -166,7 +168,7 @@ function sourceCopy(file, route) {
   const title = String(frontmatter.title ?? "").trim();
   if (!title) throw new Error(`${relative(siteRoot, file)} has no title for its Markdown copy to open with`);
   const heading = REFERENCES_HEADING[lang];
-  const copy = [`# ${title}`, body, referencesMarkdown(frontmatter.references, lang, heading)].filter(Boolean).join("\n\n");
+  const copy = [titleMarkdown(title), body, referencesMarkdown(frontmatter.references, lang, heading)].filter(Boolean).join("\n\n");
   const checked = {
     source,
     kind,
@@ -240,7 +242,7 @@ for await (const file of glob("**/*.{md,mdx}", { cwd: contentDir })) {
 
   // The page's own source, read as the site renders it (shared/page-twin.mjs):
   // the import line of a code example and a tag written in a code span stay.
-  const raw = mirror ? readFileSync(mirror, "utf8") : sourceCopy(abs, route);
+  const raw = mirror ? readCommittedText(mirror) : sourceCopy(abs, route);
   // A transplanted document sits at the root of docs/, not at its route, so
   // its relative links resolve from there: `ERRATA.es.md` beside `ERRATA.md`
   // is the Spanish registry, not a page under reference/.

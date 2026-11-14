@@ -18,7 +18,7 @@ is in [Insulation Ratings (ISO 717)](insulation-ratings.md).
 
 Instead of shifting a reference curve, DB-HR weights the measured band
 insulation with a normalised source spectrum and sums it energetically
-(Formulae A.5 to A.7):
+(Formulae A.5 to A.7, A.14, A.17 and A.18):
 
 $$
 I_x = -10 \log_{10} \sum_i 10^{(L_{x,i} - X_i)/10} \quad \text{[dBA]}
@@ -33,8 +33,8 @@ do not always agree. The band centres are in `DB_HR_FREQUENCIES_HZ`.
 
 | Normalised spectrum | Annex A table | Quantity it defines | Formula |
 | :--- | :--- | :--- | :--- |
-| A-weighted pink noise, $L_{\mathrm{Ar},i}$ | Table A.5 | $R_\mathrm{A}$, $D_{\mathrm{n}T,\mathrm{A}}$, $D_{2\mathrm{m,n}T,\mathrm{A}}$ | (A.5), (A.7) |
-| Road traffic, $L_{\mathrm{Atr},i}$ | Table A.3 | $R_\mathrm{A,tr}$, $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.6) |
+| A-weighted pink noise, $L_{\mathrm{Ar},i}$ | Table A.5 | $R_\mathrm{A}$, $R'_\mathrm{A}$, $D_{\mathrm{n}T,\mathrm{A}}$, $D_{2\mathrm{m,n}T,\mathrm{A}}$ | (A.17), (A.14), (A.7), (A.5) |
+| Road traffic, $L_{\mathrm{Atr},i}$ | Table A.3 | $R_\mathrm{A,tr}$, $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.18), (A.6) |
 | Railway noise, $L_{\mathrm{Aef},i}$ | Table A.4 (numerically identical to A.3) | $D_{2\mathrm{m,n}T,\mathrm{A}}$ | (A.5) |
 | Aircraft noise, $L_{\mathrm{Aav},i}$ | Table A.2 | $D_{2\mathrm{m,n}T,\mathrm{Atr}}$ | (A.6) |
 
@@ -52,7 +52,9 @@ put the wrong name on the result.
 All four are in `DB_HR_NORMALIZED_SPECTRA` under the keys `"pink"`,
 `"traffic"`, `"railway"` and `"aircraft"`. The calculation below reproduces
 Ejemplo 7.2 of the *Manual*, the apparent sound reduction index $R'$ of a party
-wall taken from a real field test report:
+wall taken from a real field test report. Given $R'$, `ra()` sums the same
+pink spectrum and returns the apparent index $R'_\mathrm{A}$ of Formula (A.14),
+still named `"RA"`:
 
 ```python
 from phonometry import building
@@ -264,12 +266,12 @@ values against their limits, one per checked requirement.
 
 ## What this guide covers
 
-**Covered.** The DB-HR Annex A global index (Formulae A.5 to A.7) over the
-eighteen bands from 100 Hz to 5 kHz with the four normalised spectra of Tables
-A.2 to A.5, the rounding of clause 3.1.3.1 point 4, the requirements of clause
-2 (Table 2.1 for facades, 2.1.1 airborne and party walls, 2.1.2 impact and 2.2
-reverberation and absorption) and the window-size correction of the *Catálogo
-de Elementos Constructivos*.
+**Covered.** The DB-HR Annex A global index (Formulae A.5 to A.7, A.14, A.17
+and A.18) over the eighteen bands from 100 Hz to 5 kHz with the four normalised
+spectra of Tables A.2 to A.5, the rounding of clause 3.1.3.1 point 4, the
+requirements of clause 2 (Table 2.1 for facades, 2.1.1 airborne and party
+walls, 2.1.2 impact and 2.2 reverberation and absorption) and the window-size
+correction of the *Catálogo de Elementos Constructivos*.
 
 **Not covered.** The design options of clause 3 (the simplified option with its
 solution tables, and the general option, which is the EN 12354 prediction) are
@@ -331,8 +333,8 @@ enlarged-range term $C_{100-5000}$, not the core-range one.
 CTE Documento Básico HR *Protección frente al ruido*, the noise part of the
 Spanish building code:
 [codigotecnico.org](https://www.codigotecnico.org/pdf/Documentos/HR/DBHR.pdf).
-The Annex A global index (Formulae A.5 to A.7) over the eighteen bands 100 Hz
-to 5 kHz with the normalised spectra of Tables A.2 to A.5, the rounding rule of
-clause 3.1.3.1 point 4, and the requirements of clause 2: Table 2.1 for
-facades, 2.1.1 for airborne insulation and party walls, 2.1.2 for impact sound
-and 2.2 for reverberation and absorption.
+The Annex A global index (Formulae A.5 to A.7, A.14, A.17 and A.18) over the
+eighteen bands 100 Hz to 5 kHz with the normalised spectra of Tables A.2 to
+A.5, the rounding rule of clause 3.1.3.1 point 4, and the requirements of
+clause 2: Table 2.1 for facades, 2.1.1 for airborne insulation and party walls,
+2.1.2 for impact sound and 2.2 for reverberation and absorption.

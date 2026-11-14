@@ -215,6 +215,729 @@ def test_the_docs_workflow_triggers_on_every_root_file_the_site_build_reads() ->
         )
 
 
+_INDEXNOW_SCRIPT = _ROOT / "site" / "scripts" / "indexnow-diff.mjs"
+
+#: The events that deploy the site: a push to main, and a run dispatched by
+#: hand or by a merge on jmrp.io, whose identity data the site carries. A
+#: newer run cancels an older one in the same queue, so a dispatch that comes
+#: right after a merge is the run that deploys that merge's pages.
+_DEPLOYING_EVENTS = ("push", "workflow_dispatch")
+
+#: One token of a job's or step's ``if:``, in the part of GitHub's expression
+#: language a condition on the event uses.
+_CONDITION_TOKEN = re.compile(
+    r"\s*(\(|\)|&&|\|\||==|!=|!|'(?:[^']|'')*'|[A-Za-z_][\w.-]*(?:\(\))?)"
+)
+
+
+def _runs_on(condition: object, event: str) -> bool:
+    """Whether a job or a step whose ``if:`` is *condition* runs on *event*.
+
+    No ``if:`` runs on every event. The reader knows ``github.event_name``
+    compared with a string (case-insensitively, as GitHub compares strings),
+    ``!``, ``&&``, ``||``, parentheses and ``success()``; anything else raises,
+    so a condition that also depends on what this test cannot see is never
+    judged by half of it.
+    """
+    if condition is None:
+        return True
+    text = str(condition).strip()
+    if text.startswith("${{") and text.endswith("}}"):
+        text = text[3:-2].strip()
+    tokens: list[str] = []
+    position = 0
+    while position < len(text):
+        match = _CONDITION_TOKEN.match(text, position)
+        if match is None:
+            msg = f"cannot read {text[position:]!r} in {condition!r}"
+            raise ValueError(msg)
+        tokens.append(match.group(1))
+        position = match.end()
+    at = 0
+
+    def peek() -> str | None:
+        return tokens[at] if at < len(tokens) else None
+
+    def take() -> str:
+        nonlocal at
+        if at == len(tokens):
+            msg = f"{condition!r} ends too soon"
+            raise ValueError(msg)
+        at += 1
+        return tokens[at - 1]
+
+    def operand() -> str | bool:
+        token = take()
+        if token == "(":
+            value = either()
+            if take() != ")":
+                msg = f"unbalanced parentheses in {condition!r}"
+                raise ValueError(msg)
+            return value
+        if token == "!":
+            return not operand()
+        if token.startswith("'"):
+            return token[1:-1].replace("''", "'")
+        if token == "github.event_name":
+            return event
+        if token == "success()":
+            return True
+        msg = f"{condition!r} reads {token}, which this test cannot know"
+        raise ValueError(msg)
+
+    def comparison() -> str | bool:
+        left = operand()
+        if peek() in {"==", "!="}:
+            equal = take() == "=="
+            right = operand()
+            same = str(left).casefold() == str(right).casefold()
+            return same if equal else not same
+        return left
+
+    def both() -> str | bool:
+        value = comparison()
+        while peek() == "&&":
+            take()
+            right = comparison()
+            value = right if value else value
+        return value
+
+    def either() -> str | bool:
+        value = both()
+        while peek() == "||":
+            take()
+            right = both()
+            value = value or right
+        return value
+
+    result = either()
+    if at != len(tokens):
+        msg = f"cannot read {' '.join(tokens[at:])!r} in {condition!r}"
+        raise ValueError(msg)
+    return bool(result)
+
+
+def test_the_event_reader_follows_the_conditions_the_workflows_write() -> None:
+    """The reader of ``if:`` gives each event the answer GitHub would."""
+    assert _runs_on(None, "push")
+    assert not _runs_on("github.event_name != 'pull_request'", "pull_request")
+    assert _runs_on("${{ github.event_name != 'pull_request' }}", "workflow_dispatch")
+    assert not _runs_on("github.event_name == 'push'", "workflow_dispatch")
+    assert _runs_on("github.event_name == 'PUSH'", "push")
+    condition = "!(github.event_name == 'push' || github.event_name == 'schedule')"
+    assert _runs_on(condition, "workflow_dispatch")
+    assert not _runs_on(condition, "push")
+    assert not _runs_on("success() && github.event_name == 'push'", "pull_request")
+    for unknown in (
+        "steps.found.outputs.run-id != ''",
+        "always()",
+        "github.ref == 'x'",
+    ):
+        with pytest.raises(ValueError, match="which this test cannot know"):
+            _runs_on(unknown, "push")
+
+
+def _steps_running(
+    steps: list[dict[str, object]], command: str
+) -> list[tuple[int, dict[str, object]]]:
+    """The steps whose ``run:`` holds *command*, with their positions."""
+    return [
+        (index, step)
+        for index, step in enumerate(steps)
+        if command in str(step.get("run", ""))
+    ]
+
+
+def _steps_using(
+    steps: list[dict[str, object]], action: str, name: str
+) -> list[tuple[int, dict[str, object]]]:
+    """The steps that use *action* on the artifact *name*, with their positions."""
+    found = []
+    for index, step in enumerate(steps):
+        inputs = step.get("with")
+        if (
+            str(step.get("uses", "")).startswith(f"{action}@")
+            and isinstance(inputs, dict)
+            and inputs.get("name") == name
+        ):
+            found.append((index, step))
+    return found
+
+
+def _the_one(
+    found: list[tuple[int, dict[str, object]]], what: str
+) -> tuple[int, dict[str, object]]:
+    assert len(found) == 1, f"docs.yml has {len(found)} steps that {what}"
+    return found[0]
+
+
+def _shell_path(path: object) -> str:
+    """A path as a ``run:`` and a ``with:`` input would both spell it."""
+    return str(path).replace("${{ runner.temp }}", "$RUNNER_TEMP").rstrip("/")
+
+
+def _of_this_run(step: dict[str, object]) -> bool:
+    """Whether a download step takes an artifact of this run, naming no other run."""
+    inputs = step.get("with")
+    return isinstance(inputs, dict) and "run-id" not in inputs
+
+
+def _needs(job: dict[str, object]) -> set[str]:
+    """The jobs a job waits for, whether ``needs:`` names one or a list."""
+    needs = job.get("needs")
+    if isinstance(needs, str):
+        return {needs}
+    return {str(name) for name in needs} if isinstance(needs, list) else set()
+
+
+def test_every_deploying_event_tells_indexnow_the_pages_it_changed() -> None:
+    """A deploy dispatched by hand or by jmrp.io is compared like a push.
+
+    The IndexNow submission cannot run on a pull request, so nothing but this
+    test shows that the steps behind it run on every event that deploys: the
+    one that finds the record of the pages IndexNow was last sent, the one
+    that downloads it, the comparison, the hand-over of its list to the
+    IndexNow job, and in that job the steps that take the list, submit it and
+    keep the record. A step limited to ``push`` would leave a dispatched
+    deploy with no list, or with every URL of the site, or with a record of
+    pages it never sent, and still deploy green. They run in the order the
+    record needs, and none of them, nor any of the three jobs, lets the run go
+    on past a failure: a comparison made before the record is downloaded
+    sends every URL on every deploy, and a submission that fails quietly
+    keeps a record of pages the engines were never told about. The download
+    of the record is the one step of these that goes on (the list a later
+    deploy handed, read beside it, goes on too, and has a test of its own): a
+    record that expired, was deleted or cannot be downloaded is not a reason
+    to stop the deploy, so what it left is set aside and the full list goes
+    out, as it does with no record at all, with a warning on the run. The record has
+    to travel too: the IndexNow job keeps the manifest it was handed, only
+    once its submission went through, under the name the build looks for, in
+    the folder the comparison reads, and the build may read it from an
+    earlier run. And the job keeps it only while no deploy has gone out
+    after its run's, which it learns from the moment the deploy job wrote: a
+    failed job re-run after a newer deploy would otherwise put back an older
+    manifest, and a page that deploy added and the next one removes would
+    never be sent as removed.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    triggers = workflow[True] if True in workflow else workflow["on"]
+    assert set(_DEPLOYING_EVENTS) <= set(triggers), (
+        f"docs.yml deploys on {_DEPLOYING_EVENTS}, and its triggers are {sorted(triggers)}"
+    )
+    jobs: dict[str, dict[str, object]] = workflow["jobs"]
+    build: list[dict[str, object]] = workflow["jobs"]["build"]["steps"]
+    indexnow: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
+    script = _INDEXNOW_SCRIPT.read_text(encoding="utf-8")
+    record = re.search(r"export const SUBMITTED_ARTIFACT = '([^']+)'", script)
+    assert record, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
+    submitted = record.group(1)
+    environment = re.search(r"export const PAGES_ENVIRONMENT = '([^']+)'", script)
+    assert environment, "indexnow-diff.mjs names no PAGES_ENVIRONMENT"
+
+    built_at, _ = _the_one(_steps_running(build, "pnpm build"), "build the site")
+    find_at, find = _the_one(
+        _steps_running(build, "indexnow-diff.mjs last-submitted"),
+        "find the record of the last submission",
+    )
+    fetch_at, fetch = _the_one(
+        _steps_using(build, "actions/download-artifact", submitted),
+        f"download {submitted}",
+    )
+    compare_at, compare = _the_one(
+        _steps_running(build, "indexnow-diff.mjs diff"), "compare the manifests"
+    )
+    hand_at, hand = _the_one(
+        _steps_using(build, "actions/upload-artifact", "indexnow-urls"),
+        "hand the list to the IndexNow job",
+    )
+    received_at, download = _the_one(
+        [
+            (index, step)
+            for index, step in _steps_using(
+                indexnow, "actions/download-artifact", "indexnow-urls"
+            )
+            if _of_this_run(step)
+        ],
+        "take the list in the IndexNow job",
+    )
+    sent_at, submit = _the_one(
+        _steps_running(indexnow, "api.indexnow.org"), "submit to IndexNow"
+    )
+    kept_at, keep = _the_one(
+        _steps_using(indexnow, "actions/upload-artifact", submitted),
+        f"keep {submitted}",
+    )
+    checked_at, check = _the_one(
+        _steps_running(indexnow, "indexnow-diff.mjs keep-record"),
+        "check that no deploy went out after this run's",
+    )
+
+    # The record is kept only once the submission went through, and only
+    # when the check says no deploy has gone out after this run's. A
+    # condition with no status function runs only when every step before it
+    # succeeded.
+    checker = check.get("id")
+    assert keep.get("if") == f"steps.{checker}.outputs.keep == 'true'", (
+        "a record kept whatever the check says can replace a newer deploy's"
+    )
+
+    # Every step the pages go through runs on every event that deploys. The
+    # download of the record is held to the step that names its run instead,
+    # below, which is what it waits for on any event.
+    on_every_event = {
+        "finding": find,
+        "comparing": compare,
+        "handing": hand,
+        "receiving": download,
+        "submitting": submit,
+        "checking": check,
+    }
+    for event in _DEPLOYING_EVENTS:
+        for what, step in on_every_event.items():
+            assert _runs_on(step.get("if"), event), f"the {what} step skips {event}"
+        for job in ("build", "deploy", "indexnow"):
+            assert _runs_on(jobs[job].get("if"), event), f"the {job} job skips {event}"
+    assert _runs_on(compare.get("if"), "pull_request"), (
+        "a pull request no longer prints what its merge would send"
+    )
+    assert not _runs_on(hand.get("if"), "pull_request")
+
+    # A failure anywhere on the way stops the run before the record is kept,
+    # but for the download of the record, held below to going on.
+    for what, step in {**on_every_event, "keeping": keep}.items():
+        assert not step.get("continue-on-error"), (
+            f"a failure of the {what} step lets its job go on, "
+            "so a record can be kept of pages that were not sent"
+        )
+    for job in ("build", "deploy", "indexnow"):
+        assert not jobs[job].get("continue-on-error"), (
+            f"a failure of the {job} job lets the run go on, "
+            "so a record can be kept of pages that were not sent"
+        )
+
+    # In the order the record needs: the build writes the manifest, the run
+    # of the record is found, the record fetched, the manifests compared and
+    # the list handed over; the IndexNow job waits for the deploy, takes the
+    # list, submits it and only then keeps the record.
+    assert find_at < fetch_at, (
+        "the record is fetched before the step that names its run, so it never is"
+    )
+    assert fetch_at < compare_at, (
+        "the comparison runs before the record is fetched, "
+        "so every deploy sends the full list"
+    )
+    assert built_at < compare_at, (
+        "the comparison runs before the build wrote the manifest"
+    )
+    assert compare_at < hand_at, (
+        "the list is handed over before the comparison wrote it"
+    )
+    assert "build" in _needs(jobs["deploy"])
+    assert "deploy" in _needs(jobs["indexnow"]), "IndexNow is told before the deploy"
+    assert received_at < sent_at, "the submission runs before the list is taken"
+    assert sent_at < checked_at < kept_at, (
+        "the record is kept before the submission went through, or unchecked"
+    )
+
+    # The record is fetched from the run the finding step names, whatever
+    # event this run is, and the build is allowed to read it.
+    finder = find.get("id")
+    assert fetch.get("if") == f"steps.{finder}.outputs.run-id != ''"
+    inputs = fetch["with"]
+    assert isinstance(inputs, dict)
+    assert inputs.get("run-id") == f"${{{{ steps.{finder}.outputs.run-id }}}}"
+    assert inputs.get("github-token"), "another run's artifact needs a token"
+
+    # A record that cannot be downloaded does not stop the deploy: the
+    # download goes on past its failure, and the step after it, which runs
+    # only then, takes away whatever the download left, so the comparison
+    # finds no record and the full list goes out.
+    fetcher = fetch.get("id")
+    assert fetcher, (
+        "the download of the record has no id for a step to read its outcome by"
+    )
+    assert fetch.get("continue-on-error") is True, (
+        "a record that expired, was deleted or cannot be downloaded stops the build, "
+        "and with it the deploy, where the full list should go out"
+    )
+    discard_at, discard = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(build)
+            if step.get("if") == f"steps.{fetcher}.outcome == 'failure'"
+        ],
+        "set aside a record that could not be downloaded",
+    )
+    assert fetch_at < discard_at < compare_at, (
+        "what a failed download left is set aside after the comparison read it"
+    )
+    removal = f'rm -rf "{_shell_path(inputs["path"])}"'
+    assert removal in " ".join(str(discard.get("run", "")).split()), (
+        f"the step after a failed download does not run {removal}, "
+        "so the comparison can read a part of the record"
+    )
+    assert "::warning::" in str(discard.get("run", "")), (
+        "a record that could not be downloaded sends the full list with no word on the run"
+    )
+    assert not discard.get("continue-on-error")
+    permissions = jobs["build"].get("permissions")
+    assert isinstance(permissions, dict)
+    assert permissions.get("actions") == "read"
+    finder_env = find.get("env")
+    assert isinstance(finder_env, dict)
+    assert finder_env.get("GITHUB_TOKEN")
+
+    # The check places this run's deploy among the deployments of the site:
+    # it reads the moment the deploy job wrote once its pages went out, in a
+    # step after the deployment, from the environment the script lists, with
+    # a token that may list the deployments.
+    deploy_job = jobs["deploy"]
+    deploy_steps: list[dict[str, object]] = workflow["jobs"]["deploy"]["steps"]
+    deployed_at, _ = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(deploy_steps)
+            if str(step.get("uses", "")).startswith("actions/deploy-pages@")
+        ],
+        "deploy the pages",
+    )
+    clock_outputs = deploy_job.get("outputs")
+    assert isinstance(clock_outputs, dict)
+    clock_output = re.fullmatch(
+        r"\$\{\{ steps\.([\w-]+)\.outputs\.(\w+) \}\}",
+        str(clock_outputs.get("deployed-at")),
+    )
+    assert clock_output, "the deploy job writes no deployed-at output"
+    clock_at, clock = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(deploy_steps)
+            if step.get("id") == clock_output.group(1)
+        ],
+        "write the moment the pages went out",
+    )
+    assert deployed_at < clock_at, "the moment is taken before the pages went out"
+    clock_command = f"{clock_output.group(2)}=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    assert clock_command in str(clock["run"]), clock["run"]
+    environment_of = deploy_job.get("environment")
+    assert isinstance(environment_of, dict)
+    assert environment_of.get("name") == environment.group(1), (
+        "the check lists the deployments of another environment than the deploy's"
+    )
+    check_env = check.get("env")
+    assert isinstance(check_env, dict)
+    assert check_env.get("GITHUB_TOKEN")
+    moment = re.search(r'--deployed-at "\$(\w+)"', " ".join(str(check["run"]).split()))
+    assert moment, check["run"]
+    assert check_env.get(moment.group(1)) == "${{ needs.deploy.outputs.deployed-at }}"
+    indexnow_permissions = jobs["indexnow"].get("permissions")
+    assert isinstance(indexnow_permissions, dict)
+    assert indexnow_permissions.get("deployments") == "read"
+
+    # The comparison reads the record where it was downloaded, and writes the
+    # list and the manifest where the hand-over takes them from.
+    command = " ".join(str(compare["run"]).split())
+    previous = re.search(r'--previous "?([^"\s]+)', command)
+    out = re.search(r'--out "?([^"\s]+)', command)
+    assert previous, command
+    assert out, command
+    assert previous.group(1) == f"{_shell_path(inputs['path'])}/indexnow-manifest.json"
+    handed = hand["with"]
+    assert isinstance(handed, dict)
+    assert _shell_path(handed["path"]) == out.group(1)
+
+    # The IndexNow job keeps the manifest it was handed, under the name the
+    # build looks for.
+    kept_inputs = keep["with"]
+    downloaded = download["with"]
+    assert isinstance(kept_inputs, dict)
+    assert isinstance(downloaded, dict)
+    assert kept_inputs["path"] == f"{downloaded['path']}/indexnow-manifest.json"
+
+
+def test_the_build_reads_the_list_a_deploy_after_the_record_handed_indexnow() -> None:
+    """A page a deploy submitted with no record kept, and the next one removed, is sent as removed.
+
+    The IndexNow job can submit and keep no record: the deployments cannot be
+    listed, a newer push cancels the run before the record, its upload
+    fails, or IndexNow takes the submission and the step fails after it. A
+    page that deploy added and the next one removes is then in no record, so
+    the build downloads the list the newest deploy after the record handed
+    its IndexNow job, from the run the finding step names, and the comparison
+    reads it. The list is kept as long as a record is, so it outlives any gap
+    a record covers, and like the record a list that cannot be downloaded is
+    set aside with a warning instead of stopping the deploy.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    build: list[dict[str, object]] = workflow["jobs"]["build"]["steps"]
+    indexnow: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
+    script = _INDEXNOW_SCRIPT.read_text(encoding="utf-8")
+    handed_name = re.search(r"export const HANDED_ARTIFACT = '([^']+)'", script)
+    record_name = re.search(r"export const SUBMITTED_ARTIFACT = '([^']+)'", script)
+    assert handed_name, "indexnow-diff.mjs names no HANDED_ARTIFACT"
+    assert record_name, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
+
+    find_at, find = _the_one(
+        _steps_running(build, "indexnow-diff.mjs last-submitted"),
+        "find the record of the last submission",
+    )
+    compare_at, compare = _the_one(
+        _steps_running(build, "indexnow-diff.mjs diff"), "compare the manifests"
+    )
+    _, hand = _the_one(
+        _steps_using(build, "actions/upload-artifact", handed_name.group(1)),
+        "hand the list to the IndexNow job",
+    )
+    _, keep = _the_one(
+        _steps_using(indexnow, "actions/upload-artifact", record_name.group(1)),
+        "keep the record",
+    )
+    pending_at, pending = _the_one(
+        _steps_using(build, "actions/download-artifact", handed_name.group(1)),
+        "download the list a deploy after the record handed IndexNow",
+    )
+
+    finder = find.get("id")
+    assert pending.get("if") == f"steps.{finder}.outputs.pending-run-id != ''"
+    inputs = pending["with"]
+    assert isinstance(inputs, dict)
+    assert inputs.get("run-id") == f"${{{{ steps.{finder}.outputs.pending-run-id }}}}"
+    assert inputs.get("github-token"), "another run's artifact needs a token"
+    assert pending.get("continue-on-error") is True, (
+        "a list that expired or cannot be downloaded stops the deploy"
+    )
+    assert find_at < pending_at < compare_at, (
+        "the list is read before the step that names its run, or after the comparison"
+    )
+    puller = pending.get("id")
+    assert puller, (
+        "the download of the list has no id for a step to read its outcome by"
+    )
+    discard_at, discard = _the_one(
+        [
+            (index, step)
+            for index, step in enumerate(build)
+            if step.get("if") == f"steps.{puller}.outcome == 'failure'"
+        ],
+        "set aside a list that could not be downloaded",
+    )
+    assert pending_at < discard_at < compare_at
+    removal = f'rm -rf "{_shell_path(inputs["path"])}"'
+    assert removal in " ".join(str(discard.get("run", "")).split())
+    assert "::warning::" in str(discard.get("run", ""))
+
+    command = " ".join(str(compare["run"]).split())
+    read = re.search(r'--pending "?([^"\s]+)', command)
+    assert read, f"the comparison reads no handed list: {command}"
+    assert read.group(1) == _shell_path(inputs["path"])
+
+    def kept_days(step: dict[str, object]) -> int:
+        given = step["with"]
+        assert isinstance(given, dict)
+        return int(str(given.get("retention-days", 90)))
+
+    assert kept_days(hand) >= kept_days(keep), (
+        "the list a deploy hands IndexNow expires before the record it stands in for"
+    )
+
+
+#: The condition the steps of a deploy re-run in the IndexNow job run on: the
+#: deploy job ran in another attempt than the build. A re-run runs a job again
+#: with every job that needs it, so the deploy job never runs in an earlier
+#: attempt than the build it needs, and another attempt is a later one.
+_DEPLOY_RE_RUN = "needs.deploy.outputs.attempt != needs.build.outputs.attempt"
+
+
+def test_a_deploy_re_run_works_its_list_out_again_against_the_newest_record() -> None:
+    """A deploy job re-run after a newer deploy sends what its pages change on the site.
+
+    "Re-run failed jobs" on a run whose deploy failed runs the deploy job and
+    the IndexNow job again, and the build keeps its outputs and its list. The
+    deploy puts this run's pages back on the site after whatever deploy went
+    out since, and the list was worked out before that deploy, against the
+    record of the build's time. So both jobs say which attempt they ran in,
+    and when the deploy's is another than the build's, the IndexNow job finds
+    the newest record and the newest list handed on after it, its own run's
+    left out, downloads both from the runs the finding step names, as the
+    build does, sets aside one that cannot be downloaded, works the list out
+    again over the one it was handed, and hands it on in place of the
+    build's before it submits it: the build's list is older than the record
+    it was compared with, so no later build reads it, and a job that submits
+    and keeps no record would leave the pages it sent to no one. On any
+    other run none of those steps runs, and the job may read another run's
+    artifacts only for them.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    jobs: dict[str, dict[str, object]] = workflow["jobs"]
+    indexnow: list[dict[str, object]] = workflow["jobs"]["indexnow"]["steps"]
+    script = _INDEXNOW_SCRIPT.read_text(encoding="utf-8")
+    handed_name = re.search(r"export const HANDED_ARTIFACT = '([^']+)'", script)
+    record_name = re.search(r"export const SUBMITTED_ARTIFACT = '([^']+)'", script)
+    assert handed_name, "indexnow-diff.mjs names no HANDED_ARTIFACT"
+    assert record_name, "indexnow-diff.mjs names no SUBMITTED_ARTIFACT"
+
+    for job in ("build", "deploy"):
+        outputs = jobs[job].get("outputs")
+        assert isinstance(outputs, dict), f"the {job} job has no outputs"
+        assert outputs.get("attempt") == "${{ github.run_attempt }}", (
+            f"the {job} job does not say which attempt it ran in"
+        )
+    assert {"build", "deploy"} <= _needs(jobs["indexnow"]), (
+        "the IndexNow job cannot read the attempts of the build and the deploy"
+    )
+    permissions = jobs["indexnow"].get("permissions")
+    assert isinstance(permissions, dict)
+    assert permissions.get("actions") == "read", (
+        "the IndexNow job cannot list or download another run's artifacts"
+    )
+
+    received_at, received = _the_one(
+        [
+            (index, step)
+            for index, step in _steps_using(
+                indexnow, "actions/download-artifact", handed_name.group(1)
+            )
+            if _of_this_run(step)
+        ],
+        "take the list in the IndexNow job",
+    )
+    received_inputs = received["with"]
+    assert isinstance(received_inputs, dict)
+    folder = _shell_path(received_inputs["path"])
+
+    # The newest record and the newest list after it, this run's left out.
+    find_at, find = _the_one(
+        _steps_running(indexnow, "indexnow-diff.mjs last-submitted"),
+        "find the newest record on a deploy re-run",
+    )
+    assert find.get("if") == _DEPLOY_RE_RUN, (
+        "the IndexNow job looks for the newest record on a run that is no deploy re-run, or never"
+    )
+    assert '--except-run "$GITHUB_RUN_ID"' in " ".join(str(find["run"]).split()), (
+        "the IndexNow job reads its own run's list as the newest one handed on"
+    )
+    finder_env = find.get("env")
+    assert isinstance(finder_env, dict)
+    assert finder_env.get("GITHUB_TOKEN")
+    finder = find.get("id")
+    assert finder
+
+    def downloaded(
+        name: str, output: str, what: str
+    ) -> tuple[int, int, dict[str, object]]:
+        """The download of *name* from the run the finding step names as *output*, and the step that sets it aside."""
+        fetch_at, fetch = _the_one(
+            [
+                (index, step)
+                for index, step in _steps_using(
+                    indexnow, "actions/download-artifact", name
+                )
+                if not _of_this_run(step)
+            ],
+            f"download {what} on a deploy re-run",
+        )
+        assert fetch.get("if") == f"steps.{finder}.outputs.{output} != ''"
+        inputs = fetch["with"]
+        assert isinstance(inputs, dict)
+        assert inputs.get("run-id") == f"${{{{ steps.{finder}.outputs.{output} }}}}"
+        assert inputs.get("github-token"), "another run's artifact needs a token"
+        assert fetch.get("continue-on-error") is True, (
+            f"{what} that cannot be downloaded stops the IndexNow job"
+        )
+        fetcher = fetch.get("id")
+        assert fetcher
+        discard_at, discard = _the_one(
+            [
+                (index, step)
+                for index, step in enumerate(indexnow)
+                if step.get("if") == f"steps.{fetcher}.outcome == 'failure'"
+            ],
+            f"set aside {what} that could not be downloaded",
+        )
+        path = _shell_path(inputs["path"])
+        assert f'rm -rf "{path}"' in " ".join(str(discard.get("run", "")).split())
+        assert "::warning::" in str(discard.get("run", ""))
+        return fetch_at, discard_at, {"path": path}
+
+    fetch_at, record_set_aside_at, record = downloaded(
+        record_name.group(1), "run-id", "the record"
+    )
+    pending_at, list_set_aside_at, pending = downloaded(
+        handed_name.group(1), "pending-run-id", "the list handed on after it"
+    )
+
+    # The list worked out again over the one the build handed on, which the
+    # job submits and whose manifest it keeps.
+    again_at, again = _the_one(
+        _steps_running(indexnow, "indexnow-diff.mjs diff"),
+        "work the list out again on a deploy re-run",
+    )
+    assert again.get("if") == _DEPLOY_RE_RUN, (
+        "the IndexNow job works its list out again on a run that is no deploy re-run, or never"
+    )
+    command = " ".join(str(again["run"]).split())
+    for option, path in {
+        "--current": f"{folder}/indexnow-manifest.json",
+        "--previous": f"{record['path']}/indexnow-manifest.json",
+        "--pending": pending["path"],
+        "--out": folder,
+    }.items():
+        given = re.search(rf'{option} "?([^"\s]+)', command)
+        assert given, f"the comparison of a deploy re-run gives no {option}: {command}"
+        assert given.group(1) == path, command
+    sent_at, submit = _the_one(
+        _steps_running(indexnow, "api.indexnow.org"), "submit to IndexNow"
+    )
+    assert f"{folder}/urls.json" in str(submit["run"]), (
+        "the submission reads another list than the one worked out again"
+    )
+    assert (
+        received_at
+        < find_at
+        < fetch_at
+        < record_set_aside_at
+        < pending_at
+        < list_set_aside_at
+        < again_at
+        < sent_at
+    ), "the list is worked out again out of order, or after the submission"
+
+    # The list worked out again is handed on before the submission, in place
+    # of the one the build handed on, as long as a record is kept, so the
+    # next build reads it when this job submits and keeps no record, and a
+    # later attempt of this job downloads it with the manifest it keeps.
+    hand_at, hand = _the_one(
+        _steps_using(indexnow, "actions/upload-artifact", handed_name.group(1)),
+        "hand the list worked out again on",
+    )
+    assert hand.get("if") == _DEPLOY_RE_RUN, (
+        "the IndexNow job hands its list on on a run that is no deploy re-run, or never"
+    )
+    hand_inputs = hand["with"]
+    assert isinstance(hand_inputs, dict)
+    assert _shell_path(hand_inputs["path"]) == folder, (
+        "the IndexNow job hands on another list than the one it worked out again"
+    )
+    assert hand_inputs.get("overwrite") is True, (
+        "the list worked out again does not replace the one the build handed on"
+    )
+    assert hand_inputs.get("if-no-files-found") == "error"
+    _, keep = _the_one(
+        _steps_using(indexnow, "actions/upload-artifact", record_name.group(1)),
+        "keep the record",
+    )
+    keep_inputs = keep["with"]
+    assert isinstance(keep_inputs, dict)
+    assert int(str(hand_inputs.get("retention-days", 90))) >= int(
+        str(keep_inputs.get("retention-days", 90))
+    ), "the list handed on expires before the record it stands in for"
+    assert again_at < hand_at < sent_at, (
+        "the list is handed on before it is worked out again, or after the submission"
+    )
+    for step in (find, again, hand):
+        assert not step.get("continue-on-error")
+
+
 def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
     """The 3.14 job explains itself by quoting pyproject's numba floor.
 

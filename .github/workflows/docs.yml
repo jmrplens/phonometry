@@ -89,6 +89,15 @@ jobs:
   build:
     name: Site builds and validates
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      actions: read # the record of the pages IndexNow was last sent, kept by an earlier run
+    outputs:
+      # The attempt of the run this build ran in. "Re-run failed jobs" on a
+      # run whose deploy failed runs the deploy job and the IndexNow job again
+      # and leaves this job as it was, so the IndexNow job tells a deploy
+      # re-run from the deploy that followed this build.
+      attempt: ${{ github.run_attempt }}
     env:
       # corepack fetches the pnpm site/package.json pins and says so first;
       # the pin is the decision, so the announcement adds nothing to the log.
@@ -261,9 +270,17 @@ jobs:
         # is held to the tomllib of the runner's python3 on the whole of
         # pyproject.toml. The Markdown copy of a page with no docs/ mirror is
         # tested on pages made for each case, and the pages that publish none
-        # on the site's own tree. Node's own test runner, after the install:
-        # the structured-data check and the guides' dates read a page's
-        # frontmatter with the parser the content collection uses, from
+        # on the site's own tree. The list IndexNow is sent at deploy has its
+        # tests here too, on pairs of builds: one changed page sends that page
+        # alone, a new or a removed page is sent as such, a new release number
+        # in the header of every Markdown copy sends nothing, nor does a new
+        # banner or footer around a page read from its <main>, no previous
+        # manifest, or one that cannot be read, sends every URL, the record
+        # compared with is the newest one a run of main kept, read from a
+        # stand-in for the API, and a deploy job re-run after a newer deploy
+        # sends what its pages put back. Node's own test runner, after the
+        # install: the structured-data check and the guides' dates read a
+        # page's frontmatter with the parser the content collection uses, from
         # @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
@@ -491,6 +508,105 @@ jobs:
         # share one preview.
         run: pnpm run check:visual
         working-directory: site
+      - name: Find the pages IndexNow was last sent
+        # IndexNow is told that a page was added, changed or removed, and the
+        # deploy used to send it every URL of the sitemap after every merge,
+        # the whole site for a typo on one page. The build now publishes
+        # indexnow-manifest.json, a digest of what each page says: its title,
+        # its description, its date and the text of its Markdown copy, less
+        # the header lines that name the release, or the text the page shows
+        # where it publishes no copy. Once the IndexNow job has submitted a
+        # deploy's pages it keeps that deploy's manifest as an artifact, and
+        # this step asks the API for the newest one a run of main kept. It
+        # runs on every event: a deploy dispatched by hand or by jmrp.io has
+        # to be compared like a push, and a pull request prints what its
+        # merge would send.
+        id: submitted
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/indexnow-diff.mjs last-submitted
+        working-directory: site
+      - name: Fetch the manifest of the pages IndexNow was last sent
+        # A record that expired or was deleted after the step above listed
+        # it, or that cannot be downloaded, is not a reason to stop the
+        # deploy: this step goes on past its failure, the next one takes
+        # away whatever it left, and the full list goes out.
+        id: record
+        if: steps.submitted.outputs.run-id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-submitted
+          run-id: ${{ steps.submitted.outputs.run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/indexnow/submitted
+      - name: Set aside a record that could not be downloaded
+        # A download that failed half way can leave part of the record, which
+        # the comparison must not read as the pages IndexNow was last sent.
+        if: steps.record.outcome == 'failure'
+        env:
+          RUN_ID: ${{ steps.submitted.outputs.run-id }}
+        run: |
+          rm -rf "$RUNNER_TEMP/indexnow/submitted"
+          echo "::warning::[indexnow] the record of run $RUN_ID could not be downloaded: the full list goes out."
+      - name: Fetch the list a deploy after the record handed IndexNow
+        # An IndexNow job can submit its pages and keep no record: the
+        # deployments cannot be listed, a newer push cancels the run before
+        # the record is kept, its upload fails, or IndexNow takes the
+        # submission and the step fails after it. A page that deploy added
+        # and this one removes is then in no record, so the list the newest
+        # deploy after the record handed its IndexNow job, uploaded before it
+        # went out (on a deploy re-run, by that job before it submitted), is
+        # read too, for the pages to send as removed, and for
+        # those it removed or changed that this build puts back as the
+        # record has them. A list that cannot be downloaded is set aside like
+        # the record, with a warning, and the record alone is compared with.
+        id: pending
+        if: steps.submitted.outputs.pending-run-id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-urls
+          run-id: ${{ steps.submitted.outputs.pending-run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/indexnow/pending
+      - name: Set aside a list that could not be downloaded
+        if: steps.pending.outcome == 'failure'
+        env:
+          RUN_ID: ${{ steps.submitted.outputs.pending-run-id }}
+        run: |
+          rm -rf "$RUNNER_TEMP/indexnow/pending"
+          echo "::warning::[indexnow] the list run $RUN_ID handed IndexNow could not be downloaded: a page it named and this build no longer has is not sent as removed, nor one it removed, changed or was to send and this build has as the record has it."
+      - name: Work out which pages changed since IndexNow was last sent them
+        # The pages whose digest changed, the new ones and the removed ones.
+        # With no record to compare with, one that could not be downloaded or
+        # one that cannot be read, the full list goes out, as before. The
+        # comparison is with the record, not with the manifest the live site
+        # carries: a deploy goes live before its IndexNow job submits, so a
+        # run whose job failed, or which a newer push cancelled in between,
+        # would otherwise leave its pages out for good. It fails if a step
+        # changed the pages after the manifest was written, which would
+        # publish a manifest that does not describe the site.
+        run: >-
+          node scripts/indexnow-diff.mjs diff
+          --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
+          --pending "$RUNNER_TEMP/indexnow/pending"
+          --out "$RUNNER_TEMP/indexnow/next"
+        working-directory: site
+      - name: Hand the list of changed pages to the IndexNow job
+        # With the manifest it was worked out from, which the job keeps once
+        # it has submitted them. The list is kept as long as a record is: a
+        # failed job can be re-run from it, and the next build reads it for
+        # the pages this deploy was to submit, which its job may have
+        # submitted with no record kept or may never have, and sends them
+        # again until a job keeps a record.
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: indexnow-urls
+          path: ${{ runner.temp }}/indexnow/next/
+          if-no-files-found: error
+          retention-days: 90
       # Only the branch that publishes needs the tarball. A pull request has
       # already got what it came for once the checks above have run.
       - uses: actions/upload-pages-artifact@v5
@@ -510,18 +626,131 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     outputs:
       page_url: ${{ steps.deployment.outputs.page_url }}
+      deployed-at: ${{ steps.deployed.outputs.at }}
+      # A later attempt than the build's when this job was re-run: its pages
+      # go out after whatever deploy went out since the build, and the
+      # IndexNow job works their list out again.
+      attempt: ${{ github.run_attempt }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+      # When this run's pages went out. The IndexNow job keeps its record
+      # only while no deploy has gone out after this moment. A re-run of that
+      # job alone reads the moment of the deploy it follows; a re-run of this
+      # job writes a moment of its own, since its pages go out again.
+      - id: deployed
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
   indexnow:
     name: Submit URLs to IndexNow
-    needs: deploy
+    needs: [build, deploy]
     runs-on: ubuntu-26.04
-    permissions: {}
+    permissions:
+      contents: read # the script below
+      actions: read # on a deploy re-run, the newest record and list, kept by other runs
+      deployments: read # whether a deploy has gone out after this run's
     timeout-minutes: 10
     steps:
-      - name: Submit sitemap URLs to IndexNow
+      # The script that works the list out again on a deploy re-run and tells
+      # whether this job's record is the one to keep, and nothing else of the
+      # repository.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            site/scripts
+            site/src
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # The URLs come from the build this run deployed, through the list its
+      # last steps wrote (site/scripts/indexnow-diff.mjs), or, on a deploy
+      # re-run, from the list the steps below work out again from the
+      # manifest that build handed on, and which a later attempt of this job
+      # downloads here in its place. This job used to read the sitemap from
+      # the live site a moment after the deploy, where the edge could still
+      # be serving the copy of the deploy before.
+      - name: Fetch the list of changed pages the build wrote
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-urls
+          path: indexnow
+      # A deploy job re-run after a newer deploy puts this run's pages back
+      # on the site, and the list above, worked out by the build before that
+      # deploy, against the record of its own time, says nothing of what that
+      # deploy changed and this one puts back. When the deploy job ran in a
+      # later attempt than the build, the steps below find the newest record
+      # and the newest list a deploy handed on after it, as the build does,
+      # leaving out this run's own list, work the list out again over the
+      # one above, from the manifest the build handed on, and hand that list
+      # on in place of the build's. No later build reads the build's list,
+      # older than the record it was compared with, so a job that submits
+      # and keeps no record would otherwise leave what it sent in no list.
+      # The job then submits that list and keeps the manifest under the same
+      # rule as any other. A deploy job never runs in an earlier attempt than
+      # the build it needs, so another attempt is a later one.
+      - name: Find the pages IndexNow was last sent, on a deploy re-run
+        id: submitted
+        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node site/scripts/indexnow-diff.mjs last-submitted --except-run "$GITHUB_RUN_ID"
+      - name: Fetch the manifest of the pages IndexNow was last sent
+        id: record
+        if: steps.submitted.outputs.run-id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-submitted
+          run-id: ${{ steps.submitted.outputs.run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/indexnow/submitted
+      - name: Set aside a record that could not be downloaded
+        if: steps.record.outcome == 'failure'
+        env:
+          RUN_ID: ${{ steps.submitted.outputs.run-id }}
+        run: |
+          rm -rf "$RUNNER_TEMP/indexnow/submitted"
+          echo "::warning::[indexnow] the record of run $RUN_ID could not be downloaded: the full list goes out."
+      - name: Fetch the list a deploy after the record handed IndexNow
+        id: pending
+        if: steps.submitted.outputs.pending-run-id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-urls
+          run-id: ${{ steps.submitted.outputs.pending-run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/indexnow/pending
+      - name: Set aside a list that could not be downloaded
+        if: steps.pending.outcome == 'failure'
+        env:
+          RUN_ID: ${{ steps.submitted.outputs.pending-run-id }}
+        run: |
+          rm -rf "$RUNNER_TEMP/indexnow/pending"
+          echo "::warning::[indexnow] the list run $RUN_ID handed IndexNow could not be downloaded: a page it named and this deploy no longer has is not sent as removed, nor one it removed, changed or was to send and this deploy has as the record has it."
+      - name: Work out the list again against the newest record, on a deploy re-run
+        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        run: >-
+          node site/scripts/indexnow-diff.mjs diff
+          --current "indexnow/indexnow-manifest.json"
+          --previous "$RUNNER_TEMP/indexnow/submitted/indexnow-manifest.json"
+          --pending "$RUNNER_TEMP/indexnow/pending"
+          --out "indexnow"
+      - name: Hand on the list worked out again, on a deploy re-run
+        # Before the submission, as the build hands its list on before the
+        # deploy, and kept as long as a record is. It replaces the list the
+        # build handed on (`overwrite`), so a later attempt of this job
+        # downloads this one above, with the manifest the build handed on.
+        if: needs.deploy.outputs.attempt != needs.build.outputs.attempt
+        uses: actions/upload-artifact@v7
+        with:
+          name: indexnow-urls
+          path: indexnow/
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 90
+      - name: Submit the changed pages to IndexNow
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
           PAGE_URL: ${{ needs.deploy.outputs.page_url }}
@@ -531,13 +760,33 @@ jobs:
             echo "::error::INDEXNOW_KEY secret is not set"; exit 1
           fi
           python3 - <<'PY'
-          import json, os, sys, time, urllib.request, xml.etree.ElementTree as ET
+          import json, os, sys, time, urllib.request
           from urllib.parse import urlparse
 
           TIMEOUT = 30
+          # The most URLs the protocol takes in one request.
+          BATCH = 10_000
           key = os.environ["INDEXNOW_KEY"]
           base = os.environ["PAGE_URL"].rstrip("/")
           host = urlparse(base).netloc
+
+          with open("indexnow/urls.json", encoding="utf-8") as handle:
+              listed = json.load(handle)
+          urls = listed["urls"]
+          if listed["full"]:
+              print(f"No record of the pages IndexNow was last sent to compare with, because {listed['reason']}: all {len(urls)} URLs of the sitemap.")
+          else:
+              print(
+                  f"{len(listed['changed'])} changed, {len(listed['new'])} new and "
+                  f"{len(listed['removed'])} removed since IndexNow was last sent the pages."
+              )
+          if not urls:
+              print("No page changed: nothing to submit.")
+              sys.exit(0)
+          # IndexNow refuses a request whose URLs are not on its host.
+          outside = [url for url in urls if not url.startswith(f"{base}/")]
+          if outside:
+              sys.exit(f"{len(outside)} URL(s) outside {base}/, the first {outside[0]}: the build and the deploy disagree")
 
           def fetch(url):
               with urllib.request.urlopen(url, timeout=TIMEOUT) as r:
@@ -554,24 +803,54 @@ jobs:
                       sys.exit(f"key file unreachable: {key_url}")
                   time.sleep(2 ** attempt)
 
-          ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-          index = ET.fromstring(fetch(f"{base}/sitemap-index.xml"))
-          urls = []
-          for shard in index.findall("sm:sitemap/sm:loc", ns):
-              tree = ET.fromstring(fetch(shard.text.strip()))
-              urls += [loc.text.strip() for loc in tree.findall("sm:url/sm:loc", ns)]
-          if not urls:
-              sys.exit("sitemap produced no URLs")
-
-          payload = json.dumps({
-              "host": host, "key": key, "keyLocation": key_url, "urlList": urls,
-          }).encode()
-          req = urllib.request.Request(
-              "https://api.indexnow.org/IndexNow", data=payload,
-              headers={"Content-Type": "application/json; charset=utf-8"},
-          )
-          with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-              print(f"IndexNow HTTP {r.status} ({len(urls)} URLs submitted)")
-              if r.status not in (200, 202):
-                  sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
+          for start in range(0, len(urls), BATCH):
+              batch = urls[start:start + BATCH]
+              payload = json.dumps({
+                  "host": host, "key": key, "keyLocation": key_url, "urlList": batch,
+              }).encode()
+              req = urllib.request.Request(
+                  "https://api.indexnow.org/IndexNow", data=payload,
+                  headers={"Content-Type": "application/json; charset=utf-8"},
+              )
+              with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                  print(f"IndexNow HTTP {r.status} ({len(batch)} URLs submitted)")
+                  if r.status not in (200, 202):
+                      sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
           PY
+      - name: Check that no deploy has gone out after this run's
+        # The records follow the order of the deploys, not the order their
+        # IndexNow jobs end in. A failed job re-run after a newer deploy would
+        # otherwise keep a manifest older than that deploy's, and a page that
+        # deploy added and the next one removes would be in neither manifest
+        # the next build compares, so its removal would never be sent. Such a
+        # job keeps nothing; the newer deploy's own job, re-run before or after
+        # it, keeps its record, and when none of the newer deploys keeps one
+        # the next build compares with the record this job's build compared
+        # with and sends what changed since. A deploy job re-run is the newest
+        # deploy when it goes out, and the job, having worked its list out
+        # again above, keeps its manifest while no deploy goes out after it.
+        # Deployments that cannot be listed keep nothing either: the next
+        # deploy sends these pages again, from the list this run handed on,
+        # the build's or the one worked out again above, or from a later one
+        # that carries them.
+        id: newest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOYED_AT: ${{ needs.deploy.outputs.deployed-at }}
+        run: node site/scripts/indexnow-diff.mjs keep-record --deployed-at "$DEPLOYED_AT"
+      - name: Keep the manifest of the pages IndexNow was sent
+        # The record the next build compares with: the manifest the build
+        # handed on, which the list above was worked out from, on a deploy
+        # re-run against the newest record. It is kept only once the
+        # submission above went through and while no deploy has gone out
+        # after this run's: a failed job keeps none, so the next deploy sends
+        # this one's pages along with its own. Ninety days, so a quiet spell
+        # does not send the whole site again; after one longer than that the
+        # next deploy sends every URL once, as the first one does.
+        if: steps.newest.outputs.keep == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: indexnow-submitted
+          path: indexnow/indexnow-manifest.json
+          if-no-files-found: error
+          retention-days: 90

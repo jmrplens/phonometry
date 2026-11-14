@@ -486,3 +486,29 @@ def test_a_page_git_ignores_is_found_whatever_characters_its_name_holds(
     fresh_caches(llms, ROOT=repository, DOCS=repository / "docs")
     for name in names:
         assert llms._git_ignored(repository / "docs" / "notes" / name), name
+
+
+def test_a_file_outside_the_repository_is_named_whole_in_a_refusal(
+    tmp_path: Path, fresh_caches: FreshCaches
+) -> None:
+    """The catalogue data and pages a test points at a tree of its own are named
+    in full when the run stops, where naming them relative to the repository
+    raised a ``ValueError`` in place of the refusal.
+    """
+    data = tmp_path / "catalogues.mjs"
+    data.write_text("export const catalogues = [];\n", encoding="utf-8")
+    pages = tmp_path / "content" / "reference" / "catalogues"
+    pages.mkdir(parents=True)
+    (pages / "index.mdx").write_text(_page("Catalogues", "All."), encoding="utf-8")
+    (pages / "none.mdx").write_text(_page("None", "No table."), encoding="utf-8")
+    fresh_caches(llms, CONTENT=tmp_path / "content", CATALOGUE_DATA=data)
+    with pytest.raises(SystemExit, match=re.escape(f"{data} is not the")):
+        llms._catalogue_rows()
+    data.write_text(
+        'export const catalogues = {"a": {"rows": []}};\n', encoding="utf-8"
+    )
+    with pytest.raises(
+        SystemExit,
+        match=re.escape(f"{pages / 'none.mdx'} tables no catalogue of {data}"),
+    ):
+        llms._catalogue_section()

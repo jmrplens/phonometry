@@ -3288,7 +3288,7 @@ _ES: dict[str, str] = {
     "in the band of maximum level (ISO 9614-2, clause 6.2.2)": "en la banda de nivel máximo (ISO 9614-2, apartado 6.2.2)",
     "same signs → the two channels are swapped, or one is inverted": "mismos signos → los dos canales están intercambiados, o uno está invertido",
     "more than 1,5 dB apart → the probe disturbs its own field, or the channels are not matched": "más de 1,5 dB de diferencia → la sonda perturba su propio campo, o los canales no están emparejados",
-    "$δ_{pI0}$ belongs to the probe, its spacer and the analyser together, not to the microphones": "$δ_{pI0}$ pertenece al conjunto sonda, separador y analizador, no a los micrófonos",
+    "$δ_{pI0}$ belongs to the probe, its spacer and the analyser together, not to the microphones": "$δ_{pI0}$ pertenece al conjunto sonda, espaciador y analizador, no a los micrófonos",
     # Long's Table 14.9 installation (devices/noise-control/duct-path).
     "Long's Table 14.9 installation: every row of the sheet as a place": "La instalación de la Tabla 14.9 de Long: cada fila de la hoja, en su sitio",
     "Plant room": "Sala de máquinas",

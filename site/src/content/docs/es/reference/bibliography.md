@@ -28,9 +28,10 @@ las que solo la citan. Lo que una página
 implementa apartado por apartado está reunido para toda la biblioteca en el
 [informe de conformidad](/phonometry/es/reference/conformance/), no aquí.
 
-Esta página reúne esas fuentes en una sola lista, agrupadas por las mismas once
-áreas en las que se agrupan las guías, con Acústica general y Metrología como
-los dos cajones transversales de los extremos. Cada entrada lista las páginas
+Esta página reúne esas fuentes en una sola lista, agrupadas por once de las
+trece áreas en las que se agrupan las guías, todas menos Fluidos y Sólidos
+elásticos, con Acústica general y Metrología como los dos cajones transversales
+de los extremos. Cada entrada lista las páginas
 de guía que la citan. La sección de Referencias de cada guía, generada a partir
 de su frontmatter, sigue siendo la autoridad para esa página.
 

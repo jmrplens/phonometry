@@ -1,14 +1,15 @@
 // Small builds for the tests of check-structured-data.mjs.
 //
 // The check reads a whole build, and some of what it asks is asked of the
-// whole site at once: the software node and its history on every page, the
-// site-wide block under its byte budget, the About page in both languages, a
-// share of pages edited since they were first published. A test that hands it
-// a build of a few pages has to give it all of that, or every test fails on
-// what it did not mean to test. So the pages are written here, once, whole by
-// default, and every test file of the check builds on them: a check that adds
-// a site-wide requirement adds it to this file, and each suite keeps testing
-// only its own defect.
+// whole site at once: the software node and its history on every page, its
+// descriptions and feature list in both languages, the site-wide block under
+// its byte budget, the About page in both languages, a share of pages edited
+// since they were first published. A test that hands it a build of a few
+// pages has to give it all of that, or every test fails on what it did not
+// mean to test. So the pages are written here, once, whole by default, and
+// every test file of the check builds on them: a check that adds a site-wide
+// requirement adds it to this file, and each suite keeps testing only its own
+// defect.
 //
 // A page is data until the build is written: its article node, every node of
 // its graph and what it says, which a test changes in place before `check`
@@ -20,11 +21,19 @@
 //
 // Nothing here is installed: the tests run before the site's dependencies are.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { softwareRequirements, targetPlatform } from '../../src/data/repo-stats.mjs';
+import {
+	featureList,
+	inBothLanguages,
+	keywords,
+	siteDescriptions,
+	softwareDescriptions,
+} from '../../src/data/scope.mjs';
 import { basePath, siteUrl } from '../../src/data/site.mjs';
 import { topicForSlug } from '../../src/data/topics.mjs';
 
@@ -62,6 +71,12 @@ export const LIBRARY_MODIFIED = commitDay('%ct', '-1', '--', 'src');
 
 /** The platforms the software node names when a test does not say otherwise. */
 export const PLATFORMS = ['Linux', 'macOS', 'Windows'];
+
+/** The release the API pages document, as VERSION names it. */
+export const VERSION = readFileSync(join(REPOSITORY_ROOT, 'VERSION'), 'utf8').trim();
+
+/** The Python the API pages document, from pyproject.toml, as the site states it. */
+export const TARGET_PLATFORM = targetPlatform;
 
 const REPOSITORY = 'https://github.com/jmrplens/phonometry';
 
@@ -143,7 +158,13 @@ export function siteNodes(operatingSystem = PLATFORMS) {
 				},
 			],
 		},
-		{ '@type': 'WebSite', '@id': SITE.website, name: 'phonometry', url: `${ORIGIN}/` },
+		{
+			'@type': 'WebSite',
+			'@id': SITE.website,
+			name: 'phonometry',
+			url: `${ORIGIN}/`,
+			description: inBothLanguages(siteDescriptions),
+		},
 		{
 			'@type': 'SoftwareApplication',
 			'@id': SITE.software,
@@ -156,6 +177,10 @@ export function siteNodes(operatingSystem = PLATFORMS) {
 			dateCreated: FIRST_COMMIT,
 			dateModified: LIBRARY_MODIFIED,
 			...(operatingSystem === null ? {} : { operatingSystem }),
+			description: inBothLanguages(softwareDescriptions),
+			featureList: structuredClone(featureList),
+			keywords: structuredClone(keywords),
+			softwareRequirements,
 		},
 		{
 			'@type': 'SoftwareSourceCode',
@@ -221,6 +246,26 @@ export function page(slug, lang, extra = {}) {
 	};
 	const path = `${prefix.slice(1)}${prefix ? '/' : ''}${slug}/index.html`;
 	return { path, article, nodes: [...siteNodes(), article, trail], text: '' };
+}
+
+/**
+ * One page of the API reference, typed and dated as Head.astro writes it: an
+ * APIReference naming the release and the Python it documents, with no
+ * translation, since the reference is written in English alone.
+ *
+ * @param {string} module The module's path under `reference/api/`, `signals/levels`.
+ * @param {object} [extra] Fields of the article node, over its own.
+ * @returns {{path: string, article: object, nodes: object[], text: string}} The page.
+ */
+export function apiPage(module, extra = {}) {
+	const built = page(`reference/api/${module}`, 'en', {
+		'@type': 'APIReference',
+		assemblyVersion: VERSION,
+		targetPlatform: TARGET_PLATFORM,
+		...extra,
+	});
+	delete built.article.workTranslation;
+	return built;
 }
 
 /**

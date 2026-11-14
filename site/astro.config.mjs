@@ -22,12 +22,15 @@ import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
 import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
 import { rehypeWrappableMath } from './src/lib/wrappable-math.mjs';
+import { softwareRequirements, version } from './src/data/repo-stats.mjs';
 import {
   featureList,
+  inBothLanguages,
   keywords,
   siteDescription,
+  siteDescriptions,
   socialImageAlt,
-  softwareDescription,
+  softwareDescriptions,
 } from './src/data/scope.mjs';
 
 // Rewrites documentation media to this site's own copy.
@@ -188,9 +191,6 @@ const socialImage = {
   height: 630,
 };
 
-// Single-sourced version: read from the package, never duplicated here.
-const version = readFileSync(new URL('../VERSION', import.meta.url), 'utf8').trim();
-
 // The software's history, for the SoftwareApplication node. `dateCreated` is
 // the repository's first commit, in June 2020, when the code was published as
 // PyOctave, a name that became PyOctaveBand that July. `datePublished` is the
@@ -229,8 +229,6 @@ const dateModified = commitDay(
   ['-1', '--', fileURLToPath(new URL('../src/', import.meta.url))],
   'the last change under src/',
 );
-
-const softwareRequirements = 'Python >= 3.12 with NumPy and SciPy (matplotlib and numba optional).';
 
 // --- Canonical identity --------------------------------------------------
 // The `#person` entity is no longer restated here; it is fetched from its
@@ -399,7 +397,9 @@ const jsonLd = JSON.stringify({
       '@id': websiteId,
       name: 'phonometry',
       url: `${fullUrl}/`,
-      description: siteDescription,
+      // The block is the same on every page of both languages, so the
+      // description is given in both, each tagged with its own.
+      description: inBothLanguages(siteDescriptions),
       inLanguage: ['en', 'es'],
       image: socialImage,
       publisher: { '@id': authorId },
@@ -409,6 +409,9 @@ const jsonLd = JSON.stringify({
       '@type': 'SoftwareApplication',
       '@id': softwareId,
       name: 'phonometry',
+      // The version, the Python floor and the requirements come from
+      // src/data/repo-stats.mjs, the one reader of VERSION and pyproject.toml
+      // in the site, so the node and the package cannot disagree.
       softwareVersion: version,
       applicationCategory: 'DeveloperApplication',
       applicationSubCategory: 'Scientific/Engineering',
@@ -436,13 +439,15 @@ const jsonLd = JSON.stringify({
       releaseNotes: `${repositoryUrl}/releases`,
       softwareHelp: { '@id': websiteId },
       softwareRequirements,
-      // Derived from the nine documented areas in src/data/scope.mjs. The
-      // hand-written versions of these three fields described the filter bank
-      // this used to be, while the visible meta description on the same page
-      // described the toolkit it is now.
+      // Derived from the documented areas of the landing page, in English and
+      // in Spanish, by src/data/scope.mjs. The hand-written versions of these
+      // three fields described the filter bank this used to be, while the
+      // visible meta description on the same page described the toolkit it is
+      // now; and until each text came in both languages, every Spanish page
+      // described the software in English.
       featureList,
       keywords,
-      description: softwareDescription,
+      description: inBothLanguages(softwareDescriptions),
       // The project shipped as PyOctaveBand until 3.0.0 and most of the
       // third-party references still say so, so the old name is declared
       // rather than left for a model to reconcile on its own.
@@ -707,14 +712,21 @@ export default defineConfig({
       defaultLocale: 'root',
       locales,
       head: [
-        // GitHub Pages cannot send a Content-Security-Policy header, so the
-        // policy travels as a meta tag: everything the site loads is
-        // first-party, and this pins that fact. Meta delivery cannot carry
-        // frame-ancestors or report-uri (ignored there by spec), and inline
-        // scripts/styles stay allowed because a static build cannot mint
-        // per-response nonces: Starlight's theme bootstrap and Astro's island
-        // hydration are inline by design. 'wasm-unsafe-eval' is for Pagefind,
-        // whose search index is compiled WebAssembly fetched from this origin.
+        // The Cloudflare response header rule for docs.jmrp.io sends a whole
+        // Content-Security-Policy on every response, frame-ancestors 'none'
+        // and its report-uri included (meta delivery cannot carry either; the
+        // spec ignores them there), with X-Frame-Options: DENY,
+        // Referrer-Policy and Permissions-Policy. This meta policy stays
+        // beside it: a browser enforces both, and this one is the stricter on
+        // images, img-src 'self' data: where the edge's lets in four other
+        // origins, img.shields.io among them. Everything the site loads is
+        // first-party, and this pins that fact. It also holds wherever the
+        // build is served without that rule, a local preview included.
+        // Inline scripts/styles stay allowed because a static build cannot
+        // mint per-response nonces: Starlight's theme bootstrap and Astro's
+        // island hydration are inline by design. 'wasm-unsafe-eval' is for
+        // Pagefind, whose search index is compiled WebAssembly fetched from
+        // this origin.
         {
           tag: 'meta',
           attrs: {
@@ -736,8 +748,9 @@ export default defineConfig({
         // No preconnect to raw.githubusercontent.com: every figure, animation
         // and fiche is served from this origin now (scripts/stage-media.mjs),
         // so there is no third-party handshake left to warm.
-        // GitHub Pages serves no custom response headers, so the referrer
-        // policy has to travel as a document-level tag.
+        // The Cloudflare response header rule sends Referrer-Policy on every
+        // response, with this same value; the tag gives the build that policy
+        // wherever it is served without the rule, a local preview included.
         { tag: 'meta', attrs: { name: 'referrer', content: 'strict-origin-when-cross-origin' } },
         // Machine-readable pointer to the LLM-oriented summary. It was only
         // mentioned in a robots.txt comment, which nothing parses.

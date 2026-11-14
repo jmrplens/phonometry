@@ -27,9 +27,9 @@ through their text. What a page implements
 clause by clause is collected for the whole library in the
 [conformance report](/phonometry/reference/conformance/), not here.
 
-This page collects those sources in one list, grouped by the same eleven areas the
-guides are grouped into, with General acoustics and Metrology as the two
-cross-cutting buckets at the ends. Each entry lists the guide pages that cite
+This page collects those sources in one list, grouped by eleven of the thirteen
+areas the guides are grouped into, all but Fluids and Elastic solids, with
+General acoustics and Metrology as the two cross-cutting buckets at the ends. Each entry lists the guide pages that cite
 it. Each guide's own References section, generated from its frontmatter, stays
 authoritative for that page.
 

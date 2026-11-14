@@ -28,11 +28,12 @@
   ],
   "entries": [
     {
-      "_why": "The landing page states the conformance counts, the release, the catalogue rows and how many guides, API pages and fiches there are. The counts are those the summary banner prints, which make conformance draws from the report and CI holds to it; the report itself also changes with every value and name in it, which the landing page does not show. repo-stats.mjs and conformance-stats.mjs compute the numbers, so every commit to them can change one the page shows: the guides went from 163 to 168 by a change to how repo-stats.mjs picks the topics it counts, with no guide added.",
+      "_why": "The landing page states the conformance counts, the release, the Python it needs and the line that installs it, the catalogue rows and how many guides, API pages and fiches there are. The counts are those the summary banner prints, which make conformance draws from the report and CI holds to it; the report itself also changes with every value and name in it, which the landing page does not show. repo-stats.mjs and conformance-stats.mjs compute the numbers, so every commit to them can change one the page shows: the guides went from 163 to 168 by a change to how repo-stats.mjs picks the topics it counts, with no guide added.",
       "pages": ["site/src/content/docs/index.mdx", "site/src/content/docs/es/index.mdx"],
       "sources": [
         ".github/badges/conformance-summary.svg",
         "VERSION",
+        "pyproject.toml",
         "site/src/data/home.ts",
         "site/src/data/repo-stats.mjs",
         "site/src/data/conformance-stats.mjs",

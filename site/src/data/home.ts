@@ -14,13 +14,15 @@
  *   guides/apiPages/figures/fiches/version
  *       repo-stats.mjs, counted from the tree at build time (definitions in
  *       that module)
+ *   the Python floor and the install line
+ *       repo-stats.mjs, read from pyproject.toml, the table pip installs from
  *
  * All of these used to be typed out here by hand, and every hand-written copy
  * fell a release behind. They are imported now, so there is exactly one place
  * that can be wrong.
  */
 import { designations, domains, passingChecks, sources } from './conformance-stats.mjs';
-import { apiPages, catalogueRows, fiches, guides, version } from './repo-stats.mjs';
+import { apiPages, catalogueRows, fiches, guides, installCommand, pythonFloor, version } from './repo-stats.mjs';
 
 export interface Stat {
 	value: string;
@@ -31,8 +33,19 @@ export interface Stat {
 export interface Area {
 	name: string;
 	href: string;
+	/**
+	 * The designations implemented in the area. Empty where no standard
+	 * governs it: the row then shows the locale's `coverage.noStandard`, and
+	 * the structured data built from these rows states no standard for it,
+	 * rather than publishing the placeholder as one.
+	 */
 	standards: string[];
 	summary: string;
+	/**
+	 * The area as a search keyword, where its name is not one: "Files" says
+	 * nothing about acoustics on its own. The name, in lower case, otherwise.
+	 */
+	keyword?: string;
 }
 
 export interface Step {
@@ -68,7 +81,14 @@ export interface HomeContent {
 		spectrum: { title: string; note: string; code: string; alt: string; caption: string };
 		fiche: { title: string; note: string; code: string; caption: string; description: string; linkTitle: string };
 	};
-	coverage: { title: string; lead: string; areas: Area[]; headers: [string, string] };
+	coverage: {
+		title: string;
+		lead: string;
+		areas: Area[];
+		headers: [string, string];
+		/** What the standards cell of an area says when no standard governs it. */
+		noStandard: string;
+	};
 	start: { title: string; lead: string; steps: Step[] };
 }
 
@@ -133,7 +153,7 @@ export const en: HomeContent = {
 		body: [
 			'phonometry is a Python library for acoustic measurement, analysis and prediction. You give it a signal, a measured spectrum or a set of geometrical and material inputs; it gives you the quantity the standard defines, with the intermediate terms still visible.',
 			'Every result is a typed, frozen dataclass. It carries the inputs it was computed from, it draws its own figure with a one-line <code>.plot()</code> in English or Spanish, and where a standard defines a reporting format it renders a one-page PDF fiche with <code>.report()</code>.',
-			`It is written and maintained by one person, published under the MIT licence on <a href="https://pypi.org/project/phonometry/">PyPI</a>, archived with a <a href="https://doi.org/${DOI}">DOI on Zenodo</a>, and currently at version ${version}. It needs Python 3.12 or newer with NumPy and SciPy. Optional extras add the rest: <code>[plot]</code> for the figures, <code>[perf]</code> for the faster impulse ballistics, <code>[report]</code> for the PDF fiches, <code>[audio]</code> for the audio formats beyond uncompressed WAV, <code>[full]</code> for all four, and <code>[torch]</code>, outside <code>[full]</code>, for running the FDTD simulations on PyTorch.`,
+			`It is written and maintained by one person, published under the MIT licence on <a href="https://pypi.org/project/phonometry/">PyPI</a>, archived with a <a href="https://doi.org/${DOI}">DOI on Zenodo</a>, and currently at version ${version}. It needs Python ${pythonFloor} or newer with NumPy and SciPy. Optional extras add the rest: <code>[plot]</code> for the figures, <code>[perf]</code> for the faster impulse ballistics, <code>[report]</code> for the PDF fiches, <code>[audio]</code> for the audio formats beyond uncompressed WAV, <code>[full]</code> for all four, and <code>[torch]</code>, outside <code>[full]</code>, for running the FDTD simulations on PyTorch.`,
 		],
 	},
 	who: {
@@ -182,8 +202,9 @@ export const en: HomeContent = {
 	},
 	coverage: {
 		title: 'What it covers',
-		lead: `Eleven documentation areas over twenty-one import namespaces; in all, ${guides} guides and ${apiPages} API reference pages. Each row links to the area overview; the designations are the standards actually implemented there, not a reading list.`,
+		lead: `Thirteen documentation areas over twenty-one import namespaces; in all, ${guides} guides and ${apiPages} API reference pages. Each row links to the area overview; the designations are the standards actually implemented there, not a reading list.`,
 		headers: ['Area', 'Standards implemented'],
+		noStandard: 'no governing standard',
 		areas: [
 			{
 				name: 'Signal analysis',
@@ -192,10 +213,23 @@ export const en: HomeContent = {
 				standards: ['IEC 61260-1', 'ANSI S1.11', 'IEC 61672-1', 'ISO 7196', 'IEC 61252', 'ISO 1996-1', 'IEC 60942', 'GUM'],
 			},
 			{
+				name: 'Fluids',
+				href: '/phonometry/fluids/',
+				summary: 'The fluid a sound travels through, computed from the measured conditions: humid air, sea water and ideal gases, each with the model behind it.',
+				standards: ['IEC 61094-2 Annex F'],
+			},
+			{
+				name: 'Elastic solids',
+				href: '/phonometry/solids/',
+				summary: 'The elastic constants of a solid and the three longitudinal wave speeds that follow from them, with the conversions between the forms a table prints.',
+				standards: [],
+			},
+			{
 				name: 'Files',
 				href: '/phonometry/io/',
 				summary: 'Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing, lossless conversion; catalogues of materials of your own.',
 				standards: ['EBU Tech 3285', 'ITU-R BS.2088'],
+				keyword: 'measurement audio',
 			},
 			{
 				name: 'Hearing and perception',
@@ -249,7 +283,7 @@ export const en: HomeContent = {
 				name: 'Wave simulation',
 				href: '/phonometry/simulation/',
 				summary: 'Deterministic 2D FDTD solvers, acoustic and elastic P-SV, validated against analytic oracles rather than a standard.',
-				standards: ['no governing standard'],
+				standards: [],
 			},
 		],
 	},
@@ -259,8 +293,8 @@ export const en: HomeContent = {
 		steps: [
 			{
 				title: 'Install it',
-				body: 'Python 3.12 or newer. The base install pulls in NumPy and SciPy; the [full] extra adds four more, [plot] for the figures, [perf] for the faster impulse ballistics, [report] for the PDF fiches and [audio] for the audio formats beyond uncompressed WAV. [torch], which [full] leaves out, runs the FDTD simulations on PyTorch.',
-				code: 'pip install "phonometry[full]"',
+				body: `Python ${pythonFloor} or newer. The base install pulls in NumPy and SciPy; the [full] extra adds four more, [plot] for the figures, [perf] for the faster impulse ballistics, [report] for the PDF fiches and [audio] for the audio formats beyond uncompressed WAV. [torch], which [full] leaves out, runs the FDTD simulations on PyTorch.`,
+				code: installCommand,
 				href: '/phonometry/start/getting-started/',
 				linkText: 'Installation options',
 			},
@@ -295,7 +329,7 @@ export const es: HomeContent = {
 		body: [
 			'phonometry es una biblioteca de Python para medición, análisis y predicción acústica. Le das una señal, un espectro medido o un conjunto de datos geométricos y de materiales, y te devuelve la magnitud que define la norma, con los términos intermedios a la vista.',
 			'Cada resultado es un dataclass tipado y congelado (<code>frozen</code>). Conserva los datos de entrada con los que se calculó, dibuja su propia figura con un <code>.plot()</code> de una línea en inglés o en español y, cuando una norma define un formato de informe, genera una ficha PDF de una página con <code>.report()</code>.',
-			`La escribe y la mantiene una sola persona, se publica con licencia MIT en <a href="https://pypi.org/project/phonometry/">PyPI</a>, se archiva con <a href="https://doi.org/${DOI}">DOI en Zenodo</a> y va por la versión ${version}. Necesita Python 3.12 o posterior con NumPy y SciPy. Los extras opcionales añaden el resto: <code>[plot]</code> para las figuras, <code>[perf]</code> para acelerar la ponderación temporal de impulso, <code>[report]</code> para las fichas PDF, <code>[audio]</code> para los formatos de audio más allá del WAV sin comprimir, <code>[full]</code> para los cuatro, y <code>[torch]</code>, fuera de <code>[full]</code>, para calcular las simulaciones FDTD con PyTorch.`,
+			`La escribe y la mantiene una sola persona, se publica con licencia MIT en <a href="https://pypi.org/project/phonometry/">PyPI</a>, se archiva con <a href="https://doi.org/${DOI}">DOI en Zenodo</a> y va por la versión ${version}. Necesita Python ${pythonFloor} o posterior con NumPy y SciPy. Los extras opcionales añaden el resto: <code>[plot]</code> para las figuras, <code>[perf]</code> para acelerar la ponderación temporal de impulso, <code>[report]</code> para las fichas PDF, <code>[audio]</code> para los formatos de audio más allá del WAV sin comprimir, <code>[full]</code> para los cuatro, y <code>[torch]</code>, fuera de <code>[full]</code>, para calcular las simulaciones FDTD con PyTorch.`,
 		],
 	},
 	who: {
@@ -337,8 +371,9 @@ export const es: HomeContent = {
 	},
 	coverage: {
 		title: 'Qué abarca',
-		lead: `Once áreas de documentación sobre veintiún espacios de nombres de importación; en total, ${guides} guías y ${apiPages} páginas de referencia de la API. Cada fila enlaza al índice del área; las designaciones son las normas realmente implementadas ahí, no una lista de lecturas.`,
+		lead: `Trece áreas de documentación sobre veintiún espacios de nombres de importación; en total, ${guides} guías y ${apiPages} páginas de referencia de la API. Cada fila enlaza al índice del área; las designaciones son las normas realmente implementadas ahí, no una lista de lecturas.`,
 		headers: ['Área', 'Normas implementadas'],
+		noStandard: 'sin norma que la rija',
 		areas: [
 			{
 				name: 'Análisis de señal',
@@ -347,10 +382,23 @@ export const es: HomeContent = {
 				standards: ['IEC 61260-1', 'ANSI S1.11', 'IEC 61672-1', 'ISO 7196', 'IEC 61252', 'ISO 1996-1', 'IEC 60942', 'GUM'],
 			},
 			{
+				name: 'Fluidos',
+				href: '/phonometry/es/fluids/',
+				summary: 'El fluido por el que viaja el sonido, calculado a partir de las condiciones medidas: aire húmedo, agua de mar y gases ideales, cada uno con el modelo que lo produce.',
+				standards: ['IEC 61094-2 Anexo F'],
+			},
+			{
+				name: 'Sólidos elásticos',
+				href: '/phonometry/es/solids/',
+				summary: 'Las constantes elásticas de un sólido y las tres velocidades longitudinales que se siguen de ellas, con las conversiones entre las formas que imprime una tabla.',
+				standards: [],
+			},
+			{
 				name: 'Archivos',
 				href: '/phonometry/es/io/',
 				summary: 'Audio de medición de entrada y salida: lectura calibrada, procedencia, flujo por bloques, escritura BWF, conversión sin pérdidas; catálogos de materiales propios.',
 				standards: ['EBU Tech 3285', 'ITU-R BS.2088'],
+				keyword: 'audio de medición',
 			},
 			{
 				name: 'Audición y percepción',
@@ -404,7 +452,7 @@ export const es: HomeContent = {
 				name: 'Simulación de ondas',
 				href: '/phonometry/es/simulation/',
 				summary: 'Simulación FDTD 2D determinista, acústica y elástica P-SV, validada frente a oráculos analíticos y no frente a una norma.',
-				standards: ['sin norma que la rija'],
+				standards: [],
 			},
 		],
 	},
@@ -414,8 +462,8 @@ export const es: HomeContent = {
 		steps: [
 			{
 				title: 'Instálala',
-				body: 'Python 3.12 o posterior. La instalación básica trae NumPy y SciPy; el extra [full] añade cuatro más, [plot] para las figuras, [perf] para la ponderación temporal de impulso acelerada, [report] para las fichas PDF y [audio] para los formatos de audio más allá del WAV sin comprimir. [torch], que [full] deja fuera, calcula las simulaciones FDTD con PyTorch.',
-				code: 'pip install "phonometry[full]"',
+				body: `Python ${pythonFloor} o posterior. La instalación básica trae NumPy y SciPy; el extra [full] añade cuatro más, [plot] para las figuras, [perf] para la ponderación temporal de impulso acelerada, [report] para las fichas PDF y [audio] para los formatos de audio más allá del WAV sin comprimir. [torch], que [full] deja fuera, calcula las simulaciones FDTD con PyTorch.`,
+				code: installCommand,
 				href: '/phonometry/es/start/getting-started/',
 				linkText: 'Opciones de instalación',
 			},

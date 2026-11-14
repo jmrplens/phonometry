@@ -6,9 +6,9 @@
  * what GitHub's "Cite this repository" widget renders and what Zenodo reads
  * when a release is archived. So the author, the title, the DOI, the URL and
  * the licence are read from it rather than restated here, and the version
- * cited on the site is read from the root `VERSION` file, which is the single
- * source astro.config already uses and the file whose change drives a
- * release.
+ * cited on the site is the root `VERSION` file as src/data/repo-stats.mjs
+ * reads it, the one reading of that file the whole site shares, and the file
+ * whose change drives a release.
  *
  * `CITATION.cff` also carries its own `version` and `date-released`, mostly
  * for tools that read the file directly instead of building the site (a JOSS
@@ -32,6 +32,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 import { fences, pageLines, quotationMarks, splitLines } from '../lib/markdown-fences.mjs';
+import { version } from './repo-stats.mjs';
 
 /**
  * Paths are resolved by walking up from the working directory rather than from
@@ -124,7 +125,7 @@ for (const field of ['title', 'doi', 'url', 'license', 'authors', 'version', 'da
   }
 }
 
-export const version = readFileSync(root('VERSION'), 'utf8').trim();
+export { version };
 
 /**
  * `CITATION.cff`'s own `version` is a second copy of this value, kept for

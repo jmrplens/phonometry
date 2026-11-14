@@ -28,6 +28,15 @@
 // they are built from, and the real build only ever hands the check a
 // glossary that passes.
 //
+// The site-wide graph is one block on the pages of both languages, so its
+// descriptions, feature list and keywords are held to carry each text in
+// English and in Spanish, the feature list one entry per topic that teaches,
+// and no placeholder or bare area name ("files") among the keywords; its
+// requirements are held to pyproject.toml, whatever floors and markers the
+// file gives (scripts/shared/requirement-defects.test.mjs holds the sentence
+// to the lines that give each Python a floor of its own), and every API page
+// to the release and the Python it documents.
+//
 // Each test here writes a build into a directory of its own: the two
 // bibliographies and one guide in each language, every cited work named as the
 // bibliography names it, and as many plain pages besides as a test asks for.
@@ -41,7 +50,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { glossary } from '../src/data/glossary.mjs';
-import { topicForSlug } from '../src/data/topics.mjs';
+import { en as homeEn, es as homeEs } from '../src/data/home.ts';
+import { dependencies, extras, softwareRequirements } from '../src/data/repo-stats.mjs';
+import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
+import { domainIds, topicForSlug, topics } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { variablesMeasured } from '../src/lib/catalogue-datasets.mjs';
@@ -49,6 +61,7 @@ import { glossaryTermSet } from '../src/lib/glossary-structured-data.mjs';
 import {
 	ABOUT_TEXT,
 	aboutPage,
+	apiPage,
 	build as wholeBuild,
 	check,
 	commitDay,
@@ -59,6 +72,8 @@ import {
 	SITE,
 	SITE_TYPES,
 	siteNodes,
+	TARGET_PLATFORM,
+	VERSION,
 } from './shared/structured-data-fixture.mjs';
 
 const EN = `${ORIGIN}/reference/bibliography/`;
@@ -1738,4 +1753,306 @@ test('an errata content tree checked out with CRLF line endings is read as the L
 		ran.out,
 		/ok {3}each of the 2 errata family pages names in about, in order, the works its corrects lists, 2 in all/,
 	);
+});
+
+// The site-wide graph in both languages. Every page carries the same block, so
+// each defect is one line with the number of pages it stands on; a Spanish page
+// used to describe the software in English, list eleven of the thirteen
+// topics, publish "no governing standard" as a standard and state two of the
+// package's five optional extras.
+
+/** The site-wide nodes with the one of each type in `changes` changed by its function, on a copy. */
+function changedAll(changes) {
+	return siteNodes().map((node) => {
+		const change = changes[node['@type']];
+		if (!change) return node;
+		const copy = structuredClone(node);
+		change(copy);
+		return copy;
+	});
+}
+
+/** A requirement as a failure line names it: pyproject.toml's text without spaces, its marker in brackets. */
+const asWritten = ({ text }) => {
+	const [requirement, marker] = text.split(';').map((part) => part.replace(/\s+/g, ''));
+	return marker ? `${requirement} (${marker})` : requirement;
+};
+
+/** "a", "a and b", "a, b and c", as a failure line lists what it names. */
+const listed = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`);
+
+/** The label of each topic that teaches, in the order the navigation lists them, in `lang`. */
+const topicLabels = (lang) => domainIds.map((id) => topics.find((topic) => topic.id === id).label[lang]);
+
+test('a build whose site-wide nodes speak both languages passes, and says what it read', (t) => {
+	const ran = history(t);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(
+		ran.out,
+		new RegExp(
+			'ok {3}the site-wide nodes on all 10 pages describe the site and the software in English and in Spanish, ' +
+				`list one feature for each of the ${domainIds.length} topics that teach in each language, ` +
+				'publish no placeholder as a standard or a keyword, and state every requirement and extra of pyproject.toml',
+		),
+	);
+	assert.equal(ran.err, '');
+	// A build with no API page has no release to answer for.
+	assert.doesNotMatch(ran.out, /name the release/);
+});
+
+test('descriptions in English alone, as every page published them, fail on both nodes', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			WebSite: (node) => {
+				node.description = siteDescriptions.en;
+			},
+			SoftwareApplication: (node) => {
+				node.description = softwareDescriptions.en;
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL WebSite description is not one text in English and one in Spanish, each tagged with its language: "Acoustic measurement toolkit/);
+	assert.match(ran.err, /FAIL SoftwareApplication description is not one text in English and one in Spanish, each tagged with its language: "Acoustic measurement, analysis/);
+	assert.match(ran.err, /\(on 10 pages\)/);
+	assert.doesNotMatch(ran.out, /speak|in English and in Spanish, list/);
+});
+
+test('a Spanish description that is the English text, or any other than scope.mjs writes, fails', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.description = [
+					{ '@value': softwareDescriptions.en, '@language': 'en' },
+					{ '@value': softwareDescriptions.en, '@language': 'es' },
+				];
+			},
+			WebSite: (node) => {
+				node.description[1]['@value'] = siteDescriptions.es.replace('Python', 'Phyton');
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL SoftwareApplication description in Spanish is the English text: "Acoustic measurement, analysis/);
+	assert.match(ran.err, /FAIL WebSite description in Spanish is not the Spanish text src\/data\/scope\.mjs writes: "Biblioteca de medición acústica en Phyton/);
+});
+
+test('a feature list in English alone and eleven areas long, as every page published it, fails', (t) => {
+	const eleven = featureLists.en.filter((feature) => !/^(?:Fluids|Elastic solids):/.test(feature));
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.featureList = eleven;
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL SoftwareApplication featureList has 11 entries tagged with no language of the site/);
+	assert.match(
+		ran.err,
+		new RegExp(`FAIL SoftwareApplication featureList in Spanish has 0 entries, not one for each of the ${domainIds.length} topics that teach`),
+	);
+});
+
+test('a feature list that leaves out a topic in one language fails, naming the topic', (t) => {
+	const [, fluids] = topicLabels('es');
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.featureList = node.featureList.filter(
+					(feature) => !(feature['@language'] === 'es' && feature['@value'].startsWith(`${fluids}:`)),
+				);
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(`FAIL SoftwareApplication featureList in Spanish has ${domainIds.length - 1} entries, not one for each of the ${domainIds.length} topics that teach`),
+	);
+	assert.match(ran.err, new RegExp(`entry 2 opens with "${topicLabels('es')[2]}", not with "${fluids}", the topic topics\\.mjs lists there`));
+	assert.doesNotMatch(ran.err, /featureList in English/);
+});
+
+test('a feature in another order than the navigation, or another text than scope.mjs writes, fails', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				const english = node.featureList.filter((feature) => feature['@language'] === 'en');
+				[english[0], english[1]] = [english[1], english[0]];
+				const spanish = node.featureList.filter((feature) => feature['@language'] === 'es');
+				spanish[3] = { ...spanish[3], '@value': `${spanish[3]['@value']} Y más.` };
+				node.featureList = [...english, ...spanish];
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, new RegExp(`entry 1 opens with "${topicLabels('en')[1]}", not with "${topicLabels('en')[0]}"`));
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL SoftwareApplication featureList in Spanish is not the list src/data/scope\\.mjs builds from ' +
+				`the landing page: entry 4 is "${topicLabels('es')[3]}: `,
+		),
+	);
+});
+
+test('a placeholder published as a standard or as a keyword fails, in either language', (t) => {
+	const placeholder = homeEn.coverage.noStandard;
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				const last = node.featureList.findIndex((feature) => feature['@language'] === 'es') - 1;
+				node.featureList[last] = {
+					...node.featureList[last],
+					'@value': `${node.featureList[last]['@value']} Standards implemented: ${placeholder}.`,
+				};
+				node.keywords = [...node.keywords, { '@value': 'sin norma que la rija', '@language': 'es' }];
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, new RegExp(`FAIL SoftwareApplication featureList states "${placeholder}" as a standard`));
+	assert.match(ran.err, /FAIL SoftwareApplication keywords publish "sin norma que la rija" as a keyword/);
+	// One text of keywords delimited by commas, as every page published them.
+	const joined = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.keywords = `acoustics, Python, signal analysis, files, ISO 717-1, ${placeholder}`;
+			},
+		}),
+	});
+	assert.equal(joined.status, 1);
+	assert.match(joined.err, new RegExp(`FAIL SoftwareApplication keywords publish "${placeholder}" as a keyword`));
+	assert.match(joined.err, /FAIL SoftwareApplication keywords hold no keyword in Spanish/);
+	assert.match(joined.err, /FAIL SoftwareApplication keywords publish "files", the name of an area that says nothing about acoustics on its own/);
+});
+
+test('the name of an area that says nothing about acoustics, published as a keyword, fails in either language', (t) => {
+	const replaced = [homeEn, homeEs].flatMap(({ coverage }) => coverage.areas.filter((area) => area.keyword));
+	assert.ok(replaced.length >= 2, 'no area of the landing pages gives a keyword of its own; update this test');
+	const names = new Map(replaced.map((area) => [area.keyword, area.name.toLowerCase()]));
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.keywords = node.keywords.map((keyword) =>
+					names.has(keyword?.['@value']) ? { ...keyword, '@value': names.get(keyword['@value']) } : keyword,
+				);
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	for (const area of replaced) {
+		assert.match(
+			ran.err,
+			new RegExp(
+				`FAIL SoftwareApplication keywords publish "${RegExp.escape(area.name.toLowerCase())}", the name of an area ` +
+					'that says nothing about acoustics on its own \\(on 10 pages\\)',
+			),
+		);
+	}
+	assert.match(ran.err, /keywords publish "files"/);
+	assert.match(ran.err, /keywords publish "archivos"/);
+	// The check names the Files topic itself, so a keywords list that names
+	// it in either language fails whatever the landing page's rows declare.
+	const bare = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.keywords = [...node.keywords, { '@value': 'Archivos', '@language': 'es' }];
+			},
+		}),
+	});
+	assert.equal(bare.status, 1);
+	assert.match(bare.err, /FAIL SoftwareApplication keywords publish "archivos", the name of an area that says nothing about acoustics on its own/);
+	assert.doesNotMatch(bare.err, /keywords publish "files"/);
+});
+
+test('requirements typed by hand, as every page published them, fail and name what they leave out', (t) => {
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.softwareRequirements = 'Python >= 3.12 with NumPy and SciPy (matplotlib and numba optional).';
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	// Every requirement and every extra pyproject.toml gives, read from it, so
+	// the test holds whichever floors the file sets and whatever markers it
+	// writes them behind.
+	const named = [...dependencies.map(asWritten), ...extras.map((extra) => `the extra ${extra.name}`)];
+	assert.ok(named.length > 2, 'pyproject.toml gives no requirement or no extra; update this test');
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL SoftwareApplication softwareRequirements leaves out ${RegExp.escape(listed(named))}, ` +
+				'which pyproject\\.toml gives \\(on 10 pages\\)',
+		),
+	);
+	const none = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				delete node.softwareRequirements;
+			},
+		}),
+	});
+	assert.equal(none.status, 1);
+	assert.match(none.err, /FAIL SoftwareApplication softwareRequirements is undefined, not a text naming what pyproject\.toml requires/);
+});
+
+test('a requirement stated with a version longer than the one pyproject.toml gives fails, naming it', (t) => {
+	const [first] = dependencies;
+	const floor = ` ${first.clauses[0].version}`;
+	assert.ok(softwareRequirements.includes(floor), softwareRequirements);
+	const ran = history(t, {
+		nodes: changedAll({
+			SoftwareApplication: (node) => {
+				node.softwareRequirements = softwareRequirements.replace(floor, `${floor}0`);
+			},
+		}),
+	});
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`FAIL SoftwareApplication softwareRequirements leaves out ${RegExp.escape(asWritten(first))}, ` +
+				'which pyproject\\.toml gives \\(on 10 pages\\)',
+		),
+	);
+});
+
+test('every API page names the release and the Python it documents, and the check says so', (t) => {
+	const ran = check(
+		t,
+		build({ base: { a: apiPage('signals/levels'), b: apiPage('filters/banks'), c: apiPage('room/acoustics') } }),
+	);
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, new RegExp(`ok {3}all 3 API pages name the release ${RegExp.escape(VERSION)} and ${RegExp.escape(TARGET_PLATFORM)}`));
+});
+
+test('an API page that names no release, another release or another Python fails, with the pages it stands on', (t) => {
+	const unnamed = apiPage('filters/banks');
+	delete unnamed.article.assemblyVersion;
+	delete unnamed.article.targetPlatform;
+	const ran = check(
+		t,
+		build({
+			base: {
+				right: apiPage('signals/levels'),
+				unnamed,
+				old: apiPage('room/acoustics', { assemblyVersion: '3.3.0' }),
+				python: apiPage('underwater/propagation', { targetPlatform: 'Python >= 3.11' }),
+			},
+		}),
+	);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL 1 API page\\(s\\) name the release undefined and the platform undefined, ' +
+				`not ${RegExp.escape(VERSION)}, from VERSION, and ${RegExp.escape(TARGET_PLATFORM)}, from pyproject\\.toml`,
+		),
+	);
+	assert.match(ran.err, /FAIL 1 API page\(s\) name the release "3\.3\.0" and the platform "Python >= 3\.12"/);
+	assert.match(ran.err, /FAIL 1 API page\(s\) name the release "[^"]+" and the platform "Python >= 3\.11"/);
+	assert.doesNotMatch(ran.out, /name the release/);
 });

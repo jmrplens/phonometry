@@ -49,6 +49,23 @@
 // HEAD, so a dependency bump of the documentation site announced a library
 // that had not moved.
 //
+// The site-wide graph is one block, the same on the pages of both languages,
+// and every Spanish page used to publish it in English alone: the site's and
+// the software's descriptions, a feature list of eleven of the thirteen topics
+// that teach, and keywords that ended "no governing standard", the label the
+// landing page shows where no standard governs an area. So each description
+// has to be one text in English and one in Spanish, each tagged and each the
+// text src/data/scope.mjs writes; the feature list has to give, in each
+// language, one entry per topic in the order src/data/topics.mjs lists them,
+// opening with the topic's own label there; no feature or keyword may
+// publish the placeholder, and no keyword the bare name of an area that says
+// nothing about acoustics on its own ("files"). The software's requirements
+// are held to pyproject.toml, as src/data/repo-stats.mjs reads it: the Python
+// it requires, every requirement as one phrase with its versions and the
+// Python its marker limits it to, and every extra by name
+// (scripts/shared/requirement-defects.mjs). Every API page has to name the
+// release in VERSION and the Python pyproject.toml requires.
+//
 // The About page is held to the Person node it carries: every span of years
 // the page writes, "(2011-2018)", "from 2019 to 2023", "de 2019 a 2023" or any
 // other form `SPAN_FORMS` reads, has to be the years of a role that node
@@ -67,12 +84,16 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { glossary } from '../src/data/glossary.mjs';
+import { en as homeEn, es as homeEs } from '../src/data/home.ts';
+import { dependencies, extras, requiresPython } from '../src/data/repo-stats.mjs';
+import { featureLists, siteDescriptions, softwareDescriptions } from '../src/data/scope.mjs';
 import { basePath, siteUrl } from '../src/data/site.mjs';
-import { catalogueSlugs, topicForSlug, topicSections, topics } from '../src/data/topics.mjs';
+import { catalogueSlugs, domainIds, topicForSlug, topics, topicSections } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { isoDay } from '../src/lib/date-rules.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
+import { requirementDefects } from './shared/requirement-defects.mjs';
 
 import { decode, markupOf, markupText } from './shared/dist-pages.mjs';
 
@@ -133,6 +154,9 @@ if (
 const FIRST_COMMIT = commitDay(['--max-parents=0', 'HEAD'], 'the first commit');
 /** The last commit that changed the library itself, which is what the software's `dateModified` claims. */
 const LIBRARY_MODIFIED = commitDay(['-1', '--', 'src'], 'the last change under src/');
+
+/** The release the API pages document: the first line of VERSION, read here and not from the site's own reader. */
+const VERSION = readFileSync(join(REPOSITORY_ROOT, 'VERSION'), 'utf8').trim();
 
 /**
  * Whether `url` addresses a page of this site.
@@ -263,12 +287,14 @@ const SITE_NODES = ['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceC
  * That Person is most of the block, and it changes when jmrp.io changes, with
  * no diff in this repository: four profile links added there grew every page
  * here by 132 bytes, and an earlier change there doubled the Person. The block
- * was 23,545 bytes on 2026-11-07, 16,320 of them the Person. The budget leaves
+ * was 23,545 bytes on 2026-11-07, 16,320 of them the Person, and 30,804 once
+ * it gave its descriptions, feature list and keywords in Spanish beside the
+ * English and listed a feature for each topic that teaches. The budget leaves
  * room for a few more links or topics and none for a second copy of a list,
  * so a growth of that kind stops the build and is decided here, by raising the
  * budget or by trimming the source, instead of shipping on every page unseen.
  */
-const SITE_BLOCK_BUDGET = 25_000;
+const SITE_BLOCK_BUDGET = 32_000;
 
 /** `sameAs` as an array, whichever of the two shapes a node uses. */
 const sameAsOf = (node) => (Array.isArray(node.sameAs) ? node.sameAs : [node.sameAs].filter(Boolean));
@@ -364,6 +390,186 @@ function softwareDefects(nodes) {
  * this one address, so the link holds as new visits are made.
  */
 const SOFTWARE_HERITAGE = 'https://archive.softwareheritage.org/browse/origin/?origin_url=';
+
+/** The languages the site is written in, by the tag JSON-LD gives each. */
+const LANGUAGES = ['en', 'es'];
+
+/** What the landing page's standards cell says, in each language, of an area no standard governs. */
+const PLACEHOLDERS = [homeEn.coverage.noStandard, homeEs.coverage.noStandard];
+
+/**
+ * The topics whose label says nothing about acoustics on its own: "Files" is
+ * a word every program has. Named here, not read off the keyword the landing
+ * page's row gives in its place, so that a row that loses its keyword fails
+ * the check instead of taking the label off the list.
+ */
+const GENERIC_TOPICS = ['io'];
+
+/**
+ * The area names, in lower case and in both languages, that are not keywords
+ * on their own: those of the topics above, and of every row of either landing
+ * page that gives a keyword in its place. The site published "files" before.
+ */
+const BARE_LABELS = new Set([
+	...GENERIC_TOPICS.flatMap((id) => LANGUAGES.map((lang) => topics.find((topic) => topic.id === id).label[lang].toLowerCase())),
+	...[homeEn, homeEs].flatMap(({ coverage }) =>
+		coverage.areas.filter((area) => area.keyword).map((area) => area.name.toLowerCase()),
+	),
+]);
+
+/** The label of each topic that teaches, in the order the navigation lists them, by language. */
+const TOPIC_LABELS = Object.fromEntries(
+	LANGUAGES.map((lang) => [lang, domainIds.map((id) => topics.find((topic) => topic.id === id).label[lang])]),
+);
+
+/** A value cut to a length a failure line can carry. */
+const shown = (value) => {
+	const text = JSON.stringify(value);
+	return text === undefined ? 'undefined' : text.length > 120 ? `${text.slice(0, 117)}...` : text;
+};
+
+/** Whether `value` is a text JSON-LD tags with one of the site's languages. */
+const isTagged = (value) =>
+	value !== null &&
+	typeof value === 'object' &&
+	typeof value['@value'] === 'string' &&
+	value['@value'] !== '' &&
+	LANGUAGES.includes(value['@language']);
+
+/**
+ * What a description gets wrong about the two languages: it has to be one
+ * text in each, tagged, and the one src/data/scope.mjs writes there.
+ *
+ * @param {string} type The node's type, for the message.
+ * @param {unknown} description The node's `description`.
+ * @param {{en: string, es: string}} expected The text in each language.
+ * @returns {string[]} The defects.
+ */
+function descriptionDefects(type, description, expected) {
+	const literals = Array.isArray(description) ? description : [];
+	const byLanguage = (lang) => literals.filter((literal) => isTagged(literal) && literal['@language'] === lang);
+	if (literals.length !== 2 || !literals.every(isTagged) || LANGUAGES.some((lang) => byLanguage(lang).length !== 1)) {
+		return [`${type} description is not one text in English and one in Spanish, each tagged with its language: ${shown(description)}`];
+	}
+	const [english, spanish] = LANGUAGES.map((lang) => byLanguage(lang)[0]['@value']);
+	// Held apart from scope.mjs as well, which would agree with itself had it
+	// handed the English text to both languages.
+	if (english === spanish) return [`${type} description in Spanish is the English text: ${shown(spanish)}`];
+	return LANGUAGES.filter((lang) => byLanguage(lang)[0]['@value'] !== expected[lang]).map(
+		(lang) =>
+			`${type} description in ${LANGUAGE[lang]} is not the ${LANGUAGE[lang]} text src/data/scope.mjs writes: ` +
+			shown(byLanguage(lang)[0]['@value']),
+	);
+}
+
+/**
+ * What the software node's feature list gets wrong: in each language one
+ * entry per topic that teaches, in the navigation's order and opening with
+ * that topic's label, the list src/data/scope.mjs builds, and no placeholder
+ * stated as a standard.
+ *
+ * @param {unknown} featureList The node's `featureList`.
+ * @returns {string[]} The defects.
+ */
+function featureDefects(featureList) {
+	const entries = Array.isArray(featureList) ? featureList : [featureList];
+	const defects = [];
+	const untagged = entries.filter((entry) => !isTagged(entry));
+	if (untagged.length > 0) {
+		defects.push(`SoftwareApplication featureList has ${untagged.length} entries tagged with no language of the site: ${shown(untagged[0])}`);
+	}
+	for (const lang of LANGUAGES) {
+		const texts = entries.filter((entry) => isTagged(entry) && entry['@language'] === lang).map((entry) => entry['@value']);
+		const labels = TOPIC_LABELS[lang];
+		if (texts.length !== labels.length) {
+			defects.push(
+				`SoftwareApplication featureList in ${LANGUAGE[lang]} has ${texts.length} entries, ` +
+					`not one for each of the ${labels.length} topics that teach`,
+			);
+		}
+		const misplaced = labels.findIndex((label, i) => texts[i] !== undefined && !texts[i].startsWith(`${label}: `));
+		if (misplaced >= 0) {
+			defects.push(
+				`SoftwareApplication featureList in ${LANGUAGE[lang]}, entry ${misplaced + 1} opens with ` +
+					`${shown(texts[misplaced].split(':')[0])}, not with "${labels[misplaced]}", the topic topics.mjs lists there`,
+			);
+		}
+		const differs = featureLists[lang].findIndex((feature, i) => texts[i] !== feature);
+		if (texts.length > 0 && (differs >= 0 || texts.length !== featureLists[lang].length)) {
+			const at = differs >= 0 ? differs : featureLists[lang].length;
+			defects.push(
+				`SoftwareApplication featureList in ${LANGUAGE[lang]} is not the list src/data/scope.mjs builds ` +
+					`from the landing page: entry ${at + 1} is ${shown(texts[at])}`,
+			);
+		}
+	}
+	for (const placeholder of PLACEHOLDERS) {
+		if (entries.some((entry) => String(entry?.['@value'] ?? entry).includes(placeholder))) {
+			defects.push(`SoftwareApplication featureList states "${placeholder}" as a standard`);
+		}
+	}
+	return defects;
+}
+
+/**
+ * What the software node's keywords get wrong: each is a text, tagged with a
+ * language of the site where it is written in words, none is the
+ * placeholder an area with no governing standard shows, and none is the bare
+ * name of an area that says nothing about acoustics on its own (BARE_LABELS).
+ *
+ * @param {unknown} keywords The node's `keywords`.
+ * @returns {string[]} The defects.
+ */
+function keywordDefects(keywords) {
+	const entries = Array.isArray(keywords) ? keywords : [keywords];
+	const defects = [];
+	const malformed = entries.filter((entry) => !(isTagged(entry) || (typeof entry === 'string' && entry !== '')));
+	if (malformed.length > 0) defects.push(`SoftwareApplication keywords hold ${malformed.length} value(s) that are not a text: ${shown(malformed[0])}`);
+	for (const lang of LANGUAGES) {
+		if (!entries.some((entry) => isTagged(entry) && entry['@language'] === lang)) {
+			defects.push(`SoftwareApplication keywords hold no keyword in ${LANGUAGE[lang]}`);
+		}
+	}
+	// A keywords text is a list in itself, its entries delimited by commas, as
+	// schema.org reads it: the site published one such text, ending in the
+	// placeholder.
+	const texts = entries.flatMap((entry) =>
+		String(entry?.['@value'] ?? entry)
+			.split(',')
+			.map((text) => text.trim().toLowerCase()),
+	);
+	for (const placeholder of PLACEHOLDERS) {
+		if (texts.includes(placeholder.toLowerCase())) defects.push(`SoftwareApplication keywords publish "${placeholder}" as a keyword`);
+	}
+	for (const label of BARE_LABELS) {
+		if (texts.includes(label)) {
+			defects.push(`SoftwareApplication keywords publish "${label}", the name of an area that says nothing about acoustics on its own`);
+		}
+	}
+	return defects;
+}
+
+/**
+ * What the site-wide nodes get wrong about the two languages and the package,
+ * one sentence per defect, so the same defect on every page is reported once.
+ *
+ * @param {object[]} nodes Every node of one page's graph.
+ * @returns {string[]|undefined} The defects; undefined when the page lacks the
+ *   WebSite or the SoftwareApplication node, which is reported as a missing
+ *   node, so the page is not counted as read.
+ */
+function languageDefects(nodes) {
+	const site = nodeOfType(nodes, 'WebSite');
+	const app = nodeOfType(nodes, 'SoftwareApplication');
+	if (!site || !app) return undefined;
+	return [
+		...descriptionDefects('WebSite', site.description, siteDescriptions),
+		...descriptionDefects('SoftwareApplication', app.description, softwareDescriptions),
+		...featureDefects(app.featureList),
+		...keywordDefects(app.keywords),
+		...requirementDefects(app.softwareRequirements, { requiresPython, dependencies, extras }),
+	];
+}
 
 /**
  * The years of every role a Person node dates with an end, wherever in the
@@ -786,11 +992,17 @@ const seen = {
 	datasetUnshown: 0,
 	corrected: 0,
 	history: 0,
+	languages: 0,
 	definedTerms: 0,
 };
 
 /** The About pages found in each language, and how many of them are typed AboutPage. */
 const about = { en: { found: 0, typed: 0 }, es: { found: 0, typed: 0 } };
+
+/** Each distinct defect of the site-wide graph's languages and requirements, and the pages it stands on. */
+const languageNodeDefects = new Map();
+/** Each distinct release and platform an API page names, as JSON, and the pages that name it. */
+const apiReleases = new Map();
 
 /** Each language's name, as an ok line writes it. */
 const LANGUAGE = { en: 'English', es: 'Spanish' };
@@ -1325,6 +1537,11 @@ for (const file of files) {
 	for (const defect of history ?? []) {
 		siteNodeDefects.set(defect, (siteNodeDefects.get(defect) ?? 0) + 1);
 	}
+	const spoken = languageDefects(nodes);
+	if (spoken) seen.languages += 1;
+	for (const defect of spoken ?? []) {
+		languageNodeDefects.set(defect, (languageNodeDefects.get(defect) ?? 0) + 1);
+	}
 
 	// The About page says who maintains the library and how its numbers are
 	// made, and schema.org has a type for exactly that page.
@@ -1763,12 +1980,16 @@ for (const file of files) {
 		fail(`${route}: a ${lang} page has to declare ${pairing} alone, and declares ${declared}`);
 	}
 
-	// The generated API tree is documentation of modules, not a guide.
+	// The generated API tree is documentation of modules, not a guide, and of
+	// one release, on one range of Pythons: the graph is the same for every
+	// module, so it is judged once per distinct release and platform below.
 	if (slug.startsWith('reference/api/')) {
 		seen.api += 1;
 		if (!typesOf(article).includes('APIReference')) {
 			fail(`${route}: an API page is typed ${JSON.stringify(article['@type'])}`);
 		}
+		const release = JSON.stringify([article.assemblyVersion ?? null, article.targetPlatform ?? null]);
+		apiReleases.set(release, (apiReleases.get(release) ?? 0) + 1);
 	}
 
 	// The trail: contiguous positions from one, and the last crumb is the page
@@ -2179,6 +2400,39 @@ if (siteNodeDefects.size === 0 && seen.history === seen.pages) {
 		`the software's nodes on all ${seen.pages} pages give its history: created ${FIRST_COMMIT}, ` +
 			`library last changed ${LIBRARY_MODIFIED}, release notes, help, its former package and its archive`,
 	);
+}
+
+// The languages of the site-wide graph and the package's requirements, the
+// same on every page, reported once with the pages each defect stands on. The
+// summary speaks for every page only when every page carried the two nodes.
+for (const [defect, pages] of languageNodeDefects) fail(`${defect} (on ${pages} pages)`);
+if (languageNodeDefects.size === 0 && seen.languages === seen.pages) {
+	ok(
+		`the site-wide nodes on all ${seen.pages} pages describe the site and the software in English and in Spanish, ` +
+			`list one feature for each of the ${domainIds.length} topics that teach in each language, ` +
+			'publish no placeholder as a standard or a keyword, and state every requirement and extra of pyproject.toml',
+	);
+}
+
+// The release and the Python each API page documents: VERSION, read above,
+// and the requires-python of pyproject.toml, compared without the spaces the
+// site writes between the operator and the version.
+{
+	const platform = `Python${requiresPython}`.replace(/\s+/g, '');
+	let wrong = 0;
+	for (const [release, pages] of apiReleases) {
+		const [version, target] = JSON.parse(release);
+		if (version === VERSION && typeof target === 'string' && target.replace(/\s+/g, '') === platform) continue;
+		wrong += pages;
+		fail(
+			`${pages} API page(s) name the release ${shown(version ?? undefined)} and the platform ${shown(target ?? undefined)}, ` +
+				`not ${VERSION}, from VERSION, and Python ${requiresPython.replace(/^(>=|<=|==|~=|!=|>|<)/, '$1 ')}, from pyproject.toml`,
+		);
+	}
+	if (seen.api > 0 && wrong === 0) {
+		const [, target] = JSON.parse([...apiReleases.keys()][0]);
+		ok(`all ${seen.api} API pages name the release ${VERSION} and ${target}`);
+	}
 }
 
 // One About page in each language, each typed AboutPage. A page that is not

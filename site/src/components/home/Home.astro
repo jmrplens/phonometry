@@ -17,7 +17,7 @@ import { topics } from '../../data/topics.mjs';
 
 /**
  * The area rows carry the same drawing the sidebar gives that topic, matched
- * on the route the row links to: the landing names ten of the thirteen topics,
+ * on the route the row links to: the landing names every topic that teaches,
  * and a reader who meets a drawing here meets it again in the tree.
  */
 const topicIdOf = (href: string) => {
@@ -176,7 +176,7 @@ const spectrum = `${IMAGES}/signal_response_fraction_3.svg`;
 								</th>
 								<td role="cell">
 									<span class="chips">
-										{a.standards.map((s) => (
+										{(a.standards.length > 0 ? a.standards : [content.coverage.noStandard]).map((s) => (
 											<span class="chip">{s}</span>
 										))}
 									</span>

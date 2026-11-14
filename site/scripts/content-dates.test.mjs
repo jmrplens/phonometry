@@ -30,8 +30,11 @@ import { delimiter, dirname, join, relative, resolve, sep } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import ts from 'typescript';
+
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { domainIds } from '../src/data/topics.mjs';
+import { catalogueSections } from '../src/lib/catalogue-datasets.mjs';
 import { loadContentDates } from '../src/lib/content-dates.mjs';
 import {
 	CONTENT_DIR,
@@ -1203,7 +1206,109 @@ const READS = {
 		reportsByAreaEs: 'text',
 		reportCount: 'count',
 	},
+	// Every catalogue page, read off the pages: the tables each one renders
+	// (its <Catalogues catalogue=...> tags), and so the rows the finder and
+	// the overview count for it; and the overview's title.
+	'site/src/lib/catalogue-pages.ts': {
+		cataloguePages: 'text',
+		catalogueOverview: 'text',
+	},
 };
+
+/**
+ * The names a module exports: imported where node can import it, and read
+ * from its source where it cannot, as a TypeScript module that imports
+ * Astro's own modules is.
+ */
+async function exportNames(module) {
+	const file = join(REPO, module);
+	if (!file.endsWith('.ts')) return Object.keys(await import(pathToFileURL(file).href)).filter((name) => name !== 'default');
+	return typeScriptExports(readFileSync(file, 'utf8'), file);
+}
+
+/** The identifiers a binding pattern of a declaration binds, `{ a, b: [c] }` giving a and c. */
+function boundIdentifiers(name) {
+	if (ts.isIdentifier(name)) return [name.text];
+	return name.elements.flatMap((element) => (ts.isOmittedExpression(element) ? [] : boundIdentifiers(element.name)));
+}
+
+/**
+ * The values a TypeScript module exports, read from its syntax tree by
+ * TypeScript's own parser, so that every form of export is read: a
+ * declaration (`export const`, a destructuring one included, `export
+ * function`, `export class`, `export enum`), an export list (`export { a,
+ * b as c }`) and a re-export (`export { a } from`, `export * from`, whose
+ * names are those of the module it names, read the same way). A type, an
+ * interface and a default export carry no value a page takes by name, and
+ * are left out, as `exportNames` leaves `default` out of a module node
+ * imports. Any other export (`export =`, an `export import`) is refused
+ * by name instead of passed over.
+ *
+ * @param {string} source
+ * @param {string} file The module's path, for the modules it re-exports.
+ * @returns {Promise<string[]>}
+ */
+async function typeScriptExports(source, file) {
+	const tree = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+	const names = [];
+	const exported = (node) => ts.canHaveModifiers(node) && (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+	const isDefault = (node) => (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.DefaultKeyword);
+	const where = (node) => `${relative(REPO, file)}:${tree.getLineAndCharacterOfPosition(node.getStart()).line + 1}`;
+	for (const statement of tree.statements) {
+		if (ts.isExportDeclaration(statement)) {
+			if (statement.isTypeOnly) continue;
+			const { exportClause, moduleSpecifier } = statement;
+			if (exportClause === undefined) {
+				// export * from '...': the names of the module it names.
+				const target = resolve(dirname(file), moduleSpecifier.text);
+				const module = relative(REPO, target).split(sep).join('/');
+				names.push(...(await exportNames(module)));
+			} else if (ts.isNamespaceExport(exportClause)) {
+				names.push(exportClause.name.text);
+			} else {
+				for (const element of exportClause.elements) if (!element.isTypeOnly) names.push(element.name.text);
+			}
+			continue;
+		}
+		if (ts.isExportAssignment(statement)) {
+			if (!statement.isExportEquals) continue; // export default: no name a page imports.
+			throw new Error(`${where(statement)}: an export = this reader does not read`);
+		}
+		if (!exported(statement)) continue;
+		if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) continue;
+		if (isDefault(statement)) continue;
+		if (ts.isVariableStatement(statement)) {
+			names.push(...statement.declarationList.declarations.flatMap((declaration) => boundIdentifiers(declaration.name)));
+		} else if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) {
+			names.push(statement.name.text);
+		} else {
+			throw new Error(`${where(statement)}: an export this reader does not read (${ts.SyntaxKind[statement.kind]})`);
+		}
+	}
+	return names;
+}
+
+test('the exports of a TypeScript module are read whatever form they take', async () => {
+	const file = join(REPO, 'site', 'src', 'lib', 'planted.ts');
+	const read = (source) => typeScriptExports(source, file);
+	assert.deepEqual(await read('export const a = 1;\nexport async function b() {}\nexport function* g() {}\nexport class C {}\nexport let d = 2, e = 3;'), ['a', 'b', 'g', 'C', 'd', 'e']);
+	assert.deepEqual(await read('const total = 1;\nexport { total };'), ['total']);
+	assert.deepEqual(await read('const pages = 1;\nexport { pages as alias };'), ['alias']);
+	assert.deepEqual(await read("export { reports } from '../data/reports.mjs';"), ['reports']);
+	assert.deepEqual(await read('export const { length: rows, x: [first] } = make();'), ['rows', 'first']);
+	assert.deepEqual(await read('export enum Kind { A }'), ['Kind']);
+	assert.deepEqual(await read("export * as all from '../data/reports.mjs';"), ['all']);
+	// A re-export of everything gives the names of the module it names.
+	const reports = await exportNames('site/src/data/reports.mjs');
+	assert.ok(reports.length > 0);
+	assert.deepEqual(await read("export * from '../data/reports.mjs';"), reports);
+	// Types, interfaces and a default carry no value a page takes by name.
+	assert.deepEqual(await read('export interface I { a: number }\nexport type T = string;\nexport type { I as J };\nexport default 1;\nexport default function f() {}'), []);
+	await assert.rejects(typeScriptExports('export = 1;', file), /export = this reader does not read/);
+});
+
+/** The catalogue a <Catalogues> tag renders, as the text of the catalogue pages matches it: the key in its quotes. */
+const catalogueKey = (match) => match.slice(1, -1);
 
 /** The names an import clause binds from its module; `*` for all of them. */
 function boundNames(clause) {
@@ -1608,7 +1713,7 @@ test('every page that renders data from outside its file is listed in date-sourc
 	// The table of what each export is read from covers every export, so a
 	// number added to one of these modules has to say where it comes from.
 	for (const [module, exports] of Object.entries(READS)) {
-		const names = Object.keys(await import(pathToFileURL(join(REPO, module)).href)).filter((name) => name !== 'default');
+		const names = await exportNames(module);
 		assert.deepEqual(names.sort(), Object.keys(exports).sort(), `what each export of ${module} is read from`);
 	}
 });
@@ -1668,23 +1773,46 @@ test('each count in date-sources.json is the number the page shows: files as rep
 	}
 });
 
-test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides', async (t) => {
+test('each text in date-sources.json is the one the page shows: the fiches reports.mjs reads off the guides, the tables catalogue-pages.ts reads off the catalogue pages', async (t) => {
 	const reports = await import(pathToFileURL(join(SITE, 'src', 'data', 'reports.mjs')).href);
 	const texts = readDateSources(join(SITE, DATE_SOURCES)).flatMap((entry) => Object.entries(entry.texts));
-	assert.ok(texts.length > 0, 'the index of fiches shows what the guides say of each fiche');
+	assert.ok(texts.some(([name]) => Object.hasOwn(READS['site/src/data/reports.mjs'], name)), 'the index of fiches shows what the guides say of each fiche');
+	assert.ok(texts.some(([name]) => name === 'cataloguePages'), 'the finder and the overview count the rows of the tables each catalogue page renders');
+	/** Each file a text reads, as HEAD holds it. */
+	const atHead = (set) =>
+		filesAtHead(REPO, set.files).map((file) => {
+			const head = spawnSync('git', ['show', `HEAD:${file}`], { cwd: REPO, encoding: 'utf8', maxBuffer: 1 << 28 });
+			assert.equal(head.status, 0, head.stderr);
+			return { file, text: head.stdout };
+		});
 	for (const [name, set] of texts) {
-		assert.ok(Object.hasOwn(READS['site/src/data/reports.mjs'], name), `${name} is no export of src/data/reports.mjs`);
+		const module = Object.keys(READS).find((path) => READS[path][name] === 'text');
+		assert.ok(module, `${name} is no text an export the test knows reads`);
 		// The comparison is at HEAD, which is what the dates read.
 		const dirty = spawnSync('git', ['status', '--porcelain', '--', ...set.files], { cwd: REPO, encoding: 'utf8' });
 		if (dirty.stdout.trim() !== '') {
 			t.diagnostic(`${name}: uncommitted changes under its files, not compared`);
 			continue;
 		}
+		const pattern = new RegExp(set.pattern, 'gm');
+		if (module === 'site/src/lib/catalogue-pages.ts') {
+			// The tables each catalogue page renders, in its order, as the
+			// reader catalogue-pages.ts calls finds them in the page's body.
+			assert.equal(name, 'cataloguePages', `${name}: the text of the catalogue pages is the one cataloguePages reads`);
+			let pages = 0;
+			for (const { file, text } of atHead(set)) {
+				const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+				const read = catalogueSections(body).map(({ key }) => key);
+				if (read.length > 0) pages += 1;
+				assert.deepEqual([...text.matchAll(pattern)].map(([match]) => catalogueKey(match)), read, `${name}: the tables ${file} renders`);
+			}
+			assert.ok(pages > 0, `${name}: ${set.files.join(' ')} holds no catalogue page`);
+			continue;
+		}
+		assert.equal(module, 'site/src/data/reports.mjs', `${name}: the test does not say how ${module} reads it`);
 		const matched = new Set();
-		for (const file of filesAtHead(REPO, set.files)) {
-			const head = spawnSync('git', ['show', `HEAD:${file}`], { cwd: REPO, encoding: 'utf8', maxBuffer: 1 << 28 });
-			assert.equal(head.status, 0, head.stderr);
-			for (const [match] of head.stdout.matchAll(new RegExp(set.pattern, 'gm'))) {
+		for (const { file, text } of atHead(set)) {
+			for (const [match] of text.matchAll(pattern)) {
 				const fiche = /\bname="([^"]*)"/.exec(match);
 				assert.ok(fiche, `${name}: ${file} matches ${set.pattern} with no fiche named in it`);
 				matched.add(fiche[1]);
@@ -1768,6 +1896,36 @@ test('the catalogue pages move with a commit that changes only the words of the 
 			for (const path of pages) assert.equal(day(dates, path), '2026-01-02', `${path} after a commit to ${component} alone`);
 		}
 	}
+});
+
+test('every catalogue page moves with a commit that moves a table from one catalogue page to another', async (t) => {
+	// The site's own entries for the catalogue pages, on a history where no
+	// catalogue data and no component changes: a table leaves one page for
+	// another, so the rows the finder on every page and the overview's list
+	// count for those two pages change, on the pages that did not change too.
+	const raw = JSON.parse(readFileSync(join(SITE, DATE_SOURCES), 'utf8'));
+	const tag = (key, lang) => `<Catalogues catalogue="${key}" lang="${lang}" />`;
+	const catalogue = (lang, ...keys) => page({ body: `${keys.map((key) => `## ${key}\n\nWhat ${key} holds.\n\n${tag(key, lang)}\n`).join('\n')}` });
+	const dated = {};
+	for (const [prefix, lang] of [['', 'en'], ['es/', 'es']]) {
+		const dir = `${prefix}reference/catalogues/`;
+		const entry = raw.entries.find((candidate) => candidate.pages.includes(`site/src/content/docs/${dir}`));
+		assert.ok(entry, `an entry for site/src/content/docs/${dir}`);
+		const repo = repository(t);
+		repo.write(`${dir}index.mdx`, page({ title: 'Catalogues' }));
+		repo.write(`${dir}carpets.mdx`, catalogue(lang, 'carpets', 'underlays'));
+		repo.write(`${dir}floors.mdx`, catalogue(lang, 'floors'));
+		repo.write(`${dir}solids.mdx`, catalogue(lang, 'solids'));
+		for (const spec of entry.sources) repo.writeFile(spec, 'one\n');
+		writeFileSync(join(repo.site, DATE_SOURCES), JSON.stringify({ entries: [entry] }));
+		repo.commit(1);
+		repo.write(`${dir}carpets.mdx`, catalogue(lang, 'carpets'));
+		repo.write(`${dir}floors.mdx`, catalogue(lang, 'floors', 'underlays'));
+		repo.commit(2, 'the underlays table moves from the carpets page to the floors page');
+		const dates = await repo.dates();
+		for (const name of ['index.mdx', 'solids.mdx']) dated[`${dir}${name}`] = day(dates, `${dir}${name}`);
+	}
+	assert.deepEqual(dated, Object.fromEntries(Object.keys(dated).map((path) => [path, '2026-01-02'])));
 });
 
 test('the landing page moves with a commit that changes only how its numbers are computed', async (t) => {

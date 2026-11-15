@@ -6,7 +6,7 @@ are about what the page said rather than what the numbers are. Table A2 marks
 most of its Poisson ratios and loss factors "Estimate", prints four cells as a
 range and two as an upper bound, and credits four different authors across its
 rows. The library's copy has to carry all of it, because a caller who reads a
-0,2 Poisson ratio as a measurement will trust it further than the book does.
+0.2 Poisson ratio as a measurement will trust it further than the book does.
 
 The one arithmetic test is the steel row, which is also the only row the table
 gives enough of to close the loop: a plate speed, a density and a Poisson
@@ -551,7 +551,7 @@ def test_a_page_that_does_not_say_which_loss_factor_gets_the_unqualified_one() -
 def test_no_mechel_row_invents_a_poisson_ratio() -> None:
     """The page prints none, so neither the plate nor the bulk speed follows.
 
-    A Poisson ratio of 0,3 would reproduce the table nicely and would be a
+    A Poisson ratio of 0.3 would reproduce the table nicely and would be a
     number Mechel did not give. The bar speed does follow, from the modulus
     and the density, and that is as far as a row goes.
     """
@@ -666,8 +666,8 @@ BIES = {
 def test_the_three_fluids_of_the_page_are_not_in_a_solids_catalogue() -> None:
     """The table opens with air, fresh water and sea water. They are not solids.
 
-    Their Poisson ratio of 0,5 is the page saying so: the closing note calls it
-    effectively zero for liquids and gases and the 0,5 is the incompressible
+    Their Poisson ratio of 0.5 is the page saying so: the closing note calls it
+    effectively zero for liquids and gases and the 0.5 is the incompressible
     limit, which is a statement about a fluid and not about a solid.
     """
     assert [key for key in BIES if "water" in key or "air" in key] == []
@@ -714,7 +714,7 @@ def test_the_loss_factor_column_is_two_quantities_and_not_an_interval() -> None:
 def test_the_internal_end_lands_where_the_other_books_put_it() -> None:
     """Which is the evidence that the two ends are what footnote a says.
 
-    Cremer measures steel's flexural loss factor between 0,2 and 3 times
+    Cremer measures steel's flexural loss factor between 0.2 and 3 times
     10^-4 and Mechel prints 1 times 10^-4. Bies' low end is 1 times 10^-4 and
     his high end a hundred times that, which is a mounting and not a material.
     """
@@ -803,7 +803,7 @@ def test_the_closing_note_of_the_table_is_an_oracle_for_four_conversions() -> No
 def test_a_cell_the_row_can_say_why_is_empty_is_never_filled_by_arithmetic() -> None:
     """The honeycomb rows print a modulus and a density and no speed.
 
-    The arithmetic would run: 1,31 GPa over 72 kg/m3 gives 4 265 m/s. The page
+    The arithmetic would run: 1.31 GPa over 72 kg/m3 gives 4 265 m/s. The page
     leaves the cell blank because a one-dimensional speed does not mean
     anything in a honeycomb, and its modulus and density are effective ones,
     so the number would be arithmetic standing in for a quantity that does not
@@ -952,7 +952,7 @@ def test_a_table_the_book_credits_whole_is_credited_whole() -> None:
 def test_arau_prints_the_frequency_of_a_one_centimetre_plate(
     key: str, printed_hz: float, product: float
 ) -> None:
-    """So the product held here is that frequency times 0,01 m.
+    """So the product held here is that frequency times 0.01 m.
 
     A change of unit rather than a derivation, which is why it is not in
     ``derived``: the page gives the same quantity Hopkins does, per centimetre

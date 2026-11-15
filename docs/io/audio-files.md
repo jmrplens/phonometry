@@ -233,11 +233,22 @@ unit the samples have to be in.
 The repository versions a real calibration take for exactly this workflow:
 `tests/data/audio/xl2/calibration_113_7dB.wav`, recorded by an NTi Audio
 XL2 sound level meter during a road traffic pass-by campaign at the
-University of Antwerp (CC BY 4.0; provenance, licence and attribution in
-`tests/data/audio/README.md`). Being an instrument, the meter wrote its
+University of Antwerp. Being an instrument, the meter wrote its
 own `bext` chunk and declared its digital full scale in it. That
 declaration plus the file's RMS is the whole calibration chain, and it has
 to land on the level the dataset publishes for this take: 113.7 dB.
+
+**The data.** The take is the deposit's own calibration file, renamed, its
+bytes unmodified. The folder it sits in holds the pass-by excerpts of the same
+deposit, credited as: Pass-by excerpts from A. Grangeiro de Barros and
+C. Vuye, 'Psychoacoustic indicators of pass-by road traffic noise', Zenodo,
+2023, DOI [10.5281/zenodo.7904680](https://doi.org/10.5281/zenodo.7904680),
+licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), recorded
+with an NTi Audio XL2. Changes: 4-second extracts cut bit-exactly and
+recontainered. The provenance and licence of every file are in
+`tests/data/audio/README.md`, and the
+[loudness guide](../perception/psychoacoustics/loudness.md) runs the
+excerpts themselves against the levels and the loudness the deposit publishes.
 
 ```python
 import pathlib
@@ -542,6 +553,8 @@ libsndfile under the LGPL, which the base install deliberately avoids.
   The grammar of the CodingHistory line every written chunk carries, and of the line a conversion appends to it.
 - **European Broadcasting Union. (2011).** [*Specification of the Broadcast Wave Format (BWF) — A format for audio data files in broadcasting, Version 2.0*](https://tech.ebu.ch/publications/tech3285) (EBU Tech 3285).
   The bext chunk this page reads and writes field by field: originator, the sample-accurate since-midnight time reference, CodingHistory, and the five EBU R 128 loudness values of version 2.
+- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.7904680
+  The campaign whose calibration take the real-meter section reads: the deposit's own file of the 113.7 dB calibrator tone, renamed.
 - **International Telecommunication Union. (2023).** [*Algorithms to measure audio programme loudness and true-peak audio level*](https://www.itu.int/rec/R-REC-BS.1770/en) (Recommendation ITU-R BS.1770-5).
   The loudness algorithm behind bext="loudness": the five version-2 fields are measured by the library's own implementation on the samples being written.
 - **International Telecommunication Union. (2025).** [*Long-form file format for the international exchange of audio programme materials with metadata*](https://www.itu.int/rec/R-REC-BS.2088/en) (Recommendation ITU-R BS.2088-2).

@@ -49,6 +49,15 @@ references:
     designation: "EBU R 98"
     url: "https://tech.ebu.ch/publications/r098"
     note: "La gramática de la línea CodingHistory que lleva cada chunk escrito, y de la que le añade una conversión."
+  - type: dataset
+    authors: ["Grangeiro de Barros, A.", "Vuye, C."]
+    year: 2023
+    title: "Psychoacoustic indicators of pass-by road traffic noise"
+    publisher: "Zenodo"
+    url: "https://zenodo.org/records/7904680"
+    doi: "10.5281/zenodo.7904680"
+    license: "https://creativecommons.org/licenses/by/4.0/"
+    note: "La campaña cuya toma de calibración lee la sección del sonómetro real: el propio archivo del depósito con el tono de calibrador de 113,7 dB, renombrado."
 ---
 
 import SeeAlso from '../../../../components/SeeAlso.astro';
@@ -291,12 +300,25 @@ estar las muestras.
 El repositorio versiona una toma de calibración real exactamente para este
 flujo: `tests/data/audio/xl2/calibration_113_7dB.wav`, grabada por un
 sonómetro NTi Audio XL2 durante una campaña de pasos de tráfico rodado de
-la Universidad de Amberes (CC BY 4.0; procedencia, licencia y atribución
-en `tests/data/audio/README.md`). Como instrumento que es, el sonómetro
+la Universidad de Amberes. Como instrumento que es, el sonómetro
 escribió su propio chunk `bext` y declaró en él su fondo de escala
 digital. Esa declaración más el RMS del archivo es toda la cadena de
 calibración, y tiene que caer en el nivel que el dataset publica para
 esta toma: 113,7 dB.
+
+**Los datos.** La toma es el propio archivo de calibración del depósito,
+renombrado, con sus bytes sin modificar. La carpeta en la que está guarda los
+pasos de vehículos del mismo depósito, con esta atribución: Fragmentos de
+pasos de vehículos de A. Grangeiro de Barros y C. Vuye, «Psychoacoustic
+indicators of pass-by road traffic noise», Zenodo, 2023, DOI
+[10.5281/zenodo.7904680](https://doi.org/10.5281/zenodo.7904680), con licencia
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), grabados con un
+sonómetro NTi Audio XL2. Cambios: extractos de 4 segundos cortados bit a bit y
+guardados en un contenedor nuevo. La procedencia y la licencia de cada archivo
+están en `tests/data/audio/README.md`, y la
+[guía de sonoridad](/phonometry/es/perception/psychoacoustics/loudness/) pasa
+los propios extractos frente a los niveles y la sonoridad que publica el
+depósito.
 
 ```python
 import pathlib

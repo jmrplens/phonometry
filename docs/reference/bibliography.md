@@ -191,6 +191,8 @@ would be a disservice.
   Cited by [Reading and writing measurement audio](../io/audio-files.md).
 - **FFmpeg project. (n.d.).** [*FFmpeg codecs documentation*](https://ffmpeg.org/ffmpeg-codecs.html).
   Cited by [Writing animations and FDTD runs to video](../io/videos.md).
+- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.7904680
+  Cited by [Reading and writing measurement audio](../io/audio-files.md) and [Loudness](../perception/psychoacoustics/loudness.md).
 - **International Organization for Standardization. (2010).** [*Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation*](https://www.iso.org/standard/42088.html) (ISO 10140-2:2010).
   Cited by [Your own catalogues](../io/material-catalogues.md), [Laboratory Insulation Measurement](../buildings/insulation/insulation-lab.md) and [Reading a material datasheet](../materials/reading-a-datasheet.md).
 - **International Telecommunication Union. (2025).** [*Long-form file format for the international exchange of audio programme materials with metadata*](https://www.itu.int/rec/R-REC-BS.2088/en) (Recommendation ITU-R BS.2088-2).
@@ -253,8 +255,6 @@ hearing.
   Cited by [Speech Intelligibility Index](../perception/speech/speech-intelligibility.md) and [Theory: Perception and Hearing](theory/perception.md).
 - **Google. (2019).** [*speech_intelligibility_index*](https://github.com/google/speech_intelligibility_index). GitHub.
   Cited by [Theory: Perception and Hearing](theory/perception.md).
-- **Grangeiro de Barros, A., & Vuye, C. (2023).** [*Psychoacoustic indicators of pass-by road traffic noise*](https://zenodo.org/records/7904680) \[Data set\]. Zenodo. https://doi.org/10.5281/zenodo.7904680
-  Cited by [Loudness](../perception/psychoacoustics/loudness.md).
 - **Houtgast, T., & Steeneken, H. J. M. (1985).** A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria. *The Journal of the Acoustical Society of America*, *77*(3), 1069-1077. https://doi.org/10.1121/1.392224
   The modulation-transfer framework the Speech Transmission Index is built on.
   Cited by [Speech Transmission Index (STI)](../perception/speech/speech-transmission.md) and [Theory: Perception and Hearing](theory/perception.md).

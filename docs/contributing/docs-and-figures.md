@@ -1382,25 +1382,29 @@ a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_
 **Exceptions.** Cite the document, never a file path. A claimed ratio within 0.5 % of a familiar irrational (sqrt 2, sqrt 3, pi, 2 pi, ln 2) or a small integer is the signature of a lost glyph, and clears only when the same entry cites the page it read (`--ratios`). `PAGE_CITATION_ALLOWLIST` of the script holds, by entry title with its reason, the entries filed before the page rule or whose claim is not a reading of characters (24); it only shrinks.
 
 <a id="f58"></a>
-### F58. Quote a printed value, its symbols and its separator exactly as the source prints them
+### F58. Quote a printed value and its symbols as the source prints them, and restate it with a decimal point
 
-**Why.** The registry cites what is printed: if the standard prints a comma, the entry keeps the comma, though the prose is English (requested 2026-08-04), and so does any prose of ours that quotes a printed value. The site renders the registers with KaTeX and GitHub renders docs/ERRATA.md with its own maths, so the LaTeX has to work in both.
+**Why.** The registry cites what is printed, and a reader checks an entry against the page: a quotation that changes a character of the print is no quotation. Everything around the quotation is our own English, and English takes a point ([P9](prose.md#p9)): until 2026-11-15 the registry kept the comma of an ISO, EN, IEC, DIN, ECMA, UNE, OJEU or BOE print in its own arithmetic too, "though the prose is English", and the guides and docstrings that restated a printed value followed it, so a page wrote `83,523 4 dB` for a sum it had computed beside `0.5 dB` for one it had measured. The site renders the registers with KaTeX and GitHub renders docs/ERRATA.md with its own maths, so the LaTeX has to work in both.
 
 **Do**
 
 ```markdown
-ISO 9613-1 prints $a = 2{,}2560 \times 10^{-5}$ per meter; the bandwidth of 20 kHz ...
+- **The print:** $L_{n,\text{sum}} = 83{,}523\,8\ldots = 84\ \text{dB}$.
+- **The problem:** the column sums to 83.523 4 dB, not the printed 83.523 8 dB;
+  ISO 9613-1 prints $a = 2.2560 \times 10^{-5}$ per metre.
 ```
 
 **Don't**
 
 ```markdown
-ISO 9613-1 prints a = 2.2560 × 10⁻⁵ m⁻¹ (`a = 2.256e-5`)
+- **The print:** $L_{n,\text{sum}} = 83.523\,8\ldots = 84\ \text{dB}$.
+- **The problem:** the column sums to 83,523 4 dB, not the printed 83,523 8 dB;
+  ISO 9613-1 prints a = 2,2560 × 10⁻⁵ m⁻¹ (`a = 2.256e-5`).
 ```
 
-**Enforced by:** review
+**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: English text writes the decimal point`, review
 
-**Exceptions.** The decimal separator is the cited source's: a comma for ISO, EN, IEC, DIN, ECMA, UNE, the EU Official Journal and the BOE, a point for English books and papers; look at the page before assuming. A decimal comma in math is `{,}`; display math sits on its own lines; no Unicode superscripts, no `3.2e5`, no formula in backticks; a quantity in prose stays prose (`20 kHz`). The English wording is authoritative; the Spanish edition keeps the same quoted print. The errata registers are the case review reads first; a guide or a docstring that quotes a printed value follows the same rule ([P9](prose.md#p9)), while a value the library computes is written in its page's language.
+**Exceptions.** A literal transcription keeps the print's separator, whichever it is: the `**The print:**` field of an entry, every line of it; text between quotation marks (`Clause 7.6 lists "0,5 m between any microphone position and the wall"`); a block quote that reproduces the page; the printed column of the conformance report. Look at the page before assuming the separator: a comma for ISO, EN, IEC, DIN, ECMA, UNE, the EU Official Journal and the BOE, a point for English books and papers. Outside a transcription a restated value takes the point and keeps its digits and its grouping: `83,523 4` becomes `83.523 4`, `$0{,}16/5$` becomes `$0.16/5$`, the printed `75,2527 dB` becomes the printed `75.2527 dB`. A decimal comma in transcribed maths is `{,}`; display math sits on its own lines; no Unicode superscripts, no `3.2e5`, no formula in backticks; a quantity in prose stays prose (`20 kHz`). The English wording is authoritative; the Spanish edition quotes the same print and writes its own text with the comma ([F28](#f28)). A number that may be a thousands group as well as a decimal (`1,840 m`) is decided by a person against the page, not by a sweep.
 
 <a id="f59"></a>
 ### F59. Add or remove an errata entry in docs/ERRATA.md and docs/ERRATA.es.md together

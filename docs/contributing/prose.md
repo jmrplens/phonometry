@@ -188,25 +188,40 @@ r"""... :math:`10 \log_{10} <FF>rac{S_1}{S_2}` ..."""   (<FF>: one form feed byt
 **Exceptions.** A figure or diagram label, because an SVG text line does not reflow; inside `$...$` mathtext the separator is `\,` instead. In a Python file only docstrings and comments are prose: another string may be a data key (the CNOSSOS traction table is keyed `"diesel locomotive, c. 2 200 kW"`, which a caller passes in). Inline code and fences are literals and are not read.
 
 <a id="p9"></a>
-### P9. Write the decimal point in an error message; a quotation keeps its source's separator
+### P9. Write the decimal point in English text; only a literal transcription of a print keeps the comma
 
-**Why.** Error messages are English prose, and English takes a point. Seven refusals had drifted to a comma (four of them the same `-273,15`) while eleven comparable ones used a point, and nothing saw it: the figure gate that polices decimals reads drawn labels, not exceptions. A Spanish figure is the other way round ([F28](docs-and-figures.md#f28)).
+**Why.** English takes a point, and a reader of an English page, docstring or message reads a comma between digits as a thousands separator or a list, not as a decimal marker. The library used to keep the comma wherever a value came from a standard that prints one, and the convention spread from the errata registry to the guides, the docstrings, the comments, the conformance descriptions, the figure labels and the catalogue cells: some thirteen thousand decimal commas in English text, beside the points the same pages wrote for values of their own, with nothing to tell a reader which was which. The maintainer settled it on 2026-11-15: every decimal number an English text writes itself takes a point, a value it restates from a print among them, and the print's own separator survives only where the text reproduces the print character for character. A Spanish figure and a Spanish page are the other way round ([F28](docs-and-figures.md#f28)), and a printed value is quoted as [F58](docs-and-figures.md#f58) says.
 
 **Do**
 
-```python
+```text
+ISO 9613-1 prints 2.2560 x 10^-5 for a, and the library returns 0.5 dB.
+Clause 7.6 lists "0,5 m between any microphone position and the wall".
 msg = "'temperature_c' must be a finite temperature above -273.15 degC."
 ```
 
 **Don't**
 
-```py
+```text
+ISO 9613-1 prints 2,2560 x 10^-5 for a, and the library returns 0.5 dB.
+The floor is at least 0,5 m from the wall, as Clause 7.6 lists.
 msg = "'temperature_c' must be a finite temperature above -273,15 degC."
 ```
 
-**Enforced by:** `tests/test_package_architecture.py::test_no_error_message_carries_a_comma_decimal`
+**Enforced by:** `scripts/check_decimal_comma.py`, `make decimal-comma`, `CI: English text writes the decimal point`, `tests/test_package_architecture.py::test_no_error_message_carries_a_comma_decimal`
 
-**Exceptions.** A subscript pair preceded by a letter is notation, not a number (`k2,1`, `F2,b`). A docstring or a guide that quotes a printed value keeps the source's separator ([F58](docs-and-figures.md#f58)).
+**Exceptions.** The rule covers every English text: prose, docstrings, comments, error and warning messages, test docstrings and comments, the CHANGELOG, the English site pages and their frontmatter, the prose attributes of a tag (`alt`, `title`, `caption`), the text of English figures, diagrams, plates and fiches, and the generated English pages (their generator writes the point, and they are mended at their source). A value never changes on the way: `1,5` becomes `1.5`, `83,523 4` becomes `83.523 4`, `$2{,}256$` becomes `$2.256$`.
+
+Where the comma stays, because the text transcribes the print:
+
+- between quotation marks: `the page prints "0,5 m"`, `“1,256 µT”`, `‘2,2560’`, `«0,5»`, and a value written as one, `'1,5'`;
+- in a block quote that reproduces the print (`> The value shall be 0,5 dB or less.`); a block quote that opens on a label, `> **Note.**` or `> [!NOTE]`, is a note of ours and takes the point;
+- in the `**The print:**` field of an entry of `docs/ERRATA.md`, every line of it, its maths and its tables included; the other fields of the entry (the problem, the evidence, the library's behaviour) are the registry's own text and take the point, "the printed 75.2527 dB" among them;
+- in the printed column of the conformance report, where a cell gives the printed values as the page prints them (`39,0 / 31,0 / 23,0 / 17,0 / 12,5 dB re 1 N`, a misprinted cell as printed): the `expected` and `printed` values of `scripts/conformance/`, the `expected` record of `docs/conformance.json` and the `Expected` column of `docs/CONFORMANCE.md`. A cell of that column that is a sentence of ours, a printed value restated in it among them (`0.0437 dB (printed 0.040, an erratum)`, `PNR84 = 22.5 dB; SNR84 = 21 dB; both report 82 dB`), takes the point, and so do the row's description and its computed column. The pass and the fail branch of a row write the same cell.
+
+Spanish keeps its comma everywhere and is never read: a Spanish file (`es/`, `*.es.md`, `catalogue-es.json`), the Spanish value of a translation table, a branch taken for `language == "es"`, a value under an `es` or `…Es` key, a catalogue row transcribed from a Spanish edition, a paragraph that reads as Spanish.
+
+A comma between digits that is no decimal marker is never changed: a thousands group (`91,658,333`, which the grouping rule [P8](#p8) holds and which is reported, not converted), a list (`1,2,3`), a pair of indices in brackets or braces or after a letter (`a[1,2]`, `(2,1)`, `{2,4}`, `k_{1,2}`, `k2,1`), a list of clauses (`5.2,5.3`), a chemical locant (`1,2-DHCP`), a list of coordinates (`(0,90), (45,135)`), and all code: inline code and fences (a `#` comment in a fence is prose), doctests, reStructuredText literals, regular expressions, the strings of the test suite, CSV and data files, SVG path data and dash patterns, version strings and numbers in code literals. An index has one or two digits and no leading zero, so `q_{0,1}`, `R(q0,9)` and `(0,05)` are decimals. A number such as `1,500`, which a thousands group writes too, is listed for a person to decide and never changed by a sweep; `--strict` refuses it as well.
 
 ## Citing what a page prints
 

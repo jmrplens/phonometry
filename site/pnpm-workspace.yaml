@@ -1,5 +1,8 @@
+# The packages whose install scripts pnpm runs. esbuild left the list when
+# vite 8.3.8 stopped resolving it as an optional peer, the only way it reached
+# the tree: should it come back, pnpm stops the install on its script
+# (ERR_PNPM_IGNORED_BUILDS) until someone reviews it and adds it here again.
 allowBuilds:
-  esbuild: true
   sharp: true
   puppeteer: true
 

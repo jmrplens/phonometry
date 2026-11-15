@@ -12,6 +12,14 @@ references:
     pages: "83-95"
     doi: "10.1016/0888-3270(87)90085-9"
     note: "The comb-filter model of synchronous averaging (Eq. 8, with the unit height of its teeth in Eq. 9), the revised finite-record model that yields an exactly periodic result, and the observation that a non-harmonic interfering order is best rejected by choosing the number of averages so that a comb node lands on it, not by the habitual power of two."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    implemented: false
+    url: "https://www.iso.org/standard/40537.html"
+    note: "The limit Annex A.1 sets on a clamping magnet: below 2.5 kHz, on smooth flat surfaces of steel."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -316,8 +324,9 @@ number of averages will remove it.
 
 - **Transducer and mounting.** A stud- or adhesive-mounted accelerometer on the
   bearing housing nearest the gear of interest, with its axis in the load
-  direction. A magnet base collapses the usable band to a couple of kilohertz
-  and hides the mesh harmonics the average exists to show.
+  direction. A magnet base leaves a few kilohertz of usable band at best
+  (ISO/TS 7849-1 accepts one only below 2.5 kHz) and hides the mesh harmonics
+  the average exists to show.
 - **Sample rate from the content you want to keep.** A 37-tooth pinion at
   1800 r/min meshes at $37 \times 30 = 1110$ Hz, so keeping five mesh harmonics
   needs $f_\mathrm{s} \ge 2.56 \times 5550 = 14.2$ kHz: 16 kHz in practice, 25.6 kHz on

@@ -4,12 +4,27 @@ description: "Power, real and complex cepstrum: echoes and their reflection coef
 references:
   - type: standard
     organization: "International Organization for Standardization"
-    year: 2021
+    year: 1998
     title: "Mechanical vibration and shock — Mechanical mounting of accelerometers"
-    designation: "ISO 5348:2021"
+    designation: "ISO 5348:1998"
     implemented: false
-    url: "https://www.iso.org/standard/78160.html"
-    note: "The mounting methods behind the usable upper frequency of an envelope-analysis measurement: stud and adhesive mounting against magnet bases and hand-held probes."
+    note: "The mounting methods behind the usable upper frequency of an envelope-analysis measurement: the working range of 5.2.1, a fifth of the mounted resonance, and the characteristic responses of Figures 5 to 9 for stud, adhesive, magnet and hand-held probe. The edition read is its unchanged German adoption DIN ISO 5348:1999-07; since revised as ISO 5348:2021 (https://www.iso.org/standard/78160.html)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    implemented: false
+    url: "https://www.iso.org/standard/40537.html"
+    note: "The rule that sets the upper frequency limit of an accelerometer at one third of its resonance, for 1 dB (5.2), and the limits Annex A.1 gives for adhesive, wax and clamping magnets."
+  - type: book
+    authors: ["Norton, M. P.", "Karczub, D. G."]
+    year: 2003
+    title: "Fundamentals of noise and vibration analysis for engineers"
+    edition: "2nd ed."
+    publisher: "Cambridge University Press"
+    doi: "10.1017/CBO9781139163927"
+    note: "Section 4.3.2 (p. 272), the five common ways of mounting an accelerometer: a threaded stud, a cementing stud and a thin layer of wax give very good frequency responses, a magnet limits the response to about 6000 Hz and a hand-held probe to about 1000 Hz."
   - type: book
     authors: ["Havelock, D.", "Kuwano, S.", "Vorländer, M. (Eds.)"]
     year: 2008
@@ -526,13 +541,23 @@ edges, so trim them before reading amplitudes.
 
 **The mounting.** The usable upper frequency is set by the *mounted* resonance
 of the accelerometer, not by the sensor's own datasheet limit, and that is
-exactly the band the bearing chain needs. Stud mounting or a thin layer of
-adhesive keeps a general-purpose accelerometer usable to roughly 10 kHz; a
-magnet base typically collapses that to a couple of kilohertz and a hand-held
-probe to about 1 kHz: that is, the mounting alone can destroy the band the
-method depends on. Put the sensor on the bearing housing, in the load zone, as
+exactly the band the bearing chain needs. The reading stays within about 1 dB
+up to one third of the accelerometer's resonance (ISO/TS 7849-1, 5.2), which on
+the machine is the mounted one, and, for an undamped accelerometer, within a
+few percent up to one fifth of the mounted resonance (ISO 5348:1998, 5.2.1).
+The characteristic curves ISO 5348:1998 draws for a typical accelerometer
+(Figures 5 to 9) put the resonance near 30 kHz on a stud with an oil film, a
+little lower on a thin layer of hard adhesive, near 20 kHz on a magnet and near
+2 kHz on a hand-held probe. So stud mounting or a thin layer of hard adhesive
+keeps a general-purpose accelerometer usable to roughly 10 kHz; a magnet base
+leaves a few kilohertz (about 6 kHz in Norton & Karczub, Section 4.3.2, while
+ISO/TS 7849-1, Annex A, accepts a clamping magnet only below 2.5 kHz, on smooth
+flat steel); and a hand-held probe stays under 1 kHz: that is, the mounting
+alone can destroy the band the method depends on. Put the sensor on the bearing housing, in the load zone, as
 close to the outer race as the machine allows, with its axis in the load
-direction and the cable strain-relieved. ISO 5348 is the mounting reference.
+direction and the cable strain-relieved. ISO 5348 is the mounting reference,
+and [machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/#step-0-getting-the-record)
+draws these mounts and positions on a motor and gearbox train.
 
 ```python
 # A 3 kHz structural resonance rung at a 120 Hz defect rate, under a 50 Hz

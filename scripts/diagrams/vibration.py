@@ -1392,11 +1392,18 @@ def _d_machine_diagnostics(s: SVG, th: Theme) -> None:
         anchor="start",
         bold=True,
     )
+    # The rule the four rows follow, and the sensor they are worked for: the
+    # stud-mounted resonance of the typical accelerometer of ISO 5348:1998,
+    # Figure 5 (the third is ISO/TS 7849-1, 5.2). Its Figures 6, 9 and 8 draw
+    # a typical accelerometer near 28 kHz on a hard adhesive, 20 kHz on a
+    # magnet and 2 kHz on a hand-held probe.
+    rule = "a third of the mounted resonance; for a 30 kHz sensor:"
+    s.text(70, 407, rule, s.fit_size([rule], [12, 11], 360), th.muted, anchor="start")
     rows = (
-        (420.0, "stud into a prepared flat", "tens of kHz"),
-        (450.0, "adhesive / thin cyanoacrylate", "~10 kHz"),
-        (480.0, "magnet base", "a few kHz"),
-        (510.0, "hand-held probe", "~1 kHz"),
+        (436.0, "stud into a prepared flat", "~10 kHz"),
+        (462.0, "adhesive / thin cyanoacrylate", "~10 kHz"),
+        (488.0, "magnet base", "a few kHz"),
+        (514.0, "hand-held probe", "under 1 kHz"),
     )
     for ry, what, limit in rows:
         s.text(70, ry, what, 14, th.fg, anchor="start")

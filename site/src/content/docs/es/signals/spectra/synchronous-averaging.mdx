@@ -12,6 +12,14 @@ references:
     pages: "83-95"
     doi: "10.1016/0888-3270(87)90085-9"
     note: "El modelo de filtro peine del promediado síncrono (Ec. 8, con la altura unidad de sus dientes en la Ec. 9), el modelo revisado de registro finito que produce un resultado exactamente periódico, y la observación de que un orden interferente no armónico se rechaza mejor eligiendo el número de promedios de modo que un nodo del peine caiga sobre él, no con la potencia de dos habitual."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor"
+    designation: "ISO/TS 7849-1:2009"
+    implemented: false
+    url: "https://www.iso.org/standard/40537.html"
+    note: "El límite que el Anexo A.1 pone al imán de sujeción: por debajo de 2,5 kHz, sobre superficies de acero lisas y planas."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -324,9 +332,9 @@ síncrono y ningún número de promedios lo va a eliminar.
 
 - **Transductor y montaje.** Un acelerómetro atornillado o pegado sobre el
   soporte del rodamiento más cercano al engranaje que interesa, con su eje en la
-  dirección de la carga. Una base magnética hunde la banda útil a un par de
-  kilohercios y esconde los armónicos de engrane que el promedio existe para
-  enseñar.
+  dirección de la carga. Una base magnética deja unos pocos kilohercios de banda
+  útil como mucho (ISO/TS 7849-1 solo la admite por debajo de 2,5 kHz) y esconde
+  los armónicos de engrane que el promedio existe para enseñar.
 - **La frecuencia de muestreo sale del contenido que quieres conservar.** Un
   piñón de 37 dientes a 1800 r/min engrana a $37 \times 30 = 1110$ Hz, así que
   conservar cinco armónicos de engrane pide $f_\mathrm{s} \ge 2{,}56 \times 5550 =

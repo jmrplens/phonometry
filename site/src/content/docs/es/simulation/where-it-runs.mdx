@@ -114,7 +114,7 @@ resultado de la función tiene las sondas, los tiempos y la procedencia, con
 
 | | Un codificador de CPU | Un codificador de GPU |
 |---|---|---|
-| Aquí | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4 | `VideoOptions(encoder="auto")`, el valor por defecto, prueba NVENC, Quick Sync, VAAPI y VideoToolbox, cada uno con una codificación real de un fotograma, y después la CPU |
+| Aquí | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4 | `VideoOptions(encoder="auto")`, el valor por defecto, prueba NVENC, Quick Sync, VAAPI, VideoToolbox y después la CPU, cada uno con una codificación real de un fotograma |
 | En un nodo | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(host="nas"), video=io.VideoOptions(encoder="cpu"))` | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(device="cupy", host="nas"), video=io.VideoOptions(encoder="nvenc"))`: el nodo calcula, dibuja y codifica. En un nodo Docker, NVENC necesita una ubicación en GPU (`"cupy"` o `"torch:cuda"`), la que da su GPU de NVIDIA al contenedor, y el contenedor no recibe ningún otro dispositivo; el ffmpeg de un nodo Python usa lo que tenga su máquina, sea cual sea la ubicación |
 
 ```py

@@ -109,7 +109,7 @@ probes, the times and the provenance, with `snapshots` at `None`.
 
 | | A CPU encoder | A GPU encoder |
 |---|---|---|
-| Here | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1, or without it VP9 in a WebM and x265 or x264 in an MP4 | `VideoOptions(encoder="auto")`, the default, tries NVENC, Quick Sync, VAAPI and VideoToolbox, each with a real one-frame encode, then the CPU |
+| Here | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1, or without it VP9 in a WebM and x265 or x264 in an MP4 | `VideoOptions(encoder="auto")`, the default, tries NVENC, Quick Sync, VAAPI, VideoToolbox and then the CPU, each with a real one-frame encode |
 | On a node | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(host="nas"), video=io.VideoOptions(encoder="cpu"))` | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(device="cupy", host="nas"), video=io.VideoOptions(encoder="nvenc"))`: the node computes, draws and encodes. On a Docker node NVENC needs a GPU placement (`"cupy"` or `"torch:cuda"`), the one that hands the container its NVIDIA GPU, and the container is given no other device; a Python node's ffmpeg uses what its machine has, whatever the placement |
 
 ```py

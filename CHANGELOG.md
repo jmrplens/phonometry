@@ -93,6 +93,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`emission.grade_from_local_correction` grades a method A.2 correction by
+  Condition (A.6) of ISO 11202:2010.** It applied the 4 dB of A.1.3 to every
+  local environmental correction, and Condition (A.6) adds to that bound the
+  margin A.2.5 sets by the largest dimension of the source, 0.5 dB up to 1 m,
+  1 dB up to 3 m and 1.5 dB beyond, because the method A.2 directivity index is
+  only approximate: a method A.2 correction above 3.34 dB, 2.82 dB or 2.41 dB
+  (by the largest dimension of the source) and up to 4 dB came out grade 2
+  where the standard makes it grade 3. The keyword-only `largest_dimension_m`
+  takes that dimension and reads the margin from it; substituted into (A.6),
+  Equations (A.4) and (A.5) leave a bound on `K_3` alone, 3.34 dB, 2.82 dB or
+  2.41 dB, which the function applies. Without it the function applies the
+  4 dB of A.1.3, as before.
+
 - **The FDTD engines step on an NVIDIA GPU through CuPy, or on PyTorch, from
   the same code, and every result records where it ran.**
   `simulation.Compute(device=, device_index=, dtype=, fallback=)` names where

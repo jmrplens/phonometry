@@ -6,7 +6,7 @@
 
 phonometry is a Python toolkit for acoustic measurement, from fractional
 octave filter banks and frequency weighting to sound levels and standardized
-metrics. Every metric is verified against its governing standard: 1897
+metrics. Every metric is verified against its governing standard: 1899
 numerical checks in all. Install it with `pip install phonometry`; the first
 example below filters a signal into one-third-octave bands and returns the
 sound pressure level of each band, and the section after it anchors those
@@ -658,6 +658,6 @@ format, a `.report()` method that renders the normative PDF fiche.
 - [Filter Architecture Gallery](../signals/filters/filter-gallery.md): choose an architecture and inspect responses
 - [Calibration and dBFS](../signals/metrology/calibration.md): get real-world SPL values
 - [Why phonometry](why-phonometry.md): the conformance-first design philosophy
-- [Conformance report](../CONFORMANCE.md): the expected and computed value of all 1897 checks
+- [Conformance report](../CONFORMANCE.md): the expected and computed value of all 1899 checks
 - [API Reference](https://docs.jmrp.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](../reference/bibliography.md): every work the guides cite, with the pages that cite it and its link where it has one

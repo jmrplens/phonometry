@@ -295,18 +295,27 @@ la (A.5), con un margen $\Delta D^*_I$ sumado al índice de directividad porque
 el índice es solo aproximado: 0,5 dB para una fuente de hasta 1 m en su mayor
 dimensión, 1 dB hasta 3 m y 1,5 dB por encima (apartado A.2.5). Escrito para
 $K_3$, eso baja la frontera a 3,3 dB, 2,8 dB y 2,4 dB.
-`grade_from_local_correction` aplica la frontera de 4 dB, así que una
-corrección del método A.2 entre su propia cifra y 4 dB es de grado 3 donde la
-función responde grado 2.
+`grade_from_local_correction` aplica por defecto la frontera de 4 dB del
+A.1.3; con `largest_dimension_m`, la mayor dimensión de la fuente, lee el
+margen de esa longitud y aplica en su lugar la Condición (A.6).
 
 ```python
 from phonometry import emission
 
 print(emission.grade_from_local_correction(3.7))
 print(emission.grade_from_local_correction(5.2))
+print(emission.grade_from_local_correction(3.7, largest_dimension_m=0.8))
+print(emission.grade_from_local_correction(3.2, largest_dimension_m=0.8))
 # engineering
 # survey
+# survey
+# engineering
 ```
+
+Los mismos 3,7 dB son de grado 2 por el A.1.3 y de grado 3 por el método A.2
+para una fuente de 0,8 m, cuyo margen de 0,5 dB corta el grado 2 en 3,3 dB.
+Los 4,7 dB del ejemplo del método A.2 en el anexo B de ISO 11200:2014, para una
+máquina de 3 m de alto, superan las dos fronteras, y su tabla da grado 3.
 
 ## 6. El ejemplo resuelto, de principio a fin
 
@@ -383,7 +392,8 @@ ISO 11202 y la (9) de ISO 11204; la corrección de fondo con los márgenes
 despreciable y mínimo propios de este grupo; la corrección ambiental local a
 trozos de la Ecuación (A.5) de ISO 11202 y las (A.2) y (A.5) de ISO 11204, con
 las dos rutas impresas al cociente del que es función; la frontera de grado en
-4 dB; la desviación típica total y la incertidumbre expandida; y la suma
+4 dB del A.1.3 de ISO 11202 y el margen que la Condición (A.6) le añade para el
+método A.2; la desviación típica total y la incertidumbre expandida; y la suma
 ponderada por duración de un ciclo de periodos de funcionamiento.
 </ScopeClaim>
 <ScopeClaim status="not-covered" label="Todavía no cubierto">
@@ -391,9 +401,9 @@ La medida se describe aquí, y nada de ella se calcula: las posiciones de
 micrófono del capítulo 9 y la cualificación del entorno de ISO 11201, los
 niveles alrededor de la máquina que dan su índice de directividad al método A.2
 de ISO 11202 y a ISO 11204, y la determinación de `K_2` o de `A` según ISO 3744
-o ISO 3746 las hace el usuario, y la biblioteca toma sus resultados. El margen
-que la Condición (A.6) añade para el método A.2, la medida de propagación `Q`
-de ISO 11203 y la ruta por intensidad de ISO 11205 no están implementados.
+o ISO 3746 las hace el usuario, y la biblioteca toma sus resultados. La medida
+de propagación `Q` de ISO 11203 y la ruta por intensidad de ISO 11205 no están
+implementadas.
 </ScopeClaim>
 </Scope>
 

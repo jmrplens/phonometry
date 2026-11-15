@@ -3,12 +3,12 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1897,
-    "passing": 1897,
+    "checks": 1899,
+    "passing": 1899,
     "failing": 0,
     "domains": 111,
     "citation_groups": 523,
-    "citations": 1343,
+    "citations": 1345,
     "designations": 230,
     "sources": 121
   },
@@ -175,8 +175,8 @@
     {
       "id": "emission-sound-pressure-level-iso-11200-group",
       "title": "Emission sound pressure level (ISO 11200 group)",
-      "checks": 6,
-      "passing": 6
+      "checks": 8,
+      "passing": 8
     },
     {
       "id": "free-field-qualification-reference-sound-sources",
@@ -11142,6 +11142,77 @@
         "value": -0.003
       },
       "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "emission-sound-pressure-level-iso-11200-group/iso-11200-2014-table-b-3-local-environmental-correction/k-3a-of-iso-11202-method-a-2-from-k-2a-6-5-db-and-di-op-approx-0-7-db-db",
+      "domain": "emission-sound-pressure-level-iso-11200-group",
+      "reference": {
+        "cite": "ISO 11200:2014 Table B.3 local environmental correction",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 11200",
+            "edition": "2014",
+            "clause": "Table B.3 local environmental correction"
+          }
+        ]
+      },
+      "quantity": "K_3A of ISO 11202 method A.2 from K_2A = 6.5 dB and DI*op,approx = 0.7 dB, dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.7
+      },
+      "computed": {
+        "value": 4.693
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.007
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "emission-sound-pressure-level-iso-11200-group/iso-11200-2014-table-b-3-accuracy-grade/grade-of-the-method-a-2-result-for-a-machine-3-m-in-its-largest-dimension",
+      "domain": "emission-sound-pressure-level-iso-11200-group",
+      "reference": {
+        "cite": "ISO 11200:2014 Table B.3 accuracy grade",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 11200",
+            "edition": "2014",
+            "clause": "Table B.3 accuracy grade"
+          }
+        ]
+      },
+      "quantity": "Grade of the method A.2 result for a machine 3 m in its largest dimension",
+      "kind": "record",
+      "expected": {
+        "label": "grade = 3",
+        "record": {
+          "grade": 3.0
+        }
+      },
+      "computed": {
+        "label": "grade = 3",
+        "record": {
+          "grade": 3.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

@@ -185,7 +185,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite
-runs 1897 numerical conformance checks across 111 domains, against
+runs 1899 numerical conformance checks across 111 domains, against
 230 normative designations and 121 further published sources,
 covering psychoacoustics and speech intelligibility, room, building and
 materials acoustics, human and machine vibration, environmental, aircraft,

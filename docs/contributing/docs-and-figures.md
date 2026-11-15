@@ -132,7 +132,7 @@ python scripts/check_conformance_claims.py
 **Don't**
 
 ```text
-Edit docs/CONFORMANCE.md, or type "1897 conformance checks" into a guide or .zenodo.json.
+Edit docs/CONFORMANCE.md, or type "1899 conformance checks" into a guide or .zenodo.json.
 ```
 
 **Enforced by:** `scripts/check_conformance_claims.py`, `make conformance`, `CI: Conformance report up to date`

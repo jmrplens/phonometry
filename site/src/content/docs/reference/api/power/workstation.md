@@ -443,6 +443,8 @@ GRADE_2_MAX_K3 = 4.0
 ```python
 grade_from_local_correction(
     local_correction: NumericArrayLike,
+    *,
+    largest_dimension_m: float | None = None,
 ) -> Literal['engineering', 'survey']
 ```
 
@@ -450,12 +452,23 @@ The accuracy grade a local environmental correction earns.
 
 ISO 11202:2010 A.1.3 puts the boundary at
 [`GRADE_2_MAX_K3`](/phonometry/reference/api/power/workstation/#grade_2_max_k3): a greatest possible $K_3$ of 4 dB or less
-is grade 2 (engineering), and more than that is grade 3 (survey). Method A.2
-is stricter: Condition (A.6) of A.2.5 adds a margin of 0.5 dB, 1 dB or
-1.5 dB, by the largest dimension of the source, so that once (A.4) and (A.5)
-are substituted it holds for $K_3$ up to about 3.3 dB, 2.8 dB or
-2.4 dB. This function applies the 4 dB boundary of A.1.3 alone, and does not
-apply that margin.
+is grade 2 (engineering), and more than that is grade 3 (survey). That is
+the boundary applied when `largest_dimension_m` is not given, and the one
+ISO 11204 5.6 applies too.
+
+Method A.2 is stricter. Its Condition (A.6) of A.2.5 adds a margin
+$\Delta D^*_I$ to the bound on the approximate directivity index,
+because that index is only approximate, and the margin grows with the
+largest dimension $l_\mathrm{max}$ of the source: 0.5 dB up to 1 m,
+1 dB up to 3 m and 1.5 dB beyond. Give `largest_dimension_m` and the
+margin is read from it. Once Equations (A.4) and (A.5) are substituted,
+the condition no longer holds $K_2$ and bounds $K_3$ alone,
+
+$$
+K_3 \le -10 \lg \left[ 1 - \left( 1 - 10^{-0.4} \right) 10^{-0.1 \Delta D^*_I} \right]\ \mathrm{dB}
+$$
+
+so grade 2 holds for $K_3$ up to 3.34 dB, 2.82 dB or 2.41 dB.
 
 The worst band decides, since a determination is only as good as its
 weakest part.
@@ -465,6 +478,7 @@ weakest part.
 | Name | Description |
 | :--- | :--- |
 | `local_correction` | $K_3$ in decibels; a scalar or one value per band. |
+| `largest_dimension_m` | Largest dimension $l_\mathrm{max}$ of the source, in metres, for a $K_3$ determined by method A.2 of ISO 11202 (Default: `None`, the 4 dB of A.1.3). |
 
 **Returns:** `'engineering'` or `'survey'`.
 
@@ -472,7 +486,8 @@ weakest part.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `local_correction` holds a text or a value that is not a real number. |
+| ValueError | if `largest_dimension_m` is not strictly positive. |
+| TypeError | if `local_correction` holds a text or a value that is not a real number, or `largest_dimension_m` is not a single number. |
 
 ## local_environmental_correction
 

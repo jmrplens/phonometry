@@ -367,7 +367,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cell. CI now runs the package in a notebook kernel, displaying a result, a
   verdict, an inline `.plot()`, a `.report()` and a warning, and installs the
   wheel in Pyodide, the Python of JupyterLite, with its `plot` and `report`
-  extras. On Pyodide 314.0.7 it installs on the numpy 2.4.6, scipy 1.18.0 and
+  extras. On Pyodide 314.0.8 it installs on the numpy 2.4.6, scipy 1.18.0 and
   matplotlib 3.10.8 Pyodide ships, and a one-third-octave filter bank runs
   there. The job fails, naming the floor, the day a floor in `pyproject.toml`
   rises above what Pyodide ships.

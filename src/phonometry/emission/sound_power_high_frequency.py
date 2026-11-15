@@ -5,8 +5,8 @@ Some machines emit most of what matters above the range the general methods
 cover: the paper noise of a fast printer, the whine of a switched-mode power
 supply, the tone of a display. ISO 3741 stops at the 10 kHz one-third octave
 band and ISO 3744 at the same place, so ISO 9295 adds the octave band centred
-on 16 kHz, from 11,2 kHz to 22,4 kHz (clause 1), and determines the unweighted
-sound power level in its three one-third octave bands (12,5, 16 and 20 kHz)
+on 16 kHz, from 11.2 kHz to 22.4 kHz (clause 1), and determines the unweighted
+sound power level in its three one-third octave bands (12.5, 16 and 20 kHz)
 or in the narrow bands that hold its discrete tones.
 
 Four methods are specified. Three of them use a reverberation test room with
@@ -20,7 +20,7 @@ the equipment (:math:`N = 4`), or over three revolutions of the boom
 
 .. math::
 
-   \overline{L_p} = 10 \lg\!\left[ \frac{1}{N} \sum_{i=1}^{N} 10^{0{,}1 L_i}
+   \overline{L_p} = 10 \lg\!\left[ \frac{1}{N} \sum_{i=1}^{N} 10^{0.1 L_i}
    \right] \mathrm{dB} \tag{1}
 
 A moving microphone spreads a discrete tone over sidebands. The analyser has
@@ -32,7 +32,7 @@ sidebands are summed on an energy basis, Formula (3):
 
    \Delta f = 2 f \frac{v}{c} \tag{2}
 
-   L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0{,}1 L_i}\ \mathrm{dB}
+   L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0.1 L_i}\ \mathrm{dB}
    \tag{3}
 
 **Method with the measured reverberation time** (clause 6). Above 10 kHz the
@@ -45,7 +45,7 @@ volume):
 
    R = \frac{S \, \alpha_\mathrm{room}}{1 - \alpha_\mathrm{room}} \tag{4}
 
-   \alpha_\mathrm{room} = 1 - \mathrm{e}^{-0{,}16 \, V / (S T)} \tag{5}
+   \alpha_\mathrm{room} = 1 - \mathrm{e}^{-0.16 \, V / (S T)} \tag{5}
 
 The sound power level in each band is then Formula (6):
 
@@ -64,7 +64,7 @@ unchanged:
    R = \frac{8 \alpha V}{1 - \dfrac{8 \alpha V}{S}} \tag{7}
 
 :math:`\alpha` is Annex A (normative), which is ISO 9613-1 written in nepers
-rather than decibels and evaluated up to 22,4 kHz, where ISO 9613-1 stops at
+rather than decibels and evaluated up to 22.4 kHz, where ISO 9613-1 stops at
 10 kHz; :func:`air_absorption_np_per_m` evaluates it with the library's
 ISO 9613-1 implementation. Tables 1 and 2 print it for 18 °C to 27 °C, 40 %
 to 60 % relative humidity and 10 000 Hz to 22 400 Hz.
@@ -96,7 +96,7 @@ Formula (10), with :math:`\alpha` in decibels per metre:
    K_\alpha = r \cdot \alpha \tag{10}
 
 **Reference meteorological conditions.** Clause 10.1 carries the levels of
-the reverberation-room methods to 101,325 kPa and 23,0 °C "de acuerdo con la
+the reverberation-room methods to 101,325 kPa and 23.0 °C "de acuerdo con la
 Norma ISO 3741", which is the reference-quantity correction :math:`C_1` and
 the radiation-impedance correction :math:`C_2` of ISO 3741:2010 clause 9.1.4
 for a direct method and :math:`C_2` alone for the comparison with a reference
@@ -172,7 +172,7 @@ _AIR_ABSORPTION_FLOOR_HZ = 10_000.0
 #: The lowest frequency of the ISO 9613-1 table, where the Annex A range of
 #: this module begins.
 _ISO_9613_LOW_HZ = 50.0
-#: The Eyring constant of Formula (5), as printed (0,16 s/m).
+#: The Eyring constant of Formula (5), as printed (0.16 s/m).
 _EYRING_CONSTANT = 0.16
 #: The factor of Formula (7): the air absorption area is 8 alpha V when alpha
 #: is the amplitude coefficient in nepers per metre (twice the energy one).
@@ -244,9 +244,9 @@ def air_absorption_np_per_m(
     :math:`\alpha` en Np/m por 8,686 para obtener el valor de :math:`\alpha`
     en dB/m"). The difference from
     :func:`~phonometry.environment.propagation.air_absorption.air_attenuation`
-    is the range: Annex A evaluates the same formula up to 22,4 kHz, the top
+    is the range: Annex A evaluates the same formula up to 22.4 kHz, the top
     of the 16 kHz octave band, so no advisory is raised between 10 kHz and
-    22,4 kHz, where ISO 9613-1 stops tabulating.
+    22.4 kHz, where ISO 9613-1 stops tabulating.
 
     :param frequencies: Frequency or frequencies ``f``, in hertz.
     :param temperature_c: Air temperature, in degrees Celsius. Outside
@@ -324,11 +324,11 @@ def room_absorption_coefficient(
 ) -> float | NDArray[np.float64]:
     r"""Room absorption coefficient from the reverberation time (ISO 9295 Formula (5)).
 
-    :math:`\alpha_\mathrm{room} = 1 - \mathrm{e}^{-0{,}16 \, V / (S T)}`, the
+    :math:`\alpha_\mathrm{room} = 1 - \mathrm{e}^{-0.16 \, V / (S T)}`, the
     Eyring relation solved for the absorption coefficient. Clause 6.1 asks
     for it rather than the simpler Sabine one because above 10 kHz the room
     absorption coefficient cannot be taken as small compared with unity. The
-    constant is the 0,16 the formula prints.
+    constant is the 0.16 the formula prints.
 
     :param reverberation_time: Mean measured reverberation time ``T`` per
         band, in seconds (scalar or one value per band); clause 6.2 averages
@@ -388,8 +388,8 @@ def room_constant_from_reverberation_time(
     :func:`high_frequency_sound_power` as ``room_constant``.
 
     Formula (5) makes :math:`1 - \alpha_\mathrm{room} =
-    \mathrm{e}^{-0{,}16 \, V / (S T)}`, so the two read together are
-    :math:`R = S \, (\mathrm{e}^{0{,}16 \, V / (S T)} - 1)`, which is how
+    \mathrm{e}^{-0.16 \, V / (S T)}`, so the two read together are
+    :math:`R = S \, (\mathrm{e}^{0.16 \, V / (S T)} - 1)`, which is how
     ``R`` is computed: the quotient of Formula (4) divides by nothing once
     :math:`\alpha_\mathrm{room}` rounds to 1, for a decay short enough
     that the exponent passes about 37, where ``R`` is still a number.
@@ -581,7 +581,7 @@ def min_analyzer_bandwidth(
 def tone_level_from_sidebands(sideband_levels: NumericArrayLike) -> float:
     r"""Total level of a tone from its sideband levels (ISO 9295 Formula (3)).
 
-    :math:`L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0{,}1 L_i}`,
+    :math:`L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0.1 L_i}`,
     the energy sum of the bands adjacent to the tone frequency that carry
     its energy when the analyser is narrower than
     :func:`min_analyzer_bandwidth`.
@@ -863,12 +863,12 @@ def high_frequency_sound_power(
         of the four orientations (:math:`N = 4`) or three boom revolutions
         (:math:`N = 3`), energy-averaged by Formula (1).
     :param frequencies: Band centre or tone frequencies, in hertz, one per
-        band. A frequency outside 11,2 kHz to 22,4 kHz emits a
+        band. A frequency outside 11.2 kHz to 22.4 kHz emits a
         :class:`~phonometry.emission.SoundPowerWarning`.
     :param room_constant: Room constant ``R``, in square metres, a scalar or
         one value per band.
     :param temperature_c: Air temperature in the room, in degrees Celsius
-        (default 23,0 °C, the reference temperature).
+        (default 23.0 °C, the reference temperature).
     :param static_pressure_kpa: Static pressure in the room, in kilopascals
         (default 101,325 kPa, the reference pressure).
     :param tonal: ``True`` when the bands are the narrow bands of discrete
@@ -952,7 +952,7 @@ def high_frequency_sound_power_comparison(
         percentage analyser, and holds an FFT to 112 Hz or less: a wider one
         emits a :class:`~phonometry.emission.SoundPowerWarning`.
     :param temperature_c: Air temperature in the room, in degrees Celsius
-        (default 23,0 °C).
+        (default 23.0 °C).
     :param static_pressure_kpa: Static pressure in the room, in kilopascals
         (default 101,325 kPa).
     :return: A :class:`HighFrequencySoundPowerResult` with

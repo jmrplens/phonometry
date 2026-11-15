@@ -4,22 +4,22 @@
 Anchors, read on the printed pages of BS ISO 8297:1994 (PDF pages 9 to 16,
 printed folios 1 to 8):
 
-- Table 1 (folio 2): d/sqrt(Sp) 0,05 -> +3,0/-3,5 dB; 0,1 -> +/-2,5 dB;
-  0,2 -> +2,0/-2,5 dB; 0,5 -> +1,5/-2,0 dB.
+- Table 1 (folio 2): d/sqrt(Sp) 0.05 -> +3.0/-3.5 dB; 0.1 -> +/-2.5 dB;
+  0.2 -> +2.0/-2.5 dB; 0.5 -> +1.5/-2.0 dB.
 - Table 2 (folio 6): difference < 6 -> invalid; 6, 7, 8 -> 1 dB; 9, 10 ->
-  0,5 dB; > 10 -> 0.
-- Table 3 (folio 7): alpha 0, 0, 0, 0,001, 0,002, 0,005, 0,01, 0,026,
-  0,046 dB/m in the octaves 31 (31,5) Hz to 8 kHz, at 15 degC and 70 %.
-- 9.1.1 a) (folio 5): max(0,05 sqrt(Sp), 5 m) < d <= min(0,5 sqrt(Sp), 35 m);
+  0.5 dB; > 10 -> 0.
+- Table 3 (folio 7): alpha 0, 0, 0, 0.001, 0.002, 0.005, 0.01, 0.026,
+  0.046 dB/m in the octaves 31 (31.5) Hz to 8 kHz, at 15 degC and 70 %.
+- 9.1.1 a) (folio 5): max(0.05 sqrt(Sp), 5 m) < d <= min(0.5 sqrt(Sp), 35 m);
   b) aspect angle <= 180 deg; c) Dm <= 2 d.
 - 9.2 c) and NOTE 7: H = (1/n) sum hk; ten or more sources lower than 2 m
   may be taken at 1 m.
-- 9.3 (folio 6): h = H + 0,025 sqrt(Sm), or 5 m, whichever is the greater.
+- 9.3 (folio 6): h = H + 0.025 sqrt(Sm), or 5 m, whichever is the greater.
 - 10.1 to 10.9 (folios 7, 8): the energy mean; the cap Lp + 5 dB; dLS =
   10 lg((2 Sm + h l)/S0); dLF = lg(d/(4 sqrt(Sp))), with NOTE 11 putting it
-  between -0,9 dB and -1,9 dB when 9.1 is met; dLM = 3 (1 - theta/90);
-  dLalpha = 0,5 alpha sqrt(Sm); LW = Lp + dLS + dLF + dLM + dLalpha; LWA =
-  10 lg sum 10^(0,1 (LWj + Cj)).
+  between -0.9 dB and -1.9 dB when 9.1 is met; dLM = 3 (1 - theta/90);
+  dLalpha = 0.5 alpha sqrt(Sm); LW = Lp + dLS + dLF + dLM + dLalpha; LWA =
+  10 lg sum 10^(0.1 (LWj + Cj)).
 
 The ARP 866A coefficient of ISO 3891:1978 Annex A, which Table 3 cites and
 the weather path evaluates, is checked against ISO 3891 Table 9 (70 %, 15 degC
@@ -155,7 +155,7 @@ def test_table_3_meets_the_iso_3891_formula_in_five_of_its_eight_rows() -> None:
 
 
 def test_weather_leaves_the_31_5_hz_band_at_zero() -> None:
-    """ISO 3891 Table 2 starts at 50 Hz, so the 31,5 Hz octave keeps Table 3's 0."""
+    """ISO 3891 Table 2 starts at 50 Hz, so the 31.5 Hz octave keeps Table 3's 0."""
     alpha = emission.plant_air_absorption_db_per_m(
         [31.5, 63.0], temperature_c=-10.0, relative_humidity_percent=10.0
     )
@@ -164,7 +164,7 @@ def test_weather_leaves_the_31_5_hz_band_at_zero() -> None:
 
 
 def test_air_absorption_at_8_khz_in_moist_air_is_lower_at_30_than_at_0_degc() -> None:
-    """ISO 3891 Table 11 (90 %) prints 9,5 dB/100 m at 0 degC and 5,2 at 30 degC."""
+    """ISO 3891 Table 11 (90 %) prints 9.5 dB/100 m at 0 degC and 5.2 at 30 degC."""
     cold = emission.plant_air_absorption_db_per_m(
         [8000.0], temperature_c=0.0, relative_humidity_percent=90.0
     )
@@ -277,10 +277,10 @@ def test_background_correction_reads_decimal_readings_as_their_difference(
     operating: float, background: float, correction: float
 ) -> None:
     """Table 2 is read on the difference of two decimal readings, not on its
-    last binary digits: 20,4 - 14,4 dB is 5,999 999 999 999 998 and 64,1 -
-    58,1 dB 5,999 999 999 999 993 in binary, both the 6 dB of the first row;
-    64,1 - 55,6 dB, 8,499 999 999 999 993, is the half that goes up to 9; and
-    64,4 - 54,4 dB, 10,000 000 000 000 007, is the 10 dB row, not above it.
+    last binary digits: 20.4 - 14.4 dB is 5.999 999 999 999 998 and 64.1 -
+    58.1 dB 5.999 999 999 999 993 in binary, both the 6 dB of the first row;
+    64.1 - 55.6 dB, 8.499 999 999 999 993, is the half that goes up to 9; and
+    64.4 - 54.4 dB, 10.000 000 000 000 007, is the 10 dB row, not above it.
     """
     assert emission.plant_background_correction(operating - background) == (correction)
 
@@ -357,8 +357,8 @@ def test_steady_reading_is_the_arithmetic_mean() -> None:
 
 @pytest.mark.parametrize(("maximum", "minimum"), [(75.0, 70.0), (64.1, 59.1)])
 def test_a_swing_of_5_db_is_not_steady(maximum: float, minimum: float) -> None:
-    """9.5.2 calls a noise steady below 5 dB; 64,1 - 59,1 dB is a swing of
-    5 dB, though 4,999 999 999 999 993 in binary.
+    """9.5.2 calls a noise steady below 5 dB; 64.1 - 59.1 dB is a swing of
+    5 dB, though 4.999 999 999 999 993 in binary.
     """
     with pytest.raises(ValueError, match="integrating instrument"):
         emission.plant_steady_reading(minimum, maximum)
@@ -387,14 +387,14 @@ def test_positions_are_equidistant_along_the_contour() -> None:
     contour = _contour(n_positions=16)
     assert contour.positions_m.shape == (16, 2)
     np.testing.assert_allclose(contour.positions_m[0], CONTOUR[0])
-    # 16 positions round 840 m of rectangle: one every 52,5 m.
+    # 16 positions round 840 m of rectangle: one every 52.5 m.
     np.testing.assert_allclose(contour.positions_m[1], [27.5, -25.0])
     assert contour.position_spacing_m == pytest.approx(52.5)
 
 
 def test_distances_are_to_the_nearest_point_of_the_perimeter() -> None:
     contour = _contour(n_positions=16)
-    # Position 1 at (27,5; -25) is straight below the bottom edge.
+    # Position 1 at (27.5; -25) is straight below the bottom edge.
     assert contour.distances[1] == pytest.approx(25.0)
     np.testing.assert_allclose(contour.nearest_perimeter_points_m[1], [27.5, 0.0])
     # Position 0 at the corner (-25; -25) is nearest the plant's corner (0; 0).
@@ -421,7 +421,7 @@ def test_microphone_direction_does_not_depend_on_the_winding() -> None:
 
 
 def test_aspect_angle_below_a_square_side() -> None:
-    """From (0,5; -d) under a unit square, the plant subtends 180 - 2 atan(2d)."""
+    """From (0.5; -d) under a unit square, the plant subtends 180 - 2 atan(2d)."""
     square = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
     for depth in (0.1, 0.5, 2.0):
         angle = spp._aspect_angle_deg(np.array([0.5, -depth]), square)
@@ -658,7 +658,7 @@ def test_steps_1_and_4_to_8_by_hand() -> None:
 
 
 def test_note_11_bounds_the_proximity_term() -> None:
-    """At the two ends of 9.1.1 a), dLF = lg(0,5/4) and lg(0,05/4): -0,9 and -1,9 dB."""
+    """At the two ends of 9.1.1 a), dLF = lg(0.5/4) and lg(0.05/4): -0.9 and -1.9 dB."""
     top = emission.plant_sound_power(
         [[70.0]], frequencies=[1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=50.0, plant_area_m2=1e4,
@@ -969,7 +969,7 @@ def test_a_low_microphone_is_a_deviation_above_5_m_and_a_failure_below() -> None
 @pytest.mark.parametrize("height", [15.0, 30.0, 100.0])
 def test_a_microphone_above_the_prescribed_height_is_a_deviation(height: float) -> None:
     """9.3 prescribes a height, not a lower bound: a microphone higher than
-    H + 0,025 sqrt(Sm) is reported like a lower one.
+    H + 0.025 sqrt(Sm) is reported like a lower one.
     """
     contour = _contour()
     levels = _levels(contour.positions_m.shape[0])
@@ -1060,8 +1060,8 @@ def test_the_integrated_reading_fluctuates_by_at_most_half_a_decibel_9_5_3(
 
 
 def test_an_integrated_reading_moving_over_1_db_meets_9_5_3() -> None:
-    """64,4 - 63,4 dB is a range of 1 dB, though 1,000 000 000 000 007 in
-    binary, and ± 0,5 dB allows it.
+    """64.4 - 63.4 dB is a range of 1 dB, though 1.000 000 000 000 007 in
+    binary, and ± 0.5 dB allows it.
     """
     check = emission.check_plant_measurement(_contour(), leq_range_db=64.4 - 63.4)
     row = check.requirement("integrated_reading")
@@ -1175,7 +1175,7 @@ def test_a_level_a_hair_under_5_db_above_the_average_is_not_replaced(
 ) -> None:
     """Readings that put the last level a few 10^-15 dB under the average plus
     5 dB, worked in exact arithmetic, come out of the energy mean in binary
-    that much above it, 5,000 000 000 000 014 and 5,000 000 000 000 007 dB.
+    that much above it, 5.000 000 000 000 014 and 5.000 000 000 000 007 dB.
     Neither is "more than 5 dB" (10.2), so nothing is replaced and the check
     has no deviation.
     """
@@ -1206,7 +1206,7 @@ def test_background_margins_of_decimal_readings_at_the_edges_of_6_b(
     preferred: bool,
     correction: float,
 ) -> None:
-    """64,1 over 58,1 dB is the 6 dB 6 b) requires, 64,4 over 54,4 dB the
+    """64.1 over 58.1 dB is the 6 dB 6 b) requires, 64.4 over 54.4 dB the
     10 dB it does not prefer, whatever the last binary digit of the
     difference says.
     """

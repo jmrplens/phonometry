@@ -1,15 +1,15 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Reference sound sources: ISO 6926:2016, read on the printed page.
 
-- Table 1, PDF page 11, folio 5: sigma_r of 0,8 / 0,4 / 0,2 dB; 5.2, same
-  page: no band varies by more than +-0,3 dB over the declared supply range.
+- Table 1, PDF page 11, folio 5: sigma_r of 0.8 / 0.4 / 0.2 dB; 5.2, same
+  page: no band varies by more than +-0.3 dB over the declared supply range.
 - 5.4 and 5.5, PDF pages 11-12, folios 5-6: 12 dB / 3 dB, 16 dB / 4 dB, +6 dB.
-- 5.6.2 and 5.6.3, PDF page 12, folio 6: 2,83 times Table 1.
+- 5.6.2 and 5.6.3, PDF page 12, folio 6: 2.83 times Table 1.
 - Formula (1), PDF page 17, folio 11: sigma_r about the energy average.
 - Formula (2) and C1, C3, PDF pages 17-18, folios 11-12.
 - Table 2, PDF page 20, folio 14: sigma_R per environment and arrangement.
 - Annex A, Formulae (A.1) to (A.5), PDF pages 22-23, folios 16-17.
-- Table B.1, PDF page 24, folio 18: 4,0 dB and 1,0 dB.
+- Table B.1, PDF page 24, folio 18: 4.0 dB and 1.0 dB.
 - 8.4, PDF page 18, folio 12: the C2 of the calibration is the one the user
   applies; ISO 3741:2010 Eq. (21), PDF page 32, folio 23: L_W(RSS) "corrected to
   the meteorological conditions at the time of test".
@@ -176,7 +176,7 @@ def test_a_dipole_below_its_knee_has_no_c2() -> None:
 
 
 def test_formula_2_on_a_uniform_hemisphere() -> None:
-    """C3 at a realistic a(f) = 0,5 dB/m, where its curvature term is 1e-3 dB."""
+    """C3 at a realistic a(f) = 0.5 dB/m, where its curvature term is 1e-3 dB."""
     cal = _calibration(
         conditions=emission.CalibrationConditions(air_absorption_db_per_m=0.5)
     )
@@ -197,7 +197,7 @@ def test_formula_2_at_95_kpa_and_30_degc() -> None:
     """C1 and C2 by hand from the printed formulas, away from the reference.
 
     C1 = -10 lg(ps/ps0) + 5 lg(theta/314 K) and, for a source whose
-    radiation is unknown, C2 = -10 lg(ps/ps0) + 7,5 lg(theta/296 K).
+    radiation is unknown, C2 = -10 lg(ps/ps0) + 7.5 lg(theta/296 K).
     """
     cal = _calibration(
         conditions=emission.CalibrationConditions(
@@ -279,8 +279,8 @@ def test_traverse_maxima_give_the_directivity_index() -> None:
 
 
 #: Unequal one-third octaves in the 125 Hz octave (100, 125 and 160 Hz), dB:
-#: their energy sum, 85,31 dB, is neither the middle third plus 10 lg 3,
-#: 84,77 dB, nor their arithmetic mean plus 10 lg 3, 84,44 dB.
+#: their energy sum, 85.31 dB, is neither the middle third plus 10 lg 3,
+#: 84.77 dB, nor their arithmetic mean plus 10 lg 3, 84.44 dB.
 _UNEQUAL_THIRDS_DB = (76.0, 80.0, 83.0)
 
 
@@ -304,7 +304,7 @@ def test_octave_bands_are_the_energy_sum_of_their_thirds() -> None:
 
 
 def test_an_octave_of_unequal_thirds_is_their_energy_sum() -> None:
-    """76, 80 and 83 dB at the surface sum to 85,31 dB, away from both the
+    """76, 80 and 83 dB at the surface sum to 85.31 dB, away from both the
     middle third and the arithmetic mean plus 10 lg 3.
     """
     cal = _unequal_calibration()
@@ -609,7 +609,7 @@ def test_the_repetitions_are_three_or_five() -> None:
 
 
 def test_a_spectrum_wider_than_12_db_fails_5_4() -> None:
-    lw = np.linspace(80.0, 92.5, _THIRDS.size)  # 0,625 dB steps, 12,5 dB range
+    lw = np.linspace(80.0, 92.5, _THIRDS.size)  # 0.625 dB steps, 12.5 dB range
     verdict = emission.verify_reference_sound_source(
         lw, frequencies=_THIRDS, directivity_index=np.zeros(_THIRDS.size),
         repeated_levels=np.vstack([lw, lw, lw]),
@@ -639,7 +639,7 @@ def test_an_extended_range_is_held_to_16_db_and_4_db() -> None:
     assert verdict.extended_range_db == pytest.approx(11.0)
     assert verdict.adjacent_limit_db[0] == 4.0
     assert verdict.spectrum_met
-    lw[0] = 75.0  # 16,5 dB range, 9 dB step
+    lw[0] = 75.0  # 16.5 dB range, 9 dB step
     assert not emission.verify_reference_sound_source(
         lw, frequencies=freqs, directivity_index=np.zeros(freqs.size),
         repeated_levels=np.vstack([lw, lw, lw]),
@@ -651,7 +651,7 @@ def test_the_16_db_range_is_judged_on_its_own(*, lowest: float, met: bool) -> No
     """Every step within 4 dB and 3 dB; only the extended range decides.
 
     From ``lowest`` the three extended bands rise 4 dB a band, then the core
-    rises from 83 dB to 88,5 dB: an extended range of 16,5 dB fails, 16,0 dB
+    rises from 83 dB to 88.5 dB: an extended range of 16.5 dB fails, 16.0 dB
     is on the limit and passes.
     """
     freqs = np.concatenate([[50.0, 63.0, 80.0], _THIRDS])
@@ -758,8 +758,8 @@ def test_iso_3741_reads_the_one_third_octave_bands() -> None:
 def test_iso_3741_carries_the_calibration_to_the_test_conditions() -> None:
     """Eq. (21) at 20 degC and 90 kPa, with C2 of both sources by hand.
 
-    The calibration's C2 (A.5, radiation unknown) at the test is 0,483 dB and
-    ISO 3741's own C2 is 0,452 dB: L_W = L_W,ref - 0,483 + 4 + 0,452.
+    The calibration's C2 (A.5, radiation unknown) at the test is 0.483 dB and
+    ISO 3741's own C2 is 0.452 dB: L_W = L_W,ref - 0.483 + 4 + 0.452.
     """
     cal = _calibration()
     freqs = np.array([500.0, 1000.0, 2000.0])
@@ -873,7 +873,7 @@ def test_iso_3743_1_reads_the_octave_bands_at_the_test_conditions() -> None:
 
     The calibration's thirds are equal, so each octave is one third plus
     10 lg 3, less the calibration's C2 at the test (A.5, radiation unknown),
-    0,483 dB; Annex A of ISO 3743-1, 0,452 dB, carries the result back.
+    0.483 dB; Annex A of ISO 3743-1, 0.452 dB, carries the result back.
     """
     cal = _calibration()
     freqs = np.array([125.0, 500.0, 2000.0])
@@ -968,7 +968,7 @@ def test_iso_3743_2_suitability_reads_the_calibration_at_the_test() -> None:
     """6.7 compares the room's Formula (9) level, which Annex E reads as the
     power under the conditions of the test, with the calibration read there:
     each octave three equal thirds plus 10 lg 3, less the calibration's own
-    C2 at 20 degC and 90 kPa (A.5, radiation unknown), 0,483 dB.
+    C2 at 20 degC and 90 kPa (A.5, radiation unknown), 0.483 dB.
     """
     cal = _calibration()
     octave = (
@@ -1020,7 +1020,7 @@ def test_iso_3743_2_suitability_sums_unequal_thirds_at_the_test() -> None:
 
 
 def test_iso_3743_2_suitability_fails_against_the_calibration_left_at_23_degc() -> None:
-    """Read at the default conditions instead, the calibration stands 0,482 dB
+    """Read at the default conditions instead, the calibration stands 0.482 dB
     higher, and a room on its Table 1 limits at the test is beyond them.
     """
     cal = _calibration()

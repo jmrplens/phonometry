@@ -720,7 +720,7 @@ def test_octave_band_levels_three_equal_thirds_add_10lg3() -> None:
 
 def test_octave_band_levels_group_by_table_f1() -> None:
     """Table F.1: k = 1 is 50 Hz, so 50/63/80 Hz make the 63 Hz octave and
-    6,3/8/10 kHz the 8 kHz one; a full 24-band input gives all eight octaves.
+    6.3/8/10 kHz the 8 kHz one; a full 24-band input gives all eight octaves.
     """
     thirds = np.array(
         [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,

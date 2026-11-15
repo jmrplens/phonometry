@@ -5,7 +5,7 @@ The printed values are checked against closed forms taken from the two
 standards, computed here without the library: ISO 3743-1:2010 Eq. (10) to
 (14), the energy means of the source, the reference sound source and the
 background, the background correction of Eq. (13) on the means (6 dB, 15 dB
-and the fixed 1,3 dB below 6 dB) and
+and the fixed 1.3 dB below 6 dB) and
 ``LW = LW(RSS) - L'p(RSS) + L'p(ST) + K1(RSS) - K1``; ISO 3743-2:2018
 Formula (9), ``LW = Lp - 10 lg(Tnom/T0) + 10 lg(V/V0) - 13 dB`` on the energy
 mean of Formula (8); and the octave A-weighting corrections of Annex B /
@@ -88,7 +88,7 @@ def _energy_mean(levels: np.ndarray) -> np.ndarray:
 
 def _k1(margin: np.ndarray) -> np.ndarray:
     """Eq. (13) with the rules of 8.1.3: nothing above 15 dB, and below 6 dB
-    the fixed 1,3 dB the clause prints as "the value for 6 dB".
+    the fixed 1.3 dB the clause prints as "the value for 6 dB".
     """
     safe = np.maximum(margin, 6.0)
     k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * safe))
@@ -230,7 +230,7 @@ def test_hard_walled_short_reference_margin_is_no_upper_bound(
 
 
 def test_hard_walled_one_sided_coverage_is_named(tmp_path: Path) -> None:
-    """9.1: k = 1,6 is the one-sided 95 % factor, and the basis says so."""
+    """9.1: k = 1.6 is the one-sided 95 % factor, and the basis says so."""
     with pytest.warns(
         SoundPowerWarning,
         match=r"margin of the source under test over the background is below 6 dB",
@@ -297,7 +297,7 @@ def test_hard_walled_energy_fiche(tmp_path: Path) -> None:
     assert "re 1 pJ" in text
     assert "Eq. 20" in text
     assert "PASS" in text
-    # The 9.5 EXAMPLE: sigma_R0 = 1,5 dB and sigma_omc = 2,0 dB give U = 5 dB.
+    # The 9.5 EXAMPLE: sigma_R0 = 1.5 dB and sigma_omc = 2.0 dB give U = 5 dB.
     assert "U = 5.0 dB" in text
 
 

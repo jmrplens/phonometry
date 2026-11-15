@@ -7,7 +7,7 @@ is measured by the direct method in a reverberation room of volume ``V`` and
 surface ``S`` with a uniform reverberation time ``T60``; the band sound-power
 level follows ISO 3741:2010 Eq. (20),
 
-    LW = Lp + 10*lg(A/A0) + 4,34*(A/S) + 10*lg(1 + S*c/(8*V*f)) + C1 + C2 - 6,
+    LW = Lp + 10*lg(A/A0) + 4.34*(A/S) + 10*lg(1 + S*c/(8*V*f)) + C1 + C2 - 6,
 
 with the Sabine absorption area ``A = (55,26/c)*(V/T60)``, the speed of sound
 ``c = 20,05*sqrt(273 + theta)`` and the meteorological corrections ``C1``/``C2``

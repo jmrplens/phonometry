@@ -115,7 +115,7 @@ __all__ = [
 ]
 
 #: Temporal-variability limit of ISO 9614-1:1993 Table B.3: a field whose F1
-#: exceeds 0,6 calls for action code (e) before the surface is measured.
+#: exceeds 0.6 calls for action code (e) before the surface is measured.
 TEMPORAL_VARIABILITY_LIMIT = 0.6
 
 #: Reference sound intensity, in watts per square metre (ISO 9614-1, A.2.3),
@@ -424,7 +424,7 @@ class FieldStationarityCheck(OwnsArrays):
         A ``bool`` when ``f1`` is a number, and an array of them when it is a
         sequence or an array, a zero-dimensional one included.
 
-        Judged settled: samples whose standard deviation is 0,6 of their mean
+        Judged settled: samples whose standard deviation is 0.6 of their mean
         in decimal are at the limit, whichever side of it the last bits fall.
         """
         within = np.asarray(

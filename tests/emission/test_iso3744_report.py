@@ -5,7 +5,7 @@ The rendered values are checked against a clean-room oracle derived from the
 standard, independent of the library's own combination path. For a uniform
 free-field surface-pressure spectrum measured over a hemisphere of radius r
 (area S = 2*pi*r^2, ISO 3744:2010 clause 7.2.3), with the background noise a
-uniform 10 dB below (so K1 = -10*lg(1 - 10^(-1,0)) dB, Eq. 16) and no room
+uniform 10 dB below (so K1 = -10*lg(1 - 10^(-1.0)) dB, Eq. 16) and no room
 absorption (K2 = 0), the band sound-power level is
 LW = Lp - K1 + 10*lg(S/S0) (Eqs. 17-18) and the A-weighted total is
 LWA = 10*lg(sum 10^((LW + Ck)/10)) with the Annex E octave corrections Ck

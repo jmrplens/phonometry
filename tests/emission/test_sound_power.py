@@ -6,7 +6,7 @@ Physics anchors:
 - Monopole over a rigid plane radiates into a hemisphere (Q = 2); on a
   radius-r hemisphere the field is uniform: Lp = LW - 10*lg(2*pi*r^2),
   so LW = Lp + 10*lg(S) is recovered exactly (ISO 3744 Eq. 18, S = 2*pi*r^2).
-- K1 = -10*lg(1 - 10^(-0,1*dL)) (ISO 3744 Eq. 16). dL = 6 dB -> 1,256 dB.
+- K1 = -10*lg(1 - 10^(-0.1*dL)) (ISO 3744 Eq. 16). dL = 6 dB -> 1,256 dB.
 - K2 = 10*lg(1 + 4*S/A) (ISO 3744 Eq. A.2).
 """
 
@@ -53,7 +53,7 @@ def test_survey_one_plane_reads_iso_3746_table_b1(*, tones: bool) -> None:
 
 
 def test_hemisphere_exact_table_b1_position_one() -> None:
-    """First key coordinate is exactly (0,16, -0,96, 0,22)*r (Table B.1)."""
+    """First key coordinate is exactly (0.16, -0.96, 0.22)*r (Table B.1)."""
     pos = emission.measurement_positions("hemisphere", radius=1.0)
     assert np.allclose(pos[0], [0.16, -0.96, 0.22])
 
@@ -133,7 +133,7 @@ def test_survey_positions_lie_on_the_hemisphere_in_the_free_octants(
 # K1 background-noise correction (ISO 3744 Eq. 16, ISO 3746 Eq. 12)
 # --------------------------------------------------------------------------
 def test_k1_exact_value_at_6db() -> None:
-    """dL = 6 dB -> K1 = -10*lg(1-10^-0,6) = 1,2560... dB."""
+    """dL = 6 dB -> K1 = -10*lg(1-10^-0.6) = 1.2560... dB."""
     k1 = emission.background_noise_correction(np.array([56.0]), np.array([50.0]))
     assert k1[0] == pytest.approx(1.25628, abs=1e-4)
 
@@ -146,7 +146,7 @@ def test_k1_zero_above_15db() -> None:
 
 def test_k1_applies_equation_16_at_exactly_15db() -> None:
     """dL == 15 dB stays inside '6 dB <= dLp <= 15 dB' (ISO 3744:2010, 8.2.3),
-    so Eq. (16) applies: K1 = -10*lg(1-10^-1,5) = 0,1395... dB; K1 = 0 only
+    so Eq. (16) applies: K1 = -10*lg(1-10^-1.5) = 0.1395... dB; K1 = 0 only
     for dLp strictly above 15 dB.
     """
     k1 = emission.background_noise_correction(np.array([75.0]), np.array([60.0]))
@@ -156,7 +156,7 @@ def test_k1_applies_equation_16_at_exactly_15db() -> None:
 
 def test_k1_survey_applies_equation_at_exactly_10db() -> None:
     """Survey: dL == 10 dB stays inside '3 dB <= dLp <= 10 dB' (ISO 3746:2010,
-    8.3.3), so the correction applies: K1 = -10*lg(1-10^-1) = 0,4576 dB.
+    8.3.3), so the correction applies: K1 = -10*lg(1-10^-1) = 0.4576 dB.
     """
     k1 = emission.background_noise_correction(
         np.array([70.0]), np.array([60.0]), grade="survey"
@@ -178,7 +178,7 @@ def test_k1_below_criterion_clamps_and_warns() -> None:
 
 
 def test_k1_survey_criterion_3db() -> None:
-    """Survey clamps below 3 dB to -10*lg(1-10^-0,3) = 3,0206 dB."""
+    """Survey clamps below 3 dB to -10*lg(1-10^-0.3) = 3.0206 dB."""
     with pytest.warns(emission.SoundPowerWarning):
         k1 = emission.background_noise_correction(
             np.array([52.0]), np.array([50.0]), grade="survey"
@@ -196,13 +196,13 @@ def test_k2_free_field_is_zero() -> None:
 
 
 def test_k2_closed_form_from_absorption() -> None:
-    """S = 50, A = 200 -> K2 = 10*lg(1 + 4*50/200) = 10*lg(2) = 3,0103 dB."""
+    """S = 50, A = 200 -> K2 = 10*lg(1 + 4*50/200) = 10*lg(2) = 3.0103 dB."""
     k2 = emission.environmental_correction(50.0, absorption_area=200.0)
     assert k2 == pytest.approx(3.0103, abs=1e-4)
 
 
 def test_k2_from_reverberation_time_sabine() -> None:
-    """A = 0,16*V/T; V=300, T=1,2 -> A=40; S=40 -> K2=10*lg(1+4)=6,9897 dB."""
+    """A = 0.16*V/T; V=300, T=1.2 -> A=40; S=40 -> K2=10*lg(1+4)=6.9897 dB."""
     k2 = emission.environmental_correction(40.0, reverberation_time=1.2, volume=300.0)
     assert k2 == pytest.approx(6.9897, abs=1e-4)
 
@@ -296,7 +296,7 @@ def test_monopole_radius_independence() -> None:
 
 
 def test_box_surface_area_formula() -> None:
-    """One plane: S = 4(ab+bc+ca), a=0,5l1+d, b=0,5l2+d, c=l3+d (Eq. 9)."""
+    """One plane: S = 4(ab+bc+ca), a=0.5l1+d, b=0.5l2+d, c=l3+d (Eq. 9)."""
     l1, l2, l3, d = 2.0, 1.0, 1.5, 1.0
     a, b, c = 0.5 * l1 + d, 0.5 * l2 + d, l3 + d
     s_exp = 4.0 * (a * b + b * c + c * a)
@@ -331,7 +331,7 @@ def test_full_chain_with_k1_and_k2() -> None:
 
 
 def test_a_weighted_sound_power_from_bands() -> None:
-    """LWA = 10*lg(sum 10^(0,1(LWk+Ck))) using Annex E octave Ck."""
+    """LWA = 10*lg(sum 10^(0.1(LWk+Ck))) using Annex E octave Ck."""
     freqs = np.array([250.0, 500.0, 1000.0, 2000.0])
     ck = np.array([-8.6, -3.2, 0.0, 1.2])
     r = 2.0
@@ -484,7 +484,7 @@ def test_k2_per_band_eq_a7_from_mean_absorption() -> None:
 
 
 def test_k2_per_band_from_reverberation_time() -> None:
-    """Eq. A.3: A = 0,16*V/T per band gives a per-band K2."""
+    """Eq. A.3: A = 0.16*V/T per band gives a per-band K2."""
     t = np.array([1.0, 2.0, 4.0])
     v = 300.0
     k2 = emission.environmental_correction(40.0, reverberation_time=t, volume=v)

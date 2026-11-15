@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 
 # ---------------------------------------------------------------------------
 # ISO 3745:2012 precision sound power (anechoic/hemi-anechoic). The Clause 10.5
-# EXAMPLE combines sigma_omc = 2,0 dB and sigma_R0 = 0,5 dB at k = 2 to the
-# expanded uncertainty U = 4,1 dB. The K1 background correction floors at
-# 1,26 dB (>= 6 dB signal-to-noise edge bands). The meteorological correction
-# C1 at the 23 C, ps0 reference is 5*lg(296/314) = -0,128 dB. Mirrors
+# EXAMPLE combines sigma_omc = 2.0 dB and sigma_R0 = 0.5 dB at k = 2 to the
+# expanded uncertainty U = 4.1 dB. The K1 background correction floors at
+# 1.26 dB (>= 6 dB signal-to-noise edge bands). The meteorological correction
+# C1 at the 23 C, ps0 reference is 5*lg(296/314) = -0.128 dB. Mirrors
 # tests/emission/test_sound_power_precision.py.
 # ---------------------------------------------------------------------------
 ISO3745_U_SIGMA_R0 = 0.5  # reproducibility standard deviation (dB)
@@ -124,7 +124,7 @@ ISO9614_1_BAND_ROWS: list[tuple[tuple[float, float] | None, tuple[float, float]]
 # sonora" (printed p. 13): the standard deviation s in dB, as
 # (grade 1, grade 2, grade 3) per row of ISO9614_1_BAND_ROWS. Footnote 1: the
 # true level lies within +/- 2s of the measured one with 95 % confidence.
-# Footnote 2 fixes the A-weighted range at 63 Hz to 4 kHz or 50 Hz to 6,3 kHz;
+# Footnote 2 fixes the A-weighted range at 63 Hz to 4 kHz or 50 Hz to 6.3 kHz;
 # footnote 3 calls the grade-3 value tentative.
 ISO9614_1_TABLE_2_S: list[tuple[float | None, float | None, float | None]] = [
     (2.0, 3.0, None),
@@ -223,10 +223,10 @@ ISO5136_TABLE_3_SIGMA_R: tuple[tuple[int, float], ...] = (
     (16000, 5.0),
     (20000, 5.5),
 )
-#: Annex D, Eqs (D.1) to (D.3) (PDF page 45, printed p. 35): for d = 0,5 m
-#: at 1 000 Hz, C3,4 = (1,85 + 0,038 U) dB, which the print evaluates to
+#: Annex D, Eqs (D.1) to (D.3) (PDF page 45, printed p. 35): for d = 0.5 m
+#: at 1 000 Hz, C3,4 = (1.85 + 0.038 U) dB, which the print evaluates to
 #: "≈ 2,4 dB" at U = 15 m/s (outlet duct) and "≈ 1,3 dB" at U = -15 m/s
-#: (inlet duct); the two products are exactly 2,42 and 1,28.
+#: (inlet duct); the two products are exactly 2.42 and 1.28.
 ISO5136_ANNEX_D_A0 = 1.85  # dB
 ISO5136_ANNEX_D_A1 = 0.038  # dB s/m
 ISO5136_ANNEX_D_DIAMETER = 0.5  # m
@@ -236,7 +236,7 @@ ISO5136_ANNEX_D_INLET: tuple[float, float] = (-15.0, 1.3)  # (U, printed C3,4)
 #: Table D.1 (PDF pages 45 and 46, printed pp. 35 and 36), "Value of
 #: correction C3,4 in decibels for d = 0,5 m and different flow velocities U":
 #: the six columns are U = 5, -5, 15, -15, 30 and -30 m/s, the 27 rows are the
-#: bands of ISO5136_BANDS. Transcribed as printed, to the printed 0,1 dB; the
+#: bands of ISO5136_BANDS. Transcribed as printed, to the printed 0.1 dB; the
 #: page prints "2", "0" and "16" for cells the text layer carries as "2,0",
 #: "0,0" and "16,0". The two cells of the worked example, 1 000 Hz at
 #: +/-15 m/s, are the ones the print frames in bold.
@@ -272,10 +272,10 @@ ISO5136_TABLE_D1: tuple[tuple[float, ...], ...] = (
 )
 #: Half of the last printed place of Table D.1: a cell reproduces when the
 #: polynomial lands within it of the printed value. The comparison has to be a
-#: tolerance rather than a rounding rule, because the table rounds to 0,1 dB
+#: tolerance rather than a rounding rule, because the table rounds to 0.1 dB
 #: and the polynomial lands wherever it lands: the widest gap over the 162
-#: cells is the 4 000 Hz row at U = +5 m/s, where 6,151 dB is printed as 6,2,
-#: which is 0,049 dB away and only just inside the budget.
+#: cells is the 4 000 Hz row at U = +5 m/s, where 6,151 dB is printed as 6.2,
+#: which is 0.049 dB away and only just inside the budget.
 ISO5136_TABLE_D1_TOLERANCE_DB = 0.05
 #: Clause 1.1 (PDF page 11, printed p. 1): the maximum mean flow velocity at
 #: the microphone head per shield, m/s, and the test-duct diameter range, m.
@@ -327,7 +327,7 @@ ISO8297_TABLE_2: tuple[tuple[int, float], ...] = (
     (10, 0.5),
 )
 #: Table 3 (PDF page 15, printed p. 7), alpha in dB/m at 15 degC and 70 % per
-#: octave band; the first row is printed "31" for the 31,5 Hz octave.
+#: octave band; the first row is printed "31" for the 31.5 Hz octave.
 ISO8297_TABLE_3: tuple[tuple[float, float], ...] = (
     (31.5, 0.0),
     (63.0, 0.0),
@@ -341,7 +341,7 @@ ISO8297_TABLE_3: tuple[tuple[float, float], ...] = (
 )
 #: NOTE 11 of 10.5 (PDF page 15, printed p. 7): "When the requirements of 9.1
 #: are satisfied, dLF may be expected to lie between - 0,9 dB and - 1,9 dB",
-#: the values of lg(d/(4 sqrt(Sp))) at the two ends 0,5 and 0,05 of 9.1.1 a).
+#: the values of lg(d/(4 sqrt(Sp))) at the two ends 0.5 and 0.05 of 9.1.1 a).
 ISO8297_NOTE_11_DB: tuple[float, float] = (-0.9, -1.9)
 ISO8297_NOTE_11_RATIOS: tuple[float, float] = (0.5, 0.05)
 
@@ -360,12 +360,12 @@ ISO8297_NOTE_11_RATIOS: tuple[float, float] = (0.5, 0.05)
 # the printed page: (table, Hz, degC, %) -> (the print, Annex A to the four
 # decimals the table carries). In every one the fourth decimal Annex A gives is
 # 0. The other 581 are Annex A rounded to four decimals when the temperature is
-# converted as theta + 273,16 K, which is how the tables were computed
-# (ISO9295_TABLE_KELVIN_OFFSET); with theta + 273,15 K, the library's
+# converted as theta + 273.16 K, which is how the tables were computed
+# (ISO9295_TABLE_KELVIN_OFFSET); with theta + 273.15 K, the library's
 # conversion, 61 of them move by one unit of the fourth decimal and none by more
-# than 0,000 063 Np/m. For one misprinted cell the two conversions round
-# differently: 19 500 Hz, 23 degC, 50 % is 0,054 0 by the table's conversion
-# and 0,054 1 by the library's, against the 0,054 4 printed.
+# than 0.000 063 Np/m. For one misprinted cell the two conversions round
+# differently: 19 500 Hz, 23 degC, 50 % is 0.054 0 by the table's conversion
+# and 0.054 1 by the library's, against the 0.054 4 printed.
 # Mirrors tests/emission/test_sound_power_high_frequency.py.
 # ---------------------------------------------------------------------------
 ISO9295_FREQUENCIES_HZ: tuple[float, ...] = tuple(

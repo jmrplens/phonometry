@@ -17,12 +17,12 @@ Oracles (independent of the implementation):
 * **Clause 8**: a class 1 instrument requires a class 1 probe *and* a class 1
   processor; every other combination of class 1/2 components is class 2.
 * **Clauses 6.1 and 12.4** for the frequency range a class attests: 45 Hz to
-  7,1 kHz in one-third octaves, or 45 Hz to 5,6 kHz in octaves for an
+  7.1 kHz in one-third octaves, or 45 Hz to 5.6 kHz in octaves for an
   octave-band processor, while a probe's index is determined at one-third
-  octave intervals over the whole 50 Hz to 6,3 kHz range.
+  octave intervals over the whole 50 Hz to 6.3 kHz range.
 * Fahy section 6.8 (printed page 135) for the phase-mismatch conversion:
   ``delta_pI0 = 20 dB`` corresponds to a mismatch of one hundredth of ``kd``,
-  about 0,26 degrees at 1 kHz over a 25 mm separation.
+  about 0.26 degrees at 1 kHz over a 25 mm separation.
 """
 
 from __future__ import annotations
@@ -88,7 +88,7 @@ def test_table2_instrument_column_is_the_probe_plus_processor_residual(
 
     Every one of the 22 rows of Table 2 satisfies this to within the rounding
     of the printed figures, in both classes, including the lone half-decibel
-    entry (400 Hz, instrument class 2, 14,5 dB, whose exact value is 14,54).
+    entry (400 Hz, instrument class 2, 14.5 dB, whose exact value is 14.54).
     A single mistyped digit anywhere in the table would break the identity in
     that row.
     """
@@ -154,7 +154,7 @@ def test_note1_separation_rule(spacing_mm: float, offset_db: float) -> None:
 
 
 def test_note1_rule_matches_the_table_values_at_50_mm() -> None:
-    """A 50 mm spacer earns 3,0103 dB over every printed 25 mm figure."""
+    """A 50 mm spacer earns 3.0103 dB over every printed 25 mm figure."""
     class1 = emission.residual_index_limits("instrument", spacing_m=0.050).class_1
     expected = [row[5] + 10.0 * math.log10(2.0) for row in ref.IEC61043_TABLE2]
     assert list(class1) == pytest.approx(expected)
@@ -205,7 +205,7 @@ def test_instrument_exactly_on_the_class1_limit_passes() -> None:
 
 
 def test_instrument_just_below_the_class1_limit_falls_to_class2() -> None:
-    """One band 0,1 dB short of class 1 drops the whole verdict to class 2."""
+    """One band 0.1 dB short of class 1 drops the whole verdict to class 2."""
     measured = _table_column("instrument", 1)
     measured[7] -= 0.1  # 250 Hz
     verdict = emission.verify_intensity_class(measured, frequencies=_BANDS)
@@ -248,7 +248,7 @@ def test_spacing_shifts_the_verdict() -> None:
     assert (
         emission.verify_intensity_class(measured, frequencies=_BANDS).overall_class == 2
     )
-    # A 12,5 mm spacer relaxes every requirement by 10 lg(0,5) = -3,01 dB.
+    # A 12.5 mm spacer relaxes every requirement by 10 lg(0.5) = -3.01 dB.
     relaxed = emission.verify_intensity_class(
         measured, frequencies=_BANDS, spacing_m=0.0125
     )
@@ -279,7 +279,7 @@ def test_octave_band_class_1_verdict_is_still_range_limited() -> None:
 
     The octave range is the *class 2* alternative, so clearing the class 1
     minima at seven octave centres attests class 1 over those seven bands and
-    not over the 45 Hz to 7,1 kHz one-third-octave range the class requires.
+    not over the 45 Hz to 7.1 kHz one-third-octave range the class requires.
     """
     class1 = emission.residual_index_limits("processor", frequencies=_OCTAVES).class_1
     verdict = emission.verify_intensity_class(
@@ -298,7 +298,7 @@ def test_octave_band_class_1_verdict_is_still_range_limited() -> None:
 
 
 def test_octave_band_subset_is_range_limited_for_a_probe() -> None:
-    """Clause 12.4 determines a probe's index in one-third octaves, 50 Hz-6,3 kHz.
+    """Clause 12.4 determines a probe's index in one-third octaves, 50 Hz-6.3 kHz.
 
     The octave-band alternative of clause 6.1 is a *processor* option, so a
     probe verified at seven octave centres only attests those seven bands.
@@ -352,7 +352,7 @@ def test_mismatched_lengths_and_repeats_are_rejected() -> None:
 def test_result_carries_the_masks_and_the_binding_margin() -> None:
     """The result mirrors verify_intensity_class and exposes the margins."""
     measured = [value + 1.5 for value in _table_column("instrument", 1)]
-    measured[4] -= 1.0  # 125 Hz becomes the binding band (+0,5 dB)
+    measured[4] -= 1.0  # 125 Hz becomes the binding band (+0.5 dB)
     result = emission.verify_intensity_class(measured, frequencies=_BANDS)
 
     assert result.overall_class == 1
@@ -393,7 +393,7 @@ def test_result_rejects_an_unknown_class() -> None:
 
 
 def test_fahy_worked_check_026_degrees() -> None:
-    """20 dB at 1 kHz over 25 mm is a mismatch of about 0,26 degrees."""
+    """20 dB at 1 kHz over 25 mm is a mismatch of about 0.26 degrees."""
     phi = emission.phase_mismatch_from_residual_index(
         ref.IEC61043_PHASE_INDEX_DB,
         frequency=ref.IEC61043_PHASE_FREQUENCY_HZ,

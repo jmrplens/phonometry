@@ -175,7 +175,7 @@ def test_table_2_a_weighted_row(grade: str, expected: float | None) -> None:
     list(zip(_GRADES, ref.ISO9614_1_TABLE_B1_ALL_BANDS, strict=True)),
 )
 def test_table_b1_all_bands_row(grade: str, expected: float | None) -> None:
-    """The "all bands" row of Table B.1: 0,20 at grade 1, 0,29 at grade 2."""
+    """The "all bands" row of Table B.1: 0.20 at grade 1, 0.29 at grade 2."""
     if expected is None:
         with pytest.raises(ValueError, match="leaves the 'all bands' cell"):
             emission.error_factor(grade)  # type: ignore[arg-type]
@@ -188,7 +188,7 @@ def test_table_b1_all_bands_row(grade: str, expected: float | None) -> None:
     list(zip(_GRADES, ref.ISO9614_1_TABLE_B1_A_WEIGHTED, strict=True)),
 )
 def test_table_b1_a_weighted_row(grade: str, expected: float | None) -> None:
-    """The A-weighted row of Table B.1: 0,60 at grade 3 and blank elsewhere."""
+    """The A-weighted row of Table B.1: 0.60 at grade 3 and blank elsewhere."""
     if expected is None:
         with pytest.raises(ValueError, match="leaves the 'A-weighted' cell"):
             emission.error_factor(grade, a_weighted=True)  # type: ignore[arg-type]
@@ -785,10 +785,10 @@ def test_a_uniform_field_over_many_positions_reaches_the_precision_grade() -> No
 def test_too_much_inward_flow_leaves_the_band_ungraded() -> None:
     """Figure B.1's third gate stops the grade, not only the action code.
 
-    Forty positions, thirty flowing outward at 0,94 and ten inward at 1,0
-    (arbitrary units), which puts F3 - F2 at 3,2 dB, just past the gate, while
+    Forty positions, thirty flowing outward at 0.94 and ten inward at 1.0
+    (arbitrary units), which puts F3 - F2 at 3.2 dB, just past the gate, while
     holding F4 low enough that criterion 2 is comfortably satisfied at
-    grade 2: 11 x F4^2 is 38,5 against the forty positions measured. So the
+    grade 2: 11 x F4^2 is 38.5 against the forty positions measured. So the
     only thing standing between this band and a grade is the inward flow, and
     the verdict has to be "none" all the same.
     """
@@ -815,9 +815,9 @@ def test_too_much_inward_flow_leaves_the_band_ungraded() -> None:
 
 
 def _a_little_inward_flow() -> emission.DiscretePointIntensityResult:
-    """Thirty-six segments outward and four inward: F2 = 10, F3 = 10,97 dB.
+    """Thirty-six segments outward and four inward: F2 = 10, F3 = 10.97 dB.
 
-    Ld is put at 10,5 dB, between the two, which is the only arrangement that
+    Ld is put at 10.5 dB, between the two, which is the only arrangement that
     can tell equation (B.1) apart from the same comparison written on F3. A
     field with no inward flow at all has F2 and F3 equal, so it says nothing
     about which of the two indicators criterion 1 reads.
@@ -853,7 +853,7 @@ def test_the_per_band_grade_reads_ld_at_the_grade_1_and_2_bias_factor() -> None:
 
     Table 1 allows grade 3 a K of 7 dB against the 10 dB of grades 1 and 2, so
     the same delta_pI0 buys 3 dB more dynamic capability there. Here
-    delta_pI0 = 18,5 dB puts Ld at 8,5 dB with K = 10 and at 11,5 dB with
+    delta_pI0 = 18.5 dB puts Ld at 8.5 dB with K = 10 and at 11.5 dB with
     K = 7, against an F2 of 10 dB: read at the survey K the band would clear
     criterion 1 and be graded, which Table B.2 gives no per-band column to do.
     """
@@ -886,7 +886,7 @@ def test_the_per_band_grade_needs_ld_strictly_above_f2() -> None:
 def test_an_unsteady_field_reaches_no_grade_either() -> None:
     """Figure B.1's first gate is a gate on the grade and not only on an action.
 
-    F1 > 0,6 is the initial test failing, and Table B.3 sends it to action (e)
+    F1 > 0.6 is the initial test failing, and Table B.3 sends it to action (e)
     before any other question is asked. A band whose field would otherwise
     qualify at grade 1 must therefore still come back ungraded.
     """
@@ -934,7 +934,7 @@ def test_a_band_outside_the_method_reaches_no_grade() -> None:
 # Table B.3 action codes, one case per code (Figure B.1's order)
 # ---------------------------------------------------------------------------
 def test_action_e_when_the_field_is_not_stationary() -> None:
-    """Table B.3 row 1: F1 > 0,6 asks for action (e) before anything else."""
+    """Table B.3 row 1: F1 > 0.6 asks for action (e) before anything else."""
     wandering = np.array([1.0e-5, 5.0e-5, 2.0e-6, 9.0e-5, 1.0e-6])
     result = _qualified_case(np.full(10, 1.0e-5), temporal=wandering)
     assert result.f1 is not None
@@ -957,7 +957,7 @@ def test_actions_a_or_b_when_too_much_power_flows_inward() -> None:
     """Figure B.1's third gate: (F3 - F2) above 3 dB, same two actions."""
     intensity = np.full(10, 1.0e-5)
     # (F3 - F2) = 10*lg[(9p + x)/(9p - x)] with one inward position of -x, so
-    # x = 3.2p puts the excess at about 3,2 dB, just past the Figure B.1 gate.
+    # x = 3.2p puts the excess at about 3.2 dB, just past the Figure B.1 gate.
     intensity[0] = -3.2e-5
     result = _qualified_case(intensity)
     assert result.f2 is not None
@@ -986,12 +986,12 @@ def test_action_c_when_criterion_2_fails_with_moderate_inward_flow() -> None:
 
 
 def test_action_c_still_holds_halfway_between_the_two_rows() -> None:
-    """The row-c and row-d split is at 1 dB, and 1,5 dB is still row c.
+    """The row-c and row-d split is at 1 dB, and 1.5 dB is still row c.
 
     The case above sits at about 2 dB, which leaves the whole of 1 dB to 2 dB
     untested and a limit anywhere in it indistinguishable from the printed one.
-    One inward position of -1,54 against nine outward of 1,0 puts F3 - F2 at
-    1,5 dB, halfway across that gap.
+    One inward position of -1.54 against nine outward of 1.0 puts F3 - F2 at
+    1.5 dB, halfway across that gap.
     """
     intensity = np.full(10, 1.0e-5)
     intensity[0] = -1.5388e-5
@@ -1045,7 +1045,7 @@ def test_action_d_is_the_action_at_exactly_one_decibel() -> None:
 def test_an_f1_that_is_not_a_number_asks_for_action_e() -> None:
     """A field indicator that is not a number did not qualify the field.
 
-    F1 is compared against 0,6, and NaN answers that comparison False just as a
+    F1 is compared against 0.6, and NaN answers that comparison False just as a
     small F1 does. Written as "F1 > 0,6" the first gate of Figure B.1 would
     wave through an initial test that produced no usable indicator at all, so
     it is written as "not F1 <= 0,6" instead and the two part company here.
@@ -1173,9 +1173,9 @@ def _three_bands_of_three_different_grades() -> emission.DiscretePointIntensityR
     """One determination whose bands reach grade 1, grade 2 and no grade.
 
     Twenty unit segments over three octave bands, asked for at grade 1. The
-    250 Hz band alternates about its mean at F4 = 0,90, so 29 x F4^2 is 23,5
+    250 Hz band alternates about its mean at F4 = 0.90, so 29 x F4^2 is 23.5
     against twenty positions and criterion 2 fails at grade 1 while 19 x F4^2
-    is 15,4 and it holds at grade 2. The 1 kHz band is uniform and reaches
+    is 15.4 and it holds at grade 2. The 1 kHz band is uniform and reaches
     grade 1. The 2 kHz band is uniform too, but is measured in a pressure
     field 15 dB louder, which puts F2 at 25 dB over an Ld of 20 dB and fails
     criterion 1.
@@ -1300,8 +1300,8 @@ def test_a_band_that_fails_only_criterion_2_leaves_the_sum_as_well() -> None:
     The case above omits a band on criterion 1 alone, which a screening that
     read criterion 1 only would omit just the same. Here the instrument is
     ample in both bands and criterion 1 holds in both, and what the low band
-    fails is criterion 2: its field alternates between 2,0 and 0,2, and
-    29 x F4^2 is 21,6 against the ten positions measured.
+    fails is criterion 2: its field alternates between 2.0 and 0.2, and
+    29 x F4^2 is 21.6 against the ten positions measured.
     """
     areas = np.full(10, 1.0)
     intensity = np.column_stack(
@@ -1330,11 +1330,11 @@ def test_note_11_reads_c_in_the_mid_row_when_the_top_bands_are_quiet() -> None:
     """Note 11: below half the A-weighted power up top, C comes from 200-630 Hz.
 
     B.1.2 otherwise takes the largest C over the summed range, which the 1 kHz
-    octave sets at 57 for grade 1. Here the 1 kHz band carries 7,5 % of the
+    octave sets at 57 for grade 1. Here the 1 kHz band carries 7.5 % of the
     A-weighted power, so Note 11 sends the lookup to the row covering the
     250 Hz and 500 Hz octaves instead, where C is 29. Twenty positions against
-    an A-weighted F4 of 0,664 clear 29 x F4^2 = 12,8 and do not clear
-    57 x F4^2 = 25,2, so the two readings hand back different grades.
+    an A-weighted F4 of 0.664 clear 29 x F4^2 = 12.8 and do not clear
+    57 x F4^2 = 25.2, so the two readings hand back different grades.
     """
     areas = np.full(20, 1.0)
     alternating = 1.0e-5 * (1.0 + 0.7 * np.array([1.0, -1.0] * 10))
@@ -1366,8 +1366,8 @@ def test_note_11_reads_c_in_the_mid_row_when_the_top_bands_are_quiet() -> None:
 
 
 #: Twenty positions alternating +/- 70 % about their mean. Every band built
-#: from it has the same shape, so the A-weighted F4 is 0,718 whatever the mix
-#: of band powers is, and N/F4a^2 is 38,8: between Table B.2's 29 and 57 at
+#: from it has the same shape, so the A-weighted F4 is 0.718 whatever the mix
+#: of band powers is, and N/F4a^2 is 38.8: between Table B.2's 29 and 57 at
 #: grade 1 and clear of 11 and 19 at grade 2. That is what lets the Note 11
 #: probes below move the power between bands and watch only the C lookup move.
 _ALTERNATING_20 = 1.0 + 0.7 * np.array([1.0, -1.0] * 10)
@@ -1391,11 +1391,11 @@ def _three_octaves(top: float) -> emission.DiscretePointIntensityResult:
 def test_note_11_measures_the_top_bands_against_half_the_power() -> None:
     """Note 11 prints "half", and the half is what decides which row is read.
 
-    Here the 1 kHz octave carries 35,0 % of the A-weighted power: below half,
-    so the Note fires and C at grade 1 is the mid row's 29, asking 15,0 of the
+    Here the 1 kHz octave carries 35.0 % of the A-weighted power: below half,
+    so the Note fires and C at grade 1 is the mid row's 29, asking 15.0 of the
     twenty positions measured, which the sum has. Read against a quarter the
     Note would stand down, the largest C over the range would be the 1 kHz
-    row's 57, asking 29,4 positions, and the same sum would settle for grade 2.
+    row's 57, asking 29.4 positions, and the same sum would settle for grade 2.
     """
     result = _three_octaves(0.332e-5)
     assert result.a_weighting_omitted_bands is not None
@@ -1406,12 +1406,12 @@ def test_note_11_measures_the_top_bands_against_half_the_power() -> None:
 def test_above_half_the_largest_c_over_the_summed_range_is_taken() -> None:
     """B.1.2 asks for the largest C in the range, which is its worst case.
 
-    With the 1 kHz octave carrying 60,0 % of the A-weighted power Note 11
+    With the 1 kHz octave carrying 60.0 % of the A-weighted power Note 11
     stands down and B.1.2's own rule applies: "el mayor valor de C en la banda
     de frecuencia comprendida por esta suma". That largest value is the 1 kHz
-    row's 57 at grade 1, which asks 29,4 of the twenty positions measured, so
+    row's 57 at grade 1, which asks 29.4 of the twenty positions measured, so
     the sum settles for grade 2; the smallest C over the same range, the mid
-    row's 29, would have asked 15,0 and granted grade 1. The 1 kHz octave is
+    row's 29, would have asked 15.0 and granted grade 1. The 1 kHz octave is
     the first band of the high row, so the range is read inclusively at both
     ends: drop it and the Note fires on a top row that carries nothing.
     """
@@ -1427,10 +1427,10 @@ def test_the_800_hz_one_third_octave_belongs_to_note_11s_top_row() -> None:
     The two spans are the same row of Table B.2 read in its two columns, so
     reading the octave span for a one-third-octave determination moves the
     800 Hz band out of the top row and Note 11 fires when it should not. Here
-    the 800 Hz third carries 85,8 % of the A-weighted power, so the Note stands
-    down and C at grade 1 is that row's 57, asking 29,4 of the twenty positions
+    the 800 Hz third carries 85.8 % of the A-weighted power, so the Note stands
+    down and C at grade 1 is that row's 57, asking 29.4 of the twenty positions
     measured; read out of the row, the Note would fire and the mid row's 29
-    would ask only 15,0 and grant grade 1.
+    would ask only 15.0 and grant grade 1.
     """
     result = emission.sound_power_intensity_points(
         np.column_stack([1.0e-5 * _ALTERNATING_20, 1.0e-5 * _ALTERNATING_20]),
@@ -1448,9 +1448,9 @@ def test_note_11s_row_is_read_at_the_grade_being_tried() -> None:
     """The substituted C is still a C, so it comes from the grade's own column.
 
     Note 11 changes which row of Table B.2 is read and not which column. The
-    1 kHz octave carries 7,5 % of the A-weighted power, so the Note fires; with
-    an A-weighted F4 of 0,854 over twenty positions, the mid row's 29 at
-    grade 1 asks for 21,2 positions and its 11 at grade 2 asks for 8,0, so the
+    1 kHz octave carries 7.5 % of the A-weighted power, so the Note fires; with
+    an A-weighted F4 of 0.854 over twenty positions, the mid row's 29 at
+    grade 1 asks for 21.2 positions and its 11 at grade 2 asks for 8.0, so the
     sum reaches grade 2. Read at the wrong grade it would be handed grade 1.
     """
     alternating = 1.0 + 0.9 * np.array([1.0, -1.0] * 10)
@@ -1476,7 +1476,7 @@ def test_one_band_of_inward_flow_stops_the_a_weighted_grade() -> None:
 
     An A-weighted level built on a band whose surface carries too much inward
     flow is no better than that band, so B.1.2's per-band gates are quantified
-    over all of them. Here the 2 kHz octave has F3 - F2 at 3,98 dB while the
+    over all of them. Here the 2 kHz octave has F3 - F2 at 3.98 dB while the
     1 kHz one is uniform and outward at 0 dB, and a gate read over "any band",
     or one reading the difference the other way round, would grade the sum on
     the clean band alone.
@@ -1526,8 +1526,8 @@ def test_criterion_1_must_hold_in_every_summed_band_at_the_grade_tried() -> None
     """And over criterion 1, whose Ld moves with the grade being tried.
 
     delta_pI0 = 17 dB gives Ld = 7 dB at the K = 10 dB of grades 1 and 2 and
-    Ld = 10 dB at the K = 7 dB of grade 3. Against F2 of 5,0 dB in one band and
-    9,5 dB in the other, only grade 3 clears both, so the search walks down the
+    Ld = 10 dB at the K = 7 dB of grade 3. Against F2 of 5.0 dB in one band and
+    9.5 dB in the other, only grade 3 clears both, so the search walks down the
     grades and stops at survey. Quantified over "any band" the 5 dB band alone
     would have carried the sum to grade 1.
     """
@@ -1626,9 +1626,9 @@ def test_the_survey_grade_is_reached_only_on_the_a_weighted_sum() -> None:
     """Grade 3 uses the single A-weighted C = 8, which no band column offers."""
     areas = np.full(10, 1.0)
     frequencies = np.array([500.0, 1000.0, 2000.0])
-    # One position four times the rest gives F4 = 0,730 over ten positions, so
-    # C F4^2 is 30,4 at grade 1 and 15,4 at grade 2, both above N = 10, while
-    # the A-weighted C = 8 of grade 3 asks for only 4,3.
+    # One position four times the rest gives F4 = 0.730 over ten positions, so
+    # C F4^2 is 30.4 at grade 1 and 15.4 at grade 2, both above N = 10, while
+    # the A-weighted C = 8 of grade 3 asks for only 4.3.
     weights = np.array([4.0] + [1.0] * 9)
     intensity = 1.0e-5 * np.repeat(weights[:, None], 3, axis=1)
     result = emission.sound_power_intensity_points(
@@ -1728,7 +1728,7 @@ def test_partial_power_concentration_follows_equation_b4() -> None:
 
 
 def test_the_concentration_error_factor_follows_the_grade() -> None:
-    """Table B.1 spends 0,20 at grade 1, 0,29 at grade 2 and 0,60 at grade 3."""
+    """Table B.1 spends 0.20 at grade 1, 0.29 at grade 2 and 0.60 at grade 3."""
     areas = np.full(12, 1.0)
     intensity = np.array([3.0e-5, 2.4e-5, 1.8e-5, 1.4e-5] + [8.0e-6] * 8)
     for grade, delta in (
@@ -1818,8 +1818,8 @@ def test_a_spread_out_field_has_no_concentration_to_exploit() -> None:
 def test_a_subset_of_exactly_half_the_segments_is_not_a_concentration() -> None:
     """B.1.3 asks for fewer than half, and half is not fewer than half.
 
-    Four segments of eight at 1,9 and four at 1,0 (arbitrary units): the top
-    three carry 5,7 of the 11,6 total and so do not reach half, and it takes
+    Four segments of eight at 1.9 and four at 1.0 (arbitrary units): the top
+    three carry 5.7 of the 11.6 total and so do not reach half, and it takes
     the fourth to pass it. That is a subset of exactly N/2, which the standard
     does not allow, with the power comparison itself well clear of the
     boundary.
@@ -1849,7 +1849,7 @@ def test_a_subset_carrying_exactly_half_the_power_is_not_yet_the_subset() -> Non
 def test_fewer_than_half_of_an_odd_segment_count_is_half_of_n() -> None:
     """The half B.1.3 bounds N_alpha by is half of N, not half of N - 1.
 
-    Five of eleven segments is fewer than 5,5 and so is a legal subset; taken
+    Five of eleven segments is fewer than 5.5 and so is a legal subset; taken
     against half of N - 1 it would be exactly 5 and refused. Odd counts are the
     only ones that can tell the two readings apart, and B.1.3 says "la mitad
     del número total de segmentos N".
@@ -1879,8 +1879,8 @@ def test_the_half_is_half_of_the_net_sound_power() -> None:
     halve their sum too, but the sound power of the band is the net one of
     equation (12) and the inward-flowing segments are part of it. Here they
     make the difference between a subset of two and a subset of three: the top
-    two carry 6,4e-5 W of a net 1,1e-4 W, over half, while the positive powers
-    alone come to 1,32e-4 W and would take a third segment to pass.
+    two carry 6.4e-5 W of a net 1.1e-4 W, over half, while the positive powers
+    alone come to 1.32e-4 W and would take a third segment to pass.
     """
     intensity = np.array(
         [-2e-6, 2e-6, 4e-6, 8e-6, 1e-6, -2e-6, 4e-6, -2e-6, 1.6e-5, 8e-6]

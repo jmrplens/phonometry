@@ -3,8 +3,8 @@
 
 Physics / normative anchors (ISO 3741:2010):
 - Direct method, Eq. (20):
-  LW = Lp(ST) + 10 lg(A/A0) + 4,34*(A/S) + 10 lg(1 + S*c/(8*V*f)) + C1 + C2 - 6.
-- A = (55,26/c)*(V/T60); c = 20,05*sqrt(273 + theta) (Sabine, clause 9.1.4).
+  LW = Lp(ST) + 10 lg(A/A0) + 4.34*(A/S) + 10 lg(1 + S*c/(8*V*f)) + C1 + C2 - 6.
+- A = (55.26/c)*(V/T60); c = 20.05*sqrt(273 + theta) (Sabine, clause 9.1.4).
 - Waterhouse boundary term 10 lg(1 + S*c/(8*V*f)) -> 0 as f -> infinity.
 - Comparison method, Eq. (21): LW = LW(RSS) + (Lp(ST) - Lp(RSS) + C2).
 """
@@ -151,7 +151,7 @@ def test_comparison_reference_conditions_c2_near_zero() -> None:
     lp_rss = np.array([70.0])
     lp_st = np.array([80.0])
     res = emission.sound_power_comparison(lp_st, lp_rss, reference_sound_power_levels)
-    # LW ~ 90 + (80 - 70) = 100, plus a ~0,003 dB C2 term.
+    # LW ~ 90 + (80 - 70) = 100, plus a ~0.003 dB C2 term.
     assert np.isclose(res.sound_power_level[0], 100.0, atol=0.01)
 
 
@@ -170,7 +170,7 @@ def test_comparison_fewer_than_six_positions_warns() -> None:
 
 
 def test_comparison_interposition_std_above_criterion_warns() -> None:
-    """sM > 1,5 dB across the comparison test-source positions warns (Eq. 10)."""
+    """sM > 1.5 dB across the comparison test-source positions warns (Eq. 10)."""
     levels = np.array([[70.0], [80.0], [72.0], [78.0], [71.0], [79.0]])
     lp_rss = np.array([70.0])
     reference_sound_power_levels = np.array([90.0])
@@ -248,11 +248,11 @@ def test_background_correction_is_per_position_eq14_to_16() -> None:
     Hand oracle at 1 kHz (lower criterion 10 dB): source positions
     70/68/66/72/71/69 dB over backgrounds 58/60/59/60/62/58 dB give margins
     12/8/7/12/9/11 dB, so three positions sit below the criterion and clamp
-    to K1i = 0,4576 dB while the others follow Eq. (14). The corrected mean
-    is 69,38872 dB (effective K1 = 0,36347 dB). A single K1 from the
-    position-averaged spectra (margin 10,02 dB -> K1 = 0,45536 dB) would
-    land 0,09 dB low at 69,29683 dB. The six levels spread 2,16 dB, over the
-    1,5 dB sM criterion of 8.4.2.2, which is advised as well.
+    to K1i = 0.4576 dB while the others follow Eq. (14). The corrected mean
+    is 69.38872 dB (effective K1 = 0.36347 dB). A single K1 from the
+    position-averaged spectra (margin 10.02 dB -> K1 = 0.45536 dB) would
+    land 0.09 dB low at 69.29683 dB. The six levels spread 2.16 dB, over the
+    1.5 dB sM criterion of 8.4.2.2, which is advised as well.
     """
     freqs = np.array([1000.0])
     t60 = np.array([1.5])
@@ -275,7 +275,7 @@ def test_background_correction_is_per_position_eq14_to_16() -> None:
         )
     assert res.mean_pressure_level[0] == pytest.approx(69.3887156232, abs=1e-9)
     assert res.background_correction[0] == pytest.approx(0.3634659689, abs=1e-9)
-    # Regression: the position-averaged shortcut (K1 = 0,45536 dB) is not used.
+    # Regression: the position-averaged shortcut (K1 = 0.45536 dB) is not used.
     assert res.mean_pressure_level[0] != pytest.approx(69.2968263631, abs=1e-3)
 
 
@@ -563,9 +563,9 @@ def test_volume_below_table1_minimum_warns() -> None:
 
 
 def test_t60_below_v_over_s_floor_warns() -> None:
-    """T60 <= V/S in a band below 6,3 kHz violates the Eq. (7) floor."""
+    """T60 <= V/S in a band below 6.3 kHz violates the Eq. (7) floor."""
     freqs = np.array([1000.0])
-    # floor = V/S = 200/210 ~ 0,95 s; T60 = 0,5 s is below it.
+    # floor = V/S = 200/210 ~ 0.95 s; T60 = 0.5 s is below it.
     t60 = np.array([0.5])
     lp = np.array([80.0])
     with pytest.warns(emission.SoundPowerWarning, match="V/S floor"):
@@ -585,10 +585,10 @@ def test_fewer_than_six_positions_warns() -> None:
 
 
 def test_interposition_std_above_criterion_warns() -> None:
-    """sM > 1,5 dB across the 6 positions flags discrete tones (Eq. 10)."""
+    """sM > 1.5 dB across the 6 positions flags discrete tones (Eq. 10)."""
     freqs = np.array([1000.0])
     t60 = np.array([1.5])
-    # Six positions with a large spread -> sM > 1,5 dB.
+    # Six positions with a large spread -> sM > 1.5 dB.
     levels = np.array([[70.0], [80.0], [72.0], [78.0], [71.0], [79.0]])
     with pytest.warns(
         emission.SoundPowerWarning,

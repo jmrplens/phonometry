@@ -2,22 +2,22 @@
 """Sound power and sound energy in situ by comparison: ISO 3747:2010.
 
 Normative anchors (ISO 3747:2010):
-- Background correction, Eq. (7): K1i = -10 lg(1 - 10^(-0,1 dLpi)), with the
+- Background correction, Eq. (7): K1i = -10 lg(1 - 10^(-0.1 dLpi)), with the
   8.1 rules: dL > 15 dB -> K1 = 0; 6 dB <= dL <= 15 dB -> Eq. (7); dL < 6 dB ->
-  the correction is capped at 1,3 dB and the result is an upper bound.
+  the correction is capped at 1.3 dB and the result is an upper bound.
 - Mean corrected levels, Eq. (8)-(10): energy means over the positions.
 - Sound power level, Eq. (11): LW = LW(RSS) - Lp(RSS) + Lp(ST); m locations,
   Eq. (12): energy means over j of LWj(RSS) and of Lpj(RSS).
 - Single events, Eq. (13)-(18); sound energy level Eq. (19)-(20).
 - Uncertainty, Eq. (22)-(23): sigma_tot = sqrt(sigma_R0^2 + sigma_omc^2),
-  U = k sigma_tot; Table 2: sigma_R0 = 1,5 dB (grade 2), 4,0 dB (grade 3).
-- 9.5 EXAMPLE: grade 2, sigma_omc = 2,0 dB, k = 2 -> U = 2 sqrt(1,5^2 + 2^2)
+  U = k sigma_tot; Table 2: sigma_R0 = 1.5 dB (grade 2), 4.0 dB (grade 3).
+- 9.5 EXAMPLE: grade 2, sigma_omc = 2.0 dB, k = 2 -> U = 2 sqrt(1.5^2 + 2^2)
   = 5 dB.
 - Annex A, Eq. (A.1): dLf(r) = Lp(RSS),r - LW(RSS) + 11 dB + 20 lg(r/r0).
-- Annex C: C2 = -10 lg(ps/ps0) + 15 lg((273,15 + theta)/296); Eq. (C.2):
-  ps = ps0 (1 - a Ha)^b, a = 2,2560e-5 1/m, b = 5,2553.
-- Annex D, Table D.1: Ck = -26,2 -16,1 -8,6 -3,2 0,0 1,2 1,0 -1,1 dB for the
-  octaves 63 Hz to 8 kHz; Eq. (D.1): LWA = 10 lg sum 10^(0,1 (LWk + Ck)).
+- Annex C: C2 = -10 lg(ps/ps0) + 15 lg((273.15 + theta)/296); Eq. (C.2):
+  ps = ps0 (1 - a Ha)^b, a = 2.2560e-5 1/m, b = 5.2553.
+- Annex D, Table D.1: Ck = -26.2 -16.1 -8.6 -3.2 0.0 1.2 1.0 -1.1 dB for the
+  octaves 63 Hz to 8 kHz; Eq. (D.1): LWA = 10 lg sum 10^(0.1 (LWk + Ck)).
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ CK_TABLE_D1 = np.array([-16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
 
 
 def _energy_mean(levels: np.ndarray, axis: int) -> np.ndarray:
-    """10 lg[(1/n) sum 10^(0,1 L)] along ``axis`` (Eq. 8 to 10, 12, 15, 18)."""
+    """10 lg[(1/n) sum 10^(0.1 L)] along ``axis`` (Eq. 8 to 10, 12, 15, 18)."""
     return np.asarray(10.0 * np.log10(np.mean(10.0 ** (0.1 * levels), axis=axis)))
 
 
@@ -88,11 +88,11 @@ def _power(**kwargs: object) -> emission.InSituSoundPowerResult:
 @pytest.mark.parametrize(
     ("margin", "expected"),
     [
-        # -10 lg(1 - 10^-0,6) = -10 lg(1 - 0,251 189) = -10 lg 0,748 811
+        # -10 lg(1 - 10^-0.6) = -10 lg(1 - 0.251 189) = -10 lg 0.748 811
         (6.0, 1.2563),
-        # -10 lg(1 - 0,1) = -10 lg 0,9
+        # -10 lg(1 - 0.1) = -10 lg 0.9
         (10.0, 0.4576),
-        # -10 lg(1 - 10^-1,5) = -10 lg(1 - 0,031 623) = -10 lg 0,968 377
+        # -10 lg(1 - 10^-1.5) = -10 lg(1 - 0.031 623) = -10 lg 0.968 377
         (15.0, 0.1396),
     ],
 )
@@ -119,8 +119,8 @@ def test_background_margin_above_15_db_needs_no_correction() -> None:
 
 
 def test_background_margin_below_6_db_is_capped_and_flagged() -> None:
-    """8.1: dL < 6 dB -> the correction is at most 1,3 dB and the band is an
-    upper bound; a margin of 5,9 dB is still below the cap (Eq. 7 gives
+    """8.1: dL < 6 dB -> the correction is at most 1.3 dB and the band is an
+    upper bound; a margin of 5.9 dB is still below the cap (Eq. 7 gives
     1,290 dB there) and a margin of 3 dB, or none at all, takes the cap.
     """
     background = np.full_like(ST, 40.0)
@@ -259,7 +259,7 @@ def test_eq12_energy_averages_the_locations_separately() -> None:
     )
     one = _power()
     np.testing.assert_allclose(res.sound_power_level, one.sound_power_level, atol=1e-12)
-    # and the two energy means themselves are the printed 10 lg[(1 + 10^0,6)/2]
+    # and the two energy means themselves are the printed 10 lg[(1 + 10^0.6)/2]
     lift = 10.0 * np.log10((1.0 + 10.0**0.6) / 2.0)
     np.testing.assert_allclose(res.reference_power_level, LW_RSS + lift, atol=1e-12)
     np.testing.assert_allclose(
@@ -417,8 +417,8 @@ def test_eq20_with_identical_locations_collapses_to_eq19() -> None:
 # Clause 9 and Table 2
 # --------------------------------------------------------------------------
 def test_clause_9_5_example_expanded_uncertainty_is_5_db() -> None:
-    """9.5 EXAMPLE: grade 2, sigma_omc = 2,0 dB, k = 2, sigma_R0 = 1,5 dB from
-    Table 2: U = 2 sqrt(1,5^2 + 2^2) dB = 2 sqrt(6,25) dB = 5 dB, exactly.
+    """9.5 EXAMPLE: grade 2, sigma_omc = 2.0 dB, k = 2, sigma_R0 = 1.5 dB from
+    Table 2: U = 2 sqrt(1.5^2 + 2^2) dB = 2 sqrt(6.25) dB = 5 dB, exactly.
     """
     res = _power(
         conditions=emission.GradeConditions(
@@ -439,8 +439,8 @@ def test_clause_9_5_example_expanded_uncertainty_is_5_db() -> None:
     [(0.5, 1.6), (2.0, 2.5), (4.0, 4.3)],
 )
 def test_table_e1_grade_2_row(sigma_omc: float, expected: float) -> None:
-    """Table E.1, sigma_R0 = 1,5 dB row: sqrt(2,25 + 0,25) = 1,58 -> 1,6;
-    sqrt(2,25 + 4) = 2,5; sqrt(2,25 + 16) = 4,27 -> 4,3 (printed to 0,1 dB).
+    """Table E.1, sigma_R0 = 1.5 dB row: sqrt(2.25 + 0.25) = 1.58 -> 1.6;
+    sqrt(2.25 + 4) = 2.5; sqrt(2.25 + 16) = 4.27 -> 4.3 (printed to 0.1 dB).
     """
     res = _power(
         conditions=emission.GradeConditions(
@@ -452,7 +452,7 @@ def test_table_e1_grade_2_row(sigma_omc: float, expected: float) -> None:
 
 
 def test_one_sided_coverage_factor_scales_eq23() -> None:
-    """9.1: k = 1,6 for the one-sided 95 % comparison with a limit value."""
+    """9.1: k = 1.6 for the one-sided 95 % comparison with a limit value."""
     res = _power(
         conditions=emission.GradeConditions(
             excess_levels=[8.0, 9.5, 7.2, 8.8], directivity_range=3.0
@@ -490,7 +490,7 @@ def test_table_2_grades(
 ) -> None:
     """Table 2: grade 2 needs dLfA >= 7 dB at every position and a directivity
     range within +/-7 dB; anything else, or an indicator not determined, is
-    grade 3 with sigma_R0 = 4,0 dB.
+    grade 3 with sigma_R0 = 4.0 dB.
     """
     res = _power(
         conditions=emission.GradeConditions(
@@ -520,9 +520,9 @@ def test_excess_level_is_zero_in_a_free_field_and_the_reverberant_surplus() -> N
 
 
 def test_c2_at_reference_conditions_is_the_296_k_residual() -> None:
-    """Annex C prints theta_ref = 296 K beside a 23,0 °C reference: at exactly
-    101,325 kPa and 23,0 °C, C2 = 15 lg(296,15/296) = 15 x 0,000 220 03
-    = 0,003 300 4 dB, not zero; the pressure term vanishes.
+    """Annex C prints theta_ref = 296 K beside a 23.0 °C reference: at exactly
+    101,325 kPa and 23.0 °C, C2 = 15 lg(296.15/296) = 15 x 0.000 220 03
+    = 0.003 300 4 dB, not zero; the pressure term vanishes.
     """
     res = _power()
     assert res.c2 == pytest.approx(0.0033004, abs=5e-8)
@@ -532,9 +532,9 @@ def test_c2_at_reference_conditions_is_the_296_k_residual() -> None:
 
 
 def test_static_pressure_from_altitude_eq_c2() -> None:
-    """Eq. (C.2) at 500 m: 1 - 2,2560e-5 x 500 = 0,988 72; ln = -0,011 344 1;
-    x 5,2553 = -0,059 617; exp = 0,942 126; ps = 95,461 kPa, and the Annex C
-    pressure term -10 lg(ps/ps0) is then 0,258 9 dB. At sea level ps = ps0.
+    """Eq. (C.2) at 500 m: 1 - 2.2560e-5 x 500 = 0.988 72; ln = -0.011 344 1;
+    x 5.2553 = -0.059 617; exp = 0.942 126; ps = 95,461 kPa, and the Annex C
+    pressure term -10 lg(ps/ps0) is then 0.258 9 dB. At sea level ps = ps0.
     """
     assert emission.static_pressure_from_altitude(0.0) == pytest.approx(101.325)
     ps = emission.static_pressure_from_altitude(500.0)

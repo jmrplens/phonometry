@@ -18,23 +18,23 @@ or five repeated sound pressure levels,
    \tag{Formula (1)}
 
 with :math:`\overline{L_X}` the *energy* average of the :math:`N`
-repetitions, does not exceed Table 1 (0,8 dB from 50 Hz to 80 Hz, 0,4 dB from
-100 Hz to 160 Hz, 0,2 dB from 200 Hz to 20 kHz), and over the declared range
+repetitions, does not exceed Table 1 (0.8 dB from 50 Hz to 80 Hz, 0.4 dB from
+100 Hz to 160 Hz, 0.2 dB from 200 Hz to 20 kHz), and over the declared range
 of its electrical or mechanical supply (the line voltage, say) no one-third
-octave band varies by more than 0,3 dB either way. The spectrum is broadband: from
+octave band varies by more than 0.3 dB either way. The spectrum is broadband: from
 100 Hz to 10 000 Hz every one-third octave band lies within a range of 12 dB
 and within 3 dB of its neighbours, and 16 dB and 4 dB over a range extended
 beyond it (5.4). The directivity index :math:`D_{\mathrm{I}i} = L_{pi} -
 \overline{L_p}` (3.9) does not exceed +6 dB in any band from 100 Hz to
 10 000 Hz (5.5), unless the source is labelled for reverberation rooms only.
-Recalibration is due when a band has moved by more than 2,83 times Table 1
+Recalibration is due when a band has moved by more than 2.83 times Table 1
 between two checks (5.6).
 
 **Calibration in a hemi-anechoic room (clause 8).** The room meets the
 broadband qualification of ISO 3745 Annex A (8.1), the source stands on the
 reflecting plane and the levels are measured over a hemisphere of radius 2 m
 (8.2.1). The sound power level under the reference meteorological conditions
-of clause 4 (23,0 degC, 101,325 kPa) is
+of clause 4 (23.0 degC, 101,325 kPa) is
 
 .. math::
 
@@ -44,11 +44,11 @@ of clause 4 (23,0 degC, 101,325 kPa) is
 with :math:`C_1 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 5 \lg(\theta /
 \theta_0)`, :math:`\theta_0` = 314 K, the radiation impedance correction
 :math:`C_2` from the manufacturer or from Annex A, and the air absorption
-:math:`C_3 = A_0 (1{,}005\,3 - 0{,}001\,2 A_0)^{1{,}6}` with :math:`A_0 = a(f)
+:math:`C_3 = A_0 (1.005\,3 - 0.001\,2 A_0)^{1.6}` with :math:`A_0 = a(f)
 r`. Annex A gives :math:`C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + n \lg
 (\theta/\theta_1)`, :math:`\theta_1` = 296 K, with :math:`n` = 15 for a
 monopole below the knee frequency :math:`f_\mathrm{k} = c/(2\pi d_0)`, 5 for a
-monopole at or above it, 25 for an aerodynamic dipole at or above it and 7,5
+monopole at or above it, 25 for an aerodynamic dipole at or above it and 7.5
 when the radiation is unknown. Annex B replaces the 50 Hz, 63 Hz and 80 Hz
 bands by sound intensity levels when those agree with the pressure levels
 within Table B.1 from 50 Hz to 315 Hz. Table 2 gives the reproducibility
@@ -143,7 +143,7 @@ _K_20000 = 13
 
 #: Table 1: largest standard deviation under repeatability conditions, dB.
 _TABLE_1_DB = ((_K_80, 0.8), (_K_160, 0.4), (_K_20000, 0.2))
-#: 5.6.2 and 5.6.3: a change beyond 2,83 times Table 1 calls for recalibration.
+#: 5.6.2 and 5.6.3: a change beyond 2.83 times Table 1 calls for recalibration.
 _DRIFT_FACTOR = 2.83
 #: 5.4: range and step of the spectrum from 100 Hz to 10 000 Hz, and over a
 #: range extended beyond it.
@@ -154,7 +154,7 @@ _EXTENDED_STEP_DB = 4.0
 #: 5.5: the highest directivity index from 100 Hz to 10 000 Hz.
 _MAX_DIRECTIVITY_DB = 6.0
 #: 5.2: over the declared range of the supply, no one-third octave band varies
-#: by more than +-0,3 dB.
+#: by more than +-0.3 dB.
 _SUPPLY_VARIATION_DB = 0.3
 #: 8.3.3 and 9.3.2: three repeated sound power levels or five sound pressure
 #: levels.
@@ -166,7 +166,7 @@ _TABLE_B1_DB = ((_K_80, 4.0), (_K_315, 1.0))
 _MIN_REPETITIONS = 2
 #: A level grid is (positions or repetitions, bands).
 _GRID_RANK = 2
-#: 11.2: the expanded uncertainty is +-1,96 sigma_R for 95 % coverage.
+#: 11.2: the expanded uncertainty is +-1.96 sigma_R for 95 % coverage.
 _COVERAGE_FACTOR = 1.96
 
 #: Table 2, one-third octave rows: sigma_R in dB for the hemi-anechoic room
@@ -329,7 +329,7 @@ def radiation_impedance_correction(
 
     :math:`C_2 = -10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + n \lg(\theta/
     \theta_1)`, :math:`\theta_1` = 296 K and :math:`\theta` the air temperature
-    in kelvin, with :math:`n` = 7,5 for a source whose radiation is unknown
+    in kelvin, with :math:`n` = 7.5 for a source whose radiation is unknown
     (A.5), 15 below and 5 at or above the knee frequency for a monopole
     (A.2, A.3), and 25 at or above it for an aerodynamic dipole (A.4). Annex A
     is informative: 8.4 prefers the manufacturer's value, and the formula the
@@ -475,7 +475,7 @@ class CalibrationConditions(OwnsArrays):
     air: :math:`C_1` and the Annex A :math:`C_2` read its temperature and its
     static pressure, and :math:`C_3` reads the attenuation coefficient
     :math:`a(f)` that ISO 9613-1 gives for it. The defaults are the reference
-    meteorological conditions of clause 4, 23,0 degC and 101,325 kPa, with no
+    meteorological conditions of clause 4, 23.0 degC and 101,325 kPa, with no
     air absorption.
 
     :param temperature_c: Air temperature during the calibration, in degrees
@@ -1054,7 +1054,7 @@ def reference_source_calibration(
         the frequency range of interest, here the bands calibrated from sound
         pressure at 2 m (the bands Annex B takes from sound intensity are the
         ones clause 10 lets an unqualified room calibrate, and are left out).
-    :param coverage_factor: :math:`k` of the expanded uncertainty (1,96 in
+    :param coverage_factor: :math:`k` of the expanded uncertainty (1.96 in
         11.2 for 95 %).
     :return: :class:`ReferenceSourceCalibration`.
     :raises ValueError: for bands that are not ascending one-third octaves
@@ -1140,7 +1140,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
     r"""Whether a source meets the performance requirements of ISO 6926 clause 5.
 
     Only what was measured is a field. The limits of clause 5 (Table 1, the
-    0,3 dB of the supply, the 12 dB and 16 dB ranges, the 3 dB and 4 dB steps,
+    0.3 dB of the supply, the 12 dB and 16 dB ranges, the 3 dB and 4 dB steps,
     the +6 dB of the directivity) are read from the bands as properties, and so
     are the spectrum figures they are compared with, so a verdict cannot be
     built against another limit.
@@ -1206,7 +1206,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
     def repeatability_limit_db(self) -> NDArray[np.float64]:
         r"""The Table 1 limit on :math:`\sigma_r` per band, in dB (5.2).
 
-        :return: 0,8 dB up to 80 Hz, 0,4 dB up to 160 Hz, 0,2 dB above.
+        :return: 0.8 dB up to 80 Hz, 0.4 dB up to 160 Hz, 0.2 dB above.
         """
         return np.array(
             [_repeatability_limit(int(k)) for k in self._band_indices],
@@ -1215,7 +1215,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
 
     @property
     def supply_limit_db(self) -> float:
-        """The 0,3 dB either way of 5.2, in dB."""
+        """The 0.3 dB either way of 5.2, in dB."""
         return _SUPPLY_VARIATION_DB
 
     @property
@@ -1295,7 +1295,7 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
 
     @property
     def supply_met(self) -> bool | None:
-        """5.2: no band moves by more than 0,3 dB over the declared supply range.
+        """5.2: no band moves by more than 0.3 dB over the declared supply range.
 
         :return: The verdict, or ``None`` when not judged.
         """
@@ -1542,7 +1542,7 @@ def verify_reference_sound_source(
 class ReferenceSourceDriftResult(OwnsArrays):
     """Whether a reference sound source has drifted enough to be recalibrated.
 
-    The limit is the clause's, 2,83 times Table 1, read from the bands as
+    The limit is the clause's, 2.83 times Table 1, read from the bands as
     :attr:`limit_db`, so a result cannot be built against another one.
 
     :ivar frequencies: The one-third octave bands, in hertz.
@@ -1570,7 +1570,7 @@ class ReferenceSourceDriftResult(OwnsArrays):
 
     @property
     def limit_db(self) -> NDArray[np.float64]:
-        """2,83 times the Table 1 value of each band (5.6), in dB."""
+        """2.83 times the Table 1 value of each band (5.6), in dB."""
         return _DRIFT_FACTOR * np.array(
             [
                 _repeatability_limit(_band_index(float(f)))
@@ -1581,7 +1581,7 @@ class ReferenceSourceDriftResult(OwnsArrays):
 
     @property
     def passes(self) -> bool:
-        """Whether every band stays within 2,83 times Table 1.
+        """Whether every band stays within 2.83 times Table 1.
 
         :return: ``True`` when no recalibration is called for.
         """
@@ -1589,7 +1589,7 @@ class ReferenceSourceDriftResult(OwnsArrays):
 
     @property
     def recalibration_required(self) -> bool:
-        """5.6.3: a band moved by more than 2,83 times Table 1.
+        """5.6.3: a band moved by more than 2.83 times Table 1.
 
         :return: The opposite of :attr:`passes`.
         """
@@ -1633,7 +1633,7 @@ def verify_reference_source_drift(
 
     The same check serves 5.6.2 (two calibrations), 5.6.3 (the regular
     one-third octave band levels at fixed reference points) and 5.6.4 (the
-    surface levels of a source kept in one place): a change larger than 2,83
+    surface levels of a source kept in one place): a change larger than 2.83
     times Table 1 in any band calls for recalibration.
 
     :param reference_levels: The levels of the earlier check, per band, in

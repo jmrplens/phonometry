@@ -8,13 +8,13 @@ Normative anchors (BS EN 61063:1996, the English text of IEC 1063:1991):
   below 6 m/s, a windscreen above 1 m/s.
 - 7.1 and Figure 2, printed folio 7 (PDF page 13): d = 1 m, Equation (1)
   S = 2 hmax bmax + sum l_i (2 h_i + b_i), the five key positions.
-- 7.2.2 NOTE, printed folio 8: overhead positions deleted within 1,0 dB.
+- 7.2.2 NOTE, printed folio 8: overhead positions deleted within 1.0 dB.
 - Table 2, printed folio 8 (PDF page 14): the stepped background correction.
 - 8.3 and 8.4, printed folio 9 (PDF page 15): Equations (2) and (3), K <= 7 dB,
-  the arithmetic average within 0,7 dB when the range is within 5 dB.
+  the arithmetic average within 0.7 dB when the range is within 5 dB.
 - 9.4 g), printed folio 10: LWA rounded to the nearest whole decibel.
 - Figure A.3, printed folio 12 (PDF page 18): K = 10 lg[1 + 4/(A/S)],
-  A = 0,16 V/T, K = LW - LWr; A.3.3 K <= 7, A/S >= 1 on folio 13.
+  A = 0.16 V/T, K = LW - LWr; A.3.3 K <= 7, A/S >= 1 on folio 13.
 
 The standard prints no worked example; every value below is a closed form
 computed by hand from these clauses.
@@ -91,15 +91,15 @@ def test_table_2_reads_the_difference_in_whole_decibels(
 @pytest.mark.parametrize(
     ("operating", "background", "expected"),
     [
-        (32.3, 28.8, 2.0),  # 3,499 999 999 999 996 in binary: 3,5 dB, up to 4
-        (20.4, 14.9, 1.0),  # 5,499 999 999 999 998: 5,5 dB, rounded up to 6
-        (20.1, 10.1, 0.5),  # 10,000 000 000 000 002: the row 10, not "> 10"
+        (32.3, 28.8, 2.0),  # 3.499 999 999 999 996 in binary: 3.5 dB, up to 4
+        (20.4, 14.9, 1.0),  # 5.499 999 999 999 998: 5.5 dB, rounded up to 6
+        (20.1, 10.1, 0.5),  # 10.000 000 000 000 002: the row 10, not "> 10"
     ],
 )
 def test_table_2_reads_a_difference_of_decimal_readings_as_printed(
     operating: float, background: float, expected: float
 ) -> None:
-    """The difference of two readings to 0,1 dB is not exact in binary."""
+    """The difference of two readings to 0.1 dB is not exact in binary."""
     difference = operating - background
     assert difference != round(difference, 1)
     assert emission.turbine_background_correction(difference) == expected
@@ -114,13 +114,13 @@ def test_table_2_keeps_the_shape_of_its_input() -> None:
 
 
 def test_table_2_departs_from_the_iso_3746_formula_by_tenths() -> None:
-    """At the printed rows the steps stay within 0,35 dB of Equation (12)."""
+    """At the printed rows the steps stay within 0.35 dB of Equation (12)."""
     rows = np.arange(3.0, 11.0)
     steps = np.asarray(emission.turbine_background_correction(rows))
     exact = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * rows))
     np.testing.assert_allclose(steps, exact, atol=0.36)
-    assert steps[2] - exact[2] > 0.3  # 5 dB: 2 against 1,65
-    assert exact[3] - steps[3] > 0.25  # 6 dB: 1 against 1,26
+    assert steps[2] - exact[2] > 0.3  # 5 dB: 2 against 1.65
+    assert exact[3] - steps[3] > 0.25  # 6 dB: 1 against 1.26
 
 
 def test_table_2_refuses_a_difference_that_is_not_finite() -> None:
@@ -314,8 +314,8 @@ def test_the_overhead_line_climbs_the_front_end_and_crosses_the_top() -> None:
     With a 2 m spacing the run from 1 to 3 (3 m up the front end, 7 m along
     the top, 1 m up the step and 5 m along) is 16 m, eight intervals of 2 m:
     the first position stands on the front end, 2 m above key position 1, as
-    the elevations of Figure 2 draw one. The run from 3 to 5 (1,5 m down the
-    step, 7 m along, 0,8 m down, 4 m along and 1,7 m down the rear end) is
+    the elevations of Figure 2 draw one. The run from 3 to 5 (1.5 m down the
+    step, 7 m along, 0.8 m down, 4 m along and 1.7 m down the rear end) is
     15 m, eight intervals of 1,875 m.
     """
     array = _large_array()
@@ -480,7 +480,7 @@ def test_seven_decibels_qualifies_and_a_hair_more_does_not() -> None:
 
 
 def test_seven_decibels_from_two_decimal_readings_qualifies() -> None:
-    """(85,4 + 89,2)/2 - 80,3 is 7,000 000 000 000 014 in binary: 7 dB, within."""
+    """(85.4 + 89.2)/2 - 80.3 is 7.000 000 000 000 014 in binary: 7 dB, within."""
     correction = emission.turbine_reference_source_correction(
         [85.4, 89.2], calibrated_level=80.3, machine_length_m=8.0
     )
@@ -564,7 +564,7 @@ def test_equations_2_and_3_by_hand() -> None:
         background_levels=background,
         environmental_correction=2.0,
     )
-    # Table 2 at 12, 7, 4, 9,3, 20 and 5,6 dB: 0, 1, 2, 0,5, 0 and 1 dB.
+    # Table 2 at 12, 7, 4, 9.3, 20 and 5.6 dB: 0, 1, 2, 0.5, 0 and 1 dB.
     corrections = np.array([0.0, 1.0, 2.0, 0.5, 0.0, 1.0])
     np.testing.assert_array_equal(result.background_corrections, corrections)
     surface = _energy_mean(levels - corrections) - 2.0
@@ -609,7 +609,7 @@ def test_a_background_within_three_decibels_is_an_upper_limit() -> None:
 
 
 def test_a_background_3_db_below_in_decimal_readings_is_valid() -> None:
-    """32,3 - 29,3 dB is 2,999 999 999 999 996 in binary: 3 dB, at the criterion."""
+    """32.3 - 29.3 dB is 2.999 999 999 999 996 in binary: 3 dB, at the criterion."""
     levels = np.array([32.3, 40.0, 40.0, 40.0, 40.0])
     background = np.array([29.3, 20.0, 20.0, 20.0, 20.0])
     with warnings.catch_warnings():
@@ -665,7 +665,7 @@ def test_the_level_is_reported_to_the_whole_decibel_halves_up() -> None:
     levels = np.full(5, 90.0)
     result = emission.turbine_sound_power(
         levels,
-        surface_area=10.0**2.25,  # 10 lg S = 22,5 dB
+        surface_area=10.0**2.25,  # 10 lg S = 22.5 dB
         background_levels=None,
         environmental_correction=0.0,
     )
@@ -674,7 +674,7 @@ def test_the_level_is_reported_to_the_whole_decibel_halves_up() -> None:
 
 
 def test_a_half_a_hair_under_in_binary_still_rounds_up() -> None:
-    """80,2 - 0,7 + 20 dB is 99,5 dB, and 99,499 999 999 999 99 in binary."""
+    """80.2 - 0.7 + 20 dB is 99.5 dB, and 99.499 999 999 999 99 in binary."""
     result = emission.turbine_sound_power(
         np.full(4, 80.2),
         surface_area=100.0,
@@ -721,7 +721,7 @@ def test_the_arithmetic_average_at_a_range_of_exactly_five_decibels() -> None:
 
 
 def test_a_range_of_five_decibels_in_decimal_readings_is_within_the_note() -> None:
-    """20,1 - 15,1 dB is 5,000 000 000 000 002 in binary: 5 dB, not above it."""
+    """20.1 - 15.1 dB is 5.000 000 000 000 002 in binary: 5 dB, not above it."""
     result = emission.turbine_sound_power(
         np.array([15.1, 17.0, 18.0, 20.1]),
         surface_area=100.0,
@@ -733,7 +733,7 @@ def test_a_range_of_five_decibels_in_decimal_readings_is_within_the_note() -> No
 
 
 def test_the_worst_case_of_the_note_of_8_3_is_seven_tenths_rounded() -> None:
-    """Two levels 5 dB apart, the louder at 40,6 % of the positions: 0,707 dB.
+    """Two levels 5 dB apart, the louder at 40.6 % of the positions: 0.707 dB.
 
     For a fixed range the energy average leads the arithmetic one most when
     the levels sit at the two ends of the range, so this is the largest
@@ -782,9 +782,9 @@ def _overhead_level(effect_db: float) -> float:
 
 
 def test_overhead_positions_moving_the_level_by_exactly_1_0_db_may_go() -> None:
-    """The NOTE of 7.2.2: "not ... by more than 1,0 dB", so 1,0 dB itself is in.
+    """The NOTE of 7.2.2: "not ... by more than 1,0 dB", so 1.0 dB itself is in.
 
-    The effect is the difference of two energy means near 80 dB, so at 1,0 dB
+    The effect is the difference of two energy means near 80 dB, so at 1.0 dB
     it comes out a unit or two of their last place either side of it, which
     side depending on the machine; it is judged on the limit either way, and
     a micro-decibel past it is past.
@@ -800,7 +800,7 @@ def test_overhead_positions_moving_the_level_by_exactly_1_0_db_may_go() -> None:
 
 @pytest.mark.parametrize("steps", range(-8, 9))
 def test_the_overhead_verdict_does_not_turn_on_the_last_bits(steps: int) -> None:
-    """Every overhead level a few floating-point steps round 1,0 dB is on it."""
+    """Every overhead level a few floating-point steps round 1.0 dB is on it."""
     level = _overhead_level(oracle.IEC61063_OVERHEAD_EFFECT_DB)
     for _ in range(abs(steps)):
         level = float(np.nextafter(level, np.inf if steps > 0 else -np.inf))
@@ -892,7 +892,7 @@ def _uniform(level: float) -> emission.TurbineSoundPowerResult:
 def test_the_loudest_condition_is_found_before_rounding() -> None:
     """6.2 looks for the noisiest load, 9.4 g only rounds what is reported.
 
-    105,6 dB and 106,4 dB both report as 106 dB; the 75 % load is still the
+    105.6 dB and 106.4 dB both report as 106 dB; the 75 % load is still the
     louder of the two, though the 100 % load is listed first.
     """
     declaration = emission.turbine_noise_declaration(
@@ -945,7 +945,7 @@ def test_the_report_carries_the_corrected_levels_and_the_surface_level() -> None
         measured_at="today",
         tonal=False,
     )
-    # Table 2 at 12, 7, 4, 9,3, 20 and 5,6 dB takes 0, 1, 2, 0,5, 0 and 1 dB.
+    # Table 2 at 12, 7, 4, 9.3, 20 and 5.6 dB takes 0, 1, 2, 0.5, 0 and 1 dB.
     corrected = levels - np.array([0.0, 1.0, 2.0, 0.5, 0.0, 1.0])
     np.testing.assert_allclose(declaration.position_levels[0], corrected, atol=1e-12)
     assert declaration.surface_pressure_levels[0] == pytest.approx(

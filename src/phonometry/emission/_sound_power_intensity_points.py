@@ -74,8 +74,8 @@ band and stops there.
 **Grade 3 is an A-weighted determination only.** Table B.2 tabulates the
 criterion-2 factor ``C`` for grades 1 and 2 band by band and gives grade 3 a
 single A-weighted value (8) and no per-band column at all; Table B.1 does the
-same with the error factor :math:`\Delta` (0,20 and 0,29 for all bands at
-grades 1 and 2, 0,60 A-weighted at grade 3); and Table 2 does the same with the
+same with the error factor :math:`\Delta` (0.20 and 0.29 for all bands at
+grades 1 and 2, 0.60 A-weighted at grade 3); and Table 2 does the same with the
 standard deviation ``s`` of the determination. Three tables agree, so the
 asymmetry is the standard's design and not a gap in it: a per-band
 determination can reach grade 1 or grade 2, and grade 3 is reached, if at all,
@@ -244,7 +244,7 @@ _TABLE_B2: tuple[_BandRow, ...] = (
 )
 
 #: The A-weighted row of Table B.2, whose footnote fixes the summed range at
-#: 63 Hz to 4 kHz (octave) or 50 Hz to 6,3 kHz (one-third octave). Grade 3 is
+#: 63 Hz to 4 kHz (octave) or 50 Hz to 6.3 kHz (one-third octave). Grade 3 is
 #: the only grade in it.
 _C_A_WEIGHTED: dict[str, float] = {"survey": 8.0}
 
@@ -303,7 +303,7 @@ _THIRD_BANDS: tuple[float, ...] = (
 #: Largest relative deviation accepted between a supplied band centre and the
 #: nominal label it designates, as in
 #: :mod:`phonometry.emission.intensity_compliance`: the exact base-ten centres
-#: of IEC 61260-1 Annex A sit within 0,8 % of their nominal labels, so 3 %
+#: of IEC 61260-1 Annex A sit within 0.8 % of their nominal labels, so 3 %
 #: takes both conventions and still refuses a frequency that is no band at all.
 _BAND_MATCH_TOLERANCE = 0.03
 
@@ -338,7 +338,7 @@ class ActionCode(Enum):
 
 #: The criterion column of Table B.3, one entry per action code.
 _ACTION_CRITERION: dict[ActionCode, str] = {
-    ActionCode.REDUCE_TEMPORAL_VARIABILITY: "F1 > 0,6",
+    ActionCode.REDUCE_TEMPORAL_VARIABILITY: "F1 > 0.6",
     ActionCode.ADJUST_MEASUREMENT_DISTANCE: "F2 > Ld or (F3 - F2) > 3 dB",
     ActionCode.SHIELD_OR_REDUCE_REFLECTIONS: "F2 > Ld or (F3 - F2) > 3 dB",
     ActionCode.INCREASE_POSITION_DENSITY: (
@@ -360,7 +360,7 @@ _ACTION_TEXT: dict[ActionCode, str] = {
     ActionCode.ADJUST_MEASUREMENT_DISTANCE: (
         "In the presence of significant extraneous noise and/or strong "
         "reverberation, reduce the mean distance from the measurement surface "
-        "to the source to a minimum mean value of 0,25 m. In the absence of "
+        "to the source to a minimum mean value of 0.25 m. In the absence of "
         "significant extraneous noise and/or strong reverberation, increase "
         "the measurement distance to 1 m."
     ),
@@ -506,7 +506,7 @@ def position_count_factor(
     :param frequency: Nominal mid-band centre in Hz, as a Table B.2 label or
         the exact base-ten centre behind it. ``None`` asks for the A-weighted
         row instead, whose footnote fixes the summed range at 63 Hz to 4 kHz
-        (octave) or 50 Hz to 6,3 kHz (one-third octave).
+        (octave) or 50 Hz to 6.3 kHz (one-third octave).
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves, selecting the frequency column; ignored when ``frequency`` is
         ``None``. One of ``1`` or ``3``.
@@ -588,8 +588,8 @@ def error_factor(grade: DeterminationGrade, *, a_weighted: bool = False) -> floa
 
     :math:`\Delta` is the sampling error the optional procedure of B.1.3 is
     allowed to leave on the determination, and equation (B.4) is its only
-    consumer. Table B.1 prints one row for all bands, holding 0,20 at grade 1
-    and 0,29 at grade 2, and one A-weighted row holding 0,60 at grade 3; the
+    consumer. Table B.1 prints one row for all bands, holding 0.20 at grade 1
+    and 0.29 at grade 2, and one A-weighted row holding 0.60 at grade 3; the
     remaining four cells are blank in the print.
 
     :param grade: ``'precision'`` (grade 1), ``'engineering'`` (grade 2) or
@@ -710,7 +710,7 @@ class PartialPowerConcentration(RichDisplay):
     :ivar subset_area: :math:`S_\alpha`, the total area of the subset, m^2; the
         new positions are distributed over it in proportion to segment area.
     :ivar power_fraction: :math:`\alpha`, the fraction of the total sound power
-        passing through the subset, always above 0,5.
+        passing through the subset, always above 0.5.
     :ivar subset_nonuniformity: :math:`F_4(\alpha)`, the field non-uniformity
         of the subset alone (equations (A.8), (A.9)).
     :ivar remainder_nonuniformity: :math:`F_4(1-\alpha)`, that of the remaining
@@ -787,7 +787,7 @@ def partial_power_concentration(
     The positive partial powers are ranked in decreasing order and the top
     segments are taken until more than half the total sound power has been
     accounted for. That subset is :math:`N_\alpha` segments of total area
-    :math:`S_\alpha` carrying the fraction :math:`\alpha > 0,5`, and B.1.3
+    :math:`S_\alpha` carrying the fraction :math:`\alpha > 0.5`, and B.1.3
     requires :math:`N_\alpha` to be fewer than half of ``N``. The field
     non-uniformity is then evaluated separately over the subset and over the
     remainder (equations (A.8) and (A.9)), and:
@@ -809,8 +809,8 @@ def partial_power_concentration(
         each position of one frequency band, in W/m^2 (1D).
     :param areas: Segment areas :math:`S_i` in m^2, one per position (1D).
     :param grade: The grade whose Table B.1 :math:`\Delta` is spent:
-        ``'precision'`` (0,20), ``'engineering'`` (0,29) or ``'survey'``
-        (0,60, A-weighted).
+        ``'precision'`` (0.20), ``'engineering'`` (0.29) or ``'survey'``
+        (0.60, A-weighted).
     :return: A :class:`PartialPowerConcentration`.
     :raises ValueError: If the positions and areas disagree in length, an area
         is not positive and finite, an intensity is not finite, the total sound
@@ -1345,7 +1345,7 @@ def _band_actions(
     # ``not (f1 <= limit)`` rather than ``f1 > limit`` so a NaN F1, which every
     # comparison answers False, is treated as a field that failed to qualify
     # rather than as one that passed. F1 is judged settled: ten samples whose
-    # standard deviation is 0,6 of their mean in decimal sit on the limit.
+    # standard deviation is 0.6 of their mean in decimal sit on the limit.
     if f1 is not None and not is_at_most(
         float(settled(f1)), TEMPORAL_VARIABILITY_LIMIT
     ):
@@ -1552,8 +1552,8 @@ def _test_conditions_met(intensity: NDArray[np.float64]) -> NDArray[np.bool_]:
     whose test conditions were not met, not one that met them.
 
     The sign is read off the sum settled as a share of the sum of the
-    magnitudes: intensities that cancel in decimal, 0,3,
-    -0,1 and -0,2 W/m², sum to a few units in the last place either side of
+    magnitudes: intensities that cancel in decimal, 0.3,
+    -0.1 and -0.2 W/m², sum to a few units in the last place either side of
     zero in binary, and that must not decide the verdict.
     """
     return np.asarray(settled_net_share(intensity, axis=0) > 0.0, dtype=bool)

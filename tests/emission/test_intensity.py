@@ -3,9 +3,9 @@
 
 Physics anchors:
 - Plane progressive wave: I = p_rms^2 / (rho*c), so Lp - LI =
-  10*lg(rho*c/400) = 0,14 dB (IEC 61043:1993 clause 5 note).
+  10*lg(rho*c/400) = 0.14 dB (IEC 61043:1993 clause 5 note).
 - Finite-difference estimator bias sin(k*dr)/(k*dr) (IEC 61043:1993, 7.3;
-  Table 3 nominal -10,5 dB at 6,3 kHz for 25 mm separation).
+  Table 3 nominal -10.5 dB at 6.3 kHz for 25 mm separation).
 - Field indicators from ISO 9614-1:1993 Annex A, equations (A.3)-(A.9).
 """
 
@@ -51,7 +51,7 @@ def _plane_wave_pair(
 
 
 def test_plane_progressive_wave_broadband() -> None:
-    """I = p_rms^2/(rho*c) within 3 % in the valid band, F2 = 0,14 dB."""
+    """I = p_rms^2/(rho*c) within 3 % in the valid band, F2 = 0.14 dB."""
     p1, p2 = _plane_wave_pair(delay_s=SPACING / C)
     res = emission.sound_intensity(
         p1, p2, FS, spacing_m=SPACING, density=RHO, speed_of_sound=C
@@ -62,7 +62,7 @@ def test_plane_progressive_wave_broadband() -> None:
     # 0.015 keeps ~3x headroom (was 0.03).
     assert res.total_intensity == pytest.approx(expected, rel=0.015)
     assert res.total_direction == 1
-    # IEC 61043:1993 clause 5: Lp - LI = 10*lg(rho*c/400) = 0,14 dB.
+    # IEC 61043:1993 clause 5: Lp - LI = 10*lg(rho*c/400) = 0.14 dB.
     assert res.total_pressure_intensity_index == pytest.approx(
         10 * np.log10(RHO * C / 400.0), abs=0.35
     )
@@ -190,7 +190,7 @@ def test_plane_wave_third_octave_bands() -> None:
     active = (res.frequencies >= 80.0) & (res.frequencies <= 1600.0)
     assert np.any(active)
     assert np.all(res.direction[active] == 1)
-    # Free-field: per-band pressure-intensity index stays near 0,14 dB.
+    # Free-field: per-band pressure-intensity index stays near 0.14 dB.
     assert np.all(np.abs(res.pressure_intensity_index[active]) < 1.0)
     # Correction factor grows monotonically with frequency, >= 1 in-band.
     assert np.all(res.bias_correction[active] >= 1.0)
@@ -343,7 +343,7 @@ def test_validation_errors() -> None:
 
 def test_field_indicators_uniform_field() -> None:
     """Uniform positive intensity: F4 = 0 and F2 = F3; a plane-wave-like
-    surface gives F2 = 10*lg(rho*c/400) = 0,14 dB.
+    surface gives F2 = 10*lg(rho*c/400) = 0.14 dB.
     """
     i_n = np.full(8, 1.0 / (RHO * C))  # plane-wave intensity for 1 Pa^2
     lp = np.full(8, 93.98)  # 1 Pa^2 mean-square pressure
@@ -361,7 +361,7 @@ def test_field_indicators_negative_partial_power() -> None:
     ind = emission.field_indicators(lp, i_n)
     assert ind.f3 > ind.f2
     assert ind.f4 > 0.0
-    # Hand-computed anchors: mean|In| = 1,25e-3, mean In = 1,0e-3.
+    # Hand-computed anchors: mean|In| = 1.25e-3, mean In = 1.0e-3.
     lp_surf = 90.0
     assert ind.f2 == pytest.approx(lp_surf - 10 * np.log10(1.25e-3 / 1e-12), abs=1e-9)
     assert ind.f3 == pytest.approx(lp_surf - 10 * np.log10(1.0e-3 / 1e-12), abs=1e-9)
@@ -489,7 +489,7 @@ def test_dynamic_capability_index() -> None:
 # closed form of equation (A.1) itself: the coefficient of variation of the M
 # short-time samples of the normal intensity at one fixed position, i.e. the
 # sample standard deviation (N - 1 denominator, equation (A.1)) over the
-# algebraic mean (equation (A.2)). The Table B.3 threshold of 0,6 is the
+# algebraic mean (equation (A.2)). The Table B.3 threshold of 0.6 is the
 # standard's own number.
 # ---------------------------------------------------------------------------
 
@@ -643,13 +643,13 @@ def test_field_indicators_f1_column_count_must_match_the_bands() -> None:
 
 
 def test_field_stationarity_against_the_table_b3_limit() -> None:
-    """ISO 9614-1 Table B.3 calls for action when F1 exceeds 0,6."""
+    """ISO 9614-1 Table B.3 calls for action when F1 exceeds 0.6."""
     assert emission.TEMPORAL_VARIABILITY_LIMIT == 0.6
     lp = np.full(4, 80.0)
     i_n = np.full(4, 1.0e-5)
     steady = emission.field_indicators(lp, i_n, temporal_intensity=np.full(10, 1.0e-5))
     assert steady.check_field_stationarity().passes is True
-    # A pair chosen so equation (A.1) lands exactly on the 0,6 threshold, and
+    # A pair chosen so equation (A.1) lands exactly on the 0.6 threshold, and
     # a wilder pair above it: sqrt(2)*(b - a)/(a + b) with a = 1, b = r.
     r = (np.sqrt(2.0) + 0.6) / (np.sqrt(2.0) - 0.6)
     on_limit = emission.field_indicators(
@@ -734,9 +734,9 @@ def test_an_f1_off_the_band_axis_is_refused(kind: str) -> None:
     :func:`temporal_variability_indicator` hands that single number back, so a
     scalar dropped in beside per-band F2/F3/F4 is the mistake nearest to hand.
     Nothing downstream reads it as short: plot() broadcasts F1 onto the band
-    axis, so the quietest band's 0,49 is drawn as a flat line under the
+    axis, so the quietest band's 0.49 is drawn as a flat line under the
     Table B.3 limit across the whole spectrum, and check_field_stationarity()
-    passes where these bands carry [1,19 0,92 0,49 0,55] and two of the four
+    passes where these bands carry [1.19 0.92 0.49 0.55] and two of the four
     exceed the limit.
     """
     import dataclasses
@@ -821,7 +821,7 @@ def test_the_broadband_index_must_restate_the_two_broadband_levels() -> None:
     titled the figure ``ISO 9614 $L_p$ vs $L_I$  (total $\delta_{pI}$ =
     25.0 dB)`` -- a field so reactive no instrument would qualify for it under
     ISO 9614-1 criterion 1 -- over a result whose own two totals differ by
-    -0,006 dB, and over band curves that agree with neither number.
+    -0.006 dB, and over band curves that agree with neither number.
     """
     import dataclasses
 
@@ -899,9 +899,9 @@ def test_the_broadband_totals_are_not_pinned_to_the_band_columns() -> None:
 
     ``limits`` clips the broadband sum at 100 Hz and 5 kHz, while the band
     column keeps every band whose centre falls inside those limits, edges and
-    all, out to 5,6 kHz; bands narrower than the spectral resolution are
+    all, out to 5.6 kHz; bands narrower than the spectral resolution are
     dropped from the column outright. The two sums are therefore different
-    quantities and disagree by 11 % of the intensity and 0,42 dB of the
+    quantities and disagree by 11 % of the intensity and 0.42 dB of the
     pressure level on this measurement -- which is why no guard equates them.
     """
     result = _broadband_result()

@@ -30,6 +30,10 @@ from .absorption_placement import (
 )
 from .aperture import _aperture_fields, animate_fdtd_aperture_slit
 from .barrier import _barrier_fields, animate_fdtd_barrier
+from .barrier_reflection import (
+    _barrier_reflection_fields,
+    animate_fdtd_barrier_reflection,
+)
 from .diffusion import _diffusion_fields, animate_fdtd_diffusion
 from .dispersion import _dispersion_fields, animate_fdtd_dispersion
 from .duct_modes import _duct_cut_on_fields, animate_fdtd_duct_cut_on
@@ -83,6 +87,7 @@ __all__ = [
     "_absorption_placement_fields",
     "_aperture_fields",
     "_barrier_fields",
+    "_barrier_reflection_fields",
     "_coincidence_fields",
     "_diffusion_fields",
     "_dispersion_fields",
@@ -115,6 +120,7 @@ __all__ = [
     "animate_fdtd_absorption_placement",
     "animate_fdtd_aperture_slit",
     "animate_fdtd_barrier",
+    "animate_fdtd_barrier_reflection",
     "animate_fdtd_critical_angle",
     "animate_fdtd_diffusion",
     "animate_fdtd_dispersion",

@@ -41,6 +41,7 @@ import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Una pantalla acústica de carretera se declara por su absorción, y la EN 1793-1
 la mide en una cámara reverberante: una muestra tumbada en el suelo, sonido que
@@ -167,7 +168,7 @@ y con ella el tiempo de vuelo, no tiene ocasión de cambiar entre unos y otros.
 
 Delante del dispositivo el sonido directo y la reflexión se solapan: la
 respuesta al impulso de un altavoz dura hasta 3 ms (apartado 5.4.2) y la
-reflexión llega unos 1,4 ms después del directo. El registro en campo libre,
+reflexión llega unos 1,5 ms después del directo. El registro en campo libre,
 tomado con el altavoz y la rejilla vueltos hacia donde no hay nada, tampoco el
 suelo, *es* el sonido directo. La **sustracción de la señal** (apartado 5.5.4)
 lo quita: el registro en campo libre se desplaza en pasos de un cincuentavo de
@@ -336,6 +337,42 @@ construcción de los autores del método (Garai y Guidorzi, 2000): la parte plan
 y el flanco de bajada de la ventana duran justo el retardo entre la reflexión y
 la primera componente no deseada, y su límite es la primera muesca del espectro
 de esa ventana, 162,5 Hz para la de 7,9 ms, que el artículo da como unos 160 Hz.
+
+Toda la cadena se puede ver. Debajo, una sección vertical por el altavoz y el
+micrófono 5, delante de una muestra de 4 m y de otra de 2,5 m: el pulso sale
+del altavoz, vuelve de la cara de la muestra y detrás llega lo que la ventana
+tiene que dejar fuera. Junto a cada sección, el registro en el micrófono se va
+llenando al paso del campo, con el registro en campo libre restado y, sobre lo
+que queda, la ventana que `reflection_low_frequency_limit` da a esa muestra.
+
+<Video
+  name="anim_fdtd_barrier_reflection"
+  width={2400}
+  height={1350}
+  title="El pulso de la EN 1793-5 delante de una muestra de 4 m y de otra de 2,5 m (FDTD 2D)"
+  description="Simulación FDTD 2D de la medición EN 1793-5 en una sección vertical por el altavoz y el micrófono 5, delante de una muestra rígida de 4 metros de altura y de otra de 2,5 metros, las dos sobre suelo rígido. Un pulso corto sale del altavoz, pasa por el micrófono, vuelve de la cara de la muestra y detrás llegan la reflexión en el suelo y la difracción en el borde superior. Junto a cada sección, el registro en el micrófono se va llenando, se le resta el registro en campo libre y la ventana de Adrienne se dibuja sobre la reflexión. Delante de la muestra de 4 metros la ventana dura 7,7 milisegundos y se cierra antes de la reflexión en el suelo, que llega 12,3 milisegundos después de salir el pulso; su límite de baja frecuencia es 167 hercios. Delante de la muestra de 2,5 metros la reflexión en el suelo llega a los 8,2 milisegundos, la ventana dura 3,6 milisegundos y el límite es 376 hercios."
+/>
+
+*Lo que la ventana conserva y lo que deja fuera. Cada registro tiene el sonido
+directo, la reflexión 1,5 ms detrás y luego, tras un silencio que solo fija la
+altura de la muestra, las llegadas no deseadas: la reflexión en el suelo, el
+mismo camino con un rebote más en la muestra y la difracción en el borde
+superior, que llega al micrófono 5 con alrededor de una vigésima parte del pico
+directo. Restado el registro en campo libre (apartado 5.5.4), no queda nada
+antes de la reflexión; la ventana se abre con su punto marcador 0,2 ms antes
+del pico geométrico (apartado 5.5.6) y se cierra antes de que llegue la
+reflexión en el suelo. Dura 7,7 ms delante de la muestra de 4 m y 3,6 ms
+delante de la de 2,5 m, y eso lleva el límite de baja frecuencia del micrófono 5
+de 167 Hz a 376 Hz (a 340 m/s). Tres límites de la imagen: es una sección, así
+que tiene el suelo y el borde superior pero no los bordes laterales, que solo
+llegan primero en una muestra más estrecha que alta (`device_length_m`), y sus
+frentes se abren como cilindros, de modo que los tiempos de llegada son los del
+montaje pero las amplitudes no; el suelo y la muestra son rígidos, así que la
+cara lo devuelve todo, donde un dispositivo real devuelve la fracción que mide
+el índice; y el pulso dura menos de un milisegundo, así que las llegadas quedan
+separadas, donde los 3 ms de un altavoz se solaparían. La sustracción es exacta
+aquí porque las dos simulaciones son el mismo pulso en la misma malla; en campo
+hace falta la alineación de la sección 2.*
 
 ```python
 limit = environment.reflection_low_frequency_limit(3.5, speed_of_sound=c)

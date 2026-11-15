@@ -335,6 +335,7 @@ from .fields import (
     _absorption_placement_fields,
     _aperture_fields,
     _barrier_fields,
+    _barrier_reflection_fields,
     _coincidence_fields,
     _diffusion_fields,
     _dispersion_fields,
@@ -366,6 +367,7 @@ from .fields import (
     animate_fdtd_absorption_placement,
     animate_fdtd_aperture_slit,
     animate_fdtd_barrier,
+    animate_fdtd_barrier_reflection,
     animate_fdtd_critical_angle,
     animate_fdtd_diffusion,
     animate_fdtd_dispersion,
@@ -1729,6 +1731,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_elastic_halfspace_waves": animate_elastic_halfspace_waves,
     "anim_elastic_mode_conversion": animate_elastic_mode_conversion,
     "anim_fdtd_lloyd_mirror": animate_fdtd_lloyd_mirror,
+    "anim_fdtd_barrier_reflection": animate_fdtd_barrier_reflection,
     "anim_elastic_radiation_efficiency": animate_elastic_radiation_efficiency,
     "anim_elastic_scholte": animate_elastic_scholte,
     "anim_fdtd_boundaries": animate_fdtd_boundaries,
@@ -1775,6 +1778,7 @@ _ANIM_FIELDS: dict[str, Callable[[], Any]] = {
     "anim_elastic_halfspace_waves": _halfspace_fields,
     "anim_elastic_mode_conversion": _mode_conversion_fields,
     "anim_fdtd_lloyd_mirror": _lloyd_mirror_fields,
+    "anim_fdtd_barrier_reflection": _barrier_reflection_fields,
     "anim_elastic_radiation_efficiency": _radiation_efficiency_fields,
     "anim_elastic_scholte": _scholte_fields,
     "anim_fdtd_boundaries": _boundaries_fields,
@@ -2228,6 +2232,7 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_elastic_halfspace_waves": 320.0,
     "anim_elastic_mode_conversion": 820.0,
     "anim_fdtd_lloyd_mirror": 900.0,
+    "anim_fdtd_barrier_reflection": 700.0,
     "anim_elastic_radiation_efficiency": 700.0,
     "anim_elastic_scholte": 900.0,
     "anim_fdtd_boundaries": 320.0,
@@ -2295,6 +2300,7 @@ _ANIM_DEVICES: dict[str, clip_placement.ClipDevice] = {
     "anim_elastic_halfspace_waves": "gpu",
     "anim_elastic_mode_conversion": "gpu",
     "anim_fdtd_lloyd_mirror": "cpu",
+    "anim_fdtd_barrier_reflection": "cpu",
     "anim_elastic_radiation_efficiency": "cpu",  # CuPy: two values two float32 steps off
     "anim_elastic_scholte": "cpu",  # not measured on a GPU yet
     "anim_fdtd_boundaries": "cpu",  # not measured on a GPU yet

@@ -122,7 +122,7 @@ def test_the_decay_curve_band_is_unchanged_in_english() -> None:
 
 
 def _nc_31_5() -> noise_criteria.NCResult:
-    """An NC-40 spectrum raised 10 dB at 31,5 Hz, which becomes the tangent band.
+    """An NC-40 spectrum raised 10 dB at 31.5 Hz, which becomes the tangent band.
 
     The tangency then falls between two curves of the family, so the rating is
     interpolated and carries a decimal of its own.

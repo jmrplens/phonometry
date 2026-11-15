@@ -106,7 +106,7 @@ class TestStageSupport:
             room.stage_support(response, FS, limits=None)
 
     def test_the_printed_standard_deviations_close_on_twelve_readings(self) -> None:
-        # C.2.4 estimates 1 dB for one band in one position and 0,3 dB for
+        # C.2.4 estimates 1 dB for one band in one position and 0.3 dB for
         # the single number, which is that divided by the root of the four
         # bands times three positions it averages.
         readings = len(room.STAGE_SUPPORT_BANDS_HZ) * room.STAGE_SUPPORT_POSITIONS
@@ -156,7 +156,7 @@ class TestReverberationTimeUncertainty:
     """Clause 7.1, Equations (4) and (5)."""
 
     def test_it_reproduces_the_printed_form_by_hand(self) -> None:
-        # T30 = 2,0 s in the 1 kHz octave band, ten decays in each of twelve
+        # T30 = 2.0 s in the 1 kHz octave band, ten decays in each of twelve
         # positions.
         sigma = room.reverberation_time_standard_deviation(
             2.0, 710.0, evaluation_range=30.0, decays=10, positions=12
@@ -165,7 +165,7 @@ class TestReverberationTimeUncertainty:
         assert sigma == pytest.approx(expected, abs=1e-12)
 
     def test_the_two_ranges_differ_by_the_printed_coefficients(self) -> None:
-        # 0,88/0,55 is exactly 1,6, and the rest of the ratio is the two
+        # 0.88/0.55 is exactly 1.6, and the rest of the ratio is the two
         # decay terms.
         common = {"bandwidth": 710.0, "decays": 10, "positions": 12}
         wide = room.reverberation_time_standard_deviation(
@@ -238,7 +238,7 @@ class TestFilterBandwidth:
         )
 
     def test_the_printed_fractions_round_from_the_iec_band_edges(self) -> None:
-        # 2^(1/2) - 2^(-1/2) = 0,7071 and 2^(1/6) - 2^(-1/6) = 0,2316, which
+        # 2^(1/2) - 2^(-1/2) = 0.7071 and 2^(1/6) - 2^(-1/6) = 0.2316, which
         # is what the clause rounds to two figures.
         octave = 2.0 ** (1.0 / 2.0) - 2.0 ** (-1.0 / 2.0)
         third = 2.0 ** (1.0 / 6.0) - 2.0 ** (-1.0 / 6.0)
@@ -271,7 +271,7 @@ class TestMinimumReliableReverberationTime:
         )
 
     def test_the_detector_takes_over_when_it_is_the_slower_of_the_two(self) -> None:
-        # 2 T_det = 0,1 s against 16/B = 0,0225 s.
+        # 2 T_det = 0.1 s against 16/B = 0.0225 s.
         assert room.min_reliable_reverberation_time(710.0, 0.05) == pytest.approx(
             0.1, abs=1e-15
         )

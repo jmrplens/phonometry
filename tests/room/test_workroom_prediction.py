@@ -290,7 +290,7 @@ def annex_b_case_b(
 
 
 def test_the_printed_room_has_the_absorption_area_annex_b_works_with() -> None:
-    """S = 1 090 m2 at a mean absorption of 0,15, so A = 163,5 m2."""
+    """S = 1 090 m2 at a mean absorption of 0.15, so A = 163.5 m2."""
     assert annex_b_absorption_m2() == pytest.approx(163.5)
 
 
@@ -315,7 +315,7 @@ def test_the_two_kinds_of_contribution_of_annex_b() -> None:
 
 @pytest.mark.parametrize("where", sorted(oracle.ANNEX_B_PRINTED_CASE_A_DB))
 def test_case_a_reproduces_table_b6(where: str) -> None:
-    """Table B.6: 82,1 dB beside M2 and 80,3 dB in the far corner."""
+    """Table B.6: 82.1 dB beside M2 and 80.3 dB in the far corner."""
     assert annex_b_case_a()[where] == pytest.approx(
         oracle.ANNEX_B_PRINTED_CASE_A_DB[where], abs=0.05
     )
@@ -329,7 +329,7 @@ def test_case_b_reproduces_table_b9(choice: str, where: str) -> None:
     Held to the half step of the tenth the table prints, with one exception
     named rather than absorbed into a wider tolerance for all six: the cell
     beside the new machine with the louder choice comes back 89,337 dB against
-    a printed 89,4 dB, 0,063 dB under it. The annex prints no contribution that
+    a printed 89.4 dB, 0.063 dB under it. The annex prints no contribution that
     would locate that last hundredth, so the departure is pinned as it is.
     """
     machine = ANNEX_B_M3 if choice == "first" else ANNEX_B_M4
@@ -344,9 +344,9 @@ def test_case_b_reproduces_table_b9(choice: str, where: str) -> None:
 def test_the_annex_b_results_belong_to_the_positions_not_to_the_labels() -> None:
     """Figure B.1 and Tables B.5 and B.8 disagree, and the results decide it.
 
-    Tables B.5 and B.8 put W1 at (3, 12, 1,6) and W2 at (17, 4, 1,6); Figure
+    Tables B.5 and B.8 put W1 at (3, 12, 1.6) and W2 at (17, 4, 1.6); Figure
     B.1 draws W1 beside M2 and W2 alone in the far corner. The station beside
-    M2 stands 1,2 m from a 90 dB machine and 7,1 m from a 95 dB one, so it
+    M2 stands 1.2 m from a 90 dB machine and 7.1 m from a 95 dB one, so it
     cannot be the quieter of the two, and the printed levels only come back
     when they are read the way the figure draws them.
     """
@@ -378,7 +378,7 @@ def test_the_printed_geometry_of_the_ifa_hall() -> None:
 
 
 def test_the_ifa_hall_reproduces_tab_4_2() -> None:
-    """Tab. 4.2: 279, 257, 296 and 391 m2, and 0,13, 0,12, 0,13 and 0,18."""
+    """Tab. 4.2: 279, 257, 296 and 391 m2, and 0.13, 0.12, 0.13 and 0.18."""
     areas = room.sabine_absorption_area(
         IFA_VOLUME_M3,
         oracle.IFA_LSA_01_234_REVERBERATION_S,
@@ -393,7 +393,7 @@ def test_the_ifa_hall_reproduces_tab_4_2() -> None:
 
 
 def test_the_worked_500_hz_step_of_the_ifa_sheet() -> None:
-    """A = 0,163 . 6000 / 3,5 m2, printed as approximately 279 m2."""
+    """A = 0.163 . 6000 / 3.5 m2, printed as approximately 279 m2."""
     area = float(
         room.sabine_absorption_area(
             IFA_VOLUME_M3, 3.5, speed_of_sound=oracle.IFA_LSA_01_234_SPEED_M_S
@@ -409,11 +409,11 @@ def test_the_energy_addition_reproduces_table_7_4() -> None:
     I. L. Ver and L. L. Beranek (eds.), Noise and Vibration Control
     Engineering, 2nd edition, Wiley, 2006: Table 7.4 on printed folio 200 (PDF
     page 204) prints the nine contributions and the two totals, and the text
-    on printed folio 199 (PDF page 203) prints the 3,7 dB benefit.
+    on printed folio 199 (PDF page 203) prints the 3.7 dB benefit.
 
     The nine contributions are themselves printed to a tenth of a decibel, so
-    their sum can only be recovered to half a step: 82,45 dB against a printed
-    82,4 dB before the ceiling treatment. The total after it, and the 3,7 dB
+    their sum can only be recovered to half a step: 82.45 dB against a printed
+    82.4 dB before the ceiling treatment. The total after it, and the 3.7 dB
     benefit the text draws from the pair, both round as printed.
     """
     before = room.total_workstation_level(list(oracle.VER_BERANEK_TABLE_7_4_BEFORE_DB))
@@ -450,7 +450,7 @@ def test_barron_example_7_8_reproduces_table_7_5() -> None:
 
 
 def test_the_worked_500_hz_line_of_barron_example_7_8() -> None:
-    """The book prints 114 + (-11,2) + 0,1 = 102,9 dB."""
+    """The book prints 114 + (-11.2) + 0.1 = 102.9 dB."""
     band = 2
     power = enclosure.BARRON_TABLE_7_5_LW_DB[band]
     level = float(
@@ -470,7 +470,7 @@ def test_the_worked_500_hz_line_of_barron_example_7_8() -> None:
 def test_the_2_khz_absorption_coefficient_of_table_7_5_is_not_its_room_constant() -> (
     None
 ):
-    """The room constant row prints 47,88 m2, which is 0,041 and not 0,043."""
+    """The room constant row prints 47.88 m2, which is 0.041 and not 0.043."""
     assert float(
         room.room_constant(enclosure.BARRON_EXAMPLE_7_8_SURFACE_M2, 0.041)
     ) == pytest.approx(enclosure.BARRON_TABLE_7_5_ROOM_CONSTANT_M2[4], abs=5e-3)
@@ -498,7 +498,7 @@ def test_the_2_khz_absorption_coefficient_of_table_7_5_is_not_its_room_constant(
 
 
 def test_barron_example_7_6() -> None:
-    """A Jordan refiner 4 m away in a room of 900 m2 at 0,05, printed 94,8 dB."""
+    """A Jordan refiner 4 m away in a room of 900 m2 at 0.05, printed 94.8 dB."""
     room_constant = float(
         room.room_constant(
             oracle.BARRON_EXAMPLE_7_6_SOURCE_SURFACE_M2,

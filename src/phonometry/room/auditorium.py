@@ -28,13 +28,13 @@ routes to the same number:
 
 The last two carry printed integers, 37 dB and 31 dB, and both are the
 correctly rounded value of a closed form: :math:`10\lg(1600\pi)` is
-37,0127 dB and :math:`10\lg(400\pi)` is 30,9921 dB. Rounded to whole
+37.0127 dB and :math:`10\lg(400\pi)` is 30.9921 dB. Rounded to whole
 decibels they land 6 dB apart, where the exact offsets are
-:math:`10\lg 4 = 6{,}0206` dB apart, so the reverberation-room route and
-the sound-power route cannot agree to better than 0,0206 dB. That is
+:math:`10\lg 4 = 6.0206` dB apart, so the reverberation-room route and
+the sound-power route cannot agree to better than 0.0206 dB. That is
 2 % of the 1 dB just-noticeable difference Table A.1 prints for G, and
 this module reproduces the standard's integers rather than the closed
-forms: a library that quietly used 30,9921 dB would disagree with every
+forms: a library that quietly used 30.9921 dB would disagree with every
 hand calculation done from the printed page.
 
 Both closed forms hold at a characteristic impedance of exactly
@@ -42,7 +42,7 @@ Both closed forms hold at a characteristic impedance of exactly
 quantities consistent: :math:`p_0^2 S_0 / \rho c = (20\ \mu\mathrm{Pa})^2
 / 400 = 1` pW, the reference sound power. Neither equation prints that
 caveat. Air at 20 degrees and 101,325 kPa is nearer :math:`413~\text{N s/m}^3`,
-worth 0,14 dB, an order of magnitude more than either rounding: the offsets
+worth 0.14 dB, an order of magnitude more than either rounding: the offsets
 are a convention of the decibel scales, not a property of the air in the
 hall, and this module does not make them follow the weather.
 """
@@ -196,26 +196,26 @@ _MINIMUM_DECAY_RANGE_DB = 30.0
 #: lowest band can be said to have finished.
 #:
 #: A fractional-octave filter is a resonator, and its own energy decays over
-#: roughly 2,2 Q / f_c seconds to 60 dB, which at 125 Hz in an octave band is
+#: roughly 2.2 Q / f_c seconds to 60 dB, which at 125 Hz in an octave band is
 #: about 25 ms. A record that stops before that has not collected the band's
 #: energy, and its exposure level is short. Measured against a long
-#: reference, an anechoic window of 40 ms after the direct sound is 0,04 dB
-#: light at 125 Hz, one of 20 ms is 0,9 dB light, one of 10 ms is 13 dB light
+#: reference, an anechoic window of 40 ms after the direct sound is 0.04 dB
+#: light at 125 Hz, one of 20 ms is 0.9 dB light, one of 10 ms is 13 dB light
 #: and one of 2 ms is 40 dB light. One ring-down separates the harmless from
 #: the rest, and it is what this module asks for.
 _MINIMUM_RING_DOWNS = 1.0
 
 #: Offset of Equation (A.9), in decibels: the free-field spread from a sound
 #: power level to the sound pressure level at 10 m. The closed form is
-#: 10 lg(4 pi * 100) = 30,9921 dB; the standard prints the rounded integer
+#: 10 lg(4 pi * 100) = 30.9921 dB; the standard prints the rounded integer
 #: and so does this module.
 SOUND_STRENGTH_POWER_OFFSET_DB = 31.0
 
 #: Offset of Equation (A.5), in decibels, for the reverberation-room route to
 #: the free-field reference level. The closed form is 10 lg(1600 pi) =
-#: 37,0127 dB; the standard prints the rounded integer and so does this
+#: 37.0127 dB; the standard prints the rounded integer and so does this
 #: module. See the module docstring for why the two integers cannot close
-#: to better than 0,0206 dB.
+#: to better than 0.0206 dB.
 DIFFUSE_FIELD_REFERENCE_OFFSET_DB = 37.0
 
 
@@ -227,8 +227,8 @@ def _filter_quality_factor(fraction: int | np.integer[Any]) -> float:
     r"""Quality factor of an IEC 61260 filter of the given bandwidth fraction.
 
     The band edges sit at :math:`f_c 2^{\pm 1/2n}`, so the relative
-    bandwidth is :math:`2^{1/2n} - 2^{-1/2n}` and Q is its reciprocal: 1,41
-    for an octave and 4,32 for a one-third octave, whatever the centre.
+    bandwidth is :math:`2^{1/2n} - 2^{-1/2n}` and Q is its reciprocal: 1.41
+    for an octave and 4.32 for a one-third octave, whatever the centre.
     """
     # The filter bank read it already; read here, it is read on every path.
     require_scalar(fraction, "fraction")
@@ -280,7 +280,7 @@ def _decay_range_is_thin(p2: NDArray[np.float64]) -> bool:
 def _ring_down_seconds(centre_hz: float, fraction: int | np.integer[Any]) -> float:
     """How long a band filter of that centre needs to ring down.
 
-    The 2,2 is the number of cycles a one-pole envelope of quality factor
+    The 2.2 is the number of cycles a one-pole envelope of quality factor
     :math:`Q` takes to fall 60 dB divided by :math:`Q`, so the product is
     the settling time of the filter and not of the room.
     """
@@ -502,9 +502,9 @@ def directivity_energy_average(
     An arithmetic mean of the decibel values is a different number, and a
     lower one, for any source that is not omnidirectional.
 
-    The note asks for the measurement "at every 12,5 degrees", and 12,5
+    The note asks for the measurement "at every 12,5 degrees", and 12.5
     degrees does not divide 360: 28 steps stop at 350 degrees and 29
-    overshoot to 362,5. There is no set of bearings that follows the
+    overshoot to 362.5. There is no set of bearings that follows the
     printed instruction literally, so what this function checks is what
     the instruction can mean, a uniform sampling of the full turn no
     coarser than the printed step: ``N >= 29`` bearings, 360/N degrees
@@ -593,13 +593,13 @@ def reverberation_room_reference_level(
     reverberation time through Sabine's formula, Equation (A.6), which the
     library publishes as
     :func:`phonometry.room.sabine_absorption_area`. Watch the constant when
-    reproducing a hand calculation: (A.6) prints :math:`A = 0{,}16\,V/T`,
-    which is :math:`24 \ln 10 / c_0` at :math:`c_0 = 345{,}4` m/s, while
-    that function defaults to 343 m/s and so to 0,1611. The difference moves
-    :math:`10\lg(A/S_0)` by 0,030 dB; pass ``speed_of_sound=345.39`` to get
+    reproducing a hand calculation: (A.6) prints :math:`A = 0.16\,V/T`,
+    which is :math:`24 \ln 10 / c_0` at :math:`c_0 = 345.4` m/s, while
+    that function defaults to 343 m/s and so to 0.1611. The difference moves
+    :math:`10\lg(A/S_0)` by 0.030 dB; pass ``speed_of_sound=345.39`` to get
     the printed constant back.
 
-    The printed 37 dB is :math:`10\lg(1600\pi) = 37{,}0127` dB rounded;
+    The printed 37 dB is :math:`10\lg(1600\pi) = 37.0127` dB rounded;
     see the module docstring for what that rounding costs.
 
     (A.5) also carries no Waterhouse correction, unlike the reverberation-room
@@ -676,7 +676,7 @@ def sound_strength_from_power(
 
     The third route to G, and the only one that needs no free-field
     measurement at all: the 31 dB is the spread of a point source over the
-    sphere of radius 10 m, :math:`10\lg(4\pi \cdot 100) = 30{,}9921` dB,
+    sphere of radius 10 m, :math:`10\lg(4\pi \cdot 100) = 30.9921` dB,
     rounded. A.2.1 asks for the source's power level to be measured to
     ISO 3741, which the library implements in
     :mod:`phonometry.emission.sound_power`.
@@ -921,8 +921,8 @@ class LateralEnergyResult(OwnsArrays):
     :math:`J_\mathrm{LF}` or :math:`J_\mathrm{LFC}` depending on
     ``weighting``, which is ``"squared"`` for Equation (A.14) and
     ``"cosine"`` for Equation (A.15). Both are dimensionless and Table A.1
-    gives them a just-noticeable difference of 0,05 and a typical range of
-    0,05 to 0,35 over the 125 Hz to 1 kHz octave bands.
+    gives them a just-noticeable difference of 0.05 and a typical range of
+    0.05 to 0.35 over the 125 Hz to 1 kHz octave bands.
 
     :ivar weighting: One of ``"squared"`` or ``"cosine"``.
     """
@@ -964,17 +964,17 @@ def early_lateral_energy_fraction(
 
     .. math::
 
-       J_\mathrm{LF} = \frac{\int_{0,005}^{0,080} p_\mathrm{L}^2(t)\ \mathrm{d}t}
-                            {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
+       J_\mathrm{LF} = \frac{\int_{0.005}^{0.080} p_\mathrm{L}^2(t)\ \mathrm{d}t}
+                            {\int_{0}^{0.080} p^2(t)\ \mathrm{d}t}
 
     and Equation (A.15), the cosine-weighted variant that A.2.4 calls
     subjectively more accurate:
 
     .. math::
 
-       J_\mathrm{LFC} = \frac{\int_{0,005}^{0,080}
+       J_\mathrm{LFC} = \frac{\int_{0.005}^{0.080}
                               \left| p_\mathrm{L}(t) \cdot p(t) \right|\ \mathrm{d}t}
-                             {\int_{0}^{0,080} p^2(t)\ \mathrm{d}t}
+                             {\int_{0}^{0.080} p^2(t)\ \mathrm{d}t}
 
     The modulus in (A.15) is printed and it matters: the figure-of-eight
     response changes sign with the side a reflection comes from, so without
@@ -1110,7 +1110,7 @@ def late_lateral_sound_level(
 
     .. math::
 
-       L_J = 10 \lg \frac{\int_{0,080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t}
+       L_J = 10 \lg \frac{\int_{0.080}^{\infty} p_\mathrm{L}^2(t)\ \mathrm{d}t}
                          {\int_{0}^{\infty} p_{10}^2(t)\ \mathrm{d}t}
              \ \mathrm{dB}
 
@@ -1229,11 +1229,11 @@ def late_lateral_average(levels: NumericArrayLike) -> float:
 
     .. math::
 
-       L_{J,\mathrm{avg}} = 10 \lg \left[ 0{,}25
+       L_{J,\mathrm{avg}} = 10 \lg \left[ 0.25
                             \sum_{i=1}^{4} 10^{L_{J_i}/10} \right]
                             \ \mathrm{dB}
 
-    The 0,25 is one quarter, so this is an energy **mean** and four equal
+    The 0.25 is one quarter, so this is an energy **mean** and four equal
     band values return that value unchanged. It is the one exception
     footnote a of Table A.1 makes: every other quantity in that table is
     averaged arithmetically over its bands, and only :math:`L_J` is averaged
@@ -1273,7 +1273,7 @@ class InterauralCorrelationResult(OwnsArrays):
 
     ``lag`` and ``correlation`` carry the function itself over the search
     window, one row per band, so it can be drawn rather than summarised.
-    B.4 assumes a just-noticeable difference of 0,075.
+    B.4 assumes a just-noticeable difference of 0.075.
     """
 
     frequencies: NDArray[np.float64] | None
@@ -1502,7 +1502,7 @@ STAGE_SUPPORT_STANDARD_DEVIATION_DB = 1.0
 
 #: Standard deviation C.2.4 estimates for the frequency- and
 #: position-averaged single number, in dB. It is the one above divided by the
-#: root of the twelve readings it averages, 1/sqrt(12) = 0,2887, rounded, so
+#: root of the twelve readings it averages, 1/sqrt(12) = 0.2887, rounded, so
 #: it holds for exactly four bands in three positions and for nothing else.
 STAGE_SUPPORT_SINGLE_NUMBER_STANDARD_DEVIATION_DB = 0.3
 
@@ -1557,14 +1557,14 @@ def stage_support(
     .. math::
 
        \mathrm{ST}_\mathrm{Early} = 10 \lg
-           \frac{\int_{0,020}^{0,100} p^2(t)\ \mathrm{d}t}
-                {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB},
+           \frac{\int_{0.020}^{0.100} p^2(t)\ \mathrm{d}t}
+                {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB},
        \qquad
        \mathrm{ST}_\mathrm{Late} = 10 \lg
-           \frac{\int_{0,100}^{1,000} p^2(t)\ \mathrm{d}t}
-                {\int_{0}^{0,010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
+           \frac{\int_{0.100}^{1,000} p^2(t)\ \mathrm{d}t}
+                {\int_{0}^{0.010} p^2(t)\ \mathrm{d}t}\ \mathrm{dB}
 
-    Both are measured with the source and the microphone 1,0 m apart on the
+    Both are measured with the source and the microphone 1.0 m apart on the
     platform, at the same height, with nothing reflecting within 2 m
     (C.2.1 and C.2.3). Because they share a denominator, their difference is
     a property of the hall alone and does not depend on how loud the direct
@@ -1578,7 +1578,7 @@ def stage_support(
     second, which matters in any hall whose reverberation time is longer
     than that. The equations govern, and ``docs/ERRATA.md`` records the rest.
 
-    :param ir: Impulse response measured on the platform (1D), 1,0 m from
+    :param ir: Impulse response measured on the platform (1D), 1.0 m from
         the acoustic centre of an omnidirectional source.
     :param fs: Sample rate in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own.
@@ -1640,7 +1640,7 @@ MAX_SOURCE_DIRECTIVITY_DEVIATION_DB = MappingProxyType(
 DIRECTIVITY_ARC_DEG = 30.0
 
 #: Angular step 4.2.1 asks for when a turntable is not available, in
-#: degrees. Unlike the 12,5 of the note under Equation (A.4), it divides a
+#: degrees. Unlike the 12.5 of the note under Equation (A.4), it divides a
 #: full turn exactly, into 72.
 DIRECTIVITY_STEP_DEG = 5.0
 
@@ -2031,8 +2031,8 @@ class PerceptibleDifference(OwnsArrays):
 
         A listener could then be expected to hear it. A relative JND is a
         fraction of the mean of the two, the reading that does not depend on
-        which one is called the reference. Judged settled: 1,95 and 2,05 s
-        differ by the 0,1 s of a JND in decimal whichever side of it the
+        which one is called the reference. Judged settled: 1.95 and 2.05 s
+        differ by the 0.1 s of a JND in decimal whichever side of it the
         subtraction lands.
         """
         a = np.asarray(self.first, dtype=np.float64)

@@ -116,9 +116,9 @@ def test_annex_b_reproduces_table_c6(band: int) -> None:
 
 
 def test_the_normalized_curve_reproduces_the_last_column_of_table_c6() -> None:
-    """Within 0,1 dB and not the printed 0,05: the printed 6,2 dB is 0,05 dB
+    """Within 0.1 dB and not the printed 0.05: the printed 6.2 dB is 0.05 dB
     short of the sum of the printed Table 1 weights, which is what the annex
-    normalised with, so every value comes out 0,05 dB high, and
+    normalised with, so every value comes out 0.05 dB high, and
     ``test_the_annex_normalized_with_the_table_one_sum_and_not_the_printed_offset``
     holds the split (see the errata registry).
     """
@@ -154,9 +154,9 @@ def test_the_excess_reproduces_table_c9(region: EvaluatedRegion, band: int) -> N
 def test_the_normalized_results_reproduce_tables_c8_and_c10(
     region: EvaluatedRegion,
 ) -> None:
-    """The decay rate at 0,06 dB, a slope that does not see the offset of
-    Equation (4); the excess at 0,11 dB, a level that carries the 0,05 dB the
-    printed 6,2 falls short of the sum of the printed Table 1 weights, which is
+    """The decay rate at 0.06 dB, a slope that does not see the offset of
+    Equation (4); the excess at 0.11 dB, a level that carries the 0.05 dB the
+    printed 6.2 falls short of the sum of the printed Table 1 weights, which is
     what the annex normalised with, on top of the rounding (see the errata
     registry and the test that pins the split).
     """
@@ -191,10 +191,10 @@ def test_the_annex_corrects_the_decay_but_not_the_excess() -> None:
 
     C.1 says the experimental reference curve "is known and used for
     correcting the values measured in the workroom", and Table C.7 needs that
-    correction: without it the middle-range decay at 1 kHz comes out 4,7 dB
-    where the annex prints 4,4. Table C.9 needs the opposite: with the
-    correction the same range at 1 kHz gives 6,7 dB where the annex prints 7,3,
-    and without it 7,3. See the errata registry.
+    correction: without it the middle-range decay at 1 kHz comes out 4.7 dB
+    where the annex prints 4.4. Table C.9 needs the opposite: with the
+    correction the same range at 1 kHz gives 6.7 dB where the annex prints 7.3,
+    and without it 7.3. See the errata registry.
     """
     keep = _select(*oracle.ANNEX_C_RANGES_M["middle"])
     raw, corrected = _raw(1000)[keep], _corrected(1000)[keep]
@@ -213,18 +213,18 @@ def test_the_table_one_weights_are_the_printed_ones() -> None:
 def test_the_annex_normalized_with_the_table_one_sum_and_not_the_printed_offset() -> (
     None
 ):
-    """Equation (4) prints 6,2 dB where Table 1 sums to 6,251 5 dB (see the errata).
+    """Equation (4) prints 6.2 dB where Table 1 sums to 6.251 5 dB (see the errata).
 
     The printed weights are the A-weighting to one decimal and the printed
     constant is the A-weighting's energy sum to one decimal, rounded apart, so
-    the printed table sums to 6,3 and not to the printed 6,2. Annex C was
+    the printed table sums to 6.3 and not to the printed 6.2. Annex C was
     normalised exactly: Equation (3) under the Table 1 weights, which is
     Equation (4) with the sum of those weights, lands all eleven values of the
     last column of Table C.6 and the three of Table C.10 inside their printed
-    rounding, and the printed 6,2 dB lands nine of the fourteen one unit high
+    rounding, and the printed 6.2 dB lands nine of the fourteen one unit high
     in the last place, every departure positive. The library keeps the printed
     constant, so both counts are held here so that neither the constant nor
-    the 0,1 dB tolerances of the two tests above can drift.
+    the 0.1 dB tolerances of the two tests above can drift.
     """
     weights = [
         PINK_NOISE_WEIGHTS_DB[float(band)] for band in oracle.ANNEX_C_SOURCE_POWER_DB
@@ -267,7 +267,7 @@ def test_the_annex_normalized_with_the_table_one_sum_and_not_the_printed_offset(
 
 
 def test_the_printed_factor_is_not_the_logarithm_of_two() -> None:
-    """Equation (5) prints 0,3 where Equation (8) prints lg 2 (see the errata)."""
+    """Equation (5) prints 0.3 where Equation (8) prints lg 2 (see the errata)."""
     assert DECADE_TO_DOUBLING == 0.3
     assert np.log10(2.0) == pytest.approx(0.30103, abs=1e-5)
     assert abs(DECADE_TO_DOUBLING - np.log10(2.0)) / np.log10(2.0) < 0.005
@@ -436,7 +436,7 @@ def test_the_annex_c_source_is_inside_the_limits_it_is_declared_against() -> Non
     """C.3 on printed folio 19, which prints the declaration and then "OK".
 
     The annex gives one maximum directivity index with no band attached, so it
-    says nothing about the ramp of A.1: 4,4 dB would fail the +/- 2 dB the ramp
+    says nothing about the ramp of A.1: 4.4 dB would fail the +/- 2 dB the ramp
     allows at or below 630 Hz, and the annex still passes the source. Only the
     8 dB cap and the adjacent-band step can be read off this declaration.
     """
@@ -446,9 +446,9 @@ def test_the_annex_c_source_is_inside_the_limits_it_is_declared_against() -> Non
 
 
 def test_the_a_weighted_source_power_reproduces_table_c2() -> None:
-    """Table C.2 on printed folio 18 prints 115,7 dB in its last column.
+    """Table C.2 on printed folio 18 prints 115.7 dB in its last column.
 
-    Equation (4) is the energy sum under the Table 1 weights less 6,2 dB, so
+    Equation (4) is the energy sum under the Table 1 weights less 6.2 dB, so
     adding the offset back leaves the plain A-weighted total. This is the one
     printed figure of Annex C that the Table C.6 chain never touches.
     """
@@ -473,7 +473,7 @@ def test_equation_eight_does_not_give_tables_c11_and_c12() -> None:
     annex against itself and not a curve this library rebuilt. Over the
     printed D of Table C.5, the curve the excess of Table C.9 is computed on
     and the basis of the errata entry, it misses 15 of the 18 figures of Table
-    C.11, by as much as 1,55 dB; over the one printed A-weighted curve, the
+    C.11, by as much as 1.55 dB; over the one printed A-weighted curve, the
     last column of Table C.6, it misses all three of Table C.12. The departures
     carry no systematic sign. The BS printing of ISO 14257:2001 (printed folio
     24) and the AENOR printing UNE-EN ISO 14257:2002 (printed folio 30) carry
@@ -538,11 +538,11 @@ def _suva_range(column: str, region: EvaluatedRegion) -> tuple[np.ndarray, np.nd
 def test_the_suva_decay_rates_reproduce(column: str, region: EvaluatedRegion) -> None:
     """Equation (5) over a curve this project had no part in measuring.
 
-    The tolerance is 0,06 dB rather than the 0,05 dB the printed tenth would
+    The tolerance is 0.06 dB rather than the 0.05 dB the printed tenth would
     suggest, for two of the 21 values: DL2 in the far range at 250 Hz and at
-    2 kHz land 0,001 dB the wrong side of the rounding boundary. That is
-    Equation (5) printing 0,3 where the survey's program used lg 2, which is
-    the same 0,3 % the errata registry records.
+    2 kHz land 0.001 dB the wrong side of the rounding boundary. That is
+    Equation (5) printing 0.3 where the survey's program used lg 2, which is
+    the same 0.3 % the errata registry records.
     """
     want = oracle.SUVA_DECAY_DB[region][oracle.SUVA_COLUMNS.index(column)]
     got = room.spatial_decay_rate(*_suva_range(column, region))
@@ -614,8 +614,8 @@ def test_the_ifa_decay_rates_reproduce(band: int) -> None:
     The sheet's own Equation (4.4) is not Equation (5) verbatim: it is that
     regression specialised to these four fixed distances, with the sum of the
     logarithms rounded to 1,306 and 20 lg 2 rounded to 6. It therefore runs
-    0,34 % high, which is far under the tenth of a decibel the sheet prints, so
-    this example cannot tell the printed 0,3 of Equation (5) from lg 2.
+    0.34 % high, which is far under the tenth of a decibel the sheet prints, so
+    this example cannot tell the printed 0.3 of Equation (5) from lg 2.
     """
     got = room.spatial_decay_rate(
         oracle.IFA_LSA_01_234_LEVELS_DB[band], IFA_DISTANCES_M
@@ -632,12 +632,12 @@ def test_a_constant_offset_leaves_the_decay_rate_alone() -> None:
 
 
 def test_the_ifa_result_table_prints_one_difference_its_own_data_denies() -> None:
-    """Tab. 4.5 prints Lp2 - Lp3 = 4,7 dB at 2 kHz; Tab. 4.4 gives 4,3 dB.
+    """Tab. 4.5 prints Lp2 - Lp3 = 4.7 dB at 2 kHz; Tab. 4.4 gives 4.3 dB.
 
-    The regression settles which cell is right. With the 71,0 dB Tab. 4.4
-    prints at the third position, Equation (5) gives the 4,3 dB Tab. 4.5 prints
-    for the decay rate; with the 70,6 dB the printed difference would need, it
-    gives 4,4 dB and contradicts it. Eleven of the twelve difference cells
+    The regression settles which cell is right. With the 71.0 dB Tab. 4.4
+    prints at the third position, Equation (5) gives the 4.3 dB Tab. 4.5 prints
+    for the decay rate; with the 70.6 dB the printed difference would need, it
+    gives 4.4 dB and contradicts it. Eleven of the twelve difference cells
     reproduce, so the defect is that one cell and it touches nothing else.
     """
     want = oracle.IFA_LSA_01_234_DECAY_DB[2000]

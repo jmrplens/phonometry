@@ -11,7 +11,7 @@ of the standard deletes):
   figure-of-eight responses of opposite sign, so without it their
   contributions cancel to exactly zero; with it they add. The test pins the
   printed answer and states the other one.
-- The 0,25 of (A.17) is one quarter, so four equal band values return that
+- The 0.25 of (A.17) is one quarter, so four equal band values return that
   value unchanged, and an energy average of unequal ones sits above their
   arithmetic mean.
 - The square root of (B.1) is printed: it is what makes two identical
@@ -72,8 +72,8 @@ class TestEarlyLateralEnergyFraction:
 
     @pytest.mark.parametrize("angle", [0.0, 45.0, 60.0])
     def test_one_reflection_gives_the_squared_cosine_share(self, angle: float) -> None:
-        # Total early energy is the direct 1 plus the reflection's 0,25; the
-        # lateral numerator is that 0,25 times cos^2(theta).
+        # Total early energy is the direct 1 plus the reflection's 0.25; the
+        # lateral numerator is that 0.25 times cos^2(theta).
         omni, lateral = reflection_pair([angle], [0.5], [0.020])
         share = 0.25 * np.cos(np.deg2rad(angle)) ** 2 / 1.25
         result = room.early_lateral_energy_fraction(omni, lateral, FS, limits=None)
@@ -222,8 +222,8 @@ class TestLateLateralAverage:
         assert room.late_lateral_average([-8.0] * 4) == pytest.approx(-8.0, abs=1e-12)
 
     def test_it_is_the_printed_quarter_and_nothing_else(self) -> None:
-        # 0, 0, 0, 6,0206 dB: the energies are 1, 1, 1, 4, so the quarter of
-        # their sum is 1,75 and the level is 10 lg 1,75.
+        # 0, 0, 0, 6.0206 dB: the energies are 1, 1, 1, 4, so the quarter of
+        # their sum is 1.75 and the level is 10 lg 1.75.
         levels = [0.0, 0.0, 0.0, 20.0 * np.log10(2.0)]
         assert room.late_lateral_average(levels) == pytest.approx(
             10.0 * np.log10(1.75), abs=1e-12

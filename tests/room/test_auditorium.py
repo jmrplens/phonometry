@@ -13,7 +13,7 @@ self-consistency):
 - The printed offsets of Equations (A.5) and (A.9), 37 dB and 31 dB, are
   the rounded values of 10 lg(1600 pi) and 10 lg(400 pi). Both roundings
   are correct on their own and the pair cannot close better than
-  10 lg 4 - 6 = 0,0206 dB, which is pinned here rather than left for a
+  10 lg 4 - 6 = 0.0206 dB, which is pinned here rather than left for a
   future test to trip over.
 - The energy mean of a cosine directivity is exactly 1/2, so its level is
   10 lg(1/2) below the on-axis level for every bearing count.
@@ -203,7 +203,7 @@ class TestSoundStrength:
         assert 10.0 ** (auditorium._MINIMUM_DECAY_RANGE_DB / 10.0) == 1000.0
 
     def test_it_warns_when_the_room_response_was_cut_short(self) -> None:
-        # A 2 s decay recorded for 0,1 s never reaches the 30 dB of decay
+        # A 2 s decay recorded for 0.1 s never reaches the 30 dB of decay
         # A.2.1 asks the integral to run to.
         room_ir = exponential_ir(2.0, 0.1)
         reference = anechoic_ir()
@@ -301,7 +301,7 @@ class TestReverberationRoomReferenceLevel:
     """Equation (A.5), the diffuse-field route to the same reference."""
 
     def test_it_reproduces_a_hand_calculation(self) -> None:
-        # A = 0,16 * 200 / 3,2 = 10 m^2 exactly, so 10 lg(A/S0) = 10 dB and
+        # A = 0.16 * 200 / 3.2 = 10 m^2 exactly, so 10 lg(A/S0) = 10 dB and
         # the reference sits 27 dB below the room level.
         area = 0.16 * 200.0 / 3.2
         assert room.reverberation_room_reference_level(80.0, area) == pytest.approx(
@@ -344,7 +344,7 @@ class TestSoundStrengthFromPower:
 
     def test_the_two_printed_routes_cannot_close_better_than_this(self) -> None:
         # Same source, same room, both printed routes. A reverberation room
-        # of V = 200 m^3 and T = 2,0 s has A = 16 m^2 by (A.6), where a
+        # of V = 200 m^3 and T = 2.0 s has A = 16 m^2 by (A.6), where a
         # source of L_W = 100 dB gives a diffuse level of L_W + 10 lg(4/A).
         power_level = 100.0
         area = 0.16 * 200.0 / 2.0
@@ -413,7 +413,7 @@ class TestDirectivityEnergyAverage:
         )
 
     def test_it_refuses_a_turn_sampled_coarser_than_the_printed_step(self) -> None:
-        # 28 bearings 12,857 degrees apart is coarser than the 12,5 the note
+        # 28 bearings 12,857 degrees apart is coarser than the 12.5 the note
         # prints; 29 is the first count that is not.
         with pytest.raises(ValueError, match="at least 29"):
             room.directivity_energy_average(np.zeros(28))

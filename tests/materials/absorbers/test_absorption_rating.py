@@ -9,8 +9,8 @@ Validation strategy: the standard's own numbers, not self-consistency.
   Figure A.2 (alpha_w = 0.60(M), same shift, the 500 Hz band exceeding the
   shifted reference by 0.40 >= 0.25).
 - The practical-coefficient rounding of Clause 4.1 is checked against the
-  NOTE example (0.92 -> 0.90) and the neighbouring 0,05-grid boundaries,
-  and the 1,00 cap for reverberation-room means above unity.
+  NOTE example (0.92 -> 0.90) and the neighbouring 0.05-grid boundaries,
+  and the 1.00 cap for reverberation-room means above unity.
 - The Table B.1 (Annex B) class boundaries are exercised at each edge.
 - A perfect absorber (all alpha_p = 1.00) needs no shift; a weak absorber
   drives the shift loop until Clause 4.2 is satisfied.
@@ -56,7 +56,7 @@ _ANNEX_A_SHIFTED_REF = [0.40, 0.60, 0.60, 0.60, 0.50]
 
 
 def _almost(a: float, b: float, eps: float = 1e-9) -> bool:
-    """0,05-grid equality via magnitude, never float ``==``."""
+    """0.05-grid equality via magnitude, never float ``==``."""
     return abs(a - b) < eps
 
 
@@ -141,12 +141,12 @@ def test_shift_is_the_smallest_qualifying_one() -> None:
 @pytest.mark.parametrize(
     ("mean", "expected"),
     [
-        (0.92, 0.90),  # NOTE example: 0,92 -> 0,90
+        (0.92, 0.90),  # NOTE example: 0.92 -> 0.90
         (0.93, 0.95),  # up
         (0.97, 0.95),  # down
         (0.98, 1.00),  # up into the cap band
         (0.90, 0.90),  # already on grid
-        (0.31, 0.30),  # nearest 0,05 below
+        (0.31, 0.30),  # nearest 0.05 below
         (0.325, 0.35),  # 0.325 * 100 sits just above 32.5 in binary, so it
         # rounds up here; exact hundredth-halves are not representable in
         # float and cannot arise from 2-decimal ISO 354 inputs (mean * 100 of
@@ -163,7 +163,7 @@ def test_practical_rounding_note(mean: float, expected: float) -> None:
 
 
 def test_practical_capped_at_unity() -> None:
-    # Reverberation-room alpha_s can exceed 1,00; the octave mean is capped.
+    # Reverberation-room alpha_s can exceed 1.00; the octave mean is capped.
     alpha_s = [1.20] * 15
     alpha_p = practical_absorption_coefficient(alpha_s)
     assert all(_almost(v, 1.00) for v in alpha_p)
@@ -337,7 +337,7 @@ def test_a_sum_contradicting_its_own_curves_is_refused() -> None:
     The readers take it from opposite ends and used to disagree in print:
     re-measuring the 250 Hz band and swapping it in with
     ``dataclasses.replace`` left the sum stale, and plot() titled the figure
-    "unfav. = 0.05" over a band it shaded 0,35 low while the fiche printed
+    "unfav. = 0.05" over a band it shaded 0.35 low while the fiche printed
     "sum 0.35" under that very deviation, both definitive, neither marked.
     """
     import dataclasses
@@ -352,7 +352,7 @@ def test_a_sum_contradicting_its_own_curves_is_refused() -> None:
 def test_a_sum_off_by_a_last_bit_is_kept() -> None:
     """A caller who recomputed the sum along another float path is not refused.
 
-    The deviations live on the 0,05 grid, so a billionth of a coefficient is
+    The deviations live on the 0.05 grid, so a billionth of a coefficient is
     never a disagreement about the rating; it is the last bit of a different
     summation order.
     """

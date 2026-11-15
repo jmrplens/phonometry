@@ -117,7 +117,7 @@ __all__ = [
 
 #: Atmospheric pressure ``p0`` used by EN 29052-1 for the enclosed-gas term
 #: (clause 8.2 NOTE: ``p0 = 0,1 MPa``), in pascals. The standard rounds one
-#: atmosphere to 0,1 MPa; pass the true 101 325 Pa explicitly if preferred.
+#: atmosphere to 0.1 MPa; pass the true 101 325 Pa explicitly if preferred.
 _STANDARD_ATMOSPHERIC_PRESSURE = 1.0e5
 
 #: Airflow-resistivity thresholds of clause 8.2, in kPa.s/m2.
@@ -178,7 +178,7 @@ def apparent_dynamic_stiffness(
     :param resonant_frequency_hz: Extrapolated resonant frequency ``fr``, in
         hertz (scalar or array).
     :param total_mass_per_area_kg_m2: Total mass per unit area used during the
-        test ``m't``, in kg/m2 (the load plate plus fittings over the 0,04 m2
+        test ``m't``, in kg/m2 (the load plate plus fittings over the 0.04 m2
         specimen; the standard's plate gives
         :math:`m'_\mathrm{t} = 8~\text{kg} / 0.04~\text{m}^2 = 200` kg/m2).
     :return: The apparent dynamic stiffness per unit area ``s't``, in N/m3 (numerically
@@ -241,7 +241,7 @@ def enclosed_gas_stiffness(
         in metres (scalar or array).
     :param porosity: Porosity ``epsilon`` of the specimen (0-1).
     :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals
-        (default the standard's 0,1 MPa).
+        (default the standard's 0.1 MPa).
     :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3; a
         ``float`` for a number; an array for a sequence or an array, a zero-dimensional
         one included.
@@ -823,7 +823,7 @@ class DynamicStiffnessResult(RichDisplay):
         Clause 9 requires every dynamic stiffness per unit area to be stated in
         meganewtons per cubic metre to the nearest meganewton per cubic metre,
         so the stiffness values are rounded to the nearest MN/m3; the
-        frequencies are shown to 0,1 Hz.
+        frequencies are shown to 0.1 Hz.
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata`; ``None``

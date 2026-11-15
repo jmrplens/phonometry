@@ -66,7 +66,7 @@ Complex = NDArray[np.complex128]
 
 #: Leading constant of ASTM E2611-19 Eq. (4), speed of sound (20,047).
 _ASTM_C_CONST = 20.047
-#: Celsius-to-kelvin offset used by ASTM E2611-19 Eqs. (4)/(5) (273,15).
+#: Celsius-to-kelvin offset used by ASTM E2611-19 Eqs. (4)/(5) (273.15).
 _ASTM_T0 = 273.15
 #: Reference air density of ASTM E2611-19 Eq. (5), in kg/m3 (1,290).
 _ASTM_RHO_REF = 1.290

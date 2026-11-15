@@ -883,7 +883,7 @@ class CriticalCouplingResult(RichDisplay):
     ``normalized_impedance`` the achieved ``Z cos(theta) / Z0`` (``~1``).
     ``converged`` flags a design that reached perfect absorption: the root
     find met its tolerance, its solution lies inside the search bounds it was
-    given, and ``absorption`` exceeds 0,999. The first two are facts of the
+    given, and ``absorption`` exceeds 0.999. The first two are facts of the
     solve that the result does not keep, so the flag is a field; the third is
     read from ``absorption``, so a design that claims convergence with less
     absorption is refused.
@@ -902,7 +902,7 @@ class CriticalCouplingResult(RichDisplay):
         """Reject a converged design that did not reach perfect absorption.
 
         :raises ValueError: if ``converged`` is true and ``absorption`` does
-            not exceed 0,999.
+            not exceed 0.999.
         """
         if self.converged and not _reaches_perfect_absorption(self.absorption):
             msg = (

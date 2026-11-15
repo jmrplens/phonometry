@@ -124,11 +124,11 @@ _ADIABATIC_KAPPA = 1.4
 #: IEC 61094-2:2009. Three of them are Table F.1 cells rounded to four figures and are
 #: reproduced below. The other two are not: Table F.1 tabulates the thermal
 #: *diffusivity*, not its two constituents, and the pair Annex A.3 prints for them is
-#: 1,0800 times smaller than Annex F gives at that state. The annex's own worked
+#: 1.0800 times smaller than Annex F gives at that state. The annex's own worked
 #: example is computed from the pair it prints, so the conformance rows that pin that
 #: example transcribe it themselves; it is not what a caller who asks for air should
 #: be handed, because its
-#: ``C_P = 938,7 J/(kg K)`` is 27,19 J/(mol K), below the rigid-rotor diatomic floor of
+#: ``C_P = 938,7 J/(kg K)`` is 27.19 J/(mol K), below the rigid-rotor diatomic floor of
 #: ``(7/2)R = 29,10``, so it is not air at any temperature, in any unit. See
 #: ``docs/ERRATA.md``.
 _ANNEX_A_SPEED_OF_SOUND = 345.86652  # c0 (m/s), Table F.1
@@ -625,7 +625,7 @@ def thermal_boundary_layer_thickness(
     :math:`\sqrt{2 k_\mathrm{a} / (\rho_0 C_\mathrm{P} \omega)}`, so only the pair
     ``k_a``/``C_P`` and the density move it.
 
-    ISO 9053-2:2020 Annex A.3 prints a ``k_a``/``C_P`` pair 1,0800 times smaller than
+    ISO 9053-2:2020 Annex A.3 prints a ``k_a``/``C_P`` pair 1.0800 times smaller than
     Annex F gives at that state, which it credits to IEC 61094-2:2009 but which cannot
     be found there (see ``docs/ERRATA.md``). The defaults here are the Annex F values;
     with the Annex A.3 example (:math:`f = 2` Hz) both pairs give ``1.83e-3 m``, because
@@ -757,7 +757,7 @@ def alternating_airflow_resistance(
 
     Emits :class:`AirflowResistanceWarning` when the piston frequency is outside
     1-4 Hz or when the Formula (3)/(4) validity criteria are not met. Clause 6.2
-    recommends a specimen flow velocity between 0,5 mm/s and 4 mm/s as well,
+    recommends a specimen flow velocity between 0.5 mm/s and 4 mm/s as well,
     and that recommendation is not checked here: the velocity follows from the
     piston area and the specimen area, and this function is handed neither. Compute it
     with :func:`piston_volume_flow_rate` and :func:`linear_airflow_velocity` if

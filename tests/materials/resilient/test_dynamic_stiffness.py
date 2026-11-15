@@ -53,9 +53,9 @@ def test_apparent_stiffness_vectorised() -> None:
 # Enclosed-gas stiffness (Formula 7) -- standard's 111/d NOTE oracle
 # ---------------------------------------------------------------------------
 def test_enclosed_gas_matches_standard_note() -> None:
-    """s'a = p0/(d eps); with p0=0,1 MPa, eps=0,9 the NOTE gives ~111/d MN/m3.
+    """s'a = p0/(d eps); with p0=0.1 MPa, eps=0.9 the NOTE gives ~111/d MN/m3.
 
-    The closed form yields 100000/(0,9) = 111.11.../d MN/m3 (d in mm); the
+    The closed form yields 100000/(0.9) = 111.11.../d MN/m3 (d in mm); the
     standard rounds the printed coefficient to 111.
     """
     for d_mm in (10.0, 20.0, 50.0):
@@ -66,7 +66,7 @@ def test_enclosed_gas_matches_standard_note() -> None:
 
 
 def test_enclosed_gas_true_atmosphere() -> None:
-    """A real 101 325 Pa can be passed instead of the standard's 0,1 MPa."""
+    """A real 101 325 Pa can be passed instead of the standard's 0.1 MPa."""
     sa = materials.enclosed_gas_stiffness(0.02, 0.9, static_pressure_pa=101_325.0)
     assert sa == pytest.approx(101_325.0 / (0.02 * 0.9), rel=1e-12)
 
@@ -431,7 +431,7 @@ class TestResilientLayerStiffness:
         assert stiffness is not None
         expected = materials.natural_frequency(stiffness, 100.0)
         assert layer.natural_frequency(100.0) == pytest.approx(expected, rel=1e-12)
-        # 10 MN/m3 under 100 kg/m2: f0 = sqrt(1e7/100)/(2 pi) = 50,3 Hz.
+        # 10 MN/m3 under 100 kg/m2: f0 = sqrt(1e7/100)/(2 pi) = 50.3 Hz.
         assert layer.natural_frequency(100.0) == pytest.approx(50.33, abs=0.01)
 
     def test_a_row_with_s_prime_returns_what_it_always_returned(self) -> None:
@@ -548,7 +548,7 @@ class TestResilientLayerStiffness:
 #: A test report's apparent stiffness, and the floor and the layer it is for:
 #: a layer 30 mm thick under the test load (the ``d`` of Formula 7, which
 #: clause 9 b) has the report state), of porosity 0.9, under a 120 kg/m2
-#: screed, in the standard's 0,1 MPa atmosphere. Nothing below is read from
+#: screed, in the standard's 0.1 MPa atmosphere. Nothing below is read from
 #: the library but the result.
 _S_T = 6.0e6
 _FLOOR = 120.0
@@ -615,7 +615,7 @@ class TestApparentStiffnessRow:
     def test_intermediate_resistivity_is_formula_6(self) -> None:
         """``10 <= r < 100``: ``s' = s't + s'a`` (Formula 6), ``s'a`` by Formula 7."""
         gas = _formula_7(_P0, _D, _EPSILON)
-        # The standard's NOTE: s'a = 111/d MN/m3 with d in mm, 111/30 = 3,7.
+        # The standard's NOTE: s'a = 111/d MN/m3 with d in mm, 111/30 = 3.7.
         assert gas / 1e6 == pytest.approx(111.0 / 30.0, rel=2e-3)
         f0 = _apparent_only().natural_frequency(
             _FLOOR,
@@ -623,7 +623,7 @@ class TestApparentStiffnessRow:
             gas_stiffness_n_m3=gas,
         )
         assert f0 == pytest.approx(_formula_2(_S_T + gas, _FLOOR), rel=1e-12)
-        # s' = 6 + 3,7037 = 9,7037 MN/m3: f0 = sqrt(9,7037e6/120)/(2 pi) = 45,26 Hz.
+        # s' = 6 + 3.7037 = 9.7037 MN/m3: f0 = sqrt(9.7037e6/120)/(2 pi) = 45.26 Hz.
         assert f0 == pytest.approx(45.258, abs=5e-4)
 
     def test_the_module_s_formula_7_is_the_hand_one(self) -> None:

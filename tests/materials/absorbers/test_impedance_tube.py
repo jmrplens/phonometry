@@ -76,7 +76,7 @@ def test_speed_of_sound_iso_20c() -> None:
     # ISO Eq. (5) c0 = 343.2*sqrt(T/293), with T = 273.15 + t.
     c20 = float(speed_of_sound_iso10534(temperature_c=20.0))
     assert c20 == pytest.approx(343.2, abs=0.1)
-    # 19,85 degC is the reference 293 K exactly, so the constant comes back.
+    # 19.85 degC is the reference 293 K exactly, so the constant comes back.
     c_ref = float(speed_of_sound_iso10534(temperature_c=19.85))
     assert c_ref == pytest.approx(343.2, abs=1e-9)
 
@@ -95,7 +95,7 @@ def test_both_speed_formulas_agree_at_20c() -> None:
 
 
 def test_air_density_reference_values() -> None:
-    # ISO Eq. (7): rho0 at the reference state (19,85 degC is 293 K exactly).
+    # ISO Eq. (7): rho0 at the reference state (19.85 degC is 293 K exactly).
     rho_iso = air_density_iso10534(temperature_c=19.85, static_pressure_kpa=101.325)
     assert float(rho_iso) == pytest.approx(1.186, abs=1e-9)
     # ASTM Eq. (5) at 20 degC, 101.325 kPa -> 1.2020 kg/m3 (notes 2.11).
@@ -115,7 +115,7 @@ def test_air_property_domain_errors() -> None:
 
 
 def test_air_density_astm_rejects_temperature_below_absolute_zero() -> None:
-    """ASTM Eq. (5) scales the reference density by 273,15/(273,15 + T).
+    """ASTM Eq. (5) scales the reference density by 273.15/(273.15 + T).
 
     Below absolute zero that ratio is negative, so rho would come back
     negative and carry the sign into every rho c the four-microphone
@@ -151,7 +151,7 @@ def test_air_helpers_refuse_a_positional_temperature(
     """The unit lives in the keyword, so it cannot be dropped at the call site.
 
     Before these were keyword-only, ``speed_of_sound_iso(20.0)`` read as a room
-    temperature, was taken as 20 K and returned 89,7 m/s with no exception.
+    temperature, was taken as 20 K and returned 89.7 m/s with no exception.
     """
     with pytest.raises(TypeError, match="positional"):
         helper(20.0, **extra)  # type: ignore[operator]
@@ -396,8 +396,8 @@ def test_frequency_range_warning_fires() -> None:
 
 
 def test_plane_wave_range_rectangular_bound() -> None:
-    # ISO 10534-2 Eq. (3): a rectangular tube cuts on at 0,50 c0 / d with d the
-    # maximum side length (stricter than the 0,58 circular factor of Eq. (2)).
+    # ISO 10534-2 Eq. (3): a rectangular tube cuts on at 0.50 c0 / d with d the
+    # maximum side length (stricter than the 0.58 circular factor of Eq. (2)).
     f_lower, f_upper = plane_wave_frequency_range(
         0.03, C0, diameter_m=0.05, shape="rectangular"
     )
@@ -422,8 +422,8 @@ def test_plane_wave_range_invalid_shape() -> None:
 
 
 def test_plane_wave_range_astm_bounds() -> None:
-    # ASTM E2611-19: upper = min(0,40 c/s (6.5.4), 0,586 c/d circular
-    # (6.2.4.1) or 0,500 c/d rectangular (6.2.5)); lower = c / (100 s), the
+    # ASTM E2611-19: upper = min(0.40 c/s (6.5.4), 0.586 c/d circular
+    # (6.2.4.1) or 0.500 c/d rectangular (6.2.5)); lower = c / (100 s), the
     # spacing greater than 1 % of the wavelength (6.2.3).
     f_lower, f_upper = plane_wave_frequency_range_astm_e2611(
         0.03, C0, diameter_m=0.05, shape="circular"
@@ -926,7 +926,7 @@ _OUTSIDE_ASTM_RANGE = r"Wavenumbers outside the ASTM E2611-19 plane-wave working
 
 def test_astm_solvers_warn_outside_plane_wave_range() -> None:
     # With the tube diameter given, frequencies past the 6.2.4.1 cut-on
-    # (0,586 c/d for this 10 cm circular tube ~ 2011 Hz) must be flagged.
+    # (0.586 c/d for this 10 cm circular tube ~ 2011 Hz) must be flagged.
     f = np.array([500.0, 2500.0])
     k = np.asarray(tube_wavenumber(f, C0)).real.astype(np.complex128)
     tm = air_layer_transfer_matrix(k, THICKNESS, RC)

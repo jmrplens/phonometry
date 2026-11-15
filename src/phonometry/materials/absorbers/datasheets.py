@@ -13,8 +13,8 @@ in two shapes that are not the same quantity:
   reason) and carries every digit the laboratory reported; and
 * the **practical sound absorption coefficient** :math:`\alpha_\mathrm{p}` of
   ISO 11654 Clause 4.1, one value per octave band from 125 Hz to 4 kHz, the
-  mean of the three one-third octaves in it rounded in steps of 0,05 and
-  capped at 1,00.
+  mean of the three one-third octaves in it rounded in steps of 0.05 and
+  capped at 1.00.
 
 The two are two classes here, :class:`ThirdOctaveAbsorptionSpectrum` and
 :class:`PracticalAbsorptionSpectrum`, because the band resolution and the
@@ -137,7 +137,7 @@ def _shown(value: float) -> str:
     """A coefficient as a sheet prints one: two decimals, or every digit it has.
 
     ISO 11654 Clause 5 gives the coefficients to two decimal places, so a
-    0.6 read from a cell that said 0,60 is shown as 0.60; a value with more
+    0.6 read from a cell that said 0.60 is shown as 0.60; a value with more
     digits keeps all of them.
     """
     digits = _digits(value)
@@ -176,7 +176,7 @@ class _RatedAbsorption(BandedRow):
     :ivar weighted_absorption_coefficient: The weighted sound absorption
         coefficient :math:`\alpha_\mathrm{w}` the sheet prints (ISO 11654
         Clause 4.2), dimensionless: the shifted reference curve read at
-        500 Hz, a multiple of 0,05 from 0 to 1.
+        500 Hz, a multiple of 0.05 from 0 to 1.
     :ivar shape_indicator: The shape indicators printed after it, the
         letters only: ``"MH"`` for ``0,70(MH)`` (ISO 11654 Clause 4.3). Empty
         when the sheet prints none, which on a sheet that prints the rating
@@ -185,7 +185,7 @@ class _RatedAbsorption(BandedRow):
         ``"A"`` to ``"E"`` or ``"Not classified"``, as the sheet prints it.
     :ivar noise_reduction_coefficient: The NRC a sheet prints under ASTM
         C423, dimensionless: the mean of the Sabine coefficients at 250,
-        500, 1000 and 2000 Hz rounded to 0,05. Held as printed; no function
+        500, 1000 and 2000 Hz rounded to 0.05. Held as printed; no function
         of this library works it out, so nothing compares it.
     :ivar mounting: The test mounting as the sheet prints it: ``"A"`` for a
         specimen laid against the room surface, ``"E-200"`` for one over an
@@ -254,10 +254,10 @@ class PracticalAbsorptionSpectrum(_RatedAbsorption):
     The practical sound absorption coefficient :math:`\alpha_\mathrm{p}` of
     ISO 11654 Clause 4.1 is the mean of the three one-third-octave
     coefficients of ISO 354 inside an octave, worked out to the second
-    decimal, rounded in steps of 0,05 and set to 1,00 when it rounds above.
+    decimal, rounded in steps of 0.05 and set to 1.00 when it rounds above.
     Six values from 125 Hz to 4 kHz all ending in 0 or 5 look like these,
     though only a sheet that names them says so. A row of this class holds
-    them as printed, a value above 1,00 or off the steps included: the
+    them as printed, a value above 1.00 or off the steps included: the
     reader of a catalogue file notes such a value, and nothing here corrects
     it.
 
@@ -305,7 +305,7 @@ class PracticalAbsorptionSpectrum(_RatedAbsorption):
 
         :func:`~phonometry.materials.weighted_absorption` on the five rating
         bands, 250 Hz to 4 kHz (ISO 11654 Clause 4.2), which snaps each
-        value to the 0,05 grid and caps it at 1,00 as Clause 4.1 would have.
+        value to the 0.05 grid and caps it at 1.00 as Clause 4.1 would have.
         The 125 Hz band is not read. The rating the sheet prints beside the
         bands is not consulted either: this is the one the bands give, and
         :func:`phonometry.io.read_catalogue` notes when the two differ.
@@ -330,7 +330,7 @@ class PracticalAbsorptionSpectrum(_RatedAbsorption):
     def _catalogue_notes(self) -> tuple[str, ...]:
         r"""Values off the steps ISO 11654 rounds to, and a rating that disagrees.
 
-        A practical coefficient above 1,00 or off the steps of 0,05, and a
+        A practical coefficient above 1.00 or off the steps of 0.05, and a
         printed :math:`\alpha_\mathrm{w}` off them, are noted on the digits
         the sheet prints; and when the row prints the five rating bands, the
         rating they give is compared with the one printed. Nothing is
@@ -358,7 +358,7 @@ class ThirdOctaveAbsorptionSpectrum(_RatedAbsorption):
     band, 100 Hz to 5 kHz in the standard's range and from 50 Hz to 10 kHz
     where a laboratory reports more. A value above 1 is common and not an
     error: ISO 354 (3.9, NOTE 2) says a coefficient evaluated from
-    reverberation times can exceed 1,0, for example because of diffraction
+    reverberation times can exceed 1.0, for example because of diffraction
     effects. Nothing here caps it.
 
     :meth:`practical` turns the row into its practical coefficients, and
@@ -490,7 +490,7 @@ class ThirdOctaveAbsorptionSpectrum(_RatedAbsorption):
 
         Each octave from 125 Hz to 4 kHz whose three one-third octaves the
         row prints is the mean of the three, worked out to the second decimal
-        and rounded in steps of 0,05, capped at 1,00, and marked in
+        and rounded in steps of 0.05, capped at 1.00, and marked in
         :attr:`~phonometry.io.CatalogueRow.derived` with the bands it comes
         from; when those bands do not share one
         :attr:`~phonometry.io.CatalogueRow.basis`, the text names the basis
@@ -559,7 +559,7 @@ class ThirdOctaveAbsorptionSpectrum(_RatedAbsorption):
 
         The one-third-octave coefficients themselves are measured values with
         no grid and no ceiling, so only the printed :math:`\alpha_\mathrm{w}`
-        is checked against the 0,05 steps, and, when the row prints the
+        is checked against the 0.05 steps, and, when the row prints the
         fifteen bands from 200 Hz to 5 kHz, the printed rating against the
         one they give.
         """

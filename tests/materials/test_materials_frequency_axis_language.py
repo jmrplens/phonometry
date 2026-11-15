@@ -6,7 +6,7 @@
 fixed strings, so the octave labels of these figures are written by
 ``format_frequency_axis`` and by nothing else: a renderer that does not pass
 its ``language`` on draws ``31.5`` in a Spanish figure. Every figure below
-spans 31,5 Hz, the lowest octave centre whose label carries a decimal, because
+spans 31.5 Hz, the lowest octave centre whose label carries a decimal, because
 a label without one proves nothing.
 """
 
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
-#: 20 Hz to 2 kHz: seven octave labels, the first of them 31,5.
+#: 20 Hz to 2 kHz: seven octave labels, the first of them 31.5.
 _FREQUENCIES = np.geomspace(20.0, 2000.0, 30)
 
 #: Characteristic impedance of air, rho c, in rayls.

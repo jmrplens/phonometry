@@ -96,9 +96,9 @@ __all__ = [
     "power_attenuation_from_alpha",
 ]
 
-#: Sabine constant of ISO 354:2003, Eq. (5)/(7) (55,3 exactly as printed).
+#: Sabine constant of ISO 354:2003, Eq. (5)/(7) (55.3 exactly as printed).
 _SABINE = 55.3
-#: ``10 * lg e`` (ISO 354:2003, 8.1.2.1), lg = log10; ~= 4,342944819.
+#: ``10 * lg e`` (ISO 354:2003, 8.1.2.1), lg = log10; ~= 4.342944819.
 _TEN_LG_E = 10.0 * math.log10(math.e)
 #: Validity range of the speed-of-sound Eq. (6), in degrees Celsius.
 _EQ6_TEMPERATURE_RANGE = (15.0, 30.0)
@@ -625,7 +625,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
         room containing the specimen ``A2`` (Eq. (7)), per band, in square
         metres.
     :ivar alpha_s: Sound absorption coefficient ``alpha_s`` (Eq. (8)/(9)), per
-        band. It may exceed 1,0 (Clause 3.7 NOTE 2) and is never clamped.
+        band. It may exceed 1.0 (Clause 3.7 NOTE 2) and is never clamped.
     """
 
     frequencies: NDArray[np.float64]
@@ -693,7 +693,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
         """Plot the sound absorption coefficient ``alpha_s`` versus frequency.
 
         Draws ``alpha_s`` over the one-third-octave band axis (ISO 354). Values
-        above 1,0 are kept (Clause 3.7 NOTE 2), so the axis grows to show them.
+        above 1.0 are kept (Clause 3.7 NOTE 2), so the axis grows to show them.
         Requires matplotlib (the ``[plot]`` extra); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 

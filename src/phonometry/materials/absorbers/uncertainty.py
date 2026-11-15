@@ -83,7 +83,7 @@ _EQUIV_AREA_REFERENCE_S = 10.0
 _REPEATABILITY_FACTOR = 0.6
 
 #: Condition selecting the between-laboratory σR as-is (u = σR); the other
-#: condition, "repeatability", takes σr = 0,6·σR (``_REPEATABILITY_FACTOR``).
+#: condition, "repeatability", takes σr = 0.6·σR (``_REPEATABILITY_FACTOR``).
 _REPRODUCIBILITY = "reproducibility"
 
 #: Measurement conditions selecting σR (reproducibility) or σr (repeatability).
@@ -137,7 +137,7 @@ _COVERAGE_MATCH_TOL = 1e-9
 
 #: Table 3 (Clause 8): coverage factors ``k`` for a Gaussian measurand, keyed by
 #: coverage probability as a fraction. Values are the standard's rounded factors
-#: (1,0 / 1,3 / 1,6 / 2,0 / 2,6 / 3,3), which differ from the Gaussian-exact
+#: (1.0 / 1.3 / 1.6 / 2.0 / 2.6 / 3.3), which differ from the Gaussian-exact
 #: factors of ISO 12999-1 Table 8.
 _COVERAGE_FACTORS: dict[float, float] = {
     0.68: 1.0,

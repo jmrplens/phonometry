@@ -7,7 +7,7 @@ ISO 10534-2 and the transfer matrix of ASTM E2611 measure a sample, the porous
 and layered models predict one, and ISO 9053-1 measures the airflow resistance
 that feeds those models. Every one of them ends in the same pair of curves, an
 absorption coefficient and a reflection magnitude, both bounded by one, which is
-why the figures fix the axis at 0 to 1,05 rather than letting matplotlib choose.
+why the figures fix the axis at 0 to 1.05 rather than letting matplotlib choose.
 The transfer-matrix figure puts the Eq. (26) transmission loss on the primary
 axis in decibels and hangs the Eq. (28) hard-backed absorption on a twin, so the
 two quantities keep their own scales. The airflow figure draws the fitted

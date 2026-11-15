@@ -24,21 +24,21 @@ above 1.00 are set to 1.00. The five rating bands are 250, 500, 1000, 2000 and
 
 **Weighted absorption (Clause 4.2).** The fixed reference curve of Figure 1
 (``{250: 0.80, 500: 1.00, 1000: 1.00, 2000: 1.00, 4000: 0.90}``) is shifted
-downwards, towards the measured ``alpha_p``, in steps of 0,05 until the sum
+downwards, towards the measured ``alpha_p``, in steps of 0.05 until the sum
 of the unfavourable deviations (taken only where the measured value lies
 below the shifted curve, with magnitude ``curve - measured``) is not more
-than 0,10. ``alpha_w`` is the shifted-curve value read at 500 Hz, i.e.
+than 0.10. ``alpha_w`` is the shifted-curve value read at 500 Hz, i.e.
 ``1.00 - shift``.
 
 **Shape indicators (Clause 4.3).** A shape indicator is appended in
 parentheses whenever a practical coefficient exceeds the shifted reference
-curve by 0,25 or more: ``L`` at 250 Hz, ``M`` at 500 Hz or 1000 Hz, ``H`` at
+curve by 0.25 or more: ``L`` at 250 Hz, ``M`` at 500 Hz or 1000 Hz, ``H`` at
 2000 Hz or 4000 Hz (e.g. ``0.60(M)``).
 
 **Absorption class (Table B.1, informative).** ``alpha_w`` maps to a class:
-A (0,90-1,00), B (0,80-0,85), C (0,60-0,75), D (0,30-0,55), E (0,15-0,25),
-and "Not classified" (0,00-0,10). Because ``alpha_w`` is always a multiple
-of 0,05 these ranges partition the grid exactly.
+A (0.90-1.00), B (0.80-0.85), C (0.60-0.75), D (0.30-0.55), E (0.15-0.25),
+and "Not classified" (0.00-0.10). Because ``alpha_w`` is always a multiple
+of 0.05 these ranges partition the grid exactly.
 
 The rating is defined only over the whole reference range 250 Hz to
 4000 Hz (Clause 1); the 125 Hz octave that is customarily plotted is not
@@ -128,19 +128,19 @@ REFERENCE_CURVE: Mapping[int, float] = MappingProxyType(
 #: Index of the 500 Hz band, where ``alpha_w`` is read (Clause 4.2).
 _INDEX_500 = 1
 
-#: Reference curve as integer twentieths (units of 0,05) for exact,
+#: Reference curve as integer twentieths (units of 0.05) for exact,
 #: float-safe grid arithmetic: 0.80, 1.00, 1.00, 1.00, 0.90.
 _REFERENCE_UNITS: tuple[int, ...] = (16, 20, 20, 20, 18)
 
-#: Full scale of the absorption coefficient (alpha = 1,00) in the twentieths
-#: (units of 0,05) of Clause 4.1; the Clause 4.2 shift loop never needs to
+#: Full scale of the absorption coefficient (alpha = 1.00) in the twentieths
+#: (units of 0.05) of Clause 4.1; the Clause 4.2 shift loop never needs to
 #: lower the reference curve by more than one whole unit of alpha.
 _FULL_SCALE_UNITS = 20
 
-#: Unfavourable-deviation budget of Clause 4.2, in twentieths (0,10).
+#: Unfavourable-deviation budget of Clause 4.2, in twentieths (0.10).
 _UNFAVOURABLE_BUDGET_UNITS = 2
 
-#: Shape-indicator excess threshold of Clause 4.3, in twentieths (0,25).
+#: Shape-indicator excess threshold of Clause 4.3, in twentieths (0.25).
 _SHAPE_THRESHOLD_UNITS = 5
 
 #: Table B.1 absorption classes (Annex B): lowest twentieth of the class
@@ -148,11 +148,11 @@ _SHAPE_THRESHOLD_UNITS = 5
 #: A class of Table B.1, or the residual below E.
 AbsorptionClass = Literal["A", "B", "C", "D", "E", "Not classified"]
 _CLASS_TABLE: tuple[tuple[int, AbsorptionClass], ...] = (
-    (18, "A"),  # 0,90 - 1,00
-    (16, "B"),  # 0,80 - 0,85
-    (12, "C"),  # 0,60 - 0,75
-    (6, "D"),  # 0,30 - 0,55
-    (3, "E"),  # 0,15 - 0,25
+    (18, "A"),  # 0.90 - 1.00
+    (16, "B"),  # 0.80 - 0.85
+    (12, "C"),  # 0.60 - 0.75
+    (6, "D"),  # 0.30 - 0.55
+    (3, "E"),  # 0.15 - 0.25
 )
 _NOT_CLASSIFIED: AbsorptionClass = "Not classified"
 
@@ -178,13 +178,13 @@ def _practical_round(mean: float) -> float:
     steps of 0.05, capped at 1.00 (the NOTE gives :math:`0.92 \to 0.90`).
     """
     hundredths = _round_half_up(mean * 100.0)  # second decimal
-    fives = _round_half_up(hundredths / 5.0) * 5  # nearest 0,05
-    fives = max(0, min(100, fives))  # maximise to 1,00 (Clause 4.1)
+    fives = _round_half_up(hundredths / 5.0) * 5  # nearest 0.05
+    fives = max(0, min(100, fives))  # maximise to 1.00 (Clause 4.1)
     return fives / 100.0
 
 
 def _to_units(alpha: float) -> int:
-    """Snap an absorption coefficient to the 0,05 grid as an integer
+    """Snap an absorption coefficient to the 0.05 grid as an integer
     twentieth in ``[0, 20]`` (``1.00`` -> 20), for float-safe comparison.
     """
     return max(0, min(20, _round_half_up(alpha * 20.0)))
@@ -245,7 +245,7 @@ def _unfavourable_deviation_sum(
     reported as a shape indicator instead (Clause 4.3).
 
     The sum is arithmetic and is taken as it stands. ISO 11654 shifts a curve
-    of absorption coefficients in steps of 0,05 and rounds nothing afterwards:
+    of absorption coefficients in steps of 0.05 and rounds nothing afterwards:
     the grid comes from the practical coefficients of Clause 4.1 and from the
     step of the shift itself, so the whole-decibel rounding of the ISO 717
     unfavourable sum has no counterpart here, and neither has an energy sum:
@@ -264,7 +264,7 @@ class AbsorptionRatingResult(OwnsArrays):
 
     :ivar alpha_w: Weighted sound absorption coefficient ``alpha_w``, the
         shifted reference curve read at 500 Hz (Clause 4.2). A multiple of
-        0,05 in ``[0, 1]``.
+        0.05 in ``[0, 1]``.
     :ivar shape_indicator: Concatenated shape indicators, ``L``/``M``/``H``
         in that order, or an empty string when none applies (Clause 4.3).
     :ivar absorption_class: Sound absorption class ``A``-``E`` or
@@ -279,7 +279,7 @@ class AbsorptionRatingResult(OwnsArrays):
     :ivar frequencies: Octave rating-band centre frequencies, in Hz
         (250 Hz to 4000 Hz).
     :ivar measured: Practical absorption coefficients ``alpha_p`` used for
-        the rating (snapped to the 0,05 grid of Clause 4.1).
+        the rating (snapped to the 0.05 grid of Clause 4.1).
     :ivar shifted_reference: Reference curve of Figure 1 after the final
         shift.
     :ivar third_octave_alpha_s: The fifteen one-third-octave sound absorption
@@ -309,7 +309,7 @@ class AbsorptionRatingResult(OwnsArrays):
         The evaluation table of the fiche prints one row per octave (the
         band, its practical coefficient, the shifted reference there and the
         unfavourable deviation between them) and totals that last column
-        beneath the rows, against the 0,10 budget of Clause 4.2. No total is
+        beneath the rows, against the 0.10 budget of Clause 4.2. No total is
         ever taken over curves of different lengths: the fiche refuses them on
         a guard of its own, and :meth:`plot` stops inside matplotlib before it
         can shade a deviation. What neither reader gives is the field at
@@ -341,7 +341,7 @@ class AbsorptionRatingResult(OwnsArrays):
         ``alpha_w`` is checked here with the same predicate
         :func:`absorption_class` applies, because the direct constructor never
         runs that helper: :func:`weighted_absorption` can only produce a
-        multiple of 0,05 in ``[0, 1]``, so a NaN ``alpha_w`` is always a
+        multiple of 0.05 in ``[0, 1]``, so a NaN ``alpha_w`` is always a
         construction mistake, and the fiche compared it against a supplied
         requirement anyway, where ``nan >= requirement`` is ``False`` and the
         page printed a definitive FAIL computed from nothing.
@@ -354,7 +354,7 @@ class AbsorptionRatingResult(OwnsArrays):
         held them together. A rating whose 250 Hz band is re-measured and swapped
         in with :func:`dataclasses.replace`, leaving the rest of the rating
         stale, is titled by the plot "unfav. = 0.05" over a band it shades
-        0,35 low, and printed by the fiche a page later with "sum 0.35" under
+        0.35 low, and printed by the fiche a page later with "sum 0.35" under
         that very deviation. Both pages are definitive, neither is marked, and
         they disagree. The comparison allows a billionth so a
         caller who recomputed the sum along another floating-point path is not
@@ -529,11 +529,11 @@ def practical_absorption_coefficient(
     :param third_octave_alpha_s: The fifteen one-third-octave coefficients
         ``alpha_s`` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered
         low to high or a mapping keyed by band centre frequency (Hz).
-        Values may exceed 1,00 (reverberation-room measurement); the
-        resulting octave coefficient is capped at 1,00.
+        Values may exceed 1.00 (reverberation-room measurement); the
+        resulting octave coefficient is capped at 1.00.
     :return: The five octave practical coefficients for 250, 500, 1000,
         2000 and 4000 Hz, each the mean of its three one-third octaves
-        rounded in steps of 0,05.
+        rounded in steps of 0.05.
     :raises ValueError: if any coefficient is negative or the wrong number
         of values is supplied.
     :raises TypeError: if ``third_octave_alpha_s`` holds a text or a value that is not a
@@ -554,7 +554,7 @@ def practical_absorption_coefficient(
 
 def _shape_indicator(measured_units: list[int], reference_units: list[int]) -> str:
     """Shape indicators of Clause 4.3: a band exceeding the shifted
-    reference by 0,25 or more contributes L (250 Hz), M (500/1000 Hz) or
+    reference by 0.25 or more contributes L (250 Hz), M (500/1000 Hz) or
     H (2000/4000 Hz).
     """
     excess = [
@@ -576,16 +576,16 @@ def weighted_absorption(
 ) -> AbsorptionRatingResult:
     """Weighted sound absorption coefficient ``alpha_w`` (ISO 11654 Clause 4.2).
 
-    The reference curve of Figure 1 is shifted downwards in steps of 0,05,
+    The reference curve of Figure 1 is shifted downwards in steps of 0.05,
     towards the measured practical coefficients, until the sum of the
     unfavourable deviations (measured below the shifted curve) is at most
-    0,10; ``alpha_w`` is the shifted curve read at 500 Hz.
+    0.10; ``alpha_w`` is the shifted curve read at 500 Hz.
 
     :param alpha_p: The five octave practical coefficients for 250, 500,
         1000, 2000 and 4000 Hz (e.g. from
         :func:`practical_absorption_coefficient`), as a sequence ordered
         low to high or a mapping keyed by band centre frequency (Hz).
-        Inputs are snapped to the 0,05 grid of Clause 4.1.
+        Inputs are snapped to the 0.05 grid of Clause 4.1.
     :return: A frozen :class:`AbsorptionRatingResult` with ``alpha_w``, the
         shape indicators, the applied shift, the fitted reference curve and
         the absorption class.
@@ -613,7 +613,7 @@ def _rate(
     """
     measured_units = [_to_units(v) for v in measured]
 
-    # Shift the reference down in 0,05 steps until Clause 4.2 is satisfied.
+    # Shift the reference down in 0.05 steps until Clause 4.2 is satisfied.
     # The unfavourable sum is non-increasing in the shift, so the first
     # (smallest) qualifying shift is the answer.
     shift_units = 0
@@ -669,8 +669,8 @@ def weighted_absorption_from_third_octave(
     :param third_octave_alpha_s: The fifteen one-third-octave coefficients
         ``alpha_s`` from 200 Hz to 5000 Hz (ISO 354), as a sequence ordered low
         to high or a mapping keyed by band centre frequency (Hz). Values may
-        exceed 1,00 (reverberation-room measurement); the octave coefficient is
-        capped at 1,00.
+        exceed 1.00 (reverberation-room measurement); the octave coefficient is
+        capped at 1.00.
     :return: A frozen :class:`AbsorptionRatingResult` identical to
         :func:`weighted_absorption` on the derived ``alpha_p``, additionally
         carrying ``third_octave_alpha_s`` (the input as given) and
@@ -691,7 +691,7 @@ def absorption_class(alpha_w: float) -> AbsorptionClass:
     """Sound absorption class for ``alpha_w`` (ISO 11654 Table B.1, Annex B).
 
     :param alpha_w: Weighted sound absorption coefficient (a multiple of
-        0,05 in ``[0, 1]``).
+        0.05 in ``[0, 1]``).
     :return: ``"A"``, ``"B"``, ``"C"``, ``"D"``, ``"E"`` or
         ``"Not classified"``.
     :raises ValueError: if ``alpha_w`` is not a finite value in ``[0, 1]``.

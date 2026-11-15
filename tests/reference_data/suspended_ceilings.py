@@ -53,8 +53,8 @@ EN16487_TABLE_1_UNCERTAINTY: dict[str, float] = {
 }
 EN16487_TABLE_1_WEIGHTED_UNCERTAINTY: float = 0.08
 
-#: The coverage factor the NOTE under Table 1 names, ISO 5725-6's 2,8, and the
-#: 2,0 of ISO 12999-2:2020 Table 3 at 95 % (printed folio 6) for the general
+#: The coverage factor the NOTE under Table 1 names, ISO 5725-6's 2.8, and the
+#: 2.0 of ISO 12999-2:2020 Table 3 at 95 % (printed folio 6) for the general
 #: method. EN 16487 prints no reproducibility standard deviation anywhere, so
 #: what is checkable is that each document's factor is the one used for its
 #: own table.
@@ -101,7 +101,7 @@ ISO9613_1_TABLE_1_DB_PER_KM: dict[tuple[float, float], dict[float, float]] = {
 VIGRAN_EQ_4_41_TEN_LG_E: float = 4.343
 
 #: Vigran (2008), Eq. (4.42) and the Example on printed page 123 (PDF page
-#: 144): a 100 m3 room with ``m`` read off Figure 4.8 as 0,05 1/m at 8 kHz, and
+#: 144): a 100 m3 room with ``m`` read off Figure 4.8 as 0.05 1/m at 8 kHz, and
 #: "The air absorption alone then gives an absorption area of 20 m2". The
 #: volume in cubic metres, ``m`` in reciprocal metres and the area in square
 #: metres. The arrangement is a classroom, not a reverberation-room test.
@@ -116,7 +116,7 @@ VIGRAN_EXAMPLE_AIR_ABSORPTION_M2: float = 20.0
 #: carried, because the drier ones describe conditions this test code does not
 #: allow. The 40 % row is also the one cell of the printed table that is a
 #: rounding of a rounding: at 63 Hz the book prints 0.035, which is ISO
-#: 9613-1's already-rounded 1,50 x 10-1 dB/km converted, against 0.03447 from
+#: 9613-1's already-rounded 1.50 x 10-1 dB/km converted, against 0.03447 from
 #: the model itself. The table prints its cells to different numbers of
 #: decimals, so each is judged at its own.
 COX_TABLE_4_2_BANDS_HZ: tuple[float, ...] = (
@@ -186,9 +186,9 @@ SRL_13441_RATING: tuple[float, str, str] = (0.95, "", "A")
 # ---------------------------------------------------------------------------
 
 #: SP P302808: an Acces C ceiling at a mounting depth of 200 mm, surface area
-#: 10,8 m2, room volume 200 m3; the climate of the empty room and on the
+#: 10.8 m2, room volume 200 m3; the climate of the empty room and on the
 #: object, as degrees Celsius and percent relative humidity; the five octave
-#: alpha_p and the rating it prints, alpha_w = 0,9, class A. The report is from
+#: alpha_p and the rating it prints, alpha_w = 0.9, class A. The report is from
 #: eleven years before the test code existed.
 SP_P302808_VOLUME_M3: float = 200.0
 SP_P302808_AREA_M2: float = 10.8
@@ -198,11 +198,11 @@ SP_P302808_WITH_SPECIMEN: tuple[float, float] = (24.0, 89.0)
 SP_P302808_ALPHA_P: tuple[float, ...] = (0.80, 0.85, 0.85, 0.95, 0.95)
 SP_P302808_RATING: tuple[float, str, str] = (0.90, "", "A")
 
-#: CSTB AC14-26051052/10: Hygiene Meditec A on an E-50 mounting, 10,5 m2; the
+#: CSTB AC14-26051052/10: Hygiene Meditec A on an E-50 mounting, 10.5 m2; the
 #: climate empty and with the sample, as degrees Celsius and percent relative
-#: humidity; the five octave alpha_p and the rating it prints, 0,70(MH), class
-#: C. Both high-frequency bands sit exactly 0,25 above the shifted curve, and
-#: the accepted shift leaves an unfavourable sum of exactly 0,10, which is what
+#: humidity; the five octave alpha_p and the rating it prints, 0.70(MH), class
+#: C. Both high-frequency bands sit exactly 0.25 above the shifted curve, and
+#: the accepted shift leaves an unfavourable sum of exactly 0.10, which is what
 #: makes the case discriminating.
 CSTB_AC14_AREA_M2: float = 10.5
 CSTB_AC14_DEPTH_MM: float = 50.0

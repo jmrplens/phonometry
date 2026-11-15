@@ -347,7 +347,7 @@ def test_a_wool_of_the_usual_density_has_pores_of_the_usual_size() -> None:
 def test_the_two_routes_to_the_viscous_length_drift_apart_with_density(
     density: float, expected: float
 ) -> None:
-    """The docstring's 1,4 and 1,9, measured rather than asserted.
+    """The docstring's 1.4 and 1.9, measured rather than asserted.
 
     Both routes are given the same rock wool: the resistivity and the porosity
     from Hopkins' two equations, the geometry from his fibre diameter and fibre

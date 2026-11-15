@@ -76,7 +76,7 @@ Shape = Literal["circular", "rectangular", "square"]
 
 Complex = NDArray[np.complex128]
 
-#: Reference speed of sound of ISO 10534-2 Eq. (5), in m/s (343,2 exactly).
+#: Reference speed of sound of ISO 10534-2 Eq. (5), in m/s (343.2 exactly).
 _ISO_C_REF = 343.2
 #: Reference temperature of ISO 10534-2 Eqs. (5)/(7), in kelvin (293 exactly).
 _ISO_T_REF = 293.0

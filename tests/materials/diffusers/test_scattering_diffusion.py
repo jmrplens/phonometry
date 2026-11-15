@@ -565,7 +565,7 @@ def test_speed_of_sound_bounds_only_absolute_zero() -> None:
 
 
 def test_speed_of_sound_rejects_temperature_below_absolute_zero() -> None:
-    """Eq. (2) takes the square root of (273,15 + t)/293,15.
+    """Eq. (2) takes the square root of (273.15 + t)/293.15.
 
     Below absolute zero the radicand is negative and numpy's real square root
     hands back a NaN, which would then travel silently into the Sabine

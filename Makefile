@@ -205,13 +205,16 @@ subscripts:
 euler-number:
 	$(PYTHON) scripts/check_euler_number.py
 
-# The blind spot of the Spanish pass, and the reason it needs a check of its
-# own. That pass ends with the decimal comma, guarded by `"$" not in s` because
-# a bare comma inside `$...$` sets with maths spacing -- but the guard tests the
-# WHOLE string, so a label carrying mathematics anywhere keeps an English point
-# everywhere. No other gate can see it: the language gate compares untranslated
-# WORDS, and a number is not a word. This reads the translation tables and fails
-# on a Spanish value that still has a point the pass will never reach.
+# The decimal marker, both ways round. English text writes the point, a value
+# restated from a standard that prints a comma among them, and keeps the comma
+# only where it transcribes the print (quotation marks, a block quote, the print
+# field of an errata entry, the printed column of the conformance report): the
+# English half reads every tracked file by its structure and fails on any other
+# comma between digits (rules P9 and F58). The Spanish half is the blind spot of
+# the save-time comma pass, which is guarded by `"$" not in s` and so leaves an
+# English point in a Spanish label that carries mathematics anywhere: it reads
+# the translation tables and fails on such a value (rule F29). `--labels` and
+# `--english` run one half each.
 decimal-comma:
 	$(PYTHON) scripts/check_decimal_comma.py
 
@@ -627,7 +630,7 @@ figures:
 	# cannot parse aborts the generation below, and finding that out from the
 	# traceback of a four-hundred-figure run is the slow way round.
 	$(MAKE) mathtext
-	$(MAKE) decimal-comma
+	$(PYTHON) scripts/check_decimal_comma.py --labels
 	$(MAKE) graphs
 	$(MAKE) figure-contrast
 	$(MAKE) figure-language

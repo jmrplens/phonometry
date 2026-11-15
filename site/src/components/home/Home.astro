@@ -559,6 +559,16 @@ const spectrum = `${IMAGES}/signal_response_fraction_3.svg`;
 			border: 0;
 			padding-inline: 0;
 		}
+		/* Stacked, the area cell has the row to itself. The 40 % column and the
+		   34ch measure that keep it beside the standards column on a wide screen
+		   would squeeze it into a third of a phone's width; the column width is
+		   restated here at its own specificity, which outranks the reset above. */
+		table.coverage tbody th {
+			width: auto;
+		}
+		.area-summary {
+			max-width: none;
+		}
 	}
 
 	/* ---- Start path ---- */

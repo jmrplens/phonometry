@@ -1,6 +1,6 @@
 ---
 title: "Erratas de Attenborough & Van Renterghem (2021)"
-description: "Erratas de Attenborough & Van Renterghem (2021): 2 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
+description: "Erratas de Attenborough & Van Renterghem (2021): 3 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
 corrects:
   - "doi-10-1201-9780429470806"
@@ -8,7 +8,48 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Estas son las 2 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre Attenborough & Van Renterghem (2021), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Estas son las 3 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre Attenborough & Van Renterghem (2021), en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+
+## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021), Ec. (4.35)
+
+- **Ubicación:** apartado 4.2.4.1 «Impedance Plane Approach», Ec. (4.35)
+  (p. 133 impresa), la actualización de la velocidad de partícula en un
+  contorno de impedancia real y constante.
+- **El impreso:**
+  $$
+  v^{l+0.5}_{x(i+0.5,j,k)} = \left[1 + \frac{dt\,c_0 Z_0}{dx}\right]^{-1}
+  \left[v^{l-0.5}_{x(i+0.5,j,k)}\left(1 - \frac{dt\,c_0 Z_0}{dx}\right)
+  - \frac{2\,dt}{\rho_0\,dx}\,p^{l}_{(i+1,j,k)}\right]
+  $$
+- **El problema:** la ecuación no se sigue de las dos de las que se
+  construye. La Ec. (4.33) y la figura 4.4 están escritas para un contorno
+  derecho, «assuming a right boundary»: la celda dentro de la malla es $i$,
+  la pared está en $i+0.5$, y «$i+0.5$ is used instead of $i+1$ (that would
+  obviously fall outside the grid)». La Ec. (4.33) toma la diferencia entre
+  la presión de la pared y $p^{l}_{(i,j,k)}$, y la Ec. (4.34) iguala la
+  presión de la pared a la impedancia por la media de las dos velocidades.
+  Llevando (4.34), con la impedancia $Z_0 \rho_0 c_0$, a (4.33) y despejando
+  la velocidad nueva se obtienen el corchete y el factor impresos con el
+  último término $+\,(2\,dt/(\rho_0\,dx))\,p^{l}_{(i,j,k)}$: la presión de la
+  celda de dentro de la malla, con signo más. El término impreso, un signo
+  menos sobre la presión de la celda $i+1$, es la actualización de un
+  contorno izquierdo, cuya celda interior es $i+1$ y cuya normal exterior
+  apunta al otro lado.
+- **Evidencia:** la deducción anterior, a partir de las ecuaciones y la
+  figura leídas en sus páginas: las Ecs. (4.32) y (4.33) con la frase que las
+  precede en la página 151 del PDF (p. 132 impresa), y la figura 4.4 con las
+  Ecs. (4.34) y (4.35) en la página 152 del PDF (p. 133 impresa) de
+  Predicting Outdoor Sound 2e:2021.
+- **Comportamiento de la biblioteca:** ningún número depende de la errata.
+  El motor FDTD actualiza cada lado del dominio con el signo de su propia
+  normal exterior (`_ImpedanceEdge.update` en
+  [`fdtd.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/simulation/fdtd.py): los lados derecho e
+  inferior suman la presión de la celda interior, los lados izquierdo y
+  superior la restan), que es la Ec. (4.35) deducida arriba a la derecha y la
+  forma impresa a la izquierda;
+  ``tests/simulation/test_fdtd_oblique_impedance.py`` sujeta la reflexión de
+  uno de esos lados a la de un plano de reacción local.
+- **Estado:** sin notificar (libro, no una norma).
 
 ## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021), Tabla 5.1
 

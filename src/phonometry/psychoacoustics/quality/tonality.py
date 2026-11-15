@@ -503,8 +503,8 @@ def prominence_ratio(
     band edges from the fitted Formulae 21-22 with Tables 2-3). For tones
     at or below 171.4 Hz the lower band is truncated at 20 Hz and rescaled
     to a 100 Hz bandwidth (Formula 24; Formula 23 otherwise, per the
-    clause 12.5 prose; the inline condition printed next to Formula 23 in
-    the PDF is a typo).
+    clause 12.5 prose; the condition printed beside Formula 23 is that of
+    Formula 24, a misprint recorded in docs/ERRATA.md).
 
     :param x: Input signal (1D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the

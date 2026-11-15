@@ -1,6 +1,6 @@
 ---
 title: "Errata in ECMA-418"
-description: "Errata in ECMA-418: 8 defects in the printed text, with the evidence and what phonometry does about each."
+description: "Errata in ECMA-418: 11 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
 corrects:
   - "std-ecma-418-1-2024-3rd-ed"
@@ -9,7 +9,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-These are the 8 entries of the [errata registry](/phonometry/reference/errata/) on ECMA-418-1:2024 and ECMA-418-2:2025, in the order the registry lists them. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
+These are the 11 entries of the [errata registry](/phonometry/reference/errata/) on ECMA-418-1:2024 and ECMA-418-2:2025, in the order the registry lists them. The registry's introduction says how each claim is checked against the printed page and what the status of an entry means.
 
 ## ECMA-418-1:2024 (3rd edition), clause 4.1.1 NOTE 2 (upper limit of the discrete-tone range)
 
@@ -87,6 +87,66 @@ These are the 8 entries of the [errata registry](/phonometry/reference/errata/) 
   ECMA-418-1:2024 (3rd edition).
 - **Library behaviour:** none required; the library implements the critical
   bandwidth from Formulae (3)/(6) directly.
+- **Status:** unreported.
+
+## ECMA-418-1:2024 (3rd edition), clause 12.4 (the upper band edge sent to Formula (21))
+
+- **Location:** clause 12.4 "Determination of the level of the upper
+  critical band" (printed p. 17), the sentence before Formula (22).
+- **The print:** "For the purposes of this document, the value of
+  $f_{2,\mathrm{U}}$ shall be computed from Formula (21) (which has been
+  derived from an iterative solution through the use of curve fitting)."
+- **The problem:** Formula (21) is the lower band edge of the lower critical
+  band, $f_{1,\mathrm{L}}$, with the constants of Table 2. The formula
+  printed right after the sentence is Formula (22), $f_{2,\mathrm{U}}$ with
+  the constants of Table 3, which is the one the sentence means; it was
+  copied from 12.3 with that clause's formula number.
+- **Evidence:** the sentence and the two formulas on one page. Verified on
+  PDF page 25 (printed p. 17) of ECMA-418-1:2024 (3rd edition).
+- **Library behaviour:** computes $f_{2,\mathrm{U}}$ from Formula (22) with
+  Table 3, in
+  [`tonality.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/psychoacoustics/quality/tonality.py).
+- **Status:** unreported.
+
+## ECMA-418-1:2024 (3rd edition), Formula (23) (the condition of Formula (24) printed beside it)
+
+- **Location:** clause 12.5 "Determination of prominence ratio", Formula
+  (23) (printed p. 18).
+- **The print:** "The prominence ratio, $\Delta L_\mathrm{P}$ in decibels, is
+  calculated as follows (for discrete tone frequencies greater than 171,4
+  Hz):", then Formula (23) with "for $f_t \le 171{,}4\ \text{Hz}$" beside it.
+- **The problem:** the sentence gives Formula (23) to tones above
+  171.4 Hz, and the paragraph after it brings in Formula (24) "for the
+  purposes of computing the prominence ratio for discrete tone frequencies
+  less than or equal to 171,4 Hz", which (24) also prints beside itself.
+  Read as printed, both formulas claim the low tones and neither the high
+  ones. The condition beside (23) is that of (24); the intended one is
+  $f_t > 171.4\ \text{Hz}$.
+- **Evidence:** the formula and the two sentences on one page. Verified on
+  PDF page 26 (printed p. 18) of ECMA-418-1:2024 (3rd edition).
+- **Library behaviour:** applies Formula (23) above 171.4 Hz and Formula
+  (24) at or below it, as the sentences say, in
+  [`tonality.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/psychoacoustics/quality/tonality.py),
+  whose `prominence_ratio` docstring names the printed condition as a
+  misprint.
+- **Status:** unreported.
+
+## ECMA-418-1:2024 (3rd edition), clause 12.5 (the truncation of the lower band cross-referenced to 12.4)
+
+- **Location:** clause 12.5, the paragraph between Formulae (23) and (24)
+  (printed p. 18).
+- **The print:** "For discrete tone frequencies less than or equal to 171,4
+  Hz, the lower critical band becomes truncated (see 12.4) so that its width
+  is less than what would be calculated from Formula (2)."
+- **The problem:** 12.4 is the upper critical band and says nothing of a
+  truncation. The lower band is cut at 20 Hz in 12.3: "For such cases, the
+  lower band-edge frequency shall be set equal to 20 Hz". The reference
+  should read 12.3.
+- **Evidence:** the two clauses read on their pages: 12.3 and 12.4 on PDF
+  page 25 (printed p. 17) and 12.5 on PDF page 26 (printed p. 18) of
+  ECMA-418-1:2024 (3rd edition).
+- **Library behaviour:** none required; the library cuts the lower band at
+  20 Hz as 12.3 prints and rescales it to 100 Hz by Formula (24).
 - **Status:** unreported.
 
 ## ECMA-418-2:2025 (4th edition), clause 5.1.5.2 (last block index)

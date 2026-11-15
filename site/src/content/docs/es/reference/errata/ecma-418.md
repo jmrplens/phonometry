@@ -1,6 +1,6 @@
 ---
 title: "Erratas de ECMA-418"
-description: "Erratas de ECMA-418: 8 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
+description: "Erratas de ECMA-418: 11 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
 corrects:
   - "std-ecma-418-1-2024-3-ed"
@@ -9,7 +9,7 @@ corrects:
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->
 
-Estas son las 8 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre ECMA-418-1:2024 y ECMA-418-2:2025, en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
+Estas son las 11 entradas del [registro de erratas](/phonometry/es/reference/errata/) sobre ECMA-418-1:2024 y ECMA-418-2:2025, en el orden en que las recoge el registro. La introducción del registro explica cómo se comprueba cada afirmación contra la página impresa y qué significa el estado de una entrada. La redacción autoritativa es la inglesa; las citas textuales, las matemáticas y los valores impresos se reproducen sin traducir.
 
 ## ECMA-418-1:2024 (3.ª edición), NOTA 2 del apartado 4.1.1 (límite superior del rango de tonos discretos)
 
@@ -94,6 +94,68 @@ Estas son las 8 entradas del [registro de erratas](/phonometry/es/reference/erra
 - **Comportamiento de la biblioteca:** no hizo falta ninguno; la biblioteca
   implementa el ancho de banda crítico desde las Fórmulas (3)/(6)
   directamente.
+- **Estado:** sin notificar.
+
+## ECMA-418-1:2024 (3.ª edición), apartado 12.4 (el borde superior de banda enviado a la Fórmula (21))
+
+- **Ubicación:** apartado 12.4 «Determination of the level of the upper
+  critical band» (p. 17 impresa), la frase que precede a la Fórmula (22).
+- **El impreso:** «For the purposes of this document, the value of
+  $f_{2,\mathrm{U}}$ shall be computed from Formula (21) (which has been
+  derived from an iterative solution through the use of curve fitting).»
+- **El problema:** la Fórmula (21) es el borde inferior de la banda crítica
+  inferior, $f_{1,\mathrm{L}}$, con las constantes de la tabla 2. La fórmula
+  impresa justo después de la frase es la Fórmula (22), $f_{2,\mathrm{U}}$
+  con las constantes de la tabla 3, que es la que la frase quiere decir; se
+  copió del 12.3 con el número de fórmula de ese apartado.
+- **Evidencia:** la frase y las dos fórmulas en una misma página. Verificado
+  en la página 25 del PDF (p. 17 impresa) de ECMA-418-1:2024 (3.ª edición).
+- **Comportamiento de la biblioteca:** calcula $f_{2,\mathrm{U}}$ con la
+  Fórmula (22) y la tabla 3, en
+  [`tonality.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/psychoacoustics/quality/tonality.py).
+- **Estado:** sin notificar.
+
+## ECMA-418-1:2024 (3.ª edición), Fórmula (23) (la condición de la Fórmula (24) impresa a su lado)
+
+- **Ubicación:** apartado 12.5 «Determination of prominence ratio», Fórmula
+  (23) (p. 18 impresa).
+- **El impreso:** «The prominence ratio, $\Delta L_\mathrm{P}$ in decibels,
+  is calculated as follows (for discrete tone frequencies greater than 171,4
+  Hz):», y luego la Fórmula (23) con «for $f_t \le 171{,}4\ \text{Hz}$» al
+  lado.
+- **El problema:** la frase asigna la Fórmula (23) a los tonos por encima de
+  171,4 Hz, y el párrafo siguiente introduce la Fórmula (24) «for the
+  purposes of computing the prominence ratio for discrete tone frequencies
+  less than or equal to 171,4 Hz», condición que (24) también imprime a su
+  lado. Leído tal como está impreso, las dos fórmulas reclaman los tonos
+  bajos y ninguna los altos. La condición junto a (23) es la de (24); la que
+  se pretende es $f_t > 171{,}4\ \text{Hz}$.
+- **Evidencia:** la fórmula y las dos frases en una misma página. Verificado
+  en la página 26 del PDF (p. 18 impresa) de ECMA-418-1:2024 (3.ª edición).
+- **Comportamiento de la biblioteca:** aplica la Fórmula (23) por encima de
+  171,4 Hz y la Fórmula (24) en o por debajo, como dicen las frases, en
+  [`tonality.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/psychoacoustics/quality/tonality.py),
+  cuyo docstring de `prominence_ratio` señala la condición impresa como
+  errata.
+- **Estado:** sin notificar.
+
+## ECMA-418-1:2024 (3.ª edición), apartado 12.5 (el truncado de la banda inferior remitido al 12.4)
+
+- **Ubicación:** apartado 12.5, el párrafo entre las Fórmulas (23) y (24)
+  (p. 18 impresa).
+- **El impreso:** «For discrete tone frequencies less than or equal to 171,4
+  Hz, the lower critical band becomes truncated (see 12.4) so that its width
+  is less than what would be calculated from Formula (2).»
+- **El problema:** el 12.4 es la banda crítica superior y no habla de ningún
+  truncado. La banda inferior se corta en 20 Hz en el 12.3: «For such cases,
+  the lower band-edge frequency shall be set equal to 20 Hz». La remisión
+  debería ser al 12.3.
+- **Evidencia:** los dos apartados leídos en sus páginas: 12.3 y 12.4 en la
+  página 25 del PDF (p. 17 impresa) y 12.5 en la página 26 del PDF (p. 18
+  impresa) de ECMA-418-1:2024 (3.ª edición).
+- **Comportamiento de la biblioteca:** no hizo falta ninguno; la biblioteca
+  corta la banda inferior en 20 Hz como imprime el 12.3 y la reescala a
+  100 Hz con la Fórmula (24).
 - **Estado:** sin notificar.
 
 ## ECMA-418-2:2025 (4.ª edición), apartado 5.1.5.2 (índice del último bloque)

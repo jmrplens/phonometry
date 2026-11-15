@@ -100,7 +100,7 @@ def test_the_five_percent_band_is_inclusive_at_its_edge() -> None:
     """A run exactly on the limit is inside it, which is what "within" says.
 
     The case is written to land on the edge in floating point, not near it:
-    1,05 against a mean of 1 comes out 5,000000000000004 % away, and refusing
+    1.05 against a mean of 1 comes out 5.000000000000004 % away, and refusing
     that would refuse the standard's own edge for a representation error.
     """
     mean = 1.0

@@ -187,7 +187,7 @@ def test_the_pvem_uncertainties_are_the_part_2_page() -> None:
 
 
 def test_the_three_frequency_response_clauses() -> None:
-    """12.11.2 permits 4,5 %, 12.11.3 3 % and 12.11.4 5 % (folios 29 to 31)."""
+    """12.11.2 permits 4.5 %, 12.11.3 3 % and 12.11.4 5 % (folios 29 to 31)."""
     table = vibration.PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT
     assert table["12.11.2"] == pytest.approx(4.5)
     assert table["12.11.3"] == pytest.approx(3.0)

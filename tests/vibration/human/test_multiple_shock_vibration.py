@@ -152,7 +152,7 @@ def test_annex_c_male_worked_example() -> None:
 
 
 def test_annex_c_female_worked_example() -> None:
-    # Same exposure, 64 kg female: Sd = 1,40 MPa, R = 0,97 (Annex C NOTE 5).
+    # Same exposure, 64 kg female: Sd = 1.40 MPa, R = 0.97 (Annex C NOTE 5).
     dz = v.dose_from_peaks([40.0] * 5)
     sd = v.compression_dose(dz, mz=v._MZ_FEMALE)
     assert sd == pytest.approx(ISO2631_5_SD_FEMALE, abs=0.01)

@@ -202,7 +202,7 @@ TAIL_TOLERANCE_PERCENT = (UNCONSTRAINED_BELOW_PERCENT, 26.0, math.inf)
 
 #: Table 1: the frequency at which each weighting is calibrated, in hertz. The
 #: standard prints them in radians per second (100 rad/s for whole-body,
-#: 500 rad/s for hand-transmitted, 2,5 rad/s for the low-frequency case), and
+#: 500 rad/s for hand-transmitted, 2.5 rad/s for the low-frequency case), and
 #: they are divided by 2 pi here rather than transcribed from the rounded
 #: hertz beside them.
 _REFERENCE_RAD_S: dict[WeightingName, float] = {
@@ -273,7 +273,7 @@ NOMINAL_FREQUENCY_RANGE_HZ: Mapping[WeightingName, tuple[float, float]] = (
 #: folio 23 and 13.1 on folio 37, so it is the coverage factor of a personal
 #: vibration exposure meter too. It carries the number of its standard because
 #: it is not the only coverage factor the library publishes:
-#: :data:`phonometry.hearing.COVERAGE_FACTOR` is the 1,65 of ISO 9612, and a
+#: :data:`phonometry.hearing.COVERAGE_FACTOR` is the 1.65 of ISO 9612, and a
 #: bare ``COVERAGE_FACTOR`` in a second domain would read as the same number.
 ISO8041_COVERAGE_FACTOR = 2.0
 
@@ -873,7 +873,7 @@ def peak_deviation_percent(
 
     .. math::
 
-        \Delta P_{\max} \approx \pm \max\{0{,}48 \sin \Delta\varphi_0(f_n)\}
+        \Delta P_{\max} \approx \pm \max\{0.48 \sin \Delta\varphi_0(f_n)\}
         \times 100 \, \%
 
     followed by "For the maximum characteristic phase deviations of 12°, the
@@ -1248,29 +1248,29 @@ def band_limited_weighting_factor(name: WeightingName) -> float:
     ==========  ==================  ===================
     Weighting   This ratio          Table 1 prints
     ==========  ==================  ===================
-    ``Wb``      0,812 819           0,812 6
-    ``Wc``      0,514 617           0,514 5
-    ``Wd``      0,126 120           0,126 1
-    ``We``      0,062 891           0,062 87
-    ``Wf``      0,418 982           0,388 8
-    ``Wh``      0,202 025           0,202 0
-    ``Wj``      1,018 841           1,019
-    ``Wk``      0,772 066           0,771 8
-    ``Wm``      0,336 336           0,336 2
+    ``Wb``      0.812 819           0.812 6
+    ``Wc``      0.514 617           0.514 5
+    ``Wd``      0.126 120           0.126 1
+    ``We``      0.062 891           0.062 87
+    ``Wf``      0.418 982           0.388 8
+    ``Wh``      0.202 025           0.202 0
+    ``Wj``      1.018 841           1,019
+    ``Wk``      0.772 066           0.771 8
+    ``Wm``      0.336 336           0.336 2
     ==========  ==================  ===================
 
     For eight of the nine the distinction is academic: their band-limiting
-    weighting is between 0,999 68 and 0,999 97 at their reference frequency,
-    so the printed Table 1 factor is the same number to 0,03 %, well inside
+    weighting is between 0.999 68 and 0.999 97 at their reference frequency,
+    so the printed Table 1 factor is the same number to 0.03 %, well inside
     any of the Table 2 limits the row is judged against. For ``Wf`` it is
-    not. Its reference frequency, 2,5 rad/s = 0,397 887 Hz, sits inside its
-    own band-limiting skirt (0,08 Hz and 0,63 Hz corners, Table 3): the
-    band-limiting weighting is 0,928 078 there and the overall weighting
-    0,388 848, values Table B.5 prints as 0,927 9 and 0,388 4 at the
-    neighbouring 0,398 1 Hz band centre. Reading "the appropriate weighting
-    factor" as the 0,388 8 of Table 1 makes a *conforming* ``Wf`` meter miss
-    the row by 7,76 % of the value it demands, half again over the ±5 %
-    Table 2 allows it; reading it as the ratio 0,418 982 makes the row true
+    not. Its reference frequency, 2.5 rad/s = 0.397 887 Hz, sits inside its
+    own band-limiting skirt (0.08 Hz and 0.63 Hz corners, Table 3): the
+    band-limiting weighting is 0.928 078 there and the overall weighting
+    0.388 848, values Table B.5 prints as 0.927 9 and 0.388 4 at the
+    neighbouring 0.398 1 Hz band centre. Reading "the appropriate weighting
+    factor" as the 0.388 8 of Table 1 makes a *conforming* ``Wf`` meter miss
+    the row by 7.76 % of the value it demands, half again over the ±5 %
+    Table 2 allows it; reading it as the ratio 0.418 982 makes the row true
     by construction. The standard does not define the phrase, and the
     "(see Table 1)" of 12.7 points at the reading that cannot be satisfied;
     the ambiguity is registered in ``docs/ERRATA.md``.
@@ -1316,7 +1316,7 @@ RUNNING_RMS_DECAY_TIME_S: Mapping[Method, tuple[tuple[float, float, float], ...]
 #:
 #: The rate band is not the reciprocal of the time band. The closed-form rate
 #: is ``20 lg(e) / (2 tau) = 4,3429 / tau`` dB/s, and the printed limits sit
-#: at 0,875 to 0,892 and 1,128 to 1,151 times it, while the printed times map
+#: at 0.875 to 0.892 and 1,128 to 1,151 times it, while the printed times map
 #: to narrower intervals around ``2 tau ln 10``. The time column is the one
 #: that binds; the rate column is the looser statement of the same decay.
 RUNNING_RMS_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = (
@@ -1340,7 +1340,7 @@ def running_rms_decay_time(integration_time: float, *, method: Method) -> float:
     indicated value falls as :math:`\sqrt{(\tau - t)/\tau}`, reaching 10 % at
     ``t = 0,99 tau``. The exponential average of Eq. (3) decays in power as
     :math:`\mathrm{e}^{-t/\tau}`, so the indication falls as :math:`\mathrm{e}^{-t/2\tau}` and
-    reaches 10 % at :math:`t = 2\tau\ln 10 = 4,605\,2\,\tau`.
+    reaches 10 % at :math:`t = 2\tau\ln 10 = 4.605\,2\,\tau`.
 
     Both land inside the printed bands of :data:`RUNNING_RMS_DECAY_TIME_S`
     for the three time constants the standard tabulates.
@@ -1447,7 +1447,7 @@ class RunningRMSDecayVerification(RichDisplay):
         nothing more: the other clauses a meter is graded on are hardware
         measurements this cannot stand in for.
         """
-        # Judged settled: 0,129 s against 0,124 s +- 0,005 s is on the edge
+        # Judged settled: 0.129 s against 0.124 s +- 0.005 s is on the edge
         # of the interval in decimal, a last bit outside it in binary.
         return bool(settled(abs(self.deviation_s) - self.tolerance_s) <= 0.0)
 
@@ -1507,7 +1507,7 @@ def verify_running_rms_decay(
     :param measured_time_s: The measured time to 10 % of the initial
         indicated value, in seconds (> 0).
     :param integration_time: The averaging time it was measured at, which
-        has to be one of the printed 0,125 s, 1 s and 8 s. Keyword-only, and
+        has to be one of the printed 0.125 s, 1 s and 8 s. Keyword-only, and
         so is the method: two times in seconds side by side are the kind of
         pair a positional call gets the wrong way round in silence.
     :param method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11).

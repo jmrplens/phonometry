@@ -77,7 +77,7 @@ _ANNEX_B = [
 def test_annex_b_design_goal_factors(name: str, n: int, expected: float) -> None:
     """|H| at the true band centre matches the Annex B four-figure factor."""
     got = hv.weighting_factors(name, _fc(n))
-    # 0,1 % relative + a floor for the deep-attenuation four-figure entries.
+    # 0.1 % relative + a floor for the deep-attenuation four-figure entries.
     assert got == pytest.approx(expected, rel=1e-3, abs=5e-6)
 
 
@@ -109,7 +109,7 @@ def test_annex_b_full_tables_reproduce() -> None:
     for name, rows in ISO8041_1_ANNEX_B_FACTORS.items():
         for n, printed in rows:
             got = float(hv.weighting_factors(name, _fc(n)))
-            # The tables print four significant figures (<= 0,05 % rounding).
+            # The tables print four significant figures (<= 0.05 % rounding).
             assert got == pytest.approx(printed, rel=1e-3), (name, n)
 
 
@@ -246,15 +246,15 @@ def test_annex_b_band_limiting_columns_reproduce() -> None:
     for name, rows in ISO8041_1_ANNEX_B_BAND_LIMITING.items():
         for n, printed in rows:
             got = float(hv.band_limiting_factors(name, _fc(n)))
-            # The tables print four significant figures (<= 0,05 % rounding).
+            # The tables print four significant figures (<= 0.05 % rounding).
             assert got == pytest.approx(printed, rel=1e-3), (name, n)
 
 
 def test_the_band_limiting_column_is_not_the_weighting_column() -> None:
     """The two Annex B columns are far apart wherever the weighting works.
 
-    At 1 Hz Table B.8 prints 0,987 4 for the band limiting of ``Wk`` and
-    0,482 5 for ``Wk`` itself, so a band-limiting response that returned the
+    At 1 Hz Table B.8 prints 0.987 4 for the band limiting of ``Wk`` and
+    0.482 5 for ``Wk`` itself, so a band-limiting response that returned the
     overall weighting would fail every band in the middle of the range.
     """
     freq = _fc(0)
@@ -265,7 +265,7 @@ def test_the_band_limiting_column_is_not_the_weighting_column() -> None:
 
 
 def test_six_weightings_share_one_band_limiting_pair() -> None:
-    """Table 3 gives six weightings the same 0,4 Hz and 100 Hz corners.
+    """Table 3 gives six weightings the same 0.4 Hz and 100 Hz corners.
 
     Which is why Annex B prints one band-limiting column for the six of them,
     and why ``Wf``, ``Wh`` and ``Wm``, whose corners differ, must not match.
@@ -279,7 +279,7 @@ def test_six_weightings_share_one_band_limiting_pair() -> None:
 
 
 def test_the_band_limiting_response_declares_which_curve_it_is() -> None:
-    """Table B.5, n = -4: the band limiting of ``Wf`` is 0,927 9 (-0,65 dB)."""
+    """Table B.5, n = -4: the band limiting of ``Wf`` is 0.927 9 (-0.65 dB)."""
     resp = hv.band_limiting_response("Wf", [_fc(-4)])
     assert resp.name == "Wf"
     assert resp.band_limiting
@@ -289,7 +289,7 @@ def test_the_band_limiting_response_declares_which_curve_it_is() -> None:
 
 
 def test_the_band_limiting_phase_is_the_annex_b_phase_column() -> None:
-    """Table B.8 prints 90,06 and -89,68 degrees at the two 3 dB corners."""
+    """Table B.8 prints 90.06 and -89.68 degrees at the two 3 dB corners."""
     resp = hv.band_limiting_response("Wk", [_fc(-4), _fc(20)])
     degrees = np.degrees(np.angle(resp.response))
     assert degrees == pytest.approx([90.06, -89.68], abs=0.02)
@@ -309,8 +309,8 @@ def test_band_limiting_refuses_what_the_weighting_refuses() -> None:
 def test_apply_band_limiting_scales_a_sine_by_the_band_limiting_factor() -> None:
     """And by that factor rather than by the overall weighting.
 
-    At 80 Hz Table B.8 prints 0,845 7 for the band limiting of ``Wk`` and
-    0,133 9 for ``Wk``, six times smaller.
+    At 80 Hz Table B.8 prints 0.845 7 for the band limiting of ``Wk`` and
+    0.133 9 for ``Wk``, six times smaller.
     """
     fs = 2000.0
     f0 = 80.0
@@ -388,7 +388,7 @@ def test_the_one_cycle_row_of_table_8(row: str) -> None:
     """r.m.s., VDV and both MTVV columns of the one-cycle burst.
 
     Printed with 10 % tolerance (12 % on the VDV); the chain reproduces them
-    to better than 0,5 %, which is what is checked here.
+    to better than 0.5 %, which is what is checked here.
     """
     weighted = _zero_state(
         _sawtooth_burst(1), name="Wk", band_limiting=row == "band-limiting"
@@ -406,8 +406,8 @@ def test_the_one_cycle_row_of_table_8(row: str) -> None:
 def test_the_two_mtvv_columns_of_table_8_are_different_numbers() -> None:
     """Forwarding ``method`` is what puts the exponential column in reach.
 
-    Table 8 prints 0,094 4 for the linear MTVV of the one-cycle ``Wk`` burst
-    and 0,092 2 for the exponential one, 2,3 % apart. An ``mtvv`` that
+    Table 8 prints 0.094 4 for the linear MTVV of the one-cycle ``Wk`` burst
+    and 0.092 2 for the exponential one, 2.3 % apart. An ``mtvv`` that
     averaged linearly whatever it was asked for would land on the first
     number and miss the second by four times the tolerance used here.
     """
@@ -485,7 +485,7 @@ def test_rms_metrics_on_pure_sine() -> None:
     a = 2.0
     x = a * np.sin(2.0 * math.pi * 20.0 * t)  # r.m.s. = a/sqrt(2)
     rms = a / math.sqrt(2.0)
-    # Crest factor of a sine is sqrt(2) (discrete peak sampling -> ~0,2 %).
+    # Crest factor of a sine is sqrt(2) (discrete peak sampling -> ~0.2 %).
     assert hv.crest_factor(x) == pytest.approx(math.sqrt(2.0), rel=5e-3)
     # VDV = (integral a_w^4 dt)^(1/4); for a sine of duration T:
     # mean of sin^4 = 3/8 -> VDV = a*(3/8*T)^(1/4).
@@ -539,7 +539,7 @@ def test_vibration_total_value_unweighted() -> None:
 
 
 def test_vibration_total_value_with_k_factors() -> None:
-    # ISO 2631-1 7.2.3 health seated: k = 1,4 / 1,4 / 1,0.
+    # ISO 2631-1 7.2.3 health seated: k = 1.4 / 1.4 / 1.0.
     got = hv.vibration_total_value([0.5, 0.3, 0.8], k=[1.4, 1.4, 1.0])
     expected = math.sqrt((1.4 * 0.5) ** 2 + (1.4 * 0.3) ** 2 + (1.0 * 0.8) ** 2)
     assert got == pytest.approx(expected)
@@ -547,13 +547,13 @@ def test_vibration_total_value_with_k_factors() -> None:
 
 def test_wbv_exposure_basis_x_axis_dominates() -> None:
     # Directive 2002/44/EC Annex Part B point 1: A(8) is based on the highest
-    # of 1,4*a_wx, 1,4*a_wy, a_wz. Here 1,4*0,5 = 0,7 beats a_wz = 0,6.
+    # of 1.4*a_wx, 1.4*a_wy, a_wz. Here 1.4*0.5 = 0.7 beats a_wz = 0.6.
     assert hv.wbv_exposure_basis(0.5, 0.2, 0.6) == pytest.approx(0.7)
 
 
 def test_wbv_exposure_basis_z_axis_dominates_and_differs_from_vector_total() -> None:
-    # Same axis set as the docs example: max(0,49; 0,392; 0,62) = 0,62, well
-    # below the ISO 2631-1 Eq. (10) vector total 0,882 for the same axes.
+    # Same axis set as the docs example: max(0.49; 0.392; 0.62) = 0.62, well
+    # below the ISO 2631-1 Eq. (10) vector total 0.882 for the same axes.
     basis = hv.wbv_exposure_basis(0.35, 0.28, 0.62)
     assert basis == pytest.approx(0.62)
     total = hv.vibration_total_value([0.35, 0.28, 0.62], k=[1.4, 1.4, 1.0])
@@ -573,25 +573,25 @@ def test_wbv_exposure_basis_rejects_negative_or_nonfinite() -> None:
 
 
 def test_iso5349_2_example_e2_1_single_tool() -> None:
-    """ISO 5349-2 E.2.1: a_hv=7,4 m/s2, T=2,5 h -> A(8)=4,1 m/s2."""
+    """ISO 5349-2 E.2.1: a_hv=7.4 m/s2, T=2.5 h -> A(8)=4.1 m/s2."""
     a8 = hv.daily_exposure(7.4, 2.5 * 3600.0)
     assert a8 == pytest.approx(4.1, abs=0.05)
 
 
 def test_iso5349_2_example_e2_4_burst() -> None:
-    """ISO 5349-2 E.2.4: a_hv=14,6 m/s2, T=4000 s (= 1,1 h) -> A(8)=5,4 m/s2."""
+    """ISO 5349-2 E.2.4: a_hv=14.6 m/s2, T=4000 s (= 1.1 h) -> A(8)=5.4 m/s2."""
     # T = (1000 nuts/day / 5 nuts measured) * 20 s = 4000 s per Eq. (E.4); the
-    # standard rounds 4000 s to "1,1 h". A(8) = 14,6*sqrt(4000/28800) = 5,4.
+    # standard rounds 4000 s to "1,1 h". A(8) = 14.6*sqrt(4000/28800) = 5.4.
     a8 = hv.daily_exposure(14.6, 4000.0)
     assert a8 == pytest.approx(5.4, abs=0.05)
 
 
 def test_iso5349_2_example_e3_forestry_multi_tool() -> None:
-    """ISO 5349-2 E.3: three tasks combine to A(8)=3,6 m/s2."""
+    """ISO 5349-2 E.3: three tasks combine to A(8)=3.6 m/s2."""
     partials = [
-        hv.daily_exposure(4.6, 2 * 3600.0),  # brush-saw  -> 2,3
-        hv.daily_exposure(6.0, 1 * 3600.0),  # felling    -> 2,1
-        hv.daily_exposure(3.6, 2 * 3600.0),  # stripping  -> 1,8
+        hv.daily_exposure(4.6, 2 * 3600.0),  # brush-saw  -> 2.3
+        hv.daily_exposure(6.0, 1 * 3600.0),  # felling    -> 2.1
+        hv.daily_exposure(3.6, 2 * 3600.0),  # stripping  -> 1.8
     ]
     assert partials[0] == pytest.approx(2.3, abs=0.05)
     assert partials[1] == pytest.approx(2.1, abs=0.05)
@@ -600,7 +600,7 @@ def test_iso5349_2_example_e3_forestry_multi_tool() -> None:
 
 
 def test_iso5349_1_example_multi_operation() -> None:
-    """ISO 5349-1 5.3 worked example: 1 h/3 h/0,5 h -> A(8)=3,4 m/s2."""
+    """ISO 5349-1 5.3 worked example: 1 h/3 h/0.5 h -> A(8)=3.4 m/s2."""
     a8 = hv.hav_daily_exposure([2.0, 3.5, 10.0], [3600.0, 3 * 3600.0, 0.5 * 3600.0])
     assert a8 == pytest.approx(3.4, abs=0.05)
 
@@ -625,7 +625,7 @@ def test_energy_equivalent_rejects_negative_duration() -> None:
 
 
 def test_hav_vwf_lifetime_matches_table_c1() -> None:
-    """ISO 5349-1 Table C.1 / Eq. (C.1): A(8)=7 -> ~4 years; 3,7 -> ~8."""
+    """ISO 5349-1 Table C.1 / Eq. (C.1): A(8)=7 -> ~4 years; 3.7 -> ~8."""
     assert hv.hav_vwf_lifetime_years(7.0) == pytest.approx(4.0, abs=0.3)
     assert hv.hav_vwf_lifetime_years(3.7) == pytest.approx(8.0, abs=0.6)
     assert hv.hav_vwf_lifetime_years(14.0) == pytest.approx(2.0, abs=0.2)
@@ -855,9 +855,9 @@ def test_an_assessment_refuses_a_hand_arm_vdv_pair() -> None:
     hand-arm VDV action and limit values to assess against. Built directly,
     that pair used to render a fiche headed by the hand-arm ISO standard
     whose thresholds, zone and verdict all came from the whole-body VDV
-    values: an ``A(8)`` of 3,5 m/s2, well above the 2,5 m/s2 hand-arm EAV,
+    values: an ``A(8)`` of 3.5 m/s2, well above the 2.5 m/s2 hand-arm EAV,
     printed "below the exposure action value" and passed against
-    21 m/s^1,75. The entry point refuses the pair, so the dataclass must
+    21 m/s^1.75. The entry point refuses the pair, so the dataclass must
     refuse it with the same message.
     """
     # The whole-body half of the pair stays constructible: the guard pins the

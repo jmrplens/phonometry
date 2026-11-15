@@ -142,7 +142,7 @@ def test_a_response_equal_to_the_design_goal_passes_everywhere() -> None:
 def test_the_acceptance_test_is_the_one_annex_b_prints() -> None:
     """``(measured / design - 1) * 100`` against the band, and nothing else.
 
-    A response 11,9 % high in the central region passes and one 12,1 % high
+    A response 11.9 % high in the central region passes and one 12.1 % high
     fails, which is the only difference between a conforming instrument and a
     rejected one at that frequency.
     """
@@ -245,7 +245,7 @@ def test_the_laboratory_uncertainty_extends_the_deviation_upwards() -> None:
 
     Compliance is demonstrated when the deviation, "extended by the actual
     expanded uncertainty of measurement of the testing laboratory", does not
-    exceed the tolerance limits. So a deviation of 11,5 % against the +12 %
+    exceed the tolerance limits. So a deviation of 11.5 % against the +12 %
     of the central region conforms on its own and stops conforming once a
     laboratory that measures to 1 % declares it. The pair either side of the
     edge is the whole difference the keyword makes.
@@ -365,8 +365,8 @@ def test_an_uncertainty_that_is_not_one_is_refused(bad: float) -> None:
 def test_the_coverage_factor_and_the_maximum_permitted_uncertainties() -> None:
     """12.1, and the figures the individual test clauses print.
 
-    13.1 and 14.1 print ``k = 2``; 12.11.2 permits 4,5 %, 12.11.3 3 %,
-    12.11.4 5 %, 12.13 3 % and the two timing clauses 0,01 %.
+    13.1 and 14.1 print ``k = 2``; 12.11.2 permits 4.5 %, 12.11.3 3 %,
+    12.11.4 5 %, 12.13 3 % and the two timing clauses 0.01 %.
     """
     assert ins.ISO8041_COVERAGE_FACTOR == pytest.approx(2.0)
     printed = {
@@ -453,7 +453,7 @@ def test_the_annex_b_phase_columns_reproduce() -> None:
     """All 318 printed phase cells of Tables B.1 to B.9.
 
     Formula (H.1) defines the design goal as the argument of ``H(s)``, and
-    says the values are tabulated in those tables. The worst cell is 0,05
+    says the values are tabulated in those tables. The worst cell is 0.05
     degrees away from its printed figure, which is the rounding of the
     columns that print one decimal.
     """
@@ -467,7 +467,7 @@ def test_the_annex_b_phase_columns_reproduce() -> None:
 
 
 def test_the_wh_phase_at_158_hz_is_the_printed_cell() -> None:
-    """Table B.6, n = 22: 158,5 Hz, factor 0,100 7, phase -93,75 degrees."""
+    """Table B.6, n = 22: 158.5 Hz, factor 0.100 7, phase -93.75 degrees."""
     frequencies, printed = _annex_b_grid("Wh")
     index = [n for n, _ in ISO8041_1_ANNEX_B_PHASES_DEG["Wh"]].index(22)
     assert frequencies[index] == pytest.approx(158.5, rel=1e-3)
@@ -510,7 +510,7 @@ def test_the_characteristic_deviation_belongs_to_the_lower_frequency() -> None:
 
     Which decides how a pair straddling a transition frequency is graded: by
     the region of ``f_n``. For Wh the second transition is 10 Hz, so the pair
-    (7,943, 10) is graded in the skirt at 12 degrees and the pair (10, 12,59)
+    (7,943, 10) is graded in the skirt at 12 degrees and the pair (10, 12.59)
     in the central region at 6.
     """
     frequencies = np.array([10.0 ** (n / 10.0) for n in (9, 10, 11)])
@@ -528,7 +528,7 @@ def test_the_characteristic_deviation_belongs_to_the_lower_frequency() -> None:
 
 
 def test_the_phase_verdict_turns_at_the_table_5_limit() -> None:
-    """The central region allows 6 degrees, and 5,9 is not 6,1."""
+    """The central region allows 6 degrees, and 5.9 is not 6.1."""
     frequencies, _ = _annex_b_grid("Wk")
     design = _design_phase("Wk", frequencies)
     assert vibration.verify_phase_response(
@@ -568,7 +568,7 @@ def test_the_peak_deviation_warns_where_annex_h_stops_vouching() -> None:
     """NOTE 2: the approximation "applies to small Δφ0 values only (<30°)".
 
     The fence is printed as a strict inequality, so 30 degrees is already
-    outside what the note vouches for and is warned about; 29,9 is inside.
+    outside what the note vouches for and is warned about; 29.9 is inside.
     """
     with pytest.warns(HumanVibrationWarning, match=r"H\.2\.1, NOTE 2"):
         vibration.peak_deviation_percent(30.0)
@@ -722,10 +722,10 @@ def test_the_band_limited_factor_is_the_ratio_of_the_two_responses() -> None:
 
 
 def test_eight_of_the_nine_close_on_the_table_1_factor() -> None:
-    """Their band limiting is 0,999 68 or better at the reference frequency.
+    """Their band limiting is 0.999 68 or better at the reference frequency.
 
     So the printed Table 1 factor and the ratio are the same number to
-    0,03 %, well inside the 3 % of the second row of Table 2.
+    0.03 %, well inside the 3 % of the second row of Table 2.
     """
     for name, printed in TABLE_1_PRINTED.items():
         if name == ins.LOW_FREQUENCY_WEIGHTING:
@@ -741,7 +741,7 @@ def test_the_second_row_of_table_2_cannot_close_for_wf_on_table_1() -> None:
     by more than twice the tolerance of the row they have to satisfy.
 
     The ratio is the quotient of the two cells Table B.5 prints at the
-    neighbouring 0,398 1 Hz band centre, 0,388 4 / 0,927 9.
+    neighbouring 0.398 1 Hz band centre, 0.388 4 / 0.927 9.
     """
     ratio = ins.band_limited_weighting_factor("Wf")
     printed_table_1 = TABLE_1_PRINTED["Wf"][1]
@@ -780,7 +780,7 @@ def test_the_two_decay_tables_are_transcribed() -> None:
 def test_the_closed_form_decay_lands_inside_the_printed_band(
     method: str, table: tuple[tuple[float, float, float], ...]
 ) -> None:
-    """0,99 tau and 2 tau ln 10, against the six printed cells."""
+    """0.99 tau and 2 tau ln 10, against the six printed cells."""
     for tau, printed, tolerance in table:
         assert (
             abs(ins.running_rms_decay_time(tau, method=method) - printed) <= tolerance
@@ -823,10 +823,10 @@ def test_the_running_rms_itself_decays_the_way_the_tables_print(
 
 
 def test_the_decay_rate_column_is_the_looser_statement_of_the_same_decay() -> None:
-    """Table 11 prints a dB/s band that contains 4,3429 / tau every time.
+    """Table 11 prints a dB/s band that contains 4.3429 / tau every time.
 
-    It is not the reciprocal of the time column: its limits sit at 0,875 to
-    0,892 and 1,128 to 1,151 times the closed-form rate, wider than the
+    It is not the reciprocal of the time column: its limits sit at 0.875 to
+    0.892 and 1,128 to 1,151 times the closed-form rate, wider than the
     printed times map to, which is why the time column is the one the
     verdict is taken on.
     """
@@ -838,7 +838,7 @@ def test_the_decay_rate_column_is_the_looser_statement_of_the_same_decay() -> No
 
 
 def test_the_decay_verdict_is_the_printed_interval_and_nothing_wider() -> None:
-    """0,99 +- 0,05 s for a 1 s linear average, both sides of the edge."""
+    """0.99 +- 0.05 s for a 1 s linear average, both sides of the edge."""
 
     def passes(measured: float) -> bool:
         return ins.verify_running_rms_decay(

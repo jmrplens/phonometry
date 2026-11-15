@@ -113,9 +113,9 @@ def test_table_6_covers_the_nine_weightings_once_each() -> None:
 def test_the_fall_time_limit_is_one_fifth_of_the_upper_corner() -> None:
     """12.13 (folio 36): no more than ``1/(5 f2)`` of Table 3.
 
-    ``f2`` is 10**3,1 Hz for the hand-arm band limiting, 100 Hz for whole-body
-    and 0,63 Hz for the low-frequency case, so the limits are 0,159 ms, 2 ms
-    and 0,317 s.
+    ``f2`` is 10**3.1 Hz for the hand-arm band limiting, 100 Hz for whole-body
+    and 0.63 Hz for the low-frequency case, so the limits are 0.159 ms, 2 ms
+    and 0.317 s.
     """
     limits = {
         application: test.max_fall_time_s
@@ -168,8 +168,8 @@ def test_the_continuous_row_starts_at_zero_not_at_the_start_time() -> None:
     """The convention that reproduces Table 7, and the one that does not.
 
     Filled from ``t = 0`` the band-limiting continuous cell of Table 7 comes
-    out 0,564 9 against the 0,565 printed; started at the Table 6 start time
-    it comes out 0,560 1, four times further away.
+    out 0.564 9 against the 0.565 printed; started at the Table 6 start time
+    it comes out 0.560 1, four times further away.
     """
     fs = 20_000.0
     continuous = sb.sawtooth_burst("hand-arm", None, fs=fs)
@@ -277,7 +277,7 @@ def test_table_9_is_transcribed(
     ("row", "cycles"), [("band-limiting", 1), ("band-limiting", None), ("Wh", 1)]
 )
 def test_the_library_reproduces_table_7(row: BurstRow, cycles: int | None) -> None:
-    """Hand-arm, r.m.s. value: the printed cell to better than 0,5 %."""
+    """Hand-arm, r.m.s. value: the printed cell to better than 0.5 %."""
     printed = TABLE_7_PRINTED[row, cycles]
     got = sb.signal_burst_indications("hand-arm", row, cycles, fs=50_000.0)["rms"]
     assert got == pytest.approx(printed, rel=5e-3)
@@ -287,10 +287,10 @@ def test_the_library_reproduces_table_7(row: BurstRow, cycles: int | None) -> No
     ("row", "cycles"), [("band-limiting", 1), ("Wk", 1), ("Wk", 16), ("Wk", None)]
 )
 def test_the_library_reproduces_table_8(row: BurstRow, cycles: int | None) -> None:
-    """Whole-body, all four printed columns at once, to better than 0,5 %.
+    """Whole-body, all four printed columns at once, to better than 0.5 %.
 
     The continuous row of ``Wk`` is the interesting one: its linear MTVV is
-    0,364 05 against the 0,364 printed, and it only lands there because the
+    0.364 05 against the 0.364 printed, and it only lands there because the
     filtering starts from rest.
     """
     printed = dict(
@@ -320,7 +320,7 @@ def test_the_msdv_is_the_rms_over_the_printed_duration() -> None:
     """Table 9 closes on itself: MSDV = r.m.s. times the square root of 2 400 s.
 
     The cleanest evidence that the measurement duration of the continuous row
-    is the printed one: 0,439 times sqrt(2 400) is 21,51, the printed cell.
+    is the printed one: 0.439 times sqrt(2 400) is 21.51, the printed cell.
     """
     rms, msdv = TABLE_9_PRINTED["band-limiting", None]
     duration = sb.SAWTOOTH_BURST_TESTS["low-frequency-whole-body"].duration_s
@@ -331,7 +331,7 @@ def test_zero_state_filtering_is_what_lands_on_the_continuous_cells() -> None:
     """The second convention, with the reading it replaced.
 
     Filtered circularly, the linear MTVV of the ``Wd`` continuous row of
-    Table 8 sits 3,2 % low, and ``We`` 5,2 % low, because the wrap-around
+    Table 8 sits 3.2 % low, and ``We`` 5.2 % low, because the wrap-around
     erases the switch-on transient the linear MTVV is built to catch. From
     rest they sit inside half a per cent.
     """
@@ -350,7 +350,7 @@ def test_zero_state_filtering_is_what_lands_on_the_continuous_cells() -> None:
 
 
 def test_the_band_limiting_row_uses_the_shared_corner_pair() -> None:
-    """Six of the seven whole-body weightings share 0,4 Hz and 100 Hz.
+    """Six of the seven whole-body weightings share 0.4 Hz and 100 Hz.
 
     ``Wm`` does not, and its corners miss the printed band-limiting row by
     more than the shared pair does, which is how the row was decided.

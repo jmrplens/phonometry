@@ -3488,7 +3488,7 @@ _ES_EXACT = {
     "Standing wave: reactive": "Onda estacionaria: reactiva",
     "p and u in phase": "p y u en fase",
     "p and u 90° apart": "p y u desfasados 90°",
-    r"spacer $\Delta r$": r"separador $\Delta r$",
+    r"spacer $\Delta r$": r"espaciador $\Delta r$",
     "T20 fit": "ajuste T20",
     "T30 fit": "ajuste T30",
     "Schroeder backward integration (ISO 3382)": "Integración inversa de Schroeder (ISO 3382)",

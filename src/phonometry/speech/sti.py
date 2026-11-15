@@ -387,7 +387,7 @@ def _validate_band_vector(values: NumericArrayLike, name: str) -> NDArray[np.flo
 
 
 def _truncated_mtf(mtf: NumericArrayLike) -> NDArray[np.float64]:
-    """Validate the modulation transfer matrix and truncate it to 1,0.
+    """Validate the modulation transfer matrix and truncate it to 1.0.
 
     Ed.4 A.5.3 NOTE 1 (the same rule in Ed.5): a value above 1.3 means the
     measurement is invalid, and every value is truncated to 1.0 before the
@@ -399,7 +399,7 @@ def _truncated_mtf(mtf: NumericArrayLike) -> NDArray[np.float64]:
 
 
 def _checked_mtf(mtf: NumericArrayLike) -> tuple[NDArray[np.float64], bool]:
-    """The matrix truncated to 1,0, and whether a value lay above 1,3.
+    """The matrix truncated to 1.0, and whether a value lay above 1.3.
 
     The advisory on such a value is the caller's to give, once every argument
     of the call has been checked (:func:`_invalid_mtf_advisory`).
@@ -419,7 +419,7 @@ def _checked_mtf(mtf: NumericArrayLike) -> tuple[NDArray[np.float64], bool]:
 
 
 def _invalid_mtf_advisory(*, invalid: bool) -> None:
-    """Warn that a modulation transfer value above 1,3 was truncated."""
+    """Warn that a modulation transfer value above 1.3 was truncated."""
     if invalid:
         warn_caller(
             "Modulation transfer values above 1.3 detected: the measurement "
@@ -575,7 +575,7 @@ def _index_from_corrected_mtf(
 
     Effective SNR clipped to +/-15 dB, transmission indices
     :math:`TI = (SNR_{\mathrm{eff}} + 15)/30`, the band MTIs and the
-    male-weighted STI truncated to 1,0. ``m`` must already lie in [0, 1];
+    male-weighted STI truncated to 1.0. ``m`` must already lie in [0, 1];
     :func:`_truncated_mtf` is what puts it there.
     """
     # m = 0 and m = 1 map to the clip limits through the log divergences.
@@ -716,7 +716,7 @@ def sti_adjusted_for_levels(
         if operational_ambient is None
         else _validate_band_vector(operational_ambient, "operational_ambient"),
     )
-    # Step 2 leaves the channel alone and may exceed 1,0; step 3 puts the
+    # Step 2 leaves the channel alone and may exceed 1.0; step 3 puts the
     # operational condition back, and only then is the matrix truncated.
     source = _truncated_mtf(mtf) / measured.factor[:, np.newaxis]
     adjusted = _truncated_mtf(source * operational.factor[:, np.newaxis])
@@ -773,7 +773,7 @@ def sti_from_impulse_response(
        m_k(f_m) = \left| \int h_k^2(t)\, \mathrm{e}^{-j 2\pi f_m t}\, dt \right|
        \Big/ \int h_k^2(t)\, dt
 
-    at the 14 modulation frequencies 0,63-12,5 Hz
+    at the 14 modulation frequencies 0.63-12.5 Hz
     (Ed.4 A.2.2, Ed.5 A.1.4). The result then follows the standard chain: optional noise
     degradation, optional auditory masking and absolute reception
     threshold correction, effective SNR clipped to +/-15 dB, transmission
@@ -802,7 +802,7 @@ def sti_from_impulse_response(
         moves neither the transfer values nor the STI. The absolute levels
         the noise corrections need arrive through ``levels`` and
         ``ambient``, in dB, not from the samples.
-    :param fs: Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits).
+    :param fs: Sample rate in Hz (>= 22.5 kHz so the 8 kHz band fits).
         Required for a bare array; a :class:`~phonometry.io.Signal` brings
         its own, and an explicit value that disagrees with it raises
         instead of silently winning.
@@ -996,7 +996,7 @@ def stipa(
     depths at the two Table B.1 modulation frequencies of each band are
     measured with the sine/cosine correlation over an integer number of
     periods (Ed.4 A.5.2; the same in Ed.5). The modulation transfer values are the
-    measured depths normalized by the source modulation index 0,55
+    measured depths normalized by the source modulation index 0.55
     (Annex B), or by the depths measured on ``reference`` when the
     actually emitted signal is supplied, and feed the same masking /
     threshold / TI / STI chain as the full method.
@@ -1018,12 +1018,12 @@ def stipa(
         moves neither the transfer values nor the STI. The absolute levels
         the noise corrections need arrive through ``levels`` and
         ``ambient``, in dB, not from the samples.
-    :param fs: Sample rate in Hz (>= 22,5 kHz). Required for a bare array;
+    :param fs: Sample rate in Hz (>= 22.5 kHz). Required for a bare array;
         a :class:`~phonometry.io.Signal` brings its own, and an explicit
         value that disagrees with it raises instead of silently winning.
     :param reference: Optional reference recording of the undistorted
         test signal; its measured modulation depths replace the nominal
-        0,55 as normalization (useful for non-conformant sources). Accepts
+        0.55 as normalization (useful for non-conformant sources). Accepts
         a :class:`phonometry.io.Signal`. It is a second recording of the
         same test signal, so it has to share the rate: two Signals that
         disagree are refused rather than arbitrated, and measuring the
@@ -1125,12 +1125,12 @@ def stipa_signal(
     frequency pair of each band, 180 degrees between components, applied
     in amplitude through its square root (Annex B).
 
-    :param fs: Sample rate in Hz (>= 22,5 kHz).
+    :param fs: Sample rate in Hz (>= 22.5 kHz).
     :param duration_s: Duration in seconds (the standard recommends 15 s to
         25 s; default 18 s).
     :param level: Optional overall level in dB SPL: the output is
         scaled so its RMS, taken as pascals, sits at ``level`` re
-        20 uPa. Default (None) normalizes the RMS to 0,1 (digital full
+        20 uPa. Default (None) normalizes the RMS to 0.1 (digital full
         scale headroom for the 12-14 dB crest factor).
     :param seed: Seed for the pink-noise generator (None: random).
     :return: Test signal, 1D array of ``round(duration_s * fs)`` samples.

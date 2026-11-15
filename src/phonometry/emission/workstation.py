@@ -65,13 +65,13 @@ piecewise function of one dimensionless ratio :math:`z`,
 .. math::
 
    K_3 = \begin{cases}
-     7\ \mathrm{dB}, & z \le 0{,}2 \\
-     -10 \lg z\ \mathrm{dB}, & 0{,}2 < z \le 1 \\
+     7\ \mathrm{dB}, & z \le 0.2 \\
+     -10 \lg z\ \mathrm{dB}, & 0.2 < z \le 1 \\
      0\ \mathrm{dB}, & z > 1
    \end{cases}
 
 and differ only in how :math:`z` is reached. The two branches meet: at
-:math:`z = 0{,}2` the middle branch gives :math:`-10 \lg 0{,}2 = 6{,}99` dB, so
+:math:`z = 0.2` the middle branch gives :math:`-10 \lg 0.2 = 6.99` dB, so
 the 7 dB cap is the curve's own value rounded, not a discontinuity.
 
 **The uncertainty** is one pair of equations in all three measuring parts
@@ -260,7 +260,7 @@ class WorkstationBackgroundCorrection(OwnsArrays):
 
     .. math::
 
-       K_1 = -10 \lg \left( 1 - 10^{-0,1 \Delta L} \right)\ \mathrm{dB},
+       K_1 = -10 \lg \left( 1 - 10^{-0.1 \Delta L} \right)\ \mathrm{dB},
        \qquad \Delta L = L'_p - L_p(B)
 
     Above :data:`NEGLIGIBLE_BACKGROUND_MARGIN_DB` the correction is taken as
@@ -398,8 +398,8 @@ def local_environmental_correction(
     .. math::
 
        K_3 = \begin{cases}
-         7\ \mathrm{dB}, & z \le 0{,}2 \\
-         -10 \lg z\ \mathrm{dB}, & 0{,}2 < z \le 1 \\
+         7\ \mathrm{dB}, & z \le 0.2 \\
+         -10 \lg z\ \mathrm{dB}, & 0.2 < z \le 1 \\
          0\ \mathrm{dB}, & z > 1
        \end{cases}
 
@@ -409,7 +409,7 @@ def local_environmental_correction(
     :func:`environmental_ratio_from_absorption`.
 
     The cap is the curve's own value, not a separate rule:
-    :math:`-10 \lg 0{,}2 = 6{,}99` dB, so the function is continuous where the
+    :math:`-10 \lg 0.2 = 6.99` dB, so the function is continuous where the
     7 dB takes over. The upper branch is a floor for the same reason a
     correction cannot be negative: the room can only add to the reading.
 
@@ -465,7 +465,7 @@ def environmental_ratio_from_k2(
 
     .. math::
 
-       z = 1 - \left( 1 - 10^{-0,1 K_2} \right) 10^{-0,1 D^*_{I,\mathrm{op}}}
+       z = 1 - \left( 1 - 10^{-0.1 K_2} \right) 10^{-0.1 D^*_{I,\mathrm{op}}}
 
     ISO 11202:2010 Equation (A.4) and ISO 11204:2010 Equation (A.3). :math:`K_2`
     is the average environmental correction of the reference measurement
@@ -474,7 +474,7 @@ def environmental_ratio_from_k2(
     apparent directivity index the work station sees.
 
     With no directivity to speak of the expression collapses to
-    :math:`z = 10^{-0,1 K_2}`, so :math:`K_3 = K_2`: a work station that sees
+    :math:`z = 10^{-0.1 K_2}`, so :math:`K_3 = K_2`: a work station that sees
     the machine no more strongly than the measurement surface does needs the
     same correction the surface needed. That holds until the cap bites, at
     :math:`K_2 = 7` dB; above it the local correction stays at
@@ -533,7 +533,7 @@ def environmental_ratio_from_absorption(
 
     .. math::
 
-       z = 1 - \frac{1}{1 + A / (4 S_M)}\, 10^{-0,1 D^*_{I,\mathrm{op}}}
+       z = 1 - \frac{1}{1 + A / (4 S_M)}\, 10^{-0.1 D^*_{I,\mathrm{op}}}
 
     ISO 11204:2010 Equation (A.6). It is the same quantity
     :func:`environmental_ratio_from_k2` returns, reached without going through
@@ -712,7 +712,7 @@ def emission_expanded_uncertainty(
     ISO 11204:2010 Equation (13). The coverage factor is the caller's to choose:
     :math:`k = 2` gives the two-sided 95 % interval of a normal distribution,
     while the worked examples of ISO 11200:2014 Annex B all print
-    :math:`k = 1{,}6`, which is the one-sided factor used when the result is
+    :math:`k = 1.6`, which is the one-sided factor used when the result is
     compared with a limit value, and is this function's default.
 
     :param total_standard_deviation_db: :math:`\sigma_\mathrm{tot}` in decibels.
@@ -736,7 +736,7 @@ def subinterval_level(levels: NumericArrayLike, durations_s: NumericArrayLike) -
     .. math::
 
        L_p = 10 \lg \left[ \frac{1}{T} \sum_{i=1}^{N}
-       T_i\, 10^{0,1 L_{p,T_i}} \right]\ \mathrm{dB},
+       T_i\, 10^{0.1 L_{p,T_i}} \right]\ \mathrm{dB},
        \qquad T = \sum_i T_i
 
     ISO 11201:2010 Equation (8), ISO 11202:2010 Equation (11) and

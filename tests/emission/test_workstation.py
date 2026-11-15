@@ -34,11 +34,11 @@ def _energy_mean(levels: list[float]) -> float:
 
 
 def test_annex_b_example_2_reproduces_end_to_end() -> None:
-    """A machine in an assembly workshop, 73,2 dB at the work station.
+    """A machine in an assembly workshop, 73.2 dB at the work station.
 
     Every printed intermediate of Table B.2, in the order the table prints
-    them. The room is 11 m x 8 m x 4 m with a 1,2 s reverberation time, and the
-    work station is 1,6 m from the dominating source.
+    them. The room is 11 m x 8 m x 4 m with a 1.2 s reverberation time, and the
+    work station is 1.6 m from the dominating source.
     """
     distance, volume, reverberation = 1.6, 11.0 * 8.0 * 4.0, 1.2
     surface = 2.0 * math.pi * distance**2
@@ -64,7 +64,7 @@ def test_annex_b_example_2_reproduces_end_to_end() -> None:
 
 
 def test_annex_b_example_2_earns_grade_2() -> None:
-    """K3 of 3,7 dB is under the 4 dB boundary, which is what the table says."""
+    """K3 of 3.7 dB is under the 4 dB boundary, which is what the table says."""
     k3 = ws.local_environmental_correction(
         ws.environmental_ratio_from_absorption(46.933, 16.085)
     )
@@ -77,7 +77,7 @@ def test_annex_b_example_2_earns_grade_2() -> None:
 
 
 def test_annex_b_example_3_background_correction() -> None:
-    """79,0 dB against a 70,0 dB background is a 0,6 dB correction."""
+    """79.0 dB against a 70.0 dB background is a 0.6 dB correction."""
     outcome = ws.background_noise_correction_at_workstation(79.0, 70.0)
     k1, held = outcome.correction, outcome.upper_bound
     assert k1 == pytest.approx(0.6, abs=0.05)
@@ -88,7 +88,7 @@ def test_annex_b_example_3_background_correction() -> None:
 
 
 def test_annex_b_example_3_directivity_mean() -> None:
-    """The six directivity points energy-average to the printed 77,7 dB."""
+    """The six directivity points energy-average to the printed 77.7 dB."""
     assert _energy_mean([80.5, 81.0, 76.0, 75.0, 74.0, 72.0]) == pytest.approx(
         77.7, abs=0.05
     )
@@ -212,7 +212,7 @@ def test_the_largest_dimension_is_a_length_and_given_by_name() -> None:
 
 
 def test_annex_b_example_1_uncertainty() -> None:
-    """1,5 dB of reproducibility and k = 1,6 give the printed 2,4 dB."""
+    """1.5 dB of reproducibility and k = 1.6 give the printed 2.4 dB."""
     sigma = ws.total_standard_deviation(1.5, 0.3)
     assert sigma == pytest.approx(1.5, abs=0.05)
     assert ws.emission_expanded_uncertainty(sigma) == pytest.approx(2.4, abs=0.05)
@@ -223,7 +223,7 @@ def test_the_two_annex_b_tables_disagree_on_the_estimator() -> None:
 
     Equation (C.1) prints :math:`1/(N-1)`, and Table B.3 agrees with it while
     Table B.1 divides by :math:`N`. The library follows the equation, which
-    means it does not reproduce Table B.1's 0,3 dB and says so.
+    means it does not reproduce Table B.1's 0.3 dB and says so.
     """
     table_b1 = [94.5, 94.3, 93.8]
     table_b3 = [79.0, 80.2, 82.9]
@@ -231,11 +231,11 @@ def test_the_two_annex_b_tables_disagree_on_the_estimator() -> None:
     # Table B.3 agrees with Equation (C.1).
     assert ws.operating_standard_deviation(table_b3) == pytest.approx(2.0, abs=0.05)
 
-    # Table B.1 does not: the equation gives 0,4 dB where the table prints 0,3.
+    # Table B.1 does not: the equation gives 0.4 dB where the table prints 0.3.
     by_equation = ws.operating_standard_deviation(table_b1)
     assert by_equation == pytest.approx(0.36, abs=0.005)
     assert round(by_equation, 1) == 0.4
-    # 0,3 is what dividing by N gives, which is not what (C.1) prints.
+    # 0.3 is what dividing by N gives, which is not what (C.1) prints.
     assert float(np.std(table_b1, ddof=0)) == pytest.approx(0.29, abs=0.005)
 
 
@@ -249,7 +249,7 @@ def test_the_two_annex_b_tables_disagree_on_the_estimator() -> None:
     [
         (0.05, 7.0),  # deep in the capped branch
         (0.2, 7.0),  # the cap's own boundary
-        (0.5, 3.0103),  # -10 lg 0,5
+        (0.5, 3.0103),  # -10 lg 0.5
         (1.0, 0.0),  # the upper boundary
         (2.0, 0.0),  # above it, nothing to correct
     ],
@@ -261,9 +261,9 @@ def test_k3_follows_the_printed_branches(ratio: float, expected: float) -> None:
 def test_k3_is_continuous_where_the_cap_takes_over() -> None:
     """The 7 dB cap is the curve's own value rounded, not a separate rule.
 
-    Just above the boundary the middle branch gives -10 lg 0,2 = 6,9897 dB, so
-    the step onto the cap is 0,0103 dB: two orders below the 0,1 dB the
-    standard prints its corrections to, and a tenth of the 0,1 dB a sound level
+    Just above the boundary the middle branch gives -10 lg 0.2 = 6.9897 dB, so
+    the step onto the cap is 0.0103 dB: two orders below the 0.1 dB the
+    standard prints its corrections to, and a tenth of the 0.1 dB a sound level
     meter resolves. Pinned exactly, because a real discontinuity here would be
     a defect and a rounded assertion would not see one appear.
     """
@@ -356,7 +356,7 @@ def test_a_background_too_close_clamps_and_warns() -> None:
         outcome = ws.background_noise_correction_at_workstation(80.0, 77.0)
     k1, held = outcome.correction, outcome.upper_bound
     assert held
-    # Held at the grade-2 floor of 6 dB, which is a 1,3 dB correction.
+    # Held at the grade-2 floor of 6 dB, which is a 1.3 dB correction.
     assert k1 == pytest.approx(1.256, abs=0.005)
 
 

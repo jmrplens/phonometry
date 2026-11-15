@@ -403,10 +403,15 @@ evidencia de rodamiento.
 En un **ventilador axial entubado** las palas interaccionan además con los
 álabes del estátor y establecen patrones de presión rotativos con
 $m_\mathrm{L} = nN \pm kV$ lóbulos para $V$ álabes (Ec. 8.16), que giran a
-$n N f_\mathrm{s} / m_\mathrm{L}$ (Ec. 8.17). Un patrón que gira más rápido que las propias palas
-radia con mucha más fuerza, y por eso importa la elección de $N$ y $V$, y por
-eso esas velocidades son las que hay que contrastar con las frecuencias de corte
-del conducto. Cada línea se llama `lobe n=<n> m=<mL>`: el armónico de pala forma
+$n N f_\mathrm{s} / m_\mathrm{L}$ (Ec. 8.17). Eso es una velocidad de giro, no un tono propio:
+Norton sitúa el ruido de estos patrones «also at the blade passing frequency and
+its associated harmonics», y la aritmética dice por qué, ya que $m_\mathrm{L}$ lóbulos
+que dan $nNf_\mathrm{s}/m_\mathrm{L}$ vueltas por segundo pasan por un punto fijo
+$nNf_\mathrm{s}$ veces por segundo. Lo que distingue a los patrones es el número de
+lóbulos, y eso es lo que ve el conducto: un patrón puede establecer un modo de
+orden superior del conducto con la misma distribución de presión, y cuanto más
+deprisa gira, más potencia sonora radia, y por eso importa la elección de $N$ y
+$V$. Cada patrón se llama `lobe n=<n> m=<mL>`: el armónico de pala forma
 parte del nombre porque la Ec. (8.17) lleva $n$, de modo que el mismo número de
 lóbulos alcanzado desde otro armónico es otro patrón, que gira a otra velocidad.
 
@@ -421,14 +426,18 @@ print(round(res["lobe n=1 m=2"]), round(res["lobe n=1 m=10"]))    # 175 35
 Esos dos números son el principio, resuelto. Los dos patrones salen del *mismo*
 armónico de pala del *mismo* ventilador; la única diferencia es el signo de $k$
 en $m_\mathrm{L} = nN \pm kV$, que es la razón de que el recuento de lóbulos tenga que
-formar parte del nombre de la línea. El patrón de $m_\mathrm{L} = 2$ gira a
-$nNf_\mathrm{s}/m_\mathrm{L} = 6 \times 58{,}3/2 = 175$ Hz, tres veces la velocidad del eje, así
-que es el que radia con fuerza y la línea que hay que contrastar con la
-frecuencia de corte del conducto. El patrón de $m_\mathrm{L} = 10$ gira a 35 Hz, por
-debajo de la velocidad del eje, así que radia poco. Seis palas contra cuatro
-álabes es una decisión de diseño, y esto es lo que decide.
+formar parte del nombre del patrón. El patrón de $m_\mathrm{L} = 2$ da
+$nNf_\mathrm{s}/m_\mathrm{L} = 6 \times 58{,}3/2 = 175$ vueltas por segundo, tres veces la
+velocidad del eje, y el de $m_\mathrm{L} = 10$, 35 vueltas por segundo, por debajo de
+ella. $2 \times 175 = 10 \times 35 = 350$: los dos suenan al paso de pala, y ninguno
+pone una línea propia en 175 Hz ni en 35 Hz en un espectro. Por la regla de
+Norton, el patrón más rápido es el que más radia. La biblioteca devuelve aun así
+las dos velocidades como entradas del resultado, y su `.plot()` las marca sobre
+un espectro como las demás líneas; ahí hay que leerlas como velocidades de giro.
+Seis palas contra cuatro álabes es una decisión de diseño, y esto es lo que
+decide.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Cuatro espectros con las líneas previstas por la biblioteca dibujadas sobre cada uno. Arriba a la izquierda, un espectro de engrane con un diente astillado: líneas altas en 700, 1400 y 2100 hercios con bandas laterales bajas y planas espaciadas 25 hercios a uno y otro lado, y armónicos de engrane que caen deprisa. Arriba a la derecha, el mismo par de engranajes con desgaste distribuido: las bandas laterales se convierten en grupos altos y el segundo y el tercer armónico de engrane se mantienen altos. Abajo a la izquierda, un espectro de motor de inducción en eje de amplitud logarítmico con el 1x en 60 hercios, el 2x en 120 y el doble de la frecuencia de alimentación en 360, con el armónico de ranura de rotor tres décadas por debajo en 3600 hercios flanqueado por bandas laterales a una frecuencia de eje. Abajo a la derecha, un espectro de ventilador entubado con la línea del eje en 58 hercios, la línea de paso de pala en 350, el patrón de interacción de dos lóbulos en 175 hercios dibujado alto y el de diez lóbulos en 35 hercios dibujado pequeño." width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Cuatro espectros con las líneas previstas por la biblioteca dibujadas sobre cada uno. Arriba a la izquierda, un espectro de engrane con un diente astillado: líneas altas en 700, 1400 y 2100 hercios con bandas laterales bajas y planas espaciadas 25 hercios a uno y otro lado, y armónicos de engrane que caen deprisa. Arriba a la derecha, el mismo par de engranajes con desgaste distribuido: las bandas laterales se convierten en grupos altos y el segundo y el tercer armónico de engrane se mantienen altos. Abajo a la izquierda, un espectro de motor de inducción en eje de amplitud logarítmico con el 1x en 60 hercios, el 2x en 120 y el doble de la frecuencia de alimentación en 360, con el armónico de ranura de rotor tres décadas por debajo en 3600 hercios flanqueado por bandas laterales a una frecuencia de eje. Abajo a la derecha, un espectro de ventilador entubado con la línea del eje en 58 hercios y la línea de paso de pala en 350, sin nada entre ellas; una nota multiplica cada patrón lobulado hasta el paso de pala, 2 lóbulos por 175 vueltas por segundo y 10 lóbulos por 35 vueltas por segundo, 350 lóbulos por un punto cada segundo en ambos casos, y otra nota dice que no hay línea propia en 35 ni en 175 hercios, porque son velocidades de giro." width="92%" />
 
 *Una familia de fallos se reconoce por su patrón, no por un solo número. Los dos
 paneles de engranaje son el mismo piñón de 28 dientes a 1500 r/min con dos
@@ -437,8 +446,9 @@ $\pm f_\mathrm{s}$ y armónicos que caen; un desgaste distribuido da grupos alto
 bandas laterales y levanta los armónicos superiores. El panel del motor abarca
 tres décadas de amplitud, que es la razón de que el armónico de ranura de rotor
 y sus bandas laterales a $\pm f_\mathrm{s}$ necesiten un eje logarítmico para verse
-siquiera al lado del `1x`. El panel del ventilador pone los dos patrones
-lobulados junto a la frecuencia de pala de la que salen.*
+siquiera al lado del `1x`. El panel del ventilador no tiene línea para
+ninguno de los dos patrones lobulados: los dos suenan al paso de pala del que
+salen.*
 
 <details>
 <summary>Ver el código de esta figura</summary>

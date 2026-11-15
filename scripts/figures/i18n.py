@@ -903,9 +903,7 @@ _ES_EXACT = {
     "Localised fault: one chipped tooth": "Fallo localizado: un solo diente astillado",
     "Distributed wear: every tooth": "Desgaste distribuido: todos los dientes",
     "Induction motor: 1x, 2x, 2fe and the rotor-slot family": "Motor de inducción: 1x, 2x, 2fe y la familia de ranura de rotor",
-    # "rotating" dropped for width: both lobe annotations already say
-    # "gira a ... Hz", and the full title overflowed the figure by 34 px.
-    "Ducted fan: the blade rate and its rotating lobe patterns": "Ventilador entubado: el paso de pala y sus patrones lobulados",
+    "Ducted fan: both lobe patterns sound at the blade rate": "Ventilador entubado: los dos patrones suenan al paso de pala",
     "Spectrum amplitude": "Amplitud del espectro",
     "vibration spectrum": "espectro de vibración",
     # The family legend words, worded exactly as _plot/vibration.py already
@@ -913,7 +911,7 @@ _ES_EXACT = {
     "shaft": "eje",
     "gear": "engranaje",
     "motor": "motor",
-    "blade": "álabe",
+    "blade": "pala",
     # Both sideband blocks are set narrow, one clause per line: they stand in
     # the stretch of axis below the first mesh cluster, and the Spanish
     # reading is the wider of the two, so it sets the line breaks.
@@ -925,9 +923,15 @@ _ES_EXACT = {
     "the spacing is the diagnosis": "armónico de ranura de rotor\n"
     "con bandas laterales a $\\pm f_\\mathrm{s}$:\n"
     "el espaciado es el diagnóstico",
-    "$m_\\mathrm{L}$ = 10 turns at 35 Hz,\nbelow the shaft: weak": "$m_\\mathrm{L}$ = 10 gira a 35 Hz,\npor debajo del eje: débil",
-    "$m_\\mathrm{L}$ = 2 turns at 175 Hz,\n3x the shaft speed: strong": "$m_\\mathrm{L}$ = 2 gira a 175 Hz,\n"
-    "3 veces la velocidad del eje: fuerte",
+    # The two pattern speeds of Eq. (8.17) multiplied back to the blade rate
+    # (Norton p. 525: their noise "is also at the blade passing frequency").
+    "$m_\\mathrm{L}$ = 2 lobes × 175 turns a second\n"
+    "$m_\\mathrm{L}$ = 10 lobes × 35 turns a second\n"
+    "each is 350 lobes past a point a second,\nthe blade rate": "$m_\\mathrm{L}$ = 2 lóbulos × 175 vueltas por segundo\n"
+    "$m_\\mathrm{L}$ = 10 lóbulos × 35 vueltas por segundo\n"
+    "en ambos, 350 lóbulos pasan por un punto\ncada segundo: el paso de pala",
+    "no line of their own at 35 Hz or 175 Hz:\nthose are speeds of rotation": "ninguna línea propia en 35 Hz ni en 175 Hz:\n"
+    "son velocidades de giro",
     # envelope_chain_steps: the envelope route made visible, step by step.
     "What Each Step of the Envelope Route Does to the Signal": "Qué le hace cada paso de la ruta de la envolvente a la señal",
     "1. As recorded: noise and unbalance, no visible impacts": "1. Tal como se registra: ruido y desequilibrio, sin impactos "

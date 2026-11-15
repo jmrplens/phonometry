@@ -83,9 +83,11 @@ hydraulic pulsations follow the same form with ``N`` pumping events per
 revolution (Eq. 8.18), and a rotary positive-displacement blower repeats
 four times per revolution. In a ducted axial fan the blade-vane interaction
 sets up rotating pressure patterns with :math:`m_\mathrm{L} = n N \pm k V` lobes for
-``V`` vanes (Eq. 8.16), turning at :math:`n N f_\mathrm{s} / m_\mathrm{L}` (Eq. 8.17): a
-pattern that spins faster than the blades themselves, and the reason a
-careful choice of ``N`` and ``V`` matters for radiated power.
+``V`` vanes (Eq. 8.16), turning at :math:`n N f_\mathrm{s} / m_\mathrm{L}` (Eq. 8.17). That is a
+speed of rotation, not a tone: the noise of every pattern is at the
+blade-passing harmonic it comes from (Norton, p. 525), and the faster a
+pattern turns, the more sound power it radiates, the reason a careful choice
+of ``N`` and ``V`` matters.
 """
 
 from __future__ import annotations
@@ -720,7 +722,7 @@ def _lobe_patterns(
     :math:`m_\mathrm{L} = nN \pm kV` lobes turning at ``n N fs / mL``. The pattern
     speed of Eq. (8.17) carries ``n`` in its numerator, so the same lobe
     count reached from two different blade harmonics rotates at two
-    different speeds and both are real lines: the de-duplication is on the
+    different speeds and both are kept: the de-duplication is on the
     ``(n, mL)`` pair, not on the lobe count alone. A zero lobe count (no
     pattern) is skipped.
     """
@@ -766,13 +768,18 @@ def blade_pass_frequencies(
     set up rotating pressure patterns with
     :math:`m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}`
     lobes (Eq. 8.16) turning at
-    :math:`M_\mathrm{L} = n\, N_{\text{blades}} f_\mathrm{s} / m_\mathrm{L}` (Eq. 8.17). Those
-    patterns radiate strongly when they can drive a higher-order duct mode, so
-    they are the lines to check against the duct cut-on frequencies. Give
-    *n_vanes* to include them, named ``"lobe n=1 m=2"``, ``"lobe n=1 m=10"``,
-    ... The blade harmonic is part of the name because Eq. (8.17) carries
-    ``n``: the same lobe count reached from a different harmonic is a distinct
-    pattern turning at a different speed.
+    :math:`M_\mathrm{L} = n\, N_{\text{blades}} f_\mathrm{s} / m_\mathrm{L}` (Eq. 8.17). Each
+    speed is a rotation rate, in turns per second, and not a tone of its own:
+    :math:`m_\mathrm{L}` lobes turning at :math:`M_\mathrm{L}` pass a fixed point
+    :math:`n\, N_{\text{blades}} f_\mathrm{s}` times a second, so the noise of
+    every pattern is at the blade-passing harmonic it comes from (Norton,
+    p. 525). The lobe count is what a duct sees, since a pattern can set up a
+    higher-order duct mode with the same pressure distribution, and the faster
+    a pattern turns, the more sound power it radiates. Give *n_vanes* to
+    include them, named ``"lobe n=1 m=2"``, ``"lobe n=1 m=10"``, ..., with the
+    pattern speed as the line's frequency. The blade harmonic is part of the
+    name because Eq. (8.17) carries ``n``: the same lobe count reached from a
+    different harmonic is a distinct pattern turning at a different speed.
 
     :param speed_rpm: Shaft speed ``N``, in r/min (> 0).
     :param n_blades: Number of blades (integer >= 1).

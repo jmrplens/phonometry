@@ -2097,39 +2097,48 @@ def generate_machine_fault_families(output_dir: str) -> None:
         arrowprops={"arrowstyle": "->", "color": COLOR_MUTED},
     )
 
-    # --- (d): the ducted fan, blade rate against its lobe patterns ----------
+    # --- (d): the ducted fan, and where its lobe patterns sound -------------
+    # Norton (p. 525): the noise of the rotating interaction patterns "is also
+    # at the blade passing frequency". Eq. (8.17) gives each pattern's speed
+    # of rotation, not a tone: m_L lobes turning M_L times a second pass a
+    # fixed point m_L x M_L = n N f_s times a second, the blade rate. So the
+    # spectrum carries the shaft and blade lines only, the lines are those of
+    # the call without vanes, and the two pattern speeds are written beside
+    # the blade line, each multiplied back to it.
     ax = axes[1][1]
-    fan = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+    fan = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1)
+    patterns = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
     freq = np.linspace(0.0, 420.0, 3200)
     spec = _LineSpectrum(freq, floor=0.006)
     spec.add(fan.shaft_rate, 0.10, width=0.8)
     spec.add(fan["BPF"], 1.0, width=0.8)
-    spec.add(fan["lobe n=1 m=2"], 0.62, width=0.8)
-    spec.add(fan["lobe n=1 m=10"], 0.07, width=0.8)
     fan.plot(spectrum=spec, ax=ax, language=_LANG)
-    _relabel_spectrum(ax, "Ducted fan: the blade rate and its rotating lobe patterns")
-    # Each block is centred in the column between two of the fan's lines: the
-    # first between the shaft and the two-lobe pattern, the second between that
-    # and the blade rate, which the longer Spanish reading used to run over.
+    _relabel_spectrum(ax, "Ducted fan: both lobe patterns sound at the blade rate")
+    turns = [(lobes, patterns[f"lobe n=1 m={lobes}"]) for lobes in (2, 10)]
     ax.annotate(
-        "$m_\\mathrm{L}$ = 10 turns at 35 Hz,\nbelow the shaft: weak",
-        xy=(fan["lobe n=1 m=10"], 0.12),
-        xytext=(66.0, 0.62),
+        "\n".join(
+            f"$m_\\mathrm{{L}}$ = {lobes} lobes × {speed:.0f} turns a second"
+            for lobes, speed in turns
+        )
+        + f"\neach is {fan['BPF']:.0f} lobes past a point a second,\nthe blade rate",
+        xy=(fan["BPF"], 0.55),
+        xytext=(92.0, 0.80),
         va="top",
         ha="left",
         fontsize=_NOTE_PT,
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "color": COLOR_MUTED},
     )
-    ax.annotate(
-        "$m_\\mathrm{L}$ = 2 turns at 175 Hz,\n3x the shaft speed: strong",
-        xy=(fan["lobe n=1 m=2"], 0.70),
-        xytext=(189.0, 0.96),
+    ax.text(
+        92.0,
+        0.36,
+        "no line of their own at "
+        f"{turns[1][1]:.0f} Hz or {turns[0][1]:.0f} Hz:\n"
+        "those are speeds of rotation",
         va="top",
         ha="left",
         fontsize=_NOTE_PT,
-        color=COLOR_FG,
-        arrowprops={"arrowstyle": "->", "color": COLOR_MUTED},
+        color=COLOR_MUTED,
     )
 
     # One key for the four panels, at the foot of the figure: they draw the

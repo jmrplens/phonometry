@@ -607,7 +607,7 @@ it carries a higher evidential bar than the rest of the documentation.
 > Extracted text may locate a page; it may never be
 > quoted as "the print". Establish the page offset empirically. Before filing,
 > run the entry's own arithmetic against the familiar irrationals: if the ratio
-> between printed and derived is within 0,5 % of √2, √3, π, 2π, 1/√2, ln 2 or a
+> between printed and derived is within 0.5 % of √2, √3, π, 2π, 1/√2, ln 2 or a
 > small integer, treat the entry as unproven until the page has been read as an
 > image, because that ratio is the signature of a lost glyph rather than an
 > author's error.
@@ -660,7 +660,7 @@ python scripts/check_errata_evidence.py --ratios # only the irrational-ratio lin
 ```
 
 1. **The ratio linter** parses each entry for printed-versus-derived value
-   pairs and flags any ratio within 0,5 % of √2, √3, π, 2π, 1/√2, ln 2 or a
+   pairs and flags any ratio within 0.5 % of √2, √3, π, 2π, 1/√2, ln 2 or a
    small integer. A flagged entry is not necessarily wrong (a genuine
    factor-of-ten misprint trips it too), but it must then cite, in the same
    entry, the page it read ([F57](docs/contributing/docs-and-figures.md#f57)).

@@ -326,13 +326,13 @@ $$\tau = \frac{1}{2}$$
 **Do**
 
 ```markdown
-a deviation of \<0,02 dB above 200 Hz
+a deviation of \<0.02 dB above 200 Hz
 ```
 
 **Don't**
 
 ```markdown
-a deviation of <0,02 dB above 200 Hz
+a deviation of <0.02 dB above 200 Hz
 ```
 
 **Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`

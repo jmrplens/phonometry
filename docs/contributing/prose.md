@@ -169,18 +169,18 @@ r"""... :math:`10 \log_{10} <FF>rac{S_1}{S_2}` ..."""   (<FF>: one form feed byt
 <a id="p8"></a>
 ### P8. Group a long digit string in threes with U+202F, the narrow no-break space
 
-**Why.** ISO 80000-1 and the SI Brochure group digits in threes on both sides of the decimal marker, and the corpus writes a number the way the printed table does (6,251 5 and 101 325). With an ordinary space a line break can fall inside the number and leave 6,251 at the end of one line and 5 at the start of the next, which reads as two numbers. The check runs as a step of the CI job named "Every call passes the language on".
+**Why.** ISO 80000-1 and the SI Brochure group digits in threes on both sides of the decimal marker, and the corpus writes a number the way the printed table does (6.251 5 and 101 325). With an ordinary space a line break can fall inside the number and leave 6,251 at the end of one line and 5 at the start of the next, which reads as two numbers. The check runs as a step of the CI job named "Every call passes the language on".
 
 **Do**
 
 ```text
-6,251 5   0,647 829   101 325   (each gap inside a number is U+202F)
+6.251 5   0.647 829   101 325   (each gap inside a number is U+202F)
 ```
 
 **Don't**
 
 ```text
-6,251 5   0,647 829   101 325   (ordinary spaces: a line may break inside the number)
+6.251 5   0.647 829   101 325   (ordinary spaces: a line may break inside the number)
 ```
 
 **Enforced by:** `scripts/check_digit_grouping.py`, `make digit-grouping`, `CI: Every call passes the language on`

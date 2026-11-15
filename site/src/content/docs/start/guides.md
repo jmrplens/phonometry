@@ -717,8 +717,8 @@ regulatory mapping.
   nine-microphone grid, its single number DL_RI and the low frequency limit a
   sample's size sets.
 - [Quality of Outdoor Sound Software (ISO 17534-1)](/phonometry/environment/propagation/software-quality/):
-  a program's results against its certified test-case results, and the 0,1-
-  and 0,9-quantiles of what a faster modified configuration costs.
+  a program's results against its certified test-case results, and the 0.1-
+  and 0.9-quantiles of what a faster modified configuration costs.
 
 **[Sources](/phonometry/environment/sources/)**
 
@@ -937,7 +937,7 @@ and EBU R 128.
   frequency, and the pipe wall that is what actually radiates.
 - [Hydrodynamic Valve Noise (IEC 60534-8-4)](/phonometry/devices/noise-control/valve-cavitation/):
   the same valve on a liquid line, where one threshold decides whether it
-  cavitates and 0,1 in that threshold is worth 14 dB.
+  cavitates and 0.1 in that threshold is worth 14 dB.
 - [Room to Room: Partition, Receiving Room, Criterion](/phonometry/devices/noise-control/room-to-room/):
   the source-room level through a partition into the receiving room, the noise
   criterion verdict and the transmission loss a partition or an enclosure needs.

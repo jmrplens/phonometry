@@ -1162,7 +1162,7 @@ class ElasticFDTD2D:
     def _corner_mu(mu: Field2D) -> Field2D:
         """Harmonic mean of ``mu`` over the 4 cells meeting at each corner.
 
-        The Moczo et al. (2007) effective shear modulus (Eqs. 7.37-7.38):
+        The Moczo et al. (2007) effective shear modulus (Eq. 7.38):
         the harmonic mean enforces traction continuity across internal
         interfaces, and any fluid neighbour (``mu = 0``) zeroes the corner,
         which is exactly the shear-free wetted-wall condition of a

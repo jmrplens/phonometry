@@ -270,10 +270,11 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
 
 @cache
 def _scholte_interface_result() -> ElasticFDTDResult:
-    """Water over a soft seabed, explosive shot near the contact (cached).
+    """Water over the van Vossen seabed, explosive shot near the contact (cached).
 
     Language/theme independent: the van Vossen (2002) benchmark media
-    (water 1500/1000 over a 3500/2000/2500 solid), a 50 Hz Ricker
+    (water 1500/1000 over a 3500/2000/2500 solid, whose shear speed is
+    above the water's; the paper's soft bed is another), a 50 Hz Ricker
     explosion 10 m above the interface, run until the Scholte train has
     crawled ~330 m along the contact.
     """

@@ -37,16 +37,16 @@ const WARNINGS = [
 
 /**
  * Warnings the site cannot silence, each as the build prints it from where
- * its shape starts, with the reason. Starlight 0.42.8 asks for a docs entry
+ * its shape starts, with the reason. Starlight 0.43.1 asks for a docs entry
  * named 404 on every build and serves a page of its own when there is none,
- * and Astro 7.4.4 warns for every entry `getEntry` does not find. A 404 page
+ * and Astro 7.4.12 warns for every entry `getEntry` does not find. A 404 page
  * of the site's own would need its Spanish twin and a place in every check
  * that reads the build, to silence a lookup that works.
  */
 const KNOWN = [
 	{
 		line: '[WARN] [content] Entry docs → 404 was not found.',
-		why: 'Starlight 0.42.8 looks up a 404 entry the site does not have, and Astro 7.4.4 warns for each entry getEntry misses',
+		why: 'Starlight 0.43.1 looks up a 404 entry the site does not have, and Astro 7.4.12 warns for each entry getEntry misses',
 	},
 ];
 

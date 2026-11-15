@@ -493,15 +493,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   arrangement with it sealed on both sides. `building.laboratory_joint_insulation`
   corrects the first against the second band by band, by the rules of
   ISO 10140-2:2021 A.3 that J.1 calls in: no correction from a 10 dB margin,
-  Formula (J.2) down to 6 dB, the fixed 1,3 dB below it as a minimum value,
+  Formula (J.2) down to 6 dB, the fixed 1.3 dB below it as a minimum value,
   and below 3 dB the lower limit at the maximum of the arrangement, which the
   form prints in brackets. The result carries the ISO 717-1 single numbers
   with C100-5000 and Ctr,100-5000, the rating of the maximum, and the rating
   again with the indicative bands taken as infinitely high, which puts the
   single numbers in brackets when it moves them by more than 1 dB.
   `building.check_joint_test_element` checks the length and width of J.2.1
-  and the 5,0 m of a window or door gap (J.2.2), `building.check_gap_width`
-  the four readings within 0,3 mm that give the gap width, and
+  and the 5.0 m of a window or door gap (J.2.2), `building.check_gap_width`
+  the four readings within 0.3 mm that give the gap width, and
   `building.joint_gap_series` collects a variable slit at its gap widths
   (J.4) with the single numbers against the width, read on the lines between
   the measured widths, as Figures J.8 and J.9 draw them, the octave figure
@@ -546,7 +546,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reproduces every entry of Table A.1, or by the approximation (A.2), and
   `metrology.capillary_tube_impedance` the input impedance of an open tube by
   Formulas (B.1) to (B.3), which gives Tables B.1 and B.2 to within
-  0,002 GPa·s/m³. A
+  0.002 GPa·s/m³. A
   `metrology.ReciprocityMicrophone` carries the lumped impedance of Annex E
   and its front cavity, and `metrology.microphone_acoustic_impedance` is
   Formula (E.1). `metrology.pressure_reciprocity` and
@@ -574,7 +574,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   C.2, C.3 and both Tables 1 are published read-only,
   every result has `.plot()`, and the printed tables are conformance rows.
   Three printed defects are in the errata: IEC 61094-2 heads two columns of
-  Tables B.1 and B.2 with a radius of 0,1667 mm, while the values under them
+  Tables B.1 and B.2 with a radius of 0.1667 mm, while the values under them
   were computed with a radius of 1/6 mm, and prints one entry with a decimal
   point and one with a digit missing; Formulas (8) and (9) of IEC 61094-3 drop the factor $-\mathrm{j}$
   of Formula (7), which turns the complex sensitivity by 45°; and Step 1 of
@@ -987,14 +987,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Figure 14 prints no formula. `reflection_index_expanded_uncertainty` is
   A.2: a read-only `ReflectionIndexUncertainty` with the $U_j$ of each band,
   in units of the index, and the $U$ of $DL_{RI}$ in decibels, from the
-  reproducibility of Table A.1 (the high column and $k_p$ = 1,96 by default,
+  reproducibility of Table A.1 (the high column and $k_p$ = 1.96 by default,
   as Annex B.5). Every result has `.plot()`, and a new guide in
   both languages walks through a measurement and the example of Annex B. Of
   that example the library reproduces the twelve-position average of sixteen
   bands to the hundredth (the other two fall on an exact half that the printed
-  values cannot decide), $DL_{RI}$ of 8 dB (7,68 dB before rounding on the
-  printed averages), its expanded uncertainty of 1,59 dB and interval
-  [6,09; 9,27] dB, and eleven of the eighteen band uncertainties of Table B.2;
+  values cannot decide), $DL_{RI}$ of 8 dB (7.68 dB before rounding on the
+  printed averages), its expanded uncertainty of 1.59 dB and interval
+  [6.09; 9.27] dB, and eleven of the eighteen band uncertainties of Table B.2;
   the other seven are printed a hundredth lower, which the errata registry
   records.
 - **Sound power of small movable sources in a hard-walled or a special
@@ -1256,7 +1256,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   report, the TS is followed: a period with fewer than 30 valid blocks is
   rated 0 dB and kept in its bin, and the band is chosen per bin. Every
   result has `.plot()`, and a new guide in both languages explains why the
-  air attenuation of Table C.2 sits 0,01 dB/km to 0,02 dB/km under
+  air attenuation of Table C.2 sits 0.01 dB/km to 0.02 dB/km under
   ISO 9613-1 between 50 Hz and 100 Hz: those cells are the Danish statutory
   order's, set for 80 % relative humidity where the caption says 70 %. That
   row and eight other printed defects of the TS are in the errata register,
@@ -1430,8 +1430,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`limited_positions`), and reports the arithmetic average the NOTE of 8.3
   allows and how much the overhead positions move the result. Every limit is
   judged on the number as read rather than on its last bits in binary: a
-  background of 29,3 dB under 32,3 dB is the 3 dB of 4.2, and overhead
-  positions that move the level by 1,0 dB may be deleted on every machine.
+  background of 29.3 dB under 32.3 dB is the 3 dB of 4.2, and overhead
+  positions that move the level by 1.0 dB may be deleted on every machine.
   `turbine_noise_declaration` writes the minimum report of clause 10, one row
   per load, the sound power level in whole decibels, the conformity statement
   and the Table 1 standard deviation, and refuses a determination that is not
@@ -1593,8 +1593,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   forms: a band of identical lines averages to itself, a massless spring gives
   a flat stiffness and no f_UL, a spring under a force distribution plate
   gives the f_UL of its closed form, and the output mass on its bound biases
-  the force by 0,51 to 0,54 dB, the 0,5 dB of Part 4 NOTE 1. Two defects in the
-  prints are registered in the errata: that 0,5 dB printed as "05 dB" in
+  the force by 0.51 to 0.54 dB, the 0.5 dB of Part 4 NOTE 1. Two defects in the
+  prints are registered in the errata: that 0.5 dB printed as "05 dB" in
   Part 4, and the Part 2 clause 7.6.1 that sends the unidirectionality pre-run
   to the blocked-output inequality of 6.1 instead of the unwanted-input one of
   6.4. The transfer-stiffness guide covers both parts in both languages.
@@ -1641,7 +1641,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ISO/TS 12913-2 Annex A and refuses to be built with a required item missing,
   naming its clause. Every result has `.plot()`. The standard prints no worked
   example, so the conformance rows are the printed tables and closed forms
-  (the scale values, the printed range 9,66 and its normalisation, each
+  (the scale values, the printed range 9.66 and its normalisation, each
   attribute moving the point along its own arrow of Figure A.1, the rule of
   Table D.1) and independent implementations (SciPy's Spearman, Pearson and
   Student interval). The International Soundscape Database v1.0 (CC BY 4.0)
@@ -1696,10 +1696,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   designator. Every result has `.plot()`. Tables I.2 and I.3, the 41
   frequencies of Table H.1, the clause 6 component either side of 3 kHz and
   the adjustment value of Annex A are conformance rows. Three printed defects
-  are in the errata: Table I.2 prints `k = 2,11` beside its own 29,98
-  effective degrees of freedom, for which the factor at 95 % is 2,04, so the
-  rows pin 2,04 and the expanded uncertainty it gives, 0,121 dB, where the
-  table prints 0,12(4); Table H.1 prints the exponent of index 31 as 31/80;
+  are in the errata: Table I.2 prints `k = 2,11` beside its own 29.98
+  effective degrees of freedom, for which the factor at 95 % is 2.04, so the
+  rows pin 2.04 and the expanded uncertainty it gives, 0.121 dB, where the
+  table prints 0.12(4); Table H.1 prints the exponent of index 31 as 31/80;
   and Formulas (E.4) to (E.6) exchange the two readings in the coupler that
   Figure E.1 defines, which the coupler function avoids by naming its inputs
   by what each reading is of. A new guide under Calibration and uncertainty runs every
@@ -1743,10 +1743,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   IEC 61094-8 are published read-only, every result has `.plot()`, and the
   IEC 61183 diffuse-field comparison now computes through the same model. The
   tables, the budget and the three measurement models are conformance rows.
-  Four printed defects are in the errata: D.3 of IEC 61094-5 states 0,040 dB
-  and 0,08 dB where its own eight components give 0,0437 dB and 0,087 dB; the
+  Four printed defects are in the errata: D.3 of IEC 61094-5 states 0.040 dB
+  and 0.08 dB where its own eight components give 0.0437 dB and 0.087 dB; the
   Spanish UNE-EN 61094-5:2017 leaves six of the eight values of Table D.1
-  blank and prints 0,004 dB for the combined uncertainty; IEC 61094-8 prints
+  blank and prints 0.004 dB for the combined uncertainty; IEC 61094-8 prints
   an unresolved cross-reference in 8.4; and its Formula (B.10) is the
   spectrum of a pulse of duration $2b$ that the text calls one of duration
   $b$. A new guide under Calibration and uncertainty runs a pressure and a
@@ -1774,13 +1774,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the correction against frequency. The readings at 0° and 180° enter both
   plane sums of Formula (A.3), which is what makes the 72 factors of Table A.1
   sum to one; counted once, as the paragraph under the formula could be read,
-  they sum to 0,998 097, which puts the directivity index of an
-  omnidirectional meter 0,008 dB high and that of a directional one higher,
-  about 0,02 dB at 7 dB. The ten values of Table A.1 are a conformance row to
-  their five decimals, and so are the 2,2 % of A.1.7, the halving of NOTE 2,
+  they sum to 0.998 097, which puts the directivity index of an
+  omnidirectional meter 0.008 dB high and that of a directional one higher,
+  about 0.02 dB at 7 dB. The ten values of Table A.1 are a conformance row to
+  their five decimals, and so are the 2.2 % of A.1.7, the halving of NOTE 2,
   the equal-area directions and the 30 printed cells of Table B.1. Two of those
-  directions are printed as 77,9° and 282,1° where the symmetry of the list
-  gives 77,8° and 282,2°, which is registered in the errata. A new guide under
+  directions are printed as 77.9° and 282.1° where the symmetry of the list
+  gives 77.8° and 282.2°, which is registered in the errata. A new guide under
   Calibration and uncertainty runs both methods on a synthetic meter, with a
   drawing of the two measurement set-ups, in English and Spanish.
 - **A filter bank's effective bandwidth, summation of outputs and swept
@@ -1872,11 +1872,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   verdict of Table B.1 and the four minimum differences of B.1.1 and B.2 are
   conformance rows to the printed decimal; the difference row of Table B.1
   agrees within 0.1 dB, since the standard prints the means of its second
-  test rounded (3.94 dB at 8 kHz against the printed 4,0). B.1.1 and B.2
+  test rounded (3.94 dB at 8 kHz against the printed 4.0). B.1.1 and B.2
   compute those minimum differences from the U95 their
   tables print rounded, and say so; from the unrounded budgets the earplug
-  values would be 3.21 dB and 9.37 dB rather than the printed 3,3 dB and
-  9,3 dB. The
+  values would be 3.21 dB and 9.37 dB rather than the printed 3.3 dB and
+  9.3 dB. The
   hearing-protector guide gains a section on the measurement in both languages.
 - **What a road surface adds to traffic noise, by the ISO 11819-1 statistical
   pass-by.** `environment.statistical_pass_by` takes one row per isolated
@@ -1902,10 +1902,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   does. Tables 1 and 2, the 7.3 and 9.3 numbers and the Annex D surfaces are
   read-only tables, and both results draw themselves with `.plot()`. Run from
   pass-bys placed on the regression lines Annex E prints, the method gives
-  its 78,5, 81,1 and 83,8 dB and its index of 79,9 dB; the unrounded levels
+  its 78.5, 81.1 and 83.8 dB and its index of 79.9 dB; the unrounded levels
   would give 79,985 dB, and the guide explains why the printed lines alone
   cannot tell the two apart and why the clauses can. Seven conformance rows
-  run Annex E from pass-bys to its 2,8 dB difference and Annex D to its
+  run Annex E from pass-bys to its 2.8 dB difference and Annex D to its
   average, and two defects of the printed page are in the errata registry. A
   new guide covers the method in English and Spanish, with a diagram of the
   measurement site.
@@ -1927,9 +1927,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of the standard comes out digit for digit from Table A.3, and the long-term
   levels and the median of Figure A.3 are conformance rows. Two things in
   Annex A do not follow from its own equations and are in the errata register:
-  the shift is printed as 1,04 dB where Equation (22) gives 2,878 dB at the
+  the shift is printed as 1.04 dB where Equation (22) gives 2,878 dB at the
   5 dB the annex uses, and four of the five exceedance levels of Figure A.3
-  are 0,1 dB to 0,5 dB above the roots of Equation (25). Those four are
+  are 0.1 dB to 0.5 dB above the roots of Equation (25). Those four are
   consistent with a curve accumulated from 15 dB, where the drawn curve
   begins, when it is fed the rounded 07:00 to 19:00 column of Table A.3, but
   not with the full-precision probabilities that reproduce Table A.4, so the
@@ -2023,7 +2023,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   row, because Part 2 5.13 declares the running r.m.s. not applicable to a
   PVEM. `vibration.PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT` holds the maximum
   expanded uncertainty each clause of Part 2 permits a testing laboratory,
-  among them 4,5 % for the mechanical frequency response (12.11.2), 3 % for
+  among them 4.5 % for the mechanical frequency response (12.11.2), 3 % for
   the electrical one (12.11.3) and 5 % for the overall response (12.11.4); its
   13.9, periodic verification, is not the 13.9 of Part 1. The conformance
   report has a section for Part 2: the library reproduces every printed cell
@@ -2364,7 +2364,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   within 5e-16 of the formula read in 60 digits.
   `emission.room_constant_from_reverberation_time` divided by
   $1 - \alpha_\mathrm{room}$, which is nothing once the exponent of Formula
-  (5) passes about 37; it computes $R = S\,(\mathrm{e}^{0{,}16 V/(S T)} - 1)$,
+  (5) passes about 37; it computes $R = S\,(\mathrm{e}^{0.16 V/(S T)} - 1)$,
   the two formulae read together. `vibration.infinite_beam_mobility` takes
   the reciprocal of the impedance as an array, so an impedance that underflows
   to zero gives a number what it gives an array.
@@ -4325,8 +4325,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   value, on every machine.** A margin of two readings, a spread, a mean or a
   ratio that is exactly on a limit a standard prints came out a unit or two in
   the last place either side of it in binary, and the verdict followed that
-  last bit: 32,3 - 26,3 dB is 5,999 999 999 999 996 and 32,2 - 26,2 dB is
-  6,000 000 000 000 004, so a background criterion read the same 6 dB margin
+  last bit: 32.3 - 26.3 dB is 5.999 999 999 999 996 and 32.2 - 26.2 dB is
+  6.000 000 000 000 004, so a background criterion read the same 6 dB margin
   as two. Such a quantity is now settled to nine decimal places before it
   meets its limit, and a half is rounded on the settled value; a result keeps
   the value it computed. This changes, for readings exactly on the limit only,
@@ -4367,16 +4367,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   NaN for an STI that does not fall with distance, where a constant STI used
   to put one of them some 1e16 m away when its fitted slope came out a few
   units in the last place negative, and `environment.sound_absorption_rating`
-  reaches the 0,99 limit of EN 1793-1 Clause 5 for absorption coefficients
-  that weigh to 0,99 in decimal. `building.force_pulse`,
+  reaches the 0.99 limit of EN 1793-1 Clause 5 for absorption coefficients
+  that weigh to 0.99 in decimal. `building.force_pulse`,
   `building.tapping_force_spectrum` and `building.tapping_cut_off_frequency`
   read the damping regime of the tapping hammer off one settled number, so a
   hammer and floor critically damped in decimal (K m = 4 Zdp²) give the
   critically damped pulse instead of NaN, which the square root of a
   discriminant a few units in the last place below zero used to return.
   `vibration.assess_people_in_buildings` takes a `KB_Fmax` exactly 15 % above
-  `A_u`, 0,46 against 0,4, as inside the measurement uncertainty of
-  DIN 4150-2:1999 5.4, where the product 0,4 x 1,15 used to land a last bit
+  `A_u`, 0.46 against 0.4, as inside the measurement uncertainty of
+  DIN 4150-2:1999 5.4, where the product 0.4 x 1.15 used to land a last bit
   under it. The sign of a net sound power or of a mean normal intensity, which
   ISO 9614-1, ISO 9614-2 and ISO 9614-3 judge against zero, is read off the
   sum as a settled share of the sum of the magnitudes: intensities that cancel
@@ -4393,21 +4393,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `room.noise_criterion` and the RC rating of `room.room_criterion`, send a
   difference or a mean that is a half in decimal to the even decibel as they
   say they do, where it used to go to whichever neighbour its last bits fell
-  nearer: 30,9 - 15,4 dB is reported as 16 dB, and a mid-frequency average of
-  36,5 dB rates RC-36. The same settling now judges the band flatness of
+  nearer: 30.9 - 15.4 dB is reported as 16 dB, and a mid-frequency average of
+  36.5 dB rates RC-36. The same settling now judges the band flatness of
   `noise_control.check_band_flatness`, the 6 dB and 15 dB margins of
   `emission.sound_power_in_situ`, criterion 5 of
-  `emission.precision_qualification` (a ratio of 2,46 to 2,05 is the 1,2 it
+  `emission.precision_qualification` (a ratio of 2.46 to 2.05 is the 1.2 it
   allows), the decay time of `vibration.verify_running_rms_decay` on the edge
   of its printed interval, the level differences of
   `vibration.check_blocked_output` and `vibration.check_unwanted_input`, the
   Spanish `low_frequency_correction` and `impulsive_correction` at 10 dB and
   15 dB, area weights that add up to 1 in
   `materials.directional_diffusion_coefficient` (refused, as Formula (6)
-  divides by their total less one), the 5 dB steps read to 0,05 dB by
+  divides by their total less one), the 5 dB steps read to 0.05 dB by
   `hearing.assess_anr_linearity`, and a velocity on the guideline
   `vibration.assess_building_vibration` interpolates between the frequencies
-  of DIN 4150-3 Table 1. A temporal variability F1 of exactly 0,6 counts as
+  of DIN 4150-3 Table 1. A temporal variability F1 of exactly 0.6 counts as
   stationary in `emission.field_indicators` and
   `emission.sound_power_intensity_points`, and N positions that equal C F4²
   of ISO 9614-1 criterion 2 in decimal do not meet it. Partial powers that
@@ -4422,19 +4422,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `emission.plant_measurement_contour` lays no extra position, when the
   positions are exactly twice the mean distance apart, and
   `hearing.job_based_exposure` and `hearing.full_day_exposure` raise the
-  Table C.4 advisory of ISO 9612 only above 3,5 dB, not at a contribution
-  that reads the 3,5 dB node itself.
+  Table C.4 advisory of ISO 9612 only above 3.5 dB, not at a contribution
+  that reads the 3.5 dB node itself.
 
 - **Three more verdicts on a printed limit read the decimal value, and a check
   keeps the next one out.** Requirement b) of IEC 60268-7 Annex B in
   `electroacoustics.verify_ear_canal_microphone` asks for a section "less than
-  0,6" of the canal's, and a section of 20,22 mm² in a canal of 33,7 mm², which
-  is 0,6 of it, came out a last bit under 0,6 and passed. The length to
-  diameter ratio `metrology.check_coupler` recommends by IEC 61094-2 C.2, 0,5
-  to 0,75 with the front cavities counted, was not recommended at 0,5 for a
-  5,4 mm coupler of 18,6 mm closed by microphones with 1,95 mm cavities. And
+  0,6" of the canal's, and a section of 20.22 mm² in a canal of 33.7 mm², which
+  is 0.6 of it, came out a last bit under 0.6 and passed. The length to
+  diameter ratio `metrology.check_coupler` recommends by IEC 61094-2 C.2, 0.5
+  to 0.75 with the front cavities counted, was not recommended at 0.5 for a
+  5.4 mm coupler of 18.6 mm closed by microphones with 1.95 mm cavities. And
   `within_stated_accuracy` of `metrology.reciprocity_air_attenuation` put
-  36,01 Hz at 90,025 kPa, 0,4 Hz/kPa, outside the domain IEC 61094-3 B.2 gives
+  36.01 Hz at 90,025 kPa, 0.4 Hz/kPa, outside the domain IEC 61094-3 B.2 gives
   for its accuracy. Each is now settled before it meets its limit.
   `scripts/check_boundary_comparisons.py` (`make boundary-comparisons`, and a
   job of its own in CI) found them: it follows a value through assignments,
@@ -4444,7 +4444,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with the reason it cannot sit on the limit. Run on the tree as it stood
   before the settling above, it names both comparisons that started it, the
   slope of `room.open_plan_metrics` against zero and the absorption ratio of
-  `environment.sound_absorption_rating` against 0,99.
+  `environment.sound_absorption_rating` against 0.99.
 
 - **A calibration sidecar no reader can take is refused as a `ValueError`,
   and none is written into a pipe.** `io.read_sidecar`, which `io.read` and
@@ -8273,8 +8273,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   walls and floors to duct liners and fiberglass board, each with the
   ASTM C423 mounting the page prints beside it in `AbsorptionSpectrum.mounting`.
   Fifteen finishes are printed on two mounts and are two rows here: the same
-  board laid on the test-room floor and hung over a 400 mm airspace is 0,03
-  and 0,65 at 125 Hz, and a catalogue that kept one of them would be hiding
+  board laid on the test-room floor and hung over a 400 mm airspace is 0.03
+  and 0.65 at 125 Hz, and a catalogue that kept one of them would be hiding
   the mounting's effect rather than showing it. The two rows that are areas
   in sabins, a musician with his instrument and the air itself, join
   `PUBLISHED_ABSORPTION_AREAS` converted to square metres, with the page's
@@ -8430,8 +8430,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the page prints, which is what it already was, and the two bulk speeds
   follow from the modulus and the Poisson ratio printed beside it through the
   closed forms the same table prints at its end. Steel goes from 5900 to 5958
-  m/s and from 3200 to 3184,7; aluminium from 6320 to 6450,5 and from 3130 to
-  3098,7; concrete from 3800 to 3726,8 and from 2250 to 2282,2. Nothing in the
+  m/s and from 3200 to 3184.7; aluminium from 6320 to 6450.5 and from 3130 to
+  3098.7; concrete from 3800 to 3726.8 and from 2250 to 2282.2. Nothing in the
   library depends on these except the demonstrations that name them, but a
   script that used one gets a number between half a per cent and two per cent
   away from the old one. `test_each_material_is_the_row_it_cites` recomputes
@@ -8476,8 +8476,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   **The four airs of this library are on it, and they disagree.** The absorber
   models propagate through 343 m/s at 1,205 kg/m3, the airflow-resistance
-  annex through 345,87 at 1,186, EN/ISO 12354 through 340 at 1,29 and the
-  acoustic solver defaults to 343 at 1,2. None of them is wrong: each is the
+  annex through 345.87 at 1,186, EN/ISO 12354 through 340 at 1.29 and the
+  acoustic solver defaults to 343 at 1.2. None of them is wrong: each is the
   air its own document assumes. They stay where they are, beside the clause
   that prints each one, and the comparison is made by the page rather than by
   a catalogue in `fluids` that would have had to import three of the domains
@@ -8492,9 +8492,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   now holds only what the page printed in place of a number, and
   `why_missing` composes the sentence around it, so the same field answers the
   same way in every catalogue and a published table shows the cell as it reads
-  on the page. The modulus of Bies's carbon brick is 8,2 GPa, which is what
+  on the page. The modulus of Bies's carbon brick is 8.2 GPa, which is what
   the page prints; it was stored as a number that reads back as
-  8 199 999 999,999999.
+  8 199 999 999.999999.
 
 - **Fluid states read from a printed page.** `fluids.PUBLISHED_FLUIDS` holds
   the three fluids Bies prints at the head of Table C.1, air, fresh water and
@@ -8553,7 +8553,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   **The two books check each other.** Cox credits eight of its porosity ranges
   to Mechel, and Mechel prints them: two books, two pages, two readings, and
   seven of the eight come out to the same digits. The eighth is Cox's foam
-  row, which reads 0,93 to 0,995 against Mechel's 0,95 to 0,995 and credits
+  row, which reads 0.93 to 0.995 against Mechel's 0.95 to 0.995 and credits
   four studies rather than Mechel alone, so it is a compilation of its own.
   The agreement is a test.
 
@@ -8600,9 +8600,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   **Four entries join the errata register**, all found by reading the pages
   against each other. Table 11.7's caption names Figure 11.6 for a structure
-  that is Figure 11.16 on the same page. Table 11.8 gives its glass wool 3,8 mm
+  that is Figure 11.16 on the same page. Table 11.8 gives its glass wool 3.8 mm
   where the prose of the facing folio says 5 cm, and Table 11.9 gives its plate
-  1,6 mm where the prose says 0,6; in both the other layer agrees, which is
+  1.6 mm where the prose says 0.6; in both the other layer agrees, which is
   what places the disagreement in one cell. And Table 13.2 prints a frame
   modulus of 4 400 Pa for a rockwool whose skeleton resonance the next page
   reports near 1 350 Hz, which that modulus puts near 25 Hz instead. Every row
@@ -8617,14 +8617,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   eighteen building materials the book credits whole to Beranek and Ver;
   and Arau-Puchades **Table 4.1**, seventeen materials over eighteen rows.
   Each row is keyed by the table it came from, because both books print a steel
-  at 7 800 kg/m3 and they are not the same steel: 199,6 GPa at a Poisson ratio
-  of 0,28 against 210 GPa at 0,31. `solids_named` gathers every book's reading
+  at 7 800 kg/m3 and they are not the same steel: 199.6 GPa at a Poisson ratio
+  of 0.28 against 210 GPa at 0.31. `solids_named` gathers every book's reading
   of one material, and choosing between them stays the caller's call.
 
   **Three speeds are three fields.** Cremer's `c_LII` and Bies' `sqrt(E/rho)`
   are the bar speed, Hopkins' quasi-longitudinal is the plate speed, and Cremer
   puts the gap to the pure longitudinal speed at 16 per cent for a Poisson
-  ratio of 0,3. One field holding whichever the page happened to print is the
+  ratio of 0.3. One field holding whichever the page happened to print is the
   mistake this catalogue exists to prevent, so `bar_longitudinal_speed_m_s`,
   `plate_longitudinal_speed_m_s` and `bulk_longitudinal_speed_m_s` are separate and every row carries all three:
   whichever one its page printed is read, and the others follow from the row's
@@ -8650,10 +8650,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   A page gets as far as its own columns allow. Mechel prints a modulus and no
   Poisson ratio, so his rows give the bar speed and stop: the plate and bulk
-  speeds would need a ratio he does not print, and a 0,3 would reproduce his
+  speeds would need a ratio he does not print, and a 0.3 would reproduce his
   table nicely and be a number he did not give. What crosses between all three
   books with no assumption at all is `h f_c`, which Hopkins prints as a column
-  and Mechel as `f_cr d`: for steel both print 12,3 m Hz, to the digit. His
+  and Mechel as `f_cr d`: for steel both print 12.3 m Hz, to the digit. His
   loss factor goes in `loss_factor` rather than in `flexural_loss_factor`,
   because a column headed "Loss fact." does not say which wave measured it.
 
@@ -8668,7 +8668,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   single most expensive way to misread that table: his footnote says to use
   the upper limit for panels in building construction and the lower for panels
   welded together in an enclosure, so the low end is the internal loss factor
-  and the high end the in-situ one. For steel they are 0,0001 and 0,01, and
+  and the high end the in-situ one. For steel they are 0.0001 and 0.01, and
   reading them as an interval would be a factor of a hundred. His internal end
   is where Cremer and Mechel put the same number.
 
@@ -8715,21 +8715,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   line. What it fails on is density and only density, because a density is the
   one property a table cannot get very wrong without describing a different
   material: every density the gate does not already accept agrees across these
-  six tables to within 2,6 per cent, so a disagreement past 8 per cent is a
+  six tables to within 2.6 per cent, so a disagreement past 8 per cent is a
   digit somebody typed wrong and almost always ours. Everything else it reports
   and never fails on, since moduli disagree by nineteen per cent on aluminium
   and thirty on lead between these books without anybody being wrong.
 
   Its first full run found tin. Cremer and Mechel print a Young's modulus of
-  4,4 GPa and Bies 54, a factor of twelve, while the three densities agree to
-  0,3 per cent so nobody has confused the material. Each book is consistent with
-  itself: Cremer's 4,4 GPa reproduces his own printed 780 m/s and his shear
+  4.4 GPa and Bies 54, a factor of twelve, while the three densities agree to
+  0.3 per cent so nobody has confused the material. Each book is consistent with
+  itself: Cremer's 4.4 GPa reproduces his own printed 780 m/s and his shear
   modulus and transverse speed besides, Bies' 54 reproduces his printed
-  2 720 m/s exactly, and Mechel's `f_cr d` of 81 m Hz follows from 4,4 and not
+  2 720 m/s exactly, and Mechel's `f_cr d` of 81 m Hz follows from 4.4 and not
   from 54. So no page contradicts itself and this is not an errata; it is two
   books sharing an order of magnitude against a third. The catalogue does not
   pick between them, but the rest of it says which way to look: a tin of
-  4,4 GPa carries sound at 780 m/s, which lands it among the soft plastics,
+  4.4 GPa carries sound at 780 m/s, which lands it among the soft plastics,
   below high-density polyethylene at 1 030 and below every lead row in the
   catalogue, which run from 1 180 to 1 257 m/s although lead is the softer metal
   and half again as dense. That is the case for keeping six
@@ -8760,9 +8760,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Long and Mechel each print, which is a property of the material alone and so
   the cheapest cross-check there is between books that share no other column.
   It carries the exact `2 pi / sqrt(12)` of the thin-plate dispersion relation
-  rather than the 1,8 of ISO 12354-1: the exact constant reproduces all
+  rather than the 1.8 of ISO 12354-1: the exact constant reproduces all
   twenty-five rows of Table A2, whose heading states the 343 m/s it assumes,
-  and the rounded one misses the steel row by 0,8 per cent.
+  and the rounded one misses the steel row by 0.8 per cent.
   `building.critical_frequency` keeps the rounded constant, because there it is
   the standard's own arithmetic and not the material's.
 
@@ -8782,9 +8782,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   How far the closure goes is measured rather than asserted. Hopkins (2007)
   Table A1, PDF page 634 (printed p. 607), prints both the inputs and the
   outputs for six gases at the 20 degC and 1,013 x 10^5 Pa its own footnote
-  states: the speeds land within 0,5 m/s for all six, and the densities within two
+  states: the speeds land within 0.5 m/s for all six, and the densities within two
   parts in a thousand for air, argon, nitrogen and oxygen. Carbon dioxide is
-  0,7 per cent light and sulphur hexafluoride 2,1 per cent, which is the
+  0.7 per cent light and sulphur hexafluoride 2.1 per cent, which is the
   compressibility factor and not an error in the arithmetic, and the model says
   so in its own `validity` string. Viscosity, thermal conductivity and the
   Prandtl number are transport properties that nothing in the closure
@@ -8813,7 +8813,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of two on eighteen of them and nowhere near a carpet. And the two routes to
   the viscous length are made to disagree on purpose on the same rock wool,
   because they are different models: the fibre geometry is the lower estimate
-  throughout, by 1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
+  throughout, by 1.4 at 38 kg/m³ and 1.9 at 155 kg/m³.
 
   So the numbers that come out of these can be told apart from the numbers a
   table printed, which is the point. Measuring a characteristic length is still
@@ -8932,8 +8932,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   loudspeaker.
 
   The worked example of Annex C is reproduced end to end: the 66 printed values
-  of the corrected curve to 0,09 dB, the 18 decay rates of Table C.7 to 0,05 dB,
-  the 18 level excesses of Table C.9 to 0,06 dB, and the two A-weighted
+  of the corrected curve to 0.09 dB, the 18 decay rates of Table C.7 to 0.05 dB,
+  the 18 level excesses of Table C.9 to 0.06 dB, and the two A-weighted
   pink-noise tables with them.
 
 - **ISO 11690-3:1998**, choosing a prediction method for a workroom and reading
@@ -8953,9 +8953,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ceiling those choices move the answer by more than the measurement
   uncertainty; this code closes them. `check_ceiling_specimen` is the geometry
   of 4.1.1, `air_absorption_correction` is the part of the EN ISO 354 formulae
-  that comes from the air rather than the specimen, which 4.2.1 caps at 0,05,
+  that comes from the air rather than the specimen, which 4.2.1 caps at 0.05,
   and `reproducibility_uncertainty` is Table 1, the round robin behind the
-  numbers, with the coverage factor of 2,8 that produced them.
+  numbers, with the coverage factor of 2.8 that produced them.
 
 - Three errata entries for the two ISO documents, all read from the page as
   printed: an informative annex that applies its own normative correction to one
@@ -9014,8 +9014,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   than repeat it.
 
 - `emission.ROOM_ABSORPTION_ESTIMATES` is the table of approximate mean
-  absorption coefficients of Table C.2 of ISO 11546-2, from 0,05 for an empty
-  room with hard walls to 0,5 for a room with large amounts of sound-absorbing
+  absorption coefficients of Table C.2 of ISO 11546-2, from 0.05 for an empty
+  room with hard walls to 0.5 for a room with large amounts of sound-absorbing
   material on ceiling and walls.
 
 - Ten errata entries for the three standards, all read from the page as
@@ -9070,9 +9070,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   for any decay rate; they are readings of the measurement at a microphone
   position, one of them with a logarithm entered as a round 30. Equation (4) of
   the same standard prints the A-weighting sum to one decimal and Table 1 the
-  weights to one decimal, and the two roundings miss each other by 0,05 dB;
-  its own annex was normalised exactly, so the printed equation runs 0,05 dB
-  high against it. The library keeps the printed 6,2 dB, says so, and
+  weights to one decimal, and the two roundings miss each other by 0.05 dB;
+  its own annex was normalised exactly, so the printed equation runs 0.05 dB
+  high against it. The library keeps the printed 6.2 dB, says so, and
   Equation (3) under the Table 1 weights gives the annex's reading. And
   Annex B of ISO 11690-3 gives its two workstations each other's positions:
   recomputing the annex returns both printed levels, each against the other
@@ -9080,12 +9080,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - An erratum entry for VDI 2081 Blatt 2:2005-05, read from the page as printed.
   Element 14 of Table 1 is a round bend, and its two running totals disagree in
-  one band of eight: the level arriving prints 34,0 dB at 8 kHz and the same
-  level with the bend's own flow noise in it prints 33,6 dB, which is lower than
-  what it adds to. Element 13 hands 8 kHz over at 37,0 dB, the bend takes 3 dB
-  off it, and the flow noise the element prints two rows higher is 14,4 dB under
-  the band, so it moves the level by less than 0,0001 dB. Read the other way the
-  cell is just as unreachable: 33,6 dB would need 36,6 dB to arrive. The
+  one band of eight: the level arriving prints 34.0 dB at 8 kHz and the same
+  level with the bend's own flow noise in it prints 33.6 dB, which is lower than
+  what it adds to. Element 13 hands 8 kHz over at 37.0 dB, the bend takes 3 dB
+  off it, and the flow noise the element prints two rows higher is 14.4 dB under
+  the band, so it moves the level by less than 0.0001 dB. Read the other way the
+  cell is just as unreachable: 33.6 dB would need 36.6 dB to arrive. The
   A-weighted total of the element is printed the same in both rows, which is what
   hides it.
 
@@ -9143,7 +9143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   coordinates and translations of every generated figure and diagram to
   two, and drops the indentation, the DOCTYPE and the metadata block nothing
   reads. Measured over the 2 704 committed SVGs the corpus goes from
-  258,6 MB to 217,1 MB, and a rasterisation of each version at three times
+  258.6 MB to 217.1 MB, and a rasterisation of each version at three times
   display scale differs only in the antialiasing of glyph edges. Two things
   are not rounded, both found by that rasterisation: a `scale()`, because
   the glyph outlines are drawn at `scale(0.015625)` and two decimals of that
@@ -9151,7 +9151,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   whose width and height fix the canvas. The comparison in `check_figures.py`
   accepts one rounding quantum and rejects two, since two machines that land
   either side of a boundary are now exactly one apart, and its tolerance is
-  one and a half quanta rather than one because 0,01 is not representable in
+  one and a half quanta rather than one because 0.01 is not representable in
   binary and a tolerance of exactly one quantum rejected forty-five per cent
   of the consecutive pairs below a hundred when it was tried. Its relative
   term is zero: the comparison takes the larger of the two terms, and the
@@ -9159,7 +9159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   900, which review caught and a sweep across the canvas now holds.
 
 - **The animation clips live in a repository of their own.** Cloning this
-  repository downloaded about 2 GB, and 1,8 GB of it was `.github/images`:
+  repository downloaded about 2 GB, and 1.8 GB of it was `.github/images`:
   not the 2 704 SVG figures, which are text and cost 80 MB across eleven
   thousand revisions because git stores each as a delta, but the 430 WebM,
   GIF and JPEG files, re-encoded whole on every render and kept in every
@@ -9397,7 +9397,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   for the Allard & Atalla glass wool cited **Table 6.1** for its two
   characteristic lengths, which that table does not print. They are printed in
   the prose of Sect. 6.5.4 on the facing folio, where a fibre diameter of 12 um
-  gives Lambda = 0,56e-4 m and Lambda' = 2 Lambda = 1,1e-4 m. No number moves:
+  gives Lambda = 0.56e-4 m and Lambda' = 2 Lambda = 1.1e-4 m. No number moves:
   the citation now names both pages, and the sixteen call sites read one
   published object instead of writing the numbers out again.
 
@@ -9418,11 +9418,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   say in five places, and could not reach one textbook case.
 
   The reference microphone of ISO 10847 could stand lower than the clause
-  allows. 7.2.2 puts it at least 1,5 m above the top edge of the barrier with
+  allows. 7.2.2 puts it at least 1.5 m above the top edge of the barrier with
   "shall", and its NOTE lets a close source raise it until it looks 10 degrees
   over the top. `reference_microphone_height_m` returned the NOTE's height
   whenever the source was nearer than 15 m, which for a 3 m barrier 5 m away is
-  4,34 m against the 4,5 m the clause asks for, and past 80 degrees a negative
+  4.34 m against the 4.5 m the clause asks for, and past 80 degrees a negative
   height. It returns the higher of the two now, and where no height reaches the
   10 degrees it keeps the clearance and emits a `BarrierInSituWarning`. The test
   and the conformance row had both pinned that short geometry as correct; both
@@ -9431,9 +9431,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `extraneous_corrected_mean_level` flagged a 3 dB margin as capped. ISO
   11820 caps the energy subtraction at 3 dB, and Table 1 prints what that 3 dB
   is: the correction at a 3 dB margin, which the subtraction writes unrounded as
-  3,0206 dB. The cap is judged on the margin of the two energy means now, so the
+  3.0206 dB. The cap is judged on the margin of the two energy means now, so the
   two routes the clause offers agree at the boundary they share, and floating
-  point no longer decides which side of it a printed 3,0 dB pair lands on. A
+  point no longer decides which side of it a printed 3.0 dB pair lands on. A
   margin more than 10⁻⁹ dB under 3 dB is capped and emits a
   `SilencerInSituWarning`, which prints the margin with as many decimals as it
   takes to show it under 3 dB, where two decimals wrote a margin a few
@@ -9469,8 +9469,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `room_to_room_transmission` gains `receiver_distance_m`, the direct field the
   partition radiates into the receiving room, from Equations (7-71) and (7-72)
   of Barron (2003). Norton's Equation (4.101) is its far limit and stays the
-  default. Barron's Example 7-6, an operator 1,5 m from the wall, reads 61,7 dB
-  on his page and would read 2,65 dB less without that term; the chain
+  default. Barron's Example 7-6, an operator 1.5 m from the wall, reads 61.7 dB
+  on his page and would read 2.65 dB less without that term; the chain
   reproduces it, `required_transmission_loss` carries the same term, and a
   conformance row holds it.
 
@@ -9575,7 +9575,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   from everything else, and none of these ever was a standard.
 
 - One room description of `ROOM_ABSORPTION_ESTIMATES` was transcribed short.
-  Table C.2 of ISO 11546-2 closes its 0,25 row with a worked example of what it
+  Table C.2 of ISO 11546-2 closes its 0.25 row with a worked example of what it
   means, "(e.g. partially absorptive ceiling)", and the table arrived in the
   tree without it. Nothing caught it because nothing looked: the test compared
   the seven keys and one substring, and the conformance row counted the
@@ -9589,7 +9589,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and ISO 11202:2010 prints no such table at all. Table F.1 of ISO 3744:2010,
   which the comment named, is a list of microphone coordinates. The same claim
   was published in the guide in both languages and is corrected there too,
-  along with a 0,5 row described as an absorbing ceiling and floor where the
+  along with a 0.5 row described as an absorbing ceiling and floor where the
   printed row says ceiling and walls.
 
 - The conformance report cut six citations in two. The reference parser
@@ -9607,7 +9607,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `_reduce` in the building ratings cited "an ISO 80000-1 footnote" for
   rounding half up. Annex B of ISO 80000-1:2009 is normative, not a footnote,
   and half up is its Rule B, which selects the multiple greater in magnitude:
-  it prints -12,25 as -12,3, where `floor(x + 0.5)` gives -12,2. The ratings
+  it prints -12.25 as -12.3, where `floor(x + 0.5)` gives -12.2. The ratings
   this serves are positive in practice, so no published number moves, but the
   docstring now names the annex and says where the two part company.
 
@@ -9830,7 +9830,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   limitation of Formula (3) and the KB weighting of Formula (4) as complex
   responses over both working ranges, the weighted vibration severity `KB_F`
   of Formula (1), and the clock maxima and their r.m.s. from Formula (2) with
-  both of its counting rules: a maximum at or below 0,1 enters as zero and its
+  both of its counting rules: a maximum at or below 0.1 enters as zero and its
   30 s interval still counts in N, and an interval the record did not fill is
   not an interval at all.
 
@@ -9850,9 +9850,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   frequency itself is dropped from the verdict because the standard writes
   every limit "for all f not equal to f_r". `response_tolerance_percent`
   gives the two limits at each frequency lower first and signed, as the
-  condition of 5.2.3.3 writes them: the lower limit is `-10.0` from 1,25 f_u
-  to 0,8 f_o, `-20.0` from 0,5 f_u to 1,25 f_u and from 0,8 f_o to 2 f_o, and
-  `-100.0`, no limit at all, outside 0,5 f_u to 2 f_o.
+  condition of 5.2.3.3 writes them: the lower limit is `-10.0` from 1.25 f_u
+  to 0.8 f_o, `-20.0` from 0.5 f_u to 1.25 f_u and from 0.8 f_o to 2 f_o, and
+  `-100.0`, no limit at all, outside 0.5 f_u to 2 f_o.
 
   Annex E is the part that reaches furthest. DIN 4150-3 compares a peak
   velocity with a guideline value that depends on frequency, and Annex D gives
@@ -9881,14 +9881,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the record as a judgement. The event values of an hour add in square, and a
   class of trains averages in energy, both as functions.
 
-  The narrow band is here too: the density of Formula (12) at the 1,25 Hz the
+  The narrow band is here too: the density of Formula (12) at the 1.25 Hz the
   standard recommends, and Formula (23), which adds its lines back into third
   octaves. Table 1 says how many lines each band takes and not which, so the
   choice is stated: the lines nearest the nominal centre on a logarithmic axis,
   which are the lines inside the nominal edges wherever the count is what the
   edges hold. Nominal edges do not meet, and the docstring and the guide say
   what that leaves: six lines in no band and five in two. The conformance
-  report runs the Clause 4 start-up figures, the 0,8 s block and the 23 %
+  report runs the Clause 4 start-up figures, the 0.8 s block and the 23 %
   bandwidth; Table 1 is the library's input, so it is held by the tests rather
   than by a row that would compare it with itself.
 
@@ -9909,7 +9909,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   says whether a transducer may be set down without fastening, which 5.3.2
   and 5.3.3 allow up to 100 Hz vertically and 40 Hz horizontally at a peak
   acceleration of 3 m/s² or less, and names what it has to stand on: nothing
-  or the rounded feet on a hard surface, the spiked device of about 2,5 kg on
+  or the rounded feet on a hard surface, the spiked device of about 2.5 kg on
   a carpet. `mass_loading_ratio` is the hundredth of 7.2.4, and
   `instrument_confidence_limit_percent` is Table 3, the 15 % on an r.m.s. and
   20 % on a peak that a meter meeting every requirement of Part 1 may still be
@@ -9925,7 +9925,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `vibration.immission.people`.
 
   `guide_values` is Table 1, by area, time of day and source, with the factor
-  1,5 of an urban railway on `A_u` and `A_r` and the `A_o` of row 1 that
+  1.5 of an urban railway on `A_u` and `A_r` and the `A_o` of row 1 that
   quarry blasting under the conditions of 6.5.1 takes in a mixed or
   residential area, and `construction_guide_values` is Table 2 with the
   interpolation of Figure 3 between one working day and seven, at the two
@@ -9937,9 +9937,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   events are rare, and between the two `KB_FTr` decides against `A_r`. The
   verdict carries the criterion that decided it, and compares at the decimals
   the guide value is printed with, half up, which is what Example 4 does when
-  it writes 0,154 as 0,15 and finds it met. A railway skips `A_o`, as 6.5.3.1
-  says; the night-time thresholds 6.5.3.5 puts in its place, 0,6 on a surface
-  line and 0,3 underground, are `RAILWAY_NIGHT_INVESTIGATION_KB`.
+  it writes 0.154 as 0.15 and finds it met. A railway skips `A_o`, as 6.5.3.1
+  says; the night-time thresholds 6.5.3.5 puts in its place, 0.6 on a surface
+  line and 0.3 underground, are `RAILWAY_NIGHT_INVESTIGATION_KB`.
 
   `assessment_vibration_severity` is Formulae (4a), (4b) and (5): the clock
   maximum r.m.s. of each stretch of exposure weighted by its share of 16 h or
@@ -9962,15 +9962,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   The draft rewrites the railway. Every passage counts as one clock interval,
   so `train_category_rms` is the r.m.s. of one maximum per passage with
-  nothing zeroed below 0,1; `train_kb_fmax` is 1,5 times it and
+  nothing zeroed below 0.1; `train_kb_fmax` is 1.5 times it and
   `railway_kb_fmax` the largest over the categories, which is what the draft
   compares with `A_u` and `A_o` instead of the largest maximum anyone
   observed; and `train_assessment_severity` is Formula (6), each category by
   its trains out of the 1920 or 960 intervals of the period and by the
-  weighting factor of Table 2, 0,7 for a tram on the surface to 1,3 for a
-  freight train over 600 m, with a category at or below 0,1 counting as
+  weighting factor of Table 2, 0.7 for a tram on the surface to 1.3 for a
+  freight train over 600 m, with a category at or below 0.1 counting as
   zero. `railway_guide_values` carries the night-time upper value of a line
-  to be built new, 0,6 on the surface and 0,3 underground outside an
+  to be built new, 0.6 on the surface and 0.3 underground outside an
   industrial or commercial area, and `assess_railway_change` the 25 % rule of
   an altered or extended line: the planned case is first held to the guide
   values as any immission is, and where `A_o` or `A_r` is exceeded the
@@ -9979,13 +9979,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   holding, as the draft's own Example 9 has it.
 
   The rest of the draft is an argument: `edition="2023"` on `guide_values`
-  reads Table 1 with the night `A_u` of a mixed area at 0,1, and
+  reads Table 1 with the night `A_u` of a mixed area at 0.1, and
   `assess_people_in_buildings` under it drops the shortcut inside the 15 %
   above `A_u`, which the draft's Example 3 no longer takes, compares a
   railway with `A_o` and a road by night not, and knows
   `source="road_existing"`, whose neighbours must put up with `A_u` and `A_r`
   exceeded by half, and `source="induced_seismic"`, held by night to the
-  daytime `A_o`, with `induced_seismic_kb_fmax` as 0,44 times the peak
+  daytime `A_o`, with `induced_seismic_kb_fmax` as 0.44 times the peak
   velocity. `GuideValues` now carries the period and the edition it was read
   for, the verdict takes its edition from there, and asking for the values of
   one edition under the rules of the other is refused. The draft's Table 3
@@ -9998,7 +9998,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   track. Nine things in the draft are in `docs/ERRATA.md`: Example 9 divides
   its night by 920 intervals where the clause fixes 960; Example 8 prints a
   result its own four-decimal inputs do not give; the clock maxima printed
-  on Figure B.2 give 0,37 and not the 0,39 the text uses; a decision of the
+  on Figure B.2 give 0.37 and not the 0.39 the text uses; a decision of the
   construction flowchart is drawn with its answer the wrong way round; an
   extension is assessed by the clause for a new line; 6.5.3.6 says the
   requirements are met when one of its conditions holds and its example
@@ -10025,10 +10025,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   against the ratio to the natural frequency, interpolated in decibels over
   the logarithm of the ratio. Clause 7 is `predict_train_category`: Table 2,
   the KB weighting rounded to a tenth of a decibel, added to the bands from
-  4 Hz to 80 Hz, their sum as the clock maximum r.m.s. of the category, 1,5
+  4 Hz to 80 Hz, their sum as the clock maximum r.m.s. of the category, 1.5
   times it and 3 times that as the peak velocity; Formula (11) is the sum of
   the draft of DIN 4150-2's Formula (6), which the chain ends in with that
-  formula's rule on a category at or below 0,1. Annex B, a train as a line
+  formula's rule on a category at or below 0.1. Annex B, a train as a line
   of point sources up to `L²/lambda`, is `train_decay_exponent`, with the
   negative result the annex prints no floor against, and
   `train_velocity_ratio`.
@@ -10041,7 +10041,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   turns on the difference, and its floor transfer comes from no table of
   Annex A. The timber table prints a lower deviation above its mean, three
   figure legends name the wrong table or quantity, Formula (11) prints the
-  sum without the rule on 0,1 of the formula it stands for, and Annex A is
+  sum without the rule on 0.1 of the formula it stands for, and Annex A is
   called normative on one page and informative on its own.
 
 - The shapes of every prediction, **DIN 4150-1:2001-06**, in
@@ -10100,7 +10100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The Table 1 reference conditions come with it, and they are the check that
   the nine weightings were right in the first place:
   `vibration.reference_indication` reproduces the printed 2,020 m/s2 for Wh
-  and 0,7718 for Wk. Thirty conformance rows pin Tables 1, 2, 4 and 5 against
+  and 0.7718 for Wk. Thirty conformance rows pin Tables 1, 2, 4 and 5 against
   the printed page, including each transition frequency built from the
   `10**(k/10)` exponent and checked against the rounded decimal beside it.
 
@@ -10140,9 +10140,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   are carried as data and reproduced. Two conventions the printed tables do
   not state had to be settled by measurement and are documented as decisions:
   the continuous row starts at t = 0 rather than at the Table 6 start time
-  (0,5649 against the printed 0,565, where the other reading gives 0,5601),
+  (0.5649 against the printed 0.565, where the other reading gives 0.5601),
   and the tables come from a zero-state simulation while this library's
-  weighting filter is circular, a difference worth up to 5,2 % on four of the
+  weighting filter is circular, a difference worth up to 5.2 % on four of the
   cells.
 
   The verdict also learned what a laboratory brings to it. 13.1 and 14.1 say
@@ -10213,9 +10213,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   measurement, `f = 46/h` from 163 rectangular-plan buildings, and it carries
   the error the annex admits: `empirical_frequency_bounds` is the ± 50 % D.2
   calls not uncommon. One quiet agreement between the two is worth the test
-  that pins it: 0,022 s/m is both the middle of the oldest code range and the
+  that pins it: 0.022 s/m is both the middle of the oldest code range and the
   coefficient of the measured fit. Damping gets `DAMPING_RATIO_RANGE` and no
-  estimator, which is the shape of D.4: it reports 0,5 % to 2,1 % of critical
+  estimator, which is the shape of D.4: it reports 0.5 % to 2.1 % of critical
   and says no proven method of predicting it exists.
 
 - Whether the shaking cracks the building, which is the one vibration question
@@ -10255,7 +10255,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Its Clauses 5 and 6 are the road formulas with the railway table in the
   weights, over the same eighteen bands. Rolling noise sits higher up: the
-  railway spectrum is flat within a decibel from 1,25 kHz to 2,5 kHz where
+  railway spectrum is flat within a decibel from 1.25 kHz to 2.5 kHz where
   the road one has already begun to fall away, so an absorber that improves
   with frequency is worth two decibels more beside a track. The railway parts
   print no category ladder, and the result says so by carrying nothing where
@@ -10292,7 +10292,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   EN 1793-3, eighteen one-third octave bands from 100 Hz to 5 kHz that peak at
   1 kHz and fall twelve decibels at either end, so what a device does around
   1 kHz is nearly all of what it is judged by. `DLα` (EN 1793-1 Clause 5) is
-  the energy not sent back, with the 0,99 ratio limit its own clause puts on
+  the energy not sent back, with the 0.99 ratio limit its own clause puts on
   it, which the library warns about when the limit is what answered rather
   than the measurement. `DL_R` (EN 1793-2 Clause 5.2) is the energy not let
   through. Both come back rounded to the nearest integer with the Annex A
@@ -10315,8 +10315,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   `octave_insertion_loss` is ISO 11691 Equation (2), which is worth having
   written out: the three one-third octaves are averaged on the transmitted
-  energy, not on the decibels, so 30, 30 and 5 dB give 9,7 dB over the octave
-  and not 21,7. The band that leaks decides the answer.
+  energy, not on the decibels, so 30, 30 and 5 dB give 9.7 dB over the octave
+  and not 21.7. The band that leaks decides the answer.
 
   The rest is the bookkeeping the measurement carries. `microphone_spread_limit`
   and `microphone_positions_required` are Table 6 and the rule of 6.2.1 that
@@ -10326,7 +10326,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   tests, and the flat 3 dB of the transmission-loss column is the shape of an
   estimate. `measurement_expanded_uncertainty` doubles it for the 95 %
   coverage of 7.9, and `survey_reproducibility` is ISO 11691 Table 1.
-  `substitution_area_ratio` holds the test ducts to the 0,6 to 1,7 of 4.5 and
+  `substitution_area_ratio` holds the test ducts to the 0.6 to 1.7 of 4.5 and
   warns outside it, beside the design velocity, diameter and band limits
   ISO 11691 draws round its own method.
 
@@ -10359,7 +10359,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   coefficients rather than the pressures, so the two series need share
   neither their flow rates nor their point count.
   `upstream_straight_length` is the settling length of 6.5.2.2.1, five
-  equivalent diameters or two metres, the two rules crossing at a 0,4 m
+  equivalent diameters or two metres, the two rules crossing at a 0.4 m
   equivalent diameter.
 
   A third standard shares the page. ISO 5135:1999 determines what an
@@ -10398,9 +10398,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `cavitation_transmission_loss` with the floor its NOTE puts just above the
   threshold, and the band route of 5.4 in `band_internal_levels`.
 
-  All three worked examples of Annex A reproduce end to end, at the 62,7,
-  81,0 and 66,9 dB the annex prints, and so does its Figure A.1: the third
-  example is the second one with `x_Fz` shifted by 0,1, and the answer moves
+  All three worked examples of Annex A reproduce end to end, at the 62.7,
+  81.0 and 66.9 dB the annex prints, and so does its Figure A.1: the third
+  example is the second one with `x_Fz` shifted by 0.1, and the answer moves
   14 dB. That is the whole argument for measuring the value rather than
   estimating it, and it is why `incipient_cavitation_ratio` is documented as
   an estimate of last resort.
@@ -10417,7 +10417,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the trim. Equations (18a) and (18b) carry conditions on two different
   thresholds, which divide the domain between them only at the one inlet
   pressure where those two are equal. And three intermediates of Table A.1 do
-  not follow from the intermediates printed beside them, by up to 0,08 dB.
+  not follow from the intermediates printed beside them, by up to 0.08 dB.
 
 - The trims a valve is bought quiet for, which is what Clause 6 is about.
 
@@ -10433,13 +10433,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   formula. `stage_level_correction` puts the earlier stages back.
 
   That closes the seventh worked example, a 432-passage cage on a 70 bar
-  vapour line, at the 89 dB(A) the annex prints, with a jet 2,2 mm across and
-  a peak at 14,4 kHz. All seven examples of Annex A now reproduce end to end.
+  vapour line, at the 89 dB(A) the annex prints, with a jet 2.2 mm across and
+  a peak at 14.4 kHz. All seven examples of Annex A now reproduce end to end.
 
 - The second noise source a fast valve outlet is, which closes the last of the
   seven worked examples.
 
-  Past a valve outlet Mach number of 0,3 the flow leaving the outlet stops
+  Past a valve outlet Mach number of 0.3 the flow leaving the outlet stops
   being a detail of the trim and becomes a source of its own, and IEC
   60534-8-3 sends the calculation to Clause 7 for it. `Expander` describes the
   transition piece, `expander_noise` runs Equations (34) to (42) on it, and
@@ -10449,13 +10449,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   `valve_aerodynamic_noise` takes an optional `expander` and does all of that
   itself. Without one it warns when the outlet has passed the limit, because
-  the answer is then the trim alone and a valve running at Mach 0,89 does not
+  the answer is then the trim alone and a valve running at Mach 0.89 does not
   sound like its trim.
 
   That is the sixth example of Annex A, the only column the annex works
   Clause 7 for, and every printed intermediate of it now has a conformance
-  row: 460 m/s at the expander inlet, 47 854 W of stream power, 42,0 W of
-  sound, a peak at 920 Hz where the trim peaks at 7,9 kHz, and 151 dB inside
+  row: 460 m/s at the expander inlet, 47 854 W of stream power, 42.0 W of
+  sound, a peak at 920 Hz where the trim peaks at 7.9 kHz, and 151 dB inside
   the pipe. With them the column closes at the 94 dB(A) the annex prints,
   where the trim alone gives 93.
 
@@ -10479,7 +10479,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the standard itself reads in order, `GasStream`, `ValveTrim` and
   `DownstreamPipe`, rather than with a score of loose keywords. The 2010 edition made the method
   spectral, so the result carries the internal level, the transmission loss
-  and the external level in all 33 one-third-octave bands from 12,5 Hz to
+  and the external level in all 33 one-third-octave bands from 12.5 Hz to
   20 kHz, as well as the single A-weighted number.
 
   Annex A is an unusually complete oracle, and eight conformance rows now run
@@ -10487,11 +10487,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   their regimes, sound powers and internal levels, the valve style modifier,
   the jet diameter and the vena contracta pressure of those columns, and a
   seventh example whose pipe pins the ring and coincidence frequencies and the
-  transmission loss in all 33 bands to within 0,07 dB.
+  transmission loss in all 33 bands to within 0.07 dB.
 
   Three things in that annex do not reproduce themselves and are in the errata
-  register. The piping geometry factor is printed rounded to 0,98 and the
-  annex computed with 0,984, which is enough to make every row of the table
+  register. The piping geometry factor is printed rounded to 0.98 and the
+  annex computed with 0.984, which is enough to make every row of the table
   disagree with a reader who takes the printed value. The equivalent orifice
   diameter is printed ten times too small, and the valve style modifier one
   row below is what proves it. And two frequency factors of the seventh
@@ -10554,7 +10554,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   played. `room.stage_support` computes them over the 250 Hz to 2 kHz octave
   bands C.2.4 averages, and carries the two standard deviations that clause
   estimates, which close on each other: 1 dB for one band in one position is
-  0,2887 dB over the root of the twelve readings, and 0,3 dB is what the
+  0.2887 dB over the root of the twelve readings, and 0.3 dB is what the
   clause prints.
 
   Clause 7 says how much of a measured reverberation time belongs to the
@@ -10570,7 +10570,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   An errata alongside. The prose of C.2.1 calls the early support "the
   reflected energy within the first 0,1 s" while Equation (C.1) starts at
-  20 ms, discarding the 10 ms to 20 ms interval, which is 0,68 dB in a
+  20 ms, discarding the 10 ms to 20 ms interval, which is 0.68 dB in a
   two-second hall; the prose of C.2.2 calls the late support "the reflected
   energy after the first 0,1 s" with no upper bound while Equation (C.2)
   stops at one second, which separates cathedrals. The equations govern.
@@ -10598,7 +10598,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   figure-of-eight microphone aimed as A.2.4 asks has no direct sound to
   trigger on, and its own onset lands on the first strong reflection.
 
-  Equation (A.17)'s 0,25 is one quarter, so the late lateral average is an
+  Equation (A.17)'s 0.25 is one quarter, so the late lateral average is an
   energy mean, which footnote a of Table A.1 makes the one exception to the
   arithmetic averaging every other quantity in that table gets. Five
   conformance rows, bringing the ISO 3382-1 total to twelve.
@@ -10619,10 +10619,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   together with the two levels it is the difference of.
 
   The last two routes carry printed integers, 37 dB and 31 dB, and both are
-  the correctly rounded value of a closed form: `10 lg(1600 pi)` is 37,0127 dB
-  and `10 lg(400 pi)` is 30,9921 dB. Rounded to whole decibels they land 6 dB
+  the correctly rounded value of a closed form: `10 lg(1600 pi)` is 37.0127 dB
+  and `10 lg(400 pi)` is 30.9921 dB. Rounded to whole decibels they land 6 dB
   apart where the exact offsets are `10 lg 4 = 6,0206` dB apart, so the two
-  routes cannot agree to better than 0,0206 dB. The library prints what the
+  routes cannot agree to better than 0.0206 dB. The library prints what the
   standard prints and a conformance row pins the gap, rather than leaving a
   future test to discover it.
 
@@ -10662,15 +10662,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   through `K_2` and the route through the absorption area rest on the same
   assumptions, and under the ISO 3744 definition of `K_2` they are identically
   equal. A conformance row holds them to it. The piecewise correction is
-  continuous where its 7 dB cap takes over, `-10 lg 0,2` being 6,9897 dB, so
+  continuous where its 7 dB cap takes over, `-10 lg 0,2` being 6.9897 dB, so
   the cap is the curve's own value rounded rather than a separate rule; that
-  0,0103 dB step is pinned exactly, because a real discontinuity there would be
+  0.0103 dB step is pinned exactly, because a real discontinuity there would be
   a defect and a rounded assertion would not notice one appear.
 
   Six conformance rows, against the worked examples of ISO 11200:2014 Annex B,
-  which print every intermediate: the 3,7 dB correction of a work station
-  1,6 m from a dominating source in an 11 by 8 by 4 metre workshop, the 73,2 dB
-  it leaves, the 2,9 dB expanded uncertainty, and the 0,6 dB background
+  which print every intermediate: the 3.7 dB correction of a work station
+  1.6 m from a dominating source in an 11 by 8 by 4 metre workshop, the 73.2 dB
+  it leaves, the 2.9 dB expanded uncertainty, and the 0.6 dB background
   correction of the second case. The emission domain is the sixty-seventh.
 
 - `docs/ERRATA.md` records that the two case studies of ISO 11200:2014 Annex B
@@ -10679,7 +10679,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   11202 and 11204 prints the sample standard deviation, with `1/(N-1)`.
   Table B.3 agrees with it; Table B.1 divides by `N`. It is not cosmetic: with
   the value the equation gives, Table B.1's own expanded uncertainty would be
-  2,5 dB rather than the 2,4 dB it prints, so a reader reproducing the example
+  2.5 dB rather than the 2.4 dB it prints, so a reader reproducing the example
   from the equations does not obtain the uncertainty the example publishes. The
   library follows the equation and the tests pin both halves.
 
@@ -10729,7 +10729,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reflects in every band, a sudden increase only below the limit frequency of
   the duct the sound arrives through. VDI 3733 recommends taking no more than
   5 dB from it, which is the default `cap`, and it binds from an area ratio of
-  about 10,5 upwards. A gradual change through a long tapered adapter reflects
+  about 10.5 upwards. A gradual change through a long tapered adapter reflects
   nothing worth counting, and 6.3 says so.
 
   There is no `model=` here: Long folds the reflection from a change of total
@@ -10743,13 +10743,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and `industrial_machine_zone` grades against them. The tables state each
   class twice, once in displacement and once in velocity, and 5.2.3 says the
   more restrictive of the two gradings applies: a group 2 machine on a rigid
-  support reading 2,0 mm/s and 50 um is zone B on one and zone C on the other,
+  support reading 2.0 mm/s and 50 um is zone B on one and zone C on the other,
   and it is a C.
 
   `is_significant_change`, `alarm_limit` and `trip_limit` are the operational
   limits of 5.3 and 5.4 with their numbers. An ALARM is set from the
   established baseline for that position, a quarter of the upper limit of zone
-  B above it and never more than 1,25 times that limit, so a quiet machine gets
+  B above it and never more than 1.25 times that limit, so a quiet machine gets
   an alarm well inside zone B and a machine whose baseline has crept up cannot
   drag its alarm along behind it. A TRIP is about the mechanical integrity of
   the machine, so it comes from the zone and not from the baseline.
@@ -10772,9 +10772,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   `vibration_vector_change` is Criterion II read the way Annex D reads it. A
   change in vibration is a vector, and the annex makes the point with a machine
-  that fell from 3 mm/s at 40 degrees to 2,5 mm/s at 180: the magnitude
+  that fell from 3 mm/s at 40 degrees to 2.5 mm/s at 180: the magnitude
   improved by half a millimetre per second while the vibration itself moved by
-  5,17. The result carries both numbers and plots the two states and the chord
+  5.17. The result carries both numbers and plots the two states and the chord
   between them.
 
 - The last step of the VDI 2081 chain, the level the air finally makes in the
@@ -10793,8 +10793,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   New `room.sabine_absorption_area`, the familiar Sabine relation read from the
   time to the area rather than the other way about, which is the direction a
-  room survey delivers. Its constant follows the speed of sound: 0,161 at
-  343 m/s, and the 0,163 of Equation (37), which is the same expression at
+  room survey delivers. Its constant follows the speed of sound: 0.161 at
+  343 m/s, and the 0.163 of Equation (37), which is the same expression at
   339 m/s.
 
   Element 20 of the guideline's worked example now comes out of the library:
@@ -10808,7 +10808,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reader to Equation (36) for the absorption area it is an input to; it is
   Equation (37) or (39). And the English column of the reverberation-radius
   sentence calls a *halbkugelförmig* propagation spherical, where the printed
-  0,2 is the hemispherical constant and the spherical one would be 0,141.
+  0.2 is the hemispherical constant and the spherical one would be 0.141.
 
 
 - `noise_control.fan_sound_power` takes `model="vdi2081"`, the German method of
@@ -10872,7 +10872,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Figure 18 is drawn for the rounding of a junction and all its curves cross
   zero at `r / d_a = 0,15`, so nought asks for a sharp-cornered junction and is
   worth over 6 dB at 63 Hz. That is how the guideline's own example treats its
-  bend, and passing 0,15 lands back on the uncorrected law.
+  bend, and passing 0.15 lands back on the uncorrected law.
 
   Both figures state that they hold only above a Strouhal number of one, so a
   band below that returns negative infinity, the level of no contribution,
@@ -10914,8 +10914,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Two more entries in `docs/ERRATA.md`, both from Table 1 element 2 of
   VDI 2081 Part 2. The first is substantive: the table prints a hydraulic
-  diameter of 0,171 m for the gap between splitters and computes its Strouhal
-  row from 0,200 m instead. Both are defensible for that gap, `4 A / P` and the
+  diameter of 0.171 m for the gap between splitters and computes its Strouhal
+  row from 0.200 m instead. Both are defensible for that gap, `4 A / P` and the
   parallel-plate limit `2 s`, but only the second reproduces the eight printed
   Strouhal numbers, and with it the whole element falls out to the last printed
   decimal. The second is a cross-reference: the coefficients of the pressure
@@ -10932,8 +10932,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Eleven conformance rows, and the VDI 2081 domain is the sixty-fourth. They
   are the guideline's own worked example, VDI 2081 Part 2:2005-05 Table 1: the
-  supply air fan reproduces octave by octave, and so do its unweighted 94,1 dB
-  and its A-weighted 84,5 dB. Both prints are superseded, by Part 1:2022-04
+  supply air fan reproduces octave by octave, and so do its unweighted 94.1 dB
+  and its A-weighted 84.5 dB. Both prints are superseded, by Part 1:2022-04
   and Part 2:2022-10, and neither is held; the pair in hand is what makes the
   example usable, since Part 2:2005 was written against Part 1:2001 and every
   cross-reference in its tables resolves there. The two current editions are
@@ -10965,7 +10965,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Two rows for the branch split of the SAE Method, replacing the one that
   computed both sides itself. SAE ARP 5534 Section 3.2.2 splits at a mid-band
   attenuation of 150 dB, Equation (7) below it and Equation (8) above, and the
-  two are printed to meet there within 0,003 dB. `band_attenuation_arp5534` takes a
+  two are printed to meet there within 0.003 dB. `band_attenuation_arp5534` takes a
   path length rather than an attenuation, so the split is reached by scaling
   the path: one call at unit length gives the coefficient, and 150 divided by
   it is the length at which the mid-band attenuation lands exactly on the
@@ -11100,7 +11100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Each domain publishes the air it is written around rather than repeating the
   numbers: `building.EN12354_AIR` is the 340 m/s of EN/ISO 12354 Annex A with
-  the 1,29 kg/m³ of Annex B, and `simulation.SIMULATION_AIR` is the `AIR`
+  the 1.29 kg/m³ of Annex B, and `simulation.SIMULATION_AIR` is the `AIR`
   material the solvers run in, written as a fluid. Both are `Fluid` values, so
   a caller who has measured their air passes it instead.
 
@@ -11211,7 +11211,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   five, and described the Section 6.4 mistranslation as being about a duct's
   attenuation when it is about whether a junction's reduction depends on
   frequency at all; the ISO/TR 17534-3 geometry was given as 195 m where the
-  report prints 194,16; the 50 MW cap on ISO 10816-3 group 1 was credited to
+  report prints 194.16; the 50 MW cap on ISO 10816-3 group 1 was credited to
   clause 4.2, which states no upper bound, instead of to the title of Table
   A.1; `hvac.py` credited the spectral parameter and the blade-frequency
   allowance to VDI 2081 Section 4.3.3, and both are printed in 4.3.4; and the
@@ -11232,7 +11232,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Two citations in the machine-vibration module named clauses that do not
   exist. The measurement bandwidth of ISO 10816-3 is stated in its Annex A,
   which has no subclause A.1, and the ladder ISO 20816-1 Table C.1 is drawn on
-  is an R5 series, which is what a step of about 1,6 is; R10 steps by 1,26. The
+  is an R5 series, which is what a step of about 1.6 is; R10 steps by 1.26. The
   VDI 2081 reference note named Tables 5 and 8 for the duct attenuation, and
   Table 8 is the sound reduction index of building components: the duct tables
   are 5 and 7.
@@ -11333,7 +11333,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   With the two in place the seven quality-assurance test cases the Technical
   Report marks as answerable by ISO 9613-2 alone (T01 to T07) come out of the
-  library end to end, band by band and on both totals, inside the +/-0,05 dB
+  library end to end, band by band and on both totals, inside the +/-0.05 dB
   envelope it declares. They are a kind of oracle the report did not have: a
   whole chain with every intermediate quantity printed, built to expose the
   disagreements between implementations that a single formula never does.
@@ -11381,7 +11381,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   *Principles of Sonar Performance Modelling* (Springer 2010), Equation (4.6)
   on printed folio 127, which that book attributes to Pierce (1989, p. 34). Three conformance
   rows pin it: the 1027 kg/m3 the book gives for the standard ocean, the
-  atmosphere its Equation (4.11) puts at the surface, and the 0,043 855 kg/m3
+  atmosphere its Equation (4.11) puts at the surface, and the 0.043 855 kg/m3
   the pressure term is worth.
 
   The four sound-speed equations move here with it, because a medium's own
@@ -11425,11 +11425,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Three conditions that each exist can still describe air that does not, so
   `air()` refuses the combination as well as the arguments. At 20 degC and
-  1 kPa, 50 % relative humidity asks for a water vapour mole fraction of 1,17,
+  1 kPa, 50 % relative humidity asks for a water vapour mole fraction of 1.17,
   which is more water vapour than total pressure; every argument passes its own
   guard, and without one on the fraction the CIPM equations carry on and return
   a density and a speed of sound that look like measurements. Saturated air at
-  60 degC reaches 0,198 and passes, so the bound is the only one that can be
+  60 degC reaches 0.198 and passes, so the bound is the only one that can be
   set: a mole fraction cannot reach 1.
 
   The assumption warning is now raised after the refusals rather than before
@@ -11458,7 +11458,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   one standard atmosphere puts the density about 13 % high, while the whole
   span of humidity is worth about 1 % of it. Supplying both is silent, which is the
   property a caller who measured their air should get. The carbon dioxide mole
-  fraction defaults without warning, because 0,000 4 is a value Clause F.2
+  fraction defaults without warning, because 0.000 4 is a value Clause F.2
   names for laboratory conditions rather than a guess about the caller's air.
 
   Nothing is refused but what cannot exist. Annex F states 15 °C to 27 °C,
@@ -11484,7 +11484,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is defined; the SNR method collapses it to one number against a pink noise.
   The two rating methods consume their ratings as the standard publishes them,
   rounded to the nearest integer, which is what makes the worked example's
-  predicted reduction come out at 22,5 dB rather than at the unrounded fit, and
+  predicted reduction come out at 22.5 dB rather than at the unrounded fit, and
   the reported levels round halves away from zero rather than to even.
 
   The four informative annexes are one example carried through all three
@@ -11493,7 +11493,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   triples with their statistics and the 82 dB of Annex C, and all sixteen
   single-number ratings with both applications of Annex D. Annex A's own
   assumed-protection row is the difference of the rounded intermediates it
-  displays and sits 0,1 dB from the formula applied to the data in three of its
+  displays and sits 0.1 dB from the formula applied to the data in three of its
   eight bands, which the documentation states and the suite pins both ways.
 
   One defect of the printed standard joins the errata registry: Annex C
@@ -11532,9 +11532,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is how a laboratory qualifies itself: the calculated index of a limp panel,
   mass law reduced by the radiation efficiency of forced transmission, with
   the air's characteristic impedance and speed of sound taken at the climate
-  of the test, against which a measurement must agree within 4,0 dB from 50 Hz
+  of the test, against which a measurement must agree within 4.0 dB from 50 Hz
   to 160 Hz. Its oracle is the plaster-board column of Table A.1, whose six
-  printed values reproduce from the stated inputs to the 0,05 dB of their
+  printed values reproduce from the stated inputs to the 0.05 dB of their
   printed resolution. The steel-sandwich column beside them does not: no reading of the
   inputs printed beside it reproduces it, and the one that would takes an area
   and a surface mass moved together, the mass landing heavier than solid steel
@@ -11555,21 +11555,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the shield's own responses, supplied per band; C3,4, the combined mean flow
   velocity and modal correction, is computed: the Annex A polynomial in the
   signed mean flow velocity for the sampling tube, from the Tables A.1 to A.6
-  that cover 0,15 m to 2 m ducts, and the convective term of Eq. 8 for the
+  that cover 0.15 m to 2 m ducts, and the convective term of Eq. 8 for the
   nose cone and the foam ball. `flow_modal_correction()` gives that correction
   on its own, the A-weighted total follows Annex C over the 27 bands of
   Table C.1, and the result carries the reproducibility of Table 2 doubled
   into the 95 % statement of clause 9.2 (`in_duct_reproducibility()`), with
   every band the standard gives for information only, above 10 kHz or beyond
   40 m/s, flagged as such. The two informative extensions of the Annex A
-  footnote do not compose, and neither do they here: the 12,5 kHz to 20 kHz
+  footnote do not compose, and neither do they here: the 12.5 kHz to 20 kHz
   rows are printed under a band header of their own that reads |U| <= 40 m/s,
   so a velocity past 40 m/s is refused as soon as a band above 10 kHz is
   asked for, rather than answered from a polynomial with nothing behind it.
 
-  The oracle is Table D.1: all 162 printed values of C3,4 for d = 0,5 m at
+  The oracle is Table D.1: all 162 printed values of C3,4 for d = 0.5 m at
   +/-5, +/-15 and +/-30 m/s reproduce from the Table A.4 coefficients to the
-  printed 0,1 dB, in the suite and in the conformance report, beside the
+  printed 0.1 dB, in the suite and in the conformance report, beside the
   worked example of Eqs (D.2) and (D.3), Eq. 8 at the nose cone's limit, the
   two terms of Eq. 12 and Tables 2 and C.1. Eight defects of the printed
   standard join the errata registry, among them a coefficient of Table A.5
@@ -11582,9 +11582,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Two things the standard leaves the reader to work out are said at the point
   of use rather than left in a table. Asking for the 5 000 Hz band of the
-  table that serves 0,8 m to 1,25 m warns that its $a_3$ is the one
+  table that serves 0.8 m to 1.25 m warns that its $a_3$ is the one
   coefficient of Annex A that is read rather than transcribed, since it moves
-  the correction by 0,64 dB per unit of the missing digit at 40 m/s. And a
+  the correction by 0.64 dB per unit of the missing digit at 40 m/s. And a
   determination through a nose cone or a foam ball warns that the
   reproducibility it carries is the sampling tube's, which clause 4 NOTE 5
   says "can be expected to increase for other shields" without putting a
@@ -11594,7 +11594,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   sound source: `emission.sound_power_in_situ` implements ISO 3747:2010 in
   octave bands, correcting the background at every microphone position with
   Eq. 7 and the three rules of clause 8.1 (nothing above a 15 dB margin,
-  Eq. 7 between 6 dB and 15 dB, a 1,3 dB cap below 6 dB that turns the band
+  Eq. 7 between 6 dB and 15 dB, a 1.3 dB cap below 6 dB that turns the band
   into an upper bound the result flags band by band), energy-averaging the
   corrected levels (Eq. 8 to 10) and taking the difference to the calibrated
   power of the reference source for one location (Eq. 11) or for several,
@@ -11605,7 +11605,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   20); Eq. 14 is applied as the whole ISO 3740 family prints it, with an
   `integration_time` to carry the time-averaged background to the event's
   interval where a margin is wanted like for like. The result carries the
-  Table 2 grade with its typical reproducibility (1,5 dB engineering, 4,0 dB
+  Table 2 grade with its typical reproducibility (1.5 dB engineering, 4.0 dB
   survey), the clause 9 uncertainty (Eq. 22, 23, pinned to the 9.5 EXAMPLE's
   U = 5 dB), the Annex C radiation-impedance correction shared with ISO 3741
   and the Annex D A-weighted total from the Table D.1 corrections, which are
@@ -11613,11 +11613,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `emission.excess_sound_pressure_level` evaluates the Annex A indicator that
   decides the grade and `emission.static_pressure_from_altitude` Eq. C.2. Five
   defects of the informative Annex E join the errata registry: the sign of
-  the direct-field level in E.4.2.6.2, the 0,6 dB altitude correction of
-  E.4.2.5 that Annex C's own equation puts at 0,26 dB, the excess that lost
+  the direct-field level in E.4.2.6.2, the 0.6 dB altitude correction of
+  E.4.2.5 that Annex C's own equation puts at 0.26 dB, the excess that lost
   its delta in the Table E.2 sensitivity coefficient, the sampling
   coefficient of that same table, which E.4.2.6.3 and the budget of E.4.2.12
-  both put at 1 where the table prints 0,5, and the equation E.4.2.3 sends
+  both put at 1 where the table prints 0.5, and the equation E.4.2.3 sends
   the reader to for a derivative that is taken of another.
 - The sound energy level $L_J$ of a noise burst or transient emission, the
   quantity ISO 3744 and ISO 3741 name in their titles beside the sound power
@@ -11635,7 +11635,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with the per-position $K_{1i}$ of Eq. 25, and `octave_band_levels` is the
   Annex F sum of thirds into octaves (Eq. F.1/F.4). `mean_single_event_level`
   is the Eq. 19/20 reduction on its own, and `reference_atmosphere_correction`
-  the Annex G correction of either level to 101,325 kPa and 23,0 °C, from a
+  the Annex G correction of either level to 101,325 kPa and 23.0 °C, from a
   measured static pressure or from the altitude through Eq. G.2.
 
   Neither standard prints a worked example with $L_J$, so the oracle is the
@@ -11662,19 +11662,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Two figures the informative Annex H of ISO 3744 prints for the size of the
   Annex G correction are wrong, and both are now in the errata registry. The
-  clause says the correction reaches 0,6 dB at 500 m altitude, where the
-  normative Annex G it points at gives 0,394 dB at 23,0 °C; the zero the same
+  clause says the correction reaches 0.6 dB at 500 m altitude, where the
+  normative Annex G it points at gives 0.394 dB at 23.0 °C; the zero the same
   sentence prints for 120 m comes out exact, which is what shows the equations
-  are being read as intended. The clause then divides that 0,6 dB by the square
-  root of 6 and prints 0,3 dB, which is 0,6/2. Neither figure feeds anything
+  are being read as intended. The clause then divides that 0.6 dB by the square
+  root of 6 and prints 0.3 dB, which is 0.6/2. Neither figure feeds anything
   the library publishes, since the Annex H budget is not modelled.
 
   Bringing the reverberation-room route to the sound energy level regrouped the
   terms the mean room level is raised by, so that they are summed as Eq. 30
   brackets them rather than left to right. That is a reassociation, and it
   moves the sound power level in the last bit: 34 of 84 bands over four cases
-  here, by at most 1,4e-14 dB. One committed conformance residual, the known
-  $L_W$ of ISO 3741 Eq. 20, goes from 1,42e-14 to zero for the same reason. No
+  here, by at most 1.4e-14 dB. One committed conformance residual, the known
+  $L_W$ of ISO 3741 Eq. 20, goes from 1.42e-14 to zero for the same reason. No
   figure in the corpus moves.
 
 - The ISO 16283 low-frequency procedure, which the standard makes **mandatory**
@@ -11804,9 +11804,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `sea_water_sound_speed(-273.15, 35.0, 0.0)` returned -31 457 m/s, a negative
   speed of sound; `sound_speed_profile` checked only that its temperatures were
   finite, so -300 degC went straight through to [-44 562, -45 333] m/s; and
-  `seawater_absorption(1e3, temperature=-300.0)` returned 0,495 dB/km, which is
+  `seawater_absorption(1e3, temperature=-300.0)` returned 0.495 dB/km, which is
   the dangerous one, because nothing about that number says where it came from
-  next to the 0,0185 dB/km of real cold water.
+  next to the 0.0185 dB/km of real cold water.
 
   `require_above_absolute_zero` in the internal validation now says it once,
   with an array companion for the profiles, and every site that had written it
@@ -11820,12 +11820,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Three guards deliberately do **not** migrate, and a test pins them by name.
   They protect the pole of the formula their own clause prints, `sqrt(273 + θ)`
   in ISO 3741 and ISO 3745 and `1245/(273 + t)` in Francois-Garrison, with the
-  273 the standard prints rather than the physical 273,15. Their pole sits
-  0,15 degC higher, so migrating them would leave a band of a sixth of a degree
+  273 the standard prints rather than the physical 273.15. Their pole sits
+  0.15 degC higher, so migrating them would leave a band of a sixth of a degree
   that clears the check and then overflows.
 
   Francois-Garrison needs both: the physical bound in front, and its own pole
-  behind it. The band (-273,15, -273,0] used to raise `OverflowError` or
+  behind it. The band (-273.15, -273.0] used to raise `OverflowError` or
   `ZeroDivisionError`, neither of which names the argument that caused it.
 
 
@@ -12075,7 +12075,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `DEFAULT_AIR` are withdrawn; the air those models default to is
   `ABSORBER_AIR`, and the keyword is `fluid=` rather than `air=`. Nothing
   about the numbers changed: `ABSORBER_AIR` carries the same
-  343,0 m/s, 1,205 kg/m3, 1,84 x 10^-5 Pa s, Pr = 0,71, gamma = 1,4 and
+  343.0 m/s, 1,205 kg/m3, 1.84 x 10^-5 Pa s, Pr = 0.71, gamma = 1.4 and
   101 325 Pa those models always defaulted to.
 
   What changes is what a caller can pass instead. `AirProperties` held six
@@ -12086,9 +12086,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   relative_humidity_percent=70.0)` usable here: the absorber is then predicted
   in the air of the room rather than in the air of the paper.
 
-  `ABSORBER_AIR` keeps its own Prandtl number, the 0,71 of Allard and Atalla,
+  `ABSORBER_AIR` keeps its own Prandtl number, the 0.71 of Allard and Atalla,
   rather than closing it from eta / (rho alpha_t), so that every default stays
-  where it was instead of moving by 1,5 parts in a thousand.
+  where it was instead of moving by 1.5 parts in a thousand.
 
 - The fan's pressure rise says what it is: `fan_sound_power`'s second argument
   is `fan_static_pressure_pa`, keyword-only. It is a **gauge** pressure rise in
@@ -12116,15 +12116,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   table is what it is; what changed is that the caller is told.
 
 - Two errata registered against Ainslie (2010). Its folio 177 quotes
-  1024,2 kg/m3 for sea water at 23 degC, salinity 35 and atmospheric pressure,
+  1024.2 kg/m3 for sea water at 23 degC, salinity 35 and atmospheric pressure,
   where its own Equation (4.6) read with its own Equation (4.4) gives
-  1024,287 9, which prints as 1024,3; the printed value is what the equation
+  1024.287 9, which prints as 1024.3; the printed value is what the equation
   gives with the pressure term at zero, against the definition the same chapter
   states. And its Equation (4.13), which rearranges (4.6), prints the pressure
-  coefficient as 4,3e-5 where (4.6) has 4,3e-7, two orders of magnitude and
-  0,42 % on the density. The library implements (4.6) with the absolute
+  coefficient as 4.3e-5 where (4.6) has 4.3e-7, two orders of magnitude and
+  0.42 % on the density. The library implements (4.6) with the absolute
   pressure its own (4.4) defines, because a printed definition outranks a
-  rounded quotation three chapters later; the discrepancy is 4,3 parts in a
+  rounded quotation three chapters later; the discrepancy is 4.3 parts in a
   hundred thousand and below every tolerance here, so what mattered was not
   picking a side silently.
 
@@ -12163,10 +12163,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   annex credits to IEC 61094-2:2009. Three of them are its Table F.1 cells
   rounded to four figures. The other two are not in that document at all: the
   table gives the thermal diffusivity, not its two constituents, and the pair
-  Annex A.3 prints for them is 1,0800 times smaller than Annex F gives at the
+  Annex A.3 prints for them is 1.0800 times smaller than Annex F gives at the
   same state. A caller who asked this library for air received a specific heat
-  capacity of 938,7 J/(kg·K), which is 27,19 J/(mol·K), below the rigid-rotor
-  diatomic floor of 29,10, so it is not air at any temperature in any unit.
+  capacity of 938.7 J/(kg·K), which is 27.19 J/(mol·K), below the rigid-rotor
+  diatomic floor of 29.10, so it is not air at any temperature in any unit.
 
   The defaults are now the Annex F values at 23 °C, 101,325 kPa and 50 %
   relative humidity. The two conformance rows that reproduce the Annex A.3
@@ -12176,25 +12176,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Nothing moves in the printed example either way, because Formula (A.5) uses
   the two constants only through `k_a/(rho0 c0 C_P)` and the common factor
-  cancels there: both air states give the printed b = 1,83 mm and kappa' =
+  cancels there: both air states give the printed b = 1.83 mm and kappa' =
   1,370. What changes is the number a caller gets when they do not supply air of
   their own. Anyone reproducing Annex A.3 exactly should now pass its printed
   values explicitly. The defect is registered against ISO 9053-2:2020 in
   `docs/ERRATA.md`.
 
   Two things are checked that were not. The wavelength the annex prints,
-  172,9 m, guards the transcription of the speed of sound, and it was verified
+  172.9 m, guards the transcription of the speed of sound, and it was verified
   nowhere before. And the boundary-layer assertion says what it means: b is
   printed to three significant figures, so reproducing it means rounding to it,
   which is what the test now asserts rather than a tolerance that reads like
-  spare room. There is none: the true 1,834 8 mm sits near the upper edge of
+  spare room. There is none: the true 1.834 8 mm sits near the upper edge of
   that rounding band, and did so before this change too.
 
 - The five air-property helpers of `materials` take degrees Celsius, spell the
   unit in the argument name and refuse a positional call. Two of them took
   kelvin under the same `temperature` name their three siblings read as degrees
-  Celsius, so `speed_of_sound_iso(20.0)` returned 89,7 m/s and
-  `air_density_iso(20.0)` returned 17,4 kg/m3, fourteen times the density of
+  Celsius, so `speed_of_sound_iso(20.0)` returned 89.7 m/s and
+  `air_density_iso(20.0)` returned 17.4 kg/m3, fourteen times the density of
   air, with no exception raised and nothing in the signature to say which unit
   was wanted. The helpers are now
   `speed_of_sound_iso10534(temperature_c=...)`,
@@ -12210,11 +12210,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   did not distinguish it from the ISO 17497-1 one.
 
   Eqs. (5) and (7) of ISO 10534-2 are still evaluated in kelvin and the printed
-  293 K, 343,2 m/s and 1,186 kg/m3 are still literal in the source; the
+  293 K, 343.2 m/s and 1,186 kg/m3 are still literal in the source; the
   conversion happens inside the helper. Both reference states reproduce to the
-  bit, because 19,85 degC is 293 K exactly in binary floating point.
+  bit, because 19.85 degC is 293 K exactly in binary floating point.
 
-  The only temperature refused is one at or below -273,15 degC. Neither
+  The only temperature refused is one at or below -273.15 degC. Neither
   ISO 10534-2 nor ISO 17497-1 nor ASTM E2611-19 states a temperature range, so
   none is imposed: a bound drawn at laboratory temperatures would refuse an
   extreme but conforming measurement, and would still not catch a caller who
@@ -12569,7 +12569,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   The line length is 88, which is both the tooling default and, measured, the
   one that moves this tree least: 100 and 120 each rewrite more files, because
-  a longer limit rejoins lines that were split by hand. Only 0,8 % of the lines
+  a longer limit rejoins lines that were split by hand. Only 0.8 % of the lines
   here were over 88 to begin with.
 
   Markdown stays outside it. Ruff formats fenced Python inside `.md` and does
@@ -13365,7 +13365,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that acts in parallel with the cavity air spring. `mass_spring_mass_resonance`
   and `double_wall_transmission_loss` gain a `tie_stiffness_per_area` keyword
   that folds it in (Eq. 4.89), reproducing the pair Hopkins prints for one
-  fully specified wall: 26 Hz without ties, 50 Hz with 2,5 ties/m2 of 2 MN/m,
+  fully specified wall: 26 Hz without ties, 50 Hz with 2.5 ties/m2 of 2 MN/m,
   which extends the combined-mass branch straight into the rating range.
   `wall_tie_coupling_loss_factor` gives the structure-borne path, the
   point-connection coupling loss factor of Eq. 4.87 with the linear-spring
@@ -13377,7 +13377,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - CNOSSOS-EU railway source emission (`environmental/cnossos_rail.py`,
   Directive 2002/49/EC Annex II section 2.3 and Appendix G, consolidated text):
   `railway_source_power` builds the two equivalent source lines of a track, at
-  0,5 m and at 4,0 m, from rail and wheel roughness (Tables G-1a and G-1b), the
+  0.5 m and at 4.0 m, from rail and wheel roughness (Tables G-1a and G-1b), the
   contact filter (G-2) and the track, wheel and superstructure transfer
   functions (G-3), adding impact noise at joints and switches (2.3.11, 2.3.12
   with Table G-4), curve squeal, traction noise (G-5), aerodynamic noise above
@@ -13404,7 +13404,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   source module: fed the 2015 coefficient database that workbook was computed
   with, the shipped model reproduces all 34 560 published rows of the twenty
   vehicles whose catalogue entries are well formed, 17 280 cases at both source
-  heights, to 0,0055 dB, and 123 of those cases are committed and run in CI.
+  heights, to 0.0055 dB, and 123 of those cases are committed and run in CI.
 - Poroelastic (Biot) layers in the multilayer absorber solver
   (`materials/biot.py`, Allard & Atalla 2e chapters 6 and 11). Every porous
   model shipped so far collapses the material into an equivalent fluid, so the
@@ -13433,7 +13433,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   chapter 6 closed form and the chapter 11 assembly agreeing to machine
   precision, and on the three computed numbers the book prints in prose (the
   airborne branch change at 495 Hz, `|mu_a| > 40` above 50 Hz and `mu_b` from
-  1,0 at 50 Hz to 0,82 at 1500 Hz, this last one read as `Re(mu_b)`, see the
+  1.0 at 50 Hz to 0.82 at 1500 Hz, this last one read as `Re(mu_b)`, see the
   errata below) plus its published 860 Hz impedance peak. Six new conformance
   rows. Fluid runs and poroelastic layers are split into blocks of bounded
   attenuation before the global matrix is assembled, so a stack that
@@ -13449,10 +13449,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   antisymmetric amplitude and carries the shear `k33` inside a sum over the two
   compressional waves, contradicting the Table 11.1 it is tabulated into; and
   the thickness of the second glass-wool sample of Sect. 6.6.3, printed as
-  5,4 cm in one sentence and as 5,6 cm two sentences later and in the caption
+  5.4 cm in one sentence and as 5.6 cm two sentences later and in the caption
   of Figure 6.11; and the sentence of Sect. 6.5.4 that quotes "the ratio
-  modulus `|mu_b|`" decreasing from 1,0 to 0,82, whose two values are the real
-  part of `mu_b` (0,811 against the printed 0,82, while the modulus is 0,939).
+  modulus `|mu_b|`" decreasing from 1.0 to 0.82, whose two values are the real
+  part of `mu_b` (0.811 against the printed 0.82, while the modulus is 0.939).
   The thickness entry is settled on textual grounds only, two printed
   statements against one: the numbers are ambiguous, because the peak-finding
   rule is not printed and the two natural rules point at different
@@ -13460,7 +13460,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - CNOSSOS-EU road traffic source emission
   (`environmental/cnossos_road.py`, Directive 2002/49/EC Annex II section 2.2
   and Appendix F). The source model every strategic noise map in the European
-  Union has been drawn from since 2021: each vehicle is a point source 0,05 m
+  Union has been drawn from since 2021: each vehicle is a point source 0.05 m
   above the pavement whose sound power is the energy sum of a **rolling** term
   growing logarithmically with speed (2.2.4) and a **propulsion** term growing
   linearly with it (2.2.11), and a traffic flow is a source line carrying
@@ -13481,7 +13481,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The implemented text is the consolidated one: the equations of (EU) 2015/996,
   the 63 Hz to 8 kHz octave-band range restored by the corrigendum of OJ L 5,
   10.1.2018, and Tables F-1 and F-4 as replaced by (EU) 2021/1226, which is
-  worth 2,5 to 3,5 dB(A) against the tables published in 2015. Every shipped
+  worth 2.5 to 3.5 dB(A) against the tables published in 2015. Every shipped
   table names the instrument it comes from, and both coefficient objects
   (`RoadEmissionCoefficients`, `RoadSurfaceCoefficients`) can be replaced, which
   is how Appendix F is meant to be used: as a database a Member State may
@@ -13490,7 +13490,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Anchored on the European Commission's own test set: 60 of the 4 875 cases of
   the CIRCABC road emission workbook are committed under `tests/data/cnossos/`
   with the 2015 coefficient tables they were computed with, and the shipped
-  equations reproduce every published band level to 0,005 dB, inside the two
+  equations reproduce every published band level to 0.005 dB, inside the two
   decimals the workbook prints. What the workbook cannot reach (the studded
   speed branches, the gradient breakpoints, the 20 km/h floor) is pinned on
   the exact closed forms, and the current Appendix F tables are pinned against
@@ -13539,7 +13539,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and `lining_improvement_in_situ` for the laboratory-to-field transfer.
   Anchored on the 21 printed per-band values of ISO 12354-2:2017 Table G.4 and
   its `DeltaLw = 32,2 dB`, reproduced to the table's printed precision of
-  0,1 dB, on Hopkins's printed cut-off frequencies (7 000, 2 300 and 100 Hz),
+  0.1 dB, on Hopkins's printed cut-off frequencies (7 000, 2 300 and 100 Hz),
   on the over/under-critical classification of his four walking surfaces, on
   the double-floating-floor resonances of his Fig. 4.73 (74 Hz and 195 Hz) and
   the lining resonances of his Fig. 4.48 (104, 123, 247 and 542 Hz), and on
@@ -13547,7 +13547,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Eq. (4.118), which state the same SEA model in different algebra.
   Table D.1 is read at the one-third-octave band that *contains* the
   resonance, by ISO 266 band edges rather than by proximity to a nominal
-  label, as Clause D.2.2 requires: the two differ by up to 8,8 dB at the
+  label, as Clause D.2.2 requires: the two differ by up to 8.8 dB at the
   160 Hz to 200 Hz boundary. Where a formula has no published worked example
   behind it (the cavity stiffness of Formula D.2, the asphalt fit of
   Formula C.5, and Formulae D.3 to D.8) the guide says so. Four results with
@@ -13574,7 +13574,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on an explicit, shrinking allowlist with a reason; rejects an entry that
   describes how that page was read, which is method rather than evidence; and
   separately flags any
-  multiplicative claim whose ratio lands within 0,5 % of `√2`, `√3`, `π`, `2π`,
+  multiplicative claim whose ratio lands within 0.5 % of `√2`, `√3`, `π`, `2π`,
   `1/√2`, `ln 2` or a small integer, which is the arithmetic signature of a
   glyph lost in extraction rather than an author's error. A flagged entry has
   to cite its page; the allowlist does not excuse it. It runs in CI as the
@@ -13587,10 +13587,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - A test that can tell `combined_tone_level` (ISO/PAS 20065 Formula (17) with
   Anmerkung 2) from a plain union sum. The Annex E "2 FG" oracle cannot: its
   three tones occupy disjoint line runs, so counting each line once and summing
-  the three tone levels give the same 72,15 dB. The new case pairs tones whose
+  the three tone levels give the same 72.15 dB. The new case pairs tones whose
   runs coincide and tones whose runs nest, in the same committed spectrum, and
   pins the exact gap an implementation without the deduplication would open
-  (10 lg 2 and 2,91 dB). Removing the deduplication now fails the suite.
+  (10 lg 2 and 2.91 dB). Removing the deduplication now fails the suite.
 
 - Room-to-room noise reduction (`noise_control/room_to_room.py`, Norton &
   Karczub 2003 Section 4.9): `room_to_room_transmission` composes the whole
@@ -13659,10 +13659,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `orthotropic_plate_resonance` is the matching eigenfrequency of a simply
   supported orthotropic plate (Vigran Eq. 3.113 = Bies Eq. 7.27, after Hearmon
   1959), whose lowest mode bounds the validity of both transmission models.
-  Anchored on Vigran's own worked example (a 1 mm steel plate 1 m by 1 m: 4,9
-  and 19,7 Hz flat, 25,5 and 102 Hz corrugated, which only come out with the
+  Anchored on Vigran's own worked example (a 1 mm steel plate 1 m by 1 m: 4.9
+  and 19.7 Hz flat, 25.5 and 102 Hz corrugated, which only come out with the
   developed-length mass), on the printed design-chart constants of Bies
-  Fig. 7.9(b) (-54, -13,2, -17 and -23 dB for `rho c` = 414), on the 25 `h fc`
+  Fig. 7.9(b) (-54, -13.2, -17 and -23 dB for `rho c` = 414), on the 25 `h fc`
   products of Hopkins Table A2, and on the exact reduction of the diffuse
   integral to its elementary mass-law form and of the orthotropic impedance to
   Cremer's isotropic one. New section and figure in the panel-insulation
@@ -13680,7 +13680,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   another `PorousMediumResult` that drops straight into a `PorousLayer` of the
   transfer-matrix stack. `limp_frame_applicable` and `LIMP_FRAME_CRITERIA`
   carry the published rules of thumb for when the frame may be treated as limp
-  at all (Beranek's `|Kc/Kf| < 0,05` and the 0,2 to which Doutres et al. 2007
+  at all (Beranek's `|Kc/Kf| < 0,05` and the 0.2 to which Doutres et al. 2007
   relaxed it, which for air the book states as a "bulk modulus lower than 20
   kPa"). Closed-form rather than digit-oracled: Allard & Atalla publishes no
   table of computed limp densities, so what anchors the model is the printed
@@ -13690,7 +13690,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `rho_t = rho1 + phi rho0` as the frequency falls, where the rigid model
   diverges), but they corroborate rather than pin the form: a sign-flipped
   variant of the same equation satisfies both. The decoupling frequency of
-  their Table 6.1 glass wool, 43,27 Hz, is pure arithmetic. New section and
+  their Table 6.1 glass wool, 43.27 Hz, is pure arithmetic. New section and
   figure in the porous-absorber guide, in English and Spanish.
 
 - Kinematic machine fault frequencies (`vibration/machine_diagnostics.py`,
@@ -13840,7 +13840,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   documents where each differs. `NoisePhase`, `evaluation_period_level` and
   `long_term_corrected_level` integrate phases into the day, evening and night
   indices and into the annual `LK,x`, with the regulation's own rounding
-  (`round_reported_level`, add 0,5 dB and take the integer part). The Annex II
+  (`round_reported_level`, add 0.5 dB and take the integer part). The Annex II
   quality objectives (outdoor, indoor and vibration) and the Annex III
   immission limits (new transport infrastructure, its `LAmax` variant,
   activities and ports, and noise transmitted to acoustically adjacent
@@ -13878,7 +13878,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the reverberation and absorption limits of 2.2, and the window-size
   correction of the Catalogo de Elementos Constructivos, checked through
   `check_db_hr_requirement` / `assess_db_hr` with `.plot()`. Validated against
-  Ejemplo 7.2 (`R'A` 51,4 dBA), Ejercicio 7.1 (`D2m,nT,Atr` 32,8 dBA) and
+  Ejemplo 7.2 (`R'A` 51.4 dBA), Ejercicio 7.1 (`D2m,nT,Atr` 32.8 dBA) and
   Ejemplo 7.4 of the same Manual; the direct route is cross-checked against the
   ISO 717-1 route of `weighted_rating_extended`, which reproduces the book's
   `R'w` 52 dB with `C` -1 and `Ctr` -5 and agrees to the integer on both
@@ -14365,11 +14365,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   The pass corrected three of our own arithmetic slips inside accusations that
   were otherwise right: EN 12354-3 Formula (13) against its own Annex F
-  example gives 1,5104 dB for the Sabine form and 1,6877 dB for the printed
-  formula; Miki against Attenborough gives 1,19 from the coefficient the
-  table prints, where Miki's own 0,109 gives 2,88 and the table's own
-  Delany-Bazley row gives 3,10; and reading a speed in km/h into
-  `f = v/lambda` places the CNOSSOS roughness spectrum a factor 3,6 too high
+  example gives 1.5104 dB for the Sabine form and 1.6877 dB for the printed
+  formula; Miki against Attenborough gives 1.19 from the coefficient the
+  table prints, where Miki's own 0.109 gives 2.88 and the table's own
+  Delany-Bazley row gives 3.10; and reading a speed in km/h into
+  `f = v/lambda` places the CNOSSOS roughness spectrum a factor 3.6 too high
   in frequency, not too low. Three more entries claimed more than the page
   supports and now say what it does: the Southall table duplication follows
   from the article's own in-air 15 dB offset rather than from a column slip,
@@ -15059,8 +15059,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   itself is what is wrong, with the errata registry as its evidence.
 
   Four claims on that page are corrected while it is being rewritten. The
-  IEC 61672-1 Table 4 target for the 1 ms toneburst is −21,0 dB, not −20.9;
-  Equation (7) gives 10 lg(1 − e^(−0,001/0,125)) = −20,9865 and the library's own
+  IEC 61672-1 Table 4 target for the 1 ms toneburst is −21.0 dB, not −20.9;
+  Equation (7) gives 10 lg(1 − e^(−0.001/0.125)) = −20.9865 and the library's own
   transcription in `tests/metrology/test_iec_compliance.py` reads −21.0. Printed
   as −20.9 the row reversed its own comparison, showing phonometry at −0.09 and
   python-acoustics at exactly 0.00, when the errors are +0.01 and +0.10. The
@@ -15144,8 +15144,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   I.10, each carrying one column header with the wrong spectrum index; the
   sound speed printed as `q` in Medwin & Clay Eq. (3.4.30) where the same block
   divides by `c`; the displayed male example of ISO 2631-5 Annex C, which drops
-  the `− S_stat` term of Formula (C.3) and as displayed gives R = 1,15 against
-  its own printed 1,22; and three further cells of ISO 717-2 Table C.2 that the
+  the `− S_stat` term of Formula (C.3) and as displayed gives R = 1.15 against
+  its own printed 1.22; and three further cells of ISO 717-2 Table C.2 that the
   800 Hz misprint propagates into, plus the last digit of the Table C.1 energy
   sum. Thirteen entries whose finding stands but whose stated evidence did not
   have their arguments replaced, among them the ISO/PAS 20065 edge-steepness
@@ -15846,7 +15846,7 @@ the whole of the migration.
 - `background_noise_correction` (ISO 3744:2010 / ISO 3746:2010): `K1 = 0` only
   strictly above the upper criterion; at exactly `dLp = 15 dB` (engineering,
   8.2.3) or `10 dB` (survey, 8.3.3) Equation (16) still applies, restoring the
-  0,14 dB / 0,46 dB correction at the boundary.
+  0.14 dB / 0.46 dB correction at the boundary.
 - `OperatingModeDeclaration` (ISO 4871:1996): dual-number verification per
   clause 6.2 now compares `L_1` against the sum of the separately rounded
   declared values (`round(L_WA) + round(K_WA)`, clause 3.16) through the new
@@ -15941,7 +15941,7 @@ the whole of the migration.
 - ISO 10052 survey fiches: the basis line declares the band set the
   reported curve actually carries (octave or one-third-octave) instead of
   hardcoding "octave bands".
-- ISO 16251-1 fiche: a result with bands at the 1,3 dB limit of measurement
+- ISO 16251-1 fiche: a result with bands at the 1.3 dB limit of measurement
   is qualified as a lower bound (`≥` on the boxed `ΔLw` plus a note), and a
   hand-built result without `CI,Δ` no longer prints a fabricated `(+0)`.
 - ISO 15186-1 intensity fiches: the method statement states the test-object
@@ -15983,22 +15983,22 @@ the whole of the migration.
   durations outside 1-40 years (clause 6.3.1), fractiles in the distribution
   tails the standard says "should not be estimated" (Q below 5 % or above
   95 %, clause 6.3.2), and exposure levels above the 100 dB its data cover.
-  Previously a 130 dB / 60-year / Q = 1 % request returned a 357,9 dB
+  Previously a 130 dB / 60-year / Q = 1 % request returned a 357.9 dB
   threshold shift with no indication that it was an extrapolation; the
   prediction still runs, and both fiches now print the caveat.
 - The HVAC elbow insertion loss picked the wrong row of Bies Table 8.11 for a
-  `W/lambda` ratio landing exactly on a bin edge (0,14 / 0,28 / 0,55 / 1,11 /
-  2,22). The table's rows read "a <= W/lambda < b", so an edge opens its row:
-  at W/lambda = 0,14 a square unlined bend is now 1 dB, not 0 dB.
+  `W/lambda` ratio landing exactly on a bin edge (0.14 / 0.28 / 0.55 / 1.11 /
+  2.22). The table's rows read "a <= W/lambda < b", so an edge opens its row:
+  at W/lambda = 0.14 a square unlined bend is now 1 dB, not 0 dB.
 - The STI and SII fiches printed the requirement with one decimal while
   showing the measured value at full precision, so a verdict could contradict
-  itself ("STI = 0.50, required >= 0.5 -> FAIL" for a 0,52 requirement) and an
-  SII minimum of 0,75 printed as "0.8". Both now print the requirement at the
+  itself ("STI = 0.50, required >= 0.5 -> FAIL" for a 0.52 requirement) and an
+  SII minimum of 0.75 printed as "0.8". Both now print the requirement at the
   quantity's own display precision.
 - The ISO 1999 fiches printed the library's fractile as ISO 1999's percentage
   `Q`, inverting its meaning: the standard's `Q` (6.3.2, Formulae (4)/(5)) is
   the fraction of the population with *worse* hearing, so the
-  most-susceptible tenth is Q = 10 %, not 0,9. The fiches now print ISO's `Q`
+  most-susceptible tenth is Q = 10 %, not 0.9. The fiches now print ISO's `Q`
   with its own definition and cite the clause correctly.
 - The ISO/PAS 1996-3 fiche justified a zero adjustment with "governing
   P <= 5" even when the adjustment was withheld by the onset-rate gate
@@ -16011,8 +16011,8 @@ the whole of the migration.
   the citation now spans 9.5.2 to 9.5.8.
 - The noise-control fiches decided verdicts on the half-away-from-zero display
   rounding but printed the value with Python's round-half-to-even formatting,
-  which could disagree at a boundary (0,25 printed as 0.2 against a verdict
-  taken on 0,3). Both now use the display rounding.
+  which could disagree at a boundary (0.25 printed as 0.2 against a verdict
+  taken on 0.3). Both now use the display rounding.
 - The shared 10-90 % fractile band of the hearing plots carried a hardcoded
   English legend entry in Spanish figures.
 
@@ -16079,14 +16079,14 @@ the whole of the migration.
   consideration). It is the composition `htlan()` uses internally, and it
   carries the new ISO 1999 Annex C conformance oracle: the annex's worked
   example (90 dB, 30 years, 1/2/4 kHz at Q = 10 %) reproduces its printed
-  13,3 dB compressed shift at 4 kHz and its 31,1 dB combined threshold.
+  13.3 dB compressed shift at 4 kHz and its 31.1 dB combined threshold.
 - An independent IEC 60268-16 Annex M conformance oracle: the annex's printed
   MTF matrix, speech spectrum and ambient noise reproduce its published MTI
-  row and STI = 0,76 end to end, exercising the whole A.5.3 to A.5.6 chain.
+  row and STI = 0.76 end to end, exercising the whole A.5.3 to A.5.6 chain.
 - `docs/ERRATA.md` records two further defects: ISO/PAS 1996-3:2022 Clause 5
   swaps the 3.4/3.5 cross-references of the onset rate and level difference,
-  and ISO 9613-2:1996 Table 2 prints 4,1 dB/km at 15 °C / 80 % / 1 kHz where
-  ISO 9613-1 gives 4,15 (the library computes the coefficient directly, so it
+  and ISO 9613-2:1996 Table 2 prints 4.1 dB/km at 15 °C / 80 % / 1 kHz where
+  ISO 9613-1 gives 4.15 (the library computes the coefficient directly, so it
   is unaffected).
 
 ### Changed
@@ -16620,7 +16620,7 @@ the whole of the migration.
   coverings). The sheet carries the standard-basis line, an optional metadata
   header (client, floor-covering description, mounting, mass per unit area, the
   measured frequency range, climate), the one-third-octave table of the
-  reduction of impact sound pressure level `ΔL` (bands at the 1,3 dB limit of
+  reduction of impact sound pressure level `ΔL` (bands at the 1.3 dB limit of
   measurement prefixed `>`) beside the `ΔL(f)` improvement curve, and the boxed
   single-number weighted improvement `ΔLw (CI,Δ)` (the ISO 16251-1 Clause 8 e)
   statement of results, rated per ISO 717-2:2020; a characterisation headline
@@ -17706,7 +17706,7 @@ the whole of the migration.
   frame subsampling for animation rendering) with physics and determinism
   tests, backing the physics-based documentation animations.
 - `anim_fdtd_room_modes`: a 2D FDTD documentation clip driving a rigid
-  5 m × 3,5 m room on its (2,1) mode and between modes, showing the
+  5 m × 3.5 m room on its (2,1) mode and between modes, showing the
   standing-wave pattern and the RMS mode map growing to dominance on
   resonance while the off-mode response stays weak and disorganised;
   embedded in the room-acoustics and reverberation-prediction guides
@@ -17719,8 +17719,8 @@ the whole of the migration.
   `ToneAudibilityResult` tells single tones from FG entries and the decisive
   audibility now follows Step 4 as printed.
 - DIN 45681:2005-03 Anhang I oracle: the Tabelle I.9 wind-energy-plant
-  spectrum reproduces the decisive Tabelle I.10 row end to end (LS 41,71 /
-  LT 68,10 / dL 12,52 / u 3,18 dB), Tabelle I.11 rows j = 45/48 pin the
+  spectrum reproduces the decisive Tabelle I.10 row end to end (LS 41.71 /
+  LT 68.10 / dL 12.52 / u 3.18 dB), Tabelle I.11 rows j = 45/48 pin the
   Formulae (12)-(14) chain, the printed 5 FG row pins the two-tone
   combination decision, and Tabelle A.1 pins Formula (2) at 24 printed
   bandwidths.
@@ -17745,9 +17745,9 @@ the whole of the migration.
   or less; `ImpulseProminenceResult.qualifies`: the NT ACOU 112 clause 4.5
   onset-rate qualification mask.
 - Published-oracle promotions: GUM Annex H.1 end to end through
-  `combine_uncertainty` (uc = 31,71 nm, U99 = 92,1 nm), GUM Annex H.2 as the
-  correlated Equation (16) oracle (uc(R/X/Z) = 0,071/0,295/0,236 ohm),
-  GUM-S1 Tables 2 and 3 coverage intervals (+/-3,92 Gaussian, +/-3,88
+  `combine_uncertainty` (uc = 31.71 nm, U99 = 92.1 nm), GUM Annex H.2 as the
+  correlated Equation (16) oracle (uc(R/X/Z) = 0.071/0.295/0.236 ohm),
+  GUM-S1 Tables 2 and 3 coverage intervals (+/-3.92 Gaussian, +/-3.88
   rectangular with a seeded Monte Carlo conformance entry), the full
   ISO 9613-2 Table 2 grid (6 conditions x 8 octave bands at exact midbands)
   and the IEC 61260-1 Table F.1 breakpoints with both E.3.4 rounding
@@ -17758,7 +17758,7 @@ the whole of the migration.
   response (identical to the IEC 60268-1 Appendix A network that
   IEC 60268-3 14.12.11 requires), interpolated per the recommendation's own
   log-frequency rule; `weighted_thd` now defaults to it (`'468'`), keeps
-  `'A'`/`'C'` as labelled options and documents the 31,5 Hz - 400 Hz
+  `'A'`/`'C'` as labelled options and documents the 31.5 Hz - 400 Hz
   fundamental validity range.
 - AES17 measurement-bandwidth chain for `thd_plus_noise`, `sinad` and
   `harmonic_analysis`: both the residual and the total signal are measured
@@ -17772,7 +17772,7 @@ the whole of the migration.
   the official worksheet full precision plus a discriminating
   noise-plus-hearing-loss case and the independent R package Example C.2;
   the IEC 60268-16 Ed.5 C.3.2 STIPA direct-method staircase (m = 0 to 1
-  through the full audio path, tolerance 0,05); the clipped-sine THD
+  through the full audio path, tolerance 0.05); the clipped-sine THD
   Fourier constants; a full-signal DIM regression (1,536 MHz synthesis of
   the standard test signal through a weak polynomial nonlinearity,
   FIR-decimated to 192 kHz, checked against an exact-bin FFT oracle); the
@@ -17794,28 +17794,28 @@ the whole of the migration.
   (90 % bilateral coverage, k = 1,645) and `mean_audibility_uncertainty`
   combines the per-spectrum values through the Formula (20) mean;
   `analyze_spectrum` reports the per-tone U on its result. Verified against
-  the printed Table E.2 U column (decisive tone to 0,006 dB), the 2 FG row
-  and the Annex E Step 4 mean uncertainty (1,38 dB).
+  the printed Table E.2 U column (decisive tone to 0.006 dB), the 2 FG row
+  and the Annex E Step 4 mean uncertainty (1.38 dB).
 - ISO 532-1 stationary `time_skip` parameter (Annex B.1's TimeSkip: the
-  stationary calculation starts from 0,2 s when validating against the
+  stationary calculation starts from 0.2 s when validating against the
   official recordings, excluding leading silence and the filterbank
   transient from the mean square).
 - Psychoacoustics oracle expansion: the shipped ISO 532-1 Annex B.4 Test
   signal 13 and a B.3 pink-noise bounds check; all 21 DIN 45692 Table A.2
-  rows and all 20 Table A.3 broadband rows at the normative 5 % / 0,05 acum
-  tolerance (plus a non-definitional Table A.2 conformance row at 2,5 kHz);
+  rows and all 20 Table A.3 broadband rows at the normative 5 % / 0.05 acum
+  tolerance (plus a non-definitional Table A.2 conformance row at 2.5 kHz);
   the ISO 532-2 Annex B phon columns; the ISO 532-3 Annex C.3 multi-tone
   complexes, the C.1.2/C.1.3 sone columns and the Annex C.1 anchor pinned at
-  32/44,1/48 kHz native rates; the ECMA-418-2 decision thresholds as
-  constants-tests (audibility 0,01 sone_HMS, prominent tonality 0,4 tu_HMS,
-  prominent roughness 0,2 asper); a loudness/tonality N'_tonal
+  32/44.1/48 kHz native rates; the ECMA-418-2 decision thresholds as
+  constants-tests (audibility 0.01 sone_HMS, prominent tonality 0.4 tu_HMS,
+  prominent roughness 0.2 asper); a loudness/tonality N'_tonal
   cross-consistency test on the shared Clause 6.2 intermediate; the
   fluctuation-strength carrier sweep (F&Z Fig. 10.5 trend) and the Osses
   Table 1 AM-broadband-noise row as a trend cross-check; and the full
   ISO/PAS 20065 Tables E.2/E.3/E.4 columns (LG, av, band limits, per-tone
   and mean uncertainties, all-spectra tone records).
 - ECMA-418-1 TNR/PR degenerate-input warnings: peaks within one bin of the
-  89,1 Hz / 11,2 kHz range edge (bin snapping can flip the prominence
+  89.1 Hz / 11.2 kHz range edge (bin snapping can flip the prominence
   verdict) and critical bands at numeric-noise power (silence, DC) now warn;
   the `prominent` verdict is documented as the numeric criterion only (the
   clause 11.8/12.8 aural examination and clause 8/9 hearing-threshold screen
@@ -17848,25 +17848,25 @@ the whole of the migration.
   documented through the existing `transfer_function`/`coherence` estimators.
 - ISO 10846-1:2008 Equation (6): `blocking_force_ratio` quantifies the
   blocking-force approximation F2/F2,b = 1/(1 + k2,2/kt) (within 10 % for
-  |k2,2| < 0,1 |kt|, Eq. (7)).
+  |k2,2| < 0.1 |kt|, Eq. (7)).
 - Vibration oracles promoted to tests and the conformance report: the nine
   printed ISO 8041-1:2017 Annex B design-goal tables (318 bands) with a
   Table 5 tolerance-envelope check and the Wb/Wc/Wd/We/Wf/Wj design-goal
   points, the ISO 2631-5:2018 Annex C NOTE 5 female worked example
-  (Sd = 1,40 MPa, R = 0,97) and the Annex D Table D.1 digital-filter
+  (Sd = 1.40 MPa, R = 0.97) and the Annex D Table D.1 digital-filter
   cross-check of Formula 1, the ISO 7626-2 rigid-mass calibration values and
   Annex A random-error example, the omega = 1000 rad/s rigid-mass decade
-  identity, the ISO 10846-3 validity anchors (|T| = 0,1 <->
-  DeltaL1,2 = 20 dB, model bias 1,1 within 1 dB / 12 %), the ISO 10846-1
-  Eq. (6) force ratio 1/1,1 and the 7.6 linearity criterion (10 dB input
-  step within 1,5 dB).
+  identity, the ISO 10846-3 validity anchors (|T| = 0.1 <->
+  DeltaL1,2 = 20 dB, model bias 1.1 within 1 dB / 12 %), the ISO 10846-1
+  Eq. (6) force ratio 1/1.1 and the 7.6 linearity criterion (10 dB input
+  step within 1.5 dB).
 - ISO 717 enlarged frequency ranges: `weighted_rating_extended` computes the
   Annex B spectrum adaptation terms (C50-3150, C50-5000, C100-5000 and the
   Ctr counterparts, Table B.1 spectra) and `weighted_impact_rating_extended`
-  the CI,50-2500 term of ISO 717-2:2020 A.2.1; both offer the 0,1 dB
+  the CI,50-2500 term of ISO 717-2:2020 A.2.1; both offer the 0.1 dB
   reference-curve shift and one-decimal reductions for uncertainty statements
-  (ISO 12999-1:2020 Annex B), reproducing the printed Rw = 57,4 dB example
-  and the A.2.2 constants Ln,r,0,w = 77,6 dB / CI,r,0 = -10,3 dB.
+  (ISO 12999-1:2020 Annex B), reproducing the printed Rw = 57.4 dB example
+  and the A.2.2 constants Ln,r,0,w = 77.6 dB / CI,r,0 = -10.3 dB.
 - ISO 16251-1 statement of results: the floor-covering improvement now rates
   any spectrum containing the 16 bands 100-3150 Hz (the clause 6.3 18-band
   range included) and exposes the spectrum adaptation term CI,delta
@@ -17885,19 +17885,19 @@ the whole of the migration.
   thickness change), and the E.5 K24 double-leaf branch (clamp read as
   -4 dB <= K24 <= 0 dB; the 2000 print's "0 <= K24 <= -4 dB" is a misprint).
 - EN 12354-1 Formula (5b) `standardized_level_difference` (DnT,w from R'w,
-  exact 0,32 V/Ss form) closing both Annex H.3 examples to 54 dB.
+  exact 0.32 V/Ss form) closing both Annex H.3 examples to 54 dB.
 - EN 12354-3 Annex C facade-shape term lookup
   `facade_shape_level_difference` (Figure C.2, all nine shapes, alpha_w
   interpolation).
 - ISO 10848-4 Clause 9 modal-overlap bracketing: `vibration_reduction_index`
-  accepts the per-band modal overlap factor, flags M < 0,25 bands as
+  accepts the per-band modal overlap factor, flags M < 0.25 bands as
   `bracketed` and excludes them from the single-number Kij.
 - ISO 15186-1 Clause 6.4.6 negative-direction subareas: `combine_subareas`
   accepts signed subarea areas (minus sign for reverse energy flow) with
   Sm = sum(|Smi|), raising when the signed energy sum is not positive.
 - Oracles promoted to tests and the conformance report: ISO 717-1:2020
   Annex C Table C.2 (enlarged 50-5000 Hz range), ISO 717-2 Annex C Table C.1
-  covered floor (64, -3, 30,0 dB) and Table C.2 improvement (15 dB,
+  covered floor (64, -3, 30.0 dB) and Table C.2 improvement (15 dB,
   CI,delta = -9 dB), ISO 12999-1:2020 Annex B single numbers and
   uncorrelated/correlated uncertainties, all 12 printed EN 12354-1 Annex H.3
   path values with the DnT,w closures, the remaining EN 12354-4 Table G.9
@@ -17931,10 +17931,10 @@ the whole of the migration.
   C.4.2 filter slope, A.2.2 weighting factors and A.3.1.2 phase distortion;
   the suite skips cleanly when the local data is absent), plus seven synthetic
   conformance checks that re-derive the same constructions in CI (one of them
-  replacing the previous C.3.2 m = 0,5 check, so the total grows by six): the
-  C.3.2 staircase at m = 0,2/0,5/0,8 (±0,01 STI), the C.3.3 RT60 = 1 s decay
-  against the closed-form Schroeder MTF (±0,005), the C.4.2 slope criterion
-  (m ≥ 0,5 under a +41 dB unmodulated adjacent-octave tone) and the
+  replacing the previous C.3.2 m = 0.5 check, so the total grows by six): the
+  C.3.2 staircase at m = 0.2/0.5/0.8 (±0.01 STI), the C.3.3 RT60 = 1 s decay
+  against the closed-form Schroeder MTF (±0.005), the C.4.2 slope criterion
+  (m ≥ 0.5 under a +41 dB unmodulated adjacent-octave tone) and the
   A.2.2/A.3.1.2 audio-path checks (257 checks total).
 - `fluctuation_strength_ecma`: the normative psychoacoustic fluctuation
   strength of ECMA-418-2:2025 Clause 9 (Sottek Hearing Model, vacil_HMS),
@@ -17962,7 +17962,7 @@ the whole of the migration.
   area and the climate, and derives the equivalent sound absorption areas `A1`
   (Eq. (5)) and `A2` (Eq. (7)) and the sound absorption coefficient `alpha_s`
   (Eq. (8)/(9)) by reusing the existing `absorption_area`/`absorption_coefficient`
-  functions; `alpha_s` may exceed 1,0 (Clause 3.7 NOTE 2) and is never clamped.
+  functions; `alpha_s` may exceed 1.0 (Clause 3.7 NOTE 2) and is never clamped.
   The result exposes `.plot()` (`alpha_s` versus one-third-octave frequency) and
   `.report()`, which renders a one-page accredited reverberation-room test-report
   PDF (metadata header, the `alpha_s` table beside the curve, `verbose=True`
@@ -18010,7 +18010,7 @@ the whole of the migration.
   measurement. The conformance report and the laboratory-insulation guide use
   the improvement of a textile carpet on the CSTB heavyweight mock-up, taken
   from Foret, Chéné and Guigou-Carter (Forum Acusticum 2011): the per-band ΔL
-  was read from the figure's vector chart to +/- 0,5 dB and rates to the
+  was read from the figure's vector chart to +/- 0.5 dB and rates to the
   paper's published ΔLw = 29 dB (the companion ISO 140-8 series reads back to
   its published ΔLw = 30 dB, confirming the calibration). A new conformance
   row and a clean-room test assert the rating, the worked example and its
@@ -18189,10 +18189,10 @@ the whole of the migration.
 - The boxed exposure zone of the daily vibration exposure fiche is now derived
   from the same displayed-rounded comparisons as the assessment rows and the
   verdict, so an `A(8)` that prints exactly at a threshold (for example 4,997
-  displaying as 5,00) can no longer show a boxed zone one step below its own
+  displaying as 5.00) can no longer show a boxed zone one step below its own
   Exceeded row.
 - The ISO 10848 `Kij` fiche distinguishes an empty single-number mean caused
-  by every in-range band being bracketed for poor modal overlap (M < 0,25)
+  by every in-range band being bracketed for poor modal overlap (M < 0.25)
   from a spectrum with no bands in the Annex A range (EN/ES).
 - Spanish ISO 2631-5 outputs: the injury-probability plot title translates the
   subject sex ("hombre"/"mujer") and the fiche's clause references print
@@ -18401,13 +18401,13 @@ the whole of the migration.
   IEC 60268-16:2020 on the certified test bench - the C.4.2 filter-slope
   test (an unmodulated tone one octave below the observed band, 41 dB
   louder, leaked with only ~31 dB attenuation and dragged the measured m
-  down to ~0,1 against the m ≥ 0,5 criterion) and the A.3.1.2
-  phase-distortion limit (STI bias reached -0,020 at TI = 0,9 against the
-  < 0,01 criterion). Zero-phase filtering removes the phase bias by
+  down to ~0.1 against the m ≥ 0.5 criterion) and the A.3.1.2
+  phase-distortion limit (STI bias reached -0.020 at TI = 0.9 against the
+  < 0.01 criterion). Zero-phase filtering removes the phase bias by
   construction and doubles the effective skirt attenuation to ~63 dB one
   octave out; all 49 certified bench signals now pass (worst slope-test
-  m = 0,937, worst edge-carrier bias -0,0029). STI values on ordinary
-  signals of the recommended >= 15 s duration shift by at most ~0,003
+  m = 0.937, worst edge-carrier bias -0.0029). STI values on ordinary
+  signals of the recommended >= 15 s duration shift by at most ~0.003
   (larger only below the minimum-duration warning threshold; the
   sti_vs_t60 figures are regenerated accordingly).
 - `stipa` no longer raises when an octave band of the recording carries no
@@ -18417,13 +18417,13 @@ the whole of the migration.
   measurable.
 - DIN 45681 / ISO PAS 20065 single-line tones: the tone level of a K = 1 run
   is the line level itself (Formula (7)); the Hanning bandwidth correction
-  applies only to K > 1 sums (Formula (8)). The unconditional -1,76 dB
+  applies only to K > 1 sums (Formula (8)). The unconditional -1.76 dB
   understated every single-line audibility and could flip weak
   near-bin-centred tones to inaudible.
 - `verify_weighting_class` and the conformance report's A/C branch evaluate
   the SOS at the exact base-10 frequencies behind the Table 3 nominal labels
   (Table 3 NOTE; IEC 61672-3 13.3), removing a pairing bias of up to
-  0,27 dB; `verify_filter_class` evaluates the Table 1 breakpoints exactly
+  0.27 dB; `verify_filter_class` evaluates the Table 1 breakpoints exactly
   with `sosfreqz` instead of interpolating off the grid (the 16-point floor
   now reproduces the dense-grid verdict).
 - IEC 61400-11 tone classification anchors the 10 dB cut, the reported tone
@@ -18435,11 +18435,11 @@ the whole of the migration.
   bound (the previous wording inverted the bound);
   `gaussian_residual_level` rejects inverted percentile orderings.
 - ISO 9613-2 `atmospheric_absorption` evaluates alpha at the exact base-10
-  midbands (the Table 2 convention; ~1,3 % high at 8 kHz before); grazing
+  midbands (the Table 2 convention; ~1.3 % high at 8 kHz before); grazing
   barrier geometry (z = 0) now yields Dz = 10 lg 3 instead of 0.
 - GUM `combine_uncertainty`: a correlated budget with finite input degrees
   of freedom carries undefined effective dof (the GUM defines no correlated
-  Welch-Satterthwaite form; r = 0,999 with nu = 5 previously produced
+  Welch-Satterthwaite form; r = 0.999 with nu = 5 previously produced
   k95 ~ 2e151) and `expanded()` then requires an explicit coverage factor;
   the finite-difference step is the input uncertainty with a 64-ULP floor,
   preserving locality for large-magnitude inputs while a tiny uncertainty
@@ -18450,13 +18450,13 @@ the whole of the migration.
 - `sensitivity()` rejects non-finite reference samples (a NaN propagated
   silently to a NaN calibration factor); docstring thresholds aligned with
   IEC 60942:2017 Table 2 and the plain-bilinear weighting class notes with
-  the measured behaviour (class 1 holds at 44,1/48 kHz, degrades at
+  the measured behaviour (class 1 holds at 44.1/48 kHz, degrades at
   fs <= 32 kHz).
 - SII (ANSI S3.5-1997): the equivalent disturbance spectrum level is the
   clause 5.6 maximum of the equivalent masking and internal noise levels,
   not their energy sum; the index for a hearing-impaired listener in
-  moderate noise was underestimated by up to 0,042 (0,1841 vs the
-  standard's 0,2185 for normal speech in flat 30 dB noise with a flat
+  moderate noise was underestimated by up to 0.042 (0.1841 vs the
+  standard's 0.2185 for normal speech in flat 30 dB noise with a flat
   40 dB loss). Confirmed against the official worksheet (=MAX in every
   band) and the R CRAN worked example.
 - IEC 60268-3 intermodulation reworked to the clause-exact quantities:
@@ -18467,9 +18467,9 @@ the whole of the migration.
   the reference (+6 dB on d2, +3 dB on d3); and
   `total_difference_frequency_distortion` implements 14.12.10.1 directly
   (only the two in-band products over the tone-amplitude sum, standard
-  8 kHz / 11,95 kHz tones as defaults) instead of sqrt(d2^2 + d3^2).
+  8 kHz / 11.95 kHz tones as defaults) instead of sqrt(d2^2 + d3^2).
 - Intermodulation product search windows no longer swallow neighbouring
-  components: octave-spaced clean tones read 0 instead of d2 = 1,0, DC
+  components: octave-spaced clean tones read 0 instead of d2 = 1.0, DC
   offsets no longer leak into d3, out-of-band products clamp to
   (0, Nyquist), and the two TDFD products can no longer double-count.
 - THD+N/SINAD measured noise over the full Nyquist band: at fs = 192 kHz
@@ -18478,11 +18478,11 @@ the whole of the migration.
   measurement-bandwidth chain by default.
 - The AES17 standard notch was designed at the nominal Q but applied
   zero-phase (filtfilt squares the response), so the applied quality
-  factor was 0,644x nominal (a requested 2,0 acted as 1,29; requests below
-  ~1,87 silently fell outside the AES17 [1,2, 3] range). The design Q is
+  factor was 0.644x nominal (a requested 2.0 acted as 1.29; requests below
+  ~1.87 silently fell outside the AES17 [1.2, 3] range). The design Q is
   now compensated by sqrt(1 + sqrt(2)) so the applied response has the
   requested quality factor.
-- `thd` returned 0,0 when no harmonic of the fundamental fitted below
+- `thd` returned 0.0 when no harmonic of the fundamental fitted below
   Nyquist (for example a 20 kHz fundamental at fs = 48 kHz); it now raises,
   and captures shorter than 64 samples are rejected.
 - THD/SINAD documentation labelled both THD conventions as the
@@ -18494,34 +18494,34 @@ the whole of the migration.
   PA = N5*(1 + sqrt(wS^2 + wFR^2)); every PA with a nonzero
   sharpness/fluctuation/roughness contribution was 13-29 % low, and the
   worked reference value had been hand-computed with the same wrong form.
-  The worked tuple now anchors PA = 37,0478.
+  The worked tuple now anchors PA = 37.0478.
 - ECMA-418-2 roughness omitted the mandatory Clause 5.1.2 5 ms fade-in and
   its calibration signal was synthesized with the carrier (not the overall
   signal) at 60 dB SPL. With both corrected the chain reproduces the
-  Clause 7 reference to 0,99990 asper with the tabulated c_R; the former
+  Clause 7 reference to 0.99990 asper with the tabulated c_R; the former
   "+7,35 % clean-room methodology variance" narrative was wrong and is
   removed everywhere.
 - ECMA-418-2 loudness skipped the cross-block-size-group ACF recomputation
   of Clause 6.2.3 (tonal content near the block-size boundaries was
-  mis-stated by up to -9,5 %); loudness and tonality now share one full
+  mis-stated by up to -9.5 %); loudness and tonality now share one full
   Clause 6.2.3 tonal/noise split and report identical N'_tonal. The 1 kHz /
-  40 dB calibration computes 0,9845 sone_HMS with the verbatim c_N; the
+  40 dB calibration computes 0.9845 sone_HMS with the verbatim c_N; the
   residual's origin is documented in the module. The common time grid is
   sized from the 1024-sample stage (no more trailing edge-held samples) and
   the tonality band-range arguments are validated per Formulae 56/57.
-- Fluctuation strength transcribed the misprinted Bark constant 0,76e-4 from
+- Fluctuation strength transcribed the misprinted Bark constant 0.76e-4 from
   Osses 2016 Eq. (3); the Zwicker-Terhardt formula and the paper's own
-  anchors require 0,76e-3. The 47 filter centres now span 50 Hz-13,2 kHz
+  anchors require 0.76e-3. The 47 filter centres now span 50 Hz-13.2 kHz
   (was 491 Hz-20 kHz with 12 duplicate edge bands) and carrier-frequency
-  behaviour matches F&Z Fig. 10.5 (C_FS = 0,279, near the paper's 0,2490).
+  behaviour matches F&Z Fig. 10.5 (C_FS = 0.279, near the paper's 0.2490).
 - ISO 532-1 Annex B validation tests had silently skipped since the test
   tree reorganization (broken relative fixtures path behind a skip guard);
   the path is fixed and an in-repo presence assertion prevents a recurrence.
 - DIN 45692 Aures/von Bismarck sharpness variants used self-derived
   normalization constants where Formulas (B.1)/(B.2) print the literal
-  k = 0,11 (every Aures result was +4,2 % against the published formula);
+  k = 0.11 (every Aures result was +4.2 % against the published formula);
   the reference sound now lands near, not exactly at, 1 acum
-  (0,96/1,02 acum) and is asserted non-circularly.
+  (0.96/1.02 acum) and is asserted non-circularly.
 - ISO 532-1 filterbank tables were mislabelled (Table A.1 is the reference
   section; the per-band deviations and gains are Table A.2), and the
   sone-to-phon mapping documents the reference-program provenance of its
@@ -18532,7 +18532,7 @@ the whole of the migration.
   transcription biased boric-dominated bands at 0.6-30 kHz by up to 1.7 %).
 - ISO 10846-3 indirect method returned out-of-validity results silently:
   `transfer_stiffness_indirect` now computes the per-band transmissibility
-  magnitude and emits a `PhonometryWarning` where |T| > 0,1 (Inequality (2):
+  magnitude and emits a `PhonometryWarning` where |T| > 0.1 (Inequality (2):
   DeltaL1,2 < 20 dB, outside the 1 dB / 12 % accuracy of Formula (1)),
   exposes the limit as `TRANSMISSIBILITY_LIMIT`, and documents the
   blocking-mass rigidity criterion 10 lg(m2,eff^2/m2^2) <= 1 dB
@@ -18556,13 +18556,13 @@ the whole of the migration.
   tabulate at true one-third-octave centres 10^(n/10), not nominal labels.
 - ISO 10848 octave-band single-number Kij averaged the wrong range: the
   one-third-octave 200-1250 Hz mask was reused on octave centres, dropping
-  the 125 Hz octave (a +0,5 dB bias per dB/octave of Kij slope); octave
+  the 125 Hz octave (a +0.5 dB bias per dB/octave of Kij slope); octave
   results now average 125-1000 Hz per Annex A, and `octave_bands()` validates
   that the input groups into whole octave triples.
 - EN 12354-2 Formula (3) standardization used the Annex E.3 rounding
   10 lg(V/30); `standardized_impact_level` now applies the exact
-  10 lg(0,032 V) form (the E.3 rounding stays documented), removing a
-  constant -0,18 dB bias.
+  10 lg(0.032 V) form (the E.3 rounding stays documented), removing a
+  constant -0.18 dB bias.
 - `flanking_element` never applied the mandatory Kij,min floor of EN 12354-1
   Clause 4.4.2 / Formula (29); passing the flanking-element area now clamps
   each path automatically.
@@ -18579,7 +18579,7 @@ the whole of the migration.
   reception-plate injected power (not the characteristic source level; the
   EN 12354-5 chain needs the Formula (15)/(17) conversion), the EN 12354-4
   Annex E (E.2a)/(E.2b) branches do not "meet within rounding" (about
-  -0,7 dB step for a square side), the `modal_overlap_factor` docstring no
+  -0.7 dB step for a square side), the `modal_overlap_factor` docstring no
   longer claims an exclusion the code did not apply, and
   `materials/dynamic_stiffness` no longer points to ISO 16251-1 (whose scope
   excludes floating floors).
@@ -18655,7 +18655,7 @@ the whole of the migration.
 - `air_attenuation()` and `air_attenuation_m()` (with the
   `AtmosphericAbsorptionWarning`): pure-tone atmospheric absorption coefficient
   α per ISO 9613-1:1993 (Eq. 3–5) from frequency, temperature, humidity and
-  pressure; reproduces Table 1 to under 0,4 % and exposes the ISO 354 power
+  pressure; reproduces Table 1 to under 0.4 % and exposes the ISO 354 power
   attenuation coefficient m = α/(10 lg e). `exact_midband=True` snaps onto the
   Table 1 midbands.
 - ISO 9613-2:1996 outdoor sound propagation: `outdoor_propagation_attenuation()`
@@ -18669,7 +18669,7 @@ the whole of the migration.
 - `task_based_exposure()`, `job_based_exposure()` and `full_day_exposure()`
   (with `Task`, `ExposureResult` and `OccupationalExposureWarning`): ISO 9612:2009 daily
   noise exposure LEX,8h by the three measurement strategies and the normative
-  Annex C uncertainty budget (k = 1,65 one-sided 95 %, the C.6 I(I−1) vs
+  Annex C uncertainty budget (k = 1.65 one-sided 95 %, the C.6 I(I−1) vs
   C.12 N−1 sampling asymmetry, Table C.4 and the LEX,8h + U upper limit); the
   Annex D/E/F worked examples reproduce to the standard's printed precision.
 - Documentation: new **Outdoor Sound Propagation** guide (ISO 9613-1/2, EN + ES),
@@ -18752,7 +18752,7 @@ the whole of the migration.
   `LabImpactInsulationResult` dataclasses (with `.plot()`) plus the
   `LabInsulationWarning`: laboratory sound insulation per ISO 10140: the direct
   sound reduction index R (Part 2) and normalized impact level Ln (Part 3) with
-  the Sabine absorption area A = 0,16 V/T (Part 4), background-noise correction
+  the Sabine absorption area A = 0.16 V/T (Part 4), background-noise correction
   with the 6/15 dB limit-of-measurement rule, and single-number ratings via the
   reused ISO 717-1/2 engines.
 - `predicted_airborne_insulation()`, `predicted_impact_insulation()`,

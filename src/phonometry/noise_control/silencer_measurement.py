@@ -1331,12 +1331,14 @@ def pressure_loss_coefficient(
     velocity head of Equation (13) takes that out and leaves a number that
     belongs to the object: how many velocity heads it costs to push air
     through it. Equation (17) is the same division with the mid-range point
-    of the fundamental method, :math:`\Delta p_{tot,n} / p_{dn}`.
+    of the fundamental method, :math:`\Delta p_{\mathrm{tot},n} / p_{\mathrm{d}n}`,
+    whose running index :math:`n` ISO 7235 prints upright and this module sets
+    italic, an index.
 
     :param total_loss: :math:`\Delta p_\mathrm{t}` or
-        :math:`\Delta p_{tot,n}`, in Pa.
+        :math:`\Delta p_{\mathrm{tot},n}`, in Pa.
     :param inlet_dynamic_pressure_pa: :math:`p_\mathrm{d1}` or
-        :math:`p_\mathrm{dn}`, in Pa.
+        :math:`p_{\mathrm{d}n}`, in Pa.
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If the loss is not finite, or if the dynamic pressure
         is not positive and finite.

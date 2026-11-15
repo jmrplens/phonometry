@@ -807,3 +807,46 @@ def test_a_key_passed_to_a_measurement_is_accounted_for() -> None:
     svg.text_width("$L_{n,sum}$", 20, upright=("L_x",))
     with pytest.raises(ValueError, match=r"slope keys \['L_x'\] set no subscript"):
         svg.render("A title")
+
+
+def test_the_running_index_n_of_iso_7235_is_italic_beside_its_upright_descriptors() -> (
+    None
+):
+    # ISO 7235:2003, 6.5.2.2.2, Equations (15) to (17) (BS EN ISO 7235:2009,
+    # PDF page 38, folio 28), print every subscript upright, the running
+    # index n of the flow rate q_Vn included. ISO 80000-2 decides n: it is an
+    # index and italic, while tot, s, d, 1 and the series I and II stay
+    # upright as the print sets them.
+    assert _math_runs("$Δp_{tot,n}$")[1:] == [
+        ("p", True, 0.0, 1.0),
+        ("tot,", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    assert _math_runs("$Δp_{sn}$")[2:] == [
+        ("s", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    assert _math_runs("$p_{dn}$")[1:] == [
+        ("d", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    assert _math_runs("$p_{s1(II)n}$", ("p_II",))[1:] == [
+        ("s1(II)", False, 0.22, 0.70),
+        ("n", True, 0.22, 0.70),
+    ]
+    # The split hangs on the symbol: under another one the run is an index.
+    assert _math_runs("$x_{dn}$")[1:] == [("dn", True, 0.22, 0.70)]
+
+
+def test_the_silencer_plate_typesets_the_fundamental_method_equations() -> None:
+    """The plate carries Equations (15) to (17) of ISO 7235, n italic in each."""
+    from diagrams.registry import DIAGRAMS
+
+    builder, title, height = DIAGRAMS["diagram_silencer_pressure_loss"]
+    svg = SVG(900, height, LIGHT)
+    builder(svg, LIGHT)
+    markup = svg.render(title)
+    for number in ("(15)", "(16)", "(17)"):
+        assert re.search(rf"<!-- \$[^<]*\$\s+{re.escape(number)} -->", markup), number
+    assert "Δp_{tot,n}" in markup
+    assert "p_{dn}" in markup

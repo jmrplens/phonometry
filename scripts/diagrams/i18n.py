@@ -3432,6 +3432,7 @@ _ES: dict[str, str] = {
     "Simplified method (6.5.2.1): five flow rates, the lowest giving a pressure difference above 10 Pa,": "Método simplificado (6.5.2.1): cinco caudales, el menor con una diferencia de presión de más de 10 Pa,",
     "and $q_V$ corrected by Equations (9) and (10) when $ρ_1/ρ_2$ is outside 0.98 to 1.02": "y $q_V$ corregido con las Ecuaciones (9) y (10) cuando $ρ_1/ρ_2$ queda fuera de 0,98 a 1,02",
     "Equations of the simplified method (6.5.2.1)": "Ecuaciones del método simplificado (6.5.2.1)",
+    "Equations of the fundamental method (6.5.2.2.2), at a flow rate $q_{Vn}$ in the middle of the range": "Ecuaciones del método fundamental (6.5.2.2.2), con un caudal $q_{Vn}$ de la mitad del intervalo",
     "sealed, lined loudspeaker box": "caja de altavoces estanca",
     "modal filter": "filtro modal",
     "transition": "transición",

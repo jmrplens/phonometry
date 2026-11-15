@@ -489,10 +489,16 @@ _MIXED_SCRIPTS: dict[str, str] = {
 #: ISO 9614 and ISO 15186 keeps both letters italic, two quantities. ISO 11820
 #: prints its level differences ``D_tps`` and ``D_ips`` (3.1, 3.2, PDF page 8,
 #: folio 8) with an upright t, i and s (transmission, insertion, silencer)
-#: around the italic p of the pressure.
+#: around the italic p of the pressure. ISO 7235:2003, 6.5.2.2.2, Equations
+#: (15) to (17) (BS EN ISO 7235:2009, PDF page 38, folio 28), print
+#: ``Δp_sn`` and ``p_dn`` with every letter upright, the running index n of
+#: the flow rate ``q_Vn`` included; ISO 80000-2 decides the n, an index and
+#: italic, beside the upright s (static) and d (dynamic) the print sets.
 _MIXED_SCRIPTS_OF: dict[str, dict[str, str]] = {
     "D": {"ips": "uvu", "tps": "uvu"},
     "L": {"pI": "vu", "pII": "vuu"},
+    "Δp": {"sn": "uv"},
+    "p": {"dn": "uv"},
 }
 
 #: No base-qualified runs: what a script that hangs from no listed symbol gets.

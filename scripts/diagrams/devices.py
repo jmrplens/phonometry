@@ -6794,6 +6794,10 @@ def _d_free_field_traverses(s: SVG, th: Theme) -> None:
 #: key of Figure 6 and Equations (13), (14) and 6.5.2.2.1).
 _LOSS_UPRIGHT = ("d_e", "t_b", "p_d")
 
+#: The series I and II of the two runs, upright in the static pressures
+#: ``p_s1(I)n`` and ``p_s1(II)n`` of ISO 7235 Equation (15), as printed.
+_SERIES_UPRIGHT = ("p_I", "p_II")
+
 
 def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
     """The ISO 7235 total-pressure-loss rig of 6.5, both series on one axis.
@@ -6810,7 +6814,11 @@ def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
     rules: the two series of the fundamental method (6.5.2.2) at five flow
     rates or more and its Equations (15) to (17), and the simplified method
     of 6.5.2.1 with its 10 Pa floor, its 0.98 to 1.02 density window and its
-    Equations (11), (12) and (14), which the strip at the foot carries.
+    Equations (11), (12) and (14). Two strips at the foot carry the equations
+    of each method: (11), (12) and (14) of the simplified one, and (15) to
+    (17) of the graphical evaluation of 6.5.2.2.2 at the flow rate ``q_Vn``,
+    whose running index n the print sets upright and the plate sets italic,
+    an index by ISO 80000-2 (docs/contributing/docstrings.md#d18).
     """
     x_fan = 82.0
     x_fm, w_fm = 132.0, 50.0
@@ -6829,8 +6837,8 @@ def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
 
     for row, (y, title, obj, colour) in enumerate(
         (
-            (190.0, "Series I: test object installed", "test object", th.primary),
-            (402.0, "Series II: substitution duct", "substitution duct", th.secondary),
+            (150.0, "Series I: test object installed", "test object", th.primary),
+            (362.0, "Series II: substitution duct", "substitution duct", th.secondary),
         )
     ):
         ax = y + duct_h / 2
@@ -6919,7 +6927,7 @@ def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
             span(x_ob + w_ob, x_p2, y - 16, "> 6 $t_b$", th.fg)
 
     # --- the section at plane 1 ---------------------------------------------
-    x_s, y_s, side = 70.0, 572.0, 104.0
+    x_s, y_s, side = 70.0, 532.0, 104.0
     s.rect(x_s - 10, y_s - 10, side + 20, side + 20, "none", th.accent, rx=14, sw=1.4)
     s.rect(x_s, y_s, side, side, th.panel, th.fg, sw=2.2)
     s.rect(x_s + 9, y_s + 9, side - 18, side - 18, "none", th.muted, sw=1.1, dash="3,3")
@@ -6950,7 +6958,7 @@ def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
         s.circle(cx, cy, 5, th.accent)
     s.text(x_s + side / 2, y_s + side + 32, "section at plane 1", 12, th.muted)
 
-    x_n, y_n = 222.0, 566.0
+    x_n, y_n = 222.0, 526.0
     notes = (
         (
             "Plane 1, 1.5 $d_e$ ahead of the object: four taps joined in a piezometric ring",
@@ -7001,18 +7009,18 @@ def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
             upright=_LOSS_UPRIGHT,
         )
 
-    # The strip carries the simplified method's equations, named as such: the
-    # fundamental method evaluates with Equations (15) to (17) instead.
+    # The first strip carries the simplified method's equations, named as
+    # such; the second, below it, the fundamental method's (15) to (17).
     s.text(
         50,
-        744,
+        704,
         "Equations of the simplified method (6.5.2.1)",
         12,
         th.fg,
         anchor="start",
         bold=True,
     )
-    y_f = 778.0
+    y_f = 738.0
     s.rect(50, y_f - 24, 800, 38, th.panel, th.muted, rx=6, sw=1.2)
     s.text(70, y_f, "$p_t = p_s + ρ·(q_V/S)^2/2$  (11)", 13, th.fg, anchor="start")
     s.text(
@@ -7031,4 +7039,44 @@ def _d_silencer_pressure_loss(s: SVG, th: Theme) -> None:
         th.fg,
         anchor="end",
         upright=_LOSS_UPRIGHT,
+    )
+
+    # Equations (15) to (17) of 6.5.2.2.2, at the flow rate q_Vn in the middle
+    # of the range: tot, s, d, 1 and the series I and II upright as printed,
+    # and the running index n italic.
+    s.text(
+        50,
+        786,
+        "Equations of the fundamental method (6.5.2.2.2), at a flow rate $q_{Vn}$ "
+        "in the middle of the range",
+        12,
+        th.fg,
+        anchor="start",
+        bold=True,
+    )
+    y_g = 820.0
+    s.rect(50, y_g - 24, 800, 38, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(
+        70,
+        y_g,
+        "$Δp_{tot,n} = Δp_{sn} = p_{s1(I)n} − p_{s1(II)n}$  (15)",
+        13,
+        th.fg,
+        anchor="start",
+        upright=_SERIES_UPRIGHT,
+    )
+    s.text(
+        560,
+        y_g,
+        "$p_{dn} = ρ_{1n}·(q_{Vn}/S_1)^2/2$  (16)",
+        13,
+        th.fg,
+    )
+    s.text(
+        830,
+        y_g,
+        "$ζ = Δp_{tot,n}/p_{dn}$  (17)",
+        13,
+        th.fg,
+        anchor="end",
     )

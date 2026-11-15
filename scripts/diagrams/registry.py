@@ -1242,7 +1242,7 @@ DIAGRAMS = {
     "diagram_silencer_pressure_loss": (
         _d_silencer_pressure_loss,
         "How the pressure loss of a silencer is measured (ISO 7235, 6.5)",
-        812,
+        856,
     ),
     "diagram_silencer_in_situ": (
         _d_silencer_in_situ,

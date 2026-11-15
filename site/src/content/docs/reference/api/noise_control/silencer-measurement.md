@@ -1033,14 +1033,16 @@ at, because it grows as the square of the velocity. Dividing by the
 velocity head of Equation (13) takes that out and leaves a number that
 belongs to the object: how many velocity heads it costs to push air
 through it. Equation (17) is the same division with the mid-range point
-of the fundamental method, $\Delta p_{tot,n} / p_{dn}$.
+of the fundamental method, $\Delta p_{\mathrm{tot},n} / p_{\mathrm{d}n}$,
+whose running index $n$ ISO 7235 prints upright and this module sets
+italic, an index.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `total_loss` | $\Delta p_\mathrm{t}$ or $\Delta p_{tot,n}$, in Pa. |
-| `inlet_dynamic_pressure_pa` | $p_\mathrm{d1}$ or $p_\mathrm{dn}$, in Pa. |
+| `total_loss` | $\Delta p_\mathrm{t}$ or $\Delta p_{\mathrm{tot},n}$, in Pa. |
+| `inlet_dynamic_pressure_pa` | $p_\mathrm{d1}$ or $p_{\mathrm{d}n}$, in Pa. |
 
 **Returns:** $\zeta$, dimensionless.
 

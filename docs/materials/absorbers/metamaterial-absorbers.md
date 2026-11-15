@@ -293,7 +293,7 @@ with the model's visco-thermal effective fluids. At the design slit height
 the standing wave collapses and the tone dies inside the panel; at 1.7 times
 the height the loss balance breaks and the reflection rebuilds it.
 
-**Video:** [Inside the slow-sound slit absorber in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_slit_absorber.webm): A 300 Hz plane tone in a 2D FDTD tube meets the meshed critical-coupling cell, its 0.98 mm slit and Helmholtz resonator resolved on the grid and shown in a zoomed panel. At the design slit height the pressure envelope stays flat and the annotated library absorption is 1.00; the 1.7 times wider slit stands a deep wave in front of the panel and the absorption drops to 0.34.
+**Video:** [Inside the slow-sound slit absorber in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_slit_absorber.webm): A 300 Hz plane tone in a 2D FDTD tube meets the meshed critical-coupling cell, its 0.98 mm slit and Helmholtz resonator resolved on the grid and shown in a zoomed panel. At the design slit height the pressure envelope stays flat and the annotated library absorption is 1.00; the 1.7 times wider slit stands a deep wave in front of the panel and the absorption drops to 0.34.
 
 ### Off normal incidence
 

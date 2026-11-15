@@ -463,7 +463,7 @@ reverberation-room alternative of
 [ISO 3741](sound-power-reverberation.md), and both
 end on the same $L_W$.
 
-**Video:** [Same source, two rooms, one sound power](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_power_two_rooms.webm): The same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W.
+**Video:** [Same source, two rooms, one sound power](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_power_two_rooms.webm): The same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W.
 
 **Sound power level (Clause 8).** The band sound power level is the
 surface-averaged pressure level plus the surface term and the corrections:

@@ -132,7 +132,7 @@ corridor for 81 % of them, because a 200 ms burst always fills at least part
 of a block and often fills one completely, and a full block reads the steady
 level, 1.0 dB above the target.
 
-**Video:** [The same tone burst slid across a 125 ms block boundary](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_block_vs_exponential.webm): A 4 kHz tone burst slides across the boundary between two 125 ms integration blocks. The exponential Fast envelope peaks at the same level at every alignment because the burst duration enters its differential equation, while the block Leq staircase rises and falls with where the burst happens to land, and the reading-against-alignment panel builds up both traces against the shaded class 1 corridor. The second act repeats it for a 200 ms burst, where the corridor is half as wide.
+**Video:** [The same tone burst slid across a 125 ms block boundary](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_block_vs_exponential.webm): A 4 kHz tone burst slides across the boundary between two 125 ms integration blocks. The exponential Fast envelope peaks at the same level at every alignment because the burst duration enters its differential equation, while the block Leq staircase rises and falls with where the burst happens to land, and the reading-against-alignment panel builds up both traces against the shaded class 1 corridor. The second act repeats it for a 200 ms burst, where the corridor is half as wide.
 
 *The exponential trace is flat because $10\lg(1-\mathrm{e}^{-T_\mathrm{b}/\tau})$ contains
 $T_\mathrm{b}$ and nothing about the clock; the block trace, at this fixed
@@ -226,7 +226,7 @@ independent evidence and the reading the library implements. Where that reading
 changes a number the library reports, the entry names the check or test that
 pins it; where it does not, because the defect is a label, a cross-reference or
 a table the library never reads, the entry says so instead. There are
-352 of them now, across standards, guidance documents, textbooks
+359 of them now, across standards, guidance documents, textbooks
 and journal papers, each marked as reported to the issuing body or not. A defect listed there is never a defect of the
 method: in every case the intended reading could be established from the
 document itself or from physics.

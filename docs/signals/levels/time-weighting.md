@@ -61,7 +61,7 @@ that is why level analyses discard the first instants of a recording.
   increasing portions of the signal and a 1500 ms time constant for decreasing
   portions.
 
-**Video:** [The Fast, Slow and Impulse detector ballistics](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_time_weighting.webm): A tone burst drives the RC exponential detector: the capacitor charges and drains while the Fast, Slow and Impulse meter needles follow their own ballistics, and the three level traces build up below to show the fast attack, the slow average and the asymmetric impulse hold.
+**Video:** [The Fast, Slow and Impulse detector ballistics](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_time_weighting.webm): A tone burst drives the RC exponential detector: the capacitor charges and drains while the Fast, Slow and Impulse meter needles follow their own ballistics, and the three level traces build up below to show the fast attack, the slow average and the asymmetric impulse hold.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
 

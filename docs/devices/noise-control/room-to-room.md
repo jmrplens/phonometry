@@ -487,7 +487,7 @@ transmission loss the calculation used. Each path shrinks at every element
 and junction it crosses, which is why no single one has to be large for the
 sum of the three to dominate a good partition.
 
-**Video:** [Energy pulses over the direct and flanking paths](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_flanking_paths.webm): Energy pulses leave the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, and every path label lights up as its pulse re-radiates into the receiving room.
+**Video:** [Energy pulses over the direct and flanking paths](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_flanking_paths.webm): Energy pulses leave the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, and every path label lights up as its pulse re-radiates into the receiving room.
 
 `DesignCriterion.flanking_penalty` is the explicit debit for that, in
 decibels off the

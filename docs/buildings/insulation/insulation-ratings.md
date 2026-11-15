@@ -185,11 +185,12 @@ whose unfavourable sum still exceeded 32.0 dB, and the next shift after the
 answer, which is legal but wastes the allowance. The clip walks both engines
 through those steps on the two worked spectra of this page.
 
-**Video:** [Shifting the ISO 717 reference curve until it just fits](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_iso717_shift.webm): The reference curve steps in 1 dB increments toward the measured spectrum while the unfavourable deviations shade in band by band and their sum falls toward the 32.0 dB cap. The airborne engine stops at 31.8 dB for Rw = 30 dB, one step before the position that would waste the allowance; the impact engine then runs the same rule with the deviation's sign reversed, the curve stepping upward and stopping at 28.0 dB for Ln,w = 79 dB.
+**Video:** [Shifting the ISO 717 reference curve until it just fits](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_iso717_shift.webm): The reference curve steps in 1 dB increments toward the measured spectrum while the unfavourable deviations shade in band by band and their sum falls toward the 32.0 dB cap. The airborne engine stops at 31.8 dB for Rw = 30 dB, one step before the position that would waste the allowance; the impact engine then runs the same rule with the deviation's sign reversed, the curve stepping upward and stopping at 28.0 dB for Ln,w = 79 dB.
 
 *Both walks stop where the standard says: at the largest unfavourable sum that
 does not exceed 32.0 dB. The step before it is rejected for overshooting the
-cap, and the step after it is legal but reads a decibel lower for no reason,
+cap, and the step after it is legal but rates the element a decibel worse (a
+lower $R_\mathrm{w}$, a higher $L_\mathrm{n,w}$) for no reason,
 which is what "as large as possible" in ISO 717-1:2020, 4.4 and
 ISO 717-2:2020, 4.3.1 excludes.*
 

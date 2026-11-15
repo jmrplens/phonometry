@@ -648,7 +648,7 @@ does it again. Successive round trips either shrink, in which case the sum of
 all of them is finite, or they do not, in which case there is no sum. Watching
 the copies is the whole argument.
 
-**Video:** [One burst going round the reinforcement loop, three times over](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_feedback_howl.webm): A burst circulates the loudspeaker-to-microphone path while each returning copy is drawn as a stem and the running total of all copies so far is plotted. With Long's 10 dB margin each copy is 0.316 of the last and the total settles 3.30 dB above the direct sound; four open microphones add 6 dB and the same loop takes far longer to settle, 8.69 dB up; four more decibels of system gain put the loop gain at unity, the copies stop shrinking and the total climbs without limit.
+**Video:** [One burst going round the reinforcement loop, three times over](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_feedback_howl.webm): A burst circulates the loudspeaker-to-microphone path while each returning copy is drawn as a stem and the running total of all copies so far is plotted. With Long's 10 dB margin each copy is 0.316 of the last and the total settles 3.30 dB above the direct sound; four open microphones add 6 dB and the same loop takes far longer to settle, 8.69 dB up; four more decibels of system gain put the loop gain at unity, the copies stop shrinking and the total climbs without limit.
 
 *Three runs of the same auditorium, all from `feedback_stability` with
 $L_{\mathrm{H}\text{-}\mathrm{M}} = 76$ dB and $L_{\mathrm{H}\text{-}\mathrm{L}} = 80$ dB. The loop gains are

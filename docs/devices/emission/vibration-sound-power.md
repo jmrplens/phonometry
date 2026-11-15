@@ -225,7 +225,7 @@ The attachment is the part that silently costs bandwidth:
 | Attachment | Usable to | Notes |
 | :--- | :--- | :--- |
 | Stud (threaded) | the transducer's own limit | The reference mounting; needs a drilled and faced boss |
-| Adhesive, or a thin layer of adhesive wax | about 10 kHz | Wax not on hot surfaces (it softens well below 40 °C) |
+| Adhesive, or a thin layer of adhesive wax | about 10 kHz | Wax not on hot surfaces (ISO 5348 gives a thin layer of beeswax a maximum of 40 °C) |
 | Clamping magnet | about 2.5 kHz | Smooth flat steel only; a 110 g magnet plus a 30 g transducer also caps the measurable acceleration, and paint or roughness destroys the adhering force |
 | Hand-held probe | low bands only | For a quick survey, never for a determination |
 
@@ -274,7 +274,7 @@ coincidence would be the only thing in the air and would teach the opposite of
 the truth. It then runs the same scene twice, at $f_\mathrm{c}/2$ and at $2f_\mathrm{c}$, with
 nothing differing between the panels but the drive frequency.
 
-**Video:** [A steel plate driven below and above its coincidence frequency](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_radiation_efficiency.webm): A bending wave runs to the right along a steel plate with air above it. In the lower-frequency panel the plate ripples with a wavelength shorter than the sound wavelength and the pressure above it forms alternating lobes that cling to the plate and fade out within a few centimetres, so nothing leaves. In the higher-frequency panel the plate ripples with a longer wavelength and a plane beam of pressure departs at forty-five degrees along the whole driven span, growing as it goes.
+**Video:** [A steel plate driven below and above its coincidence frequency](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_radiation_efficiency.webm): A bending wave runs to the right along a steel plate with air above it. In the lower-frequency panel the plate ripples with a wavelength shorter than the sound wavelength and the pressure above it forms alternating lobes that cling to the plate and fade out within a few centimetres, so nothing leaves. In the higher-frequency panel the plate ripples with a longer wavelength and a plane beam of pressure departs at forty-five degrees along the whole driven span, growing as it goes.
 
 Below coincidence the bending wavelength is **shorter** than the acoustic one.
 Adjacent half-waves of the plate push and pull the same air in antiphase, and
@@ -509,6 +509,8 @@ Sound power from vibration fiche (VibrationSoundPowerResult.report), an ISO/TS 7
 
 - **Cremer, L., Heckl, M., & Petersson, B. A. T. (2005).** *Structure-borne sound: Structural vibrations and sound radiation at audio frequencies* (3rd ed.). Springer. https://doi.org/10.1007/b137728
   The radiation-efficiency treatment behind section 3: coincidence, the cancellation below the critical frequency and the radiation of finite plates. ISBN 978-3-540-22696-3.
+- **International Organization for Standardization. (1998).** *Mechanical vibration and shock — Mechanical mounting of accelerometers* (ISO 5348:1998).
+  The mounting the page asks for: the characteristic responses of Figures 5 to 10, and the maximum of 40 °C Figure 10 gives a thin layer of beeswax. The edition read is its unchanged German adoption DIN ISO 5348:1999-07; since revised as ISO 5348:2021 (https://www.iso.org/standard/78160.html).
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
   The upper-limit method with ε = 1: the radiated power P = Z_c⟨v²⟩Sε (Formula 6), the velocity level and its calibration (Formulae 3, 8), the mean over the surface (Formulae 10/11), the extraneous correction (Table 2) and the sound power level with the fixed impedance term (Formula 12). Conformance is anchored on the standard's own worked calibration example.
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor*](https://www.iso.org/standard/40538.html) (ISO/TS 7849-2:2009).

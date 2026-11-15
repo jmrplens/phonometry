@@ -388,7 +388,7 @@ direct wave and its ground reflection. Below, a 400 Hz source 1.5 m above a
 rigid plane forms the lobe pattern, with the image source ghosted below the
 ground and a receiver sitting in an interference dip.
 
-**Video:** [Ground-effect interference over rigid ground (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_ground_effect.webm): A 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground. The direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level sampled on an 8 metre arc converges to the two-path image-source model with its predicted nulls.
+**Video:** [Ground-effect interference over rigid ground (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_ground_effect.webm): A 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground. The direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level sampled on an 8 metre arc converges to the two-path image-source model with its predicted nulls.
 
 The start-of-roll directivity is the lobed rearward radiation of jet-exhaust
 noise: strongest near an azimuth $\psi \approx 120°$ from the nose, falling

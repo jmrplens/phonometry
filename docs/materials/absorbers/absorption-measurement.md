@@ -416,7 +416,7 @@ section 4 puts a number on it: because $\alpha_\mathrm{s}$ is a difference of tw
 reciprocal decay times, its uncertainty is worst exactly where the two decays
 are most alike, at the low-frequency end.
 
-**Video:** [Schroeder backward integration of the squared impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_schroeder.webm): The tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis, ending with the T20 and T30 regression lines.
+**Video:** [Schroeder backward integration of the squared impulse response](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_schroeder.webm): The tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis, ending with the T20 and T30 regression lines.
 
 A room volume below the 150 m³ minimum or a
 sample area outside 10–12 m² raises an advisory `AbsorptionWarning`; the result

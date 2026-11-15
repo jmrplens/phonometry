@@ -33,7 +33,7 @@ adjustment "for sounds with onset rates larger than 10 dB/s" only):
 warns about them, and never lets them set the governing prominence or a
 $K_\mathrm{I}$ (the adjustment is 0 dB when no event qualifies).
 
-**Video:** [Detecting an impulse onset in the level history](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_onset_detection.webm): A magnifier scans the A-weighted Fast level history L_AF; where the level climbs faster than 10 dB/s the onset stretch is highlighted, and the onset rate (200 dB/s), level difference (30 dB), prominence P and adjustment KI boxes light up in turn.
+**Video:** [Detecting an impulse onset in the level history](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_onset_detection.webm): A magnifier scans the A-weighted Fast level history L_AF; where the level climbs faster than 10 dB/s the onset stretch is highlighted, and the onset rate (200 dB/s), level difference (30 dB), prominence P and adjustment KI boxes light up in turn.
 
 ```python
 from phonometry import environment

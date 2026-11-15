@@ -210,7 +210,7 @@ reflected and transmitted waves this section prices at $\tau_{12}(0°) = 0.5$.
 The fast in-plane precursor racing down the receiving plate is the mode
 conversion the pinned-junction model deliberately leaves out.
 
-**Video:** [Bending waves at an L-junction in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_plate_junction.webm): A 4 kHz tone-burst force launches a bending-wave packet along a 10 mm steel plate. On the straight control plate the packet just runs on and nothing returns. At an L-junction with an identical perpendicular plate it splits: part reflects, part turns the corner as a bending wave descending the vertical plate, and a faster in-plane precursor races ahead, with the closed-form transmission coefficient of 0.50 at normal incidence and the diffuse vibration reduction index of 5.2 dB annotated.
+**Video:** [Bending waves at an L-junction in a 2D elastic FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_elastic_plate_junction.webm): A 4 kHz tone-burst force launches a bending-wave packet along a 10 mm steel plate. On the straight control plate the packet just runs on and nothing returns. At an L-junction with an identical perpendicular plate it splits: part reflects, part turns the corner as a bending wave descending the vertical plate, and a faster in-plane precursor races ahead, with the closed-form transmission coefficient of 0.50 at normal incidence and the diffuse vibration reduction index of 5.2 dB annotated.
 
 ## 3. Diffuse-field angular average
 

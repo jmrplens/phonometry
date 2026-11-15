@@ -67,7 +67,7 @@ on, so the depth $(\max - \min)/(\max + \min)$ you can measure off the screen
 mean, which is the whole point: a sound level meter pointed at any frame of
 this clip reads the same number, and the index does not.
 
-**Video:** [Reverberation and noise taking apart a speech-rate envelope](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_modulation_transfer.webm): A fully modulated four-hertz intensity envelope is received through the one-kilohertz octave band of a room. As the reverberation time sweeps from 0.30 to 2.50 seconds the peaks fall and the valleys fill toward a mean line that never moves, and the measured modulation depth falls from 0.90 to 0.26; the modulation transfer curve beside it drops at every one of the fourteen modulation frequencies, the seven band modulation transfer indices fall with it and the speech transmission index walks from 0.84 down to 0.40. Then, at a fixed one-second reverberation time, the speech-to-noise ratio sweeps from 25 to 0 decibels: a shaded noise floor rises under the trace instead, the mean still does not move, and the depth falls again to 0.28 for a speech transmission index of 0.36.
+**Video:** [Reverberation and noise taking apart a speech-rate envelope](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_modulation_transfer.webm): A fully modulated four-hertz intensity envelope is received through the one-kilohertz octave band of a room. As the reverberation time sweeps from 0.30 to 2.50 seconds the peaks fall and the valleys fill toward a mean line that never moves, and the measured modulation depth falls from 0.90 to 0.26; the modulation transfer curve beside it drops at every one of the fourteen modulation frequencies, the seven band modulation transfer indices fall with it and the speech transmission index walks from 0.84 down to 0.40. Then, at a fixed one-second reverberation time, the speech-to-noise ratio sweeps from 25 to 0 decibels: a shaded noise floor rises under the trace instead, the mean still does not move, and the depth falls again to 0.28 for a speech transmission index of 0.36.
 
 Two mechanisms, one quantity. Reverberation smears energy across the gaps, so the envelope shrinks about its mean; steady noise fills the gaps from below, so a floor rises under it. Neither changes the average level, and both destroy the contrast a listener segments syllables by.
 
@@ -332,7 +332,7 @@ verification test bench** signals from [stipa.info](https://stipa.info/)
 (Embedded Acoustics BV): the direct-method modulation-depth staircase
 (Annex C.3.2), the indirect-method exponential decays against the closed-form
 Schroeder MTF (C.3.3), the filter-bank slope test with a +41 dB unmodulated
-adjacent-octave tone (C.4.2, $m \ge 0.5$), the weighting-factor band pairs (A.2.2)
+adjacent-octave tone (C.4.2, $m \ge 0.5$), the weighting-factor band pairs (A.2.2 of Edition 5)
 and the filter-bank phase-distortion test with half-octave edge carriers
 (A.3.1.2, |STI bias| < 0.01 over TI = 0.1–0.9). All five suites pass with the
 level-dependent features disabled, as the bench prescribes. The 49 certified
@@ -540,7 +540,7 @@ arithmetically, in four steps and without a second visit:
 3. **Reapply.** Multiply by the correction the operational levels produce,
    putting the occupancy noise, masking and threshold of the simulated
    condition in.
-4. **Process.** Run the resulting matrix through the A.5.4 to A.5.6 chain
+4. **Process.** Run the resulting matrix through the A.5.4 to A.5.6 chain of Edition 4
    into the index.
 
 Taking the old condition out before putting the new one in is not ceremony,
@@ -562,13 +562,13 @@ noise correction over the measured matrix again with the occupancy levels
 counts the noise twice, because the measurement's own noise is already in
 there. Note also where the truncation goes. The channel step 2 recovers can
 exceed 1.0 in a band whose correction was strong, and it is not clamped between
-the steps: the $m > 1$ truncation of A.5.3 NOTE 1 is for the matrix about to be
+the steps: the $m > 1$ truncation of A.5.3 NOTE 1 of Edition 4 is for the matrix about to be
 processed, which is the one step 3 produces. The annex's own example never
 tests that, its recovered matrix peaking at 0.997, but a measurement whose
 correction bites harder would.
 
 For the library the two steps are also one piece of code, which is the other
-reason to keep them apart. Step 2 divides by the same clause A.5.3 factor a
+reason to keep them apart. Step 2 divides by the same factor of Edition 4 clause A.5.3 a
 forward measurement multiplies by and step 3 multiplies by it, so the masking
 of Table A.2 and the threshold of Table A.3 have a single implementation and
 the adjustment cannot drift away from the measurement it adjusts.
@@ -718,7 +718,7 @@ one. Neither of those is visible in the index.
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `mtf` | (7, n) array | — | ≥ 0, finite | The matrix as measured, noise and masking included; values above 1 are truncated to 1, and above 1.3 warn that the measurement is likely invalid (A.5.3 NOTE 1) |
+| `mtf` | (7, n) array | — | ≥ 0, finite | The matrix as measured, noise and masking included; values above 1 are truncated to 1, and above 1.3 warn that the measurement is likely invalid (Edition 4, A.5.3 NOTE 1) |
 | `measured_levels` | 7-vector | dB SPL | required | Speech band levels during the measurement |
 | `measured_ambient` | 7-vector, optional | dB SPL | default `None` | Background-noise band levels during the measurement |
 | `operational_levels` | 7-vector | dB SPL | required | Speech band levels of the condition simulated |
@@ -741,7 +741,7 @@ one. Neither of those is visible in the index.
 
 - **Covered.** IEC 60268-16:2020 (Edition 5) for the male speech option, the only one Edition
   5 keeps: the modulation transfer function and the m to STI mapping (clauses
-  A.5.2 to A.5.6), the full-STI indirect method from a measured impulse response
+  A.5.2 to A.5.6 of Edition 4), the full-STI indirect method from a measured impulse response
   via `speech.sti_from_impulse_response()`, the direct STIPA method of Annex B
   via `speech.stipa_signal()` and `speech.stipa()`, the Ed.5 male test-signal
   spectrum of clause A.6.1, the level-dependent auditory masking and reception

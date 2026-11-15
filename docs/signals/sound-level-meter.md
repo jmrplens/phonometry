@@ -121,7 +121,7 @@ laf_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
 # laf_t peaks near 80 dB during the event and settles near 55 dB between.
 ```
 
-**Video:** [The Fast, Slow and Impulse detector ballistics](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_time_weighting.webm): A tone burst drives the RC exponential detector: the capacitor charges and drains while the Fast, Slow and Impulse meter needles follow their own ballistics, and the three level traces build up below to show the fast attack, the slow average and the asymmetric impulse hold.
+**Video:** [The Fast, Slow and Impulse detector ballistics](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_time_weighting.webm): A tone burst drives the RC exponential detector: the capacitor charges and drains while the Fast, Slow and Impulse meter needles follow their own ballistics, and the three level traces build up below to show the fast attack, the slow average and the asymmetric impulse hold.
 
 The needle in the clip is that `time_weighting` call: a first-order low-pass
 charging and draining on the squared signal. The three needles differ in one

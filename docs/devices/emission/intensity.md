@@ -172,7 +172,7 @@ The same contrast plays out dynamically below: the pressure and velocity
 phasors of a progressive and a standing wave, with the instantaneous
 intensity averaging to a net flow in one case and to zero in the other.
 
-**Video:** [Instantaneous intensity phasors: progressive versus standing wave](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_instantaneous_intensity.webm): A two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave.
+**Video:** [Instantaneous intensity phasors: progressive versus standing wave](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_instantaneous_intensity.webm): A two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave.
 
 ## Knowing when to trust the number
 
@@ -352,7 +352,7 @@ plt.show()
 
 </details>
 
-**Video:** [Intensity scanning over a measurement box](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_intensity_scan_power.webm): A p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W.
+**Video:** [Intensity scanning over a measurement box](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_intensity_scan_power.webm): A p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W.
 
 ### The margin over the residual index
 

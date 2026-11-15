@@ -267,7 +267,7 @@ print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
 
 Three more decibels at 63 Hz, and the reflection coefficient rises with it.
 
-**Video:** [The open end of a duct in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_open_end.webm): A 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19.
+**Video:** [The open end of a duct in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_open_end.webm): A 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19.
 
 *Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
 inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.

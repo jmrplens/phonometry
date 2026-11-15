@@ -464,17 +464,18 @@ The errata register has one page per document family, each with the defects foun
 - [Errata in ANSI S1.4](https://docs.jmrp.io/phonometry/reference/errata/ansi-s1-4/): 1 entry
 - [Errata in ANSI S3.5](https://docs.jmrp.io/phonometry/reference/errata/ansi-s3-5/): 2 entries
 - [Errata in ASHRAE (2019)](https://docs.jmrp.io/phonometry/reference/errata/ashrae/): 1 entry
-- [Errata in Attenborough & Van Renterghem (2021)](https://docs.jmrp.io/phonometry/reference/errata/attenborough-van-renterghem/): 2 entries
+- [Errata in Attenborough & Van Renterghem (2021)](https://docs.jmrp.io/phonometry/reference/errata/attenborough-van-renterghem/): 3 entries
 - [Errata in Barham, Barrera-Figueroa & Avison (2014)](https://docs.jmrp.io/phonometry/reference/errata/barham-barrera-figueroa-avison/): 1 entry
 - [Errata in Bies, Hansen & Howard (2017)](https://docs.jmrp.io/phonometry/reference/errata/bies-hansen-howard/): 4 entries
 - [Errata in Cox & D'Antonio (2017)](https://docs.jmrp.io/phonometry/reference/errata/cox-dantonio/): 3 entries
-- [Errata in DIN 4150](https://docs.jmrp.io/phonometry/reference/errata/din-4150/): 15 entries
+- [Errata in DIN 4150](https://docs.jmrp.io/phonometry/reference/errata/din-4150/): 16 entries
 - [Errata in DIN 45669](https://docs.jmrp.io/phonometry/reference/errata/din-45669/): 2 entries
 - [Errata in DIN 45672](https://docs.jmrp.io/phonometry/reference/errata/din-45672/): 9 entries
 - [Errata in DIN 45681](https://docs.jmrp.io/phonometry/reference/errata/din-45681/): 2 entries
 - [Errata in Directive (EU) 2015/996](https://docs.jmrp.io/phonometry/reference/errata/directive-eu-2015-996/): 6 entries
 - [Errata in ECAC Doc 29](https://docs.jmrp.io/phonometry/reference/errata/ecac-doc-29/): 5 entries
-- [Errata in ECMA-418](https://docs.jmrp.io/phonometry/reference/errata/ecma-418/): 8 entries
+- [Errata in ECMA-418](https://docs.jmrp.io/phonometry/reference/errata/ecma-418/): 11 entries
+- [Errata in EN 15461](https://docs.jmrp.io/phonometry/reference/errata/en-15461/): 1 entry
 - [Errata in EN 15610](https://docs.jmrp.io/phonometry/reference/errata/en-15610/): 2 entries
 - [Errata in EN 15657](https://docs.jmrp.io/phonometry/reference/errata/en-15657/): 1 entry
 - [Errata in EN 16272](https://docs.jmrp.io/phonometry/reference/errata/en-16272/): 1 entry
@@ -548,7 +549,7 @@ The errata register has one page per document family, each with the defects foun
 - [Errata in Norton & Karczub (2003)](https://docs.jmrp.io/phonometry/reference/errata/norton-karczub/): 5 entries
 - [Errata in Osses, García & Kohlrausch (2016)](https://docs.jmrp.io/phonometry/reference/errata/osses-garcia-kohlrausch/): 1 entry
 - [Errata in RANDI 3.1 Physics Description](https://docs.jmrp.io/phonometry/reference/errata/randi/): 1 entry
-- [Errata in Real Decreto 1367/2007](https://docs.jmrp.io/phonometry/reference/errata/real-decreto-1367-2007/): 1 entry
+- [Errata in Real Decreto 1367/2007](https://docs.jmrp.io/phonometry/reference/errata/real-decreto-1367-2007/): 2 entries
 - [Errata in Rossing (2014)](https://docs.jmrp.io/phonometry/reference/errata/rossing/): 6 entries
 - [Errata in Southall et al. (2019)](https://docs.jmrp.io/phonometry/reference/errata/southall/): 1 entry
 - [Errata in VDI 2081](https://docs.jmrp.io/phonometry/reference/errata/vdi-2081/): 6 entries

@@ -273,7 +273,7 @@ diffraction alone and none of the finite-impedance ground effect of section 1;
 the coherent four-path model below adds that, and its curve swings tens of
 decibels where this one is smooth.
 
-**Video:** [Barrier diffraction at 100 Hz and 500 Hz (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_barrier.webm): A 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side. The long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB.
+**Video:** [Barrier diffraction at 100 Hz and 500 Hz (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_barrier.webm): A 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side. The long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB.
 
 The thin-screen methods share the same three geometric quantities: the two
 diffracted segments over the edge and the straight path they replace. Drawn on

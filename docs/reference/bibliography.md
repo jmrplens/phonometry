@@ -147,7 +147,7 @@ synchronous averaging, Golay for the complementary pairs.
 - **International Organization for Standardization. (1997).** [*Acoustics — Preferred frequencies*](https://www.iso.org/standard/1350.html) (ISO 266:1997).
   Cited by [Octave and Fractional-Octave Filter Banks](../signals/filters/filter-banks.md).
 - **International Organization for Standardization. (1998).** *Mechanical vibration and shock — Mechanical mounting of accelerometers* (ISO 5348:1998).
-  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md).
+  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md), [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md) and [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md).
 - **International Organization for Standardization. (2015).** *Acoustics. Preferred reference values for acoustical and vibratory levels* (ISO 1683:2015).
   Cited by [Integrated and Statistical Levels](../signals/levels/levels.md) and [Underwater acoustics: radiated noise and pile driving](../underwater/underwater-acoustics.md).
 - **Kirkeby, O., & Nelson, P. A. (1999).** [Digital filter design for inversion problems in sound reproduction](https://aes.org/publications/elibrary-page/?id=12098). *Journal of the Audio Engineering Society*, *47*(7/8), 583-595.
@@ -714,7 +714,7 @@ the transmission physics above them.
   Cited by [Transfer stiffness of resilient elements (ISO 10846)](../vibration/structural/transfer-stiffness.md).
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 1: Survey method using a fixed radiation factor*](https://www.iso.org/standard/40537.html) (ISO/TS 7849-1:2009).
   The upper-limit sound power from surface velocity with ε = 1.
-  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md), [Time synchronous averaging](../signals/spectra/synchronous-averaging.md), [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md) and [Theory: Vibration](theory/vibration.md).
+  Cited by [Cepstrum, echoes and the envelope spectrum](../signals/spectra/cepstrum-echoes.md), [Time synchronous averaging](../signals/spectra/synchronous-averaging.md), [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md), [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md) and [Theory: Vibration](theory/vibration.md).
 - **International Organization for Standardization. (2009).** [*Acoustics — Determination of airborne sound power levels emitted by machinery using vibration measurement — Part 2: Engineering method including determination of the adequate radiation factor*](https://www.iso.org/standard/40538.html) (ISO/TS 7849-2:2009).
   The engineering method with a measured band-wise radiation factor.
   Cited by [Sound power from surface vibration (ISO/TS 7849)](../devices/emission/vibration-sound-power.md) and [Theory: Vibration](theory/vibration.md).

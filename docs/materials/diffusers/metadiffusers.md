@@ -235,7 +235,7 @@ animation below meshes both panels for real (the metadiffuser at 0.25 mm, slits,
 necks and cavities included) and lets the same 2 kHz wavefront hit them: the
 27 cm QRD and the 2 cm panel throw out nearly the same scattered fan.
 
-**Video:** [Schroeder diffuser vs metadiffuser in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_metadiffuser.webm): A 2 kHz plane wavefront hits a Schroeder diffuser with wells down to 27 centimetres and, beside it, the 2 centimetre metadiffuser of the published design, whose real slits, necks and cavities are meshed at 0.25 millimetres. The total field and the persistent scattered envelope show both panels spraying nearly identical diffuse fans, and the receiver-arc diffusion coefficients confirm it quantitatively.
+**Video:** [Schroeder diffuser vs metadiffuser in a 2D FDTD simulation](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_metadiffuser.webm): A 2 kHz plane wavefront hits a Schroeder diffuser with wells down to 27 centimetres and, beside it, the 2 centimetre metadiffuser of the published design, whose real slits, necks and cavities are meshed at 0.25 millimetres. The total field and the persistent scattered envelope show both panels spraying nearly identical diffuse fans, and the receiver-arc diffusion coefficients confirm it quantitatively.
 
 ## 3. The design recipe: phases first, geometry second
 

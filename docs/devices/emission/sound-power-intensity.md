@@ -35,7 +35,7 @@ P_i = \langle I_{\mathrm{n},i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
 L_W = 10 \log_{10}\frac{P}{P_0},\quad P_0 = 1\ \text{pW} .
 $$
 
-**Video:** [Intensity scanning over a measurement box](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_intensity_scan_power.webm): A p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W.
+**Video:** [Intensity scanning over a measurement box](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_intensity_scan_power.webm): A p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W.
 
 ### Running the scan
 

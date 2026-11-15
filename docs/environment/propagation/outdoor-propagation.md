@@ -585,7 +585,7 @@ wave adds to the direct one. Below, a 400 Hz source 1.5 m over rigid ground
 builds the lobe pattern of that interference, and the level sampled on an arc
 converges to the two-path image-source model, dips included.
 
-**Video:** [Ground-effect interference over rigid ground (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_ground_effect.webm): A 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground. The direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level sampled on an 8 metre arc converges to the two-path image-source model with its predicted nulls.
+**Video:** [Ground-effect interference over rigid ground (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_ground_effect.webm): A 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground. The direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level sampled on an 8 metre arc converges to the two-path image-source model with its predicted nulls.
 
 ### `Barrier` and the screening term
 
@@ -603,7 +603,7 @@ over the edge and fills
 the shadow zone, while at 500 Hz the shadow is deep and sharp. A barrier only
 works when the wavelength is short next to the path difference.
 
-**Video:** [Barrier diffraction at 100 Hz and 500 Hz (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_barrier.webm): A 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side. The long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB.
+**Video:** [Barrier diffraction at 100 Hz and 500 Hz (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/a6e56d3504d9485e4e0402fa87ad71260ed8d924/images/anim_fdtd_barrier.webm): A 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side. The long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB.
 
 ### `outdoor_propagation_attenuation()` parameters
 

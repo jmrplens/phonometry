@@ -415,17 +415,17 @@ WATER = Material(c_p=1480.0, c_s=0.0, rho=1000.0)
 
 #: Structural steel, from Bies 5e Table C.1 row "Steel (mild)", PDF page 747
 #: (printed p. 718): rho = 7850 kg/m3 as printed, with the two speeds from the
-#: E = 207 GPa and nu = 0,30 printed beside it.
+#: E = 207 GPa and nu = 0.30 printed beside it.
 STEEL = Material(c_p=5958.0, c_s=3184.7, rho=7850.0)
 
 #: Aluminium, from Bies 5e Table C.1 row "Aluminum sheet", PDF page 747
 #: (printed p. 718): rho = 2700 kg/m3 as printed, with the two speeds from the
-#: E = 70 GPa and nu = 0,35 printed beside it.
+#: E = 70 GPa and nu = 0.35 printed beside it.
 ALUMINUM = Material(c_p=6450.5, c_s=3098.7, rho=2700.0)
 
 #: Dense concrete, from Bies 5e Table C.1 row "Concrete (high strength)", PDF
 #: page 748 (printed p. 719): rho = 2400 kg/m3 as printed, with the two speeds
-#: from the E = 30 GPa and nu = 0,20 printed beside it.
+#: from the E = 30 GPa and nu = 0.20 printed beside it.
 CONCRETE = Material(c_p=3726.8, c_s=2282.2, rho=2400.0)
 
 

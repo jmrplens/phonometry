@@ -549,7 +549,7 @@ def require_positive(value: float, name: str) -> float:
 #: Absolute zero, in degrees Celsius. The bound on a temperature that has to be
 #: a temperature. It is not the same number as the ``-273`` that several ISO 3740
 #: clauses print inside their own ``sqrt(273 + theta)``: those guards protect the
-#: pole of the formula the clause states, which sits 0,15 degC higher, and they
+#: pole of the formula the clause states, which sits 0.15 degC higher, and they
 #: stay where they are.
 ABSOLUTE_ZERO_C = -273.15
 
@@ -563,7 +563,7 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     zero is not a state at all, and the arithmetic below one is not wrong so much as
     meaningless. Left unguarded it does not raise, it returns: a sea-water sound
     speed comes back at -31 457 m/s, and an absorption at -300 degC comes back
-    at a plausible-looking 0,495 dB/km.
+    at a plausible-looking 0.495 dB/km.
 
     :param value: The temperature to validate, in degrees Celsius.
     :param name: Parameter name used in the error message.
@@ -571,7 +571,7 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     :raises TypeError: for a ``value`` that is an array, a text, or something
         else that is not a number.
     :raises ValueError: for a non-finite temperature, or one at or below
-        -273,15 degC.
+        -273.15 degC.
     """
     number = real_number(value, name)
     if not math.isfinite(number) or number <= ABSOLUTE_ZERO_C:
@@ -594,7 +594,7 @@ def require_above_absolute_zero_array(
     :param name: Parameter name used in the error message.
     :return: The temperatures as a ``float64`` array.
     :raises ValueError: if any element is non-finite or at or below
-        -273,15 degC.
+        -273.15 degC.
     :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
     values = real_array(x, name)

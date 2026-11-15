@@ -240,7 +240,7 @@ def impedance_adjustment(
     :param static_pressure_kpa: Aerodrome air pressure ``p``, in kPa (default 101.325 kPa).
     :return: The impedance adjustment, in dB (added to the NPD level).
     :raises ValueError: If the pressure is not positive, the temperature is at
-        or below -273,15 degC, or either input is non-finite.
+        or below -273.15 degC, or either input is non-finite.
     :raises TypeError: if ``static_pressure_kpa`` or ``temperature_c`` is not a single
         number.
     """

@@ -57,11 +57,11 @@ def test_settling_keeps_the_shape() -> None:
 @pytest.mark.parametrize(
     ("value", "decimals", "expected"),
     [
-        (64.1 - 3.6, 0, 61.0),  # 60,5 in decimal
-        (128.2 - 45.7, 0, 83.0),  # 82,5 in decimal
+        (64.1 - 3.6, 0, 61.0),  # 60.5 in decimal
+        (128.2 - 45.7, 0, 83.0),  # 82.5 in decimal
         (2.5, 0, 3.0),
         (-2.5, 0, -2.0),
-        (1.005 * 100.0, 0, 101.0),  # 100,5 in decimal
+        (1.005 * 100.0, 0, 101.0),  # 100.5 in decimal
         (40.65, 1, 40.7),
         (52.35, 1, 52.4),
     ],
@@ -115,7 +115,7 @@ def test_the_net_share_keeps_its_sign_and_its_axis() -> None:
 
 
 def test_a_share_of_a_power_in_watts_settles_on_its_own_scale() -> None:
-    # A half of 1,28e-5 W is 0,5 settled, which nine decimals of a watt
+    # A half of 1.28e-5 W is 0.5 settled, which nine decimals of a watt
     # could not tell from nothing.
     assert float(settled_ratio(3.5e-6 + 2.9e-6, 1.28e-5)) == 0.5
     assert float(settled_ratio(1.0, 0.0)) == 0.0
@@ -132,8 +132,8 @@ def test_a_share_of_a_power_in_watts_settles_on_its_own_scale() -> None:
 @pytest.mark.parametrize(
     ("value", "decimals", "expected"),
     [
-        (30.9 - 15.4, 0, 16.0),  # 15,5 in decimal, under it in binary
-        (30.1 - 15.6, 0, 14.0),  # 14,5 in decimal, over it in binary
+        (30.9 - 15.4, 0, 16.0),  # 15.5 in decimal, under it in binary
+        (30.1 - 15.6, 0, 14.0),  # 14.5 in decimal, over it in binary
         (2.5, 0, 2.0),
         (3.5, 0, 4.0),
         (-2.5, 0, -2.0),

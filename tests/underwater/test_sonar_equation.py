@@ -380,11 +380,11 @@ def test_directivity_index_refuses_what_is_not_an_array(
 
 
 def test_detection_threshold_reproduces_equation_11_22() -> None:
-    """DT50 = 10 log10(log2(1/(2 pfa))) - 0,8 dB, printed on folio 581.
+    """DT50 = 10 log10(log2(1/(2 pfa))) - 0.8 dB, printed on folio 581.
 
     The inner logarithm is base two, not a square: the two are typeset alike
     and the distinction is worth a test of its own, since taking it as a
-    square would give 10,5 dB where the book gives 10,1 at pfa = 1e-4.
+    square would give 10.5 dB where the book gives 10.1 at pfa = 1e-4.
     """
     for p_fa in (1.0e-2, 1.0e-3, 1.0e-4, 1.0e-6):
         expected = 10.0 * math.log10(math.log2(1.0 / (2.0 * p_fa))) - 0.8

@@ -98,7 +98,7 @@ def _a_weighting_corrections(frequencies: NDArray[np.float64]) -> NDArray[np.flo
 #: The 2010 editions of the sound power standards print a different table under
 #: the same title, and it is not this one: ISO 3744:2010 Table A.1 (printed
 #: folio 36) and ISO 3746:2010 Table A.1 (printed folio 24) have eight rows,
-#: adding 0,30 for a room with an absorbing ceiling and bare walls, and they
+#: adding 0.30 for a room with an absorbing ceiling and bare walls, and they
 #: reword two of the seven kept here, saying "right cuboid" where ISO 11546-2
 #: says "rectangular" and "on part of ceiling or walls" where it says "with a
 #: small amount of sound-absorbing material on ceiling or walls". ISO 11202:2010

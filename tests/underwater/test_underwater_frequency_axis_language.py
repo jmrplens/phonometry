@@ -6,7 +6,7 @@
 fixed strings, so the octave labels of these figures are written by
 ``format_frequency_axis`` and by nothing else: a renderer that does not pass
 its ``language`` on draws ``31.5`` in a Spanish figure. Every figure below
-spans 31,5 Hz, the lowest octave centre whose label carries a decimal, because
+spans 31.5 Hz, the lowest octave centre whose label carries a decimal, because
 a label without one proves nothing.
 """
 

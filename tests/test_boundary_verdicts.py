@@ -3,9 +3,9 @@
 
 Every case below puts a quantity exactly on a printed limit in decimal: two
 readings whose difference is the 6 dB of a background criterion, a ratio of
-two areas that is the 0,6 of a range, a mean that is a half. In binary such a
+two areas that is the 0.6 of a range, a mean that is a half. In binary such a
 quantity comes out a few units in the last place off the limit, and which way
-depends on the readings: 32,3 - 26,3 dB lands under 6 dB and 32,2 - 26,2 dB
+depends on the readings: 32.3 - 26.3 dB lands under 6 dB and 32.2 - 26.2 dB
 over it on the machines this library is tested on. Each verdict is therefore
 checked with readings that land on both sides, and the assertion is the
 decimal verdict for both. Nothing here asserts which side a residual falls
@@ -77,7 +77,7 @@ def test_floor_covering_background_leaves_15_db_alone(
 
 @pytest.mark.parametrize(("signal", "background"), _pairs(6.0))
 def test_laboratory_background_caps_at_6_db(signal: float, background: float) -> None:
-    # ISO 10140-4 4.3: a margin of 6 dB or less takes the fixed 1,3 dB.
+    # ISO 10140-4 4.3: a margin of 6 dB or less takes the fixed 1.3 dB.
     with pytest.warns(building.LaboratoryInsulationWarning, match="at or below 6 dB"):
         corrected = building.background_correction([signal], [background])
     assert corrected[0] == pytest.approx(signal - 1.3, abs=1e-12)
@@ -195,7 +195,7 @@ def test_screen_background_at_10_db_is_still_corrected(
 def test_silencer_background_10_db_is_the_last_row(
     signal: float, background: float
 ) -> None:
-    # ISO 11820 Table 1 prints 0,5 dB against 10 dB, and nothing above it.
+    # ISO 11820 Table 1 prints 0.5 dB against 10 dB, and nothing above it.
     correction = noise_control.silencer_background_correction([signal - background])
     assert correction[0] == 0.5
 
@@ -329,7 +329,7 @@ def test_silencer_spread_of_6_db_keeps_three_positions(high: float, low: float) 
 def test_silencer_area_ratio_at_the_range_ends_does_not_warn(
     duct: float, element: float
 ) -> None:
-    # ISO 11691 4.5: between 0,6 and 1,7 times the area, both ends included.
+    # ISO 11691 4.5: between 0.6 and 1.7 times the area, both ends included.
     with warnings.catch_warnings():
         warnings.simplefilter("error", noise_control.SilencerMeasurementWarning)
         ratio = noise_control.substitution_area_ratio(duct, element)
@@ -393,7 +393,7 @@ def test_a_value_exactly_u_above_a_minimum_does_not_provably_exceed_it(
 def test_a_value_exactly_u_below_a_maximum_does_not_provably_stay_under_it(
     value: float, requirement: float
 ) -> None:
-    # Formula (4), strict too: 30,9 + 1,3 is 32,2 in decimal, under it in binary.
+    # Formula (4), strict too: 30.9 + 1.3 is 32.2 in decimal, under it in binary.
     assert not building.assess_requirement_conformity(
         value, 1.3, requirement, bound="maximum"
     ).passes
@@ -408,8 +408,8 @@ def test_like_elements_couple_strongly_at_exactly_3_db() -> None:
 
 @pytest.mark.parametrize(("frame", "fluid"), [(0.01, 0.05), (0.07, 0.35)])
 def test_a_modulus_ratio_of_exactly_0_2_is_not_limp(frame: float, fluid: float) -> None:
-    # Doutres, as Allard & Atalla print it: limp while |Kc / Kf| < 0,2. The
-    # ratio is 0,2 in decimal and a unit off it in binary, so it is on the
+    # Doutres, as Allard & Atalla print it: limp while |Kc / Kf| < 0.2. The
+    # ratio is 0.2 in decimal and a unit off it in binary, so it is on the
     # threshold, and the threshold itself does not pass.
     assert not materials.check_limp_frame(frame, fluid_bulk_modulus=fluid).passes
 
@@ -418,7 +418,7 @@ def test_a_modulus_ratio_of_exactly_0_2_is_not_limp(frame: float, fluid: float) 
 def test_an_air_correction_of_exactly_0_05_does_not_warn(
     with_specimen: float, empty: float
 ) -> None:
-    # ISO 354-related clause 4.2.1 of the ceiling standard: at most 0,05.
+    # ISO 354-related clause 4.2.1 of the ceiling standard: at most 0.05.
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         correction = materials.air_absorption_correction(
@@ -456,7 +456,7 @@ def test_a_difference_of_exactly_one_relative_jnd_is_perceptible(
     first: float, second: float
 ) -> None:
     # ISO 3382-1 Table A.1: the JND of EDT is 5 %, here of the mean of the
-    # two; 2,05 and 1,95 s differ by 0,1 s, which is 5 % of 2,0 s.
+    # two; 2.05 and 1.95 s differ by 0.1 s, which is 5 % of 2.0 s.
     assert room.assess_perceptible_difference("EDT", [first], [second]).different
 
 
@@ -492,8 +492,8 @@ def test_a_growth_of_exactly_25_percent_is_not_tolerable(
 def test_a_kb_ftr_growth_of_exactly_25_percent_is_not_tolerable(
     before: float, after: float
 ) -> None:
-    # E DIN 4150-2 6.5.3.6, the same 25 % for KB_FTr above A_r; 0,28 to 0,35
-    # comes out 24,999 999 999 999 98 % in binary.
+    # E DIN 4150-2 6.5.3.6, the same 25 % for KB_FTr above A_r; 0.28 to 0.35
+    # comes out 24.999 999 999 999 98 % in binary.
     from phonometry.vibration.immission.train_categories import railway_guide_values
 
     change = vibration.assess_railway_change(
@@ -526,7 +526,7 @@ def test_a_difference_equal_to_the_combined_uncertainty_is_not_significant(
 def test_a_field_position_exactly_2_5_db_off_is_uniform(
     position: float, reference: float
 ) -> None:
-    # ISO 4869-1 Annex: each position within ±2,5 dB of the reference point.
+    # ISO 4869-1 Annex: each position within ±2.5 dB of the reference point.
     levels = dict.fromkeys(("front", "back", "left", "right", "down"), [reference])
     check = hearing.check_reat_sound_field(
         {**levels, "up": [position]}, [reference], frequencies=[1000.0]
@@ -584,7 +584,7 @@ def test_three_whole_days_spreading_3_db_raise_the_advisory(
 def test_a_sampling_contribution_of_exactly_3_5_db_is_not_above_it(
     centre: float,
 ) -> None:
-    # ISO 9612 Table C.4: seven samples with u1 = 4,0 dB give c1 u1 = 3,5 dB,
+    # ISO 9612 Table C.4: seven samples with u1 = 4.0 dB give c1 u1 = 3.5 dB,
     # and 10.4 asks for a revised plan only above it. Three readings 4 dB over
     # the centre, three 4 dB under it and one on it have u1 = 4 in decimal.
     high, low = round(centre + 4.0, 1), round(centre - 4.0, 1)
@@ -712,9 +712,9 @@ def test_an_alternating_airflow_margin_of_exactly_10_db_warns(
         )
 
 
-#: Ten short-time intensities whose standard deviation is 0,6 of their mean
-#: in decimal (a mean of 1,9 and of 1,1 W/m^2, four readings 0,9 of the mean
-#: either side of it and six on it); F1 lands over 0,6 in binary for the
+#: Ten short-time intensities whose standard deviation is 0.6 of their mean
+#: in decimal (a mean of 1.9 and of 1.1 W/m^2, four readings 0.9 of the mean
+#: either side of it and six on it); F1 lands over 0.6 in binary for the
 #: first and under it for the second.
 _F1_ON_THE_LIMIT = (
     [3.61, 0.19, 3.61, 0.19, 1.9, 1.9, 1.9, 1.9, 1.9, 1.9],
@@ -726,7 +726,7 @@ _F1_ON_THE_LIMIT = (
 def test_a_temporal_variability_of_exactly_0_6_is_stationary(
     samples: list[float],
 ) -> None:
-    # ISO 9614-1 Table B.3: action (e) only for F1 > 0,6.
+    # ISO 9614-1 Table B.3: action (e) only for F1 > 0.6.
     indicators = emission.field_indicators(
         np.full(10, 121.0), np.ones(10), temporal_intensity=samples
     )
@@ -840,8 +840,8 @@ def test_a_pressure_intensity_indicator_of_exactly_10_db_qualifies(
 
 
 def test_a_position_spread_of_exactly_1_5_db_does_not_warn() -> None:
-    # ISO 3741 8.4.2.2: the sM criterion is exceeded only past 1,5 dB. Three
-    # levels 1,5 dB apart have a standard deviation of exactly 1,5 dB.
+    # ISO 3741 8.4.2.2: the sM criterion is exceeded only past 1.5 dB. Three
+    # levels 1.5 dB apart have a standard deviation of exactly 1.5 dB.
     from phonometry.emission._sound_power_reverberation import (
         _position_sampling_warnings,
     )
@@ -895,7 +895,7 @@ def test_a_change_of_slope_of_exactly_5_db_is_not_encircled() -> None:
     from phonometry.aircraft.certification import _tone_marked_slopes
 
     spl = np.full(24, 63.9)
-    spl[10:] = 68.9  # 68,9 - 63,9 is 5 dB in decimal and over it in binary
+    spl[10:] = 68.9  # 68.9 - 63.9 is 5 dB in decimal and over it in binary
     _, marked = _tone_marked_slopes(spl, 2)
     assert not bool(np.any(marked))
 
@@ -910,7 +910,7 @@ def test_samples_equally_far_from_the_10_db_down_level_keep_the_inner_one() -> N
 
 def test_burst_readings_exactly_10_percent_over_the_table_conform() -> None:
     # ISO 8041-1 12.13 and Table 7: within 10 % of the printed response. The
-    # readings are the printed ones times 1,1 to six decimals, which binary
+    # readings are the printed ones times 1.1 to six decimals, which binary
     # leaves a unit or two either side of 10 % from one row to the next.
     from phonometry.vibration.human.signal_burst import SIGNAL_BURST_RESPONSE
 
@@ -947,7 +947,7 @@ def test_a_band_exactly_5_db_over_its_neighbours_takes_3_db(
 def test_heights_a_tenth_of_the_distance_are_not_a_short_distance(
     source: float, receiver: float, first: float, second: float
 ) -> None:
-    # ISO 10847 6.3: short distance when the height ratio exceeds 0,1.
+    # ISO 10847 6.3: short distance when the height ratio exceeds 0.1.
     before = environment.check_short_distance(
         source_height_m=source,
         receiver_height_m=receiver,
@@ -958,8 +958,8 @@ def test_heights_a_tenth_of_the_distance_are_not_a_short_distance(
     assert not before
 
 
-#: Geometries whose "after" ratio of ISO 10847 6.3 is 0,1 in decimal, one
-#: through each of its two conditions, landing over 0,1 in binary (the first
+#: Geometries whose "after" ratio of ISO 10847 6.3 is 0.1 in decimal, one
+#: through each of its two conditions, landing over 0.1 in binary (the first
 #: of each pair) and under it (the second); the other condition holds clearly.
 _AFTER_ON_A_TENTH = (
     (0.1, 1.0, 1.1, 12.0, 5.0),
@@ -975,7 +975,7 @@ _AFTER_ON_A_TENTH = (
 def test_a_barrier_a_tenth_of_its_distance_is_not_a_short_distance_after(
     source: float, receiver: float, barrier: float, first: float, second: float
 ) -> None:
-    # ISO 10847 6.3.1: both "after" ratios must exceed 0,1.
+    # ISO 10847 6.3.1: both "after" ratios must exceed 0.1.
     after = environment.check_short_distance(
         source_height_m=source,
         receiver_height_m=receiver,
@@ -1007,7 +1007,7 @@ def test_an_operating_point_exactly_3_db_off_the_line_is_accepted(
 def test_a_protector_level_that_is_a_half_rounds_away_from_zero() -> None:
     from phonometry.hearing.hearing_protectors import _round_half_up
 
-    assert _round_half_up(64.1 - 3.6) == 61  # 60,5 in decimal, under it in binary
+    assert _round_half_up(64.1 - 3.6) == 61  # 60.5 in decimal, under it in binary
     assert _round_half_up(-(64.1 - 3.6)) == -61
 
 
@@ -1015,14 +1015,14 @@ def test_a_db_hr_value_that_is_a_half_rounds_up() -> None:
     from phonometry.building.regulation.spain import _round_half_up
 
     assert _round_half_up(64.1 - 3.6) == 61.0
-    # 64,1 - 1,35 is 62,75 in decimal and 62,749 999 999 999 99 in binary.
+    # 64.1 - 1.35 is 62.75 in decimal and 62.749 999 999 999 99 in binary.
     assert _round_half_up(64.1 - 1.35, 1) == pytest.approx(62.8, abs=1e-12)
 
 
 def test_a_pass_by_level_that_is_a_half_tenth_rounds_up() -> None:
     from phonometry.environment.sources._statistical_pass_by import _round_tenth
 
-    # 64,1 - 1,35 is 62,75 in decimal and 62,749 999 999 999 99 in binary.
+    # 64.1 - 1.35 is 62.75 in decimal and 62.749 999 999 999 99 in binary.
     assert _round_tenth(64.1 - 1.35) == pytest.approx(62.8, abs=1e-12)
     assert _round_tenth(40.65) == pytest.approx(40.7, abs=1e-12)
 
@@ -1033,7 +1033,7 @@ def test_iso_717_reductions_round_a_decimal_half_outwards() -> None:
         _round_half_up_tenths,
     )
 
-    half = 64.1 - 1.35  # 62,75 in decimal, under it in binary
+    half = 64.1 - 1.35  # 62.75 in decimal, under it in binary
     np.testing.assert_allclose(
         _round_half_up_tenths(np.array([half, -half])), [62.8, -62.8], atol=1e-12
     )
@@ -1048,8 +1048,8 @@ def test_a_declared_level_that_is_a_half_rounds_up() -> None:
 
 
 def test_a_practical_coefficient_mean_on_a_half_rounds_up() -> None:
-    # ISO 11654 4.1: the mean of 0,03, 0,285 and 0,06 is 0,125, rounded to
-    # 0,13 and then to the 0,15 step; a last-bit 0,1249 would give 0,10.
+    # ISO 11654 4.1: the mean of 0.03, 0.285 and 0.06 is 0.125, rounded to
+    # 0.13 and then to the 0.15 step; a last-bit 0.1249 would give 0.10.
     alpha = [0.03, 0.285, 0.06] * 5
     np.testing.assert_allclose(
         materials.practical_absorption_coefficient(alpha), [0.15] * 5, atol=1e-12
@@ -1071,7 +1071,7 @@ def test_a_critically_damped_tapping_hammer_has_a_finite_force(
     stiffness: float, impedance: float
 ) -> None:
     # Hopkins Eq. (3.95): K m = 4 Zdp^2 is critical damping. With the hammer
-    # of 0,5 kg these contact stiffnesses and impedances meet it in decimal,
+    # of 0.5 kg these contact stiffnesses and impedances meet it in decimal,
     # and the discriminant of the pulse came out a few units in the last place
     # negative, so its square root was NaN.
     from phonometry.building.prediction import (
@@ -1103,11 +1103,11 @@ def test_a_critically_damped_tapping_hammer_has_a_finite_force(
 @pytest.mark.parametrize(
     ("area", "time_of_day", "kb_fmax"),
     [
-        ("industrial", "day", 0.46),  # 0,4 x 1,15 lands under 0,46 in binary
-        ("commercial", "night", 0.23),  # 0,2 x 1,15 lands under 0,23
-        ("sensitive", "day", 0.115),  # 0,1 x 1,15 lands under 0,115
-        ("industrial", "night", 0.345),  # 0,3 x 1,15 lands on 0,345
-        ("mixed", "night", 0.1725),  # 0,15 x 1,15 lands on 0,1725
+        ("industrial", "day", 0.46),  # 0.4 x 1.15 lands under 0.46 in binary
+        ("commercial", "night", 0.23),  # 0.2 x 1.15 lands under 0.23
+        ("sensitive", "day", 0.115),  # 0.1 x 1.15 lands under 0.115
+        ("industrial", "night", 0.345),  # 0.3 x 1.15 lands on 0.345
+        ("mixed", "night", 0.1725),  # 0.15 x 1.15 lands on 0.1725
     ],
 )
 def test_a_kb_value_exactly_15_percent_over_a_u_is_within_the_uncertainty(
@@ -1243,9 +1243,9 @@ def test_partial_powers_that_cancel_have_nothing_to_concentrate(
 def test_a_remainder_that_uses_up_the_error_factor_leaves_no_budget(
     intensity: list[float],
 ) -> None:
-    # ISO 9614-1 (B.4): the top two carry 0,6 of the power and the other four
-    # have F4 = 0,5, so 0,20 - 0,4 x (2/2) x 0,5 leaves Delta_alpha = 0 at the
-    # precision grade; in binary it came out 1,4e-16 and asked for 3e30 more
+    # ISO 9614-1 (B.4): the top two carry 0.6 of the power and the other four
+    # have F4 = 0.5, so 0.20 - 0.4 x (2/2) x 0.5 leaves Delta_alpha = 0 at the
+    # precision grade; in binary it came out 1.4e-16 and asked for 3e30 more
     # positions.
     areas = np.ones(6)
     with pytest.raises(ValueError, match="exhaust the ISO 9614-1"):
@@ -1268,7 +1268,7 @@ def test_samples_that_cancel_have_no_temporal_variability_indicator(
 # ---------------------------------------------------------------------------
 
 #: Pairs of readings whose difference is a half in decimal, landing under it
-#: (15,5 dB, reported 16) and over it (14,5 dB, reported 14) in binary.
+#: (15.5 dB, reported 16) and over it (14.5 dB, reported 14) in binary.
 _HALVES = (((30.9, 15.4), 16), ((30.1, 15.6), 14))
 
 
@@ -1321,7 +1321,7 @@ def test_an_rc_mid_frequency_average_on_a_half_rates_even(
     mid: list[float], rating: int
 ) -> None:
     # ANSI/ASA S12.2 Annex D: the RC rating is LMF to the nearest decibel;
-    # these averages are 39,5 and 36,5 in decimal, under and over in binary.
+    # these averages are 39.5 and 36.5 in decimal, under and over in binary.
     levels = np.full(10, 30.0)
     levels[5:8] = mid
     result = room.room_criterion(
@@ -1338,7 +1338,7 @@ def test_an_nc_speech_interference_level_on_a_half_rates_even(
     sil_levels: list[float], rating: float
 ) -> None:
     # ANSI/ASA S12.2 5.2.2: NC-(SIL) when no band exceeds that curve; these
-    # SIL are 29,5 and 24,5 in decimal, under and over in binary.
+    # SIL are 29.5 and 24.5 in decimal, under and over in binary.
     levels = np.zeros(10)
     levels[5:9] = sil_levels
     result = room.noise_criterion(
@@ -1379,7 +1379,7 @@ def test_iso_3747_reads_a_margin_on_its_criterion_as_decimal(
 def test_a_field_nonuniformity_ratio_of_exactly_1_2_meets_criterion_5(
     first: float, second: float
 ) -> None:
-    # ISO 9614-3 criterion 5: 0,83 <= FS(1)/FS(2) <= 1,2, both ends included.
+    # ISO 9614-3 criterion 5: 0.83 <= FS(1)/FS(2) <= 1.2, both ends included.
     scan = np.full((4, 1), 1.0e-6)
     indicators = emission.precision_field_indicators(
         scan, 10.0 * np.log10(scan / 1.0e-12) + 3.0
@@ -1448,7 +1448,7 @@ def test_area_weights_adding_up_to_one_are_refused(weights: list[float]) -> None
 def test_external_steps_on_the_reading_tolerance_are_accepted(
     external: list[float],
 ) -> None:
-    # EN 352-4 / 5.4.4: 5 dB steps, read to 0,05 dB.
+    # EN 352-4 / 5.4.4: 5 dB steps, read to 0.05 dB.
     result = hearing.assess_anr_linearity(external, [[40.0, 45.0, 50.0]])
     assert result.passes
 
@@ -1458,7 +1458,7 @@ def test_a_velocity_on_the_interpolated_guideline_keeps_to_it(
     frequency: float, velocity: float
 ) -> None:
     # DIN 4150-3 Table 1: the guideline between 50 and 100 Hz is interpolated,
-    # 43,02 mm/s at 65,1 Hz for a commercial building, and keeping to it is
+    # 43.02 mm/s at 65.1 Hz for a commercial building, and keeping to it is
     # not exceeding it.
     assessment = vibration.assess_building_vibration(
         velocity, building_class="commercial", frequency_hz=frequency
@@ -1471,7 +1471,7 @@ def test_a_canal_section_of_six_tenths_of_the_canal_is_not_less_than_that(
     section: float, canal: float
 ) -> None:
     # IEC 60268-7 Annex B b): in the rest of the canal "an area less than 0,6"
-    # of the canal's. 20,22 / 33,7 is 0,6 and comes out under it in binary.
+    # of the canal's. 20.22 / 33.7 is 0.6 and comes out under it in binary.
     check = electroacoustics.verify_ear_canal_microphone(
         entrance_area_mm2=4.0,
         canal_section_area_mm2=section,
@@ -1516,9 +1516,9 @@ def test_a_coupler_on_the_ends_of_the_recommended_ratio_is_recommended(
     length_mm: float, depth_mm: float, diameter_mm: float
 ) -> None:
     # IEC 61094-2 C.2: a length to diameter ratio "within the range of 0,5 to
-    # 0,75", the length between the diaphragms. 5,4 + 2 x 1,95 mm over
-    # 18,6 mm is 0,5 and comes out under it in binary; 5,9 + 2 x 2 mm over
-    # 13,2 mm is 0,75 and comes out over it.
+    # 0,75", the length between the diaphragms. 5.4 + 2 x 1.95 mm over
+    # 18.6 mm is 0.5 and comes out under it in binary; 5.9 + 2 x 2 mm over
+    # 13.2 mm is 0.75 and comes out over it.
     check = _coupler_check(length_mm, depth_mm, diameter_mm)
     assert check.ratio_recommended is True
 
@@ -1530,8 +1530,8 @@ def test_a_frequency_of_four_tenths_hz_per_kpa_is_inside_the_stated_accuracy(
     frequency: float, pressure: float
 ) -> None:
     # IEC 61094-3 B.2: the attenuation is accurate to 10 % for a ratio of
-    # frequency to static pressure of 0,4 Hz/kPa to 10^4 Hz/kPa. 36,01 Hz at
-    # 90,025 kPa is 0,4 Hz/kPa and comes out under it in binary.
+    # frequency to static pressure of 0.4 Hz/kPa to 10^4 Hz/kPa. 36.01 Hz at
+    # 90.025 kPa is 0.4 Hz/kPa and comes out under it in binary.
     attenuation = metrology.reciprocity_air_attenuation(
         [frequency],
         temperature_c=23.0,

@@ -132,8 +132,8 @@ print(res.loss.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
 print(res.area_term_db.round(1))   # [-10.8 -10.8 -10.8 -10.8 -10.8 -10.8] dB
 ```
 
-The area term is negative here and that is not a mistake. A duct of 0,9 m²
-discharging into a room whose quarter-absorption is 10,8 m² spreads the same
+The area term is negative here and that is not a mistake. A duct of 0.9 m²
+discharging into a room whose quarter-absorption is 10.8 m² spreads the same
 power over twelve times the area, so the room is already quieter than the duct
 before the silencer does anything. Subtracting that is what stops the room being
 credited to the silencer. The term comes back once per band even here, where
@@ -175,7 +175,7 @@ print(area.round(1))   # [ 8.1  9.3 10.8 11.8 13.  14.4] m^2
 
 It is a quarter of the Sabine equivalent absorption area, which is the factor
 that turns a reverberant level into a sound power. A reverberation time is a
-band quantity, so the area is one too, and the 10,8 m² of section 1 was only its
+band quantity, so the area is one too, and the 10.8 m² of section 1 was only its
 value at 500 Hz. Both loss functions take each area, and the field correction,
 as one value for every band or as one value per band, so the array goes in as it
 comes out:
@@ -191,8 +191,8 @@ print(res.loss.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
 ```
 
 At 500 Hz nothing moves. Below it the room is more reverberant, its area smaller
-and the silencer credited with more, by 1,2 dB at 125 Hz; above it the other way
-round, by 1,3 dB at 4 kHz. The duct cross-section stays one number, because it
+and the silencer credited with more, by 1.2 dB at 125 Hz; above it the other way
+round, by 1.3 dB at 4 kHz. The duct cross-section stays one number, because it
 is one.
 
 ## 3. The silencer that is quiet and blocks the duct
@@ -267,7 +267,7 @@ print(res.rounded_a_weighted)      # 10 dB
 7.4 c) reports both to the nearest whole decibel. `rounded` and
 `rounded_a_weighted` give them that way, as integers, while `attenuation`
 keeps the unrounded difference to compute with. An exact half goes to the even
-decibel, as in the other in-situ results of the library, so the 9,5 dB above is
+decibel, as in the other in-situ results of the library, so the 9.5 dB above is
 reported as 10 dB.
 
 The A-weighted pair is clause 5.9, and it comes with a condition the library
@@ -279,7 +279,7 @@ machine's.
 
 An artificial source has a test of its own to pass first. Definition 3.10 reads
 the directivity index at twelve positions evenly spaced on a horizontal circle
-of about 1,5 m radius, as the logarithmic mean less the position, and 5.2.2
+of about 1.5 m radius, as the logarithmic mean less the position, and 5.2.2
 accepts the source while no position falls more than 8 dB below the mean.
 
 Where the microphones stand is 5.5.2: a quarter, a half, once and twice the
@@ -356,14 +356,14 @@ makes sense if each campaign takes its own. `measured_insertion_loss_indirect` t
 receiver type for each campaign, and
 [the errata registry](/phonometry/reference/errata/) gives the reading.
 
-The reference microphone stands at least 1,5 m above the top edge of the
+The reference microphone stands at least 1.5 m above the top edge of the
 barrier, measured from its highest point where the top is not a straight edge,
 and 7.2.2 says so with "shall". Where the near end of the source region is
 closer than 15 m, the NOTE to 7.2.2 lets the microphone be raised further, until
 it looks over the top edge by 10 degrees. The NOTE only ever raises it, so the
 height is the higher of the two. A 4 m barrier 8 m from the source takes the
-angle; a 3 m barrier 5 m from the source reaches its 10 degrees at 4,34 m and
-keeps the 4,5 m of the clearance:
+angle; a 3 m barrier 5 m from the source reaches its 10 degrees at 4.34 m and
+keeps the 4.5 m of the clearance:
 
 ```python
 print(round(environment.reference_microphone_height_m(
@@ -398,7 +398,7 @@ print(environment.wind_class(-2.0))                       # None
 
 Whether the geometry is a short distance is not a matter of opinion either. 6.3.1
 prints one inequality for the "before" campaign and two for the "after" one, all
-against the same ratio of 0,1, and the two campaigns can disagree:
+against the same ratio of 0.1, and the two campaigns can disagree:
 
 ```python
 geometry = environment.check_short_distance(
@@ -418,7 +418,7 @@ ray outdoors is not measured directly and the sky is the best proxy available.
 
 Fix the receiver positions and the reference position first, and keep them for
 both campaigns: the subtraction means nothing otherwise. Put the reference
-microphone at least 1,5 m above the top edge of the barrier, on a vertical plane
+microphone at least 1.5 m above the top edge of the barrier, on a vertical plane
 through it, measured from the highest point where the top is not a straight
 edge, and higher where the source region comes closer than 15 m and the
 elevation rule of the NOTE asks for more. Record the wind component on the source-to-receiver line, the
@@ -434,7 +434,7 @@ that did not come from the source. All three answer it differently, and the
 differences are not rounding.
 
 **ISO 11820** prints a stepped table, positive, to be **subtracted**: 3 dB at a
-margin of 3 dB, falling to 0,5 dB at 9 and 10, nothing above, and under 3 dB the
+margin of 3 dB, falling to 0.5 dB at 9 and 10, nothing above, and under 3 dB the
 measurements are invalid. **ISO 10847** prints a stepped table, negative, to be
 **added**: 2 dB at a margin of 4 or 5, 1 dB from 6 to 9, nothing from 10 up, and
 under 4 dB the results are not valid. **ISO 11821** prints no table at all and
@@ -449,7 +449,7 @@ print(round(80.0 - noise_control.screen_background_corrected_level(
     [80.0], [71.0])[0], 2))                                     # 0.58 dB off
 ```
 
-Three standards, one margin of 9 dB, three answers: 0,5 dB, 1 dB and 0,58 dB.
+Three standards, one margin of 9 dB, three answers: 0.5 dB, 1 dB and 0.58 dB.
 They are kept as three implementations for that reason, and a conformance check
 holds them against each other at the margin where they part. The two tables and
 their opposite signs are recorded in the errata registry as a difference that is
@@ -462,7 +462,7 @@ is not determined, and what may be stated instead is the inequality of clause 4.
 `extraneous_corrected_mean_level` returns the corrected level, the margin it was
 read at and whether the correction went past the cap (`capped`), so that a capped number
 cannot be written down as a determination. The cap is judged on the margin, where Table 1 draws it. At a
-margin of exactly 3 dB the subtraction takes off 3,02 dB, which is the printed
+margin of exactly 3 dB the subtraction takes off 3.02 dB, which is the printed
 3 dB unrounded and the correction Table 1 applies at that row, so the level is
 still determined; under 3 dB it is not.
 

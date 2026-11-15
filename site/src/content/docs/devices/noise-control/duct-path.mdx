@@ -39,7 +39,7 @@ references:
     year: 2001
     title: "Geräuscherzeugung und Lärmminderung in Raumlufttechnischen Anlagen"
     designation: "VDI 2081 Blatt 1:2001-07"
-    note: "Section 6.7.3: the level an air outlet produces in a room (Equation (36)), the equivalent absorption area a reverberation time implies (Equation (37)) and the reverberation radius rH = 0,2 sqrt(A). Element 20 of the worked example in its Part 2:2005-05 is the case checked here."
+    note: "Section 6.7.3: the level an air outlet produces in a room (Equation (36)), the equivalent absorption area a reverberation time implies (Equation (37)) and the reverberation radius rH = 0.2 sqrt(A). Element 20 of the worked example in its Part 2:2005-05 is the case checked here."
   - type: standard
     organization: "Air-Conditioning, Heating and Refrigeration Institute"
     designation: "AHRI Standard 885"
@@ -709,7 +709,7 @@ q = np.array([2.1, 2.4, 3.0, 4.0, 5.5, 6.7, 7.0, 7.2])
 print(np.round(noise_control.room_effect(1.5, absorption_area=20.0, directivity=q), 1))
 # [5.6 5.5 5.1 4.7 4.  3.6 3.5 3.4]
 
-# Where the reverberant field takes over, Equation (36a): rH = 0,2 sqrt(A).
+# Where the reverberant field takes over, Equation (36a): rH = 0.2 sqrt(A).
 print(round(float(room.critical_distance(absorption_area=20.0, directivity=2.0)), 2))  # 0.89
 # And the absorption a measured reverberation time implies, Equation (37).
 print(round(float(room.sabine_absorption_area(54.4, 0.44, speed_of_sound=339.0)), 1))  # 20.2
@@ -717,8 +717,8 @@ print(round(float(room.sabine_absorption_area(54.4, 0.44, speed_of_sound=339.0))
 
 `sabine_absorption_area` is the familiar Sabine relation read the other way
 about, from the time to the area, which is the direction a room survey
-actually delivers. Its leading constant follows the speed of sound: $0{,}161$
-at 343 m/s, and the $0{,}163$ the guideline prints, which is the same
+actually delivers. Its leading constant follows the speed of sound: $0.161$
+at 343 m/s, and the $0.163$ the guideline prints, which is the same
 expression at 339 m/s.
 
 Figure 30 itself is not implemented. It is a chart of $Q$ against the product

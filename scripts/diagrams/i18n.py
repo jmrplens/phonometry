@@ -793,14 +793,15 @@ _ES: dict[str, str] = {
     # Human vibration (ISO 2631-1 / ISO 8041-1 / 2002-44-EC)
     "Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)": "Medición de vibración de cuerpo entero (ISO 2631-1 / ISO 8041-1)",
     "vibration input": "entrada de vibración",
-    "Seat/body interface": "Interfaz asiento/cuerpo",
+    "Interface between": "Interfaz entre",
+    "seat and body": "asiento y cuerpo",
     "Triaxial accelerometer": "Acelerómetro triaxial",
     "Band limiting + Wk / Wd": "Limitación de banda + Wk / Wd",
     "weighting (ISO 8041-1)": "ponderación (ISO 8041-1)",
     "Weighted r.m.s. $a_w$  &  VDV": "$a_w$ eficaz ponderada  y  VDV",
     "(ISO 2631-1)": "(ISO 2631-1)",
     "$A(8) = max(1.4·a_{wx} , 1.4·a_{wy} , a_{wz})·√(T/T_0)$": "$A(8) = max(1,4·a_{wx} , 1,4·a_{wy} , a_{wz})·√(T/T_0)$",
-    "assessed vs EAV / ELV (Directive 2002/44/EC)": "evaluada frente a EAV / ELV (Directiva 2002/44/CE)",
+    "assessed vs EAV / ELV (Directive 2002/44/EC)": "evaluada frente a VAE / VLE (Directiva 2002/44/CE)",
     # Where whole-body vibration is measured (ISO 2631-1, Figure 1, 5.2-5.3,
     # Tables 1 and 2, 7.2.3 and 8.2.2)
     "Whole-body vibration: where it is measured and how each axis is weighted": "Vibración de cuerpo entero: dónde se mide y cómo se pondera cada eje",

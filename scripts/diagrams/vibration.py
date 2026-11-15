@@ -68,7 +68,16 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
     # the axes plate, not as an oblique arrow, which the forearm would cut.
     _axis_into_page(s, th, ox, oy)
     s.text(ox - 13, oy - 3, "$y$", 15, th.accent, "end", bold=True)
-    s.text(150, gy + 34, "Seat/body interface", 15, th.fg, "middle")
+    # Under the cushion it names, right of the shin, and not under the floor
+    # hatch, where it named the ground the pedestal stands on. Two lines,
+    # so that neither language reaches the dashed box at x = 400.
+    s.text(240, 460, "Interface between", 15, th.fg, "start")
+    s.text(240, 478, "seat and body", 15, th.fg, "start")
+    # A leader from the label up to the top of the cushion it names, right
+    # of the shin and left of the cushion's end, with a dot where the body
+    # sits on the seat.
+    s.line(244, 445, 244, 427, th.fg, 1.0)
+    s.circle(244, 424, 2.4, th.fg, th.fg, 1.0)
     _axis_into_page(s, th, 46, gy + 56)
     s.text(
         60,

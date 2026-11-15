@@ -437,6 +437,22 @@ un espectro como las demás líneas; ahí hay que leerlas como velocidades de gi
 Seis palas contra cuatro álabes es una decisión de diseño, y esto es lo que
 decide.
 
+La animación hace girar los dos patrones en el ventilador de esta página y
+cuenta lo que ve un punto de la pared del conducto.
+
+<Video
+  name="anim_fan_lobe_patterns"
+  width={2400}
+  height={1350}
+  title="Los dos patrones lobulados de un ventilador entubado, y el ritmo que ve un punto de la pared"
+  description="Dos vistas frontales del ventilador de esta página, seis palas que giran delante de cuatro álabes del estátor dibujados a trazos dentro de un conducto, cada una con un anillo alrededor del rotor. A la izquierda el anillo tiene dos lóbulos y da 175 vueltas por segundo; a la derecha tiene diez lóbulos y da 35 vueltas por segundo, los dos en el sentido en que gira el rotor. Un punto marca un lugar de la pared del conducto y destella cada vez que pasa por él la cresta de un lóbulo, con un contador bajo cada vista; a los 40 milisegundos los dos marcan 14. Bajo las vistas, dos trazas escriben la forma de cada patrón en ese punto frente al tiempo de máquina de 0 a 40 milisegundos, con una marca cada vez que una pala pasa por el punto: las dos trazas están desplazadas entre sí pero se repiten con el mismo periodo, 2,86 milisegundos, la separación de las marcas de pala, señalado una vez como 1/BPF."
+/>
+
+*Las velocidades son las de `blade_pass_frequencies` para este ventilador, 500
+veces más lentas. Los anillos son un esquema de un número de lóbulos y de una
+velocidad de giro, no de un campo de presión, y el clip no dice nada de cuánto
+radia cada patrón.*
+
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Cuatro espectros con las líneas previstas por la biblioteca dibujadas sobre cada uno. Arriba a la izquierda, un espectro de engrane con un diente astillado: líneas altas en 700, 1400 y 2100 hercios con bandas laterales bajas y planas espaciadas 25 hercios a uno y otro lado, y armónicos de engrane que caen deprisa. Arriba a la derecha, el mismo par de engranajes con desgaste distribuido: las bandas laterales se convierten en grupos altos y el segundo y el tercer armónico de engrane se mantienen altos. Abajo a la izquierda, un espectro de motor de inducción en eje de amplitud logarítmico con el 1x en 60 hercios, el 2x en 120 y el doble de la frecuencia de alimentación en 360, con el armónico de ranura de rotor tres décadas por debajo en 3600 hercios flanqueado por bandas laterales a una frecuencia de eje. Abajo a la derecha, un espectro de ventilador entubado con la línea del eje en 58 hercios y la línea de paso de pala en 350, sin nada entre ellas; una nota multiplica cada patrón lobulado hasta el paso de pala, 2 lóbulos por 175 vueltas por segundo y 10 lóbulos por 35 vueltas por segundo, 350 lóbulos por un punto cada segundo en ambos casos, y otra nota dice que no hay línea propia en 35 ni en 175 hercios, porque son velocidades de giro." width="92%" />
 
 *Una familia de fallos se reconoce por su patrón, no por un solo número. Los dos

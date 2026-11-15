@@ -597,6 +597,7 @@ from .schematics import (
     animate_comb_filtering,
     animate_dynamic_stiffness_sweep,
     animate_epnl_flyover,
+    animate_fan_lobe_patterns,
     animate_feedback_howl,
     animate_flanking_paths,
     animate_image_source_buildup,
@@ -1735,6 +1736,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_feedback_howl": animate_feedback_howl,
     "anim_synchronous_averaging": animate_synchronous_averaging,
     "anim_bearing_load_zone": animate_bearing_load_zone,
+    "anim_fan_lobe_patterns": animate_fan_lobe_patterns,
 }
 
 
@@ -2231,6 +2233,7 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_feedback_howl": 65.0,
     "anim_synchronous_averaging": 70.0,
     "anim_bearing_load_zone": 150.0,
+    "anim_fan_lobe_patterns": 120.0,
 }
 
 # A clip rename must not silently drop its scheduling weight; fail fast.

@@ -2254,6 +2254,17 @@ _ES_EXACT = {
     "Turning with the shaft, in and out of the load zone": "Gira con el eje: entra y sale de la zona de carga",
     "Riding the cage, striking both races in turn": "Viaja con la jaula y golpea las dos pistas por turno",
     "The modulation rate names the damaged part": "El ritmo de la modulación delata la pieza dañada",
+    # --- anim_fan_lobe_patterns: two lobe patterns, one rate at the wall ---
+    "Two lobe patterns of one fan pass the wall at one rate": "Dos patrones lobulados de un ventilador pasan por la pared al mismo ritmo",
+    "$m_\\mathrm{L}$ = 2 lobes, 175 turns a second": "$m_\\mathrm{L}$ = 2 lóbulos, 175 vueltas por segundo",
+    "$m_\\mathrm{L}$ = 10 lobes, 35 turns a second": "$m_\\mathrm{L}$ = 10 lóbulos, 35 vueltas por segundo",
+    "$m_\\mathrm{L}$ = 2 at the point": "$m_\\mathrm{L}$ = 2 en el punto",
+    "$m_\\mathrm{L}$ = 10 at the point": "$m_\\mathrm{L}$ = 10 en el punto",
+    "ticks: a blade passes the point": "marcas: una pala pasa por el punto",
+    "1/BPF = 2.86 ms for both": "1/BPF = 2,86 ms para los dos",
+    "6 blades, 4 vanes, 3500 r/min, slowed 500 times; "
+    "the lobes are a sketch of count and speed": "6 palas, 4 álabes, 3500 r/min, 500 veces más lento; "
+    "los lóbulos son un esquema del número y la velocidad",
     # --- anim_feedback_howl: the loop as a geometric series ---
     "Gain before feedback is a convergence condition": "La ganancia antes del acople es una condición de convergencia",
     "talker,\n0.3 m from\nthe microphone": "hablante,\na 0,3 m del\nmicrófono",
@@ -4921,6 +4932,8 @@ _ES_PATTERNS = [
         r"sin el escalón de \1 dB\nla subida da \2 dB donde\nel §16.3 admite \3 dB, y el\n"
         r"dictamen deja incompleto\nel apartado 16",
     ),
+    # anim_fan_lobe_patterns: the running count of crests past the wall point.
+    (r"^lobes past the point: (\d+)$", r"lóbulos por el punto: \1"),
     # road_device_ratings: the legends carry the computed rating and category.
     (
         r"^absorptive cassette: \$DL_\\alpha\$ = (\d+) dB \((A\d)\)$",

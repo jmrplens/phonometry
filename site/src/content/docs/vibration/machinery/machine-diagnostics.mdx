@@ -407,6 +407,22 @@ returns the two speeds as entries of the result, and its `.plot()` marks them
 on a spectrum like the other lines; read them there as speeds of rotation. Six
 blades against four vanes is a design decision, and this is what it decides.
 
+The animation turns both patterns on the fan of this page and counts what a
+point on the duct wall sees.
+
+<Video
+  name="anim_fan_lobe_patterns"
+  width={2400}
+  height={1350}
+  title="The two lobe patterns of a ducted fan, and the rate a point on the wall sees"
+  description="Two end views of the fan of this page, six blades turning in front of four dashed stator vanes inside a duct, each with a ring drawn around the rotor. On the left the ring has two lobes and turns 175 times a second; on the right it has ten lobes and turns 35 times a second, both the way the rotor turns. A dot marks one point on the duct wall and flashes each time a lobe crest passes it, with a counter under each view; at 40 milliseconds both read 14. Under the views, two traces write the shape of each pattern at that point against machine time from 0 to 40 milliseconds, with a tick each time a blade passes the point: the two traces are shifted against each other but repeat with the same period, 2.86 milliseconds, the spacing of the blade ticks, marked once as 1/BPF."
+/>
+
+*The speeds are those of `blade_pass_frequencies` for this fan, slowed 500
+times. The rings are a sketch of a lobe count and a speed of rotation, not of
+a pressure field, and the clip says nothing about how strongly either pattern
+radiates.*
+
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_fault_families.svg" alt="Four spectra with the library's predicted lines drawn over each. Top left, a gear-mesh spectrum with one chipped tooth: tall lines at 700, 1400 and 2100 hertz with low, flat sidebands spaced 25 hertz on either side, and the mesh harmonics falling away quickly. Top right, the same gear pair with distributed wear: the sidebands become tall groups and the second and third mesh harmonics stay high. Bottom left, an induction-motor spectrum on a logarithmic amplitude axis showing 1x at 60 hertz, 2x at 120 and twice the supply frequency at 360, with the rotor-slot harmonic three decades lower at 3600 hertz flanked by sidebands one shaft rate away. Bottom right, a ducted-fan spectrum with the shaft line at 58 hertz and the blade-passing line at 350 and nothing between them; a note multiplies each lobe pattern back to the blade rate, 2 lobes times 175 turns a second and 10 lobes times 35 turns a second, both 350 lobes past a point each second, and a second note says there is no line of their own at 35 or 175 hertz, because those are speeds of rotation." width="92%" />
 
 *A fault family is recognised by its pattern, not by a single number. The two

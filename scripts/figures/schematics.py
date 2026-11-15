@@ -6700,3 +6700,255 @@ def animate_bearing_load_zone(output_dir: str) -> None:
         "anim_bearing_load_zone",
         frames=3 * _BLZ_ACT_FRAMES + _ANIM_HOLD,
     )
+
+
+# --- anim_fan_lobe_patterns: the two interaction patterns of a ducted fan ---
+_FLP_SLOW = 500.0  # times slower than the machine: one frame is 0.1 ms
+_FLP_FRAMES = 400  # 40 ms of machine time, 14 blade passes at the wall
+# The point on the duct wall, between two vanes. Not at 45 degrees: the two
+# patterns differ by kV = 8 lobes, and 8 x 45 degrees is a full turn, so there
+# their two traces would fall on one another.
+_FLP_PROBE = np.pi / 6.0
+
+
+@lru_cache(maxsize=1)
+def _fan_lobe_data() -> dict[str, Any]:
+    """The rates of the page's ducted fan, read from the library.
+
+    Six blades and four vanes at 3500 r/min, the example of the
+    machine-diagnostics page: Eq. (8.16) gives the two first patterns,
+    m_L = 6 - 4 = 2 and m_L = 6 + 4 = 10 lobes, and Eq. (8.17) their speeds
+    of rotation, in turns a second.
+    """
+    from phonometry import vibration
+
+    fan = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+    return {
+        "shaft": float(fan.shaft_rate),
+        "bpf": float(fan["BPF"]),
+        "patterns": tuple(
+            (lobes, float(fan[f"lobe n=1 m={lobes}"])) for lobes in (2, 10)
+        ),
+        "blades": 6,
+        "vanes": 4,
+    }
+
+
+def animate_fan_lobe_patterns(output_dir: str) -> None:
+    """The two lobe patterns of a ducted fan, and the rate a fixed point sees.
+
+    Norton & Karczub (2003), p. 525: blade-vane interaction sets up rotating
+    pressure patterns of m_L = nN +- kV lobes (Eq. 8.16) turning at
+    n N r.p.m. / m_L (Eq. 8.17), whose noise "is also at the blade passing
+    frequency". Each pattern is drawn as a ring of m_L lobes, the shape
+    cos(m_L (theta - phi)) turning at the speed of Eq. (8.17): a sketch of
+    the lobe count and the speed, not of a pressure. The point on the wall
+    is passed by 2 x 175 = 10 x 35 = 350 crests a second, the blade rate,
+    and the trace under the two panels writes what each pattern puts there.
+    """
+    from matplotlib.patches import Annulus, Circle
+
+    T = _translate_str
+
+    d = _fan_lobe_data()
+    shaft, bpf = d["shaft"], d["bpf"]
+    blades, vanes = d["blades"], d["vanes"]
+    patterns = d["patterns"]
+    two_pi = 2.0 * np.pi
+    frame_s = 1.0 / (_ANIM_FPS * _FLP_SLOW)
+    span_ms = 1000.0 * _FLP_FRAMES * frame_s
+    t_ms = np.linspace(0.0, span_ms, 2001)
+
+    def at(radius: float, angle: float) -> tuple[float, float]:
+        """The point at *radius* and *angle* from the top, drawn clockwise."""
+        return radius * float(np.sin(angle)), radius * float(np.cos(angle))
+
+    def phase(speed: float, seconds: float) -> float:
+        """How far a pattern turning *speed* times a second has gone."""
+        return two_pi * speed * seconds
+
+    fig = _anim_figure()
+    fig.suptitle(T("Two lobe patterns of one fan pass the wall at one rate"))
+    gs = fig.add_gridspec(2, 2, height_ratios=[2.15, 1.0])
+
+    theta = np.linspace(0.0, two_pi, 721)
+    rings: list[Any] = []
+    rotors: list[list[Any]] = []
+    flashes: list[Any] = []
+    counters: list[Any] = []
+    for col, (lobes, speed) in enumerate(patterns):
+        ax = fig.add_subplot(gs[0, col])
+        _schematic_axes(ax, (-1.32, 1.32), (-1.32, 1.18), equal=True)
+        ax.set_title(
+            T(f"$m_\\mathrm{{L}}$ = {lobes} lobes, {speed:.0f} turns a second"),
+            fontsize=9,
+            color=COLOR_FG,
+        )
+        ax.add_patch(
+            Annulus(
+                (0.0, 0.0),
+                1.08,
+                0.08,
+                facecolor=_solid_fill(ax),
+                edgecolor=COLOR_FG,
+                lw=1.1,
+            )
+        )
+        # The stator vanes, fixed and behind the rotor.
+        for v in range(vanes):
+            (x0, y0), (x1, y1) = (
+                at(0.2, two_pi * v / vanes),
+                at(0.62, two_pi * v / vanes),
+            )
+            ax.plot([x0, x1], [y0, y1], color=COLOR_MUTED, lw=1.4, ls="--")
+        ax.add_patch(
+            Circle(
+                (0.0, 0.0), 0.18, facecolor=_solid_fill(ax), edgecolor=COLOR_FG, lw=1.1
+            )
+        )
+        rotor = [
+            ax.plot([], [], color=COLOR_PRIMARY, lw=3.0, solid_capstyle="round")[0]
+            for _ in range(blades)
+        ]
+        ink = COLOR_SECONDARY if col == 0 else COLOR_TERTIARY
+        (ring,) = ax.plot([], [], color=ink, lw=1.8)
+        px, py = at(1.0, _FLP_PROBE)
+        ax.plot([px], [py], ls="none", marker="o", ms=5.0, color=COLOR_FG, zorder=5)
+        (flash,) = ax.plot(
+            [],
+            [],
+            ls="none",
+            marker=(8, 1, 0),
+            color=ink,
+            markeredgecolor=ink,
+            zorder=6,
+        )
+        counter = ax.text(
+            0.0,
+            -1.27,
+            "",
+            ha="center",
+            va="bottom",
+            color=COLOR_FG,
+            fontsize=8.5,
+        )
+        rings.append(ring)
+        rotors.append(rotor)
+        flashes.append(flash)
+        counters.append(counter)
+
+    # --- bottom: what each pattern puts on the point of the wall ----------
+    ax_t = fig.add_subplot(gs[1, :])
+    _grid_axes(ax_t)
+    ax_t.set_xlim(0.0, span_ms)
+    ax_t.set_ylim(-1.75, 2.75)
+    ax_t.set_yticks([])
+    ax_t.tick_params(labelsize=8)
+    ax_t.set_xlabel(T("Machine time [ms]"), fontsize=8.5)
+    traces = [
+        ax_t.plot([], [], color=ink, lw=1.2)[0]
+        for ink in (COLOR_SECONDARY, COLOR_TERTIARY)
+    ]
+    # A blade passes the point once every 1/BPF: the moment the first blade
+    # is at the point, then every pass after it.
+    first = ((_FLP_PROBE / two_pi) % (1.0 / blades)) / shaft
+    passes_ms = 1000.0 * (first + np.arange(64) / bpf)
+    passes_ms = passes_ms[passes_ms <= span_ms]
+    ticks = ax_t.vlines([], -1.6, -1.2, color=COLOR_FG, lw=1.1)
+    for x, text, ink in (
+        (0.008, T("$m_\\mathrm{L}$ = 2 at the point"), COLOR_SECONDARY),
+        (0.24, T("$m_\\mathrm{L}$ = 10 at the point"), COLOR_TERTIARY),
+        (0.48, T("ticks: a blade passes the point"), COLOR_FG),
+    ):
+        ax_t.text(
+            x,
+            0.96,
+            text,
+            transform=ax_t.transAxes,
+            ha="left",
+            va="top",
+            color=ink,
+            fontsize=8,
+        )
+    left, right = float(passes_ms[9]), float(passes_ms[10])
+    (bracket,) = ax_t.plot(
+        [left, right],
+        [1.5, 1.5],
+        color=COLOR_FG,
+        lw=1.1,
+        marker="|",
+        ms=6.0,
+        visible=False,
+    )
+    bracket_txt = ax_t.text(
+        right + 0.4,
+        1.5,
+        T(f"1/BPF = {1000.0 / bpf:.2f} ms for both"),
+        ha="left",
+        va="center",
+        color=COLOR_FG,
+        fontsize=8,
+        visible=False,
+    )
+    ax_t.set_title(
+        T(
+            f"6 blades, 4 vanes, 3500 r/min, slowed {_FLP_SLOW:.0f} times; "
+            "the lobes are a sketch of count and speed"
+        ),
+        fontsize=8.5,
+        fontstyle="italic",
+        color=COLOR_FG,
+    )
+
+    def at_point(
+        lobes: int, speed: float, seconds: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """The pattern's shape where the point is, at *seconds*."""
+        return np.asarray(
+            np.cos(lobes * (_FLP_PROBE - two_pi * speed * seconds)), dtype=float
+        )
+
+    def update(kf: int) -> tuple[Any, ...]:
+        k = min(kf, _FLP_FRAMES)
+        now = k * frame_s
+        arts: list[Any] = []
+        for col, (lobes, speed) in enumerate(patterns):
+            turned = phase(speed, now)
+            radius = 0.78 + 0.12 * np.cos(lobes * (theta - turned))
+            rings[col].set_data(radius * np.sin(theta), radius * np.cos(theta))
+            for b, blade in enumerate(rotors[col]):
+                angle = two_pi * b / blades + phase(shaft, now)
+                (x0, y0), (x1, y1) = at(0.2, angle), at(0.6, angle)
+                blade.set_data([x0, x1], [y0, y1])
+            # Crests that have reached the point: m_L (probe - phase) has
+            # come down through a multiple of 2 pi since the start.
+            start = lobes * _FLP_PROBE / two_pi
+            reached = int(np.floor(start)) - int(np.floor(start - lobes * speed * now))
+            counters[col].set_text(T(f"lobes past the point: {reached}"))
+            since = (start - lobes * speed * now) % 1.0
+            age = (1.0 - since) / (lobes * speed * frame_s) if since > 0.0 else 0.0
+            flashes[col].set_data([], [])
+            if reached > 0 and age < 3.0:
+                fx, fy = at(1.0, _FLP_PROBE)
+                flashes[col].set_data([fx], [fy])
+                flashes[col].set_markersize(13.0 * (1.0 - age / 3.0) + 2.0)
+            arts += [rings[col], *rotors[col], flashes[col], counters[col]]
+        upto = int(np.searchsorted(t_ms, 1000.0 * now, side="right"))
+        for trace, (lobes, speed) in zip(traces, patterns, strict=True):
+            trace.set_data(t_ms[:upto], at_point(lobes, speed, t_ms[:upto] / 1000.0))
+            arts.append(trace)
+        shown = passes_ms[passes_ms <= 1000.0 * now]
+        ticks.set_segments([[(x, -1.6), (x, -1.2)] for x in shown])
+        seen = 1000.0 * now >= right
+        bracket.set_visible(bool(seen))
+        bracket_txt.set_visible(bool(seen))
+        arts += [ticks, bracket, bracket_txt]
+        return tuple(arts)
+
+    _render_clip(
+        fig,
+        update,
+        output_dir,
+        "anim_fan_lobe_patterns",
+        frames=_FLP_FRAMES + _ANIM_HOLD,
+    )

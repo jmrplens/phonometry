@@ -177,7 +177,7 @@ plot-style-defaults:
 	$(PYTHON) scripts/check_plot_style_defaults.py
 
 # ISO 80000-1 groups long numbers in threes, and the standards this library
-# reads print them that way, so the corpus writes 6,251 5 and 101 325. Written
+# reads print them that way, so the corpus writes 6.251 5 and 101 325. Written
 # with an ordinary space a line break can fall inside the number and leave half
 # of it on the next line, reading as two numbers. This asks for U+202F, and it
 # knows the two shapes that are not groupings at all: an array's printed output
@@ -195,7 +195,7 @@ digit-grouping:
 subscripts:
 	$(PYTHON) scripts/check_subscript_slope.py
 
-# ISO 80000-2 prints the mathematical constants upright, e = 2,718 281 828 ...
+# ISO 80000-2 prints the mathematical constants upright, e = 2.718 281 828 ...
 # beside pi, and an italic e is a variable. KaTeX and mathtext set a bare letter
 # italic, so the exponential is upright only where the source writes
 # \mathrm{e}, and the corpus had both, a few lines apart on one page. This
@@ -548,7 +548,7 @@ published-catalogues:
 
 # The solids catalogue holds the same material from up to four books, and two
 # densities that disagree are a digit somebody typed wrong: every density the
-# script does not already accept agrees across these tables to within 2,6 per
+# script does not already accept agrees across these tables to within 2.6 per
 # cent. It puts the books side by side and fails above 8 per cent, so a real
 # spread passes without a word, while reporting the moduli and speeds, which do
 # disagree by thirty per cent without anybody being wrong. Needs the package

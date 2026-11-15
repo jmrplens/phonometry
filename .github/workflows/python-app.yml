@@ -678,7 +678,7 @@ jobs:
   # another published value than alone, and four books print the same material.
   # Two densities that disagree are a digit somebody typed wrong, because every
   # density the script does not already accept agrees across these tables to
-  # within 2,6 per cent, so it fails above 8 per cent and lets anything under
+  # within 2.6 per cent, so it fails above 8 per cent and lets anything under
   # that pass without a word. Moduli and speeds disagree by thirty per cent
   # between books without anybody being wrong, so those it reports and never
   # fails; the ones it reports by default are the few an order of magnitude
@@ -1282,7 +1282,7 @@ jobs:
       run: python scripts/check_reference_values.py
 
   # A standard prints its limits in decimal, and a margin of two readings that
-  # is 6 dB in decimal comes out 5,999 999 999 999 996 or 6,000 000 000 000 004
+  # is 6 dB in decimal comes out 5.999 999 999 999 996 or 6.000 000 000 000 004
   # in binary, so a verdict read straight off the comparison turns on the last
   # bit. The sweep that settled this class fixed more than a hundred sites;
   # this keeps the next one out. It fails on a computed decimal compared with a

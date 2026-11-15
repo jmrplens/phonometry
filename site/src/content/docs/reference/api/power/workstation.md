@@ -451,8 +451,11 @@ The accuracy grade a local environmental correction earns.
 ISO 11202:2010 A.1.3 puts the boundary at
 [`GRADE_2_MAX_K3`](/phonometry/reference/api/power/workstation/#grade_2_max_k3): a greatest possible $K_3$ of 4 dB or less
 is grade 2 (engineering), and more than that is grade 3 (survey). Method A.2
-reaches the same boundary by a different road, Condition (A.6), which is
-algebraically the same 4 dB once (A.4) and (A.5) are substituted into it.
+is stricter: Condition (A.6) of A.2.5 adds a margin of 0.5 dB, 1 dB or
+1.5 dB, by the largest dimension of the source, so that once (A.4) and (A.5)
+are substituted it holds for $K_3$ up to about 3.3 dB, 2.8 dB or
+2.4 dB. This function applies the 4 dB boundary of A.1.3 alone, and does not
+apply that margin.
 
 The worst band decides, since a determination is only as good as its
 weakest part.

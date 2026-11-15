@@ -88,8 +88,11 @@ surface is a pressure-release mirror, so the ship radiates as a source plus a
 phase-inverted image a distance $2 d_\mathrm{s}$ above it (the dipole of ISO 17208-2
 Annex A). When the pair is shallow in wavelength terms the two nearly cancel, so
 the field measured below understates what an equivalent monopole would have to
-be; when it is deep in wavelength terms the two decorrelate over the
-measurement aperture and radiate twice the power of one alone.
+be; when it is deep in wavelength terms the field breaks into lobes of up to
+twice the pressure of one source (+6 dB) with nulls between them (Formula
+(A.7)), and taken over those lobes, as the three hydrophones of the string
+(A.4) and the width of a band take it, the pair radiates twice the power of
+one alone.
 
 Read the limits as that statement. $\Delta L$ grows **without bound** as
 $u \to 0$ (the argument of the logarithm tends to $u^2$), which is low frequency
@@ -98,8 +101,9 @@ so a small error in the assumed source depth or sound speed becomes a large
 error in source level, and the low-frequency end of a reported source-level
 spectrum is the least trustworthy part of it. It crosses zero at $u \approx 1.03$
 (59 Hz for the 4.2 m source depth of the example below), and tends to
-$-10\log_{10}(2) = -3.01$ dB as $u \to \infty$, where source and image add
-incoherently.
+$-10\log_{10}(2) = -3.01$ dB as $u \to \infty$: the average over those lobes,
+which Formula (A.8) puts in place of the exact pattern once
+$k d_\mathrm{s} \sin\alpha > 3\pi/4$.
 
 The nominal source depth itself is a convention, not a located source:
 ISO 17208-2 Formula (1) fixes $d_\mathrm{s} = 0.7\,D$ on the mean of the bow and stern
@@ -113,7 +117,7 @@ the sound speed used and the conversion formula applied to be reported with it.
 *The gap between the two curves is the surface correction, and it changes sign.
 For this 6 m draught ($d_\mathrm{s}$ = 4.2 m) it adds 9.08 dB at 20 Hz, crosses zero
 near 59 Hz, overshoots to −4.07 dB at 160 Hz and only then settles on the
-$-10\log_{10}(2) = -3.01$ dB of an incoherent source-plus-image pair, which it reaches
+$-10\log_{10}(2) = -3.01$ dB of a source and its image averaged over their lobes, which it reaches
 by 4 kHz. Everything left of the crossing is the inversion of a near-total
 cancellation: that is the part of a published source-level spectrum that moves
 most when the assumed source depth is wrong.*
@@ -134,6 +138,29 @@ res.plot()
 ```
 
 </details>
+
+The mirror itself can be watched. Below, the same 4.2 m source radiates under a
+pressure-release surface at 31.5 Hz ($k d_\mathrm{s} = 0.55$) and at 315 Hz
+($k d_\mathrm{s} = 5.54$), one band on each side of the crossing, and the level
+is read along the ISO 17208-1 hydrophone string 100 m away, against the same
+source with the surface taken away.
+
+**Video:** [Lloyd's mirror under a ship at 31.5 Hz and 315 Hz (2D FDTD)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_fdtd_lloyd_mirror.webm): A 2D FDTD simulation of a source 4.2 metres under a pressure-release sea surface at 31.5 hertz and at 315 hertz. The strip above the surface shows the phase-inverted image source. At 31.5 hertz the pair radiates as a vertical dipole, with nothing along the surface and one lobe downwards; at 315 hertz lobes and nulls fan out. The level along a hydrophone string 100 metres away, with hydrophones at depression angles of 15, 30 and 45 degrees, is plotted against the level of the same source with no surface, and follows the field of a source and its inverted image.
+
+*What the correction averages. At 31.5 Hz source and image are a fraction of a
+wavelength apart and radiate as a vertical dipole: nothing along the surface, a
+single lobe downwards, and every hydrophone of the string reads less than the
+source would give alone, which is why $\Delta L$ is positive there (+5.15 dB
+from Formula (3)). At 315 Hz a single frequency does not give an incoherent
+pair but lobes of up to twice the pressure (+6 dB) with nulls between them: the
+15° hydrophone sits on a lobe, the 30° one on the flank of the null at 34.5°
+and the 45° one on the next lobe. The −3 dB of the limit is the average over
+those lobes, which the three hydrophones and the width of a decidecade band
+take between them; Formula (3) gives −3.57 dB for this band. The simulation is
+two-dimensional (a line source), so its levels are compared with the exact
+field of a line source and its inverted image, the counterpart of
+ISO 17208-2 Formula (A.6), and not with Formula (3), which is a fit to the
+three-dimensional far field averaged over the three hydrophones.*
 
 ```python
 import numpy as np

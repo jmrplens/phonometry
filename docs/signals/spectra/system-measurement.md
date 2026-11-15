@@ -340,6 +340,18 @@ response builds the room's modes into the filter, and they move with the
 microphone. Below the gate's limit, a ground-plane measurement is the usual
 alternative.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_bench_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_bench.svg" alt="Two benches for a sweep measurement: panel (a) an audio interface driving an electrical device under test with a second interface channel wired straight back from the output as a loopback reference that fixes t equal to zero; panel (b) a loudspeaker and a measurement microphone both 1.20 m over a hard floor and 1.00 m apart, with the reflected path of 2.60 m dashed and the resulting reflection-free time of 4.7 ms stated; below both, the sweep's own time axis with the linear arrival at t equal to zero, the second and third harmonic pre-arrivals at minus 0.49 and minus 0.77 seconds, the per-order window of 8192 samples and the closest arrival spacing L ln(3/2) equal to 0.28 s" width="92%"></picture>
+
+*Panel (b) is the bench of this section: source and microphone 1.20 m above a
+hard floor and 1.00 m apart, so the reflected path is
+$\sqrt{1.00^2 + 2.40^2} = 2.60$ m, 1.60 m longer than the direct one, and the
+floor arrives $1.60/343 = 4.7$ ms late. The gate has to close before that, and a
+4.7 ms window resolves nothing below about 210 Hz. Panel (a) is the electrical
+counterpart, where a loopback channel fixes $t = 0$; the strip under both is the
+harmonic time budget of the sweep that
+[swept-sine distortion](../../devices/electroacoustics/swept-sine-distortion.md)
+plays, and takes no part in the inversion.*
+
 Equalizing with a measured response means inverting it, and a plain
 reciprocal $1/H(f)$ explodes wherever the system radiates little energy (a
 notch in-band, everything out-of-band), turning an equalizer into a noise

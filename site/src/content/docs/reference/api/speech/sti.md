@@ -9,16 +9,17 @@ Speech Transmission Index (STI) per IEC 60268-16:2020 (Edition 5).
 
 Implements the full-STI indirect method from impulse responses (Schroeder
 modulation transfer function), the direct STIPA method on recorded signals
-(Annex B), an Ed.5-conformant STIPA test-signal generator (clauses A.4
-and A.6.1) and the Annex M adjustment of a measured result to other speech
-and occupancy-noise levels. Only the male speech option exists: Edition 5
-removed the female spectrum and weighting factors (foreword, item d).
+(Annex B), an Ed.5-conformant STIPA test-signal generator (Ed.5 clauses
+A.5 and A.6.1, Ed.4 clause A.4) and the Annex M adjustment of a measured
+result to other speech and occupancy-noise levels. Only the male speech
+option exists: Edition 5 removed the female spectrum and weighting factors
+(foreword, item d).
 
 The computation chain (octave-band MTF -> auditory masking and reception
 threshold correction -> effective SNR clipped to +/-15 dB -> transmission
 indices -> band MTI -> weighted STI) is numerically identical between
-Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5; the only Ed.5 numeric change is
-the male test-signal spectrum (A.6.1).
+Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5, which moves them to A.2 and A.3;
+the only Ed.5 numeric change is the male test-signal spectrum (A.6.1).
 
 The level adjustment of [`sti_adjusted_for_levels`](/phonometry/reference/api/speech/sti/#sti_adjusted_for_levels) is the four-step
 procedure of Ed.4 (2011) Annex M, verified against the printed
@@ -59,10 +60,10 @@ it without measuring again:
 3. multiply by the correction the operational levels produce, putting
    the occupancy noise, masking and threshold of the simulated
    condition back in;
-4. process the resulting matrix into the index by the usual A.5.4 to
-   A.5.6 chain.
+4. process the resulting matrix into the index by the usual Ed.4 A.5.4
+   to A.5.6 chain.
 
-Steps 2 and 3 run the one level-dependent correction of clause A.5.3
+Steps 2 and 3 run the one level-dependent correction of Ed.4 clause A.5.3
 that the forward chain applies, once inverted and once as it stands, so
 the adjustment cannot drift from the masking and threshold model the
 rest of the module uses.
@@ -143,7 +144,7 @@ m_k(f_m) = \left| \int h_k^2(t)\, \mathrm{e}^{-j 2\pi f_m t}\, dt \right| \Big/ 
 $$
 
 at the 14 modulation frequencies 0,63-12,5 Hz
-(A.2.2). The result then follows the standard chain: optional noise
+(Ed.4 A.2.2, Ed.5 A.1.4). The result then follows the standard chain: optional noise
 degradation, optional auditory masking and absolute reception
 threshold correction, effective SNR clipped to +/-15 dB, transmission
 indices, band MTIs and the male-weighted STI (Ed.5 Table A.1).
@@ -156,7 +157,7 @@ skipped (they require absolute band levels), matching the common
 :::note
 The indirect method has a small positive MTF bias that grows
 with reverberation time for a finite noise-carrier IR. It stays within
-the IEC 60268-16 A.5.1.2 systematic-error allowance (\<= 0.01 STI) up to
+the IEC 60268-16 Ed.4 A.5.1.2 systematic-error allowance (\<= 0.01 STI) up to
 about T60 = 4 s, reaching ~+0.012 STI only in very reverberant rooms
 (T60 ~ 8 s, STI ~ 0.19). It is a property of the finite IR, not of the
 (exact) Schroeder integration, and does not depend on IR truncation.
@@ -218,7 +219,7 @@ The recording is filtered into the seven octave bands, squared and
 low-passed (~100 Hz) into intensity envelopes, and the modulation
 depths at the two Table B.1 modulation frequencies of each band are
 measured with the sine/cosine correlation over an integer number of
-periods (Ed.4 A.5.2 = Ed.5). The modulation transfer values are the
+periods (Ed.4 A.5.2; the same in Ed.5). The modulation transfer values are the
 measured depths normalized by the source modulation index 0,55
 (Annex B), or by the depths measured on `reference` when the
 actually emitted signal is supplied, and feed the same masking /
@@ -267,8 +268,8 @@ stipa_signal(
 Generate an IEC 60268-16:2020 conformant STIPA test signal.
 
 Pink-noise carriers are band-limited to half-octave bands centred on
-the seven octave-band frequencies (clause A.4), set to the Ed.5 male
-speech spectrum of clause A.6.1 (`-2,5; 0,5; 0; -6; -12; -18; -24`
+the seven octave-band frequencies (Ed.5 clause A.5, Ed.4 A.4), set to the
+Ed.5 male speech spectrum of clause A.6.1 (`-2,5; 0,5; 0; -6; -12; -18; -24`
 dB re the 500 Hz band) and intensity-modulated with
 `0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))`: the Table B.1
 frequency pair of each band, 180 degrees between components, applied

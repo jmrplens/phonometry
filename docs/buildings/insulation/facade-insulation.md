@@ -101,6 +101,23 @@ number even when they are the same size.
 
 ### Choosing and running the method (Clauses 9 and 10)
 
+**The instruments (Clause 4).** Everything that measures a sound pressure
+level, the microphones with their cables, windscreens and recorders, meets
+class 0 or 1 of IEC 61672-1 for random incidence, and the microphone used for
+the surface measurements of the element methods has a diameter of **13 mm at
+most** (Clause 4.1). The filters are class 0 or 1 of IEC 61260, and the
+reverberation time equipment complies with ISO 3382-2. Check the whole chain
+with a class 0 or 1 sound calibrator (IEC 60942) at the beginning and at the
+end of every measurement session, and at least at the beginning and the end of
+each measurement day, and note each reading in the field record. If two
+consecutive checks differ by more than 0.5 dB, with no adjustment in between,
+everything measured since the last satisfactory check is discarded
+(Clause 4.2). Unless national regulations dictate otherwise, Clause 4.3
+recommends having the calibrator calibrated every year at most, and the meter
+and the filter set verified every two. The same classes and the same 0.5 dB
+rule open the other two parts of ISO 16283, in
+[Field Insulation Measurement](insulation-field.md#taking-the-measurement-iso-16283-1-clauses-7-and-9).
+
 **Global or element.** They answer different questions and ISO 16283-3
 Table 1 says which is preferred for which. The **global** methods give
 $D_{2\mathrm{m,n}T}$ (or $D_{2\mathrm{m,n}}$) and "quantify the airborne sound insulation of a

@@ -161,9 +161,11 @@ much larger values where material flow or process variability dominates.
 
 ### A decision path
 
-The table compresses into a short sequence of questions (ISO 3740 dedicates
-its Table 3 and Annex D to exactly this decision). Work through them in
-order; the first match names the standard.
+The table compresses into a short sequence of questions (ISO 3740:2019 draws
+the same decision as two flowcharts in its clause 5, Figure 1 for the whole
+family and Figure 2 for measurements in situ). Work through them in order;
+the first match names the standard, and the chart after the list draws the
+path.
 
 1. **What is the number for?** A datasheet declaration or a limit check
    normally asks for engineering grade (grade 2, the preferred grade for
@@ -187,7 +189,14 @@ order; the first match names the standard.
    least 6 dB below the source (preferably more than 15 dB) and
    $K_2 \le 4\ \text{dB}$. If only a
    3 dB margin or $K_2 \le 7\ \text{dB}$ can be met, the same microphones and formulae
-   degrade gracefully to ISO 3746 at survey grade.
+   degrade gracefully to ISO 3746 at survey grade. A room too reverberant
+   for either (ISO 3746 stops at $K_2 = 7\ \text{dB}$) is the case ISO 3747
+   is written for: with a calibrated reference sound source at hand, the
+   machine is compared with it at the same microphone positions, at
+   engineering grade where the excess of sound pressure level $\Delta L_f$
+   is at least 7 dB at every position and the source is not strongly
+   directional, and at survey grade otherwise, as [Sound Power in Situ by
+   Comparison](sound-power-in-situ.md) sets out.
 4. **Is the background the problem?** When neighbouring machines cannot be
    switched off, or the margin is outright negative, the pressure methods
    are out. Intensity (ISO 9614-1 at discrete points, ISO 9614-2 by scanning,
@@ -203,11 +212,26 @@ order; the first match names the standard.
    characterises what the *structure* radiates, and stays blind to sound
    escaping through openings, intakes and gaps, and it costs a radiation factor
    you must either assume (Part 1, an upper limit) or measure once (Part 2).
+   If a microphone can be put there and nothing above matched, the route is
+   intensity again: a note to clause 4.3 of ISO 3746 sends a room beyond its
+   $K_2$ limit to ISO 3747 or ISO 9614, and Figure 1 of ISO 3740:2019 lists
+   ISO 9614 at every one of its in situ exits.
 6. **How repeatable is the machine itself?** None of the above bounds
    $\sigma_\text{omc}$, and on a process machine it can outrank the whole grade
    choice: a grade-1 facility around a source whose own operating conditions
    scatter by 2 dB buys a $\sigma_\text{tot}$ no better than grade 2. Estimate it
    before paying for the room.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_decision_path_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_decision_path.svg" alt="A flow chart of this guide's six questions, read downwards. A dashed gate across the top, question 1, what is the number for, holds three chips: grade 2 engineering for a declaration or a check against a limit, grade 1 precision for a reference source, a ranking or a dispute, grade 3 survey for a first walk-through, with a note that grade 1 is reached only by ISO 3741, ISO 3745, ISO 9614-1 and ISO 9614-3. Four diamonds follow down the left, each with its exits in green boxes to the right. Question 2, can the source travel to a laboratory: yes leads to ISO 3741 in a qualified reverberation room and ISO 3745 in an anechoic or hemi-anechoic room, both grade 1, and to the small test rooms of ISO 3743-1 and -2 at grade 2. Question 3, how quiet and how dry is the site, has three exits: ISO 3744 at grade 2 with the background at least 6 dB below the source, preferably more than 15 dB, and K2 at most 4 dB; ISO 3746 at grade 3 with a 3 dB margin and K2 at most 7 dB; and ISO 3747, the comparison in situ at grade 2 or 3, for a room too reverberant for both, given a reference sound source and an excess of sound pressure level of at least 7 dB. Question 4, is the background the problem: yes leads to intensity by ISO 9614-1 and -2, at discrete points or by scanning. Question 5, can a microphone be put there at all: yes returns to the intensity box, no leads to ISO/TS 7849-1 and -2, the surface velocity of the casing with a radiation factor. A grey line collects every exit down the right-hand side into a second dashed box, question 6, how repeatable is the machine itself, with the total standard deviation as the root sum of squares of the method's and the operating and mounting one" width="92%"></picture>
+
+*The six questions as a path. Question 1 is a gate: it fixes the grade and names
+no standard. Question 6 is a check every route passes through on its way out.
+The four between them are the decisions, read downwards, and the first green
+box reached names the standard. The order is this page's own: Figure 1 of
+ISO 3740:2019 asks whether only the structure-borne part is wanted before
+anything else, and carries neither the gate nor the check. Where the
+background is the obstacle, both its flowcharts name ISO 9614-1 and -2 only,
+and the plate follows them there.*
 
 ### What the accuracy grades mean
 

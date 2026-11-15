@@ -52,6 +52,20 @@ here, and not by the device, which is why the same windows work for any
 weakly non-linear system and why lengthening the sweep is what buys
 separation.*
 
+The sketch is the end state. The clip shows how the recording gets there:
+while the sweep plays, the response draws one ridge per order on the
+time-frequency plane, straight and parallel on a logarithmic frequency axis
+and each $L\ln n$ ahead of the sweep, and the inverse filter then stands them
+up into separate arrivals.
+
+**Video:** [The harmonic ridges of a swept-sine recording and their collapse](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_sweep_harmonics.webm): An exponential sweep from 20 Hz to 6 kHz plays for 4 s while the spectrogram of the response builds on a logarithmic frequency axis: the fundamental ridge and, fainter and parallel to it, the ridges at twice, three and four times the frequency. Arrows then measure how far ahead of the sweep each harmonic ridge runs, 0.49 s, 0.77 s and 0.97 s. The inverse filter moves every frequency back by the time the sweep took to reach it, the four ridges stand up into vertical lines, and beside them the impulse response of each order appears 0.49 s, 0.77 s and 0.97 s before the linear one.
+
+*The recording is the sweep of this section through the same memoryless
+polynomial with a fourth-order term added, so that a fourth ridge exists. The
+collapse is drawn as the shift the filter's group delay, $L\ln(f/f_1)$, applies
+to each row of the recorded map; the arrivals on the right are the windowed
+responses `swept_sine_distortion` returns, as envelopes in decibels.*
+
 ```python
 import numpy as np
 from phonometry import electroacoustics

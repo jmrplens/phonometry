@@ -191,7 +191,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 ### Sound insulation
 
-- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation.txt)
+- [Overview](https://docs.jmrp.io/phonometry/buildings/insulation/): Airborne and impact insulation measured and rated: laboratory (ISO 10140, 15186, 10848), field (ISO 16283, 10052, 16032), ISO 717 ratings and façades. · [full text, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-1.txt) · [full text, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-2.txt)
 - [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): Field sound insulation by ISO 16283-1/-2: airborne D, DnT and R', impact L'nT and L'n, the Clause 14 test report and the ISO 12999-1 uncertainty.
 - [Small Rooms: the ISO 16283 Low-Frequency Procedure](https://docs.jmrp.io/phonometry/buildings/insulation/low-frequency-procedure/): Corner procedure that ISO 16283 requires below 25 m³: corner level, combination and 63 Hz reverberation time, for airborne, impact and façade.
 - [Heavy and Soft Impact Sources (ISO 16283-2)](https://docs.jmrp.io/phonometry/buildings/insulation/heavy-impact-sources/): Rubber ball and bang machine: force exposure level, the ISO 16283-2 and JIS A 1418-2 checks, Fast maximum level and the ISO 717-2 Annex D rating.
@@ -300,7 +300,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 ### Outdoor sound
 
-- [Overview](https://docs.jmrp.io/phonometry/environment/propagation/): Sound in open air: ISO 9613 propagation, ground effect, barriers, refraction, EN 1793-5 barrier reflection and ISO 17534-1 software checks. · [full text](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation.txt)
+- [Overview](https://docs.jmrp.io/phonometry/environment/propagation/): Sound in open air: ISO 9613 propagation, ground effect, barriers, refraction, EN 1793-5 barrier reflection and ISO 17534-1 software checks. · [full text, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation-1.txt) · [full text, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation-2.txt)
 - [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): Outdoor sound propagation from a point source in Python by ISO 9613-1 and -2: divergence, air absorption, ground, barriers and meteorology, per octave band.
 - [Spherical ground effect and advanced barriers](https://docs.jmrp.io/phonometry/environment/propagation/ground-barriers/): Weyl-Van der Pol spherical-wave reflection over finite-impedance ground and wave-theory diffraction: Kurze-Anderson, rigid half-plane, thick barriers.
 - [Atmospheric refraction: rays and the GFPE](https://docs.jmrp.io/phonometry/environment/propagation/atmospheric-refraction/): Ray tracing and the Green's Function parabolic equation (GFPE) in a refracting atmosphere: sound-speed profiles, curved rays and shadow zones.
@@ -511,7 +511,7 @@ The errata register has one page per document family, each with the defects foun
 - [Errata in ISO 14257](https://docs.jmrp.io/phonometry/reference/errata/iso-14257/): 4 entries
 - [Errata in ISO 15186](https://docs.jmrp.io/phonometry/reference/errata/iso-15186/): 2 entries
 - [Errata in ISO/DIS 16032](https://docs.jmrp.io/phonometry/reference/errata/iso-16032/): 6 entries
-- [Errata in ISO 16283](https://docs.jmrp.io/phonometry/reference/errata/iso-16283/): 3 entries
+- [Errata in ISO 16283](https://docs.jmrp.io/phonometry/reference/errata/iso-16283/): 4 entries
 - [Errata in ISO 17208](https://docs.jmrp.io/phonometry/reference/errata/iso-17208/): 1 entry
 - [Errata in ISO/TR 17534](https://docs.jmrp.io/phonometry/reference/errata/iso-17534/): 2 entries
 - [Errata in ISO/PAS 1996](https://docs.jmrp.io/phonometry/reference/errata/iso-1996/): 1 entry
@@ -615,7 +615,8 @@ One file per area, each small enough to fetch whole. An area too long for one fe
 - [Room acoustics, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms-1.txt)
 - [Room acoustics, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms-2.txt)
 - [Auditorium measures of the ISO 3382-1 annexes](https://docs.jmrp.io/phonometry/llms/llms-buildings-rooms-auditorium.txt)
-- [Sound insulation](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation.txt)
+- [Sound insulation, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-1.txt)
+- [Sound insulation, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-2.txt)
 - [Laboratory insulation measurement](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-laboratory.txt)
 - [Insulation ratings and the envelope](https://docs.jmrp.io/phonometry/llms/llms-buildings-insulation-ratings.txt)
 - [Insulation design, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-buildings-design-1.txt)
@@ -634,7 +635,8 @@ One file per area, each small enough to fetch whole. An area too long for one fe
 - [Vibration immission](https://docs.jmrp.io/phonometry/llms/llms-vibration-immission.txt)
 - [Environment and transport](https://docs.jmrp.io/phonometry/llms/llms-environment.txt)
 - [Assessment and regulation](https://docs.jmrp.io/phonometry/llms/llms-environment-assessment.txt)
-- [Outdoor sound](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation.txt)
+- [Outdoor sound, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation-1.txt)
+- [Outdoor sound, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-propagation-2.txt)
 - [Environmental sources, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-sources-1.txt)
 - [Environmental sources, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-environment-sources-2.txt)
 - [Aircraft noise](https://docs.jmrp.io/phonometry/llms/llms-aircraft.txt)

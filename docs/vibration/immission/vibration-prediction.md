@@ -85,6 +85,24 @@ ax.legend()
 
 </details>
 
+The decay law starts from the surface wave because, as the standard says
+under Formula (1), the vibration of a source near the surface travels
+predominantly along the ground surface, as a Rayleigh wave. The animation
+shows it on the half-space of the elastic solver: a hit on the free surface
+sends a compressional and a shear front down into the body, and along the
+surface the train that follows them is the strongest motion and the last to
+pass.
+
+**Video:** [Lamb's problem with a free and with a rigid top surface](https://raw.githubusercontent.com/jmrplens/phonometry-assets/121efdf58a806512db6b3ce160760f280e642f53/images/anim_elastic_halfspace_waves.webm): A vertical hit on an aluminium half-space sends out a compressional front and a slower shear front, both drawn with dotted arcs at their exact analytic radii that stay locked to them as they expand and leave the frame. On the free-surface panel a train of strong lobes runs along the surface a step behind the shear front, the strongest motion in the frame once clear of the impact, until it leaves through the sides, and the two probe traces beside it separate by the Rayleigh time of flight. The clip runs on until both body fronts have left the frame. On the rigid-surface panel the same two fronts appear and no surface train follows them.
+
+*Along the surface the Rayleigh train comes after the two body fronts and
+carries the strongest motion. It is the wave in whose wavelengths Formula (1)
+measures the near field, and the one Figure 1 of DIN 4150-1:2001-06 starts
+from. The half-space of the clip is
+aluminium, not soil: it is the clip of the
+[elastic waves guide](../../simulation/elastic-waves.md), and it shows the
+kinds of wave, not a decay to read numbers from.*
+
 The damping alone is worth drawing, and Figure 2 draws it for a damping
 ratio of 0,01 and a wave speed of 200 m/s: over 100 m the ground takes
 27 % of the amplitude at 10 Hz and 79 % at 50 Hz, which is why the low
@@ -265,6 +283,9 @@ point of Figure A.18, labelled all groups of a hall of 252 machines, sits at
   what the predicted numbers are judged against.
 - [Vibration next to a railway (DIN 45672)](railway-vibration.md):
   the wave speeds of the ground that the wavelength here comes from.
+- [Elastic waves and fluid-solid coupling](../../simulation/elastic-waves.md):
+  the solver behind the animation of section 1, and Lamb's problem with a
+  free and with a rigid surface.
 - API reference:
   [`vibration.immission.prediction`](https://docs.jmrp.io/phonometry/reference/api/vibration/prediction/).
 

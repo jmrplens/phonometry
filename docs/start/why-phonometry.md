@@ -226,7 +226,7 @@ independent evidence and the reading the library implements. Where that reading
 changes a number the library reports, the entry names the check or test that
 pins it; where it does not, because the defect is a label, a cross-reference or
 a table the library never reads, the entry says so instead. There are
-351 of them now, across standards, guidance documents, textbooks
+352 of them now, across standards, guidance documents, textbooks
 and journal papers, each marked as reported to the issuing body or not. A defect listed there is never a defect of the
 method: in every case the intended reading could be established from the
 document itself or from physics.

@@ -93,6 +93,22 @@ plt.show()
 
 </details>
 
+The two methods cut the same spectrum in two different ways, and the cut is
+what a hand check of a result has to reproduce. For the tone-to-noise ratio it
+is made inside the critical band: the tone band is the run of lines between the
+minima on either side of the peak, searched within 15 % of the critical
+bandwidth, and only what stands above the straight line between its two end
+lines counts as tone (clause 11.2, Formula 9).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_to_noise_partition_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_to_noise_partition.svg" alt="Two panels on the averaged spectrum of a 1 kHz tone in noise. Left, the critical band of the tone, 162.2 Hz wide from 922.2 Hz to 1084.4 Hz, shaded under the spectrum as the total level, with the window of 15 % of that width marked about the peak. Right, that window line by line, from 988 Hz to 1012 Hz: the tone band is the seven lines between the minima on either side of the peak, a dashed straight line joins its two end lines l1 and l2, and the area between that line and the spectrum is shaded as the tone. The heading gives a tone level of minus 28.0 dB, a masking noise level of minus 40.0 dB and a tone-to-noise ratio of 12.0 dB" width="100%"></picture>
+
+For the prominence ratio the cut is made across three bands: the critical band
+of the tone and the two that touch it, whose outer edges come from the fitted
+Formulae 21 and 22. A tone at or below 171.4 Hz has its lower band cut at
+20 Hz, and Formula 24 scales what is left of it to 100 Hz.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prominence_ratio_partition_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prominence_ratio_partition.svg" alt="Two panels, each an averaged spectrum cut into three shaded bands with the level of each written in it. Left, a 1 kHz tone: lower band from 782.5 Hz to 922.2 Hz at minus 40.5 dB, middle band from 922.2 Hz to 1084.4 Hz at minus 27.8 dB with the tone in it, upper band from 1084.4 Hz to 1261.5 Hz at minus 39.5 dB, and a prominence ratio of 12.2 dB by Formula 23. Right, a 120 Hz tone: the lower band is cut at 20 Hz and runs to 69.5 Hz, 49 Hz wide, at minus 45.0 dB, the middle band runs from 69.5 Hz to 170.5 Hz at minus 32.9 dB, the upper band from 170.5 Hz to 274.8 Hz at minus 42.0 dB, and the prominence ratio is 9.0 dB by Formula 24, which scales the lower band by 100 Hz over its width" width="100%"></picture>
+
 A TNR at or above $8 + 8.33\log_{10}(1000/f_\mathrm{t})$ dB below 1 kHz (a flat 8 dB for
 $f_\mathrm{t} \ge 1$ kHz) classifies the tone as *prominent*; the PR criterion is
 $9 + 10\log_{10}(1000/f_\mathrm{t})$ dB below 1 kHz and 9 dB from there up, likewise

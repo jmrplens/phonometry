@@ -213,7 +213,10 @@ $\alpha_\mathrm{w} = 0.70(\text{H})$, class C, laid flat as a Type A, and
 $\alpha_\mathrm{w} = 0.90$, class A, on a Type E-400 mounting. Two classes come from one
 product because the 350 mm of air behind it moves the layer into the
 particle-velocity maximum at 250 Hz (where the predicted coefficient goes from
-0.37 to 0.86). A quoted $\alpha_\mathrm{s}$ or $\alpha_\mathrm{w}$ without its mounting is
+0.37 to 0.86); the porous absorbers guide
+[plays that move](porous-absorbers.md#spacing-the-layer-off-the-wall)
+at normal incidence, the layer leaving the wall and the velocity it meets. A
+quoted $\alpha_\mathrm{s}$ or $\alpha_\mathrm{w}$ without its mounting is
 therefore not a material property but an installation result, which is why the
 `mounting` field of the fiche below is not decoration.
 

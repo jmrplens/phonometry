@@ -124,7 +124,7 @@ def _loudspeaker_example() -> tuple[object, ReportMetadata, str]:
     passband near 87 dB with a gentle ripple, a low-frequency roll-off below
     50 Hz and a high-frequency roll-off above 16 kHz, so the effective frequency
     range (IEC 60268-5 21.2) sits inside the measured band. The characteristic
-    sensitivity is referred to 1 W into 8 ohm at 1 m (the default 2,83 V drive),
+    sensitivity is referred to 1 W into 8 ohm at 1 m (the default 2.83 V drive),
     and the impedance modulus, the total-harmonic-distortion curve and a baffled
     circular-piston directivity feed the impedance, THD and polar panels. The
     requirement is a characteristic sensitivity the example clears.
@@ -195,12 +195,12 @@ def _microphone_example() -> tuple[object, ReportMetadata, str]:
     region near 9 kHz, a low-frequency roll-off crossing -3 dB near 30 Hz and a
     high-frequency roll-off crossing -3 dB near 19 kHz, so the effective
     frequency range (IEC 60268-4 12.2) sits inside the measured band. The rated
-    free-field sensitivity of 12,5 mV/Pa gives a sensitivity level of
-    20 lg 0,0125 = -38,1 dB re 1 V/Pa (11.1); the A-weighted inherent-noise
+    free-field sensitivity of 12.5 mV/Pa gives a sensitivity level of
+    20 lg 0.0125 = -38.1 dB re 1 V/Pa (11.1); the A-weighted inherent-noise
     voltage yields the equivalent noise level (17.2); the ideal-cardioid
-    directional pattern at 1 kHz yields a directivity index of 10 lg 3 = 4,8 dB
+    directional pattern at 1 kHz yields a directivity index of 10 lg 3 = 4.8 dB
     (13.2.2); and the distortion-against-level curve places the overload sound
-    pressure level at the 0,5 % THD limit (15.2). The requirement is a maximum
+    pressure level at the 0.5 % THD limit (15.2). The requirement is a maximum
     equivalent noise level the example clears.
     """
     freqs = np.geomspace(20.0, 20000.0, 400)

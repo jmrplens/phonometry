@@ -247,12 +247,12 @@ apply the corrections to your levels **before** anything on this page:
 | Microphone location | Correction to reach the incident (free-field) reference | The condition it holds under |
 | :--- | :--- | :--- |
 | Incident sound field | 0 dB, this **is** the reference condition | No reflecting surface other than the ground close enough to matter |
-| Flush-mounted on the façade | Subtract up to **6 dB**; exactly **5,7 dB** where the Annex B conditions are met | Façade plane within ±0,05 m over 1 m around the microphone, and more than 1 m from any edge of the wall |
-| 0,5 m to 2 m in front of the façade | Subtract up to **3 dB**; exactly **3 dB** where the Annex B conditions are met | An otherwise open situation. **Not recommended at near-grazing incidence**, and a street canyon or a dense block can make the real difference much larger |
+| Flush-mounted on the façade | Subtract up to **6 dB**; exactly **5.7 dB** where the Annex B conditions are met | Façade plane within ±0.05 m over 1 m around the microphone, and more than 1 m from any edge of the wall |
+| 0.5 m to 2 m in front of the façade | Subtract up to **3 dB**; exactly **3 dB** where the Annex B conditions are met | An otherwise open situation. **Not recommended at near-grazing incidence**, and a street canyon or a dense block can make the real difference much larger |
 
 (ISO 1996-2:2017, 9.2.1 and Annex B. For general mapping in multi-storey
 residential areas the same clause fixes the microphone height at
-(4,0 ± 0,2) m.)
+(4.0 ± 0.2) m.)
 
 The reason the two corrections are not simply 6 and 3 dB is interference.
 Flush-mounted, the direct and reflected waves are in phase everywhere on the
@@ -261,8 +261,8 @@ recommends this position, not the 3 dB one, for stationary sources and low
 frequencies. Two metres out, the path difference is finite and frequency
 dependent, so the 3 dB is an ideal-case average that a canyon or a nearby
 building breaks; Table B.1 puts the standard uncertainty of the correction at
-0,4 dB for either position under traffic noise from all angles, but at **2,0 dB
-for the 5,7 dB position and 1,0 dB for the 3 dB position under predominantly
+0.4 dB for either position under traffic noise from all angles, but at **2.0 dB
+for the 5.7 dB position and 1.0 dB for the 3 dB position under predominantly
 grazing incidence**.
 
 Two consequences for everything below. `lden`, `ldn` and
@@ -307,7 +307,7 @@ only apply between −10 °C and +50 °C.
 
 **Calibration** (5.2) is a check at the start *and* the end of every measurement
 with a class 1 IEC 60942 sound calibrator. The acceptance criterion is explicit:
-without any readjustment the two consecutive checks must differ by **≤ 0,5 dB**,
+without any readjustment the two consecutive checks must differ by **≤ 0.5 dB**,
 and if they do not, *everything measured since the previous satisfactory check is
 discarded*. That is the single rule that most often costs a campaign a day, and
 it is why the closing check is not optional. For monitoring over several days or
@@ -319,9 +319,9 @@ IEC 61672-3, IEC 61260 and IEC 60942, issued by a laboratory meeting ISO/IEC
 a year and the **maximum allowable interval is two years**.
 
 The **meteorological** sensors carry their own maximum permissible errors (5.4),
-and they are what the uncertainty budget below silently assumes: ±0,5 K for
-temperature, ±5,0 % for relative humidity, ±0,5 hPa for barometric pressure,
-±0,5 m/s for wind speed and ±5° for wind direction.
+and they are what the uncertainty budget below silently assumes: ±0.5 K for
+temperature, ±5.0 % for relative humidity, ±0.5 hPa for barometric pressure,
+±0.5 m/s for wind speed and ±5° for wind direction.
 
 Finally, a measured environmental level is only reportable with its context.
 Clause 13 lists what has to be recorded: the time, day and place; the
@@ -529,11 +529,11 @@ ISO 1996-2:2017 and every entry has a name, a source and a size:
 
 | Contribution | Where it comes from | $c_j u_j$ |
 | :--- | :--- | :--- |
-| Measured level $L_\mathrm{eq,1h}$ | $u = 0{,}5$ dB (which already absorbs the class 1 sound level meter's own 0,5 dB default), multiplied by the residual-correction sensitivity $c_{L'}$ of Formula (F.7) | 0,59 dB |
-| Source operating conditions | 1 000 vehicles counted, $10/\sqrt{1000}$ (Formula (8)) | 0,30 dB |
-| **Meteorology** | favourable conditions, Formula (12) | **2,00 dB** |
-| Microphone location | the +5,7 dB flush-mounted correction of Annex B | 0,40 dB |
-| Residual sound | $L_\mathrm{res} = 50$ dB with $u = 2$ dB, through the sensitivity $c_\mathrm{res}$ of Formula (F.8) | 0,38 dB |
+| Measured level $L_\mathrm{eq,1h}$ | $u = 0.5$ dB (which already absorbs the class 1 sound level meter's own 0.5 dB default), multiplied by the residual-correction sensitivity $c_{L'}$ of Formula (F.7) | 0.59 dB |
+| Source operating conditions | 1 000 vehicles counted, $10/\sqrt{1000}$ (Formula (8)) | 0.30 dB |
+| **Meteorology** | favourable conditions, Formula (12) | **2.00 dB** |
+| Microphone location | the +5.7 dB flush-mounted correction of Annex B | 0.40 dB |
+| Residual sound | $L_\mathrm{res} = 50$ dB with $u = 2$ dB, through the sensitivity $c_\mathrm{res}$ of Formula (F.8) | 0.38 dB |
 
 `metrology.combined_standard_uncertainty` also accepts $(u_j, c_j)$ **pairs**, so the
 sensitivity coefficients need not be pre-multiplied by hand, and
@@ -542,8 +542,8 @@ Formulae (F.7)/(F.8), both of which grow without bound as the residual
 approaches the measured level, which is the same 3 dB cliff as above seen from
 the uncertainty side.
 
-Now read the column. The meteorology term alone is 2,0 dB and it sets the
-answer: drop it and the combined uncertainty falls from 2,18 dB to 0,86 dB. The
+Now read the column. The meteorology term alone is 2.0 dB and it sets the
+answer: drop it and the combined uncertainty falls from 2.18 dB to 0.86 dB. The
 instrument is nowhere near the top of the list. **A class 1 meter does not make
 an environmental measurement accurate.** How representative the propagation
 conditions and the source operation were during that hour is what decides it, and

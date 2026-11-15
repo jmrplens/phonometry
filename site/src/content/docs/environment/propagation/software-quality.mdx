@@ -8,7 +8,7 @@ references:
     title: "Acoustics — Software for the calculation of sound outdoors — Part 1: Quality requirements and quality assurance"
     designation: "ISO 17534-1:2015"
     primary: true
-    note: "The implemented parts: the test-case comparison of clause 7.1 with the TRC form of Annex B (Tables B.1 and B.2) and the ±0,05 dB of Table A.5, note a; the characteristic values of Annex C (C.2 to C.5, Table C.1 and Formulas (C.1) and (C.2)); and the round-robin result of 4.5.2 and A.3. Read from BS ISO 17534-1:2015, whose pages carry the ISO text unchanged."
+    note: "The implemented parts: the test-case comparison of clause 7.1 with the TRC form of Annex B (Tables B.1 and B.2) and the ±0.05 dB of Table A.5, note a; the characteristic values of Annex C (C.2 to C.5, Table C.1 and Formulas (C.1) and (C.2)); and the round-robin result of 4.5.2 and A.3. Read from BS ISO 17534-1:2015, whose pages carry the ISO text unchanged."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2015
@@ -59,7 +59,7 @@ Four things in the standard are arithmetic, and
 - the comparison of a program's results with the limits of the certified
   results of a method's test cases, which the producer declares in the TRC
   form of Annex B and the user repeats with every update (7.1);
-- the characteristic values $q_{0,1}$ and $q_{0,9}$ of the level differences
+- the characteristic values $q_{0.1}$ and $q_{0.9}$ of the level differences
   between a modified configuration and the reference one (Annex C, 5.2.3,
   7.2);
 - where the sample of those differences is taken (C.2, C.3);
@@ -79,7 +79,7 @@ does not exceed ±0,05 dB" (Table A.5, note a), which is
 `CERTIFIED_RESULT_TOLERANCE_DB`. A.2 and 4.5.2 put the same rounding interval
 another way: the limits are "given to one decimal place", and "an interval of
 0,1 is always included for rounding purposes" when the result ends in 5
-(13,65 gives 13,6 to 13,7, which is 13,65 ± 0,05). Table B.2 and every test
+(13.65 gives 13.6 to 13.7, which is 13.65 ± 0.05). Table B.2 and every test
 case of ISO/TR 17534-3 print the limits to two decimals, which is the
 convention the constant follows, and the function compares with whatever
 limits it is given. The producer lists each result beside its
@@ -107,19 +107,19 @@ v.plot()
 The verdict is the object: `v.passes` is the answer, `failing_labels` names
 the rows outside, and `bool(v)` raises rather than let
 `if verify_calculation_results(...):` pass every program. A limit is part of
-the interval, because a deviation that reaches 0,05 dB "does not exceed" it,
+the interval, because a deviation that reaches 0.05 dB "does not exceed" it,
 and a result that lands on a limit through floating-point arithmetic is on it.
 
 The figure runs the form on this library's own implementation of ISO 9613-2,
 with test case T03 of ISO/TR 17534-3 (porous ground, Table 6). The rows are
 the form's: the A-weighted level in each octave band and their total, against
-the row $L_\mathrm{A}$ of Table 6, the one its footnote certifies to ±0,05 dB. On the
+the row $L_\mathrm{A}$ of Table 6, the one its footnote certifies to ±0.05 dB. On the
 left, the library as it is: every row inside its interval, the largest
-deviation 0,008 dB. On the right, one detail changed: the air
+deviation 0.008 dB. On the right, one detail changed: the air
 absorption read at the nominal band centres instead of at the exact base-10
 midband frequencies of ISO 9613-1, which the attenuation coefficients of
 ISO 9613-2 are computed at. At 8 kHz that is 8000 Hz instead of 7943 Hz, and
-it alone moves the band 0,20 dB off its certified result, 0,15 dB below the
+it alone moves the band 0.20 dB off its certified result, 0.15 dB below the
 lower limit, while the total stays inside. This is the kind of
 implementation detail the form exists to catch, and a total that passes does
 not show it.
@@ -177,7 +177,7 @@ def trc_rows(band_levels):
     return np.append(weighted, 10 * np.log10(np.sum(10 ** (weighted / 10))))
 
 
-# Row L_A of Table 6 of the report, certified to +/-0,05 dB: bands and total.
+# Row L_A of Table 6 of the report, certified to +/-0.05 dB: bands and total.
 printed = np.array([13.70, 16.38, 17.73, 23.83, 33.27, 35.69, 32.79, 20.26, 39.14])
 tol = environment.CERTIFIED_RESULT_TOLERANCE_DB
 labels = ["63 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz",
@@ -208,14 +208,14 @@ reference configuration and once in the modified configuration the map will
 really be computed with, and describe the level differences by two order
 statistics of the sample (Annex C, which is informative). The differences are
 sorted in ascending order, and the values at two **ranking positions** are the
-**0,1-quantile** $q_{0,1}$ and the **0,9-quantile** $q_{0,9}$: 10 % of all the
+**0.1-quantile** $q_{0.1}$ and the **0.9-quantile** $q_{0.9}$: 10 % of all the
 differences in the calculation area are expected below the one and 10 % above
 the other (C.2, NOTE 2). The two values can go into the legend of the map
 (7.2).
 
 The standard's own example sorts 25 differences between two calculation
-variants and reads $R(q_{0,1}) = 2$, $R(q_{0,9}) = 24$, $q_{0,1} = -1$ dB and
-$q_{0,9} = 3$ dB, so that 80 % of the differences are expected between −1 dB
+variants and reads $R(q_{0.1}) = 2$, $R(q_{0.9}) = 24$, $q_{0.1} = -1$ dB and
+$q_{0.9} = 3$ dB, so that 80 % of the differences are expected between −1 dB
 and +3 dB:
 
 ```python
@@ -238,20 +238,20 @@ carry into an error-propagation calculation by ISO/IEC Guide 98-3. The
 estimate is the sample standard deviation, with $N - 1$ degrees of freedom.
 The example does not say which variant was subtracted from which. Were the
 differences the modified configuration minus the reference one, the
-convention below, the modified configuration would read 1,56 dB high on
+convention below, the modified configuration would read 1.56 dB high on
 average, and the quantiles would say more than the mean: a tenth of the area
 would be expected more than 3 dB high.
 
 Two conventions need saying. A difference is the modified configuration's
-level minus the reference configuration's, so a positive $q_{0,9}$ is a
+level minus the reference configuration's, so a positive $q_{0.9}$ is a
 shortcut that overestimates. And the quantiles are the statistician's, not
-the acoustician's: C.2 NOTE 2 warns that its $q_{0,1}$ leaves 10 % of the
+the acoustician's: C.2 NOTE 2 warns that its $q_{0.1}$ leaves 10 % of the
 values below it, the opposite of a percentile level $L_{10}$, which is
 exceeded 10 % of the time. C.4 says the same thing the other way round: the
-ranks of $q_{0,1}$ are based on $L_{x,90}$ and those of $q_{0,9}$ on
+ranks of $q_{0.1}$ are based on $L_{x,90}$ and those of $q_{0.9}$ on
 $L_{x,10}$.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_quantiles.svg" alt="The 25 level differences of the example sorted by ranking position from 1 to 25, rising from minus 1.4 dB through a plateau near 1 to 2 dB to 3.4 dB; a shaded band between minus 1 dB and plus 3 dB holds the central 80 % of the differences, a diamond at rank 2 marks q0,1 = minus 1.00 dB and a diamond at rank 24 marks q0,9 = 3.00 dB, each with a dotted vertical line at its rank" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_quantiles.svg" alt="The 25 level differences of the example sorted by ranking position from 1 to 25, rising from minus 1.4 dB through a plateau near 1 to 2 dB to 3.4 dB; a shaded band between minus 1 dB and plus 3 dB holds the central 80 % of the differences, a diamond at rank 2 marks q0.1 = minus 1.00 dB and a diamond at rank 24 marks q0.9 = 3.00 dB, each with a dotted vertical line at its rank" width="88%" />
 
 *The example of C.4 from the result's own `.plot()`: the sorted sample, the
 two ranks and the band that holds the central 80 %.*
@@ -262,9 +262,9 @@ Table C.1 prints the ranking positions for samples of 20 to 50 values, and
 above 50 the standard gives two formulas instead,
 
 $$
-R(q_{0,1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right),
+R(q_{0.1}) = \mathrm{IP}\!\left(\frac{N + 4}{10}\right),
 \qquad
-R(q_{0,9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1,
+R(q_{0.9}) = \mathrm{IP}\!\left(\frac{9 N}{10}\right) + 1,
 $$
 
 with IP the integer part (Formulas (C.1) and (C.2)). A sample smaller than 20
@@ -287,16 +287,16 @@ for n in (20, 25, 26, 50, 51, 55, 56, 100):
 ```
 
 The table and the formulas do not join. In every one of the 31 rows of the
-table $R(q_{0,9}) = N + 1 - R(q_{0,1})$: it leaves as many values below
-$q_{0,1}$ as above $q_{0,9}$. Formula (C.1) continues the first column and
+table $R(q_{0.9}) = N + 1 - R(q_{0.1})$: it leaves as many values below
+$q_{0.1}$ as above $q_{0.9}$. Formula (C.1) continues the first column and
 reproduces all 31 rows. Formula (C.2) does not continue the second: it
 reproduces only 16 of them, and gives one rank less for $N$ = 21 to 25, 31 to
 35 and 41 to 45. Above 50 it keeps that habit: whenever the last digit of $N$
-is 1 to 5, $q_{0,9}$ leaves one value more above it than $q_{0,1}$ leaves
+is 1 to 5, $q_{0.9}$ leaves one value more above it than $q_{0.1}$ leaves
 below, so at $N = 51$ the formula gives 46 where the symmetry of the table
 would give 47.
 
-| $N$ | Rule | $R(q_{0,1})$ | $R(q_{0,9})$ | Values below $q_{0,1}$ | Values above $q_{0,9}$ |
+| $N$ | Rule | $R(q_{0.1})$ | $R(q_{0.9})$ | Values below $q_{0.1}$ | Values above $q_{0.9}$ |
 | ---: | --- | ---: | ---: | ---: | ---: |
 | 25 | Table C.1 | 2 | 24 | 1 | 1 |
 | 26 | Table C.1 | 3 | 24 | 2 | 2 |
@@ -306,17 +306,17 @@ would give 47.
 | 56 | (C.1), (C.2) | 6 | 51 | 5 | 5 |
 
 The break is in (C.2) alone. Formula (C.1) is the table's rule carried on,
-and it is not the rank $\mathrm{IP}(0{,}1 N) + 1$ of the empirical
-0,1-quantile (at $N = 51$ that rank is 6, and (C.1) gives 5), while (C.2) is
-exactly that kind of rank, $\mathrm{IP}(0{,}9 N) + 1$. Written in the shape of
+and it is not the rank $\mathrm{IP}(0.1 N) + 1$ of the empirical
+0.1-quantile (at $N = 51$ that rank is 6, and (C.1) gives 5), while (C.2) is
+exactly that kind of rank, $\mathrm{IP}(0.9 N) + 1$. Written in the shape of
 (C.2), the symmetric rule would read $\mathrm{IP}((9N + 5)/10) + 1$, and a lost
 "+ 5" is conceivable.
 
 Whether it is a slip cannot be settled from the pages that have been read.
 Annex C was taken from DIN 45687:2006-05, whose Annex F.4 prints the same
 table, the same two formulas and the same worked example. It bases the ranks
-of the table on VDI 3723 Blatt 1 (Table 6, column $L_{x,90}$, for $q_{0,1}$,
-and Table 5, column $L_{x,10}$, for $q_{0,9}$), and it introduces the
+of the table on VDI 3723 Blatt 1 (Table 6, column $L_{x,90}$, for $q_{0.1}$,
+and Table 5, column $L_{x,10}$, for $q_{0.9}$), and it introduces the
 formulas with "Falls die Anzahl der Stichproben N > 50 ist, gilt ergänzend zu
 VDI 3723 Blatt 1 [15] mit ausreichender Übereinstimmung zu E VDI 2450 Blatt 5
 [17]": above 50 values the formulas supplement VDI 3723 Blatt 1, the source of
@@ -344,7 +344,7 @@ corrected either.
 What decides is that ISO 17534-1 and DIN 45687 both print (C.2) this way, and
 `ranking_positions` applies what they print: the table up to 50, the formulas
 above. A program that carried the symmetric rule past 50 would report
-$q_{0,9}$ one rank higher than this one for half of all sample sizes, which is
+$q_{0.9}$ one rank higher than this one for half of all sample sizes, which is
 exactly the disagreement between two quality-assured implementations the
 standard is written to prevent. `LevelDifferenceQuantiles.from_table` says
 which of the two rules answered.
@@ -354,7 +354,7 @@ which of the two rules answered.
 The receiver points closer than 2 m horizontally to a source or an obstacle
 are left out first (`SAMPLE_CLEARANCE_M`), and the sample of $M$ points is
 spread evenly over the $N$ that remain: numbered consecutively, the points of
-ordinal number $\mathrm{IP}((i - 0{,}5) N/M)$, $i = 1, \ldots, M$, are taken
+ordinal number $\mathrm{IP}((i - 0.5) N/M)$, $i = 1, \ldots, M$, are taken
 (C.2). The standard recommends at least one sample point in a hundred
 (`RECOMMENDED_SAMPLE_RATIO`); a thinner sample is still drawn, with a
 `SoftwareQualityWarning`, because its quantiles are defined, only less
@@ -384,7 +384,7 @@ $N$ is less than $2M$, while from zero every sample point sits at the middle
 of its $M$-th of the list. For a sound contour (C.3), the level of the contour
 at evenly spaced points is compared with a single-point calculation at the
 same places, the points sitting at what C.3 calls the "kilometerages"
-$\mathrm{IP}((i - 0{,}5) L/M)$ along the contours laid end to end (DIN 45687
+$\mathrm{IP}((i - 0.5) L/M)$ along the contours laid end to end (DIN 45687
 F.3: "Kilometrierungen"). A kilometerage is a chainage, a position counted
 along a route: the word names that position, not the unit it is counted in.
 Taken in kilometres, the integer part would put every point of a contour
@@ -405,10 +405,10 @@ with four participants and 400 receivers; its Figure A.3 is a histogram of
 $|dL_n|_{\max}$ drawn "only shown to demonstrate the principle", so the figure below
 builds a synthetic round robin in the same shape.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_round_robin.svg" alt="Histogram of the largest absolute deviation from the mean level at each of 400 receivers in a synthetic round robin of four programs, in classes 0.2 dB wide: 39 receivers below 0.2 dB, the most, 120, between 0.2 and 0.4 dB, then 84, 60, 33, 20 and 16 falling away, and a thin tail of a few receivers out to 3.4 dB; a dashed vertical line marks q0,9 = 1.28 dB" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/software_quality_round_robin.svg" alt="Histogram of the largest absolute deviation from the mean level at each of 400 receivers in a synthetic round robin of four programs, in classes 0.2 dB wide: 39 receivers below 0.2 dB, the most, 120, between 0.2 and 0.4 dB, then 84, 60, 33, 20 and 16 falling away, and a thin tail of a few receivers out to 3.4 dB; a dashed vertical line marks q0.9 = 1.28 dB" width="88%" />
 
 *The largest deviation at each receiver, from the result's own `.plot()`:
-nine receivers in ten sit below $q_{0,9}$ = 1,28 dB.*
+nine receivers in ten sit below $q_{0.9}$ = 1.28 dB.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -434,7 +434,7 @@ rr.plot()
 
 The mean is arithmetic, not energetic, as the standard defines it, and the
 quantile is read with the same ranks as Annex C: for 400 receivers,
-$R(q_{0,9}) = 361$ by Formula (C.2).
+$R(q_{0.9}) = 361$ by Formula (C.2).
 
 ## What this guide covers
 
@@ -442,7 +442,7 @@ $R(q_{0,9}) = 361$ by Formula (C.2).
 <ScopeClaim status="covered" label="Covered">
 **ISO 17534-1:2015, the parts that are arithmetic:** the comparison of a
 program's results with the limits of the certified results (clause 7.1, the
-TRC form of Tables B.1 and B.2, the ±0,05 dB of Table A.5, note a), limits
+TRC form of Tables B.1 and B.2, the ±0.05 dB of Table A.5, note a), limits
 included; the ranking positions of Table C.1 and Formulas (C.1) and (C.2) and
 the characteristic values of C.4, with the mean and the estimated standard
 deviation of C.5; the uniform sample of C.2 with the 2 m exclusion and the

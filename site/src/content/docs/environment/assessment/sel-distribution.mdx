@@ -44,7 +44,7 @@ This page is that statistical core, run on the example the standard prints in
 its Annex A: a TOW anti-tank missile launcher heard at 3 020 m under 27
 excess-attenuation classes.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="Two panels for the TOW launcher of ISO 13474 Annex A. Left: the step density of the 27 classes before the turbulent spread, against the single-event sound exposure level from 27 to 47 dB; a tall narrow class near 30,8 dB reaches 1,24 per decibel, a second group of narrow classes sits near 31,8 dB, and low wide steps run out to 46 dB. Right: the same distribution spread by a normal distribution of 5 dB standard deviation, a smooth bell peaking near 30,5 dB at about 0,061 per decibel with a long tail towards high levels, and a dashed vertical line at the long-term level LT2 of 37,0 dB" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_density.svg" alt="Two panels for the TOW launcher of ISO 13474 Annex A. Left: the step density of the 27 classes before the turbulent spread, against the single-event sound exposure level from 27 to 47 dB; a tall narrow class near 30.8 dB reaches 1.24 per decibel, a second group of narrow classes sits near 31.8 dB, and low wide steps run out to 46 dB. Right: the same distribution spread by a normal distribution of 5 dB standard deviation, a smooth bell peaking near 30.5 dB at about 0.061 per decibel with a long tail towards high levels, and a dashed vertical line at the long-term level LT2 of 37.0 dB" width="100%" />
 
 *The classes of Annex A before the spread (left, Figure A.1 of the standard)
 and after it (right, Figure A.2), with the long-term level LT2 marked.*
@@ -57,7 +57,7 @@ source level less the attenuation of every mechanism along the path (Equation
 the energy sum over the bands of Equation (5):
 
 $$
-L_{E,\mathrm{w}} = 10\lg \sum_{j} 10^{0{,}1\left[L_E(j) + \mathrm{w}(j)\right]}~\text{dB}
+L_{E,\mathrm{w}} = 10\lg \sum_{j} 10^{0.1\left[L_E(j) + \mathrm{w}(j)\right]}~\text{dB}
 $$
 
 The weighting is whatever the assessment uses, A or C, given as one value per
@@ -67,7 +67,7 @@ Annex A prints in its Table A.1, with the A-weighting at the octave centres:
 ```python
 from phonometry import environment
 
-source_db = [115.0, 119.0, 134.0, 135.0, 134.0, 136.0, 133.0, 126.0]  # 31,5 Hz to 4 kHz
+source_db = [115.0, 119.0, 134.0, 135.0, 134.0, 136.0, 133.0, 126.0]  # 31.5 Hz to 4 kHz
 a_weighting_db = [-39.4, -26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0]
 print(round(environment.frequency_weighted_sel(source_db, a_weighting_db), 1))  # 139.5
 ```
@@ -109,7 +109,7 @@ ISO 1996-1 assessment:
 
 $$
 \langle L_{E,\mathrm{w}}\rangle_\mathrm{LT} = 10\lg\left[\sum_{k}\sum_{l}
-\wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\,10^{0{,}1 L_{E,\mathrm{w},k,l}}\right]~\text{dB}
+\wp_{\mathrm{atm},k}\,\wp_{\mathrm{exc},l}\,10^{0.1 L_{E,\mathrm{w},k,l}}\right]~\text{dB}
 $$
 
 ```python
@@ -117,8 +117,8 @@ print(round(environment.long_term_sel(levels, probabilities), 1))  # 37.0
 print(round(environment.long_term_sel(levels, probabilities, rating_adjustment=12.0), 1))  # 49.0
 ```
 
-37,0 dB is the LT1 Figure A.3 prints. It sits well above the level half the
-events exceed, 31,5 dB, because an energy mean is dominated by the loud
+37.0 dB is the LT1 Figure A.3 prints. It sits well above the level half the
+events exceed, 31.5 dB, because an energy mean is dominated by the loud
 minority: the downwind classes above 40 dB hold 15 % of the events and more
 than half of the energy.
 
@@ -145,8 +145,8 @@ print(dist.replicas[2], dist.replicas[3])         # (7,) (19,)
 That is Table A.4, and every one of its 27 rows comes out digit for digit.
 Two things in it are worth seeing. The class densities are the full-precision
 probabilities over the widths, not the rounded column printed beside them:
-0,1860 over 0,15 dB would print 1,2400, and the table prints 1,2399. And two
-pairs of classes share a level, 30,8 dB (Table A.3 rows 8 and 20) and 31,8 dB
+0.1860 over 0.15 dB would print 1.2400, and the table prints 1.2399. And two
+pairs of classes share a level, 30.8 dB (Table A.3 rows 8 and 20) and 31.8 dB
 (rows 9 and 10). Equation (11) puts their common boundary at that level and
 each keeps its half on its own side, so the table keeps both, and
 `replicas` says which input each came from. The standard names the case of
@@ -173,7 +173,7 @@ where the subclass was (Equation (22)):
 
 $$
 \Delta\mu = 10\lg\left[\frac{1}{\sigma\sqrt{2\pi}}\int_{-\infty}^{\infty}
-10^{0{,}1x}\,\mathrm{e}^{-x^2/(2\sigma^2)}\,\mathrm{d}x\right]
+10^{0.1x}\,\mathrm{e}^{-x^2/(2\sigma^2)}\,\mathrm{d}x\right]
 = \frac{\sigma^2\ln 10}{20}~\text{dB}
 $$
 
@@ -182,11 +182,11 @@ print(round(environment.turbulence_level_shift(5.0), 3))   # 2.878
 print(round(dist.level_shift, 3))                       # 2.878
 ```
 
-Annex A says the shift of its example was 1,04 dB. That is Equation (22) at a
+Annex A says the shift of its example was 1.04 dB. That is Equation (22) at a
 standard deviation of 3 dB, not at the 5 dB of the same paragraph, and the
-rest of the annex was computed with 2,878 dB: with 1,04 dB every level of the
-distribution would move up by 1,84 dB and the long-term level of the next
-section would read 38,8 dB, not 37,0 dB. The
+rest of the annex was computed with 2,878 dB: with 1.04 dB every level of the
+distribution would move up by 1.84 dB and the long-term level of the next
+section would read 38.8 dB, not 37.0 dB. The
 [errata register](/phonometry/reference/errata/) has the entry. The library
 evaluates the integral in closed form, so the shift is not a parameter.
 
@@ -209,25 +209,25 @@ print(round(dist.long_term_level, 2), round(dist.distribution_long_term_level, 2
 
 The long-term level taken a second time, over the continuous density
 (Equation (A.4), LT2), differs from LT1 only by where each class's energy sits
-inside its width, and both print 37,0 dB, which is the agreement the annex
+inside its width, and both print 37.0 dB, which is the agreement the annex
 offers as its check. The probability that one event exceeds the long-term
 level is 21 %: one event in five is louder than the level that stands for all
 of them.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event sound exposure level of the TOW launcher exceeds x, falling from 1 below 15 dB to 0 above 50 dB, with five marked points: L95 at 21,6 dB, L50 at 31,5 dB, L10 at 40,5 dB, L5 at 43,0 dB and L1 at 47,5 dB, and a dashed vertical line at the long-term level LT2 of 37,0 dB" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_distribution_exceedance.svg" alt="The probability that the single-event sound exposure level of the TOW launcher exceeds x, falling from 1 below 15 dB to 0 above 50 dB, with five marked points: L95 at 21.6 dB, L50 at 31.5 dB, L10 at 40.5 dB, L5 at 43.0 dB and L1 at 47.5 dB, and a dashed vertical line at the long-term level LT2 of 37.0 dB" width="88%" />
 
 *The exceedance curve of the Annex A example with the five percentiles Figure
 A.3 lists, as Equation (25) gives them, from `dist.plot(view="exceedance")`.*
 
-Figure A.3 prints those five levels as 21,7; 31,5; 40,6; 43,2 and 48,0 dB.
-$L_{50}$ agrees; the other four are 0,1 dB to 0,5 dB higher in print, the more
+Figure A.3 prints those five levels as 21.7; 31.5; 40.6; 43.2 and 48.0 dB.
+$L_{50}$ agrees; the other four are 0.1 dB to 0.5 dB higher in print, the more
 so the rarer the level, and the annex does not say how it computed them. They
 are consistent with a curve accumulated from 15 dB, where the drawn curve
 begins (the axis starts at 10 dB), rather than from minus infinity, when that
 curve is fed the 07:00 to 19:00 column of Table A.3 as printed: all five then
 come out to the printed digit. Fed the full-precision probabilities that
-reproduce Table A.4, as `dist` above is, the same reading gives 48,05 dB for
-$L_1$, which would print 48,1 dB, so it stays a hypothesis. The
+reproduce Table A.4, as `dist` above is, the same reading gives 48.05 dB for
+$L_1$, which would print 48.1 dB, so it stays a hypothesis. The
 [errata register](/phonometry/reference/errata/) has the entry, and the
 library evaluates Equation (24) as written.
 
@@ -296,7 +296,7 @@ would start.
   the sound exposure level of a measured event and the percentile levels of a
   record, which this page predicts rather than measures.
 - [Errata in published sources](/phonometry/reference/errata/): the shift
-  Annex A prints as 1,04 dB and the five exceedance levels of Figure A.3.
+  Annex A prints as 1.04 dB and the five exceedance levels of Figure A.3.
 - API reference: [`environment.assessment.exposure_distribution`](/phonometry/reference/api/environment/exposure-distribution/).
 
 </SeeAlso>

@@ -2349,6 +2349,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The IEC 61400-11 tonality fiche shows the spectrum under its critical
+  band on every svglib the `report` extra admits.** The plot shaded the band
+  with `alpha=0.12`, which matplotlib writes as the SVG `opacity` property,
+  and svglib before 2.4 ignores it, so `.report()` drew the band solid green
+  over the spectrum and left only the tone marker in sight. The band is now
+  the opaque wash the other fiche plots use (`theme_fill`). The fiche test
+  reads the SVG of every example fiche's plot and fails on a shape drawn
+  through `opacity`, a legend's frame excepted.
+
 - **The standing-wave impedance and the room constant of ISO 9295 keep their
   digits where a reflection or an absorption rounds to one.**
   `materials.standing_wave_normalized_impedance` formed $(1 + r)/(1 - r)$

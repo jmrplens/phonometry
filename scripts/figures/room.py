@@ -3169,8 +3169,8 @@ def generate_sound_strength_routes(output_dir: str) -> None:
     # -- Left: one source, three printed routes to the same reference level.
     #
     # A dodecahedron source of L_W = 100 dB in one octave band, measured
-    # three ways. The reverberation room is 200 m3 with a 2,0 s reverberation
-    # time, so A = 0,16 * 200 / 2,0 = 16 m2 by Equation (A.6), where the
+    # three ways. The reverberation room is 200 m3 with a 2.0 s reverberation
+    # time, so A = 0.16 * 200 / 2.0 = 16 m2 by Equation (A.6), where the
     # diffuse-field level is L_W + 10 lg(4/A).
     ax = axes[0]
     power_level = 100.0
@@ -3259,7 +3259,7 @@ def generate_sound_strength_routes(output_dir: str) -> None:
 
     # -- Right: what A.5 suggests plotting, G against source-receiver distance.
     #
-    # A 15 000 m3 concert hall of 3 800 m2 of surface with a 2,0 s
+    # A 15 000 m3 concert hall of 3 800 m2 of surface with a 2.0 s
     # reverberation time. The direct field falls at 6 dB per doubling and the
     # reverberant field does not, so G flattens beyond the critical distance.
     ax2 = axes[1]
@@ -3399,7 +3399,7 @@ def generate_lateral_energy_measures(output_dir: str) -> None:
 
     # -- Middle: both fractions per band, for a synthetic hall.
     #
-    # A 2,0 s decay whose lateral component is a fixed share of the total,
+    # A 2.0 s decay whose lateral component is a fixed share of the total,
     # so the two fractions differ only by the weighting above.
     ax2 = axes[1]
     fs = 48000
@@ -3513,7 +3513,7 @@ def generate_stage_support_windows(output_dir: str) -> None:
     _fig, axes = plt.subplots(1, 3, figsize=(15.2, 4.6))
 
     # A platform response of the shape Annex C measures: the musician's own
-    # direct sound at 1,0 m, a handful of reflections off the stage and the
+    # direct sound at 1.0 m, a handful of reflections off the stage and the
     # enclosure inside the early window, and the hall's decay behind them.
     fs = 48000
     rng = np.random.default_rng(3382)

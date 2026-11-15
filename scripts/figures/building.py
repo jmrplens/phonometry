@@ -669,7 +669,7 @@ def generate_low_frequency_intensity(output_dir: str) -> None:
         )
     ax_ri.set_ylabel("Sound reduction index [dB]")
     # Headroom on both scales so the legend clears the bars and the indicator:
-    # the bars top out at 28 dB and the indicator at 12,4 dB.
+    # the bars top out at 28 dB and the indicator at 12.4 dB.
     ax_ri.set_ylim(0.0, 36.0)
     ax_ri.set_title("Low-frequency index and its field indicator", pad=12)
     ax_ri.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
@@ -715,7 +715,7 @@ def generate_low_frequency_intensity(output_dir: str) -> None:
         facecolor=COLOR_PANEL,
     )
 
-    # Right: Annex A. The calculated limp-panel curve, the 4,0 dB the annex
+    # Right: Annex A. The calculated limp-panel curve, the 4.0 dB the annex
     # allows either side of it, and a measurement that stays inside.
     calculated = building.limp_panel_reduction_index(
         freqs, surface_mass=10.0, area=10.0, temperature_c=23.0
@@ -980,8 +980,8 @@ def generate_ceiling_plenum_flanking(output_dir: str) -> None:
 
     _fig, (ax_path, ax_cac) = plt.subplots(1, 2, figsize=(13.0, 5.6))
 
-    # Vigran Figs. 9.11-9.13 geometry: LS = LR = 4,75 m, plenum h = 0,43 m,
-    # 9,5 mm plasterboard ceiling, reflecting plenum sidewalls.
+    # Vigran Figs. 9.11-9.13 geometry: LS = LR = 4.75 m, plenum h = 0.43 m,
+    # 9.5 mm plasterboard ceiling, reflecting plenum sidewalls.
     freqs = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
     ceiling = np.array([17.0, 21.0, 25.0, 29.0, 32.0, 30.0, 38.0])
     x = np.arange(freqs.size)
@@ -1403,7 +1403,7 @@ def generate_insulation_uncertainty_demo(output_dir: str) -> None:
 def generate_facade_elevation_geometry(output_dir: str) -> None:
     """Composite facade elevation with the element areas to scale.
 
-    A masonry wall of 6 m2 with a 1,5 m2 window and its 0,3 m2 roller
+    A masonry wall of 6 m2 with a 1.5 m2 window and its 0.3 m2 roller
     shutter box, the classic composite of the facade prediction. One
     concept: the areas the composite sound reduction index weighs.
     """
@@ -2317,7 +2317,7 @@ def generate_dbhr_global_index(output_dir: str) -> None:
     The published eighteen-band apparent sound reduction index R' of a field
     test, weighted with the normalised pink-noise spectrum of DB-HR Annex A
     Table A.5. The energy sum of the per-band transmitted level L_Ar,i - R'_i
-    sets the global index, R'A = 51,4 dBA.
+    sets the global index, R'A = 51.4 dBA.
     """
     print("Generating dbhr_global_index.png...")
     from phonometry import building
@@ -2553,7 +2553,7 @@ def generate_background_correction_regimes(output_dir: str) -> None:
     ax.text(
         3.0,
         cap + 0.18,
-        "limit of measurement\n(fixed 1,3 dB, flag the band)",
+        "limit of measurement\n(fixed 1.3 dB, flag the band)",
         ha="center",
         fontsize=9,
         color=COLOR_FG,
@@ -2661,7 +2661,7 @@ def generate_fast_reverberation_correction(output_dir: str) -> None:
         "edgecolor": COLOR_GRID,
     }
     ax.annotate(
-        "$T = T_0$ = 0,5 s\nboth terms vanish",
+        "$T = T_0$ = 0.5 s\nboth terms vanish",
         xy=(0.5, 0.0),
         xytext=(0.62, 4.4),
         fontsize=9,
@@ -2671,7 +2671,7 @@ def generate_fast_reverberation_correction(output_dir: str) -> None:
         arrowprops={"arrowstyle": "->", "lw": 1.0},
     )
     ax.annotate(
-        "$T$ = 1,7275 s: $C = 1$, $g = 1/e$",
+        "$T$ = 1.7275 s: $C = 1$, $g = 1/e$",
         xy=(1.7275, float(np.interp(1.7275, t, fast))),
         xytext=(1.95, 1.1),
         fontsize=9,
@@ -3051,10 +3051,10 @@ def generate_intensity_field_indicator(output_dir: str) -> None:
     plt.close()
 
 
-#: The receiving bedroom of the low-frequency figure, in metres: 3,6 m by
-#: 2,7 m by 2,4 m is 23,3 m³, which rounds to 23 m³ and so falls under the
+#: The receiving bedroom of the low-frequency figure, in metres: 3.6 m by
+#: 2.7 m by 2.4 m is 23.3 m³, which rounds to 23 m³ and so falls under the
 #: 25 m³ trigger of ISO 16283-1 Clause 8.1. The separating wall is one short
-#: wall of it, 2,7 m by 2,4 m.
+#: wall of it, 2.7 m by 2.4 m.
 _LF_ROOM = (3.6, 2.7, 2.4)
 
 
@@ -3334,8 +3334,8 @@ def generate_low_frequency_procedure(output_dir: str) -> None:
     plt.close()
 
 
-#: The receiving bedroom of the ISO/DIS 16032 figures, 4,2 m by 3,4 m by
-#: 2,5 m (36 m³), next to the bathroom whose water closet is measured.
+#: The receiving bedroom of the ISO/DIS 16032 figures, 4.2 m by 3.4 m by
+#: 2.5 m (36 m³), next to the bathroom whose water closet is measured.
 _SERVICE_ROOM = (4.2, 3.4, 2.5)
 
 
@@ -3494,7 +3494,7 @@ def generate_service_equipment_instrument_agreement(output_dir: str) -> None:
     plt.close()
 
 
-#: The one-third-octave bands of the ISO 16251-1 rating range, 100 Hz to 3,15 kHz.
+#: The one-third-octave bands of the ISO 16251-1 rating range, 100 Hz to 3.15 kHz.
 _ISO16251_BANDS_HZ = (
     100.0,
     125.0,
@@ -3548,7 +3548,7 @@ def generate_strong_coupling_check(output_dir: str) -> None:
     """ISO 10848-1 Formula (15) across the bands of a heavy junction.
 
     A 140 mm concrete wall (322 kg/m², fc 133 Hz) excited, joined to a
-    200 mm one (460 kg/m², fc 93 Hz): the bound is 6,1 dB and the one-way
+    200 mm one (460 kg/m², fc 93 Hz): the bound is 6.1 dB and the one-way
     velocity level difference stays under it in the five lowest bands, where
     the walls are strongly coupled and the measured Kij may not be relevant.
     """

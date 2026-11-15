@@ -104,7 +104,7 @@ def generate_metadiffuser_ntff_polar(output_dir: str) -> None:
 def generate_fdtd_domain_geometry(output_dir: str) -> None:
     """The configured FDTD domain drawn before any time stepping.
 
-    A 4,5 x 3 m domain with sponge layers left and right, an impedance top
+    A 4.5 x 3 m domain with sponge layers left and right, an impedance top
     edge, a rigid floor, a thin obstacle, one source and two probes: the
     setup drawing that precedes every simulation. One concept: check the
     domain before you run it.

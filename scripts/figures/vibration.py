@@ -678,9 +678,9 @@ def generate_vibration_weighting(output_dir: str) -> None:
     from phonometry import vibration
 
     # A user evaluates the principal ISO 2631-1 weighting Wk on a fine
-    # frequency grid across the whole-body band (0,4-100 Hz). The result is the
-    # ISO 8041-1 cascade H(f): a gentle +0,5 dB peak near 6 Hz, a band-limiting
-    # roll-off below 0,4 Hz and above ~16 Hz.
+    # frequency grid across the whole-body band (0.4-100 Hz). The result is the
+    # ISO 8041-1 cascade H(f): a gentle +0.5 dB peak near 6 Hz, a band-limiting
+    # roll-off below 0.4 Hz and above ~16 Hz.
     freqs = np.geomspace(0.4, 100.0, 240)
     result = vibration.frequency_weighting("Wk", freqs)
 
@@ -815,8 +815,8 @@ def generate_daily_vibration_exposure(output_dir: str) -> None:
 
     # A forestry worker's day across three chain-saw tasks (the ISO 5349-2
     # Annex E.3 worked example): each task's a_hv and duration give a partial
-    # exposure A_i(8); they combine to A(8) = 3,6 m/s^2, assessed against the
-    # hand-arm action (2,5) and limit (5,0) values of Directive 2002/44/EC.
+    # exposure A_i(8); they combine to A(8) = 3.6 m/s^2, assessed against the
+    # hand-arm action (2.5) and limit (5.0) values of Directive 2002/44/EC.
     result = vibration.daily_vibration_exposure(
         [4.6, 6.0, 3.6],
         [2 * 3600.0, 1 * 3600.0, 2 * 3600.0],
@@ -949,7 +949,7 @@ def generate_vibration_weighting_family(output_dir: str) -> None:
 
     # One evaluation per weighting over the band the *family* spans: Wf is a
     # sub-hertz weighting and Wh is still within 40 dB of its peak at 1 kHz,
-    # so the axis has to run from 0,05 Hz to 1,5 kHz for the nine curves to be
+    # so the axis has to run from 0.05 Hz to 1.5 kHz for the nine curves to be
     # comparable at all. Grouped by the part of the family each belongs to.
     freqs = np.geomspace(0.05, 1500.0, 900)
     curves: tuple[tuple[WeightingName, str, str, Any, float], ...] = (
@@ -986,12 +986,12 @@ def generate_vibration_weighting_family(output_dir: str) -> None:
     ax.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.4, zorder=1)
 
     # The band each part of the family is tabulated over, drawn above the
-    # curves: ISO 2631-1 Table 3 (0,5-80 Hz, band-limited 0,4/100 Hz),
-    # its Wf column (0,1-0,5 Hz, band-limited 0,08/0,63 Hz) and ISO 5349-1
-    # Table A.2 (6,3-1250 Hz, band-limited 6,31/1258,9 Hz). Each carries the
+    # curves: ISO 2631-1 Table 3 (0.5-80 Hz, band-limited 0.4/100 Hz),
+    # its Wf column (0.1-0.5 Hz, band-limited 0.08/0.63 Hz) and ISO 5349-1
+    # Table A.2 (6.3-1250 Hz, band-limited 6.31/1258.9 Hz). Each carries the
     # frequency its label is centred on, which is the middle of the band for
     # the first two and is not for the third: the hand-arm range begins under
-    # the whole-body band drawn above it, so a chip centred on 6,3-1250 Hz
+    # the whole-body band drawn above it, so a chip centred on 6.3-1250 Hz
     # sits on the 80 Hz end of that bar and hides it, leaving the bar
     # apparently stopping in mid-air at the very frequency the label beside it
     # states. Centred over 80-1250 Hz -- the part of the range that is the
@@ -1393,7 +1393,7 @@ def generate_spinal_response_peaks(output_dir: str) -> None:
 
     # A synthetic off-road seat record: a 3.6 Hz ride oscillation, four
     # impacts of clearly different severity, and a 0.4 s free fall before the
-    # largest one (the case clause 5.1.3 NOTE 2 sets the 0,01 Hz high pass
+    # largest one (the case clause 5.1.3 NOTE 2 sets the 0.01 Hz high pass
     # for). 256 samples per second is the rate clause 5.1.2 asks for.
     fs, duration = 256.0, 8.0
     time = np.arange(int(duration * fs)) / fs

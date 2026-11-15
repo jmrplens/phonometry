@@ -3965,7 +3965,7 @@ def generate_sti_mtf_curves(output_dir: str) -> None:
         ax_t.axvline(f_stipa, color=COLOR_FG, linewidth=1.0, linestyle=":")
     # Along the top of the panel, not along the floor of it. The note is as
     # wide as the span it names, so at the bottom it lay across the tail of
-    # the 2,5 s curve and its backing swallowed the 10 Hz point whole -- the
+    # the 2.5 s curve and its backing swallowed the 10 Hz point whole -- the
     # one band where that curve has all but run out of modulation, which is
     # the thing the panel is showing. Above the family there is nothing to
     # hide, and the two rules it names run the whole height of the panel, so
@@ -5088,7 +5088,7 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
 
 
 #: A single-walled booth whose ventilation leaves low-frequency noise behind:
-#: its one-third-octave ambient levels from 31,5 Hz to 8 kHz, in dB.
+#: its one-third-octave ambient levels from 31.5 Hz to 8 kHz, in dB.
 _BOOTH_AMBIENT_DB = (
     50.0, 48.0, 45.0, 43.0, 40.0, 36.0, 30.0, 24.0, 19.0, 16.0, 14.0, 12.0, 11.0,
     10.0, 10.0, 10.0, 9.0, 9.0, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0,

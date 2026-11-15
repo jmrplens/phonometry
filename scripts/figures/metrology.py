@@ -193,7 +193,7 @@ def generate_calibrator_verification(output_dir: str) -> None:
     """IEC 60942:2017: a class 1 calibrator's record, read requirement by requirement.
 
     A pattern-evaluation record at 1 kHz with every graded requirement in it,
-    and one environmental reading 0,03 dB past its Table 5 limit, so the figure
+    and one environmental reading 0.03 dB past its Table 5 limit, so the figure
     shows both what a pass looks like and what the one failure does to the
     verdict. Drawn by the result's own ``.plot()``.
     """
@@ -230,9 +230,9 @@ def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
 
     A meter with the A, C and Z weightings, the F and S time weightings, a
     time-averaged display and two level ranges, every result inside its
-    limits but the maximum F-weighted response to the 0,25 ms toneburst:
-    -30,4 dB against the -27,0 dB of IEC 61672-1 Table 4, a deviation of
-    -3,4 dB where class 1 allows -3,0 dB. Clause 16 takes the 25 steps 16.3
+    limits but the maximum F-weighted response to the 0.25 ms toneburst:
+    -30.4 dB against the -27.0 dB of IEC 61672-1 Table 4, a deviation of
+    -3.4 dB where class 1 allows -3.0 dB. Clause 16 takes the 25 steps 16.3
     asks over a linear operating range of 80 dB, from 40 dB to 120 dB, and
     17.4 reads both level ranges, the reference one first. The numbers are
     illustrative, not a real meter's; they are the guide's record.
@@ -924,8 +924,8 @@ def generate_conformance_rule_examples(output_dir: str) -> None:
 
     Left, the eight of IEC 60942:2017 Table E.1, whose deviations are absolute,
     so Figure E.1 draws its lower acceptance limit at 0 dB and its upper one at
-    0,25 dB, and so does this panel; right, the ten of IEC 61672-1:2013 Table
-    C.1 against +1,0 dB and -1,2 dB. Each marker is the verdict the rule
+    0.25 dB, and so does this panel; right, the ten of IEC 61672-1:2013 Table
+    C.1 against +1.0 dB and -1.2 dB. Each marker is the verdict the rule
     returned, and it is the verdict the table prints.
     """
     print("Generating conformance_rule_examples...")
@@ -2019,13 +2019,13 @@ _METER_REAR_FLOOR = 0.02
 _METER_CASE_SHADOW = 1.25
 
 #: The exponents of the guide's 8 kHz example: 0.785 in the X-Y plane, which
-#: gives the 2,45 dB Table B.1 prints at 8 kHz, and 1.25 times it, 0.98, in
+#: gives the 2.45 dB Table B.1 prints at 8 kHz, and 1.25 times it, 0.98, in
 #: the X-Z plane.
 _METER_8K_EXPONENTS = (0.785, 0.98)
 
 #: Where the free-field sensitivity level of the synthetic meter rolls off,
-#: as a second-order low-pass, -10 lg[1 + (f/f_c)^4]: flat to 0,05 dB up to
-#: 8 kHz, 0,7 dB down at 16 kHz and 1,5 dB at 20 kHz.
+#: as a second-order low-pass, -10 lg[1 + (f/f_c)^4]: flat to 0.05 dB up to
+#: 8 kHz, 0.7 dB down at 16 kHz and 1.5 dB at 20 kHz.
 _METER_ROLL_OFF_HZ = 25000.0
 
 #: The diffuse field both instruments are placed in, in dB.

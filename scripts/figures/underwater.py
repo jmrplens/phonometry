@@ -2295,7 +2295,7 @@ def generate_sonar_detection_terms(output_dir: str) -> None:
         linewidth=1.9,
         label="DT at 50 % detection probability",
     )
-    # The closed form is stated to 0,1 dB below 1e-2 and is an extrapolation
+    # The closed form is stated to 0.1 dB below 1e-2 and is an extrapolation
     # above it, which is why the curve is drawn and shaded there rather than
     # stopped: a reader who works at 5e-2 should see what the formula gives
     # and that it is outside the stated accuracy.
@@ -2400,7 +2400,7 @@ def generate_sonar_detection_terms(output_dir: str) -> None:
     ax_di.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_di.set_axisbelow(True)
     # Bottom right, under the broadside curve: the note on the low-frequency
-    # limit has to point at 0,5 wavelengths, which puts it in the top left.
+    # limit has to point at 0.5 wavelengths, which puts it in the top left.
     ax_di.legend(loc="lower right", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "sonar_detection_terms.svg")

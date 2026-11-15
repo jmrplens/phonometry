@@ -156,7 +156,7 @@ def _pressure_budget(
 
 
 def _free_field_example() -> "ReciprocityCalibration":
-    """The guide's triad of LS2aP microphones 0,25 m apart in a free field."""
+    """The guide's triad of LS2aP microphones 0.25 m apart in a free field."""
     from phonometry import metrology
 
     f = metrology.exact_frequencies(1000, 40000, fraction=3)

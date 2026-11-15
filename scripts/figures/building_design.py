@@ -251,7 +251,7 @@ def generate_masonry_wall_ties(output_dir: str) -> None:
     _fig, (ax_clf, ax_tl) = plt.subplots(1, 2, figsize=(13.0, 5.6))
 
     # Two 100 mm masonry leaves, 150 and 170 kg/m2 (Hopkins Fig. 5.30
-    # flanking-laboratory cavity wall), 2,5 ties per m2.
+    # flanking-laboratory cavity wall), 2.5 ties per m2.
     freq = np.logspace(np.log10(50.0), np.log10(5000.0), 200)
     stiffness1 = 150.0 * 2000.0**2 * 0.1**2 / 12.0
     stiffness2 = 170.0 * 2000.0**2 * 0.1**2 / 12.0
@@ -308,7 +308,7 @@ def generate_masonry_wall_ties(output_dir: str) -> None:
     ax_clf.set_axisbelow(True)
     ax_clf.legend(loc="lower left", fontsize=9)
 
-    # Hopkins Fig. 4.35: two 140 kg/m2 leaves, empty 75 mm cavity, 2,5 ties/m2
+    # Hopkins Fig. 4.35: two 140 kg/m2 leaves, empty 75 mm cavity, 2.5 ties/m2
     # of s_75mm = 2e6 N/m, which lifts fmsm from 26 Hz to 50 Hz.
     bands = np.array(
         [
@@ -402,7 +402,7 @@ def generate_floating_floor_prediction(output_dir: str) -> None:
     from phonometry import building
 
     # The worked floating floor of ISO 12354-2:2017 Annex G: a 35 mm screed
-    # (m' = 73,5 kg/m2) on a resilient layer of s' = 8 MN/m3.
+    # (m' = 73.5 kg/m2) on a resilient layer of s' = 8 MN/m3.
     mass_per_area, stiffness = 73.5, 8.0e6
     f0 = building.floating_floor_resonance_frequency(stiffness, mass_per_area)
     delta_lw = building.weighted_floating_floor_improvement(mass_per_area, stiffness)
@@ -531,8 +531,8 @@ def generate_soft_covering_prediction(output_dir: str) -> None:
     from phonometry import building, vibration
 
     # A 140 mm cast in-situ concrete slab (Hopkins Table A2: 2 200 kg/m3,
-    # cL = 3 800 m/s, nu = 0,2) carrying the two soft coverings of Hopkins
-    # Fig. 4.64: E/d = 1,5e11 N/m3 (a few mm of solid PVC) and 2,8e8 N/m3
+    # cL = 3 800 m/s, nu = 0.2) carrying the two soft coverings of Hopkins
+    # Fig. 4.64: E/d = 1.5e11 N/m3 (a few mm of solid PVC) and 2.8e8 N/m3
     # (a vinyl or carpet with a resilient backing).
     density, longitudinal, poisson, thickness = 2200.0, 3800.0, 0.2, 0.14
     modulus = density * longitudinal**2 * (1.0 - poisson**2)
@@ -658,13 +658,13 @@ def generate_structure_borne_power(output_dir: str) -> None:
     bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
     # A pump-like source on the two plates EN 15657 specifies. Low-mobility
     # (clause 7.2.2): 100 mm concrete of 2 300 kg/m3, so m = 230 kg/m2, over
-    # 3,15 m x 2,23 m = 7,0 m2 with Ts = 0,25 s, which keeps eta >= 0,08
+    # 3.15 m x 2.23 m = 7.0 m2 with Ts = 0.25 s, which keeps eta >= 0.08
     # through the 50-100 Hz bands. High-mobility (clause 7.3.2): 1 mm
-    # perforated steel, m = 7,9 kg/m2, over 2,0 m2 in its support frame.
+    # perforated steel, m = 7.9 kg/m2, over 2.0 m2 in its support frame.
     lv_low = np.array([72.0, 74.0, 71.0, 68.0, 64.0, 60.0, 55.0])
-    # Their point mobilities are 4,9e-6 and 1,1e-2 m/(N.s); driven by a source
+    # Their point mobilities are 4.9e-6 and 1.1e-2 m/(N.s); driven by a source
     # of |Y_S| ~ 1e-3 m/(N.s) the light plate's spatial-mean velocity level runs
-    # 35,1 dB higher, of which 12,0 dB is extra injected power and the rest is
+    # 35.1 dB higher, of which 12.0 dB is extra injected power and the rest is
     # its far smaller eta*m*S dissipating it.
     lv_high = lv_low + 35.1
     res_low = building.reception_plate_power(
@@ -868,7 +868,7 @@ def generate_aperture_slit_geometry(output_dir: str) -> None:
 def generate_double_wall_geometry(output_dir: str) -> None:
     """Mass-spring-mass double wall to scale.
 
-    Two 12,5 mm plasterboard leaves (8,8 kg/m2 each) on a 100 mm stud
+    Two 12.5 mm plasterboard leaves (8.8 kg/m2 each) on a 100 mm stud
     cavity, the classic lightweight double wall, with its mass-air-mass
     resonance annotated. One concept: the geometry behind the double-wall
     resonance dip.
@@ -1503,7 +1503,7 @@ def generate_orthotropic_transmission_loss(output_dir: str) -> None:
     from phonometry import building, vibration
 
     # Vigran's worked example (printed p. 96): 1 mm steel, corrugation of total
-    # height 20 mm (H = 10 mm) at a 100 mm pitch, E = 2,1e11 Pa, nu = 0,3.
+    # height 20 mm (H = 10 mm) at a 100 mm pitch, E = 2.1e11 Pa, nu = 0.3.
     modulus, thickness, poisson, eta = 2.1e11, 1.0e-3, 0.3, 0.011
     amplitude, pitch, mass_flat = 0.010, 0.100, 7.8
     flat_b = vibration.plate_bending_stiffness(modulus, thickness, poisson)

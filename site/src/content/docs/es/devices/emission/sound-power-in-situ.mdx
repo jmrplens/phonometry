@@ -277,7 +277,7 @@ claramente no emiten y toma el centro geométrico y la caja de lo que queda.
 Haz después el barrido de directividad a 1 m de la caja de referencia,
 normalmente a 1,5 m de altura y a intervalos de 2 m o menos por cada lado:
 dentro de ±2 dB la máquina es omnidireccional y, pasado ±7 dB, el resultado
-queda en grado de control. Acerca la fuente de referencia cuanto puedas al
+queda en grado de peritaje. Acerca la fuente de referencia cuanto puedas al
 centro acústico: en una máquina directiva, donde imite su patrón de emisión;
 si no, encima; y solo si tampoco es posible, al lado, evitando quedar a menos
 de 0,5 m de la caja de referencia. Normalmente basta una ubicación. Cuando la
@@ -314,7 +314,7 @@ cobertura y probabilidad.
 | `reference_background_levels` | array 1D o 2D | dB | mismas formas | Ruido de fondo de la lectura de la fuente de referencia; `None` reutiliza `background_levels` (7.5) |
 | `temperature_c` | float | °C | por defecto `23.0` | Temperatura del aire en el ensayo, para $C_2$ |
 | `static_pressure_kpa` | float | kPa | por defecto `101.325` | Presión estática en el ensayo, para $C_2$; véase `static_pressure_from_altitude` |
-| `conditions` | `GradeConditions` | | | Las dos condiciones que la Tabla 2 lee juntas: `excess_levels`, el $\Delta L_{f\mathrm{A}}$ en cada posición `(n,)` en decibelios (Anexo A), y `directivity_range`, la semiamplitud del barrido de directividad ponderado A en decibelios (7.2). Si falta cualquiera de las dos, la determinación se queda en grado de control |
+| `conditions` | `GradeConditions` | | | Las dos condiciones que la Tabla 2 lee juntas: `excess_levels`, el $\Delta L_{f\mathrm{A}}$ en cada posición `(n,)` en decibelios (Anexo A), y `directivity_range`, la semiamplitud del barrido de directividad ponderado A en decibelios (7.2). Si falta cualquiera de las dos, la determinación se queda en grado de peritaje |
 | `sigma_omc_db` | float | dB | $\ge 0$ | Desviación típica de las condiciones de funcionamiento y montaje (9.2); `None` deja la incertidumbre en `NaN` |
 | `coverage_factor` | float | | por defecto `2.0` | $k$ de la Ec. 23; 1,6 para una comparación unilateral con un límite |
 

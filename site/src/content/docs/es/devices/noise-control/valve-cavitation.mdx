@@ -85,7 +85,7 @@ print(round(noise_control.corrected_incipient_ratio(x_fz, 1.0e6), 4))
 #                                                       # 0.2386  a 10 bar
 ```
 
-Esta válvula está por encima de su umbral, así que cavita. Un interno
+Esta válvula está por encima de su umbral, así que cavita. Un obturador
 multiorificio de la misma capacidad no lo estaría: la Ecuación (3b) responde a
 la geometría de los orificios y no a la capacidad, y ciento veinte agujeros de
 tres milímetros suben el umbral la mitad. La comparación hay que hacerla
@@ -314,7 +314,7 @@ for stage in stages:
 print(round(noise_control.combined_stage_level([78.0, 74.0, 71.0]), 1))   # 80.0
 ```
 
-Los internos con los que se construye una válvula multietapa están
+Los obturadores con los que se construye una válvula multietapa están
 dibujados debajo, junto a las familias para gas de IEC 60534-8-3 que los
 comparten.
 
@@ -327,7 +327,7 @@ Esos tres coeficientes crecen a lo largo del flujo, que es el dispositivo de
 la Figura 2: la mayor parte de la presión se toma en las primeras etapas y la
 última queda trabajando con un diferencial lo bastante pequeño como para no
 cavitar. El 6.3.2 calcula entonces **solo** esa última etapa, porque el sonido
-que hacen las anteriores se absorbe dentro del interno antes de llegar a la
+que hacen las anteriores se absorbe dentro del obturador antes de llegar a la
 tubería, y limita el diferencial con el umbral de cavitación de la última
 etapa en vez de con el punto de bloqueo:
 
@@ -364,7 +364,7 @@ sonora de las (7a) y (7b), el nivel interior en la pared de la tubería de la
 (10), el número de Strouhal y las dos frecuencias de pico de las (11) a (13),
 la frecuencia de anillo y la pérdida por transmisión de las (14) a (17) con el
 suelo de la NOTA, el nivel exterior de las (18a) y (18b), y toda la ruta en
-frecuencia del 5.4 por bandas. Y el apartado 6 para un interno multietapa: las
+frecuencia del 5.4 por bandas. Y el apartado 6 para un obturador multietapa: las
 presiones y cocientes por etapa de las Ecuaciones (23a) a (26), la suma
 energética de la (27), y el diferencial, el modificador de estilo y el
 diámetro de asiento de la última etapa del 6.3.2.

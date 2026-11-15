@@ -40,7 +40,7 @@ distingue la energía que *sale* de la fuente de la energía estacionaria que
 solo atraviesa la superficie de medición, y los métodos de barrido
 construidos sobre ella toleran un ruido extraño que derrotaría a cualquier
 método de presión. Esta guía cubre los dos: la determinación de
-ingeniería/inspección de ISO 9614-2 con sus indicadores de campo y su grado
+ingeniería/peritaje de ISO 9614-2 con sus indicadores de campo y su grado
 alcanzado por banda, el barrido de precisión (grado 1) de ISO 9614-3 con
 sus criterios más estrictos, y la ficha de ensayo de estilo acreditado. La
 propia sonda, su sesgo por diferencias finitas y el método de puntos
@@ -139,7 +139,7 @@ grado 2 y 7 dB para el grado 3) debe superar $F_{pI}$ (criterio 1);
 $F_{+/-} \le 3\ \text{dB}$ es el criterio 2 (obligatorio para el grado 2); y
 los dos barridos girados deben coincidir dentro del límite $s$ de la Tabla 2
 por segmento (criterio 3). Una banda es de
-grado **ingeniería** cuando se cumplen los criterios 1, 2 y 3, de **inspección**
+grado **ingeniería** cuando se cumplen los criterios 1, 2 y 3, de **peritaje**
 cuando se cumplen 1 y 3, y en caso contrario `none`.
 
 ### Leer los indicadores
@@ -294,7 +294,7 @@ Tabla 2 tabula $s$ por banda solo para el grado de **ingeniería**; para el grad
 de inspección da un único valor ponderado A de 4 dB, y esta implementación
 reutiliza esos 4 dB como límite por banda de inspección. Es una extrapolación
 deliberada, no un valor normativo, y es más laxa que cualquier límite de grado 2
-de la tabla: superar el criterio 3 en grado de inspección no es por tanto prueba
+de la tabla: superar el criterio 3 en grado de peritaje no es por tanto prueba
 de repetibilidad de grado 2. La Tabla 2 está además acotada: `_table2_s` lanza un
 error fuera de las bandas de octava de 63 Hz a 4 kHz y de las de tercio de octava
 de 50 Hz a 6,3 kHz, de modo que una octava de 8 kHz es una excepción, no un

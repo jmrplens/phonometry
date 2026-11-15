@@ -46,20 +46,20 @@ references:
     title: "Dynamic stiffness as an acoustic specification parameter for wall ties used in masonry cavity walls"
     journal: "Applied Acoustics 58, 51-68"
     doi: "10.1016/S0003-682X(98)00068-1"
-    note: "The measurement behind the 50 mm rows of Hopkins' Table A4: butterfly 1,7 MN/m, double-triangle 16,1 MN/m and vertical-twist 94,0 MN/m."
+    note: "The measurement behind the 50 mm rows of Hopkins' Table A4: butterfly 1.7 MN/m, double-triangle 16.1 MN/m and vertical-twist 94.0 MN/m."
   - type: article
     authors: ["Hall, R.", "Hopkins, C."]
     year: 2001
     title: "The measurement of dynamic stiffness of wall ties used in masonry cavity walls"
     journal: "Proceedings of the Institute of Acoustics 23(8), 259-266"
-    note: "The 100 mm cavity row of Hopkins' Table A4: the proprietary vertical-twist tie at 43,4 MN/m."
+    note: "The 100 mm cavity row of Hopkins' Table A4: the proprietary vertical-twist tie at 43.4 MN/m."
   - type: article
     authors: ["Craik, R. J. M.", "Wilson, R."]
     year: 1995
     title: "Sound transmission through masonry cavity walls"
     journal: "Journal of Sound and Vibration 179(1), 79-96"
     doi: "10.1006/jsvi.1995.0006"
-    note: "Table 1: the same tie types measured at an 85 mm cavity (butterfly 1,1 MN/m, double-triangle 4,3 MN/m), which corroborate the ordering of Table A4 but not its values, since the dynamic stiffness is defined at a given cavity width."
+    note: "Table 1: the same tie types measured at an 85 mm cavity (butterfly 1.1 MN/m, double-triangle 4.3 MN/m), which corroborate the ordering of Table A4 but not its values, since the dynamic stiffness is defined at a given cavity width."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -216,16 +216,16 @@ standard would otherwise demand a laboratory measurement.
 mounted*, not the material's internal loss factor. In a mounted element the total
 is internal plus radiation plus the losses at the edges, and for a heavy element
 in a test opening the edge term dominates: ISO 12354-1 Annex C gives
-$\eta_\mathrm{tot,lab} \approx \eta_\mathrm{int} + m'/(485\sqrt{f}) \approx 0{,}01 +
+$\eta_\mathrm{tot,lab} \approx \eta_\mathrm{int} + m'/(485\sqrt{f}) \approx 0.01 +
 m'/(485\sqrt{f})$ for elements below 800 kg/m², reachable without leaving the
 library as `laboratory_total_loss_factor`. For this 15 kg/m² pane that estimate
-is 0,011 at 500 Hz, barely above the internal value; for a 484 kg/m² concrete
-floor it is 0,055, five times the material figure. The measured route is the
-structural reverberation time and $\eta = 2{,}2/(fT_\mathrm{s})$, the same quantity the
+is 0.011 at 500 Hz, barely above the internal value; for a 484 kg/m² concrete
+floor it is 0.055, five times the material figure. The measured route is the
+structural reverberation time and $\eta = 2.2/(fT_\mathrm{s})$, the same quantity the
 [ISO 10848](/phonometry/buildings/insulation/flanking-lab/) and
 [EN 15657](/phonometry/buildings/design/structure-borne-power/) guides measure.
 The stake is worth knowing: the dip depth carries $10\lg\eta$, so a factor of
-three in $\eta$ moves the coincidence region by 4,8 dB and changes nothing below
+three in $\eta$ moves the coincidence region by 4.8 dB and changes nothing below
 $f_\mathrm{c}/2$.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/single_panel_rating.svg" alt="Predicted sound reduction index of a 6 mm float glass pane per one-third-octave band against the shifted ISO 717-1 reference curve, with the coincidence dip at about 2100 Hz marked, the unfavourable deviations shaded and the Rw rating annotated" width="80%" />

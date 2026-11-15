@@ -108,14 +108,14 @@ types exist). Bigger is better: $K_{ij}$ enters Formula (28a) with a plus sign, 
 a high value is a junction that does not pass vibration on. The ranges are worth
 carrying in your head. A rigid cross junction of similar masses sits around
 8–13 dB and a rigid T junction about 3 dB lower (Annex E.3.2/E.3.3 give
-$K_{13} = 8{,}7 + 17{,}1M + 5{,}7M^2$ and $5{,}7 + 14{,}1M + 5{,}7M^2$); the
+$K_{13} = 8.7 + 17.1M + 5.7M^2$ and $5.7 + 14.1M + 5.7M^2$); the
 corner and thickness-change junctions of Annex E.3.6 fall to $15M - 3$ dB
 (floored at $-2$ dB) and $5M^2 - 5$ dB, so at the worked example's mass ratio
-they return 0,1 dB and $-4{,}8$ dB, a junction that hides nothing; and a
+they return 0.1 dB and $-4.8$ dB, a junction that hides nothing; and a
 resilient interlayer or a lightweight double-leaf junction can exceed 20 dB
-(the same mass ratio through a `flexible_t` gives 20,9 dB). That upper range is
+(the same mass ratio through a `flexible_t` gives 20.9 dB). That upper range is
 what makes the internal wall of the worked example below almost invisible: it is
-the weakest element on the list at $R_\mathrm{w}$ = 33 dB, yet the 33,5 dB tabulated for
+the weakest element on the list at $R_\mathrm{w}$ = 33 dB, yet the 33.5 dB tabulated for
 its $K_\mathrm{Ff}$ takes its Ff path out of the sum entirely. On this model a bad
 element behind a good junction beats a good element behind a bad one. For the
 simplified model the Annex E values are read once, at 500 Hz, and stand in for a
@@ -126,10 +126,10 @@ quadratic in $M = \lg(m'_{\perp,i}/m'_i)$: the base-ten **logarithm** of the
 mass ratio, with $m'_i$ the element carrying the path and $m'_{\perp,i}$ the
 perpendicular element of the junction (Formula E.3). The library takes the
 **mass ratio itself** and forms $M$ internally, so `mass_ratio=1.61` means the
-perpendicular element is 1,61 times as heavy per unit area. Any positive number
+perpendicular element is 1.61 times as heavy per unit area. Any positive number
 is accepted, so passing an already-logged value returns a plausible but wrong
 answer: `junction_vibration_reduction("rigid_cross", "through", 0.2068)` returns
-$-0{,}3$ dB where the answer is 12,5 dB. And because $m'_i$ is the element *in
+$-0.3$ dB where the answer is 12.5 dB. And because $m'_i$ is the element *in
 the transmission path*, the same junction has a different mass ratio for
 $K_{13}$ and for $K_{12}$: the ratio is per path, not per junction.
 
@@ -137,7 +137,7 @@ $K_{13}$ and for $K_{12}$: the ratio is per path, not per junction.
 
 Each drawing above maps onto one `(junction_type, path)` argument pair, and the
 path branch matters as much as the junction type: on the same rigid cross of the
-worked example, `path='through'` gives 12,5 dB and `path='corner'` 8,9 dB.
+worked example, `path='through'` gives 12.5 dB and `path='corner'` 8.9 dB.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo.svg" alt="Per-path sound reduction indices for the EN 12354-1 Annex H.3 example and each path's share of the transmitted energy, showing the direct path dominating at R'w = 52 dB" width="80%" />
 
@@ -236,7 +236,7 @@ would be wasted money; the floor, the ceiling and the façade carry the rest, an
 a junction detail or a lining on *them* is what moves the answer. The rule
 generalises: the best achievable improvement from fixing one path is
 $-10\lg(1 - \text{its energy fraction})$ dB, so a path below about 10 % of the
-total is worth at most 0,5 dB and is not worth touching, while a path at 50 % is
+total is worth at most 0.5 dB and is not worth touching, while a path at 50 % is
 worth 3 dB and one at 80 % is worth 7 dB. Rank the paths, spend on the top of the
 list, and stop when the next one is under a decibel.
 

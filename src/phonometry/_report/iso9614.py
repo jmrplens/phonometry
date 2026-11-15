@@ -118,7 +118,7 @@ _PRECISION_GRADE_PHRASE = "precision grade (accuracy grade 1)"
 #: coverage probability of 95 % as defined in the GUM.
 _COVERAGE_FACTOR = 2.0
 #: The Table 1 standard deviation of reproducibility of the A-weighted sound
-#: power level, in dB (footnote b: a relatively flat 50 Hz to 6,3 kHz spectrum).
+#: power level, in dB (footnote b: a relatively flat 50 Hz to 6.3 kHz spectrum).
 _SIGMA_A_WEIGHTED = 1.0
 #: Band fraction returned by ``band_labels`` for a one-third-octave band set
 #: (1 = octave, 3 = one-third octave, 0 = unlabelled); ISO 9614-3:2002 Table 1
@@ -378,7 +378,7 @@ def _band_uncertainty(result: PrecisionIntensityResult) -> NDArray[np.float64]:
     ISO 9614-3:2002 clause 4.3 states the expanded uncertainty for a coverage
     probability of 95 % as twice the standard deviation of reproducibility of
     Table 1, which is tabulated for the one-third-octave bands from 50 Hz to
-    6,3 kHz. A band outside that set, or a determination whose bands are not
+    6.3 kHz. A band outside that set, or a determination whose bands are not
     one-third octaves, has no tabulated value and reports ``NaN`` (an em dash
     on the sheet) rather than an uncertainty the standard does not give.
     """
@@ -430,8 +430,8 @@ def d2(value: float, language: Language = "en") -> str:
     """Two decimal places, locale-aware separator; em dash when not finite.
 
     The temporal-variability and field-non-uniformity indicators are ratios,
-    not levels: ``FT`` is judged against 0,6 and ``FS`` against 2, and a scan
-    whose ``FT`` is 0,04 reads as 0,0 at the one decimal a decibel gets.
+    not levels: ``FT`` is judged against 0.6 and ``FS`` against 2, and a scan
+    whose ``FT`` is 0.04 reads as 0.0 at the one decimal a decibel gets.
 
     :raises TypeError: if ``value`` is not one real number.
     """
@@ -543,7 +543,7 @@ def _precision_caption(
     """The band-set caption, extended with the frequency range determined.
 
     ISO 9614-3:2002 clause 4.3 covers the one-third-octave bands from 50 Hz to
-    6,3 kHz and requires a determination made over a more restricted range to
+    6.3 kHz and requires a determination made over a more restricted range to
     state that range. Naming the first and last band in the caption states it
     where the reader meets the table, and costs the sheet no line of its own.
     """
@@ -688,7 +688,7 @@ def _precision_model_strip(
         "L<sub>W</sub> = 10 lg(P/P<sub>0</sub>), P the sum of the "
         "partial-surface powers P<sub>i</sub> = I<sub>n,i</sub> S<sub>i</sub>, "
         "P<sub>0</sub> = 1 pW (ISO 9614-3:2002 Eq. 5/8/9); L<sub>W0</sub> = "
-        "L<sub>W</sub> &#8722; 15 lg[(B/101 325)(296,15/(273,15 + &#952;))] "
+        "L<sub>W</sub> &#8722; 15 lg[(B/101 325)(296.15/(273.15 + &#952;))] "
         "refers it to 23 &#176;C, 101 325 Pa (Eq. 10), applied normalization "
         "{offset} dB. Annex B indicators F<sub>T</sub> = {ft}, "
         "F<sub><i>p</i>|<i>I</i>n|</sub> = {unsigned} dB, F<sub><i>pI</i>n</sub> = {signed} dB, "
@@ -798,7 +798,7 @@ def _precision_criteria_strip(
         "Table 1 (criterion 1), L<sub>d</sub> &#8805; F<sub><i>pI</i>n</sub> with "
         "K = 10 dB (2), F<sub><i>pI</i>n</sub> &#8722; F<sub><i>p</i>|<i>I</i>n|</sub> &#8804; 3 dB "
         "(3) and F<sub>S</sub> &#8804; 2 (4), or a doubled scan-line density "
-        "gives 0,83 &#8804; F<sub>S</sub>(1)/F<sub>S</sub>(2) &#8804; 1,2 (5), "
+        "gives 0.83 &#8804; F<sub>S</sub>(1)/F<sub>S</sub>(2) &#8804; 1.2 (5), "
         "which qualifies the band even where F<sub>S</sub>(2) &#8805; 2. The "
         "A-weighted L<sub>WA</sub> sums the qualified bands only: a band whose "
         "criteria are not satisfied is omitted (clause 10 f) 2)), even where "
@@ -806,7 +806,7 @@ def _precision_criteria_strip(
         "with net power P &#8804; 0, to which the method is not applicable "
         "(clause 9.2). U is twice the Table 1 standard deviation of "
         "reproducibility (clause 4.3, coverage probability 95 %); its "
-        "A-weighted value holds for the relatively flat 50 Hz to 6,3 kHz "
+        "A-weighted value holds for the relatively flat 50 Hz to 6.3 kHz "
         "spectrum of the Table 1 footnote.",
         language,
     )

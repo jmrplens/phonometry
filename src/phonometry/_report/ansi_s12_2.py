@@ -129,7 +129,7 @@ def _metadata_pairs(
 def _band_labels(language: Language = "en") -> list[str]:
     """Nominal octave-band labels (16 ... 8000 Hz), aligned with the levels.
 
-    The centre of the 31,5 Hz band is a number like any other on the sheet, so
+    The centre of the 31.5 Hz band is a number like any other on the sheet, so
     a Spanish sheet writes it with the decimal comma the level beside it in the
     same row already uses.
     """

@@ -222,7 +222,7 @@ def plot_facade_elements(
 
     Each element of :func:`~phonometry.building.facade_sound_reduction` is a
     tile whose drawn area equals its real area (small-area elements without
-    an area, such as airbricks rated by ``dn_e``, get a nominal 0,1 m2 tile).
+    an area, such as airbricks rated by ``dn_e``, get a nominal 0.1 m2 tile).
 
     :param elements: The
         :class:`~phonometry.building.FacadeElement` sequence.
@@ -318,7 +318,7 @@ def plot_facade_result_geometry(
 # Double wall (mass-spring-mass) cross-section.
 # ---------------------------------------------------------------------------
 #: Drawn leaf thickness per unit surface density (gypsum board density
-#: ~700 kg/m3 gives 12,5 mm for the classic 8,8 kg/m2 board).
+#: ~700 kg/m3 gives 12.5 mm for the classic 8.8 kg/m2 board).
 _LEAF_DENSITY = 700.0
 
 

@@ -1341,7 +1341,7 @@ def plot_in_situ_geometry(
 
     Loudspeaker on its mast above the surface, microphone below it, direct
     and surface-reflected paths, and the sampled-area radius on the ground.
-    Defaults are the standard heights (1,25 m source, 0,25 m microphone)
+    Defaults are the standard heights (1.25 m source, 0.25 m microphone)
     with the sampled radius of the standard 5 ms window.
 
     :param ax: Existing axes, or ``None`` to create a figure.

@@ -326,7 +326,7 @@ def plot_joint_test_element_check(
 ) -> Axes:
     """The length and width of a joint as fractions of their bounds (J.2.1, J.2.2).
 
-    The length is drawn over its lower bound (1 m, or 5,0 m for a window or
+    The length is drawn over its lower bound (1 m, or 5.0 m for a window or
     door gap) and the width over its upper bound of 50 mm, so both read
     against the one line at 1.
 
@@ -384,7 +384,7 @@ def plot_gap_width_check(
     """The gap widths read along a joint with their average (J.2.2).
 
     The readings in the order given, their average (the gap width ``b``) and
-    the 0,3 mm the readings may span, laid from the smallest one.
+    the 0.3 mm the readings may span, laid from the smallest one.
 
     :param result: A
         :class:`~phonometry.building.measurement.joint_insulation.GapWidthCheck`.
@@ -612,7 +612,7 @@ def plot_joint_gap_series_check(
     r"""The gap widths measured against the three widths of J.4.
 
     :math:`b_\mathrm{min}` (when named), :math:`b_\mathrm{n}` and
-    :math:`b_\mathrm{n} + 3` drawn as in Figure J.8, each with the 0,3 mm a
+    :math:`b_\mathrm{n} + 3` drawn as in Figure J.8, each with the 0.3 mm a
     measured width may lie from it shaded, and the measured widths as points
     on one line.
 

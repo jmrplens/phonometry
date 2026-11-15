@@ -510,7 +510,7 @@ def plot_reference_sound_source(
 
     A value at or below 1 meets the requirement. Per band: the repeatability
     standard deviation over Table 1, the variation over the declared supply
-    range over 0,3 dB, the step to the adjacent band over its 3 dB (or 4 dB)
+    range over 0.3 dB, the step to the adjacent band over its 3 dB (or 4 dB)
     and the directivity index over 6 dB. Over a range of bands, as a
     horizontal segment across them: the spread from 100 Hz to 10 kHz over
     12 dB and, when the range is extended, the spread over every band over
@@ -610,7 +610,7 @@ def plot_reference_source_drift(
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Change of each band between two checks against 2,83 times Table 1.
+    """Change of each band between two checks against 2.83 times Table 1.
 
     :param result: A
         :class:`~phonometry.emission.reference_sound_source.ReferenceSourceDriftResult`.

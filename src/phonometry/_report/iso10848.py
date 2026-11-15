@@ -289,7 +289,7 @@ _KIJ_STATEMENT = (
     "The single-number K<sub>ij</sub> is the arithmetic mean over the Annex A "
     "band range (200 Hz to 1250 Hz for one-third-octave bands, 125 Hz to "
     "1000 Hz for octave bands). Bracketed bands, where the modal overlap "
-    "factor is below 0,25 (ISO 10848-4:2010 Clause 9), are excluded from the "
+    "factor is below 0.25 (ISO 10848-4:2010 Clause 9), are excluded from the "
     "mean. The reported index relates only to the tested junction."
 )
 
@@ -392,7 +392,7 @@ def _kij_result_box(
     ]
     if bracketed is not None:
         extended.append(
-            t("Bracketed (M &lt; 0,25): {n}", language).format(
+            t("Bracketed (M &lt; 0.25): {n}", language).format(
                 n=int(np.count_nonzero(bracketed))
             )
         )
@@ -400,12 +400,12 @@ def _kij_result_box(
     if result.single_number is None:
         # Distinguish why the mean is empty: no measured band lies inside the
         # Annex A range, or in-range bands exist but every one is bracketed
-        # for poor modal overlap (M < 0,25, ISO 10848-4:2010 Clause 9).
+        # for poor modal overlap (M < 0.25, ISO 10848-4:2010 Clause 9).
         frequencies = np.asarray(result.frequencies, dtype=np.float64)
         any_in_range = bool(np.any((frequencies >= low) & (frequencies <= high)))
         key = (
             "No single-number K<sub>ij</sub> (all in-range bands bracketed, "
-            "M &lt; 0,25)"
+            "M &lt; 0.25)"
             if any_in_range
             else "No single-number K<sub>ij</sub> (no bands in the Annex A range)"
         )

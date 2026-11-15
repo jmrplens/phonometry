@@ -190,7 +190,7 @@ def range_str(
 
     ``decimals`` is the precision the quantity is read at: one decimal for a
     level in decibels, two for a dimensionless field indicator judged against a
-    threshold of 0,6 or 2 (ISO 9614-3:2002 Annex C). A spread below half the
+    threshold of 0.6 or 2 (ISO 9614-3:2002 Annex C). A spread below half the
     last printed digit is one value rather than a range.
 
     :raises TypeError: if ``values`` holds a text or a value that is not a real number.

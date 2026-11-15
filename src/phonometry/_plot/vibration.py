@@ -2370,7 +2370,7 @@ def plot_fault_frequencies(
         object exposing ``frequencies`` and ``amplitude``. Without it the
         predicted lines are drawn alone.
     :param max_frequency: Upper limit of the frequency axis, in hertz
-        (Default: the spectrum's own upper limit, or 1,15 x the highest line).
+        (Default: the spectrum's own upper limit, or 1.15 x the highest line).
     :param annotate: Label each line with its name (Default: ``True``).
     :param kwargs: Forwarded to the spectrum curve.
     :return: The axes.
@@ -2841,7 +2841,7 @@ def plot_vibration_meter_verification(
     inside = result.within_tolerance[order]
 
     # The upper limit is infinite where the measured response sits below the
-    # 0,01 of footnote a. Drawing an infinite edge would blank the axes, so
+    # 0.01 of footnote a. Drawing an infinite edge would blank the axes, so
     # the band is closed at the largest finite limit and the points still
     # carry the verdict.
     finite_upper = upper[np.isfinite(upper)]

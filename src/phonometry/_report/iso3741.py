@@ -209,9 +209,9 @@ def _corrections_strip(
         "The mean room level L<sub>p</sub> is the energy average over the "
         "microphone positions corrected for background noise (K1, "
         "ISO 3741:2010 Eq. 14); L<sub>W</sub> = L<sub>p</sub> + 10 lg(A/"
-        "A<sub>0</sub>) + 4,34 (A/S) + 10 lg(1 + S c /(8 V f)) + C1 + C2 "
+        "A<sub>0</sub>) + 4.34 (A/S) + 10 lg(1 + S c /(8 V f)) + C1 + C2 "
         "&#8722; 6, A<sub>0</sub> = 1 m<super>2</super> (Eq. 20), with the "
-        "Sabine absorption area A = (55,26/c)(V/T<sub>60</sub>) and c = {c} "
+        "Sabine absorption area A = (55.26/c)(V/T<sub>60</sub>) and c = {c} "
         "m/s. Applied meteorological corrections C1 = {c1} dB, C2 = {c2} dB.",
         language,
     ).format(c=c, c1=c1, c2=c2)

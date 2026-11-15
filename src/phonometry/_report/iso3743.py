@@ -21,10 +21,10 @@ there is one), the determined levels in octave bands and A-weighted, the
 expanded uncertainty with its coverage factor and, marked in the table and
 stated beneath it, the bands whose background noise requirement was not met,
 which 8.1.3 of Part 1 and 9.8 of Part 2 require a report to say in words.
-Part 1 rounds the levels to 0,1 dB (10.5 g); Part 2 asks for the corrected
+Part 1 rounds the levels to 0.1 dB (10.5 g); Part 2 asks for the corrected
 band levels to the nearest one-half decibel (12.5 d), so its band column is
 tabulated that way, while its A-weighted level, for which 12.5 c) sets no
-rounding, keeps 0,1 dB. Of the Part 1 bands that fail the requirement, only
+rounding, keeps 0.1 dB. Of the Part 1 bands that fail the requirement, only
 those where the source under test's own margin fell short are named upper
 bounds, as 8.1.3 has it; a short margin of the reference sound source lowers
 the level instead, and such a band is named only as failing 4.5. The
@@ -126,7 +126,7 @@ def _nearest_half(values: NDArray[np.float64]) -> NDArray[np.float64]:
 def _coverage_sentence(k: float, language: Language) -> str:
     """What the coverage factor of the sheet gives, as 9.1 of Part 1 and 11.1
     of Part 2 print it: 95 % two-sided for ``k`` = 2, 95 % one-sided for a
-    comparison with a limit for ``k`` = 1,6, and the factor alone otherwise.
+    comparison with a limit for ``k`` = 1.6, and the factor alone otherwise.
     """
     value = format_number(real_number(k, "k"), language, decimals=1, trim=True)
     if math.isclose(k, _COVERAGE_TWO_SIDED):

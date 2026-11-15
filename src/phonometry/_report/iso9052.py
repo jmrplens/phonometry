@@ -25,7 +25,7 @@ EN 29052-1 is a characterisation, so this fiche carries no pass/fail verdict.
 Clause 9 requires every dynamic stiffness per unit area to be stated in
 meganewtons per cubic metre to the nearest meganewton per cubic metre, so the
 stiffness values are rounded to the nearest MN/m3; the frequencies are shown to
-0,1 Hz.
+0.1 Hz.
 
 The quantity-independent skeleton lives in :mod:`._layout`; this module only
 holds the EN 29052-1 specifics. reportlab, matplotlib and svglib are soft
@@ -63,7 +63,7 @@ def _mn(value: float, language: Language = "en") -> str:
 
 
 def _hz(value: float, language: Language = "en") -> str:
-    """A frequency to 0,1 Hz."""
+    """A frequency to 0.1 Hz."""
     return format_number(value, language, decimals=1)
 
 
@@ -104,7 +104,7 @@ def _metric_rows(
 ) -> list[tuple[str, str]]:
     """The scalar results shown in the left-hand metrics table.
 
-    The resonant frequency and the natural frequency are printed to 0,1 Hz; the
+    The resonant frequency and the natural frequency are printed to 0.1 Hz; the
     dynamic stiffnesses to the nearest MN/m3 (Clause 9). The enclosed-gas term
     ``s'a`` is shown only when it is non-zero (an air-permeable material in the
     intermediate/low airflow-resistivity regime); the installed ``s'`` shows an

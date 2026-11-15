@@ -170,7 +170,7 @@ def _relation_strip(language: Language = "en") -> str:
         "m<sub>0</sub> S<sub>0</sub>)) + L<sub>v</sub> - 60 dB re 1 pW "
         "(UNE-EN 15657:2018 Formula 14), with the references f<sub>0</sub> = 1 Hz, "
         "m<sub>0</sub> = 1 kg, S<sub>0</sub> = 1 m<super>2</super>, the plate "
-        "loss factor &#951; = 2,2/(f T<sub>s</sub>) (Formula 13) and the "
+        "loss factor &#951; = 2.2/(f T<sub>s</sub>) (Formula 13) and the "
         "spatial mean velocity level L<sub>v</sub> = 10 lg((1/N) &#931; "
         "10<super>L<sub>v,<i>i</i></sub>/10</super>) re v<sub>0</sub> = "
         "10<super>&#8722;9</super> m/s (Formula 12).",

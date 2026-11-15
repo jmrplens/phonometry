@@ -82,12 +82,12 @@ _FREQUENCY_COLUMN = "f [Hz]"
 
 
 def _c2(value: float, language: Language = "en") -> str:
-    """Two decimals (coefficients ``s``, ``d``; ISO 17497 rounds to 0,01)."""
+    """Two decimals (coefficients ``s``, ``d``; ISO 17497 rounds to 0.01)."""
     return format_number(value, language, decimals=2)
 
 
 def _d1(value: float, language: Language = "en") -> str:
-    """One decimal (polar reflected levels; ISO 17497-2 rounds to 0,1 dB)."""
+    """One decimal (polar reflected levels; ISO 17497-2 rounds to 0.1 dB)."""
     return format_number(value, language, decimals=1)
 
 

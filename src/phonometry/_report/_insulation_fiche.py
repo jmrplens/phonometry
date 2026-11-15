@@ -57,7 +57,7 @@ if TYPE_CHECKING:
     from .metadata import ReportMetadata
 
 #: Cell padding, font size and leading of a compact band table, in points
-#: (the regular table pads 2,6 pt and sets 8 pt type).
+#: (the regular table pads 2.6 pt and sets 8 pt type).
 _COMPACT_PADDING_PT = 0.8
 _COMPACT_FONT_PT = 7.4
 _COMPACT_LEADING_PT = 8.6

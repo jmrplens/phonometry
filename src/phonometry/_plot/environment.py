@@ -188,8 +188,8 @@ _STRINGS: dict[str, str] = {
         "Potencia de la línea fuente ferroviaria CNOSSOS-EU"
     ),
     "Both heights": "Ambas alturas",
-    "Source A (0,5 m)": "Fuente A (0,5 m)",
-    "Source B (4,0 m)": "Fuente B (4,0 m)",
+    "Source A (0.5 m)": "Fuente A (0,5 m)",
+    "Source B (4.0 m)": "Fuente B (4,0 m)",
     "Excess attenuation $\\Delta L$": "Atenuación en exceso $\\Delta L$",
     "Free field (0 dB)": "Campo libre (0 dB)",
     "Hard-ground limit (+6 dB)": "Límite de suelo duro (+6 dB)",
@@ -708,7 +708,7 @@ def plot_cnossos_rail_emission(
     """Per-metre railway source-line power of the two equivalent source heights.
 
     Draws the energy-summed line power of the track as bars over the eight
-    CNOSSOS-EU octave bands, with source A (0,5 m) and source B (4,0 m) overlaid
+    CNOSSOS-EU octave bands, with source A (0.5 m) and source B (4.0 m) overlaid
     as marker lines, so the bands where the roof and pantograph sources matter
     are read directly off the chart.
 
@@ -733,8 +733,8 @@ def plot_cnossos_rail_emission(
     ax.bar(positions, np.where(np.isfinite(total), total, np.nan), **kwargs)
 
     styles = (
-        (_C_PRIMARY, "o", "Source A (0,5 m)"),
-        (_C_SECONDARY, "s", "Source B (4,0 m)"),
+        (_C_PRIMARY, "o", "Source A (0.5 m)"),
+        (_C_SECONDARY, "s", "Source B (4.0 m)"),
     )
     for row, (color, marker, label) in zip(
         np.asarray(result.line_power, dtype=np.float64), styles, strict=True
@@ -1578,7 +1578,7 @@ def plot_direct_sound_subtraction(
 #: How much of the record the subtraction plot shows around the direct peak.
 _SUBTRACTION_BEFORE_S = 1.0e-3
 _SUBTRACTION_AFTER_S = 3.0e-3
-#: Formula (6) integrates 0,5 ms either side of the peak.
+#: Formula (6) integrates 0.5 ms either side of the peak.
 _SUBTRACTION_HALF_WIDTH_S = 0.5e-3
 
 #: Colour of each component that can limit the reflected window.
@@ -2044,7 +2044,7 @@ def plot_sel_distribution(
         # drawn in the page's own ink, dimmed, so it reads on both themes and
         # does not compete with the curve for colour. It is the level taken
         # over the spread distribution, which Figure A.3 names LT2 beside the
-        # LT1 of Equation (7); both print 37,0 dB, so the label names which.
+        # LT1 of Equation (7); both print 37.0 dB, so the label names which.
         ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.8)
         lt_label = (
             f"LT2 ({_t('long-term level', language)}) "
@@ -2935,7 +2935,7 @@ def plot_round_robin_precision(
     r"""The distribution of :math:`|dL_n|_{\max}` of a round robin, as Figure A.3.
 
     A histogram of the largest absolute deviation at each receiver, in
-    classes of a round width, with the 0,9-quantile of C.4 marked.
+    classes of a round width, with the 0.9-quantile of C.4 marked.
 
     :param result: A
         :class:`~phonometry.environment.propagation.software_quality.RoundRobinPrecision`.

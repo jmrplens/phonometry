@@ -62,12 +62,12 @@ def _pas(value: float, language: Language = "en") -> str:
 
 
 def _mm_s(value_m_s: float, language: Language = "en") -> str:
-    """A linear airflow velocity (stored in m/s) printed in mm/s to 0,1 mm/s."""
+    """A linear airflow velocity (stored in m/s) printed in mm/s to 0.1 mm/s."""
     return format_number(value_m_s * 1e3, language, decimals=1, trim=True)
 
 
 def _pa(value: float, language: Language = "en") -> str:
-    """A pressure difference to 0,1 Pa."""
+    """A pressure difference to 0.1 Pa."""
     return format_number(value, language, decimals=1, trim=True)
 
 

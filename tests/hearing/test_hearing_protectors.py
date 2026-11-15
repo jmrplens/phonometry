@@ -35,7 +35,7 @@ def test_annex_a_mean_and_spread() -> None:
 
 
 def test_annex_a_printed_apv_subtracts_the_rounded_intermediates() -> None:
-    """Formula (1) on the data and the annex's own row differ by 0,1 dB.
+    """Formula (1) on the data and the annex's own row differ by 0.1 dB.
 
     Table A.1 displays m_f and s_f to one decimal and prints their difference,
     which is not Formula (1) applied to the underlying attenuations. Three of
@@ -168,7 +168,7 @@ def test_the_octave_band_method_drops_63_hz_when_asked_to() -> None:
     )
     assert seven.frequencies is not None
     assert seven.frequencies.tolist() == list(hearing.PROTECTOR_OCTAVE_BANDS_HZ[1:])
-    # 63 Hz contributes 44,7 dB against a total of 81,4 dB, so dropping it
+    # 63 Hz contributes 44.7 dB against a total of 81.4 dB, so dropping it
     # moves the answer by less than the reported resolution.
     assert seven.reported_level == ref.ISO4869_2_ANNEX_B_REPORTED
 
@@ -223,10 +223,10 @@ def test_annex_c_statistics_and_rating() -> None:
 def test_the_hml_fit_uses_table_2_and_not_its_reprint() -> None:
     """Table C.1 disagrees with Table 2, and Annex C follows Table 2.
 
-    Table C.1 says it reprints Table 2 but prints 89,4 dB and 93,5 dB at
-    250 Hz and 500 Hz of the sixth reference noise where Table 2 prints 89,3
-    and 93,3. The sixth row of Table C.2 tells them apart: Table 2 reproduces
-    all sixteen values, the reprint misses thirteen of them by 0,1 dB.
+    Table C.1 says it reprints Table 2 but prints 89.4 dB and 93.5 dB at
+    250 Hz and 500 Hz of the sixth reference noise where Table 2 prints 89.3
+    and 93.3. The sixth row of Table C.2 tells them apart: Table 2 reproduces
+    all sixteen values, the reprint misses thirteen of them by 0.1 dB.
     """
     rating = hearing.hml_rating(ref.ISO4869_2_ATTENUATION)
     from_table_2 = np.round(rating.predicted_reduction[:, 5], 1)
@@ -244,7 +244,7 @@ def test_the_hml_fit_uses_table_2_and_not_its_reprint() -> None:
 
 
 def test_annex_c_application() -> None:
-    """PNR84 = 22,5 dB and the level it leaves, from the Annex B noise."""
+    """PNR84 = 22.5 dB and the level it leaves, from the Annex B noise."""
     rating = hearing.hml_rating(ref.ISO4869_2_ATTENUATION)
     result = hearing.hml_protected_level(
         ref.ISO4869_2_ANNEX_B_LPA, ref.ISO4869_2_ANNEX_B_LPC, rating
@@ -275,7 +275,7 @@ def test_the_hml_branches_meet_and_only_meet_at_two_decibels() -> None:
     high, medium, low = rating.reported
     just_below = hearing.hml_protected_level(100.0, 101.999, rating)
     just_above = hearing.hml_protected_level(100.0, 102.001, rating)
-    # The two slopes are (H - M)/4 and (M - L)/8, so a step of 0,002 dB either
+    # The two slopes are (H - M)/4 and (M - L)/8, so a step of 0.002 dB either
     # side of the break separates them by their sum times that step and no
     # more: continuous, with a corner.
     slopes = (high - medium) / 4.0 + (medium - low) / 8.0
@@ -394,7 +394,7 @@ def test_the_ratings_refuse_a_band_set_the_reference_spectra_cannot_meet(
 def test_the_reported_levels_round_halves_away_from_zero() -> None:
     """ "Rounded to the nearest integer" is not Python's round()."""
     rating = hearing.snr_rating(ref.ISO4869_2_ATTENUATION)
-    # SNR84 = 21 dB, so a C-weighted level of 103,5 dB lands exactly on .5.
+    # SNR84 = 21 dB, so a C-weighted level of 103.5 dB lands exactly on .5.
     half = hearing.snr_protected_level(rating, l_p_c=103.5)
     assert half.effective_level == pytest.approx(82.5)
     assert half.reported_level == 83

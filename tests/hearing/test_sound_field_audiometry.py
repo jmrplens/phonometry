@@ -94,7 +94,7 @@ def test_a_diffuse_field_passes_when_both_conditions_hold() -> None:
 
 
 def test_table_1_limits_the_variation_by_the_index() -> None:
-    """An index of 4,5 dB allows 4,5 dB, and 4,7 dB still only 4,5 dB."""
+    """An index of 4.5 dB allows 4.5 dB, and 4.7 dB still only 4.5 dB."""
     directional = [[0.0] * _ELEVEN, [4.8] * _ELEVEN]
     for index in (4.5, 4.7):
         check = hearing.check_diffuse_sound_field(
@@ -220,7 +220,7 @@ def test_the_axial_pair_is_judged_against_the_inverse_distance_law() -> None:
 
 
 def test_the_axial_offset_and_the_law_are_read_from_the_field() -> None:
-    """ISO 8253-2:2009 5.2 c) and 5.4 c): 0,15 m and 0,10 m, as printed.
+    """ISO 8253-2:2009 5.2 c) and 5.4 c): 0.15 m and 0.10 m, as printed.
 
     PDF pages 12 and 13, printed folios 6 and 7. Neither the offset nor the
     inverse distance difference is a field, so a check cannot be judged

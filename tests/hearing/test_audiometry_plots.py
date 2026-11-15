@@ -240,8 +240,8 @@ def test_the_fixture_site_is_titled_as_its_standard_names_it() -> None:
 
 
 def test_a_free_field_band_is_crossed_on_the_requirement_it_fails() -> None:
-    """Lateral deviations inside ±2 dB above 4 kHz, the ear sides 3,4 dB and
-    3,7 dB apart: the crosses sit on the right-left difference.
+    """Lateral deviations inside ±2 dB above 4 kHz, the ear sides 3.4 dB and
+    3.7 dB apart: the crosses sit on the right-left difference.
     """
     lateral = {
         "left": [0.2] * 9 + [0.0, 0.0],

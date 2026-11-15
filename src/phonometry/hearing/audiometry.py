@@ -9,7 +9,7 @@ follows.
 
 **The test room (Clause 11).** The ambient noise must not mask the lowest
 test tone. Tables 2 and 4 give the maximum permissible ambient sound pressure
-levels :math:`L_{S,\mathrm{max}}` in one-third-octave bands from 31,5 Hz to
+levels :math:`L_{S,\mathrm{max}}` in one-third-octave bands from 31.5 Hz to
 8 kHz, for air conduction with typical supra-aural earphones and for bone
 conduction, each for the lowest test frequency of the audiometry: 125 Hz,
 250 Hz or, for air conduction, 500 Hz. They hold for hearing threshold levels
@@ -77,7 +77,7 @@ A.3 gives typical values for the repeatability, the audiometer, the
 transducer, the ambient noise and the masking;
 :func:`audiometric_uncertainty` assembles them into an
 :class:`AudiometricUncertaintyBudget`, and for air conduction below 4 kHz
-without masking it reproduces the example of Table A.2: :math:`u` = 4,9 dB and
+without masking it reproduces the example of Table A.2: :math:`u` = 4.9 dB and
 :math:`U` = 10 dB.
 
 Clause, table and formula numbers refer to ISO 8253-1:2010(E).
@@ -152,7 +152,7 @@ __all__ = [
     "sweep_audiometry_threshold",
 ]
 
-#: The one-third-octave mid-frequencies of Tables 2 to 4, in hertz: 31,5 Hz
+#: The one-third-octave mid-frequencies of Tables 2 to 4, in hertz: 31.5 Hz
 #: to 8 kHz.
 AMBIENT_NOISE_BANDS_HZ: tuple[float, ...] = _SOUND_FIELD_BANDS_HZ[:-2]
 
@@ -1641,7 +1641,7 @@ def automatic_audiometry_threshold(
     return AutomaticThresholdResult(
         reversal_levels=levels,
         mean_level=mean,
-        # Settled first, so a mean such as 12,000 000 000 000 002 dB is not
+        # Settled first, so a mean such as 12.000 000 000 000 002 dB is not
         # taken up to 13 dB by a last-bit excess.
         threshold_level=float(math.ceil(float(settled(mean)))),
     )
@@ -1848,7 +1848,7 @@ def sweep_audiometry_threshold(
 ) -> SweepThresholdResult:
     r"""Hearing threshold levels from a sweep-frequency tracing (7.5).
 
-    The frequency sweeps continuously, normally at 0,5 to 2 octaves per
+    The frequency sweeps continuously, normally at 0.5 to 2 octaves per
     minute, while the subject tracks the threshold as in automatic
     audiometry. At a specified frequency, 7.5 averages the three peaks and the
     three valleys of the tracing closest to it and takes the mean of the two
@@ -2330,7 +2330,7 @@ def audiometric_uncertainty(
     Fills Table A.1 with the values A.3 gives, which differ up to and above
     4 kHz:
 
-    - :math:`u_1` (A.3.2): 2,5 dB and 4 dB for air conduction, 3 dB and 5 dB
+    - :math:`u_1` (A.3.2): 2.5 dB and 4 dB for air conduction, 3 dB and 5 dB
       for bone conduction;
     - :math:`u_2` (A.3.3): the audiometer's maximum output deviation
       :math:`a` of IEC 60645-1 (±3 dB and ±5 dB for air, ±4 dB and ±5 dB for
@@ -2342,9 +2342,9 @@ def audiometric_uncertainty(
          u_2 = \sqrt{\left(\frac{a}{\sqrt{3}}\right)^2
          + \left(\frac{s}{2\sqrt{3}}\right)^2}
 
-      which for air conduction up to 4 kHz and 5 dB steps is 2,3 dB;
-    - :math:`u_3` (A.3.4): :math:`\sqrt{1{,}5^2 + 2{,}5^2}` = 2,9 dB up to
-      4 kHz and :math:`\sqrt{2{,}5^2 + 3^2}` = 3,9 dB above;
+      which for air conduction up to 4 kHz and 5 dB steps is 2.3 dB;
+    - :math:`u_3` (A.3.4): :math:`\sqrt{1.5^2 + 2.5^2}` = 2.9 dB up to
+      4 kHz and :math:`\sqrt{2.5^2 + 3^2}` = 3.9 dB above;
     - :math:`u_4` (A.3.5): 2 dB when the ambient noise meets Clause 11 and the
       subject's threshold is near 0 dB. It may be negligible for thresholds
       well above 0 dB and is considerably larger in a room that exceeds the
@@ -2355,7 +2355,7 @@ def audiometric_uncertainty(
       exceptional situation calls for them.
 
     For air conduction below 4 kHz without masking this is the example of
-    Table A.2: :math:`u` = 4,9 dB and :math:`U` = 10 dB.
+    Table A.2: :math:`u` = 4.9 dB and :math:`U` = 10 dB.
 
     :param frequency: The test frequency, in hertz.
     :param conduction: ``"air"`` (default) or ``"bone"``.

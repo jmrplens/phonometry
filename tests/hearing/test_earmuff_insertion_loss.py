@@ -30,7 +30,7 @@ def test_the_published_tables_are_the_printed_ones() -> None:
 
 
 def test_table_b1_gives_its_combined_and_expanded_uncertainty() -> None:
-    """u = 1,3 dB and U = 2u = 2,6 dB (B.3, B.4)."""
+    """u = 1.3 dB and U = 2u = 2.6 dB (B.3, B.4)."""
     budget = hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY
     assert round(budget.combined_uncertainty_db, 1) == ISO4869_3_TABLE_B1_U_DB
     assert round(budget.expanded_uncertainty_db, 1) == ISO4869_3_B4_EXPANDED_DB
@@ -76,7 +76,7 @@ def test_the_insertion_loss_is_the_open_level_less_the_occluded_one() -> None:
 
 
 def test_the_level_uncertainties_come_from_the_repetitions() -> None:
-    """B.3: the standard deviation of the mean; one open reading takes 0,5 dB."""
+    """B.3: the standard deviation of the mean; one open reading takes 0.5 dB."""
     open_level, occluded = _fittings()
     result = hearing.earmuff_insertion_loss(open_level, occluded)
     np.testing.assert_allclose(result.occluded_uncertainty_db, 0.4 / math.sqrt(3.0))
@@ -108,7 +108,7 @@ def test_the_report_rounds_to_a_tenth_of_a_decibel() -> None:
 
 
 def test_the_isolation_cup_must_read_ten_decibels_lower() -> None:
-    """5.3: exactly 10 dB lower is enough, 9,9 dB lower is not."""
+    """5.3: exactly 10 dB lower is enough, 9.9 dB lower is not."""
     open_level, occluded = _fittings()
     cup = occluded.mean(axis=0) - 12.0
     cup[0] = occluded.mean(axis=0)[0] - 10.0
@@ -180,7 +180,7 @@ def _positions(deviation: float = 1.0) -> dict[str, list[float]]:
 
 
 def test_the_random_incidence_field_uses_its_own_table_1() -> None:
-    """An index of 4,5 dB allows 4 dB here, where ISO 8253-2 allows 4,5 dB."""
+    """An index of 4.5 dB allows 4 dB here, where ISO 8253-2 allows 4.5 dB."""
     directional = [[0.0] * _BANDS, [4.2] * _BANDS]
     here = hearing.check_random_incidence_field(
         _positions(),
@@ -205,7 +205,7 @@ def test_an_index_of_exactly_five_decibels_allows_five() -> None:
 
 
 def test_the_fixture_serves_as_the_microphone_where_its_index_allows() -> None:
-    """Annex A: the ATF reaches 4 dB at 1,25 kHz to 3,15 kHz and above 6 kHz."""
+    """Annex A: the ATF reaches 4 dB at 1.25 kHz to 3.15 kHz and above 6 kHz."""
     freqs = hearing.EARMUFF_TEST_BANDS_HZ
     index = [hearing.ATF_FRONT_TO_RANDOM_INDEX.get(f, math.nan) for f in freqs]
     check = hearing.check_random_incidence_field(

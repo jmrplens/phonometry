@@ -357,7 +357,7 @@ def test_the_linearity_figure_marks_the_highest_linear_level() -> None:
 
 
 def test_the_linearity_figure_writes_a_spanish_level_with_a_comma() -> None:
-    """5.4.3 allows a start at 87,5 dB, and the Spanish title keeps the comma."""
+    """5.4.3 allows a start at 87.5 dB, and the Spanish title keeps the comma."""
     result = hearing.assess_anr_linearity(
         [87.5, 92.5, 97.5], [[60.0, 65.0, 70.0], [61.0, 66.0, 71.0]]
     )

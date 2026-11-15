@@ -208,6 +208,6 @@ class TestRefusals:
 
     def test_the_iso_389_7_frequencies_are_a_different_set(self) -> None:
         # 8 kHz is in both; the ISO 389-7 table has no 6300 Hz and this one
-        # has no 12,5 kHz, so neither is a subset of the other by accident.
+        # has no 12.5 kHz, so neither is a subset of the other by accident.
         assert np.isclose(h.RETSPL_FREQUENCIES_HZ, 8000.0).any()
         assert not np.isclose(h.AUDIOMETRIC_FREQUENCIES_HZ, 6300.0).any()

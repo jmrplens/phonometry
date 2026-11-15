@@ -418,7 +418,7 @@ def test_a_job_result_without_its_sampling_summary_is_refused() -> None:
     """The sampling summary is Clause 15 d), and the fiche prints it always.
 
     Built on the field defaults, the sheet rendered the literal string
-    ``None`` for the number of samples and a fabricated 0,0 for every
+    ``None`` for the number of samples and a fabricated 0.0 for every
     Formula (C.9) budget term, then closed on a normal PASS verdict: an
     accredited page stating a zero uncertainty budget nobody measured. The
     refusal names every term that is missing.

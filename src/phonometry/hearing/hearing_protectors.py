@@ -279,10 +279,10 @@ def _round_half_up(value: float) -> int:
 
     Clauses 6, 7.3 and 8.3 all end "shall be rounded to the nearest integer",
     which is not what :func:`round` does: it sends halves to the even
-    neighbour, so 82,5 dB would come back 82 dB.
+    neighbour, so 82.5 dB would come back 82 dB.
 
     The level is settled before the half is judged, so an effective level of
-    64,1 - 3,6 dB, 60,499 999 999 999 99 in binary, still rounds to 61 dB.
+    64.1 - 3.6 dB, 60.499 999 999 999 99 in binary, still rounds to 61 dB.
 
     :param value: The level to round.
     :return: The nearest integer, with .5 going away from zero.
@@ -365,7 +365,7 @@ def assumed_protection_value(
 
        Annex A prints its ``APV`` row as the difference of the *rounded*
        ``m_f`` and ``s_f`` it displays above it, which differs from Formula (1)
-       applied to the underlying data by 0,1 dB in three of its eight bands.
+       applied to the underlying data by 0.1 dB in three of its eight bands.
        This returns Formula (1) applied to the data; round afterwards if you
        need the annex's table back.
     """
@@ -486,7 +486,7 @@ def octave_band_protected_level(
     .. math::
 
        L'_{p,\mathrm{A}x} = 10 \lg \sum_{k=1}^{8}
-       10^{0,1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)} \mathrm{dB} \tag{2}
+       10^{0.1\left(L_{p,f(k)} + A_{f(k)} - APV_{f(k)x}\right)} \mathrm{dB} \tag{2}
 
     The summation runs over the eight octaves from 63 Hz, or over seven from
     125 Hz when 63 Hz data is missing for either the noise or the protector
@@ -657,18 +657,18 @@ def hml_rating(
     .. math::
 
        PNR_{ji} = 100\ \mathrm{dB} - 10 \lg \sum_{k=2}^{8}
-       10^{0,1\left(L_{p,\mathrm{A}f(k)i} - a_{jf(k)}\right)} \mathrm{dB} \tag{15}
+       10^{0.1\left(L_{p,\mathrm{A}f(k)i} - a_{jf(k)}\right)} \mathrm{dB} \tag{15}
 
     and collapses the eight into three, weighted by the empirical constants
     :math:`d_i` of Table 2:
 
     .. math::
 
-       H_j = 0{,}25 \sum_{i=1}^{4} PNR_{ji} - 0{,}48 \sum_{i=1}^{4} d_i PNR_{ji} \tag{12}
+       H_j = 0.25 \sum_{i=1}^{4} PNR_{ji} - 0.48 \sum_{i=1}^{4} d_i PNR_{ji} \tag{12}
 
-       M_j = 0{,}25 \sum_{i=5}^{8} PNR_{ji} - 0{,}16 \sum_{i=5}^{8} d_i PNR_{ji} \tag{13}
+       M_j = 0.25 \sum_{i=5}^{8} PNR_{ji} - 0.16 \sum_{i=5}^{8} d_i PNR_{ji} \tag{13}
 
-       L_j = 0{,}25 \sum_{i=5}^{8} PNR_{ji} + 0{,}23 \sum_{i=5}^{8} d_i PNR_{ji} \tag{14}
+       L_j = 0.25 \sum_{i=5}^{8} PNR_{ji} + 0.23 \sum_{i=5}^{8} d_i PNR_{ji} \tag{14}
 
     The four quiet-spectrum noises carry ``H`` and the four loud-spectrum ones
     carry ``M`` and ``L``, which is the split the formulas print. Each index is
@@ -855,7 +855,7 @@ def snr_rating(
     .. math::
 
        SNR_j = 100\ \mathrm{dB} - 10 \lg \sum_{k=2}^{8}
-       10^{0,1\left(L_{p,\mathrm{A}f(k)} - a_{jf(k)}\right)} \tag{22}
+       10^{0.1\left(L_{p,\mathrm{A}f(k)} - a_{jf(k)}\right)} \tag{22}
 
        SNR_x = SNR_m - \alpha\, SNR_s \tag{19}
 

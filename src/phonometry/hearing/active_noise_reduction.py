@@ -34,8 +34,8 @@ d) each octave band is the energetic average of its three one-third-octave
    .. math::
 
       A_{\mathrm{total,oct},j} = -10 \lg \left[\left(
-      10^{-0,1 A_{\mathrm{total},f_1,j}} + 10^{-0,1 A_{\mathrm{total},f_2,j}}
-      + 10^{-0,1 A_{\mathrm{total},f_3,j}}\right) / 3\right] \mathrm{dB} \tag{1}
+      10^{-0.1 A_{\mathrm{total},f_1,j}} + 10^{-0.1 A_{\mathrm{total},f_2,j}}
+      + 10^{-0.1 A_{\mathrm{total},f_3,j}}\right) / 3\right] \mathrm{dB} \tag{1}
 
 e) the sixteen octave-band data sets go into ISO 4869-2 at a protection
    performance of 84 %: the mean, the standard deviation, the APV, the H, M
@@ -47,9 +47,9 @@ the standard, and that workbook interpolates **linearly in frequency, in
 hertz**, between the nominal centre frequencies, not on a logarithmic axis:
 80 Hz sits 27 % of the way from 63 Hz to 125 Hz, not a third of it. This
 follows the workbook. The workbook also rounds each interpolated value and
-each octave result to 0,1 dB, and the mean and standard deviation before it
+each octave result to 0.1 dB, and the mean and standard deviation before it
 forms the APV; this computes at full precision throughout, which moves an
-octave-band total by less than 0,1 dB.
+octave-band total by less than 0.1 dB.
 
 **The uncertainty (Annex A).** Formula (A.1) is the model of ISO 4869-1
 applied to the active insertion loss, and within one laboratory the combined
@@ -112,9 +112,9 @@ __all__ = [
 
 #: Table A.2: the typical budget of the mean active insertion loss of an ANR
 #: earmuff within one laboratory, for the sixteen lower-ear values of 5.5 b):
-#: 0,6 dB for the method, 0,3 dB for the signal generation and MIRE
-#: acquisition, 0,4 dB for the environment. Its combined and expanded values,
-#: 0,78 dB and 1,6 dB in the table, are derived from these.
+#: 0.6 dB for the method, 0.3 dB for the signal generation and MIRE
+#: acquisition, 0.4 dB for the environment. Its combined and expanded values,
+#: 0.78 dB and 1.6 dB in the table, are derived from these.
 ANR_WITHIN_LABORATORY_UNCERTAINTY = ProtectorUncertaintyBudget(0.6, 0.3, 0.4)
 
 #: The nominal one-third-octave centre frequencies of 5.3.1, 50 Hz to 10 kHz,
@@ -575,7 +575,7 @@ def anr_total_attenuation(
     .. math::
 
        A_{\mathrm{total,oct},j} = -10 \lg \left[\left(
-       \sum_{i=1}^{3} 10^{-0,1 A_{\mathrm{total},f_i,j}}\right) / 3\right]
+       \sum_{i=1}^{3} 10^{-0.1 A_{\mathrm{total},f_i,j}}\right) / 3\right]
        \mathrm{dB} \tag{1}
 
     and the octave-band totals of all subjects go into ISO 4869-2 at 84 %. The
@@ -772,7 +772,7 @@ def assess_anr_linearity(
         msg = "'external_levels' must hold at least two finite levels, in dB."
         raise ValueError(msg)
     steps = np.diff(external)
-    # Settled: 60,02 - 54,97 dB is a 5,05 dB step, on the reading tolerance
+    # Settled: 60.02 - 54.97 dB is a 5.05 dB step, on the reading tolerance
     # in decimal and a last bit past it in binary.
     if np.any(settled(np.abs(steps - _LINEARITY_STEP_DB)) > _STEP_READING_DB):
         msg = (

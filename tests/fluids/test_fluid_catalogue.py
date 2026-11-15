@@ -131,7 +131,7 @@ def test_the_two_books_that_print_air_at_twenty_degrees_agree_to_a_tenth() -> No
 
     The same air at the same temperature, rounded by two authors, and the gap
     is one part in a thousand. Worth asserting because it is the size of
-    agreement a reader should expect between books, against the 1,7 per cent
+    agreement a reader should expect between books, against the 1.7 per cent
     that separates the building standard's air from the metrology annex's.
     """
     bies = PUBLISHED_FLUIDS["bies-2017-table-c1-fluids/air"]

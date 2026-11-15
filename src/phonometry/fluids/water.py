@@ -531,8 +531,8 @@ def sea_water_density(
 
     .. math::
 
-       \rho = 1027 + 4{,}3\times10^{-7} P_\mathrm{w}
-              + 0{,}75\,(S - 35) - 0{,}16\,(T - 10) - 0{,}004\,(T - 10)^2
+       \rho = 1027 + 4.3\times10^{-7} P_\mathrm{w}
+              + 0.75\,(S - 35) - 0.16\,(T - 10) - 0.004\,(T - 10)^2
 
     The pressure is **absolute**, in pascals, as Equations (4.4) and (4.7) to
     (4.10) define it. Use :func:`depth_to_absolute_pressure_pa` to get one from

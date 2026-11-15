@@ -21,9 +21,9 @@ Not every named air in this library is here
 -------------------------------------------
 Four more sit elsewhere in the tree, each beside the model or the standard
 that fixes it, and they disagree: the absorber models propagate through
-343 m/s at 1,205 kg/m3, the airflow-resistance annex through 345,87 at 1,186,
-EN/ISO 12354 through 340 at 1,29, and the acoustic solver defaults to 343 at
-1,2. None of them is wrong. Each is the air its own document assumes, and
+343 m/s at 1,205 kg/m3, the airflow-resistance annex through 345.87 at 1,186,
+EN/ISO 12354 through 340 at 1.29, and the acoustic solver defaults to 343 at
+1.2. None of them is wrong. Each is the air its own document assumes, and
 substituting one for another would change a number that document prints, which
 is why each stays with the clause that prints it rather than being gathered
 here.
@@ -204,7 +204,7 @@ class Gas(CatalogueRow):
 
     :ivar molar_mass_kg_mol: Molar mass ``M``, in kg/mol, as the page prints
         it. The gas tables print kg/mol rather than g/mol, so the number in
-        the cell is 0,028 97 for air.
+        the cell is 0.028 97 for air.
     :ivar heat_capacity_ratio: Ratio of specific heats ``gamma``, which is
         ``c_p/c_v`` and therefore above 1 for every gas.
     """
@@ -280,9 +280,9 @@ def gases_named(
     """Every row for a gas name, across the tables.
 
     Two books printing one gas is worth having, because the pair they print is
-    not always the same pair: for carbon dioxide one of them gives 1,30 and
-    the other 1,33. That is 2,3 per cent on the ratio and, since the speed of
-    sound goes as its square root, 1,2 per cent on the speed, which a reader
+    not always the same pair: for carbon dioxide one of them gives 1.30 and
+    the other 1.33. That is 2.3 per cent on the ratio and, since the speed of
+    sound goes as its square root, 1.2 per cent on the speed, which a reader
     deserves to see both sides of rather than whichever this library happened
     to load first.
 

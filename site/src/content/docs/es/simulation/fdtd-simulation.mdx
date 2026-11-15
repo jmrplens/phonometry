@@ -519,6 +519,35 @@ plt.show()
 
 </details>
 
+Las cuatro condiciones se distinguen mejor en movimiento que en una lista. El
+clip de abajo suelta un pulso cerca de la esquina inferior derecha de una caja
+de aire de 4,00 m por 2,25 m cuyos lados llevan una cada uno: el izquierdo se
+deja rígido, el superior es una esponja, el derecho lleva la $\rho c$ anecoica
+y el inferior los $1{,}92\,\rho c$ de una absorción de 0,9 a incidencia
+normal. El panel lateral dibuja lo que devuelve cada uno a cada ángulo.
+
+<Video
+  name="anim_fdtd_boundaries"
+  width={2400}
+  height={1350}
+  title="Un pulso en una caja cuyos cuatro lados son rígido, esponja y dos impedancias"
+  description="Un pulso se extiende desde una fuente cercana a la esquina inferior derecha de una caja de aire. El lado izquierdo, rígido, devuelve el pulso entero como una imagen especular. La esponja del lado superior apenas devuelve nada cerca de su normal, y solo un frente débil desde su extremo lejano, donde el pulso la alcanza a más de 60 grados. El lado derecho, adaptado a la impedancia del aire, no devuelve nada por su normal, marcada con un rayo punteado, y sí un frente invertido que se intensifica cuanto más inclinada es la incidencia. El lado inferior, ajustado para una absorción de 0,9 a incidencia normal, devuelve un frente débil sin invertir cerca de la normal, nada por un segundo rayo punteado a 58,7 grados, y un frente invertido más allá. Un panel lateral traza el coeficiente de reflexión de los tres lados que reflejan frente al ángulo de incidencia: plano en más uno para el lado rígido, cayendo de cero a menos uno para el lado adaptado, y cayendo de 0,32, pasando por cero a 58,7 grados, hasta menos uno para el inferior."
+/>
+
+Compara los frentes que vuelven con el panel lateral. El lado rígido devuelve
+el pulso entero, igual a cualquier ángulo. La esponja apenas devuelve nada
+cerca de su normal, y un frente débil desde su extremo lejano, donde el pulso
+la alcanza a más de 60°: una esponja rinde menos a incidencia oblicua, como
+mide la sección 3. El
+lado derecho, adaptado a $\rho c$, no devuelve nada por su normal, el rayo
+punteado, y sí un frente invertido que crece cuanto más inclinada es la
+incidencia, un tercio de la amplitud a 60°. El inferior devuelve un frente
+débil sin invertir cerca de la normal, 0,32 de la amplitud, nada por el rayo
+punteado a 58,7°, y uno invertido más allá. Esa es la salvedad de la
+conversión de arriba, dibujada: un solo $\alpha$ fija lo que hace un borde de
+impedancia a incidencia normal, y en ningún otro sitio.
+
+
 ### Comprobaciones de que una ejecución es utilizable
 
 `plot_geometry` pilla una escena mal construida. Estas seis pillan una

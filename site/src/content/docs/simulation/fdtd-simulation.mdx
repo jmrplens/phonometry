@@ -497,6 +497,35 @@ plt.show()
 
 </details>
 
+The four conditions are easier to tell apart in motion than in a list. The
+clip below sets one pulse loose near the bottom-right corner of a 4.00 m by
+2.25 m box of air whose sides carry one each: the left side is left rigid,
+the top is a sponge, the right side carries the anechoic $\rho c$ and the
+bottom the $1.92\,\rho c$ of a normal-incidence absorption of 0.9. The side
+panel draws what each of them sends back at every angle.
+
+<Video
+  name="anim_fdtd_boundaries"
+  width={2400}
+  height={1350}
+  title="One pulse in a box whose four sides are rigid, a sponge and two impedances"
+  description="A pulse spreads from a source near the bottom-right corner of a box of air. The rigid left side sends the whole pulse back as a mirror image. The sponge along the top sends next to nothing back near its normal, and only a faint front from its far end, where the pulse meets it at more than 60 degrees. The right side, matched to the impedance of air, returns nothing along its normal, marked by a dotted ray, and an inverted front that brightens as the incidence gets more oblique. The bottom side, set for an absorption of 0.9 at normal incidence, returns a weak upright front near the normal, nothing along a second dotted ray at 58.7 degrees, and an inverted front beyond it. A side panel plots the reflection coefficient of the three reflecting sides against the angle of incidence: flat at plus one for the rigid side, falling from zero to minus one for the matched side, and falling from 0.32 through zero at 58.7 degrees to minus one for the bottom."
+/>
+
+Compare the returning fronts with the side panel. The rigid side sends the
+whole pulse back, the same at every angle. The sponge sends next to nothing
+back near its normal, and a faint front from its far end, where the pulse
+meets it at more than 60°: a sponge is weaker at oblique incidence, as
+section 3 measures. The
+right side, matched to $\rho c$, returns nothing along its normal, the dotted
+ray, and an inverted front that grows as the incidence gets more oblique, a third
+of the amplitude at 60°. The bottom returns a weak upright front near the
+normal, 0.32 of the amplitude, nothing along the dotted ray at 58.7°, and an
+inverted one beyond it. That is the caveat of the conversion above, drawn: a
+single $\alpha$ fixes what an impedance edge does at normal incidence, and
+nowhere else.
+
+
 ### Checks that a run is usable
 
 `plot_geometry` catches a scene that was built wrongly. These six catch a

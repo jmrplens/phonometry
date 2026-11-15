@@ -4526,6 +4526,22 @@ _ES_EXACT = {
     "depth [m]": "profundidad [m]",
     "distance from the impact [m]": "distancia al impacto [m]",
     "surface $v_y$ at 0.15 and 0.30 m": "$v_y$ en la superficie a 0,15 y 0,30 m",
+    # Boundaries clip (simulation/fdtd-simulation).
+    "Four boundaries, one pulse (2D FDTD)": "Cuatro contornos, un pulso (FDTD 2D)",
+    "rigid: $R = +1$ at every angle": "rígido: $R = +1$ a cualquier ángulo",
+    "sponge: the pulse leaves": "esponja: el pulso se va",
+    "$Z = \\rho c$: nothing back at 0°": "$Z = \\rho c$: nada vuelve a 0°",
+    "$Z = 1.92\\,\\rho c$: nothing back at 58.7°": "$Z = 1{,}92\\,\\rho c$: nada vuelve a 58,7°",
+    "rigid side": "lado rígido",
+    "side at $Z = 1.92\\,\\rho c$": "lado con $Z = 1{,}92\\,\\rho c$",
+    "side at $Z = \\rho c$": "lado con $Z = \\rho c$",
+    "angle from the normal [°]": "ángulo desde la normal [°]",
+    "reflection coefficient $R$": "coeficiente de reflexión $R$",
+    "What each side sends back": "Lo que devuelve cada lado",
+    "air in a 4.00 m by 2.25 m box; a locally reacting side reflects $R(\\theta) = (Z\\cos\\theta - \\rho c)/(Z\\cos\\theta "
+    "+ \\rho c)$; dotted: the two rays that are not reflected": "aire en una caja de 4,00 m por 2,25 m; un lado de reacción "
+    "local refleja $R(\\theta) = (Z\\cos\\theta - \\rho c)/(Z\\cos\\theta + \\rho c)$; punteados: los dos rayos que no se "
+    "reflejan",
     # Scholte clip (simulation/elastic-waves).
     "Scholte wave: the train a water-seabed contact keeps (elastic 2D FDTD)": "Onda de Scholte: el tren que retiene un contacto agua-sedimento "
     "(FDTD elástico 2D)",

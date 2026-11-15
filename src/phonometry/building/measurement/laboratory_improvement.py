@@ -118,8 +118,8 @@ _CURING_DAYS = 14.0
 _LAG_FACTOR = 3.0
 
 #: Relative slack on the two inclusive bounds of G.4 ("not less than two
-#: weeks", "shall not exceed one-third"). A lag of 2,1 d after 6,3 d of curing
-#: is exactly one third, but 3 x 2,1 is 6,300000000000001 in binary floating
+#: weeks", "shall not exceed one-third"). A lag of 2.1 d after 6.3 d of curing
+#: is exactly one third, but 3 x 2.1 is 6.300000000000001 in binary floating
 #: point. Nine orders of magnitude below the curing time is far above that
 #: arithmetic and far below a second of any day count.
 _BOUND_SLACK = 1e-9
@@ -368,8 +368,8 @@ class LiningCuringCheck(RichDisplay):
     def lag_within_third(self) -> bool:
         """Whether the time lag is at most a third of the curing time, the alternative G.4 allows.
 
-        Inclusive, with the same slack: the printed 1 d and 3 d, or 2,1 d and
-        6,3 d, are on the bound.
+        Inclusive, with the same slack: the printed 1 d and 3 d, or 2.1 d and
+        6.3 d, are on the bound.
         """
         return self.time_lag_days * _LAG_FACTOR <= self.curing_time_days * (
             1.0 + _BOUND_SLACK
@@ -767,7 +767,7 @@ def heavy_impact_improvement(
     ISO 10140-5:2021 Annex F) is measured without and with it; the improvement
     is :math:`\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}`
     in each band (Formula (H.3)). The source is characterised in octave
-    bands from 31,5 Hz to 500 Hz, and the levels are usually taken in the
+    bands from 31.5 Hz to 500 Hz, and the levels are usually taken in the
     octaves 63 Hz to 500 Hz or the matching one-third octaves
     (:func:`~phonometry.building.heavy_impact_octave_levels`).
 

@@ -97,7 +97,7 @@ def test_airborne_fiche_reproduces_iso717_1_annex_c1(tmp_path: Path) -> None:
     """The airborne fiche reproduces the ISO 717-1:2020 Annex C Table C.1 example.
 
     The values printed in the standard's worked example are exactly the ones the
-    fiche shows: Rw(C;Ctr) = 30(-2;-3) dB, unfavourable-deviation sum 31,8 dB, the
+    fiche shows: Rw(C;Ctr) = 30(-2;-3) dB, unfavourable-deviation sum 31.8 dB, the
     reference curve shifted by -22 dB, and the per-band unfavourable deviations.
     """
     pytest.importorskip("matplotlib")
@@ -121,7 +121,7 @@ def test_airborne_fiche_reproduces_iso717_1_annex_c1(tmp_path: Path) -> None:
 def test_impact_fiche_reproduces_iso717_2_annex_c1(tmp_path: Path) -> None:
     """The impact fiche reproduces the ISO 717-2 Annex C Table C.1 example.
 
-    Ln,w = 79 dB, CI = -11 dB, unfavourable-deviation sum 28,0 dB (see the note
+    Ln,w = 79 dB, CI = -11 dB, unfavourable-deviation sum 28.0 dB (see the note
     on the 2020 reprint's CI in reference_data).
     """
     pytest.importorskip("matplotlib")
@@ -261,7 +261,7 @@ def test_airborne_fiche_pins_displayed_rating(tmp_path: Path) -> None:
     """The fiche prints exactly the Annex C Table C.1 numbers.
 
     Independent oracle: ISO 717-1:2020 Annex C states Rw (C; Ctr) =
-    30 (-2; -3) dB with an unfavourable-deviation sum of 31,8 dB. The
+    30 (-2; -3) dB with an unfavourable-deviation sum of 31.8 dB. The
     adaptation terms carry a sign only when negative, as the standard's own
     examples write them (e.g. "41 (0; -5) dB" in clause 5.2).
     """

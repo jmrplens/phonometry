@@ -13,7 +13,7 @@ Two conventions in that chain are worth more than the formulae themselves and
 are pinned here band by band. Clause D.2.2 rounds ``fo`` to the centre frequency
 of the one-third-octave band *in which it falls*, so the ISO 266 band edges
 ``10^((n +- 0,5)/10)`` decide the row, not proximity to a rounded nominal label:
-the two disagree by up to 1,4 % in frequency and by up to 8,8 dB in the answer.
+the two disagree by up to 1.4 % in frequency and by up to 8.8 dB in the answer.
 And the rounding happens *before* Table D.1 is read, so the
 ``74,4 - 20 lg(fo) - Rw/2`` branch is evaluated at the nominal centre, not at
 the raw resonance.
@@ -68,11 +68,11 @@ def test_formula_d1_reproduces_the_printed_hopkins_lining_resonance() -> None:
     [
         # H Fig. 4.48 captions, printed p. 486, all on the same 100 mm aircrete
         # block wall (rhos = 51 kg/m2):
-        # (a) 12,5 mm plasterboard (10,8 kg/m2), 37 mm cavity with rock fibre
+        # (a) 12.5 mm plasterboard (10.8 kg/m2), 37 mm cavity with rock fibre
         #     quilt -> "Mass-air-mass: fmsm = 104 Hz";
-        # (b) 9,5 mm plasterboard + 32 mm XPS (6,3 + 1,1 kg/m2), 37 mm empty
+        # (b) 9.5 mm plasterboard + 32 mm XPS (6.3 + 1.1 kg/m2), 37 mm empty
         #     cavity -> "fmsm = 123 Hz";
-        # (c) 9,5 mm plasterboard + 32 mm EPS (6,3 + 0,4 kg/m2), 10 mm empty
+        # (c) 9.5 mm plasterboard + 32 mm EPS (6.3 + 0.4 kg/m2), 10 mm empty
         #     cavity -> "Mass-air-mass: fmsm = 247 Hz".
         (51.0, 10.8, 0.037, 104.0),
         (51.0, 7.4, 0.037, 123.0),
@@ -128,7 +128,7 @@ def test_table_d1_low_frequency_branch() -> None:
     )
     # NOTE 1's floor. Inside the stated validity box (30 Hz to 160 Hz,
     # 20 dB <= Rw <= 60 dB) the branch never reaches 0 dB: its minimum is
-    # 74,4 - 20 lg(160) - 30 = 0,32 dB, so the floor only binds for an Rw
+    # 74.4 - 20 lg(160) - 30 = 0.32 dB, so the floor only binds for an Rw
     # above the range Clause D.2.2 states.
     assert building.weighted_lining_improvement(160.0, 60.0) == pytest.approx(
         74.4 - 20.0 * np.log10(160.0) - 30.0, abs=1e-9
@@ -164,9 +164,9 @@ def test_table_d1_fixed_rows(resonance: float, printed: float) -> None:
 @pytest.mark.parametrize(
     ("lower_band", "upper_band", "lower_value", "upper_value"),
     [
-        # ISO 266 band edges are 10^((n +- 0,5)/10) about the exact midband
+        # ISO 266 band edges are 10^((n +- 0.5)/10) about the exact midband
         # frequencies 10^(n/10), NOT the geometric mean of the rounded nominal
-        # labels. The two disagree by up to 1,4 % and straddle real inputs.
+        # labels. The two disagree by up to 1.4 % and straddle real inputs.
         (250.0, 315.0, -3.0, -5.0),
         (315.0, 400.0, -5.0, -7.0),
         (400.0, 500.0, -7.0, -9.0),
@@ -204,7 +204,7 @@ def test_table_d1_low_branch_evaluates_at_the_rounded_nominal_not_raw_fo() -> No
     band-edge error through unnoticed, since the answer then varies smoothly
     and no boundary test can see it.
     """
-    # 100 Hz band: 89,1 Hz to 112,2 Hz (ISO 266 edges).
+    # 100 Hz band: 89.1 Hz to 112.2 Hz (ISO 266 edges).
     expected = 74.4 - 20.0 * np.log10(100.0) - 22.5
     for f0 in (89.2, 95.0, 100.0, 108.0, 112.0):
         assert building.weighted_lining_improvement(f0, 45.0) == pytest.approx(
@@ -216,12 +216,12 @@ def test_table_d1_low_branch_evaluates_at_the_rounded_nominal_not_raw_fo() -> No
 
 
 def test_table_d1_band_edges_beat_the_nominal_geometric_mean() -> None:
-    """The two rounding conventions disagree on real inputs, by up to 8,8 dB.
+    """The two rounding conventions disagree on real inputs, by up to 8.8 dB.
 
     The worst case is the 160|200 boundary, where Table D.1 changes from the
     ``74,4 - 20 lg(fo) - Rw/2`` branch to the fixed -1 dB row. The ISO 266
     edge is ``10^(2,25) = 177,83 Hz``; the geometric mean of the nominal
-    labels 160 and 200 is 178,89 Hz. A resonance at 178,5 Hz belongs to the
+    labels 160 and 200 is 178.89 Hz. A resonance at 178.5 Hz belongs to the
     200 Hz band.
     """
     assert 10.0**2.25 < 178.5 < np.sqrt(160.0 * 200.0)
@@ -234,10 +234,10 @@ def test_table_d1_band_edges_beat_the_nominal_geometric_mean() -> None:
 
 
 def test_table_d1_63_to_80_boundary() -> None:
-    """The same distinction inside the low-frequency branch, worth 2,1 dB.
+    """The same distinction inside the low-frequency branch, worth 2.1 dB.
 
     The 63 Hz band ends at ``10^1,85 = 70,79 Hz``; the geometric mean of the
-    labels 63 and 80 is 70,99 Hz. A lining resonance of 70,81 Hz, which the
+    labels 63 and 80 is 70.99 Hz. A lining resonance of 70.81 Hz, which the
     guide's worked stud lining produces, therefore reads off the 80 Hz row.
     """
     assert 10.0**1.85 < 70.8115 < np.sqrt(63.0 * 80.0)
@@ -274,7 +274,7 @@ def test_table_d1_warns_outside_the_stated_rw_box(rating: float) -> None:
     range of 20 dB <= Rw <= 60 dB".
 
     The low branch is linear in ``Rw`` and returns nonsense outside it: an
-    ``Rw`` of -50 dB yields +65,4 dB of improvement from a lining. The value
+    ``Rw`` of -50 dB yields +65.4 dB of improvement from a lining. The value
     is still returned, because the formula is what it is, but the caller is
     told the standard does not cover it.
     """
@@ -296,7 +296,7 @@ def test_lining_formulae_warn_outside_the_annex_d_range(resonance: float) -> Non
     """Formulae (D.3), (D.4) and (D.7) are monotonic in ``lg(fo)`` and
     unbounded below the range Annex D puts lining resonances on.
 
-    At ``fo = 1 Hz`` the mineral-wool fit returns +82,5 dB, which is more
+    At ``fo = 1 Hz`` the mineral-wool fit returns +82.5 dB, which is more
     improvement than any lining has ever given. Table D.1 is the only place
     the annex bounds ``fo``, at 30 Hz to 5 000 Hz, so that is the envelope
     used.
@@ -336,9 +336,9 @@ def test_stacked_d5_and_d6_corrections_can_fall_below_the_reference_floor() -> N
 def test_exterior_lining_formulae_d3_and_d4() -> None:
     """ISO 12354-1:2017 Formulae (D.3)/(D.4), printed p. 40.
 
-    Mineral wool: -36 lg(fo) + 82,5 / -42 lg(fo) + 92,0 / -39 lg(fo) + 87,7,
-    each ">= -4"; foams: -33 lg(fo) + 76,0 / -33 lg(fo) + 74,0 /
-    -36 lg(fo) + 77,0, each ">= -3".
+    Mineral wool: -36 lg(fo) + 82.5 / -42 lg(fo) + 92.0 / -39 lg(fo) + 87.7,
+    each ">= -4"; foams: -33 lg(fo) + 76.0 / -33 lg(fo) + 74.0 /
+    -36 lg(fo) + 77.0, each ">= -3".
     """
     wool = building.lining_improvement(100.0)
     assert _ratings(wool) == pytest.approx((82.5 - 72.0, 92.0 - 84.0, 87.7 - 78.0))
@@ -409,7 +409,7 @@ def test_third_octave_centres_are_the_iso_266_nominal_series() -> None:
     """Every entry of the rounding table is the ISO 266 nominal label of its
     band, i.e. within about 1 % of the exact midband frequency ``10^(n/10)``.
 
-    Without this the entries below 31,5 Hz and above 5 000 Hz are unreachable
+    Without this the entries below 31.5 Hz and above 5 000 Hz are unreachable
     through Table D.1 and could hold any value at all.
     """
     for offset, nominal in enumerate(_THIRD_OCTAVE_CENTRES):

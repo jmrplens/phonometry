@@ -56,7 +56,7 @@ def test_zero_improvement_gives_zero_delta_lw() -> None:
 # ---------------------------------------------------------------------------
 # Real measured oracle: textile carpet (Foret, Chene & Guigou-Carter, Forum
 # Acusticum 2011, Figure 4). The Delta-L spectrum was digitized from the vector
-# chart to +/- 0,5 dB per band; the ISO 717-2 rating must reproduce the paper's
+# chart to +/- 0.5 dB per band; the ISO 717-2 rating must reproduce the paper's
 # published ΔLw = 29 dB. See tests/reference_data/ for the full provenance.
 # ---------------------------------------------------------------------------
 def test_foret2011_carpet_rates_to_29() -> None:
@@ -70,7 +70,7 @@ def test_foret2011_carpet_rates_to_29() -> None:
 
 
 def test_foret2011_carpet_rating_robust_to_half_db() -> None:
-    """The single-number ΔLw is stable to +/- 0,5 dB band perturbations.
+    """The single-number ΔLw is stable to +/- 0.5 dB band perturbations.
 
     This justifies the figure-digitization tolerance: the published rating does
     not depend on reading each band better than about half a decibel.
@@ -80,7 +80,7 @@ def test_foret2011_carpet_rating_robust_to_half_db() -> None:
     # purpose: it moves the single number one-for-one, unlike independent
     # errors that cancel over the sixteen bands). Include the closed-interval
     # endpoints the open random draw never reaches: each band set to exactly
-    # base +/- 0,5 by an alternating sign pattern, then seeded interior draws.
+    # base +/- 0.5 by an alternating sign pattern, then seeded interior draws.
     signs = np.where(np.arange(base.size) % 2 == 0, 0.5, -0.5)
     for pattern in (signs, -signs):
         assert (
@@ -212,7 +212,7 @@ def test_baruch_2018_published_spectrum_crosscheck() -> None:
     engineering models, and reports ΔLw = 16 dB (full) and 15 dB (simplified).
     Feeding those two spectra through the ISO 717-2 rating here gives 15 dB for
     both. The 1 dB gap on the full spectrum is the well-known rounding
-    sensitivity of the ISO 717-2 shift near the 32,0 dB boundary (the two
+    sensitivity of the ISO 717-2 shift near the 32.0 dB boundary (the two
     published spectra are nearly identical yet the paper itself splits them
     16 vs 15); our rating is the value validated against the ISO 717-2 Annex C
     worked examples, so the published figures corroborate it to within 1 dB.

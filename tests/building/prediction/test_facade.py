@@ -88,8 +88,8 @@ def test_annex_f_derived_indices() -> None:
 def test_annex_f_high_bands_self_consistent() -> None:
     """At 1 k / 2 k the code reproduces the standard's OWN per-element values.
 
-    The standard's printed R' row (35,4 / 37,5) is inconsistent with its printed
-    partial indices; summing those indices energetically yields 35,8 / 38,0,
+    The standard's printed R' row (35.4 / 37.5) is inconsistent with its printed
+    partial indices; summing those indices energetically yields 35.8 / 38.0,
     which is what a faithful implementation must produce.
     """
     res = _annex_f_result()
@@ -101,7 +101,7 @@ def test_annex_f_high_bands_self_consistent() -> None:
 
 
 def test_d2m_nt_formula() -> None:
-    """D2m,nT = R' + ΔLfs + 10 lg(V/(6 T0 S)) with T0 = 0,5 s (Formula 13)."""
+    """D2m,nT = R' + ΔLfs + 10 lg(V/(6 T0 S)) with T0 = 0.5 s (Formula 13)."""
     res = _annex_f_result()
     term = 10.0 * np.log10(
         ref.EN12354_3_ANNEX_F_VOLUME / (6.0 * 0.5 * ref.EN12354_3_ANNEX_F_AREA)
@@ -221,7 +221,7 @@ def test_facade_shape_level_difference_table(
 
 
 def test_facade_shape_level_difference_interpolates_alpha() -> None:
-    # Balcony 6, 1,5-2,5 m: -1 / 1 / 3 over αw 0,3 / 0,6 / 0,9.
+    # Balcony 6, 1.5-2.5 m: -1 / 1 / 3 over αw 0.3 / 0.6 / 0.9.
     mid = building.facade_shape_level_difference(
         "balcony_6", line_of_sight=2.0, absorption=0.45
     )

@@ -139,16 +139,16 @@ _NO_RATING_TO_PLOT = (
     "or 16 one-third-octave bands)."
 )
 
-#: Reference reverberation time T0 (ISO 10052:2021, Clause 3.3): 0,5 s.
+#: Reference reverberation time T0 (ISO 10052:2021, Clause 3.3): 0.5 s.
 _T0 = 0.5
 
 #: Reference equivalent absorption area A0 (Clause 3.5): 10 m².
 _A0 = 10.0
 
-#: Sabine constant in A = 0,16 V / T.
+#: Sabine constant in A = 0.16 V / T.
 _SABINE = 0.16
 
-#: Minimum-area factor of Clause 3.6: where V/7,5 > S, use V/7,5 for S.
+#: Minimum-area factor of Clause 3.6: where V/7.5 > S, use V/7.5 for S.
 _MIN_AREA_FACTOR = 7.5
 
 #: Prescribed count of measurement positions for the service-equipment method
@@ -257,7 +257,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def _normalization_term(volume: float) -> float:
-    """The 10 lg(A0 T0 / (0,16 V)) normalization offset, in dB."""
+    """The 10 lg(A0 T0 / (0.16 V)) normalization offset, in dB."""
     return float(10.0 * np.log10(_A0 * _T0 / (_SABINE * _positive(volume, "volume"))))
 
 
@@ -297,7 +297,7 @@ def reverberation_index(
     r"""Reverberation index :math:`k = 10 \log_{10}(T/T_0)` (ISO 10052, Cl. 3.3).
 
     :param t: Receiving-room reverberation time per band, in seconds.
-    :param t0: Reference reverberation time ``T0``, in seconds (Default: 0,5 s).
+    :param t0: Reference reverberation time ``T0``, in seconds (Default: 0.5 s).
     :return: The reverberation index ``k`` per band, in dB. A ``float`` for a number, an
         array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``t``/``t0`` are not positive or ``t`` is non-finite.

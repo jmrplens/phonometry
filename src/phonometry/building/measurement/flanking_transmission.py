@@ -64,7 +64,7 @@ is 100 Hz to 5000 Hz (18 bands). The single-number ``Kij`` is the arithmetic
 mean over 200 Hz to 1250 Hz for one-third-octave bands, or over 125 Hz to
 1000 Hz for octave bands (Annex A); the automatic mean is formed only when
 the corresponding band set is present in the supplied frequencies. For heavy
-junctions (Part 4, Clause 9) bands whose modal overlap factor is below 0,25
+junctions (Part 4, Clause 9) bands whose modal overlap factor is below 0.25
 are bracketed and excluded from the single-number mean when the per-band
 ``modal_overlap`` is supplied.
 """
@@ -500,7 +500,7 @@ class VibrationReductionResult(OwnsArrays):
         corresponding band set. Bands bracketed for poor modal overlap
         (ISO 10848-4:2010 Clause 9) are excluded from the mean.
     :ivar bracketed: Per-band boolean flags, ``True`` where the modal overlap
-        factor is below 0,25 so the band is bracketed and excluded from the
+        factor is below 0.25 so the band is bracketed and excluded from the
         single-number rating (ISO 10848-4:2010 Clause 9), or ``None`` when no
         modal overlap was supplied.
     :ivar modal_overlap: The modal overlap factor ``M`` per band the bands are
@@ -514,7 +514,7 @@ class VibrationReductionResult(OwnsArrays):
         it from the spacing of the frequencies each time. One of ``1`` or ``3``.
 
     ``single_number`` and ``bracketed`` are read from the fields, the
-    0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
+    0.25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
     fields.
     """
 
@@ -553,7 +553,7 @@ class VibrationReductionResult(OwnsArrays):
 
     @property
     def bracketed(self) -> NDArray[np.bool_] | None:
-        """Per band, whether the modal overlap is below 0,25 (ISO 10848-4 Clause 9).
+        """Per band, whether the modal overlap is below 0.25 (ISO 10848-4 Clause 9).
 
         ``None`` when no modal overlap was supplied.
         """
@@ -715,7 +715,7 @@ def _single_number_kij(
     """Arithmetic-mean ``K̄ij`` (Annex A), or ``None``.
 
     Averages over 200-1250 Hz (one-third octave) or 125-1000 Hz (octave).
-    Bands flagged as ``bracketed`` (modal overlap below 0,25, ISO 10848-4
+    Bands flagged as ``bracketed`` (modal overlap below 0.25, ISO 10848-4
     Clause 9) are excluded; the mean is ``None`` if no band remains. The
     average runs over the bands *present* inside the range: a spectrum that
     does not cover the full Annex A range yields the mean of its available
@@ -838,7 +838,7 @@ def vibration_reduction_index(
         m = _broadcast(m, dv.size, "modal_overlap")
 
     k_ij = dv + 10.0 * np.log10(lij / np.sqrt(a_i * a_j))
-    # The bands bracketed below the 0,25 of ISO 10848-4 Clause 9, the band
+    # The bands bracketed below the 0.25 of ISO 10848-4 Clause 9, the band
     # set of the Annex A range and the Annex A mean are read by the result
     # from the frequencies and the modal overlap it keeps.
     return VibrationReductionResult(

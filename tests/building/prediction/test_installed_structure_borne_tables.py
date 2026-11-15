@@ -70,7 +70,7 @@ def test_table_d1_bar_end_row() -> None:
 
 
 def test_table_d1_beam_row() -> None:
-    """Row "Beam": |Y| = [7,6 rho t w sqrt(cL t f)]^-1 (radical included)."""
+    """Row "Beam": |Y| = [7.6 rho t w sqrt(cL t f)]^-1 (radical included)."""
     assert building.typical_element_mobility(
         "beam",
         frequency=250.0,
@@ -82,7 +82,7 @@ def test_table_d1_beam_row() -> None:
 
 
 def test_table_d1_plate_row() -> None:
-    """Row "Plate": |Y| = [2,3 cL rho t^2]^-1, for a 140 mm concrete slab."""
+    """Row "Plate": |Y| = [2.3 cL rho t^2]^-1, for a 140 mm concrete slab."""
     assert building.typical_element_mobility(
         "plate", density=2300.0, longitudinal_velocity=3800.0, thickness_m=0.14
     ) == pytest.approx(2.5380762194441e-06)
@@ -158,13 +158,13 @@ def test_mass_spring_row_is_the_series_sum_of_spring_and_mass() -> None:
 
 
 def test_plate_row_is_formula_f4_in_other_symbols() -> None:
-    """[2,3 cL rho t^2]^-1 is Y = 1/(8 sqrt(m B')) of Formula (F.4).
+    """[2.3 cL rho t^2]^-1 is Y = 1/(8 sqrt(m B')) of Formula (F.4).
 
     Annex F Formula (F.4) writes the same infinite-plate mobility as
     ``1/(8 sqrt(m B'))``; with ``B' = rho cL^2 t^3/12`` that is
-    ``[8/sqrt(12) cL rho t^2]^-1``, and ``8/sqrt(12) = 2,309`` is the 2,3 of
+    ``[8/sqrt(12) cL rho t^2]^-1``, and ``8/sqrt(12) = 2,309`` is the 2.3 of
     Table D.1 rounded to its two printed figures. The two therefore agree to
-    0,4 %, which is that rounding and nothing else.
+    0.4 %, which is that rounding and nothing else.
     """
     rho, c_l, t = 2300.0, 3800.0, 0.14
     bending = rho * c_l**2 * t**3 / 12.0
@@ -247,7 +247,7 @@ def test_table_d1_broadcasts_over_bands() -> None:
 def test_table_f1_cells_as_printed() -> None:
     """The eight cells of Table F.1, header row and value row.
 
-    The header prints the first centre as "31"; it is the nominal 31,5 Hz
+    The header prints the first centre as "31"; it is the nominal 31.5 Hz
     octave band.
     """
     assert building.TABLE_F1_OCTAVE_BANDS_HZ == (
@@ -300,7 +300,7 @@ def test_table_f1_departs_from_the_closed_form_above_1_khz() -> None:
 
 
 def test_third_octave_closed_form_is_the_octave_one_less_10_lg_3() -> None:
-    """0,8 f against 2,5 f: the three one-third octaves of an octave band."""
+    """0.8 f against 2.5 f: the three one-third octaves of an octave band."""
     difference = float(
         building.tapping_machine_force_level_estimate(1000.0)
         - building.tapping_machine_force_level_estimate(1000.0, fraction=3)
@@ -312,12 +312,12 @@ def test_third_octave_closed_form_is_the_octave_one_less_10_lg_3() -> None:
 def test_table_f1_is_referred_to_1e_6_newton_not_1_piconewton() -> None:
     """The tabulated levels are the machine's own force spectrum re 1e-6 N.
 
-    The ISO tapping machine drops five 0,5 kg hammers from 40 mm at ten
+    The ISO tapping machine drops five 0.5 kg hammers from 40 mm at ten
     impacts per second (ISO 10140-5), so each impact transfers a momentum
     ``m sqrt(2 g h)`` and the force is a 10 Hz impulse train whose every
     harmonic carries an r.m.s. force of ``sqrt(2) m sqrt(2 g h) n``. Summing
     the harmonics that fall in each octave band reproduces the tabulated
-    values to 0,5 dB from 31,5 Hz to 1 kHz **only** when the level is read re
+    values to 0.5 dB from 31.5 Hz to 1 kHz **only** when the level is read re
     1e-6 N, the reference force of ISO 1683 that UNE-EN 15657:2018 Formula (15)
     also uses. Read re the 1 pN printed in the caption of Table F.1 the same
     cells would be 120 dB away from the machine that produces them; see

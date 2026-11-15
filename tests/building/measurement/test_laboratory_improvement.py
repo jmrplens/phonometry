@@ -22,8 +22,8 @@ Oracles:
   ΔLw = 15 dB as printed, and CI,Δ = -9 dB from the Table 4 floor, where the
   print's own chain gives -8 dB (docs/ERRATA.md).
 - The G.4 example: two measurements within 1 d may start 3 d after the end of
-  construction; and the same bound reached by decimal inputs (2,1 d after
-  6,3 d), which binary rounding would put a hair above it.
+  construction; and the same bound reached by decimal inputs (2.1 d after
+  6.3 d), which binary rounding would put a hair above it.
 - Closed forms: a flat improvement shifts every rating one for one, to one
   decimal place as well, and a curve laid on the ISO 717-1 reference rates at
   the reference plus two.
@@ -150,9 +150,9 @@ def test_flat_improvement_shifts_every_floor_one_for_one(floor: str) -> None:
 
 @pytest.mark.parametrize("floor", sorted(building.IMPACT_REFERENCE_FLOORS))
 def test_flat_improvement_to_one_decimal_is_exact(floor: str) -> None:
-    """Both curves rated with the 0,1 dB shift: a flat 10 dB is 10,0 and 0,0.
+    """Both curves rated with the 0.1 dB shift: a flat 10 dB is 10.0 and 0.0.
 
-    Rating only one of the two curves with the 0,1 dB shift would move ΔLw by
+    Rating only one of the two curves with the 0.1 dB shift would move ΔLw by
     up to half a decibel on every floor.
     """
     flat = np.full(16, 10.0)
@@ -184,7 +184,7 @@ def test_sloped_improvement_is_rated_on_each_floor(floor: ReferenceFloor) -> Non
 
 
 def test_one_decimal_improvement_keeps_the_tenth() -> None:
-    """5.4 states ΔLw to one decimal with its uncertainty (EXAMPLE 18,9)."""
+    """5.4 states ΔLw to one decimal with its uncertainty (EXAMPLE 18.9)."""
     dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L)
     value = building.weighted_impact_improvement(dl, one_decimal=True)
     assert isinstance(value, float)
@@ -257,7 +257,7 @@ def test_flat_lining_improvement_shifts_every_term(element: str) -> None:
 
 @pytest.mark.parametrize("element", sorted(building.LINING_REFERENCE_ELEMENTS))
 def test_flat_lining_improvement_to_one_decimal_is_exact(element: str) -> None:
-    """Both curves rated with the 0,1 dB shift: every term of a flat 10 dB is 10,0."""
+    """Both curves rated with the 0.1 dB shift: every term of a flat 10 dB is 10.0."""
     rating = building.weighted_reduction_improvement(
         np.full(21, 10.0),
         frequencies=_TABLE_E1,
@@ -491,7 +491,7 @@ def test_curing_one_day_early_fails() -> None:
 def test_lag_of_one_third_on_decimal_inputs_sits_on_the_bound(
     curing: float, lag: float
 ) -> None:
-    """3 x 2,1 is 6,300000000000001 in binary, still "one-third" of 6,3 d."""
+    """3 x 2.1 is 6.300000000000001 in binary, still "one-third" of 6.3 d."""
     check = building.check_lining_curing(curing, lag)
     assert check.lag_within_third
     assert check.passes
@@ -504,7 +504,7 @@ def test_lag_just_over_one_third_fails() -> None:
 
 
 def test_curing_period_reached_by_decimal_arithmetic_is_reached() -> None:
-    """1,4 d / 0,1 is 13,999999999999998 in binary, and two weeks all the same."""
+    """1.4 d / 0.1 is 13.999999999999998 in binary, and two weeks all the same."""
     check = building.check_lining_curing(1.4 / 0.1, 10.0)
     assert check.cured
     assert check.passes

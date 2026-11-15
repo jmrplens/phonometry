@@ -75,9 +75,9 @@ What the page got wrong
 -----------------------
 These tables print every dimension twice, in SI and in US customary units, and
 nineteen of the three hundred and twenty-one pairs are not each other: row 9 gives
-16 in as 30,8 cm where the other eighteen 16 in of these tables are 40,6 cm,
-row 31 gives 2 in as 10,1 cm, row 38 gives 44 oz/yd2 as 1,99 kg/m2 where 28 and
-30 give it as 1,5. They are registered as one entry in ``docs/ERRATA.md`` and
+16 in as 30.8 cm where the other eighteen 16 in of these tables are 40.6 cm,
+row 31 gives 2 in as 10.1 cm, row 38 gives 44 oz/yd2 as 1.99 kg/m2 where 28 and
+30 give it as 1.5. They are registered as one entry in ``docs/ERRATA.md`` and
 nothing here quietly repairs them: the printed description is kept whole and
 the seventeen rows that carry one mark the cell in
 :attr:`~phonometry.io.CatalogueRow.misprinted`. One of the

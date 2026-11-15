@@ -11,7 +11,7 @@ Oracles, all printed:
   wavelength 100 mm. Four published values, and reproducing them requires the
   developed-length surface density Vigran warns about in the same paragraph.
 * **Bies, Hansen & Howard 5e** Figure 7.9(b) and Eqs. (7.59)/(7.60), printed
-  pp. 381 and 384: the design-chart constants -54, -13,2, -17 and -23 dB
+  pp. 381 and 384: the design-chart constants -54, -13.2, -17 and -23 dB
   (stated for ``rho c = 414``). Bies Eqs. (7.30)/(7.31)/(7.38) are an
   independent transcription of Vigran Eqs. (6.108)/(6.109)/(6.111).
 * **Hopkins, Sound Insulation (2007)** Table A2, printed p. 608 (pdf p. 635):
@@ -73,7 +73,7 @@ VIGRAN_MASS = 7.8
 VIGRAN_AMPLITUDE = 0.010
 VIGRAN_WAVELENGTH = 0.100
 
-#: Vigran Figure 6.27 (printed p. 254): a corrugated panel of 7,5 kg/m2 with
+#: Vigran Figure 6.27 (printed p. 254): a corrugated panel of 7.5 kg/m2 with
 #: the coincidence range 400 Hz to 4000 Hz, the case the book integrates.
 FIG627_FC1 = 400.0
 FIG627_FC2 = 4000.0
@@ -178,8 +178,8 @@ def test_corrugated_plate_eigenfrequencies_match_vigran_example() -> None:
     Reproducing the two published values needs the surface density to carry the
     developed length of the profile, which is exactly the caveat Vigran states
     in the same paragraph ("the mass per unit area will increase when making
-    the corrugations"); with the flat 7,8 kg/m2 the model would return 26,7 Hz
-    and 106,7 Hz instead.
+    the corrugations"); with the flat 7.8 kg/m2 the model would return 26.7 Hz
+    and 106.7 Hz instead.
     """
     mass, (b_x, b_z, b_xz) = _vigran_corrugated()
     kwargs: dict[str, float] = {
@@ -306,10 +306,10 @@ def test_orthotropic_critical_frequencies_bound_the_isotropic_one() -> None:
 
 
 def test_corrugating_vigran_plate_moves_the_coincidence_range() -> None:
-    """The corrugated version of Vigran's plate spans 1,16 kHz to 13,1 kHz.
+    """The corrugated version of Vigran's plate spans 1.16 kHz to 13.1 kHz.
 
     Both bounds follow from the published Eq. (3.115) stiffnesses and the
-    developed-length mass; the flat sheet's single ``fc`` is 11,9 kHz, so
+    developed-length mass; the flat sheet's single ``fc`` is 11.9 kHz, so
     corrugating drags the lower bound down by more than a decade, which is the
     mechanism Vigran Sect. 6.5.3 describes.
     """
@@ -334,7 +334,7 @@ def _fig627(
     limiting_angle_deg: float = 78.0,
     fluid: Fluid = ABSORBER_AIR,
 ) -> building.SoundReductionResult:
-    """The Figure 6.27 panel: 7,5 kg/m2 with the range 400 Hz to 4000 Hz."""
+    """The Figure 6.27 panel: 7.5 kg/m2 with the range 400 Hz to 4000 Hz."""
     return building.orthotropic_transmission_loss(
         freq,
         FIG627_MASS,
@@ -354,7 +354,7 @@ def _heckl(freq: np.ndarray, fluid: Fluid = ABSORBER_AIR) -> np.ndarray:
 
 
 def test_heckl_coincidence_branch_matches_bies_equation_759() -> None:
-    """Bies Eq. (7.59): the printed constant is -13,2 dB for ``rho c = 414``.
+    """Bies Eq. (7.59): the printed constant is -13.2 dB for ``rho c = 414``.
 
     ``TL = 20 lg f + 10 lg m'' - 10 lg fc1 - 20 lg(ln(4 f / fc1)) - 13.2``, so
     subtracting the four leading terms from the computed TL must leave the
@@ -398,7 +398,7 @@ def test_heckl_design_chart_points_a_and_d() -> None:
     Point A sits at ``fc1/2`` on the field-incidence mass law; point D at
     ``2 fc2`` on Eq. (7.60), printed as
     ``TL = 10 lg m'' + 15 lg fc2 - 5 lg fc1 - 17``. Both printed constants are
-    rounded, so 0,15 dB is the honest tolerance.
+    rounded, so 0.15 dB is the honest tolerance.
     """
     fc1 = FIG627_FC1
     fc2 = FIG627_FC2
@@ -506,7 +506,7 @@ def test_undamped_integral_meets_heckls_recovery_branch_above_2fc2() -> None:
     Bies Eq. (7.60) is derived from Eq. (7.38) for ``eta = 0``, so the
     numerically averaged integral has to converge on it once the damping is
     removed. This is a cross-check of the two transcriptions against each
-    other: each decade of ``eta`` closes the gap until it settles about 0,3 dB
+    other: each decade of ``eta`` closes the gap until it settles about 0.3 dB
     below the closed form, which is the accuracy of the approximation itself.
     """
     f = 5.0 * FIG627_FC2
@@ -565,7 +565,7 @@ def test_orthotropic_area_limits_the_incidence_angle() -> None:
     """Bies Eq. (7.36): ``cos^2(theta_L) = min(lambda/(2 pi sqrt(A)), 0.9)``.
 
     A 10 m2 specimen at 1 kHz gives ``cos^2(theta_L) = 0,0173``, i.e.
-    ``theta_L = 82,4 deg``; the clamp at 0,9 bites only when the wavelength is
+    ``theta_L = 82,4 deg``; the clamp at 0.9 bites only when the wavelength is
     large compared with the panel. Both routes must agree with the equivalent
     fixed angle.
     """

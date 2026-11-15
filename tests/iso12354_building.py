@@ -16,8 +16,8 @@ Two inputs are taken **corrected**, not as printed (both recorded in
   are self-consistent with their own columns (external wall 1: 2,375 m;
   internal wall 2: 1,839 m against the printed 1,840 m) and supplies the three
   that are not;
-* the external walls' internal loss factor is 0,012 5 (the element
-  specification and Annex B Table B.3), not the 0,013 of the input block.
+* the external walls' internal loss factor is 0.012 5 (the element
+  specification and Annex B Table B.3), not the 0.013 of the input block.
 
 Both ``tests/building/prediction/test_detailed_model.py`` and
 ``scripts/conformance_report.py`` import these helpers, so the per-band tables
@@ -63,7 +63,7 @@ JUNCTION_KIND = {
 def junction_indices() -> dict[str, float]:
     """The example's Annex E junction indices, unrounded.
 
-    Tables L.5 to L.9 / G.5 to G.9 print them rounded to 0,1 dB; the perimeter
+    Tables L.5 to L.9 / G.5 to G.9 print them rounded to 0.1 dB; the perimeter
     sums of Formula (C.4) only reproduce the printed ``Σ lk αk`` when the
     unrounded values are used, so they are re-derived from Annex E here.
     """

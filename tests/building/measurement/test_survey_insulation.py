@@ -14,7 +14,7 @@ _OCTAVE = 5  # ISO 10052 octave-band count (125-2000 Hz)
 
 
 def _norm(volume: float) -> float:
-    """The 10 lg(A0 T0 / (0,16 V)) offset, recomputed independently."""
+    """The 10 lg(A0 T0 / (0.16 V)) offset, recomputed independently."""
     return 10.0 * np.log10(10.0 * 0.5 / (0.16 * volume))
 
 
@@ -24,7 +24,7 @@ def _norm(volume: float) -> float:
 
 
 def test_reverberation_index_formula_3() -> None:
-    """k = 10 lg(T/T0), T0 = 0,5 s."""
+    """k = 10 lg(T/T0), T0 = 0.5 s."""
     k = building.reverberation_index([0.5, 1.0, 0.25])
     np.testing.assert_allclose(k, [0.0, 10.0 * np.log10(2.0), 10.0 * np.log10(0.5)])
 
@@ -57,7 +57,7 @@ def test_airborne_d_dnt_dn_rprime() -> None:
 
 
 def test_airborne_v_over_7_5_rule() -> None:
-    """Where V/7,5 > S, the larger V/7,5 replaces S in R' (Clause 3.6)."""
+    """Where V/7.5 > S, the larger V/7.5 replaces S in R' (Clause 3.6)."""
     k = np.zeros(_OCTAVE)
     # V/7.5 = 120/7.5 = 16 > S = 5, so S_eff = 16.
     res = building.survey_airborne_insulation(

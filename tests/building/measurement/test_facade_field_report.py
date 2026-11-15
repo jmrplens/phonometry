@@ -49,7 +49,7 @@ _ANNEX_C_R = np.array(
     ]
 )
 
-#: A receiving-room reverberation time equal to T0 = 0,5 s in every band, so
+#: A receiving-room reverberation time equal to T0 = 0.5 s in every band, so
 #: D2m,nT = D2m and the fiche's rating is hand-computable.
 _T_AT_T0 = np.full(16, 0.5)
 
@@ -71,8 +71,8 @@ def _facade_dnt() -> building.FacadeInsulationResult:
 
 
 def _facade_r_prime() -> building.FacadeInsulationResult:
-    """A facade result whose R'45 equals the Annex C curve (S = A, -1,5 dB)."""
-    # A = 0,16 x 62,5 / 1 = 10 = S, so 10 lg(S/A) = 0 and R'45 = L1,s - L2 - 1,5.
+    """A facade result whose R'45 equals the Annex C curve (S = A, -1.5 dB)."""
+    # A = 0.16 x 62.5 / 1 = 10 = S, so 10 lg(S/A) = 0 and R'45 = L1,s - L2 - 1.5.
     surf = _ANNEX_C_R + 1.5
     return building.facade_insulation(
         np.full(16, 50.0),
@@ -123,7 +123,7 @@ def test_r_prime_fiche(tmp_path: Path) -> None:
 
 def test_r_prime_road_traffic_fiche_labelled_rtrs(tmp_path: Path) -> None:
     """A road-traffic result is labelled R'tr,s (Clause 3.13), never R'45."""
-    # A = 0,16 x 62,5 / 1 = 10 = S, so 10 lg(S/A) = 0 and R'tr,s = L1,s - L2 - 3.
+    # A = 0.16 x 62.5 / 1 = 10 = S, so 10 lg(S/A) = 0 and R'tr,s = L1,s - L2 - 3.
     pytest.importorskip("matplotlib")
     surf = _ANNEX_C_R + 3.0
     result = building.facade_insulation(

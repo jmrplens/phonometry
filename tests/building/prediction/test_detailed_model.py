@@ -14,7 +14,7 @@ gives an independent octave-band plausibility check on the impact chain.
 **Two inputs are taken corrected, not as printed.** The Table L.3 / G.3 input
 block prints one perimeter sum ``Σ lk αk`` per element *type*, but the columns
 need one per element, and it prints the external walls' internal loss factor as
-0,013 where the element specification (and Table B.3) gives 0,012 5. This
+0.013 where the element specification (and Table B.3) gives 0.012 5. This
 fixture therefore
 
 * builds every ``Σ lk αk`` from Formula (C.4), ``αk = Σj √(fc,j/fref)
@@ -25,7 +25,7 @@ fixture therefore
 * uses ``ηint = 0,012 5``.
 
 Both discrepancies are recorded in ``docs/ERRATA.md``. The printed tables are
-rounded but were computed unrounded, so the per-band comparisons use a 0,1 dB
+rounded but were computed unrounded, so the per-band comparisons use a 0.1 dB
 tolerance as the standard's own note (Table L.1) invites.
 
 The building itself is built once, in :mod:`iso12354_building`, which the
@@ -63,7 +63,7 @@ def situ() -> dict:
 
 @pytest.fixture(scope="module")
 def delta_l() -> np.ndarray:
-    """The floating floor's improvement, 30 lg(f/fo) above fo = 52,8 Hz."""
+    """The floating floor's improvement, 30 lg(f/fo) above fo = 52.8 Hz."""
     return building.floating_floor_improvement(
         BANDS, resonance_frequency=iso12354_building.floating_floor_resonance()
     )
@@ -109,9 +109,9 @@ def test_floating_floor_resonance_and_improvement(delta_l: np.ndarray) -> None:
 def test_table_l2_free_radiation_factor(situ: dict, label: str) -> None:
     """Table L.2 / G.2, radiation factor for free bending waves σ.
 
-    The internal walls' printed values at 100 Hz sit 0,2 % below the exact
-    recomputation because the printed critical frequency (128,4 Hz) is itself
-    rounded. On a σ of about 1,9 that is 0,004, so an absolute tolerance of
+    The internal walls' printed values at 100 Hz sit 0.2 % below the exact
+    recomputation because the printed critical frequency (128.4 Hz) is itself
+    rounded. On a σ of about 1.9 that is 0.004, so an absolute tolerance of
     5·10⁻³ covers it and stays tight everywhere else.
     """
     got = situ[label].radiation_factor
@@ -337,7 +337,7 @@ def test_table_g1_direct_path_over_the_whole_range(
 
     The Table G.1 / G.4 disagreement recorded in docs/ERRATA.md affects only
     the four *flanking* columns: Table G.1 and Table G.4 print the same direct
-    column, 57,3 / 55,9 / 53,8 dB at 50 Hz to 80 Hz included, so this one is
+    column, 57.3 / 55.9 / 53.8 dB at 50 Hz to 80 Hz included, so this one is
     asserted over the full range.
     """
     by_label = {p.label: p.values for p in impact.paths}
@@ -353,7 +353,7 @@ def test_table_g1_flanking_paths_from_100_hz(
     The 50 Hz, 63 Hz and 80 Hz cells of the four flanking columns of Table G.1
     disagree with Table G.4, which prints the same path Df1 for external wall 1
     from the same inputs; the recomputation reproduces Table G.4 (see
-    docs/ERRATA.md), so the comparison here starts at 100 Hz. The 0,15 dB
+    docs/ERRATA.md), so the comparison here starts at 100 Hz. The 0.15 dB
     tolerance covers the rounding of the printed intermediate columns the
     standard chained together.
     """
@@ -368,10 +368,10 @@ def test_table_g1_total_and_rating(impact: building.DetailedImpactResult) -> Non
 
     The 50 Hz to 80 Hz flanking cells of Table G.1 feed its own total, so the
     total inherits the disagreement of docs/ERRATA.md there: the recomputation
-    gives 58,7 / 57,2 / 56,1 dB against the printed 58,6 / 57,0 / 55,9 dB. The
-    three bands are therefore asserted at 0,25 dB, which is tight enough to
+    gives 58.7 / 57.2 / 56.1 dB against the printed 58.6 / 57.0 / 55.9 dB. The
+    three bands are therefore asserted at 0.25 dB, which is tight enough to
     catch any real drift and honest about where the printed total comes from,
-    and the rest of the range at the usual 0,1 dB.
+    and the rest of the range at the usual 0.1 dB.
     """
     assert impact.l_prime_n[3:] == pytest.approx(
         ref.ISO12354_ANNEX_G1_L_PRIME_N[3:], abs=TOL
@@ -394,16 +394,16 @@ def test_simplified_model_agrees_with_the_detailed_model(
 
     The simplified single-number model of Clause 4.4 gives ``R'w = 57,0 dB``
     for the same building; the detailed per-band model of Clause 4.2 gives 57
-    (the standard printing 57,8/57,9 from a continuous reference shift). The
+    (the standard printing 57.8/57.9 from a continuous reference shift). The
     two agree to well within the model's own standard deviation.
 
     The printed per-path values round the coupling term ``10 lg(Ss/(lo lf))``
-    to 7,0 dB and 6,0 dB, which the exact form gives as 6,9897 and 6,0206, so
-    the per-path tolerance is 0,1 dB.
+    to 7.0 dB and 6.0 dB, which the exact form gives as 6.9897 and 6.0206, so
+    the per-path tolerance is 0.1 dB.
     """
     rw = ref.ISO12354_ANNEX_L10_RW
     # The simplified model reads the junction indices as Table L.10 prints
-    # them, rounded to 0,1 dB, not the unrounded Annex E values the detailed
+    # them, rounded to 0.1 dB, not the unrounded Annex E values the detailed
     # model needs for the perimeter sums.
     kij = ref.ISO12354_ANNEX_L_KIJ
     lengths = iso12354_building.COUPLING_LENGTH
@@ -451,7 +451,7 @@ def test_simplified_model_agrees_with_the_detailed_model(
 def test_table_l12_resonant_correction_of_the_wall_leaf() -> None:
     """Table L.12, ``R*`` from ``R`` by the Annex B.2 8 dB estimate.
 
-    The gypsum leaf's critical frequency falls between the 2 kHz and 2,5 kHz
+    The gypsum leaf's critical frequency falls between the 2 kHz and 2.5 kHz
     bands, above which the printed correction drops to zero.
     """
     got = building.resonant_sound_reduction_index(
@@ -545,8 +545,8 @@ def test_flanking_impact_level_from_a_measured_flanking_level() -> None:
     ISO 12354-2 prints no worked example for this route (Annex G characterises
     every flanking path through the elements), so the oracle is the printed
     formula evaluated by hand: with Si = 20 m², Si,lab = 10 m², lij = 4 m and
-    llab = 4,5 m the geometry term is 10 lg(20 · 4,5/(10 · 4)) = 10 lg 2,25 =
-    3,521 8 dB, and it must vanish when the field geometry equals the
+    llab = 4.5 m the geometry term is 10 lg(20 · 4.5/(10 · 4)) = 10 lg 2.25 =
+    3.521 8 dB, and it must vanish when the field geometry equals the
     laboratory one.
     """
     ln_f = np.array([60.0, 58.0, 56.0])
@@ -570,7 +570,7 @@ def test_impact_prediction_without_a_direct_path_sums_the_flanking_paths() -> No
     """Part 2, Formula (2): rooms next to each other carry no direct path.
 
     ``L'n = 10 lg Σ 10^(Ln,ij/10)`` over the flanking paths alone, so two equal
-    flanking paths add exactly 10 lg 2 = 3,010 3 dB and each carries half the
+    flanking paths add exactly 10 lg 2 = 3.010 3 dB and each carries half the
     energy. The result must contain no direct path at all, not a placeholder.
     """
     from phonometry.building.prediction.detailed_model import BandPath
@@ -682,7 +682,7 @@ def test_table_b2_octave_impact_levels_of_monolithic_floors() -> None:
 
     The four printed monolithic floors are rebuilt from the Table B.1 material
     properties with the laboratory loss factor of Formula (C.3) on the 10 m²
-    test opening (2,65 m x 3,75 m, the geometry the companion Table B.2 of
+    test opening (2.65 m x 3.75 m, the geometry the companion Table B.2 of
     ISO 12354-1 names). Following the table's own note the levels are computed
     at one-third-octave spacing and combined into octave bands, energetically:
     an octave band collects the energy of its three one-third-octave bands.
@@ -1081,7 +1081,7 @@ def test_an_in_situ_spectrum_short_of_the_band_axis_is_refused(situ: dict) -> No
     band, so an index that lost its band axis on either of them is stretched
     over its partner's rather than refused. Collapsing external wall 1 to its
     50 Hz value leaves the ``D1`` path of this building 21 bands long, finite
-    and in dB, and 16,1 dB low at 1250 Hz, with nothing said.
+    and in dB, and 16.1 dB low at 1250 Hz, with nothing said.
     """
     import dataclasses
 

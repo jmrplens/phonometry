@@ -134,10 +134,10 @@ def test_kij_lightweight_double_homogeneous_e7() -> None:
     )
     assert k24 == pytest.approx(3.0 + 14.1 * m24 + 5.7 * m24 * m24)
     # The per-path form equals the 2000 print's figure-axis recast
-    # 3,0 - 14,1 lg(m2/m1) + 5,7 lg(m2/m1)^2 (same relation, see ERRATA).
+    # 3.0 - 14.1 lg(m2/m1) + 5.7 lg(m2/m1)^2 (same relation, see ERRATA).
     assert k24 == pytest.approx(3.0 - 14.1 * m + 5.7 * m * m)
-    # The Figure E.9 curve anchors: about -2,4 dB at m2/m1 = 3 and
-    # -5,4 dB at m2/m1 = 10.
+    # The Figure E.9 curve anchors: about -2.4 dB at m2/m1 = 3 and
+    # -5.4 dB at m2/m1 = 10.
     assert building.junction_vibration_reduction(
         "lightweight_double_homogeneous", "double_leaf", 0.1
     ) == pytest.approx(-5.4)
@@ -420,7 +420,7 @@ def test_airborne_annex_h_example() -> None:
 
 
 def test_airborne_annex_h_all_twelve_path_values() -> None:
-    """Every printed H.3 path Rij,w reproduces to the table's 0,1 dB."""
+    """Every printed H.3 path Rij,w reproduces to the table's 0.1 dB."""
     by_label = {
         p.label: p.r_w
         for p in building.predicted_airborne_insulation(
@@ -438,8 +438,8 @@ def test_airborne_annex_h_dnt_closures() -> None:
     v, ss = ref.EN12354_1_ANNEX_H3_VOLUME, ref.EN12354_1_ANNEX_H3_SEPARATING_AREA
     first = building.standardized_level_difference(52.2, v, ss)
     assert round(first) == ref.EN12354_1_ANNEX_H3_DNT_W
-    # The printed 53,8 dB uses the standard's own V/(3 S) rounding; the exact
-    # 0,32 V/Ss form sits 0,18 dB below it.
+    # The printed 53.8 dB uses the standard's own V/(3 S) rounding; the exact
+    # 0.32 V/Ss form sits 0.18 dB below it.
     assert first == pytest.approx(ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED, abs=0.2)
     second = building.standardized_level_difference(52.7, v, ss)
     assert round(second) == ref.EN12354_1_ANNEX_H3_DNT_W_SECOND

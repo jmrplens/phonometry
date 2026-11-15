@@ -4,7 +4,7 @@
 The fiche's numbers are verified against the standards' own definitions
 using hand-computable syntheses. For the airborne fiche, choosing the free
 test opening area S = 10 m2 equal to the receiving-room absorption area
-A = 0,16 V / T (V = 31,25 m3, T = 0,5 s give A = 10 m2) makes the term
+A = 0.16 V / T (V = 31.25 m3, T = 0.5 s give A = 10 m2) makes the term
 10 lg(S/A) vanish, so R = L1 - L2 reproduces the ISO 717-1 Annex C worked
 example exactly and pins the fiche's rating to the published 30 (-2; -3) dB.
 For the impact fiche, the same V and T give A = A0 = 10 m2, so the term
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 #: Receiving-room reverberation time and volume that make the equivalent
-#: absorption area A = 0,16 V / T equal to 10 m2 in every band, so both the
+#: absorption area A = 0.16 V / T equal to 10 m2 in every band, so both the
 #: airborne 10 lg(S/A) (with S = 10 m2) and the impact 10 lg(A/A0) (with
 #: A0 = 10 m2) vanish and the reported quantity equals its raw input.
 _T_UNITY = np.full(16, 0.5)

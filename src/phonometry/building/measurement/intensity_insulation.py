@@ -948,9 +948,9 @@ _FPI_LIMIT_ABSORBING = 6.0
 _ANNEX_A_B0 = 101300.0
 #: Characteristic impedance of air at 0 degC and B0, in N s/m^3 (Formula (A.4)).
 _ANNEX_A_RHO_C0 = 427.0
-#: Celsius-to-kelvin offset as Formula (A.4) prints it: 273, not 273,15.
+#: Celsius-to-kelvin offset as Formula (A.4) prints it: 273, not 273.15.
 _ANNEX_A_KELVIN = 273.0
-#: Speed of sound of Formula (A.5), c = 331 + 0,6 theta.
+#: Speed of sound of Formula (A.5), c = 331 + 0.6 theta.
 _ANNEX_A_C0 = 331.0
 _ANNEX_A_C_PER_DEGREE = 0.6
 #: The constant inside the radiation-efficiency approximation (Formula (A.3)).
@@ -971,7 +971,7 @@ def limp_panel_reduction_index(
 
     Annex A is normative and is how a laboratory qualifies itself: measure a
     limp panel of area :math:`S > 1~\text{m}^2`, calculate what it should
-    read, and require the two to agree within 4,0 dB from 50 Hz to 160 Hz.
+    read, and require the two to agree within 4.0 dB from 50 Hz to 160 Hz.
     This is the calculated half.
 
     A.1 states two different things about the area, and this enforces the
@@ -988,7 +988,7 @@ def limp_panel_reduction_index(
        R_0 = 20 \lg \frac{\pi f m}{\rho c} \tag{A.2}
 
        \sigma_\mathrm{d} = \frac{1}{2}
-       \left[ 0{,}20 + \ln\left( 2\pi \frac{f}{c} \sqrt{S} \right) \right] \tag{A.3}
+       \left[ 0.20 + \ln\left( 2\pi \frac{f}{c} \sqrt{S} \right) \right] \tag{A.3}
 
     with the characteristic impedance and the speed of sound taken from the
     climate of the test (Formulas (A.4) and (A.5)),
@@ -996,7 +996,7 @@ def limp_panel_reduction_index(
     .. math::
 
        \rho c = 427 \sqrt{\frac{273}{273 + \theta}} \cdot \frac{B}{B_0},
-       \qquad c = 331 + 0{,}6\,\theta
+       \qquad c = 331 + 0.6\,\theta
 
     The panel is limp by assumption: :math:`R_0` is the mass law and
     :math:`\sigma_\mathrm{d}` the radiation efficiency of forced transmission
@@ -1075,7 +1075,7 @@ def limp_panel_reduction_index(
 
 
 #: Relative tolerance that matches a given mid-band frequency to the band it
-#: names. A nominal label and its exact series value differ by 0,15 % and
+#: names. A nominal label and its exact series value differ by 0.15 % and
 #: neighbouring one-third octaves by 26 %, so this separates them cleanly.
 _BAND_TOLERANCE = 0.03
 

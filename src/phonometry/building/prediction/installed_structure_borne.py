@@ -495,7 +495,7 @@ def _beam_mobility(
 
     .. math::
 
-       |Y| = \left[ 7{,}6\, \rho\, t\, w \sqrt{c_\mathrm{L} t f} \right]^{-1}
+       |Y| = \left[ 7.6\, \rho\, t\, w \sqrt{c_\mathrm{L} t f} \right]^{-1}
 
     :param frequency: Frequency ``f``, in hertz (scalar or per band, > 0).
     :param density: Density ``rho``, in kg/m^3 (> 0).
@@ -524,7 +524,7 @@ def _plate_mobility(
 
     .. math::
 
-       |Y| = \left[ 2{,}3\, c_\mathrm{L}\, \rho\, t^2 \right]^{-1}
+       |Y| = \left[ 2.3\, c_\mathrm{L}\, \rho\, t^2 \right]^{-1}
 
     Frequency-independent above the lowest plate resonance, and the same
     quantity Annex F Formula (F.4) writes as
@@ -731,10 +731,10 @@ def typical_element_mobility(
       [m2]: :math:`\lvert Y \rvert = \left[ \rho c_\mathrm{L} S \right]^{-1}`.
     - ``"beam"``, described by :math:`\rho`, :math:`c_\mathrm{L}`, ``thickness_m``
       :math:`t` [m] and ``width_m`` :math:`w` [m]:
-      :math:`\lvert Y \rvert = \left[ 7{,}6\, \rho t w \sqrt{c_\mathrm{L} t f}
+      :math:`\lvert Y \rvert = \left[ 7.6\, \rho t w \sqrt{c_\mathrm{L} t f}
       \right]^{-1}`.
     - ``"plate"``, described by :math:`\rho`, :math:`c_\mathrm{L}` and :math:`t`:
-      :math:`\lvert Y \rvert = \left[ 2{,}3\, c_\mathrm{L} \rho t^2 \right]^{-1}`.
+      :math:`\lvert Y \rvert = \left[ 2.3\, c_\mathrm{L} \rho t^2 \right]^{-1}`.
     - ``"pipe"``, described by :math:`\rho`, :math:`c_\mathrm{L}`, :math:`t` and
       ``radius`` :math:`r` [m]:
       :math:`\lvert Y \rvert = \left[ 63\, \rho t r \sqrt{c_\mathrm{L} r f}
@@ -851,8 +851,8 @@ def typical_element_mobility(
 # machine in octave bands" (BS EN 12354-5:2009, PDF page 61, printed folio 59).
 # The table is two rows deep under one spanning header, "Octave band with
 # centre frequency in Hz": the eight nominal centres and the eight force
-# levels. The standard prints the first centre as "31"; it is the 31,5 Hz
-# nominal octave band, and this module keys it as 31,5 Hz like every other
+# levels. The standard prints the first centre as "31"; it is the 31.5 Hz
+# nominal octave band, and this module keys it as 31.5 Hz like every other
 # band elsewhere in the library.
 #
 # Clause F.4.2 sets the conditions: the values are for the ISO tapping machine
@@ -909,7 +909,7 @@ def tapping_machine_force_level() -> NDArray[np.float64]:
     r"""Tabulated ISO tapping machine force level (EN 12354-5, Table F.1).
 
     The eight octave-band values of Table F.1, in the order of
-    :data:`TABLE_F1_OCTAVE_BANDS_HZ` (31,5 Hz to 4 kHz). Clause F.4.2
+    :data:`TABLE_F1_OCTAVE_BANDS_HZ` (31.5 Hz to 4 kHz). Clause F.4.2
     offers them for the tapping machine used in place of an electrodynamic
     shaker when measuring ``D_Fp,n`` (Formula F.9), and clause D.1.2.3
     restricts the source to low-mobility receiving structures.
@@ -954,9 +954,9 @@ def tapping_machine_force_level_estimate(
 
     .. math::
 
-       L_\mathrm{F} = 10 \log_{10} \frac{2{,}5 f}{10^{-12}} \quad\text{(octave)},
+       L_\mathrm{F} = 10 \log_{10} \frac{2.5 f}{10^{-12}} \quad\text{(octave)},
        \qquad
-       L_\mathrm{F} = 10 \log_{10} \frac{0{,}8 f}{10^{-12}} \quad\text{(1/3 octave)}
+       L_\mathrm{F} = 10 \log_{10} \frac{0.8 f}{10^{-12}} \quad\text{(1/3 octave)}
 
     The standard qualifies this with "up till about 1000 Hz": it reproduces the
     first six tabulated values to the printed decibel, and above that it
@@ -967,8 +967,8 @@ def tapping_machine_force_level_estimate(
     bands the standard does not tabulate.
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
-    :param fraction: The band set, 1 for octaves (default, coefficient 2,5) or
-        3 for one-third octaves (coefficient 0,8). One of ``1`` or ``3``.
+    :param fraction: The band set, 1 for octaves (default, coefficient 2.5) or
+        3 for one-third octaves (coefficient 0.8). One of ``1`` or ``3``.
     :return: The force level ``L_F``, in dB re 1e-6 N (the standard prints "re 1 pN";
         see ``docs/ERRATA.md``). A ``float`` for a number, an array for a sequence or an
         array, a zero-dimensional one included.
@@ -1032,7 +1032,7 @@ def tapping_machine_characteristic_power_level(
 
     The standard notes the result is about 115 dB re 1 pW per one-third octave
     for the ISO tapping machine, treated in clause D.1.3 as a force source with
-    the mass-like source mobility of its 0,5 kg hammers. Pair it with
+    the mass-like source mobility of its 0.5 kg hammers. Pair it with
     :func:`tapping_machine_coupling_term` and hand both to
     :func:`installed_source_prediction`.
 
@@ -1107,7 +1107,7 @@ def tapping_machine_coupling_term(
        + 10 \log_{10}\left[ 1 + (\omega M Y_i)^2 \right]
 
     with :math:`\omega = 2 \pi f` and ``M`` the hammer mass of clause D.1.3,
-    which the standard takes as 0,5 kg. It is the mass-like-source form of
+    which the standard takes as 0.5 kg. It is the mass-like-source form of
     Formula (19b), for a machine standing on a plate-like element of real
     mobility ``Y_i``; Annex F Formulae (F.4) to (F.6b) estimate that ``Y_i``.
 
@@ -1115,7 +1115,7 @@ def tapping_machine_coupling_term(
     :param receiver_mobility: Real mobility ``Y_i`` of the supporting element,
         in m/(N.s) (> 0).
     :param hammer_mass: Source mass ``M``, in kilograms (Default:
-        :data:`~phonometry.building.TAPPING_HAMMER_MASS_KG`, the 0,5 kg of clause
+        :data:`~phonometry.building.TAPPING_HAMMER_MASS_KG`, the 0.5 kg of clause
         D.1.3 and ISO 10140-5).
     :return: The coupling term ``D_C,i``, in dB. A ``float`` when ``receiver_mobility``
         and ``frequency`` are both numbers, an array when either is a sequence or an
@@ -1163,7 +1163,7 @@ def multi_junction_adjustment(n_junctions: int | np.integer[Any]) -> float:
     :data:`MIN_MULTI_JUNCTION_KIJ`.
 
     :param n_junctions: Number of junctions the transmission path crosses (>= 1).
-    :return: The adjustment ``dK``, in dB (0,0 for a single junction).
+    :return: The adjustment ``dK``, in dB (0.0 for a single junction).
     :raises ValueError: for a number of junctions that is not a whole number
         from 1.
     :raises TypeError: if ``n_junctions`` is a flag, a text or an array where a

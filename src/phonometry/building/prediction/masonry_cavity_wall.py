@@ -138,11 +138,11 @@ class WallTieStiffness(OwnsArrays):
 #: (2007) **Table A4**, PDF page 637 (printed p. 610), as :class:`WallTieStiffness` rows
 #: (cavity width in m, dynamic stiffness ``sX mm`` in N/m). The three 50 mm ties are those of
 #: BS 1243:1978 measured by Hopkins, Wilson & Craik (1999) (their Table 1
-#: prints the same 1,7 / 16,1 / 94,0 MN/m, with a standard deviation only for
+#: prints the same 1.7 / 16.1 / 94.0 MN/m, with a standard deviation only for
 #: the two butterfly rows, the other two being single samples); the 100 mm
 #: proprietary vertical-twist tie is from Hall & Hopkins (2001). The stiffness
 #: is a property of the tie *at that cavity width*: the same vertical-twist
-#: design measures 94,0 MN/m at 50 mm and 43,4 MN/m at 100 mm, so pass the
+#: design measures 94.0 MN/m at 50 mm and 43.4 MN/m at 100 mm, so pass the
 #: matching ``gap_m`` to the double-wall functions.
 WALL_TIE_STIFFNESS: Mapping[WallTie, WallTieStiffness] = MappingProxyType(
     {

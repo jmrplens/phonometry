@@ -15,8 +15,8 @@ of this module.
 **Weighted rating (ISO 717-1).** The reference-curve method of Clause 4.4
 shifts the reference curve of Table 3 in 1 dB steps towards the measured
 curve until the sum of unfavourable deviations (measured below the
-shifted reference) is as large as possible but not more than 32,0 dB for
-the 16 one-third-octave bands (100 Hz to 3150 Hz) or 10,0 dB for the 5
+shifted reference) is as large as possible but not more than 32.0 dB for
+the 16 one-third-octave bands (100 Hz to 3150 Hz) or 10.0 dB for the 5
 octave bands (125 Hz to 2000 Hz). The weighted rating (``Rw``, ``R'w``,
 ``Dn,w``, ``DnT,w`` ...) is the shifted reference read at 500 Hz. The
 spectrum adaptation terms are :math:`C = X_{\mathrm{A}1} - X_\mathrm{w}` and
@@ -36,7 +36,7 @@ stated with the range as a subscript: ``C50-3150``, ``C50-5000``,
 ``CI,50-2500`` for impact. :func:`weighted_rating_extended` and
 :func:`weighted_impact_rating_extended` compute them alongside the core
 rating. Both accept ``one_decimal=True`` for the "1/10 dB for the expression
-of uncertainty" variant of Clauses 4.4/4.5 (reference-curve shift in 0,1 dB
+of uncertainty" variant of Clauses 4.4/4.5 (reference-curve shift in 0.1 dB
 steps and one-decimal reductions), which ISO 12999-1:2020 Annex B requires
 when stating the uncertainty of single-number values.
 
@@ -44,8 +44,8 @@ when stating the uncertainty of single-number values.
 Clause 4.3 shifts the Table 3 impact reference curve towards the measured
 curve until the sum of unfavourable deviations (here where the
 **measurement exceeds** the reference, the sign opposite to airborne) is
-as large as possible but not more than 32,0 dB (16 one-third-octave bands)
-or 10,0 dB (5 octave bands). The rating (``Ln,w``, ``L'n,w``, ``L'nT,w``)
+as large as possible but not more than 32.0 dB (16 one-third-octave bands)
+or 10.0 dB (5 octave bands). The rating (``Ln,w``, ``L'n,w``, ``L'nT,w``)
 is the shifted reference read at 500 Hz, reduced by a further 5 dB for
 octave bands (Clause 4.3.2). The spectrum adaptation term
 :math:`C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}` uses the energetic sum ``Ln,sum``
@@ -188,13 +188,13 @@ _INDEX_500_OCTAVE = 2
 
 #: Maximum sum of unfavourable deviations. These bounds are shared by both
 #: rating paths: ISO 717-1 Clause 4.4 (airborne) and ISO 717-2 Clause 4.3
-#: (impact) specify the identical 32,0 dB (16 one-third-octave bands) and
-#: 10,0 dB (5 octave bands) limits.
+#: (impact) specify the identical 32.0 dB (16 one-third-octave bands) and
+#: 10.0 dB (5 octave bands) limits.
 _MAX_UNFAVOURABLE_THIRD = 32.0
 _MAX_UNFAVOURABLE_OCTAVE = 10.0
 
 #: Tolerance absorbing floating-point noise when comparing the
-#: unfavourable-deviation sum (a true multiple of 0,1 dB) to the bound.
+#: unfavourable-deviation sum (a true multiple of 0.1 dB) to the bound.
 _SHIFT_TOLERANCE = 1e-6
 
 #: Tolerance for checking a stored unfavourable-deviation sum against the two
@@ -480,16 +480,16 @@ def _require_unfavourable_sum(
     arrives as *impact* rather than being read off a field. Neither part
     rounds the deviations any further: Table C.1 of each 2020 edition prints
     them in the tenths the measurement was already reduced to (Clause 4.4
-    footnote 1) and adds those tenths straight up, reaching 31,8 dB and
-    28,0 dB against bounds of 32,0 dB.
+    footnote 1) and adds those tenths straight up, reaching 31.8 dB and
+    28.0 dB against bounds of 32.0 dB.
 
     A fiche prints the contradiction twice on one page. Its verbose Annex C
     table recomputes the deviation column from the two curves and closes it
     with a sum row, while the plot beside it titles itself from this field:
     a rating whose ``measured`` was swapped through
     :func:`dataclasses.replace` keeps the aggregate the old curve earned,
-    and the page then reads a sum row of 0,0 dB under a column of em dashes
-    next to a title claiming 31,8 dB.
+    and the page then reads a sum row of 0.0 dB under a column of em dashes
+    next to a title claiming 31.8 dB.
 
     The em dash there is Table C.1's own mark for a band with no
     unfavourable deviation, not for one left undetermined: both curves are
@@ -533,7 +533,7 @@ class WeightedRatingResult(OwnsArrays):
     :ivar ctr: Spectrum adaptation term ``Ctr`` (spectrum No. 2), in dB
         (Clause 4.5). Integer.
     :ivar unfavorable_sum: Sum of unfavourable deviations at the final
-        shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5
+        shift, in dB (Clause 4.4); at most 32.0 (16 bands) or 10.0 (5
         bands). Restates ``measured`` against ``shifted_reference`` and is
         checked against them.
     :ivar frequencies: Band centre frequencies of the measured curve, in
@@ -691,7 +691,7 @@ class ImpactRatingResult(OwnsArrays):
     :ivar ci: Spectrum adaptation term ``CI`` (Clause A.2.1), in dB.
         Integer.
     :ivar unfavorable_sum: Sum of unfavourable deviations at the final
-        shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5
+        shift, in dB (Clause 4.3); at most 32.0 (16 bands) or 10.0 (5
         bands). Restates ``measured`` against ``shifted_reference``, with the
         impact sign, and is checked against them.
     :ivar frequencies: Band centre frequencies of the measured curve, in
@@ -935,16 +935,16 @@ def _best_shift(
     - \mathrm{measured}) \le \mathrm{limit}`
     (the sum is monotone non-decreasing in the shift), together with that
     sum. ``step`` is 1 dB for the standard rating (ISO 717-1 Clause 4.4 /
-    ISO 717-2 Clause 4.3) or 0,1 dB for the one-decimal rating used in
+    ISO 717-2 Clause 4.3) or 0.1 dB for the one-decimal rating used in
     uncertainty statements (ISO 717 "1/10 dB for the expression of
-    uncertainty"; ISO 12999-1:2020 Annex B.2 requires the 0,1 dB steps).
+    uncertainty"; ISO 12999-1:2020 Annex B.2 requires the 0.1 dB steps).
 
-    Measured levels are multiples of 0,1 dB (Clause 4.4 footnote 1) and the
+    Measured levels are multiples of 0.1 dB (Clause 4.4 footnote 1) and the
     reference is integer, so with both step sizes every deviation sum is a
-    true multiple of 0,1 dB; a small tolerance absorbs floating-point noise
-    so that a sum of exactly 32,0 (or 10,0) dB is not spuriously rejected.
+    true multiple of 0.1 dB; a small tolerance absorbs floating-point noise
+    so that a sum of exactly 32.0 (or 10.0) dB is not spuriously rejected.
     The shift is searched on an integer grid of ``step`` ticks to keep the
-    0,1 dB steps exact.
+    0.1 dB steps exact.
     """
     require_scalar(step, "step")
     scale = round(1.0 / step)
@@ -981,8 +981,8 @@ def weighted_rating(
     Applies the reference-curve method of Clause 4.4: the Table 3
     reference curve is shifted in 1 dB steps towards the measured curve
     until the sum of unfavourable deviations is as large as possible but
-    not more than 32,0 dB (16 one-third-octave bands, 100 Hz to 3150 Hz)
-    or 10,0 dB (5 octave bands, 125 Hz to 2000 Hz). The rating is the
+    not more than 32.0 dB (16 one-third-octave bands, 100 Hz to 3150 Hz)
+    or 10.0 dB (5 octave bands, 125 Hz to 2000 Hz). The rating is the
     shifted reference read at 500 Hz. The spectrum adaptation terms
     ``C`` and ``Ctr`` follow Clause 4.5 with the Table 4 spectra No. 1 and
     No. 2. Input values are first reduced to one decimal place
@@ -1097,8 +1097,8 @@ def weighted_impact_rating(
     Applies the reference-curve method of Clause 4.3: the Table 3 impact
     reference curve is shifted in 1 dB steps towards the measured curve
     until the sum of unfavourable deviations is as large as possible but
-    not more than 32,0 dB (16 one-third-octave bands, 100 Hz to 3150 Hz)
-    or 10,0 dB (5 octave bands, 125 Hz to 2000 Hz). For impact sound an
+    not more than 32.0 dB (16 one-third-octave bands, 100 Hz to 3150 Hz)
+    or 10.0 dB (5 octave bands, 125 Hz to 2000 Hz). For impact sound an
     unfavourable deviation occurs where the **measurement exceeds** the
     reference (the sign opposite to ISO 717-1 airborne). The rating is the
     shifted reference read at 500 Hz; for octave bands it is then reduced
@@ -1429,7 +1429,7 @@ def _reduce(value: float, *, one_decimal: bool) -> float:
     folio 36: of two equally near multiples, the greater in magnitude is the
     rounded number. :math:`\lfloor x + 0.5 \rfloor` is that rule only for a
     non-negative ``value``; it rounds a negative half towards positive infinity
-    instead, where Rule B prints -12,25 as -12,3. The ratings this serves are
+    instead, where Rule B prints -12.25 as -12.3. The ratings this serves are
     levels and differences of levels that are positive in practice, so the two
     never part company here.
     """
@@ -1510,7 +1510,7 @@ def weighted_rating_extended(
     over the
     bands of the enlarged range (Clause 4.5 with Annex B).
 
-    With ``one_decimal=True`` the reference-curve shift runs in 0,1 dB steps
+    With ``one_decimal=True`` the reference-curve shift runs in 0.1 dB steps
     and every reduction keeps one decimal place; the variant Clauses 4.4/4.5
     prescribe "for the expression of uncertainty" and ISO 12999-1:2020
     Annex B requires for the uncertainty of single-number values.
@@ -1521,7 +1521,7 @@ def weighted_rating_extended(
         ``None`` assumes exactly the 16 core bands 100-3150 Hz. The 16 core
         bands must always be present; extended terms are formed for each
         Annex B range whose bands are all present.
-    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :param one_decimal: Use the 0.1 dB shift and one-decimal reductions.
     :return: An :class:`ExtendedWeightedRatingResult`.
     :raises ValueError: If the input is not one-dimensional and finite, the
         band counts differ, or the core bands are missing.
@@ -1588,7 +1588,7 @@ def weighted_impact_rating_extended(
     the energetic sum runs over 50-2500 Hz instead of 100-2500 Hz in
     Formula (A.1), :math:`C_\mathrm{I} = L_\mathrm{n,sum} - 15 - L_\mathrm{n,w}`.
 
-    With ``one_decimal=True`` the reference-curve shift runs in 0,1 dB steps
+    With ``one_decimal=True`` the reference-curve shift runs in 0.1 dB steps
     and the sums keep one decimal place (Clauses 4.3.1/4.4; e.g. the
     reference floor yields :math:`L_\mathrm{n,r,0,w} = 77.6` dB and
     :math:`C_\mathrm{I,r,0} = -10.3` dB
@@ -1598,7 +1598,7 @@ def weighted_impact_rating_extended(
         in dB, one-third-octave bands.
     :param frequencies: Band centre frequencies, in Hz (one per value).
         ``None`` assumes exactly the 16 core bands 100-3150 Hz.
-    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :param one_decimal: Use the 0.1 dB shift and one-decimal reductions.
     :return: An :class:`ExtendedImpactRatingResult`.
     :raises ValueError: If the input is not one-dimensional and finite, the
         band counts differ, or the core bands are missing.
@@ -1828,9 +1828,9 @@ def weighted_impact_improvement(
     substituting the heavy reference floor by a lightweight reference floor"
     and 6.2 designates ``ΔLt,1,w``, ``ΔLt,2,w`` or ``ΔLt,3,w`` by floor type.
 
-    ``one_decimal=True`` rates both curves with the 0,1 dB shift and keeps one
+    ``one_decimal=True`` rates both curves with the 0.1 dB shift and keeps one
     decimal place, the form 5.4 prescribes when the uncertainty of ``ΔLw`` is
-    stated (its EXAMPLE, ``ΔLw = 18,9 ± 1,1``); ``Ln,r,0,w`` is then 77,6 dB for
+    stated (its EXAMPLE, ``ΔLw = 18,9 ± 1,1``); ``Ln,r,0,w`` is then 77.6 dB for
     the heavyweight floor, as A.2.2 prints.
 
     :param delta_l: The reduction of impact sound pressure level ``ΔL`` per band,
@@ -1840,7 +1840,7 @@ def weighted_impact_improvement(
         that holds those 16 bands, other keys not read.
     :param reference_floor: ``"heavyweight"`` (default), ``"lightweight_1"``,
         ``"lightweight_2"`` or ``"lightweight_3"``.
-    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :param one_decimal: Use the 0.1 dB shift and one-decimal reductions.
     :return: The weighted reduction, in dB: an integer, or a value to one
         decimal place when ``one_decimal`` is set.
     :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave values,
@@ -1905,7 +1905,7 @@ def impact_improvement_adaptation_term(
     and ISO 10140-1:2021 H.5 h) require this term in the statement of results.
 
     With ``one_decimal=True`` both terms keep one decimal place, which gives
-    ``CI,r,0 = -10,3`` dB and ``CI,t,r,0`` of 0,0 and -2,8 dB as A.2.2 and
+    ``CI,r,0 = -10,3`` dB and ``CI,t,r,0`` of 0.0 and -2.8 dB as A.2.2 and
     A.2.3 print.
 
     :param delta_l: The reduction of impact sound pressure level ``ΔL`` per
@@ -1914,7 +1914,7 @@ def impact_improvement_adaptation_term(
         16 bands, other keys not read.
     :param reference_floor: ``"heavyweight"`` (default), ``"lightweight_1"``,
         ``"lightweight_2"`` or ``"lightweight_3"``.
-    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :param one_decimal: Use the 0.1 dB shift and one-decimal reductions.
     :return: The spectrum adaptation term, in dB: an integer, or a value to
         one decimal place when ``one_decimal`` is set.
     :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave
@@ -2056,7 +2056,7 @@ def weighted_reduction_improvement(
         (50 Hz to 5 000 Hz).
     :param basic_element: ``"heavy_wall"`` (default), ``"heavy_floor"`` or
         ``"lightweight_wall"``.
-    :param one_decimal: Rate both curves with the 0,1 dB shift and one-decimal
+    :param one_decimal: Rate both curves with the 0.1 dB shift and one-decimal
         reductions, the form of Clause 4.4 for the expression of uncertainty.
     :return: A :class:`ReductionImprovementRating`.
     :raises ValueError: If ``delta_r`` is not one-dimensional and finite, the

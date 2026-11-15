@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 # ISO 717-1 Annex C, Table C.1 - measured airborne sound reduction index R
 # (100-3150 Hz, one-third-octave). The worked example gives
-# Rw(C;Ctr) = 30(-2;-3) dB with an unfavourable-deviation sum of 31,8 dB.
+# Rw(C;Ctr) = 30(-2;-3) dB with an unfavourable-deviation sum of 31.8 dB.
 # ---------------------------------------------------------------------------
 ISO717_1_ANNEX_C_R: list[float] = [
     20.4,
@@ -77,10 +77,10 @@ ISO717_1_ANNEX_C2_EXPECTED = {
 # ---------------------------------------------------------------------------
 # ISO 16283-3:2016 field facade sound insulation. Clause 3.12 defines the
 # apparent sound reduction index of the element (loudspeaker) method as
-# R'45deg = L1,s - L2 + 10 lg(S/A) - 1,5. Choosing the specimen area S equal to
-# the equivalent absorption area A (A = 0,16 V/T = 0,16 * 62,5 / 1,0 = 10 m2)
-# collapses the 10 lg(S/A) coupling term, isolating the -1,5 dB oblique-
-# incidence correction exactly: R' = 60 - 20 - 1,5 = 38,5 dB. (Road-traffic
+# R'45deg = L1,s - L2 + 10 lg(S/A) - 1.5. Choosing the specimen area S equal to
+# the equivalent absorption area A (A = 0.16 V/T = 0.16 * 62.5 / 1.0 = 10 m2)
+# collapses the 10 lg(S/A) coupling term, isolating the -1.5 dB oblique-
+# incidence correction exactly: R' = 60 - 20 - 1.5 = 38.5 dB. (Road-traffic
 # method R'tr,s uses -3 dB instead; Clause 3.13.)
 # ---------------------------------------------------------------------------
 ISO16283_3_R45_LOUDSPEAKER_CORRECTION_DB = 1.5
@@ -102,8 +102,8 @@ ISO16283_3_R45_EXPECTED_DB = 38.5
 # The trigger is "smaller than 25 m3 (calculated to the nearest cubic metre)",
 # printed in ISO 16283-1:2014 Clause 8.1 and 10.4, ISO 16283-2:2020 Clause 6,
 # 8.1 and 10.4, and ISO 16283-3:2016 Clause 6, 7.3.1 and 8.4. Rounded half away
-# from zero, the last volume that triggers is 24,49 m3 and the first that does
-# not is 24,5 m3.
+# from zero, the last volume that triggers is 24.49 m3 and the first that does
+# not is 24.5 m3.
 # ---------------------------------------------------------------------------
 ISO16283_LF_BANDS_HZ: list[float] = [50.0, 63.0, 80.0]
 ISO16283_LF_VOLUME_LIMIT_M3 = 25.0
@@ -135,9 +135,9 @@ ISO16283_LF_T63_OCTAVE_S = 0.72
 
 # ---------------------------------------------------------------------------
 # ISO 10140-2:2010 laboratory airborne sound reduction index R (Formula (2)):
-# R = L1 - L2 + 10 lg(S/A), A = 0,16 V/T. The reference-curve construction lays
+# R = L1 - L2 + 10 lg(S/A), A = 0.16 V/T. The reference-curve construction lays
 # R exactly on the ISO 717-1 Table 3 shape (100-3150 Hz) by choosing S = A
-# (S = 10 m2, A = 0,16 * 50 / 0,8 = 10 m2), so R = L1 - L2 = the reference. The
+# (S = 10 m2, A = 0.16 * 50 / 0.8 = 10 m2), so R = L1 - L2 = the reference. The
 # 32 dB unfavourable-deviation allowance then permits a 2 dB upward shift of the
 # reference (32 dB / 16 bands), giving Rw = curve@500 Hz (52) + 2 = 54 dB - the
 # analytic +2-shift anchor (mirrors tests/building/measurement/test_laboratory_insulation.py).
@@ -164,10 +164,10 @@ ISO10140_2_REF_AIRBORNE_RW = 54
 
 # ---------------------------------------------------------------------------
 # EN 12354-1:2000 Annex H.3 airborne prediction worked example. A separating
-# element of Rw = 57 dB and area S = 11,5 m2 is flanked by four elements; each
+# element of Rw = 57 dB and area S = 11.5 m2 is flanked by four elements; each
 # contributes an Ff/Fd/Df triplet (12 flanking paths), which with the direct
 # Dd path make 13 transmission paths. Energy summation (Formula (26)) gives
-# R'w = 52,2 dB -> 52 dB. Row = (label, Rw_flanking, KFf, KFd=KDf, coupling
+# R'w = 52.2 dB -> 52 dB. Row = (label, Rw_flanking, KFf, KFd=KDf, coupling
 # length lf). Mirrors tests/building/prediction/test_simplified_model.py (_annex_h_paths).
 # ---------------------------------------------------------------------------
 EN12354_1_ANNEX_H3_R_DIRECT = 57.0
@@ -179,7 +179,7 @@ EN12354_1_ANNEX_H3_ELEMENTS: list[tuple[str, float, float, float, float]] = [
     ("intwall", 33.0, 33.5, 15.7, 2.55),
 ]
 EN12354_1_ANNEX_H3_NUM_PATHS = 13
-EN12354_1_ANNEX_H3_RPRIME_W = 52  # 52,2 dB rounds to 52
+EN12354_1_ANNEX_H3_RPRIME_W = 52  # 52.2 dB rounds to 52
 # All twelve printed flanking-path values of the H.3 results table (dB): for
 # each element the standard prints RFd = RDf (the "R_1d"/"R_D1" rows are the
 # same value) and RFf. Keyed by element label -> (R_Ff, R_Fd = R_Df).
@@ -189,14 +189,14 @@ EN12354_1_ANNEX_H3_PATH_RW: dict[str, tuple[float, float]] = {
     "facade": (61.1, 62.7),
     "intwall": (73.0, 67.2),
 }
-# Formula (5b) closure of both H.3 examples: V = 50 m3, Ss = 11,5 m2. The
-# standard prints DnT,w = 52,2 + 10 lg[50/(3 x 11,5)] = 53,8 ~ 54 dB and (with
-# the floating floor) 52,7 + 1,6 = 54,3 ~ 54 dB; the exact Formula (5b) factor
-# 0,32 V/Ss gives 53,6 / 54,1 dB - same integer ratings.
+# Formula (5b) closure of both H.3 examples: V = 50 m3, Ss = 11.5 m2. The
+# standard prints DnT,w = 52.2 + 10 lg[50/(3 x 11.5)] = 53.8 ~ 54 dB and (with
+# the floating floor) 52.7 + 1.6 = 54.3 ~ 54 dB; the exact Formula (5b) factor
+# 0.32 V/Ss gives 53.6 / 54.1 dB - same integer ratings.
 EN12354_1_ANNEX_H3_VOLUME = 50.0
 EN12354_1_ANNEX_H3_DNT_W = 54
 EN12354_1_ANNEX_H3_DNT_W_PRINTED = 53.8  # with the standard's V/(3 S) rounding
-EN12354_1_ANNEX_H3_DNT_W_SECOND = 54  # second example: 54,3 ~ 54 dB
+EN12354_1_ANNEX_H3_DNT_W_SECOND = 54  # second example: 54.3 ~ 54 dB
 
 # ---------------------------------------------------------------------------
 # EN 12354-2:2000 Annex E.3 impact prediction worked example. A concrete floor
@@ -213,22 +213,22 @@ EN12354_2_ANNEX_E3_K = 2
 EN12354_2_ANNEX_E3_LPRIME_N_W = 45
 
 # ---------------------------------------------------------------------------
-# EN 12354-3:2000 Annex F worked example - facade airborne insulation. A 11,3 m2
+# EN 12354-3:2000 Annex F worked example - facade airborne insulation. A 11.3 m2
 # facade (V = 50 m3, flat reflecting so ΔLfs = 0) of four elements, octave bands
 # 125-2000 Hz. Rows: (name, area_m2, R_or_Dne_dB[5]); the air inlet is a small
 # element entered as Dn,e (already length-corrected to the installed 3 m). The
 # apparent R' = -10 lg Σ τe (Formula 10) and D2m,nT = R' + 10 lg(V/(6 T0 S))
-# (Formula 13, T0 = 0,5 s) give the single numbers R'tr,s,w = 31 (Ctr = -3) and
+# (Formula 13, T0 = 0.5 s) give the single numbers R'tr,s,w = 31 (Ctr = -3) and
 # D2m,nT,w = 33 dB (Table F.1.3). NOTE: the standard's own printed per-element
-# partial indices sum to R' = 35,8 / 38,0 dB at 1 k / 2 k, whereas its R' row
-# prints 35,4 / 37,5 - an internal rounding inconsistency in the 2000 example;
+# partial indices sum to R' = 35.8 / 38.0 dB at 1 k / 2 k, whereas its R' row
+# prints 35.4 / 37.5 - an internal rounding inconsistency in the 2000 example;
 # the low bands (125-500 Hz) and every single-number rating are exact.
-# NOTE 2: the printed D2m,nT row of Annex F equals R' + 1,5 dB, whereas
-# Formula (13) with V = 50 m3, S = 11,3 m2, T0 = 0,5 s gives
-# 10 lg(50/(6*0,5*11,3)) = +1,69 dB. The example is the self-consistent one
-# here: 10 lg(0,16*50/(0,5*11,3)) = 1,5116 dB is the printed row, and
-# Formula (13)'s "6" is a rounded 1/0,16 = 6,25, worth 10 lg(6,25/6) = 0,18 dB.
-# ISO 12354-3:2017 Formula (4) replaces the 6 with an explicit Csab = 0,16 s/m,
+# NOTE 2: the printed D2m,nT row of Annex F equals R' + 1.5 dB, whereas
+# Formula (13) with V = 50 m3, S = 11.3 m2, T0 = 0.5 s gives
+# 10 lg(50/(6*0.5*11.3)) = +1.69 dB. The example is the self-consistent one
+# here: 10 lg(0.16*50/(0.5*11.3)) = 1.5116 dB is the printed row, and
+# Formula (13)'s "6" is a rounded 1/0.16 = 6.25, worth 10 lg(6.25/6) = 0.18 dB.
+# ISO 12354-3:2017 Formula (4) replaces the 6 with an explicit Csab = 0.16 s/m,
 # i.e. it adopts the example's constant. The module implements Formula (13) as
 # printed; the single-number oracle D2m,nT,w = 33 reproduces either way.
 # ---------------------------------------------------------------------------
@@ -271,7 +271,7 @@ EN12354_4_ANNEX_G_DOOR_AREA = 24.0  # 6 x 4 m
 EN12354_4_ANNEX_G_SIDE1_RPRIME_LOW = [28.2, 30.8, 33.9]  # 63/125/250 Hz
 EN12354_4_ANNEX_G_SIDE1_LW_LOW = [59.8, 61.2]  # 63/125 Hz, digit-exact
 # Table G.9 attenuation and exterior level (side W x H, distance d) -> A'tot, Lp.
-# Lp uses the side's A-weighted power level (Table G.8): side1 62,9 / side4 72,9.
+# Lp uses the side's A-weighted power level (Table G.8): side1 62.9 / side4 72.9.
 EN12354_4_ANNEX_G_SIDE1_LWA = 62.9
 EN12354_4_ANNEX_G_SIDE4_LWA = 72.9
 EN12354_4_ANNEX_G_ATTENUATION: list[tuple[float, float, float, float]] = [
@@ -285,8 +285,8 @@ EN12354_4_ANNEX_G_LP_SIDE1_D5 = 36.6
 EN12354_4_ANNEX_G_LP_SIDE4_D25 = 37.3
 # Remaining Table G.9 cells: Lp = LWA - A'tot for the other two reception
 # points (side 1 at 25 m; side 4 at 5 m).
-EN12354_4_ANNEX_G_LP_SIDE1_D25 = 28.5  # 62,9 - 34,4
-EN12354_4_ANNEX_G_LP_SIDE4_D5 = 44.6  # 72,9 - 28,3
+EN12354_4_ANNEX_G_LP_SIDE1_D25 = 28.5  # 62.9 - 34.4
+EN12354_4_ANNEX_G_LP_SIDE4_D5 = 44.6  # 72.9 - 28.3
 
 # ---------------------------------------------------------------------------
 # EN 12354-3:2000 Annex C, Figure C.2 - facade-shape level difference ΔLfs
@@ -315,9 +315,9 @@ EN12354_3_ANNEX_C_DLFS: list[tuple[FacadeShape, float, float, float]] = [
 # ---------------------------------------------------------------------------
 # ISO 12999-1:2020 measurement uncertainty. Table 2 (Clause 7.2) tabulates the
 # airborne one-third-octave standard uncertainty; situation A at 1000 Hz is
-# 1,8 dB (digit-exact oracle). Table 8 (Clause 8) gives the two-sided 95 %
-# coverage factor k = 1,96, so the expanded uncertainty is U = k u = 1,96 u
-# exactly; for Rw in situation A (u = 1,2 dB, Table 3) this is U = 2,352 dB.
+# 1.8 dB (digit-exact oracle). Table 8 (Clause 8) gives the two-sided 95 %
+# coverage factor k = 1.96, so the expanded uncertainty is U = k u = 1.96 u
+# exactly; for Rw in situation A (u = 1.2 dB, Table 3) this is U = 2,352 dB.
 # ---------------------------------------------------------------------------
 ISO12999_1_TABLE2_AIRBORNE_A_1000HZ = 1.8
 ISO12999_1_COVERAGE_K_95 = 1.96
@@ -326,7 +326,7 @@ ISO12999_1_RW_A_STANDARD_UNCERTAINTY = 1.2
 # ISO 12999-1:2020 Annex B worked example. Table B.1 gives a measured Ri
 # spectrum (21 one-third-octave bands 50-5000 Hz) with the Table 2
 # situation-A uncertainties ui; Table B.2 the resulting one-decimal single
-# numbers (0,1 dB reference-curve shift per B.2) and their uncertainties:
+# numbers (0.1 dB reference-curve shift per B.2) and their uncertainties:
 # correlated per Formulae (B.3)-(B.6), uncorrelated per Formula (B.2).
 ISO12999_1_ANNEX_B_FREQ: list[float] = [
     50,
@@ -410,10 +410,10 @@ ISO12999_1_ANNEX_B_U_UNCORR_CTR = 0.8  # u(Rw+Ctr,50-5000), uncorrelated
 # ISO 717-2 Annex C, Table C.1 - measured normalized impact sound pressure
 # level Ln (100-3150 Hz, one-third-octave, laboratory). The worked example
 # gives Ln,w = 79 dB, CI = -11 dB with an unfavourable-deviation sum of
-# 28,0 dB. CI = -11 pins the ISO 717-2:2013 Annex C print: the 2020 reprint
-# of this example says CI = -10 because its Ln,sum (83,5238 -> 84) erroneously
+# 28.0 dB. CI = -11 pins the ISO 717-2:2013 Annex C print: the 2020 reprint
+# of this example says CI = -10 because its Ln,sum (83.5238 -> 84) erroneously
 # includes the 3 150 Hz band, contradicting its own A.2.1 (100-2500 Hz);
-# summing 100-2500 Hz gives 83,2613 -> 83 and CI = -11.
+# summing 100-2500 Hz gives 83.2613 -> 83 and CI = -11.
 # ---------------------------------------------------------------------------
 ISO717_2_ANNEX_C1_LN: list[float] = [
     62.1,
@@ -439,7 +439,7 @@ ISO717_2_ANNEX_C1_EXPECTED = {
     "unfavorable_sum": 28.0,
 }
 # Same Table C.1, right-hand columns: the floor WITH the floor covering.
-# Ln,w = 64 dB, CI = -3 dB, unfavourable-deviation sum 30,0 dB.
+# Ln,w = 64 dB, CI = -3 dB, unfavourable-deviation sum 30.0 dB.
 ISO717_2_ANNEX_C1_COVERED_LN: list[float] = [
     59.1,
     59.5,
@@ -473,7 +473,7 @@ ISO717_2_ANNEX_C1_COVERED_EXPECTED = {
 # "Ln,sum = 75,2527" is the energy sum of the wrong column over the wrong
 # range (the measured floor with covering, 16 bands 100-3150 Hz); the A.2.1
 # sum of the covered reference floor over 100-2500 Hz rounds to 76 dB with
-# either the misprinted 71,0 or Table 4's 71,5 at 800 Hz (see docs/ERRATA.md).
+# either the misprinted 71.0 or Table 4's 71.5 at 800 Hz (see docs/ERRATA.md).
 # ---------------------------------------------------------------------------
 ISO717_2_ANNEX_C2_DELTA_L: list[float] = [
     3.0,
@@ -505,9 +505,9 @@ ISO717_2_ANNEX_C2_CI_DELTA = -9
 # engine returns the same Rw = 30 dB through the intensity path. The
 # adaptation term Kc (Annex B) oracle is the standard's own printed
 # Table B.1 (21 one-third-octave rows, 50-5000 Hz, one decimal): the
-# Formula (B.2) approximation Kc = 10 lg(1 + 61,4/f) reproduces every row at
+# Formula (B.2) approximation Kc = 10 lg(1 + 61.4/f) reproduces every row at
 # 1 dp, and Formula (B.1) with the reference room (Sb2 = 117 m², V2 = 81 m³,
-# c = 340 m/s) reduces to (B.2) within 0,001 dB.
+# c = 340 m/s) reduces to (B.2) within 0.001 dB.
 # ---------------------------------------------------------------------------
 ISO15186_1_REF_LP1 = 85.0  # flat source-room level (dB)
 ISO15186_1_REF_SM = 12.0  # measurement-surface area (m²)
@@ -548,7 +548,7 @@ ISO15186_1_KC_B1_PRINTED = [kc for _, kc in ISO15186_1_KC_TABLE_B1]
 # panels at 1 013 hPa and 23 degC, over the six one-third octaves 50 Hz to
 # 160 Hz. The plaster-board column is the oracle of Formulas (A.1) to (A.5)
 # and is reproduced from its own stated inputs (10 kg/m2 over a 10 m2 test
-# opening) to within the 0,05 dB of its printed resolution.
+# opening) to within the 0.05 dB of its printed resolution.
 #
 # The steel-sandwich column is NOT an oracle and is deliberately not used as
 # one: it cannot be reproduced from the inputs printed beside it. See
@@ -557,7 +557,7 @@ ISO15186_1_KC_B1_PRINTED = [kc for _, kc in ISO15186_1_KC_TABLE_B1]
 ISO15186_3_ANNEX_A_BANDS = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0)
 ISO15186_3_ANNEX_A_TEMPERATURE = 23.0  # degC, stated in the table caption
 ISO15186_3_ANNEX_A_PRESSURE = 101300.0  # Pa, 1 013 hPa, likewise
-ISO15186_3_PLASTER_SURFACE_MASS = 10.0  # kg/m2, 12,5 mm plaster board
+ISO15186_3_PLASTER_SURFACE_MASS = 10.0  # kg/m2, 12.5 mm plaster board
 ISO15186_3_PLASTER_AREA = 10.0  # m2, the stated wall opening
 #: Printed Table A.1, plaster-board column, in dB.
 ISO15186_3_PLASTER_TABLE_A1 = [10.7, 11.9, 13.4, 14.8, 16.3, 17.9]
@@ -606,9 +606,9 @@ ISO717_2_REFERENCE_FLOOR_CI = -11
 # paths, not a raster; only the test-setup photographs in the paper are
 # raster), so the per-band spectrum below was digitized from the vector
 # markers. Axis calibration: the nine major horizontal gridlines span 0 to
-# 80 dB over 1549 px at 600 dpi (0,0517 dB/px); each data point is the colour
+# 80 dB over 1549 px at 600 dpi (0.0517 dB/px); each data point is the colour
 # segmented centroid of the red ISO 16251-1 square markers. Digitization
-# tolerance +/- 0,5 dB per band. The ISO 717-2 single-number rating is
+# tolerance +/- 0.5 dB per band. The ISO 717-2 single-number rating is
 # invariant to that band error and to rounding the spectrum to integers or to
 # half-decibels. End-check: the paper's published Delta-Lw = 29 dB
 # (ISO 16251-1) is reproduced exactly; the companion ISO 140-8 series, read the
@@ -683,13 +683,13 @@ ISO10848_LOSS_FACTOR = 0.0044
 # ---------------------------------------------------------------------------
 # EN 12354-5:2009 Annex I - installed structure-borne sound worked examples
 # (octave bands 63-2000 Hz). The printed tables carry one-decimal
-# intermediates, so chained values reproduce within +/-0,15 dB.
+# intermediates, so chained values reproduce within +/-0.15 dB.
 # ---------------------------------------------------------------------------
 EN12354_5_ANNEX_I_BANDS: tuple[float, ...] = (63, 125, 250, 500, 1000, 2000)
 
 # I.2 whirlpool bath (Tables I.6a/I.7). Floor power component: the laboratory
 # characteristic reception-plate levels L_Ws,n,1 (re Y_inf,rec = 5e-6 m/Ns)
-# are corrected to the installed floor (Y_inf,1 = 1.25e-6 m/Ns -> -6,0 dB);
+# are corrected to the installed floor (Y_inf,1 = 1.25e-6 m/Ns -> -6.0 dB);
 # path 11 then follows Formula (18a) with the -4 dB area/absorption terms of
 # the example (S_i = S0 = 10 m2). Table I.7 totals the whirlpool at 26 dB(A).
 EN12354_5_I6A_LWSN_FLOOR = [67.6, 67.3, 64.4, 48.4, 42.5, 41.3]
@@ -922,7 +922,7 @@ ISO10140_5_TABLE_I1: tuple[tuple[float, float, float], ...] = (
 # in m/s) of Table H.1, then (hole diameter range in mm, holes per m2, fall
 # height in m) of rows 1 to 3 of Table H.2. Rows 4, 6 and 7 of Table H.2 repeat
 # Table H.1. The tolerances are in the text of H.1 below Table H.2: rate within
-# +-2 mm/h, half of the drops within +-0,5 mm and within +-1 m/s.
+# +-2 mm/h, half of the drops within +-0.5 mm and within +-1 m/s.
 ISO10140_5_TABLES_H1_H2: dict[
     RainType, tuple[float, float, float, tuple[float, float], float, float]
 ] = {
@@ -1094,9 +1094,9 @@ ISO12354_ANNEX_L_ELEMENTS: dict[str, tuple[float, ...]] = {
     "int1": (11.00, 4.00, 2.75, 360.0, 128.4, 0.0100, 1800.0, 2500.0, 4.0),
     "int2": (13.75, 5.00, 2.75, 360.0, 128.4, 0.0100, 1800.0, 2500.0, 5.0),
 }
-# The rows above carry the *element specifications*: 0,005 for the concrete
-# floor and 0,012 5 for the AAC external walls (Annex B Table B.3). The
-# Table L.3 / G.3 input block prints 0,013 for the external walls, which does
+# The rows above carry the *element specifications*: 0.005 for the concrete
+# floor and 0.012 5 for the AAC external walls (Annex B Table B.3). The
+# Table L.3 / G.3 input block prints 0.013 for the external walls, which does
 # not reproduce their own column; see docs/ERRATA.md.
 ISO12354_ANNEX_L_FLOOR_ETA_INT = 0.005
 ISO12354_ANNEX_L3_PRINTED_EXT_ETA_INT = 0.013
@@ -1225,7 +1225,7 @@ ISO12354_ANNEX_L2_SIGMA: dict[str, tuple[float, ...]] = {
     ),
 }
 # Table L.2 / G.2 - radiation factor for forced waves (depends only on the
-# element dimensions, so the 4,00 x 2,75 and 5,00 x 2,75 walls pair up).
+# element dimensions, so the 4.00 x 2.75 and 5.00 x 2.75 walls pair up).
 ISO12354_ANNEX_L2_SIGMA_F: dict[str, tuple[float, ...]] = {
     "floor": (
         0.7912,
@@ -2031,8 +2031,8 @@ ISO12354_ANNEX_L1_R_PRIME = (
     70.9,
     70.9,
 )
-# ISO 717-1 rating of that spectrum. Table L.1 prints a non-integer 57,8 /
-# 57,9 (see docs/ERRATA.md); the ISO 717-1 rating in 1 dB steps is 57 dB.
+# ISO 717-1 rating of that spectrum. Table L.1 prints a non-integer 57.8 /
+# 57.9 (see docs/ERRATA.md); the ISO 717-1 rating in 1 dB steps is 57 dB.
 ISO12354_ANNEX_L1_R_PRIME_W = 57
 
 # Table G.4 - the printed per-band improvement of the floating floor,
@@ -2864,7 +2864,7 @@ ISO10140_2_TABLE_A1_R_F: tuple[float, ...] = (
 ISO10140_2_TABLE_A1_RATING: tuple[int, int, int] = (59, -2, -7)
 
 # ISO 10140-1:2021 J.1 (PDF page 44, printed folio 38): the fixed correction
-# below a 6 dB margin over Rs,max, 1,3 dB, which ISO 10140-2:2021 A.3 (PDF
+# below a 6 dB margin over Rs,max, 1.3 dB, which ISO 10140-2:2021 A.3 (PDF
 # page 16, printed folio 10) says "corresponds to a difference of 6 dB"; and
 # the lower limit J.1 prints as its example, "(Rs >= 50,4 dB)".
 ISO10140_1_J1_LIMIT_CORRECTION_DB = 1.3

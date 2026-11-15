@@ -125,9 +125,9 @@ def test_bands_are_the_printed_three() -> None:
         (8.0, True),
         (24.0, True),
         (24.4, True),
-        # floor(24,49 + 0,5) = 24, the last volume that still triggers.
+        # floor(24.49 + 0.5) = 24, the last volume that still triggers.
         (24.49, True),
-        # floor(24,5 + 0,5) = 25: rounds up to the limit, so it does not.
+        # floor(24.5 + 0.5) = 25: rounds up to the limit, so it does not.
         (24.5, False),
         (24.6, False),
         # "smaller than", strictly: 25 m³ exactly is outside the procedure.
@@ -144,7 +144,7 @@ def test_trigger_is_strict_below_25_after_rounding(
 
 
 def test_half_way_volume_diverges_from_the_builtin_round() -> None:
-    """24,5 m³ is where the tie rule shows, so the tie rule is pinned here.
+    """24.5 m³ is where the tie rule shows, so the tie rule is pinned here.
 
     The standards give none, so the tree's own rule applies: half away from
     zero, ``floor(V + 0,5)``, which answers 25 m³ and does not trigger. Python's
@@ -359,7 +359,7 @@ def test_the_63_hz_octave_value_replaces_all_three_bands() -> None:
 
 
 def test_exact_band_centres_are_recognised_as_well_as_nominal_ones() -> None:
-    """49,6 / 62,5 / 79,4 Hz is the same measurement as 50 / 63 / 80 Hz."""
+    """49.6 / 62.5 / 79.4 Hz is the same measurement as 50 / 63 / 80 Hz."""
     exact = np.array([49.6, 62.5, 79.4, 100.0, 125.0])
     nominal = apply_low_frequency_procedure(
         _L2,
@@ -379,8 +379,8 @@ def test_the_three_bands_are_read_where_they_actually_sit() -> None:
 
     Every other case here puts 50 / 63 / 80 Hz in the first three columns, so
     reading the leading three would answer them all. A real sheet from a
-    two-thirds-octave-wider analyser starts at 31,5 Hz, and then the leading
-    three columns are 31,5 / 40 / 50 Hz: the wrong bands, and up to 6 dB out.
+    two-thirds-octave-wider analyser starts at 31.5 Hz, and then the leading
+    three columns are 31.5 / 40 / 50 Hz: the wrong bands, and up to 6 dB out.
     """
     freqs = np.array([31.5, 40.0, 50.0, 63.0, 80.0, 100.0])
     levels = np.array([62.0, 58.0, 50.0, 52.0, 49.0, 45.0])
@@ -400,7 +400,7 @@ def test_the_three_bands_are_read_where_they_actually_sit() -> None:
         ]
     )
     assert np.allclose(result.levels[2:5], expected, rtol=0.0, atol=1e-12)
-    # 31,5 Hz and 40 Hz are below the procedure and 100 Hz above it: the
+    # 31.5 Hz and 40 Hz are below the procedure and 100 Hz above it: the
     # substitution touches neither end.
     assert np.array_equal(result.levels[:2], levels[:2])
     assert np.array_equal(result.levels[5:], levels[5:])
@@ -825,7 +825,7 @@ def test_without_the_procedure_nothing_changes() -> None:
 # 80 Hz. When the volume and the band centres are both in hand the library can
 # see that for itself, and says so.
 
-#: The bedroom of the low-frequency-procedure page: 3,6 m by 2,7 m by 2,4 m,
+#: The bedroom of the low-frequency-procedure page: 3.6 m by 2.7 m by 2.4 m,
 #: which is 23 m³ to the nearest cubic metre, measured over the 16 core bands
 #: and the optional low range of Clause 5.
 _BEDROOM_VOLUME = 23.328

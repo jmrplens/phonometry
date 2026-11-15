@@ -371,8 +371,8 @@ HARRIS_32_DENSITIES: tuple[tuple[str, str, str], ...] = (
 #: a fraction, because on these pages the imperial half is the measurement and
 #: the SI half its translation, and two-directional wherever the imperial half
 #: is itself printed as a rounded decimal. That is what keeps row 17 off this
-#: list: it prints "36,9 cm (14,5 in)" where 14,5 in is 36,83 cm, and 36,9 cm
-#: is 14,53 in, which the page would print as the 14,5 in beside it. It is also
+#: list: it prints "36,9 cm (14,5 in)" where 14.5 in is 36.83 cm, and 36.9 cm
+#: is 14.53 in, which the page would print as the 14.5 in beside it. It is also
 #: what keeps the page's coarse roundings off it, "60 cm (24 in)" and "2,5 cm
 #: (1 in)" among them: a truncation is still the number.
 HARRIS_32_MISPRINTED_PAIRS: tuple[tuple[str, str], ...] = (

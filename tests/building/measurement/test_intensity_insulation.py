@@ -133,7 +133,7 @@ def test_kc_reproduces_printed_table_b1() -> None:
 
 
 def test_kc_b1_reference_room_reduces_to_b2() -> None:
-    """Formula (B.1) with the reference room equals (B.2) within 0,001 dB."""
+    """Formula (B.1) with the reference room equals (B.2) within 0.001 dB."""
     b2 = building.adaptation_term_kc(ref.ISO15186_1_KC_BANDS)
     b1 = building.adaptation_term_kc(
         ref.ISO15186_1_KC_BANDS, boundary_area=117.0, volume=81.0
@@ -142,7 +142,7 @@ def test_kc_b1_reference_room_reduces_to_b2() -> None:
 
 
 def test_kc_decreases_with_frequency() -> None:
-    """Kc is strictly monotone decreasing (the 61,4/f term shrinks)."""
+    """Kc is strictly monotone decreasing (the 61.4/f term shrinks)."""
     kc = building.adaptation_term_kc([100.0, 200.0, 400.0, 800.0, 1600.0])
     assert np.all(np.diff(kc) < 0.0)
 
@@ -252,7 +252,7 @@ def test_subarea_intensity_level_negative_direction_rule() -> None:
     expected = 10.0 * np.log10((9.0 * 10**5.0 - 1.0 * 10**4.0) / 10.0)
     assert lin[0] == pytest.approx(expected)
     assert sm == pytest.approx(10.0)  # Sm = sum(|Smi|)
-    # The unsigned sum would overestimate LIn by 10 lg(9,1/8,9) ~ 0,1 dB of
+    # The unsigned sum would overestimate LIn by 10 lg(9.1/8.9) ~ 0.1 dB of
     # numerator energy for this case; check the exact signed/unsigned gap.
     unsigned = building.subarea_intensity_level([[50.0], [40.0]], [9.0, 1.0]).levels
     assert unsigned[0] - lin[0] == pytest.approx(10.0 * np.log10(9.1 / 8.9))

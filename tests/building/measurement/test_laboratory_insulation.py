@@ -13,7 +13,7 @@ formulae, and consistency with the verified ISO 717-1/2 rating engine.
   :func:`weighted_rating` / :func:`weighted_impact_rating` on the per-band
   quantity, and reproduce a curve laid on the ISO 717 reference.
 - Background correction (ISO 10140-4 Clause 4.3, Formula (4)): the 6/15 dB
-  criteria and the fixed 1,3 dB limit-of-measurement cap.
+  criteria and the fixed 1.3 dB limit-of-measurement cap.
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ _REF_IMPACT = np.array(
 
 
 def test_r_reduces_to_level_difference_when_s_equals_a() -> None:
-    # A = 0,16 * 50 / 0,8 = 10 m² per band; S = 10 => 10 lg(S/A) = 0.
+    # A = 0.16 * 50 / 0.8 = 10 m² per band; S = 10 => 10 lg(S/A) = 0.
     l1 = np.full(16, 90.0)
     l2 = np.full(16, 40.0)
     t2 = np.full(16, 0.8)
@@ -130,7 +130,7 @@ def test_airborne_extended_range_has_no_rating() -> None:
 
 
 def test_ln_reduces_to_li_when_a_equals_a0() -> None:
-    # A = 0,16 * 50 / 0,8 = 10 = A0 => Ln = Li.
+    # A = 0.16 * 50 / 0.8 = 10 = A0 => Ln = Li.
     li = np.full(16, 60.0)
     t2 = np.full(16, 0.8)
     res = building.laboratory_impact_insulation(li, t2, volume=50.0)
@@ -139,7 +139,7 @@ def test_ln_reduces_to_li_when_a_equals_a0() -> None:
 
 
 def test_ln_adds_ten_lg_a_over_a0() -> None:
-    # A = 0,16 * 100 / 0,8 = 20 => Ln = Li + 10 lg(20/10).
+    # A = 0.16 * 100 / 0.8 = 20 => Ln = Li + 10 lg(20/10).
     li = np.full(16, 55.0)
     t2 = np.full(16, 0.8)
     res = building.laboratory_impact_insulation(li, t2, volume=100.0)
@@ -195,7 +195,7 @@ def test_background_correction_exactly_15_unchanged() -> None:
 
 
 def test_background_correction_low_margin_capped_and_warns() -> None:
-    # Margin 3 dB (<= 6): fixed 1,3 dB cap, warning.
+    # Margin 3 dB (<= 6): fixed 1.3 dB cap, warning.
     with pytest.warns(LaboratoryInsulationWarning):
         corrected = building.background_correction([53.0], [50.0])
     assert np.allclose(corrected, 53.0 - 1.3)
@@ -330,7 +330,7 @@ def test_airborne_absorption_of_another_band_count_is_refused() -> None:
 
     The verbose ISO 10140-2 table walks the band centres and reads each column
     at that band, so an absorption area one entry too long is printed only as
-    far as the sixteenth band: the surplus 99,9 m² lands beside the 100 Hz
+    far as the sixteenth band: the surplus 99.9 m² lands beside the 100 Hz
     ``R`` and the tail is dropped with nothing said. The renderer checks the
     reported curve against the rating and never looks at ``absorption_area``, so
     construction is the last place the mismatch can be caught.
@@ -429,7 +429,7 @@ def test_plot_without_rating_raises() -> None:
 def test_reference_element_airborne_end_to_end(element: BasicElement) -> None:
     """The published basic-element curves reproduce their printed Rw (C; Ctr).
 
-    End to end: with S = A (S = 10 m2, A = 0,16*50/0,8 = 10 m2) the level
+    End to end: with S = A (S = 10 m2, A = 0.16*50/0.8 = 10 m2) the level
     difference equals the tabulated R, so the whole ISO 10140-2 Formula (2)
     -> ISO 717-1 chain must return the printed single numbers.
     """
@@ -453,7 +453,7 @@ def test_reference_element_airborne_end_to_end(element: BasicElement) -> None:
 def test_reference_floor_impact_end_to_end(floor: ReferenceFloor) -> None:
     """The published lightweight floors reproduce their printed Ln,t,r,0,w (CI).
 
-    End to end: with A = A0 (V = 31,25 m3, T = 0,5 s -> A = 10 m2) the
+    End to end: with A = A0 (V = 31.25 m3, T = 0.5 s -> A = 10 m2) the
     receiving level equals the tabulated Ln, so the ISO 10140-3 Formula (1)
     -> ISO 717-2 chain must return the printed single numbers.
     """

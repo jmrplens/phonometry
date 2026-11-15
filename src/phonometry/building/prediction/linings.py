@@ -169,7 +169,7 @@ _THIRD_OCTAVE_CENTRES: tuple[float, ...] = (
 )
 
 #: Base-ten band index ``n`` of the first entry of ``_THIRD_OCTAVE_CENTRES``:
-#: the nominal 12,5 Hz band has the exact midband frequency ``10^(11/10)``.
+#: the nominal 12.5 Hz band has the exact midband frequency ``10^(11/10)``.
 _THIRD_OCTAVE_FIRST_INDEX: int = 11
 
 #: Additional-layer system of ISO 12354-1:2017 Annex D.
@@ -318,7 +318,7 @@ def weighted_lining_improvement(
             f"base_rating = {rw:g} dB lies outside the "
             f"{rw_low:g} dB <= Rw <= {rw_high:g} dB range Clause D.2.2 states "
             "Table D.1 for; the result is an extrapolation of "
-            "74,4 - 20 lg(fo) - Rw/2 and is not covered by the standard.",
+            "74.4 - 20 lg(fo) - Rw/2 and is not covered by the standard.",
             BuildingPredictionWarning,
         )
     nominal = _round_to_third_octave(f0)

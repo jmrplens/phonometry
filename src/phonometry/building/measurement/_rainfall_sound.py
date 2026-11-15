@@ -42,7 +42,7 @@ level :math:`L_{I\mathrm{A}} = 10 \log_{10} \sum 10^{0.1(L_{Ij} + C_j)}`
 and three bands into an octave by Formula (K.3).
 
 **The reference specimen.** For comparison between laboratories, the levels
-are normalized with the result for a 6 mm glass pane of 1,25 m by 1,5 m under
+are normalized with the result for a 6 mm glass pane of 1.25 m by 1.5 m under
 heavy rain (K.6, ISO 10140-5:2021 Annex I): its measured level is corrected to
 the reference loss factor of Table I.1, :math:`L_{I,\mathrm{m,ref}} =
 L_{I,\mathrm{ref}} + 10 \log_{10}(\eta/\eta_\mathrm{ref})` with
@@ -239,7 +239,7 @@ def _band_table(values: tuple[float, ...]) -> Mapping[float, float]:
 #: The values :math:`C_j` of ISO 10140-1:2021 Table K.2 (PDF page 57, printed
 #: folio 51), in dB, keyed by one-third-octave band centre frequency in Hz,
 #: 100 Hz to 5 000 Hz: the corrections Formula (K.2) adds to each band before
-#: the energetic sum. They are the A-weighting of IEC 61672-1 rounded to 0,1 dB
+#: the energetic sum. They are the A-weighting of IEC 61672-1 rounded to 0.1 dB
 #: and evaluated, as IEC 61672-1 Table 3 is, at the exact base-ten midband
 #: frequency of each nominal band; at the nominal 125 Hz, 160 Hz, 200 Hz,
 #: 250 Hz and 5 000 Hz the rounded weighting would not be the printed value.
@@ -283,8 +283,8 @@ _DROP_SHARE = 0.5
 
 #: Relative slack on the inclusive tolerances of H.1 ("within ±2 mm/h", "within
 #: ±0,5 mm", "within ±1 m/s"). A rate on the bound must pass, but it rarely
-#: reaches the comparison as the decimal it stands for: 3,8 L collected on
-#: 0,1 m² in one hour is 38 mm/h, 2 mm/h below the nominal 40 mm/h, and the
+#: reaches the comparison as the decimal it stands for: 3.8 L collected on
+#: 0.1 m² in one hour is 38 mm/h, 2 mm/h below the nominal 40 mm/h, and the
 #: division leaves it a few units in the last place lower. Nine orders of
 #: magnitude below the tolerance is far above that arithmetic and far below
 #: anything a rain gauge resolves.
@@ -669,8 +669,8 @@ def rainfall_reference_correction(
 ) -> RainfallReferenceCorrection:
     r"""Correction :math:`\Delta L_{I\mathrm{c}}` of a laboratory (ISO 10140-5 I.2).
 
-    The small reference specimen is a single 6 mm glass pane of 1,25 m by
-    1,5 m, mounted as a window pane of ISO 10140-1:2021 Annex D and wetted by
+    The small reference specimen is a single 6 mm glass pane of 1.25 m by
+    1.5 m, mounted as a window pane of ISO 10140-1:2021 Annex D and wetted by
     heavy rain centred on it. Its structural reverberation time gives its
     loss factor, :math:`\eta = 2.2/(f T_\mathrm{s})` (Formula (I.1)), and its
     measured intensity level is brought to the reference loss factor of
@@ -901,7 +901,7 @@ def rainfall_sound(
        - 10 \log_{10}(S_\mathrm{e}/S_0)
 
     (Formula (K.1)). A small specimen (a roof window or rooflight, about
-    1,25 m by 1,5 m) is wetted from one position and :math:`S_\mathrm{e}` is
+    1.25 m by 1.5 m) is wetted from one position and :math:`S_\mathrm{e}` is
     its area; a large one (10 m² to 20 m²) from three, whose levels are added
     energetically, and :math:`S_\mathrm{e}` is three times the perforated
     area of the tank. The 18 bands 100 Hz to 5 000 Hz give the A-weighted

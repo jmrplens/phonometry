@@ -5,17 +5,17 @@ The draft prints no worked example. The oracles are the numbers it prints and
 the closed forms it states:
 
 * **Clause 9**, folio 10: a background 4 dB below gives a correction of
-  2,2 dB, and below 4 dB the correction is held there.
+  2.2 dB, and below 4 dB the correction is held there.
 * **Table A.1**, folio 12, as printed, with the C-weighting cells the library
   takes from IEC 61672-1:2013 Table 3 instead, pinned against the library's
   own copy of that table.
 * **Table 2**, folio 10: the reproducibility standard deviations.
 * **Formulae (1), (2), (3), (5), (6) and (8)** and the ladder of 7.4.1, checked
   against identities a reader can do by hand (a reverberation time equal to
-  :math:`T_0`, a volume that makes :math:`0{,}16\,V/T = A_0`, a flat spectrum)
+  :math:`T_0`, a volume that makes :math:`0.16\,V/T = A_0`, a flat spectrum)
   and against values worked by hand where an identity would hide a reversed
   formula (an equivalent absorption area of 16 m² normalized to 10 m² gains
-  :math:`10 \lg 1{,}6`).
+  :math:`10 \lg 1.6`).
 """
 
 from __future__ import annotations
@@ -246,8 +246,8 @@ def test_ten_db_or_more_is_left_uncorrected() -> None:
 @pytest.mark.parametrize(
     ("measured", "background", "regime"),
     [
-        (20.4, 10.4, "none"),  # 10,0 dB, 9,999 999 999 999 998 in binary
-        (32.3, 28.3, "corrected"),  # 4,0 dB, 3,999 999 999 999 996 in binary
+        (20.4, 10.4, "none"),  # 10.0 dB, 9.999 999 999 999 998 in binary
+        (32.3, 28.3, "corrected"),  # 4.0 dB, 3.999 999 999 999 996 in binary
     ],
 )
 def test_the_clause_9_thresholds_hold_for_decimal_levels(
@@ -328,8 +328,8 @@ def test_average_is_formula_1_rounded_to_one_decimal() -> None:
     ("level", "rounded"),
     [
         (40.05, 40.1),
-        # Formula (1) returns 40,649 999 999 999 99 for three readings of
-        # 40,65 dB: only the cut to nine decimals rounds it up.
+        # Formula (1) returns 40.649 999 999 999 99 for three readings of
+        # 40.65 dB: only the cut to nine decimals rounds it up.
         (40.65, 40.7),
     ],
 )
@@ -341,7 +341,7 @@ def test_a_half_tenth_rounds_up(level: float, rounded: float) -> None:
 
 
 def test_a_half_decibel_single_number_rounds_up() -> None:
-    """A lone 1 000 Hz band at 44,5 dB sums to exactly 44,5 dB; 7.8 gives 45."""
+    """A lone 1 000 Hz band at 44.5 dB sums to exactly 44.5 dB; 7.8 gives 45."""
     levels = np.full(THIRD.size, -200.0)
     levels[THIRD == 1000.0] = 44.5
     res = building.service_equipment_level(
@@ -360,7 +360,7 @@ def test_flat_spectrum_a_and_c_weighted_values() -> None:
     c = [40.0 + table["C"][f] for f in THIRD]
     assert res.unrounded_ratings["LA,Fmax"] == pytest.approx(_energy_sum(a), abs=1e-9)
     assert res.unrounded_ratings["LC,Fmax"] == pytest.approx(_energy_sum(c), abs=1e-9)
-    # 51,000 4 dB and 53,550 7 dB, rounded to whole decibels by 7.8.
+    # 51.000 4 dB and 53.550 7 dB, rounded to whole decibels by 7.8.
     assert res.ratings["LA,Fmax"] == 51
     assert res.ratings["LC,Fmax"] == 54
     assert set(res.ratings) == {"LA,Fmax", "LC,Fmax"}
@@ -451,7 +451,7 @@ def test_formula_6_at_the_reference_absorption_leaves_the_levels() -> None:
 
 
 def test_formula_6_raises_a_room_more_absorbing_than_a0() -> None:
-    """T = 0,5 s in 50 m³ is A = 16 m²: 10 lg 1,6 = 2,04 dB is added."""
+    """T = 0.5 s in 50 m³ is A = 16 m²: 10 lg 1.6 = 2.04 dB is added."""
     res = building.service_equipment_level(
         _flat(40.0),
         frequencies=THIRD,
@@ -709,13 +709,13 @@ def test_result_checks_its_band_arrays() -> None:
 @pytest.mark.parametrize(
     ("levels", "action", "following"),
     [
-        ([35.1, 32.1, 34.0], "proceed", ()),  # 3,0 dB, inclusive
+        ([35.1, 32.1, 34.0], "proceed", ()),  # 3.0 dB, inclusive
         ([35.2, 32.1, 34.0], "add_positions", (4, 5)),
-        ([35.0, 32.1, 36.0, 35.2, 33.0, 37.9], "proceed", ()),  # 5,8 dB
-        ([38.1, 32.1, 35.0, 37.0, 34.0, 36.0], "add_positions", (6, 7)),  # 6,0 dB
+        ([35.0, 32.1, 36.0, 35.2, 33.0, 37.9], "proceed", ()),  # 5.8 dB
+        ([38.1, 32.1, 35.0, 37.0, 34.0, 36.0], "add_positions", (6, 7)),  # 6.0 dB
         ([35.0, 32.0, 36.0, 35.0, 34.0, 36.0, 35.0, 40.9, 33.0], "proceed", ()),
         ([35.0, 32.0, 36.0, 35.0, 34.0, 36.0, 35.0, 41.0, 33.0], "interrupt", ()),
-        # Readings only widen the spread: from 9,0 dB no later stage passes.
+        # Readings only widen the spread: from 9.0 dB no later stage passes.
         ([30.0, 33.0, 38.9], "add_positions", (4, 5)),
         ([30.0, 33.0, 39.0], "interrupt", ()),
         ([30.0, 33.0, 40.0], "interrupt", ()),
@@ -827,7 +827,7 @@ def test_between_1_and_1_5_m_passes_but_is_not_preferred() -> None:
 
 
 def test_small_room_surface_distance() -> None:
-    near = [(2.5, 2.0, 1.2), (4.6, 3.2, 1.5)]  # 0,40 m from the wall at x = 5 m
+    near = [(2.5, 2.0, 1.2), (4.6, 3.2, 1.5)]  # 0.40 m from the wall at x = 5 m
     assert not _positions(room_positions_m=near).surface_ok
     assert _positions(room_positions_m=near, small_room=True).surface_ok
 
@@ -853,12 +853,12 @@ def test_corner_height_from_0_5_m_to_1_5_m() -> None:
 
 
 #: Each limit of 7.3, and the corner height of 7.2, met exactly and missed by
-#: 0,01 m, in the 5 m by 4 m by 2,6 m room of :func:`_positions` (2,4 m high
+#: 0.01 m, in the 5 m by 4 m by 2.6 m room of :func:`_positions` (2.4 m high
 #: for the ceiling). The separation is taken from the corner as well as
 #: between the room positions, and the surface distance from the ceiling as
 #: well as from the walls. Where decimal coordinates put the
-#: limit a hair under itself in binary (4,0 - 3,7 = 0,299 999 999 999 999 8,
-#: 2,3 - 1,3 = 0,999 999 999 999 999 8), the passing case uses them.
+#: limit a hair under itself in binary (4.0 - 3.7 = 0.299 999 999 999 999 8,
+#: 2.3 - 1.3 = 0.999 999 999 999 999 8), the passing case uses them.
 _LIMIT_CASES = [
     pytest.param(
         "surface_ok",
@@ -1017,9 +1017,9 @@ def test_each_limit_of_7_2_and_7_3_at_its_boundary(
 def test_the_corner_0_5_m_from_its_walls_is_preferred_not_required() -> None:
     """7.2 words the corner location as a preference; only its height is judged."""
     assert _positions().preferred_corner_wall_distance
-    # Raised for furniture, the corner keeps its 0,5 m from the walls.
+    # Raised for furniture, the corner keeps its 0.5 m from the walls.
     assert _positions(corner_position_m=(0.5, 0.5, 1.0)).preferred_corner_wall_distance
-    # The far corner of the room: 5,0 - 4,5 and 4,0 - 3,5.
+    # The far corner of the room: 5.0 - 4.5 and 4.0 - 3.5.
     far = _positions(
         corner_position_m=(4.5, 3.5, 0.5),
         room_positions_m=[(1.5, 1.5, 1.2), (2.8, 2.5, 1.5)],
@@ -1339,8 +1339,8 @@ def test_position_figure_of_its_own_keeps_key_and_title_on_the_canvas(
 )
 def test_corner_at_least_0_2_m_from_any_obstacle(distance: float, *, ok: bool) -> None:
     # "The microphone position shall be at least 0,2 m away from any obstacle"
-    # (7.2, folio 7): at least, so 0,2 m itself passes, and 0,7 - 0,5 m, a
-    # hair under 0,2 in binary, is still 0,2 m.
+    # (7.2, folio 7): at least, so 0.2 m itself passes, and 0.7 - 0.5 m, a
+    # hair under 0.2 in binary, is still 0.2 m.
     check = _positions(corner_obstacle_distance_m=distance)
     assert check.corner_obstacle_ok is ok
     assert check.passes is ok
@@ -1386,10 +1386,10 @@ def test_an_obstacle_distance_is_refused_by_name(
     ids=["exact in binary", "a hair over in binary"],
 )
 def test_calibrations_0_5_db_apart_pass(readings: list[float]) -> None:
-    # "more than 0,5 dB" (Clause 5, folio 5): exactly 0,5 dB does not take the
+    # "more than 0,5 dB" (Clause 5, folio 5): exactly 0.5 dB does not take the
     # equipment out of use. Two readings in the same binade subtract exactly,
-    # so 94,3 - 93,8 is 0,5 on the dot; 127,8 and 128,3 straddle 128 and come
-    # out 0,500 000 000 000 014 2 in binary, which must still read as 0,5.
+    # so 94.3 - 93.8 is 0.5 on the dot; 127.8 and 128.3 straddle 128 and come
+    # out 0.500 000 000 000 014 2 in binary, which must still read as 0.5.
     check = building.verify_calibration_deviation(readings)
     assert math.isnan(check.deviations_db[0])
     assert check.deviations_db[1] == pytest.approx(0.5)
@@ -1403,7 +1403,7 @@ def test_calibrations_more_than_0_5_db_apart_take_the_equipment_out_of_use() -> 
 
 
 def test_each_calibration_is_held_to_every_earlier_one() -> None:
-    # The end is 0,2 dB from the beginning but 0,6 dB from an earlier
+    # The end is 0.2 dB from the beginning but 0.6 dB from an earlier
     # calibration of the same instrumentation: it "deviates from previous
     # calibrations by more than 0,5 dB".
     check = building.verify_calibration_deviation(
@@ -1415,7 +1415,7 @@ def test_each_calibration_is_held_to_every_earlier_one() -> None:
 
 
 def test_the_end_is_held_to_the_beginning_as_well_as_to_earlier_calibrations() -> None:
-    # The end is 0,25 dB from the earlier calibration but 0,55 dB from the
+    # The end is 0.25 dB from the earlier calibration but 0.55 dB from the
     # beginning of the same measurement, also a previous calibration.
     check = building.verify_calibration_deviation([93.7, 94.25], previous_levels=[94.0])
     np.testing.assert_allclose(check.deviations_db, [0.3, 0.55])
@@ -1574,9 +1574,9 @@ def test_the_background_maximum_is_watched_for_10_to_15_min(
 
 
 def test_a_background_maximum_10_db_below_lets_the_result_stand() -> None:
-    # "10 dB or more below": 20,4 dB under 30,4 dB is exactly 10 dB, and
-    # 30,3 dB under 40,3 dB is 9,999 999 999 999 996 in binary; both are the
-    # 10 dB and stand, and 9,9 dB does not.
+    # "10 dB or more below": 20.4 dB under 30.4 dB is exactly 10 dB, and
+    # 30.3 dB under 40.3 dB is 9.999 999 999 999 996 in binary; both are the
+    # 10 dB and stand, and 9.9 dB does not.
     check = building.check_varying_background(
         [20.4, 30.3, 30.6, 15.0],
         [30.4, 40.3, 40.5, 40.0],
@@ -1638,8 +1638,8 @@ def test_varying_background_check_checks_its_bands() -> None:
 
 
 def test_a_maximum_5_db_above_the_equivalent_marks_the_period() -> None:
-    # "should be less than 5 dB" (Clause 9, folio 10): 45,3 - 40,3 is exactly
-    # 5 dB, and 35,01 - 30,01 is 4,999 999 999 999 996 in binary; both are
+    # "should be less than 5 dB" (Clause 9, folio 10): 45.3 - 40.3 is exactly
+    # 5 dB, and 35.01 - 30.01 is 4.999 999 999 999 996 in binary; both are
     # the 5 dB, not less than it, and mark their periods.
     check = building.check_measurement_disturbance(
         [45.3, 44.0, 52.1, 43.9, 35.01], [40.3, 41.5, 42.0, 39.0, 30.01]
@@ -1672,7 +1672,7 @@ def test_disturbance_check_checks_its_periods() -> None:
 
 def test_the_calculation_within_2_db_of_the_instrument_agrees() -> None:
     # "If the difference is more than 2 dB, the calculations should be
-    # checked" (NOTE to 7.8, folio 9): exactly 2 dB agrees, 2,1 dB does not.
+    # checked" (NOTE to 7.8, folio 9): exactly 2 dB agrees, 2.1 dB does not.
     res = _chain()
     la, lc = res.ratings["LA,eq"], res.ratings["LC,eq"]
     check = building.check_instrument_agreement(
@@ -1686,7 +1686,7 @@ def test_the_calculation_within_2_db_of_the_instrument_agrees() -> None:
 
 def test_a_calculation_above_the_instrument_is_held_to_2_db_too() -> None:
     # "the difference": either way. A calculation 2 dB above the meter agrees,
-    # one 2,1 dB above it does not.
+    # one 2.1 dB above it does not.
     res = _chain()
     la, lc = res.ratings["LA,eq"], res.ratings["LC,eq"]
     check = building.check_instrument_agreement(

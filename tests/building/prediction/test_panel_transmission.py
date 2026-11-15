@@ -264,28 +264,28 @@ def test_plot_language_spanish_and_validation() -> None:
 # Clean-room oracle:
 #
 # * **Problem 3.11** (printed p. 580; answer p. 611). An 8 m x 3 m solid brick
-#   wall, 110 mm thick, 2,1 kg/m^2 per mm: printed octave-band TL
-#   35,8 / 37 / 37 / 42,5 / 52,5 / 62,5 / 72,5 dB from 63 Hz to 4 kHz. The
+#   wall, 110 mm thick, 2.1 kg/m^2 per mm: printed octave-band TL
+#   35.8 / 37 / 37 / 42.5 / 52.5 / 62.5 / 72.5 dB from 63 Hz to 4 kHz. The
 #   63 Hz value is the field-incidence mass law and the 125/250 Hz values are
 #   the tabulated brick plateau height, so all three are reproduced exactly.
 #   The four values above point B are read off the design chart of Fig. 3.24
-#   and sit 0,8 dB below the analytic construction; what *is* exact there is
+#   and sit 0.8 dB below the analytic construction; what *is* exact there is
 #   the 10 dB per octave slope, which the printed values carry to the digit.
 # * **Problem 3.14** (printed p. 580; answer p. 611). A 20 mm particle-board
-#   panel: printed "diffuse field" TL 6,4 / 12,2 / 18,1 / 24,1 / 30,1 / 36,1 /
-#   42,1 / 48,1 dB from 31,5 Hz to 4 kHz, then 27 dB at 8 kHz and 38,6 dB at
+#   panel: printed "diffuse field" TL 6.4 / 12.2 / 18.1 / 24.1 / 30.1 / 36.1 /
+#   42.1 / 48.1 dB from 31.5 Hz to 4 kHz, then 27 dB at 8 kHz and 38.6 dB at
 #   16 kHz. With Norton's Appendix 4 particle board (750 kg/m^3, fc.t =
-#   97,7 m/s) and rho0 c0 = 415 rayl, the first eight follow Eq. (3.104) and
+#   97.7 m/s) and rho0 c0 = 415 rayl, the first eight follow Eq. (3.104) and
 #   the last two Eq. (3.110). See docs/ERRATA.md for the loss factor.
 #
-# Norton uses rho0 = 1,21 kg/m^3 with c0 = 343 m/s throughout.
+# Norton uses rho0 = 1.21 kg/m^3 with c0 = 343 m/s throughout.
 # ---------------------------------------------------------------------------
 
 NORTON_AIR_DENSITY = 1.21
 
 #: Norton's air as the `Fluid` the models now take, built here from the two
 #: constants the book prints, so the oracle stays independent of the library's
-#: own air, which is 1,205 rather than 1,21.
+#: own air, which is 1,205 rather than 1.21.
 NORTON_AIR = Fluid(
     temperature_c=20.0,
     static_pressure_pa=101_325.0,
@@ -362,7 +362,7 @@ def test_plateau_problem_311_mass_law_and_plateau_exactly() -> None:
 
 def test_plateau_problem_311_recovery_slope_is_exactly_10_db_per_octave() -> None:
     # Above point B the printed answers rise by exactly 10 dB per octave; so
-    # does the construction, and the two agree to within the 0,8 dB offset of
+    # does the construction, and the two agree to within the 0.8 dB offset of
     # reading Fig. 3.24 by eye.
     res = _brick_wall()
     above = res.transmission_loss[3:]

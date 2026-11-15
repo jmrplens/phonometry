@@ -344,6 +344,7 @@ from .fields import (
     _ground_effect_fields,
     _halfspace_fields,
     _impedance_tube_fields,
+    _lloyd_mirror_fields,
     _metadiffuser_fields,
     _mode_conversion_fields,
     _open_end_fields,
@@ -373,6 +374,7 @@ from .fields import (
     animate_fdtd_expansion_chamber,
     animate_fdtd_ground_effect,
     animate_fdtd_impedance_tube,
+    animate_fdtd_lloyd_mirror,
     animate_fdtd_metadiffuser,
     animate_fdtd_open_end,
     animate_fdtd_pillar_hall,
@@ -1726,6 +1728,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_elastic_coincidence": animate_elastic_coincidence,
     "anim_elastic_halfspace_waves": animate_elastic_halfspace_waves,
     "anim_elastic_mode_conversion": animate_elastic_mode_conversion,
+    "anim_fdtd_lloyd_mirror": animate_fdtd_lloyd_mirror,
     "anim_elastic_radiation_efficiency": animate_elastic_radiation_efficiency,
     "anim_elastic_scholte": animate_elastic_scholte,
     "anim_fdtd_boundaries": animate_fdtd_boundaries,
@@ -1771,6 +1774,7 @@ _ANIM_FIELDS: dict[str, Callable[[], Any]] = {
     "anim_elastic_coincidence": _coincidence_fields,
     "anim_elastic_halfspace_waves": _halfspace_fields,
     "anim_elastic_mode_conversion": _mode_conversion_fields,
+    "anim_fdtd_lloyd_mirror": _lloyd_mirror_fields,
     "anim_elastic_radiation_efficiency": _radiation_efficiency_fields,
     "anim_elastic_scholte": _scholte_fields,
     "anim_fdtd_boundaries": _boundaries_fields,
@@ -2223,6 +2227,7 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_elastic_coincidence": 640.0,
     "anim_elastic_halfspace_waves": 320.0,
     "anim_elastic_mode_conversion": 820.0,
+    "anim_fdtd_lloyd_mirror": 900.0,
     "anim_elastic_radiation_efficiency": 700.0,
     "anim_elastic_scholte": 900.0,
     "anim_fdtd_boundaries": 320.0,
@@ -2289,6 +2294,7 @@ _ANIM_DEVICES: dict[str, clip_placement.ClipDevice] = {
     "anim_elastic_coincidence": "gpu",
     "anim_elastic_halfspace_waves": "gpu",
     "anim_elastic_mode_conversion": "gpu",
+    "anim_fdtd_lloyd_mirror": "cpu",
     "anim_elastic_radiation_efficiency": "cpu",  # CuPy: two values two float32 steps off
     "anim_elastic_scholte": "cpu",  # not measured on a GPU yet
     "anim_fdtd_boundaries": "cpu",  # not measured on a GPU yet

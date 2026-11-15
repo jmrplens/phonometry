@@ -46,6 +46,7 @@ from .expansion_chamber import (
 )
 from .ground_effect import _ground_effect_fields, animate_fdtd_ground_effect
 from .halfspace import _halfspace_fields, animate_elastic_halfspace_waves
+from .lloyd_mirror import _lloyd_mirror_fields, animate_fdtd_lloyd_mirror
 from .metadiffuser import (
     _meshed_metadiffuser_ntff_levels,
     _metadiffuser_fields,
@@ -92,6 +93,7 @@ __all__ = [
     "_ground_effect_fields",
     "_halfspace_fields",
     "_impedance_tube_fields",
+    "_lloyd_mirror_fields",
     "_meshed_metadiffuser_ntff_levels",
     "_metadiffuser_fields",
     "_mode_conversion_fields",
@@ -122,6 +124,7 @@ __all__ = [
     "animate_fdtd_open_end",
     "animate_fdtd_ground_effect",
     "animate_fdtd_impedance_tube",
+    "animate_fdtd_lloyd_mirror",
     "animate_fdtd_metadiffuser",
     "animate_fdtd_pillar_hall",
     "animate_fdtd_refraction",

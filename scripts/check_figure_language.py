@@ -172,6 +172,16 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "reader would type them (calibration data-flow plate)",
     "laeq · sel · lc_peak": "the level functions of the API, listed as the reader would type "
     "them (sound-level-meter pipeline plate)",
+    "FDTDRun  |  ElasticRun": "the two run records of the API, named as the reader would type "
+    "them (compute map plate)",
+    "Compute(device, dtype, host)": "the record of the API and three of its fields, as the reader "
+    "would type them (compute map plate)",
+    "result.provenance": "the attribute of a result the compute map plate ends in, as the "
+    "reader would type it",
+    "Quick Sync": "Intel's name for its hardware video encoder, which has no Spanish form "
+    "(compute map plate)",
+    "VideoToolbox": "Apple's name for its hardware video encoder, which has no Spanish form "
+    "(compute map plate)",
     r"$\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}$": "Formula (8) of IEC 61183 in "
     "the standard's own symbols; the ref subscript is the one the standard prints, "
     "and a subscript follows its source (diffuse_field_sensitivity)",

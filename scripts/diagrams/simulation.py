@@ -959,3 +959,245 @@ def _d_elastic_staggered_cell(s: SVG, th: Theme) -> None:
         12,
         th.muted,
     )
+
+
+def _d_compute_map(s: SVG, th: Theme) -> None:
+    """Where a simulation steps and where its video is encoded, on one sheet.
+
+    The map of ``simulation/where-it-runs.mdx``, and of section 1 of
+    ``simulation/remote-node.mdx``, which walks the node branch in prose. No
+    standard stands behind it: every box is the library's own behaviour, and
+    each was read off the code before it was drawn.
+
+    Upper lane. The run record (``FDTDRun`` or ``ElasticRun``) and the
+    ``Compute`` record (``simulation/compute.py``: ``device``, ``dtype``,
+    ``host``, ``fallback``) go into one of the four functions that take a
+    host. With ``host=None`` the run steps here on one of the five devices
+    of ``Compute.device``; with a host it goes to a node, in the five steps
+    of the remote-node guide. Both end in ``result.provenance``
+    (``RunProvenance``: ``device``, ``dtype``, ``host``, ``gpu``,
+    ``package_sha256``), and ``fallback=True`` brings a failed device, node
+    or connection back to NumPy here, with a ``ComputeFallbackWarning``.
+
+    Lower lane. ``VideoOptions(encoder="auto")`` tries the kinds of encoder
+    in the order of ``_internal/video_encoders.AUTO_ORDER``: NVENC, Quick
+    Sync, VAAPI, VideoToolbox, then the CPU, each candidate with a trial
+    encode of one frame, and the first that passes writes the video. The
+    names under the boxes are the ``encoder=`` literals of that module.
+    """
+    left, right = 40.0, 860.0
+    centre = (left + right) / 2
+
+    def card(
+        x0: float,
+        y0: float,
+        w: float,
+        h: float,
+        head: str,
+        note: str,
+        stroke: str,
+        *,
+        sw: float = 2.0,
+    ) -> None:
+        """A record or a function: its name as typed, and what it is."""
+        s.rect(x0, y0, w, h, th.panel, stroke, rx=10, sw=sw)
+        head_size = s.fit_size((head,), (14, 13, 12, 11), w - 24, bold=True, mono=True)
+        s.text(x0 + w / 2, y0 + 26, head, head_size, th.fg, bold=True, mono=True)
+        note_size = s.fit_size((note,), (12, 11), w - 24)
+        s.text(x0 + w / 2, y0 + 47, note, note_size, th.muted)
+
+    # === Upper lane: where a simulation steps =============================
+    s.text(left, 68, "Where a simulation steps", 15, th.fg, "start", bold=True)
+
+    in_y, in_h, in_w = 82.0, 62.0, 395.0
+    card(
+        left,
+        in_y,
+        in_w,
+        in_h,
+        "FDTDRun  |  ElasticRun",
+        "the run: what to simulate, checked when it is built",
+        th.fg,
+    )
+    card(
+        right - in_w,
+        in_y,
+        in_w,
+        in_h,
+        "Compute(device, dtype, host)",
+        "where it steps, passed as compute=",
+        th.fg,
+    )
+
+    call_y, call_h = 176.0, 62.0
+    card(
+        left,
+        call_y,
+        right - left,
+        call_h,
+        "fdtd_simulation  |  elastic_fdtd_simulation  |  write_fdtd_animation"
+        "  |  write_elastic_fdtd_animation",
+        "the same call here and on a node; an engine built directly"
+        " (FDTD2D, ElasticFDTD2D) steps in this process only",
+        th.fg,
+    )
+    for x in (left + in_w / 2, right - in_w / 2):
+        s.arrow(x, in_y + in_h, x, call_y - 2, th.fg, 1.8)
+
+    # --- The fork: here, or on a node -------------------------------------
+    fork_y, fork_h = 290.0, 196.0
+    # The node's five steps are sentences and the devices are names: the
+    # node takes the wider share, and both hold their Spanish at 11 px.
+    here_w, node_w = 330.0, 470.0
+    node_x = right - node_w
+    here_mid, node_mid = left + here_w / 2, node_x + node_w / 2
+    s.rect(left, fork_y, here_w, fork_h, th.panel, th.primary, rx=10, sw=2.2)
+    s.rect(node_x, fork_y, node_w, fork_h, th.panel, th.accent, rx=10, sw=2.2)
+    s.arrow(here_mid, call_y + call_h, here_mid, fork_y - 2, th.primary, 1.8)
+    s.arrow(node_mid, call_y + call_h, node_mid, fork_y - 2, th.accent, 1.8)
+    s.text(here_mid + 12, 270, "host=None", 12, th.primary, "start", mono=True)
+    s.text(node_mid + 12, 270, 'host="nas"', 12, th.accent, "start", mono=True)
+
+    s.text(here_mid, fork_y + 26, "Here, on the device asked for", 14, bold=True)
+    device_size = s.fit_size(
+        (
+            "NumPy, the default",
+            "an NVIDIA GPU, through CuPy",
+            "PyTorch on the CPU",
+            "PyTorch on an NVIDIA GPU",
+            "Apple's GPU, in float32 only",
+        ),
+        (12, 11),
+        here_w - 140,
+    )
+    for row, (literal, what) in enumerate(
+        (
+            ('"cpu"', "NumPy, the default"),
+            ('"cupy"', "an NVIDIA GPU, through CuPy"),
+            ('"torch:cpu"', "PyTorch on the CPU"),
+            ('"torch:cuda"', "PyTorch on an NVIDIA GPU"),
+            ('"torch:mps"', "Apple's GPU, in float32 only"),
+        )
+    ):
+        y = fork_y + 58 + 29 * row
+        s.text(left + 22, y, literal, 12, th.primary, "start", bold=True, mono=True)
+        s.text(left + 126, y, what, device_size, th.fg, "start")
+
+    s.text(node_mid, fork_y + 26, "On a node of your hosts file", 14, bold=True)
+    steps = (
+        "the hosts file says where the node is and how it runs a job",
+        "one ssh process carries the run, as data and never as code",
+        "phonometry is sent once per version and kept under a digest",
+        "the node builds the run again and steps it on the device asked for",
+        "back come the probes and the snapshots, or the bytes of a video",
+    )
+    step_size = s.fit_size(steps, (12, 11), node_w - 60)
+    for row, step in enumerate(steps):
+        y = fork_y + 58 + 29 * row
+        s.circle(node_x + 26, y - 4, 9.5, th.bg, th.accent, 1.6)
+        s.text(node_x + 26, y, str(row + 1), 11, th.accent, bold=True)
+        s.text(node_x + 46, y, step, step_size, th.fg, "start")
+
+    # --- Both end in the provenance; the fallback comes back here ---------
+    fork_b = fork_y + fork_h
+    prov_y, prov_h = 596.0, 62.0
+    card(
+        left,
+        prov_y,
+        right - left,
+        prov_h,
+        "result.provenance",
+        "device, dtype and gpu say where the run stepped; host and"
+        " package_sha256 name the node and the package it ran",
+        th.fg,
+        sw=2.4,
+    )
+    s.arrow(left + 60, fork_b, left + 60, prov_y - 2, th.primary, 1.8)
+    s.arrow(right - 60, fork_b, right - 60, prov_y - 2, th.accent, 1.8)
+
+    # A failed node, connection or device does not reach the provenance on
+    # its own road: with fallback=True it comes back to NumPy, here.
+    back_y = fork_b + 24
+    s.line(node_mid, fork_b, node_mid, back_y, th.secondary, 1.8, dash="6,4")
+    s.line(node_mid, back_y, here_mid, back_y, th.secondary, 1.8, dash="6,4")
+    s.arrow(here_mid, back_y, here_mid, fork_b + 2, th.secondary, 1.8)
+    s.text(centre, back_y + 22, "fallback=True", 12, th.secondary, bold=True, mono=True)
+    back_notes = (
+        "a device that cannot be used, or a node or a connection that fails,"
+        " warns with ComputeFallbackWarning",
+        "and the run steps on NumPy here, in the dtype asked for;"
+        " its provenance then says cpu and no host",
+    )
+    back_size = s.fit_size(back_notes, (12, 11), right - left - 160)
+    for row, note in enumerate(back_notes):
+        s.text(centre, back_y + 42 + 18 * row, note, back_size, th.muted)
+
+    # === Lower lane: where a video is encoded =============================
+    lane_y = 690.0
+    s.line(left, lane_y, right, lane_y, th.muted, 0.9, dash="3,4")
+    s.text(left, lane_y + 30, "Where a video is encoded", 15, th.fg, "start", bold=True)
+    s.text(
+        right,
+        lane_y + 30,
+        "io.VideoOptions(encoder=...), passed as video=",
+        12,
+        th.muted,
+        "end",
+    )
+
+    row_y, row_h = lane_y + 48, 58.0
+    # 140 + 4 x (22 + 106) + 22 + 146 = 820: the row ends on the right margin.
+    auto_w, kind_w, cpu_w, gap = 140.0, 106.0, 146.0, 22.0
+    s.rect(left, row_y, auto_w, row_h, th.panel, th.fg, rx=10, sw=2.0)
+    s.text(left + auto_w / 2, row_y + 25, '"auto"', 14, th.fg, bold=True, mono=True)
+    s.text(left + auto_w / 2, row_y + 45, "the default", 12, th.muted)
+
+    kinds = (
+        ("NVENC", '"nvenc"'),
+        ("Quick Sync", '"qsv"'),
+        ("VAAPI", '"vaapi"'),
+        ("VideoToolbox", '"videotoolbox"'),
+    )
+    kind_size = s.fit_size(
+        [name for name, _ in kinds], (13, 12, 11), kind_w - 12, bold=True
+    )
+    x = left + auto_w + gap
+    kind_x0 = x
+    for name, literal in kinds:
+        s.arrow(x - gap, row_y + row_h / 2, x - 2, row_y + row_h / 2, th.fg, 1.8)
+        s.rect(x, row_y, kind_w, row_h, th.panel, th.primary, rx=10, sw=2.0)
+        s.text(x + kind_w / 2, row_y + 25, name, kind_size, th.fg, bold=True)
+        s.text(x + kind_w / 2, row_y + 45, literal, 11, th.primary, mono=True)
+        x += kind_w + gap
+    s.arrow(x - gap, row_y + row_h / 2, x - 2, row_y + row_h / 2, th.fg, 1.8)
+    s.rect(x, row_y, cpu_w, row_h, th.panel, th.accent, rx=10, sw=2.0)
+    s.text(x + cpu_w / 2, row_y + 25, "CPU", 13, th.fg, bold=True)
+    s.text(x + cpu_w / 2, row_y + 45, '"cpu"', 11, th.accent, mono=True)
+
+    # One bracket under the five candidates: what "tries" means. The CPU
+    # encoder is given the same trial as the four before it.
+    kind_x1 = x + cpu_w
+    brace_y = row_y + row_h + 12
+    s.path(
+        f"M {kind_x0} {brace_y - 6} L {kind_x0} {brace_y} "
+        f"L {kind_x1} {brace_y} L {kind_x1} {brace_y - 6}",
+        stroke=th.primary,
+        sw=1.4,
+    )
+    # Set on the sheet's centre, not on the bracket's: the Spanish runs 728
+    # px, and centred under the bracket it passed the right margin.
+    trial = (
+        "tried in this order, each with a real encode of one frame;"
+        " the first that passes writes the video"
+    )
+    trial_size = s.fit_size((trial,), (12, 11), right - left)
+    s.text(centre, brace_y + 19, trial, trial_size, th.fg)
+    foot = (
+        "On the CPU: SVT-AV1 or, without it, VP9 in a WebM and x265 or x264"
+        " in an MP4. A GIF is always written on the CPU.",
+        "An animation you draw yourself is encoded here only; the two"
+        " simulation writers also draw and encode on a node.",
+    )
+    foot_size = s.fit_size(foot, (12, 11), right - left)
+    for row, note in enumerate(foot):
+        s.text(centre, brace_y + 50 + 19 * row, note, foot_size, th.muted)

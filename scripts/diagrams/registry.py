@@ -201,6 +201,7 @@ from .signals import (
     _d_verification_regimes,
 )
 from .simulation import (
+    _d_compute_map,
     _d_elastic_fluid_solid,
     _d_elastic_staggered_cell,
     _d_fdtd,
@@ -1240,6 +1241,11 @@ DIAGRAMS = {
         _d_elastic_staggered_cell,
         "One staggered cell, two solvers: acoustic and elastic",
         624,
+    ),
+    "diagram_compute_map": (
+        _d_compute_map,
+        "Where heavy work runs: the device, the node and the encoder",
+        890,
     ),
 }
 

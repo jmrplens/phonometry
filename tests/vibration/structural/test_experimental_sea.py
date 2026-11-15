@@ -9,22 +9,22 @@ answer to problem 6.10.
 **Clean-room oracle.**
 
 * **Problem 6.10** (printed pp. 593-594; answer p. 617). A satellite platform
-  (5 mm aluminium plate) carrying an aluminium cylinder 2 m long, 1,5 m mean
+  (5 mm aluminium plate) carrying an aluminium cylinder 2 m long, 1.5 m mean
   diameter, 3 mm wall, in the 500 Hz octave: ``eta_1 = 4,4e-3``,
   ``eta_2 = 2,4e-3``, ``v_1 = 27,2 mm/s``, ``v_2 = 13,2 mm/s``. Printed
   answers ``eta_12 = 4,26e-4``, ``eta_21 = 3,92e-4`` and ``Pi_in = 1,31 W``.
 
-  The problem statement gives the platform as 3,5 m x 3 m, but that area is
+  The problem statement gives the platform as 3.5 m x 3 m, but that area is
   **not** consistent with the printed answers: it fixes ``E_1/E_2 = 7,88``
   whereas the three printed values together require ``6,55``. The free plate
-  area implied by the answers is 8,73 m^2, which is exactly 3,5 x 3 minus the
-  0,75 m radius footprint of the cylinder that Fig. P6.10 shows standing on
+  area implied by the answers is 8.73 m^2, which is exactly 3.5 x 3 minus the
+  0.75 m radius footprint of the cylinder that Fig. P6.10 shows standing on
   the platform. With that area all three printed answers come out within
-  0,4 %. See ``docs/ERRATA.md``.
+  0.4 %. See ``docs/ERRATA.md``.
 
 * **Reciprocity** (Eq. 6.8): ``n_1 eta_12 = n_2 eta_21`` must hold exactly for
   the single-drive inversion, and the printed pair satisfies
-  ``eta_21/eta_12 = n_1/n_2`` to 0,3 %.
+  ``eta_21/eta_12 = n_1/n_2`` to 0.3 %.
 
 * **Energy balance**: the input power of Eq. (6.10) must equal the total
   dissipated power ``omega (eta_1 E_1 + eta_2 E_2)``, because substituting
@@ -80,7 +80,7 @@ _CL = math.sqrt(_E / (_RHO * (1.0 - _NU**2)))
 _T1, _T2 = 0.005, 0.003
 _RADIUS, _LENGTH = 0.75, 2.0
 _S2 = 2.0 * math.pi * _RADIUS * _LENGTH
-#: Free platform area: 3,5 m x 3 m minus the cylinder footprint (see module
+#: Free platform area: 3.5 m x 3 m minus the cylinder footprint (see module
 #: docstring and docs/ERRATA.md).
 _S1 = 3.5 * 3.0 - math.pi * _RADIUS**2
 _BAND = 500.0
@@ -117,19 +117,19 @@ class TestNortonProblem610:
         )
 
     def test_coupling_loss_factor_12(self, result: PowerInjectionResult) -> None:
-        """Printed answer eta_12 = 4,26e-4."""
+        """Printed answer eta_12 = 4.26e-4."""
         assert float(result.coupling_loss_factor12[0]) == pytest.approx(
             4.26e-4, rel=0.005
         )
 
     def test_coupling_loss_factor_21(self, result: PowerInjectionResult) -> None:
-        """Printed answer eta_21 = 3,92e-4."""
+        """Printed answer eta_21 = 3.92e-4."""
         assert float(result.coupling_loss_factor21[0]) == pytest.approx(
             3.92e-4, rel=0.005
         )
 
     def test_input_power(self, result: PowerInjectionResult) -> None:
-        """Printed answer Pi_in = 1,31 W."""
+        """Printed answer Pi_in = 1.31 W."""
         assert float(result.input_power[0]) == pytest.approx(1.31, rel=0.005)
 
     def test_ring_frequency_places_the_band_below_it(self) -> None:
@@ -343,7 +343,7 @@ class TestModalDensities:
         assert n[0] == pytest.approx(expected, rel=1e-12)
 
     def test_cylinder_middle_regime_is_linear(self) -> None:
-        """Eq. (6.28) is proportional to ``f`` between 0,48 and 0,83 fr."""
+        """Eq. (6.28) is proportional to ``f`` between 0.48 and 0.83 fr."""
         f_r = ring_frequency(_RADIUS, _CL)
         f = np.array([0.5, 0.8]) * f_r
         n = cylindrical_shell_modal_density(f, _S2, _T2, _RADIUS, _CL)

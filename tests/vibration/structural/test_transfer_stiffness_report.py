@@ -265,10 +265,10 @@ def test_a_sweep_without_five_lines_a_band_says_so(tmp_path: Path) -> None:
 
 
 def test_the_headline_is_read_at_the_lowest_valid_line(tmp_path: Path) -> None:
-    """An indirect result excludes |T| > 0,1: the fiche must not box that region.
+    """An indirect result excludes |T| > 0.1: the fiche must not box that region.
 
     8 kg on 1 MN/m (c = 120 N.s/m), lines every 2 Hz from 90 Hz: |T| falls to
-    0,1 at 187,5 Hz, so the headline is the 188 Hz line, not the inflated
+    0.1 at 187.5 Hz, so the headline is the 188 Hz line, not the inflated
     90 Hz one the resonance region gives.
     """
     pytest.importorskip("reportlab")

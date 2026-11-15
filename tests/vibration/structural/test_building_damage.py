@@ -240,7 +240,7 @@ def test_bending_stress_is_formula_1() -> None:
     """Formula (1) of 6.2, term by term.
 
     Concrete at ``E_dyn`` = 30 GPa and 2400 kg/m3, a beam carrying nothing
-    else, first mode: the square root is 1,73 times the characteristic
+    else, first mode: the square root is 1.73 times the characteristic
     impedance of the material, so the stress is linear in the velocity and
     the system dimensions never appear.
     """

@@ -56,9 +56,9 @@ check to the stress calculation of 4.2:
 
 .. math::
 
-   \hat{\sigma}_\mathrm{max} = 1{,}73
+   \hat{\sigma}_\mathrm{max} = 1.73
    \left(E_\mathrm{dyn} \, \varrho \,
-   \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0,5}
+   \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0.5}
    k_n \, \hat{v}_\mathrm{max} \tag{1}
 
 The guideline values are not limits in the legal sense and not an acceptance
@@ -491,7 +491,7 @@ class DamageAssessment(RichDisplay):
         guideline value does not mean damage occurs, it means the question
         has to be answered by 4.2 to 4.4 instead.
         """
-        # Judged settled: the guideline interpolated at 65,1 Hz is 43,02 mm/s
+        # Judged settled: the guideline interpolated at 65.1 Hz is 43.02 mm/s
         # in decimal and a last bit under it in binary.
         return bool(settled(self.velocity_mm_s - self.guideline_mm_s) <= 0.0)
 
@@ -662,14 +662,14 @@ def bending_stress(
 
     .. math::
 
-       \hat{\sigma}_\mathrm{max} = 1{,}73
+       \hat{\sigma}_\mathrm{max} = 1.73
        \left(E_\mathrm{dyn} \, \varrho \,
-       \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0,5}
+       \frac{G_\mathrm{ges}}{G_\mathrm{balken}}\right)^{0.5}
        k_n \, \hat{v}_\mathrm{max}
 
     The system dimensions do not enter, which is the point of the formula: a
     velocity measured where the amplitude is largest is enough. The mode
-    factor :math:`k_n` lies between 1 and 1,3 in the technically important
+    factor :math:`k_n` lies between 1 and 1.3 in the technically important
     cases, so it moves the answer by less than a third.
 
     :param peak_velocity_m_s: Peak velocity over the beam length, in metres

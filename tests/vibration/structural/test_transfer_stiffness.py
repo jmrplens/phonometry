@@ -599,7 +599,7 @@ def test_a_band_value_exists_exactly_where_five_lines_were_averaged(
 def test_the_indirect_result_averages_only_where_the_transmissibility_is_small() -> (
     None
 ):
-    """ISO 10846-3 Inequality (2): lines with |T| > 0,1 leave the band average."""
+    """ISO 10846-3 Inequality (2): lines with |T| > 0.1 leave the band average."""
     f = np.geomspace(20.0, 2000.0, 400)
     t = vibration.base_transmissibility(f, 8.0, 1.0e6, 120.0)
     with pytest.warns(vibration.TransferStiffnessWarning, match="Inequality"):
@@ -625,7 +625,7 @@ def test_the_direct_result_averages_every_line_by_default() -> None:
 
 
 def test_a_result_reads_its_validity_from_the_transmissibility() -> None:
-    """Inequality (2) of ISO 10846-3, |T| <= 0,1, inclusive; no flags are taken."""
+    """Inequality (2) of ISO 10846-3, |T| <= 0.1, inclusive; no flags are taken."""
     f = _TWO_BANDS_HZ[:3]
     k = np.full(3, 1.0e6 + 0j)
     t = np.array([0.05 + 0j, 0.1 + 0j, 0.2 + 0j])
@@ -654,7 +654,7 @@ def test_the_indirect_warning_is_the_transfer_stiffness_warning() -> None:
 # Adequacy conditions: blocked output, unwanted input, output mass
 # ---------------------------------------------------------------------------
 def test_an_output_20_db_below_the_input_is_blocked() -> None:
-    """The inequality is inclusive: 20 dB exactly holds, 19,9 dB does not."""
+    """The inequality is inclusive: 20 dB exactly holds, 19.9 dB does not."""
     f = np.array([100.0, 200.0])
     with pytest.warns(
         vibration.TransferStiffnessWarning, match="down to 19.9 dB at 200 Hz"
@@ -694,7 +694,7 @@ def test_the_loudest_unwanted_direction_decides() -> None:
 
 
 def test_an_unwanted_direction_15_db_down_is_acceptable() -> None:
-    """The inequality is inclusive: 15 dB exactly holds, 14,9 dB does not."""
+    """The inequality is inclusive: 15 dB exactly holds, 14.9 dB does not."""
     f = np.array([100.0, 200.0])
     with pytest.warns(
         vibration.TransferStiffnessWarning, match="down to 14.9 dB at 200 Hz"
@@ -749,7 +749,7 @@ def test_a_level_difference_check_is_not_a_truth_value() -> None:
 
 
 def test_the_output_mass_limit_is_six_percent_of_force_over_acceleration() -> None:
-    """LF2 = 120 dB re 1 µN is 1 N, La2 = 100 dB re 1 µm/s² is 0,1 m/s²: 0,6 kg."""
+    """LF2 = 120 dB re 1 µN is 1 N, La2 = 100 dB re 1 µm/s² is 0.1 m/s²: 0.6 kg."""
     check = vibration.check_output_mass(
         frequencies=[100.0],
         output_mass_kg=0.3,
@@ -761,11 +761,11 @@ def test_the_output_mass_limit_is_six_percent_of_force_over_acceleration() -> No
 
 
 def test_the_output_mass_on_its_limit_biases_the_force_by_half_a_decibel() -> None:
-    """ISO 10846-4 NOTE 1: Inequality (3) is |L_Fb - L_F2| <= 0,5 dB.
+    """ISO 10846-4 NOTE 1: Inequality (3) is |L_Fb - L_F2| <= 0.5 dB.
 
     With m0 on the bound, the inertia force is 6 % of the measured one;
-    Fb = F2 + m0 a2 moves the level by 20 lg 1,06 = 0,51 dB in phase and by
-    -20 lg 0,94 = 0,54 dB in antiphase, both 0,5 dB to the tenth.
+    Fb = F2 + m0 a2 moves the level by 20 lg 1.06 = 0.51 dB in phase and by
+    -20 lg 0.94 = 0.54 dB in antiphase, both 0.5 dB to the tenth.
     """
     check = vibration.check_output_mass(
         frequencies=[100.0],
@@ -786,7 +786,7 @@ def test_the_output_mass_on_its_limit_biases_the_force_by_half_a_decibel() -> No
 
 
 def test_a_heavy_output_mass_warns() -> None:
-    """0,5 kg against limits of 0,6 kg (La2 = 100 dB) and 0,19 kg (La2 = 110 dB)."""
+    """0.5 kg against limits of 0.6 kg (La2 = 100 dB) and 0.19 kg (La2 = 110 dB)."""
     with pytest.warns(vibration.TransferStiffnessWarning, match="NOTE 2"):
         check = vibration.check_output_mass(
             frequencies=[100.0, 200.0],
@@ -866,7 +866,7 @@ def test_f3_is_interpolated_in_log_frequency_and_the_mask_ends_before_it() -> No
     The mask keeps exactly the lines before the first one outside 1 dB, and
     f3 is the crossing of the 1 dB margin interpolated linearly against the
     logarithm of frequency between that line and the one before it; on this
-    grid a linear-in-f interpolation lands 0,3 Hz away.
+    grid a linear-in-f interpolation lands 0.3 Hz away.
     """
     fc, m2 = 3000.0, 20.0
     f = np.geomspace(40.0, 5000.0, 60)
@@ -935,7 +935,7 @@ def test_effective_mass_refuses_an_unsorted_sweep() -> None:
 # ---------------------------------------------------------------------------
 # Driving-point method (ISO 10846-5)
 # ---------------------------------------------------------------------------
-#: The 0,2 Hz spacing of 7.5 up to 20 Hz, and on up to 400 Hz.
+#: The 0.2 Hz spacing of 7.5 up to 20 Hz, and on up to 400 Hz.
 _SWEEP_HZ = np.arange(1.0, 400.0, 0.2)
 _OMEGA = 2.0 * np.pi * _SWEEP_HZ
 
@@ -999,7 +999,7 @@ def test_band_averages_below_f_ul_are_within_2_db_of_the_transfer_stiffness() ->
 
 
 def test_the_band_average_is_quiet_about_the_short_bands_below_20_hz() -> None:
-    """7.5: 0,2 Hz spacing up to 20 Hz leaves the lowest bands short of five."""
+    """7.5: 0.2 Hz spacing up to 20 Hz leaves the lowest bands short of five."""
     force, accel = _driven(np.full(_SWEEP_HZ.size, 1.0e6 + 0j))
     res = vibration.driving_point_stiffness(
         frequencies=_SWEEP_HZ, input_force_n=force, input_acceleration_m_s2=accel
@@ -1062,8 +1062,8 @@ def test_a_line_exactly_on_the_threshold_is_f_ul_and_is_kept() -> None:
 def test_a_line_must_pass_both_inequalities_and_counts_nowhere_if_it_fails() -> None:
     """Inequalities (1) and (2) are both required, for f_UL and the 1-20 Hz value.
 
-    A flat 1 MN/m element with a 3 dB dip at 9,9 Hz to 10,5 Hz, where the
-    output is only 10,5 dB down (Inequality (1) fails, (2) holds), and an
+    A flat 1 MN/m element with a 3 dB dip at 9.9 Hz to 10.5 Hz, where the
+    output is only 10.5 dB down (Inequality (1) fails, (2) holds), and an
     unwanted direction 6 dB down at 30 Hz to 31 Hz only. With both given the
     dip is excluded: no f_UL, and the low-frequency value is the flat 120 dB.
     """
@@ -1122,7 +1122,7 @@ def test_lines_below_1_hz_neither_set_f_ul_nor_enter_the_result() -> None:
 def test_short_bands_are_quiet_up_to_20_hz_and_no_further() -> None:
     """7.5 asks for five lines a band only above 20 Hz.
 
-    Lines every hertz from 1 Hz leave the 6,3 Hz to 16 Hz bands with two or
+    Lines every hertz from 1 Hz leave the 6.3 Hz to 16 Hz bands with two or
     three lines and the 20 Hz band with five: nothing warns. The same short
     bands above 20 Hz do warn.
     """
@@ -1198,10 +1198,10 @@ def test_the_annex_b_defaults_are_the_expressions_b3_prints() -> None:
 
 
 def test_the_table_b1_values_are_the_three_rectangular_terms_rounded_up() -> None:
-    """Table B.1 prints 0,3, 1,2 and 0,5: each expression rounded up to a tenth.
+    """Table B.1 prints 0.3, 1.2 and 0.5: each expression rounded up to a tenth.
 
     Rounding up is the conservative rounding an uncertainty may take (GUM
-    7.2.6); to the nearest tenth the linearity term 0,433 would read 0,4.
+    7.2.6); to the nearest tenth the linearity term 0.433 would read 0.4.
     """
     u = vibration.driving_point_uncertainty(120.0, repeatability_range_db=0.0)
     rig, dps, lin = (float(c) for c in u.budget.contributions[3:])
@@ -1358,7 +1358,7 @@ def test_the_band_figure_legend_leaves_every_marker_clear(language: str) -> None
 
 
 def test_a_spanish_title_fits_the_default_figure() -> None:
-    """The output-mass title stays inside a default 6,4 in figure in Spanish."""
+    """The output-mass title stays inside a default 6.4 in figure in Spanish."""
     pytest.importorskip("matplotlib")
     import matplotlib as mpl
 
@@ -1386,7 +1386,7 @@ def test_a_spanish_title_fits_the_default_figure() -> None:
 
 
 def test_the_transfer_stiffness_figure_draws_the_excluded_lines_apart() -> None:
-    """Lines with |T| > 0,1 are not drawn as part of the result."""
+    """Lines with |T| > 0.1 are not drawn as part of the result."""
     pytest.importorskip("matplotlib")
     import matplotlib as mpl
 

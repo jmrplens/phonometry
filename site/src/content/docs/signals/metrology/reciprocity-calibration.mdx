@@ -88,10 +88,10 @@ is computed and what each part's formulas make of them.*
 
 | Requirement | Value | Clause |
 | :--- | :--- | :--- |
-| Reference conditions | 23,0 °C, 101,325 kPa, 50 % relative humidity | 61094-2 and 61094-3, 4 |
-| Polarizing voltage | 200,0 V recommended, and the one used reported | 61094-2, 6.2; 61094-3, 6.2 |
-| Plane-wave coupler | Distance between the diaphragms 0,5 to 0,75 times the diameter, up to about 10 kHz (LS1P) and 20 kHz (LS2P) | 61094-2, C.2 |
-| Large-volume coupler | Length to diameter about 0,3, up to about 2,5 kHz (LS1P) and 5 kHz (LS2P) with a wave-motion correction | 61094-2, C.3 |
+| Reference conditions | 23.0 °C, 101,325 kPa, 50 % relative humidity | 61094-2 and 61094-3, 4 |
+| Polarizing voltage | 200.0 V recommended, and the one used reported | 61094-2, 6.2; 61094-3, 6.2 |
+| Plane-wave coupler | Distance between the diaphragms 0.5 to 0.75 times the diameter, up to about 10 kHz (LS1P) and 20 kHz (LS2P) | 61094-2, C.2 |
+| Large-volume coupler | Length to diameter about 0.3, up to about 2.5 kHz (LS1P) and 5 kHz (LS2P) with a wave-motion correction | 61094-2, C.3 |
 | Free-field distance | Greater than ten nominal diameters of the microphone | 61094-3, 7.3 |
 | Free-field mounting | On a cylinder of the microphone's diameter at least twenty diameters long, tapered to its support | 61094-3, 6.4 |
 | Reported uncertainty | Expanded, with $k = 2$ (61094-2) or for a 95 % coverage probability (61094-3), at each frequency | 61094-2, 7.5; 61094-3, 7.8 |
@@ -102,7 +102,7 @@ Each microphone enters the acoustic transfer impedance through its acoustic
 impedance and its front cavity. Annex E writes the impedance as a lumped
 compliance, mass and resistance, or equivalently as the equivalent volume at
 low frequencies, the resonance frequency and the loss factor; E.4 states the
-representation good to about 1,3 times the resonance frequency. The front
+representation good to about 1.3 times the resonance frequency. The front
 cavity's measured volume, depth and diameter come from E.2 and E.3. The
 coupler is either a plane-wave coupler of the diameter of the front cavities
 or a large-volume coupler, with the nominal dimensions of Tables C.1 and C.2
@@ -110,7 +110,7 @@ in `metrology.IEC61094_2_TABLE_C1` and `metrology.IEC61094_2_TABLE_C2`.
 Figure C.2 draws each microphone of a large-volume coupler with its face a
 distance F back from the cavity, through a bore of the front-cavity diameter
 B: `LargeVolumeCoupler` takes that length as `port_length_m`, and the two
-bores of the LS1P coupler add 2,4 % to its volume, a tenth of a decibel on
+bores of the LS1P coupler add 2.4 % to its volume, a tenth of a decibel on
 each sensitivity.
 
 ```python
@@ -145,10 +145,10 @@ print(round(large.cavity_volume_m3 * 1e9), round(large.closed_volume_m3(mics[:2]
 `check_coupler` holds the coupler to what its formulas need: Formulas (A.3)
 and (A.4) "are valid for the frequency range given by $\omega\rho a^2 >
 100\eta$", 3 Hz and 12 Hz for the LS1P and LS2aP couplers of Table C.1; the
-approximation (A.2) of a large-volume coupler to $0{,}125 < R < 8$ and
+approximation (A.2) of a large-volume coupler to $0.125 < R < 8$ and
 $X > 5$; and the conditions to the domain Annex F states for its air. Two
 things are reported without entering the verdict: the ratio C.2 recommends,
-0,5 to 0,75 between the distance of the diaphragms and the diameter, and a
+0.5 to 0.75 between the distance of the diaphragms and the diameter, and a
 frequency below 20 Hz with the approximation, where A.2 asks for the full
 solution "or the corresponding uncertainty component shall be increased
 accordingly" (`full_solution_advised`).
@@ -194,14 +194,14 @@ print(za[0].heat_conduction_correction[[1, 16, 25]].round(3))   # [-0.287 -0.051
 print(za[0].capillary_correction_db[[1, 16, 25]].round(3))         # [-0.213  0.011 -0.   ]
 ```
 
-At 31,6 Hz the heat conduction lowers the transfer impedance by 0,29 dB and
-the two tubes by another 0,21 dB; at 1 kHz both are a few hundredths. The two
+At 31.6 Hz the heat conduction lowers the transfer impedance by 0.29 dB and
+the two tubes by another 0.21 dB; at 1 kHz both are a few hundredths. The two
 annexes print tables meant for testing exactly this arithmetic.
 `temperature_transfer_function` sums the full solution of the annex's
 reference [A.1], which A.2 requires below 20 Hz unless the uncertainty
 component is increased instead, and which gives every entry of
-Table A.1 to the 0,000 01 the annex states for them; Formula (A.2) is the
-approximation, accurate to 0,01 % in modulus for $X > 5$:
+Table A.1 to the 0.000 01 the annex states for them; Formula (A.2) is the
+approximation, accurate to 0.01 % in modulus for $X > 5$:
 
 ```python
 print(np.round(metrology.temperature_transfer_function(1.0, 100.0), 5))                      # (0.97179+0.02758j)
@@ -211,13 +211,13 @@ tube = metrology.capillary_tube_impedance([20.0, 1000.0], length_m=0.05, radius_
 print((tube.impedance_pa_s_m3 / 1e9).round(3))   # [3.015+0.097j 8.331+4.288j]
 ```
 
-Table B.1 prints 3,015 and 8,331 GPa·s/m³ for this tube, Table B.2 0,097 and
-4,287. The radius the table heads "0,1667 mm" is 1/6 mm: with 0,1667 mm the
-values come out 0,08 % low, beyond the last printed figure (an erratum). Even
+Table B.1 prints 3,015 and 8,331 GPa·s/m³ for this tube, Table B.2 0.097 and
+4,287. The radius the table heads "0,1667 mm" is 1/6 mm: with 0.1667 mm the
+values come out 0.08 % low, beyond the last printed figure (an erratum). Even
 with 1/6 mm the air of Annex F does not give every entry to its last figure:
-the 186 complex entries come back within 0,002 GPa·s/m³, the residue reaching
-0,0011 in the real part and 0,0018 in the imaginary near the resonances of the
-tubes, and 0,0005 and 0,0007 from 20 Hz to 250 Hz, as the 4,288 here shows.
+the 186 complex entries come back within 0.002 GPa·s/m³, the residue reaching
+0.0011 in the real part and 0.0018 in the imaginary near the resonances of the
+tubes, and 0.0005 and 0.0007 from 20 Hz to 250 Hz, as the 4,288 here shows.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reciprocity_coupler_physics.svg" alt="Two panels against frequency. Left, the heat-conduction correction 20 lg|Delta_H| of the LS1P large-volume coupler of Table C.2 closed by two microphones, with the two bores of length F, R = 0.293 and l = 4.005 mm: 0.61 dB at 2.5 Hz falling smoothly to 0.01 dB at 10 kHz. Right, the real and imaginary parts of the input impedance of an open capillary tube 50 mm long and 1/6 mm in radius at the reference conditions, in GPa s per cubic metre, 20 Hz to 20 kHz: the real part near 3 up to 300 Hz, then six resonance peaks, 12.5 at 1.33 kHz, 8.3 at 4.5 kHz and 6.9, 6.3, 5.9 and 5.7 near 7.7, 11, 14.4 and 17.7 kHz, with troughs between rising from 2.6 to 4.2; the imaginary part rising from 0.1 at 20 Hz to 4.3 near 1 kHz, swinging to -5.6 at 1.7 kHz and oscillating about zero above with a shrinking swing" width="100%" />
 
@@ -296,7 +296,7 @@ att = metrology.reciprocity_air_attenuation(ff, **ffc)
 print(att.attenuation_db_per_m[[0, 10, 13, 15]].round(4))   # [0.0053 0.1348 0.4713 0.9877]
 ```
 
-Three LS2aP microphones 0,25 m apart, with acoustic centres a few millimetres
+Three LS2aP microphones 0.25 m apart, with acoustic centres a few millimetres
 in front of their diaphragms that recede towards the diaphragm at high
 frequency (Annex A shows such curves; these are illustrative):
 
@@ -423,7 +423,7 @@ The expanded uncertainty is $k = 2$ times the root-sum-square, which IEC
 61094-2 7.5 states; IEC 61094-3 7.8 asks for the factor of a 95 % coverage
 probability, which `coverage_factor` sets when a budget is dominated by a
 component with few degrees of freedom. The free-field budget moves each
-acoustic centre by 0,5 mm in turn, and the attenuation by the ±10 % B.2
+acoustic centre by 0.5 mm in turn, and the attenuation by the ±10 % B.2
 states, taken as a rectangular distribution. The components on this page are
 illustrative.
 Passed as `expanded_uncertainty_db`, the budget draws the band of the
@@ -498,7 +498,7 @@ Annex E; Tables C.1, C.2 and C.3 as published data, the wave-motion
 correction of Table C.3 with the frequency scaling of C.3 for hydrogen; the
 check of what the formulas require (A.2, A.3, Annex F); Table 1 and the
 one-at-a-time recalculation of 7.5. Table A.1 is reproduced to its stated
-0,000 01; Tables B.1 and B.2 to within 0,002 GPa·s/m³, more than their
+0.000 01; Tables B.1 and B.2 to within 0.002 GPa·s/m³, more than their
 printed half-unit near the resonances of the tubes (section 3).
 **IEC 61094-3:2016 with COR1:2016:** the products of Formula (7), the
 sensitivities of Formulas (8) and (9) with the factor of (7), Formula (D.1);

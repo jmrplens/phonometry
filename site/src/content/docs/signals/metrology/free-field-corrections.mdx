@@ -123,9 +123,9 @@ print(round(a.check_frequency_offset_db, 2))                           # 0.15
 a.plot()
 ```
 
-The fit lowers the sensitivity by 0,37 dB, the calibrator then reads
-93,98 dB, and the manual states $\Delta L = 0{,}02$ dB. At 1 kHz the adjusted
-meter reads a free field 0,15 dB high, $L_2 - L_1$: that is the offset the
+The fit lowers the sensitivity by 0.37 dB, the calibrator then reads
+93.98 dB, and the manual states $\Delta L = 0.02$ dB. At 1 kHz the adjusted
+meter reads a free field 0.15 dB high, $L_2 - L_1$: that is the offset the
 fit chose so that the response sits inside the tolerances everywhere else. A
 tolerance of `np.inf` leaves a band out of the fit, and
 `pressure_indicated_level=` adds the pressure response, from which
@@ -283,7 +283,7 @@ u_\mathrm{c}^2 = \sum_{i=1}^{15} u_i^2,
 \qquad
 \nu_\mathrm{eff} = \frac{u_\mathrm{c}^4}{\sum_i u_i^4/\nu_i},
 \qquad
-U = t_{0{,}975}(\nu_\mathrm{eff})\, u_\mathrm{c}
+U = t_{0.975}(\nu_\mathrm{eff})\, u_\mathrm{c}
 $$
 
 ```python
@@ -305,16 +305,16 @@ print(round(b8.combined_uncertainty_db, 3), round(b8.coverage_factor, 2),
       round(b8.expanded_uncertainty_db, 2))                                # 0.14 2.0 0.28
 ```
 
-Both tables reproduce: 0,0590 dB and 29,98 degrees of freedom at 1 kHz,
-0,140 dB, $k = 2$ and 0,28 dB at 8 kHz. Table I.2 prints $k = 2{,}11$, though,
-and that is not the factor its own 29,98 degrees of freedom give. At 95 % the
-Student factor for 29,98 is 2,042; 2,11 is the one for about 17. The expanded
-uncertainty the page's numbers give is $2{,}042 \times 0{,}059\,03 = 0{,}121$
-dB, printed 0,12 either way, but the table's guard digit, 0,12(4), is the
+Both tables reproduce: 0.0590 dB and 29.98 degrees of freedom at 1 kHz,
+0.140 dB, $k = 2$ and 0.28 dB at 8 kHz. Table I.2 prints $k = 2.11$, though,
+and that is not the factor its own 29.98 degrees of freedom give. At 95 % the
+Student factor for 29.98 is 2,042; 2.11 is the one for about 17. The expanded
+uncertainty the page's numbers give is $2.042 \times 0.059\,03 = 0.121$
+dB, printed 0.12 either way, but the table's guard digit, 0.12(4), is the
 misprinted $k$ at work; the case is in the [errata
 register](/phonometry/reference/errata/). Below 97 kPa,
-`static_pressure_kpa=` adds the component of clause 6 (0,15 dB up to 3 kHz,
-0,25 dB above, $k = 2$), and `additional_components=` takes any component a
+`static_pressure_kpa=` adds the component of clause 6 (0.15 dB up to 3 kHz,
+0.25 dB above, $k = 2$), and `additional_components=` takes any component a
 laboratory's own method needs, such as the drive of an actuator.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_uncertainty.svg" alt="Two bar charts of the standard uncertainty of each of the fifteen components of IEC 62585 Table I.1, labelled a1 to a15. Left, at 1000 Hz: the largest bars are a7, the free-field correction of the reference microphone, and a15, the repeatability, both 0.030 dB, then a5 at 0.029 dB; the combined standard uncertainty 0.0590 dB is marked dashed, and the title reads nu_eff = 29.98, k = 2.04, U = 0.121 dB. Right, at 8000 Hz: a7 grows to 0.085 dB and a11 and a12, the free field and the mountings, to 0.060 dB each, with the repeatability 0.060 dB; the combined standard uncertainty is 0.1400 dB and the title reads nu_eff = 59.33, k = 2.00, U = 0.280 dB. The repeatability bar is drawn in a second colour as the one Type A component" width="100%" />
@@ -332,10 +332,10 @@ by the same rule as the IEC TC 29 conformance verdict.
 
 | Clause | Correction for | Maximum expanded uncertainty |
 | :--- | :--- | :--- |
-| 9 | Reflections from the case, diffraction round the microphone | 0,25 dB up to and including 4 kHz; 0,35 dB above |
-| 10 | The microphone's deviation from a uniform response | 0,25 dB from 63 Hz to 4 kHz; 0,35 dB to 8 kHz; 0,45 dB above |
-| 11 | Windscreens and similar accessories | 0,20 dB up to and including 4 kHz; 0,30 dB above |
-| 12, 13, 14 | A calibrator, a coupler, an actuator | 0,25 dB up to and including 4 kHz; 0,35 dB below 10 kHz; 0,50 dB from 10 kHz |
+| 9 | Reflections from the case, diffraction round the microphone | 0.25 dB up to and including 4 kHz; 0.35 dB above |
+| 10 | The microphone's deviation from a uniform response | 0.25 dB from 63 Hz to 4 kHz; 0.35 dB to 8 kHz; 0.45 dB above |
+| 11 | Windscreens and similar accessories | 0.20 dB up to and including 4 kHz; 0.30 dB above |
+| 12, 13, 14 | A calibrator, a coupler, an actuator | 0.25 dB up to and including 4 kHz; 0.35 dB below 10 kHz; 0.50 dB from 10 kHz |
 
 Clauses 10 and 11 exclude the variability of the samples of microphone or
 accessory. For a calibrator, a coupler or an actuator, clauses 12 to 14 add a
@@ -381,7 +381,7 @@ v.report("free-field-corrections.pdf")
 The verdict is the object, not a boolean: `v.passes` is the answer,
 `failing_frequencies_hz` says where it fails, and `bool(v)` raises rather than
 let `if verify_correction_uncertainty(...):` pass every measurement. The
-tightest margin is at 16 kHz, 0,04 dB under the 0,50 dB of clause 12.
+tightest margin is at 16 kHz, 0.04 dB under the 0.50 dB of clause 12.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_verification.svg" alt="The expanded uncertainty of the calibrator's corrections at the nine exact octaves from 63 Hz to 16 kHz, 0.12 dB up to 1 kHz and rising to 0.28 dB at 8 kHz and 0.46 dB at 16 kHz, under the stepped maximum of clause 12, 0.25 dB up to 4 kHz, 0.35 dB above and 0.50 dB from 10 kHz, with the range of the corrections over the three microphones below both, from 0.003 dB to 0.23 dB; the title reads Clause 12: within the maximum at every frequency" width="88%" />
 

@@ -116,7 +116,7 @@ The ratio of the velocity at the building to that at the reference distance
 is `(r / r₀)^-n · exp(-α_R (r - r₀))` (Formula (5)) with `α_R = 2π f D / c_s`,
 the damping ratio of the ground over the wavelength, or a power law alone
 with an exponent measured per band (Formula (6)); the level difference is
-20 lg of it (Formula (4)). On the surface the exponent is usually 0,2 to 0,4.
+20 lg of it (Formula (4)). On the surface the exponent is usually 0.2 to 0.4.
 
 ```python
 from phonometry import vibration
@@ -200,7 +200,7 @@ and the sum level gives the clock maximum r.m.s. of the kind of train
 (Formula (9)), `KB_FTm,Zug = c_T1 · v₀ · 10^(L/20)` with `c_T1` = 1 for Max
 Hold spectra and `v₀` = 5·10⁻⁵ mm/s, the reference of the level. The value
 is the KB quantity itself, because KB is the velocity in millimetres per
-second. Then 1,5 times it is $KB_\mathrm{Fmax,Zug}$ (Formula (10)) and 3 times that
+second. Then 1.5 times it is $KB_\mathrm{Fmax,Zug}$ (Formula (10)) and 3 times that
 the peak velocity a [DIN 4150-3](/phonometry/vibration/structural/structural-damage/)
 comparison wants (Formula (12)).
 
@@ -224,8 +224,8 @@ print(f"v_max = {prediction.peak_velocity_mm_s:.2f} mm/s")  # 1.73 mm/s
 
 The assessment vibration severity over a day's timetable is Formula (11),
 the sum of Formula (6) of the [draft of DIN 4150-2](/phonometry/vibration/immission/railway-categories/)
-with the same weighting factors, 0,7 for a tram on the surface, printed
-without that formula's sentence that a category at or below 0,1 counts as
+with the same weighting factors, 0.7 for a tram on the surface, printed
+without that formula's sentence that a category at or below 0.1 counts as
 zero; the library applies the sentence, since the assessment is the one the
 draft says it performs. With the
 200 passages by day and 20 by night of the example, and the guide values of
@@ -273,8 +273,8 @@ Annex B is for the case where the ground's decay was measured with a point
 excitation, a drop weight or a shaker, and a train is wanted. Nearer than
 $R_0 \approx L^2/\lambda$ (Formula (B.1)) a train of length $L$ is a line of point sources
 and its surface waves spread less than a point's; further away it is a
-point. So the exponent measured with the point is made shallower by 0,3 up
-to $R_0$, or by 0,5 if the point fit lumped spreading and damping into one
+point. So the exponent measured with the point is made shallower by 0.3 up
+to $R_0$, or by 0.5 if the point fit lumped spreading and damping into one
 power law, and kept as it is beyond (Formula (B.2) and Figure B.1). Within
 the distances of Table 1, 25 m from a surface tram to 200 m from freight on
 soft ground, the line behaviour is the rule.
@@ -291,21 +291,21 @@ print(vibration.RECOMMENDED_DISTANCES_M["urban"])  # {'tunnel': 20.0, 'surface':
 ## 5. What the example gets wrong
 
 Annex C is the only worked case, and three things in it do not follow from
-the standard's own text. Its sum level of 78,1 dB is the energy sum of all
+the standard's own text. Its sum level of 78.1 dB is the energy sum of all
 19 bands without the weighting Clause 7.1 prescribes; the weighted sum over
-4 Hz to 80 Hz is 77,7 dB, and the printed 1,81 mm/s can only be reached from
-the unweighted one. Its assessment severities, 0,11 by day and 0,05 by
-night, are what the printed inputs give with the factor 0,7 under the root
-once instead of squared, where Formula (11) gives 0,090 and 0,040, and the
+4 Hz to 80 Hz is 77.7 dB, and the printed 1.81 mm/s can only be reached from
+the unweighted one. Its assessment severities, 0.11 by day and 0.05 by
+night, are what the printed inputs give with the factor 0.7 under the root
+once instead of squared, where Formula (11) gives 0.090 and 0.040, and the
 daytime verdict turns on the difference: the
-example finds $A_\mathrm{r}$ = 0,1 exceeded, the formula finds it met. And its floor
+example finds $A_\mathrm{r}$ = 0.1 exceeded, the formula finds it met. And its floor
 transfer column comes from no table of Annex A, and cites Figure 3 for it
 where the concrete floor is Figure 4. The conformance rows hold the chain
-from the printed 78,1 dB and the formula for the printed inputs, and the
+from the printed 78.1 dB and the formula for the printed inputs, and the
 [errata page](/phonometry/reference/errata/) has the readings, together with
 a timber floor table whose lower deviation is printed above its mean, three
 figure legends that name the wrong table or quantity, the sentence on a
-category at or below 0,1 that Formula (11) leaves out, and an Annex A called
+category at or below 0.1 that Formula (11) leaves out, and an Annex A called
 normative on one page and informative on its own.
 
 <Scope>
@@ -330,7 +330,7 @@ the logarithm of the ratio and `nan` where the print has none.
 <ScopeClaim status="covered">
 **Clause 7 entire**: Table 2 as the KB weighting rounded to a tenth of a
 decibel, Formulae (8) to (13), and Formula (11) with the rule of the draft
-of DIN 4150-2 on a category at or below 0,1, which it prints without. **Annex B**: the transition distance, the exponent correction and
+of DIN 4150-2 on a category at or below 0.1, which it prints without. **Annex B**: the transition distance, the exponent correction and
 the piecewise decay of Figure B.1. **Table 1**, the recommended distances.
 </ScopeClaim>
 

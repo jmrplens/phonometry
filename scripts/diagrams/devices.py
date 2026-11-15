@@ -5212,6 +5212,161 @@ def _d_in_duct_rig(s: SVG, th: Theme) -> None:
     )
 
 
+def _d_valve_quiet_trims(s: SVG, th: Theme) -> None:
+    """The three trim families of IEC 60534-8-3 Clause 6 and its outlet expander.
+
+    Schematic sections, not to scale and not any maker's trim: the print calls
+    each of its Figures 1 to 3 "one example of many effective noise-reducing
+    trims". (a) is the drilled cage of 6.2 with the passage length l and
+    diameter d of Figure 1 and Equation (26), l/d counting up to 4; (b) the
+    single path through several stages of 6.3, with the pressures p1, pn and
+    p2 and the last-stage coefficient Cn that Figure 2 of IEC 60534-8-4
+    letters, the flow area growing along the path as that figure has it;
+    (c) the multipath, multistage trim of 6.4, whose NOTE 1 covers linear
+    travel valves only and whose NOTE 2 puts every calculation on the last
+    stage; (d) the valve outlet di opening into the pipe Di through a
+    transition piece, which 7.1 holds to 30 degrees of total angle.
+    """
+
+    def head(cx: float, oy: float, title: str, clause: str) -> None:
+        s.text(cx, oy + 20, title, 14, th.fg, bold=True)
+        s.text(cx, oy + 38, clause, 11, th.muted)
+
+    def notes(cx: float, oy: float, lines: tuple[str, ...]) -> None:
+        size = s.fit_size(lines, (12, 11), 420)
+        for k, line in enumerate(lines):
+            s.text(cx, oy + 266 + 18 * k, line, size, th.muted)
+
+    def stage(x: float, y: float, half: float, gap: float, colour: str) -> None:
+        """One restriction in a channel of half-height *half*, open by *gap*."""
+        s.rect(x - 4, y - half, 8, half - gap / 2, th.panel, colour, sw=1.4)
+        s.rect(x - 4, y + gap / 2, 8, half - gap / 2, th.panel, colour, sw=1.4)
+
+    # --- (a) drilled cage: many small jets through holes of length l, diameter d
+    ox, oy = 0.0, 60.0
+    cx, ay = ox + 225.0, oy + 140.0
+    head(cx, oy, "(a) drilled cage", "IEC 60534-8-3, 6.2 and Figure 1")
+    s.rect(80, oy + 60, 84, 160, th.panel, th.fg, sw=1.6)
+    s.text(122, ay + 4, "valve plug", 11, th.fg)
+    wall_x, wall_w, hh = 176.0, 50.0, 7.0
+    s.rect(wall_x, oy + 60, wall_w, 160, th.panel, th.fg, sw=1.6)
+    holes = (ay - 64, ay - 32, ay, ay + 32, ay + 64)
+    for k, y in enumerate(holes):
+        s.rect(wall_x - 1, y - hh, wall_w + 2, 2 * hh, th.bg)
+        s.line(wall_x, y - hh, wall_x + wall_w, y - hh, th.fg, 1.4)
+        s.line(wall_x, y + hh, wall_x + wall_w, y + hh, th.fg, 1.4)
+        if k != 2:
+            s.arrow(wall_x + wall_w + 4, y, wall_x + wall_w + 52, y, th.primary, 1.6)
+    s.text(wall_x + wall_w + 64, ay - 40, "jets", 12, th.primary, anchor="start")
+    # d, drafted on the middle passage: witness lines out of the wall and the
+    # two arrows pointing in from outside, the passage being too narrow for
+    # a dimension line between them.
+    xd = wall_x + wall_w + 30
+    s.line(wall_x + wall_w + 2, ay - hh, xd + 8, ay - hh, th.muted, 0.9)
+    s.line(wall_x + wall_w + 2, ay + hh, xd + 8, ay + hh, th.muted, 0.9)
+    s.arrow(xd, ay - hh - 16, xd, ay - hh, th.muted, 1.2)
+    s.arrow(xd, ay + hh + 16, xd, ay + hh, th.muted, 1.2)
+    s.text(xd + 14, ay + 5, "$d$", 13, th.fg, anchor="start")
+    s.dim(wall_x, oy + 246, wall_x + wall_w, oy + 246, "$l$", size=13)
+    notes(
+        cx,
+        oy,
+        (
+            "many small jets instead of one large one",
+            "passages of one hydraulic diameter, apart enough to keep",
+            "the jets from interacting; $l/d$ counts up to 4 (Eq. 26)",
+        ),
+    )
+
+    # --- (b) one path, several stages: only the last one is computed
+    ox = 450.0
+    cx = ox + 225.0
+    head(cx, oy, "(b) multistage, one path", "6.3, and IEC 60534-8-4, Figure 2")
+    x0, x1, half = ox + 40.0, ox + 410.0, 40.0
+    s.line(x0, ay - half, x1, ay - half, th.fg, 1.8)
+    s.line(x0, ay + half, x1, ay + half, th.fg, 1.8)
+    s.text(x0 + 6, ay - 10, "flow", 12, th.muted, anchor="start")
+    s.arrow(x0 + 6, ay + 4, x0 + 46, ay + 4, th.muted, 1.6)
+    plates = ((ox + 150.0, 16.0), (ox + 245.0, 30.0), (ox + 340.0, 46.0))
+    for k, (x, gap) in enumerate(plates):
+        last = k == len(plates) - 1
+        stage(x, ay, half, gap, th.primary if last else th.fg)
+        s.arrow(x + 8, ay, x + 40, ay, th.primary if last else th.muted, 1.6)
+    s.text(ox + 95, ay - half - 12, "$p_1$", 14, th.fg)
+    s.text(ox + 292, ay - half - 12, "$p_n$", 14, th.fg)
+    s.text(ox + 385, ay - half - 12, "$p_2$", 14, th.fg)
+    s.text(ox + 340, ay + half + 24, "$C_n$, last stage", 13, th.primary, bold=True)
+    notes(
+        cx,
+        oy,
+        (
+            "each stage takes part of the drop, and the flow area grows",
+            "only the last stage is computed, at $p_n$ for $p_1$ (6.3, NOTE 1)",
+            "the stages before it enter through $p_1/p_n$ (Eq. 31)",
+        ),
+    )
+
+    # --- (c) several paths, each of several stages
+    ox, oy = 0.0, 370.0
+    cx, ay = ox + 225.0, oy + 140.0
+    head(cx, oy, "(c) multipath, multistage", "IEC 60534-8-3, 6.4")
+    s.rect(98, oy + 66, 26, 148, th.panel, th.fg, sw=1.6)
+    s.text(111, oy + 232, "inlet", 11, th.muted)
+    for y in (ay - 48, ay, ay + 48):
+        s.line(136, y - 15, 318, y - 15, th.fg, 1.5)
+        s.line(136, y + 15, 318, y + 15, th.fg, 1.5)
+        for k, (x, gap) in enumerate(((178.0, 8.0), (233.0, 13.0), (288.0, 19.0))):
+            stage(x, y, 15.0, gap, th.primary if k == 2 else th.fg)
+        s.arrow(322, y, 366, y, th.primary, 1.6)
+    notes(
+        cx,
+        oy,
+        (
+            "several paths, several stages each, the flow area growing",
+            "every calculation of 6.4 on the last stage (NOTE 2)",
+            "linear travel valves only (NOTE 1)",
+        ),
+    )
+
+    # --- (d) the outlet: di opens into Di through a cone of 30 degrees at most
+    ox = 450.0
+    cx = ox + 225.0
+    head(cx, oy, "(d) outlet and expander", "IEC 60534-8-3, Clause 7")
+    small, large = 22.0, 40.0
+    # A cone of 15 degrees a side: 18 px of radius over 18 / tan 15 degrees.
+    xa, xb = ox + 50.0, ox + 160.0
+    xc = xb + (large - small) / math.tan(math.radians(15.0))
+    xd = ox + 400.0
+    for sign in (-1.0, 1.0):
+        s.line(xa, ay + sign * small, xb, ay + sign * small, th.fg, 1.8)
+        s.line(xb, ay + sign * small, xc, ay + sign * large, th.primary, 2.2)
+        s.line(xc, ay + sign * large, xd, ay + sign * large, th.fg, 1.8)
+    s.text(xa + 4, ay - small - 10, "valve outlet", 11, th.muted, anchor="start")
+    s.text(xd - 4, ay - large - 10, "pipe", 11, th.muted, anchor="end")
+    s.dim(
+        xa + 40, ay - small, xa + 40, ay + small, "$d_i$", size=13, label_side="right"
+    )
+    s.dim(xd - 40, ay - large, xd - 40, ay + large, "$D_i$", size=13)
+    s.arrow(xb - 30, ay, xc + 20, ay, th.muted, 1.6)
+    s.text(
+        (xb + xc) / 2,
+        ay + large + 24,
+        "30° of total angle at most (7.1)",
+        12,
+        th.primary,
+        bold=True,
+    )
+    notes(
+        cx,
+        oy,
+        (
+            "Clause 7 is for valves with higher outlet Mach numbers,",
+            "with or without an expander downstream; the transition",
+            "piece is held to 30° of total angle",
+        ),
+    )
+
+
 def _d_valve_noise_place(s: SVG, th: Theme) -> None:
     """The place the printed level belongs to, and the path that gets it there.
 

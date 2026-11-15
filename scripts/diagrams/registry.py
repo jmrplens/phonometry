@@ -104,6 +104,7 @@ from .devices import (
     _d_swept_sine,
     _d_turbine_hall,
     _d_valve_noise_place,
+    _d_valve_quiet_trims,
     _d_vdi2081_sheet,
     _d_vibration_sound_power,
     _d_workstation_microphone,
@@ -1214,6 +1215,11 @@ DIAGRAMS = {
         _d_valve_noise_place,
         "Where control valve noise is made, and where it is quoted",
         502,
+    ),
+    "diagram_valve_quiet_trims": (
+        _d_valve_quiet_trims,
+        "Trims built to be quiet, and the outlet that follows them",
+        680,
     ),
     "diagram_vdi2081_sheet": (
         _d_vdi2081_sheet,

@@ -314,6 +314,15 @@ for stage in stages:
 print(round(noise_control.combined_stage_level([78.0, 74.0, 71.0]), 1))   # 80.0
 ```
 
+Los internos con los que se construye una válvula multietapa están
+dibujados debajo, junto a las familias para gas de IEC 60534-8-3 que los
+comparten.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_valve_quiet_trims.svg" alt="Cuatro secciones esquemáticas en una rejilla de dos por dos, ninguna a escala ni de ningún fabricante. Arriba a la izquierda, una jaula perforada: un obturador junto a una pared de jaula atravesada por cinco pasos, cuatro de ellos con un chorro de salida, la longitud de paso l acotada a lo ancho de la pared y el diámetro de paso d en el del medio; las notas dicen muchos chorros pequeños en vez de uno grande, pasos de un mismo diámetro hidráulico lo bastante separados para que los chorros no interactúen, y l entre d contado hasta 4 en la Ecuación 26. Arriba a la derecha, un solo paso de flujo a través de tres etapas cuyas aberturas se ensanchan a lo largo del flujo, con p1 en la entrada, pn antes de la última etapa y p2 en la salida, y la última etapa marcada con su coeficiente de caudal Cn; las notas dicen que cada etapa se lleva parte de la caída mientras el área de paso crece, que solo se calcula la última etapa, con pn en lugar de p1, y que las etapas anteriores entran por p1 entre pn en la Ecuación 31. Abajo a la izquierda, tres pasos en paralelo desde una misma entrada, cada uno con tres etapas que se ensanchan a lo largo del flujo y la última marcada; las notas dicen que todos los cálculos del 6.4 se hacen sobre la última etapa y que el subapartado solo cubre válvulas de recorrido lineal. Abajo a la derecha, la salida de la válvula de diámetro di que se abre por un cono a la tubería de diámetro Di, con el cono marcado como 30 grados de ángulo total como máximo según el 7.1; las notas dicen que el apartado 7 es para válvulas con números de Mach de salida más altos, con o sin expansor aguas abajo" width="100%" />
+
+*El panel (b) es el dispositivo de la Figura 2 de IEC 60534-8-4: el área de
+paso crece etapa a etapa y solo se calcula la última.*
+
 Esos tres coeficientes crecen a lo largo del flujo, que es el dispositivo de
 la Figura 2: la mayor parte de la presión se toma en las primeras etapas y la
 última queda trabajando con un diferencial lo bastante pequeño como para no

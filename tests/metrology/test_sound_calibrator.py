@@ -290,8 +290,8 @@ def _page_limits(
 
 
 #: A nominal frequency inside every printed row a class has a figure in: class
-#: 1 over 31,5 Hz to 16 kHz, both ends of each row and a point inside it, and
-#: classes LS and 2 over 160 Hz to 1,25 kHz.
+#: 1 over 31.5 Hz to 16 kHz, both ends of each row and a point inside it, and
+#: classes LS and 2 over 160 Hz to 1.25 kHz.
 _ROW_FREQUENCIES = [
     *(
         ("1", f)
@@ -315,8 +315,8 @@ def test_each_requirement_reads_its_own_tables(
 
     At 1 kHz Table 2 equals Table 5 for every class, and Table A.1 equals
     Table A.4 for classes LS and 1, so a requirement wired to its neighbour's
-    table only shows away from 1 kHz: at 2 kHz class 1 prints 0,35 dB in
-    Table 2 and 0,30 dB in Table 5.
+    table only shows away from 1 kHz: at 2 kHz class 1 prints 0.35 dB in
+    Table 2 and 0.30 dB in Table 5.
     """
     result = metrology.verify_sound_calibrator(
         calibrator_class, _full_record(), nominal_frequency_hz=frequency_hz
@@ -347,8 +347,8 @@ def test_a_negative_deviation_meets_the_lower_limit(
 ) -> None:
     """The level, supply-voltage, frequency and field limits bound |deviation|.
 
-    Class 1 at 1 kHz: 0,7 % (Table 4), 0,7 % (Table 6), 0,25 dB (5.9.4.2),
-    0,06 dB (Table 3) and 0,25 dB (Table 2), each on the negative side too.
+    Class 1 at 1 kHz: 0.7 % (Table 4), 0.7 % (Table 6), 0.25 dB (5.9.4.2),
+    0.06 dB (Table 3) and 0.25 dB (Table 2), each on the negative side too.
     """
     deviation_field, uncertainty_field = _FIELD_NAMES[requirement]
     record = metrology.SoundCalibratorMeasurements(
@@ -374,8 +374,8 @@ _FIELD_NAMES = {
 def test_the_static_pressure_sweep_inside_and_outside_the_band() -> None:
     """A.6.2.4: Table 2 inside the band of 5.3.2, Table 5 outside it.
 
-    Class 1 at 2 kHz: 0,33 dB is inside the 0,35 dB of Table 2 and outside the
-    0,30 dB of Table 5, with the 0,30 dB maximum of Table A.4 for both. The
+    Class 1 at 2 kHz: 0.33 dB is inside the 0.35 dB of Table 2 and outside the
+    0.30 dB of Table 5, with the 0.30 dB maximum of Table A.4 for both. The
     abbreviated test replaces the temperature and humidity tests only, so the
     in-band points keep Table 2 under it.
     """
@@ -417,7 +417,7 @@ def test_table_e1_through_the_class_1_level_at_1_khz(
     conforms: bool,
     outcome: int,
 ) -> None:
-    """Examples 1 to 7 use 0,25 dB and 0,15 dB, Table 2 and A.1 for class 1."""
+    """Examples 1 to 7 use 0.25 dB and 0.15 dB, Table 2 and A.1 for class 1."""
     assert (limit, maximum) == (0.25, 0.15)
     record = metrology.SoundCalibratorMeasurements(
         level_deviation_db=deviation, level_uncertainty_db=uncertainty
@@ -472,11 +472,11 @@ def test_classes_ls_and_2_at_1_khz() -> None:
 
 
 def test_the_pistonphone_correction_is_added_to_the_level() -> None:
-    """At 100 Hz a 0,2 dB reading and a +0,1 dB correction land on 0,30 dB.
+    """At 100 Hz a 0.2 dB reading and a +0.1 dB correction land on 0.30 dB.
 
-    In binary the sum is 0,300 000 000 000 000 04, one bit past the Table 2
+    In binary the sum is 0.300 000 000 000 000 04, one bit past the Table 2
     limit of class 1 below 160 Hz, and it still conforms; a correction of
-    0,11 dB does not.
+    0.11 dB does not.
     """
     record = metrology.SoundCalibratorMeasurements(
         level_deviation_db=0.2,
@@ -532,7 +532,7 @@ def test_one_correction_per_level_measurement() -> None:
 
 
 def test_the_abbreviated_environmental_test() -> None:
-    """A.6.4.7: Table 5 less 0,05 dB (class 1) and 0,5 % for the frequency."""
+    """A.6.4.7: Table 5 less 0.05 dB (class 1) and 0.5 % for the frequency."""
     record = metrology.SoundCalibratorMeasurements(
         environmental_level_deviation_db=0.22,
         environmental_level_uncertainty_db=0.10,
@@ -697,7 +697,7 @@ def test_the_verification_plot_draws_two_bars_per_measurement() -> None:
     assert len(ax.patches) == 2 * measurements
     red = mpl.colors.to_rgba("#d62728")
     reds = [p for p in ax.patches if p.get_facecolor() == red]
-    assert len(reds) == 1, "only the 0,30 dB environmental reading exceeds its limit"
+    assert len(reds) == 1, "only the 0.30 dB environmental reading exceeds its limit"
     assert reds[0].get_width() == pytest.approx(120.0)
     labels = [t.get_text() for t in ax.get_yticklabels()]
     assert "Environmental level (§5.5) #2" in labels
@@ -741,7 +741,7 @@ def test_the_requirement_plot_draws_every_measurement() -> None:
 
 
 def test_a_verdict_on_its_limit_is_not_drawn_as_a_failure() -> None:
-    """0,2 dB plus a 0,1 dB correction reads a hair over 100 % of 0,30 dB.
+    """0.2 dB plus a 0.1 dB correction reads a hair over 100 % of 0.30 dB.
 
     The verdict forgives that last bit and conforms; the bar has to follow the
     verdict rather than the share, or a conforming calibrator is drawn red.

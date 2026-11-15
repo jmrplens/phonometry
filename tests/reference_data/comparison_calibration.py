@@ -65,7 +65,7 @@ IEC61094_5_TABLE_D1_STANDARD_DB: dict[PressureComparisonComponent, float] = {
 #: Table D.1: the value each row's text states and what it is divided by,
 #: for the seven rows that state one. The reference is quoted "as ± 0,05 dB
 #: with a coverage factor of k = 2", and the polarising voltage is set to
-#: (200,0 ± 0,2) V "giving a semi-range for this component of
+#: (200.0 ± 0.2) V "giving a semi-range for this component of
 #: 20 lg (200,2/200) dB with a rectangular distribution". The repeatability
 #: row states no value ("Found from the standard uncertainties of a large
 #: number of similar measurements."), so it is not here.
@@ -86,16 +86,16 @@ IEC61094_5_D3_PRINTED_COMBINED_DB = 0.040
 IEC61094_5_D3_PRINTED_EXPANDED_DB = 0.08
 
 #: The root-sum-square of the printed standard uncertainty column, the value
-#: D.3 describes, to four decimals: 0,043 669 dB.
+#: D.3 describes, to four decimals: 0.043 669 dB.
 IEC61094_5_D3_COMBINED_DB = 0.0437
 
-#: The same with k = 2, to three decimals: 0,087 34 dB.
+#: The same with k = 2, to three decimals: 0.087 34 dB.
 IEC61094_5_D3_EXPANDED_DB = 0.087
 
 #: The "strict calculation" D.3 mentions and does not print: each component
 #: of the printed column converted to a relative uncertainty
 #: 10**(u/20) - 1, combined in quadrature and converted back by
-#: 20 lg(1 + r), to six decimals: 0,043 614 dB, 0,000 055 dB below the
+#: 20 lg(1 + r), to six decimals: 0.043 614 dB, 0.000 055 dB below the
 #: combination in decibels.
 IEC61094_5_D3_LINEAR_COMBINED_DB = 0.043614
 
@@ -184,7 +184,7 @@ IEC61094_8_TABLE_2_SUBCLAUSES: dict[FreeFieldComparisonComponent, tuple[str, ...
 }
 
 #: IEC 61094-5 clause 4 and IEC 61094-8 clause 4: the reference environmental
-#: conditions, 23,0 °C, 101,325 kPa and 50 %.
+#: conditions, 23.0 °C, 101.325 kPa and 50 %.
 IEC61094_REFERENCE_CONDITIONS: tuple[float, float, float] = (23.0, 101.325, 50.0)
 
 #: BS EN 61094-8:2012 B.2.2, folio 25 (PDF page 27): "in small anechoic
@@ -246,7 +246,7 @@ BARHAM_2014_TABLE_2_CALCULATED_DB: dict[float, float] = {
 
 #: The speed of sound, in m/s, at which the model reproduces every row of
 #: Table 2 to its printed rounding: the paper prints none. Any value from
-#: 344,78 m/s to 344,84 m/s does it; 344,8 m/s is about air at 21 °C.
+#: 344.78 m/s to 344.84 m/s does it; 344.8 m/s is about air at 21 °C.
 BARHAM_2014_SPEED_OF_SOUND = 344.8
 
 #: Jarvis, "Methods for determining the pressure sensitivity of working

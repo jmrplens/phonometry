@@ -74,7 +74,7 @@ def test_iec61672_1_table_c1(
     conforms: bool,
     outcome: int,
 ) -> None:
-    """Every example of Table C.1, whose limits are asymmetric (+1,0; -1,2 dB)."""
+    """Every example of Table C.1, whose limits are asymmetric (+1.0; -1.2 dB)."""
     upper, lower = limits
     result = metrology.verify_conformance(
         deviation,
@@ -89,7 +89,7 @@ def test_iec61672_1_table_c1(
 
 
 def test_a_symmetric_limit_bounds_the_absolute_deviation() -> None:
-    """One number is +/- that number, so -0,25 dB conforms against 0,25 dB."""
+    """One number is +/- that number, so -0.25 dB conforms against 0.25 dB."""
     below = metrology.verify_conformance(
         -0.25, uncertainty=0.1, acceptance_limits=0.25, max_uncertainty=0.15
     )
@@ -116,7 +116,7 @@ def test_both_criteria_are_inclusive_and_nothing_beyond() -> None:
 
 
 def test_a_sum_that_lands_on_the_limit_is_on_it() -> None:
-    """0,1 + 0,2 is 0,300 000 000 000 000 04 in binary and still conforms."""
+    """0.1 + 0.2 is 0.300 000 000 000 000 04 in binary and still conforms."""
     deviation = 0.1 + 0.2
     assert deviation > 0.3
     result = metrology.verify_conformance(
@@ -129,7 +129,7 @@ def test_the_uncertainty_is_not_added_to_the_deviation() -> None:
     """Unlike ISO 8041-1 13.1, a deviation on the limit with a large U conforms.
 
     What the rule refuses is an uncertainty above the maximum, not the sum:
-    0,25 dB measured with U = 0,15 dB against 0,25 dB and 0,15 dB conforms.
+    0.25 dB measured with U = 0.15 dB against 0.25 dB and 0.15 dB conforms.
     """
     result = metrology.verify_conformance(
         0.25, uncertainty=0.15, acceptance_limits=0.25, max_uncertainty=0.15
@@ -303,7 +303,7 @@ def test_plot_draws_limits_band_error_bar_and_verdict() -> None:
     assert len(diamonds) == 1
     assert diamonds[0].get_ydata()[0] == pytest.approx(-0.6)
     band = [p for p in ax.patches if p.get_height() == pytest.approx(1.0)]
-    assert band, "the maximum-permitted band is 2 x 0,5 dB tall"
+    assert band, "the maximum-permitted band is 2 x 0.5 dB tall"
     assert band[0].get_y() == pytest.approx(-1.1)
     assert "conforms" in ax.get_title()
     plt.close("all")

@@ -34,7 +34,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from phonometry.metrology.reciprocity_coupler import MicrophoneType
 
-#: IEC 61094-2:2009 and IEC 61094-3:2016 clause 4: 23,0 °C, 101,325 kPa, 50 %.
+#: IEC 61094-2:2009 and IEC 61094-3:2016 clause 4: 23.0 °C, 101.325 kPa, 50 %.
 IEC61094_RECIPROCITY_REFERENCE_CONDITIONS: tuple[float, float, float] = (
     23.0,
     101325.0,
@@ -42,7 +42,7 @@ IEC61094_RECIPROCITY_REFERENCE_CONDITIONS: tuple[float, float, float] = (
 )
 
 #: IEC 61094-2:2009 Table A.1, printed folio 21 (PDF page 23): Gerber's E_V,
-#: keyed by X, as ((real, imaginary) at R = 0,2, at R = 0,5, at R = 1). "The
+#: keyed by X, as ((real, imaginary) at R = 0.2, at R = 0.5, at R = 1). "The
 #: figures given are considered accurate to 0,000 01."
 IEC61094_2_TABLE_A1: dict[float, tuple[tuple[float, float], ...]] = {
     1.0: ((0.72127, 0.24038), (0.71996, 0.22323), (0.72003, 0.22146)),
@@ -67,10 +67,10 @@ IEC61094_2_TABLE_A1: dict[float, tuple[tuple[float, float], ...]] = {
 IEC61094_2_TABLE_A1_RATIOS: tuple[float, float, float] = (0.2, 0.5, 1.0)
 
 #: The six tubes of Tables B.1 and B.2, in the order of their columns, as
-#: (length in mm, radius in mm) as printed: 50 mm at 0,1667, 0,20 and 0,25 mm,
-#: then 100 mm at the same three radii. The radius printed 0,1667 mm is 1/6 mm:
-#: the printed values come back with 1/6 mm, and with 0,1667 mm the real part
-#: comes out about 0,08 % low (8e-4 relative, up to 0,005 GPa s/m3), beyond
+#: (length in mm, radius in mm) as printed: 50 mm at 0.1667, 0.20 and 0.25 mm,
+#: then 100 mm at the same three radii. The radius printed 0.1667 mm is 1/6 mm:
+#: the printed values come back with 1/6 mm, and with 0.1667 mm the real part
+#: comes out about 0.08 % low (8e-4 relative, up to 0.005 GPa s/m3), beyond
 #: the last printed digit.
 IEC61094_2_TABLE_B_TUBES: tuple[tuple[float, float], ...] = (
     (50.0, 0.1667),
@@ -86,9 +86,9 @@ IEC61094_2_TABLE_B_TUBES: tuple[tuple[float, float], ...] = (
 #: conditions, in GPa s/m3, as printed. Each row is the frequency in Hz, then
 #: (real, imaginary) for the six tubes in the order of
 #: :data:`IEC61094_2_TABLE_B_TUBES`. Table B.1 prints its last real part,
-#: 20 kHz for the 100 mm tube of 0,25 mm radius, as "2.021" with a point, and
+#: 20 kHz for the 100 mm tube of 0.25 mm radius, as "2.021" with a point, and
 #: Table B.2 prints the imaginary part at 800 Hz for the 100 mm tube of
-#: 0,1667 mm as "-3,89" with two decimals; both are read as the numbers they
+#: 0.1667 mm as "-3,89" with two decimals; both are read as the numbers they
 #: write.
 IEC61094_2_TABLE_B: tuple[tuple[float, tuple[tuple[float, float], ...]], ...] = (
     (
@@ -444,7 +444,7 @@ IEC61094_2_TABLE_C1_MM: dict[MicrophoneType, tuple[float, ...]] = {
 
 #: IEC 61094-2:2009 Table C.2, folio 29: the nominal dimensions of
 #: large-volume couplers in mm, (ø A, ø B, ø C, D, E, F), per type, with a
-#: tolerance of ± 0,03 mm on C, E and F.
+#: tolerance of ± 0.03 mm on C, E and F.
 IEC61094_2_TABLE_C2_MM: dict[MicrophoneType, tuple[float, ...]] = {
     "LS1P": (23.77, 18.6, 42.88, 1.95, 12.55, 0.80),
     "LS2aP": (13.2, 9.3, 18.30, 0.5, 3.50, 0.40),
@@ -538,7 +538,7 @@ IEC61094_3_TABLE_1_TEXT: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 
 #: IEC 61094-3:2016 Table B.1, folio 22: the nine conditions of its columns,
-#: (temperature in °C, relative humidity in %), all at 101,325 kPa.
+#: (temperature in °C, relative humidity in %), all at 101.325 kPa.
 IEC61094_3_TABLE_B1_CONDITIONS: tuple[tuple[float, float], ...] = (
     (21.0, 25.0),
     (21.0, 50.0),
@@ -553,7 +553,7 @@ IEC61094_3_TABLE_B1_CONDITIONS: tuple[tuple[float, float], ...] = (
 
 #: IEC 61094-3:2016 Table B.1, printed folio 22 (PDF page 24): the attenuation
 #: of sound pressure in air in dB/m, "calculated according to ISO 9613-1", at
-#: 101,325 kPa, keyed by frequency in kHz, nine columns in the order of
+#: 101.325 kPa, keyed by frequency in kHz, nine columns in the order of
 #: :data:`IEC61094_3_TABLE_B1_CONDITIONS`.
 IEC61094_3_TABLE_B1: dict[float, tuple[float, ...]] = {
     1.0: (0.0054, 0.0048, 0.0054, 0.0054, 0.0052, 0.0059, 0.0054, 0.0057, 0.0063),

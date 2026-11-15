@@ -50,7 +50,7 @@ rather than grading it against a neighbouring row.
 
 **The /M correction is an input.** A class LS/M or 1/M pistonphone's output
 follows the ambient static pressure, and its manual gives the correction to
-the reference 101,325 kPa (5.1.5, 6.3 i). That correction depends on the
+the reference 101.325 kPa (5.1.5, 6.3 i). That correction depends on the
 barometer reading and on data only the manufacturer has, so this module does
 not compute it: the caller supplies it as
 :attr:`SoundCalibratorMeasurements.static_pressure_correction` and it is
@@ -60,8 +60,8 @@ B.4.3.2). Every other calibrator shall not need any environmental correction
 
 **The abbreviated environmental test.** A.6.4 lets a laboratory replace the
 full temperature and humidity tests (A.6.5 to A.6.7) with a few combined
-conditions judged against tighter limits: Table 5 reduced by 0,05 dB for
-classes LS and 1 and by 0,10 dB for class 2, and 0,5 %, 0,5 % and 1,3 % for the
+conditions judged against tighter limits: Table 5 reduced by 0.05 dB for
+classes LS and 1 and by 0.10 dB for class 2, and 0.5 %, 0.5 % and 1.3 % for the
 frequency (A.6.4.7). A calibrator that meets those is deemed to conform; one
 that does not is **not** thereby non-conforming, it has to be given the full
 tests (A.6.1.2). ``environmental_test="abbreviated"`` applies the reduced limits
@@ -372,7 +372,7 @@ ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT: Mapping[BaseClass, float] = (
 #: IEC 60942:2017 A.5.5.7 and A.5.5.8 (folios 26 and 27): the
 #: maximum-permitted expanded uncertainty of the supply-voltage level
 #: difference, for a coverage probability of 95 %, in decibels. The clauses
-#: print it in the text, 0,02 dB for class LS and 0,04 dB for classes 1 and 2,
+#: print it in the text, 0.02 dB for class LS and 0.04 dB for classes 1 and 2,
 #: and note that it is included in Table A.1.
 SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.02, "1": 0.04, "2": 0.04}
@@ -387,7 +387,7 @@ FIELD_IMMUNITY_ACCEPTANCE_LIMITS_DB: Mapping[BaseClass, float] = MappingProxyTyp
 
 #: IEC 60942:2017 A.7.4.8 and A.7.4.10 (folios 40 and 41): the
 #: maximum-permitted expanded uncertainty of that level difference, for a
-#: coverage probability of 95 %, in decibels: 0,05 dB for every class, the
+#: coverage probability of 95 %, in decibels: 0.05 dB for every class, the
 #: measurement of the field itself excluded.
 FIELD_IMMUNITY_MAX_UNCERTAINTY_DB: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.05, "1": 0.05, "2": 0.05}
@@ -447,7 +447,7 @@ def _fluctuation_limit_db(nominal_frequency_hz: float, calibrator_class: str) ->
     :func:`phonometry.metrology.sensitivity` screens a *recording* with this,
     which may be at a frequency the calibrator's class has no limit at, so a
     dash falls back to the strictest figure the class prints anywhere, rather
-    than to none: 0,03 dB for LS, 0,07 dB for class 1 and 0,15 dB for class 2.
+    than to none: 0.03 dB for LS, 0.07 dB for class 1 and 0.15 dB for class 2.
     """
     base = _base_class(calibrator_class)
     limit = _banded(FLUCTUATION_ACCEPTANCE_LIMITS_DB, base, nominal_frequency_hz)
@@ -584,8 +584,8 @@ class SoundCalibratorMeasurements(RichDisplay):
         per cent of the specified frequency (5.4.2).
     :ivar frequency_uncertainty_percent: Its expanded uncertainty, in per cent
         of the specified frequency.
-    :ivar distortion_percent: The total distortion + noise over 22,4 Hz to
-        22,4 kHz (5.6), in per cent.
+    :ivar distortion_percent: The total distortion + noise over 22.4 Hz to
+        22.4 kHz (5.6), in per cent.
     :ivar distortion_uncertainty_percent: Its expanded uncertainty, in per
         cent distortion.
     :ivar supply_voltage_deviation_db: The level at a supply voltage at an end
@@ -1028,7 +1028,7 @@ def verify_sound_calibrator(
     :param measurements: What was measured, as
         :class:`SoundCalibratorMeasurements`.
     :param nominal_frequency_hz: The nominal frequency of the setting, in
-        hertz. It has to be one the class has acceptance limits at: 31,5 Hz to
+        hertz. It has to be one the class has acceptance limits at: 31.5 Hz to
         16 kHz for class 1, 160 Hz to 1 250 Hz for classes LS and 2 (5.1.2).
     :param environmental_test: ``"full"`` (default) judges the environmental
         requirements against Tables 5 and 6; ``"abbreviated"`` against the

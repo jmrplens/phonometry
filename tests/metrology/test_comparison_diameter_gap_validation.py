@@ -91,7 +91,7 @@ _WS2P = ref.JARVIS_1996_WS2P
 _LENGTH, _RADIUS = ref.JARVIS_1996_TUBE
 _GAP = {"gap_length_m": _LENGTH, "gap_radius_m": _RADIUS}
 
-#: IEC 61094-1:2000 6.2.2, kappa_r p_s,r with kappa_r = 1,40: what turns an
+#: IEC 61094-1:2000 6.2.2, kappa_r p_s,r with kappa_r = 1.40: what turns an
 #: impedance into an equivalent volume.
 _KAPPA_P = ref.IEC61094_1_KAPPA_REFERENCE * 101325.0
 
@@ -149,7 +149,7 @@ def test_barham_table_2_is_table_a1() -> None:
 
 
 def test_model_reproduces_every_row_of_table_a1_at_its_speed_of_sound() -> None:
-    """At 344,8 m/s every correction of Table A.1 to the thousandth of a
+    """At 344.8 m/s every correction of Table A.1 to the thousandth of a
     decibel the table prints. The paper prints no speed of sound.
     """
     printed = ref.BARHAM_2014_TABLE_2_CALCULATED_DB
@@ -162,7 +162,7 @@ def test_model_reproduces_every_row_of_table_a1_at_its_speed_of_sound() -> None:
 
 
 def test_model_at_the_reference_air_is_within_a_hundredth_of_table_a1() -> None:
-    """At the reference air of clause 4, within 0,01 dB of every row, far
+    """At the reference air of clause 4, within 0.01 dB of every row, far
     inside the 10 % expanded uncertainty of the NOTE to Table A.1.
     """
     result = metrology.diameter_sound_field_correction(_F_A1, **_WS3)
@@ -246,8 +246,8 @@ def test_doubled_separation_is_the_model_at_twice_the_distance() -> None:
         rtol=1e-12,
     )
     # A regression pin of the model's own output, not a value any source
-    # prints: by the model the change on doubling is 6,3 % of the correction
-    # at 1 kHz and 5,4 % at 20 kHz, where A.2 observed "approximately" 10 %.
+    # prints: by the model the change on doubling is 6.3 % of the correction
+    # at 1 kHz and 5.4 % at 20 kHz, where A.2 observed "approximately" 10 %.
     share = single.separation_change_db / np.abs(single.correction)
     assert share[0] == pytest.approx(0.0630, abs=5e-4)
     assert share[-1] == pytest.approx(0.0536, abs=5e-4)
@@ -286,7 +286,7 @@ def test_half_wave_gap_returns_the_finite_ratio() -> None:
     """At c/2L the plane mode of a gap closed at both ends resonates without
     loss; the pressures grow without bound but their ratio does not, and the
     plane mode then gives R_P = -1. A 10 mm gap, its first half-wave
-    resonance at 17,25 kHz, below both resonance frequencies.
+    resonance at 17.25 kHz, below both resonance frequencies.
     """
     speed = 345.0
     separation = 0.01
@@ -361,10 +361,10 @@ def test_series_impedance_gives_the_ratio_appendix_b_prints() -> None:
 
 def test_error_matches_the_printed_graph() -> None:
     """Folio 27: the error in the sensitivity level, 20 lg|R|, dips to about
-    -0,0065 dB near 7 kHz and reaches about 0,025 dB at 20 kHz; the error in
-    phase peaks at about 0,16 degrees near 12,5 kHz and ends at about
-    0,09 degrees at 20 kHz, where the mass term read without its imaginary
-    unit would end at 0,117 degrees.
+    -0.0065 dB near 7 kHz and reaches about 0.025 dB at 20 kHz; the error in
+    phase peaks at about 0.16 degrees near 12.5 kHz and ends at about
+    0.09 degrees at 20 kHz, where the mass term read without its imaginary
+    unit would end at 0.117 degrees.
     """
     frequencies = np.arange(100.0, 20000.0 + 1.0, 100.0)
     ratio = _library_ratio(frequencies)
@@ -503,8 +503,8 @@ def _reciprocity(
 
 
 def test_agreement_is_within_the_root_sum_square() -> None:
-    """|Delta| <= sqrt(U1^2 + U2^2): 0,1 dB apart with 0,06 dB and 0,08 dB
-    is on the limit and agrees; 0,11 dB apart does not.
+    """|Delta| <= sqrt(U1^2 + U2^2): 0.1 dB apart with 0.06 dB and 0.08 dB
+    is on the limit and agrees; 0.11 dB apart does not.
     """
     jig = _comparison(np.array([-26.3, -26.3, -26.3, -26.3]), 0.06)
     other = _comparison(np.array([-26.4, -26.41, -26.3, -26.3]), 0.08)
@@ -521,9 +521,9 @@ def test_agreement_is_within_the_root_sum_square() -> None:
 
 
 def test_settling_decides_a_difference_on_the_limit() -> None:
-    """-26,9 dB against -27,0 dB is 0,1 dB apart, but the subtraction lands a
-    few units in the last place above the 0,1 dB root-sum-square of 0,08 dB
-    and 0,06 dB: only the settling to a nanodecibel keeps it on the limit.
+    """-26.9 dB against -27.0 dB is 0.1 dB apart, but the subtraction lands a
+    few units in the last place above the 0.1 dB root-sum-square of 0.08 dB
+    and 0.06 dB: only the settling to a nanodecibel keeps it on the limit.
     """
     on_the_limit = cc.JigCouplerVerification(
         frequencies=np.array([1000.0, 2000.0]),
@@ -540,7 +540,7 @@ def test_settling_decides_a_difference_on_the_limit() -> None:
 
 
 def test_validation_pairs_each_frequency_with_its_own() -> None:
-    """The jig at 1, 2, 4 and 8 kHz against a calibration at 0,5, 1, 2 and
+    """The jig at 1, 2, 4 and 8 kHz against a calibration at 0.5, 1, 2 and
     4 kHz, every level and uncertainty its own: each jig frequency meets the
     validation at the same frequency, not at the same position, and 8 kHz is
     left unvalidated.
@@ -714,23 +714,23 @@ def test_verification_refuses_two_zero_uncertainties() -> None:
         )
 
 
-#: Table D.1 at 2 kHz, by hand: the eight rows sum to 0,001 907 dB^2, so each
-#: calibration of the budget has U = 2 sqrt(0,001 907) = 0,087 338 dB. Two
-#: against the same reference share its row, 0,025 dB; the other seven sum
-#: to 0,001 907 - 0,000 625 = 0,001 282 dB^2, and the difference of the two
-#: carries U = 2 sqrt(2 x 0,001 282) = 0,101 272 dB rather than the
-#: 2 sqrt(2 x 0,001 907) = 0,123 515 dB of two independent calibrations.
+#: Table D.1 at 2 kHz, by hand: the eight rows sum to 0.001 907 dB^2, so each
+#: calibration of the budget has U = 2 sqrt(0.001 907) = 0.087 338 dB. Two
+#: against the same reference share its row, 0.025 dB; the other seven sum
+#: to 0.001 907 - 0.000 625 = 0.001 282 dB^2, and the difference of the two
+#: carries U = 2 sqrt(2 x 0.001 282) = 0.101 272 dB rather than the
+#: 2 sqrt(2 x 0.001 907) = 0.123 515 dB of two independent calibrations.
 _D1_EXPANDED_DB = 0.0873384222435922
 _D1_DIFFERENCE_SHARED_DB = 0.1012719112093773
 _D1_DIFFERENCE_INDEPENDENT_DB = 0.1235151812531561
-#: r = 0,000 625/0,001 907 (JCGM 100:2008 Formula (14)).
+#: r = 0.000 625/0.001 907 (JCGM 100:2008 Formula (14)).
 _D1_CORRELATION = 0.3277399056109072
 
 
 def test_shared_reference_cancels_in_the_difference() -> None:
     """Two calibrations with the budget of Table D.1 against the same LS2P:
-    its row, 0,025 dB, cancels in the difference, 0,101 272 dB where the
-    root-sum-square gives 0,123 515 dB, worked by hand above.
+    its row, 0.025 dB, cancels in the difference, 0.101 272 dB where the
+    root-sum-square gives 0.123 515 dB, worked by hand above.
     """
     jig = _comparison(np.full(4, -26.3), _D1_EXPANDED_DB)
     coupler = _comparison(np.full(4, -26.31), _D1_EXPANDED_DB)
@@ -811,7 +811,7 @@ def test_shared_part_follows_the_frequencies_the_validation_covers(
 def test_correlation_is_zero_where_a_calibration_carries_no_uncertainty() -> None:
     """At a frequency where one calibration carries 0 dB nothing can be
     shared, and the correlation coefficient is 0 there, not a division by
-    zero; elsewhere it is (k u_sh)^2/(U_cal U_val) = 0,04^2/(0,08 x 0,06).
+    zero; elsewhere it is (k u_sh)^2/(U_cal U_val) = 0.04^2/(0.08 x 0.06).
     """
     result = cc.JigCouplerVerification(
         frequencies=np.array([1000.0, 2000.0]),
@@ -829,8 +829,8 @@ def test_correlation_is_zero_where_a_calibration_carries_no_uncertainty() -> Non
 
 
 def test_shared_part_tightens_the_verdict() -> None:
-    """0,11 dB apart agrees within the 0,124 dB of two independent Table D.1
-    calibrations, and not within the 0,101 dB left once the reference they
+    """0.11 dB apart agrees within the 0.124 dB of two independent Table D.1
+    calibrations, and not within the 0.101 dB left once the reference they
     share is taken out.
     """
     jig = _comparison(np.full(4, -26.3), _D1_EXPANDED_DB)
@@ -868,9 +868,9 @@ def test_no_shared_part_is_the_root_sum_square_to_the_last_bit() -> None:
 
 
 def test_shared_part_as_large_as_one_uncertainty_is_allowed() -> None:
-    """u_sh = 0,03 dB is all of the 0,06 dB calibration (k = 2): the
-    difference keeps the rest of the other, sqrt(0,08^2 - 0,06^2) =
-    0,052 915 dB, and r = 0,000 9/(0,04 x 0,03) = 0,75.
+    """u_sh = 0.03 dB is all of the 0.06 dB calibration (k = 2): the
+    difference keeps the rest of the other, sqrt(0.08^2 - 0.06^2) =
+    0.052 915 dB, and r = 0.000 9/(0.04 x 0.03) = 0.75.
     """
     jig = _comparison(np.full(4, -26.3), 0.06)
     other = _comparison(np.full(4, -26.33), 0.08)
@@ -900,7 +900,7 @@ def test_shared_part_within_a_nanodecibel_of_the_whole_is_the_whole() -> None:
 def test_gum_example_2_correlation_of_two_items_against_one_standard() -> None:
     """JCGM 100:2008 F.1.2.3 Example 2: against a standard of relative
     standard uncertainty 10^-4, comparisons of 100, 10 and 1 x 10^-6 give
-    r ~ 0,5, 0,990 and 1,000, to the decimals printed. In levels each
+    r ~ 0.5, 0.990 and 1.000, to the decimals printed. In levels each
     calibration carries sqrt(u(alpha)^2 + (u(R_S)/R_S)^2) and they share
     u(R_S)/R_S, all scaled by the same 20/ln 10 dB per neper.
     """
@@ -956,8 +956,8 @@ def test_verification_publishes_the_shared_part_read_only() -> None:
 def test_validation_refuses_a_shared_part_it_cannot_hold(
     shared: float | np.ndarray, match: str
 ) -> None:
-    """Larger than the 0,06 dB calibration's standard uncertainty (0,03 dB)
-    or, at 8 kHz, the 0,08 dB one's (0,04 dB); negative; or neither one
+    """Larger than the 0.06 dB calibration's standard uncertainty (0.03 dB)
+    or, at 8 kHz, the 0.08 dB one's (0.04 dB); negative; or neither one
     value nor one per frequency of the calibration.
     """
     jig = _comparison(np.full(4, -26.3), np.array([0.06, 0.06, 0.06, 0.1]))
@@ -969,7 +969,7 @@ def test_validation_refuses_a_shared_part_it_cannot_hold(
 
 
 def test_verification_refuses_two_uncertainties_all_shared() -> None:
-    """Two calibrations of 0,08 dB that share all of it leave their
+    """Two calibrations of 0.08 dB that share all of it leave their
     difference no uncertainty to be judged against.
     """
     with pytest.raises(ValueError, match="above 0 dB"):

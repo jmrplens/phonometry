@@ -6,7 +6,7 @@ measured with time-weighting F over 60 s, sampling at least 30 times; the
 absolute value of the difference between each of the maximum and minimum
 levels and the mean level shall not exceed the Table 2 (p. 16) acceptance
 limits, read from :data:`phonometry.metrology.FLUCTUATION_ACCEPTANCE_LIMITS_DB`.
-Class 1: 0.20 dB in 31,5-63 Hz, 0.10 dB in >63-<160 Hz, 0.07 dB from 160 Hz up
+Class 1: 0.20 dB in 31.5-63 Hz, 0.10 dB in >63-<160 Hz, 0.07 dB from 160 Hz up
 (classes LS/2 are only specified in 160-1250 Hz: 0.03/0.15 dB).
 """
 

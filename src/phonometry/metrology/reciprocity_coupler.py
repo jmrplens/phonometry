@@ -58,7 +58,7 @@ cylinder: :func:`temperature_transfer_function` computes it either by the
 approximation (A.2) or by the full solution of the reference [A.1], which
 A.2 requires below 20 Hz unless the uncertainty component is increased
 instead, and which reproduces every entry of Table A.1 to its
-stated 0,000 01. In the plane-wave coupler the propagation coefficient and the
+stated 0.000 01. In the plane-wave coupler the propagation coefficient and the
 wave impedance of Formulas (A.3) and (A.4) carry the losses at the cylindrical
 wall, and the admittance of Formula (A.5) those at the two diaphragms.
 
@@ -193,7 +193,7 @@ _REFERENCE_RELATIVE_HUMIDITY_PERCENT = 50.0
 @functools.cache
 def _reference_kappa() -> float:
     r""":math:`\kappa_\mathrm{r}`, the ratio of specific heats of humid air at
-    the reference conditions of clause 4, by Annex F (1,400 757 3 in Table F.1).
+    the reference conditions of clause 4, by Annex F (1.400 757 3 in Table F.1).
     """
     from ..fluids import air
 
@@ -399,9 +399,9 @@ def temperature_transfer_function(
     ``method="exact"`` (default) sums the full solution of the annex's
     reference [A.1], which A.2 requires below 20 Hz unless the uncertainty
     component is increased instead, and which reproduces all 96
-    entries of Table A.1 to the 0,000 01 the annex states for them.
+    entries of Table A.1 to the 0.000 01 the annex states for them.
     ``method="approximation"`` is Formula (A.2), whose modulus the annex
-    states accurate to 0,01 % for :math:`0{,}125 < R < 8` and :math:`X > 5`;
+    states accurate to 0.01 % for :math:`0.125 < R < 8` and :math:`X > 5`;
     its first two terms are the approximation the annex allows for a coupler
     that is not a right circular cylinder.
 
@@ -725,8 +725,8 @@ def capillary_tube_impedance(
     instead (B.1), which a coupler without a ``capillary`` stands for.
 
     Tables B.1 and B.2 tabulate :math:`Z_{\mathrm{a,C}}` at the reference
-    conditions for tubes 50 mm and 100 mm long and 0,1667 mm, 0,20 mm and
-    0,25 mm in radius; the first radius is 1/6 mm, which is what the printed
+    conditions for tubes 50 mm and 100 mm long and 0.1667 mm, 0.20 mm and
+    0.25 mm in radius; the first radius is 1/6 mm, which is what the printed
     values were computed with.
 
     :param frequencies: The frequencies, in Hz, increasing.
@@ -787,7 +787,7 @@ class ReciprocityMicrophone(RichDisplay):
        V_\mathrm{eq} = c_\mathrm{a}\kappa_\mathrm{r} p_\mathrm{s,r},\qquad
        d = r_\mathrm{a}\,2\pi f_0\,c_\mathrm{a}
 
-    E.4 states this representation is generally sufficient up to about 1,3
+    E.4 states this representation is generally sufficient up to about 1.3
     times the resonance frequency.
 
     :ivar equivalent_volume_m3: :math:`V_\mathrm{eq}`, the low-frequency real
@@ -1088,13 +1088,13 @@ class LargeVolumeCoupler(RichDisplay):
     :math:`\pi B^2 F/4` to the volume of Formula (3) and :math:`\pi B F` to the
     surface the heat conduction sees, with B the front-cavity diameter of the
     microphone in it (:func:`coupler_transfer_impedance`). For the coupler of
-    Table C.2 the two bores of LS1P microphones are 2,4 % of the cavity, about
-    0,1 dB on each sensitivity.
+    Table C.2 the two bores of LS1P microphones are 2.4 % of the cavity, about
+    0.1 dB on each sensitivity.
 
     :ivar length_m: The length of the cavity, in m (dimension E).
     :ivar diameter_m: Its diameter, in m (dimension C).
     :ivar port_length_m: The length of the bore between each microphone face
-        and the cavity, in m (dimension F of Table C.2: 0,80 mm for LS1P, 0,40
+        and the cavity, in m (dimension F of Table C.2: 0.80 mm for LS1P, 0.40
         mm for LS2P); zero for microphones whose faces close the cavity.
     :ivar capillary: The capillary tubes, or ``None``.
     :ivar volume_m3: The measured volume of the cavity of length E, without
@@ -1255,7 +1255,7 @@ IEC61094_2_TABLE_C1: Mapping[MicrophoneType, CouplerDimensions] = MappingProxyTy
 
 #: IEC 61094-2:2009 Table C.2, "Nominal dimensions and tolerances for
 #: large-volume couplers", printed folio 29 (PDF page 31), keyed by microphone
-#: type; the tolerance is ± 0,03 mm on C, E and F.
+#: type; the tolerance is ± 0.03 mm on C, E and F.
 IEC61094_2_TABLE_C2: Mapping[MicrophoneType, CouplerDimensions] = MappingProxyType(
     {
         "LS1P": CouplerDimensions(
@@ -1880,7 +1880,7 @@ def large_volume_wave_motion_correction(
     The correction is to be added to the pressure sensitivity level determined
     in the air-filled coupler of Table C.2, when it is not practical to
     determine it for the individual coupler and microphones. It is nil up to
-    800 Hz and printed at five frequencies from 1 kHz to 2,5 kHz, where C.3
+    800 Hz and printed at five frequencies from 1 kHz to 2.5 kHz, where C.3
     sets the upper limit of the coupler for LS1P microphones. A frequency
     within 2 % of a printed one takes its value; one between two rows is
     interpolated linearly in lg f, and flagged.
@@ -1970,7 +1970,7 @@ class CouplerCheck(RichDisplay):
 
     @property
     def ratio_recommended(self) -> bool | None:
-        """For a plane-wave coupler, whether :math:`R` is within the 0,5 to 0,75 C.2 recommends.
+        """For a plane-wave coupler, whether :math:`R` is within the 0.5 to 0.75 C.2 recommends.
 
         ``None`` for a large-volume one. Advisory: it does not enter
         :attr:`passes`.
@@ -1990,7 +1990,7 @@ class CouplerCheck(RichDisplay):
     def approximation_valid(self) -> bool | None:
         """For a large-volume coupler computed with Formula (A.2), whether A.2 states its accuracy.
 
-        :math:`0{,}125 < R < 8` and :math:`X > 5`; ``None`` with the full
+        :math:`0.125 < R < 8` and :math:`X > 5`; ``None`` with the full
         solution or for a plane-wave coupler.
         """
         if not self._approximation or self.lowest_x is None:
@@ -2080,8 +2080,8 @@ def _within(value: float, bounds: tuple[float, float]) -> bool:
     """Whether a value is in a printed range, ends included, read in decimal.
 
     The length-to-diameter ratio of a coupler is a sum of decimal lengths over
-    a decimal diameter, and one that is 0,5 in decimal comes out
-    0,499 999 999 999 999 9 in binary; settled, it is on the range.
+    a decimal diameter, and one that is 0.5 in decimal comes out
+    0.499 999 999 999 999 9 in binary; settled, it is on the range.
     """
     return bool(bounds[0] <= float(settled(value)) <= bounds[1])
 
@@ -2102,9 +2102,9 @@ def check_coupler(
     For a plane-wave coupler, Formulas (A.3) and (A.4) "are valid for the
     frequency range given by :math:`\omega\rho a^2 > 100\eta`" (A.3), which is
     required at the lowest frequency; C.2 recommends a ratio of the distance
-    between the diaphragms to the diameter of 0,5 to 0,75, reported but not
+    between the diaphragms to the diameter of 0.5 to 0.75, reported but not
     required. For a large-volume coupler with the approximation (A.2), A.2
-    states its accuracy for :math:`0{,}125 < R < 8` and :math:`X > 5`, which
+    states its accuracy for :math:`0.125 < R < 8` and :math:`X > 5`, which
     is required; below 20 Hz A.2 asks for the full solution or a larger
     uncertainty component, which is reported but not required. In air, the
     conditions are checked against the domain Annex F states for its

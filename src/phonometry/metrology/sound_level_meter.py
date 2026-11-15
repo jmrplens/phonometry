@@ -36,39 +36,39 @@ and :attr:`SoundLevelMeterPeriodicVerification.failed` rather than under
 of IEC 61672-3 points to and the maximum of its Table B.1:
 
 * ``acoustic_weighting`` (12): the relative frequency weighting at 125 Hz and
-  8 kHz, relative to 1 kHz (12.7, 12.15), against Table 3, with 0,60 dB and
-  0,70 dB;
+  8 kHz, relative to 1 kHz (12.7, 12.15), against Table 3, with 0.60 dB and
+  0.70 dB;
 * ``electrical_weighting`` (13): every frequency weighting the meter provides
   at the octave frequencies of 13.4 (63 Hz to 16 kHz for class 1, to 8 kHz for
-  class 2), against Table 3, with 0,60 dB up to 4 kHz, 0,70 dB above it and
-  1,00 dB above 10 kHz;
-* ``weighting_at_1khz`` (14.2): C and Z against A at 1 kHz, 5.5.9, +/-0,2 dB,
-  with 0,20 dB;
+  class 2), against Table 3, with 0.60 dB up to 4 kHz, 0.70 dB above it and
+  1.00 dB above 10 kHz;
+* ``weighting_at_1khz`` (14.2): C and Z against A at 1 kHz, 5.5.9, +/-0.2 dB,
+  with 0.20 dB;
 * ``time_weighting_at_1khz`` (14.3): S and time-averaged against F at 1 kHz,
-  5.8.3, +/-0,1 dB, with 0,20 dB (the maximum uncertainty is larger than the
+  5.8.3, +/-0.1 dB, with 0.20 dB (the maximum uncertainty is larger than the
   acceptance limit, as the page prints them);
 * ``long_term_stability`` (15): the final minus the initial indication over
-  25 min to 35 min, 5.14.2, +/-0,1 dB (class 1) or +/-0,3 dB (class 2), with
-  0,10 dB;
+  25 min to 35 min, 5.14.2, +/-0.1 dB (class 1) or +/-0.3 dB (class 2), with
+  0.10 dB;
 * ``level_linearity`` (16): the level linearity deviations at 8 kHz on the
-  reference level range, 5.6.5, +/-0,8 dB or +/-1,1 dB, with 0,30 dB; and
+  reference level range, 5.6.5, +/-0.8 dB or +/-1.1 dB, with 0.30 dB; and
   the absence of an overload or under-range indication within the linear
   operating range the instruction manual states (16.4; IEC 61672-1 5.6.10);
 * ``range_linearity`` (17): the level linearity deviations including the
   level range control, the same limits;
 * ``toneburst`` (18): the 4 kHz toneburst responses of 18.5 to 18.7 less the
-  reference responses of Table 4, against its limits, with 0,30 dB;
+  reference responses of Table 4, against its limits, with 0.30 dB;
 * ``c_peak`` (19): :math:`L_\mathrm{Cpeak} - L_\mathrm{C}` for one cycle at
   8 kHz and the two half cycles at 500 Hz, less the reference differences of
-  Table 5, against its limits, with 0,35 dB; and the absence of an overload
+  Table 5, against its limits, with 0.35 dB; and the absence of an overload
   indication while those signals are applied (19.3, 19.5);
 * ``overload`` (20): the difference between the positive and the negative
   one-half-cycle input levels that first cause an overload indication,
-  5.11.3, 1,5 dB either way, with 0,25 dB; and the latching of the indicator
+  5.11.3, 1.5 dB either way, with 0.25 dB; and the latching of the indicator
   (20.5);
 * ``high_level_stability`` (21): the final minus the initial indication over
-  5 min near the top of the least-sensitive range, 5.15.2, +/-0,1 dB or
-  +/-0,3 dB, with 0,10 dB.
+  5 min near the top of the least-sensitive range, 5.15.2, +/-0.1 dB or
+  +/-0.3 dB, with 0.10 dB.
 
 **What is recorded, not graded.** The indications at the calibration check
 frequency before and after adjustment (Clause 10) and the self-generated
@@ -366,7 +366,7 @@ _F_AND_E_LIMITS_DB: dict[float, tuple[tuple[float, float], tuple[float, float]]]
 }
 
 #: The reference responses of Table 4: maximum F-weighted level (Equation (7),
-#: tau = 0,125 s) and sound exposure level (Equation (8)), by duration (ms).
+#: tau = 0.125 s) and sound exposure level (Equation (8)), by duration (ms).
 _F_REFERENCES_DB = (
     0.0,
     -0.1,
@@ -400,7 +400,7 @@ _E_REFERENCES_DB = (
 #: responses relative to the steady sound level and their acceptance limits,
 #: keyed by the measurement: ``"F"`` for the maximum F-time-weighted level
 #: (:math:`L_\mathrm{AFmax} - L_\mathrm{A}`, 12 rows from 1 s to
-#: 0,25 ms), ``"S"`` for the maximum S-time-weighted level (9 rows from
+#: 0.25 ms), ``"S"`` for the maximum S-time-weighted level (9 rows from
 #: 1 s to 2 ms, with limits of their own) and ``"E"`` for the sound
 #: exposure level (:math:`L_\mathrm{AE} - L_\mathrm{A}`, the 12 durations of
 #: F, whose limits it shares). The rows hold for the A, C and Z weightings
@@ -619,7 +619,7 @@ ELECTRICAL_TEST_FREQUENCIES_HZ: Mapping[int, tuple[float, ...]] = MappingProxyTy
 )
 
 #: IEC 61672-3:2013 18.5 to 18.7: the toneburst durations each measurement is
-#: tested at, in milliseconds: 200 ms, 2 ms and 0,25 ms for the maximum
+#: tested at, in milliseconds: 200 ms, 2 ms and 0.25 ms for the maximum
 #: F-weighted level and the sound exposure level, 200 ms and 2 ms for the
 #: maximum S-weighted level.
 TONEBURST_TEST_DURATIONS_MS: Mapping[ToneburstResponse, tuple[float, ...]] = (
@@ -2193,7 +2193,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         limits, the deviation from the design goal, the actual uncertainty as
         its error bar and the maximum permitted as the band behind it. The
         electrical test of the frequency weightings, whose limits run from
-        0,7 dB to 16 dB, is drawn as each result's margin to its nearer limit
+        0.7 dB to 16 dB, is drawn as each result's margin to its nearer limit
         instead. A result whose uncertainty exceeds its maximum is drawn
         hollow, as 4.3 forbids using it, and a result of
         :attr:`over_max_by_correction_data` as one that did not conform

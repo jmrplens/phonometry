@@ -143,8 +143,8 @@ def test_published_tables_are_immutable() -> None:
 # Annex D: the budget
 # --------------------------------------------------------------------------
 def test_d3_combines_the_printed_column_to_0_0437_not_0_040() -> None:
-    """D.3: the root-sum-square of Table D.1 is 0,0437 dB; the page prints
-    0,040 dB and 0,08 dB, an erratum.
+    """D.3: the root-sum-square of Table D.1 is 0.0437 dB; the page prints
+    0.040 dB and 0.08 dB, an erratum.
     """
     budget = _d1_budget()
     assert budget.combined_uncertainty_db == pytest.approx(
@@ -159,7 +159,7 @@ def test_d3_combines_the_printed_column_to_0_0437_not_0_040() -> None:
 
 
 def test_d3_linear_and_logarithmic_combination_are_essentially_the_same() -> None:
-    """The strict calculation of D.3 is 0,043 614 dB, 0,000 055 dB below the
+    """The strict calculation of D.3 is 0.043 614 dB, 0.000 055 dB below the
     root-sum-square in decibels: essentially the same, and not the same.
     """
     budget = _d1_budget()
@@ -479,7 +479,7 @@ def test_environmental_correction_at_as_many_other_frequencies_is_refused(
 ) -> None:
     # As many frequencies as the calibration, one of them different: 10 kHz
     # where the calibration has 8 kHz. A check on the count alone applies the
-    # 10 kHz coefficient at 8 kHz and moves the result by 0,5 dB in silence.
+    # 10 kHz coefficient at 8 kHz and moves the result by 0.5 dB in silence.
     env = metrology.environmental_sensitivity_correction(
         [250.0, 1000.0, 2000.0, 4000.0, 10000.0],
         static_pressure_kpa=96.325,

@@ -110,7 +110,7 @@ def _triad(
 
 
 def test_full_solution_reproduces_every_entry_of_table_a1() -> None:
-    """The 96 entries, to the 0,000 01 A.2 states for them."""
+    """The 96 entries, to the 0.000 01 A.2 states for them."""
     worst = 0.0
     for x, row in ref.IEC61094_2_TABLE_A1.items():
         for ratio, (real, imag) in zip(
@@ -122,7 +122,7 @@ def test_full_solution_reproduces_every_entry_of_table_a1() -> None:
 
 
 def test_approximation_is_accurate_where_the_annex_says() -> None:
-    """Formula (A.2): modulus to 0,01 % for 0,125 < R < 8 and X > 5."""
+    """Formula (A.2): modulus to 0.01 % for 0.125 < R < 8 and X > 5."""
     for x, row in ref.IEC61094_2_TABLE_A1.items():
         if x <= 5.0:
             continue
@@ -138,7 +138,7 @@ def test_approximation_is_accurate_where_the_annex_says() -> None:
 
 
 def test_approximation_departs_below_its_domain() -> None:
-    """At R = 0,2 and X = 1 the three-term series is 0,24 % off the table."""
+    """At R = 0.2 and X = 1 the three-term series is 0.24 % off the table."""
     value = complex(
         metrology.temperature_transfer_function(0.2, 1.0, method="approximation")
     )
@@ -190,7 +190,7 @@ def test_broadband_validity_is_the_frequency_a3_prints(
 ) -> None:
     """A.3: omega rho a**2 > 100 eta above 3 Hz (LS1P) and 12 Hz (LS2aP).
 
-    The printed frequencies are the bounds rounded up: 2,83 Hz and 11,34 Hz.
+    The printed frequencies are the bounds rounded up: 2.83 Hz and 11.34 Hz.
     """
     gas = _air()
     radius = ref.IEC61094_2_TABLE_C1_MM[kind][2] / 2000.0
@@ -220,10 +220,10 @@ def _tube(length_mm: float, radius_mm: float, frequencies: np.ndarray) -> np.nda
 
 
 def test_capillary_impedance_reproduces_tables_b1_and_b2() -> None:
-    """All 186 complex entries within 0,002 GPa s/m3.
+    """All 186 complex entries within 0.002 GPa s/m3.
 
     The tables were not computed with Annex F air to the fifth figure: the low
-    frequencies agree to the printed rounding, the resonances to 0,0018.
+    frequencies agree to the printed rounding, the resonances to 0.0018.
     """
     frequencies, printed = _tube_table()
     for column, (length, radius) in enumerate(ref.IEC61094_2_TABLE_B_TUBES):
@@ -237,7 +237,7 @@ def test_capillary_impedance_reproduces_tables_b1_and_b2() -> None:
 
 
 def test_the_printed_radius_0_1667_mm_is_one_sixth_of_a_millimetre() -> None:
-    """At 20 Hz the 50 mm tube prints 3,015; 0,1667 mm gives 3,013, 1/6 mm 3,015."""
+    """At 20 Hz the 50 mm tube prints 3.015; 0.1667 mm gives 3.013, 1/6 mm 3.015."""
     exact = metrology.capillary_tube_impedance(
         [20.0], length_m=0.05, radius_m=1.0 / 6000.0, gas=_air()
     )
@@ -473,7 +473,7 @@ def test_the_bores_of_figure_c2_add_to_the_volume_and_the_surface() -> None:
 
 
 def test_the_bores_of_table_c2_move_each_sensitivity_by_a_tenth_of_a_decibel() -> None:
-    """The two bores of the LS1P coupler are 2,4 % of its cavity."""
+    """The two bores of the LS1P coupler are 2.4 % of its cavity."""
     flush = dataclasses.replace(_LARGE, capillary=None, port_length_m=0.0)
     bored = dataclasses.replace(_LARGE, capillary=None)
     change = [
@@ -515,7 +515,7 @@ def test_large_volume_heat_conduction_is_formulas_3_and_a1_with_table_a1(
 ) -> None:
     """Formula (3) with Delta_H of Formula (A.1) and E_V read from Table A.1.
 
-    A coupler of R = 0,5 closed by two microphones, at the frequency where the
+    A coupler of R = 0.5 closed by two microphones, at the frequency where the
     X of A.2 is a printed one. The gas is held by kappa p_s at the conditions
     and the microphones by kappa_r p_s,r at the reference ones, as Formula (3)
     prints them; away from the reference conditions the two differ.
@@ -833,7 +833,7 @@ def test_another_gas_changes_the_transfer_impedance() -> None:
 
 
 def test_plane_wave_check_reports_the_recommended_ratio_without_failing() -> None:
-    """C.2: l0/D of 0,5 to 0,75, with l0 between the diaphragms (5.4)."""
+    """C.2: l0/D of 0.5 to 0.75, with l0 between the diaphragms (5.4)."""
     check = metrology.check_coupler(_F, _PLANE, _MICS, **_CONDITIONS)
     assert check.length_to_diameter_ratio == pytest.approx((7.5 + 2 * 1.95) / 18.6)
     assert check.ratio_recommended is True
@@ -907,7 +907,7 @@ def test_check_coupler_needs_two_microphones() -> None:
 def test_check_holds_formulas_a3_and_a4_to_their_bound(
     kind: MicrophoneType, below_hz: float, above_hz: float
 ) -> None:
-    """omega rho a**2 > 100 eta at 2,83 Hz and 11,34 Hz in the couplers of
+    """omega rho a**2 > 100 eta at 2.83 Hz and 11.34 Hz in the couplers of
     Table C.1, which A.3 prints rounded up as 3 Hz and 12 Hz.
     """
     _, b, c, d, _, _ = ref.IEC61094_2_TABLE_C1_MM[kind]

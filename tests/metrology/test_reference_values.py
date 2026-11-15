@@ -96,7 +96,7 @@ def test_the_printed_strings_carry_the_prefix() -> None:
 
 
 def test_note_b_of_table_2_is_the_air_to_water_offset() -> None:
-    """A level re 1 µPa is 10 lg(20²/1²) ≈ 26,0 dB above the same level re 20 µPa."""
+    """A level re 1 µPa is 10 lg(20²/1²) ≈ 26.0 dB above the same level re 20 µPa."""
     assert underwater.in_air_to_underwater_spl(0.0) == pytest.approx(26.0, abs=0.05)
 
 

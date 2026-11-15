@@ -55,7 +55,7 @@ to the environmental conditions of the test. IEC 61094-5 6.6 does so when the
 two microphones are different models; for two of the same model it allows the
 result to be referred instead to the conditions at which the reference's
 calibration is valid. Both parts allow the result to be referred to the
-reference conditions of clause 4 (23,0 °C, 101,325 kPa, 50 %) when reliable
+reference conditions of clause 4 (23.0 °C, 101.325 kPa, 50 %) when reliable
 correction data are available.
 :func:`environmental_sensitivity_correction` writes that correction to first
 order from the coefficients of the microphone, in the units IEC 61094-2
@@ -169,8 +169,8 @@ Printed values the library does not follow
 ------------------------------------------
 
 **IEC 61094-5 D.3.** The root-sum-square of the eight components Table D.1
-prints is 0,0437 dB, not the 0,040 dB D.3 states; with :math:`k = 2` it is
-0,087 dB rather than 0,08 dB. :func:`comparison_uncertainty_budget` gives the
+prints is 0.0437 dB, not the 0.040 dB D.3 states; with :math:`k = 2` it is
+0.087 dB rather than 0.08 dB. :func:`comparison_uncertainty_budget` gives the
 sum of the printed components, and the defect is in ``docs/ERRATA.md``.
 
 **IEC 61094-8 B.10.** The spectrum of Formula (B.10) is that of a rectangular
@@ -181,7 +181,7 @@ follows them and reads :math:`b` as the half-duration:
 is in ``docs/ERRATA.md``.
 
 **Barham et al. (2014), Formulas (1), (2) and (4).** With the inputs of its
-Table 1, the model as printed gives -0.986 dB at 20 kHz at 344,8 m/s, where
+Table 1, the model as printed gives -0.986 dB at 20 kHz at 344.8 m/s, where
 its Table 2 (Table A.1 of IEC 61094-5) prints -1.443 dB. Read with the radial
 sensitivity of Formula (4) less 1, the deflection of a membrane under a
 uniform pressure, the annulus of Formula (2) from the test microphone's
@@ -636,8 +636,8 @@ SharedComparisonComponent = Literal[
 #: simultaneous calibration of a low-sensitivity WS2P microphone against an
 #: LS2P reference in the coupler of Figure A.1, at 2 kHz. Keyed by the name
 #: :func:`comparison_uncertainty_budget` takes each component by, in the
-#: table's order. The polarising voltage of (200,0 ± 0,2) V states a
-#: semi-range of :math:`20\lg(200{,}2/200)` dB. The repeatability row states no
+#: table's order. The polarising voltage of (200.0 ± 0.2) V states a
+#: semi-range of :math:`20\lg(200.2/200)` dB. The repeatability row states no
 #: value, only that it was "found from the standard uncertainties of a large
 #: number of similar measurements", so it holds the printed standard
 #: uncertainty alone.
@@ -648,7 +648,7 @@ SharedComparisonComponent = Literal[
 #: Table A.1)" and an expanded uncertainty of 10 % of the correction: it is
 #: :attr:`JigDiameterCorrection.standard_uncertainty_db`. The second, the
 #: uncertainties of a calibration made as a system with a preamplifier, prints
-#: 0,002 dB, "frequency dependent" and "<0,02 above 200 Hz" in its column,
+#: 0.002 dB, "frequency dependent" and "<0,02 above 200 Hz" in its column,
 #: beside a heading and two notes: the effect of a polarising voltage that
 #: deviates from 200 V, and the capacitance component to be reconsidered. A
 #: set-up that needs them passes them to :func:`comparison_uncertainty_budget`
@@ -798,7 +798,7 @@ IEC61094_8_TABLE_1: Mapping[str, ReferenceCalibrationRow] = MappingProxyType(
 #: IEC 61094-5:2016 Table A.1, "Calculated corrections to be added to the
 #: sensitivity level of the WS3 microphone when using the arrangement in
 #: Figure A.4", keyed by frequency in Hz, in dB. They assume an LS2aP
-#: reference and a radially symmetrical field, and hold for the 0,5 mm
+#: reference and a radially symmetrical field, and hold for the 0.5 mm
 #: separation of Figure A.4 only.
 IEC61094_5_TABLE_A1: Mapping[float, float] = MappingProxyType(
     {
@@ -991,15 +991,15 @@ def environmental_sensitivity_correction(
     with the coefficients in the units IEC 61094-2:2009 Annex D gives them:
     dB/kPa for the static pressure, dB/K for the temperature. Annex D of that
     part puts the low-frequency static pressure coefficient of LS1P
-    microphones between -0,01 dB/kPa and -0,02 dB/kPa and of LS2P between
-    -0,003 dB/kPa and -0,008 dB/kPa, the temperature coefficient within
-    ±0,005 dB/K, and all three vary with frequency and from one microphone to
+    microphones between -0.01 dB/kPa and -0.02 dB/kPa and of LS2P between
+    -0.003 dB/kPa and -0.008 dB/kPa, the temperature coefficient within
+    ±0.005 dB/K, and all three vary with frequency and from one microphone to
     another, so they are the microphone's own and are required here. 6.5.3 of
     the same part observes no influence of humidity on a laboratory standard
     microphone, hence the default of 0 for its coefficient.
 
     The reference conditions default to clause 4 of IEC 61094-5 and IEC
-    61094-8, 101,325 kPa, 23,0 °C and 50 %. The correction adds to a level
+    61094-8, 101.325 kPa, 23.0 °C and 50 %. The correction adds to a level
     known at the reference conditions to give it at the conditions of the
     test; :func:`simultaneous_comparison` and :func:`sequential_comparison`
     add it to the reference microphone's level (``reference_environment=``)
@@ -1016,8 +1016,8 @@ def environmental_sensitivity_correction(
     :param humidity_coefficient_db_per_percent: :math:`\delta_H`, in dB per
         percentage point (Default: 0).
     :param reference_static_pressure_kpa: :math:`p_{s,0}`, where the level is
-        known, in kPa (Default: 101,325).
-    :param reference_temperature_c: :math:`t_0`, in °C (Default: 23,0).
+        known, in kPa (Default: 101.325).
+    :param reference_temperature_c: :math:`t_0`, in °C (Default: 23.0).
     :param reference_relative_humidity_percent: :math:`H_0`, in % (Default:
         50).
     :return: The :class:`EnvironmentalSensitivityCorrection`.
@@ -1145,8 +1145,8 @@ def jig_diameter_correction(
     against a type LS2aP reference in the jig of Figure A.4.
 
     The table gives them at the preferred one-third-octave frequencies from
-    1 kHz, -0,004 dB, to 20 kHz, -1,443 dB, calculated for a radially
-    symmetrical field and the 0,5 mm diaphragm separation of Figure A.4, "the
+    1 kHz, -0.004 dB, to 20 kHz, -1.443 dB, calculated for a radially
+    symmetrical field and the 0.5 mm diaphragm separation of Figure A.4, "the
     only one for which the corrections specified in Table A.1 are valid". A
     frequency within 2 % of a row, such as an exact base-ten one-third-octave
     frequency, reads as that row. Pass ``.correction`` to the comparison as
@@ -1484,8 +1484,8 @@ def diameter_sound_field_correction(
     while the average of Formula (5) runs over its diaphragm radius
     :math:`b`; and the argument of Formula (1) is :math:`k_n r/a`, as in (2)
     and (3). The paper prints no speed of sound: at the reference air of
-    clause 4 the result is within 0,01 dB of every row of Table A.1, and at
-    344,8 m/s it is every row.
+    clause 4 the result is within 0.01 dB of every row of Table A.1, and at
+    344.8 m/s it is every row.
 
     The circular symmetry it assumes is the reason a calibration it corrects
     is made with a coaxial source in a free field or in a diffuse field
@@ -1503,22 +1503,22 @@ def diameter_sound_field_correction(
         both resonance frequencies.
     :param reference_radius_m: :math:`a`, the radius of the reference
         microphone's front cavity, which the model also takes for its
-        diaphragm, in m (an LS2: 4,650 mm, Table 1 of the paper).
+        diaphragm, in m (an LS2: 4.650 mm, Table 1 of the paper).
     :param test_diaphragm_radius_m: :math:`b`, the radius of the test
-        microphone's diaphragm, in m (a WS3: 2,065 mm).
+        microphone's diaphragm, in m (a WS3: 2.065 mm).
     :param test_outer_radius_m: The overall radius of the test microphone, in
-        m, at least :math:`b` and less than :math:`a` (a WS3: 2,975 mm).
+        m, at least :math:`b` and less than :math:`a` (a WS3: 2.975 mm).
     :param separation_m: :math:`L`, the distance between the diaphragms, in
-        m (Figure A.4: 0,5 mm, "the only one for which the corrections
+        m (Figure A.4: 0.5 mm, "the only one for which the corrections
         specified in Table A.1 are valid").
     :param reference_resonance_frequency_hz: The resonance frequency of the
         reference microphone's diaphragm, in Hz (an LS2: 22 kHz).
     :param test_resonance_frequency_hz: That of the test microphone, in Hz
         (a WS3: 100 kHz).
-    :param temperature_c: The air temperature, in °C (Default: 23,0, the
+    :param temperature_c: The air temperature, in °C (Default: 23.0, the
         reference conditions of clause 4).
     :param static_pressure_kpa: The static pressure, in kPa (Default:
-        101,325).
+        101.325).
     :param relative_humidity_percent: The relative humidity, in % (Default:
         50).
     :param gas: A :class:`~phonometry.fluids.Fluid` whose speed of sound is
@@ -2699,7 +2699,7 @@ def comparison_uncertainty_budget(
     Each component is given as a standard uncertainty in dB, the column
     Table D.1 prints, or as a :class:`~phonometry.metrology.Quantity` whose
     standard uncertainty it takes: ``metrology.rectangular(0, 0.03)`` for a
-    semi-range of 0,03 dB, say. They are keyed by the names of
+    semi-range of 0.03 dB, say. They are keyed by the names of
     :data:`IEC61094_5_TABLE_D1` for a pressure calibration and of
     :data:`IEC61094_8_TABLE_2` for a free-field one; neither table is
     exhaustive (D.1, 8.1), so a component may be left out and
@@ -2712,8 +2712,8 @@ def comparison_uncertainty_budget(
     second report with.
 
     With the eight components of Table D.1 at 2 kHz the combined standard
-    uncertainty is 0,0437 dB and the expanded one 0,087 dB. D.3 prints
-    0,040 dB and 0,08 dB, which are not the root-sum-square of its own
+    uncertainty is 0.0437 dB and the expanded one 0.087 dB. D.3 prints
+    0.040 dB and 0.08 dB, which are not the root-sum-square of its own
     components (an erratum; see ``docs/ERRATA.md``).
 
     :param standard_uncertainties_db: The components, keyed by name, each a
@@ -3332,16 +3332,16 @@ def free_field_region(
     Formula (B.1), :math:`A = d + \tau c`, with :math:`c` "the speed of sound
     at the prevailing environmental conditions", which is taken from the
     IEC 61094-2:2009 Annex F air of :func:`~phonometry.fluids.air`. The
-    conditions default to the reference conditions of clause 4, 23,0 °C,
-    101,325 kPa and 50 %.
+    conditions default to the reference conditions of clause 4, 23.0 °C,
+    101.325 kPa and 50 %.
 
     :param source_distance_m: :math:`d`, the separation of the acoustic
         centres of the source and the microphone, in m.
     :param window_time_s: :math:`\tau`, from the arrival of the sound at the
         microphone to the end of the time window, in s.
-    :param temperature_c: The air temperature, in °C (Default: 23,0).
+    :param temperature_c: The air temperature, in °C (Default: 23.0).
     :param static_pressure_kpa: The static pressure, in kPa (Default:
-        101,325).
+        101.325).
     :param relative_humidity_percent: The relative humidity, in % (Default:
         50).
     :return: The :class:`FreeFieldRegion`.
@@ -3439,9 +3439,9 @@ def reflection_free_window_s(
         centres of the source and the microphone, in m.
     :param reflected_path_m: :math:`L`, the length of the shortest reflected
         path, from the source by the reflector to the microphone, in m.
-    :param temperature_c: The air temperature, in °C (Default: 23,0).
+    :param temperature_c: The air temperature, in °C (Default: 23.0).
     :param static_pressure_kpa: The static pressure, in kPa (Default:
-        101,325).
+        101.325).
     :param relative_humidity_percent: The relative humidity, in % (Default:
         50).
     :return: :math:`(L - d)/c`, in s.
@@ -3568,7 +3568,7 @@ class ImpedancePressureRatio(OwnsArrays):
         dB.
 
         This is how Table D.1 of IEC 61094-5 carries the effect, a semi-range
-        of 0,005 dB at 2 kHz giving 0,003 dB, and how 7.5 asks for it when no
+        of 0.005 dB at 2 kHz giving 0.003 dB, and how 7.5 asks for it when no
         reference of similar impedance is available: "the size of the error
         caused should be estimated and added to the uncertainty budget". It
         is the ``"impedance"`` component of
@@ -3633,8 +3633,8 @@ def impedance_pressure_ratio(
     the simultaneous excitation of Table D.1, the circuit of its reference
     [2], Jarvis (1996). Each microphone enters by its equivalent volume
     :math:`V_\mathrm{e} = \kappa_\mathrm{r} p_{s,\mathrm{r}}/(\mathrm{j}\omega
-    Z_\mathrm{a})` (IEC 61094-1 6.2.2, with :math:`\kappa_\mathrm{r} = 1{,}40`
-    and :math:`p_{s,\mathrm{r}}` = 101,325 kPa):
+    Z_\mathrm{a})` (IEC 61094-1 6.2.2, with :math:`\kappa_\mathrm{r} = 1.40`
+    and :math:`p_{s,\mathrm{r}}` = 101.325 kPa):
 
     * **A closed coupler, sequential substitution.** In a coupler small
       against the wavelength, the source drives the sum of the admittances of
@@ -3676,9 +3676,9 @@ def impedance_pressure_ratio(
         from the lumped parameters of IEC 61094-2 E.4. Its ratio to
         :math:`V_\mathrm{eq}` holds no :math:`\kappa_\mathrm{r}`, so the
         volume keeps the definition :math:`V_\mathrm{eq}` was given in, the
-        :math:`\kappa_\mathrm{r} = 1{,}40` of IEC 61094-1 for the values of
+        :math:`\kappa_\mathrm{r} = 1.40` of IEC 61094-1 for the values of
         its Table 3; a series impedance is turned into :math:`V_x` with that
-        same 1,40.
+        same 1.40.
     :param test_equivalent_volume_m3: :math:`V_\mathrm{e,test}`, in m³.
     :param coupling_equivalent_volume_m3: :math:`V_x` of a closed coupler, in
         m³ at the reference conditions (Default: None).
@@ -3846,17 +3846,17 @@ def air_gap_series_impedance_pa_s_m3(
     :param gap_length_m: :math:`L`, the length of the space between the two
         diaphragms, in m (Appendix B's example: 2 mm).
     :param gap_radius_m: :math:`r`, its radius, in m (Appendix B's example:
-        half of 12,7 mm).
-    :param temperature_c: The air temperature, in °C (Default: 23,0, the
+        half of 12.7 mm).
+    :param temperature_c: The air temperature, in °C (Default: 23.0, the
         reference conditions of clause 4).
     :param static_pressure_kpa: The static pressure :math:`p_0`, in kPa
-        (Default: 101,325).
+        (Default: 101.325).
     :param relative_humidity_percent: The relative humidity, in % (Default:
         50).
     :param gas: A :class:`~phonometry.fluids.Fluid` whose density and ratio
         of specific heats are used instead of those of the IEC 61094-2
         Annex F air at the three conditions, at the same static pressure
-        (Default: None). Appendix B takes 1,21 kg/m³, 1,4 and 101 325 Pa.
+        (Default: None). Appendix B takes 1.21 kg/m³, 1.4 and 101 325 Pa.
     :return: :math:`Z_x` at each frequency, complex, in Pa·s/m³, read-only. A
         ``complex`` for a number, an array for a sequence or an array, a
         zero-dimensional one included.
@@ -4064,8 +4064,8 @@ def rectangular_pulse_duration_s(
        T = 2b = \frac{1}{r\, f_\mathrm{max}}
 
     with :math:`r` the factor, 10 by default. For 20 kHz that is 5 µs, a
-    half-duration :math:`b` of 2,5 µs, at which the spectrum has fallen by
-    0,14 dB.
+    half-duration :math:`b` of 2.5 µs, at which the spectrum has fallen by
+    0.14 dB.
 
     :param upper_frequency_hz: :math:`f_\mathrm{max}`, in Hz.
     :param zero_ratio: :math:`r`, the first zero over :math:`f_\mathrm{max}`
@@ -4409,9 +4409,9 @@ class TimeSelectiveResponse(OwnsArrays):
         :param source_distance_m: :math:`d`, in m.
         :param arrival_time_s: When the direct sound reaches the microphone,
             in s from the start of the record.
-        :param temperature_c: The air temperature, in °C (Default: 23,0).
+        :param temperature_c: The air temperature, in °C (Default: 23.0).
         :param static_pressure_kpa: The static pressure, in kPa (Default:
-            101,325).
+            101.325).
         :param relative_humidity_percent: The relative humidity, in %
             (Default: 50).
         :return: The :class:`FreeFieldRegion`.
@@ -4520,7 +4520,7 @@ def time_selective_response(
     :param window_shape: ``"tukey"`` (default), ``"hann"``, ``"hamming"`` or
         ``"rectangular"``.
     :param taper_fraction: The fraction of a Tukey window that is taper, half
-        at each edge (Default: 0,25).
+        at each edge (Default: 0.25).
     :param excitation: The :class:`RectangularPulse` of a direct impulse
         measurement, divided out of the response (Default: None).
     :return: The :class:`TimeSelectiveResponse`.

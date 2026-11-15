@@ -40,9 +40,9 @@ real part of the propagation coefficient, computed by the five steps of B.2
 (:func:`reciprocity_air_attenuation`): ISO 9613-1 adjusted to the
 quantities of IEC 61094-2, with the speed of sound at the conditions of the
 calibration in the vibrational terms. Step 1 prints the last coefficient of
-the saturation vapour pressure as :math:`6{,}3343\,184\,5\cdot10^3`, where
+the saturation vapour pressure as :math:`6.3343\,184\,5\cdot10^3`, where
 IEC 61094-2 Table F.2, which the step refers to, prints
-:math:`6{,}343\,164\,5\times10^3`; the library uses the latter (an erratum).
+:math:`6.343\,164\,5\times10^3`; the library uses the latter (an erratum).
 Table B.1 tabulates the attenuation by ISO 9613-1 itself, as its text says,
 and :func:`~phonometry.environment.propagation.air_absorption.air_attenuation`
 reproduces every one of its 162 entries.
@@ -51,7 +51,7 @@ reproduces every one of its 162 entries.
 61094-2 Annex F (:func:`~phonometry.fluids.air`), by default with the
 dispersion of its NOTE to F.3: :math:`c = c_0[1 + \sum_n c\,\alpha_{\mathrm{v}n}/
 (2\pi f_{\mathrm{v}n})]`, a few parts in :math:`10^5` that reach a few tenths of
-a degree of phase at 20 kHz over 0,2 m. Annex B.1 points to it ("including
+a degree of phase at 20 kHz over 0.2 m. Annex B.1 points to it ("including
 dispersion effects").
 
 **Acoustic centres** (6.5 and Annex A). The distance :math:`d_{12}` is between
@@ -131,23 +131,23 @@ _KELVIN = 273.15
 #: IEC 61094-3:2016 B.2: ":math:`p_\mathrm{s,r}` = 101 325 Pa".
 _REFERENCE_PRESSURE_PA = 101325.0
 #: Step 1, read from IEC 61094-2:2009 Table F.2, which the step refers to; the
-#: step itself prints the last coefficient as 6,3343 184 5e3, a misprint
+#: step itself prints the last coefficient as 6.3343 184 5e3, a misprint
 #: (docs/ERRATA.md).
 _PSV = (1.2378847e-5, -1.9121316e-2, 33.93711047, -6.3431645e3)
 #: Step 2: "(1,000 62 + 3,14·10^-8·p_s + 5,6·10^-7·t^2)".
 _ENHANCEMENT = (1.00062, 3.14e-8, 5.6e-7)
-#: Step 3, the oxygen relaxation frequency: 24, 4,04e6, 0,2, 1e3, 3,91.
+#: Step 3, the oxygen relaxation frequency: 24, 4.04e6, 0.2, 1e3, 3.91.
 _FRO = (24.0, 4.04e6, 0.2, 1.0e3, 3.91)
-#: Step 3, the nitrogen relaxation frequency: 9, 28e3, -4,170.
+#: Step 3, the nitrogen relaxation frequency: 9, 28e3, -4.170.
 _FRN = (9.0, 28.0e3, -4.170)
-#: Step 4, classical and rotational absorption: 18,42e-12.
+#: Step 4, classical and rotational absorption: 18.42e-12.
 _CLASSICAL = 18.42e-12
-#: Step 4, vibrational absorption of oxygen: 4,3778 and 2 239,1 K.
+#: Step 4, vibrational absorption of oxygen: 4.3778 and 2 239.1 K.
 _VIB_O = (4.3778, 2239.1)
-#: Step 4, vibrational absorption of nitrogen: 36,6624 and 3 352,0 K.
+#: Step 4, vibrational absorption of nitrogen: 36.6624 and 3 352.0 K.
 _VIB_N = (36.6624, 3352.0)
 #: B.2: "The tabulated values are expressed in decibels per metre as 8,686
-#: alpha"; 20 lg e, which 8,686 rounds.
+#: alpha"; 20 lg e, which 8.686 rounds.
 _NP_TO_DB = 20.0 / math.log(10.0)
 
 #: B.2: the accuracy of ±10 % holds within "Air temperature: -20 °C to 50 °C",
@@ -251,8 +251,8 @@ class ReciprocityAirAttenuation(OwnsArrays):
             <= self.water_vapor_mole_fraction
             <= _ACCURACY_WATER_FRACTION[1]
         )
-        # f/p_s of decimal readings is decimal: 40,8 Hz at 102 kPa is 0,4 Hz/kPa
-        # and comes out 0,399 999 999 999 999 97 in binary; settled, it is 0,4.
+        # f/p_s of decimal readings is decimal: 40.8 Hz at 102 kPa is 0.4 Hz/kPa
+        # and comes out 0.399 999 999 999 999 97 in binary; settled, it is 0.4.
         per_kpa = settled(self.frequencies / (self.static_pressure_pa / 1000.0))
         return np.asarray(
             conditions
@@ -292,19 +292,19 @@ def reciprocity_air_attenuation(
 
     .. math::
 
-       \alpha = f^2\left[18{,}42\times10^{-12}\left(\frac{p_\mathrm{s}}{p_\mathrm{s,r}}\right)^{-1}
+       \alpha = f^2\left[18.42\times10^{-12}\left(\frac{p_\mathrm{s}}{p_\mathrm{s,r}}\right)^{-1}
        \left(\frac{T}{T_{20}}\right)^{1/2}
        + \left(\frac{T}{T_{20}}\right)^{-2}\left(
-       \frac{4{,}3778}{c}\frac{\mathrm{e}^{-2239{,}1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
-       + \frac{36{,}6624}{c}\frac{\mathrm{e}^{-3352{,}0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}}
+       \frac{4.3778}{c}\frac{\mathrm{e}^{-2239.1/T}}{f_\mathrm{rO} + f^2/f_\mathrm{rO}}
+       + \frac{36.6624}{c}\frac{\mathrm{e}^{-3352.0/T}}{f_\mathrm{rN} + f^2/f_\mathrm{rN}}
        \right)\right]
 
     in Np/m, with the relaxation frequencies of Step 3 from the water vapour
     mole fraction of Steps 1 and 2, and :math:`c` the speed of sound of IEC
     61094-2 Formula (F.2) at the conditions. B.2 estimates the accuracy at
     ±10 % within -20 °C to 50 °C, below 200 kPa, for
-    :math:`0{,}5\times10^{-3} \le x_\mathrm{w} \le 50\times10^{-3}` and a
-    frequency-to-pressure ratio of 0,4 Hz/kPa to :math:`10^4` Hz/kPa
+    :math:`0.5\times10^{-3} \le x_\mathrm{w} \le 50\times10^{-3}` and a
+    frequency-to-pressure ratio of 0.4 Hz/kPa to :math:`10^4` Hz/kPa
     (:attr:`ReciprocityAirAttenuation.within_stated_accuracy`).
 
     Step 1 is computed with the coefficient of IEC 61094-2 Table F.2, which it
@@ -1044,7 +1044,7 @@ def check_free_field_arrangement(
     :param frequencies: The frequencies of the calibration, in Hz.
     :param diaphragm_distances_m: The distance of each pair, in m.
     :param microphone_diameter_m: The nominal diameter of the microphones, in m
-        (23,77 mm for LS1, 13,2 mm for LS2a: dimension A of Table C.1 of IEC
+        (23.77 mm for LS1, 13.2 mm for LS2a: dimension A of Table C.1 of IEC
         61094-2).
     :param temperature_c: The temperature, in °C.
     :param static_pressure_pa: The static pressure, in Pa.
@@ -1234,7 +1234,7 @@ class FreeFieldInputUncertainties(OwnsArrays):
         percentage points.
     :param u_air_attenuation_ratio: Of the attenuation coefficient, as a
         fraction of it. B.2 estimates its accuracy at ±10 %, a standard
-        uncertainty of :math:`0{,}1/\sqrt{3}` for a rectangular distribution.
+        uncertainty of :math:`0.1/\sqrt{3}` for a rectangular distribution.
     :raises ValueError: for an uncertainty that is negative or not finite, or
         acoustic-centre uncertainties that are not one value or one column.
     """

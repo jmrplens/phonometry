@@ -60,7 +60,7 @@ in the same order.
   band is included, contradicting A.2.1. The correct sum over 100 Hz to 2500
   Hz is 83.2613 dB, rounded 83, giving $C_I = -11$. (b) Even read as the
   sixteen-band sum the printed digits are wrong in the last place: the
-  bare-floor $L_n$ column sums to 83.523 4 dB, not the printed 83,523 **8**
+  bare-floor $L_n$ column sums to 83.523 4 dB, not the printed 83.523 **8**
   dB. The defect is confined to that cell, since the with-covering column of
   the same table prints $L_{n,\text{sum}} = 76.059\,3\ldots$ and recomputes
   to 76.059 29 dB, reproducing every printed digit. Neither (a) nor (b)
@@ -103,7 +103,7 @@ in the same order.
   the wrong range*: the measured floor "with covering" over all sixteen bands
   100 Hz to 3150 Hz. A.2.1 defines $C_I$ from the reference floor with
   covering (the $L_{n,r,0} - \Delta L$ column) over 100 Hz to 2500 Hz (15
-  bands), which gives 75,674 dB (printed chain) or 75,710 dB (corrected 800 Hz
+  bands), which gives 75.674 dB (printed chain) or 75.710 dB (corrected 800 Hz
   cell), both round to 76 dB, so $C_{I,r} = 76 - 15 - 63 = -2$ either way,
   giving $C_{I,\Delta} = -11 - (-2) = -9$ and
   $\Delta L_\text{lin} = 6\ \text{dB}$, not the printed −3 / −8 / 7 dB chain.
@@ -454,7 +454,7 @@ in the same order.
 - **The problem:** the annex's $V/30$ is a rounding of the formula's own
   constant; the two differ by a constant 0.177 dB.
 - **Evidence:** direct algebra; both variants recomputed for the E.3 case
-  (42,959 vs 42,782 dB, both rounding to 43 in that example). Verified on PDF
+  (42.959 vs 42.782 dB, both rounding to 43 in that example). Verified on PDF
   page 7 (printed p. 5) and PDF page 34 (printed p. 32) of EN 12354-2:2000.
 - **Library behaviour:** implements the exact $0.032 \cdot V$ form and
   documents the annex's rounding.
@@ -650,25 +650,25 @@ in the same order.
   internal wall 1,840 m ($S = 13{,}75\ \text{m}^2$).
 - **The problem:** Formula (C.1) needs one sum per *element*, and the example
   has five elements with three different areas. Only two of the three printed
-  values reproduce the columns they are supposed to drive: 2,375 m with
-  $S = 11\ \text{m}^2$ gives external wall 1 exactly, and 1,840 m with
+  values reproduce the columns they are supposed to drive: 2.375 m with
+  $S = 11\ \text{m}^2$ gives external wall 1 exactly, and 1.840 m with
   $S = 13.75\ \text{m}^2$ gives internal wall **2** exactly. The separating
-  floor's printed 2,364 m does not reproduce its own column at any band
+  floor's printed 2.364 m does not reproduce its own column at any band
   (0.074 9 against the printed 0.083 1 at 50 Hz, 0.026 4 against 0.029 0 at
-  500 Hz); 2,659 m does, at every band. The two elements with no printed value
-  need 2,548 m (external wall 2, $S = 13.75\ \text{m}^2$) and 1,636 m
+  500 Hz); 2.659 m does, at every band. The two elements with no printed value
+  need 2.548 m (external wall 2, $S = 13.75\ \text{m}^2$) and 1.636 m
   (internal wall 1, $S = 11\ \text{m}^2$).
 - **Evidence:** all five sums re-derived from Formula (C.4),
   $\alpha_k = \sum_j \sqrt{f_{c,j}/f_\text{ref}}\ 10^{-K_{ij}/10}$, over the
-  example's own junction geometry with the unrounded Annex E indices: 2,659 /
-  2,375 / 2,548 / 1,636 / 1,839 m. The derivation returns the two printed
-  values that are self-consistent with their own columns (2,375 m, and 1,839 m
-  against the printed 1,840 m) and supplies the three that are missing or
+  example's own junction geometry with the unrounded Annex E indices: 2.659 /
+  2.375 / 2.548 / 1.636 / 1.839 m. The derivation returns the two printed
+  values that are self-consistent with their own columns (2.375 m, and 1.839 m
+  against the printed 1.840 m) and supplies the three that are missing or
   wrong, and every $\eta_\text{tot,situ}$ column of Table L.3 / G.3 then
   reproduces to $5 \cdot 10^{-5}$. The printed values applied to the wrong
-  element of the same type miss by far more than that rounding: 2,375 m on
+  element of the same type miss by far more than that rounding: 2.375 m on
   external wall 2 gives 0.108 5 against the printed 0.114 9 at 50 Hz, and
-  1,840 m on internal wall 1 gives 0.085 0 against 0.077 0.
+  1.840 m on internal wall 1 gives 0.085 0 against 0.077 0.
 - **Library behaviour:** `in_situ_total_loss_factor` takes $\sum l_k \alpha_k$
   as an input and `perimeter_absorption_coefficient` implements Formula (C.4);
   the Annex L fixture derives all five sums that way rather than using the
@@ -1909,7 +1909,7 @@ in the same order.
   being $10^{4.6} = 39\,811$ rounded, undivided. A reader who forms
   $I_k + I_{am,k} + I_{rt,k}$ from the cells as printed understates its first
   term by $10^{6}$. The printed "adjustment to remove masking and
-  threshold" row is the check: 1,019 at 500 Hz is
+  threshold" row is the check: 1.019 at 500 Hz is
   $(I_k + I_{am,k} + I_{rt,k})/I_k$ only once $I_k$ is restored to
   26 305 192; formed from the cells as printed the same expression reads
   19 279.
@@ -2053,7 +2053,7 @@ in the same order.
   freedom. Verified on PDF page 40 (printed p. 38) of BS EN 62585:2012, the
   English text of EN 62585:2012, which is IEC 62585:2012 unchanged.
 - **Library behaviour:** `metrology.correction_uncertainty_budget` takes the
-  coverage factor from the effective degrees of freedom, 2,042 here, and the
+  coverage factor from the effective degrees of freedom, 2.042 here, and the
   conformance rows on Table I.2 pin that factor and the expanded uncertainty
   it gives, 0.121 dB, with the printed ones named as the erratum
   ([`tests/metrology/test_free_field_corrections.py`](../tests/metrology/test_free_field_corrections.py)).
@@ -2068,7 +2068,7 @@ in the same order.
 - **The problem:** every other row prints the exponent $x/40$, which is
   Formula (H.1), $f_x = f_\mathrm{r} \cdot 10^{3x/10b}$ with $b = 12$, and the
   calculated value beside it is $10^{31/40} = 5.956\,621$. $10^{31/80}$ would
-  be 2,441 kHz, outside the decade the table covers. The exponent reads
+  be 2.441 kHz, outside the decade the table covers. The exponent reads
   **$10^{31/40}$**.
 - **Evidence:** Formula (H.1) evaluated for the 41 indices; all 41 calculated
   values reproduce to the seven significant digits printed. Verified on PDF
@@ -2298,7 +2298,7 @@ in the same order.
   the traverse across the width with points read off both curves.
 - **Status:** unreported.
 
-## IEC 60118-4:2014, E.6 (the flux density of 1 A/m printed as 1,256 µT)
+## IEC 60118-4:2014, E.6 (the flux density of 1 A/m printed as 1.256 µT)
 
 - **Location:** Annex E, E.6 "Magnetic units", the bullet on magnetic
   induction (printed folio 44).
@@ -2306,7 +2306,7 @@ in the same order.
   free space ($4\pi \times 10^{-7}$ H/m) [...] the magnetic induction due to a
   field strength of 1 A/m is **1,256 µT**".
 - **The problem:** $4\pi \times 10^{-7}\ \mathrm{H/m} \times 1\ \mathrm{A/m} =
-  1.256\,64\ \mu\mathrm{T}$, which reads **1,257 µT** to the four figures
+  1.256\,64\ \mu\mathrm{T}$, which reads **1.257 µT** to the four figures
   printed; the print drops the last digit instead of rounding it. The field
   strength of 79.58 A/m that the same bullet gives for one gauss in air,
   $10^{-4}\ \mathrm{T}/\mu_0 = 79.577$ A/m, is rounded correctly.
@@ -2315,7 +2315,7 @@ in the same order.
   60118-4:2015, which is IEC 60118-4:2014 unchanged.
 - **Library behaviour:** `electroacoustics.magnetic_flux_density` multiplies
   by $\mu_0 = 4\pi \times 10^{-7}$ H/m; the conformance row on E.6 compares it
-  with the printed 1,256 µT within 0.001 µT and names the print as the
+  with the printed 1.256 µT within 0.001 µT and names the print as the
   erratum.
 - **Status:** unreported (typographic, no numerical consequence).
 
@@ -2743,14 +2743,14 @@ in the same order.
   mm, 0.166 67 mm. The impedance goes as the fourth power of the radius (B.1),
   so the rounding of the header moves the result by 0.08 %, more than the last
   printed figure: Formulas (B.1) to (B.3) at the reference conditions give
-  3,013 and $6.029\ \text{GPa}\cdot\text{s/m}^3$ at 20 Hz for the 50 mm and 100 mm tubes with 0.1667
-  mm, and the printed 3,015 and 6,034 with 1/6 mm. A program tested against the
+  3.013 and $6.029\ \text{GPa}\cdot\text{s/m}^3$ at 20 Hz for the 50 mm and 100 mm tubes with 0.1667
+  mm, and the printed 3.015 and 6.034 with 1/6 mm. A program tested against the
   table with the radius as printed fails the test by up to five units of the
   last figure. The other two slips are typographical: "2.021" is 2,021, and
-  "–3,89" is the only entry with two decimals (the formulas give –3,892 with the
+  "–3,89" is the only entry with two decimals (the formulas give –3.892 with the
   1/6 mm of the column).
 - **Evidence:** Formulas (B.1) to (B.3) evaluated with the air of Annex F at 23
-  °C, 101,325 kPa and 50 %, with both radii, against the printed columns.
+  °C, 101.325 kPa and 50 %, with both radii, against the printed columns.
   Verified on PDF pages 26 and 27 (printed pp. 24 and 25) of BS EN
   61094-2:2009, the English text of EN 61094-2:2009, which is IEC 61094-2:2009
   unchanged.
@@ -2814,7 +2814,7 @@ in the same order.
   61094-2:2009 (printed folio 41), which the step refers to, prints the same
   four coefficients with the last as $a_3 = \mathbf{-6{,}343\,164\,5}\times10^3$.
 - **The problem:** the digits are transposed and mis-grouped: 6 334.318 45
-  against 6 343,164 5. The first three coefficients agree with Table F.2 to the
+  against 6 343.164 5. The first three coefficients agree with Table F.2 to the
   last digit, and the Table F.2 value is the one of the CIPM-2007 formula that
   IEC 61094-2 F.2 cites. With the printed coefficient the saturation vapour
   pressure at 23 °C is 2 896.1 Pa instead of 2 810.9 Pa, 3.0 % high, and the
@@ -3554,7 +3554,7 @@ in the same order.
   sone to the ninth. The sentence should read "a subsequent application of
   the exponent 1/3". ISO 532-1:2017, 6.4, NOTE, describes the energy mean of
   the loudness level in the same shape and gets it right: a power of about
-  3,322 and then a power law "with the exponent lg(2)", its inverse.
+  3.322 and then a power law "with the exponent lg(2)", its inverse.
 - **Evidence:** the NOTE and its formula on PDF page 14 (printed p. 8) of
   ISO/TS 12913-2:2018 (first edition, 2018-08); ISO 532-1:2017, 6.4, on PDF
   page 22 (printed p. 16).
@@ -5665,7 +5665,7 @@ in the same order.
   coefficient. The factor $\eta(\delta)$ of A.2 is 0.200 from $\delta = 6.50$
   onwards (Table 1), and in each of these cells $\delta$ is past 6.50 at 70 %
   as well as at 80 %, so the formula gives the one value 0.104, 0.130, 0.349,
-  0.349, 0.642, 0.946 and 2,849 dB/100 m for both tables. Table 10 prints each
+  0.349, 0.642, 0.946 and 2.849 dB/100 m for both tables. Table 10 prints each
   of them rounded; Table 9 prints each one unit of the last digit above it,
   which at 200 Hz and 250 Hz and 20 °C doubles the coefficient, and reads
   against its own neighbours at 15 °C and 25 °C, both printed 0.1. The same
@@ -5779,7 +5779,7 @@ in the same order.
   appears in Annex C. The informative example is inconsistent with the
   normative annex it cites.
 - **Evidence:** recomputation of Eq. (C.2) and $C_2$ from the printed
-  constants ($a = 2.2560 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5,255 3, $p_{\mathrm{s},0}$ =
+  constants ($a = 2.2560 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5.255 3, $p_{\mathrm{s},0}$ =
   $1.013\,25 \times 10^{5}$ Pa, $\theta_\mathrm{ref}$ = 296 K). Verified on PDF page 46
   (printed p. 37) and PDF page 36 (printed p. 27) of BS EN ISO 3747:2010.
 - **Library behaviour:** implements Annex C as printed:
@@ -5959,8 +5959,8 @@ in the same order.
   prints $C_2$ alone. The divisor is right, $0.4/\sqrt{6} = 0.16$, which
   rounds to the 0.2 printed.
 - **Evidence:** recomputation of Equation (A.2) and of $C_2$ from the
-  constants Annex A prints ($a = 2.256\,0 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5,255 3,
-  $p_{\mathrm{s},0}$ = 101,325 kPa, $\theta_1$ = 296 K), and of $C_1 + C_2$
+  constants Annex A prints ($a = 2.256\,0 \times 10^{-5}\ \text{m}^{-1}$, $b$ = 5.255 3,
+  $p_{\mathrm{s},0}$ = 101.325 kPa, $\theta_1$ = 296 K), and of $C_1 + C_2$
   from ISO 3741:2010 clause 9.1.4. Verified on PDF page 41 (printed p. 32)
   and PDF page 31 (printed p. 22) of BS EN ISO 3743-1:2010.
 - **Library behaviour:** implements Annex A as printed: a site at 500 m and
@@ -6824,7 +6824,7 @@ in the same order.
   Equation (C.1) starts at 0.020 s, not at the 0.010 s the direct-sound
   window ends at, so the interval between them is counted in neither the
   numerator nor the denominator and the prose never mentions the gap.
-  Equation (C.2) stops at 1,000 s, where the prose puts no upper limit at
+  Equation (C.2) stops at 1.000 s, where the prose puts no upper limit at
   all.
 - **Consequence:** both move a number, and the first moves it further. On an
   exponential decay of $T = 2$ s, a reader who takes "within the first 0,1 s"
@@ -7065,7 +7065,7 @@ in the same order.
   sum is $-51.763$ dB. The row below settles it too: Equation (21) with
   $L_{pi}(8\,000\ \text{Hz}) = 116.3$ dB and the 12.67 dB spreading term
   gives 51.87 dB against the printed $L_{pe,1m} = 51.8$, and the unrounded
-  116,252 dB of the chain gives 51.82; with $+51.76$ it would give
+  116.252 dB of the chain gives 51.82; with $+51.76$ it would give
   155.4 dB.
 - **Consequence:** none for the annex, which computed with the right sign and
   printed the wrong one, and 103 dB for anyone seeding an oracle from that
@@ -7397,8 +7397,8 @@ in the same order.
   printed cell. The other eleven bands reproduce to the hundredth, and so does
   the row of $DL_{RI}$ (1.96 times 0.81 dB is 1.59 dB, and 7.68 dB plus or minus
   that is the [6.09; 9.27] dB of B.5). No single coverage factor reproduces
-  the seven: the 100 Hz cell needs one between 1,922 and 1,953, the 125 Hz cell
-  one between 1,861 and 1,917.
+  the seven: the 100 Hz cell needs one between 1.922 and 1.953, the 125 Hz cell
+  one between 1.861 and 1.917.
 - **The likely mechanism:** every one of the seven is consistent with 1.96
   times an unrounded standard deviation that rounds to the printed one (0.316
   prints as 0.32, and 1.96 times 0.316 is 0.619). The print does not show
@@ -7713,10 +7713,10 @@ in the same order.
 - **The problem:** the two rows are computed on different band limitations, and
   the peak row does not follow the standard's own Formula (5). With
   $f_u = 1$ Hz and $f_o = 80$ Hz that formula gives $|H_{u\mathrm{Soll}}|$ =
-  0.995 at 31.5 Hz and 0.100 at 315 Hz, against the 1,000 and 0.249 printed. The
+  0.995 at 31.5 Hz and 0.100 at 315 Hz, against the 1.000 and 0.249 printed. The
   $KB_\mathrm{F}$ row settles which of the two is the intended reading: $KB_\mathrm{F}$ is
   $|H_{B\mathrm{Soll}}|/\sqrt{2}$ for a 1 mm/s sine, and at 31.5 Hz that is
-  0.6928 from 0.995 and 0.6962 from 1,000, so the printed 0.693 is the first;
+  0.6928 from 0.995 and 0.6962 from 1.000, so the printed 0.693 is the first;
   at 315 Hz it is 0.0709 from 0.100 and 0.176 from 0.249, so the printed 0.071
   is again the first, by a factor of two and a half. The 0.852 at 1 Hz is the
   same kind of departure at the other end, against the 0.842 of Formula (5).
@@ -8949,7 +8949,7 @@ in the same order.
   Equation (6) at the 4 m position of Table C.5, in all six bands; the 10 m row
   is the mean of Equation (6) at the 8 m and 12 m positions that bracket it, in
   all six bands; and the 30 m row is Equation (6) at the 32 m position with
-  $20\lg 32$ entered as 30 dB rather than 30,103 dB, in five bands of six.
+  $20\lg 32$ entered as 30 dB rather than 30.103 dB, in five bands of six.
 - **Evidence:** Tables C.10, C.11 and C.12 read on PDF page 34 (printed p. 24),
   Tables C.5 and C.6 on PDF page 31 (printed p. 21) and Equations (6), (7) and
   (8) with their keys on PDF page 20 (printed p. 10), all of
@@ -9643,7 +9643,7 @@ in the same order.
 - **The problem:** nineteen of the three hundred and twenty-one pairs are not each
   other. The inch is 2.54 cm exactly, the pound is 0.45359237 kg exactly and
   the yard 0.9144 m exactly, so one pound per cubic foot is 16.0185 kg/m3, one
-  pound per square yard 0.54249 kg/m2 and one ounce per square yard 33,906
+  pound per square yard 0.54249 kg/m2 and one ounce per square yard 33.906
   g/m2, and each pair is decided by arithmetic alone. On these pages the US
   customary half is the measurement and the SI half its translation, so a pair
   whose imperial half is a whole number or a fraction is read in that
@@ -9713,7 +9713,7 @@ in the same order.
   - **Row 38** (PDF page 756, printed folio 32.14): "1,99 kg/m2 (44 oz/yd2)"
     for the wool pile carpet. $44 \times 33.906 = 1492$ g/m2, which rows 28
     and 30 print as 1.5 kg/m2 for the same cloth. The two carpet cells of this
-    row are both 1,334 of their own conversion, so one wrong factor was
+    row are both 1.334 of their own conversion, so one wrong factor was
     applied to the pair rather than two digits slipping.
 - **Evidence:** Verified on PDF pages 750 to 757 (printed pp. 32.8-32.15) of
   Harris (ed.), *Manual de medidas acústicas y control del ruido* 3e (1995),
@@ -9962,7 +9962,7 @@ in the same order.
   aire", on printed folios 15 and 16 of UNE-EN ISO 9295:2015 (October 2015),
   which declares itself the Spanish version of EN ISO 9295:2015 and adopts ISO
   9295:2015 without modification. The two tables give the air absorption
-  coefficient $\alpha$ in Np/m at a static pressure of 101,325 kPa, for 26
+  coefficient $\alpha$ in Np/m at a static pressure of 101.325 kPa, for 26
   frequencies from 10 000 Hz to 22 400 Hz, at 18, 20, 21, 22, 23, 24, 25 and
   27 °C and at 40 %, 50 % and 60 % relative humidity: 624 cells. Clause 7.2
   reads $\alpha$ from them into the room constant of Formula (7), and the
@@ -10474,7 +10474,7 @@ in the same order.
   computed at the wrong temperature. At the 10 °C and 80 % the row prints, it
   reads **10, 6.3, 5 and 4 kHz**.
 - **Evidence:** the rule of 12.5.2.4 evaluated with ISO 9613-1 at the exact
-  mid-band frequencies and 101,325 kPa for the twenty cells of the table.
+  mid-band frequencies and 101.325 kPa for the twenty cells of the table.
   Table 7 read on PDF page 47 (printed p. 45) of IEC TS 61400-11-2:2024
   (Edition 1.0, 2024-03).
 - **Library behaviour:** `upper_tone_search_frequency` applies the rule of
@@ -10561,7 +10561,7 @@ in the same order.
   0,26, 0,41, 0,59 and 0,80 dB/km from 10 Hz to 200 Hz, and "The air
   absorption coefficient is calculated according to ISO 9613-1."
 - **The problem:** ISO 9613-1 at the caption's 10 °C and 70 % relative
-  humidity, at 101,325 kPa and the nominal band centres, gives to two decimals
+  humidity, at 101.325 kPa and the nominal band centres, gives to two decimals
   0.01, 0.01, 0.02 and 0.02 dB/km more than the table at 50 Hz, 63 Hz, 80 Hz
   and 100 Hz (0.08, 0.12, 0.19 and 0.28), and 0.01 dB/km where the table
   prints 0.0 at 12.5 Hz to 20 Hz; from 125 Hz to 200 Hz it gives the printed
@@ -11343,10 +11343,10 @@ published sources:
   path is the internal wall, so $m'_i$ should be 360.0 and the perpendicular
   mass 219.0. It is a labelling slip and nothing else: the branch is the
   rigid-T **corner** branch $K_{12} = 5.7 + 5.7 M^2$, where only $M^2$
-  enters, so both assignments return the same 5,965 → 6.0 dB. The second row
+  enters, so both assignments return the same 5.965 → 6.0 dB. The second row
   of each table, "Ext. wall 1/2 – Ext. wall 1/2", is the through branch
   $5.7 + 14.1 M + 5.7 M^2$, where the sign of $M$ does matter, and it is
-  labelled and populated consistently ($M = \log_{10}(360/219)$ gives 9,006 →
+  labelled and populated consistently ($M = \log_{10}(360/219)$ gives 9.006 →
   the printed 9.0). Verified on PDF page 89 (printed p. 83) of ISO
   12354-1:2017 and PDF page 46 (printed p. 40) of ISO 12354-2:2017. Not
   registered as an erratum because no number depends on it; registered here so

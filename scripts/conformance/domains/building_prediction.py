@@ -82,7 +82,7 @@ def _chk_en12354_1_h3_paths() -> Outcome:
         0.05,
         unit="dB",
         places=3,
-        expected_label="max abs(Rij,w - printed) <= 0,05 dB",
+        expected_label="max abs(Rij,w - printed) <= 0.05 dB",
     )
 
 
@@ -99,12 +99,12 @@ def _chk_en12354_1_dnt_closure() -> Outcome:
     ok = (
         round(first) == ref.EN12354_1_ANNEX_H3_DNT_W
         and round(second) == ref.EN12354_1_ANNEX_H3_DNT_W_SECOND
-        # The printed 53,8 dB uses the standard's own V/(3 S) rounding of the
-        # exact 0,32 V/Ss factor (0,18 dB apart).
+        # The printed 53.8 dB uses the standard's own V/(3 S) rounding of the
+        # exact 0.32 V/Ss factor (0.18 dB apart).
         and abs(first - ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED) <= 0.2
     )
     return Outcome(
-        expected=f"DnT,w {ref.EN12354_1_ANNEX_H3_DNT_W} dB (printed 53,8/54,3)",
+        expected=f"DnT,w {ref.EN12354_1_ANNEX_H3_DNT_W} dB (printed 53.8/54.3)",
         computed=f"DnT,w {first:.2f} / {second:.2f} dB",
         delta=f"{first - ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED:+.2f} dB vs printed",
         passed=ok,
@@ -137,15 +137,15 @@ def _chk_en12354_2_impact() -> Outcome:
 @register(
     "Building prediction & uncertainty",
     "EN 12354-2:2000 Formula (3) / Annex E.3",
-    "Standardized impact level L'nT,w (exact 0,032 V form -> 43 dB)",
+    "Standardized impact level L'nT,w (exact 0.032 V form -> 43 dB)",
 )
 def _chk_en12354_2_standardized() -> Outcome:
-    # Exact Formula (3): 45 - 10 lg(0,032 x 50) = 42,96 dB. The E.3 chain's own
-    # "10 lg(V/30)" rounding gives 42,8 dB; both round to 43 dB.
+    # Exact Formula (3): 45 - 10 lg(0.032 x 50) = 42.96 dB. The E.3 chain's own
+    # "10 lg(V/30)" rounding gives 42.8 dB; both round to 43 dB.
     lnt = float(ph.building.standardized_impact_level(45.0, 50.0))
     ok = round(lnt) == 43 and abs(lnt - 42.96) <= 0.01
     return Outcome(
-        expected="L'nT,w 43 dB (exact 42,96; E.3 prints 42,8)",
+        expected="L'nT,w 43 dB (exact 42.96; E.3 prints 42.8)",
         computed=f"L'nT,w {lnt:.2f} dB",
         delta=f"{lnt - 42.96:+.3f} dB",
         passed=ok,
@@ -274,7 +274,7 @@ def _chk_en12354_4_propagation() -> Outcome:
         worst = max(worst, abs(att - a_tot), abs(lp - lp_expected))
         computed_lp.append(lp)
     return Outcome(
-        expected="Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0,05)",
+        expected="Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0.05)",
         computed="Lp " + " / ".join(f"{v:.1f}" for v in computed_lp) + " dB",
         delta=f"{worst:.3f} dB",
         passed=worst <= 0.05,
@@ -330,7 +330,7 @@ def _chk_iso12999_annex_b_values() -> Outcome:
 @register(
     "Building prediction & uncertainty",
     "ISO 12999-1:2020 Annex B, Formulae (B.2)/(B.6)",
-    "Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9)",
+    "Single-number uncertainties (uncorrelated 0.6/0.8; correlated u(Rw) 1.9)",
 )
 def _chk_iso12999_annex_b_uncertainties() -> Outcome:
     from phonometry.building.measurement.ratings import (

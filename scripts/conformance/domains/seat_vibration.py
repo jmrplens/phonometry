@@ -31,7 +31,7 @@ _SEAT = "Seat vibration transmission (ISO 10326-1)"
 _PLATFORM_RUNS = (1.02, 1.00, 0.99)
 _SEAT_RUNS = (0.72, 0.70, 0.71)
 
-#: 10.2.3: the input the test intended, against the 1,00333... it delivered.
+#: 10.2.3: the input the test intended, against the 1.00333... it delivered.
 _INTENDED_PLATFORM = 1.10
 
 #: 10.3: the two readings at resonance of a seat that doubles what it is given.

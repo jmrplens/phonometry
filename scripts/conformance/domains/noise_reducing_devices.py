@@ -18,10 +18,10 @@ against: the geometry of the grid in Tables 2 and 3, the sampled area of
 positions averaged in Table B.1 and their uncertainty in Table B.2. The
 processing itself is checked on synthetic records where the answer is known
 in closed form: a perfect flat reflector returns 1, a reflection of amplitude
-0,5 returns 0,25 whatever gain change the gain factor has to undo, the
+0.5 returns 0.25 whatever gain change the gain factor has to undo, the
 subtraction finds a shift a fraction of a sample long, a reflection of two
 impulses returns the comb each band integrates between its own edges, and an
-impulse the 6,0 ms window leaves out and the 7,9 ms one takes in moves the
+impulse the 6.0 ms window leaves out and the 7.9 ms one takes in moves the
 three lowest bands and none of the others.
 """
 
@@ -86,7 +86,7 @@ def _chk_traffic_spectrum() -> Outcome:
 @register(
     _ROAD_DEVICES,
     "EN 1793-1:2012 Clause 5 (DLalpha, constant absorption)",
-    "a device absorbing 0,50 in every band rates -10 lg(1 - 0,50)",
+    "a device absorbing 0.50 in every band rates -10 lg(1 - 0.50)",
 )
 def _chk_absorption_constant() -> Outcome:
     got = ph.environment.sound_absorption_rating(np.full(_BANDS, 0.5))
@@ -95,8 +95,8 @@ def _chk_absorption_constant() -> Outcome:
 
 @register(
     _ROAD_DEVICES,
-    "EN 1793-1:2012 Clause 5 (DLalpha, the 0,99 ratio limit)",
-    "a perfect absorber is capped at -10 lg(1 - 0,99) = 20 dB",
+    "EN 1793-1:2012 Clause 5 (DLalpha, the 0.99 ratio limit)",
+    "a perfect absorber is capped at -10 lg(1 - 0.99) = 20 dB",
 )
 def _chk_absorption_cap() -> Outcome:
     with warnings.catch_warnings():
@@ -250,7 +250,7 @@ def _reflector_records(
 def _impulse_records(
     *, taps: tuple[int, ...] = (0,), late_s: float | None = None
 ) -> tuple[np.ndarray, np.ndarray]:
-    """One-sample direct sounds and a reflection of 0,5 on whole samples, 48 kHz.
+    """One-sample direct sounds and a reflection of 0.5 on whole samples, 48 kHz.
 
     Every impulse but the late one lies in the flat part of its window, so
     the band energies of Formula (1) are closed forms.
@@ -281,7 +281,7 @@ def _reflection(front: np.ndarray, free: np.ndarray) -> np.ndarray:
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 Table 2 (paths and Cgeo,k of the nine microphones)",
-    "dS = 1,50 m, dM = 0,25 m and s = 0,40 m give the printed two decimals",
+    "dS = 1.50 m, dM = 0.25 m and s = 0.40 m give the printed two decimals",
 )
 def _chk_reflection_table_2() -> Outcome:
     paths = ph.environment.reflection_grid_paths_m()
@@ -321,7 +321,7 @@ def _chk_reflection_table_3() -> Outcome:
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 5.6.1 NOTE 1 (maximum sampled area, Formula (8))",
-    "a 4 m by 4 m sample, the 7,9 ms window and 340 m/s give 1,96 m",
+    "a 4 m by 4 m sample, the 7.9 ms window and 340 m/s give 1.96 m",
 )
 def _chk_reflection_sampled_area() -> Outcome:
     radius = ph.environment.reflection_sampled_area_radius_m(
@@ -334,7 +334,7 @@ def _chk_reflection_sampled_area() -> Outcome:
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 5.5.5 and 5.5.1 (the three Adrienne windows)",
-    "leading edge, flat part and trailing edge of the 7,9 ms, 6,0 ms and 1,3 ms windows",
+    "leading edge, flat part and trailing edge of the 7.9 ms, 6.0 ms and 1.3 ms windows",
 )
 def _chk_reflection_windows() -> Outcome:
     fs = 100_000.0
@@ -368,18 +368,18 @@ def _chk_reflection_perfect() -> Outcome:
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 Formulas (1) and (4) (a gain change between configurations)",
-    "a reflection of amplitude 0,5 rates RI = 0,25 whatever the gain did",
+    "a reflection of amplitude 0.5 rates RI = 0.25 whatever the gain did",
 )
 def _chk_reflection_gain() -> Outcome:
     front, free = _reflector_records(reflection=0.5, gain=1.08, shift=0.4)
     worst = float(np.max(np.abs(_reflection(front, free) - 0.25)))
-    return numeric(0.0, worst, 1e-5, expected_label="max |RI - 0,25| = 0")
+    return numeric(0.0, worst, 1e-5, expected_label="max |RI - 0.25| = 0")
 
 
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 Formula (1) (the one-third octave bands of a comb)",
-    "two impulses 0,5 ms apart: 0,25 (2 + 2 cos 2 pi f tau) averaged over each band's base-ten edges",
+    "two impulses 0.5 ms apart: 0.25 (2 + 2 cos 2 pi f tau) averaged over each band's base-ten edges",
 )
 def _chk_reflection_comb() -> Outcome:
     fs, delay = 48000.0, 24
@@ -414,17 +414,17 @@ def _chk_reflection_window_bands() -> Outcome:
     if lower < 1e-3:
         return Outcome(
             expected="the three lowest bands move",
-            computed=f"min |RI - 0,25| = {lower:.2e} below 200 Hz",
+            computed=f"min |RI - 0.25| = {lower:.2e} below 200 Hz",
             delta="unmoved",
             passed=False,
         )
-    return numeric(0.0, upper, 1e-9, expected_label="max |RI - 0,25| from 200 Hz = 0")
+    return numeric(0.0, upper, 1e-9, expected_label="max |RI - 0.25| from 200 Hz = 0")
 
 
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 5.5.4 (subtraction to a fiftieth of a sample)",
-    "a free-field record 0,36 samples late is found 0,36 samples late",
+    "a free-field record 0.36 samples late is found 0.36 samples late",
 )
 def _chk_reflection_subtraction() -> Outcome:
     front, free = _reflector_records(reflection=0.5, shift=0.36)
@@ -477,7 +477,7 @@ def _chk_reflection_rating() -> Outcome:
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 Table B.2 (expanded uncertainty of DLRI)",
-    "1,96 times the high reproducibility of Table A.1, 0,81 dB",
+    "1.96 times the high reproducibility of Table A.1, 0.81 dB",
 )
 def _chk_reflection_rating_uncertainty() -> Outcome:
     expanded = ph.environment.reflection_index_expanded_uncertainty().rating_expanded_uncertainty_db
@@ -489,7 +489,7 @@ def _chk_reflection_rating_uncertainty() -> Outcome:
 @register(
     _ROAD_DEVICES,
     "EN 1793-5:2016 Table B.2 (expanded uncertainty per band)",
-    "the eleven cells 1,96 times the printed sR gives; the other seven are a hundredth lower, as unrounded sR would give",
+    "the eleven cells 1.96 times the printed sR gives; the other seven are a hundredth lower, as unrounded sR would give",
 )
 def _chk_reflection_band_uncertainty() -> Outcome:
     per_band = (

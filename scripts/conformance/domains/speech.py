@@ -93,7 +93,7 @@ def _chk_sti_annex_m() -> Outcome:
 
 
 #: One unit in the last place the Annex M matrices are printed to. The step 1
-#: matrix is given to three decimals, so up to 0,0005 of its rounding travels
+#: matrix is given to three decimals, so up to 0.0005 of its rounding travels
 #: through the adjustment into every later cell.
 _ANNEX_M_MTF_TOL = 0.001
 
@@ -158,10 +158,10 @@ class _PrintedRow(NamedTuple):
 #: What the annex's own rounding of the combined level can move the amf rows
 #: by, as a fraction of the value. The amf x 1000 rows are derived from the
 #: combined-level row above them, which is printed to two decimals, and the
-#: A.5.3 masking slope at these levels is 0,5 dB per dB, so up to
-#: 0,5 x 0,005 = 0,0025 dB of hidden rounding rides into them: measured at
-#: 250 Hz of step 2, the annex's 77,90 gives 8,222 where the unrounded
-#: 77,90444 gives 8,227, and only the former prints the tabulated 8,22.
+#: A.5.3 masking slope at these levels is 0.5 dB per dB, so up to
+#: 0.5 x 0.005 = 0.0025 dB of hidden rounding rides into them: measured at
+#: 250 Hz of step 2, the annex's 77.90 gives 8,222 where the unrounded
+#: 77.90444 gives 8,227, and only the former prints the tabulated 8.22.
 _ANNEX_M_AMF_CARRY = 10.0 ** (0.5 * 0.005 / 10.0) - 1.0
 
 
@@ -288,8 +288,8 @@ def _chk_sti_annex_m_step2_rows() -> Outcome:
             figures=(3, 3, 3, 3, 3, 3),
         ),
         _PrintedRow("ART", ref.IEC60268_16_ANNEX_M_ART_DB, _ART_DB, 0.05),
-        # Four of the seven I_rt,k cells are printed to two figures (4,5 for
-        # 10^0,65 = 4,4668), and 40 000 for 10^4,6 = 39 811 is two as well.
+        # Four of the seven I_rt,k cells are printed to two figures (4.5 for
+        # 10^0.65 = 4.4668), and 40 000 for 10^4.6 = 39 811 is two as well.
         _PrintedRow(
             "I_rt,k",
             ref.IEC60268_16_ANNEX_M_INTENSITY_THRESHOLD,
@@ -398,9 +398,9 @@ def _chk_sti_annex_m_step3_rows() -> Outcome:
 
 
 #: The printed effective SNRs are two decimals of a quantity whose slope
-#: d/dm of 10 lg(m/(1-m)) reaches ~220 dB per unit m at the m ~ 0,98 of the
-#: first modulation frequencies, so the 0,0005 of hidden rounding in the
-#: step 1 matrix is worth about 0,11 dB here. This is the tighter figure the
+#: d/dm of 10 lg(m/(1-m)) reaches ~220 dB per unit m at the m ~ 0.98 of the
+#: first modulation frequencies, so the 0.0005 of hidden rounding in the
+#: step 1 matrix is worth about 0.11 dB here. This is the tighter figure the
 #: chain actually achieves.
 _ANNEX_M_SNR_TOL = 0.08
 
@@ -447,7 +447,7 @@ _STI_CENTERS = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
 _STI_F1 = [1.60, 1.00, 0.63, 2.00, 1.25, 0.80, 2.50]
 _STI_F2 = [8.00, 5.00, 3.15, 10.00, 6.25, 4.00, 12.50]
 _STI_LEVELS = [-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0]
-# m <-> STI staircase of the Ed.5 verification bench (m in 0,1 steps;
+# m <-> STI staircase of the Ed.5 verification bench (m in 0.1 steps;
 # TI = (10 lg(m/(1-m)) + 15)/30, rounded as published).
 _STI_STAIRCASE = {
     0.0: 0.00,
@@ -474,7 +474,7 @@ def _stipa_sine_signal(
 ) -> np.ndarray:
     """Ed.5 Formula (C.1)-style verification signal with sine carriers.
 
-    A_k(t) = g_k c_k(t) sqrt(0,5 (1 + 0,55 m (sin 2 pi f1_k t -
+    A_k(t) = g_k c_k(t) sqrt(0.5 (1 + 0.55 m (sin 2 pi f1_k t -
     sin 2 pi f2_k t))). ``bands`` limits the modulation (m = 0 elsewhere,
     as in the A.2.2 pair signals); ``edge_carriers`` uses the two
     half-octave edge carriers fc 2^(+/-1/4) per band (A.3.1.2);
@@ -506,7 +506,7 @@ def _chk_stipa_staircase(m: float) -> Outcome:
     # must read the published staircase STI through the full stipa()
     # audio path (octave bank, envelopes, correlation, TI chain). The
     # certified stipa.info WAV bench (same construction) measures a worst
-    # deviation of 0,0031 STI; tolerance +/-0,01.
+    # deviation of 0.0031 STI; tolerance +/-0.01.
     computed = float(ph.speech.stipa(_stipa_sine_signal(m), _FS).sti)
     return numeric(_STI_STAIRCASE[m], computed, 0.01, places=4)
 
@@ -549,13 +549,13 @@ def _chk_sti_indirect_expdecay() -> Outcome:
     # RT60) must reproduce the closed-form Schroeder MTF
     # m(F) = 1/sqrt(1 + (2 pi F RT60 / (6 ln 10))^2) through the octave
     # bank and Schroeder integral. Certified WAV bench worst deviation:
-    # 0,0002 STI; tolerance +/-0,005.
+    # 0.0002 STI; tolerance +/-0.005.
     rt60 = 1.0
     t = np.arange(int(3.0 * _FS)) / _FS
     x = np.sum([np.sin(2 * np.pi * fc * t) for fc in _STI_CENTERS], axis=0) * 10.0 ** (
         -3.0 * t / rt60
     )
-    # The 14 modulation frequencies 0,63 - 12,5 Hz (Ed.5 A.2.2).
+    # The 14 modulation frequencies 0.63 - 12.5 Hz (Ed.5 A.2.2).
     mod_freqs = np.array(
         [
             0.63,
@@ -590,10 +590,10 @@ def _chk_sti_indirect_expdecay() -> Outcome:
 def _chk_sti_filter_slope() -> Outcome:
     # Ed.5 filter-slope verification (worst case of the certified bench
     # pre-fix): a fully modulated 125 Hz carrier plus an unmodulated
-    # 62,5 Hz tone 41 dB louder must still read m >= 0,5 in the 125 Hz
+    # 62.5 Hz tone 41 dB louder must still read m >= 0.5 in the 125 Hz
     # band, i.e. the analysis filter must be > 41 dB down one octave out
     # (steeper than IEC 61260-1 class 1; the zero-phase bank achieves
-    # m >= 0,94 on all 14 certified signals).
+    # m >= 0.94 on all 14 certified signals).
     t = np.arange(int(16.0 * _FS)) / _FS
     env = 0.5 * (
         1.0 + 0.55 * (np.sin(2 * np.pi * 1.60 * t) - np.sin(2 * np.pi * 8.00 * t))
@@ -624,8 +624,8 @@ def _chk_sti_filter_slope() -> Outcome:
 def _chk_sti_weighting_pair_audio() -> Outcome:
     # Ed.5 weighting-factor verification through the full audio path:
     # sine carriers in all seven bands, only the 500/1000 Hz pair
-    # modulated (m = 1) -> STI = alpha_3 + alpha_4 - beta_3 = 0,398.
-    # Certified WAV bench worst deviation vs the identity: 0,0002 STI.
+    # modulated (m = 1) -> STI = alpha_3 + alpha_4 - beta_3 = 0.398.
+    # Certified WAV bench worst deviation vs the identity: 0.0002 STI.
     x = _stipa_sine_signal(1.0, bands=(2, 3), flat_levels=True)
     computed = float(ph.speech.stipa(x, _FS).sti)
     return numeric(0.398, computed, 0.005, places=4)
@@ -639,9 +639,9 @@ def _chk_sti_weighting_pair_audio() -> Outcome:
 def _chk_sti_edge_carriers() -> Outcome:
     # Ed.5 filter-bank phase-distortion verification: two sine carriers
     # per band at fc 2^(+/-1/4) (the extremes of the half-octave STIPA
-    # generation band), modulation depth m = 0,94065 (TI = 0,9). The
-    # normative criterion is |STI bias| < 0,01 over TI = 0,1 .. 0,9; the
-    # zero-phase bank measures -0,0029 worst on the certified WAVs.
+    # generation band), modulation depth m = 0.94065 (TI = 0.9). The
+    # normative criterion is |STI bias| < 0.01 over TI = 0.1 .. 0.9; the
+    # zero-phase bank measures -0.0029 worst on the certified WAVs.
     x = _stipa_sine_signal(0.94065, edge_carriers=True, flat_levels=True)
     computed = float(ph.speech.stipa(x, _FS).sti)
     return numeric(0.9, computed, 0.01, places=4)

@@ -9,13 +9,13 @@ numbers it fixes, on three printed pages of BS EN 16487:2014:
 
 * **Table 1**, printed folio 14 (PDF page 16): the reproducibility of the 2010
   round robin of Annex A, as an expanded uncertainty, with the ISO 5725-6
-  coverage factor of 2,8 named in the NOTE beneath it. The same table, the same
+  coverage factor of 2.8 named in the NOTE beneath it. The same table, the same
   two footnotes and the same coverage factor are printed in the official
   Spanish adoption, UNE-EN 16487:2015, Tabla 1 on printed folio 16, which is
   where the transcription below was checked a second time;
 * **4.2.1**, printed folio 12 (PDF page 14): the air-absorption correction
-  ``4V(m2 - m1)/S``, and the 0,05 it may not exceed at any frequency;
-* **4.1.1.1.1** and **4.1.1.2.3.1**, printed folios 6 and 9: the 10,80 m2
+  ``4V(m2 - m1)/S``, and the 0.05 it may not exceed at any frequency;
+* **4.1.1.1.1** and **4.1.1.2.3.1**, printed folios 6 and 9: the 10.80 m2
   specimen and the 200 mm overall depth the CE marking data rests on.
 
 The rest of this module is the chain 4.2.1 hangs off, anchored where it can be
@@ -42,7 +42,7 @@ report from eleven years before the test code existed (P302808, Enclosure 24,
 reproduced. A fourth arrangement is the E-400 mounting of G. van Hout, The
 Acoustic Performance of Suspended Ceiling Systems, master of engineering
 thesis, University of Canterbury, 2016, which prints the 400 mm cavity and the
-3 600 mm by 3 000 mm, 10,8 m2 specimen on printed page 27 (PDF page 45).
+3 600 mm by 3 000 mm, 10.8 m2 specimen on printed page 27 (PDF page 45).
 """
 
 from __future__ import annotations
@@ -166,13 +166,13 @@ def _chk_table_one() -> Outcome:
     _CEILINGS,
     "EN 16487:2014 Table 1 NOTE (printed folio 14) against ISO 12999-2:2020 "
     "Table 3 (printed folio 6)",
-    "The coverage factor is the 2,8 of ISO 5725-6 for this test code and the "
-    "2,0 of Table 3 at 95 % for the general method",
+    "The coverage factor is the 2.8 of ISO 5725-6 for this test code and the "
+    "2.0 of Table 3 at 95 % for the general method",
 )
 def _chk_coverage_factors() -> Outcome:
     """Two printed coverage factors that the library must not confuse.
 
-    EN 16487 prints no reproducibility standard deviation anywhere, so the 2,8
+    EN 16487 prints no reproducibility standard deviation anywhere, so the 2.8
     of its NOTE cannot be checked by dividing the table by it and multiplying
     back; that is an identity, and it passes for any pair of numbers. What can
     be checked is that the two coverage factors this library holds are the two
@@ -202,8 +202,8 @@ def _chk_iso9613_table1_climates() -> Outcome:
     These are the inputs of the two 4.2.1 cases, so the cases stand on a
     printed table rather than on the library's own atmospheric model. Table 1
     is tabulated at the exact one-third-octave midbands of Note 5, which is why
-    ``exact_midband`` is set: at the nominal 4 kHz the model gives 29,67 dB/km
-    against the printed 2,94 x 10.
+    ``exact_midband`` is set: at the nominal 4 kHz the model gives 29.67 dB/km
+    against the printed 2.94 x 10.
     """
     matching = 0
     total = 0
@@ -268,7 +268,7 @@ def _chk_ten_lg_e() -> Outcome:
 def _chk_four_m_v() -> Outcome:
     """``4mV`` from the printed volume and the printed attenuation.
 
-    Vigran's example reads ``m`` off Figure 4.8 as 0,05 m-1 at 8 kHz in a
+    Vigran's example reads ``m`` off Figure 4.8 as 0.05 m-1 at 8 kHz in a
     100 m3 room and prints the resulting absorption area: "The air absorption
     alone then gives an absorption area of 20 m2". EN 16487 4.2.1 carries the
     same ``4V(m2 - m1)`` divided by the specimen area, so multiplying the
@@ -291,7 +291,7 @@ def _chk_four_m_v() -> Outcome:
         float(correction[0]) * TARGET_SPECIMEN_AREA_M2,
         5e-9,
         unit="m2",
-        expected_label="20 m2 of air absorption, from V = 100 m3 and m = 0,05 1/m",
+        expected_label="20 m2 of air absorption, from V = 100 m3 and m = 0.05 1/m",
     )
 
 
@@ -350,12 +350,12 @@ def _chk_air_correction_over_the_cap() -> Outcome:
     """The clause failing, on a real room and printed climates.
 
     The room and the specimen are the ones SRL certificate 13441 prints,
-    300 m3 and 10,7 m2; the two climates are two columns of ISO 9613-1
+    300 m3 and 10.7 m2; the two climates are two columns of ISO 9613-1
     Table 1(i) at 20 degC, so every input is on a page. The correction itself
     is printed nowhere, so no value of it is compared here: the 10 lg(e) and
     the factor of four it is built from are held to the numbers Vigran prints
     in the two rows above. What this row compares is what the clause decides,
-    against the 0,05 it prints: the cap the library holds is that 0,05, and it
+    against the 0.05 it prints: the cap the library holds is that 0.05, and it
     reports this room as over it on the absolute value of a negative
     correction. The computed side shows the correction the verdict rests on.
     """
@@ -380,7 +380,7 @@ def _chk_air_correction_over_the_cap() -> Outcome:
 def _chk_air_correction_inside_the_cap() -> Outcome:
     """The clause passing, so the cap is exercised from both sides.
 
-    The room is the one SP report P302808 prints, 200 m3 with a 10,8 m2
+    The room is the one SP report P302808 prints, 200 m3 with a 10.8 m2
     specimen at 200 mm. Its printed climates are 20 degC / 90 % empty and
     24 degC / 89 % on the object; ISO 9613-1 Table 1 is printed on a 5 degC
     grid with humidity columns every ten points, so the nearer grid point,
@@ -419,7 +419,7 @@ def _cap_verdict(
     return record(
         {"cap of 4.2.1": _PRINTED_CAP, verdict: 1.0},
         {"cap of 4.2.1": AIR_CORRECTION_LIMIT, verdict: float(warned is over)},
-        label=f"the printed 0,05, and the room {verdict}",
+        label=f"the printed 0.05, and the room {verdict}",
         computed_label=(
             f"cap {AIR_CORRECTION_LIMIT:g}, largest correction "
             f"{float(computed[worst]):+.5f} at {bands[worst]:g} Hz, "
@@ -442,11 +442,11 @@ def _chk_srl_absorption_coefficient() -> Outcome:
     specimen area, both climates including two different barometric pressures,
     and per band the empty-room and with-specimen reverberation times beside
     the coefficient it derived from them. Feeding the library nothing but those
-    printed numbers reproduces the six octave-centre coefficients to the 0,01
+    printed numbers reproduces the six octave-centre coefficients to the 0.01
     the certificate prints.
 
     The air term is what makes this a check rather than a formality: dropped,
-    the same call misses three of the six bands, by 0,016 at 4 kHz.
+    the same call misses three of the six bands, by 0.016 at 4 kHz.
     """
     empty_temperature_c, empty_humidity, empty_pressure_mbar = oracle.SRL_13441_EMPTY
     temperature_c, humidity, pressure_mbar = oracle.SRL_13441_WITH_SPECIMEN
@@ -490,19 +490,19 @@ def _chk_srl_absorption_coefficient() -> Outcome:
     "EN 16487:2014 4.1.1.1.1 and 4.1.1.2.3.1 (printed folios 6 and 9, PDF "
     "pages 8 and 11)",
     "Four real suspended-ceiling arrangements judged against the printed "
-    "10,80 m2 and the printed 200 mm",
+    "10.80 m2 and the printed 200 mm",
 )
 def _chk_real_arrangements() -> Outcome:
     """Specimens nobody here chose, against the two numbers the clauses fix.
 
-    4.1.1.1.1 asks for an area as close to 10,80 m2 as the product allows and
+    4.1.1.1.1 asks for an area as close to 10.80 m2 as the product allows and
     4.1.1.2.3.1 fixes the type E depth at 200 mm for the measurement CE marking
     rests on. Two of these four arrangements sit on both, one is the E-50 of a
     CSTB report that names this test code on its face, and the last is the
     E-400 of a university reverberation room. The area error and the CE marking
     verdict are checked; the area is a target and not a tolerance, so nothing
-    here makes a failure of the 0,30 m2 the CSTB specimen falls short by. The
-    E-400 and its 10,8 m2 are printed in van Hout's thesis on page 27 (PDF
+    here makes a failure of the 0.30 m2 the CSTB specimen falls short by. The
+    E-400 and its 10.8 m2 are printed in van Hout's thesis on page 27 (PDF
     page 45), which the module docstring cites in full.
     """
     cases = {
@@ -543,7 +543,7 @@ def _chk_real_arrangements() -> Outcome:
         len(cases),
         subject="arrangements judged as the two clauses print them",
         expected_label=(
-            f"4/4 against the 10,80 m2 of 4.1.1.1.1 and the "
+            f"4/4 against the 10.80 m2 of 4.1.1.1.1 and the "
             f"{TYPE_E_DEPTH_MM:g} mm of 4.1.1.2.3.1"
         ),
     )
@@ -627,16 +627,16 @@ def _chk_printed_ratings() -> Outcome:
     Table 1's weighted figure is qualified as "calculated without any rounding
     in the calculation chain in EN ISO 11654", so the chain is named by this
     test code even though the rating itself belongs to the other standard. The
-    three reports print what came out of it: alpha_w = 0,95 class A from
-    fifteen one-third-octave coefficients, alpha_w = 0,9 class A from five
-    octave ones, and alpha_w = 0,70(MH) class C, the last of these on a report
+    three reports print what came out of it: alpha_w = 0.95 class A from
+    fifteen one-third-octave coefficients, alpha_w = 0.9 class A from five
+    octave ones, and alpha_w = 0.70(MH) class C, the last of these on a report
     whose own standards line names prEN 16487.
 
     The CSTB case is the discriminating one. Both high-frequency bands sit
-    exactly 0,25 above the shifted curve, so a strict comparison there prints M
+    exactly 0.25 above the shifted curve, so a strict comparison there prints M
     where the page prints MH, and the accepted shift leaves an unfavourable sum
-    of exactly 0,10, so a strict comparison there gives 0,65 where the page
-    prints 0,70.
+    of exactly 0.10, so a strict comparison there gives 0.65 where the page
+    prints 0.70.
     """
     from_third_octave = ph.materials.weighted_absorption_from_third_octave(
         oracle.SRL_13441_THIRD_OCTAVE_ALPHA_S

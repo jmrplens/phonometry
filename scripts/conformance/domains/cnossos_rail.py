@@ -261,7 +261,7 @@ def _chk_cnossos_rail_source_tables() -> Outcome:
 @register(
     _CNOSSOS_RAIL,
     "Annex II 2.3.2, formula (2.3.15)",
-    "Horizontal dipole directivity along the track: 10 lg(0,01) at phi = 0",
+    "Horizontal dipole directivity along the track: 10 lg(0.01) at phi = 0",
 )
 def _chk_cnossos_rail_horizontal_directivity() -> Outcome:
     got = float(ph.environment.horizontal_directivity(0.0)[0])
@@ -300,7 +300,7 @@ def _chk_cnossos_rail_aerodynamic_law() -> Outcome:
 @register(
     _CNOSSOS_RAIL,
     "Annex II 2.3.2, formula (2.3.12)",
-    "Impact roughness at the tabulated joint density n_l = 0,01 per m",
+    "Impact roughness at the tabulated joint density n_l = 0.01 per m",
 )
 def _chk_cnossos_rail_joint_density() -> Outcome:
     single = ph.environment.impact_roughness_single().levels

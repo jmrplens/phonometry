@@ -73,7 +73,7 @@ _PRINTED_A_WEIGHTING = (-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1)
 #: The table prints one decimal, and Section 1.3 on printed folio 5 says why
 #: that is the resolution to judge it at: the spreadsheet rounds each result to
 #: whole decibels and "kleine Differenzen (< 0,1 dB) in den Berechnungen"
-#: follow from it. Half of that 0,1 dB is the tolerance, 0,05 dB, and not half
+#: follow from it. Half of that 0.1 dB is the tolerance, 0.05 dB, and not half
 #: of the whole decibel the rounding is to.
 _PRINTED_TOLERANCE = 0.05
 
@@ -155,7 +155,7 @@ def _chk_overall_level() -> Outcome:
     "Supply fan total sound power level, dB",
 )
 def _chk_total() -> Outcome:
-    """The unweighted sum of the eight octaves, printed as 94,1 dB."""
+    """The unweighted sum of the eight octaves, printed as 94.1 dB."""
     total = 10.0 * math.log10(float(np.sum(10.0 ** (_fan() / 10.0))))
     return numeric(94.1, total, _PRINTED_TOLERANCE, unit="dB", places=3)
 
@@ -166,7 +166,7 @@ def _chk_total() -> Outcome:
     "Supply fan A-weighted sound power level, dB",
 )
 def _chk_total_a_weighted() -> Outcome:
-    """The A-weighted sum, printed as 84,5 dB.
+    """The A-weighted sum, printed as 84.5 dB.
 
     The weighting is the one Table 1 prints in its own header row, not the one
     the library computes, so the row checks the spectrum and not the weighting.
@@ -198,7 +198,7 @@ _PRINTED_BEND = (0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 3.0)
     "Rectangular duct 500 x 400 mm over 4 m, worst octave deviation, dB",
 )
 def _chk_rectangular_run() -> Outcome:
-    """Table 5 read by the largest side, which is what puts 250 Hz at 0,3 dB/m."""
+    """Table 5 read by the largest side, which is what puts 250 Hz at 0.3 dB/m."""
     width, height, length = _RECT_RUN
     values = ph.noise_control.unlined_rectangular_duct_attenuation(
         np.array(_PRINTED_BANDS), width, height, length, model="vdi2081"
@@ -228,8 +228,8 @@ def _chk_limit_frequency() -> Outcome:
     """``f_G = 0,586 c / d``, printed beside element 14 as 1245 Hz.
 
     Checked against the library's own first cut-on frequency rather than
-    against the printed constant recomputed: 0,586 is the guideline's rounding
-    of the first circular mode's 1,8412 over pi, so the two agree to the
+    against the printed constant recomputed: 0.586 is the guideline's rounding
+    of the first circular mode's 1.8412 over pi, so the two agree to the
     resolution the value is printed at and the row exercises the code.
     """
     return numeric(
@@ -297,7 +297,7 @@ _register_junctions()
 _STRAIGHT_AREA = 0.5 * 0.4
 _STRAIGHT_VELOCITY = (4200.0 / 3600.0) / _STRAIGHT_AREA
 #: Table 1, element 3: the junction. Its approach velocity comes from the whole
-#: system's 16 000 m3/h over the 0,90 m2 feeder, not from the branch's own duty.
+#: system's 16 000 m3/h over the 0.90 m2 feeder, not from the branch's own duty.
 _JUNCTION_APPROACH = (16000.0 / 3600.0) / 0.90
 _JUNCTION_BRANCH = (4200.0 / 3600.0) / 0.30
 _PRINTED_JUNCTION_NOISE = (39.1, 33.5, 27.4, 20.7, 13.7, 6.2, -1.5, -9.6)
@@ -616,7 +616,7 @@ def _chk_room_attenuation() -> Outcome:
     "Room attenuation of a hemispherical outlet, dB",
 )
 def _chk_room_attenuation_hemispherical() -> Outcome:
-    """The single 5,7 dB printed beside the row, which no octave of it equals.
+    """The single 5.7 dB printed beside the row, which no octave of it equals.
 
     It is the same room and distance with the directivity a half space gives,
     Q = 2, before Figure 30 makes the factor a function of frequency.
@@ -650,7 +650,7 @@ def _chk_room_levels() -> Outcome:
     "Total sound pressure level in room 102, dB",
 )
 def _chk_room_total() -> Outcome:
-    """The unweighted sum of the eight octaves, printed as 51,4 dB."""
+    """The unweighted sum of the eight octaves, printed as 51.4 dB."""
     levels = _room_levels()
     total = 10.0 * math.log10(float(np.sum(10.0 ** (levels / 10.0))))
     return numeric(_PRINTED_ROOM_TOTAL, total, _PRINTED_TOLERANCE, unit="dB", places=3)
@@ -662,7 +662,7 @@ def _chk_room_total() -> Outcome:
     "A-weighted sound pressure level in room 102, dB",
 )
 def _chk_room_total_a_weighted() -> Outcome:
-    """The A-weighted sum, printed as 40,0 dB, against the table's own weighting."""
+    """The A-weighted sum, printed as 40.0 dB, against the table's own weighting."""
     levels = _room_levels() + np.array(_PRINTED_A_WEIGHTING)
     total = 10.0 * math.log10(float(np.sum(10.0 ** (levels / 10.0))))
     return numeric(
@@ -721,7 +721,7 @@ _register_section_change()
 def _chk_section_change_increase_band_count() -> Outcome:
     """Above the limit frequency of the upstream duct the figure prints nought.
 
-    A 0,8 m side puts Equation (33) at 214,4 Hz, which leaves the 63 and
+    A 0.8 m side puts Equation (33) at 214.4 Hz, which leaves the 63 and
     125 Hz octaves below it and the other six above.
     """
     values = ph.noise_control.section_change_loss(

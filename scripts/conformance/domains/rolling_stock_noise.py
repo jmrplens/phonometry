@@ -9,7 +9,7 @@ limit a second time, as the table its Annex B listing types in, and prints the
 lengths of Method B (2 m discarded at either end, 5 m, 15 m) in 7.4.3 and the
 bands it filters in the listing; the filters of Method B are held to the
 class 0 limits EN 61260:1995 prints in its Table 1. Annex G works
-one uncertainty budget, Table G.2, to 55,68 dB, 0,83 dB and 1,66 dB, and
+one uncertainty budget, Table G.2, to 55.68 dB, 0.83 dB and 1.66 dB, and
 Figure G.1 draws its shares in an order the budget has to reproduce.
 
 Everything else is anchored in closed forms: the transit exposure level of
@@ -62,7 +62,7 @@ def _table_g2() -> ph.environment.PassByUncertainty:
     _ROLLING_STOCK,
     "ISO 3095:2013 Figure 2",
     "Default upper limit of the one-third octave band rail roughness, the 22 "
-    "levels printed beside the points, 40 cm to 0,315 cm, dB re 1 µm",
+    "levels printed beside the points, 40 cm to 0.315 cm, dB re 1 µm",
 )
 def _chk_roughness_limit() -> Outcome:
     published = ph.environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
@@ -280,7 +280,7 @@ def _chk_sinusoid_roughness() -> Outcome:
     "EN 15610:2009 7.4.3 and EN 61260:1995 Table 1",
     "Bands of the Method B filter bank at 1 mm sampling within the class 0 "
     "limits of Table 1 on relative attenuation, graded up to the Nyquist "
-    "wavenumber of the record, 0,5 m to 2,5 mm",
+    "wavenumber of the record, 0.5 m to 2.5 mm",
 )
 def _chk_method_b_filter_class() -> Outcome:
     bank = ph.environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
@@ -348,7 +348,7 @@ def _chk_method_b_alias_rejection() -> Outcome:
     _ROLLING_STOCK,
     "EN 15610:2009 Annex B.9.2",
     "Bands Method B reports on a 19 m record sampled every millimetre, against "
-    "wl_d, the 24 band centres the listing filters, 0,5 m to 2,5 mm",
+    "wl_d, the 24 band centres the listing filters, 0.5 m to 2.5 mm",
 )
 def _chk_method_b_bands() -> Outcome:
     x = np.arange(0.0, 19.0, 1.0e-3)
@@ -372,7 +372,7 @@ def _chk_method_b_bands() -> Outcome:
     _ROLLING_STOCK,
     "EN 15610:2009 7.4.3 and EN 61260:1995 Table 1",
     "Band level of a 3 µm sinusoidal roughness at the 1 cm band centre, Method B: "
-    "10 lg(A²/2) within the ±0,15 dB of class 0 at the midband, dB re 1 µm",
+    "10 lg(A²/2) within the ±0.15 dB of class 0 at the midband, dB re 1 µm",
 )
 def _chk_method_b_sinusoid() -> Outcome:
     x = np.arange(0.0, 20.0, 1.0e-3)
@@ -428,7 +428,7 @@ def _chk_method_b_shortest_record() -> Outcome:
     _ROLLING_STOCK,
     "EN 15610:2009 7.4.3",
     "A line analysed by Method B needs 15 m of record once 2 m are discarded at "
-    "either end of each: a 15 m line holds, a 14,9 m one does not",
+    "either end of each: a 15 m line holds, a 14.9 m one does not",
 )
 def _chk_method_b_total_length() -> Outcome:
     limit = ph.environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
@@ -451,7 +451,7 @@ def _chk_method_b_total_length() -> Outcome:
 @register(
     _ROLLING_STOCK,
     "EN 15610:2009 7.3",
-    "Curvature processing of an 11 mm pit 50 µm deep: the 0,375 m circle rests "
+    "Curvature processing of an 11 mm pit 50 µm deep: the 0.375 m circle rests "
     "on its rims 6 mm from its middle, µm",
 )
 def _chk_curvature_pit() -> Outcome:
@@ -494,7 +494,7 @@ def _chk_exponential_decay() -> Outcome:
     _ROLLING_STOCK,
     "ISO 3095:2013 Annex C",
     "Effect of a 3 dB exceedance in the 4 cm band at 36 km/h, carried whole "
-    "onto 250 Hz, on a flat 25-band spectrum: 10 lg 25 - 10 lg(24 + 10^-0,3), dB",
+    "onto 250 Hz, on a flat 25-band spectrum: 10 lg 25 - 10 lg(24 + 10^-0.3), dB",
 )
 def _chk_annex_c() -> Outcome:
     limit = ph.environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB

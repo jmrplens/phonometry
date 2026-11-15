@@ -6,7 +6,7 @@ declare conformity against a published set of test cases; ISO/TR 17534-3
 carries that set for ISO 9613-2. Nineteen scenarios are printed, each with its
 input geometry and a step-by-step table of intermediate quantities, and the
 document states the envelope a result has to stay inside to count as correct:
-+/-0,05 dB per band and on the total.
++/-0.05 dB per band and on the total.
 
 That makes it an oracle of an unusual kind. Every other row of this report
 checks one formula against one printed number; these check the whole chain of
@@ -207,7 +207,7 @@ _register_homogeneous()
 
 @register(_QA, "ISO/TR 17534-3:2015 Table 3", "Ground-projected path length dp, m")
 def _chk_dp() -> Outcome:
-    """The horizontal leg of every case, printed as 194,16 m."""
+    """The horizontal leg of every case, printed as 194.16 m."""
     return numeric(194.16, _DP, _LENGTH_TOLERANCE, unit="m", places=3)
 
 
@@ -219,7 +219,7 @@ def _chk_d3() -> Outcome:
 
 @register(_QA, "ISO/TR 17534-3:2015 Table 3", "Geometrical divergence Adiv, dB")
 def _chk_adiv() -> Outcome:
-    """``Adiv = 20 lg(d/d0) + 11``, printed as 56,76 dB."""
+    """``Adiv = 20 lg(d/d0) + 11``, printed as 56.76 dB."""
     return numeric(
         56.76,
         ph.environment.geometric_divergence(_D3_FLAT),
@@ -407,7 +407,7 @@ _register_region_factors()
 
 @register(_QA, "ISO/TR 17534-3:2015 Table 14 (T06)", "Straight-line path length d3, m")
 def _chk_d3_sloped() -> Outcome:
-    """The 10 m the ground gains under the receiver lengthens the ray to 194,60 m."""
+    """The 10 m the ground gains under the receiver lengthens the ray to 194.60 m."""
     return numeric(194.60, _D3_SLOPED, _LENGTH_TOLERANCE, unit="m", places=3)
 
 

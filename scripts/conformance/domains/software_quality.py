@@ -2,7 +2,7 @@
 """Quality assurance of outdoor sound software, by ISO 17534-1 itself.
 
 ISO 17534-1 prints three things a program can be checked against. Table C.1
-gives the ranking positions of the 0,1- and 0,9-quantiles for samples of 20 to
+gives the ranking positions of the 0.1- and 0.9-quantiles for samples of 20 to
 50 values, and Formulas (C.1) and (C.2) take over above 50; the example that
 follows sorts 25 level differences and reads the two quantiles off them.
 Table B.2 is the worked Test Case Results Comparison form of a test case
@@ -46,7 +46,7 @@ _FORMULA_RANGE = range(51, 1001)
 @register(
     _QA,
     "ISO 17534-1:2015 Table C.1",
-    "Ranking position R(q0,1) of the 0,1-quantile, N = 20 to 50",
+    "Ranking position R(q0,1) of the 0.1-quantile, N = 20 to 50",
 )
 def _chk_table_c1_q01() -> Outcome:
     """The first column of Table C.1, row by row."""
@@ -60,7 +60,7 @@ def _chk_table_c1_q01() -> Outcome:
 @register(
     _QA,
     "ISO 17534-1:2015 Table C.1",
-    "Ranking position R(q0,9) of the 0,9-quantile, N = 20 to 50",
+    "Ranking position R(q0,9) of the 0.9-quantile, N = 20 to 50",
 )
 def _chk_table_c1_q09() -> Outcome:
     """The second column of Table C.1, row by row.
@@ -171,10 +171,10 @@ def _chk_table_b2_inside() -> Outcome:
 @register(
     _QA,
     "ISO 17534-1:2015 Table A.5, note a; Table B.2",
-    "Width of each certified interval, twice the 0,05 dB tolerance",
+    "Width of each certified interval, twice the 0.05 dB tolerance",
 )
 def _chk_table_b2_tolerance() -> Outcome:
-    """The limits of Table B.2 lie 0,05 dB either side of each certified result.
+    """The limits of Table B.2 lie 0.05 dB either side of each certified result.
 
     Read against the tolerance the library publishes for Table A.5, so the
     constant a user builds limits with is the one the printed form was built

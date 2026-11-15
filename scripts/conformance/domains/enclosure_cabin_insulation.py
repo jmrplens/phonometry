@@ -364,7 +364,7 @@ def _chk_source_position_criterion() -> Outcome:
         float(verdict.n_required_positions),
         0.0,
         unit="",
-        expected_label="6 positions for a 9,5 dB spread, capped at six",
+        expected_label="6 positions for a 9.5 dB spread, capped at six",
         computed_label=(
             f"{verdict.n_required_positions} positions for "
             f"{verdict.max_octave_spread_db:.1f} dB"
@@ -440,7 +440,7 @@ def _chk_uncertainty_conditions() -> Outcome:
 )
 def _chk_npl_reverberation_k2a() -> Outcome:
     # A tenth of a decibel, not a twentieth: the study prints its answers to
-    # 0,1 dB and prints the volume and the reverberation time it fed them
+    # 0.1 dB and prints the volume and the reverberation time it fed them
     # rounded as well, so the inputs carry rounding of their own.
     worst = 0.0
     matching = 0
@@ -462,7 +462,7 @@ def _chk_npl_reverberation_k2a() -> Outcome:
     return count(
         matching,
         total,
-        subject="printed values of K_2A, from 1,1 dB to 8,4 dB",
+        subject="printed values of K_2A, from 1.1 dB to 8.4 dB",
         expected_label=f"17/17 (worst departure {worst:.2f} dB)",
     )
 
@@ -531,7 +531,7 @@ def _chk_npl_annex_c_at_the_precision_ceiling() -> Outcome:
         float(matching),
         0.0,
         expected_label="13 of 17, the four that differ being room A, which is "
-        "hemi-anechoic and so more absorbent than the 0,5 the table stops at",
+        "hemi-anechoic and so more absorbent than the 0.5 the table stops at",
         computed_label=f"{matching} of 17, differing at {', '.join(differing)}",
     )
 
@@ -581,16 +581,16 @@ def _chk_npl_room_e_area_conflict() -> Outcome:
     "NPL CIRA(EXT) 009 (1996) Tables 10 to 14, PDF pp. 22 to 24, "
     "printed folios 18 to 20",
     "The estimated room absorption column of the study does not follow the "
-    "study's own Eq. (3): every one of its 17 cells sits more than 0,4 dB "
+    "study's own Eq. (3): every one of its 17 cells sits more than 0.4 dB "
     "away from it, so that column is no oracle for this library",
 )
 def _chk_npl_estimated_absorption_drops_the_factor_four() -> Outcome:
     # The column follows 10 lg (1 + S/(alpha S_V)) instead, the factor 4
     # dropped: 10 of the 17 cells to the tenth it is printed to, the rooms C
-    # and E within 0,2 dB of it, and the lower bound of room D, surface 4,
-    # printed as 0,1 dB where that form gives 0,49 dB. Anyone anchoring the
+    # and E within 0.2 dB of it, and the lower bound of room D, surface 4,
+    # printed as 0.1 dB where that form gives 0.49 dB. Anyone anchoring the
     # absorption route on the column would read the library as wrong by up
-    # to 4,6 dB while it is right.
+    # to 4.6 dB while it is right.
     far = 0
     total = 0
     closest = float("inf")
@@ -695,7 +695,7 @@ def _chk_baua_applicability_verdict() -> Outcome:
         matching,
         total,
         subject="verdicts that agree with the printed K_2A",
-        expected_label="6/6, the tightest of them sitting 0,09 dB over the "
+        expected_label="6/6, the tightest of them sitting 0.09 dB over the "
         "7 dB ceiling",
     )
 
@@ -734,15 +734,15 @@ def _chk_baua_measured_absorption_area() -> Outcome:
 @register(
     _ENCLOSURES,
     "Barron (2003) Example 7-8, PDF pp. 321 and 323, printed folios 309 and 311",
-    "The two A-weighted totals of that example on their own, 108,4 dBA "
-    "without the enclosure and 89,8 dBA with it, which is where the "
+    "The two A-weighted totals of that example on their own, 108.4 dBA "
+    "without the enclosure and 89.8 dBA with it, which is where the "
     "weighting table shows and the difference of the two hides it",
 )
 def _chk_barron_a_weighted_totals() -> Outcome:
     # The rows above take the difference of these two totals, and a difference
     # hardly constrains the weighting at all: a whole decibel of error in any
-    # one band moves D_pA by at most 0,07 dB, while it moves the 1 kHz share
-    # of the total by 0,45 dB. The totals are the discriminating numbers, the
+    # one band moves D_pA by at most 0.07 dB, while it moves the 1 kHz share
+    # of the total by 0.45 dB. The totals are the discriminating numbers, the
     # result object does not publish them, so the row reaches the helper that
     # forms them. The spectra and the printed totals are the ones the
     # Equation (3) and Equation (4) rows already read from Table 7-5.
@@ -807,9 +807,9 @@ def _chk_smith_estimate_follows_the_spectrum() -> Outcome:
     _ENCLOSURES,
     "Schirmer (2006) 10.8.1, PDF pp. 323 and 324, printed folios 303 and 304",
     "ISO 11546-1:1995 3.16 / ISO 11546-2:1995 3.14: the leak ratio of an "
-    "enclosure with a 0,25 m2 opening in 95,75 m2 of wall, taken over the "
+    "enclosure with a 0.25 m2 opening in 95.75 m2 of wall, taken over the "
     "interior surface with the opening counted in, against the printed "
-    "q = 2,6e-3",
+    "q = 2.6e-3",
 )
 def _chk_schirmer_leak_ratio() -> Outcome:
     # Definition 3.14 of part 2 is definition 3.16 of part 1 word for word, so
@@ -824,7 +824,7 @@ def _chk_schirmer_leak_ratio() -> Outcome:
         ratio,
         5e-5,
         places=6,
-        expected_label="q = 2,6e-3 (+/-5e-5, half of the last digit printed)",
+        expected_label="q = 2.6e-3 (+/-5e-5, half of the last digit printed)",
         computed_label=f"{ratio:.6f}",
     )
 
@@ -925,7 +925,7 @@ _CK_THIRD_DB = np.array(oracle.ISO3744_TABLE_E1_CK_DB)
     "ISO 11957:1996 6.4 with ISO 3741:2010 9.1.2, Equation (14) and its clamps "
     "(PDF pp. 28 and 29, printed folios 19 and 20)",
     "The background correction 6.4 delegates, at the two clamp points "
-    "ISO 3741 prints: 1,26 dB for a 6 dB margin and 0,46 dB for a 10 dB one",
+    "ISO 3741 prints: 1.26 dB for a 6 dB margin and 0.46 dB for a 10 dB one",
 )
 def _chk_printed_k1_clamps() -> Outcome:
     levels = np.full(_K1_CLAMP_BANDS_HZ.size, _K1_SIGNAL_DB)
@@ -939,8 +939,8 @@ def _chk_printed_k1_clamps() -> Outcome:
         0.005,
         unit="dB",
         expected_label=(
-            "the printed 1,26 dB and 0,46 dB, to the two decimals folio 20 "
-            "prints them at (+/-0,005 dB, half of that last digit)"
+            "the printed 1.26 dB and 0.46 dB, to the two decimals folio 20 "
+            "prints them at (+/-0.005 dB, half of that last digit)"
         ),
         computed_label=(
             f"worst departure {worst:.4f} dB over the three bands, which "
@@ -986,8 +986,8 @@ def _chk_printed_k1_reaches_both_clauses() -> Outcome:
         0.005,
         unit="dB",
         expected_label=(
-            "80 - 1,26 and 80 - 0,46 for L_pA, and 31,26 / 30,46 / 31,26 "
-            "for D_p (+/-0,005 dB, half of the last digit printed)"
+            "80 - 1.26 and 80 - 0.46 for L_pA, and 31.26 / 30.46 / 31.26 "
+            "for D_p (+/-0.005 dB, half of the last digit printed)"
         ),
         computed_label=f"worst departure {worst:.4f} dB over the five values",
     )
@@ -998,7 +998,7 @@ def _chk_printed_k1_reaches_both_clauses() -> Outcome:
     "ISO 11957:1996 clause 8 with ISO 717-1:2013 Annex C, Table C.1 "
     "(PDF p. 24, printed folio 16)",
     "Clause 8 is ISO 717-1 with D_p written where that standard writes R, so "
-    "its printed example rates 30 (-2; -3) dB on an unfavourable sum of 31,8 dB",
+    "its printed example rates 30 (-2; -3) dB on an unfavourable sum of 31.8 dB",
 )
 def _chk_clause_eight_on_the_iso717_example() -> Outcome:
     printed = ref.ISO717_1_ANNEX_C_EXPECTED
@@ -1029,7 +1029,7 @@ def _chk_clause_eight_on_the_iso717_example() -> Outcome:
 )
 def _chk_annex_a_on_the_printed_sums() -> Outcome:
     # The table truncates, so the acceptance band is one-sided: a correct
-    # value sits at or above each printed figure and less than 0,001 dB over
+    # value sits at or above each printed figure and less than 0.001 dB over
     # it, never under. The departure reported is the one nearest an edge.
     departures: list[float] = []
     for spectrum, printed in zip(
@@ -1051,9 +1051,9 @@ def _chk_annex_a_on_the_printed_sums() -> Outcome:
     binding = min(departures, key=lambda value: min(value, 0.001 - value))
     return mask(
         expected=(
-            "the printed -10 lg of the two sums, 28,308 dB and 26,859 dB. "
+            "the printed -10 lg of the two sums, 28.308 dB and 26.859 dB. "
             "The table truncates rather than rounds, which its ellipsis says, "
-            "so a correct value sits at or above each and within 0,001 dB of it"
+            "so a correct value sits at or above each and within 0.001 dB of it"
         ),
         computed=(
             "departures "
@@ -1095,7 +1095,7 @@ def _chk_sgs_pod_rating() -> Outcome:
 @register(
     _ENCLOSURES,
     "ISO 11957:1996 clause 8 in AGH report 5.5.130. (2023), PDF p. 10, printed folio 10 of 10",
-    "An acoustic booth measured in a 180,4 m3 reverberation room and rated "
+    "An acoustic booth measured in a 180.4 m3 reverberation room and rated "
     "by the issuing laboratory at D_p,w = 22 dB",
 )
 def _chk_agh_booth_rating() -> Outcome:
@@ -1125,7 +1125,7 @@ def _chk_agh_booth_rating() -> Outcome:
 def _chk_euronova_booth_rating() -> Outcome:
     # The plotted curve on the same card carries finer values than the table,
     # so the laboratory rated unrounded data. Rating the printed integers
-    # reaches the same 30 dB with 9,0 dB of the 32,0 dB budget to spare, which
+    # reaches the same 30 dB with 9.0 dB of the 32.0 dB budget to spare, which
     # is the margin this row is worth and no more.
     rating = ph.noise_control.weighted_cabin_insulation(
         np.array(oracle.EURONOVA_BOOTH_DP_DB)

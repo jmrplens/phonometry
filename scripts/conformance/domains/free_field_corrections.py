@@ -19,8 +19,8 @@ page 37), Table I.2 on folio 38 (PDF page 40) and Table I.3 on folio 39 (PDF
 page 41).
 
 Three printed defects sit in this oracle and are recorded in
-``docs/ERRATA.md``. Table I.2 prints k = 2,11 beside its own 29,98 effective
-degrees of freedom, for which the Student factor at 95 % is 2,04; the rows pin
+``docs/ERRATA.md``. Table I.2 prints k = 2.11 beside its own 29.98 effective
+degrees of freedom, for which the Student factor at 95 % is 2.04; the rows pin
 the factor and the expanded uncertainty the page's own numbers give. Table H.1 prints the exponent of index
 31 as 31/80 beside the value of 10^(31/40). Formulas (E.4) to (E.6) exchange
 the two readings in the coupler that Figure E.1 defines, which the derivation
@@ -113,7 +113,7 @@ def _chk_i2_components() -> Outcome:
     "Combined standard uncertainty of the correction at 1 kHz",
 )
 def _chk_i2_combined() -> Outcome:
-    """The 15 components in quadrature, printed 0,059 0 dB."""
+    """The 15 components in quadrature, printed 0.059 0 dB."""
     return numeric(
         ref.IEC62585_TABLE_I2_COMBINED_DB,
         _budget_i2().combined_uncertainty_db,
@@ -141,13 +141,13 @@ def _chk_i2_dof() -> Outcome:
 @register(
     _IEC62585,
     "IEC 62585:2012 Table I.2, clause 5",
-    "Coverage factor for 95 % at the 29,98 degrees of freedom the table prints",
+    "Coverage factor for 95 % at the 29.98 degrees of freedom the table prints",
 )
 def _chk_i2_coverage() -> Outcome:
     """The Student factor at the page's own degrees of freedom.
 
-    The table prints k = 2,11, the factor for about 17 degrees of freedom; at
-    the 29,98 it prints beside it the factor is 2,04 (docs/ERRATA.md). The
+    The table prints k = 2.11, the factor for about 17 degrees of freedom; at
+    the 29.98 it prints beside it the factor is 2.04 (docs/ERRATA.md). The
     row pins the value that follows from the page's own numbers.
     """
     return numeric(
@@ -155,7 +155,7 @@ def _chk_i2_coverage() -> Outcome:
         _budget_i2().coverage_factor,
         0.005,
         places=3,
-        expected_label="2.04 (printed 2,11, an erratum)",
+        expected_label="2.04 (printed 2.11, an erratum)",
     )
 
 
@@ -165,12 +165,12 @@ def _chk_i2_coverage() -> Outcome:
     "Expanded uncertainty of the correction at 1 kHz, to the printed guard digit",
 )
 def _chk_i2_expanded() -> Outcome:
-    """2,042 times 0,05903 dB is 0,1206 dB, that is 0,12(1).
+    """2,042 times 0.05903 dB is 0.1206 dB, that is 0.12(1).
 
-    The table prints 0,12(4), which follows from its misprinted k = 2,11
+    The table prints 0.12(4), which follows from its misprinted k = 2.11
     (docs/ERRATA.md). The row pins the value the page's own numbers give to
-    the guard digit the table prints, so it tells the two apart: 2,11 times
-    0,05903 dB is 0,1246 dB.
+    the guard digit the table prints, so it tells the two apart: 2.11 times
+    0.05903 dB is 0.1246 dB.
     """
     return numeric(
         ref.IEC62585_TABLE_I2_EXPANDED_DB,
@@ -178,7 +178,7 @@ def _chk_i2_expanded() -> Outcome:
         0.0005,
         unit="dB",
         places=4,
-        expected_label="0.121 dB (printed 0,12(4), an erratum)",
+        expected_label="0.121 dB (printed 0.12(4), an erratum)",
     )
 
 
@@ -215,7 +215,7 @@ def _chk_i3_components() -> Outcome:
     "Combined standard uncertainty of the correction at 8 kHz",
 )
 def _chk_i3_combined() -> Outcome:
-    """Printed 0,140 dB."""
+    """Printed 0.140 dB."""
     return numeric(
         ref.IEC62585_TABLE_I3_COMBINED_DB,
         _budget_i3().combined_uncertainty_db,
@@ -243,7 +243,7 @@ def _chk_i3_coverage() -> Outcome:
     "Expanded uncertainty of the correction at 8 kHz",
 )
 def _chk_i3_expanded() -> Outcome:
-    """Printed 0,28 dB."""
+    """Printed 0.28 dB."""
     return numeric(
         ref.IEC62585_TABLE_I3_EXPANDED_DB,
         _budget_i3().expanded_uncertainty_db,
@@ -297,7 +297,7 @@ def _chk_maxima() -> Outcome:
     "Static-pressure component below 97 kPa, up to and above 3 kHz",
 )
 def _chk_static_pressure() -> Outcome:
-    """0,15 dB and 0,25 dB, expanded with k = 2, as the budget states them."""
+    """0.15 dB and 0.25 dB, expanded with k = 2, as the budget states them."""
     matching = 0
     for frequency, expanded in ref.IEC62585_STATIC_PRESSURE_EXPANDED_DB:
         budget = metrology.correction_uncertainty_budget(
@@ -399,9 +399,9 @@ def _chk_annex_a() -> Outcome:
     """Delta L = L1 - L4, added to what the adjusted meter reads.
 
     With equal weights the fit moves the sensitivity by minus the mean
-    deviation: deviations of +0,2, +0,1 and -0,6 dB give s = +0,1 dB, so a
-    meter reading 93,7 dB on a 94,0 dB calibrator before the adjustment reads
-    L4 = 93,8 dB after it, and Delta L = +0,2 dB.
+    deviation: deviations of +0.2, +0.1 and -0.6 dB give s = +0.1 dB, so a
+    meter reading 93.7 dB on a 94.0 dB calibrator before the adjustment reads
+    L4 = 93.8 dB after it, and Delta L = +0.2 dB.
     """
     result = metrology.adjustment_value(
         frequencies=[125.0, 1000.0, 8000.0],

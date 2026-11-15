@@ -5,13 +5,13 @@ Four things are pinned here.
 
 The printed numbers of the two test standards. IEC 61260-3:2016 Table C.1
 lists the fifteen normalized test frequencies of a one-third-octave filter to
-five decimals, and C.2 derives the first of them (Omega_1 ~ 1,026 67 and its
-inverse 0,974 02); Table 1 gives the acceptance limits the periodic test
+five decimals, and C.2 derives the first of them (Omega_1 ~ 1.026 67 and its
+inverse 0.974 02); Table 1 gives the acceptance limits the periodic test
 reads at them. Both parts print the same two worked examples in their
 Annexes A and B: the level an exponential sweep leaves at the output of a
-one-third-octave filter, L_c = 127 dB - 19,03 dB = 107,97 dB (B.5), and the
-uncertainty of that level, u ~ 0,057 dB, 0,115 dB expanded and 0,128 dB with a
-0,1 dB display (A.3.5). The last reproduces only with the square that the
+one-third-octave filter, L_c = 127 dB - 19.03 dB = 107.97 dB (B.5), and the
+uncertainty of that level, u ~ 0.057 dB, 0.115 dB expanded and 0.128 dB with a
+0.1 dB display (A.3.5). The last reproduces only with the square that the
 printed Formula (A.2) leaves off its frequency terms (see the errata
 registry).
 

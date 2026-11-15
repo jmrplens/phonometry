@@ -472,7 +472,7 @@ def _search_khz(distance: float, temperature: float, humidity: float) -> float:
     found = env.upper_tone_search_frequency(
         distance, temperature_c=temperature, relative_humidity_percent=humidity
     ).upper_frequency_hz
-    # Table 7 prints the nominal 3 150 Hz band as 3,2 kHz.
+    # Table 7 prints the nominal 3 150 Hz band as 3.2 kHz.
     return 3.2 if math.isclose(found, 3150.0) else found / 1000.0
 
 

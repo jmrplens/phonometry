@@ -61,7 +61,7 @@ _EXAMPLE_8 = {
 _FIGURE_3 = {2: 0.73, 3: 0.67, 4: 0.6, 5: 0.53, 6: 0.47}
 
 #: Annex D (printed page 19): the trains an hour Figure D.1 allows at
-#: KB_FTm = 0,2 for two values of A_r.
+#: KB_FTm = 0.2 for two values of A_r.
 _FIGURE_D1 = {0.05: 7, 0.07: 14}
 
 
@@ -190,7 +190,7 @@ def _register_figures() -> None:
         register(
             _PEOPLE,
             f"{_EDITION} Annex D, Figure D.1",
-            f"Trains an hour at KB_FTm = 0,2 for A_r = {a_r:g}",
+            f"Trains an hour at KB_FTm = 0.2 for A_r = {a_r:g}",
         )(functools.partial(_chk_figure_d1, a_r))
 
 

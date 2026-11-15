@@ -76,7 +76,7 @@ _register_fit()
 @register(
     _BUILDING_RESPONSE,
     "ISO 4866:2010 D.2",
-    "The same fit as a period, T = 0,022 h, s",
+    "The same fit as a period, T = 0.022 h, s",
 )
 def _chk_fit_period() -> Outcome:
     """D.2 prints the fit twice, and the two printings have to agree."""

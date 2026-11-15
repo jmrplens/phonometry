@@ -16,11 +16,11 @@ Figure A.3 on folio 36 (PDF page 44).
 
 Two printed defects sit in this oracle and both are recorded in
 ``docs/ERRATA.md``. The running text gives the shift of Equation (22) as
-1,04 dB with a standard deviation of 5 dB, where the equation gives 2,878 dB;
+1.04 dB with a standard deviation of 5 dB, where the equation gives 2,878 dB;
 LT2 and the curve of Figure A.2 were computed with 2,878 dB, so the rows use
 the equation. And four of the five exceedance levels of Figure A.3 are not
-the roots of Equation (25): solved on this distribution it gives 21,6 / 40,5 /
-43,0 / 47,5 dB where the figure prints 21,7 / 40,6 / 43,2 / 48,0 dB. How the
+the roots of Equation (25): solved on this distribution it gives 21.6 / 40.5 /
+43.0 / 47.5 dB where the figure prints 21.7 / 40.6 / 43.2 / 48.0 dB. How the
 figure arrived at them is not stated, so those four have no row; the 50 %
 level, which Equation (25) does reproduce, has one.
 """
@@ -75,7 +75,7 @@ def _cells_matching(computed: np.ndarray, printed: np.ndarray, places: int) -> i
 def _chk_table_a4_boundaries() -> Outcome:
     """The order of the classes and every boundary, from Table A.3 alone.
 
-    Two pairs of classes share a level, 30,8 dB and 31,8 dB; Equation (11)
+    Two pairs of classes share a level, 30.8 dB and 31.8 dB; Equation (11)
     puts their common boundary at that level and Table A.4 keeps both classes
     of each pair, in the order of Table A.3. The outer boundaries mirror the
     nearest inner one about the end level, Equations (12) and (13).
@@ -115,8 +115,8 @@ def _chk_table_a4_densities() -> Outcome:
     """All 27 densities to the four printed decimals.
 
     The table divides the full-precision probability, not the rounded column
-    beside it: 0,1860 / 0,15 would print 1,2400 where the table prints 1,2399,
-    and 0,0042 / 0,25 would print 0,0168 where it prints 0,0170.
+    beside it: 0.1860 / 0.15 would print 1.2400 where the table prints 1.2399,
+    and 0.0042 / 0.25 would print 0.0168 where it prints 0.0170.
     """
     dist = _annex_a(_PERIOD)
     matching = _cells_matching(dist.class_densities_per_db, _table_a4(5), 4)
@@ -144,13 +144,13 @@ def _chk_lt2() -> Outcome:
 
     The row does not read the closed form the result carries: it integrates
     ``SELDistribution.density``, the sum of the shifted Gaussians of Equation
-    (23), weighted by 10^(0,1 x), so the sign and size of the shift, the
+    (23), weighted by 10^(0.1 x), so the sign and size of the shift, the
     normalisation of each Gaussian and the weight it carries all reach the
     number. The shift of Equation (22) keeps the energy of every subclass, so
     LT2 differs from LT1 only by the spreading of each class over its width,
-    about 0,05 dB here, and both print 37,0 dB. With the 1,04 dB the running
-    text gives for the shift, every level would move up by 1,84 dB and LT2
-    would read 38,8 dB.
+    about 0.05 dB here, and both print 37.0 dB. With the 1.04 dB the running
+    text gives for the shift, every level would move up by 1.84 dB and LT2
+    would read 38.8 dB.
     """
     dist = _annex_a(_PERIOD)
     energy, _ = integrate.quad(
@@ -174,7 +174,7 @@ def _chk_level_shift() -> Outcome:
     """Equation (22) as printed, integrated numerically, against the closed form.
 
     The page gives no value of the equation it can be checked against: its
-    one number, 1,04 dB, is the equation at 3 dB and not at the 5 dB of the
+    one number, 1.04 dB, is the equation at 3 dB and not at the 5 dB of the
     same paragraph (see docs/ERRATA.md). The expected side is therefore the
     printed integral evaluated by quadrature, which shares nothing with the
     library's ``sigma**2 * ln(10) / 20``.
@@ -202,7 +202,7 @@ def _chk_level_shift() -> Outcome:
     "Level exceeded by 50 % of the events, L50",
 )
 def _chk_l50() -> Outcome:
-    """The median of the spread distribution, the root of Equation (25) at 0,5."""
+    """The median of the spread distribution, the root of Equation (25) at 0.5."""
     value = float(_annex_a(_PERIOD).exceedance_level(50.0))
     return numeric(
         ref.ISO13474_FIGURE_A3_EXCEEDANCE_DB[50], value, 0.05, unit="dB", places=2

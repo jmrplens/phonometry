@@ -16,7 +16,7 @@ does print: the three impedance codes of Clause 4, the 80 % of 8.2.1 b), the
 94 dB and 500 Hz of 7.2 b), the 1 mW of 8.5.2, the 120 ohm and 5 V of IEC
 61938 that 7.1 and 8.3.1 cite, the peak-to-RMS window of 8.3.2.2 b) from both
 sides, the 1 dB of 8.3.6.2 b), the eight and 16 persons of 8.6.3 and 8.6.5.3,
-the 2,5 dB and 3 dB of 8.6.5.2, NOTE 1 of 8.7.3.3 and the products it names,
+the 2.5 dB and 3 dB of 8.6.5.2, NOTE 1 of 8.7.3.3 and the products it names,
 the 80 Hz of 8.7.4.1 and the limits of Annex B; and on closed forms the
 clauses state, Formula (1), the power summation of the NOTE under Figure 3
 and the two settings of the working e.m.f. in 8.5.2 b) and 8.5.3 c),
@@ -243,7 +243,7 @@ def _chk_impedance_codes() -> Outcome:
 @register(
     _HEADPHONES,
     f"{_60268_7} 8.2.1 b)",
-    "Lowest modulus in the rated range at 80 % and at 79,9 % of the rated value",
+    "Lowest modulus in the rated range at 80 % and at 79.9 % of the rated value",
 )
 def _chk_rated_impedance() -> Outcome:
     f = np.array([20.0, 100.0, 1000.0, 20000.0])
@@ -259,7 +259,7 @@ def _chk_rated_impedance() -> Outcome:
         )
         verdicts[f"{100 * share:g} %"] = _flag(verdict.passes)
     return record(
-        {"80 %": 1.0, "79.9 %": 0.0}, verdicts, label="80 % passes, 79,9 % fails"
+        {"80 %": 1.0, "79.9 %": 0.0}, verdicts, label="80 % passes, 79.9 % fails"
     )
 
 
@@ -271,7 +271,7 @@ def _chk_rated_impedance() -> Outcome:
 @register(
     _HEADPHONES,
     f"{_60268_7} 8.3.3",
-    "Characteristic voltage from 100 dB at 0,1 V: the e.m.f. for 94 dB",
+    "Characteristic voltage from 100 dB at 0.1 V: the e.m.f. for 94 dB",
 )
 def _chk_characteristic_voltage() -> Outcome:
     voltage = ea.characteristic_voltage(0.1, 100.0)
@@ -358,7 +358,7 @@ def _chk_a_weighting_coefficients() -> Outcome:
 @register(
     _HEADPHONES,
     f"{_60268_7} 8.3.4, Figure 3 NOTE",
-    "Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0,1 V",
+    "Programme characteristic voltage of a flat headphone, 21 bands at 80 dB from 0.1 V",
 )
 def _chk_programme_voltage() -> Outcome:
     result = ea.program_characteristic_voltage(
@@ -388,7 +388,7 @@ def _chk_fittings_mean() -> Outcome:
 @register(
     _HEADPHONES,
     f"{_60268_7} 8.3.2.2 b)",
-    "Clipped programme signal at the two ends of the 1,8 to 2,2 window",
+    "Clipped programme signal at the two ends of the 1.8 to 2.2 window",
 )
 def _chk_limiting_signal() -> Outcome:
     verdicts = {}
@@ -401,7 +401,7 @@ def _chk_limiting_signal() -> Outcome:
     return record(
         {"1.7": 0.0, "1.8": 1.0, "2.2": 1.0, "2.3": 0.0, "unclipped": 0.0},
         verdicts,
-        label="1,8 and 2,2 pass with the Table II spectrum; 1,7, 2,3 and unclipped fail",
+        label="1.8 and 2.2 pass with the Table II spectrum; 1.7, 2.3 and unclipped fail",
     )
 
 
@@ -415,7 +415,7 @@ def _chk_protection_voltage() -> Outcome:
     shortfall = np.array([0.0, 0.0, 0.0, 0.5, 2.0])
     levels = 94.0 + 20.0 * np.log10(emf / 0.1) - shortfall
     result = ea.protection_voltage(emf, levels)
-    # The 1 dB falls a third of the way from 0,5 dB at 0,8 V to 2 dB at 1,6 V.
+    # The 1 dB falls a third of the way from 0.5 dB at 0.8 V to 2 dB at 1.6 V.
     expected = 0.8 * 2.0 ** (1.0 / 3.0)
     computed = result.protection_voltage_v or float("nan")
     return numeric(expected, computed, 1e-12, unit="V", places=6)
@@ -531,11 +531,11 @@ def _chk_formula_1() -> Outcome:
 @register(
     _HEADPHONES,
     f"{_60268_7} 8.6.5.2 c) and f)",
-    "Fittings 2,5 dB apart and a 500 Hz band 3 dB off, inclusive",
+    "Fittings 2.5 dB apart and a 500 Hz band 3 dB off, inclusive",
 )
 def _chk_ear_canal_limits() -> Outcome:
-    # Four persons: the first two refit 2,5 dB and 2,6 dB apart in one band,
-    # the last two set their 500 Hz band 3,0 dB and 3,1 dB off the field's.
+    # Four persons: the first two refit 2.5 dB and 2.6 dB apart in one band,
+    # the last two set their 500 Hz band 3.0 dB and 3.1 dB off the field's.
     field = np.full((4, 2, _BANDS.size), 70.0)
     earphone = np.full((4, 2, _BANDS.size), 70.0)
     reference = list(_BANDS).index(500.0)
@@ -559,7 +559,7 @@ def _chk_ear_canal_limits() -> Outcome:
         "3.1 dB off": 0.0,
     }
     return record(
-        expected, computed, label="2,5 dB and 3 dB are inside, 2,6 dB and 3,1 dB not"
+        expected, computed, label="2.5 dB and 3 dB are inside, 2.6 dB and 3.1 dB not"
     )
 
 

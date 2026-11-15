@@ -70,7 +70,7 @@ def _chk_reverberation_correction() -> Outcome:
 
     Clause 6.3 writes ``D_i = L_p1 - L_p2 + 10 lg(T_2 / T_1)``, with ``T_2``
     the reverberation time measured with the test object installed. Doubling
-    it has to add exactly 3,0103 dB to the insertion loss and nothing else,
+    it has to add exactly 3.0103 dB to the insertion loss and nothing else,
     so the correction is checked against the logarithm rather than against a
     rounded decibel.
     """
@@ -84,7 +84,7 @@ def _chk_reverberation_correction() -> Outcome:
         1e-12,
         unit="dB",
         places=6,
-        expected_label="10 lg 2 = 3,010300 dB",
+        expected_label="10 lg 2 = 3.010300 dB",
     )
 
 
@@ -92,8 +92,8 @@ def _chk_reverberation_correction() -> Outcome:
 def _chk_octave_insertion_loss() -> Outcome:
     """Equation (2) averages the transmission, not the decibels.
 
-    Three one-third octaves of 30, 30 and 5 dB average to 21,67 dB read as
-    decibels and to 9,74 dB read as Equation (2) asks. The difference is the
+    Three one-third octaves of 30, 30 and 5 dB average to 21.67 dB read as
+    decibels and to 9.74 dB read as Equation (2) asks. The difference is the
     whole point of the equation being written out: the leaky band carries
     nearly all of the transmitted energy, so it decides the octave.
     """
@@ -105,7 +105,7 @@ def _chk_octave_insertion_loss() -> Outcome:
         1e-12,
         unit="dB",
         places=6,
-        expected_label="-10 lg[(10^-3 + 10^-3 + 10^-0,5)/3] = 9,744 dB",
+        expected_label="-10 lg[(10^-3 + 10^-3 + 10^-0.5)/3] = 9,744 dB",
     )
 
 
@@ -117,7 +117,7 @@ def _chk_octave_bounds() -> Outcome:
     smallest of them and that value plus 10 lg 3 = 4,771 dB: the mean of the
     three transmitted energies is at least a third of the largest and at most
     the largest itself. The example is the same 30, 30 and 5 dB triple, whose
-    9,744 dB sits 4,744 dB above its worst band with 0,027 dB of headroom to
+    9,744 dB sits 4,744 dB above its worst band with 0.027 dB of headroom to
     the upper edge.
     """
     thirds = (30.0, 30.0, 5.0)
@@ -137,8 +137,8 @@ def _chk_octave_bounds() -> Outcome:
 def _chk_survey_reproducibility() -> Outcome:
     """Table 1, both rows.
 
-    Two decibels from 50 Hz to the 1,25 kHz one-third octave and three from
-    1,6 kHz to 10 kHz. ISO 11691 offers no interlaboratory result of its own
+    Two decibels from 50 Hz to the 1.25 kHz one-third octave and three from
+    1.6 kHz to 10 kHz. ISO 11691 offers no interlaboratory result of its own
     and says only that this is what makes it a survey standard.
     """
     bands = (50.0, 1250.0, 1600.0, 10000.0)
@@ -265,7 +265,7 @@ def _chk_expanded_uncertainty() -> Outcome:
 
 @register(_ISO7235, "ISO 11691:1995", "Test duct against the silencer (4.5)")
 def _chk_area_ratio() -> Outcome:
-    """The 0,6 to 1,7 the survey method holds the ducts to.
+    """The 0.6 to 1.7 the survey method holds the ducts to.
 
     Inside the range the two joints reflect little enough that the test ducts
     stand in for the installation, and transition elements may be fitted;
@@ -368,7 +368,7 @@ def _chk_rectangular_cut_on() -> Outcome:
         1e-9,
         unit="Hz",
         places=6,
-        expected_label="343,000000 Hz from the (1, 0) eigenvalue",
+        expected_label="343.000000 Hz from the (1, 0) eigenvalue",
     )
 
 
@@ -377,9 +377,9 @@ def _chk_circular_cut_on() -> Outcome:
     """Equation (4) is the same mode with a rounded constant.
 
     The exact coefficient is the first zero of the derivative of the Bessel
-    function of order one divided by pi, 1,8412 / pi = 0,58607. The standard
-    prints 0,59, which is 0,67 % high: on the 0,4 m duct of the sound source
-    of ISO 11691 that is 505,9 Hz against 502,6 Hz, a difference of 3,4 Hz on
+    function of order one divided by pi, 1.8412 / pi = 0.58607. The standard
+    prints 0.59, which is 0.67 % high: on the 0.4 m duct of the sound source
+    of ISO 11691 that is 505.9 Hz against 502.6 Hz, a difference of 3.4 Hz on
     a frequency the modal filter requirement steps at. The row pins the
     ratio, which is the part that does not depend on the duct.
     """
@@ -390,7 +390,7 @@ def _chk_circular_cut_on() -> Outcome:
         found / float(exact.cut_on_no_flow[0]),
         1e-9,
         places=6,
-        expected_label="0,59 / (1,8412 / pi) = 1,006701",
+        expected_label="0.59 / (1.8412 / pi) = 1.006701",
     )
 
 
@@ -403,8 +403,8 @@ def _chk_measured_transmission_loss() -> Outcome:
     ``D_t = D_i + D_td`` puts back what the open end of the duct was keeping
     in anyway, so the gap between the two quantities has to be Equation (B.3)
     exactly. The expected side here is that equation written out again away
-    from the library: on a 350 mm duct flush with a wall it is 11,2 dB at
-    63 Hz and 0,05 dB at 2 kHz, which is why an air-terminal unit's
+    from the library: on a 350 mm duct flush with a wall it is 11.2 dB at
+    63 Hz and 0.05 dB at 2 kHz, which is why an air-terminal unit's
     transmission loss and its insertion loss are the same number at the top
     of the range and are not at the bottom.
     """
@@ -433,12 +433,12 @@ def _chk_normal_air_density() -> Outcome:
 
     ISO 7235 prints ``R = 287 N.m/(kg.K)`` and writes the absolute
     temperature as ``theta + 273 degC``. Neither is the accurate figure
-    (287,05 and 273,15): the offset alone puts a density 0,051 % high at
-    20 °C and the gas constant adds 0,017 % to that. The row pins the printed
+    (287.05 and 273.15): the offset alone puts a density 0.051 % high at
+    20 °C and the gas constant adds 0.017 % to that. The row pins the printed
     arithmetic, which is what reproduces a result computed to the standard.
     The error does not cancel where the density is used, it scales: the same
     value is in the dynamic pressure of both test series, so the pressure
-    loss coefficient of Equation (18) comes out 0,069 % low rather than
+    loss coefficient of Equation (18) comes out 0.069 % low rather than
     displaced, which is far under the uncertainty of the test.
     """
     found = ph.noise_control.normal_air_density(200.0, 101325.0, 20.0)
@@ -449,7 +449,7 @@ def _chk_normal_air_density() -> Outcome:
         1e-12,
         unit="kg/m3",
         places=6,
-        expected_label="(101 325 + 200) / (287 x 293) = 1,207323 kg/m³",
+        expected_label="(101 325 + 200) / (287 x 293) = 1.207323 kg/m³",
     )
 
 
@@ -523,9 +523,9 @@ def _chk_average_pressure_loss_coefficient() -> Outcome:
 
     Equation (18) averages the coefficients rather than the pressures, so the
     two series need share neither their flow rates nor their point count.
-    The row runs a test object at 2,5 velocity heads against a substitution
-    duct at 0,4, over five points and six points at different flow rates, and
-    the difference has to come back as exactly 2,1.
+    The row runs a test object at 2.5 velocity heads against a substitution
+    duct at 0.4, over five points and six points at different flow rates, and
+    the difference has to come back as exactly 2.1.
     """
     first = np.array([20.0, 40.0, 60.0, 80.0, 100.0])
     second = np.array([25.0, 50.0, 75.0, 100.0, 125.0, 150.0])
@@ -537,7 +537,7 @@ def _chk_average_pressure_loss_coefficient() -> Outcome:
         found,
         1e-12,
         places=6,
-        expected_label="2,5 - 0,4 = 2,100000",
+        expected_label="2.5 - 0.4 = 2.100000",
     )
 
 
@@ -546,21 +546,21 @@ def _chk_upstream_length() -> Outcome:
     """Five equivalent diameters or two metres, whichever is greater.
 
     The two rules cross at the duct whose five diameters are exactly two
-    metres, which is an equivalent diameter of 0,4 m and an area of
-    0,1257 m². Below it the floor binds and above it the diameters do, and
+    metres, which is an equivalent diameter of 0.4 m and an area of
+    0.1257 m². Below it the floor binds and above it the diameters do, and
     the row checks a duct on each side of the crossing as well as the
     crossing itself.
     """
     crossing = math.pi * (2.0 / 5.0) ** 2 / 4.0
     expected = {
-        "S = 0,0962 m² (350 mm)": 2.0,
-        "S = 0,1257 m² (400 mm)": 2.0,
-        "S = 0,5 m²": 5.0 * math.sqrt(4.0 * 0.5 / math.pi),
+        "S = 0.0962 m² (350 mm)": 2.0,
+        "S = 0.1257 m² (400 mm)": 2.0,
+        "S = 0.5 m²": 5.0 * math.sqrt(4.0 * 0.5 / math.pi),
     }
     computed = {
-        "S = 0,0962 m² (350 mm)": ph.noise_control.upstream_straight_length(0.0962),
-        "S = 0,1257 m² (400 mm)": ph.noise_control.upstream_straight_length(crossing),
-        "S = 0,5 m²": ph.noise_control.upstream_straight_length(0.5),
+        "S = 0.0962 m² (350 mm)": ph.noise_control.upstream_straight_length(0.0962),
+        "S = 0.1257 m² (400 mm)": ph.noise_control.upstream_straight_length(crossing),
+        "S = 0.5 m²": ph.noise_control.upstream_straight_length(0.5),
     }
     return record(expected, computed, unit="m")
 
@@ -608,7 +608,7 @@ def _chk_duct_sound_power() -> Outcome:
     """What the room measured, plus what the duct mouth kept in.
 
     ``L_Wduct = L_W + Delta L_r``. On the 350 mm duct of the other rows,
-    flush with a wall, that is 11,2 dB at 63 Hz and 0,05 dB at 2 kHz, so an
+    flush with a wall, that is 11.2 dB at 63 Hz and 0.05 dB at 2 kHz, so an
     air-terminal device measured in a reverberation room is understated in
     the duct by eleven decibels at the bottom of the range and by nothing at
     the top.
@@ -642,14 +642,14 @@ def _chk_operating_line() -> Outcome:
     line = ph.noise_control.fit_operating_line(duty, levels)
     expected = {
         "slope [dB/decade]": 20.0,
-        "level at 0,2 m³/s [dB]": 50.0,
+        "level at 0.2 m³/s [dB]": 50.0,
         "worst deviation [dB]": 0.0,
         "lowest readable duty [m³/s]": 0.025,
         "highest readable duty [m³/s]": 1.6,
     }
     computed = {
         "slope [dB/decade]": round(line.slope, 6),
-        "level at 0,2 m³/s [dB]": round(line.level_at(0.2), 6),
+        "level at 0.2 m³/s [dB]": round(line.level_at(0.2), 6),
         "worst deviation [dB]": round(line.max_deviation, 6),
         "lowest readable duty [m³/s]": round(line.valid_range[0], 6),
         "highest readable duty [m³/s]": round(line.valid_range[1], 6),

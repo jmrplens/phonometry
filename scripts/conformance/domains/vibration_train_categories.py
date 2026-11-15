@@ -5,7 +5,7 @@ The draft of August 2023 that is to replace DIN 4150-2:1999-06 rewrites the
 assessment of a railway, and its Annex B works two examples through the new
 formulae with every number printed. Example 8 is a tram and a metro next to
 a new residential building: Table B.1 lists the clock maximum of each of 47
-passages and the r.m.s. of each category by Formula (5), then 1,5 times it
+passages and the r.m.s. of each category by Formula (5), then 1.5 times it
 by Formula (7), and the day's assessment severity by Formula (6) with the
 weighting factors of Table 2. Example 9 is an existing line extended by a
 second track: the assessment severity of the case without the project and
@@ -16,7 +16,7 @@ construction site that the 1999 Figure 3 made one read off a curve.
 Every row runs the library on the example's inputs and compares with the
 printed result at the decimals it is printed with. The two night rows of
 Example 9 compare with the value the draft's own 960 intervals give, because
-the print divides by 920 and gets 0,066 and 0,096 instead; the entry is in
+the print divides by 920 and gets 0.066 and 0.096 instead; the entry is in
 ``docs/ERRATA.md``.
 
 Oracle: E DIN 4150-2:2023-08, Table 1 on printed page 14, Table 3 on printed
@@ -100,9 +100,9 @@ def _chk_table_b1(name: str, quantity: str) -> Outcome:
 @register(
     _TRAINS,
     f"{_EDITION} Annex B, Example 8",
-    "KB_FTr of the day by Formula (6), 144 metros at 1,0 and 80 trams at 0,7 a track "
-    "(the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal "
-    "inputs give 0,099 7)",
+    "KB_FTr of the day by Formula (6), 144 metros at 1.0 and 80 trams at 0.7 a track "
+    "(the print says 0.099 8, which its three-decimal r.m.s. give; its four-decimal "
+    "inputs give 0.099 7)",
 )
 def _chk_example_8_kb_ftr() -> Outcome:
     kb_ftm = [ph.vibration.train_category_rms(c[0]) for c in _CATEGORIES.values()]
@@ -159,12 +159,12 @@ def _register_rows() -> None:
         )(functools.partial(_chk_table_b1, name, "kb_fmax"))
     for case, time_of_day in _EXAMPLE_9:
         note = (
-            " (the print divides by 920 and gets 0,066)"
+            " (the print divides by 920 and gets 0.066)"
             if (case, time_of_day) == ("nullfall", "night")
             else ""
         )
         if (case, time_of_day) == ("planfall", "night"):
-            note = " (the print divides by 920 and gets 0,096)"
+            note = " (the print divides by 920 and gets 0.096)"
         register(
             _TRAINS,
             f"{_EDITION} Annex B, Example 9",

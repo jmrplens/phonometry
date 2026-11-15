@@ -16,7 +16,7 @@ with. Three rows of Table C.1 are a tenth off the sum of their printed
 terms, which is what rounding the terms after summing does, and the row
 carries that tenth. The example feeds Formula (9) the unweighted sum of all
 19 bands, so the chain is held to that; and its assessment severities of
-Formula (11), printed as 0,11 and 0,05, do not follow from any printed
+Formula (11), printed as 0.11 and 0.05, do not follow from any printed
 input, so those rows compare with what the formula gives for the printed
 inputs and the entry is in ``docs/ERRATA.md``.
 
@@ -85,11 +85,11 @@ _ANNEX_A: dict[str, tuple[float, Callable[[], float]]] = {
             "timber", floor_natural_frequency_hz=8.0
         )[0],
     ),
-    "Table A.3, ground to a basement, the mean at 31,5 Hz": (
+    "Table A.3, ground to a basement, the mean at 31.5 Hz": (
         -9.3,
         lambda: ph.vibration.ground_to_foundation_level_difference("basement")[9],
     ),
-    "Table A.4, ground to a ground floor, the mean at 12,5 Hz": (
+    "Table A.4, ground to a ground floor, the mean at 12.5 Hz": (
         -1.9,
         lambda: ph.vibration.ground_to_foundation_level_difference("ground_floor")[5],
     ),
@@ -135,14 +135,14 @@ def _chk_sum_level() -> Outcome:
 @register(
     _PREDICTION,
     f"{_EDITION} Annex C, C.3",
-    "KB_FTm,Zug from 78,1 dB by Formula (9), c_T1 = 1",
+    "KB_FTm,Zug from 78.1 dB by Formula (9), c_T1 = 1",
 )
 def _chk_kb_ftm() -> Outcome:
     return numeric(0.4, ph.vibration.takt_max_kb([78.1]), 0.05, places=4)
 
 
 @register(
-    _PREDICTION, f"{_EDITION} Annex C, C.3", "KB_Fmax,Zug by Formula (10), 1,5 times it"
+    _PREDICTION, f"{_EDITION} Annex C, C.3", "KB_Fmax,Zug by Formula (10), 1.5 times it"
 )
 def _chk_kb_fmax() -> Outcome:
     computed = ph.vibration.TRAIN_KB_FMAX_FACTOR * ph.vibration.takt_max_kb([78.1])
@@ -166,7 +166,7 @@ def _chk_peak_velocity() -> Outcome:
 @register(
     _PREDICTION,
     f"{_EDITION} Annex C, C.3",
-    "KB_FTr of the day by Formula (11), 200 trams at 0,7 (the print's 0,11 puts "
+    "KB_FTr of the day by Formula (11), 200 trams at 0.7 (the print's 0.11 puts "
     "alpha under the root once, not squared)",
 )
 def _chk_kb_ftr_day() -> Outcome:
@@ -177,7 +177,7 @@ def _chk_kb_ftr_day() -> Outcome:
 @register(
     _PREDICTION,
     f"{_EDITION} Annex C, C.3",
-    "KB_FTr of the night by Formula (11), 20 trams at 0,7 (the print's 0,05 puts "
+    "KB_FTr of the night by Formula (11), 20 trams at 0.7 (the print's 0.05 puts "
     "alpha under the root once, not squared)",
 )
 def _chk_kb_ftr_night() -> Outcome:

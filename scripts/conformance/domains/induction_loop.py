@@ -15,18 +15,18 @@ a draft.
 
 Two figures are read off their curves at 300 dots per inch against their own
 gridlines, and the tolerance of those rows is the read, not a choice: Figure
-H.1, the current that gives 400 mA/m 1,4 m above a loop's centre, at the end of
-each curve (one pixel is 0,007 A and the lines are 3 to 5 pixels wide, so
-+/-0,03 A), and Figure E.2 b), the two components of the field of a 15 by 10
-loop 1,2 units above it (+/-0,5 dB: the vertical curve sits some 0,2 dB to
-0,3 dB below a filament's field all along). The E.2 b) curves are the traverse
+H.1, the current that gives 400 mA/m 1.4 m above a loop's centre, at the end of
+each curve (one pixel is 0.007 A and the lines are 3 to 5 pixels wide, so
++/-0.03 A), and Figure E.2 b), the two components of the field of a 15 by 10
+loop 1.2 units above it (+/-0.5 dB: the vertical curve sits some 0.2 dB to
+0.3 dB below a filament's field all along). The E.2 b) curves are the traverse
 across the loop's width, as E.1 describes them; the figure's panel a) draws the
 vertical-field line along the length, which ``docs/ERRATA.md`` records.
 
 Three rows pin the value the page's own definitions give where the page prints
 another: the band-limit responses of 6.4 NOTE 2 (printed exchanged), the fall
 of 5.4.14.1 (printed as the rise) and the counter loop of Table B.1, whose
-resistance needs the 1,6 m perimeter its sides give, not the printed 1,5 m. A
+resistance needs the 1.6 m perimeter its sides give, not the printed 1.5 m. A
 fourth compares the flux density of 1 A/m with the 1,256 µT E.6 prints, where
 4 pi 10^-7 rounds to 1,257, within the last printed digit. All four are in
 ``docs/ERRATA.md``.
@@ -113,7 +113,7 @@ def _band_limit_row(frequency: float) -> Outcome:
 @register(
     _AFILS,
     f"{_60118} 6.4 NOTE 2",
-    "Third-order Butterworth band limit at 100 Hz (-3 dB at 75 Hz and 6,5 kHz)",
+    "Third-order Butterworth band limit at 100 Hz (-3 dB at 75 Hz and 6.5 kHz)",
 )
 def _chk_band_limit_100() -> Outcome:
     return _band_limit_row(100.0)
@@ -122,7 +122,7 @@ def _chk_band_limit_100() -> Outcome:
 @register(
     _AFILS,
     f"{_60118} 6.4 NOTE 2",
-    "Third-order Butterworth band limit at 5 kHz (-3 dB at 75 Hz and 6,5 kHz)",
+    "Third-order Butterworth band limit at 5 kHz (-3 dB at 75 Hz and 6.5 kHz)",
 )
 def _chk_band_limit_5k() -> Outcome:
     return _band_limit_row(5000.0)
@@ -255,10 +255,10 @@ def _chk_field_window() -> Outcome:
         {
             "+3 dB": (True, verdict(tol)),
             "-3 dB": (True, verdict(-tol)),
-            "+3,01 dB": (False, verdict(tol + 0.01)),
-            "-3,01 dB": (False, verdict(-tol - 0.01)),
-            # -5,9 + 3 is -2,900 000 000 000 000 4 in binary.
-            "-2,9 dB on a meter reading 400 mA/m as -5,9 dB": (
+            "+3.01 dB": (False, verdict(tol + 0.01)),
+            "-3.01 dB": (False, verdict(-tol - 0.01)),
+            # -5.9 + 3 is -2.900 000 000 000 000 4 in binary.
+            "-2.9 dB on a meter reading 400 mA/m as -5.9 dB": (
                 True,
                 verdict(-2.9, -5.9),
             ),
@@ -279,12 +279,12 @@ def _chk_field_reached() -> Outcome:
     return _window_row(
         {
             "0 dB at one point, -3 dB elsewhere": (True, verdict([-3.0, 0.0])),
-            "-0,01 dB at best": (False, verdict([-3.0, -0.01])),
+            "-0.01 dB at best": (False, verdict([-3.0, -0.01])),
             "pink noise: -6 dB at one point (Table 3)": (
                 True,
                 verdict([-9.0, pink], pink),
             ),
-            "pink noise: -6,01 dB at best": (
+            "pink noise: -6.01 dB at best": (
                 False,
                 verdict([-9.0, pink - 0.01], pink),
             ),
@@ -314,16 +314,16 @@ def _chk_response_window() -> Outcome:
     return _window_row(
         {
             "-3 dB at 100 Hz, +3 dB at 5 kHz": (True, verdict(-tol, tol, 0.0)),
-            "-3,01 dB at 100 Hz": (False, verdict(-tol - 0.01, 0.0, 0.0)),
-            "+3,01 dB at 5 kHz": (False, verdict(0.0, tol + 0.01, 0.0)),
+            "-3.01 dB at 100 Hz": (False, verdict(-tol - 0.01, 0.0, 0.0)),
+            "+3.01 dB at 5 kHz": (False, verdict(0.0, tol + 0.01, 0.0)),
             "-20 dB outside the band": (True, verdict(0.0, 0.0, -20.0)),
-            # Read as decimals, the edges are 3,000 000 000 000 001 8 dB down
-            # and 3,000 000 000 000 003 6 dB up in binary.
-            "-18,6 dB at 100 Hz against -15,6 dB at 1 kHz": (
+            # Read as decimals, the edges are 3.000 000 000 000 001 8 dB down
+            # and 3.000 000 000 000 003 6 dB up in binary.
+            "-18.6 dB at 100 Hz against -15.6 dB at 1 kHz": (
                 True,
                 verdict(-18.6, -15.6, -15.6, -15.6),
             ),
-            "-31,7 dB at 5 kHz against -34,7 dB at 1 kHz": (
+            "-31.7 dB at 5 kHz against -34.7 dB at 1 kHz": (
                 True,
                 verdict(-34.7, -31.7, -34.7, -34.7),
             ),
@@ -357,10 +357,10 @@ def _chk_small_volume() -> Outcome:
     return _window_row(
         {
             "+/-6 dB with 0 dB reached": (True, verdict(edges)),
-            "+6,01 dB at one point": (False, verdict(over)),
+            "+6.01 dB at one point": (False, verdict(over)),
             "every point below 0 dB": (False, verdict(under)),
             "+8 dB in the standing area": (True, verdict(edges, [area])),
-            "+8,01 dB in the standing area": (False, verdict(edges, [area + 0.01])),
+            "+8.01 dB in the standing area": (False, verdict(edges, [area + 0.01])),
         }
     )
 
@@ -452,7 +452,7 @@ def _chk_overload_offset() -> Outcome:
 @register(
     _AFILS,
     f"{_60118_A1} 10.3.2",
-    "Sweep end where the voltage of a 0,69 ohm, 109 uH loop doubles, Hz",
+    "Sweep end where the voltage of a 0.69 ohm, 109 uH loop doubles, Hz",
 )
 def _chk_overload_doubling() -> Outcome:
     resistance, inductance = 0.69, 109e-6
@@ -490,8 +490,8 @@ def _chk_overload_verdict() -> Outcome:
 
     return _window_row(
         {
-            "compliance at the 2,5 kHz voltage": (True, verdict(at_table_4)),
-            "compliance 0,1 % below it": (False, verdict(0.999 * at_table_4)),
+            "compliance at the 2.5 kHz voltage": (True, verdict(at_table_4)),
+            "compliance 0.1 % below it": (False, verdict(0.999 * at_table_4)),
         }
     )
 
@@ -509,11 +509,11 @@ def _chk_system_noise() -> Outcome:
     return _window_row(
         {
             "SNR 55 dB, on at -47 dB": (True, verdict(-55.0, ceiling)),
-            "SNR 55 dB, on at -46,99 dB": (False, verdict(-55.0, ceiling + 0.01)),
+            "SNR 55 dB, on at -46.99 dB": (False, verdict(-55.0, ceiling + 0.01)),
             "SNR 40 dB, on 1 dB up": (True, verdict(-40.0, -40.0 + rise)),
-            "SNR 40 dB, on 1,01 dB up": (False, verdict(-40.0, -40.0 + rise + 0.01)),
-            # -32,7 + 1 is -31,700 000 000 000 003 in binary.
-            "SNR 32,7 dB, on at -31,7 dB": (True, verdict(-32.7, -31.7)),
+            "SNR 40 dB, on 1.01 dB up": (False, verdict(-40.0, -40.0 + rise + 0.01)),
+            # -32.7 + 1 is -31.700 000 000 000 003 in binary.
+            "SNR 32.7 dB, on at -31.7 dB": (True, verdict(-32.7, -31.7)),
         }
     )
 
@@ -577,7 +577,7 @@ def _figure_e2_row(component: str, position: float) -> Outcome:
         0.5,
         unit="dB",
         places=2,
-        expected_label=f"{printed:.1f} dB read off the curve (+/-0,5)",
+        expected_label=f"{printed:.1f} dB read off the curve (+/-0.5)",
     )
 
 
@@ -587,7 +587,7 @@ def _register_figure_e2() -> None:
         register(
             _AFILS,
             f"{_60118} Figure E.2 b)",
-            f"{component.capitalize()} component of a 15 by 10 loop at 1,2 units, "
+            f"{component.capitalize()} component of a 15 by 10 loop at 1.2 units, "
             f"{position:g} % across its width".replace(".", ","),
         )(functools.partial(_figure_e2_row, component, position))
 
@@ -604,7 +604,7 @@ def _figure_h1_row(aspect: float) -> Outcome:
         0.03,
         unit="A",
         places=3,
-        expected_label=f"{printed:.2f} A read off the curve (+/-0,03)",
+        expected_label=f"{printed:.2f} A read off the curve (+/-0.03)",
     )
 
 
@@ -614,7 +614,7 @@ def _register_figure_h1() -> None:
         register(
             _AFILS,
             f"{_60118} Figure H.1",
-            "Current for 400 mA/m 1,4 m above a 10 m loop of aspect ratio "
+            "Current for 400 mA/m 1.4 m above a 10 m loop of aspect ratio "
             + f"{aspect:g}".replace(".", ","),
         )(functools.partial(_figure_h1_row, aspect))
 
@@ -625,7 +625,7 @@ _register_figure_h1()
 @register(
     _AFILS,
     f"{_62489} 5.4.10.2",
-    "Loop current for 400 mA/m 1,4 m above a 3-turn 6 m by 2 m loop, by Biot-Savart",
+    "Loop current for 400 mA/m 1.4 m above a 3-turn 6 m by 2 m loop, by Biot-Savart",
 )
 def _chk_loop_current_rectangle() -> Outcome:
     height = ref.IEC62489_1_FIELD_HEIGHT_M
@@ -686,7 +686,7 @@ def _chk_flux_density() -> Outcome:
         0.001,
         unit="µT",
         places=4,
-        expected_label="1,256 µT (+/-0,001: the print truncates 1,2566, see ERRATA)",
+        expected_label="1,256 µT (+/-0.001: the print truncates 1.2566, see ERRATA)",
     )
 
 
@@ -827,7 +827,7 @@ def _chk_maximum_output_current() -> Outcome:
     result = ea.max_output_current(
         voltage, thd, load_resistance_ohm=resistance, rated_thd_percent=rated
     )
-    # 1 % lies a quarter of the way from 0,8 % at 3 V to 1,6 % at 3,5 V.
+    # 1 % lies a quarter of the way from 0.8 % at 3 V to 1.6 % at 3.5 V.
     closed = (3.0 + 0.25 * 0.5) / resistance
     return numeric(closed, result.max_current_a, 1e-12, rel=True, unit="A", places=4)
 
@@ -881,7 +881,7 @@ def _chk_quadrature_fall() -> Outcome:
         1e-9,
         unit="dB",
         places=3,
-        expected_label=f"{closed:.3f} dB, 20 lg(1 - cos 85) (printed as 0,72 dB, see ERRATA)",
+        expected_label=f"{closed:.3f} dB, 20 lg(1 - cos 85) (printed as 0.72 dB, see ERRATA)",
     )
 
 
@@ -902,12 +902,12 @@ def _chk_neck_loop_types() -> Outcome:
         {
             "type 1 at -5 %": (True, verdict(nominal * (1 - tol), limit, 1)),
             "type 1 at +5 %": (True, verdict(nominal * (1 + tol), limit, 1)),
-            "type 1 at +5,1 %": (False, verdict(nominal * (1 + tol + 0.001), limit, 1)),
+            "type 1 at +5.1 %": (False, verdict(nominal * (1 + tol + 0.001), limit, 1)),
             "type 2 at 32 ohm": (
                 True,
                 verdict(ref.IEC62489_1_A2_DRAFT_TYPE2_MIN_OHM, limit, 2),
             ),
             "type 2 below 32 ohm": (False, verdict(31.99, limit, 2)),
-            "1,07 V for 400 mA/m": (False, verdict(nominal, limit + 0.01, 1)),
+            "1.07 V for 400 mA/m": (False, verdict(nominal, limit + 0.01, 1)),
         }
     )

@@ -15,8 +15,8 @@ row that restated a constant would check nothing, and a row that runs the
 chain checks the whole of it.
 
 **The row that is not here.** Table 9 also prints a ``|v|max`` row, and two of
-its five cells cannot be reproduced: at 31,5 Hz it prints 1,000 where Formula
-(5) gives 0,995 and at 315 Hz it prints 0,249 where Formula (5) gives 0,100,
+its five cells cannot be reproduced: at 31.5 Hz it prints 1,000 where Formula
+(5) gives 0.995 and at 315 Hz it prints 0.249 where Formula (5) gives 0.100,
 while the ``KB_F`` row of the same two columns follows Formula (5). It is
 registered in ``docs/ERRATA.md`` instead.
 
@@ -72,10 +72,10 @@ _TABLE_9 = {
 _REFERENCE = {"kbf": 0.667, "kbf_max": 0.680}
 #: One unit in the last printed place. Tighter than either allowance the
 #: standard itself carries: the KB_F row is printed with a 2 % fluctuation
-#: band, which at 0,5 is 0,010, and Tables 2 and 3 allow the response behind
+#: band, which at 0.5 is 0.010, and Tables 2 and 3 allow the response behind
 #: these numbers 10 %. What is left at this precision is the ripple of a
 #: running r.m.s., whose mean sits a little below the ideal value at the
-#: frequencies where the period and the 0,125 s time constant are comparable.
+#: frequencies where the period and the 0.125 s time constant are comparable.
 _INDICATION_TOLERANCE = 0.001
 
 #: Table 8 as Berichtigung 1 rewrites it: bursts of an 80 Hz sine repeated once
@@ -99,7 +99,7 @@ _PULSE_TOLERANCE = 0.7
 #: Table E.1 on printed folio 49, read at the two corners of its segments: the
 #: weighting is the guideline curve of DIN 4150-3 Table 1 inverted and
 #: normalised to its 1 Hz to 10 Hz value, so at 50 Hz the commercial class,
-#: whose curve has risen from 20 mm/s to 40 mm/s, weighs 0,5.
+#: whose curve has risen from 20 mm/s to 40 mm/s, weighs 0.5.
 _TABLE_E1: dict[tuple[BuildingClass, float], float] = {
     ("commercial", 50.0): 0.5,
     ("commercial", 100.0): 0.4,
@@ -206,10 +206,10 @@ def _chk_table_e2(building_class: BuildingClass) -> Outcome:
 @register(
     _IMMISSION,
     f"{_EDITION} 5.2.3.2",
-    "Band limitation at the lower corner 0,8 f_u, magnitude",
+    "Band limitation at the lower corner 0.8 f_u, magnitude",
 )
 def _chk_lower_corner() -> Outcome:
-    """The note under Formula (3) puts the high pass at 0,8 Hz for f_u = 1 Hz."""
+    """The note under Formula (3) puts the high pass at 0.8 Hz for f_u = 1 Hz."""
     computed = float(abs(ph.vibration.band_limitation_response([0.8])[0]))
     return numeric(1.0 / math.sqrt(2.0), computed, 5e-5, places=5)
 
@@ -217,7 +217,7 @@ def _chk_lower_corner() -> Outcome:
 @register(
     _IMMISSION,
     f"{_EDITION} 5.2.3.2",
-    "Band limitation at the upper corner f_o / 0,8, magnitude",
+    "Band limitation at the upper corner f_o / 0.8, magnitude",
 )
 def _chk_upper_corner() -> Outcome:
     """And the low pass at 100 Hz for f_o = 80 Hz, three decibels down."""
@@ -228,10 +228,10 @@ def _chk_upper_corner() -> Outcome:
 @register(
     _IMMISSION,
     f"{_EDITION} 5.2.3.2",
-    "KB weighting at its own corner 5,6 Hz, relative to the band limitation",
+    "KB weighting at its own corner 5.6 Hz, relative to the band limitation",
 )
 def _chk_kb_corner() -> Outcome:
-    """Formula (4) divides by ``1 - j 5,6 Hz / f``, so 5,6 Hz is 3 dB down."""
+    """Formula (4) divides by ``1 - j 5,6 Hz / f``, so 5.6 Hz is 3 dB down."""
     band = float(abs(ph.vibration.band_limitation_response([5.6])[0]))
     weighted = float(abs(ph.vibration.kb_weighting_response([5.6])[0]))
     return numeric(1.0 / math.sqrt(2.0), weighted / band, 5e-5, places=5)
@@ -239,7 +239,7 @@ def _chk_kb_corner() -> Outcome:
 
 @register(_IMMISSION, f"{_EDITION} Table 2", "Lower limit of F(f) inside the band, %")
 def _chk_central_lower() -> Outcome:
-    """From 1,25 f_u to 0,8 f_o the response may fall 10 % short.
+    """From 1.25 f_u to 0.8 f_o the response may fall 10 % short.
 
     Table 2 prints the magnitude G_u; the library returns the signed limit
     ``-G_u`` that F(f) is compared with.
@@ -250,7 +250,7 @@ def _chk_central_lower() -> Outcome:
 
 @register(_IMMISSION, f"{_EDITION} Table 2", "Lower limit of F(f) in the skirt, %")
 def _chk_skirt_lower() -> Outcome:
-    """Outside that band and inside 0,5 f_u to 2 f_o, twice as much."""
+    """Outside that band and inside 0.5 f_u to 2 f_o, twice as much."""
     lower, _ = ph.vibration.response_tolerance_percent([1.0])
     return numeric(20.0, -float(lower[0]), 1e-9, unit="%", places=3)
 

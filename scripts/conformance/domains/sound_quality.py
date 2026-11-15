@@ -34,7 +34,7 @@ def _chk_ecma418_1_critical_band() -> Outcome:
 
     f1, f2, dfc = _critical_band(1000.0)
     # 0.05 Hz = half a unit in the last printed digit (the clause EXAMPLE
-    # values are given to one decimal: 922,2 / 1084,4 / 162,2 Hz).
+    # values are given to one decimal: 922.2 / 1084.4 / 162.2 Hz).
     out = numeric(ref.ECMA418_1_DFC_1KHZ, float(dfc), 0.05, unit="Hz", places=2)
     edges_ok = (
         abs(float(f1) - ref.ECMA418_1_F1_1KHZ) <= 0.05
@@ -62,7 +62,7 @@ def _chk_ecma418_1_proximity_spacing() -> Outcome:
     v150 = float(_proximity_spacing(150.0))
     v850 = float(_proximity_spacing(850.0))
     # 0.5 Hz = half a unit in the last printed digit of the coarser EXAMPLE
-    # value (the standard prints 23 Hz with no decimals; 63,8 Hz with one).
+    # value (the standard prints 23 Hz with no decimals; 63.8 Hz with one).
     ok = (
         abs(v150 - ref.ECMA418_1_PROX_150HZ) <= 0.5
         and abs(v850 - ref.ECMA418_1_PROX_850HZ) <= 0.5

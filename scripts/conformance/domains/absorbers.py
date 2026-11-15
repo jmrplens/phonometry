@@ -415,7 +415,7 @@ def _chk_biot_frame_borne_ratio() -> Outcome:
 @register(
     _POROUS,
     "Allard & Atalla 2e Sect. 6.6.3 (Biot model output), p. 129",
-    "Surface-impedance peak of a 5,6 cm layer, Hz",
+    "Surface-impedance peak of a 5.6 cm layer, Hz",
 )
 def _chk_biot_impedance_peak() -> Outcome:
     grid = np.arange(500.0, 1200.0, 0.25)

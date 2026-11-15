@@ -9,7 +9,7 @@ both limits inclusive. Each standard prints worked examples with the verdict
 and the reason, eight in IEC 60942 Table E.1 and ten in IEC 61672-1 Table C.1,
 and each is a row: the verdict, the outcome number and the printed reason
 have to come back, the boundary cases included (a deviation equal to its
-limit, an uncertainty equal to its maximum, and the deviation of -1,2 dB on
+limit, an uncertainty equal to its maximum, and the deviation of -1.2 dB on
 the lower limit of C.1).
 
 The second is IEC 60942 itself: Tables 2 to 7 and A.1 to A.5 and the limits
@@ -351,7 +351,7 @@ def _chk_abbreviated_limits() -> Outcome:
     "Table E.1 examples 1 to 7 as a class 1 level at 1 kHz, 7 verdicts",
 )
 def _chk_e1_through_the_calibrator() -> Outcome:
-    """Examples 1 to 7 use 0,25 dB and 0,15 dB, the class 1 figures at 1 kHz.
+    """Examples 1 to 7 use 0.25 dB and 0.15 dB, the class 1 figures at 1 kHz.
 
     So the same seven verdicts have to come back from the calibrator verdict,
     which reads its limits from Tables 2 and A.1 rather than being handed them.
@@ -377,10 +377,10 @@ def _chk_e1_through_the_calibrator() -> Outcome:
 @register(
     _CALIBRATORS,
     "IEC 60942:2017 A.6.4.7",
-    "0,22 dB conforms to Table 5 and not to the abbreviated test, 2 verdicts",
+    "0.22 dB conforms to Table 5 and not to the abbreviated test, 2 verdicts",
 )
 def _chk_abbreviated_verdict() -> Outcome:
-    """Class 1 at 1 kHz: 0,25 dB in Table 5, reduced to 0,20 dB by A.6.4.7."""
+    """Class 1 at 1 kHz: 0.25 dB in Table 5, reduced to 0.20 dB by A.6.4.7."""
     measured = ph.metrology.SoundCalibratorMeasurements(
         environmental_level_deviation_db=0.22,
         environmental_level_uncertainty_db=0.10,
@@ -396,25 +396,25 @@ def _chk_abbreviated_verdict() -> Outcome:
         agree,
         2,
         subject="verdicts",
-        expected_label="conforms to Table 5 (0,25 dB), not to A.6.4.7 (0,20 dB)",
+        expected_label="conforms to Table 5 (0.25 dB), not to A.6.4.7 (0.20 dB)",
     )
 
 
 @register(
     _CALIBRATORS,
     "IEC 60942:2017 5.5 and A.6.2.4 with Tables 2, 5, A.4 and A.5",
-    "Class 1 at 2 kHz: 0,33 dB out of the band and in it, -0,5 % with U 0,25 %, "
+    "Class 1 at 2 kHz: 0.33 dB out of the band and in it, -0.5 % with U 0.25 %, "
     "3 verdicts",
 )
 def _chk_environmental_at_2_khz() -> Outcome:
-    """Where Table 2 and Table 5 part: class 1 at 2 kHz, 0,35 dB against 0,30 dB.
+    """Where Table 2 and Table 5 part: class 1 at 2 kHz, 0.35 dB against 0.30 dB.
 
-    A level 0,33 dB off at an environmental condition outside the band of
-    5.3.2 exceeds Table 5 (0,30 dB); the same 0,33 dB at a static pressure of
-    the A.6.2 sweep inside the band meets Table 2 (0,35 dB), which A.6.2.4
-    applies there, both with the 0,30 dB maximum of Table A.4. A frequency
-    0,5 % off, inside the 0,7 % of Table 6, measured with 0,25 % against the
-    0,2 % of Table A.5, cannot demonstrate conformance.
+    A level 0.33 dB off at an environmental condition outside the band of
+    5.3.2 exceeds Table 5 (0.30 dB); the same 0.33 dB at a static pressure of
+    the A.6.2 sweep inside the band meets Table 2 (0.35 dB), which A.6.2.4
+    applies there, both with the 0.30 dB maximum of Table A.4. A frequency
+    0.5 % off, inside the 0.7 % of Table 6, measured with 0.25 % against the
+    0.2 % of Table A.5, cannot demonstrate conformance.
     """
     measured = ph.metrology.SoundCalibratorMeasurements(
         environmental_level_deviation_db=0.33,
@@ -441,7 +441,7 @@ def _chk_environmental_at_2_khz() -> Outcome:
         3,
         subject="verdicts",
         expected_label=(
-            "No by Table 5 (0,30 dB); Yes by Table 2 (0,35 dB); "
-            "No, U over Table A.5 (0,2 %)"
+            "No by Table 5 (0.30 dB); Yes by Table 2 (0.35 dB); "
+            "No, U over Table A.5 (0.2 %)"
         ),
     )

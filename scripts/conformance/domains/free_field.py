@@ -158,7 +158,7 @@ def _free_field_fit(distances: np.ndarray) -> emission.InverseSquareLawResult:
 @register(
     _DOMAIN,
     "ISO 26101:2017 Formulae (2) and (4)",
-    "An exact inverse-square field, six traverses 0,30 m to 3,00 m: the "
+    "An exact inverse-square field, six traverses 0.30 m to 3.00 m: the "
     "qualified radius is the end of the traverses, m (closed form)",
 )
 def _chk_exact_field_radius() -> Outcome:
@@ -183,8 +183,8 @@ def _chk_exact_field_deviation() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 26101:2017 Formula (3)",
-    "Starting value of b for L_pi = 85,0 / 80,5 / 76,0 / 73,5 dB at 0,5 / 1,0 / "
-    "1,5 / 2,0 m, the mean of 20 lg(r_i/r0) + L_pi, dB",
+    "Starting value of b for L_pi = 85.0 / 80.5 / 76.0 / 73.5 dB at 0.5 / 1.0 / "
+    "1.5 / 2.0 m, the mean of 20 lg(r_i/r0) + L_pi, dB",
 )
 def _chk_formula_3() -> Outcome:
     d = np.array([0.5, 1.0, 1.5, 2.0])
@@ -200,7 +200,7 @@ def _chk_formula_3() -> Outcome:
 
 
 def _reflection() -> tuple[np.ndarray, np.ndarray, float]:
-    """A fully reflecting wall 2,5 m ahead, as an incoherent image source."""
+    """A fully reflecting wall 2.5 m ahead, as an incoherent image source."""
     rho2, wall, tol = 1.0, 2.5, 1.0
     d = np.arange(0.50, 2.4001, 0.05)
     excess = 10.0 * np.log10(1.0 + rho2 * (d / (2.0 * wall - d)) ** 2)
@@ -212,7 +212,7 @@ def _reflection() -> tuple[np.ndarray, np.ndarray, float]:
 @register(
     _DOMAIN,
     "ISO 26101:2017 Formulae (2) and (4)",
-    "One incoherent reflection, rho^2 = 1 from a wall 2,5 m ahead, 1 kHz in "
+    "One incoherent reflection, rho^2 = 1 from a wall 2.5 m ahead, 1 kHz in "
     "an anechoic room: the qualified distance is the last point before "
     "D(r) - D(r1) = 2 dB, m (closed form)",
 )
@@ -253,7 +253,7 @@ def _chk_reflection_spread() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 26101:2017 Formula (1)",
-    "A source drifting by 0 to 0,8 dB along the traverse, seen by the monitor "
+    "A source drifting by 0 to 0.8 dB along the traverse, seen by the monitor "
     "microphone: the largest deviation left after the correction, dB",
 )
 def _chk_formula_1() -> Outcome:
@@ -301,7 +301,7 @@ def _chk_6926_table_1() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 6926:2016 Formula (1)",
-    "sigma_r of 80,0 / 80,2 / 79,9 dB about their energy average, dB (closed form)",
+    "sigma_r of 80.0 / 80.2 / 79.9 dB about their energy average, dB (closed form)",
 )
 def _chk_6926_formula_1() -> Outcome:
     levels = np.array([80.0, 80.2, 79.9])
@@ -385,7 +385,7 @@ def _chk_6926_annex_a() -> Outcome:
     _DOMAIN,
     "ISO 6926:2016 Formula (2)",
     "L_W of a uniform 80 dB over the 2 m hemisphere at the reference "
-    "conditions, with a(f) = 0,01 dB/m, 1 kHz, dB (closed form)",
+    "conditions, with a(f) = 0.01 dB/m, 1 kHz, dB (closed form)",
 )
 def _chk_6926_formula_2() -> Outcome:
     calibration = emission.reference_source_calibration(
@@ -418,10 +418,10 @@ def _spectrum_verdict(lw: np.ndarray, freqs: tuple[float, ...]) -> bool:
 @register(
     _DOMAIN,
     "ISO 6926:2016 5.4",
-    "Spectra at the edges of 5.4: a 12,0 dB range and a 3,0 dB step pass, "
-    "12,5 dB and 3,1 dB fail; extended to 50 Hz, steps of 4,0 dB pass and one "
-    "of 4,1 dB fails, and with every step within 4 dB a 16,0 dB range passes "
-    "and 16,5 dB fails",
+    "Spectra at the edges of 5.4: a 12.0 dB range and a 3.0 dB step pass, "
+    "12.5 dB and 3.1 dB fail; extended to 50 Hz, steps of 4.0 dB pass and one "
+    "of 4.1 dB fails, and with every step within 4 dB a 16.0 dB range passes "
+    "and 16.5 dB fails",
 )
 def _chk_6926_spectrum() -> Outcome:
     n = len(_THIRDS)
@@ -439,24 +439,24 @@ def _chk_6926_spectrum() -> Outcome:
     on_limit = np.concatenate([[72.5, 76.5, 80.5], core])
     too_wide = np.concatenate([[72.0, 76.0, 80.0], core])
     expected = {
-        "12,0 dB range": 1.0,
-        "12,5 dB range": 0.0,
-        "3,0 dB step": 1.0,
-        "3,1 dB step": 0.0,
+        "12.0 dB range": 1.0,
+        "12.5 dB range": 0.0,
+        "3.0 dB step": 1.0,
+        "3.1 dB step": 0.0,
         "extended, 12 dB and 4 dB steps": 1.0,
-        "extended, a 4,1 dB step": 0.0,
-        "extended, 16,0 dB": 1.0,
-        "extended, 16,5 dB": 0.0,
+        "extended, a 4.1 dB step": 0.0,
+        "extended, 16.0 dB": 1.0,
+        "extended, 16.5 dB": 0.0,
     }
     computed = {
-        "12,0 dB range": float(_spectrum_verdict(within, _THIRDS)),
-        "12,5 dB range": float(_spectrum_verdict(wide, _THIRDS)),
-        "3,0 dB step": float(_spectrum_verdict(step, _THIRDS)),
-        "3,1 dB step": float(_spectrum_verdict(steep, _THIRDS)),
+        "12.0 dB range": float(_spectrum_verdict(within, _THIRDS)),
+        "12.5 dB range": float(_spectrum_verdict(wide, _THIRDS)),
+        "3.0 dB step": float(_spectrum_verdict(step, _THIRDS)),
+        "3.1 dB step": float(_spectrum_verdict(steep, _THIRDS)),
         "extended, 12 dB and 4 dB steps": float(_spectrum_verdict(extended, ext)),
-        "extended, a 4,1 dB step": float(_spectrum_verdict(steeper, ext)),
-        "extended, 16,0 dB": float(_spectrum_verdict(on_limit, ext)),
-        "extended, 16,5 dB": float(_spectrum_verdict(too_wide, ext)),
+        "extended, a 4.1 dB step": float(_spectrum_verdict(steeper, ext)),
+        "extended, 16.0 dB": float(_spectrum_verdict(on_limit, ext)),
+        "extended, 16.5 dB": float(_spectrum_verdict(too_wide, ext)),
     }
     return record(expected, computed)
 
@@ -464,7 +464,7 @@ def _chk_6926_spectrum() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 6926:2016 5.6.3",
-    "Recalibration limit, 2,83 times Table 1, at 80, 125 and 1\u202f000 Hz, dB",
+    "Recalibration limit, 2.83 times Table 1, at 80, 125 and 1\u202f000 Hz, dB",
 )
 def _chk_6926_drift() -> Outcome:
     freqs = (80.0, 125.0, 1000.0)
@@ -512,8 +512,8 @@ def _steady_enough(bands: tuple[float, ...], band: float, sigma_db: float) -> fl
     _DOMAIN,
     "ISO 6926:2016 Table 1",
     "At the edge of every row: three repetitions whose sigma_r of Formula (1) "
-    "equals the limit pass and 0,01 dB more fail, at 80 Hz (0,8 dB), 160 Hz "
-    "(0,4 dB) and 200 Hz (0,2 dB)",
+    "equals the limit pass and 0.01 dB more fail, at 80 Hz (0.8 dB), 160 Hz "
+    "(0.4 dB) and 200 Hz (0.2 dB)",
 )
 def _chk_6926_table_1_edges() -> Outcome:
     extended = (50.0, 63.0, 80.0)
@@ -532,9 +532,9 @@ def _chk_6926_table_1_edges() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 6926:2016 5.6.3",
-    "At the edge of every row of Table 1: a change of exactly 2,83 times it "
-    "calls for no recalibration and 0,01 dB more does, at 80 Hz (2,264 dB), "
-    "125 Hz (1,132 dB) and 1\u202f000 Hz (0,566 dB)",
+    "At the edge of every row of Table 1: a change of exactly 2.83 times it "
+    "calls for no recalibration and 0.01 dB more does, at 80 Hz (2,264 dB), "
+    "125 Hz (1,132 dB) and 1\u202f000 Hz (0.566 dB)",
 )
 def _chk_6926_drift_edges() -> Outcome:
     freqs = (80.0, 125.0, 1000.0)
@@ -597,11 +597,11 @@ _TRAVERSE = np.arange(0.30, 3.0001, 0.02)
 @register(
     _DOMAIN,
     "ISO 3745:2012/Amd.1:2017 A.2.5",
-    "Reflecting plane: an absorption coefficient of 0,06 passes and 0,07 "
-    "fails; with 125 Hz the lowest band, a plane extending 0,75 m beyond the "
-    "surface passes and 0,74 m fails, the 0,75 m binding over the 0,686 m "
+    "Reflecting plane: an absorption coefficient of 0.06 passes and 0.07 "
+    "fails; with 125 Hz the lowest band, a plane extending 0.75 m beyond the "
+    "surface passes and 0.74 m fails, the 0.75 m binding over the 0.686 m "
     "quarter wavelength; with 100 Hz the lowest, the quarter wavelength of "
-    "0,857\u202f5 m binds, and 0,857\u202f5 m passes and 0,857\u202f4 m fails",
+    "0.857\u202f5 m binds, and 0.857\u202f5 m passes and 0.857\u202f4 m fails",
 )
 def _chk_a25_plane() -> Outcome:
     def plane(freqs: tuple[float, ...], absorption: float, margin: float) -> float:
@@ -616,15 +616,15 @@ def _chk_a25_plane() -> Outcome:
 
     from_125 = _GRID[1:]
     from_100 = (100.0, 1000.0)
-    expected = {"0,06": 1.0, "0,07": 0.0, "0,75 m": 1.0, "0,74 m": 0.0,
-                "0,857\u202f5 m": 1.0, "0,857\u202f4 m": 0.0}  # fmt: skip
+    expected = {"0.06": 1.0, "0.07": 0.0, "0.75 m": 1.0, "0.74 m": 0.0,
+                "0.857\u202f5 m": 1.0, "0.857\u202f4 m": 0.0}  # fmt: skip
     computed = {
-        "0,06": plane(from_125, 0.06, 1.0),
-        "0,07": plane(from_125, 0.07, 1.0),
-        "0,75 m": plane(from_125, 0.02, 0.75),
-        "0,74 m": plane(from_125, 0.02, 0.74),
-        "0,857\u202f5 m": plane(from_100, 0.02, 0.8575),
-        "0,857\u202f4 m": plane(from_100, 0.02, 0.8574),
+        "0.06": plane(from_125, 0.06, 1.0),
+        "0.07": plane(from_125, 0.07, 1.0),
+        "0.75 m": plane(from_125, 0.02, 0.75),
+        "0.74 m": plane(from_125, 0.02, 0.74),
+        "0.857\u202f5 m": plane(from_100, 0.02, 0.8575),
+        "0.857\u202f4 m": plane(from_100, 0.02, 0.8574),
     }
     return record(expected, computed)
 
@@ -634,7 +634,7 @@ def _chk_a25_plane() -> Outcome:
     "ISO 3745:2012/Amd.1:2017 A.3.3",
     "Traverse paths: four fail, five and eight pass, nine fail; in a "
     "hemi-anechoic room a path 20 deg and 80 deg from the vertical passes, "
-    "19,9 deg and 80,1 deg fail",
+    "19.9 deg and 80.1 deg fail",
 )
 def _chk_a33_paths() -> Outcome:
     freqs = (1000.0,)
@@ -653,10 +653,10 @@ def _chk_a33_paths() -> Outcome:
         for n in (4, 5, 8, 9)
     }
     for degrees, name in (
-        (19.9, "19,9 deg"),
+        (19.9, "19.9 deg"),
         (20.0, "20 deg"),
         (80.0, "80 deg"),
-        (80.1, "80,1 deg"),
+        (80.1, "80.1 deg"),
     ):
         path = (math.tan(math.radians(degrees)), 0.0, 1.0)
         check = _check(
@@ -670,16 +670,16 @@ def _chk_a33_paths() -> Outcome:
         "5 traverses": 1.0,
         "8 traverses": 1.0,
         "9 traverses": 0.0,
-        "19,9 deg": 0.0,
+        "19.9 deg": 0.0,
         "20 deg": 1.0,
         "80 deg": 1.0,
-        "80,1 deg": 0.0,
+        "80.1 deg": 0.0,
     }
     return record(expected, computed)
 
 
 def _points_met(counts: tuple[int, ...]) -> float:
-    """Traverses at 20 mm that all end where the longest does, from 0,06 m."""
+    """Traverses at 20 mm that all end where the longest does, from 0.06 m."""
     longest = max(counts)
     traverses = []
     for count_, u in zip(counts, _DIRECTIONS * 2, strict=False):
@@ -706,7 +706,7 @@ def _spacing_met(step_m: float, frequency: float, *, iso26101: bool) -> float:
     "fail, and six of 10, 10, 10, 10, 10 and 9 fail; four of 13, 13, 12 and 12 "
     "(50 in all) pass and four of 13, 12, 12 and 12 (49 in all) fail; the "
     "spacing at 500 Hz, 100 mm passes and 101 mm fails, and at 125 Hz a tenth "
-    "of a wavelength, 274,4 mm, passes and 274,5 mm fails",
+    "of a wavelength, 274.4 mm, passes and 274.5 mm fails",
 )
 def _chk_a43_points_and_spacing() -> Outcome:
     expected = {
@@ -717,8 +717,8 @@ def _chk_a43_points_and_spacing() -> Outcome:
         "13, 12, 12, 12": 0.0,
         "100 mm at 500 Hz": 1.0,
         "101 mm at 500 Hz": 0.0,
-        "274,4 mm at 125 Hz": 1.0,
-        "274,5 mm at 125 Hz": 0.0,
+        "274.4 mm at 125 Hz": 1.0,
+        "274.5 mm at 125 Hz": 0.0,
     }
     computed = {
         "5 x 10": _points_met((10,) * 5),
@@ -728,8 +728,8 @@ def _chk_a43_points_and_spacing() -> Outcome:
         "13, 12, 12, 12": _points_met((13, 12, 12, 12)),
         "100 mm at 500 Hz": _spacing_met(0.100, 500.0, iso26101=False),
         "101 mm at 500 Hz": _spacing_met(0.101, 500.0, iso26101=False),
-        "274,4 mm at 125 Hz": _spacing_met(0.2744, 125.0, iso26101=False),
-        "274,5 mm at 125 Hz": _spacing_met(0.2745, 125.0, iso26101=False),
+        "274.4 mm at 125 Hz": _spacing_met(0.2744, 125.0, iso26101=False),
+        "274.5 mm at 125 Hz": _spacing_met(0.2745, 125.0, iso26101=False),
     }
     return record(expected, computed)
 
@@ -738,20 +738,20 @@ def _chk_a43_points_and_spacing() -> Outcome:
     _DOMAIN,
     "ISO 26101:2017 A.4.3",
     "Spatial resolution: at 2 kHz, 25 mm passes and 26 mm fails; at 500 Hz, a "
-    "tenth of a wavelength, 68,6 mm, passes and 68,7 mm fails",
+    "tenth of a wavelength, 68.6 mm, passes and 68.7 mm fails",
 )
 def _chk_26101_resolution() -> Outcome:
     expected = {
         "25 mm at 2 kHz": 1.0,
         "26 mm at 2 kHz": 0.0,
-        "68,6 mm at 500 Hz": 1.0,
-        "68,7 mm at 500 Hz": 0.0,
+        "68.6 mm at 500 Hz": 1.0,
+        "68.7 mm at 500 Hz": 0.0,
     }
     computed = {
         "25 mm at 2 kHz": _spacing_met(0.025, 2000.0, iso26101=True),
         "26 mm at 2 kHz": _spacing_met(0.026, 2000.0, iso26101=True),
-        "68,6 mm at 500 Hz": _spacing_met(0.0686, 500.0, iso26101=True),
-        "68,7 mm at 500 Hz": _spacing_met(0.0687, 500.0, iso26101=True),
+        "68.6 mm at 500 Hz": _spacing_met(0.0686, 500.0, iso26101=True),
+        "68.7 mm at 500 Hz": _spacing_met(0.0687, 500.0, iso26101=True),
     }
     return record(expected, computed)
 
@@ -759,9 +759,9 @@ def _chk_26101_resolution() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 26101:2017 5.1.4.3",
-    "Traverse length at 100 Hz, a quarter wavelength of 0,857\u202f5 m: a start at "
-    "0,857\u202f5 m passes and 0,857\u202f6 m fails; a run of 0,857\u202f5 m "
-    "passes and 0,857\u202f4 m fails",
+    "Traverse length at 100 Hz, a quarter wavelength of 0.857\u202f5 m: a start at "
+    "0.857\u202f5 m passes and 0.857\u202f6 m fails; a run of 0.857\u202f5 m "
+    "passes and 0.857\u202f4 m fails",
 )
 def _chk_26101_length() -> Outcome:
     freqs = (100.0,)
@@ -770,13 +770,13 @@ def _chk_26101_length() -> Outcome:
         d = start + np.linspace(0.0, run, 40)
         return float(bool(_check(_exact_traverses(d, freqs), freqs).length_met[0]))
 
-    expected = {"start 0,857\u202f5 m": 1.0, "start 0,857\u202f6 m": 0.0,
-                "run 0,857\u202f5 m": 1.0, "run 0,857\u202f4 m": 0.0}  # fmt: skip
+    expected = {"start 0.857\u202f5 m": 1.0, "start 0.857\u202f6 m": 0.0,
+                "run 0.857\u202f5 m": 1.0, "run 0.857\u202f4 m": 0.0}  # fmt: skip
     computed = {
-        "start 0,857\u202f5 m": length(0.8575, 1.0),
-        "start 0,857\u202f6 m": length(0.8576, 1.0),
-        "run 0,857\u202f5 m": length(0.30, 0.8575),
-        "run 0,857\u202f4 m": length(0.30, 0.8574),
+        "start 0.857\u202f5 m": length(0.8575, 1.0),
+        "start 0.857\u202f6 m": length(0.8576, 1.0),
+        "run 0.857\u202f5 m": length(0.30, 0.8575),
+        "run 0.857\u202f4 m": length(0.30, 0.8574),
     }
     return record(expected, computed)
 
@@ -784,7 +784,7 @@ def _chk_26101_length() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 26101:2017 5.1.2.2 c)",
-    "Levels 6,0 dB above the background at every point pass, 5,9 dB fail",
+    "Levels 6.0 dB above the background at every point pass, 5.9 dB fail",
 )
 def _chk_26101_background() -> Outcome:
     freqs = (1000.0,)
@@ -794,8 +794,8 @@ def _chk_26101_background() -> Outcome:
         return float(bool(check.background_met is not None and check.background_met[0]))
 
     return record(
-        {"6,0 dB": 1.0, "5,9 dB": 0.0},
-        {"6,0 dB": background(6.0), "5,9 dB": background(5.9)},
+        {"6.0 dB": 1.0, "5.9 dB": 0.0},
+        {"6.0 dB": background(6.0), "5.9 dB": background(5.9)},
     )
 
 
@@ -821,7 +821,7 @@ def _qualifies_to_the_end(frequency: float, room: str, rise_db: float) -> float:
     _DOMAIN,
     "ISO 26101:2017 Table A.1 / ISO 3745:2012/Amd.1:2017 Table A.1",
     "At the edge of every cell: a traverse whose deviations reach the limit "
-    "either way qualifies to its last point, and 0,005 dB past it ends one "
+    "either way qualifies to its last point, and 0.005 dB past it ends one "
     "point short; anechoic and hemi-anechoic, at 500 Hz, 1\u202f000 Hz and "
     "8\u202f000 Hz",
 )
@@ -861,7 +861,7 @@ def _uniform_within(room: str, frequency: float, deviation_db: float) -> float:
     _DOMAIN,
     "ISO 26101:2017 Table B.1",
     "At the edge of every cell: a test source whose extreme positions lie on "
-    "the allowable deviation either way is uniform enough, and 0,01 dB past it "
+    "the allowable deviation either way is uniform enough, and 0.01 dB past it "
     "is not; anechoic and hemi-anechoic, at 630, 800, 6\u202f300 and "
     "12\u202f500 Hz",
 )
@@ -891,7 +891,7 @@ def _chk_table_b1_edges() -> Outcome:
     _DOMAIN,
     "ISO 6926:2016 Table B.1",
     "Pressure and intensity sound power levels at the edges of the tolerance: "
-    "4,0 dB apart at 50 Hz and 1,0 dB at 315 Hz agree, 4,1 dB and 1,1 dB do not",
+    "4.0 dB apart at 50 Hz and 1.0 dB at 315 Hz agree, 4.1 dB and 1.1 dB do not",
 )
 def _chk_6926_table_b1() -> Outcome:
     freqs = (50.0, 63.0, 80.0, *_THIRDS)
@@ -911,13 +911,13 @@ def _chk_6926_table_b1() -> Outcome:
         )
         return float(bool(calibration.intensity_agreement))
 
-    expected = {"50 Hz, 4,0 dB": 1.0, "50 Hz, 4,1 dB": 0.0, "315 Hz, 1,0 dB": 1.0,
-                "315 Hz, 1,1 dB": 0.0}  # fmt: skip
+    expected = {"50 Hz, 4.0 dB": 1.0, "50 Hz, 4.1 dB": 0.0, "315 Hz, 1.0 dB": 1.0,
+                "315 Hz, 1.1 dB": 0.0}  # fmt: skip
     computed = {
-        "50 Hz, 4,0 dB": agrees(50.0, 4.0),
-        "50 Hz, 4,1 dB": agrees(50.0, 4.1),
-        "315 Hz, 1,0 dB": agrees(315.0, 1.0),
-        "315 Hz, 1,1 dB": agrees(315.0, 1.1),
+        "50 Hz, 4.0 dB": agrees(50.0, 4.0),
+        "50 Hz, 4.1 dB": agrees(50.0, 4.1),
+        "315 Hz, 1.0 dB": agrees(315.0, 1.0),
+        "315 Hz, 1.1 dB": agrees(315.0, 1.1),
     }
     return record(expected, computed)
 
@@ -925,8 +925,8 @@ def _chk_6926_table_b1() -> Outcome:
 @register(
     _DOMAIN,
     "ISO 6926:2016 5.2 / ISO 6926:2016 5.5",
-    "A change of 0,30 dB over the declared supply range passes and 0,31 dB "
-    "fails; a highest directivity index of 6,0 dB passes and 6,1 dB fails",
+    "A change of 0.30 dB over the declared supply range passes and 0.31 dB "
+    "fails; a highest directivity index of 6.0 dB passes and 6.1 dB fails",
 )
 def _chk_6926_supply_and_directivity() -> Outcome:
     lw = np.full(len(_THIRDS), 90.0)
@@ -941,12 +941,12 @@ def _chk_6926_supply_and_directivity() -> Outcome:
             directivity_index=np.full(len(_THIRDS), directivity),
         )
 
-    expected = {"0,30 dB": 1.0, "0,31 dB": 0.0, "6,0 dB": 1.0, "6,1 dB": 0.0}
+    expected = {"0.30 dB": 1.0, "0.31 dB": 0.0, "6.0 dB": 1.0, "6.1 dB": 0.0}
     computed = {
-        "0,30 dB": float(bool(verdict(0.30, 0.0).supply_met)),
-        "0,31 dB": float(bool(verdict(0.31, 0.0).supply_met)),
-        "6,0 dB": float(bool(verdict(0.0, 6.0).directivity_met)),
-        "6,1 dB": float(bool(verdict(0.0, 6.1).directivity_met)),
+        "0.30 dB": float(bool(verdict(0.30, 0.0).supply_met)),
+        "0.31 dB": float(bool(verdict(0.31, 0.0).supply_met)),
+        "6.0 dB": float(bool(verdict(0.0, 6.0).directivity_met)),
+        "6.1 dB": float(bool(verdict(0.0, 6.1).directivity_met)),
     }
     return record(expected, computed)
 
@@ -984,8 +984,8 @@ def _chk_6926_formula_2_meteorology() -> Outcome:
     _DOMAIN,
     "ISO 6926:2016 8.4 / ISO 3741:2010 Eq. 21",
     "A calibration read by an ISO 3741 comparison at 20 degC and 90 kPa: L_W "
-    "less its own C2 at the test, 0,483 dB for a source of unknown radiation, "
-    "plus 4 dB and ISO 3741's C2 of 0,452 dB, 1 kHz, dB (closed form)",
+    "less its own C2 at the test, 0.483 dB for a source of unknown radiation, "
+    "plus 4 dB and ISO 3741's C2 of 0.452 dB, 1 kHz, dB (closed form)",
 )
 def _chk_6926_calibration_at_the_test() -> Outcome:
     calibration = emission.reference_source_calibration(

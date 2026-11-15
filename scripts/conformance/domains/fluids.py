@@ -124,7 +124,7 @@ def _chk_annex_f_diffusivity_closes() -> Outcome:
 # ---------------------------------------------------------------------------
 _SEA = "Sea water (Ainslie 2010)"
 
-#: Eq. (4.11) at the surface: 98 066,5 x 1,04, one atmosphere and not zero.
+#: Eq. (4.11) at the surface: 98 066.5 x 1.04, one atmosphere and not zero.
 _SURFACE_ABSOLUTE_PA = 101989.16
 
 
@@ -162,7 +162,7 @@ def _chk_ainslie_surface_pressure() -> Outcome:
 @register(
     _SEA,
     "Ainslie (2010) Eq. (4.6) vs printed folio 177",
-    "The pressure term the book's own folio 177 drops: 4,3e-7 per pascal times "
+    "The pressure term the book's own folio 177 drops: 4.3e-7 per pascal times "
     "one atmosphere",
 )
 def _chk_ainslie_folio_177_gap() -> Outcome:
@@ -172,7 +172,7 @@ def _chk_ainslie_folio_177_gap() -> Outcome:
     without_pressure = ph.fluids.sea_water_density(
         temperature_c=23.0, salinity_psu=35.0, static_pressure_pa=1.0
     )
-    # 4,3e-7 per pascal over the atmosphere Eq. (4.11) puts at the surface. The
+    # 4.3e-7 per pascal over the atmosphere Eq. (4.11) puts at the surface. The
     # expected value is that product rather than a rounded quotation of it, so
     # the row measures the implementation and not the rounding.
     expected = 4.3e-7 * (_SURFACE_ABSOLUTE_PA - 1.0)

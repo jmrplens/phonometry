@@ -58,7 +58,7 @@ def _chk_cnossos_road_workbook() -> Outcome:
     The European Commission source-module test set was computed with the
     Appendix F tables of Commission Directive (EU) 2015/996, so the shipped
     equations are fed that superseded database. The workbook prints two
-    decimals, hence the 0,01 dB budget.
+    decimals, hence the 0.01 dB budget.
     """
     coefficients, surfaces = _cnossos_road_2015_inputs()
     worst = 0.0
@@ -421,7 +421,7 @@ def _chk_spb_annex_e_corrected_index() -> Outcome:
 @register(
     _ROAD_SURFACE,
     "ISO 11819-1:1997 clause 10 and Annex E",
-    "Difference of the temperature-corrected SPBI from the 77,3 dB of the "
+    "Difference of the temperature-corrected SPBI from the 77.3 dB of the "
     "reference surface, dB",
 )
 def _chk_spb_annex_e_difference() -> Outcome:

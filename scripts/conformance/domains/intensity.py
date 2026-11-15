@@ -394,9 +394,9 @@ def _chk_octave_band_levels_annex_f() -> Outcome:
 def _chk_annex_g_zero_at_120m() -> Outcome:
     """H.4.2.7: 'At 120 m altitude and 23 C the correction is zero.'
 
-    Eq. (G.2) gives p_s(120 m) = 99,89 kPa, -10 lg(p_s/p_s0) = 0,062 dB in
-    each term, and the temperature terms 5 lg(296,15/314) + 15 lg(296,15/296)
-    = -0,124 dB cancel the pair to under 1e-4 dB.
+    Eq. (G.2) gives p_s(120 m) = 99.89 kPa, -10 lg(p_s/p_s0) = 0.062 dB in
+    each term, and the temperature terms 5 lg(296.15/314) + 15 lg(296.15/296)
+    = -0.124 dB cancel the pair to under 1e-4 dB.
     """
     corr = ph.emission.reference_atmosphere_correction(23.0, altitude=120.0)
     return numeric(0.0, float(corr.total), 1e-3, unit="dB", places=5)
@@ -499,7 +499,7 @@ def _chk_iso9614_1_table_2() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 9614-1:1993 Table B.1",
-    "Error factor Delta: 0,20 and 0,29 for all bands, 0,60 A-weighted",
+    "Error factor Delta: 0.20 and 0.29 for all bands, 0.60 A-weighted",
 )
 def _chk_iso9614_1_table_b1() -> Outcome:
     """The three cells Table B.1 fills, and only those three."""
@@ -590,14 +590,14 @@ def _chk_iso9614_1_table_b3() -> Outcome:
         return tuple(action.value for action in result.required_actions()[0])
 
     reached = {
-        "F1 > 0,6": codes(outward, temporal=wandering),
+        "F1 > 0.6": codes(outward, temporal=wandering),
         "F2 > Ld": codes(outward, residual_index=10.0),
         "(F3 - F2) > 3 dB": codes(inward),
         "criterion 2, 1 dB <= (F3 - F2) <= 3 dB": codes(moderate),
         "criterion 2, (F3 - F2) <= 1 dB": codes(concentrated),
     }
     expected = {
-        "F1 > 0,6": ("e",),
+        "F1 > 0.6": ("e",),
         "F2 > Ld": ("a", "b"),
         "(F3 - F2) > 3 dB": ("a", "b"),
         "criterion 2, 1 dB <= (F3 - F2) <= 3 dB": ("c",),
@@ -710,7 +710,7 @@ def _no_background_levels() -> Iterator[None]:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 9.5 EXAMPLE",
-    "Expanded uncertainty U = 2 sqrt(1,5^2 + 2^2) dB, grade 2 with sigma_omc = 2,0 dB",
+    "Expanded uncertainty U = 2 sqrt(1.5^2 + 2^2) dB, grade 2 with sigma_omc = 2.0 dB",
 )
 def _chk_iso3747_example_uncertainty() -> Outcome:
     with _no_background_levels():
@@ -725,7 +725,7 @@ def _chk_iso3747_example_uncertainty() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 Table 2 / Eq. 22",
-    "sigma_R0 by grade: 1,5 dB (grade 2) and 4,0 dB (grade 3), sigma_tot of Table E.1 row 2",
+    "sigma_R0 by grade: 1.5 dB (grade 2) and 4.0 dB (grade 3), sigma_tot of Table E.1 row 2",
 )
 def _chk_iso3747_table2_and_e1() -> Outcome:
     with _no_background_levels():
@@ -738,13 +738,13 @@ def _chk_iso3747_table2_and_e1() -> Outcome:
             _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
             conditions=ph.emission.GradeConditions(excess_levels=[8.0, 6.9, 7.2, 8.8], directivity_range=3.0)
         )  # fmt: skip
-    # Table E.1, sigma_R0 = 1,5 dB row at sigma_omc = 4 dB: sqrt(18,25) = 4,27 -> 4,3.
+    # Table E.1, sigma_R0 = 1.5 dB row at sigma_omc = 4 dB: sqrt(18.25) = 4.27 -> 4.3.
     return record(
-        {"sigma_R0 grade 2": 1.5, "sigma_R0 grade 3": 4.0, "sigma_tot (1,5; 4)": 4.3},
+        {"sigma_R0 grade 2": 1.5, "sigma_R0 grade 3": 4.0, "sigma_tot (1.5; 4)": 4.3},
         {
             "sigma_R0 grade 2": float(grade2.sigma_r0),
             "sigma_R0 grade 3": float(grade3.sigma_r0),
-            "sigma_tot (1,5; 4)": round(float(grade2.sigma_tot), 1),
+            "sigma_tot (1.5; 4)": round(float(grade2.sigma_tot), 1),
         },
         unit="dB",
     )
@@ -753,7 +753,7 @@ def _chk_iso3747_table2_and_e1() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 Eq. 7 / 8.1",
-    "K1 at the 6 dB validity margin, -10 lg(1 - 10^-0,6) = 1,2563 dB, and the 1,3 dB cap below it",
+    "K1 at the 6 dB validity margin, -10 lg(1 - 10^-0.6) = 1.2563 dB, and the 1.3 dB cap below it",
 )
 def _chk_iso3747_k1_margin_and_cap() -> Outcome:
     background = np.full_like(_ISO3747_ST, 40.0)
@@ -777,7 +777,7 @@ def _chk_iso3747_k1_margin_and_cap() -> Outcome:
         1e-9,
         unit="dB",
         places=9,
-        expected_label="K1(6 dB) = 1,2563 dB, K1(2 dB) = 1,3 dB, 4 kHz flagged",
+        expected_label="K1(6 dB) = 1.2563 dB, K1(2 dB) = 1.3 dB, 4 kHz flagged",
     )
 
 
@@ -874,7 +874,7 @@ def _chk_iso3747_event_forms() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 Annex C",
-    "C2 at 101,325 kPa and 23,0 degC is 15 lg(296,15/296) = 0,003 300 dB (theta_ref = 296 K)",
+    "C2 at 101,325 kPa and 23.0 degC is 15 lg(296.15/296) = 0.003 300 dB (theta_ref = 296 K)",
 )
 def _chk_iso3747_c2_reference_conditions() -> Outcome:
     with _no_background_levels():
@@ -888,7 +888,7 @@ def _chk_iso3747_c2_reference_conditions() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 Eq. C.2",
-    "Static pressure at 500 m, 101,325 (1 - 2,2560e-5 x 500)^5,2553 kPa",
+    "Static pressure at 500 m, 101,325 (1 - 2.2560e-5 x 500)^5.2553 kPa",
 )
 def _chk_iso3747_altitude_pressure() -> Outcome:
     expected = 101.325 * (1.0 - 2.2560e-5 * 500.0) ** 5.2553
@@ -930,7 +930,7 @@ def _chk_iso3747_excess_level() -> Outcome:
 # 9295:2015, the Spanish adoption of ISO 9295:2015 unchanged, Tables 1 and 2 on
 # PDF pages 15 and 16 (printed folios 15 and 16), read on the page. The tables
 # are Annex A rounded to four decimals with the temperature converted as
-# theta + 273,16 K; the library converts with 273,15 K, which moves 61 of the
+# theta + 273.16 K; the library converts with 273.15 K, which moves 61 of the
 # correctly printed cells by one unit of the fourth decimal and none by more.
 # 43 cells are misprinted, each a 0 of Annex A set as another digit
 # (docs/ERRATA.md); the rows below pin the others and name those.
@@ -957,7 +957,7 @@ def _iso9295_cells(table: int) -> list[tuple[float, float, float, float]]:
 
 
 def _iso9295_at_table_conversion(frequency: float, t: float, rh: float) -> float:
-    """Annex A as the tables were computed: T = theta + 273,16 K, 101,325 kPa."""
+    """Annex A as the tables were computed: T = theta + 273.16 K, 101,325 kPa."""
     f2, bracket = _pure_tone_terms(
         np.asarray([frequency]), t + ref.ISO9295_TABLE_KELVIN_OFFSET, rh, 101.325
     )
@@ -982,7 +982,7 @@ def _iso9295_printed_cells(table: int) -> Outcome:
 def _iso9295_zero_set_as_digit_before(annex_a: float) -> float | None:
     """Annex A to four decimals with its first trailing 0 set as the digit before.
 
-    0,027 0 becomes 0,027 7 and 0,030 0 becomes 0,033 0: the one pattern the
+    0.027 0 becomes 0.027 7 and 0.030 0 becomes 0.033 0: the one pattern the
     errata entry registers for all 43 misprints. ``None`` for a value that
     does not end in 0, which no misprinted cell can be.
     """
@@ -1000,7 +1000,7 @@ def _iso9295_misprints(table: int) -> Outcome:
 
     The expected side is what the page prints in each cell; the check counts
     the cells where that print is the library's Annex A (at the tables'
-    theta + 273,16 K) with its first trailing 0 set as the digit before it,
+    theta + 273.16 K) with its first trailing 0 set as the digit before it,
     the pattern docs/ERRATA.md registers. A change to Annex A or to the
     transcription breaks the count.
     """
@@ -1033,7 +1033,7 @@ def _iso9295_misprints(table: int) -> Outcome:
     "Intensity & sound power",
     "ISO 9295:2015 Table 1 (UNE-EN ISO 9295:2015, PDF page 15, printed folio 15)",
     "Air absorption alpha in Np/m, 18 degC to 22 degC, 40 % to 60 %, 10\u202f000 Hz "
-    "to 22\u202f400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, "
+    "to 22\u202f400 Hz: Annex A at theta + 273.16 K, to the four decimals printed, "
     "in the 303 cells the table prints correctly",
 )
 def _chk_iso9295_table1() -> Outcome:
@@ -1044,7 +1044,7 @@ def _chk_iso9295_table1() -> Outcome:
     "Intensity & sound power",
     "ISO 9295:2015 Table 2 (UNE-EN ISO 9295:2015, PDF page 16, printed folio 16)",
     "Air absorption alpha in Np/m, 23 degC to 27 degC, 40 % to 60 %, 10\u202f000 Hz "
-    "to 22\u202f400 Hz: Annex A at theta + 273,16 K, to the four decimals printed, "
+    "to 22\u202f400 Hz: Annex A at theta + 273.16 K, to the four decimals printed, "
     "in the 278 cells the table prints correctly",
 )
 def _chk_iso9295_table2() -> Outcome:
@@ -1055,7 +1055,7 @@ def _chk_iso9295_table2() -> Outcome:
     "Intensity & sound power",
     "ISO 9295:2015 Table 1 (UNE-EN ISO 9295:2015, PDF page 15, printed folio 15)",
     "The 9 cells Table 1 misprints (docs/ERRATA.md), as printed: each is Annex A "
-    "at theta + 273,16 K with its first trailing 0 set as the digit before it",
+    "at theta + 273.16 K with its first trailing 0 set as the digit before it",
 )
 def _chk_iso9295_table1_misprints() -> Outcome:
     return _iso9295_misprints(1)
@@ -1065,7 +1065,7 @@ def _chk_iso9295_table1_misprints() -> Outcome:
     "Intensity & sound power",
     "ISO 9295:2015 Table 2 (UNE-EN ISO 9295:2015, PDF page 16, printed folio 16)",
     "The 34 cells Table 2 misprints (docs/ERRATA.md), as printed: each is Annex A "
-    "at theta + 273,16 K with its first trailing 0 set as the digit before it",
+    "at theta + 273.16 K with its first trailing 0 set as the digit before it",
 )
 def _chk_iso9295_table2_misprints() -> Outcome:
     return _iso9295_misprints(2)
@@ -1074,7 +1074,7 @@ def _chk_iso9295_table2_misprints() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 9295:2015 Annex A / Tables 1 and 2",
-    "The published Annex A at theta + 273,15 K against the 581 correctly printed "
+    "The published Annex A at theta + 273.15 K against the 581 correctly printed "
     "cells: within one unit of the fourth decimal",
 )
 def _chk_iso9295_library_conversion() -> Outcome:
@@ -1094,7 +1094,7 @@ def _chk_iso9295_library_conversion() -> Outcome:
     "Intensity & sound power",
     "ISO 9295:2015 Formulae (4) and (5)",
     "Room absorption coefficient and room constant from the reverberation time, "
-    "V = 200 m3, S = 210 m2, T = 0,70 s: alpha_room = 1 - exp(-0,16 V/(S T)), "
+    "V = 200 m3, S = 210 m2, T = 0.70 s: alpha_room = 1 - exp(-0.16 V/(S T)), "
     "R = S alpha_room / (1 - alpha_room) (closed form)",
 )
 def _chk_iso9295_eyring_room_constant() -> Outcome:
@@ -1208,7 +1208,7 @@ def _chk_iso9295_comparison() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 9295:2015 Formulae (2) and (3)",
-    "Moving microphone: Delta f = 2 f v / c at 16 kHz, 0,4 m/s, 345 m/s, and "
+    "Moving microphone: Delta f = 2 f v / c at 16 kHz, 0.4 m/s, 345 m/s, and "
     "three equal sidebands summing to 10 lg 3 above one",
 )
 def _chk_iso9295_tone_under_moving_microphone() -> Outcome:
@@ -1314,14 +1314,14 @@ def _chk_iso9295_table3() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 5136:2003 Table D.1",
-    "C3,4 of the sampling tube for d = 0,5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands",
+    "C3,4 of the sampling tube for d = 0.5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands",
 )
 def _chk_iso5136_table_d1() -> Outcome:
     """All 162 printed cells against Eq. (7) with the Table A.4 coefficients.
 
-    The table prints to 0,1 dB, so the budget is half of that. The widest
+    The table prints to 0.1 dB, so the budget is half of that. The widest
     gap is the 4 000 Hz row at U = +5 m/s, where the polynomial gives 6,151 dB
-    against a printed 6,2, which is 0,049 dB and only just inside the budget.
+    against a printed 6.2, which is 0.049 dB and only just inside the budget.
     """
     worst = 0.0
     for band, row in zip(ref.ISO5136_BANDS, ref.ISO5136_TABLE_D1, strict=True):
@@ -1339,7 +1339,7 @@ def _chk_iso5136_table_d1() -> Outcome:
         ref.ISO5136_TABLE_D1_TOLERANCE_DB,
         unit="dB",
         places=3,
-        expected_label=f"{n} tabulated values reproduced to the printed 0,1 dB",
+        expected_label=f"{n} tabulated values reproduced to the printed 0.1 dB",
         computed_label=f"max absolute deviation {worst:.3f} dB",
     )
 
@@ -1347,13 +1347,13 @@ def _chk_iso5136_table_d1() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 5136:2003 Eqs (D.2)/(D.3)",
-    "Worked example: C3,4 = (1,85 + 0,038 U) dB at 1 kHz, U = +15 and -15 m/s",
+    "Worked example: C3,4 = (1.85 + 0.038 U) dB at 1 kHz, U = +15 and -15 m/s",
 )
 def _chk_iso5136_annex_d_example() -> Outcome:
     """The two framed cells of the example, to the exact product.
 
-    1,85 + 0,038 x 15 = 2,42 dB (printed "approx. 2,4") and
-    1,85 + 0,038 x (-15) = 1,28 dB (printed "approx. 1,3").
+    1.85 + 0.038 x 15 = 2.42 dB (printed "approx. 2,4") and
+    1.85 + 0.038 x (-15) = 1.28 dB (printed "approx. 1,3").
     """
     worst = 0.0
     for velocity, _printed in (ref.ISO5136_ANNEX_D_OUTLET, ref.ISO5136_ANNEX_D_INLET):
@@ -1370,7 +1370,7 @@ def _chk_iso5136_annex_d_example() -> Outcome:
         1e-9,
         unit="dB",
         places=9,
-        expected_label="2,42 dB at +15 m/s and 1,28 dB at -15 m/s reproduced",
+        expected_label="2.42 dB at +15 m/s and 1.28 dB at -15 m/s reproduced",
         computed_label=f"max absolute deviation {residue_text(worst, 'dB', '.1e')}",
     )
 
@@ -1381,7 +1381,7 @@ def _chk_iso5136_annex_d_example() -> Outcome:
     "Nose-cone / foam-ball correction 10 lg[1/(1 - U/c)^2] at U = 20 m/s, c = 340 m/s",
 )
 def _chk_iso5136_eq8() -> Outcome:
-    """The convective term written out: -20 lg(1 - 20/340) = 0,52658 dB."""
+    """The convective term written out: -20 lg(1 - 20/340) = 0.52658 dB."""
     expected = -20.0 * math.log10(1.0 - 20.0 / ref.ISO5136_C_NORMAL)
     computed = float(
         ph.emission.flow_modal_correction(
@@ -1394,15 +1394,15 @@ def _chk_iso5136_eq8() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 5136:2003 Eq. (12)",
-    "Plane-wave relation LW - Lp = 10 lg(S/S0) - 10 lg(rho c/400), d = 0,5 m",
+    "Plane-wave relation LW - Lp = 10 lg(S/S0) - 10 lg(rho c/400), d = 0.5 m",
 )
 def _chk_iso5136_eq12() -> Outcome:
     """The two terms of Eq. (12) written out against the result's own rho c.
 
-    S = pi x 0,5^2 / 4 = 0,196350 m^2, 10 lg S = -7,0697 dB; the duct air at
-    20 degC and 101,325 kPa has rho c = 413,25 N s/m^3 (1,2041 kg/m^3 times
-    343,20 m/s), so the impedance term is -0,1416 dB and the whole bracket
-    -7,2113 dB.
+    S = pi x 0.5^2 / 4 = 0.196350 m^2, 10 lg S = -7.0697 dB; the duct air at
+    20 degC and 101,325 kPa has rho c = 413.25 N s/m^3 (1.2041 kg/m^3 times
+    343.20 m/s), so the impedance term is -0.1416 dB and the whole bracket
+    -7.2113 dB.
 
     Half of this row is an oracle and half is an invariant, and the two should
     not be confused. What Eq. (12) prints is the shape of the bracket and the
@@ -1434,7 +1434,7 @@ def _chk_iso5136_eq12() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 5136:2003 Table 2 / Table 3",
-    "Reproducibility sigma_R per band, 50 Hz to 10 kHz, and the extrapolated 12,5 to 20 kHz",
+    "Reproducibility sigma_R per band, 50 Hz to 10 kHz, and the extrapolated 12.5 to 20 kHz",
 )
 def _chk_iso5136_table_2() -> Outcome:
     """Every band of the two tables, the ranges of Table 2 unrolled."""
@@ -1561,8 +1561,8 @@ def _chk_iso8297_table_3() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 8297:1994 10.5 NOTE 11",
-    "Proximity term lg(d/(4 sqrt(Sp))) at the two ends 0,5 and 0,05 of 9.1.1 a), "
-    "to the printed decimal: -0,9 dB and -1,9 dB",
+    "Proximity term lg(d/(4 sqrt(Sp))) at the two ends 0.5 and 0.05 of 9.1.1 a), "
+    "to the printed decimal: -0.9 dB and -1.9 dB",
 )
 def _chk_iso8297_note_11() -> Outcome:
     area = 10_000.0
@@ -1653,8 +1653,8 @@ def _chk_iso8297_point_source() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 8297:1994 9.1.1 b)",
-    "Aspect angle of a unit square seen from (0,5; -d): 180 - 2 atan(2 d) degrees at "
-    "d = 0,1, 0,5 and 2 (closed form)",
+    "Aspect angle of a unit square seen from (0.5; -d): 180 - 2 atan(2 d) degrees at "
+    "d = 0.1, 0.5 and 2 (closed form)",
 )
 def _chk_iso8297_aspect_angle() -> Outcome:
     from phonometry.emission.sound_power_plant import _aspect_angle_deg
@@ -1682,7 +1682,7 @@ _WORKSTATION = "Emission sound pressure level (ISO 11200 group)"
 
 
 def _annex_b_example_2_k3() -> float:
-    """K_3 of Table B.2: a work station 1,6 m from the dominating source."""
+    """K_3 of Table B.2: a work station 1.6 m from the dominating source."""
     surface = 2.0 * math.pi * 1.6**2
     absorption = 0.16 * (11.0 * 8.0 * 4.0) / 1.2
     ratio = ph.emission.environmental_ratio_from_absorption(absorption, surface)
@@ -1692,7 +1692,7 @@ def _annex_b_example_2_k3() -> float:
 @register(
     _WORKSTATION,
     "ISO 11200:2014 Table B.2 local environmental correction",
-    "K_3A at a work station 1,6 m from the dominating source, dB",
+    "K_3A at a work station 1.6 m from the dominating source, dB",
 )
 def _chk_workstation_k3() -> Outcome:
     return numeric(3.7, _annex_b_example_2_k3(), 0.05, unit="dB", places=3)
@@ -1715,7 +1715,7 @@ def _chk_workstation_level() -> Outcome:
 @register(
     _WORKSTATION,
     "ISO 11200:2014 Table B.2 expanded uncertainty",
-    "U from sigma_R0 = 1,5 dB and sigma_omc = 1,0 dB at k = 1,6, dB",
+    "U from sigma_R0 = 1.5 dB and sigma_omc = 1.0 dB at k = 1.6, dB",
 )
 def _chk_workstation_uncertainty() -> Outcome:
     sigma = ph.emission.total_standard_deviation(1.5, 1.0)

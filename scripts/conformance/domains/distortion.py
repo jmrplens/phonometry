@@ -341,7 +341,7 @@ def _chk_tdfd() -> Outcome:
     "Weighting network response at the 6.3 kHz peak (14.12.11 network)",
 )
 def _chk_itu_468_peak() -> Outcome:
-    # Table 1 prints +12,2 dB here; the Fig. 1a network the row samples reads
+    # Table 1 prints +12.2 dB here; the Fig. 1a network the row samples reads
     # +12.2167 dB, so the tolerance is the table's own rounding quantum and
     # not the 1e-9 an interpolated table used to return for its own knot.
     value = float(ph.electroacoustics.weighting_bs468([6300.0])[0])

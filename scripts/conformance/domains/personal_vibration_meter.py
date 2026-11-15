@@ -259,7 +259,7 @@ def _chk_table_2() -> Outcome:
     "Maximum expanded uncertainties of the frequency-response tests, %",
 )
 def _chk_frequency_response_uncertainties() -> Outcome:
-    """12.11.2 (folio 29) 4,5 %, 12.11.3 (folio 30) 3 %, 12.11.4 (folio 31) 5 %."""
+    """12.11.2 (folio 29) 4.5 %, 12.11.3 (folio 30) 3 %, 12.11.4 (folio 31) 5 %."""
     clauses = ("12.11.2", "12.11.3", "12.11.4")
     printed = {
         clause: ref.ISO8041_2_MAX_EXPANDED_UNCERTAINTY_PERCENT[clause]

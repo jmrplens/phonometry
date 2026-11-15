@@ -18,10 +18,10 @@ property of the edition, so any copy of that edition resolves it.
 
 **The arithmetic tells.** When a glyph is lost the printed and derived values
 differ by the lost factor, so their ratio lands on one of a small set of
-constants. That entry announced its own ratio twice, as "1,73 times
-too small" and as "a fixed 2,4 dB offset" -- ``sqrt(3)`` and
+constants. That entry announced its own ratio twice, as "1.73 times
+too small" and as "a fixed 2.4 dB offset" -- ``sqrt(3)`` and
 ``20 lg sqrt(3)``. Hence :func:`check_ratios`: any multiplicative claim in an
-entry whose value sits within 0,5 % of ``sqrt(2)``, ``sqrt(3)``, ``pi``,
+entry whose value sits within 0.5 % of ``sqrt(2)``, ``sqrt(3)``, ``pi``,
 ``2 pi``, ``1/sqrt(2)``, ``ln 2`` or a small integer is reported, and is an
 error unless that entry cites the page it read. A genuine factor-of-ten
 misprint trips the test too; that is the point, since the way to clear it is

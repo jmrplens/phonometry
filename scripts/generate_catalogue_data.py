@@ -560,7 +560,7 @@ TRANSMISSION_LOSS_COLUMNS = (
 #: because two rows do not print one and carry it down from the merged cell
 #: above, and only a column can show that those two were derived. The length
 #: is printed by two of the six tables and empty on the other four, whose note
-#: gives the 6,1 m they were all measured at.
+#: gives the 6.1 m they were all measured at.
 DUCT_TRANSMISSION_LOSS_COLUMNS = (
     ("diameter_mm", "Diameter", "Diámetro", "mm"),
     ("first_side_mm", "First side", "Primer lado", "mm"),
@@ -669,13 +669,13 @@ GROUND_COLUMNS = (
 #: Its inputs were printed to four at most, so a plate speed worked out of a
 #: modulus and a density is not known to fifteen and must not be shown to
 #: fifteen. A value the page itself printed is shown as stored, whatever its
-#: length: the 345,866 52 m/s of the metrology annex is what that annex
+#: length: the 345.866 52 m/s of the metrology annex is what that annex
 #: prints, and rounding it here would erase what distinguishes it.
 _DERIVED_FIGURES = 4
 
 #: Where a column stops reading as digits. A modulus of 471 700 000 000 Pa is
 #: twelve digits of a number nobody says out loud, and a permeability of
-#: 0,0000000033 m2 is eight leading zeros. A column like that is rewritten:
+#: 0.0000000033 m2 is eight leading zeros. A column like that is rewritten:
 #: first by moving the prefix into the heading, so the moduli are a column of
 #: GPa, and where the unit takes no prefix, by a mantissa and a power of ten.
 #: The test is made once per column and not per cell, because a column is what
@@ -683,8 +683,8 @@ _DERIVED_FIGURES = 4
 #:
 #: It is made on the median and not on the extremes, because one outlier must
 #: not set the form of a whole column: the loss factors of the solids run from
-#: 0,000003 to 0,3 around a median of 0,005, and writing that column in powers
-#: of ten to spare its smallest cell would turn every ordinary 0,005 in it
+#: 0.000003 to 0.3 around a median of 0.005, and writing that column in powers
+#: of ten to spare its smallest cell would turn every ordinary 0.005 in it
 #: into 5 x 10^-3.
 _BIG = 1e7
 _TINY = 1e-4
@@ -1212,8 +1212,8 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     )
     states = {**PUBLISHED_FLUIDS, **IN_TREE_FLUIDS}
     # The same decision the material columns take, made the same way: a
-    # viscosity of 0,0000184 Pa s is a column of leading zeros, and moving the
-    # prefix into the heading makes it 18,4 µPa·s.
+    # viscosity of 0.0000184 Pa s is a column of leading zeros, and moving the
+    # prefix into the heading makes it 18.4 µPa·s.
     written = {
         name: column_style(
             unit,
@@ -1247,7 +1247,7 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     for key, state in states.items():
         # A state read from a table and a state a model fixes are different
         # kinds of number, and the cell says which: 343 m/s is what Bies
-        # printed, where the 345,86652 m/s of the metrology annex is what its
+        # printed, where the 345.86652 m/s of the metrology annex is what its
         # closed form returns at the conditions that annex assumes.
         kind = "printed" if key in PUBLISHED_FLUIDS else "fixed"
         record = printed.get(key, {})
@@ -1300,7 +1300,7 @@ AIR_ATTENUATION_TABLE = "en-12354-6-table-1"
 #: thousandths of a neper per metre and the library holds them in neper per
 #: metre, so each one reached the package through a multiplication by a
 #: thousandth, and that multiplication does not round-trip in binary: the
-#: 1,8 the page prints is held as 0,001 800 000 000 000 000 2. Every digit a
+#: 1.8 the page prints is held as 0.001 800 000 000 000 000 2. Every digit a
 #: float carries is what a number read off a page earns, and those last
 #: fifteen are not digits this page printed. Three is the most any cell of the
 #: table has, so nothing printed is lost by writing them back to three.

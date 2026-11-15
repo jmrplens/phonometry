@@ -3128,7 +3128,7 @@ TUPLE_RETURN_EXEMPT: dict[tuple[str, str], str] = {
     ("phonometry.emission.sound_power_plant", "plant_mean_distance_limits_m"): _BOUNDS,
     ("phonometry.emission.sound_power_plant", "plant_method_uncertainty"): _BOUNDS,
     ("phonometry.environment.propagation.software_quality", "ranking_positions"): (
-        "the ranks of the 0,1- and the 0,9-quantile, lower first"
+        "the ranks of the 0.1- and the 0.9-quantile, lower first"
     ),
     (
         "phonometry.environment.sources._statistical_pass_by",

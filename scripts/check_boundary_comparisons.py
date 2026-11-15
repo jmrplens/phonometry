@@ -3,8 +3,8 @@
 
 A standard prints a limit in decimal, and the quantity judged against it is
 computed: the difference of two readings, the mean of three, the ratio of two
-areas. In binary a difference that is 6,0 dB in decimal comes out
-5,999 999 999 999 996 as often as 6,000 000 000 000 004, so a verdict read
+areas. In binary a difference that is 6.0 dB in decimal comes out
+5.999 999 999 999 996 as often as 6.000 000 000 000 004, so a verdict read
 straight off ``margin >= 6.0`` turns on the last bit, and which bit depends on
 the readings, on the order of a sum and on the machine. The tree settles such a
 quantity first, through :mod:`phonometry._internal.boundary`, or compares it

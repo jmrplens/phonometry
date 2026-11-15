@@ -5,7 +5,7 @@
 band-centre labels of a continuous frequency axis are written by
 ``format_frequency_axis`` and by nothing else: a renderer that does not hand
 its ``language`` down draws 31.5 on a Spanish figure where 31,5 belongs. Every
-range here reaches down past 31,5 Hz, the lowest octave centre whose label
+range here reaches down past 31.5 Hz, the lowest octave centre whose label
 carries a decimal, because a set of labels without one proves nothing.
 
 The rigid-mass calibration check formats the axis from two places, once for
@@ -131,7 +131,7 @@ def _band_average() -> BandAveragedStiffness:
 
 
 def _radiation_efficiency() -> RadiationEfficiencyResult:
-    # 6 mm glass on a 1,5 m by 1,25 m pane.
+    # 6 mm glass on a 1.5 m by 1.25 m pane.
     bending_stiffness = vibration.plate_bending_stiffness(6.2e10, 0.006, 0.24)
     critical = vibration.coincidence_frequency(2500.0 * 0.006, bending_stiffness)
     return vibration.radiation_efficiency(

@@ -307,8 +307,8 @@ def test_the_overlay_scales_its_amplitude_axis_to_the_measured_peak() -> None:
 def test_crowded_fault_labels_do_not_overlap() -> None:
     """Names of nearby lines are pushed apart instead of stacking up.
 
-    On a wide axis the low-frequency bearing lines (FTF 13,8 Hz, FTF_rel
-    19,5 Hz and the 33,3 Hz shaft) fall within a few points of each other and
+    On a wide axis the low-frequency bearing lines (FTF 13.8 Hz, FTF_rel
+    19.5 Hz and the 33.3 Hz shaft) fall within a few points of each other and
     their rotated labels used to be drawn on top of one another.
     """
     pytest.importorskip("matplotlib")
@@ -653,7 +653,7 @@ def test_the_meter_verification_draws_the_band_it_was_judged_against() -> None:
         (design_16 * 0.89, design_16 * 1.12)
     )
 
-    # And at 0,5 Hz, past ft1 and inside the lower skirt, it opens to
+    # And at 0.5 Hz, past ft1 and inside the lower skirt, it opens to
     # +26 % / -21 %.
     ft1 = TRANSITION_FREQUENCIES_HZ["Wk"][0]
     assert ft1 < 0.5 < ft2

@@ -123,7 +123,7 @@ def _reference_specific() -> NDArray[np.float64]:
 _K_DIN: float | None = None
 
 #: Literal factor of the informative Annex B variants, Formulas (B.1)/(B.2):
-#: S_A = 0,11 * moment_A and S_B = 0,11 * moment_B. Unlike the normative
+#: S_A = 0.11 * moment_A and S_B = 0.11 * moment_B. Unlike the normative
 #: clause 5.2 k (derived so the reference sound is exactly 1.00 acum), the
 #: Annex prints a fixed 0.11 -- with it the clause 6 reference sound lands
 #: NEAR, not exactly at, 1 acum through this front-end (measured ~0.96 acum

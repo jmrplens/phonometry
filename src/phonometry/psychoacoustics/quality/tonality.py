@@ -233,7 +233,7 @@ class ToneAssessment(RichDisplay):
 def _critical_band(f0: float) -> tuple[float, float, float]:
     """Clause 10: critical bandwidth and band-edge frequencies at ``f0``.
 
-    Formula (2): dfc = 25,0 + 75,0*(1,0 + 1,4*(f0/1000)^2)^0,69.
+    Formula (2): dfc = 25.0 + 75.0*(1.0 + 1.4*(f0/1000)^2)^0.69.
     Edges: Formulae (4)-(5) (arithmetic) for f0 <= 500 Hz and (7)-(8)
     (geometric) above.
     """

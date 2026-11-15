@@ -2,11 +2,11 @@
 """Prominent discrete tones: TNR and PR per ECMA-418-1:2024.
 
 Anchors transcribed from the official PDF:
-- Clause 10 Formula (2) EXAMPLE: dfc = 162,2 Hz at 1 kHz; 117,3 Hz at 500 Hz.
-- Clause 12.2 EXAMPLE: f1,M = 922,2 Hz and f2,M = 1084,4 Hz for ft = 1 kHz.
-- Clause 11.6 Formula (14) EXAMPLE: dfprox = 23 Hz at 150 Hz; 63,8 Hz at 850 Hz.
-- Prominence criteria: TNR >= 8,0 dB at/above 1 kHz, 8,0 + 8,33*lg(1000/ft)
-  below (Formulae 12-13); PR >= 9,0 dB / 9,0 + 10*lg(1000/ft) (25-26).
+- Clause 10 Formula (2) EXAMPLE: dfc = 162.2 Hz at 1 kHz; 117.3 Hz at 500 Hz.
+- Clause 12.2 EXAMPLE: f1,M = 922.2 Hz and f2,M = 1084.4 Hz for ft = 1 kHz.
+- Clause 11.6 Formula (14) EXAMPLE: dfprox = 23 Hz at 150 Hz; 63.8 Hz at 850 Hz.
+- Prominence criteria: TNR >= 8.0 dB at/above 1 kHz, 8.0 + 8.33*lg(1000/ft)
+  below (Formulae 12-13); PR >= 9.0 dB / 9.0 + 10*lg(1000/ft) (25-26).
 """
 
 from collections.abc import Callable

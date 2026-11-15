@@ -790,7 +790,7 @@ def _sone_to_phon(loudness: float) -> float:
 
     Provenance notes (electronic attachment vs printed standard): the
     factor above 1 sone is the exact 10/lg 2 = 33.2193... used by the
-    reference program, where Formula (2) prints the rounded 33,22 (the
+    reference program, where Formula (2) prints the rounded 33.22 (the
     difference stays below 0.005 phon even at 1000 sone). The 3.0 phon
     floor below is the reference main program's behaviour and appears in
     no printed formula; it only affects N < 2.3e-4 sone (deep silence).

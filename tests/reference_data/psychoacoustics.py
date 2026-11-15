@@ -134,9 +134,9 @@ ISO532_3_ANCHOR_1KHZ_40DB_SONE = 1.0
 # Prominent discrete tones - ECMA-418-1:2024, clause-EXAMPLE anchors
 # (transcribed from the official PDF, printed to one decimal).
 # Clause 10 Formula (2): critical band around ft = 1 kHz is
-# f1,c = 922,2 Hz .. f2,c = 1084,4 Hz, width dfc = 162,2 Hz (117,3 Hz at
+# f1,c = 922.2 Hz .. f2,c = 1084.4 Hz, width dfc = 162.2 Hz (117.3 Hz at
 # 500 Hz). Clause 11.6 Formula (14): proximity spacing dfprox = 23 Hz at
-# 150 Hz and 63,8 Hz at 850 Hz.
+# 150 Hz and 63.8 Hz at 850 Hz.
 # ---------------------------------------------------------------------------
 ECMA418_1_DFC_1KHZ = 162.2  # critical bandwidth at 1 kHz (Hz)
 ECMA418_1_DFC_500HZ = 117.3  # critical bandwidth at 500 Hz (Hz)

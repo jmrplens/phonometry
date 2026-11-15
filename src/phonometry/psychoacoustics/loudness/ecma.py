@@ -290,20 +290,20 @@ class EcmaLoudness(OwnsArrays):
     ``loudness`` is the single representative loudness N in sone_HMS
     (Formula 117).  ``specific_loudness`` is the average specific loudness
     N'(z) in sone_HMS/Bark_HMS over the 53 auditory bands (Formula 115),
-    with ``bark`` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
+    with ``bark`` the critical-band-rate scale z (0.5..26.5 Bark_HMS) and
     ``frequencies`` the band centre frequencies F(z).  ``times`` and
-    ``loudness_vs_time`` hold the time-dependent loudness N(l) at 187,5 Hz
+    ``loudness_vs_time`` hold the time-dependent loudness N(l) at 187.5 Hz
     (Formula 116).  ``field`` records the assumed sound field.
 
     ``basis_loudness_vs_time`` is the total basis loudness N_basis(l) in
     sone_HMS (Formula 26) at the same ``times``, the quantity Clause 5.1.9
     compares with its audibility criterion,
-    :data:`AUDIBILITY_THRESHOLD_SONE_HMS` (0,01 sone_HMS). It is the
+    :data:`AUDIBILITY_THRESHOLD_SONE_HMS` (0.01 sone_HMS). It is the
     specific basis loudness N'_basis(l, z) of Formula (25), the front-end's
     output before the tonal and noise split, summed over the 53 bands with
-    dz = 0,5. Each band computes it at its own block size, the segmentation
+    dz = 0.5. Each band computes it at its own block size, the segmentation
     Clause 5.1.5.1 (Table 4) prescribes for tonality and loudness, and is
-    resampled by linear interpolation onto the common 187,5 Hz grid of the
+    resampled by linear interpolation onto the common 187.5 Hz grid of the
     1024-sample blocks (Clause 6.2.6, Table 6), the grid the tonal and noise
     loudness are resampled to.
 
@@ -314,7 +314,7 @@ class EcmaLoudness(OwnsArrays):
     and fluctuation strength segment with the fixed blocks of Clause 5.1.5.2
     and pad by Clause 5.1.2.2, so the N_basis they form differs from this one
     for a sound that changes in time (a 60 ms 1 kHz burst at 3 dB SPL reaches
-    0,021 sone_HMS here and 0,0025 with the 16384-sample blocks of
+    0.021 sone_HMS here and 0.0025 with the 16384-sample blocks of
     roughness); the library reads it on the Table 4 segmentation that the
     loudness of Clause 8 is built on.
 
@@ -369,7 +369,7 @@ class EcmaLoudness(OwnsArrays):
         with the audibility criterion at the wrong time.
 
         The two axes are checked apart because nothing relates them: the band
-        count is fixed by the standard, whereas the number of 187,5 Hz blocks
+        count is fixed by the standard, whereas the number of 187.5 Hz blocks
         follows the length of the recording, and a 53-block recording is no
         evidence that either is right. ``last_evaluated_block`` indexes the
         time axis, so it must name one of its blocks: one past the end would

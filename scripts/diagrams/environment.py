@@ -944,13 +944,13 @@ def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
         # through it, so that it hears the source and not the barrier.
         s.mic(440, top - 46, top, scale=0.8)
         s.line(430, top, 450, top, th.muted, 1.2, dash="3,3")
-        s.dim(470, top, 470, top - 46, "1,5 m", size=13, label_side="right")
+        s.dim(470, top, 470, top - 46, "1.5 m", size=13, label_side="right")
         s.text(440, base + 30, "reference microphone", 13, th.accent)
 
         # The receiver, at 1,2 m or more, where somebody actually stands.
         s.mic(740, base - 86, base, scale=0.9)
         s.text(740, base + 30, "receiver position", 13, th.accent)
-        s.dim(790, base, 790, base - 86, "≥ 1,2 m", size=13, label_side="right")
+        s.dim(790, base, 790, base - 86, "≥ 1.2 m", size=13, label_side="right")
 
         s.arrow(225, base - 26, 415, top + 24, colour, 1.8)
         if built:

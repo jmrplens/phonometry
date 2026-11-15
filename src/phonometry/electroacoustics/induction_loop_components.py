@@ -28,8 +28,8 @@ different", :math:`d` is taken as :math:`\sqrt{d_1 d_2}`
 (:func:`loop_center_field`). Everything else about the field is a figure in
 that standard. Here it is computed: :func:`rectangular_loop_field` sums the
 Biot-Savart field of the four straight sides exactly, at any point, which is
-how the E.1 formula is checked (it is exact for the square and off by 0,35 dB
-for a rectangle of aspect ratio 1,5). Two of the figures are reproduced: the
+how the E.1 formula is checked (it is exact for the square and off by 0.35 dB
+for a rectangle of aspect ratio 1.5). Two of the figures are reproduced: the
 curves of Figure E.2 b), both components within about half a decibel, taken
 across the 10-unit width of its 15 by 10 loop, as E.1 describes them (the
 figure's panel a) puts the vertical-field line along the length, see
@@ -37,7 +37,7 @@ figure's panel a) puts the vertical-field line along the length, see
 :func:`loop_current`. Figures E.3 to E.5 and A.1 draw the same kind of
 pattern and are not checked point by point.
 
-IEC 62489-1:2010 5.4.10.2 fixes where an amplifier's field is measured: 1,4 m
+IEC 62489-1:2010 5.4.10.2 fixes where an amplifier's field is measured: 1.4 m
 above the centre of a horizontal square loop whose resistance and inductance
 equal the rated load. :func:`loop_current` gives the current that loop needs
 for a field strength, and :func:`loop_dimensions` answers 5.4.11 the other way
@@ -51,7 +51,7 @@ The loop is a resistance in series with an inductance (IEC 62489-1 B.2).
 The resistance is :math:`R = \rho l / a` for a conductor of length :math:`l`
 and area :math:`a` (:func:`loop_resistance`), with the resistivity of standard
 annealed copper, 1/58 ohm square millimetre per metre at 20 degrees Celsius
-and a temperature coefficient of 0,00393 per degree (IEC 60028:1925, clause I).
+and a temperature coefficient of 0.00393 per degree (IEC 60028:1925, clause I).
 The inductance of a rectangle of round wire is Grover's Formula (58)
 (:func:`rectangular_loop_inductance`); for :math:`N` turns it is multiplied by
 :math:`N^2`, the perfect coupling Table B.1 assumes. The impedance
@@ -62,7 +62,7 @@ resistance (IEC 60118-4 E.3), and the voltage the amplifier has to deliver is
 
 Table B.1 of IEC 62489-1 is the oracle. Its six resistances are reproduced by
 the 20 degree resistivity with the perimeter of each loop, which for the
-0,35 m by 0,45 m counter loop is 1,6 m and not the printed 1,5 m (see
+0.35 m by 0.45 m counter loop is 1.6 m and not the printed 1.5 m (see
 ``docs/ERRATA.md``). Grover's formula reproduces four of its six inductances
 to the printed microhenry once the term for the flux inside the wire is left
 out: 189, 22, 47 and 109 microhenries. Table B.1 does not say which formula it
@@ -121,10 +121,10 @@ frequencies where it differs from the response at 1 kHz by 3 dB
 (:func:`neck_loop_characteristics`). The draft Amendment 2 (prEN
 62489-1:2010/prA2:2017, read in E DIN EN 62489-1/A2:2017-10) replaces Annex D
 with two example specifications: type 1, for audio sources powered by two
-primary 1,5 V cells and higher voltage supplies, by a DC resistance of 32 ohm
+primary 1.5 V cells and higher voltage supplies, by a DC resistance of 32 ohm
 plus or minus 5 %, and type 2, a neck loop with a transformer or an amplifier,
 by an input DC resistance of at least 32 ohm, both reaching 400 mA/m on the
-jig with at most 1,06 V at the input (:data:`NECK_LOOP_TYPES`,
+jig with at most 1.06 V at the input (:data:`NECK_LOOP_TYPES`,
 :func:`verify_neck_loop`). It is a draft, and
 this module cites it as one. Its Table D.1 (the field a type 1 loop reaches
 from a 3 V and a 9 V battery) rests on a source model the draft does not give
@@ -231,7 +231,7 @@ _COPPER_TEMPERATURE_COEFFICIENT = 0.00393
 _COPPER_REFERENCE_TEMPERATURE_C = 20.0
 
 #: Magnetic constant, in henries per metre. The exact pre-2019 value: Grover's
-#: formulas carry it as the factor 0,004 microhenry per centimetre.
+#: formulas carry it as the factor 0.004 microhenry per centimetre.
 _MU_0 = 4.0e-7 * math.pi
 
 #: The reference frequency every response of both standards is normalized to,
@@ -280,7 +280,7 @@ _AGC_RECOMMENDED_RANGE_DB = 32.0
 
 #: Two output levels 3 dB apart to within this are taken as exactly 3 dB
 #: apart, in dB: a characteristic stated to the tenth of a decibel, whose
-#: 3,0 dB difference can come out of floating point as 3,0000000000000004,
+#: 3.0 dB difference can come out of floating point as 3.0000000000000004,
 #: does not lose its window to the rounding.
 _AGC_LEVEL_MATCH_DB = 1.0e-9
 
@@ -429,7 +429,7 @@ class LoopField(OwnsArrays):
         r"""The field strength level of one component, dB re 400 mA/m.
 
         :param component: ``"x"``, ``"y"``, ``"z"`` or ``"magnitude"``.
-        :return: :math:`20\lg(|H|/0{,}4\ \mathrm{A/m})`; minus infinity where
+        :return: :math:`20\lg(|H|/0.4\ \mathrm{A/m})`; minus infinity where
             the component vanishes, which is the null line outside a loop.
         :raises TypeError: if ``component`` is not a text.
         """
@@ -582,8 +582,8 @@ def loop_center_field(
     exact; for a rectangle
     it is the approximation E.1 prints, and :func:`rectangular_loop_field`
     gives the exact value, which is larger by
-    :math:`\sqrt{(d_1^2 + d_2^2)/(2 d_1 d_2)}`: 0,35 dB at an aspect ratio
-    of 1,5 and 3,3 dB at 4.
+    :math:`\sqrt{(d_1^2 + d_2^2)/(2 d_1 d_2)}`: 0.35 dB at an aspect ratio
+    of 1.5 and 3.3 dB at 4.
 
     :param current_a: RMS current in each turn, in amperes.
     :param length_m: Side of the square, or one side of the rectangle, in
@@ -615,11 +615,11 @@ def loop_current(
 
     The exact on-axis field of the rectangle (see the module docstring),
     inverted for the current. The defaults are the conditions of IEC
-    62489-1:2010 5.4.10.2, 400 mA/m at 1,4 m above the centre of the loop
+    62489-1:2010 5.4.10.2, 400 mA/m at 1.4 m above the centre of the loop
     plane, which is also where IEC 60118-4:2014 Figure H.1 plots the current
     required against the loop's size and aspect ratio, and the curves of that
-    figure are reproduced: 4,88 A for a 10 m square and 6,41 A for 10 m by
-    30 m, read as about 4,89 A and 6,41 A.
+    figure are reproduced: 4.88 A for a 10 m square and 6.41 A for 10 m by
+    30 m, read as about 4.89 A and 6.41 A.
 
     :param length_m: Length of the loop, in metres.
     :param width_m: Width of the loop, in metres.
@@ -679,7 +679,7 @@ def loop_dimensions(
     :param aspect_ratio: Long side over short side, at least 1 (1 for the
         square of 5.4.11.1, 3 for its second loop).
     :param height_m: Height above the centre of the loop plane, in metres
-        (1,4 m, 5.4.10.2).
+        (1.4 m, 5.4.10.2).
     :param field_strength_a_per_m: The field strength to reach, in A/m
         (400 mA/m).
     :param n_turns: Number of turns.
@@ -746,10 +746,10 @@ def loop_resistance(
 
     :math:`R = \rho N l / a`, with the resistivity of standard annealed copper,
     1/58 ohm square millimetre per metre at 20 degrees Celsius, carried to the
-    conductor's temperature by the coefficient 0,00393 per degree (IEC
+    conductor's temperature by the coefficient 0.00393 per degree (IEC
     60028:1925, clause I). B.2 quotes "approximately 0,017 ohm/m" for 1 mm² at
     25 degrees Celsius; Table B.1 is computed at 20 degrees, where its six
-    rounded resistances hold the resistivity between 1,716 and 1,738 times
+    rounded resistances hold the resistivity between 1.716 and 1.738 times
     :math:`10^{-8}` ohm metres, and 1/58 is inside that range.
 
     :param perimeter_m: Length of one turn, in metres.
@@ -795,7 +795,7 @@ def rectangular_loop_inductance(
        - 2(a + b) + \frac{\mu}{4}(a + b)\right]
 
     for sides :math:`a` and :math:`b` and a wire of radius :math:`\rho`
-    (Grover, *Inductance Calculations*, 1946, p. 60; the factor 0,004
+    (Grover, *Inductance Calculations*, 1946, p. 60; the factor 0.004
     microhenry per centimetre there is :math:`\mu_0/\pi`). The last term is the
     flux inside the wire, :math:`\mu = 1` for copper. For :math:`N` turns the
     single-turn value is multiplied by :math:`N^2`, the perfect coupling IEC
@@ -805,7 +805,7 @@ def rectangular_loop_inductance(
     (``internal_inductance=False``): the counter loop, the home loop, the small
     room and the typical place of worship come out at 189, 22, 47 and 109
     microhenries, as printed. With the term they are about 3 % higher, from
-    2,7 % for the place of worship to 4,2 % for the counter loop. At audio
+    2.7 % for the place of worship to 4.2 % for the counter loop. At audio
     frequencies the current fills the wire (the skin depth in copper is 2 mm
     at 1 kHz), which is why the term is included by default.
 
@@ -1547,7 +1547,7 @@ class QuadraturePhaseError(OwnsArrays):
     :math:`\cos(90^\circ - \delta) = \sin\delta` of one field against the
     other, which raises the level where the two add and lowers it where they
     subtract, by :math:`20\lg(1 \pm \sin\delta)` dB (5.4.14.1: at 85 degrees
-    the in-phase part is :math:`\cos 85^\circ = 0{,}087`).
+    the in-phase part is :math:`\cos 85^\circ = 0.087`).
 
     :ivar frequencies: The measurement frequencies, in hertz.
     :ivar phase_difference_deg: The phase angle between the loop currents at
@@ -1728,7 +1728,7 @@ def neck_loop_characteristics(
     The loop is arranged on the non-metallic jig of Annex E and the field
     measured at the telecoil position with a small inductor, about 3 mm by
     10 mm, the size of a behind-the-ear telecoil (9.1.2). The rated input
-    voltage is applied from a source of less than 0,4 ohm (9.3.2).
+    voltage is applied from a source of less than 0.4 ohm (9.3.2).
 
     A passive loop is linear, so the input voltage for 400 mA/m at 1 kHz
     (9.1) follows from the level measured at any voltage:
@@ -1819,10 +1819,10 @@ class NeckLoopType(RichDisplay):
 
 #: The two neck-loop types of the draft Amendment 2, D.1.2 and D.1.3
 #: (prEN 62489-1:2010/prA2:2017, a draft; read in E DIN EN 62489-1/A2:2017-10):
-#: type 1, for sources of two primary 1,5 V cells and higher voltage supplies,
+#: type 1, for sources of two primary 1.5 V cells and higher voltage supplies,
 #: of 32 ohm plus or minus 5 % DC resistance, and type 2, a neck loop with a
 #: transformer or an amplifier, of at least 32 ohm. Both reach 400 mA/m on the
-#: jig with at most 1,06 V at the input.
+#: jig with at most 1.06 V at the input.
 NECK_LOOP_TYPES: Mapping[int, NeckLoopType] = MappingProxyType(
     {
         1: NeckLoopType(
@@ -1935,10 +1935,10 @@ def verify_neck_loop(
 
     The draft Amendment 2 to IEC 62489-1 (prEN 62489-1:2010/prA2:2017, read in
     E DIN EN 62489-1/A2:2017-10) specifies a type 1 neck loop, for audio
-    sources powered by two primary 1,5 V cells and higher voltage supplies, by
+    sources powered by two primary 1.5 V cells and higher voltage supplies, by
     a DC resistance of 32 ohm plus or minus 5 % and a type 2 neck loop with a
     transformer or an amplifier by an input DC resistance of at least 32 ohm,
-    both reaching 400 mA/m on the jig of Annex E with at most 1,06 V at the
+    both reaching 400 mA/m on the jig of Annex E with at most 1.06 V at the
     input (:data:`NECK_LOOP_TYPES`). It is a draft, cited as one.
 
     :param dc_resistance_ohm: The measured DC input resistance, in ohms.

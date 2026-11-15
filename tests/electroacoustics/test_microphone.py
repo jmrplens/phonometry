@@ -5,7 +5,7 @@
 The four computed characteristics are checked against IEC 60268-4's own
 definitions as clean-room oracles:
 
-* **Sensitivity level** (11.1): ``L_M = 20 lg(M / 1 V/Pa)``, so 12,5 mV/Pa
+* **Sensitivity level** (11.1): ``L_M = 20 lg(M / 1 V/Pa)``, so 12.5 mV/Pa
   returns ``20 lg 0,0125 = -38,06`` dB re 1 V/Pa (hand-computed) and
   1 000 mV/Pa returns 0 dB exactly.
 * **Effective frequency range** (12.2): a response crossing the
@@ -14,7 +14,7 @@ definitions as clean-room oracles:
 * **Directivity index** (13.2.2 via the 11.2.2 a) integral): the ideal
   cardioid ``(1 + cos theta) / 2`` returns ``10 lg 3 = 4,77`` dB.
 * **Equivalent noise level** (17.2 d/e): ``20 lg((U_N / M) / 20 uPa)``, so
-  2,5 uV over 12,5 mV/Pa is 200 uPa, i.e. 20,0 dB exactly, and the overload
+  2.5 uV over 12.5 mV/Pa is 200 uPa, i.e. 20.0 dB exactly, and the overload
   sound pressure level (15.2.2) is read from a distortion curve that reaches
   the stated limit at a chosen level.
 
@@ -65,7 +65,7 @@ def _extract_text(path: str) -> str:
 
 
 def test_sensitivity_level_is_20lg_m_over_1v_pa() -> None:
-    """12,5 mV/Pa gives 20 lg 0,0125 = -38,06 dB re 1 V/Pa (11.1)."""
+    """12.5 mV/Pa gives 20 lg 0.0125 = -38.06 dB re 1 V/Pa (11.1)."""
     f, rel = _flat_response()
     result = electroacoustics.microphone_characteristics(
         frequencies=f, response_db=rel, sensitivity_mv_per_pa=_M_MV, tolerance_db=_TOL
@@ -133,7 +133,7 @@ def test_response_is_normalized_at_reference_frequency() -> None:
 
 
 def test_cardioid_directivity_index_is_10lg3() -> None:
-    """The ideal cardioid returns D = 10 lg 3 = 4,77 dB (13.2.2 / 11.2.2 a)."""
+    """The ideal cardioid returns D = 10 lg 3 = 4.77 dB (13.2.2 / 11.2.2 a)."""
     f, rel = _flat_response()
     angles = np.linspace(0.0, 179.9, 1800)
     pattern = 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)
@@ -166,7 +166,7 @@ def test_omnidirectional_directivity_index_is_zero() -> None:
             polar=(angles, np.zeros_like(angles))
         ),
     )
-    # Trapezoidal quadrature of the 11.2.2 a) integral over 0,25 degree steps.
+    # Trapezoidal quadrature of the 11.2.2 a) integral over 0.25 degree steps.
     assert result.directivity_index == pytest.approx(0.0, abs=1e-4)
 
 
@@ -238,7 +238,7 @@ def test_front_quarter_beyond_270_gives_no_directivity_index() -> None:
 
 
 def test_equivalent_noise_level_from_noise_voltage() -> None:
-    """2,5 uV over 12,5 mV/Pa is 200 uPa = 20,0 dB SPL exactly (17.2 d/e)."""
+    """2.5 uV over 12.5 mV/Pa is 200 uPa = 20.0 dB SPL exactly (17.2 d/e)."""
     f, rel = _flat_response()
     result = electroacoustics.microphone_characteristics(
         frequencies=f,
@@ -248,7 +248,7 @@ def test_equivalent_noise_level_from_noise_voltage() -> None:
         noise=electroacoustics.MicrophoneNoise(voltage_v=2.5e-6),
     )
     assert result.equivalent_noise_level == pytest.approx(20.0, abs=1e-12)
-    # SNR re 1 Pa: 20 lg(1 Pa / 20 uPa) - L_N = 93,98 - 20,0.
+    # SNR re 1 Pa: 20 lg(1 Pa / 20 uPa) - L_N = 93.98 - 20.0.
     assert result.signal_to_noise_ratio_db == pytest.approx(
         20.0 * math.log10(1.0 / 20e-6) - 20.0, abs=1e-12
     )
@@ -257,7 +257,7 @@ def test_equivalent_noise_level_from_noise_voltage() -> None:
 def test_overload_spl_read_from_distortion_curve() -> None:
     """The overload SPL is where the THD reaches the stated limit (15.2.2)."""
     f, rel = _flat_response()
-    spl = np.linspace(100.0, 140.0, 81)  # includes 130,0 dB exactly
+    spl = np.linspace(100.0, 140.0, 81)  # includes 130.0 dB exactly
     thd = 0.5 * 10.0 ** ((spl - 130.0) * 0.08)
     result = electroacoustics.microphone_characteristics(
         frequencies=f,

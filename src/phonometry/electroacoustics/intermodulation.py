@@ -13,9 +13,9 @@ inharmonic with the programme:
   sidebands at :math:`f_2 \pm (n-1) f_1`.
 * **Difference-frequency distortion** ``d_d,2``/``d_d,3`` (14.12.8) from two
   equal-amplitude tones, and the **total difference-frequency distortion**
-  (14.12.10) of the standard 8 kHz / 11,95 kHz pair.
+  (14.12.10) of the standard 8 kHz / 11.95 kHz pair.
 * **Dynamic intermodulation distortion** ``DIM`` (14.12.9) from the 15 kHz
-  sine / 3,15 kHz square-wave test signal.
+  sine / 3.15 kHz square-wave test signal.
 
 The per-order definitions are the IEC ones (arithmetic sums of the product
 amplitudes, referenced as each clause prescribes), with the SMPTE
@@ -487,7 +487,7 @@ def dynamic_intermodulation_distortion(
     # ("the ratio of the r.m.s. sum of the output voltages ... to the
     # amplitude of the output voltage at the frequency f_s"). The 14.12.9.2 f)
     # formula prints the denominator as "U2", which Table 2 and item d) define
-    # as the 8,70 kHz intermodulation component -- i.e. one of the nine terms
+    # as the 8.70 kHz intermodulation component -- i.e. one of the nine terms
     # of the formula's own numerator. That is an editorial defect of
     # IEC 60268-3:2013 (see docs/ERRATA.md); the Otala convention implemented
     # here follows the 14.12.9.1 definition.

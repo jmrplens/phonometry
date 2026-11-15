@@ -61,7 +61,7 @@ COHERENCE_EXPECTED = COHERENCE_SNR / (1.0 + COHERENCE_SNR)
 # filter has exactly the nominal gain at a frequency, and the +/-1 % component
 # tolerance the same figure blesses already moves it by up to 0.11 dB - so a
 # test must substitute its own budget there and say so. AES17-2015 Table 1
-# prints +/-0,01 dB for the same row, which is the only sign in these
+# prints +/-0.01 dB for the same row, which is the only sign in these
 # documents that anyone noticed.
 ITU_R_468_TABLE1: tuple[tuple[float, float, float], ...] = (
     (31.5, -29.9, 2.0),
@@ -87,14 +87,14 @@ ITU_R_468_TABLE1: tuple[tuple[float, float, float], ...] = (
     (31500.0, -42.7, 2.8),
 )
 
-#: Half the 0,1 dB quantum Table 1 is printed to, and therefore the largest
+#: Half the 0.1 dB quantum Table 1 is printed to, and therefore the largest
 #: difference rounding the nominal curve to that table can produce.
 ITU_R_468_TABLE1_ROUNDING_DB = 0.05
 
 #: Bound on |Fig. 1a network - printed Table 1 cell|, over all 21 rows. It is
 #: the quantum above plus a hair, and the hair is one row: at 100 Hz the
 #: network reads -19.850221 dB, 0.000221 dB past the rounding boundary, so
-#: the printed -19,8 sits on the far side of a tie that component values given
+#: the printed -19.8 sits on the far side of a tie that component values given
 #: to four significant figures cannot resolve. Every other row is inside
 #: 0.0384 dB and the rms over all 21 is 0.0264 dB, which is the signature of a
 #: rounding residual rather than a modelling error. A test must therefore not
@@ -116,11 +116,11 @@ ITU_R_468_AES17_ROWS: tuple[tuple[float, float], ...] = (
 )
 
 #: Tolerance for comparing the Fig. 1a network against those AES17 cells. The
-#: comparison crosses two independent roundings to 0,1 dB: AES17 derived its
+#: comparison crosses two independent roundings to 0.1 dB: AES17 derived its
 #: table from BS.468-4's *rounded* Table 1 rather than from the curve (5 of
 #: the 21 rows differ from ``round(network - 5.63)``, at 100, 200, 400, 3 150
 #: and 8 000 Hz), so the residual is up to 0.0802 dB, at 100 Hz. The AES17
 #: offset itself was taken from the curve, not the table: the network reads
-#: +5.6292 dB at 2 kHz, which rounds to the printed 5,63 and not to Table 1's
-#: +5,6.
+#: +5.6292 dB at 2 kHz, which rounds to the printed 5.63 and not to Table 1's
+#: +5.6.
 ITU_R_468_AES17_TOL_DB = 0.09

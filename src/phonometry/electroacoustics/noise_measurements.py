@@ -4,7 +4,7 @@
 The two levels that say how quiet a device is, both measured through the
 AES17 measurement chain: the standard notch (5.2.8) where a test tone has
 to be removed, the CCIR-RMS weighting (5.2.7, the ITU-R BS.468-4 curve with
-the flat -5,63 dB gain that puts unity at 2 kHz) and the 20 Hz to 20 kHz
+the flat -5.63 dB gain that puts unity at 2 kHz) and the 20 Hz to 20 kHz
 band (5.2.5):
 
 * **Dynamic range** (6.4.1), the ratio of the maximum output level to the
@@ -54,8 +54,8 @@ __all__ = [
 ]
 
 #: AES17-2015 5.2.7: the CCIR-RMS weighting is the ITU-R BS.468-4 curve with an
-#: additional flat gain of -5,63 dB, which places unity gain at 2 kHz. Table 1
-#: tabulates the result (for example -5,6 dB at 1 kHz, 0 dB at 2 kHz).
+#: additional flat gain of -5.63 dB, which places unity gain at 2 kHz. Table 1
+#: tabulates the result (for example -5.6 dB at 1 kHz, 0 dB at 2 kHz).
 _CCIR_RMS_OFFSET_DB = -5.63
 
 

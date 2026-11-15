@@ -7,7 +7,7 @@ definitions as clean-room oracles:
 
 * **Characteristic sensitivity level** (20.3/20.4): a flat ``L0`` response
   driven at ``sqrt(R)`` volts and measured at 1 m returns ``L0`` exactly (1 W
-  into ``R``); doubling the drive voltage subtracts 6,02 dB, and doubling the
+  into ``R``); doubling the drive voltage subtracts 6.02 dB, and doubling the
   distance while doubling the voltage cancels back to ``L0``.
 * **Effective frequency range** (21.2): a response crossing the ``reference −
   10 dB`` threshold at chosen frequencies returns exactly those frequencies,
@@ -69,7 +69,7 @@ def test_characteristic_sensitivity_is_band_mean_at_1w_1m() -> None:
         sensitivity_band=(200.0, 4000.0),
     )
     assert result.sensitivity_level == pytest.approx(_L0, abs=1e-9)
-    # Default drive is sqrt(R): 1 W into R (the 2,83 V @ 8 ohm convention).
+    # Default drive is sqrt(R): 1 W into R (the 2.83 V @ 8 ohm convention).
     assert result.input_voltage_v == pytest.approx(math.sqrt(_R))
 
 

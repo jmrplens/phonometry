@@ -112,7 +112,7 @@ in the ear canal instead of a loudness judgement, by Formula (1),
 
 after averaging the two fittings of the headphone and the two readings of the
 sound field, with the procedure repeated when the two fittings differ by more
-than 2,5 dB in any band (:func:`ear_canal_frequency_response`). A headphone
+than 2.5 dB in any band (:func:`ear_canal_frequency_response`). A headphone
 measured that way on at least 16 persons may replace the sound field of the
 indirect method (8.6.5.3, whose two references to 8.6.4.2 are read as 8.6.5.2,
 see ``docs/ERRATA.md``). The microphone in the ear canal is specified by
@@ -474,7 +474,7 @@ _IMPEDANCE_RANGE_HZ = (20.0, 20000.0)
 _LIMITING_PEAK_TO_RMS = (1.8, 2.2)
 
 #: The exact base-ten centres of the bands of IEC 60268-1 Table II, 20 Hz to
-#: 20 kHz, in hertz (19,95 Hz to 19,95 kHz), and the ratio of a band's upper
+#: 20 kHz, in hertz (19.95 Hz to 19.95 kHz), and the ratio of a band's upper
 #: edge to its centre.
 _TABLE_II_EXACT: tuple[float, ...] = tuple(
     1000.0 * 10.0 ** (n / 10.0) for n in range(-17, 14)
@@ -645,7 +645,7 @@ class RatedImpedanceVerification(OwnsArrays):
 
     @property
     def passes(self) -> bool:
-        """Whether the rated impedance is at most 1,25 times the lowest modulus in range."""
+        """Whether the rated impedance is at most 1.25 times the lowest modulus in range."""
         return self.min_ratio >= _RATED_IMPEDANCE_FRACTION * (1.0 - _LIMIT_SLACK)
 
     def __bool__(self) -> bool:
@@ -865,7 +865,7 @@ def working_sound_pressure_level(
     impedance :math:`Z` at 500 Hz takes its share of the e.m.f.,
     :math:`E = \sqrt{P R}\,|Z + R_\mathrm{s}|/|Z|`. The two readings agree
     when :math:`Z` is the rated impedance and part when it is not: a 32 ohm
-    headphone of 40 ohm at 500 Hz on a 120 ohm source reads 1,49 dB lower by
+    headphone of 40 ohm at 500 Hz on a 120 ohm source reads 1.49 dB lower by
     8.5.3 c). Pass ``headphone_impedance_ohm`` for the reading of 8.5.3 c)
     (see ``docs/ERRATA.md``); it applies to the 500 Hz sine of 8.5.2 b),
     since a noise signal has no single impedance to divide by.
@@ -1157,7 +1157,7 @@ class LimitingTestSignalCheck(RichDisplay):
 
     @property
     def peak_to_rms_passes(self) -> bool:
-        """Whether the peak-to-RMS ratio is between 1,8 and 2,2."""
+        """Whether the peak-to-RMS ratio is between 1.8 and 2.2."""
         lower, upper = _LIMITING_PEAK_TO_RMS
         return (
             lower * (1.0 - _LIMIT_SLACK)
@@ -1789,7 +1789,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
 
     @property
     def fittings_consistent(self) -> NDArray[np.bool_]:
-        """For each person, whether the fittings agree within 2,5 dB in every band.
+        """For each person, whether the fittings agree within 2.5 dB in every band.
 
         8.6.5.2 f): "if there is a difference exceeding 2,5 dB [...] in any 1/3
         octave band, the whole procedure is repeated."
@@ -1885,7 +1885,7 @@ def ear_canal_frequency_response(
     :math:`L_\mathrm{f} = L_\mathrm{e} - L_\mathrm{s} - (L_\mathrm{e} -
     L_\mathrm{s})_{500}`, averaged over at least eight persons (h). The
     result also carries the two checks of the procedure: the fittings within
-    2,5 dB in every band (f), and the 500 Hz band of the first fitting within
+    2.5 dB in every band (f), and the 500 Hz band of the first fitting within
     3 dB of the sound field's (c).
 
     :param frequencies: The band centres, in Hz, ascending, including the
@@ -1974,8 +1974,8 @@ class EarCanalMicrophoneVerification(RichDisplay):
             {
                 "a": self.entrance_area_mm2
                 <= _MAX_ENTRANCE_AREA_MM2 * (1.0 + _LIMIT_SLACK),
-                # A ratio of two decimal areas that is 0,6 in decimal comes
-                # out either side of it in binary; settled, it is 0,6.
+                # A ratio of two decimal areas that is 0.6 in decimal comes
+                # out either side of it in binary; settled, it is 0.6.
                 "b": float(settled(self.area_ratio)) < _MAX_CANAL_AREA_RATIO,
                 "c": self.volume_mm3 < _MAX_VOLUME_MM3,
                 "d": self.neighbor_difference
@@ -2034,7 +2034,7 @@ def verify_ear_canal_microphone(
 
     The five measurable conditions of the normative Annex B: a) a
     cross-sectional area of 5 mm² or less within the concha and the first
-    4 mm of the canal; b) in the rest of the canal, an area less than 0,6 of
+    4 mm of the canal; b) in the rest of the canal, an area less than 0.6 of
     the canal's ("The average ear canal area of an adult is 45 mm²"); c) a
     volume, mounting parts included, less than 130 mm³; d) responses to
     neighbouring one-third-octave bands of pink noise that "do not differ by
@@ -2111,8 +2111,8 @@ def headphone_modulation_signal(
 
     "The sum of two sinusoidal signals, at 70 Hz and 600 Hz, with amplitude
     ratio 4:1. The peak voltage of the signal shall be equal to that of the
-    rated input voltage": amplitudes :math:`0{,}8\sqrt{2}U` and
-    :math:`0{,}2\sqrt{2}U` for a rated voltage :math:`U`, which NOTE 1 states
+    rated input voltage": amplitudes :math:`0.8\sqrt{2}U` and
+    :math:`0.2\sqrt{2}U` for a rated voltage :math:`U`, which NOTE 1 states
     as "−1,9 dB at 70 Hz and −14,0 dB at 600 Hz". Both start at their crest
     (cosine phase), so the record reaches that peak at its first sample.
     Read the products with

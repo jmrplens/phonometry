@@ -179,7 +179,7 @@ def test_table_spectrum_sits_on_the_table() -> None:
     check = ea.check_program_signal(
         frequencies=bands.frequencies, band_levels=np.asarray(bands.levels)
     )
-    # The middle bands are wide enough for 120 s to settle well inside 0,5 dB.
+    # The middle bands are wide enough for 120 s to settle well inside 0.5 dB.
     middle = (check.frequencies >= 250.0) & (check.frequencies <= 8000.0)
     assert np.max(np.abs(check.deviations_db[middle])) < 0.1
 
@@ -234,8 +234,8 @@ def test_the_table_itself_passes_with_its_whole_tolerance() -> None:
 def test_a_band_on_its_limit_passes() -> None:
     frequencies, levels, _ = _table()
     shifted = levels.copy()
-    # 20 Hz raised 3,5 dB: the only level that fits is -0,5 dB, which puts it
-    # on its +3 dB limit and the 0,5 dB bands of the middle on their -0,5 dB.
+    # 20 Hz raised 3.5 dB: the only level that fits is -0.5 dB, which puts it
+    # on its +3 dB limit and the 0.5 dB bands of the middle on their -0.5 dB.
     shifted[0] += 3.5
     check = ea.check_program_signal(frequencies=frequencies, band_levels=shifted)
     assert check.offset_db == pytest.approx(-0.5, abs=1e-12)
@@ -246,7 +246,7 @@ def test_a_band_on_its_limit_passes() -> None:
 def test_a_band_beyond_its_limit_fails_and_is_named() -> None:
     frequencies, levels, _ = _table()
     shifted = levels.copy()
-    shifted[14] += 1.5  # 500 Hz, tolerance 0,5 dB
+    shifted[14] += 1.5  # 500 Hz, tolerance 0.5 dB
     check = ea.check_program_signal(frequencies=frequencies, band_levels=shifted)
     assert not check.passes
     assert 500.0 in check.binding_bands_hz

@@ -555,7 +555,7 @@ def test_itu_r_468_weighting_reproduces_every_table_1_row() -> None:
 
     The function evaluates the Fig. 1a network, which clause 1 makes the
     nominal curve, so the table is an oracle rather than the source: each row
-    is the curve rounded to 0,1 dB and must therefore agree to half a
+    is the curve rounded to 0.1 dB and must therefore agree to half a
     quantum (bar the 100 Hz knife-edge the bound carries). That is a real
     check. Pinning the same rows to 1e-9, as this test used to, only asserted
     that ``np.interp`` returns its own knots.
@@ -619,9 +619,9 @@ def test_itu_r_468_weighting_rejects_a_negative_frequency() -> None:
 
 
 def test_itu_r_468_matches_aes17_ccir_rms_table() -> None:
-    """AES17-2015 Table 1 is this curve shifted by -5,63 dB (5.2.7).
+    """AES17-2015 Table 1 is this curve shifted by -5.63 dB (5.2.7).
 
-    The tolerance crosses two independent roundings to 0,1 dB, not one: AES17
+    The tolerance crosses two independent roundings to 0.1 dB, not one: AES17
     derived its cells from BS.468-4's rounded Table 1 rather than from the
     curve, so ``network - 5.63`` sits up to 0.0802 dB from a printed cell.
     Two of the four rows checked here (3 150 and 8 000 Hz) are among the five
@@ -634,7 +634,7 @@ def test_itu_r_468_matches_aes17_ccir_rms_table() -> None:
         )
         assert shifted == pytest.approx(printed, abs=ref.ITU_R_468_AES17_TOL_DB)
     # The offset itself was taken from the curve, not from the table: it is
-    # the network's 2 kHz response rounded to 0,01 dB.
+    # the network's 2 kHz response rounded to 0.01 dB.
     at_2k = float(electroacoustics.weighting_bs468([2000.0])[0])
     assert at_2k == pytest.approx(-ref.ITU_R_468_AES17_OFFSET_DB, abs=0.005)
 

@@ -125,7 +125,7 @@ def test_text_input_is_refused_by_name(text: str) -> None:
 def test_flux_density_of_one_ampere_per_metre() -> None:
     microtesla = float(ea.magnetic_flux_density(1.0)) * 1e6
     assert microtesla == pytest.approx(4.0 * math.pi / 10.0, rel=1e-12)
-    # E.6 prints 1,256, the last digit truncated rather than rounded.
+    # E.6 prints 1.256, the last digit truncated rather than rounded.
     assert round(microtesla, 3) == pytest.approx(1.257)
     assert microtesla == pytest.approx(
         ref.IEC60118_4_E6_MICROTESLA_PER_A_PER_M, abs=1e-3
@@ -328,8 +328,8 @@ def test_combi_refuses_less_than_four_times_the_noise() -> None:
 def test_combi_keeps_four_times_the_noise_once_the_sine_is_rounded(
     sine: float, noise: float
 ) -> None:
-    # 1,2496 s of sine rounds up to 1 250 whole periods, 1,25 s, and 4,9984 s
-    # of noise would leave a ratio of 3,999: Table 2 says the ratio of 4:1
+    # 1.2496 s of sine rounds up to 1 250 whole periods, 1.25 s, and 4.9984 s
+    # of noise would leave a ratio of 3.999: Table 2 says the ratio of 4:1
     # shall not be reduced.
     x = ea.combi_signal(FS, sine_s=sine, noise_s=noise, seed=1)
     n_sine = round(round(sine * 1000.0) * FS / 1000.0)
@@ -582,8 +582,8 @@ def test_system_noise_at_exactly_47_db_uses_the_1_db_rule() -> None:
 
 
 def test_response_exactly_3_db_from_1_khz_is_on_the_edge() -> None:
-    # -18,6 - (-15,6) is -3,000 000 000 000 001 8 in binary, and -31,7 - (-34,7)
-    # is +3,000 000 000 000 003 6.
+    # -18.6 - (-15.6) is -3.000 000 000 000 001 8 in binary, and -31.7 - (-34.7)
+    # is +3.000 000 000 000 003 6.
     result = ea.verify_induction_loop_system(
         [0.0],
         frequencies=_F,
@@ -596,16 +596,16 @@ def test_response_exactly_3_db_from_1_khz_is_on_the_edge() -> None:
 
 
 def test_field_strength_3_db_from_a_specified_level_is_on_the_edge() -> None:
-    # A meter that reads 400 mA/m as -5,9 dB: -5,9 + 3 is
-    # -2,900 000 000 000 000 4 in binary, below the reading of -2,9 dB.
+    # A meter that reads 400 mA/m as -5.9 dB: -5.9 + 3 is
+    # -2.900 000 000 000 000 4 in binary, below the reading of -2.9 dB.
     result = ea.verify_induction_loop_system([-8.9, -2.9], specified_level=-5.9)
     assert result.requirement("field_strength").worst_margin_db == 0.0
     assert result.passes
 
 
 def test_system_noise_exactly_1_db_up_is_on_the_edge() -> None:
-    # A site at a reference signal-to-noise ratio of 32,7 dB: -32,7 + 1 is
-    # -31,700 000 000 000 003 in binary, below the reading of -31,7 dB.
+    # A site at a reference signal-to-noise ratio of 32.7 dB: -32.7 + 1 is
+    # -31.700 000 000 000 003 in binary, below the reading of -31.7 dB.
     result = ea.verify_induction_loop_system(
         [0.0], background_noise_levels=[-32.7], system_noise_levels=[-31.7]
     )
@@ -877,7 +877,7 @@ def test_overload_passes_on_the_compliance_voltage() -> None:
 
 
 def test_overload_is_judged_at_the_table_4_frequency() -> None:
-    # The voltage doubles above 2,5 kHz, so the sweep runs on past Table 4;
+    # The voltage doubles above 2.5 kHz, so the sweep runs on past Table 4;
     # 10.3.3 forbids clipping at the Table 4 frequency, not beyond it.
     impedance = ea.loop_impedance(2.0, 109e-6)
     at_table_4 = 10 ** (-7 / 20) * float(impedance.at(2500.0))
@@ -897,7 +897,7 @@ def test_overload_is_judged_at_the_table_4_frequency() -> None:
 
 
 def test_current_response_scales_the_loop_voltage_in_decibels() -> None:
-    # The current doubles from 1 kHz to 2 kHz and holds: 6,02 dB of lift,
+    # The current doubles from 1 kHz to 2 kHz and holds: 6.02 dB of lift,
     # read log-linearly between the measured frequencies.
     impedance = ea.loop_impedance(0.69, 109e-6)
     response = ea.amplifier_frequency_response(
@@ -981,7 +981,7 @@ def _first_doubling(
 
 def test_overload_sweep_stops_at_the_first_doubling_of_a_peaked_response() -> None:
     # A correction that peaks at 5 kHz and falls away above it doubles the
-    # voltage near 4,2 kHz and brings it back below twice its start by
+    # voltage near 4.2 kHz and brings it back below twice its start by
     # 10 kHz: the sweep ends at that first doubling, above the 4 kHz of Table 4.
     impedance = ea.loop_impedance(2.0, 20e-6)
     frequencies = [
@@ -1011,8 +1011,8 @@ def test_overload_sweep_stops_at_the_first_doubling_of_a_peaked_response() -> No
 
 
 def test_overload_sweep_takes_the_first_of_several_doublings() -> None:
-    # The voltage doubles near 2,3 kHz, falls back and doubles again near
-    # 9 kHz; the first doubling is below the 3,15 kHz of Table 4, where the
+    # The voltage doubles near 2.3 kHz, falls back and doubles again near
+    # 9 kHz; the first doubling is below the 3.15 kHz of Table 4, where the
     # sweep for speech ends.
     impedance = ea.loop_impedance(2.0, 20e-6)
     frequencies = [1000.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0]

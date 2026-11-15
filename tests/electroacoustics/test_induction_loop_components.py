@@ -143,7 +143,7 @@ def test_biot_savart_reproduces_the_curves_of_figure_e2_b(
 
 def test_figure_e2_vertical_curve_is_not_the_traverse_along_the_length() -> None:
     # Figure E.2 a) labels the vertical field along the 15-unit length; there
-    # the vertical component at 5 % reads +1,8 dB where the printed curve,
+    # the vertical component at 5 % reads +1.8 dB where the printed curve,
     # the traverse across the width, reads below 0 dB.
     length, width, height = ref.IEC60118_4_FIGURE_E2B_LOOP
     along = ea.rectangular_loop_field(1.0, length, width, -0.45 * length, 0.0, height)
@@ -311,7 +311,7 @@ def test_inductance_refuses_a_thick_wire() -> None:
 )
 def test_table_b1_impedances_follow_from_its_rounded_r_and_l(row: tuple) -> None:
     *_, resistance, inductance, z2k, z5k = row
-    # The printed R and L are rounded to 0,01 ohm and 1 microhenry; the
+    # The printed R and L are rounded to 0.01 ohm and 1 microhenry; the
     # printed impedances lie within what that rounding allows, plus their own.
     corners = [
         ea.loop_impedance(resistance + dr, (inductance + dl) * 1e-6)
@@ -453,10 +453,10 @@ def test_agc_range_handles_an_overshoot() -> None:
     emf = [-40.0, -30.0, -20.0, -10.0, 0.0]
     out = [-10.0, -1.0, 1.0, -2.5, -1.0]
     agc = ea.agc_characteristic(emf, out)
-    # The overshoot to +1 dB and the dip to -2,5 dB cannot share a 3 dB
+    # The overshoot to +1 dB and the dip to -2.5 dB cannot share a 3 dB
     # window: the widest one holds the overshoot and runs from where the
-    # rising side reaches -2 dB (-31,11 dB) to where the falling side does
-    # (-11,43 dB), wider than the 18,57 dB from +0,5 dB down to the top.
+    # rising side reaches -2 dB (-31.11 dB) to where the falling side does
+    # (-11.43 dB), wider than the 18.57 dB from +0.5 dB down to the top.
     assert agc.agc_range_start_level == pytest.approx(-40.0 + 8.0 / 0.9, abs=2e-3)
     assert agc.agc_range_end_level == pytest.approx(-20.0 + 3.0 / 0.35, abs=2e-3)
     assert agc.agc_range_db == pytest.approx(3.0 / 0.35 + 20.0 - 8.0 / 0.9, abs=3e-3)
@@ -471,7 +471,7 @@ def test_agc_characteristic_needs_ascending_input() -> None:
 def test_agc_range_ends_where_the_line_crosses_a_level_between_steps() -> None:
     # The widest window holds the 0 dB of the third step as its lowest value
     # and the 3 dB above it: it enters on the first segment where the line
-    # rises through 0 dB (-23,33 dB) and leaves on the last where it rises
+    # rises through 0 dB (-23.33 dB) and leaves on the last where it rises
     # through 3 dB (-5 dB). Neither end is a step, and neither lies on any
     # grid of input levels.
     agc = ea.agc_characteristic([-30.0, -20.0, -10.0, 0.0], [-6.0, 3.0, 0.0, 6.0])
@@ -481,8 +481,8 @@ def test_agc_range_ends_where_the_line_crosses_a_level_between_steps() -> None:
 
 
 def test_agc_range_keeps_a_window_whose_levels_differ_by_exactly_3_db() -> None:
-    # 4,19 dB and 1,19 dB are 3 dB apart, but in floating point 1,19 + 3 is
-    # 4,1899999999999995 and 4,19 - 3 is 1,1900000000000004: without the
+    # 4.19 dB and 1.19 dB are 3 dB apart, but in floating point 1.19 + 3 is
+    # 4.1899999999999995 and 4.19 - 3 is 1.1900000000000004: without the
     # tolerance neither step's 3 dB band holds the other, and the window
     # shrinks to the 30 dB from 10 dB onwards.
     emf = [0.0, 10.0, 20.0, 30.0, 40.0]
@@ -494,9 +494,9 @@ def test_agc_range_keeps_a_window_whose_levels_differ_by_exactly_3_db() -> None:
 
 
 def test_agc_range_ends_where_a_window_exactly_3_db_deep_meets_its_edges() -> None:
-    # -1,4 dB less -4,4 dB is 3,0000000000000004 dB in floating point, while
-    # -1,4 dB less 3 dB rounds to -4,4 dB, so the band below the -1,4 dB step
-    # holds the window: it runs from the fall through -1,4 dB to the rise
+    # -1.4 dB less -4.4 dB is 3.0000000000000004 dB in floating point, while
+    # -1.4 dB less 3 dB rounds to -4.4 dB, so the band below the -1.4 dB step
+    # holds the window: it runs from the fall through -1.4 dB to the rise
     # back to it.
     emf = [-35.0, -30.0, -25.0, -20.0, -15.0]
     out = [0.0, -4.4, -1.4, -1.6, 2.0]
@@ -527,7 +527,7 @@ def test_quadrature_example_of_5_4_14_1() -> None:
     assert error.level_increase == pytest.approx(
         ref.IEC62489_1_QUADRATURE_EXAMPLE_DB, abs=0.01
     )
-    # The decrease is 0,79 dB, not the 0,72 dB 5.4.14.1 prints for both.
+    # The decrease is 0.79 dB, not the 0.72 dB 5.4.14.1 prints for both.
     assert error.level_decrease == pytest.approx(-0.79, abs=0.005)
 
 
@@ -566,7 +566,7 @@ def test_quadrature_in_phase_currents_cancel_where_they_subtract(phase: float) -
 
 
 def test_quadrature_decrease_near_90_degrees_is_accurate() -> None:
-    # 20 lg(1 - sin 89,9999 degrees), from the series 1 - sin(90 - e) = e^2/2.
+    # 20 lg(1 - sin 89.9999 degrees), from the series 1 - sin(90 - e) = e^2/2.
     error = ea.quadrature_phase_error(
         frequencies=[1000.0], phase_difference_deg=[1.0e-4]
     )
@@ -810,8 +810,8 @@ _STEPS_THD = [0.1, 0.2, 0.5, 1.5, 3.0]
 
 
 def test_maximum_output_current_is_read_where_the_thd_reaches_its_rating() -> None:
-    # Between 3 V (0,5 %) and 4 V (1,5 %) across 0,5 ohm the distortion
-    # passes 1 % half way: 3,5 V, so 7 A.
+    # Between 3 V (0.5 %) and 4 V (1.5 %) across 0.5 ohm the distortion
+    # passes 1 % half way: 3.5 V, so 7 A.
     result = ea.max_output_current(
         _STEPS_V, _STEPS_THD, load_resistance_ohm=0.5, rated_thd_percent=1.0
     )

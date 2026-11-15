@@ -789,7 +789,7 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
 
     s.ground(gy, 50.0, 850.0)
 
-    # Source and receiver, both 1,5 m high (drawn out of scale for legibility).
+    # Source and receiver, both 1.5 m high (drawn out of scale for legibility).
     hs = 86.0
     s.circle(x0, gy - hs, 9, th.secondary)
     s.line(x0, gy - hs, x0, gy, th.fg, 2.0)
@@ -940,14 +940,14 @@ def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
             s.rect(430, top, 20, 132, "none", th.muted, rx=3, sw=1.4, dash="5,4")
             s.text(440, top - 62, "where it will stand", 13, th.muted)
 
-        # The reference microphone: 1,5 m clear of the top edge, on the plane
+        # The reference microphone: 1.5 m clear of the top edge, on the plane
         # through it, so that it hears the source and not the barrier.
         s.mic(440, top - 46, top, scale=0.8)
         s.line(430, top, 450, top, th.muted, 1.2, dash="3,3")
         s.dim(470, top, 470, top - 46, "1.5 m", size=13, label_side="right")
         s.text(440, base + 30, "reference microphone", 13, th.accent)
 
-        # The receiver, at 1,2 m or more, where somebody actually stands.
+        # The receiver, at 1.2 m or more, where somebody actually stands.
         s.mic(740, base - 86, base, scale=0.9)
         s.text(740, base + 30, "receiver position", 13, th.accent)
         s.dim(790, base, 790, base - 86, "≥ 1.2 m", size=13, label_side="right")
@@ -1270,7 +1270,7 @@ def _d_barrier_four_paths(s: SVG, th: Theme) -> None:
     gy = 260.0
     x0, x1 = 110.0, 800.0
     sx, sy = x0, gy - 60.0  # source, 1 m high (out of scale)
-    rx, ry = x1, gy - 90.0  # receiver, 1,5 m high
+    rx, ry = x1, gy - 90.0  # receiver, 1.5 m high
     ex = x0 + (x1 - x0) * 0.5  # barrier at 50 m of 100 m
     ey = gy - 200.0  # 4 m screen (out of scale)
 
@@ -1472,7 +1472,7 @@ def _d_cnossos_road(s: SVG, th: Theme) -> None:
     s.rect(120.0, sy - 8, 300.0, 8, th.muted)
     s.text(240.0, sy + 34, "road surface", 15, th.muted)
     s.circle(300.0, sy - 22, 8, th.secondary)
-    s.dim(300.0, sy, 300.0, sy - 22, "0,05 m", 40, 15, label_side="right")
+    s.dim(300.0, sy, 300.0, sy - 22, "0.05 m", 40, 15, label_side="right")
     s.text(300.0, sy - 44, "equivalent point source", 15, th.fg, bold=True)
 
     # The gradient, with the two halves of a bidirectional flow.
@@ -1502,7 +1502,7 @@ def _d_cnossos_rail(s: SVG, th: Theme) -> None:
     s.text(70.0, 74.0, "Section", 17, th.fg, anchor="start", bold=True)
     s.ground(gy, 190.0, 470.0)
     cx = 330.0  # track centre
-    gauge = 92.0  # 1,435 m, out of scale
+    gauge = 92.0  # 1.435 m, out of scale
     s.path(
         f"M {cx - 130} {gy} L {cx - 96} {gy - 30} L {cx + 96} {gy - 30} "
         f"L {cx + 130} {gy} Z",
@@ -1526,15 +1526,15 @@ def _d_cnossos_rail(s: SVG, th: Theme) -> None:
         th.secondary,
         anchor="end",
     )
-    s.dim(cx - gauge / 2, gy - 76, cx + gauge / 2, gy - 76, "1,435 m", 0, 15)
+    s.dim(cx - gauge / 2, gy - 76, cx + gauge / 2, gy - 76, "1.435 m", 0, 15)
 
     # Source A and source B on the track centre.
     ay = datum - 60.0
     by = datum - 250.0
     s.circle(cx, ay, 9, th.primary)
     s.circle(cx, by, 9, th.accent)
-    s.dim(cx, datum, cx, ay, "0,5 m", 60, 15, label_side="right")
-    s.dim(cx, datum, cx, by, "4,0 m", 120, 15, label_side="right")
+    s.dim(cx, datum, cx, ay, "0.5 m", 60, 15, label_side="right")
+    s.dim(cx, datum, cx, by, "4.0 m", 120, 15, label_side="right")
     s.text(cx - 26, ay - 6, "A: rolling, impact, squeal,", 14, th.fg, anchor="end")
     s.text(cx - 26, ay + 16, "bridge, low traction", 14, th.fg, anchor="end")
     s.text(cx - 26, by + 16, "B: exhausts, roof apparatus,", 14, th.fg, anchor="end")
@@ -1598,7 +1598,7 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
     # --- plan ------------------------------------------------------------
     cx, cy, r = 250.0, 210.0, 130.0
     s.circle(cx, cy, r, th.panel, th.fg, sw=2.2)
-    s.dim(cx - r, cy + r + 34, cx + r, cy + r + 34, "diameter ≥ 1,0 m", 0, 15)
+    s.dim(cx - r, cy + r + 34, cx + r, cy + r + 34, "diameter ≥ 1.0 m", 0, 15)
     s.circle(cx, cy, 9, th.fg)
     s.arrow(cx, cy, cx + r + 46, cy, th.secondary, 2.0)
     s.text(cx + r + 54, cy + 6, "to the turbine", 15, th.secondary, anchor="start")
@@ -1621,7 +1621,7 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
     bx0, bx1 = 470.0, 830.0
     s.ground(gy, 440.0, 860.0)
     s.rect(bx0, gy - 12, bx1 - bx0, 12, th.panel, th.fg, sw=2.0)
-    s.text((bx0 + bx1) / 2, gy + 108, "plywood ≥ 12,0 mm  ·  metal ≥ 2,5 mm", 15, th.fg)
+    s.text((bx0 + bx1) / 2, gy + 108, "plywood ≥ 12.0 mm  ·  metal ≥ 2.5 mm", 15, th.fg)
     # Soil fillet at the edges.
     s.path(f"M {bx0 - 34} {gy} L {bx0} {gy - 12} L {bx0} {gy} Z", fill=th.muted)
     s.path(f"M {bx1 + 34} {gy} L {bx1} {gy - 12} L {bx1} {gy} Z", fill=th.muted)
@@ -1662,7 +1662,7 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
             "within ±15° of downwind",
             "$R_0$ to ±20 %, max ±30 m, measured to ±2 %",
             "board inclination $φ$ between 25° and 40°",
-            "reflections from structures < 0,2 dB",
+            "reflections from structures < 0.2 dB",
         )
     ):
         s.text(56.0, 458.0 + i * 24.0, line, 15, th.fg, anchor="start")
@@ -2261,7 +2261,7 @@ def _d_soundscape_study(s: SVG, th: Theme) -> None:
 def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:
     # --- plan, 12 px per metre -------------------------------------------
     # Figure 3's two-lane road: the measuring lane on the roadside of
-    # right-hand traffic, the microphone 7,5 m from its centre (8.1), and
+    # right-hand traffic, the microphone 7.5 m from its centre (8.1), and
     # 30 m of level, straight road on each side of it (6.1).
     rx0, rx1 = 50.0, 850.0
     mx = 450.0
@@ -2289,7 +2289,7 @@ def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:
     s.rect(cx0, centre - 11, cx1 - cx0, 22, th.secondary, rx=6)
     s.arrow(cx1 + 8, centre, cx1 + 48, centre, th.secondary, 2.0)
 
-    # The two microphone positions, both 7,5 m from the measuring lane.
+    # The two microphone positions, both 7.5 m from the measuring lane.
     mic1 = centre + 7.5 * per_m
     mic2 = centre - 7.5 * per_m
     for my in (mic1, mic2):
@@ -2378,12 +2378,12 @@ def _d_statistical_pass_by_site(s: SVG, th: Theme) -> None:
 
 def _d_rolling_stock_site(s: SVG, th: Theme) -> None:
     # --- section across the track, 23 px per metre -------------------------
-    # Figure 6: A at 7,5 m and 1,2 m above the top of rail, B at 7,5 m and
-    # 3,5 m (6.4.2), C at 25 m and 3,5 m (6.4.1, 200 km/h and above).
+    # Figure 6: A at 7.5 m and 1.2 m above the top of rail, B at 7.5 m and
+    # 3.5 m (6.4.2), C at 25 m and 3.5 m (6.4.1, 200 km/h and above).
     per_m = 23.0
     x0 = 130.0  # track centreline
     rail = 300.0  # top of rail
-    gy = rail + 1.3 * per_m  # the ground, 1,3 m below the top of rail
+    gy = rail + 1.3 * per_m  # the ground, 1.3 m below the top of rail
     s.text(
         50.0,
         70.0,
@@ -2571,7 +2571,7 @@ def _d_wind_turbine_receptor(s: SVG, th: Theme) -> None:
     frequency of interest, typically 15 m to 20 m (8.1.1, PDF page 25,
     printed p. 23), free-field and inside a two-stage or oversize wind screen
     on a tripod or a pole (8.1.3, same page). The façade alternative is plane
-    within ±0,05 m within 1 m of the microphone, with the edges of the façade
+    within ±0.05 m within 1 m of the microphone, with the edges of the façade
     more than 1 m away, the relevant turbines within 45° of its normal, and no
     use for tonal audibility, amplitude modulation or impulsivity (8.1.3,
     PDF pages 25 and 26, pp. 23 and 24). Wind and the turbines' power are

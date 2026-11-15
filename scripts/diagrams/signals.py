@@ -2844,7 +2844,7 @@ def _g_weight_db(f: float) -> float:
 
 
 def _d_infrasound_chain(s: SVG, th: Theme) -> None:
-    """The chain that has to deliver 0,25 Hz, and where it usually does not.
+    """The chain that has to deliver 0.25 Hz, and where it usually does not.
 
     Left: section through the ground board with the capsule at its centre,
     the static-pressure equalisation vent called out, and the two windscreens.
@@ -2903,7 +2903,7 @@ def _d_infrasound_chain(s: SVG, th: Theme) -> None:
     # step on top of that.
     bx, bw, bh = 320.0, 264.0, 92.0
     stages = (
-        ("Preamplifier", "corner << 0,25 Hz", th.primary),
+        ("Preamplifier", "corner << 0.25 Hz", th.primary),
         ("Recorder", "low-cut switch OFF", th.primary),
         ("G weighting + integrator", "$T ≥ 10$ s (A.5)", th.accent),
     )
@@ -2936,7 +2936,7 @@ def _d_infrasound_chain(s: SVG, th: Theme) -> None:
     def fy(db: float) -> float:
         return py + ph * (db_hi - db) / (db_hi - db_lo)
 
-    # The 0,25 Hz - 315 Hz span ISO 7196 Annex A asks the microphone to cover.
+    # The 0.25 Hz - 315 Hz span ISO 7196 Annex A asks the microphone to cover.
     s.add(
         f'<rect x="{fx(0.25):.1f}" y="{py + 2:.1f}" '
         f'width="{fx(315.0) - fx(0.25):.1f}" height="{ph - 4:.1f}" '
@@ -2967,7 +2967,7 @@ def _d_infrasound_chain(s: SVG, th: Theme) -> None:
     s.line(fx(corner), py + 2, fx(corner), py + ph - 2, th.secondary, 1.2, dash="3,4")
     s.text(px + pw / 2, py - 14, "What the chain lets through", 15, th.fg, bold=True)
     for f_tick, label in (
-        (0.1, "0,1"),
+        (0.1, "0.1"),
         (1.0, "1"),
         (10.0, "10"),
         (100.0, "100"),
@@ -2990,7 +2990,7 @@ def _d_infrasound_chain(s: SVG, th: Theme) -> None:
     )
     # The span of the shaded band, named with the captions: inside the plot
     # the G curve and the corner line ran through it wherever it went.
-    s.text(px + pw / 2, py + ph + 138, "A.2: 0,25 - 315 Hz", 13, th.accent, bold=True)
+    s.text(px + pw / 2, py + ph + 138, "A.2: 0.25 - 315 Hz", 13, th.accent, bold=True)
     s.text(px + pw / 2, py + ph + 160, "ISO 7196:1995, Annex A", 14, th.muted)
 
 
@@ -3002,7 +3002,7 @@ def _d_infrasound_chain(s: SVG, th: Theme) -> None:
 def _d_multichannel_capture(s: SVG, th: Theme) -> None:
     """Four microphones, one converter, and the map from row to position.
 
-    Room-survey spacing with the capsules at 1,2 m, the calibrator drawn
+    Room-survey spacing with the capsules at 1.2 m, the calibrator drawn
     coupled onto one capsule and moved along the row, and the single-clock
     requirement stated where it is decided: at the interface.
     """
@@ -3011,8 +3011,8 @@ def _d_multichannel_capture(s: SVG, th: Theme) -> None:
     s.text(172, 92, "Each position, its sensitivity", 16, th.fg, bold=True)
 
     xs = (66.0, 132.0, 198.0, 264.0)
-    sens = ("11,8", "12,3", "11,9", "12,1")
-    cap_y = gy - 120.0  # capsule height, 1,2 m to scale
+    sens = ("11.8", "12.3", "11.9", "12.1")
+    cap_y = gy - 120.0  # capsule height, 1.2 m to scale
     for i, (x, mv) in enumerate(zip(xs, sens, strict=True)):
         s.mic(x, cap_y, gy, 0.95)
         s.text(x, gy + 24, f"P{i + 1}", 15, th.fg, bold=True)
@@ -3021,11 +3021,11 @@ def _d_multichannel_capture(s: SVG, th: Theme) -> None:
     # The label over the top of the dimension: beside it, the first stand
     # ran through it.
     s.dim(40, cap_y, 40, gy, "", size=13, label_side="right")
-    s.text(40, cap_y - 10, "1,2 m", 13, th.fg)
+    s.text(40, cap_y - 10, "1.2 m", 13, th.fg)
 
     # Calibrator coupled onto P2 and moved along the row.
     s.rect(xs[1] - 22, cap_y - 56, 44, 56, th.panel, th.secondary, rx=6, sw=2)
-    s.text(xs[1], cap_y - 30, "94,0", 13, th.secondary, bold=True, mono=True)
+    s.text(xs[1], cap_y - 30, "94.0", 13, th.secondary, bold=True, mono=True)
     s.text(xs[1], cap_y - 12, "dB", 11, th.muted, mono=True)
     s.path(
         f"M {xs[0]:.0f} {cap_y - 78:.0f} Q {xs[1] + 34:.0f} "
@@ -3463,8 +3463,8 @@ def _d_verification_regimes(s: SVG, th: Theme) -> None:
     of 10.2 only where the filters are time invariant; for any other filter
     set 10.2 is the only route. One condition the cell is too narrow to
     carry: the k range of 13.4 runs from -7 to 7 only while the test
-    frequency stays above 0,5 times the lowest exact midband frequency of the
-    set and below 1,5 times the highest, so fifteen is a ceiling. The box at
+    frequency stays above 0.5 times the lowest exact midband frequency of the
+    set and below 1.5 times the highest, so fifteen is a ceiling. The box at
     the foot is the conformance criterion both series apply (5.1.21 of
     IEC 61672-1, 5.1.9 of IEC 61260-1), of which a computed response can show
     only the first half. The arrows down the two outer margins are

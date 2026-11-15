@@ -683,7 +683,7 @@ def _d_metadiffuser_chain(s: SVG, th: Theme) -> None:
             )
         s.text(x0 + h * mm_a / 2, ym - 6, str(i + 1), 11, th.fg)
     # The backing sits just clear of the panel back, so its line is the wall
-    # the lower cavities stop 0,5 mm short of rather than a stroke over them.
+    # the lower cavities stop 0.5 mm short of rather than a stroke over them.
     s.ground(ym + depth_px + 1.2, xm - 4, xm + 5 * pitch + 4)
     s.text(xm + 5 * pitch + 8, ym + 10, "2 cm", 12, th.fg, "start")
     s.arrow(596, 170, 640, 132, th.primary, 1.6)
@@ -1717,11 +1717,11 @@ def _d_iso354_room(s: SVG, th: Theme) -> None:
 def _d_suspended_ceiling_specimen(s: SVG, th: Theme) -> None:
     """The EN 16487 specimen: what the test code fixes before ISO 354 measures.
 
-    Three views of one arrangement. In plan, the 10,80 m2 of 4.1.1.1.1 built
-    from thirty 0,6 m test objects (4.1.1.1.2), five by six, butted with no
+    Three views of one arrangement. In plan, the 10.80 m2 of 4.1.1.1.1 built
+    from thirty 0.6 m test objects (4.1.1.1.2), five by six, butted with no
     seal and no grid over the joints (4.1.1.1.3, 4.1.1.2.3.3), turned at least
     10 degrees off the room walls together with its fixture (4.1.1.1.5), and
-    no nearer a room edge than the 0,75 m of EN ISO 354, 6.2.1.2. In section,
+    no nearer a room edge than the 0.75 m of EN ISO 354, 6.2.1.2. In section,
     the type E mounting of 4.1.1.2.3 standing face up on the floor, which
     EN ISO 354, B.4 allows unless gravity changes the answer and 4.1.1.2.3.7
     then holds a loose porous backing to the tile with a wire grid: 200 mm

@@ -1073,19 +1073,19 @@ _REV_MICS = (
     (2.8, 4.6),
     (1.2, 3.6),
 )  #: six positions, in metres on the room floor plan
-_REV_SOURCE = (1.7, 1.7)  #: source under test, asymmetric and 1,7 m off both walls
+_REV_SOURCE = (1.7, 1.7)  #: source under test, asymmetric and 1.7 m off both walls
 
 
 def _d_reverberation_power(s: SVG, th: Theme) -> None:
     """ISO 3741 reverberation test room drawn in plan, both methods.
 
-    Left, the direct method (Eq. 20): the source on the floor at least 1,5 m
+    Left, the direct method (Eq. 20): the source on the floor at least 1.5 m
     from every wall and six microphone positions carrying the three clause 8.3
     clearances. Right, the comparison method (Eq. 21): the reference sound
     source run at the *same* six positions with the source under test left in
     the room. The room is the guide's own example, V = 200 m3, S = 220 m2,
-    T60 = 2,0 s, so d_min = 0,08 sqrt(200/2) = 0,8 m (1,6 m recommended below
-    5 kHz) and half a wavelength at 100 Hz is 1,7 m.
+    T60 = 2.0 s, so d_min = 0.08 sqrt(200/2) = 0.8 m (1.6 m recommended below
+    5 kHz) and half a wavelength at 100 Hz is 1.7 m.
     """
     sc, base = 45.0, 352.0  # 45 px per metre; y of the plan origin
 
@@ -1134,11 +1134,11 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
         mic(*mp(ax, mx, my), str(i) if i != 4 else "")
     # The three clearances, each measured on the position that binds it.
     m4x, m4y = mp(ax, *_REV_MICS[3])
-    # Position 4 is numbered under its circle: above it, the 1,0 m line to
+    # Position 4 is numbered under its circle: above it, the 1.0 m line to
     # the wall ran through the number, and beside it the traverse does.
     s.text(m4x, m4y + 22, "4", 13, th.fg, bold=True)
     s.line(m4x, m4y, m4x, base - 272, th.muted, 1.0, dash="4,3")
-    s.text(m4x + 8, (m4y + base - 272) / 2, "> 1,0 m", 13, th.fg, anchor="start")
+    s.text(m4x + 8, (m4y + base - 272) / 2, "> 1.0 m", 13, th.fg, anchor="start")
     m1x, m1y = mp(ax, *_REV_MICS[0])
     s.line(sx, sy, m1x, m1y, th.primary, 1.4, dash="6,4")
     s.text((sx + m1x) / 2, sy - 10, "$> d_{min}$", 13, th.primary, bold=True)
@@ -1167,7 +1167,7 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
     )
     for mx, my in _REV_MICS:
         mic(*mp(bx, mx, my))
-    # At x = 3,9 m rather than 4,2, so that its two-line name ends inside the
+    # At x = 3.9 m rather than 4.2, so that its two-line name ends inside the
     # room: the Spanish ran into the right-hand wall.
     rx_, ry_ = mp(bx, 3.9, 3.2)
     s.circle(rx_, ry_, 15.0, th.accent)
@@ -1185,7 +1185,7 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
         anchor="start",
     )
     s.line(sx2, sy2, rx_, ry_, th.muted, 1.2, dash="5,4")
-    s.text((sx2 + rx_) / 2 + 6, (sy2 + ry_) / 2 + 22, "≥ 1,5 m", 13, th.fg)
+    s.text((sx2 + rx_) / 2 + 6, (sy2 + ry_) / 2 + 22, "≥ 1.5 m", 13, th.fg)
 
     # ===== Footer: the rules the drawing cannot dimension =====
     s.line(50, 386, 850, 386, th.muted, 1.0)
@@ -1193,15 +1193,15 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
         (
             (
                 (
-                    "$d_{min} = D_1 √(V / T_{60})$ ,  $D_1$ = 0,08  "
-                    "(0,16 recommended below 5 kHz)"
+                    "$d_{min} = D_1 √(V / T_{60})$ ,  $D_1$ = 0.08  "
+                    "(0.16 recommended below 5 kHz)"
                 ),
                 th.primary,
                 True,
             ),
             (
                 (
-                    "$V$ = 200 m³ · $T_{60}$ = 2,0 s  →  $d_{min}$ = 0,8 m,  or 1,6 m "
+                    "$V$ = 200 m³ · $T_{60}$ = 2.0 s  →  $d_{min}$ = 0.8 m,  or 1.6 m "
                     "at the recommended $D_1$"
                 ),
                 th.primary,
@@ -1209,23 +1209,23 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
             ),
             (
                 (
-                    "six positions: > 1,0 m from every room surface · $> d_{min}$ from "
-                    "the source · spacing $≥ λ/2$ (1,7 m at 100 Hz)"
+                    "six positions: > 1.0 m from every room surface · $> d_{min}$ from "
+                    "the source · spacing $≥ λ/2$ (1.7 m at 100 Hz)"
                 ),
                 th.fg,
                 False,
             ),
             (
                 (
-                    "traverse instead: $≥ d_{min}$ from the source · ≥ 1,0 m from any "
-                    "surface · ≥ 0,5 m from a diffuser"
+                    "traverse instead: $≥ d_{min}$ from the source · ≥ 1.0 m from any "
+                    "surface · ≥ 0.5 m from a diffuser"
                 ),
                 th.fg,
                 False,
             ),
             (
                 (
-                    "· not within 10° of a room surface · length $≥ 3λ$ or 10,3 m, "
+                    "· not within 10° of a room surface · length $≥ 3λ$ or 10.3 m, "
                     "whichever is smaller"
                 ),
                 th.fg,
@@ -1249,7 +1249,7 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
             ),
             (
                 (
-                    "hard walls, $α < 0,06$ within one wavelength of the source · "
+                    "hard walls, $α < 0.06$ within one wavelength of the source · "
                     "$T_{60}$ per ISO 3382-2, first 10 dB or 15 dB only"
                 ),
                 th.muted,
@@ -1264,16 +1264,16 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
 # ISO 3743-1 and ISO 3743-2: the two small test rooms, in plan
 # ---------------------------------------------------------------------------
 
-#: ISO 3743-1 panel: the guide's 5,0 m x 4,0 m x 3,0 m hard-walled room
-#: (V = 60 m3, d_min = 0,3 V^(1/3) = 1,17 m, lambda/2 = 1,37 m at 125 Hz),
+#: ISO 3743-1 panel: the guide's 5.0 m x 4.0 m x 3.0 m hard-walled room
+#: (V = 60 m3, d_min = 0.3 V^(1/3) = 1.17 m, lambda/2 = 1.37 m at 125 Hz),
 #: the blender's reference box and the four microphone positions round it, in
 #: metres; the fifth stands above the box (7.3).
 _HW_ROOM_M = (5.0, 4.0)
 _HW_SOURCE = (1.7, 2.0)
 _HW_MICS = ((3.0, 3.4), (4.4, 2.6), (3.4, 0.8), (1.6, 0.6))
-#: ISO 3743-2 panel: a 5,4 m x 4,4 m x 3,03 m special room (V = 72 m3,
-#: d_min = 1,25 m, lambda/4 = 0,69 m and lambda/2 = 1,37 m at 125 Hz), two
-#: source locations 1,2 m apart, and six positions that keep every clearance
+#: ISO 3743-2 panel: a 5.4 m x 4.4 m x 3.03 m special room (V = 72 m3,
+#: d_min = 1.25 m, lambda/4 = 0.69 m and lambda/2 = 1.37 m at 125 Hz), two
+#: source locations 1.2 m apart, and six positions that keep every clearance
 #: from both.
 _SR_ROOM_M = (5.4, 4.4)
 _SR_SOURCES = ((1.5, 1.7), (2.7, 1.7))
@@ -1286,15 +1286,15 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
     Left, the hard-walled room of Part 1: the source's reference box at least
     1 m from every wall and turned off the walls' axes (6.3), the reference
     sound source run afterwards in the same place (7.2), and five microphone
-    positions at least 0,3 V^(1/3) from the source, 0,5 m from the walls and
+    positions at least 0.3 V^(1/3) from the source, 0.5 m from the walls and
     the ceiling and half a wavelength of the lowest band apart, four round the
     box and the fifth above it (7.3). Right, the special
     reverberation room of Part 2: absorbers in patches over the walls
     (Annex B), a reflecting floor (6.4), two source locations at least 1 m
     from the nearest wall (8.2, 9.4), and six positions a quarter wavelength
-    from the surfaces, 0,3 V^(1/3) from every source location and half a
+    from the surfaces, 0.3 V^(1/3) from every source location and half a
     wavelength apart (9.3). Both rooms are the guide's own examples; the
-    reference source of the Part 2 comparison method, at least 1,5 m from
+    reference source of the Part 2 comparison method, at least 1.5 m from
     every wall (10.3), is left to the footer.
     """
     base = 344.0  # y of both plans' origin
@@ -1353,17 +1353,17 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
     m4x, m4y = pts[3]
     s.line(sx, sy + 17, m4x, m4y - 6.5, th.primary, 1.4, dash="6,4")
     s.text(
-        sx - 8, (sy + m4y) / 2 + 8, "$≥ 0,3 V^{1/3}$", 12, th.primary, "end", bold=True
+        sx - 8, (sy + m4y) / 2 + 8, "$≥ 0.3 V^{1/3}$", 12, th.primary, "end", bold=True
     )
     # Half a wavelength between two positions.
     (m3x, m3y) = pts[2]
     s.line(m3x, m3y, m4x, m4y, th.secondary, 1.2, dash="5,4")
     s.text((m3x + m4x) / 2, max(m3y, m4y) + 20, "$≥ λ/2$", 12, th.secondary, bold=True)
-    # 0,5 m from the wall.
+    # 0.5 m from the wall.
     m2x, m2y = pts[1]
     rwall = lx + _HW_ROOM_M[0] * lsc
     s.line(m2x + 6.5, m2y, rwall, m2y, th.muted, 1.0, dash="3,3")
-    s.text(rwall - 4, m2y + 17, "≥ 0,5 m", 11, th.muted, "end")
+    s.text(rwall - 4, m2y + 17, "≥ 0.5 m", 11, th.muted, "end")
 
     # ===== Right: ISO 3743-2, the special reverberation room =====
     rx, rsc = 488.0, 57.0
@@ -1374,7 +1374,7 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
     s.text(rx + 154, 58, "ISO 3743-2: special reverberation room", 16, th.fg, bold=True)
     plan(rx, _SR_ROOM_M, rsc)
     w, h = _SR_ROOM_M[0] * rsc, _SR_ROOM_M[1] * rsc
-    # Annex B: absorbers in patches of at most 1,5 m2, spread over the walls.
+    # Annex B: absorbers in patches of at most 1.5 m2, spread over the walls.
     for fx in (0.12, 0.47, 0.78):
         s.rect(rx + fx * w, base - h + 3, 34, 7, th.accent, rx=1.5)
         s.rect(rx + (fx + 0.06) * w, base - 10, 34, 7, th.accent, rx=1.5)
@@ -1382,7 +1382,7 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
         s.rect(rx + 3, base - (fy + 0.1) * h, 7, 30, th.accent, rx=1.5)
         s.rect(rx + w - 10, base - fy * h, 7, 30, th.accent, rx=1.5)
     s.text(
-        rx + w / 2, base - h - 12, "absorber patches ≤ 1,5 m² (Annex B)", 12, th.accent
+        rx + w / 2, base - h - 12, "absorber patches ≤ 1.5 m² (Annex B)", 12, th.accent
     )
     (s1x, s1y), (s2x, s2y) = rp(*_SR_SOURCES[0]), rp(*_SR_SOURCES[1])
     box(s1x, s1y, th.fg)
@@ -1399,7 +1399,7 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
     s.text(
         (s2x + b_x) / 2 + 12,
         (s2y + b_y) / 2 - 4,
-        "$≥ 0,3 V^{1/3}$",
+        "$≥ 0.3 V^{1/3}$",
         12,
         th.primary,
         "start",
@@ -1409,7 +1409,7 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
     s.text((a_x + b_x) / 2 - 30, a_y + 18, "$≥ λ/2$", 12, th.secondary, bold=True)
     s.line(b_x, b_y + 6.5, b_x, base, th.muted, 1.0, dash="3,3")
     s.text(b_x + 8, b_y + 26, "$≥ λ/4$", 11, th.muted, "start")
-    s.text(rx + w / 2, base + 22, "floor: painted concrete, $α < 0,06$", 12, th.muted)
+    s.text(rx + w / 2, base + 22, "floor: painted concrete, $α < 0.06$", 12, th.muted)
 
     # ===== Footer: the rules the plans cannot dimension =====
     s.line(50, 386, 850, 386, th.muted, 1.0)
@@ -1417,13 +1417,13 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
         (
             (
                 "Part 1: $V ≥$ 40 m³ and ≥ 40 × the reference box · every surface "
-                "$α ≤ 0,20$ · 8 orientations (Table 3)",
+                "$α ≤ 0.20$ · 8 orientations (Table 3)",
                 th.primary,
                 True,
             ),
             (
                 "≥ 3 positions, five if the room allows · $V$ = 60 m³: "
-                "$0,3 V^{1/3}$ = 1,17 m, $λ/2$ = 1,37 m at 125 Hz",
+                "$0.3 V^{1/3}$ = 1.17 m, $λ/2$ = 1.37 m at 125 Hz",
                 th.fg,
                 False,
             ),
@@ -1435,19 +1435,19 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
             ),
             (
                 "Part 2: $V ≥$ 70 m³ (≤ 300 m³ for 4 and 8 kHz, direct method) · "
-                "floor $α < 0,06$ · walls 0,5 to 1,5 × mean",
+                "floor $α < 0.06$ · walls 0.5 to 1.5 × mean",
                 th.secondary,
                 True,
             ),
             (
-                "$T$ from $0,9 R T_{nom}$ to $1,1 R T_{nom}$ with "
-                "$R = 1 + 257/(f V^{1/3})$ · $T_{nom}$ 0,5 s to 1,0 s (6.3)",
+                "$T$ from $0.9 R T_{nom}$ to $1.1 R T_{nom}$ with "
+                "$R = 1 + 257/(f V^{1/3})$ · $T_{nom}$ 0.5 s to 1.0 s (6.3)",
                 th.fg,
                 False,
             ),
             (
-                "six positions (9.3) · $V$ = 72 m³: $0,3 V^{1/3}$ = 1,25 m, "
-                "$λ/4$ = 0,69 m, $λ/2$ = 1,37 m at 125 Hz",
+                "six positions (9.3) · $V$ = 72 m³: $0.3 V^{1/3}$ = 1.25 m, "
+                "$λ/4$ = 0.69 m, $λ/2$ = 1.37 m at 125 Hz",
                 th.fg,
                 False,
             ),
@@ -1459,7 +1459,7 @@ def _d_small_test_rooms(s: SVG, th: Theme) -> None:
             ),
             (
                 "comparison method: $L_{We} = L_{pe} + L_{Wr} − L_{pr}$ (Formula 10), "
-                "the reference source ≥ 1,5 m from the walls",
+                "the reference source ≥ 1.5 m from the walls",
                 th.accent,
                 True,
             ),
@@ -1477,11 +1477,11 @@ def _d_sound_power_in_situ(s: SVG, th: Theme) -> None:
     """The ISO 3747 comparison in plan: one room, two sources, the same microphones.
 
     The machine is measured where it stands, and its reference box is the
-    guide's compressor, 2,2 m by 1,4 m. Its directivity survey spans 4 dB,
+    guide's compressor, 2.2 m by 1.4 m. Its directivity survey spans 4 dB,
     which makes it directional (7.2), so the reference sound source goes on
-    the side it emits towards, 0,5 m clear of the box (7.3.2, B.2), and one
+    the side it emits towards, 0.5 m clear of the box (7.3.2, B.2), and one
     location serves (7.3.1, 7.3.3). The four microphone positions stand at
-    the guide's measurement distance of 1,5 m, at least 2 m apart and 0,5 m
+    the guide's measurement distance of 1.5 m, at least 2 m apart and 0.5 m
     from every boundary (7.4.1), and they are zoned by Table 1: position 1
     is as far from the source as from the box within 10 % (+/-), position 2
     is nearer the source (-), position 3 nearer the machine (+), and
@@ -1723,9 +1723,9 @@ def _d_sound_power_in_situ(s: SVG, th: Theme) -> None:
 def _d_box_array(s: SVG, th: Theme) -> None:
     """ISO 3744 Annex C array on a box surface, in two orthographic views.
 
-    The reference box is the guide's own 1,4 x 0,9 x 1,1 m machine and the
-    measurement distance is d = 1 m, so a = 1,7 m, b = 1,45 m, c = 2,1 m and
-    S = 4(ab + bc + ca) = 36,3 m2. The 3,4 m long faces exceed the clause C.1
+    The reference box is the guide's own 1.4 x 0.9 x 1.1 m machine and the
+    measurement distance is d = 1 m, so a = 1.7 m, b = 1.45 m, c = 2.1 m and
+    S = 4(ab + bc + ca) = 36.3 m2. The 3.4 m long faces exceed the clause C.1
     limit of 3d on a partial-area side, so they split in two and the array
     grows past the nine-position minimum.
     """
@@ -1766,7 +1766,7 @@ def _d_box_array(s: SVG, th: Theme) -> None:
     s.text(
         tx + tw / 2,
         ty + td + 74,
-        "$2a = l_1 + 2d$ = 3,4 m   ·   $2b$ = 2,9 m",
+        "$2a = l_1 + 2d$ = 3.4 m   ·   $2b$ = 2.9 m",
         14,
         th.accent,
     )
@@ -1815,7 +1815,7 @@ def _d_box_array(s: SVG, th: Theme) -> None:
         gy,
         ex + ew,
         gy - eh,
-        "$c$ = 2,1 m",
+        "$c$ = 2.1 m",
         offset=36,
         size=14,
         label_side="right",
@@ -1827,8 +1827,8 @@ def _d_box_array(s: SVG, th: Theme) -> None:
         (
             (
                 (
-                    "$S = 4(a·b + b·c + c·a)$ = 36,3 m²   for $l_1 × l_2 × l_3$ = "
-                    "1,4 × 0,9 × 1,1 m at $d$ = 1 m"
+                    "$S = 4(a·b + b·c + c·a)$ = 36.3 m²   for $l_1 × l_2 × l_3$ = "
+                    "1.4 × 0.9 × 1.1 m at $d$ = 1 m"
                 ),
                 th.accent,
                 True,
@@ -1905,10 +1905,10 @@ def _d_radiation_factor(s: SVG, th: Theme) -> None:
     s.text(bx - 40, 120, "$⟨v_j^2⟩$ on the casing", 15, th.secondary, bold=True)
     s.line(bx - 10, 130, bx - 44, 196, th.muted, 1.0)
 
-    # The ISO 9614 measurement surface, offset 0,25 m from the casing.
+    # The ISO 9614 measurement surface, offset 0.25 m from the casing.
     off = 44.0
     _box_wire(s, bx, gy, hw + off, dp + off * 0.8, ht + off, th.primary)
-    s.dim(fx1, fy - 26, fx1 + off, fy - 26, "0,25 m", offset=-30, size=14)
+    s.dim(fx1, fy - 26, fx1 + off, fy - 26, "0.25 m", offset=-30, size=14)
     s.text(bx, 84, "ISO 9614 measurement surface", 15, th.primary, bold=True)
 
     # A serpentine sweep over the front segment of that surface, with a probe.
@@ -2029,22 +2029,22 @@ def _d_residual_intensity_check(s: SVG, th: Theme) -> None:
             sw=1.6,
         )
     capsules(cx, cy, th.secondary)
-    s.text(cx, cy + 84, "pink or white noise, 45 Hz to 7,1 kHz", 12, th.muted)
-    s.text(cx, cy + 106, "both capsules within ± 0,1 dB", 12, th.muted)
+    s.text(cx, cy + 84, "pink or white noise, 45 Hz to 7.1 kHz", 12, th.muted)
+    s.text(cx, cy + 106, "both capsules within ± 0.1 dB", 12, th.muted)
     s.text(cx, cy + 134, "$δ_{pI0} = L_p − L_{I0}$", 15, th.primary, bold=True)
 
     # --- 2: the sound calibrator on one capsule at a time -------------------
     x1 = tops[1]
     cx, cy = x1 + w / 2, 186.0
     s.rect(cx - 74, cy - 40, 62, 80, th.bg, th.accent, rx=8, sw=2.2)
-    s.text(cx - 43, cy + 4, "94,0", 13, th.accent, bold=True, mono=True)
+    s.text(cx - 43, cy + 4, "94.0", 13, th.accent, bold=True, mono=True)
     s.text(cx - 43, cy + 22, "dB", 12, th.accent, mono=True)
     s.rect(cx - 12, cy - 14, 22, 28, th.panel, th.secondary, rx=5, sw=2.0)
     s.rect(cx + 10, cy - 8, 44, 16, th.panel, th.muted, rx=4, sw=1.4)
     s.rect(cx + 54, cy - 14, 22, 28, th.panel, th.secondary, rx=5, sw=2.0)
     s.text(cx, cy + 66, "IEC 60942 calibrator, class 0 or 1", 12, th.muted)
     s.text(cx, cy + 88, "on each microphone in turn", 12, th.muted)
-    s.text(cx, cy + 120, "adjust to ± 0,1 dB", 15, th.accent, bold=True)
+    s.text(cx, cy + 120, "adjust to ± 0.1 dB", 15, th.accent, bold=True)
     s.text(cx, cy + 144, "in both channels", 13, th.muted)
 
     # --- 3: the probe reversal on the measurement surface -------------------
@@ -2078,7 +2078,7 @@ def _d_residual_intensity_check(s: SVG, th: Theme) -> None:
         450,
         416,
         "accepted when the two readings have opposite signs and "
-        "differ by less than 1,5 dB",
+        "differ by less than 1.5 dB",
         15,
         th.fg,
         bold=True,
@@ -2094,7 +2094,7 @@ def _d_residual_intensity_check(s: SVG, th: Theme) -> None:
         (
             "same signs → the two channels are swapped, or one is inverted",
             (
-                "more than 1,5 dB apart → the probe disturbs its own field, or the "
+                "more than 1.5 dB apart → the probe disturbs its own field, or the "
                 "channels are not matched"
             ),
             (
@@ -4179,7 +4179,7 @@ def _d_vdi2081_sheet(s: SVG, th: Theme) -> None:
     s.line(838.0, fan_cy, 838.0, ceil_y - 8, th.fg, 2.2)
     s.rect(814.0, ceil_y - 8, 48.0, 12.0, th.bg, th.secondary, sw=2.0)
 
-    # --- element 20: the room, and the listener 1,5 m from the outlet ------
+    # --- element 20: the room, and the listener 1.5 m from the outlet ------
     s.text(room_x + 14, ceil_y + 26, "Room 102", 14, th.fg, bold=True, anchor="start")
     s.text(room_x + 14, ceil_y + 46, "$A$ = 20 m²", 11, th.muted, anchor="start")
     s.text(
@@ -4416,7 +4416,7 @@ def _d_silencer_in_situ(s: SVG, th: Theme) -> None:
         size=14,
         upright=("d_d",),
     )
-    s.text(196, duct_y + duct_h + 104, "$d_u = 1,5 √(4S_u/π)$", 13, th.muted)
+    s.text(196, duct_y + duct_h + 104, "$d_u = 1.5 √(4S_u/π)$", 13, th.muted)
     s.text(
         523,
         duct_y + duct_h + 104,
@@ -4521,7 +4521,7 @@ def _d_screen_in_situ(s: SVG, th: Theme) -> None:
     # The operator the geometry is written for.
     s.person(x_screen + 248, floor, h=96)
     s.text(
-        x_screen + 248, floor - 190, "operator height 1,55 m ± 0,075 m", 13, th.muted
+        x_screen + 248, floor - 190, "operator height 1.55 m ± 0.075 m", 13, th.muted
     )
 
     s.rect(70, 496, 760, 62, th.panel, th.fg, rx=6, sw=1.6)
@@ -5510,7 +5510,7 @@ def _d_noise_declaration_chain(s: SVG, th: Theme) -> None:
     the basic standards and are drawn on their own pages. The declaration is
     made for each operating mode (clause 4) by the manufacturer or supplier
     (3.13) from two inputs, the measured value, not rounded (3.12), and its
-    uncertainty, K = 1,645 sigma_R, with the 2,5 dB and 4 dB of Annex A.2.2
+    uncertainty, K = 1.645 sigma_R, with the 2.5 dB and 4 dB of Annex A.2.2
     when no noise test code gives sigma_R. Both belong to a single machine:
     A.2.3 determines K another way for a batch, so the plate stays on the one
     machine 6.2 verifies. The noise test code picks the form (clause 4): the

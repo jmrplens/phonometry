@@ -107,7 +107,7 @@ def test_a_power_of_ten_sets_as_a_power_of_ten(value: float, expected: str) -> N
 
 
 def test_a_printed_number_keeps_every_digit_it_carries() -> None:
-    """The metrology annex prints 345,866 52 m/s, and that is the number."""
+    """The metrology annex prints 345.866 52 m/s, and that is the number."""
     assert gcd.number(345.86652) == "345,86652"
 
 
@@ -120,7 +120,7 @@ def test_a_derived_number_is_rounded_to_what_its_inputs_could_support() -> None:
 # How a column is written: the prefix moves into the heading
 # ---------------------------------------------------------------------------
 def test_a_column_of_moduli_is_a_column_of_gigapascals() -> None:
-    """62,11 under GPa beats 6,211 × 10¹⁰ under Pa in every cell of a table."""
+    """62.11 under GPa beats 6,211 × 10¹⁰ under Pa in every cell of a table."""
     style = gcd.column_style("Pa", [6.211e10, 4.717e11, 1.2e9])
 
     assert style.unit == "GPa"
@@ -143,7 +143,7 @@ def test_a_column_that_needs_no_prefix_keeps_its_unit() -> None:
 
 
 def test_scaling_a_column_does_not_invent_a_digit() -> None:
-    """143 000 000 / 1000 in binary floating point is 143 000,000 000 000 01."""
+    """143 000 000 / 1000 in binary floating point is 143 000.000 000 000 01."""
     assert gcd.number(1.43e8, exponent=3) == f"143{_GROUP}000"
 
 
@@ -173,10 +173,10 @@ def test_a_column_of_moduli_is_written_in_powers_of_ten() -> None:
 
 
 def test_one_small_outlier_does_not_take_a_column_with_it() -> None:
-    """The loss factors run to 0,000003 around a median of 0,005.
+    """The loss factors run to 0.000003 around a median of 0.005.
 
     Writing that column in powers of ten to spare its smallest cell would
-    turn every ordinary 0,005 in it into 5 × 10⁻³, which is the opposite of
+    turn every ordinary 0.005 in it into 5 × 10⁻³, which is the opposite of
     the point.
     """
     catalogue = _catalogue(
@@ -190,7 +190,7 @@ def test_one_small_outlier_does_not_take_a_column_with_it() -> None:
 
 
 def test_a_column_that_lives_below_a_ten_thousandth_is_written_in_powers() -> None:
-    """A permeability of 0,0000000033 m2 is eight leading zeros."""
+    """A permeability of 0.0000000033 m2 is eight leading zeros."""
     catalogue = _catalogue(
         _row(thermal_permeability_m2=3.3e-9),
         _row(thermal_permeability_m2=6e-9),

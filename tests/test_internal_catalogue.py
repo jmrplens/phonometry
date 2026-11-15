@@ -620,7 +620,7 @@ def test_a_misprinted_number_is_not_also_served(path: pathlib.Path) -> None:
 def test_no_number_carries_more_digits_than_a_page_prints(path: pathlib.Path) -> None:
     """``0.82e10`` read back is ``8199999999.999999``, and the table shows it.
 
-    The value is right and its spelling is not: a modulus printed as 0,82 of
+    The value is right and its spelling is not: a modulus printed as 0.82 of
     ten thousand million is ``8.2e9``, which round-trips, where the other
     spelling lands one unit in the last place away and prints sixteen digits.
     """

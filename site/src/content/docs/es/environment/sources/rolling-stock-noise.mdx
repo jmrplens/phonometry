@@ -230,6 +230,23 @@ print(standing.set_levels.round(2), standing.reported_level)
 # [66.31 66.71 66.01] 66.0
 ```
 
+Las dos disposiciones se leen mejor dibujadas que en una celda de tabla: la
+malla del ensayo estático, con las dos longitudes por las que la fórmula 1
+pondera una posición, y las posiciones del ensayo de arranque en las cuatro
+unidades que dibuja la figura 10.
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rolling_stock_test_positions.svg"
+  alt="Dos disposiciones de micrófonos de la ISO 3095. Arriba, el ensayo estático alrededor de una unidad de 20 m, en planta y a escala: la unidad dividida en cuatro áreas de 5 m, un micrófono frente al centro de cada área a ambos lados, a 7,5 m del eje de la vía, y dos más en cada extremo, a 30 grados a cada lado del eje sobre un semicírculo de 7,5 m de radio con centro en el extremo de la unidad; un área y un cuarto de círculo aparecen resaltados como las longitudes por las que valen una posición lateral y una de extremo, 5 m y 11,78 m. Abajo, el ensayo de arranque a nivel máximo en unidades de 42 m, 54 m, 87 m y 108 m: todas tienen una posición 10 m por delante del frente; la de 54 m, una segunda 17 m por detrás del frente, que queda 10 m por delante de su centro; la de 87 m, una segunda 33,5 m por detrás del frente; y la de 108 m, dos más, a 17 m y 44 m por detrás del frente, separadas 27 m."
+  width="92%"
+/>
+
+*Una posición de extremo vale por un cuarto de círculo de 7,5 m de radio, y de
+ahí salen los $(\pi/2) \times 7{,}5$ m de la fórmula 1; una posición lateral
+vale por su propia área. Las posiciones de arranque son las que devuelve
+`acceleration_test_positions` para las cuatro longitudes que dibuja la norma, y
+caen sobre las cotas que imprime.*
+
 ## 4. La vía de referencia
 
 ### 4.1 La rugosidad de los carriles (EN 15610)

@@ -4420,6 +4420,280 @@ def generate_rolling_stock_track_decay_grid(output_dir: str) -> None:
     plt.close()
 
 
+def _test_positions_strings() -> dict[str, str]:
+    """The words of the test positions figure, in the language being drawn."""
+    if _LANG == "es":
+        return {
+            "title_a": "Ensayo estático: la malla del apartado 5.5.1.1 alrededor de una unidad de {length} m, en planta y a escala",
+            "title_b": "Ensayo de arranque, nivel máximo: las posiciones del apartado 7.5.1.1 en las cuatro unidades de la figura 10",
+            "unit": "unidad de {length} m: {count} áreas de {area} m",
+            "area": "una posición lateral vale por su área:\n$l_i$ = {value} m aquí (de 3 m a 5 m)",
+            "end": "una posición de extremo\nvale por (π/2) × {radius} m\n= {value} m de arco\n(apartado 5.8.1)",
+            "distance": "{radius} m",
+            "notes": "Las laterales a {radius} m del eje de la vía\n(la línea de trazo y punto); todas a {height} m\nsobre la cabeza del carril.\n\nEn cada extremo, dos posiciones a 30° del\neje sobre un semicírculo de {radius} m de\nradio con centro en el punto medio del\nextremo de la unidad. En una unidad\nremolcada, solo en los extremos con\ncabina (apartado 5.5.1.1).\n\nSe miden los dos lados, salvo que la\nunidad sea simétrica (apartado 5.5.1.2).",
+            "axis": "Distancia por detrás del frente de la unidad [m]",
+            "length": "$l$ = {value} m",
+            "front": "frente",
+            "middle": "centro",
+            "span": "{value} m",
+            "rule": "Una posición {ahead} m por delante del frente. Si la unidad pasa de {limit} m,\notra {ahead} m por delante de su centro, y entre las dos, repartidas por igual,\nlas que hagan falta para que no disten más de {limit} m. Cada una a {radius} m\ndel eje de la vía y a {height} m de altura, a ambos lados y en los dos sentidos\nde marcha salvo simetría (figura 11).",
+        }
+    return {
+        "title_a": "Stationary test: the mesh of clause 5.5.1.1 around a {length} m unit, in plan and to scale",
+        "title_b": "Starting test, maximum level: the positions of clause 7.5.1.1 along the four units of Figure 10",
+        "unit": "{length} m unit: {count} areas of {area} m",
+        "area": "a side position stands for its area:\n$l_i$ = {value} m here (3 m to 5 m)",
+        "end": "an end position stands\nfor (π/2) × {radius} m\n= {value} m of arc\n(clause 5.8.1)",
+        "distance": "{radius} m",
+        "notes": "The side positions {radius} m from the track\ncentreline (the dash-dot line); all {height} m\nabove the top of rail.\n\nOff each end, two positions at 30° from\nthe centreline on a half circle of {radius} m\nradius about the midpoint of the end of\nthe unit. On a trailer unit, only off the\nends with a cab (clause 5.5.1.1).\n\nBoth sides are measured, unless the\nunit is symmetrical (clause 5.5.1.2).",
+        "axis": "Distance behind the front of the unit [m]",
+        "length": "$l$ = {value} m",
+        "front": "front",
+        "middle": "middle",
+        "span": "{value} m",
+        "rule": "One position {ahead} m ahead of the front. Past {limit} m of unit, another {ahead} m\nahead of its middle and, between the two, as many evenly spaced ones as keep\nthem no more than {limit} m apart. Each {radius} m from the track centreline and\n{height} m high, on both sides and for both driving directions unless the\nsources are symmetrical (Figure 11).",
+    }
+
+
+def generate_rolling_stock_test_positions(output_dir: str) -> None:
+    """ISO 3095 5.5.1.1 and 7.5.1.1: where the microphones of two tests stand.
+
+    The length an end position stands for is
+    :data:`STATIONARY_END_POSITION_LENGTH_M`, the radius of the half circles
+    is that length over a quarter turn, and every starting position is what
+    ``acceleration_test_positions`` returns for the four unit lengths of
+    Figure 10, so the figure cannot drift from what the library computes.
+    """
+    print("Generating rolling_stock_test_positions...")
+    from matplotlib.patches import Arc, Rectangle
+
+    from phonometry import environment
+    from phonometry._i18n import format_number
+    from phonometry.environment.sources.rolling_stock_noise import (
+        _AHEAD_M,
+        _MAXIMUM_SPACING_M,
+    )
+
+    words = _test_positions_strings()
+
+    def number(value: float, decimals: int) -> str:
+        return format_number(value, _LANG, decimals=decimals, trim=True)
+
+    # The library holds the 7.5 m of 5.5.1.1 as the radius of the arc an end
+    # position stands for in Formula 1 (5.8.1), and nowhere else.
+    end_length = environment.STATIONARY_END_POSITION_LENGTH_M
+    radius = end_length / (math.pi / 2.0)
+    # The guide's own stationary example: a 20 m locomotive in four areas.
+    unit, areas = 20.0, 4
+    area = unit / areas
+    mark = COLOR_SECONDARY
+
+    fig = plt.figure(figsize=(12.0, 8.6))
+    grid = fig.add_gridspec(2, 1, height_ratios=[1.3, 1.0])
+    ax = fig.add_subplot(grid[0])
+    ax_s = fig.add_subplot(grid[1])
+
+    # --- the stationary mesh, in plan ----------------------------------------
+    ax.plot([-11.5, unit + 9.5], [0.0, 0.0], ls="-.", color=COLOR_MUTED, lw=1.0)
+    ax.add_patch(
+        Rectangle((0.0, -1.5), unit, 3.0, facecolor="none", edgecolor=COLOR_FG, lw=1.6)
+    )
+    ax.text(
+        unit / 2.0,
+        0.75,
+        words["unit"].format(length=number(unit, 0), count=areas, area=number(area, 1)),
+        ha="center",
+        va="center",
+        fontsize=9,
+    )
+    for k in range(areas + 1):
+        for low, high in ((-radius, -1.5), (1.5, radius)):
+            ax.plot([k * area] * 2, [low, high], color=COLOR_MUTED, lw=0.8, ls=":")
+    for side in (1.0, -1.0):
+        ax.plot([0.0, unit], [side * radius] * 2, color=COLOR_MUTED, lw=0.8)
+        ax.plot(
+            (np.arange(areas) + 0.5) * area,
+            np.full(areas, side * radius),
+            linestyle="none",
+            marker="o",
+            markersize=7,
+            color=COLOR_PRIMARY,
+        )
+    for end, outward, start in ((0.0, -1.0, 90.0), (unit, 1.0, -90.0)):
+        ax.add_patch(
+            Arc(
+                (end, 0.0),
+                2.0 * radius,
+                2.0 * radius,
+                theta1=start,
+                theta2=start + 180.0,
+                color=COLOR_MUTED,
+                lw=0.8,
+            )
+        )
+        for side in (1.0, -1.0):
+            x = end + outward * radius * math.cos(math.radians(30.0))
+            y = side * radius * math.sin(math.radians(30.0))
+            ax.plot([end, x], [0.0, y], color=COLOR_MUTED, lw=0.8)
+            ax.plot(
+                [x],
+                [y],
+                linestyle="none",
+                marker="o",
+                markersize=7,
+                color=COLOR_PRIMARY,
+            )
+    # What Formula 1 weights by: one area, and a quarter of a circle.
+    ax.plot(
+        [area, 2.0 * area],
+        [radius + 1.0] * 2,
+        color=mark,
+        lw=2.0,
+        marker="|",
+        markersize=9,
+    )
+    ax.text(
+        1.5 * area,
+        radius + 1.6,
+        words["area"].format(value=number(area, 1)),
+        ha="center",
+        va="bottom",
+        fontsize=9,
+        color=mark,
+    )
+    ax.add_patch(
+        Arc(
+            (0.0, 0.0),
+            2.0 * radius + 1.2,
+            2.0 * radius + 1.2,
+            theta1=90.0,
+            theta2=180.0,
+            color=mark,
+            lw=2.0,
+        )
+    )
+    ax.text(
+        -11.8,
+        radius + 1.1,
+        words["end"].format(radius=number(radius, 1), value=number(end_length, 2)),
+        ha="left",
+        va="bottom",
+        fontsize=9,
+        color=mark,
+    )
+    ax.add_patch(
+        Arc((0.0, 0.0), 6.0, 6.0, theta1=150.0, theta2=180.0, color=COLOR_FG, lw=0.9)
+    )
+    ax.text(-4.3, 1.15, "30°", ha="center", va="center", fontsize=9)
+    ax.add_patch(
+        Arc((0.0, 0.0), 6.0, 6.0, theta1=180.0, theta2=210.0, color=COLOR_FG, lw=0.9)
+    )
+    ax.text(-4.3, -1.15, "30°", ha="center", va="center", fontsize=9)
+    ax.annotate(
+        "",
+        xy=(0.55 * unit, -radius),
+        xytext=(0.55 * unit, 0.0),
+        arrowprops={"arrowstyle": "<->", "color": COLOR_FG, "lw": 1.0},
+    )
+    ax.text(
+        0.55 * unit + 0.4,
+        -0.62 * radius,
+        words["distance"].format(radius=number(radius, 1)),
+        ha="left",
+        va="center",
+        fontsize=9,
+    )
+    ax.text(
+        unit + radius + 2.2,
+        radius + 1.0,
+        words["notes"].format(radius=number(radius, 1), height=number(1.2, 1)),
+        ha="left",
+        va="top",
+        fontsize=9,
+    )
+    ax.set_xlim(-12.0, unit + 27.0)
+    ax.set_ylim(-radius - 1.2, radius + 4.6)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.set_title(words["title_a"].format(length=number(unit, 0)), fontsize=11)
+
+    # --- the starting test, along the track -----------------------------------
+    lengths = (42.0, 54.0, 87.0, 108.0)
+    for row, length in enumerate(lengths):
+        y = -1.0 * row
+        positions = np.asarray(environment.acceleration_test_positions(length))
+        ax_s.add_patch(
+            Rectangle(
+                (0.0, y), length, 0.3, facecolor="none", edgecolor=COLOR_FG, lw=1.4
+            )
+        )
+        ax_s.text(
+            length + 2.0,
+            y + 0.15,
+            words["length"].format(value=number(length, 1)),
+            ha="left",
+            va="center",
+            fontsize=9,
+        )
+        marks = [0.0]
+        if length > _MAXIMUM_SPACING_M:
+            marks.append(length / 2.0)
+            ax_s.text(
+                length / 2.0,
+                y + 0.36,
+                words["middle"],
+                ha="center",
+                va="bottom",
+                fontsize=8,
+            )
+        for x in marks:
+            ax_s.plot([x, x], [y - 0.42, y + 0.3], color=COLOR_MUTED, lw=0.9)
+        ax_s.plot(
+            positions,
+            np.full(positions.size, y - 0.3),
+            linestyle="none",
+            marker="o",
+            markersize=7,
+            color=COLOR_PRIMARY,
+        )
+        edges = np.unique(np.concatenate((positions, marks)))
+        for left, right in zip(edges[:-1], edges[1:], strict=True):
+            ax_s.text(
+                float((left + right) / 2.0),
+                y - 0.3,
+                words["span"].format(value=number(float(right - left), 1)),
+                ha="center",
+                va="center",
+                fontsize=8.5,
+            )
+    ax_s.text(0.0, 0.36, words["front"], ha="center", va="bottom", fontsize=8)
+    ax_s.text(
+        62.0,
+        0.62,
+        words["rule"].format(
+            ahead=number(_AHEAD_M, 0),
+            limit=number(_MAXIMUM_SPACING_M, 0),
+            radius=number(radius, 1),
+            height=number(1.2, 1),
+        ),
+        ha="left",
+        va="top",
+        fontsize=8.6,
+    )
+    ax_s.set_xlim(-16.0, 128.0)
+    ax_s.set_ylim(-3.62, 0.85)
+    ax_s.set_xticks([-10.0, 0.0, 20.0, 40.0, 60.0, 80.0, 100.0])
+    ax_s.set_yticks([])
+    for spine in ("left", "right", "top"):
+        ax_s.spines[spine].set_visible(False)
+    ax_s.grid(visible=False)
+    ax_s.set_xlabel(words["axis"])
+    ax_s.set_title(words["title_b"], fontsize=11)
+    plt.tight_layout()
+    save_figure(output_dir, "rolling_stock_test_positions.svg")
+    plt.close()
+
+
 def generate_rolling_stock_small_deviation(output_dir: str) -> None:
     """ISO 3095 Annex C: the measured and revised pass-by spectra at 160 km/h."""
     print("Generating rolling_stock_small_deviation...")

@@ -72,7 +72,7 @@ def _column(index: int) -> np.ndarray:
 # Annex A: Table A.3 to Table A.4
 # ---------------------------------------------------------------------------
 def test_period_column_of_table_a3_is_the_80_20_average() -> None:
-    """The printed 07:00 to 19:00 column is 0,8 day + 0,2 night, rounded."""
+    """The printed 07:00 to 19:00 column is 0.8 day + 0.2 night, rounded."""
     np.testing.assert_array_equal(np.round(_PERIOD, 4), _PRINTED_PERIOD)
 
 
@@ -85,18 +85,18 @@ def test_table_a4_levels_probabilities_and_boundaries() -> None:
 
 
 def test_table_a4_densities_digit_by_digit() -> None:
-    """All 27 printed densities, including 1,2399 and 0,0170.
+    """All 27 printed densities, including 1.2399 and 0.0170.
 
     Both are what the full-precision probability gives and not what the
-    rounded column beside them gives (0,1860 / 0,15 = 1,2400 and
-    0,0042 / 0,25 = 0,0168), which is how the annex was computed.
+    rounded column beside them gives (0.1860 / 0.15 = 1.2400 and
+    0.0042 / 0.25 = 0.0168), which is how the annex was computed.
     """
     dist = _annex_a()
     np.testing.assert_array_equal(np.round(dist.class_densities_per_db, 4), _column(5))
 
 
 def test_equal_levels_keep_their_classes_in_input_order() -> None:
-    """The two 30,8 dB classes are n = 8 then n = 20, as Table A.4 orders them."""
+    """The two 30.8 dB classes are n = 8 then n = 20, as Table A.4 orders them."""
     dist = _annex_a()
     # Flat indices are the Table A.3 row numbers minus one.
     assert dist.replicas[2] == (7,)
@@ -166,11 +166,11 @@ def test_fifty_percent_level_matches_figure_a3() -> None:
 
 
 def test_figure_a3_levels_other_than_l50_are_not_the_roots_of_equation_25() -> None:
-    """Equation (25) gives 21,6 / 40,5 / 43,0 / 47,5 dB; the figure prints higher.
+    """Equation (25) gives 21.6 / 40.5 / 43.0 / 47.5 dB; the figure prints higher.
 
     The roots are checked against a bracketing root search on the quadrature
     of the density, which shares no code with ``exceedance_level``. The
-    printed 21,7 / 40,6 / 43,2 / 48,0 dB are the erratum in docs/ERRATA.md,
+    printed 21.7 / 40.6 / 43.2 / 48.0 dB are the erratum in docs/ERRATA.md,
     whichever of the two probability columns feeds the distribution.
     """
     percents = (95.0, 10.0, 5.0, 1.0)
@@ -220,10 +220,10 @@ def test_the_15_db_reading_matches_figure_a3_only_with_the_rounded_column() -> N
     Accumulated from 15 dB, where the drawn curve of Figure A.3 begins (its
     axis starts at 10 dB), the curve reproduces all five printed levels when
     fed the 07:00 to 19:00 column of Table A.3 as printed, which sums to
-    1,0004. Fed the full-precision probabilities that reproduce Table A.4, it
-    gives 48,05 dB for L1, which would print 48,1 dB. With the printed column
-    the reading adds about 0,17 % to every exceedance: the 0,21 % below 15 dB
-    less the 0,04 % by which the column exceeds one.
+    1.0004. Fed the full-precision probabilities that reproduce Table A.4, it
+    gives 48.05 dB for L1, which would print 48.1 dB. With the printed column
+    the reading adds about 0.17 % to every exceedance: the 0.21 % below 15 dB
+    less the 0.04 % by which the column exceeds one.
     """
     rounded = _annex_a(_PRINTED_PERIOD)
     for percent, printed in ISO13474_FIGURE_A3_EXCEEDANCE_DB.items():
@@ -241,10 +241,10 @@ def test_the_15_db_reading_matches_figure_a3_only_with_the_rounded_column() -> N
 
 
 def test_printed_level_shift_is_not_equation_22_at_5_db() -> None:
-    """1,04 dB is Equation (22) at sigma = 3 dB; the annex spreads with 5 dB.
+    """1.04 dB is Equation (22) at sigma = 3 dB; the annex spreads with 5 dB.
 
-    LT2 printed as 37,0 dB needs the 2,878 dB of Equation (22): with 1,04 dB
-    every level of the distribution moves up by 1,84 dB and LT2 reads 38,8 dB.
+    LT2 printed as 37.0 dB needs the 2.878 dB of Equation (22): with 1.04 dB
+    every level of the distribution moves up by 1.84 dB and LT2 reads 38.8 dB.
     """
     assert round(sd.turbulence_level_shift(3.0), 2) == ISO13474_ANNEX_A_PRINTED_SHIFT_DB
     shift = sd.turbulence_level_shift(ISO13474_ANNEX_A_SIGMA_DB)
@@ -260,7 +260,7 @@ def test_figure_a2_peak_sits_where_the_printed_curve_peaks() -> None:
     """The crest of Figure A.2, to what the page resolves.
 
     Read off the drawn curve (folio 35), the crest is flat to its line width
-    from about 30,2 dB to 30,8 dB and sits at 0,0607/dB, a height the page
+    from about 30.2 dB to 30.8 dB and sits at 0.0607/dB, a height the page
     gives to a few units in the fifth decimal. The check holds the computed
     peak to that span and that height, and no closer.
     """
@@ -537,7 +537,7 @@ def test_refuses_a_set_of_classes_two_percent_from_one(total: float) -> None:
 
 @pytest.mark.parametrize("total", [0.995, 1.0004, 1.005])
 def test_accepts_probabilities_rounded_to_a_printed_table(total: float) -> None:
-    """Table A.3 prints a 07:00 to 19:00 column that sums to 1,000 4."""
+    """Table A.3 prints a 07:00 to 19:00 column that sums to 1.000 4."""
     probs = _PERIOD * (total / float(np.sum(_PERIOD)))
     dist = sd.sel_distribution(_LEVELS, probs)
     assert float(np.sum(dist.probabilities)) == pytest.approx(total)

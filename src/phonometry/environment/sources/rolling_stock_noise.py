@@ -6,13 +6,13 @@ wagon is measured so that two units measured on two tracks can be compared.
 It has four tests and one condition that makes the constant-speed test
 comparable at all, the track.
 
-**Clause 5, standing still.** Microphones 7,5 m from the track centreline and
-1,2 m high stand opposite the middle of equal areas 3 m to 5 m long along both
-sides of every car, plus two at 30° on a 7,5 m half circle off each end of
+**Clause 5, standing still.** Microphones 7.5 m from the track centreline and
+1.2 m high stand opposite the middle of equal areas 3 m to 5 m long along both
+sides of every car, plus two at 30° on a 7.5 m half circle off each end of
 the unit, only off the ends with a cab for a trailer unit (5.5.1.1). The
 level :math:`L^i_{p\mathrm{Aeq},T}` of every position, over at least 20 s, is
 energy averaged weighted by the length :math:`l_i` each position stands for,
-:math:`(\pi/2) \times 7{,}5` m for the end positions
+:math:`(\pi/2) \times 7.5` m for the end positions
 (:data:`STATIONARY_END_POSITION_LENGTH_M`):
 
 .. math::
@@ -28,8 +28,8 @@ integer decibel (5.8.1, :func:`stationary_test`).
 **Clause 6, at constant speed.** The pass-by level
 :math:`L_{p\mathrm{Aeq},T_p}` is the A-weighted equivalent level over the
 pass-by time :math:`T_p` of the unit, from its front to its rear for a fixed
-formation (6.6.3, :func:`pass_by_measurement`), at 7,5 m and 1,2 m, or 25 m
-and 3,5 m at 200 km/h and above. Three runs per speed and side give a mean
+formation (6.6.3, :func:`pass_by_measurement`), at 7.5 m and 1.2 m, or 25 m
+and 3.5 m at 200 km/h and above. Three runs per speed and side give a mean
 rounded to the integer; the louder side is the result (6.7.1,
 :func:`rolling_stock_test`). The test speeds are 80 km/h and the maximum
 speed, or the maximum alone up to 80 km/h (6.6.2, :func:`type_test_speeds`).
@@ -48,7 +48,7 @@ time of half the unit, for a single trailer at the end of a train
 (Formula B.1).
 
 **Clauses 7 and 8, starting and braking.** Starting is measured two ways:
-the maximum :math:`L_{p\mathrm{AFmax}}` at 7,5 m at a cross section 10 m ahead
+the maximum :math:`L_{p\mathrm{AFmax}}` at 7.5 m at a cross section 10 m ahead
 of the unit and at further positions along a long unit
 (:func:`acceleration_test_positions`), or :math:`L_{p\mathrm{Aeq},T}` at
 25 m over the passage of the unit. Braking from 30 km/h is measured by
@@ -82,8 +82,8 @@ module (:func:`pass_by_uncertainty`).
 **Roundings.** 5.8.1, 6.7.1, 7.5.4, 7.6.4 and 8.7 round to the nearest integer
 decibel and 6.3.4 to one decimal, without a rule for a value on the half; a
 half goes up here, a convention of this module, and so does a mean that binary
-arithmetic lands a hair under it (runs of 70,1 dB, 70,3 dB and 71,1 dB average
-to 70,5 dB and give 71 dB).
+arithmetic lands a hair under it (runs of 70.1 dB, 70.3 dB and 71.1 dB average
+to 70.5 dB and give 71 dB).
 
 Read from ISO 3095:2013 (third edition) and, for the transit exposure level,
 BS EN ISO 3095:2005 (second edition).
@@ -173,8 +173,8 @@ __all__ = [
 
 #: 6.2.5 and Figure 2: the default upper limit of the one-third octave band
 #: acoustic rail roughness level, dB re 1 µm, keyed by nominal wavelength in
-#: metres, from 0,4 m to 3,15 mm. Figure 2 prints each level beside its point;
-#: its axis labels the 3,15 cm, 1,25 cm, 0,63 cm and 0,315 cm bands as 3.2,
+#: metres, from 0.4 m to 3.15 mm. Figure 2 prints each level beside its point;
+#: its axis labels the 3.15 cm, 1.25 cm, 0.63 cm and 0.315 cm bands as 3.2,
 #: 1.3, 0.6 and 0.3. The same 22 values are the "2007 TSI limit" of the EN
 #: 15610:2009 Annex B.9.2 listing.
 REFERENCE_TRACK_ROUGHNESS_LIMIT_DB: Mapping[float, float] = MappingProxyType(
@@ -269,7 +269,7 @@ PREFERRED_PASS_BY_SPEEDS_KMH: tuple[float, ...] = (
     350.0,
 )
 
-#: 5.8.1: the length :math:`(\pi/2) \times 7{,}5` m an end position of the
+#: 5.8.1: the length :math:`(\pi/2) \times 7.5` m an end position of the
 #: stationary mesh stands for in Formula 1, in metres.
 STATIONARY_END_POSITION_LENGTH_M: float = math.pi / 2.0 * 7.5
 
@@ -334,8 +334,8 @@ _HIGH_SPEED_CURVE_RADIUS_M = 5000.0
 #: 6.2.2: the steepest gradient where powered units are tested, 5:1 000.
 _MAXIMUM_GRADIENT_RATIO = 5.0 / 1000.0
 
-#: 6.2.5: the speed up to which the roughness is needed from 0,003 m to
-#: 0,10 m; above it, to 0,25 m.
+#: 6.2.5: the speed up to which the roughness is needed from 0.003 m to
+#: 0.10 m; above it, to 0.25 m.
 _WAVELENGTH_RANGE_SPEED_KMH = 190.0
 _SHORTEST_WAVELENGTH_M = 0.003
 _LONGEST_WAVELENGTH_M = (0.10, 0.25)
@@ -362,8 +362,8 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
 
     The standard rounds to the nearest integer (or one decimal) and gives no
     rule for a value on the half; going up is a convention of this module. A
-    value within :data:`_TOLERANCE` under the half is on it: the mean of 70,1,
-    70,3 and 71,1 dB is 70,5 dB, which binary arithmetic lands a hair under.
+    value within :data:`_TOLERANCE` under the half is on it: the mean of 70.1,
+    70.3 and 71.1 dB is 70.5 dB, which binary arithmetic lands a hair under.
     """
     scale = 10.0**decimals
     return math.floor((value + _TOLERANCE) * scale + 0.5) / scale
@@ -867,7 +867,7 @@ def stationary_test(
     position are valid when they are no more than 3 dB apart (9.3).
 
     :param levels: One row per set, one column per position of the whole
-        mesh of 5.5.1.1 at 1,2 m, in dB; at least three sets.
+        mesh of 5.5.1.1 at 1.2 m, in dB; at least three sets.
     :param lengths_m: The length each position stands for, in metres.
     :return: The test.
     :raises ValueError: See :class:`StationaryTestResult`.
@@ -1259,7 +1259,7 @@ class AdjacentVehicleNeutrality(RichDisplay):
 
     @property
     def passes(self) -> bool:
-        """Whether the adjacent vehicle adds no more than 2,0 dB."""
+        """Whether the adjacent vehicle adds no more than 2.0 dB."""
         tenths = round(_round_half_up(self.with_adjacent_level, 1) * 10) - round(
             _round_half_up(self.unit_level, 1) * 10
         )
@@ -1297,7 +1297,7 @@ def check_adjacent_vehicle_neutrality(
 
     It is when it is of the same class as the unit, or when the pass-by level
     over the units under test and the adjacent vehicle,
-    :math:`L_{p\mathrm{Aeq},T_{p1}}`, is no more than 2,0 dB above the level
+    :math:`L_{p\mathrm{Aeq},T_{p1}}`, is no more than 2.0 dB above the level
     over the units alone, :math:`L_{p\mathrm{Aeq},T_p}`, both rounded to one
     decimal for the comparison (Figure 5). This is the second test; it is
     made at least once for each tested speed.
@@ -2320,8 +2320,8 @@ def check_reference_track(
     """Is this track a reference track for a constant-speed type test? 6.2.
 
     **6.2.5.** The roughness of every rail (every line, when 6.4.3 of EN 15610
-    asks for three) must cover at least 0,003 m to 0,10 m up to 190 km/h and
-    0,003 m to 0,25 m above, and must not exceed the limit of Figure 2 in any
+    asks for three) must cover at least 0.003 m to 0.10 m up to 190 km/h and
+    0.003 m to 0.25 m above, and must not exceed the limit of Figure 2 in any
     band (EN 15610 clause 8). A small exceedance is accepted when Annex C
     finds its effect on the pass-by level at most 1 dB: pass the result of
     :func:`check_small_roughness_deviations` for the speed. A line analysed
@@ -2349,7 +2349,7 @@ def check_reference_track(
     :param curve_radius_m: The radius of curvature of the track, in metres;
         not judged when omitted.
     :param track_gradient_ratio: The gradient, rise over length (5:1 000 is
-        0,005); not judged when omitted.
+        0.005); not judged when omitted.
     :param small_deviations: The Annex C verdict of this speed, computed on the
         quadratic average of ``roughness``
         (:func:`~phonometry.environment.sources.acoustic_roughness.average_roughness_spectra`,

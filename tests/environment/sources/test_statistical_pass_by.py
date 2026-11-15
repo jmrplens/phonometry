@@ -118,8 +118,8 @@ def test_table_2_and_the_counts_of_7_3_and_9_3() -> None:
 def test_table_2_intervals_are_about_two_standard_errors() -> None:
     """The printed intervals follow from their NOTE's vehicle counts, roughly.
 
-    1,96 standard deviations over the root of 100 cars rounds to the printed
-    0,3 dB. Over the root of 40 heavy vehicles it gives 0,62 dB where 0,7 dB
+    1.96 standard deviations over the root of 100 cars rounds to the printed
+    0.3 dB. Over the root of 40 heavy vehicles it gives 0.62 dB where 0.7 dB
     is printed: 9.6 reports the findings of research rather than this
     arithmetic, so the heavy intervals are only held to be the next tenth up.
     """
@@ -207,7 +207,7 @@ def test_annex_e_vehicle_sound_levels(annex_e: StatisticalPassByResult) -> None:
 
 
 def test_annex_e_index_is_the_index_of_the_printed_levels() -> None:
-    """79,9 dB is what the three levels give as printed, to one decimal."""
+    """79.9 dB is what the three levels give as printed, to one decimal."""
     index = statistical_pass_by_index(
         ref.ANNEX_E_VEHICLE_SOUND_LEVELS_DB, road_speed_category="medium"
     )
@@ -226,7 +226,7 @@ def test_annex_e_index_end_to_end_is_the_printed_79_9(
 def test_the_unrounded_chain_would_print_80_0(
     annex_e: StatisticalPassByResult,
 ) -> None:
-    """Carried unrounded from the printed lines, the index would print 80,0 dB."""
+    """Carried unrounded from the printed lines, the index would print 80.0 dB."""
     assert annex_e.full_precision_index == pytest.approx(79.9852, abs=1e-4)
     assert round(annex_e.full_precision_index, 1) == pytest.approx(80.0)
     two_decimals = {k: round(v, 2) for k, v in annex_e.vehicle_sound_levels.items()}
@@ -236,7 +236,7 @@ def test_the_unrounded_chain_would_print_80_0(
 
 
 def test_the_index_is_rounded_once(annex_e: StatisticalPassByResult) -> None:
-    """79,946 dB taken to 79,95 dB first would print 80,0 dB, not Annex E's 79,9."""
+    """79.946 dB taken to 79.95 dB first would print 80.0 dB, not Annex E's 79.9."""
     two_steps = math.floor(round(annex_e.index, 2) * 10.0 + 0.5) / 10.0
     assert two_steps == pytest.approx(80.0)
     assert annex_e.reported_index == pytest.approx(79.9)
@@ -245,7 +245,7 @@ def test_the_index_is_rounded_once(annex_e: StatisticalPassByResult) -> None:
 def test_the_two_indices_differ_by_less_than_half_a_tenth(
     annex_e: StatisticalPassByResult,
 ) -> None:
-    """Rounding moves each level at most 0,05 dB, and the index follows."""
+    """Rounding moves each level at most 0.05 dB, and the index follows."""
     gap = abs(annex_e.full_precision_index - annex_e.index)
     assert 0.0 < gap <= 0.05
 
@@ -268,7 +268,7 @@ def test_annex_e_meets_7_3_and_9_3(annex_e: StatisticalPassByResult) -> None:
 
 
 def test_annex_d_reference_index_is_not_the_annex_e_one() -> None:
-    """The seven-surface reference of Annex D indexes to 78,9 dB, not 77,3 dB."""
+    """The seven-surface reference of Annex D indexes to 78.9 dB, not 77.3 dB."""
     index = statistical_pass_by_index(
         SPB_NORMALIZED_REFERENCE_LEVELS, road_speed_category="medium"
     )
@@ -523,7 +523,7 @@ def _nine_three_warnings(caught: list[warnings.WarningMessage]) -> list[str]:
 def test_speed_window_is_k_deviations_of_lg_v_about_its_mean(
     category: str, k: float, *, inside: bool
 ) -> None:
-    """A reference speed 1,25 deviations off is inside the car window, outside the heavy one."""
+    """A reference speed 1.25 deviations off is inside the car window, outside the heavy one."""
     lg_sd = 0.05
     centre = math.log10(50.0) + 1.25 * lg_sd
     speeds = _placed_speeds(centre, lg_sd)

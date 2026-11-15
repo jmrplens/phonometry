@@ -102,7 +102,7 @@ def test_the_two_ground_factors_differ_for_two_of_the_eight_classes() -> None:
     """Which is the reason to carry both rather than one.
 
     ISO 9613-2 admits only hard ground and porous ground; NMPB-2008 grades the
-    two classes in between at 0,7 and 0,3.
+    two classes in between at 0.7 and 0.3.
     """
     classes = {
         row.harmonoise_class: row
@@ -142,7 +142,7 @@ def test_the_rotorcraft_model_and_the_book_print_the_same_eight_numbers() -> Non
 def test_the_cell_printed_with_two_decimal_points_is_not_a_number() -> None:
     """Cox's heath row prints ``1.7.3 x 10^5``, which nobody can read.
 
-    Guessing at 1,73 or 1,7 would be inventing a resistivity, so the cell
+    Guessing at 1.73 or 1.7 would be inventing a resistivity, so the cell
     keeps what the page printed and the row says the number is missing.
     """
     row = PUBLISHED_GROUND_SURFACES["cox-2017-table-6-7/heath_line_1_marked_b"]

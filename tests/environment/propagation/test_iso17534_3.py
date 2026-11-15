@@ -120,14 +120,14 @@ def _energy_sum(levels: np.ndarray, weighting: np.ndarray | None = None) -> floa
 # The geometry every case shares (Table 3)
 # --------------------------------------------------------------------------- #
 def test_the_shared_geometry_matches_table_3() -> None:
-    """dp, d3 and Adiv, printed as 194,16 m, 194,19 m and 56,76 dB."""
+    """dp, d3 and Adiv, printed as 194.16 m, 194.19 m and 56.76 dB."""
     assert DP == pytest.approx(194.16, abs=0.005)
     assert D3_FLAT == pytest.approx(194.19, abs=0.005)
     assert environment.geometric_divergence(D3_FLAT) == pytest.approx(56.76, abs=0.005)
 
 
 def test_the_three_regions_leave_a_middle_one() -> None:
-    """30 hs and 30 hr take 150 m of the 194,16 m, and q is the rest of it."""
+    """30 hs and 30 hr take 150 m of the 194.16 m, and q is the rest of it."""
     assert 30.0 * SOURCE[2] == pytest.approx(30.0)
     assert 30.0 * RECEIVER[2] == pytest.approx(120.0)
     assert DP - 150.0 == pytest.approx(44.16, abs=0.005)
@@ -179,7 +179,7 @@ def test_flat_ground_of_one_kind_reproduces_its_printed_table(
 
 
 def test_hard_ground_gives_back_the_three_decibels_it_reflects() -> None:
-    """T01 prints Agr = -3,68 dB in every band: -1,5 twice, and -3q for the middle.
+    """T01 prints Agr = -3.68 dB in every band: -1.5 twice, and -3q for the middle.
 
     Reflecting ground is the one case Table 3 answers with a constant, so the
     whole spectrum of T01 is the free field shifted by one number.
@@ -216,7 +216,7 @@ def test_porous_ground_costs_most_where_the_notch_falls() -> None:
 # T04 and T06: ground of three kinds, general method (Tables 8, 9, 14, 15)
 # --------------------------------------------------------------------------- #
 def test_t04_averages_the_three_areas_into_three_regions() -> None:
-    """Table 8: Gs 0,20, Gm 0,43 and Gr 0,67 from the segments of Table 7."""
+    """Table 8: Gs 0.20, Gm 0.43 and Gr 0.67 from the segments of Table 7."""
     factors = environment.region_ground_factors(SEGMENTS, G_T04, SOURCE[2], RECEIVER[2])
     assert factors.source == pytest.approx(0.20, abs=0.005)
     assert factors.middle == pytest.approx(0.43, abs=0.005)
@@ -224,7 +224,7 @@ def test_t04_averages_the_three_areas_into_three_regions() -> None:
 
 
 def test_t06_averages_the_same_segments_the_other_way_about() -> None:
-    """Table 14: the same lengths over reversed areas give 0,90, 0,60 and 0,37."""
+    """Table 14: the same lengths over reversed areas give 0.90, 0.60 and 0.37."""
     factors = environment.region_ground_factors(SEGMENTS, G_T06, SOURCE[2], RECEIVER[2])
     assert factors.source == pytest.approx(0.90, abs=0.005)
     assert factors.middle == pytest.approx(0.60, abs=0.005)
@@ -247,7 +247,7 @@ def test_t06_reproduces_table_15() -> None:
     """The same three areas reversed, over ground that rises 10 m at the receiver.
 
     Only two things separate this from T04: which area the source stands on,
-    and the 13 m the ray climbs, which lengthens d3 to 194,60 m and moves Adiv
+    and the 13 m the ray climbs, which lengthens d3 to 194.60 m and moves Adiv
     and Aatm with it.
     """
     printed = (39.88, 35.65, 29.70, 29.24, 34.82, 35.83, 33.13, 22.68)
@@ -287,7 +287,7 @@ def test_the_printed_table_3_functions_come_out_of_the_heights_alone() -> None:
 # T05 and T07: the same two scenarios by the alternative method (7.3.2)
 # --------------------------------------------------------------------------- #
 def test_t05_reproduces_table_10() -> None:
-    """Flat ground: hm is 2,50 m, Agr is one number and DOmega is 3,01 dB."""
+    """Flat ground: hm is 2.50 m, Agr is one number and DOmega is 3.01 dB."""
     printed = (34.90, 34.86, 34.71, 34.38, 33.95, 33.17, 30.48, 20.05)
     hm = environment.mean_path_height((0.0, DP), (0.0, 0.0), SOURCE[2], RECEIVER[2])
     assert hm == pytest.approx(2.50, abs=0.005)
@@ -306,7 +306,7 @@ def test_t05_reproduces_table_10() -> None:
 
 
 def test_t07_reproduces_table_18() -> None:
-    """The rising slope halves the clearance the ray has, so hm is 4,99 m."""
+    """The rising slope halves the clearance the ray has, so hm is 4.99 m."""
     printed = (35.36, 35.32, 35.16, 34.83, 34.40, 33.62, 30.92, 20.47)
     hm = environment.mean_path_height(
         SLOPE_DISTANCES,
@@ -332,7 +332,7 @@ def test_the_two_methods_disagree_by_more_than_their_own_envelope() -> None:
 
     7.3.2 is offered as a shortcut for the A-weighted level, and the guideline
     prints both answers for the same two scenarios precisely because they are
-    not the same answer. If they were within the +/-0,05 dB envelope, half of
+    not the same answer. If they were within the +/-0.05 dB envelope, half of
     these rows would be checking nothing.
     """
     general_flat = _receiver_levels(

@@ -354,7 +354,7 @@ def test_the_history_reports_the_interval_it_actually_used() -> None:
 
     The step is quantised to whole samples, so a target that is not an
     integer number of them cannot be honoured exactly. Measured before this
-    was fixed: at 44,1 kHz with ``dt=0.021`` the result reported 0.021 while
+    was fixed: at 44.1 kHz with ``dt=0.021`` the result reported 0.021 while
     its own times were 0.020997732 apart.
     """
     rng = np.random.default_rng(0)

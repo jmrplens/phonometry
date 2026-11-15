@@ -185,7 +185,7 @@ def test_a_margin_under_four_decibels_is_refused() -> None:
 def test_this_table_is_not_the_one_the_silencer_standard_prints() -> None:
     from phonometry.noise_control import silencer_background_correction
 
-    # At a 9 dB margin ISO 11820 takes off 0,5 dB and ISO 10847 takes off 1.
+    # At a 9 dB margin ISO 11820 takes off 0.5 dB and ISO 10847 takes off 1.
     assert silencer_background_correction([9.0])[0] == 0.5
     assert environment.barrier_background_correction([9.0])[0] == -1.0
 
@@ -215,8 +215,8 @@ def test_the_inequality_is_strict_at_the_ratio() -> None:
 
 
 def test_a_geometry_past_the_ratio_is_short_before_and_after() -> None:
-    # 6.3.1: (Hs + HR) / (d1 + d2) = 4 / 20 = 0,2 and (Hs + H) / d1 =
-    # (H + HR) / d2 = 5 / 10 = 0,5, all past 0,1.
+    # 6.3.1: (Hs + HR) / (d1 + d2) = 4 / 20 = 0.2 and (Hs + H) / d1 =
+    # (H + HR) / d2 = 5 / 10 = 0.5, all past 0.1.
     check = environment.check_short_distance(
         source_height_m=2.0,
         receiver_height_m=2.0,
@@ -300,7 +300,7 @@ def test_a_close_source_takes_the_ten_degree_rule() -> None:
     # applied to. CEN/TS 16272-7:2015 8.2.3, printed folio 16 (PDF page 17),
     # words the same rule the same way, "10 degrees greater than to the top of
     # the barrier", which is what fixes this reading. All four geometries are
-    # ones where the angle asks for more than the 1,5 m clearance, so the NOTE
+    # ones where the angle asks for more than the 1.5 m clearance, so the NOTE
     # is what sets the height.
     for distance, barrier in ((5.0, 4.0), (10.0, 4.0), (12.0, 2.5), (14.999, 5.0)):
         height = environment.reference_microphone_height_m(
@@ -317,8 +317,8 @@ def test_the_clearance_governs_where_the_angle_asks_for_less() -> None:
     # ISO 10847:1997 7.2.2, printed folio 9 (PDF page 13): the height "shall be
     # at least 1,5 m above the top edge of the barriers". The NOTE under it
     # only ever raises the microphone, so it cannot take it under that. A 3 m
-    # barrier 5 m from the source reaches its 10 degrees at 4,34 m, which is
-    # under the 4,5 m the clause requires.
+    # barrier 5 m from the source reaches its 10 degrees at 4.34 m, which is
+    # under the 4.5 m the clause requires.
     angle = 5.0 * math.tan(math.atan(3.0 / 5.0) + math.radians(10.0))
     assert angle == pytest.approx(4.341, abs=1e-3)
     height = environment.reference_microphone_height_m(3.0, source_to_barrier_m=5.0)
@@ -326,7 +326,7 @@ def test_the_clearance_governs_where_the_angle_asks_for_less() -> None:
 
 
 def test_no_close_geometry_puts_the_microphone_under_the_clearance() -> None:
-    # Every geometry of the NOTE's range on a 0,1 m grid whose barrier top
+    # Every geometry of the NOTE's range on a 0.1 m grid whose barrier top
     # stands under 80 degrees from the source, where a finite height reaches
     # the increment. The result never falls under the clearance of 7.2.2, and
     # wherever it stands above it the 10 degrees of the NOTE hold exactly.
@@ -363,7 +363,7 @@ def test_a_barrier_top_past_eighty_degrees_keeps_the_clearance() -> None:
     # Once the top of the barrier stands 80 degrees or more above the near end
     # of the source region, no height puts the microphone 10 degrees higher
     # still, and the tangent of the NOTE's angle turns negative. The NOTE is a
-    # preference and 7.2.2 a requirement, so the microphone keeps the 1,5 m
+    # preference and 7.2.2 a requirement, so the microphone keeps the 1.5 m
     # and the unreachable preference is reported.
     for distance, barrier, expected in ((1.0, 6.0, 7.5), (1.0, 10.0, 11.5)):
         with pytest.warns(BarrierInSituWarning, match="10 degrees"):
@@ -381,8 +381,8 @@ def test_the_ten_degrees_are_not_measured_from_the_ground_plane() -> None:
     # at least 10 degrees", which is an absolute elevation and not an
     # increment. The two readings are not interchangeable: for a 4 m barrier
     # with the source 10 m away the absolute one, taken at the 15 m that page
-    # prints, lands at 2,64 m, under the top of the barrier.
-    # No document prints the height either reading yields, so the 6,2006 m
+    # prints, lands at 2.64 m, under the top of the barrier.
+    # No document prints the height either reading yields, so the 6.2006 m
     # below is this library's answer pinned against change, not an oracle.
     absolute = 15.0 * math.tan(math.radians(REFERENCE_ELEVATION_INCREMENT_DEG))
     height = environment.reference_microphone_height_m(4.0, source_to_barrier_m=10.0)
@@ -483,7 +483,7 @@ def test_a_non_finite_wind_component_is_refused() -> None:
 # worked example of its own. Every level was read on the printed page, and
 # every expected value is the one that page prints beside those levels; both
 # are in ``tests/reference_data/barrier_in_situ.py`` with the document, the
-# folio and the PDF page. They report to 0,1 dB, so agreement is asserted to
+# folio and the PDF page. They report to 0.1 dB, so agreement is asserted to
 # half of that.
 
 PRINTED_TENTH_DB = 0.05
@@ -535,12 +535,12 @@ def test_the_lindeman_direct_runs_reproduce_their_printed_losses() -> None:
 
 
 def test_the_lindeman_first_run_is_a_defect_of_the_source() -> None:
-    # Run 1 of the same table prints 6,2 dB in column (7) where its own four
-    # levels give 5,8 dB. TABLES 4 and 5 on printed folio 37 (PDF page 5)
+    # Run 1 of the same table prints 6.2 dB in column (7) where its own four
+    # levels give 5.8 dB. TABLES 4 and 5 on printed folio 37 (PDF page 5)
     # reach both of those levels a second time through their own arithmetic,
-    # and column (3) of TABLE 8 prints their difference as 6,6 dB, so the
+    # and column (3) of TABLE 8 prints their difference as 6.6 dB, so the
     # levels are corroborated and the printed insertion loss is not. Neither
-    # it nor the note's mean of 7,5 dBA is used as an expected value.
+    # it nor the note's mean of 7.5 dBA is used as an expected value.
     reference_before, reference_after, receiver_before, receiver_after = (
         oracle.LINDEMAN_TABLE_8_RUN_1_DBA
     )
@@ -578,11 +578,11 @@ def test_the_lindeman_indirect_runs_and_their_mean() -> None:
 
 
 def test_the_lindeman_fourth_run_takes_its_level_from_the_table_above() -> None:
-    # Column (2) of TABLE 13 prints 60,2 dBA for run 4, a repeat of run 3.
+    # Column (2) of TABLE 13 prints 60.2 dBA for run 4, a repeat of run 3.
     # The table contradicts itself there rather than leaving it open: its own
-    # column (3) prints 7,7 dBA for that run and 68,8 - 60,2 is 8,6. TABLE 12,
+    # column (3) prints 7.7 dBA for that run and 68.8 - 60.2 is 8.6. TABLE 12,
     # directly above on the same folio and covering the same microphone and
-    # the same five runs, prints 61,1 dBA, which restores both columns.
+    # the same five runs, prints 61.1 dBA, which restores both columns.
     levels = oracle.LINDEMAN_TABLE_13_DBA
     run = 3
     res = environment.measured_insertion_loss_indirect(
@@ -607,10 +607,10 @@ def test_the_fhwa_worked_example_reaches_both_of_its_printed_answers() -> None:
     # 101), and the same example in FHWA-HEP-18-065 on folios 108 and 109.
     # L_edge is an FHWA edge-diffraction adjustment with no counterpart in
     # ISO 10847, so it is applied here rather than fed to the function. The
-    # example lists a receiver level of 56,3 dB and then types 56,2 dB in its
-    # expression, which is the whole of the difference between the 8,7 dB the
+    # example lists a receiver level of 56.3 dB and then types 56.2 dB in its
+    # expression, which is the whole of the difference between the 8.7 dB the
     # FHWA Noise Barrier Design Handbook prints for it in clause 15.1.2.1 and
-    # the 8,8 dB the two manuals print.
+    # the 8.8 dB the two manuals print.
     edge_db = oracle.FHWA_6_6_3_EDGE_DB
     for receiver_after, printed in oracle.FHWA_6_6_3_PRINTED_DB.values():
         res = environment.measured_insertion_loss_direct(
@@ -629,9 +629,9 @@ def test_an_exact_half_is_reported_as_the_even_whole_decibel() -> None:
     # tie. ISO 80000-1:2009 Annex B, B.3, printed folio 35 (PDF page 43),
     # supplies Rule A, the even multiple, and folio 36 (PDF page 44) calls it
     # "generally preferable". Its EXAMPLE 2 on folio 35 prints the ties at a
-    # rounding range of 10: 1 225,0 becomes 1 220 and 1 235,0 becomes 1 240.
+    # rounding range of 10: 1 225.0 becomes 1 220 and 1 235.0 becomes 1 240.
     # Divided by that range they are the exact halves below, both of them
-    # binary-exact, which the ties of the printed 0,1 range are not. Rule B,
+    # binary-exact, which the ties of the printed 0.1 range are not. Rule B,
     # printed on folio 36, would give 1 230 for the first, so the pair
     # discriminates.
     ties = [
@@ -690,11 +690,11 @@ def test_the_jagniatinskis_campaign_uses_only_the_printed_difference() -> None:
     # Loss of Acoustic Barriers under Specific Conditions", Procedia
     # Engineering 187, 2017. Table 1 on printed folio 293 (PDF page 5) prints
     # the reference level, the site level and one "environment correction",
-    # -9,1 and -6,9 dBA with the sign the table gives them, which is the
+    # -9.1 and -6.9 dBA with the sign the table gives them, which is the
     # "before" difference of 8.2.1 given as a single number with its sign
-    # reversed: 76,0 - 56,3 - 9,1 = 10,6. The two levels behind it are free.
+    # reversed: 76.0 - 56.3 - 9.1 = 10.6. The two levels behind it are free.
     # Site 1 is a 5 m barrier with the receiver 30 m away and site 2 a
-    # separate 6 m barrier at 20 m. The 8,0 dBA is the same site read from its
+    # separate 6 m barrier at 20 m. The 8.0 dBA is the same site read from its
     # total level, printed on folio 294. The residual levels came from an ISO
     # 1996 extraction, which is not the background treatment of 6.4 and is not
     # exercised here.
@@ -750,7 +750,7 @@ def test_the_six_decibels_are_a_pressure_doubling() -> None:
     # reflecting surface "pressure doubling occurs with an apparent increase
     # in sound pressure level of 6 dB". ISO 1996-2:2017 9.2.1.2 b) 2), printed
     # folio 14 (PDF page 20), prints the same figure in its NOTE 2 as the
-    # ideal case, while asking for 5,7 dB when its Annex B conditions are met,
+    # ideal case, while asking for 5.7 dB when its Annex B conditions are met,
     # so it corroborates the mechanism and not the flat 6 dB.
     assert RECEIVER_CORRECTIONS["reflecting_surface"] == pytest.approx(
         20.0 * math.log10(2.0), abs=0.021

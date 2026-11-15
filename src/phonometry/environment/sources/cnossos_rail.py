@@ -211,7 +211,7 @@ RAILWAY_OCTAVE_BANDS_HZ: tuple[float, ...] = (
     8000.0,
 )
 #: Heights of the two equivalent source lines above the rail head, in m
-#: (2.3.1): source A at 0,5 m and source B at 4,0 m.
+#: (2.3.1): source A at 0.5 m and source B at 4.0 m.
 RAILWAY_SOURCE_HEIGHTS_M: tuple[float, float] = (0.5, 4.0)
 #: Speed floor used to determine the total effective roughness of a train, km/h.
 RAILWAY_MIN_SPEED_KMH = 50.0
@@ -225,7 +225,7 @@ AERODYNAMIC_REFERENCE_SPEED_KMH = 300.0
 REFERENCE_JOINT_DENSITY_PER_M = 0.01
 
 #: Wavelength grid of Tables G-1b, G-2 and G-4 as replaced by (EU) 2021/1226,
-#: in mm: the standard 1/3-octave series from 2 000 mm to 0,8 mm.
+#: in mm: the standard 1/3-octave series from 2 000 mm to 0.8 mm.
 _WAVELENGTHS_STANDARD: tuple[float, ...] = (
     2000.0,
     1600.0,
@@ -266,8 +266,8 @@ _WAVELENGTHS_STANDARD: tuple[float, ...] = (
 #: Wavelength grid, in mm, of Table G-1a, the first table of G-1, which
 #: (EU) 2021/1226 did not replace: point (20)(a) replaces "the second table"
 #: only.
-#: It stops at 1 000 mm and keeps the non-standard steps 120, 12 and 3,2 mm
-#: where the amended tables read 125, 12,5 and 3,15 mm. Each table is therefore
+#: It stops at 1 000 mm and keeps the non-standard steps 120, 12 and 3.2 mm
+#: where the amended tables read 125, 12.5 and 3.15 mm. Each table is therefore
 #: resampled on its own grid rather than forced onto a common one, which is how
 #: this implementation resolves an ambiguity the Directive leaves open.
 _WAVELENGTHS_WHEEL: tuple[float, ...] = (
@@ -1285,7 +1285,7 @@ _TABLE_G3B: dict[float, tuple[float, ...]] = {
 }
 
 #: Table G-3c - superstructure transfer function ``L_H,VEH,SUP,i`` of the only
-#: tabulated superstructure ("EU standard", vehicle type ``a``): 0,0 dB in every
+#: tabulated superstructure ("EU standard", vehicle type ``a``): 0.0 dB in every
 #: 1/3-octave band from 50 Hz to 10 kHz.
 _TABLE_G3C: tuple[float, ...] = (0.0,) * 24
 
@@ -1355,8 +1355,8 @@ class TractionVehicle(Enum):
 # ---------------------------------------------------------------------------
 # Table G-5 - traction sound power per vehicle, source A then source B. Values
 # unchanged since 2015/996 except the 6 300 Hz pair of the 2 200 kW diesel
-# locomotive, which (EU) 2021/1226 Annex point (20)(f) corrected from 31,4/30,7
-# to 81,4/80,7; the same point corrected the band labels. Because
+# locomotive, which (EU) 2021/1226 Annex point (20)(f) corrected from 31.4/30.7
+# to 81.4/80.7; the same point corrected the band labels. Because
 # L_W,0,const,i = L_W,0,idling,i, this one table serves both running conditions.
 # ---------------------------------------------------------------------------
 _TABLE_G5: dict[str, tuple[tuple[float, ...], tuple[float, ...]]] = {

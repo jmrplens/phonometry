@@ -6,8 +6,8 @@ filtering, a record of at least 5 m (NOTE 1) and 15 m analysed in total, and
 filters that "shall comply with EN 61260", the 1995 edition its normative
 references date. That edition prints the limits the bank is held to: Table 1
 on the relative attenuation, 4.5.3 on the filter integrated response
-(:math:`\pm 0{,}15` dB for class 0) and 4.9 on the summation of the outputs
-(:math:`\pm 1{,}0` dB for class 0).
+(:math:`\pm 0.15` dB for class 0) and 4.9 on the summation of the outputs
+(:math:`\pm 1.0` dB for class 0).
 
 Methods A and B are compared on records whose band levels are known in
 closed form. A tone on a Fourier line, its three Hanning lines inside its
@@ -59,7 +59,7 @@ _G = 10.0**0.3
 #: for one-third octave filters, from where Table 1 asks class 0 for +75 dB.
 _OMEGA_G4 = 1.0 + (_G ** (1.0 / 6.0) - 1.0) / (_G**0.5 - 1.0) * (_G**4 - 1.0)
 
-#: The sampling intervals the record-length tests run at: 1 mm and 0,5 mm.
+#: The sampling intervals the record-length tests run at: 1 mm and 0.5 mm.
 _SPACINGS_M = (1.0e-3, 5.0e-4)
 
 
@@ -141,9 +141,9 @@ def test_the_bank_attenuates_class_0_beyond_g4_on_a_record() -> None:
 
     Table 1 of EN 61260:1995 asks class 0 for a relative attenuation of at
     least 75 dB at and beyond the normalized frequencies :math:`G^{\pm 4}`
-    maps to. Tones from 0,3 per metre to just under the Nyquist wavenumber,
+    maps to. Tones from 0.3 per metre to just under the Nyquist wavenumber,
     and the two wavenumbers that fold onto bands of a decimated bank
-    (74,773 per metre onto the 0,5 m band, 88,202 per metre onto the 0,4 m
+    (74.773 per metre onto the 0.5 m band, 88.202 per metre onto the 0.4 m
     band), are filtered on a 40 m record; the mean square of the
     last 15 m, once every filter has rung out, is compared with that of a
     tone at the band's midband wavenumber.
@@ -195,7 +195,7 @@ def _relative_attenuation_db(
 
 
 def test_the_integrated_response_of_every_band_is_within_class_0() -> None:
-    r"""EN 61260:1995 4.5: :math:`\Delta B = 10 \lg (B_e / B_r)` within ±0,15 dB.
+    r"""EN 61260:1995 4.5: :math:`\Delta B = 10 \lg (B_e / B_r)` within ±0.15 dB.
 
     :math:`B_e` is the integral of :math:`10^{-0.1 \Delta A}` over the
     normalized frequency (equation 14) and :math:`B_r = G^{1/6} - G^{-1/6}`
@@ -213,7 +213,7 @@ def test_the_integrated_response_of_every_band_is_within_class_0() -> None:
 
 
 def test_the_summation_of_outputs_is_within_class_0() -> None:
-    """EN 61260:1995 4.9: between two midbands, the summed outputs within ±1,0 dB."""
+    """EN 61260:1995 4.9: between two midbands, the summed outputs within ±1.0 dB."""
     bank = roughness_filter_bank(sample_spacing_m=_DX)
     worst = 0.0
     for index in range(1, bank.n_bands - 1):
@@ -241,7 +241,7 @@ def test_order_4_is_the_lowest_order_whose_bank_is_class_0() -> None:
 
 
 def test_the_bank_holds_the_bands_the_annex_b_listing_filters() -> None:
-    """At 1 mm the default bank runs the 24 bands of ``wl_d``, 0,5 m to 2,5 mm (B.9.2)."""
+    """At 1 mm the default bank runs the 24 bands of ``wl_d``, 0.5 m to 2.5 mm (B.9.2)."""
     bank = roughness_filter_bank(sample_spacing_m=_DX)
     listing = ref.EN15610_LISTING_FILTER_WAVELENGTHS_M
     centres = np.asarray(bank.frequencies)
@@ -253,7 +253,7 @@ def test_the_bank_holds_the_bands_the_annex_b_listing_filters() -> None:
 
 
 def test_the_bank_runs_at_a_fractional_number_of_samples_per_metre() -> None:
-    """0,3 mm is 3 333,3 samples per metre, and the bank runs at that rate."""
+    """0.3 mm is 3 333.3 samples per metre, and the bank runs at that rate."""
     bank = roughness_filter_bank(sample_spacing_m=3.0e-4)
     assert bank.fs == pytest.approx(1.0 / 3.0e-4, rel=1e-12)
     assert bank.n_bands > 0
@@ -273,9 +273,9 @@ def test_the_bank_refuses_a_reach_past_the_nyquist_band() -> None:
 # Methods A and B on the same record.
 # ---------------------------------------------------------------------------
 
-#: One tone in every other band from 6,3 cm to 2,5 mm, on a whole number of
+#: One tone in every other band from 6.3 cm to 2.5 mm, on a whole number of
 #: cycles per metre with the whole width of its three Hanning lines inside the
-#: band, which the 0,1 m band, 2,3 per metre wide, cannot hold.
+#: band, which the 0.1 m band, 2.3 per metre wide, cannot hold.
 _TONE_WAVENUMBERS = (16, 25, 40, 63, 100, 158, 251, 398)
 
 
@@ -309,7 +309,7 @@ def test_methods_a_and_b_agree_on_tones_within_table_1_class_0() -> None:
 
 
 def test_method_b_reads_an_even_spread_within_the_class_0_integrated_response() -> None:
-    """Lines every 1/17 per metre: each band within ±0,15 dB of the sum of its lines.
+    """Lines every 1/17 per metre: each band within ±0.15 dB of the sum of its lines.
 
     A 21 m record leaves 17 m once 2 m are discarded at either end, one period
     of the lines, so they add on their mean squares exactly there. Bands with
@@ -335,7 +335,7 @@ def test_method_b_reads_an_even_spread_within_the_class_0_integrated_response() 
 
 
 def test_both_methods_report_the_same_bands_on_a_five_metre_record() -> None:
-    """1 m analysed by B and 1 m segments by A: both from 0,25 m to 2,5 mm (7.5)."""
+    """1 m analysed by B and 1 m segments by A: both from 0.25 m to 2.5 mm (7.5)."""
     record = _tones((40,), 5.0)
     fourier = acoustic_roughness_spectrum(
         record, sample_spacing_m=_DX, spike_removal=False, curvature_processing=False
@@ -389,10 +389,10 @@ def test_five_metres_is_the_shortest_record(spacing_m: float) -> None:
 
 
 def test_a_long_record_reaches_as_far_as_its_filters_settle() -> None:
-    """19 m leaves 15 m: 7.5 would allow 3,15 m, the filters settle to 0,5 m.
+    """19 m leaves 15 m: 7.5 would allow 3.15 m, the filters settle to 0.5 m.
 
-    The 0,63 m filter has not built up to within 0,15 dB of its steady output
-    over the 15 m analysed, after the 2 m discarded; the 0,5 m one has.
+    The 0.63 m filter has not built up to within 0.15 dB of its steady output
+    over the 15 m analysed, after the 2 m discarded; the 0.5 m one has.
     """
     spectrum = _plain(_tones((40,), 19.0))
     assert spectrum.wavelengths_m[0] == pytest.approx(0.5)
@@ -400,7 +400,7 @@ def test_a_long_record_reaches_as_far_as_its_filters_settle() -> None:
 
 
 def test_a_steady_long_wave_reads_its_level_once_the_filter_settles() -> None:
-    """A 2 um sinusoid in the 0,5 m band of a 19 m record reads 10 lg 2 within 0,15 dB."""
+    """A 2 um sinusoid in the 0.5 m band of a 19 m record reads 10 lg 2 within 0.15 dB."""
     x = np.arange(0.0, 19.0, _DX)
     spectrum = _plain(2.0 * np.cos(2.0 * np.pi * 2.0 * x))
     assert spectrum.level_at(0.5) == pytest.approx(10.0 * math.log10(2.0), abs=0.15)
@@ -411,7 +411,7 @@ def test_an_offset_and_a_slope_do_not_reach_the_filters(*, processed: bool) -> N
     """The mean and the linear trend go before the filters, as in the Annex B listing.
 
     A 1 mm offset and a slope of 100 um per metre under the 2 um sinusoid of
-    the 0,5 m band leave its level at 10 lg 2 within 0,15 dB, with the 7.1
+    the 0.5 m band leave its level at 10 lg 2 within 0.15 dB, with the 7.1
     processing or without it; left in, the offset alone reads 20 dB high.
     """
     x = np.arange(0.0, 19.0, _DX)

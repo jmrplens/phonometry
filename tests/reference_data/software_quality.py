@@ -117,8 +117,8 @@ ISO17534_1_TABLE_B2: tuple[tuple[str, float, float, float], ...] = (
 #: TRC-form based on test case 1", the A-weighted limits of the certified
 #: results of T01 and an exemplary software calculation result, in dB, as
 #: ``(row, upper, lower, result)``. Every row answers "yes" to "Result inside
-#: tolerances", including 250 Hz, whose printed 31,0 lies below its lower
-#: limit 31,05 (docs/ERRATA.md).
+#: tolerances", including 250 Hz, whose printed 31.0 lies below its lower
+#: limit 31.05 (docs/ERRATA.md).
 ISO17534_3_TABLE_69: tuple[tuple[str, float, float, float], ...] = (
     ("63 Hz", 13.75, 13.65, 13.7),
     ("125 Hz", 23.81, 23.71, 23.8),

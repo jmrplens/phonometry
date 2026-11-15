@@ -59,7 +59,7 @@ from phonometry.environment.sources.cnossos_road import (
     road_vehicle_sound_power,
 )
 
-#: The workbook prints levels rounded to 0,01 dB, so that is the whole budget.
+#: The workbook prints levels rounded to 0.01 dB, so that is the whole budget.
 WORKBOOK_TOLERANCE = 0.01
 CATEGORIES: tuple[RoadVehicleCode, ...] = ("1", "2", "3", "4a", "4b")
 
@@ -500,7 +500,7 @@ def test_gradient_dead_band_is_pinned_on_both_sides_of_every_breakpoint(
     The correction is continuous, so it evaluates to zero *at* every breakpoint
     and a test that samples only the edges cannot tell a widened branch from
     the printed one: at s = 2 % the category 1 uphill branch returns
-    (2 - 2)/1,5 = 0 whether it opens at 0 % or at 2 %. These gradients sit
+    (2 - 2)/1.5 = 0 whether it opens at 0 % or at 2 %. These gradients sit
     strictly inside the band, where a breakpoint moved outwards makes the
     correction negative, and strictly outside it, where one moved inwards
     would leave it at zero.

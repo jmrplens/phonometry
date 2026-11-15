@@ -18,7 +18,7 @@ is, which is what makes them oracles rather than regression pins:
 - a device with the same ``R`` in every band rates exactly that ``R``,
   because the weighting cancels between numerator and denominator;
 - the same holds for absorption: a constant ``α`` rates -10 lg(1 - α);
-- a perfect absorber is capped by Clause 5 at 0,99 and therefore at 20 dB;
+- a perfect absorber is capped by Clause 5 at 0.99 and therefore at 20 dB;
 - a device that does nothing (α = 0, R = 0) rates 0 dB;
 - shifting every ``R`` by ``d`` shifts ``DL_R`` by exactly ``d``.
 """
@@ -91,7 +91,7 @@ class TestAbsorptionRating:
     def test_a_perfect_absorber_is_capped_by_the_clause(self) -> None:
         with pytest.warns(prop.RoadDeviceWarning, match="0.99 limit"):
             got = prop.sound_absorption_rating(np.ones(_BANDS))
-        # -10 lg(1 - 0,99) = 20 dB exactly, which is the ceiling the cap puts
+        # -10 lg(1 - 0.99) = 20 dB exactly, which is the ceiling the cap puts
         # on any device however absorptive it measures.
         assert got.rating == pytest.approx(20.0)
         assert got.category == "A5"
@@ -107,7 +107,7 @@ class TestAbsorptionRating:
         ("spectrum", "changes"),
         [
             # Pairs of bands with the same spectrum level, moved by the same
-            # amount either way, so the weighted ratio is 0,99 in decimal.
+            # amount either way, so the weighted ratio is 0.99 in decimal.
             ("road", {3: 0.98, 16: 1.00, 8: 0.94, 13: 1.04}),
             ("railway", {7: 0.85, 16: 1.13, 13: 0.85, 14: 1.13}),
         ],
@@ -115,8 +115,8 @@ class TestAbsorptionRating:
     def test_a_ratio_of_exactly_0_99_reaches_the_limit(
         self, spectrum: str, changes: dict[int, float]
     ) -> None:
-        # Clause 5 limits a ratio that reaches 0,99; these coefficients weigh
-        # to 0,99 in decimal, which binary arithmetic can leave a unit or two
+        # Clause 5 limits a ratio that reaches 0.99; these coefficients weigh
+        # to 0.99 in decimal, which binary arithmetic can leave a unit or two
         # in the last place under it, and that must not decide the verdict.
         alpha = np.full(_BANDS, 0.99)
         for band, value in changes.items():
@@ -130,7 +130,7 @@ class TestAbsorptionRating:
         # is quietest: same arithmetic mean, different rating.
         loud = np.zeros(_BANDS)
         quiet = np.zeros(_BANDS)
-        loud[8:12] = 1.0  # 630 Hz to 1,25 kHz, around the peak
+        loud[8:12] = 1.0  # 630 Hz to 1.25 kHz, around the peak
         quiet[[0, 1, 16, 17]] = 1.0  # the two ends
         assert (
             prop.sound_absorption_rating(loud).rating
@@ -217,7 +217,7 @@ class TestReporting:
     """What the two parts print, and what they refuse."""
 
     def test_the_reported_value_rounds_half_up(self) -> None:
-        # 24,5 dB is reported as 25 dB, which is also where B2 becomes B3.
+        # 24.5 dB is reported as 25 dB, which is also where B2 becomes B3.
         got = prop.airborne_insulation_rating(np.full(_BANDS, 24.5))
         assert got.reported == 25
         assert got.category == "B3"
@@ -275,7 +275,7 @@ class TestRailwaySpectrum:
         assert set(prop.SPECTRA) == {"road", "railway"}
 
     def test_the_railway_plateau_is_where_rolling_noise_is(self) -> None:
-        # Flat within a decibel from 1,25 kHz to 2,5 kHz, where the road
+        # Flat within a decibel from 1.25 kHz to 2.5 kHz, where the road
         # spectrum has already begun to fall away.
         rail = np.asarray(prop.NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB)
         road = np.asarray(prop.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB)

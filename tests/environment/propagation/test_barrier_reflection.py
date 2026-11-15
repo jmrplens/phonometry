@@ -7,7 +7,7 @@ names each page and folio):
 - Table 2, the paths and the divergence correction of the nine microphones,
   and Table 3, the path differences of the two position checks, both
   recomputed from the three distances the standard fixes;
-- 5.6.1 NOTE 1, the 1,96 m sampled area of a 4 m sample at 340 m/s;
+- 5.6.1 NOTE 1, the 1.96 m sampled area of a 4 m sample at 340 m/s;
 - 5.5.5 and 5.5.1, the three lengths of each window;
 - Table B.1, the average of twelve grid positions and its single number, and
   Table B.2, the expanded uncertainty of the same example.
@@ -215,7 +215,7 @@ class TestAdrienneWindow:
             prop.adrienne_reflection_window(_FS, window_length_s=0.4e-3)
 
     def test_the_notch_of_the_standard_window_is_about_160_hz(self) -> None:
-        # Garai and Guidorzi (2000), III.D.4: about 160 Hz for 7,9 ms.
+        # Garai and Guidorzi (2000), III.D.4: about 160 Hz for 7.9 ms.
         notch = prop.adrienne_low_frequency_limit(7.9e-3)
         assert notch == pytest.approx(162.55, abs=0.05)
 
@@ -267,7 +267,7 @@ class TestSubtraction:
     def test_the_reduction_factor_integrates_half_a_millisecond_each_side(
         self,
     ) -> None:
-        # Formula (6): what is left within 0,5 ms of the peak (24 samples at
+        # Formula (6): what is left within 0.5 ms of the peak (24 samples at
         # 48 kHz) counts, what is left beyond it does not.
         free = np.zeros(_N)
         free[1000] = 1.0
@@ -429,8 +429,8 @@ class TestReflectionIndex:
         assert np.ptp(result.reflection_index) > 0.5
 
     def test_the_long_window_serves_only_the_three_low_bands(self) -> None:
-        # An impulse 6 ms after the reflection is outside the 6,0 ms window
-        # and inside the tail of the 7,9 ms one (5.5.5).
+        # An impulse 6 ms after the reflection is outside the 6.0 ms window
+        # and inside the tail of the 7.9 ms one (5.5.5).
         front, free = _impulse_grid(reflection=0.5, late_s=6.0e-3)
         result = _index(front, free)
         np.testing.assert_allclose(result.reflection_index[3:], 0.25, atol=1e-12)
@@ -701,7 +701,7 @@ class TestAnnexB:
 
     def test_the_rating_of_the_particular_values(self) -> None:
         # Formula (12) on the unrounded means of the particular values gives
-        # 7,65 dB; Table B.2 prints 7,68 dB, which is Formula (12) on the
+        # 7.65 dB; Table B.2 prints 7.68 dB, which is Formula (12) on the
         # averages rounded to two decimals (5.11), as the test above shows.
         result = prop.reflection_index_from_positions(self._positions())
         assert round(result.rating.rating, 2) == pytest.approx(7.65)
@@ -860,10 +860,10 @@ class TestRating:
     def test_a_ratio_of_0_99_in_decimal_is_not_above_the_limit(
         self, lowest_band_hz: float
     ) -> None:
-        # Every index read as 0,99 weighs to 0,99 exactly in decimal; from
+        # Every index read as 0.99 weighs to 0.99 exactly in decimal; from
         # these bands the energy mean comes out one or two units in the last
         # place above it in binary. Clause 5.8 limits the ratio to a maximum
-        # of 0,99, which this ratio does not pass, so nothing is limited.
+        # of 0.99, which this ratio does not pass, so nothing is limited.
         values = np.full(_BANDS, 0.99)
         first = prop.TRAFFIC_NOISE_BANDS_HZ.index(lowest_band_hz)
         values[:first] = np.nan
@@ -961,8 +961,8 @@ class TestLowFrequencyLimit:
         )
 
     def test_the_top_edge_sets_the_window_of_microphone_2(self) -> None:
-        # Over the top edge of a 4 m device: 2 m above the loudspeaker, 1,6 m
-        # above microphone 2, which is 0,4 m off the specular plane of 5.
+        # Over the top edge of a 4 m device: 2 m above the loudspeaker, 1.6 m
+        # above microphone 2, which is 0.4 m off the specular plane of 5.
         limit = prop.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)
         top_edge = math.hypot(1.5, 2.0) + math.hypot(0.25, 1.6)
         specular = math.hypot(1.75, 0.4)
@@ -972,7 +972,7 @@ class TestLowFrequencyLimit:
 
     def test_a_side_edge_sets_the_window_of_microphone_4(self) -> None:
         # A 2 m sample: its left edge is 1 m from the loudspeaker axis and
-        # 0,6 m from microphone 4, at the loudspeaker's height.
+        # 0.6 m from microphone 4, at the loudspeaker's height.
         limit = prop.reflection_low_frequency_limit(
             6.0, speed_of_sound=343.0, device_length_m=2.0
         )
@@ -1016,7 +1016,7 @@ class TestLowFrequencyLimit:
             prop.reflection_low_frequency_limit(0.7, speed_of_sound=343.0)
 
     def test_a_device_whose_ground_reflection_comes_first_is_refused(self) -> None:
-        # At 1,5 m the bottom row hears the ground before the device.
+        # At 1.5 m the bottom row hears the ground before the device.
         with pytest.raises(ValueError, match="too low for the grid"):
             prop.reflection_low_frequency_limit(1.5, speed_of_sound=343.0)
 

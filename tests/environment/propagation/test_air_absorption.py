@@ -2,17 +2,17 @@
 """Tests for ISO 9613-1:1993 atmospheric sound absorption.
 
 Normative anchors (ISO 9613-1:1993):
-- Eq. (3): frO = (pa/pr)[24 + 4,04e4 h (0,02+h)/(0,391+h)]  (oxygen relaxation).
-- Eq. (4): frN = (pa/pr)(T/T0)^-1/2 [9 + 280 h exp{-4,170[(T/T0)^-1/3 - 1]}].
-- Eq. (5): alpha = 8,686 f^2 { 1,84e-11 (pa/pr)^-1 (T/T0)^1/2
-                              + (T/T0)^-5/2 [0,012 75 e^(-2239,1/T)(frO+f^2/frO)^-1
-                                            + 0,106 8 e^(-3352,0/T)(frN+f^2/frN)^-1] }.
+- Eq. (3): frO = (pa/pr)[24 + 4.04e4 h (0.02+h)/(0.391+h)]  (oxygen relaxation).
+- Eq. (4): frN = (pa/pr)(T/T0)^-1/2 [9 + 280 h exp{-4.170[(T/T0)^-1/3 - 1]}].
+- Eq. (5): alpha = 8.686 f^2 { 1.84e-11 (pa/pr)^-1 (T/T0)^1/2
+                              + (T/T0)^-5/2 [0.012 75 e^(-2239.1/T)(frO+f^2/frO)^-1
+                                            + 0.106 8 e^(-3352.0/T)(frN+f^2/frN)^-1] }.
 - Eq. (6): fm = 1000*10^(k/10) exact midband frequencies (Table 1 uses these).
-- Clause 4.2: T0 = 293,15 K, pr = 101,325 kPa; Annex B: T01 = 273,16 K.
+- Clause 4.2: T0 = 293.15 K, pr = 101.325 kPa; Annex B: T01 = 273.16 K.
 
 Primary oracle: Table 1 (a)-(h), digit-exact, shared via
 ``reference_data.ISO9613_1_TABLE1``. The implementation reproduces every point
-to < 0,4 %; tests assert agreement to within 1 in the last printed (3-sig-fig)
+to < 0.4 %; tests assert agreement to within 1 in the last printed (3-sig-fig)
 digit -- far tighter than the standard's own +/- 10 % claim (clause 7.1).
 """
 
@@ -59,7 +59,7 @@ def test_table1_digit_exact(
 
 
 def test_table1_agreement_is_tight() -> None:
-    # The whole grid reproduces to well under 0,5 % (rounding-limited).
+    # The whole grid reproduces to well under 0.5 % (rounding-limited).
     worst = 0.0
     for temp, rh, freq, alpha_km in ref.ISO9613_1_TABLE1:
         got = (
@@ -268,7 +268,7 @@ def test_iso9613_2_table2_grid_exact_midbands() -> None:
     across the eight octave bands, evaluated at the exact base-10 midbands
     (the table's own convention). Every cell agrees to half a unit of its
     last printed digit except the documented 15 degC / 80 % / 1 kHz print
-    quirk (printed 4,1 vs exact 4,151).
+    quirk (printed 4.1 vs exact 4.151).
     """
     import reference_data as ref
 
@@ -324,7 +324,7 @@ def test_atmospheric_attenuation_wraps_air_attenuation() -> None:
 
 
 def test_atmospheric_attenuation_matches_table1_cell() -> None:
-    # 10 degC, 70 % RH, 1 kHz -> 3,66 dB/km (ISO 9613-1 Table 1, exact midband).
+    # 10 degC, 70 % RH, 1 kHz -> 3.66 dB/km (ISO 9613-1 Table 1, exact midband).
     res = environment.atmospheric_attenuation(
         1000.0,
         temperature_c=10.0,

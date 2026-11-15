@@ -10,25 +10,25 @@ is the PDF page less two.
 * Table 3 (PDF page 43, printed folio 41): the nominal path differences of
   the two position checks and their tolerance.
 * 5.6.1 NOTE 1 (PDF page 37, printed folio 35): the maximum sampled area of a
-  4 m by 4 m sample, 1,96 m, at 340 m/s.
-* 5.5.5 (PDF page 32, printed folio 30): the three lengths of the 7,9 ms and
-  6,0 ms windows; 5.5.1 (PDF page 28, printed folio 26) those of the 1,3 ms
+  4 m by 4 m sample, 1.96 m, at 340 m/s.
+* 5.5.5 (PDF page 32, printed folio 30): the three lengths of the 7.9 ms and
+  6.0 ms windows; 5.5.1 (PDF page 28, printed folio 26) those of the 1.3 ms
   gain window.
 * 5.5.7 (PDF page 35, printed folio 33): the low frequency limit of a 4 m
   sample at microphones 2, 5 and 8, "about" 160 Hz, 170 Hz and 220 Hz.
 * Figure 14 (PDF pages 35 and 36, printed folios 33 and 34): the three
   curves of the low frequency limit against the height of the device, read
   off the images embedded in the PDF (906 by 561 pixels each), calibrated on
-  the eleven gridlines from 0 Hz to 1 000 Hz and on the 2,0 m and 8,0 m ends
+  the eleven gridlines from 0 Hz to 1 000 Hz and on the 2.0 m and 8.0 m ends
   of the axis, to about 1 %.
 * Table B.1 (PDF page 55, printed folio 53): the index of twelve grid
   positions in front of a 4 m absorptive barrier, their average and
   :math:`DL_{RI}` = 8 dB.
 * Table B.2 (PDF page 57, printed folio 55): the expanded uncertainty of that
-  example from the high column of Table A.1 and :math:`k_p` = 1,96, and
-  :math:`DL_{RI}` before rounding, 7,68 dB.
+  example from the high column of Table A.1 and :math:`k_p` = 1.96, and
+  :math:`DL_{RI}` before rounding, 7.68 dB.
 * B.5 (PDF page 56, printed folio 54): the conservative 95 % interval of the
-  single number, [6,09, 9,27] dB.
+  single number, [6.09, 9.27] dB.
 
 Stdlib only, like every module of this package.
 """
@@ -87,7 +87,7 @@ LOW_FREQUENCY_LIMITS_4M_HZ: dict[int, float] = {2: 160.0, 5: 170.0, 8: 220.0}
 # ---------------------------------------------------------------------------
 # Figure 14 (a), (b) and (c): the curve of microphones 2, 5 and 8, read off
 # the page as (device height [m], low frequency limit [Hz]); the curve of
-# microphone 8 starts above the 1 000 Hz top of the axis below 2,5 m.
+# microphone 8 starts above the 1 000 Hz top of the axis below 2.5 m.
 # ---------------------------------------------------------------------------
 FIGURE_14_HZ: dict[int, tuple[tuple[float, float], ...]] = {
     2: (
@@ -192,7 +192,7 @@ TABLE_B1_AVERAGE: tuple[float, ...] = (
     0.43,
 )
 #: The two averages whose printed particular values mean to an exact half
-#: (0,355 and 0,155), printed one down and one up: consistent with averages
+#: (0.355 and 0.155), printed one down and one up: consistent with averages
 #: taken from unrounded particular values, which the print does not show.
 TABLE_B1_TIED_BANDS_HZ: tuple[float, ...] = (200.0, 2500.0)
 #: The single number printed under the table, and the lowest band it sums.
@@ -242,7 +242,7 @@ TABLE_B2_EXPANDED: tuple[float, ...] = (
     0.39,
     0.45,
 )
-#: The seven cells printed a hundredth below 1,96 times the printed sR, as
+#: The seven cells printed a hundredth below 1.96 times the printed sR, as
 #: unrounded standard deviations would give; the print does not show which
 #: values the example multiplied (docs/ERRATA.md).
 TABLE_B2_LOW_CELLS_HZ: tuple[float, ...] = (

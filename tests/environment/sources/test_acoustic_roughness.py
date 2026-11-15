@@ -6,7 +6,7 @@ spectrum with the numbers shown. The oracles are closed forms instead. A
 sinusoid of amplitude :math:`A` whose wavenumber sits on a Fourier line has a
 mean square of :math:`A^2/2`, all of it inside one band, so its band level is
 :math:`10 \lg (A^2/2)`; a narrow pit is bridged where a circle of radius
-0,375 m rests on its rims; and the Annex C sharing of a band's energy by the
+0.375 m rests on its rims; and the Annex C sharing of a band's energy by the
 width it covers conserves the energy that falls inside the targets. The
 spike loop is run on the ridge the Annex B listing never finishes on.
 """
@@ -52,7 +52,7 @@ def test_a_sinusoid_on_a_line_reads_its_mean_square_in_its_band() -> None:
         curvature_processing=False,
     )
     assert spectrum.level_at(0.01) == pytest.approx(10.0 * math.log10(4.5), abs=1e-9)
-    # 7.4.2: 1 m segments overlapping by half, starting every 0,5 m to 14 m.
+    # 7.4.2: 1 m segments overlapping by half, starting every 0.5 m to 14 m.
     assert spectrum.n_segments == 29
 
 
@@ -60,9 +60,9 @@ def test_the_linear_trend_of_each_segment_is_removed() -> None:
     """7.4.2: each segment has its mean and its linear trend removed.
 
     A 1 mm/m slope under the 3 um sinusoid leaves the 1 cm band at
-    10 lg 4,5 dB and puts nothing measurable in the 0,25 m band (about
+    10 lg 4.5 dB and puts nothing measurable in the 0.25 m band (about
     -86 dB, rounding); removing the mean alone would leave a sawtooth of
-    0,5 mm in every segment, about +9 dB there.
+    0.5 mm in every segment, about +9 dB there.
     """
     x = np.arange(0.0, 15.0, _DX)
     record = _sinusoid(3.0, 100.0, 15.0) + 1000.0 * x
@@ -74,7 +74,7 @@ def test_the_linear_trend_of_each_segment_is_removed() -> None:
 
 
 def test_a_band_reaches_its_base_ten_edges() -> None:
-    """The 1 cm band runs from 10^(2 - 0,05) to 10^(2 + 0,05) per metre, 89,1 to 112,2.
+    """The 1 cm band runs from 10^(2 - 0.05) to 10^(2 + 0.05) per metre, 89.1 to 112.2.
 
     A sinusoid of 110 cycles per metre on a 1 m segment puts its energy on
     the lines at 109, 110 and 111 per metre, all inside the band, so the
@@ -91,13 +91,13 @@ def test_a_band_reaches_its_base_ten_edges() -> None:
 
 
 def test_a_band_edge_splits_the_line_it_crosses() -> None:
-    """The upper edge of the 1 cm band, 100 x 10^0,05 = 112,20 per metre, cuts the line at 112.
+    """The upper edge of the 1 cm band, 100 x 10^0.05 = 112.20 per metre, cuts the line at 112.
 
     A sinusoid of 111 cycles per metre on 1 m segments puts a sixth of its
     mean square on the lines at 110 and 112 per metre and four sixths on
-    111. The line at 112 spans 111,5 to 112,5 per metre, and the band keeps
+    111. The line at 112 spans 111.5 to 112.5 per metre, and the band keeps
     the part of it below its edge (Annex C), so the band reads
-    10 lg(A^2/2 x (5 + p)/6) with p = 112,20 - 111,5.
+    10 lg(A^2/2 x (5 + p)/6) with p = 112.20 - 111.5.
     """
     spectrum = acoustic_roughness_spectrum(
         _sinusoid(2.0, 111.0, 15.0),
@@ -111,7 +111,7 @@ def test_a_band_edge_splits_the_line_it_crosses() -> None:
 
 
 def test_a_longer_segment_keeps_a_longer_wavelength_inside_its_band() -> None:
-    """At 0,1 m the Hanning lobe of 1 m segments leaks out of the band; 4 m ones keep it."""
+    """At 0.1 m the Hanning lobe of 1 m segments leaks out of the band; 4 m ones keep it."""
     record = _sinusoid(2.0, 10.0, 24.0)
     long = acoustic_roughness_spectrum(
         record,
@@ -128,7 +128,7 @@ def test_a_longer_segment_keeps_a_longer_wavelength_inside_its_band() -> None:
 
 
 def test_the_bands_run_from_a_quarter_segment_down_to_nyquist() -> None:
-    """1 m segments at 1 mm resolve 0,25 m (7.5) down to the 2,5 mm band, longest first."""
+    """1 m segments at 1 mm resolve 0.25 m (7.5) down to the 2.5 mm band, longest first."""
     spectrum = acoustic_roughness_spectrum(
         _sinusoid(1.0, 50.0, 3.0), sample_spacing_m=_DX
     )
@@ -140,7 +140,7 @@ def test_the_bands_run_from_a_quarter_segment_down_to_nyquist() -> None:
 
 
 def test_a_band_longer_than_a_quarter_segment_is_left_out() -> None:
-    """7.5: 1,2 m segments resolve 0,30 m, which leaves out the 0,315 m band."""
+    """7.5: 1.2 m segments resolve 0.30 m, which leaves out the 0.315 m band."""
     spectrum = acoustic_roughness_spectrum(
         _sinusoid(1.0, 50.0, 3.0), sample_spacing_m=_DX, segment_length_m=1.2
     )
@@ -171,8 +171,8 @@ def test_a_spike_bends_under_minus_1e7_um_per_m2(
 ) -> None:
     """7.2 c): a one-sample peak of h um bends by -2h/dx**2 at its crest.
 
-    At 4,9 um that is -9,8e6 um/m**2, no spike; at 5,1 um it is
-    -1,02e7 um/m**2, a spike. Either would pass the height test,
+    At 4.9 um that is -9.8e6 um/m**2, no spike; at 5.1 um it is
+    -1.02e7 um/m**2, a spike. Either would pass the height test,
     h > w**2/a with w = 2 mm, so the second derivative alone decides.
     """
     record = np.zeros(200)
@@ -206,7 +206,7 @@ def test_a_crest_bending_at_exactly_minus_1e7_um_per_m2_is_no_spike() -> None:
 def test_a_slope_of_exactly_5e3_um_per_m_is_still_inside_the_spike() -> None:
     """7.2 d) puts an edge where abs(dr/dx) becomes less than 5e3 um/m, so 5e3 itself is inside.
 
-    At a spacing of 2^-10 m a 9,765625 um shoulder two samples from the
+    At a spacing of 2^-10 m a 9.765625 um shoulder two samples from the
     crest gives a slope of exactly 5e3 um/m, and the edges run on to the
     flat record; reading the edge at the slope itself would stop on the
     4 um shoulder and leave it.
@@ -220,11 +220,11 @@ def test_a_slope_of_exactly_5e3_um_per_m_is_still_inside_the_spike() -> None:
 
 
 def test_the_edges_of_a_spike_are_where_the_slope_falls_under_5e3_um_per_m() -> None:
-    """7.2 d): a 100 um peak on shoulders of 13,2, 9,8 and 3 um is cut level at 3 um.
+    """7.2 d): a 100 um peak on shoulders of 13.2, 9.8 and 3 um is cut level at 3 um.
 
-    The slope is 5,1e3 um/m two samples out and 4,9e3 um/m three out, so the
+    The slope is 5.1e3 um/m two samples out and 4.9e3 um/m three out, so the
     edges are the 3 um samples and the straight line between them is level.
-    Edges read at a slope a little steeper would stop on the 9,8 um
+    Edges read at a slope a little steeper would stop on the 9.8 um
     shoulder, and edges read at one a little gentler would run on to the
     flat record at 0 um.
     """
@@ -241,9 +241,9 @@ def test_the_edges_of_a_spike_are_where_the_slope_falls_under_5e3_um_per_m() -> 
 def test_a_spike_is_removed_when_higher_than_w_squared_over_3_m(
     height_um: float, *, removed: bool
 ) -> None:
-    """7.2: a peak between edges 8 mm apart goes when h > (8 mm)**2 / 3 m, 21,3 um.
+    """7.2: a peak between edges 8 mm apart goes when h > (8 mm)**2 / 3 m, 21.3 um.
 
-    Shoulders of 15, 10,5 and 4 um either side keep the slope above
+    Shoulders of 15, 10.5 and 4 um either side keep the slope above
     5e3 um/m for three samples, put the edges four samples out, where it is
     2e3 um/m, and leave the crest sharp enough to be a spike. The peak stands
     its whole height over the line between the edges, so 21 um stays and
@@ -262,7 +262,7 @@ def test_a_broad_ridge_is_kept_and_the_sweep_ends() -> None:
     """A ridge 200 um high on a 40 mm base fails h > w**2/a and stays.
 
     The slope rule of 7.2 d) puts its edges 42 mm apart, so w**2/3 is
-    0,59 mm, above its 0,2 mm. Its crest has the second derivative and the
+    0.59 mm, above its 0.2 mm. Its crest has the second derivative and the
     sign change of a spike, so it is detected on every pass, and the Annex
     B.9.2 listing, which repeats while any second derivative is below the
     threshold, never stops on it; the sweep here stops when a pass removes
@@ -277,7 +277,7 @@ def test_a_broad_ridge_is_kept_and_the_sweep_ends() -> None:
 
 
 def test_a_bend_without_an_extremum_is_no_spike() -> None:
-    """A rail rising 20 um/mm, then 5 um/mm, bends at -1,5e7 um/m**2 and stays.
+    """A rail rising 20 um/mm, then 5 um/mm, bends at -1.5e7 um/m**2 and stays.
 
     7.2 c) asks a spike for the change of sign of dr/dx as well, and there
     is none at the bend; the Annex B.9.2 listing loops on it for ever, since
@@ -292,7 +292,7 @@ def test_a_bend_without_an_extremum_is_no_spike() -> None:
 
 
 def test_a_narrow_pit_is_bridged_where_the_wheel_rests_on_its_rims() -> None:
-    """The circle of 0,375 m radius spans an 11 mm pit 6 mm either side of its middle."""
+    """The circle of 0.375 m radius spans an 11 mm pit 6 mm either side of its middle."""
     record = np.zeros(2001)
     record[995:1006] = -50.0
     processed = curvature_processed_roughness(record, sample_spacing_m=_DX)

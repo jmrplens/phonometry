@@ -3,8 +3,8 @@ r"""Tests for the track decay rate of EN 15461:2008+A1:2010.
 
 EN 15461 prints no measured example. The oracle is its own Annex A: a
 response that decays as :math:`A(0)\,e^{-\beta x}` has the rate
-:math:`20 \lg e^{\beta} = 8{,}686\,\beta` dB/m, and on any grid Formula 1 is
-:math:`4{,}343` over the sum of :math:`e^{-2\beta x_n}\,\Delta x_n` with the
+:math:`20 \lg e^{\beta} = 8.686\,\beta` dB/m, and on any grid Formula 1 is
+:math:`4.343` over the sum of :math:`e^{-2\beta x_n}\,\Delta x_n` with the
 intervals of A.2, which a uniform grid turns into a geometric series with a
 closed sum. The grid itself is Figure 2, whose 29 points are pinned here.
 """
@@ -35,7 +35,7 @@ _GRID_ORDER = "'distances' must start at the accelerometer, 0 m, and increase"
 
 
 def test_the_grid_is_the_29_points_of_figure_2() -> None:
-    """Quarter bays to 2,5, half bays to 4, whole bays to 8, then 10 to 66."""
+    """Quarter bays to 2.5, half bays to 4, whole bays to 8, then 10 to 66."""
     assert len(TRACK_DECAY_EXCITATION_INDICES) == 29
     assert TRACK_DECAY_EXCITATION_INDICES[:11] == tuple(0.25 * n for n in range(11))
     assert TRACK_DECAY_EXCITATION_INDICES[11:18] == (3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0)
@@ -45,7 +45,7 @@ def test_the_grid_is_the_29_points_of_figure_2() -> None:
 
 
 def test_the_grid_scales_with_the_sleeper_spacing() -> None:
-    """6.7: 0,6 m bays when the rail has no discrete supports, 39,6 m at bay 66."""
+    """6.7: 0.6 m bays when the rail has no discrete supports, 39.6 m at bay 66."""
     positions = track_decay_excitation_positions()
     assert positions[-1] == pytest.approx(39.6)
     np.testing.assert_allclose(
@@ -55,7 +55,7 @@ def test_the_grid_scales_with_the_sleeper_spacing() -> None:
 
 
 def test_formula_1_on_a_uniform_grid_is_a_geometric_series() -> None:
-    """4,343 / (dx/2 + dx*sum q**n + dx*q**N), q = exp(-2 beta dx), to rounding."""
+    """4.343 / (dx/2 + dx*sum q**n + dx*q**N), q = exp(-2 beta dx), to rounding."""
     beta = 0.3
     dx = 0.25
     count = 80
@@ -68,7 +68,7 @@ def test_formula_1_on_a_uniform_grid_is_a_geometric_series() -> None:
 
 
 def test_a_dense_grid_recovers_the_exponential_rate() -> None:
-    """A.1: the rate of A(0) exp(-beta x) is 8,686 beta dB/m."""
+    """A.1: the rate of A(0) exp(-beta x) is 8.686 beta dB/m."""
     distances = np.arange(0.0, 150.0, 1.0e-3)
     beta = 0.23
     rate = track_decay_rate(
@@ -94,7 +94,7 @@ def test_mobility_and_accelerance_give_the_same_rate() -> None:
 
 
 def test_formula_2_floor_and_the_suitable_bands() -> None:
-    """DR_min = 4,343/x_max; a rate below twice it is unsuitable (clause 7)."""
+    """DR_min = 4.343/x_max; a rate below twice it is unsuitable (clause 7)."""
     positions = track_decay_excitation_positions()
     rates_db = np.array([0.1, 1.0])
     rate = track_decay_rate(
@@ -126,7 +126,7 @@ def test_the_far_field_drop_is_judged_against_10_db() -> None:
 def test_a_rate_of_exactly_twice_the_floor_is_suitable() -> None:
     """Clause 7: a band is unsuitable when DR_min is greater than half its rate.
 
-    On the Figure 2 grid, rates of 1,95, 2 and 2,05 times DR_min are
+    On the Figure 2 grid, rates of 1.95, 2 and 2.05 times DR_min are
     unsuitable, suitable and suitable.
     """
     positions = track_decay_excitation_positions()
@@ -146,7 +146,7 @@ def test_a_rate_of_exactly_twice_the_floor_is_suitable() -> None:
 def test_a_far_field_drop_of_10_db_is_the_boundary(
     drop_db: float, *, sufficient: bool
 ) -> None:
-    """6.7: a response 9,8 dB down at the farthest position is short, 10,2 dB down is not."""
+    """6.7: a response 9.8 dB down at the farthest position is short, 10.2 dB down is not."""
     positions = track_decay_excitation_positions()
     rate = track_decay_rate(
         np.exp(-np.outer(positions, [drop_db / positions[-1] / _NEPER_DB])),
@@ -164,7 +164,7 @@ def test_a_far_field_drop_of_10_db_is_the_boundary(
 def test_a_far_field_drop_of_exactly_10_db_is_sufficient(
     direct_db: float, farthest_db: float
 ) -> None:
-    """6.7 asks for at least 10 dB, and levels 10,0 dB apart are exactly that.
+    """6.7 asks for at least 10 dB, and levels 10.0 dB apart are exactly that.
 
     Carried to magnitudes and back, each of these pairs comes out a few units
     in the last place under 10 dB; the verdict must not hang on them.
@@ -182,9 +182,9 @@ def test_a_far_field_drop_of_exactly_10_db_is_sufficient(
 def test_a_measured_rate_of_exactly_twice_the_floor_is_suitable() -> None:
     """Clause 7 on measured responses: exactly twice DR_min is not less than twice.
 
-    Positions 0, 0,5 m and 1,4 m stand for 0,25 m, 0,7 m and 0,9 m of rail
-    (A.2), so magnitudes 1, 0,75 and 0,25 sum to 0,25 + 0,5625 x 0,7 +
-    0,0625 x 0,9 = 0,7 m, half of x_max, and the rate is exactly twice the
+    Positions 0, 0.5 m and 1.4 m stand for 0.25 m, 0.7 m and 0.9 m of rail
+    (A.2), so magnitudes 1, 0.75 and 0.25 sum to 0.25 + 0.5625 x 0.7 +
+    0.0625 x 0.9 = 0.7 m, half of x_max, and the rate is exactly twice the
     floor; binary arithmetic lands it a few units in the last place under.
     """
     rate = track_decay_rate(
@@ -358,7 +358,7 @@ def test_the_arrays_are_read_only() -> None:
 
 
 def test_the_plot_is_logarithmic_between_the_limits_of_9_2() -> None:
-    """EN 15461 9.2: 0,01 dB/m to 100 dB/m, with the lower limit drawn."""
+    """EN 15461 9.2: 0.01 dB/m to 100 dB/m, with the lower limit drawn."""
     rates = TrackDecayRate(
         direction="vertical",
         frequencies=[250.0, 315.0, 400.0],

@@ -95,7 +95,7 @@ def _limit_spectrum(offset_db: float = 0.0) -> AcousticRoughnessSpectrum:
 
 
 def test_the_roughness_limit_is_figure_2() -> None:
-    """The 22 labels Figure 2 prints, from 40 cm to 0,315 cm."""
+    """The 22 labels Figure 2 prints, from 40 cm to 0.315 cm."""
     wavelengths = [100.0 * w for w in REFERENCE_TRACK_ROUGHNESS_LIMIT_DB]
     np.testing.assert_allclose(wavelengths, ref.FIGURE_2_WAVELENGTHS_CM, rtol=1e-12)
     assert tuple(REFERENCE_TRACK_ROUGHNESS_LIMIT_DB.values()) == ref.FIGURE_2_LIMIT_DB
@@ -109,7 +109,7 @@ def test_figure_2_and_the_en_15610_listing_print_the_same_limit() -> None:
         REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
         strict=True,
     ):
-        # The listing types 3,15 cm as 0.032 and 3,15 mm as 0.003: the same band.
+        # The listing types 3.15 cm as 0.032 and 3.15 mm as 0.003: the same band.
         assert round(-10.0 * math.log10(listed)) == round(-10.0 * math.log10(nominal))
 
 
@@ -161,7 +161,7 @@ def test_a_51_m_unit_has_two_positions_and_a_101_m_unit_three() -> None:
 
 
 def test_table_g2_is_reproduced() -> None:
-    """55,68 dB, u_c = 0,83 dB and U = 1,66 dB, from the printed rows."""
+    """55.68 dB, u_c = 0.83 dB and U = 1.66 dB, from the printed rows."""
     budget = pass_by_uncertainty(
         ref.TABLE_G2_READING_DB,
         [
@@ -216,9 +216,9 @@ def test_table_g1_rows_are_a_over_root_3(
 
 
 def test_two_rows_of_table_g1_are_not_a_over_root_3() -> None:
-    """The 25 m distance row prints 0,004 dB and the 7,5 m ground row 0,55 dB.
+    """The 25 m distance row prints 0.004 dB and the 7.5 m ground row 0.55 dB.
 
-    Formula G.2 gives 0,040 dB and 0,30 dB; Table G.2 prints 0,30 dB for the
+    Formula G.2 gives 0.040 dB and 0.30 dB; Table G.2 prints 0.30 dB for the
     same ground row. Both are in the errata register.
     """
     _, a_distance, printed_distance = ref.TABLE_G1_DISTANCE_25M
@@ -318,7 +318,7 @@ def test_the_record_margins_of_6_6_3() -> None:
 
 
 def _stepped_tone(steps_db: tuple[float, float, float]) -> np.ndarray:
-    """A 1 kHz tone of 0,1 Pa whose level steps at 2 s and 8 s, zero crossings both."""
+    """A 1 kHz tone of 0.1 Pa whose level steps at 2 s and 8 s, zero crossings both."""
     t = np.arange(int(10.0 * _FS)) / _FS
     gain = np.where(t < 2.0, steps_db[0], np.where(t < 8.0, steps_db[1], steps_db[2]))
     return 0.1 * 10.0 ** (gain / 20.0) * np.sin(2.0 * np.pi * 1000.0 * t)
@@ -332,7 +332,7 @@ def _stepped_tone(steps_db: tuple[float, float, float]) -> np.ndarray:
 def test_the_record_margin_is_10_db_at_either_end(
     end: str, margin_db: float, *, sufficient: bool
 ) -> None:
-    """6.6.3: a record 9,5 dB down at either end is short, one 10,1 dB down is not.
+    """6.6.3: a record 9.5 dB down at either end is short, one 10.1 dB down is not.
 
     The level steps up at 2 s and down at 8 s. With the front passing at 5 s
     and the rear at 7 s, the record ends 12 dB down and the start margin
@@ -357,7 +357,7 @@ def test_the_record_margin_is_10_db_at_either_end(
 def test_the_maximum_is_taken_within_the_interval() -> None:
     """A burst ten times louder outside T1 to T2 does not reach L_pAFmax (3.13).
 
-    The burst ends 1,4 s before T1, by when time weighting F has let it fall
+    The burst ends 1.4 s before T1, by when time weighting F has let it fall
     about 49 dB, under the tone by more than 25 dB.
     """
     t = np.arange(int(10.0 * _FS)) / _FS
@@ -375,7 +375,7 @@ def test_the_equivalent_level_is_the_mean_square_of_the_pressure() -> None:
 
     A burst 30 times louder in the last 50 ms of the interval carries most
     of its energy; the F time weighting would spread it past T2 and read
-    about 5,6 dB less. At 1 kHz the A-weighting is 0 dB, so the unweighted
+    about 5.6 dB less. At 1 kHz the A-weighting is 0 dB, so the unweighted
     record gives the expected level.
     """
     t = np.arange(int(10.0 * _FS)) / _FS
@@ -447,7 +447,7 @@ def test_the_stationary_average_is_formula_1() -> None:
 
 
 def test_the_end_position_stands_for_a_quarter_circle() -> None:
-    """5.8.1: (pi/2) x 7,5 m."""
+    """5.8.1: (pi/2) x 7.5 m."""
     assert pytest.approx(math.pi * 3.75) == STATIONARY_END_POSITION_LENGTH_M
 
 
@@ -464,7 +464,7 @@ def test_the_stationary_result_is_the_rounded_mean_of_the_sets() -> None:
 
 
 def test_samples_3_db_apart_are_valid() -> None:
-    """9.3: no more than 3 dB is valid, so a spread of 3,0 dB is and one of 3,1 dB is not."""
+    """9.3: no more than 3 dB is valid, so a spread of 3.0 dB is and one of 3.1 dB is not."""
     lengths = [4.0, 4.0]
     exact = stationary_test([[60.0, 70.0], [63.0, 70.0], [61.0, 70.0]], lengths)
     assert exact.valid is True
@@ -507,12 +507,12 @@ def test_the_result_is_the_highest_rounded_mean() -> None:
 def test_a_mean_on_the_half_goes_up(
     runs: tuple[float, float, float], expected: float
 ) -> None:
-    """Means of 70,5 dB and 71,5 dB round up, though binary arithmetic lands them a hair under."""
+    """Means of 70.5 dB and 71.5 dB round up, though binary arithmetic lands them a hair under."""
     assert rolling_stock_test({"p": runs}).final_level == expected
 
 
 def test_every_mean_of_runs_in_tenths_on_a_half_goes_up() -> None:
-    """Runs reported to 0,1 dB from 70,0 dB to 72,9 dB: every mean of three that is a half rounds up.
+    """Runs reported to 0.1 dB from 70.0 dB to 72.9 dB: every mean of three that is a half rounds up.
 
     In tenths, the mean of three runs is their sum over 30 dB, a half when
     the sum leaves 15 over a multiple of 30, and half up is then
@@ -548,7 +548,7 @@ def test_runs_more_than_3_db_apart_are_not_valid() -> None:
 
 @pytest.mark.parametrize(("top_db", "valid"), [(73.0, True), (73.1, False)])
 def test_runs_3_db_apart_are_valid(top_db: float, *, valid: bool) -> None:
-    """9.3: runs 3,0 dB apart are valid, runs 3,1 dB apart are not."""
+    """9.3: runs 3.0 dB apart are valid, runs 3.1 dB apart are not."""
     assert rolling_stock_test({"a": [70.0, top_db, 71.0]}).valid is valid
 
 
@@ -580,9 +580,9 @@ def test_the_rise_speed_is_the_steepest_rise_of_a_10_db_slope() -> None:
     dt = 0.01
     times = np.arange(0.0, 3.0, dt)
     levels = np.full(times.size, 60.0)
-    levels[50:71] = 60.0 + 0.6 * np.arange(21)  # 12 dB over 0,2 s
+    levels[50:71] = 60.0 + 0.6 * np.arange(21)  # 12 dB over 0.2 s
     levels[71:150] = 72.0
-    levels[150:155] = 72.0 + 2.0 * np.arange(5)  # 8 dB in 0,04 s
+    levels[150:155] = 72.0 + 2.0 * np.arange(5)  # 8 dB in 0.04 s
     levels[155:] = 80.0
     result = impulsiveness_rise_speed(times, levels)
     assert result.slopes == ((50, 70),)
@@ -606,7 +606,7 @@ def test_the_rise_speed_is_the_steepest_step_not_the_mean_slope() -> None:
 
 @pytest.mark.parametrize(("rise_db", "counts"), [(9.5, False), (10.0, True)])
 def test_a_slope_counts_from_a_rise_of_10_db(rise_db: float, *, counts: bool) -> None:
-    """Annex A: a slope climbing 10,0 dB in 0,2 s counts, one climbing 9,5 dB does not."""
+    """Annex A: a slope climbing 10.0 dB in 0.2 s counts, one climbing 9.5 dB does not."""
     times = np.arange(0.0, 1.0, 0.01)
     ramp = 60.0 + np.linspace(0.0, rise_db, 21)
     levels = np.concatenate(
@@ -654,14 +654,14 @@ def test_the_times_have_to_increase() -> None:
 def test_neutrality_is_judged_on_levels_rounded_to_a_decimal(
     with_adjacent: float, unit: float, difference: float, *, neutral: bool
 ) -> None:
-    """6.3.4: no more than 2,0 dB, both levels rounded to one decimal first."""
+    """6.3.4: no more than 2.0 dB, both levels rounded to one decimal first."""
     verdict = check_adjacent_vehicle_neutrality(with_adjacent, unit)
     assert verdict.difference == pytest.approx(difference)
     assert verdict.passes is neutral
 
 
 def test_the_neutrality_plot_writes_the_levels_under_the_bars() -> None:
-    """83,0 dB ends 0,1 dB under the allowance line, so the levels go in the tick labels."""
+    """83.0 dB ends 0.1 dB under the allowance line, so the levels go in the tick labels."""
     ax = check_adjacent_vehicle_neutrality(83.0, 81.1).plot(language="es")
     labels = [t.get_text() for t in ax.get_xticklabels()]
     assert labels == [
@@ -707,13 +707,13 @@ def test_the_background_is_measured_in_the_bands_of_the_level() -> None:
 def test_the_background_correction_needs_more_than_3_db(
     measured_db: float, background_db: float
 ) -> None:
-    """D.4.2 applies it only above 3 dB of excess; 64,4 - 61,4 is 3 dB, though binary lands it a hair above."""
+    """D.4.2 applies it only above 3 dB of excess; 64.4 - 61.4 is 3 dB, though binary lands it a hair above."""
     with pytest.raises(ValueError, match="D.4.2 applies the correction only where"):
         background_level_increase(measured_db, background_db)
 
 
 def test_no_decimal_level_exactly_3_db_up_is_corrected() -> None:
-    """Every tenth of a decibel from 50,0 dB to 99,9 dB over a background 3,0 dB below is refused."""
+    """Every tenth of a decibel from 50.0 dB to 99.9 dB over a background 3.0 dB below is refused."""
     measured = np.round(np.arange(500, 1000) / 10.0, 1)
     background = np.round(measured - 3.0, 1)
     accepted = []
@@ -727,7 +727,7 @@ def test_no_decimal_level_exactly_3_db_up_is_corrected() -> None:
 
 
 def test_the_background_correction_takes_an_excess_of_3_1_db() -> None:
-    """3,1 dB over the background is more than 3 dB, and Formula D.1 applies."""
+    """3.1 dB over the background is more than 3 dB, and Formula D.1 applies."""
     expected = 60.0 - 10.0 * math.log10(10**6.0 - 10**5.69)
     assert background_level_increase(60.0, 56.9) == pytest.approx(expected)
 
@@ -755,8 +755,8 @@ def test_two_rails_on_the_limit_do_not_exceed_it() -> None:
     """C.2.1 and 6.2.5 agree that roughness on the limit does not exceed it.
 
     The quadratic average of two rails on Figure 2 is Figure 2, but binary
-    arithmetic brings the 6,3 cm and 1,6 cm bands back a few units in the last
-    place above 0,9 dB and -6,8 dB.
+    arithmetic brings the 6.3 cm and 1.6 cm bands back a few units in the last
+    place above 0.9 dB and -6.8 dB.
     """
     rail = _limit_spectrum()
     averaged = average_roughness_spectra([rail, rail])
@@ -828,7 +828,7 @@ _ONE_DB_EXCEEDANCE = -10.0 * math.log10((124.0 / 10.0**0.1 - 24.0) / 100.0)
 def test_annex_c_accepts_an_effect_of_1_db_and_no_more(
     exceedance_db: float, *, accepted: bool
 ) -> None:
-    """C.3: effects of about 0,95 dB and of 1 dB are accepted, one of about 1,02 dB is not.
+    """C.3: effects of about 0.95 dB and of 1 dB are accepted, one of about 1.02 dB is not.
 
     At 36 km/h the 4 cm band corrects 250 Hz alone, and a noise spectrum
     of 60 dB with 80 dB at 250 Hz gives the effect in closed form,
@@ -850,7 +850,7 @@ def test_annex_c_accepts_an_effect_of_1_db_and_no_more(
     expected = 10.0 * math.log10(24.0 + 100.0) - 10.0 * math.log10(
         24.0 + 100.0 * 10.0 ** (-exceedance_db / 10.0)
     )
-    assert abs(expected - 1.0) < 0.06  # 0,948 dB, 1 dB and 1,016 dB
+    assert abs(expected - 1.0) < 0.06  # 0.948 dB, 1 dB and 1.016 dB
     assert verdict.level_increase == pytest.approx(expected, abs=1e-9)
     assert verdict.passes is accepted
 
@@ -972,7 +972,7 @@ def test_a_tighter_curve_fails_the_same_track() -> None:
 
 
 def test_the_roughness_limit_is_judged_in_every_band() -> None:
-    """One band 0,5 dB over the limit fails 6.2.5 without Annex C."""
+    """One band 0.5 dB over the limit fails 6.2.5 without Annex C."""
     roughness = _limit_spectrum(-1.0)
     levels = np.array(roughness.levels)
     levels[5] += 1.5
@@ -1039,7 +1039,7 @@ def test_a_track_within_the_limit_keeps_no_annex_c_verdict() -> None:
 
 
 def test_the_roughness_reaches_down_to_3_mm() -> None:
-    """6.2.5: a spectrum that stops at 4 mm misses the 3,15 mm band."""
+    """6.2.5: a spectrum that stops at 4 mm misses the 3.15 mm band."""
     wavelengths = [w for w in REFERENCE_TRACK_ROUGHNESS_LIMIT_DB if w >= 0.004]
     short = AcousticRoughnessSpectrum(
         wavelengths_m=wavelengths,
@@ -1054,9 +1054,9 @@ def test_the_roughness_reaches_down_to_3_mm() -> None:
 
 
 def test_above_190_kmh_the_roughness_reaches_0_25_m() -> None:
-    """6.2.5: a spectrum that stops at 0,1 m will do at 190 km/h and is short at 195 km/h.
+    """6.2.5: a spectrum that stops at 0.1 m will do at 190 km/h and is short at 195 km/h.
 
-    Above 190 km/h one that reaches 0,25 m will do.
+    Above 190 km/h one that reaches 0.25 m will do.
     """
     wavelengths = [w for w in REFERENCE_TRACK_ROUGHNESS_LIMIT_DB if w <= 0.1]
     short = AcousticRoughnessSpectrum(
@@ -1106,7 +1106,7 @@ def _measured_lateral(
 
     With ``flat_band_hz``, one more band below the limits whose response stays
     flat to the last position and then drops 20 dB: Formula 1 reads it about
-    0,12 dB/m, under twice the floor of Formula 2, while it drops far enough.
+    0.12 dB/m, under twice the floor of Formula 2, while it drops far enough.
     """
     positions = track_decay_excitation_positions()
     limit = REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M["lateral"]
@@ -1130,8 +1130,8 @@ def _en_15461_conditions(check: ReferenceTrackCheck) -> dict[str, bool | None]:
 def test_measured_rates_bring_the_en_15461_checks_with_them() -> None:
     """With the grid known, the floor of Formula 2 and the 10 dB drop are judged.
 
-    Lateral rates 1,5 times Figure 3 drop at least 0,30 x 39,6 = 11,9 dB over
-    the grid, and every one is above twice 4,343/39,6 = 0,219 dB/m.
+    Lateral rates 1.5 times Figure 3 drop at least 0.30 x 39.6 = 11.9 dB over
+    the grid, and every one is above twice 4.343/39.6 = 0.219 dB/m.
     """
     check = check_reference_track(
         [_limit_spectrum(-1.0)],
@@ -1143,7 +1143,7 @@ def test_measured_rates_bring_the_en_15461_checks_with_them() -> None:
 
 
 def test_a_set_that_drops_less_than_10_db_fails_en_15461_6_7() -> None:
-    """Lateral rates 1,2 times Figure 3 drop 0,24 x 39,6 = 9,5 dB at 1 kHz and 1,25 kHz."""
+    """Lateral rates 1.2 times Figure 3 drop 0.24 x 39.6 = 9.5 dB at 1 kHz and 1.25 kHz."""
     check = check_reference_track(
         [_limit_spectrum(-1.0)],
         [_decay_at(1.1, "vertical"), _measured_lateral(1.2)],
@@ -1157,7 +1157,7 @@ def test_a_set_that_drops_less_than_10_db_fails_en_15461_6_7() -> None:
 
 
 def test_a_rate_under_twice_the_floor_fails_en_15461_7() -> None:
-    """A 200 Hz band that reads about 0,12 dB/m is unsuitable, below 2 x 0,110 dB/m.
+    """A 200 Hz band that reads about 0.12 dB/m is unsuitable, below 2 x 0.110 dB/m.
 
     Figure 3 sets no limit at 200 Hz and the response still drops 20 dB, so
     clause 7 alone fails.
@@ -1175,7 +1175,7 @@ def test_a_rate_under_twice_the_floor_fails_en_15461_7() -> None:
 
 
 def _exceeding_roughness() -> AcousticRoughnessSpectrum:
-    """1 dB under the limit but 0,5 dB over it in the 4 cm band."""
+    """1 dB under the limit but 0.5 dB over it in the 4 cm band."""
     roughness = _limit_spectrum(-1.0)
     levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] += 1.5
@@ -1364,7 +1364,7 @@ def test_the_curve_radius_and_the_gradient() -> None:
 def test_the_curve_radius_and_the_gradient_at_their_limits(
     radius_m: float, gradient: float, failed: list[str]
 ) -> None:
-    """6.2.2: 3 000 m and 5:1 000 themselves are accepted; 2 990 m and 5,1:1 000 are not."""
+    """6.2.2: 3 000 m and 5:1 000 themselves are accepted; 2 990 m and 5.1:1 000 are not."""
     check = check_reference_track(
         [_limit_spectrum(-1.0)],
         [_decay_at(1.1, "vertical"), _decay_at(1.1, "lateral")],
@@ -1438,7 +1438,7 @@ def test_a_verdict_never_holds_a_decay_limit_it_did_not_apply() -> None:
 
 
 def test_a_roughness_limit_gives_one_level_per_band() -> None:
-    """0,4 m and 0,41 m name one band; the 6.2.5 verdict and Annex C refuse the limit by name."""
+    """0.4 m and 0.41 m name one band; the 6.2.5 verdict and Annex C refuse the limit by name."""
     limit = {**REFERENCE_TRACK_ROUGHNESS_LIMIT_DB, 0.41: 0.0}
     roughness = [_limit_spectrum(-1.0)]
     decay = [_decay_at(1.1, "vertical"), _decay_at(1.1, "lateral")]

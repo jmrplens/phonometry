@@ -12,7 +12,7 @@ is those four:
 * **The test-case comparison** of clause 7.1 and Annex B. A method's test
   cases print, for every band and for the total, a correct result and the
   limits a program's result has to fall inside; Table A.5 puts them at
-  +/-0,05 dB round the result given to two decimals. The Test Case Results
+  +/-0.05 dB round the result given to two decimals. The Test Case Results
   Comparison form (TRC form, Tables B.1 and B.2) lists each result beside its
   limits and answers "Result inside tolerances: yes/no".
   :func:`verify_calculation_results` fills that column and returns the
@@ -22,7 +22,7 @@ is those four:
   configuration and in the faster "modified configuration" a noise map is
   actually computed with, 5.2.3 and 7.2) differ, and the standard describes
   the differences by two order statistics of a random sample of them: the
-  0,1-quantile :math:`q_{0,1}` and the 0,9-quantile :math:`q_{0,9}`, so that
+  0.1-quantile :math:`q_{0,1}` and the 0.9-quantile :math:`q_{0,9}`, so that
   80 % of the differences are expected between the two.
   :func:`level_difference_quantiles` sorts the sample, takes the ranking
   positions of :func:`ranking_positions` and returns
@@ -30,13 +30,13 @@ is those four:
   deviation C.5 asks for beside them.
 * **Where the sample is taken**, C.2 and C.3: a uniform sample of ``M`` of
   the ``N`` single points by the ordinal numbers
-  :math:`\mathrm{IP}((i - 0{,}5) N / M)` (:func:`uniform_sample_indices`), or
+  :math:`\mathrm{IP}((i - 0.5) N / M)` (:func:`uniform_sample_indices`), or
   of points along sound contours of total length ``L`` at the chainages
-  :math:`\mathrm{IP}((i - 0{,}5) L / M)` (:func:`contour_sample_chainages_m`),
+  :math:`\mathrm{IP}((i - 0.5) L / M)` (:func:`contour_sample_chainages_m`),
   with the points closer than 2 m to a source or an obstacle left out first.
 * **The precision of a method across programs**, 4.5.2 and A.3: with ``M``
   participants of a round robin calculating the same ``N`` receivers, the
-  0,9-quantile of the ``N`` largest absolute deviations from the mean level
+  0.9-quantile of the ``N`` largest absolute deviations from the mean level
   at each receiver (:func:`round_robin_precision`,
   :class:`RoundRobinPrecision`).
 
@@ -62,7 +62,7 @@ leaves as many values below :math:`q_{0,1}` as above :math:`q_{0,9}`. For
 
 The two formulas do not treat the table alike. Formula (C.1) continues its
 first column exactly: it reproduces all 31 rows, and it is not the rank
-:math:`\mathrm{IP}(0{,}1 N) + 1` of the empirical 0,1-quantile, from which it
+:math:`\mathrm{IP}(0.1 N) + 1` of the empirical 0.1-quantile, from which it
 differs at 570 of the 950 sizes from 51 to 1000 (at ``N`` = 51 that rank is 6,
 (C.1) gives 5). Formula (C.2) does not continue the second column: it
 reproduces 16 of the 31 rows and gives one rank less for ``N`` = 21 to 25, 31
@@ -120,7 +120,7 @@ Three readings the text leaves to the implementer
 
 **Ordinal numbers from zero.** C.2 numbers the ``N`` remaining single points
 consecutively and takes the ordinal numbers
-:math:`\mathrm{IP}((i - 0{,}5) N / M)`, ``i`` from 1 to ``M``. Counted from
+:math:`\mathrm{IP}((i - 0.5) N / M)`, ``i`` from 1 to ``M``. Counted from
 zero, the ordinals run from :math:`\mathrm{IP}(N / 2M)` to at most ``N - 1``
 for every ``N`` at least ``M``, and each sample point sits at the middle of
 its ``M``-th of the list. Counted from one, the formula would ask for the
@@ -129,13 +129,13 @@ module counts from zero, which is also the index a Python array uses.
 
 **Chainages in metres.** C.3 lays the contours out "by consecutive
 kilometerage" and places the sample points "at the kilometerages"
-:math:`\mathrm{IP}((i - 0{,}5) L / M)` (DIN 45687, F.3: "an den
+:math:`\mathrm{IP}((i - 0.5) L / M)` (DIN 45687, F.3: "an den
 Kilometrierungen"). A kilometerage is a chainage, a position counted along a
 route, and the word names that position, not the unit it is counted in. Taken
 in kilometres, the integer part would put every point of a contour shorter
 than a kilometre at its start, so the chainage is read in metres, and each
 point falls on a whole metre. Two points can share a metre only on contours
-shorter than ``M`` metres, though not on all of them (19,5 m of contour still
+shorter than ``M`` metres, though not on all of them (19.5 m of contour still
 give 20 points the metres 0 to 19), and a sample in which two do is refused
 rather than returned with repeats.
 
@@ -198,15 +198,15 @@ __all__ = [
 #: total level are considered to be correct if the deviation does not exceed
 #: +/-0,05 dB." The half-width, in dB, of the interval a test case prints
 #: round a correct result given to two decimals, as the limits of Table B.2
-#: are (13,65 dB to 13,75 dB round 13,70 dB). A method-specific Technical
+#: are (13.65 dB to 13.75 dB round 13.70 dB). A method-specific Technical
 #: Report may widen it for a case with open issues (A.2).
 #:
 #: A.2 and 4.5.2 word the limits differently: they are "given to one decimal
 #: place", and "in cases where the final result given to two decimal places is
-#: x,x5, an interval of 0,1 is always included for rounding purposes" (13,65
-#: gives 13,6 to 13,7, which is 13,65 +/- 0,05). 4.5.2 sends that interval to
+#: x,x5, an interval of 0,1 is always included for rounding purposes" (13.65
+#: gives 13.6 to 13.7, which is 13.65 +/- 0.05). 4.5.2 sends that interval to
 #: "rounding aspects (see Table A.5)", and Table B.2 and every test case of
-#: ISO/TR 17534-3 print the limits to two decimals at +/-0,05 dB, which is the
+#: ISO/TR 17534-3 print the limits to two decimals at +/-0.05 dB, which is the
 #: convention implemented here. :func:`verify_calculation_results` compares
 #: with whatever limits it is given, so limits printed either way can be used.
 CERTIFIED_RESULT_TOLERANCE_DB: Final = 0.05
@@ -227,7 +227,7 @@ SAMPLE_CLEARANCE_M: Final = 2.0
 
 #: Table C.1 of ISO 17534-1:2015, printed folio 20: for a sample of ``N``
 #: values sorted in ascending order, the ranking positions
-#: ``(R(q0,1), R(q0,9))`` of the 0,1-quantile and the 0,9-quantile, counted
+#: ``(R(q0,1), R(q0,9))`` of the 0.1-quantile and the 0.9-quantile, counted
 #: from 1. The 31 rows from ``N`` = 20 to 50; above 50, Formulas (C.1) and
 #: (C.2) apply (see the module docstring for why the two do not join).
 RANKING_POSITIONS: Final[Mapping[int, tuple[int, int]]] = MappingProxyType(
@@ -268,7 +268,7 @@ RANKING_POSITIONS: Final[Mapping[int, tuple[int, int]]] = MappingProxyType(
 
 #: Relative slack of the limit comparisons of :func:`verify_calculation_results`,
 #: so that a result that lands on a limit through floating-point arithmetic
-#: (13,65 formed as 13,70 - 0,05) is on it, which "does not exceed" includes.
+#: (13.65 formed as 13.70 - 0.05) is on it, which "does not exceed" includes.
 _BOUNDARY_REL_TOL = 1e-9
 
 #: Absolute slack of the same comparisons, for a limit of zero.
@@ -296,11 +296,11 @@ class SoftwareQualityWarning(PhonometryWarning):
 # Annex C.4: ranking positions and the characteristic values
 # --------------------------------------------------------------------------- #
 def ranking_positions(sample_size: int | np.integer[Any]) -> tuple[int, int]:
-    r"""Ranking positions of the 0,1- and 0,9-quantiles (ISO 17534-1 C.4).
+    r"""Ranking positions of the 0.1- and 0.9-quantiles (ISO 17534-1 C.4).
 
     For a sample of ``N`` values sorted in ascending order, the positions,
-    counted from 1, of the value taken as the 0,1-quantile and of the value
-    taken as the 0,9-quantile. Table C.1 (:data:`RANKING_POSITIONS`) from 20 to
+    counted from 1, of the value taken as the 0.1-quantile and of the value
+    taken as the 0.9-quantile. Table C.1 (:data:`RANKING_POSITIONS`) from 20 to
     50 values; above 50, Formulas (C.1) and (C.2),
 
     .. math::
@@ -384,12 +384,12 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
     @property
     def rank_q01(self) -> int:
-        """:math:`R(q_{0,1})`, the ranking position of the 0,1-quantile."""
+        """:math:`R(q_{0,1})`, the ranking position of the 0.1-quantile."""
         return ranking_positions(self.sample_size)[0]
 
     @property
     def rank_q09(self) -> int:
-        """:math:`R(q_{0,9})`, the ranking position of the 0,9-quantile."""
+        """:math:`R(q_{0,9})`, the ranking position of the 0.9-quantile."""
         return ranking_positions(self.sample_size)[1]
 
     @property
@@ -458,7 +458,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 def level_difference_quantiles(
     level_differences: NumericArrayLike,
 ) -> LevelDifferenceQuantiles:
-    r"""The 0,1- and 0,9-quantiles of a sample of level differences
+    r"""The 0.1- and 0.9-quantiles of a sample of level differences
     (ISO 17534-1:2015, C.4).
 
     The sample is sorted in ascending order and the values at the ranking
@@ -509,7 +509,7 @@ def uniform_sample_indices(
 
     .. math::
 
-       \mathrm{IP}\!\left((i - 0{,}5)\,\frac{N}{M}\right),
+       \mathrm{IP}\!\left((i - 0.5)\,\frac{N}{M}\right),
        \qquad i = 1, \ldots, M,
 
     counted from zero (the module docstring says why), evaluated in integer
@@ -583,7 +583,7 @@ def contour_sample_chainages_m(
 
     .. math::
 
-       \mathrm{IP}\!\left((i - 0{,}5)\,\frac{L}{M}\right),
+       \mathrm{IP}\!\left((i - 0.5)\,\frac{L}{M}\right),
        \qquad i = 1, \ldots, M,
 
     read in metres, so that each point falls on a whole metre (the module
@@ -591,8 +591,8 @@ def contour_sample_chainages_m(
     arithmetic on the decimal value of the length, as
     :math:`\lfloor (2i - 1) L / 2M \rfloor`: through a rounded quotient
     ``L/M``, a chainage that is a whole number of metres can come out a metre
-    short (115 m for ``L`` = 184 m and ``M`` = 20, where ``L/M`` is 9,2), and
-    through the binary fraction nearest a decimal length such as 22,4 m, so
+    short (115 m for ``L`` = 184 m and ``M`` = 20, where ``L/M`` is 9.2), and
+    through the binary fraction nearest a decimal length such as 22.4 m, so
     can one that the decimal length puts on a whole metre. The level of the
     contour there is compared with a single-point calculation at the same
     place, and the differences go to :func:`level_difference_quantiles`.
@@ -748,8 +748,8 @@ class RoundRobinPrecision(OwnsArrays):
         r"""Draw the distribution of :math:`|dL_n|_{\max}`, as Figure A.3 does.
 
         A histogram of the largest absolute deviations with :math:`q_{0,9}`
-        marked. Figure A.3 counts them in classes 0,1 dB wide; here the
-        class width is the narrowest round one (0,05 dB, 0,1 dB, 0,2 dB and
+        marked. Figure A.3 counts them in classes 0.1 dB wide; here the
+        class width is the narrowest round one (0.05 dB, 0.1 dB, 0.2 dB and
         so on) that draws the widest deviation in at most 25 classes.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -961,7 +961,7 @@ def verify_calculation_results(
     prints. A test case of ISO/TR 17534-3 prints a correct result to two
     decimals and, by Table A.5, a result is correct within
     :data:`CERTIFIED_RESULT_TOLERANCE_DB` of it, so its limits are the
-    certified result minus and plus 0,05 dB. Table B.2 is the worked form:
+    certified result minus and plus 0.05 dB. Table B.2 is the worked form:
     eight octave bands and a total of the test case "T XX", every result
     inside.
 

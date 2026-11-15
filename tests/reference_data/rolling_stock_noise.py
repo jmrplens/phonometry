@@ -28,8 +28,8 @@ from __future__ import annotations
 
 # ---------------------------------------------------------------------------
 # ISO 3095:2013 Figure 2 (folio 12): nominal wavelength in centimetres and the
-# printed label of each point, dB re 1 um. The axis labels the 3,15, 1,25,
-# 0,63 and 0,315 cm bands as 3.2, 1.3, 0.6 and 0.3.
+# printed label of each point, dB re 1 um. The axis labels the 3.15, 1.25,
+# 0.63 and 0.315 cm bands as 3.2, 1.3, 0.6 and 0.3.
 # ---------------------------------------------------------------------------
 FIGURE_2_WAVELENGTHS_CM: tuple[float, ...] = (
     40.0, 31.5, 25.0, 20.0, 16.0, 12.5, 10.0, 8.0, 6.3, 5.0, 4.0,
@@ -42,7 +42,7 @@ FIGURE_2_LIMIT_DB: tuple[float, ...] = (
 
 # ---------------------------------------------------------------------------
 # EN 15610:2009 Annex B.9.2 (folio 26): wl_tsi (m) and tsi_rough (dB), as the
-# listing types them, 3,15 cm as 0.032 and 3,15 mm as 0.003.
+# listing types them, 3.15 cm as 0.032 and 3.15 mm as 0.003.
 # ---------------------------------------------------------------------------
 EN15610_LISTING_WAVELENGTHS_M: tuple[float, ...] = (
     0.400, 0.315, 0.250, 0.200, 0.160, 0.125, 0.100, 0.080, 0.063, 0.050, 0.040,
@@ -156,8 +156,8 @@ FIGURE_G1_ORDER: tuple[str, ...] = (
 # ISO 3095:2013 Table G.1 (folios 48 and 49): the rectangular rows whose
 # printed standard uncertainty is the half-width over the square root of 3
 # (Formula G.2), as (quantity, half-width a, printed u), dB. The two rows that
-# are not (the 25 m distance, printed 0,004 dB, and the 7,5 m ground level,
-# printed 0,55 dB) are in the errata register.
+# are not (the 25 m distance, printed 0.004 dB, and the 7.5 m ground level,
+# printed 0.55 dB) are in the errata register.
 # ---------------------------------------------------------------------------
 TABLE_G1_RECTANGULAR_ROWS: tuple[tuple[str, float, float], ...] = (
     ("cal, reference", 0.25, 0.14),

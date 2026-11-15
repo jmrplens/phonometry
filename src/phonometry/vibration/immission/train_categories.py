@@ -4,27 +4,27 @@ r"""Railway vibration by category of train (E DIN 4150-2:2023-08, 6.5.3).
 The draft of August 2023 that is to replace DIN 4150-2:1999-06 rewrites how a
 railway is assessed for the people in a building. The 1999 edition formed the
 clock maximum r.m.s. over the intervals a class of train occupied, raised the
-guide values by 1,5 for an urban line and left the upper value out of the
+guide values by 1.5 for an urban line and left the upper value out of the
 railway's verdict altogether. The draft keeps the two assessment quantities
 and changes what feeds them:
 
 - every train passage counts as **one** clock interval, however long it
   lasts (6.5.3.2), so :math:`KB_\mathrm{FTm,Zug}` of Formula (5) is the r.m.s. of one
-  clock maximum per passage, with nothing set to zero below 0,1;
+  clock maximum per passage, with nothing set to zero below 0.1;
 - :math:`KB_\mathrm{Fmax}` of a railway is not the largest clock maximum
-  observed but **1,5 times** :math:`KB_\mathrm{FTm,Zug}` of each category and the
+  observed but **1.5 times** :math:`KB_\mathrm{FTm,Zug}` of each category and the
   largest of those (Formulae (7) and (8)), because a single passage with a
   flat spot on a wheel is not what the line is like;
 - the assessment vibration severity of Formula (6) weights each category by
   the number of its trains in the period, out of the 1920 or 960 clock
   intervals of the day or the night, and by a **weighting factor**
   :math:`\alpha_\mathrm{Zug}` of Table 2 for the kind of train and whether the
-  line runs on the surface or underground: 0,7 for a tram on the surface, 1,3 for
+  line runs on the surface or underground: 0.7 for a tram on the surface, 1.3 for
   a freight train over 600 m anywhere. A category whose r.m.s. is at or below
-  0,1 enters Formula (6) as zero;
+  0.1 enters Formula (6) as zero;
 - a line to be built new is held at night to an upper value of its own
-  (6.5.3.5): 0,6 on the surface in any area, and underground the Table 1
-  value in an industrial or commercial area and 0,3 elsewhere;
+  (6.5.3.5): 0.6 on the surface in any area, and underground the Table 1
+  value in an industrial or commercial area and 0.3 elsewhere;
 - an existing line that is altered or extended is judged by the **change**
   it brings (6.5.3.6): the planned case is first held to the guide values as
   any immission is, and where :math:`A_\mathrm{o}` or :math:`A_\mathrm{r}` is exceeded the
@@ -40,15 +40,15 @@ and changes what feeds them:
 E DIN 45672-3:2023-02, the draft prediction method for railways, takes the
 sum of Formula (6) as its Formula (11) and the same factors as its Annex E,
 though it prints the sum without the sentence that zeroes a category at or
-below 0,1, so the functions here serve both; the prediction chain that leads
+below 0.1, so the functions here serve both; the prediction chain that leads
 up to them is in :mod:`phonometry.vibration.immission.railway_prediction`.
 
 Every example of Annex B that the draft works with these formulae is a
 conformance row: the 47 passages of Table B.1 and their eight derived values,
 and the four assessment severities of Example 9. The two night-time
 severities of those four are printed over 920 intervals where 6.5.3.2 fixes
-960, and the day-time one of Example 8 is printed as 0,099 8 where its own
-four-decimal inputs give 0,099 7; both are registered in ``docs/ERRATA.md``,
+960, and the day-time one of Example 8 is printed as 0.099 8 where its own
+four-decimal inputs give 0.099 7; both are registered in ``docs/ERRATA.md``,
 and the rows run the standard's own 960 and its own inputs.
 """
 
@@ -104,7 +104,7 @@ __all__ = [
 ]
 
 #: The factor Formula (7) puts on :math:`KB_\mathrm{FTm,Zug}` to estimate the
-#: :math:`KB_\mathrm{Fmax}` of a category of train: 1,5. E DIN 45672-3
+#: :math:`KB_\mathrm{Fmax}` of a category of train: 1.5. E DIN 45672-3
 #: Formula (10) is the same number.
 TRAIN_KB_FMAX_FACTOR: float = 1.5
 
@@ -140,8 +140,8 @@ TRAIN_WEIGHTING_FACTORS: Mapping[TrainKind, Mapping[Alignment, float]] = (
 )
 
 #: The upper guide value :math:`A_\mathrm{o}` a line to be built new is held to at
-#: night (6.5.3.5): 0,6 on the surface in any area; underground, the night
-#: :math:`A_\mathrm{o}` of Table 1 in an industrial or commercial area and 0,3 in a
+#: night (6.5.3.5): 0.6 on the surface in any area; underground, the night
+#: :math:`A_\mathrm{o}` of Table 1 in an industrial or commercial area and 0.3 in a
 #: mixed, residential or sensitive one. The same values bound the planned
 #: case of an altered line (6.5.3.6 b)).
 RAILWAY_NEW_LINE_NIGHT_A_O: Mapping[Alignment, float] = MappingProxyType(
@@ -193,7 +193,7 @@ def train_category_rms(kb_fti_zug: NumericArrayLike) -> float:
     :math:`KB_\mathrm{FTm,Zug} = \sqrt{\frac{1}{Z}\sum_{i=1}^{Z} KB^2_{\mathrm{FT}i,\mathrm{Zug}}}` over
     the :math:`Z` passages measured, one clock maximum per passage whatever
     the passage lasted. Unlike Formula (1) and the 1999 edition's (A.1), a
-    maximum at or below 0,1 enters as it is: the suppression is applied to
+    maximum at or below 0.1 enters as it is: the suppression is applied to
     the category's r.m.s. in Formula (6), not to the passages (C.2), because
     :math:`KB_\mathrm{Fmax}` of Formula (7) is formed from this value.
 
@@ -224,11 +224,11 @@ def train_kb_fmax[A: NumericArrayLike](
 def train_kb_fmax(kb_ftm_zug: NumericArrayLike) -> float | NDArray[np.float64]:
     r"""The :math:`KB_\mathrm{Fmax,Zug}` of each category, Formula (7).
 
-    :math:`KB_\mathrm{Fmax,Zug} = 1{,}5 \cdot KB_\mathrm{FTm,Zug}`, the estimate the
+    :math:`KB_\mathrm{Fmax,Zug} = 1.5 \cdot KB_\mathrm{FTm,Zug}`, the estimate the
     draft uses instead of the largest clock maximum observed, which a single
     passage with an out-of-round wheel would decide. Formed from the value
-    before rounding: Table B.1 prints 0,851 for a category whose r.m.s. it
-    prints as 0,568.
+    before rounding: Table B.1 prints 0.851 for a category whose r.m.s. it
+    prints as 0.568.
 
     :param kb_ftm_zug: :math:`KB_\mathrm{FTm,Zug}` of each category.
     :return: :math:`KB_\mathrm{Fmax,Zug}` of each, in the same order. A ``float`` for a
@@ -271,9 +271,9 @@ def train_assessment_severity(
     (\alpha_\mathrm{Zug} KB_\mathrm{FTm,Zug})^2}`: each category weighted by the
     trains it runs in the period, out of the :math:`N_\mathrm{r}` = 1920 clock intervals
     of the day or 960 of the night, and by its factor of Table 2. A category
-    whose r.m.s. is at or below 0,1 enters as zero. The rest hours of the day
+    whose r.m.s. is at or below 0.1 enters as zero. The rest hours of the day
     are not applied to a railway (6.5.3.2). E DIN 45672-3:2023-02 Formula (11)
-    is the same sum, printed without the sentence on 0,1. The categories are at
+    is the same sum, printed without the sentence on 0.1. The categories are at
     least one per track or direction and kind of train, and their trains are
     counted apart, so nothing bounds their sum by the intervals of the period:
     two tracks can each carry a train in the same interval.
@@ -327,8 +327,8 @@ def railway_guide_values(
 
     :math:`A_\mathrm{u}` and :math:`A_\mathrm{r}` are Table 1 of the draft, by day and by
     night, and :math:`A_\mathrm{o}` is Table 1 by day. At night the upper value is the
-    line's own: 0,6 on the surface whatever the area; underground, the
-    Table 1 value in an industrial or commercial area and 0,3 in a mixed,
+    line's own: 0.6 on the surface whatever the area; underground, the
+    Table 1 value in an industrial or commercial area and 0.3 in a mixed,
     residential or sensitive one. The same values bound the planned case of
     an altered or extended line (6.5.3.6 b)).
 
@@ -400,8 +400,8 @@ class RailwayChange(RichDisplay):
 
         It keeps to :math:`A_\mathrm{u}` or :math:`A_\mathrm{o}`, or exceeds :math:`A_\mathrm{o}` by an
         increase under 25 % against the case without the project. The
-        increase is judged settled: 0,28 to 0,35 is 25 % in decimal and
-        24,999 999 999 999 98 % in binary, which must not decide the verdict.
+        increase is judged settled: 0.28 to 0.35 is 25 % in decimal and
+        24.999 999 999 999 98 % in binary, which must not decide the verdict.
         """
         if self._keeps_to_lower:
             return True
@@ -471,8 +471,8 @@ def assess_railway_change(
     :math:`KB_\mathrm{FTr}` exceeds :math:`A_\mathrm{r}`, the requirements still count as
     met if the quantity grows by less than 25 % against the case without the
     project; otherwise mitigation is to be looked into. Example 9 of Annex B
-    finds a night-time :math:`KB_\mathrm{FTr}` of 0,096 against 0,066 before, an
-    increase of over 25 % above an :math:`A_\mathrm{r}` of 0,07, and sends the
+    finds a night-time :math:`KB_\mathrm{FTr}` of 0.096 against 0.066 before, an
+    increase of over 25 % above an :math:`A_\mathrm{r}` of 0.07, and sends the
     project to mitigation although its :math:`KB_\mathrm{Fmax}` does not
     change, which is why every condition that applies has to hold here and
     not one of them, as the clause is printed.

@@ -10,7 +10,7 @@ prints it**, decimal comma and all, and the minus sign as an ASCII hyphen;
 
 - Table A.1, PDF page 24, printed folio 24: the ground to floor level
   difference for concrete floors. Columns: the band, then the floor natural
-  frequency 8, 10, 12,5, 16, 20, 25, 31,5, 40, 50, 62,5 and 80 Hz.
+  frequency 8, 10, 12.5, 16, 20, 25, 31.5, 40, 50, 62.5 and 80 Hz.
 - Table A.2, PDF page 25, printed folio 25: the same for timber floors.
 - Table A.3, PDF page 26, printed folio 26: ground to foundation, basement
   (A-u, A-m, A-o: lower, mean, upper).

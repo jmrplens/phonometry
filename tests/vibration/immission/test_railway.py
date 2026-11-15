@@ -55,7 +55,7 @@ def test_the_velocity_reference_is_the_one_emission_uses() -> None:
 
 
 def test_a_steady_one_millimetre_per_second_is_86_decibels() -> None:
-    """20 lg(1 / 5·10⁻⁵) = 86,02 dB once the running r.m.s. has settled."""
+    """20 lg(1 / 5·10⁻⁵) = 86.02 dB once the running r.m.s. has settled."""
     level = im.running_velocity_level(_sine(80.0, math.sqrt(2.0), 3.0, FS_HZ), FS_HZ)
     assert np.mean(level[-FS_HZ:]) == pytest.approx(86.02, abs=0.05)
 
@@ -134,7 +134,7 @@ def test_an_interval_outside_the_record_is_refused() -> None:
 
 
 def test_the_event_value_refers_the_passage_to_one_hour() -> None:
-    """Formula (8): 0,1 mm/s for 36 s is 0,01 mm/s over the hour."""
+    """Formula (8): 0.1 mm/s for 36 s is 0.01 mm/s over the hour."""
     assert im.event_velocity(0.1, 36.0) == pytest.approx(0.01)
 
 
@@ -250,7 +250,7 @@ def test_a_density_at_the_reference_is_zero_decibels() -> None:
 
 
 def test_annex_a_divides_by_both_coefficients_squared() -> None:
-    """Annex A: 0,030 V/(mm/s) and a gain of 10 divide the density by 0,09."""
+    """Annex A: 0.030 V/(mm/s) and a gain of 10 divide the density by 0.09."""
     converted = im.velocity_psd_from_voltage(
         [0.09, 1.0], sensitivity_v_per_mm_s=0.030, gain=10.0
     )
@@ -266,7 +266,7 @@ def _lines(upper_hz: float = 600.0) -> np.ndarray:
 
 
 def test_each_band_takes_the_lines_table_1_gives_it() -> None:
-    """A flat density of one: each band's mean square is K_n · 1,25."""
+    """A flat density of one: each band's mean square is K_n · 1.25."""
     f = _lines()
     bands = im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
     centres, rms = bands.frequencies, bands.velocities_mm_s
@@ -287,8 +287,8 @@ def _band_of(line_hz: float) -> list[float]:
 def test_table_1_is_a_sixth_of_an_octave_either_side_but_at_10_hz() -> None:
     """Every line lands where the nominal band edges put it, except one.
 
-    The 11,25 Hz line lies 0,03 Hz above the nominal edge between 10 Hz and
-    12,5 Hz, and Table 1 counts it in the 10 Hz band, which is where the
+    The 11.25 Hz line lies 0.03 Hz above the nominal edge between 10 Hz and
+    12.5 Hz, and Table 1 counts it in the 10 Hz band, which is where the
     nearest-lines rule puts it too.
     """
     f = _lines()
@@ -327,11 +327,11 @@ def test_a_late_spectrum_starts_at_the_first_whole_band() -> None:
     from_line = im.third_octaves_from_narrowband(
         frequencies=f[3:], psd=np.ones(f.size - 3)
     )
-    assert from_line.frequencies[0] == 4.0  # 3,75 Hz is the whole 4 Hz band
+    assert from_line.frequencies[0] == 4.0  # 3.75 Hz is the whole 4 Hz band
     from_20 = im.third_octaves_from_narrowband(
         frequencies=f[16:], psd=np.ones(f.size - 16)
     )
-    assert from_20.frequencies[0] == 25.0  # the 20 Hz band needs 18,75 Hz
+    assert from_20.frequencies[0] == 25.0  # the 20 Hz band needs 18.75 Hz
     assert np.allclose(
         from_20.velocities_mm_s**2 / 1.25, list(im.THIRD_OCTAVE_LINES.values())[8:]
     )
@@ -464,7 +464,7 @@ def test_the_stretches_nest_and_stay_inside_the_record() -> None:
 
 
 def test_a_fractional_rate_runs() -> None:
-    """The third-octave bank takes any rate, so a passage at 2048,5 Hz is read."""
+    """The third-octave bank takes any rate, so a passage at 2048.5 Hz is read."""
     record = _passage()
     passage = im.evaluate_train_passage(record, 2048.5, t2_s=(8.0, 20.0))
     whole = im.evaluate_train_passage(record, 2048.0, t2_s=(8.0, 20.0))

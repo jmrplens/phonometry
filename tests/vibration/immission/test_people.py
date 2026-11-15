@@ -39,7 +39,7 @@ def test_table_1_as_printed() -> None:
 
 
 def test_example_1_meets_the_lower_value() -> None:
-    """C.1: KB_Fmax = 0,25 against A_u = 0,3 of a commercial area, met."""
+    """C.1: KB_Fmax = 0.25 against A_u = 0.3 of a commercial area, met."""
     guide = im.guide_values("commercial")
     verdict = im.assess_people_in_buildings(0.25, guide)
     assert verdict.passes
@@ -48,7 +48,7 @@ def test_example_1_meets_the_lower_value() -> None:
 
 
 def test_example_3_exceeds_a_u_within_the_measurement_uncertainty() -> None:
-    """C.3: 0,17 against 0,15 by night in a mixed area, KB_FTr not needed as
+    """C.3: 0.17 against 0.15 by night in a mixed area, KB_FTr not needed as
     T_e = 8 h, and the excess is inside the 15 % of 5.4, so the standard
     concludes the requirement "can as a rule still be regarded as met".
     """
@@ -66,13 +66,13 @@ def test_example_3_exceeds_a_u_within_the_measurement_uncertainty() -> None:
 
 
 def test_a_reading_is_compared_as_printed_half_up() -> None:
-    """Example 4 writes a KB_FTr of 0,154 as 0,15 and finds it at A_r = 0,15;
-    0,155 is written 0,16, as a hand rounds, and is not.
+    """Example 4 writes a KB_FTr of 0.154 as 0.15 and finds it at A_r = 0.15;
+    0.155 is written 0.16, as a hand rounds, and is not.
     """
     guide = im.guide_values("commercial")
     assert im.assess_people_in_buildings(0.47, guide, kb_ftr=0.154).passes
     assert not im.assess_people_in_buildings(0.47, guide, kb_ftr=0.155).passes
-    # A guide value raised by 1,5 carries three decimals and is compared at three.
+    # A guide value raised by 1.5 carries three decimals and is compared at three.
     urban = im.guide_values("residential", time_of_day="night", source="urban_railway")
     assert urban.a_r == 0.075
     assert im.assess_people_in_buildings(
@@ -106,8 +106,8 @@ def test_quarry_blasting_takes_the_a_o_of_row_1_by_day_in_rows_3_and_4() -> None
 
 
 def test_example_6_meets_a_u_and_needs_no_a_r() -> None:
-    """C.6: hammer a) at 0,23 against A_u = 0,3, met on A_u although the
-    rest-time weighting would put KB_FTr at 0,18 above A_r = 0,15.
+    """C.6: hammer a) at 0.23 against A_u = 0.3, met on A_u although the
+    rest-time weighting would put KB_FTr at 0.18 above A_r = 0.15.
     """
     guide = im.guide_values("commercial")
     verdict = im.assess_people_in_buildings(0.23, guide)
@@ -154,7 +154,7 @@ def test_a_railway_is_judged_on_a_u_and_a_r_only() -> None:
 
 
 def test_an_urban_surface_railway_raises_a_u_and_a_r_by_half() -> None:
-    """6.5.3.3: the factor 1,5 on A_u and A_r, not on A_o."""
+    """6.5.3.3: the factor 1.5 on A_u and A_r, not on A_o."""
     plain = im.guide_values("residential")
     urban = im.guide_values("residential", source="urban_railway")
     assert urban.a_u == pytest.approx(1.5 * plain.a_u)
@@ -166,16 +166,16 @@ def test_an_urban_surface_railway_raises_a_u_and_a_r_by_half() -> None:
 
 
 def test_example_2_admissible_exposure() -> None:
-    """C.2: KB_FTm = 0,23 against A_r = 0,07 leaves T_e = 1,48 h of a 16 h day."""
+    """C.2: KB_FTm = 0.23 against A_r = 0.07 leaves T_e = 1.48 h of a 16 h day."""
     exposure = im.admissible_exposure_s(0.23, 0.07)
     assert round(exposure / HOUR, 2) == 1.48
     assert im.assessment_vibration_severity(0.23, exposure) == pytest.approx(0.07)
 
 
 def test_example_4_two_hammers_formula_4a() -> None:
-    """C.4: 6 h at 0,16 and 1,5 h at 0,39 over 16 h give 0,15, met at A_r.
+    """C.4: 6 h at 0.16 and 1.5 h at 0.39 over 16 h give 0.15, met at A_r.
 
-    The unrounded value is 0,154, and the standard writes it as 0,15 and
+    The unrounded value is 0.154, and the standard writes it as 0.15 and
     calls it met: the comparison is made at the decimals of Table 1.
     """
     kb_ftr = im.assessment_vibration_severity([0.16, 0.39], [6.0 * HOUR, 1.5 * HOUR])
@@ -188,7 +188,7 @@ def test_example_4_two_hammers_formula_4a() -> None:
 
 
 def test_example_5_hammer_b_in_the_rest_hours_formula_5() -> None:
-    """C.5: the same 1,5 h weighted twice give 0,20, above A_r = 0,15."""
+    """C.5: the same 1.5 h weighted twice give 0.20, above A_r = 0.15."""
     kb_ftr = im.assessment_vibration_severity(
         [0.16, 0.39], [6.0 * HOUR, 1.5 * HOUR], in_rest_time=[False, True]
     )
@@ -213,7 +213,7 @@ def test_the_night_has_no_rest_hours_and_the_period_is_a_ceiling() -> None:
 
 
 def test_example_7_formula_6_and_7() -> None:
-    """C.7: 4 mm/s at 14 Hz with c_F = 0,8 estimate KB*_Fmax = 2,1."""
+    """C.7: 4 mm/s at 14 Hz with c_F = 0.8 estimate KB*_Fmax = 2.1."""
     kb = im.kb_from_peak_velocity(4.0, 14.0)
     assert kb == pytest.approx(
         4.0 / math.sqrt(2.0) / math.sqrt(1.0 + (5.6 / 14.0) ** 2)
@@ -245,15 +245,15 @@ def test_example_8_the_two_classes_of_train() -> None:
     assert round(im.railway_takt_max_rms(class_1), 2) == 0.82
     assert round(im.railway_takt_max_rms(class_1) ** 2, 3) == 0.672
     assert round(im.railway_takt_max_rms(class_2), 2) == 0.22
-    # The standard prints 0,048 4, which is 0,22 squared; the mean square of
-    # the two maxima is 0,048 8, and the difference does not reach KB_FTr.
+    # The standard prints 0.048 4, which is 0.22 squared; the mean square of
+    # the two maxima is 0.048 8, and the difference does not reach KB_FTr.
     assert round(im.railway_takt_max_rms(class_2) ** 2, 4) == 0.0488
     assert round(im.railway_takt_spread(class_1), 2) == 0.27
     assert round(im.railway_takt_spread(class_2), 3) == 0.012
 
 
 def test_example_8_formula_a3_and_its_interval() -> None:
-    """C.8: 288 and 192 occupied intervals of 1920 give 0,325, +0,059/-0,073."""
+    """C.8: 288 and 192 occupied intervals of 1920 give 0.325, +0.059/-0.073."""
     result = im.railway_assessment_severity(
         [0.82, 0.22], [288, 192], spread=[0.27, 0.012]
     )
@@ -268,8 +268,8 @@ def test_example_8_formula_a3_and_its_interval() -> None:
 
 
 def test_example_8_formula_3_over_the_whole_record_agrees() -> None:
-    """C.8: the 20 clock intervals of the 10 min record give the same 0,325,
-    and the passage maxima alone 0,318.
+    """C.8: the 20 clock intervals of the 10 min record give the same 0.325,
+    and the passage maxima alone 0.318.
     """
     maxima = np.zeros(20)
     maxima[:5] = [0.92, 0.6, 0.2, 0.9, 0.24]
@@ -282,7 +282,7 @@ def test_example_8_formula_3_over_the_whole_record_agrees() -> None:
 
 
 def test_figure_d1_trains_per_hour() -> None:
-    """Annex D reads 7 trains at A_r = 0,05 and 14 at 0,07, for KB_FTm = 0,2."""
+    """Annex D reads 7 trains at A_r = 0.05 and 14 at 0.07, for KB_FTm = 0.2."""
     assert math.floor(im.admissible_trains_per_hour(0.2, 0.05)) == 7
     assert math.floor(im.admissible_trains_per_hour(0.2, 0.07)) == 14
     seven = im.railway_assessment_severity(0.2, 7 * 16)
@@ -303,9 +303,9 @@ def test_a_railway_refuses_more_intervals_than_the_period_holds() -> None:
 
 
 def test_the_spread_is_about_the_mean_square_the_rms_returns() -> None:
-    """Formula (3)'s rule that a maximum at or below 0,1 counts as zero holds
-    in (A.2) as in (A.1), so the spread of [0,1, 0,3] is about 0,045, the
-    mean square (A.1) gives, and not about 0,05.
+    """Formula (3)'s rule that a maximum at or below 0.1 counts as zero holds
+    in (A.2) as in (A.1), so the spread of [0.1, 0.3] is about 0.045, the
+    mean square (A.1) gives, and not about 0.05.
     """
     maxima = [0.1, 0.3]
     mean_square = im.railway_takt_max_rms(maxima) ** 2
@@ -334,9 +334,9 @@ def test_table_2_as_printed() -> None:
 
 
 def test_figure_3_interpolates_two_to_six_days() -> None:
-    """Printed page 9: 0,73, 0,67, 0,6, 0,53 and 0,47 for stage I."""
+    """Printed page 9: 0.73, 0.67, 0.6, 0.53 and 0.47 for stage I."""
     steps = [im.construction_guide_values(days, stage="I").a_u for days in range(2, 7)]
-    # As the figure prints them, not 0,7333 and 0,4667: a reading of 0,47 on
+    # As the figure prints them, not 0.7333 and 0.4667: a reading of 0.47 on
     # the sixth day is at the value, not a third of a hundredth above it.
     assert steps == [0.73, 0.67, 0.6, 0.53, 0.47]
     assert im.construction_guide_values(4, stage="I").a_r == 0.35
@@ -370,7 +370,7 @@ def test_table_2_is_not_applicable_to_a_sensitive_area_or_to_part_days() -> None
 
 
 def test_the_draft_changes_one_cell_of_table_1() -> None:
-    """Printed page 14 of the draft: the night A_u of a mixed area is 0,1."""
+    """Printed page 14 of the draft: the night A_u of a mixed area is 0.1."""
     for area in im.GUIDE_VALUES:
         for period in ("day", "night"):
             printed = im.guide_values(area, time_of_day=period)
@@ -393,9 +393,9 @@ def test_the_draft_changes_one_cell_of_table_1() -> None:
 
 
 def test_draft_example_3_goes_on_to_a_r_and_fails() -> None:
-    """B.3 of the draft: 0,114 against A_u = 0,10 by night in a mixed area is
+    """B.3 of the draft: 0.114 against A_u = 0.10 by night in a mixed area is
     inside the 15 %, and the draft no longer stops there; KB_FTr = KB_FTm =
-    0,075 exceeds A_r = 0,07, not met.
+    0.075 exceeds A_r = 0.07, not met.
     """
     guide = im.guide_values("mixed", time_of_day="night", edition="2023")
     verdict = im.assess_people_in_buildings(0.114, guide, kb_ftr=0.075, edition="2023")
@@ -444,7 +444,7 @@ def test_the_draft_tolerates_an_existing_road_by_half() -> None:
 
 
 def test_the_draft_bounds_an_induced_seismic_event_by_the_daytime_a_o() -> None:
-    """6.5.1.3 of the draft: KB_Fmax = 0,44 v_max, held by day and by night to
+    """6.5.1.3 of the draft: KB_Fmax = 0.44 v_max, held by day and by night to
     the daytime A_o, with no KB_FTr.
     """
     assert im.induced_seismic_kb_fmax(5.0) == pytest.approx(2.2)
@@ -489,7 +489,7 @@ def test_the_module_lists_what_it_publishes() -> None:
 
 def test_the_draft_does_not_judge_a_road_on_a_o_by_night() -> None:
     """Printed page 18, 6.5.2 of the draft: a rare exceedance of the night-time
-    A_o does not fail a road, and single clock maxima above 0,6 are a reason
+    A_o does not fail a road, and single clock maxima above 0.6 are a reason
     to look into the cause; by day, and under the 1999 edition, the road is
     judged on A_o like any other source.
     """

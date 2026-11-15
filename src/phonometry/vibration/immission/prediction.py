@@ -18,19 +18,19 @@ surface wavelength, the velocity amplitude decays as
    \bar v = \bar v_1 \left(\frac{R}{R_1}\right)^{-n} \exp[-\alpha (R - R_1)]
 
 (Formula (2)): geometric spreading with an exponent :math:`n` that Figure 1
-fixes at 0, 0,5, 1 or 1,5 by whether the source is a line or a point,
+fixes at 0, 0.5, 1 or 1.5 by whether the source is a line or a point,
 harmonic or impulsive, and the wave a surface or a body wave; and material
 damping with :math:`\alpha \approx 2\pi D / \lambda`, the damping ratio of the
-ground over the wavelength, which for loose ground may be taken as 0,01 at
+ground over the wavelength, which for loose ground may be taken as 0.01 at
 most in a preliminary estimate. Nearer than :math:`R_1` the formula does not
 hold. A train is a chain of point sources and decays with an exponent
-between 0,3 and 0,5.
+between 0.3 and 0.5.
 
 **Into the building** (Clause 4.3). A building on the ground is a mass on a
 spring with the natural frequency of Formula (3), about 15 Hz for one or two
 storeys and under 8 Hz above six; the foundation passes at most
 :math:`1 / (2 D_0)` of the ground's amplitude at that frequency, 2 for the
-0,25 of loose ground, and a mean of 0,5 above it, or all of it on rock; a
+0.25 of loose ground, and a mean of 0.5 above it, or all of it on rock; a
 floor amplifies by at most :math:`1 / (2 D_1)`, 10 to 25 for a concrete
 floor; and the lowest horizontal natural frequency of a building of five
 storeys or more is about :math:`10 / n` Hz (Formula (4)), the estimate
@@ -125,7 +125,7 @@ WaveType = Literal["surface", "body"]
 #: geometry of the source (``"point"`` or ``"line"``), its character in time
 #: (``"harmonic"``, stationary, or ``"impulsive"``) and the wave that
 #: carries it (``"surface"`` or ``"body"``). Each of point, impulsive and
-#: body adds 0,5 to the 0 of a harmonic line source on a surface wave.
+#: body adds 0.5 to the 0 of a harmonic line source on a surface wave.
 SOURCE_EXPONENTS: Mapping[tuple[SourceGeometry, SourceCharacter, WaveType], float] = (
     MappingProxyType(
         {
@@ -142,11 +142,11 @@ SOURCE_EXPONENTS: Mapping[tuple[SourceGeometry, SourceCharacter, WaveType], floa
 )
 
 #: The far-field exponent of a train, a chain of point sources not excited
-#: in phase: between 0,3 and 0,5 (Clause 4.2).
+#: in phase: between 0.3 and 0.5 (Clause 4.2).
 TRAIN_CHAIN_EXPONENT_RANGE: tuple[float, float] = (0.3, 0.5)
 
 #: The damping ratio :math:`D` a preliminary estimate may assume for loose
-#: ground at most (Clause 4.2): 0,01. More has to be proven.
+#: ground at most (Clause 4.2): 0.01. More has to be proven.
 LOOSE_GROUND_DAMPING_RATIO: float = 0.01
 
 #: The shear wave speed of a ground of medium stiffness (Clause 4.3), in
@@ -154,17 +154,17 @@ LOOSE_GROUND_DAMPING_RATIO: float = 0.01
 MEDIUM_SOIL_SHEAR_WAVE_SPEED_M_S: tuple[float, float] = (150.0, 200.0)
 
 #: The system damping :math:`D_0` of a building on loose ground that
-#: Clause 4.3 lets one assume: 0,25, which caps the foundation's transfer at
+#: Clause 4.3 lets one assume: 0.25, which caps the foundation's transfer at
 #: resonance at 2.
 LOOSE_GROUND_SYSTEM_DAMPING: float = 0.25
 
 #: The mean transfer value of a foundation above the natural frequency of
-#: the building on its ground (Clause 4.3): 0,5. On rock there is no
+#: the building on its ground (Clause 4.3): 0.5. On rock there is no
 #: reduction at all.
 FOUNDATION_TRANSFER_ABOVE_RESONANCE: float = 0.5
 
 #: The damping ratio :math:`D_1` of a reinforced concrete floor (Clause
-#: 4.3): between 0,02 and 0,05, so the floor amplifies by 10 to 25 at most.
+#: 4.3): between 0.02 and 0.05, so the floor amplifies by 10 to 25 at most.
 FLOOR_DAMPING_RATIO_RANGE: tuple[float, float] = (0.02, 0.05)
 
 #: How far the vibration of a blast is very rarely relevant beyond (Clause
@@ -177,7 +177,7 @@ BLASTING_RELEVANT_DISTANCE_M: Mapping[str, float] = MappingProxyType(
     }
 )
 
-#: The spacing of the rail supports (Clause 5.3.2), in metres: 0,6 to 0,9.
+#: The spacing of the rail supports (Clause 5.3.2), in metres: 0.6 to 0.9.
 RAIL_SUPPORT_SPACING_M: tuple[float, float] = (0.6, 0.9)
 
 #: The natural frequencies of the parts of a rail vehicle, which do not
@@ -291,7 +291,7 @@ def geometric_exponent(
     :param geometry: ``"point"`` or ``"line"``.
     :param character: ``"harmonic"`` (stationary) or ``"impulsive"``.
     :param wave: ``"surface"`` or ``"body"``.
-    :return: :math:`n`: 0, 0,5, 1 or 1,5.
+    :return: :math:`n`: 0, 0.5, 1 or 1.5.
     :raises ValueError: For an unknown geometry, character or wave.
     :raises TypeError: if ``character``, ``geometry`` or ``wave`` is not a text.
     """
@@ -330,10 +330,10 @@ def attenuation_coefficient_per_m(
     r"""The material damping of the ground, :math:`\alpha` of Formula (2).
 
     :math:`\alpha \approx 2\pi D / \lambda` with :math:`\lambda = c / f` the
-    wavelength that matters. Figure A.19 prints 0,005 for a damping ratio of
-    0,01 and a wavelength of 12,5 m.
+    wavelength that matters. Figure A.19 prints 0.005 for a damping ratio of
+    0.01 and a wavelength of 12.5 m.
 
-    :param damping_ratio: :math:`D`, not negative; 0,01 at most for loose
+    :param damping_ratio: :math:`D`, not negative; 0.01 at most for loose
         ground in a preliminary estimate.
     :param wavelength_m: :math:`\lambda`, in metres.
     :return: :math:`\alpha`, in reciprocal metres.
@@ -391,8 +391,8 @@ def far_field_velocity_mm_s(
 
     :math:`\bar v = \bar v_1 (R / R_1)^{-n} \exp[-\alpha (R - R_1)]`: the
     amplitude at the reference distance, spread with the exponent of Figure
-    1 and damped with :math:`\alpha`. Figure A.19 draws it for 0,44 mm/s at
-    13 m with :math:`\alpha` = 0,005 for the three exponents 0, 0,5 and 1.
+    1 and damped with :math:`\alpha`. Figure A.19 draws it for 0.44 mm/s at
+    13 m with :math:`\alpha` = 0.005 for the three exponents 0, 0.5 and 1.
 
     :param reference_velocity_mm_s: :math:`\bar v_1`, at :math:`R_1`, in
         millimetres per second.
@@ -468,7 +468,7 @@ def material_damping_factor(
     r"""The share the ground absorbs over a distance, Figure 2.
 
     :math:`\exp[-2\pi D f (R - R_1) / c]`, the damping factor of Formula (2)
-    alone, which Figure 2 draws for a damping ratio of 0,01 and a wave speed
+    alone, which Figure 2 draws for a damping ratio of 0.01 and a wave speed
     of 200 m/s from 10 Hz to 50 Hz: at 100 m the ground has taken 27 % of
     the amplitude at 10 Hz and 79 % at 50 Hz.
 
@@ -547,11 +547,11 @@ def foundation_transfer_max(
     r"""The most a foundation passes at the building's resonance, Clause 4.3.
 
     :math:`V_F = 1 / (2 D_0)` with the system damping of the building on its
-    ground, 0,25 for loose ground, which gives 2. Above the resonance a
+    ground, 0.25 for loose ground, which gives 2. Above the resonance a
     mean of :data:`FOUNDATION_TRANSFER_ABOVE_RESONANCE` may be assumed, and
     on rock there is no reduction.
 
-    :param system_damping_ratio: :math:`D_0`, positive; 0,25 by default.
+    :param system_damping_ratio: :math:`D_0`, positive; 0.25 by default.
     :return: :math:`V_F`.
     :raises ValueError: For a non-positive damping ratio.
     :raises TypeError: if ``system_damping_ratio`` is not a single number.
@@ -565,7 +565,7 @@ def floor_transfer_max(floor_damping_ratio: float) -> float:
     :math:`V_D = 1 / (2 D_1)`, from the foundation through the walls to the
     floor, for a building excited in phase over its whole footprint by
     predominantly harmonic vibration: 25 for a concrete floor with a damping
-    ratio of 0,02 and 10 for one with 0,05. Short spans, partitions and a
+    ratio of 0.02 and 10 for one with 0.05. Short spans, partitions and a
     foundation on loose ground raise the damping.
 
     :param floor_damping_ratio: :math:`D_1`, positive.
@@ -717,7 +717,7 @@ def impact_peak_velocity_mm_s(
 ) -> float | NDArray[np.float64]:
     r"""The peak velocity of a falling mass, Formula (6).
 
-    :math:`v_{\max} = k (E/E_0)^{0{,}5} (R/R_0)^{-m}` with the fall energy
+    :math:`v_{\max} = k (E/E_0)^{0.5} (R/R_0)^{-m}` with the fall energy
     :math:`E` against 1 kJ, the distance against 1 m, and :math:`k` and
     :math:`m` from comparable cases. The blast that fells a chimney is
     usually the smaller source; the impact is this one.
@@ -869,7 +869,7 @@ def machine_hall_velocity_mm_s(
 
     :math:`v_N = \chi \, v_B \sqrt{N}`: the velocity measured at the point
     with :math:`N_B` machines running, scaled to :math:`N` of them with the
-    correction of Figure 3. Figure A.18 draws it for 0,44 mm/s measured with
+    correction of Figure 3. Figure A.18 draws it for 0.44 mm/s measured with
     three machines and finds the measurements on the curve up to about
     sixty, the nearest group; beyond that the added groups are further off.
 

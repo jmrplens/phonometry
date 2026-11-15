@@ -30,7 +30,7 @@ give the interval and maximum third-octave levels of Formulae (6) and (7).
 
 **Narrow band** (Clause 7.3). The one-sided power spectral density of Formula
 (12), blockwise with a Hanning window and at least half a block of overlap, at
-the resolution of 1,25 Hz the standard recommends because it resolves the
+the resolution of 1.25 Hz the standard recommends because it resolves the
 resonance of an ordinary floor. Adding its lines back into third octaves is
 Formula (23), and Table 1 fixes how many lines each band takes: a number
 recommended for comparability rather than derived, which is why it is a
@@ -145,12 +145,12 @@ PASSAGE_BANDS_HZ: tuple[float, float] = (4.0, 315.0)
 #: :data:`THIRD_OCTAVE_LINES` are written for.
 NARROWBAND_RESOLUTION_HZ: float = 1.25
 
-#: Table 1: how many narrow-band lines of 1,25 Hz each third octave takes when
+#: Table 1: how many narrow-band lines of 1.25 Hz each third octave takes when
 #: a narrow-band spectrum is added back into bands (Formula (23)), keyed by the
 #: nominal centre frequency in hertz. The counts are recommended "for
 #: comparability" and are not derived in the standard. They are what a sixth
 #: of an octave either side of the nominal centre holds, except at 10 Hz and
-#: 12,5 Hz, where the table gives each band two lines and those edges give one
+#: 12.5 Hz, where the table gives each band two lines and those edges give one
 #: and three.
 THIRD_OCTAVE_LINES: Mapping[float, int] = MappingProxyType(
     {
@@ -179,9 +179,9 @@ THIRD_OCTAVE_LINES: Mapping[float, int] = MappingProxyType(
     }
 )
 
-#: How far the line spacing may stray from 1,25 Hz before Table 1 stops
+#: How far the line spacing may stray from 1.25 Hz before Table 1 stops
 #: describing the spectrum it is handed. The counts are counts of lines of that
-#: spacing: at 0,1 % the lines up to 560 Hz drift by less than half a line, and
+#: spacing: at 0.1 % the lines up to 560 Hz drift by less than half a line, and
 #: every sampling rate in common use lands well inside it.
 _RESOLUTION_TOLERANCE = 1e-3
 
@@ -205,12 +205,12 @@ def running_velocity_rms(
     has to be running before the train arrives. It puts the cost at 14 % after
     :math:`2\tau` and 2 % after :math:`4\tau`, which are the shortfalls of the
     mean square, :math:`\mathrm{e}^{-2}` and :math:`\mathrm{e}^{-4}`; the running r.m.s. itself,
-    which is what Figure 3 draws, is 7 % and 0,9 % short.
+    which is what Figure 3 draws, is 7 % and 0.9 % short.
 
     :param velocity_mm_s: The velocity, in millimetres per second (1-D), as
         measured or in one third-octave band of it.
     :param fs: Sampling frequency, in hertz.
-    :param time_constant_s: The time constant, in seconds (default 0,125 s,
+    :param time_constant_s: The time constant, in seconds (default 0.125 s,
         "Fast").
     :return: :math:`\tilde v_\mathrm{F}(t)`, one value per sample, in mm/s.
     :raises ValueError: For a bad record or a non-positive rate or constant.
@@ -524,7 +524,7 @@ def narrowband_psd(
         second (1-D).
     :param fs: Sampling frequency, in hertz.
     :param resolution_hz: The line spacing :math:`\Delta f`, in hertz (default
-        1,25 Hz). The block holds ``round(fs / resolution)`` samples, so the
+        1.25 Hz). The block holds ``round(fs / resolution)`` samples, so the
         spacing actually used is ``fs`` over that count.
     :return: The spectrum, as a
         :class:`~phonometry.signals.SpectralDensityResult`.
@@ -675,7 +675,7 @@ def velocity_psd_from_voltage(
 
     :param psd_v2_per_hz: The density the analyser shows, in V²/Hz.
     :param sensitivity_v_per_mm_s: :math:`\kappa_A`, in volts per millimetre
-        per second (Annex A uses 0,030).
+        per second (Annex A uses 0.030).
     :param gain: :math:`\kappa_V`, the amplifier gain, in volts per volt
         (Annex A uses 10).
     :return: The density of the velocity, in (mm/s)²/Hz. A ``float`` for a number, an
@@ -736,13 +736,13 @@ def third_octaves_from_narrowband(
     stated here: the lines nearest the nominal centre on a logarithmic axis.
     Wherever the count is what a sixth of an octave either side of the centre
     holds, which is every band but two, those are exactly the lines inside the
-    band's nominal edges; at 10 Hz and 12,5 Hz, where the table departs from
-    the edges, they are 10 and 11,25 Hz, then 12,5 and 13,75 Hz.
+    band's nominal edges; at 10 Hz and 12.5 Hz, where the table departs from
+    the edges, they are 10 and 11.25 Hz, then 12.5 and 13.75 Hz.
 
     It is a rule of nominal bands and it behaves like one. Nominal edges do
-    not meet: six lines fall between two bands and are in neither (71,25 Hz,
-    141,25 Hz and 142,5 Hz, and 353,75 Hz to 356,25 Hz), and five are in two
-    (178,75 Hz, 223,75 Hz, and 446,25 Hz to 448,75 Hz). The bands therefore
+    not meet: six lines fall between two bands and are in neither (71.25 Hz,
+    141.25 Hz and 142.5 Hz, and 353.75 Hz to 356.25 Hz), and five are in two
+    (178.75 Hz, 223.75 Hz, and 446.25 Hz to 448.75 Hz). The bands therefore
     do not add up to the spectrum exactly, and a tone that sits in one of the
     gaps is in no band at all; that is the comparability the table buys.
 
@@ -751,7 +751,7 @@ def third_octaves_from_narrowband(
     bands out rather than filling them with the lines of a neighbour.
 
     :param frequencies: The line frequencies of the spectrum, in hertz,
-        evenly spaced at 1,25 Hz.
+        evenly spaced at 1.25 Hz.
     :param psd: The one-sided power spectral density at those lines, in
         (mm/s)²/Hz.
     :return: The nominal centres of the bands the spectrum holds whole, from
@@ -855,7 +855,7 @@ def elastic_insertion_loss(
 def band_sum_level(levels: NumericArrayLike) -> float:
     r"""The sum level :math:`\Sigma L` of a spectrum, Annex B, Formula (B.3).
 
-    :math:`10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}`, the energy sum of the bands.
+    :math:`10 \lg \sum 10^{0.1 L(f_{\mathrm{T}n})}`, the energy sum of the bands.
 
     :param levels: The band levels, in decibels.
     :return: :math:`\Sigma L`, in decibels.

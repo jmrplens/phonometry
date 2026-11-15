@@ -84,9 +84,9 @@ def test_a_large_machine_is_allowed_more_than_a_medium_one() -> None:
 
 
 def test_grading_a_machine_on_one_measured_quantity() -> None:
-    """A medium machine on a rigid support at 3,0 mm/s is in zone C.
+    """A medium machine on a rigid support at 3.0 mm/s is in zone C.
 
-    Its boundaries are 1,4, 2,8 and 4,5 mm/s, so 3,0 has passed the limit of
+    Its boundaries are 1.4, 2.8 and 4.5 mm/s, so 3.0 has passed the limit of
     unrestricted operation and is not yet doing damage.
     """
     assert (
@@ -103,7 +103,7 @@ def test_the_more_restrictive_of_the_two_quantities_wins() -> None:
     """5.2.3: with both measured, the worse grading is the grading.
 
     This is the case the pair of tables exists for. A large rigid machine at
-    2,0 mm/s is comfortably inside zone A on velocity, and at 95 micrometres
+    2.0 mm/s is comfortably inside zone A on velocity, and at 95 micrometres
     it is past the C/D boundary on displacement: a slow machine whose
     once-per-revolution component is large reads well on velocity and badly on
     displacement, and the standard takes the bad one.
@@ -189,7 +189,7 @@ def test_a_change_is_significant_past_a_quarter_of_zone_b() -> None:
 
 
 def test_the_significant_change_threshold_is_a_quarter_of_zone_b() -> None:
-    """5.3: a quarter of the 4,5 mm/s B/C boundary is 1,125 mm/s."""
+    """5.3: a quarter of the 4.5 mm/s B/C boundary is 1,125 mm/s."""
     change = vibration.assess_operational_change(1.2, 4.5)
     assert change.threshold == pytest.approx(1.125, abs=1e-12)
     assert change.change == 1.2
@@ -204,7 +204,7 @@ def test_the_alarm_sits_a_quarter_of_zone_b_above_the_baseline() -> None:
 
 
 def test_the_alarm_is_capped_however_high_the_baseline_climbs() -> None:
-    """5.4.1 again: not normally above 1,25 times the upper limit of zone B."""
+    """5.4.1 again: not normally above 1.25 times the upper limit of zone B."""
     upper = 4.5
     capped = vibration.alarm_limit(100.0, upper)
     assert capped == pytest.approx(1.25 * upper)

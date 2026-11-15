@@ -213,7 +213,7 @@ def test_grading_a_gear_unit_against_the_row_its_class_picks() -> None:
 def test_an_acceptance_criterion_sits_at_most_a_quarter_above_the_a_b_boundary() -> (
     None
 ):
-    """8.3: normally not more than 1,25 times the A/B boundary."""
+    """8.3: normally not more than 1.25 times the A/B boundary."""
     boundaries = vibration.gear_unit_zone_boundaries("velocity", 5.0)
     ceiling = vibration.GEAR_ACCEPTANCE_HEADROOM * boundaries.a_b
     assert ceiling == pytest.approx(3.9375)

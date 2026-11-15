@@ -24,7 +24,7 @@ def _agg() -> None:
 
 
 def _annex_d() -> vibration.VectorChangeResult:
-    """The worked case of D.2: 3 mm/s at 40 degrees to 2,5 at 180."""
+    """The worked case of D.2: 3 mm/s at 40 degrees to 2.5 at 180."""
     return vibration.vibration_vector_change(3.0, 40.0, 2.5, 180.0)
 
 

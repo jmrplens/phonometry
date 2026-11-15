@@ -34,7 +34,7 @@ def test_a_sudden_reduction_reflects_in_every_band() -> None:
 
 def test_a_sudden_increase_reflects_only_below_the_limit_frequency() -> None:
     """Above it the figure prints approximately nought."""
-    # A 0,8 m side puts Equation (33) at 343 / 1,6 = 214,4 Hz, so the 63 and
+    # A 0.8 m side puts Equation (33) at 343 / 1.6 = 214.4 Hz, so the 63 and
     # 125 Hz bands are below it and the rest are above.
     result = noise_control.section_change_loss(
         BANDS, 0.2, 0.5, shape="rectangular", upstream_size=0.8
@@ -63,7 +63,7 @@ def test_no_change_of_section_reflects_nothing() -> None:
 
 
 def test_the_vdi_3733_cap_binds_where_the_expression_passes_it() -> None:
-    """5 dB is reached at a ratio of about 10,55, and nothing above it."""
+    """5 dB is reached at a ratio of about 10.55, and nothing above it."""
     below = noise_control.section_change_loss(BANDS, 10.0, 1.0, shape="round")
     above = noise_control.section_change_loss(BANDS, 40.0, 1.0, shape="round")
     assert float(below.values[0]) == pytest.approx(printed(10.0))

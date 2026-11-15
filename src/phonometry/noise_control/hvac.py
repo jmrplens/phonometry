@@ -337,19 +337,19 @@ _EFFICIENCY_CORRECTION: tuple[tuple[float, float], ...] = (
 #: (15) with the blade-frequency allowance ``dL_Wd`` in dB, both from Section
 #: 4.3.4. The three ``L_WSM`` values are the printed representative ones, not
 #: ``71,6 - 10 lg psi + L_USM`` recomputed. Two of the three land inside the
-#: tolerance the guideline states beside the relation (RR: 34,6 against 34,
-#: within +/-1; AM: 41,6 against 42, within +/-2); assembly T does not, and
+#: tolerance the guideline states beside the relation (RR: 34.6 against 34,
+#: within +/-1; AM: 41.6 against 42, within +/-2); assembly T does not, and
 #: which column is read decides it. The German prints ``67,3 +/-0,5`` and the
-#: English beside it ``67.3 +/-1``, so the representative 36 dB, 0,7 dB from
-#: the 35,3 the relation gives, is inside the English tolerance and outside the
+#: English beside it ``67.3 +/-1``, so the representative 36 dB, 0.7 dB from
+#: the 35.3 the relation gives, is inside the English tolerance and outside the
 #: normative German one. The printed representative value is what is stored
 #: either way: it is what the guideline tells a planner to use.
 _VDI2081_ASSEMBLY: dict[str, tuple[float, float, float]] = {
-    # radial fans with rearwards curved blades, psi = 0,63 to 1,0
+    # radial fans with rearwards curved blades, psi = 0.63 to 1.0
     "rr": (34.0, 0.4, 0.0),
-    # cylindrical rotors with forwards curved blades, psi = 2,4 to 3,0
+    # cylindrical rotors with forwards curved blades, psi = 2.4 to 3.0
     "t": (36.0, 0.15, 0.0),
-    # axial fans with a downstream diffuser, psi = 0,25 to 0,63
+    # axial fans with a downstream diffuser, psi = 0.25 to 0.63
     "am": (42.0, -0.6, 4.0),
 }
 #: Equation (15) -- ``dL_W_Okt = -c1 - c2 (lg St + c3)^2``, both constants 5 dB.
@@ -383,7 +383,7 @@ _VDI2081_STRAIGHT_DUCT: dict[str, tuple[tuple[float, tuple[float, ...]], ...]] =
     ),
 }
 #: VDI 2081 Part 1 Table 7 -- level reduction of a 90 degree bend, dB, over the
-#: nine octaves 31,5 Hz to 8 kHz, for a side length of 1250 mm and a limit
+#: nine octaves 31.5 Hz to 8 kHz, for a side length of 1250 mm and a limit
 #: frequency in the 125 Hz octave. Section 6.2 shifts the whole row so that its
 #: 125 Hz column lands on the octave holding the duct's own limit frequency.
 _VDI2081_BEND: dict[str, tuple[float, ...]] = {
@@ -1226,7 +1226,7 @@ def flow_noise_straight_duct_overall(
     :func:`flow_noise_straight_duct` is this level with the relative spectrum
     of Figure 16 on it. The band levels do not sum back here, and not by a
     fixed amount either: the difference the figure prints tends to
-    :math:`-2 - 26 \lg 1{,}14 = -2{,}5` dB as :math:`f_\mathrm{m}/v` falls, so
+    :math:`-2 - 26 \lg 1.14 = -2.5` dB as :math:`f_\mathrm{m}/v` falls, so
     the energy sum grows with however many octaves are taken. Over the range
     the figure is drawn for it lands within half a decibel of this number, and
     outside it the sum means nothing.
@@ -1287,9 +1287,9 @@ def flow_noise_bend(
        + 50 \log_{10} v_\mathrm{a} + K
 
     with the normalised level of Figure 17,
-    :math:`L_W^{*} = 12 - 21{,}5 (\lg St)^{1{,}268} + (32 + 13 \lg St)
+    :math:`L_W^{*} = 12 - 21.5 (\lg St)^{1.268} + (32 + 13 \lg St)
     \lg (v_\mathrm{h}/v_\mathrm{a})`, the rounding correction of Figure 18,
-    :math:`K = 13{,}9 (3{,}43 - \lg St)(0{,}15 - r/d_\mathrm{a})`, and
+    :math:`K = 13.9 (3.43 - \lg St)(0.15 - r/d_\mathrm{a})`, and
     :math:`St = f d_\mathrm{a} / v_\mathrm{a}`. A bend is the same law with
     the two velocities equal, which sends the second term of :math:`L_W^{*}`
     and the velocity ratio to nought.
@@ -1317,7 +1317,7 @@ def flow_noise_bend(
         the rounding of a **junction**, and its curves all cross zero at
         ``r / d_a = 0,15``, so passing 0 asks for a sharp-cornered junction and
         is worth over 6 dB rather than nothing. Figure 18 is drawn from 0
-        to 0,20.
+        to 0.20.
     :return: A :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     :raises TypeError: if ``model`` is not a text, or ``area``, ``branch_diameter_m``,
@@ -1412,7 +1412,7 @@ def fan_efficiency_correction(*, relative_efficiency_percent: float) -> float:
     :param relative_efficiency_percent: **ASHRAE only.** Static efficiency as
         a **percentage**
         of the peak, in ``(0, 100]``. A fraction is not accepted in disguise:
-        the table is tabulated from 50 % up, so 0,8 would fall to its bottom
+        the table is tabulated from 50 % up, so 0.8 would fall to its bottom
         row and return 16 dB where 80 % returns 6, ten decibels with nothing to
         say it happened. Below 50 % the caller is warned that the value is
         outside the span Table 13.6 tabulates.
@@ -1429,7 +1429,7 @@ def fan_efficiency_correction(*, relative_efficiency_percent: float) -> float:
         warn_caller(
             f"A relative efficiency of {eta:g} % is below the 50 % floor Long "
             f"Table 13.6 is tabulated from, so the table's worst-case "
-            f"correction is returned. A fraction such as 0,8 lands here; this "
+            f"correction is returned. A fraction such as 0.8 lands here; this "
             f"argument is a percentage.",
             HVACWarning,
         )
@@ -1599,7 +1599,7 @@ def fan_sound_power(
     not an input here. Section 4.3.3 sets the specific level and the spectral
     parameter for each of the three assemblies of VDI 3731 Part 2, and
     Figures 13 and 14 add a cubic allowance for running away from the best
-    duty point, worth 0,1 dB at the optimum itself.
+    duty point, worth 0.1 dB at the optimum itself.
 
     :param volume_flow: Volume flow through the fan ``Q_\mathrm{F}``, m3/s.
     :param fan_static_pressure_pa: **ASHRAE only.** Fan static pressure
@@ -1621,7 +1621,7 @@ def fan_sound_power(
     :param relative_efficiency_percent: Static efficiency as a **percentage**
         of the peak (default 80, Long's recommendation when the peak is
         unknown). Table 13.6 is tabulated from 50 % up, so a fraction such as
-        0,8 falls through to the table's bottom row and returns its worst-case
+        0.8 falls through to the table's bottom row and returns its worst-case
         16 dB correction instead of the 6 dB that 80 % earns. That is what
         :class:`HVACWarning` says when it fires below the floor.
     :param blade_frequency: **ASHRAE only.** Blade passing frequency ``f_bp``,
@@ -1850,7 +1850,7 @@ def _vdi2081_octave_bandwidth(bands: NDArray[np.float64]) -> NDArray[np.float64]
     """Table 1 of VDI 2081 Part 1: an octave is ``f_m / sqrt(2)`` wide.
 
     Its edges are ``f_m / sqrt(2)`` and ``f_m sqrt(2)``, so the width is the
-    difference, which reduces to the centre over the root of two: 44,55 Hz at
+    difference, which reduces to the centre over the root of two: 44.55 Hz at
     63 Hz, as the guideline's own tables print in their header row.
     """
     return np.asarray(bands / math.sqrt(2.0), dtype=np.float64)
@@ -1917,8 +1917,8 @@ def _vdi2081_limit_frequency(shape: str, size: float, speed_of_sound: float) -> 
     ``a`` and ``0,586 c / d`` for a round one of bore ``d``, and both are the
     first cut-on frequency of the duct, which :func:`plane_wave_limit` already
     computes from the mode theory: the rectangular one exactly, and the round
-    one to the three figures the guideline rounds 1,8412 over pi to: 0,586
-    against 0,58607, which is one part in eight thousand. So the law is called
+    one to the three figures the guideline rounds 1.8412 over pi to: 0.586
+    against 0.58607, which is one part in eight thousand. So the law is called
     rather than written a second time, and the width the rectangular form
     needs is the one it is given, the other side being irrelevant to the first
     mode across the largest one.
@@ -2124,7 +2124,7 @@ def unlined_circular_duct_attenuation(
         octave bands from 63 Hz to 8 kHz.
     :param length: Duct run length, m.
     :param diameter_m: **VDI 2081 only.** Internal diameter, m, which selects the
-        Table 5 row. The table stops at 1,00 m.
+        Table 5 row. The table stops at 1.00 m.
     :param model: ``"ashrae"`` (default, Long Table 14.1) or ``"vdi2081"``.
     :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
     :raises TypeError: if ``model`` is not a text, or ``diameter_m`` or ``length`` is
@@ -2352,7 +2352,7 @@ def section_change_loss(
     The reduction is reached only with the duct anechoically terminated at
     both ends, which practice rarely is, so VDI 3733 recommends taking no more
     than 5 dB from it. That is the default ``cap``, and it binds from an area
-    ratio of about 10,5 upwards, or 0,095 downwards.
+    ratio of about 10.5 upwards, or 0.095 downwards.
 
     There is no ASHRAE counterpart to call through ``model=``: Long folds the
     reflection from a change of total section into the junction itself, which

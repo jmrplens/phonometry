@@ -49,8 +49,8 @@ The corrections that are not a correction
 
 Clause 4 corrects for background noise from a **printed table**, not from the
 usual logarithmic subtraction, and the two do not agree: at a margin of 5 dB
-the table takes off 2 dB where the formula takes off 1,7, and at 8 dB it takes
-off 1 where the formula takes off 0,7. :func:`silencer_background_correction`
+the table takes off 2 dB where the formula takes off 1.7, and at 8 dB it takes
+off 1 where the formula takes off 0.7. :func:`silencer_background_correction`
 implements the table as printed, and says so.
 
 Where the extraneous sound can be measured on its own, 9.1.1 and 9.1.2 offer
@@ -177,7 +177,7 @@ ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB: float = 10.0
 
 #: 9.1.1 and 9.1.2: "the maximum correction is 3 dB". The printed value is
 #: the correction at a 3 dB margin, the "3 -> 3" row of Table 1, which the
-#: energy subtraction writes unrounded as -10 lg(1 - 10^-0,3) = 3,0206 dB;
+#: energy subtraction writes unrounded as -10 lg(1 - 10^-0.3) = 3.0206 dB;
 #: ISO 3746:2010 8.3.3 prints the same number the same way, as 3 dB and "the
 #: value for" a 3 dB margin. The cap is therefore judged on the margin.
 MAX_EXTRANEOUS_CORRECTION: float = 3.0
@@ -255,8 +255,8 @@ _ANY_SIDE: Final = "any"
 _THIRDS_PER_OCTAVE = 3
 
 #: How far under the 3 dB of clause 4 the margin of two energy means may fall
-#: in floating point and still be the printed 3 dB, in decibels. Levels 3,0 dB
-#: apart come out of the two means up to 1,4e-14 dB either side of it.
+#: in floating point and still be the printed 3 dB, in decibels. Levels 3.0 dB
+#: apart come out of the two means up to 1.4e-14 dB either side of it.
 _MARGIN_TOLERANCE_DB = 1e-9
 
 #: The most decimals the advisory of a capped margin writes. A capped margin
@@ -274,7 +274,7 @@ class SilencerInSituWarning(PhonometryWarning):
       where clause 4 leaves only an inequality to state: a margin of the two
       energy means more than :math:`10^{-9}` dB under 3 dB
       (:attr:`ExtraneousCorrectionResult.capped`). A margin of exactly 3 dB
-      takes off 3,02 dB, the printed 3 dB unrounded, and emits nothing;
+      takes off 3.02 dB, the printed 3 dB unrounded, and emits nothing;
     - a field correction over the 3 dB in absolute value NOTE 4 of 3.3
       expects;
     - a downstream distance Equation (16) cannot give, which 8.3.1 leaves to
@@ -422,10 +422,10 @@ def silencer_background_correction(
     r"""The background correction of Table 1, in decibels to subtract.
 
     The table is printed stepped and integer-indexed, and it is **not** the
-    logarithmic subtraction :math:`-10 \lg(1 - 10^{-0,1 \Delta L})` that most
+    logarithmic subtraction :math:`-10 \lg(1 - 10^{-0.1 \Delta L})` that most
     emission standards use: at a margin of 5 dB it takes off 2 dB where the
-    formula takes off 1,7, and at 8 dB it takes off 1 where the formula takes
-    off 0,7. It is implemented as printed.
+    formula takes off 1.7, and at 8 dB it takes off 1 where the formula takes
+    off 0.7. It is implemented as printed.
 
     The table gives no row between its integers. A difference that falls
     between two rows is read at the lower one, which is the larger correction
@@ -433,7 +433,7 @@ def silencer_background_correction(
     and the choice is stated here rather than smoothed away. Above
     :data:`ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` there is no row to read
     at all: 10 dB is the last one the table prints, and anything over it takes
-    nothing off, so 10,5 dB is corrected by zero rather than by the 0,5 dB of
+    nothing off, so 10.5 dB is corrected by zero rather than by the 0.5 dB of
     the 10 dB row.
 
     :param level_difference: The difference between the level measured with
@@ -446,7 +446,7 @@ def silencer_background_correction(
         real number.
     """
     # Settled: a difference of two readings that is 10 dB in decimal can be
-    # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
+    # 9.999 999 999 999 996 in binary, which would floor to the 9 dB row.
     margin = settled(require_finite_array(level_difference, "level_difference"))
     if float(np.min(margin)) < ISO11820_MIN_BACKGROUND_MARGIN_DB:
         msg = (
@@ -457,8 +457,8 @@ def silencer_background_correction(
         )
         raise ValueError(msg)
     # The threshold is read before the table, not after flooring it: Table 1
-    # prints 0,5 dB against a margin of 10 dB and nothing above it, so a margin
-    # of 10,5 dB is one the standard corrects by nothing, not a 10 dB row.
+    # prints 0.5 dB against a margin of 10 dB and nothing above it, so a margin
+    # of 10.5 dB is one the standard corrects by nothing, not a 10 dB row.
     rows = np.floor(margin).astype(int)
     return as_float_or_array(
         [
@@ -476,7 +476,7 @@ def silencer_mean_sound_pressure_level(levels: NumericArrayLike) -> float:
 
     .. math::
 
-       \overline{L_p} = 10 \lg \left(\frac{1}{N} \sum_j 10^{0,1 L_{pj}}\right)
+       \overline{L_p} = 10 \lg \left(\frac{1}{N} \sum_j 10^{0.1 L_{pj}}\right)
 
     An energy mean, which is what every clause of the standard means by "mean
     sound pressure level".
@@ -528,12 +528,12 @@ class ExtraneousCorrectionResult(RichDisplay):
 
         The cap is judged on the margin of the two energy means and not on the
         correction itself: the printed 3 dB is what Table 1 takes off at its
-        3 dB row, which the subtraction writes unrounded as 3,0206 dB, so a
+        3 dB row, which the subtraction writes unrounded as 3.0206 dB, so a
         margin of exactly 3 dB is not capped. A margin is capped when it is
         more than :math:`10^{-9}` dB under 3 dB: one closer than that counts
-        as 3 dB, on the side Table 1 accepts, since levels written 3,0 dB
+        as 3 dB, on the side Table 1 accepts, since levels written 3.0 dB
         apart come out of the two energy means up to
-        :math:`1{,}4 \cdot 10^{-14}` dB either side of it. That is when
+        :math:`1.4 \cdot 10^{-14}` dB either side of it. That is when
         :func:`extraneous_corrected_mean_level` emits a
         :class:`SilencerInSituWarning`.
         """
@@ -566,7 +566,7 @@ def extraneous_corrected_mean_level(
     .. math::
 
        \overline{L_{p1}} = 10 \lg \left[\frac{1}{N} \sum_j
-       \left(10^{0,1 L_{pj}} - 10^{0,1 L_{ej}}\right)\right]
+       \left(10^{0.1 L_{pj}} - 10^{0.1 L_{ej}}\right)\right]
 
     printed :math:`\overline{L_{p1}}` in Equation (17) and
     :math:`\overline{L_{pI}}` in Equation (18). The energy route 9.1.1 and 9.1.2 offer instead of Table 1, for the case
@@ -580,7 +580,7 @@ def extraneous_corrected_mean_level(
     inequality of clause 4. Clause 4.1 (folio 4, PDF page 12) ties that to a
     correction of 3 dB that "is not sufficient", and Table 1 (folio 5, PDF
     page 13) prints where that starts: a margin under 3 dB is invalid, and a
-    margin of 3 dB takes off 3 dB. The subtraction reaches 3,0206 dB at that
+    margin of 3 dB takes off 3 dB. The subtraction reaches 3.0206 dB at that
     same margin, which is the printed 3 dB unrounded, so the cap is judged on
     the margin of the two energy means, :math:`\overline{L_p}` of the levels
     as measured (Equation (2)) over that of the extraneous levels:
@@ -590,7 +590,7 @@ def extraneous_corrected_mean_level(
        \overline{L_p} - \overline{L_e} \ge 3\ \mathrm{dB}
 
     That is the same condition as a correction of at most
-    :math:`-10 \lg(1 - 10^{-0,3})` dB, and it keeps the two routes of the
+    :math:`-10 \lg(1 - 10^{-0.3})` dB, and it keeps the two routes of the
     standard in agreement at their shared boundary.
 
     The result's ``capped`` says whether the correction went past the cap, a
@@ -955,7 +955,7 @@ def temperature_field_correction(
     temperature as the receiver one and the without-silencer temperature as
     the source one, which is the ordering the two equations share.
 
-    The standard writes 273 rather than 273,15, and that is what is used.
+    The standard writes 273 rather than 273.15, and that is what is used.
 
     :param receiver_temperature_c: :math:`\theta_1` on the receiver side, or
         :math:`\theta_\mathrm{I}` with the silencer, in degrees Celsius.
@@ -1350,7 +1350,7 @@ def static_pressure_difference_pa(
 def measurement_distance_upstream_m(upstream_area: float) -> float:
     r"""How far upstream the measurement surface stands, Equation (15).
 
-    :math:`d_\mathrm{u} = 1,5 \sqrt{4 S_\mathrm{u} / \pi}`, which is one and a half equivalent
+    :math:`d_\mathrm{u} = 1.5 \sqrt{4 S_\mathrm{u} / \pi}`, which is one and a half equivalent
     diameters of the upstream measurement cross-section.
 
     :param upstream_area: :math:`S_\mathrm{u}`, in square metres.
@@ -1512,7 +1512,7 @@ def gas_density_kg_m3(
 
        \rho = \frac{M \, p_{\text{amb}}}{R \, (273 + \theta)}
 
-    with :math:`R` the universal gas constant, printed as 8 314,4 N m per
+    with :math:`R` the universal gas constant, printed as 8 314.4 N m per
     kmol K, and :math:`M` the molar mass. The standard adds that
     :math:`R/M = 287` N m per kg K for air, and that is what is used when no
     molar mass is given.

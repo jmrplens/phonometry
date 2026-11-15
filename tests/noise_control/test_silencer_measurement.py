@@ -128,7 +128,7 @@ class TestOctaveInsertionLoss:
         assert sm.octave_insertion_loss([12.0, 12.0, 12.0]) == pytest.approx([12.0])
 
     def test_the_leaky_band_decides_the_octave(self) -> None:
-        # 30, 30 and 5 dB average to 21,7 dB on the decibels and to 9,7 dB on
+        # 30, 30 and 5 dB average to 21.7 dB on the decibels and to 9.7 dB on
         # the energy, and it is the second that the standard asks for: the
         # 5 dB band carries almost all of the transmitted sound.
         assert sm.octave_insertion_loss([30.0, 30.0, 5.0]) == pytest.approx(
@@ -391,7 +391,7 @@ class TestOpenEnd:
         assert np.all(found < 1.0)
 
     def test_the_anechoic_termination_limit_of_five_two_four(self) -> None:
-        # A test duct qualifies as anechoic only below r = 0,3, which this
+        # A test duct qualifies as anechoic only below r = 0.3, which this
         # bare open end reaches only above 700 Hz or so.
         bands = np.array([500.0, 1000.0])
         found = sm.open_end_reflection_coefficient(bands, DUCT_AREA)
@@ -478,8 +478,8 @@ class TestModalFilterCutOn:
         assert found == pytest.approx(float(exact.cut_on_no_flow[0]))
 
     def test_the_circular_constant_is_rounded_high(self) -> None:
-        # The exact coefficient is the first zero of J_1', 1,8412 / pi, so
-        # the printed 0,59 sits 0,67 % above it.
+        # The exact coefficient is the first zero of J_1', 1.8412 / pi, so
+        # the printed 0.59 sits 0.67 % above it.
         from phonometry.noise_control import circular_duct_cut_on
 
         exact = circular_duct_cut_on(0.4, speed_of_sound=343.0, n_modes=1)
@@ -508,7 +508,7 @@ class TestFlowQuantities:
     """ISO 7235 6.5, Equations (8) to (13) and (16)."""
 
     def test_the_gas_law_with_the_printed_constants(self) -> None:
-        # (101 325 + 200) / (287 x 293) = 1,2073 kg/m3.
+        # (101 325 + 200) / (287 x 293) = 1.2073 kg/m3.
         found = sm.normal_air_density(200.0, 101325.0, 20.0)
         assert found == pytest.approx(101525.0 / (287.0 * 293.0))
 
@@ -518,8 +518,8 @@ class TestFlowQuantities:
         assert found == pytest.approx(101025.0 / (287.0 * 293.0))
 
     def test_the_printed_offset_is_two_hundred_and_seventy_three(self) -> None:
-        # Not 273,15, and the gas constant is 287 and not 287,05. Together
-        # they put the density 0,069 % high at 20 degrees, and both cancel in
+        # Not 273.15, and the gas constant is 287 and not 287.05. Together
+        # they put the density 0.069 % high at 20 degrees, and both cancel in
         # the pressure loss coefficient because the same density is in the
         # dynamic pressure of each series.
         assert sm.ISO7235_ABSOLUTE_ZERO_OFFSET_K == pytest.approx(273.0)
@@ -543,8 +543,8 @@ class TestFlowQuantities:
         assert sm.DENSITY_RATIO_RANGE == (0.98, 1.02)
 
     def test_the_dynamic_pressure_is_half_rho_v_squared(self) -> None:
-        # 1 m3/s through 0,0962 m2 is 10,395 m/s, and 1,2 kg/m3 makes that
-        # 64,83 Pa.
+        # 1 m3/s through 0.0962 m2 is 10,395 m/s, and 1.2 kg/m3 makes that
+        # 64.83 Pa.
         found = sm.dynamic_pressure(1.0, 0.0962, 1.2)
         assert found == pytest.approx(0.5 * 1.2 * (1.0 / 0.0962) ** 2)
 
@@ -682,7 +682,7 @@ class TestUpstreamStraightLength:
     """ISO 7235 6.5.2.2.1, the settling length before the test object."""
 
     def test_a_small_duct_takes_the_two_metre_floor(self) -> None:
-        # A 350 mm duct is 1,75 m of five diameters, so the floor binds.
+        # A 350 mm duct is 1.75 m of five diameters, so the floor binds.
         assert sm.upstream_straight_length(0.0962) == pytest.approx(2.0)
 
     def test_a_large_duct_takes_five_equivalent_diameters(self) -> None:
@@ -846,7 +846,7 @@ class TestOperatingLinePlot:
         assert self._axes().get_xscale() == "log"  # type: ignore[attr-defined]
 
     def test_the_duty_ticks_are_plain_decimals(self) -> None:
-        # A log axis labels 0,1 as 10^-1 by default, which reads as an
+        # A log axis labels 0.1 as 10^-1 by default, which reads as an
         # exponent rather than as the flow rate a point was taken at.
         ax = self._axes()
         ax.figure.canvas.draw()  # type: ignore[attr-defined]

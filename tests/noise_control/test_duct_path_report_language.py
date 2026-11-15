@@ -6,7 +6,7 @@ The room-criterion designation, the band headings, the verdict band and the
 design target are assembled as text rather than through a localised table
 cell, so a Spanish sheet keeps an English decimal point wherever one of them is
 not handed the language. The NC family of ANSI/ASA S12.2-2019 Table 1 starts at
-16 Hz, so a 31,5 Hz band on the sheet, or as the governing band of the
+16 Hz, so a 31.5 Hz band on the sheet, or as the governing band of the
 designation, is an ordinary case and not a contrived one.
 """
 
@@ -28,7 +28,7 @@ _BANDS = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 
 
 def _interpolated_nc_at_31_5() -> noise_criteria.NCResult:
-    """An NC-40 spectrum raised 10 dB at 31,5 Hz: an interpolated tangency there."""
+    """An NC-40 spectrum raised 10 dB at 31.5 Hz: an interpolated tangency there."""
     levels = noise_criteria.nc_curve(40.0).copy()
     levels[list(noise_criteria.NC_OCTAVE_BANDS_HZ).index(31.5)] += 10.0
     rating = noise_criteria.noise_criterion(levels)
@@ -69,7 +69,7 @@ def test_the_designation_is_unchanged_in_english() -> None:
 
 
 def test_an_out_of_range_designation_reaches_spanish() -> None:
-    # 30 dB over NC-30 at 31,5 Hz puts the spectrum above the whole family.
+    # 30 dB over NC-30 at 31.5 Hz puts the spectrum above the whole family.
     result = _path(_nc_30_on_the_bands() + np.array([30.0, 5, 5, 5, 5, 5, 5, 5]))
     assert result.rating.out_of_range == "above"
     assert _rating_designation(result.rating, language="es") == ">NC-70 (31,5 Hz)"

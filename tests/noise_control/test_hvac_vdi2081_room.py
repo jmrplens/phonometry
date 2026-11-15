@@ -79,7 +79,7 @@ def test_the_band_levels_round_onto_the_printed_integers() -> None:
 
 
 def test_both_printed_sums_come_out_of_the_band_levels() -> None:
-    """51,4 dB and 40,0 dB, from the unrounded bands rather than the printed ones."""
+    """51.4 dB and 40.0 dB, from the unrounded bands rather than the printed ones."""
     levels = ENTERING_SOUND_POWER_DB - _room_attenuation()
     total = 10.0 * math.log10(float(np.sum(10.0 ** (levels / 10.0))))
     weighted = 10.0 * math.log10(
@@ -90,9 +90,9 @@ def test_both_printed_sums_come_out_of_the_band_levels() -> None:
 
 
 def test_the_single_printed_room_attenuation_is_the_hemispherical_one() -> None:
-    """Element 20 prints 5,7 dB beside the row, which no octave of it equals.
+    """Element 20 prints 5.7 dB beside the row, which no octave of it equals.
 
-    The eight-band row runs from 5,6 down to 3,4 dB, so the single value is not
+    The eight-band row runs from 5.6 down to 3.4 dB, so the single value is not
     a band of it, and it is not their energy sum either. It is the attenuation
     the same room and distance give an outlet radiating into a half space,
     ``Q = 2``: the value before Figure 30 makes the directivity a function of
@@ -173,22 +173,22 @@ def test_room_effect_refuses_an_ill_posed_room(
 # Section 6.7.3 as room acoustics: Equations (37) and the reverberation radius
 # ---------------------------------------------------------------------------
 def test_equation_37_is_sabine_read_the_other_way_about() -> None:
-    """``A = 0,163 V / T``, which is the 0,161 constant at 339 m/s."""
+    """``A = 0,163 V / T``, which is the 0.161 constant at 339 m/s."""
     volume, reverberation = 54.432, 0.5
     area = float(
         room.sabine_absorption_area(volume, reverberation, speed_of_sound=339.0)
     )
     assert area == pytest.approx(0.163 * volume / reverberation, rel=2e-3)
     # And it inverts the forward relation the library already carries, to the
-    # width of the two constants: this one is 24 ln 10 = 55,26 and ISO 11690-3
-    # Formula 5 rounds the same numerator to 55,3.
+    # width of the two constants: this one is 24 ln 10 = 55.26 and ISO 11690-3
+    # Formula 5 rounds the same numerator to 55.3.
     assert float(
         room.reverberation_time(area, volume, speed_of_sound=339.0)
     ) == pytest.approx(reverberation, rel=1e-3)
 
 
 def test_the_room_of_element_20_wants_about_half_a_second() -> None:
-    """The printed A = 20 m2 in a 54,4 m3 room is a reverberation time near 0,44 s.
+    """The printed A = 20 m2 in a 54.4 m3 room is a reverberation time near 0.44 s.
 
     Element 20 prints the absorption area and not the time it came from, so
     this is a consistency check on the two rather than an oracle: an office of
@@ -204,9 +204,9 @@ def test_the_room_of_element_20_wants_about_half_a_second() -> None:
 def test_the_reverberation_radius_is_the_hemispherical_critical_distance() -> None:
     """``rH = 0,2 sqrt(A)`` is ``sqrt(Q A / 16 pi)`` at Q = 2, not at Q = 1.
 
-    Section 6.7.3 prints the constant as 0,2 and the German column says the
+    Section 6.7.3 prints the constant as 0.2 and the German column says the
     propagation is *halbkugelförmig*, hemispherical. The English column of the
-    same sentence says spherical, which would put the constant at 0,141.
+    same sentence says spherical, which would put the constant at 0.141.
     """
     hemispherical = float(
         room.critical_distance(absorption_area=ABSORPTION_AREA_M2, directivity=2.0)
@@ -219,7 +219,7 @@ def test_the_reverberation_radius_is_the_hemispherical_critical_distance() -> No
 
 
 def test_the_listener_of_element_20_stands_beyond_the_reverberation_radius() -> None:
-    """1,5 m against an rH of 0,9 m, so the printed levels are reverberant-leaning."""
+    """1.5 m against an rH of 0.9 m, so the printed levels are reverberant-leaning."""
     radius = float(
         room.critical_distance(absorption_area=ABSORPTION_AREA_M2, directivity=2.0)
     )

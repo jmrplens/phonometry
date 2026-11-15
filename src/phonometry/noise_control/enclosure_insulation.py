@@ -856,7 +856,7 @@ def weighted_enclosure_insulation(
     rows; what is done here is the trim to the rating bands.
 
     :param insulation: The insertion loss per band, in decibels, over exactly
-        the 16 one-third-octave rating bands of 100 Hz to 3,15 kHz or the 5
+        the 16 one-third-octave rating bands of 100 Hz to 3.15 kHz or the 5
         octave ones of 125 Hz to 2 kHz; a wider spectrum is refused rather
         than trimmed, because which bands it holds is the caller's to say.
     :param quantity: ``"sound_power"`` (default) or ``"reciprocity"``.
@@ -898,7 +898,7 @@ def estimated_a_weighted_enclosure_insulation(
 
     .. math::
 
-       D_{W\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0,1 (L_i - A_i - D_i)}
+       D_{W\mathrm{A},\mathrm{e}} = L_A - 10 \lg \sum_i 10^{0.1 (L_i - A_i - D_i)}
 
     where :math:`L_i` is the assumed source spectrum, :math:`A_i` the
     A-weighting of the band and :math:`D_i` the measured insulation. The sign
@@ -936,7 +936,7 @@ def estimated_a_weighted_enclosure_insulation(
 def source_position_clearance_m(shortest_inner_dimension_m: float) -> float:
     r"""How far the artificial source stands from a wall, 7.3 of part 1 and 7.2 of part 2.
 
-    :math:`0,2\,d` with :math:`d` the shortest interior dimension of the
+    :math:`0.2\,d` with :math:`d` the shortest interior dimension of the
     enclosure, so that the plate is never against a panel it is meant to
     excite through the air. Both parts print the same sentence, and both add
     that the source is used in two orientations 90 degrees apart where the

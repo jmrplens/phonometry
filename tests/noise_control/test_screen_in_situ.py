@@ -122,7 +122,7 @@ def test_the_correction_window_is_the_printed_one() -> None:
     assert (lower, upper) == (6.0, 10.0)
     assert ISO11821_MIN_BACKGROUND_MARGIN_DB == 6.0
     assert ISO11821_PREFERRED_BACKGROUND_MARGIN_DB == 10.0
-    # At the two ends of the window the correction is 1,2563 dB and 0,4576 dB.
+    # At the two ends of the window the correction is 1.2563 dB and 0.4576 dB.
     at_six = noise_control.screen_background_corrected_level([80.0], [74.0])
     at_ten = noise_control.screen_background_corrected_level([80.0], [70.0])
     assert 80.0 - at_six[0] == pytest.approx(1.2563, abs=1e-4)
@@ -417,8 +417,8 @@ def test_the_ifa_worked_example_differences_are_the_printed_ones() -> None:
 
 
 def test_the_ifa_table_misprints_one_of_its_twelve_differences() -> None:
-    # Tab. 4.5 prints 4,7 dB for Lp2 - Lp3 at 2000 Hz. Its own Tab. 4.4 gives
-    # 75,3 dB and 71,0 dB there, so the difference is 4,3 dB. The other eleven
+    # Tab. 4.5 prints 4.7 dB for Lp2 - Lp3 at 2000 Hz. Its own Tab. 4.4 gives
+    # 75.3 dB and 71.0 dB there, so the difference is 4.3 dB. The other eleven
     # cells of the table agree with the levels; this one does not.
     levels = spatial_decay.IFA_LSA_01_234_LEVELS_DB
     res = noise_control.screen_attenuation(
@@ -481,7 +481,7 @@ def test_the_upper_edge_of_the_window_is_still_corrected() -> None:
 
 def test_the_six_decibel_correction_is_the_one_two_standards_print() -> None:
     # ISO 140-3:1995 6.5 (folio 7) and ISO 3744:2010 8.2.3 (folio 23) both
-    # print 1,3 dB for a 6 dB margin, from the same energy subtraction 5.7
+    # print 1.3 dB for a 6 dB margin, from the same energy subtraction 5.7
     # boxes. Neither reads the margin as 5.7 does: both apply the value as a
     # floor below 6 dB, where ISO 11821 refuses the measurement instead.
     corrected = noise_control.screen_background_corrected_level([70.0], [64.0])

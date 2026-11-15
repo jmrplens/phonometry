@@ -84,7 +84,7 @@ ISO11546_2_TABLE_C1_DB: dict[
 #: 11546-2:2009, printed folio 13 (PDF page 19). The 2010 editions of the sound
 #: power standards print a longer table under the same title and it is not
 #: this one: ISO 3744:2010 Table A.1 (printed folio 36) and ISO 3746:2010 Table
-#: A.1 (printed folio 24) carry eight rows, adding 0,30 for a room with an
+#: A.1 (printed folio 24) carry eight rows, adding 0.30 for a room with an
 #: absorbing ceiling and bare walls, and reword two of the seven.
 ISO11546_2_TABLE_C2: dict[float, str] = {
     0.05: (
@@ -155,7 +155,7 @@ NPL_REFERENCE_SOURCE_DB: float = 90.9
 
 #: Tables 10 to 14 on PDF pages 22 to 24, printed folios 18 to 20,
 #: ``absolute`` row: the measured K_2A of each room and measurement surface, in
-#: decibels, against the 90,9 dB re 1 pW the reference sound source was
+#: decibels, against the 90.9 dB re 1 pW the reference sound source was
 #: calibrated to. This is a measurement, not an evaluation of a formula, and it
 #: is the ground truth the applicability rows are judged against.
 NPL_MEASURED_K2A: dict[str, dict[int, float]] = {
@@ -168,7 +168,7 @@ NPL_MEASURED_K2A: dict[str, dict[int, float]] = {
 
 #: The same tables, ``reverberation (A-wt)`` row: K_2A as the authors computed
 #: it from their Eq. (3), K_2 = 10 lg (1 + 4 S/A), with the room absorption of
-#: their Eq. (5), A = 0,16 V/T. That is the pair ISO 3744 prints as Eq. (A.2)
+#: their Eq. (5), A = 0.16 V/T. That is the pair ISO 3744 prints as Eq. (A.2)
 #: and Eq. (A.3), and the pair ISO 11546-2 leans on through Annex C.
 NPL_REVERBERATION_K2A: dict[str, dict[int, float]] = {
     "A": {1: 2.5, 2: 2.5, 3: 4.0, 4: 5.7},
@@ -204,25 +204,25 @@ NPL_ESTIMATED_K2A: dict[str, dict[int, tuple[float, float]]] = {
 #: followed by the K_2A each assessment yields on the two reference measurement
 #: surfaces the same folio defines, in decibels. The table's fourth column
 #: holds column means rather than a fourth assessment, so it is not a case. The
-#: printed A is rounded (engineer 2's 0,15 x 173,0 lands on the tie at 25,95
-#: and prints 25,9), which is why alpha and S_V are the inputs, never it.
+#: printed A is rounded (engineer 2's 0.15 x 173.0 lands on the tie at 25.95
+#: and prints 25.9), which is why alpha and S_V are the inputs, never it.
 BAUA_ENGINEERS: dict[str, tuple[float, float, float, float, float]] = {
-    # alpha, S_V in m2, A in m2, K_2A at 0,5 m, K_2A at 1 m
+    # alpha, S_V in m2, A in m2, K_2A at 0.5 m, K_2A at 1 m
     "Test Eng. 1": (0.15, 174.0, 26.1, 7.1, 9.2),
     "Test Eng. 2": (0.15, 173.0, 25.9, 7.1, 9.3),
     "Test Eng. 3": (0.30, 174.3, 52.3, 4.9, 6.7),
 }
 
-#: Folio 186 again: the reference measurement surface for a workstation 0,5 m
+#: Folio 186 again: the reference measurement surface for a workstation 0.5 m
 #: from the machine, and for one at 1 m, in square metres.
 BAUA_SURFACES_M2: tuple[float, float] = (26.9, 48.3)
 
 #: Table 4 on PDF page 11, printed folio 187: the equivalent absorption area
 #: each of the two rooms was measured to have with a reference sound source, in
-#: square metres, then the K_2A computed from it at 0,5 m, at 1 m and on the
-#: 25,1 m2 measurement surface the source itself stood on, in decibels.
+#: square metres, then the K_2A computed from it at 0.5 m, at 1 m and on the
+#: 25.1 m2 measurement surface the source itself stood on, in decibels.
 BAUA_DIRECT: dict[str, tuple[float, float, float, float]] = {
-    # A in m2, K_2A at 0,5 m, K_2A at 1 m, K_2A on the 25,1 m2 surface
+    # A in m2, K_2A at 0.5 m, K_2A at 1 m, K_2A on the 25.1 m2 surface
     "workroom": (55.2, 4.7, 6.5, 4.5),
     "former reverberation room": (97.7, 3.2, 4.7, 3.1),
 }
@@ -235,7 +235,7 @@ BAUA_SOURCE_POWER_DB: float = 90.67
 
 #: Folio 187 again: the average A-weighted level on that surface in each room,
 #: in decibels. The workroom cell closes on its own absorption area through the
-#: author's Eq. (9); the other does not (it would need 79,74 dB), which is why
+#: author's Eq. (9); the other does not (it would need 79.74 dB), which is why
 #: only the absorption areas of Table 4 are used as inputs.
 BAUA_LEVEL_IN_SITU_DB: dict[str, float] = {
     "workroom": 81.17,
@@ -247,13 +247,13 @@ BAUA_LEVEL_IN_SITU_DB: dict[str, float] = {
 # ---------------------------------------------------------------------------
 
 #: Table 7-5 "Solution for Example 7-8" on PDF page 320, printed folio 308: a
-#: machine in a 1,80 m by 1,20 m by 1,00 m plywood enclosure, with the operator
+#: machine in a 1.80 m by 1.20 m by 1.00 m plywood enclosure, with the operator
 #: 3 m away in a room 20 m by 20 m by 4 m. The octave band centres in hertz,
 #: which are exactly the mandatory octave range of clause 6.2 of ISO 11546-1;
 #: the machine sound power, the power radiated once the enclosure is in place,
 #: the insertion loss, the power ratio W/W_out, and the sound pressure levels
 #: at the operator without and with the enclosure, all in decibels except the
-#: ratio and printed to 0,1 dB. The example is a prediction, not an ISO 11546
+#: ratio and printed to 0.1 dB. The example is a prediction, not an ISO 11546
 #: or ISO 11957 measurement: the insertion loss comes from the sound power
 #: balance of the book's Equation (7-85), and only the arithmetic that follows
 #: is shared with the standards.
@@ -291,8 +291,8 @@ BARRON_TABLE_7_5_LP_WITH_DB: tuple[float, ...] = (82.4, 84.9, 85.9, 85.8, 83.9, 
 #: 1 120 m2 of boundary of the 20 m by 20 m by 4 m room and the 3 m from the
 #: machine to the operator, with a directivity factor of unity. The room
 #: constant is the column to feed a field calculation: the absorption
-#: coefficient the row above it prints at 2 kHz, 0,043, gives 50,32 m2, and the
-#: printed 47,88 m2 is what 0,041 gives.
+#: coefficient the row above it prints at 2 kHz, 0.043, gives 50.32 m2, and the
+#: printed 47.88 m2 is what 0.041 gives.
 BARRON_TABLE_7_5_ROOM_CONSTANT_M2: tuple[float, ...] = (
     40.62,
     51.55,
@@ -306,9 +306,9 @@ BARRON_EXAMPLE_7_8_SURFACE_M2: float = 1120.0
 BARRON_EXAMPLE_7_8_OPERATOR_DISTANCE_M: float = 3.0
 
 #: The one band of Table 7-5 where the sound power rows do not close on
-#: themselves, in hertz. At 2 000 Hz the table prints L_W,out = 94,2 dB while
-#: 113 - 18,9 = 94,1, and the table's own L_p(OB) of 83,9 dB follows 94,1 rather
-#: than 94,2, so it is the printed L_W,out that is 0,1 dB high there and the
+#: themselves, in hertz. At 2 000 Hz the table prints L_W,out = 94.2 dB while
+#: 113 - 18.9 = 94.1, and the table's own L_p(OB) of 83.9 dB follows 94.1 rather
+#: than 94.2, so it is the printed L_W,out that is 0.1 dB high there and the
 #: printed insertion loss that is right. A slip in a textbook, not in a
 #: standard, so it is recorded here and not in docs/ERRATA.md.
 BARRON_TABLE_7_5_INCONSISTENT_BAND_HZ: float = 2000.0
@@ -378,8 +378,8 @@ HARRIS_BEFORE_DBA: float = 107.0
 #: personnel enclosure, nearer ISO 11957 in subject, and is kept because the
 #: estimator is the same formula. The book adds bands pairwise from a
 #: difference table (Figure A3-1, PDF page 130, printed folio 120), which costs
-#: about 0,7 dB at worst: Example 1(a) prints 94 dBA where its own pairwise
-#: chain lands on 94,5 and an energy sum gives 94,7, so a comparison belongs on
+#: about 0.7 dB at worst: Example 1(a) prints 94 dBA where its own pairwise
+#: chain lands on 94.5 and an energy sum gives 94.7, so a comparison belongs on
 #: the reduction and never on the rounded total.
 HARRIS_CASES: dict[str, tuple[tuple[float, ...], float]] = {
     "Example 1(a), plywood": ((13.0, 11.0, 12.0, 12.0, 13.0, 15.0), 94.0),
@@ -395,10 +395,10 @@ HARRIS_CASES: dict[str, tuple[tuple[float, ...], float]] = {
 # Schirmer (2006, 2023), 10.8.1: the leak ratio of a real enclosure
 # ---------------------------------------------------------------------------
 
-#: An enclosure 6 m by 5 m by 3 m high with a 0,25 m2 exhaust opening. The 2nd
-#: edition prints its walls and roof as S_K = 96 m2 - 0,25 m2 = 95,75 m2 on PDF
+#: An enclosure 6 m by 5 m by 3 m high with a 0.25 m2 exhaust opening. The 2nd
+#: edition prints its walls and roof as S_K = 96 m2 - 0.25 m2 = 95.75 m2 on PDF
 #: page 323, printed folio 303, and the opening fraction
-#: q = S_O/(S_K + S_O) = 2,6e-3 on PDF page 324, printed folio 304; the 3rd
+#: q = S_O/(S_K + S_O) = 2.6e-3 on PDF page 324, printed folio 304; the 3rd
 #: edition prints the same numbers at the same clause, on PDF pages 517 and
 #: 518, printed folios 499 and 500. The 96 m2 is the book's own modelling
 #: choice, walls and roof with the opening counted in and the floor left out.
@@ -532,7 +532,7 @@ ISO3744_TABLE_E1_CK_DB: tuple[float, ...] = (
 #: SGS-CSTC Standards Technical Services, Shunde Branch, test report
 #: SDHL260400706101HI of 7 May 2026, PDF page 3, folio "Page 3 of 4": D_p of a
 #: meeting pod measured in a 200 m3 reverberation room, in decibels, rated there
-#: at D_p,w = 32 dB. The report also prints 36,2 dB at 4 000 Hz and 36,4 dB at
+#: at D_p,w = 32 dB. The report also prints 36.2 dB at 4 000 Hz and 36.4 dB at
 #: 5 000 Hz, which the rating does not read.
 SGS_POD_DP_DB: tuple[float, ...] = (
     11.0,
@@ -557,7 +557,7 @@ SGS_POD_RATING_DB: int = 32
 
 #: AGH University, Department of Mechanics and Vibroacoustics, report 5.5.130.
 #: of August 2023, PDF page 10, folio "Strona 10 z 10": D of an acoustic booth
-#: measured in a 180,4 m3 reverberation room, in decibels, rated there at
+#: measured in a 180.4 m3 reverberation room, in decibels, rated there at
 #: D_p,w = 22 dB. The printed table runs from 50 Hz to 10 kHz; the eight bands
 #: outside the rating range play no part in it.
 AGH_BOOTH_DP_DB: tuple[float, ...] = (

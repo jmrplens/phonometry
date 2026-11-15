@@ -354,7 +354,7 @@ def test_a_spread_between_whole_decibels_rounds_the_count_up() -> None:
     """7.2.1: the count is "equal to or greater than" the spread in decibels.
 
     BS EN ISO 11957:2009 (ISO 11957:1996), PDF page 14, printed folio 5. A
-    4,2 dB spread is more than four, so four positions are too few and five
+    4.2 dB spread is more than four, so four positions are too few and five
     are enough.
     """
     base = np.full(OCTAVES.size, 30.0)
@@ -672,7 +672,7 @@ PRINTED_K1_DB = np.array(
 
 #: Half of the last digit those two values are printed to. The library clamps
 #: the margin and re-evaluates Equation (14) rather than taking the rounded
-#: constant, so it lands 0,004 dB under 1,26 and 0,002 dB under 0,46.
+#: constant, so it lands 0.004 dB under 1.26 and 0.002 dB under 0.46.
 PRINTED_K1_TOLERANCE_DB = 0.005
 
 ISO717_SPECTRUM_ONE_DB = np.array(oracle.ISO717_1_SPECTRUM_ONE_DB)
@@ -717,7 +717,7 @@ def test_the_background_correction_matches_the_printed_clamps_of_iso_3741() -> N
 
 
 def test_the_internal_noise_level_carries_the_printed_correction() -> None:
-    """The two edges of the window of 6.7, against 80 - 1,26 and 80 - 0,46 dB.
+    """The two edges of the window of 6.7, against 80 - 1.26 and 80 - 0.46 dB.
 
     The window of 6.7 and the band thresholds of ISO 3741 share the numbers 6
     and 10 and are not the same rule. What is pinned here is the value of K_1

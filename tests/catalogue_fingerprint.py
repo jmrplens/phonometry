@@ -925,6 +925,125 @@ def fiber_spelled_the_american_way(
     return out
 
 
+#: The English text of the rows whose own numbers were written with a decimal
+#: comma, by catalogue, row and the path to the field that holds it. The rows
+#: of the Spanish editions keep their printed labels; what moved is the prose
+#: the library wrote about them, and the variants of two English books.
+DECIMAL_POINT_TEXT: Mapping[str, Mapping[str, tuple[tuple[str, ...], ...]]] = (
+    MappingProxyType(
+        {
+            "PUBLISHED_CARPETS": MappingProxyType(
+                {
+                    "harris-1995-table-30-2/de_nudo_1_1_14_cortado_nylon": (("note",),),
+                    "harris-1995-table-30-2/de_nudo_1_5_13_cortado_madera": (
+                        ("note",),
+                    ),
+                }
+            ),
+            "PUBLISHED_IMPACT_INSULATION": MappingProxyType(
+                {
+                    **{
+                        f"harris-1995-tables-32-1-to-32-8/{row}": (
+                            ("misprinted", "name"),
+                        )
+                        for row in (
+                            "9",
+                            "11",
+                            "14",
+                            "18",
+                            "22",
+                            "23",
+                            "26",
+                            "27",
+                            "28",
+                            "29",
+                            "31",
+                            "34A",
+                            "35B",
+                            "36B",
+                            "37A",
+                            "38",
+                        )
+                    },
+                    "harris-1995-tables-32-1-to-32-8/35A": (
+                        ("misprinted", "name"),
+                        ("misprinted", "layer_density_kg_m3"),
+                    ),
+                }
+            ),
+            "PUBLISHED_SOLIDS": MappingProxyType(
+                {
+                    **{
+                        f"bies-2017-table-c1/aluminum_honeycomb_{cell}": (("variant",),)
+                        for cell in (
+                            "64_mm_cell_005_mm_foil",
+                            "64_mm_cell_008_mm_foil",
+                            "95_mm_cell_005_mm_foil",
+                            "95_mm_cell_013_mm_foil",
+                        )
+                    },
+                    "long-2014-table-12-1/gypboard": (("variant",),),
+                    "long-2014-table-12-1/plywood": (("variant",),),
+                    "arau-1999-table-4-1/plomo": (("note",),),
+                }
+            ),
+        }
+    )
+)
+
+#: A quotation of the page, in straight or curly marks, which keeps the
+#: separator it was printed with.
+_QUOTATION = re.compile(r'"[^"]*"|“[^”]*”')
+
+#: A comma between two digits.
+_DECIMAL_COMMA = re.compile(r"(?<=\d),(?=\d)")
+
+
+def _with_decimal_points(text: str) -> str:
+    """*text* with every decimal comma outside a quotation of the page a point."""
+    parts: list[str] = []
+    last = 0
+    for quotation in _QUOTATION.finditer(text):
+        parts.append(_DECIMAL_COMMA.sub(".", text[last : quotation.start()]))
+        parts.append(quotation.group())
+        last = quotation.end()
+    parts.append(_DECIMAL_COMMA.sub(".", text[last:]))
+    return "".join(parts)
+
+
+def decimal_point_in_english(
+    catalogues: Mapping[str, Mapping[str, Row]],
+) -> dict[str, dict[str, Row]]:
+    """The dump taken through the decimal point of the English text.
+
+    The library's English writes its own numbers, and the values it restates
+    from a print, with a decimal point; only a quotation of the page keeps
+    the comma it was printed with. One thing moved, and nothing else may:
+
+    * in each field :data:`DECIMAL_POINT_TEXT` names, every comma between two
+      digits outside a quotation became a point. No value, key or other field
+      moved, and a Spanish label stayed as its edition prints it.
+
+    :raises ValueError: when a field it names holds no such comma, so that
+        the step can never claim a change it did not make.
+    """
+    out = {name: dict(rows) for name, rows in catalogues.items()}
+    for name, rows in DECIMAL_POINT_TEXT.items():
+        for key, paths in rows.items():
+            row: Row = json.loads(json.dumps(out[name][key]))
+            for path in paths:
+                holder = row
+                for part in path[:-1]:
+                    holder = holder[part]
+                text = holder[path[-1]]
+                holder[path[-1]] = _with_decimal_points(text)
+                if holder[path[-1]] == text:
+                    msg = f"{name}[{key!r}]: {'/'.join(path)} has no decimal comma"
+                    raise ValueError(msg)
+            out[name][key] = row
+    return out
+
+
 #: Every change since the baseline, oldest first.
 CHANGES: tuple[Change, ...] = (
     one_row_shape,
@@ -939,6 +1058,7 @@ CHANGES: tuple[Change, ...] = (
     decay_rate_spelled_once,
     catalogues_named_as_their_lookups,
     fiber_spelled_the_american_way,
+    decimal_point_in_english,
 )
 
 

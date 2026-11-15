@@ -363,7 +363,7 @@ def test_the_one_wrong_pair_that_is_a_quantity_serves_no_number() -> None:
     why = row.why_missing("layer_density_kg_m3")
     assert "410 kg/m3 (26,1 lb/ft3)" in why
     assert "418 kg/m3" in why
-    assert "25,6 lb/ft3" in why
+    assert "25.6 lb/ft3" in why
     with pytest.raises(ValueError, match="has no layer_density_kg_m3"):
         row.printed("layer_density_kg_m3")
 
@@ -475,7 +475,7 @@ def test_the_density_field_says_layer_because_two_of_the_three_are_not_slabs() -
 
     The name of the field is the only thing a caller filtering the catalogue
     reads, and a caller after the density of a structural floor who filtered on
-    a field called ``slab_density`` would be handed 35,2 kg/m3 of semi-rigid
+    a field called ``slab_density`` would be handed 35.2 kg/m3 of semi-rigid
     polyurethane foam.
     """
     assert hasattr(_row("5"), "layer_density_kg_m3")

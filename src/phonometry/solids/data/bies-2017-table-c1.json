@@ -1240,7 +1240,7 @@
     {
       "key": "aluminum_honeycomb_64_mm_cell_005_mm_foil",
       "name": "Aluminum honeycomb",
-      "variant": "6,4 mm cell, 0,05 mm foil",
+      "variant": "6.4 mm cell, 0.05 mm foil",
       "density_kg_m3": 72.0,
       "youngs_modulus_pa": 1310000000.0,
       "loss_factor": 0.0001,
@@ -1253,7 +1253,7 @@
     {
       "key": "aluminum_honeycomb_64_mm_cell_008_mm_foil",
       "name": "Aluminum honeycomb",
-      "variant": "6,4 mm cell, 0,08 mm foil",
+      "variant": "6.4 mm cell, 0.08 mm foil",
       "density_kg_m3": 96.0,
       "youngs_modulus_pa": 2240000000.0,
       "loss_factor": 0.0001,
@@ -1266,7 +1266,7 @@
     {
       "key": "aluminum_honeycomb_95_mm_cell_005_mm_foil",
       "name": "Aluminum honeycomb",
-      "variant": "9,5 mm cell, 0,05 mm foil",
+      "variant": "9.5 mm cell, 0.05 mm foil",
       "density_kg_m3": 48.0,
       "youngs_modulus_pa": 760000000.0,
       "loss_factor": 0.0001,
@@ -1279,7 +1279,7 @@
     {
       "key": "aluminum_honeycomb_95_mm_cell_013_mm_foil",
       "name": "Aluminum honeycomb",
-      "variant": "9,5 mm cell, 0,13 mm foil",
+      "variant": "9.5 mm cell, 0.13 mm foil",
       "density_kg_m3": 101.0,
       "youngs_modulus_pa": 1860000000.0,
       "loss_factor": 0.0001,

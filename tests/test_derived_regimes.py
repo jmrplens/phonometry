@@ -55,7 +55,7 @@ def test_the_hammer_regime_is_no_constructor_field() -> None:
 
 
 def test_critical_damping_itself_is_over_critical() -> None:
-    # K m = 4 Zdp^2 exactly: 8e6 x 0,5 = 4 x 1000^2. Hopkins prints the
+    # K m = 4 Zdp^2 exactly: 8e6 x 0.5 = 4 x 1000^2. Hopkins prints the
     # over-critical case with >=, so the boundary is no rebound.
     assert _tapping(8.0e6, 1000.0).over_critical is True
     assert _tapping(8.0e6, 1000.001).over_critical is False
@@ -71,7 +71,7 @@ def test_the_hammer_regime_is_read_from_k_zdp_and_m() -> None:
 
 def test_a_tapping_result_cannot_keep_the_cut_off_of_another_regime() -> None:
     # Eq. (3.102) gives 225 Hz under-critical; at Zdp = 100 the regime is
-    # over-critical, where Eq. (3.101) gives 32,5 Hz.
+    # over-critical, where Eq. (3.101) gives 32.5 Hz.
     soft = _tapping(1.0e6, 3.0e4)
     with pytest.raises(ValueError, match="cut_off_frequency"):
         dataclasses.replace(soft, impedance=100.0)
@@ -178,14 +178,14 @@ def test_a_valve_result_needs_the_liquid_below_its_inlet_pressure() -> None:
 
 
 def test_the_pressure_ratio_is_equation_1_of_the_pressures() -> None:
-    # x_F = 0,9 is past x_Fzp1 = 0,2345 while the pressures say 0,15.
+    # x_F = 0.9 is past x_Fzp1 = 0.2345 while the pressures say 0.15.
     turbulent = _liquid(8.5e5)
     with pytest.raises(ValueError, match="pressure_ratio"):
         dataclasses.replace(turbulent, pressure_ratio=0.9)
 
 
 def test_the_corrected_threshold_is_equation_3c_of_x_fz_and_p1() -> None:
-    # x_Fz = 0,9 moves the threshold to 0,844 at 10 bar, where 3,5 bar of
+    # x_Fz = 0.9 moves the threshold to 0.844 at 10 bar, where 3.5 bar of
     # differential is turbulent.
     cavitating = _liquid(6.5e5)
     with pytest.raises(ValueError, match="corrected_ratio"):
@@ -273,7 +273,7 @@ def test_a_gas_result_refuses_a_ratio_no_regime_holds() -> None:
 
 
 def test_a_gas_result_cannot_keep_the_mach_number_of_another_regime() -> None:
-    # x = 0,6 is regime IV, whose jet Mach number is 1,45; regime I kept 0,99.
+    # x = 0.6 is regime IV, whose jet Mach number is 1.45; regime I kept 0.99.
     subsonic = _gas(7.2e5)
     with pytest.raises(ValueError, match="mach"):
         dataclasses.replace(subsonic, pressure_ratio=0.6)

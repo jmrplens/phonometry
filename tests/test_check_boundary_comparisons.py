@@ -74,7 +74,7 @@ def open_plan_metrics(positions_m, spl_a_speech, sti_values):
 """
 
 #: environment/propagation/noise_reducing_devices.py at 9692e3596, reduced: a
-#: weighted mean of decimal absorption coefficients that is 0,99 in decimal
+#: weighted mean of decimal absorption coefficients that is 0.99 in decimal
 #: computes 0.989 999 999 999 999 8 and missed the limit.
 _ABSORPTION_BEFORE = """
 import numpy as np

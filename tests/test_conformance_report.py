@@ -66,7 +66,7 @@ def test_building_reference_data_matches_published_oracles() -> None:
     """
     import reference_data as ref
 
-    assert ref.ISO16283_3_R45_EXPECTED_DB == 38.5  # 60 - 20 - 1,5
+    assert ref.ISO16283_3_R45_EXPECTED_DB == 38.5  # 60 - 20 - 1.5
     assert ref.ISO10140_2_REF_AIRBORNE_RW == 54  # +2-shift anchor
     assert len(ref.ISO10140_2_REF_AIRBORNE_R) == 16
     assert ref.EN12354_1_ANNEX_H3_RPRIME_W == 52  # Annex H.3
@@ -96,7 +96,7 @@ def test_outdoor_exposure_reference_data_matches_published_oracles() -> None:
 
     assert ref.ISO9613_2_ADIV_100M == 51.0  # 20 lg(100) + 11
     assert ref.ISO9613_2_GROUND_BPRIME_ZERO == 10.1  # Table 3 b'(0)
-    assert ref.ISO9613_2_GROUND_AGR_250_POROUS == 17.2  # 2*(-1,5 + 10,1)
+    assert ref.ISO9613_2_GROUND_AGR_250_POROUS == 17.2  # 2*(-1.5 + 10.1)
     assert ref.ISO9613_2_BARRIER_CAP_SINGLE == 20.0  # clause 7.4
     assert ref.ISO9613_2_BARRIER_CAP_DOUBLE == 25.0  # clause 7.4
     assert ref.ISO9612_ANNEX_D_LEX_8H == 84.3  # welder day
@@ -187,7 +187,7 @@ def test_human_vibration_reference_data_matches_oracles() -> None:
     assert ref.ISO8041_1_WK_FACTOR_6P31HZ == 1.054  # Table B.8, n=8
     assert ref.ISO8041_1_WM_FACTOR_1P585HZ == 0.9342  # Table B.9, n=2
     assert ref.ISO8041_1_WH_REF_FACTOR == 0.2020  # Table 1, Wh @ 500 rad/s
-    assert ref.ISO5349_2_E21_A8 == 4.1  # 7,4*sqrt(2,5/8)
+    assert ref.ISO5349_2_E21_A8 == 4.1  # 7.4*sqrt(2.5/8)
     assert ref.ISO5349_2_E3_A8 == 3.6  # forestry three-task
     assert ref.ISO5349_1_VWF_A8 == 7.0
     assert ref.ISO5349_1_VWF_DY_YEARS == 4.0  # Table C.1

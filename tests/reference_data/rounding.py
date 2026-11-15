@@ -20,9 +20,9 @@ from __future__ import annotations
 #: over the range, rounded to the nearest integer, is that count.
 #:
 #: The two ties of Rule A at rounding range 10 are the pair that decides the
-#: rule: 1 225,0 goes to 1 220 and 1 235,0 to 1 240, the even multiple in both
+#: rule: 1 225.0 goes to 1 220 and 1 235.0 to 1 240, the even multiple in both
 #: cases, where Rule B would give 1 230 and 1 240. Both are exact in binary. The
-#: ties Rule A prints at rounding range 0,1 are deliberately left out: 12,35
+#: ties Rule A prints at rounding range 0.1 are deliberately left out: 12.35
 #: has no exact double, so the tie is gone before any code sees it and a
 #: comparison would test the binary representation rather than the rule.
 ISO80000_1_ANNEX_B_ROUNDINGS: dict[str, tuple[float, float, int]] = {

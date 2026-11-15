@@ -534,7 +534,7 @@ ANSIS3_5_WG_FLAT_CASES: tuple[tuple[Method, str, float, float, float], ...] = (
 #   step 1  the signal and background-noise octave-band levels present during
 #           the measurement, and the MTF matrix measured with the noise,
 #           masking and threshold in it (rows are the 14 modulation
-#           frequencies 0,63 Hz to 12,5 Hz, columns the 7 octave bands 125 Hz
+#           frequencies 0.63 Hz to 12.5 Hz, columns the 7 octave bands 125 Hz
 #           to 8 kHz);
 #   step 2  the same correction the forward chain applies, divided out, which
 #           leaves the transmission channel alone;
@@ -674,7 +674,7 @@ IEC60268_16_ANNEX_M_SOURCE_MTF = (
 #: Absolute speech reception threshold ART_k, printed once per step with the
 #: same values (Table A.2 of the same edition), and the intensity it becomes.
 #: The step 3 print of the 250 Hz cell reads 500 where step 2 reads 501; both
-#: are roundings of 10^2,7 = 501,19, at three and at two significant figures.
+#: are roundings of 10^2.7 = 501.19, at three and at two significant figures.
 IEC60268_16_ANNEX_M_ART_DB = (46.0, 27.0, 12.0, 6.5, 7.5, 8.0, 12.0)
 IEC60268_16_ANNEX_M_INTENSITY_THRESHOLD = (
     40_000.0,

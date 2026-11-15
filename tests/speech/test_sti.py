@@ -3,15 +3,15 @@
 
 Validation vectors:
 - Weighting-factor test (Ed.5 A.2.2): band pairs with TI=1 give exact STI
-  values 0,127 / 0,279 / 0,398 / 0,531 / 0,486 / 0,302 (tol 0,001);
+  values 0.127 / 0.279 / 0.398 / 0.531 / 0.486 / 0.302 (tol 0.001);
   analytically STI = alpha_k + alpha_{k+1} - beta_k.
 - Filter-bank phase test pairs (Ed.5 A.3.1.2): uniform m <-> STI mapping,
-  e.g. (0,5; 0,5), (0,11182; 0,2), tol +/-0,01.
+  e.g. (0.5; 0.5), (0.11182; 0.2), tol +/-0.01.
 - Indirect method (Ed.5 C.3.3): exponential-decay IRs vs the analytic
-  Schroeder MTF m(F) = 1/sqrt(1 + (2 pi F T/13,8)^2).
+  Schroeder MTF m(F) = 1/sqrt(1 + (2 pi F T/13.8)^2).
 - Auditory masking control points (Ed.5 Table A.2): L=60 -> -35 dB;
-  65 -> -29,9; 80 -> -19,8; 100 -> -10.
-- Annex F qualification bands: edges 0,36-0,76 in 0,04 steps, U..A+.
+  65 -> -29.9; 80 -> -19.8; 100 -> -10.
+- Annex F qualification bands: edges 0.36-0.76 in 0.04 steps, U..A+.
 """
 
 import warnings
@@ -98,7 +98,7 @@ def _decay_ir(t60: float, fs: int, seed: int = 0) -> np.ndarray:
 
 def _analytic_decay_sti(t60: float) -> float:
     """Expected STI from the closed-form Schroeder MTF of an exponential
-    decay, identical in all bands: m(F) = 1/sqrt(1 + (2 pi F T/13,8)^2).
+    decay, identical in all bands: m(F) = 1/sqrt(1 + (2 pi F T/13.8)^2).
     """
     m = 1.0 / np.sqrt(1.0 + (2.0 * np.pi * _MOD_FREQS * t60 / 13.8) ** 2)
     return _sti_from_mtf(np.tile(m, (_NUM_BANDS, 1))).sti
@@ -151,16 +151,16 @@ def test_weighting_factor_pairs(bands: tuple[int, int], expected: float) -> None
 )
 def test_m_to_sti_mapping(m: float, expected_sti: float) -> None:
     # Ed.5 A.3.1.2 pairs: uniform m across all bands and modulation
-    # frequencies maps to the given STI (tol +/-0,01).
+    # frequencies maps to the given STI (tol +/-0.01).
     result = _sti_from_mtf(_uniform_mtf(m))
     assert result.sti == pytest.approx(expected_sti, abs=0.01)
 
 
 def test_alpha_beta_artifact_truncated_to_one() -> None:
     # Ed.4 Table A.3 NOTE (= Ed.5 Table A.1): with the 250 Hz band knocked
-    # out (TI=0) and all other bands at TI=1 the raw formula gives 1,036
+    # out (TI=0) and all other bands at TI=1 the raw formula gives 1.036
     # (sum(alpha) - alpha_1 - sum(beta) + beta_0 + beta_1); it must be
-    # truncated to 1,0.
+    # truncated to 1.0.
     mtf = _uniform_mtf(1.0)
     mtf[1, :] = 0.0
     raw = (
@@ -186,7 +186,7 @@ def test_delta_impulse_response_is_perfect_transmission() -> None:
     ir[100] = 1.0
     result = speech.sti_from_impulse_response(ir, FS)
     # The residual error is the analysis filter bank's own MTF; the
-    # standard allows < 0,01 STI systematic error (Ed.4 A.5.1.2).
+    # standard allows < 0.01 STI systematic error (Ed.4 A.5.1.2).
     assert result.sti == pytest.approx(1.0, abs=0.01)
     assert result.rating == "A+"
     assert result.mtf.shape == (7, 14)
@@ -212,7 +212,7 @@ def test_snr_degradation_on_impulse_response() -> None:
     plain = speech.sti_from_impulse_response(ir, fs)
     high_snr = speech.sti_from_impulse_response(ir, fs, snr=30.0)
     zero_snr = speech.sti_from_impulse_response(ir, fs, snr=0.0)
-    # +30 dB SNR: m factor 1/(1+10^-3) = 0,999 -> no visible change.
+    # +30 dB SNR: m factor 1/(1+10^-3) = 0.999 -> no visible change.
     assert high_snr.sti == pytest.approx(plain.sti, abs=0.01)
     # 0 dB SNR: every m halved -> STI drops markedly.
     np.testing.assert_allclose(zero_snr.mtf, plain.mtf / 2.0, rtol=1e-12)
@@ -260,7 +260,7 @@ def test_masking_amdb_is_vectorized_and_continuous() -> None:
     out = _masking_amdb(levels)
     assert out.shape == levels.shape
     # The 63 and 67 dB joints are continuous; at 100 dB the table has a
-    # deliberate 0,2 dB step onto the -10 dB plateau.
+    # deliberate 0.2 dB step onto the -10 dB plateau.
     assert out[0] == pytest.approx(out[1], abs=1e-2)
     assert out[2] == pytest.approx(out[3], abs=1e-2)
     assert out[4] == pytest.approx(-9.8, abs=1e-2)
@@ -332,7 +332,7 @@ def test_stipa_signal_properties() -> None:
     seconds = 18.0
     x = speech.stipa_signal(FS, duration_s=seconds, seed=0)
     assert x.shape == (int(seconds * FS),)
-    # Default normalization: RMS = 0,1 digital units.
+    # Default normalization: RMS = 0.1 digital units.
     assert float(np.sqrt(np.mean(x**2))) == pytest.approx(0.1, rel=1e-9)
     # Crest factor of the STIPA signal: expected around 12-14 dB (A.4).
     crest_db = 20.0 * np.log10(np.max(np.abs(x)) / np.sqrt(np.mean(x**2)))
@@ -360,7 +360,7 @@ def test_rating_letters_from_band_edges() -> None:
     for sti in np.arange(0.0, 1.001, 0.01):
         expected = _RATING_LETTERS[int(np.searchsorted(edges, sti, side="right"))]
         assert _rating(float(sti)) == expected
-    # Band centres (Annex F): 0,38 -> J ... 0,74 -> A; extremes U / A+.
+    # Band centres (Annex F): 0.38 -> J ... 0.74 -> A; extremes U / A+.
     assert _rating(0.30) == "U"
     assert _rating(0.38) == "J"
     assert _rating(0.50) == "G"
@@ -476,14 +476,14 @@ def test_mtf_above_1_3_warns_and_truncates() -> None:
 # ---------------------------------------------------------------------------
 
 # Expected STI for the Ed.5 Formula (C.1) test signal at modulation scale
-# m = 0,0, 0,1, ... 1,0 (Ed.5 Table C.2 staircase), tolerance +/-0,05.
+# m = 0.0, 0.1, ... 1.0 (Ed.5 Table C.2 staircase), tolerance +/-0.05.
 _C32_STI_STAIRCASE = [0.0, 0.18, 0.30, 0.38, 0.44, 0.50, 0.56, 0.62, 0.70, 0.82, 1.0]
 
 
 def _c32_signal(m: float, fs: int, seconds: float) -> np.ndarray:
     """Ed.5 Formula (C.1) verification signal with sinusoidal carriers.
 
-    A_k(t) = g_k sin(2 pi fc_k t) sqrt(0,5 (1 + 0,55 m (sin 2 pi f1_k t
+    A_k(t) = g_k sin(2 pi fc_k t) sqrt(0.5 (1 + 0.55 m (sin 2 pi f1_k t
     - sin 2 pi f2_k t))), with the Table B.1 modulation pairs and the
     A.6.1 male spectrum g_k; the values here restate the standard, not
     the implementation.
@@ -510,7 +510,7 @@ def _c32_signal(m: float, fs: int, seconds: float) -> np.ndarray:
 def test_stipa_direct_method_modulation_depth_staircase(i: int) -> None:
     """Ed.5 C.3.2: the full stipa() audio path (octave bank, intensity
     envelopes, sine/cosine correlation, TI chain) must reproduce the
-    published STI staircase for the Formula (C.1) signal within +/-0,05.
+    published STI staircase for the Formula (C.1) signal within +/-0.05.
     """
     m = i / 10.0
     x = _c32_signal(m, FS, seconds=16.0)
@@ -526,10 +526,10 @@ def test_stipa_direct_method_modulation_depth_staircase(i: int) -> None:
 #
 # Two tolerances recur below and both come from the same place: the step 1
 # matrix is printed to three decimals, so every cell of it carries up to
-# 0,0005 of hidden rounding. Propagated through the adjustment that is one
-# unit in the last printed place of an MTF cell (0,001), and, because
-# d/dm of 10 lg(m/(1-m)) reaches ~220 dB per unit m at the m ~ 0,98 of the
-# first modulation frequencies, up to ~0,11 dB of an effective SNR.
+# 0.0005 of hidden rounding. Propagated through the adjustment that is one
+# unit in the last printed place of an MTF cell (0.001), and, because
+# d/dm of 10 lg(m/(1-m)) reaches ~220 dB per unit m at the m ~ 0.98 of the
+# first modulation frequencies, up to ~0.11 dB of an effective SNR.
 # ---------------------------------------------------------------------------
 _ANNEX_M_MTF_TOL = 0.001
 _ANNEX_M_SNR_TOL = 0.08
@@ -628,7 +628,7 @@ def test_annex_m_step2_prints_the_measurement_correction() -> None:
     assert correction.intensity_masking[0] == 0.0
     np.testing.assert_array_equal(_ART_DB, IEC60268_16_ANNEX_M_ART_DB)
     # The I_rt,k row is printed to two figures in four of its seven cells
-    # (4,5 for 10^0,65 = 4,4668), which is what sets this tolerance.
+    # (4.5 for 10^0.65 = 4.4668), which is what sets this tolerance.
     assert correction.intensity_threshold == pytest.approx(
         IEC60268_16_ANNEX_M_INTENSITY_THRESHOLD, rel=0.01
     )

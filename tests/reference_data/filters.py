@@ -144,14 +144,14 @@ IEC61260_3_TABLE_1: dict[
     7: (4.0, (70.0, None), (60.0, None)),
 }
 # IEC 61260-3:2016 C.2, Formulas (C.3) and (C.4) (printed p. 21, PDF page 23):
-# Omega_1 ~ 1,026 67 and Omega_-1 = 1/Omega_1 ~ 0,974 02.
+# Omega_1 ~ 1.026 67 and Omega_-1 = 1/Omega_1 ~ 0.974 02.
 IEC61260_3_C2 = (1.02667, 0.97402)
 # IEC 61260-2:2016 A.3.5 (printed p. 21, PDF page 23) = IEC 61260-3:2016 A.3.5
-# (printed p. 18, PDF page 20): the input level is constant within 0,03 dB and
-# read on a 0,1 dB display, so u_Lin = sqrt((0,1/(2 sqrt 3))^2 + 0,03^2)
-# ~ 0,042 dB; T_sweep = 20 s (u 0,05 s), T_avg = 20 s (u 0,02 s),
-# f_end = 50 000 Hz (u 5 Hz), f_start = 0,5 Hz (u 0,05 Hz). Printed:
-# u_Lc ~ 0,057 dB, expanded 0,115 dB, 0,128 dB with a 0,1 dB display.
+# (printed p. 18, PDF page 20): the input level is constant within 0.03 dB and
+# read on a 0.1 dB display, so u_Lin = sqrt((0.1/(2 sqrt 3))^2 + 0.03^2)
+# ~ 0.042 dB; T_sweep = 20 s (u 0.05 s), T_avg = 20 s (u 0.02 s),
+# f_end = 50 000 Hz (u 5 Hz), f_start = 0.5 Hz (u 0.05 Hz). Printed:
+# u_Lc ~ 0.057 dB, expanded 0.115 dB, 0.128 dB with a 0.1 dB display.
 IEC61260_A35_INPUTS = {
     "level_resolution_db": 0.1,
     "level_constancy_db": 0.03,
@@ -174,7 +174,7 @@ IEC61260_A35_PRINTED = {
 # IEC 61260-2:2016 Annex B (printed pp. 22-23, PDF pages 24-25) = IEC
 # 61260-3:2016 Annex B (printed pp. 19-20, PDF pages 21-22): one-third-octave
 # filters, L_in = 127 dB re 1 uV, A_ref = 0 dB, T_sweep = T_avg = 30 s, sweep
-# 0,01 Hz to 1 MHz. Formula (B.5): L_c = 127 dB - 19,03 dB = 107,97 dB.
+# 0.01 Hz to 1 MHz. Formula (B.5): L_c = 127 dB - 19.03 dB = 107.97 dB.
 IEC61260_B5 = {
     "input_level": 127.0,
     "fraction": 3,
@@ -238,8 +238,8 @@ IEC61260_1_TABLE_B1_LINEARITY = ((40.0, 0.20), (math.inf, 0.35))
 # linearity limits, +/- dB, down to 40 dB below the upper boundary and below.
 IEC61260_1_LINEARITY_LIMITS_DB = {1: (0.5, 0.7), 2: (0.6, 0.9)}
 # IEC 61260-1:2014 E.3.4 worked rounding examples (nominal frequencies for
-# b = 24): 41,567 Hz -> 41,6 Hz (MSD 4: three significant figures) and
-# 8 785,2 Hz -> 8 800 Hz (MSD 8: two significant figures).
+# b = 24): 41.567 Hz -> 41.6 Hz (MSD 4: three significant figures) and
+# 8 785.2 Hz -> 8 800 Hz (MSD 8: two significant figures).
 IEC61260_E34_EXAMPLES = [(41.567, 41.6), (8785.2, 8800.0)]
 
 # ---------------------------------------------------------------------------

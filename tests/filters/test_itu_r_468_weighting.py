@@ -41,9 +41,9 @@ from phonometry.filters.weighting import (
 #: Substitute for the 0 dB tolerance Table 1 prints at 6 300 Hz. The printed
 #: value is unsatisfiable: the +/-1 % component tolerance the same figure
 #: blesses already moves the peak by up to 0.11 dB, and AES17-2015 Table 1
-#: quietly replaces the row with +/-0,01 dB. The fitted design lands within
+#: quietly replaces the row with +/-0.01 dB. The fitted design lands within
 #: 0.017 dB of the nominal peak at every rate here, so this stays the
-#: library's own budget: the 0,1 dB quantum the table is printed to.
+#: library's own budget: the 0.1 dB quantum the table is printed to.
 _PEAK_ROW_BUDGET_DB = ref.ITU_R_468_TABLE1_ROUNDING_DB
 
 
@@ -116,7 +116,7 @@ def test_prototype_is_one_zero_at_the_origin_and_six_stable_poles() -> None:
 def test_prototype_reproduces_all_21_rows_of_table_1() -> None:
     """The oracle the Recommendation offers, at the printed frequencies.
 
-    Table 1 is the nominal curve rounded to 0,1 dB, so agreement to the
+    Table 1 is the nominal curve rounded to 0.1 dB, so agreement to the
     rounding quantum is the strongest statement the printed table supports -
     and it is an independent one, because the network was evaluated from its
     component values while the table was transcribed from a different page.

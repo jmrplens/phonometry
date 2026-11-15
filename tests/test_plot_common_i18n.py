@@ -289,7 +289,7 @@ def _two_run_axes(language: str) -> Axes:
     """A continuous two-run figure, which is where the twin axis is built."""
     from phonometry import noise_control
 
-    # The range has to reach down to 31,5 Hz: it is the lowest octave centre
+    # The range has to reach down to 31.5 Hz: it is the lowest octave centre
     # whose label carries a decimal, and a label without one proves nothing.
     freqs = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
     result = noise_control.screen_attenuation(

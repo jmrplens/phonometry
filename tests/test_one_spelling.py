@@ -58,7 +58,7 @@ _ANP = aircraft.load_anp_database()
 #: A receiver of an ANP single event, 500 m along and 600 m beside the track.
 _OBSERVER = [500.0, 600.0, 0.0]
 
-#: An ``LpAF`` history with one onset of 30 dB over 0,1 s.
+#: An ``LpAF`` history with one onset of 30 dB over 0.1 s.
 _ONSET = np.concatenate(
     [np.full(20, 50.0), np.linspace(50.0, 80.0, 10), np.full(20, 80.0)]
 )

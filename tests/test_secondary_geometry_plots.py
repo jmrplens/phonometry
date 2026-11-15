@@ -61,7 +61,7 @@ def test_an_area_less_facade_element_takes_the_nominal_tile() -> None:
     """The elevation's refusal is conditional on an area having been given.
 
     A ``dn_e`` airbrick carries no area at all -- it enters the energy sum
-    through ``A0``, not through ``Si`` -- so it takes the nominal 0,1 m2
+    through ``A0``, not through ``Si`` -- so it takes the nominal 0.1 m2
     tile rather than a ValueError.
     """
     ax = pm.building.plot_facade_elements(

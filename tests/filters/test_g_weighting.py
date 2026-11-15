@@ -5,7 +5,7 @@ Clause 4: the G frequency response is the pole-zero configuration of
 Table 1 (transcribed below from the official PDF, p. 2), with 0 dB gain at
 10 Hz, a 12 dB/octave rise from 1 Hz to 20 Hz and 24 dB/octave cut-offs
 below 1 Hz and above 20 Hz. Table 2 (p. 2) lists the nominal relative
-response at one-third-octave frequencies from 0,25 Hz to 315 Hz. Annex A.3
+response at one-third-octave frequencies from 0.25 Hz to 315 Hz. Annex A.3
 (informative) gives the instrumentation tolerance: +/- 1 dB from 1 Hz to
 20 Hz and (-inf, +1] dB below 1 Hz / above 20 Hz.
 """

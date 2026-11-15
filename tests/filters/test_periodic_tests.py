@@ -142,7 +142,7 @@ def test_test_frequencies_reproduce_table_c1() -> None:
 
 
 def test_test_frequencies_reproduce_the_derivation_of_c2() -> None:
-    """(C.3) and (C.4): Omega_1 ~ 1,026 67 and its inverse ~ 0,974 02."""
+    """(C.3) and (C.4): Omega_1 ~ 1.026 67 and its inverse ~ 0.974 02."""
     omega = filters.periodic_test_frequencies(3)
     upper, lower = ref.IEC61260_3_C2
     assert round(float(omega[8]), 5) == upper
@@ -268,7 +268,7 @@ def test_class_2_widens_the_mid_band_limits() -> None:
 def test_class_2_linearity_limits_are_5_13_3_and_5_13_4(
     deviation: float, depth: float, *, conforms: bool
 ) -> None:
-    """+/-0,6 dB within 40 dB of the upper boundary, +/-0,9 dB beyond it."""
+    """+/-0.6 dB within 40 dB of the upper boundary, +/-0.9 dB beyond it."""
     near, far = ref.IEC61260_1_LINEARITY_LIMITS_DB[2]
     assert (near, far) == (0.6, 0.9)
     record = _record(**_one_linearity([deviation], [depth], [0.1]))
@@ -335,7 +335,7 @@ def test_40_db_below_the_upper_boundary_is_still_5_13_3() -> None:
 
 
 def test_clause_13_reads_its_maximum_off_the_attenuation() -> None:
-    """Annex B: 0,20 dB up to 2 dB, 0,30 dB up to 40 dB, 0,50 dB beyond."""
+    """Annex B: 0.20 dB up to 2 dB, 0.30 dB up to 40 dB, 0.50 dB beyond."""
     verdict = filters.verify_filter_periodic(1, _record(), fraction=3)
     maxima = {
         label: v.max_uncertainty
@@ -405,7 +405,7 @@ def test_a_mid_band_attenuation_past_2_db_is_a_failure_not_unusable() -> None:
 
 
 def test_clause_13_skips_the_frequencies_13_4_drops() -> None:
-    """13.4: above 0,5 times the lowest mid-band frequency, below 1,5 times the highest."""
+    """13.4: above 0.5 times the lowest mid-band frequency, below 1.5 times the highest."""
     verdict = filters.verify_filter_periodic(1, _record(), fraction=3)
     labels = verdict.clause("13").labels
     for dropped in (

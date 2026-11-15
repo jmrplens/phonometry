@@ -124,10 +124,10 @@ def test_the_tolerance_accepts_one_quantum_and_rejects_two(
 ) -> None:
     """Every consecutive pair of two-decimal values across the canvas.
 
-    Below a hundred is where a tolerance of exactly 0,01 failed on the
+    Below a hundred is where a tolerance of exactly 0.01 failed on the
     binary representation of the difference. The other three bands are
     where a relative term would have let two quanta through: at 200 a
-    relative 1e-4 allowed 0,02 and at 900 it allowed 0,09, and review caught
+    relative 1e-4 allowed 0.02 and at 900 it allowed 0.09, and review caught
     that the sweep had only ever looked below a hundred.
     """
     tol = check_figures.SVG_TOL

@@ -310,7 +310,7 @@ def test_the_spread_is_the_fraction_of_the_smaller() -> None:
 def test_the_argument_the_guide_makes_about_tin_still_holds() -> None:
     """The catalogue's own case against the modulus two of its books share.
 
-    The guide says a tin of 4,4 GPa would carry sound more slowly than every
+    The guide says a tin of 4.4 GPa would carry sound more slowly than every
     lead row here although lead is the softer metal and half again as dense.
     That is the only thing deciding the disagreement, since no page
     contradicts itself, so it has to keep being true of the rows as they are.

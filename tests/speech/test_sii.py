@@ -474,7 +474,7 @@ def test_a_non_finite_band_quantity_is_refused_by_field_name(name: str) -> None:
     assembled or amended by hand is the other door, and the plot is where it
     shows. The weighted series is scaled by its own peak, so one NaN band
     makes that peak NaN, ``peak > 0.0`` False and the series the legend calls
-    "(scaled)" is drawn at its raw height: 0,0898 of the axis instead of
+    "(scaled)" is drawn at its raw height: 0.0898 of the axis instead of
     filling it, with the corrupt band missing and the title still reading
     "SII = 0.996". A NaN in ``frequencies`` labels a band ``nan``, on the axis
     and in the fiche's frequency column.
@@ -1089,7 +1089,7 @@ def test_the_weighted_series_fills_the_axis_the_legend_says_it_is_scaled_to() ->
     because the poisoned result can no longer be built. The defect was never
     an exception: with one NaN band the peak the series divides by was NaN,
     ``peak > 0.0`` came out False and the whole series was drawn raw, topping
-    out at 0,0898 under a legend still promising "(scaled)" and a title still
+    out at 0.0898 under a legend still promising "(scaled)" and a title still
     reading a finite index. Assert the scaling itself, so that removing it
     fails here rather than passing quietly behind an intact guard.
     """
@@ -1118,8 +1118,8 @@ def test_the_procedure_step_draws_every_band_and_its_own_headroom() -> None:
 
     The other half of the same pin. A NaN column entry left its band out of
     the curve and scaled the panel to the largest of the bands that remained,
-    which for the octave procedure moved the top of the axis from 0,30452 to
-    0,275295: a band-importance function overlaid on the others short of a
+    which for the octave procedure moved the top of the axis from 0.30452 to
+    0.275295: a band-importance function overlaid on the others short of a
     band and stretched to a height that is not its own.
     """
     pytest.importorskip("matplotlib")

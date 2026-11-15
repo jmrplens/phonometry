@@ -306,8 +306,8 @@ def test_normalizedfreq_fraction1_and_invalid_fraction() -> None:
 
 
 def test_annex_e34_worked_rounding_examples() -> None:
-    """IEC 61260-1:2014 E.3.4: 41,567 -> 41,6 (MSD 4, three significant
-    figures) and 8 785,2 -> 8 800 (MSD 8, two significant figures).
+    """IEC 61260-1:2014 E.3.4: 41.567 -> 41.6 (MSD 4, three significant
+    figures) and 8 785.2 -> 8 800 (MSD 8, two significant figures).
     """
     from reference_data import IEC61260_E34_EXAMPLES
 

@@ -17,37 +17,37 @@ Expected values come from the accompanying signal description (Jan Verhave,
 Embedded Acoustics, v1.0 June 2020) and from the filenames; only the WAVs,
 filenames and that description were used (the bundled reference .m sources
 were consulted solely to resolve the envelope convention of C.3.2: the
-signals encode a STIPA channel of MTF = m, i.e. envelope index 0,55 m, so an
-analyzer normalizing by 0,55 must read back m itself).
+signals encode a STIPA channel of MTF = m, i.e. envelope index 0.55 m, so an
+analyzer normalizing by 0.55 must read back m itself).
 
 Suites:
 
 - Annex C.3.2 - direct-method modulation depth: sine-carrier STIPA
-  signals at m = 0,0 .. 1,0; the analyzer must recover m per band and the
+  signals at m = 0.0 .. 1.0; the analyzer must recover m per band and the
   published m <-> STI staircase.
 - Annex C.3.3 - indirect-method modulation depth: exponentially decayed
-  sine carriers (RT60 = 0,125 .. 8 s) against the closed-form Schroeder
-  MTF m(F) = 1/sqrt(1 + (2 pi F T/13,8)^2).
+  sine carriers (RT60 = 0.125 .. 8 s) against the closed-form Schroeder
+  MTF m(F) = 1/sqrt(1 + (2 pi F T/13.8)^2).
 - Annex C.4.2 - filter-bank slope: modulated carrier plus an unmodulated
-  adjacent-octave tone 41 dB louder; normative criterion m >= 0,5 in the
+  adjacent-octave tone 41 dB louder; normative criterion m >= 0.5 in the
   observed band (needs > 41 dB effective slope, steeper than class 1).
 - Annex A.2.2 - weighting/redundancy factors: modulated octave-band
   pairs; STI = alpha_k + alpha_{k+1} - beta_k.
 - Annex A.3.1.2 - filter-bank phase distortion: two sine carriers per
   band at the half-octave edges fc*2^(+/-1/4); normative criterion
-  |STI bias| < 0,01 over TI = 0,1 .. 0,9.
+  |STI bias| < 0.01 over TI = 0.1 .. 0.9.
 
 Measured worst-case deviations with this implementation (zero-phase
 analysis bank), on which the tolerances are based:
-C.3.2 |dSTI| 0,0031 / per-m 0,004; C.3.3 |dSTI| 0,0002 / per-m 0,018;
-C.4.2 min m 0,937; A.2.2 |dSTI| 0,0002 vs the exact alpha/beta identity;
-A.3.1.2 worst bias -0,0029.
+C.3.2 |dSTI| 0.0031 / per-m 0.004; C.3.3 |dSTI| 0.0002 / per-m 0.018;
+C.4.2 min m 0.937; A.2.2 |dSTI| 0.0002 vs the exact alpha/beta identity;
+A.3.1.2 worst bias -0.0029.
 
 With the committed extract alone, C.3.3 and C.4.2 are covered in full and
-the other three suites keep their worst-case point (C.3.2 m = 0,9 and the
-m = 0 / m = 1 ends, A.3.1.2 TI = 0,9, A.2.2 the outer band pairs). The
+the other three suites keep their worst-case point (C.3.2 m = 0.9 and the
+m = 0 / m = 1 ends, A.3.1.2 TI = 0.9, A.2.2 the outer band pairs). The
 intermediate points of C.3.2, A.2.2 and A.3.1.2 - i.e. the shape of the
-staircase between its ends, and the phase bias below TI = 0,9 - can only be
+staircase between its ends, and the phase bias below TI = 0.9 - can only be
 asserted where the full bench is present. No tolerance is relaxed either way.
 """
 
@@ -147,7 +147,7 @@ def _stipa_quiet(x: np.ndarray) -> speech.STIResult:
     """stipa() with the two advisories the verification bench meets let through.
 
     The two-band C.4.2 signals leave octave bands without energy and give
-    m > 1,3 in others, and the analysis says both; those two advisories, and
+    m > 1.3 in others, and the analysis says both; those two advisories, and
     no other, are let through by their messages.
     """
     with warnings.catch_warnings():
@@ -167,7 +167,7 @@ def _stipa_quiet(x: np.ndarray) -> speech.STIResult:
 # ---------------------------------------------------------------------------
 
 # m <-> STI staircase from the signal description (Table with related m,
-# SNR and STI values); m and TI = (10 lg(m/(1-m)) + 15)/30 in 0,1 steps.
+# SNR and STI values); m and TI = (10 lg(m/(1-m)) + 15)/30 in 0.1 steps.
 _C32_EXPECTED = {
     0.0: 0.00,
     0.1: 0.18,
@@ -187,11 +187,11 @@ _C32_FILES = {m: f"Annex C.3.2/STIPA-sinecarrier-M={m:g}.wav" for m in _C32_EXPE
 @pytest.mark.parametrize("m", _available(_C32_FILES))
 def test_c32_direct_method_modulation_depth(m: float) -> None:
     res = speech.stipa(_load(_C32_FILES[m]), FS)
-    # Published staircase (worst measured |dSTI| = 0,0031 -> tol 0,01).
+    # Published staircase (worst measured |dSTI| = 0.0031 -> tol 0.01).
     assert res.sti == pytest.approx(_C32_EXPECTED[m], abs=0.01)
     # MTF extraction: every band/modulation-frequency cell must read back
-    # the encoded m (worst measured deviation 0,004 -> tol 0,01). At
-    # m = 1,0 the cells are clipped to at most 1.
+    # the encoded m (worst measured deviation 0.004 -> tol 0.01). At
+    # m = 1.0 the cells are clipped to at most 1.
     assert res.mtf.shape == (7, 2)
     np.testing.assert_allclose(res.mtf, m, atol=0.01)
 
@@ -219,16 +219,16 @@ def test_c33_indirect_method_exponential_decay(rt60: float) -> None:
     res = speech.sti_from_impulse_response(_load(_C33_FILES[rt60]), FS)
     m_expected = _schroeder_m(rt60)
     # Per-band, per-modulation-frequency MTF against the closed form
-    # (worst measured deviation 0,018 at RT60 = 0,125 s -> tol 0,03).
+    # (worst measured deviation 0.018 at RT60 = 0.125 s -> tol 0.03).
     np.testing.assert_allclose(res.mtf, np.tile(m_expected, (_NUM_BANDS, 1)), atol=0.03)
     # STI derived from the closed-form MTF through the standard TI chain
-    # (worst measured |dSTI| = 0,0002 -> tol 0,005).
+    # (worst measured |dSTI| = 0.0002 -> tol 0.005).
     sti_expected = _sti_from_mtf(np.tile(m_expected, (_NUM_BANDS, 1))).sti
     assert res.sti == pytest.approx(sti_expected, abs=0.005)
 
 
 # ---------------------------------------------------------------------------
-# Annex C.4.2 - filter-bank slope (m >= 0,5 with a +41 dB adjacent tone)
+# Annex C.4.2 - filter-bank slope (m >= 0.5 with a +41 dB adjacent tone)
 # ---------------------------------------------------------------------------
 
 _C42_FILES = {
@@ -243,14 +243,14 @@ def test_c42_filter_slope(case: tuple[str, int]) -> None:
     slope, band = case
     res = _stipa_quiet(_load(_C42_FILES[case]))
     m_observed = res.mtf[_BANDS.index(band)]
-    # Normative pass criterion of the bench: m >= 0,5 in the observed
+    # Normative pass criterion of the bench: m >= 0.5 in the observed
     # band (an unmodulated tone one octave away, 41 dB louder, must not
     # leak enough to halve the modulation depth).
     assert np.all(m_observed >= 0.5), (
         f"m = {m_observed} in the {band} Hz band ({slope})"
     )
     # Regression lock well above the criterion: the zero-phase bank
-    # achieves m >= 0,937 on all 14 signals.
+    # achieves m >= 0.937 on all 14 signals.
     assert np.all(m_observed >= 0.85)
 
 
@@ -280,8 +280,8 @@ _A22_FILES = {
 @pytest.mark.parametrize("pair", _available(_A22_FILES))
 def test_a22_weighting_factor_pairs(pair: tuple[int, int]) -> None:
     res = speech.stipa(_load(_A22_FILES[pair]), FS)
-    # Worst measured deviation vs the exact identity: 0,0002 (the visible
-    # 0,004 vs the filename is its 2-decimal rounding) -> tol 0,005.
+    # Worst measured deviation vs the exact identity: 0.0002 (the visible
+    # 0.004 vs the filename is its 2-decimal rounding) -> tol 0.005.
     assert res.sti == pytest.approx(_A22_EXPECTED[pair], abs=0.005)
 
 
@@ -313,9 +313,9 @@ _A312_FILES = {
 @pytest.mark.parametrize("ti", _available(_A312_FILES))
 def test_a312_filter_bank_phase(ti: float) -> None:
     res = speech.stipa(_load(_A312_FILES[ti]), FS)
-    # Normative criterion: |STI bias| < 0,01 over TI = 0,1 .. 0,9; the
+    # Normative criterion: |STI bias| < 0.01 over TI = 0.1 .. 0.9; the
     # endpoints (clipped m) hold trivially and are asserted at the same
-    # tolerance. Worst measured bias with the zero-phase bank: -0,0029.
+    # tolerance. Worst measured bias with the zero-phase bank: -0.0029.
     assert res.sti == pytest.approx(ti, abs=0.01)
 
 

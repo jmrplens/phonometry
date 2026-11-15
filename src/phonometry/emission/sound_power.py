@@ -1129,14 +1129,12 @@ def _surface_background_correction(
 def _surface_environmental_correction(
     area: float,
     n_bands: int,
-    grade: Grade,
     room: RoomEnvironment,
 ) -> NDArray[np.float64]:
     """Per-band environmental correction ``K2`` broadcast over the bands.
 
     :param area: Measurement surface area ``S``, in square metres.
     :param n_bands: Number of frequency bands.
-    :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :param room: Room data behind ``K2`` (:class:`RoomEnvironment`).
     :return: ``K2`` per band, in decibels; :func:`_k2_advisory` says when it
         exceeds the limit of the grade, once every argument has been checked.
@@ -1309,7 +1307,7 @@ def sound_power_pressure(
         mean_level = energy_mean(levels, axis=0)
         n_bands = mean_level.shape[0]
         k2 = _surface_environmental_correction(
-            area, n_bands, grade, RoomEnvironment() if room is None else room
+            area, n_bands, RoomEnvironment() if room is None else room
         )
         freqs = _band_frequencies(frequencies, n_bands)
 
@@ -1829,7 +1827,7 @@ def sound_energy_pressure(
             else _background_exposure(background_levels, integration_time)
         )
         k2 = _surface_environmental_correction(
-            area, n_bands, grade, RoomEnvironment() if room is None else room
+            area, n_bands, RoomEnvironment() if room is None else room
         )
         freqs = _band_frequencies(frequencies, n_bands)
 

@@ -407,6 +407,7 @@ from figures.schematics import (
     animate_schroeder,
     animate_specific_loudness,
     animate_sweep_deconvolution,
+    animate_synchronous_averaging,
     animate_time_weighting_ballistics,
 )
 from figures.signals import (
@@ -588,6 +589,7 @@ __all__ = [
     "animate_specific_loudness",
     "animate_standing_wave_tube",
     "animate_sweep_deconvolution",
+    "animate_synchronous_averaging",
     "animate_time_weighting_ballistics",
     "apply_axis_styling",
     "generate_absorber_stack_geometry",

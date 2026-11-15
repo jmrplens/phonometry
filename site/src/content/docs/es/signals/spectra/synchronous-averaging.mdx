@@ -11,13 +11,14 @@ references:
     issue: 1
     pages: "83-95"
     doi: "10.1016/0888-3270(87)90085-9"
-    note: "El modelo de filtro peine del promediado síncrono (Ec. 8, magnitud Ec. 9), el modelo revisado de registro finito que produce un resultado exactamente periódico, y la observación de que un orden interferente no armónico se rechaza mejor eligiendo el número de promedios de modo que un nodo del peine caiga sobre él, no con la potencia de dos habitual."
+    note: "El modelo de filtro peine del promediado síncrono (Ec. 8, con la altura unidad de sus dientes en la Ec. 9), el modelo revisado de registro finito que produce un resultado exactamente periódico, y la observación de que un orden interferente no armónico se rechaza mejor eligiendo el número de promedios de modo que un nodo del peine caiga sobre él, no con la potencia de dos habitual."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
+import Video from '../../../../../components/Video.astro';
 
 Una máquina rotativa repite su firma una vez por revolución. Enterrada en el
 ruido de banda ancha y en los tonos del resto de los ejes, esa forma de onda
@@ -105,15 +106,15 @@ a(t) = \frac{1}{N} \sum_{n=0}^{N-1} y(t + n\,T),
 $$
 
 es, en el dominio de la frecuencia, la multiplicación del espectro de la señal
-por un **filtro peine** (Ec. 8). Su magnitud (Ec. 9) es el núcleo de Dirichlet
+por un **filtro peine** (Ec. 8). Su magnitud es el núcleo de Dirichlet
 
 $$
 |C(f)| = \left| \frac{\sin(N\pi f T)}{N \sin(\pi f T)} \right| .
 $$
 
 El peine tiene un **diente** de altura unidad en cada armónico $k/T$ (los
-órdenes $fT = 1, 2, 3, \dots$), *independiente de $N$*: las componentes
-síncronas con el periodo pasan intactas. Entre los dientes tiene **nodos** en
+órdenes $fT = 1, 2, 3, \dots$), *independiente de $N$* (el límite de la
+Ec. 9): las componentes síncronas con el periodo pasan intactas. Entre los dientes tiene **nodos** en
 $j/(NT)$ para todo $j$ que no sea múltiplo de $N$, donde la respuesta es
 exactamente cero. `comb_filter_response` evalúa esta forma cerrada
 directamente:
@@ -133,6 +134,40 @@ signals.comb_filter_response(np.array([0.5 / period_s]), period_s, 2)    # 0.0 e
 promedio aplicó está disponible junto a la forma de onda recuperada.
 
 ## 2. El ruido cae como la raíz cuadrada del número de promedios
+
+El peine de la sección 1 y la ley de esta son el mismo proceso visto por dos
+lados, y es un proceso: se despliega a medida que $N$ crece. El clip de abajo
+promedia un registro periodo a periodo, de 1 a 128. El registro es el de la
+figura de más abajo: una forma de onda de tres armónicos, los órdenes 1, 3 y
+5, en ruido de varianza unidad, con 256 muestras por periodo a 8192 Hz.
+
+<Video
+  name="anim_synchronous_averaging"
+  width={2400}
+  height={1350}
+  title="El promediado síncrono a medida que el número de periodos promediados crece de 1 a 128"
+  description="Tres paneles que cambian mientras un contador N recorre de 1 a 128. Arriba a la izquierda: el promedio de los primeros N periodos de un registro ruidoso, dibujado sobre la forma de onda verdadera de tres armónicos, en trazo discontinuo; empieza siendo un solo periodo ruidoso que oscila entre unos menos 3 y 3 y se cierra sobre la curva discontinua. Arriba a la derecha: en ejes logarítmicos, el error RMS de ese promedio frente a N; los puntos medidos, marcados en 1, 2, 4, 8, 16, 32, 64 y 128, bajan a lo largo de una línea discontinua de uno entre raíz de N, de 0,97 a 0,090. Abajo: la magnitud del filtro peine en los órdenes 0 a 6; plana en 1 con N igual a 1, y después un diente de altura 1 en cada orden entero que conserva su altura mientras se estrecha, con N menos 1 nodos entre cada par de dientes, hasta que con 128 solo quedan púas finas sobre una banda baja; tres puntos marcan los órdenes 1, 3 y 5, los armónicos de la forma de onda, con ganancia 1 en todo momento."
+/>
+
+Los tres paneles se leen juntos. Arriba a la izquierda, el periodo promediado:
+con $N = 1$ es un solo periodo ruidoso, y con $N = 128$ descansa sobre la forma
+de onda verdadera, en trazo discontinuo. Arriba a la derecha, su error RMS baja
+a lo largo de la línea discontinua $\sigma/\sqrt{N}$, de 0,97 con un periodo a
+0,090 con 128, donde la línea está en 0,088. Abajo, el peine que el promedio
+lleva aplicado. Con $N = 1$ es plano: un solo periodo, promediado con nada,
+deja pasar todas las frecuencias. A partir de ahí cada par de dientes vecinos
+guarda $N - 1$ nodos, el primero a $1/N$ de orden de su diente, de modo que los
+dientes se estrechan como $1/N$ mientras su altura no se mueve: los tres
+puntos, los armónicos de la forma de onda, están en ganancia 1 en todos los
+fotogramas. Las dos lecturas de la derecha, el error
+arriba y el primer nodo abajo, son un solo hecho. La media de
+$|C|^2$ sobre un orden es exactamente $1/N$, así que un ruido blanco de
+varianza $\sigma^2$ sale del peine con $\sigma^2/N$: lo que los dientes pierden
+de anchura es lo que el error pierde de potencia. Los lóbulos laterales también
+bajan, bajo la envolvente $1/(N\,|\sin \pi f T|)$, que vale $1/N$ a medio camino
+entre dos dientes; pero el lóbulo contiguo a un diente nunca baja de 0,217
+veces su altura, y por eso la sección 3 coloca un nodo sobre un tono
+interferente en vez de fiarse de un lóbulo.
 
 El ruido asíncrono de varianza $\sigma^2$ promediado sobre $N$ periodos tiene
 varianza residual $\sigma^2/N$: la desviación típica residual cae como
@@ -218,9 +253,9 @@ estimado, elige el $N$ cuyo nodo caiga más cerca del orden interferente.
 Su propio ejemplo es un tono en 32,05 órdenes. Con $N = 20$ el producto
 $20 \cdot 32{,}05 = 641$ es entero, así que un nodo del peine cae sobre el tono
 y lo rechaza en más de 100 dB. La elección común $N = 32$ da
-$32 \cdot 32{,}05 = 1025{,}6$, que se sitúa en un lóbulo lateral: el tono
-apenas se toca. La figura de arriba muestra ambos peines en torno al orden 32; el
-promedio de extremo a extremo lo confirma:
+$32 \cdot 32{,}05 = 1025{,}6$, que se sitúa en un lóbulo lateral: 0,19 del tono,
+14 dB menos, sigue pasando. La figura del principio de la página muestra ambos
+peines en torno al orden 32; el promedio de extremo a extremo lo confirma:
 
 ```python
 # 8.º orden verdadero más un interferente fuerte en 32,05 órdenes
@@ -381,8 +416,8 @@ identificación.
 <ScopeClaim status="covered" label="Cubierto">
 El modelo revisado de McFadden para el promediado en el dominio del tiempo
 (*Mechanical Systems and Signal Processing*, 1987): la descripción por filtro
-peine del promedio (Ec. 8, magnitud Ec. 9) implementada por
-`comb_filter_response`, la ley de reducción de ruido en raíz cuadrada expuesta
+peine del promedio (Ec. 8, con la altura unidad de sus dientes en la Ec. 9)
+implementada por `comb_filter_response`, la ley de reducción de ruido en raíz cuadrada expuesta
 como `noise_reduction` y `amplitude_snr_gain`, y la elección de $N$ que
 sitúa un nodo del peine sobre un orden interferente, siguiendo el propio
 ejemplo del artículo con el orden 32,05. `time_synchronous_average` también

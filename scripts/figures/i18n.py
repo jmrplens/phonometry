@@ -2195,6 +2195,16 @@ _ES_EXACT = {
     "Burst start within the block [ms]": "Inicio de la ráfaga dentro del bloque [ms]",
     "Reading [dB]": "Lectura [dB]",
     "the block reading leaves the corridor": "la lectura por bloques sale del corredor",
+    # --- anim_synchronous_averaging: one record, one more period at a time ---
+    "Synchronous averaging, one more period at a time": "Promediado síncrono, un periodo más cada vez",
+    "average of $N$ periods": "promedio de $N$ periodos",
+    "true waveform, without the noise": "forma de onda verdadera, sin el ruido",
+    "RMS error of the average": "Error RMS del promedio",
+    "measured RMS error": "error RMS medido",
+    "comb of the average, $|C(f)|$ (McFadden Eq. 8)": "peine del promedio, $|C(f)|$ (McFadden Ec. 8)",
+    "the three harmonics of the waveform: gain 1 at every $N$": "los tres armónicos de la forma de onda: "
+    "ganancia 1 con cualquier $N$",
+    "$N$ = 1: every frequency passes with gain 1": "$N$ = 1: toda frecuencia pasa con ganancia 1",
     # --- anim_feedback_howl: the loop as a geometric series ---
     "Gain before feedback is a convergence condition": "La ganancia antes del acople es una condición de convergencia",
     "talker,\n0.3 m from\nthe microphone": "hablante,\na 0,3 m del\nmicrófono",
@@ -5613,6 +5623,23 @@ _ES_PATTERNS = [
     (r"^block Leq    (.+) dB \((.+)\)$", r"Leq bloques  \1 dB (\2)"),
     (r"^spread so far, exponential: (.+) dB$", r"dispersión, exponencial: \1 dB"),
     (r"^spread so far, block Leq:   (.+) dB$", r"dispersión, Leq bloques: \1 dB"),
+    # --- anim_synchronous_averaging: readouts rewritten on every frame ---
+    (
+        r"^\$N\$ = (\d+): noise power down (\d+)\.(\d+) dB$",
+        r"$N$ = \1: la potencia de ruido baja \2,\3 dB",
+    ),
+    (
+        r"^RMS error (\d+)\.(\d+); ideal \$\\sigma/\\sqrt\{N\}\$ = (\d+)\.(\d+)$",
+        r"error RMS \1,\2; ideal $\\sigma/\\sqrt{N}$ = \3,\4",
+    ),
+    (
+        r"^nodes between neighbouring teeth: \$N - 1\$ = (\d+)$",
+        r"nodos entre dientes vecinos: $N - 1$ = \1",
+    ),
+    (
+        r"^first node \$1/N\$ = (\d+)\.(\d+) orders from each tooth$",
+        r"primer nodo a $1/N$ = \1,\2 órdenes de cada diente",
+    ),
     # --- anim_feedback_howl: readouts rewritten on every frame ---
     (
         r"^\$Z_\\mathrm\{S\}\$ = (.+) dB, (\d+) open microphone\(s\)$",

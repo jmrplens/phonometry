@@ -5666,3 +5666,267 @@ def animate_feedback_howl(output_dir: str) -> None:
 
     case_totals = [c["totals_db"] for c in cases]
     _render_clip(fig, update, output_dir, "anim_feedback_howl")
+
+
+# --- synchronous averaging, as the number of averages grows -----------------
+#
+# The guide's stills each hold N fixed: the waveform at N = 40, the comb at
+# N = 20 and 32 around order 32, the error at eight counts. McFadden's own
+# Figure 2 draws the comb at N = 1, 2, 4 and 8. What none of them shows is one
+# process: the same record, one more period at a time, with the comb the
+# average has applied so far and the error it has left. The record is the one
+# `generate_tsa_noise_reduction` averages (three harmonics, 256 samples per
+# period at 8192 Hz, unit-variance noise, seed 5), so the markers this clip
+# drops at 1, 2, 4 ... 128 are the points of that still.
+
+_TSA_FS = 8192.0
+_TSA_SAMPLES = 256  # one period: T = 1/32 s
+_TSA_N_MAX = 128
+#: The counts the still of the guide marks, and this clip marks as it passes.
+_TSA_COUNTS = (1, 2, 4, 8, 16, 32, 64, 128)
+#: (order, amplitude, phase) of the three harmonics of the signature.
+_TSA_HARMONICS = ((1, 1.0, 0.0), (3, 0.5, 0.7), (5, 0.25, 1.1))
+_TSA_ORDERS = 6  # the comb is drawn over orders 0 to 6
+# Points per lobe of the comb: with 24 the grid of N holds every node j/N and
+# every tooth exactly, so a node is drawn at zero and a tooth at one.
+_TSA_PER_LOBE = 24
+# Frames per doubling of N. The seven doublings end on frame 196 of the 240,
+# each count of the still falls on a frame of its own (frame 28 k shows
+# N = 2^k), and the 44 frames from 196 on hold N = 128.
+_TSA_FRAMES_PER_OCTAVE = 28
+
+
+def _synchronous_averaging_data() -> dict[str, Any]:
+    """The average, its error and its comb for every N from 1 to 128.
+
+    Everything drawn is the library's: the averaged period and the noise
+    reduction of ``time_synchronous_average`` over the first N periods of the
+    record, and ``comb_filter_response`` on a grid that holds the nodes and
+    the teeth of that N.
+    """
+    from phonometry import signals
+
+    fs, samples = _TSA_FS, _TSA_SAMPLES
+    period_s = samples / fs
+    t = np.arange(samples) / fs
+    true = np.zeros(samples)
+    for order, amplitude, phase in _TSA_HARMONICS:
+        true += amplitude * np.cos(2.0 * np.pi * order * t / period_s + phase)
+    rng = np.random.default_rng(5)
+    record = np.tile(true, _TSA_N_MAX) + rng.standard_normal(_TSA_N_MAX * samples)
+
+    averages, errors, reductions, combs = [], [], [], []
+    for n in range(1, _TSA_N_MAX + 1):
+        res = signals.time_synchronous_average(
+            record[: n * samples], fs, period_s=period_s, n_averages=n
+        )
+        average = np.asarray(res.period_waveform, dtype=np.float64)
+        averages.append(average)
+        errors.append(float(np.sqrt(np.mean((average - true) ** 2))))
+        reductions.append(float(res.noise_reduction))
+        orders = np.linspace(
+            0.0, float(_TSA_ORDERS), _TSA_ORDERS * n * _TSA_PER_LOBE + 1
+        )
+        combs.append(
+            (orders, signals.comb_filter_response(orders / period_s, period_s, n))
+        )
+    return {
+        "t_ms": 1e3 * t,
+        "period_ms": 1e3 * period_s,
+        "true": true,
+        "averages": averages,
+        "errors": np.asarray(errors),
+        "reductions": reductions,
+        "combs": combs,
+    }
+
+
+@lru_cache(maxsize=1)
+def _tsa_cached() -> dict[str, Any]:
+    """One data build per process, not one per language x theme variant."""
+    return _synchronous_averaging_data()
+
+
+def _tsa_count(frame: int) -> int:
+    """The number of averages drawn on *frame*: a doubling every 28 frames.
+
+    A geometric clock, so that each doubling of N takes the same time and
+    the first few combs, whose nodes can still be counted, stay on screen
+    as long as the last sixty-four. Every N up to 46 has a frame of its own;
+    past that the count skips, and the eight counts of the still are never
+    skipped.
+    """
+    octaves = min(frame / _TSA_FRAMES_PER_OCTAVE, float(np.log2(_TSA_N_MAX)))
+    return int(np.clip(round(2.0**octaves), 1, _TSA_N_MAX))
+
+
+def animate_synchronous_averaging(output_dir: str) -> None:
+    """One record averaged over 1, 2, 3 ... 128 of its periods. The averaged
+    period closes on the true waveform, its error runs down the
+    sigma/sqrt(N) line, and the comb the average has applied keeps a tooth
+    of unit height on every order while N - 1 nodes crowd in between each
+    pair and the teeth thin as 1/N (McFadden 1987, Eqs. 5, 8 and 9).
+    """
+    from matplotlib.ticker import NullFormatter
+
+    T = _translate_str
+
+    d = _tsa_cached()
+    counts = np.asarray(_TSA_COUNTS)
+    all_n = np.arange(1, _TSA_N_MAX + 1)
+
+    fig = _anim_figure()
+    fig.suptitle(T("Synchronous averaging, one more period at a time"))
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.25, 1.0], height_ratios=[1.0, 1.0])
+
+    # --- top left: the averaged period over the true waveform ------------
+    ax_w = fig.add_subplot(gs[0, 0])
+    _grid_axes(ax_w)
+    ax_w.set_xlim(0.0, d["period_ms"])
+    # The first period alone swings to +-3; the legend sits in the headroom
+    # above it, where no average reaches.
+    ax_w.set_ylim(-3.4, 5.3)
+    ax_w.set_yticks([-2.0, 0.0, 2.0])
+    ax_w.set_xlabel(T("Time [ms]"), fontsize=8.5)
+    ax_w.set_ylabel(T("Amplitude"), fontsize=8.5)
+    ax_w.tick_params(labelsize=8)
+    (avg_line,) = ax_w.plot(
+        [], [], color=COLOR_PRIMARY, lw=1.3, label=T("average of $N$ periods")
+    )
+    ax_w.plot(
+        d["t_ms"],
+        d["true"],
+        color=COLOR_SECONDARY,
+        lw=1.3,
+        ls="--",
+        label=T("true waveform, without the noise"),
+    )
+    ax_w.legend(loc="upper center", ncol=2, fontsize=7.5, framealpha=0.9)
+
+    # --- top right: the error against the square-root law ----------------
+    ax_e = fig.add_subplot(gs[0, 1])
+    ax_e.set_xscale("log")
+    ax_e.set_yscale("log")
+    ax_e.grid(visible=True, color=COLOR_GRID, linestyle="--", alpha=0.5, which="major")
+    ax_e.set_xlim(0.8, 160.0)
+    ax_e.set_ylim(0.06, 1.6)
+    ax_e.set_xticks(counts)
+    ax_e.set_xticklabels([str(n) for n in counts])
+    ax_e.set_yticks([0.1, 0.2, 0.5, 1.0])
+    ax_e.set_yticklabels(["0.1", "0.2", "0.5", "1"])
+    ax_e.xaxis.set_minor_formatter(NullFormatter())
+    ax_e.yaxis.set_minor_formatter(NullFormatter())
+    ax_e.minorticks_off()
+    ax_e.set_xlabel(T("Number of averages $N$"), fontsize=8.5)
+    ax_e.set_ylabel(T("RMS error of the average"), fontsize=8.5)
+    ax_e.tick_params(labelsize=8)
+    ax_e.plot(
+        all_n,
+        1.0 / np.sqrt(all_n),
+        color=COLOR_SECONDARY,
+        lw=1.3,
+        ls="--",
+        label=T(r"Ideal $\sigma/\sqrt{N}$"),
+    )
+    (err_trace,) = ax_e.plot([], [], color=COLOR_PRIMARY, lw=1.1)
+    (err_marks,) = ax_e.plot(
+        [],
+        [],
+        color=COLOR_PRIMARY,
+        marker="o",
+        ms=4.5,
+        ls="none",
+        label=T("measured RMS error"),
+    )
+    (err_now,) = ax_e.plot(
+        [], [], color=COLOR_TERTIARY, marker="o", ms=6.5, ls="none", zorder=5
+    )
+    # The line falls from the upper left to the lower right, and the lower
+    # left is the corner neither it nor a measured point reaches. The box is
+    # two short labels wide: in the upper right, with a longer second label,
+    # it lay over the points of N = 2 and 3 (and in Spanish over N = 2 for
+    # the whole clip).
+    ax_e.legend(loc="lower left", fontsize=7.5, framealpha=0.9)
+
+    # --- bottom: the comb the average has applied ------------------------
+    ax_c = fig.add_subplot(gs[1, :])
+    _grid_axes(ax_c)
+    ax_c.set_xlim(0.0, float(_TSA_ORDERS))
+    # A tooth reaches one at every N, and at N = 1 the whole comb is one:
+    # the legend takes the headroom above it.
+    ax_c.set_ylim(0.0, 1.42)
+    ax_c.set_yticks([0.0, 0.5, 1.0])
+    ax_c.set_xlabel(T("Frequency [orders]"), fontsize=8.5)
+    ax_c.set_ylabel(T("Comb filter magnitude"), fontsize=8.5)
+    ax_c.tick_params(labelsize=8)
+    (comb_line,) = ax_c.plot(
+        [],
+        [],
+        color=COLOR_PRIMARY,
+        lw=0.9,
+        label=T("comb of the average, $|C(f)|$ (McFadden Eq. 8)"),
+    )
+    ax_c.plot(
+        [order for order, _, _ in _TSA_HARMONICS],
+        [1.0] * len(_TSA_HARMONICS),
+        color=COLOR_SECONDARY,
+        marker="o",
+        ms=5.0,
+        ls="none",
+        zorder=5,
+        label=T("the three harmonics of the waveform: gain 1 at every $N$"),
+    )
+    ax_c.legend(loc="upper center", ncol=2, fontsize=7.5, framealpha=0.9)
+
+    def update(kf: int) -> tuple[Any, ...]:
+        n = _tsa_count(kf)
+
+        avg_line.set_data(d["t_ms"], d["averages"][n - 1])
+        ax_w.set_title(
+            T(f"$N$ = {n}: noise power down {d['reductions'][n - 1]:.1f} dB"),
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+
+        err_trace.set_data(all_n[:n], d["errors"][:n])
+        reached = counts[counts <= n]
+        err_marks.set_data(reached, d["errors"][reached - 1])
+        err_now.set_data([n], [d["errors"][n - 1]])
+        ax_e.set_title(
+            T(
+                f"RMS error {d['errors'][n - 1]:.3f}; "
+                rf"ideal $\sigma/\sqrt{{N}}$ = {1.0 / np.sqrt(n):.3f}"
+            ),
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+
+        orders, comb = d["combs"][n - 1]
+        comb_line.set_data(orders, comb)
+        ax_c.set_title(
+            T(f"nodes between neighbouring teeth: $N - 1$ = {n - 1}"),
+            loc="left",
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+        ax_c.set_title(
+            T("$N$ = 1: every frequency passes with gain 1")
+            if n == 1
+            else T(f"first node $1/N$ = {1.0 / n:.3f} orders from each tooth"),
+            loc="right",
+            fontsize=8.5,
+            color=COLOR_FG,
+        )
+        return (avg_line, err_trace, err_marks, err_now, comb_line)
+
+    def settle() -> None:
+        # The three titles are rewritten on every frame, and under
+        # constrained layout a title that changes width moves the panels
+        # under it: measured, the waveform panel was 0.453 of the canvas wide
+        # at N = 1 in Spanish and 0.463 at N = 3. The layout is solved once,
+        # on the first frame in its final language, and then held.
+        update(0)
+        fig.canvas.draw()
+        fig.set_layout_engine("none")
+
+    _render_clip(fig, update, output_dir, "anim_synchronous_averaging", measure=settle)

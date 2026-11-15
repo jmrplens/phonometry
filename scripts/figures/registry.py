@@ -609,6 +609,7 @@ from .schematics import (
     animate_schroeder,
     animate_specific_loudness,
     animate_sweep_deconvolution,
+    animate_synchronous_averaging,
     animate_time_weighting_ballistics,
 )
 from .signals import (
@@ -1725,6 +1726,7 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_iso717_shift": animate_iso717_shift,
     "anim_block_vs_exponential": animate_block_vs_exponential,
     "anim_feedback_howl": animate_feedback_howl,
+    "anim_synchronous_averaging": animate_synchronous_averaging,
 }
 
 
@@ -2218,6 +2220,7 @@ _ANIM_WEIGHTS: dict[str, float] = {
     "anim_iso717_shift": 60.0,
     "anim_block_vs_exponential": 75.0,
     "anim_feedback_howl": 65.0,
+    "anim_synchronous_averaging": 70.0,
 }
 
 # A clip rename must not silently drop its scheduling weight; fail fast.

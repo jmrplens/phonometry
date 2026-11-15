@@ -336,37 +336,56 @@ bearing evidence.
 
 In a **ducted axial fan** the blades also interact with the stator vanes and set
 up rotating pressure patterns with $m_\mathrm{L} = nN \pm kV$ lobes for $V$ vanes
-(Eq. 8.16), turning at $n N f_\mathrm{s} / m_\mathrm{L}$ (Eq. 8.17). That is a speed of
-rotation, not a tone of its own: Norton puts the noise of these patterns "also
-at the blade passing frequency and its associated harmonics", and the
-arithmetic says why, since $m_\mathrm{L}$ lobes turning $nNf_\mathrm{s}/m_\mathrm{L}$ times a
-second pass a fixed point $nNf_\mathrm{s}$ times a second. What sets the patterns
-apart is the lobe count, and that is what a duct sees: a pattern can set up a
-higher-order duct mode with the same pressure distribution, and the faster it
-turns, the more sound power it radiates, which is why the choice of $N$ and $V$
-matters. Each pattern is named `lobe n=<n> m=<mL>`: the blade harmonic belongs
-in the name because Eq. (8.17) carries $n$, so the same lobe count reached from
-a different harmonic is a different pattern turning at a different speed.
+(Eq. 8.16), turning at $M_\mathrm{L} = n N \times \text{r/min} / m_\mathrm{L}$ (Eq. 8.17), a
+speed Norton writes in r/min. That is a speed of rotation, not a tone of its
+own: Norton puts the noise of these patterns "also at the blade passing
+frequency and its associated harmonics", and the arithmetic says why, since
+$m_\mathrm{L}$ lobes turning $nNf_\mathrm{s}/m_\mathrm{L}$ times a second pass a fixed point
+$nNf_\mathrm{s}$ times a second. What sets the patterns apart is the lobe count,
+and that is what a duct sees: a pattern can set up a higher-order duct mode with
+the same pressure distribution, and the faster it turns, the more sound power
+it radiates, which is why the choice of $N$ and $V$ matters. So the library
+keeps the patterns out of the lines. Give `n_vanes` and the result, a
+`BladePassResult`, holds the shaft and blade lines as any other family does and
+the patterns apart in `lobe_patterns`, one `LobePattern` for each blade
+harmonic $n$ and each signed $k$: its `n_lobes` is $m_\mathrm{L}$ and its `speed_rpm`
+is $M_\mathrm{L}$. `.plot()` draws only the lines, and `combine_fault_lines` merges
+only the lines.
 
 ```python
 # Six blades, four vanes, 3500 r/min (blade_pass_frequencies imported above).
 res = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
 print(round(res.shaft_rate, 1))   # 58.3 Hz, the shaft itself
 print(round(res["BPF"]))          # 350
-print(round(res["lobe n=1 m=2"]), round(res["lobe n=1 m=10"]))    # 175 35
+print(res.names)                  # ('shaft', 'BPF'), the lines alone
+for pattern in res.lobe_patterns:
+    print(pattern.n_lobes, round(pattern.speed_rpm), round(pattern.speed_rpm / 60))
+# 2 10500 175
+# 10 2100 35
 ```
 
 Those two numbers are the principle, worked. Both patterns come from the *same*
 blade harmonic on the *same* fan; the only difference is the sign of $k$ in
-$m_\mathrm{L} = nN \pm kV$, which is why the lobe count has to be part of the pattern's
-name. The $m_\mathrm{L} = 2$ pattern turns $nNf_\mathrm{s}/m_\mathrm{L} = 6 \times 58.3/2 = 175$ times a
-second, three times the shaft speed, and the $m_\mathrm{L} = 10$ pattern 35 times a
-second, below it. $2 \times 175 = 10 \times 35 = 350$: both sound at the blade rate,
-and neither puts a line of its own at 175 Hz or 35 Hz in a spectrum. By
-Norton's rule the faster pattern is the stronger radiator. The library still
-returns the two speeds as entries of the result, and its `.plot()` marks them
-on a spectrum like the other lines; read them there as speeds of rotation. Six
-blades against four vanes is a design decision, and this is what it decides.
+$m_\mathrm{L} = nN \pm kV$. The $m_\mathrm{L} = 2$ pattern turns 10 500 times a minute, 175
+times a second, three times the shaft speed, and the $m_\mathrm{L} = 10$ pattern
+35 times a second, below it. $2 \times 175 = 10 \times 35 = 350$: both sound at the
+blade rate, and neither puts a line of its own at 175 Hz or 35 Hz in a
+spectrum, which is why neither is a line of the result. By Norton's rule the
+faster pattern is the stronger radiator. Six blades against four vanes is a
+design decision, and this is what it decides.
+
+The sign of $m_\mathrm{L}$ is kept, because it is the sense in which the pattern
+turns. With more vanes than blades, $k = -1$ gives a negative lobe count, and
+Eq. (8.17) a negative speed: the pattern turns against the rotor. Four blades
+and six vanes at 600 r/min give $m_\mathrm{L} = 4 - 6 = -2$, turning at
+$4 \times 600 / (-2) = -1200$ r/min, beside $m_\mathrm{L} = 10$ at 240 r/min with
+the rotor:
+
+```python
+res = vibration.blade_pass_frequencies(600.0, 4, n_harmonics=1, n_vanes=6)
+print([(p.vane_order, p.n_lobes, round(p.speed_rpm)) for p in res.lobe_patterns])
+# [(-1, -2, -1200), (1, 10, 240)]
+```
 
 The animation turns both patterns on the fan of this page and counts what a
 point on the duct wall sees.

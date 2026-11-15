@@ -4873,6 +4873,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`vibration.blade_pass_frequencies` returns the lobe patterns of a ducted
+  fan apart from its lines, as speeds of rotation with their sign.** With
+  `n_vanes` it returned each interaction pattern of Norton Eqs. (8.16) and
+  (8.17) as a `FaultLine` of family `"blade"` named `lobe n=1 m=2`, with the
+  pattern's speed as the line's frequency, so `.plot()` marked a line at 175 Hz
+  and 35 Hz for the six-blade, four-vane fan and `combine_fault_lines` carried
+  them into every merged family. Norton puts the noise of a pattern "also at
+  the blade passing frequency and its associated harmonics" (printed p. 525):
+  `m_L` lobes turning `M_L` times a minute pass a point `m_L M_L` times a
+  minute, the blade rate, and no line sits at the pattern's speed. The lobe
+  count was also taken as its magnitude, which dropped the sense of rotation of
+  a pattern with a negative `m_L` and merged it with the pattern of `+m_L`. The
+  function now returns a `BladePassResult`, a `FaultFrequencyResult` whose lines
+  are the shaft and blade tones alone, with the patterns in `lobe_patterns`: one
+  `LobePattern` per blade harmonic and signed vane order, holding `harmonic`,
+  `vane_order`, `n_lobes` and `speed_rpm`, the speed of Eq. (8.17) in r/min as
+  Norton prints it, negative for a pattern turning against the rotor. `within`
+  keeps the patterns and `combine_fault_lines` merges the lines only. The
+  migration guide maps the old keys to the new fields.
+
 - **The ± 50 % of ISO 4866 D.2 is `vibration.EMPIRICAL_FREQUENCY_ERROR`.**
   4.0.0rc1 published it as `EMPIRICAL_FREQUENCY_TOLERANCE`, although every
   other published constant named a tolerance is a bound a value has to stay

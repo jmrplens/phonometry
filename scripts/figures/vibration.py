@@ -2102,19 +2102,20 @@ def generate_machine_fault_families(output_dir: str) -> None:
     # at the blade passing frequency". Eq. (8.17) gives each pattern's speed
     # of rotation, not a tone: m_L lobes turning M_L times a second pass a
     # fixed point m_L x M_L = n N f_s times a second, the blade rate. So the
-    # spectrum carries the shaft and blade lines only, the lines are those of
-    # the call without vanes, and the two pattern speeds are written beside
-    # the blade line, each multiplied back to it.
+    # spectrum carries the shaft and blade lines only, which are all the lines
+    # the result holds, and the two pattern speeds, which it holds apart in
+    # lobe_patterns, are written beside the blade line, each multiplied back
+    # to it.
     ax = axes[1][1]
-    fan = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1)
-    patterns = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
+    fan = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
     freq = np.linspace(0.0, 420.0, 3200)
     spec = _LineSpectrum(freq, floor=0.006)
     spec.add(fan.shaft_rate, 0.10, width=0.8)
     spec.add(fan["BPF"], 1.0, width=0.8)
     fan.plot(spectrum=spec, ax=ax, language=_LANG)
     _relabel_spectrum(ax, "Ducted fan: both lobe patterns sound at the blade rate")
-    turns = [(lobes, patterns[f"lobe n=1 m={lobes}"]) for lobes in (2, 10)]
+    # Eq. (8.17) gives the speed in r/min; the note writes turns a second.
+    turns = [(p.n_lobes, p.speed_rpm / 60.0) for p in fan.lobe_patterns]
     ax.annotate(
         "\n".join(
             f"$m_\\mathrm{{L}}$ = {lobes} lobes × {speed:.0f} turns a second"

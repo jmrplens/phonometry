@@ -6718,7 +6718,8 @@ def _fan_lobe_data() -> dict[str, Any]:
     Six blades and four vanes at 3500 r/min, the example of the
     machine-diagnostics page: Eq. (8.16) gives the two first patterns,
     m_L = 6 - 4 = 2 and m_L = 6 + 4 = 10 lobes, and Eq. (8.17) their speeds
-    of rotation, in turns a second.
+    of rotation, which the library gives in r/min and the clip turns into
+    turns a second.
     """
     from phonometry import vibration
 
@@ -6727,7 +6728,7 @@ def _fan_lobe_data() -> dict[str, Any]:
         "shaft": float(fan.shaft_rate),
         "bpf": float(fan["BPF"]),
         "patterns": tuple(
-            (lobes, float(fan[f"lobe n=1 m={lobes}"])) for lobes in (2, 10)
+            (pattern.n_lobes, pattern.speed_rpm / 60.0) for pattern in fan.lobe_patterns
         ),
         "blades": 6,
         "vanes": 4,

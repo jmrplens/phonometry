@@ -2124,13 +2124,13 @@ _ES: dict[str, str] = {
     "28-tooth pinion on a": "piñón de 28 dientes sobre un",
     "1500 r/min shaft:": "eje a 1500 r/min:",
     "$f_s$ = 25 Hz": "$f_s$ = 25 Hz",
-    "6 blades (solid), 4 vanes (dashed)": "6 álabes (continuos), 4 directrices (a trazos)",
+    "6 blades (solid), 4 vanes (dashed)": "6 palas (continuas), 4 álabes (a trazos)",
     "$GMF = N f_s = 28 × 25$ = 700 Hz, and a chipped tooth modulates it "
     "once per revolution: sidebands at $± f_s$": "$GMF = N f_s = 28 × 25$ = 700 Hz, y un diente desconchado la modula "
     "una vez por vuelta: bandas laterales a $± f_s$",
-    "$m_L = n·N ± k·V = 6 ± 4$ → 2 or 10 lobes, turning at $n·N·f_s/m_L$ = "
-    "175 or 35 Hz: the faster radiates much more": "$m_L = n·N ± k·V = 6 ± 4$ → 2 o 10 lóbulos, que giran a "
-    "$n·N·f_s/m_L$ = 175 o 35 Hz: el más rápido radia mucho más",
+    "$m_L = nN ± kV = 6 ± 4$ → 2 or 10 lobes, turning 10 500 or 2100 r/min: "
+    "both sound at the blade rate": "$m_L = nN ± kV = 6 ± 4$ → 2 o 10 lóbulos, que giran a 10 500 o "
+    "2100 r/min: los dos suenan al paso de pala",
     # Condition monitoring on a machine train (Norton & Karczub Section 8.4)
     "Condition monitoring on a motor-gearbox train (Norton Section 8.4)": "Monitorización de estado en un tren motor-reductora (Norton 8.4)",
     "motor": "motor",

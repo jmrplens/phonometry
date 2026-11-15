@@ -896,7 +896,7 @@ _ES_EXACT = {
     "las líneas de la envolvente caen en BPFO, no en BPFI: "
     "descascarillado de la pista exterior",
     # machine_fault_families: the three families of Norton 8.4 as patterns.
-    # The drawn line names (2xGMF, fsh, lobe n=1 m=2...) are the keys of the
+    # The drawn line names (2xGMF, fsh, BPF...) are the keys of the
     # FaultFrequencyResult and stay in English by design -- see
     # ENGLISH_BY_DESIGN in scripts/check_figure_language.py.
     "Fault Families Are Recognised by Their Pattern": "Las familias de fallos se reconocen por su patrón",

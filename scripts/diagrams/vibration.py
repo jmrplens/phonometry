@@ -1720,11 +1720,11 @@ def _d_fault_kinematics(s: SVG, th: Theme) -> None:
     s.text(
         450,
         758,
-        "$m_L = n·N ± k·V = 6 ± 4$ → 2 or 10 lobes, turning at "
-        "$n·N·f_s/m_L$ = 175 or 35 Hz: the faster radiates much "
-        "more",
+        "$m_L = nN ± kV = 6 ± 4$ → 2 or 10 lobes, turning "
+        "10 500 or 2100 r/min: both sound at the blade rate",
         14,
         th.fg,
+        upright=("m_L",),
     )
 
 

@@ -138,7 +138,7 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "quoted as the reader would type them",
     # The machine-fault line names drawn by FaultFrequencyResult.plot() are
     # the keys of the result the figure documents (res["2xGMF+1x"],
-    # res["lobe n=1 m=2"]...), and the library draws line.name verbatim even
+    # res["fsh"]...), and the library draws line.name verbatim even
     # for language="es": the label is what the reader indexes, in either
     # language, so translating one would name a key that does not exist.
     "2xGMF": "a FaultFrequencyResult key, drawn as the reader indexes it",
@@ -153,10 +153,6 @@ ENGLISH_BY_DESIGN: dict[str, str] = {
     "3xGMF-2x": "a FaultFrequencyResult key, drawn as the reader indexes it",
     "fsh": "the rotor-slot key of induction_motor_frequencies, drawn as the "
     "reader indexes it",
-    "lobe n=1 m=2": "a lobe-pattern key of blade_pass_frequencies, drawn as the reader "
-    "indexes it",
-    "lobe n=1 m=10": "a lobe-pattern key of blade_pass_frequencies, drawn as the reader "
-    "indexes it",
     "butter": "the filter_type= literal of FilterDesign, quoted as the reader "
     "would type it (architecture_tradeoff tick labels)",
     "cheby1": "the filter_type= literal of FilterDesign, quoted as the reader "

@@ -403,39 +403,57 @@ evidencia de rodamiento.
 En un **ventilador axial entubado** las palas interaccionan además con los
 álabes del estátor y establecen patrones de presión rotativos con
 $m_\mathrm{L} = nN \pm kV$ lóbulos para $V$ álabes (Ec. 8.16), que giran a
-$n N f_\mathrm{s} / m_\mathrm{L}$ (Ec. 8.17). Eso es una velocidad de giro, no un tono propio:
-Norton sitúa el ruido de estos patrones «also at the blade passing frequency and
-its associated harmonics», y la aritmética dice por qué, ya que $m_\mathrm{L}$ lóbulos
+$M_\mathrm{L} = n N \times \text{r/min} / m_\mathrm{L}$ (Ec. 8.17), una velocidad que Norton
+escribe en r/min. Eso es una velocidad de giro, no un tono propio: Norton sitúa
+el ruido de estos patrones «also at the blade passing frequency and its
+associated harmonics», y la aritmética dice por qué, ya que $m_\mathrm{L}$ lóbulos
 que dan $nNf_\mathrm{s}/m_\mathrm{L}$ vueltas por segundo pasan por un punto fijo
 $nNf_\mathrm{s}$ veces por segundo. Lo que distingue a los patrones es el número de
 lóbulos, y eso es lo que ve el conducto: un patrón puede establecer un modo de
 orden superior del conducto con la misma distribución de presión, y cuanto más
 deprisa gira, más potencia sonora radia, y por eso importa la elección de $N$ y
-$V$. Cada patrón se llama `lobe n=<n> m=<mL>`: el armónico de pala forma
-parte del nombre porque la Ec. (8.17) lleva $n$, de modo que el mismo número de
-lóbulos alcanzado desde otro armónico es otro patrón, que gira a otra velocidad.
+$V$. Por eso la biblioteca deja los patrones fuera de las líneas. Con
+`n_vanes`, el resultado, un `BladePassResult`, guarda las líneas del eje y de
+paso de pala como cualquier otra familia y aparte los patrones, en
+`lobe_patterns`, un `LobePattern` por cada armónico de pala $n$ y cada $k$ con
+su signo: su `n_lobes` es $m_\mathrm{L}$ y su `speed_rpm` es $M_\mathrm{L}$. `.plot()`
+dibuja solo las líneas, y `combine_fault_lines` junta solo las líneas.
 
 ```python
 # Seis palas, cuatro álabes, 3500 r/min (blade_pass_frequencies importado arriba).
 res = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
 print(round(res.shaft_rate, 1))   # 58.3 Hz, el eje mismo
 print(round(res["BPF"]))          # 350
-print(round(res["lobe n=1 m=2"]), round(res["lobe n=1 m=10"]))    # 175 35
+print(res.names)                  # ('shaft', 'BPF'), solo las líneas
+for pattern in res.lobe_patterns:
+    print(pattern.n_lobes, round(pattern.speed_rpm), round(pattern.speed_rpm / 60))
+# 2 10500 175
+# 10 2100 35
 ```
 
 Esos dos números son el principio, resuelto. Los dos patrones salen del *mismo*
 armónico de pala del *mismo* ventilador; la única diferencia es el signo de $k$
-en $m_\mathrm{L} = nN \pm kV$, que es la razón de que el recuento de lóbulos tenga que
-formar parte del nombre del patrón. El patrón de $m_\mathrm{L} = 2$ da
-$nNf_\mathrm{s}/m_\mathrm{L} = 6 \times 58{,}3/2 = 175$ vueltas por segundo, tres veces la
-velocidad del eje, y el de $m_\mathrm{L} = 10$, 35 vueltas por segundo, por debajo de
-ella. $2 \times 175 = 10 \times 35 = 350$: los dos suenan al paso de pala, y ninguno
-pone una línea propia en 175 Hz ni en 35 Hz en un espectro. Por la regla de
-Norton, el patrón más rápido es el que más radia. La biblioteca devuelve aun así
-las dos velocidades como entradas del resultado, y su `.plot()` las marca sobre
-un espectro como las demás líneas; ahí hay que leerlas como velocidades de giro.
-Seis palas contra cuatro álabes es una decisión de diseño, y esto es lo que
-decide.
+en $m_\mathrm{L} = nN \pm kV$. El patrón de $m_\mathrm{L} = 2$ da 10 500 vueltas por
+minuto, 175 por segundo, tres veces la velocidad del eje, y el de
+$m_\mathrm{L} = 10$, 35 vueltas por segundo, por debajo de ella.
+$2 \times 175 = 10 \times 35 = 350$: los dos suenan al paso de pala, y ninguno pone
+una línea propia en 175 Hz ni en 35 Hz en un espectro, y por eso ninguno es una
+línea del resultado. Por la regla de Norton, el patrón más rápido es el que más
+radia. Seis palas contra cuatro álabes es una decisión de diseño, y esto es lo
+que decide.
+
+El signo de $m_\mathrm{L}$ se conserva, porque es el sentido en que gira el patrón.
+Con más álabes que palas, $k = -1$ da un número de lóbulos negativo, y la
+Ec. (8.17) una velocidad negativa: el patrón gira contra el rotor. Cuatro palas
+y seis álabes a 600 r/min dan $m_\mathrm{L} = 4 - 6 = -2$, que gira a
+$4 \times 600 / (-2) = -1200$ r/min, junto a $m_\mathrm{L} = 10$ a 240 r/min con el
+rotor:
+
+```python
+res = vibration.blade_pass_frequencies(600.0, 4, n_harmonics=1, n_vanes=6)
+print([(p.vane_order, p.n_lobes, round(p.speed_rpm)) for p in res.lobe_patterns])
+# [(-1, -2, -1200), (1, 10, 240)]
+```
 
 La animación hace girar los dos patrones en el ventilador de esta página y
 cuenta lo que ve un punto de la pared del conducto.

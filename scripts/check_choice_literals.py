@@ -443,6 +443,12 @@ OPEN: dict[tuple[str, str, str], str] = {
         "FaultFrequencyResult",
         "source",
     ): "a description of the machine element, the plot's title",
+    (
+        "phonometry.vibration.machinery.diagnostics",
+        "BladePassResult",
+        "source",
+    ): "the field FaultFrequencyResult opens for the plot's title; a "
+    "BladePassResult is one, and combine_fault_lines joins it with others",
     ("phonometry.vibration.machinery.diagnostics", "FaultLine", "name"): (
         "a short label of the line, unique within a result"
     ),
